@@ -109,11 +109,14 @@ jobs:
         kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/$SOURCES_VERSION/camel.yaml
 
         # Wait for installation completed
-        while [ "$(kubectl get pod -n kourier-system --no-headers | wc -l)" == "0" ]; do echo "Waiting for pods to start in kourier-system"; kubectl get pod -n kourier-system; sleep 5; done
-        while [ "$(kubectl get pod -n kourier-system -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in kourier-system"; kubectl get pod -n kourier-system; sleep 5; done
-        while [ "$(kubectl get pod -n knative-serving -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-serving"; kubectl get pod -n knative-serving; sleep 5; done
-        while [ "$(kubectl get pod -n knative-eventing -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-eventing"; kubectl get pod -n knative-eventing; sleep 5; done
-        while [ "$(kubectl get pod -n knative-sources -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-sources"; kubectl get pod -n knative-sources; sleep 5; done
+        echo "Waiting for all pods to be ready in kourier-system"
+        kubectl wait --for=condition=Ready pod --all -n kourier-system --timeout=60s
+        echo "Waiting for all pods to be ready in knative-serving"
+        kubectl wait --for=condition=Ready pod --all -n knative-serving --timeout=60s
+        echo "Waiting for all pods to be ready in knative-eventing"
+        kubectl wait --for=condition=Ready pod --all -n knative-eventing --timeout=60s
+        echo "Waiting for all pods to be ready in knative-sources"
+        kubectl wait --for=condition=Ready pod --all -n knative-sources --timeout=60s
 
     - name: Build Operator
       run: |
@@ -229,11 +232,14 @@ jobs:
           kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/$SOURCES_VERSION/camel.yaml
 
           # Wait for installation completed
-          while [ "$(kubectl get pod -n kourier-system --no-headers | wc -l)" == "0" ]; do echo "Waiting for pods to start in kourier-system"; kubectl get pod -n kourier-system; sleep 5; done
-          while [ "$(kubectl get pod -n kourier-system -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in kourier-system"; kubectl get pod -n kourier-system; sleep 5; done
-          while [ "$(kubectl get pod -n knative-serving -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-serving"; kubectl get pod -n knative-serving; sleep 5; done
-          while [ "$(kubectl get pod -n knative-eventing -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-eventing"; kubectl get pod -n knative-eventing; sleep 5; done
-          while [ "$(kubectl get pod -n knative-sources -o 'jsonpath={range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}' | grep -v True | wc -l)" != "0" ]; do echo "Waiting for all pods to be ready in knative-sources"; kubectl get pod -n knative-sources; sleep 5; done
+          echo "Waiting for all pods to be ready in kourier-system"
+          kubectl wait --for=condition=Ready pod --all -n kourier-system --timeout=60s
+          echo "Waiting for all pods to be ready in knative-serving"
+          kubectl wait --for=condition=Ready pod --all -n knative-serving --timeout=60s
+          echo "Waiting for all pods to be ready in knative-eventing"
+          kubectl wait --for=condition=Ready pod --all -n knative-eventing --timeout=60s
+          echo "Waiting for all pods to be ready in knative-sources"
+          kubectl wait --for=condition=Ready pod --all -n knative-sources --timeout=60s
 
       - name: Build Operator
         run: |
