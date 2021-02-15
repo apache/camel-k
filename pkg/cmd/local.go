@@ -49,8 +49,9 @@ func addLocalSubCommands(cmd *cobra.Command, options *RootCmdOptions) error {
 		return errors.New("could not find any configured local command")
 	}
 
-	localCmd.AddCommand(cmdOnly(newCmdLocalRun(options)))
 	localCmd.AddCommand(cmdOnly(newCmdLocalCreate(options)))
+	localCmd.AddCommand(cmdOnly(newCmdLocalInspect(options)))
+	localCmd.AddCommand(cmdOnly(newCmdLocalRun(options)))
 
 	return nil
 }
