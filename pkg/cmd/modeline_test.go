@@ -142,10 +142,10 @@ func TestModelineInspectSimple(t *testing.T) {
 	err = ioutil.WriteFile(fileName, []byte(file), 0777)
 	assert.NoError(t, err)
 
-	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "inspect", fileName})
+	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "local", "inspect", fileName})
 	assert.NoError(t, err)
 	assert.NotNil(t, cmd)
-	assert.Equal(t, []string{"inspect", fileName, "--dependency=mvn:org.my:lib:1.0"}, flags)
+	assert.Equal(t, []string{"local", "inspect", fileName, "--dependency=mvn:org.my:lib:1.0"}, flags)
 }
 
 func TestModelineInspectMultipleDeps(t *testing.T) {
@@ -161,8 +161,8 @@ func TestModelineInspectMultipleDeps(t *testing.T) {
 	err = ioutil.WriteFile(fileName, []byte(file), 0777)
 	assert.NoError(t, err)
 
-	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "inspect", fileName})
+	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "local", "inspect", fileName})
 	assert.NoError(t, err)
 	assert.NotNil(t, cmd)
-	assert.Equal(t, []string{"inspect", fileName, "--dependency=mvn:org.my:lib:1.0", "--dependency=camel-k:camel-dep"}, flags)
+	assert.Equal(t, []string{"local", "inspect", fileName, "--dependency=mvn:org.my:lib:1.0", "--dependency=camel-k:camel-dep"}, flags)
 }
