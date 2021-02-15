@@ -24,15 +24,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newCmdLocalCreate(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localCreateCmdOptions) {
-	options := localCreateCmdOptions{
+func newCmdLocalBuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localBuildCmdOptions) {
+	options := localBuildCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 
 	cmd := cobra.Command{
-		Use:     "create [options]",
-		Short:   "Create integration images locally.",
-		Long:    `Create integration images locally for containerized integrations.`,
+		Use:     "build [options]",
+		Short:   "Build integration images locally.",
+		Long:    `Build integration images locally for containerized integrations.`,
 		PreRunE: decode(&options),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
@@ -55,7 +55,7 @@ func newCmdLocalCreate(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localCr
 		},
 	}
 
-	cmd.Flags().Bool("base-image", false, "Create base image used as a starting point for any integration.")
+	cmd.Flags().Bool("base-image", false, "Build base image used as a starting point for any integration.")
 	cmd.Flags().String("container-registry", "", "Registry that holds intermediate images.")
 	cmd.Flags().String("image", "", "Full path to integration image including registry.")
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
@@ -66,7 +66,7 @@ func newCmdLocalCreate(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localCr
 	return &cmd, &options
 }
 
-type localCreateCmdOptions struct {
+type localBuildCmdOptions struct {
 	*RootCmdOptions
 	BaseImage              bool     `mapstructure:"base-image"`
 	ContainerRegistry      string   `mapstructure:"container-registry"`
@@ -77,7 +77,7 @@ type localCreateCmdOptions struct {
 	MavenRepositories      []string `mapstructure:"maven-repositories"`
 }
 
-func (command *localCreateCmdOptions) validate(args []string) error {
+func (command *localBuildCmdOptions) validate(args []string) error {
 	// Validate integration files.
 	if len(args) > 0 {
 		err := validateIntegrationFiles(args)
@@ -108,13 +108,13 @@ func (command *localCreateCmdOptions) validate(args []string) error {
 
 	// Docker registry must be set.
 	if command.BaseImage && command.ContainerRegistry == "" {
-		return errors.New("base image cannot be created as registry has not been provided")
+		return errors.New("base image cannot be built as registry has not been provided")
 	}
 
 	return nil
 }
 
-func (command *localCreateCmdOptions) init(args []string) error {
+func (command *localBuildCmdOptions) init(args []string) error {
 	// If base image construction is enabled create a directory for it.
 	err := createDockerBaseWorkingDirectory()
 	if err != nil {
@@ -137,7 +137,7 @@ func (command *localCreateCmdOptions) init(args []string) error {
 	return nil
 }
 
-func (command *localCreateCmdOptions) run(cmd *cobra.Command, args []string) error {
+func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 	dependenciesList := []string{}
 	propertyFilesList := []string{}
 	if !command.BaseImage {
@@ -166,7 +166,7 @@ func (command *localCreateCmdOptions) run(cmd *cobra.Command, args []string) err
 	return nil
 }
 
-func (command *localCreateCmdOptions) deinit(args []string) error {
+func (command *localBuildCmdOptions) deinit(args []string) error {
 	// If base image construction is enabled delete the directory for it.
 	deleteDockerBaseWorkingDirectory()
 
