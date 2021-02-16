@@ -290,16 +290,18 @@ func DirectoryExists(directory string) (bool, error) {
 
 // CreateDirectory --
 func CreateDirectory(directory string) error {
-	// If directory does not exist, create it.
-	directoryExists, err := DirectoryExists(directory)
-	if err != nil {
-		return err
-	}
-
-	if !directoryExists {
-		err := os.MkdirAll(directory, 0777)
+	if directory != "" {
+		// If directory does not exist, create it.
+		directoryExists, err := DirectoryExists(directory)
 		if err != nil {
 			return err
+		}
+
+		if !directoryExists {
+			err := os.MkdirAll(directory, 0777)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -537,4 +539,23 @@ func EvaluateCLIAndLazyEnvVars() ([]string, error) {
 	}
 
 	return evaluatedEnvVars, nil
+}
+
+// CopyIntegrationFilesToDirectory --
+func CopyIntegrationFilesToDirectory(files []string, directory string) ([]string, error) {
+	// Create directory if one does not already exist.
+	err := CreateDirectory(directory)
+	if err != nil {
+		return nil, err
+	}
+
+	// Coopy files to new location. Also create the list with relocated files.
+	relocatedFilesList := []string{}
+	for _, filePath := range files {
+		newFilePath := path.Join(directory, path.Base(filePath))
+		CopyFile(filePath, newFilePath)
+		relocatedFilesList = append(relocatedFilesList, newFilePath)
+	}
+
+	return relocatedFilesList, nil
 }
