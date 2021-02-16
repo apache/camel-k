@@ -145,12 +145,12 @@ func (command *localBuildCmdOptions) init(args []string) error {
 			if err != nil {
 				return err
 			}
-
-			err = createMavenWorkingDirectory()
-			if err != nil {
-				return err
-			}
 		}
+	}
+
+	err = createMavenWorkingDirectory()
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -159,6 +159,7 @@ func (command *localBuildCmdOptions) init(args []string) error {
 func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 	dependenciesList := []string{}
 	propertyFilesList := []string{}
+	routeFiles := []string{}
 	if !command.BaseImage {
 		// Fetch dependencies.
 		dependencies, err := getDependencies(args, command.AdditionalDependencies, command.MavenRepositories, true)
@@ -190,16 +191,36 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 			if err != nil {
 				return err
 			}
+
+			// Save routes.
+			localRoutesDirectory := path.Join(command.IntegrationDirectory, "routes")
+
+			// Copy routes in persistent IntegrationDirectory/dependencies
+			routeFiles, err = util.CopyIntegrationFilesToDirectory(args, localRoutesDirectory)
+			if err != nil {
+				return err
+			}
 		} else {
 			// Use files directory from their original location.
 			dependenciesList = dependencies
 			propertyFilesList = propertyFiles
+			routeFiles = args
 		}
+	}
+
+	// Integration directory can only be used when building an integration image or when we just
+	// build the integration without also building the image. A local build of the integration is
+	// represented by all the files that define the integration: dependencies, properties and routes.
+
+	// The only case where we should not execute the image integration creation is when we want to
+	// just output the files that comprise the integration locally.
+	if command.IntegrationDirectory != "" && command.Image == "" {
+		return nil
 	}
 
 	// Create and build integration image.
 	err := createAndBuildIntegrationImage(command.Context, command.ContainerRegistry, command.BaseImage,
-		command.Image, propertyFilesList, dependenciesList, args, cmd.OutOrStdout(), cmd.ErrOrStderr())
+		command.Image, propertyFilesList, dependenciesList, routeFiles, cmd.OutOrStdout(), cmd.ErrOrStderr())
 	if err != nil {
 		return err
 	}
