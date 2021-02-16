@@ -35,6 +35,7 @@ func init() {
 	AddToTraits(newDeploymentTrait)
 	AddToTraits(newGarbageCollectorTrait)
 	AddToTraits(newAffinityTrait)
+	AddToTraits(newTolerationTrait)
 	AddToTraits(newKnativeServiceTrait)
 	AddToTraits(newServiceTrait)
 	AddToTraits(newContainerTrait)
