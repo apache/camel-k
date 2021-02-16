@@ -26,18 +26,18 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/pkg/errors"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/gzip"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/maven"
@@ -171,6 +171,8 @@ func (t *openAPITrait) generateOpenAPIConfigMap(e *Environment, resource v1.Reso
 		// ConfigMap already exists and matches the source
 		// Re-adding it to update its revision
 		cm.ResourceVersion = ""
+		// Clear the managed fields to support server-side apply
+		cm.ManagedFields = nil
 		e.Resources.Add(&cm)
 		return nil
 	}
