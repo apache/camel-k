@@ -25,6 +25,8 @@
 
 **Merged pull requests:**
 
+- fix\(ci\): Use kubectl wait command to check Knative readiness [\#2036](https://github.com/apache/camel-k/pull/2036) ([astefanutti](https://github.com/astefanutti))
+- Point to documentation for debugging using VS Code [\#2030](https://github.com/apache/camel-k/pull/2030) ([apupier](https://github.com/apupier))
 - Increase timeouts [\#2028](https://github.com/apache/camel-k/pull/2028) ([bouskaJ](https://github.com/bouskaJ))
 - chore\(RBAC\): Symmetrical RBAC setup between OLM and CLI [\#2027](https://github.com/apache/camel-k/pull/2027) ([astefanutti](https://github.com/astefanutti))
 - \[fix\] Add bigger flexibility to alerts tests [\#2026](https://github.com/apache/camel-k/pull/2026) ([llowinge](https://github.com/llowinge))
@@ -105,6 +107,7 @@
 - feat\(test\): builder command unit test [\#1891](https://github.com/apache/camel-k/pull/1891) ([squakez](https://github.com/squakez))
 - feat\(test\): kit create command unit test [\#1889](https://github.com/apache/camel-k/pull/1889) ([squakez](https://github.com/squakez))
 - feat\(test\): delete command unit test [\#1888](https://github.com/apache/camel-k/pull/1888) ([squakez](https://github.com/squakez))
+- Backport  \#1880 to 1.3.x [\#1886](https://github.com/apache/camel-k/pull/1886) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(e2e\): add test for Istio trait \#1547 [\#1885](https://github.com/apache/camel-k/pull/1885) ([tadayosi](https://github.com/tadayosi))
 - feat\(test\): install command flags unit test [\#1883](https://github.com/apache/camel-k/pull/1883) ([squakez](https://github.com/squakez))
 - Fix operator monitoring test [\#1880](https://github.com/apache/camel-k/pull/1880) ([llowinge](https://github.com/llowinge))
@@ -170,7 +173,6 @@
 - Backport \#1900 to 1.3.x [\#1905](https://github.com/apache/camel-k/pull/1905) ([astefanutti](https://github.com/astefanutti))
 - Backport \#1707 to 1.3.x [\#1896](https://github.com/apache/camel-k/pull/1896) ([nicolaferraro](https://github.com/nicolaferraro))
 - Backport \#1873 to 1.3.x [\#1887](https://github.com/apache/camel-k/pull/1887) ([nicolaferraro](https://github.com/nicolaferraro))
-- Backport  \#1880 to 1.3.x [\#1886](https://github.com/apache/camel-k/pull/1886) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [pkg/client/camel/v1.3.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.3.0) (2020-12-22)
 
@@ -247,6 +249,7 @@
 - Fix \#1562: remove support for main runtime [\#1804](https://github.com/apache/camel-k/pull/1804) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(ci\): simplify test configuration [\#1801](https://github.com/apache/camel-k/pull/1801) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#751: add guard to global operator [\#1800](https://github.com/apache/camel-k/pull/1800) ([nicolaferraro](https://github.com/nicolaferraro))
+- Fixes ENTESB-15219: only use default values when user doesn't provide a kamelet property value in integration [\#1796](https://github.com/apache/camel-k/pull/1796) ([dhirajsb](https://github.com/dhirajsb))
 - \[test\] Detect camel quarkus version dynamically in monitoring test [\#1795](https://github.com/apache/camel-k/pull/1795) ([llowinge](https://github.com/llowinge))
 - \#1283: Enhance the `kamel log` command to show more detail prior to i… [\#1793](https://github.com/apache/camel-k/pull/1793) ([phantomjinx](https://github.com/phantomjinx))
 - Fix \#1791: auto-generate v1alpha1 resources [\#1792](https://github.com/apache/camel-k/pull/1792) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -309,7 +312,6 @@
 **Merged pull requests:**
 
 - Fix ENTESB-15219: only use default values when user doesn't provide a kamelet property value in integration [\#1797](https://github.com/apache/camel-k/pull/1797) ([dhirajsb](https://github.com/dhirajsb))
-- Fixes ENTESB-15219: only use default values when user doesn't provide a kamelet property value in integration [\#1796](https://github.com/apache/camel-k/pull/1796) ([dhirajsb](https://github.com/dhirajsb))
 - Backport Kamelet changes to 1.2.x [\#1788](https://github.com/apache/camel-k/pull/1788) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [pkg/client/camel/v1.2.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.2.0) (2020-10-08)
@@ -538,6 +540,7 @@
 - \#1524 set the OLM channel used on install to 'stable' [\#1527](https://github.com/apache/camel-k/pull/1527) ([ipolyzos](https://github.com/ipolyzos))
 -  \#1321 add support for nodeport type for services [\#1526](https://github.com/apache/camel-k/pull/1526) ([ipolyzos](https://github.com/ipolyzos))
 - Add ikb as alias for builds.camel.apache.org [\#1521](https://github.com/apache/camel-k/pull/1521) ([lburgazzoli](https://github.com/lburgazzoli))
+- fix for \#1511 [\#1517](https://github.com/apache/camel-k/pull/1517) ([ipolyzos](https://github.com/ipolyzos))
 - CLI - Make kamel run handle github urls that are not raw [\#1515](https://github.com/apache/camel-k/pull/1515) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(release\): bump version to 1.1.0-SNAPSHOT and update OLM/HELM [\#1510](https://github.com/apache/camel-k/pull/1510) ([nicolaferraro](https://github.com/nicolaferraro))
 - feat: Prometheus support for Quarkus based on MicroProfile Metrics [\#1490](https://github.com/apache/camel-k/pull/1490) ([astefanutti](https://github.com/astefanutti))
@@ -579,7 +582,6 @@
 -  \#1524 set the OLM channel used on install to 'stable' [\#1532](https://github.com/apache/camel-k/pull/1532) ([oscerd](https://github.com/oscerd))
 - fix: JVM trait overrides other traits JVM arguments [\#1529](https://github.com/apache/camel-k/pull/1529) ([astefanutti](https://github.com/astefanutti))
 - Backport fix for \#1511 in release-1.0.x [\#1520](https://github.com/apache/camel-k/pull/1520) ([nicolaferraro](https://github.com/nicolaferraro))
-- fix for \#1511 [\#1517](https://github.com/apache/camel-k/pull/1517) ([ipolyzos](https://github.com/ipolyzos))
 
 ## [1.0.0](https://github.com/apache/camel-k/tree/1.0.0) (2020-06-05)
 
