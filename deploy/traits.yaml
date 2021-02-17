@@ -633,6 +633,32 @@ traits:
   - name: description-path
     type: string
     description: The path where the Open-API specification is published (default `/openapi.json`)
+- name: toleration
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: This trait will enable a Toleration. Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints. See https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ for more details. It's disabled by default.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common property.
+  - name: key
+    type: string
+    description: The key to match the Taint
+  - name: operator
+    type: string
+    description: The operator (Equal | Exists)
+  - name: value
+    type: string
+    description: The value to match if Equal operator selected
+  - name: effect
+    type: string
+    description: The effect that will be set on the Pod (NoExecute | NoSchedule | PreferNoSchedule)
+  - name: seconds
+    type: string
+    description: How long that Pod stays bound to a failing or unresponsive Node
 - name: tracing
   platform: false
   profiles:

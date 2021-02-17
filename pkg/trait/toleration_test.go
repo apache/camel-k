@@ -33,7 +33,7 @@ import (
 
 func TestConfigureTolerationTraitMissingKey(t *testing.T) {
 	tolerationTrait, environment, _ := createNominalTolerationTest()
-	tolerationTrait.Toleration = util.BoolP(true)
+	tolerationTrait.Enabled = util.BoolP(true)
 
 	success, err := tolerationTrait.Configure(environment)
 
@@ -43,7 +43,7 @@ func TestConfigureTolerationTraitMissingKey(t *testing.T) {
 
 func TestConfigureTolerationTraitMissingOperator(t *testing.T) {
 	tolerationTrait, environment, _ := createNominalTolerationTest()
-	tolerationTrait.Toleration = util.BoolP(true)
+	tolerationTrait.Enabled = util.BoolP(true)
 	tolerationTrait.Key = "my-toleration"
 
 	success, err := tolerationTrait.Configure(environment)
@@ -54,7 +54,7 @@ func TestConfigureTolerationTraitMissingOperator(t *testing.T) {
 
 func TestConfigureTolerationTraitMissingValue(t *testing.T) {
 	tolerationTrait, environment, _ := createNominalTolerationTest()
-	tolerationTrait.Toleration = util.BoolP(true)
+	tolerationTrait.Enabled = util.BoolP(true)
 	tolerationTrait.Key = "my-toleration"
 	tolerationTrait.Operator = "Equal"
 
@@ -66,7 +66,7 @@ func TestConfigureTolerationTraitMissingValue(t *testing.T) {
 
 func TestConfigureTolerationTraitMissingEffect(t *testing.T) {
 	tolerationTrait, environment, _ := createNominalTolerationTest()
-	tolerationTrait.Toleration = util.BoolP(true)
+	tolerationTrait.Enabled = util.BoolP(true)
 	tolerationTrait.Key = "my-toleration"
 	tolerationTrait.Operator = "Exists"
 
@@ -78,7 +78,7 @@ func TestConfigureTolerationTraitMissingEffect(t *testing.T) {
 
 func TestApplyPodTolerationLabelsDefault(t *testing.T) {
 	tolerationTrait, environment, deployment := createNominalTolerationTest()
-	tolerationTrait.Toleration = util.BoolP(true)
+	tolerationTrait.Enabled = util.BoolP(true)
 	tolerationTrait.Key = "my-toleration"
 	tolerationTrait.Operator = "Equal"
 	tolerationTrait.Value = "my-value"
@@ -97,7 +97,7 @@ func TestApplyPodTolerationLabelsDefault(t *testing.T) {
 
 func TestApplyPodTolerationLabelsTolerationSeconds(t *testing.T) {
 	tolerationTrait, environment, deployment := createNominalTolerationTest()
-	tolerationTrait.Toleration = util.BoolP(true)
+	tolerationTrait.Enabled = util.BoolP(true)
 	tolerationTrait.Key = "my-toleration"
 	tolerationTrait.Operator = "Exists"
 	tolerationTrait.Effect = "NoExecute"
@@ -116,7 +116,7 @@ func TestApplyPodTolerationLabelsTolerationSeconds(t *testing.T) {
 
 func TestApplyPodTolerationLabelsTolerationSecondsFail(t *testing.T) {
 	tolerationTrait, environment, _ := createNominalTolerationTest()
-	tolerationTrait.Toleration = util.BoolP(true)
+	tolerationTrait.Enabled = util.BoolP(true)
 	tolerationTrait.Key = "my-toleration"
 	tolerationTrait.Operator = "Exists"
 	tolerationTrait.Effect = "NoExecute"
