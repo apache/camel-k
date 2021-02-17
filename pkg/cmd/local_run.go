@@ -144,8 +144,10 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 		return nil
 	}
 
+	hasIntegrationDir := command.IntegrationDirectory != ""
+
 	dependencies := []string{}
-	if command.IntegrationDirectory != "" {
+	if hasIntegrationDir {
 		localBuildDependencies, err := getLocalBuildDependencies(command.IntegrationDirectory)
 		if err != nil {
 			return err
@@ -161,37 +163,28 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 	}
 
 	// Manage integration properties which may come from files or CLI.
-	propertyFiles := []string{}
-	if command.IntegrationDirectory != "" {
+	propertyFiles := command.PropertyFiles
+	if hasIntegrationDir {
 		localBuildPropertyFiles, err := getLocalBuildProperties(command.IntegrationDirectory)
 		if err != nil {
 			return err
 		}
 		propertyFiles = localBuildPropertyFiles
-	} else {
-		updatedPropertyFiles, err := updateIntegrationProperties(command.Properties, command.PropertyFiles)
-		if err != nil {
-			return err
-		}
-		propertyFiles = updatedPropertyFiles
 	}
 
-	propertieDir := ""
-	if command.IntegrationDirectory != "" {
-		propertieDir = getCustomPropertiesDir(command.IntegrationDirectory)
-	} else {
-		propertieDir = util.GetLocalPropertiesDir()
+	updatedPropertyFiles, err := updateIntegrationProperties(command.Properties, propertyFiles, hasIntegrationDir)
+	if err != nil {
+		return err
 	}
+	propertyFiles = updatedPropertyFiles
 
-	routes := []string{}
-	if command.IntegrationDirectory != "" {
+	routes := args
+	if hasIntegrationDir {
 		localBuildRoutes, err := getLocalBuildRoutes(command.IntegrationDirectory)
 		if err != nil {
 			return err
 		}
 		routes = localBuildRoutes
-	} else {
-		routes = args
 	}
 
 	// If this is a containerized local run, create, build and run the container image.
@@ -208,6 +201,11 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 			return err
 		}
 	} else {
+		propertieDir := util.GetLocalPropertiesDir()
+		if hasIntegrationDir {
+			propertieDir = getCustomPropertiesDir(command.IntegrationDirectory)
+		}
+
 		// Run integration locally.
 		err := RunLocalIntegrationRunCommand(command.Context, propertyFiles, dependencies, routes, propertieDir, cmd.OutOrStdout(), cmd.ErrOrStderr())
 		if err != nil {

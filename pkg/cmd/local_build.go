@@ -158,7 +158,7 @@ func (command *localBuildCmdOptions) init(args []string) error {
 func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 	dependenciesList := []string{}
 	propertyFilesList := []string{}
-	routeFiles := []string{}
+	routeFiles := args
 	if !command.BaseImage {
 		// Fetch dependencies.
 		dependencies, err := getDependencies(args, command.AdditionalDependencies, command.MavenRepositories, true)
@@ -166,13 +166,17 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 			return err
 		}
 
+		hasIntegrationDir := command.IntegrationDirectory != ""
+
 		// Manage integration properties which may come from files or CLI.
-		propertyFiles, err := updateIntegrationProperties(command.Properties, command.PropertyFiles)
+		propertyFiles, err := updateIntegrationProperties(command.Properties, command.PropertyFiles, hasIntegrationDir)
 		if err != nil {
 			return err
 		}
 
-		if command.IntegrationDirectory != "" {
+		dependenciesList = dependencies
+		propertyFilesList = propertyFiles
+		if hasIntegrationDir {
 			// Create dependencies subdirectory.
 			localDependenciesDirectory := getCustomDependenciesDir(command.IntegrationDirectory)
 
@@ -199,11 +203,6 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 			if err != nil {
 				return err
 			}
-		} else {
-			// Use files directory from their original location.
-			dependenciesList = dependencies
-			propertyFilesList = propertyFiles
-			routeFiles = args
 		}
 	}
 

@@ -372,7 +372,7 @@ func validatePropertyFiles(propertyFiles []string) error {
 	return nil
 }
 
-func updateIntegrationProperties(properties []string, propertyFiles []string) ([]string, error) {
+func updateIntegrationProperties(properties []string, propertyFiles []string, hasIntegrationDir bool) ([]string, error) {
 	// Create properties directory under Maven working directory.
 	// This ensures that property files of different integrations do not clash.
 	err := util.CreateLocalPropertiesDirectory()
@@ -388,14 +388,16 @@ func updateIntegrationProperties(properties []string, propertyFiles []string) ([
 		relocatedPropertyFiles = append(relocatedPropertyFiles, relocatedPropertyFile)
 	}
 
-	// Output list of properties to property file if any CLI properties were given.
-	if len(properties) > 0 {
-		propertyFilePath := path.Join(util.GetLocalPropertiesDir(), "CLI.properties")
-		err = ioutil.WriteFile(propertyFilePath, []byte(strings.Join(properties, "\n")), 0777)
-		if err != nil {
-			return nil, err
+	if !hasIntegrationDir {
+		// Output list of properties to property file if any CLI properties were given.
+		if len(properties) > 0 {
+			propertyFilePath := path.Join(util.GetLocalPropertiesDir(), "CLI.properties")
+			err = ioutil.WriteFile(propertyFilePath, []byte(strings.Join(properties, "\n")), 0777)
+			if err != nil {
+				return nil, err
+			}
+			relocatedPropertyFiles = append(relocatedPropertyFiles, propertyFilePath)
 		}
-		relocatedPropertyFiles = append(relocatedPropertyFiles, propertyFilePath)
 	}
 
 	return relocatedPropertyFiles, nil
