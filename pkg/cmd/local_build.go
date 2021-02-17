@@ -169,7 +169,7 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 		hasIntegrationDir := command.IntegrationDirectory != ""
 
 		// Manage integration properties which may come from files or CLI.
-		propertyFiles, err := updateIntegrationProperties(command.Properties, command.PropertyFiles, hasIntegrationDir)
+		propertyFiles, err := updateIntegrationProperties(command.Properties, command.PropertyFiles, false)
 		if err != nil {
 			return err
 		}
