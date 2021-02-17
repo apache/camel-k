@@ -32,6 +32,8 @@ type KameletBindingSpec struct {
 	Source Endpoint `json:"source,omitempty"`
 	// Sink is the destination of the integration defined by this binding
 	Sink Endpoint `json:"sink,omitempty"`
+	// Steps contains an optional list of intermediate steps that are executed between the Source and the Sink
+	Steps []Endpoint `json:"steps,omitempty"`
 }
 
 // Endpoint represents a source/sink external entity
@@ -50,6 +52,7 @@ type EndpointType string
 
 const (
 	EndpointTypeSource EndpointType = "source"
+	EndpointTypeAction EndpointType = "action"
 	EndpointTypeSink   EndpointType = "sink"
 )
 

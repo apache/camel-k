@@ -53,6 +53,17 @@ func TestBindings(t *testing.T) {
 			uri: "knative:endpoint/myservice?apiVersion=serving.knative.dev%2Fv1&kind=Service",
 		},
 		{
+			endpointType: v1alpha1.EndpointTypeAction,
+			endpoint: v1alpha1.Endpoint{
+				Ref: &corev1.ObjectReference{
+					Kind:       "Service",
+					APIVersion: "serving.knative.dev/v1",
+					Name:       "myservice",
+				},
+			},
+			uri: "knative:endpoint/myservice?apiVersion=serving.knative.dev%2Fv1&kind=Service",
+		},
+		{
 			endpointType: v1alpha1.EndpointTypeSink,
 			endpoint: v1alpha1.Endpoint{
 				Ref: &corev1.ObjectReference{
@@ -211,7 +222,9 @@ func TestBindings(t *testing.T) {
 				Profile:   profile,
 			}
 
-			binding, err := Translate(bindingContext, tc.endpointType, tc.endpoint)
+			binding, err := Translate(bindingContext, EndpointContext{
+				Type: tc.endpointType,
+			}, tc.endpoint)
 			assert.NoError(t, err)
 			assert.NotNil(t, binding)
 			assert.Equal(t, tc.uri, binding.URI)

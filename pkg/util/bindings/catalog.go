@@ -37,13 +37,13 @@ func RegisterBindingProvider(bp BindingProvider) {
 }
 
 // Translate execute all chained binding providers, returning the first success or the first error
-func Translate(ctx BindingContext, endpointType v1alpha1.EndpointType, endpoint v1alpha1.Endpoint) (*Binding, error) {
+func Translate(ctx BindingContext, endpointCtx EndpointContext, endpoint v1alpha1.Endpoint) (*Binding, error) {
 	if err := validateEndpoint(ctx, endpoint); err != nil {
 		return nil, err
 	}
 
 	for _, bp := range bindingProviders {
-		b, err := bp.Translate(ctx, endpointType, endpoint)
+		b, err := bp.Translate(ctx, endpointCtx, endpoint)
 		if b != nil || err != nil {
 			return b, err
 		}

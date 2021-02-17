@@ -30,7 +30,7 @@ func (k CamelURIBindingProvider) ID() string {
 	return "camel-uri"
 }
 
-func (k CamelURIBindingProvider) Translate(ctx BindingContext, endpointType v1alpha1.EndpointType, e v1alpha1.Endpoint) (*Binding, error) {
+func (k CamelURIBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
 	if e.URI == nil {
 		// works only on uris
 		return nil, nil

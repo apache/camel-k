@@ -71,52 +71,68 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 		Profile:   profile,
 	}
 
-	from, err := bindings.Translate(bindingContext, v1alpha1.EndpointTypeSource, kameletbinding.Spec.Source)
+	from, err := bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1alpha1.EndpointTypeSource}, kameletbinding.Spec.Source)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not determine source URI")
 	}
-	to, err := bindings.Translate(bindingContext, v1alpha1.EndpointTypeSink, kameletbinding.Spec.Sink)
+	to, err := bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1alpha1.EndpointTypeSink}, kameletbinding.Spec.Sink)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not determine sink URI")
 	}
 
-	if len(from.Traits) > 0 || len(to.Traits) > 0 {
+	steps := make([]*bindings.Binding, 0, len(kameletbinding.Spec.Steps))
+	for idx, step := range kameletbinding.Spec.Steps {
+		position := idx
+		stepBinding, err := bindings.Translate(bindingContext, bindings.EndpointContext{
+			Type:     v1alpha1.EndpointTypeAction,
+			Position: &position,
+		}, step)
+		if err != nil {
+			return nil, errors.Wrapf(err, "could not determine URI for step %d", idx)
+		}
+		steps = append(steps, stepBinding)
+	}
+
+	allBindings := make([]*bindings.Binding, 0, len(steps)+2)
+	allBindings = append(allBindings, from)
+	allBindings = append(allBindings, steps...)
+	allBindings = append(allBindings, to)
+
+	propList := make([]string, 0)
+	for _, b := range allBindings {
 		if it.Spec.Traits == nil {
 			it.Spec.Traits = make(map[string]v1.TraitSpec)
 		}
-		for k, v := range from.Traits {
+		for k, v := range b.Traits {
 			it.Spec.Traits[k] = v
 		}
-		for k, v := range to.Traits {
-			it.Spec.Traits[k] = v
+		for k, v := range b.ApplicationProperties {
+			propList = append(propList, fmt.Sprintf("%s=%s", k, v))
 		}
 	}
 
-	if len(from.ApplicationProperties) > 0 || len(to.ApplicationProperties) > 0 {
-		propList := make([]string, 0, len(from.ApplicationProperties)+len(to.ApplicationProperties))
-		for k, v := range from.ApplicationProperties {
-			propList = append(propList, fmt.Sprintf("%s=%s", k, v))
-		}
-		for k, v := range to.ApplicationProperties {
-			propList = append(propList, fmt.Sprintf("%s=%s", k, v))
-		}
-		sort.Strings(propList)
-		for _, p := range propList {
-			it.Spec.Configuration = append(it.Spec.Configuration, v1.ConfigurationSpec{
-				Type:  "property",
-				Value: p,
-			})
-		}
+	sort.Strings(propList)
+	for _, p := range propList {
+		it.Spec.Configuration = append(it.Spec.Configuration, v1.ConfigurationSpec{
+			Type:  "property",
+			Value: p,
+		})
 	}
+
+	dslSteps := make([]map[string]interface{}, 0)
+	for _, step := range steps {
+		dslSteps = append(dslSteps, map[string]interface{}{
+			"to": step.URI,
+		})
+	}
+	dslSteps = append(dslSteps, map[string]interface{}{
+		"to": to.URI,
+	})
 
 	flow := map[string]interface{}{
 		"from": map[string]interface{}{
-			"uri": from.URI,
-			"steps": []map[string]interface{}{
-				{
-					"to": to.URI,
-				},
-			},
+			"uri":   from.URI,
+			"steps": dslSteps,
 		},
 	}
 	encodedFlow, err := json.Marshal(flow)

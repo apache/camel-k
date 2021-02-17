@@ -32,7 +32,7 @@ func (k KameletBindingProvider) ID() string {
 	return "kamelet"
 }
 
-func (k KameletBindingProvider) Translate(ctx BindingContext, endpointType v1alpha1.EndpointType, e v1alpha1.Endpoint) (*Binding, error) {
+func (k KameletBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
 	if e.Ref == nil {
 		// works only on refs
 		return nil, nil
@@ -55,8 +55,7 @@ func (k KameletBindingProvider) Translate(ctx BindingContext, endpointType v1alp
 		if idPresent {
 			delete(props, v1alpha1.KameletIDProperty)
 		} else {
-			// Let's use literal "source" or "sink" as ID for the Kamelet
-			id = string(endpointType)
+			id = endpointCtx.GenerateID()
 		}
 		kameletURI = fmt.Sprintf("%s/%s", kameletURI, url.PathEscape(id))
 

@@ -58,7 +58,9 @@ func TestStrimziDirect(t *testing.T) {
 		}),
 	}
 
-	binding, err := StrimziBindingProvider{}.Translate(bindingContext, v1alpha1.EndpointTypeSink, endpoint)
+	binding, err := StrimziBindingProvider{}.Translate(bindingContext, bindings.EndpointContext{
+		Type: v1alpha1.EndpointTypeSink,
+	}, endpoint)
 	assert.NoError(t, err)
 	assert.NotNil(t, binding)
 	assert.Equal(t, "kafka:mytopic?brokers=my-cluster-kafka-bootstrap%3A9092", binding.URI)
@@ -116,7 +118,9 @@ func TestStrimziLookup(t *testing.T) {
 		},
 	}
 
-	binding, err := provider.Translate(bindingContext, v1alpha1.EndpointTypeSink, endpoint)
+	binding, err := provider.Translate(bindingContext, bindings.EndpointContext{
+		Type: v1alpha1.EndpointTypeSink,
+	}, endpoint)
 	assert.NoError(t, err)
 	assert.NotNil(t, binding)
 	assert.Equal(t, "kafka:mytopicy?brokers=my-clusterx-kafka-bootstrap%3A9092", binding.URI)
