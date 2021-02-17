@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"fmt"
-	"path"
 
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/pkg/errors"
@@ -175,7 +174,7 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 
 		if command.IntegrationDirectory != "" {
 			// Create dependencies subdirectory.
-			localDependenciesDirectory := path.Join(command.IntegrationDirectory, "dependencies")
+			localDependenciesDirectory := getCustomDependenciesDir(command.IntegrationDirectory)
 
 			// Copy dependencies in persistent IntegrationDirectory/dependencies
 			dependenciesList, err = util.CopyIntegrationFilesToDirectory(dependencies, localDependenciesDirectory)
@@ -184,7 +183,7 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 			}
 
 			// Create dependencies subdirectory.
-			localPropertiesDirectory := path.Join(command.IntegrationDirectory, "properties")
+			localPropertiesDirectory := getCustomPropertiesDir(command.IntegrationDirectory)
 
 			// Copy dependencies in persistent IntegrationDirectory/dependencies
 			propertyFilesList, err = util.CopyIntegrationFilesToDirectory(propertyFiles, localPropertiesDirectory)
@@ -193,7 +192,7 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 			}
 
 			// Save routes.
-			localRoutesDirectory := path.Join(command.IntegrationDirectory, "routes")
+			localRoutesDirectory := getCustomRoutesDir(command.IntegrationDirectory)
 
 			// Copy routes in persistent IntegrationDirectory/dependencies
 			routeFiles, err = util.CopyIntegrationFilesToDirectory(args, localRoutesDirectory)
@@ -210,7 +209,7 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 
 	// Integration directory can only be used when building an integration image or when we just
 	// build the integration without also building the image. A local build of the integration is
-	// represented by all the files that define the integration: dependencies, properties and routes.
+	// represented by all the files that define	 the integration: dependencies, properties and routes.
 
 	// The only case where we should not execute the image integration creation is when we want to
 	// just output the files that comprise the integration locally.
