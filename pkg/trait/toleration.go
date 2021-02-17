@@ -37,8 +37,6 @@ import (
 // +camel-k:trait=toleration
 type tolerationTrait struct {
 	BaseTrait `property:",squash"`
-	// Enable a toleration trait (default *false*).
-	Toleration *bool `property:"toleration" json:"toleration,omitempty"`
 	// The key to match the Taint
 	Key string `property:"key" json:"key,omitempty"`
 	// The operator (Equal | Exists)
@@ -53,8 +51,7 @@ type tolerationTrait struct {
 
 func newTolerationTrait() Trait {
 	return &tolerationTrait{
-		BaseTrait:  NewBaseTrait("toleration", 1200),
-		Toleration: util.BoolP(false),
+		BaseTrait: NewBaseTrait("toleration", 1200),
 	}
 }
 
