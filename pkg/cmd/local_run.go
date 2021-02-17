@@ -20,6 +20,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -58,6 +59,7 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 	cmd.Flags().Bool("containerize", false, "Run integration in a local container.")
 	cmd.Flags().String("image", "", "Full path to integration image including registry.")
 	cmd.Flags().String("network", "", "Custom network name to be used by the underlying Docker command.")
+	cmd.Flags().String("integration-directory", "", "Directory which holds the locally built integration and is the result of a local build action.")
 	cmd.Flags().StringArrayP("env", "e", nil, "Flag to specify an environment variable [--env VARIABLE=value].")
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a Camel property to the integration.")
@@ -72,6 +74,7 @@ type localRunCmdOptions struct {
 	Containerize           bool     `mapstructure:"containerize"`
 	Image                  string   `mapstructure:"image"`
 	Network                string   `mapstructure:"network"`
+	IntegrationDirectory   string   `mapstructure:"integration-directory"`
 	EnvironmentVariables   []string `mapstructure:"envs"`
 	PropertyFiles          []string `mapstructure:"property-files"`
 	Properties             []string `mapstructure:"properties"`
@@ -80,8 +83,9 @@ type localRunCmdOptions struct {
 }
 
 func (command *localRunCmdOptions) validate(args []string) error {
-	// Validate integration files.
-	if command.Image == "" || command.Containerize {
+	// Validate integration files when no image is provided and we are
+	// not running an already locally-built integration.
+	if command.Image == "" && command.IntegrationDirectory == "" {
 		err := validateIntegrationFiles(args)
 		if err != nil {
 			return err
@@ -140,22 +144,60 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 		return nil
 	}
 
-	// Fetch dependencies.
-	dependencies, err := getDependencies(args, command.AdditionalDependencies, command.MavenRepositories, true)
-	if err != nil {
-		return err
+	dependencies := []string{}
+	if command.IntegrationDirectory != "" {
+		localBuildDependencies, err := getLocalBuildDependencies(command.IntegrationDirectory)
+		if err != nil {
+			return err
+		}
+		dependencies = localBuildDependencies
+	} else {
+		// Fetch dependencies.
+		computedDependencies, err := getDependencies(args, command.AdditionalDependencies, command.MavenRepositories, true)
+		if err != nil {
+			return err
+		}
+		dependencies = computedDependencies
 	}
 
 	// Manage integration properties which may come from files or CLI.
-	propertyFiles, err := updateIntegrationProperties(command.Properties, command.PropertyFiles)
-	if err != nil {
-		return err
+	propertyFiles := []string{}
+	if command.IntegrationDirectory != "" {
+		localBuildPropertyFiles, err := getLocalBuildProperties(command.IntegrationDirectory)
+		if err != nil {
+			return err
+		}
+		propertyFiles = localBuildPropertyFiles
+	} else {
+		updatedPropertyFiles, err := updateIntegrationProperties(command.Properties, command.PropertyFiles)
+		if err != nil {
+			return err
+		}
+		propertyFiles = updatedPropertyFiles
+	}
+
+	propertieDir := ""
+	if command.IntegrationDirectory != "" {
+		propertieDir = getCustomPropertiesDir(command.IntegrationDirectory)
+	} else {
+		propertieDir = util.GetLocalPropertiesDir()
+	}
+
+	routes := []string{}
+	if command.IntegrationDirectory != "" {
+		localBuildRoutes, err := getLocalBuildRoutes(command.IntegrationDirectory)
+		if err != nil {
+			return err
+		}
+		routes = localBuildRoutes
+	} else {
+		routes = args
 	}
 
 	// If this is a containerized local run, create, build and run the container image.
 	if command.Containerize {
 		// Create and build integration image.
-		err = createAndBuildIntegrationImage(command.Context, "", false, command.Image, propertyFiles, dependencies, args, cmd.OutOrStdout(), cmd.ErrOrStderr())
+		err := createAndBuildIntegrationImage(command.Context, "", false, command.Image, propertyFiles, dependencies, routes, cmd.OutOrStdout(), cmd.ErrOrStderr())
 		if err != nil {
 			return err
 		}
@@ -167,7 +209,7 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 		}
 	} else {
 		// Run integration locally.
-		err = RunLocalIntegrationRunCommand(command.Context, propertyFiles, dependencies, args, cmd.OutOrStdout(), cmd.ErrOrStderr())
+		err := RunLocalIntegrationRunCommand(command.Context, propertyFiles, dependencies, routes, propertieDir, cmd.OutOrStdout(), cmd.ErrOrStderr())
 		if err != nil {
 			return err
 		}

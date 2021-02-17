@@ -172,6 +172,49 @@ func getTransitiveDependencies(
 	return transitiveDependencies, nil
 }
 
+func getRegularFilesInDir(directory string) ([]string, error) {
+	dirFiles := []string{}
+	files, err := ioutil.ReadDir(directory)
+	for _, file := range files {
+		fileName := file.Name()
+
+		// Do not include hidden files or sub-directories.
+		if !file.IsDir() && !strings.HasPrefix(fileName, ".") {
+			dirFiles = append(dirFiles, path.Join(directory, fileName))
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return dirFiles, nil
+}
+
+func getLocalBuildDependencies(integrationDirectory string) ([]string, error) {
+	locallyBuiltDependencies, err := getRegularFilesInDir(getCustomDependenciesDir(integrationDirectory))
+	if err != nil {
+		return nil, err
+	}
+	return locallyBuiltDependencies, nil
+}
+
+func getLocalBuildProperties(integrationDirectory string) ([]string, error) {
+	locallyBuiltProperties, err := getRegularFilesInDir(getCustomPropertiesDir(integrationDirectory))
+	if err != nil {
+		return nil, err
+	}
+	return locallyBuiltProperties, nil
+}
+
+func getLocalBuildRoutes(integrationDirectory string) ([]string, error) {
+	locallyBuiltRoutes, err := getRegularFilesInDir(getCustomRoutesDir(integrationDirectory))
+	if err != nil {
+		return nil, err
+	}
+	return locallyBuiltRoutes, nil
+}
+
 func generateCatalog() (*camel.RuntimeCatalog, error) {
 	// A Camel catalog is required for this operation
 	settings := ""
@@ -405,4 +448,16 @@ func deleteMavenWorkingDirectory() error {
 	defer os.RemoveAll(util.MavenWorkingDirectory)
 
 	return nil
+}
+
+func getCustomDependenciesDir(integrationDirectory string) string {
+	return path.Join(integrationDirectory, "dependencies")
+}
+
+func getCustomPropertiesDir(integrationDirectory string) string {
+	return path.Join(integrationDirectory, "properties")
+}
+
+func getCustomRoutesDir(integrationDirectory string) string {
+	return path.Join(integrationDirectory, "routes")
 }

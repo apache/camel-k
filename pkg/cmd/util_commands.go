@@ -103,8 +103,8 @@ func assembleIntegrationRunCommand(ctx context.Context, properties []string, dep
 }
 
 // RunLocalIntegrationRunCommand --
-func RunLocalIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string, stdout, stderr io.Writer) error {
-	cmd, err := assembleIntegrationRunCommand(ctx, properties, dependencies, routes, util.GetLocalPropertiesDir(), stdout, stderr, true)
+func RunLocalIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string, propertiesDir string, stdout, stderr io.Writer) error {
+	cmd, err := assembleIntegrationRunCommand(ctx, properties, dependencies, routes, propertiesDir, stdout, stderr, true)
 	if err != nil {
 		return err
 	}
