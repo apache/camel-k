@@ -63,8 +63,20 @@ func (t *tolerationTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
+	if t.Key == "" {
+		return false, fmt.Errorf("missing key for toleration trait")
+	}
+
+	if t.Operator != "Equal" && t.Operator != "Exists" {
+		return false, fmt.Errorf("expected Equal or Exists for operator toleration trait, got %v", t.Operator)
+	}
+
 	if t.Operator == "Equal" && t.Value == "" {
-		return false, fmt.Errorf("missing value for toleration equal operator")
+		return false, fmt.Errorf("missing value for equal operator toleration trait")
+	}
+
+	if t.Effect != "NoExecute" && t.Effect != "NoSchedule" && t.Effect != "PreferNoSchedule" {
+		return false, fmt.Errorf("expected NoExecute, NoSchedule or PreferNoSchedule for effect toleration trait, got %v", t.Effect)
 	}
 
 	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
@@ -87,10 +99,6 @@ func (t *tolerationTrait) Apply(e *Environment) (err error) {
 }
 
 func (t *tolerationTrait) addToleration(_ *Environment, deployment *appsv1.Deployment) error {
-	if t.Key == "" {
-		return nil
-	}
-
 	toleration := corev1.Toleration{
 		Key:      t.Key,
 		Operator: corev1.TolerationOperator(t.Operator),

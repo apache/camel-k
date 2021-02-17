@@ -31,33 +31,25 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-func TestConfigureTolerationTraitDoesSucceed(t *testing.T) {
+func TestConfigureTolerationTraitMissingKey(t *testing.T) {
 	tolerationTrait, environment, _ := createNominalTolerationTest()
-	configured, err := tolerationTrait.Configure(environment)
+	tolerationTrait.Toleration = util.BoolP(true)
 
-	assert.True(t, configured)
-	assert.Nil(t, err)
+	success, err := tolerationTrait.Configure(environment)
+
+	assert.Equal(t, false, success)
+	assert.NotNil(t, err)
 }
 
-func TestApplyPodTolerationLabelsDoesSucceed(t *testing.T) {
-	tolerationTrait, environment, deployment := createNominalTolerationTest()
+func TestConfigureTolerationTraitMissingOperator(t *testing.T) {
+	tolerationTrait, environment, _ := createNominalTolerationTest()
 	tolerationTrait.Toleration = util.BoolP(true)
 	tolerationTrait.Key = "my-toleration"
-	tolerationTrait.Operator = "Equal"
-	tolerationTrait.Value = "my-value"
-	tolerationTrait.Effect = "NoExecute"
-	tolerationTrait.TolerationSeconds = "300"
 
-	err := tolerationTrait.Apply(environment)
+	success, err := tolerationTrait.Configure(environment)
 
-	assert.Nil(t, err)
-	assert.Equal(t, 1, len(deployment.Spec.Template.Spec.Tolerations))
-	toleration := deployment.Spec.Template.Spec.Tolerations[0]
-	assert.Equal(t, "my-toleration", toleration.Key)
-	assert.Equal(t, corev1.TolerationOpEqual, toleration.Operator)
-	assert.Equal(t, "my-value", toleration.Value)
-	assert.Equal(t, corev1.TaintEffectNoExecute, toleration.Effect)
-	assert.Equal(t, int64(300), *toleration.TolerationSeconds)
+	assert.Equal(t, false, success)
+	assert.NotNil(t, err)
 }
 
 func TestConfigureTolerationTraitMissingValue(t *testing.T) {
@@ -69,6 +61,69 @@ func TestConfigureTolerationTraitMissingValue(t *testing.T) {
 	success, err := tolerationTrait.Configure(environment)
 
 	assert.Equal(t, false, success)
+	assert.NotNil(t, err)
+}
+
+func TestConfigureTolerationTraitMissingEffect(t *testing.T) {
+	tolerationTrait, environment, _ := createNominalTolerationTest()
+	tolerationTrait.Toleration = util.BoolP(true)
+	tolerationTrait.Key = "my-toleration"
+	tolerationTrait.Operator = "Exists"
+
+	success, err := tolerationTrait.Configure(environment)
+
+	assert.Equal(t, false, success)
+	assert.NotNil(t, err)
+}
+
+func TestApplyPodTolerationLabelsDefault(t *testing.T) {
+	tolerationTrait, environment, deployment := createNominalTolerationTest()
+	tolerationTrait.Toleration = util.BoolP(true)
+	tolerationTrait.Key = "my-toleration"
+	tolerationTrait.Operator = "Equal"
+	tolerationTrait.Value = "my-value"
+	tolerationTrait.Effect = "NoExecute"
+
+	err := tolerationTrait.Apply(environment)
+
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(deployment.Spec.Template.Spec.Tolerations))
+	toleration := deployment.Spec.Template.Spec.Tolerations[0]
+	assert.Equal(t, "my-toleration", toleration.Key)
+	assert.Equal(t, corev1.TolerationOpEqual, toleration.Operator)
+	assert.Equal(t, "my-value", toleration.Value)
+	assert.Equal(t, corev1.TaintEffectNoExecute, toleration.Effect)
+}
+
+func TestApplyPodTolerationLabelsTolerationSeconds(t *testing.T) {
+	tolerationTrait, environment, deployment := createNominalTolerationTest()
+	tolerationTrait.Toleration = util.BoolP(true)
+	tolerationTrait.Key = "my-toleration"
+	tolerationTrait.Operator = "Exists"
+	tolerationTrait.Effect = "NoExecute"
+	tolerationTrait.TolerationSeconds = "300"
+
+	err := tolerationTrait.Apply(environment)
+
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(deployment.Spec.Template.Spec.Tolerations))
+	toleration := deployment.Spec.Template.Spec.Tolerations[0]
+	assert.Equal(t, "my-toleration", toleration.Key)
+	assert.Equal(t, corev1.TolerationOpExists, toleration.Operator)
+	assert.Equal(t, corev1.TaintEffectNoExecute, toleration.Effect)
+	assert.Equal(t, int64(300), *toleration.TolerationSeconds)
+}
+
+func TestApplyPodTolerationLabelsTolerationSecondsFail(t *testing.T) {
+	tolerationTrait, environment, _ := createNominalTolerationTest()
+	tolerationTrait.Toleration = util.BoolP(true)
+	tolerationTrait.Key = "my-toleration"
+	tolerationTrait.Operator = "Exists"
+	tolerationTrait.Effect = "NoExecute"
+	tolerationTrait.TolerationSeconds = "abc"
+
+	err := tolerationTrait.Apply(environment)
+
 	assert.NotNil(t, err)
 }
 
