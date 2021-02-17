@@ -91,6 +91,25 @@ func removeNilValues(v reflect.Value, parent reflect.Value) {
 	}
 }
 
+func ObjectMetaEqualDeepDerivative(object runtime.Object, expected runtime.Object) (res bool) {
+	defer func() {
+		if r := recover(); r != nil {
+			res = false
+		}
+	}()
+
+	if expected == nil {
+		return true
+	} else if object == nil {
+		return false
+	}
+
+	objectMeta := reflect.ValueOf(object).Elem().FieldByName("ObjectMeta").Interface()
+	expectedMeta := reflect.ValueOf(expected).Elem().FieldByName("ObjectMeta").Interface()
+
+	return equality.Semantic.DeepDerivative(expectedMeta, objectMeta)
+}
+
 func SpecEqualDeepDerivative(object runtime.Object, expected runtime.Object) (res bool) {
 	defer func() {
 		if r := recover(); r != nil {
