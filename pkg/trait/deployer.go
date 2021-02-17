@@ -95,9 +95,10 @@ func (t *deployerTrait) Apply(e *Environment) error {
 					return err
 				}
 
-				if !patch.SpecEqualDeepDerivative(object, resource) {
-					// If both objects have a "Spec" field and it contains all expected fields
-					// (plus optional others), then avoid patching
+				// If both objects have "ObjectMeta" and "Spec" fields and they contain all the expected fields
+				// (plus optional others), then avoid patching.
+				if !patch.ObjectMetaEqualDeepDerivative(object, resource) ||
+					!patch.SpecEqualDeepDerivative(object, resource) {
 
 					p, err := patch.PositiveMergePatch(object, resource)
 					if err != nil {
