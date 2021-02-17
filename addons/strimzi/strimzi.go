@@ -40,7 +40,7 @@ func (s StrimziBindingProvider) ID() string {
 	return "strimzi"
 }
 
-func (s StrimziBindingProvider) Translate(ctx bindings.BindingContext, _ v1alpha1.EndpointType, endpoint v1alpha1.Endpoint) (*bindings.Binding, error) {
+func (s StrimziBindingProvider) Translate(ctx bindings.BindingContext, _ bindings.EndpointContext, endpoint v1alpha1.Endpoint) (*bindings.Binding, error) {
 	if endpoint.Ref == nil {
 		// React only on refs
 		return nil, nil
