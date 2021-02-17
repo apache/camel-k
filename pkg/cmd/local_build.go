@@ -57,6 +57,7 @@ func newCmdLocalBuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localBui
 	}
 
 	cmd.Flags().Bool("base-image", false, "Build base image used as a starting point for any integration.")
+	cmd.Flags().Bool("dependencies-only", false, "Only output the integration dependencies. The integration-directory flag must be set.")
 	cmd.Flags().String("container-registry", "", "Registry that holds intermediate images. This flag should only be used in conjunction with the base-image flag.")
 	cmd.Flags().String("image", "", "Full path to integration image including registry.")
 	cmd.Flags().String("integration-directory", "", "Directory to hold local integration files.")
@@ -71,6 +72,7 @@ func newCmdLocalBuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localBui
 type localBuildCmdOptions struct {
 	*RootCmdOptions
 	BaseImage              bool     `mapstructure:"base-image"`
+	DependenciesOnly       bool     `mapstructure:"dependencies-only"`
 	ContainerRegistry      string   `mapstructure:"container-registry"`
 	Image                  string   `mapstructure:"image"`
 	IntegrationDirectory   string   `mapstructure:"integration-directory"`
@@ -121,6 +123,11 @@ func (command *localBuildCmdOptions) validate(args []string) error {
 		return errors.New("base image construction does not use integration files")
 	}
 
+	// The integration directory must be set when only outputting dependencies.
+	if command.DependenciesOnly && command.IntegrationDirectory == "" {
+		return errors.New("to output dependencies the integration directory flag must be set")
+	}
+
 	return nil
 }
 
@@ -166,16 +173,18 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 			return err
 		}
 
-		hasIntegrationDir := command.IntegrationDirectory != ""
-
-		// Manage integration properties which may come from files or CLI.
-		propertyFiles, err := updateIntegrationProperties(command.Properties, command.PropertyFiles, false)
-		if err != nil {
-			return err
+		propertyFiles := []string{}
+		if !command.DependenciesOnly {
+			// Manage integration properties which may come from files or CLI.
+			propertyFiles, err = updateIntegrationProperties(command.Properties, command.PropertyFiles, false)
+			if err != nil {
+				return err
+			}
 		}
 
 		dependenciesList = dependencies
 		propertyFilesList = propertyFiles
+		hasIntegrationDir := command.IntegrationDirectory != ""
 		if hasIntegrationDir {
 			// Create dependencies subdirectory.
 			localDependenciesDirectory := getCustomDependenciesDir(command.IntegrationDirectory)
@@ -184,6 +193,11 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 			dependenciesList, err = util.CopyIntegrationFilesToDirectory(dependencies, localDependenciesDirectory)
 			if err != nil {
 				return err
+			}
+
+			// Once dependencies have been copied to local folder, we can exit.
+			if command.DependenciesOnly {
+				return nil
 			}
 
 			// Create dependencies subdirectory.
