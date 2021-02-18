@@ -46,9 +46,9 @@ func GetIntegrationKit(ctx context.Context, c client.Client, integration *v1.Int
 	}
 
 	name := integration.Status.Kit
-	kit := v1.NewIntegrationKit(integration.Namespace, name)
+	kit := v1.NewIntegrationKit(integration.GetIntegrationKitNamespace(), name)
 	key := k8sclient.ObjectKey{
-		Namespace: integration.Namespace,
+		Namespace: integration.GetIntegrationKitNamespace(),
 		Name:      name,
 	}
 	err := c.Get(ctx, key, &kit)

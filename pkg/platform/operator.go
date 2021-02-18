@@ -115,6 +115,11 @@ func IsOperatorAllowedOnNamespace(ctx context.Context, c client.Client, namespac
 	if !IsCurrentOperatorGlobal() {
 		return true, nil
 	}
+	operatorNamespace := GetOperatorNamespace()
+	if operatorNamespace == namespace {
+		// Global operator is allowed on its own namespace
+		return true, nil
+	}
 	alreadyOwned, err := IsNamespaceLocked(ctx, c, namespace)
 	if err != nil {
 		return false, err

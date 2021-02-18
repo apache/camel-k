@@ -31,36 +31,55 @@ const (
 	DefaultPlatformName = "camel-k"
 )
 
-// GetOrLookupCurrent --
-func GetOrLookupCurrent(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1.IntegrationPlatform, error) {
+// GetCurrent returns the currently installed platform (local or global)
+func GetCurrent(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatform, error) {
+	return find(ctx, c, namespace, true)
+}
+
+// GetOrFind returns the named platform or any other platform in the local namespace or the global one
+func GetOrFind(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool) (*v1.IntegrationPlatform, error) {
 	if name != "" {
-		return Get(ctx, c, namespace, name)
+		return get(ctx, c, namespace, name)
 	}
 
-	return GetCurrentPlatform(ctx, c, namespace)
+	return find(ctx, c, namespace, active)
 }
 
-// GetOrLookupAny returns the named platform or any other platform in the namespace
-func GetOrLookupAny(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1.IntegrationPlatform, error) {
+// GetOrFindLocal returns the named platform or any other platform in the local namespace
+func GetOrFindLocal(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool) (*v1.IntegrationPlatform, error) {
 	if name != "" {
-		return Get(ctx, c, namespace, name)
+		return kubernetes.GetIntegrationPlatform(ctx, c, name, namespace)
 	}
 
-	return getAnyPlatform(ctx, c, namespace, false)
+	return findLocal(ctx, c, namespace, active)
 }
 
-// Get returns the currently installed platform
-func Get(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1.IntegrationPlatform, error) {
-	return kubernetes.GetIntegrationPlatform(ctx, c, name, namespace)
+// get returns the given platform in the given namespace or the global one
+func get(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1.IntegrationPlatform, error) {
+	p, err := kubernetes.GetIntegrationPlatform(ctx, c, name, namespace)
+	if err != nil && k8serrors.IsNotFound(err) {
+		operatorNamespace := GetOperatorNamespace()
+		if operatorNamespace != "" && operatorNamespace != namespace {
+			p, err = kubernetes.GetIntegrationPlatform(ctx, c, name, operatorNamespace)
+		}
+	}
+	return p, err
 }
 
-// GetCurrentPlatform returns the currently installed platform
-func GetCurrentPlatform(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatform, error) {
-	return getAnyPlatform(ctx, c, namespace, true)
+// find returns the currently installed platform or any platform existing in local or operator namespace
+func find(ctx context.Context, c k8sclient.Reader, namespace string, active bool) (*v1.IntegrationPlatform, error) {
+	p, err := findLocal(ctx, c, namespace, active)
+	if err != nil && k8serrors.IsNotFound(err) {
+		operatorNamespace := GetOperatorNamespace()
+		if operatorNamespace != "" && operatorNamespace != namespace {
+			p, err = findLocal(ctx, c, operatorNamespace, active)
+		}
+	}
+	return p, err
 }
 
-// getAnyPlatform returns the currently installed platform or any platform existing in the namespace
-func getAnyPlatform(ctx context.Context, c k8sclient.Reader, namespace string, active bool) (*v1.IntegrationPlatform, error) {
+// findLocal returns the currently installed platform or any platform existing in local namespace
+func findLocal(ctx context.Context, c k8sclient.Reader, namespace string, active bool) (*v1.IntegrationPlatform, error) {
 	lst, err := ListPlatforms(ctx, c, namespace)
 	if err != nil {
 		return nil, err

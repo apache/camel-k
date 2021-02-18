@@ -172,7 +172,7 @@ func (r *reconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 	target := instance.DeepCopy()
 	targetLog := rlog.ForBuild(target)
 
-	pl, err := platform.GetOrLookupCurrent(ctx, r.client, target.Namespace, target.Status.Platform)
+	pl, err := platform.GetOrFind(ctx, r.client, target.Namespace, target.Status.Platform, true)
 	if target.Status.Phase == v1.BuildPhaseNone || target.Status.Phase == v1.BuildPhaseWaitingForPlatform {
 		if err != nil || pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
 			target.Status.Phase = v1.BuildPhaseWaitingForPlatform

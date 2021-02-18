@@ -258,7 +258,8 @@ func (in *Integration) SetIntegrationPlatform(platform *IntegrationPlatform) {
 		cs = corev1.ConditionFalse
 	}
 
-	in.Status.SetCondition(IntegrationConditionPlatformAvailable, cs, IntegrationConditionPlatformAvailableReason, platform.Name)
+	in.Status.SetCondition(IntegrationConditionPlatformAvailable, cs, IntegrationConditionPlatformAvailableReason, platform.Namespace+"/"+platform.Name)
+	in.Status.PlatformNamespace = platform.Namespace
 	in.Status.Platform = platform.Name
 }
 
@@ -271,13 +272,21 @@ func (in *Integration) SetIntegrationKit(kit *IntegrationKit) {
 		if kit.Status.Phase == IntegrationKitPhaseNone {
 			message = fmt.Sprintf("creating a new integration kit")
 		} else {
-			message = fmt.Sprintf("integration kit %s is in state %q", kit.Name, kit.Status.Phase)
+			message = fmt.Sprintf("integration kit %s/%s is in state %q", kit.Namespace, kit.Name, kit.Status.Phase)
 		}
 	}
 
 	in.Status.SetCondition(IntegrationConditionKitAvailable, cs, IntegrationConditionKitAvailableReason, message)
 	in.Status.Kit = kit.Name
 	in.Status.Image = kit.Status.Image
+}
+
+// SetIntegrationKit --
+func (in *Integration) GetIntegrationKitNamespace() string {
+	if in.Status.PlatformNamespace != "" {
+		return in.Status.PlatformNamespace
+	}
+	return in.Namespace
 }
 
 // GetCondition returns the condition with the provided type.

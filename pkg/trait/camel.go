@@ -96,7 +96,7 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 		// the required versions (camel and runtime) are not expressed as
 		// semver constraints
 		if exactVersionRegexp.MatchString(runtimeVersion) {
-			catalog, err = camel.GenerateCatalog(e.C, e.Client, ns, e.Platform.Status.Build.Maven, runtime, []maven.Dependency{})
+			catalog, err = camel.GenerateCatalog(e.C, e.Client, e.Platform.Namespace, e.Platform.Status.Build.Maven, runtime, []maven.Dependency{})
 			if err != nil {
 				return err
 			}

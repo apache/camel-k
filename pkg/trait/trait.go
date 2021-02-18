@@ -71,7 +71,7 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integr
 		namespace = kit.Namespace
 	}
 
-	pl, err := platform.GetCurrentPlatform(ctx, c, namespace)
+	pl, err := platform.GetCurrent(ctx, c, namespace)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return nil, err
 	}

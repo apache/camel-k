@@ -44,7 +44,7 @@ func publisher(ctx *builder.Context) error {
 		return err
 	}
 
-	pl, err := platform.GetCurrentPlatform(ctx.C, ctx, ctx.Namespace)
+	pl, err := platform.GetCurrent(ctx.C, ctx, ctx.Namespace)
 	if err != nil {
 		return err
 	}

@@ -48,7 +48,7 @@ func (action *deployAction) Handle(ctx context.Context, integration *v1.Integrat
 		return nil, errors.Errorf("no kit set on integration %s", integration.Name)
 	}
 
-	kit, err := kubernetes.GetIntegrationKit(ctx, action.client, integration.Status.Kit, integration.Namespace)
+	kit, err := kubernetes.GetIntegrationKit(ctx, action.client, integration.Status.Kit, integration.GetIntegrationKitNamespace())
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to find integration kit %s, %s", integration.Status.Kit, err)
 	}

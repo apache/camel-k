@@ -52,7 +52,7 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 		return nil, err
 	}
 
-	kit := v1.NewIntegrationKit(integration.Namespace, integration.Spec.Kit)
+	kit := v1.NewIntegrationKit(integration.GetIntegrationKitNamespace(), integration.Spec.Kit)
 
 	integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 	integration.SetIntegrationKit(&kit)

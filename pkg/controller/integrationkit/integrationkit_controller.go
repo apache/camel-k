@@ -204,7 +204,8 @@ func (r *reconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 	targetLog := rlog.ForIntegrationKit(target)
 
 	if target.Status.Phase == v1.IntegrationKitPhaseNone || target.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
-		pl, err := platform.GetOrLookupCurrent(ctx, r.client, target.Namespace, target.Status.Platform)
+		// TODO.... here local...
+		pl, err := platform.GetOrFindLocal(ctx, r.client, target.Namespace, target.Status.Platform, true)
 		if err != nil || pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
 			target.Status.Phase = v1.IntegrationKitPhaseWaitingForPlatform
 		} else {

@@ -35,6 +35,10 @@ The following configuration options are available:
 | bool
 | To create a default (empty) platform when the platform is missing.
 
+| platform.global
+| bool
+| Indicates if the platform should be created globally in the case of global operator (default true).
+
 | platform.auto
 | bool
 | To automatically detect from the environment if a default platform can be created (it will be created on OpenShift only).

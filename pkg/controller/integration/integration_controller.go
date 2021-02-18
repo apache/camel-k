@@ -114,7 +114,13 @@ func add(mgr manager.Manager, r reconcile.Reconciler, c client.Client) error {
 			if kit.Status.Phase == v1.IntegrationKitPhaseReady || kit.Status.Phase == v1.IntegrationKitPhaseError {
 				list := &v1.IntegrationList{}
 
-				if err := mgr.GetClient().List(context.TODO(), list, k8sclient.InNamespace(kit.Namespace)); err != nil {
+				// Do global search in case of global operator (it may be using a global platform)
+				var opts []k8sclient.ListOption
+				if !platform.IsCurrentOperatorGlobal() {
+					opts = append(opts, k8sclient.InNamespace(kit.Namespace))
+				}
+
+				if err := mgr.GetClient().List(context.TODO(), list, opts...); err != nil {
 					log.Error(err, "Failed to retrieve integration list")
 					return requests
 				}
@@ -130,6 +136,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler, c client.Client) error {
 						})
 					}
 				}
+
 			}
 
 			return requests

@@ -35,16 +35,16 @@ import (
 // LookupKitForIntegration --
 func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integration *v1.Integration) (*v1.IntegrationKit, error) {
 	if integration.Status.Kit != "" {
-		kit, err := kubernetes.GetIntegrationKit(ctx, c, integration.Status.Kit, integration.Namespace)
+		kit, err := kubernetes.GetIntegrationKit(ctx, c, integration.Status.Kit, integration.GetIntegrationKitNamespace())
 		if err != nil {
-			return nil, errors.Wrapf(err, "unable to find integration kit %s, %s", integration.Status.Kit, err)
+			return nil, errors.Wrapf(err, "unable to find integration kit %s/%s, %s", integration.GetIntegrationKitNamespace(), integration.Status.Kit, err)
 		}
 
 		return kit, nil
 	}
 
 	options := []k8sclient.ListOption{
-		k8sclient.InNamespace(integration.Namespace),
+		k8sclient.InNamespace(integration.GetIntegrationKitNamespace()),
 		k8sclient.MatchingLabels{
 			"camel.apache.org/runtime.version":  integration.Status.RuntimeVersion,
 			"camel.apache.org/runtime.provider": string(integration.Status.RuntimeProvider),
