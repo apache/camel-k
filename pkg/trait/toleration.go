@@ -31,14 +31,15 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 )
 
-// This trait will enable a Toleration.
-// Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
+// This trait will set a Toleration over an integration pod. Tolerations allow (but do not require) the pods to schedule onto nodes with matching taints.
 // See https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ for more details.
 //
-// The toleration should be expressed in a similar manner of taints *Key[=Value]:Effect[:Seconds]* where values in square brackets are optional. Examples:
+// The toleration should be expressed in a similar manner of taints *_Key[=Value]:Effect[:Seconds]_* where values in square brackets are optional. Examples:
+//
 // my-key:NoExecute
-// my-key=my-val:NoSchedule
-// my-key=my-val:NoSchedule:120
+// com.example/my-key:NoExecute
+// com.example/my-key=my-val:NoSchedule
+// com.example/my-key=my-val:NoSchedule:120
 //
 // It's disabled by default.
 //
