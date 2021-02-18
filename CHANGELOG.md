@@ -27,6 +27,9 @@
 
 **Merged pull requests:**
 
+- For the moment lets remove absolute path [\#2049](https://github.com/apache/camel-k/pull/2049) ([oscerd](https://github.com/oscerd))
+- fix: Consider ObjectMeta field for deep derivative comparison before patching [\#2042](https://github.com/apache/camel-k/pull/2042) ([astefanutti](https://github.com/astefanutti))
+- fix\(pdb\): Add TypeMeta field to PodDisruptionBudget resource [\#2041](https://github.com/apache/camel-k/pull/2041) ([astefanutti](https://github.com/astefanutti))
 - chore\(ci\): Pin the Kubernetes version deployed by Kind [\#2037](https://github.com/apache/camel-k/pull/2037) ([astefanutti](https://github.com/astefanutti))
 - fix\(ci\): Use kubectl wait command to check Knative readiness [\#2036](https://github.com/apache/camel-k/pull/2036) ([astefanutti](https://github.com/astefanutti))
 - chore\(olm\): Update IntegrationPlatform creation step in CSV description [\#2034](https://github.com/apache/camel-k/pull/2034) ([astefanutti](https://github.com/astefanutti))
@@ -162,7 +165,6 @@
 - Adding a way to override the default base image at runtime [\#1707](https://github.com/apache/camel-k/issues/1707)
 - camel-K installation failed with Helm on GKE [\#1664](https://github.com/apache/camel-k/issues/1664)
 - Add a warning when operating from a CLI with a different installed Operator version [\#1652](https://github.com/apache/camel-k/issues/1652)
-- Increase trait test coverage [\#1547](https://github.com/apache/camel-k/issues/1547)
 - Upgrade CRDs to apiextensions.k8s.io/v1 [\#1487](https://github.com/apache/camel-k/issues/1487)
 - Implement kit\_create command's flags test [\#1159](https://github.com/apache/camel-k/issues/1159)
 - Implement install command's flags test [\#1158](https://github.com/apache/camel-k/issues/1158)
@@ -308,11 +310,13 @@
 - Error during unshare\(...\): Operation not permitted [\#1580](https://github.com/apache/camel-k/issues/1580)
 - Remove support for Main runtime for integrations [\#1562](https://github.com/apache/camel-k/issues/1562)
 - Auto-detect json in yaml syntax [\#1549](https://github.com/apache/camel-k/issues/1549)
+- Increase trait test coverage [\#1547](https://github.com/apache/camel-k/issues/1547)
 - Provide yaml schema of design definition [\#1537](https://github.com/apache/camel-k/issues/1537)
 - Expose operator related metrics [\#1267](https://github.com/apache/camel-k/issues/1267)
 - helm.sh entries in go.sum [\#1231](https://github.com/apache/camel-k/issues/1231)
 - Add camel-k-quarkus example [\#1082](https://github.com/apache/camel-k/issues/1082)
 - Make sure global and local operators can cohexist [\#751](https://github.com/apache/camel-k/issues/751)
+- The --maven-repository shortcut does not configure plugin repositories [\#746](https://github.com/apache/camel-k/issues/746)
 - Document architecture [\#36](https://github.com/apache/camel-k/issues/36)
 
 **Merged pull requests:**
@@ -757,6 +761,7 @@
 **Merged pull requests:**
 
 - Fix \#1449: add support for modeline options [\#1455](https://github.com/apache/camel-k/pull/1455) ([nicolaferraro](https://github.com/nicolaferraro))
+- information to update the homebrew formula [\#1454](https://github.com/apache/camel-k/pull/1454) ([ipolyzos](https://github.com/ipolyzos))
 - Fix \#1450: fix servicemonitor roles on direct install [\#1453](https://github.com/apache/camel-k/pull/1453) ([nicolaferraro](https://github.com/nicolaferraro))
 - Helm fix [\#1448](https://github.com/apache/camel-k/pull/1448) ([nicolaferraro](https://github.com/nicolaferraro))
 
@@ -775,7 +780,6 @@
 
 **Merged pull requests:**
 
-- information to update the homebrew formula [\#1454](https://github.com/apache/camel-k/pull/1454) ([ipolyzos](https://github.com/ipolyzos))
 - Fix \#1446 and \#1395: completely update integration resource on redepl… [\#1447](https://github.com/apache/camel-k/pull/1447) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1367: add more build events [\#1444](https://github.com/apache/camel-k/pull/1444) ([nicolaferraro](https://github.com/nicolaferraro))
 - Partially Fixes Camel 14995: generates master and 3/threescale traits docs. [\#1441](https://github.com/apache/camel-k/pull/1441) ([djencks](https://github.com/djencks))
@@ -1097,6 +1101,7 @@
 - feat\(build\): Better report build progress [\#1064](https://github.com/apache/camel-k/pull/1064) ([astefanutti](https://github.com/astefanutti))
 - Add GC trait discovery client caching options and server-side deletion [\#1062](https://github.com/apache/camel-k/pull/1062) ([astefanutti](https://github.com/astefanutti))
 - chore\(olm\): fix olm naming [\#1060](https://github.com/apache/camel-k/pull/1060) ([nicolaferraro](https://github.com/nicolaferraro))
+- fix\(camel\): Report runtime version from Camel catalog into integration and kit statuses [\#1044](https://github.com/apache/camel-k/pull/1044) ([astefanutti](https://github.com/astefanutti))
 - feat\(build\): Task-based builds [\#1121](https://github.com/apache/camel-k/pull/1121) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.0-M4](https://github.com/apache/camel-k/tree/1.0.0-M4) (2019-11-13)
@@ -1128,7 +1133,6 @@
 - Fix \#1036: generate k8s client for camel k resources [\#1051](https://github.com/apache/camel-k/pull/1051) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(magic\): auto-add dependency on camel-jackson when using plain .… [\#1049](https://github.com/apache/camel-k/pull/1049) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix \#662: mark kit traits to avoid rebuilding when not necessary [\#1046](https://github.com/apache/camel-k/pull/1046) ([nicolaferraro](https://github.com/nicolaferraro))
-- fix\(camel\): Report runtime version from Camel catalog into integration and kit statuses [\#1044](https://github.com/apache/camel-k/pull/1044) ([astefanutti](https://github.com/astefanutti))
 - chore\(dev\): Upgrade Operator SDK to version 0.12.0 [\#1043](https://github.com/apache/camel-k/pull/1043) ([astefanutti](https://github.com/astefanutti))
 - Fix typo in doc [\#1042](https://github.com/apache/camel-k/pull/1042) ([apupier](https://github.com/apupier))
 - fix \#989: document the release process [\#1041](https://github.com/apache/camel-k/pull/1041) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1308,7 +1312,6 @@
 - Route trait does not work if route.auto is set to false [\#767](https://github.com/apache/camel-k/issues/767)
 - Switch to Camel 3 [\#755](https://github.com/apache/camel-k/issues/755)
 - Do not create a route on top of prometheus service only [\#749](https://github.com/apache/camel-k/issues/749)
-- The --maven-repository shortcut does not configure plugin repositories [\#746](https://github.com/apache/camel-k/issues/746)
 - Add a --global install option [\#745](https://github.com/apache/camel-k/issues/745)
 - CR example is using wrong schema [\#737](https://github.com/apache/camel-k/issues/737)
 - camelContext is not supported in XML DSL routedefinition [\#731](https://github.com/apache/camel-k/issues/731)
@@ -1615,6 +1618,8 @@
 - feature\(kaniko\): support for incremental build [\#530](https://github.com/apache/camel-k/pull/530) ([lburgazzoli](https://github.com/lburgazzoli))
 - ordered delete [\#529](https://github.com/apache/camel-k/pull/529) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(kamel\): fix reset command [\#526](https://github.com/apache/camel-k/pull/526) ([lburgazzoli](https://github.com/lburgazzoli))
+- chore\(release\): add automatic version update to release [\#524](https://github.com/apache/camel-k/pull/524) ([nicolaferraro](https://github.com/nicolaferraro))
+- Adding Probes to Knative services [\#514](https://github.com/apache/camel-k/pull/514) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.3.0](https://github.com/apache/camel-k/tree/0.3.0) (2019-03-04)
 
@@ -1642,14 +1647,12 @@
 
 **Merged pull requests:**
 
-- chore\(release\): add automatic version update to release [\#524](https://github.com/apache/camel-k/pull/524) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix: Allow file names as delete cmd argument [\#522](https://github.com/apache/camel-k/pull/522) ([christophd](https://github.com/christophd))
 - chore\(image\): include camel runtime adapters [\#521](https://github.com/apache/camel-k/pull/521) ([lburgazzoli](https://github.com/lburgazzoli))
 - test\(builder\): more assertions on deps [\#520](https://github.com/apache/camel-k/pull/520) ([oscerd](https://github.com/oscerd))
 - chore\(build\): remove jitpack configuration [\#519](https://github.com/apache/camel-k/pull/519) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(runtime\): Bump runtime to 0.3.0 [\#518](https://github.com/apache/camel-k/pull/518) ([oscerd](https://github.com/oscerd))
 - knative\(serving\): add support for additional annotations [\#517](https://github.com/apache/camel-k/pull/517) ([lburgazzoli](https://github.com/lburgazzoli))
-- Adding Probes to Knative services [\#514](https://github.com/apache/camel-k/pull/514) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(make\): fix images-push target [\#510](https://github.com/apache/camel-k/pull/510) ([lburgazzoli](https://github.com/lburgazzoli))
 - minikube doc update [\#509](https://github.com/apache/camel-k/pull/509) ([kameshsampath](https://github.com/kameshsampath))
 - chore\(crd\): add missing label to CamelCatalog CRD [\#502](https://github.com/apache/camel-k/pull/502) ([lburgazzoli](https://github.com/lburgazzoli))
