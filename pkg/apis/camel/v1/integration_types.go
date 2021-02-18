@@ -65,6 +65,8 @@ type IntegrationStatus struct {
 }
 
 // +genclient
+// +genclient:method=GetScale,verb=get,subresource=scale,result=k8s.io/api/autoscaling/v1.Scale
+// +genclient:method=UpdateScale,verb=update,subresource=scale,input=k8s.io/api/autoscaling/v1.Scale,result=k8s.io/api/autoscaling/v1.Scale
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=integrations,scope=Namespaced,shortName=it,categories=kamel;camel
 // +kubebuilder:subresource:status
