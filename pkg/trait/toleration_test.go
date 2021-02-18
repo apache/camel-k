@@ -33,10 +33,9 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-func TestConfigureTolerationTraitMissingKey(t *testing.T) {
+func TestConfigureTolerationTraitMissingTaint(t *testing.T) {
 	environment, _ := createNominalDeploymentTolerationTest()
-	tolerationTrait := newTolerationTrait().(*tolerationTrait)
-	tolerationTrait.Enabled = util.BoolP(true)
+	tolerationTrait := createNominalTolerationTrait()
 
 	success, err := tolerationTrait.Configure(environment)
 
@@ -44,51 +43,19 @@ func TestConfigureTolerationTraitMissingKey(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestConfigureTolerationTraitMissingOperator(t *testing.T) {
+func TestApplyTolerationTraitMalformedTaint(t *testing.T) {
 	environment, _ := createNominalDeploymentTolerationTest()
-	tolerationTrait := newTolerationTrait().(*tolerationTrait)
-	tolerationTrait.Enabled = util.BoolP(true)
-	tolerationTrait.Key = "my-toleration"
+	tolerationTrait := createNominalTolerationTrait()
+	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration-failure")
 
-	success, err := tolerationTrait.Configure(environment)
+	err := tolerationTrait.Apply(environment)
 
-	assert.Equal(t, false, success)
-	assert.NotNil(t, err)
-}
-
-func TestConfigureTolerationTraitMissingValue(t *testing.T) {
-	environment, _ := createNominalDeploymentTolerationTest()
-	tolerationTrait := newTolerationTrait().(*tolerationTrait)
-	tolerationTrait.Enabled = util.BoolP(true)
-	tolerationTrait.Key = "my-toleration"
-	tolerationTrait.Operator = "Equal"
-
-	success, err := tolerationTrait.Configure(environment)
-
-	assert.Equal(t, false, success)
-	assert.NotNil(t, err)
-}
-
-func TestConfigureTolerationTraitMissingEffect(t *testing.T) {
-	environment, _ := createNominalDeploymentTolerationTest()
-	tolerationTrait := newTolerationTrait().(*tolerationTrait)
-	tolerationTrait.Enabled = util.BoolP(true)
-	tolerationTrait.Key = "my-toleration"
-	tolerationTrait.Operator = "Exists"
-
-	success, err := tolerationTrait.Configure(environment)
-
-	assert.Equal(t, false, success)
 	assert.NotNil(t, err)
 }
 
 func TestApplyPodTolerationLabelsDefault(t *testing.T) {
-	tolerationTrait := newTolerationTrait().(*tolerationTrait)
-	tolerationTrait.Enabled = util.BoolP(true)
-	tolerationTrait.Key = "my-toleration"
-	tolerationTrait.Operator = "Equal"
-	tolerationTrait.Value = "my-value"
-	tolerationTrait.Effect = "NoExecute"
+	tolerationTrait := createNominalTolerationTrait()
+	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration=my-value:NoExecute")
 
 	environment, deployment := createNominalDeploymentTolerationTest()
 	testApplyPodTolerationLabelsDefault(t, tolerationTrait, environment, &deployment.Spec.Template.Spec.Tolerations)
@@ -113,12 +80,8 @@ func testApplyPodTolerationLabelsDefault(t *testing.T, trait *tolerationTrait, e
 }
 
 func TestApplyPodTolerationLabelsTolerationSeconds(t *testing.T) {
-	tolerationTrait := newTolerationTrait().(*tolerationTrait)
-	tolerationTrait.Enabled = util.BoolP(true)
-	tolerationTrait.Key = "my-toleration"
-	tolerationTrait.Operator = "Exists"
-	tolerationTrait.Effect = "NoExecute"
-	tolerationTrait.TolerationSeconds = "300"
+	tolerationTrait := createNominalTolerationTrait()
+	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration:NoExecute:300")
 
 	environment, deployment := createNominalDeploymentTolerationTest()
 	testApplyPodTolerationLabelsTolerationSeconds(t, tolerationTrait, environment, &deployment.Spec.Template.Spec.Tolerations)
@@ -142,28 +105,21 @@ func testApplyPodTolerationLabelsTolerationSeconds(t *testing.T, trait *tolerati
 	assert.Equal(t, int64(300), *toleration.TolerationSeconds)
 }
 
-func TestApplyPodTolerationLabelsTolerationSecondsFail(t *testing.T) {
-	tolerationTrait := newTolerationTrait().(*tolerationTrait)
-	tolerationTrait.Enabled = util.BoolP(true)
-	tolerationTrait.Key = "my-toleration"
-	tolerationTrait.Operator = "Exists"
-	tolerationTrait.Effect = "NoExecute"
-	tolerationTrait.TolerationSeconds = "abc"
+func TestTolerationValidTaints(t *testing.T) {
+	environment, _ := createNominalDeploymentTolerationTest()
+	tolerationTrait := createNominalTolerationTrait()
+	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration:NoExecute")
+	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration:NoSchedule")
+	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration:PreferNoSchedule")
+	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration:PreferNoSchedule:100")
+	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration=my-val:NoExecute")
+	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration=my-val:NoExecute:120")
+	tolerationTrait.Taints = append(tolerationTrait.Taints, "org.apache.camel/my-toleration:NoExecute")
+	tolerationTrait.Taints = append(tolerationTrait.Taints, "org.apache.camel/my-toleration=val:NoExecute")
 
-	environment, deployment := createNominalDeploymentTolerationTest()
-	testApplyPodTolerationLabelsTolerationSecondsFail(t, tolerationTrait, environment, &deployment.Spec.Template.Spec.Tolerations)
+	err := tolerationTrait.Apply(environment)
 
-	environment, knativeService := createNominalKnativeServiceTolerationTest()
-	testApplyPodTolerationLabelsTolerationSecondsFail(t, tolerationTrait, environment, &knativeService.Spec.Template.Spec.Tolerations)
-
-	environment, cronJob := createNominalCronJobTolerationTest()
-	testApplyPodTolerationLabelsTolerationSecondsFail(t, tolerationTrait, environment, &cronJob.Spec.JobTemplate.Spec.Template.Spec.Tolerations)
-}
-
-func testApplyPodTolerationLabelsTolerationSecondsFail(t *testing.T, trait *tolerationTrait, environment *Environment, tolerations *[]corev1.Toleration) {
-	err := trait.Apply(environment)
-
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 }
 
 func createNominalDeploymentTolerationTest() (*Environment, *appsv1.Deployment) {
@@ -235,4 +191,12 @@ func createNominalCronJobTolerationTest() (*Environment, *v1beta1.CronJob) {
 	}
 
 	return environment, cronJob
+}
+
+func createNominalTolerationTrait() *tolerationTrait {
+	tolerationTrait := newTolerationTrait().(*tolerationTrait)
+	tolerationTrait.Enabled = util.BoolP(true)
+	tolerationTrait.Taints = make([]string, 0)
+
+	return tolerationTrait
 }

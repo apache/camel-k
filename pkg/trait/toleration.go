@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -34,22 +35,21 @@ import (
 // Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
 // See https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ for more details.
 //
+// The toleration should be expressed in a similar manner of taints *Key[=Value]:Effect[:Seconds]* where values in square brackets are optional. Examples:
+// my-key:NoExecute
+// my-key=my-val:NoSchedule
+// my-key=my-val:NoSchedule:120
+//
 // It's disabled by default.
 //
 // +camel-k:trait=toleration
 type tolerationTrait struct {
 	BaseTrait `property:",squash"`
-	// The key to match the Taint
-	Key string `property:"key" json:"key,omitempty"`
-	// The operator (Equal | Exists)
-	Operator string `property:"operator" json:"operator,omitempty"`
-	// The value to match if Equal operator selected
-	Value string `property:"value" json:"value,omitempty"`
-	// The effect that will be set on the Pod (NoExecute | NoSchedule | PreferNoSchedule)
-	Effect string `property:"effect" json:"effect,omitempty"`
-	// How long that Pod stays bound to a failing or unresponsive Node
-	TolerationSeconds string `property:"seconds" json:"seconds,omitempty"`
+	// The taint to tolerate in the form Key[=Value]:Effect[:Seconds]
+	Taints []string `property:"taint" json:"taint,omitempty"`
 }
+
+var validTaintRegexp = regexp.MustCompile(`^([\w\/_\-\.]+)(=)?([\w_\-\.]+)?:(NoSchedule|NoExecute|PreferNoSchedule):?(\d*)?$`)
 
 func newTolerationTrait() Trait {
 	return &tolerationTrait{
@@ -62,27 +62,15 @@ func (t *tolerationTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if t.Key == "" {
-		return false, fmt.Errorf("missing key for toleration trait")
-	}
-
-	if t.Operator != "Equal" && t.Operator != "Exists" {
-		return false, fmt.Errorf("expected Equal or Exists for operator toleration trait, got %v", t.Operator)
-	}
-
-	if t.Operator == "Equal" && t.Value == "" {
-		return false, fmt.Errorf("missing value for equal operator toleration trait")
-	}
-
-	if t.Effect != "NoExecute" && t.Effect != "NoSchedule" && t.Effect != "PreferNoSchedule" {
-		return false, fmt.Errorf("expected NoExecute, NoSchedule or PreferNoSchedule for effect toleration trait, got %v", t.Effect)
+	if len(t.Taints) == 0 {
+		return false, fmt.Errorf("no taint was provided")
 	}
 
 	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
 }
 
 func (t *tolerationTrait) Apply(e *Environment) (err error) {
-	toleration, err := t.getToleration()
+	tolerations, err := t.getTolerations()
 	if err != nil {
 		return err
 	}
@@ -125,27 +113,41 @@ func (t *tolerationTrait) Apply(e *Environment) (err error) {
 		if *specTolerations == nil {
 			*specTolerations = make([]corev1.Toleration, 0)
 		}
-		*specTolerations = append(*specTolerations, toleration)
+		*specTolerations = append(*specTolerations, tolerations...)
 	}
 
 	return nil
 }
 
-func (t *tolerationTrait) getToleration() (corev1.Toleration, error) {
-	toleration := corev1.Toleration{
-		Key:      t.Key,
-		Operator: corev1.TolerationOperator(t.Operator),
-		Value:    t.Value,
-		Effect:   corev1.TaintEffect(t.Effect),
-	}
-
-	if t.TolerationSeconds != "" {
-		tolerationSeconds, err := strconv.ParseInt(t.TolerationSeconds, 10, 64)
-		if err != nil {
-			return corev1.Toleration{}, err
+func (t *tolerationTrait) getTolerations() ([]corev1.Toleration, error) {
+	tolerations := make([]corev1.Toleration, 0)
+	for _, t := range t.Taints {
+		if !validTaintRegexp.MatchString(t) {
+			return nil, fmt.Errorf("could not match taint %v", t)
 		}
-		toleration.TolerationSeconds = &tolerationSeconds
+		toleration := corev1.Toleration{}
+		// Parse the regexp groups
+		groups := validTaintRegexp.FindStringSubmatch(t)
+		toleration.Key = groups[1]
+		if groups[2] != "" {
+			toleration.Operator = corev1.TolerationOpEqual
+		} else {
+			toleration.Operator = corev1.TolerationOpExists
+		}
+		if groups[3] != "" {
+			toleration.Value = groups[3]
+		}
+		toleration.Effect = corev1.TaintEffect(groups[4])
+
+		if groups[5] != "" {
+			tolerationSeconds, err := strconv.ParseInt(groups[5], 10, 64)
+			if err != nil {
+				return nil, err
+			}
+			toleration.TolerationSeconds = &tolerationSeconds
+		}
+		tolerations = append(tolerations, toleration)
 	}
 
-	return toleration, nil
+	return tolerations, nil
 }
