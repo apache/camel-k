@@ -34,11 +34,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
 	"github.com/spf13/cobra"
+
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -46,6 +45,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1beta1"
@@ -57,10 +57,12 @@ import (
 
 	"github.com/apache/camel-k/e2e/support/util"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/cmd"
 	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/openshift"
 
@@ -260,6 +262,16 @@ func IntegrationPodImage(ns string, name string) func() string {
 
 func IntegrationPod(ns string, name string) func() *corev1.Pod {
 	return func() *corev1.Pod {
+		pods := IntegrationPods(ns, name)()
+		if len(pods) == 0 {
+			return nil
+		}
+		return &pods[0]
+	}
+}
+
+func IntegrationPods(ns string, name string) func() []corev1.Pod {
+	return func() []corev1.Pod {
 		lst := corev1.PodList{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Pod",
@@ -274,10 +286,27 @@ func IntegrationPod(ns string, name string) func() *corev1.Pod {
 		if err != nil {
 			panic(err)
 		}
-		if len(lst.Items) == 0 {
+		return lst.Items
+	}
+}
+
+func IntegrationSpecReplicas(ns string, name string) func() *int32 {
+	return func() *int32 {
+		it := Integration(ns, name)()
+		if it == nil {
 			return nil
 		}
-		return &lst.Items[0]
+		return it.Spec.Replicas
+	}
+}
+
+func IntegrationStatusReplicas(ns string, name string) func() *int32 {
+	return func() *int32 {
+		it := Integration(ns, name)()
+		if it == nil {
+			return nil
+		}
+		return it.Status.Replicas
 	}
 }
 
