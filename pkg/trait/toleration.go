@@ -22,7 +22,9 @@ import (
 	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
@@ -80,22 +82,56 @@ func (t *tolerationTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *tolerationTrait) Apply(e *Environment) (err error) {
-	var deployment *appsv1.Deployment
-	e.Resources.VisitDeployment(func(d *appsv1.Deployment) {
-		if d.Name == e.Integration.Name {
-			deployment = d
-		}
+	toleration, err := t.getToleration()
+	if err != nil {
+		return err
+	}
+	var specTolerations *[]corev1.Toleration
+	found := false
+
+	// Deployment
+	deployment := e.Resources.GetDeployment(func(d *appsv1.Deployment) bool {
+		return d.Name == e.Integration.Name
 	})
 	if deployment != nil {
-		if err := t.addToleration(e, deployment); err != nil {
-			return err
+		specTolerations = &deployment.Spec.Template.Spec.Tolerations
+		found = true
+	}
+
+	// Knative service
+	if !found {
+		knativeService := e.Resources.GetKnativeService(func(s *serving.Service) bool {
+			return s.Name == e.Integration.Name
+		})
+		if knativeService != nil {
+			specTolerations = &knativeService.Spec.Template.Spec.Tolerations
+			found = true
 		}
+	}
+
+	// Cronjob
+	if !found {
+		cronJob := e.Resources.GetCronJob(func(c *v1beta1.CronJob) bool {
+			return c.Name == e.Integration.Name
+		})
+		if cronJob != nil {
+			specTolerations = &cronJob.Spec.JobTemplate.Spec.Template.Spec.Tolerations
+			found = true
+		}
+	}
+
+	// Add the toleration
+	if found {
+		if *specTolerations == nil {
+			*specTolerations = make([]corev1.Toleration, 0)
+		}
+		*specTolerations = append(*specTolerations, toleration)
 	}
 
 	return nil
 }
 
-func (t *tolerationTrait) addToleration(_ *Environment, deployment *appsv1.Deployment) error {
+func (t *tolerationTrait) getToleration() (corev1.Toleration, error) {
 	toleration := corev1.Toleration{
 		Key:      t.Key,
 		Operator: corev1.TolerationOperator(t.Operator),
@@ -106,16 +142,10 @@ func (t *tolerationTrait) addToleration(_ *Environment, deployment *appsv1.Deplo
 	if t.TolerationSeconds != "" {
 		tolerationSeconds, err := strconv.ParseInt(t.TolerationSeconds, 10, 64)
 		if err != nil {
-			return err
+			return corev1.Toleration{}, err
 		}
 		toleration.TolerationSeconds = &tolerationSeconds
 	}
 
-	if deployment.Spec.Template.Spec.Tolerations == nil {
-		deployment.Spec.Template.Spec.Tolerations = make([]corev1.Toleration, 0)
-	}
-
-	deployment.Spec.Template.Spec.Tolerations = append(deployment.Spec.Template.Spec.Tolerations, toleration)
-
-	return nil
+	return toleration, nil
 }
