@@ -89,6 +89,32 @@ __kamel_deletion_policy() {
     COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
 }
 
+__kamel_kubectl_get_servicebinding() {
+    local template
+    local template_gvkn
+    local kubectl_out
+    local service_names
+    local services_list
+
+    template="{{ range .items  }}{{ .metadata.name }} {{ end }}"
+    template_gvkn="{{ range .items  }}{{ .kind  }}/{{ .apiVersion  }}/{{ .metadata.name }} {{ end }}" 
+    if kubectl_out=$(kubectl get -o template --template="${template}" crd -l service.binding/provisioned-service=true 2>/dev/null); then
+        kubectl_out="${kubectl_out// /,}"
+        service_names="${kubectl_out}servicebinding"
+        if kubectl_out=$(kubectl get -o template --template="${template_gvkn}" ${service_names} 2>/dev/null); then
+            for resource in  $kubectl_out
+            do
+               name=$(echo ${resource} | cut -d'/' -f 4)
+               version=$(echo ${resource} | cut -d'/' -f 3)
+               group=$(echo ${resource} | cut -d'/' -f 2)
+               kind=$(echo ${resource} | cut -d'/' -f 1)
+               services_list="${services_list} ${kind}.${version}.${group}/${name}"
+            done
+            COMPREPLY=( $( compgen -W "${services_list[*]}" -- "$cur" ) )
+        fi
+    fi
+}
+
 __kamel_kubectl_get_configmap() {
     local template
     local kubectl_out
@@ -250,6 +276,13 @@ func configureKnownBashCompletions(command *cobra.Command) {
 		"deletion-policy",
 		map[string][]string{
 			cobra.BashCompCustom: {"__kamel_deletion_policy"},
+		},
+	)
+	configureBashAnnotationForFlag(
+		command,
+		"connect",
+		map[string][]string{
+			cobra.BashCompCustom: {"__kamel_kubectl_get_servicebinding"},
 		},
 	)
 }
