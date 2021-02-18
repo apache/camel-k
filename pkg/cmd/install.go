@@ -369,14 +369,10 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			platform.Spec.Build.KanikoBuildCache = &o.KanikoBuildCache
 		}
 
-		// Do not create an integration platform in global mode as platforms are expected
-		// to be created in other namespaces.
-		// In OLM mode, the operator is installed in an external namespace, so it's ok to install the platform locally.
-		if !o.Global || installViaOLM {
-			err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, o.Force, platform)
-			if err != nil {
-				return err
-			}
+		// Always create a platform in the namespace where the operator is located
+		err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, o.Force, platform)
+		if err != nil {
+			return err
 		}
 
 		if o.ExampleSetup {

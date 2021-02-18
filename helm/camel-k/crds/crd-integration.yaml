@@ -367,6 +367,8 @@ spec:
                 type: string
               platform:
                 type: string
+              platformNamespace:
+                type: string
               profile:
                 description: TraitProfile represents lists of traits that are enabled
                   for the specific installation/integration

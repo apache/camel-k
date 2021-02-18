@@ -48,6 +48,7 @@ type IntegrationStatus struct {
 	Dependencies       []string               `json:"dependencies,omitempty"`
 	Profile            TraitProfile           `json:"profile,omitempty"`
 	Kit                string                 `json:"kit,omitempty"`
+	PlatformNamespace  string                 `json:"platformNamespace,omitempty"`
 	Platform           string                 `json:"platform,omitempty"`
 	GeneratedSources   []SourceSpec           `json:"generatedSources,omitempty"`
 	GeneratedResources []ResourceSpec         `json:"generatedResources,omitempty"`

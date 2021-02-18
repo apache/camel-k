@@ -213,7 +213,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Res
 	mc.AddArgument("-Dopenapi.spec=" + in)
 	mc.AddArgument("-Ddsl.out=" + out)
 
-	settings, err := kubernetes.ResolveValueSource(e.C, e.Client, e.Integration.Namespace, &e.Platform.Status.Build.Maven.Settings)
+	settings, err := kubernetes.ResolveValueSource(e.C, e.Client, e.Platform.Namespace, &e.Platform.Status.Build.Maven.Settings)
 	if err != nil {
 		return err
 	}

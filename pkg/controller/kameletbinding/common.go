@@ -148,7 +148,7 @@ func determineProfile(ctx context.Context, c client.Client, binding *v1alpha1.Ka
 	if binding.Spec.Integration != nil && binding.Spec.Integration.Profile != "" {
 		return binding.Spec.Integration.Profile, nil
 	}
-	pl, err := platform.GetCurrentPlatform(ctx, c, binding.Namespace)
+	pl, err := platform.GetCurrent(ctx, c, binding.Namespace)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return "", errors.Wrap(err, "error while retrieving the integration platform")
 	}

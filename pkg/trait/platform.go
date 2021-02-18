@@ -35,6 +35,8 @@ type platformTrait struct {
 	BaseTrait `property:",squash"`
 	// To create a default (empty) platform when the platform is missing.
 	CreateDefault *bool `property:"create-default" json:"createDefault,omitempty"`
+	// Indicates if the platform should be created globally in the case of global operator (default true).
+	Global *bool `property:"global" json:"global,omitempty"`
 	// To automatically detect from the environment if a default platform can be created (it will be created on OpenShift only).
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 }
@@ -55,12 +57,18 @@ func (t *platformTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	if t.Auto == nil || !*t.Auto {
-		if e.Platform == nil && t.CreateDefault == nil {
-			// Calculate if the platform should be automatically created when missing.
-			if ocp, err := openshift.IsOpenShift(t.Client); err != nil {
-				return false, err
-			} else if ocp {
-				t.CreateDefault = &ocp
+		if e.Platform == nil {
+			if t.CreateDefault == nil {
+				// Calculate if the platform should be automatically created when missing.
+				if ocp, err := openshift.IsOpenShift(t.Client); err != nil {
+					return false, err
+				} else if ocp {
+					t.CreateDefault = &ocp
+				}
+			}
+			if t.Global == nil {
+				globalOperator := platform.IsCurrentOperatorGlobal()
+				t.Global = &globalOperator
 			}
 		}
 	}
@@ -92,14 +100,21 @@ func (t *platformTrait) Apply(e *Environment) error {
 }
 
 func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlatform, error) {
-	pl, err := platform.GetOrLookupAny(t.Ctx, t.Client, e.Integration.Namespace, e.Integration.Status.Platform)
+	pl, err := platform.GetOrFind(t.Ctx, t.Client, e.Integration.Namespace, e.Integration.Status.Platform, false)
 	if err != nil && k8serrors.IsNotFound(err) {
 		if t.CreateDefault != nil && *t.CreateDefault {
 			platformName := e.Integration.Status.Platform
 			if platformName == "" {
 				platformName = platform.DefaultPlatformName
 			}
-			defaultPlatform := v1.NewIntegrationPlatform(e.Integration.Namespace, platformName)
+			namespace := e.Integration.Namespace
+			if t.Global != nil && *t.Global {
+				operatorNamespace := platform.GetOperatorNamespace()
+				if operatorNamespace != "" {
+					namespace = operatorNamespace
+				}
+			}
+			defaultPlatform := v1.NewIntegrationPlatform(namespace, platformName)
 			if defaultPlatform.Labels == nil {
 				defaultPlatform.Labels = make(map[string]string)
 			}

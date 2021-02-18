@@ -493,6 +493,9 @@ traits:
   - name: create-default
     type: bool
     description: To create a default (empty) platform when the platform is missing.
+  - name: global
+    type: bool
+    description: Indicates if the platform should be created globally in the case of global operator (default true).
   - name: auto
     type: bool
     description: To automatically detect from the environment if a default platform can be created (it will be created on OpenShift only).
