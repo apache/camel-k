@@ -23,6 +23,7 @@ import (
 	"context"
 
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -140,4 +141,26 @@ func (c *FakeIntegrations) Patch(ctx context.Context, name string, pt types.Patc
 		return nil, err
 	}
 	return obj.(*camelv1.Integration), err
+}
+
+// GetScale takes name of the integration, and returns the corresponding scale object, and an error if there is any.
+func (c *FakeIntegrations) GetScale(ctx context.Context, integrationName string, options v1.GetOptions) (result *autoscalingv1.Scale, err error) {
+	obj, err := c.Fake.
+		Invokes(testing.NewGetSubresourceAction(integrationsResource, c.ns, "scale", integrationName), &autoscalingv1.Scale{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*autoscalingv1.Scale), err
+}
+
+// UpdateScale takes the representation of a scale and updates it. Returns the server's representation of the scale, and an error, if there is any.
+func (c *FakeIntegrations) UpdateScale(ctx context.Context, integrationName string, scale *autoscalingv1.Scale, opts v1.UpdateOptions) (result *autoscalingv1.Scale, err error) {
+	obj, err := c.Fake.
+		Invokes(testing.NewUpdateSubresourceAction(integrationsResource, "scale", c.ns, scale), &autoscalingv1.Scale{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*autoscalingv1.Scale), err
 }

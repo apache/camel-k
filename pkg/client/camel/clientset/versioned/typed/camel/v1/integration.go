@@ -25,6 +25,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	scheme "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/scheme"
+	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -48,6 +49,9 @@ type IntegrationInterface interface {
 	List(ctx context.Context, opts metav1.ListOptions) (*v1.IntegrationList, error)
 	Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error)
 	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *v1.Integration, err error)
+	GetScale(ctx context.Context, integrationName string, options metav1.GetOptions) (*autoscalingv1.Scale, error)
+	UpdateScale(ctx context.Context, integrationName string, scale *autoscalingv1.Scale, opts metav1.UpdateOptions) (*autoscalingv1.Scale, error)
+
 	IntegrationExpansion
 }
 
@@ -190,6 +194,35 @@ func (c *integrations) Patch(ctx context.Context, name string, pt types.PatchTyp
 		SubResource(subresources...).
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(data).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// GetScale takes name of the integration, and returns the corresponding autoscalingv1.Scale object, and an error if there is any.
+func (c *integrations) GetScale(ctx context.Context, integrationName string, options metav1.GetOptions) (result *autoscalingv1.Scale, err error) {
+	result = &autoscalingv1.Scale{}
+	err = c.client.Get().
+		Namespace(c.ns).
+		Resource("integrations").
+		Name(integrationName).
+		SubResource("scale").
+		VersionedParams(&options, scheme.ParameterCodec).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// UpdateScale takes the top resource name and the representation of a scale and updates it. Returns the server's representation of the scale, and an error, if there is any.
+func (c *integrations) UpdateScale(ctx context.Context, integrationName string, scale *autoscalingv1.Scale, opts metav1.UpdateOptions) (result *autoscalingv1.Scale, err error) {
+	result = &autoscalingv1.Scale{}
+	err = c.client.Put().
+		Namespace(c.ns).
+		Resource("integrations").
+		Name(integrationName).
+		SubResource("scale").
+		VersionedParams(&opts, scheme.ParameterCodec).
+		Body(scale).
 		Do(ctx).
 		Into(result)
 	return
