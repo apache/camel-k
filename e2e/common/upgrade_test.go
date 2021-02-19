@@ -34,6 +34,7 @@ import (
 func TestPlatformUpgrade(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		Eventually(PlatformVersion(ns)).Should(Equal(defaults.Version))
 
 		// Scale the operator down to zero
