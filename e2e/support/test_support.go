@@ -104,6 +104,7 @@ func init() {
 	client.FastMapperAllowedAPIGroups["eventing.knative.dev"] = true
 	client.FastMapperAllowedAPIGroups["messaging.knative.dev"] = true
 	client.FastMapperAllowedAPIGroups["serving.knative.dev"] = true
+	client.FastMapperAllowedAPIGroups["policy"] = true
 
 	var err error
 	TestContext = context.TODO()
