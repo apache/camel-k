@@ -533,6 +533,9 @@ traits:
   - name: secret-name
     type: string
     description: The pull secret name to set on the Pod. If left empty this is automatically taken from the `IntegrationPlatform` registry configuration.
+  - name: image-puller-delegation
+    type: bool
+    description: When using a global operator with a shared platform, this enables delegation of the `system:image-puller` cluster role on the operator namespace to the integration service account.
   - name: auto
     type: bool
     description: Automatically configures the platform registry secret on the pod if it is of type `kubernetes.io/dockerconfigjson`.
