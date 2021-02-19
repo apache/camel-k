@@ -23,9 +23,10 @@ import (
 	"github.com/apache/camel-k/pkg/cmd/operator"
 )
 
+const operatorCommand = "operator"
+
 func newCmdOperator() (*cobra.Command, *operatorCmdOptions) {
-	options := operatorCmdOptions{
-	}
+	options := operatorCmdOptions{}
 
 	cmd := cobra.Command{
 		Use:     "operator",
