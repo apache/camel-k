@@ -341,18 +341,20 @@ func (e *Environment) GetIntegrationPodSpec() *corev1.PodSpec {
 	return nil
 }
 
-// DetermineNamespace --
-func (e *Environment) DetermineNamespace() string {
-	if e.Integration != nil && e.Integration.Namespace != "" {
-		return e.Integration.Namespace
-	}
-	if e.IntegrationKit != nil && e.IntegrationKit.Namespace != "" {
-		return e.IntegrationKit.Namespace
+// DetermineCatalogNamespace --
+func (e *Environment) DetermineCatalogNamespace() string {
+	if e.Integration != nil && e.Integration.Status.PlatformNamespace != "" {
+		return e.Integration.Status.PlatformNamespace
 	}
 	if e.Platform != nil && e.Platform.Namespace != "" {
 		return e.Platform.Namespace
 	}
-
+	if e.IntegrationKit != nil && e.IntegrationKit.Namespace != "" {
+		return e.IntegrationKit.Namespace
+	}
+	if e.Integration != nil && e.Integration.Namespace != "" {
+		return e.Integration.Namespace
+	}
 	return ""
 }
 
