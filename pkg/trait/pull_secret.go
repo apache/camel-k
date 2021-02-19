@@ -18,9 +18,17 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/openshift"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -40,6 +48,8 @@ type pullSecretTrait struct {
 	BaseTrait `property:",squash"`
 	// The pull secret name to set on the Pod. If left empty this is automatically taken from the `IntegrationPlatform` registry configuration.
 	SecretName string `property:"secret-name" json:"secretName,omitempty"`
+	// When using a global operator with a shared platform, this enables delegation of the `system:image-puller` cluster role on the operator namespace to the integration service account.
+	ImagePullerDelegation *bool `property:"image-puller-delegation" json:"imagePullerDelegation,omitempty"`
 	// Automatically configures the platform registry secret on the pod if it is of type `kubernetes.io/dockerconfigjson`.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 }
@@ -73,17 +83,72 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 				}
 			}
 		}
+		if t.ImagePullerDelegation == nil {
+			var isOpenshift bool
+			if t.Client != nil {
+				var err error
+				isOpenshift, err = openshift.IsOpenShift(t.Client)
+				if err != nil {
+					return false, err
+				}
+			}
+			isOperatorGlobal := platform.IsCurrentOperatorGlobal()
+			isKitExternal := e.Integration.GetIntegrationKitNamespace() != e.Integration.Namespace
+			needsDelegation := isOpenshift && isOperatorGlobal && isKitExternal
+			t.ImagePullerDelegation = &needsDelegation
+		}
 	}
 
-	return t.SecretName != "", nil
+	return t.SecretName != "" || util.IsTrue(t.ImagePullerDelegation), nil
 }
 
 func (t *pullSecretTrait) Apply(e *Environment) error {
-	e.Resources.VisitPodSpec(func(p *corev1.PodSpec) {
-		p.ImagePullSecrets = append(p.ImagePullSecrets, corev1.LocalObjectReference{
-			Name: t.SecretName,
+	if t.SecretName != "" {
+		e.Resources.VisitPodSpec(func(p *corev1.PodSpec) {
+			p.ImagePullSecrets = append(p.ImagePullSecrets, corev1.LocalObjectReference{
+				Name: t.SecretName,
+			})
 		})
-	})
+	}
+	if util.IsTrue(t.ImagePullerDelegation) {
+		if err := t.delegateImagePuller(e); err != nil {
+			return err
+		}
+	}
 
 	return nil
+}
+
+func (t *pullSecretTrait) delegateImagePuller(e *Environment) error {
+	// Applying the rolebinding directly because it's a resource in the operator namespace
+	// (different from the integration namespace when delegation is enabled).
+	rb := t.newImagePullerRoleBinding(e)
+	if err := kubernetes.ReplaceResource(e.C, e.Client, rb); err != nil {
+		return errors.Wrap(err, "error during the creation of the system:image-puller delegating role binding")
+	}
+	return nil
+}
+
+func (t *pullSecretTrait) newImagePullerRoleBinding(e *Environment) *rbacv1.RoleBinding {
+	serviceAccount := e.Integration.Spec.ServiceAccountName
+	if serviceAccount == "" {
+		serviceAccount = "default"
+	}
+	return &rbacv1.RoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: e.Integration.GetIntegrationKitNamespace(),
+			Name:      fmt.Sprintf("camel-k-puller-%s", e.Integration.Namespace),
+		},
+		RoleRef: rbacv1.RoleRef{
+			Kind: "ClusterRole",
+			Name: "system:image-puller",
+		},
+		Subjects: []rbacv1.Subject{
+			{
+				Kind:      "ServiceAccount",
+				Namespace: e.Integration.Namespace,
+				Name:      serviceAccount,
+			},
+		},
+	}
 }

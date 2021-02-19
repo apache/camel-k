@@ -150,20 +150,26 @@ func add(mgr manager.Manager, r reconcile.Reconciler, c client.Client) error {
 	// requests for any integrations that are in phase waiting for platform
 	err = ctrl.Watch(&source.Kind{Type: &v1.IntegrationPlatform{}}, &handler.EnqueueRequestsFromMapFunc{
 		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
-			platform := a.Object.(*v1.IntegrationPlatform)
+			pl := a.Object.(*v1.IntegrationPlatform)
 			var requests []reconcile.Request
 
-			if platform.Status.Phase == v1.IntegrationPlatformPhaseReady {
+			if pl.Status.Phase == v1.IntegrationPlatformPhaseReady {
 				list := &v1.IntegrationList{}
 
-				if err := mgr.GetClient().List(context.TODO(), list, k8sclient.InNamespace(platform.Namespace)); err != nil {
+				// Do global search in case of global operator (it may be using a global platform)
+				var opts []k8sclient.ListOption
+				if !platform.IsCurrentOperatorGlobal() {
+					opts = append(opts, k8sclient.InNamespace(pl.Namespace))
+				}
+
+				if err := mgr.GetClient().List(context.TODO(), list, opts...); err != nil {
 					log.Error(err, "Failed to retrieve integration list")
 					return requests
 				}
 
 				for _, integration := range list.Items {
 					if integration.Status.Phase == v1.IntegrationPhaseWaitingForPlatform {
-						log.Infof("Platform %s ready, wake-up integration: %s", platform.Name, integration.Name)
+						log.Infof("Platform %s ready, wake-up integration: %s", pl.Name, integration.Name)
 						requests = append(requests, reconcile.Request{
 							NamespacedName: types.NamespacedName{
 								Namespace: integration.Namespace,

@@ -26,8 +26,11 @@ import (
 	fakecamelclientset "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/fake"
 	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	camelv1alpha1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/kubernetes"
 	fakeclientset "k8s.io/client-go/kubernetes/fake"
 	clientscheme "k8s.io/client-go/kubernetes/scheme"
@@ -100,4 +103,24 @@ func (c *FakeClient) GetConfig() *rest.Config {
 
 func (c *FakeClient) GetCurrentNamespace(kubeConfig string) (string, error) {
 	return "", nil
+}
+
+func (c *FakeClient) Discovery() discovery.DiscoveryInterface {
+	return &FakeDiscovery{
+		DiscoveryInterface: c.Interface.Discovery(),
+	}
+}
+
+type FakeDiscovery struct {
+	discovery.DiscoveryInterface
+}
+
+func (f *FakeDiscovery) ServerResourcesForGroupVersion(groupVersion string) (*metav1.APIResourceList, error) {
+	// Normalize the fake discovery to behave like the real implementation when checking for openshift
+	if groupVersion == "image.openshift.io/v1" {
+		return nil, k8serrors.NewNotFound(schema.GroupResource{
+			Group: "image.openshift.io",
+		}, "")
+	}
+	return f.DiscoveryInterface.ServerResourcesForGroupVersion(groupVersion)
 }
