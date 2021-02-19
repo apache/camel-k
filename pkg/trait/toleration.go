@@ -39,9 +39,6 @@ import (
 // node-role.kubernetes.io/master:NoSchedule
 // node.kubernetes.io/network-unavailable:NoExecute:3000
 // disktype=ssd:PreferNoSchedule
-// com.example/my-key:NoExecute
-// com.example/my-key=my-val:NoSchedule
-// com.example/my-key=my-val:NoSchedule:120
 //
 // It's disabled by default.
 //

@@ -639,12 +639,12 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: 'This trait will set a Toleration over an integration pod. Tolerations allow (but do not require) the pods to schedule onto nodes with matching taints. See https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ for more details. The toleration should be expressed in a similar manner of taints *_Key[=Value]:Effect[:Seconds]_* where values in square brackets are optional. Examples: my-key:NoExecute com.example/my-key:NoExecute com.example/my-key=my-val:NoSchedule com.example/my-key=my-val:NoSchedule:120 It''s disabled by default.'
+  description: 'This trait sets Tolerations over Integration pods. Tolerations allow (but do not require) the pods to schedule onto nodes with matching taints. See https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ for more details. The toleration should be expressed in a similar manner of taints *_Key[=Value]:Effect[:Seconds]_* where values in square brackets are optional. Examples: node-role.kubernetes.io/master:NoSchedule node.kubernetes.io/network-unavailable:NoExecute:3000 disktype=ssd:PreferNoSchedule It''s disabled by default.'
   properties:
   - name: enabled
     type: bool
     description: Can be used to enable or disable a trait. All traits share this common property.
-  - name: taint
+  - name: taints
     type: '[]string'
     description: The taint to tolerate in the form Key[=Value]:Effect[:Seconds]
 - name: tracing
