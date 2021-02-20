@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- \[cmd\] Warning on launching operator [\#2051](https://github.com/apache/camel-k/issues/2051)
+- kamelet-binding: support for processing steps [\#2043](https://github.com/apache/camel-k/issues/2043)
 - spectrum publish x509: certificate signed by unknown authority [\#2029](https://github.com/apache/camel-k/issues/2029)
 - ServiceBinding kind not installed  [\#2018](https://github.com/apache/camel-k/issues/2018)
 - Mount resource ConfigMaps as subPaths instead of volumes [\#1998](https://github.com/apache/camel-k/issues/1998)
@@ -23,14 +25,22 @@
 - Refactor artifacts of deploy directory and continue alignment towards operator-sdk & kustomize [\#1820](https://github.com/apache/camel-k/issues/1820)
 - Example Integration in the ClusterServiceVersion stuck in Deploying phase [\#1677](https://github.com/apache/camel-k/issues/1677)
 - Take a look at service binding [\#1445](https://github.com/apache/camel-k/issues/1445)
+- Build controller service / operator [\#681](https://github.com/apache/camel-k/issues/681)
 - Add support for template endpoint [\#249](https://github.com/apache/camel-k/issues/249)
 
 **Merged pull requests:**
 
+- chore\(cmd\): skip operator compatibility warning [\#2056](https://github.com/apache/camel-k/pull/2056) ([squakez](https://github.com/squakez))
+- feat: add command completion for connect flag [\#2055](https://github.com/apache/camel-k/pull/2055) ([johnpoth](https://github.com/johnpoth))
+- Wait for operator to start before scaling it to zero [\#2054](https://github.com/apache/camel-k/pull/2054) ([bouskaJ](https://github.com/bouskaJ))
+- chore\(test\): Add integration scaling e2e tests [\#2053](https://github.com/apache/camel-k/pull/2053) ([astefanutti](https://github.com/astefanutti))
 - chore\(api\): Add Scale methods to the Integration generated client API [\#2052](https://github.com/apache/camel-k/pull/2052) ([astefanutti](https://github.com/astefanutti))
 - For the moment lets remove absolute path [\#2049](https://github.com/apache/camel-k/pull/2049) ([oscerd](https://github.com/oscerd))
+- Add local build command replacing local create [\#2048](https://github.com/apache/camel-k/pull/2048) ([doru1004](https://github.com/doru1004))
+- Fix \#2043: add processing steps to KameletBinding [\#2044](https://github.com/apache/camel-k/pull/2044) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix: Consider ObjectMeta field for deep derivative comparison before patching [\#2042](https://github.com/apache/camel-k/pull/2042) ([astefanutti](https://github.com/astefanutti))
 - fix\(pdb\): Add TypeMeta field to PodDisruptionBudget resource [\#2041](https://github.com/apache/camel-k/pull/2041) ([astefanutti](https://github.com/astefanutti))
+- feat\(trait\): toleration trait [\#2040](https://github.com/apache/camel-k/pull/2040) ([squakez](https://github.com/squakez))
 - feat: Use server-side apply to create and patch owned resources [\#2039](https://github.com/apache/camel-k/pull/2039) ([astefanutti](https://github.com/astefanutti))
 - chore\(ci\): Pin the Kubernetes version deployed by Kind [\#2037](https://github.com/apache/camel-k/pull/2037) ([astefanutti](https://github.com/astefanutti))
 - fix\(ci\): Use kubectl wait command to check Knative readiness [\#2036](https://github.com/apache/camel-k/pull/2036) ([astefanutti](https://github.com/astefanutti))
@@ -747,7 +757,6 @@
 - Fix \#1463: add apis and client as submodule [\#1464](https://github.com/apache/camel-k/pull/1464) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1045: hide internal CRDs in OLM console [\#1461](https://github.com/apache/camel-k/pull/1461) ([nicolaferraro](https://github.com/nicolaferraro))
 - Make cron work on quarkus runtime [\#1460](https://github.com/apache/camel-k/pull/1460) ([nicolaferraro](https://github.com/nicolaferraro))
-- Allow the short syntax in knative endpoints [\#1458](https://github.com/apache/camel-k/pull/1458) ([nicolaferraro](https://github.com/nicolaferraro))
 - Remove unused import package in example [\#1457](https://github.com/apache/camel-k/pull/1457) ([apupier](https://github.com/apupier))
 
 ## [1.0.0-nightly.202005130003](https://github.com/apache/camel-k/tree/1.0.0-nightly.202005130003) (2020-05-11)
@@ -761,6 +770,7 @@
 
 **Merged pull requests:**
 
+- Allow the short syntax in knative endpoints [\#1458](https://github.com/apache/camel-k/pull/1458) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1449: add support for modeline options [\#1455](https://github.com/apache/camel-k/pull/1455) ([nicolaferraro](https://github.com/nicolaferraro))
 - information to update the homebrew formula [\#1454](https://github.com/apache/camel-k/pull/1454) ([ipolyzos](https://github.com/ipolyzos))
 - Fix \#1450: fix servicemonitor roles on direct install [\#1453](https://github.com/apache/camel-k/pull/1453) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1214,6 +1224,7 @@
 - Orphan generated XML DSL from OpenAPI JSON after deleting integration [\#839](https://github.com/apache/camel-k/issues/839)
 - All links of the documentation are missing spaces before and after displayed text [\#794](https://github.com/apache/camel-k/issues/794)
 - Update Camel K tagline in Kamel CLI [\#732](https://github.com/apache/camel-k/issues/732)
+- Review reset and delete with --all option for merging similar functions to one place  [\#598](https://github.com/apache/camel-k/issues/598)
 - Able to run maven build with debug and/or extended info [\#85](https://github.com/apache/camel-k/issues/85)
 - Remove references to host that did compilation in stacktraces [\#972](https://github.com/apache/camel-k/issues/972)
 - Integration fails with --dev mode [\#968](https://github.com/apache/camel-k/issues/968)
@@ -1517,7 +1528,6 @@
 - allow to configure default configurations on platform [\#608](https://github.com/apache/camel-k/issues/608)
 - Script set-version.sh does not honor the registry/repository settings [\#602](https://github.com/apache/camel-k/issues/602)
 - add options to configure affinity [\#601](https://github.com/apache/camel-k/issues/601)
-- Review reset and delete with --all option for merging similar functions to one place  [\#598](https://github.com/apache/camel-k/issues/598)
 - camel-k groovy, jvm, spring-boot gives error pushing image [\#588](https://github.com/apache/camel-k/issues/588)
 - on-premises: mount rwx volume [\#587](https://github.com/apache/camel-k/issues/587)
 - context with status error should not be included when looking up suitable context for an integration [\#584](https://github.com/apache/camel-k/issues/584)
@@ -1619,7 +1629,6 @@
 - Add option to health probes [\#531](https://github.com/apache/camel-k/pull/531) ([lburgazzoli](https://github.com/lburgazzoli))
 - feature\(kaniko\): support for incremental build [\#530](https://github.com/apache/camel-k/pull/530) ([lburgazzoli](https://github.com/lburgazzoli))
 - ordered delete [\#529](https://github.com/apache/camel-k/pull/529) ([lburgazzoli](https://github.com/lburgazzoli))
-- chore\(kamel\): fix reset command [\#526](https://github.com/apache/camel-k/pull/526) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(release\): add automatic version update to release [\#524](https://github.com/apache/camel-k/pull/524) ([nicolaferraro](https://github.com/nicolaferraro))
 - Adding Probes to Knative services [\#514](https://github.com/apache/camel-k/pull/514) ([lburgazzoli](https://github.com/lburgazzoli))
 
@@ -1649,6 +1658,7 @@
 
 **Merged pull requests:**
 
+- chore\(kamel\): fix reset command [\#526](https://github.com/apache/camel-k/pull/526) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix: Allow file names as delete cmd argument [\#522](https://github.com/apache/camel-k/pull/522) ([christophd](https://github.com/christophd))
 - chore\(image\): include camel runtime adapters [\#521](https://github.com/apache/camel-k/pull/521) ([lburgazzoli](https://github.com/lburgazzoli))
 - test\(builder\): more assertions on deps [\#520](https://github.com/apache/camel-k/pull/520) ([oscerd](https://github.com/oscerd))
