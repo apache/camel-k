@@ -24,29 +24,28 @@ package languages
 import (
 	"testing"
 
+	. "github.com/onsi/gomega"
+
+	v1 "k8s.io/api/core/v1"
+
 	. "github.com/apache/camel-k/e2e/support"
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	. "github.com/onsi/gomega"
-	v1 "k8s.io/api/core/v1"
 )
 
 func TestRunSimpleJavaScriptExamples(t *testing.T) {
-
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		t.Run("run js", func(t *testing.T) {
-			RegisterTestingT(t)
-			Expect(Kamel("run", "-n", ns, "../files/js.js").Execute()).Should(BeNil())
+			Expect(Kamel("run", "-n", ns, "../files/js.js").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "js"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "js", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "js"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("init run JavaScript", func(t *testing.T) {
 			RunInitGeneratedExample(camelv1.LanguageJavaScript, ns, t)
 		})
-
 	})
 }

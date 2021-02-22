@@ -24,32 +24,32 @@ package traits
 import (
 	"testing"
 
-	. "github.com/apache/camel-k/e2e/support"
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-
 	. "github.com/onsi/gomega"
 
 	v1 "k8s.io/api/core/v1"
+
+	. "github.com/apache/camel-k/e2e/support"
+	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 func TestIstioTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		t.Run("Run Java with Istio", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "../files/Java.java",
-				"-t", "istio.enabled=true").Execute()).Should(BeNil())
+				"-t", "istio.enabled=true").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			pod := IntegrationPod(ns, "java")()
-			Expect(pod.ObjectMeta.Annotations).ShouldNot(BeNil())
+			Expect(pod.ObjectMeta.Annotations).NotTo(BeNil())
 			annotations := pod.ObjectMeta.Annotations
-			Expect(annotations["sidecar.istio.io/inject"]).Should(Equal("true"))
-			Expect(annotations["traffic.sidecar.istio.io/includeOutboundIPRanges"]).Should(Equal("10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"))
+			Expect(annotations["sidecar.istio.io/inject"]).To(Equal("true"))
+			Expect(annotations["traffic.sidecar.istio.io/includeOutboundIPRanges"]).To(Equal("10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"))
 
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 	})
 }

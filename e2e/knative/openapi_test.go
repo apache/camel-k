@@ -24,22 +24,24 @@ package knative
 import (
 	"testing"
 
+	. "github.com/onsi/gomega"
+
+	corev1 "k8s.io/api/core/v1"
+
 	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	. "github.com/onsi/gomega"
-	corev1 "k8s.io/api/core/v1"
 )
 
 func TestOpenAPIService(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--trait-profile", string(v1.TraitProfileKnative)).Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns, "--trait-profile", string(v1.TraitProfileKnative)).Execute()).To(Succeed())
 		Expect(Kamel(
 			"run",
 			"-n", ns,
 			"--name", "petstore",
 			"--open-api", "files/petstore-api.yaml",
 			"files/petstore.groovy",
-		).Execute()).Should(BeNil())
+		).Execute()).To(Succeed())
 
 		Eventually(KnativeService(ns, "petstore"), TestTimeoutLong).
 			Should(Not(BeNil()))
@@ -51,20 +53,20 @@ func TestOpenAPIService(t *testing.T) {
 		Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Route: showPetById started and consuming from: platform-http:///v1/pets"))
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 
 func TestOpenAPIDeployment(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--trait-profile", string(v1.TraitProfileKubernetes)).Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns, "--trait-profile", string(v1.TraitProfileKubernetes)).Execute()).To(Succeed())
 		Expect(Kamel(
 			"run",
 			"-n", ns,
 			"--name", "petstore",
 			"--open-api", "files/petstore-api.yaml",
 			"files/petstore.groovy",
-		).Execute()).Should(BeNil())
+		).Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, "petstore"), TestTimeoutLong).
 			Should(Equal(corev1.PodRunning))
@@ -78,6 +80,6 @@ func TestOpenAPIDeployment(t *testing.T) {
 		Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Route: showPetById started and consuming from: platform-http:///v1/pets"))
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

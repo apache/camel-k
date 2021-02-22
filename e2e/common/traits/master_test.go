@@ -25,32 +25,31 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/apache/camel-k/e2e/support"
 	. "github.com/onsi/gomega"
+
 	v1 "k8s.io/api/core/v1"
+
+	. "github.com/apache/camel-k/e2e/support"
 )
 
 func TestMasterTrait(t *testing.T) {
-
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		t.Run("master works", func(t *testing.T) {
-			RegisterTestingT(t)
-			Expect(Kamel("run", "-n", ns, "files/Master.java").Execute()).Should(BeNil())
+			Expect(Kamel("run", "-n", ns, "files/Master.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "master"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationLogs(ns, "master"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("only one integration with master runs", func(t *testing.T) {
-			RegisterTestingT(t)
 			Expect(Kamel("run", "-n", ns, "files/Master.java",
 				"--name", "first",
 				"--label", "leader-group=same",
 				"-t", "master.label-key=leader-group",
 				"-t", "master.label-value=same",
-				"-t", "owner.target-labels=leader-group").Execute()).Should(BeNil())
+				"-t", "owner.target-labels=leader-group").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "first"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationLogs(ns, "first"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			// Start a second integration with the same lock (it should not start the route)
@@ -60,12 +59,11 @@ func TestMasterTrait(t *testing.T) {
 				"-t", "master.label-key=leader-group",
 				"-t", "master.label-value=same",
 				"-t", "master.configmap=first-lock",
-				"-t", "owner.target-labels=leader-group").Execute()).Should(BeNil())
+				"-t", "owner.target-labels=leader-group").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "second"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationLogs(ns, "second"), TestTimeoutShort).Should(ContainSubstring("started in"))
 			Eventually(IntegrationLogs(ns, "second"), 30*time.Second).ShouldNot(ContainSubstring("Magicstring!"))
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
-
 	})
 }

@@ -43,12 +43,12 @@ import (
 func TestPodDisruptionBudget(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		name := "java"
-		Expect(Kamel("install", "-n", ns).Execute()).To(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 		Expect(Kamel("run", "-n", ns, "../files/Java.java",
 			"--name", name,
 			"-t", "pdb.enabled=true",
 			"-t", "pdb.min-available=2",
-		).Execute()).To(BeNil())
+		).Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(v1.PodRunning))
 		Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
@@ -77,7 +77,7 @@ func TestPodDisruptionBudget(t *testing.T) {
 		Expect(UpdateIntegration(ns, name, func(it *camelv1.Integration) {
 			replicas := int32(2)
 			it.Spec.Replicas = &replicas
-		})).To(BeNil())
+		})).To(Succeed())
 		Eventually(IntegrationPods(ns, name), TestTimeoutMedium).Should(HaveLen(2))
 		Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
 			Should(gstruct.PointTo(BeNumerically("==", 2)))
@@ -130,7 +130,7 @@ func TestPodDisruptionBudget(t *testing.T) {
 		Expect(UpdateIntegration(ns, name, func(it *camelv1.Integration) {
 			replicas := int32(3)
 			it.Spec.Replicas = &replicas
-		})).To(BeNil())
+		})).To(Succeed())
 		Eventually(IntegrationPods(ns, name), TestTimeoutMedium).Should(HaveLen(3))
 		Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
 			Should(gstruct.PointTo(BeNumerically("==", 3)))
@@ -146,7 +146,7 @@ func TestPodDisruptionBudget(t *testing.T) {
 		Expect(err).To(Succeed())
 
 		// Clean up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(BeNil())
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

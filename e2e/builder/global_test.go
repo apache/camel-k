@@ -25,12 +25,14 @@ import (
 	"os"
 	"testing"
 
+	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
+
+	v1 "k8s.io/api/core/v1"
+
 	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/openshift"
-	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
-	v1 "k8s.io/api/core/v1"
 )
 
 func TestRunGlobalInstall(t *testing.T) {
@@ -45,34 +47,34 @@ func TestRunGlobalInstall(t *testing.T) {
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--global").Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns, "--global").Execute()).To(Succeed())
 
 		// NS2: namespace without operator
 		WithNewTestNamespace(t, func(ns2 string) {
-			Expect(Kamel("install", "-n", ns2, "--skip-operator-setup", "--olm=false").Execute()).Should(BeNil())
+			Expect(Kamel("install", "-n", ns2, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
 
-			Expect(Kamel("run", "-n", ns2, "files/Java.java").Execute()).Should(BeNil())
+			Expect(Kamel("run", "-n", ns2, "files/Java.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns2, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationLogs(ns2, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Expect(Kamel("delete", "--all", "-n", ns2).Execute()).Should(BeNil())
+			Expect(Kamel("delete", "--all", "-n", ns2).Execute()).To(Succeed())
 
-			Expect(ConfigMap(ns2, platform.OperatorLockName)()).Should(BeNil(), "No locking configmap expected")
+			Expect(ConfigMap(ns2, platform.OperatorLockName)()).To(BeNil(), "No locking configmap expected")
 		})
 
 		// NS3: namespace with its own operator
 		WithNewTestNamespace(t, func(ns3 string) {
-			Expect(Kamel("install", "-n", ns3, "--olm=false").Execute()).Should(BeNil())
+			Expect(Kamel("install", "-n", ns3, "--olm=false").Execute()).To(Succeed())
 
-			Expect(Kamel("run", "-n", ns3, "files/Java.java").Execute()).Should(BeNil())
+			Expect(Kamel("run", "-n", ns3, "files/Java.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns3, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationLogs(ns3, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Expect(Kamel("delete", "--all", "-n", ns3).Execute()).Should(BeNil())
+			Expect(Kamel("delete", "--all", "-n", ns3).Execute()).To(Succeed())
 
 			Expect(ConfigMap(ns3, platform.OperatorLockName)()).ShouldNot(BeNil(),
 				"OperatorSDK is expected to use configmaps for locking: if this changes (e.g. using Leases) we should update our guard logic",
 			)
 		})
 
-		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles").Execute()).Should(BeNil())
+		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles").Execute()).To(Succeed())
 	})
 }

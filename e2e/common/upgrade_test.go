@@ -25,15 +25,17 @@ import (
 	"testing"
 	"time"
 
+	. "github.com/onsi/gomega"
+
+	v1 "k8s.io/api/core/v1"
+
 	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/util/defaults"
-	. "github.com/onsi/gomega"
-	v1 "k8s.io/api/core/v1"
 )
 
 func TestPlatformUpgrade(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		Eventually(PlatformVersion(ns)).Should(Equal(defaults.Version))
 
@@ -42,7 +44,7 @@ func TestPlatformUpgrade(t *testing.T) {
 		Eventually(OperatorPod(ns)).Should(BeNil())
 
 		// Change the version to an older one
-		Eventually(SetPlatformVersion(ns, "an.older.one")).Should(BeNil())
+		Eventually(SetPlatformVersion(ns, "an.older.one")).Should(Succeed())
 		Eventually(PlatformVersion(ns)).Should(Equal("an.older.one"))
 
 		// Scale the operator up
@@ -56,11 +58,11 @@ func TestPlatformUpgrade(t *testing.T) {
 
 func TestIntegrationUpgrade(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 		Eventually(PlatformVersion(ns)).Should(Equal(defaults.Version))
 
 		// Run an integration
-		Expect(Kamel("run", "-n", ns, "files/js.js").Execute()).Should(BeNil())
+		Expect(Kamel("run", "-n", ns, "files/js.js").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "js"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 		initialKit := IntegrationKit(ns, "js")()
 
@@ -69,8 +71,8 @@ func TestIntegrationUpgrade(t *testing.T) {
 		Eventually(OperatorPod(ns)).Should(BeNil())
 
 		// Change the version to an older one
-		Expect(SetIntegrationVersion(ns, "js", "an.older.one")).Should(BeNil())
-		Expect(SetAllKitsVersion(ns, "an.older.one")).Should(BeNil())
+		Expect(SetIntegrationVersion(ns, "js", "an.older.one")).To(Succeed())
+		Expect(SetAllKitsVersion(ns, "an.older.one")).To(Succeed())
 		Eventually(IntegrationVersion(ns, "js")).Should(Equal("an.older.one"))
 		Eventually(KitsWithVersion(ns, "an.older.one")).Should(Equal(1))
 		Eventually(KitsWithVersion(ns, defaults.Version)).Should(Equal(0))
@@ -84,7 +86,7 @@ func TestIntegrationUpgrade(t *testing.T) {
 		Consistently(IntegrationVersion(ns, "js"), 3*time.Second).Should(Equal("an.older.one"))
 
 		// Clear the integration status
-		Expect(Kamel("rebuild", "js", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("rebuild", "js", "-n", ns).Execute()).To(Succeed())
 
 		// Check the integration version change
 		Eventually(IntegrationVersion(ns, "js")).Should(Equal(defaults.Version))

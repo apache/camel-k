@@ -25,11 +25,13 @@ import (
 	"os"
 	"testing"
 
-	. "github.com/apache/camel-k/e2e/support"
-	"github.com/apache/camel-k/pkg/util/openshift"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
+
 	v1 "k8s.io/api/core/v1"
+
+	. "github.com/apache/camel-k/e2e/support"
+	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 func TestRunGlobalKamelet(t *testing.T) {
@@ -44,20 +46,20 @@ func TestRunGlobalKamelet(t *testing.T) {
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--global").Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns, "--global").Execute()).To(Succeed())
 
-		Expect(CreateTimerKamelet(ns, "my-own-timer-source")()).Should(BeNil())
+		Expect(CreateTimerKamelet(ns, "my-own-timer-source")()).To(Succeed())
 
 		// NS2: namespace without operator
 		WithNewTestNamespace(t, func(ns2 string) {
-			Expect(Kamel("install", "-n", ns2, "--skip-operator-setup", "--olm=false").Execute()).Should(BeNil())
+			Expect(Kamel("install", "-n", ns2, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
 
-			Expect(Kamel("run", "-n", ns2, "files/timer-kamelet-usage.groovy").Execute()).Should(BeNil())
+			Expect(Kamel("run", "-n", ns2, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns2, "timer-kamelet-usage"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationLogs(ns2, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
-			Expect(Kamel("delete", "--all", "-n", ns2).Execute()).Should(BeNil())
+			Expect(Kamel("delete", "--all", "-n", ns2).Execute()).To(Succeed())
 		})
 
-		Expect(Kamel("uninstall", "-n", ns, "--skip-cluster-roles=false", "--skip-cluster-role-bindings=false").Execute()).Should(BeNil())
+		Expect(Kamel("uninstall", "-n", ns, "--skip-cluster-roles=false", "--skip-cluster-role-bindings=false").Execute()).To(Succeed())
 	})
 }
