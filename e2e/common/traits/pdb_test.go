@@ -19,7 +19,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package common
+package traits
 
 import (
 	"net/http"
@@ -44,7 +44,7 @@ func TestPodDisruptionBudget(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		name := "java"
 		Expect(Kamel("install", "-n", ns).Execute()).To(BeNil())
-		Expect(Kamel("run", "-n", ns, "files/Java.java",
+		Expect(Kamel("run", "-n", ns, "../files/Java.java",
 			"--name", name,
 			"-t", "pdb.enabled=true",
 			"-t", "pdb.min-available=2",
