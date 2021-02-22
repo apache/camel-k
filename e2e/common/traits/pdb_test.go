@@ -74,10 +74,7 @@ func TestPodDisruptionBudget(t *testing.T) {
 		))
 
 		// Scale Integration
-		Expect(UpdateIntegration(ns, name, func(it *camelv1.Integration) {
-			replicas := int32(2)
-			it.Spec.Replicas = &replicas
-		})).To(Succeed())
+		Expect(ScaleIntegration(ns, name, 2)).To(Succeed())
 		Eventually(IntegrationPods(ns, name), TestTimeoutMedium).Should(HaveLen(2))
 		Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
 			Should(gstruct.PointTo(BeNumerically("==", 2)))
@@ -127,10 +124,7 @@ func TestPodDisruptionBudget(t *testing.T) {
 
 		// Scale Integration to Scale > PodDisruptionBudgetSpec.MinAvailable
 		// for the eviction request to succeed once replicas are ready
-		Expect(UpdateIntegration(ns, name, func(it *camelv1.Integration) {
-			replicas := int32(3)
-			it.Spec.Replicas = &replicas
-		})).To(Succeed())
+		Expect(ScaleIntegration(ns, name, 3)).To(Succeed())
 		Eventually(IntegrationPods(ns, name), TestTimeoutMedium).Should(HaveLen(3))
 		Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
 			Should(gstruct.PointTo(BeNumerically("==", 3)))
@@ -138,12 +132,11 @@ func TestPodDisruptionBudget(t *testing.T) {
 
 		pods = IntegrationPods(ns, name)()
 		Expect(pods).To(HaveLen(3))
-		err = TestClient().CoreV1().Pods(ns).Evict(TestContext, &policy.Eviction{
+		Expect(TestClient().CoreV1().Pods(ns).Evict(TestContext, &policy.Eviction{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: pods[0].Name,
 			},
-		})
-		Expect(err).To(Succeed())
+		})).To(Succeed())
 
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
