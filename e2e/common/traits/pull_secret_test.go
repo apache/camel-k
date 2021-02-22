@@ -19,7 +19,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package common
+package traits
 
 import (
 	"testing"
@@ -41,7 +41,7 @@ func TestPullSecretTrait(t *testing.T) {
 		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
 
 		t.Run("Image pull secret is set on pod", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/Java.java",
+			Expect(Kamel("run", "-n", ns, "../files/Java.java",
 				"-t", "pull-secret.enabled=true",
 				"-t", "pull-secret.secret-name=dummy-secret").Execute()).Should(BeNil())
 			// pod may not run because the pull secret is dummy
@@ -55,7 +55,7 @@ func TestPullSecretTrait(t *testing.T) {
 		})
 
 		t.Run("Explicity disable image pull secret", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/Java.java",
+			Expect(Kamel("run", "-n", ns, "../files/Java.java",
 				"-t", "pull-secret.enabled=false").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
@@ -75,7 +75,7 @@ func TestPullSecretTrait(t *testing.T) {
 		if ocp {
 			// OpenShift always has an internal registry so image pull secret is set by default
 			t.Run("Image pull secret is automatically set by default", func(t *testing.T) {
-				Expect(Kamel("run", "-n", ns, "files/Java.java").Execute()).Should(BeNil())
+				Expect(Kamel("run", "-n", ns, "../files/Java.java").Execute()).Should(BeNil())
 				Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(v1.PodRunning))
 				Eventually(IntegrationCondition(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 				Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))

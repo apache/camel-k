@@ -19,35 +19,40 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package common
+package traits
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/apache/camel-k/e2e/support"
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-
 	. "github.com/onsi/gomega"
-
+	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 )
 
-func TestIstioTrait(t *testing.T) {
+func TestJolokiaTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
 
-		t.Run("Run Java with Istio", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/Java.java",
-				"-t", "istio.enabled=true").Execute()).Should(BeNil())
+		t.Run("Run Java with Jolokia", func(t *testing.T) {
+			Expect(Kamel("run", "-n", ns, "../files/Java.java",
+				"-t", "jolokia.enabled=true",
+				"-t", "jolokia.use-ssl-client-authentication=false",
+				"-t", "jolokia.protocol=http",
+				"-t", "jolokia.extended-client-check=false").Execute()).Should(BeNil())
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			pod := IntegrationPod(ns, "java")()
-			Expect(pod.ObjectMeta.Annotations).ShouldNot(BeNil())
-			annotations := pod.ObjectMeta.Annotations
-			Expect(annotations["sidecar.istio.io/inject"]).Should(Equal("true"))
-			Expect(annotations["traffic.sidecar.istio.io/includeOutboundIPRanges"]).Should(Equal("10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"))
+			pod := IntegrationPod(ns, "java")
+			response, err := TestClient().CoreV1().RESTClient().Get().
+				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/jolokia/", ns, pod().Name)).DoRaw(TestContext)
+			if err != nil {
+				assert.Fail(t, err.Error())
+			}
+			assert.Contains(t, string(response), `"status":200`)
 
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
