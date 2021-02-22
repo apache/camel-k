@@ -16,6 +16,6 @@ limitations under the License.
 */
 
 // Package duck contains a partial schema of the Strimzi APIs
-// +k8s:deepcopy-gen=package,register
+// +kubebuilder:object:generate=true
 // +groupName=kafka.strimzi.io
 package v1beta1

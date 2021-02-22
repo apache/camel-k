@@ -31,10 +31,10 @@ const (
 	StrimziListenerTypePlain = "plain"
 )
 
-// +kubebuilder:object:root=true
 // +genclient
 // +genclient:onlyVerbs=get,list,watch
 // +genclient:noStatus
+// +kubebuilder:object:root=true
 
 // KafkaTopic is the duck of a KafkaTopic
 type KafkaTopic struct {
@@ -42,7 +42,8 @@ type KafkaTopic struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 }
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
+
 // KafkaTopicList contains a list of KafkaTopic
 type KafkaTopicList struct {
 	metav1.TypeMeta `json:",inline"`
@@ -50,10 +51,10 @@ type KafkaTopicList struct {
 	Items           []KafkaTopic `json:"items"`
 }
 
-// +kubebuilder:object:root=true
 // +genclient
 // +genclient:onlyVerbs=get,list,watch
 // +genclient:noStatus
+// +kubebuilder:object:root=true
 
 // Kafka is the duck of a Kafka
 type Kafka struct {
@@ -74,7 +75,8 @@ type KafkaStatusListener struct {
 	Type             string `json:"type,omitempty"`
 }
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
+
 // KafkaList contains a list of Kafka
 type KafkaList struct {
 	metav1.TypeMeta `json:",inline"`
