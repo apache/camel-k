@@ -26,7 +26,6 @@ import (
 
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gstruct"
-	"github.com/stretchr/testify/assert"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -44,8 +43,8 @@ import (
 func TestIntegrationScale(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		name := "java"
-		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
-		Expect(Kamel("run", "-n", ns, "files/Java.java", "--name", name).Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("run", "-n", ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(v1.PodRunning))
 		Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -53,18 +52,16 @@ func TestIntegrationScale(t *testing.T) {
 		t.Run("Scale integration with polymorphic client", func(t *testing.T) {
 			// Polymorphic scale client
 			groupResources, err := restmapper.GetAPIGroupResources(TestClient().Discovery())
-			assert.Nil(t, err)
+			Expect(err).To(BeNil())
 			mapper := restmapper.NewDiscoveryRESTMapper(groupResources)
 			resolver := scale.NewDiscoveryScaleKindResolver(TestClient().Discovery())
 			scaleClient, err := scale.NewForConfig(TestClient().GetConfig(), mapper, dynamic.LegacyAPIPathResolverFunc, resolver)
-			assert.Nil(t, err)
+			Expect(err).To(BeNil())
 
 			// Patch the integration scale subresource
 			patch := "{\"spec\":{\"replicas\":3}}"
 			_, err = scaleClient.Scales(ns).Patch(TestContext, camelv1.SchemeGroupVersion.WithResource("integrations"), name, types.MergePatchType, []byte(patch), metav1.PatchOptions{})
-			if err != nil {
-				t.Fatal(err)
-			}
+			Expect(err).To(BeNil())
 
 			// Check the Integration scale subresource Spec field
 			Eventually(IntegrationSpecReplicas(ns, name), TestTimeoutShort).
@@ -78,22 +75,18 @@ func TestIntegrationScale(t *testing.T) {
 
 		t.Run("Scale integration with Camel K client", func(t *testing.T) {
 			camel, err := versioned.NewForConfig(TestClient().GetConfig())
-			if err != nil {
-				t.Fatal(err)
-			}
+			Expect(err).To(BeNil())
 
 			// Getter
 			integrationScale, err := camel.CamelV1().Integrations(ns).GetScale(TestContext, name, metav1.GetOptions{})
-			Expect(integrationScale).ShouldNot(BeNil())
-			Expect(integrationScale.Spec.Replicas).Should(BeNumerically("==", 3))
-			Expect(integrationScale.Status.Replicas).Should(BeNumerically("==", 3))
+			Expect(err).To(BeNil())
+			Expect(integrationScale.Spec.Replicas).To(BeNumerically("==", 3))
+			Expect(integrationScale.Status.Replicas).To(BeNumerically("==", 3))
 
 			// Setter
 			integrationScale.Spec.Replicas = 2
 			integrationScale, err = camel.CamelV1().Integrations(ns).UpdateScale(TestContext, name, integrationScale, metav1.UpdateOptions{})
-			if err != nil {
-				t.Fatal(err)
-			}
+			Expect(err).To(BeNil())
 
 			// Check the Integration scale subresource Spec field
 			Eventually(IntegrationSpecReplicas(ns, name), TestTimeoutShort).
@@ -109,7 +102,7 @@ func TestIntegrationScale(t *testing.T) {
 			Expect(UpdateIntegration(ns, name, func(it *camelv1.Integration) {
 				replicas := int32(1)
 				it.Spec.Replicas = &replicas
-			})).Should(BeNil())
+			})).To(Succeed())
 
 			// Check it cascades into the Deployment scale
 			Eventually(IntegrationPods(ns, name), TestTimeoutMedium).Should(HaveLen(1))
@@ -119,6 +112,6 @@ func TestIntegrationScale(t *testing.T) {
 		})
 
 		// Clean up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(BeNil())
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

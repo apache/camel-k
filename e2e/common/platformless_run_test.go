@@ -25,12 +25,14 @@ import (
 	"os"
 	"testing"
 
+	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
+
+	corev1 "k8s.io/api/core/v1"
+
 	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/openshift"
-	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
-	corev1 "k8s.io/api/core/v1"
 )
 
 func TestPlatformlessRun(t *testing.T) {
@@ -43,18 +45,18 @@ func TestPlatformlessRun(t *testing.T) {
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		// Delete the platform from the namespace before running the integration
 		Eventually(DeletePlatform(ns)).Should(BeTrue())
 
-		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).Should(BeNil())
+		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		// Platform should be recreated
 		Eventually(Platform(ns)).ShouldNot(BeNil())
 		Eventually(PlatformProfile(ns)).Should(Equal(v1.TraitProfile("")))
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

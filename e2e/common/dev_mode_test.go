@@ -27,17 +27,17 @@ import (
 	"os"
 	"testing"
 
+	. "github.com/onsi/gomega"
+
 	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/e2e/support/util"
-	. "github.com/onsi/gomega"
 )
 
 func TestRunDevMode(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		t.Run("run yaml dev mode", func(t *testing.T) {
-			RegisterTestingT(t)
 			ctx, cancel := context.WithCancel(TestContext)
 			defer cancel()
 			piper, pipew := io.Pipe()
@@ -65,7 +65,6 @@ func TestRunDevMode(t *testing.T) {
 		})
 
 		t.Run("run yaml remote dev mode", func(t *testing.T) {
-			RegisterTestingT(t)
 			ctx, cancel := context.WithCancel(TestContext)
 			defer cancel()
 			piper, pipew := io.Pipe()

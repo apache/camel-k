@@ -27,14 +27,16 @@ import (
 	"net/http"
 	"testing"
 
-	. "github.com/apache/camel-k/e2e/support"
-	"github.com/apache/camel-k/pkg/util/openshift"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
+
 	v1 "k8s.io/api/core/v1"
+
+	. "github.com/apache/camel-k/e2e/support"
+	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
-func TestRunREST(t *testing.T) {
+func TestRunRest(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		var profile string
 		ocp, err := openshift.IsOpenShift(TestClient())
@@ -45,15 +47,15 @@ func TestRunREST(t *testing.T) {
 			profile = "Kubernetes"
 		}
 
-		Expect(Kamel("install", "-n", ns, "--trait-profile", profile).Execute()).Should(BeNil())
-		Expect(Kamel("run", "-n", ns, "files/RestConsumer.java").Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns, "--trait-profile", profile).Execute()).To(Succeed())
+		Expect(Kamel("run", "-n", ns, "files/RestConsumer.java").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "rest-consumer"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 
 		t.Run("Service works", func(t *testing.T) {
 			name := "John"
 			service := Service(ns, "rest-consumer")
 			Eventually(service, TestTimeoutShort).ShouldNot(BeNil())
-			Expect(Kamel("run", "-n", ns, "files/RestProducer.groovy", "-p", "serviceName=rest-consumer", "-p", "name="+name).Execute()).Should(BeNil())
+			Expect(Kamel("run", "-n", ns, "files/RestProducer.groovy", "-p", "serviceName=rest-consumer", "-p", "name="+name).Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "rest-producer"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationLogs(ns, "rest-consumer"), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
 			Eventually(IntegrationLogs(ns, "rest-producer"), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("%s Doe", name)))

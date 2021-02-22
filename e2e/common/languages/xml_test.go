@@ -24,24 +24,24 @@ package languages
 import (
 	"testing"
 
+	. "github.com/onsi/gomega"
+
+	v1 "k8s.io/api/core/v1"
+
 	. "github.com/apache/camel-k/e2e/support"
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	. "github.com/onsi/gomega"
-	v1 "k8s.io/api/core/v1"
 )
 
 func TestRunSimpleXmlExamples(t *testing.T) {
-
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		t.Run("run xml", func(t *testing.T) {
-			RegisterTestingT(t)
-			Expect(Kamel("run", "-n", ns, "../files/xml.xml").Execute()).Should(BeNil())
+			Expect(Kamel("run", "-n", ns, "../files/xml.xml").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "xml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "xml", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "xml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("init run xml", func(t *testing.T) {

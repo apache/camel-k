@@ -25,9 +25,11 @@ import (
 	"os"
 	"testing"
 
-	. "github.com/apache/camel-k/e2e/support"
 	. "github.com/onsi/gomega"
+
 	v1 "k8s.io/api/core/v1"
+
+	. "github.com/apache/camel-k/e2e/support"
 )
 
 func TestRunWithDockerHubRegistry(t *testing.T) {
@@ -44,15 +46,14 @@ func TestRunWithDockerHubRegistry(t *testing.T) {
 				"--registry-auth-username", user,
 				"--registry-auth-password", pass,
 				"--cluster-type", "kubernetes").
-				Execute()).Should(BeNil())
+				Execute()).To(Succeed())
 
-			Expect(Kamel("run", "-n", ns, "files/groovy.groovy").Execute()).Should(BeNil())
+			Expect(Kamel("run", "-n", ns, "files/groovy.groovy").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "groovy"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationLogs(ns, "groovy"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Eventually(IntegrationPodImage(ns, "groovy"), TestTimeoutShort).Should(HavePrefix("docker.io"))
 
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 	}
-
 }

@@ -25,17 +25,19 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/apache/camel-k/e2e/support"
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/openshift"
-
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
 
-	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
+
+	. "github.com/apache/camel-k/e2e/support"
+	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 func TestPrometheusTrait(t *testing.T) {
@@ -46,11 +48,11 @@ func TestPrometheusTrait(t *testing.T) {
 		// suppress Service Monitor for the time being as CI test runs on OCP 3.11
 		createServiceMonitor := false
 
-		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		Expect(Kamel("run", "-n", ns, "../files/Java.java",
 			"-t", "prometheus.enabled=true",
-			"-t", fmt.Sprintf("prometheus.service-monitor=%v", createServiceMonitor)).Execute()).Should(BeNil())
+			"-t", fmt.Sprintf("prometheus.service-monitor=%v", createServiceMonitor)).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(v1.PodRunning))
 		Eventually(IntegrationCondition(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -78,7 +80,7 @@ func TestPrometheusTrait(t *testing.T) {
 			})
 		}
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

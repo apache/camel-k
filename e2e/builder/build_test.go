@@ -24,9 +24,10 @@ package builder
 import (
 	"testing"
 
+	. "github.com/onsi/gomega"
+
 	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/apis/camel/v1"
-	. "github.com/onsi/gomega"
 )
 
 func TestKitTimerToLogFullBuild(t *testing.T) {
@@ -39,12 +40,12 @@ func TestKitKnativeFullBuild(t *testing.T) {
 
 func doKitFullBuild(t *testing.T, name string, dependencies ...string) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 		buildKitArgs := []string{"kit", "create", name, "-n", ns}
 		for _, dep := range dependencies {
 			buildKitArgs = append(buildKitArgs, "-d", dep)
 		}
-		Expect(Kamel(buildKitArgs...).Execute()).Should(BeNil())
+		Expect(Kamel(buildKitArgs...).Execute()).To(Succeed())
 		Eventually(Build(ns, name)).ShouldNot(BeNil())
 		Eventually(func() v1.BuildPhase {
 			return Build(ns, name)().Status.Phase

@@ -24,20 +24,21 @@ package common
 import (
 	"testing"
 
-	. "github.com/apache/camel-k/e2e/support"
 	. "github.com/onsi/gomega"
+
+	. "github.com/apache/camel-k/e2e/support"
 )
 
 // TestTektonLikeBehavior verifies that the kamel binary can be invoked from within the Camel K image.
 // This feature is used in Tekton pipelines.
 func TestTektonLikeBehavior(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(CreateOperatorServiceAccount(ns)).Should(BeNil())
-		Expect(CreateOperatorRole(ns)).Should(BeNil())
-		Expect(CreateOperatorRoleBinding(ns)).Should(BeNil())
+		Expect(CreateOperatorServiceAccount(ns)).To(Succeed())
+		Expect(CreateOperatorRole(ns)).To(Succeed())
+		Expect(CreateOperatorRoleBinding(ns)).To(Succeed())
 
 		Eventually(OperatorPod(ns)).Should(BeNil())
-		Expect(CreateKamelPod(ns, "tekton-task", "install", "--skip-cluster-setup", "--force")).Should(BeNil())
+		Expect(CreateKamelPod(ns, "tekton-task", "install", "--skip-cluster-setup", "--force")).To(Succeed())
 
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 	})
