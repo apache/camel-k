@@ -60,8 +60,37 @@ func TestIntegrationScale(t *testing.T) {
 			assert.Nil(t, err)
 
 			// Patch the integration scale subresource
-			patch := "{\"spec\":{\"replicas\":2}}"
+			patch := "{\"spec\":{\"replicas\":3}}"
 			_, err = scaleClient.Scales(ns).Patch(TestContext, camelv1.SchemeGroupVersion.WithResource("integrations"), name, types.MergePatchType, []byte(patch), metav1.PatchOptions{})
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// Check the Integration scale subresource Spec field
+			Eventually(IntegrationSpecReplicas(ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 3)))
+			// Then check it cascades into the Deployment scale
+			Eventually(IntegrationPods(ns, name), TestTimeoutMedium).Should(HaveLen(3))
+			// Finally check it cascades into the Integration scale subresource Status field
+			Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 3)))
+		})
+
+		t.Run("Scale integration with Camel K client", func(t *testing.T) {
+			camel, err := versioned.NewForConfig(TestClient().GetConfig())
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// Getter
+			integrationScale, err := camel.CamelV1().Integrations(ns).GetScale(TestContext, name, metav1.GetOptions{})
+			Expect(integrationScale).ShouldNot(BeNil())
+			Expect(integrationScale.Spec.Replicas).Should(BeNumerically("==", 3))
+			Expect(integrationScale.Status.Replicas).Should(BeNumerically("==", 3))
+
+			// Setter
+			integrationScale.Spec.Replicas = 2
+			integrationScale, err = camel.CamelV1().Integrations(ns).UpdateScale(TestContext, name, integrationScale, metav1.UpdateOptions{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -76,36 +105,20 @@ func TestIntegrationScale(t *testing.T) {
 				Should(gstruct.PointTo(BeNumerically("==", 2)))
 		})
 
-		t.Run("Scale integration with Camel K client", func(t *testing.T) {
-			camel, err := versioned.NewForConfig(TestClient().GetConfig())
-			if err != nil {
-				t.Fatal(err)
-			}
+		t.Run("Update integration scale spec", func(t *testing.T) {
+			Expect(UpdateIntegration(ns, name, func(it *camelv1.Integration) {
+				replicas := int32(1)
+				it.Spec.Replicas = &replicas
+			})).Should(BeNil())
 
-			// Getter
-			integrationScale, err := camel.CamelV1().Integrations(ns).GetScale(TestContext, name, metav1.GetOptions{})
-			Expect(integrationScale).ShouldNot(BeNil())
-			Expect(integrationScale.Spec.Replicas).Should(BeNumerically("==", 2))
-			Expect(integrationScale.Status.Replicas).Should(BeNumerically("==", 2))
-
-			// Setter
-			integrationScale.Spec.Replicas = 1
-			integrationScale, err = camel.CamelV1().Integrations(ns).UpdateScale(TestContext, name, integrationScale, metav1.UpdateOptions{})
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			// Check the Integration scale subresource Spec field
-			Eventually(IntegrationSpecReplicas(ns, name), TestTimeoutShort).
-				Should(gstruct.PointTo(BeNumerically("==", 1)))
-			// Then check it cascades into the Deployment scale
+			// Check it cascades into the Deployment scale
 			Eventually(IntegrationPods(ns, name), TestTimeoutMedium).Should(HaveLen(1))
 			// Finally check it cascades into the Integration scale subresource Status field
 			Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
 				Should(gstruct.PointTo(BeNumerically("==", 1)))
 		})
 
-		// Cleanup
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		// Clean up
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(BeNil())
 	})
 }
