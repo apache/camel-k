@@ -19,7 +19,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package common
+package traits
 
 import (
 	"testing"
@@ -30,7 +30,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-func TestAddons(t *testing.T) {
+func TestMasterTrait(t *testing.T) {
 
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).Should(BeNil())
