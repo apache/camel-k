@@ -75,9 +75,8 @@ type CamelCatalogSpec struct {
 type CamelCatalogStatus struct {
 }
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +k8s:openapi-gen=true
 // +genclient
+// +kubebuilder:object:root=true
 // +kubebuilder:resource:path=camelcatalogs,scope=Namespaced,shortName=cc,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +kubebuilder:storageversion
@@ -93,7 +92,7 @@ type CamelCatalog struct {
 	Spec   CamelCatalogSpec   `json:"spec,omitempty" yaml:"spec,omitempty"`
 }
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
 
 // CamelCatalogList contains a list of CamelCatalog
 type CamelCatalogList struct {

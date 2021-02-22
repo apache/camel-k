@@ -108,8 +108,8 @@ const (
 	KameletBindingPhaseReady KameletBindingPhase = "Ready"
 )
 
-// +kubebuilder:object:root=true
 // +genclient
+// +kubebuilder:object:root=true
 // +kubebuilder:resource:path=kameletbindings,scope=Namespaced,shortName=klb,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The Kamelet Binding phase"
@@ -123,7 +123,7 @@ type KameletBinding struct {
 	Status KameletBindingStatus `json:"status,omitempty"`
 }
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
 
 // KameletBindingList contains a list of KameletBinding
 type KameletBindingList struct {
