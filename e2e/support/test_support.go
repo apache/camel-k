@@ -483,6 +483,12 @@ func UpdateIntegration(ns string, name string, upd func(it *v1.Integration)) err
 	return TestClient().Update(TestContext, it)
 }
 
+func ScaleIntegration(ns string, name string, replicas int32) error {
+	return UpdateIntegration(ns, name, func(it *v1.Integration) {
+		it.Spec.Replicas = &replicas
+	})
+}
+
 func Kits(ns string) func() []v1.IntegrationKit {
 	return func() []v1.IntegrationKit {
 		lst := v1.NewIntegrationKitList()
@@ -1089,7 +1095,6 @@ func UserCleanup() {
 func InvokeUserTestCode(t *testing.T, ns string, doRun func(string)) {
 	defer func() {
 		if t.Failed() {
-
 			if err := util.Dump(TestContext, TestClient(), ns, t); err != nil {
 				t.Logf("Error while dumping namespace %s: %v\n", ns, err)
 			}

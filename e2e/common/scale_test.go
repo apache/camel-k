@@ -49,6 +49,19 @@ func TestIntegrationScale(t *testing.T) {
 		Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
+		t.Run("Update integration scale spec", func(t *testing.T) {
+			Expect(ScaleIntegration(ns, name, 3)).To(Succeed())
+			// Check the readiness condition becomes falsy
+			Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionFalse))
+			// Check the scale cascades into the Deployment scale
+			Eventually(IntegrationPods(ns, name), TestTimeoutShort).Should(HaveLen(3))
+			// Check it also cascades into the Integration scale subresource Status field
+			Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 3)))
+			// Finally check the readiness condition becomes truthy back
+			Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
+		})
+
 		t.Run("Scale integration with polymorphic client", func(t *testing.T) {
 			// Polymorphic scale client
 			groupResources, err := restmapper.GetAPIGroupResources(TestClient().Discovery())
@@ -59,18 +72,20 @@ func TestIntegrationScale(t *testing.T) {
 			Expect(err).To(BeNil())
 
 			// Patch the integration scale subresource
-			patch := "{\"spec\":{\"replicas\":3}}"
+			patch := "{\"spec\":{\"replicas\":2}}"
 			_, err = scaleClient.Scales(ns).Patch(TestContext, camelv1.SchemeGroupVersion.WithResource("integrations"), name, types.MergePatchType, []byte(patch), metav1.PatchOptions{})
 			Expect(err).To(BeNil())
 
+			// Check the readiness condition is still truthy as down-scaling
+			Expect(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady)()).To(Equal(v1.ConditionTrue))
 			// Check the Integration scale subresource Spec field
 			Eventually(IntegrationSpecReplicas(ns, name), TestTimeoutShort).
-				Should(gstruct.PointTo(BeNumerically("==", 3)))
+				Should(gstruct.PointTo(BeNumerically("==", 2)))
 			// Then check it cascades into the Deployment scale
-			Eventually(IntegrationPods(ns, name), TestTimeoutMedium).Should(HaveLen(3))
+			Eventually(IntegrationPods(ns, name), TestTimeoutShort).Should(HaveLen(2))
 			// Finally check it cascades into the Integration scale subresource Status field
 			Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
-				Should(gstruct.PointTo(BeNumerically("==", 3)))
+				Should(gstruct.PointTo(BeNumerically("==", 2)))
 		})
 
 		t.Run("Scale integration with Camel K client", func(t *testing.T) {
@@ -80,32 +95,21 @@ func TestIntegrationScale(t *testing.T) {
 			// Getter
 			integrationScale, err := camel.CamelV1().Integrations(ns).GetScale(TestContext, name, metav1.GetOptions{})
 			Expect(err).To(BeNil())
-			Expect(integrationScale.Spec.Replicas).To(BeNumerically("==", 3))
-			Expect(integrationScale.Status.Replicas).To(BeNumerically("==", 3))
+			Expect(integrationScale.Spec.Replicas).To(BeNumerically("==", 2))
+			Expect(integrationScale.Status.Replicas).To(BeNumerically("==", 2))
 
 			// Setter
-			integrationScale.Spec.Replicas = 2
+			integrationScale.Spec.Replicas = 1
 			integrationScale, err = camel.CamelV1().Integrations(ns).UpdateScale(TestContext, name, integrationScale, metav1.UpdateOptions{})
 			Expect(err).To(BeNil())
 
+			// Check the readiness condition is still truthy as down-scaling
+			Expect(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady)()).To(Equal(v1.ConditionTrue))
 			// Check the Integration scale subresource Spec field
 			Eventually(IntegrationSpecReplicas(ns, name), TestTimeoutShort).
-				Should(gstruct.PointTo(BeNumerically("==", 2)))
+				Should(gstruct.PointTo(BeNumerically("==", 1)))
 			// Then check it cascades into the Deployment scale
-			Eventually(IntegrationPods(ns, name), TestTimeoutMedium).Should(HaveLen(2))
-			// Finally check it cascades into the Integration scale subresource Status field
-			Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
-				Should(gstruct.PointTo(BeNumerically("==", 2)))
-		})
-
-		t.Run("Update integration scale spec", func(t *testing.T) {
-			Expect(UpdateIntegration(ns, name, func(it *camelv1.Integration) {
-				replicas := int32(1)
-				it.Spec.Replicas = &replicas
-			})).To(Succeed())
-
-			// Check it cascades into the Deployment scale
-			Eventually(IntegrationPods(ns, name), TestTimeoutMedium).Should(HaveLen(1))
+			Eventually(IntegrationPods(ns, name), TestTimeoutShort).Should(HaveLen(1))
 			// Finally check it cascades into the Integration scale subresource Status field
 			Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
 				Should(gstruct.PointTo(BeNumerically("==", 1)))
