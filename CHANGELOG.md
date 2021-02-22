@@ -1565,7 +1565,6 @@
 - context with status error should not be included when looking up suitable context for an integration [\#585](https://github.com/apache/camel-k/pull/585) ([lburgazzoli](https://github.com/lburgazzoli))
 - Split builder from operator [\#583](https://github.com/apache/camel-k/pull/583) ([astefanutti](https://github.com/astefanutti))
 - Add log4j-slf4j-impl as runtime dependency in default project build [\#578](https://github.com/apache/camel-k/pull/578) ([astefanutti](https://github.com/astefanutti))
-- Fix \#557: fix generated images [\#560](https://github.com/apache/camel-k/pull/560) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [0.3.2](https://github.com/apache/camel-k/tree/0.3.2) (2019-03-26)
 
@@ -1610,6 +1609,7 @@
 
 **Merged pull requests:**
 
+- Fix \#557: fix generated images [\#560](https://github.com/apache/camel-k/pull/560) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(maven\): Run Maven in batch mode to reduce log noise [\#556](https://github.com/apache/camel-k/pull/556) ([jamesnetherton](https://github.com/jamesnetherton))
 - knative: fix copy secrets to env vars [\#555](https://github.com/apache/camel-k/pull/555) ([lburgazzoli](https://github.com/lburgazzoli))
 - resources: add options to configure mount path and key [\#554](https://github.com/apache/camel-k/pull/554) ([lburgazzoli](https://github.com/lburgazzoli))
@@ -1873,7 +1873,6 @@
 - chore\(release\): package examples to publish them during release [\#295](https://github.com/apache/camel-k/pull/295) ([nicolaferraro](https://github.com/nicolaferraro))
 - Allow to generate install resources if needed [\#294](https://github.com/apache/camel-k/pull/294) ([nicolaferraro](https://github.com/nicolaferraro))
 - Re-add missing commits [\#293](https://github.com/apache/camel-k/pull/293) ([nicolaferraro](https://github.com/nicolaferraro))
-- Runtime enhacements [\#290](https://github.com/apache/camel-k/pull/290) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(log\): make dev-mode work in Knative [\#280](https://github.com/apache/camel-k/pull/280) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#221: use registry name instead of IP in Knative on Openshift [\#278](https://github.com/apache/camel-k/pull/278) ([nicolaferraro](https://github.com/nicolaferraro))
 - Determine active/passive endpoints from Catalog [\#277](https://github.com/apache/camel-k/pull/277) ([lburgazzoli](https://github.com/lburgazzoli))
