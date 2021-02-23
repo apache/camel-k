@@ -30,6 +30,12 @@
 
 **Merged pull requests:**
 
+- chore\(e2e\): Polish Gomega usage in e2e tests [\#2063](https://github.com/apache/camel-k/pull/2063) ([astefanutti](https://github.com/astefanutti))
+- test: Add eviction cases to the PodDisruptionBudget trait e2e tests [\#2062](https://github.com/apache/camel-k/pull/2062) ([astefanutti](https://github.com/astefanutti))
+- chore\(e2e\): Add test case to Integration scaling e2e tests [\#2061](https://github.com/apache/camel-k/pull/2061) ([astefanutti](https://github.com/astefanutti))
+- fix\(api\): Remove deprecated deepcopy-gen markers [\#2060](https://github.com/apache/camel-k/pull/2060) ([astefanutti](https://github.com/astefanutti))
+- Move trait test to separate directory [\#2059](https://github.com/apache/camel-k/pull/2059) ([bouskaJ](https://github.com/bouskaJ))
+- test: Add PodDisruptionBudget trait e2e tests [\#2057](https://github.com/apache/camel-k/pull/2057) ([astefanutti](https://github.com/astefanutti))
 - chore\(cmd\): skip operator compatibility warning [\#2056](https://github.com/apache/camel-k/pull/2056) ([squakez](https://github.com/squakez))
 - feat: add command completion for connect flag [\#2055](https://github.com/apache/camel-k/pull/2055) ([johnpoth](https://github.com/johnpoth))
 - Wait for operator to start before scaling it to zero [\#2054](https://github.com/apache/camel-k/pull/2054) ([bouskaJ](https://github.com/bouskaJ))
