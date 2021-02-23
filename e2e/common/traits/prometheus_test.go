@@ -50,7 +50,7 @@ func TestPrometheusTrait(t *testing.T) {
 
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
-		Expect(Kamel("run", "-n", ns, "../files/Java.java",
+		Expect(Kamel("run", "-n", ns, "files/Java.java",
 			"-t", "prometheus.enabled=true",
 			"-t", fmt.Sprintf("prometheus.service-monitor=%v", createServiceMonitor)).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(v1.PodRunning))
