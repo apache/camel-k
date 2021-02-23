@@ -62,18 +62,18 @@ func TestIntegrationUpgrade(t *testing.T) {
 		Eventually(PlatformVersion(ns)).Should(Equal(defaults.Version))
 
 		// Run an integration
-		Expect(Kamel("run", "-n", ns, "files/js.js").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "js"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-		initialKit := IntegrationKit(ns, "js")()
+		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+		initialKit := IntegrationKit(ns, "yaml")()
 
 		// Scale the operator down to zero
 		Eventually(ScaleOperator(ns, 0)).Should(BeNil())
 		Eventually(OperatorPod(ns)).Should(BeNil())
 
 		// Change the version to an older one
-		Expect(SetIntegrationVersion(ns, "js", "an.older.one")).To(Succeed())
+		Expect(SetIntegrationVersion(ns, "yaml", "an.older.one")).To(Succeed())
 		Expect(SetAllKitsVersion(ns, "an.older.one")).To(Succeed())
-		Eventually(IntegrationVersion(ns, "js")).Should(Equal("an.older.one"))
+		Eventually(IntegrationVersion(ns, "yaml")).Should(Equal("an.older.one"))
 		Eventually(KitsWithVersion(ns, "an.older.one")).Should(Equal(1))
 		Eventually(KitsWithVersion(ns, defaults.Version)).Should(Equal(0))
 
@@ -83,16 +83,16 @@ func TestIntegrationUpgrade(t *testing.T) {
 		Eventually(OperatorPodPhase(ns)).Should(Equal(v1.PodRunning))
 
 		// No auto-update expected
-		Consistently(IntegrationVersion(ns, "js"), 3*time.Second).Should(Equal("an.older.one"))
+		Consistently(IntegrationVersion(ns, "yaml"), 3*time.Second).Should(Equal("an.older.one"))
 
 		// Clear the integration status
-		Expect(Kamel("rebuild", "js", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("rebuild", "yaml", "-n", ns).Execute()).To(Succeed())
 
 		// Check the integration version change
-		Eventually(IntegrationVersion(ns, "js")).Should(Equal(defaults.Version))
+		Eventually(IntegrationVersion(ns, "yaml")).Should(Equal(defaults.Version))
 		Eventually(KitsWithVersion(ns, "an.older.one")).Should(Equal(1)) // old one is not recycled
 		Eventually(KitsWithVersion(ns, defaults.Version)).Should(Equal(1))
-		Eventually(IntegrationKit(ns, "js"), TestTimeoutMedium).ShouldNot(Equal(initialKit))
-		Eventually(IntegrationPodPhase(ns, "js"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+		Eventually(IntegrationKit(ns, "yaml"), TestTimeoutMedium).ShouldNot(Equal(initialKit))
+		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 	})
 }

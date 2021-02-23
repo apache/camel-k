@@ -37,7 +37,7 @@ func TestRunSimpleJavaScriptExamples(t *testing.T) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		t.Run("run js", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "../files/js.js").Execute()).To(Succeed())
+			Expect(Kamel("run", "-n", ns, "files/js.js").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "js"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "js", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "js"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))

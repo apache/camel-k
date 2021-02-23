@@ -48,7 +48,7 @@ func TestAffinityTrait(t *testing.T) {
 
 		if hostname != "" {
 			t.Run("Run Java with node affinity", func(t *testing.T) {
-				Expect(Kamel("run", "-n", ns, "../files/Java.java",
+				Expect(Kamel("run", "-n", ns, "files/Java.java",
 					"--name", "java1",
 					"-t", "affinity.enabled=true",
 					"-t", fmt.Sprintf("affinity.node-affinity-labels=kubernetes.io/hostname in(%s)", hostname)).Execute()).To(Succeed())
@@ -68,7 +68,7 @@ func TestAffinityTrait(t *testing.T) {
 		}
 
 		t.Run("Run Java with pod affinity", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "../files/Java.java",
+			Expect(Kamel("run", "-n", ns, "files/Java.java",
 				"--name", "java2",
 				"-t", "affinity.enabled=true",
 				"-t", "affinity.pod-affinity-labels=camel.apache.org/integration").Execute()).To(Succeed())
@@ -88,7 +88,7 @@ func TestAffinityTrait(t *testing.T) {
 		})
 
 		t.Run("Run Java with pod anti affinity", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "../files/Java.java",
+			Expect(Kamel("run", "-n", ns, "files/Java.java",
 				"--name", "java3",
 				"-t", "affinity.enabled=true",
 				"-t", "affinity.pod-anti-affinity-labels=camel.apache.org/integration").Execute()).To(Succeed())

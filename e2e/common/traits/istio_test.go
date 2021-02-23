@@ -37,7 +37,7 @@ func TestIstioTrait(t *testing.T) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		t.Run("Run Java with Istio", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "../files/Java.java",
+			Expect(Kamel("run", "-n", ns, "files/Java.java",
 				"-t", "istio.enabled=true").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))

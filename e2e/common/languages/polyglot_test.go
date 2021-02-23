@@ -37,7 +37,7 @@ func TestRunPolyglotExamples(t *testing.T) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		t.Run("run polyglot", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "--name", "polyglot", "../files/js-polyglot.js", "../files/yaml-polyglot.yaml").Execute()).To(Succeed())
+			Expect(Kamel("run", "-n", ns, "--name", "polyglot", "files/js-polyglot.js", "files/yaml-polyglot.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "polyglot"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "polyglot", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "polyglot"), TestTimeoutShort).Should(ContainSubstring("Magicpolyglot-yaml"))

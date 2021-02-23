@@ -37,7 +37,7 @@ func TestRunSimpleYamlExamples(t *testing.T) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		t.Run("run yaml", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "../files/yaml.yaml").Execute()).To(Succeed())
+			Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "yaml", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -45,7 +45,7 @@ func TestRunSimpleYamlExamples(t *testing.T) {
 		})
 
 		t.Run("run yaml Quarkus", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "--name", "yaml-quarkus", "../files/yaml.yaml", "-t", "quarkus.enabled=true").Execute()).To(Succeed())
+			Expect(Kamel("run", "-n", ns, "--name", "yaml-quarkus", "files/yaml.yaml", "-t", "quarkus.enabled=true").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "yaml-quarkus"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "yaml-quarkus", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "yaml-quarkus"), TestTimeoutShort).Should(ContainSubstring("powered by Quarkus"))
