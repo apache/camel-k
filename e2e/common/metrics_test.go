@@ -25,7 +25,6 @@ import (
 	"bytes"
 	"fmt"
 	"math"
-	"strings"
 	"testing"
 	"time"
 
@@ -39,6 +38,7 @@ import (
 	"github.com/prometheus/common/expfmt"
 
 	. "github.com/apache/camel-k/e2e/support"
+	. "github.com/apache/camel-k/e2e/support/util"
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
@@ -76,7 +76,35 @@ func TestMetrics(t *testing.T) {
 			Expect(err).To(BeNil())
 
 			// Check it's consistent with the duration observed from logs
-			durationFromLogs := buildDuration(&logs, ns, build.Name)
+			var ts1, ts2 time.Time
+			err = NewLogWalker(&logs).
+				AddStep(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+					"LoggerName":  Equal("camel-k.controller.build"),
+					"Message":     Equal("Build state transition"),
+					"Phase":       Equal("Pending"),
+					"RequestName": Equal(build.Name),
+				}), LogEntryNoop).
+				AddStep(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+					"LoggerName":  Equal("camel-k.controller.build"),
+					"Message":     Equal("Reconciling Build"),
+					"RequestName": Equal(build.Name),
+				}), func(l *LogEntry) { ts1 = l.Timestamp.Time }).
+				AddStep(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+					"LoggerName": Equal("camel-k.builder"),
+					"Message":    HavePrefix("resolved image"),
+				}), LogEntryNoop).
+				AddStep(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+					"LoggerName":  Equal("camel-k.controller.build"),
+					"Message":     Equal("Reconciling Build"),
+					"RequestName": Equal(build.Name),
+				}), func(l *LogEntry) { ts2 = l.Timestamp.Time }).
+				Walk()
+			Expect(err).To(BeNil())
+			Expect(ts1).NotTo(BeNil())
+			Expect(ts2).NotTo(BeNil())
+			Expect(ts2).To(BeTemporally(">", ts1))
+
+			durationFromLogs := ts2.Sub(ts1)
 			Expect(math.Abs((durationFromLogs - duration).Seconds())).To(BeNumerically("<", 1))
 
 			// Check the duration is observed in the corresponding metric
@@ -118,26 +146,6 @@ func TestMetrics(t *testing.T) {
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
-}
-
-func buildDuration(logs *[]LogEntry, ns, buildName string) time.Duration {
-	var ts1, ts2 time.Time
-	for _, log := range *logs {
-		if ts1.IsZero() &&
-			log.LoggerName == "camel-k.controller.build" &&
-			log.Message == "Build state transition" &&
-			log.RequestNamespace == ns &&
-			log.RequestName == buildName &&
-			log.Phase == "Pending" {
-			ts1 = log.Timestamp.Time
-		}
-		if ts2.IsZero() &&
-			log.LoggerName == "camel-k.builder" &&
-			strings.HasPrefix(log.Message, "resolved image") {
-			ts2 = log.Timestamp.Time
-		}
-	}
-	return ts2.Sub(ts1)
 }
 
 func label(name, value string) *prometheus.LabelPair {

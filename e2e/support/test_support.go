@@ -29,10 +29,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"math"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -40,8 +38,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
 	"github.com/spf13/cobra"
-
-	"go.uber.org/zap/zapcore"
 
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
@@ -253,40 +249,7 @@ func Logs(ns, podName string, options corev1.PodLogOptions) func() string {
 	}
 }
 
-type Time struct {
-	time.Time
-}
-
-func (t *Time) UnmarshalJSON(s []byte) (err error) {
-	f, err := strconv.ParseFloat(string(s), 10)
-	if err != nil {
-		return err
-	}
-	ns := (f - math.Floor(f)) * 1000000000
-	*t = Time{
-		time.Unix(int64(f), int64(ns)),
-	}
-	return nil
-}
-
-type LogEntry struct {
-	// Zap
-	Level      zapcore.Level `json:"level,omitempty"`
-	Timestamp  Time          `json:"ts,omitempty"`
-	LoggerName string        `json:"logger,omitempty"`
-	Message    string        `json:"msg,omitempty"`
-	// Controller runtime
-	RequestNamespace string `json:"request-namespace,omitempty"`
-	RequestName      string `json:"request-name,omitempty"`
-	ApiVersion       string `json:"api-version,omitempty"`
-	Kind             string `json:"kind,omitempty"`
-	// Camel K
-	Namespace string `json:"ns,omitempty"`
-	Name      string `json:"name,omitempty"`
-	Phase     string `json:"phase,omitempty"`
-}
-
-func StructuredLogs(ns, podName string, options corev1.PodLogOptions) []LogEntry {
+func StructuredLogs(ns, podName string, options corev1.PodLogOptions) []util.LogEntry {
 	byteReader, err := TestClient().CoreV1().Pods(ns).GetLogs(podName, &options).Stream(TestContext)
 	if err != nil {
 		log.Error(err, "Error while reading container logs")
@@ -298,10 +261,10 @@ func StructuredLogs(ns, podName string, options corev1.PodLogOptions) []LogEntry
 		}
 	}()
 
-	entries := make([]LogEntry, 0)
+	entries := make([]util.LogEntry, 0)
 	scanner := bufio.NewScanner(byteReader)
 	for scanner.Scan() {
-		entry := LogEntry{}
+		entry := util.LogEntry{}
 		t := scanner.Text()
 		err := json.Unmarshal([]byte(t), &entry)
 		if err != nil {
