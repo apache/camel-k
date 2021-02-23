@@ -27,6 +27,8 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.42.1
 	github.com/prometheus/client_golang v1.9.0
+	github.com/prometheus/client_model v0.2.0
+	github.com/prometheus/common v0.15.0
 	github.com/radovskyb/watcher v1.0.6
 	github.com/redhat-developer/service-binding-operator v0.5.0
 	github.com/rs/xid v1.2.1
@@ -40,6 +42,7 @@ require (
 	github.com/stoewer/go-strcase v1.2.0
 	github.com/stretchr/testify v1.6.1
 	go.uber.org/multierr v1.6.0
+	go.uber.org/zap v1.16.0
 	golang.org/x/oauth2 v0.0.0-20210126194326-f9ce19ea3013
 	gopkg.in/inf.v0 v0.9.1
 	gopkg.in/yaml.v2 v2.4.0
@@ -49,6 +52,7 @@ require (
 	k8s.io/client-go v12.0.0+incompatible
 	k8s.io/gengo v0.0.0-20201214224949-b6c5ce23f027
 	k8s.io/klog/v2 v2.5.0
+	k8s.io/utils v0.0.0-20210111153108-fddb29f9d009
 	knative.dev/eventing v0.21.1
 	knative.dev/pkg v0.0.0-20210216013737-584933f8280b
 	knative.dev/serving v0.21.0
