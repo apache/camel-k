@@ -22,14 +22,17 @@ limitations under the License.
 package support
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -38,6 +41,8 @@ import (
 	"github.com/onsi/gomega"
 	"github.com/spf13/cobra"
 
+	"go.uber.org/zap/zapcore"
+
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	coordination "k8s.io/api/coordination/v1"
@@ -45,6 +50,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -206,25 +212,30 @@ func KamelWithContext(ctx context.Context, args ...string) *cobra.Command {
 	Curryied utility functions for testing
 */
 
-func IntegrationLogs(ns string, name string) func() string {
+func IntegrationLogs(ns, name string) func() string {
 	return func() string {
 		pod := IntegrationPod(ns, name)()
 		if pod == nil {
 			return ""
 		}
-		containerName := ""
+
+		options := corev1.PodLogOptions{
+			TailLines: pointer.Int64Ptr(100),
+		}
+
 		if len(pod.Spec.Containers) > 1 {
-			containerName = pod.Spec.Containers[0].Name
+			options.Container = pod.Spec.Containers[0].Name
 		}
-		tail := int64(100)
-		logOptions := corev1.PodLogOptions{
-			Follow:    false,
-			Container: containerName,
-			TailLines: &tail,
-		}
-		byteReader, err := TestClient().CoreV1().Pods(ns).GetLogs(pod.Name, &logOptions).Stream(TestContext)
+
+		return Logs(ns, pod.Name, options)()
+	}
+}
+
+func Logs(ns, podName string, options corev1.PodLogOptions) func() string {
+	return func() string {
+		byteReader, err := TestClient().CoreV1().Pods(ns).GetLogs(podName, &options).Stream(TestContext)
 		if err != nil {
-			log.Error(err, "Error while reading the pod logs")
+			log.Error(err, "Error while reading container logs")
 			return ""
 		}
 		defer func() {
@@ -235,11 +246,76 @@ func IntegrationLogs(ns string, name string) func() string {
 
 		bytes, err := ioutil.ReadAll(byteReader)
 		if err != nil {
-			log.Error(err, "Error while reading the pod logs content")
+			log.Error(err, "Error while reading container logs")
 			return ""
 		}
 		return string(bytes)
 	}
+}
+
+type Time struct {
+	time.Time
+}
+
+func (t *Time) UnmarshalJSON(s []byte) (err error) {
+	f, err := strconv.ParseFloat(string(s), 10)
+	if err != nil {
+		return err
+	}
+	ns := (f - math.Floor(f)) * 1000000000
+	*t = Time{
+		time.Unix(int64(f), int64(ns)),
+	}
+	return nil
+}
+
+type LogEntry struct {
+	// Zap
+	Level      zapcore.Level `json:"level,omitempty"`
+	Timestamp  Time          `json:"ts,omitempty"`
+	LoggerName string        `json:"logger,omitempty"`
+	Message    string        `json:"msg,omitempty"`
+	// Controller runtime
+	RequestNamespace string `json:"request-namespace,omitempty"`
+	RequestName      string `json:"request-name,omitempty"`
+	ApiVersion       string `json:"api-version,omitempty"`
+	Kind             string `json:"kind,omitempty"`
+	// Camel K
+	Namespace string `json:"ns,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Phase     string `json:"phase,omitempty"`
+}
+
+func StructuredLogs(ns, podName string, options corev1.PodLogOptions) []LogEntry {
+	byteReader, err := TestClient().CoreV1().Pods(ns).GetLogs(podName, &options).Stream(TestContext)
+	if err != nil {
+		log.Error(err, "Error while reading container logs")
+		return nil
+	}
+	defer func() {
+		if err := byteReader.Close(); err != nil {
+			log.Error(err, "Error closing the stream")
+		}
+	}()
+
+	entries := make([]LogEntry, 0)
+	scanner := bufio.NewScanner(byteReader)
+	for scanner.Scan() {
+		entry := LogEntry{}
+		t := scanner.Text()
+		err := json.Unmarshal([]byte(t), &entry)
+		if err != nil {
+			continue
+		}
+		entries = append(entries, entry)
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Error(err, "Error while scanning container logs")
+		return nil
+	}
+
+	return entries
 }
 
 func IntegrationPodPhase(ns string, name string) func() corev1.PodPhase {
