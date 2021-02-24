@@ -30,6 +30,7 @@
 
 **Merged pull requests:**
 
+- chore\(e2e\): Assert Integration readiness condition in scaling e2e tests [\#2064](https://github.com/apache/camel-k/pull/2064) ([astefanutti](https://github.com/astefanutti))
 - chore\(e2e\): Polish Gomega usage in e2e tests [\#2063](https://github.com/apache/camel-k/pull/2063) ([astefanutti](https://github.com/astefanutti))
 - test: Add eviction cases to the PodDisruptionBudget trait e2e tests [\#2062](https://github.com/apache/camel-k/pull/2062) ([astefanutti](https://github.com/astefanutti))
 - chore\(e2e\): Add test case to Integration scaling e2e tests [\#2061](https://github.com/apache/camel-k/pull/2061) ([astefanutti](https://github.com/astefanutti))
@@ -635,7 +636,6 @@
 - Multiple traits to create a service [\#1061](https://github.com/apache/camel-k/issues/1061)
 - Camel K Operator is not reading the Telegram endpoint API-Key properly. [\#1039](https://github.com/apache/camel-k/issues/1039)
 - No interface for setting the number of pods on which an integration is to be deployed [\#1032](https://github.com/apache/camel-k/issues/1032)
-- Is there a way to co-locate the camel-k-operator, builder and PV in the same node [\#924](https://github.com/apache/camel-k/issues/924)
 - Camel-K build fails with error: open /workspace/builder-656588331/package/context/Dockerfile: no such file or directory [\#923](https://github.com/apache/camel-k/issues/923)
 - Add support for defining the loader to be used by the runtime [\#910](https://github.com/apache/camel-k/issues/910)
 - Support shebang to precise that a file is a Camel-K executable file [\#754](https://github.com/apache/camel-k/issues/754)
@@ -1216,6 +1216,7 @@
 
 - Build completes OK but integration shows ERROR [\#965](https://github.com/apache/camel-k/issues/965)
 - Monitoring kubectl for changes to integrations misses transition to error state [\#937](https://github.com/apache/camel-k/issues/937)
+- Is there a way to co-locate the camel-k-operator, builder and PV in the same node [\#924](https://github.com/apache/camel-k/issues/924)
 - Knative route from AWS S3 endpoint immediatly stops after starting [\#919](https://github.com/apache/camel-k/issues/919)
 - Dev mode doesn't show if the build failed [\#906](https://github.com/apache/camel-k/issues/906)
 - Road Map about Yaml DSL [\#902](https://github.com/apache/camel-k/issues/902)
