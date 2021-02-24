@@ -1,0 +1,1 @@
+{"summary":{"total":2,"passed":2,"failed":0,"skipped":0,"pending":0,"undefined":0},"tests":[{"name":"Running integration using a simple Kamelet with KameletBinding","classname":"kamelet.feature:3"},{"name":"Binding to a HTTP URI should use CloudEvents","classname":"kamelet.feature:7"}]}

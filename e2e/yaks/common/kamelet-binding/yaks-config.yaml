@@ -37,3 +37,5 @@ pre:
     kamel run display.groovy -w -n $YAKS_NAMESPACE
     cat timer-source-binding-display.yaml | sed  's/{namespace}/'"${YAKS_NAMESPACE}"'/' | kubectl apply -n $YAKS_NAMESPACE -f -
     kubectl wait kameletbinding timer-source-binding-display --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
+    kubectl get pods -o yaml -n $YAKS_NAMESPACE
+    kubectl logs -l name=camel-k-operator -n $YAKS_NAMESPACE

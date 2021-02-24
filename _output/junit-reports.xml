@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?><testsuites>
+  <testsuite name="org.citrusframework.yaks.JUnitReport" errors="0" failures="0" skipped="0" tests="2" time="0">
+    <testcase name="Running integration using a simple Kamelet with KameletBinding" classname="kamelet.feature:3" time="0"></testcase>
+    <testcase name="Binding to a HTTP URI should use CloudEvents" classname="kamelet.feature:7" time="0"></testcase>
+  </testsuite>
+</testsuites>
