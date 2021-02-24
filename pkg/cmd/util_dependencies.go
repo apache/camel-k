@@ -71,7 +71,6 @@ func getDependencies(args []string, additionalDependencies []string, repositorie
 			return nil, err
 		}
 	}
-
 	return dependencies, nil
 }
 
@@ -151,14 +150,9 @@ func getTransitiveDependencies(
 		return nil, err
 	}
 
-	content, err := runtime.ComputeQuarkusDependenciesCommon(mc, catalog.Runtime.Version)
-	if err != nil {
-		return nil, err
-	}
-
 	// Compose artifacts list
 	artifacts := []v1.Artifact{}
-	artifacts, err = runtime.ProcessQuarkusTransitiveDependencies(mc, content)
+	artifacts, err = runtime.ProcessQuarkusTransitiveDependencies(mc)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +162,6 @@ func getTransitiveDependencies(
 	for _, entry := range artifacts {
 		transitiveDependencies = append(transitiveDependencies, entry.Location)
 	}
-
 	return transitiveDependencies, nil
 }
 
@@ -413,7 +406,14 @@ func updateIntegrationDependencies(dependencies []string) error {
 
 	// Relocate dependencies files to this integration's dependencies directory
 	for _, dependency := range dependencies {
-		util.CopyFile(dependency, path.Join(util.GetLocalDependenciesDir(), path.Base(dependency)))
+		var targetPath string
+		basePath := util.SubstringFrom(dependency, util.QuarkusDependenciesBaseDirectory)
+		if basePath != "" {
+			targetPath = path.Join(util.GetLocalDependenciesDir(), basePath)
+		} else {
+			targetPath = path.Join(util.GetLocalDependenciesDir(), path.Base(dependency))
+		}
+		util.CopyFile(dependency, targetPath)
 	}
 
 	return nil

@@ -7,7 +7,7 @@ require (
 	github.com/apache/camel-k/pkg/apis/camel v0.0.0
 	github.com/apache/camel-k/pkg/client/camel v0.0.0
 	github.com/apache/camel-k/pkg/kamelet/repository v0.0.0
-	github.com/container-tools/spectrum v0.3.2
+	github.com/container-tools/spectrum v0.3.4
 	github.com/evanphx/json-patch v4.9.0+incompatible
 	github.com/fatih/structs v1.1.0
 	github.com/gertd/go-pluralize v0.1.1
@@ -56,12 +56,12 @@ require (
 
 replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.2+incompatible // Required by OLM
-	k8s.io/client-go => k8s.io/client-go v0.18.9
-	k8s.io/code-generator => k8s.io/code-generator v0.18.9
 	// Required by Service Binding Operator dependency, see https://github.com/redhat-developer/service-binding-operator/pull/798
 	github.com/operator-framework/operator-lifecycle-manager => github.com/operator-framework/operator-lifecycle-manager v0.0.0-20200321030439-57b580e57e88
 	github.com/operator-framework/operator-sdk => github.com/operator-framework/operator-sdk v0.17.1
 	k8s.io/api => k8s.io/api v0.18.9
+	k8s.io/client-go => k8s.io/client-go v0.18.9
+	k8s.io/code-generator => k8s.io/code-generator v0.18.9
 )
 
 replace github.com/docker/docker => github.com/moby/moby v0.7.3-0.20190826074503-38ab9da00309 // Required by Helm

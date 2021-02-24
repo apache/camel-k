@@ -195,7 +195,7 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 			return err
 		}
 
-		// Run integratgion image.
+		// Run integration image.
 		err = runIntegrationImage(command.Context, command.Image, cmd.OutOrStdout(), cmd.ErrOrStderr())
 		if err != nil {
 			return err

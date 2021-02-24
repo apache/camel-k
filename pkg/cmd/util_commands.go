@@ -63,7 +63,7 @@ func assembleIntegrationRunCommand(ctx context.Context, properties []string, dep
 	args := make([]string, 0)
 	args = append(args, "-cp")
 	args = append(args, classpathValue)
-	args = append(args, "io.quarkus.runner.GeneratedMain")
+	args = append(args, "io.quarkus.bootstrap.runner.QuarkusEntryPoint")
 
 	cmd := exec.CommandContext(ctx, javaCmd, args...)
 
@@ -128,7 +128,7 @@ func GetContainerIntegrationRunCommand(ctx context.Context, properties []string,
 
 	// Update property file paths.
 	containerProperties := docker.ContainerizeFilePaths(properties, docker.GetContainerPropertiesDir())
-	containerDependencies := docker.ContainerizeFilePaths(dependencies, docker.GetContainerDependenciesDir())
+	containerDependencies := docker.ContainerizeDependencyPaths(dependencies, docker.GetContainerDependenciesDir())
 	containerRoutes := docker.ContainerizeFilePaths(routes, docker.GetContainerRoutesDir())
 
 	return assembleIntegrationRunCommand(ctx, containerProperties, containerDependencies, containerRoutes, docker.GetContainerPropertiesDir(), stdout, stderr, false)

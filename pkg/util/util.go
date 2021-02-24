@@ -65,6 +65,9 @@ var ContainerRoutesDirectory = "/etc/camel/sources"
 // ContainerResourcesDirectory --
 var ContainerResourcesDirectory = "/etc/camel/resources"
 
+// QuarkusDependenciesBaseDirectory --
+var QuarkusDependenciesBaseDirectory = "/quarkus-app"
+
 // ListOfLazyEvaluatedEnvVars -- List of unevaluated environment variables.
 // These are sensitive values or values that may have different values depending
 // where the integration is run (locally vs. the cloud). These environment variables
@@ -153,6 +156,15 @@ func StringSliceUniqueConcat(slice *[]string, items []string) bool {
 		}
 	}
 	return changed
+}
+
+// SubstringFrom --
+func SubstringFrom(s string, substr string) string {
+	index := strings.Index(s, substr)
+	if index != -1 {
+		return s[index:]
+	}
+	return ""
 }
 
 // EncodeXML --

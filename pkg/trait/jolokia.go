@@ -153,7 +153,7 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 		optionValues[i] = k + "=" + options[k]
 	}
 
-	container.Args = append(container.Args, "-javaagent:dependencies/org.jolokia.jolokia-jvm-1.6.2-agent.jar="+strings.Join(optionValues, ","))
+	container.Args = append(container.Args, "-javaagent:dependencies/lib/main/org.jolokia.jolokia-jvm-1.6.2-agent.jar="+strings.Join(optionValues, ","))
 
 	containerPort := corev1.ContainerPort{
 		Name:          "jolokia",

@@ -51,7 +51,7 @@ func TestApplyJolokiaTraitNominalShouldSucceed(t *testing.T) {
 	assert.NotNil(t, container)
 
 	assert.Equal(t, container.Args, []string{
-		"-javaagent:dependencies/org.jolokia.jolokia-jvm-1.6.2-agent.jar=discoveryEnabled=false,host=*,port=8778",
+		"-javaagent:dependencies/lib/main/org.jolokia.jolokia-jvm-1.6.2-agent.jar=discoveryEnabled=false,host=*,port=8778",
 	})
 
 	assert.Len(t, container.Ports, 1)
@@ -78,7 +78,7 @@ func TestApplyJolokiaTraitForOpenShiftProfileShouldSucceed(t *testing.T) {
 	assert.NotNil(t, container)
 
 	assert.Equal(t, container.Args, []string{
-		"-javaagent:dependencies/org.jolokia.jolokia-jvm-1.6.2-agent.jar=caCert=/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt," +
+		"-javaagent:dependencies/lib/main/org.jolokia.jolokia-jvm-1.6.2-agent.jar=caCert=/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt," +
 			"clientPrincipal.1=cn=system:master-proxy,clientPrincipal.2=cn=hawtio-online.hawtio.svc," +
 			"clientPrincipal.3=cn=fuse-console.fuse.svc,discoveryEnabled=false,extendedClientCheck=true," +
 			"host=*,port=8778,protocol=https,useSslClientAuthentication=true",
@@ -128,7 +128,7 @@ func TestApplyJolokiaTraitWithOptionShouldOverrideDefault(t *testing.T) {
 	container := environment.Resources.GetContainerByName(defaultContainerName)
 
 	assert.Equal(t, container.Args, []string{
-		"-javaagent:dependencies/org.jolokia.jolokia-jvm-1.6.2-agent.jar=caCert=.cacert,clientPrincipal=cn:any," +
+		"-javaagent:dependencies/lib/main/org.jolokia.jolokia-jvm-1.6.2-agent.jar=caCert=.cacert,clientPrincipal=cn:any," +
 			"discoveryEnabled=true,extendedClientCheck=false,host=explicit-host,port=8778,protocol=http," +
 			"useSslClientAuthentication=false",
 	})
