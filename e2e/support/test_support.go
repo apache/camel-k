@@ -744,29 +744,12 @@ func OperatorTryPodForceKill(ns string, timeSeconds int) {
 
 func ScaleOperator(ns string, replicas int32) func() error {
 	return func() error {
-		lst := appsv1.DeploymentList{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Deployment",
-				APIVersion: appsv1.SchemeGroupVersion.String(),
-			},
-		}
-		err := TestClient().List(TestContext, &lst,
-			k8sclient.InNamespace(ns),
-			k8sclient.MatchingLabels{
-				"camel.apache.org/component": "operator",
-			})
+		operator, err := TestClient().AppsV1().Deployments(ns).Get(TestContext, "camel-k-operator", metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
-		if len(lst.Items) == 0 {
-			return errors.New("camel k operator not found")
-		} else if len(lst.Items) > 1 {
-			return errors.New("too many camel k operators")
-		}
-
-		operatorDeployment := lst.Items[0]
-		operatorDeployment.Spec.Replicas = &replicas
-		err = TestClient().Update(TestContext, &operatorDeployment)
+		operator.Spec.Replicas = &replicas
+		_, err = TestClient().AppsV1().Deployments(ns).Update(TestContext,operator, metav1.UpdateOptions{})
 		if err != nil {
 			return err
 		}
