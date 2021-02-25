@@ -636,6 +636,7 @@
 - Multiple traits to create a service [\#1061](https://github.com/apache/camel-k/issues/1061)
 - Camel K Operator is not reading the Telegram endpoint API-Key properly. [\#1039](https://github.com/apache/camel-k/issues/1039)
 - No interface for setting the number of pods on which an integration is to be deployed [\#1032](https://github.com/apache/camel-k/issues/1032)
+- Is there a way to co-locate the camel-k-operator, builder and PV in the same node [\#924](https://github.com/apache/camel-k/issues/924)
 - Camel-K build fails with error: open /workspace/builder-656588331/package/context/Dockerfile: no such file or directory [\#923](https://github.com/apache/camel-k/issues/923)
 - Add support for defining the loader to be used by the runtime [\#910](https://github.com/apache/camel-k/issues/910)
 - Support shebang to precise that a file is a Camel-K executable file [\#754](https://github.com/apache/camel-k/issues/754)
@@ -765,6 +766,7 @@
 - Make cron work on quarkus runtime [\#1460](https://github.com/apache/camel-k/pull/1460) ([nicolaferraro](https://github.com/nicolaferraro))
 - Allow the short syntax in knative endpoints [\#1458](https://github.com/apache/camel-k/pull/1458) ([nicolaferraro](https://github.com/nicolaferraro))
 - Remove unused import package in example [\#1457](https://github.com/apache/camel-k/pull/1457) ([apupier](https://github.com/apupier))
+- information to update the homebrew formula [\#1454](https://github.com/apache/camel-k/pull/1454) ([ipolyzos](https://github.com/ipolyzos))
 
 ## [1.0.0-nightly.202005130003](https://github.com/apache/camel-k/tree/1.0.0-nightly.202005130003) (2020-05-11)
 
@@ -778,7 +780,6 @@
 **Merged pull requests:**
 
 - Fix \#1449: add support for modeline options [\#1455](https://github.com/apache/camel-k/pull/1455) ([nicolaferraro](https://github.com/nicolaferraro))
-- information to update the homebrew formula [\#1454](https://github.com/apache/camel-k/pull/1454) ([ipolyzos](https://github.com/ipolyzos))
 - Fix \#1450: fix servicemonitor roles on direct install [\#1453](https://github.com/apache/camel-k/pull/1453) ([nicolaferraro](https://github.com/nicolaferraro))
 - Helm fix [\#1448](https://github.com/apache/camel-k/pull/1448) ([nicolaferraro](https://github.com/nicolaferraro))
 
@@ -1216,7 +1217,6 @@
 
 - Build completes OK but integration shows ERROR [\#965](https://github.com/apache/camel-k/issues/965)
 - Monitoring kubectl for changes to integrations misses transition to error state [\#937](https://github.com/apache/camel-k/issues/937)
-- Is there a way to co-locate the camel-k-operator, builder and PV in the same node [\#924](https://github.com/apache/camel-k/issues/924)
 - Knative route from AWS S3 endpoint immediatly stops after starting [\#919](https://github.com/apache/camel-k/issues/919)
 - Dev mode doesn't show if the build failed [\#906](https://github.com/apache/camel-k/issues/906)
 - Road Map about Yaml DSL [\#902](https://github.com/apache/camel-k/issues/902)
