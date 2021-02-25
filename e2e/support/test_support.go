@@ -1182,7 +1182,7 @@ func NewTestNamespace(injectKnativeBroker bool) metav1.Object {
 	var oc bool
 	var obj runtime.Object
 
-	brokerLabel := "knative-eventing-injection"
+	brokerLabel := "eventing.knative.dev/injection"
 	name := "test-" + uuid.New().String()
 
 	if oc, err = openshift.IsOpenShift(TestClient()); err != nil {
