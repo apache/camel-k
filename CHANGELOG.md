@@ -1024,7 +1024,6 @@
 - kamel run --wait should return non-zero exit code in case of failure [\#1178](https://github.com/apache/camel-k/pull/1178) ([jamesnetherton](https://github.com/jamesnetherton))
 - Auto detect Camel components via FQN classnames [\#1177](https://github.com/apache/camel-k/pull/1177) ([jamesnetherton](https://github.com/jamesnetherton))
 - chore\(release\): bump version to 1.0.0-RC2-SNAPSHOT [\#1168](https://github.com/apache/camel-k/pull/1168) ([nicolaferraro](https://github.com/nicolaferraro))
-- Upgrade to Runtime 1.0.9 and Kaniko 0.14.0 [\#1167](https://github.com/apache/camel-k/pull/1167) ([nicolaferraro](https://github.com/nicolaferraro))
 - Buildah support [\#1259](https://github.com/apache/camel-k/pull/1259) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.0-RC1](https://github.com/apache/camel-k/tree/1.0.0-RC1) (2019-12-20)
@@ -1046,6 +1045,7 @@
 - Automatically extract trait configuration for user manual [\#1014](https://github.com/apache/camel-k/issues/1014)
 - Cannot set blockOwnerDeletion in this case because cannot find RESTMapping for APIVersion camel.apache.org/v1alpha1 Kind IntegrationKit [\#764](https://github.com/apache/camel-k/issues/764)
 - Error creating integration context with buildStrategy: routine on minikube [\#665](https://github.com/apache/camel-k/issues/665)
+- Kaniko: Add ability to push to on-premise registries [\#613](https://github.com/apache/camel-k/issues/613)
 - \[quarkus\] in JVM mode we should no restrict the languages we can use [\#1154](https://github.com/apache/camel-k/issues/1154)
 - In Kotlin example single quote needs to be replaced with double quotes [\#1145](https://github.com/apache/camel-k/issues/1145)
 - \[gc\] cannot delete collection resource "daemonsets" [\#1140](https://github.com/apache/camel-k/issues/1140)
@@ -1071,6 +1071,7 @@
 
 **Merged pull requests:**
 
+- Upgrade to Runtime 1.0.9 and Kaniko 0.14.0 [\#1167](https://github.com/apache/camel-k/pull/1167) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(CLI\): Cannot set Kaniko cache option [\#1166](https://github.com/apache/camel-k/pull/1166) ([astefanutti](https://github.com/astefanutti))
 - \[quarkus\] in JVM mode we should no restrict the languages we can use [\#1161](https://github.com/apache/camel-k/pull/1161) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#921: Migration to v1 API [\#1160](https://github.com/apache/camel-k/pull/1160) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1530,7 +1531,6 @@
 - FTP producer: Error writig file [\#620](https://github.com/apache/camel-k/issues/620)
 - Kamel binary install on Windows 10 with Minikube [\#619](https://github.com/apache/camel-k/issues/619)
 - Malformed maven project while building context [\#618](https://github.com/apache/camel-k/issues/618)
-- Kaniko: Add ability to push to on-premise registries [\#613](https://github.com/apache/camel-k/issues/613)
 - istio: allow to control annotation sidecar.istio.io/inject [\#609](https://github.com/apache/camel-k/issues/609)
 - allow to configure default configurations on platform [\#608](https://github.com/apache/camel-k/issues/608)
 - Script set-version.sh does not honor the registry/repository settings [\#602](https://github.com/apache/camel-k/issues/602)
