@@ -18,12 +18,10 @@ limitations under the License.
 package apis
 
 import (
-	olmv1 "github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1"
-	olmv1alpha1 "github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1alpha1"
+	scheme "github.com/operator-framework/operator-lifecycle-manager/pkg/api/client/clientset/versioned/scheme"
 )
 
 func init() {
 	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
-	AddToSchemes = append(AddToSchemes, olmv1alpha1.AddToScheme)
-	AddToSchemes = append(AddToSchemes, olmv1.AddToScheme)
+	AddToSchemes = append(AddToSchemes, scheme.AddToScheme)
 }
