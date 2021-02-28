@@ -571,7 +571,6 @@
 - fix for \#1511 [\#1517](https://github.com/apache/camel-k/pull/1517) ([ipolyzos](https://github.com/ipolyzos))
 - CLI - Make kamel run handle github urls that are not raw [\#1515](https://github.com/apache/camel-k/pull/1515) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(release\): bump version to 1.1.0-SNAPSHOT and update OLM/HELM [\#1510](https://github.com/apache/camel-k/pull/1510) ([nicolaferraro](https://github.com/nicolaferraro))
-- feat: Prometheus support for Quarkus based on MicroProfile Metrics [\#1490](https://github.com/apache/camel-k/pull/1490) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.1](https://github.com/apache/camel-k/tree/1.0.1) (2020-06-25)
 
@@ -745,6 +744,7 @@
 - Avoid requirements of a kubeconfig when using  command [\#1493](https://github.com/apache/camel-k/pull/1493) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add tracing trait and automatically discover Jaeger [\#1492](https://github.com/apache/camel-k/pull/1492) ([nicolaferraro](https://github.com/nicolaferraro))
 - support for jitpack dependencies [\#1491](https://github.com/apache/camel-k/pull/1491) ([lburgazzoli](https://github.com/lburgazzoli))
+- feat: Prometheus support for Quarkus based on MicroProfile Metrics [\#1490](https://github.com/apache/camel-k/pull/1490) ([astefanutti](https://github.com/astefanutti))
 - chore\(keys\): update PGP key [\#1488](https://github.com/apache/camel-k/pull/1488) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1396: use circuitbreaker capability from runtime [\#1486](https://github.com/apache/camel-k/pull/1486) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix: Regenerate catalogs with Camel version 3.3.0 [\#1485](https://github.com/apache/camel-k/pull/1485) ([astefanutti](https://github.com/astefanutti))
