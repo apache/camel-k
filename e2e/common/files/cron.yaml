@@ -20,7 +20,7 @@
     from: 
       uri: "cron:tab"
       parameters:
-        schedule: "*+*+*+*+?s"
+        schedule: "*+*+*+*+?"
     steps:
       - set-header:
           name: "m"
