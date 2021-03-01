@@ -25,9 +25,12 @@ import (
 	"strconv"
 	"strings"
 
+	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
@@ -307,6 +310,35 @@ func (e *Environment) getControllerStrategyChoosers() (res []ControllerStrategyS
 		return res[i].ControllerStrategySelectorOrder() < res[j].ControllerStrategySelectorOrder()
 	})
 	return res
+}
+
+// GetIntegrationPodSpec return the Integration Template Pod Specification, regardless of the deployment strategy
+func (e *Environment) GetIntegrationPodSpec() *corev1.PodSpec {
+	// Deployment
+	deployment := e.Resources.GetDeployment(func(d *appsv1.Deployment) bool {
+		return d.Name == e.Integration.Name
+	})
+	if deployment != nil {
+		return &deployment.Spec.Template.Spec
+	}
+
+	// Knative service
+	knativeService := e.Resources.GetKnativeService(func(s *serving.Service) bool {
+		return s.Name == e.Integration.Name
+	})
+	if knativeService != nil {
+		return &knativeService.Spec.Template.Spec.PodSpec
+	}
+
+	// Cronjob
+	cronJob := e.Resources.GetCronJob(func(c *v1beta1.CronJob) bool {
+		return c.Name == e.Integration.Name
+	})
+	if cronJob != nil {
+		return &cronJob.Spec.JobTemplate.Spec.Template.Spec
+	}
+
+	return nil
 }
 
 // DetermineNamespace --

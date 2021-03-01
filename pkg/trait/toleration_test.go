@@ -21,20 +21,14 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 func TestConfigureTolerationTraitMissingTaint(t *testing.T) {
-	environment, _ := createNominalDeploymentTolerationTest()
+	environment, _ := createNominalDeploymentTraitTest()
 	tolerationTrait := createNominalTolerationTrait()
 
 	success, err := tolerationTrait.Configure(environment)
@@ -44,7 +38,7 @@ func TestConfigureTolerationTraitMissingTaint(t *testing.T) {
 }
 
 func TestApplyTolerationTraitMalformedTaint(t *testing.T) {
-	environment, _ := createNominalDeploymentTolerationTest()
+	environment, _ := createNominalDeploymentTraitTest()
 	tolerationTrait := createNominalTolerationTrait()
 	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration-failure")
 
@@ -57,13 +51,13 @@ func TestApplyPodTolerationLabelsDefault(t *testing.T) {
 	tolerationTrait := createNominalTolerationTrait()
 	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration=my-value:NoExecute")
 
-	environment, deployment := createNominalDeploymentTolerationTest()
+	environment, deployment := createNominalDeploymentTraitTest()
 	testApplyPodTolerationLabelsDefault(t, tolerationTrait, environment, &deployment.Spec.Template.Spec.Tolerations)
 
-	environment, knativeService := createNominalKnativeServiceTolerationTest()
+	environment, knativeService := createNominalKnativeServiceTraitTest()
 	testApplyPodTolerationLabelsDefault(t, tolerationTrait, environment, &knativeService.Spec.Template.Spec.Tolerations)
 
-	environment, cronJob := createNominalCronJobTolerationTest()
+	environment, cronJob := createNominalCronJobTraitTest()
 	testApplyPodTolerationLabelsDefault(t, tolerationTrait, environment, &cronJob.Spec.JobTemplate.Spec.Template.Spec.Tolerations)
 }
 
@@ -83,13 +77,13 @@ func TestApplyPodTolerationLabelsTolerationSeconds(t *testing.T) {
 	tolerationTrait := createNominalTolerationTrait()
 	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration:NoExecute:300")
 
-	environment, deployment := createNominalDeploymentTolerationTest()
+	environment, deployment := createNominalDeploymentTraitTest()
 	testApplyPodTolerationLabelsTolerationSeconds(t, tolerationTrait, environment, &deployment.Spec.Template.Spec.Tolerations)
 
-	environment, knativeService := createNominalKnativeServiceTolerationTest()
+	environment, knativeService := createNominalKnativeServiceTraitTest()
 	testApplyPodTolerationLabelsTolerationSeconds(t, tolerationTrait, environment, &knativeService.Spec.Template.Spec.Tolerations)
 
-	environment, cronJob := createNominalCronJobTolerationTest()
+	environment, cronJob := createNominalCronJobTraitTest()
 	testApplyPodTolerationLabelsTolerationSeconds(t, tolerationTrait, environment, &cronJob.Spec.JobTemplate.Spec.Template.Spec.Tolerations)
 }
 
@@ -106,7 +100,7 @@ func testApplyPodTolerationLabelsTolerationSeconds(t *testing.T, trait *tolerati
 }
 
 func TestTolerationValidTaints(t *testing.T) {
-	environment, _ := createNominalDeploymentTolerationTest()
+	environment, _ := createNominalDeploymentTraitTest()
 	tolerationTrait := createNominalTolerationTrait()
 	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration:NoExecute")
 	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration:NoSchedule")
@@ -120,77 +114,6 @@ func TestTolerationValidTaints(t *testing.T) {
 	err := tolerationTrait.Apply(environment)
 
 	assert.Nil(t, err)
-}
-
-func createNominalDeploymentTolerationTest() (*Environment, *appsv1.Deployment) {
-	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "integration-name",
-		},
-		Spec: appsv1.DeploymentSpec{
-			Template: corev1.PodTemplateSpec{},
-		},
-	}
-
-	environment := &Environment{
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "integration-name",
-			},
-			Status: v1.IntegrationStatus{
-				Phase: v1.IntegrationPhaseDeploying,
-			},
-		},
-		Resources: kubernetes.NewCollection(deployment),
-	}
-
-	return environment, deployment
-}
-
-func createNominalKnativeServiceTolerationTest() (*Environment, *serving.Service) {
-	knativeService := &serving.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "integration-name",
-		},
-		Spec: serving.ServiceSpec{},
-	}
-
-	environment := &Environment{
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "integration-name",
-			},
-			Status: v1.IntegrationStatus{
-				Phase: v1.IntegrationPhaseDeploying,
-			},
-		},
-		Resources: kubernetes.NewCollection(knativeService),
-	}
-
-	return environment, knativeService
-}
-
-func createNominalCronJobTolerationTest() (*Environment, *v1beta1.CronJob) {
-	cronJob := &v1beta1.CronJob{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "integration-name",
-		},
-		Spec: v1beta1.CronJobSpec{},
-	}
-
-	environment := &Environment{
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "integration-name",
-			},
-			Status: v1.IntegrationStatus{
-				Phase: v1.IntegrationPhaseDeploying,
-			},
-		},
-		Resources: kubernetes.NewCollection(cronJob),
-	}
-
-	return environment, cronJob
 }
 
 func createNominalTolerationTrait() *tolerationTrait {
