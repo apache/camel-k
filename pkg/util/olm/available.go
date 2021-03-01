@@ -20,12 +20,15 @@ package olm
 import (
 	"context"
 
-	kubernetesutils "github.com/apache/camel-k/pkg/util/kubernetes"
-	olmv1 "github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1"
-	olmv1alpha1 "github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1alpha1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
+
+	operatorsv1 "github.com/operator-framework/api/pkg/operators/v1"
+	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
+	operatorsv1alpha2 "github.com/operator-framework/api/pkg/operators/v1alpha2"
+
+	kubernetesutils "github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 // IsAPIAvailable returns true if we are connected to a cluster with OLM installed
@@ -56,7 +59,8 @@ func isAvailable(c kubernetes.Interface, api schema.GroupVersion) (bool, error) 
 
 func getOLMGroupVersions() []schema.GroupVersion {
 	return []schema.GroupVersion{
-		olmv1alpha1.SchemeGroupVersion,
-		olmv1.SchemeGroupVersion,
+		operatorsv1alpha1.SchemeGroupVersion,
+		operatorsv1alpha2.SchemeGroupVersion,
+		operatorsv1.SchemeGroupVersion,
 	}
 }
