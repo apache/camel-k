@@ -17,7 +17,7 @@ limitations under the License.
 
 package apis
 
-import "github.com/redhat-developer/service-binding-operator/pkg/apis/operators/v1alpha1"
+import "github.com/redhat-developer/service-binding-operator/api/v1alpha1"
 
 func init() {
 	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back

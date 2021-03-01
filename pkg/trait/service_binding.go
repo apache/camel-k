@@ -21,12 +21,15 @@ import (
 	"fmt"
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	sb "github.com/redhat-developer/service-binding-operator/pkg/apis/operators/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	sb "github.com/redhat-developer/service-binding-operator/api/v1alpha1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // The Service Binding trait allows users to connect to Provisioned Services and ServiceBindings in Kubernetes:
@@ -154,7 +157,7 @@ func setCollectionReady(e *Environment, serviceBinding string, status corev1.Con
 func isCollectionReady(sb sb.ServiceBinding) bool {
 	for _, condition := range sb.Status.Conditions {
 		if condition.Type == "CollectionReady" {
-			return condition.Status == corev1.ConditionTrue && sb.Status.Secret != ""
+			return condition.Status == metav1.ConditionTrue && sb.Status.Secret != ""
 		}
 	}
 	return false
@@ -191,14 +194,12 @@ func (t *serviceBindingTrait) parseProvisionedServices(e *Environment) ([]sb.Ser
 		if len(seg) == 3 {
 			namespace = seg[2]
 		}
-		namePrefix := ""
 		service := sb.Service{
 			GroupVersionKind: metav1.GroupVersionKind{
 				Group:   group,
 				Version: version,
 				Kind:    kind,
 			},
-			EnvVarPrefix: &namePrefix,
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: name,
 			},
