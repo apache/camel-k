@@ -27,8 +27,10 @@ import (
 )
 
 // KameletLister helps list Kamelets.
+// All objects returned here must be treated as read-only.
 type KameletLister interface {
 	// List lists all Kamelets in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.Kamelet, err error)
 	// Kamelets returns an object that can list and get Kamelets.
 	Kamelets(namespace string) KameletNamespaceLister
@@ -59,10 +61,13 @@ func (s *kameletLister) Kamelets(namespace string) KameletNamespaceLister {
 }
 
 // KameletNamespaceLister helps list and get Kamelets.
+// All objects returned here must be treated as read-only.
 type KameletNamespaceLister interface {
 	// List lists all Kamelets in the indexer for a given namespace.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.Kamelet, err error)
 	// Get retrieves the Kamelet from the indexer for a given namespace and name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1alpha1.Kamelet, error)
 	KameletNamespaceListerExpansion
 }
