@@ -24,7 +24,7 @@ require (
 	github.com/openshift/api v3.9.1-0.20190927182313-d4a64ec2cbd8+incompatible
 	github.com/operator-framework/api v0.3.20
 	github.com/operator-framework/operator-lib v0.1.0
-	github.com/operator-framework/operator-lifecycle-manager v3.11.0+incompatible
+	github.com/operator-framework/operator-lifecycle-manager v0.17.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.42.1
 	github.com/prometheus/client_golang v1.7.1
@@ -59,7 +59,7 @@ replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.2+incompatible // Required by OLM
 	// Required by Service Binding Operator dependency, see https://github.com/redhat-developer/service-binding-operator/pull/798
 	github.com/operator-framework/operator-lifecycle-manager => github.com/operator-framework/operator-lifecycle-manager v0.17.0
-	github.com/operator-framework/operator-sdk => github.com/operator-framework/operator-sdk v0.17.1
+	github.com/operator-framework/operator-sdk => github.com/operator-framework/operator-sdk v1.0.0
 	k8s.io/api => k8s.io/api v0.18.9
 	k8s.io/client-go => k8s.io/client-go v0.18.9
 	k8s.io/code-generator => k8s.io/code-generator v0.18.9
