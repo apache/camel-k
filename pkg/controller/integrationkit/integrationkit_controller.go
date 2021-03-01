@@ -204,27 +204,31 @@ func (r *reconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcil
 	targetLog := rlog.ForIntegrationKit(target)
 
 	if target.Status.Phase == v1.IntegrationKitPhaseNone || target.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
-		// TODO.... here local...
-		pl, err := platform.GetOrFindLocal(ctx, r.client, target.Namespace, target.Status.Platform, true)
-		if err != nil || pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
-			target.Status.Phase = v1.IntegrationKitPhaseWaitingForPlatform
-		} else {
+		if target.Labels["camel.apache.org/kit.type"] == v1.IntegrationKitTypeExternal {
 			target.Status.Phase = v1.IntegrationKitPhaseInitialization
-		}
-
-		if instance.Status.Phase != target.Status.Phase {
-			if err != nil {
-				target.Status.SetErrorCondition(v1.IntegrationKitConditionPlatformAvailable, v1.IntegrationKitConditionPlatformAvailableReason, err)
-			}
-
-			if pl != nil {
-				target.SetIntegrationPlatform(pl)
-			}
-
 			return r.update(ctx, &instance, target)
-		}
+		} else {
+			// Platform is always local to the kit
+			pl, err := platform.GetOrFindLocal(ctx, r.client, target.Namespace, target.Status.Platform, true)
+			if err != nil || pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
+				target.Status.Phase = v1.IntegrationKitPhaseWaitingForPlatform
+			} else {
+				target.Status.Phase = v1.IntegrationKitPhaseInitialization
+			}
 
-		return reconcile.Result{}, err
+			if instance.Status.Phase != target.Status.Phase {
+				if err != nil {
+					target.Status.SetErrorCondition(v1.IntegrationKitConditionPlatformAvailable, v1.IntegrationKitConditionPlatformAvailableReason, err)
+				}
+
+				if pl != nil {
+					target.SetIntegrationPlatform(pl)
+				}
+
+				return r.update(ctx, &instance, target)
+			}
+			return reconcile.Result{}, err
+		}
 	}
 
 	actions := []Action{

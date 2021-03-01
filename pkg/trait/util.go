@@ -41,15 +41,13 @@ var exactVersionRegexp = regexp.MustCompile(`^(\d+)\.(\d+)\.([\w-.]+)$`)
 
 // GetIntegrationKit retrieves the kit set on the integration
 func GetIntegrationKit(ctx context.Context, c client.Client, integration *v1.Integration) (*v1.IntegrationKit, error) {
-	if integration.Status.Kit == "" {
+	if integration.Status.IntegrationKit == nil {
 		return nil, nil
 	}
-
-	name := integration.Status.Kit
-	kit := v1.NewIntegrationKit(integration.GetIntegrationKitNamespace(), name)
+	kit := v1.NewIntegrationKit(integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name)
 	key := k8sclient.ObjectKey{
-		Namespace: integration.GetIntegrationKitNamespace(),
-		Name:      name,
+		Namespace: integration.Status.IntegrationKit.Namespace,
+		Name:      integration.Status.IntegrationKit.Name,
 	}
 	err := c.Get(ctx, key, &kit)
 	return &kit, err

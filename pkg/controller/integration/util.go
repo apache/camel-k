@@ -21,7 +21,9 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/pkg/errors"
+	k8errors "k8s.io/apimachinery/pkg/api/errors"
 
 	"k8s.io/apimachinery/pkg/selection"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -34,17 +36,22 @@ import (
 
 // LookupKitForIntegration --
 func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integration *v1.Integration) (*v1.IntegrationKit, error) {
-	if integration.Status.Kit != "" {
-		kit, err := kubernetes.GetIntegrationKit(ctx, c, integration.Status.Kit, integration.GetIntegrationKitNamespace())
+	if integration.Status.IntegrationKit != nil {
+		kit, err := kubernetes.GetIntegrationKit(ctx, c, integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
 		if err != nil {
-			return nil, errors.Wrapf(err, "unable to find integration kit %s/%s, %s", integration.GetIntegrationKitNamespace(), integration.Status.Kit, err)
+			return nil, errors.Wrapf(err, "unable to find integration kit %s/%s, %s", integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
 		}
 
 		return kit, nil
 	}
 
+	pl, err := platform.GetCurrent(ctx, c, integration.Namespace)
+	if err != nil && !k8errors.IsNotFound(err) {
+		return nil, err
+	}
+
 	options := []k8sclient.ListOption{
-		k8sclient.InNamespace(integration.GetIntegrationKitNamespace()),
+		k8sclient.InNamespace(integration.GetIntegrationKitNamespace(pl)),
 		k8sclient.MatchingLabels{
 			"camel.apache.org/runtime.version":  integration.Status.RuntimeVersion,
 			"camel.apache.org/runtime.provider": string(integration.Status.RuntimeProvider),

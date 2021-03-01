@@ -93,7 +93,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 				}
 			}
 			isOperatorGlobal := platform.IsCurrentOperatorGlobal()
-			isKitExternal := e.Integration.GetIntegrationKitNamespace() != e.Integration.Namespace
+			isKitExternal := e.Integration.GetIntegrationKitNamespace(e.Platform) != e.Integration.Namespace
 			needsDelegation := isOpenshift && isOperatorGlobal && isKitExternal
 			t.ImagePullerDelegation = &needsDelegation
 		}
@@ -136,7 +136,7 @@ func (t *pullSecretTrait) newImagePullerRoleBinding(e *Environment) *rbacv1.Role
 	}
 	return &rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: e.Integration.GetIntegrationKitNamespace(),
+			Namespace: e.Integration.GetIntegrationKitNamespace(e.Platform),
 			Name:      fmt.Sprintf("camel-k-puller-%s", e.Integration.Namespace),
 		},
 		RoleRef: rbacv1.RoleRef{
