@@ -21,7 +21,6 @@ require (
 	github.com/openshift/api v3.9.1-0.20190927182313-d4a64ec2cbd8+incompatible
 	github.com/operator-framework/api v0.3.12
 	github.com/operator-framework/operator-lib v0.1.0
-	github.com/operator-framework/operator-lifecycle-manager v0.0.0-20200903182547-fddbf04ca175
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.42.1
 	github.com/radovskyb/watcher v1.0.6
@@ -51,7 +50,6 @@ require (
 
 replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.2+incompatible // Required by OLM
-	github.com/operator-framework/operator-lifecycle-manager v0.0.0-20200321030439-57b580e57e88 => github.com/operator-framework/operator-lifecycle-manager v0.0.0-20200903182547
 	k8s.io/client-go => k8s.io/client-go v0.18.9
 	k8s.io/code-generator => k8s.io/code-generator v0.18.9
 )
