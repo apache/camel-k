@@ -19,7 +19,6 @@ package integration
 
 import (
 	"context"
-	"reflect"
 
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
@@ -38,7 +37,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	sb "github.com/redhat-developer/service-binding-operator/pkg/apis/operators/v1alpha1"
+	sb "github.com/redhat-developer/service-binding-operator/api/v1alpha1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
@@ -222,11 +221,11 @@ func add(mgr manager.Manager, r reconcile.Reconciler, c client.Client) error {
 	}
 
 	// Check the ServiceBinding CRD is present
-	if ok, err := kubernetes.IsAPIResourceInstalled(c, sb.SchemeGroupVersion.String(), reflect.TypeOf(sb.ServiceBinding{}).Name()); err != nil {
+	if ok, err := kubernetes.IsAPIResourceInstalled(c, sb.GroupVersion.String(), sb.GroupVersionKind.Kind); err != nil {
 		return err
 	} else if !ok {
 		log.Info("Service binding is disabled, install the Service Binding Operator if needed")
-	} else if ok, err := kubernetes.CheckPermission(context.TODO(), c, sb.SchemeGroupVersion.Group, "servicebindings", platform.GetOperatorWatchNamespace(), "", "create"); err != nil {
+	} else if ok, err := kubernetes.CheckPermission(context.TODO(), c, sb.GroupVersion.Group, sb.GroupVersionResource.Resource, platform.GetOperatorWatchNamespace(), "", "create"); err != nil {
 		return err
 	} else if !ok {
 		log.Info("Service binding is disabled, the operator is not granted permission to create ServiceBindings!")
