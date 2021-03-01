@@ -22,10 +22,7 @@ import (
 	"regexp"
 	"strconv"
 
-	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
@@ -74,46 +71,14 @@ func (t *tolerationTrait) Apply(e *Environment) (err error) {
 	if err != nil {
 		return err
 	}
-	var specTolerations *[]corev1.Toleration
-	found := false
-
-	// Deployment
-	deployment := e.Resources.GetDeployment(func(d *appsv1.Deployment) bool {
-		return d.Name == e.Integration.Name
-	})
-	if deployment != nil {
-		specTolerations = &deployment.Spec.Template.Spec.Tolerations
-		found = true
-	}
-
-	// Knative service
-	if !found {
-		knativeService := e.Resources.GetKnativeService(func(s *serving.Service) bool {
-			return s.Name == e.Integration.Name
-		})
-		if knativeService != nil {
-			specTolerations = &knativeService.Spec.Template.Spec.Tolerations
-			found = true
-		}
-	}
-
-	// Cronjob
-	if !found {
-		cronJob := e.Resources.GetCronJob(func(c *v1beta1.CronJob) bool {
-			return c.Name == e.Integration.Name
-		})
-		if cronJob != nil {
-			specTolerations = &cronJob.Spec.JobTemplate.Spec.Template.Spec.Tolerations
-			found = true
-		}
-	}
+	podSpec := e.GetIntegrationPodSpec()
 
 	// Add the toleration
-	if found {
-		if *specTolerations == nil {
-			*specTolerations = make([]corev1.Toleration, 0)
+	if podSpec != nil {
+		if podSpec.Tolerations == nil {
+			podSpec.Tolerations = make([]corev1.Toleration, 0)
 		}
-		*specTolerations = append(*specTolerations, tolerations...)
+		podSpec.Tolerations = append(podSpec.Tolerations, tolerations...)
 	}
 
 	return nil
