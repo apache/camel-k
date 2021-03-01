@@ -976,12 +976,6 @@ github.com/operator-framework/api v0.3.12 h1:In6bSbDr5zVOb5ats7TBMnl1h0hCIjkAxXk
 github.com/operator-framework/api v0.3.12/go.mod h1:Xbje9x0SHmh0nihE21kpesB38vk3cyxnE6JdDS8Jo1Q=
 github.com/operator-framework/operator-lib v0.1.0 h1:7Qy6v2ZccvCeFLWEkrGnN+U+DkaeIWp0gAZaBM9T3DI=
 github.com/operator-framework/operator-lib v0.1.0/go.mod h1:HLw61JTIEeq0YLeVf4dwYx/zt4DmLGZUVWI1y3Lf5Hg=
-github.com/operator-framework/operator-lifecycle-manager v0.0.0-20200321030439-57b580e57e88 h1:ByKBik0i2aTEr7iKdSCmUGULydHwr6hA0h4INv9LkSA=
-github.com/operator-framework/operator-lifecycle-manager v0.0.0-20200321030439-57b580e57e88/go.mod h1:7Ut8p9jJ8C6RZyyhZfZypmlibCIJwK5Wcc+WZDgLkOA=
-github.com/operator-framework/operator-lifecycle-manager v0.0.0-20200903182547-fddbf04ca175 h1:5hEYbs/U3ZzAiGrxsbvj+IMtXaGUV2hwDnZFBhGKKTc=
-github.com/operator-framework/operator-lifecycle-manager v0.0.0-20200903182547-fddbf04ca175/go.mod h1:UwsM5sJtJBZHeBsRfRX+u4TqygcAm6ut90nCFJRe4wQ=
-github.com/operator-framework/operator-registry v1.5.3/go.mod h1:agrQlkWOo1q8U1SAaLSS2WQ+Z9vswNT2M2HFib9iuLY=
-github.com/operator-framework/operator-registry v1.6.1/go.mod h1:sx4wWMiZtYhlUiaKscg3QQUPPM/c1bkrAs4n4KipDb4=
 github.com/operator-framework/operator-registry v1.13.6/go.mod h1:YhnIzOVjRU2ZwZtzt+fjcjW8ujJaSFynBEu7QVKaSdU=
 github.com/otiai10/copy v1.0.1/go.mod h1:8bMCJrAqOtN/d9oyh5HR7HhLQMvcGMpGdwRDYsfOCHc=
 github.com/otiai10/copy v1.0.2/go.mod h1:c7RpqBkwMom4bYTSkLSym4VSJz/XtncWRAj/J4PEIMY=
