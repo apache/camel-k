@@ -27,8 +27,10 @@ import (
 )
 
 // IntegrationKitLister helps list IntegrationKits.
+// All objects returned here must be treated as read-only.
 type IntegrationKitLister interface {
 	// List lists all IntegrationKits in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1.IntegrationKit, err error)
 	// IntegrationKits returns an object that can list and get IntegrationKits.
 	IntegrationKits(namespace string) IntegrationKitNamespaceLister
@@ -59,10 +61,13 @@ func (s *integrationKitLister) IntegrationKits(namespace string) IntegrationKitN
 }
 
 // IntegrationKitNamespaceLister helps list and get IntegrationKits.
+// All objects returned here must be treated as read-only.
 type IntegrationKitNamespaceLister interface {
 	// List lists all IntegrationKits in the indexer for a given namespace.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1.IntegrationKit, err error)
 	// Get retrieves the IntegrationKit from the indexer for a given namespace and name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1.IntegrationKit, error)
 	IntegrationKitNamespaceListerExpansion
 }

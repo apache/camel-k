@@ -27,8 +27,10 @@ import (
 )
 
 // CamelCatalogLister helps list CamelCatalogs.
+// All objects returned here must be treated as read-only.
 type CamelCatalogLister interface {
 	// List lists all CamelCatalogs in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1.CamelCatalog, err error)
 	// CamelCatalogs returns an object that can list and get CamelCatalogs.
 	CamelCatalogs(namespace string) CamelCatalogNamespaceLister
@@ -59,10 +61,13 @@ func (s *camelCatalogLister) CamelCatalogs(namespace string) CamelCatalogNamespa
 }
 
 // CamelCatalogNamespaceLister helps list and get CamelCatalogs.
+// All objects returned here must be treated as read-only.
 type CamelCatalogNamespaceLister interface {
 	// List lists all CamelCatalogs in the indexer for a given namespace.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1.CamelCatalog, err error)
 	// Get retrieves the CamelCatalog from the indexer for a given namespace and name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1.CamelCatalog, error)
 	CamelCatalogNamespaceListerExpansion
 }

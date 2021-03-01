@@ -27,8 +27,10 @@ import (
 )
 
 // KameletBindingLister helps list KameletBindings.
+// All objects returned here must be treated as read-only.
 type KameletBindingLister interface {
 	// List lists all KameletBindings in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.KameletBinding, err error)
 	// KameletBindings returns an object that can list and get KameletBindings.
 	KameletBindings(namespace string) KameletBindingNamespaceLister
@@ -59,10 +61,13 @@ func (s *kameletBindingLister) KameletBindings(namespace string) KameletBindingN
 }
 
 // KameletBindingNamespaceLister helps list and get KameletBindings.
+// All objects returned here must be treated as read-only.
 type KameletBindingNamespaceLister interface {
 	// List lists all KameletBindings in the indexer for a given namespace.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.KameletBinding, err error)
 	// Get retrieves the KameletBinding from the indexer for a given namespace and name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1alpha1.KameletBinding, error)
 	KameletBindingNamespaceListerExpansion
 }

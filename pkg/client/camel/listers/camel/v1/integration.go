@@ -27,8 +27,10 @@ import (
 )
 
 // IntegrationLister helps list Integrations.
+// All objects returned here must be treated as read-only.
 type IntegrationLister interface {
 	// List lists all Integrations in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1.Integration, err error)
 	// Integrations returns an object that can list and get Integrations.
 	Integrations(namespace string) IntegrationNamespaceLister
@@ -59,10 +61,13 @@ func (s *integrationLister) Integrations(namespace string) IntegrationNamespaceL
 }
 
 // IntegrationNamespaceLister helps list and get Integrations.
+// All objects returned here must be treated as read-only.
 type IntegrationNamespaceLister interface {
 	// List lists all Integrations in the indexer for a given namespace.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1.Integration, err error)
 	// Get retrieves the Integration from the indexer for a given namespace and name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1.Integration, error)
 	IntegrationNamespaceListerExpansion
 }
