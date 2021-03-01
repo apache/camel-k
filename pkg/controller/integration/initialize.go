@@ -20,6 +20,9 @@ package integration
 import (
 	"context"
 
+	"github.com/apache/camel-k/pkg/platform"
+	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -52,10 +55,33 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 		return nil, err
 	}
 
-	kit := v1.NewIntegrationKit(integration.GetIntegrationKitNamespace(), integration.Spec.Kit)
+	if integration.Spec.IntegrationKit == nil && integration.Spec.Kit != "" {
+		// TODO: temporary fallback until deprecated field gets removed
+		integration.Spec.IntegrationKit = &corev1.ObjectReference{
+			Name: integration.Spec.Kit,
+		}
+	}
+
+	if integration.Spec.IntegrationKit != nil && integration.Spec.IntegrationKit.Name != "" {
+		kitNamespace := integration.Spec.IntegrationKit.Namespace
+		kitName := integration.Spec.IntegrationKit.Name
+
+		if kitNamespace == "" {
+			pl, err := platform.GetCurrent(ctx, action.client, integration.Namespace)
+			if err != nil && !k8serrors.IsNotFound(err) {
+				return nil, err
+			}
+			if pl != nil {
+				kitNamespace = pl.Namespace
+			}
+		}
+		kit := v1.NewIntegrationKit(kitNamespace, kitName)
+		integration.SetIntegrationKit(&kit)
+	} else {
+		integration.Status.IntegrationKit = nil
+	}
 
 	integration.Status.Phase = v1.IntegrationPhaseBuildingKit
-	integration.SetIntegrationKit(&kit)
 	integration.Status.Version = defaults.Version
 	if timestamp := integration.Status.InitializationTimestamp; timestamp == nil || timestamp.IsZero() {
 		now := metav1.Now()

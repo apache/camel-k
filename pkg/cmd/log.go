@@ -142,7 +142,7 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 			// the associated Integration Kit's progress
 			//
 			newLogMsg = fmt.Sprintf("The building kit for integration '%s' is being initialised. This may take some time ...", integrationId)
-			if integration.Status.Kit == "" {
+			if integration.Status.IntegrationKit == nil {
 				//
 				// Not created yet so wait quietly
 				//
@@ -155,13 +155,13 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 					APIVersion: v1.SchemeGroupVersion.String(),
 				},
 				ObjectMeta: metav1.ObjectMeta{
-					Namespace: o.Namespace,
-					Name:      integration.Status.Kit,
+					Namespace: integration.Status.IntegrationKit.Namespace,
+					Name:      integration.Status.IntegrationKit.Name,
 				},
 			}
 			ikKey := k8sclient.ObjectKey{
-				Namespace: o.Namespace,
-				Name:      integration.Status.Kit,
+				Namespace: integration.Status.IntegrationKit.Namespace,
+				Name:      integration.Status.IntegrationKit.Name,
 			}
 
 			//

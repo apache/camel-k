@@ -27,40 +27,43 @@ import (
 
 // IntegrationSpec defines the desired state of Integration
 type IntegrationSpec struct {
-	Replicas           *int32               `json:"replicas,omitempty"`
-	Sources            []SourceSpec         `json:"sources,omitempty"`
-	Flows              []Flow               `json:"flows,omitempty"`
-	Resources          []ResourceSpec       `json:"resources,omitempty"`
-	Kit                string               `json:"kit,omitempty"`
-	Dependencies       []string             `json:"dependencies,omitempty"`
-	Profile            TraitProfile         `json:"profile,omitempty"`
-	Traits             map[string]TraitSpec `json:"traits,omitempty"`
-	Configuration      []ConfigurationSpec  `json:"configuration,omitempty"`
-	Repositories       []string             `json:"repositories,omitempty"`
-	ServiceAccountName string               `json:"serviceAccountName,omitempty"`
+	Replicas  *int32         `json:"replicas,omitempty"`
+	Sources   []SourceSpec   `json:"sources,omitempty"`
+	Flows     []Flow         `json:"flows,omitempty"`
+	Resources []ResourceSpec `json:"resources,omitempty"`
+	// Deprecated: use the IntegrationKit field
+	Kit                string                  `json:"kit,omitempty"`
+	IntegrationKit     *corev1.ObjectReference `json:"integrationKit,omitempty"`
+	Dependencies       []string                `json:"dependencies,omitempty"`
+	Profile            TraitProfile            `json:"profile,omitempty"`
+	Traits             map[string]TraitSpec    `json:"traits,omitempty"`
+	Configuration      []ConfigurationSpec     `json:"configuration,omitempty"`
+	Repositories       []string                `json:"repositories,omitempty"`
+	ServiceAccountName string                  `json:"serviceAccountName,omitempty"`
 }
 
 // IntegrationStatus defines the observed state of Integration
 type IntegrationStatus struct {
-	Phase              IntegrationPhase       `json:"phase,omitempty"`
-	Digest             string                 `json:"digest,omitempty"`
-	Image              string                 `json:"image,omitempty"`
-	Dependencies       []string               `json:"dependencies,omitempty"`
-	Profile            TraitProfile           `json:"profile,omitempty"`
-	Kit                string                 `json:"kit,omitempty"`
-	PlatformNamespace  string                 `json:"platformNamespace,omitempty"`
-	Platform           string                 `json:"platform,omitempty"`
-	GeneratedSources   []SourceSpec           `json:"generatedSources,omitempty"`
-	GeneratedResources []ResourceSpec         `json:"generatedResources,omitempty"`
-	Failure            *Failure               `json:"failure,omitempty"`
-	RuntimeVersion     string                 `json:"runtimeVersion,omitempty"`
-	RuntimeProvider    RuntimeProvider        `json:"runtimeProvider,omitempty"`
-	Configuration      []ConfigurationSpec    `json:"configuration,omitempty"`
-	Conditions         []IntegrationCondition `json:"conditions,omitempty"`
-	Version            string                 `json:"version,omitempty"`
-	Replicas           *int32                 `json:"replicas,omitempty"`
-	Selector           string                 `json:"selector,omitempty"`
-	Capabilities       []string               `json:"capabilities,omitempty"`
+	Phase        IntegrationPhase `json:"phase,omitempty"`
+	Digest       string           `json:"digest,omitempty"`
+	Image        string           `json:"image,omitempty"`
+	Dependencies []string         `json:"dependencies,omitempty"`
+	Profile      TraitProfile     `json:"profile,omitempty"`
+	// Deprecated: use the IntegrationKit field
+	Kit                string                  `json:"kit,omitempty"`
+	IntegrationKit     *corev1.ObjectReference `json:"integrationKit,omitempty"`
+	Platform           string                  `json:"platform,omitempty"`
+	GeneratedSources   []SourceSpec            `json:"generatedSources,omitempty"`
+	GeneratedResources []ResourceSpec          `json:"generatedResources,omitempty"`
+	Failure            *Failure                `json:"failure,omitempty"`
+	RuntimeVersion     string                  `json:"runtimeVersion,omitempty"`
+	RuntimeProvider    RuntimeProvider         `json:"runtimeProvider,omitempty"`
+	Configuration      []ConfigurationSpec     `json:"configuration,omitempty"`
+	Conditions         []IntegrationCondition  `json:"conditions,omitempty"`
+	Version            string                  `json:"version,omitempty"`
+	Replicas           *int32                  `json:"replicas,omitempty"`
+	Selector           string                  `json:"selector,omitempty"`
+	Capabilities       []string                `json:"capabilities,omitempty"`
 	// The timestamp representing the last time when this integration was initialized.
 	InitializationTimestamp *metav1.Time `json:"lastInitTimestamp,omitempty"`
 }
@@ -74,7 +77,7 @@ type IntegrationStatus struct {
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.selector
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration phase"
-// +kubebuilder:printcolumn:name="Kit",type=string,JSONPath=`.status.kit`,description="The integration kit"
+// +kubebuilder:printcolumn:name="Kit",type=string,JSONPath=`.status.integrationKit.name`,description="The integration kit"
 // +kubebuilder:printcolumn:name="Replicas",type=integer,JSONPath=`.status.replicas`,description="The number of pods"
 
 // Integration is the Schema for the integrations API

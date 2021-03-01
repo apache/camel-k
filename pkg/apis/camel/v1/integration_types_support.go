@@ -259,7 +259,6 @@ func (in *Integration) SetIntegrationPlatform(platform *IntegrationPlatform) {
 	}
 
 	in.Status.SetCondition(IntegrationConditionPlatformAvailable, cs, IntegrationConditionPlatformAvailableReason, platform.Namespace+"/"+platform.Name)
-	in.Status.PlatformNamespace = platform.Namespace
 	in.Status.Platform = platform.Name
 }
 
@@ -277,14 +276,23 @@ func (in *Integration) SetIntegrationKit(kit *IntegrationKit) {
 	}
 
 	in.Status.SetCondition(IntegrationConditionKitAvailable, cs, IntegrationConditionKitAvailableReason, message)
-	in.Status.Kit = kit.Name
+	in.Status.IntegrationKit = &corev1.ObjectReference{
+		Namespace: kit.Namespace,
+		Name:      kit.Name,
+	}
 	in.Status.Image = kit.Status.Image
 }
 
-// SetIntegrationKit --
-func (in *Integration) GetIntegrationKitNamespace() string {
-	if in.Status.PlatformNamespace != "" {
-		return in.Status.PlatformNamespace
+// GetIntegrationKitNamespace --
+func (in *Integration) GetIntegrationKitNamespace(p *IntegrationPlatform) string {
+	if in.Status.IntegrationKit != nil && in.Status.IntegrationKit.Namespace != "" {
+		return in.Status.IntegrationKit.Namespace
+	}
+	if in.Spec.IntegrationKit != nil && in.Spec.IntegrationKit.Namespace != "" {
+		return in.Spec.IntegrationKit.Namespace
+	}
+	if p != nil {
+		return p.Namespace
 	}
 	return in.Namespace
 }

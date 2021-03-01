@@ -439,6 +439,14 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 		return nil, errors.New("unable to determine integration name")
 	}
 
+	var integrationKit *corev1.ObjectReference
+	if o.IntegrationKit != "" {
+		integrationKit = &corev1.ObjectReference{
+			Namespace: namespace,
+			Name:      o.IntegrationKit,
+		}
+	}
+
 	integration := v1.Integration{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       v1.IntegrationKind,
@@ -449,11 +457,11 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 			Name:      name,
 		},
 		Spec: v1.IntegrationSpec{
-			Dependencies:  make([]string, 0, len(o.Dependencies)),
-			Kit:           o.IntegrationKit,
-			Configuration: make([]v1.ConfigurationSpec, 0),
-			Repositories:  o.Repositories,
-			Profile:       v1.TraitProfileByName(o.Profile),
+			Dependencies:   make([]string, 0, len(o.Dependencies)),
+			IntegrationKit: integrationKit,
+			Configuration:  make([]v1.ConfigurationSpec, 0),
+			Repositories:   o.Repositories,
+			Profile:        v1.TraitProfileByName(o.Profile),
 		},
 	}
 

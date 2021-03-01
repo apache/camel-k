@@ -461,7 +461,10 @@ func IntegrationKit(ns string, name string) func() string {
 		if it == nil {
 			return ""
 		}
-		return it.Status.Kit
+		if it.Status.IntegrationKit == nil {
+			return ""
+		}
+		return it.Status.IntegrationKit.Name
 	}
 }
 

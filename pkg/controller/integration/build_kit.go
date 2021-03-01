@@ -22,9 +22,11 @@ import (
 	"fmt"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/rs/xid"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 // NewBuildKitAction create an action that handles integration kit build
@@ -92,7 +94,7 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 			return integration, nil
 		}
 
-		if integration.Status.Kit == "" {
+		if integration.Status.IntegrationKit == nil || integration.Status.IntegrationKit.Name == "" {
 			integration.SetIntegrationKit(kit)
 
 			return integration, nil
@@ -101,8 +103,13 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 		return nil, nil
 	}
 
+	pl, err := platform.GetCurrent(ctx, action.client, integration.Namespace)
+	if err != nil && !k8serrors.IsNotFound(err) {
+		return nil, err
+	}
+
 	platformKitName := fmt.Sprintf("kit-%s", xid.New())
-	platformKit := v1.NewIntegrationKit(integration.GetIntegrationKitNamespace(), platformKitName)
+	platformKit := v1.NewIntegrationKit(integration.GetIntegrationKitNamespace(pl), platformKitName)
 
 	// Add some information for post-processing, this may need to be refactored
 	// to a proper data structure

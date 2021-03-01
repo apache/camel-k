@@ -70,23 +70,27 @@ func (t *jvmTrait) Configure(e *Environment) (bool, error) {
 func (t *jvmTrait) Apply(e *Environment) error {
 	kit := e.IntegrationKit
 
-	if kit == nil && e.Integration.Status.Kit != "" {
-		name := e.Integration.Status.Kit
-		k := v1.NewIntegrationKit(e.Integration.Namespace, name)
+	if kit == nil && e.Integration.Status.IntegrationKit != nil {
+		name := e.Integration.Status.IntegrationKit.Name
+		ns := e.Integration.GetIntegrationKitNamespace(e.Platform)
+		k := v1.NewIntegrationKit(ns, name)
 		key := k8sclient.ObjectKey{
-			Namespace: e.Integration.Namespace,
+			Namespace: ns,
 			Name:      name,
 		}
 
 		if err := t.Client.Get(t.Ctx, key, &k); err != nil {
-			return errors.Wrapf(err, "unable to find integration kit %s, %s", name, err)
+			return errors.Wrapf(err, "unable to find integration kit %s/%s, %s", ns, name, err)
 		}
 
 		kit = &k
 	}
 
 	if kit == nil {
-		return fmt.Errorf("unable to find integration kit %s", e.Integration.Status.Kit)
+		if e.Integration.Status.IntegrationKit != nil {
+			return fmt.Errorf("unable to find integration kit %s/%s", e.Integration.GetIntegrationKitNamespace(e.Platform), e.Integration.Status.IntegrationKit.Name)
+		}
+		return fmt.Errorf("unable to find integration kit for integration %s", e.Integration.Name)
 	}
 
 	classpath := strset.New()

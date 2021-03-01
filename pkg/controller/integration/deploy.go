@@ -44,13 +44,13 @@ func (action *deployAction) CanHandle(integration *v1.Integration) bool {
 }
 
 func (action *deployAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
-	if integration.Status.Kit == "" {
+	if integration.Status.IntegrationKit == nil {
 		return nil, errors.Errorf("no kit set on integration %s", integration.Name)
 	}
 
-	kit, err := kubernetes.GetIntegrationKit(ctx, action.client, integration.Status.Kit, integration.GetIntegrationKitNamespace())
+	kit, err := kubernetes.GetIntegrationKit(ctx, action.client, integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to find integration kit %s, %s", integration.Status.Kit, err)
+		return nil, errors.Wrapf(err, "unable to find integration kit %s/%s, %s", integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
 	}
 
 	_, err = trait.Apply(ctx, action.client, integration, kit)

@@ -81,7 +81,12 @@ func (o *getCmdOptions) run(cmd *cobra.Command, args []string) error {
 	w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 8, 1, '\t', 0)
 	fmt.Fprintln(w, "NAME\tPHASE\tKIT")
 	for _, integration := range integrationList.Items {
-		fmt.Fprintf(w, "%s\t%s\t%s\n", integration.Name, string(integration.Status.Phase), integration.Status.Kit)
+		kit := ""
+		if integration.Status.IntegrationKit != nil {
+			ns := integration.GetIntegrationKitNamespace(nil)
+			kit = fmt.Sprintf("%s/%s", ns, integration.Status.IntegrationKit.Name)
+		}
+		fmt.Fprintf(w, "%s\t%s\t%s\n", integration.Name, string(integration.Status.Phase), kit)
 	}
 	w.Flush()
 

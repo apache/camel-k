@@ -1145,6 +1145,11 @@ func (in *IntegrationSpec) DeepCopyInto(out *IntegrationSpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.IntegrationKit != nil {
+		in, out := &in.IntegrationKit, &out.IntegrationKit
+		*out = new(corev1.ObjectReference)
+		**out = **in
+	}
 	if in.Dependencies != nil {
 		in, out := &in.Dependencies, &out.Dependencies
 		*out = make([]string, len(*in))
@@ -1186,6 +1191,11 @@ func (in *IntegrationStatus) DeepCopyInto(out *IntegrationStatus) {
 		in, out := &in.Dependencies, &out.Dependencies
 		*out = make([]string, len(*in))
 		copy(*out, *in)
+	}
+	if in.IntegrationKit != nil {
+		in, out := &in.IntegrationKit, &out.IntegrationKit
+		*out = new(corev1.ObjectReference)
+		**out = **in
 	}
 	if in.GeneratedSources != nil {
 		in, out := &in.GeneratedSources, &out.GeneratedSources

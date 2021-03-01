@@ -101,7 +101,12 @@ func (command *describeIntegrationCommandOptions) describeIntegration(i v1.Integ
 
 		w.Write(0, "Phase:\t%s\n", i.Status.Phase)
 		w.Write(0, "Runtime Version:\t%s\n", i.Status.RuntimeVersion)
-		w.Write(0, "Kit:\t%s\n", i.Status.Kit)
+		kit := ""
+		if i.Status.IntegrationKit != nil {
+			ns := i.GetIntegrationKitNamespace(nil)
+			kit = fmt.Sprintf("%s/%s", ns, i.Status.IntegrationKit.Name)
+		}
+		w.Write(0, "Kit:\t%s\n", kit)
 		w.Write(0, "Image:\t%s\n", i.Status.Image)
 		w.Write(0, "Version:\t%s\n", i.Status.Version)
 
