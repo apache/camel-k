@@ -54,6 +54,10 @@ require (
 	sigs.k8s.io/controller-runtime v0.6.4
 )
 
+// To be removed when upgrading to controller-runtime 0.7+
+// See: https://github.com/kubernetes-sigs/controller-runtime/pull/1238
+replace sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.6.3
+
 replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.2+incompatible // Required by client-go Azure plugin
 	k8s.io/client-go => k8s.io/client-go v0.19.8
