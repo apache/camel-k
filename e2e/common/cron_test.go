@@ -37,7 +37,7 @@ func TestRunCronExample(t *testing.T) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		t.Run("cron", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/cron.groovy").Execute()).To(Succeed())
+			Expect(Kamel("run", "-n", ns, "files/cron.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationCronJob(ns, "cron"), TestTimeoutMedium).ShouldNot(BeNil())
 			Eventually(IntegrationCondition(ns, "cron", camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "cron"), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
@@ -45,7 +45,7 @@ func TestRunCronExample(t *testing.T) {
 		})
 
 		t.Run("cron-timer", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/cron-timer.groovy").Execute()).To(Succeed())
+			Expect(Kamel("run", "-n", ns, "files/cron-timer.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationCronJob(ns, "cron-timer"), TestTimeoutMedium).ShouldNot(BeNil())
 			Eventually(IntegrationCondition(ns, "cron-timer", camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "cron-timer"), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
@@ -53,7 +53,7 @@ func TestRunCronExample(t *testing.T) {
 		})
 
 		t.Run("cron-fallback", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/cron-fallback.groovy").Execute()).To(Succeed())
+			Expect(Kamel("run", "-n", ns, "files/cron-fallback.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "cron-fallback"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "cron-fallback", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "cron-fallback"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -61,7 +61,7 @@ func TestRunCronExample(t *testing.T) {
 		})
 
 		t.Run("cron-quartz", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/cron-quartz.groovy").Execute()).To(Succeed())
+			Expect(Kamel("run", "-n", ns, "files/cron-quartz.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "cron-quartz"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "cron-quartz", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "cron-quartz"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
