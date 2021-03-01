@@ -566,11 +566,11 @@
 - fix\(doc\): remove redundant '/build' entry in project structure [\#1530](https://github.com/apache/camel-k/pull/1530) ([tadayosi](https://github.com/tadayosi))
 - fix: JVM trait overrides other traits JVM arguments [\#1528](https://github.com/apache/camel-k/pull/1528) ([astefanutti](https://github.com/astefanutti))
 - \#1524 set the OLM channel used on install to 'stable' [\#1527](https://github.com/apache/camel-k/pull/1527) ([ipolyzos](https://github.com/ipolyzos))
--  \#1321 add support for nodeport type for services [\#1526](https://github.com/apache/camel-k/pull/1526) ([ipolyzos](https://github.com/ipolyzos))
 - Add ikb as alias for builds.camel.apache.org [\#1521](https://github.com/apache/camel-k/pull/1521) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix for \#1511 [\#1517](https://github.com/apache/camel-k/pull/1517) ([ipolyzos](https://github.com/ipolyzos))
 - CLI - Make kamel run handle github urls that are not raw [\#1515](https://github.com/apache/camel-k/pull/1515) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(release\): bump version to 1.1.0-SNAPSHOT and update OLM/HELM [\#1510](https://github.com/apache/camel-k/pull/1510) ([nicolaferraro](https://github.com/nicolaferraro))
+- feat: Prometheus support for Quarkus based on MicroProfile Metrics [\#1490](https://github.com/apache/camel-k/pull/1490) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.1](https://github.com/apache/camel-k/tree/1.0.1) (2020-06-25)
 
@@ -608,6 +608,7 @@
 
 -  \#1524 set the OLM channel used on install to 'stable' [\#1532](https://github.com/apache/camel-k/pull/1532) ([oscerd](https://github.com/oscerd))
 - fix: JVM trait overrides other traits JVM arguments [\#1529](https://github.com/apache/camel-k/pull/1529) ([astefanutti](https://github.com/astefanutti))
+-  \#1321 add support for nodeport type for services [\#1526](https://github.com/apache/camel-k/pull/1526) ([ipolyzos](https://github.com/ipolyzos))
 - Backport fix for \#1511 in release-1.0.x [\#1520](https://github.com/apache/camel-k/pull/1520) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [1.0.0](https://github.com/apache/camel-k/tree/1.0.0) (2020-06-05)
@@ -744,7 +745,6 @@
 - Avoid requirements of a kubeconfig when using  command [\#1493](https://github.com/apache/camel-k/pull/1493) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add tracing trait and automatically discover Jaeger [\#1492](https://github.com/apache/camel-k/pull/1492) ([nicolaferraro](https://github.com/nicolaferraro))
 - support for jitpack dependencies [\#1491](https://github.com/apache/camel-k/pull/1491) ([lburgazzoli](https://github.com/lburgazzoli))
-- feat: Prometheus support for Quarkus based on MicroProfile Metrics [\#1490](https://github.com/apache/camel-k/pull/1490) ([astefanutti](https://github.com/astefanutti))
 - chore\(keys\): update PGP key [\#1488](https://github.com/apache/camel-k/pull/1488) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1396: use circuitbreaker capability from runtime [\#1486](https://github.com/apache/camel-k/pull/1486) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix: Regenerate catalogs with Camel version 3.3.0 [\#1485](https://github.com/apache/camel-k/pull/1485) ([astefanutti](https://github.com/astefanutti))
@@ -810,7 +810,6 @@
 - Fixes CAMEL-14975 \(2 of 3\) Issue 14975 move lang to runtime: remove moved files [\#1433](https://github.com/apache/camel-k/pull/1433) ([djencks](https://github.com/djencks))
 - Fix 1401 [\#1432](https://github.com/apache/camel-k/pull/1432) ([oscerd](https://github.com/oscerd))
 - chore\(CI\): add knative sources test with YAKS [\#1431](https://github.com/apache/camel-k/pull/1431) ([nicolaferraro](https://github.com/nicolaferraro))
-- Fix for \#1358 [\#1430](https://github.com/apache/camel-k/pull/1430) ([dobozysaurus](https://github.com/dobozysaurus))
 - Fix knative sources [\#1421](https://github.com/apache/camel-k/pull/1421) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add license headers to files generated with kamel init [\#1420](https://github.com/apache/camel-k/pull/1420) ([ipolyzos](https://github.com/ipolyzos))
 - Attempt to make CI better [\#1418](https://github.com/apache/camel-k/pull/1418) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -829,6 +828,7 @@
 
 **Merged pull requests:**
 
+- Fix for \#1358 [\#1430](https://github.com/apache/camel-k/pull/1430) ([dobozysaurus](https://github.com/dobozysaurus))
 - Fixed cron trait docs [\#1405](https://github.com/apache/camel-k/pull/1405) ([oscerd](https://github.com/oscerd))
 - Fix \#1393: create standard role at operator startup in OLM [\#1399](https://github.com/apache/camel-k/pull/1399) ([nicolaferraro](https://github.com/nicolaferraro))
 - Cannot switch between cron and normal deployment in dev mode [\#1398](https://github.com/apache/camel-k/pull/1398) ([lburgazzoli](https://github.com/lburgazzoli))
