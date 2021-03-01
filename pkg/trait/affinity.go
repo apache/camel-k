@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"strings"
 
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -74,20 +73,19 @@ func (t *affinityTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *affinityTrait) Apply(e *Environment) (err error) {
-	var deployment *appsv1.Deployment
-	e.Resources.VisitDeployment(func(d *appsv1.Deployment) {
-		if d.Name == e.Integration.Name {
-			deployment = d
+	podSpec := e.GetIntegrationPodSpec()
+
+	if podSpec != nil {
+		if podSpec.Affinity == nil {
+			podSpec.Affinity = &corev1.Affinity{}
 		}
-	})
-	if deployment != nil {
-		if err := t.addNodeAffinity(e, deployment); err != nil {
+		if err := t.addNodeAffinity(e, podSpec); err != nil {
 			return err
 		}
-		if err := t.addPodAffinity(e, deployment); err != nil {
+		if err := t.addPodAffinity(e, podSpec); err != nil {
 			return err
 		}
-		if err := t.addPodAntiAffinity(e, deployment); err != nil {
+		if err := t.addPodAntiAffinity(e, podSpec); err != nil {
 			return err
 		}
 	}
@@ -95,7 +93,7 @@ func (t *affinityTrait) Apply(e *Environment) (err error) {
 	return nil
 }
 
-func (t *affinityTrait) addNodeAffinity(_ *Environment, deployment *appsv1.Deployment) error {
+func (t *affinityTrait) addNodeAffinity(_ *Environment, podSpec *corev1.PodSpec) error {
 	if len(t.NodeAffinityLabels) == 0 {
 		return nil
 	}
@@ -129,16 +127,11 @@ func (t *affinityTrait) addNodeAffinity(_ *Environment, deployment *appsv1.Deplo
 		},
 	}
 
-	if deployment.Spec.Template.Spec.Affinity == nil {
-		deployment.Spec.Template.Spec.Affinity = &corev1.Affinity{}
-	}
-
-	deployment.Spec.Template.Spec.Affinity.NodeAffinity = nodeAffinity
-
+	podSpec.Affinity.NodeAffinity = nodeAffinity
 	return nil
 }
 
-func (t *affinityTrait) addPodAffinity(e *Environment, deployment *appsv1.Deployment) error {
+func (t *affinityTrait) addPodAffinity(e *Environment, podSpec *corev1.PodSpec) error {
 	if util.IsNilOrFalse(t.PodAffinity) && len(t.PodAffinityLabels) == 0 {
 		return nil
 	}
@@ -185,16 +178,11 @@ func (t *affinityTrait) addPodAffinity(e *Environment, deployment *appsv1.Deploy
 		},
 	}
 
-	if deployment.Spec.Template.Spec.Affinity == nil {
-		deployment.Spec.Template.Spec.Affinity = &corev1.Affinity{}
-	}
-
-	deployment.Spec.Template.Spec.Affinity.PodAffinity = podAffinity
-
+	podSpec.Affinity.PodAffinity = podAffinity
 	return nil
 }
 
-func (t *affinityTrait) addPodAntiAffinity(e *Environment, deployment *appsv1.Deployment) error {
+func (t *affinityTrait) addPodAntiAffinity(e *Environment, podSpec *corev1.PodSpec) error {
 	if util.IsNilOrFalse(t.PodAntiAffinity) && len(t.PodAntiAffinityLabels) == 0 {
 		return nil
 	}
@@ -241,12 +229,7 @@ func (t *affinityTrait) addPodAntiAffinity(e *Environment, deployment *appsv1.De
 		},
 	}
 
-	if deployment.Spec.Template.Spec.Affinity == nil {
-		deployment.Spec.Template.Spec.Affinity = &corev1.Affinity{}
-	}
-
-	deployment.Spec.Template.Spec.Affinity.PodAntiAffinity = podAntiAffinity
-
+	podSpec.Affinity.PodAntiAffinity = podAntiAffinity
 	return nil
 }
 
