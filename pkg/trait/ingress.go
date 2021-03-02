@@ -21,13 +21,11 @@ import (
 	"errors"
 	"fmt"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-
-	"k8s.io/api/extensions/v1beta1"
-	"k8s.io/apimachinery/pkg/util/intstr"
-
 	corev1 "k8s.io/api/core/v1"
+	networking "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // The Ingress trait can be used to expose the service associated with the integration
@@ -108,21 +106,25 @@ func (t *ingressTrait) Apply(e *Environment) error {
 		return errors.New("cannot Apply ingress trait: no target service")
 	}
 
-	ingress := v1beta1.Ingress{
+	ingress := networking.Ingress{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Ingress",
-			APIVersion: v1beta1.SchemeGroupVersion.String(),
+			APIVersion: networking.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      service.Name,
 			Namespace: service.Namespace,
 		},
-		Spec: v1beta1.IngressSpec{
-			Backend: &v1beta1.IngressBackend{
-				ServiceName: service.Name,
-				ServicePort: intstr.FromString("http"),
+		Spec: networking.IngressSpec{
+			DefaultBackend: &networking.IngressBackend{
+				Service: &networking.IngressServiceBackend{
+					Name: service.Name,
+					Port: networking.ServiceBackendPort{
+						Name: "http",
+					},
+				},
 			},
-			Rules: []v1beta1.IngressRule{
+			Rules: []networking.IngressRule{
 				{
 					Host: t.Host,
 				},
@@ -135,8 +137,8 @@ func (t *ingressTrait) Apply(e *Environment) error {
 	message := fmt.Sprintf("%s(%s) -> %s(%s)",
 		ingress.Name,
 		t.Host,
-		ingress.Spec.Backend.ServiceName,
-		ingress.Spec.Backend.ServicePort.String())
+		ingress.Spec.DefaultBackend.Service.Name,
+		ingress.Spec.DefaultBackend.Service.Port.Name)
 
 	e.Integration.Status.SetCondition(
 		v1.IntegrationConditionExposureAvailable,
