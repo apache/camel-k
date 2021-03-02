@@ -47,6 +47,16 @@ func TestApplyTolerationTraitMalformedTaint(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestApplyPodTolerationMissingDeployment(t *testing.T) {
+	tolerationTrait := createNominalTolerationTrait()
+	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration=my-value:NoExecute")
+
+	environment := createNominalMissingDeploymentTraitTest()
+	err := tolerationTrait.Apply(environment)
+
+	assert.NotNil(t, err)
+}
+
 func TestApplyPodTolerationLabelsDefault(t *testing.T) {
 	tolerationTrait := createNominalTolerationTrait()
 	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration=my-value:NoExecute")

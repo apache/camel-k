@@ -59,6 +59,15 @@ func TestConfigureDisabledAffinityTraitFails(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestApplyAffinityMissingDeployment(t *testing.T) {
+	tolerationTrait := createNominalAffinityTest()
+
+	environment := createNominalMissingDeploymentTraitTest()
+	err := tolerationTrait.Apply(environment)
+
+	assert.NotNil(t, err)
+}
+
 func TestApplyEmptyAffinityLabelsDoesSucceed(t *testing.T) {
 	affinityTrait := createNominalAffinityTest()
 

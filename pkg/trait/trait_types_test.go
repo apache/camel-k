@@ -54,6 +54,22 @@ func createNominalDeploymentTraitTest() (*Environment, *appsv1.Deployment) {
 	return environment, deployment
 }
 
+func createNominalMissingDeploymentTraitTest() *Environment {
+	environment := &Environment{
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "integration-name",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+		},
+		Resources: kubernetes.NewCollection(),
+	}
+
+	return environment
+}
+
 func createNominalKnativeServiceTraitTest() (*Environment, *serving.Service) {
 	knativeService := &serving.Service{
 		ObjectMeta: metav1.ObjectMeta{
