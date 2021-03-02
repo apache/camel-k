@@ -108,7 +108,7 @@ func TestApplyJvmTraitWithDeploymentResource(t *testing.T) {
 	assert.Equal(t, []string{
 		"-cp",
 		"./resources:/etc/camel/resources:/mount/path",
-		"io.quarkus.runner.GeneratedMain",
+		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }
 
@@ -140,7 +140,7 @@ func TestApplyJvmTraitWithKNativeResource(t *testing.T) {
 	assert.Equal(t, []string{
 		"-cp",
 		"./resources:/etc/camel/resources:/mount/path",
-		"io.quarkus.runner.GeneratedMain",
+		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, s.Spec.Template.Spec.Containers[0].Args)
 }
 

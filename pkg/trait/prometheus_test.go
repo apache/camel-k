@@ -164,6 +164,7 @@ func TestPrometheusTraitGetServiceMonitor(t *testing.T) {
 	assert.Equal(t, "integration-name", serviceMonitor.Spec.Selector.MatchLabels[v1.IntegrationLabel])
 	assert.Len(t, serviceMonitor.Spec.Endpoints, 1)
 	assert.Equal(t, "prometheus", serviceMonitor.Spec.Endpoints[0].Port)
+	assert.Equal(t, "/q/metrics", serviceMonitor.Spec.Endpoints[0].Path)
 }
 
 func createNominalPrometheusTest() (*prometheusTrait, *Environment) {

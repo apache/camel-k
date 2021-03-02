@@ -198,6 +198,7 @@ func (t *prometheusTrait) getServiceMonitorFor(e *Environment) (*monitoringv1.Se
 			},
 			Endpoints: []monitoringv1.Endpoint{
 				{
+					Path: "/q/metrics",
 					Port: prometheusPortName,
 				},
 			},
