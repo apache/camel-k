@@ -44,4 +44,6 @@ git clone -b $branch --single-branch --depth 1 $repo ./tmp_kamelet_catalog
 mkdir $target
 cp ./tmp_kamelet_catalog/*.kamelet.yaml $target
 
+echo "This directory has been auto-generated from the $branch branch of the $repo repository: do not edit the contained files (changes will be overwritten)" > $target/auto-generated.txt
+
 rm -rf ./tmp_kamelet_catalog

@@ -1,0 +1,57 @@
+apiVersion: camel.apache.org/v1alpha1
+kind: Kamelet
+metadata:
+  name: aws-kinesis-source
+  annotations:
+    camel.apache.org/kamelet.icon: "data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgMzA4LjIzNDAxIj48dGl0bGU+YXdzLWtpbmVzaXM8L3RpdGxlPjxwYXRoIGQ9Ik0wLDE3Mi4wODdsMTI3Ljc1NCw1OC44MSwxMjcuNzUyLTU4LjgxLTEyNy43NTItNS4yOTNaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwIDAuMDAwMDUpIiBmaWxsPSIjZmNiZjkyIi8+PHBhdGggZD0iTTEyOC4xNDcsMCwuMDU5LDYzLjg4MXY5MC4xMzZIMTUzLjY0OFYxMi43NTFaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwIDAuMDAwMDUpIiBmaWxsPSIjOWQ1MDI1Ii8+PHBhdGggZD0iTS4wNTksMjE3LjU1OWwxMjguMTYyLDkwLjY3NUwyNTYsMjE3LjU1OSwxMjcuOTQ1LDE5OC45MjZaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwIDAuMDAwMDUpIiBmaWxsPSIjZmNiZjkyIi8+PHBhdGggZD0iTTEyOC4xNDYsMTU0LjAxN2g2Ny41NzdWNTcuODM2TDE3NS45OSw0OS45NDMsMTI4LjE0Niw2My44OThaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwIDAuMDAwMDUpIiBmaWxsPSIjOWQ1MDI1Ii8+PHBhdGggZD0iTTE3NS45OSwxNTQuMDE3aDUyLjIzM1Y5MS42MzJsLTE0Ljk0LTQuNDgxLTM3LjI5Myw2LjMzWiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCAwLjAwMDA1KSIgZmlsbD0iIzlkNTAyNSIvPjxwYXRoIGQ9Ik0yMTMuMjgyLDgyLjI2djcxLjc1N2g0Mi4yMjRMMjU2LDgxLjk0MWwtMTIuODI2LTUuMTI0WiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCAwLjAwMDA1KSIgZmlsbD0iIzlkNTAyNSIvPjxwYXRoIGQ9Ik0xMjguMTQ3LDBWMTU0LjAxN2gyNS41VjEyLjc1MVoiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgMC4wMDAwNSkiIGZpbGw9IiNmNjg1MzQiLz48cGF0aCBkPSJNMTk1LjcyNCw1Ny44MzZsLTE5LjczMy03Ljg5NFYxNTQuMDE3aDE5LjczMloiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgMC4wMDAwNSkiIGZpbGw9IiNmNjg1MzQiLz48cGF0aCBkPSJNMjI4LjIyNCw5MS42MzJsLTE0Ljk0MS00LjQ4djY2Ljg2NWgxNC45NFoiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgMC4wMDAwNSkiIGZpbGw9IiNmNjg1MzQiLz48cGF0aCBkPSJNMjQzLjE3NCwxNTQuMDE3SDI1NlY4MS45NDFsLTEyLjgyNi01LjEyNFoiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgMC4wMDAwNSkiIGZpbGw9IiNmNjg1MzQiLz48cGF0aCBkPSJNMTI3Ljc1NCwxODQuODYzdjQ2LjAzM2wxMjcuNzUyLTMxLjg0NFYxNzIuMDg3WiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCAwLjAwMDA1KSIgZmlsbD0iI2Y2ODUzNCIvPjxwYXRoIGQ9Ik0xMjcuNzU0LDI2Mi43ODF2NDUuNDUzTDI1NiwyNDQuMTE0VjIxNy41NloiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgMC4wMDAwNSkiIGZpbGw9IiNmNjg1MzQiLz48cGF0aCBkPSJNLjA1OSwyNDQuMzlsMTI3LjY5NSw2My44NDRWMjYyLjQ0OEwuMDU4LDIxNy41NThaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwIDAuMDAwMDUpIiBmaWxsPSIjOWQ1MDI1Ii8+PHBhdGggZD0iTTAsMTk5LjA1MWwxMjcuNzU0LDMxLjg0NVYxODQuODYyTDAsMTcyLjA4NloiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgMC4wMDAwNSkiIGZpbGw9IiM5ZDUwMjUiLz48L3N2Zz4="
+    camel.apache.org/provider: "Apache Software Foundation"
+  labels:
+    camel.apache.org/kamelet.type: "source"
+spec:
+  definition:
+    title: "AWS Kinesis Source"
+    description: |-
+      Receive data from AWS Kinesis.
+    required:
+      - stream
+      - accessKey
+      - secretKey
+      - region
+    properties:
+      stream:
+        title: Stream Name
+        description: The Kinesis stream that you want to access (needs to be created in advance)
+        type: string
+      accessKey:
+        title: Access Key
+        description: The access key obtained from AWS
+        type: string
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:password
+      secretKey:
+        title: Secret Key
+        description: The secret key obtained from AWS
+        type: string
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:password
+      region:
+        title: AWS Region
+        description: The AWS region to connect to (capitalized name)
+        type: string
+        example: eu-west-1
+  types:
+    out:
+      mediaType: application/json
+  dependencies:
+  - "camel:jackson"
+  flow:
+    from:
+      uri: aws2-kinesis:{{stream}}
+      parameters:
+        secretKey: "{{secretKey}}"
+        accessKey: "{{accessKey}}"
+        region: "{{region}}"
+      steps:
+      - marshal:
+          json: {}
+      - to: "kamelet:sink"

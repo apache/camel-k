@@ -35,9 +35,9 @@ STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 STAGING_RUNTIME_REPO :=
 
 # Define here the repo containing the default Kamelet catalog (if any)
-KAMELET_CATALOG_REPO :=
-# Optional branch for the default Kamelet catalog
-KAMELET_CATALOG_REPO_BRANCH :=
+KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
+# Optional branch for the default Kamelet catalog (change this to a tag before release)
+KAMELET_CATALOG_REPO_BRANCH := master
 
 # When packaging artifacts into the docker image, you can "copy" them from local maven
 # or "download" them from Apache Snapshots and Maven Central
@@ -169,17 +169,21 @@ test-resources: build
 build-kamel:
 	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
 
-build-resources: bundle-kamelets
+build-resources:
 	./script/build_catalog.sh $(RUNTIME_VERSION) -Dcatalog.file=camel-catalog-$(RUNTIME_VERSION).yaml -Dcatalog.runtime=quarkus -Dstaging.repo="$(STAGING_RUNTIME_REPO)"
 	go generate ./pkg/...
 
 bundle-kamelets:
+ifneq (,$(findstring release,$(MAKECMDGOALS)))
+ifneq (,$(findstring $(KAMELET_CATALOG_REPO_BRANCH), master main))
+	@echo "You cannot set KAMELET_CATALOG_REPO_BRANCH=$(KAMELET_CATALOG_REPO_BRANCH) when doing a release"
+	@exit 1
+endif
+endif
 	./script/bundle_kamelets.sh $(KAMELET_CATALOG_REPO) $(KAMELET_CATALOG_REPO_BRANCH)
 
 build-submodules:
 	./script/build_submodules.sh
-
-
 
 build-compile-integration-tests:
 	go test -c -tags="integration" ./e2e/common
@@ -265,11 +269,11 @@ package-artifacts:
 unsnapshot-olm:
 	./script/unsnapshot_olm.sh
 
-release: clean codegen set-module-version set-version build-resources check-licenses unsnapshot-olm build images images-push cross-compile package-examples git-tag
+release: clean codegen set-module-version set-version bundle-kamelets build-resources check-licenses unsnapshot-olm build images images-push cross-compile package-examples git-tag
 
-release-staging: clean codegen set-module-version set-version build-resources check-licenses unsnapshot-olm build images images-push-staging cross-compile package-examples git-tag
+release-staging: clean codegen set-module-version set-version bundle-kamelets build-resources check-licenses unsnapshot-olm build images images-push-staging cross-compile package-examples git-tag
 
-release-nightly: clean codegen set-module-version set-version build-resources build images images-push cross-compile package-examples
+release-nightly: clean codegen set-module-version set-version bundle-kamelets build-resources build images images-push cross-compile package-examples
 
 release-helm:
 	./script/release_helm.sh
