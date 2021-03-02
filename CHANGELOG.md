@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- bou.ke/monkey license [\#2067](https://github.com/apache/camel-k/issues/2067)
 - \[cmd\] Warning on launching operator [\#2051](https://github.com/apache/camel-k/issues/2051)
 - kamelet-binding: support for processing steps [\#2043](https://github.com/apache/camel-k/issues/2043)
 - spectrum publish x509: certificate signed by unknown authority [\#2029](https://github.com/apache/camel-k/issues/2029)
@@ -30,6 +31,10 @@
 
 **Merged pull requests:**
 
+- Upgrade Kubernetes to v0.19.8 and Service Binding operator to v0.4.1 [\#2076](https://github.com/apache/camel-k/pull/2076) ([astefanutti](https://github.com/astefanutti))
+- Fix deprecated annotation [\#2070](https://github.com/apache/camel-k/pull/2070) ([bouskaJ](https://github.com/bouskaJ))
+- Operator labels are different when OLM is used [\#2069](https://github.com/apache/camel-k/pull/2069) ([bouskaJ](https://github.com/bouskaJ))
+- Cleanup files dir [\#2065](https://github.com/apache/camel-k/pull/2065) ([bouskaJ](https://github.com/bouskaJ))
 - chore\(e2e\): Assert Integration readiness condition in scaling e2e tests [\#2064](https://github.com/apache/camel-k/pull/2064) ([astefanutti](https://github.com/astefanutti))
 - chore\(e2e\): Polish Gomega usage in e2e tests [\#2063](https://github.com/apache/camel-k/pull/2063) ([astefanutti](https://github.com/astefanutti))
 - test: Add eviction cases to the PodDisruptionBudget trait e2e tests [\#2062](https://github.com/apache/camel-k/pull/2062) ([astefanutti](https://github.com/astefanutti))
@@ -140,7 +145,6 @@
 - Fix operator monitoring test [\#1880](https://github.com/apache/camel-k/pull/1880) ([llowinge](https://github.com/llowinge))
 - Add network name flag to local run. [\#1879](https://github.com/apache/camel-k/pull/1879) ([doru1004](https://github.com/doru1004))
 - Skip CRD installation if output flag enabled [\#1876](https://github.com/apache/camel-k/pull/1876) ([squakez](https://github.com/squakez))
-- \[Fix\] Check conditions in the correct order [\#1873](https://github.com/apache/camel-k/pull/1873) ([doru1004](https://github.com/doru1004))
 - proposal: add Service Binding proposal \(\#1445\) [\#1864](https://github.com/apache/camel-k/pull/1864) ([johnpoth](https://github.com/johnpoth))
 
 ## [v1.3.1](https://github.com/apache/camel-k/tree/v1.3.1) (2021-02-01)
@@ -566,6 +570,7 @@
 - fix\(doc\): remove redundant '/build' entry in project structure [\#1530](https://github.com/apache/camel-k/pull/1530) ([tadayosi](https://github.com/tadayosi))
 - fix: JVM trait overrides other traits JVM arguments [\#1528](https://github.com/apache/camel-k/pull/1528) ([astefanutti](https://github.com/astefanutti))
 - \#1524 set the OLM channel used on install to 'stable' [\#1527](https://github.com/apache/camel-k/pull/1527) ([ipolyzos](https://github.com/ipolyzos))
+-  \#1321 add support for nodeport type for services [\#1526](https://github.com/apache/camel-k/pull/1526) ([ipolyzos](https://github.com/ipolyzos))
 - Add ikb as alias for builds.camel.apache.org [\#1521](https://github.com/apache/camel-k/pull/1521) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix for \#1511 [\#1517](https://github.com/apache/camel-k/pull/1517) ([ipolyzos](https://github.com/ipolyzos))
 - CLI - Make kamel run handle github urls that are not raw [\#1515](https://github.com/apache/camel-k/pull/1515) ([lburgazzoli](https://github.com/lburgazzoli))
@@ -608,7 +613,6 @@
 
 -  \#1524 set the OLM channel used on install to 'stable' [\#1532](https://github.com/apache/camel-k/pull/1532) ([oscerd](https://github.com/oscerd))
 - fix: JVM trait overrides other traits JVM arguments [\#1529](https://github.com/apache/camel-k/pull/1529) ([astefanutti](https://github.com/astefanutti))
--  \#1321 add support for nodeport type for services [\#1526](https://github.com/apache/camel-k/pull/1526) ([ipolyzos](https://github.com/ipolyzos))
 - Backport fix for \#1511 in release-1.0.x [\#1520](https://github.com/apache/camel-k/pull/1520) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [1.0.0](https://github.com/apache/camel-k/tree/1.0.0) (2020-06-05)
@@ -810,6 +814,7 @@
 - Fixes CAMEL-14975 \(2 of 3\) Issue 14975 move lang to runtime: remove moved files [\#1433](https://github.com/apache/camel-k/pull/1433) ([djencks](https://github.com/djencks))
 - Fix 1401 [\#1432](https://github.com/apache/camel-k/pull/1432) ([oscerd](https://github.com/oscerd))
 - chore\(CI\): add knative sources test with YAKS [\#1431](https://github.com/apache/camel-k/pull/1431) ([nicolaferraro](https://github.com/nicolaferraro))
+- Fix for \#1358 [\#1430](https://github.com/apache/camel-k/pull/1430) ([dobozysaurus](https://github.com/dobozysaurus))
 - Fix knative sources [\#1421](https://github.com/apache/camel-k/pull/1421) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add license headers to files generated with kamel init [\#1420](https://github.com/apache/camel-k/pull/1420) ([ipolyzos](https://github.com/ipolyzos))
 - Attempt to make CI better [\#1418](https://github.com/apache/camel-k/pull/1418) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -828,7 +833,6 @@
 
 **Merged pull requests:**
 
-- Fix for \#1358 [\#1430](https://github.com/apache/camel-k/pull/1430) ([dobozysaurus](https://github.com/dobozysaurus))
 - Fixed cron trait docs [\#1405](https://github.com/apache/camel-k/pull/1405) ([oscerd](https://github.com/oscerd))
 - Fix \#1393: create standard role at operator startup in OLM [\#1399](https://github.com/apache/camel-k/pull/1399) ([nicolaferraro](https://github.com/nicolaferraro))
 - Cannot switch between cron and normal deployment in dev mode [\#1398](https://github.com/apache/camel-k/pull/1398) ([lburgazzoli](https://github.com/lburgazzoli))
