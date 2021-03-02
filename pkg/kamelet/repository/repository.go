@@ -33,7 +33,7 @@ const (
 	NoneRepository = "none"
 )
 
-var DefaultRemoteRepository = "github:apache/camel-kamelets"
+var DefaultRemoteRepository = NoneRepository
 
 // KameletRepository can be used to obtain a Kamelet definition, looking it up in one or more physical locations
 type KameletRepository interface {

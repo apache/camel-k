@@ -9,9 +9,6 @@
 /kamel-config.yaml
 /.kamel/kamel-config.yaml
 
-# Kamelet catalog
-/deploy/kamelets
-
 # Released Packages
 *.tar.gz
 
