@@ -60,6 +60,26 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-knative-consumer</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-knative-consumer-deployment</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-knative-producer</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-knative-producer-deployment</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-knative-http</artifactId>
             <version>${runtime.version}</version>
         </dependency>
@@ -70,7 +90,17 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-core-deployment</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-knative</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-knative-deployment</artifactId>
             <version>${runtime.version}</version>
         </dependency>
         <dependency>
@@ -80,7 +110,17 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-master-deployment</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-cron</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-cron-deployment</artifactId>
             <version>${runtime.version}</version>
         </dependency>
 

@@ -261,6 +261,8 @@ github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGX
 github.com/cockroachdb/datadriven v0.0.0-20190809214429-80d97fb3cbaa/go.mod h1:zn76sxSg3SzpJ0PPJaLDCu+Bu0Lg3sKTORVIj19EIF8=
 github.com/container-tools/spectrum v0.3.2 h1:KQz70RWAzITzaPx+qPsiGkrF0uGmFJfKak2yOqJyPKQ=
 github.com/container-tools/spectrum v0.3.2/go.mod h1:hsogRHNfGQLysCyDiGT4SAioTS8LGLbyC4b0Ep2Iw+o=
+github.com/container-tools/spectrum v0.3.4 h1:ykSzjjIbmwy/dQKyaTRNf69gqSx5rB/XwjuYhOspJSY=
+github.com/container-tools/spectrum v0.3.4/go.mod h1:hsogRHNfGQLysCyDiGT4SAioTS8LGLbyC4b0Ep2Iw+o=
 github.com/containerd/cgroups v0.0.0-20190919134610-bf292b21730f/go.mod h1:OApqhQ4XNSNC13gXIwDjhOQxjWa/NxkwZXJ1EvqT0ko=
 github.com/containerd/console v0.0.0-20180822173158-c12b1e7919c1/go.mod h1:Tj/on1eG8kiEhd0+fhSDzsPAFESxzBBvdyEgyryXffw=
 github.com/containerd/containerd v1.3.0-beta.2.0.20190828155532-0293cbd26c69/go.mod h1:bC6axHOhabU15QhwfG7w5PipXdVtMXFTttgp+kVtyUA=

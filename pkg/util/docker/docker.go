@@ -132,12 +132,25 @@ func GetContainerRoutesDir() string {
 // ContainerizeFilePaths -- make paths valid container paths given a valid container directory in newDir.
 func ContainerizeFilePaths(currentFilePaths []string, newDir string) []string {
 	newFilePaths := []string{}
-
 	for _, currentFilePath := range currentFilePaths {
 		newFilePaths = append(newFilePaths, newDir+containerFileSeparator+path.Base(currentFilePath))
 	}
 
 	return newFilePaths
+}
+
+// ContainerizeDependencyPaths -- make dependency paths valid given a valid container directory in newDir
+func ContainerizeDependencyPaths(dependencyPaths []string, newDir string) []string {
+	newDependencyPaths := []string{}
+	for _, currentDependencyPath := range dependencyPaths {
+		newDependencyPath := util.SubstringFrom(currentDependencyPath, util.QuarkusDependenciesBaseDirectory)
+		if newDependencyPath != "" {
+			newDependencyPaths = append(newDependencyPaths, newDir+newDependencyPath)
+		} else {
+			newDependencyPaths = append(newDependencyPaths, newDir+containerFileSeparator+path.Base(currentDependencyPath))
+		}
+	}
+	return newDependencyPaths
 }
 
 // ExtractRegistryName -- Extract registry name from image path.

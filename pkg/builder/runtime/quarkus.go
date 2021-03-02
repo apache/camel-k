@@ -19,13 +19,12 @@ package runtime
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/util/digest"
-
-	yaml2 "gopkg.in/yaml.v2"
 
 	"github.com/pkg/errors"
 
@@ -79,7 +78,7 @@ func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion str
 	p.Dependencies = make([]maven.Dependency, 0)
 	p.Build = &maven.Build{Plugins: make([]maven.Plugin, 0)}
 
-	// camel-quarkus doe routes discovery at startup but we don't want
+	// camel-quarkus does routes discovery at startup but we don't want
 	// this to happen as routes are loaded at runtime and looking for
 	// routes at build time may try to load camel-k-runtime routes builder
 	// proxies which in some case may fail
@@ -87,6 +86,9 @@ func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion str
 
 	// disable quarkus banner ...
 	p.Properties["quarkus.banner.enabled"] = "false"
+
+	// set fast-jar packaging since it gives some startup time improvements
+	p.Properties["quarkus.package.type"] = "fast-jar"
 
 	// DependencyManagement
 	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies,
@@ -148,7 +150,7 @@ func BuildQuarkusRunnerCommon(mc maven.Context) error {
 
 	// generate an empty application.properties so that there will be something in
 	// target/classes as if such directory does not exist, the quarkus maven plugin
-	// mai fail the build
+	// may fail the build
 	//
 	// in the future there should be a way to provide build information from secrets,
 	// configmap, etc.
@@ -171,15 +173,9 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 	mc.LocalRepository = ctx.Build.Maven.LocalRepository
 	mc.Timeout = ctx.Build.Maven.GetTimeout().Duration
 
-	// Compute dependencies.
-	content, err := ComputeQuarkusDependenciesCommon(mc, ctx.Catalog.Runtime.Version)
-	if err != nil {
-		return err
-	}
-
 	// Process artifacts list and add it to existing artifacts.
 	artifacts := []v1.Artifact{}
-	artifacts, err = ProcessQuarkusTransitiveDependencies(mc, content)
+	artifacts, err := ProcessQuarkusTransitiveDependencies(mc)
 	if err != nil {
 		return err
 	}
@@ -188,76 +184,33 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 	return nil
 }
 
-// ComputeQuarkusDependenciesCommon --
-func ComputeQuarkusDependenciesCommon(mc maven.Context, runtimeVersion string) ([]byte, error) {
-	// Retrieve the runtime dependencies
-	mc.AddArgumentf("org.apache.camel.k:camel-k-maven-plugin:%s:generate-dependency-list", runtimeVersion)
-	if err := maven.Run(mc); err != nil {
-		return nil, errors.Wrap(err, "failure while determining classpath")
-	}
-
-	dependencies := path.Join(mc.Path, "target", "dependencies.yaml")
-	content, err := ioutil.ReadFile(dependencies)
-	if err != nil {
-		return nil, err
-	}
-
-	return content, nil
-}
-
 // ProcessQuarkusTransitiveDependencies --
-func ProcessQuarkusTransitiveDependencies(mc maven.Context, content []byte) ([]v1.Artifact, error) {
-	cp := make(map[string][]v1.Artifact)
-	err := yaml2.Unmarshal(content, &cp)
-	if err != nil {
-		return nil, err
-	}
-
+func ProcessQuarkusTransitiveDependencies(mc maven.Context) ([]v1.Artifact, error) {
 	artifacts := []v1.Artifact{}
-	for _, e := range cp["dependencies"] {
-		_, fileName := path.Split(e.Location)
 
-		gav, err := maven.ParseGAV(e.ID)
-		if err != nil {
-			return nil, err
-		}
+	// Quarkus fast-jar format is split into various sub directories in quarkus-app
+	quarkusAppDir := path.Join(mc.Path, "target", "quarkus-app")
 
-		//
-		// Compute the checksum if it has not been computed by the camel-k-maven-plugin
-		//
-		if e.Checksum == "" {
-			chksum, err := digest.ComputeSHA1(e.Location)
+	// Discover application dependencies from the Quarkus fast-jar directory tree
+	err := filepath.Walk(quarkusAppDir, func(filePath string, info os.FileInfo, err error) error {
+		fileRelPath := strings.Replace(filePath, quarkusAppDir, "", 1)
+
+		if !info.IsDir() {
+			sha1, err := digest.ComputeSHA1(filePath)
 			if err != nil {
-				return nil, err
+				return err
 			}
 
-			e.Checksum = "sha1:" + chksum
+			artifacts = append(artifacts, v1.Artifact{
+				ID:       filepath.Base(fileRelPath),
+				Location: filePath,
+				Target:   path.Join("dependencies", fileRelPath),
+				Checksum: "sha1:" + sha1,
+			})
 		}
 
-		artifacts = append(artifacts, v1.Artifact{
-			ID:       e.ID,
-			Location: e.Location,
-			Target:   path.Join("dependencies", gav.GroupID+"."+fileName),
-			Checksum: e.Checksum,
-		})
-	}
-
-	runner := "camel-k-integration-" + defaults.Version + "-runner.jar"
-
-	//
-	// Quarkus' runner checksum need to be recomputed each time
-	//
-	runnerChecksum, err := digest.ComputeSHA1(mc.Path, "target", runner)
-	if err != nil {
-		return nil, err
-	}
-
-	artifacts = append(artifacts, v1.Artifact{
-		ID:       runner,
-		Location: path.Join(mc.Path, "target", runner),
-		Target:   path.Join("dependencies", runner),
-		Checksum: "sha1:" + runnerChecksum,
+		return nil
 	})
 
-	return artifacts, nil
+	return artifacts, err
 }

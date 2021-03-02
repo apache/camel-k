@@ -85,6 +85,7 @@ func publisher(ctx *builder.Context) error {
 		Target:        target,
 		Stdout:        os.Stdout,
 		Stderr:        os.Stderr,
+		Recursive:     true,
 	}
 
 	digest, err := spectrum.Build(options, libraryPath+":/deployments/dependencies")
