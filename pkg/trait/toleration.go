@@ -73,14 +73,13 @@ func (t *tolerationTrait) Apply(e *Environment) (err error) {
 	}
 	podSpec := e.GetIntegrationPodSpec()
 
-	// Add the toleration
-	if podSpec != nil {
-		if podSpec.Tolerations == nil {
-			podSpec.Tolerations = make([]corev1.Toleration, 0)
-		}
-		podSpec.Tolerations = append(podSpec.Tolerations, tolerations...)
+	if podSpec == nil {
+		return fmt.Errorf("could not find any integration deployment for %v", e.Integration.Name)
 	}
-
+	if podSpec.Tolerations == nil {
+		podSpec.Tolerations = make([]corev1.Toleration, 0)
+	}
+	podSpec.Tolerations = append(podSpec.Tolerations, tolerations...)
 	return nil
 }
 

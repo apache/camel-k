@@ -75,21 +75,21 @@ func (t *affinityTrait) Configure(e *Environment) (bool, error) {
 func (t *affinityTrait) Apply(e *Environment) (err error) {
 	podSpec := e.GetIntegrationPodSpec()
 
-	if podSpec != nil {
-		if podSpec.Affinity == nil {
-			podSpec.Affinity = &corev1.Affinity{}
-		}
-		if err := t.addNodeAffinity(e, podSpec); err != nil {
-			return err
-		}
-		if err := t.addPodAffinity(e, podSpec); err != nil {
-			return err
-		}
-		if err := t.addPodAntiAffinity(e, podSpec); err != nil {
-			return err
-		}
+	if podSpec == nil {
+		return fmt.Errorf("could not find any integration deployment for %v", e.Integration.Name)
 	}
-
+	if podSpec.Affinity == nil {
+		podSpec.Affinity = &corev1.Affinity{}
+	}
+	if err := t.addNodeAffinity(e, podSpec); err != nil {
+		return err
+	}
+	if err := t.addPodAffinity(e, podSpec); err != nil {
+		return err
+	}
+	if err := t.addPodAntiAffinity(e, podSpec); err != nil {
+		return err
+	}
 	return nil
 }
 
