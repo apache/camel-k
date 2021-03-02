@@ -21,15 +21,15 @@ import (
 	"context"
 	"testing"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/stretchr/testify/assert"
 
-	"k8s.io/api/extensions/v1beta1"
+	corev1 "k8s.io/api/core/v1"
+	networking "k8s.io/api/networking/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 func TestConfigureIngressTraitDoesSucceed(t *testing.T) {
@@ -139,10 +139,10 @@ func TestApplyIngressTraitDoesSucceed(t *testing.T) {
 
 	assert.Len(t, environment.Resources.Items(), 2)
 	environment.Resources.Visit(func(resource runtime.Object) {
-		if ingress, ok := resource.(*v1beta1.Ingress); ok {
+		if ingress, ok := resource.(*networking.Ingress); ok {
 			assert.Equal(t, "service-name", ingress.Name)
 			assert.Equal(t, "namespace", ingress.Namespace)
-			assert.Equal(t, "service-name", ingress.Spec.Backend.ServiceName)
+			assert.Equal(t, "service-name", ingress.Spec.DefaultBackend.Service.Name)
 			assert.Len(t, ingress.Spec.Rules, 1)
 			assert.Equal(t, "hostname", ingress.Spec.Rules[0].Host)
 		}
