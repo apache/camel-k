@@ -1,1 +1,0 @@
-This directory has been auto-generated from the master branch of the https://github.com/apache/camel-kamelets.git repository: do not edit the contained files (changes will be overwritten)

@@ -19,39 +19,59 @@ package install
 
 import (
 	"context"
+	"fmt"
+	"io/ioutil"
+	"os"
 	"path"
 	"strings"
 
 	"github.com/pkg/errors"
-
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-
-	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/resources"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-const kameletDir = "/kamelets/"
+const kameletDirEnv = "KAMELET_CATALOG_DIR"
+const defaultKameletDir = "/kamelets/"
 const kameletBundledLabel = "camel.apache.org/kamelet.bundled"
 const kameletReadOnlyLabel = "camel.apache.org/kamelet.readonly"
 
 // KameletCatalog installs the bundled KameletCatalog into one namespace
 func KameletCatalog(ctx context.Context, c client.Client, namespace string) error {
-	if !resources.DirExists(kameletDir) {
+	kameletDir := os.Getenv(kameletDirEnv)
+	if kameletDir == "" {
+		kameletDir = defaultKameletDir
+	}
+	if d, err := os.Stat(kameletDir); err != nil && os.IsNotExist(err) {
 		return nil
+	} else if err != nil {
+		return err
+	} else if !d.IsDir() {
+		return fmt.Errorf("Kamelet directory %q is a file", kameletDir)
 	}
 
-	for _, res := range resources.Resources(kameletDir) {
-		if !strings.HasSuffix(res, ".yaml") && !strings.HasSuffix(res, ".yml") {
+	files, err := ioutil.ReadDir(kameletDir)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if file.IsDir() || !(strings.HasSuffix(file.Name(), ".yaml") || strings.HasSuffix(file.Name(), ".yml")) {
 			continue
 		}
 
-		obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString(path.Join(kameletDir, res)))
+		content, err := ioutil.ReadFile(path.Join(kameletDir, file.Name()))
+		if err != nil {
+			return err
+		}
+
+		obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), string(content))
 		if err != nil {
 			return err
 		}
@@ -67,24 +87,24 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 			}
 
 			if existing == nil || existing.Annotations[kamelVersionAnnotation] != defaults.Version {
-				err := Resource(ctx, c, namespace, true, func(o ctrl.Object) ctrl.Object {
-					if o.GetAnnotations() == nil {
-						o.SetAnnotations(make(map[string]string))
-					}
-					o.GetAnnotations()[kamelVersionAnnotation] = defaults.Version
+				if k.GetAnnotations() == nil {
+					k.SetAnnotations(make(map[string]string))
+				}
+				k.GetAnnotations()[kamelVersionAnnotation] = defaults.Version
 
-					if o.GetLabels() == nil {
-						o.SetLabels(make(map[string]string))
-					}
-					o.GetLabels()[kameletBundledLabel] = "true"
-					o.GetLabels()[kameletReadOnlyLabel] = "true"
-					return o
-				}, path.Join(kameletDir, res))
+				if k.GetLabels() == nil {
+					k.SetLabels(make(map[string]string))
+				}
+				k.GetLabels()[kameletBundledLabel] = "true"
+				k.GetLabels()[kameletReadOnlyLabel] = "true"
+
+				err := RuntimeObject(ctx, c, namespace, true, k)
 
 				if err != nil {
-					return errors.Wrapf(err, "could not create resource %q", res)
+					return errors.Wrapf(err, "could not create resource from file %q", path.Join(kameletDir, file.Name()))
 				}
 			}
+
 		}
 	}
 

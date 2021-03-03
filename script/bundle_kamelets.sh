@@ -23,8 +23,11 @@ repo=$1
 branch=$2
 
 cd $location/../
-target=./deploy/kamelets
+target=./build/_kamelets
+
+# Always recreate the dir
 rm -rf $target
+mkdir $target
 
 if [ "$repo" = "" ]; then
 	echo "no kamelet catalog defined: skipping"
@@ -41,9 +44,6 @@ echo "Cloning repository $repo on branch $branch to bundle kamelets..."
 rm -rf ./tmp_kamelet_catalog
 git clone -b $branch --single-branch --depth 1 $repo ./tmp_kamelet_catalog
 
-mkdir $target
 cp ./tmp_kamelet_catalog/*.kamelet.yaml $target
-
-echo "This directory has been auto-generated from the $branch branch of the $repo repository: do not edit the contained files (changes will be overwritten)" > $target/auto-generated.txt
 
 rm -rf ./tmp_kamelet_catalog

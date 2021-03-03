@@ -32,6 +32,7 @@
 build/_output
 build/_test
 build/_maven_output
+build/_kamelets
 /api_*
 
 # envrc
