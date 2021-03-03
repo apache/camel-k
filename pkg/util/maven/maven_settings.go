@@ -42,7 +42,7 @@ func NewSettings() Settings {
 }
 
 // NewDefaultSettings --
-func NewDefaultSettings(repositories []Repository) Settings {
+func NewDefaultSettings(repositories []Repository, mirrors []Mirror) Settings {
 	settings := NewSettings()
 
 	var additionalRepos []Repository
@@ -65,6 +65,8 @@ func NewDefaultSettings(repositories []Repository) Settings {
 			PluginRepositories: repositories,
 		},
 	}
+
+	settings.Mirrors = mirrors
 
 	return settings
 }

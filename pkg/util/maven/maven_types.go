@@ -41,6 +41,14 @@ type RepositoryPolicy struct {
 	ChecksumPolicy string `xml:"checksumPolicy,omitempty"`
 }
 
+// Mirror --
+type Mirror struct {
+	ID        string           `xml:"id"`
+	Name      string           `xml:"name,omitempty"`
+	URL       string           `xml:"url"`
+	MirrorOf  string           `xml:"mirrorOf"`
+}
+
 // Build --
 type Build struct {
 	DefaultGoal string   `xml:"defaultGoal,omitempty"`
@@ -157,6 +165,7 @@ type Settings struct {
 	XsiSchemaLocation string    `xml:"xsi:schemaLocation,attr"`
 	LocalRepository   string    `xml:"localRepository"`
 	Profiles          []Profile `xml:"profiles>profile,omitempty"`
+	Mirrors           []Mirror  `xml:"mirrors>mirror,omitempty"`
 }
 
 // MarshalBytes --
@@ -235,3 +244,5 @@ type PropertyActivation struct {
 	Name  string `xml:"name"`
 	Value string `xml:"value"`
 }
+
+

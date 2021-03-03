@@ -197,3 +197,22 @@ func NewRepository(repo string) Repository {
 
 	return r
 }
+
+func NewMirror(repo string) Mirror{
+	m := Mirror{}
+	if idx := strings.Index(repo, "@"); idx != -1 {
+		m.URL = repo[:idx]
+
+		for _, attribute := range strings.Split(repo[idx+1:], "@") {
+			switch {
+			case strings.HasPrefix(attribute, "mirrorOf="):
+				m.MirrorOf = attribute[9:]
+			case strings.HasPrefix(attribute, "id="):
+				m.ID = attribute[3:]
+			case strings.HasPrefix(attribute, "name="):
+				m.Name = attribute[5:]
+			}
+		}
+	}
+	return m
+}

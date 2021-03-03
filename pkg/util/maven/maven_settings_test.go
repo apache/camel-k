@@ -52,6 +52,7 @@ const expectedSettings = `<?xml version="1.0" encoding="UTF-8"?>
       <pluginRepositories></pluginRepositories>
     </profile>
   </profiles>
+  <mirrors></mirrors>
 </settings>`
 
 const expectedDefaultSettings = `<?xml version="1.0" encoding="UTF-8"?>
@@ -94,6 +95,7 @@ const expectedDefaultSettings = `<?xml version="1.0" encoding="UTF-8"?>
       </pluginRepositories>
     </profile>
   </profiles>
+  <mirrors></mirrors>
 </settings>`
 
 const expectedDefaultSettingsWithExtraRepo = `<?xml version="1.0" encoding="UTF-8"?>
@@ -160,6 +162,13 @@ const expectedDefaultSettingsWithExtraRepo = `<?xml version="1.0" encoding="UTF-
       </pluginRepositories>
     </profile>
   </profiles>
+  <mirrors>
+    <mirror>
+      <id>foo</id>
+      <url>https://foo.bar.org/repo</url>
+      <mirrorOf>*</mirrorOf>
+    </mirror>
+  </mirrors>
 </settings>`
 
 func TestSettingsGeneration(t *testing.T) {
@@ -198,7 +207,7 @@ func TestSettingsGeneration(t *testing.T) {
 }
 
 func TestDefaultSettingsGeneration(t *testing.T) {
-	settings := NewDefaultSettings([]Repository{})
+	settings := NewDefaultSettings([]Repository{}, []Mirror{})
 
 	content, err := util.EncodeXML(settings)
 
@@ -213,7 +222,10 @@ func TestDefaultSettingsGenerationWithAdditionalRepo(t *testing.T) {
 		NewRepository("https://repo1.maven.org/maven2@id=central"),
 		NewRepository("https://foo.bar.org/repo@id=foo"),
 	}
-	settings := NewDefaultSettings(repositories)
+	mirrors := []Mirror{
+		NewMirror("https://foo.bar.org/repo@id=foo@mirrorOf=*"),
+	}
+	settings := NewDefaultSettings(repositories, mirrors)
 
 	content, err := util.EncodeXML(settings)
 
@@ -224,7 +236,7 @@ func TestDefaultSettingsGenerationWithAdditionalRepo(t *testing.T) {
 }
 
 func TestCreateSettingsConfigMap(t *testing.T) {
-	settings := NewDefaultSettings([]Repository{})
+	settings := NewDefaultSettings([]Repository{}, []Mirror{})
 
 	configMap, err := CreateSettingsConfigMap("foo", "bar", settings)
 	assert.Nil(t, err)
