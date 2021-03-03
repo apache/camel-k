@@ -8,7 +8,9 @@
 
 - bou.ke/monkey license [\#2067](https://github.com/apache/camel-k/issues/2067)
 - \[cmd\] Warning on launching operator [\#2051](https://github.com/apache/camel-k/issues/2051)
+- \[Trait\] Extend affinity trait to CronJobs and KnativeServices [\#2047](https://github.com/apache/camel-k/issues/2047)
 - kamelet-binding: support for processing steps [\#2043](https://github.com/apache/camel-k/issues/2043)
+- Local build implementation [\#2038](https://github.com/apache/camel-k/issues/2038)
 - spectrum publish x509: certificate signed by unknown authority [\#2029](https://github.com/apache/camel-k/issues/2029)
 - ServiceBinding kind not installed  [\#2018](https://github.com/apache/camel-k/issues/2018)
 - Mount resource ConfigMaps as subPaths instead of volumes [\#1998](https://github.com/apache/camel-k/issues/1998)
@@ -19,18 +21,24 @@
 - Make changelog action work again [\#1981](https://github.com/apache/camel-k/issues/1981)
 - Add a Backport Github action  [\#1969](https://github.com/apache/camel-k/issues/1969)
 - Release 1.3.1 [\#1966](https://github.com/apache/camel-k/issues/1966)
+- Group all traits test under one e2e directory [\#1955](https://github.com/apache/camel-k/issues/1955)
 - Usage of binary data in ConfigMaps [\#1946](https://github.com/apache/camel-k/issues/1946)
 - \[ppc64le\] bundle image generated using `bundle` and `bundle-build` targets incompatible with `opm` [\#1923](https://github.com/apache/camel-k/issues/1923)
+- Installing Camel-K operator on Docker for Desktop with Kubernetes cluster enabled [\#1902](https://github.com/apache/camel-k/issues/1902)
 - Corrupted binaries attached as resource [\#1881](https://github.com/apache/camel-k/issues/1881)
 - Release 1.3.0 [\#1867](https://github.com/apache/camel-k/issues/1867)
 - Refactor artifacts of deploy directory and continue alignment towards operator-sdk & kustomize [\#1820](https://github.com/apache/camel-k/issues/1820)
+- Add a cli subcommand to inspect dependencies required by an Integration [\#1738](https://github.com/apache/camel-k/issues/1738)
+- Camel K installed globally by default [\#1693](https://github.com/apache/camel-k/issues/1693)
 - Example Integration in the ClusterServiceVersion stuck in Deploying phase [\#1677](https://github.com/apache/camel-k/issues/1677)
+- document how to create knative camel sources using Java [\#1674](https://github.com/apache/camel-k/issues/1674)
 - Take a look at service binding [\#1445](https://github.com/apache/camel-k/issues/1445)
 - Build controller service / operator [\#681](https://github.com/apache/camel-k/issues/681)
 - Add support for template endpoint [\#249](https://github.com/apache/camel-k/issues/249)
 
 **Merged pull requests:**
 
+- refactor\(trait\): affinity  [\#2078](https://github.com/apache/camel-k/pull/2078) ([squakez](https://github.com/squakez))
 - Upgrade Kubernetes to v0.19.8 and Service Binding operator to v0.4.1 [\#2076](https://github.com/apache/camel-k/pull/2076) ([astefanutti](https://github.com/astefanutti))
 - Fix deprecated annotation [\#2070](https://github.com/apache/camel-k/pull/2070) ([bouskaJ](https://github.com/bouskaJ))
 - Operator labels are different when OLM is used [\#2069](https://github.com/apache/camel-k/pull/2069) ([bouskaJ](https://github.com/bouskaJ))
@@ -116,6 +124,7 @@
 - Fix \#1936: avoid patching if the target resource contains all expecte… [\#1937](https://github.com/apache/camel-k/pull/1937) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(api\): Add missing x-descriptors field to Kamelet property type [\#1934](https://github.com/apache/camel-k/pull/1934) ([astefanutti](https://github.com/astefanutti))
 - Fix helm chart so it is compatible with Go 1.14 [\#1933](https://github.com/apache/camel-k/pull/1933) ([jon-ruckwood](https://github.com/jon-ruckwood))
+- Use Quarkus fast-jar package format apache/camel-k-runtime\#360 [\#1931](https://github.com/apache/camel-k/pull/1931) ([jamesnetherton](https://github.com/jamesnetherton))
 - Fix \#1928: use "id" property in kamelet binding for adding specific c… [\#1929](https://github.com/apache/camel-k/pull/1929) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(examples\): kamelets properties fix [\#1927](https://github.com/apache/camel-k/pull/1927) ([squakez](https://github.com/squakez))
 - Fix saga example [\#1926](https://github.com/apache/camel-k/pull/1926) ([jamesnetherton](https://github.com/jamesnetherton))
@@ -140,11 +149,6 @@
 - feat\(test\): builder command unit test [\#1891](https://github.com/apache/camel-k/pull/1891) ([squakez](https://github.com/squakez))
 - feat\(test\): kit create command unit test [\#1889](https://github.com/apache/camel-k/pull/1889) ([squakez](https://github.com/squakez))
 - feat\(test\): delete command unit test [\#1888](https://github.com/apache/camel-k/pull/1888) ([squakez](https://github.com/squakez))
-- chore\(e2e\): add test for Istio trait \#1547 [\#1885](https://github.com/apache/camel-k/pull/1885) ([tadayosi](https://github.com/tadayosi))
-- feat\(test\): install command flags unit test [\#1883](https://github.com/apache/camel-k/pull/1883) ([squakez](https://github.com/squakez))
-- Fix operator monitoring test [\#1880](https://github.com/apache/camel-k/pull/1880) ([llowinge](https://github.com/llowinge))
-- Add network name flag to local run. [\#1879](https://github.com/apache/camel-k/pull/1879) ([doru1004](https://github.com/doru1004))
-- Skip CRD installation if output flag enabled [\#1876](https://github.com/apache/camel-k/pull/1876) ([squakez](https://github.com/squakez))
 - proposal: add Service Binding proposal \(\#1445\) [\#1864](https://github.com/apache/camel-k/pull/1864) ([johnpoth](https://github.com/johnpoth))
 
 ## [v1.3.1](https://github.com/apache/camel-k/tree/v1.3.1) (2021-02-01)
@@ -441,7 +445,6 @@
 - Related to \#1638 kamel init - should not create source file with ASF … [\#1639](https://github.com/apache/camel-k/pull/1639) ([oscerd](https://github.com/oscerd))
 - Add support for sinkbinding [\#1637](https://github.com/apache/camel-k/pull/1637) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
-- fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
 - Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
 - Implement Kamelets [\#1602](https://github.com/apache/camel-k/pull/1602) ([nicolaferraro](https://github.com/nicolaferraro))
 
@@ -527,6 +530,7 @@
 
 **Merged pull requests:**
 
+- fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
 - Initial architecture documentation [\#1629](https://github.com/apache/camel-k/pull/1629) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix\(doc\): PodMonitoring -\> PodMonitor [\#1628](https://github.com/apache/camel-k/pull/1628) ([astefanutti](https://github.com/astefanutti))
 - doc: Init troubleshooting guide [\#1627](https://github.com/apache/camel-k/pull/1627) ([astefanutti](https://github.com/astefanutti))
@@ -1304,6 +1308,7 @@
 - Fix embedded resources snapshot version [\#882](https://github.com/apache/camel-k/pull/882) ([dmvolod](https://github.com/dmvolod))
 - Switch to images-dev build on install-mini\<plaform\> [\#881](https://github.com/apache/camel-k/pull/881) ([dmvolod](https://github.com/dmvolod))
 - Added unit tests for ingress\_trait \#255 [\#880](https://github.com/apache/camel-k/pull/880) ([aldettinger](https://github.com/aldettinger))
+- Remove Dep files [\#872](https://github.com/apache/camel-k/pull/872) ([astefanutti](https://github.com/astefanutti))
 - feat: Enable integration scale sub-resource [\#962](https://github.com/apache/camel-k/pull/962) ([astefanutti](https://github.com/astefanutti))
 - fix: Add option to disable Kaniko cache warming [\#922](https://github.com/apache/camel-k/pull/922) ([asifdxtreme](https://github.com/asifdxtreme))
 
@@ -1364,7 +1369,6 @@
 - Fix make clean for tests and remove binary file from repo [\#879](https://github.com/apache/camel-k/pull/879) ([dmvolod](https://github.com/dmvolod))
 - chore\(js\): fix examples, use arrow function for lambda style processor [\#877](https://github.com/apache/camel-k/pull/877) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix\(GC\): Skip 503 errors when scanning for resources to be GCed [\#876](https://github.com/apache/camel-k/pull/876) ([astefanutti](https://github.com/astefanutti))
-- Remove Dep files [\#872](https://github.com/apache/camel-k/pull/872) ([astefanutti](https://github.com/astefanutti))
 - chore\(build\): remove go mod vendor from travis build [\#871](https://github.com/apache/camel-k/pull/871) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#789: add correct example for operator hub [\#868](https://github.com/apache/camel-k/pull/868) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#730: put example that demonstrate backward compatibility works [\#867](https://github.com/apache/camel-k/pull/867) ([nicolaferraro](https://github.com/nicolaferraro))
