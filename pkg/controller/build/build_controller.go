@@ -25,10 +25,10 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/record"
 
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -82,7 +82,8 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Build
-	err = c.Watch(&source.Kind{Type: &v1.Build{}}, &handler.EnqueueRequestForObject{},
+	err = c.Watch(&source.Kind{Type: &v1.Build{}},
+		&handler.EnqueueRequestForObject{},
 		predicate.Funcs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
 				oldBuild := e.ObjectOld.(*v1.Build)
@@ -93,7 +94,8 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				return oldBuild.Generation != newBuild.Generation ||
 					oldBuild.Status.Phase != newBuild.Status.Phase
 			},
-		})
+		},
+	)
 	if err != nil {
 		return err
 	}
@@ -112,7 +114,8 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				// as it's used to transition the builds from one phase to another
 				return oldPod.Status.Phase != newPod.Status.Phase
 			},
-		})
+		},
+	)
 	if err != nil {
 		return err
 	}
@@ -129,7 +132,7 @@ type reconcileBuild struct {
 	client client.Client
 	// Non-caching client to be used whenever caching may cause race conditions,
 	// like in the builds scheduling critical section
-	reader   k8sclient.Reader
+	reader   ctrl.Reader
 	scheme   *runtime.Scheme
 	builder  builder.Builder
 	routines sync.Map
@@ -141,11 +144,9 @@ type reconcileBuild struct {
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *reconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
 	rlog.Info("Reconciling Build")
-
-	ctx := context.TODO()
 
 	// Make sure the operator is allowed to act on namespace
 	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
@@ -265,7 +266,7 @@ func (r *reconcileBuild) Reconcile(request reconcile.Request) (reconcile.Result,
 }
 
 func (r *reconcileBuild) update(ctx context.Context, base *v1.Build, target *v1.Build) (reconcile.Result, error) {
-	err := r.client.Status().Patch(ctx, target, k8sclient.MergeFrom(base))
+	err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base))
 
 	return reconcile.Result{}, err
 }

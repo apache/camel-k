@@ -37,7 +37,7 @@ require (
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.6.2
-	github.com/stoewer/go-strcase v1.0.2
+	github.com/stoewer/go-strcase v1.2.0
 	github.com/stretchr/testify v1.6.1
 	go.uber.org/multierr v1.5.0
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
@@ -51,12 +51,8 @@ require (
 	knative.dev/eventing v0.18.0
 	knative.dev/pkg v0.0.0-20200922164940-4bf40ad82aab
 	knative.dev/serving v0.18.0
-	sigs.k8s.io/controller-runtime v0.6.4
+	sigs.k8s.io/controller-runtime v0.7.2
 )
-
-// To be removed when upgrading to controller-runtime 0.7+
-// See: https://github.com/kubernetes-sigs/controller-runtime/pull/1238
-replace sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.6.3
 
 replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.2+incompatible // Required by client-go Azure plugin

@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"strings"
 
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/resources"
@@ -29,7 +31,6 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/uri"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // The Master trait allows to configure the integration to automatically leverage Kubernetes resources for doing
@@ -256,7 +257,7 @@ func findAdditionalDependencies(e *trait.Environment, meta metadata.IntegrationM
 	return dependencies
 }
 
-func loadResource(e *trait.Environment, name string, params interface{}) (runtime.Object, error) {
+func loadResource(e *trait.Environment, name string, params interface{}) (ctrl.Object, error) {
 	data, err := resources.TemplateResource(fmt.Sprintf("/addons/master/%s", name), params)
 	if err != nil {
 		return nil, err

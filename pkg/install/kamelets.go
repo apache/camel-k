@@ -23,10 +23,11 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
@@ -66,27 +67,24 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 			}
 
 			if existing == nil || existing.Annotations[kamelVersionAnnotation] != defaults.Version {
-				err := Resource(ctx, c, namespace, true, func(object runtime.Object) runtime.Object {
-					if o, ok := object.(metav1.Object); ok {
-						if o.GetAnnotations() == nil {
-							o.SetAnnotations(make(map[string]string))
-						}
-						o.GetAnnotations()[kamelVersionAnnotation] = defaults.Version
-
-						if o.GetLabels() == nil {
-							o.SetLabels(make(map[string]string))
-						}
-						o.GetLabels()[kameletBundledLabel] = "true"
-						o.GetLabels()[kameletReadOnlyLabel] = "true"
+				err := Resource(ctx, c, namespace, true, func(o ctrl.Object) ctrl.Object {
+					if o.GetAnnotations() == nil {
+						o.SetAnnotations(make(map[string]string))
 					}
-					return object
+					o.GetAnnotations()[kamelVersionAnnotation] = defaults.Version
+
+					if o.GetLabels() == nil {
+						o.SetLabels(make(map[string]string))
+					}
+					o.GetLabels()[kameletBundledLabel] = "true"
+					o.GetLabels()[kameletReadOnlyLabel] = "true"
+					return o
 				}, path.Join(kameletDir, res))
 
 				if err != nil {
 					return errors.Wrapf(err, "could not create resource %q", res)
 				}
 			}
-
 		}
 	}
 

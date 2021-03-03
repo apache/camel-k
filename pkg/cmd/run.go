@@ -39,7 +39,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
@@ -302,12 +302,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 			// The integration watch timed out so recreate it using the latest integration resource version
 			clone := integration.DeepCopy()
-			var key k8sclient.ObjectKey
-			key, err = k8sclient.ObjectKeyFromObject(clone)
-			if err != nil {
-				return err
-			}
-			err = c.Get(o.Context, key, clone)
+			err = c.Get(o.Context, ctrl.ObjectKeyFromObject(clone), clone)
 			if err != nil {
 				return err
 			}
@@ -429,7 +424,7 @@ func (o *runCmdOptions) createIntegration(c client.Client, sources []string, cat
 	return o.updateIntegrationCode(c, sources, catalog)
 }
 
-//nolint: gocyclo
+// nolint: gocyclo
 func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string, catalog *trait.Catalog) (*v1.Integration, error) {
 	namespace := o.Namespace
 
@@ -590,12 +585,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		existed = true
 		clone := integration.DeepCopy()
-		var key k8sclient.ObjectKey
-		key, err = k8sclient.ObjectKeyFromObject(clone)
-		if err != nil {
-			return nil, err
-		}
-		err = c.Get(o.Context, key, clone)
+		err = c.Get(o.Context, ctrl.ObjectKeyFromObject(clone), clone)
 		if err != nil {
 			return nil, err
 		}

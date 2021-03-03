@@ -23,10 +23,9 @@ import (
 	"github.com/pkg/errors"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/patch"
@@ -109,30 +108,27 @@ func (t *deployerTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *deployerTrait) serverSideApply(env *Environment, resource runtime.Object) error {
+func (t *deployerTrait) serverSideApply(env *Environment, resource ctrl.Object) error {
 	target, err := patch.PositiveApplyPatch(resource)
 	if err != nil {
 		return err
 	}
-	err = env.Client.Patch(env.C, target, client.Apply, client.ForceOwnership, client.FieldOwner("camel-k-operator"))
+	err = env.Client.Patch(env.C, target, ctrl.Apply, ctrl.ForceOwnership, ctrl.FieldOwner("camel-k-operator"))
 	if err != nil {
 		return errors.Wrapf(err, "error during apply resource: %v", resource)
 	}
 	return nil
 }
 
-func (t *deployerTrait) clientSideApply(env *Environment, resource runtime.Object) error {
+func (t *deployerTrait) clientSideApply(env *Environment, resource ctrl.Object) error {
 	err := env.Client.Create(env.C, resource)
 	if err == nil {
 		return nil
 	} else if !k8serrors.IsAlreadyExists(err) {
 		return errors.Wrapf(err, "error during create resource: %v", resource)
 	}
-	key, err := client.ObjectKeyFromObject(resource)
-	if err != nil {
-		return err
-	}
-	object := resource.DeepCopyObject()
+	key := ctrl.ObjectKeyFromObject(resource)
+	object := resource.DeepCopyObject().(ctrl.Object)
 	err = env.Client.Get(env.C, key, object)
 	if err != nil {
 		return err
@@ -144,7 +140,7 @@ func (t *deployerTrait) clientSideApply(env *Environment, resource runtime.Objec
 		// Avoid triggering a patch request for nothing
 		return nil
 	}
-	err = env.Client.Patch(env.C, resource, client.RawPatch(types.MergePatchType, p))
+	err = env.Client.Patch(env.C, resource, ctrl.RawPatch(types.MergePatchType, p))
 	if err != nil {
 		return errors.Wrapf(err, "error during patch resource: %v", resource)
 	}

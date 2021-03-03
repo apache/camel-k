@@ -29,8 +29,9 @@ import (
 	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
@@ -393,9 +394,9 @@ func (e *Environment) computeApplicationProperties() *corev1.ConfigMap {
 	return nil
 }
 
-func (e *Environment) computeConfigMaps() []runtime.Object {
+func (e *Environment) computeConfigMaps() []ctrl.Object {
 	sources := e.Integration.Sources()
-	maps := make([]runtime.Object, 0, len(sources)+1)
+	maps := make([]ctrl.Object, 0, len(sources)+1)
 
 	// combine properties of integration with kit, integration
 	// properties have the priority

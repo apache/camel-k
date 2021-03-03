@@ -29,7 +29,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/json"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	buildv1 "github.com/openshift/api/build/v1"
 	imagev1 "github.com/openshift/api/image/v1"
@@ -175,11 +175,7 @@ func publisher(ctx *builder.Context) error {
 		return err
 	}
 
-	key, err := k8sclient.ObjectKeyFromObject(&is)
-	if err != nil {
-		return err
-	}
-	err = ctx.Client.Get(ctx.C, key, &is)
+	err = ctx.Client.Get(ctx.C, ctrl.ObjectKeyFromObject(&is), &is)
 	if err != nil {
 		return err
 	}

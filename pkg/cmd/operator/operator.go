@@ -27,7 +27,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/apache/camel-k/pkg/platform"
 	corev1 "k8s.io/api/core/v1"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/record"
@@ -45,6 +44,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/controller"
 	"github.com/apache/camel-k/pkg/install"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )

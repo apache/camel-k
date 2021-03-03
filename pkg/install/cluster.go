@@ -25,14 +25,13 @@ import (
 	"time"
 
 	rbacv1 "k8s.io/api/rbac/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
-
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/resources"
@@ -68,7 +67,7 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 			return err
 		}
 	}
-	downgradeToCRDv1beta1 := func(object runtime.Object) runtime.Object {
+	downgradeToCRDv1beta1 := func(object ctrl.Object) ctrl.Object {
 		if !isApiExtensionsV1 {
 			v1Crd := object.(*apiextensionsv1.CustomResourceDefinition)
 			v1beta1Crd := &apiextensionsv1beta1.CustomResourceDefinition{}
@@ -284,12 +283,8 @@ func isClusterRoleInstalled(ctx context.Context, c client.Client, name string) (
 	return isResourceInstalled(ctx, c, &clusterRole)
 }
 
-func isResourceInstalled(ctx context.Context, c client.Client, object runtime.Object) (bool, error) {
-	key, err := k8sclient.ObjectKeyFromObject(object)
-	if err != nil {
-		return false, err
-	}
-	err = c.Get(ctx, key, object)
+func isResourceInstalled(ctx context.Context, c client.Client, object ctrl.Object) (bool, error) {
+	err := c.Get(ctx, ctrl.ObjectKeyFromObject(object), object)
 	if err != nil && k8serrors.IsNotFound(err) {
 		return false, nil
 	} else if err != nil {

@@ -26,7 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/record"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -77,21 +77,24 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Kamelet
-	err = c.Watch(&source.Kind{Type: &v1alpha1.Kamelet{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
-		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldKamelet := e.ObjectOld.(*v1alpha1.Kamelet)
-			newKamelet := e.ObjectNew.(*v1alpha1.Kamelet)
-			// Ignore updates to the kamelet status in which case metadata.Generation
-			// does not change, or except when the kamelet phase changes as it's used
-			// to transition from one phase to another
-			return oldKamelet.Generation != newKamelet.Generation ||
-				oldKamelet.Status.Phase != newKamelet.Status.Phase
+	err = c.Watch(&source.Kind{Type: &v1alpha1.Kamelet{}},
+		&handler.EnqueueRequestForObject{},
+		predicate.Funcs{
+			UpdateFunc: func(e event.UpdateEvent) bool {
+				oldKamelet := e.ObjectOld.(*v1alpha1.Kamelet)
+				newKamelet := e.ObjectNew.(*v1alpha1.Kamelet)
+				// Ignore updates to the kamelet status in which case metadata.Generation
+				// does not change, or except when the kamelet phase changes as it's used
+				// to transition from one phase to another
+				return oldKamelet.Generation != newKamelet.Generation ||
+					oldKamelet.Status.Phase != newKamelet.Status.Phase
+			},
+			DeleteFunc: func(e event.DeleteEvent) bool {
+				// Evaluates to false if the object has been confirmed deleted
+				return !e.DeleteStateUnknown
+			},
 		},
-		DeleteFunc: func(e event.DeleteEvent) bool {
-			// Evaluates to false if the object has been confirmed deleted
-			return !e.DeleteStateUnknown
-		},
-	})
+	)
 	if err != nil {
 		return err
 	}
@@ -115,11 +118,9 @@ type reconcileKamelet struct {
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *reconcileKamelet) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *reconcileKamelet) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
 	rlog.Info("Reconciling Kamelet")
-
-	ctx := context.TODO()
 
 	// Make sure the operator is allowed to act on namespace
 	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
@@ -172,7 +173,7 @@ func (r *reconcileKamelet) Reconcile(request reconcile.Request) (reconcile.Resul
 			}
 
 			if target != nil {
-				if err := r.client.Status().Patch(ctx, target, k8sclient.MergeFrom(&instance)); err != nil {
+				if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(&instance)); err != nil {
 					camelevent.NotifyKameletError(ctx, r.client, r.recorder, &instance, target, err)
 					return reconcile.Result{}, err
 				}

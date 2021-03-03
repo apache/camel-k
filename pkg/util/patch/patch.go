@@ -23,9 +23,10 @@ import (
 	jsonpatch "github.com/evanphx/json-patch"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func PositiveMergePatch(source runtime.Object, target runtime.Object) ([]byte, error) {
@@ -64,7 +65,7 @@ func PositiveMergePatch(source runtime.Object, target runtime.Object) ([]byte, e
 	return json.Marshal(positivePatch)
 }
 
-func PositiveApplyPatch(source runtime.Object) (runtime.Object, error) {
+func PositiveApplyPatch(source runtime.Object) (ctrl.Object, error) {
 	sourceJSON, err := json.Marshal(source)
 	if err != nil {
 		return nil, err

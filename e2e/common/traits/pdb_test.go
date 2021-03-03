@@ -155,11 +155,7 @@ func podDisruptionBudget(ns string, name string) func() *policy.PodDisruptionBud
 				Name:      name,
 			},
 		}
-		key, err := client.ObjectKeyFromObject(&pdb)
-		if err != nil {
-			panic(err)
-		}
-		err = TestClient().Get(TestContext, key, &pdb)
+		err := TestClient().Get(TestContext, client.ObjectKeyFromObject(&pdb), &pdb)
 		if err != nil && errors.IsNotFound(err) {
 			return nil
 		} else if err != nil {

@@ -18,6 +18,7 @@ limitations under the License.
 package monitoring
 
 import (
+	"context"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -57,17 +58,17 @@ type instrumentedReconciler struct {
 
 var _ reconcile.Reconciler = &instrumentedReconciler{}
 
-func NewInstrumentedReconciler(reconciler reconcile.Reconciler, gvk schema.GroupVersionKind) reconcile.Reconciler {
+func NewInstrumentedReconciler(rec reconcile.Reconciler, gvk schema.GroupVersionKind) reconcile.Reconciler {
 	return &instrumentedReconciler{
-		reconciler: reconciler,
+		reconciler: rec,
 		gvk:        gvk,
 	}
 }
 
-func (r *instrumentedReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *instrumentedReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	timer := NewTimer()
 
-	res, err := r.reconciler.Reconcile(request)
+	res, err := r.reconciler.Reconcile(ctx, request)
 
 	labels := prometheus.Labels{
 		namespaceLabel: request.Namespace,

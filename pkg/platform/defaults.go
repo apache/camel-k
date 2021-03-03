@@ -23,8 +23,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apache/camel-k/pkg/kamelet/repository"
-	"github.com/apache/camel-k/pkg/util/patch"
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -33,15 +31,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/install"
+	"github.com/apache/camel-k/pkg/kamelet/repository"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/openshift"
+	"github.com/apache/camel-k/pkg/util/patch"
 )
 
 // BuilderServiceAccount --
@@ -293,13 +293,8 @@ func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Clie
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		return err
 	} else if k8serrors.IsAlreadyExists(err) {
-		key, err := k8sclient.ObjectKeyFromObject(cm)
-		if err != nil {
-			return err
-		}
-
-		cmCopy := cm.DeepCopyObject()
-		err = client.Get(ctx, key, cmCopy)
+		cmCopy := cm.DeepCopyObject().(ctrl.Object)
+		err = client.Get(ctx, ctrl.ObjectKeyFromObject(cm), cmCopy)
 		if err != nil {
 			return err
 		}
@@ -308,7 +303,7 @@ func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Clie
 		if err != nil {
 			return err
 		} else if len(p) != 0 {
-			err = client.Patch(ctx, cm, k8sclient.RawPatch(types.MergePatchType, p))
+			err = client.Patch(ctx, cm, ctrl.RawPatch(types.MergePatchType, p))
 			if err != nil {
 				return errors.Wrap(err, "error during patch resource")
 			}
@@ -339,7 +334,7 @@ func createServiceCaBundleConfigMap(ctx context.Context, client client.Client, p
 
 func createBuilderServiceAccount(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) error {
 	sa := corev1.ServiceAccount{}
-	key := k8sclient.ObjectKey{
+	key := ctrl.ObjectKey{
 		Name:      BuilderServiceAccount,
 		Namespace: p.Namespace,
 	}

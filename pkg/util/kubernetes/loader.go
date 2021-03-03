@@ -25,10 +25,12 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/util/yaml"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // LoadResourceFromYaml loads a k8s resource from a yaml definition
-func LoadResourceFromYaml(scheme *runtime.Scheme, data string) (runtime.Object, error) {
+func LoadResourceFromYaml(scheme *runtime.Scheme, data string) (ctrl.Object, error) {
 	source := []byte(data)
 	jsonSource, err := yaml.ToJSON(source)
 	if err != nil {
@@ -39,7 +41,15 @@ func LoadResourceFromYaml(scheme *runtime.Scheme, data string) (runtime.Object, 
 	if err != nil {
 		return nil, err
 	}
-	return RuntimeObjectFromUnstructured(scheme, &u)
+	ro, err := runtimeObjectFromUnstructured(scheme, &u)
+	if err != nil {
+		return nil, err
+	}
+	if o, ok := ro.(ctrl.Object); !ok {
+		return nil, err
+	} else {
+		return o, nil
+	}
 }
 
 // LoadRawResourceFromYaml loads a k8s resource from a yaml definition without making assumptions on the underlying type
@@ -58,8 +68,7 @@ func LoadRawResourceFromYaml(data string) (runtime.Object, error) {
 	}, nil
 }
 
-// RuntimeObjectFromUnstructured converts an unstructured to a runtime object
-func RuntimeObjectFromUnstructured(scheme *runtime.Scheme, u *unstructured.Unstructured) (runtime.Object, error) {
+func runtimeObjectFromUnstructured(scheme *runtime.Scheme, u *unstructured.Unstructured) (runtime.Object, error) {
 	gvk := u.GroupVersionKind()
 	codecs := serializer.NewCodecFactory(scheme)
 	decoder := codecs.UniversalDecoder(gvk.GroupVersion())

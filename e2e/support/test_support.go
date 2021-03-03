@@ -44,9 +44,8 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1beta1"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1beta1"
@@ -280,8 +279,8 @@ func IntegrationPods(ns string, name string) func() []corev1.Pod {
 			},
 		}
 		err := TestClient().List(TestContext, &lst,
-			k8sclient.InNamespace(ns),
-			k8sclient.MatchingLabels{
+			ctrl.InNamespace(ns),
+			ctrl.MatchingLabels{
 				v1.IntegrationLabel: name,
 			})
 		if err != nil {
@@ -328,7 +327,7 @@ func IntegrationCondition(ns string, name string, conditionType v1.IntegrationCo
 func ConfigMap(ns string, name string) func() *corev1.ConfigMap {
 	return func() *corev1.ConfigMap {
 		cm := corev1.ConfigMap{}
-		key := k8sclient.ObjectKey{
+		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
 		}
@@ -345,7 +344,7 @@ func ConfigMap(ns string, name string) func() *corev1.ConfigMap {
 func Service(ns string, name string) func() *corev1.Service {
 	return func() *corev1.Service {
 		svc := corev1.Service{}
-		key := k8sclient.ObjectKey{
+		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
 		}
@@ -362,7 +361,7 @@ func Service(ns string, name string) func() *corev1.Service {
 func Route(ns string, name string) func() *routev1.Route {
 	return func() *routev1.Route {
 		route := routev1.Route{}
-		key := k8sclient.ObjectKey{
+		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
 		}
@@ -385,8 +384,8 @@ func IntegrationCronJob(ns string, name string) func() *v1beta1.CronJob {
 			},
 		}
 		err := TestClient().List(TestContext, &lst,
-			k8sclient.InNamespace(ns),
-			k8sclient.MatchingLabels{
+			ctrl.InNamespace(ns),
+			ctrl.MatchingLabels{
 				"camel.apache.org/integration": name,
 			})
 		if err != nil {
@@ -402,7 +401,7 @@ func IntegrationCronJob(ns string, name string) func() *v1beta1.CronJob {
 func Integration(ns string, name string) func() *v1.Integration {
 	return func() *v1.Integration {
 		it := v1.NewIntegration(ns, name)
-		key := k8sclient.ObjectKey{
+		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
 		}
@@ -495,7 +494,7 @@ func ScaleIntegration(ns string, name string, replicas int32) error {
 func Kits(ns string) func() []v1.IntegrationKit {
 	return func() []v1.IntegrationKit {
 		lst := v1.NewIntegrationKitList()
-		if err := TestClient().List(TestContext, &lst, k8sclient.InNamespace(ns)); err != nil {
+		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
 			panic(err)
 		}
 		return lst.Items
@@ -559,7 +558,7 @@ func Configmap(ns string, name string) func() *corev1.ConfigMap {
 				Name:      name,
 			},
 		}
-		key := k8sclient.ObjectKey{
+		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
 		}
@@ -585,7 +584,7 @@ func KnativeService(ns string, name string) func() *servingv1.Service {
 				Name:      name,
 			},
 		}
-		key := k8sclient.ObjectKey{
+		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
 		}
@@ -611,7 +610,7 @@ func Deployment(ns string, name string) func() *appsv1.Deployment {
 				Name:      name,
 			},
 		}
-		key := k8sclient.ObjectKey{
+		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
 		}
@@ -628,7 +627,7 @@ func Deployment(ns string, name string) func() *appsv1.Deployment {
 func Build(ns string, name string) func() *v1.Build {
 	return func() *v1.Build {
 		build := v1.NewBuild(ns, name)
-		key := k8sclient.ObjectKey{
+		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
 		}
@@ -645,7 +644,7 @@ func Build(ns string, name string) func() *v1.Build {
 func Platform(ns string) func() *v1.IntegrationPlatform {
 	return func() *v1.IntegrationPlatform {
 		lst := v1.NewIntegrationPlatformList()
-		if err := TestClient().List(TestContext, &lst, k8sclient.InNamespace(ns)); err != nil {
+		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
 			panic(err)
 		}
 		if len(lst.Items) == 0 {
@@ -722,8 +721,8 @@ func OperatorPod(ns string) func() *corev1.Pod {
 			},
 		}
 		err := TestClient().List(TestContext, &lst,
-			k8sclient.InNamespace(ns),
-			k8sclient.MatchingLabels{
+			ctrl.InNamespace(ns),
+			ctrl.MatchingLabels{
 				"camel.apache.org/component": "operator",
 			})
 		if err != nil {
@@ -739,7 +738,7 @@ func OperatorPod(ns string) func() *corev1.Pod {
 func OperatorTryPodForceKill(ns string, timeSeconds int) {
 	pod := OperatorPod(ns)()
 	if pod != nil {
-		if err := TestClient().Delete(TestContext, pod, k8sclient.GracePeriodSeconds(timeSeconds)); err != nil {
+		if err := TestClient().Delete(TestContext, pod, ctrl.GracePeriodSeconds(timeSeconds)); err != nil {
 			log.Error(err, "cannot forcefully kill the pod")
 		}
 	}
@@ -752,7 +751,7 @@ func ScaleOperator(ns string, replicas int32) func() error {
 			return err
 		}
 		operator.Spec.Replicas = &replicas
-		_, err = TestClient().AppsV1().Deployments(ns).Update(TestContext,operator, metav1.UpdateOptions{})
+		_, err = TestClient().AppsV1().Deployments(ns).Update(TestContext, operator, metav1.UpdateOptions{})
 		if err != nil {
 			return err
 		}
@@ -774,8 +773,8 @@ func Role(ns string) func() *rbacv1.Role {
 			},
 		}
 		err := TestClient().List(TestContext, &lst,
-			k8sclient.InNamespace(ns),
-			k8sclient.MatchingLabels{
+			ctrl.InNamespace(ns),
+			ctrl.MatchingLabels{
 				"app": "camel-k",
 			})
 		if err != nil {
@@ -797,8 +796,8 @@ func RoleBinding(ns string) func() *rbacv1.RoleBinding {
 			},
 		}
 		err := TestClient().List(TestContext, &lst,
-			k8sclient.InNamespace(ns),
-			k8sclient.MatchingLabels{
+			ctrl.InNamespace(ns),
+			ctrl.MatchingLabels{
 				"app": "camel-k",
 			})
 		if err != nil {
@@ -820,8 +819,8 @@ func ServiceAccount(ns, name string) func() *corev1.ServiceAccount {
 			},
 		}
 		err := TestClient().List(TestContext, &lst,
-			k8sclient.InNamespace(ns),
-			k8sclient.MatchingLabels{
+			ctrl.InNamespace(ns),
+			ctrl.MatchingLabels{
 				"app": "camel-k",
 			})
 		if err != nil {
@@ -1035,7 +1034,7 @@ func NumPods(ns string) func() int {
 				APIVersion: v1.SchemeGroupVersion.String(),
 			},
 		}
-		if err := TestClient().List(TestContext, &lst, k8sclient.InNamespace(ns)); err != nil && k8serrors.IsUnauthorized(err) {
+		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil && k8serrors.IsUnauthorized(err) {
 			return 0
 		} else if err != nil {
 			log.Error(err, "Error while listing the pods")
@@ -1101,10 +1100,7 @@ func DeleteKnativeBroker(ns metav1.Object) {
 			Name: ns.GetName(),
 		},
 	}
-	nsKey, err := k8sclient.ObjectKeyFromObject(&nsRef)
-	if err != nil {
-		panic(err)
-	}
+	nsKey := ctrl.ObjectKeyFromObject(&nsRef)
 	if err := TestClient().Get(TestContext, nsKey, &nsRef); err != nil {
 		panic(err)
 	}
@@ -1128,7 +1124,7 @@ func DeleteKnativeBroker(ns metav1.Object) {
 	}
 }
 
-func DeleteTestNamespace(t *testing.T, ns metav1.Object) {
+func DeleteTestNamespace(t *testing.T, ns ctrl.Object) {
 	var oc bool
 	var err error
 	if oc, err = openshift.IsOpenShift(TestClient()); err != nil {
@@ -1147,7 +1143,7 @@ func DeleteTestNamespace(t *testing.T, ns metav1.Object) {
 			t.Logf("Warning: cannot delete test project %q", prj.Name)
 		}
 	} else {
-		if err := TestClient().Delete(TestContext, ns.(runtime.Object)); err != nil {
+		if err := TestClient().Delete(TestContext, ns); err != nil {
 			t.Logf("Warning: cannot delete test namespace %q", ns.GetName())
 		}
 	}
@@ -1163,10 +1159,10 @@ func DeleteTestNamespace(t *testing.T, ns metav1.Object) {
 	}
 }
 
-func NewTestNamespace(injectKnativeBroker bool) metav1.Object {
+func NewTestNamespace(injectKnativeBroker bool) ctrl.Object {
 	var err error
 	var oc bool
-	var obj runtime.Object
+	var obj ctrl.Object
 
 	brokerLabel := "eventing.knative.dev/injection"
 	name := "test-" + uuid.New().String()
@@ -1222,5 +1218,5 @@ func NewTestNamespace(injectKnativeBroker bool) metav1.Object {
 			}
 		}
 	}
-	return obj.(metav1.Object)
+	return obj
 }

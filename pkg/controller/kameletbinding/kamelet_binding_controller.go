@@ -26,7 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/record"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -76,21 +76,24 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource KameletBinding
-	err = c.Watch(&source.Kind{Type: &v1alpha1.KameletBinding{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
-		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldKameletBinding := e.ObjectOld.(*v1alpha1.KameletBinding)
-			newKameletBinding := e.ObjectNew.(*v1alpha1.KameletBinding)
-			// Ignore updates to the kameletBinding status in which case metadata.Generation
-			// does not change, or except when the kameletBinding phase changes as it's used
-			// to transition from one phase to another
-			return oldKameletBinding.Generation != newKameletBinding.Generation ||
-				oldKameletBinding.Status.Phase != newKameletBinding.Status.Phase
+	err = c.Watch(&source.Kind{Type: &v1alpha1.KameletBinding{}},
+		&handler.EnqueueRequestForObject{},
+		predicate.Funcs{
+			UpdateFunc: func(e event.UpdateEvent) bool {
+				oldKameletBinding := e.ObjectOld.(*v1alpha1.KameletBinding)
+				newKameletBinding := e.ObjectNew.(*v1alpha1.KameletBinding)
+				// Ignore updates to the kameletBinding status in which case metadata.Generation
+				// does not change, or except when the kameletBinding phase changes as it's used
+				// to transition from one phase to another
+				return oldKameletBinding.Generation != newKameletBinding.Generation ||
+					oldKameletBinding.Status.Phase != newKameletBinding.Status.Phase
+			},
+			DeleteFunc: func(e event.DeleteEvent) bool {
+				// Evaluates to false if the object has been confirmed deleted
+				return !e.DeleteStateUnknown
+			},
 		},
-		DeleteFunc: func(e event.DeleteEvent) bool {
-			// Evaluates to false if the object has been confirmed deleted
-			return !e.DeleteStateUnknown
-		},
-	})
+	)
 	if err != nil {
 		return err
 	}
@@ -123,11 +126,9 @@ type ReconcileKameletBinding struct {
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcileKameletBinding) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileKameletBinding) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
 	rlog.Info("Reconciling KameletBinding")
-
-	ctx := context.TODO()
 
 	// Make sure the operator is allowed to act on namespace
 	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
@@ -180,7 +181,7 @@ func (r *ReconcileKameletBinding) Reconcile(request reconcile.Request) (reconcil
 			}
 
 			if target != nil {
-				if err := r.client.Status().Patch(ctx, target, k8sclient.MergeFrom(&instance)); err != nil {
+				if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(&instance)); err != nil {
 					camelevent.NotifyKameletBindingError(ctx, r.client, r.recorder, &instance, target, err)
 					return reconcile.Result{}, err
 				}
