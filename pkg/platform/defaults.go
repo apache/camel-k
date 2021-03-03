@@ -284,7 +284,7 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1.Integration
 }
 
 func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Client, p *v1.IntegrationPlatform, settings maven.Settings) error {
-	cm, err := maven.CreateSettingsConfigMap(p.Namespace, p.Name, settings)
+	cm, err := maven.SettingsConfigMap(p.Namespace, p.Name, settings)
 	if err != nil {
 		return err
 	}
@@ -293,13 +293,18 @@ func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Clie
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		return err
 	} else if k8serrors.IsAlreadyExists(err) {
-		cmCopy := cm.DeepCopyObject().(ctrl.Object)
-		err = client.Get(ctx, ctrl.ObjectKeyFromObject(cm), cmCopy)
+		existing := &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: cm.Namespace,
+				Name:      cm.Name,
+			},
+		}
+		err = client.Get(ctx, ctrl.ObjectKeyFromObject(existing), existing)
 		if err != nil {
 			return err
 		}
 
-		p, err := patch.PositiveMergePatch(cmCopy, cm)
+		p, err := patch.PositiveMergePatch(existing, cm)
 		if err != nil {
 			return err
 		} else if len(p) != 0 {

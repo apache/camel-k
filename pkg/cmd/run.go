@@ -39,6 +39,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -301,13 +302,13 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 			}
 
 			// The integration watch timed out so recreate it using the latest integration resource version
-			clone := integration.DeepCopy()
-			err = c.Get(o.Context, ctrl.ObjectKeyFromObject(clone), clone)
+			existing := v1.NewIntegration(integration.Namespace, integration.Name)
+			err = c.Get(o.Context, ctrl.ObjectKeyFromObject(&existing), &existing)
 			if err != nil {
 				return err
 			}
 
-			integration.ObjectMeta.ResourceVersion = clone.ObjectMeta.ResourceVersion
+			integration.ObjectMeta.ResourceVersion = existing.ObjectMeta.ResourceVersion
 		}
 	}
 	if o.Logs || o.Dev {
@@ -584,19 +585,24 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	err = c.Create(o.Context, &integration)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		existed = true
-		clone := integration.DeepCopy()
-		err = c.Get(o.Context, ctrl.ObjectKeyFromObject(clone), clone)
+		existing := &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: integration.Namespace,
+				Name:      integration.Name,
+			},
+		}
+		err = c.Get(o.Context, ctrl.ObjectKeyFromObject(existing), existing)
 		if err != nil {
 			return nil, err
 		}
 		// Hold the resource from the operator controller
-		clone.Status.Phase = v1.IntegrationPhaseUpdating
-		err = c.Status().Update(o.Context, clone)
+		existing.Status.Phase = v1.IntegrationPhaseUpdating
+		err = c.Status().Update(o.Context, existing)
 		if err != nil {
 			return nil, err
 		}
 		// Update the spec
-		integration.ResourceVersion = clone.ResourceVersion
+		integration.ResourceVersion = existing.ResourceVersion
 		err = c.Update(o.Context, &integration)
 		if err != nil {
 			return nil, err
