@@ -225,7 +225,7 @@ lint-fix:
 check-licenses:
 	./script/check_licenses.sh
 
-images: test
+images: bundle-kamelets test
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
 ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
@@ -235,7 +235,7 @@ else
 endif
 	docker build -t $(IMAGE_NAME):$(VERSION) -f build/Dockerfile .
 
-images-dev: test package-artifacts
+images-dev: bundle-kamelets test package-artifacts
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
 ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
@@ -276,11 +276,11 @@ package-artifacts:
 unsnapshot-olm:
 	./script/unsnapshot_olm.sh
 
-release: clean codegen set-module-version set-version bundle-kamelets build-resources check-licenses unsnapshot-olm build images images-push cross-compile package-examples git-tag
+release: clean codegen set-module-version set-version build-resources check-licenses unsnapshot-olm build images images-push cross-compile package-examples git-tag
 
-release-staging: clean codegen set-module-version set-version bundle-kamelets build-resources check-licenses unsnapshot-olm build images images-push-staging cross-compile package-examples git-tag
+release-staging: clean codegen set-module-version set-version build-resources check-licenses unsnapshot-olm build images images-push-staging cross-compile package-examples git-tag
 
-release-nightly: clean codegen set-module-version set-version bundle-kamelets build-resources build images images-push cross-compile package-examples
+release-nightly: clean codegen set-module-version set-version build-resources build images images-push cross-compile package-examples
 
 release-helm:
 	./script/release_helm.sh

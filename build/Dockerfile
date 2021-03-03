@@ -27,11 +27,14 @@ RUN mkdir -p /usr/share/maven \
     && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
 
 ADD build/_maven_output /tmp/artifacts/m2
+ADD build/_kamelets /kamelets
 
 USER 0
 
 RUN chgrp -R 0 /tmp/artifacts/m2 \
-    && chmod -R g=u /tmp/artifacts/m2
+    && chmod -R g=u /tmp/artifacts/m2 \
+    && chgrp -R 0 /kamelets \
+    && chmod -R g=u /kamelets
 
 USER 1000
 
