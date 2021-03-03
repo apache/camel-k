@@ -20,8 +20,9 @@ package maven
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/apache/camel-k/pkg/util"
 )
 
 const expectedSettings = `<?xml version="1.0" encoding="UTF-8"?>
@@ -238,7 +239,7 @@ func TestDefaultSettingsGenerationWithAdditionalRepo(t *testing.T) {
 func TestCreateSettingsConfigMap(t *testing.T) {
 	settings := NewDefaultSettings([]Repository{}, []Mirror{})
 
-	configMap, err := CreateSettingsConfigMap("foo", "bar", settings)
+	configMap, err := SettingsConfigMap("foo", "bar", settings)
 	assert.Nil(t, err)
 	assert.NotNil(t, configMap)
 

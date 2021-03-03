@@ -23,6 +23,7 @@ import (
 	"github.com/pkg/errors"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -127,9 +128,11 @@ func (t *deployerTrait) clientSideApply(env *Environment, resource ctrl.Object) 
 	} else if !k8serrors.IsAlreadyExists(err) {
 		return errors.Wrapf(err, "error during create resource: %v", resource)
 	}
-	key := ctrl.ObjectKeyFromObject(resource)
-	object := resource.DeepCopyObject().(ctrl.Object)
-	err = env.Client.Get(env.C, key, object)
+	object := &unstructured.Unstructured{}
+	object.SetNamespace(resource.GetNamespace())
+	object.SetName(resource.GetName())
+	object.SetGroupVersionKind(resource.GetObjectKind().GroupVersionKind())
+	err = env.Client.Get(env.C, ctrl.ObjectKeyFromObject(object), object)
 	if err != nil {
 		return err
 	}

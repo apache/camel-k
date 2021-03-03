@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -171,13 +170,13 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 	err = c.Create(command.Context, &kit)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		existed = true
-		clone := kit.DeepCopy()
-		err = c.Get(command.Context, key, clone)
+		existing := v1.NewIntegrationKit(kit.Namespace, kit.Name)
+		err = c.Get(command.Context, key, &existing)
 		if err != nil {
 			fmt.Print(err.Error())
 			return nil
 		}
-		kit.ResourceVersion = clone.ResourceVersion
+		kit.ResourceVersion = existing.ResourceVersion
 		err = c.Update(command.Context, &kit)
 	}
 

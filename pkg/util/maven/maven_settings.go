@@ -21,17 +21,16 @@ import (
 	"encoding/xml"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/apache/camel-k/pkg/util"
 )
 
 // DefaultMavenRepositories is a comma separated list of default maven repositories
 // This variable can be overridden at build time
 var DefaultMavenRepositories = "https://repo.maven.apache.org/maven2@id=central"
 
-// NewSettings --
 func NewSettings() Settings {
 	return Settings{
 		XMLName:           xml.Name{Local: "settings"},
@@ -41,12 +40,11 @@ func NewSettings() Settings {
 	}
 }
 
-// NewDefaultSettings --
 func NewDefaultSettings(repositories []Repository, mirrors []Mirror) Settings {
 	settings := NewSettings()
 
 	var additionalRepos []Repository
-	for _, defaultRepo := range getDefaultMavenRepositories() {
+	for _, defaultRepo := range defaultMavenRepositories() {
 		if !containsRepo(repositories, defaultRepo.ID) {
 			additionalRepos = append(additionalRepos, defaultRepo)
 		}
@@ -71,8 +69,7 @@ func NewDefaultSettings(repositories []Repository, mirrors []Mirror) Settings {
 	return settings
 }
 
-// CreateSettingsConfigMap --
-func CreateSettingsConfigMap(namespace string, name string, settings Settings) (*corev1.ConfigMap, error) {
+func SettingsConfigMap(namespace string, name string, settings Settings) (*corev1.ConfigMap, error) {
 	data, err := util.EncodeXML(settings)
 	if err != nil {
 		return nil, err
@@ -81,7 +78,7 @@ func CreateSettingsConfigMap(namespace string, name string, settings Settings) (
 	cm := &corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
-			APIVersion: "v1",
+			APIVersion: corev1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name + "-maven-settings",
@@ -98,7 +95,7 @@ func CreateSettingsConfigMap(namespace string, name string, settings Settings) (
 	return cm, nil
 }
 
-func getDefaultMavenRepositories() (repos []Repository) {
+func defaultMavenRepositories() (repos []Repository) {
 	for _, repoDesc := range strings.Split(DefaultMavenRepositories, ",") {
 		repos = append(repos, NewRepository(repoDesc))
 	}
