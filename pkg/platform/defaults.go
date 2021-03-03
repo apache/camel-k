@@ -212,17 +212,26 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1.Integration
 
 	if p.Status.Build.Maven.Settings.ConfigMapKeyRef == nil && p.Status.Build.Maven.Settings.SecretKeyRef == nil {
 		var repositories []maven.Repository
+		var mirrors []maven.Mirror
 		for i, c := range p.Status.Configuration {
 			if c.Type == "repository" {
-				repository := maven.NewRepository(c.Value)
-				if repository.ID == "" {
-					repository.ID = fmt.Sprintf("repository-%03d", i)
+				if strings.Contains(c.Value, "@mirrorOf=") {
+					mirror := maven.NewMirror(c.Value)
+					if mirror.ID == "" {
+						mirror.ID = fmt.Sprintf("mirror-%03d", i)
+					}
+					mirrors = append(mirrors, mirror)
+				} else {
+					repository := maven.NewRepository(c.Value)
+					if repository.ID == "" {
+						repository.ID = fmt.Sprintf("repository-%03d", i)
+					}
+					repositories = append(repositories, repository)
 				}
-				repositories = append(repositories, repository)
 			}
 		}
 
-		settings := maven.NewDefaultSettings(repositories)
+		settings := maven.NewDefaultSettings(repositories, mirrors)
 
 		err := createDefaultMavenSettingsConfigMap(ctx, c, p, settings)
 		if err != nil {
