@@ -21,23 +21,23 @@ import (
 	"context"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/resources"
+	"k8s.io/apimachinery/pkg/api/errors"
+	k8s "k8s.io/client-go/kubernetes"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/resources"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/openshift"
-	kube "k8s.io/client-go/kubernetes"
-
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // ResourceCustomizer can be used to inject code that changes the objects before they are created
-type ResourceCustomizer func(object runtime.Object) runtime.Object
+type ResourceCustomizer func(object ctrl.Object) ctrl.Object
 
 // IdentityResourceCustomizer is a ResourceCustomizer that does nothing
-var IdentityResourceCustomizer = func(object runtime.Object) runtime.Object {
+var IdentityResourceCustomizer = func(object ctrl.Object) ctrl.Object {
 	return object
 }
 
@@ -62,7 +62,6 @@ func Resource(ctx context.Context, c client.Client, namespace string, force bool
 	return ResourceOrCollect(ctx, c, namespace, nil, force, customizer, name)
 }
 
-// ResourceOrCollect --
 func ResourceOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection,
 	force bool, customizer ResourceCustomizer, name string) error {
 	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString(name))
@@ -70,25 +69,17 @@ func ResourceOrCollect(ctx context.Context, c client.Client, namespace string, c
 		return err
 	}
 
-	return RuntimeObjectOrCollect(ctx, c, namespace, collection, force, customizer(obj))
+	return ObjectOrCollect(ctx, c, namespace, collection, force, customizer(obj))
 }
 
-// RuntimeObject installs a single runtime object
-func RuntimeObject(ctx context.Context, c client.Client, namespace string, force bool, obj runtime.Object) error {
-	return RuntimeObjectOrCollect(ctx, c, namespace, nil, force, obj)
-}
-
-// RuntimeObjectOrCollect --
-func RuntimeObjectOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection, force bool, obj runtime.Object) error {
+func ObjectOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection, force bool, obj ctrl.Object) error {
 	if collection != nil {
 		// Adding to the collection before setting the namespace
 		collection.Add(obj)
 		return nil
 	}
 
-	if metaObject, ok := obj.(metav1.Object); ok {
-		metaObject.SetNamespace(namespace)
-	}
+	obj.SetNamespace(namespace)
 
 	if obj.GetObjectKind().GroupVersionKind().Kind == "PersistentVolumeClaim" {
 		if err := c.Create(ctx, obj); err != nil && !errors.IsAlreadyExists(err) {
@@ -115,7 +106,7 @@ func RuntimeObjectOrCollect(ctx context.Context, c client.Client, namespace stri
 	return c.Create(ctx, obj)
 }
 
-func isOpenShift(c kube.Interface, clusterType string) (bool, error) {
+func isOpenShift(c k8s.Interface, clusterType string) (bool, error) {
 	var res bool
 	var err error
 	if clusterType != "" {

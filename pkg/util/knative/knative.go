@@ -22,14 +22,14 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/apache/camel-k/pkg/client"
-	kubernetesutils "github.com/apache/camel-k/pkg/util/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1beta1"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1beta1"
 	sources "knative.dev/eventing/pkg/apis/sources/v1alpha2"
@@ -38,12 +38,14 @@ import (
 	duckv1alpha1 "knative.dev/pkg/apis/duck/v1alpha1"
 	"knative.dev/pkg/tracker"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
-	controller "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/apache/camel-k/pkg/client"
+	util "github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 // CreateSubscription ---
-func CreateSubscription(channelReference corev1.ObjectReference, serviceName string) runtime.Object {
-	subs := messaging.Subscription{
+func CreateSubscription(channelReference corev1.ObjectReference, serviceName string) *messaging.Subscription {
+	return &messaging.Subscription{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: messaging.SchemeGroupVersion.String(),
 			Kind:       "Subscription",
@@ -67,20 +69,18 @@ func CreateSubscription(channelReference corev1.ObjectReference, serviceName str
 			},
 		},
 	}
-
-	return &subs
 }
 
 // CreateTrigger ---
-func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, eventType string) runtime.Object {
-	subs := eventing.Trigger{
+func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, eventType string) *eventing.Trigger {
+	return &eventing.Trigger{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: eventing.SchemeGroupVersion.String(),
 			Kind:       "Trigger",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: brokerReference.Namespace,
-			Name:      brokerReference.Name + "-" + serviceName + "-" + kubernetesutils.SanitizeLabel(eventType),
+			Name:      brokerReference.Name + "-" + serviceName + "-" + util.SanitizeLabel(eventType),
 		},
 		Spec: eventing.TriggerSpec{
 			Filter: &eventing.TriggerFilter{
@@ -98,12 +98,11 @@ func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, e
 			},
 		},
 	}
-	return &subs
 }
 
 // CreateSinkBinding ---
-func CreateSinkBinding(source corev1.ObjectReference, target corev1.ObjectReference) runtime.Object {
-	binding := sources.SinkBinding{
+func CreateSinkBinding(source corev1.ObjectReference, target corev1.ObjectReference) *sources.SinkBinding {
+	return &sources.SinkBinding{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: sources.SchemeGroupVersion.String(),
 			Kind:       "SinkBinding",
@@ -131,8 +130,6 @@ func CreateSinkBinding(source corev1.ObjectReference, target corev1.ObjectRefere
 			},
 		},
 	}
-
-	return &binding
 }
 
 // GetAddressableReference looks up the resource among all given types and returns an object reference to it
@@ -142,8 +139,8 @@ func GetAddressableReference(ctx context.Context, c client.Client,
 	for _, ref := range possibleReferences {
 		sink := ref.DeepCopy()
 		sink.Namespace = namespace
-		_, err := GetSinkURI(ctx, c, sink, namespace)
-		if err != nil && (k8serrors.IsNotFound(err) || kubernetesutils.IsUnknownAPIError(err)) {
+		_, err := getSinkURI(ctx, c, sink, namespace)
+		if err != nil && (k8serrors.IsNotFound(err) || util.IsUnknownAPIError(err)) {
 			continue
 		} else if err != nil {
 			return nil, err
@@ -156,25 +153,24 @@ func GetAddressableReference(ctx context.Context, c client.Client,
 
 // GetSinkURL returns the sink as *url.URL
 func GetSinkURL(ctx context.Context, c client.Client, sink *corev1.ObjectReference, namespace string) (*url.URL, error) {
-	res, err := GetSinkURI(ctx, c, sink, namespace)
+	res, err := getSinkURI(ctx, c, sink, namespace)
 	if err != nil {
 		return nil, err
 	}
 	return url.Parse(res)
 }
 
-// GetSinkURI retrieves the sink URI from the object referenced by the given
-// ObjectReference.
+// getSinkURI retrieves the sink URI from the object referenced by the given ObjectReference.
 //
 // Method taken from https://github.com/knative/eventing-contrib/blob/master/pkg/controller/sinks/sinks.go
-func GetSinkURI(ctx context.Context, c client.Client, sink *corev1.ObjectReference, namespace string) (string, error) {
+func getSinkURI(ctx context.Context, c client.Client, sink *corev1.ObjectReference, namespace string) (string, error) {
 	if sink == nil {
 		return "", fmt.Errorf("sink ref is nil")
 	}
 
 	u := &unstructured.Unstructured{}
 	u.SetGroupVersionKind(sink.GroupVersionKind())
-	err := c.Get(ctx, controller.ObjectKey{Namespace: namespace, Name: sink.Name}, u)
+	err := c.Get(ctx, ctrl.ObjectKey{Namespace: namespace, Name: sink.Name}, u)
 	if err != nil {
 		return "", err
 	}

@@ -24,6 +24,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1beta1"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -36,13 +38,13 @@ import (
 
 // A Collection is a container of Kubernetes resources
 type Collection struct {
-	items []runtime.Object
+	items []ctrl.Object
 }
 
 // NewCollection creates a new empty collection
-func NewCollection(objects ...runtime.Object) *Collection {
+func NewCollection(objects ...ctrl.Object) *Collection {
 	collection := Collection{
-		items: make([]runtime.Object, 0, len(objects)),
+		items: make([]ctrl.Object, 0, len(objects)),
 	}
 
 	collection.items = append(collection.items, objects...)
@@ -56,7 +58,7 @@ func (c *Collection) Size() int {
 }
 
 // Items returns all resources belonging to the collection
-func (c *Collection) Items() []runtime.Object {
+func (c *Collection) Items() []ctrl.Object {
 	return c.items
 }
 
@@ -79,21 +81,21 @@ func (c *Collection) AsKubernetesList() *corev1.List {
 }
 
 // Add adds a resource to the collection
-func (c *Collection) Add(resource runtime.Object) {
+func (c *Collection) Add(resource ctrl.Object) {
 	if resource != nil {
 		c.items = append(c.items, resource)
 	}
 }
 
 // AddFirst adds a resource to the head of the collection
-func (c *Collection) AddFirst(resource runtime.Object) {
+func (c *Collection) AddFirst(resource ctrl.Object) {
 	if resource != nil {
-		c.items = append([]runtime.Object{resource}, c.items...)
+		c.items = append([]ctrl.Object{resource}, c.items...)
 	}
 }
 
 // AddAll adds all resources to the collection
-func (c *Collection) AddAll(resource []runtime.Object) {
+func (c *Collection) AddAll(resource []ctrl.Object) {
 	c.items = append(c.items, resource...)
 }
 

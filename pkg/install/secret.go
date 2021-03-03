@@ -21,11 +21,12 @@ import (
 	"context"
 	"io/ioutil"
 
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/registry"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const registrySecretName = "camel-k-registry-secret"
@@ -70,7 +71,7 @@ func registrySecretFromDataOrCollect(ctx context.Context, c client.Client, names
 		},
 	}
 
-	if err := RuntimeObjectOrCollect(ctx, c, namespace, collection, force, &registrySecret); err != nil {
+	if err := ObjectOrCollect(ctx, c, namespace, collection, force, &registrySecret); err != nil {
 		return "", err
 	}
 	return registrySecretName, nil

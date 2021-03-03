@@ -26,7 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -79,21 +79,24 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource IntegrationKit
-	err = c.Watch(&source.Kind{Type: &v1.IntegrationKit{}}, &handler.EnqueueRequestForObject{}, predicate.Funcs{
-		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldIntegrationKit := e.ObjectOld.(*v1.IntegrationKit)
-			newIntegrationKit := e.ObjectNew.(*v1.IntegrationKit)
-			// Ignore updates to the integration kit status in which case metadata.Generation
-			// does not change, or except when the integration kit phase changes as it's used
-			// to transition from one phase to another
-			return oldIntegrationKit.Generation != newIntegrationKit.Generation ||
-				oldIntegrationKit.Status.Phase != newIntegrationKit.Status.Phase
+	err = c.Watch(&source.Kind{Type: &v1.IntegrationKit{}},
+		&handler.EnqueueRequestForObject{},
+		predicate.Funcs{
+			UpdateFunc: func(e event.UpdateEvent) bool {
+				oldIntegrationKit := e.ObjectOld.(*v1.IntegrationKit)
+				newIntegrationKit := e.ObjectNew.(*v1.IntegrationKit)
+				// Ignore updates to the integration kit status in which case metadata.Generation
+				// does not change, or except when the integration kit phase changes as it's used
+				// to transition from one phase to another
+				return oldIntegrationKit.Generation != newIntegrationKit.Generation ||
+					oldIntegrationKit.Status.Phase != newIntegrationKit.Status.Phase
+			},
+			DeleteFunc: func(e event.DeleteEvent) bool {
+				// Evaluates to false if the object has been confirmed deleted
+				return !e.DeleteStateUnknown
+			},
 		},
-		DeleteFunc: func(e event.DeleteEvent) bool {
-			// Evaluates to false if the object has been confirmed deleted
-			return !e.DeleteStateUnknown
-		},
-	})
+	)
 	if err != nil {
 		return err
 	}
@@ -113,29 +116,30 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				// to another during the image build
 				return oldBuild.Status.Phase != newBuild.Status.Phase
 			},
-		})
+		},
+	)
 	if err != nil {
 		return err
 	}
 
 	// Watch for IntegrationPlatform phase transitioning to ready and enqueue
 	// requests for any integration kits that are in phase waiting for platform
-	err = c.Watch(&source.Kind{Type: &v1.IntegrationPlatform{}}, &handler.EnqueueRequestsFromMapFunc{
-		ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
-			platform := a.Object.(*v1.IntegrationPlatform)
+	err = c.Watch(&source.Kind{Type: &v1.IntegrationPlatform{}},
+		handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
+			p := a.(*v1.IntegrationPlatform)
 			var requests []reconcile.Request
 
-			if platform.Status.Phase == v1.IntegrationPlatformPhaseReady {
+			if p.Status.Phase == v1.IntegrationPlatformPhaseReady {
 				list := &v1.IntegrationKitList{}
 
-				if err := mgr.GetClient().List(context.TODO(), list, k8sclient.InNamespace(platform.Namespace)); err != nil {
-					log.Error(err, "Failed to retrieve integrationkit list")
+				if err := mgr.GetClient().List(context.TODO(), list, ctrl.InNamespace(p.Namespace)); err != nil {
+					log.Error(err, "Failed to list integration kits")
 					return requests
 				}
 
 				for _, kit := range list.Items {
 					if kit.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
-						log.Infof("Platform %s ready, wake-up integrationkit: %s", platform.Name, kit.Name)
+						log.Infof("Platform %s ready, wake-up integration kit: %s", p.Name, kit.Name)
 						requests = append(requests, reconcile.Request{
 							NamespacedName: types.NamespacedName{
 								Namespace: kit.Namespace,
@@ -148,7 +152,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 			return requests
 		}),
-	})
+	)
 	if err != nil {
 		return err
 	}
@@ -172,11 +176,9 @@ type reconcileIntegrationKit struct {
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *reconcileIntegrationKit) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
 	rlog.Info("Reconciling IntegrationKit")
-
-	ctx := context.TODO()
 
 	// Make sure the operator is allowed to act on namespace
 	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
@@ -284,7 +286,7 @@ func (r *reconcileIntegrationKit) update(ctx context.Context, base *v1.Integrati
 
 	target.Status.Digest = dgst
 
-	err = r.client.Status().Patch(ctx, target, k8sclient.MergeFrom(base))
+	err = r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base))
 
 	return reconcile.Result{}, err
 }

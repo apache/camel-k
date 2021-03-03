@@ -370,7 +370,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		}
 
 		// Always create a platform in the namespace where the operator is located
-		err = install.RuntimeObjectOrCollect(o.Context, c, namespace, collection, o.Force, platform)
+		err = install.ObjectOrCollect(o.Context, c, namespace, collection, o.Force, platform)
 		if err != nil {
 			return err
 		}
