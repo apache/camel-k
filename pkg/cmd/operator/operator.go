@@ -111,15 +111,17 @@ func Run(healthPort, monitoringPort int32) {
 		os.Exit(1)
 	}
 
-	// Configure event broadcaster
-	var eventBroadcaster record.EventBroadcaster
+	// We do not rely on the event broadcaster managed by controller runtime,
+	// so that we can check the operator has been granted permission to create
+	// Events. This is required for the operator to be installable by standard
+	// admin users, that are not granted create permission on Events by default.
+	eventBroadcaster := record.NewBroadcaster()
 	// nolint: gocritic
 	if ok, err := kubernetes.CheckPermission(context.TODO(), c, corev1.GroupName, "events", namespace, "", "create"); err != nil {
 		log.Error(err, "cannot check permissions for configuring event broadcaster")
 	} else if !ok {
 		log.Info("Event broadcasting to Kubernetes is disabled because of missing permissions to create events")
 	} else {
-		eventBroadcaster = record.NewBroadcaster()
 		eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: c.CoreV1().Events(namespace)})
 	}
 
@@ -168,6 +170,8 @@ func Run(healthPort, monitoringPort int32) {
 		log.Error(err, "manager exited non-zero")
 		os.Exit(1)
 	}
+
+	eventBroadcaster.Shutdown()
 }
 
 // getWatchNamespace returns the Namespace the operator should be watching for changes
