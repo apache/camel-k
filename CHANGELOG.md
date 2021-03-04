@@ -28,6 +28,7 @@
 - Corrupted binaries attached as resource [\#1881](https://github.com/apache/camel-k/issues/1881)
 - Release 1.3.0 [\#1867](https://github.com/apache/camel-k/issues/1867)
 - Refactor artifacts of deploy directory and continue alignment towards operator-sdk & kustomize [\#1820](https://github.com/apache/camel-k/issues/1820)
+- Implementing a global build strategy [\#1799](https://github.com/apache/camel-k/issues/1799)
 - Add a cli subcommand to inspect dependencies required by an Integration [\#1738](https://github.com/apache/camel-k/issues/1738)
 - Camel K installed globally by default [\#1693](https://github.com/apache/camel-k/issues/1693)
 - Example Integration in the ClusterServiceVersion stuck in Deploying phase [\#1677](https://github.com/apache/camel-k/issues/1677)
@@ -49,6 +50,7 @@
 - chore\(e2e\): Add test case to Integration scaling e2e tests [\#2061](https://github.com/apache/camel-k/pull/2061) ([astefanutti](https://github.com/astefanutti))
 - fix\(api\): Remove deprecated deepcopy-gen markers [\#2060](https://github.com/apache/camel-k/pull/2060) ([astefanutti](https://github.com/astefanutti))
 - Move trait test to separate directory [\#2059](https://github.com/apache/camel-k/pull/2059) ([bouskaJ](https://github.com/bouskaJ))
+- Implement a lightning-fast global strategy [\#2058](https://github.com/apache/camel-k/pull/2058) ([nicolaferraro](https://github.com/nicolaferraro))
 - test: Add PodDisruptionBudget trait e2e tests [\#2057](https://github.com/apache/camel-k/pull/2057) ([astefanutti](https://github.com/astefanutti))
 - chore\(cmd\): skip operator compatibility warning [\#2056](https://github.com/apache/camel-k/pull/2056) ([squakez](https://github.com/squakez))
 - feat: add command completion for connect flag [\#2055](https://github.com/apache/camel-k/pull/2055) ([johnpoth](https://github.com/johnpoth))
@@ -141,14 +143,6 @@
 - chore: Bump resources to version 1.4.0-SNAPSHOT [\#1908](https://github.com/apache/camel-k/pull/1908) ([astefanutti](https://github.com/astefanutti))
 - fix\(cli\): help command offline [\#1907](https://github.com/apache/camel-k/pull/1907) ([squakez](https://github.com/squakez))
 - fix: Unique syntax for Maven artifact GAV string representation [\#1903](https://github.com/apache/camel-k/pull/1903) ([astefanutti](https://github.com/astefanutti))
-- fix\(ci\): Use AdoptOpenJDK/install-jdk@v1 action [\#1901](https://github.com/apache/camel-k/pull/1901) ([astefanutti](https://github.com/astefanutti))
-- fix: Do not filter Camel catalogs by runtime provider label [\#1900](https://github.com/apache/camel-k/pull/1900) ([astefanutti](https://github.com/astefanutti))
-- refactor\(test\): included all run command flag test [\#1895](https://github.com/apache/camel-k/pull/1895) ([squakez](https://github.com/squakez))
-- Fix \#1707: add a way to override the base image in the operator [\#1894](https://github.com/apache/camel-k/pull/1894) ([nicolaferraro](https://github.com/nicolaferraro))
-- feat\(test\): operator command unit test [\#1893](https://github.com/apache/camel-k/pull/1893) ([squakez](https://github.com/squakez))
-- feat\(test\): builder command unit test [\#1891](https://github.com/apache/camel-k/pull/1891) ([squakez](https://github.com/squakez))
-- feat\(test\): kit create command unit test [\#1889](https://github.com/apache/camel-k/pull/1889) ([squakez](https://github.com/squakez))
-- feat\(test\): delete command unit test [\#1888](https://github.com/apache/camel-k/pull/1888) ([squakez](https://github.com/squakez))
 - proposal: add Service Binding proposal \(\#1445\) [\#1864](https://github.com/apache/camel-k/pull/1864) ([johnpoth](https://github.com/johnpoth))
 
 ## [v1.3.1](https://github.com/apache/camel-k/tree/v1.3.1) (2021-02-01)
@@ -205,7 +199,6 @@
 - fix\(ci\): Use AdoptOpenJDK/install-jdk@v1 action [\#1940](https://github.com/apache/camel-k/pull/1940) ([astefanutti](https://github.com/astefanutti))
 - Backport fix \#1936: avoid patching if the target resource contains all expecte… [\#1938](https://github.com/apache/camel-k/pull/1938) ([nicolaferraro](https://github.com/nicolaferraro))
 - \[backport 1.3.x\] fix\(cli\): check run sources exists [\#1932](https://github.com/apache/camel-k/pull/1932) ([squakez](https://github.com/squakez))
-- Backport \#1900 to 1.3.x [\#1905](https://github.com/apache/camel-k/pull/1905) ([astefanutti](https://github.com/astefanutti))
 - Backport \#1707 to 1.3.x [\#1896](https://github.com/apache/camel-k/pull/1896) ([nicolaferraro](https://github.com/nicolaferraro))
 - Backport \#1873 to 1.3.x [\#1887](https://github.com/apache/camel-k/pull/1887) ([nicolaferraro](https://github.com/nicolaferraro))
 - Backport  \#1880 to 1.3.x [\#1886](https://github.com/apache/camel-k/pull/1886) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -445,6 +438,7 @@
 - Related to \#1638 kamel init - should not create source file with ASF … [\#1639](https://github.com/apache/camel-k/pull/1639) ([oscerd](https://github.com/oscerd))
 - Add support for sinkbinding [\#1637](https://github.com/apache/camel-k/pull/1637) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
+- fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
 - Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
 - Implement Kamelets [\#1602](https://github.com/apache/camel-k/pull/1602) ([nicolaferraro](https://github.com/nicolaferraro))
 
@@ -530,7 +524,6 @@
 
 **Merged pull requests:**
 
-- fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
 - Initial architecture documentation [\#1629](https://github.com/apache/camel-k/pull/1629) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix\(doc\): PodMonitoring -\> PodMonitor [\#1628](https://github.com/apache/camel-k/pull/1628) ([astefanutti](https://github.com/astefanutti))
 - doc: Init troubleshooting guide [\#1627](https://github.com/apache/camel-k/pull/1627) ([astefanutti](https://github.com/astefanutti))
@@ -1308,7 +1301,6 @@
 - Fix embedded resources snapshot version [\#882](https://github.com/apache/camel-k/pull/882) ([dmvolod](https://github.com/dmvolod))
 - Switch to images-dev build on install-mini\<plaform\> [\#881](https://github.com/apache/camel-k/pull/881) ([dmvolod](https://github.com/dmvolod))
 - Added unit tests for ingress\_trait \#255 [\#880](https://github.com/apache/camel-k/pull/880) ([aldettinger](https://github.com/aldettinger))
-- Remove Dep files [\#872](https://github.com/apache/camel-k/pull/872) ([astefanutti](https://github.com/astefanutti))
 - feat: Enable integration scale sub-resource [\#962](https://github.com/apache/camel-k/pull/962) ([astefanutti](https://github.com/astefanutti))
 - fix: Add option to disable Kaniko cache warming [\#922](https://github.com/apache/camel-k/pull/922) ([asifdxtreme](https://github.com/asifdxtreme))
 
@@ -1369,6 +1361,7 @@
 - Fix make clean for tests and remove binary file from repo [\#879](https://github.com/apache/camel-k/pull/879) ([dmvolod](https://github.com/dmvolod))
 - chore\(js\): fix examples, use arrow function for lambda style processor [\#877](https://github.com/apache/camel-k/pull/877) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix\(GC\): Skip 503 errors when scanning for resources to be GCed [\#876](https://github.com/apache/camel-k/pull/876) ([astefanutti](https://github.com/astefanutti))
+- Remove Dep files [\#872](https://github.com/apache/camel-k/pull/872) ([astefanutti](https://github.com/astefanutti))
 - chore\(build\): remove go mod vendor from travis build [\#871](https://github.com/apache/camel-k/pull/871) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#789: add correct example for operator hub [\#868](https://github.com/apache/camel-k/pull/868) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#730: put example that demonstrate backward compatibility works [\#867](https://github.com/apache/camel-k/pull/867) ([nicolaferraro](https://github.com/nicolaferraro))
