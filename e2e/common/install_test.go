@@ -38,7 +38,7 @@ func TestBasicInstallation(t *testing.T) {
 
 func TestAlternativeImageInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--operator-image", "x/y:latest").Execute()).To(Succeed())
+		Expect(Kamel("install", "-n", ns, "--olm=false", "--operator-image", "x/y:latest").Execute()).To(Succeed())
 		Eventually(OperatorImage(ns)).Should(Equal("x/y:latest"))
 	})
 }
