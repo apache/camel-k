@@ -22,3 +22,4 @@
           uri: "http:{{serviceName}}/customers/{{name}}"
       - log:
           message: "${body}"
+          
