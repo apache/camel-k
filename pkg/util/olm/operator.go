@@ -28,7 +28,7 @@ import (
 
 	runtime "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/operator-framework/api/pkg/operators"
+	operatorsv1 "github.com/operator-framework/api/pkg/operators/v1"
 	operatorsv1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 
 	"github.com/apache/camel-k/pkg/client"
@@ -91,7 +91,7 @@ func IsOperatorInstalled(ctx context.Context, client client.Client, namespace st
 
 // HasPermissionToInstall checks if the current user/serviceaccount has the right permissions to install camel k via OLM
 func HasPermissionToInstall(ctx context.Context, client client.Client, namespace string, global bool, options Options) (bool, error) {
-	if ok, err := kubernetes.CheckPermission(ctx, client, operators.GroupName, "clusterserviceversions", namespace, options.Package, "list"); err != nil {
+	if ok, err := kubernetes.CheckPermission(ctx, client, operatorsv1alpha1.GroupName, "clusterserviceversions", namespace, options.Package, "list"); err != nil {
 		return false, err
 	} else if !ok {
 		return false, nil
@@ -102,7 +102,7 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 		targetNamespace = options.GlobalNamespace
 	}
 
-	if ok, err := kubernetes.CheckPermission(ctx, client, operators.GroupName, "subscriptions", targetNamespace, options.Package, "create"); err != nil {
+	if ok, err := kubernetes.CheckPermission(ctx, client, operatorsv1alpha1.GroupName, "subscriptions", targetNamespace, options.Package, "create"); err != nil {
 		return false, err
 	} else if !ok {
 		return false, nil
@@ -115,18 +115,18 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 	}
 
 	if !global {
-		if ok, err := kubernetes.CheckPermission(ctx, client, operators.GroupName, "operatorgroups", namespace, options.Package, "list"); err != nil {
+		if ok, err := kubernetes.CheckPermission(ctx, client, operatorsv1.GroupName, "operatorgroups", namespace, options.Package, "list"); err != nil {
 			return false, err
 		} else if !ok {
 			return false, nil
 		}
 
-		group, err := findOperatorGroup(ctx, client, namespace, options)
+		group, err := findOperatorGroup(ctx, client, namespace)
 		if err != nil {
 			return false, err
 		}
 		if group == nil {
-			if ok, err := kubernetes.CheckPermission(ctx, client, operators.GroupName, "operatorgroups", namespace, options.Package, "create"); err != nil {
+			if ok, err := kubernetes.CheckPermission(ctx, client, operatorsv1.GroupName, "operatorgroups", namespace, options.Package, "create"); err != nil {
 				return false, err
 			} else if !ok {
 				return false, nil
@@ -173,17 +173,17 @@ func Install(ctx context.Context, client client.Client, namespace string, global
 	}
 
 	if !global {
-		group, err := findOperatorGroup(ctx, client, namespace, options)
+		group, err := findOperatorGroup(ctx, client, namespace)
 		if err != nil {
 			return false, err
 		}
 		if group == nil {
-			group = &operators.OperatorGroup{
+			group = &operatorsv1.OperatorGroup{
 				ObjectMeta: v1.ObjectMeta{
 					Namespace:    namespace,
 					GenerateName: fmt.Sprintf("%s-", namespace),
 				},
-				Spec: operators.OperatorGroupSpec{
+				Spec: operatorsv1.OperatorGroupSpec{
 					TargetNamespaces: []string{namespace},
 				},
 			}
@@ -256,9 +256,8 @@ func findCSV(ctx context.Context, client client.Client, namespace string, option
 	return nil, nil
 }
 
-// nolint:unparam
-func findOperatorGroup(ctx context.Context, client client.Client, namespace string, options Options) (*operators.OperatorGroup, error) {
-	opGroupList := operators.OperatorGroupList{}
+func findOperatorGroup(ctx context.Context, client client.Client, namespace string) (*operatorsv1.OperatorGroup, error) {
+	opGroupList := operatorsv1.OperatorGroupList{}
 	if err := client.List(ctx, &opGroupList, runtime.InNamespace(namespace)); err != nil {
 		return nil, err
 	}
