@@ -43,6 +43,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/controller"
+	"github.com/apache/camel-k/pkg/event"
 	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
@@ -115,20 +116,23 @@ func Run(healthPort, monitoringPort int32) {
 	// so that we can check the operator has been granted permission to create
 	// Events. This is required for the operator to be installable by standard
 	// admin users, that are not granted create permission on Events by default.
-	eventBroadcaster := record.NewBroadcaster()
+	broadcaster := record.NewBroadcaster()
 	// nolint: gocritic
-	if ok, err := kubernetes.CheckPermission(context.TODO(), c, corev1.GroupName, "events", namespace, "", "create"); err != nil {
-		log.Error(err, "cannot check permissions for configuring event broadcaster")
-	} else if !ok {
-		log.Info("Event broadcasting to Kubernetes is disabled because of missing permissions to create events")
+	if ok, err := kubernetes.CheckPermission(context.TODO(), c, corev1.GroupName, "events", namespace, "", "create"); err != nil || !ok {
+		// Do not sink Events to the server as they'll be rejected
+		broadcaster = event.NewSinkLessBroadcaster(broadcaster)
+		if err != nil {
+			log.Error(err, "cannot check permissions for configuring event broadcaster")
+		} else if !ok {
+			log.Info("Event broadcasting to Kubernetes is disabled because of missing permissions to create events")
+		}
 	} else {
-		eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: c.CoreV1().Events(namespace)})
+		broadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: c.CoreV1().Events(namespace)})
 	}
 
-	// Create a new Cmd to provide shared dependencies and start components
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
 		Namespace:              namespace,
-		EventBroadcaster:       eventBroadcaster,
+		EventBroadcaster:       broadcaster,
 		HealthProbeBindAddress: ":" + strconv.Itoa(int(healthPort)),
 		MetricsBindAddress:     ":" + strconv.Itoa(int(monitoringPort)),
 	})
@@ -165,13 +169,12 @@ func Run(healthPort, monitoringPort int32) {
 
 	log.Info("Starting the Cmd.")
 
-	// Start the Cmd
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
 		log.Error(err, "manager exited non-zero")
 		os.Exit(1)
 	}
 
-	eventBroadcaster.Shutdown()
+	broadcaster.Shutdown()
 }
 
 // getWatchNamespace returns the Namespace the operator should be watching for changes

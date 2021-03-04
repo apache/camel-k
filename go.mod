@@ -48,6 +48,7 @@ require (
 	k8s.io/apimachinery v0.19.8
 	k8s.io/client-go v12.0.0+incompatible
 	k8s.io/gengo v0.0.0-20200428234225-8167cfdcfc14
+	k8s.io/klog/v2 v2.2.0
 	knative.dev/eventing v0.18.0
 	knative.dev/pkg v0.0.0-20200922164940-4bf40ad82aab
 	knative.dev/serving v0.18.0
