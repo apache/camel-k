@@ -59,7 +59,7 @@ func TestUninstallSkipOperator(t *testing.T) {
 func TestUninstallSkipRole(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		// a successful new installation
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("install", "-n", ns, "--olm=false").Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		// on uninstall it should remove everything except roles
 		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-roles").Execute()).To(Succeed())
@@ -70,7 +70,7 @@ func TestUninstallSkipRole(t *testing.T) {
 func TestUninstallSkipRoleBinding(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		// a successful new installation
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("install", "-n", ns, "--olm=false").Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		// on uninstall it should remove everything except role-bindings
 		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-role-bindings").Execute()).To(Succeed())
@@ -81,7 +81,7 @@ func TestUninstallSkipRoleBinding(t *testing.T) {
 func TestUninstallSkipServiceAccounts(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		// a successful new installation
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("install", "-n", ns, "--olm=false").Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		// on uninstall it should remove everything except cluster-roles
 		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-service-accounts").Execute()).To(Succeed())
