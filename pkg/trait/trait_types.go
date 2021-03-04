@@ -706,21 +706,21 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	// Volumes :: Additional Secrets
 	//
 	// append Service Binding secrets
-	for _, name := range e.ServiceBindings {
-		refName := kubernetes.SanitizeLabel(name)
+	for sb, secret := range e.ServiceBindings {
+		refName := kubernetes.SanitizeLabel(sb)
 
 		*vols = append(*vols, corev1.Volume{
 			Name: refName,
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
-					SecretName: name,
+					SecretName: secret,
 				},
 			},
 		})
 
 		*mnts = append(*mnts, corev1.VolumeMount{
 			Name:      refName,
-			MountPath: path.Join(serviceBindingsMountPath, strings.ToLower(name)),
+			MountPath: path.Join(serviceBindingsMountPath, strings.ToLower(sb)),
 		})
 	}
 	for _, secretName := range e.collectConfigurationValues("secret") {

@@ -195,15 +195,15 @@ func (t *serviceBindingTrait) parseProvisionedServices(e *Environment) ([]sb.Ser
 			namespace = seg[2]
 		}
 		service := sb.Service{
-			GroupVersionKind: metav1.GroupVersionKind{
-				Group:   group,
-				Version: version,
-				Kind:    kind,
+			NamespacedRef: sb.NamespacedRef{
+				Ref: sb.Ref{
+					Group:   group,
+					Version: version,
+					Kind:    kind,
+					Name:    name,
+				},
+				Namespace: &namespace,
 			},
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: name,
-			},
-			Namespace: &namespace,
 		}
 		services = append(services, service)
 	}
@@ -222,8 +222,8 @@ func (t *serviceBindingTrait) parseServiceBindings(e *Environment) ([]string, er
 		kind := seg[0][0:index]
 		if kind == "ServiceBinding" {
 			vg := seg[0][index+1 : len(gvk)]
-			if vg != "v1alpha1.operators.coreos.com" {
-				return nil, fmt.Errorf("ServiceBinding: %s VERSION.GROUP should be v1alpha1.operators.coreos.com", s)
+			if vg != "v1alpha1.binding.operators.coreos.com" {
+				return nil, fmt.Errorf("ServiceBinding: %s VERSION.GROUP should be v1alpha1.binding.operators.coreos.com", s)
 			}
 			if len(seg) == 3 && seg[2] != e.Integration.Namespace {
 				return nil, fmt.Errorf("ServiceBinding: %s should be in the same namespace %s as the integration", s, e.Integration.Namespace)
@@ -236,7 +236,8 @@ func (t *serviceBindingTrait) parseServiceBindings(e *Environment) ([]string, er
 
 func createServiceBinding(e *Environment, services []sb.Service, name string) sb.ServiceBinding {
 	spec := sb.ServiceBindingSpec{
-		Services: services,
+		NamingStrategy: "none",
+		Services:       services,
 	}
 	labels := map[string]string{
 		v1.IntegrationLabel: e.Integration.Name,
@@ -244,7 +245,7 @@ func createServiceBinding(e *Environment, services []sb.Service, name string) sb
 	serviceBinding := sb.ServiceBinding{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceBinding",
-			APIVersion: "operators.coreos.com/v1alpha1",
+			APIVersion: "binding.operators.coreos.com/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: e.Integration.Namespace,
