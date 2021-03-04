@@ -66,7 +66,6 @@ func (t *serviceBindingTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *serviceBindingTrait) Apply(e *Environment) error {
-	integrationServiceBindingName := e.Integration.Name + "-service-binding-request"
 	services, err := t.parseProvisionedServices(e)
 	if err != nil {
 		return err
@@ -76,19 +75,19 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 		return err
 	}
 	if len(services) > 0 {
-		serviceBindings = append(serviceBindings, integrationServiceBindingName)
+		serviceBindings = append(serviceBindings, e.Integration.Name)
 	}
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		serviceBindingsCollectionReady := true
 		for _, name := range serviceBindings {
-			isIntSB := name == integrationServiceBindingName
+			isIntSB := name == e.Integration.Name
 			serviceBinding, err := t.getServiceBinding(e, name)
 			// Do not throw an error if the ServiceBinding is not found and if we are managing it: we will create it
 			if (err != nil && !k8serrors.IsNotFound(err)) || (err != nil && !isIntSB) {
 				return err
 			}
 			if isIntSB {
-				request := createServiceBinding(e, services, integrationServiceBindingName)
+				request := createServiceBinding(e, services, e.Integration.Name)
 				e.Resources.Add(&request)
 			}
 			if isCollectionReady(serviceBinding) {
@@ -134,8 +133,8 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 				return nil
 			}
 			e.ServiceBindings[name] = sb.Status.Secret
-			if name == integrationServiceBindingName {
-				request := createServiceBinding(e, services, integrationServiceBindingName)
+			if name == e.Integration.Name {
+				request := createServiceBinding(e, services, e.Integration.Name)
 				e.Resources.Add(&request)
 			}
 		}
