@@ -28,7 +28,6 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
-	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/record"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -126,8 +125,6 @@ func Run(healthPort, monitoringPort int32) {
 		} else if !ok {
 			log.Info("Event broadcasting to Kubernetes is disabled because of missing permissions to create events")
 		}
-	} else {
-		broadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: c.CoreV1().Events(namespace)})
 	}
 
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
