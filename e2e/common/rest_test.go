@@ -48,17 +48,17 @@ func TestRunRest(t *testing.T) {
 		}
 
 		Expect(Kamel("install", "-n", ns, "--trait-profile", profile).Execute()).To(Succeed())
-		Expect(Kamel("run", "-n", ns, "files/RestConsumer.java").Execute()).To(Succeed())
+		Expect(Kamel("run", "-n", ns, "files/rest-consumer.yaml").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "rest-consumer"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 
 		t.Run("Service works", func(t *testing.T) {
 			name := "John"
 			service := Service(ns, "rest-consumer")
 			Eventually(service, TestTimeoutShort).ShouldNot(BeNil())
-			Expect(Kamel("run", "-n", ns, "files/RestProducer.groovy", "-p", "serviceName=rest-consumer", "-p", "name="+name).Execute()).To(Succeed())
+			Expect(Kamel("run", "-n", ns, "files/rest-producer.yaml", "-p", "serviceName=rest-consumer", "-p", "name="+name).Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "rest-producer"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationLogs(ns, "rest-consumer"), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
-			Eventually(IntegrationLogs(ns, "rest-producer"), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("%s Doe", name)))
+			Eventually(IntegrationLogs(ns, "rest-consumer"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
+			Eventually(IntegrationLogs(ns, "rest-producer"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("%s Doe", name)))
 		})
 
 		if ocp {
