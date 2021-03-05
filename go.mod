@@ -4,58 +4,60 @@ go 1.13
 
 require (
 	github.com/Masterminds/semver v1.5.0
+	github.com/Microsoft/hcsshim v0.8.15 // indirect
 	github.com/apache/camel-k/pkg/apis/camel v0.0.0
 	github.com/apache/camel-k/pkg/client/camel v0.0.0
 	github.com/apache/camel-k/pkg/kamelet/repository v0.0.0
 	github.com/container-tools/spectrum v0.3.4
+	github.com/containerd/continuity v0.0.0-20210208174643-50096c924a4e // indirect
 	github.com/evanphx/json-patch v4.9.0+incompatible
 	github.com/fatih/structs v1.1.0
 	github.com/gertd/go-pluralize v0.1.1
-	github.com/go-logr/logr v0.3.0
-	github.com/golangplus/testing v0.0.0-20180327235837-af21d9c3145e
+	github.com/go-logr/logr v0.4.0
+	github.com/golangplus/testing v1.0.0
 	github.com/google/go-github/v32 v32.1.0
-	github.com/google/uuid v1.1.1
+	github.com/google/uuid v1.2.0
 	github.com/jpillora/backoff v1.0.0
 	github.com/magiconair/properties v1.8.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.1.2
-	github.com/onsi/gomega v1.10.2
-	github.com/opencontainers/runc v1.0.0-rc2.0.20190611121236-6cc515888830 // indirect
+	github.com/onsi/gomega v1.10.3
 	github.com/openshift/api v3.9.1-0.20190927182313-d4a64ec2cbd8+incompatible
 	github.com/operator-framework/api v0.3.8
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.42.1
-	github.com/prometheus/client_golang v1.7.1
+	github.com/prometheus/client_golang v1.9.0
 	github.com/radovskyb/watcher v1.0.6
 	github.com/redhat-developer/service-binding-operator v0.5.0
 	github.com/rs/xid v1.2.1
 	github.com/scylladb/go-set v1.0.2
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
-	github.com/sirupsen/logrus v1.6.0
+	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.6.2
 	github.com/stoewer/go-strcase v1.2.0
 	github.com/stretchr/testify v1.6.1
-	go.uber.org/multierr v1.5.0
-	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+	go.uber.org/multierr v1.6.0
+	golang.org/x/oauth2 v0.0.0-20210126194326-f9ce19ea3013
 	gopkg.in/inf.v0 v0.9.1
-	gopkg.in/yaml.v2 v2.3.0
-	k8s.io/api v0.19.8
+	gopkg.in/yaml.v2 v2.4.0
+	k8s.io/api v0.20.1
 	k8s.io/apiextensions-apiserver v0.19.8
-	k8s.io/apimachinery v0.19.8
+	k8s.io/apimachinery v0.20.1
 	k8s.io/client-go v12.0.0+incompatible
-	k8s.io/gengo v0.0.0-20200428234225-8167cfdcfc14
-	k8s.io/klog/v2 v2.2.0
-	knative.dev/eventing v0.18.0
-	knative.dev/pkg v0.0.0-20200922164940-4bf40ad82aab
-	knative.dev/serving v0.18.0
+	k8s.io/gengo v0.0.0-20201214224949-b6c5ce23f027
+	k8s.io/klog/v2 v2.5.0
+	knative.dev/eventing v0.21.1
+	knative.dev/pkg v0.0.0-20210216013737-584933f8280b
+	knative.dev/serving v0.21.0
 	sigs.k8s.io/controller-runtime v0.7.2
 )
 
 replace (
-	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.2+incompatible // Required by client-go Azure plugin
+	k8s.io/api => k8s.io/api v0.19.8
+	k8s.io/apimachinery => k8s.io/apimachinery v0.19.8
 	k8s.io/client-go => k8s.io/client-go v0.19.8
 )
 
