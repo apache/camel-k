@@ -99,6 +99,7 @@ var TestImageVersion = defaults.Version
 
 func init() {
 	// Register some resources used in e2e tests only
+	client.FastMapperAllowedAPIGroups["coordination.k8s.io"] = true
 	client.FastMapperAllowedAPIGroups["project.openshift.io"] = true
 	client.FastMapperAllowedAPIGroups["route.openshift.io"] = true
 	client.FastMapperAllowedAPIGroups["eventing.knative.dev"] = true
