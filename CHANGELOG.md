@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Add support for `@mirrorOf=xxx` for --maven-repository option [\#2088](https://github.com/apache/camel-k/issues/2088)
 - bou.ke/monkey license [\#2067](https://github.com/apache/camel-k/issues/2067)
 - \[cmd\] Warning on launching operator [\#2051](https://github.com/apache/camel-k/issues/2051)
 - \[Trait\] Extend affinity trait to CronJobs and KnativeServices [\#2047](https://github.com/apache/camel-k/issues/2047)
@@ -39,6 +40,9 @@
 
 **Merged pull requests:**
 
+- Disable OLM in uninstall tests [\#2092](https://github.com/apache/camel-k/pull/2092) ([bouskaJ](https://github.com/bouskaJ))
+- Fix alternative image test [\#2091](https://github.com/apache/camel-k/pull/2091) ([bouskaJ](https://github.com/bouskaJ))
+- Fix \#200: Add support for mirrorOf attribute [\#2089](https://github.com/apache/camel-k/pull/2089) ([bouskaJ](https://github.com/bouskaJ))
 - refactor\(trait\): affinity  [\#2078](https://github.com/apache/camel-k/pull/2078) ([squakez](https://github.com/squakez))
 - Upgrade Kubernetes to v0.19.8 and Service Binding operator to v0.4.1 [\#2076](https://github.com/apache/camel-k/pull/2076) ([astefanutti](https://github.com/astefanutti))
 - Fix deprecated annotation [\#2070](https://github.com/apache/camel-k/pull/2070) ([bouskaJ](https://github.com/bouskaJ))
@@ -96,6 +100,7 @@
 - Switch to a different backport implementation [\#1995](https://github.com/apache/camel-k/pull/1995) ([oscerd](https://github.com/oscerd))
 - Fix \#1992: allow accessing Strimzi "kafkatopics" instead of "topics" [\#1993](https://github.com/apache/camel-k/pull/1993) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(OLM\): Remove replaces field from Kustomize base CSV manifest [\#1991](https://github.com/apache/camel-k/pull/1991) ([astefanutti](https://github.com/astefanutti))
+- \[Backport release-1.3.x\] Fix a little typo good for testing backport action [\#1990](https://github.com/apache/camel-k/pull/1990) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Fix a little typo good for testing backport action [\#1989](https://github.com/apache/camel-k/pull/1989) ([oscerd](https://github.com/oscerd))
 - Fix \#1986: use properties instead of URL encoding for Kamelets in bin… [\#1987](https://github.com/apache/camel-k/pull/1987) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(OLM\): Add missing internal-objects annotation to Kustomize base CSV manifest [\#1985](https://github.com/apache/camel-k/pull/1985) ([astefanutti](https://github.com/astefanutti))
@@ -139,10 +144,6 @@
 - Upgrade CRDs to apiextensions.k8s.io/v1 [\#1914](https://github.com/apache/camel-k/pull/1914) ([astefanutti](https://github.com/astefanutti))
 - fix\(cli\): check run sources exists [\#1913](https://github.com/apache/camel-k/pull/1913) ([squakez](https://github.com/squakez))
 - Feat\(cli\): version operator and warning compatibility message [\#1912](https://github.com/apache/camel-k/pull/1912) ([squakez](https://github.com/squakez))
-- chore: Remove duplicated version target in Makefile [\#1909](https://github.com/apache/camel-k/pull/1909) ([astefanutti](https://github.com/astefanutti))
-- chore: Bump resources to version 1.4.0-SNAPSHOT [\#1908](https://github.com/apache/camel-k/pull/1908) ([astefanutti](https://github.com/astefanutti))
-- fix\(cli\): help command offline [\#1907](https://github.com/apache/camel-k/pull/1907) ([squakez](https://github.com/squakez))
-- fix: Unique syntax for Maven artifact GAV string representation [\#1903](https://github.com/apache/camel-k/pull/1903) ([astefanutti](https://github.com/astefanutti))
 - proposal: add Service Binding proposal \(\#1445\) [\#1864](https://github.com/apache/camel-k/pull/1864) ([johnpoth](https://github.com/johnpoth))
 
 ## [v1.3.1](https://github.com/apache/camel-k/tree/v1.3.1) (2021-02-01)
@@ -199,6 +200,7 @@
 - fix\(ci\): Use AdoptOpenJDK/install-jdk@v1 action [\#1940](https://github.com/apache/camel-k/pull/1940) ([astefanutti](https://github.com/astefanutti))
 - Backport fix \#1936: avoid patching if the target resource contains all expecte… [\#1938](https://github.com/apache/camel-k/pull/1938) ([nicolaferraro](https://github.com/nicolaferraro))
 - \[backport 1.3.x\] fix\(cli\): check run sources exists [\#1932](https://github.com/apache/camel-k/pull/1932) ([squakez](https://github.com/squakez))
+- Backport \#1900 to 1.3.x [\#1905](https://github.com/apache/camel-k/pull/1905) ([astefanutti](https://github.com/astefanutti))
 - Backport \#1707 to 1.3.x [\#1896](https://github.com/apache/camel-k/pull/1896) ([nicolaferraro](https://github.com/nicolaferraro))
 - Backport \#1873 to 1.3.x [\#1887](https://github.com/apache/camel-k/pull/1887) ([nicolaferraro](https://github.com/nicolaferraro))
 - Backport  \#1880 to 1.3.x [\#1886](https://github.com/apache/camel-k/pull/1886) ([nicolaferraro](https://github.com/nicolaferraro))
