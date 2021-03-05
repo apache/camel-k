@@ -28,6 +28,7 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"k8s.io/client-go/tools/record"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -36,8 +37,6 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
-
-	"github.com/operator-framework/operator-lib/leader"
 
 	"github.com/apache/camel-k/pkg/apis"
 	"github.com/apache/camel-k/pkg/client"
@@ -86,25 +85,12 @@ func Run(healthPort, monitoringPort int32) {
 		os.Exit(1)
 	}
 
-	// Get a config to talk to the API server
 	cfg, err := config.GetConfig()
 	if err != nil {
 		log.Error(err, "")
 		os.Exit(1)
 	}
 
-	// Become the leader before proceeding
-	err = leader.Become(context.TODO(), platform.OperatorLockName)
-	if err != nil {
-		if err == leader.ErrNoNamespace {
-			log.Info("Local run detected, leader election is disabled")
-		} else {
-			log.Error(err, "")
-			os.Exit(1)
-		}
-	}
-
-	// Configure an event broadcaster
 	c, err := client.NewClient(false)
 	if err != nil {
 		log.Error(err, "cannot initialize client")
@@ -127,11 +113,23 @@ func Run(healthPort, monitoringPort int32) {
 		}
 	}
 
+	leaderElectionNamespace := platform.GetOperatorNamespace()
+	if leaderElectionNamespace == "" {
+		// Fallback to using the watch namespace when the operator is not in-cluster.
+		// It does not support local (off-cluster) operator watching resources globally,
+		// in which case it's not possible to determine a namespace.
+		leaderElectionNamespace = platform.GetOperatorWatchNamespace()
+	}
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
-		Namespace:              namespace,
-		EventBroadcaster:       broadcaster,
-		HealthProbeBindAddress: ":" + strconv.Itoa(int(healthPort)),
-		MetricsBindAddress:     ":" + strconv.Itoa(int(monitoringPort)),
+		Namespace:                     namespace,
+		EventBroadcaster:              broadcaster,
+		LeaderElection:                true,
+		LeaderElectionNamespace:       leaderElectionNamespace,
+		LeaderElectionID:              platform.OperatorLockName,
+		LeaderElectionResourceLock:    resourcelock.LeasesResourceLock,
+		LeaderElectionReleaseOnCancel: true,
+		HealthProbeBindAddress:        ":" + strconv.Itoa(int(healthPort)),
+		MetricsBindAddress:            ":" + strconv.Itoa(int(monitoringPort)),
 	})
 	if err != nil {
 		log.Error(err, "")

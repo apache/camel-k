@@ -23,8 +23,10 @@ import (
 	"os"
 	"strings"
 
+	coordination "k8s.io/api/coordination/v1"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -97,12 +99,12 @@ func IsNamespaceLocked(ctx context.Context, c client.Client, namespace string) (
 		return false, nil
 	}
 
-	cm := v1.ConfigMap{}
+	lease := coordination.Lease{}
 	key := client.ObjectKey{
 		Namespace: namespace,
 		Name:      OperatorLockName,
 	}
-	if err := c.Get(ctx, key, &cm); err != nil && k8serrors.IsNotFound(err) {
+	if err := c.Get(ctx, key, &lease); err != nil && k8serrors.IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
 		return true, err
