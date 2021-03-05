@@ -106,7 +106,14 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		// In case of an external created kit, we do not have any information about
 		// the classpath so we assume the all jars in /deployments/dependencies/ have
 		// to be taken into account
-		classpath.Add("/deployments/dependencies/*")
+		dependencies := "/deployments/dependencies"
+		classpath.Add(
+			dependencies+"/*",
+			dependencies+"/app/*",
+			dependencies+"/lib/boot/*",
+			dependencies+"/lib/main/*",
+			dependencies+"/quarkus/*",
+		)
 	}
 
 	container := e.getIntegrationContainer()
