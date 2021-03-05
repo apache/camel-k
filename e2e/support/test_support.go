@@ -40,6 +40,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
+	coordination "k8s.io/api/coordination/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -324,20 +325,20 @@ func IntegrationCondition(ns string, name string, conditionType v1.IntegrationCo
 	}
 }
 
-func ConfigMap(ns string, name string) func() *corev1.ConfigMap {
-	return func() *corev1.ConfigMap {
-		cm := corev1.ConfigMap{}
+func Lease(ns string, name string) func() *coordination.Lease {
+	return func() *coordination.Lease {
+		lease := coordination.Lease{}
 		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
 		}
-		err := TestClient().Get(TestContext, key, &cm)
+		err := TestClient().Get(TestContext, key, &lease)
 		if err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
 			panic(err)
 		}
-		return &cm
+		return &lease
 	}
 }
 

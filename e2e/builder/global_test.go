@@ -25,13 +25,14 @@ import (
 	"os"
 	"testing"
 
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
+
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
+	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/openshift"
 )
@@ -62,7 +63,7 @@ func TestRunGlobalInstall(t *testing.T) {
 				Expect(Kits(ns2)()).Should(HaveLen(1))
 				Expect(Kits(ns)()).Should(HaveLen(0))
 
-				Expect(ConfigMap(ns2, platform.OperatorLockName)()).To(BeNil(), "No locking configmap expected")
+				Expect(Lease(ns2, platform.OperatorLockName)()).To(BeNil(), "No locking Leases expected")
 			})
 		})
 
@@ -75,8 +76,8 @@ func TestRunGlobalInstall(t *testing.T) {
 				Eventually(IntegrationLogs(ns3, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 				Expect(Kamel("delete", "--all", "-n", ns3).Execute()).To(Succeed())
 
-				Expect(ConfigMap(ns3, platform.OperatorLockName)()).ShouldNot(BeNil(),
-					"OperatorSDK is expected to use configmaps for locking: if this changes (e.g. using Leases) we should update our guard logic",
+				Expect(Lease(ns3, platform.OperatorLockName)()).ShouldNot(BeNil(),
+					"Controller Runtime is expected to use Leases for leader election: if this changes we should update our locking logic",
 				)
 			})
 		})
@@ -90,7 +91,7 @@ func TestRunGlobalInstall(t *testing.T) {
 				Expect(Kits(ns4)()).Should(HaveLen(0))
 				Expect(Kits(ns)()).Should(HaveLen(1)) // Kit built globally
 
-				Expect(ConfigMap(ns4, platform.OperatorLockName)()).To(BeNil(), "No locking configmap expected")
+				Expect(Lease(ns4, platform.OperatorLockName)()).To(BeNil(), "No locking Leases expected")
 			})
 		})
 
@@ -129,7 +130,7 @@ func TestRunGlobalInstall(t *testing.T) {
 					Expect(Kits(ns)()).Should(HaveLen(1))  // the global one
 				}
 
-				Expect(ConfigMap(ns5, platform.OperatorLockName)()).To(BeNil(), "No locking configmap expected")
+				Expect(Lease(ns5, platform.OperatorLockName)()).To(BeNil(), "No locking Leases expected")
 			})
 		})
 
