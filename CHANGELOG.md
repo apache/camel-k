@@ -6,7 +6,9 @@
 
 **Closed issues:**
 
+- Error when using an external kit [\#2090](https://github.com/apache/camel-k/issues/2090)
 - Add support for `@mirrorOf=xxx` for --maven-repository option [\#2088](https://github.com/apache/camel-k/issues/2088)
+- Upgrade to Service Binding operator to v0.5.0 [\#2077](https://github.com/apache/camel-k/issues/2077)
 - bou.ke/monkey license [\#2067](https://github.com/apache/camel-k/issues/2067)
 - \[cmd\] Warning on launching operator [\#2051](https://github.com/apache/camel-k/issues/2051)
 - \[Trait\] Extend affinity trait to CronJobs and KnativeServices [\#2047](https://github.com/apache/camel-k/issues/2047)
@@ -25,7 +27,9 @@
 - Group all traits test under one e2e directory [\#1955](https://github.com/apache/camel-k/issues/1955)
 - Usage of binary data in ConfigMaps [\#1946](https://github.com/apache/camel-k/issues/1946)
 - \[ppc64le\] bundle image generated using `bundle` and `bundle-build` targets incompatible with `opm` [\#1923](https://github.com/apache/camel-k/issues/1923)
+- kamel inspect is not providing dependencies specified in modeline [\#1921](https://github.com/apache/camel-k/issues/1921)
 - Installing Camel-K operator on Docker for Desktop with Kubernetes cluster enabled [\#1902](https://github.com/apache/camel-k/issues/1902)
+- Removed changelog gh action [\#1890](https://github.com/apache/camel-k/issues/1890)
 - Corrupted binaries attached as resource [\#1881](https://github.com/apache/camel-k/issues/1881)
 - Release 1.3.0 [\#1867](https://github.com/apache/camel-k/issues/1867)
 - Refactor artifacts of deploy directory and continue alignment towards operator-sdk & kustomize [\#1820](https://github.com/apache/camel-k/issues/1820)
@@ -40,9 +44,13 @@
 
 **Merged pull requests:**
 
+- Add missing classpath locations for external kits [\#2097](https://github.com/apache/camel-k/pull/2097) ([jamesnetherton](https://github.com/jamesnetherton))
+- fix: Use correct versions to access OLM APIs [\#2095](https://github.com/apache/camel-k/pull/2095) ([astefanutti](https://github.com/astefanutti))
+- Upgrade sbo [\#2094](https://github.com/apache/camel-k/pull/2094) ([johnpoth](https://github.com/johnpoth))
 - Disable OLM in uninstall tests [\#2092](https://github.com/apache/camel-k/pull/2092) ([bouskaJ](https://github.com/bouskaJ))
 - Fix alternative image test [\#2091](https://github.com/apache/camel-k/pull/2091) ([bouskaJ](https://github.com/bouskaJ))
 - Fix \#200: Add support for mirrorOf attribute [\#2089](https://github.com/apache/camel-k/pull/2089) ([bouskaJ](https://github.com/bouskaJ))
+- chore: Upgrade controller-runtime to version 0.7.2 [\#2087](https://github.com/apache/camel-k/pull/2087) ([astefanutti](https://github.com/astefanutti))
 - refactor\(trait\): affinity  [\#2078](https://github.com/apache/camel-k/pull/2078) ([squakez](https://github.com/squakez))
 - Upgrade Kubernetes to v0.19.8 and Service Binding operator to v0.4.1 [\#2076](https://github.com/apache/camel-k/pull/2076) ([astefanutti](https://github.com/astefanutti))
 - Fix deprecated annotation [\#2070](https://github.com/apache/camel-k/pull/2070) ([bouskaJ](https://github.com/bouskaJ))
@@ -100,7 +108,6 @@
 - Switch to a different backport implementation [\#1995](https://github.com/apache/camel-k/pull/1995) ([oscerd](https://github.com/oscerd))
 - Fix \#1992: allow accessing Strimzi "kafkatopics" instead of "topics" [\#1993](https://github.com/apache/camel-k/pull/1993) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(OLM\): Remove replaces field from Kustomize base CSV manifest [\#1991](https://github.com/apache/camel-k/pull/1991) ([astefanutti](https://github.com/astefanutti))
-- \[Backport release-1.3.x\] Fix a little typo good for testing backport action [\#1990](https://github.com/apache/camel-k/pull/1990) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Fix a little typo good for testing backport action [\#1989](https://github.com/apache/camel-k/pull/1989) ([oscerd](https://github.com/oscerd))
 - Fix \#1986: use properties instead of URL encoding for Kamelets in bin… [\#1987](https://github.com/apache/camel-k/pull/1987) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(OLM\): Add missing internal-objects annotation to Kustomize base CSV manifest [\#1985](https://github.com/apache/camel-k/pull/1985) ([astefanutti](https://github.com/astefanutti))
@@ -137,12 +144,8 @@
 - Fix saga example [\#1926](https://github.com/apache/camel-k/pull/1926) ([jamesnetherton](https://github.com/jamesnetherton))
 - Fix image location extraction [\#1925](https://github.com/apache/camel-k/pull/1925) ([doru1004](https://github.com/doru1004))
 - Fix modeline for inspect. [\#1924](https://github.com/apache/camel-k/pull/1924) ([doru1004](https://github.com/doru1004))
-- chore\(cli\): global install enhanced description [\#1920](https://github.com/apache/camel-k/pull/1920) ([squakez](https://github.com/squakez))
-- Fix contributing documentation for integration test naming convention [\#1918](https://github.com/apache/camel-k/pull/1918) ([apupier](https://github.com/apupier))
-- fix\(cli\): remove install camel-version flag [\#1917](https://github.com/apache/camel-k/pull/1917) ([squakez](https://github.com/squakez))
 - Environment variables evaluated only at integration runtime [\#1916](https://github.com/apache/camel-k/pull/1916) ([doru1004](https://github.com/doru1004))
 - Upgrade CRDs to apiextensions.k8s.io/v1 [\#1914](https://github.com/apache/camel-k/pull/1914) ([astefanutti](https://github.com/astefanutti))
-- fix\(cli\): check run sources exists [\#1913](https://github.com/apache/camel-k/pull/1913) ([squakez](https://github.com/squakez))
 - Feat\(cli\): version operator and warning compatibility message [\#1912](https://github.com/apache/camel-k/pull/1912) ([squakez](https://github.com/squakez))
 - proposal: add Service Binding proposal \(\#1445\) [\#1864](https://github.com/apache/camel-k/pull/1864) ([johnpoth](https://github.com/johnpoth))
 
@@ -279,7 +282,6 @@
 - Add local run subcommand with basic support [\#1805](https://github.com/apache/camel-k/pull/1805) ([doru1004](https://github.com/doru1004))
 - Fix \#1562: remove support for main runtime [\#1804](https://github.com/apache/camel-k/pull/1804) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(ci\): simplify test configuration [\#1801](https://github.com/apache/camel-k/pull/1801) ([nicolaferraro](https://github.com/nicolaferraro))
-- Fix \#751: add guard to global operator [\#1800](https://github.com/apache/camel-k/pull/1800) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fixes ENTESB-15219: only use default values when user doesn't provide a kamelet property value in integration [\#1796](https://github.com/apache/camel-k/pull/1796) ([dhirajsb](https://github.com/dhirajsb))
 - \[test\] Detect camel quarkus version dynamically in monitoring test [\#1795](https://github.com/apache/camel-k/pull/1795) ([llowinge](https://github.com/llowinge))
 - \#1283: Enhance the `kamel log` command to show more detail prior to i… [\#1793](https://github.com/apache/camel-k/pull/1793) ([phantomjinx](https://github.com/phantomjinx))
@@ -342,6 +344,7 @@
 
 **Merged pull requests:**
 
+- Fix \#751: add guard to global operator [\#1800](https://github.com/apache/camel-k/pull/1800) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix ENTESB-15219: only use default values when user doesn't provide a kamelet property value in integration [\#1797](https://github.com/apache/camel-k/pull/1797) ([dhirajsb](https://github.com/dhirajsb))
 - Backport Kamelet changes to 1.2.x [\#1788](https://github.com/apache/camel-k/pull/1788) ([nicolaferraro](https://github.com/nicolaferraro))
 
@@ -1162,7 +1165,6 @@
 - fix \#1023: add possibility to reference staging artifacts [\#1029](https://github.com/apache/camel-k/pull/1029) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore: fix eaxmples [\#1026](https://github.com/apache/camel-k/pull/1026) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix\(SDK\): Add relative symlink to kamel main package [\#1025](https://github.com/apache/camel-k/pull/1025) ([astefanutti](https://github.com/astefanutti))
-- chore: Use non-caching API reader from SDK [\#1021](https://github.com/apache/camel-k/pull/1021) ([astefanutti](https://github.com/astefanutti))
 - feat\(quarkus\): Initial Quarkus support [\#1013](https://github.com/apache/camel-k/pull/1013) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.0-M3](https://github.com/apache/camel-k/tree/1.0.0-M3) (2019-10-18)
@@ -1193,6 +1195,7 @@
 
 **Merged pull requests:**
 
+- chore: Use non-caching API reader from SDK [\#1021](https://github.com/apache/camel-k/pull/1021) ([astefanutti](https://github.com/astefanutti))
 - fix \#985: add correct clusterroles for knative in global mode [\#1019](https://github.com/apache/camel-k/pull/1019) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix \#988: add check for missing licenses before release [\#1018](https://github.com/apache/camel-k/pull/1018) ([nicolaferraro](https://github.com/nicolaferraro))
 - Upgrade Operator SDK to version 0.11.0 [\#1017](https://github.com/apache/camel-k/pull/1017) ([astefanutti](https://github.com/astefanutti))
