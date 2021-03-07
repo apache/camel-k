@@ -282,6 +282,7 @@
 - Add local run subcommand with basic support [\#1805](https://github.com/apache/camel-k/pull/1805) ([doru1004](https://github.com/doru1004))
 - Fix \#1562: remove support for main runtime [\#1804](https://github.com/apache/camel-k/pull/1804) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(ci\): simplify test configuration [\#1801](https://github.com/apache/camel-k/pull/1801) ([nicolaferraro](https://github.com/nicolaferraro))
+- Fix \#751: add guard to global operator [\#1800](https://github.com/apache/camel-k/pull/1800) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fixes ENTESB-15219: only use default values when user doesn't provide a kamelet property value in integration [\#1796](https://github.com/apache/camel-k/pull/1796) ([dhirajsb](https://github.com/dhirajsb))
 - \[test\] Detect camel quarkus version dynamically in monitoring test [\#1795](https://github.com/apache/camel-k/pull/1795) ([llowinge](https://github.com/llowinge))
 - \#1283: Enhance the `kamel log` command to show more detail prior to i… [\#1793](https://github.com/apache/camel-k/pull/1793) ([phantomjinx](https://github.com/phantomjinx))
@@ -344,7 +345,6 @@
 
 **Merged pull requests:**
 
-- Fix \#751: add guard to global operator [\#1800](https://github.com/apache/camel-k/pull/1800) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix ENTESB-15219: only use default values when user doesn't provide a kamelet property value in integration [\#1797](https://github.com/apache/camel-k/pull/1797) ([dhirajsb](https://github.com/dhirajsb))
 - Backport Kamelet changes to 1.2.x [\#1788](https://github.com/apache/camel-k/pull/1788) ([nicolaferraro](https://github.com/nicolaferraro))
 
@@ -772,6 +772,7 @@
 - Make cron work on quarkus runtime [\#1460](https://github.com/apache/camel-k/pull/1460) ([nicolaferraro](https://github.com/nicolaferraro))
 - Allow the short syntax in knative endpoints [\#1458](https://github.com/apache/camel-k/pull/1458) ([nicolaferraro](https://github.com/nicolaferraro))
 - Remove unused import package in example [\#1457](https://github.com/apache/camel-k/pull/1457) ([apupier](https://github.com/apupier))
+- Fix \#1446 and \#1395: completely update integration resource on redepl… [\#1447](https://github.com/apache/camel-k/pull/1447) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [1.0.0-nightly.202005130003](https://github.com/apache/camel-k/tree/1.0.0-nightly.202005130003) (2020-05-11)
 
@@ -804,7 +805,6 @@
 
 **Merged pull requests:**
 
-- Fix \#1446 and \#1395: completely update integration resource on redepl… [\#1447](https://github.com/apache/camel-k/pull/1447) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1367: add more build events [\#1444](https://github.com/apache/camel-k/pull/1444) ([nicolaferraro](https://github.com/nicolaferraro))
 - Partially Fixes Camel 14995: generates master and 3/threescale traits docs. [\#1441](https://github.com/apache/camel-k/pull/1441) ([djencks](https://github.com/djencks))
 - Fixes CAMEL-14993 generate traits table with Antora, etc. [\#1440](https://github.com/apache/camel-k/pull/1440) ([djencks](https://github.com/djencks))
@@ -1165,6 +1165,7 @@
 - fix \#1023: add possibility to reference staging artifacts [\#1029](https://github.com/apache/camel-k/pull/1029) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore: fix eaxmples [\#1026](https://github.com/apache/camel-k/pull/1026) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix\(SDK\): Add relative symlink to kamel main package [\#1025](https://github.com/apache/camel-k/pull/1025) ([astefanutti](https://github.com/astefanutti))
+- chore: Use non-caching API reader from SDK [\#1021](https://github.com/apache/camel-k/pull/1021) ([astefanutti](https://github.com/astefanutti))
 - feat\(quarkus\): Initial Quarkus support [\#1013](https://github.com/apache/camel-k/pull/1013) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.0-M3](https://github.com/apache/camel-k/tree/1.0.0-M3) (2019-10-18)
@@ -1195,7 +1196,6 @@
 
 **Merged pull requests:**
 
-- chore: Use non-caching API reader from SDK [\#1021](https://github.com/apache/camel-k/pull/1021) ([astefanutti](https://github.com/astefanutti))
 - fix \#985: add correct clusterroles for knative in global mode [\#1019](https://github.com/apache/camel-k/pull/1019) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix \#988: add check for missing licenses before release [\#1018](https://github.com/apache/camel-k/pull/1018) ([nicolaferraro](https://github.com/nicolaferraro))
 - Upgrade Operator SDK to version 0.11.0 [\#1017](https://github.com/apache/camel-k/pull/1017) ([astefanutti](https://github.com/astefanutti))
