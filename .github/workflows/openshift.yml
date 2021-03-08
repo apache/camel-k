@@ -79,11 +79,6 @@ jobs:
         # Download and install the oc binary
         sudo mount --make-shared /
 
-        sudo apt-get install resolvconf
-        echo "nameserver 8.8.8.8" | sudo tee /etc/resolvconf/resolv.conf.d/head > /dev/null
-        echo "nameserver 8.8.4.4" | sudo tee /etc/resolvconf/resolv.conf.d/head > /dev/null
-        sudo service resolvconf restart
-
         sudo service docker stop
         sudo echo '{"insecure-registries": ["172.30.0.0/16"]}' | sudo tee /etc/docker/daemon.json > /dev/null
         sudo service docker start
@@ -106,6 +101,33 @@ jobs:
 
         # Start OpenShift
         oc cluster up --public-hostname=$IP_ADDR --enable=persistent-volumes,registry,router
+        oc login -u system:admin
+
+        # Wait until we have a ready node in openshift
+        TIMEOUT=0
+        TIMEOUT_COUNT=60
+        until [ $TIMEOUT -eq $TIMEOUT_COUNT ]; do
+          if [ -n "$(oc get nodes | grep Ready)" ]; then
+            break
+          fi
+          echo "openshift is not up yet"
+          TIMEOUT=$((TIMEOUT+1))
+          sleep 5
+        done
+
+        if [ $TIMEOUT -eq $TIMEOUT_COUNT ]; then
+          echo "Failed to start openshift"
+          exit 1
+        fi
+
+        # Configure DNS
+        oc cluster down
+
+        echo "nameserver 8.8.8.8" >> openshift.local.clusterup/kubedns/resolv.conf
+        echo "nameserver 4.4.4.4" >> openshift.local.clusterup/kubedns/resolv.conf
+
+        # Restart OpenShift
+        oc cluster up
         oc login -u system:admin
 
         # Wait until we have a ready node in openshift
