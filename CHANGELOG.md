@@ -772,7 +772,6 @@
 - Make cron work on quarkus runtime [\#1460](https://github.com/apache/camel-k/pull/1460) ([nicolaferraro](https://github.com/nicolaferraro))
 - Allow the short syntax in knative endpoints [\#1458](https://github.com/apache/camel-k/pull/1458) ([nicolaferraro](https://github.com/nicolaferraro))
 - Remove unused import package in example [\#1457](https://github.com/apache/camel-k/pull/1457) ([apupier](https://github.com/apupier))
-- Fix \#1446 and \#1395: completely update integration resource on redepl… [\#1447](https://github.com/apache/camel-k/pull/1447) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [1.0.0-nightly.202005130003](https://github.com/apache/camel-k/tree/1.0.0-nightly.202005130003) (2020-05-11)
 
@@ -805,6 +804,7 @@
 
 **Merged pull requests:**
 
+- Fix \#1446 and \#1395: completely update integration resource on redepl… [\#1447](https://github.com/apache/camel-k/pull/1447) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1367: add more build events [\#1444](https://github.com/apache/camel-k/pull/1444) ([nicolaferraro](https://github.com/nicolaferraro))
 - Partially Fixes Camel 14995: generates master and 3/threescale traits docs. [\#1441](https://github.com/apache/camel-k/pull/1441) ([djencks](https://github.com/djencks))
 - Fixes CAMEL-14993 generate traits table with Antora, etc. [\#1440](https://github.com/apache/camel-k/pull/1440) ([djencks](https://github.com/djencks))
@@ -1125,6 +1125,7 @@
 - feat\(build\): Better report build progress [\#1064](https://github.com/apache/camel-k/pull/1064) ([astefanutti](https://github.com/astefanutti))
 - Add GC trait discovery client caching options and server-side deletion [\#1062](https://github.com/apache/camel-k/pull/1062) ([astefanutti](https://github.com/astefanutti))
 - chore\(olm\): fix olm naming [\#1060](https://github.com/apache/camel-k/pull/1060) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore\(magic\): auto-add dependency on camel-jackson when using plain .… [\#1049](https://github.com/apache/camel-k/pull/1049) ([nicolaferraro](https://github.com/nicolaferraro))
 - feat\(build\): Task-based builds [\#1121](https://github.com/apache/camel-k/pull/1121) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.0-M4](https://github.com/apache/camel-k/tree/1.0.0-M4) (2019-11-13)
@@ -1154,7 +1155,6 @@
 - Fix \#1038: redeploy integration when trait config changes [\#1053](https://github.com/apache/camel-k/pull/1053) ([nicolaferraro](https://github.com/nicolaferraro))
 - Remove support for java class loader [\#1052](https://github.com/apache/camel-k/pull/1052) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#1036: generate k8s client for camel k resources [\#1051](https://github.com/apache/camel-k/pull/1051) ([nicolaferraro](https://github.com/nicolaferraro))
-- chore\(magic\): auto-add dependency on camel-jackson when using plain .… [\#1049](https://github.com/apache/camel-k/pull/1049) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix \#662: mark kit traits to avoid rebuilding when not necessary [\#1046](https://github.com/apache/camel-k/pull/1046) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(camel\): Report runtime version from Camel catalog into integration and kit statuses [\#1044](https://github.com/apache/camel-k/pull/1044) ([astefanutti](https://github.com/astefanutti))
 - chore\(dev\): Upgrade Operator SDK to version 0.12.0 [\#1043](https://github.com/apache/camel-k/pull/1043) ([astefanutti](https://github.com/astefanutti))
