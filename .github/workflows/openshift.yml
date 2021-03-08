@@ -73,6 +73,11 @@ jobs:
         export OPENSHIFT_COMMIT=0cbc58b
         export MAVEN_OPTS=-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 
+        sudo rm -f /etc/resolv.conf
+        sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+        sudo sh -c 'echo "DNS=8.8.8.8 4.4.4.4" >> /etc/systemd/resolved.conf'
+        sudo service systemd-resolved restart
+
         # set docker0 to promiscuous mode
         sudo ip link set docker0 promisc on
 
@@ -101,33 +106,6 @@ jobs:
 
         # Start OpenShift
         oc cluster up --public-hostname=$IP_ADDR --enable=persistent-volumes,registry,router
-        oc login -u system:admin
-
-        # Wait until we have a ready node in openshift
-        TIMEOUT=0
-        TIMEOUT_COUNT=60
-        until [ $TIMEOUT -eq $TIMEOUT_COUNT ]; do
-          if [ -n "$(oc get nodes | grep Ready)" ]; then
-            break
-          fi
-          echo "openshift is not up yet"
-          TIMEOUT=$((TIMEOUT+1))
-          sleep 5
-        done
-
-        if [ $TIMEOUT -eq $TIMEOUT_COUNT ]; then
-          echo "Failed to start openshift"
-          exit 1
-        fi
-
-        # Configure DNS
-        oc cluster down
-
-        echo "nameserver 8.8.8.8" >> openshift.local.clusterup/kubedns/resolv.conf
-        echo "nameserver 4.4.4.4" >> openshift.local.clusterup/kubedns/resolv.conf
-
-        # Restart OpenShift
-        oc cluster up
         oc login -u system:admin
 
         # Wait until we have a ready node in openshift
