@@ -90,6 +90,7 @@ func Run(healthPort, monitoringPort int32) {
 	// Events. This is required for the operator to be installable by standard
 	// admin users, that are not granted create permission on Events by default.
 	broadcaster := record.NewBroadcaster()
+	defer broadcaster.Shutdown()
 	// nolint: gocritic
 	if ok, err := kubernetes.CheckPermission(context.TODO(), c, corev1.GroupName, "events", watchNamespace, "", "create"); err != nil || !ok {
 		// Do not sink Events to the server as they'll be rejected
@@ -153,8 +154,6 @@ func Run(healthPort, monitoringPort int32) {
 
 	log.Info("Starting the manager")
 	exitOnError(mgr.Start(signals.SetupSignalHandler()), "manager exited non-zero")
-
-	broadcaster.Shutdown()
 }
 
 // getWatchNamespace returns the Namespace the operator should be watching for changes
