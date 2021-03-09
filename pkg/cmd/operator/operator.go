@@ -33,7 +33,6 @@ import (
 	"k8s.io/client-go/tools/record"
 
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -80,23 +79,11 @@ func Run(healthPort, monitoringPort int32) {
 
 	printVersion()
 
-	namespace, err := getWatchNamespace()
-	if err != nil {
-		log.Error(err, "failed to get watch namespace")
-		os.Exit(1)
-	}
-
-	cfg, err := config.GetConfig()
-	if err != nil {
-		log.Error(err, "")
-		os.Exit(1)
-	}
+	watchNamespace, err := getWatchNamespace()
+	exitOnError(err, "failed to get watch namespace")
 
 	c, err := client.NewClient(false)
-	if err != nil {
-		log.Error(err, "cannot initialize client")
-		os.Exit(1)
-	}
+	exitOnError(err, "cannot initialize client")
 
 	// We do not rely on the event broadcaster managed by controller runtime,
 	// so that we can check the operator has been granted permission to create
@@ -104,7 +91,7 @@ func Run(healthPort, monitoringPort int32) {
 	// admin users, that are not granted create permission on Events by default.
 	broadcaster := record.NewBroadcaster()
 	// nolint: gocritic
-	if ok, err := kubernetes.CheckPermission(context.TODO(), c, corev1.GroupName, "events", namespace, "", "create"); err != nil || !ok {
+	if ok, err := kubernetes.CheckPermission(context.TODO(), c, corev1.GroupName, "events", watchNamespace, "", "create"); err != nil || !ok {
 		// Do not sink Events to the server as they'll be rejected
 		broadcaster = event.NewSinkLessBroadcaster(broadcaster)
 		if err != nil {
@@ -116,19 +103,19 @@ func Run(healthPort, monitoringPort int32) {
 
 	leaderElection := true
 
-	leaderElectionNamespace := platform.GetOperatorNamespace()
-	if leaderElectionNamespace == "" {
+	operatorNamespace := platform.GetOperatorNamespace()
+	if operatorNamespace == "" {
 		// Fallback to using the watch namespace when the operator is not in-cluster.
 		// It does not support local (off-cluster) operator watching resources globally,
 		// in which case it's not possible to determine a namespace.
-		leaderElectionNamespace = platform.GetOperatorWatchNamespace()
-		if leaderElectionNamespace == "" {
+		operatorNamespace = watchNamespace
+		if operatorNamespace == "" {
 			leaderElection = false
-			log.Info( "unable to determine namespace for leader election")
+			log.Info("unable to determine namespace for leader election")
 		}
 	}
 
-	if ok, err := kubernetes.CheckPermission(context.TODO(), c, coordination.GroupName, "leases", leaderElectionNamespace, "", "create"); err != nil || !ok {
+	if ok, err := kubernetes.CheckPermission(context.TODO(), c, coordination.GroupName, "leases", operatorNamespace, "", "create"); err != nil || !ok {
 		leaderElection = false
 		if err != nil {
 			log.Error(err, "cannot check permissions for creating Leases")
@@ -141,68 +128,47 @@ func Run(healthPort, monitoringPort int32) {
 		log.Info("Leader election is disabled!")
 	}
 
-	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
-		Namespace:                     namespace,
+	mgr, err := ctrl.NewManager(c.GetConfig(), ctrl.Options{
+		Namespace:                     watchNamespace,
 		EventBroadcaster:              broadcaster,
 		LeaderElection:                leaderElection,
-		LeaderElectionNamespace:       leaderElectionNamespace,
+		LeaderElectionNamespace:       operatorNamespace,
 		LeaderElectionID:              platform.OperatorLockName,
 		LeaderElectionResourceLock:    resourcelock.LeasesResourceLock,
 		LeaderElectionReleaseOnCancel: true,
 		HealthProbeBindAddress:        ":" + strconv.Itoa(int(healthPort)),
 		MetricsBindAddress:            ":" + strconv.Itoa(int(monitoringPort)),
 	})
-	if err != nil {
-		log.Error(err, "")
-		os.Exit(1)
-	}
+	exitOnError(err, "")
 
-	// Add health check
-	if err := mgr.AddHealthzCheck("health-probe", healthz.Ping); err != nil {
-		log.Error(err, "Unable add liveness check")
-		os.Exit(1)
-	}
+	log.Info("Configuring manager")
+	exitOnError(mgr.AddHealthzCheck("health-probe", healthz.Ping), "Unable add liveness check")
+	exitOnError(apis.AddToScheme(mgr.GetScheme()), "")
+	exitOnError(controller.AddToManager(mgr), "")
 
-	log.Info("Registering Components.")
-
-	// Setup Scheme for all resources
-	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Error(err, "")
-		os.Exit(1)
-	}
-
-	// Try to register the OpenShift CLI Download link if possible
+	log.Info("Installing operator resources")
 	installCtx, installCancel := context.WithTimeout(context.TODO(), 1*time.Minute)
 	defer installCancel()
-	operatorNamespace := os.Getenv("NAMESPACE")
-	install.OperatorStartupOptionalTools(installCtx, c, namespace, operatorNamespace, log)
+	install.OperatorStartupOptionalTools(installCtx, c, watchNamespace, operatorNamespace, log)
 
-	// Setup all Controllers
-	if err := controller.AddToManager(mgr); err != nil {
-		log.Error(err, "")
-		os.Exit(1)
-	}
-
-	log.Info("Starting the Cmd.")
-
-	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
-		log.Error(err, "manager exited non-zero")
-		os.Exit(1)
-	}
+	log.Info("Starting the manager")
+	exitOnError(mgr.Start(signals.SetupSignalHandler()), "manager exited non-zero")
 
 	broadcaster.Shutdown()
 }
 
 // getWatchNamespace returns the Namespace the operator should be watching for changes
 func getWatchNamespace() (string, error) {
-	// WatchNamespaceEnvVar is the constant for env variable WATCH_NAMESPACE
-	// which specifies the Namespace to watch.
-	// An empty value means the operator is running with cluster scope.
-	var watchNamespaceEnvVar = "WATCH_NAMESPACE"
-
-	ns, found := os.LookupEnv(watchNamespaceEnvVar)
+	ns, found := os.LookupEnv(platform.OperatorWatchNamespaceEnvVariable)
 	if !found {
-		return "", fmt.Errorf("%s must be set", watchNamespaceEnvVar)
+		return "", fmt.Errorf("%s must be set", platform.OperatorWatchNamespaceEnvVariable)
 	}
 	return ns, nil
+}
+
+func exitOnError(err error, msg string) {
+	if err != nil {
+		log.Error(err, msg)
+		os.Exit(1)
+	}
 }
