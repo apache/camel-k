@@ -76,7 +76,11 @@ func mirrorReadyConditionFromReplicaSet(ctx context.Context, c client.Client, it
 	if rs.Spec.Replicas != nil {
 		replicas = *rs.Spec.Replicas
 	}
-	if replicas == rs.Status.ReadyReplicas {
+	// The Integration is considered ready when the number of replicas
+	// reported to be ready is larger or equal to the specified number
+	// of replicas. This avoid reporting a falsy readiness condition
+	// when the Integration is being down-scaled.
+	if replicas <= rs.Status.ReadyReplicas {
 		it.Status.SetCondition(
 			v1.IntegrationConditionReady,
 			corev1.ConditionTrue,
