@@ -212,7 +212,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		if k8serrors.IsAlreadyExists(errmtr) {
 			return errmtr
 		}
-		fmt.Println("Warning: the operator will not be able to perform locking using Camel \"master\" component. Try installing as cluster-admin to allow management of lease resources.")
+		fmt.Println("Warning: the operator will not be able to create Leases. Try installing as cluster-admin to allow management of Lease resources.")
 	}
 
 	if errmtr := installServiceBindings(ctx, c, cfg.Namespace, customizer, collection, force); errmtr != nil {

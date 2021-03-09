@@ -27,6 +27,7 @@ import (
 	"strconv"
 	"time"
 
+	coordination "k8s.io/api/coordination/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"k8s.io/client-go/tools/record"
@@ -109,9 +110,11 @@ func Run(healthPort, monitoringPort int32) {
 		if err != nil {
 			log.Error(err, "cannot check permissions for configuring event broadcaster")
 		} else if !ok {
-			log.Info("Event broadcasting to Kubernetes is disabled because of missing permissions to create events")
+			log.Info("Event broadcasting is disabled because of missing permissions to create Events")
 		}
 	}
+
+	leaderElection := true
 
 	leaderElectionNamespace := platform.GetOperatorNamespace()
 	if leaderElectionNamespace == "" {
@@ -119,11 +122,29 @@ func Run(healthPort, monitoringPort int32) {
 		// It does not support local (off-cluster) operator watching resources globally,
 		// in which case it's not possible to determine a namespace.
 		leaderElectionNamespace = platform.GetOperatorWatchNamespace()
+		if leaderElectionNamespace == "" {
+			leaderElection = false
+			log.Info( "unable to determine namespace for leader election")
+		}
 	}
+
+	if ok, err := kubernetes.CheckPermission(context.TODO(), c, coordination.GroupName, "leases", leaderElectionNamespace, "", "create"); err != nil || !ok {
+		leaderElection = false
+		if err != nil {
+			log.Error(err, "cannot check permissions for creating Leases")
+		} else if !ok {
+			log.Info("The operator is not granted permissions to create Leases")
+		}
+	}
+
+	if !leaderElection {
+		log.Info("Leader election is disabled!")
+	}
+
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
 		Namespace:                     namespace,
 		EventBroadcaster:              broadcaster,
-		LeaderElection:                true,
+		LeaderElection:                leaderElection,
 		LeaderElectionNamespace:       leaderElectionNamespace,
 		LeaderElectionID:              platform.OperatorLockName,
 		LeaderElectionResourceLock:    resourcelock.LeasesResourceLock,
