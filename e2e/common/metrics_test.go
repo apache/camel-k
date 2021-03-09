@@ -49,7 +49,7 @@ func TestMetrics(t *testing.T) {
 		Expect(Kamel("run", "-n", ns, "files/Java.java",
 			"-t", "prometheus.enabled=true",
 			"-t", "prometheus.service-monitor=false").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 		Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
@@ -65,12 +65,12 @@ func TestMetrics(t *testing.T) {
 		metrics, err := parsePrometheusData(response)
 		Expect(err).To(BeNil())
 
-		t.Run("Build duration metric", func(t *testing.T) {
-			it := Integration(ns, name)()
-			Expect(it).NotTo(BeNil())
-			build := Build(ns, it.Status.Kit)()
-			Expect(build).NotTo(BeNil())
+		it := Integration(ns, name)()
+		Expect(it).NotTo(BeNil())
+		build := Build(ns, it.Status.IntegrationKit.Name)()
+		Expect(build).NotTo(BeNil())
 
+		t.Run("Build duration metric", func(t *testing.T) {
 			// Get the duration from the Build status
 			duration, err := time.ParseDuration(build.Status.Duration)
 			Expect(err).To(BeNil())
@@ -120,15 +120,44 @@ func TestMetrics(t *testing.T) {
 						Histogram: &prometheus.Histogram{
 							SampleCount: uint64P(1),
 							SampleSum:   float64P(duration.Seconds()),
-							Bucket: []*prometheus.Bucket{
-								bucket(duration, 30),
-								bucket(duration, 60),
-								bucket(duration, 90),
-								bucket(duration, 120),
-								bucket(duration, 300),
-								bucket(duration, 600),
-								bucket(duration, math.Inf(1)),
-							},
+							Bucket:      buckets(duration.Seconds(), []float64{30, 60, 90, 120, 300, 600, math.Inf(1)}),
+						},
+					},
+				},
+			}))))
+		})
+
+		t.Run("Build recovery attempts", func(t *testing.T) {
+			// Check there are no failures reported in the Build status
+			Expect(build.Status.Failure).To(BeNil())
+
+			// Check no recovery attempts are reported in the logs
+			recoveryAttemptLogged := false
+			err = NewLogWalker(&logs).
+				AddStep(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+					"LoggerName":  Equal("camel-k.controller.build"),
+					"Message":     HavePrefix("Recovery attempt"),
+					"Kind":        Equal("Build"),
+					"RequestName": Equal(build.Name),
+				}), func(l *LogEntry) { recoveryAttemptLogged = true }).
+				Walk()
+			Expect(err).To(BeNil())
+			Expect(recoveryAttemptLogged).To(BeFalse())
+
+			// Check no recovery attempts are observed in the corresponding metric
+			Expect(metrics).To(HaveKeyWithValue("camel_k_build_recovery_attempts", gstruct.PointTo(Equal(prometheus.MetricFamily{
+				Name: stringP("camel_k_build_recovery_attempts"),
+				Help: stringP("Camel K build recovery attempts"),
+				Type: metricTypeP(prometheus.MetricType_HISTOGRAM),
+				Metric: []*prometheus.Metric{
+					{
+						Label: []*prometheus.LabelPair{
+							label("result", "Succeeded"),
+						},
+						Histogram: &prometheus.Histogram{
+							SampleCount: uint64P(1),
+							SampleSum:   float64P(0),
+							Bucket:      buckets(0, []float64{0, 1, 2, 3, 4, 5, math.Inf(1)}),
 						},
 					},
 				},
@@ -138,7 +167,7 @@ func TestMetrics(t *testing.T) {
 		t.Run("Integration metrics", func(t *testing.T) {
 			pod := IntegrationPod(ns, name)()
 			response, err := TestClient().CoreV1().RESTClient().Get().
-				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/metrics", ns, pod.Name)).DoRaw(TestContext)
+				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/q/metrics", ns, pod.Name)).DoRaw(TestContext)
 			Expect(err).To(BeNil())
 			assert.Contains(t, string(response), "camel.route.exchanges.total")
 		})
@@ -155,15 +184,23 @@ func label(name, value string) *prometheus.LabelPair {
 	}
 }
 
-func bucket(duration time.Duration, boundSeconds float64) *prometheus.Bucket {
+func bucket(value float64, upperBound float64) *prometheus.Bucket {
 	var count uint64
-	if duration.Seconds() < boundSeconds {
+	if value <= upperBound {
 		count++
 	}
 	return &prometheus.Bucket{
-		UpperBound:      float64P(boundSeconds),
+		UpperBound:      float64P(upperBound),
 		CumulativeCount: &count,
 	}
+}
+
+func buckets(value float64, upperBounds []float64) []*prometheus.Bucket {
+	var buckets []*prometheus.Bucket
+	for _, upperBound := range upperBounds {
+		buckets = append(buckets, bucket(value, upperBound))
+	}
+	return buckets
 }
 
 // https://prometheus.io/docs/instrumenting/exposition_formats/
