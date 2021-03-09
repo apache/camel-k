@@ -95,11 +95,8 @@ func Run(healthPort, monitoringPort int32) {
 	if ok, err := kubernetes.CheckPermission(context.TODO(), c, corev1.GroupName, "events", watchNamespace, "", "create"); err != nil || !ok {
 		// Do not sink Events to the server as they'll be rejected
 		broadcaster = event.NewSinkLessBroadcaster(broadcaster)
-		if err != nil {
-			log.Error(err, "cannot check permissions for configuring event broadcaster")
-		} else if !ok {
-			log.Info("Event broadcasting is disabled because of missing permissions to create Events")
-		}
+		exitOnError(err, "cannot check permissions for creating Events")
+		log.Info("Event broadcasting is disabled because of missing permissions to create Events")
 	}
 
 	leaderElection := true
@@ -118,11 +115,8 @@ func Run(healthPort, monitoringPort int32) {
 
 	if ok, err := kubernetes.CheckPermission(context.TODO(), c, coordination.GroupName, "leases", operatorNamespace, "", "create"); err != nil || !ok {
 		leaderElection = false
-		if err != nil {
-			log.Error(err, "cannot check permissions for creating Leases")
-		} else if !ok {
-			log.Info("The operator is not granted permissions to create Leases")
-		}
+		exitOnError(err, "cannot check permissions for creating Leases")
+		log.Info("The operator is not granted permissions to create Leases")
 	}
 
 	if !leaderElection {
