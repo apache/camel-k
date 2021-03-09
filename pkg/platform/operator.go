@@ -30,7 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const operatorWatchNamespaceEnvVariable = "WATCH_NAMESPACE"
+const OperatorWatchNamespaceEnvVariable = "WATCH_NAMESPACE"
 const operatorNamespaceEnvVariable = "NAMESPACE"
 const operatorPodNameEnvVariable = "POD_NAME"
 
@@ -63,7 +63,7 @@ func GetCurrentOperatorImage(ctx context.Context, c client.Client) (string, erro
 
 // IsCurrentOperatorGlobal returns true if the operator is configured to watch all namespaces
 func IsCurrentOperatorGlobal() bool {
-	if watchNamespace, envSet := os.LookupEnv(operatorWatchNamespaceEnvVariable); !envSet || strings.TrimSpace(watchNamespace) == "" {
+	if watchNamespace, envSet := os.LookupEnv(OperatorWatchNamespaceEnvVariable); !envSet || strings.TrimSpace(watchNamespace) == "" {
 		return true
 	}
 	return false
@@ -71,7 +71,7 @@ func IsCurrentOperatorGlobal() bool {
 
 // GetOperatorWatchNamespace returns the namespace the operator watches
 func GetOperatorWatchNamespace() string {
-	if namespace, envSet := os.LookupEnv(operatorWatchNamespaceEnvVariable); envSet {
+	if namespace, envSet := os.LookupEnv(OperatorWatchNamespaceEnvVariable); envSet {
 		return namespace
 	}
 	return ""
