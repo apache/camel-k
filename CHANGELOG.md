@@ -44,6 +44,7 @@
 
 **Merged pull requests:**
 
+- chore : Fix links to the developers guide - needs to point to latest/contributing/developers.html [\#2102](https://github.com/apache/camel-k/pull/2102) ([cunningt](https://github.com/cunningt))
 - Add missing classpath locations for external kits [\#2097](https://github.com/apache/camel-k/pull/2097) ([jamesnetherton](https://github.com/jamesnetherton))
 - fix: Use correct versions to access OLM APIs [\#2095](https://github.com/apache/camel-k/pull/2095) ([astefanutti](https://github.com/astefanutti))
 - Upgrade sbo [\#2094](https://github.com/apache/camel-k/pull/2094) ([johnpoth](https://github.com/johnpoth))
@@ -334,6 +335,7 @@
 - Add suport for gists [\#1740](https://github.com/apache/camel-k/issues/1740)
 - Update to k8s 0.18.8 [\#1698](https://github.com/apache/camel-k/issues/1698)
 - Error during unshare\(...\): Operation not permitted [\#1580](https://github.com/apache/camel-k/issues/1580)
+- kamelets: operator support [\#1574](https://github.com/apache/camel-k/issues/1574)
 - Remove support for Main runtime for integrations [\#1562](https://github.com/apache/camel-k/issues/1562)
 - Auto-detect json in yaml syntax [\#1549](https://github.com/apache/camel-k/issues/1549)
 - Provide yaml schema of design definition [\#1537](https://github.com/apache/camel-k/issues/1537)
@@ -379,7 +381,6 @@
 - Add related image in OLM descriptor [\#1611](https://github.com/apache/camel-k/issues/1611)
 - Deprecate build kit at platform set-up time [\#1604](https://github.com/apache/camel-k/issues/1604)
 - kamelets: runtime support [\#1575](https://github.com/apache/camel-k/issues/1575)
-- kamelets: operator support [\#1574](https://github.com/apache/camel-k/issues/1574)
 - Support for Kamelets [\#1567](https://github.com/apache/camel-k/issues/1567)
 - Add a kamel help cli command [\#1545](https://github.com/apache/camel-k/issues/1545)
 - Switch to Quarkus as default runtime for integrations [\#1513](https://github.com/apache/camel-k/issues/1513)
@@ -1125,7 +1126,6 @@
 - feat\(build\): Better report build progress [\#1064](https://github.com/apache/camel-k/pull/1064) ([astefanutti](https://github.com/astefanutti))
 - Add GC trait discovery client caching options and server-side deletion [\#1062](https://github.com/apache/camel-k/pull/1062) ([astefanutti](https://github.com/astefanutti))
 - chore\(olm\): fix olm naming [\#1060](https://github.com/apache/camel-k/pull/1060) ([nicolaferraro](https://github.com/nicolaferraro))
-- chore\(magic\): auto-add dependency on camel-jackson when using plain .… [\#1049](https://github.com/apache/camel-k/pull/1049) ([nicolaferraro](https://github.com/nicolaferraro))
 - feat\(build\): Task-based builds [\#1121](https://github.com/apache/camel-k/pull/1121) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.0-M4](https://github.com/apache/camel-k/tree/1.0.0-M4) (2019-11-13)
@@ -1155,6 +1155,7 @@
 - Fix \#1038: redeploy integration when trait config changes [\#1053](https://github.com/apache/camel-k/pull/1053) ([nicolaferraro](https://github.com/nicolaferraro))
 - Remove support for java class loader [\#1052](https://github.com/apache/camel-k/pull/1052) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#1036: generate k8s client for camel k resources [\#1051](https://github.com/apache/camel-k/pull/1051) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore\(magic\): auto-add dependency on camel-jackson when using plain .… [\#1049](https://github.com/apache/camel-k/pull/1049) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix \#662: mark kit traits to avoid rebuilding when not necessary [\#1046](https://github.com/apache/camel-k/pull/1046) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(camel\): Report runtime version from Camel catalog into integration and kit statuses [\#1044](https://github.com/apache/camel-k/pull/1044) ([astefanutti](https://github.com/astefanutti))
 - chore\(dev\): Upgrade Operator SDK to version 0.12.0 [\#1043](https://github.com/apache/camel-k/pull/1043) ([astefanutti](https://github.com/astefanutti))
