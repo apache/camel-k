@@ -29,7 +29,8 @@ import (
 	"time"
 
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/gstruct"
+	. "github.com/onsi/gomega/gstruct"
+	"github.com/onsi/gomega/types"
 	"github.com/stretchr/testify/assert"
 
 	v1 "k8s.io/api/core/v1"
@@ -78,22 +79,22 @@ func TestMetrics(t *testing.T) {
 			// Check it's consistent with the duration observed from logs
 			var ts1, ts2 time.Time
 			err = NewLogWalker(&logs).
-				AddStep(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.build"),
 					"Message":     Equal("Build state transition"),
 					"Phase":       Equal("Pending"),
 					"RequestName": Equal(build.Name),
 				}), LogEntryNoop).
-				AddStep(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.build"),
 					"Message":     Equal("Reconciling Build"),
 					"RequestName": Equal(build.Name),
 				}), func(l *LogEntry) { ts1 = l.Timestamp.Time }).
-				AddStep(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName": Equal("camel-k.builder"),
 					"Message":    HavePrefix("resolved image"),
 				}), LogEntryNoop).
-				AddStep(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.build"),
 					"Message":     Equal("Reconciling Build"),
 					"RequestName": Equal(build.Name),
@@ -108,60 +109,223 @@ func TestMetrics(t *testing.T) {
 			Expect(math.Abs((durationFromLogs - duration).Seconds())).To(BeNumerically("<", 1))
 
 			// Check the duration is observed in the corresponding metric
-			Expect(metrics).To(HaveKeyWithValue("camel_k_build_duration_seconds", gstruct.PointTo(Equal(prometheus.MetricFamily{
-				Name: stringP("camel_k_build_duration_seconds"),
-				Help: stringP("Camel K build duration"),
-				Type: metricTypeP(prometheus.MetricType_HISTOGRAM),
-				Metric: []*prometheus.Metric{
-					{
-						Label: []*prometheus.LabelPair{
-							label("result", "Succeeded"),
-						},
-						Histogram: &prometheus.Histogram{
-							SampleCount: uint64P(1),
-							SampleSum:   float64P(duration.Seconds()),
-							Bucket:      buckets(duration.Seconds(), []float64{30, 60, 90, 120, 300, 600, math.Inf(1)}),
+			Expect(metrics).To(HaveKeyWithValue("camel_k_build_duration_seconds",
+				EqualP(prometheus.MetricFamily{
+					Name: stringP("camel_k_build_duration_seconds"),
+					Help: stringP("Camel K build duration"),
+					Type: metricTypeP(prometheus.MetricType_HISTOGRAM),
+					Metric: []*prometheus.Metric{
+						{
+							Label: []*prometheus.LabelPair{
+								label("result", "Succeeded"),
+							},
+							Histogram: &prometheus.Histogram{
+								SampleCount: uint64P(1),
+								SampleSum:   float64P(duration.Seconds()),
+								Bucket:      buckets(duration.Seconds(), []float64{30, 60, 90, 120, 300, 600, math.Inf(1)}),
+							},
 						},
 					},
-				},
-			}))))
+				}),
+			))
 		})
 
-		t.Run("Build recovery attempts", func(t *testing.T) {
+		t.Run("Build recovery attempts metric", func(t *testing.T) {
 			// Check there are no failures reported in the Build status
 			Expect(build.Status.Failure).To(BeNil())
 
 			// Check no recovery attempts are reported in the logs
-			recoveryAttemptLogged := false
-			err = NewLogWalker(&logs).
-				AddStep(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
-					"LoggerName":  Equal("camel-k.controller.build"),
-					"Message":     HavePrefix("Recovery attempt"),
-					"Kind":        Equal("Build"),
-					"RequestName": Equal(build.Name),
-				}), func(l *LogEntry) { recoveryAttemptLogged = true }).
-				Walk()
+			recoveryAttempts, err := NewLogCounter(&logs).Count(MatchFields(IgnoreExtras, Fields{
+				"LoggerName":  Equal("camel-k.controller.build"),
+				"Message":     HavePrefix("Recovery attempt"),
+				"Kind":        Equal("Build"),
+				"RequestName": Equal(build.Name),
+			}))
 			Expect(err).To(BeNil())
-			Expect(recoveryAttemptLogged).To(BeFalse())
+			Expect(recoveryAttempts).To(BeNumerically("==", 0))
 
 			// Check no recovery attempts are observed in the corresponding metric
-			Expect(metrics).To(HaveKeyWithValue("camel_k_build_recovery_attempts", gstruct.PointTo(Equal(prometheus.MetricFamily{
-				Name: stringP("camel_k_build_recovery_attempts"),
-				Help: stringP("Camel K build recovery attempts"),
-				Type: metricTypeP(prometheus.MetricType_HISTOGRAM),
-				Metric: []*prometheus.Metric{
-					{
-						Label: []*prometheus.LabelPair{
-							label("result", "Succeeded"),
-						},
-						Histogram: &prometheus.Histogram{
-							SampleCount: uint64P(1),
-							SampleSum:   float64P(0),
-							Bucket:      buckets(0, []float64{0, 1, 2, 3, 4, 5, math.Inf(1)}),
+			Expect(metrics).To(HaveKeyWithValue("camel_k_build_recovery_attempts",
+				EqualP(prometheus.MetricFamily{
+					Name: stringP("camel_k_build_recovery_attempts"),
+					Help: stringP("Camel K build recovery attempts"),
+					Type: metricTypeP(prometheus.MetricType_HISTOGRAM),
+					Metric: []*prometheus.Metric{
+						{
+							Label: []*prometheus.LabelPair{
+								label("result", "Succeeded"),
+							},
+							Histogram: &prometheus.Histogram{
+								SampleCount: uint64P(1),
+								SampleSum:   float64P(0),
+								Bucket:      buckets(0, []float64{0, 1, 2, 3, 4, 5, math.Inf(1)}),
+							},
 						},
 					},
-				},
-			}))))
+				}),
+			))
+		})
+
+		t.Run("reconciliation duration metric", func(t *testing.T) {
+			Expect(metrics).To(HaveKeyWithValue("camel_k_reconciliation_duration_seconds",
+				PointTo(MatchFields(IgnoreExtras, Fields{
+					"Name": EqualP("camel_k_reconciliation_duration_seconds"),
+					"Help": EqualP("Camel K reconciliation loop duration"),
+					"Type": EqualP(prometheus.MetricType_HISTOGRAM),
+				})),
+			))
+
+			counter := NewLogCounter(&logs)
+
+			// Count the number of IntegrationPlatform reconciliations
+			platformReconciliations, err := counter.Count(MatchFields(IgnoreExtras, Fields{
+				"LoggerName":       Equal("camel-k.controller.integrationplatform"),
+				"Message":          Equal("Reconciling IntegrationPlatform"),
+				"RequestNamespace": Equal(ns),
+				"RequestName":      Equal("camel-k"),
+			}))
+			Expect(err).To(BeNil())
+
+			// Check it matches the observation in the corresponding metric
+			platformReconciled := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
+				MatchFieldsP(IgnoreExtras, Fields{
+					"Label": ConsistOf(
+						label("group", camelv1.SchemeGroupVersion.Group),
+						label("version", camelv1.SchemeGroupVersion.Version),
+						label("kind", "IntegrationPlatform"),
+						label("namespace", ns),
+						label("result", "Reconciled"),
+						label("tag", ""),
+					),
+				}))
+			Expect(platformReconciled).NotTo(BeNil())
+			platformReconciledCount := *platformReconciled.Histogram.SampleCount
+			Expect(platformReconciledCount).To(BeNumerically(">", 0))
+
+			platformRequeued := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
+				MatchFieldsP(IgnoreExtras, Fields{
+					"Label": ConsistOf(
+						label("group", camelv1.SchemeGroupVersion.Group),
+						label("version", camelv1.SchemeGroupVersion.Version),
+						label("kind", "IntegrationPlatform"),
+						label("namespace", ns),
+						label("result", "Requeued"),
+						label("tag", ""),
+					),
+				}))
+			platformRequeuedCount := uint64(0)
+			if platformRequeued != nil {
+				platformRequeuedCount = *platformRequeued.Histogram.SampleCount
+			}
+
+			Expect(platformReconciliations).To(BeNumerically("==", platformReconciledCount+platformRequeuedCount))
+
+			// Count the number of Integration reconciliations
+			integrationReconciliations, err := counter.Count(MatchFields(IgnoreExtras, Fields{
+				"LoggerName":       Equal("camel-k.controller.integration"),
+				"Message":          Equal("Reconciling Integration"),
+				"RequestNamespace": Equal(it.Namespace),
+				"RequestName":      Equal(it.Name),
+			}))
+			Expect(err).To(BeNil())
+			Expect(integrationReconciliations).To(BeNumerically(">", 0))
+
+			// Check it matches the observation in the corresponding metric
+			Expect(metrics).To(HaveKeyWithValue("camel_k_reconciliation_duration_seconds",
+				PointTo(MatchFields(IgnoreExtras, Fields{
+					"Name": EqualP("camel_k_reconciliation_duration_seconds"),
+					"Help": EqualP("Camel K reconciliation loop duration"),
+					"Type": EqualP(prometheus.MetricType_HISTOGRAM),
+					"Metric": ContainElement(MatchFieldsP(IgnoreExtras, Fields{
+						"Label": ConsistOf(
+							label("group", camelv1.SchemeGroupVersion.Group),
+							label("version", camelv1.SchemeGroupVersion.Version),
+							label("kind", "Integration"),
+							label("namespace", it.Namespace),
+							label("result", "Reconciled"),
+							label("tag", ""),
+						),
+						"Histogram": MatchFieldsP(IgnoreExtras, Fields{
+							"SampleCount": EqualP(uint64(integrationReconciliations)),
+						}),
+					})),
+				})),
+			))
+
+			// Count the number of IntegrationKit reconciliations
+			integrationKitReconciliations, err := counter.Count(MatchFields(IgnoreExtras, Fields{
+				"LoggerName":       Equal("camel-k.controller.integrationkit"),
+				"Message":          Equal("Reconciling IntegrationKit"),
+				"RequestNamespace": Equal(it.Status.IntegrationKit.Namespace),
+				"RequestName":      Equal(it.Status.IntegrationKit.Name),
+			}))
+			Expect(err).To(BeNil())
+			Expect(integrationKitReconciliations).To(BeNumerically(">", 0))
+
+			// Check it matches the observation in the corresponding metric
+			Expect(metrics).To(HaveKeyWithValue("camel_k_reconciliation_duration_seconds",
+				PointTo(MatchFields(IgnoreExtras, Fields{
+					"Name": EqualP("camel_k_reconciliation_duration_seconds"),
+					"Help": EqualP("Camel K reconciliation loop duration"),
+					"Type": EqualP(prometheus.MetricType_HISTOGRAM),
+					"Metric": ContainElement(MatchFieldsP(IgnoreExtras, Fields{
+						"Label": ConsistOf(
+							label("group", camelv1.SchemeGroupVersion.Group),
+							label("version", camelv1.SchemeGroupVersion.Version),
+							label("kind", "IntegrationKit"),
+							label("namespace", it.Status.IntegrationKit.Namespace),
+							label("result", "Reconciled"),
+							label("tag", ""),
+						),
+						"Histogram": MatchFieldsP(IgnoreExtras, Fields{
+							"SampleCount": EqualP(uint64(integrationKitReconciliations)),
+						}),
+					})),
+				})),
+			))
+
+			// Count the number of Build reconciliations
+			buildReconciliations, err := counter.Count(MatchFields(IgnoreExtras, Fields{
+				"LoggerName":       Equal("camel-k.controller.build"),
+				"Message":          Equal("Reconciling Build"),
+				"RequestNamespace": Equal(build.Namespace),
+				"RequestName":      Equal(build.Name),
+			}))
+			Expect(err).To(BeNil())
+
+			// Check it matches the observation in the corresponding metric
+			buildReconciled := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
+				MatchFieldsP(IgnoreExtras, Fields{
+					"Label": ConsistOf(
+						label("group", camelv1.SchemeGroupVersion.Group),
+						label("version", camelv1.SchemeGroupVersion.Version),
+						label("kind", "Build"),
+						label("namespace", build.Namespace),
+						label("result", "Reconciled"),
+						label("tag", ""),
+					),
+				}))
+			Expect(buildReconciled).NotTo(BeNil())
+			buildReconciledCount := *buildReconciled.Histogram.SampleCount
+			Expect(buildReconciledCount).To(BeNumerically(">", 0))
+
+			buildRequeued := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
+				MatchFieldsP(IgnoreExtras, Fields{
+					"Label": ConsistOf(
+						label("group", camelv1.SchemeGroupVersion.Group),
+						label("version", camelv1.SchemeGroupVersion.Version),
+						label("kind", "Build"),
+						label("namespace", build.Namespace),
+						label("result", "Requeued"),
+						label("tag", ""),
+					),
+				}))
+			buildRequeuedCount := uint64(0)
+			if buildRequeued != nil {
+				buildRequeuedCount = *buildRequeued.Histogram.SampleCount
+			}
+
+			Expect(buildReconciliations).To(BeNumerically("==", buildReconciledCount+buildRequeuedCount))
 		})
 
 		t.Run("Integration metrics", func(t *testing.T) {
@@ -175,6 +339,17 @@ func TestMetrics(t *testing.T) {
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
+}
+
+func getMetric(family *prometheus.MetricFamily, matcher types.GomegaMatcher) *prometheus.Metric {
+	for _, metric := range family.Metric {
+		if match, err := matcher.Match(metric); err != nil {
+			panic(err)
+		} else if match {
+			return metric
+		}
+	}
+	return nil
 }
 
 func label(name, value string) *prometheus.LabelPair {
@@ -207,6 +382,14 @@ func buckets(value float64, upperBounds []float64) []*prometheus.Bucket {
 func parsePrometheusData(data []byte) (map[string]*prometheus.MetricFamily, error) {
 	var parser expfmt.TextParser
 	return parser.TextToMetricFamilies(bytes.NewReader(data))
+}
+
+func EqualP(expected interface{}) types.GomegaMatcher {
+	return PointTo(Equal(expected))
+}
+
+func MatchFieldsP(options Options, fields Fields) types.GomegaMatcher {
+	return PointTo(MatchFields(options, fields))
 }
 
 func stringP(s string) *string {
