@@ -27,6 +27,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	v1alpha12 "github.com/operator-framework/api/pkg/operators/v1alpha1"
 	"io"
 	"io/ioutil"
 	"os"
@@ -34,6 +35,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unsafe"
 
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
@@ -116,6 +118,7 @@ func init() {
 	client.FastMapperAllowedAPIGroups["eventing.knative.dev"] = true
 	client.FastMapperAllowedAPIGroups["messaging.knative.dev"] = true
 	client.FastMapperAllowedAPIGroups["serving.knative.dev"] = true
+	client.FastMapperAllowedAPIGroups["operators.coreos.com"] = true
 	client.FastMapperAllowedAPIGroups["policy"] = true
 
 	var err error
@@ -667,6 +670,65 @@ func KnativeService(ns string, name string) func() *servingv1.Service {
 			return nil
 		}
 		return &answer
+	}
+}
+
+func CKClusterServiceVersion(conditions func(v1alpha12.ClusterServiceVersion) bool ,ns string) func() *v1alpha12.ClusterServiceVersion {
+	return func() *v1alpha12.ClusterServiceVersion {
+		lst := v1alpha12.ClusterServiceVersionList{}
+		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+			panic(err)
+		}
+		for _, s := range lst.Items {
+			if strings.Contains(s.Name, "camel-k") && conditions(s){
+				return &s
+			}
+		}
+		return nil
+	}
+}
+
+func CKClusterServiceVersionPhase(conditions func(v1alpha12.ClusterServiceVersion) bool, ns string) func() v1alpha12.ClusterServiceVersionPhase {
+	return func() v1alpha12.ClusterServiceVersionPhase {
+		if csv := CKClusterServiceVersion(conditions, ns)(); csv != nil && unsafe.Sizeof(csv.Status) > 0 {
+			return csv.Status.Phase
+		}
+		return ""
+	}
+}
+
+func CatalogSource(name string, ns string) func() *v1alpha12.CatalogSource {
+	return func() *v1alpha12.CatalogSource {
+		answer := v1alpha12.CatalogSource{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "CatalogSource",
+				APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: ns,
+				Name:      name,
+			},
+		}
+		key := ctrl.ObjectKey{
+			Namespace: ns,
+			Name:      name,
+		}
+		if err := TestClient().Get(TestContext, key, &answer); err != nil && k8serrors.IsNotFound(err) {
+			return nil
+		} else if err != nil {
+			log.Errorf(err, "Error while retrieving CatalogSource %s", name)
+			return nil
+		}
+		return &answer
+	}
+}
+
+func CatalogSourcePhase(name string, ns string) func() string {
+	return func() string {
+		if source := CatalogSource(name, ns)(); source != nil && source.Status.GRPCConnectionState != nil {
+			return CatalogSource(name, ns)().Status.GRPCConnectionState.LastObservedState
+		}
+		return ""
 	}
 }
 
