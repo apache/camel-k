@@ -19,3 +19,4 @@ resources:
 - ../default
 - ../samples
 - ../scorecard
+- ./bases/camel-k.clusterserviceversion.yaml

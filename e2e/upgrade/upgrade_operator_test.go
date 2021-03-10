@@ -36,6 +36,9 @@ import (
 )
 
 func TestOperatorUpgrade(t *testing.T) {
+	// Clean all cluster-wide resources that could corrupt the test run
+	Expect(Kamel("uninstall", "--all", "--olm=false").Execute()).To(Succeed())
+
 	WithNewTestNamespace(t, func(ns string) {
 		version, ok := os.LookupEnv("KAMEL_K_TEST_RELEASE_VERSION")
 		Expect(ok).To(BeTrue())
@@ -43,8 +46,14 @@ func TestOperatorUpgrade(t *testing.T) {
 		image, ok := os.LookupEnv("KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE")
 		Expect(ok).To(BeTrue())
 
-		Expect(Kamel("install", "--cluster-setup").Execute()).To(Succeed())
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		kamel, ok := os.LookupEnv("RELEASED_KAMEL_BIN")
+		Expect(ok).To(BeTrue())
+
+		//set KAMEL_BIN only for this test - don't override the ENV variable for all tests
+		Expect(os.Setenv("KAMEL_BIN", kamel)).To(Succeed())
+
+		Expect(Kamel("install", "--olm=false", "--cluster-setup", "--force").Execute()).To(Succeed())
+		Expect(Kamel("install", "--olm=false", "-n", ns).Execute()).To(Succeed())
 
 		// Check the operator pod is running
 		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(v1.PodRunning))
@@ -69,8 +78,8 @@ func TestOperatorUpgrade(t *testing.T) {
 
 		// Upgrade the operator by installing the current version
 		// FIXME: it seems forcing the installation does not re-install the CRDs
-		Expect(Kamel("install", "--cluster-setup", "--force").Execute()).To(Succeed())
-		Expect(Kamel("install", "-n", ns, "--force", "--operator-image", image).Execute()).To(Succeed())
+		Expect(Kamel("install", "--olm=false", "--cluster-setup", "--force").Execute()).To(Succeed())
+		Expect(Kamel("install", "-n", ns, "--olm=false", "--force", "--operator-image", image).Execute()).To(Succeed())
 
 		// Check the operator image is the current built one
 		Eventually(OperatorImage(ns)).Should(Equal(image))
@@ -99,5 +108,6 @@ func TestOperatorUpgrade(t *testing.T) {
 
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("uninstall", "--all", "--olm=false").Execute()).To(Succeed())
 	})
 }

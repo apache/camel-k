@@ -64,9 +64,19 @@ jobs:
       with:
         version: "11"
     - name: Set Go
-      uses: actions/setup-go@v1
+      uses: actions/setup-go@v2
       with:
         go-version: 1.13.x
+    - name: Set up operator-sdk
+      run: |
+        curl -L https://github.com/operator-framework/operator-sdk/releases/download/v1.3.0/operator-sdk_linux_amd64 -o operator-sdk
+        chmod +x operator-sdk
+        sudo mv operator-sdk /usr/local/bin/
+    - name: Set up opm tool
+      run: |
+        curl -L https://github.com/operator-framework/operator-registry/releases/download/v1.16.1/linux-amd64-opm -o opm
+        chmod +x opm
+        sudo mv opm /usr/local/bin/
     - name: Kubernetes KinD Cluster
       uses: container-tools/kind-action@v1
       with:
@@ -75,6 +85,12 @@ jobs:
       run: |
         kubectl cluster-info
         kubectl describe nodes
+    - name: Install OLM
+      run: |
+        kubectl apply -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.17.0/crds.yaml
+        # wait for a while to be sure CRDs are installed
+        sleep 1
+        kubectl apply -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.17.0/olm.yaml
     - name: Get Kamel CLI
       run: |
         export KAMEL_VERSION=$(make get-last-released-version)
@@ -92,12 +108,52 @@ jobs:
         cp ./kamel ./build/_output/bin/
         echo "Building the images"
         export LOCAL_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make get-version)
+        echo "LOCAL_IMAGE=${LOCAL_IMAGE}" >> $GITHUB_ENV
         docker build -t "${LOCAL_IMAGE}" -f build/Dockerfile .
         docker push ${LOCAL_IMAGE}
+    - name: Build Operator bundle
+      run: |
+        echo "Build Operator bundle"
+
+        # reinstall kustomize to be always on the same version
+        sudo rm $(which kustomize)
+
+        make kustomize
+
+        # replace image
+        $(cd config/manifests && kustomize edit set image "docker.io/apache/camel-k=${{ env.LOCAL_IMAGE }}")
+
+
+        # CSV the patch to force OLM upgrade
+        export RELEASE_VERSION=$(make get-version | grep -Po "\d.\d.\d")
+        cat <<EOF > config/manifests/patch.yml
+        apiVersion: operators.coreos.com/v1alpha1
+        kind: ClusterServiceVersion
+        metadata:
+          namespace: placeholder
+          name: camel-k.v$(make get-last-released-version)
+          annotations:
+            olm.skipRange: ">=1.0.0 <${RELEASE_VERSION}"
+        EOF
+
+        echo "Patching CSV with"
+        cat config/manifests/patch.yml
+        $(cd config/manifests && kustomize edit add patch patch.yml)
+
+        export LOCAL_IMAGE_BUNDLE=$KIND_REGISTRY/apache/camel-k-bundle:$(make get-version)
+        echo "LOCAL_IMAGE_BUNDLE=${LOCAL_IMAGE_BUNDLE}" >> $GITHUB_ENV
+        make bundle-build METADATA_IMAGE_NAME=${LOCAL_IMAGE_BUNDLE} BUNDLE_METADATA_OPTS="--channels stable"
+        docker push ${LOCAL_IMAGE_BUNDLE}
+    - name: Create new index image
+      run: |
+        export LOCAL_IIB=$KIND_REGISTRY/apache/camel-k-iib:$(make get-version)
+        echo "LOCAL_IIB=${LOCAL_IIB}" >> $GITHUB_ENV
+        opm index add --bundles ${{ env.LOCAL_IMAGE_BUNDLE }} --from-index quay.io/operatorhubio/catalog:latest --tag ${LOCAL_IIB} --skip-tls
+        podman push --tls-verify=false ${LOCAL_IIB}
     - name: Run IT
       run: |
         # Use the last released Kamel CLI
-        export KAMEL_BIN=/usr/local/bin/kamel
+        export RELEASED_KAMEL_BIN=/usr/local/bin/kamel
 
         # Configure install options
         export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
@@ -105,10 +161,9 @@ jobs:
         export KAMEL_INSTALL_REGISTRY=$KIND_REGISTRY
         export KAMEL_INSTALL_REGISTRY_INSECURE=true
 
-        # TODO: Install OLM and cover upgrade managed by OLM
-        export KAMEL_INSTALL_OLM=false
-
         # Configure test options
+        export CAMEL_K_PREV_IIB=quay.io/operatorhubio/catalog:latest
+        export CAMEL_K_NEW_IIB=${{ env.LOCAL_IIB }}
         export KAMEL_K_TEST_RELEASE_VERSION=$(make get-last-released-version)
         export KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make get-version)
 
