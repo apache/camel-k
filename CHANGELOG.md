@@ -44,7 +44,10 @@
 
 **Merged pull requests:**
 
+- fix: Do not report falsy readiness condition on Integration downscaling [\#2108](https://github.com/apache/camel-k/pull/2108) ([astefanutti](https://github.com/astefanutti))
+- fix\(ci\): Fix OpenShift DNS node configuration [\#2104](https://github.com/apache/camel-k/pull/2104) ([astefanutti](https://github.com/astefanutti))
 - chore : Fix links to the developers guide - needs to point to latest/contributing/developers.html [\#2102](https://github.com/apache/camel-k/pull/2102) ([cunningt](https://github.com/cunningt))
+- chore: Rely on Lease from controller-runtime for leader election [\#2100](https://github.com/apache/camel-k/pull/2100) ([astefanutti](https://github.com/astefanutti))
 - Add missing classpath locations for external kits [\#2097](https://github.com/apache/camel-k/pull/2097) ([jamesnetherton](https://github.com/jamesnetherton))
 - fix: Use correct versions to access OLM APIs [\#2095](https://github.com/apache/camel-k/pull/2095) ([astefanutti](https://github.com/astefanutti))
 - Upgrade sbo [\#2094](https://github.com/apache/camel-k/pull/2094) ([johnpoth](https://github.com/johnpoth))
@@ -145,10 +148,7 @@
 - Fix saga example [\#1926](https://github.com/apache/camel-k/pull/1926) ([jamesnetherton](https://github.com/jamesnetherton))
 - Fix image location extraction [\#1925](https://github.com/apache/camel-k/pull/1925) ([doru1004](https://github.com/doru1004))
 - Fix modeline for inspect. [\#1924](https://github.com/apache/camel-k/pull/1924) ([doru1004](https://github.com/doru1004))
-- Environment variables evaluated only at integration runtime [\#1916](https://github.com/apache/camel-k/pull/1916) ([doru1004](https://github.com/doru1004))
-- Upgrade CRDs to apiextensions.k8s.io/v1 [\#1914](https://github.com/apache/camel-k/pull/1914) ([astefanutti](https://github.com/astefanutti))
 - Feat\(cli\): version operator and warning compatibility message [\#1912](https://github.com/apache/camel-k/pull/1912) ([squakez](https://github.com/squakez))
-- proposal: add Service Binding proposal \(\#1445\) [\#1864](https://github.com/apache/camel-k/pull/1864) ([johnpoth](https://github.com/johnpoth))
 
 ## [v1.3.1](https://github.com/apache/camel-k/tree/v1.3.1) (2021-02-01)
 
@@ -335,7 +335,6 @@
 - Add suport for gists [\#1740](https://github.com/apache/camel-k/issues/1740)
 - Update to k8s 0.18.8 [\#1698](https://github.com/apache/camel-k/issues/1698)
 - Error during unshare\(...\): Operation not permitted [\#1580](https://github.com/apache/camel-k/issues/1580)
-- kamelets: operator support [\#1574](https://github.com/apache/camel-k/issues/1574)
 - Remove support for Main runtime for integrations [\#1562](https://github.com/apache/camel-k/issues/1562)
 - Auto-detect json in yaml syntax [\#1549](https://github.com/apache/camel-k/issues/1549)
 - Provide yaml schema of design definition [\#1537](https://github.com/apache/camel-k/issues/1537)
@@ -381,6 +380,7 @@
 - Add related image in OLM descriptor [\#1611](https://github.com/apache/camel-k/issues/1611)
 - Deprecate build kit at platform set-up time [\#1604](https://github.com/apache/camel-k/issues/1604)
 - kamelets: runtime support [\#1575](https://github.com/apache/camel-k/issues/1575)
+- kamelets: operator support [\#1574](https://github.com/apache/camel-k/issues/1574)
 - Support for Kamelets [\#1567](https://github.com/apache/camel-k/issues/1567)
 - Add a kamel help cli command [\#1545](https://github.com/apache/camel-k/issues/1545)
 - Switch to Quarkus as default runtime for integrations [\#1513](https://github.com/apache/camel-k/issues/1513)
