@@ -73,9 +73,8 @@ type knativeTrait struct {
 	// List of event types that the integration will produce.
 	// Can contain simple event types or full Camel URIs (to use a specific broker).
 	EventSinks []string `property:"event-sinks" json:"eventSinks,omitempty"`
-	// Enables filtering on events based on the header "ce-knativehistory". Since this is an experimental header
-	// that can be removed in a future version of Knative, filtering is enabled only when the integration is
-	// listening from more than 1 channel.
+	// Enables filtering on events based on the header "ce-knativehistory". Since this header has been removed in newer versions of
+	// Knative, filtering is disabled by default.
 	FilterSourceChannels *bool `property:"filter-source-channels" json:"filterSourceChannels,omitempty"`
 	// Enables Knative CamelSource pre 0.15 compatibility fixes (will be removed in future versions).
 	CamelSourceCompat *bool `property:"camel-source-compat" json:"camelSourceCompat,omitempty"`
@@ -193,11 +192,9 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 
 			t.EventSinks = items
 		}
-		if len(t.ChannelSources) > 1 {
-			// Always filter channels when the integration subscribes to more than one
-			// Using Knative experimental header: https://github.com/knative/eventing/blob/7df0cc56c28d58223ff25d5ddfb487fa8c29a004/pkg/provisioners/message.go#L28
-			// TODO: filter automatically all source channels when the feature becomes stable
-			filter := true
+		if t.FilterSourceChannels == nil {
+			// Filtering is no longer used by default
+			filter := false
 			t.FilterSourceChannels = &filter
 		}
 		if t.SinkBinding == nil {
@@ -299,8 +296,8 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 			if err != nil {
 				return err
 			}
+			path := fmt.Sprintf("/channels/%s", ref.Name)
 			meta := map[string]string{
-				knativeapi.CamelMetaServicePath:       "/",
 				knativeapi.CamelMetaEndpointKind:      string(knativeapi.CamelEndpointKindSource),
 				knativeapi.CamelMetaKnativeAPIVersion: ref.APIVersion,
 				knativeapi.CamelMetaKnativeKind:       ref.Kind,
@@ -312,11 +309,12 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 			svc := knativeapi.CamelServiceDefinition{
 				Name:        ref.Name,
 				ServiceType: knativeapi.CamelServiceTypeChannel,
+				Path:        path,
 				Metadata:    meta,
 			}
 			env.Services = append(env.Services, svc)
 
-			if err := t.createSubscription(e, ref); err != nil {
+			if err := t.createSubscription(e, ref, path); err != nil {
 				return err
 			}
 
@@ -350,11 +348,11 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 	return nil
 }
 
-func (t *knativeTrait) createSubscription(e *Environment, ref *corev1.ObjectReference) error {
+func (t *knativeTrait) createSubscription(e *Environment, ref *corev1.ObjectReference, path string) error {
 	if ref.Namespace == "" {
 		ref.Namespace = e.Integration.Namespace
 	}
-	sub := knativeutil.CreateSubscription(*ref, e.Integration.Name)
+	sub := knativeutil.CreateSubscription(*ref, e.Integration.Name, path)
 	e.Resources.Add(sub)
 	return nil
 }
@@ -374,8 +372,8 @@ func (t *knativeTrait) configureEndpoints(e *Environment, env *knativeapi.CamelE
 		svc := knativeapi.CamelServiceDefinition{
 			Name:        ref.Name,
 			ServiceType: knativeapi.CamelServiceTypeEndpoint,
+			Path:        "/",
 			Metadata: map[string]string{
-				knativeapi.CamelMetaServicePath:       "/",
 				knativeapi.CamelMetaEndpointKind:      string(knativeapi.CamelEndpointKindSource),
 				knativeapi.CamelMetaKnativeAPIVersion: serving.SchemeGroupVersion.String(),
 				knativeapi.CamelMetaKnativeKind:       "Service",
@@ -419,15 +417,15 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 			if serviceName == "" {
 				serviceName = "default"
 			}
-			servicePath := "/" + eventType
+			servicePath := fmt.Sprintf("/events/%s", eventType)
 			t.createTrigger(e, ref, eventType, servicePath)
 
 			if !env.ContainsService(serviceName, knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEvent, ref.APIVersion, ref.Kind) {
 				svc := knativeapi.CamelServiceDefinition{
 					Name:        serviceName,
 					ServiceType: knativeapi.CamelServiceTypeEvent,
+					Path:        servicePath,
 					Metadata: map[string]string{
-						knativeapi.CamelMetaServicePath:       servicePath,
 						knativeapi.CamelMetaEndpointKind:      string(knativeapi.CamelEndpointKindSource),
 						knativeapi.CamelMetaKnativeAPIVersion: ref.APIVersion,
 						knativeapi.CamelMetaKnativeKind:       ref.Kind,

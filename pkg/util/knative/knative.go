@@ -45,7 +45,7 @@ import (
 )
 
 // CreateSubscription ---
-func CreateSubscription(channelReference corev1.ObjectReference, serviceName string) *messaging.Subscription {
+func CreateSubscription(channelReference corev1.ObjectReference, serviceName string, path string) *messaging.Subscription {
 	return &messaging.Subscription{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: messaging.SchemeGroupVersion.String(),
@@ -66,6 +66,9 @@ func CreateSubscription(channelReference corev1.ObjectReference, serviceName str
 					APIVersion: serving.SchemeGroupVersion.String(),
 					Kind:       "Service",
 					Name:       serviceName,
+				},
+				URI: &apis.URL{
+					Path: path,
 				},
 			},
 		},
