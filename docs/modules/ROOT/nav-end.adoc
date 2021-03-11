@@ -3,6 +3,8 @@
 ** xref:troubleshooting/operating.adoc[Operating]
 ** xref:troubleshooting/known-issues.adoc[Known Issues]
 * xref:kamelets/kamelets.adoc[Kamelets]
+** xref:kamelets/kamelets-user.adoc[Kamelets User Guide]
+** xref:kamelets/kamelets-dev.adoc[Kamelets Developer Guide]
 * xref:architecture/architecture.adoc[Architecture]
 ** xref:architecture/operator.adoc[Operator]
 *** xref:architecture/cr/integration-platform.adoc[IntegrationPlatform]
