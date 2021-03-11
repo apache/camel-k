@@ -82,7 +82,7 @@ func TestMetrics(t *testing.T) {
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.build"),
 					"Message":     Equal("Build state transition"),
-					"Phase":       Equal("Pending"),
+					"Phase":       Equal(string(camelv1.BuildPhasePending)),
 					"RequestName": Equal(build.Name),
 				}), LogEntryNoop).
 				AddStep(MatchFields(IgnoreExtras, Fields{
@@ -101,8 +101,8 @@ func TestMetrics(t *testing.T) {
 				}), func(l *LogEntry) { ts2 = l.Timestamp.Time }).
 				Walk()
 			Expect(err).To(BeNil())
-			Expect(ts1).NotTo(BeNil())
-			Expect(ts2).NotTo(BeNil())
+			Expect(ts1).NotTo(BeZero())
+			Expect(ts2).NotTo(BeZero())
 			Expect(ts2).To(BeTemporally(">", ts1))
 
 			durationFromLogs := ts2.Sub(ts1)
@@ -326,6 +326,58 @@ func TestMetrics(t *testing.T) {
 			}
 
 			Expect(buildReconciliations).To(BeNumerically("==", buildReconciledCount+buildRequeuedCount))
+		})
+
+		t.Run("Build queue duration metric", func(t *testing.T) {
+			var ts1, ts2 time.Time
+			// The start queuing time is taken from the creation time
+			ts1 = build.CreationTimestamp.Time
+
+			// Retrieve the end queuing time from the logs
+			err = NewLogWalker(&logs).
+				AddStep(MatchFields(IgnoreExtras, Fields{
+					"LoggerName":  Equal("camel-k.controller.build"),
+					"Message":     Equal("Build state transition"),
+					"Phase":       Equal(string(camelv1.BuildPhasePending)),
+					"RequestName": Equal(build.Name),
+				}), func(l *LogEntry) { ts2 = l.Timestamp.Time }).
+				Walk()
+			Expect(err).To(BeNil())
+			Expect(ts1).NotTo(BeZero())
+			Expect(ts2).NotTo(BeZero())
+
+			durationFromLogs := ts2.Sub(ts1)
+
+			// Retrieve the queuing duration from the metric
+			Expect(metrics).To(HaveKey("camel_k_build_queue_duration_seconds"))
+			metric := metrics["camel_k_build_queue_duration_seconds"].Metric
+			Expect(metric).To(HaveLen(1))
+			histogram := metric[0].Histogram
+			Expect(histogram).NotTo(BeNil())
+			Expect(histogram.SampleSum).NotTo(BeNil())
+
+			duration := *histogram.SampleSum
+
+			// Check both durations match
+			Expect(math.Abs(durationFromLogs.Seconds() - duration)).To(BeNumerically("<", 1))
+
+			// Check the queuing duration is correctly observed in the corresponding metric
+			Expect(metrics).To(HaveKeyWithValue("camel_k_build_queue_duration_seconds",
+				EqualP(prometheus.MetricFamily{
+					Name: stringP("camel_k_build_queue_duration_seconds"),
+					Help: stringP("Camel K build queue duration"),
+					Type: metricTypeP(prometheus.MetricType_HISTOGRAM),
+					Metric: []*prometheus.Metric{
+						{
+							Histogram: &prometheus.Histogram{
+								SampleCount: uint64P(1),
+								SampleSum:   histogram.SampleSum,
+								Bucket:      buckets(0, []float64{5, 15, 30, 60, 300, math.Inf(1)}),
+							},
+						},
+					},
+				}),
+			))
 		})
 
 		t.Run("Integration metrics", func(t *testing.T) {
