@@ -125,6 +125,9 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().Bool("monitoring", false, "To enable or disable the operator monitoring")
 	cmd.Flags().Int("monitoring-port", 8080, "The port of the metrics endpoint")
 
+	// Pod settings
+	cmd.Flags().StringArrayP("toleration", "", nil, "Add a Toleration to the operator Pod")
+
 	// save
 	cmd.Flags().Bool("save", false, "Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
 
@@ -169,6 +172,7 @@ type installCmdOptions struct {
 	MonitoringPort          int32    `mapstructure:"monitoring-port"`
 	Properties              []string `mapstructure:"properties"`
 	TraitProfile            string   `mapstructure:"trait-profile"`
+	Tolerations             []string `mapstructure:"tolerations"`
 	HTTPProxySecret         string   `mapstructure:"http-proxy-secret"`
 
 	registry         v1.IntegrationPlatformRegistrySpec
@@ -199,7 +203,6 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		if olmAvailable, err = olm.IsAPIAvailable(o.Context, olmClient, o.Namespace); err != nil {
 			return errors.Wrap(err, "error while checking OLM availability. Run with '--olm=false' to skip this check")
 		}
-
 		if olmAvailable {
 			if installViaOLM, err = olm.HasPermissionToInstall(o.Context, olmClient, o.Namespace, o.Global, o.olmOptions); err != nil {
 				return errors.Wrap(err, "error while checking permissions to install operator via OLM. Run with '--olm=false' to skip this check")
@@ -216,7 +219,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		if installViaOLM {
 			fmt.Fprintln(cobraCmd.OutOrStdout(), "OLM is available in the cluster")
 			var installed bool
-			if installed, err = olm.Install(o.Context, olmClient, o.Namespace, o.Global, o.olmOptions, collection); err != nil {
+			if installed, err = olm.Install(o.Context, olmClient, o.Namespace, o.Global, o.olmOptions, collection, o.Tolerations); err != nil {
 				return err
 			}
 			if !installed {
@@ -267,6 +270,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 					Enabled: o.Monitoring,
 					Port:    o.MonitoringPort,
 				},
+				Tolerations: o.Tolerations,
 			}
 			err = install.OperatorOrCollect(o.Context, c, cfg, collection, o.Force)
 			if err != nil {

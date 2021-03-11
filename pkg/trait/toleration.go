@@ -19,13 +19,12 @@ package trait
 
 import (
 	"fmt"
-	"regexp"
-	"strconv"
 
 	corev1 "k8s.io/api/core/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 // This trait sets Tolerations over Integration pods. Tolerations allow (but do not require) the pods to schedule onto nodes with matching taints.
@@ -48,8 +47,6 @@ type tolerationTrait struct {
 	Taints []string `property:"taints" json:"taints,omitempty"`
 }
 
-var validTaintRegexp = regexp.MustCompile(`^([\w\/_\-\.]+)(=)?([\w_\-\.]+)?:(NoSchedule|NoExecute|PreferNoSchedule):?(\d*)?$`)
-
 func newTolerationTrait() Trait {
 	return &tolerationTrait{
 		BaseTrait: NewBaseTrait("toleration", 1200),
@@ -69,7 +66,7 @@ func (t *tolerationTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *tolerationTrait) Apply(e *Environment) (err error) {
-	tolerations, err := t.getTolerations()
+	tolerations, err := kubernetes.GetTolerations(t.Taints)
 	if err != nil {
 		return err
 	}
@@ -83,37 +80,4 @@ func (t *tolerationTrait) Apply(e *Environment) (err error) {
 	}
 	podSpec.Tolerations = append(podSpec.Tolerations, tolerations...)
 	return nil
-}
-
-func (t *tolerationTrait) getTolerations() ([]corev1.Toleration, error) {
-	tolerations := make([]corev1.Toleration, 0)
-	for _, t := range t.Taints {
-		if !validTaintRegexp.MatchString(t) {
-			return nil, fmt.Errorf("could not match taint %v", t)
-		}
-		toleration := corev1.Toleration{}
-		// Parse the regexp groups
-		groups := validTaintRegexp.FindStringSubmatch(t)
-		toleration.Key = groups[1]
-		if groups[2] != "" {
-			toleration.Operator = corev1.TolerationOpEqual
-		} else {
-			toleration.Operator = corev1.TolerationOpExists
-		}
-		if groups[3] != "" {
-			toleration.Value = groups[3]
-		}
-		toleration.Effect = corev1.TaintEffect(groups[4])
-
-		if groups[5] != "" {
-			tolerationSeconds, err := strconv.ParseInt(groups[5], 10, 64)
-			if err != nil {
-				return nil, err
-			}
-			toleration.TolerationSeconds = &tolerationSeconds
-		}
-		tolerations = append(tolerations, toleration)
-	}
-
-	return tolerations, nil
 }

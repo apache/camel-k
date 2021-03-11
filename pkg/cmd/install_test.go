@@ -371,3 +371,13 @@ func TestDecodeMavenSettings(t *testing.T) {
 	_, err = decodeMavenSettings("secret")
 	assert.NotNil(t, err)
 }
+
+func TestInstallTolerationFlag(t *testing.T) {
+	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdInstall,
+		"--toleration", "key1=value1:NoSchedule",
+		"--toleration", "key2=value2:NoExecute")
+	assert.Nil(t, err)
+	assert.Equal(t, "key1=value1:NoSchedule", installCmdOptions.Tolerations[0])
+	assert.Equal(t, "key2=value2:NoExecute", installCmdOptions.Tolerations[1])
+}
