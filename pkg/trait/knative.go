@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net/url"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -414,14 +415,19 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 		func(ref *corev1.ObjectReference, serviceURI string, _ func() (*url.URL, error)) error {
 			// Iterate over all, without skipping duplicates
 			eventType := knativeutil.ExtractEventType(serviceURI)
-			t.createTrigger(e, ref, eventType)
+			serviceName := eventType
+			if serviceName == "" {
+				serviceName = "default"
+			}
+			servicePath := "/" + eventType
+			t.createTrigger(e, ref, eventType, servicePath)
 
-			if !env.ContainsService(ref.Name, knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEvent, ref.APIVersion, ref.Kind) {
+			if !env.ContainsService(serviceName, knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEvent, ref.APIVersion, ref.Kind) {
 				svc := knativeapi.CamelServiceDefinition{
-					Name:        ref.Name,
+					Name:        serviceName,
 					ServiceType: knativeapi.CamelServiceTypeEvent,
 					Metadata: map[string]string{
-						knativeapi.CamelMetaServicePath:       "/",
+						knativeapi.CamelMetaServicePath:       servicePath,
 						knativeapi.CamelMetaEndpointKind:      string(knativeapi.CamelEndpointKindSource),
 						knativeapi.CamelMetaKnativeAPIVersion: ref.APIVersion,
 						knativeapi.CamelMetaKnativeKind:       ref.Kind,
@@ -549,18 +555,18 @@ func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.Came
 	return err
 }
 
-func (t *knativeTrait) createTrigger(e *Environment, ref *corev1.ObjectReference, eventType string) {
+func (t *knativeTrait) createTrigger(e *Environment, ref *corev1.ObjectReference, eventType string, path string) {
 	// TODO extend to additional filters too, to filter them at source and not at destination
 	found := e.Resources.HasKnativeTrigger(func(trigger *eventing.Trigger) bool {
 		return trigger.Spec.Broker == ref.Name &&
 			trigger.Spec.Filter != nil &&
-			trigger.Spec.Filter.Attributes["type"] == eventType
+			trigger.Spec.Filter.Attributes["type"] == eventType // can be also missing
 	})
 	if !found {
 		if ref.Namespace == "" {
 			ref.Namespace = e.Integration.Namespace
 		}
-		trigger := knativeutil.CreateTrigger(*ref, e.Integration.Name, eventType)
+		trigger := knativeutil.CreateTrigger(*ref, e.Integration.Name, eventType, path)
 		e.Resources.Add(trigger)
 	}
 }
@@ -631,5 +637,6 @@ func (t *knativeTrait) extractServices(names []string, serviceType knativeapi.Ca
 			answer = append(answer, i)
 		}
 	}
+	sort.Strings(answer)
 	return answer
 }

@@ -27,6 +27,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"knative.dev/pkg/apis"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -72,7 +73,15 @@ func CreateSubscription(channelReference corev1.ObjectReference, serviceName str
 }
 
 // CreateTrigger ---
-func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, eventType string) *eventing.Trigger {
+func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, eventType string, path string) *eventing.Trigger {
+	nameSuffix := ""
+	var attributes map[string]string
+	if eventType != "" {
+		nameSuffix = fmt.Sprintf("-%s", util.SanitizeLabel(eventType))
+		attributes = map[string]string{
+			"type": eventType,
+		}
+	}
 	return &eventing.Trigger{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: eventing.SchemeGroupVersion.String(),
@@ -80,13 +89,11 @@ func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, e
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: brokerReference.Namespace,
-			Name:      brokerReference.Name + "-" + serviceName + "-" + util.SanitizeLabel(eventType),
+			Name:      brokerReference.Name + "-" + serviceName + nameSuffix,
 		},
 		Spec: eventing.TriggerSpec{
 			Filter: &eventing.TriggerFilter{
-				Attributes: eventing.TriggerFilterAttributes{
-					"type": eventType,
-				},
+				Attributes: attributes,
 			},
 			Broker: brokerReference.Name,
 			Subscriber: duckv1.Destination{
@@ -94,6 +101,9 @@ func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, e
 					APIVersion: serving.SchemeGroupVersion.String(),
 					Kind:       "Service",
 					Name:       serviceName,
+				},
+				URI: &apis.URL{
+					Path: path,
 				},
 			},
 		},
