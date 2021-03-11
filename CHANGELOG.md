@@ -47,6 +47,7 @@
 - fix: Do not report falsy readiness condition on Integration downscaling [\#2108](https://github.com/apache/camel-k/pull/2108) ([astefanutti](https://github.com/astefanutti))
 - fix\(ci\): Fix OpenShift DNS node configuration [\#2104](https://github.com/apache/camel-k/pull/2104) ([astefanutti](https://github.com/astefanutti))
 - chore : Fix links to the developers guide - needs to point to latest/contributing/developers.html [\#2102](https://github.com/apache/camel-k/pull/2102) ([cunningt](https://github.com/cunningt))
+- chore: Upgrade Knative to version 0.21.0 [\#2101](https://github.com/apache/camel-k/pull/2101) ([astefanutti](https://github.com/astefanutti))
 - chore: Rely on Lease from controller-runtime for leader election [\#2100](https://github.com/apache/camel-k/pull/2100) ([astefanutti](https://github.com/astefanutti))
 - Add missing classpath locations for external kits [\#2097](https://github.com/apache/camel-k/pull/2097) ([jamesnetherton](https://github.com/jamesnetherton))
 - fix: Use correct versions to access OLM APIs [\#2095](https://github.com/apache/camel-k/pull/2095) ([astefanutti](https://github.com/astefanutti))
@@ -1168,6 +1169,7 @@
 - fix\(SDK\): Add relative symlink to kamel main package [\#1025](https://github.com/apache/camel-k/pull/1025) ([astefanutti](https://github.com/astefanutti))
 - chore: Use non-caching API reader from SDK [\#1021](https://github.com/apache/camel-k/pull/1021) ([astefanutti](https://github.com/astefanutti))
 - feat\(quarkus\): Initial Quarkus support [\#1013](https://github.com/apache/camel-k/pull/1013) ([astefanutti](https://github.com/astefanutti))
+- fix: Avoid updating Deployment replicas in default configuration [\#1003](https://github.com/apache/camel-k/pull/1003) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.0-M3](https://github.com/apache/camel-k/tree/1.0.0-M3) (2019-10-18)
 
@@ -1204,7 +1206,6 @@
 - Support Knative broker/trigger model and explicit source/sink [\#1012](https://github.com/apache/camel-k/pull/1012) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix \#1005: allow to customize loader and add default dependencies for… [\#1007](https://github.com/apache/camel-k/pull/1007) ([nicolaferraro](https://github.com/nicolaferraro))
 - Update OLM manifests for 1.0.0-M2 release [\#1006](https://github.com/apache/camel-k/pull/1006) ([astefanutti](https://github.com/astefanutti))
-- fix: Avoid updating Deployment replicas in default configuration [\#1003](https://github.com/apache/camel-k/pull/1003) ([astefanutti](https://github.com/astefanutti))
 - perf: Enqueue ReplicaSet updates only when replicas changed [\#1002](https://github.com/apache/camel-k/pull/1002) ([astefanutti](https://github.com/astefanutti))
 - chore: Remove references to OpenShift deprecated build APIs [\#1001](https://github.com/apache/camel-k/pull/1001) ([astefanutti](https://github.com/astefanutti))
 - fix: Handle traits update conflicts gracefully [\#1000](https://github.com/apache/camel-k/pull/1000) ([astefanutti](https://github.com/astefanutti))
