@@ -138,7 +138,7 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 }
 
 // Install creates a subscription for the OLM package
-func Install(ctx context.Context, client client.Client, namespace string, global bool, options Options, collection *kubernetes.Collection) (bool, error) {
+func Install(ctx context.Context, client client.Client, namespace string, global bool, options Options, collection *kubernetes.Collection, tolerations []string) (bool, error) {
 	options = fillDefaults(options)
 	if installed, err := IsOperatorInstalled(ctx, client, namespace, global, options); err != nil {
 		return false, err
@@ -166,6 +166,12 @@ func Install(ctx context.Context, client client.Client, namespace string, global
 			InstallPlanApproval:    operatorsv1alpha1.ApprovalAutomatic,
 		},
 	}
+	// Additional configuration
+	err := maybeSetTolerations(&sub, tolerations)
+	if err != nil {
+		return false, errors.Wrap(err, fmt.Sprintf("could not set tolerations"))
+	}
+
 	if collection != nil {
 		collection.Add(&sub)
 	} else if err := client.Create(ctx, &sub); err != nil {
@@ -197,6 +203,17 @@ func Install(ctx context.Context, client client.Client, namespace string, global
 		}
 	}
 	return true, nil
+}
+
+func maybeSetTolerations(sub *operatorsv1alpha1.Subscription, tolArray []string) error {
+	if tolArray != nil {
+		tolerations, err := kubernetes.GetTolerations(tolArray)
+		if err != nil {
+			return err
+		}
+		sub.Spec.Config.Tolerations = tolerations
+	}
+	return nil
 }
 
 // Uninstall removes CSV and subscription from the namespace
