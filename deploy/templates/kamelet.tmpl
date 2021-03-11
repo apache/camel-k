@@ -1,5 +1,3 @@
-# camel-k: language=kamelet
-
 apiVersion: camel.apache.org/v1alpha1
 kind: Kamelet
 metadata:
@@ -8,7 +6,7 @@ metadata:
     camel.apache.org/kamelet.type: "source"
 spec:
   definition:
-    title: "Timer"
+    title: "Timer Example"
     description: "Produces periodic events with a custom payload"
     required:
       - message
@@ -24,10 +22,7 @@ spec:
         type: string
   types:
     out:
-      mediaType: application/json
-      schema:
-        id: text.camel.apache.org
-        type: string
+      mediaType: text/plain
   flow:
     from:
       uri: timer:tick
@@ -36,4 +31,7 @@ spec:
       steps:
         - set-body:
             constant: {{`"{{message}}"`}}
+        - set-header:
+            name: "Content-Type"
+            constant: "text/plain"
         - to: "kamelet:sink"
