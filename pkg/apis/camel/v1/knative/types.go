@@ -40,6 +40,7 @@ type CamelServiceDefinition struct {
 	// Deprecated: use URL instead
 	Port     *int              `json:"port,omitempty"`
 	URL      string            `json:"url,omitempty"`
+	Path     string            `json:"path,omitempty"`
 	Metadata map[string]string `json:"metadata,omitempty"`
 }
 
@@ -75,8 +76,6 @@ func (s CamelServiceType) ResourceDescription(subject string) string {
 
 // Meta Options
 const (
-	CamelMetaServicePath = "service.path"
-
 	CamelMetaKnativeKind       = "knative.kind"
 	CamelMetaKnativeAPIVersion = "knative.apiVersion"
 	CamelMetaKnativeReply      = "knative.reply"
