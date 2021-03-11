@@ -209,6 +209,8 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 					"You can either ask your administrator to provide permissions (preferred) or run the install command with the `--olm=false` flag.")
 				os.Exit(1)
 			}
+		} else {
+			fmt.Fprintln(cobraCmd.OutOrStdout(), "OLM is not available in the cluster. Fallback to regular installation.")
 		}
 
 		if installViaOLM {
