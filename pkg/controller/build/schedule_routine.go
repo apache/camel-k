@@ -25,6 +25,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -85,18 +86,13 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1.Build
 
 	// Transition the build to pending state
 	// This must be done in the critical section rather than delegated to the controller
-	target := build.DeepCopy()
-	target.Status.Phase = v1.BuildPhasePending
-	action.L.Info("Build state transition", "phase", target.Status.Phase)
-	err = action.client.Status().Update(ctx, target)
+	err = action.updateBuildStatus(ctx, build, v1.BuildStatus{Phase: v1.BuildPhasePending})
 	if err != nil {
 		return nil, err
 	}
 
 	// Report the duration the Build has been waiting in the build queue
 	queueDuration.Observe(time.Now().Sub(getBuildQueuingTime(build)).Seconds())
-
-	camelevent.NotifyBuildUpdated(ctx, action.client, action.recorder, build, target)
 
 	// Start the build asynchronously to avoid blocking the reconcile loop
 	action.routines.Store(build.Name, true)
@@ -172,6 +168,9 @@ func (action *scheduleRoutineAction) updateBuildStatus(ctx context.Context, buil
 	if err != nil {
 		action.L.Errorf(err, "Cannot update build status: %s", build.Name)
 		return err
+	}
+	if target.Status.Phase != build.Status.Phase {
+		action.L.Info("Build state transition", "phase", target.Status.Phase)
 	}
 	camelevent.NotifyBuildUpdated(ctx, action.client, action.recorder, build, target)
 	build.Status = target.Status
