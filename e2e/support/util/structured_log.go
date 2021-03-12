@@ -58,4 +58,6 @@ type LogEntry struct {
 	Namespace string `json:"ns,omitempty"`
 	Name      string `json:"name,omitempty"`
 	Phase     string `json:"phase,omitempty"`
+	PhaseFrom string `json:"phase-from,omitempty"`
+	PhaseTo   string `json:"phase-to,omitempty"`
 }
