@@ -250,7 +250,7 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 	assert.NotNil(t, channel)
 	assert.Equal(t, "false", channel.Metadata[knativeapi.CamelMetaKnativeReply])
 
-	broker := ne.FindService("default", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEvent, "", "")
+	broker := ne.FindService("evt.type", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEvent, "", "")
 	assert.NotNil(t, broker)
 	assert.Equal(t, "false", broker.Metadata[knativeapi.CamelMetaKnativeReply])
 }
