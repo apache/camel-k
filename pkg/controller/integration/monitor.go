@@ -103,7 +103,9 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		(previous == nil || previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero()) &&
 			next != nil && next.Status == corev1.ConditionTrue && !(next.FirstTruthyTime == nil || next.FirstTruthyTime.IsZero()) {
 		// Observe the time to first readiness metric
-		timeToFirstReadiness.Observe(next.FirstTruthyTime.Time.Sub(integration.Status.InitializationTimestamp.Time).Seconds())
+		duration := next.FirstTruthyTime.Time.Sub(integration.Status.InitializationTimestamp.Time)
+		action.L.Infof("First readiness after %s", duration)
+		timeToFirstReadiness.Observe(duration.Seconds())
 	}
 
 	return integration, nil
