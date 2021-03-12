@@ -380,6 +380,61 @@ func TestMetrics(t *testing.T) {
 			))
 		})
 
+		t.Run("Integration first readiness metric", func(t *testing.T) {
+			var ts1, ts2 time.Time
+
+			// The start time is taken from the Integration status initialization timestamp
+			ts1 = it.Status.InitializationTimestamp.Time
+			Expect(ts1).NotTo(BeZero())
+			// The end time is reported into the ready condition first truthy time
+			ts2 = it.Status.GetCondition(camelv1.IntegrationConditionReady).FirstTruthyTime.Time
+			Expect(ts2).NotTo(BeZero())
+
+			duration := ts2.Sub(ts1)
+
+			// Retrieve these start and end times from the logs
+			err = NewLogWalker(&logs).
+				AddStep(MatchFields(IgnoreExtras, Fields{
+					"LoggerName":  Equal("camel-k.controller.integration"),
+					"Message":     Equal("Reconciling Integration"),
+					"RequestName": Equal(it.Name),
+					"PhaseFrom":   Equal(string(camelv1.IntegrationPhaseInitialization)),
+					"PhaseTo":     Equal(string(camelv1.IntegrationPhaseBuildingKit)),
+				}), func(l *LogEntry) { ts1 = l.Timestamp.Time }).
+				AddStep(MatchFields(IgnoreExtras, Fields{
+					"LoggerName":  Equal("camel-k.controller.integration"),
+					"Message":     HavePrefix("First readiness"),
+					"RequestName": Equal(it.Name),
+				}), func(l *LogEntry) { ts2 = l.Timestamp.Time }).
+				Walk()
+			Expect(err).To(BeNil())
+			Expect(ts1).NotTo(BeZero())
+			Expect(ts2).NotTo(BeZero())
+			Expect(ts2).To(BeTemporally(">", ts1))
+			durationFromLogs := ts2.Sub(ts1)
+
+			// Check both durations match
+			Expect(math.Abs((durationFromLogs - duration).Seconds())).To(BeNumerically("<", 1))
+
+			// Check the duration is correctly observed in the corresponding metric
+			Expect(metrics).To(HaveKeyWithValue("camel_k_integration_first_readiness_seconds",
+				EqualP(prometheus.MetricFamily{
+					Name: stringP("camel_k_integration_first_readiness_seconds"),
+					Help: stringP("Camel K integration time to first readiness"),
+					Type: metricTypeP(prometheus.MetricType_HISTOGRAM),
+					Metric: []*prometheus.Metric{
+						{
+							Histogram: &prometheus.Histogram{
+								SampleCount: uint64P(1),
+								SampleSum:   float64P(duration.Seconds()),
+								Bucket:      buckets(duration.Seconds(), []float64{5, 10, 30, 60, 120, math.Inf(1)}),
+							},
+						},
+					},
+				}),
+			))
+		})
+
 		t.Run("Integration metrics", func(t *testing.T) {
 			pod := IntegrationPod(ns, name)()
 			response, err := TestClient().CoreV1().RESTClient().Get().
