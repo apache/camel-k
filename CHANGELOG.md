@@ -149,7 +149,6 @@
 - Fix saga example [\#1926](https://github.com/apache/camel-k/pull/1926) ([jamesnetherton](https://github.com/jamesnetherton))
 - Fix image location extraction [\#1925](https://github.com/apache/camel-k/pull/1925) ([doru1004](https://github.com/doru1004))
 - Fix modeline for inspect. [\#1924](https://github.com/apache/camel-k/pull/1924) ([doru1004](https://github.com/doru1004))
-- Feat\(cli\): version operator and warning compatibility message [\#1912](https://github.com/apache/camel-k/pull/1912) ([squakez](https://github.com/squakez))
 
 ## [v1.3.1](https://github.com/apache/camel-k/tree/v1.3.1) (2021-02-01)
 
@@ -240,7 +239,6 @@
 - Define default global Kamelets [\#1675](https://github.com/apache/camel-k/issues/1675)
 - Enable SinkBinding automatically [\#1654](https://github.com/apache/camel-k/issues/1654)
 - Document the --config option in the kamel CLI [\#1185](https://github.com/apache/camel-k/issues/1185)
-- Basic module structure for Camel K projects [\#1135](https://github.com/apache/camel-k/issues/1135)
 
 **Merged pull requests:**
 
@@ -446,6 +444,7 @@
 - Add support for sinkbinding [\#1637](https://github.com/apache/camel-k/pull/1637) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
 - fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
+- doc: Update secured monitoring proposal for Quarkus/Knative single-port [\#1625](https://github.com/apache/camel-k/pull/1625) ([astefanutti](https://github.com/astefanutti))
 - Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
 - Implement Kamelets [\#1602](https://github.com/apache/camel-k/pull/1602) ([nicolaferraro](https://github.com/nicolaferraro))
 
@@ -535,7 +534,6 @@
 - fix\(doc\): PodMonitoring -\> PodMonitor [\#1628](https://github.com/apache/camel-k/pull/1628) ([astefanutti](https://github.com/astefanutti))
 - doc: Init troubleshooting guide [\#1627](https://github.com/apache/camel-k/pull/1627) ([astefanutti](https://github.com/astefanutti))
 - chore\(doc\): Polish secured monitoring proposal [\#1626](https://github.com/apache/camel-k/pull/1626) ([astefanutti](https://github.com/astefanutti))
-- doc: Update secured monitoring proposal for Quarkus/Knative single-port [\#1625](https://github.com/apache/camel-k/pull/1625) ([astefanutti](https://github.com/astefanutti))
 - Fix \#1599: generate good trait doc [\#1622](https://github.com/apache/camel-k/pull/1622) ([nicolaferraro](https://github.com/nicolaferraro))
 - Init .asf.yaml file [\#1621](https://github.com/apache/camel-k/pull/1621) ([astefanutti](https://github.com/astefanutti))
 - Upgrade to staged Camel K runtime 1.4.0 \(Camel 3.4.0,Camel-Quarkus 1.… [\#1620](https://github.com/apache/camel-k/pull/1620) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1040,6 +1038,7 @@
 
 **Closed issues:**
 
+- Basic module structure for Camel K projects [\#1135](https://github.com/apache/camel-k/issues/1135)
 - Trying to get sample RestWithUndertow working. [\#1130](https://github.com/apache/camel-k/issues/1130)
 - unable to execute basic Examples eg. Printer.groovy in GKE [\#1115](https://github.com/apache/camel-k/issues/1115)
 - kamel scale integration to zero not possible [\#1094](https://github.com/apache/camel-k/issues/1094)
@@ -1169,7 +1168,6 @@
 - fix\(SDK\): Add relative symlink to kamel main package [\#1025](https://github.com/apache/camel-k/pull/1025) ([astefanutti](https://github.com/astefanutti))
 - chore: Use non-caching API reader from SDK [\#1021](https://github.com/apache/camel-k/pull/1021) ([astefanutti](https://github.com/astefanutti))
 - feat\(quarkus\): Initial Quarkus support [\#1013](https://github.com/apache/camel-k/pull/1013) ([astefanutti](https://github.com/astefanutti))
-- fix: Avoid updating Deployment replicas in default configuration [\#1003](https://github.com/apache/camel-k/pull/1003) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.0-M3](https://github.com/apache/camel-k/tree/1.0.0-M3) (2019-10-18)
 
@@ -1206,6 +1204,7 @@
 - Support Knative broker/trigger model and explicit source/sink [\#1012](https://github.com/apache/camel-k/pull/1012) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix \#1005: allow to customize loader and add default dependencies for… [\#1007](https://github.com/apache/camel-k/pull/1007) ([nicolaferraro](https://github.com/nicolaferraro))
 - Update OLM manifests for 1.0.0-M2 release [\#1006](https://github.com/apache/camel-k/pull/1006) ([astefanutti](https://github.com/astefanutti))
+- fix: Avoid updating Deployment replicas in default configuration [\#1003](https://github.com/apache/camel-k/pull/1003) ([astefanutti](https://github.com/astefanutti))
 - perf: Enqueue ReplicaSet updates only when replicas changed [\#1002](https://github.com/apache/camel-k/pull/1002) ([astefanutti](https://github.com/astefanutti))
 - chore: Remove references to OpenShift deprecated build APIs [\#1001](https://github.com/apache/camel-k/pull/1001) ([astefanutti](https://github.com/astefanutti))
 - fix: Handle traits update conflicts gracefully [\#1000](https://github.com/apache/camel-k/pull/1000) ([astefanutti](https://github.com/astefanutti))
