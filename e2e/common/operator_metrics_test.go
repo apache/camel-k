@@ -31,8 +31,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	"github.com/onsi/gomega/types"
-	"github.com/stretchr/testify/assert"
-
 	v1 "k8s.io/api/core/v1"
 
 	prometheus "github.com/prometheus/client_model/go"
@@ -433,14 +431,6 @@ func TestMetrics(t *testing.T) {
 					},
 				}),
 			))
-		})
-
-		t.Run("Integration metrics", func(t *testing.T) {
-			pod := IntegrationPod(ns, name)()
-			response, err := TestClient().CoreV1().RESTClient().Get().
-				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/q/metrics", ns, pod.Name)).DoRaw(TestContext)
-			Expect(err).To(BeNil())
-			assert.Contains(t, string(response), "camel.route.exchanges.total")
 		})
 
 		// Clean up
