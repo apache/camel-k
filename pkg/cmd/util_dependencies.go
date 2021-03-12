@@ -262,6 +262,7 @@ func outputDependencies(dependencies []string, format string) error {
 		}
 	} else {
 		// Print output in text form
+		fmt.Println("dependencies:")
 		for _, dep := range dependencies {
 			fmt.Printf("%v\n", dep)
 		}
