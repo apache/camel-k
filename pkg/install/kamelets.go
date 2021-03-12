@@ -27,8 +27,6 @@ import (
 
 	"github.com/pkg/errors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -98,7 +96,7 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 				k.GetLabels()[kameletBundledLabel] = "true"
 				k.GetLabels()[kameletReadOnlyLabel] = "true"
 
-				err := RuntimeObject(ctx, c, namespace, true, k)
+				err := ObjectOrCollect(ctx, c, namespace, nil, true, k)
 
 				if err != nil {
 					return errors.Wrapf(err, "could not create resource from file %q", path.Join(kameletDir, file.Name()))
