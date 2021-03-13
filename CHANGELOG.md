@@ -44,6 +44,9 @@
 
 **Merged pull requests:**
 
+- chore\(doc\): fix links to unlock website [\#2121](https://github.com/apache/camel-k/pull/2121) ([nicolaferraro](https://github.com/nicolaferraro))
+- Kamel local inspect: In case of missing format, show the output in th… [\#2118](https://github.com/apache/camel-k/pull/2118) ([oscerd](https://github.com/oscerd))
+- chore\(documentation\): add Kamelet development guide [\#2110](https://github.com/apache/camel-k/pull/2110) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix: Do not report falsy readiness condition on Integration downscaling [\#2108](https://github.com/apache/camel-k/pull/2108) ([astefanutti](https://github.com/astefanutti))
 - fix\(ci\): Fix OpenShift DNS node configuration [\#2104](https://github.com/apache/camel-k/pull/2104) ([astefanutti](https://github.com/astefanutti))
 - chore : Fix links to the developers guide - needs to point to latest/contributing/developers.html [\#2102](https://github.com/apache/camel-k/pull/2102) ([cunningt](https://github.com/cunningt))
@@ -60,6 +63,7 @@
 - Upgrade Kubernetes to v0.19.8 and Service Binding operator to v0.4.1 [\#2076](https://github.com/apache/camel-k/pull/2076) ([astefanutti](https://github.com/astefanutti))
 - Fix deprecated annotation [\#2070](https://github.com/apache/camel-k/pull/2070) ([bouskaJ](https://github.com/bouskaJ))
 - Operator labels are different when OLM is used [\#2069](https://github.com/apache/camel-k/pull/2069) ([bouskaJ](https://github.com/bouskaJ))
+- test: Add metrics e2e tests [\#2066](https://github.com/apache/camel-k/pull/2066) ([astefanutti](https://github.com/astefanutti))
 - Cleanup files dir [\#2065](https://github.com/apache/camel-k/pull/2065) ([bouskaJ](https://github.com/bouskaJ))
 - chore\(e2e\): Assert Integration readiness condition in scaling e2e tests [\#2064](https://github.com/apache/camel-k/pull/2064) ([astefanutti](https://github.com/astefanutti))
 - chore\(e2e\): Polish Gomega usage in e2e tests [\#2063](https://github.com/apache/camel-k/pull/2063) ([astefanutti](https://github.com/astefanutti))
@@ -139,16 +143,7 @@
 - chore\(crd\): Use conversion-gen API for structured conversion of CRDs to v1beta1 [\#1950](https://github.com/apache/camel-k/pull/1950) ([astefanutti](https://github.com/astefanutti))
 - doc: local development environment [\#1949](https://github.com/apache/camel-k/pull/1949) ([squakez](https://github.com/squakez))
 - fix\(cli\): Improve CLI / operator versions compatibility check [\#1944](https://github.com/apache/camel-k/pull/1944) ([astefanutti](https://github.com/astefanutti))
-- fix\(doc\): Activating the Prometheus trait at platform level must use a boolean [\#1942](https://github.com/apache/camel-k/pull/1942) ([astefanutti](https://github.com/astefanutti))
-- Fix \#1936: avoid patching if the target resource contains all expecte… [\#1937](https://github.com/apache/camel-k/pull/1937) ([nicolaferraro](https://github.com/nicolaferraro))
-- fix\(api\): Add missing x-descriptors field to Kamelet property type [\#1934](https://github.com/apache/camel-k/pull/1934) ([astefanutti](https://github.com/astefanutti))
-- Fix helm chart so it is compatible with Go 1.14 [\#1933](https://github.com/apache/camel-k/pull/1933) ([jon-ruckwood](https://github.com/jon-ruckwood))
 - Use Quarkus fast-jar package format apache/camel-k-runtime\#360 [\#1931](https://github.com/apache/camel-k/pull/1931) ([jamesnetherton](https://github.com/jamesnetherton))
-- Fix \#1928: use "id" property in kamelet binding for adding specific c… [\#1929](https://github.com/apache/camel-k/pull/1929) ([nicolaferraro](https://github.com/nicolaferraro))
-- chore\(examples\): kamelets properties fix [\#1927](https://github.com/apache/camel-k/pull/1927) ([squakez](https://github.com/squakez))
-- Fix saga example [\#1926](https://github.com/apache/camel-k/pull/1926) ([jamesnetherton](https://github.com/jamesnetherton))
-- Fix image location extraction [\#1925](https://github.com/apache/camel-k/pull/1925) ([doru1004](https://github.com/doru1004))
-- Fix modeline for inspect. [\#1924](https://github.com/apache/camel-k/pull/1924) ([doru1004](https://github.com/doru1004))
 
 ## [v1.3.1](https://github.com/apache/camel-k/tree/v1.3.1) (2021-02-01)
 
@@ -239,6 +234,7 @@
 - Define default global Kamelets [\#1675](https://github.com/apache/camel-k/issues/1675)
 - Enable SinkBinding automatically [\#1654](https://github.com/apache/camel-k/issues/1654)
 - Document the --config option in the kamel CLI [\#1185](https://github.com/apache/camel-k/issues/1185)
+- Basic module structure for Camel K projects [\#1135](https://github.com/apache/camel-k/issues/1135)
 
 **Merged pull requests:**
 
@@ -444,7 +440,6 @@
 - Add support for sinkbinding [\#1637](https://github.com/apache/camel-k/pull/1637) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
 - fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
-- doc: Update secured monitoring proposal for Quarkus/Knative single-port [\#1625](https://github.com/apache/camel-k/pull/1625) ([astefanutti](https://github.com/astefanutti))
 - Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
 - Implement Kamelets [\#1602](https://github.com/apache/camel-k/pull/1602) ([nicolaferraro](https://github.com/nicolaferraro))
 
@@ -534,6 +529,7 @@
 - fix\(doc\): PodMonitoring -\> PodMonitor [\#1628](https://github.com/apache/camel-k/pull/1628) ([astefanutti](https://github.com/astefanutti))
 - doc: Init troubleshooting guide [\#1627](https://github.com/apache/camel-k/pull/1627) ([astefanutti](https://github.com/astefanutti))
 - chore\(doc\): Polish secured monitoring proposal [\#1626](https://github.com/apache/camel-k/pull/1626) ([astefanutti](https://github.com/astefanutti))
+- doc: Update secured monitoring proposal for Quarkus/Knative single-port [\#1625](https://github.com/apache/camel-k/pull/1625) ([astefanutti](https://github.com/astefanutti))
 - Fix \#1599: generate good trait doc [\#1622](https://github.com/apache/camel-k/pull/1622) ([nicolaferraro](https://github.com/nicolaferraro))
 - Init .asf.yaml file [\#1621](https://github.com/apache/camel-k/pull/1621) ([astefanutti](https://github.com/astefanutti))
 - Upgrade to staged Camel K runtime 1.4.0 \(Camel 3.4.0,Camel-Quarkus 1.… [\#1620](https://github.com/apache/camel-k/pull/1620) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1038,7 +1034,6 @@
 
 **Closed issues:**
 
-- Basic module structure for Camel K projects [\#1135](https://github.com/apache/camel-k/issues/1135)
 - Trying to get sample RestWithUndertow working. [\#1130](https://github.com/apache/camel-k/issues/1130)
 - unable to execute basic Examples eg. Printer.groovy in GKE [\#1115](https://github.com/apache/camel-k/issues/1115)
 - kamel scale integration to zero not possible [\#1094](https://github.com/apache/camel-k/issues/1094)
