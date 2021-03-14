@@ -142,7 +142,6 @@
 - feat: Add ServiceBinding trait \(\#1445\) [\#1952](https://github.com/apache/camel-k/pull/1952) ([johnpoth](https://github.com/johnpoth))
 - chore\(crd\): Use conversion-gen API for structured conversion of CRDs to v1beta1 [\#1950](https://github.com/apache/camel-k/pull/1950) ([astefanutti](https://github.com/astefanutti))
 - doc: local development environment [\#1949](https://github.com/apache/camel-k/pull/1949) ([squakez](https://github.com/squakez))
-- fix\(cli\): Improve CLI / operator versions compatibility check [\#1944](https://github.com/apache/camel-k/pull/1944) ([astefanutti](https://github.com/astefanutti))
 - Use Quarkus fast-jar package format apache/camel-k-runtime\#360 [\#1931](https://github.com/apache/camel-k/pull/1931) ([jamesnetherton](https://github.com/jamesnetherton))
 
 ## [v1.3.1](https://github.com/apache/camel-k/tree/v1.3.1) (2021-02-01)
