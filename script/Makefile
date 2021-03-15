@@ -166,6 +166,10 @@ test-resources: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/resources -tags=integration
 	#go test -timeout 60m -v ./e2e/resources -tags=integration
 
+test-kamel-cli: build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/common/cli -tags=integration
+	#go test -timeout 60m -v ./e2e/common/cli -tags=integration
+
 build-kamel:
 	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
 
