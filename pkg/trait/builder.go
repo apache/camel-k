@@ -342,9 +342,15 @@ func (t *builderTrait) kanikoTask(e *Environment) (*v1.ImageTask, error) {
 			return nil, err
 		}
 		mountRegistrySecret(e.Platform.Status.Build.Registry.Secret, secret, &volumes, &volumeMounts, &env)
-	} else if e.Platform.Status.Build.Registry.Insecure {
+	}
+
+	if e.Platform.Status.Build.Registry.Insecure {
 		args = append(args, "--insecure")
 		args = append(args, "--insecure-pull")
+
+		// We use these 2 flags to force Kaniko to try HTTP instead of HTTPS
+		args = append(args, "--skip-tls-verify")
+		args = append(args, "--skip-tls-verify-pull")
 	}
 
 	env = append(env, proxySecretEnvVars(e)...)
