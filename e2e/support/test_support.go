@@ -22,6 +22,7 @@ limitations under the License.
 package support
 
 import (
+	"bytes"
 	"bufio"
 	"context"
 	"encoding/json"
@@ -1310,4 +1311,22 @@ func NewTestNamespace(injectKnativeBroker bool) ctrl.Object {
 		}
 	}
 	return obj
+}
+
+func GetOutputString(command *cobra.Command) string {
+	var buf bytes.Buffer
+	reader, writer, err := os.Pipe()
+	if err != nil {
+		panic(err)
+	}
+
+	command.SetOut(writer)
+	command.Execute()
+
+	writer.Close()
+	defer reader.Close()
+
+	buf.ReadFrom(reader)
+
+	return buf.String()
 }
