@@ -23,6 +23,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform"
@@ -62,9 +63,15 @@ func publisher(ctx *builder.Context) error {
 	}
 
 	pullInsecure := pl.Status.Build.Registry.Insecure // incremental build case
-	if ctx.BaseImage == pl.Status.Build.BaseImage {
-		// Assuming the base image is always secure (we should add a flag)
-		pullInsecure = false
+
+	log.Debugf("Registry address: %s", pl.Status.Build.Registry.Address)
+	log.Debugf("Base image: %s", ctx.BaseImage)
+
+	if !strings.HasPrefix(ctx.BaseImage, pl.Status.Build.Registry.Address) {
+		if pullInsecure {
+			log.Info("Assuming secure pull because the registry for the base image and the main registry are different")
+			pullInsecure = false
+		}
 	}
 
 	registryConfigDir := ""
