@@ -36,6 +36,7 @@ import (
 	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/builder/spectrum"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 const builderDir = "/builder"
@@ -172,11 +173,17 @@ func (t *builderTrait) addVolumeMounts(builderTask *v1.BuilderTask, imageTask *v
 }
 
 func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
+	labels := map[string]string{
+		"app": "camel-k",
+	}
+	labels = kubernetes.MergeCamelCreatorLabels(e.IntegrationKit.Labels, labels)
+
 	task := &v1.BuilderTask{
 		BaseTask: v1.BaseTask{
-			Name: "builder",
+			Name: e.IntegrationKit.Name,
 		},
-		Meta:         e.IntegrationKit.ObjectMeta,
+		Tag:          e.IntegrationKit.ResourceVersion,
+		Labels:       labels,
 		BaseImage:    e.Platform.Status.Build.BaseImage,
 		Runtime:      e.CamelCatalog.Runtime,
 		Dependencies: e.IntegrationKit.Spec.Dependencies,

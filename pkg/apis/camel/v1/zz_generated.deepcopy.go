@@ -197,7 +197,13 @@ func (in *BuildStatus) DeepCopy() *BuildStatus {
 func (in *BuilderTask) DeepCopyInto(out *BuilderTask) {
 	*out = *in
 	in.BaseTask.DeepCopyInto(&out.BaseTask)
-	in.Meta.DeepCopyInto(&out.Meta)
+	if in.Labels != nil {
+		in, out := &in.Labels, &out.Labels
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	in.Runtime.DeepCopyInto(&out.Runtime)
 	if in.Sources != nil {
 		in, out := &in.Sources, &out.Sources

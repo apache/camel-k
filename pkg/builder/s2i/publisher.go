@@ -47,11 +47,9 @@ func publisher(ctx *builder.Context) error {
 			Kind:       "BuildConfig",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "camel-k-" + ctx.Build.Meta.Name,
+			Name:      "camel-k-" + ctx.Build.Name,
 			Namespace: ctx.Namespace,
-			Labels: map[string]string{
-				"app": "camel-k",
-			},
+			Labels:    ctx.Build.Labels,
 		},
 		Spec: buildv1.BuildConfigSpec{
 			CommonSpec: buildv1.CommonSpec{
@@ -64,14 +62,12 @@ func publisher(ctx *builder.Context) error {
 				Output: buildv1.BuildOutput{
 					To: &corev1.ObjectReference{
 						Kind: "ImageStreamTag",
-						Name: "camel-k-" + ctx.Build.Meta.Name + ":" + ctx.Build.Meta.ResourceVersion,
+						Name: "camel-k-" + ctx.Build.Name + ":" + ctx.Build.Tag,
 					},
 				},
 			},
 		},
 	}
-
-	bc.Labels = kubernetes.MergeCamelCreatorLabels(ctx.Build.Meta.Labels, bc.Labels)
 
 	err := ctx.Client.Delete(ctx.C, &bc)
 	if err != nil && !apierrors.IsNotFound(err) {
@@ -89,11 +85,9 @@ func publisher(ctx *builder.Context) error {
 			Kind:       "ImageStream",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "camel-k-" + ctx.Build.Meta.Name,
+			Name:      "camel-k-" + ctx.Build.Name,
 			Namespace: ctx.Namespace,
-			Labels: map[string]string{
-				"app": "camel-k",
-			},
+			Labels:    ctx.Build.Labels,
 		},
 		Spec: imagev1.ImageStreamSpec{
 			LookupPolicy: imagev1.ImageLookupPolicy{
@@ -101,8 +95,6 @@ func publisher(ctx *builder.Context) error {
 			},
 		},
 	}
-
-	is.Labels = kubernetes.MergeCamelCreatorLabels(ctx.Build.Meta.Labels, is.Labels)
 
 	err = ctx.Client.Delete(ctx.C, &is)
 	if err != nil && !apierrors.IsNotFound(err) {
@@ -136,7 +128,7 @@ func publisher(ctx *builder.Context) error {
 		Namespace(ctx.Namespace).
 		Body(resource).
 		Resource("buildconfigs").
-		Name("camel-k-" + ctx.Build.Meta.Name).
+		Name("camel-k-" + ctx.Build.Name).
 		SubResource("instantiatebinary").
 		Do(ctx.C)
 
@@ -184,7 +176,7 @@ func publisher(ctx *builder.Context) error {
 		return errors.New("dockerImageRepository not available in ImageStream")
 	}
 
-	ctx.Image = is.Status.DockerImageRepository + ":" + ctx.Build.Meta.ResourceVersion
+	ctx.Image = is.Status.DockerImageRepository + ":" + ctx.Build.Tag
 
 	return nil
 }

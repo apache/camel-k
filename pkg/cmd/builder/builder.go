@@ -80,7 +80,7 @@ func Run(namespace string, buildName string, taskName string) {
 			reflect.TypeOf(v1.BuilderTask{}).Name(), taskName, namespace, buildName), "")
 	}
 
-	status := builder.New(c).Run(*task)
+	status := builder.New(c).Run(ctx, namespace, *task)
 	target := build.DeepCopy()
 	target.Status = status
 	// Copy the failure field from the build to persist recovery state

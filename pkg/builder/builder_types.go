@@ -18,13 +18,13 @@ limitations under the License.
 package builder
 
 import (
+	"context"
 	"fmt"
 	"math"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
@@ -45,7 +45,7 @@ const (
 
 // Builder --
 type Builder interface {
-	Run(build v1.BuilderTask) v1.BuildStatus
+	Run(ctx context.Context, ns string, build v1.BuilderTask) v1.BuildStatus
 }
 
 // Step --
@@ -99,7 +99,7 @@ type Resource struct {
 // Context --
 type Context struct {
 	client.Client
-	C                 cancellable.Context
+	C                 context.Context
 	Catalog           *camel.RuntimeCatalog
 	Build             v1.BuilderTask
 	BaseImage         string

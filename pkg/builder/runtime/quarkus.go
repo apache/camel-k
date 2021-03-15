@@ -24,14 +24,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/digest"
-
 	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
@@ -44,7 +43,7 @@ var QuarkusSteps = []builder.Step{
 }
 
 func loadCamelQuarkusCatalog(ctx *builder.Context) error {
-	catalog, err := camel.LoadCatalog(ctx.C, ctx.Client, ctx.Build.Meta.Namespace, ctx.Build.Runtime)
+	catalog, err := camel.LoadCatalog(ctx.C, ctx.Client, ctx.Namespace, ctx.Build.Runtime)
 	if err != nil {
 		return err
 	}
@@ -174,7 +173,6 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 	mc.Timeout = ctx.Build.Maven.GetTimeout().Duration
 
 	// Process artifacts list and add it to existing artifacts.
-	artifacts := []v1.Artifact{}
 	artifacts, err := ProcessQuarkusTransitiveDependencies(mc)
 	if err != nil {
 		return err
@@ -186,7 +184,7 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 
 // ProcessQuarkusTransitiveDependencies --
 func ProcessQuarkusTransitiveDependencies(mc maven.Context) ([]v1.Artifact, error) {
-	artifacts := []v1.Artifact{}
+	var artifacts []v1.Artifact
 
 	// Quarkus fast-jar format is split into various sub directories in quarkus-app
 	quarkusAppDir := path.Join(mc.Path, "target", "quarkus-app")

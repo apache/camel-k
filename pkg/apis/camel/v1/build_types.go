@@ -63,12 +63,11 @@ type ImageTask struct {
 
 // BuilderTask --
 type BuilderTask struct {
-	BaseTask `json:",inline"`
-	// This is required until https://github.com/kubernetes-sigs/controller-tools/pull/395 gets merged
-	// +kubebuilder:pruning:PreserveUnknownFields
-	Meta         metav1.ObjectMeta `json:"meta,omitempty"`
-	Image        string            `json:"image,omitempty"`
+	BaseTask     `json:",inline"`
 	BaseImage    string            `json:"baseImage,omitempty"`
+	Image        string            `json:"image,omitempty"`
+	Tag          string            `json:"tag,omitempty"`
+	Labels       map[string]string `json:"labels,omitempty"`
 	Runtime      RuntimeSpec       `json:"runtime,omitempty"`
 	Sources      []SourceSpec      `json:"sources,omitempty"`
 	Resources    []ResourceSpec    `json:"resources,omitempty"`
