@@ -25,11 +25,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	spectrum "github.com/container-tools/spectrum/pkg/builder"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/log"
-	spectrum "github.com/container-tools/spectrum/pkg/builder"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func publisher(ctx *builder.Context) error {
@@ -50,7 +52,7 @@ func publisher(ctx *builder.Context) error {
 		return err
 	}
 
-	target := "camel-k-" + ctx.Build.Meta.Name + ":" + ctx.Build.Meta.ResourceVersion
+	target := "camel-k-" + ctx.Build.Name + ":" + ctx.Build.Tag
 	repo := pl.Status.Build.Registry.Organization
 	if repo != "" {
 		target = fmt.Sprintf("%s/%s", repo, target)

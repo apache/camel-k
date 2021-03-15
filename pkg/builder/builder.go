@@ -18,6 +18,7 @@ limitations under the License.
 package builder
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"path"
@@ -26,13 +27,11 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
 type defaultBuilder struct {
 	log    log.Logger
-	ctx    cancellable.Context
 	client client.Client
 }
 
@@ -40,15 +39,16 @@ type defaultBuilder struct {
 func New(c client.Client) Builder {
 	m := defaultBuilder{
 		log:    log.WithName("builder"),
-		ctx:    cancellable.NewContext(),
 		client: c,
 	}
 
 	return &m
 }
 
+var _ Builder = &defaultBuilder{}
+
 // Run --
-func (b *defaultBuilder) Run(build v1.BuilderTask) v1.BuildStatus {
+func (b *defaultBuilder) Run(ctx context.Context, namespace string, build v1.BuilderTask) v1.BuildStatus {
 	result := v1.BuildStatus{}
 
 	var buildDir string
@@ -68,9 +68,9 @@ func (b *defaultBuilder) Run(build v1.BuilderTask) v1.BuildStatus {
 
 	c := Context{
 		Client:    b.client,
-		C:         b.ctx,
+		C:         ctx,
 		Path:      buildDir,
-		Namespace: build.Meta.Namespace,
+		Namespace: namespace,
 		Build:     build,
 		BaseImage: build.BaseImage,
 	}
@@ -133,13 +133,12 @@ func (b *defaultBuilder) Run(build v1.BuilderTask) v1.BuildStatus {
 		}
 
 		select {
-		case <-b.ctx.Done():
+		case <-ctx.Done():
 			result.Phase = v1.BuildPhaseInterrupted
 		default:
 			l := b.log.WithValues(
 				"step", step.ID(),
 				"phase", step.Phase(),
-				"name", build.Meta.Name,
 				"task", build.Name,
 			)
 

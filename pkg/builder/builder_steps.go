@@ -24,14 +24,14 @@ import (
 	"path"
 	"reflect"
 
-	"github.com/apache/camel-k/pkg/util/controller"
-	"github.com/apache/camel-k/pkg/util/camel"
 	"k8s.io/apimachinery/pkg/selection"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/controller"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 

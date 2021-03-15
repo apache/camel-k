@@ -754,6 +754,10 @@ spec:
                           type: array
                         image:
                           type: string
+                        labels:
+                          additionalProperties:
+                            type: string
+                          type: object
                         maven:
                           description: MavenSpec --
                           properties:
@@ -805,11 +809,6 @@ spec:
                             timeout:
                               type: string
                           type: object
-                        meta:
-                          description: This is required until https://github.com/kubernetes-sigs/controller-tools/pull/395
-                            gets merged
-                          type: object
-                          x-kubernetes-preserve-unknown-fields: true
                         name:
                           type: string
                         properties:
@@ -953,6 +952,8 @@ spec:
                           items:
                             type: string
                           type: array
+                        tag:
+                          type: string
                         timeout:
                           type: string
                         volumeMounts:

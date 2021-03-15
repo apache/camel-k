@@ -132,7 +132,7 @@ func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Bui
 			break
 		}
 
-		status := action.builder.Run(*task.Builder)
+		status := action.builder.Run(ctx, build.Namespace, *task.Builder)
 		lastTask := i == len(build.Spec.Tasks)-1
 		taskFailed := status.Phase == v1.BuildPhaseFailed
 		if lastTask && !taskFailed {

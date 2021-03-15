@@ -25,6 +25,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/test"
 )
 
@@ -61,6 +62,7 @@ func TestFailure(t *testing.T) {
 		Runtime: catalog.Runtime,
 	}
 
-	status := b.Run(r)
+	ctx := cancellable.NewContext()
+	status := b.Run(ctx, "", r)
 	assert.Equal(t, v1.BuildPhaseFailed, status.Phase)
 }
