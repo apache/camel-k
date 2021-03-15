@@ -40,7 +40,7 @@ import (
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-func TestPodDisruptionBudget(t *testing.T) {
+func TestPodDisruptionBudgetTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		name := "java"
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
