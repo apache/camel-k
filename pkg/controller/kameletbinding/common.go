@@ -79,9 +79,12 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 	if err != nil {
 		return nil, errors.Wrap(err, "could not determine sink URI")
 	}
-	onError, err := bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1alpha1.EndpointTypeErrorHandler}, kameletbinding.Spec.ErrorHandler)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not determine error handler URI")
+	var onError *bindings.Binding
+	if kameletbinding.Spec.ErrorHandler.Ref != nil || kameletbinding.Spec.ErrorHandler.URI != nil {
+		onError, err = bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1alpha1.EndpointTypeErrorHandler}, kameletbinding.Spec.ErrorHandler)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not determine error handler URI")
+		}
 	}
 
 	steps := make([]*bindings.Binding, 0, len(kameletbinding.Spec.Steps))
