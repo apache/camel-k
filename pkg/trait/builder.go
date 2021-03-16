@@ -270,7 +270,9 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 			})
 		}
 		mountRegistrySecret(e.Platform.Status.Build.Registry.Secret, secret, &volumes, &volumeMounts, &env)
-	} else if e.Platform.Status.Build.Registry.Insecure {
+	}
+
+	if e.Platform.Status.Build.Registry.Insecure {
 		bud = append(bud[:2], append([]string{"--tls-verify=false"}, bud[2:]...)...)
 		push = append(push[:2], append([]string{"--tls-verify=false"}, push[2:]...)...)
 	}
