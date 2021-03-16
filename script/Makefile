@@ -174,7 +174,13 @@ test-kamel-cli: build
 	#go test -timeout 60m -v ./e2e/common/cli -tags=integration
 
 build-kamel:
+# Ensure the binary is statically linked when building on Linux due to ABI changes in newer glibc 2.32, otherwise
+# it would not run on older versions. See https://github.com/apache/camel-k/pull/2141#issuecomment-800990117
+ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
+	CGO_ENABLED=0 go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
+else
 	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
+endif
 
 build-resources: bundle-kamelets
 	./script/build_catalog.sh $(RUNTIME_VERSION) -Dcatalog.file=camel-catalog-$(RUNTIME_VERSION).yaml -Dcatalog.runtime=quarkus -Dstaging.repo="$(STAGING_RUNTIME_REPO)"
