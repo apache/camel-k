@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- Push to insecure registry fails when using Kaniko build strategy [\#2127](https://github.com/apache/camel-k/issues/2127)
+- Allow pulling base images from insecure registries [\#2122](https://github.com/apache/camel-k/issues/2122)
 - Error when using an external kit [\#2090](https://github.com/apache/camel-k/issues/2090)
 - Add support for `@mirrorOf=xxx` for --maven-repository option [\#2088](https://github.com/apache/camel-k/issues/2088)
 - Upgrade to Service Binding operator to v0.5.0 [\#2077](https://github.com/apache/camel-k/issues/2077)
@@ -44,6 +46,10 @@
 
 **Merged pull requests:**
 
+- fix: ensure Kaniko build strategy works with insecure registries [\#2130](https://github.com/apache/camel-k/pull/2130) ([orpiske](https://github.com/orpiske))
+- test: Add e2e/common/cli to common e2e test suite [\#2128](https://github.com/apache/camel-k/pull/2128) ([astefanutti](https://github.com/astefanutti))
+- Create new test folder with kamel cli specific tests [\#2125](https://github.com/apache/camel-k/pull/2125) ([mmajerni](https://github.com/mmajerni))
+- fix: only assume secure pull if the main registry and the base image registry are different [\#2124](https://github.com/apache/camel-k/pull/2124) ([orpiske](https://github.com/orpiske))
 - chore\(doc\): fix links to unlock website [\#2121](https://github.com/apache/camel-k/pull/2121) ([nicolaferraro](https://github.com/nicolaferraro))
 - Kamel local inspect: In case of missing format, show the output in th… [\#2118](https://github.com/apache/camel-k/pull/2118) ([oscerd](https://github.com/oscerd))
 - chore\(documentation\): add Kamelet development guide [\#2110](https://github.com/apache/camel-k/pull/2110) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -118,7 +124,6 @@
 - Fix \#1992: allow accessing Strimzi "kafkatopics" instead of "topics" [\#1993](https://github.com/apache/camel-k/pull/1993) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(OLM\): Remove replaces field from Kustomize base CSV manifest [\#1991](https://github.com/apache/camel-k/pull/1991) ([astefanutti](https://github.com/astefanutti))
 - Fix a little typo good for testing backport action [\#1989](https://github.com/apache/camel-k/pull/1989) ([oscerd](https://github.com/oscerd))
-- Fix \#1986: use properties instead of URL encoding for Kamelets in bin… [\#1987](https://github.com/apache/camel-k/pull/1987) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(OLM\): Add missing internal-objects annotation to Kustomize base CSV manifest [\#1985](https://github.com/apache/camel-k/pull/1985) ([astefanutti](https://github.com/astefanutti))
 - Re-introduce changelog action [\#1982](https://github.com/apache/camel-k/pull/1982) ([oscerd](https://github.com/oscerd))
 - Refactors the deploy directory to make config directory single source of CRD truth [\#1978](https://github.com/apache/camel-k/pull/1978) ([phantomjinx](https://github.com/phantomjinx))
@@ -137,10 +142,7 @@
 - \[ENTESB-15644\] Fix monitoring test [\#1958](https://github.com/apache/camel-k/pull/1958) ([llowinge](https://github.com/llowinge))
 - proposal: provided kamelets [\#1957](https://github.com/apache/camel-k/pull/1957) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(prometheus\): Remove runtime references from the Prometheus trait [\#1956](https://github.com/apache/camel-k/pull/1956) ([astefanutti](https://github.com/astefanutti))
-- Remove references to Quarkus runtime from monitoring and modeline documentation [\#1954](https://github.com/apache/camel-k/pull/1954) ([astefanutti](https://github.com/astefanutti))
-- fix\(trait\): using proper contentKey for sources [\#1953](https://github.com/apache/camel-k/pull/1953) ([squakez](https://github.com/squakez))
 - feat: Add ServiceBinding trait \(\#1445\) [\#1952](https://github.com/apache/camel-k/pull/1952) ([johnpoth](https://github.com/johnpoth))
-- chore\(crd\): Use conversion-gen API for structured conversion of CRDs to v1beta1 [\#1950](https://github.com/apache/camel-k/pull/1950) ([astefanutti](https://github.com/astefanutti))
 - Use Quarkus fast-jar package format apache/camel-k-runtime\#360 [\#1931](https://github.com/apache/camel-k/pull/1931) ([jamesnetherton](https://github.com/jamesnetherton))
 
 ## [v1.3.1](https://github.com/apache/camel-k/tree/v1.3.1) (2021-02-01)
@@ -913,7 +915,6 @@
 - Abilty to disable sidecar injection in knative services [\#1173](https://github.com/apache/camel-k/issues/1173)
 - Support for using ENV variables in kamel binary [\#1103](https://github.com/apache/camel-k/issues/1103)
 - Get rid of json schema generation [\#1037](https://github.com/apache/camel-k/issues/1037)
-- camel-k-maven-settings localRepository change is not working [\#1010](https://github.com/apache/camel-k/issues/1010)
 - Error in jsonschema gen [\#561](https://github.com/apache/camel-k/issues/561)
 - Provide config command for kamel [\#504](https://github.com/apache/camel-k/issues/504)
 - Decouple traits from base image [\#394](https://github.com/apache/camel-k/issues/394)
@@ -1169,6 +1170,7 @@
 **Closed issues:**
 
 - Failing start the camel-k-operator 1.0.0.-M3-SNAPSHOT with the minishifit [\#1015](https://github.com/apache/camel-k/issues/1015)
+- camel-k-maven-settings localRepository change is not working [\#1010](https://github.com/apache/camel-k/issues/1010)
 - Provide a plain text file with the latest version of Camel K for easier automation of downloading via the tooling [\#1009](https://github.com/apache/camel-k/issues/1009)
 - Cannot use knative-source-yaml loader [\#1005](https://github.com/apache/camel-k/issues/1005)
 - Pubilsh Camel K 1.0.0-M2 to operator hub [\#1004](https://github.com/apache/camel-k/issues/1004)
