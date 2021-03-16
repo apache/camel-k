@@ -25,6 +25,8 @@ type Metadata struct {
 	FromURIs []string
 	// All end URIs of defined routes
 	ToURIs []string
+	// All error handlers URIs of defined routes
+	ErrorHandlerURIs []string
 	// All inferred dependencies required to run the integration
 	Dependencies *strset.Set
 	// ExposesHTTPServices indicates if a route defined by the source is exposed
