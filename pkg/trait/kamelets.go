@@ -103,6 +103,7 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 			metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 				util.StringSliceUniqueConcat(&kamelets, extractKamelets(meta.FromURIs))
 				util.StringSliceUniqueConcat(&kamelets, extractKamelets(meta.ToURIs))
+				util.StringSliceUniqueConcat(&kamelets, extractKamelets(meta.ErrorHandlerURIs))
 				return true
 			})
 			sort.Strings(kamelets)

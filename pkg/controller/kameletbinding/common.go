@@ -79,6 +79,10 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 	if err != nil {
 		return nil, errors.Wrap(err, "could not determine sink URI")
 	}
+	onError, err := bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1alpha1.EndpointTypeErrorHandler}, kameletbinding.Spec.ErrorHandler)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not determine error handler URI")
+	}
 
 	steps := make([]*bindings.Binding, 0, len(kameletbinding.Spec.Steps))
 	for idx, step := range kameletbinding.Spec.Steps {
@@ -93,10 +97,13 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 		steps = append(steps, stepBinding)
 	}
 
-	allBindings := make([]*bindings.Binding, 0, len(steps)+2)
+	allBindings := make([]*bindings.Binding, 0, len(steps)+3)
 	allBindings = append(allBindings, from)
 	allBindings = append(allBindings, steps...)
 	allBindings = append(allBindings, to)
+	if onError != nil {
+		allBindings = append(allBindings, onError)
+	}
 
 	propList := make([]string, 0)
 	for _, b := range allBindings {
@@ -129,17 +136,38 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 		"to": to.URI,
 	})
 
-	flow := map[string]interface{}{
+	// Append Error Handler flow, if it exists
+	if onError != nil {
+		flowErrorHandler := map[string]interface{}{
+			"error-handler": map[string]interface{}{
+				"dead-letter-channel": map[string]interface{}{
+					"dead-letter-uri":                  onError.URI,
+					"dead-letter-handle-new-exception": true,
+					"async-delayed-redelivery":         false,
+					"use-original-message":             true,
+				},
+			},
+		}
+		encodedErrorHandler, err := json.Marshal(flowErrorHandler)
+
+		if err != nil {
+			return nil, err
+		}
+		it.Spec.Flows = append(it.Spec.Flows, v1.Flow{RawMessage: encodedErrorHandler})
+	}
+
+	// Append From flow: it must exist
+	flowFrom := map[string]interface{}{
 		"from": map[string]interface{}{
 			"uri":   from.URI,
 			"steps": dslSteps,
 		},
 	}
-	encodedFlow, err := json.Marshal(flow)
+	encodedFrom, err := json.Marshal(flowFrom)
 	if err != nil {
 		return nil, err
 	}
-	it.Spec.Flows = append(it.Spec.Flows, v1.Flow{RawMessage: encodedFlow})
+	it.Spec.Flows = append(it.Spec.Flows, v1.Flow{RawMessage: encodedFrom})
 
 	return &it, nil
 }
