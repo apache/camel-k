@@ -90,7 +90,7 @@ func TestMetrics(t *testing.T) {
 				}), func(l *LogEntry) { ts1 = l.Timestamp.Time }).
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName": Equal("camel-k.builder"),
-					"Message":    HavePrefix("resolved image"),
+					"Message":    HavePrefix("resolved base image:"),
 				}), LogEntryNoop).
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.build"),
