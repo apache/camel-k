@@ -30,79 +30,56 @@ import (
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
-type defaultBuilder struct {
-	log    log.Logger
-	client client.Client
+type builderTask struct {
+	c     client.Client
+	log   log.Logger
+	build *v1.Build
+	task  *v1.BuilderTask
 }
 
-// New --
-func New(c client.Client) Builder {
-	m := defaultBuilder{
-		log:    log.WithName("builder"),
-		client: c,
-	}
+var _ Task = &builderTask{}
 
-	return &m
-}
-
-var _ Builder = &defaultBuilder{}
-
-// Run --
-func (b *defaultBuilder) Run(ctx context.Context, namespace string, build v1.BuilderTask) v1.BuildStatus {
+func (t *builderTask) Do(ctx context.Context) v1.BuildStatus {
 	result := v1.BuildStatus{}
 
-	var buildDir string
-	if build.BuildDir == "" {
+	buildDir := t.task.BuildDir
+	if buildDir == "" {
 		tmpDir, err := ioutil.TempDir(os.TempDir(), "builder-")
 		if err != nil {
 			log.Error(err, "Unexpected error while creating a temporary dir")
-
 			result.Phase = v1.BuildPhaseFailed
 			result.Error = err.Error()
 		}
 		buildDir = tmpDir
 		defer os.RemoveAll(buildDir)
-	} else {
-		buildDir = build.BuildDir
 	}
 
-	c := Context{
-		Client:    b.client,
+	c := builderContext{
+		Client:    t.c,
 		C:         ctx,
 		Path:      buildDir,
-		Namespace: namespace,
-		Build:     build,
-		BaseImage: build.BaseImage,
-	}
-
-	if build.Image != "" {
-		c.BaseImage = build.Image
-	}
-
-	// base image is mandatory
-	if c.BaseImage == "" {
-		result.Phase = v1.BuildPhaseFailed
-		result.Image = ""
-		result.Error = "no base image defined"
+		Namespace: t.build.Namespace,
+		Build:     *t.task,
+		BaseImage: t.task.BaseImage,
 	}
 
 	// Add sources
-	for _, data := range build.Sources {
-		c.Resources = append(c.Resources, Resource{
+	for _, data := range t.task.Sources {
+		c.Resources = append(c.Resources, resource{
 			Content: []byte(data.Content),
 			Target:  path.Join("sources", data.Name),
 		})
 	}
 
 	// Add resources
-	for _, data := range build.Resources {
+	for _, data := range t.task.Resources {
 		t := path.Join("resources", data.Name)
 
 		if data.MountPath != "" {
 			t = path.Join(data.MountPath, data.Name)
 		}
 
-		c.Resources = append(c.Resources, Resource{
+		c.Resources = append(c.Resources, resource{
 			Content: []byte(data.Content),
 			Target:  t,
 		})
@@ -113,7 +90,7 @@ func (b *defaultBuilder) Run(ctx context.Context, namespace string, build v1.Bui
 	}
 
 	steps := make([]Step, 0)
-	for _, step := range build.Steps {
+	for _, step := range t.task.Steps {
 		s, ok := stepsByID[step]
 		if !ok {
 			log.Info("Skipping unknown build step", "step", step)
@@ -126,7 +103,7 @@ func (b *defaultBuilder) Run(ctx context.Context, namespace string, build v1.Bui
 		return steps[i].Phase() < steps[j].Phase()
 	})
 
-	b.log.Infof("steps: %v", steps)
+	t.log.Infof("steps: %v", steps)
 	for _, step := range steps {
 		if c.Error != nil || result.Phase == v1.BuildPhaseInterrupted {
 			break
@@ -136,16 +113,16 @@ func (b *defaultBuilder) Run(ctx context.Context, namespace string, build v1.Bui
 		case <-ctx.Done():
 			result.Phase = v1.BuildPhaseInterrupted
 		default:
-			l := b.log.WithValues(
+			l := t.log.WithValues(
 				"step", step.ID(),
 				"phase", step.Phase(),
-				"task", build.Name,
+				"task", t.task.Name,
 			)
 
 			l.Infof("executing step")
 
 			start := time.Now()
-			c.Error = step.Execute(&c)
+			c.Error = step.execute(&c)
 
 			if c.Error == nil {
 				l.Infof("step done in %f seconds", time.Since(start).Seconds())
@@ -157,8 +134,6 @@ func (b *defaultBuilder) Run(ctx context.Context, namespace string, build v1.Bui
 
 	if result.Phase != v1.BuildPhaseInterrupted {
 		result.BaseImage = c.BaseImage
-		result.Image = c.Image
-		result.Digest = c.Digest
 
 		if c.Error != nil {
 			result.Error = c.Error.Error()
@@ -168,14 +143,13 @@ func (b *defaultBuilder) Run(ctx context.Context, namespace string, build v1.Bui
 		result.Artifacts = make([]v1.Artifact, 0, len(c.Artifacts))
 		result.Artifacts = append(result.Artifacts, c.Artifacts...)
 
-		b.log.Infof("dependencies: %s", build.Dependencies)
-		b.log.Infof("artifacts: %s", artifactIDs(c.Artifacts))
-		b.log.Infof("artifacts selected: %s", artifactIDs(c.SelectedArtifacts))
-		b.log.Infof("base image: %s", build.BaseImage)
-		b.log.Infof("resolved base image: %s", c.BaseImage)
-		b.log.Infof("resolved image: %s", c.Image)
+		t.log.Infof("dependencies: %s", t.task.Dependencies)
+		t.log.Infof("artifacts: %s", artifactIDs(c.Artifacts))
+		t.log.Infof("artifacts selected: %s", artifactIDs(c.SelectedArtifacts))
+		t.log.Infof("base image: %s", t.task.BaseImage)
+		t.log.Infof("resolved base image: %s", c.BaseImage)
 	} else {
-		b.log.Infof("build task %s interrupted", build.Name)
+		t.log.Infof("build task %s interrupted", t.task.Name)
 	}
 
 	return result

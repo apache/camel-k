@@ -18,146 +18,33 @@ limitations under the License.
 package builder
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
-	"reflect"
 
 	"k8s.io/apimachinery/pkg/selection"
-
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/controller"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-var stepsByID = make(map[string]Step)
+type artifactsSelector func(ctx *builderContext) error
 
-func init() {
-	RegisterSteps(Steps)
-}
-
-type steps struct {
-	CleanBuildDir           Step
-	GenerateProjectSettings Step
-	InjectDependencies      Step
-	SanitizeDependencies    Step
-	StandardImageContext    Step
-	IncrementalImageContext Step
-}
-
-// Steps --
-var Steps = steps{
-	CleanBuildDir: NewStep(
-		ProjectGenerationPhase-1,
-		cleanBuildDir,
-	),
-	GenerateProjectSettings: NewStep(
-		ProjectGenerationPhase+1,
-		generateProjectSettings,
-	),
-	InjectDependencies: NewStep(
-		ProjectGenerationPhase+2,
-		injectDependencies,
-	),
-	SanitizeDependencies: NewStep(
-		ProjectGenerationPhase+3,
-		sanitizeDependencies,
-	),
-	StandardImageContext: NewStep(
-		ApplicationPackagePhase,
-		standardImageContext,
-	),
-	IncrementalImageContext: NewStep(
-		ApplicationPackagePhase,
-		incrementalImageContext,
-	),
-}
-
-// DefaultSteps --
-var DefaultSteps = []Step{
-	Steps.CleanBuildDir,
-	Steps.GenerateProjectSettings,
-	Steps.InjectDependencies,
-	Steps.SanitizeDependencies,
-	Steps.IncrementalImageContext,
-}
-
-// RegisterSteps --
-func RegisterSteps(steps interface{}) {
-	v := reflect.ValueOf(steps)
-	t := reflect.TypeOf(steps)
-
-	for i := 0; i < v.NumField(); i++ {
-		field := t.Field(i)
-		if step, ok := v.Field(i).Interface().(Step); ok {
-			id := t.PkgPath() + "/" + field.Name
-			// Set the fully qualified step ID
-			reflect.Indirect(v.Field(i).Elem()).FieldByName("StepID").SetString(id)
-
-			registerStep(step)
-		}
-	}
-}
-
-func registerStep(steps ...Step) {
-	for _, step := range steps {
-		if _, exists := stepsByID[step.ID()]; exists {
-			panic(fmt.Errorf("the build step is already registered: %s", step.ID()))
-		}
-		stepsByID[step.ID()] = step
-	}
-}
-
-func cleanBuildDir(ctx *Context) error {
-	if ctx.Build.BuildDir == "" {
-		return nil
-	}
-
-	return os.RemoveAll(ctx.Build.BuildDir)
-}
-
-func generateProjectSettings(ctx *Context) error {
-	val, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, &ctx.Build.Maven.Settings)
-	if err != nil {
-		return err
-	}
-	if val != "" {
-		ctx.Maven.SettingsData = []byte(val)
-	}
-
-	return nil
-}
-
-func injectDependencies(ctx *Context) error {
-	// Add dependencies from build
-	return camel.ManageIntegrationDependencies(&ctx.Maven.Project, ctx.Build.Dependencies, ctx.Catalog)
-}
-
-func sanitizeDependencies(ctx *Context) error {
-	return camel.SanitizeIntegrationDependencies(ctx.Maven.Project.Dependencies)
-}
-
-type artifactsSelector func(ctx *Context) error
-
-func standardImageContext(ctx *Context) error {
-	return imageContext(ctx, func(ctx *Context) error {
+func standardImageContext(ctx *builderContext) error {
+	return imageContext(ctx, func(ctx *builderContext) error {
 		ctx.SelectedArtifacts = ctx.Artifacts
 
 		return nil
 	})
 }
 
-func incrementalImageContext(ctx *Context) error {
-	if ctx.HasRequiredImage() {
-		//
+func incrementalImageContext(ctx *builderContext) error {
+	if ctx.Build.BaseImage != "" {
 		// If the build requires a specific image, don't try to determine the
 		// base image using artifact so just use the standard packages
-		//
 		return standardImageContext(ctx)
 	}
 
@@ -166,7 +53,7 @@ func incrementalImageContext(ctx *Context) error {
 		return err
 	}
 
-	return imageContext(ctx, func(ctx *Context) error {
+	return imageContext(ctx, func(ctx *builderContext) error {
 		ctx.SelectedArtifacts = ctx.Artifacts
 
 		bestImage, commonLibs := findBestImage(images, ctx.Artifacts)
@@ -179,13 +66,19 @@ func incrementalImageContext(ctx *Context) error {
 					ctx.SelectedArtifacts = append(ctx.SelectedArtifacts, entry)
 				}
 			}
+		} else {
+			pl, err := platform.GetCurrent(ctx.C, ctx, ctx.Namespace)
+			if err != nil {
+				return err
+			}
+			ctx.BaseImage = pl.Status.Build.BaseImage
 		}
 
 		return nil
 	})
 }
 
-func imageContext(ctx *Context, selector artifactsSelector) error {
+func imageContext(ctx *builderContext, selector artifactsSelector) error {
 	err := selector(ctx)
 	if err != nil {
 		return err
@@ -227,7 +120,7 @@ func imageContext(ctx *Context, selector artifactsSelector) error {
 	return nil
 }
 
-func listPublishedImages(context *Context) ([]v1.IntegrationKitStatus, error) {
+func listPublishedImages(context *builderContext) ([]v1.IntegrationKitStatus, error) {
 	options := []k8sclient.ListOption{
 		k8sclient.InNamespace(context.Namespace),
 		k8sclient.MatchingLabels{
@@ -276,11 +169,9 @@ func findBestImage(images []v1.IntegrationKitStatus, artifacts []v1.Artifact) (v
 	for _, image := range images {
 		common := make(map[string]bool)
 		for _, artifact := range image.Artifacts {
-			//
 			// If the Artifact's checksum is not defined we can't reliably determine if for some
 			// reason the artifact has been changed but not the ID (as example for snapshots or
 			// other generated jar) thus we do not take this artifact into account.
-			//
 			if artifact.Checksum == "" {
 				continue
 			}

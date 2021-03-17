@@ -24,15 +24,16 @@ import (
 	"path"
 	"strings"
 
+	"github.com/pkg/errors"
+	"github.com/scylladb/go-set/strset"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/builder/runtime"
+	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/maven"
-	"github.com/pkg/errors"
-	"github.com/scylladb/go-set/strset"
 )
 
 var acceptedDependencyTypes = []string{"bom", "camel", "camel-k", "camel-quarkus", "mvn", "github"}
@@ -109,7 +110,7 @@ func getTransitiveDependencies(
 	}
 
 	// Create Maven project
-	project := runtime.GenerateQuarkusProjectCommon(
+	project := builder.GenerateQuarkusProjectCommon(
 		catalog.CamelCatalogSpec.Runtime.Metadata["camel-quarkus.version"],
 		defaults.DefaultRuntimeVersion, catalog.CamelCatalogSpec.Runtime.Metadata["quarkus.version"])
 
@@ -154,20 +155,19 @@ func getTransitiveDependencies(
 	// Make maven command less verbose
 	mc.AdditionalArguments = append(mc.AdditionalArguments, "-q")
 
-	err = runtime.BuildQuarkusRunnerCommon(mc)
+	err = builder.BuildQuarkusRunnerCommon(mc)
 	if err != nil {
 		return nil, err
 	}
 
 	// Compose artifacts list
-	artifacts := []v1.Artifact{}
-	artifacts, err = runtime.ProcessQuarkusTransitiveDependencies(mc)
+	artifacts, err := builder.ProcessQuarkusTransitiveDependencies(mc)
 	if err != nil {
 		return nil, err
 	}
 
 	// Dump dependencies in the dependencies directory and construct the list of dependencies
-	transitiveDependencies := []string{}
+	var transitiveDependencies []string
 	for _, entry := range artifacts {
 		transitiveDependencies = append(transitiveDependencies, entry.Location)
 	}
@@ -175,7 +175,7 @@ func getTransitiveDependencies(
 }
 
 func getRegularFilesInDir(directory string) ([]string, error) {
-	dirFiles := []string{}
+	var dirFiles []string
 	files, err := ioutil.ReadDir(directory)
 	for _, file := range files {
 		fileName := file.Name()
@@ -227,7 +227,7 @@ func generateCatalog() (*camel.RuntimeCatalog, error) {
 		Version:  defaults.DefaultRuntimeVersion,
 		Provider: v1.RuntimeProviderQuarkus,
 	}
-	providerDependencies := []maven.Dependency{}
+	var providerDependencies []maven.Dependency
 	catalog, err := camel.GenerateCatalogCommon(settings, mvn, runtime, providerDependencies)
 	if err != nil {
 		return nil, err
@@ -384,7 +384,7 @@ func updateIntegrationProperties(properties []string, propertyFiles []string, ha
 	}
 
 	// Relocate properties files to this integration's property directory.
-	relocatedPropertyFiles := []string{}
+	var relocatedPropertyFiles []string
 	for _, propertyFile := range propertyFiles {
 		relocatedPropertyFile := path.Join(util.GetLocalPropertiesDir(), path.Base(propertyFile))
 		util.CopyFile(propertyFile, relocatedPropertyFile)

@@ -19,7 +19,6 @@ package build
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
@@ -35,7 +34,7 @@ import (
 )
 
 // NewScheduleRoutineAction creates a new schedule routine action
-func NewScheduleRoutineAction(reader client.Reader, b builder.Builder, r *sync.Map) Action {
+func NewScheduleRoutineAction(reader client.Reader, b *builder.Builder, r *sync.Map) Action {
 	return &scheduleRoutineAction{
 		reader:   reader,
 		builder:  b,
@@ -47,7 +46,7 @@ type scheduleRoutineAction struct {
 	baseAction
 	lock     sync.Mutex
 	reader   client.Reader
-	builder  builder.Builder
+	builder  *builder.Builder
 	routines *sync.Map
 }
 
@@ -97,6 +96,7 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1.Build
 	// Start the build asynchronously to avoid blocking the reconcile loop
 	action.routines.Store(build.Name, true)
 
+	// FIXME: Use context.WithTimeout
 	go action.runBuild(ctx, build)
 
 	return nil, nil
@@ -114,27 +114,12 @@ func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Bui
 		return
 	}
 
+	// FIXME: Clean-up build directory
 	for i, task := range build.Spec.Tasks {
-		if task.Builder == nil {
-			duration := metav1.Now().Sub(build.Status.StartedAt.Time)
-			status := v1.BuildStatus{
-				// Error the build directly as we know recovery won't work over ill-defined tasks
-				Phase: v1.BuildPhaseError,
-				Error: fmt.Sprintf("task cannot be executed using the routine strategy: %s",
-					task.GetName()),
-				Duration: duration.String(),
-			}
+		status := action.builder.Build(build).Task(task).Do(ctx)
 
-			// Account for the Build metrics
-			observeBuildResult(build, status.Phase, duration)
-
-			_ = action.updateBuildStatus(ctx, build, status)
-			break
-		}
-
-		status := action.builder.Run(ctx, build.Namespace, *task.Builder)
 		lastTask := i == len(build.Spec.Tasks)-1
-		taskFailed := status.Phase == v1.BuildPhaseFailed
+		taskFailed := status.Phase == v1.BuildPhaseFailed || status.Phase == v1.BuildPhaseError
 		if lastTask && !taskFailed {
 			status.Phase = v1.BuildPhaseSucceeded
 		}

@@ -27,28 +27,8 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/test"
 )
-
-type testSteps struct {
-	TestStep Step
-}
-
-func TestRegisterDuplicatedSteps(t *testing.T) {
-	steps := testSteps{
-		TestStep: NewStep(
-			ApplicationPublishPhase,
-			func(context *Context) error {
-				return nil
-			},
-		),
-	}
-	RegisterSteps(steps)
-	assert.Panics(t, func() {
-		RegisterSteps(steps)
-	})
-}
 
 func TestMavenSettingsFromConfigMap(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
@@ -72,7 +52,7 @@ func TestMavenSettingsFromConfigMap(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	ctx := Context{
+	ctx := builderContext{
 		Catalog:   catalog,
 		Client:    c,
 		Namespace: "ns",
@@ -91,7 +71,7 @@ func TestMavenSettingsFromConfigMap(t *testing.T) {
 		},
 	}
 
-	err = Steps.GenerateProjectSettings.Execute(&ctx)
+	err = Steps.GenerateProjectSettings.execute(&ctx)
 	assert.Nil(t, err)
 
 	assert.Equal(t, []byte("setting-data"), ctx.Maven.SettingsData)
@@ -119,7 +99,7 @@ func TestMavenSettingsFromSecret(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	ctx := Context{
+	ctx := builderContext{
 		Catalog:   catalog,
 		Client:    c,
 		Namespace: "ns",
@@ -138,71 +118,8 @@ func TestMavenSettingsFromSecret(t *testing.T) {
 		},
 	}
 
-	err = Steps.GenerateProjectSettings.Execute(&ctx)
+	err = Steps.GenerateProjectSettings.execute(&ctx)
 	assert.Nil(t, err)
 
 	assert.Equal(t, []byte("setting-data"), ctx.Maven.SettingsData)
-}
-
-func TestListPublishedImages(t *testing.T) {
-	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
-
-	c, err := test.NewFakeClient(
-		&v1.IntegrationKit{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1.SchemeGroupVersion.String(),
-				Kind:       v1.IntegrationKitKind,
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "ns",
-				Name:      "my-kit-1",
-				Labels: map[string]string{
-					"camel.apache.org/kit.type":         v1.IntegrationKitTypePlatform,
-					"camel.apache.org/runtime.version":  catalog.Runtime.Version,
-					"camel.apache.org/runtime.provider": string(catalog.Runtime.Provider),
-				},
-			},
-			Status: v1.IntegrationKitStatus{
-				Phase:           v1.IntegrationKitPhaseError,
-				Image:           "image-1",
-				RuntimeVersion:  catalog.Runtime.Version,
-				RuntimeProvider: catalog.Runtime.Provider,
-			},
-		},
-		&v1.IntegrationKit{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1.SchemeGroupVersion.String(),
-				Kind:       v1.IntegrationKitKind,
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "ns",
-				Name:      "my-kit-2",
-				Labels: map[string]string{
-					"camel.apache.org/kit.type":         v1.IntegrationKitTypePlatform,
-					"camel.apache.org/runtime.version":  catalog.Runtime.Version,
-					"camel.apache.org/runtime.provider": string(catalog.Runtime.Provider),
-				},
-			},
-			Status: v1.IntegrationKitStatus{
-				Phase:           v1.IntegrationKitPhaseReady,
-				Image:           "image-2",
-				RuntimeVersion:  catalog.Runtime.Version,
-				RuntimeProvider: catalog.Runtime.Provider,
-			},
-		},
-	)
-
-	assert.Nil(t, err)
-	assert.NotNil(t, c)
-
-	i, err := listPublishedImages(&Context{
-		Client:  c,
-		Catalog: catalog,
-		C:       cancellable.NewContext(),
-	})
-
-	assert.Nil(t, err)
-	assert.Len(t, i, 1)
-	assert.Equal(t, "image-2", i[0].Image)
 }

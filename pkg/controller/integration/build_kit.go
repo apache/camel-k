@@ -21,12 +21,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/rs/xid"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
-	"github.com/rs/xid"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 // NewBuildKitAction create an action that handles integration kit build
@@ -50,7 +52,7 @@ func (action *buildKitAction) CanHandle(integration *v1.Integration) bool {
 func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	kit, err := LookupKitForIntegration(ctx, action.client, integration)
 	if err != nil {
-		//TODO: we may need to add a wait strategy, i.e give up after some time
+		// TODO: we may need to add a wait strategy, i.e give up after some time
 		return nil, err
 	}
 
@@ -62,7 +64,7 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 
 			versionMatch := kit.Status.Version == integration.Status.Version
 
-			//TODO: this is a very simple check, we may need to provide a deps comparison strategy
+			// TODO: this is a very simple check, we may need to provide a deps comparison strategy
 			dependenciesMatch := util.StringSliceContains(kit.Spec.Dependencies, integration.Status.Dependencies)
 
 			if !dependenciesMatch || !versionMatch {

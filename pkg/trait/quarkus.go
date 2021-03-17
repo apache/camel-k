@@ -19,7 +19,6 @@ package trait
 
 import (
 	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/builder/runtime"
 )
 
 // The Quarkus trait activates the Quarkus runtime.
@@ -62,5 +61,5 @@ func (t *quarkusTrait) InfluencesKit() bool {
 }
 
 func (t *quarkusTrait) addBuildSteps(steps *[]builder.Step) {
-	*steps = append(*steps, runtime.QuarkusSteps...)
+	*steps = append(*steps, builder.QuarkusSteps...)
 }

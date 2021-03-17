@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package runtime
+package builder
 
 import (
 	"fmt"
@@ -27,22 +27,38 @@ import (
 	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
-// QuarkusSteps --
-var QuarkusSteps = []builder.Step{
-	Steps.LoadCamelQuarkusCatalog,
-	Steps.GenerateQuarkusProject,
-	Steps.BuildQuarkusRunner,
-	Steps.ComputeQuarkusDependencies,
+func init() {
+	registerSteps(quarkus)
 }
 
-func loadCamelQuarkusCatalog(ctx *builder.Context) error {
+type quarkusSteps struct {
+	LoadCamelQuarkusCatalog    Step
+	GenerateQuarkusProject     Step
+	BuildQuarkusRunner         Step
+	ComputeQuarkusDependencies Step
+}
+
+var quarkus = quarkusSteps{
+	LoadCamelQuarkusCatalog:    NewStep(InitPhase, loadCamelQuarkusCatalog),
+	GenerateQuarkusProject:     NewStep(ProjectGenerationPhase, generateQuarkusProject),
+	BuildQuarkusRunner:         NewStep(ProjectBuildPhase, buildQuarkusRunner),
+	ComputeQuarkusDependencies: NewStep(ProjectBuildPhase+1, computeQuarkusDependencies),
+}
+
+var QuarkusSteps = []Step{
+	quarkus.LoadCamelQuarkusCatalog,
+	quarkus.GenerateQuarkusProject,
+	quarkus.BuildQuarkusRunner,
+	quarkus.ComputeQuarkusDependencies,
+}
+
+func loadCamelQuarkusCatalog(ctx *builderContext) error {
 	catalog, err := camel.LoadCatalog(ctx.C, ctx.Client, ctx.Namespace, ctx.Build.Runtime)
 	if err != nil {
 		return err
@@ -59,7 +75,7 @@ func loadCamelQuarkusCatalog(ctx *builder.Context) error {
 	return nil
 }
 
-func generateQuarkusProject(ctx *builder.Context) error {
+func generateQuarkusProject(ctx *builderContext) error {
 	p := GenerateQuarkusProjectCommon(ctx.Build.Runtime.Metadata["camel-quarkus.version"], ctx.Build.Runtime.Version, ctx.Build.Runtime.Metadata["quarkus.version"])
 
 	// Add all the properties from the build configuration
@@ -70,7 +86,6 @@ func generateQuarkusProject(ctx *builder.Context) error {
 	return nil
 }
 
-// GenerateQuarkusProjectCommon --
 func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion string, quarkusVersion string) maven.Project {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", defaults.Version)
 	p.DependencyManagement = &maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)}
@@ -126,7 +141,7 @@ func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion str
 	return p
 }
 
-func buildQuarkusRunner(ctx *builder.Context) error {
+func buildQuarkusRunner(ctx *builderContext) error {
 	mc := maven.NewContext(path.Join(ctx.Path, "maven"), ctx.Maven.Project)
 	mc.SettingsContent = ctx.Maven.SettingsData
 	mc.LocalRepository = ctx.Build.Maven.LocalRepository
@@ -140,7 +155,6 @@ func buildQuarkusRunner(ctx *builder.Context) error {
 	return nil
 }
 
-// BuildQuarkusRunnerCommon --
 func BuildQuarkusRunnerCommon(mc maven.Context) error {
 	resourcesPath := path.Join(mc.Path, "src", "main", "resources")
 	if err := os.MkdirAll(resourcesPath, os.ModePerm); err != nil {
@@ -166,7 +180,7 @@ func BuildQuarkusRunnerCommon(mc maven.Context) error {
 	return nil
 }
 
-func computeQuarkusDependencies(ctx *builder.Context) error {
+func computeQuarkusDependencies(ctx *builderContext) error {
 	mc := maven.NewContext(path.Join(ctx.Path, "maven"), ctx.Maven.Project)
 	mc.SettingsContent = ctx.Maven.SettingsData
 	mc.LocalRepository = ctx.Build.Maven.LocalRepository
@@ -182,7 +196,6 @@ func computeQuarkusDependencies(ctx *builder.Context) error {
 	return nil
 }
 
-// ProcessQuarkusTransitiveDependencies --
 func ProcessQuarkusTransitiveDependencies(mc maven.Context) ([]v1.Artifact, error) {
 	var artifacts []v1.Artifact
 

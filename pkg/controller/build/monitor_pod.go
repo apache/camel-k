@@ -74,8 +74,8 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		observeBuildResult(build, build.Status.Phase, duration)
 
 		for _, task := range build.Spec.Tasks {
-			if task.Image != nil {
-				build.Status.Image = task.Image.BuiltImage
+			if t := task.Image; t != nil {
+				build.Status.Image = t.Image
 				break
 			}
 		}
@@ -88,7 +88,12 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		}
 
 	case pod.Status.Phase == corev1.PodFailed:
-		build.Status.Phase = v1.BuildPhaseFailed
+		phase := v1.BuildPhaseFailed
+		// Do not override errored build
+		if build.Status.Phase == v1.BuildPhaseError {
+			phase = v1.BuildPhaseError
+		}
+		build.Status.Phase = phase
 		duration := metav1.Now().Sub(build.Status.StartedAt.Time)
 		build.Status.Duration = duration.String()
 

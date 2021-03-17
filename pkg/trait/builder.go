@@ -19,6 +19,8 @@ package trait
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 	"path"
 	"sort"
 	"strconv"
@@ -32,11 +34,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/builder/kaniko"
-	"github.com/apache/camel-k/pkg/builder/s2i"
-	"github.com/apache/camel-k/pkg/builder/spectrum"
 	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 const builderDir = "/builder"
@@ -77,9 +75,44 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 
 func (t *builderTrait) Apply(e *Environment) error {
 	builderTask := t.builderTask(e)
+
+	switch e.Platform.Status.Build.PublishStrategy {
+	case v1.IntegrationPlatformBuildPublishStrategyBuildah, v1.IntegrationPlatformBuildPublishStrategyKaniko:
+		builderTask.BuildDir = path.Join(builderDir, e.IntegrationKit.Name)
+	default:
+		tmpDir, err := ioutil.TempDir(os.TempDir(), e.IntegrationKit.Name+"-")
+		if err != nil {
+			return err
+		}
+		builderTask.BuildDir = tmpDir
+	}
 	e.BuildTasks = append(e.BuildTasks, v1.Task{Builder: builderTask})
 
 	switch e.Platform.Status.Build.PublishStrategy {
+	case v1.IntegrationPlatformBuildPublishStrategySpectrum:
+		e.BuildTasks = append(e.BuildTasks, v1.Task{Spectrum: &v1.SpectrumTask{
+			BaseTask: v1.BaseTask{
+				Name: "spectrum",
+			},
+			PublishTask: v1.PublishTask{
+				ContextDir: path.Join(builderTask.BuildDir, "context"),
+				BaseImage:  e.Platform.Status.Build.BaseImage,
+				Image:      getImageName(e),
+			},
+			Registry: e.Platform.Status.Build.Registry,
+		}})
+
+	case v1.IntegrationPlatformBuildPublishStrategyS2I:
+		e.BuildTasks = append(e.BuildTasks, v1.Task{S2i: &v1.S2iTask{
+			BaseTask: v1.BaseTask{
+				Name: "s2i",
+			},
+			PublishTask: v1.PublishTask{
+				BaseImage:  e.Platform.Status.Build.BaseImage,
+				ContextDir: path.Join(builderTask.BuildDir, "context"),
+			},
+			Tag: e.IntegrationKit.ResourceVersion,
+		}})
 
 	case v1.IntegrationPlatformBuildPublishStrategyBuildah:
 		imageTask, err := t.buildahTask(e)
@@ -147,7 +180,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			})
 			imageTask.VolumeMounts = append(imageTask.VolumeMounts, corev1.VolumeMount{
 				Name:      "kaniko-cache",
-				MountPath: kaniko.CacheDir,
+				MountPath: builder.KanikoCacheDir,
 			})
 		}
 
@@ -158,33 +191,11 @@ func (t *builderTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *builderTrait) addVolumeMounts(builderTask *v1.BuilderTask, imageTask *v1.ImageTask) {
-	mount := corev1.VolumeMount{Name: "camel-k-builder", MountPath: builderDir}
-	builderTask.VolumeMounts = append(builderTask.VolumeMounts, mount)
-	imageTask.VolumeMounts = append(imageTask.VolumeMounts, mount)
-
-	// Use an emptyDir volume to coordinate the Maven build and the image build
-	builderTask.Volumes = append(builderTask.Volumes, corev1.Volume{
-		Name: "camel-k-builder",
-		VolumeSource: corev1.VolumeSource{
-			EmptyDir: &corev1.EmptyDirVolumeSource{},
-		},
-	})
-}
-
 func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
-	labels := map[string]string{
-		"app": "camel-k",
-	}
-	labels = kubernetes.MergeCamelCreatorLabels(e.IntegrationKit.Labels, labels)
-
 	task := &v1.BuilderTask{
 		BaseTask: v1.BaseTask{
-			Name: e.IntegrationKit.Name,
+			Name: "builder",
 		},
-		Tag:          e.IntegrationKit.ResourceVersion,
-		Labels:       labels,
-		BaseImage:    e.Platform.Status.Build.BaseImage,
 		Runtime:      e.CamelCatalog.Runtime,
 		Dependencies: e.IntegrationKit.Spec.Dependencies,
 		Properties:   e.Platform.Status.Build.Properties,
@@ -194,16 +205,6 @@ func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
 
 	steps := make([]builder.Step, 0)
 	steps = append(steps, builder.DefaultSteps...)
-
-	switch e.Platform.Status.Build.PublishStrategy {
-	case v1.IntegrationPlatformBuildPublishStrategyBuildah, v1.IntegrationPlatformBuildPublishStrategyKaniko:
-		task.BuildDir = path.Join(builderDir, e.IntegrationKit.Name)
-
-	case v1.IntegrationPlatformBuildPublishStrategyS2I:
-		steps = append(steps, s2i.S2iSteps...)
-	case v1.IntegrationPlatformBuildPublishStrategySpectrum:
-		steps = append(steps, spectrum.SpectrumSteps...)
-	}
 
 	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
 	quarkus.addBuildSteps(&steps)
@@ -309,12 +310,15 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 	}
 
 	return &v1.ImageTask{
-		ContainerTask: v1.ContainerTask{
-			BaseTask: v1.BaseTask{
-				Name:         "buildah",
-				Volumes:      volumes,
-				VolumeMounts: volumeMounts,
-			},
+		BaseTask: v1.BaseTask{
+			Name:         "buildah",
+			Volumes:      volumes,
+			VolumeMounts: volumeMounts,
+		},
+		PublishTask: v1.PublishTask{
+			Image: image,
+		},
+		Container: v1.ContainerTask{
 			Image:           fmt.Sprintf("quay.io/buildah/stable:v%s", defaults.BuildahVersion),
 			Command:         []string{"/bin/sh", "-c"},
 			Args:            []string{strings.Join(args, " && ")},
@@ -322,7 +326,6 @@ func (t *builderTrait) buildahTask(e *Environment) (*v1.ImageTask, error) {
 			WorkingDir:      path.Join(builderDir, e.IntegrationKit.Name, "context"),
 			SecurityContext: sc,
 		},
-		BuiltImage: image,
 	}, nil
 }
 
@@ -334,7 +337,7 @@ func (t *builderTrait) kanikoTask(e *Environment) (*v1.ImageTask, error) {
 		"--context=" + path.Join(builderDir, e.IntegrationKit.Name, "context"),
 		"--destination=" + image,
 		"--cache=" + strconv.FormatBool(e.Platform.Status.Build.IsKanikoCacheEnabled()),
-		"--cache-dir=" + kaniko.CacheDir,
+		"--cache-dir=" + builder.KanikoCacheDir,
 	}
 
 	if t.Verbose {
@@ -365,18 +368,34 @@ func (t *builderTrait) kanikoTask(e *Environment) (*v1.ImageTask, error) {
 	env = append(env, proxySecretEnvVars(e)...)
 
 	return &v1.ImageTask{
-		ContainerTask: v1.ContainerTask{
-			BaseTask: v1.BaseTask{
-				Name:         "kaniko",
-				Volumes:      volumes,
-				VolumeMounts: volumeMounts,
-			},
+		BaseTask: v1.BaseTask{
+			Name:         "kaniko",
+			Volumes:      volumes,
+			VolumeMounts: volumeMounts,
+		},
+		PublishTask: v1.PublishTask{
+			Image: image,
+		},
+		Container: v1.ContainerTask{
 			Image: fmt.Sprintf("gcr.io/kaniko-project/executor:v%s", defaults.KanikoVersion),
 			Args:  args,
 			Env:   env,
 		},
-		BuiltImage: image,
 	}, nil
+}
+
+func (t *builderTrait) addVolumeMounts(builderTask *v1.BuilderTask, imageTask *v1.ImageTask) {
+	mount := corev1.VolumeMount{Name: "camel-k-builder", MountPath: builderDir}
+	builderTask.VolumeMounts = append(builderTask.VolumeMounts, mount)
+	imageTask.VolumeMounts = append(imageTask.VolumeMounts, mount)
+
+	// Use an emptyDir volume to coordinate the Maven build and the image build
+	builderTask.Volumes = append(builderTask.Volumes, corev1.Volume{
+		Name: "camel-k-builder",
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{},
+		},
+	})
 }
 
 type registrySecret struct {

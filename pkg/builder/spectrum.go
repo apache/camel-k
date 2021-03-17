@@ -15,10 +15,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package spectrum
+package builder
 
 import (
-	"fmt"
+	"context"
 	"io/ioutil"
 	"os"
 	"path"
@@ -26,50 +26,48 @@ import (
 	"strings"
 
 	spectrum "github.com/container-tools/spectrum/pkg/builder"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/platform"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
-func publisher(ctx *builder.Context) error {
-	libraryPath := path.Join(ctx.Path, "context", "dependencies")
+type spectrumTask struct {
+	c     client.Client
+	build *v1.Build
+	task  *v1.SpectrumTask
+}
+
+var _ Task = &spectrumTask{}
+
+func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
+	status := v1.BuildStatus{}
+
+	baseImage := t.build.Status.BaseImage
+	if baseImage == "" {
+		baseImage = t.task.BaseImage
+		status.BaseImage = baseImage
+	}
+
+	libraryPath := path.Join(t.task.ContextDir /*, "context"*/, "dependencies")
 	_, err := os.Stat(libraryPath)
 	if err != nil && os.IsNotExist(err) {
 		// this can only indicate that there are no more libraries to add to the base image,
 		// because transitive resolution is the same even if spec differs
-		log.Infof("No new image to build, reusing existing image %s", ctx.BaseImage)
-		ctx.Image = ctx.BaseImage
-		return nil
+		log.Infof("No new image to build, reusing existing image %s", baseImage)
+		status.Image = baseImage
+		return status
 	} else if err != nil {
-		return err
+		return status.Failed(err)
 	}
 
-	pl, err := platform.GetCurrent(ctx.C, ctx, ctx.Namespace)
-	if err != nil {
-		return err
-	}
+	pullInsecure := t.task.Registry.Insecure // incremental build case
 
-	target := "camel-k-" + ctx.Build.Name + ":" + ctx.Build.Tag
-	repo := pl.Status.Build.Registry.Organization
-	if repo != "" {
-		target = fmt.Sprintf("%s/%s", repo, target)
-	} else {
-		target = fmt.Sprintf("%s/%s", ctx.Namespace, target)
-	}
-	registry := pl.Status.Build.Registry.Address
-	if registry != "" {
-		target = fmt.Sprintf("%s/%s", registry, target)
-	}
+	log.Debugf("Registry address: %s", t.task.Registry.Address)
+	log.Debugf("Base image: %s", baseImage)
 
-	pullInsecure := pl.Status.Build.Registry.Insecure // incremental build case
-
-	log.Debugf("Registry address: %s", pl.Status.Build.Registry.Address)
-	log.Debugf("Base image: %s", ctx.BaseImage)
-
-	if !strings.HasPrefix(ctx.BaseImage, pl.Status.Build.Registry.Address) {
+	if !strings.HasPrefix(baseImage, t.task.Registry.Address) {
 		if pullInsecure {
 			log.Info("Assuming secure pull because the registry for the base image and the main registry are different")
 			pullInsecure = false
@@ -77,21 +75,21 @@ func publisher(ctx *builder.Context) error {
 	}
 
 	registryConfigDir := ""
-	if pl.Spec.Build.Registry.Secret != "" {
-		registryConfigDir, err = mountSecret(ctx, pl.Spec.Build.Registry.Secret)
+	if t.task.Registry.Secret != "" {
+		registryConfigDir, err = mountSecret(ctx, t.c, t.build.Namespace, t.task.Registry.Secret)
 		if err != nil {
-			return err
+			return status.Failed(err)
 		}
 		defer os.RemoveAll(registryConfigDir)
 	}
 
 	options := spectrum.Options{
 		PullInsecure:  pullInsecure,
-		PushInsecure:  pl.Status.Build.Registry.Insecure,
+		PushInsecure:  t.task.Registry.Insecure,
 		PullConfigDir: registryConfigDir,
 		PushConfigDir: registryConfigDir,
-		Base:          ctx.BaseImage,
-		Target:        target,
+		Base:          baseImage,
+		Target:        t.task.Image,
 		Stdout:        os.Stdout,
 		Stderr:        os.Stderr,
 		Recursive:     true,
@@ -99,21 +97,22 @@ func publisher(ctx *builder.Context) error {
 
 	digest, err := spectrum.Build(options, libraryPath+":/deployments/dependencies")
 	if err != nil {
-		return err
+		return status.Failed(err)
 	}
 
-	ctx.Image = target
-	ctx.Digest = digest
-	return nil
+	status.Image = t.task.Image
+	status.Digest = digest
+
+	return status
 }
 
-func mountSecret(ctx *builder.Context, name string) (string, error) {
+func mountSecret(ctx context.Context, c client.Client, namespace, name string) (string, error) {
 	dir, err := ioutil.TempDir("", "spectrum-secret-")
 	if err != nil {
 		return "", err
 	}
 
-	secret, err := ctx.CoreV1().Secrets(ctx.Namespace).Get(ctx.C, name, metav1.GetOptions{})
+	secret, err := c.CoreV1().Secrets(namespace).Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
 		os.RemoveAll(dir)
 		return "", err

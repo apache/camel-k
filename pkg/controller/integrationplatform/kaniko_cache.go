@@ -28,7 +28,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/builder/kaniko"
+	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
@@ -58,13 +58,13 @@ func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platf
 					Name:  "warm-kaniko-cache",
 					Image: fmt.Sprintf("gcr.io/kaniko-project/warmer:v%s", defaults.KanikoVersion),
 					Args: []string{
-						"--cache-dir=" + kaniko.CacheDir,
+						"--cache-dir=" + builder.KanikoCacheDir,
 						"--image=" + platform.Status.Build.BaseImage,
 					},
 					VolumeMounts: []corev1.VolumeMount{
 						{
 							Name:      "kaniko-cache",
-							MountPath: kaniko.CacheDir,
+							MountPath: builder.KanikoCacheDir,
 						},
 					},
 				},
@@ -76,11 +76,11 @@ func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platf
 					Image:           "busybox",
 					ImagePullPolicy: corev1.PullIfNotPresent,
 					Command:         []string{"/bin/sh", "-c"},
-					Args:            []string{"mkdir -p " + kaniko.CacheDir + "&& chmod -R a+rwx " + kaniko.CacheDir},
+					Args:            []string{"mkdir -p " + builder.KanikoCacheDir + "&& chmod -R a+rwx " + builder.KanikoCacheDir},
 					VolumeMounts: []corev1.VolumeMount{
 						{
 							Name:      "kaniko-cache",
-							MountPath: kaniko.CacheDir,
+							MountPath: builder.KanikoCacheDir,
 						},
 					},
 				},

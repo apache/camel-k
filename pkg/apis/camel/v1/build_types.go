@@ -32,8 +32,10 @@ type BuildSpec struct {
 
 // Task --
 type Task struct {
-	Builder *BuilderTask `json:"builder,omitempty"`
-	Image   *ImageTask   `json:"image,omitempty"`
+	Builder  *BuilderTask  `json:"builder,omitempty"`
+	Image    *ImageTask    `json:"image,omitempty"`
+	Spectrum *SpectrumTask `json:"spectrum,omitempty"`
+	S2i      *S2iTask      `json:"s2i,omitempty"`
 }
 
 // BaseTask --
@@ -46,7 +48,6 @@ type BaseTask struct {
 
 // ContainerTask --
 type ContainerTask struct {
-	BaseTask        `json:",inline"`
 	Image           string                  `json:"image,omitempty"`
 	Command         []string                `json:"command,omitempty"`
 	Args            []string                `json:"args,omitempty"`
@@ -57,17 +58,15 @@ type ContainerTask struct {
 
 // ImageTask --
 type ImageTask struct {
-	ContainerTask `json:",inline"`
-	BuiltImage    string `json:"builtImage,omitempty"`
+	BaseTask    `json:",inline"`
+	PublishTask `json:",inline"`
+	Container   ContainerTask `json:",inline"`
 }
 
 // BuilderTask --
 type BuilderTask struct {
 	BaseTask     `json:",inline"`
 	BaseImage    string            `json:"baseImage,omitempty"`
-	Image        string            `json:"image,omitempty"`
-	Tag          string            `json:"tag,omitempty"`
-	Labels       map[string]string `json:"labels,omitempty"`
 	Runtime      RuntimeSpec       `json:"runtime,omitempty"`
 	Sources      []SourceSpec      `json:"sources,omitempty"`
 	Resources    []ResourceSpec    `json:"resources,omitempty"`
@@ -77,6 +76,27 @@ type BuilderTask struct {
 	BuildDir     string            `json:"buildDir,omitempty"`
 	Properties   map[string]string `json:"properties,omitempty"`
 	Timeout      metav1.Duration   `json:"timeout,omitempty"`
+}
+
+// PublishTask --
+type PublishTask struct {
+	ContextDir string `json:"contextDir,omitempty"`
+	BaseImage  string `json:"baseImage,omitempty"`
+	Image      string `json:"image,omitempty"`
+}
+
+// S2iTask --
+type S2iTask struct {
+	BaseTask    `json:",inline"`
+	PublishTask `json:",inline"`
+	Tag         string `json:"tag,omitempty"`
+}
+
+// SpectrumTask --
+type SpectrumTask struct {
+	BaseTask    `json:",inline"`
+	PublishTask `json:",inline"`
+	Registry    IntegrationPlatformRegistrySpec `json:"registry,omitempty"`
 }
 
 // BuildStatus defines the observed state of Build

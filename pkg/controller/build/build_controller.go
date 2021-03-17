@@ -134,7 +134,7 @@ type reconcileBuild struct {
 	// like in the builds scheduling critical section
 	reader   ctrl.Reader
 	scheme   *runtime.Scheme
-	builder  builder.Builder
+	builder  *builder.Builder
 	routines sync.Map
 	recorder record.EventRecorder
 }

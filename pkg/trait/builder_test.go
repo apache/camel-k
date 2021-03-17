@@ -27,7 +27,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/builder/s2i"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -83,17 +82,9 @@ func TestS2IBuilderTrait(t *testing.T) {
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.NotNil(t, env.GetTrait("builder"))
 	assert.NotEmpty(t, env.BuildTasks)
-	assert.Len(t, env.BuildTasks, 1)
+	assert.Len(t, env.BuildTasks, 2)
 	assert.NotNil(t, env.BuildTasks[0].Builder)
-	assert.Condition(t, func() bool {
-		for _, s := range env.BuildTasks[0].Builder.Steps {
-			if s == s2i.Steps.Publisher.ID() {
-				return true
-			}
-		}
-
-		return false
-	})
+	assert.NotNil(t, env.BuildTasks[1].S2i)
 }
 
 func TestKanikoBuilderTrait(t *testing.T) {
