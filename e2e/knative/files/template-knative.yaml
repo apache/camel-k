@@ -1,0 +1,5 @@
+containers:
+  - name: integration
+    env:
+      - name: TEST_ENV_VARIABLE
+        value: "hello from the template"

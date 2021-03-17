@@ -39,6 +39,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/yaml"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -97,6 +98,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArray("property-file", nil, "Bind a property file to the integration. E.g. \"--property-file integration.properties\"")
 	cmd.Flags().StringArray("label", nil, "Add a label to the integration. E.g. \"--label my.company=hello\"")
 	cmd.Flags().StringArray("source", nil, "Add source file to your integration, this is added to the list of files listed as arguments of the command")
+	cmd.Flags().String("pod-template", "", "The path of the YAML file containing a PodSpec template to be used for the Integration pods")
 
 	cmd.Flags().Bool("save", false, "Save the run parameters into the default kamel configuration file (kamel-config.yaml)")
 
@@ -119,6 +121,7 @@ type runCmdOptions struct {
 	IntegrationName string   `mapstructure:"name" yaml:",omitempty"`
 	Profile         string   `mapstructure:"profile" yaml:",omitempty"`
 	OutputFormat    string   `mapstructure:"output" yaml:",omitempty"`
+	PodTemplate     string   `mapstructure:"pod-template" yaml:",omitempty"`
 	Connects        []string `mapstructure:"connects" yaml:",omitempty"`
 	Resources       []string `mapstructure:"resources" yaml:",omitempty"`
 	OpenAPIs        []string `mapstructure:"open-apis" yaml:",omitempty"`
@@ -498,6 +501,11 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 		}
 	}
 
+	err = resolvePodTemplate(context.Background(),o.PodTemplate, &integration.Spec)
+	if err != nil {
+		return nil, err
+	}
+
 	for _, resource := range o.Resources {
 		rawData, contentType, err := loadRawContent(resource)
 		if err != nil {
@@ -721,6 +729,37 @@ func escapePropertyFileItem(item string) string {
 	return item
 }
 
+func resolvePodTemplate(ctx context.Context, templateSrc string, spec *v1.IntegrationSpec) (err error) {
+	// check if template is set
+	if templateSrc == "" {
+		return nil
+	}
+	var template v1.PodSpec
+
+	//check if value is a path to the file
+	if _, err := os.Stat(templateSrc); err == nil {
+		rsc, err := ResolveSources(ctx, []string{templateSrc}, false)
+		if err == nil && len(rsc) > 0 {
+			templateSrc = rsc[0].Content
+		}
+	}
+	//template is inline
+	templateBytes := []byte(templateSrc)
+
+	jsonTemplate,err:= yaml.ToJSON(templateBytes)
+	if err!= nil {
+		jsonTemplate = templateBytes
+	}
+	err = json.Unmarshal(jsonTemplate, &template)
+
+	if err == nil {
+		spec.PodTemplate = &v1.PodSpecTemplate {
+			Spec: template,
+		}
+	}
+	return err
+}
+
 func configureTraits(options []string, catalog *trait.Catalog) (map[string]v1.TraitSpec, error) {
 	traits := make(map[string]map[string]interface{})
 
@@ -746,15 +785,7 @@ func configureTraits(options []string, catalog *trait.Catalog) (map[string]v1.Tr
 			// $ kamel run --trait <trait>.<property>=<value_1>,...,<trait>.<property>=<value_N>
 			traits[id][prop] = []string{v, value}
 		case nil:
-			//check if value is a path to the file
-			if _, err := os.Stat(value); err == nil {
-				rsc, errResolve := ResolveSources(context.TODO(), []string{value}, false)
-				if errResolve == nil && len(rsc) > 0 {
-					traits[id][prop] = rsc[0].Content
-				}
-			} else {
-				traits[id][prop] = value
-			}
+			traits[id][prop] = value
 		}
 	}
 

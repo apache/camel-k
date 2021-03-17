@@ -20,23 +20,23 @@ package trait
 import (
 	"fmt"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/ghodss/yaml"
-	v12 "k8s.io/api/core/v1"
+	"k8s.io/api/batch/v1beta1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/json"
-	"k8s.io/kubernetes/staging/src/k8s.io/apimachinery/pkg/util/strategicpatch"
-
-	//"github.com/ghodss/yaml"
-	//	cmd "github.com/apache/camel-k/pkg/cmd"
+	"k8s.io/apimachinery/pkg/util/strategicpatch"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	appsv1 "k8s.io/api/apps/v1"
 )
 
-// The Pod trait allows to modify the custom PodTemplateSpec resource for the Integration pods
+//    The pod trait allows the customization of the Integration pods.
+//    It applies the `PodSpecTemplate` struct contained in the Integration `.spec.podTemplate` field, into the Integration deployment Pods template, using strategic merge patch.
 //
-// +camel-k:trait=pdb
+//    This can be used to customize the container where Camel routes execute, by using the `integration` container name.
+//
+// +camel-k:trait=pod
 type podTrait struct {
 	BaseTrait `property:",squash"`
-	Template  string `property:"template"`
 }
 
 func newPodTrait() Trait {
@@ -46,16 +46,12 @@ func newPodTrait() Trait {
 }
 
 func (t *podTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled == nil || !*t.Enabled {
+	if t.Enabled != nil && !*t.Enabled {
 		return false, nil
 	}
 
-	if t.Template == "" {
-		return false, fmt.Errorf("template must be specified")
-	}
-
-	if _, err := t.parseTemplate(); err != nil {
-		return false, err
+	if e.Integration != nil && e.Integration.Spec.PodTemplate == nil {
+		return false, nil
 	}
 
 	return e.IntegrationInPhase(
@@ -65,47 +61,63 @@ func (t *podTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *podTrait) Apply(e *Environment) error {
-	var deployment *appsv1.Deployment
+	changes := e.Integration.Spec.PodTemplate.Spec
+	var patchedPodSpec *corev1.PodSpec
+	strategy, err := e.DetermineControllerStrategy()
+	if err != nil {
+		return fmt.Errorf("unable to determine the controller stratedy")
+	}
+	switch strategy {
+	case ControllerStrategyCronJob:
+		e.Resources.VisitCronJob(func(c *v1beta1.CronJob) {
+			if c.Name == e.Integration.Name {
+				if patchedPodSpec, err = t.applyChangesTo(&c.Spec.JobTemplate.Spec.Template.Spec, changes); err == nil {
+					c.Spec.JobTemplate.Spec.Template.Spec = *patchedPodSpec
+				}
+			}
+		})
 
-	e.Resources.VisitDeployment(func(d *appsv1.Deployment) {
-		if d.Name == e.Integration.Name {
-			deployment = d
-		}
-	})
+	case ControllerStrategyDeployment:
+		e.Resources.VisitDeployment(func(d *appsv1.Deployment) {
+			if d.Name == e.Integration.Name {
+				if patchedPodSpec, err = t.applyChangesTo(&d.Spec.Template.Spec, changes); err == nil {
+					d.Spec.Template.Spec = *patchedPodSpec
+				}
+			}
+		})
 
-	modifiedTemplate, err := t.mergeIntoTemplateSpec(deployment.Spec.Template, []byte(t.Template))
+	case ControllerStrategyKnativeService:
+		e.Resources.VisitKnativeService(func(s *serving.Service) {
+			if s.Name == e.Integration.Name {
+				if patchedPodSpec, err = t.applyChangesTo(&s.Spec.Template.Spec.PodSpec, changes); err == nil {
+					s.Spec.Template.Spec.PodSpec = * patchedPodSpec
+				}
+			}
+		})
+
+	}
 	if err != nil {
 		return err
 	}
-	deployment.Spec.Template = *modifiedTemplate
 	return nil
 }
 
-func (t *podTrait) parseTemplate() (*v12.PodTemplateSpec, error) {
-	var template *v12.PodTemplateSpec
-
-	if err := yaml.Unmarshal([]byte(t.Template), &template); err != nil {
-		return nil, err
-	}
-	return template, nil
-}
-
-func (t *podTrait) mergeIntoTemplateSpec(template v12.PodTemplateSpec, changesBytes []byte) (mergedTemplate *v12.PodTemplateSpec, err error) {
-	patch, err := yaml.YAMLToJSON(changesBytes)
+func (t *podTrait) applyChangesTo(podSpec *corev1.PodSpec, changes v1.PodSpec) (patchedPodSpec *corev1.PodSpec, err error) {
+	patch, err := json.Marshal(changes)
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	sourceJson, err := json.Marshal(template)
+	sourceJson, err := json.Marshal(podSpec)
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	patched, err := strategicpatch.StrategicMergePatch(sourceJson, patch, v12.PodTemplateSpec{})
+	patched, err := strategicpatch.StrategicMergePatch(sourceJson, patch, corev1.PodSpec{})
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	err = json.Unmarshal(patched, &mergedTemplate)
+	err = json.Unmarshal(patched, &patchedPodSpec)
 	return
 }

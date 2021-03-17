@@ -1,0 +1,19 @@
+containers:
+  - name: integration
+    env:
+      - name: TEST_VARIABLE
+        value: "hello from the template"
+    volumeMounts:
+      - name: var-logs
+        mountPath: /var/log
+  - name: sidecar-container
+    image: busybox
+    command: [ "/bin/sh" , "-c", "while true; do echo $(date -u) 'Content from the sidecar container' > /var/log/file.txt; sleep 1;done" ]
+
+    resources: { }
+    volumeMounts:
+      - name: var-logs
+        mountPath: /var/log
+volumes:
+  - name: var-logs
+    emptyDir: { }
