@@ -1,0 +1,52 @@
+[[installation-on-k3s]]
+= Installing Camel K on K3s
+
+This guide assumes you've already deployed a https://k3s.io[K3s] cluster and have installed and configured the kubectl command to manage the cluster.
+
+You can create a namespace to install Camel K on:
+
+```
+kubectl create namespace camel-k-test || true
+```
+
+Camel K needs a xref:installation/registry/registry.adoc[registry] to push the integrations it builds. For K3s you have to possibilities:
+
+* You can configure Camel K installation to use the Docker registry, Quay.io or a similar publicly available registry, or;
+* You can deploy your own private repository in the cluster or on your network.
+
+[[public-registry]]
+== Using a Public Registry
+
+Most of the those registries require authentication to push images. Therefore, we have to create a secret the namespace that will contain the credentials to access it. To do so, you can execute:
+
+*Note*: before running the command below, please make sure that you are logged in to the registry you are planning to use.
+
+```
+kubectl -n camel-k-test create secret generic my-registry-secret --from-file=$HOME/.docker/config.json
+```
+
+You can follow the steps described in the xref:installation/registry/registry.adoc[registry] documentation if you are deploying using a public registry, such as the https://hub.docker.com[DockerHub] or https://quay.io[Quay].
+
+
+[[private-registry]]
+== Using a Private Registry
+
+Although K3s does not come with a private registry, one can be installed by following the steps described in the https://rancher.com/docs/k3s/latest/en/installation/private-registry/[K3s' private registry] documentation.
+
+*Note*: installing your own registry gives you more flexibility to define how the registry should run, including the level of security required for it to run. More specifically, you can configure your registry to require or not credentials, to use HTTP instead of HTTPS, and so on. For the purpose of this guide and to present how Camel K can be installed on a seamless way, this guide demonstrates the installation using an insecure registry (unencrypted and without authentication).
+
+[[installation]]
+=== Installing Camel K on K3s with Private Registry
+
+With the secret created on the cluster, we can install Camel K and tell it to use those credentials when pushing the integrations.
+
+You can now download *kamel* CLI tool from https://github.com/apache/camel-k/releases[release page]
+and put it on your system path.
+
+After configure *kamel* CLI, you can execute the following command to install it on the namespace and configured to use your private registry:
+
+```
+kamel install -n camel-k-test --force --olm=false --registry address-of-the-registry --organization your-user-id-or-org --registry-insecure true
+```
+
+After doing that, you'll be ready to play with Camel K. Enjoy!
