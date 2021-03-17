@@ -16,6 +16,7 @@ before installing it. Customized instructions are needed for the following clust
 - xref:installation/gke.adoc[Google Kubernetes Engine (GKE)]
 - xref:installation/openshift.adoc[OpenShift]
 - xref:installation/iks.adoc[IBM Kubernetes Services (IKS)]
+- xref:installation/k3s.adoc[K3s]
 
 Other cluster types (such as OpenShift clusters) should *not need* prior configuration.
 

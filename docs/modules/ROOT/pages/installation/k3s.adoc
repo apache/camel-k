@@ -1,0 +1,4 @@
+[[installation-on-k3s]]
+= Installing Camel K on K3s
+
+Because K3s does not come with a builtin registry, you should follow the steps described on xref:installation/registry/k3s.adoc[Installing Camel K on K3s] to deploy it configure it to use a public or a private registry.
