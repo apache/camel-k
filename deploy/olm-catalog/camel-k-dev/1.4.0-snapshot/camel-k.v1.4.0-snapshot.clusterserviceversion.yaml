@@ -546,7 +546,7 @@ spec:
           verbs:
           - create
         - apiGroups:
-          - operators.coreos.com
+          - binding.operators.coreos.com
           resources:
           - servicebindings
           verbs:

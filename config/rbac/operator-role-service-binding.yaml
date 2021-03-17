@@ -23,7 +23,7 @@ metadata:
     app: "camel-k"
 rules:
 - apiGroups:
-    - operators.coreos.com
+    - binding.operators.coreos.com
   resources:
     - servicebindings
   verbs:
