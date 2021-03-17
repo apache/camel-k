@@ -21,11 +21,8 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"reflect"
 	"runtime"
 	"time"
-
-	"github.com/pkg/errors"
 
 	"k8s.io/apimachinery/pkg/types"
 
@@ -69,18 +66,7 @@ func Run(namespace string, buildName string, taskName string) {
 		c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: buildName}, build), "",
 	)
 
-	var task *v1.BuilderTask
-	for _, t := range build.Spec.Tasks {
-		if t.Builder != nil && t.Builder.Name == taskName {
-			task = t.Builder
-		}
-	}
-	if task == nil {
-		exitOnError(errors.Errorf("No task of type [%s] with name [%s] in build [%s/%s]",
-			reflect.TypeOf(v1.BuilderTask{}).Name(), taskName, namespace, buildName), "")
-	}
-
-	status := builder.New(c).Run(ctx, namespace, *task)
+	status := builder.New(c).Build(build).TaskByName(taskName).Do(ctx)
 	target := build.DeepCopy()
 	target.Status = status
 	// Copy the failure field from the build to persist recovery state

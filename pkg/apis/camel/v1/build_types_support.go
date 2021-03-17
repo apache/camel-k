@@ -56,7 +56,7 @@ func NewBuildList() BuildList {
 	}
 }
 
-func(buildPhase *BuildPhase) String() string {
+func (buildPhase *BuildPhase) String() string {
 	return string(*buildPhase)
 }
 
@@ -81,6 +81,12 @@ func (in *BuildStatus) GetCondition(condType BuildConditionType) *BuildCondition
 		}
 	}
 	return nil
+}
+
+func (in *BuildStatus) Failed(err error) BuildStatus {
+	in.Error = err.Error()
+	in.Phase = BuildPhaseFailed
+	return *in
 }
 
 // SetCondition --

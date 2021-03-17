@@ -15,7 +15,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package kaniko
+package builder
 
-// CacheDir is the cache directory for Kaniko builds (mounted into the Kaniko pod)
-const CacheDir = "/kaniko/cache"
+import (
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+)
+
+func artifactIDs(artifacts []v1.Artifact) []string {
+	result := make([]string, 0, len(artifacts))
+
+	for _, a := range artifacts {
+		result = append(result, a.ID)
+	}
+
+	return result
+}

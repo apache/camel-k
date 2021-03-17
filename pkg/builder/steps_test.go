@@ -15,29 +15,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package spectrum
+package builder
 
 import (
-	"github.com/apache/camel-k/pkg/builder"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func init() {
-	builder.RegisterSteps(Steps)
+type testSteps struct {
+	TestStep Step
 }
 
-type steps struct {
-	Publisher builder.Step
-}
-
-// Steps --
-var Steps = steps{
-	Publisher: builder.NewStep(
-		builder.ApplicationPublishPhase,
-		publisher,
-	),
-}
-
-// SpectrumSteps --
-var SpectrumSteps = []builder.Step{
-	Steps.Publisher,
+func TestRegisterDuplicatedSteps(t *testing.T) {
+	steps := testSteps{
+		TestStep: NewStep(
+			ApplicationPublishPhase,
+			func(context *builderContext) error {
+				return nil
+			},
+		),
+	}
+	registerSteps(steps)
+	assert.Panics(t, func() {
+		registerSteps(steps)
+	})
 }

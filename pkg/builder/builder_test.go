@@ -24,7 +24,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/test"
 )
@@ -35,34 +34,42 @@ type errorTestSteps struct {
 }
 
 func TestFailure(t *testing.T) {
-	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
-
 	c, err := test.NewFakeClient()
 	assert.Nil(t, err)
 
 	b := New(c)
 
 	steps := errorTestSteps{
-		Step1: NewStep(InitPhase, func(i *Context) error {
+		Step1: NewStep(InitPhase, func(i *builderContext) error {
 			return nil
 		}),
-		Step2: NewStep(ApplicationPublishPhase, func(i *Context) error {
+		Step2: NewStep(ApplicationPublishPhase, func(i *builderContext) error {
 			return errors.New("an error")
 		}),
 	}
 
-	RegisterSteps(steps)
+	registerSteps(steps)
 
-	r := v1.BuilderTask{
-		Steps: StepIDsFor(
-			steps.Step1,
-			steps.Step2,
-		),
-		Runtime: catalog.Runtime,
+	build := &v1.Build{
+		Spec: v1.BuildSpec{
+			Tasks: []v1.Task{
+				{
+					Builder: &v1.BuilderTask{
+						BaseTask: v1.BaseTask{
+							Name: "builder",
+						},
+						Steps: StepIDsFor(
+							steps.Step1,
+							steps.Step2,
+						),
+					},
+				},
+			},
+		},
 	}
 
 	ctx := cancellable.NewContext()
-	status := b.Run(ctx, "", r)
+	status := b.Build(build).TaskByName("builder").Do(ctx)
 	assert.Equal(t, v1.BuildPhaseFailed, status.Phase)
+	assert.Equal(t, "an error", status.Error)
 }

@@ -24,8 +24,7 @@ import (
 	"time"
 
 	_ "github.com/apache/camel-k/addons"
-	_ "github.com/apache/camel-k/pkg/builder/kaniko"
-	_ "github.com/apache/camel-k/pkg/builder/s2i"
+	_ "github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/cmd"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth/azure"

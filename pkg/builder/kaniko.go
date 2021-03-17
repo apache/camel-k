@@ -17,25 +17,5 @@ limitations under the License.
 
 package builder
 
-import (
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-)
-
-// StepIDsFor --
-func StepIDsFor(steps ...Step) []string {
-	IDs := make([]string, 0)
-	for _, step := range steps {
-		IDs = append(IDs, step.ID())
-	}
-	return IDs
-}
-
-func artifactIDs(artifacts []v1.Artifact) []string {
-	result := make([]string, 0, len(artifacts))
-
-	for _, a := range artifacts {
-		result = append(result, a.ID)
-	}
-
-	return result
-}
+// KanikoCacheDir is the cache directory for Kaniko builds (mounted into the Kaniko pod)
+const KanikoCacheDir = "/kaniko/cache"

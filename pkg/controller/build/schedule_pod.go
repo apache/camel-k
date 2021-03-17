@@ -187,12 +187,12 @@ func (action *schedulePodAction) addImageTaskToPod(task *v1.ImageTask, pod *core
 		Name:            task.Name,
 		Image:           task.Image,
 		ImagePullPolicy: corev1.PullIfNotPresent,
-		Command:         task.Command,
-		Args:            task.Args,
-		Env:             task.Env,
-		WorkingDir:      task.WorkingDir,
+		Command:         task.Container.Command,
+		Args:            task.Container.Args,
+		Env:             task.Container.Env,
+		WorkingDir:      task.Container.WorkingDir,
 		VolumeMounts:    task.VolumeMounts,
-		SecurityContext: task.SecurityContext,
+		SecurityContext: task.Container.SecurityContext,
 	})
 
 	action.addBaseTaskToPod(&task.BaseTask, pod)

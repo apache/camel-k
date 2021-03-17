@@ -15,12 +15,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package s2i
+package builder
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"path"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -34,22 +36,33 @@ import (
 	buildv1 "github.com/openshift/api/build/v1"
 	imagev1 "github.com/openshift/api/image/v1"
 
-	"github.com/apache/camel-k/pkg/builder"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
 	"github.com/apache/camel-k/pkg/util/zip"
 )
 
-func publisher(ctx *builder.Context) error {
+type s2iTask struct {
+	c     client.Client
+	build *v1.Build
+	task  *v1.S2iTask
+}
+
+var _ Task = &s2iTask{}
+
+func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
+	status := v1.BuildStatus{}
+
 	bc := buildv1.BuildConfig{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: buildv1.GroupVersion.String(),
 			Kind:       "BuildConfig",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "camel-k-" + ctx.Build.Name,
-			Namespace: ctx.Namespace,
-			Labels:    ctx.Build.Labels,
+			Name:      "camel-k-" + t.build.Name,
+			Namespace: t.build.Namespace,
+			Labels:    t.build.Labels,
 		},
 		Spec: buildv1.BuildConfigSpec{
 			CommonSpec: buildv1.CommonSpec{
@@ -62,21 +75,21 @@ func publisher(ctx *builder.Context) error {
 				Output: buildv1.BuildOutput{
 					To: &corev1.ObjectReference{
 						Kind: "ImageStreamTag",
-						Name: "camel-k-" + ctx.Build.Name + ":" + ctx.Build.Tag,
+						Name: "camel-k-" + t.build.Name + ":" + t.task.Tag,
 					},
 				},
 			},
 		},
 	}
 
-	err := ctx.Client.Delete(ctx.C, &bc)
+	err := t.c.Delete(ctx, &bc)
 	if err != nil && !apierrors.IsNotFound(err) {
-		return errors.Wrap(err, "cannot delete build config")
+		return status.Failed(errors.Wrap(err, "cannot delete build config"))
 	}
 
-	err = ctx.Client.Create(ctx.C, &bc)
+	err = t.c.Create(ctx, &bc)
 	if err != nil {
-		return errors.Wrap(err, "cannot create build config")
+		return status.Failed(errors.Wrap(err, "cannot create build config"))
 	}
 
 	is := imagev1.ImageStream{
@@ -85,9 +98,9 @@ func publisher(ctx *builder.Context) error {
 			Kind:       "ImageStream",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "camel-k-" + ctx.Build.Name,
-			Namespace: ctx.Namespace,
-			Labels:    ctx.Build.Labels,
+			Name:      "camel-k-" + t.build.Name,
+			Namespace: t.build.Namespace,
+			Labels:    t.build.Labels,
 		},
 		Spec: imagev1.ImageStreamSpec{
 			LookupPolicy: imagev1.ImageLookupPolicy{
@@ -96,62 +109,67 @@ func publisher(ctx *builder.Context) error {
 		},
 	}
 
-	err = ctx.Client.Delete(ctx.C, &is)
+	err = t.c.Delete(ctx, &is)
 	if err != nil && !apierrors.IsNotFound(err) {
-		return errors.Wrap(err, "cannot delete image stream")
+		return status.Failed(errors.Wrap(err, "cannot delete image stream"))
 	}
 
-	err = ctx.Client.Create(ctx.C, &is)
+	err = t.c.Create(ctx, &is)
 	if err != nil {
-		return errors.Wrap(err, "cannot create image stream")
+		return status.Failed(errors.Wrap(err, "cannot create image stream"))
 	}
 
-	archive := path.Join(ctx.Path, "archive.zip")
-	err = zip.Directory(path.Join(ctx.Path, "context"), archive)
+	tmpDir, err := ioutil.TempDir(os.TempDir(), t.build.Name+"-s2i-")
 	if err != nil {
-		return errors.Wrap(err, "cannot zip context directory")
+		return status.Failed(err)
+	}
+	archive := path.Join(tmpDir, "archive.zip")
+	defer os.RemoveAll(tmpDir)
+
+	err = zip.Directory(t.task.ContextDir, archive)
+	if err != nil {
+		return status.Failed(errors.Wrap(err, "cannot zip context directory"))
 	}
 
 	resource, err := ioutil.ReadFile(archive)
 	if err != nil {
-		return errors.Wrap(err, "cannot fully read zip file "+archive)
+		return status.Failed(errors.Wrap(err, "cannot fully read zip file "+archive))
 	}
 
-	defer os.RemoveAll(ctx.Path)
-
-	restClient, err := customclient.GetClientFor(ctx.Client, "build.openshift.io", "v1")
+	restClient, err := customclient.GetClientFor(t.c, "build.openshift.io", "v1")
 	if err != nil {
-		return err
+		return status.Failed(err)
 	}
 
-	result := restClient.Post().
-		Namespace(ctx.Namespace).
+	r := restClient.Post().
+		Namespace(t.build.Namespace).
 		Body(resource).
 		Resource("buildconfigs").
-		Name("camel-k-" + ctx.Build.Name).
+		Name("camel-k-" + t.build.Name).
 		SubResource("instantiatebinary").
-		Do(ctx.C)
+		Do(ctx)
 
-	if result.Error() != nil {
-		return errors.Wrap(result.Error(), "cannot instantiate binary")
+	if r.Error() != nil {
+		return status.Failed(errors.Wrap(r.Error(), "cannot instantiate binary"))
 	}
 
-	data, err := result.Raw()
+	data, err := r.Raw()
 	if err != nil {
-		return errors.Wrap(err, "no raw data retrieved")
+		return status.Failed(errors.Wrap(err, "no raw data retrieved"))
 	}
 
 	ocbuild := buildv1.Build{}
 	err = json.Unmarshal(data, &ocbuild)
 	if err != nil {
-		return errors.Wrap(err, "cannot unmarshal instantiated binary response")
+		return status.Failed(errors.Wrap(err, "cannot unmarshal instantiated binary response"))
 	}
 
-	err = kubernetes.WaitCondition(ctx.C, ctx.Client, &ocbuild, func(obj interface{}) (bool, error) {
+	// FIXME: Use context.WithTimeout
+	err = kubernetes.WaitCondition(ctx, t.c, &ocbuild, func(obj interface{}) (bool, error) {
 		if val, ok := obj.(*buildv1.Build); ok {
 			if val.Status.Phase == buildv1.BuildPhaseComplete {
 				if val.Status.Output.To != nil {
-					ctx.Digest = val.Status.Output.To.ImageDigest
+					status.Digest = val.Status.Output.To.ImageDigest
 				}
 				return true, nil
 			} else if val.Status.Phase == buildv1.BuildPhaseCancelled ||
@@ -161,22 +179,22 @@ func publisher(ctx *builder.Context) error {
 			}
 		}
 		return false, nil
-	}, ctx.Build.Timeout.Duration)
+	}, 5*time.Minute)
 
 	if err != nil {
-		return err
+		return status.Failed(err)
 	}
 
-	err = ctx.Client.Get(ctx.C, ctrl.ObjectKeyFromObject(&is), &is)
+	err = t.c.Get(ctx, ctrl.ObjectKeyFromObject(&is), &is)
 	if err != nil {
-		return err
+		return status.Failed(err)
 	}
 
 	if is.Status.DockerImageRepository == "" {
-		return errors.New("dockerImageRepository not available in ImageStream")
+		return status.Failed(errors.New("dockerImageRepository not available in ImageStream"))
 	}
 
-	ctx.Image = is.Status.DockerImageRepository + ":" + ctx.Build.Tag
+	status.Image = is.Status.DockerImageRepository + ":" + t.task.Tag
 
-	return nil
+	return status
 }

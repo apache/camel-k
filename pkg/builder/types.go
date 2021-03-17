@@ -19,12 +19,12 @@ package builder
 
 import (
 	"context"
-	"fmt"
 	"math"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
@@ -43,82 +43,52 @@ const (
 	NotifyPhase int32 = math.MaxInt32
 )
 
-// Builder --
-type Builder interface {
-	Run(ctx context.Context, ns string, build v1.BuilderTask) v1.BuildStatus
+func New(c client.Client) *Builder {
+	return &Builder{
+		log:    log.WithName("builder"),
+		client: c,
+	}
 }
 
-// Step --
+type Builder struct {
+	log    log.Logger
+	client client.Client
+}
+
+type Build struct {
+	builder Builder
+	build   *v1.Build
+}
+
+type Task interface {
+	Do(ctx context.Context) v1.BuildStatus
+}
+
 type Step interface {
 	ID() string
 	Phase() int32
-	Execute(*Context) error
+	execute(*builderContext) error
 }
 
-type stepWrapper struct {
-	StepID string
-	phase  int32
-	task   StepTask
-}
-
-func (s *stepWrapper) String() string {
-	return fmt.Sprintf("%s@%d", s.StepID, s.phase)
-}
-
-func (s *stepWrapper) ID() string {
-	return s.StepID
-}
-
-func (s *stepWrapper) Phase() int32 {
-	return s.phase
-}
-
-func (s *stepWrapper) Execute(ctx *Context) error {
-	return s.task(ctx)
-}
-
-// StepTask ---
-type StepTask func(*Context) error
-
-// NewStep --
-func NewStep(phase int32, task StepTask) Step {
-	s := stepWrapper{
-		phase: phase,
-		task:  task,
-	}
-
-	return &s
-}
-
-// Resource --
-type Resource struct {
+type resource struct {
 	Target  string
 	Content []byte
 }
 
-// Context --
-type Context struct {
+type builderContext struct {
 	client.Client
 	C                 context.Context
 	Catalog           *camel.RuntimeCatalog
 	Build             v1.BuilderTask
 	BaseImage         string
-	Image             string
-	Digest            string
 	Error             error
 	Namespace         string
 	Path              string
 	Artifacts         []v1.Artifact
 	SelectedArtifacts []v1.Artifact
-	Resources         []Resource
-
-	Maven struct {
+	Resources         []resource
+	Maven             struct {
 		Project      maven.Project
 		SettingsData []byte
 	}
-}
-
-// HasRequiredImage --
-func (c *Context) HasRequiredImage() bool {
-	return c.Build.Image != ""
 }
