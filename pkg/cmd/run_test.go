@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -512,4 +513,39 @@ func TestRunTextCompressedResource(t *testing.T) {
 	assert.Equal(t, "file.ext", textResourceSpec.Name)
 	assert.Equal(t, "text/plain", textResourceSpec.ContentType)
 	assert.True(t, textResourceSpec.Compression)
+}
+
+func TestResolvePodTemplate(t *testing.T) {
+	//runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
+	templateText := `
+containers:
+  - name: integration
+    env:
+      - name: TEST
+        value: TEST
+    volumeMounts:
+      - name: var-logs
+        mountPath: /var/log
+volumes:
+  - name: var-logs
+    emptyDir: { }
+`
+
+	integrationSpec := v1.IntegrationSpec{}
+	err := resolvePodTemplate(context.TODO(),templateText, &integrationSpec)
+	assert.Nil(t, err)
+	assert.NotNil(t, integrationSpec.PodTemplate)
+	assert.Equal(t, 1, len(integrationSpec.PodTemplate.Spec.Containers))
+	//assert.Equal(t, 1,len(integrationSpec.PodTemplate.Spec.Containers[0].VolumeMounts))
+}
+
+func TestResolveJsonPodTemplate(t *testing.T) {
+	integrationSpec := v1.IntegrationSpec{}
+	minifiedYamlTemplate := `{"containers": [{"name": "second"}, {"name": "integration", "env": [{"name": "CAMEL_K_DIGEST", "value": "new_value"}]}]}`
+
+	err := resolvePodTemplate(context.TODO(),minifiedYamlTemplate, &integrationSpec)
+
+	assert.Nil(t, err)
+	assert.NotNil(t, integrationSpec.PodTemplate)
+	assert.Equal(t, 2, len(integrationSpec.PodTemplate.Spec.Containers))
 }

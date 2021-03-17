@@ -56,6 +56,7 @@
 ** xref:traits:owner.adoc[Owner]
 ** xref:traits:pdb.adoc[Pdb]
 ** xref:traits:platform.adoc[Platform]
+** xref:traits:pod.adoc[Pod]
 ** xref:traits:prometheus.adoc[Prometheus]
 ** xref:traits:pull-secret.adoc[Pull Secret]
 ** xref:traits:quarkus.adoc[Quarkus]

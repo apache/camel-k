@@ -68,6 +68,24 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 		}
 	}
 	downgradeToCRDv1beta1 := func(object ctrl.Object) ctrl.Object {
+		//Deletes not allowed default values in v1beta1 integrations and kameletbidnings crd,
+		removeDefaultProtocolFromCRD := func(crd *apiextensionsv1beta1.CustomResourceDefinition, property string) {
+			defaultValue := apiextensionsv1beta1.JSONSchemaProps{
+				Default: nil,
+			}
+			if crd.Name == "integrations.camel.apache.org" {
+				crd.Spec.Validation.OpenAPIV3Schema.
+					Properties["spec"].Properties["template"].Properties["spec"].Properties[property].Items.Schema.
+					Properties["ports"].Items.Schema.Properties["protocol"] = defaultValue
+			}
+
+			if crd.Name == "kameletbindings.camel.apache.org" {
+				crd.Spec.Validation.OpenAPIV3Schema.Properties["spec"].Properties["integration"].Properties["template"].
+					Properties["spec"].Properties[property].Items.Schema.Properties["ports"].Items.Schema.
+					Properties["protocol"] = defaultValue
+			}
+		}
+
 		if !isApiExtensionsV1 {
 			v1Crd := object.(*apiextensionsv1.CustomResourceDefinition)
 			v1beta1Crd := &apiextensionsv1beta1.CustomResourceDefinition{}
@@ -82,6 +100,10 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 			if err != nil {
 				return nil
 			}
+
+			removeDefaultProtocolFromCRD(v1beta1Crd, "ephemeralContainers")
+			removeDefaultProtocolFromCRD(v1beta1Crd, "containers")
+			removeDefaultProtocolFromCRD(v1beta1Crd, "initContainers")
 
 			return v1beta1Crd
 		}

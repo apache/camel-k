@@ -301,7 +301,7 @@ traits:
     description: Can be used to enable or disable a trait. All traits share this common
       property.
   - name: discovery-cache
-    type: camel-k/pkg/trait.discoveryCacheType
+    type: ./pkg/trait.discoveryCacheType
     description: Discovery client cache to be used, either `disabled`, `disk` or `memory`
       (default `memory`)
 - name: ingress
@@ -712,6 +712,18 @@ traits:
     type: bool
     description: To automatically detect from the environment if a default platform
       can be created (it will be created on OpenShift only).
+- name: pod
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The pod trait allows the customization of the Integration pods. It
+    applies the `PodSpecTemplate` struct contained in the Integration `.spec.podTemplate`
+    field, into the Integration deployment Pods template, using strategic merge patch.
+    This can be used to customize the container where Camel routes execute, by using
+    the `integration` container name.
+  properties: []
 - name: prometheus
   platform: false
   profiles:
