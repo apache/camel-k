@@ -18,9 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"io/ioutil"
-	"os"
-	"path"
 	"sort"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -64,16 +61,6 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 func (t *builderTrait) Apply(e *Environment) error {
 	builderTask := t.builderTask(e)
 
-	switch e.Platform.Status.Build.PublishStrategy {
-	case v1.IntegrationPlatformBuildPublishStrategyBuildah, v1.IntegrationPlatformBuildPublishStrategyKaniko:
-		builderTask.BuildDir = path.Join(builderDir, e.IntegrationKit.Name)
-	default:
-		tmpDir, err := ioutil.TempDir(os.TempDir(), e.IntegrationKit.Name+"-")
-		if err != nil {
-			return err
-		}
-		builderTask.BuildDir = tmpDir
-	}
 	e.BuildTasks = append(e.BuildTasks, v1.Task{Builder: builderTask})
 
 	switch e.Platform.Status.Build.PublishStrategy {
@@ -83,10 +70,9 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Name: "spectrum",
 			},
 			PublishTask: v1.PublishTask{
-				ContextDir: path.Join(builderTask.BuildDir, "context"),
-				BaseImage:  e.Platform.Status.Build.BaseImage,
-				Image:      getImageName(e),
-				Registry:   e.Platform.Status.Build.Registry,
+				BaseImage: e.Platform.Status.Build.BaseImage,
+				Image:     getImageName(e),
+				Registry:  e.Platform.Status.Build.Registry,
 			},
 		}})
 
@@ -95,8 +81,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			BaseTask: v1.BaseTask{
 				Name: "s2i",
 			},
-			ContextDir: path.Join(builderTask.BuildDir, "context"),
-			Tag:        e.IntegrationKit.ResourceVersion,
+			Tag: e.IntegrationKit.ResourceVersion,
 		}})
 
 	case v1.IntegrationPlatformBuildPublishStrategyBuildah:

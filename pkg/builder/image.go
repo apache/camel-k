@@ -31,6 +31,8 @@ import (
 	"github.com/apache/camel-k/pkg/util/controller"
 )
 
+const ContextDir = "context"
+
 type artifactsSelector func(ctx *builderContext) error
 
 func standardImageContext(ctx *builderContext) error {
@@ -84,7 +86,7 @@ func imageContext(ctx *builderContext, selector artifactsSelector) error {
 		return err
 	}
 
-	contextDir := path.Join(ctx.Path, "context")
+	contextDir := path.Join(ctx.Path, ContextDir)
 
 	err = os.MkdirAll(contextDir, 0777)
 	if err != nil {
