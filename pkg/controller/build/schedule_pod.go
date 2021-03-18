@@ -464,10 +464,13 @@ func (action *schedulePodAction) addKanikoTaskToPod(ctx context.Context, build *
 	}
 
 	container := corev1.Container{
-		Image:        fmt.Sprintf("gcr.io/kaniko-project/executor:v%s", defaults.KanikoVersion),
-		Args:         args,
-		Env:          env,
-		VolumeMounts: volumeMounts,
+		Name:            task.Name,
+		Image:           fmt.Sprintf("gcr.io/kaniko-project/executor:v%s", defaults.KanikoVersion),
+		ImagePullPolicy: corev1.PullIfNotPresent,
+		Args:            args,
+		Env:             env,
+		WorkingDir:      path.Join(builderDir, build.Name, builder.ContextDir),
+		VolumeMounts:    volumeMounts,
 	}
 
 	// We may want to handle possible conflicts
