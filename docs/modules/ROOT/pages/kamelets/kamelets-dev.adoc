@@ -47,6 +47,7 @@ kamel init twitter-search-source.kamelet.yaml
 
 This produces a YAML file like the following one:
 
+.twitter-search-source.kamelet.yaml
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
@@ -89,7 +90,7 @@ We need to change the file to do what we want to achieve, that is, creating a ro
 
 The route provided in the initial scaffold (timer-to-log) is not what we need, so we change it to the following:
 
-
+.twitter-search-source.kamelet.yaml
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
@@ -122,6 +123,7 @@ because the output of a Kamelet needs always to be something that can be transfe
 The Kamelet is almost complete, we just need to document the parameters in a JSON schema format.
 We specify it in the `spec` -> `definition` part:
 
+.twitter-search-source.kamelet.yaml
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
@@ -187,6 +189,7 @@ spec:
 This is all you need to create a Kamelet so that other users can leverage it. There are a few things remaining, like setting information about
 the generated objects and other metadata (like the icon and the provider and you're done). The final Kamelet can look like the following:
 
+.twitter-search-source.kamelet.yaml
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
@@ -353,6 +356,7 @@ kamel init Earthquake.java
 This will scaffold a Java source file with a timer-to-log integration, that we'll edit according to our need.
 A first version of the integration might look like the following:
 
+.Earthquake.java
 [source,java]
 ----
 // camel-k: language=java
@@ -462,6 +466,7 @@ TIP: If an end-to-end "exactly once" semantics is needed, you could later add a 
 
 Let's try sorting out these issues in the route (we publish here the final version):
 
+.Earthquake.java
 [source,java]
 ----
 // camel-k: language=java
@@ -530,6 +535,7 @@ For the example above, there are 2 things that a user may want to configure:
 
 Those two will become Kamelet parameters as you might expect, but for the time being, let's refactor the integration to externalize them as standard Camel K properties:
 
+.Earthquake.java
 [source,java]
 ----
 // camel-k: language=java property=period=20000 property=lookAhead=120 <1>
@@ -574,7 +580,7 @@ with all the advantages that derive from a point of view of performance and reso
 
 If we managed to reduce our integration to contain only a Camel route, converting it to YAML is straightforward:
 
-
+.earthquake-source.kamelet.yaml
 [source,yaml]
 ----
 # camel-k: language=yaml property=period=20000 property=lookAhead=120 dependency=camel-quarkus:caffeine dependency=camel-quarkus:http
@@ -649,6 +655,7 @@ kamel local run earthquake.yaml
 We're about to write down an "Earthquake Source Kamelet" from the route we've built.
 As starting point, we may just wrap the previous YAML route into the Kamelet envelope. The result looks like:
 
+.earthquake-source.kamelet.yaml
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
@@ -720,6 +727,7 @@ a placeholder that will be replaced with something else when the Kamelet is actu
 The Kamelet above is incomplete, we need to define the two parameters we've identified in the template and also give a description
 to the Kamelet itself. The way to express all this information is via a https://json-schema.org/[JSON Schema] specification in the Kamelet YAML.
 
+.earthquake-source.kamelet.yaml
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
@@ -759,6 +767,7 @@ We should complete the Kamelet with all mandatory (also optional) options that a
 
 The final result should look like:
 
+.earthquake-source.kamelet.yaml
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
@@ -861,13 +870,14 @@ To create the Kamelet, you can execute:
 
 [source]
 ----
-kubectl apply earthquake-source.kamelet.yaml
+kubectl apply -f earthquake-source.kamelet.yaml
 ----
 
 If the Kamelet is valid, this will result in the Kamelet resource being created in the current namespace.
 
 To check if it works, you can create a simple binding:
 
+.earthquake-source-binding.yaml
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
@@ -896,7 +906,7 @@ Creating this resource will tell the operator to materialize the binding using a
 
 [source]
 ----
-kubectl apply earthquake-source-binding.yaml
+kubectl apply -f earthquake-source-binding.yaml
 ----
 
 We can check the logs of the integration using:
@@ -933,6 +943,7 @@ TIP: For this particular use case, I've created a simple integration before to g
 
 Let's start with a simple integration:
 
+.telegram.yaml
 [source,yaml]
 ----
 # camel-k: language=yaml property=chatId=158584902 <1>
