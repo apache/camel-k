@@ -41,7 +41,10 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-const builderVolume = "camel-k-builder"
+const (
+	builderDir    = "/builder"
+	builderVolume = "camel-k-builder"
+)
 
 type schedulePodAction struct {
 	baseAction
@@ -246,7 +249,15 @@ func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1.Buil
 }
 
 func (action *schedulePodAction) addBuilderTaskToPod(build *v1.Build, task *v1.BuilderTask, pod *corev1.Pod) {
-	pod.Spec.InitContainers = append(pod.Spec.InitContainers, corev1.Container{
+	// Add the EmptyDir volume used to share the build state across tasks
+	pod.Spec.Volumes = append(pod.Spec.Volumes, corev1.Volume{
+		Name: builderVolume,
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{},
+		},
+	})
+
+	container := corev1.Container{
 		Name:            task.Name,
 		Image:           action.operatorImage,
 		ImagePullPolicy: corev1.PullIfNotPresent,
@@ -260,20 +271,10 @@ func (action *schedulePodAction) addBuilderTaskToPod(build *v1.Build, task *v1.B
 			"--task-name",
 			task.Name,
 		},
-		VolumeMounts: []corev1.VolumeMount{
-			{
-				Name:      builderVolume,
-				MountPath: builderDir,
-			},
-		},
-	})
+		WorkingDir: path.Join(builderDir, build.Name),
+	}
 
-	pod.Spec.Volumes = append(pod.Spec.Volumes, corev1.Volume{
-		Name: builderVolume,
-		VolumeSource: corev1.VolumeSource{
-			EmptyDir: &corev1.EmptyDirVolumeSource{},
-		},
-	})
+	action.addContainerToPod(build, container, pod)
 }
 
 func (action *schedulePodAction) addBuildahTaskToPod(ctx context.Context, build *v1.Build, task *v1.BuildahTask, pod *corev1.Pod) error {
@@ -357,13 +358,13 @@ func (action *schedulePodAction) addBuildahTaskToPod(ctx context.Context, build 
 		Command:         []string{"/bin/sh", "-c"},
 		Args:            []string{strings.Join(args, " && ")},
 		Env:             env,
-		WorkingDir:      path.Join(builderDir, e.IntegrationKit.Name, "context"),
+		WorkingDir:      path.Join(builderDir, build.Name, builder.ContextDir),
 		VolumeMounts:    volumeMounts,
 	}
 
 	pod.Spec.Volumes = append(pod.Spec.Volumes, volumes...)
 
-	action.addContainerToPod(container, pod)
+	action.addContainerToPod(build, container, pod)
 
 	return nil
 }
@@ -376,7 +377,7 @@ func (action *schedulePodAction) addKanikoTaskToPod(ctx context.Context, build *
 
 	args := []string{
 		"--dockerfile=Dockerfile",
-		"--context=" + path.Join(builderDir, e.IntegrationKit.Name, "context"),
+		"--context=" + path.Join(builderDir, build.Name, builder.ContextDir),
 		"--destination=" + task.Image,
 		"--cache=" + strconv.FormatBool(cache),
 		"--cache-dir=" + builder.KanikoCacheDir,
@@ -473,16 +474,16 @@ func (action *schedulePodAction) addKanikoTaskToPod(ctx context.Context, build *
 	pod.Spec.Affinity = affinity
 	pod.Spec.Volumes = append(pod.Spec.Volumes, volumes...)
 
-	action.addContainerToPod(container, pod)
+	action.addContainerToPod(build, container, pod)
 
 	return nil
 }
 
-func (action *schedulePodAction) addContainerToPod(container corev1.Container, pod *corev1.Pod) {
+func (action *schedulePodAction) addContainerToPod(build *v1.Build, container corev1.Container, pod *corev1.Pod) {
 	if action.hasBuilderVolume(pod) {
 		container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
 			Name:      builderVolume,
-			MountPath: builderDir,
+			MountPath: path.Join(builderDir, build.Name),
 		})
 	}
 

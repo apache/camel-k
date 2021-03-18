@@ -19,6 +19,9 @@ package build
 
 import (
 	"context"
+	"io/ioutil"
+	"os"
+	"path"
 	"sync"
 	"time"
 
@@ -114,28 +117,55 @@ func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Bui
 		return
 	}
 
-	// FIXME: Clean-up build directory
+	buildDir := ""
+	defer os.RemoveAll(buildDir)
+
 	for i, task := range build.Spec.Tasks {
-		status := action.builder.Build(build).Task(task).Do(ctx)
+		// Coordinate the build and context directories across the sequence of tasks
+		if t := task.Builder; t != nil {
+			if t.BuildDir == "" {
+				tmpDir, err := ioutil.TempDir(os.TempDir(), build.Name+"-")
+				if err != nil {
+					status.Failed(err)
+					break
+				}
+				t.BuildDir = tmpDir
+			}
+			buildDir = t.BuildDir
+		} else if t := task.Spectrum; t != nil && t.ContextDir == "" {
+			t.ContextDir = path.Join(buildDir, builder.ContextDir)
+		} else if t := task.S2i; t != nil && t.ContextDir == "" {
+			t.ContextDir = path.Join(buildDir, builder.ContextDir)
+		}
+
+		// Execute the task
+		status = action.builder.Build(build).Task(task).Do(ctx)
 
 		lastTask := i == len(build.Spec.Tasks)-1
 		taskFailed := status.Phase == v1.BuildPhaseFailed || status.Phase == v1.BuildPhaseError
 		if lastTask && !taskFailed {
 			status.Phase = v1.BuildPhaseSucceeded
 		}
-		if lastTask || taskFailed {
-			duration := metav1.Now().Sub(build.Status.StartedAt.Time)
-			status.Duration = duration.String()
 
-			// Account for the Build metrics
-			observeBuildResult(build, status.Phase, duration)
+		if lastTask || taskFailed {
+			// Spare a redundant update
+			break
 		}
 
+		// Update the Build status
 		err := action.updateBuildStatus(ctx, build, status)
-		if err != nil || taskFailed {
+		if err != nil {
+			status.Failed(err)
 			break
 		}
 	}
+
+	duration := metav1.Now().Sub(build.Status.StartedAt.Time)
+	status.Duration = duration.String()
+	// Account for the Build metrics
+	observeBuildResult(build, status.Phase, duration)
+
+	_ = action.updateBuildStatus(ctx, build, status)
 }
 
 func (action *scheduleRoutineAction) updateBuildStatus(ctx context.Context, build *v1.Build, status v1.BuildStatus) error {
