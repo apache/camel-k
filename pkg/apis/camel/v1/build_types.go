@@ -33,34 +33,15 @@ type BuildSpec struct {
 // Task --
 type Task struct {
 	Builder  *BuilderTask  `json:"builder,omitempty"`
-	Image    *ImageTask    `json:"image,omitempty"`
+	Buildah  *BuildahTask  `json:"buildah,omitempty"`
+	Kaniko   *KanikoTask   `json:"kaniko,omitempty"`
 	Spectrum *SpectrumTask `json:"spectrum,omitempty"`
 	S2i      *S2iTask      `json:"s2i,omitempty"`
 }
 
 // BaseTask --
 type BaseTask struct {
-	Name         string               `json:"name,omitempty"`
-	Affinity     *corev1.Affinity     `json:"affinity,omitempty"`
-	Volumes      []corev1.Volume      `json:"volumes,omitempty"`
-	VolumeMounts []corev1.VolumeMount `json:"volumeMounts,omitempty"`
-}
-
-// ContainerTask --
-type ContainerTask struct {
-	Image           string                  `json:"image,omitempty"`
-	Command         []string                `json:"command,omitempty"`
-	Args            []string                `json:"args,omitempty"`
-	Env             []corev1.EnvVar         `json:"env,omitempty"`
-	WorkingDir      string                  `json:"workingDir,omitempty"`
-	SecurityContext *corev1.SecurityContext `json:"securityContext,omitempty"`
-}
-
-// ImageTask --
-type ImageTask struct {
-	BaseTask    `json:",inline"`
-	PublishTask `json:",inline"`
-	Container   ContainerTask `json:"container,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
 // BuilderTask --
@@ -80,23 +61,46 @@ type BuilderTask struct {
 
 // PublishTask --
 type PublishTask struct {
-	ContextDir string `json:"contextDir,omitempty"`
-	BaseImage  string `json:"baseImage,omitempty"`
-	Image      string `json:"image,omitempty"`
+	ContextDir string                          `json:"contextDir,omitempty"`
+	BaseImage  string                          `json:"baseImage,omitempty"`
+	Image      string                          `json:"image,omitempty"`
+	Registry   IntegrationPlatformRegistrySpec `json:"registry,omitempty"`
 }
 
-// S2iTask --
-type S2iTask struct {
-	BaseTask    `json:",inline"`
-	PublishTask `json:",inline"`
-	Tag         string `json:"tag,omitempty"`
+// BuildahTask --
+type BuildahTask struct {
+	BaseTask        `json:",inline"`
+	PublishTask     `json:",inline"`
+	Verbose         *bool  `json:"verbose,omitempty"`
+	HttpProxySecret string `json:"httpProxySecret,omitempty"`
+}
+
+// KanikoTask --
+type KanikoTask struct {
+	BaseTask        `json:",inline"`
+	PublishTask     `json:",inline"`
+	Verbose         *bool           `json:"verbose,omitempty"`
+	HttpProxySecret string          `json:"httpProxySecret,omitempty"`
+	Cache           KanikoTaskCache `json:"cache,omitempty"`
+}
+
+// KanikoTaskCache
+type KanikoTaskCache struct {
+	Enabled               *bool  `json:"enabled,omitempty"`
+	PersistentVolumeClaim string `json:"persistentVolumeClaim,omitempty"`
 }
 
 // SpectrumTask --
 type SpectrumTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
-	Registry    IntegrationPlatformRegistrySpec `json:"registry,omitempty"`
+}
+
+// S2iTask --
+type S2iTask struct {
+	BaseTask   `json:",inline"`
+	ContextDir string `json:"contextDir,omitempty"`
+	Tag        string `json:"tag,omitempty"`
 }
 
 // BuildStatus defines the observed state of Build
