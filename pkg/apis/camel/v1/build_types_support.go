@@ -22,16 +22,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// GetName --
-func (t *Task) GetName() string {
-	if t.Builder != nil {
-		return t.Builder.Name
-	} else if t.Image != nil {
-		return t.Image.Name
-	}
-	return ""
-}
-
 // NewBuild --
 func NewBuild(namespace string, name string) Build {
 	return Build{
