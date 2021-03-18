@@ -19,6 +19,7 @@ package builder
 
 import (
 	"context"
+	"os"
 	"path"
 	"sort"
 	"time"
@@ -46,7 +47,11 @@ func (t *builderTask) Do(ctx context.Context) v1.BuildStatus {
 		// This is useful when the task is executed in-container,
 		// so that its WorkingDir can be used to share state and
 		// coordinate with other tasks.
-		buildDir = "."
+		pwd, err := os.Getwd()
+		if err != nil {
+			return result.Failed(err)
+		}
+		buildDir = pwd
 	}
 
 	c := builderContext{
