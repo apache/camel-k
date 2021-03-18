@@ -19,8 +19,6 @@ package builder
 
 import (
 	"context"
-	"io/ioutil"
-	"os"
 	"path"
 	"sort"
 	"time"
@@ -44,14 +42,11 @@ func (t *builderTask) Do(ctx context.Context) v1.BuildStatus {
 
 	buildDir := t.task.BuildDir
 	if buildDir == "" {
-		tmpDir, err := ioutil.TempDir(os.TempDir(), "builder-")
-		if err != nil {
-			log.Error(err, "Unexpected error while creating a temporary dir")
-			result.Phase = v1.BuildPhaseFailed
-			result.Error = err.Error()
-		}
-		buildDir = tmpDir
-		defer os.RemoveAll(buildDir)
+		// Use the working directory.
+		// This is useful when the task is executed in-container,
+		// so that its WorkingDir can be used to share state and
+		// coordinate with other tasks.
+		buildDir = "."
 	}
 
 	c := builderContext{
