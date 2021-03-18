@@ -60,7 +60,7 @@ type ContainerTask struct {
 type ImageTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
-	Container   ContainerTask `json:",inline"`
+	Container   ContainerTask `json:"container,omitempty"`
 }
 
 // BuilderTask --
