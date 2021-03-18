@@ -39,6 +39,16 @@ func (b *Build) Task(task v1.Task) Task {
 			build: b.build,
 			task:  task.Builder,
 		}
+	} else if task.Buildah != nil {
+		return &unsupportedTask{
+			build: b.build,
+			name:  task.Buildah.Name,
+		}
+	} else if task.Kaniko != nil {
+		return &unsupportedTask{
+			build: b.build,
+			name:  task.Kaniko.Name,
+		}
 	} else if task.Spectrum != nil {
 		return &spectrumTask{
 			c:     b.builder.client,
@@ -50,11 +60,6 @@ func (b *Build) Task(task v1.Task) Task {
 			c:     b.builder.client,
 			build: b.build,
 			task:  task.S2i,
-		}
-	} else if task.Image != nil {
-		return &unsupportedTask{
-			build: b.build,
-			name:  task.Image.Name,
 		}
 	}
 	return &emptyTask{
@@ -108,6 +113,16 @@ func (b *Build) TaskByName(name string) Task {
 				build: b.build,
 				task:  task.Builder,
 			}
+		} else if task.Buildah != nil && task.Buildah.Name == name {
+			return &unsupportedTask{
+				build: b.build,
+				name:  task.Buildah.Name,
+			}
+		} else if task.Kaniko != nil && task.Kaniko.Name == name {
+			return &unsupportedTask{
+				build: b.build,
+				name:  task.Kaniko.Name,
+			}
 		} else if task.Spectrum != nil && task.Spectrum.Name == name {
 			return &spectrumTask{
 				c:     b.builder.client,
@@ -119,11 +134,6 @@ func (b *Build) TaskByName(name string) Task {
 				c:     b.builder.client,
 				build: b.build,
 				task:  task.S2i,
-			}
-		} else if task.Image != nil && task.Image.Name == name {
-			return &unsupportedTask{
-				build: b.build,
-				name:  task.Image.Name,
 			}
 		}
 	}

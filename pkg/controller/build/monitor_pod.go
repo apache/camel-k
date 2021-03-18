@@ -74,7 +74,10 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		observeBuildResult(build, build.Status.Phase, duration)
 
 		for _, task := range build.Spec.Tasks {
-			if t := task.Image; t != nil {
+			if t := task.Buildah; t != nil {
+				build.Status.Image = t.Image
+				break
+			} else if t := task.Kaniko; t != nil {
 				build.Status.Image = t.Image
 				break
 			}
