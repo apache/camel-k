@@ -45,7 +45,7 @@ func TestTolerationTrait(t *testing.T) {
 				"-t", "toleration.enabled=true",
 				"-t", "toleration.taints=camel.apache.org/master:NoExecute:300",
 			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
@@ -67,7 +67,7 @@ func TestTolerationTrait(t *testing.T) {
 				"-t", "toleration.enabled=true",
 				"-t", "toleration.taints=camel.apache.org/master=test:NoExecute:300",
 			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
@@ -83,8 +83,11 @@ func TestTolerationTrait(t *testing.T) {
 		})
 
 		t.Run("Run Java with master node toleration", func(t *testing.T) {
+			if len(Nodes()()) == 1 {
+				t.Skip("Skip master node toleration test on single-node cluster")
+			}
+
 			name := "java3"
-			Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 			Expect(Kamel("run", "-n", ns, "files/Java.java",
 				"--name", name,
 				// Use the affinity trait to force the scheduling of the Integration pod onto a master node
@@ -110,9 +113,8 @@ func TestTolerationTrait(t *testing.T) {
 			}))
 
 			// Check the Integration pod is running on a master node
-			node := Node(pod.Spec.NodeName)()
-			Expect(node).NotTo(BeNil())
-			Expect(node).To(PointTo(MatchFields(IgnoreExtras, Fields{
+			Expect(Node(pod.Spec.NodeName)).NotTo(BeNil())
+			Expect(Node(pod.Spec.NodeName)).To(PointTo(MatchFields(IgnoreExtras, Fields{
 				"Spec": MatchFields(IgnoreExtras, Fields{
 					"Taints": ContainElement(v1.Taint{
 						Key:    "node-role.kubernetes.io/master",

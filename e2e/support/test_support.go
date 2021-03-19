@@ -382,6 +382,22 @@ func Lease(ns string, name string) func() *coordination.Lease {
 	}
 }
 
+func Nodes() func() []corev1.Node {
+	return func() []corev1.Node {
+		nodes := &corev1.NodeList{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "NodeList",
+				APIVersion: corev1.SchemeGroupVersion.String(),
+			},
+		}
+		err := TestClient().List(TestContext, nodes)
+		if err != nil {
+			panic(err)
+		}
+		return nodes.Items
+	}
+}
+
 func Node(name string) func() *corev1.Node {
 	return func() *corev1.Node {
 		node := &corev1.Node{
