@@ -96,7 +96,7 @@ func TestYAMLDependencies(t *testing.T) {
 			name:   "invalid",
 			source: YAMLInvalid,
 			dependencies: []string{
-				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
+				`mvn:org.apache.camel.k/camel-k-knative-consumer`,
 			},
 		},
 	}
