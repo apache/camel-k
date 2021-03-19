@@ -23,9 +23,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/camel"
-
 	"github.com/scylladb/go-set/strset"
 	"github.com/stretchr/testify/assert"
 
@@ -36,6 +33,9 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
 )
@@ -209,7 +209,7 @@ func TestApplyJvmTraitWithExternalKitType(t *testing.T) {
 
 	// classpath JAR location segments must be wildcarded for an external kit
 	for _, cp := range strings.Split(container.Args[1], ":") {
-		if strings.HasPrefix(cp, "/deployments") {
+		if strings.HasPrefix(cp, builder.DeploymentDir) {
 			assert.True(t, strings.HasSuffix(cp, "/*"))
 		}
 	}

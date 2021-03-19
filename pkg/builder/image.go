@@ -31,7 +31,11 @@ import (
 	"github.com/apache/camel-k/pkg/util/controller"
 )
 
-const ContextDir = "context"
+const (
+	ContextDir      = "context"
+	DeploymentDir   = "/deployments"
+	DependenciesDir = "dependencies"
+)
 
 type artifactsSelector func(ctx *builderContext) error
 
@@ -110,7 +114,7 @@ func imageContext(ctx *builderContext, selector artifactsSelector) error {
 	// #nosec G202
 	dockerfile := []byte(`
 		FROM ` + ctx.BaseImage + `
-		ADD . /deployments
+		ADD . ` + DeploymentDir + `
 		USER 1000
 	`)
 
