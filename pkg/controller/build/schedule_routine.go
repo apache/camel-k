@@ -19,6 +19,7 @@ package build
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -118,7 +119,6 @@ func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Bui
 	}
 
 	buildDir := ""
-	defer os.RemoveAll(buildDir)
 
 	for i, task := range build.Spec.Tasks {
 		// Coordinate the build and context directories across the sequence of tasks
@@ -130,11 +130,21 @@ func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Bui
 					break
 				}
 				t.BuildDir = tmpDir
+				// Deferring in the for loop is what we want here
+				defer os.RemoveAll(tmpDir)
 			}
 			buildDir = t.BuildDir
 		} else if t := task.Spectrum; t != nil && t.ContextDir == "" {
+			if buildDir == "" {
+				status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
+				break
+			}
 			t.ContextDir = path.Join(buildDir, builder.ContextDir)
 		} else if t := task.S2i; t != nil && t.ContextDir == "" {
+			if buildDir == "" {
+				status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
+				break
+			}
 			t.ContextDir = path.Join(buildDir, builder.ContextDir)
 		}
 
