@@ -62,6 +62,13 @@ const YAMLRouteTransformer = `
           uri: knative:endpoint/service
 `
 
+const YAMLInvalid = `
+- from:
+    uri: knative:endpoint/default
+    steps:
+      - "log:out"
+`
+
 func TestYAMLDependencies(t *testing.T) {
 	tests := []struct {
 		name                string
@@ -86,6 +93,13 @@ func TestYAMLDependencies(t *testing.T) {
 			source: YAMLRouteTransformer,
 			dependencies: []string{
 				`mvn:org.apache.camel.k:camel-k-knative-producer`,
+				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
+			},
+		},
+		{
+			name:   "invalid",
+			source: YAMLInvalid,
+			dependencies: []string{
 				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
 			},
 		},

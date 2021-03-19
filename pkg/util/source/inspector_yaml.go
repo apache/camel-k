@@ -91,34 +91,37 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 		} else if u, ok := t["from"]; ok {
 			return i.parseStep("from", u, meta)
 		} else if u, ok := t["steps"]; ok {
-			steps := u.([]interface{})
+			if steps, stepsFormatOk := u.([]interface{}); stepsFormatOk {
+				for _, raw := range steps {
+					if step, stepFormatOk := raw.(map[interface{}]interface{}); stepFormatOk {
 
-			for _, raw := range steps {
-				step := raw.(map[interface{}]interface{})
-
-				if len(step) != 1 {
-					return fmt.Errorf("unable to parse step: %v", step)
-				}
-
-				for k, v := range step {
-					switch kt := k.(type) {
-					case fmt.Stringer:
-						if err := i.parseStep(kt.String(), v, meta); err != nil {
-							return err
+						if len(step) != 1 {
+							return fmt.Errorf("unable to parse step: %v", step)
 						}
-					case string:
-						if err := i.parseStep(kt, v, meta); err != nil {
-							return err
+
+						for k, v := range step {
+							switch kt := k.(type) {
+							case fmt.Stringer:
+								if err := i.parseStep(kt.String(), v, meta); err != nil {
+									return err
+								}
+							case string:
+								if err := i.parseStep(kt, v, meta); err != nil {
+									return err
+								}
+							default:
+								return fmt.Errorf("unknown key type: %v, step: %v", k, step)
+							}
 						}
-					default:
-						return fmt.Errorf("unknown key type: %v, step: %v", k, step)
 					}
 				}
 			}
 		}
 
 		if u, ok := t["uri"]; ok {
-			maybeURI = u.(string)
+			if v, isString := u.(string); isString {
+				maybeURI = v
+			}
 		}
 
 		if _, ok := t["language"]; ok {
