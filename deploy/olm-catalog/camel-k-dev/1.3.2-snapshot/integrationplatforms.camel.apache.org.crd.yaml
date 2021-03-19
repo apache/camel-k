@@ -1,0 +1,396 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  labels:
+    app: "camel-k"
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
+  name: integrationplatforms.camel.apache.org
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.phase
+    description: The integration platform phase
+    name: Phase
+    type: string
+  group: camel.apache.org
+  names:
+    categories:
+    - kamel
+    - camel
+    kind: IntegrationPlatform
+    listKind: IntegrationPlatformList
+    plural: integrationplatforms
+    shortNames:
+    - ip
+    singular: integrationplatform
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: IntegrationPlatform is the Schema for the integrationplatforms
+        API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: IntegrationPlatformSpec defines the desired state of IntegrationPlatform
+          properties:
+            build:
+              description: IntegrationPlatformBuildSpec contains platform related
+                build information
+              properties:
+                baseImage:
+                  type: string
+                buildStrategy:
+                  description: IntegrationPlatformBuildStrategy enumerates all implemented
+                    build strategies
+                  type: string
+                httpProxySecret:
+                  type: string
+                kanikoBuildCache:
+                  type: boolean
+                maven:
+                  description: MavenSpec --
+                  properties:
+                    localRepository:
+                      type: string
+                    settings:
+                      description: ValueSource --
+                      properties:
+                        configMapKeyRef:
+                          description: Selects a key of a ConfigMap.
+                          properties:
+                            key:
+                              description: The key to select.
+                              type: string
+                            name:
+                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                TODO: Add other useful fields. apiVersion, kind, uid?'
+                              type: string
+                            optional:
+                              description: Specify whether the ConfigMap or its key
+                                must be defined
+                              type: boolean
+                          required:
+                          - key
+                          type: object
+                        secretKeyRef:
+                          description: Selects a key of a secret.
+                          properties:
+                            key:
+                              description: The key of the secret to select from.  Must
+                                be a valid secret key.
+                              type: string
+                            name:
+                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                TODO: Add other useful fields. apiVersion, kind, uid?'
+                              type: string
+                            optional:
+                              description: Specify whether the Secret or its key must
+                                be defined
+                              type: boolean
+                          required:
+                          - key
+                          type: object
+                      type: object
+                    timeout:
+                      type: string
+                  type: object
+                persistentVolumeClaim:
+                  type: string
+                properties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                publishStrategy:
+                  description: IntegrationPlatformBuildPublishStrategy enumerates
+                    all implemented publish strategies
+                  type: string
+                registry:
+                  description: IntegrationPlatformRegistrySpec --
+                  properties:
+                    address:
+                      type: string
+                    ca:
+                      type: string
+                    insecure:
+                      type: boolean
+                    organization:
+                      type: string
+                    secret:
+                      type: string
+                  type: object
+                runtimeProvider:
+                  description: RuntimeProvider --
+                  type: string
+                runtimeVersion:
+                  type: string
+                timeout:
+                  type: string
+              type: object
+            cluster:
+              description: IntegrationPlatformCluster is the kind of orchestration
+                cluster the platform is installed into
+              type: string
+            configuration:
+              items:
+                description: ConfigurationSpec --
+                properties:
+                  type:
+                    type: string
+                  value:
+                    type: string
+                required:
+                - type
+                - value
+                type: object
+              type: array
+            kamelet:
+              description: IntegrationPlatformKameletSpec --
+              properties:
+                repositories:
+                  items:
+                    description: IntegrationPlatformKameletRepositorySpec --
+                    properties:
+                      uri:
+                        type: string
+                    type: object
+                  type: array
+              type: object
+            profile:
+              description: TraitProfile represents lists of traits that are enabled
+                for the specific installation/integration
+              type: string
+            resources:
+              description: IntegrationPlatformResourcesSpec contains platform related
+                resources
+              type: object
+            traits:
+              additionalProperties:
+                description: A TraitSpec contains the configuration of a trait
+                properties:
+                  configuration:
+                    description: TraitConfiguration --
+                    type: object
+                required:
+                - configuration
+                type: object
+              type: object
+          type: object
+        status:
+          description: IntegrationPlatformStatus defines the observed state of IntegrationPlatform
+          properties:
+            build:
+              description: IntegrationPlatformBuildSpec contains platform related
+                build information
+              properties:
+                baseImage:
+                  type: string
+                buildStrategy:
+                  description: IntegrationPlatformBuildStrategy enumerates all implemented
+                    build strategies
+                  type: string
+                httpProxySecret:
+                  type: string
+                kanikoBuildCache:
+                  type: boolean
+                maven:
+                  description: MavenSpec --
+                  properties:
+                    localRepository:
+                      type: string
+                    settings:
+                      description: ValueSource --
+                      properties:
+                        configMapKeyRef:
+                          description: Selects a key of a ConfigMap.
+                          properties:
+                            key:
+                              description: The key to select.
+                              type: string
+                            name:
+                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                TODO: Add other useful fields. apiVersion, kind, uid?'
+                              type: string
+                            optional:
+                              description: Specify whether the ConfigMap or its key
+                                must be defined
+                              type: boolean
+                          required:
+                          - key
+                          type: object
+                        secretKeyRef:
+                          description: Selects a key of a secret.
+                          properties:
+                            key:
+                              description: The key of the secret to select from.  Must
+                                be a valid secret key.
+                              type: string
+                            name:
+                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                TODO: Add other useful fields. apiVersion, kind, uid?'
+                              type: string
+                            optional:
+                              description: Specify whether the Secret or its key must
+                                be defined
+                              type: boolean
+                          required:
+                          - key
+                          type: object
+                      type: object
+                    timeout:
+                      type: string
+                  type: object
+                persistentVolumeClaim:
+                  type: string
+                properties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                publishStrategy:
+                  description: IntegrationPlatformBuildPublishStrategy enumerates
+                    all implemented publish strategies
+                  type: string
+                registry:
+                  description: IntegrationPlatformRegistrySpec --
+                  properties:
+                    address:
+                      type: string
+                    ca:
+                      type: string
+                    insecure:
+                      type: boolean
+                    organization:
+                      type: string
+                    secret:
+                      type: string
+                  type: object
+                runtimeProvider:
+                  description: RuntimeProvider --
+                  type: string
+                runtimeVersion:
+                  type: string
+                timeout:
+                  type: string
+              type: object
+            cluster:
+              description: IntegrationPlatformCluster is the kind of orchestration
+                cluster the platform is installed into
+              type: string
+            conditions:
+              items:
+                description: IntegrationPlatformCondition describes the state of a
+                  resource at a certain point.
+                properties:
+                  lastTransitionTime:
+                    description: Last time the condition transitioned from one status
+                      to another.
+                    format: date-time
+                    type: string
+                  lastUpdateTime:
+                    description: The last time this condition was updated.
+                    format: date-time
+                    type: string
+                  message:
+                    description: A human readable message indicating details about
+                      the transition.
+                    type: string
+                  reason:
+                    description: The reason for the condition's last transition.
+                    type: string
+                  status:
+                    description: Status of the condition, one of True, False, Unknown.
+                    type: string
+                  type:
+                    description: Type of integration condition.
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
+            configuration:
+              items:
+                description: ConfigurationSpec --
+                properties:
+                  type:
+                    type: string
+                  value:
+                    type: string
+                required:
+                - type
+                - value
+                type: object
+              type: array
+            kamelet:
+              description: IntegrationPlatformKameletSpec --
+              properties:
+                repositories:
+                  items:
+                    description: IntegrationPlatformKameletRepositorySpec --
+                    properties:
+                      uri:
+                        type: string
+                    type: object
+                  type: array
+              type: object
+            phase:
+              description: IntegrationPlatformPhase --
+              type: string
+            profile:
+              description: TraitProfile represents lists of traits that are enabled
+                for the specific installation/integration
+              type: string
+            resources:
+              description: IntegrationPlatformResourcesSpec contains platform related
+                resources
+              type: object
+            traits:
+              additionalProperties:
+                description: A TraitSpec contains the configuration of a trait
+                properties:
+                  configuration:
+                    description: TraitConfiguration --
+                    type: object
+                required:
+                - configuration
+                type: object
+              type: object
+            version:
+              type: string
+          type: object
+      type: object
+  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
