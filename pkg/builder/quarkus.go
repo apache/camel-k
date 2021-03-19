@@ -215,7 +215,7 @@ func ProcessQuarkusTransitiveDependencies(mc maven.Context) ([]v1.Artifact, erro
 			artifacts = append(artifacts, v1.Artifact{
 				ID:       filepath.Base(fileRelPath),
 				Location: filePath,
-				Target:   path.Join("dependencies", fileRelPath),
+				Target:   path.Join(DependenciesDir, fileRelPath),
 				Checksum: "sha1:" + sha1,
 			})
 		}

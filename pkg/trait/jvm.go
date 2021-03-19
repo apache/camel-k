@@ -19,18 +19,24 @@ package trait
 
 import (
 	"fmt"
+	"path"
 	"sort"
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util"
 	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
+
 	infp "gopkg.in/inf.v0"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/util"
 )
 
 // The JVM trait is used to configure the JVM that runs the integration.
@@ -74,15 +80,9 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		name := e.Integration.Status.IntegrationKit.Name
 		ns := e.Integration.GetIntegrationKitNamespace(e.Platform)
 		k := v1.NewIntegrationKit(ns, name)
-		key := k8sclient.ObjectKey{
-			Namespace: ns,
-			Name:      name,
-		}
-
-		if err := t.Client.Get(t.Ctx, key, &k); err != nil {
+		if err := t.Client.Get(t.Ctx, ctrl.ObjectKeyFromObject(&k), &k); err != nil {
 			return errors.Wrapf(err, "unable to find integration kit %s/%s, %s", ns, name, err)
 		}
-
 		kit = &k
 	}
 
@@ -95,7 +95,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 
 	classpath := strset.New()
 
-	classpath.Add("/etc/camel/resources")
+	classpath.Add(resourcesMountPath)
 	classpath.Add("./resources")
 
 	for _, artifact := range kit.Status.Artifacts {
@@ -106,7 +106,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		// In case of an external created kit, we do not have any information about
 		// the classpath so we assume the all jars in /deployments/dependencies/ have
 		// to be taken into account
-		dependencies := "/deployments/dependencies"
+		dependencies := path.Join(builder.DeploymentDir, builder.DependenciesDir)
 		classpath.Add(
 			dependencies+"/*",
 			dependencies+"/app/*",
@@ -188,7 +188,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		container.Args = args
 	}
 
-	container.WorkingDir = "/deployments"
+	container.WorkingDir = builder.DeploymentDir
 
 	return nil
 }

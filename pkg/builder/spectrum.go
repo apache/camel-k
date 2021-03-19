@@ -50,7 +50,7 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 		status.BaseImage = baseImage
 	}
 
-	libraryPath := path.Join(t.task.ContextDir /*, "context"*/, "dependencies")
+	libraryPath := path.Join(t.task.ContextDir, DependenciesDir)
 	_, err := os.Stat(libraryPath)
 	if err != nil && os.IsNotExist(err) {
 		// this can only indicate that there are no more libraries to add to the base image,
@@ -95,7 +95,7 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 		Recursive:     true,
 	}
 
-	digest, err := spectrum.Build(options, libraryPath+":/deployments/dependencies")
+	digest, err := spectrum.Build(options, libraryPath+":"+path.Join(DeploymentDir, DependenciesDir))
 	if err != nil {
 		return status.Failed(err)
 	}
