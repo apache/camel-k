@@ -1666,7 +1666,6 @@
 - ordered delete [\#529](https://github.com/apache/camel-k/pull/529) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(kamel\): fix reset command [\#526](https://github.com/apache/camel-k/pull/526) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(release\): add automatic version update to release [\#524](https://github.com/apache/camel-k/pull/524) ([nicolaferraro](https://github.com/nicolaferraro))
-- test\(builder\): more assertions on deps [\#520](https://github.com/apache/camel-k/pull/520) ([oscerd](https://github.com/oscerd))
 - Adding Probes to Knative services [\#514](https://github.com/apache/camel-k/pull/514) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.3.0](https://github.com/apache/camel-k/tree/0.3.0) (2019-03-04)
@@ -1697,6 +1696,7 @@
 
 - fix: Allow file names as delete cmd argument [\#522](https://github.com/apache/camel-k/pull/522) ([christophd](https://github.com/christophd))
 - chore\(image\): include camel runtime adapters [\#521](https://github.com/apache/camel-k/pull/521) ([lburgazzoli](https://github.com/lburgazzoli))
+- test\(builder\): more assertions on deps [\#520](https://github.com/apache/camel-k/pull/520) ([oscerd](https://github.com/oscerd))
 - chore\(build\): remove jitpack configuration [\#519](https://github.com/apache/camel-k/pull/519) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(runtime\): Bump runtime to 0.3.0 [\#518](https://github.com/apache/camel-k/pull/518) ([oscerd](https://github.com/oscerd))
 - knative\(serving\): add support for additional annotations [\#517](https://github.com/apache/camel-k/pull/517) ([lburgazzoli](https://github.com/lburgazzoli))
