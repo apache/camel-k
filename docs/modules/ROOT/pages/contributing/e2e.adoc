@@ -1,0 +1,33 @@
+= End To End local integration test
+
+Camel K has a suite of integration test that will run on every Pull Request. You can contribute by adding an integration test to cover any new feature introduced (or increment the coverage with features still untested).
+
+The test script will take care to install the operators needed in a random namespace, execute all expected tests and clean themselves. Cleaning may not be performed if the execution of tests fails or the test process is interrupted. In that case you can look for any namespace similar to `test-29ed8147-c9fc-4c04-9c29-744eaf4750c6` and remove manually.
+
+In order to run the test locally you will have to be connected to a kubernetes cluster and execute:
+
+----
+make test
+----
+
+You probably want to test your changes on camel-k `operator` locally after some development. You will need to make the operator docker image available to your cluster registry before launching the tests. We have a script that will take care of that.
+
+First, you must connect and point to the `docker daemon`. If you're on a local environment such as `minikube`, it will be as simple as executing
+
+----
+eval $(minikube -p minikube docker-env)
+----
+
+For other cluster types you may check the specific documentation. As soon as you're connected to the `docker daemon` you can build images via:
+
+----
+make images
+----
+
+The script will take care to build the operator docker image and push to the underlying docker daemon registry. At this stage, the cluster will be able to pickup this latest image when it executes the tests.
+
+You can also execute the following script, if by any chance you have some change applied to the `camel-k-runtime`:
+
+----
+make images-dev
+----
