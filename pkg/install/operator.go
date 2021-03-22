@@ -31,7 +31,6 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -72,15 +71,93 @@ type OperatorMonitoringConfiguration struct {
 // OperatorOrCollect installs the operator resources or adds them to the collector if present
 func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection, force bool) error {
 	customizer := func(o ctrl.Object) ctrl.Object {
-		operatorDeployment := operatorDeployment(o)
-		if operatorDeployment == nil {
-			return o
+		if cfg.CustomImage != "" {
+			if d, ok := o.(*appsv1.Deployment); ok {
+				if d.Labels["camel.apache.org/component"] == "operator" {
+					d.Spec.Template.Spec.Containers[0].Image = cfg.CustomImage
+				}
+			}
 		}
-		maybeSetCustomImage(cfg, operatorDeployment)
-		maybeSetCustomImagePullPolicy(cfg, operatorDeployment)
-		setPorts(cfg, operatorDeployment)
-		maybeSetGlobal(cfg, o)
-		maybeSetTolerations(cfg, operatorDeployment)
+
+		if cfg.CustomImagePullPolicy != "" {
+			if d, ok := o.(*appsv1.Deployment); ok {
+				if d.Labels["camel.apache.org/component"] == "operator" {
+					d.Spec.Template.Spec.Containers[0].ImagePullPolicy = corev1.PullPolicy(cfg.CustomImagePullPolicy)
+				}
+			}
+		}
+
+		if cfg.Tolerations != nil {
+			if d, ok := o.(*appsv1.Deployment); ok {
+				if d.Labels["camel.apache.org/component"] == "operator" {
+					tolerations, err := kubernetes.GetTolerations(cfg.Tolerations)
+					if err != nil {
+						fmt.Println("Warning: could not parse the configured tolerations!")
+					}
+					d.Spec.Template.Spec.Tolerations = tolerations
+				}
+			}
+		}
+
+		if d, ok := o.(*appsv1.Deployment); ok {
+			if d.Labels["camel.apache.org/component"] == "operator" {
+				// Metrics endpoint port
+				d.Spec.Template.Spec.Containers[0].Args = append(d.Spec.Template.Spec.Containers[0].Args,
+					fmt.Sprintf("--monitoring-port=%d", cfg.Monitoring.Port))
+				d.Spec.Template.Spec.Containers[0].Ports[0].ContainerPort = cfg.Monitoring.Port
+				// Health endpoint port
+				d.Spec.Template.Spec.Containers[0].Args = append(d.Spec.Template.Spec.Containers[0].Args,
+					fmt.Sprintf("--health-port=%d", cfg.Health.Port))
+				d.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Port = intstr.FromInt(int(cfg.Health.Port))
+			}
+		}
+
+		if cfg.Global {
+			if d, ok := o.(*appsv1.Deployment); ok {
+				if d.Labels["camel.apache.org/component"] == "operator" {
+					// Make the operator watch all namespaces
+					envvar.SetVal(&d.Spec.Template.Spec.Containers[0].Env, "WATCH_NAMESPACE", "")
+				}
+			}
+
+			// Turn Role & RoleBinding into their equivalent cluster types
+			if r, ok := o.(*rbacv1.Role); ok {
+				if strings.HasPrefix(r.Name, "camel-k-operator") {
+					o = &rbacv1.ClusterRole{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: cfg.Namespace,
+							Name:      r.Name,
+							Labels: map[string]string{
+								"app": "camel-k",
+							},
+						},
+						Rules: r.Rules,
+					}
+				}
+			}
+
+			if rb, ok := o.(*rbacv1.RoleBinding); ok {
+				if strings.HasPrefix(rb.Name, "camel-k-operator") {
+					rb.Subjects[0].Namespace = cfg.Namespace
+
+					o = &rbacv1.ClusterRoleBinding{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: cfg.Namespace,
+							Name:      rb.Name,
+							Labels: map[string]string{
+								"app": "camel-k",
+							},
+						},
+						Subjects: rb.Subjects,
+						RoleRef: rbacv1.RoleRef{
+							APIGroup: rb.RoleRef.APIGroup,
+							Kind:     "ClusterRole",
+							Name:     rb.RoleRef.Name,
+						},
+					}
+				}
+			}
+		}
 		return o
 	}
 
@@ -170,102 +247,6 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		}
 	}
 
-	return nil
-}
-
-func operatorDeployment(o runtime.Object) *appsv1.Deployment {
-	if d, ok := o.(*appsv1.Deployment); ok {
-		if d.Labels["camel.apache.org/component"] == "operator" {
-			return d
-		}
-	}
-	return nil
-}
-
-func maybeSetCustomImage(cfg OperatorConfiguration, d *appsv1.Deployment) error {
-	if cfg.CustomImage != "" {
-		d.Spec.Template.Spec.Containers[0].Image = cfg.CustomImage
-	}
-	return nil
-}
-
-func maybeSetCustomImagePullPolicy(cfg OperatorConfiguration, d *appsv1.Deployment) error {
-	if cfg.CustomImagePullPolicy != "" {
-		d.Spec.Template.Spec.Containers[0].ImagePullPolicy = corev1.PullPolicy(cfg.CustomImagePullPolicy)
-	}
-	return nil
-}
-
-func maybeSetTolerations(cfg OperatorConfiguration, d *appsv1.Deployment) error {
-	if cfg.Tolerations != nil {
-		tolerations, err := kubernetes.GetTolerations(cfg.Tolerations)
-		if err != nil {
-			return err
-		}
-		d.Spec.Template.Spec.Tolerations = tolerations
-	}
-	return nil
-}
-
-func maybeSetGlobal(cfg OperatorConfiguration, o runtime.Object) error {
-	if cfg.Global {
-		if d, ok := o.(*appsv1.Deployment); ok {
-			if d.Labels["camel.apache.org/component"] == "operator" {
-				// Make the operator watch all namespaces
-				envvar.SetVal(&d.Spec.Template.Spec.Containers[0].Env, "WATCH_NAMESPACE", "")
-			}
-		}
-
-		// Turn Role & RoleBinding into their equivalent cluster types
-		if r, ok := o.(*rbacv1.Role); ok {
-			if strings.HasPrefix(r.Name, "camel-k-operator") {
-				o = &rbacv1.ClusterRole{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: cfg.Namespace,
-						Name:      r.Name,
-						Labels: map[string]string{
-							"app": "camel-k",
-						},
-					},
-					Rules: r.Rules,
-				}
-			}
-		}
-
-		if rb, ok := o.(*rbacv1.RoleBinding); ok {
-			if strings.HasPrefix(rb.Name, "camel-k-operator") {
-				rb.Subjects[0].Namespace = cfg.Namespace
-
-				o = &rbacv1.ClusterRoleBinding{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: cfg.Namespace,
-						Name:      rb.Name,
-						Labels: map[string]string{
-							"app": "camel-k",
-						},
-					},
-					Subjects: rb.Subjects,
-					RoleRef: rbacv1.RoleRef{
-						APIGroup: rb.RoleRef.APIGroup,
-						Kind:     "ClusterRole",
-						Name:     rb.RoleRef.Name,
-					},
-				}
-			}
-		}
-	}
-	return nil
-}
-
-func setPorts(cfg OperatorConfiguration, d *appsv1.Deployment) error {
-	// Metrics endpoint port
-	d.Spec.Template.Spec.Containers[0].Args = append(d.Spec.Template.Spec.Containers[0].Args,
-		fmt.Sprintf("--monitoring-port=%d", cfg.Monitoring.Port))
-	d.Spec.Template.Spec.Containers[0].Ports[0].ContainerPort = cfg.Monitoring.Port
-	// Health endpoint port
-	d.Spec.Template.Spec.Containers[0].Args = append(d.Spec.Template.Spec.Containers[0].Args,
-		fmt.Sprintf("--health-port=%d", cfg.Health.Port))
-	d.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Port = intstr.FromInt(int(cfg.Health.Port))
 	return nil
 }
 
