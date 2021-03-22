@@ -90,7 +90,6 @@
 - Add scaffold for Kamelet via kamel init [\#2004](https://github.com/apache/camel-k/pull/2004) ([rudeigerc](https://github.com/rudeigerc))
 - feat\(conf\): Mount source and resource ConfigMaps as subPaths instead of volumes [\#2002](https://github.com/apache/camel-k/pull/2002) ([astefanutti](https://github.com/astefanutti))
 - Document OLM based deployment from source [\#2001](https://github.com/apache/camel-k/pull/2001) ([amitsadaphule](https://github.com/amitsadaphule))
-- chore\(doc\): Use Asciidoc style code blocks instead of Markdown style Verified [\#1999](https://github.com/apache/camel-k/pull/1999) ([astefanutti](https://github.com/astefanutti))
 - Refactors the deploy directory to make config directory single source of CRD truth [\#1978](https://github.com/apache/camel-k/pull/1978) ([phantomjinx](https://github.com/phantomjinx))
 - feat: Add ServiceBinding trait \(\#1445\) [\#1952](https://github.com/apache/camel-k/pull/1952) ([johnpoth](https://github.com/johnpoth))
 - Use Quarkus fast-jar package format apache/camel-k-runtime\#360 [\#1931](https://github.com/apache/camel-k/pull/1931) ([jamesnetherton](https://github.com/jamesnetherton))
@@ -924,7 +923,6 @@
 - Make test timeouts configurable [\#1307](https://github.com/apache/camel-k/pull/1307) ([bouskaJ](https://github.com/bouskaJ))
 - Add super-fast builds for dev clusters [\#1306](https://github.com/apache/camel-k/pull/1306) ([nicolaferraro](https://github.com/nicolaferraro))
 - Unable to run the polyglot sample  [\#1303](https://github.com/apache/camel-k/pull/1303) ([lburgazzoli](https://github.com/lburgazzoli))
-- feat: Support Buildah builds on OpenShift with internal registry auto-configuration [\#1295](https://github.com/apache/camel-k/pull/1295) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.0-RC2](https://github.com/apache/camel-k/tree/1.0.0-RC2) (2020-02-24)
 
@@ -995,6 +993,7 @@
 
 **Merged pull requests:**
 
+- feat: Support Buildah builds on OpenShift with internal registry auto-configuration [\#1295](https://github.com/apache/camel-k/pull/1295) ([astefanutti](https://github.com/astefanutti))
 - Fix \#1236: upgrade to runtime 1.1.0 and remove camel-bean autodetection [\#1294](https://github.com/apache/camel-k/pull/1294) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(platform\): Default to pod build strategy for Kaniko [\#1292](https://github.com/apache/camel-k/pull/1292) ([astefanutti](https://github.com/astefanutti))
 - Related to \#1190: add more logs when patch fails [\#1291](https://github.com/apache/camel-k/pull/1291) ([nicolaferraro](https://github.com/nicolaferraro))
