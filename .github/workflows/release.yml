@@ -24,7 +24,7 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - name: Set up JDK 11
       uses: AdoptOpenJDK/install-jdk@v1

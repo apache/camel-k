@@ -25,7 +25,7 @@ on:
 
 jobs:
   generate_changelog:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     name: Generate changelog for master branch
     if: github.ref == 'refs/heads/master' && github.repository == 'apache/camel-k'
     steps:
