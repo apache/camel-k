@@ -53,10 +53,15 @@ jobs:
         sudo swapoff -a
         sudo rm -f /swapfile
         sudo apt clean
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf "/usr/local/share/boost"
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
         docker rmi $(docker image ls -aq)
 
         echo "Final status:"
         df -h
+        sudo mount --make-shared /
     - name: Set up JDK 11
       uses: AdoptOpenJDK/install-jdk@v1
       with:
@@ -169,6 +174,10 @@ jobs:
           sudo swapoff -a
           sudo rm -f /swapfile
           sudo apt clean
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
           docker rmi $(docker image ls -aq)
 
           echo "Final status:"
