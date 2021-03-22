@@ -178,6 +178,21 @@ jobs:
           verbs: ["create"]
         EOF
 
+        # Aggregate nodes permission to the default admin role
+        cat <<EOF | oc apply -f -
+        kind: ClusterRole
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k:node
+          labels:
+            app: "camel-k"
+            rbac.authorization.k8s.io/aggregate-to-admin: "true"
+        rules:
+        - apiGroups: [""]
+          resources: ["nodes"]
+          verbs: ["get","list"]
+        EOF
+
         # Login as normal user
         oc login -u developer
 
