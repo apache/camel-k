@@ -24,12 +24,10 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 )
 
-// ToJSON --
 func ToJSON(value runtime.Object) ([]byte, error) {
 	return json.Marshal(value)
 }
 
-// ToYAML --
 func ToYAML(value runtime.Object) ([]byte, error) {
 	data, err := ToJSON(value)
 	if err != nil {

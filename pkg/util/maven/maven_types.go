@@ -43,10 +43,10 @@ type RepositoryPolicy struct {
 
 // Mirror --
 type Mirror struct {
-	ID        string           `xml:"id"`
-	Name      string           `xml:"name,omitempty"`
-	URL       string           `xml:"url"`
-	MirrorOf  string           `xml:"mirrorOf"`
+	ID       string `xml:"id"`
+	Name     string `xml:"name,omitempty"`
+	URL      string `xml:"url"`
+	MirrorOf string `xml:"mirrorOf"`
 }
 
 // Build --
@@ -120,6 +120,7 @@ func NewContext(buildDir string, project Project) Context {
 type Context struct {
 	Path                string
 	Project             Project
+	ExtraMavenOpts      []string
 	SettingsContent     []byte
 	AdditionalArguments []string
 	AdditionalEntries   map[string]interface{}
@@ -244,5 +245,3 @@ type PropertyActivation struct {
 	Name  string `xml:"name"`
 	Value string `xml:"value"`
 }
-
-

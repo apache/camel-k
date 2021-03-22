@@ -62,7 +62,7 @@ func TestQuarkusTraitAddBuildStepsShouldSucceed(t *testing.T) {
 
 	quarkusTrait.addBuildSteps(&steps)
 
-	assert.Len(t, steps, 9)
+	assert.Len(t, steps, len(builder.DefaultSteps)+len(builder.QuarkusSteps))
 }
 
 func createNominalQuarkusTest() (*quarkusTrait, *Environment) {

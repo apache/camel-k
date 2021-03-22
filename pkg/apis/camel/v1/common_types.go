@@ -83,9 +83,10 @@ type PlatformInjectable interface {
 
 // MavenSpec --
 type MavenSpec struct {
-	LocalRepository string           `json:"localRepository,omitempty"`
-	Settings        ValueSource      `json:"settings,omitempty"`
-	Timeout         *metav1.Duration `json:"timeout,omitempty"`
+	LocalRepository string                    `json:"localRepository,omitempty"`
+	Settings        ValueSource               `json:"settings,omitempty"`
+	CaCert          *corev1.SecretKeySelector `json:"caCert,omitempty"`
+	Timeout         *metav1.Duration          `json:"timeout,omitempty"`
 }
 
 // ValueSource --
