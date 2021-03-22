@@ -18,12 +18,16 @@ limitations under the License.
 package builder
 
 import (
+	"fmt"
 	"os"
+	"os/exec"
+	"path"
+	"strings"
 
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
-
 
 func init() {
 	registerSteps(Steps)
@@ -31,6 +35,7 @@ func init() {
 
 type steps struct {
 	CleanUpBuildDir         Step
+	GenerateJavaKeystore    Step
 	GenerateProjectSettings Step
 	InjectDependencies      Step
 	SanitizeDependencies    Step
@@ -40,6 +45,7 @@ type steps struct {
 
 var Steps = steps{
 	CleanUpBuildDir:         NewStep(ProjectGenerationPhase-1, cleanUpBuildDir),
+	GenerateJavaKeystore:    NewStep(ProjectGenerationPhase, generateJavaKeystore),
 	GenerateProjectSettings: NewStep(ProjectGenerationPhase+1, generateProjectSettings),
 	InjectDependencies:      NewStep(ProjectGenerationPhase+2, injectDependencies),
 	SanitizeDependencies:    NewStep(ProjectGenerationPhase+3, sanitizeDependencies),
@@ -49,6 +55,7 @@ var Steps = steps{
 
 var DefaultSteps = []Step{
 	Steps.CleanUpBuildDir,
+	Steps.GenerateJavaKeystore,
 	Steps.GenerateProjectSettings,
 	Steps.InjectDependencies,
 	Steps.SanitizeDependencies,
@@ -61,6 +68,33 @@ func cleanUpBuildDir(ctx *builderContext) error {
 	}
 
 	return os.RemoveAll(ctx.Build.BuildDir)
+}
+
+func generateJavaKeystore(ctx *builderContext) error {
+	if ctx.Build.Maven.CaCert == nil {
+		return nil
+	}
+
+	certData, err := kubernetes.GetSecretRefData(ctx.C, ctx.Client, ctx.Namespace, ctx.Build.Maven.CaCert)
+	if err != nil {
+		return err
+	}
+
+	certPath := ctx.Build.Maven.CaCert.Key
+	if err := util.WriteFileWithContent(ctx.Path, certPath, certData); err != nil {
+		return err
+	}
+
+	keystore := "trust.jks"
+	ctx.Maven.TrustStorePath = path.Join(ctx.Path, keystore)
+
+	args := strings.Fields(fmt.Sprintf("-importcert -alias maven -file %s -keystore %s", certPath, keystore))
+	cmd := exec.CommandContext(ctx.C, "keytool", args...)
+	cmd.Dir = ctx.Path
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+
+	return cmd.Run()
 }
 
 func generateProjectSettings(ctx *builderContext) error {

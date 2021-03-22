@@ -88,7 +88,8 @@ type builderContext struct {
 	SelectedArtifacts []v1.Artifact
 	Resources         []resource
 	Maven             struct {
-		Project      maven.Project
-		SettingsData []byte
+		Project        maven.Project
+		SettingsData   []byte
+		TrustStorePath string
 	}
 }

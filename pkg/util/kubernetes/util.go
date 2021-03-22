@@ -25,19 +25,18 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util"
 )
 
-// ToJSON --
 func ToJSON(value runtime.Object) ([]byte, error) {
 	return json.Marshal(value)
 }
 
-// ToYAML --
 func ToYAML(value runtime.Object) ([]byte, error) {
 	data, err := ToJSON(value)
 	if err != nil {
@@ -47,9 +46,8 @@ func ToYAML(value runtime.Object) ([]byte, error) {
 	return util.JSONToYAML(data)
 }
 
-// GetConfigMap --
-func GetConfigMap(context context.Context, client k8sclient.Reader, name string, namespace string) (*corev1.ConfigMap, error) {
-	key := k8sclient.ObjectKey{
+func GetConfigMap(context context.Context, client ctrl.Reader, name string, namespace string) (*corev1.ConfigMap, error) {
+	key := ctrl.ObjectKey{
 		Name:      name,
 		Namespace: namespace,
 	}
@@ -72,9 +70,8 @@ func GetConfigMap(context context.Context, client k8sclient.Reader, name string,
 	return &answer, nil
 }
 
-// GetSecret --
-func GetSecret(context context.Context, client k8sclient.Reader, name string, namespace string) (*corev1.Secret, error) {
-	key := k8sclient.ObjectKey{
+func GetSecret(context context.Context, client ctrl.Reader, name string, namespace string) (*corev1.Secret, error) {
+	key := ctrl.ObjectKey{
 		Name:      name,
 		Namespace: namespace,
 	}
@@ -97,9 +94,8 @@ func GetSecret(context context.Context, client k8sclient.Reader, name string, na
 	return &answer, nil
 }
 
-// GetIntegrationPlatform --
-func GetIntegrationPlatform(context context.Context, client k8sclient.Reader, name string, namespace string) (*v1.IntegrationPlatform, error) {
-	key := k8sclient.ObjectKey{
+func GetIntegrationPlatform(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationPlatform, error) {
+	key := ctrl.ObjectKey{
 		Name:      name,
 		Namespace: namespace,
 	}
@@ -113,9 +109,8 @@ func GetIntegrationPlatform(context context.Context, client k8sclient.Reader, na
 	return &answer, nil
 }
 
-// GetIntegrationKit --
-func GetIntegrationKit(context context.Context, client k8sclient.Reader, name string, namespace string) (*v1.IntegrationKit, error) {
-	key := k8sclient.ObjectKey{
+func GetIntegrationKit(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationKit, error) {
+	key := ctrl.ObjectKey{
 		Name:      name,
 		Namespace: namespace,
 	}
@@ -129,25 +124,8 @@ func GetIntegrationKit(context context.Context, client k8sclient.Reader, name st
 	return &answer, nil
 }
 
-// GetIntegration --
-func GetIntegration(context context.Context, client k8sclient.Reader, name string, namespace string) (*v1.Integration, error) {
-	key := k8sclient.ObjectKey{
-		Name:      name,
-		Namespace: namespace,
-	}
-
-	answer := v1.NewIntegration(namespace, name)
-
-	if err := client.Get(context, key, &answer); err != nil {
-		return nil, err
-	}
-
-	return &answer, nil
-}
-
-// GetBuild --
 func GetBuild(context context.Context, client client.Client, name string, namespace string) (*v1.Build, error) {
-	key := k8sclient.ObjectKey{
+	key := ctrl.ObjectKey{
 		Name:      name,
 		Namespace: namespace,
 	}
@@ -161,47 +139,31 @@ func GetBuild(context context.Context, client client.Client, name string, namesp
 	return &answer, nil
 }
 
-// GetService --
-func GetService(context context.Context, client k8sclient.Reader, name string, namespace string) (*corev1.Service, error) {
-	key := k8sclient.ObjectKey{
-		Name:      name,
-		Namespace: namespace,
-	}
-
-	answer := corev1.Service{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Service",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-	}
-
-	if err := client.Get(context, key, &answer); err != nil {
-		return nil, err
-	}
-
-	return &answer, nil
-}
-
-// GetSecretRefValue returns the value of a secret in the supplied namespace --
-func GetSecretRefValue(ctx context.Context, client k8sclient.Reader, namespace string, selector *corev1.SecretKeySelector) (string, error) {
-	secret, err := GetSecret(ctx, client, selector.Name, namespace)
+// GetSecretRefValue returns the value of a secret in the supplied namespace
+func GetSecretRefValue(ctx context.Context, client ctrl.Reader, namespace string, selector *corev1.SecretKeySelector) (string, error) {
+	data, err := GetSecretRefData(ctx, client, namespace, selector)
 	if err != nil {
 		return "", err
 	}
+	return string(data), nil
+}
 
-	if data, ok := secret.Data[selector.Key]; ok {
-		return string(data), nil
+// GetSecretRefData returns the value of a secret in the supplied namespace
+func GetSecretRefData(ctx context.Context, client ctrl.Reader, namespace string, selector *corev1.SecretKeySelector) ([]byte, error) {
+	secret, err := GetSecret(ctx, client, selector.Name, namespace)
+	if err != nil {
+		return nil, err
 	}
 
-	return "", fmt.Errorf("key %s not found in secret %s", selector.Key, selector.Name)
+	if data, ok := secret.Data[selector.Key]; ok {
+		return data, nil
+	}
+
+	return nil, fmt.Errorf("key %s not found in secret %s", selector.Key, selector.Name)
 }
 
 // GetConfigMapRefValue returns the value of a configmap in the supplied namespace
-func GetConfigMapRefValue(ctx context.Context, client k8sclient.Reader, namespace string, selector *corev1.ConfigMapKeySelector) (string, error) {
+func GetConfigMapRefValue(ctx context.Context, client ctrl.Reader, namespace string, selector *corev1.ConfigMapKeySelector) (string, error) {
 	cm, err := GetConfigMap(ctx, client, selector.Name, namespace)
 	if err != nil {
 		return "", err
@@ -214,8 +176,7 @@ func GetConfigMapRefValue(ctx context.Context, client k8sclient.Reader, namespac
 	return "", fmt.Errorf("key %s not found in config map %s", selector.Key, selector.Name)
 }
 
-// ResolveValueSource --
-func ResolveValueSource(ctx context.Context, client k8sclient.Reader, namespace string, valueSource *v1.ValueSource) (string, error) {
+func ResolveValueSource(ctx context.Context, client ctrl.Reader, namespace string, valueSource *v1.ValueSource) (string, error) {
 	if valueSource.ConfigMapKeyRef != nil && valueSource.SecretKeyRef != nil {
 		return "", fmt.Errorf("value source has bot config map and secret configured")
 	}

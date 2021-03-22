@@ -35,10 +35,8 @@ import (
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
-// Log --
 var Log = log.WithName("maven")
 
-// GenerateProjectStructure --
 func GenerateProjectStructure(context Context) error {
 	if err := util.WriteFileWithBytesMarshallerContent(context.Path, "pom.xml", context.Project); err != nil {
 		return err
@@ -78,7 +76,6 @@ func GenerateProjectStructure(context Context) error {
 	return nil
 }
 
-// Run --
 func Run(ctx Context) error {
 	if err := GenerateProjectStructure(ctx); err != nil {
 		return err
@@ -127,7 +124,27 @@ func Run(ctx Context) error {
 		cmd.Stdout = os.Stdout
 	}
 
-	Log.WithValues("timeout", timeout.String()).Infof("executing: %s", strings.Join(cmd.Args, " "))
+	mavenOpts, ok := os.LookupEnv("MAVEN_OPTS")
+	// FIXME: do not override duplicated Maven options
+	mavenOpts = strings.Join(append(strings.Fields(mavenOpts), ctx.ExtraMavenOpts...), " ")
+
+	// Inherit the parent process environment
+	env := os.Environ()
+	if !ok {
+		env = append(env, mavenOpts)
+	} else {
+		for i, e := range env {
+			if strings.HasPrefix(e, "MAVEN_OPTS=") {
+				env[i] = mavenOpts
+				break
+			}
+		}
+	}
+
+	cmd.Env = env
+
+	Log.WithValues("timeout", timeout.String(), "env", env).
+		Infof("executing: %s", strings.Join(cmd.Args, " "))
 
 	return cmd.Run()
 }
