@@ -168,7 +168,7 @@ jobs:
         kind: ClusterRole
         apiVersion: rbac.authorization.k8s.io/v1
         metadata:
-          name: camel-k:eviction
+          name: camel-k-test:eviction
           labels:
             app: "camel-k"
             rbac.authorization.k8s.io/aggregate-to-admin: "true"
@@ -183,14 +183,24 @@ jobs:
         kind: ClusterRole
         apiVersion: rbac.authorization.k8s.io/v1
         metadata:
-          name: camel-k:node
-          labels:
-            app: "camel-k"
-            rbac.authorization.k8s.io/aggregate-to-admin: "true"
+          name: camel-k-test:nodes
         rules:
         - apiGroups: [""]
           resources: ["nodes"]
           verbs: ["get","list"]
+        EOF
+        cat <<EOF | oc apply -f -
+        kind: ClusterRoleBinding
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:nodes
+        subjects:
+        - kind: User
+          name: developer
+        roleRef:
+          kind: ClusterRole
+          name: camel-k-test:nodes
+          apiGroup: rbac.authorization.k8s.io
         EOF
 
         # Login as normal user
