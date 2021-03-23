@@ -1,0 +1,115 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: upgrade
+
+on:
+  pull_request:
+    branches:
+      - master
+      - "release-*"
+    paths-ignore:
+      - '**.adoc'
+      - 'KEYS'
+      - 'LICENSE'
+      - 'NOTICE'
+  push:
+    branches:
+      - master
+      - "release-*"
+    paths-ignore:
+      - '**.adoc'
+      - 'KEYS'
+      - 'LICENSE'
+      - 'NOTICE'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Cleanup
+      run: |
+        ls -lart
+        echo "Initial status:"
+        df -h
+
+        echo "Cleaning up resources:"
+        sudo swapoff -a
+        sudo rm -f /swapfile
+        sudo apt clean
+        docker rmi $(docker image ls -aq)
+
+        echo "Final status:"
+        df -h
+    - name: Set up JDK 11
+      uses: AdoptOpenJDK/install-jdk@v1
+      with:
+        version: "11"
+    - name: Set Go
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13.x
+    - name: Kubernetes KinD Cluster
+      uses: container-tools/kind-action@v1
+      with:
+        node_image: kindest/node:v1.20.2
+    - name: Info
+      run: |
+        kubectl cluster-info
+        kubectl describe nodes
+    - name: Get Kamel CLI
+      run: |
+        export KAMEL_VERSION=$(make get-last-released-version)
+        curl -L https://github.com/apache/camel-k/releases/download/v${KAMEL_VERSION}/camel-k-client-${KAMEL_VERSION}-linux-64bit.tar.gz -o kamel.tar.gz
+        tar -zxf kamel.tar.gz
+        sudo mv kamel /usr/local/bin/
+    - name: Build Operator
+      run: |
+        echo "Build project"
+        make build-kamel bundle-kamelets
+        echo "Adding maven artifacts to the image context"
+        make PACKAGE_ARTIFACTS_STRATEGY=download package-artifacts
+        echo "Copying binary file to docker dir"
+        mkdir -p ./build/_output/bin
+        cp ./kamel ./build/_output/bin/
+        echo "Building the images"
+        export LOCAL_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make get-version)
+        docker build -t "${LOCAL_IMAGE}" -f build/Dockerfile .
+        docker push ${LOCAL_IMAGE}
+    - name: Run IT
+      run: |
+        # Use the last released Kamel CLI
+        KAMEL_BIN=kamel
+
+        # Configure install options
+        export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
+        export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
+        export KAMEL_INSTALL_REGISTRY=$KIND_REGISTRY
+        export KAMEL_INSTALL_REGISTRY_INSECURE=true
+
+        # TODO: Install OLM and cover upgrade managed by OLM
+        export KAMEL_INSTALL_OLM=false
+
+        # Configure test options
+        export KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make get-version)
+
+        # Then run integration tests
+        make test-upgrade

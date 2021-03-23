@@ -173,6 +173,10 @@ test-kamel-cli: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/common/cli -tags=integration
 	#go test -timeout 60m -v ./e2e/common/cli -tags=integration
 
+test-upgrade: build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	go test -timeout 60m -v ./e2e/upgrade -tags=integration
+
 build-kamel:
 # Ensure the binary is statically linked when building on Linux due to ABI changes in newer glibc 2.32, otherwise
 # it would not run on older versions. See https://github.com/apache/camel-k/pull/2141#issuecomment-800990117
@@ -260,6 +264,9 @@ images-push-staging:
 
 get-version:
 	@echo $(VERSION)
+
+get-last-released-version:
+	@echo $(LAST_RELEASED_VERSION)
 
 set-version:
 	./script/set_version.sh $(VERSION) $(IMAGE_NAME)
