@@ -45,7 +45,11 @@ func TestOperatorUpgrade(t *testing.T) {
 
 		Expect(Kamel("install", "--cluster-setup").Execute()).To(Succeed())
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
-		Eventually(PlatformVersion(ns)).Should(Equal(version))
+
+		// Check the operator pod is running
+		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+		// Check the IntegrationPlatform has been reconciled
+		Eventually(PlatformVersion(ns), TestTimeoutMedium).Should(Equal(version))
 
 		// Run the Integration
 		name := "yaml"
@@ -64,9 +68,12 @@ func TestOperatorUpgrade(t *testing.T) {
 		Expect(Kamel("install", "--cluster-setup", "--force").Execute()).To(Succeed())
 		Expect(Kamel("install", "-n", ns, "--force", "--operator-image", image).Execute()).To(Succeed())
 
+		// Check the operator image is the current built one
 		Eventually(OperatorImage(ns)).Should(Equal(image))
-		Eventually(OperatorPodPhase(ns)).Should(Equal(v1.PodRunning))
-		Eventually(PlatformVersion(ns)).Should(Equal(defaults.Version))
+		// Check the operator pod is running
+		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+		// Check the IntegrationPlatform has been reconciled
+		Eventually(PlatformVersion(ns), TestTimeoutMedium).Should(Equal(defaults.Version))
 
 		// Check the Integration hasn't been upgraded
 		Consistently(IntegrationVersion(ns, "yaml"), 3*time.Second).Should(Equal(version))
