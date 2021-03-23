@@ -27,8 +27,6 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	v1 "k8s.io/api/core/v1"
-
 	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
@@ -53,46 +51,5 @@ func TestPlatformUpgrade(t *testing.T) {
 
 		// Check the platform version change
 		Eventually(PlatformVersion(ns)).Should(Equal(defaults.Version))
-	})
-}
-
-func TestIntegrationUpgrade(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
-		Eventually(PlatformVersion(ns)).Should(Equal(defaults.Version))
-
-		// Run an integration
-		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-		initialKit := IntegrationKit(ns, "yaml")()
-
-		// Scale the operator down to zero
-		Eventually(ScaleOperator(ns, 0)).Should(BeNil())
-		Eventually(OperatorPod(ns)).Should(BeNil())
-
-		// Change the version to an older one
-		Expect(SetIntegrationVersion(ns, "yaml", "an.older.one")).To(Succeed())
-		Expect(SetAllKitsVersion(ns, "an.older.one")).To(Succeed())
-		Eventually(IntegrationVersion(ns, "yaml")).Should(Equal("an.older.one"))
-		Eventually(KitsWithVersion(ns, "an.older.one")).Should(Equal(1))
-		Eventually(KitsWithVersion(ns, defaults.Version)).Should(Equal(0))
-
-		// Scale the operator up
-		Eventually(ScaleOperator(ns, 1)).Should(BeNil())
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(OperatorPodPhase(ns)).Should(Equal(v1.PodRunning))
-
-		// No auto-update expected
-		Consistently(IntegrationVersion(ns, "yaml"), 3*time.Second).Should(Equal("an.older.one"))
-
-		// Clear the integration status
-		Expect(Kamel("rebuild", "yaml", "-n", ns).Execute()).To(Succeed())
-
-		// Check the integration version change
-		Eventually(IntegrationVersion(ns, "yaml")).Should(Equal(defaults.Version))
-		Eventually(KitsWithVersion(ns, "an.older.one")).Should(Equal(1)) // old one is not recycled
-		Eventually(KitsWithVersion(ns, defaults.Version)).Should(Equal(1))
-		Eventually(IntegrationKit(ns, "yaml"), TestTimeoutMedium).ShouldNot(Equal(initialKit))
-		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 	})
 }
