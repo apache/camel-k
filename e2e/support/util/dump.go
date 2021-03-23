@@ -25,11 +25,12 @@ import (
 	"fmt"
 	"testing"
 
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Dump prints all information about the given namespace to debug errors
@@ -95,6 +96,20 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 			return err
 		}
 		t.Logf("---\n%s\n---\n", string(pdata))
+	}
+
+	deployments, err := c.AppsV1().Deployments(ns).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	t.Logf("Found %d deployments:\n", len(iks.Items))
+	for _, deployment := range deployments.Items {
+		ref := deployment
+		data, err := kubernetes.ToYAML(&ref)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(data))
 	}
 
 	lst, err := c.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{})
