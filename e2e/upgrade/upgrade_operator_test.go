@@ -37,7 +37,7 @@ import (
 
 func TestOperatorUpgrade(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		version, ok := os.LookupEnv("KAMEL_VERSION")
+		version, ok := os.LookupEnv("KAMEL_K_TEST_RELEASE_VERSION")
 		Expect(ok).To(BeTrue())
 
 		image, ok := os.LookupEnv("KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE")

@@ -109,6 +109,7 @@ jobs:
         export KAMEL_INSTALL_OLM=false
 
         # Configure test options
+        export KAMEL_K_TEST_RELEASE_VERSION=$(make get-last-released-version)
         export KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make get-version)
 
         # Then run integration tests
