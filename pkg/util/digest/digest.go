@@ -130,8 +130,8 @@ func ComputeForIntegration(integration *v1.Integration) (string, error) {
 // Produces a digest that can be used as docker image tag
 func ComputeForIntegrationKit(kit *v1.IntegrationKit) (string, error) {
 	hash := sha256.New()
-	// Operator version is relevant
-	if _, err := hash.Write([]byte(defaults.Version)); err != nil {
+	// Kit version is relevant
+	if _, err := hash.Write([]byte(kit.Status.Version)); err != nil {
 		return "", err
 	}
 
