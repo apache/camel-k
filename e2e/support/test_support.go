@@ -176,19 +176,26 @@ func KamelWithContext(ctx context.Context, args ...string) *cobra.Command {
 		fmt.Printf("Using external kamel binary on path %s\n", kamelBin)
 		c = &cobra.Command{
 			DisableFlagParsing: true,
-			Run: func(cmd *cobra.Command, args []string) {
-
-				externalBin := exec.Command(kamelBin, args...)
+			RunE: func(cmd *cobra.Command, args []string) error {
+				externalBin := exec.CommandContext(ctx, kamelBin, args...)
 				var stdout io.Reader
 				stdout, err = externalBin.StdoutPipe()
 				if err != nil {
 					panic(err)
 				}
-
-				externalBin.Start()
-				io.Copy(c.OutOrStdout(), stdout)
-				externalBin.Wait()
-
+				err := externalBin.Start()
+				if err != nil {
+					return err
+				}
+				_, err = io.Copy(c.OutOrStdout(), stdout)
+				if err != nil {
+					return err
+				}
+				err = externalBin.Wait()
+				if err != nil {
+					return err
+				}
+				return nil
 			},
 		}
 	} else {
