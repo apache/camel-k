@@ -2,8 +2,33 @@ apiVersion: v1
 entries:
   camel-k:
   - apiVersion: v2
+    appVersion: 1.3.1
+    created: "2021-02-04T17:17:45.338311833+01:00"
+    description: A lightweight integration platform, born on Kubernetes, with serverless
+      superpowers
+    digest: 222b6b51ac7c836e1a7cfe44228de3666cb2b4c559c64bee35afaef9cbfe2449
+    home: https://camel.apache.org/camel-k/latest/
+    icon: https://github.com/apache/camel/raw/master/docs/img/logo64-d.png
+    keywords:
+    - serverless
+    - integration
+    - patterns
+    maintainers:
+    - email: nferraro@apache.org
+      name: nferraro
+    name: camel-k
+    sources:
+    - https://github.com/apache/camel-k
+    - https://github.com/apache/camel-k-runtime
+    - https://github.com/apache/camel-quarkus
+    - https://github.com/apache/camel
+    type: application
+    urls:
+    - https://apache.github.io/camel-k/charts/camel-k-0.5.1.tgz
+    version: 0.5.1
+  - apiVersion: v2
     appVersion: 1.2.1
-    created: "2020-11-27T11:59:24.780436646+01:00"
+    created: "2021-02-04T17:17:45.336715843+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 393f4e4b32119824442ee2abdfc34a34bc49ec0fc6e957057e955cb5dd63aece
@@ -28,7 +53,7 @@ entries:
     version: 0.4.1
   - apiVersion: v2
     appVersion: 1.2.0
-    created: "2020-11-27T11:59:24.778468169+01:00"
+    created: "2021-02-04T17:17:45.335210645+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: c47863e13644340b857acf5c688004927e0ad126a9c39e8c90fa6d84e2c445b9
@@ -53,7 +78,7 @@ entries:
     version: 0.4.0
   - apiVersion: v2
     appVersion: 1.1.1
-    created: "2020-11-27T11:59:24.776444422+01:00"
+    created: "2021-02-04T17:17:45.3331965+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 46771bd1c0e52097f07e9c17e657690872716ed845b196cd0c981c97b984b573
@@ -78,7 +103,7 @@ entries:
     version: 0.3.2
   - apiVersion: v2
     appVersion: 1.0.1
-    created: "2020-11-27T11:59:24.775064834+01:00"
+    created: "2021-02-04T17:17:45.331823233+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: d7453b9b6281355caad37896c6760be64735f69009bc312a54cbc17e8a1f6697
@@ -103,7 +128,7 @@ entries:
     version: 0.3.1
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2020-11-27T11:59:24.774668625+01:00"
+    created: "2021-02-04T17:17:45.33145139+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 610a2b024d539451ee278b72179f34c242a67b7949e2a4eae7b0fa2d8d3630e3
@@ -128,7 +153,7 @@ entries:
     version: 0.3.0
   - apiVersion: v2
     appVersion: 1.0.0-RC2
-    created: "2020-11-27T11:59:24.773910513+01:00"
+    created: "2021-02-04T17:17:45.331060513+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 3d5397e111004a8735849dcebd55c9827e687aa3ab28b5c28de8fe69595e1b8f
@@ -153,7 +178,7 @@ entries:
     version: 0.2.1
   - apiVersion: v2
     appVersion: 1.0.0-RC2
-    created: "2020-11-27T11:59:24.77350109+01:00"
+    created: "2021-02-04T17:17:45.330669068+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 43fa5d9563ce76d25695e4132c5870279541b26be2ac8023537b587483853260
@@ -178,7 +203,7 @@ entries:
     version: 0.1.1
   - apiVersion: v2
     appVersion: 1.0.0-RC2
-    created: "2020-11-27T11:59:24.773077768+01:00"
+    created: "2021-02-04T17:17:45.329553179+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 3bc8c53c4d781c4b4e4aac254d291339b348c2d8b4cf24b579ceb4330a48edd5
@@ -201,4 +226,4 @@ entries:
     urls:
     - https://apache.github.io/camel-k/charts/camel-k-0.1.0.tgz
     version: 0.1.0
-generated: "2020-11-27T11:59:24.772425794+01:00"
+generated: "2021-02-04T17:17:45.329083667+01:00"
