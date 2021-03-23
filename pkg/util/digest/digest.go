@@ -40,8 +40,8 @@ import (
 // Produces a digest that can be used as docker image tag
 func ComputeForIntegration(integration *v1.Integration) (string, error) {
 	hash := sha256.New()
-	// Operator version is relevant
-	if _, err := hash.Write([]byte(defaults.Version)); err != nil {
+	// Integration version is relevant
+	if _, err := hash.Write([]byte(integration.Status.Version)); err != nil {
 		return "", err
 	}
 	// Integration Kit is relevant
@@ -241,7 +241,6 @@ func sortedTraitSpecMapKeys(m map[string]v1.TraitSpec) []string {
 	return res
 }
 
-// ComputeSHA1 ---
 func ComputeSHA1(elem ...string) (string, error) {
 	file := path.Join(elem...)
 
