@@ -97,7 +97,7 @@ jobs:
     - name: Run IT
       run: |
         # Use the last released Kamel CLI
-        KAMEL_BIN=kamel
+        export KAMEL_BIN=/usr/local/bin/kamel
 
         # Configure install options
         export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
