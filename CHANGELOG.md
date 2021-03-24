@@ -6,12 +6,15 @@
 
 **Closed issues:**
 
+- Integrations are re-built on operator upgrade [\#2162](https://github.com/apache/camel-k/issues/2162)
 - kamelet-binding: embedding camelets [\#2146](https://github.com/apache/camel-k/issues/2146)
 
 **Merged pull requests:**
 
+- fix: Integrations are re-built on operator upgrade [\#2163](https://github.com/apache/camel-k/pull/2163) ([astefanutti](https://github.com/astefanutti))
 - doc\(test\): basic e2e local instructions [\#2155](https://github.com/apache/camel-k/pull/2155) ([squakez](https://github.com/squakez))
 - fix\(ci\): Free more disk space and pin OS version [\#2154](https://github.com/apache/camel-k/pull/2154) ([astefanutti](https://github.com/astefanutti))
+- chore\(s2i\): Set owner reference for BuildConfig and ImageStream resources [\#2152](https://github.com/apache/camel-k/pull/2152) ([astefanutti](https://github.com/astefanutti))
 - Fix \#2035: invalid YAML should not make the operator panic [\#2148](https://github.com/apache/camel-k/pull/2148) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix oc parameter and added filenames to the yaml sections [\#2147](https://github.com/apache/camel-k/pull/2147) ([claudio4j](https://github.com/claudio4j))
 - fix service-binding role group [\#2145](https://github.com/apache/camel-k/pull/2145) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -93,9 +96,6 @@
 - chore\(install\): Tidy RBAC resources into Kustomize directory [\#2008](https://github.com/apache/camel-k/pull/2008) ([astefanutti](https://github.com/astefanutti))
 - fix\(api\): Fix JSON schemas generation based on CRD apiextensions.k8s.io/v1 [\#2006](https://github.com/apache/camel-k/pull/2006) ([astefanutti](https://github.com/astefanutti))
 - chore\(CRD\): Remove old CRDs from the deploy directory [\#2005](https://github.com/apache/camel-k/pull/2005) ([astefanutti](https://github.com/astefanutti))
-- Add scaffold for Kamelet via kamel init [\#2004](https://github.com/apache/camel-k/pull/2004) ([rudeigerc](https://github.com/rudeigerc))
-- feat\(conf\): Mount source and resource ConfigMaps as subPaths instead of volumes [\#2002](https://github.com/apache/camel-k/pull/2002) ([astefanutti](https://github.com/astefanutti))
-- Refactors the deploy directory to make config directory single source of CRD truth [\#1978](https://github.com/apache/camel-k/pull/1978) ([phantomjinx](https://github.com/phantomjinx))
 - feat: Add ServiceBinding trait \(\#1445\) [\#1952](https://github.com/apache/camel-k/pull/1952) ([johnpoth](https://github.com/johnpoth))
 - Use Quarkus fast-jar package format apache/camel-k-runtime\#360 [\#1931](https://github.com/apache/camel-k/pull/1931) ([jamesnetherton](https://github.com/jamesnetherton))
 
@@ -538,6 +538,7 @@
 - Camel to Yaml transformation [\#1581](https://github.com/apache/camel-k/issues/1581)
 - Running YAML code [\#1579](https://github.com/apache/camel-k/issues/1579)
 - Add the camel category to Camel K CRDs [\#1556](https://github.com/apache/camel-k/issues/1556)
+- kamel run simple.js --dev hangs after multiple kill/start [\#1505](https://github.com/apache/camel-k/issues/1505)
 - Support `make install-crc` [\#1410](https://github.com/apache/camel-k/issues/1410)
 - Add a nodeport option to the service trait [\#1321](https://github.com/apache/camel-k/issues/1321)
 - Misleading error message in knative trait: cannot find event default [\#1308](https://github.com/apache/camel-k/issues/1308)
@@ -620,7 +621,6 @@
 - Update the kamel homebrew formula to v1.0.0 [\#1512](https://github.com/apache/camel-k/issues/1512)
 - \[regression\]kamel help trait --all -o json returns both yaml and json output [\#1511](https://github.com/apache/camel-k/issues/1511)
 - addRoutes problem when running 01-Basic example from new camel-k-example docs [\#1509](https://github.com/apache/camel-k/issues/1509)
-- kamel run simple.js --dev hangs after multiple kill/start [\#1505](https://github.com/apache/camel-k/issues/1505)
 - CLI - Make kamel run handle github urls that are not raw [\#1497](https://github.com/apache/camel-k/issues/1497)
 - metrics: in quarkus mode, use microprofile metrics in place of the prometheus agent [\#1263](https://github.com/apache/camel-k/issues/1263)
 - Add time it takes to build a kit in the builder pod log [\#1186](https://github.com/apache/camel-k/issues/1186)
