@@ -108,7 +108,7 @@ __kamel_kubectl_get_servicebinding() {
                version=$(echo ${resource} | cut -d'/' -f 3)
                group=$(echo ${resource} | cut -d'/' -f 2)
                kind=$(echo ${resource} | cut -d'/' -f 1)
-               services_list="${services_list} ${kind}.${version}.${group}/${name}"
+               services_list="${services_list} ${group}/${version}:${kind}:${name}"
             done
             COMPREPLY=( $( compgen -W "${services_list[*]}" -- "$cur" ) )
         fi
