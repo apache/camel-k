@@ -48,6 +48,10 @@ func TestOperatorUpgrade(t *testing.T) {
 
 		// Check the operator pod is running
 		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+
+		// Refresh the test client to account for the newly installed CRDs
+		SyncClient()
+
 		// Check the IntegrationPlatform has been reconciled
 		Eventually(PlatformVersion(ns), TestTimeoutMedium).Should(Equal(version))
 
