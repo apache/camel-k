@@ -207,8 +207,11 @@ func (t *serviceBindingTrait) parseServiceBindings(e *Environment) ([]string, er
 		if err != nil {
 			return serviceBindings, err
 		}
+		if ref.Namespace == "" {
+			ref.Namespace = e.Integration.Namespace
+		}
 		if ref.Kind == "ServiceBinding" {
-			if ref.GroupVersionKind().String() != sb.GroupVersion.String() {
+			if ref.GroupVersionKind().GroupVersion().String() != sb.GroupVersion.String() {
 				return nil, fmt.Errorf("ServiceBinding: %q api version should be %q", s, sb.GroupVersion.String())
 			}
 			if ref.Namespace != e.Integration.Namespace {
