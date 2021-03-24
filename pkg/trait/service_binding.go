@@ -19,8 +19,8 @@ package trait
 
 import (
 	"fmt"
-	"strings"
 
+	"github.com/apache/camel-k/pkg/util/reference"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -38,7 +38,7 @@ import (
 // +camel-k:trait=service-binding
 type serviceBindingTrait struct {
 	BaseTrait `property:",squash"`
-	// List of Provisioned Services and ServiceBindings in the form KIND.VERSION.GROUP/NAME[/NAMESPACE]
+	// List of Provisioned Services and ServiceBindings in the form [[apigroup/]version:]kind:[namespace/]name
 	ServiceBindings []string `property:"service-bindings" json:"serviceBindings,omitempty"`
 }
 
@@ -173,33 +173,23 @@ func (t *serviceBindingTrait) getServiceBinding(e *Environment, name string) (sb
 
 func (t *serviceBindingTrait) parseProvisionedServices(e *Environment) ([]sb.Service, error) {
 	services := make([]sb.Service, 0)
+	converter := reference.NewConverter("")
 	for _, s := range t.ServiceBindings {
-		seg := strings.Split(s, "/")
-		if !(len(seg) == 3 || len(seg) == 2) {
-			return nil, fmt.Errorf("ServiceBinding: %s should be specified in the form KIND.VERSION.GROUP/NAME[/NAMESPACE]", s)
+		ref, err := converter.FromString(s)
+		if err != nil {
+			return services, err
 		}
-		gvk := seg[0]
-		index := strings.Index(gvk, ".")
-		kind := seg[0][0:index]
-		if kind == "ServiceBinding" {
-			continue
-		}
-		vg := seg[0][index+1 : len(gvk)]
-		index = strings.Index(vg, ".")
-		version := vg[0:index]
-		group := vg[index+1 : len(vg)]
-		name := seg[1]
 		namespace := e.Integration.Namespace
-		if len(seg) == 3 {
-			namespace = seg[2]
+		if ref.Namespace != "" {
+			namespace = ref.Namespace
 		}
 		service := sb.Service{
 			NamespacedRef: sb.NamespacedRef{
 				Ref: sb.Ref{
-					Group:   group,
-					Version: version,
-					Kind:    kind,
-					Name:    name,
+					Group:   ref.GroupVersionKind().Group,
+					Version: ref.GroupVersionKind().Version,
+					Kind:    ref.Kind,
+					Name:    ref.Name,
 				},
 				Namespace: &namespace,
 			},
@@ -211,23 +201,20 @@ func (t *serviceBindingTrait) parseProvisionedServices(e *Environment) ([]sb.Ser
 
 func (t *serviceBindingTrait) parseServiceBindings(e *Environment) ([]string, error) {
 	serviceBindings := make([]string, 0)
+	converter := reference.NewConverter("")
 	for _, s := range t.ServiceBindings {
-		seg := strings.Split(s, "/")
-		if !(len(seg) == 3 || len(seg) == 2) {
-			return nil, fmt.Errorf("ServiceBinding: %s should be specified in the form KIND.VERSION.GROUP/NAME[/NAMESPACE]", s)
+		ref, err := converter.FromString(s)
+		if err != nil {
+			return serviceBindings, err
 		}
-		gvk := seg[0]
-		index := strings.Index(gvk, ".")
-		kind := seg[0][0:index]
-		if kind == "ServiceBinding" {
-			vg := seg[0][index+1 : len(gvk)]
-			if vg != "v1alpha1.binding.operators.coreos.com" {
-				return nil, fmt.Errorf("ServiceBinding: %s VERSION.GROUP should be v1alpha1.binding.operators.coreos.com", s)
+		if ref.Kind == "ServiceBinding" {
+			if ref.GroupVersionKind().String() != sb.GroupVersion.String() {
+				return nil, fmt.Errorf("ServiceBinding: %q api version should be %q", s, sb.GroupVersion.String())
 			}
-			if len(seg) == 3 && seg[2] != e.Integration.Namespace {
+			if ref.Namespace != e.Integration.Namespace {
 				return nil, fmt.Errorf("ServiceBinding: %s should be in the same namespace %s as the integration", s, e.Integration.Namespace)
 			}
-			serviceBindings = append(serviceBindings, seg[1])
+			serviceBindings = append(serviceBindings, ref.Name)
 		}
 	}
 	return serviceBindings, nil
