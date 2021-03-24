@@ -530,9 +530,8 @@ traits:
   - name: filter-source-channels
     type: bool
     description: Enables filtering on events based on the header "ce-knativehistory".
-      Since this is an experimental headerthat can be removed in a future version
-      of Knative, filtering is enabled only when the integration islistening from
-      more than 1 channel.
+      Since this header has been removed in newer versions ofKnative, filtering is
+      disabled by default.
   - name: camel-source-compat
     type: bool
     description: Enables Knative CamelSource pre 0.15 compatibility fixes (will be
@@ -808,7 +807,7 @@ traits:
       property.
   - name: service-bindings
     type: '[]string'
-    description: List of Provisioned Services and ServiceBindings in the form KIND.VERSION.GROUP/NAME[/NAMESPACE]
+    description: List of Provisioned Services and ServiceBindings in the form [[apigroup/]version:]kind:[namespace/]name
 - name: service
   platform: false
   profiles:

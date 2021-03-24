@@ -1257,6 +1257,9 @@
         },
         {
           "properties": {
+            "break-on-shutdown": {
+              "type": "string"
+            },
             "copy": {
               "type": "string"
             },
@@ -3129,7 +3132,7 @@
         "include": {
           "type": "string"
         },
-        "json-view": {
+        "json-view-type-name": {
           "type": "string"
         },
         "module-class-names": {
@@ -3272,7 +3275,7 @@
         "include": {
           "type": "string"
         },
-        "json-view": {
+        "json-view-type-name": {
           "type": "string"
         },
         "library": {
@@ -4500,15 +4503,22 @@
       ]
     },
     "org.apache.camel.model.loadbalancer.CustomLoadBalancerDefinition": {
-      "type": "object",
-      "properties": {
-        "id": {
+      "anyOf": [
+        {
           "type": "string"
         },
-        "ref": {
-          "type": "string"
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "ref": {
+              "type": "string"
+            }
+          }
         }
-      }
+      ]
     },
     "org.apache.camel.model.loadbalancer.FailoverLoadBalancerDefinition": {
       "type": "object",

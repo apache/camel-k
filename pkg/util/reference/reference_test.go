@@ -32,6 +32,7 @@ func TestExpressions(t *testing.T) {
 		name          string
 		error         bool
 		ref           corev1.ObjectReference
+		stringRef     string
 	}{
 		{
 			name:  "lowercase:source",
@@ -53,6 +54,7 @@ func TestExpressions(t *testing.T) {
 				APIVersion: "camel.apache.org/v1alpha1",
 				Name:       "source",
 			},
+			stringRef: "camel.apache.org/v1alpha1:Kamelet:source",
 		},
 		{
 			name: "ns1/source",
@@ -62,6 +64,17 @@ func TestExpressions(t *testing.T) {
 				Namespace:  "ns1",
 				Name:       "source",
 			},
+			stringRef: "camel.apache.org/v1alpha1:Kamelet:ns1/source",
+		},
+		{
+			name: "v1:Secret:ns1/scr2",
+			ref: corev1.ObjectReference{
+				Kind:       "Secret",
+				APIVersion: "v1",
+				Namespace:  "ns1",
+				Name:       "scr2",
+			},
+			stringRef: "v1:Secret:ns1/scr2",
 		},
 		{
 			name: "ksvc:service",
@@ -70,6 +83,7 @@ func TestExpressions(t *testing.T) {
 				APIVersion: "serving.knative.dev/v1",
 				Name:       "service",
 			},
+			stringRef: "serving.knative.dev/v1:Service:service",
 		},
 		{
 			name: "channel:ns3/ch2",
@@ -79,6 +93,7 @@ func TestExpressions(t *testing.T) {
 				Namespace:  "ns3",
 				Name:       "ch2",
 			},
+			stringRef: "messaging.knative.dev/v1:Channel:ns3/ch2",
 		},
 		{
 			name: "broker:default",
@@ -87,6 +102,7 @@ func TestExpressions(t *testing.T) {
 				APIVersion: "eventing.knative.dev/v1",
 				Name:       "default",
 			},
+			stringRef: "eventing.knative.dev/v1:Broker:default",
 		},
 		{
 			name: "PostgreSQL:ns1/db",
@@ -95,6 +111,7 @@ func TestExpressions(t *testing.T) {
 				Namespace: "ns1",
 				Name:      "db",
 			},
+			stringRef: "PostgreSQL:ns1/db",
 		},
 		{
 			name: "postgres.org/v1alpha1:PostgreSQL:ns1/db",
@@ -104,6 +121,7 @@ func TestExpressions(t *testing.T) {
 				Namespace:  "ns1",
 				Name:       "db",
 			},
+			stringRef: "postgres.org/v1alpha1:PostgreSQL:ns1/db",
 		},
 	}
 
@@ -122,8 +140,12 @@ func TestExpressions(t *testing.T) {
 			if tc.error {
 				assert.Error(t, err)
 			} else {
+				asString, err2 := converter.ToString(ref)
+				assert.NoError(t, err2)
+
 				assert.NoError(t, err)
 				assert.Equal(t, tc.ref, ref)
+				assert.Equal(t, tc.stringRef, asString)
 			}
 		})
 	}
