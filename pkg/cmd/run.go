@@ -73,7 +73,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	}
 
 	cmd.Flags().String("name", "", "The integration name")
-	cmd.Flags().StringArrayP("connect", "c", nil, "A ServiceBinding or Provisioned Service that the integration should bind to specified as KIND.VERSION.GROUP/NAME[/NAMESPACE]")
+	cmd.Flags().StringArrayP("connect", "c", nil, "A ServiceBinding or Provisioned Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
 	cmd.Flags().StringArrayP("dependency", "d", nil, "An external library that should be included. E.g. for Maven dependencies \"mvn:org.my/app:1.0\"")
 	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
