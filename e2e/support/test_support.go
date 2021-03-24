@@ -93,6 +93,15 @@ func TestClient() client.Client {
 	return testClient
 }
 
+func SyncClient() client.Client {
+	var err error
+	testClient, err = NewTestClient()
+	if err != nil {
+		panic(err)
+	}
+	return testClient
+}
+
 // KamelHooks contains hooks useful to add option to kamel commands at runtime
 var KamelHooks []func([]string) []string
 
@@ -550,15 +559,6 @@ func IntegrationKit(ns string, name string) func() string {
 	}
 }
 
-func SetIntegrationVersion(ns string, name string, version string) error {
-	it := Integration(ns, name)()
-	if it == nil {
-		return fmt.Errorf("no integration named %s found", name)
-	}
-	it.Status.Version = version
-	return TestClient().Status().Update(TestContext, it)
-}
-
 func UpdateIntegration(ns string, name string, upd func(it *v1.Integration)) error {
 	it := Integration(ns, name)()
 	if it == nil {
@@ -594,17 +594,6 @@ func KitsWithVersion(ns string, version string) func() int {
 		}
 		return count
 	}
-}
-
-func SetAllKitsVersion(ns string, version string) error {
-	for _, k := range Kits(ns)() {
-		kit := k
-		kit.Status.Version = version
-		if err := TestClient().Status().Update(TestContext, &kit); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func OperatorImage(ns string) func() string {
