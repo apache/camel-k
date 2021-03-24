@@ -18,6 +18,7 @@ limitations under the License.
 package reference
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"unicode"
@@ -124,5 +125,20 @@ func (c *Converter) simpleDecodeString(str string) (corev1.ObjectReference, erro
 }
 
 func (c *Converter) ToString(ref corev1.ObjectReference) (string, error) {
-	return "", nil
+	if ref.Kind == "" {
+		return "", errors.New(`object reference is missing the "kind" field`)
+	}
+	if ref.Name == "" {
+		return "", errors.New(`object reference is missing the "name" field`)
+	}
+	res := ""
+	if ref.APIVersion != "" {
+		res += ref.APIVersion + ":"
+	}
+	res += ref.Kind + ":"
+	if ref.Namespace != "" {
+		res += ref.Namespace + "/"
+	}
+	res += ref.Name
+	return res, nil
 }

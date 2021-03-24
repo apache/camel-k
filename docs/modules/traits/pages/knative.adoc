@@ -66,9 +66,8 @@ Can contain simple event types or full Camel URIs (to use a specific broker).
 
 | knative.filter-source-channels
 | bool
-| Enables filtering on events based on the header "ce-knativehistory". Since this is an experimental header
-that can be removed in a future version of Knative, filtering is enabled only when the integration is
-listening from more than 1 channel.
+| Enables filtering on events based on the header "ce-knativehistory". Since this header has been removed in newer versions of
+Knative, filtering is disabled by default.
 
 | knative.camel-source-compat
 | bool

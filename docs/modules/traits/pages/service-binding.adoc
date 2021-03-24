@@ -28,7 +28,7 @@ The following configuration options are available:
 
 | service-binding.service-bindings
 | []string
-| List of Provisioned Services and ServiceBindings in the form KIND.VERSION.GROUP/NAME[/NAMESPACE]
+| List of Provisioned Services and ServiceBindings in the form [[apigroup/]version:]kind:[namespace/]name
 
 |===
 
