@@ -44,11 +44,13 @@ func newCmdDump(rootCmdOptions *RootCmdOptions) (*cobra.Command, *dumpCmdOptions
 		RunE:    options.dump,
 	}
 
+	cmd.Flags().Int("logLines", 100, "Number of log lines to dump")
 	return &cmd, &options
 }
 
 type dumpCmdOptions struct {
 	*RootCmdOptions
+	LogLines int `mapstructure:"logLines"`
 }
 
 func (o *dumpCmdOptions) dump(_ *cobra.Command, args []string) error {
@@ -62,15 +64,15 @@ func (o *dumpCmdOptions) dump(_ *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		dumpNamespace(o.Context, c, o.Namespace, writer)
+		dumpNamespace(o.Context, c, o.Namespace, writer, o.LogLines)
 		defer writer.Close()
 	} else {
-		dumpNamespace(o.Context, c, o.Namespace, os.Stdout)
+		dumpNamespace(o.Context, c, o.Namespace, os.Stdout, o.LogLines)
 	}
 	return nil
 }
 
-func dumpNamespace(ctx context.Context, c client.Client, ns string, out *os.File) error {
+func dumpNamespace(ctx context.Context, c client.Client, ns string, out *os.File, logLines int) error {
 
 	camelClient, err := versioned.NewForConfig(c.GetConfig())
 	if err != nil {
@@ -162,7 +164,7 @@ func dumpNamespace(ctx context.Context, c client.Client, ns string, out *os.File
 		for _, container := range allContainers {
 			pad := "    "
 			fmt.Fprintf(out, "%s%s\n", pad, container.Name)
-			err := dumpLogs(ctx, c, fmt.Sprintf("%s> ", pad), ns, pod.Name, container.Name, out)
+			err := dumpLogs(ctx, c, fmt.Sprintf("%s> ", pad), ns, pod.Name, container.Name, out, logLines)
 			if err != nil {
 				fmt.Fprintf(out, "%sERROR while reading the logs: %v\n", pad, err)
 			}
@@ -177,8 +179,8 @@ func dumpConditions(prefix string, conditions []v1.PodCondition, out *os.File) {
 	}
 }
 
-func dumpLogs(ctx context.Context, c client.Client, prefix string, ns string, name string, container string, out *os.File) error {
-	lines := int64(50)
+func dumpLogs(ctx context.Context, c client.Client, prefix string, ns string, name string, container string, out *os.File, logLines int) error {
+	lines := int64(logLines)
 	stream, err := c.CoreV1().Pods(ns).GetLogs(name, &v1.PodLogOptions{
 		Container: container,
 		TailLines: &lines,
