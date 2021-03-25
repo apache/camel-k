@@ -39,12 +39,10 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/gzip"
+	"github.com/apache/camel-k/pkg/util/jvm"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/maven"
 )
-
-// OpenAPITraitName ---
-const OpenAPITraitName = "openapi"
 
 // The OpenAPI DSL trait is internally used to allow creating integrations from a OpenAPI specs.
 //
@@ -55,7 +53,7 @@ type openAPITrait struct {
 
 func newOpenAPITrait() Trait {
 	return &openAPITrait{
-		BaseTrait: NewBaseTrait(OpenAPITraitName, 300),
+		BaseTrait: NewBaseTrait("openapi", 300),
 	}
 }
 
@@ -117,9 +115,7 @@ func (t *openAPITrait) Apply(e *Environment) error {
 		generatedSources := make([]v1.SourceSpec, 0, len(e.Integration.Status.GeneratedSources))
 
 		if e.Integration.Status.GeneratedSources != nil {
-			//
 			// Filter out the previously generated source
-			//
 			for _, x := range e.Integration.Status.GeneratedSources {
 				if x.Name != generatedSourceName {
 					generatedSources = append(generatedSources, x)
@@ -127,9 +123,7 @@ func (t *openAPITrait) Apply(e *Environment) error {
 			}
 		}
 
-		//
 		// Add an additional source that references the config map
-		//
 		generatedSources = append(generatedSources, v1.SourceSpec{
 			DataSpec: v1.DataSpec{
 				Name:        generatedSourceName,
@@ -221,6 +215,19 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Res
 		mc.SettingsContent = []byte(settings)
 	}
 
+	if e.Platform.Status.Build.Maven.CaCert != nil {
+		certData, err := kubernetes.GetSecretRefData(e.C, e.Client, e.Platform.Namespace, e.Platform.Status.Build.Maven.CaCert)
+		if err != nil {
+			return err
+		}
+		trustStoreName := "trust.jks"
+		err = jvm.GenerateJavaKeystore(e.C, tmpDir, trustStoreName, certData)
+		if err != nil {
+			return err
+		}
+		mc.ExtraMavenOpts = append(mc.ExtraMavenOpts, "-Djavax.net.ssl.trustStore="+trustStoreName)
+	}
+
 	err = maven.Run(mc)
 	if err != nil {
 		return err
@@ -246,10 +253,8 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Res
 		return err
 	}
 
-	//
 	// Store the generated rest xml in a separate config map in order
 	// not to pollute the integration with generated data
-	//
 	cm := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
