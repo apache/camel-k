@@ -124,26 +124,48 @@ func Run(ctx Context) error {
 		cmd.Stdout = os.Stdout
 	}
 
-	mavenOpts, ok := os.LookupEnv("MAVEN_OPTS")
-	// FIXME: do not override duplicated Maven options
-	mavenOpts = strings.Join(append(strings.Fields(mavenOpts), ctx.ExtraMavenOpts...), " ")
+	var mavenOptions string
+	if len(ctx.ExtraMavenOpts) > 0 {
+		// Inherit the parent process environment
+		env := os.Environ()
 
-	// Inherit the parent process environment
-	env := os.Environ()
-	if !ok {
-		env = append(env, mavenOpts)
-	} else {
-		for i, e := range env {
-			if strings.HasPrefix(e, "MAVEN_OPTS=") {
-				env[i] = mavenOpts
-				break
+		mavenOpts, ok := os.LookupEnv("MAVEN_OPTS")
+		if !ok {
+			mavenOptions = strings.Join(ctx.ExtraMavenOpts, " ")
+			env = append(env, "MAVEN_OPTS="+mavenOptions)
+		} else {
+			var extraOptions []string
+			options := strings.Fields(mavenOpts)
+			for _, extraOption := range ctx.ExtraMavenOpts {
+				// Basic duplicated key detection, that should be improved
+				// to support a wider range of JVM options
+				key := strings.SplitN(extraOption, "=", 2)[0]
+				exists := false
+				for _, opt := range options {
+					if strings.HasPrefix(opt, key) {
+						exists = true
+						break
+					}
+				}
+				if !exists {
+					extraOptions = append(extraOptions, extraOption)
+				}
+			}
+
+			options = append(options, extraOptions...)
+			mavenOptions = strings.Join(options, " ")
+			for i, e := range env {
+				if strings.HasPrefix(e, "MAVEN_OPTS=") {
+					env[i] = "MAVEN_OPTS=" + mavenOptions
+					break
+				}
 			}
 		}
+
+		cmd.Env = env
 	}
 
-	cmd.Env = env
-
-	Log.WithValues("timeout", timeout.String(), "env", env).
+	Log.WithValues("timeout", timeout.String(), "MAVEN_OPTS", mavenOptions).
 		Infof("executing: %s", strings.Join(cmd.Args, " "))
 
 	return cmd.Run()
