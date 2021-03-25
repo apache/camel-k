@@ -30,16 +30,15 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/resources"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/jvm"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
-// DefaultCatalog --
 func DefaultCatalog() (*RuntimeCatalog, error) {
 	return QuarkusCatalog()
 }
 
-// QuarkusCatalog --
 func QuarkusCatalog() (*RuntimeCatalog, error) {
 	return catalogForRuntimeProvider(v1.RuntimeProviderQuarkus)
 }
@@ -63,7 +62,6 @@ func catalogForRuntimeProvider(provider v1.RuntimeProvider) (*RuntimeCatalog, er
 	})
 }
 
-// GenerateCatalog --
 func GenerateCatalog(
 	ctx context.Context,
 	client k8sclient.Reader,
@@ -77,12 +75,20 @@ func GenerateCatalog(
 		return nil, err
 	}
 
-	return GenerateCatalogCommon(settings, mvn, runtime, providerDependencies)
+	var caCert []byte
+	if mvn.CaCert != nil {
+		caCert, err = kubernetes.GetSecretRefData(ctx, client, namespace, mvn.CaCert)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return GenerateCatalogCommon(settings, caCert, mvn, runtime, providerDependencies)
 }
 
-// GenerateCatalogCommon --
 func GenerateCatalogCommon(
 	settings string,
+	caCert []byte,
 	mvn v1.MavenSpec,
 	runtime v1.RuntimeSpec,
 	providerDependencies []maven.Dependency) (*RuntimeCatalog, error) {
@@ -111,6 +117,15 @@ func GenerateCatalogCommon(
 	mc.SettingsContent = nil
 	if settings != "" {
 		mc.SettingsContent = []byte(settings)
+	}
+
+	if caCert != nil {
+		trustStoreName := "trust.jks"
+		err := jvm.GenerateJavaKeystore(context.Background(), tmpDir, trustStoreName, caCert)
+		if err != nil {
+			return nil, err
+		}
+		mc.ExtraMavenOpts = append(mc.ExtraMavenOpts, "-Djavax.net.ssl.trustStore="+trustStoreName)
 	}
 
 	err = maven.Run(mc)
