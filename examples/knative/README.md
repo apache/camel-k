@@ -1,7 +1,7 @@
 # Knative Camel K Example
 This example shows how Camel K can be used to connect Knative building blocks to create awesome applications.
 
-A video version of this https://youtu.be/btf_e2GniXM[demo is available on YouTube].
+A video version of this [demo is available on YouTube](https://youtu.be/btf_e2GniXM).
 
 It's assumed that both Camel K and Knative are properly installed (including Knative Build, Serving and Eventing) into the cluster.
 Refer to the specific documentation to install and configure all components.
