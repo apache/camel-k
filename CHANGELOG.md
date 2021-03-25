@@ -6,12 +6,18 @@
 
 **Closed issues:**
 
+- Review generated CSV [\#2164](https://github.com/apache/camel-k/issues/2164)
 - Integrations are re-built on operator upgrade [\#2162](https://github.com/apache/camel-k/issues/2162)
+- Deployment on K3s failing with Kaniko and Buildah build strategy [\#2161](https://github.com/apache/camel-k/issues/2161)
+- Deployment on K3s failing with Spectrum build strategy [\#2160](https://github.com/apache/camel-k/issues/2160)
 - kamelet-binding: embedding camelets [\#2146](https://github.com/apache/camel-k/issues/2146)
+- Adding camel-jackson dependency creates issues with inner classes  [\#1507](https://github.com/apache/camel-k/issues/1507)
 
 **Merged pull requests:**
 
+- chore\(OLM\): Remove old Build CRD from OLM package [\#2166](https://github.com/apache/camel-k/pull/2166) ([astefanutti](https://github.com/astefanutti))
 - fix: Integrations are re-built on operator upgrade [\#2163](https://github.com/apache/camel-k/pull/2163) ([astefanutti](https://github.com/astefanutti))
+- test: Operator upgrade e2e tests [\#2159](https://github.com/apache/camel-k/pull/2159) ([astefanutti](https://github.com/astefanutti))
 - doc\(test\): basic e2e local instructions [\#2155](https://github.com/apache/camel-k/pull/2155) ([squakez](https://github.com/squakez))
 - fix\(ci\): Free more disk space and pin OS version [\#2154](https://github.com/apache/camel-k/pull/2154) ([astefanutti](https://github.com/astefanutti))
 - chore\(s2i\): Set owner reference for BuildConfig and ImageStream resources [\#2152](https://github.com/apache/camel-k/pull/2152) ([astefanutti](https://github.com/astefanutti))
@@ -95,7 +101,6 @@
 - chore\(doc\): Add ServiceBinding trait documentation [\#2010](https://github.com/apache/camel-k/pull/2010) ([astefanutti](https://github.com/astefanutti))
 - chore\(install\): Tidy RBAC resources into Kustomize directory [\#2008](https://github.com/apache/camel-k/pull/2008) ([astefanutti](https://github.com/astefanutti))
 - fix\(api\): Fix JSON schemas generation based on CRD apiextensions.k8s.io/v1 [\#2006](https://github.com/apache/camel-k/pull/2006) ([astefanutti](https://github.com/astefanutti))
-- chore\(CRD\): Remove old CRDs from the deploy directory [\#2005](https://github.com/apache/camel-k/pull/2005) ([astefanutti](https://github.com/astefanutti))
 - feat: Add ServiceBinding trait \(\#1445\) [\#1952](https://github.com/apache/camel-k/pull/1952) ([johnpoth](https://github.com/johnpoth))
 - Use Quarkus fast-jar package format apache/camel-k-runtime\#360 [\#1931](https://github.com/apache/camel-k/pull/1931) ([jamesnetherton](https://github.com/jamesnetherton))
 
