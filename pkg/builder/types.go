@@ -90,6 +90,6 @@ type builderContext struct {
 	Maven             struct {
 		Project        maven.Project
 		SettingsData   []byte
-		TrustStorePath string
+		TrustStoreName string
 	}
 }

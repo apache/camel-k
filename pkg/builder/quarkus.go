@@ -147,8 +147,8 @@ func buildQuarkusRunner(ctx *builderContext) error {
 	mc.LocalRepository = ctx.Build.Maven.LocalRepository
 	mc.Timeout = ctx.Build.Maven.GetTimeout().Duration
 
-	if ctx.Maven.TrustStorePath != "" {
-		mc.ExtraMavenOpts = append(mc.ExtraMavenOpts, "-Djavax.net.ssl.trustStore="+path.Join(ctx.Path, ctx.Maven.TrustStorePath))
+	if ctx.Maven.TrustStoreName != "" {
+		mc.ExtraMavenOpts = append(mc.ExtraMavenOpts, "-Djavax.net.ssl.trustStore="+path.Join(ctx.Path, ctx.Maven.TrustStoreName))
 	}
 
 	err := BuildQuarkusRunnerCommon(mc)

@@ -18,14 +18,10 @@ limitations under the License.
 package builder
 
 import (
-	"fmt"
 	"os"
-	"os/exec"
-	"path"
-	"strings"
 
-	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/jvm"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -80,21 +76,9 @@ func generateJavaKeystore(ctx *builderContext) error {
 		return err
 	}
 
-	certPath := ctx.Build.Maven.CaCert.Key
-	if err := util.WriteFileWithContent(ctx.Path, certPath, certData); err != nil {
-		return err
-	}
+	ctx.Maven.TrustStoreName = "trust.jks"
 
-	keystore := "trust.jks"
-	ctx.Maven.TrustStorePath = path.Join(ctx.Path, keystore)
-
-	args := strings.Fields(fmt.Sprintf("-importcert -alias maven -file %s -keystore %s", certPath, keystore))
-	cmd := exec.CommandContext(ctx.C, "keytool", args...)
-	cmd.Dir = ctx.Path
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-
-	return cmd.Run()
+	return jvm.GenerateJavaKeystore(ctx.C, ctx.Path, ctx.Maven.TrustStoreName, certData)
 }
 
 func generateProjectSettings(ctx *builderContext) error {
