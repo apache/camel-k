@@ -1264,6 +1264,11 @@ func (in *MavenArtifact) DeepCopy() *MavenArtifact {
 func (in *MavenSpec) DeepCopyInto(out *MavenSpec) {
 	*out = *in
 	in.Settings.DeepCopyInto(&out.Settings)
+	if in.CaCert != nil {
+		in, out := &in.CaCert, &out.CaCert
+		*out = new(corev1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Timeout != nil {
 		in, out := &in.Timeout, &out.Timeout
 		*out = new(metav1.Duration)

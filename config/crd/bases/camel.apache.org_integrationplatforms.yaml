@@ -81,6 +81,28 @@ spec:
                   maven:
                     description: MavenSpec --
                     properties:
+                      caCert:
+                        description: The Secret key containing the CA certificate
+                          used to connect to remote repositories. A JKS formatted
+                          keystore is automatically created to store the CA certificate,
+                          and configured to be used as a trusted certificate by the
+                          Maven command.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                              TODO: Add other useful fields. apiVersion, kind, uid?'
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
                       localRepository:
                         type: string
                       settings:
@@ -229,6 +251,28 @@ spec:
                   maven:
                     description: MavenSpec --
                     properties:
+                      caCert:
+                        description: The Secret key containing the CA certificate
+                          used to connect to remote repositories. A JKS formatted
+                          keystore is automatically created to store the CA certificate,
+                          and configured to be used as a trusted certificate by the
+                          Maven command.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                              TODO: Add other useful fields. apiVersion, kind, uid?'
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
                       localRepository:
                         type: string
                       settings:
