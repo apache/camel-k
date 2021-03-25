@@ -62,15 +62,15 @@ func (o *dumpCmdOptions) dump(_ *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		Dump(o.Context, c, o.Namespace, writer)
+		dumpNamespace(o.Context, c, o.Namespace, writer)
 		defer writer.Close()
 	} else {
-		Dump(o.Context, c, o.Namespace, os.Stdout)
+		dumpNamespace(o.Context, c, o.Namespace, os.Stdout)
 	}
 	return nil
 }
 
-func Dump(ctx context.Context, c client.Client, ns string, out *os.File) error {
+func dumpNamespace(ctx context.Context, c client.Client, ns string, out *os.File) error {
 
 	camelClient, err := versioned.NewForConfig(c.GetConfig())
 	if err != nil {
