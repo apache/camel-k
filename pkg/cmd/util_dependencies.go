@@ -228,7 +228,8 @@ func generateCatalog() (*camel.RuntimeCatalog, error) {
 		Provider: v1.RuntimeProviderQuarkus,
 	}
 	var providerDependencies []maven.Dependency
-	catalog, err := camel.GenerateCatalogCommon(settings, mvn, runtime, providerDependencies)
+	var caCert []byte
+	catalog, err := camel.GenerateCatalogCommon(settings, caCert, mvn, runtime, providerDependencies)
 	if err != nil {
 		return nil, err
 	}
