@@ -138,7 +138,7 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 }
 
 // Install creates a subscription for the OLM package
-func Install(ctx context.Context, client client.Client, namespace string, global bool, options Options, collection *kubernetes.Collection, tolerations []string) (bool, error) {
+func Install(ctx context.Context, client client.Client, namespace string, global bool, options Options, collection *kubernetes.Collection, tolerations []string, nodeSelectors []string) (bool, error) {
 	options = fillDefaults(options)
 	if installed, err := IsOperatorInstalled(ctx, client, namespace, global, options); err != nil {
 		return false, err
@@ -170,6 +170,10 @@ func Install(ctx context.Context, client client.Client, namespace string, global
 	err := maybeSetTolerations(&sub, tolerations)
 	if err != nil {
 		return false, errors.Wrap(err, fmt.Sprintf("could not set tolerations"))
+	}
+	err = maybeSetNodeSelectors(&sub, nodeSelectors)
+	if err != nil {
+		return false, errors.Wrap(err, fmt.Sprintf("could not set node selectors"))
 	}
 
 	if collection != nil {
@@ -212,6 +216,17 @@ func maybeSetTolerations(sub *operatorsv1alpha1.Subscription, tolArray []string)
 			return err
 		}
 		sub.Spec.Config.Tolerations = tolerations
+	}
+	return nil
+}
+
+func maybeSetNodeSelectors(sub *operatorsv1alpha1.Subscription, nsArray []string) error {
+	if nsArray != nil {
+		nodeSelectors, err := kubernetes.GetNodeSelectors(nsArray)
+		if err != nil {
+			return err
+		}
+		sub.Spec.Config.NodeSelector = nodeSelectors
 	}
 	return nil
 }
