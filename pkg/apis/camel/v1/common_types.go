@@ -85,11 +85,14 @@ type PlatformInjectable interface {
 type MavenSpec struct {
 	LocalRepository string      `json:"localRepository,omitempty"`
 	Settings        ValueSource `json:"settings,omitempty"`
-	// The Secret key containing the CA certificate used to connect to remote repositories.
-	// A JKS formatted keystore is automatically created to store the CA certificate,
-	// and configured to be used as a trusted certificate by the Maven command.
-	CaCert  *corev1.SecretKeySelector `json:"caCert,omitempty"`
-	Timeout *metav1.Duration          `json:"timeout,omitempty"`
+	// The Secret name and key, containing the CA certificate(s) used to connect
+	// to remote Maven repositories.
+	// It can contain X.509 certificates, and PKCS#7 formatted certificate chains.
+	// A JKS formatted keystore is automatically created to store the CA certificate(s),
+	// and configured to be used as a trusted certificate(s) by the Maven commands.
+	// Note that the root CA certificates are also imported into the created keystore.
+	CASecret *corev1.SecretKeySelector `json:"caSecret,omitempty"`
+	Timeout  *metav1.Duration          `json:"timeout,omitempty"`
 }
 
 // ValueSource --

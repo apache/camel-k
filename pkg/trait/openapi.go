@@ -215,8 +215,8 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Res
 		mc.SettingsContent = []byte(settings)
 	}
 
-	if e.Platform.Status.Build.Maven.CaCert != nil {
-		certData, err := kubernetes.GetSecretRefData(e.C, e.Client, e.Platform.Namespace, e.Platform.Status.Build.Maven.CaCert)
+	if e.Platform.Status.Build.Maven.CASecret != nil {
+		certData, err := kubernetes.GetSecretRefData(e.C, e.Client, e.Platform.Namespace, e.Platform.Status.Build.Maven.CASecret)
 		if err != nil {
 			return err
 		}

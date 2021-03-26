@@ -1264,8 +1264,8 @@ func (in *MavenArtifact) DeepCopy() *MavenArtifact {
 func (in *MavenSpec) DeepCopyInto(out *MavenSpec) {
 	*out = *in
 	in.Settings.DeepCopyInto(&out.Settings)
-	if in.CaCert != nil {
-		in, out := &in.CaCert, &out.CaCert
+	if in.CASecret != nil {
+		in, out := &in.CASecret, &out.CASecret
 		*out = new(corev1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
