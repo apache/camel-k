@@ -10,11 +10,16 @@
 - Integrations are re-built on operator upgrade [\#2162](https://github.com/apache/camel-k/issues/2162)
 - Deployment on K3s failing with Kaniko and Buildah build strategy [\#2161](https://github.com/apache/camel-k/issues/2161)
 - Deployment on K3s failing with Spectrum build strategy [\#2160](https://github.com/apache/camel-k/issues/2160)
+- Normalize object references [\#2158](https://github.com/apache/camel-k/issues/2158)
 - kamelet-binding: embedding camelets [\#2146](https://github.com/apache/camel-k/issues/2146)
 - Adding camel-jackson dependency creates issues with inner classes  [\#1507](https://github.com/apache/camel-k/issues/1507)
+- Adding a dump command [\#1415](https://github.com/apache/camel-k/issues/1415)
 
 **Merged pull requests:**
 
+- Fix link in example knative readme [\#2174](https://github.com/apache/camel-k/pull/2174) ([apupier](https://github.com/apupier))
+- Adding a dump command [\#2171](https://github.com/apache/camel-k/pull/2171) ([oscerd](https://github.com/oscerd))
+- Normalize names [\#2169](https://github.com/apache/camel-k/pull/2169) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(OLM\): Remove old Build CRD from OLM package [\#2166](https://github.com/apache/camel-k/pull/2166) ([astefanutti](https://github.com/astefanutti))
 - fix: Integrations are re-built on operator upgrade [\#2163](https://github.com/apache/camel-k/pull/2163) ([astefanutti](https://github.com/astefanutti))
 - test: Operator upgrade e2e tests [\#2159](https://github.com/apache/camel-k/pull/2159) ([astefanutti](https://github.com/astefanutti))
@@ -99,8 +104,6 @@
 - chore\(olm\): Regenerate current OLM package manifest [\#2012](https://github.com/apache/camel-k/pull/2012) ([astefanutti](https://github.com/astefanutti))
 - fix\(olm\): Add back lost rules to OLM role [\#2011](https://github.com/apache/camel-k/pull/2011) ([astefanutti](https://github.com/astefanutti))
 - chore\(doc\): Add ServiceBinding trait documentation [\#2010](https://github.com/apache/camel-k/pull/2010) ([astefanutti](https://github.com/astefanutti))
-- chore\(install\): Tidy RBAC resources into Kustomize directory [\#2008](https://github.com/apache/camel-k/pull/2008) ([astefanutti](https://github.com/astefanutti))
-- fix\(api\): Fix JSON schemas generation based on CRD apiextensions.k8s.io/v1 [\#2006](https://github.com/apache/camel-k/pull/2006) ([astefanutti](https://github.com/astefanutti))
 - feat: Add ServiceBinding trait \(\#1445\) [\#1952](https://github.com/apache/camel-k/pull/1952) ([johnpoth](https://github.com/johnpoth))
 - Use Quarkus fast-jar package format apache/camel-k-runtime\#360 [\#1931](https://github.com/apache/camel-k/pull/1931) ([jamesnetherton](https://github.com/jamesnetherton))
 
