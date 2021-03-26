@@ -221,11 +221,15 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Res
 			return err
 		}
 		trustStoreName := "trust.jks"
-		err = jvm.GenerateJavaKeystore(e.C, tmpDir, trustStoreName, certData)
+		trustStorePass := jvm.NewKeystorePassword()
+		err = jvm.GenerateKeystore(e.C, tmpDir, trustStoreName, trustStorePass, certData)
 		if err != nil {
 			return err
 		}
-		mc.ExtraMavenOpts = append(mc.ExtraMavenOpts, "-Djavax.net.ssl.trustStore="+trustStoreName)
+		mc.ExtraMavenOpts = append(mc.ExtraMavenOpts,
+			"-Djavax.net.ssl.trustStore="+trustStoreName,
+			"-Djavax.net.ssl.trustStorePassword="+trustStorePass,
+		)
 	}
 
 	err = maven.Run(mc)

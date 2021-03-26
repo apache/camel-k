@@ -91,5 +91,6 @@ type builderContext struct {
 		Project        maven.Project
 		SettingsData   []byte
 		TrustStoreName string
+		TrustStorePass string
 	}
 }
