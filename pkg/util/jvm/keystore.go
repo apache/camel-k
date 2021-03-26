@@ -18,6 +18,7 @@ limitations under the License.
 package jvm
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"math/rand"
@@ -26,25 +27,17 @@ import (
 	"path"
 	"strings"
 	"time"
-
-	"github.com/apache/camel-k/pkg/util"
 )
 
 func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePass string, data []byte) error {
-	tmpFile := "ca-cert.tmp"
-	err := util.WriteFileWithContent(keystoreDir, tmpFile, data)
-	if err != nil {
-		return err
-	}
-	defer os.Remove(path.Join(keystoreDir, tmpFile))
-
-	args := strings.Fields(fmt.Sprintf("-importcert -noprompt -alias maven -storepass %s -file %s -keystore %s", keystorePass, tmpFile, keystoreName))
+	args := strings.Fields(fmt.Sprintf("-importcert -noprompt -alias maven -storepass %s -keystore %s", keystorePass, keystoreName))
 	cmd := exec.CommandContext(ctx, "keytool", args...)
 	cmd.Dir = keystoreDir
+	cmd.Stdin = bytes.NewReader(data)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 
-	err = cmd.Run()
+	err := cmd.Run()
 	if err != nil {
 		return err
 	}
