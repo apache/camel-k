@@ -55,6 +55,7 @@ type OperatorConfiguration struct {
 	Health                OperatorHealthConfiguration
 	Monitoring            OperatorMonitoringConfiguration
 	Tolerations           []string
+	NodeSelectors         []string
 }
 
 // OperatorHealthConfiguration --
@@ -95,6 +96,18 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 						fmt.Println("Warning: could not parse the configured tolerations!")
 					}
 					d.Spec.Template.Spec.Tolerations = tolerations
+				}
+			}
+		}
+
+		if cfg.NodeSelectors != nil {
+			if d, ok := o.(*appsv1.Deployment); ok {
+				if d.Labels["camel.apache.org/component"] == "operator" {
+					nodeSelector, err := kubernetes.GetNodeSelectors(cfg.NodeSelectors)
+					if err != nil {
+						fmt.Println("Warning: could not parse the configured node selectors!")
+					}
+					d.Spec.Template.Spec.NodeSelector = nodeSelector
 				}
 			}
 		}
