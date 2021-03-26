@@ -95,3 +95,42 @@ func TestValueTolerations(t *testing.T) {
 	assert.Equal(t, v1.TaintEffectNoSchedule, toleration[3].Effect)
 	assert.Equal(t, int64(120), *toleration[3].TolerationSeconds)
 }
+
+func TestValidNodeSelectors(t *testing.T) {
+	validNodeSelectors := [][]string{
+		{"key1=value"},
+		{"kubernetes.io/hostname=worker0"},
+		{"disktype=ssd"},
+		{"key=path-to-value"},
+		{"keyNum=123"},
+	}
+	for _, vds := range validNodeSelectors {
+		_, err := GetNodeSelectors(vds)
+		assert.Nil(t, err)
+	}
+}
+
+func TestInvalidNodeSelectors(t *testing.T) {
+	validNodeSelectors := [][]string{
+		{"key1"},
+		{"kubernetes.io@hostname=worker0"},
+		{"key=path/to/value"},
+	}
+	for _, vds := range validNodeSelectors {
+		_, err := GetNodeSelectors(vds)
+		assert.NotNil(t, err)
+	}
+}
+
+func TestValueNodeSelectors(t *testing.T) {
+	nodeSelectorsArray := []string{
+		"key=value",
+		"kubernetes.io/hostname=worker0",
+	}
+	nodeSelectors, err := GetNodeSelectors(nodeSelectorsArray)
+	assert.Nil(t, err)
+	assert.Equal(t, 2, len(nodeSelectors))
+
+	assert.Equal(t, "value", nodeSelectors["key"])
+	assert.Equal(t, "worker0", nodeSelectors["kubernetes.io/hostname"])
+}

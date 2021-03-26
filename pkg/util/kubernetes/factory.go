@@ -26,6 +26,7 @@ import (
 )
 
 var validTaintRegexp = regexp.MustCompile(`^([\w\/_\-\.]+)(=)?([\w_\-\.]+)?:(NoSchedule|NoExecute|PreferNoSchedule):?(\d*)?$`)
+var validNodeSelectorRegexp = regexp.MustCompile(`^([\w\/_\-\.]+)=([\w_\-\.]+)$`)
 
 // GetTolerations build an array of Tolerations from an array of string
 func NewTolerations(taints []string) ([]corev1.Toleration, error) {
@@ -59,4 +60,18 @@ func NewTolerations(taints []string) ([]corev1.Toleration, error) {
 	}
 
 	return tolerations, nil
+}
+
+// GetNodeSelectors build a map of NodeSelectors from an array of string
+func GetNodeSelectors(nsArray []string) (map[string]string, error) {
+	nodeSelectors := make(map[string]string)
+	for _, ns := range nsArray {
+		if !validNodeSelectorRegexp.MatchString(ns) {
+			return nil, fmt.Errorf("could not match node selector %v", ns)
+		}
+		// Parse the regexp groups
+		groups := validNodeSelectorRegexp.FindStringSubmatch(ns)
+		nodeSelectors[groups[1]] = groups[2]
+	}
+	return nodeSelectors, nil
 }
