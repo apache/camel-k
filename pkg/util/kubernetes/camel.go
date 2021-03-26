@@ -20,13 +20,13 @@ package kubernetes
 import (
 	"strings"
 
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+
+	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// CamelCreatorLabelPrefix --
 const (
 	CamelCreatorLabelPrefix = "camel.apache.org/created.by"
 

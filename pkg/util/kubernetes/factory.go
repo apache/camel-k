@@ -28,7 +28,7 @@ import (
 var validTaintRegexp = regexp.MustCompile(`^([\w\/_\-\.]+)(=)?([\w_\-\.]+)?:(NoSchedule|NoExecute|PreferNoSchedule):?(\d*)?$`)
 
 // GetTolerations build an array of Tolerations from an array of string
-func GetTolerations(taints []string) ([]corev1.Toleration, error) {
+func NewTolerations(taints []string) ([]corev1.Toleration, error) {
 	tolerations := make([]corev1.Toleration, 0)
 	for _, t := range taints {
 		if !validTaintRegexp.MatchString(t) {

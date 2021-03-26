@@ -30,7 +30,6 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 )
 
-// GetIntegrationPlatform --
 func GetIntegrationPlatform(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationPlatform, error) {
 	key := ctrl.ObjectKey{
 		Name:      name,
@@ -46,7 +45,6 @@ func GetIntegrationPlatform(context context.Context, client ctrl.Reader, name st
 	return &answer, nil
 }
 
-// GetIntegrationKit --
 func GetIntegrationKit(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationKit, error) {
 	key := ctrl.ObjectKey{
 		Name:      name,
@@ -62,23 +60,6 @@ func GetIntegrationKit(context context.Context, client ctrl.Reader, name string,
 	return &answer, nil
 }
 
-// GetIntegration --
-func GetIntegration(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.Integration, error) {
-	key := ctrl.ObjectKey{
-		Name:      name,
-		Namespace: namespace,
-	}
-
-	answer := v1.NewIntegration(namespace, name)
-
-	if err := client.Get(context, key, &answer); err != nil {
-		return nil, err
-	}
-
-	return &answer, nil
-}
-
-// GetBuild --
 func GetBuild(context context.Context, client client.Client, name string, namespace string) (*v1.Build, error) {
 	key := ctrl.ObjectKey{
 		Name:      name,
@@ -94,7 +75,6 @@ func GetBuild(context context.Context, client client.Client, name string, namesp
 	return &answer, nil
 }
 
-// GetConfigMap --
 func GetConfigMap(context context.Context, client ctrl.Reader, name string, namespace string) (*corev1.ConfigMap, error) {
 	key := ctrl.ObjectKey{
 		Name:      name,
@@ -119,7 +99,6 @@ func GetConfigMap(context context.Context, client ctrl.Reader, name string, name
 	return &answer, nil
 }
 
-// GetSecret --
 func GetSecret(context context.Context, client ctrl.Reader, name string, namespace string) (*corev1.Secret, error) {
 	key := ctrl.ObjectKey{
 		Name:      name,
@@ -129,31 +108,6 @@ func GetSecret(context context.Context, client ctrl.Reader, name string, namespa
 	answer := corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Secret",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-	}
-
-	if err := client.Get(context, key, &answer); err != nil {
-		return nil, err
-	}
-
-	return &answer, nil
-}
-
-// GetService --
-func GetService(context context.Context, client ctrl.Reader, name string, namespace string) (*corev1.Service, error) {
-	key := ctrl.ObjectKey{
-		Name:      name,
-		Namespace: namespace,
-	}
-
-	answer := corev1.Service{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Service",
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{

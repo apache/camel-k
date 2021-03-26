@@ -90,7 +90,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		if cfg.Tolerations != nil {
 			if d, ok := o.(*appsv1.Deployment); ok {
 				if d.Labels["camel.apache.org/component"] == "operator" {
-					tolerations, err := kubernetes.GetTolerations(cfg.Tolerations)
+					tolerations, err := kubernetes.NewTolerations(cfg.Tolerations)
 					if err != nil {
 						fmt.Println("Warning: could not parse the configured tolerations!")
 					}
