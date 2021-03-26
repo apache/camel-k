@@ -148,7 +148,10 @@ func buildQuarkusRunner(ctx *builderContext) error {
 	mc.Timeout = ctx.Build.Maven.GetTimeout().Duration
 
 	if ctx.Maven.TrustStoreName != "" {
-		mc.ExtraMavenOpts = append(mc.ExtraMavenOpts, "-Djavax.net.ssl.trustStore="+path.Join(ctx.Path, ctx.Maven.TrustStoreName))
+		mc.ExtraMavenOpts = append(mc.ExtraMavenOpts,
+			"-Djavax.net.ssl.trustStore="+path.Join(ctx.Path, ctx.Maven.TrustStoreName),
+			"-Djavax.net.ssl.trustStorePassword="+ctx.Maven.TrustStorePass,
+		)
 	}
 
 	err := BuildQuarkusRunnerCommon(mc)
@@ -165,18 +168,18 @@ func BuildQuarkusRunnerCommon(mc maven.Context) error {
 		return errors.Wrap(err, "failure while creating resource folder")
 	}
 
-	// generate an empty application.properties so that there will be something in
+	// Generate an empty application.properties so that there will be something in
 	// target/classes as if such directory does not exist, the quarkus maven plugin
-	// may fail the build
-	//
-	// in the future there should be a way to provide build information from secrets,
+	// may fail the build.
+	// In the future there should be a way to provide build information from secrets,
 	// configmap, etc.
 	if _, err := os.Create(path.Join(resourcesPath, "application.properties")); err != nil {
 		return errors.Wrap(err, "failure while creating application.properties")
 	}
 
-	// Build the project
 	mc.AddArgument("package")
+
+	// Build the project
 	if err := maven.Run(mc); err != nil {
 		return errors.Wrap(err, "failure while building project")
 	}

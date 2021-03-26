@@ -121,11 +121,15 @@ func GenerateCatalogCommon(
 
 	if caCert != nil {
 		trustStoreName := "trust.jks"
-		err := jvm.GenerateJavaKeystore(context.Background(), tmpDir, trustStoreName, caCert)
+		trustStorePass := jvm.NewKeystorePassword()
+		err := jvm.GenerateKeystore(context.Background(), tmpDir, trustStoreName, trustStorePass, caCert)
 		if err != nil {
 			return nil, err
 		}
-		mc.ExtraMavenOpts = append(mc.ExtraMavenOpts, "-Djavax.net.ssl.trustStore="+trustStoreName)
+		mc.ExtraMavenOpts = append(mc.ExtraMavenOpts,
+			"-Djavax.net.ssl.trustStore="+trustStoreName,
+			"-Djavax.net.ssl.trustStorePassword="+trustStorePass,
+		)
 	}
 
 	err = maven.Run(mc)

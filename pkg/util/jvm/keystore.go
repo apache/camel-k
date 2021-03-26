@@ -20,28 +20,31 @@ package jvm
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/apache/camel-k/pkg/util"
 )
 
-func GenerateJavaKeystore(ctx context.Context, keystoreDir, keystoreName string, data []byte) error {
+func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePass string, data []byte) error {
 	tmpFile := "ca-cert.tmp"
-	if err := util.WriteFileWithContent(keystoreDir, tmpFile, data); err != nil {
+	err := util.WriteFileWithContent(keystoreDir, tmpFile, data)
+	if err != nil {
 		return err
 	}
 	defer os.Remove(path.Join(keystoreDir, tmpFile))
 
-	args := strings.Fields(fmt.Sprintf("-importcert -noprompt -alias maven -file %s -keystore %s", tmpFile, keystoreName))
+	args := strings.Fields(fmt.Sprintf("-importcert -noprompt -alias maven -storepass %s -file %s -keystore %s", keystorePass, tmpFile, keystoreName))
 	cmd := exec.CommandContext(ctx, "keytool", args...)
 	cmd.Dir = keystoreDir
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
 		return err
 	}
@@ -52,7 +55,7 @@ func GenerateJavaKeystore(ctx context.Context, keystoreDir, keystoreName string,
 	javaHome, ok := os.LookupEnv("JAVA_HOME")
 	if ok {
 		caCertsPath := path.Join(javaHome, "lib/security/cacerts")
-		args := strings.Fields(fmt.Sprintf("-importkeystore -noprompt -srckeystore %s -srcstorepass %s -destkeystore %s", caCertsPath, "changeit", keystoreName))
+		args := strings.Fields(fmt.Sprintf("-importkeystore -noprompt -srckeystore %s -srcstorepass %s -destkeystore %s -deststorepass %s", caCertsPath, "changeit", keystoreName, keystorePass))
 		cmd := exec.CommandContext(ctx, "keytool", args...)
 		cmd.Dir = keystoreDir
 		cmd.Stderr = os.Stderr
@@ -65,4 +68,38 @@ func GenerateJavaKeystore(ctx context.Context, keystoreDir, keystoreName string,
 	}
 
 	return nil
+}
+
+// The keytool CLI mandates a password at least 6 characters long
+// to access any key stores.
+func NewKeystorePassword() string {
+	return randString(10)
+}
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+const (
+	letterIdxBits = 6                    // 6 bits to represent a letter index
+	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
+	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
+)
+
+var src = rand.NewSource(time.Now().UnixNano())
+
+func randString(n int) string {
+	sb := strings.Builder{}
+	sb.Grow(n)
+	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
+		if remain == 0 {
+			cache, remain = src.Int63(), letterIdxMax
+		}
+		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
+			sb.WriteByte(letterBytes[idx])
+			i--
+		}
+		cache >>= letterIdxBits
+		remain--
+	}
+
+	return sb.String()
 }
