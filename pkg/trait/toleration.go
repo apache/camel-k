@@ -66,7 +66,7 @@ func (t *tolerationTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *tolerationTrait) Apply(e *Environment) (err error) {
-	tolerations, err := kubernetes.GetTolerations(t.Taints)
+	tolerations, err := kubernetes.NewTolerations(t.Taints)
 	if err != nil {
 		return err
 	}

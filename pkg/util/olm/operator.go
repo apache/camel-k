@@ -207,7 +207,7 @@ func Install(ctx context.Context, client client.Client, namespace string, global
 
 func maybeSetTolerations(sub *operatorsv1alpha1.Subscription, tolArray []string) error {
 	if tolArray != nil {
-		tolerations, err := kubernetes.GetTolerations(tolArray)
+		tolerations, err := kubernetes.NewTolerations(tolArray)
 		if err != nil {
 			return err
 		}
