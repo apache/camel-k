@@ -77,8 +77,9 @@ func generateJavaKeystore(ctx *builderContext) error {
 	}
 
 	ctx.Maven.TrustStoreName = "trust.jks"
+	ctx.Maven.TrustStorePass = jvm.NewKeystorePassword()
 
-	return jvm.GenerateJavaKeystore(ctx.C, ctx.Path, ctx.Maven.TrustStoreName, certData)
+	return jvm.GenerateKeystore(ctx.C, ctx.Path, ctx.Maven.TrustStoreName, ctx.Maven.TrustStorePass, certData)
 }
 
 func generateProjectSettings(ctx *builderContext) error {
