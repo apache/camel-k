@@ -67,11 +67,11 @@ func cleanUpBuildDir(ctx *builderContext) error {
 }
 
 func generateJavaKeystore(ctx *builderContext) error {
-	if ctx.Build.Maven.CaCert == nil {
+	if ctx.Build.Maven.CASecret == nil {
 		return nil
 	}
 
-	certData, err := kubernetes.GetSecretRefData(ctx.C, ctx.Client, ctx.Namespace, ctx.Build.Maven.CaCert)
+	certData, err := kubernetes.GetSecretRefData(ctx.C, ctx.Client, ctx.Namespace, ctx.Build.Maven.CASecret)
 	if err != nil {
 		return err
 	}

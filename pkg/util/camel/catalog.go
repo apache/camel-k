@@ -76,8 +76,8 @@ func GenerateCatalog(
 	}
 
 	var caCert []byte
-	if mvn.CaCert != nil {
-		caCert, err = kubernetes.GetSecretRefData(ctx, client, namespace, mvn.CaCert)
+	if mvn.CASecret != nil {
+		caCert, err = kubernetes.GetSecretRefData(ctx, client, namespace, mvn.CASecret)
 		if err != nil {
 			return nil, err
 		}

@@ -49,7 +49,7 @@ func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePa
 		return err
 	}
 
-	// Try to locale root CA certificates truststore, in order to import them
+	// Try to locate root CA certificates truststore, in order to import them
 	// into the newly created truststore. It avoids tempering the system-wide
 	// JVM truststore.
 	javaHome, ok := os.LookupEnv("JAVA_HOME")
