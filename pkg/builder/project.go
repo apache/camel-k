@@ -63,7 +63,12 @@ func cleanUpBuildDir(ctx *builderContext) error {
 		return nil
 	}
 
-	return os.RemoveAll(ctx.Build.BuildDir)
+	err := os.RemoveAll(ctx.Build.BuildDir)
+	if err != nil {
+		return err
+	}
+
+	return os.MkdirAll(ctx.Build.BuildDir, 0777)
 }
 
 func generateJavaKeystore(ctx *builderContext) error {
