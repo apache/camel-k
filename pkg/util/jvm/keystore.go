@@ -35,11 +35,34 @@ func GenerateJavaKeystore(ctx context.Context, keystoreDir, keystoreName string,
 	}
 	defer os.Remove(path.Join(keystoreDir, tmpFile))
 
-	args := strings.Fields(fmt.Sprintf("-importcert -alias maven -file %s -keystore %s", tmpFile, keystoreName))
+	args := strings.Fields(fmt.Sprintf("-importcert -noprompt -alias maven -file %s -keystore %s", tmpFile, keystoreName))
 	cmd := exec.CommandContext(ctx, "keytool", args...)
 	cmd.Dir = keystoreDir
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 
-	return cmd.Run()
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	// Try to locale root CA certificates truststore, in order to import them
+	// into the newly created truststore. It avoids tempering the system-wide
+	// JVM truststore.
+	javaHome, ok := os.LookupEnv("JAVA_HOME")
+	if ok {
+		caCertsPath := path.Join(javaHome, "lib/security/cacerts")
+		args := strings.Fields(fmt.Sprintf("-importkeystore -noprompt -srckeystore %s -srcstorepass %s -destkeystore %s", caCertsPath, "changeit", keystoreName))
+		cmd := exec.CommandContext(ctx, "keytool", args...)
+		cmd.Dir = keystoreDir
+		cmd.Stderr = os.Stderr
+		cmd.Stdout = os.Stdout
+
+		err := cmd.Run()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
