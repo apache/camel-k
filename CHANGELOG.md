@@ -42,6 +42,7 @@
 - chore\(doc\): fix links to unlock website [\#2121](https://github.com/apache/camel-k/pull/2121) ([nicolaferraro](https://github.com/nicolaferraro))
 - Kamel local inspect: In case of missing format, show the output in th… [\#2118](https://github.com/apache/camel-k/pull/2118) ([oscerd](https://github.com/oscerd))
 - Fix knative subscriptions and triggers [\#2115](https://github.com/apache/camel-k/pull/2115) ([nicolaferraro](https://github.com/nicolaferraro))
+- feat\(operator\): toleration install flag [\#2114](https://github.com/apache/camel-k/pull/2114) ([squakez](https://github.com/squakez))
 - fix\(cli\): install error message [\#2112](https://github.com/apache/camel-k/pull/2112) ([squakez](https://github.com/squakez))
 - chore: fix default template for Kamelets [\#2111](https://github.com/apache/camel-k/pull/2111) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(documentation\): add Kamelet development guide [\#2110](https://github.com/apache/camel-k/pull/2110) ([nicolaferraro](https://github.com/nicolaferraro))
