@@ -105,7 +105,6 @@
 - chore\(olm\): Regenerate current OLM package manifest [\#2012](https://github.com/apache/camel-k/pull/2012) ([astefanutti](https://github.com/astefanutti))
 - fix\(olm\): Add back lost rules to OLM role [\#2011](https://github.com/apache/camel-k/pull/2011) ([astefanutti](https://github.com/astefanutti))
 - chore\(doc\): Add ServiceBinding trait documentation [\#2010](https://github.com/apache/camel-k/pull/2010) ([astefanutti](https://github.com/astefanutti))
-- feat: Add ServiceBinding trait \(\#1445\) [\#1952](https://github.com/apache/camel-k/pull/1952) ([johnpoth](https://github.com/johnpoth))
 - Use Quarkus fast-jar package format apache/camel-k-runtime\#360 [\#1931](https://github.com/apache/camel-k/pull/1931) ([jamesnetherton](https://github.com/jamesnetherton))
 
 ## [v1.3.2](https://github.com/apache/camel-k/tree/v1.3.2) (2021-03-19)
