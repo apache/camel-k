@@ -114,9 +114,10 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 		"operator (used in combination with the --global flag)")
 
 	// Maven settings
-	cmd.Flags().String("local-repository", "", "Location of the local maven repository")
-	cmd.Flags().String("maven-settings", "", "Configure the source of the maven settings (configmap|secret:name[/key])")
-	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
+	cmd.Flags().String("local-repository", "", "Location of the local Maven repository")
+	cmd.Flags().String("maven-settings", "", "Configure the source of the Maven settings (configmap|secret:name[/key])")
+	cmd.Flags().StringArray("maven-repository", nil, "Add a Maven repository")
+	cmd.Flags().String("maven-ca-secret", "", "Configure the secret key containing the Maven CA certificates (secret/key)")
 
 	// health
 	cmd.Flags().Int("health-port", 8081, "The port of the health endpoint")
@@ -167,6 +168,7 @@ type installCmdOptions struct {
 	BuildTimeout            string   `mapstructure:"build-timeout"`
 	MavenRepositories       []string `mapstructure:"maven-repositories"`
 	MavenSettings           string   `mapstructure:"maven-settings"`
+	MavenCASecret           string   `mapstructure:"maven-ca-secret"`
 	HealthPort              int32    `mapstructure:"health-port"`
 	Monitoring              bool     `mapstructure:"monitoring"`
 	MonitoringPort          int32    `mapstructure:"monitoring-port"`
@@ -356,6 +358,14 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				return err
 			}
 			platform.Spec.Build.Maven.Settings = mavenSettings
+		}
+
+		if o.MavenCASecret != "" {
+			secret, err := decodeSecretKeySelector(o.MavenCASecret)
+			if err != nil {
+				return err
+			}
+			platform.Spec.Build.Maven.CASecret = secret
 		}
 
 		if o.HTTPProxySecret != "" {
@@ -613,4 +623,21 @@ func decodeMavenSettings(mavenSettings string) (v1.ValueSource, error) {
 	}
 
 	return v1.ValueSource{}, fmt.Errorf("illegal maven setting definition, syntax: configmap|secret:resource-name[/settings path]")
+}
+
+func decodeSecretKeySelector(secretKey string) (*corev1.SecretKeySelector, error) {
+	r := regexp.MustCompile(`^([a-zA-Z0-9-]*)/([a-zA-Z0-9].*)$`)
+
+	if !r.MatchString(secretKey) {
+		return nil, fmt.Errorf("illegal Maven CA certificates secret key selector, syntax: secret-name/secret-key")
+	}
+
+	match := r.FindStringSubmatch(secretKey)
+
+	return &corev1.SecretKeySelector{
+		LocalObjectReference: corev1.LocalObjectReference{
+			Name: match[1],
+		},
+		Key: match[2],
+	}, nil
 }
