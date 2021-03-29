@@ -42,6 +42,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	. "github.com/apache/camel-k/e2e/support"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 func TestMavenCASecret(t *testing.T) {
@@ -235,6 +236,16 @@ ProxyPreserveHost On
 										MountPath: "/nexus-data",
 									},
 								},
+								ReadinessProbe: &corev1.Probe{
+									InitialDelaySeconds: 30,
+									FailureThreshold:    3,
+									Handler: corev1.Handler{
+										HTTPGet: &corev1.HTTPGetAction{
+											Port: intstr.FromString("nexus"),
+											Path: "/repository/maven-public/",
+										},
+									},
+								},
 							},
 						},
 						Volumes: []corev1.Volume{
@@ -298,7 +309,7 @@ ProxyPreserveHost On
 		Expect(TestClient().Create(TestContext, service)).To(Succeed())
 
 		// Wait for the Deployment to become ready
-		Eventually(Deployment(ns, deployment.Name)).Should(PointTo(MatchFields(IgnoreExtras,
+		Eventually(Deployment(ns, deployment.Name), TestTimeoutMedium).Should(PointTo(MatchFields(IgnoreExtras,
 			Fields{
 				"Status": MatchFields(IgnoreExtras,
 					Fields{
@@ -307,17 +318,21 @@ ProxyPreserveHost On
 			}),
 		))
 
-		// Install Camel K with the Maven CA secret
+		// Install Camel K with the Maven Central Nexus proxy and the corresponding Maven CA secret
 		Expect(Kamel("install", "-n", ns,
 			"--maven-repository", fmt.Sprintf(`https://%s/repository/maven-public/@id=central@snapshots`, hostname),
 			"--maven-ca-secret", secret.Name+"/"+corev1.TLSCertKey,
 		).Execute()).To(Succeed())
 
+		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
 		// Run the Integration
 		name := "java"
-		Expect(Kamel("run", "-n", ns, "files/Java.java",
-			"--name", name,
-		).Execute()).To(Succeed())
+		Expect(Kamel("run", "-n", ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
