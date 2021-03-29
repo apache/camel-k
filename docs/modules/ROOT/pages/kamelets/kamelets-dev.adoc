@@ -758,8 +758,8 @@ spec:
       # ...
 ----
 <1> The definition part starts with general information about the Kamelet
-<2> Definition of the "period" parameter (used with the `{{period}}` placeholder in the route)
-<3> Definition of the "lookAhead" parameter
+<2> Definition of the period parameter (used with the `{{period}}` placeholder in the route)
+<3> Definition of the lookAhead parameter
 
 === Step 7: add metadata and sugar
 
