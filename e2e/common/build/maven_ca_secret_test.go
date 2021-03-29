@@ -309,7 +309,7 @@ ProxyPreserveHost On
 
 		// Install Camel K with the Maven CA secret
 		Expect(Kamel("install", "-n", ns,
-			"--maven-repository", fmt.Sprintf(`https://%s/nexus/content/groups/public@id\=nexus@snapshots`, hostname),
+			"--maven-repository", fmt.Sprintf(`https://%s/repository/maven-public/@id=central@snapshots`, hostname),
 			"--maven-ca-secret", secret.Name+"/"+corev1.TLSCertKey,
 		).Execute()).To(Succeed())
 
