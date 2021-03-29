@@ -27,7 +27,14 @@ import (
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
+var uriRegexp = regexp.MustCompile(`^[a-z0-9+][a-zA-Z0-9-+]*:.*$`)
+
 var queryExtractorRegexp = `^[^?]+\?(?:|.*[&])%s=([^&]+)(?:[&].*|$)`
+
+// HasCamelURIFormat tells if a given string may belong to a Camel URI, without checking any catalog
+func HasCamelURIFormat(uri string) bool {
+	return uriRegexp.MatchString(uri)
+}
 
 // GetComponent returns the Camel component used in the URI
 func GetComponent(uri string) string {

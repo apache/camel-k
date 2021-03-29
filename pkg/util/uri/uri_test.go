@@ -142,3 +142,40 @@ func TestAppendParameters(t *testing.T) {
 		})
 	}
 }
+
+func TestCamelURIFormat(t *testing.T) {
+	tests := []struct {
+		uri     string
+		invalid bool
+	}{
+		{
+			uri: "knative:channnel",
+		},
+		{
+			uri: "atomix-value:",
+		},
+		{
+			uri: "aws-ec2:",
+		},
+		{
+			uri: "coap+tcp:",
+		},
+		{
+			uri: "solrCloud:",
+		},
+		{
+			uri:     "PostgreSQL:db",
+			invalid: true,
+		},
+		{
+			uri:     "postgres.org/v1alpha1:PostgreSQL:db",
+			invalid: true,
+		},
+	}
+
+	for i, tc := range tests {
+		t.Run(fmt.Sprintf("%d-%s", i, tc.uri), func(t *testing.T) {
+			assert.Equal(t, !tc.invalid, HasCamelURIFormat(tc.uri))
+		})
+	}
+}
