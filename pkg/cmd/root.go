@@ -147,6 +147,7 @@ func addKamelSubcommands(cmd *cobra.Command, options *RootCmdOptions) {
 	cmd.AddCommand(cmdOnly(newCmdDebug(options)))
 	cmd.AddCommand(cmdOnly(newCmdDump(options)))
 	cmd.AddCommand(newCmdLocal(options))
+	cmd.AddCommand(cmdOnly(newCmdBind(options)))
 }
 
 func addHelpSubCommands(cmd *cobra.Command, options *RootCmdOptions) error {
@@ -206,7 +207,7 @@ func checkAndShowCompatibilityWarning(ctx context.Context, c client.Client, name
 		if k8serrors.IsNotFound(err) {
 			fmt.Printf("No IntegrationPlatform resource in %s namespace\n", namespace)
 		} else {
-			fmt.Printf("Unable to retrieve the operator version: %s", err.Error())
+			fmt.Printf("Unable to retrieve the operator version: %s\n", err.Error())
 		}
 	} else {
 		if operatorVersion != "" && !compatibleVersions(operatorVersion, defaults.Version) {

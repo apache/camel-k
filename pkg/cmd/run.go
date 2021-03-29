@@ -414,7 +414,7 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 				}
 			}()
 		} else {
-			fmt.Printf("WARNING: the following URL will not be watched for changes: %s\n", s)
+			fmt.Printf("Warning: the following URL will not be watched for changes: %s\n", s)
 		}
 	}
 
