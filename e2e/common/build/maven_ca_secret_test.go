@@ -110,24 +110,37 @@ func TestMavenCASecret(t *testing.T) {
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: ns,
-				Name:      "httd-config",
+				Name:      "httpd-config",
 			},
 			Data: map[string]string{
 				"httpd.conf": fmt.Sprintf(`
-ServerRoot "/usr/local/apache2"
+ServerRoot "/etc/httpd
 
-LoadModule ssl_module modules/mod_ssl.so
+PidFile /var/run/httpd/httpd.pid"
+
+LoadModule mpm_event_module /usr/local/apache2/modules/mod_mpm_event.so
+LoadModule proxy_module /usr/local/apache2/modules/mod_proxy.so
+LoadModule proxy_http_module /usr/local/apache2/modules/mod_proxy_http.so
+LoadModule headers_module /usr/local/apache2/modules/mod_headers.so
+LoadModule setenvif_module /usr/local/apache2/modules/mod_setenvif.so
+LoadModule version_module /usr/local/apache2/modules/mod_version.so
+LoadModule log_config_module /usr/local/apache2/modules/mod_log_config.so
+LoadModule env_module /usr/local/apache2/modules/mod_env.so
+LoadModule unixd_module /usr/local/apache2/modules/mod_unixd.so
+LoadModule status_module /usr/local/apache2/modules/mod_status.so
+LoadModule autoindex_module /usr/local/apache2/modules/mod_autoindex.so
+LoadModule ssl_module /usr/local/apache2/modules/mod_ssl.so
 
 ErrorLog /proc/self/fd/2
 
 LogLevel warn
 
-Listen 443
+Listen 8443
 
 ProxyRequests Off
 ProxyPreserveHost On
 
-<VirtualHost *:443>
+<VirtualHost *:8443>
   SSLEngine on
 
   SSLCertificateFile "%s/%s"
@@ -173,19 +186,29 @@ ProxyPreserveHost On
 					Spec: corev1.PodSpec{
 						Containers: []corev1.Container{
 							{
-								Name:  "httpd",
-								Image: "httpd:2.4.46",
+								Name:    "httpd",
+								Image:   "httpd:2.4.46",
+								Command: []string{"httpd", "-f", "/etc/httpd/httpd.conf", "-DFOREGROUND"},
+								Ports: []corev1.ContainerPort{
+									{
+										Name:          "https",
+										ContainerPort: 8443,
+									},
+								},
 								VolumeMounts: []corev1.VolumeMount{
 									{
 										Name:      "tls",
-										ReadOnly:  true,
 										MountPath: tlsMountPath,
+										ReadOnly:  true,
 									},
 									{
-										Name:      "httpd",
+										Name:      "httpd-conf",
+										MountPath: "/etc/httpd",
 										ReadOnly:  true,
-										MountPath: "/usr/local/apache2/conf",
-										SubPath:   "httpd.conf",
+									},
+									{
+										Name:      "httpd-run",
+										MountPath: "/var/run/httpd",
 									},
 								},
 							},
@@ -196,6 +219,12 @@ ProxyPreserveHost On
 									{
 										Name:          "nexus",
 										ContainerPort: 8081,
+									},
+								},
+								VolumeMounts: []corev1.VolumeMount{
+									{
+										Name:      "nexus",
+										MountPath: "/nexus-data",
 									},
 								},
 							},
@@ -210,13 +239,25 @@ ProxyPreserveHost On
 								},
 							},
 							{
-								Name: "httpd",
+								Name: "httpd-conf",
 								VolumeSource: corev1.VolumeSource{
 									ConfigMap: &corev1.ConfigMapVolumeSource{
 										LocalObjectReference: corev1.LocalObjectReference{
 											Name: config.Name,
 										},
 									},
+								},
+							},
+							{
+								Name: "httpd-run",
+								VolumeSource: corev1.VolumeSource{
+									EmptyDir: &corev1.EmptyDirVolumeSource{},
+								},
+							},
+							{
+								Name: "nexus",
+								VolumeSource: corev1.VolumeSource{
+									EmptyDir: &corev1.EmptyDirVolumeSource{},
 								},
 							},
 						},
