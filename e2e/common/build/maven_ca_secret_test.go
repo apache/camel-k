@@ -119,6 +119,8 @@ ServerRoot "/etc/httpd
 PidFile /var/run/httpd/httpd.pid"
 
 LoadModule mpm_event_module /usr/local/apache2/modules/mod_mpm_event.so
+LoadModule authn_core_module /usr/local/apache2/modules/mod_authn_core.so
+LoadModule authz_core_module /usr/local/apache2/modules/mod_authz_core.so
 LoadModule proxy_module /usr/local/apache2/modules/mod_proxy.so
 LoadModule proxy_http_module /usr/local/apache2/modules/mod_proxy_http.so
 LoadModule headers_module /usr/local/apache2/modules/mod_headers.so
@@ -139,6 +141,12 @@ Listen 8443
 
 ProxyRequests Off
 ProxyPreserveHost On
+
+<Directory />
+  Options FollowSymLinks
+  AllowOverride All
+  Require all granted
+</Directory>
 
 <VirtualHost *:8443>
   SSLEngine on
