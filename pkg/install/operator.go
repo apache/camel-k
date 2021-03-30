@@ -56,6 +56,7 @@ type OperatorConfiguration struct {
 	Monitoring            OperatorMonitoringConfiguration
 	Tolerations           []string
 	NodeSelectors         []string
+	ResourcesRequirements []string
 }
 
 // OperatorHealthConfiguration --
@@ -96,6 +97,20 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 						fmt.Println("Warning: could not parse the configured tolerations!")
 					}
 					d.Spec.Template.Spec.Tolerations = tolerations
+				}
+			}
+		}
+
+		if cfg.ResourcesRequirements != nil {
+			if d, ok := o.(*appsv1.Deployment); ok {
+				if d.Labels["camel.apache.org/component"] == "operator" {
+					resourceReq, err := kubernetes.GetResourceRequirements(cfg.ResourcesRequirements)
+					if err != nil {
+						fmt.Println("Warning: could not parse the configured resources requests!")
+					}
+					for i := 0; i < len(d.Spec.Template.Spec.Containers); i++ {
+						d.Spec.Template.Spec.Containers[i].Resources = resourceReq
+					}
 				}
 			}
 		}
