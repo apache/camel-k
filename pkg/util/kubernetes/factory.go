@@ -23,10 +23,12 @@ import (
 	"strconv"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 var validTaintRegexp = regexp.MustCompile(`^([\w\/_\-\.]+)(=)?([\w_\-\.]+)?:(NoSchedule|NoExecute|PreferNoSchedule):?(\d*)?$`)
 var validNodeSelectorRegexp = regexp.MustCompile(`^([\w\/_\-\.]+)=([\w_\-\.]+)$`)
+var validResourceRequirementsRegexp = regexp.MustCompile(`^(requests|limits)\.(memory|cpu)=([\w\.]+)$`)
 
 // NewTolerations build an array of Tolerations from an array of string
 func NewTolerations(taints []string) ([]corev1.Toleration, error) {
@@ -74,4 +76,39 @@ func NewNodeSelectors(nsArray []string) (map[string]string, error) {
 		nodeSelectors[groups[1]] = groups[2]
 	}
 	return nodeSelectors, nil
+}
+
+// GetResourceRequirements will build a CPU and memory requirements from an array of requests
+// matching <requestType.requestResource=value> (ie, limits.memory=256Mi)
+func GetResourceRequirements(reqs []string) (corev1.ResourceRequirements, error) {
+	resReq := corev1.ResourceRequirements{
+		Requests: corev1.ResourceList{},
+		Limits:   corev1.ResourceList{},
+	}
+
+	for _, s := range reqs {
+		if !validResourceRequirementsRegexp.MatchString(s) {
+			return resReq, fmt.Errorf("could not match resource requirement %v", s)
+		}
+
+		resGroups := validResourceRequirementsRegexp.FindStringSubmatch(s)
+
+		reqType := resGroups[1]
+		reqRes := resGroups[2]
+		reqQuantity, err := resource.ParseQuantity(resGroups[3])
+		if err != nil {
+			return resReq, err
+		}
+		switch reqType {
+		case "requests":
+			resReq.Requests[corev1.ResourceName(reqRes)] = reqQuantity
+		case "limits":
+			resReq.Limits[corev1.ResourceName(reqRes)] = reqQuantity
+		default:
+			return resReq, fmt.Errorf("unknown resource requirements %v", reqType)
+		}
+
+	}
+
+	return resReq, nil
 }
