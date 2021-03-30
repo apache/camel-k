@@ -18,10 +18,12 @@ limitations under the License.
 package kubernetes
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 func TestValidTolerations(t *testing.T) {
@@ -133,4 +135,38 @@ func TestValueNodeSelectors(t *testing.T) {
 
 	assert.Equal(t, "value", nodeSelectors["key"])
 	assert.Equal(t, "worker0", nodeSelectors["kubernetes.io/hostname"])
+}
+
+func TestAllResourceRequirements(t *testing.T) {
+	resReq := "limits.memory=256Mi,requests.memory=128Mi,limits.cpu=1000m,requests.cpu=500m"
+	resourceRequirements, err := GetResourceRequirements(strings.Split(resReq, ","))
+	assert.Nil(t, err)
+
+	assert.Equal(t, resource.MustParse("256Mi"), *resourceRequirements.Limits.Memory())
+	assert.Equal(t, resource.MustParse("128Mi"), *resourceRequirements.Requests.Memory())
+	assert.Equal(t, resource.MustParse("1000m"), *resourceRequirements.Limits.Cpu())
+	assert.Equal(t, resource.MustParse("500m"), *resourceRequirements.Requests.Cpu())
+}
+
+func TestSomeResourceRequirements(t *testing.T) {
+	resReq := "limits.memory=128Mi,requests.cpu=500m"
+	resourceRequirements, err := GetResourceRequirements(strings.Split(resReq, ","))
+	assert.Nil(t, err)
+
+	assert.Equal(t, resource.MustParse("128Mi"), *resourceRequirements.Limits.Memory())
+	assert.Equal(t, true, resourceRequirements.Requests.Memory().IsZero())
+	assert.Equal(t, true, resourceRequirements.Limits.Cpu().IsZero())
+	assert.Equal(t, resource.MustParse("500m"), *resourceRequirements.Requests.Cpu())
+}
+
+func TestErrorResourceRequirements(t *testing.T) {
+	resReq := "limits.memory=expectSomeError!"
+	_, err := GetResourceRequirements(strings.Split(resReq, ","))
+	assert.NotNil(t, err)
+}
+
+func TestMissingResourceRequirements(t *testing.T) {
+	resReq := ""
+	_, err := GetResourceRequirements(strings.Split(resReq, ","))
+	assert.NotNil(t, err)
 }
