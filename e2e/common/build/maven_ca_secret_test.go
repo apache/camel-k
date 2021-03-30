@@ -134,6 +134,8 @@ LoadModule status_module /usr/local/apache2/modules/mod_status.so
 LoadModule autoindex_module /usr/local/apache2/modules/mod_autoindex.so
 LoadModule ssl_module /usr/local/apache2/modules/mod_ssl.so
 
+Mutex posixsem
+
 ErrorLog /proc/self/fd/2
 
 LogLevel warn
