@@ -138,7 +138,8 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 }
 
 // Install creates a subscription for the OLM package
-func Install(ctx context.Context, client client.Client, namespace string, global bool, options Options, collection *kubernetes.Collection, tolerations []string, nodeSelectors []string) (bool, error) {
+func Install(ctx context.Context, client client.Client, namespace string, global bool, options Options, collection *kubernetes.Collection,
+	tolerations []string, nodeSelectors []string, resourcesRequirements []string) (bool, error) {
 	options = fillDefaults(options)
 	if installed, err := IsOperatorInstalled(ctx, client, namespace, global, options); err != nil {
 		return false, err
@@ -174,6 +175,10 @@ func Install(ctx context.Context, client client.Client, namespace string, global
 	err = maybeSetNodeSelectors(&sub, nodeSelectors)
 	if err != nil {
 		return false, errors.Wrap(err, fmt.Sprintf("could not set node selectors"))
+	}
+	err = maybeSetResourcesRequirements(&sub, resourcesRequirements)
+	if err != nil {
+		return false, errors.Wrap(err, fmt.Sprintf("could not set resources requirements"))
 	}
 
 	if collection != nil {
@@ -227,6 +232,18 @@ func maybeSetNodeSelectors(sub *operatorsv1alpha1.Subscription, nsArray []string
 			return err
 		}
 		sub.Spec.Config.NodeSelector = nodeSelectors
+	}
+	return nil
+}
+
+func maybeSetResourcesRequirements(sub *operatorsv1alpha1.Subscription, reqArray []string) error {
+	if reqArray != nil {
+		resourcesReq, err := kubernetes.GetResourceRequirements(reqArray)
+		if err != nil {
+			return err
+		}
+		sub.Spec.Config.Resources = resourcesReq
+		fmt.Println("Setting resources to", sub.Spec.Config.Resources)
 	}
 	return nil
 }

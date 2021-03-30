@@ -225,7 +225,8 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		if installViaOLM {
 			fmt.Fprintln(cobraCmd.OutOrStdout(), "OLM is available in the cluster")
 			var installed bool
-			if installed, err = olm.Install(o.Context, olmClient, o.Namespace, o.Global, o.olmOptions, collection, o.Tolerations, o.NodeSelectors); err != nil {
+			if installed, err = olm.Install(o.Context, olmClient, o.Namespace, o.Global, o.olmOptions, collection,
+				o.Tolerations, o.NodeSelectors, o.ResourcesRequirements); err != nil {
 				return err
 			}
 			if !installed {
