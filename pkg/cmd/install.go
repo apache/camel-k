@@ -127,8 +127,9 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().Int("monitoring-port", 8080, "The port of the metrics endpoint")
 
 	// Pod settings
-	cmd.Flags().StringArrayP("toleration", "", nil, "Add a Toleration to the operator Pod")
-	cmd.Flags().StringArrayP("node-selector", "", nil, "Add a NodeSelector to the operator Pod")
+	cmd.Flags().StringArray("toleration", nil, "Add a Toleration to the operator Pod")
+	cmd.Flags().StringArray("node-selector", nil, "Add a NodeSelector to the operator Pod")
+	cmd.Flags().StringArray("resources-requirements", nil, "Define the resources requests and limits assigned to the operator Pod as <requestType.requestResource=value> (ie, limits.memory=256Mi)")
 
 	// save
 	cmd.Flags().Bool("save", false, "Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
@@ -178,6 +179,7 @@ type installCmdOptions struct {
 	Tolerations             []string `mapstructure:"tolerations"`
 	NodeSelectors           []string `mapstructure:"node-selectors"`
 	HTTPProxySecret         string   `mapstructure:"http-proxy-secret"`
+	ResourcesRequirements   []string `mapstructure:"resources-requirements"`
 
 	registry         v1.IntegrationPlatformRegistrySpec
 	registryAuth     registry.Auth
@@ -274,8 +276,9 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 					Enabled: o.Monitoring,
 					Port:    o.MonitoringPort,
 				},
-				Tolerations:   o.Tolerations,
-				NodeSelectors: o.NodeSelectors,
+				Tolerations:           o.Tolerations,
+				NodeSelectors:         o.NodeSelectors,
+				ResourcesRequirements: o.ResourcesRequirements,
 			}
 			err = install.OperatorOrCollect(o.Context, c, cfg, collection, o.Force)
 			if err != nil {
