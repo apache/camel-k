@@ -22,6 +22,8 @@ limitations under the License.
 package build
 
 import (
+	"bufio"
+	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -30,11 +32,16 @@ import (
 	"fmt"
 	"math/big"
 	rand2 "math/rand"
+	"os"
 	"testing"
 	"time"
 
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
+	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/tools/remotecommand"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -320,9 +327,81 @@ ProxyPreserveHost On
 			}),
 		))
 
+		// Get the Nexus Pod
+		pods := &corev1.PodList{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Pod",
+				APIVersion: corev1.SchemeGroupVersion.String(),
+			},
+		}
+		Expect(TestClient().List(TestContext, pods,
+			ctrl.InNamespace(ns),
+			ctrl.MatchingLabels{"camel-k": "maven-test-nexus"},
+		)).To(Succeed())
+		Expect(pods.Items).To(HaveLen(1))
+
+		// Retrieve the Nexus admin password
+		req := TestClient().CoreV1().RESTClient().Post().
+			Resource("pods").
+			Name(pods.Items[0].Name).
+			Namespace(ns).
+			SubResource("exec").
+			Param("container", "nexus")
+
+		req.VersionedParams(&corev1.PodExecOptions{
+			Container: "nexus",
+			Command:   []string{"cat", "/nexus-data/admin.password"},
+			Stdout:    true,
+			Stderr:    true,
+			TTY:       false,
+		}, scheme.ParameterCodec)
+
+		exec, err := remotecommand.NewSPDYExecutor(TestClient().GetConfig(), "POST", req.URL())
+		Expect(err).To(BeNil())
+
+		var password bytes.Buffer
+		Expect(exec.Stream(remotecommand.StreamOptions{
+			Stdout: bufio.NewWriter(&password),
+			Stderr: os.Stderr,
+			Tty:    false,
+		})).To(Succeed())
+
+		// Create the Apache Snapshot proxy repository using the Nexus REST API
+		req = TestClient().CoreV1().RESTClient().Post().
+			Resource("pods").
+			Name(pods.Items[0].Name).
+			Namespace(ns).
+			SubResource("exec").
+			Param("container", "nexus")
+
+		apacheSnapshots := "https://repository.apache.org/content/repositories/snapshots/"
+		repository := fmt.Sprintf(`{"name":"apache-snapshots","proxy":{"remoteUrl":"%s","contentMaxAge":1440,"metadataMaxAge":1440},"online":true,"maven":{"versionPolicy":"SNAPSHOT","layoutPolicy":"PERMISSIVE"},"negativeCache":{"enabled":false,"timeToLive":1440},"httpClient":{"autoBlock":false,"blocked":false},"storage":{"strictContentTypeValidation":true,"blobStoreName":"default"}}`, apacheSnapshots)
+
+		req.VersionedParams(&corev1.PodExecOptions{
+			Container: "nexus",
+			Command: []string{"curl", "-v",
+				"-u", "admin:" + password.String(),
+				"-H", "Content-Type: application/json",
+				"--data", repository,
+				"http://localhost:8081/service/rest/v1/repositories/maven/proxy/"},
+			Stdout: true,
+			Stderr: true,
+			TTY:    false,
+		}, scheme.ParameterCodec)
+
+		exec, err = remotecommand.NewSPDYExecutor(TestClient().GetConfig(), "POST", req.URL())
+		Expect(err).To(BeNil())
+
+		Expect(exec.Stream(remotecommand.StreamOptions{
+			Stdout: os.Stdout,
+			Stderr: os.Stderr,
+			Tty:    false,
+		})).To(Succeed())
+
 		// Install Camel K with the Maven Central Nexus proxy and the corresponding Maven CA secret
 		Expect(Kamel("install", "-n", ns,
-			"--maven-repository", fmt.Sprintf(`https://%s/repository/maven-public/@id=central@snapshots`, hostname),
+			"--maven-repository", fmt.Sprintf(`https://%s/repository/maven-public/@id=central`, hostname),
+			"--maven-repository", fmt.Sprintf(`https://%s/repository/apache-snapshots/@id=apache-snapshots@snapshots`, hostname),
 			"--maven-ca-secret", secret.Name+"/"+corev1.TLSCertKey,
 		).Execute()).To(Succeed())
 
