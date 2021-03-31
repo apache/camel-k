@@ -11,6 +11,7 @@
 - Deployment on K3s failing with Kaniko and Buildah build strategy [\#2161](https://github.com/apache/camel-k/issues/2161)
 - Deployment on K3s failing with Spectrum build strategy [\#2160](https://github.com/apache/camel-k/issues/2160)
 - Normalize object references [\#2158](https://github.com/apache/camel-k/issues/2158)
+- Ability to provide Maven repository CA certificates [\#2149](https://github.com/apache/camel-k/issues/2149)
 - kamelet-binding: embedding camelets [\#2146](https://github.com/apache/camel-k/issues/2146)
 - Release 1.3.2 [\#2144](https://github.com/apache/camel-k/issues/2144)
 - Adding camel-jackson dependency creates issues with inner classes  [\#1507](https://github.com/apache/camel-k/issues/1507)
@@ -18,6 +19,7 @@
 
 **Merged pull requests:**
 
+- feat\(build\): Custom Maven CA certificate\(s\) support [\#2180](https://github.com/apache/camel-k/pull/2180) ([astefanutti](https://github.com/astefanutti))
 - Fix link in example knative readme [\#2174](https://github.com/apache/camel-k/pull/2174) ([apupier](https://github.com/apupier))
 - Adding a dump command [\#2171](https://github.com/apache/camel-k/pull/2171) ([oscerd](https://github.com/oscerd))
 - Normalize names [\#2169](https://github.com/apache/camel-k/pull/2169) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -92,18 +94,7 @@
 - chore\(cli\): Exclude manifests directory from embedded resources [\#2033](https://github.com/apache/camel-k/pull/2033) ([astefanutti](https://github.com/astefanutti))
 - fix\(olm\): Fix Integration example from CSV description [\#2032](https://github.com/apache/camel-k/pull/2032) ([astefanutti](https://github.com/astefanutti))
 - Point to documentation for debugging using VS Code [\#2030](https://github.com/apache/camel-k/pull/2030) ([apupier](https://github.com/apupier))
-- Increase timeouts [\#2028](https://github.com/apache/camel-k/pull/2028) ([bouskaJ](https://github.com/bouskaJ))
 - chore\(RBAC\): Symmetrical RBAC setup between OLM and CLI [\#2027](https://github.com/apache/camel-k/pull/2027) ([astefanutti](https://github.com/astefanutti))
-- \[fix\] Add bigger flexibility to alerts tests [\#2026](https://github.com/apache/camel-k/pull/2026) ([llowinge](https://github.com/llowinge))
-- fix: Add embedded kamelets directory check back [\#2021](https://github.com/apache/camel-k/pull/2021) ([astefanutti](https://github.com/astefanutti))
-- fix: Resource name must be used instead of kind for SelfSubjectAccessReview request [\#2020](https://github.com/apache/camel-k/pull/2020) ([astefanutti](https://github.com/astefanutti))
-- fix: ServiceBinding SAR check does not guaranty CRD is installed [\#2019](https://github.com/apache/camel-k/pull/2019) ([astefanutti](https://github.com/astefanutti))
-- chore\(config\): Remove RBAC duplications [\#2017](https://github.com/apache/camel-k/pull/2017) ([astefanutti](https://github.com/astefanutti))
-- fix\(pdb\): Add missing watch verb to PodDisruptionBudget resources RBAC [\#2016](https://github.com/apache/camel-k/pull/2016) ([astefanutti](https://github.com/astefanutti))
-- fix\(helm\): Add missing permissions for PodDisruptionBudget resources [\#2015](https://github.com/apache/camel-k/pull/2015) ([astefanutti](https://github.com/astefanutti))
-- chore\(helm\): Remove duplicated rule for servicebindings [\#2014](https://github.com/apache/camel-k/pull/2014) ([astefanutti](https://github.com/astefanutti))
-- chore\(olm\): Regenerate current OLM package manifest [\#2012](https://github.com/apache/camel-k/pull/2012) ([astefanutti](https://github.com/astefanutti))
-- fix\(olm\): Add back lost rules to OLM role [\#2011](https://github.com/apache/camel-k/pull/2011) ([astefanutti](https://github.com/astefanutti))
 - Use Quarkus fast-jar package format apache/camel-k-runtime\#360 [\#1931](https://github.com/apache/camel-k/pull/1931) ([jamesnetherton](https://github.com/jamesnetherton))
 
 ## [v1.3.2](https://github.com/apache/camel-k/tree/v1.3.2) (2021-03-19)
@@ -1192,6 +1183,7 @@
 - fix\(camel\): Report runtime version from Camel catalog into integration and kit statuses [\#1044](https://github.com/apache/camel-k/pull/1044) ([astefanutti](https://github.com/astefanutti))
 - chore\(dev\): Upgrade Operator SDK to version 0.12.0 [\#1043](https://github.com/apache/camel-k/pull/1043) ([astefanutti](https://github.com/astefanutti))
 - Fix typo in doc [\#1042](https://github.com/apache/camel-k/pull/1042) ([apupier](https://github.com/apupier))
+- fix \#989: document the release process [\#1041](https://github.com/apache/camel-k/pull/1041) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(dev\): Require Go version 1.13 [\#1040](https://github.com/apache/camel-k/pull/1040) ([astefanutti](https://github.com/astefanutti))
 - Add readme in examples subfolder [\#1034](https://github.com/apache/camel-k/pull/1034) ([apupier](https://github.com/apupier))
 - fix \#1023: add possibility to reference staging artifacts [\#1029](https://github.com/apache/camel-k/pull/1029) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1228,7 +1220,6 @@
 
 **Merged pull requests:**
 
-- fix \#989: document the release process [\#1041](https://github.com/apache/camel-k/pull/1041) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix \#985: add correct clusterroles for knative in global mode [\#1019](https://github.com/apache/camel-k/pull/1019) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix \#988: add check for missing licenses before release [\#1018](https://github.com/apache/camel-k/pull/1018) ([nicolaferraro](https://github.com/nicolaferraro))
 - Upgrade Operator SDK to version 0.11.0 [\#1017](https://github.com/apache/camel-k/pull/1017) ([astefanutti](https://github.com/astefanutti))
@@ -1919,7 +1910,6 @@
 - chore\(release\): package examples to publish them during release [\#295](https://github.com/apache/camel-k/pull/295) ([nicolaferraro](https://github.com/nicolaferraro))
 - Allow to generate install resources if needed [\#294](https://github.com/apache/camel-k/pull/294) ([nicolaferraro](https://github.com/nicolaferraro))
 - Re-add missing commits [\#293](https://github.com/apache/camel-k/pull/293) ([nicolaferraro](https://github.com/nicolaferraro))
-- refactor: consistent env var management in traits [\#291](https://github.com/apache/camel-k/pull/291) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(log\): make dev-mode work in Knative [\#280](https://github.com/apache/camel-k/pull/280) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#221: use registry name instead of IP in Knative on Openshift [\#278](https://github.com/apache/camel-k/pull/278) ([nicolaferraro](https://github.com/nicolaferraro))
 - Determine active/passive endpoints from Catalog [\#277](https://github.com/apache/camel-k/pull/277) ([lburgazzoli](https://github.com/lburgazzoli))
