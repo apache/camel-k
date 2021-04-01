@@ -1,0 +1,99 @@
+= Configure Maven
+
+== Maven Settings
+
+The Maven settings, used by the Camel K operator, can be provided in a ConfigMap or a Secret.
+
+The `kubectl` CLI provides convenient commands, to create a ConfigMap or a Secret from a file, e.g.:
+
+[source,console]
+----
+$ kubectl create configmap maven-settings --from-file=settings.xml
+----
+
+The created ConfigMap or Secret can then be referenced in the IntegrationPlatform resource, from the `spec.build.maven.settings` field, e.g.:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: IntegrationPlatform
+metadata:
+  name: camel-k
+spec:
+  build:
+    maven:
+      settings:
+        configMapKeyRef:
+          key: settings.xml
+          name: maven-settings
+----
+
+The IntegrationPlatform resource can be edited directly, to reference the ConfigMap or the Secret that contains the Maven settings, e.g.:
+
+[source,console]
+----
+$ kubectl edit ip camel-k
+----
+
+Alternatively, the Kamel CLI provides the `--maven-settings` option, with the `install` command, that can be used to configure the Maven settings at installation time, e.g.:
+
+[source,console]
+----
+$ kamel install --maven-settings=configmap|secret:name[/key]
+----
+
+In case you only want to configure remote repositories, you can use the `--maven-repository` option, that automatically generates a `settings.xml` file and relieves from creating a ConfigMap or Secret, e.g.:
+
+[source,console]
+----
+$ kamel install --maven-repository <repository_url>
+----
+
+Extra attributes can be appended to the `repository_url`, using the `@` separator.
+The following attributes are supported:
+
+.Maven Repository Attributes
+[cols="1m,1,2"]
+|===
+|Name |Type |Description
+
+| @snapshots
+| flag
+| Turns `snapshots.enabled` to `true`
+
+| @noreleases
+| flag
+| Turns `snapshots.enabled` to `false`
+
+| @id
+| string
+| Sets the repository `id`
+
+|===
+
+For example, running the following command:
+
+[source,console]
+----
+$ kamel install --maven-repository https://repository.apache.org/content/groups/snapshots-group@id=apache@snapshots@noreleases
+----
+
+Results in generating the following `settings.xml` file:
+
+[source,xml]
+----
+<repositories>
+  <repository>
+    <id>apache</id>
+    <url>http://repository.apache.org/content/groups/snapshots-group</url>
+    <snapshots>
+      <enabled>true</enabled>
+    </snapshots>
+    <releases>
+      <enabled>false</enabled>
+    </releases>
+  </repository>
+</repositories>
+----
+
+WARNING: The `--maven-settings` and `--maven-repository` options are mutually exclusive.
