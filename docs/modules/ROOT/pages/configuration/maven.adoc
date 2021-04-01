@@ -49,6 +49,8 @@ In case you only want to configure remote repositories, you can use the `--maven
 $ kamel install --maven-repository <repository_url>
 ----
 
+NOTE: Check the <<ca-certificates>> section, if these remote repositories require custom CA certificates.
+
 Extra attributes can be appended to the `repository_url`, using the `@` separator.
 The following attributes are supported:
 
@@ -97,3 +99,41 @@ Results in generating the following `settings.xml` file:
 ----
 
 WARNING: The `--maven-settings` and `--maven-repository` options are mutually exclusive.
+
+[[ca-certificates]]
+== CA Certificates
+
+The CA certificates, used by the Maven commands to connect to the remote Maven repositories, can be provided in a Secret.
+
+The `kubectl` CLI provides a convenient command, to create a Secret from a file, e.g.:
+
+[source,console]
+----
+$ kubectl create secret generic maven-ca-certs --from-file=ca.crt
+----
+
+The Secret can contain X.509 certificates, and PKCS#7 formatted certificate chains.
+A JKS formatted keystore is automatically created to store the CA certificate(s), and configured to be used as a trusted certificate(s) by the Maven commands.
+The root CA certificates are also imported into the created keystore.
+
+The created Secret can then be referenced in the IntegrationPlatform resource, from the `spec.build.maven.caSecret` field, e.g.:
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: IntegrationPlatform
+metadata:
+  name: camel-k
+spec:
+  build:
+    maven:
+      caSecret:
+        key: tls.crt
+        name: tls-secret
+----
+
+Alternatively, the Kamel CLI provides the `--maven-ca-secret` option, with the `install` command, that can be used to configure the Maven CA Secret at installation time, e.g.:
+
+[source,console]
+----
+$ kamel install --maven-ca-secret <secret_name>/<secret_key>
+----
