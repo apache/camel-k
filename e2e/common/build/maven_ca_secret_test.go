@@ -38,15 +38,15 @@ import (
 
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
-	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/tools/remotecommand"
-
-	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/tools/remotecommand"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -379,7 +379,7 @@ ProxyPreserveHost On
 
 		req.VersionedParams(&corev1.PodExecOptions{
 			Container: "nexus",
-			Command: []string{"curl", "-v",
+			Command: []string{"curl",
 				"-u", "admin:" + password.String(),
 				"-H", "Content-Type: application/json",
 				"--data", repository,
