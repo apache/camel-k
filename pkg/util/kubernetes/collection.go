@@ -382,7 +382,7 @@ func (c *Collection) VisitContainer(visitor func(container *corev1.Container)) {
 }
 
 // GetController returns the controller associated with the integration (e.g. Deployment, Knative Service or CronJob)
-func (c *Collection) GetController(filter func(object runtime.Object) bool) runtime.Object {
+func (c *Collection) GetController(filter func(object ctrl.Object) bool) ctrl.Object {
 	d := c.GetDeployment(func(deployment *appsv1.Deployment) bool {
 		return filter(deployment)
 	})
@@ -476,7 +476,6 @@ func (c *Collection) Remove(selector func(runtime.Object) bool) runtime.Object {
 	return nil
 }
 
-// VisitServiceMonitor ---
 func (c *Collection) VisitServiceMonitor(visitor func(*monitoringv1.ServiceMonitor)) {
 	c.Visit(func(res runtime.Object) {
 		if conv, ok := res.(*monitoringv1.ServiceMonitor); ok {
@@ -485,7 +484,6 @@ func (c *Collection) VisitServiceMonitor(visitor func(*monitoringv1.ServiceMonit
 	})
 }
 
-// GetServiceMonitor ---
 func (c *Collection) GetServiceMonitor(filter func(*monitoringv1.ServiceMonitor) bool) *monitoringv1.ServiceMonitor {
 	var retValue *monitoringv1.ServiceMonitor
 	c.VisitServiceMonitor(func(serviceMonitor *monitoringv1.ServiceMonitor) {
