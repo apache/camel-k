@@ -59,6 +59,14 @@ The following attributes are supported:
 |===
 |Name |Type |Description
 
+| @id
+| string
+| Sets the repository `id`
+
+| @name
+| string
+| Sets the repository `name`
+
 | @snapshots
 | flag
 | Turns `snapshots.enabled` to `true`
@@ -67,9 +75,13 @@ The following attributes are supported:
 | flag
 | Turns `snapshots.enabled` to `false`
 
-| @id
+| @checksumpolicy
 | string
-| Sets the repository `id`
+| Sets the repository `checksumPolicy`
+
+| @mirrorOf
+| string
+| Declares the repository as a mirror of the repositories with matching ids
 
 |===
 
@@ -99,6 +111,8 @@ Results in generating the following `settings.xml` file:
 ----
 
 WARNING: The `--maven-settings` and `--maven-repository` options are mutually exclusive.
+
+You can find more information in the https://maven.apache.org/guides/introduction/introduction-to-repositories.html[Introduction to Repositories] from the Maven documentation.
 
 [[ca-certificates]]
 == CA Certificates
