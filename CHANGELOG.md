@@ -19,6 +19,7 @@
 
 **Merged pull requests:**
 
+- chore: upgrade Service Binding Operator to v0.6.0 [\#2187](https://github.com/apache/camel-k/pull/2187) ([johnpoth](https://github.com/johnpoth))
 - feat\(build\): Custom Maven CA certificate\(s\) support [\#2180](https://github.com/apache/camel-k/pull/2180) ([astefanutti](https://github.com/astefanutti))
 - Fix link in example knative readme [\#2174](https://github.com/apache/camel-k/pull/2174) ([apupier](https://github.com/apupier))
 - Adding a dump command [\#2171](https://github.com/apache/camel-k/pull/2171) ([oscerd](https://github.com/oscerd))
@@ -468,7 +469,6 @@
 - Add support for sinkbinding [\#1637](https://github.com/apache/camel-k/pull/1637) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
 - fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
-- Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
 - Implement Kamelets [\#1602](https://github.com/apache/camel-k/pull/1602) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [v1.1.1](https://github.com/apache/camel-k/tree/v1.1.1) (2020-09-11)
@@ -565,6 +565,7 @@
 - \#1556 - Add the camel category to Camel K CRDs [\#1615](https://github.com/apache/camel-k/pull/1615) ([ipolyzos](https://github.com/ipolyzos))
 - Add examples back into the affinity trait documentation [\#1613](https://github.com/apache/camel-k/pull/1613) ([astefanutti](https://github.com/astefanutti))
 - feat: expose Operator ImagePullPolicy option and set it to Always in … [\#1612](https://github.com/apache/camel-k/pull/1612) ([johnpoth](https://github.com/johnpoth))
+- Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
 - doc: add toc to readme [\#1606](https://github.com/apache/camel-k/pull/1606) ([tadayosi](https://github.com/tadayosi))
 - Upgrade Knative to version 0.15.0 [\#1605](https://github.com/apache/camel-k/pull/1605) ([oscerd](https://github.com/oscerd))
 - Fix \#1601: add v prefix to future tags [\#1603](https://github.com/apache/camel-k/pull/1603) ([nicolaferraro](https://github.com/nicolaferraro))
