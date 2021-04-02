@@ -474,7 +474,6 @@ func (c *Collection) Remove(selector func(runtime.Object) bool) runtime.Object {
 	return nil
 }
 
-// VisitServiceMonitor ---
 func (c *Collection) VisitServiceMonitor(visitor func(*monitoringv1.ServiceMonitor)) {
 	c.Visit(func(res runtime.Object) {
 		if conv, ok := res.(*monitoringv1.ServiceMonitor); ok {
@@ -483,7 +482,6 @@ func (c *Collection) VisitServiceMonitor(visitor func(*monitoringv1.ServiceMonit
 	})
 }
 
-// GetServiceMonitor ---
 func (c *Collection) GetServiceMonitor(filter func(*monitoringv1.ServiceMonitor) bool) *monitoringv1.ServiceMonitor {
 	var retValue *monitoringv1.ServiceMonitor
 	c.VisitServiceMonitor(func(serviceMonitor *monitoringv1.ServiceMonitor) {
