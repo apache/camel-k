@@ -400,8 +400,8 @@ ProxyPreserveHost On
 
 		// Install Camel K with the Maven Central Nexus proxy and the corresponding Maven CA secret
 		Expect(Kamel("install", "-n", ns,
-			"--maven-repository", fmt.Sprintf(`https://%s/repository/maven-public/@id=central`, hostname),
-			"--maven-repository", fmt.Sprintf(`https://%s/repository/apache-snapshots/@id=apache-snapshots@snapshots`, hostname),
+			"--maven-repository", fmt.Sprintf(`https://%s/repository/maven-public/@id=central-internal@mirrorOf=central`, hostname),
+			"--maven-repository", fmt.Sprintf(`https://%s/repository/apache-snapshots/@id=apache-snapshots@snapshots@noreleases`, hostname),
 			"--maven-ca-secret", secret.Name+"/"+corev1.TLSCertKey,
 		).Execute()).To(Succeed())
 
@@ -414,6 +414,15 @@ ProxyPreserveHost On
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+		// Assert no dependencies have been downloaded from the Maven central repository
+		// Note: this should be adapted for the Pod build strategy
+		pod := OperatorPod(ns)()
+		Expect(pod).NotTo(BeNil())
+
+		logs := Logs(ns, pod.Name, corev1.PodLogOptions{})()
+		Expect(logs).NotTo(BeEmpty())
+		Expect(logs).NotTo(ContainSubstring("Downloaded from central:"))
 
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
