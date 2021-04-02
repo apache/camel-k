@@ -31,6 +31,8 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1beta1"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -524,7 +526,7 @@ func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.Came
 					return nil
 				}
 
-				controller := e.Resources.GetController(func(object runtime.Object) bool {
+				controller := e.Resources.GetController(func(object ctrl.Object) bool {
 					return true
 				})
 				if controller != nil && !reflect.ValueOf(controller).IsNil() {
@@ -542,7 +544,20 @@ func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.Came
 						Name:       ref.Name,
 						APIVersion: ref.APIVersion,
 					}
+
+					// Add the SinkBinding in first position, to make sure it is created
+					// before the reference source, so that the SinkBinding webhook has
+					// all the information to perform injection.
 					e.Resources.AddFirst(knativeutil.CreateSinkBinding(source, target))
+
+					// Make sure the Eventing webhook will select the source resource,
+					// in order to inject the sink information.
+					// This is necessary for Knative environments, that are configured
+					// with SINK_BINDING_SELECTION_MODE=inclusion.
+					// See:
+					// - https://knative.dev/v0.20-docs/eventing/sources/sinkbinding/
+					// - https://github.com/knative/operator/blob/c60e62bb86ff318c44d1520927d2182659cfdeb5/docs/configuration.md#specsinkbindingselectionmode
+					controller.GetLabels()["bindings.knative.dev/include"] = "true"
 				}
 				return nil
 			})
