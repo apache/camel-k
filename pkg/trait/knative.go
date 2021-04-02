@@ -513,7 +513,7 @@ func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.Came
 		e.ApplicationProperties["camel.k.customizer.sinkbinding.kind"] = ref.Kind
 		e.ApplicationProperties["camel.k.customizer.sinkbinding.api-version"] = ref.APIVersion
 
-		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
+		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 			e.PostStepProcessors = append(e.PostStepProcessors, func(e *Environment) error {
 				sinkBindingInjected := false
 				e.Resources.Visit(func(object runtime.Object) {
