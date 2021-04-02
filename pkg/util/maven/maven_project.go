@@ -23,7 +23,6 @@ import (
 	"strings"
 )
 
-// NewProject --
 func NewProject() Project {
 	return Project{
 		XMLName:           xml.Name{Local: "project"},
@@ -34,7 +33,6 @@ func NewProject() Project {
 	}
 }
 
-// NewProjectWithGAV --
 func NewProjectWithGAV(group string, artifact string, version string) Project {
 	p := NewProject()
 	p.GroupID = group
@@ -46,7 +44,6 @@ func NewProjectWithGAV(group string, artifact string, version string) Project {
 	return p
 }
 
-// MarshalBytes --
 func (p Project) MarshalBytes() ([]byte, error) {
 	w := &bytes.Buffer{}
 	w.WriteString(xml.Header)
@@ -62,7 +59,6 @@ func (p Project) MarshalBytes() ([]byte, error) {
 	return w.Bytes(), nil
 }
 
-// LookupDependency --
 func (p *Project) LookupDependency(dep Dependency) *Dependency {
 	for i := range p.Dependencies {
 		// Check if the given dependency is already included in the dependency list
@@ -74,7 +70,6 @@ func (p *Project) LookupDependency(dep Dependency) *Dependency {
 	return nil
 }
 
-// ReplaceDependency --
 func (p *Project) ReplaceDependency(dep Dependency) {
 	for i, d := range p.Dependencies {
 		// Check if the given dependency is already included in the dependency list
@@ -118,7 +113,6 @@ func (p *Project) AddEncodedDependencyGAV(gav string) {
 	}
 }
 
-// AddDependencyExclusion --
 func (p *Project) AddDependencyExclusion(dep Dependency, exclusion Exclusion) {
 	if t := p.LookupDependency(dep); t != nil {
 		if t.Exclusions == nil {
@@ -136,7 +130,6 @@ func (p *Project) AddDependencyExclusion(dep Dependency, exclusion Exclusion) {
 	}
 }
 
-// AddDependencyExclusions --
 func (p *Project) AddDependencyExclusions(dep Dependency, exclusions ...Exclusion) {
 	for _, e := range exclusions {
 		p.AddDependencyExclusion(dep, e)
@@ -188,6 +181,8 @@ func NewRepository(repo string) Repository {
 				r.Releases.Enabled = false
 			case strings.HasPrefix(attribute, "id="):
 				r.ID = attribute[3:]
+			case strings.HasPrefix(attribute, "name="):
+				r.Name = attribute[5:]
 			case strings.HasPrefix(attribute, "checksumpolicy="):
 				r.Snapshots.ChecksumPolicy = attribute[15:]
 				r.Releases.ChecksumPolicy = attribute[15:]
@@ -198,7 +193,7 @@ func NewRepository(repo string) Repository {
 	return r
 }
 
-func NewMirror(repo string) Mirror{
+func NewMirror(repo string) Mirror {
 	m := Mirror{}
 	if idx := strings.Index(repo, "@"); idx != -1 {
 		m.URL = repo[:idx]
