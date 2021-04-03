@@ -20,6 +20,7 @@
 **Merged pull requests:**
 
 - chore: upgrade Service Binding Operator to v0.6.0 [\#2187](https://github.com/apache/camel-k/pull/2187) ([johnpoth](https://github.com/johnpoth))
+- doc: Maven configuration documentation [\#2186](https://github.com/apache/camel-k/pull/2186) ([astefanutti](https://github.com/astefanutti))
 - feat\(build\): Custom Maven CA certificate\(s\) support [\#2180](https://github.com/apache/camel-k/pull/2180) ([astefanutti](https://github.com/astefanutti))
 - Fix link in example knative readme [\#2174](https://github.com/apache/camel-k/pull/2174) ([apupier](https://github.com/apupier))
 - Adding a dump command [\#2171](https://github.com/apache/camel-k/pull/2171) ([oscerd](https://github.com/oscerd))
@@ -84,6 +85,7 @@
 - chore\(api\): Add Scale methods to the Integration generated client API [\#2052](https://github.com/apache/camel-k/pull/2052) ([astefanutti](https://github.com/astefanutti))
 - For the moment lets remove absolute path [\#2049](https://github.com/apache/camel-k/pull/2049) ([oscerd](https://github.com/oscerd))
 - Add local build command replacing local create [\#2048](https://github.com/apache/camel-k/pull/2048) ([doru1004](https://github.com/doru1004))
+- Backport \#2041 to 1.3.x branch [\#2045](https://github.com/apache/camel-k/pull/2045) ([astefanutti](https://github.com/astefanutti))
 - Fix \#2043: add processing steps to KameletBinding [\#2044](https://github.com/apache/camel-k/pull/2044) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix: Consider ObjectMeta field for deep derivative comparison before patching [\#2042](https://github.com/apache/camel-k/pull/2042) ([astefanutti](https://github.com/astefanutti))
 - fix\(pdb\): Add TypeMeta field to PodDisruptionBudget resource [\#2041](https://github.com/apache/camel-k/pull/2041) ([astefanutti](https://github.com/astefanutti))
@@ -95,7 +97,6 @@
 - chore\(cli\): Exclude manifests directory from embedded resources [\#2033](https://github.com/apache/camel-k/pull/2033) ([astefanutti](https://github.com/astefanutti))
 - fix\(olm\): Fix Integration example from CSV description [\#2032](https://github.com/apache/camel-k/pull/2032) ([astefanutti](https://github.com/astefanutti))
 - Point to documentation for debugging using VS Code [\#2030](https://github.com/apache/camel-k/pull/2030) ([apupier](https://github.com/apupier))
-- chore\(RBAC\): Symmetrical RBAC setup between OLM and CLI [\#2027](https://github.com/apache/camel-k/pull/2027) ([astefanutti](https://github.com/astefanutti))
 - Use Quarkus fast-jar package format apache/camel-k-runtime\#360 [\#1931](https://github.com/apache/camel-k/pull/1931) ([jamesnetherton](https://github.com/jamesnetherton))
 
 ## [v1.3.2](https://github.com/apache/camel-k/tree/v1.3.2) (2021-03-19)
@@ -168,7 +169,6 @@
 - update operator-lifecycle-manager [\#2072](https://github.com/apache/camel-k/pull/2072) ([akihikokuroda](https://github.com/akihikokuroda))
 - Backport \#2036 to 1.3.x branch [\#2050](https://github.com/apache/camel-k/pull/2050) ([astefanutti](https://github.com/astefanutti))
 - Backport \#2042 to 1.3.x branch [\#2046](https://github.com/apache/camel-k/pull/2046) ([astefanutti](https://github.com/astefanutti))
-- Backport \#2041 to 1.3.x branch [\#2045](https://github.com/apache/camel-k/pull/2045) ([astefanutti](https://github.com/astefanutti))
 - Backport fix to \#1992: allow accessing Strimzi "kafkatopics" instead of "topics" [\#1994](https://github.com/apache/camel-k/pull/1994) ([nicolaferraro](https://github.com/nicolaferraro))
 - \[Backport release-1.3.x\] Fix a little typo good for testing backport action [\#1990](https://github.com/apache/camel-k/pull/1990) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Backport fixes for \#1928, \#1939 and \#1986 in 1.3.x [\#1988](https://github.com/apache/camel-k/pull/1988) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -469,6 +469,7 @@
 - Add support for sinkbinding [\#1637](https://github.com/apache/camel-k/pull/1637) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
 - fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
+- Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
 - Implement Kamelets [\#1602](https://github.com/apache/camel-k/pull/1602) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [v1.1.1](https://github.com/apache/camel-k/tree/v1.1.1) (2020-09-11)
@@ -565,7 +566,6 @@
 - \#1556 - Add the camel category to Camel K CRDs [\#1615](https://github.com/apache/camel-k/pull/1615) ([ipolyzos](https://github.com/ipolyzos))
 - Add examples back into the affinity trait documentation [\#1613](https://github.com/apache/camel-k/pull/1613) ([astefanutti](https://github.com/astefanutti))
 - feat: expose Operator ImagePullPolicy option and set it to Always in … [\#1612](https://github.com/apache/camel-k/pull/1612) ([johnpoth](https://github.com/johnpoth))
-- Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
 - doc: add toc to readme [\#1606](https://github.com/apache/camel-k/pull/1606) ([tadayosi](https://github.com/tadayosi))
 - Upgrade Knative to version 0.15.0 [\#1605](https://github.com/apache/camel-k/pull/1605) ([oscerd](https://github.com/oscerd))
 - Fix \#1601: add v prefix to future tags [\#1603](https://github.com/apache/camel-k/pull/1603) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1603,6 +1603,7 @@
 - context with status error should not be included when looking up suitable context for an integration [\#585](https://github.com/apache/camel-k/pull/585) ([lburgazzoli](https://github.com/lburgazzoli))
 - Split builder from operator [\#583](https://github.com/apache/camel-k/pull/583) ([astefanutti](https://github.com/astefanutti))
 - Add log4j-slf4j-impl as runtime dependency in default project build [\#578](https://github.com/apache/camel-k/pull/578) ([astefanutti](https://github.com/astefanutti))
+- chore\(style\): apply gofmt after code generation [\#577](https://github.com/apache/camel-k/pull/577) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.3.2](https://github.com/apache/camel-k/tree/0.3.2) (2019-03-26)
 
@@ -1623,7 +1624,6 @@
 **Merged pull requests:**
 
 - Fix \#579: fix namespace in subscription [\#581](https://github.com/apache/camel-k/pull/581) ([nicolaferraro](https://github.com/nicolaferraro))
-- chore\(style\): apply gofmt after code generation [\#577](https://github.com/apache/camel-k/pull/577) ([lburgazzoli](https://github.com/lburgazzoli))
 - allow to configure resources requests/limits [\#573](https://github.com/apache/camel-k/pull/573) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add support for traits defaults [\#572](https://github.com/apache/camel-k/pull/572) ([lburgazzoli](https://github.com/lburgazzoli))
 - knative: create full camel environment [\#571](https://github.com/apache/camel-k/pull/571) ([lburgazzoli](https://github.com/lburgazzoli))
@@ -1669,6 +1669,7 @@
 - ordered delete [\#529](https://github.com/apache/camel-k/pull/529) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(kamel\): fix reset command [\#526](https://github.com/apache/camel-k/pull/526) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(release\): add automatic version update to release [\#524](https://github.com/apache/camel-k/pull/524) ([nicolaferraro](https://github.com/nicolaferraro))
+- test\(builder\): more assertions on deps [\#520](https://github.com/apache/camel-k/pull/520) ([oscerd](https://github.com/oscerd))
 - Adding Probes to Knative services [\#514](https://github.com/apache/camel-k/pull/514) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.3.0](https://github.com/apache/camel-k/tree/0.3.0) (2019-03-04)
@@ -1699,7 +1700,6 @@
 
 - fix: Allow file names as delete cmd argument [\#522](https://github.com/apache/camel-k/pull/522) ([christophd](https://github.com/christophd))
 - chore\(image\): include camel runtime adapters [\#521](https://github.com/apache/camel-k/pull/521) ([lburgazzoli](https://github.com/lburgazzoli))
-- test\(builder\): more assertions on deps [\#520](https://github.com/apache/camel-k/pull/520) ([oscerd](https://github.com/oscerd))
 - chore\(build\): remove jitpack configuration [\#519](https://github.com/apache/camel-k/pull/519) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(runtime\): Bump runtime to 0.3.0 [\#518](https://github.com/apache/camel-k/pull/518) ([oscerd](https://github.com/oscerd))
 - knative\(serving\): add support for additional annotations [\#517](https://github.com/apache/camel-k/pull/517) ([lburgazzoli](https://github.com/lburgazzoli))
