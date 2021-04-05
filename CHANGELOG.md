@@ -95,7 +95,6 @@
 - chore\(olm\): Update IntegrationPlatform creation step in CSV description [\#2034](https://github.com/apache/camel-k/pull/2034) ([astefanutti](https://github.com/astefanutti))
 - chore\(cli\): Exclude manifests directory from embedded resources [\#2033](https://github.com/apache/camel-k/pull/2033) ([astefanutti](https://github.com/astefanutti))
 - fix\(olm\): Fix Integration example from CSV description [\#2032](https://github.com/apache/camel-k/pull/2032) ([astefanutti](https://github.com/astefanutti))
-- Point to documentation for debugging using VS Code [\#2030](https://github.com/apache/camel-k/pull/2030) ([apupier](https://github.com/apupier))
 - Use Quarkus fast-jar package format apache/camel-k-runtime\#360 [\#1931](https://github.com/apache/camel-k/pull/1931) ([jamesnetherton](https://github.com/jamesnetherton))
 
 ## [v1.3.2](https://github.com/apache/camel-k/tree/v1.3.2) (2021-03-19)
@@ -366,6 +365,7 @@
 - helm.sh entries in go.sum [\#1231](https://github.com/apache/camel-k/issues/1231)
 - Add camel-k-quarkus example [\#1082](https://github.com/apache/camel-k/issues/1082)
 - Make sure global and local operators can cohexist [\#751](https://github.com/apache/camel-k/issues/751)
+- The --maven-repository shortcut does not configure plugin repositories [\#746](https://github.com/apache/camel-k/issues/746)
 - Document architecture [\#36](https://github.com/apache/camel-k/issues/36)
 
 **Merged pull requests:**
@@ -416,6 +416,7 @@
 - chore\(crd\): make CRD more json-schema friend [\#1752](https://github.com/apache/camel-k/pull/1752) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1750: auto-compress/encode binary sources and resources [\#1751](https://github.com/apache/camel-k/pull/1751) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1747: propagate icon on kameletbinding and fix integration owner… [\#1749](https://github.com/apache/camel-k/pull/1749) ([nicolaferraro](https://github.com/nicolaferraro))
+- Add suport for gists [\#1748](https://github.com/apache/camel-k/pull/1748) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add support for Strimzi KafkaTopics in KameletBinding [\#1745](https://github.com/apache/camel-k/pull/1745) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore: Upgrade Prometheus to version 0.42.1 [\#1744](https://github.com/apache/camel-k/pull/1744) ([astefanutti](https://github.com/astefanutti))
 - fix\(doc\): Set architecture diagram width explicitly [\#1742](https://github.com/apache/camel-k/pull/1742) ([astefanutti](https://github.com/astefanutti))
@@ -1361,7 +1362,6 @@
 - Route trait does not work if route.auto is set to false [\#767](https://github.com/apache/camel-k/issues/767)
 - Switch to Camel 3 [\#755](https://github.com/apache/camel-k/issues/755)
 - Do not create a route on top of prometheus service only [\#749](https://github.com/apache/camel-k/issues/749)
-- The --maven-repository shortcut does not configure plugin repositories [\#746](https://github.com/apache/camel-k/issues/746)
 - Add a --global install option [\#745](https://github.com/apache/camel-k/issues/745)
 - CR example is using wrong schema [\#737](https://github.com/apache/camel-k/issues/737)
 - camelContext is not supported in XML DSL routedefinition [\#731](https://github.com/apache/camel-k/issues/731)
