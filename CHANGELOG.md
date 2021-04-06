@@ -91,7 +91,6 @@
 - feat\(trait\): toleration trait [\#2040](https://github.com/apache/camel-k/pull/2040) ([squakez](https://github.com/squakez))
 - feat: Use server-side apply to create and patch owned resources [\#2039](https://github.com/apache/camel-k/pull/2039) ([astefanutti](https://github.com/astefanutti))
 - chore\(ci\): Pin the Kubernetes version deployed by Kind [\#2037](https://github.com/apache/camel-k/pull/2037) ([astefanutti](https://github.com/astefanutti))
-- fix\(ci\): Use kubectl wait command to check Knative readiness [\#2036](https://github.com/apache/camel-k/pull/2036) ([astefanutti](https://github.com/astefanutti))
 - chore\(olm\): Update IntegrationPlatform creation step in CSV description [\#2034](https://github.com/apache/camel-k/pull/2034) ([astefanutti](https://github.com/astefanutti))
 - chore\(cli\): Exclude manifests directory from embedded resources [\#2033](https://github.com/apache/camel-k/pull/2033) ([astefanutti](https://github.com/astefanutti))
 - fix\(olm\): Fix Integration example from CSV description [\#2032](https://github.com/apache/camel-k/pull/2032) ([astefanutti](https://github.com/astefanutti))
@@ -365,7 +364,6 @@
 - helm.sh entries in go.sum [\#1231](https://github.com/apache/camel-k/issues/1231)
 - Add camel-k-quarkus example [\#1082](https://github.com/apache/camel-k/issues/1082)
 - Make sure global and local operators can cohexist [\#751](https://github.com/apache/camel-k/issues/751)
-- The --maven-repository shortcut does not configure plugin repositories [\#746](https://github.com/apache/camel-k/issues/746)
 - Document architecture [\#36](https://github.com/apache/camel-k/issues/36)
 
 **Merged pull requests:**
@@ -416,7 +414,6 @@
 - chore\(crd\): make CRD more json-schema friend [\#1752](https://github.com/apache/camel-k/pull/1752) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1750: auto-compress/encode binary sources and resources [\#1751](https://github.com/apache/camel-k/pull/1751) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1747: propagate icon on kameletbinding and fix integration owner… [\#1749](https://github.com/apache/camel-k/pull/1749) ([nicolaferraro](https://github.com/nicolaferraro))
-- Add suport for gists [\#1748](https://github.com/apache/camel-k/pull/1748) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add support for Strimzi KafkaTopics in KameletBinding [\#1745](https://github.com/apache/camel-k/pull/1745) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore: Upgrade Prometheus to version 0.42.1 [\#1744](https://github.com/apache/camel-k/pull/1744) ([astefanutti](https://github.com/astefanutti))
 - fix\(doc\): Set architecture diagram width explicitly [\#1742](https://github.com/apache/camel-k/pull/1742) ([astefanutti](https://github.com/astefanutti))
@@ -1362,6 +1359,7 @@
 - Route trait does not work if route.auto is set to false [\#767](https://github.com/apache/camel-k/issues/767)
 - Switch to Camel 3 [\#755](https://github.com/apache/camel-k/issues/755)
 - Do not create a route on top of prometheus service only [\#749](https://github.com/apache/camel-k/issues/749)
+- The --maven-repository shortcut does not configure plugin repositories [\#746](https://github.com/apache/camel-k/issues/746)
 - Add a --global install option [\#745](https://github.com/apache/camel-k/issues/745)
 - CR example is using wrong schema [\#737](https://github.com/apache/camel-k/issues/737)
 - camelContext is not supported in XML DSL routedefinition [\#731](https://github.com/apache/camel-k/issues/731)
@@ -1468,6 +1466,7 @@
 - Added KEYS file [\#734](https://github.com/apache/camel-k/pull/734) ([oscerd](https://github.com/oscerd))
 - Bump to 1.0.0-M1-SNAPSHOT and release changes [\#733](https://github.com/apache/camel-k/pull/733) ([nicolaferraro](https://github.com/nicolaferraro))
 - Rename 'context' term used by Camel K. [\#726](https://github.com/apache/camel-k/pull/726) ([lburgazzoli](https://github.com/lburgazzoli))
+-  Allow to provide custom settings.xml [\#720](https://github.com/apache/camel-k/pull/720) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.3.4](https://github.com/apache/camel-k/tree/0.3.4) (2019-06-07)
 
@@ -1514,7 +1513,6 @@
 - Filter allowed env variables in Knative [\#724](https://github.com/apache/camel-k/pull/724) ([nicolaferraro](https://github.com/nicolaferraro))
 - Automatically configure global build strategy [\#723](https://github.com/apache/camel-k/pull/723) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(build\): remove test artifacts [\#721](https://github.com/apache/camel-k/pull/721) ([lburgazzoli](https://github.com/lburgazzoli))
--  Allow to provide custom settings.xml [\#720](https://github.com/apache/camel-k/pull/720) ([lburgazzoli](https://github.com/lburgazzoli))
 - Don't automatically install contexts upon platform installation [\#719](https://github.com/apache/camel-k/pull/719) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore: default to camel-k-runtime v0.3.3 [\#718](https://github.com/apache/camel-k/pull/718) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#707: sign released artifacts [\#713](https://github.com/apache/camel-k/pull/713) ([nicolaferraro](https://github.com/nicolaferraro))
