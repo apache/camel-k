@@ -163,7 +163,7 @@ metadata:
     categories: Integration & Delivery
     certified: "false"
     containerImage: docker.io/apache/camel-k:1.3.0-SNAPSHOT
-    createdAt: "2021-02-15T11:05:04Z"
+    createdAt: "2021-04-07T08:20:51Z"
     description: Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless superpowers.
     operators.operatorframework.io/builder: operator-sdk-v1.3.0
     operators.operatorframework.io/internal-objects: '["builds.camel.apache.org","integrationkits.camel.apache.org","camelcatalogs.camel.apache.org"]'
@@ -320,8 +320,8 @@ spec:
                   httpGet:
                     path: /healthz
                     port: 8081
-                  initialDelaySeconds: 5
-                  periodSeconds: 5
+                  initialDelaySeconds: 20
+                  periodSeconds: 10
                 name: camel-k-operator
                 ports:
                 - containerPort: 8080
