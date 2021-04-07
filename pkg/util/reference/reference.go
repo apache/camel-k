@@ -18,12 +18,14 @@ limitations under the License.
 package reference
 
 import (
-	"errors"
 	"fmt"
+	"net/url"
 	"regexp"
+	"strings"
 	"unicode"
 
 	camelv1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	eventingv1 "knative.dev/eventing/pkg/apis/eventing/v1"
 	messagingv1 "knative.dev/eventing/pkg/apis/messaging/v1"
@@ -35,8 +37,9 @@ const (
 )
 
 var (
-	simpleNameRegexp = regexp.MustCompile(`^(?:(?P<namespace>[a-z0-9-.]+)/)?(?P<name>[a-z0-9-.]+)$`)
-	fullNameRegexp   = regexp.MustCompile(`^(?:(?P<apiVersion>(?:[a-z0-9-.]+/)?(?:[a-z0-9-.]+)):)?(?P<kind>[A-Za-z0-9-.]+):(?:(?P<namespace>[a-z0-9-.]+)/)?(?P<name>[a-z0-9-.]+)$`)
+	simpleNameRegexp = regexp.MustCompile(`^(?:(?P<namespace>[a-z0-9-.]+)/)?(?P<name>[a-z0-9-.]+)(?:$|[?].*$)`)
+	fullNameRegexp   = regexp.MustCompile(`^(?:(?P<apiVersion>(?:[a-z0-9-.]+/)?(?:[a-z0-9-.]+)):)?(?P<kind>[A-Za-z0-9-.]+):(?:(?P<namespace>[a-z0-9-.]+)/)?(?P<name>[a-z0-9-.]+)(?:$|[?].*$)`)
+	queryRegexp      = regexp.MustCompile(`^[^?]*[?](?P<query>.*)$`)
 
 	templates = map[string]corev1.ObjectReference{
 		"kamelet": corev1.ObjectReference{
@@ -79,6 +82,41 @@ func (c *Converter) FromString(str string) (corev1.ObjectReference, error) {
 		return corev1.ObjectReference{}, fmt.Errorf("invalid kind: %q", ref.Kind)
 	}
 	return ref, nil
+}
+
+func (c *Converter) PropertiesFromString(str string) (map[string]string, error) {
+	if queryRegexp.MatchString(str) {
+		groupNames := queryRegexp.SubexpNames()
+		res := make(map[string]string)
+		var query string
+		for _, match := range queryRegexp.FindAllStringSubmatch(str, -1) {
+			for idx, text := range match {
+				groupName := groupNames[idx]
+				switch groupName {
+				case "query":
+					query = text
+				}
+			}
+		}
+		parts := strings.Split(query, "&")
+		for _, part := range parts {
+			kv := strings.SplitN(part, "=", 2)
+			if len(kv) != 2 {
+				return nil, fmt.Errorf("invalid key=value format for string %q", part)
+			}
+			k, errkey := url.QueryUnescape(kv[0])
+			if errkey != nil {
+				return nil, errors.Wrapf(errkey, "cannot unescape key %q", kv[0])
+			}
+			v, errval := url.QueryUnescape(kv[1])
+			if errval != nil {
+				return nil, errors.Wrapf(errval, "cannot unescape value %q", kv[1])
+			}
+			res[k] = v
+		}
+		return res, nil
+	}
+	return nil, nil
 }
 
 func (c *Converter) expandReference(ref *corev1.ObjectReference) {

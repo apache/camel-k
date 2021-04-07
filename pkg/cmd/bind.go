@@ -57,15 +57,17 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 
 	cmd.Flags().String("name", "", "Name for the binding")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
-	cmd.Flags().StringArrayP("property", "p", nil, `Add a binding property in the form of "source.<key>=<value>" or "sink.<key>=<value>"`)
+	cmd.Flags().StringArrayP("property", "p", nil, `Add a binding property in the form of "source.<key>=<value>", "sink.<key>=<value>" or "step-<n>.<key>=<value>"`)
 	cmd.Flags().Bool("skip-checks", false, "Do not verify the binding for compliance with Kamelets and other Kubernetes resources")
+	cmd.Flags().StringArray("step", nil, `Add binding steps as Kubernetes resources, such as Kamelets. Endpoints are expected in the format "[[apigroup/]version:]kind:[namespace/]name" or plain Camel URIs.`)
 
 	return &cmd, &options
 }
 
 const (
-	sourceKey = "source"
-	sinkKey   = "sink"
+	sourceKey     = "source"
+	sinkKey       = "sink"
+	stepKeyPrefix = "step-"
 )
 
 type bindCmdOptions struct {
@@ -74,6 +76,7 @@ type bindCmdOptions struct {
 	OutputFormat string   `mapstructure:"output" yaml:",omitempty"`
 	Properties   []string `mapstructure:"properties" yaml:",omitempty"`
 	SkipChecks   bool     `mapstructure:"skip-checks" yaml:",omitempty"`
+	Steps        []string `mapstructure:"steps" yaml:",omitempty"`
 }
 
 func (o *bindCmdOptions) validate(cmd *cobra.Command, args []string) error {
@@ -105,6 +108,17 @@ func (o *bindCmdOptions) validate(cmd *cobra.Command, args []string) error {
 		if err := o.checkCompliance(cmd, sink); err != nil {
 			return err
 		}
+
+		for idx, stepDesc := range o.Steps {
+			stepKey := fmt.Sprintf("%s%d", stepKeyPrefix, idx)
+			step, err := o.decode(stepDesc, stepKey)
+			if err != nil {
+				return err
+			}
+			if err := o.checkCompliance(cmd, step); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
@@ -132,6 +146,18 @@ func (o *bindCmdOptions) run(args []string) error {
 			Source: source,
 			Sink:   sink,
 		},
+	}
+
+	if len(o.Steps) > 0 {
+		binding.Spec.Steps = make([]v1alpha1.Endpoint, 0)
+		for idx, stepDesc := range o.Steps {
+			stepKey := fmt.Sprintf("%s%d", stepKeyPrefix, idx)
+			step, err := o.decode(stepDesc, stepKey)
+			if err != nil {
+				return err
+			}
+			binding.Spec.Steps = append(binding.Spec.Steps, step)
+		}
 	}
 
 	switch o.OutputFormat {
@@ -183,7 +209,8 @@ func (o *bindCmdOptions) run(args []string) error {
 func (o *bindCmdOptions) decode(res string, key string) (v1alpha1.Endpoint, error) {
 	refConverter := reference.NewConverter(reference.KameletPrefix)
 	endpoint := v1alpha1.Endpoint{}
-	props, err := o.asEndpointProperties(o.getProperties(key))
+	explicitProps := o.getProperties(key)
+	props, err := o.asEndpointProperties(explicitProps)
 	if err != nil {
 		return endpoint, err
 	}
@@ -201,6 +228,26 @@ func (o *bindCmdOptions) decode(res string, key string) (v1alpha1.Endpoint, erro
 	if endpoint.Ref.Namespace == "" {
 		endpoint.Ref.Namespace = o.Namespace
 	}
+	embeddedProps, err := refConverter.PropertiesFromString(res)
+	if err != nil {
+		return endpoint, err
+	}
+	if len(embeddedProps) > 0 {
+		allProps := make(map[string]string)
+		for k, v := range explicitProps {
+			allProps[k] = v
+		}
+		for k, v := range embeddedProps {
+			allProps[k] = v
+		}
+
+		props, err := o.asEndpointProperties(allProps)
+		if err != nil {
+			return endpoint, err
+		}
+		endpoint.Properties = props
+	}
+
 	return endpoint, nil
 }
 
@@ -254,14 +301,17 @@ func (o *bindCmdOptions) getProperties(refType string) map[string]string {
 func (o *bindCmdOptions) parseProperty(prop string) (string, string, string, error) {
 	parts := strings.SplitN(prop, "=", 2)
 	if len(parts) != 2 {
-		return "", "", "", fmt.Errorf(`property %q does not follow format "[source|sink].<key>=<value>"`, prop)
+		return "", "", "", fmt.Errorf(`property %q does not follow format "[source|sink|step-<n>].<key>=<value>"`, prop)
 	}
 	keyParts := strings.SplitN(parts[0], ".", 2)
 	if len(keyParts) != 2 {
-		return "", "", "", fmt.Errorf(`property key %q does not follow format "[source|sink].<key>"`, parts[0])
+		return "", "", "", fmt.Errorf(`property key %q does not follow format "[source|sink|step-<n>].<key>"`, parts[0])
 	}
-	if keyParts[0] != sourceKey && keyParts[0] != sinkKey {
-		return "", "", "", fmt.Errorf(`property key %q does not start with "source." or "sink."`, parts[0])
+	isSource := keyParts[0] == sourceKey
+	isSink := keyParts[0] == sinkKey
+	isStep := strings.HasPrefix(keyParts[0], stepKeyPrefix)
+	if !isSource && !isSink && !isStep {
+		return "", "", "", fmt.Errorf(`property key %q does not start with "source.", "sink." or "step-<n>."`, parts[0])
 	}
 	return keyParts[0], keyParts[1], parts[1], nil
 }
@@ -280,7 +330,7 @@ func (o *bindCmdOptions) checkCompliance(cmd *cobra.Command, endpoint v1alpha1.E
 		if err := c.Get(o.Context, key, &kamelet); err != nil {
 			if k8serrors.IsNotFound(err) {
 				// Kamelet may be in the operator namespace, but we currently don't have a way to determine it: we just warn
-				fmt.Fprintf(cmd.OutOrStderr(), "Warning: Kamelet %q not found in namespace %q\n", key.Name, key.Namespace)
+				fmt.Fprintf(cmd.ErrOrStderr(), "Warning: Kamelet %q not found in namespace %q\n", key.Name, key.Namespace)
 				return nil
 			}
 			return err

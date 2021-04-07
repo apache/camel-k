@@ -194,24 +194,24 @@ func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 		// Furthermore, there can be any incompatibilities, as the install command deploys
 		// the operator version it's compatible with.
 		if cmd.Use != installCommand && cmd.Use != operatorCommand {
-			checkAndShowCompatibilityWarning(command.Context, c, command.Namespace)
+			checkAndShowCompatibilityWarning(cmd, command.Context, c, command.Namespace)
 		}
 	}
 
 	return nil
 }
 
-func checkAndShowCompatibilityWarning(ctx context.Context, c client.Client, namespace string) {
+func checkAndShowCompatibilityWarning(cmd *cobra.Command, ctx context.Context, c client.Client, namespace string) {
 	operatorVersion, err := operatorVersion(ctx, c, namespace)
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			fmt.Printf("No IntegrationPlatform resource in %s namespace\n", namespace)
+			fmt.Fprintf(cmd.ErrOrStderr(), "No IntegrationPlatform resource in %s namespace\n", namespace)
 		} else {
-			fmt.Printf("Unable to retrieve the operator version: %s\n", err.Error())
+			fmt.Fprintf(cmd.ErrOrStderr(), "Unable to retrieve the operator version: %s\n", err.Error())
 		}
 	} else {
 		if operatorVersion != "" && !compatibleVersions(operatorVersion, defaults.Version) {
-			fmt.Printf("You're using Camel K %s client with a %s cluster operator, it's recommended to use the same version to improve compatibility.\n\n", defaults.Version, operatorVersion)
+			fmt.Fprintf(cmd.ErrOrStderr(), "You're using Camel K %s client with a %s cluster operator, it's recommended to use the same version to improve compatibility.\n\n", defaults.Version, operatorVersion)
 		}
 	}
 }

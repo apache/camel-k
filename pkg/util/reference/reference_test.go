@@ -33,6 +33,7 @@ func TestExpressions(t *testing.T) {
 		error         bool
 		ref           corev1.ObjectReference
 		stringRef     string
+		properties    map[string]string
 	}{
 		{
 			name:  "lowercase:source",
@@ -123,6 +124,37 @@ func TestExpressions(t *testing.T) {
 			},
 			stringRef: "postgres.org/v1alpha1:PostgreSQL:ns1/db",
 		},
+		{
+			name: "postgres.org/v1alpha1:PostgreSQL:ns1/db?user=user1&password=pwd2&host=192.168.2.2&special=%201&special2=a=1",
+			ref: corev1.ObjectReference{
+				APIVersion: "postgres.org/v1alpha1",
+				Kind:       "PostgreSQL",
+				Namespace:  "ns1",
+				Name:       "db",
+			},
+			stringRef: "postgres.org/v1alpha1:PostgreSQL:ns1/db",
+			properties: map[string]string{
+				"user":     "user1",
+				"password": "pwd2",
+				"host":     "192.168.2.2",
+				"special":  " 1",
+				"special2": "a=1",
+			},
+		},
+		{
+			name: "source?a=b&b=c&d=e",
+			ref: corev1.ObjectReference{
+				Kind:       "Kamelet",
+				APIVersion: "camel.apache.org/v1alpha1",
+				Name:       "source",
+			},
+			stringRef: "camel.apache.org/v1alpha1:Kamelet:source",
+			properties: map[string]string{
+				"a": "b",
+				"b": "c",
+				"d": "e",
+			},
+		},
 	}
 
 	for i, tc := range tests {
@@ -142,6 +174,10 @@ func TestExpressions(t *testing.T) {
 			} else {
 				asString, err2 := converter.ToString(ref)
 				assert.NoError(t, err2)
+
+				props, err3 := converter.PropertiesFromString(tc.name)
+				assert.NoError(t, err3)
+				assert.Equal(t, tc.properties, props)
 
 				assert.NoError(t, err)
 				assert.Equal(t, tc.ref, ref)
