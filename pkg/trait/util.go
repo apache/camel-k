@@ -94,23 +94,27 @@ func collectConfigurationPairs(configurationType string, configurable ...v1.Conf
 		for _, entry := range entries {
 			if entry.Type == configurationType {
 				pair := strings.SplitN(entry.Value, "=", 2)
+				var k, v string
+				if len(pair) >= 1 {
+					k = strings.TrimSpace(pair[0])
+				}
 				if len(pair) == 2 {
-					k := strings.TrimSpace(pair[0])
-					v := strings.TrimSpace(pair[1])
+					v = strings.TrimSpace(pair[1])
+				}
+				if k == "" {
+					continue
+				}
 
-					if len(k) > 0 && len(v) > 0 {
-						ok := false
-						for i, variable := range result {
-							if variable.Name == k {
-								result[i].Value = v
-								ok = true
-								break
-							}
-						}
-						if !ok {
-							result = append(result, variable{Name: k, Value: v})
-						}
+				ok := false
+				for i, variable := range result {
+					if variable.Name == k {
+						result[i].Value = v
+						ok = true
+						break
 					}
+				}
+				if !ok {
+					result = append(result, variable{Name: k, Value: v})
 				}
 			}
 		}
