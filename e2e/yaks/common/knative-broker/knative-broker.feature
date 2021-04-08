@@ -39,7 +39,8 @@ Feature: Camel K can correctly filter messages from broker
     from('knative:event')
       .log('From all: $simple{body}')
     """
-    Then Camel-K integration receiver should print From evt1: event-1
+    Then Camel-K integration receiver should be running
+    And Camel-K integration receiver should print From evt1: event-1
     And Camel-K integration receiver should print From evt2: event-2
     And Camel-K integration receiver should print From all: event-1
     And Camel-K integration receiver should print From all: event-2
