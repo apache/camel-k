@@ -402,8 +402,8 @@ func (e *Environment) computeConfigMaps() []ctrl.Object {
 	// properties have the priority
 	userProperties := ""
 
-	for key, val := range e.collectConfigurationPairs("property") {
-		userProperties += fmt.Sprintf("%s=%s\n", key, val)
+	for _, prop := range e.collectConfigurationPairs("property") {
+		userProperties += fmt.Sprintf("%s=%s\n", prop.Name, prop.Value)
 	}
 
 	if userProperties != "" {
@@ -783,8 +783,12 @@ func (e *Environment) collectConfigurationValues(configurationType string) []str
 	return collectConfigurationValues(configurationType, e.Platform, e.IntegrationKit, e.Integration)
 }
 
-func (e *Environment) collectConfigurationPairs(configurationType string) map[string]string {
-	return CollectConfigurationPairs(configurationType, e.Platform, e.IntegrationKit, e.Integration)
+type variable struct {
+	Name, Value string
+}
+
+func (e *Environment) collectConfigurationPairs(configurationType string) []variable {
+	return collectConfigurationPairs(configurationType, e.Platform, e.IntegrationKit, e.Integration)
 }
 
 func (e *Environment) getIntegrationContainer() *corev1.Container {

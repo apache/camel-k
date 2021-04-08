@@ -28,7 +28,7 @@ import (
 	user "github.com/mitchellh/go-homedir"
 	"github.com/scylladb/go-set/strset"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
@@ -39,17 +39,13 @@ import (
 
 var exactVersionRegexp = regexp.MustCompile(`^(\d+)\.(\d+)\.([\w-.]+)$`)
 
-// GetIntegrationKit retrieves the kit set on the integration
-func GetIntegrationKit(ctx context.Context, c client.Client, integration *v1.Integration) (*v1.IntegrationKit, error) {
+// getIntegrationKit retrieves the kit set on the integration
+func getIntegrationKit(ctx context.Context, c client.Client, integration *v1.Integration) (*v1.IntegrationKit, error) {
 	if integration.Status.IntegrationKit == nil {
 		return nil, nil
 	}
 	kit := v1.NewIntegrationKit(integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name)
-	key := k8sclient.ObjectKey{
-		Namespace: integration.Status.IntegrationKit.Namespace,
-		Name:      integration.Status.IntegrationKit.Name,
-	}
-	err := c.Get(ctx, key, &kit)
+	err := c.Get(ctx, ctrl.ObjectKeyFromObject(&kit), &kit)
 	return &kit, err
 }
 
@@ -80,8 +76,8 @@ func collectConfigurationValues(configurationType string, configurable ...v1.Con
 	return s
 }
 
-func CollectConfigurationPairs(configurationType string, configurable ...v1.Configurable) map[string]string {
-	result := make(map[string]string)
+func collectConfigurationPairs(configurationType string, configurable ...v1.Configurable) []variable {
+	result := make([]variable, 0)
 
 	for _, c := range configurable {
 		c := c
@@ -103,7 +99,17 @@ func CollectConfigurationPairs(configurationType string, configurable ...v1.Conf
 					v := strings.TrimSpace(pair[1])
 
 					if len(k) > 0 && len(v) > 0 {
-						result[k] = v
+						ok := false
+						for i, variable := range result {
+							if variable.Name == k {
+								result[i].Value = v
+								ok = true
+								break
+							}
+						}
+						if !ok {
+							result = append(result, variable{Name: k, Value: v})
+						}
 					}
 				}
 			}
@@ -129,8 +135,8 @@ func keyValuePairArrayAsStringMap(pairs []string) (map[string]string, error) {
 	return m, nil
 }
 
-// FilterTransferableAnnotations returns a map containing annotations that are meaningful for being transferred to child resources.
-func FilterTransferableAnnotations(annotations map[string]string) map[string]string {
+// filterTransferableAnnotations returns a map containing annotations that are meaningful for being transferred to child resources.
+func filterTransferableAnnotations(annotations map[string]string) map[string]string {
 	res := make(map[string]string)
 	for k, v := range annotations {
 		if strings.HasPrefix(k, "kubectl.kubernetes.io") {

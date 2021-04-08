@@ -60,9 +60,7 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 		return condition != nil && condition.Status == corev1.ConditionTrue, nil
 	}
 
-	//
 	// Don't deploy when a different strategy is needed (e.g. Knative, Cron)
-	//
 	strategy, err := e.DetermineControllerStrategy()
 	if err != nil {
 		e.Integration.Status.SetErrorCondition(
@@ -141,7 +139,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	// create a copy to avoid sharing the underlying annotation map
 	annotations := make(map[string]string)
 	if e.Integration.Annotations != nil {
-		for k, v := range FilterTransferableAnnotations(e.Integration.Annotations) {
+		for k, v := range filterTransferableAnnotations(e.Integration.Annotations) {
 			annotations[k] = v
 		}
 	}

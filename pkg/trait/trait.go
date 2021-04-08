@@ -20,17 +20,17 @@ package trait
 import (
 	"context"
 
+	"github.com/pkg/errors"
+
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/pkg/errors"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
-// Apply --
 func Apply(ctx context.Context, c client.Client, integration *v1.Integration, kit *v1.IntegrationKit) (*Environment, error) {
 	environment, err := newEnvironment(ctx, c, integration, kit)
 	if err != nil {
@@ -77,7 +77,7 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integr
 	}
 
 	if kit == nil {
-		kit, err = GetIntegrationKit(ctx, c, integration)
+		kit, err = getIntegrationKit(ctx, c, integration)
 		if err != nil {
 			return nil, err
 		}
