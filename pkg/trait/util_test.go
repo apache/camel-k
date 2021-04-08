@@ -94,8 +94,10 @@ func TestCollectConfigurationPairs(t *testing.T) {
 	e.Platform.ResyncStatusFullConfig()
 
 	pairs := e.collectConfigurationPairs("property")
-	assert.Equal(t, "integration", pairs["p1"])
-	assert.Equal(t, "kit", pairs["p2"])
-	assert.Equal(t, "platform", pairs["p3"])
-	assert.Equal(t, "integration", pairs["p4"])
+	assert.Equal(t, pairs, []variable{
+		{Name: "p1", Value: "integration"},
+		{Name: "p2", Value: "kit"},
+		{Name: "p3", Value: "platform"},
+		{Name: "p4", Value: "integration"},
+	})
 }

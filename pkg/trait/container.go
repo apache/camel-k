@@ -186,8 +186,8 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	}
 
 	// combine Environment of integration with platform, kit, integration
-	for key, value := range e.collectConfigurationPairs("env") {
-		envvar.SetVal(&container.Env, key, value)
+	for _, env := range e.collectConfigurationPairs("env") {
+		envvar.SetVal(&container.Env, env.Name, env.Value)
 	}
 
 	envvar.SetVal(&container.Env, "CAMEL_K_DIGEST", e.Integration.Status.Digest)

@@ -269,7 +269,7 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) *serving.Service {
 
 	// Copy annotations from the integration resource
 	if e.Integration.Annotations != nil {
-		for k, v := range FilterTransferableAnnotations(e.Integration.Annotations) {
+		for k, v := range filterTransferableAnnotations(e.Integration.Annotations) {
 			annotations[k] = v
 		}
 	}
