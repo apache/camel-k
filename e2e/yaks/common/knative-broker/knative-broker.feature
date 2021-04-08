@@ -1,6 +1,7 @@
 Feature: Camel K can correctly filter messages from broker
 
   Background:
+    Given create Knative broker default
     Given Knative broker default is running
     Given Disable auto removal of Camel-K resources
     Given Disable auto removal of Kubernetes resources
