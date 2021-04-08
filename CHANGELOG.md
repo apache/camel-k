@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - \[regression\] 1.3.2 regresses on "SinkBinding on KSVC results into ping-pong between operators \#1936" [\#2184](https://github.com/apache/camel-k/issues/2184)
+- Default liveness probe initial delay is too short [\#2173](https://github.com/apache/camel-k/issues/2173)
 - Review generated CSV [\#2164](https://github.com/apache/camel-k/issues/2164)
 - Integrations are re-built on operator upgrade [\#2162](https://github.com/apache/camel-k/issues/2162)
 - Deployment on K3s failing with Kaniko and Buildah build strategy [\#2161](https://github.com/apache/camel-k/issues/2161)
@@ -15,11 +16,14 @@
 - Ability to provide Maven repository CA certificates [\#2149](https://github.com/apache/camel-k/issues/2149)
 - kamelet-binding: embedding camelets [\#2146](https://github.com/apache/camel-k/issues/2146)
 - Release 1.3.2 [\#2144](https://github.com/apache/camel-k/issues/2144)
+- Improve description of "dependency" run and modeline option to include case of Camel components artifactId [\#1584](https://github.com/apache/camel-k/issues/1584)
 - Adding camel-jackson dependency creates issues with inner classes  [\#1507](https://github.com/apache/camel-k/issues/1507)
 - Adding a dump command [\#1415](https://github.com/apache/camel-k/issues/1415)
 
 **Merged pull requests:**
 
+- chore\(cli\): Improve run command --dependency option description [\#2193](https://github.com/apache/camel-k/pull/2193) ([astefanutti](https://github.com/astefanutti))
+- fix: Increase operator liveness probe initial delay and period [\#2192](https://github.com/apache/camel-k/pull/2192) ([astefanutti](https://github.com/astefanutti))
 - fix: Add bindings.knative.dev/include label to SinkBinding sources [\#2190](https://github.com/apache/camel-k/pull/2190) ([astefanutti](https://github.com/astefanutti))
 - chore: upgrade Service Binding Operator to v0.6.0 [\#2187](https://github.com/apache/camel-k/pull/2187) ([johnpoth](https://github.com/johnpoth))
 - doc: Maven configuration documentation [\#2186](https://github.com/apache/camel-k/pull/2186) ([astefanutti](https://github.com/astefanutti))
@@ -92,8 +96,6 @@
 - fix\(pdb\): Add TypeMeta field to PodDisruptionBudget resource [\#2041](https://github.com/apache/camel-k/pull/2041) ([astefanutti](https://github.com/astefanutti))
 - feat\(trait\): toleration trait [\#2040](https://github.com/apache/camel-k/pull/2040) ([squakez](https://github.com/squakez))
 - feat: Use server-side apply to create and patch owned resources [\#2039](https://github.com/apache/camel-k/pull/2039) ([astefanutti](https://github.com/astefanutti))
-- chore\(olm\): Update IntegrationPlatform creation step in CSV description [\#2034](https://github.com/apache/camel-k/pull/2034) ([astefanutti](https://github.com/astefanutti))
-- chore\(cli\): Exclude manifests directory from embedded resources [\#2033](https://github.com/apache/camel-k/pull/2033) ([astefanutti](https://github.com/astefanutti))
 - Use Quarkus fast-jar package format apache/camel-k-runtime\#360 [\#1931](https://github.com/apache/camel-k/pull/1931) ([jamesnetherton](https://github.com/jamesnetherton))
 
 ## [v1.3.2](https://github.com/apache/camel-k/tree/v1.3.2) (2021-03-19)
@@ -1189,6 +1191,7 @@
 - chore: fix eaxmples [\#1026](https://github.com/apache/camel-k/pull/1026) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix\(SDK\): Add relative symlink to kamel main package [\#1025](https://github.com/apache/camel-k/pull/1025) ([astefanutti](https://github.com/astefanutti))
 - chore: Use non-caching API reader from SDK [\#1021](https://github.com/apache/camel-k/pull/1021) ([astefanutti](https://github.com/astefanutti))
+- feat\(quarkus\): Initial Quarkus support [\#1013](https://github.com/apache/camel-k/pull/1013) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.0-M3](https://github.com/apache/camel-k/tree/1.0.0-M3) (2019-10-18)
 
@@ -1222,7 +1225,6 @@
 - fix \#988: add check for missing licenses before release [\#1018](https://github.com/apache/camel-k/pull/1018) ([nicolaferraro](https://github.com/nicolaferraro))
 - Upgrade Operator SDK to version 0.11.0 [\#1017](https://github.com/apache/camel-k/pull/1017) ([astefanutti](https://github.com/astefanutti))
 - chore\(tests\): add integration tests for common knative issues [\#1016](https://github.com/apache/camel-k/pull/1016) ([nicolaferraro](https://github.com/nicolaferraro))
-- feat\(quarkus\): Initial Quarkus support [\#1013](https://github.com/apache/camel-k/pull/1013) ([astefanutti](https://github.com/astefanutti))
 - Support Knative broker/trigger model and explicit source/sink [\#1012](https://github.com/apache/camel-k/pull/1012) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix \#1005: allow to customize loader and add default dependencies for… [\#1007](https://github.com/apache/camel-k/pull/1007) ([nicolaferraro](https://github.com/nicolaferraro))
 - Update OLM manifests for 1.0.0-M2 release [\#1006](https://github.com/apache/camel-k/pull/1006) ([astefanutti](https://github.com/astefanutti))
