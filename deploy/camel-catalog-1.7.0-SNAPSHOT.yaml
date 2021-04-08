@@ -30,7 +30,7 @@ spec:
     provider: quarkus
     applicationClass: io.quarkus.bootstrap.runner.QuarkusEntryPoint
     metadata:
-      camel-quarkus.version: 1.8.0
+      camel-quarkus.version: 1.8.1
       camel.version: 3.9.0
       quarkus.version: 1.13.0.Final
     dependencies:
@@ -2851,8 +2851,8 @@ spec:
       - org.apache.camel.component.zookeepermaster.MasterComponent
   loaders:
     groovy:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-groovy-dsl
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-groovy
       languages:
       - groovy
       metadata:
