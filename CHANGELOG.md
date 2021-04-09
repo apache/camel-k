@@ -22,6 +22,7 @@
 
 **Merged pull requests:**
 
+- chore\(ci\): upgrade YAKS version [\#2194](https://github.com/apache/camel-k/pull/2194) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(cli\): Improve run command --dependency option description [\#2193](https://github.com/apache/camel-k/pull/2193) ([astefanutti](https://github.com/astefanutti))
 - fix: Increase operator liveness probe initial delay and period [\#2192](https://github.com/apache/camel-k/pull/2192) ([astefanutti](https://github.com/astefanutti))
 - fix: Add bindings.knative.dev/include label to SinkBinding sources [\#2190](https://github.com/apache/camel-k/pull/2190) ([astefanutti](https://github.com/astefanutti))
@@ -92,8 +93,6 @@
 - For the moment lets remove absolute path [\#2049](https://github.com/apache/camel-k/pull/2049) ([oscerd](https://github.com/oscerd))
 - Add local build command replacing local create [\#2048](https://github.com/apache/camel-k/pull/2048) ([doru1004](https://github.com/doru1004))
 - Fix \#2043: add processing steps to KameletBinding [\#2044](https://github.com/apache/camel-k/pull/2044) ([nicolaferraro](https://github.com/nicolaferraro))
-- fix: Consider ObjectMeta field for deep derivative comparison before patching [\#2042](https://github.com/apache/camel-k/pull/2042) ([astefanutti](https://github.com/astefanutti))
-- fix\(pdb\): Add TypeMeta field to PodDisruptionBudget resource [\#2041](https://github.com/apache/camel-k/pull/2041) ([astefanutti](https://github.com/astefanutti))
 - feat\(trait\): toleration trait [\#2040](https://github.com/apache/camel-k/pull/2040) ([squakez](https://github.com/squakez))
 - feat: Use server-side apply to create and patch owned resources [\#2039](https://github.com/apache/camel-k/pull/2039) ([astefanutti](https://github.com/astefanutti))
 - Use Quarkus fast-jar package format apache/camel-k-runtime\#360 [\#1931](https://github.com/apache/camel-k/pull/1931) ([jamesnetherton](https://github.com/jamesnetherton))
