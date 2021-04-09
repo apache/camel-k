@@ -57,6 +57,7 @@ func TestHttpOnlyJavaSource(t *testing.T) {
 			from("direct:bots/cippa").to("log:stash");
 			from("netty-http:uri").to("log:stash");
 			from("seda:path").to("log:stash");
+			from("kamelet:source").to("log:sink");
 		`,
 		},
 		Language: v1.LanguageJavaSource,

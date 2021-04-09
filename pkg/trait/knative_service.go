@@ -102,10 +102,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if e.IntegrationInPhase(v1.IntegrationPhaseRunning) {
-		condition := e.Integration.Status.GetCondition(v1.IntegrationConditionKnativeServiceAvailable)
-		return condition != nil && condition.Status == corev1.ConditionTrue, nil
-	} else if !e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) {
+	if !e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) && !e.IntegrationInPhase(v1.IntegrationPhaseRunning) {
 		return false, nil
 	}
 
@@ -162,6 +159,11 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 				t.MinScale = &single
 			}
 		}
+	}
+
+	if e.IntegrationInPhase(v1.IntegrationPhaseRunning) {
+		condition := e.Integration.Status.GetCondition(v1.IntegrationConditionKnativeServiceAvailable)
+		return condition != nil && condition.Status == corev1.ConditionTrue, nil
 	}
 
 	return true, nil
