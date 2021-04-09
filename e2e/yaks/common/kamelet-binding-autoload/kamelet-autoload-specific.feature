@@ -4,8 +4,8 @@ Feature: Camel K can load specific secrets for Kamelets
     Given Disable auto removal of Kamelet resources
     Given Disable auto removal of Kubernetes resources
     Given Camel-K resource polling configuration
-      | maxAttempts          | 20   |
-      | delayBetweenAttempts | 1000 |
+      | maxAttempts          | 40   |
+      | delayBetweenAttempts | 3000 |
 
   Scenario: KameletBinding can load specific settings for Kamelet
     Given create Kubernetes service stub-service-2 with target port 8081
