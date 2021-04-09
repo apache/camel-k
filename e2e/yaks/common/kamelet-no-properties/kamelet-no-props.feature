@@ -3,6 +3,9 @@ Feature: Kamelet may have no properties
   Background:
     Given Disable auto removal of Camel-K resources
     Given Disable auto removal of Kamelet resources
+    Given Camel-K resource polling configuration
+      | maxAttempts          | 40   |
+      | delayBetweenAttempts | 3000 |
 
   Scenario: Create Kamelet
     Given create Kamelet no-props-source with flow
