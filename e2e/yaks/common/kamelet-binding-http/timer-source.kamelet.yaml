@@ -15,21 +15,40 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-config:
-  namespace:
-    temporary: true
-pre:
-- name: installation
-  run: |
-    kamel install -n $YAKS_NAMESPACE
-
-    kubectl apply -f messages-channel.yaml -n $YAKS_NAMESPACE
-
-    kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
-    kubectl apply -f logger-sink.kamelet.yaml -n $YAKS_NAMESPACE
-
-    kubectl apply -f timer-source-binding.yaml -n $YAKS_NAMESPACE
-    kubectl apply -f logger-sink-binding.yaml -n $YAKS_NAMESPACE
-
-    kubectl wait kameletbinding timer-source-binding --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
-    kubectl wait kameletbinding logger-sink-binding --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
+apiVersion: camel.apache.org/v1alpha1
+kind: Kamelet
+metadata:
+  name: timer-source
+  labels:
+    camel.apache.org/kamelet.type: "source"
+spec:
+  definition:
+    title: "Timer"
+    description: "Produces periodic events with a custom payload"
+    required:
+      - message
+    properties:
+      period:
+        title: Period
+        description: The time interval between two events
+        type: integer
+        default: 1000
+      message:
+        title: Message
+        description: The message to generate
+        type: string
+  types:
+    out:
+      mediaType: application/json
+      schema:
+        id: text.camel.apache.org
+        type: string
+  flow:
+    from:
+      uri: timer:tick
+      parameters:
+        period: "{{period}}"
+      steps:
+        - set-body:
+            constant: "{{message}}"
+        - to: "kamelet:sink"
