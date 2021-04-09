@@ -324,6 +324,9 @@ func (i *baseInspector) hasOnlyPassiveEndpoints(fromURIs []string) bool {
 
 func (i *baseInspector) containsOnlyURIsIn(fromURI []string, allowed map[string]bool) bool {
 	for _, uri := range fromURI {
+		if uri == "kamelet:source" {
+			continue
+		}
 		prefix := i.getURIPrefix(uri)
 		if enabled, ok := allowed[prefix]; !ok || !enabled {
 			return false
