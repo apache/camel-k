@@ -22,6 +22,7 @@
 
 **Merged pull requests:**
 
+- Update to Camel 3.9.0 and Camel-Quarkus 1.8.1 [\#2197](https://github.com/apache/camel-k/pull/2197) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(ci\): upgrade YAKS version [\#2194](https://github.com/apache/camel-k/pull/2194) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(cli\): Improve run command --dependency option description [\#2193](https://github.com/apache/camel-k/pull/2193) ([astefanutti](https://github.com/astefanutti))
 - fix: Increase operator liveness probe initial delay and period [\#2192](https://github.com/apache/camel-k/pull/2192) ([astefanutti](https://github.com/astefanutti))
@@ -75,7 +76,7 @@
 - Upgrade Kubernetes to v0.19.8 and Service Binding operator to v0.4.1 [\#2076](https://github.com/apache/camel-k/pull/2076) ([astefanutti](https://github.com/astefanutti))
 - Fix deprecated annotation [\#2070](https://github.com/apache/camel-k/pull/2070) ([bouskaJ](https://github.com/bouskaJ))
 - Operator labels are different when OLM is used [\#2069](https://github.com/apache/camel-k/pull/2069) ([bouskaJ](https://github.com/bouskaJ))
-- test: Add metrics e2e tests [\#2066](https://github.com/apache/camel-k/pull/2066) ([astefanutti](https://github.com/astefanutti))
+- test: Add operator metrics e2e tests [\#2066](https://github.com/apache/camel-k/pull/2066) ([astefanutti](https://github.com/astefanutti))
 - Cleanup files dir [\#2065](https://github.com/apache/camel-k/pull/2065) ([bouskaJ](https://github.com/bouskaJ))
 - chore\(e2e\): Assert Integration readiness condition in scaling e2e tests [\#2064](https://github.com/apache/camel-k/pull/2064) ([astefanutti](https://github.com/astefanutti))
 - chore\(e2e\): Polish Gomega usage in e2e tests [\#2063](https://github.com/apache/camel-k/pull/2063) ([astefanutti](https://github.com/astefanutti))
@@ -90,7 +91,6 @@
 - Wait for operator to start before scaling it to zero [\#2054](https://github.com/apache/camel-k/pull/2054) ([bouskaJ](https://github.com/bouskaJ))
 - chore\(test\): Add integration scaling e2e tests [\#2053](https://github.com/apache/camel-k/pull/2053) ([astefanutti](https://github.com/astefanutti))
 - chore\(api\): Add Scale methods to the Integration generated client API [\#2052](https://github.com/apache/camel-k/pull/2052) ([astefanutti](https://github.com/astefanutti))
-- For the moment lets remove absolute path [\#2049](https://github.com/apache/camel-k/pull/2049) ([oscerd](https://github.com/oscerd))
 - Add local build command replacing local create [\#2048](https://github.com/apache/camel-k/pull/2048) ([doru1004](https://github.com/doru1004))
 - Fix \#2043: add processing steps to KameletBinding [\#2044](https://github.com/apache/camel-k/pull/2044) ([nicolaferraro](https://github.com/nicolaferraro))
 - feat\(trait\): toleration trait [\#2040](https://github.com/apache/camel-k/pull/2040) ([squakez](https://github.com/squakez))
