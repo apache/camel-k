@@ -94,7 +94,6 @@
 - Add local build command replacing local create [\#2048](https://github.com/apache/camel-k/pull/2048) ([doru1004](https://github.com/doru1004))
 - Fix \#2043: add processing steps to KameletBinding [\#2044](https://github.com/apache/camel-k/pull/2044) ([nicolaferraro](https://github.com/nicolaferraro))
 - feat\(trait\): toleration trait [\#2040](https://github.com/apache/camel-k/pull/2040) ([squakez](https://github.com/squakez))
-- feat: Use server-side apply to create and patch owned resources [\#2039](https://github.com/apache/camel-k/pull/2039) ([astefanutti](https://github.com/astefanutti))
 - Use Quarkus fast-jar package format apache/camel-k-runtime\#360 [\#1931](https://github.com/apache/camel-k/pull/1931) ([jamesnetherton](https://github.com/jamesnetherton))
 
 ## [v1.3.2](https://github.com/apache/camel-k/tree/v1.3.2) (2021-03-19)
@@ -463,7 +462,6 @@
 - Related to \#1638 kamel init - should not create source file with ASF … [\#1643](https://github.com/apache/camel-k/pull/1643) ([oscerd](https://github.com/oscerd))
 - Related to \#1638 kamel init - should not create source file with ASF … [\#1642](https://github.com/apache/camel-k/pull/1642) ([oscerd](https://github.com/oscerd))
 - Related to \#1638 kamel init - should not create source file with ASF … [\#1641](https://github.com/apache/camel-k/pull/1641) ([oscerd](https://github.com/oscerd))
-- Related to \#1638 kamel init - should not create source file with ASF … [\#1640](https://github.com/apache/camel-k/pull/1640) ([oscerd](https://github.com/oscerd))
 - Related to \#1638 kamel init - should not create source file with ASF … [\#1639](https://github.com/apache/camel-k/pull/1639) ([oscerd](https://github.com/oscerd))
 - Add support for sinkbinding [\#1637](https://github.com/apache/camel-k/pull/1637) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
@@ -553,6 +551,7 @@
 
 **Merged pull requests:**
 
+- Related to \#1638 kamel init - should not create source file with ASF … [\#1640](https://github.com/apache/camel-k/pull/1640) ([oscerd](https://github.com/oscerd))
 - Initial architecture documentation [\#1629](https://github.com/apache/camel-k/pull/1629) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix\(doc\): PodMonitoring -\> PodMonitor [\#1628](https://github.com/apache/camel-k/pull/1628) ([astefanutti](https://github.com/astefanutti))
 - doc: Init troubleshooting guide [\#1627](https://github.com/apache/camel-k/pull/1627) ([astefanutti](https://github.com/astefanutti))
