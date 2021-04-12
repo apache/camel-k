@@ -222,7 +222,7 @@ func maybeSetTolerations(sub *operatorsv1alpha1.Subscription, tolArray []string)
 
 func maybeSetNodeSelectors(sub *operatorsv1alpha1.Subscription, nsArray []string) error {
 	if nsArray != nil {
-		nodeSelectors, err := kubernetes.GetNodeSelectors(nsArray)
+		nodeSelectors, err := kubernetes.NewNodeSelectors(nsArray)
 		if err != nil {
 			return err
 		}
