@@ -311,7 +311,7 @@ func validateFiles(args []string) error {
 	for _, arg := range args {
 		err := validateFile(arg)
 		if err != nil {
-			return nil
+			return err
 		}
 	}
 
@@ -354,7 +354,7 @@ func validateIntegrationFiles(args []string) error {
 	// Validate integration files.
 	err := validateFiles(args)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	return nil
@@ -388,7 +388,10 @@ func updateIntegrationProperties(properties []string, propertyFiles []string, ha
 	var relocatedPropertyFiles []string
 	for _, propertyFile := range propertyFiles {
 		relocatedPropertyFile := path.Join(util.GetLocalPropertiesDir(), path.Base(propertyFile))
-		util.CopyFile(propertyFile, relocatedPropertyFile)
+		_, err = util.CopyFile(propertyFile, relocatedPropertyFile)
+		if err != nil {
+			return nil, err
+		}
 		relocatedPropertyFiles = append(relocatedPropertyFiles, relocatedPropertyFile)
 	}
 
@@ -424,7 +427,10 @@ func updateIntegrationDependencies(dependencies []string) error {
 		} else {
 			targetPath = path.Join(util.GetLocalDependenciesDir(), path.Base(dependency))
 		}
-		util.CopyFile(dependency, targetPath)
+		_, err = util.CopyFile(dependency, targetPath)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -437,7 +443,10 @@ func updateIntegrationRoutes(routes []string) error {
 	}
 
 	for _, route := range routes {
-		util.CopyFile(route, path.Join(util.GetLocalRoutesDir(), path.Base(route)))
+		_, err = util.CopyFile(route, path.Join(util.GetLocalRoutesDir(), path.Base(route)))
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
