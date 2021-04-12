@@ -103,7 +103,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		if cfg.NodeSelectors != nil {
 			if d, ok := o.(*appsv1.Deployment); ok {
 				if d.Labels["camel.apache.org/component"] == "operator" {
-					nodeSelector, err := kubernetes.GetNodeSelectors(cfg.NodeSelectors)
+					nodeSelector, err := kubernetes.NewNodeSelectors(cfg.NodeSelectors)
 					if err != nil {
 						fmt.Println("Warning: could not parse the configured node selectors!")
 					}

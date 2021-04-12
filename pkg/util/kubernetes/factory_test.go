@@ -40,7 +40,7 @@ func TestValidTolerations(t *testing.T) {
 		{"existKey:PreferNoSchedule:120"},
 	}
 	for _, vd := range validTolerations {
-		_, err := GetTolerations(vd)
+		_, err := NewTolerations(vd)
 		assert.Nil(t, err)
 	}
 }
@@ -57,7 +57,7 @@ func TestInvalidTolerations(t *testing.T) {
 		{"existKey:PreferNoSchedule:something"},
 	}
 	for _, vd := range validTolerations {
-		_, err := GetTolerations(vd)
+		_, err := NewTolerations(vd)
 		assert.NotNil(t, err)
 	}
 }
@@ -69,7 +69,7 @@ func TestValueTolerations(t *testing.T) {
 		"existKey:PreferNoSchedule",
 		"existKey:NoSchedule:120",
 	}
-	toleration, err := GetTolerations(tolerations)
+	toleration, err := NewTolerations(tolerations)
 	assert.Nil(t, err)
 	assert.Equal(t, 4, len(toleration))
 
@@ -105,7 +105,7 @@ func TestValidNodeSelectors(t *testing.T) {
 		{"keyNum=123"},
 	}
 	for _, vds := range validNodeSelectors {
-		_, err := GetNodeSelectors(vds)
+		_, err := NewNodeSelectors(vds)
 		assert.Nil(t, err)
 	}
 }
@@ -117,7 +117,7 @@ func TestInvalidNodeSelectors(t *testing.T) {
 		{"key=path/to/value"},
 	}
 	for _, vds := range validNodeSelectors {
-		_, err := GetNodeSelectors(vds)
+		_, err := NewNodeSelectors(vds)
 		assert.NotNil(t, err)
 	}
 }
@@ -127,7 +127,7 @@ func TestValueNodeSelectors(t *testing.T) {
 		"key=value",
 		"kubernetes.io/hostname=worker0",
 	}
-	nodeSelectors, err := GetNodeSelectors(nodeSelectorsArray)
+	nodeSelectors, err := NewNodeSelectors(nodeSelectorsArray)
 	assert.Nil(t, err)
 	assert.Equal(t, 2, len(nodeSelectors))
 
