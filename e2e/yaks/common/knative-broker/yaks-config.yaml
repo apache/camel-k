@@ -16,9 +16,6 @@
 # ---------------------------------------------------------------------------
 
 config:
-  runtime:
-    env:
-      YAKS_KNATIVE_API_VERSION: eventing.knative.dev/v1
   namespace:
     temporary: true
 pre:
