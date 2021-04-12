@@ -90,7 +90,6 @@
 - feat: add command completion for connect flag [\#2055](https://github.com/apache/camel-k/pull/2055) ([johnpoth](https://github.com/johnpoth))
 - Wait for operator to start before scaling it to zero [\#2054](https://github.com/apache/camel-k/pull/2054) ([bouskaJ](https://github.com/bouskaJ))
 - chore\(test\): Add integration scaling e2e tests [\#2053](https://github.com/apache/camel-k/pull/2053) ([astefanutti](https://github.com/astefanutti))
-- chore\(api\): Add Scale methods to the Integration generated client API [\#2052](https://github.com/apache/camel-k/pull/2052) ([astefanutti](https://github.com/astefanutti))
 - Add local build command replacing local create [\#2048](https://github.com/apache/camel-k/pull/2048) ([doru1004](https://github.com/doru1004))
 - Fix \#2043: add processing steps to KameletBinding [\#2044](https://github.com/apache/camel-k/pull/2044) ([nicolaferraro](https://github.com/nicolaferraro))
 - feat\(trait\): toleration trait [\#2040](https://github.com/apache/camel-k/pull/2040) ([squakez](https://github.com/squakez))
@@ -462,6 +461,7 @@
 - Related to \#1638 kamel init - should not create source file with ASF … [\#1643](https://github.com/apache/camel-k/pull/1643) ([oscerd](https://github.com/oscerd))
 - Related to \#1638 kamel init - should not create source file with ASF … [\#1642](https://github.com/apache/camel-k/pull/1642) ([oscerd](https://github.com/oscerd))
 - Related to \#1638 kamel init - should not create source file with ASF … [\#1641](https://github.com/apache/camel-k/pull/1641) ([oscerd](https://github.com/oscerd))
+- Related to \#1638 kamel init - should not create source file with ASF … [\#1640](https://github.com/apache/camel-k/pull/1640) ([oscerd](https://github.com/oscerd))
 - Related to \#1638 kamel init - should not create source file with ASF … [\#1639](https://github.com/apache/camel-k/pull/1639) ([oscerd](https://github.com/oscerd))
 - Add support for sinkbinding [\#1637](https://github.com/apache/camel-k/pull/1637) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
@@ -551,7 +551,6 @@
 
 **Merged pull requests:**
 
-- Related to \#1638 kamel init - should not create source file with ASF … [\#1640](https://github.com/apache/camel-k/pull/1640) ([oscerd](https://github.com/oscerd))
 - Initial architecture documentation [\#1629](https://github.com/apache/camel-k/pull/1629) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix\(doc\): PodMonitoring -\> PodMonitor [\#1628](https://github.com/apache/camel-k/pull/1628) ([astefanutti](https://github.com/astefanutti))
 - doc: Init troubleshooting guide [\#1627](https://github.com/apache/camel-k/pull/1627) ([astefanutti](https://github.com/astefanutti))
@@ -811,6 +810,7 @@
 - information to update the homebrew formula [\#1454](https://github.com/apache/camel-k/pull/1454) ([ipolyzos](https://github.com/ipolyzos))
 - Fix \#1450: fix servicemonitor roles on direct install [\#1453](https://github.com/apache/camel-k/pull/1453) ([nicolaferraro](https://github.com/nicolaferraro))
 - Helm fix [\#1448](https://github.com/apache/camel-k/pull/1448) ([nicolaferraro](https://github.com/nicolaferraro))
+- Fix \#1446 and \#1395: completely update integration resource on redepl… [\#1447](https://github.com/apache/camel-k/pull/1447) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [1.0.0-nightly.202005060045](https://github.com/apache/camel-k/tree/1.0.0-nightly.202005060045) (2020-05-05)
 
@@ -827,7 +827,6 @@
 
 **Merged pull requests:**
 
-- Fix \#1446 and \#1395: completely update integration resource on redepl… [\#1447](https://github.com/apache/camel-k/pull/1447) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1367: add more build events [\#1444](https://github.com/apache/camel-k/pull/1444) ([nicolaferraro](https://github.com/nicolaferraro))
 - Partially Fixes Camel 14995: generates master and 3/threescale traits docs. [\#1441](https://github.com/apache/camel-k/pull/1441) ([djencks](https://github.com/djencks))
 - Fixes CAMEL-14993 generate traits table with Antora, etc. [\#1440](https://github.com/apache/camel-k/pull/1440) ([djencks](https://github.com/djencks))
