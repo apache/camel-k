@@ -20,9 +20,10 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/util"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+
+	"github.com/apache/camel-k/pkg/util"
 )
 
 func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCmdOptions) {
@@ -146,7 +147,7 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 
 	hasIntegrationDir := command.IntegrationDirectory != ""
 
-	dependencies := []string{}
+	var dependencies []string
 	if hasIntegrationDir {
 		localBuildDependencies, err := getLocalBuildDependencies(command.IntegrationDirectory)
 		if err != nil {
@@ -201,13 +202,13 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 			return err
 		}
 	} else {
-		propertieDir := util.GetLocalPropertiesDir()
+		propertiesDir := util.GetLocalPropertiesDir()
 		if hasIntegrationDir {
-			propertieDir = getCustomPropertiesDir(command.IntegrationDirectory)
+			propertiesDir = getCustomPropertiesDir(command.IntegrationDirectory)
 		}
 
 		// Run integration locally.
-		err := RunLocalIntegrationRunCommand(command.Context, propertyFiles, dependencies, routes, propertieDir, cmd.OutOrStdout(), cmd.ErrOrStderr())
+		err := RunLocalIntegrationRunCommand(command.Context, propertyFiles, dependencies, routes, propertiesDir, cmd.OutOrStdout(), cmd.ErrOrStderr())
 		if err != nil {
 			return err
 		}

@@ -20,9 +20,10 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/util"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+
+	"github.com/apache/camel-k/pkg/util"
 )
 
 func newCmdLocalBuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localBuildCmdOptions) {
@@ -105,7 +106,7 @@ func (command *localBuildCmdOptions) validate(args []string) error {
 	// Validate properties file.
 	err = validateFiles(command.PropertyFiles)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	// ContainerRegistry should only be specified when building the base image.
@@ -163,8 +164,7 @@ func (command *localBuildCmdOptions) init(args []string) error {
 }
 
 func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
-	dependenciesList := []string{}
-	propertyFilesList := []string{}
+	var dependenciesList, propertyFilesList []string
 	routeFiles := args
 	if !command.BaseImage {
 		// Fetch dependencies.
@@ -173,7 +173,7 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 			return err
 		}
 
-		propertyFiles := []string{}
+		var propertyFiles []string
 		if !command.DependenciesOnly {
 			// Manage integration properties which may come from files or CLI.
 			propertyFiles, err = updateIntegrationProperties(command.Properties, command.PropertyFiles, false)
