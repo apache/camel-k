@@ -23,6 +23,7 @@ on:
       - master
       - "release-*"
     paths-ignore:
+      - 'proposals/**'
       - '**.adoc'
       - 'KEYS'
       - 'LICENSE'
@@ -32,6 +33,7 @@ on:
       - master
       - "release-*"
     paths-ignore:
+      - 'proposals/**'
       - '**.adoc'
       - 'KEYS'
       - 'LICENSE'
