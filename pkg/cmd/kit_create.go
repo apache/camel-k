@@ -138,7 +138,7 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 		case strings.HasPrefix(item, "file:"):
 			kit.Spec.Dependencies = append(kit.Spec.Dependencies, item)
 		case strings.HasPrefix(item, "camel-quarkus-"):
-			kit.Spec.Dependencies = append(kit.Spec.Dependencies, "camel-quarkus:"+strings.TrimPrefix(item, "camel-quarkus-"))
+			kit.Spec.Dependencies = append(kit.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-quarkus-"))
 		case strings.HasPrefix(item, "camel-"):
 			kit.Spec.Dependencies = append(kit.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-"))
 		}
