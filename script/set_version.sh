@@ -28,7 +28,7 @@ image_name=${2:-docker.io\/apache\/camel-k}
 sanitized_image_name=${image_name//\//\\\/}
 
 
-for f in $(find $location/../deploy -type f -name "*.yaml" | grep -v olm-catalog);
+for f in $(find $location/../config/manager -type f -name "*.yaml");
 do
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     sed -i -r "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/${sanitized_image_name}:${version}/" $f
