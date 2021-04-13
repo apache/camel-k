@@ -123,6 +123,16 @@
             <artifactId>camel-k-cron-deployment</artifactId>
             <version>${runtime.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-kamelet-reify</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel.k</groupId>
+            <artifactId>camel-k-kamelet-reify-deployment</artifactId>
+            <version>${runtime.version}</version>
+        </dependency>
 
         <!-- loaders -->
         <dependency>
