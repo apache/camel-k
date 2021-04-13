@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Multiple ReplicaSet Race Condition [\#2188](https://github.com/apache/camel-k/issues/2188)
 - \[regression\] 1.3.2 regresses on "SinkBinding on KSVC results into ping-pong between operators \#1936" [\#2184](https://github.com/apache/camel-k/issues/2184)
 - Default liveness probe initial delay is too short [\#2173](https://github.com/apache/camel-k/issues/2173)
 - Review generated CSV [\#2164](https://github.com/apache/camel-k/issues/2164)
@@ -16,19 +17,26 @@
 - Ability to provide Maven repository CA certificates [\#2149](https://github.com/apache/camel-k/issues/2149)
 - kamelet-binding: embedding camelets [\#2146](https://github.com/apache/camel-k/issues/2146)
 - Release 1.3.2 [\#2144](https://github.com/apache/camel-k/issues/2144)
+- cli: add a binding sub command [\#2083](https://github.com/apache/camel-k/issues/2083)
 - Improve description of "dependency" run and modeline option to include case of Camel components artifactId [\#1584](https://github.com/apache/camel-k/issues/1584)
 - Adding camel-jackson dependency creates issues with inner classes  [\#1507](https://github.com/apache/camel-k/issues/1507)
 - Adding a dump command [\#1415](https://github.com/apache/camel-k/issues/1415)
 
 **Merged pull requests:**
 
+- chore: Tidy proposals directory [\#2204](https://github.com/apache/camel-k/pull/2204) ([astefanutti](https://github.com/astefanutti))
+- chore\(cli\): Fix error handling in local commands [\#2202](https://github.com/apache/camel-k/pull/2202) ([astefanutti](https://github.com/astefanutti))
+- Add OLM upgrade test [\#2198](https://github.com/apache/camel-k/pull/2198) ([bouskaJ](https://github.com/bouskaJ))
 - Update to Camel 3.9.0 and Camel-Quarkus 1.8.1 [\#2197](https://github.com/apache/camel-k/pull/2197) ([nicolaferraro](https://github.com/nicolaferraro))
+- fix: Prevent Integration environment variables ordering randomization [\#2196](https://github.com/apache/camel-k/pull/2196) ([astefanutti](https://github.com/astefanutti))
 - chore\(ci\): upgrade YAKS version [\#2194](https://github.com/apache/camel-k/pull/2194) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(cli\): Improve run command --dependency option description [\#2193](https://github.com/apache/camel-k/pull/2193) ([astefanutti](https://github.com/astefanutti))
 - fix: Increase operator liveness probe initial delay and period [\#2192](https://github.com/apache/camel-k/pull/2192) ([astefanutti](https://github.com/astefanutti))
 - fix: Add bindings.knative.dev/include label to SinkBinding sources [\#2190](https://github.com/apache/camel-k/pull/2190) ([astefanutti](https://github.com/astefanutti))
 - chore: upgrade Service Binding Operator to v0.6.0 [\#2187](https://github.com/apache/camel-k/pull/2187) ([johnpoth](https://github.com/johnpoth))
 - doc: Maven configuration documentation [\#2186](https://github.com/apache/camel-k/pull/2186) ([astefanutti](https://github.com/astefanutti))
+- Fix \#2083: add kamel bind command [\#2183](https://github.com/apache/camel-k/pull/2183) ([nicolaferraro](https://github.com/nicolaferraro))
+- feat\(operator\): NodeSelector install options [\#2182](https://github.com/apache/camel-k/pull/2182) ([squakez](https://github.com/squakez))
 - feat\(build\): Custom Maven CA certificate\(s\) support [\#2180](https://github.com/apache/camel-k/pull/2180) ([astefanutti](https://github.com/astefanutti))
 - Fix link in example knative readme [\#2174](https://github.com/apache/camel-k/pull/2174) ([apupier](https://github.com/apupier))
 - Adding a dump command [\#2171](https://github.com/apache/camel-k/pull/2171) ([oscerd](https://github.com/oscerd))
@@ -53,6 +61,7 @@
 - fix: only assume secure pull if the main registry and the base image registry are different [\#2124](https://github.com/apache/camel-k/pull/2124) ([orpiske](https://github.com/orpiske))
 - test: Add toleration trait e2e tests [\#2123](https://github.com/apache/camel-k/pull/2123) ([astefanutti](https://github.com/astefanutti))
 - chore\(doc\): fix links to unlock website [\#2121](https://github.com/apache/camel-k/pull/2121) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore\(test\): test correct filtering of messages from Knative broker [\#2120](https://github.com/apache/camel-k/pull/2120) ([nicolaferraro](https://github.com/nicolaferraro))
 - Kamel local inspect: In case of missing format, show the output in th… [\#2118](https://github.com/apache/camel-k/pull/2118) ([oscerd](https://github.com/oscerd))
 - Fix knative subscriptions and triggers [\#2115](https://github.com/apache/camel-k/pull/2115) ([nicolaferraro](https://github.com/nicolaferraro))
 - feat\(operator\): toleration install flag [\#2114](https://github.com/apache/camel-k/pull/2114) ([squakez](https://github.com/squakez))
@@ -86,13 +95,8 @@
 - Move trait test to separate directory [\#2059](https://github.com/apache/camel-k/pull/2059) ([bouskaJ](https://github.com/bouskaJ))
 - Implement a lightning-fast global strategy [\#2058](https://github.com/apache/camel-k/pull/2058) ([nicolaferraro](https://github.com/nicolaferraro))
 - test: Add PodDisruptionBudget trait e2e tests [\#2057](https://github.com/apache/camel-k/pull/2057) ([astefanutti](https://github.com/astefanutti))
-- chore\(cmd\): skip operator compatibility warning [\#2056](https://github.com/apache/camel-k/pull/2056) ([squakez](https://github.com/squakez))
-- feat: add command completion for connect flag [\#2055](https://github.com/apache/camel-k/pull/2055) ([johnpoth](https://github.com/johnpoth))
-- Wait for operator to start before scaling it to zero [\#2054](https://github.com/apache/camel-k/pull/2054) ([bouskaJ](https://github.com/bouskaJ))
-- chore\(test\): Add integration scaling e2e tests [\#2053](https://github.com/apache/camel-k/pull/2053) ([astefanutti](https://github.com/astefanutti))
 - Add local build command replacing local create [\#2048](https://github.com/apache/camel-k/pull/2048) ([doru1004](https://github.com/doru1004))
 - Fix \#2043: add processing steps to KameletBinding [\#2044](https://github.com/apache/camel-k/pull/2044) ([nicolaferraro](https://github.com/nicolaferraro))
-- feat\(trait\): toleration trait [\#2040](https://github.com/apache/camel-k/pull/2040) ([squakez](https://github.com/squakez))
 - Use Quarkus fast-jar package format apache/camel-k-runtime\#360 [\#1931](https://github.com/apache/camel-k/pull/1931) ([jamesnetherton](https://github.com/jamesnetherton))
 
 ## [v1.3.2](https://github.com/apache/camel-k/tree/v1.3.2) (2021-03-19)
@@ -810,7 +814,6 @@
 - information to update the homebrew formula [\#1454](https://github.com/apache/camel-k/pull/1454) ([ipolyzos](https://github.com/ipolyzos))
 - Fix \#1450: fix servicemonitor roles on direct install [\#1453](https://github.com/apache/camel-k/pull/1453) ([nicolaferraro](https://github.com/nicolaferraro))
 - Helm fix [\#1448](https://github.com/apache/camel-k/pull/1448) ([nicolaferraro](https://github.com/nicolaferraro))
-- Fix \#1446 and \#1395: completely update integration resource on redepl… [\#1447](https://github.com/apache/camel-k/pull/1447) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [1.0.0-nightly.202005060045](https://github.com/apache/camel-k/tree/1.0.0-nightly.202005060045) (2020-05-05)
 
@@ -827,6 +830,7 @@
 
 **Merged pull requests:**
 
+- Fix \#1446 and \#1395: completely update integration resource on redepl… [\#1447](https://github.com/apache/camel-k/pull/1447) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1367: add more build events [\#1444](https://github.com/apache/camel-k/pull/1444) ([nicolaferraro](https://github.com/nicolaferraro))
 - Partially Fixes Camel 14995: generates master and 3/threescale traits docs. [\#1441](https://github.com/apache/camel-k/pull/1441) ([djencks](https://github.com/djencks))
 - Fixes CAMEL-14993 generate traits table with Antora, etc. [\#1440](https://github.com/apache/camel-k/pull/1440) ([djencks](https://github.com/djencks))
@@ -843,7 +847,6 @@
 - Add license headers to files generated with kamel init [\#1420](https://github.com/apache/camel-k/pull/1420) ([ipolyzos](https://github.com/ipolyzos))
 - Attempt to make CI better [\#1418](https://github.com/apache/camel-k/pull/1418) ([nicolaferraro](https://github.com/nicolaferraro))
 - Properly handle platform-http component in routes [\#1411](https://github.com/apache/camel-k/pull/1411) ([lburgazzoli](https://github.com/lburgazzoli))
-- Add some sugar for additional sources [\#1400](https://github.com/apache/camel-k/pull/1400) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [1.0.0-nightly.202004171040](https://github.com/apache/camel-k/tree/1.0.0-nightly.202004171040) (2020-04-17)
 
@@ -858,6 +861,7 @@
 **Merged pull requests:**
 
 - Fixed cron trait docs [\#1405](https://github.com/apache/camel-k/pull/1405) ([oscerd](https://github.com/oscerd))
+- Add some sugar for additional sources [\#1400](https://github.com/apache/camel-k/pull/1400) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#1393: create standard role at operator startup in OLM [\#1399](https://github.com/apache/camel-k/pull/1399) ([nicolaferraro](https://github.com/nicolaferraro))
 - Cannot switch between cron and normal deployment in dev mode [\#1398](https://github.com/apache/camel-k/pull/1398) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#1384: allow to define an alternative prometheus config [\#1397](https://github.com/apache/camel-k/pull/1397) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1924,6 +1928,7 @@
 - Support for compressed source blob [\#265](https://github.com/apache/camel-k/issues/265)
 - add an option to always generate a docker image [\#246](https://github.com/apache/camel-k/issues/246)
 - temporary build folder not cleaned up [\#230](https://github.com/apache/camel-k/issues/230)
+- Kaniko build failing on Minikube [\#226](https://github.com/apache/camel-k/issues/226)
 - Do not always scale down to 0 in Knative [\#219](https://github.com/apache/camel-k/issues/219)
 - Allow to push to a Knative channel or service endpoint [\#218](https://github.com/apache/camel-k/issues/218)
 - Support subscription to multiple Knative channels [\#216](https://github.com/apache/camel-k/issues/216)
@@ -1975,7 +1980,6 @@
 
 **Closed issues:**
 
-- Kaniko build failing on Minikube [\#226](https://github.com/apache/camel-k/issues/226)
 - camel-k make resulting in test failures while building runtime kotlin  [\#222](https://github.com/apache/camel-k/issues/222)
 - Provide option to get the Json/Yaml of a integration [\#207](https://github.com/apache/camel-k/issues/207)
 - Where we can get XSD for plain XML DSL? [\#201](https://github.com/apache/camel-k/issues/201)
