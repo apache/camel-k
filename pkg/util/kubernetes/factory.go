@@ -78,9 +78,9 @@ func NewNodeSelectors(nsArray []string) (map[string]string, error) {
 	return nodeSelectors, nil
 }
 
-// GetResourceRequirements will build a CPU and memory requirements from an array of requests
+// NewResourceRequirements will build a CPU and memory requirements from an array of requests
 // matching <requestType.requestResource=value> (ie, limits.memory=256Mi)
-func GetResourceRequirements(reqs []string) (corev1.ResourceRequirements, error) {
+func NewResourceRequirements(reqs []string) (corev1.ResourceRequirements, error) {
 	resReq := corev1.ResourceRequirements{
 		Requests: corev1.ResourceList{},
 		Limits:   corev1.ResourceList{},
