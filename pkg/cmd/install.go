@@ -129,7 +129,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	// Pod settings
 	cmd.Flags().StringArray("toleration", nil, "Add a Toleration to the operator Pod")
 	cmd.Flags().StringArray("node-selector", nil, "Add a NodeSelector to the operator Pod")
-	cmd.Flags().StringArray("resources-requirements", nil, "Define the resources requests and limits assigned to the operator Pod as <requestType.requestResource=value> (ie, limits.memory=256Mi)")
+	cmd.Flags().StringArray("operator-resources", nil, "Define the resources requests and limits assigned to the operator Pod as <requestType.requestResource=value> (ie, limits.memory=256Mi)")
 
 	// save
 	cmd.Flags().Bool("save", false, "Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
@@ -179,7 +179,7 @@ type installCmdOptions struct {
 	Tolerations             []string `mapstructure:"tolerations"`
 	NodeSelectors           []string `mapstructure:"node-selectors"`
 	HTTPProxySecret         string   `mapstructure:"http-proxy-secret"`
-	ResourcesRequirements   []string `mapstructure:"resources-requirements"`
+	ResourcesRequirements   []string `mapstructure:"operator-resources"`
 
 	registry         v1.IntegrationPlatformRegistrySpec
 	registryAuth     registry.Auth
