@@ -36,11 +36,12 @@ import (
 )
 
 const (
-	defaultContainerName = "integration"
-	defaultContainerPort = 8080
-	defaultServicePort   = 80
-	defaultProbePath     = "/health"
-	containerTraitID     = "container"
+	defaultContainerName     = "integration"
+	defaultContainerPort     = 8080
+	defaultContainerPortName = "http"
+	defaultServicePort       = 80
+	defaultProbePath         = "/health"
+	containerTraitID         = "container"
 )
 
 // The Container trait can be used to configure properties of the container where the integration will run.
@@ -111,9 +112,8 @@ func newContainerTrait() Trait {
 	return &containerTrait{
 		BaseTrait:       NewBaseTrait(containerTraitID, 1600),
 		Port:            defaultContainerPort,
-		PortName:        httpPortName,
 		ServicePort:     defaultServicePort,
-		ServicePortName: httpPortName,
+		ServicePortName: defaultContainerPortName,
 		Name:            defaultContainerName,
 		ProbesEnabled:   util.BoolP(false),
 		ProbePath:       defaultProbePath,
@@ -205,11 +205,13 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		return err
 	}
 
-	//
+	portName := t.PortName
+	if portName == "" {
+		portName = defaultContainerPortName
+	}
 	// Deployment
-	//
 	if err := e.Resources.VisitDeploymentE(func(deployment *appsv1.Deployment) error {
-		if util.IsTrue(t.ProbesEnabled) && t.PortName == httpPortName {
+		if util.IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
 			if err := t.configureProbes(e, &container, t.Port, t.ProbePath); err != nil {
 				return err
 			}
@@ -234,11 +236,9 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		return err
 	}
 
-	//
 	// Knative Service
-	//
 	if err := e.Resources.VisitKnativeServiceE(func(service *serving.Service) error {
-		if util.IsTrue(t.ProbesEnabled) && t.PortName == httpPortName {
+		if util.IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
 			// don't set the port on Knative service as it is not allowed.
 			if err := t.configureProbes(e, &container, 0, t.ProbePath); err != nil {
 				return err
@@ -275,11 +275,9 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		return err
 	}
 
-	//
 	// CronJob
-	//
 	if err := e.Resources.VisitCronJobE(func(cron *v1beta1.CronJob) error {
-		if util.IsTrue(t.ProbesEnabled) && t.PortName == httpPortName {
+		if util.IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
 			if err := t.configureProbes(e, &container, t.Port, t.ProbePath); err != nil {
 				return err
 			}
@@ -313,8 +311,13 @@ func (t *containerTrait) configureService(e *Environment, container *corev1.Cont
 		return
 	}
 
+	name := t.PortName
+	if name == "" {
+		name = defaultContainerPortName
+	}
+
 	containerPort := corev1.ContainerPort{
-		Name:          t.PortName,
+		Name:          name,
 		ContainerPort: int32(t.Port),
 		Protocol:      corev1.ProtocolTCP,
 	}
@@ -323,7 +326,7 @@ func (t *containerTrait) configureService(e *Environment, container *corev1.Cont
 		Name:       t.ServicePortName,
 		Port:       int32(t.ServicePort),
 		Protocol:   corev1.ProtocolTCP,
-		TargetPort: intstr.FromString(t.PortName),
+		TargetPort: intstr.FromString(name),
 	}
 
 	e.Integration.Status.SetCondition(
@@ -345,9 +348,7 @@ func (t *containerTrait) configureService(e *Environment, container *corev1.Cont
 }
 
 func (t *containerTrait) configureResources(_ *Environment, container *corev1.Container) {
-	//
 	// Requests
-	//
 	if container.Resources.Requests == nil {
 		container.Resources.Requests = make(corev1.ResourceList)
 	}
@@ -369,9 +370,7 @@ func (t *containerTrait) configureResources(_ *Environment, container *corev1.Co
 		}
 	}
 
-	//
 	// Limits
-	//
 	if container.Resources.Limits == nil {
 		container.Resources.Limits = make(corev1.ResourceList)
 	}

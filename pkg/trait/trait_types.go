@@ -801,6 +801,30 @@ func (e *Environment) getIntegrationContainer() *corev1.Container {
 	return e.Resources.GetContainerByName(containerName)
 }
 
+func (e *Environment) getIntegrationContainerPort() *corev1.ContainerPort {
+	container := e.getIntegrationContainer()
+	if container == nil {
+		return nil
+	}
+
+	portName := ""
+	t := e.Catalog.GetTrait(containerTraitID)
+	if t != nil {
+		portName = t.(*containerTrait).PortName
+	}
+	if portName == "" {
+		portName = defaultContainerPortName
+	}
+
+	for i, port := range container.Ports {
+		if port.Name == portName {
+			return &container.Ports[i]
+		}
+	}
+
+	return nil
+}
+
 func (e *Environment) getAllInterceptors() []string {
 	res := make([]string, 0)
 	util.StringSliceUniqueConcat(&res, e.Interceptors)

@@ -40,10 +40,7 @@ type serviceTrait struct {
 	NodePort *bool `property:"node-port" json:"nodePort,omitempty"`
 }
 
-const (
-	serviceTraitID = "service"
-	httpPortName   = "http"
-)
+const serviceTraitID = "service"
 
 func newServiceTrait() Trait {
 	return &serviceTrait{

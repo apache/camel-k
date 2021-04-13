@@ -31,14 +31,15 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	"github.com/onsi/gomega/types"
-	v1 "k8s.io/api/core/v1"
+
+	corev1 "k8s.io/api/core/v1"
 
 	prometheus "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
 
 	. "github.com/apache/camel-k/e2e/support"
 	. "github.com/apache/camel-k/e2e/support/util"
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 func TestMetrics(t *testing.T) {
@@ -47,15 +48,15 @@ func TestMetrics(t *testing.T) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 		Expect(Kamel("run", "-n", ns, "files/Java.java",
 			"-t", "prometheus.enabled=true",
-			"-t", "prometheus.service-monitor=false").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			"-t", "prometheus.pod-monitor=false").Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		pod := OperatorPod(ns)()
 		Expect(pod).NotTo(BeNil())
 
-		logs := StructuredLogs(ns, pod.Name, v1.PodLogOptions{})
+		logs := StructuredLogs(ns, pod.Name, corev1.PodLogOptions{})
 		Expect(logs).NotTo(BeEmpty())
 
 		response, err := TestClient().CoreV1().RESTClient().Get().
@@ -80,7 +81,7 @@ func TestMetrics(t *testing.T) {
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.build"),
 					"Message":     Equal("Build state transition"),
-					"Phase":       Equal(string(camelv1.BuildPhasePending)),
+					"Phase":       Equal(string(v1.BuildPhasePending)),
 					"RequestName": Equal(build.Name),
 				}), LogEntryNoop).
 				AddStep(MatchFields(IgnoreExtras, Fields{
@@ -188,8 +189,8 @@ func TestMetrics(t *testing.T) {
 			platformReconciled := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
 				MatchFieldsP(IgnoreExtras, Fields{
 					"Label": ConsistOf(
-						label("group", camelv1.SchemeGroupVersion.Group),
-						label("version", camelv1.SchemeGroupVersion.Version),
+						label("group", v1.SchemeGroupVersion.Group),
+						label("version", v1.SchemeGroupVersion.Version),
 						label("kind", "IntegrationPlatform"),
 						label("namespace", ns),
 						label("result", "Reconciled"),
@@ -203,8 +204,8 @@ func TestMetrics(t *testing.T) {
 			platformRequeued := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
 				MatchFieldsP(IgnoreExtras, Fields{
 					"Label": ConsistOf(
-						label("group", camelv1.SchemeGroupVersion.Group),
-						label("version", camelv1.SchemeGroupVersion.Version),
+						label("group", v1.SchemeGroupVersion.Group),
+						label("version", v1.SchemeGroupVersion.Version),
 						label("kind", "IntegrationPlatform"),
 						label("namespace", ns),
 						label("result", "Requeued"),
@@ -236,8 +237,8 @@ func TestMetrics(t *testing.T) {
 					"Type": EqualP(prometheus.MetricType_HISTOGRAM),
 					"Metric": ContainElement(MatchFieldsP(IgnoreExtras, Fields{
 						"Label": ConsistOf(
-							label("group", camelv1.SchemeGroupVersion.Group),
-							label("version", camelv1.SchemeGroupVersion.Version),
+							label("group", v1.SchemeGroupVersion.Group),
+							label("version", v1.SchemeGroupVersion.Version),
 							label("kind", "Integration"),
 							label("namespace", it.Namespace),
 							label("result", "Reconciled"),
@@ -268,8 +269,8 @@ func TestMetrics(t *testing.T) {
 					"Type": EqualP(prometheus.MetricType_HISTOGRAM),
 					"Metric": ContainElement(MatchFieldsP(IgnoreExtras, Fields{
 						"Label": ConsistOf(
-							label("group", camelv1.SchemeGroupVersion.Group),
-							label("version", camelv1.SchemeGroupVersion.Version),
+							label("group", v1.SchemeGroupVersion.Group),
+							label("version", v1.SchemeGroupVersion.Version),
 							label("kind", "IntegrationKit"),
 							label("namespace", it.Status.IntegrationKit.Namespace),
 							label("result", "Reconciled"),
@@ -295,8 +296,8 @@ func TestMetrics(t *testing.T) {
 			buildReconciled := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
 				MatchFieldsP(IgnoreExtras, Fields{
 					"Label": ConsistOf(
-						label("group", camelv1.SchemeGroupVersion.Group),
-						label("version", camelv1.SchemeGroupVersion.Version),
+						label("group", v1.SchemeGroupVersion.Group),
+						label("version", v1.SchemeGroupVersion.Version),
 						label("kind", "Build"),
 						label("namespace", build.Namespace),
 						label("result", "Reconciled"),
@@ -310,8 +311,8 @@ func TestMetrics(t *testing.T) {
 			buildRequeued := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
 				MatchFieldsP(IgnoreExtras, Fields{
 					"Label": ConsistOf(
-						label("group", camelv1.SchemeGroupVersion.Group),
-						label("version", camelv1.SchemeGroupVersion.Version),
+						label("group", v1.SchemeGroupVersion.Group),
+						label("version", v1.SchemeGroupVersion.Version),
 						label("kind", "Build"),
 						label("namespace", build.Namespace),
 						label("result", "Requeued"),
@@ -336,7 +337,7 @@ func TestMetrics(t *testing.T) {
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.build"),
 					"Message":     Equal("Build state transition"),
-					"Phase":       Equal(string(camelv1.BuildPhasePending)),
+					"Phase":       Equal(string(v1.BuildPhasePending)),
 					"RequestName": Equal(build.Name),
 				}), func(l *LogEntry) { ts2 = l.Timestamp.Time }).
 				Walk()
@@ -385,7 +386,7 @@ func TestMetrics(t *testing.T) {
 			ts1 = it.Status.InitializationTimestamp.Time
 			Expect(ts1).NotTo(BeZero())
 			// The end time is reported into the ready condition first truthy time
-			ts2 = it.Status.GetCondition(camelv1.IntegrationConditionReady).FirstTruthyTime.Time
+			ts2 = it.Status.GetCondition(v1.IntegrationConditionReady).FirstTruthyTime.Time
 			Expect(ts2).NotTo(BeZero())
 
 			duration := ts2.Sub(ts1)
@@ -396,8 +397,8 @@ func TestMetrics(t *testing.T) {
 					"LoggerName":  Equal("camel-k.controller.integration"),
 					"Message":     Equal("Reconciling Integration"),
 					"RequestName": Equal(it.Name),
-					"PhaseFrom":   Equal(string(camelv1.IntegrationPhaseInitialization)),
-					"PhaseTo":     Equal(string(camelv1.IntegrationPhaseBuildingKit)),
+					"PhaseFrom":   Equal(string(v1.IntegrationPhaseInitialization)),
+					"PhaseTo":     Equal(string(v1.IntegrationPhaseBuildingKit)),
 				}), func(l *LogEntry) { ts1 = l.Timestamp.Time }).
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.integration"),
