@@ -238,12 +238,11 @@ func maybeSetNodeSelectors(sub *operatorsv1alpha1.Subscription, nsArray []string
 
 func maybeSetResourcesRequirements(sub *operatorsv1alpha1.Subscription, reqArray []string) error {
 	if reqArray != nil {
-		resourcesReq, err := kubernetes.GetResourceRequirements(reqArray)
+		resourcesReq, err := kubernetes.NewResourceRequirements(reqArray)
 		if err != nil {
 			return err
 		}
 		sub.Spec.Config.Resources = resourcesReq
-		fmt.Println("Setting resources to", sub.Spec.Config.Resources)
 	}
 	return nil
 }

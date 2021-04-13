@@ -104,7 +104,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		if cfg.ResourcesRequirements != nil {
 			if d, ok := o.(*appsv1.Deployment); ok {
 				if d.Labels["camel.apache.org/component"] == "operator" {
-					resourceReq, err := kubernetes.GetResourceRequirements(cfg.ResourcesRequirements)
+					resourceReq, err := kubernetes.NewResourceRequirements(cfg.ResourcesRequirements)
 					if err != nil {
 						fmt.Println("Warning: could not parse the configured resources requests!")
 					}

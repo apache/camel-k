@@ -139,7 +139,7 @@ func TestValueNodeSelectors(t *testing.T) {
 
 func TestAllResourceRequirements(t *testing.T) {
 	resReq := "limits.memory=256Mi,requests.memory=128Mi,limits.cpu=1000m,requests.cpu=500m"
-	resourceRequirements, err := GetResourceRequirements(strings.Split(resReq, ","))
+	resourceRequirements, err := NewResourceRequirements(strings.Split(resReq, ","))
 	assert.Nil(t, err)
 
 	assert.Equal(t, resource.MustParse("256Mi"), *resourceRequirements.Limits.Memory())
@@ -150,7 +150,7 @@ func TestAllResourceRequirements(t *testing.T) {
 
 func TestSomeResourceRequirements(t *testing.T) {
 	resReq := "limits.memory=128Mi,requests.cpu=500m"
-	resourceRequirements, err := GetResourceRequirements(strings.Split(resReq, ","))
+	resourceRequirements, err := NewResourceRequirements(strings.Split(resReq, ","))
 	assert.Nil(t, err)
 
 	assert.Equal(t, resource.MustParse("128Mi"), *resourceRequirements.Limits.Memory())
@@ -161,12 +161,12 @@ func TestSomeResourceRequirements(t *testing.T) {
 
 func TestErrorResourceRequirements(t *testing.T) {
 	resReq := "limits.memory=expectSomeError!"
-	_, err := GetResourceRequirements(strings.Split(resReq, ","))
+	_, err := NewResourceRequirements(strings.Split(resReq, ","))
 	assert.NotNil(t, err)
 }
 
 func TestMissingResourceRequirements(t *testing.T) {
 	resReq := ""
-	_, err := GetResourceRequirements(strings.Split(resReq, ","))
+	_, err := NewResourceRequirements(strings.Split(resReq, ","))
 	assert.NotNil(t, err)
 }
