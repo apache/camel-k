@@ -476,19 +476,19 @@ func (c *Collection) Remove(selector func(runtime.Object) bool) runtime.Object {
 	return nil
 }
 
-func (c *Collection) VisitServiceMonitor(visitor func(*monitoringv1.ServiceMonitor)) {
+func (c *Collection) VisitPodMonitor(visitor func(*monitoringv1.PodMonitor)) {
 	c.Visit(func(res runtime.Object) {
-		if conv, ok := res.(*monitoringv1.ServiceMonitor); ok {
+		if conv, ok := res.(*monitoringv1.PodMonitor); ok {
 			visitor(conv)
 		}
 	})
 }
 
-func (c *Collection) GetServiceMonitor(filter func(*monitoringv1.ServiceMonitor) bool) *monitoringv1.ServiceMonitor {
-	var retValue *monitoringv1.ServiceMonitor
-	c.VisitServiceMonitor(func(serviceMonitor *monitoringv1.ServiceMonitor) {
-		if filter(serviceMonitor) {
-			retValue = serviceMonitor
+func (c *Collection) GetPodMonitor(filter func(*monitoringv1.PodMonitor) bool) *monitoringv1.PodMonitor {
+	var retValue *monitoringv1.PodMonitor
+	c.VisitPodMonitor(func(podMonitor *monitoringv1.PodMonitor) {
+		if filter(podMonitor) {
+			retValue = podMonitor
 		}
 	})
 	return retValue

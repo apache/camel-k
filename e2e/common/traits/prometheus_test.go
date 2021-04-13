@@ -29,9 +29,9 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	v1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/errors"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 
@@ -45,14 +45,14 @@ func TestPrometheusTrait(t *testing.T) {
 		ocp, err := openshift.IsOpenShift(TestClient())
 		assert.Nil(t, err)
 
-		// suppress Service Monitor for the time being as CI test runs on OCP 3.11
-		createServiceMonitor := false
+		// Do not create PodMonitor for the time being as CI test runs on OCP 3.11
+		createPodMonitor := false
 
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		Expect(Kamel("run", "-n", ns, "files/Java.java",
 			"-t", "prometheus.enabled=true",
-			"-t", fmt.Sprintf("prometheus.service-monitor=%v", createServiceMonitor)).Execute()).To(Succeed())
+			"-t", fmt.Sprintf("prometheus.pod-monitor=%v", createPodMonitor)).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(v1.PodRunning))
 		Eventually(IntegrationCondition(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -67,15 +67,9 @@ func TestPrometheusTrait(t *testing.T) {
 			assert.Contains(t, string(response), "camel.route.exchanges.total")
 		})
 
-		t.Run("Service is created", func(t *testing.T) {
-			// service name is "<integration name>-prometheus"
-			service := Service(ns, "java-prometheus")
-			Eventually(service, TestTimeoutShort).ShouldNot(BeNil())
-		})
-
-		if ocp && createServiceMonitor {
-			t.Run("Service Monitor is created on OpenShift", func(t *testing.T) {
-				sm := serviceMonitor(ns, "java")
+		if ocp && createPodMonitor {
+			t.Run("PodMonitor is created", func(t *testing.T) {
+				sm := podMonitor(ns, "java")
 				Eventually(sm, TestTimeoutShort).ShouldNot(BeNil())
 			})
 		}
@@ -84,19 +78,19 @@ func TestPrometheusTrait(t *testing.T) {
 	})
 }
 
-func serviceMonitor(ns string, name string) func() *monitoringv1.ServiceMonitor {
-	return func() *monitoringv1.ServiceMonitor {
-		sm := monitoringv1.ServiceMonitor{}
-		key := k8sclient.ObjectKey{
+func podMonitor(ns string, name string) func() *monitoringv1.PodMonitor {
+	return func() *monitoringv1.PodMonitor {
+		pm := monitoringv1.PodMonitor{}
+		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
 		}
-		err := TestClient().Get(TestContext, key, &sm)
-		if err != nil && k8serrors.IsNotFound(err) {
+		err := TestClient().Get(TestContext, key, &pm)
+		if err != nil && errors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
 			panic(err)
 		}
-		return &sm
+		return &pm
 	}
 }

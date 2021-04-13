@@ -353,7 +353,7 @@ func TestConfigureTraits(t *testing.T) {
 		"--trait", "container.probes-enabled=false",
 		"--trait", "environment.container-meta=false",
 		"--trait", "jvm.print-command=false",
-		"--trait", "prometheus.service-monitor=false",
+		"--trait", "prometheus.pod-monitor=false",
 		"example.js")
 	if err != nil {
 		t.Error(err)
@@ -372,7 +372,7 @@ func TestConfigureTraits(t *testing.T) {
 	assertTraitConfiguration(t, traits, "container", `{"probesEnabled":false}`)
 	assertTraitConfiguration(t, traits, "environment", `{"containerMeta":false}`)
 	assertTraitConfiguration(t, traits, "jvm", `{"printCommand":false}`)
-	assertTraitConfiguration(t, traits, "prometheus", `{"serviceMonitor":false}`)
+	assertTraitConfiguration(t, traits, "prometheus", `{"podMonitor":false}`)
 }
 
 func assertTraitConfiguration(t *testing.T, traits map[string]v1.TraitSpec, trait string, expected string) {

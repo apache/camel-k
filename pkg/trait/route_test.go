@@ -114,7 +114,7 @@ func TestRoute_Default(t *testing.T) {
 	assert.NotNil(t, route)
 	assert.Nil(t, route.Spec.TLS)
 	assert.NotNil(t, route.Spec.Port)
-	assert.Equal(t, httpPortName, route.Spec.Port.TargetPort.StrVal)
+	assert.Equal(t, defaultContainerPortName, route.Spec.Port.TargetPort.StrVal)
 }
 
 func TestRoute_Disabled(t *testing.T) {

@@ -112,7 +112,7 @@ func (t *routeTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *routeTrait) Apply(e *Environment) error {
-	servicePortName := httpPortName
+	servicePortName := defaultContainerPortName
 	dt := e.Catalog.GetTrait(containerTraitID)
 	if dt != nil {
 		servicePortName = dt.(*containerTrait).ServicePortName
