@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/jitpack"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/rs/xid"
@@ -51,13 +52,23 @@ func ManageIntegrationDependencies(
 				Scope:      "import",
 			})
 		case strings.HasPrefix(d, "camel:"):
-			artifactID := strings.TrimPrefix(d, "camel:")
+			if catalog != nil && catalog.Runtime.Provider == v1.RuntimeProviderQuarkus {
+				artifactID := strings.TrimPrefix(d, "camel:")
 
-			if !strings.HasPrefix(artifactID, "camel-") {
-				artifactID = "camel-" + artifactID
+				if !strings.HasPrefix(artifactID, "camel-") {
+					artifactID = "camel-quarkus-" + artifactID
+				}
+
+				project.AddDependencyGAV("org.apache.camel.quarkus", artifactID, "")
+			} else {
+				artifactID := strings.TrimPrefix(d, "camel:")
+
+				if !strings.HasPrefix(artifactID, "camel-") {
+					artifactID = "camel-" + artifactID
+				}
+
+				project.AddDependencyGAV("org.apache.camel", artifactID, "")
 			}
-
-			project.AddDependencyGAV("org.apache.camel", artifactID, "")
 		case strings.HasPrefix(d, "camel-k:"):
 			artifactID := strings.TrimPrefix(d, "camel-k:")
 

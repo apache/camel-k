@@ -286,11 +286,6 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 }
 
 func (i *baseInspector) addDependency(dependency string, meta *Metadata) {
-	if i.catalog.Runtime.Provider == v1.RuntimeProviderQuarkus {
-		if strings.HasPrefix(dependency, "camel:") {
-			dependency = "camel-quarkus:" + strings.TrimPrefix(dependency, "camel:")
-		}
-	}
 	meta.Dependencies.Add(dependency)
 }
 

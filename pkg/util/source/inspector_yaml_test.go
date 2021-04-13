@@ -192,7 +192,7 @@ func TestYAMLRestDSL(t *testing.T) {
 			err := inspector.Extract(code, &meta)
 			assert.Nil(t, err)
 			assert.True(t, meta.RequiredCapabilities.Has(v1.CapabilityRest))
-			assert.True(t, meta.Dependencies.Has("camel-quarkus:log"))
+			assert.True(t, meta.Dependencies.Has("camel:log"))
 			assert.True(t, meta.ExposesHTTPServices)
 		})
 	}
@@ -239,19 +239,19 @@ func TestYAMLJson(t *testing.T) {
 	}{
 		{
 			source:     YAMLJSONMarshal,
-			dependency: "camel-quarkus:jackson",
+			dependency: "camel:jackson",
 		},
 		{
 			source:     YAMLJSONUnmarshal,
-			dependency: "camel-quarkus:jackson",
+			dependency: "camel:jackson",
 		},
 		{
 			source:     YAMLJSONGsonMarshal,
-			dependency: "camel-quarkus:gson",
+			dependency: "camel:gson",
 		},
 		{
 			source:     YAMLJSONUnknownMarshal,
-			dependency: "camel-quarkus:timer",
+			dependency: "camel:timer",
 		},
 	}
 
