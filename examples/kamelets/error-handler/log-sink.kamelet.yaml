@@ -16,24 +16,17 @@
 # ---------------------------------------------------------------------------
 
 apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+kind: Kamelet
 metadata:
-  name: kamelet-binding-error-handler
+  name: log-sink
+  labels:
+    camel.apache.org/kamelet.type: "sink"
 spec:
-  source:
-    ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
-      name: incremental-id-source
-  sink:
-    ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
-      name: log-sink
-  errorHandler:
-    ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
-      name: error-handler    
-#    uri: kamelet:error-handler
-    
+  definition:
+    title: "Regular Log Sink"
+    description: "Consume events from a channel"  
+  flow:
+    from:
+      uri: kamelet:source
+      steps:
+      - to: "log:ok"
