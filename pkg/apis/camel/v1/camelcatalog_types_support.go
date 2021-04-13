@@ -65,10 +65,8 @@ func NewCamelCatalogList() CamelCatalogList {
 // GetDependencyID returns a Camel K recognizable maven dependency for the artifact
 func (in *CamelArtifact) GetDependencyID() string {
 	switch {
-	case in.GroupID == "org.apache.camel" && strings.HasPrefix(in.ArtifactID, "camel-"):
-		return "camel:" + in.ArtifactID[6:]
 	case in.GroupID == "org.apache.camel.quarkus" && strings.HasPrefix(in.ArtifactID, "camel-quarkus-"):
-		return "camel-quarkus:" + in.ArtifactID[14:]
+		return "camel:" + in.ArtifactID[14:]
 	case in.Version == "":
 		return "mvn:" + in.GroupID + ":" + in.ArtifactID
 	default:

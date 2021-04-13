@@ -361,7 +361,7 @@ func TestCronDepsFallback(t *testing.T) {
 	assert.NotNil(t, ct)
 	assert.NotNil(t, ct.Fallback)
 	assert.True(t, util.StringSliceExists(environment.Integration.Status.Capabilities, v1.CapabilityCron))
-	assert.Contains(t, environment.Integration.Status.Dependencies, "camel-quarkus:quartz")
+	assert.Contains(t, environment.Integration.Status.Dependencies, "camel:quartz")
 	assert.Contains(t, environment.Integration.Status.Dependencies, "mvn:org.apache.camel.k:camel-k-cron")
 }
 
