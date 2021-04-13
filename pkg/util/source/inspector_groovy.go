@@ -22,17 +22,17 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 )
 
-// GroovyInspector --
 type GroovyInspector struct {
 	baseInspector
 }
 
-// Extract --
 func (i GroovyInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	from := util.FindAllDistinctStringSubmatch(
 		source.Content,
 		singleQuotedFrom,
 		doubleQuotedFrom,
+		singleQuotedFromF,
+		doubleQuotedFromF,
 	)
 	to := util.FindAllDistinctStringSubmatch(
 		source.Content,

@@ -34,7 +34,9 @@ const (
 
 var (
 	singleQuotedFrom        = regexp.MustCompile(`from\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
+	singleQuotedFromF       = regexp.MustCompile(`fromF\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
 	doubleQuotedFrom        = regexp.MustCompile(`from\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
+	doubleQuotedFromF       = regexp.MustCompile(`fromF\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
 	singleQuotedTo          = regexp.MustCompile(`\.to\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
 	singleQuotedToD         = regexp.MustCompile(`\.toD\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
 	singleQuotedToF         = regexp.MustCompile(`\.toF\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)

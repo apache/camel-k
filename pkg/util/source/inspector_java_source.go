@@ -22,16 +22,15 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 )
 
-// JavaSourceInspector --
 type JavaSourceInspector struct {
 	baseInspector
 }
 
-// Extract --
 func (i JavaSourceInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	from := util.FindAllDistinctStringSubmatch(
 		source.Content,
 		doubleQuotedFrom,
+		doubleQuotedFromF,
 	)
 	to := util.FindAllDistinctStringSubmatch(
 		source.Content,
