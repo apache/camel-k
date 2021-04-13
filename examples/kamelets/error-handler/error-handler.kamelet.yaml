@@ -16,24 +16,25 @@
 # ---------------------------------------------------------------------------
 
 apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+kind: Kamelet
 metadata:
-  name: kamelet-binding-error-handler
+  name: error-handler
 spec:
-  source:
-    ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
-      name: incremental-id-source
-  sink:
-    ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
-      name: log-sink
-  errorHandler:
-    ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
-      name: error-handler    
-#    uri: kamelet:error-handler
-    
+  sources:
+  - content: |
+      import org.apache.camel.builder.RouteBuilder;
+      public class ErrorHandlerSource extends RouteBuilder {
+        @Override
+        public void configure() throws Exception {
+            errorHandler(deadLetterChannel("log:error?showCaughtException=true&showException=true&showHeaders=true"));
+        }
+      }
+    name: ErrorHandlerSource.java
+  definition:
+    title: "Error Handler Log DLC"
+    description: "Dead letter channel"
+# We can use the below once this is fixed https://issues.apache.org/jira/browse/CAMEL-16486
+#  flow:
+#    error-handler:
+#      dead-letter-channel:
+#        dead-letter-uri: log:error-sink?showCaughtException=true&showException=true&showHeaders=true

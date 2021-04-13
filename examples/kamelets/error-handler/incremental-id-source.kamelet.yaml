@@ -16,24 +16,36 @@
 # ---------------------------------------------------------------------------
 
 apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+kind: Kamelet
 metadata:
-  name: kamelet-binding-error-handler
+  name: incremental-id-source
+  labels:
+    camel.apache.org/kamelet.type: "source"
 spec:
-  source:
-    ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
-      name: incremental-id-source
-  sink:
-    ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
-      name: log-sink
-  errorHandler:
-    ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
-      name: error-handler    
-#    uri: kamelet:error-handler
-    
+  definition:
+    title: "Incremental ID Source"
+    description: "Produces periodic events with an incremental ID"
+    properties:
+      period:
+        title: Period
+        description: The interval between two events
+        type: integer
+        default: 1000
+  types:
+    out:
+      mediaType: text/plain
+  flow:
+    from:
+      uri: timer:tick
+      parameters:
+        period: "{{period}}"
+      steps:
+      - set-body:
+          simple: "Producing message #${exchangeProperty.CamelTimerCounter}"
+      - choice:
+          when:
+          - simple: "${bodyAs(String)} contains 0"
+            steps:
+            - set-body:
+                simple: "${mandatoryBodyAs(Boolean)}"
+      - to: "kamelet:sink"                
