@@ -206,8 +206,9 @@ type SourceSpec struct {
 type SourceType string
 
 const (
-	SourceTypeDefault  SourceType = ""
-	SourceTypeTemplate SourceType = "template"
+	SourceTypeDefault      SourceType = ""
+	SourceTypeTemplate     SourceType = "template"
+	SourceTypeErrorHandler SourceType = "errorHandler"
 )
 
 // DataSpec --

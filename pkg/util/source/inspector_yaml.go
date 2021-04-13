@@ -78,10 +78,6 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 				}
 			}
 		}
-	case "error-handler":
-		deadLetterChannel := content.(map[interface{}]interface{})
-		deadLetterURI := deadLetterChannel["dead-letter-channel"].(map[interface{}]interface{})
-		meta.ErrorHandlerURIs = append(meta.ErrorHandlerURIs, deadLetterURI["dead-letter-uri"].(string))
 	}
 
 	var maybeURI string

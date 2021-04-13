@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -79,11 +80,16 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 	if err != nil {
 		return nil, errors.Wrap(err, "could not determine sink URI")
 	}
-	var onError *bindings.Binding
+	var errorHandler *bindings.Binding
 	if kameletbinding.Spec.ErrorHandler.Ref != nil || kameletbinding.Spec.ErrorHandler.URI != nil {
-		onError, err = bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1alpha1.EndpointTypeErrorHandler}, kameletbinding.Spec.ErrorHandler)
+		errorHandler, err = bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1alpha1.EndpointTypeErrorHandler}, kameletbinding.Spec.ErrorHandler)
 		if err != nil {
 			return nil, errors.Wrap(err, "could not determine error handler URI")
+		}
+
+		err = setErrorHandlerKamelet(errorHandler, kameletbinding.Spec.ErrorHandler)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not set error handler")
 		}
 	}
 
@@ -104,8 +110,8 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 	allBindings = append(allBindings, from)
 	allBindings = append(allBindings, steps...)
 	allBindings = append(allBindings, to)
-	if onError != nil {
-		allBindings = append(allBindings, onError)
+	if errorHandler != nil {
+		allBindings = append(allBindings, errorHandler)
 	}
 
 	propList := make([]string, 0)
@@ -139,27 +145,6 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 		"to": to.URI,
 	})
 
-	// Append Error Handler flow, if it exists
-	if onError != nil {
-		flowErrorHandler := map[string]interface{}{
-			"error-handler": map[string]interface{}{
-				"dead-letter-channel": map[string]interface{}{
-					"dead-letter-uri":                  onError.URI,
-					"dead-letter-handle-new-exception": true,
-					"async-delayed-redelivery":         false,
-					"use-original-message":             true,
-				},
-			},
-		}
-		encodedErrorHandler, err := json.Marshal(flowErrorHandler)
-
-		if err != nil {
-			return nil, err
-		}
-		it.Spec.Flows = append(it.Spec.Flows, v1.Flow{RawMessage: encodedErrorHandler})
-	}
-
-	// Append From flow: it must exist
 	flowFrom := map[string]interface{}{
 		"from": map[string]interface{}{
 			"uri":   from.URI,
@@ -173,6 +158,23 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 	it.Spec.Flows = append(it.Spec.Flows, v1.Flow{RawMessage: encodedFrom})
 
 	return &it, nil
+}
+
+func setErrorHandlerKamelet(errorHandler *bindings.Binding, kameletSpec v1alpha1.Endpoint) error {
+	if errorHandler.ApplicationProperties == nil {
+		errorHandler.ApplicationProperties = make(map[string]string)
+	}
+	if kameletSpec.URI != nil {
+		if !strings.HasPrefix(*kameletSpec.URI, "kamelet") {
+			return fmt.Errorf("Kamelet Binding only supports kamelet as error handler, provided: %s", *kameletSpec.URI)
+		}
+
+		errorHandler.ApplicationProperties["camel.k.default-error-handler"] = *kameletSpec.URI
+		return nil
+	}
+
+	errorHandler.ApplicationProperties["camel.k.default-error-handler"] = kameletSpec.Ref.Name
+	return nil
 }
 
 func determineProfile(ctx context.Context, c client.Client, binding *v1alpha1.KameletBinding) (v1.TraitProfile, error) {
