@@ -446,6 +446,10 @@ ProxyPreserveHost On
 
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(TestClient().Delete(TestContext, deployment)).To(Succeed())
+		Expect(TestClient().Delete(TestContext, service)).To(Succeed())
+		Expect(TestClient().Delete(TestContext, secret)).To(Succeed())
+		Expect(TestClient().Delete(TestContext, config)).To(Succeed())
 	})
 }
 
