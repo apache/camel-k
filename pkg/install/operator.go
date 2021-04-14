@@ -235,11 +235,11 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		fmt.Println("Warning: the operator will not be able to publish Kubernetes events. Try installing as cluster-admin to allow it to generate events.")
 	}
 
-	if errmtr := installServiceMonitors(ctx, c, cfg.Namespace, customizer, collection, force); errmtr != nil {
+	if errmtr := installPodMonitors(ctx, c, cfg.Namespace, customizer, collection, force); errmtr != nil {
 		if k8serrors.IsAlreadyExists(errmtr) {
 			return errmtr
 		}
-		fmt.Println("Warning: the operator will not be able to create servicemonitors for metrics. Try installing as cluster-admin to allow the creation of servicemonitors.")
+		fmt.Println("Warning: the operator will not be able to create PodMonitor resources. Try installing as cluster-admin.")
 	}
 
 	if errmtr := installStrimziBindings(ctx, c, cfg.Namespace, customizer, collection, force); errmtr != nil {
@@ -373,10 +373,10 @@ func installEvents(ctx context.Context, c client.Client, namespace string, custo
 	)
 }
 
-func installServiceMonitors(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
+func installPodMonitors(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-		"/rbac/operator-role-servicemonitors.yaml",
-		"/rbac/operator-role-binding-servicemonitors.yaml",
+		"/rbac/operator-role-podmonitors.yaml",
+		"/rbac/operator-role-binding-podmonitors.yaml",
 	)
 }
 
