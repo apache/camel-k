@@ -32,7 +32,7 @@ kind: Prometheus
 metadata:
   name: prometheus
 spec:
-  serviceMonitorSelector:
+  podMonitorSelector:
     matchExpressions:
       - key: camel.apache.org/integration
         operator: Exists
@@ -40,7 +40,7 @@ EOF
 ----
 
 By default, the Prometheus instance discovers applications to be monitored in the same namespace.
-You can use the `serviceMonitorNamespaceSelector` field from the `Prometheus` resource to enable cross-namespace monitoring.
+You can use the `podMonitorNamespaceSelector` field from the `Prometheus` resource to enable cross-namespace monitoring.
 You may also need to specify a ServiceAccount with the `serviceAccountName` field, that's bound to a Role with the necessary permissions.
 
 [[openshift]]
