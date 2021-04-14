@@ -18,14 +18,14 @@
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: camel-k-operator-servicemonitors
+  name: camel-k-operator-podmonitors
   labels:
     app: "camel-k"
 rules:
 - apiGroups:
   - monitoring.coreos.com
   resources:
-  - servicemonitors
+  - podmonitors
   verbs:
   - create
   - delete

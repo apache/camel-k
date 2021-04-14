@@ -18,7 +18,7 @@
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: camel-k-operator-servicemonitors
+  name: camel-k-operator-podmonitors
   labels:
     app: "camel-k"
 subjects:
@@ -26,5 +26,5 @@ subjects:
   name: camel-k-operator
 roleRef:
   kind: Role
-  name: camel-k-operator-servicemonitors
+  name: camel-k-operator-podmonitors
   apiGroup: rbac.authorization.k8s.io

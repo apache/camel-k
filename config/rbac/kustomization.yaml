@@ -22,14 +22,14 @@ resources:
 - operator-role-leases.yaml
 - operator-role-openshift.yaml
 - operator-role-service-binding.yaml
-- operator-role-servicemonitors.yaml
+- operator-role-podmonitors.yaml
 - operator-role-strimzi.yaml
 - operator-role-binding-events.yaml
 - operator-role-binding-knative.yaml
 - operator-role-binding-leases.yaml
 - operator-role-binding-openshift.yaml
 - operator-role-binding-service-binding.yaml
-- operator-role-binding-servicemonitors.yaml
+- operator-role-binding-podmonitors.yaml
 - operator-role-binding-strimzi.yaml
 - operator-role-binding.yaml
 - operator-cluster-role-openshift.yaml
