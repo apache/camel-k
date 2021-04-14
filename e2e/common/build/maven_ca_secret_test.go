@@ -33,6 +33,7 @@ import (
 	"math/big"
 	rand2 "math/rand"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -50,6 +51,7 @@ import (
 
 	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/maven"
 )
 
 func TestMavenCASecret(t *testing.T) {
@@ -374,8 +376,26 @@ ProxyPreserveHost On
 			SubResource("exec").
 			Param("container", "nexus")
 
-		apacheSnapshots := "https://repository.apache.org/content/repositories/snapshots/"
-		repository := fmt.Sprintf(`{"name":"apache-snapshots","proxy":{"remoteUrl":"%s","contentMaxAge":1440,"metadataMaxAge":1440},"online":true,"maven":{"versionPolicy":"SNAPSHOT","layoutPolicy":"PERMISSIVE"},"negativeCache":{"enabled":false,"timeToLive":1440},"httpClient":{"autoBlock":false,"blocked":false},"storage":{"strictContentTypeValidation":true,"blobStoreName":"default"}}`, apacheSnapshots)
+		// Rely on the Camel K staging repository, that can either be Apache Staging,
+		// during releases preparation, or Apache Snapshots otherwise.
+		stagingRepositoryUrl := os.Getenv("KAMEL_INSTALL_MAVEN_REPOSITORIES")
+		if stagingRepositoryUrl == "" {
+			stagingRepositoryUrl = "https://repository.apache.org/content/repositories/snapshots/@id=apache-snapshots@snapshots@noreleases"
+		}
+		stagingRepository := maven.NewRepository(stagingRepositoryUrl)
+		if stagingRepository.ID == "" {
+			stagingRepository.ID = "staging"
+		}
+		versionPolicy := ""
+		if stagingRepository.Releases.Enabled && stagingRepository.Snapshots.Enabled {
+			versionPolicy = "MIXED"
+		} else if stagingRepository.Releases.Enabled {
+			versionPolicy = "RELEASE"
+		} else {
+			versionPolicy = "SNAPSHOT"
+		}
+
+		repository := fmt.Sprintf(`{"name":"%s","proxy":{"remoteUrl":"%s","contentMaxAge":1440,"metadataMaxAge":1440},"online":true,"maven":{"versionPolicy":"%s","layoutPolicy":"PERMISSIVE"},"negativeCache":{"enabled":false,"timeToLive":1440},"httpClient":{"autoBlock":false,"blocked":false},"storage":{"strictContentTypeValidation":true,"blobStoreName":"default"}}`, stagingRepository.ID, stagingRepository.URL, versionPolicy)
 
 		req.VersionedParams(&corev1.PodExecOptions{
 			Container: "nexus",
@@ -401,7 +421,7 @@ ProxyPreserveHost On
 		// Install Camel K with the Maven Central Nexus proxy and the corresponding Maven CA secret
 		Expect(Kamel("install", "-n", ns,
 			"--maven-repository", fmt.Sprintf(`https://%s/repository/maven-public/@id=central-internal@mirrorOf=central`, hostname),
-			"--maven-repository", fmt.Sprintf(`https://%s/repository/apache-snapshots/@id=apache-snapshots@snapshots@noreleases`, hostname),
+			"--maven-repository", fmt.Sprintf(`https://%s/repository/%s/%s`, hostname, stagingRepository.ID, strings.Join(getRepositoryAttributes(stagingRepository), "")),
 			"--maven-ca-secret", secret.Name+"/"+corev1.TLSCertKey,
 		).Execute()).To(Succeed())
 
@@ -427,4 +447,18 @@ ProxyPreserveHost On
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
+}
+
+func getRepositoryAttributes(repository maven.Repository) []string {
+	var attributes []string
+	if repository.ID != "" {
+		attributes = append(attributes, "@id="+repository.ID)
+	}
+	if !repository.Releases.Enabled {
+		attributes = append(attributes, "@noreleases")
+	}
+	if repository.Snapshots.Enabled {
+		attributes = append(attributes, "@snapshots")
+	}
+	return attributes
 }
