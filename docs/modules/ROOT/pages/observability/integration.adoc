@@ -55,26 +55,26 @@ It is possible to extend this set of metrics by using either, or both:
 
 The Prometheus trait automatically configures the resources necessary for the Prometheus Operator to reconcile, so that the managed Prometheus instance can scrape the integration _metrics_ endpoint.
 
-By default, the Prometheus trait creates a `ServiceMonitor` resource, with the `camel.apache.org/integration` label, which must match the `serviceMonitorSelector` field from the `Prometheus` resource.
-Additional labels can be specified with the `service-monitor-labels` parameter from the Prometheus trait, e.g.:
+By default, the Prometheus trait creates a `PodMonitor` resource, with the `camel.apache.org/integration` label, which must match the `podMonitorSelector` field from the `Prometheus` resource.
+Additional labels can be specified with the `pod-monitor-labels` parameter from the Prometheus trait, e.g.:
 
 [source,sh]
 ----
-$ kamel run -t prometheus.service-monitor-labels="label_to_be_match_by=prometheus_selector" ...
+$ kamel run -t prometheus.pod-monitor-labels="label_to_be_match_by=prometheus_selector" ...
 ----
 
-The creation of the `ServiceMonitor` resource can be disabled using the `service-monitor` parameter, e.g.:
+The creation of the `PodMonitor` resource can be disabled using the `pod-monitor` parameter, e.g.:
 
 [source,sh]
 ----
-$ kamel run -t prometheus.service-monitor=false ...
+$ kamel run -t prometheus.pod-monitor=false ...
 ----
 
 More information can be found in the xref:traits:prometheus.adoc[Prometheus trait] documentation.
 
 The Prometheus Operator https://github.com/coreos/prometheus-operator/blob/v0.38.0/Documentation/user-guides/getting-started.md#related-resources[getting started] guide documents the discovery mechanism, as well as the relationship between the operator resources.
 
-In case your integration metrics are not discovered, you may want to rely on https://github.com/coreos/prometheus-operator/blob/v0.38.0/Documentation/troubleshooting.md#troubleshooting-servicemonitor-changes[Troubleshooting `ServiceMonitor` changes].
+In case your integration metrics are not discovered, you may want to rely on https://github.com/coreos/prometheus-operator/blob/v0.38.0/Documentation/troubleshooting.md#troubleshooting-servicemonitor-changes[Troubleshooting `ServiceMonitor` changes], which also applies to `PodMonitor` resources troubleshooting.
 
 == Alerting
 

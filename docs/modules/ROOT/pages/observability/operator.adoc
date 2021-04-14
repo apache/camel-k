@@ -102,7 +102,7 @@ In case your operator metrics are not discovered, you may want to rely on https:
 [[alerting]]
 == Alerting
 
-NOTE: The Prometheus Operator declares the `AlertManager` resource that can be used to configure _Alertmanager_ instances, along with `Prometheus` instances. The following section assumes an `AlertManager` resource already exists in your cluster.
+NOTE: The Prometheus Operator declares the `AlertManager` resource that can be used to configure _AlertManager_ instances, along with `Prometheus` instances. The following section assumes an `AlertManager` resource already exists in your cluster.
 
 A `PrometheusRule` resource can be created for the Prometheus Operator to reconcile, so that the managed AlertManager instance can trigger alerts, based on the metrics exposed by the Camel K operator.
 

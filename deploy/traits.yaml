@@ -679,11 +679,10 @@ traits:
   - Knative
   - OpenShift
   description: 'The Prometheus trait configures a Prometheus-compatible endpoint.
-    This trait also exposes the integration with `Service` and `ServiceMonitor` resources,
-    so that the endpoint can be scraped automatically, when using the Prometheus Operator.
-    The metrics are exposed using MicroProfile Metrics. WARNING: The creation of the
-    `ServiceMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus
-    Operator] custom resource definition to be installed. You can set `service-monitor`
+    It also creates a `PodMonitor` resource, so that the endpoint can be scraped automatically,
+    when using the Prometheus operator. The metrics are exposed using MicroProfile
+    Metrics. WARNING: The creation of the `PodMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus
+    Operator] custom resource definition to be installed. You can set `pod-monitor`
     to `false` for the Prometheus trait to work without the Prometheus Operator. The
     Prometheus trait is disabled by default.'
   properties:
@@ -691,16 +690,13 @@ traits:
     type: bool
     description: Can be used to enable or disable a trait. All traits share this common
       property.
-  - name: port
-    type: int
-    description: The Prometheus endpoint port (default `9779`, or `8080` with Quarkus).
-  - name: service-monitor
+  - name: pod-monitor
     type: bool
-    description: Whether a `ServiceMonitor` resource is created (default `true`).
-  - name: service-monitor-labels
+    description: Whether a `PodMonitor` resource is created (default `true`).
+  - name: pod-monitor-labels
     type: '[]string'
-    description: The `ServiceMonitor` resource labels, applicable when `service-monitor`
-      is `true`.
+    description: The `PodMonitor` resource labels, applicable when `pod-monitor` is
+      `true`.
 - name: pull-secret
   platform: false
   profiles:
