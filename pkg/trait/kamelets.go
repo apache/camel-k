@@ -116,16 +116,18 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 
 func (t *kameletsTrait) Apply(e *Environment) error {
 
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseRunning) {
 		if err := t.addKamelets(e); err != nil {
 			return err
 		}
-		if err := t.addConfigurationSecrets(e); err != nil {
-			return err
-		}
+	}
+
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		return t.addConfigurationSecrets(e)
 	} else if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		return t.configureApplicationProperties(e)
 	}
+
 	return nil
 }
 
