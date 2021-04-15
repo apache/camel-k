@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.4.0...HEAD)
+
+**Merged pull requests:**
+
+- chore\(e2e\): Rely on staging repository in Maven CA e2e tests [\#2219](https://github.com/apache/camel-k/pull/2219) ([astefanutti](https://github.com/astefanutti))
+
 ## [v1.4.0](https://github.com/apache/camel-k/tree/v1.4.0) (2021-04-13)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.4.0...v1.4.0)
@@ -884,7 +892,6 @@
 - Include checksum when checking for compatible kits [\#1389](https://github.com/apache/camel-k/pull/1389) ([lburgazzoli](https://github.com/lburgazzoli))
 - bug: fix minor repetition of example heading in cron trait [\#1385](https://github.com/apache/camel-k/pull/1385) ([AemieJ](https://github.com/AemieJ))
 - fix \#1382: enable prometheus roles when installing from olm and helm [\#1383](https://github.com/apache/camel-k/pull/1383) ([nicolaferraro](https://github.com/nicolaferraro))
-- Switch to java 11 by default and adapt to runtime 1.3.x [\#1381](https://github.com/apache/camel-k/pull/1381) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#1379: make download link available also when installing from operator hub [\#1380](https://github.com/apache/camel-k/pull/1380) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1356: remove namespace resources on uninstall and fix maven-sett… [\#1378](https://github.com/apache/camel-k/pull/1378) ([nicolaferraro](https://github.com/nicolaferraro))
 
@@ -913,6 +920,7 @@
 
 **Merged pull requests:**
 
+- Switch to java 11 by default and adapt to runtime 1.3.x [\#1381](https://github.com/apache/camel-k/pull/1381) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(build\): fix package\_artifact.sh script call [\#1374](https://github.com/apache/camel-k/pull/1374) ([johnpoth](https://github.com/johnpoth))
 - Add nightly releases [\#1373](https://github.com/apache/camel-k/pull/1373) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1364: only delete direct children of the integration during gc [\#1372](https://github.com/apache/camel-k/pull/1372) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -1069,6 +1077,7 @@
 - kamel run --wait should return non-zero exit code in case of failure [\#1178](https://github.com/apache/camel-k/pull/1178) ([jamesnetherton](https://github.com/jamesnetherton))
 - Auto detect Camel components via FQN classnames [\#1177](https://github.com/apache/camel-k/pull/1177) ([jamesnetherton](https://github.com/jamesnetherton))
 - chore\(release\): bump version to 1.0.0-RC2-SNAPSHOT [\#1168](https://github.com/apache/camel-k/pull/1168) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore\(dev\): Upgrade Operator SDK to version 0.13.0 [\#1153](https://github.com/apache/camel-k/pull/1153) ([astefanutti](https://github.com/astefanutti))
 - Buildah support [\#1259](https://github.com/apache/camel-k/pull/1259) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.0-RC1](https://github.com/apache/camel-k/tree/1.0.0-RC1) (2019-12-20)
@@ -1120,7 +1129,6 @@
 - fix\(CLI\): Cannot set Kaniko cache option [\#1166](https://github.com/apache/camel-k/pull/1166) ([astefanutti](https://github.com/astefanutti))
 - \[quarkus\] in JVM mode we should no restrict the languages we can use [\#1161](https://github.com/apache/camel-k/pull/1161) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix \#921: Migration to v1 API [\#1160](https://github.com/apache/camel-k/pull/1160) ([nicolaferraro](https://github.com/nicolaferraro))
-- chore\(dev\): Upgrade Operator SDK to version 0.13.0 [\#1153](https://github.com/apache/camel-k/pull/1153) ([astefanutti](https://github.com/astefanutti))
 - fix for issue \#1138 [\#1152](https://github.com/apache/camel-k/pull/1152) ([mrganeshraja](https://github.com/mrganeshraja))
 - Fix \#1089: defer knative detection to when integration runs [\#1151](https://github.com/apache/camel-k/pull/1151) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(gc\): Do not log 403 errors on deletecollection requests during GC [\#1150](https://github.com/apache/camel-k/pull/1150) ([astefanutti](https://github.com/astefanutti))
