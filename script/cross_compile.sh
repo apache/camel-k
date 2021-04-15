@@ -35,6 +35,7 @@ cross_compile () {
 	local extension=""
 	export GOOS=$2
 	export GOARCH=$3
+	export CGO_ENABLED=0
 
 	if [ "${GOOS}" == "windows" ]; then
 		extension=".exe"
