@@ -14,7 +14,7 @@
 # limitations under the License.
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION := 1.4.0-SNAPSHOT
+VERSION := 1.4.0
 OPERATOR_VERSION := $(subst -SNAPSHOT,,$(VERSION))
 LAST_RELEASED_VERSION := 1.3.2
 RUNTIME_VERSION := 1.7.0
