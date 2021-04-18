@@ -194,8 +194,6 @@
 - Backport fix to \#1992: allow accessing Strimzi "kafkatopics" instead of "topics" [\#1994](https://github.com/apache/camel-k/pull/1994) ([nicolaferraro](https://github.com/nicolaferraro))
 - \[Backport release-1.3.x\] Fix a little typo good for testing backport action [\#1990](https://github.com/apache/camel-k/pull/1990) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Backport fixes for \#1928, \#1939 and \#1986 in 1.3.x [\#1988](https://github.com/apache/camel-k/pull/1988) ([nicolaferraro](https://github.com/nicolaferraro))
-- Refactors the deploy directory to make config directory single source of CRD truth [\#1978](https://github.com/apache/camel-k/pull/1978) ([phantomjinx](https://github.com/phantomjinx))
-- Remove node configuration from backport action. It is not needed [\#1974](https://github.com/apache/camel-k/pull/1974) ([oscerd](https://github.com/oscerd))
 - \[ENTESB-15644\] Fix monitoring test [\#1959](https://github.com/apache/camel-k/pull/1959) ([llowinge](https://github.com/llowinge))
 
 ## [pkg/client/camel/v1.3.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.3.1) (2021-02-01)
@@ -286,7 +284,6 @@
 - Move released images to a hub without rate limits [\#1761](https://github.com/apache/camel-k/issues/1761)
 - Define default global Kamelets [\#1675](https://github.com/apache/camel-k/issues/1675)
 - Enable SinkBinding automatically [\#1654](https://github.com/apache/camel-k/issues/1654)
-- Remove support for Main runtime for integrations [\#1562](https://github.com/apache/camel-k/issues/1562)
 - Document the --config option in the kamel CLI [\#1185](https://github.com/apache/camel-k/issues/1185)
 - Basic module structure for Camel K projects [\#1135](https://github.com/apache/camel-k/issues/1135)
 
@@ -384,6 +381,7 @@
 - Add suport for gists [\#1740](https://github.com/apache/camel-k/issues/1740)
 - Update to k8s 0.18.8 [\#1698](https://github.com/apache/camel-k/issues/1698)
 - Error during unshare\(...\): Operation not permitted [\#1580](https://github.com/apache/camel-k/issues/1580)
+- Remove support for Main runtime for integrations [\#1562](https://github.com/apache/camel-k/issues/1562)
 - Auto-detect json in yaml syntax [\#1549](https://github.com/apache/camel-k/issues/1549)
 - Provide yaml schema of design definition [\#1537](https://github.com/apache/camel-k/issues/1537)
 - Expose operator related metrics [\#1267](https://github.com/apache/camel-k/issues/1267)
