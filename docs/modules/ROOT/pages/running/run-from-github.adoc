@@ -16,14 +16,14 @@ As example, running the following command
 
 [source]
 ----
-kamel run github:apache/camel-k/examples/Sample.java
+kamel run github:apache/camel-k/examples/languages/Sample.java
 ----
 
 is equivalent to:
 
 [source]
 ----
-kamel run https://raw.githubusercontent.com/apache/camel-k/master/examples/Sample.java
+kamel run https://raw.githubusercontent.com/apache/camel-k/master/examples/languages/Sample.java
 ----
 
 but does not require to type the full GitHub RAW URL.
