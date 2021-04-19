@@ -83,7 +83,6 @@
 - Fix \#2035: invalid YAML should not make the operator panic [\#2148](https://github.com/apache/camel-k/pull/2148) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix oc parameter and added filenames to the yaml sections [\#2147](https://github.com/apache/camel-k/pull/2147) ([claudio4j](https://github.com/claudio4j))
 - fix service-binding role group [\#2145](https://github.com/apache/camel-k/pull/2145) ([nicolaferraro](https://github.com/nicolaferraro))
-- doc: added documentation about deploying Camel K on k3s [\#2143](https://github.com/apache/camel-k/pull/2143) ([orpiske](https://github.com/orpiske))
 - Add toleration trait e2e test [\#2142](https://github.com/apache/camel-k/pull/2142) ([tplevko](https://github.com/tplevko))
 - fix: disable CGO when building on Fedora to avoid linking issues on the Ubuntu-based image \(\#2140\) [\#2141](https://github.com/apache/camel-k/pull/2141) ([orpiske](https://github.com/orpiske))
 - fix: buildah to ensure it works with insecure registries [\#2138](https://github.com/apache/camel-k/pull/2138) ([orpiske](https://github.com/orpiske))
@@ -187,6 +186,7 @@
 **Merged pull requests:**
 
 - Backport fix for \#2035: invalid YAML should not make the operator panic [\#2150](https://github.com/apache/camel-k/pull/2150) ([nicolaferraro](https://github.com/nicolaferraro))
+- doc: added documentation about deploying Camel K on k3s [\#2143](https://github.com/apache/camel-k/pull/2143) ([orpiske](https://github.com/orpiske))
 - update operator-lifecycle-manager [\#2072](https://github.com/apache/camel-k/pull/2072) ([akihikokuroda](https://github.com/akihikokuroda))
 - Backport \#2036 to 1.3.x branch [\#2050](https://github.com/apache/camel-k/pull/2050) ([astefanutti](https://github.com/astefanutti))
 - Backport \#2042 to 1.3.x branch [\#2046](https://github.com/apache/camel-k/pull/2046) ([astefanutti](https://github.com/astefanutti))
