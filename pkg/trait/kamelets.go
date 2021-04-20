@@ -47,8 +47,10 @@ type kameletsTrait struct {
 	Auto *bool `property:"auto"`
 	// Comma separated list of Kamelet names to load into the current integration
 	List string `property:"list"`
-	// Kamelet name used as error handler
-	ErrorHandler string `property:"error-handler"`
+
+	// TODO move into a struct
+	ErrorHandlerURI  string
+	ErrorHandlerType string
 }
 
 type configurationKey struct {
@@ -96,8 +98,8 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	if t.Auto == nil || *t.Auto {
+		var kamelets []string
 		if t.List == "" {
-			var kamelets []string
 			sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
 			if err != nil {
 				return false, err
@@ -108,34 +110,25 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 				return true
 			})
 			sort.Strings(kamelets)
-			t.List = strings.Join(kamelets, ",")
 		}
-		if t.ErrorHandler == "" {
-			t.ErrorHandler = maybeKameletAsDefaultErrorHandler(e.Integration.Configurations())
-		}
-	}
-
-	return t.declareKamelets(), nil
-}
-
-func maybeKameletAsDefaultErrorHandler(properties []v1.ConfigurationSpec) string {
-	for _, property := range properties {
-		if strings.HasPrefix(property.Value, "camel.k.default-error-handler=") {
-			split := strings.Split(property.Value, "=")
-			if len(split) > 0 {
-				if strings.HasPrefix(split[1], "kamelet:") {
-					return extractKamelet(split[1])
+		if t.ErrorHandlerType == "" {
+			t.ErrorHandlerType = maybeErrorHandler(e.Integration.Configurations())
+			if t.ErrorHandlerType != "" && v1alpha1.ErrorHandlerType(t.ErrorHandlerType) == v1alpha1.ErrorHandlerTypeDeadLetterChannel {
+				t.ErrorHandlerURI = maybeKameletAsDefaultErrorHandler(e.Integration.Configurations())
+				if strings.HasPrefix(t.ErrorHandlerURI, "kamelet:") {
+					kamelets = append(kamelets, extractKamelet(t.ErrorHandlerURI))
 				}
-				return split[1]
 			}
 		}
+
+		t.List = strings.Join(kamelets, ",")
 	}
 
-	return ""
+	return t.declaredKamelets(), nil
 }
 
-func (t *kameletsTrait) declareKamelets() bool {
-	return len(t.getKameletKeys()) > 0 || t.ErrorHandler != ""
+func (t *kameletsTrait) declaredKamelets() bool {
+	return len(t.getKameletKeys()) > 0
 }
 
 func (t *kameletsTrait) Apply(e *Environment) error {
@@ -156,7 +149,7 @@ func (t *kameletsTrait) Apply(e *Environment) error {
 }
 
 func (t *kameletsTrait) addKamelets(e *Environment) error {
-	if t.declareKamelets() {
+	if t.declaredKamelets() {
 		repo, err := repository.NewForPlatform(e.C, e.Client, e.Platform, e.Integration.Namespace, platform.GetOperatorNamespace())
 		if err != nil {
 			return err
@@ -165,13 +158,6 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 		// Declared kamelets
 		for _, k := range t.getKameletKeys() {
 			err := initializeKamelet(repo, e, k, t, v1.SourceTypeTemplate)
-			if err != nil {
-				return err
-			}
-		}
-		if t.ErrorHandler != "" {
-			// Possible error handler
-			err = initializeKamelet(repo, e, t.ErrorHandler, t, v1.SourceTypeErrorHandler)
 			if err != nil {
 				return err
 			}
