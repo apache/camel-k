@@ -1,0 +1,531 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
+  labels:
+    app: camel-k
+  name: builds.camel.apache.org
+spec:
+  group: camel.apache.org
+  names:
+    categories:
+    - kamel
+    - camel
+    kind: Build
+    listKind: BuildList
+    plural: builds
+    shortNames:
+    - ikb
+    singular: build
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: The build phase
+      jsonPath: .status.phase
+      name: Phase
+      type: string
+    - description: The time at which the build was created
+      jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    - description: The time at which the build was last (re-)started
+      jsonPath: .status.startedAt
+      name: Started
+      type: date
+    - description: The build last execution duration
+      jsonPath: .status.duration
+      name: Duration
+      type: string
+    - description: The number of execution attempts
+      jsonPath: .status.failure.recovery.attempt
+      name: Attempts
+      type: integer
+    name: v1
+    schema:
+      openAPIV3Schema:
+        description: Build is the Schema for the builds API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: BuildSpec defines the desired state of Build
+            properties:
+              tasks:
+                items:
+                  description: Task --
+                  properties:
+                    buildah:
+                      description: BuildahTask --
+                      properties:
+                        baseImage:
+                          type: string
+                        contextDir:
+                          type: string
+                        httpProxySecret:
+                          type: string
+                        image:
+                          type: string
+                        name:
+                          type: string
+                        registry:
+                          description: IntegrationPlatformRegistrySpec --
+                          properties:
+                            address:
+                              type: string
+                            ca:
+                              type: string
+                            insecure:
+                              type: boolean
+                            organization:
+                              type: string
+                            secret:
+                              type: string
+                          type: object
+                        verbose:
+                          type: boolean
+                      type: object
+                    builder:
+                      description: BuilderTask --
+                      properties:
+                        baseImage:
+                          type: string
+                        buildDir:
+                          type: string
+                        dependencies:
+                          items:
+                            type: string
+                          type: array
+                        maven:
+                          description: MavenSpec --
+                          properties:
+                            caSecret:
+                              description: The Secret name and key, containing the
+                                CA certificate(s) used to connect to remote Maven
+                                repositories. It can contain X.509 certificates, and
+                                PKCS#7 formatted certificate chains. A JKS formatted
+                                keystore is automatically created to store the CA
+                                certificate(s), and configured to be used as a trusted
+                                certificate(s) by the Maven commands. Note that the
+                                root CA certificates are also imported into the created
+                                keystore.
+                              properties:
+                                key:
+                                  description: The key of the secret to select from.  Must
+                                    be a valid secret key.
+                                  type: string
+                                name:
+                                  description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                    TODO: Add other useful fields. apiVersion, kind,
+                                    uid?'
+                                  type: string
+                                optional:
+                                  description: Specify whether the Secret or its key
+                                    must be defined
+                                  type: boolean
+                              required:
+                              - key
+                              type: object
+                            localRepository:
+                              type: string
+                            settings:
+                              description: ValueSource --
+                              properties:
+                                configMapKeyRef:
+                                  description: Selects a key of a ConfigMap.
+                                  properties:
+                                    key:
+                                      description: The key to select.
+                                      type: string
+                                    name:
+                                      description: 'Name of the referent. More info:
+                                        https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                        TODO: Add other useful fields. apiVersion,
+                                        kind, uid?'
+                                      type: string
+                                    optional:
+                                      description: Specify whether the ConfigMap or
+                                        its key must be defined
+                                      type: boolean
+                                  required:
+                                  - key
+                                  type: object
+                                secretKeyRef:
+                                  description: Selects a key of a secret.
+                                  properties:
+                                    key:
+                                      description: The key of the secret to select
+                                        from.  Must be a valid secret key.
+                                      type: string
+                                    name:
+                                      description: 'Name of the referent. More info:
+                                        https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                        TODO: Add other useful fields. apiVersion,
+                                        kind, uid?'
+                                      type: string
+                                    optional:
+                                      description: Specify whether the Secret or its
+                                        key must be defined
+                                      type: boolean
+                                  required:
+                                  - key
+                                  type: object
+                              type: object
+                            timeout:
+                              type: string
+                          type: object
+                        name:
+                          type: string
+                        properties:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        resources:
+                          items:
+                            description: ResourceSpec --
+                            properties:
+                              compression:
+                                type: boolean
+                              content:
+                                type: string
+                              contentKey:
+                                type: string
+                              contentRef:
+                                type: string
+                              contentType:
+                                type: string
+                              mountPath:
+                                type: string
+                              name:
+                                type: string
+                              rawContent:
+                                format: byte
+                                type: string
+                              type:
+                                description: ResourceType --
+                                type: string
+                            type: object
+                          type: array
+                        runtime:
+                          description: RuntimeSpec --
+                          properties:
+                            applicationClass:
+                              type: string
+                            capabilities:
+                              additionalProperties:
+                                description: Capability --
+                                properties:
+                                  dependencies:
+                                    items:
+                                      description: MavenArtifact --
+                                      properties:
+                                        artifactId:
+                                          type: string
+                                        groupId:
+                                          type: string
+                                        version:
+                                          type: string
+                                      required:
+                                      - artifactId
+                                      - groupId
+                                      type: object
+                                    type: array
+                                  metadata:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                required:
+                                - dependencies
+                                type: object
+                              type: object
+                            dependencies:
+                              items:
+                                description: MavenArtifact --
+                                properties:
+                                  artifactId:
+                                    type: string
+                                  groupId:
+                                    type: string
+                                  version:
+                                    type: string
+                                required:
+                                - artifactId
+                                - groupId
+                                type: object
+                              type: array
+                            metadata:
+                              additionalProperties:
+                                type: string
+                              type: object
+                            provider:
+                              description: RuntimeProvider --
+                              type: string
+                            version:
+                              type: string
+                          required:
+                          - applicationClass
+                          - dependencies
+                          - provider
+                          - version
+                          type: object
+                        sources:
+                          items:
+                            description: SourceSpec --
+                            properties:
+                              compression:
+                                type: boolean
+                              content:
+                                type: string
+                              contentKey:
+                                type: string
+                              contentRef:
+                                type: string
+                              contentType:
+                                type: string
+                              interceptors:
+                                description: Interceptors are optional identifiers
+                                  the org.apache.camel.k.RoutesLoader uses to pre/post
+                                  process sources
+                                items:
+                                  type: string
+                                type: array
+                              language:
+                                description: Language --
+                                type: string
+                              loader:
+                                description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
+                                  that will interpret this source at runtime
+                                type: string
+                              name:
+                                type: string
+                              property-names:
+                                description: List of property names defined in the
+                                  source (e.g. if type is "template")
+                                items:
+                                  type: string
+                                type: array
+                              rawContent:
+                                format: byte
+                                type: string
+                              type:
+                                description: Type defines the kind of source described
+                                  by this object
+                                type: string
+                            type: object
+                          type: array
+                        steps:
+                          items:
+                            type: string
+                          type: array
+                        timeout:
+                          type: string
+                      type: object
+                    kaniko:
+                      description: KanikoTask --
+                      properties:
+                        baseImage:
+                          type: string
+                        cache:
+                          description: KanikoTaskCache
+                          properties:
+                            enabled:
+                              type: boolean
+                            persistentVolumeClaim:
+                              type: string
+                          type: object
+                        contextDir:
+                          type: string
+                        httpProxySecret:
+                          type: string
+                        image:
+                          type: string
+                        name:
+                          type: string
+                        registry:
+                          description: IntegrationPlatformRegistrySpec --
+                          properties:
+                            address:
+                              type: string
+                            ca:
+                              type: string
+                            insecure:
+                              type: boolean
+                            organization:
+                              type: string
+                            secret:
+                              type: string
+                          type: object
+                        verbose:
+                          type: boolean
+                      type: object
+                    s2i:
+                      description: S2iTask --
+                      properties:
+                        contextDir:
+                          type: string
+                        name:
+                          type: string
+                        tag:
+                          type: string
+                      type: object
+                    spectrum:
+                      description: SpectrumTask --
+                      properties:
+                        baseImage:
+                          type: string
+                        contextDir:
+                          type: string
+                        image:
+                          type: string
+                        name:
+                          type: string
+                        registry:
+                          description: IntegrationPlatformRegistrySpec --
+                          properties:
+                            address:
+                              type: string
+                            ca:
+                              type: string
+                            insecure:
+                              type: boolean
+                            organization:
+                              type: string
+                            secret:
+                              type: string
+                          type: object
+                      type: object
+                  type: object
+                type: array
+            type: object
+          status:
+            description: BuildStatus defines the observed state of Build
+            properties:
+              artifacts:
+                items:
+                  description: Artifact --
+                  properties:
+                    checksum:
+                      type: string
+                    id:
+                      type: string
+                    location:
+                      type: string
+                    target:
+                      type: string
+                  required:
+                  - id
+                  type: object
+                type: array
+              baseImage:
+                type: string
+              conditions:
+                items:
+                  description: BuildCondition describes the state of a resource at
+                    a certain point.
+                  properties:
+                    lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: The last time this condition was updated.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type of integration condition.
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              digest:
+                type: string
+              duration:
+                description: Change to Duration / ISO 8601 when CRD uses OpenAPI spec
+                  v3 https://github.com/OAI/OpenAPI-Specification/issues/845
+                type: string
+              error:
+                type: string
+              failure:
+                description: Failure --
+                properties:
+                  reason:
+                    type: string
+                  recovery:
+                    description: FailureRecovery --
+                    properties:
+                      attempt:
+                        type: integer
+                      attemptMax:
+                        type: integer
+                      attemptTime:
+                        format: date-time
+                        type: string
+                    required:
+                    - attempt
+                    - attemptMax
+                    type: object
+                  time:
+                    format: date-time
+                    type: string
+                required:
+                - reason
+                - recovery
+                - time
+                type: object
+              image:
+                type: string
+              phase:
+                description: BuildPhase --
+                type: string
+              platform:
+                type: string
+              startedAt:
+                format: date-time
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
