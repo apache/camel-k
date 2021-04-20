@@ -33,10 +33,24 @@ type KameletBindingSpec struct {
 	// Sink is the destination of the integration defined by this binding
 	Sink Endpoint `json:"sink,omitempty"`
 	// ErrorHandler is an optional handler called upon an error occuring in the integration
-	ErrorHandler Endpoint `json:"errorHandler,omitempty"`
+	ErrorHandler ErrorHandler `json:"errorHandler,omitempty"`
 	// Steps contains an optional list of intermediate steps that are executed between the Source and the Sink
 	Steps []Endpoint `json:"steps,omitempty"`
 }
+
+type ErrorHandler struct {
+	Endpoint      Endpoint                `json:"endpoint,omitempty"`
+	Type          ErrorHandlerType        `json:"type,omitempty"`
+	Configuration *ErrorHandlerProperties `json:"configuration,omitempty"`
+}
+
+type ErrorHandlerType string
+
+const (
+	ErrorHandlerTypeNone              ErrorHandlerType = "no"
+	ErrorHandlerTypeDefault           ErrorHandlerType = "default"
+	ErrorHandlerTypeDeadLetterChannel ErrorHandlerType = "dead-letter-channel"
+)
 
 // Endpoint represents a source/sink external entity
 type Endpoint struct {
@@ -58,6 +72,10 @@ const (
 	EndpointTypeSink         EndpointType = "sink"
 	EndpointTypeErrorHandler EndpointType = "errorHandler"
 )
+
+type ErrorHandlerProperties struct {
+	v1.RawMessage `json:",inline"`
+}
 
 // EndpointProperties is a key/value struct represented as JSON raw to allow numeric/boolean values
 type EndpointProperties struct {

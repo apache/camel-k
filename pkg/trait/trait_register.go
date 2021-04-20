@@ -26,6 +26,7 @@ func init() {
 	AddToTraits(newOpenAPITrait)
 	AddToTraits(newKnativeTrait)
 	AddToTraits(newKameletsTrait)
+	AddToTraits(newErrorHandlerTrait)
 	AddToTraits(newDependenciesTrait)
 	AddToTraits(newBuilderTrait)
 	AddToTraits(newQuarkusTrait)
