@@ -14,9 +14,9 @@
 # limitations under the License.
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION := 1.4.0-SNAPSHOT
+VERSION := 1.5.0-SNAPSHOT
 OPERATOR_VERSION := $(subst -SNAPSHOT,,$(VERSION))
-LAST_RELEASED_VERSION := 1.3.2
+LAST_RELEASED_VERSION := 1.4.0
 RUNTIME_VERSION := 1.7.0
 BUILDAH_VERSION := 1.14.0
 KANIKO_VERSION := 0.17.1
@@ -32,7 +32,7 @@ LINT_DEADLINE := 10m
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
-STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1310
+STAGING_RUNTIME_REPO :=
 
 # Define here the repo containing the default Kamelet catalog (if any)
 KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git

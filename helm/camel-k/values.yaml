@@ -23,7 +23,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 operator:
-  image: docker.io/apache/camel-k:1.4.0-SNAPSHOT
+  image: docker.io/apache/camel-k:1.5.0-SNAPSHOT
 
 platform:
   build:
