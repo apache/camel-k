@@ -1,0 +1,615 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: |-
+      [
+        {
+          "apiVersion": "camel.apache.org/v1",
+          "kind": "Build",
+          "metadata": {
+            "name": "example"
+          },
+          "spec": {}
+        },
+        {
+          "apiVersion": "camel.apache.org/v1",
+          "kind": "CamelCatalog",
+          "metadata": {
+            "name": "example"
+          },
+          "spec": {}
+        },
+        {
+          "apiVersion": "camel.apache.org/v1",
+          "kind": "Integration",
+          "metadata": {
+            "name": "example"
+          },
+          "spec": {
+            "flows": [
+              {
+                "from": {
+                  "parameters": {
+                    "period": "1000"
+                  },
+                  "steps": [
+                    {
+                      "set-body": {
+                        "constant": "Hello from Camel K"
+                      }
+                    },
+                    {
+                      "to": "log:info"
+                    }
+                  ],
+                  "uri": "timer:yaml"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "apiVersion": "camel.apache.org/v1",
+          "kind": "IntegrationKit",
+          "metadata": {
+            "name": "example"
+          },
+          "spec": {}
+        },
+        {
+          "apiVersion": "camel.apache.org/v1",
+          "kind": "IntegrationPlatform",
+          "metadata": {
+            "labels": {
+              "app": "camel-k"
+            },
+            "name": "camel-k"
+          },
+          "spec": null
+        },
+        {
+          "apiVersion": "camel.apache.org/v1alpha1",
+          "kind": "Kamelet",
+          "metadata": {
+            "name": "example"
+          },
+          "spec": {
+            "definition": {
+              "description": "Produces periodic events with a custom payload",
+              "properties": {
+                "message": {
+                  "description": "The message to generate",
+                  "title": "Message",
+                  "type": "string"
+                },
+                "period": {
+                  "default": 1000,
+                  "description": "The time interval between two events",
+                  "title": "Period",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "message"
+              ],
+              "title": "Example Timer"
+            },
+            "flow": {
+              "from": {
+                "parameters": {
+                  "period": "#property:period"
+                },
+                "steps": [
+                  {
+                    "set-body": {
+                      "constant": "#property:message"
+                    }
+                  },
+                  {
+                    "to": "kamelet:sink"
+                  }
+                ],
+                "uri": "timer:tick"
+              }
+            }
+          }
+        },
+        {
+          "apiVersion": "camel.apache.org/v1alpha1",
+          "kind": "KameletBinding",
+          "metadata": {
+            "name": "example"
+          },
+          "spec": {
+            "sink": {
+              "ref": {
+                "apiVersion": "messaging.knative.dev/v1beta1",
+                "kind": "InMemoryChannel",
+                "name": "example"
+              }
+            },
+            "source": {
+              "properties": {
+                "message": "Hello world"
+              },
+              "ref": {
+                "apiVersion": "camel.apache.org/v1alpha1",
+                "kind": "Kamelet",
+                "name": "example"
+              }
+            }
+          }
+        }
+      ]
+    capabilities: Full Lifecycle
+    categories: Integration & Delivery
+    certified: "false"
+    containerImage: docker.io/apache/camel-k:1.5.0-SNAPSHOT
+    createdAt: "2021-04-20T08:35:55Z"
+    description: Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless superpowers.
+    operators.operatorframework.io/builder: operator-sdk-v1.3.0
+    operators.operatorframework.io/internal-objects: '["builds.camel.apache.org","integrationkits.camel.apache.org","camelcatalogs.camel.apache.org"]'
+    operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
+    repository: https://github.com/apache/camel-k
+    support: Camel
+  name: camel-k.v1.5.0-snapshot
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: Build is the Schema for the builds API
+      displayName: Build
+      kind: Build
+      name: builds.camel.apache.org
+      version: v1
+    - description: CamelCatalog is the Schema for the camelcatalogs API
+      displayName: Camel Catalog
+      kind: CamelCatalog
+      name: camelcatalogs.camel.apache.org
+      version: v1
+    - description: IntegrationKit is the Schema for the integrationkits API
+      displayName: Integration Kit
+      kind: IntegrationKit
+      name: integrationkits.camel.apache.org
+      version: v1
+    - description: IntegrationPlatform is the Schema for the integrationplatforms API
+      displayName: Integration Platform
+      kind: IntegrationPlatform
+      name: integrationplatforms.camel.apache.org
+      version: v1
+    - description: Integration is the Schema for the integrations API
+      displayName: Integration
+      kind: Integration
+      name: integrations.camel.apache.org
+      version: v1
+    - description: KameletBinding is the Schema for the kamelets binding API
+      displayName: Kamelet Binding
+      kind: KameletBinding
+      name: kameletbindings.camel.apache.org
+      version: v1alpha1
+    - description: Kamelet is the Schema for the kamelets API
+      displayName: Kamelet
+      kind: Kamelet
+      name: kamelets.camel.apache.org
+      version: v1alpha1
+  description: |
+    Apache Camel K
+    ==============
+
+    Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless superpowers.
+
+    ## Installation
+
+    To start using Camel K, install the operator and then create the following `IntegrationPlatform`:
+    ```
+    apiVersion: camel.apache.org/v1
+    kind: IntegrationPlatform
+    metadata:
+      name: camel-k
+      labels:
+        app: "camel-k"
+    ```
+
+    An `IntegrationPlatform` resource is automatically created by default on OpenShift, so you can skip this step.
+    Also, You can edit the `IntegrationPlatform`, to configure Camel K.
+    The configuration from the `IntegrationPlatform` will apply to the Camel integrations created in the same namespace/project.
+
+    ## Running an Integration
+
+    After the initial setup, you can run a Camel integration on the cluster by creating an example `Integration`, e.g.:
+    ```
+    apiVersion: camel.apache.org/v1
+    kind: Integration
+    metadata:
+      name: example
+    spec:
+      sources:
+      - name: Example.java
+        content: |
+          import org.apache.camel.builder.RouteBuilder;
+
+          public class Example extends RouteBuilder {
+              @Override
+              public void configure() throws Exception {
+                  from("timer:tick")
+                      .setBody(constant("Hello World!"))
+                  .to("log:info?skipBodyLineSeparator=false");
+              }
+          }
+    ```
+  displayName: Camel K Operator
+  icon:
+  - base64data: PHN2ZyB2aWV3Qm94PSIwIDAgMTMwLjIxIDEzMC4wMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImEiIHgxPSIzMzMuNDgiIHgyPSI0NzciIHkxPSI3MDIuNiIgeTI9IjU2My43MyIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSg5NC4wMzggMjc2LjA2KSBzY2FsZSguOTkyMDYpIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agc3RvcC1jb2xvcj0iI0Y2OTkyMyIgb2Zmc2V0PSIwIi8+PHN0b3Agc3RvcC1jb2xvcj0iI0Y3OUEyMyIgb2Zmc2V0PSIuMTEiLz48c3RvcCBzdG9wLWNvbG9yPSIjRTk3ODI2IiBvZmZzZXQ9Ii45NDUiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0iYiIgeDE9IjMzMy40OCIgeDI9IjQ3NyIgeTE9IjcwMi42IiB5Mj0iNTYzLjczIiBncmFkaWVudFRyYW5zZm9ybT0idHJhbnNsYXRlKDk0LjAzOCAyNzYuMDYpIHNjYWxlKC45OTIwNikiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj48c3RvcCBzdG9wLWNvbG9yPSIjRjY5OTIzIiBvZmZzZXQ9IjAiLz48c3RvcCBzdG9wLWNvbG9yPSIjRjc5QTIzIiBvZmZzZXQ9Ii4wOCIvPjxzdG9wIHN0b3AtY29sb3I9IiNFOTc4MjYiIG9mZnNldD0iLjQxOSIvPjwvbGluZWFyR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJjIiB4MT0iNjMzLjU1IiB4Mj0iNTY2LjQ3IiB5MT0iODE0LjYiIHkyPSI5MDkuMTIiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTg1LjQyMSA1Ni4yMzYpIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agc3RvcC1jb2xvcj0iI2Y2ZTQyMyIgb2Zmc2V0PSIwIi8+PHN0b3Agc3RvcC1jb2xvcj0iI0Y3OUEyMyIgb2Zmc2V0PSIuNDEyIi8+PHN0b3Agc3RvcC1jb2xvcj0iI0U5NzgyNiIgb2Zmc2V0PSIuNzMzIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTQzNy44OSAtODM1LjI5KSI+PGNpcmNsZSBjeD0iNTAzLjEiIGN5PSI5MDAuMjkiIHI9IjYyLjUyIiBmaWxsPSJ1cmwoI2EpIiBzdHJva2U9InVybCgjYikiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iNC45NiIvPjxwYXRoIGQ9Ik00ODcuODkgODczLjY0YTg5LjUzIDg5LjUzIDAgMCAwLTIuNjg4LjAzMWMtMS4wNDMuMDMxLTIuNDQ1LjM2Mi00LjA2Mi45MDYgMjcuMzA5IDIwLjczNyAzNy4xMjcgNTguMTQ2IDIwLjI1IDkwLjY1Ni41NzMuMDE1IDEuMTQyLjA2MyAxLjcxOS4wNjMgMzAuODQ0IDAgNTYuNjItMjEuNDkzIDYzLjI4LTUwLjMxMi0xOS41NzItMjIuOTQzLTQ2LjExNy00MS4yOTQtNzguNS00MS4zNDR6IiBmaWxsPSJ1cmwoI2MpIiBvcGFjaXR5PSIuNzUiLz48cGF0aCBkPSJNNDgxLjE0IDg3NC41OGMtOS4wNjggMy4wNTItMjYuMzY4IDEzLjgwMi00MyAyOC4xNTYgMS4yNjMgMzQuMTk1IDI4Ljk2MSA2MS42MDcgNjMuMjUgNjIuNSAxNi44NzctMzIuNTEgNy4wNi02OS45MTktMjAuMjUtOTAuNjU2eiIgZmlsbD0iIzI4MTcwYiIgb3BhY2l0eT0iLjc1Ii8+PHBhdGggZD0iTTUwNC44ODkgODYyLjU0NmMtLjQ3Mi0uMDMyLS45MzIuMDI4LTEuMzc1LjI1LTUuNiAyLjgwMSAwIDE0IDAgMTQtMTYuODA3IDE0LjAwOS0xMy4yMzYgMzcuOTM4LTMyLjg0NCAzNy45MzgtMTAuNjg5IDAtMjEuMzIyLTEyLjI5My0zMi41MzEtMTkuODEyLS4xNDQgMS43NzMtLjI1IDMuNTY0LS4yNSA1LjM3NSAwIDI0LjUxNSAxMy41MSA0NS44NjMgMzMuNDY5IDU3LjA2MyA1LjU4My0uNzAzIDExLjE1OC0yLjExNCAxNS4zNDQtNC45MDYgMjEuOTkyLTE0LjY2MiAyNy40NTItNDIuNTU3IDM2LjQzOC01Ni4wMzEgNS41OTYtOC40MDcgMzEuODI0LTcuNjc3IDMzLjU5NC0xMS4yMiAyLjgwNC01LjYwMS01LjYwMi0xNC04LjQwNi0xNGgtMjIuNDA2Yy0xLjU2NiAwLTQuMDI1LTIuNzgtNS41OTQtMi43OGgtOC40MDZzLTMuNzI1LTUuNjUtNy4wMzEtNS44NzV6IiBmaWxsPSIjZmZmIi8+PC9nPjwvc3ZnPg==
+    mediatype: image/svg+xml
+  install:
+    spec:
+      clusterPermissions:
+      - rules:
+        - apiGroups:
+          - console.openshift.io
+          resources:
+          - consoleclidownloads
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        serviceAccountName: camel-k-operator
+      deployments:
+      - name: camel-k-operator
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: camel-k
+              name: camel-k-operator
+          strategy:
+            type: Recreate
+          template:
+            metadata:
+              labels:
+                app: camel-k
+                camel.apache.org/component: operator
+                name: camel-k-operator
+            spec:
+              containers:
+              - command:
+                - kamel
+                - operator
+                env:
+                - name: WATCH_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.annotations['olm.targetNamespaces']
+                - name: OPERATOR_NAME
+                  value: camel-k
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                image: docker.io/apache/camel-k:1.5.0-SNAPSHOT
+                imagePullPolicy: IfNotPresent
+                livenessProbe:
+                  httpGet:
+                    path: /healthz
+                    port: 8081
+                  initialDelaySeconds: 20
+                  periodSeconds: 10
+                name: camel-k-operator
+                ports:
+                - containerPort: 8080
+                  name: metrics
+                resources: {}
+              serviceAccountName: camel-k-operator
+      permissions:
+      - rules:
+        - apiGroups:
+          - camel.apache.org
+          resources:
+          - '*'
+          verbs:
+          - '*'
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - services
+          - endpoints
+          - persistentvolumeclaims
+          - configmaps
+          - secrets
+          - serviceaccounts
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - policy
+          resources:
+          - poddisruptionbudgets
+          verbs:
+          - create
+          - delete
+          - get
+          - update
+          - list
+          - patch
+          - watch
+        - apiGroups:
+          - rbac.authorization.k8s.io
+          resources:
+          - roles
+          - rolebindings
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - apps
+          resources:
+          - deployments
+          - replicasets
+          - statefulsets
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - batch
+          resources:
+          - cronjobs
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - apps
+          resources:
+          - daemonsets
+          verbs:
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - extensions
+          resources:
+          - ingresses
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - ""
+          resources:
+          - events
+          verbs:
+          - create
+          - patch
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - serving.knative.dev
+          resources:
+          - services
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - eventing.knative.dev
+          - messaging.knative.dev
+          - sources.knative.dev
+          resources:
+          - '*'
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - coordination.k8s.io
+          resources:
+          - leases
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - ""
+          - build.openshift.io
+          resources:
+          - buildconfigs
+          - buildconfigs/webhooks
+          - builds
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - ""
+          - image.openshift.io
+          resources:
+          - imagestreamimages
+          - imagestreammappings
+          - imagestreams
+          - imagestreams/secrets
+          - imagestreamtags
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - ""
+          - build.openshift.io
+          resources:
+          - buildconfigs/instantiate
+          - buildconfigs/instantiatebinary
+          - builds/clone
+          verbs:
+          - create
+        - apiGroups:
+          - ""
+          - route.openshift.io
+          resources:
+          - routes
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - ""
+          - route.openshift.io
+          resources:
+          - routes/custom-host
+          verbs:
+          - create
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - podmonitors
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - binding.operators.coreos.com
+          resources:
+          - servicebindings
+          verbs:
+          - create
+          - delete
+          - deletecollection
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - kafka.strimzi.io
+          resources:
+          - kafkatopics
+          - kafkas
+          verbs:
+          - get
+          - list
+          - watch
+        serviceAccountName: camel-k-operator
+    strategy: deployment
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - apache
+  - kamel
+  - kubernetes
+  - serverless
+  - microservices
+  labels:
+    name: camel-k-operator
+  links:
+  - name: Camel K source code repository
+    url: https://github.com/apache/camel-k
+  maintainers:
+  - email: users@camel.apache.org
+    name: The Apache Software Foundation
+  maturity: alpha
+  minKubeVersion: 1.11.0
+  provider:
+    name: The Apache Software Foundation
+  selector:
+    matchLabels:
+      name: camel-k-operator
+  version: 1.5.0-snapshot

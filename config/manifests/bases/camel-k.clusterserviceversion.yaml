@@ -154,4 +154,4 @@ spec:
   selector:
     matchLabels:
       name: camel-k-operator
-  version: 1.4.0-snapshot
+  version: 1.5.0-snapshot
