@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
-	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -81,8 +80,8 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 		return nil, errors.Wrap(err, "could not determine sink URI")
 	}
 	var errorHandler *bindings.Binding
-	if kameletbinding.Spec.ErrorHandler.Ref != nil || kameletbinding.Spec.ErrorHandler.URI != nil {
-		errorHandler, err = bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1alpha1.EndpointTypeErrorHandler}, kameletbinding.Spec.ErrorHandler)
+	if kameletbinding.Spec.ErrorHandler.Endpoint.Ref != nil || kameletbinding.Spec.ErrorHandler.Endpoint.URI != nil {
+		errorHandler, err = bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1alpha1.EndpointTypeErrorHandler}, kameletbinding.Spec.ErrorHandler.Endpoint)
 		if err != nil {
 			return nil, errors.Wrap(err, "could not determine error handler URI")
 		}
@@ -160,20 +159,14 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 	return &it, nil
 }
 
-func setErrorHandlerKamelet(errorHandler *bindings.Binding, kameletSpec v1alpha1.Endpoint) error {
+func setErrorHandlerKamelet(errorHandler *bindings.Binding, errorHandlerSpec v1alpha1.ErrorHandler) error {
 	if errorHandler.ApplicationProperties == nil {
 		errorHandler.ApplicationProperties = make(map[string]string)
 	}
-	if kameletSpec.URI != nil {
-		if !strings.HasPrefix(*kameletSpec.URI, "kamelet") {
-			return fmt.Errorf("Kamelet Binding only supports kamelet as error handler, provided: %s", *kameletSpec.URI)
-		}
 
-		errorHandler.ApplicationProperties["camel.k.default-error-handler"] = *kameletSpec.URI
-		return nil
-	}
+	errorHandler.ApplicationProperties["camel.k.default-error-handler.uri"] = errorHandler.URI
+	errorHandler.ApplicationProperties["camel.k.default-error-handler.type"] = string(errorHandlerSpec.Type)
 
-	errorHandler.ApplicationProperties["camel.k.default-error-handler"] = kameletSpec.Ref.Name
 	return nil
 }
 
