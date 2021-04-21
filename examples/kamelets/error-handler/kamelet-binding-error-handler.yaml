@@ -31,9 +31,12 @@ spec:
       apiVersion: camel.apache.org/v1alpha1
       name: log-sink
   errorHandler:
-    ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
-      name: error-handler    
-#    uri: kamelet:error-handler
+    type: dead-letter-channel
+    endpoint:
+      ref:
+        kind: Kamelet
+        apiVersion: camel.apache.org/v1alpha1
+        name: error-handler
+      properties:
+        message: "ERROR!"   
     
