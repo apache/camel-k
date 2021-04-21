@@ -110,7 +110,12 @@ func parseErrorHandler(errorHandlerSpec v1.ErrorHandlerSpec) (string, error) {
 	case "no":
 		return `errorHandler(noErrorHandler());`, nil
 	case "default":
-		return `errorHandler(defaultErrorHandler());`, nil
+		errorHandlerConfiguration, err := parseErrorHandlerConfiguration(errorHandlerSpec.Configuration)
+		if err != nil {
+			return "", err
+		}
+
+		return fmt.Sprintf(`errorHandler(defaultErrorHandler()%v);`, errorHandlerConfiguration), nil
 	case "dead-letter-channel":
 		errorHandlerConfiguration, err := parseErrorHandlerConfiguration(errorHandlerSpec.Configuration)
 		if err != nil {
