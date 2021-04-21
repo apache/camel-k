@@ -38,12 +38,12 @@ echo "Using start SHA $start_sha from tag $last_tag"
 set +e
 end_sha=$(git rev-list -n 1 $new_tag 2>&1)
 if [ $? -ne 0 ]; then
-	end_sha=$(git rev-parse upstream/master)
+	end_sha=$(git rev-parse upstream/main)
     if [ "$end_sha" == "" ]; then
     	echo "cannot determine current SHA from git"
     	exit 1
     fi
-    echo "Using end SHA $end_sha from upstream/master"
+    echo "Using end SHA $end_sha from upstream/main"
 else
 	echo "Using end SHA $end_sha from tag $new_tag"
 fi
