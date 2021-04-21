@@ -10,7 +10,7 @@ the technical process changes.
 The https://github.com/apache/camel-k-runtime[Camel K Runtime project] is not a standalone project, it's meant to be used with Camel K. For this reason, it's common to release the runtime artifacts together with a release of Camel K.
 To avoid depending on snapshots, camel-k-runtime can be also released independently.
 
-Follow the https://github.com/apache/camel/blob/master/docs/user-manual/modules/ROOT/pages/release-guide.adoc[Camel release guide] in order to setup the Maven environment and gpg for the release.
+Follow the https://github.com/apache/camel/blob/main/docs/user-manual/modules/ROOT/pages/release-guide.adoc[Camel release guide] in order to setup the Maven environment and gpg for the release.
 
 To prepare a release and check problems:
 ```
@@ -49,7 +49,7 @@ Voting can start for camel-k-runtime, or a combined vote with camel-k can be sta
 
 Releasing the Camel K main artifacts require some manual steps.
 
-First thing is to checkout master branch and sync with upstream.
+First thing is to checkout main branch and sync with upstream.
 
 Next, the version of the runtime libraries to use need to be aligned in the Makefile (use the just released camel-k-runtime version if available).
 
@@ -80,13 +80,13 @@ Run build and basic tests:
 make
 ```
 
-Sync the master branch (with your changes) with upstream.
+Sync the main branch (with your changes) with upstream.
 
 ```
 git add *
 git commit -m "preparing for next release"
 # assuming write permissions
-git push upstream master
+git push upstream main
 ```
 
 Now the release on staging can be executed.
@@ -192,14 +192,14 @@ An helm chart must be generated with the new version.
 
 First update the chart version in the `Chart.yaml` file under the `/helm` section, setting a new chart release.
 
-From the master branch:
+From the main branch:
 
 ```
 ./script/set-version.sh <released-version>
 make generate-helm
 ```
 
-Commit to the master branch the tar.gz file and the updated index that have been generated in `/docs/charts` and the updated `Chart.yaml`.
+Commit to the main branch the tar.gz file and the updated index that have been generated in `/docs/charts` and the updated `Chart.yaml`.
 
 Wait for them to be available on https://hub.helm.sh/.
 
