@@ -45,7 +45,7 @@ func TestRunExamplesFromGitHub(t *testing.T) {
 		})
 
 		t.Run("run java from GitHub (RAW)", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "https://raw.githubusercontent.com/apache/camel-k/master/e2e/common/files/Java.java").Execute()).To(Succeed())
+			Expect(Kamel("run", "-n", ns, "https://raw.githubusercontent.com/apache/camel-k/main/e2e/common/files/Java.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))

@@ -11,7 +11,7 @@ image:https://img.shields.io/badge/zulip-join_chat-brightgreen.svg["Chat on Zuli
 
 image:https://github.com/apache/camel-k/workflows/kubernetes/badge.svg["Kubernetes", link="https://github.com/apache/camel-k/actions"]
 image:https://github.com/apache/camel-k/workflows/knative/badge.svg["Knative", link="https://github.com/apache/camel-k/actions"]
-image:https://img.shields.io/travis/apache/camel-k/master.svg?label=openshift["OpenShift", link="https://travis-ci.org/apache/camel-k"]
+image:https://img.shields.io/travis/apache/camel-k/main.svg?label=openshift["OpenShift", link="https://travis-ci.org/apache/camel-k"]
 
 Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless superpowers.
 
