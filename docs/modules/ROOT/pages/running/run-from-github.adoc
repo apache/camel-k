@@ -23,7 +23,7 @@ is equivalent to:
 
 [source]
 ----
-kamel run https://raw.githubusercontent.com/apache/camel-k/master/examples/languages/Sample.java
+kamel run https://raw.githubusercontent.com/apache/camel-k/main/examples/languages/Sample.java
 ----
 
 but does not require to type the full GitHub RAW URL.

@@ -45,5 +45,5 @@ type Action interface {
 
 [NOTE]
 ====
-Since the go language does not yet support generics, there is an `Action` definition per CR, The full list of definitions can be found in the https://github.com/apache/camel-k/tree/master/pkg/controller[controller package]
+Since the go language does not yet support generics, there is an `Action` definition per CR, The full list of definitions can be found in the https://github.com/apache/camel-k/tree/main/pkg/controller[controller package]
 ====

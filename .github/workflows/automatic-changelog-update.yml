@@ -29,7 +29,7 @@ jobs:
     name: Generate changelog for main branch
     if: github.ref == 'refs/heads/main' && github.repository == 'apache/camel-k'
     steps:
-      - name: "Checkout camel-kafka-connector"
+      - name: "Checkout camel-k"
         uses: actions/checkout@v2
         with:
           persist-credentials: false

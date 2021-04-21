@@ -30,7 +30,7 @@ type IntegrationSpec struct {
 
 [NOTE]
 ====
-the full go definition can be found https://github.com/apache/camel-k/blob/master/pkg/apis/camel/v1/integration_types.go[here]
+the full go definition can be found https://github.com/apache/camel-k/blob/main/pkg/apis/camel/v1/integration_types.go[here]
 ====
 
 image::architecture/camel-k-state-machine-integration.png[life cycle]
