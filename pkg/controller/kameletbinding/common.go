@@ -166,7 +166,8 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 
 func setIntegrationErrorHandler(it *v1.IntegrationSpec, errorHandlerURI string, errorHandlerSpec v1alpha1.ErrorHandler) error {
 	it.ErrorHandler = v1.ErrorHandlerSpec{
-		Type: string(errorHandlerSpec.Type),
+		Type:          string(errorHandlerSpec.Type),
+		Configuration: &v1.ErrorHandlerConfiguration{errorHandlerSpec.Configuration.RawMessage},
 	}
 
 	if errorHandlerURI != "" {
