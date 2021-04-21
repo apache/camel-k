@@ -35,7 +35,7 @@ if [ "$repo" = "" ]; then
 fi
 
 if [ "$branch" = "" ]; then
-  branch="master"
+  branch="main"
 fi
 
 echo "Cloning repository $repo on branch $branch to bundle kamelets..."
