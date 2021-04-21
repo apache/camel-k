@@ -50,7 +50,7 @@ As we move forward, we may want to build together a Catalog of curated Kamelets 
 There's a procedure to embed Kamelets in the operator, but it's not used.
 
 The current implementation currently looks up Kamelets in the current namespace first, then in the operator namespace (in case it's different), then
-it does a lookup on the `master` branch in https://github.com/apache/camel-kamelets to search for a specific Kamelet when used.
+it does a lookup on the `main` branch in https://github.com/apache/camel-kamelets to search for a specific Kamelet when used.
 This causes problems because it's not difficult to hit rate limiting on using the Github APIs. There's a cache to avoid too many requests, but it's not always sufficient.
 
 == Proposal
