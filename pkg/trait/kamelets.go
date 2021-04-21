@@ -47,10 +47,6 @@ type kameletsTrait struct {
 	Auto *bool `property:"auto"`
 	// Comma separated list of Kamelet names to load into the current integration
 	List string `property:"list"`
-
-	// TODO move into a struct
-	ErrorHandlerURI  string
-	ErrorHandlerType string
 }
 
 type configurationKey struct {
@@ -111,13 +107,10 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 			})
 			sort.Strings(kamelets)
 		}
-		if t.ErrorHandlerType == "" {
-			t.ErrorHandlerType = maybeErrorHandler(e.Integration.Configurations())
-			if t.ErrorHandlerType != "" && v1alpha1.ErrorHandlerType(t.ErrorHandlerType) == v1alpha1.ErrorHandlerTypeDeadLetterChannel {
-				t.ErrorHandlerURI = maybeKameletAsDefaultErrorHandler(e.Integration.Configurations())
-				if strings.HasPrefix(t.ErrorHandlerURI, "kamelet:") {
-					kamelets = append(kamelets, extractKamelet(t.ErrorHandlerURI))
-				}
+		// Check if a Kamelet is configured as default error handler
+		if e.Integration.Spec.ErrorHandler.URI != "" {
+			if strings.HasPrefix(e.Integration.Spec.ErrorHandler.URI, "kamelet:") {
+				kamelets = append(kamelets, extractKamelet(e.Integration.Spec.ErrorHandler.URI))
 			}
 		}
 
@@ -132,8 +125,12 @@ func (t *kameletsTrait) declaredKamelets() bool {
 }
 
 func (t *kameletsTrait) Apply(e *Environment) error {
+<<<<<<< HEAD
 
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseRunning) {
+=======
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+>>>>>>> refactor(trait): integration error handler spec
 		if err := t.addKamelets(e); err != nil {
 			return err
 		}
