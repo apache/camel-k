@@ -20,7 +20,7 @@ name: builder
 on:
   pull_request:
     branches:
-      - master
+      - main
       - "release-*"
     paths-ignore:
       - 'proposals/**'
@@ -30,7 +30,7 @@ on:
       - 'NOTICE'
   push:
     branches:
-      - master
+      - main
       - "release-*"
     paths-ignore:
       - 'proposals/**'

@@ -26,8 +26,8 @@ on:
 jobs:
   generate_changelog:
     runs-on: ubuntu-20.04
-    name: Generate changelog for master branch
-    if: github.ref == 'refs/heads/master' && github.repository == 'apache/camel-k'
+    name: Generate changelog for main branch
+    if: github.ref == 'refs/heads/main' && github.repository == 'apache/camel-k'
     steps:
       - name: "Checkout camel-kafka-connector"
         uses: actions/checkout@v2
@@ -56,4 +56,4 @@ jobs:
           CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
           CI_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" HEAD:master
+          git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" HEAD:main
