@@ -86,9 +86,9 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 			return nil, errors.Wrap(err, "could not determine error handler URI")
 		}
 
-		err = setErrorHandlerKamelet(errorHandler, kameletbinding.Spec.ErrorHandler)
+		err = setIntegrationErrorHandler(&it.Spec, errorHandler, kameletbinding.Spec.ErrorHandler)
 		if err != nil {
-			return nil, errors.Wrap(err, "could not set error handler")
+			return nil, errors.Wrap(err, "could not set integration error handler")
 		}
 	}
 
@@ -159,13 +159,11 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 	return &it, nil
 }
 
-func setErrorHandlerKamelet(errorHandler *bindings.Binding, errorHandlerSpec v1alpha1.ErrorHandler) error {
-	if errorHandler.ApplicationProperties == nil {
-		errorHandler.ApplicationProperties = make(map[string]string)
+func setIntegrationErrorHandler(it *v1.IntegrationSpec, errorHandler *bindings.Binding, errorHandlerSpec v1alpha1.ErrorHandler) error {
+	it.ErrorHandler = v1.ErrorHandlerSpec{
+		URI:  errorHandler.URI,
+		Type: string(errorHandlerSpec.Type),
 	}
-
-	errorHandler.ApplicationProperties["camel.k.default-error-handler.uri"] = errorHandler.URI
-	errorHandler.ApplicationProperties["camel.k.default-error-handler.type"] = string(errorHandlerSpec.Type)
 
 	return nil
 }

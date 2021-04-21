@@ -19,10 +19,8 @@ package trait
 
 import (
 	"fmt"
-	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
 // The error handler is a platform trait used to inject Error Handler source into the integration runtime.
@@ -30,12 +28,7 @@ import (
 // +camel-k:trait=error-handler
 type errorHandlerTrait struct {
 	BaseTrait `property:",squash"`
-	// Automatically inject all referenced Kamelets and their default configuration (enabled by default)
-	Auto *bool `property:"auto"`
-
-	// TODO move into a struct
-	ErrorHandlerURI  string
-	ErrorHandlerType string
+	Auto      *bool `property:"auto"`
 }
 
 func newErrorHandlerTrait() Trait {
@@ -58,50 +51,14 @@ func (t *errorHandlerTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if t.Auto == nil || *t.Auto {
-		if t.ErrorHandlerType == "" {
-			t.ErrorHandlerType = maybeErrorHandler(e.Integration.Configurations())
-			if t.ErrorHandlerType != "" && v1alpha1.ErrorHandlerType(t.ErrorHandlerType) == v1alpha1.ErrorHandlerTypeDeadLetterChannel {
-				t.ErrorHandlerURI = maybeKameletAsDefaultErrorHandler(e.Integration.Configurations())
-			}
-		}
-	}
-
-	return t.ErrorHandlerType != "", nil
-}
-
-func maybeErrorHandler(properties []v1.ConfigurationSpec) string {
-	for _, property := range properties {
-		if strings.HasPrefix(property.Value, "camel.k.default-error-handler.type=") {
-			split := strings.Split(property.Value, "=")
-			if len(split) > 0 {
-				return split[1]
-			}
-		}
-	}
-
-	return ""
-}
-
-func maybeKameletAsDefaultErrorHandler(properties []v1.ConfigurationSpec) string {
-	for _, property := range properties {
-		if strings.HasPrefix(property.Value, "camel.k.default-error-handler.uri=") {
-			split := strings.Split(property.Value, "=")
-			if len(split) > 0 {
-				return split[1]
-			}
-		}
-	}
-
-	return ""
+	return e.Integration.Spec.ErrorHandler.Type != "", nil
 }
 
 func (t *errorHandlerTrait) Apply(e *Environment) error {
-
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		if t.ErrorHandlerType != "" {
+		if e.Integration.Spec.ErrorHandler.Type != "" {
 			// Possible error handler
-			err := addErrorHandlerAsSource(e, t.ErrorHandlerURI, t.ErrorHandlerType)
+			err := addErrorHandlerAsSource(e)
 			if err != nil {
 				return err
 			}
@@ -110,8 +67,8 @@ func (t *errorHandlerTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func addErrorHandlerAsSource(e *Environment, errorHandlerURI string, errorHandlerType string) error {
-	errorHandlerStatement, err := parseErrorHandler(errorHandlerURI, errorHandlerType)
+func addErrorHandlerAsSource(e *Environment) error {
+	errorHandlerStatement, err := parseErrorHandler(e.Integration.Spec.ErrorHandler.URI, e.Integration.Spec.ErrorHandler.Type)
 	if err != nil {
 		return err
 	}
@@ -148,14 +105,14 @@ func addErrorHandlerAsSource(e *Environment, errorHandlerURI string, errorHandle
 	return nil
 }
 
-func parseErrorHandler(errHandlUri string, errHandlType string) (string, error) {
+func parseErrorHandler(errHandlURI string, errHandlType string) (string, error) {
 	switch errHandlType {
 	case "no":
 		return `errorHandler(noErrorHandler());`, nil
 	case "default":
 		return `errorHandler(defaultErrorHandler());`, nil
 	case "dead-letter-channel":
-		return fmt.Sprintf(`errorHandler(deadLetterChannel("%v"));`, errHandlUri), nil
+		return fmt.Sprintf(`errorHandler(deadLetterChannel("%v"));`, errHandlURI), nil
 	}
 
 	return "", fmt.Errorf("Cannot recognize any error handler of type %s", errHandlType)
