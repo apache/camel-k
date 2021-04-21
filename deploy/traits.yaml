@@ -271,6 +271,15 @@ traits:
     type: bool
     description: Enables injection of `NAMESPACE` and `POD_NAME` environment variables
       (default `true`)
+- name: error-handler
+  platform: true
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The error-handler is a platform trait used to inject Error Handler
+    source into the integration runtime.
+  properties: []
 - name: gc
   platform: false
   profiles:
