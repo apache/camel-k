@@ -20,21 +20,22 @@ kind: Kamelet
 metadata:
   name: error-handler
 spec:
-  sources:
-  - content: |
-      import org.apache.camel.builder.RouteBuilder;
-      public class ErrorHandlerSource extends RouteBuilder {
-        @Override
-        public void configure() throws Exception {
-            errorHandler(deadLetterChannel("log:error?showCaughtException=true&showException=true&showHeaders=true"));
-        }
-      }
-    name: ErrorHandlerSource.java
   definition:
-    title: "Error Handler Log DLC"
-    description: "Dead letter channel"
-# We can use the below once this is fixed https://issues.apache.org/jira/browse/CAMEL-16486
-#  flow:
-#    error-handler:
-#      dead-letter-channel:
-#        dead-letter-uri: log:error-sink?showCaughtException=true&showException=true&showHeaders=true
+    title: "Error Log Sink"
+    description: "Consume events from a channel"
+    required:
+      - message
+    properties:
+      message:
+        title: Message
+        description: The message to log
+        type: string
+        example: "error while checking the source"    
+  flow:
+    from:
+      uri: kamelet:source
+      steps:
+#      - to: my-dlc
+      - set-body:
+          constant: "{{message}}"
+      - to: "log:error-sink"  
