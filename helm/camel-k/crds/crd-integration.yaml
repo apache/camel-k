@@ -88,6 +88,19 @@ spec:
                 items:
                   type: string
                 type: array
+              errorHandler:
+                description: ErrorHandlerSpec respresents an integration error handler
+                  to be used as default at runtime
+                properties:
+                  configuration:
+                    description: ErrorHandlerConfiguration --
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  type:
+                    type: string
+                  uri:
+                    type: string
+                type: object
               flows:
                 items:
                   description: Flow is an unstructured object representing a Camel
