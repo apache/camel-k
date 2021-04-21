@@ -38,5 +38,8 @@ spec:
         apiVersion: camel.apache.org/v1alpha1
         name: error-handler
       properties:
-        message: "ERROR!"   
+        message: "ERROR!"
+    configuration:
+      maximumRedeliveries: 3
+      redeliveryDelay: 2000
     

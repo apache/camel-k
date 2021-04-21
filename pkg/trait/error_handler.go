@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"encoding/json"
 	"fmt"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -67,7 +68,7 @@ func (t *errorHandlerTrait) Apply(e *Environment) error {
 }
 
 func addErrorHandlerAsSource(e *Environment) error {
-	errorHandlerStatement, err := parseErrorHandler(e.Integration.Spec.ErrorHandler.URI, e.Integration.Spec.ErrorHandler.Type)
+	errorHandlerStatement, err := parseErrorHandler(e.Integration.Spec.ErrorHandler)
 	if err != nil {
 		return err
 	}
@@ -104,15 +105,34 @@ func addErrorHandlerAsSource(e *Environment) error {
 	return nil
 }
 
-func parseErrorHandler(errHandlURI string, errHandlType string) (string, error) {
-	switch errHandlType {
+func parseErrorHandler(errorHandlerSpec v1.ErrorHandlerSpec) (string, error) {
+	switch errorHandlerSpec.Type {
 	case "no":
 		return `errorHandler(noErrorHandler());`, nil
 	case "default":
 		return `errorHandler(defaultErrorHandler());`, nil
 	case "dead-letter-channel":
-		return fmt.Sprintf(`errorHandler(deadLetterChannel("%v"));`, errHandlURI), nil
+		errorHandlerConfiguration, err := parseErrorHandlerConfiguration(errorHandlerSpec.Configuration)
+		if err != nil {
+			return "", err
+		}
+
+		return fmt.Sprintf(`errorHandler(deadLetterChannel("%v")%v);`, errorHandlerSpec.URI, errorHandlerConfiguration), nil
 	}
 
-	return "", fmt.Errorf("Cannot recognize any error handler of type %s", errHandlType)
+	return "", fmt.Errorf("Cannot recognize any error handler of type %s", errorHandlerSpec.Type)
+}
+
+func parseErrorHandlerConfiguration(conf *v1.ErrorHandlerConfiguration) (string, error) {
+	javaPropertiesBuilder := ""
+	var properties map[string]interface{}
+	err := json.Unmarshal(conf.RawMessage, &properties)
+	if err != nil {
+		return "", err
+	}
+	for method, value := range properties {
+		javaPropertiesBuilder = javaPropertiesBuilder + fmt.Sprintf(".%s(%v)\n", method, value)
+	}
+
+	return javaPropertiesBuilder, nil
 }
