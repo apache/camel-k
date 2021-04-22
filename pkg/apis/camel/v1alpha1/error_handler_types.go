@@ -21,9 +21,14 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// ErrorHandler represent an unstructured object for an error handler
+// ErrorHandler represents an unstructured object for an error handler
 type ErrorHandler struct {
 	v1.RawMessage `json:",omitempty"`
+}
+
+// ErrorHandlerProperties represent an unstructured object for error handler parameters
+type ErrorHandlerProperties struct {
+	v1.RawMessage `json:",inline"`
 }
 
 // AbstractErrorHandler is a generic interface that represent any type of error handler specification

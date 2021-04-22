@@ -59,10 +59,6 @@ const (
 	EndpointTypeErrorHandler EndpointType = "errorHandler"
 )
 
-type ErrorHandlerProperties struct {
-	v1.RawMessage `json:",inline"`
-}
-
 // EndpointProperties is a key/value struct represented as JSON raw to allow numeric/boolean values
 type EndpointProperties struct {
 	v1.RawMessage `json:",inline"`
