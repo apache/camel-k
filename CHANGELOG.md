@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.4.0...HEAD)
+
+**Closed issues:**
+
+- Update run-from-github page to correct github example path [\#2230](https://github.com/apache/camel-k/issues/2230)
+
+**Merged pull requests:**
+
+- issue2230- fix for run-from-github page [\#2231](https://github.com/apache/camel-k/pull/2231) ([bfitzpat](https://github.com/bfitzpat))
+
 ## [v1.4.0](https://github.com/apache/camel-k/tree/v1.4.0) (2021-04-16)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.4.0...v1.4.0)
