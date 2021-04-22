@@ -39,6 +39,7 @@ jobs:
         uses: ./.github/actions/changelog
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          release_branch: "main"
 
       - name: Commit files
         env:
