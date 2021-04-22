@@ -107,17 +107,17 @@ func addErrorHandlerAsSource(e *Environment) error {
 
 func parseErrorHandler(errorHandlerSpec v1.ErrorHandlerSpec) (string, error) {
 	switch errorHandlerSpec.Type {
-	case "no":
+	case "none":
 		return `errorHandler(noErrorHandler());`, nil
-	case "default":
-		errorHandlerConfiguration, err := parseErrorHandlerConfiguration(errorHandlerSpec.Configuration)
+	case "log":
+		errorHandlerConfiguration, err := parseErrorHandlerConfiguration(errorHandlerSpec.Parameters)
 		if err != nil {
 			return "", err
 		}
 
 		return fmt.Sprintf(`errorHandler(defaultErrorHandler()%v);`, errorHandlerConfiguration), nil
 	case "dead-letter-channel":
-		errorHandlerConfiguration, err := parseErrorHandlerConfiguration(errorHandlerSpec.Configuration)
+		errorHandlerConfiguration, err := parseErrorHandlerConfiguration(errorHandlerSpec.Parameters)
 		if err != nil {
 			return "", err
 		}
@@ -128,7 +128,7 @@ func parseErrorHandler(errorHandlerSpec v1.ErrorHandlerSpec) (string, error) {
 	return "", fmt.Errorf("Cannot recognize any error handler of type %s", errorHandlerSpec.Type)
 }
 
-func parseErrorHandlerConfiguration(conf *v1.ErrorHandlerConfiguration) (string, error) {
+func parseErrorHandlerConfiguration(conf *v1.ErrorHandlerParameters) (string, error) {
 	javaPropertiesBuilder := ""
 	var properties map[string]interface{}
 	err := json.Unmarshal(conf.RawMessage, &properties)
