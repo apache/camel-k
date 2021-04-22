@@ -41,18 +41,21 @@ log-sink                Ready
 incremental-id-source   Ready
 ```
 ## Error Handler Kamelet Binding
-We can create a `KameletBinding` which is started by the _incremental-id-source_ `Kamelet` and log events to _log-sink_ `Kamelet`. As this will sporadically fail, we can configure an _errorHandler_ with the _error-handler_ `Kamelet` as **Dead Letter Channel**. We can declare it as in `kamelet-binding-error-handler.yaml` file:
+We can create a `KameletBinding` which is started by the _incremental-id-source_ `Kamelet` and log events to _log-sink_ `Kamelet`. As this will sporadically fail, we can configure an _errorHandler_ with the _error-handler_ `Kamelet` as **Dead Letter Channel**. We want to configure also some redelivery policies. We can declare it as in `kamelet-binding-error-handler.yaml` file:
 ```
 ...
   errorHandler:
-    type: dead-letter-channel
-    endpoint:
-      ref:
-        kind: Kamelet
-        apiVersion: camel.apache.org/v1alpha1
-        name: error-handler
-      properties:
-        message: "ERROR!"
+    dead-letter-channel:
+      endpoint:
+        ref:
+          kind: Kamelet
+          apiVersion: camel.apache.org/v1alpha1
+          name: error-handler
+        properties:
+          message: "ERROR!"
+      parameters:
+        maximumRedeliveries: 3
+        redeliveryDelay: 2000
 ```
 Execute the following command to start the `Integration`:
 ```
@@ -63,6 +66,6 @@ As soon as the `Integration` starts, it will log the events on the `ok` log chan
 [1] 2021-04-21 13:03:43,773 INFO  [sink] (Camel (camel-1) thread #0 - timer://tick) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Producing message #8]
 [1] 2021-04-21 13:03:44,774 INFO  [sink] (Camel (camel-1) thread #0 - timer://tick) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Producing message #9]
 [1] 2021-04-21 13:03:45,898 INFO  [error-sink] (Camel (camel-1) thread #0 - timer://tick) Exchange[ExchangePattern: InOnly, BodyType: String, Body: ERROR!]
-[1] 2021-04-21 13:03:46,775 INFO  [sink] (Camel (camel-1) thread #0 - timer://tick) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Producing message #11]
+[1] 2021-04-21 13:09:46,775 INFO  [sink] (Camel (camel-1) thread #0 - timer://tick) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Producing message #11]
 ```
 This example is useful to guide you through the configuration of an error handler. In a production environment you will likely configure the error handler `Kamelet` pointing to a persistent queue.

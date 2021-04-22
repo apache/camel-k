@@ -79,22 +79,10 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 	if err != nil {
 		return nil, errors.Wrap(err, "could not determine sink URI")
 	}
-	var errorHandler *bindings.Binding
-	if kameletbinding.Spec.ErrorHandler.Type != "" {
-		errorHandlerURI := ""
-		if kameletbinding.Spec.ErrorHandler.Endpoint.Ref != nil || kameletbinding.Spec.ErrorHandler.Endpoint.URI != nil {
-			errorHandler, err = bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1alpha1.EndpointTypeErrorHandler}, kameletbinding.Spec.ErrorHandler.Endpoint)
-			if err != nil {
-				return nil, errors.Wrap(err, "could not determine error handler URI")
-			}
-
-			errorHandlerURI = errorHandler.URI
-		}
-
-		err = setIntegrationErrorHandler(&it.Spec, errorHandlerURI, kameletbinding.Spec.ErrorHandler)
-		if err != nil {
-			return nil, errors.Wrap(err, "could not set integration error handler")
-		}
+	// error handler is optional
+	errorHandler, err := maybeErrorHandler(kameletbinding.Spec.ErrorHandler, bindingContext, &it.Spec)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not determine error handler")
 	}
 
 	steps := make([]*bindings.Binding, 0, len(kameletbinding.Spec.Steps))
@@ -162,19 +150,6 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 	it.Spec.Flows = append(it.Spec.Flows, v1.Flow{RawMessage: encodedFrom})
 
 	return &it, nil
-}
-
-func setIntegrationErrorHandler(it *v1.IntegrationSpec, errorHandlerURI string, errorHandlerSpec v1alpha1.ErrorHandler) error {
-	it.ErrorHandler = v1.ErrorHandlerSpec{
-		Type:          string(errorHandlerSpec.Type),
-		Configuration: &v1.ErrorHandlerConfiguration{errorHandlerSpec.Configuration.RawMessage},
-	}
-
-	if errorHandlerURI != "" {
-		it.ErrorHandler.URI = errorHandlerURI
-	}
-
-	return nil
 }
 
 func determineProfile(ctx context.Context, c client.Client, binding *v1alpha1.KameletBinding) (v1.TraitProfile, error) {
