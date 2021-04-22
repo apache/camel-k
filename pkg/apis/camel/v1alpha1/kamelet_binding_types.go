@@ -38,20 +38,6 @@ type KameletBindingSpec struct {
 	Steps []Endpoint `json:"steps,omitempty"`
 }
 
-type ErrorHandler struct {
-	Endpoint      Endpoint                `json:"endpoint,omitempty"`
-	Type          ErrorHandlerType        `json:"type,omitempty"`
-	Configuration *ErrorHandlerProperties `json:"configuration,omitempty"`
-}
-
-type ErrorHandlerType string
-
-const (
-	ErrorHandlerTypeNone              ErrorHandlerType = "no"
-	ErrorHandlerTypeDefault           ErrorHandlerType = "default"
-	ErrorHandlerTypeDeadLetterChannel ErrorHandlerType = "dead-letter-channel"
-)
-
 // Endpoint represents a source/sink external entity
 type Endpoint struct {
 	// Ref can be used to declare a Kubernetes resource as source/sink endpoint
