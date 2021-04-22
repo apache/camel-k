@@ -92,8 +92,10 @@ spec:
                 description: ErrorHandlerSpec respresents an integration error handler
                   to be used as default at runtime
                 properties:
-                  configuration:
-                    description: ErrorHandlerConfiguration --
+                  parameters:
+                    description: ErrorHandlerParameters is an unstructured object
+                      representing the configuration parameters available for an error
+                      handler
                     type: object
                     x-kubernetes-preserve-unknown-fields: true
                   type:
