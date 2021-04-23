@@ -21,31 +21,61 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// ErrorHandler represents an unstructured object for an error handler
-type ErrorHandler struct {
+// ErrorHandlerSpec represents an unstructured object for an error handler
+type ErrorHandlerSpec struct {
 	v1.RawMessage `json:",omitempty"`
 }
 
-// ErrorHandlerProperties represent an unstructured object for error handler parameters
-type ErrorHandlerProperties struct {
+// ErrorHandlerParameters represent an unstructured object for error handler parameters
+type ErrorHandlerParameters struct {
 	v1.RawMessage `json:",inline"`
 }
 
-// AbstractErrorHandler is a generic interface that represent any type of error handler specification
-type AbstractErrorHandler interface {
+// BeanProperties represent an unstructured object properties to be set on a bean
+type BeanProperties struct {
+	v1.RawMessage `json:",inline"`
+}
+
+// ErrorHandler is a generic interface that represent any type of error handler specification
+type ErrorHandler interface {
 	Type() ErrorHandlerType
-	Params() *ErrorHandlerProperties
+	Params() *ErrorHandlerParameters
 	Endpoint() *Endpoint
 	Ref() *string
+	Bean() *string
+}
+
+type abstractErrorHandler struct {
+}
+
+// Type --
+func (e abstractErrorHandler) Type() ErrorHandlerType {
+	return errorHandlerTypeAbstract
+}
+
+// Params --
+func (e abstractErrorHandler) Params() *ErrorHandlerParameters {
+	return nil
+}
+
+// Endpoint --
+func (e abstractErrorHandler) Endpoint() *Endpoint {
+	return nil
+}
+
+// Ref --
+func (e abstractErrorHandler) Ref() *string {
+	return nil
+}
+
+// Ref --
+func (e abstractErrorHandler) Bean() *string {
+	return nil
 }
 
 // ErrorHandlerNone --
 type ErrorHandlerNone struct {
-}
-
-// NewErrorHandlerNone represents a no (ignore) error handler type
-func NewErrorHandlerNone() ErrorHandlerNone {
-	return ErrorHandlerNone{}
+	*abstractErrorHandler
 }
 
 // Type --
@@ -53,24 +83,10 @@ func (e ErrorHandlerNone) Type() ErrorHandlerType {
 	return ErrorHandlerTypeNone
 }
 
-// Params --
-func (e ErrorHandlerNone) Params() *ErrorHandlerProperties {
-	return nil
-}
-
-// Endpoint --
-func (e ErrorHandlerNone) Endpoint() *Endpoint {
-	return nil
-}
-
-// Ref --
-func (e ErrorHandlerNone) Ref() *string {
-	return nil
-}
-
 // ErrorHandlerLog represent a default (log) error handler type
 type ErrorHandlerLog struct {
-	Parameters *ErrorHandlerProperties `json:"parameters,omitempty"`
+	*abstractErrorHandler
+	Parameters *ErrorHandlerParameters `json:"parameters,omitempty"`
 }
 
 // Type --
@@ -79,18 +95,8 @@ func (e ErrorHandlerLog) Type() ErrorHandlerType {
 }
 
 // Params --
-func (e ErrorHandlerLog) Params() *ErrorHandlerProperties {
+func (e ErrorHandlerLog) Params() *ErrorHandlerParameters {
 	return e.Parameters
-}
-
-// Endpoint --
-func (e ErrorHandlerLog) Endpoint() *Endpoint {
-	return nil
-}
-
-// Ref --
-func (e ErrorHandlerLog) Ref() *string {
-	return nil
 }
 
 // ErrorHandlerDeadLetterChannel represents a dead letter channel error handler type
@@ -104,49 +110,50 @@ func (e ErrorHandlerDeadLetterChannel) Type() ErrorHandlerType {
 	return ErrorHandlerTypeDeadLetterChannel
 }
 
-// Params --
-func (e ErrorHandlerDeadLetterChannel) Params() *ErrorHandlerProperties {
-	return e.Parameters
-}
-
 // Endpoint --
 func (e ErrorHandlerDeadLetterChannel) Endpoint() *Endpoint {
 	return e.DLCEndpoint
 }
 
-// Ref --
-func (e ErrorHandlerDeadLetterChannel) Ref() *string {
-	return nil
-}
-
 // ErrorHandlerRef represents a reference to an error handler builder available in the registry
-type ErrorHandlerRef string
+type ErrorHandlerRef struct {
+	*abstractErrorHandler
+	string
+}
 
 // Type --
 func (e ErrorHandlerRef) Type() ErrorHandlerType {
 	return ErrorHandlerTypeRef
 }
 
-// Params --
-func (e ErrorHandlerRef) Params() *ErrorHandlerProperties {
-	return nil
-}
-
-// Endpoint --
-func (e ErrorHandlerRef) Endpoint() *Endpoint {
-	return nil
-}
-
 // Ref --
 func (e ErrorHandlerRef) Ref() *string {
-	s := string(e)
+	s := string(e.string)
 	return &s
+}
+
+// ErrorHandlerBean represents a bean error handler type
+type ErrorHandlerBean struct {
+	*ErrorHandlerLog
+	BeanType   *string         `json:"type,omitempty"`
+	Properties *BeanProperties `json:"properties,omitempty"`
+}
+
+// Type --
+func (e ErrorHandlerBean) Type() ErrorHandlerType {
+	return ErrorHandlerTypeBean
+}
+
+// Bean --
+func (e ErrorHandlerBean) Bean() *string {
+	return e.BeanType
 }
 
 // ErrorHandlerType --
 type ErrorHandlerType string
 
 const (
+	errorHandlerTypeAbstract ErrorHandlerType = ""
 	// ErrorHandlerTypeNone --
 	ErrorHandlerTypeNone ErrorHandlerType = "none"
 	// ErrorHandlerTypeLog --
@@ -155,4 +162,6 @@ const (
 	ErrorHandlerTypeDeadLetterChannel ErrorHandlerType = "dead-letter-channel"
 	// ErrorHandlerTypeRef --
 	ErrorHandlerTypeRef ErrorHandlerType = "ref"
+	// ErrorHandlerTypeBean --
+	ErrorHandlerTypeBean ErrorHandlerType = "bean"
 )

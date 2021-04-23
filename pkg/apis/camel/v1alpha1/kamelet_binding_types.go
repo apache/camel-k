@@ -33,7 +33,7 @@ type KameletBindingSpec struct {
 	// Sink is the destination of the integration defined by this binding
 	Sink Endpoint `json:"sink,omitempty"`
 	// ErrorHandler is an optional handler called upon an error occuring in the integration
-	ErrorHandler ErrorHandler `json:"errorHandler,omitempty"`
+	ErrorHandler ErrorHandlerSpec `json:"errorHandler,omitempty"`
 	// Steps contains an optional list of intermediate steps that are executed between the Source and the Sink
 	Steps []Endpoint `json:"steps,omitempty"`
 }
