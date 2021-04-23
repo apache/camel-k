@@ -75,3 +75,19 @@ func TestParseErrorHandlerDLCWithParametersDoesSucceed(t *testing.T) {
 	assert.Equal(t, "someUri", *dlcErrorHandler.Endpoint().URI)
 	assert.NotNil(t, dlcErrorHandler.Params())
 }
+
+func TestParseErrorHandlerBeanWithParametersDoesSucceed(t *testing.T) {
+	beanErrorHandler, err := parseErrorHandler(
+		[]byte(`{
+			"bean": {
+				"type": "com.acme.MyType", 
+				"parameters": 
+					[{"param1": "value1"}]
+			}
+		}`),
+	)
+	assert.Nil(t, err)
+	assert.Equal(t, v1alpha1.ErrorHandlerTypeBean, beanErrorHandler.Type())
+	assert.Equal(t, "com.acme.MyType", *beanErrorHandler.Bean())
+	assert.NotNil(t, beanErrorHandler.Params())
+}
