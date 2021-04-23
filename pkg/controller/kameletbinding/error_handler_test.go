@@ -30,6 +30,9 @@ func TestParseErrorHandlerNoneDoesSucceed(t *testing.T) {
 	)
 	assert.Nil(t, err)
 	assert.Equal(t, v1alpha1.ErrorHandlerTypeNone, noErrorHandler.Type())
+	parameters, err := noErrorHandler.Configuration()
+	assert.Nil(t, err)
+	assert.Equal(t, "#class:org.apache.camel.builder.NoErrorHandlerBuilder", parameters["camel.beans.defaultErrorHandler"])
 }
 
 func TestParseErrorHandlerLogDoesSucceed(t *testing.T) {
@@ -38,15 +41,23 @@ func TestParseErrorHandlerLogDoesSucceed(t *testing.T) {
 	)
 	assert.Nil(t, err)
 	assert.Equal(t, v1alpha1.ErrorHandlerTypeLog, logErrorHandler.Type())
+	parameters, err := logErrorHandler.Configuration()
+	assert.Nil(t, err)
+	assert.Equal(t, "#class:org.apache.camel.builder.DefaultErrorHandlerBuilder", parameters["camel.beans.defaultErrorHandler"])
 }
 
 func TestParseErrorHandlerLogWithParametersDoesSucceed(t *testing.T) {
 	logErrorHandler, err := parseErrorHandler(
-		[]byte(`{"log": {"parameters": [{"param1": "value1"}, {"param2": "value2"}]}}`),
+		[]byte(`{"log": {"parameters": {"param1": "value1", "param2": "value2"}}}`),
 	)
 	assert.Nil(t, err)
 	assert.Equal(t, v1alpha1.ErrorHandlerTypeLog, logErrorHandler.Type())
 	assert.NotNil(t, logErrorHandler.Params())
+	parameters, err := logErrorHandler.Configuration()
+	assert.Nil(t, err)
+	assert.Equal(t, "#class:org.apache.camel.builder.DefaultErrorHandlerBuilder", parameters["camel.beans.defaultErrorHandler"])
+	assert.Equal(t, "value1", parameters["camel.beans.defaultErrorHandler.param1"])
+	assert.Equal(t, "value2", parameters["camel.beans.defaultErrorHandler.param2"])
 }
 
 func TestParseErrorHandlerDLCDoesSucceed(t *testing.T) {
