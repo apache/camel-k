@@ -162,18 +162,6 @@ type Flow struct {
 	RawMessage `json:",inline"`
 }
 
-// ErrorHandlerSpec respresents an integration error handler to be used as default at runtime
-type ErrorHandlerSpec struct {
-	Type       string                  `json:"type,omitempty"`
-	URI        string                  `json:"uri,omitempty"`
-	Parameters *ErrorHandlerParameters `json:"parameters,omitempty"`
-}
-
-// ErrorHandlerParameters is an unstructured object representing the configuration parameters available for an error handler
-type ErrorHandlerParameters struct {
-	RawMessage `json:",inline"`
-}
-
 // RuntimeProvider --
 type RuntimeProvider string
 

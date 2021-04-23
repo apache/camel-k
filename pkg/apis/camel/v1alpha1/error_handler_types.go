@@ -18,8 +18,12 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"encoding/json"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
+
+const errorHandlerAppPropertiesPrefix = "camel.beans.defaultErrorHandler"
 
 // ErrorHandlerSpec represents an unstructured object for an error handler
 type ErrorHandlerSpec struct {
@@ -43,6 +47,7 @@ type ErrorHandler interface {
 	Endpoint() *Endpoint
 	Ref() *string
 	Bean() *string
+	Configuration() (map[string]interface{}, error)
 }
 
 type abstractErrorHandler struct {
@@ -68,9 +73,14 @@ func (e abstractErrorHandler) Ref() *string {
 	return nil
 }
 
-// Ref --
+// Bean --
 func (e abstractErrorHandler) Bean() *string {
 	return nil
+}
+
+// Configuration --
+func (e abstractErrorHandler) Configuration() (map[string]interface{}, error) {
+	return nil, nil
 }
 
 // ErrorHandlerNone --
@@ -81,6 +91,13 @@ type ErrorHandlerNone struct {
 // Type --
 func (e ErrorHandlerNone) Type() ErrorHandlerType {
 	return ErrorHandlerTypeNone
+}
+
+// Configuration --
+func (e ErrorHandlerNone) Configuration() (map[string]interface{}, error) {
+	return map[string]interface{}{
+		errorHandlerAppPropertiesPrefix: "#class:org.apache.camel.builder.NoErrorHandlerBuilder",
+	}, nil
 }
 
 // ErrorHandlerLog represent a default (log) error handler type
@@ -97,6 +114,26 @@ func (e ErrorHandlerLog) Type() ErrorHandlerType {
 // Params --
 func (e ErrorHandlerLog) Params() *ErrorHandlerParameters {
 	return e.Parameters
+}
+
+// Configuration --
+func (e ErrorHandlerLog) Configuration() (map[string]interface{}, error) {
+	properties := map[string]interface{}{
+		errorHandlerAppPropertiesPrefix: "#class:org.apache.camel.builder.DefaultErrorHandlerBuilder",
+	}
+
+	if e.Params() != nil {
+		var parameters map[string]interface{}
+		err := json.Unmarshal(e.Params().RawMessage, &parameters)
+		if err != nil {
+			return nil, err
+		}
+		for key, value := range parameters {
+			properties[errorHandlerAppPropertiesPrefix+"."+key] = value
+		}
+	}
+
+	return properties, nil
 }
 
 // ErrorHandlerDeadLetterChannel represents a dead letter channel error handler type

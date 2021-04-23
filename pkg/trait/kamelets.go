@@ -106,10 +106,11 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 				return true
 			})
 		}
-		// Check if a Kamelet is configured as default error handler
-		if e.Integration.Spec.ErrorHandler.URI != "" {
-			if strings.HasPrefix(e.Integration.Spec.ErrorHandler.URI, "kamelet:") {
-				kamelets = append(kamelets, extractKamelet(e.Integration.Spec.ErrorHandler.URI))
+		// Check if a Kamelet is configured as default error handler URI
+		defaultErrorHandlerURI := e.Integration.Spec.GetDefaultErrorHandlerURI()
+		if defaultErrorHandlerURI != "" {
+			if strings.HasPrefix(defaultErrorHandlerURI, "kamelet:") {
+				kamelets = append(kamelets, extractKamelet(defaultErrorHandlerURI))
 			}
 		}
 
