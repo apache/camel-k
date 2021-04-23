@@ -180,6 +180,10 @@ test-upgrade: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 60m -v ./e2e/upgrade -tags=integration
 
+test-service-binding: build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/service-binding -tags=integration
+	#go test -timeout 60m -v ./e2e/service-binding -tags=integration
+
 build-kamel:
 # Ensure the binary is statically linked when building on Linux due to ABI changes in newer glibc 2.32, otherwise
 # it would not run on older versions. See https://github.com/apache/camel-k/pull/2141#issuecomment-800990117
