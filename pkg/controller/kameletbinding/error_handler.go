@@ -26,7 +26,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func maybeErrorHandler(errHandlConf v1alpha1.ErrorHandler, bindingContext bindings.BindingContext, itSpec *v1.IntegrationSpec) (*bindings.Binding, error) {
+func maybeErrorHandler(errHandlConf v1alpha1.ErrorHandlerSpec, bindingContext bindings.BindingContext, itSpec *v1.IntegrationSpec) (*bindings.Binding, error) {
 	var errorHandler *bindings.Binding
 	if errHandlConf.RawMessage != nil {
 		errorHandlerSpec, err := parseErrorHandler(errHandlConf.RawMessage)
@@ -41,10 +41,10 @@ func maybeErrorHandler(errHandlConf v1alpha1.ErrorHandler, bindingContext bindin
 			}
 
 			errorHandlerURI = errorHandler.URI
-		}
-
-		if errorHandlerSpec.Type() == v1alpha1.ErrorHandlerTypeRef {
+		} else if errorHandlerSpec.Type() == v1alpha1.ErrorHandlerTypeRef {
 			errorHandlerURI = *errorHandlerSpec.Ref()
+		} else if errorHandlerSpec.Type() == v1alpha1.ErrorHandlerTypeBean {
+			errorHandlerURI = *errorHandlerSpec.Bean()
 		}
 
 		err = setIntegrationErrorHandler(itSpec, errorHandlerURI, errorHandlerSpec)
@@ -57,7 +57,7 @@ func maybeErrorHandler(errHandlConf v1alpha1.ErrorHandler, bindingContext bindin
 	return nil, nil
 }
 
-func parseErrorHandler(rawMessage v1.RawMessage) (v1alpha1.AbstractErrorHandler, error) {
+func parseErrorHandler(rawMessage v1.RawMessage) (v1alpha1.ErrorHandler, error) {
 	var properties map[v1alpha1.ErrorHandlerType]v1.RawMessage
 	err := json.Unmarshal(rawMessage, &properties)
 	if err != nil {
@@ -68,7 +68,7 @@ func parseErrorHandler(rawMessage v1.RawMessage) (v1alpha1.AbstractErrorHandler,
 	}
 
 	for errHandlType, errHandlValue := range properties {
-		var dst v1alpha1.AbstractErrorHandler
+		var dst v1alpha1.ErrorHandler
 		switch errHandlType {
 		case v1alpha1.ErrorHandlerTypeNone:
 			dst = new(v1alpha1.ErrorHandlerNone)
@@ -78,6 +78,8 @@ func parseErrorHandler(rawMessage v1.RawMessage) (v1alpha1.AbstractErrorHandler,
 			dst = new(v1alpha1.ErrorHandlerDeadLetterChannel)
 		case v1alpha1.ErrorHandlerTypeRef:
 			dst = new(v1alpha1.ErrorHandlerRef)
+		case v1alpha1.ErrorHandlerTypeBean:
+			dst = new(v1alpha1.ErrorHandlerBean)
 		default:
 			return nil, errors.Errorf("Unknown error type %s, supported error types are: none, log, dead-letter-channel", errHandlType)
 		}
@@ -93,7 +95,7 @@ func parseErrorHandler(rawMessage v1.RawMessage) (v1alpha1.AbstractErrorHandler,
 	return nil, errors.New("You must provide any supported error handler (none, log, dead-letter-channel)")
 }
 
-func setIntegrationErrorHandler(it *v1.IntegrationSpec, errorHandlerURI string, errorHandlerSpec v1alpha1.AbstractErrorHandler) error {
+func setIntegrationErrorHandler(it *v1.IntegrationSpec, errorHandlerURI string, errorHandlerSpec v1alpha1.ErrorHandler) error {
 	it.ErrorHandler = v1.ErrorHandlerSpec{
 		Type: string(errorHandlerSpec.Type()),
 	}

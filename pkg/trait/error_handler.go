@@ -68,7 +68,7 @@ func (t *errorHandlerTrait) Apply(e *Environment) error {
 }
 
 func addErrorHandlerAsSource(e *Environment) error {
-	errorHandlerStatement, err := parseErrorHandler(e.Integration.Spec.ErrorHandler)
+	errorHandlerStatement, err := parseErrorHandler(e)
 	if err != nil {
 		return err
 	}
@@ -91,21 +91,22 @@ func addErrorHandlerAsSource(e *Environment) error {
 		Type:     v1.SourceTypeErrorHandler,
 	}
 
-	replaced := false
-	for idx, existing := range e.Integration.Status.GeneratedSources {
-		if existing.Name == errorHandlerSource.Name {
-			replaced = true
-			e.Integration.Status.GeneratedSources[idx] = errorHandlerSource
-		}
-	}
-	if !replaced {
-		e.Integration.Status.GeneratedSources = append(e.Integration.Status.GeneratedSources, errorHandlerSource)
-	}
+	e.Integration.Status.AddOrReplaceGeneratedSources(errorHandlerSource)
 
 	return nil
 }
 
-func parseErrorHandler(errorHandlerSpec v1.ErrorHandlerSpec) (string, error) {
+func addErrorHandlerBeanConfiguration(e *Environment, fqn string) error {
+	// camel.beans.defaultErrorHandler = #class:the-full-qualified-class-name
+	e.Integration.Status.AddConfigurationsIfMissing(v1.ConfigurationSpec{
+		Type:  "property",
+		Value: fmt.Sprintf("camel.beans.defaultErrorHandler=#class:%s", fqn),
+	})
+	return nil
+}
+
+func parseErrorHandler(e *Environment) (string, error) {
+	errorHandlerSpec := e.Integration.Spec.ErrorHandler
 	switch errorHandlerSpec.Type {
 	case "none":
 		return `errorHandler(noErrorHandler());`, nil
@@ -126,6 +127,10 @@ func parseErrorHandler(errorHandlerSpec v1.ErrorHandlerSpec) (string, error) {
 	case "ref":
 		// TODO using URI temporarily, fix it properly
 		return fmt.Sprintf(`errorHandler("%v");`, errorHandlerSpec.URI), nil
+	case "bean":
+		// TODO using URI temporarily, fix it properly
+		addErrorHandlerBeanConfiguration(e, errorHandlerSpec.URI)
+		return fmt.Sprintf(`errorHandler("%v");`, "defaultErrorHandler"), nil
 	}
 
 	return "", fmt.Errorf("Cannot recognize any error handler of type %s", errorHandlerSpec.Type)
