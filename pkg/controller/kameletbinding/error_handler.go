@@ -19,6 +19,7 @@ package kameletbinding
 
 import (
 	"encoding/json"
+	"fmt"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -33,21 +34,17 @@ func maybeErrorHandler(errHandlConf v1alpha1.ErrorHandlerSpec, bindingContext bi
 		if err != nil {
 			return nil, errors.Wrap(err, "could not parse error handler")
 		}
+		// We need to get the translated URI from any referenced resource (ie, kamelets)
 		errorHandlerURI := ""
 		if errorHandlerSpec.Type() == v1alpha1.ErrorHandlerTypeDeadLetterChannel {
 			errorHandler, err = bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1alpha1.EndpointTypeErrorHandler}, *errorHandlerSpec.Endpoint())
 			if err != nil {
 				return nil, errors.Wrap(err, "could not determine error handler URI")
 			}
-
 			errorHandlerURI = errorHandler.URI
-		} else if errorHandlerSpec.Type() == v1alpha1.ErrorHandlerTypeRef {
-			errorHandlerURI = *errorHandlerSpec.Ref()
-		} else if errorHandlerSpec.Type() == v1alpha1.ErrorHandlerTypeBean {
-			errorHandlerURI = *errorHandlerSpec.Bean()
 		}
 
-		err = setIntegrationErrorHandler(itSpec, errorHandlerURI, errorHandlerSpec)
+		err = setErrorHandlerConfiguration(itSpec, errorHandlerURI, errorHandlerSpec)
 		if err != nil {
 			return nil, errors.Wrap(err, "could not set integration error handler")
 		}
@@ -95,16 +92,13 @@ func parseErrorHandler(rawMessage v1.RawMessage) (v1alpha1.ErrorHandler, error) 
 	return nil, errors.New("You must provide any supported error handler (none, log, dead-letter-channel)")
 }
 
-func setIntegrationErrorHandler(it *v1.IntegrationSpec, errorHandlerURI string, errorHandlerSpec v1alpha1.ErrorHandler) error {
-	it.ErrorHandler = v1.ErrorHandlerSpec{
-		Type: string(errorHandlerSpec.Type()),
+func setErrorHandlerConfiguration(it *v1.IntegrationSpec, errorHandlerURI string, errorHandler v1alpha1.ErrorHandler) error {
+	properties, err := errorHandler.Configuration()
+	if err != nil {
+		return err
 	}
-	if errorHandlerSpec.Params() != nil {
-		it.ErrorHandler.Parameters = &v1.ErrorHandlerParameters{errorHandlerSpec.Params().RawMessage}
+	for key, value := range properties {
+		it.AddConfiguration("property", fmt.Sprintf("%s=%v", key, value))
 	}
-	if errorHandlerURI != "" {
-		it.ErrorHandler.URI = errorHandlerURI
-	}
-
 	return nil
 }
