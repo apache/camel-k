@@ -131,6 +131,33 @@ func (in *IntegrationSpec) AddDependency(dependency string) {
 	in.Dependencies = append(in.Dependencies, newDep)
 }
 
+// HasDefaultErrorHandler checks the configuration properties to see if a default error handler is declared
+func (in *IntegrationSpec) HasDefaultErrorHandler() bool {
+	return in.GetDefaultErrorHandler() != ""
+}
+
+// GetDefaultErrorHandler returns the default error handler, if it is declared
+func (in *IntegrationSpec) GetDefaultErrorHandler() string {
+	return in.getConfigurationProperty("camel.beans.defaultErrorHandler")
+}
+
+// GetDefaultErrorHandlerURI returns the default error handler uri, if it is declared
+func (in *IntegrationSpec) GetDefaultErrorHandlerURI() string {
+	return in.getConfigurationProperty("camel.beans.defaultErrorHandler.uri")
+}
+
+func (in *IntegrationSpec) getConfigurationProperty(property string) string {
+	for _, confSpec := range in.Configuration {
+		if confSpec.Type == "property" && strings.HasPrefix(confSpec.Value, property) {
+			splitConf := strings.Split(confSpec.Value, "=")
+			if len(splitConf) > 0 {
+				return splitConf[1]
+			}
+		}
+	}
+	return ""
+}
+
 // AddOrReplaceGeneratedResources --
 func (in *IntegrationStatus) AddOrReplaceGeneratedResources(resources ...ResourceSpec) {
 	newResources := make([]ResourceSpec, 0)
