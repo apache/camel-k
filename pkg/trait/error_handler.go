@@ -123,6 +123,9 @@ func parseErrorHandler(errorHandlerSpec v1.ErrorHandlerSpec) (string, error) {
 		}
 
 		return fmt.Sprintf(`errorHandler(deadLetterChannel("%v")%v);`, errorHandlerSpec.URI, errorHandlerConfiguration), nil
+	case "ref":
+		// TODO using URI temporarily, fix it properly
+		return fmt.Sprintf(`errorHandler("%v");`, errorHandlerSpec.URI), nil
 	}
 
 	return "", fmt.Errorf("Cannot recognize any error handler of type %s", errorHandlerSpec.Type)

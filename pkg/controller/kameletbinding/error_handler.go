@@ -43,6 +43,10 @@ func maybeErrorHandler(errHandlConf v1alpha1.ErrorHandler, bindingContext bindin
 			errorHandlerURI = errorHandler.URI
 		}
 
+		if errorHandlerSpec.Type() == v1alpha1.ErrorHandlerTypeRef {
+			errorHandlerURI = *errorHandlerSpec.Ref()
+		}
+
 		err = setIntegrationErrorHandler(itSpec, errorHandlerURI, errorHandlerSpec)
 		if err != nil {
 			return nil, errors.Wrap(err, "could not set integration error handler")
@@ -72,6 +76,8 @@ func parseErrorHandler(rawMessage v1.RawMessage) (v1alpha1.AbstractErrorHandler,
 			dst = new(v1alpha1.ErrorHandlerLog)
 		case v1alpha1.ErrorHandlerTypeDeadLetterChannel:
 			dst = new(v1alpha1.ErrorHandlerDeadLetterChannel)
+		case v1alpha1.ErrorHandlerTypeRef:
+			dst = new(v1alpha1.ErrorHandlerRef)
 		default:
 			return nil, errors.Errorf("Unknown error type %s, supported error types are: none, log, dead-letter-channel", errHandlType)
 		}

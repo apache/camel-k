@@ -36,6 +36,7 @@ type AbstractErrorHandler interface {
 	Type() ErrorHandlerType
 	Params() *ErrorHandlerProperties
 	Endpoint() *Endpoint
+	Ref() *string
 }
 
 // ErrorHandlerNone --
@@ -62,6 +63,11 @@ func (e ErrorHandlerNone) Endpoint() *Endpoint {
 	return nil
 }
 
+// Ref --
+func (e ErrorHandlerNone) Ref() *string {
+	return nil
+}
+
 // ErrorHandlerLog represent a default (log) error handler type
 type ErrorHandlerLog struct {
 	Parameters *ErrorHandlerProperties `json:"parameters,omitempty"`
@@ -79,6 +85,11 @@ func (e ErrorHandlerLog) Params() *ErrorHandlerProperties {
 
 // Endpoint --
 func (e ErrorHandlerLog) Endpoint() *Endpoint {
+	return nil
+}
+
+// Ref --
+func (e ErrorHandlerLog) Ref() *string {
 	return nil
 }
 
@@ -103,6 +114,35 @@ func (e ErrorHandlerDeadLetterChannel) Endpoint() *Endpoint {
 	return e.DLCEndpoint
 }
 
+// Ref --
+func (e ErrorHandlerDeadLetterChannel) Ref() *string {
+	return nil
+}
+
+// ErrorHandlerRef represents a reference to an error handler builder available in the registry
+type ErrorHandlerRef string
+
+// Type --
+func (e ErrorHandlerRef) Type() ErrorHandlerType {
+	return ErrorHandlerTypeRef
+}
+
+// Params --
+func (e ErrorHandlerRef) Params() *ErrorHandlerProperties {
+	return nil
+}
+
+// Endpoint --
+func (e ErrorHandlerRef) Endpoint() *Endpoint {
+	return nil
+}
+
+// Ref --
+func (e ErrorHandlerRef) Ref() *string {
+	s := string(e)
+	return &s
+}
+
 // ErrorHandlerType --
 type ErrorHandlerType string
 
@@ -113,4 +153,6 @@ const (
 	ErrorHandlerTypeLog ErrorHandlerType = "log"
 	// ErrorHandlerTypeDeadLetterChannel --
 	ErrorHandlerTypeDeadLetterChannel ErrorHandlerType = "dead-letter-channel"
+	// ErrorHandlerTypeRef --
+	ErrorHandlerTypeRef ErrorHandlerType = "ref"
 )
