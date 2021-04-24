@@ -1867,6 +1867,7 @@
 - Allow to configure the location fo the local maven repo [\#359](https://github.com/apache/camel-k/pull/359) ([lburgazzoli](https://github.com/lburgazzoli))
 - kamel stuck when a secret has an illegal name [\#357](https://github.com/apache/camel-k/pull/357) ([lburgazzoli](https://github.com/lburgazzoli))
 - Enable status subresource for integration [\#352](https://github.com/apache/camel-k/pull/352) ([astefanutti](https://github.com/astefanutti))
+- build handlers: split buld step in two phases: submit and run [\#351](https://github.com/apache/camel-k/pull/351) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.2.0](https://github.com/apache/camel-k/tree/0.2.0) (2019-01-22)
 
@@ -1910,7 +1911,6 @@
 
 **Merged pull requests:**
 
-- build handlers: split buld step in two phases: submit and run [\#351](https://github.com/apache/camel-k/pull/351) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix openapi handling when used in conjunction with deployment.container-image=true [\#350](https://github.com/apache/camel-k/pull/350) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore: regenerated resources.go [\#349](https://github.com/apache/camel-k/pull/349) ([rhuss](https://github.com/rhuss))
 - fix\(kamel log\): Use integration name for looking up containers [\#348](https://github.com/apache/camel-k/pull/348) ([rhuss](https://github.com/rhuss))
