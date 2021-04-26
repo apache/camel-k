@@ -19,11 +19,19 @@ package v1alpha1
 
 import (
 	"encoding/json"
+	"fmt"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-const errorHandlerAppPropertiesPrefix = "camel.beans.defaultErrorHandler"
+// ErrorHandlerRefName --
+const ErrorHandlerRefName = "camel.k.errorHandler.ref"
+
+// ErrorHandlerRefDefaultName --
+const ErrorHandlerRefDefaultName = "defaultErrorHandler"
+
+// ErrorHandlerAppPropertiesPrefix --
+const ErrorHandlerAppPropertiesPrefix = "camel.beans.defaultErrorHandler"
 
 // ErrorHandlerSpec represents an unstructured object for an error handler
 type ErrorHandlerSpec struct {
@@ -32,60 +40,42 @@ type ErrorHandlerSpec struct {
 
 // ErrorHandlerParameters represent an unstructured object for error handler parameters
 type ErrorHandlerParameters struct {
-	v1.RawMessage `json:",inline"`
+	v1.RawMessage `json:",omitempty"`
 }
 
 // BeanProperties represent an unstructured object properties to be set on a bean
 type BeanProperties struct {
-	v1.RawMessage `json:",inline"`
+	v1.RawMessage `json:",omitempty"`
 }
 
 // ErrorHandler is a generic interface that represent any type of error handler specification
 type ErrorHandler interface {
 	Type() ErrorHandlerType
-	Params() *ErrorHandlerParameters
 	Endpoint() *Endpoint
-	Ref() *string
-	Bean() *string
 	Configuration() (map[string]interface{}, error)
 }
 
-type abstractErrorHandler struct {
+type baseErrorHandler struct {
 }
 
 // Type --
-func (e abstractErrorHandler) Type() ErrorHandlerType {
-	return errorHandlerTypeAbstract
-}
-
-// Params --
-func (e abstractErrorHandler) Params() *ErrorHandlerParameters {
-	return nil
+func (e baseErrorHandler) Type() ErrorHandlerType {
+	return errorHandlerTypeBase
 }
 
 // Endpoint --
-func (e abstractErrorHandler) Endpoint() *Endpoint {
-	return nil
-}
-
-// Ref --
-func (e abstractErrorHandler) Ref() *string {
-	return nil
-}
-
-// Bean --
-func (e abstractErrorHandler) Bean() *string {
+func (e baseErrorHandler) Endpoint() *Endpoint {
 	return nil
 }
 
 // Configuration --
-func (e abstractErrorHandler) Configuration() (map[string]interface{}, error) {
+func (e baseErrorHandler) Configuration() (map[string]interface{}, error) {
 	return nil, nil
 }
 
 // ErrorHandlerNone --
 type ErrorHandlerNone struct {
-	*abstractErrorHandler
+	baseErrorHandler
 }
 
 // Type --
@@ -96,13 +86,14 @@ func (e ErrorHandlerNone) Type() ErrorHandlerType {
 // Configuration --
 func (e ErrorHandlerNone) Configuration() (map[string]interface{}, error) {
 	return map[string]interface{}{
-		errorHandlerAppPropertiesPrefix: "#class:org.apache.camel.builder.NoErrorHandlerBuilder",
+		ErrorHandlerAppPropertiesPrefix: "#class:org.apache.camel.builder.NoErrorHandlerBuilder",
+		ErrorHandlerRefName:             ErrorHandlerRefDefaultName,
 	}, nil
 }
 
 // ErrorHandlerLog represent a default (log) error handler type
 type ErrorHandlerLog struct {
-	*abstractErrorHandler
+	ErrorHandlerNone
 	Parameters *ErrorHandlerParameters `json:"parameters,omitempty"`
 }
 
@@ -111,25 +102,22 @@ func (e ErrorHandlerLog) Type() ErrorHandlerType {
 	return ErrorHandlerTypeLog
 }
 
-// Params --
-func (e ErrorHandlerLog) Params() *ErrorHandlerParameters {
-	return e.Parameters
-}
-
 // Configuration --
 func (e ErrorHandlerLog) Configuration() (map[string]interface{}, error) {
-	properties := map[string]interface{}{
-		errorHandlerAppPropertiesPrefix: "#class:org.apache.camel.builder.DefaultErrorHandlerBuilder",
+	properties, err := e.ErrorHandlerNone.Configuration()
+	if err != nil {
+		return nil, err
 	}
+	properties[ErrorHandlerAppPropertiesPrefix] = "#class:org.apache.camel.builder.DefaultErrorHandlerBuilder"
 
-	if e.Params() != nil {
+	if e.Parameters != nil {
 		var parameters map[string]interface{}
-		err := json.Unmarshal(e.Params().RawMessage, &parameters)
+		err := json.Unmarshal(e.Parameters.RawMessage, &parameters)
 		if err != nil {
 			return nil, err
 		}
 		for key, value := range parameters {
-			properties[errorHandlerAppPropertiesPrefix+"."+key] = value
+			properties[ErrorHandlerAppPropertiesPrefix+"."+key] = value
 		}
 	}
 
@@ -138,7 +126,7 @@ func (e ErrorHandlerLog) Configuration() (map[string]interface{}, error) {
 
 // ErrorHandlerDeadLetterChannel represents a dead letter channel error handler type
 type ErrorHandlerDeadLetterChannel struct {
-	*ErrorHandlerLog
+	ErrorHandlerLog
 	DLCEndpoint *Endpoint `json:"endpoint,omitempty"`
 }
 
@@ -152,10 +140,21 @@ func (e ErrorHandlerDeadLetterChannel) Endpoint() *Endpoint {
 	return e.DLCEndpoint
 }
 
+// Configuration --
+func (e ErrorHandlerDeadLetterChannel) Configuration() (map[string]interface{}, error) {
+	properties, err := e.ErrorHandlerLog.Configuration()
+	if err != nil {
+		return nil, err
+	}
+	properties[ErrorHandlerAppPropertiesPrefix] = "#class:org.apache.camel.builder.DeadLetterChannelBuilder"
+
+	return properties, err
+}
+
 // ErrorHandlerRef represents a reference to an error handler builder available in the registry
 type ErrorHandlerRef struct {
-	*abstractErrorHandler
-	string
+	baseErrorHandler
+	v1.RawMessage
 }
 
 // Type --
@@ -163,17 +162,25 @@ func (e ErrorHandlerRef) Type() ErrorHandlerType {
 	return ErrorHandlerTypeRef
 }
 
-// Ref --
-func (e ErrorHandlerRef) Ref() *string {
-	s := string(e.string)
-	return &s
+// Configuration --
+func (e ErrorHandlerRef) Configuration() (map[string]interface{}, error) {
+	var refName string
+	err := json.Unmarshal(e.RawMessage, &refName)
+	if err != nil {
+		return nil, err
+	}
+
+	properties := map[string]interface{}{
+		ErrorHandlerRefName: refName,
+	}
+
+	return properties, nil
 }
 
 // ErrorHandlerBean represents a bean error handler type
 type ErrorHandlerBean struct {
-	*ErrorHandlerLog
-	BeanType   *string         `json:"type,omitempty"`
-	Properties *BeanProperties `json:"properties,omitempty"`
+	ErrorHandlerLog
+	BeanType *string `json:"type,omitempty"`
 }
 
 // Type --
@@ -181,16 +188,22 @@ func (e ErrorHandlerBean) Type() ErrorHandlerType {
 	return ErrorHandlerTypeBean
 }
 
-// Bean --
-func (e ErrorHandlerBean) Bean() *string {
-	return e.BeanType
+// Configuration --
+func (e ErrorHandlerBean) Configuration() (map[string]interface{}, error) {
+	properties, err := e.ErrorHandlerLog.Configuration()
+	if err != nil {
+		return nil, err
+	}
+	properties[ErrorHandlerAppPropertiesPrefix] = fmt.Sprintf("#class:%v", *e.BeanType)
+
+	return properties, err
 }
 
 // ErrorHandlerType --
 type ErrorHandlerType string
 
 const (
-	errorHandlerTypeAbstract ErrorHandlerType = ""
+	errorHandlerTypeBase ErrorHandlerType = ""
 	// ErrorHandlerTypeNone --
 	ErrorHandlerTypeNone ErrorHandlerType = "none"
 	// ErrorHandlerTypeLog --

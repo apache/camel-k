@@ -78,7 +78,7 @@ func parseErrorHandler(rawMessage v1.RawMessage) (v1alpha1.ErrorHandler, error) 
 		case v1alpha1.ErrorHandlerTypeBean:
 			dst = new(v1alpha1.ErrorHandlerBean)
 		default:
-			return nil, errors.Errorf("Unknown error type %s, supported error types are: none, log, dead-letter-channel", errHandlType)
+			return nil, errors.Errorf("Unknown error handler type %s", errHandlType)
 		}
 
 		err := json.Unmarshal(errHandlValue, dst)
@@ -89,7 +89,7 @@ func parseErrorHandler(rawMessage v1.RawMessage) (v1alpha1.ErrorHandler, error) 
 		return dst, nil
 	}
 
-	return nil, errors.New("You must provide any supported error handler (none, log, dead-letter-channel)")
+	return nil, errors.New("You must provide any supported error handler")
 }
 
 func setErrorHandlerConfiguration(it *v1.IntegrationSpec, errorHandlerURI string, errorHandler v1alpha1.ErrorHandler) error {
@@ -99,6 +99,9 @@ func setErrorHandlerConfiguration(it *v1.IntegrationSpec, errorHandlerURI string
 	}
 	for key, value := range properties {
 		it.AddConfiguration("property", fmt.Sprintf("%s=%v", key, value))
+	}
+	if errorHandler.Type() == v1alpha1.ErrorHandlerTypeDeadLetterChannel && errorHandlerURI != "" {
+		it.AddConfiguration("property", fmt.Sprintf("%s.deadLetterUri=%v", v1alpha1.ErrorHandlerAppPropertiesPrefix, errorHandlerURI))
 	}
 	return nil
 }
