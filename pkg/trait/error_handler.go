@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
 // The error-handler is a platform trait used to inject Error Handler source into the integration runtime.
@@ -50,7 +51,7 @@ func (t *errorHandlerTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.Integration.Spec.HasDefaultErrorHandler(), nil
+	return e.Integration.Spec.GetConfigurationProperty(v1alpha1.ErrorHandlerRefName) != "", nil
 }
 
 func (t *errorHandlerTrait) Apply(e *Environment) error {
@@ -64,19 +65,20 @@ func (t *errorHandlerTrait) Apply(e *Environment) error {
 }
 
 func addErrorHandlerAsSource(e *Environment) error {
+	errorHandlerRefName := e.Integration.Spec.GetConfigurationProperty(v1alpha1.ErrorHandlerRefName)
 	// TODO change to yaml flow when we fix https://issues.apache.org/jira/browse/CAMEL-16486
 	errorHandlerSource := v1.SourceSpec{
 		DataSpec: v1.DataSpec{
 			Name: "ErrorHandlerSource.java",
-			Content: `
+			Content: fmt.Sprintf(`
 			import org.apache.camel.builder.RouteBuilder;
 			public class ErrorHandlerSource extends RouteBuilder {
 			@Override
 			public void configure() throws Exception {
-				errorHandler("defaultErrorHandler");
+				errorHandler("%s");
 			  }
 			}
-			`,
+			`, errorHandlerRefName),
 		},
 		Language: v1.LanguageJavaSource,
 		Type:     v1.SourceTypeErrorHandler,
@@ -84,14 +86,5 @@ func addErrorHandlerAsSource(e *Environment) error {
 
 	e.Integration.Status.AddOrReplaceGeneratedSources(errorHandlerSource)
 
-	return nil
-}
-
-func addErrorHandlerBeanConfiguration(e *Environment, fqn string) error {
-	// camel.beans.defaultErrorHandler = #class:the-full-qualified-class-name
-	e.Integration.Status.AddConfigurationsIfMissing(v1.ConfigurationSpec{
-		Type:  "property",
-		Value: fmt.Sprintf("camel.beans.defaultErrorHandler=#class:%s", fqn),
-	})
 	return nil
 }

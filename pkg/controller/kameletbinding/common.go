@@ -53,6 +53,7 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 			},
 		},
 	}
+
 	// start from the integration spec defined in the binding
 	if kameletbinding.Spec.Integration != nil {
 		it.Spec = *kameletbinding.Spec.Integration.DeepCopy()
