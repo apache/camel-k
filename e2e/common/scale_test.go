@@ -50,6 +50,7 @@ func TestIntegrationScale(t *testing.T) {
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		t.Run("Update integration scale spec", func(t *testing.T) {
+			RegisterTestingT(t)
 			Expect(ScaleIntegration(ns, name, 3)).To(Succeed())
 			// Check the readiness condition becomes falsy
 			Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionFalse))
@@ -63,6 +64,7 @@ func TestIntegrationScale(t *testing.T) {
 		})
 
 		t.Run("Scale integration with polymorphic client", func(t *testing.T) {
+			RegisterTestingT(t)
 			// Polymorphic scale client
 			groupResources, err := restmapper.GetAPIGroupResources(TestClient().Discovery())
 			Expect(err).To(BeNil())
@@ -89,6 +91,7 @@ func TestIntegrationScale(t *testing.T) {
 		})
 
 		t.Run("Scale integration with Camel K client", func(t *testing.T) {
+			RegisterTestingT(t)
 			camel, err := versioned.NewForConfig(TestClient().GetConfig())
 			Expect(err).To(BeNil())
 
@@ -116,6 +119,7 @@ func TestIntegrationScale(t *testing.T) {
 		})
 
 		// Clean up
+		RegisterTestingT(t)
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
