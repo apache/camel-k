@@ -83,7 +83,25 @@ func addErrorHandlerAsSource(e *Environment) error {
 		Language: v1.LanguageJavaSource,
 		Type:     v1.SourceTypeErrorHandler,
 	}
-
+	/*
+		flowErrorHandler := map[string]interface{}{
+			"error-handler": map[string]string{
+				"ref": errorHandlerRefName,
+			},
+		}
+		encodedFlowErrorHandler, err := yaml.Marshal(flowErrorHandler)
+		if err != nil {
+			return err
+		}
+		errorHandlerSource := v1.SourceSpec{
+			DataSpec: v1.DataSpec{
+				Name:    "ErrorHandlerSource.yaml",
+				Content: string(encodedFlowErrorHandler),
+			},
+			Language: v1.LanguageYaml,
+			Type:     v1.SourceTypeErrorHandler,
+		}
+	*/
 	e.Integration.Status.AddOrReplaceGeneratedSources(errorHandlerSource)
 
 	return nil
