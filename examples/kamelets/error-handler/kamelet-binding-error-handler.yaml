@@ -38,7 +38,7 @@ spec:
 #    ref: "something"
 #    bean:
 #      type: "org.apache.camel.builder.DeadLetterChannelBuilder"
-#      parameters:
+#      properties:
 #        deadLetterUri: log:error
     dead-letter-channel:
       endpoint:
