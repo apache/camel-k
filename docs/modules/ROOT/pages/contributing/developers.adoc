@@ -199,13 +199,13 @@ The build phase cannot be (currently) debugged in Minikube because the Kaniko bu
 
 [publishing]
 == Building Metadata for Publishing the Operator in Operator Hub
-----
 
 Publishing to an operator hub requires creation and submission of metadata, required in a specific
 https://github.com/operator-framework/operator-registry/#manifest-format[format]. The
 https://sdk.operatorframework.io/docs/cli[operator-sdk] provides tools to help with the creation of this metadata.
 
 There are two formats for the publishing of the metadata:
+
 === Package Manifests
 The legacy packaging format used for deploying the operator to an OLM registry. While deprecated in Openshift 4.5+,
 it is still supported and used on that and other cluster types. A single CSV is generated, comprising of the operator
@@ -216,8 +216,8 @@ To generate the metadata for camel-k in the legacy format, use the following com
 make build-olm
 ----
 The CSV and accompanying files are located in `deploy/olm-catalog`.
-**Note. these files are under version control.**
 
+NOTE: These files are under version control.
 
 === `bundles`
 The latest packaging format used for deploying the operator to an OLM registry. This generates a CSV and related metadata
