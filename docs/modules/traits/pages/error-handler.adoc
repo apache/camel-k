@@ -15,7 +15,7 @@ WARNING: The error-handler trait is a *platform trait*: disabling it may comprom
 Trait properties can be specified when running any integration with the CLI:
 [source,console]
 ----
-$ kamel run --trait error-handler.[key]=[value] integration.groovy
+$ kamel run --trait error-handler.[key]=[value] --trait error-handler.[key2]=[value2] integration.groovy
 ----
 The following configuration options are available:
 
@@ -26,6 +26,10 @@ The following configuration options are available:
 | error-handler.enabled
 | bool
 | Can be used to enable or disable a trait. All traits share this common property.
+
+| error-handler.,omitempty
+| string
+| The error handler ref name found in application properties
 
 |===
 
