@@ -107,8 +107,8 @@ func TestParseErrorHandlerBeanWithParamsDoesSucceed(t *testing.T) {
 		[]byte(`{
 			"bean": {
 				"type": "com.acme.MyType",
-				"parameters": 
-					{"param1": "value1", "param2": "value2"}
+				"properties": 
+					{"beanProp1": "value1", "beanProp2": "value2"}
 			}
 		}`),
 	)
@@ -118,8 +118,8 @@ func TestParseErrorHandlerBeanWithParamsDoesSucceed(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "#class:com.acme.MyType", parameters[v1alpha1.ErrorHandlerAppPropertiesPrefix])
 	assert.Equal(t, v1alpha1.ErrorHandlerRefDefaultName, parameters[v1alpha1.ErrorHandlerRefName])
-	assert.Equal(t, "value1", parameters["camel.beans.defaultErrorHandler.param1"])
-	assert.Equal(t, "value2", parameters["camel.beans.defaultErrorHandler.param2"])
+	assert.Equal(t, "value1", parameters["camel.beans.defaultErrorHandler.beanProp1"])
+	assert.Equal(t, "value2", parameters["camel.beans.defaultErrorHandler.beanProp2"])
 }
 
 func TestParseErrorHandlerRefDoesSucceed(t *testing.T) {

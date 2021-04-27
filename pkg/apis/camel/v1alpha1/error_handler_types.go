@@ -179,8 +179,9 @@ func (e ErrorHandlerRef) Configuration() (map[string]interface{}, error) {
 
 // ErrorHandlerBean represents a bean error handler type
 type ErrorHandlerBean struct {
-	ErrorHandlerLog
-	BeanType *string `json:"type,omitempty"`
+	ErrorHandlerNone
+	BeanType       *string         `json:"type,omitempty"`
+	BeanProperties *BeanProperties `json:"properties,omitempty"`
 }
 
 // Type --
@@ -190,11 +191,22 @@ func (e ErrorHandlerBean) Type() ErrorHandlerType {
 
 // Configuration --
 func (e ErrorHandlerBean) Configuration() (map[string]interface{}, error) {
-	properties, err := e.ErrorHandlerLog.Configuration()
+	properties, err := e.ErrorHandlerNone.Configuration()
 	if err != nil {
 		return nil, err
 	}
 	properties[ErrorHandlerAppPropertiesPrefix] = fmt.Sprintf("#class:%v", *e.BeanType)
+
+	if e.BeanProperties != nil {
+		var beanProperties map[string]interface{}
+		err := json.Unmarshal(e.BeanProperties.RawMessage, &beanProperties)
+		if err != nil {
+			return nil, err
+		}
+		for key, value := range beanProperties {
+			properties[ErrorHandlerAppPropertiesPrefix+"."+key] = value
+		}
+	}
 
 	return properties, err
 }
