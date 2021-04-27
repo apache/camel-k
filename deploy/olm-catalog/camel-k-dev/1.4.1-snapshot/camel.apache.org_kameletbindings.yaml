@@ -63,6 +63,11 @@ spec:
           spec:
             description: KameletBindingSpec --
             properties:
+              errorHandler:
+                description: ErrorHandler is an optional handler called upon an error
+                  occuring in the integration
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
               integration:
                 description: Integration is an optional integration used to specify
                   custom parameters
