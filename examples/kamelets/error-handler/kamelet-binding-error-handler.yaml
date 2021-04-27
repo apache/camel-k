@@ -30,7 +30,16 @@ spec:
       kind: Kamelet
       apiVersion: camel.apache.org/v1alpha1
       name: log-sink
-  errorHandler:
+  errorHandler:   
+#    log:
+#      parameters:
+#        maximumRedeliveries: 3
+#        redeliveryDelay: 2000      
+#    ref: "something"
+#    bean:
+#      type: "org.apache.camel.builder.DeadLetterChannelBuilder"
+#      parameters:
+#        deadLetterUri: log:error
     dead-letter-channel:
       endpoint:
         ref:
