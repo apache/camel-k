@@ -12,6 +12,8 @@
 
 **Merged pull requests:**
 
+- chore: change references to use "main" [\#2234](https://github.com/apache/camel-k/pull/2234) ([nicolaferraro](https://github.com/nicolaferraro))
+- Bump version to 1.5.0-SNAPSHOT [\#2233](https://github.com/apache/camel-k/pull/2233) ([nicolaferraro](https://github.com/nicolaferraro))
 - issue2230- fix for run-from-github page [\#2231](https://github.com/apache/camel-k/pull/2231) ([bfitzpat](https://github.com/bfitzpat))
 
 ## [v1.4.0](https://github.com/apache/camel-k/tree/v1.4.0) (2021-04-16)
@@ -435,7 +437,6 @@
 - Release 1.1.1 [\#1700](https://github.com/apache/camel-k/issues/1700)
 - Upgrade to Prometheus operator version 0.42.0+ [\#1697](https://github.com/apache/camel-k/issues/1697)
 - Kamel init - Do not include license header [\#1696](https://github.com/apache/camel-k/issues/1696)
-- Add support for Strimzi Topics in KameletBinding [\#1686](https://github.com/apache/camel-k/issues/1686)
 - kamelets: source/sink binding [\#1676](https://github.com/apache/camel-k/issues/1676)
 - Add related image in OLM descriptor [\#1611](https://github.com/apache/camel-k/issues/1611)
 - Deprecate build kit at platform set-up time [\#1604](https://github.com/apache/camel-k/issues/1604)
@@ -506,7 +507,6 @@
 - Fix \#1536: take modeline changes into account in dev mode [\#1634](https://github.com/apache/camel-k/pull/1634) ([johnpoth](https://github.com/johnpoth))
 - fix\(doc\): Fix Affinity trait examples formatting [\#1631](https://github.com/apache/camel-k/pull/1631) ([astefanutti](https://github.com/astefanutti))
 - Use Quarkus as default runtime [\#1609](https://github.com/apache/camel-k/pull/1609) ([nicolaferraro](https://github.com/nicolaferraro))
-- Implement Kamelets [\#1602](https://github.com/apache/camel-k/pull/1602) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [pkg/apis/camel/v1.1.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.1.1) (2020-09-11)
 
@@ -523,6 +523,7 @@
 **Closed issues:**
 
 - Failed to install Camel-K in IKS [\#1687](https://github.com/apache/camel-k/issues/1687)
+- Add support for Strimzi Topics in KameletBinding [\#1686](https://github.com/apache/camel-k/issues/1686)
 - Upgrade base to Knative 0.16 and support 0.17 [\#1670](https://github.com/apache/camel-k/issues/1670)
 - Integration is logged twice in dev mode [\#1668](https://github.com/apache/camel-k/issues/1668)
 - operator.adoc - ascii doc warning [\#1662](https://github.com/apache/camel-k/issues/1662)
@@ -605,6 +606,7 @@
 - doc: add toc to readme [\#1606](https://github.com/apache/camel-k/pull/1606) ([tadayosi](https://github.com/tadayosi))
 - Upgrade Knative to version 0.15.0 [\#1605](https://github.com/apache/camel-k/pull/1605) ([oscerd](https://github.com/oscerd))
 - Fix \#1601: add v prefix to future tags [\#1603](https://github.com/apache/camel-k/pull/1603) ([nicolaferraro](https://github.com/nicolaferraro))
+- Implement Kamelets [\#1602](https://github.com/apache/camel-k/pull/1602) ([nicolaferraro](https://github.com/nicolaferraro))
 - feat: Structured traits configuration serialization [\#1600](https://github.com/apache/camel-k/pull/1600) ([astefanutti](https://github.com/astefanutti))
 - Fix typo missing space "featuresare" -\> "features are" [\#1598](https://github.com/apache/camel-k/pull/1598) ([apupier](https://github.com/apupier))
 - chore: Add information on how to debug the camel-k operator [\#1597](https://github.com/apache/camel-k/pull/1597) ([johnpoth](https://github.com/johnpoth))
@@ -1227,6 +1229,7 @@
 - chore: fix eaxmples [\#1026](https://github.com/apache/camel-k/pull/1026) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix\(SDK\): Add relative symlink to kamel main package [\#1025](https://github.com/apache/camel-k/pull/1025) ([astefanutti](https://github.com/astefanutti))
 - chore: Use non-caching API reader from SDK [\#1021](https://github.com/apache/camel-k/pull/1021) ([astefanutti](https://github.com/astefanutti))
+- feat\(quarkus\): Initial Quarkus support [\#1013](https://github.com/apache/camel-k/pull/1013) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.0-M3](https://github.com/apache/camel-k/tree/1.0.0-M3) (2019-10-18)
 
@@ -1260,7 +1263,6 @@
 - fix \#988: add check for missing licenses before release [\#1018](https://github.com/apache/camel-k/pull/1018) ([nicolaferraro](https://github.com/nicolaferraro))
 - Upgrade Operator SDK to version 0.11.0 [\#1017](https://github.com/apache/camel-k/pull/1017) ([astefanutti](https://github.com/astefanutti))
 - chore\(tests\): add integration tests for common knative issues [\#1016](https://github.com/apache/camel-k/pull/1016) ([nicolaferraro](https://github.com/nicolaferraro))
-- feat\(quarkus\): Initial Quarkus support [\#1013](https://github.com/apache/camel-k/pull/1013) ([astefanutti](https://github.com/astefanutti))
 - Support Knative broker/trigger model and explicit source/sink [\#1012](https://github.com/apache/camel-k/pull/1012) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix \#1005: allow to customize loader and add default dependencies for… [\#1007](https://github.com/apache/camel-k/pull/1007) ([nicolaferraro](https://github.com/nicolaferraro))
 - Update OLM manifests for 1.0.0-M2 release [\#1006](https://github.com/apache/camel-k/pull/1006) ([astefanutti](https://github.com/astefanutti))
@@ -1951,7 +1953,6 @@
 - Fix \#221: use registry name instead of IP in Knative on Openshift [\#278](https://github.com/apache/camel-k/pull/278) ([nicolaferraro](https://github.com/nicolaferraro))
 - Determine active/passive endpoints from Catalog [\#277](https://github.com/apache/camel-k/pull/277) ([lburgazzoli](https://github.com/lburgazzoli))
 - trait: add a trait to inject pod metadata as env var [\#276](https://github.com/apache/camel-k/pull/276) ([lburgazzoli](https://github.com/lburgazzoli))
-- Traits lifecycle [\#273](https://github.com/apache/camel-k/pull/273) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.1.0](https://github.com/apache/camel-k/tree/0.1.0) (2018-12-10)
 
@@ -1978,6 +1979,7 @@
 
 **Merged pull requests:**
 
+- Traits lifecycle [\#273](https://github.com/apache/camel-k/pull/273) ([lburgazzoli](https://github.com/lburgazzoli))
 - Allow using compressed sources in Knative profile [\#272](https://github.com/apache/camel-k/pull/272) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(deps\): update kotlin to v1.3.11 [\#271](https://github.com/apache/camel-k/pull/271) ([lburgazzoli](https://github.com/lburgazzoli))
 - builder: wake up event loop when the container image buils is done to seep up deployment time [\#269](https://github.com/apache/camel-k/pull/269) ([lburgazzoli](https://github.com/lburgazzoli))
@@ -2086,7 +2088,6 @@
 - runtime: improve kotlin dsl [\#151](https://github.com/apache/camel-k/pull/151) ([lburgazzoli](https://github.com/lburgazzoli))
 - runtime: improve groovy dsl [\#150](https://github.com/apache/camel-k/pull/150) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore: compile integration tests on make [\#149](https://github.com/apache/camel-k/pull/149) ([nicolaferraro](https://github.com/nicolaferraro))
-- runtime: enhance groovy dsl [\#148](https://github.com/apache/camel-k/pull/148) ([lburgazzoli](https://github.com/lburgazzoli))
 
 ## [0.0.3](https://github.com/apache/camel-k/tree/0.0.3) (2018-10-02)
 
@@ -2105,6 +2106,7 @@
 
 **Merged pull requests:**
 
+- runtime: enhance groovy dsl [\#148](https://github.com/apache/camel-k/pull/148) ([lburgazzoli](https://github.com/lburgazzoli))
 - Added Maven Wrapper [\#147](https://github.com/apache/camel-k/pull/147) ([oscerd](https://github.com/oscerd))
 - Added vendor directory to avoid dep ensure [\#145](https://github.com/apache/camel-k/pull/145) ([oscerd](https://github.com/oscerd))
 - chore: small improvement to groovy dls [\#144](https://github.com/apache/camel-k/pull/144) ([lburgazzoli](https://github.com/lburgazzoli))
