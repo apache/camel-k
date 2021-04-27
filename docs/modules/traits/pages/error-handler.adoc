@@ -27,7 +27,7 @@ The following configuration options are available:
 | bool
 | Can be used to enable or disable a trait. All traits share this common property.
 
-| error-handler.,omitempty
+| error-handler.error-handler-ref
 | string
 | The error handler ref name found in application properties
 

@@ -136,7 +136,7 @@ func (in *IntegrationSpec) GetConfigurationProperty(property string) string {
 	for _, confSpec := range in.Configuration {
 		if confSpec.Type == "property" && strings.HasPrefix(confSpec.Value, property) {
 			splitConf := strings.Split(confSpec.Value, "=")
-			if len(splitConf) > 0 {
+			if len(splitConf) > 1 {
 				return splitConf[1]
 			}
 		}

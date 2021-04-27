@@ -22,7 +22,7 @@ metadata:
 spec:
   definition:
     title: "Error Log Sink"
-    description: "Consume events from a channel"
+    description: "Error logger channel"
     required:
       - message
     properties:
@@ -35,7 +35,6 @@ spec:
     from:
       uri: kamelet:source
       steps:
-#      - to: my-dlc
       - set-body:
           constant: "{{message}}"
       - to: "log:error-sink"  
