@@ -29,7 +29,7 @@ import (
 type errorHandlerTrait struct {
 	BaseTrait `property:",squash"`
 	// The error handler ref name found in application properties
-	ErrorHandlerRef string `property:",omitempty"`
+	ErrorHandlerRef string `property:"error-handler-ref" json:"error-handler-ref,omitempty"`
 }
 
 func newErrorHandlerTrait() Trait {
