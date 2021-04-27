@@ -76,30 +76,13 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	}
 
 	if p.Status.Build.BuildStrategy == "" {
-		operatorIsLocal := !IsCurrentOperatorGlobal()
-		// Local operators build in the same namespace by definition
-		buildInDifferentNamespace := !operatorIsLocal
-		if !operatorIsLocal {
-			// Unless it's a global operator using a globally shared integration platform
-			buildInDifferentNamespace = p.Namespace != GetOperatorNamespace()
-		}
-
-		// If the operator and the build are in different namespaces, pod strategy should be used (except for Spectrum)
-		if buildInDifferentNamespace {
-			if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategySpectrum {
-				p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyRoutine
-			} else {
-				p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyPod
-			}
+		// Use the fastest strategy that they support (routine when possible)
+		if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I ||
+			p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategySpectrum {
+			p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyRoutine
 		} else {
-			// Same-namespace builds use the fastest strategy that they support (routine when possible)
-			if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I ||
-				p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategySpectrum {
-				p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyRoutine
-			} else {
-				// The build output has to be shared via a volume
-				p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyPod
-			}
+			// The build output has to be shared via a volume
+			p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyPod
 		}
 	}
 
