@@ -18,10 +18,9 @@ limitations under the License.
 package trait
 
 import (
-	"fmt"
-
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"gopkg.in/yaml.v2"
 )
 
 // The error-handler is a platform trait used to inject Error Handler source into the integration runtime.
@@ -29,6 +28,8 @@ import (
 // +camel-k:trait=error-handler
 type errorHandlerTrait struct {
 	BaseTrait `property:",squash"`
+	// The error handler ref name found in application properties
+	ErrorHandlerRef string `property:",omitempty"`
 }
 
 func newErrorHandlerTrait() Trait {
@@ -51,57 +52,37 @@ func (t *errorHandlerTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.Integration.Spec.GetConfigurationProperty(v1alpha1.ErrorHandlerRefName) != "", nil
+	t.ErrorHandlerRef = e.Integration.Spec.GetConfigurationProperty(v1alpha1.ErrorHandlerRefName)
+
+	return t.ErrorHandlerRef != "", nil
 }
 
 func (t *errorHandlerTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		err := addErrorHandlerAsSource(e)
-		if err != nil {
-			return err
-		}
+		return t.addErrorHandlerAsSource(e)
 	}
 	return nil
 }
 
-func addErrorHandlerAsSource(e *Environment) error {
-	errorHandlerRefName := e.Integration.Spec.GetConfigurationProperty(v1alpha1.ErrorHandlerRefName)
-	// TODO change to yaml flow when we fix https://issues.apache.org/jira/browse/CAMEL-16486
+func (t *errorHandlerTrait) addErrorHandlerAsSource(e *Environment) error {
+	flowErrorHandler := map[string]interface{}{
+		"error-handler": map[string]string{
+			"ref": t.ErrorHandlerRef,
+		},
+	}
+	encodedFlowErrorHandler, err := yaml.Marshal([]map[string]interface{}{flowErrorHandler})
+	if err != nil {
+		return err
+	}
 	errorHandlerSource := v1.SourceSpec{
 		DataSpec: v1.DataSpec{
-			Name: "ErrorHandlerSource.java",
-			Content: fmt.Sprintf(`
-			import org.apache.camel.builder.RouteBuilder;
-			public class ErrorHandlerSource extends RouteBuilder {
-			@Override
-			public void configure() throws Exception {
-				errorHandler("%s");
-			  }
-			}
-			`, errorHandlerRefName),
+			Name:    "camel-k-embedded-error-handler.yaml",
+			Content: string(encodedFlowErrorHandler),
 		},
-		Language: v1.LanguageJavaSource,
+		Language: v1.LanguageYaml,
 		Type:     v1.SourceTypeErrorHandler,
 	}
-	/*
-		flowErrorHandler := map[string]interface{}{
-			"error-handler": map[string]string{
-				"ref": errorHandlerRefName,
-			},
-		}
-		encodedFlowErrorHandler, err := yaml.Marshal(flowErrorHandler)
-		if err != nil {
-			return err
-		}
-		errorHandlerSource := v1.SourceSpec{
-			DataSpec: v1.DataSpec{
-				Name:    "ErrorHandlerSource.yaml",
-				Content: string(encodedFlowErrorHandler),
-			},
-			Language: v1.LanguageYaml,
-			Type:     v1.SourceTypeErrorHandler,
-		}
-	*/
+
 	e.Integration.Status.AddOrReplaceGeneratedSources(errorHandlerSource)
 
 	return nil
