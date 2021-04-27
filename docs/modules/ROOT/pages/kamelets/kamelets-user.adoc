@@ -356,6 +356,10 @@ This KameletBinding explicitly defines an URI where data is going to be pushed.
 NOTE: the `uri` option is also conventionally used in Knative to specify a non-kubernetes destination.
 To comply with the Knative specifications, in case an "http" or "https" URI is used, Camel will send https://cloudevents.io/[CloudEvents] to the destination.
 
+=== Error Handling
+
+You can configure an error handler in order to specify what to do when some event ends up with failure. See xref:kamelets/kameletbindings-error-handler.adoc[Kamelet Bindings Error Handler User Guide] for more detail.
+
 [[kamelets-specification]]
 == Kamelet Specification
 
