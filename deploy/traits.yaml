@@ -279,7 +279,14 @@ traits:
   - OpenShift
   description: The error-handler is a platform trait used to inject Error Handler
     source into the integration runtime.
-  properties: []
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: ',omitempty'
+    type: string
+    description: The error handler ref name found in application properties
 - name: gc
   platform: false
   profiles:
