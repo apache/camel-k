@@ -24,7 +24,7 @@ metadata:
 spec:
   definition:
     title: "Incremental ID Source"
-    description: "Produces periodic events with an incremental ID"
+    description: "Produces periodic events with an incremental ID and fails when the ID contains any 0 character"
     properties:
       period:
         title: Period
