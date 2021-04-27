@@ -4,4 +4,5 @@
 This section of the documentation contains information about Kamelets from both a user and a developer point of view:
 
 - The xref:kamelets/kamelets-user.adoc[Kamelets User Guide] is for users that want to use Kamelets for connecting systems with their applications
+- The xref:kamelets/kameletbindings-error-handler.adoc[Kamelet Bindings Error Handler User Guide] explains how to configure an error handler on a `Kamelet Binding`
 - The xref:kamelets/kamelets-dev.adoc[Kamelets Developer Guide] is a reference for developers that want to create new Kamelets and share them with users
