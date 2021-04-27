@@ -41,9 +41,8 @@ func maybeErrorHandler(errHandlConf v1alpha1.ErrorHandlerSpec, bindingContext bi
 				return nil, errors.Wrap(err, "could not determine error handler URI")
 			}
 		} else {
-			// Create a new binding otherwise in order to store application properties
+			// Create a new binding otherwise in order to store error handler application properties
 			errorHandlerBinding = &bindings.Binding{
-				URI:                   "error-handler",
 				ApplicationProperties: make(map[string]string),
 			}
 		}
