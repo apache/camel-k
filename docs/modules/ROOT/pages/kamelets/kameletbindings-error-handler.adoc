@@ -1,0 +1,156 @@
+[[kameletbindings-error-handler]]
+= Kamelet Bindings Error Handler
+
+`Kamelet Binding`s offer a mechanism to specify an error policy to adopt in case an event produced by a `source` or consumed by a `sink`. Through the definition of an `errorHandler` you will be able to apply certain logic to the failing event, such as simply logging, ignoring the event or posting the event to a `Dead Letter Channel`.
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  name: my-kamelet-binding
+spec:
+  source: # <1>
+...
+  sink: # <2>
+...
+  errorHandler: # <3>
+----
+<1> Reference to the source that provides data
+<2> Reference to the sink where data should be sent to
+<3> Error Handler Configuration
+
+[[kameletbindings-error-handler-types]]
+== Error Handler Types
+
+We have different types of error handler: `ǹone`, `log`, `dead-letter-channel`, `bean`, `ref`. The `errorHandler` parameter is optional. The runtime will use the configuration to create an https://camel.apache.org/manual/latest/error-handler.html[Error Handler] as specified by Apache Camel.
+
+[[kameletbindings-error-handler-none]]
+=== No error handler
+
+There may be certain cases where you want to just ignore any failure happening on your integration. In this situation just use a `ǹone` error handler. Under the hood the configuration will create a https://camel.apache.org/manual/latest/error-handler.html#ErrorHandler-NoErrorHandler[`No` error handler builder]. 
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  name: my-kamelet-binding
+spec:
+  source:
+...
+  sink: 
+...
+  errorHandler: 
+    none: # <1>
+----
+<1> `none` error handler does not expect any configuration
+
+[[kameletbindings-error-handler-log]]
+=== Log error handler
+
+Apache Camel offers a default behavior for handling any failure: log to standard output. However you can use the `log` error handler to specify other behaviors such as redelivery or delay policy. Under the hood the configuration will create a https://camel.apache.org/manual/latest/error-handler.html#_defaulterrorhandler[`Default` error handler builder].
+
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  name: my-kamelet-binding
+spec:
+  source:
+...
+  sink: 
+...
+  errorHandler: 
+    log:
+      parameters: # <1>
+        maximumRedeliveries: 3
+        redeliveryDelay: 2000
+----
+<1> Parameters belonging to the `log` error handler type
+
+[[kameletbindings-error-handler-dlc]]
+=== Dead Letter Channel error handler
+
+The `Dead Letter Channel` is probably the most interesting error handler type as it allows you to redirect any failing event to any other component, such as a third party URI, a queue or even another `Kamelet` which will be performing certain logic with the failing event. Under the hood the configuration will create a https://camel.apache.org/manual/latest/error-handler.html#_dead_letter_channel[`Dead Letter Channel` error handler builder].
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  name: my-kamelet-binding
+spec:
+  source:
+...
+  sink: 
+...
+  errorHandler: 
+    dead-letter-channel:
+      endpoint: 
+        ref: # <1>
+          kind: Kamelet
+          apiVersion: camel.apache.org/v1alpha1
+          name: error-handler
+        properties:
+          message: "ERROR!" # <2>
+          ...
+      parameters:
+        maximumRedeliveries: 1 # <3>
+        ... 
+----
+<1> You can use `ref` or `uri`. `ref` will be interpreted by the operator according the `kind`, `apiVersion` and `name`. You can use any `Kamelet`, `KafkaTopic` channel or `Knative` destination.
+<2> Properties belonging to the endpoint (in this example, to the `Kamelet` named error handler)
+<3> Parameters belonging to the `dead-letter-channel` error handler type
+
+[[kameletbindings-error-handler-bean]]
+=== Bean error handler
+
+With the `Bean` error handler you can extend the functionality of the Error Handler by providing a custom bean to be used as Error Handler.
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  name: my-kamelet-binding
+spec:
+  source:
+...
+  sink: 
+...
+  errorHandler: 
+    bean:
+      type: "org.apache.camel.builder.DeadLetterChannelBuilder" # <1>
+      properties: # <2>
+        deadLetterUri: log:error
+        ... 
+----
+<1> Fully qualified name of the ErrorHandlerBuilder
+<2> Properties expected by your type
+
+[[kameletbindings-error-handler-ref]]
+=== Ref error handler
+
+With the `Ref` error handler you can use any `Bean` that is expected to be found in the Camel registry at runtime.
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  name: my-kamelet-binding
+spec:
+  source:
+...
+  sink: 
+...
+  errorHandler: 
+    ref: my-custom-builder # <1>
+... 
+----
+<1> The name of the bean to be looked up at runtime
+
+NOTE: make sure to have the `ref` correctly bind at runtime.
