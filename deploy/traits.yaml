@@ -284,9 +284,9 @@ traits:
     type: bool
     description: Can be used to enable or disable a trait. All traits share this common
       property.
-  - name: error-handler-ref
+  - name: ref
     type: string
-    description: The error handler ref name found in application properties
+    description: The error handler ref name provided or found in application properties
 - name: gc
   platform: false
   profiles:
