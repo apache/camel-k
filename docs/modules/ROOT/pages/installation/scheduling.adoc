@@ -1,0 +1,42 @@
+[[scheduling-infra-pod]]
+= Scheduling infrastructure Pods and Resource managment
+
+During the installation procedure you will be able to provide information on how to best "operationalize" your infrastructure. Through the configuration of `--node-selector`, `--toleration` and `--operator-resources` you will be able to drive the operator `Pod`s scheduling and to be able to assign resources.
+
+The usage of these advanced properties assumes you're familiar with the https://kubernetes.io/docs/concepts/scheduling-eviction/[Kubernetes Scheduling] concepts and configurations.
+
+NOTE: the aforementioned flags setting will work both with `OLM` installation and regular installation.
+
+[[scheduling-infra-pod-scheduling]]
+== Scheduling
+
+=== Node Selectors
+The most basic operation we provide is to let you assign Camel K operator `Pod`s to a specific cluster `Node` via `--node-selector` option. The functionality is based on https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/[`NodeSelector` Kubernetes feature]. As an example, you can schedule Camel K infra `Pod`s to a specific `Node` of your cluster:
+
+```
+kamel install --node-selector kubernetes.io/hostname=ip-172-20-114-199.ec2.internal ...
+```
+
+The option will accept any `key=value` pair as specified and supported by Kubernetes. You can specify more than one `node-selector`.
+
+=== Tolerations
+The `--toleration` option will let you tolerate a Camel K infra `Pod` to support any matching `Taint` according the https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/[`Taint` and `Toleration` Kubernetes feature]. As an example, let's suppose we have a node tainted as "dedicated=camel-k:NoSchedule". In order to allow the infra `Pod`s to be scheduled on that `Node` we can provide the following option during installation procedure:
+
+```
+kamel install --toleration dedicated=camel-k:NoSchedule ...
+```
+
+The option accept a value in the following format `Key[=Value]:Effect[:Seconds]` where the values in squared bracket are considered optional and `Effect` must admit any of the `Taint`s accepted values: `NoSchedule`, `PreferNoSchedule`, `NoExecute`. You can specify more than one `toleration`.
+
+[[scheduling-infra-pod-resources]]
+== Resources
+
+While installing the Camel K operator, you can also specify the resources requests and limits to assign to the operator `Pod` with `--operator-resources` option. The option will expect the configuration as required by https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/[Kubernetes Resource managment]. 
+
+```
+kamel install --operator-resources requests.cpu=256m --operator-resources limits.cpu=500m --operator-resources limits.memory=512Mi ...
+```
+
+The value expected by the option are in the form `requestType.requestResource=value` where `requestType` must be either `requests` or `limits`, `requestResource` must be either `cpu` or `memory` and `value` expressed in the numeric value as expected by the resource. You can specify more than one `operator-resources`.
+
+NOTE: if you specify a limit, but does not specify a request, Kubernetes automatically assigns a request that matches the limit.
