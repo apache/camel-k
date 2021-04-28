@@ -28,8 +28,8 @@ import (
 // +camel-k:trait=error-handler
 type errorHandlerTrait struct {
 	BaseTrait `property:",squash"`
-	// The error handler ref name found in application properties
-	ErrorHandlerRef string `property:"error-handler-ref" json:"error-handler-ref,omitempty"`
+	// The error handler ref name provided or found in application properties
+	ErrorHandlerRef string `property:"ref" json:"ref,omitempty"`
 }
 
 func newErrorHandlerTrait() Trait {
@@ -52,7 +52,9 @@ func (t *errorHandlerTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	t.ErrorHandlerRef = e.Integration.Spec.GetConfigurationProperty(v1alpha1.ErrorHandlerRefName)
+	if t.ErrorHandlerRef == "" {
+		t.ErrorHandlerRef = e.Integration.Spec.GetConfigurationProperty(v1alpha1.ErrorHandlerRefName)
+	}
 
 	return t.ErrorHandlerRef != "", nil
 }
