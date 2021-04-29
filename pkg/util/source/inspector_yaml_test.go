@@ -198,6 +198,58 @@ func TestYAMLRestDSL(t *testing.T) {
 	}
 }
 
+const YAMLFromDSL = `
+- from:
+    uri: "timer:tick"
+    parameters:
+      period: "5000"
+    steps:
+      - set-body:
+          constant: "Hello Yaml !!!"
+      - transform:
+          simple: "${body.toUpperCase()}"
+      - to: "log:info"
+`
+
+const YAMLFromDSLWithRoute = `
+- route:
+    id: route1
+    from:
+      uri: "timer:tick"
+      parameters:
+        period: "5000"
+    steps:
+      - set-body:
+          constant: "Hello Yaml !!!"
+      - transform:
+          simple: "${body.toUpperCase()}"
+      - to: "log:info"
+`
+
+func TestYAMLRouteAndFromEquivalence(t *testing.T) {
+	for name, content := range map[string]string{"YAMLFromDSL": YAMLFromDSL, "YAMLFromDSLWithRoute": YAMLFromDSLWithRoute} {
+		sourceContent := content
+		t.Run(name, func(t *testing.T) {
+			code := v1.SourceSpec{
+				DataSpec: v1.DataSpec{
+					Name:    "route.yaml",
+					Content: sourceContent,
+				},
+				Language: v1.LanguageYaml,
+			}
+
+			meta := NewMetadata()
+			inspector := NewtestYAMLInspector(t)
+			err := inspector.Extract(code, &meta)
+			assert.Nil(t, err)
+			assert.Equal(t, meta.FromURIs, []string{"timer:tick"})
+			assert.Equal(t, meta.ToURIs, []string{"log:info"})
+			assert.True(t, meta.Dependencies.Has("camel:log"))
+			assert.True(t, meta.Dependencies.Has("camel:timer"))
+		})
+	}
+}
+
 const YAMLJSONMarshal = `
 - from:
     uri: timer:tick
