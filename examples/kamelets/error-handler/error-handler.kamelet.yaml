@@ -21,20 +21,53 @@ metadata:
   name: error-handler
 spec:
   definition:
-    title: "Error Log Sink"
-    description: "Error logger channel"
+    title: "DLC and Log"
+    description: "Push an event to a kafka topic and log an error message"
     required:
-      - message
+      - kafka-brokers
+      - kafka-topic
+      - kafka-service-account-id
+      - kafka-service-account-secret
+      - log-message
     properties:
-      message:
+      kafka-brokers:
+        title: Kafka Brokers
+        description: the bootstrap server
+        type: string
+        example: "xyz-ins--rplssqfz-yyyyyyy-crojg.bf2.kafka.my-clud-service.com:443"    
+      kafka-topic:
+        title: Kafka Topic
+        description: the DLC topic
+        type: string
+        example: "my-dlc"    
+      kafka-service-account-id:
+        title: Service Account ID
+        description: the SA to use
+        type: string
+        example: "srvc-acct-xxxxxx-519b-453f-9f68-yyyyyyyyy"    
+      kafka-service-account-secret:
+        title: Service Account Secret
+        description: the SA secrete to use
+        type: string
+        example: "xxxxxxxxx-46c7-4c6c-a753-yyyyyyyyyyyyyyy"                
+      log-message:
         title: Message
-        description: The message to log
+        description: A message warning to log
         type: string
         example: "error while checking the source"    
   flow:
     from:
       uri: kamelet:source
       steps:
+      # First step: send to the DLC for future processing
+      - to:
+          uri: kafka:{{kafka-topic}}
+          parameters:
+            brokers: "{{kafka-brokers}}"
+            security-protocol: SASL_SSL
+            sasl-mechanism: PLAIN
+            sasl-jaas-config: "org.apache.kafka.common.security.plain.PlainLoginModule required username={{kafka-service-account-id}} password={{kafka-service-account-secret}};"
+      # Log an error message to notify about the failure
       - set-body:
-          constant: "{{message}}"
+          constant: "{{log-message}} - worry not, the event is stored in the DLC"
       - to: "log:error-sink"  
