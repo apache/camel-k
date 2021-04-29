@@ -13,6 +13,8 @@
 **Merged pull requests:**
 
 - fix\(ci\): Use Docker to build OLM index image [\#2242](https://github.com/apache/camel-k/pull/2242) ([astefanutti](https://github.com/astefanutti))
+- fix\(build\): Default to routine build strategy for local IntegrationPlatform [\#2240](https://github.com/apache/camel-k/pull/2240) ([astefanutti](https://github.com/astefanutti))
+- chore: ugprade Service Binding Operator v0.7.1 [\#2235](https://github.com/apache/camel-k/pull/2235) ([johnpoth](https://github.com/johnpoth))
 - chore: change references to use "main" [\#2234](https://github.com/apache/camel-k/pull/2234) ([nicolaferraro](https://github.com/nicolaferraro))
 - Bump version to 1.5.0-SNAPSHOT [\#2233](https://github.com/apache/camel-k/pull/2233) ([nicolaferraro](https://github.com/nicolaferraro))
 - issue2230- fix for run-from-github page [\#2231](https://github.com/apache/camel-k/pull/2231) ([bfitzpat](https://github.com/bfitzpat))
@@ -704,7 +706,6 @@
 - Basic javascript example generates "Multiple applicable overloads found for method name process" [\#1144](https://github.com/apache/camel-k/issues/1144)
 - Basic groovy example generates "Ambiguous method overloading for method org.apache.camel.model.RouteDefinition\#process" [\#1143](https://github.com/apache/camel-k/issues/1143)
 - Multiple traits to create a service [\#1061](https://github.com/apache/camel-k/issues/1061)
-- camel-k installation struggles [\#1059](https://github.com/apache/camel-k/issues/1059)
 - Camel K Operator is not reading the Telegram endpoint API-Key properly. [\#1039](https://github.com/apache/camel-k/issues/1039)
 - No interface for setting the number of pods on which an integration is to be deployed [\#1032](https://github.com/apache/camel-k/issues/1032)
 - Is there a way to co-locate the camel-k-operator, builder and PV in the same node [\#924](https://github.com/apache/camel-k/issues/924)
@@ -1111,6 +1112,7 @@
 - No component found with scheme: http4 // Camel-k 1.0.0M4 [\#1072](https://github.com/apache/camel-k/issues/1072)
 - Registry beans issues after upgrade from kamel 0.3.4 to kamel 1.0.0 M4 [\#1071](https://github.com/apache/camel-k/issues/1071)
 - broken routes.js example [\#1065](https://github.com/apache/camel-k/issues/1065)
+- camel-k installation struggles [\#1059](https://github.com/apache/camel-k/issues/1059)
 - camel-k-maven-plugin must not contain any of these characters \/:"\<\>|?\* but found \> @ line 16, column 18 [\#1056](https://github.com/apache/camel-k/issues/1056)
 - Automatically extract trait configuration for user manual [\#1014](https://github.com/apache/camel-k/issues/1014)
 - Cannot set blockOwnerDeletion in this case because cannot find RESTMapping for APIVersion camel.apache.org/v1alpha1 Kind IntegrationKit [\#764](https://github.com/apache/camel-k/issues/764)
