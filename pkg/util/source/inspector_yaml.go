@@ -57,6 +57,15 @@ func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 
 func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata) error {
 	switch key {
+	case "route":
+		// process steps if they are defined in the route
+		if routeSteps, ok := content.(map[interface{}]interface{}); ok {
+			if steps, stepsFormatOk := routeSteps["steps"].([]interface{}); stepsFormatOk {
+				if err := i.parseStepsParam(steps, meta); err != nil {
+					return err
+				}
+			}
+		}
 	case "rest":
 		meta.ExposesHTTPServices = true
 		meta.RequiredCapabilities.Add(v1.CapabilityRest)
@@ -92,28 +101,8 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 			return i.parseStep("from", u, meta)
 		} else if u, ok := t["steps"]; ok {
 			if steps, stepsFormatOk := u.([]interface{}); stepsFormatOk {
-				for _, raw := range steps {
-					if step, stepFormatOk := raw.(map[interface{}]interface{}); stepFormatOk {
-
-						if len(step) != 1 {
-							return fmt.Errorf("unable to parse step: %v", step)
-						}
-
-						for k, v := range step {
-							switch kt := k.(type) {
-							case fmt.Stringer:
-								if err := i.parseStep(kt.String(), v, meta); err != nil {
-									return err
-								}
-							case string:
-								if err := i.parseStep(kt, v, meta); err != nil {
-									return err
-								}
-							default:
-								return fmt.Errorf("unknown key type: %v, step: %v", k, step)
-							}
-						}
-					}
+				if err := i.parseStepsParam(steps, meta); err != nil {
+					return err
 				}
 			}
 		}
@@ -151,6 +140,33 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 			meta.FromURIs = append(meta.FromURIs, maybeURI)
 		case "to":
 			meta.ToURIs = append(meta.ToURIs, maybeURI)
+		}
+	}
+	return nil
+}
+
+func (i YAMLInspector) parseStepsParam(steps []interface{}, meta *Metadata) error {
+	for _, raw := range steps {
+		if step, stepFormatOk := raw.(map[interface{}]interface{}); stepFormatOk {
+
+			if len(step) != 1 {
+				return fmt.Errorf("unable to parse step: %v", step)
+			}
+
+			for k, v := range step {
+				switch kt := k.(type) {
+				case fmt.Stringer:
+					if err := i.parseStep(kt.String(), v, meta); err != nil {
+						return err
+					}
+				case string:
+					if err := i.parseStep(kt, v, meta); err != nil {
+						return err
+					}
+				default:
+					return fmt.Errorf("unknown key type: %v, step: %v", k, step)
+				}
+			}
 		}
 	}
 	return nil
