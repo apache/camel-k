@@ -30,16 +30,7 @@ spec:
       kind: Kamelet
       apiVersion: camel.apache.org/v1alpha1
       name: log-sink
-  errorHandler:   
-#    log:
-#      parameters:
-#        maximumRedeliveries: 3
-#        redeliveryDelay: 2000      
-#    ref: "something"
-#    bean:
-#      type: "org.apache.camel.builder.DeadLetterChannelBuilder"
-#      properties:
-#        deadLetterUri: log:error
+  errorHandler:
     dead-letter-channel:
       endpoint:
         ref:
@@ -47,8 +38,12 @@ spec:
           apiVersion: camel.apache.org/v1alpha1
           name: error-handler
         properties:
-          message: "ERROR!"
+          log-message: "ERROR!"
+          kafka-brokers: ***
+          kafka-topic: my-first-test
+          kafka-service-account-id: ***
+          kafka-service-account-secret: ***
       parameters:
-        maximumRedeliveries: 3
+        maximumRedeliveries: 1
         redeliveryDelay: 2000    
     
