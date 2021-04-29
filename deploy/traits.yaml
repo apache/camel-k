@@ -285,7 +285,7 @@ traits:
     description: Can be used to enable or disable a trait. All traits share this common
       property.
   - name: discovery-cache
-    type: ./pkg/trait.discoveryCacheType
+    type: camel-k/pkg/trait.discoveryCacheType
     description: Discovery client cache to be used, either `disabled`, `disk` or `memory`
       (default `memory`)
 - name: ingress
@@ -545,6 +545,21 @@ traits:
   - name: auto
     type: bool
     description: Enable automatic discovery of all trait properties.
+- name: logging
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: This trait is used to control logging options (such as color)
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: color
+    type: bool
+    description: Colorize the log output
 - name: master
   platform: false
   profiles:
