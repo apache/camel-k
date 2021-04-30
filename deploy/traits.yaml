@@ -560,6 +560,12 @@ traits:
   - name: color
     type: bool
     description: Colorize the log output
+  - name: json
+    type: bool
+    description: Output the log in json format
+  - name: json-pretty-print
+    type: bool
+    description: Enable "pretty printing" of the json log
 - name: master
   platform: false
   profiles:

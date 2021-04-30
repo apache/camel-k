@@ -22,13 +22,14 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"testing"
 )
 
-func createLoggingTestEnv(t *testing.T) *Environment {
+func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint bool) *Environment {
 	c, err := camel.DefaultCatalog()
 	if err != nil {
 		panic(err)
@@ -48,6 +49,13 @@ func createLoggingTestEnv(t *testing.T) *Environment {
 			},
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileOpenShift,
+				Traits: map[string]v1.TraitSpec{
+					"logging": test.TraitSpecFromMap(t, map[string]interface{}{
+						"color":             color,
+						"json":              json,
+						"json-pretty-print": jsonPrettyPrint,
+					}),
+				},
 			},
 		},
 		IntegrationKit: &v1.IntegrationKit{
@@ -71,18 +79,24 @@ func createLoggingTestEnv(t *testing.T) *Environment {
 	return res
 }
 
+func createDefaultLoggingTestEnv(t *testing.T) *Environment {
+	return createLoggingTestEnv(t, true, false, false)
+}
+
 func NewLoggingTestCatalog() *Catalog {
 	return NewCatalog(context.TODO(), nil)
 }
 
 func TestEmptyLoggingTrait(t *testing.T) {
-	env := createLoggingTestEnv(t)
+	env := createDefaultLoggingTestEnv(t)
 	err := NewLoggingTestCatalog().apply(env)
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, env.ExecutedTraits)
 
 	quarkusConsoleColor := false
+	jsonFormat := false
+	jsonPrettyPrint := false
 
 	for _, e := range env.EnvVars {
 		if e.Name == envVarQuarkusLogConsoleColor {
@@ -90,7 +104,59 @@ func TestEmptyLoggingTrait(t *testing.T) {
 				quarkusConsoleColor = true
 			}
 		}
+
+		if e.Name == envVarQuarkusLogConsoleJson {
+			if e.Value == "true" {
+				jsonFormat = true
+			}
+		}
+
+		if e.Name == envVarQuarkusLogConsoleJsonPrettyPrint {
+			if e.Value == "true" {
+				jsonPrettyPrint = true
+			}
+		}
 	}
 
 	assert.True(t, quarkusConsoleColor)
+	assert.False(t, jsonFormat)
+	assert.False(t, jsonPrettyPrint)
+	assert.NotEmpty(t, env.ExecutedTraits)
+}
+
+func TestJsonLoggingTrait(t *testing.T) {
+	env := createLoggingTestEnv(t, true, true, false)
+	err := NewLoggingTestCatalog().apply(env)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, env.ExecutedTraits)
+
+	quarkusConsoleColor := false
+	jsonFormat := true
+	jsonPrettyPrint := false
+
+	for _, e := range env.EnvVars {
+		if e.Name == envVarQuarkusLogConsoleColor {
+			if e.Value == "true" {
+				quarkusConsoleColor = true
+			}
+		}
+
+		if e.Name == envVarQuarkusLogConsoleJson {
+			if e.Value == "true" {
+				jsonFormat = true
+			}
+		}
+
+		if e.Name == envVarQuarkusLogConsoleJsonPrettyPrint {
+			if e.Value == "true" {
+				jsonPrettyPrint = true
+			}
+		}
+	}
+
+	assert.False(t, quarkusConsoleColor)
+	assert.True(t, jsonFormat)
+	assert.False(t, jsonPrettyPrint)
+	assert.NotEmpty(t, env.ExecutedTraits)
 }
