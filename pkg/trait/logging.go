@@ -25,7 +25,10 @@ import (
 )
 
 const (
-	envVarQuarkusLogConsoleColor = "QUARKUS_LOG_CONSOLE_COLOR"
+	envVarQuarkusLogConsoleColor           = "QUARKUS_LOG_CONSOLE_COLOR"
+	envVarQuarkusLogConsoleJson            = "QUARKUS_LOG_CONSOLE_JSON"
+	envVarQuarkusLogConsoleJsonPrettyPrint = "QUARKUS_LOG_CONSOLE_JSON_PRETTY_PRINT"
+	depQuarkusLoggingJson                  = "mvn:io.quarkus:quarkus-logging-json"
 )
 
 // This trait is used to control logging options (such as color)
@@ -35,12 +38,18 @@ type loggingTrait struct {
 	BaseTrait `property:",squash"`
 	// Colorize the log output
 	Color *bool `property:"color" json:"color,omitempty"`
+	// Output the log in json format
+	Json *bool `property:"json" json:"json,omitempty"`
+	// Enable "pretty printing" of the json log
+	JsonPrettyPrint *bool `property:"json-pretty-print" json:"jsonPrettyPrint,omitempty"`
 }
 
 func newLoggingTraitTrait() Trait {
 	return &loggingTrait{
-		BaseTrait: NewBaseTrait("logging", 800),
-		Color:     util.BoolP(true),
+		BaseTrait:       NewBaseTrait("logging", 800),
+		Color:           util.BoolP(true),
+		Json:            util.BoolP(false),
+		JsonPrettyPrint: util.BoolP(false),
 	}
 }
 
@@ -49,11 +58,30 @@ func (l loggingTrait) Configure(environment *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return environment.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
+	return environment.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying,
+		v1.IntegrationPhaseRunning), nil
 }
 
 func (l loggingTrait) Apply(environment *Environment) error {
-	envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleColor, strconv.FormatBool(*l.Color))
+
+	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		if *l.Json {
+			if environment.Integration.Status.Dependencies == nil {
+				environment.Integration.Status.Dependencies = make([]string, 0)
+			}
+
+			util.StringSliceUniqueAdd(&environment.Integration.Status.Dependencies, depQuarkusLoggingJson)
+		}
+
+		return nil
+	}
+
+	envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJson, strconv.FormatBool(*l.Json))
+	envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJsonPrettyPrint, strconv.FormatBool(*l.JsonPrettyPrint))
+
+	if !*l.Json {
+		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleColor, strconv.FormatBool(*l.Color))
+	}
 
 	return nil
 }
