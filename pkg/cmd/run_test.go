@@ -532,7 +532,7 @@ volumes:
 `
 
 	integrationSpec := v1.IntegrationSpec{}
-	err := resolvePodTemplate(context.TODO(),templateText, &integrationSpec)
+	err := resolvePodTemplate(context.TODO(), templateText, &integrationSpec)
 	assert.Nil(t, err)
 	assert.NotNil(t, integrationSpec.PodTemplate)
 	assert.Equal(t, 1, len(integrationSpec.PodTemplate.Spec.Containers))
@@ -543,9 +543,16 @@ func TestResolveJsonPodTemplate(t *testing.T) {
 	integrationSpec := v1.IntegrationSpec{}
 	minifiedYamlTemplate := `{"containers": [{"name": "second"}, {"name": "integration", "env": [{"name": "CAMEL_K_DIGEST", "value": "new_value"}]}]}`
 
-	err := resolvePodTemplate(context.TODO(),minifiedYamlTemplate, &integrationSpec)
+	err := resolvePodTemplate(context.TODO(), minifiedYamlTemplate, &integrationSpec)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, integrationSpec.PodTemplate)
 	assert.Equal(t, 2, len(integrationSpec.PodTemplate.Spec.Containers))
+}
+
+func TestIsLocalFileAndExists(t *testing.T) {
+	value, err := isLocalAndFileExists("/root/test")
+	// must not panic because a permission error
+	assert.NotNil(t, err)
+	assert.False(t, value)
 }
