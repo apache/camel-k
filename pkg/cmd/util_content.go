@@ -30,7 +30,12 @@ func loadRawContent(source string) ([]byte, string, error) {
 	var content []byte
 	var err error
 
-	if isLocalAndFileExists(source) {
+	ok, err := isLocalAndFileExists(source)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if ok {
 		content, err = ioutil.ReadFile(source)
 	} else {
 		u, err := url.Parse(source)
