@@ -9,6 +9,7 @@
 - Update run-from-github page to correct github example path [\#2230](https://github.com/apache/camel-k/issues/2230)
 - Release 1.4.0 [\#2134](https://github.com/apache/camel-k/issues/2134)
 - Can't mount secrets with binary data [\#2009](https://github.com/apache/camel-k/issues/2009)
+- kamelet-binding : suport for error handling [\#1941](https://github.com/apache/camel-k/issues/1941)
 
 **Merged pull requests:**
 
@@ -18,6 +19,7 @@
 - chore: change references to use "main" [\#2234](https://github.com/apache/camel-k/pull/2234) ([nicolaferraro](https://github.com/nicolaferraro))
 - Bump version to 1.5.0-SNAPSHOT [\#2233](https://github.com/apache/camel-k/pull/2233) ([nicolaferraro](https://github.com/nicolaferraro))
 - issue2230- fix for run-from-github page [\#2231](https://github.com/apache/camel-k/pull/2231) ([bfitzpat](https://github.com/bfitzpat))
+- feat\(kamelets\): kamelet binding error handler [\#2217](https://github.com/apache/camel-k/pull/2217) ([squakez](https://github.com/squakez))
 
 ## [v1.4.0](https://github.com/apache/camel-k/tree/v1.4.0) (2021-04-16)
 
@@ -2134,6 +2136,7 @@
 - Add asciidoc documentation with sub-documents and some badges [\#109](https://github.com/apache/camel-k/pull/109) ([nicolaferraro](https://github.com/nicolaferraro))
 - Refactor build, deploy and run workflow [\#107](https://github.com/apache/camel-k/pull/107) ([lburgazzoli](https://github.com/lburgazzoli))
 - Bump version to 0.0.3-SNAPSHOT [\#105](https://github.com/apache/camel-k/pull/105) ([nicolaferraro](https://github.com/nicolaferraro))
+- Add delete integration option [\#100](https://github.com/apache/camel-k/pull/100) ([dmvolod](https://github.com/dmvolod))
 
 ## [0.0.2](https://github.com/apache/camel-k/tree/0.0.2) (2018-09-19)
 
@@ -2165,7 +2168,6 @@
 
 - Fix golint findings, remove unused code [\#103](https://github.com/apache/camel-k/pull/103) ([lburgazzoli](https://github.com/lburgazzoli))
 - feat\(examples\): Add a Camel-caffeine Cache java sample [\#101](https://github.com/apache/camel-k/pull/101) ([oscerd](https://github.com/oscerd))
-- Add delete integration option [\#100](https://github.com/apache/camel-k/pull/100) ([dmvolod](https://github.com/dmvolod))
 - chore: refactor pkg/build to a more idiomatic structure [\#99](https://github.com/apache/camel-k/pull/99) ([lburgazzoli](https://github.com/lburgazzoli))
 - Auto-discover dependencies [\#98](https://github.com/apache/camel-k/pull/98) ([nicolaferraro](https://github.com/nicolaferraro))
 - Embed camel catalog [\#95](https://github.com/apache/camel-k/pull/95) ([lburgazzoli](https://github.com/lburgazzoli))
