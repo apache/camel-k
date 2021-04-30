@@ -48,6 +48,8 @@ type BeanProperties struct {
 	v1.RawMessage `json:",omitempty"`
 }
 
+// +kubebuilder:object:generate=false
+
 // ErrorHandler is a generic interface that represent any type of error handler specification
 type ErrorHandler interface {
 	Type() ErrorHandlerType
