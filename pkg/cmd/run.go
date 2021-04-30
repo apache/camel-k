@@ -376,7 +376,11 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 	files = append(files, o.OpenAPIs...)
 
 	for _, s := range files {
-		if isLocalAndFileExists(s) {
+		ok, err := isLocalAndFileExists(s)
+		if err != nil {
+			return err
+		}
+		if ok {
 			changes, err := sync.File(o.Context, s)
 			if err != nil {
 				return err
@@ -680,12 +684,16 @@ func (o *runCmdOptions) configureTraits(integration *v1.Integration, options []s
 	return nil
 }
 
-func isLocalAndFileExists(fileName string) bool {
+func isLocalAndFileExists(fileName string) (bool, error) {
 	info, err := os.Stat(fileName)
-	if os.IsNotExist(err) {
-		return false
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		// If it is a different error (ie, permission denied) we should report it back
+		return false, errors.Wrap(err, fmt.Sprintf("file system error while looking for %s", fileName))
 	}
-	return !info.IsDir()
+	return !info.IsDir(), nil
 }
 
 func addPropertyFile(fileName string, spec *v1.IntegrationSpec) error {

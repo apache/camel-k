@@ -65,7 +65,12 @@ func ResolveSources(ctx context.Context, locations []string, compress bool) ([]S
 	sources := make([]Source, 0, len(locations))
 
 	for _, location := range locations {
-		if isLocalAndFileExists(location) {
+		ok, err := isLocalAndFileExists(location)
+		if err != nil {
+			return sources, err
+		}
+
+		if ok {
 			answer, err := ResolveLocalSource(location, compress)
 			if err != nil {
 				return sources, err

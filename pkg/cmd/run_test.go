@@ -513,3 +513,10 @@ func TestRunTextCompressedResource(t *testing.T) {
 	assert.Equal(t, "text/plain", textResourceSpec.ContentType)
 	assert.True(t, textResourceSpec.Compression)
 }
+
+func TestIsLocalFileAndExists(t *testing.T) {
+	value, err := isLocalAndFileExists("/root/test")
+	// must not panic because a permission error
+	assert.NotNil(t, err)
+	assert.False(t, value)
+}
