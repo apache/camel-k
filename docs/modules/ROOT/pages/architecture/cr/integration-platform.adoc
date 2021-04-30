@@ -22,7 +22,7 @@ type IntegrationPlatformSpec struct {
 <2> The status of the object at current time
 <3> The type of the Kubernetes Cluster (Kubernetes or OpenShift)
 <4> Configures the traits that have to be applied by default (Kubernetes, OpneShift, Knative)
-<5> Configuration options of the image build process such as the type of the builder (buildah, kanico, spectrum) and the maven repositories that have to be configured in order retrieve the artifacts needed by the integrations.
+<5> Configuration options of the image build process such as the type of the builder (buildah, kanico, spectrum), maven repositories that have to be configured in order retrieve the artifacts needed by the integrations, and the target repository name for the builders that use container registry.
 <6> The traits and configuration options that have to be propagated to each integration.
 
 [NOTE]

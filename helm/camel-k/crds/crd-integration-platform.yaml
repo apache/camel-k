@@ -180,6 +180,8 @@ spec:
                     type: string
                   runtimeVersion:
                     type: string
+                  targetRepository:
+                    type: string
                   timeout:
                     type: string
                 type: object
@@ -351,6 +353,8 @@ spec:
                     description: RuntimeProvider --
                     type: string
                   runtimeVersion:
+                    type: string
+                  targetRepository:
                     type: string
                   timeout:
                     type: string
