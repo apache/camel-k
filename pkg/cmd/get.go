@@ -41,7 +41,7 @@ func newCmdGet(rootCmdOptions *RootCmdOptions) (*cobra.Command, *getCmdOptions) 
 	cmd := cobra.Command{
 		Use:     "get [integration]",
 		Short:   "Get integrations deployed on Kubernetes",
-		Long:    `Get the status of integrations deployed on on Kubernetes.`,
+		Long:    `Get the status of integrations deployed on Kubernetes.`,
 		PreRunE: decode(&options),
 		RunE:    options.run,
 	}
