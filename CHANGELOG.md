@@ -13,6 +13,9 @@
 
 **Merged pull requests:**
 
+- fix\(api\): Fix error handler types deepcopy generation [\#2253](https://github.com/apache/camel-k/pull/2253) ([astefanutti](https://github.com/astefanutti))
+- Added support for the json log format via the logging trait [\#2252](https://github.com/apache/camel-k/pull/2252) ([orpiske](https://github.com/orpiske))
+- Improve readability of error messages in Camel K [\#2245](https://github.com/apache/camel-k/pull/2245) ([orpiske](https://github.com/orpiske))
 - fix\(ci\): Use Docker to build OLM index image [\#2242](https://github.com/apache/camel-k/pull/2242) ([astefanutti](https://github.com/astefanutti))
 - fix\(build\): Default to routine build strategy for local IntegrationPlatform [\#2240](https://github.com/apache/camel-k/pull/2240) ([astefanutti](https://github.com/astefanutti))
 - chore: ugprade Service Binding Operator v0.7.1 [\#2235](https://github.com/apache/camel-k/pull/2235) ([johnpoth](https://github.com/johnpoth))
@@ -259,7 +262,6 @@
 - camel-K installation failed with Helm on GKE [\#1664](https://github.com/apache/camel-k/issues/1664)
 - Add a warning when operating from a CLI with a different installed Operator version [\#1652](https://github.com/apache/camel-k/issues/1652)
 - Increase trait test coverage [\#1547](https://github.com/apache/camel-k/issues/1547)
-- Upgrade CRDs to apiextensions.k8s.io/v1 [\#1487](https://github.com/apache/camel-k/issues/1487)
 - Implement kit\_create command's flags test [\#1159](https://github.com/apache/camel-k/issues/1159)
 - Implement install command's flags test [\#1158](https://github.com/apache/camel-k/issues/1158)
 - Implement delete command's flags test [\#1157](https://github.com/apache/camel-k/issues/1157)
@@ -692,6 +694,7 @@
 **Closed issues:**
 
 - Print the JVM command with its parameters in integration pod logs [\#1495](https://github.com/apache/camel-k/issues/1495)
+- Upgrade CRDs to apiextensions.k8s.io/v1 [\#1487](https://github.com/apache/camel-k/issues/1487)
 - Converting ProcessorDefinition to DSL and interfacing with camel k [\#1469](https://github.com/apache/camel-k/issues/1469)
 - vanilla minikube - CronJobs are not being built from operator [\#1442](https://github.com/apache/camel-k/issues/1442)
 - Move languages documentation to camel-k-runtime [\#1427](https://github.com/apache/camel-k/issues/1427)
@@ -2136,7 +2139,6 @@
 - Add asciidoc documentation with sub-documents and some badges [\#109](https://github.com/apache/camel-k/pull/109) ([nicolaferraro](https://github.com/nicolaferraro))
 - Refactor build, deploy and run workflow [\#107](https://github.com/apache/camel-k/pull/107) ([lburgazzoli](https://github.com/lburgazzoli))
 - Bump version to 0.0.3-SNAPSHOT [\#105](https://github.com/apache/camel-k/pull/105) ([nicolaferraro](https://github.com/nicolaferraro))
-- Add delete integration option [\#100](https://github.com/apache/camel-k/pull/100) ([dmvolod](https://github.com/dmvolod))
 
 ## [0.0.2](https://github.com/apache/camel-k/tree/0.0.2) (2018-09-19)
 
@@ -2168,6 +2170,7 @@
 
 - Fix golint findings, remove unused code [\#103](https://github.com/apache/camel-k/pull/103) ([lburgazzoli](https://github.com/lburgazzoli))
 - feat\(examples\): Add a Camel-caffeine Cache java sample [\#101](https://github.com/apache/camel-k/pull/101) ([oscerd](https://github.com/oscerd))
+- Add delete integration option [\#100](https://github.com/apache/camel-k/pull/100) ([dmvolod](https://github.com/dmvolod))
 - chore: refactor pkg/build to a more idiomatic structure [\#99](https://github.com/apache/camel-k/pull/99) ([lburgazzoli](https://github.com/lburgazzoli))
 - Auto-discover dependencies [\#98](https://github.com/apache/camel-k/pull/98) ([nicolaferraro](https://github.com/nicolaferraro))
 - Embed camel catalog [\#95](https://github.com/apache/camel-k/pull/95) ([lburgazzoli](https://github.com/lburgazzoli))
