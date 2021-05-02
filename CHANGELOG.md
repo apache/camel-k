@@ -262,6 +262,7 @@
 - camel-K installation failed with Helm on GKE [\#1664](https://github.com/apache/camel-k/issues/1664)
 - Add a warning when operating from a CLI with a different installed Operator version [\#1652](https://github.com/apache/camel-k/issues/1652)
 - Increase trait test coverage [\#1547](https://github.com/apache/camel-k/issues/1547)
+- Upgrade CRDs to apiextensions.k8s.io/v1 [\#1487](https://github.com/apache/camel-k/issues/1487)
 - Implement kit\_create command's flags test [\#1159](https://github.com/apache/camel-k/issues/1159)
 - Implement install command's flags test [\#1158](https://github.com/apache/camel-k/issues/1158)
 - Implement delete command's flags test [\#1157](https://github.com/apache/camel-k/issues/1157)
@@ -694,7 +695,6 @@
 **Closed issues:**
 
 - Print the JVM command with its parameters in integration pod logs [\#1495](https://github.com/apache/camel-k/issues/1495)
-- Upgrade CRDs to apiextensions.k8s.io/v1 [\#1487](https://github.com/apache/camel-k/issues/1487)
 - Converting ProcessorDefinition to DSL and interfacing with camel k [\#1469](https://github.com/apache/camel-k/issues/1469)
 - vanilla minikube - CronJobs are not being built from operator [\#1442](https://github.com/apache/camel-k/issues/1442)
 - Move languages documentation to camel-k-runtime [\#1427](https://github.com/apache/camel-k/issues/1427)
