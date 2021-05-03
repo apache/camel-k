@@ -1957,6 +1957,7 @@
 - chore\(release\): package examples to publish them during release [\#295](https://github.com/apache/camel-k/pull/295) ([nicolaferraro](https://github.com/nicolaferraro))
 - Allow to generate install resources if needed [\#294](https://github.com/apache/camel-k/pull/294) ([nicolaferraro](https://github.com/nicolaferraro))
 - Re-add missing commits [\#293](https://github.com/apache/camel-k/pull/293) ([nicolaferraro](https://github.com/nicolaferraro))
+- Inject camel-k version as environment variable [\#286](https://github.com/apache/camel-k/pull/286) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(log\): make dev-mode work in Knative [\#280](https://github.com/apache/camel-k/pull/280) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#221: use registry name instead of IP in Knative on Openshift [\#278](https://github.com/apache/camel-k/pull/278) ([nicolaferraro](https://github.com/nicolaferraro))
 - Determine active/passive endpoints from Catalog [\#277](https://github.com/apache/camel-k/pull/277) ([lburgazzoli](https://github.com/lburgazzoli))
@@ -2137,7 +2138,6 @@
 - chore\(kamel\): improve completion and context delete [\#111](https://github.com/apache/camel-k/pull/111) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(dep\): remove dependency on yaml.v1 [\#110](https://github.com/apache/camel-k/pull/110) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add asciidoc documentation with sub-documents and some badges [\#109](https://github.com/apache/camel-k/pull/109) ([nicolaferraro](https://github.com/nicolaferraro))
-- Refactor build, deploy and run workflow [\#107](https://github.com/apache/camel-k/pull/107) ([lburgazzoli](https://github.com/lburgazzoli))
 - Bump version to 0.0.3-SNAPSHOT [\#105](https://github.com/apache/camel-k/pull/105) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [0.0.2](https://github.com/apache/camel-k/tree/0.0.2) (2018-09-19)
@@ -2168,6 +2168,7 @@
 
 **Merged pull requests:**
 
+- Refactor build, deploy and run workflow [\#107](https://github.com/apache/camel-k/pull/107) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix golint findings, remove unused code [\#103](https://github.com/apache/camel-k/pull/103) ([lburgazzoli](https://github.com/lburgazzoli))
 - feat\(examples\): Add a Camel-caffeine Cache java sample [\#101](https://github.com/apache/camel-k/pull/101) ([oscerd](https://github.com/oscerd))
 - Add delete integration option [\#100](https://github.com/apache/camel-k/pull/100) ([dmvolod](https://github.com/dmvolod))
