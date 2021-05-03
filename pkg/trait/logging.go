@@ -25,10 +25,12 @@ import (
 )
 
 const (
+	envVarQuarkusLogLevel                  = "QUARKUS_LOG_LEVEL"
 	envVarQuarkusLogConsoleColor           = "QUARKUS_LOG_CONSOLE_COLOR"
 	envVarQuarkusLogConsoleJson            = "QUARKUS_LOG_CONSOLE_JSON"
 	envVarQuarkusLogConsoleJsonPrettyPrint = "QUARKUS_LOG_CONSOLE_JSON_PRETTY_PRINT"
 	depQuarkusLoggingJson                  = "mvn:io.quarkus:quarkus-logging-json"
+	defaultLogLevel                        = "INFO"
 )
 
 // This trait is used to control logging options (such as color)
@@ -38,6 +40,8 @@ type loggingTrait struct {
 	BaseTrait `property:",squash"`
 	// Colorize the log output
 	Color *bool `property:"color" json:"color,omitempty"`
+	// Adjust the log level for the integrations (defaults to INFO)
+	Level string `property:"level" json:"level,omitempty"`
 	// Output the log in json format
 	Json *bool `property:"json" json:"json,omitempty"`
 	// Enable "pretty printing" of the json log
@@ -48,6 +52,7 @@ func newLoggingTraitTrait() Trait {
 	return &loggingTrait{
 		BaseTrait:       NewBaseTrait("logging", 800),
 		Color:           util.BoolP(true),
+		Level:           defaultLogLevel,
 		Json:            util.BoolP(false),
 		JsonPrettyPrint: util.BoolP(false),
 	}
@@ -76,6 +81,7 @@ func (l loggingTrait) Apply(environment *Environment) error {
 		return nil
 	}
 
+	envvar.SetVal(&environment.EnvVars, envVarQuarkusLogLevel, l.Level)
 	envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJson, strconv.FormatBool(*l.Json))
 	envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJsonPrettyPrint, strconv.FormatBool(*l.JsonPrettyPrint))
 
