@@ -576,6 +576,9 @@ traits:
   - name: color
     type: bool
     description: Colorize the log output
+  - name: level
+    type: string
+    description: Adjust the log level for the integrations (defaults to INFO)
   - name: json
     type: bool
     description: Output the log in json format

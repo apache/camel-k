@@ -29,6 +29,10 @@ The following configuration options are available:
 | bool
 | Colorize the log output
 
+| logging.level
+| string
+| Adjust the log level for the integrations (defaults to INFO)
+
 | logging.json
 | bool
 | Output the log in json format
