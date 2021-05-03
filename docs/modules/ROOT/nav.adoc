@@ -20,7 +20,6 @@
 * xref:configuration/configuration.adoc[Configuration]
 ** xref:configuration/maven.adoc[Maven]
 ** xref:configuration/components.adoc[Components]
-** xref:configuration/logging.adoc[Logging]
 ** xref:configuration/dependencies.adoc[Dependencies]
 ** xref:configuration/configmap-secret.adoc[ConfigMap/Secret]
 * Observability
