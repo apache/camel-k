@@ -114,7 +114,6 @@ rules:
   - watch
 - apiGroups:
   - apps
-  attributeRestrictions: null
   resources:
   - daemonsets
   verbs:
@@ -124,7 +123,7 @@ rules:
 - apiGroups:
   - extensions
   resources:
-  - ingresses
+  - networking.k8s.io
   verbs:
   - create
   - delete
@@ -171,7 +170,6 @@ rules:
 - apiGroups:
   - ""
   - build.openshift.io
-  attributeRestrictions: null
   resources:
   - buildconfigs/instantiate
   - buildconfigs/instantiatebinary
