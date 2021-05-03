@@ -29,7 +29,7 @@ import (
 	"testing"
 )
 
-func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint bool) *Environment {
+func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint bool, logLevel string) *Environment {
 	c, err := camel.DefaultCatalog()
 	if err != nil {
 		panic(err)
@@ -54,6 +54,7 @@ func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint b
 						"color":             color,
 						"json":              json,
 						"json-pretty-print": jsonPrettyPrint,
+						"level":             logLevel,
 					}),
 				},
 			},
@@ -80,7 +81,7 @@ func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint b
 }
 
 func createDefaultLoggingTestEnv(t *testing.T) *Environment {
-	return createLoggingTestEnv(t, true, false, false)
+	return createLoggingTestEnv(t, true, false, false, defaultLogLevel)
 }
 
 func NewLoggingTestCatalog() *Catalog {
@@ -97,6 +98,7 @@ func TestEmptyLoggingTrait(t *testing.T) {
 	quarkusConsoleColor := false
 	jsonFormat := false
 	jsonPrettyPrint := false
+	logLevelIsInfo := false
 
 	for _, e := range env.EnvVars {
 		if e.Name == envVarQuarkusLogConsoleColor {
@@ -116,16 +118,23 @@ func TestEmptyLoggingTrait(t *testing.T) {
 				jsonPrettyPrint = true
 			}
 		}
+
+		if e.Name == envVarQuarkusLogLevel {
+			if e.Value == "INFO" {
+				logLevelIsInfo = true
+			}
+		}
 	}
 
 	assert.True(t, quarkusConsoleColor)
+	assert.True(t, logLevelIsInfo)
 	assert.False(t, jsonFormat)
 	assert.False(t, jsonPrettyPrint)
 	assert.NotEmpty(t, env.ExecutedTraits)
 }
 
 func TestJsonLoggingTrait(t *testing.T) {
-	env := createLoggingTestEnv(t, true, true, false)
+	env := createLoggingTestEnv(t, true, true, false, "TRACE")
 	err := NewLoggingTestCatalog().apply(env)
 
 	assert.Nil(t, err)
@@ -134,6 +143,7 @@ func TestJsonLoggingTrait(t *testing.T) {
 	quarkusConsoleColor := false
 	jsonFormat := true
 	jsonPrettyPrint := false
+	logLevelIsTrace := false
 
 	for _, e := range env.EnvVars {
 		if e.Name == envVarQuarkusLogConsoleColor {
@@ -153,10 +163,17 @@ func TestJsonLoggingTrait(t *testing.T) {
 				jsonPrettyPrint = true
 			}
 		}
+
+		if e.Name == envVarQuarkusLogLevel {
+			if e.Value == "TRACE" {
+				logLevelIsTrace = true
+			}
+		}
 	}
 
 	assert.False(t, quarkusConsoleColor)
 	assert.True(t, jsonFormat)
 	assert.False(t, jsonPrettyPrint)
+	assert.True(t, logLevelIsTrace)
 	assert.NotEmpty(t, env.ExecutedTraits)
 }
