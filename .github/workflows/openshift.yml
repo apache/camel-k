@@ -148,6 +148,9 @@ jobs:
         echo "Build project"
         make build-kamel bundle-kamelets
 
+        echo "Preparing the maven overlay"
+        make maven-overlay
+
         echo "Adding maven artifacts to the image context"
         make PACKAGE_ARTIFACTS_STRATEGY=download package-artifacts
 

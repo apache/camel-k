@@ -219,6 +219,7 @@ clean:
 	rm -f kamel
 	rm -f *.test
 	rm -rf build/_maven_output
+	rm -rf build/_maven_overlay
 	rm -rf build/_output
 	rm -rf camel-k-client-*.tar.gz
 	rm -rf camel-k-examples-*.tar.gz
@@ -237,7 +238,11 @@ lint-fix:
 check-licenses:
 	./script/check_licenses.sh
 
-images: bundle-kamelets test
+maven-overlay:
+	mkdir -p build/_maven_overlay
+	./script/maven_overlay.sh build/_maven_overlay
+
+images: bundle-kamelets test maven-overlay
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
 ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
@@ -247,7 +252,7 @@ else
 endif
 	docker build -t $(IMAGE_NAME):$(VERSION) -f build/Dockerfile .
 
-images-dev: bundle-kamelets test package-artifacts
+images-dev: bundle-kamelets test package-artifacts maven-overlay
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
 ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)

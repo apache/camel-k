@@ -24,10 +24,15 @@ RUN mkdir -p /usr/share/maven \
     && echo "${SHA} /tmp/maven.tar.gz" | sha512sum -c - \
     && tar -xzC /usr/share/maven --strip-components=1 -f /tmp/maven.tar.gz \
     && rm -v /tmp/maven.tar.gz \
-    && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
+    && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn \
+    && rm /usr/share/maven/lib/maven-slf4j-provider*
 
 ADD build/_maven_output /tmp/artifacts/m2
 ADD build/_kamelets /kamelets
+COPY build/_maven_overlay/ /usr/share/maven/lib/
+ADD build/logback.xml /usr/share/maven/conf/
+
+ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=/usr/share/maven/conf/logback.xml"
 
 USER 0
 
