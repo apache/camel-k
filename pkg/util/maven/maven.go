@@ -18,6 +18,7 @@ limitations under the License.
 package maven
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -117,12 +118,6 @@ func Run(ctx Context) error {
 
 	cmd := exec.CommandContext(c, mvnCmd, args...)
 	cmd.Dir = ctx.Path
-	cmd.Stderr = os.Stderr
-	if ctx.Stdout != nil {
-		cmd.Stdout = ctx.Stdout
-	} else {
-		cmd.Stdout = os.Stdout
-	}
 
 	var mavenOptions string
 	if len(ctx.ExtraMavenOpts) > 0 {
@@ -168,7 +163,36 @@ func Run(ctx Context) error {
 	Log.WithValues("timeout", timeout.String(), "MAVEN_OPTS", mavenOptions).
 		Infof("executing: %s", strings.Join(cmd.Args, " "))
 
-	return cmd.Run()
+	stdOut, error := cmd.StdoutPipe()
+	if error != nil {
+		return nil
+	}
+
+	error = cmd.Start()
+
+	if error != nil {
+		return error
+	}
+
+	scanner := bufio.NewScanner(stdOut)
+
+	Log.Debug("About to start parsing the Maven output")
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		mavenLog, parseError := ParseLog(line)
+
+		if parseError != nil {
+			// Do not abort the build because parsing failed ... the build may have succeeded
+			Log.Error(parseError, "Unable to parse maven log")
+		} else {
+			NormalizeLog(mavenLog)
+		}
+	}
+	Log.Debug("Finished parsing Maven output")
+
+	return cmd.Wait()
 }
 
 // ParseGAV decode a maven artifact id to a dependency definition.
