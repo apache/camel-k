@@ -102,19 +102,9 @@ jobs:
     - name: Build Operator
       run: |
         echo "Build project"
-        make build-kamel bundle-kamelets
-        echo "Preparing the maven overlay"
-        make maven-overlay
-        echo "Adding maven artifacts to the image context"
-        make PACKAGE_ARTIFACTS_STRATEGY=download package-artifacts
-        echo "Copying binary file to docker dir"
-        mkdir -p ./build/_output/bin
-        cp ./kamel ./build/_output/bin/
-        echo "Building the images"
-        export LOCAL_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make get-version)
-        echo "LOCAL_IMAGE=${LOCAL_IMAGE}" >> $GITHUB_ENV
-        docker build -t "${LOCAL_IMAGE}" -f build/Dockerfile .
-        docker push ${LOCAL_IMAGE}
+        export LOCAL_IMAGE=$KIND_REGISTRY/apache/camel-k
+        echo "LOCAL_IMAGE=${LOCAL_IMAGE}:$(make get-version)" >> $GITHUB_ENV
+        make IMAGE_NAME=${LOCAL_IMAGE} PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images images-push
     - name: Build Operator bundle
       run: |
         echo "Build Operator bundle"
