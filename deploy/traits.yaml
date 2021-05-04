@@ -567,7 +567,9 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: This trait is used to control logging options (such as color)
+  description: This trait is used to control logging options (such as color and the
+    format). The logging backend is provided by Quarkus and configuration details
+    for things like the the log format can be found on https://quarkus.io/guides/logging
   properties:
   - name: enabled
     type: bool
@@ -576,6 +578,9 @@ traits:
   - name: color
     type: bool
     description: Colorize the log output
+  - name: format
+    type: string
+    description: Log message format
   - name: level
     type: string
     description: Adjust the log level for the integrations (defaults to INFO)

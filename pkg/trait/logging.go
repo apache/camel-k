@@ -27,19 +27,24 @@ import (
 const (
 	envVarQuarkusLogLevel                  = "QUARKUS_LOG_LEVEL"
 	envVarQuarkusLogConsoleColor           = "QUARKUS_LOG_CONSOLE_COLOR"
+	envVarQuarkusLogConsoleFormat          = "QUARKUS_LOG_CONSOLE_FORMAT"
 	envVarQuarkusLogConsoleJson            = "QUARKUS_LOG_CONSOLE_JSON"
 	envVarQuarkusLogConsoleJsonPrettyPrint = "QUARKUS_LOG_CONSOLE_JSON_PRETTY_PRINT"
 	depQuarkusLoggingJson                  = "mvn:io.quarkus:quarkus-logging-json"
+	defaultLogFormat                       = ""
 	defaultLogLevel                        = "INFO"
 )
 
-// This trait is used to control logging options (such as color)
+// This trait is used to control logging options (such as color and the format). The logging backend is provided by
+// Quarkus and configuration details for things like the the log format can be found on https://quarkus.io/guides/logging
 //
 // +camel-k:trait=logging
 type loggingTrait struct {
 	BaseTrait `property:",squash"`
 	// Colorize the log output
 	Color *bool `property:"color" json:"color,omitempty"`
+	// Log message format
+	Format string `property:"format" json:"format,omitempty"`
 	// Adjust the log level for the integrations (defaults to INFO)
 	Level string `property:"level" json:"level,omitempty"`
 	// Output the log in json format
@@ -52,6 +57,7 @@ func newLoggingTraitTrait() Trait {
 	return &loggingTrait{
 		BaseTrait:       NewBaseTrait("logging", 800),
 		Color:           util.BoolP(true),
+		Format:          defaultLogFormat,
 		Level:           defaultLogLevel,
 		Json:            util.BoolP(false),
 		JsonPrettyPrint: util.BoolP(false),
@@ -82,6 +88,11 @@ func (l loggingTrait) Apply(environment *Environment) error {
 	}
 
 	envvar.SetVal(&environment.EnvVars, envVarQuarkusLogLevel, l.Level)
+
+	if l.Format != defaultLogFormat {
+		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleFormat, l.Format)
+	}
+
 	envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJson, strconv.FormatBool(*l.Json))
 	envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJsonPrettyPrint, strconv.FormatBool(*l.JsonPrettyPrint))
 
