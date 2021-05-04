@@ -146,21 +146,9 @@ jobs:
       run: |
         # Compute registry parameters
         echo "Build project"
-        make build-kamel bundle-kamelets
 
-        echo "Preparing the maven overlay"
-        make maven-overlay
-
-        echo "Adding maven artifacts to the image context"
-        make PACKAGE_ARTIFACTS_STRATEGY=download package-artifacts
-
-        echo "Copying binary file to docker dir"
-        mkdir -p ./build/_output/bin
-        cp ./kamel ./build/_output/bin/
-
-        echo "Building the images"
-        export IMAGE=docker.io/apache/camel-k:$(make get-version)
-        docker build -t "${IMAGE}" -f build/Dockerfile .
+        export IMAGE_NAME=docker.io/apache/camel-k:$(make get-version)
+        make PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images
 
         # Make the Apache Snapshots or Apache Staging repository enabled by default
         export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
