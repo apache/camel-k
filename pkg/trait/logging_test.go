@@ -29,7 +29,7 @@ import (
 	"testing"
 )
 
-func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint bool, logLevel string) *Environment {
+func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint bool, logLevel string, logFormat string) *Environment {
 	c, err := camel.DefaultCatalog()
 	if err != nil {
 		panic(err)
@@ -52,6 +52,7 @@ func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint b
 				Traits: map[string]v1.TraitSpec{
 					"logging": test.TraitSpecFromMap(t, map[string]interface{}{
 						"color":             color,
+						"format":            logFormat,
 						"json":              json,
 						"json-pretty-print": jsonPrettyPrint,
 						"level":             logLevel,
@@ -81,7 +82,7 @@ func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint b
 }
 
 func createDefaultLoggingTestEnv(t *testing.T) *Environment {
-	return createLoggingTestEnv(t, true, false, false, defaultLogLevel)
+	return createLoggingTestEnv(t, true, false, false, defaultLogLevel, defaultLogFormat)
 }
 
 func NewLoggingTestCatalog() *Catalog {
@@ -99,6 +100,7 @@ func TestEmptyLoggingTrait(t *testing.T) {
 	jsonFormat := false
 	jsonPrettyPrint := false
 	logLevelIsInfo := false
+	logFormatIsNotDefault := false
 
 	for _, e := range env.EnvVars {
 		if e.Name == envVarQuarkusLogConsoleColor {
@@ -124,17 +126,23 @@ func TestEmptyLoggingTrait(t *testing.T) {
 				logLevelIsInfo = true
 			}
 		}
+
+		if e.Name == envVarQuarkusLogConsoleFormat {
+			logFormatIsNotDefault = true
+		}
 	}
 
 	assert.True(t, quarkusConsoleColor)
 	assert.True(t, logLevelIsInfo)
 	assert.False(t, jsonFormat)
 	assert.False(t, jsonPrettyPrint)
+	assert.False(t, logFormatIsNotDefault)
 	assert.NotEmpty(t, env.ExecutedTraits)
 }
 
 func TestJsonLoggingTrait(t *testing.T) {
-	env := createLoggingTestEnv(t, true, true, false, "TRACE")
+	// When running, this log should look like "09:07:00 INFO  (main) Profile prod activated."
+	env := createLoggingTestEnv(t, true, true, false, "TRACE", "%d{HH:mm:ss} %-5p (%t) %s%e%n")
 	err := NewLoggingTestCatalog().apply(env)
 
 	assert.Nil(t, err)
@@ -144,6 +152,7 @@ func TestJsonLoggingTrait(t *testing.T) {
 	jsonFormat := true
 	jsonPrettyPrint := false
 	logLevelIsTrace := false
+	logFormatIsNotDefault := false
 
 	for _, e := range env.EnvVars {
 		if e.Name == envVarQuarkusLogConsoleColor {
@@ -169,11 +178,18 @@ func TestJsonLoggingTrait(t *testing.T) {
 				logLevelIsTrace = true
 			}
 		}
+
+		if e.Name == envVarQuarkusLogConsoleFormat {
+			if e.Value == "%d{HH:mm:ss} %-5p (%t) %s%e%n" {
+				logFormatIsNotDefault = true
+			}
+		}
 	}
 
 	assert.False(t, quarkusConsoleColor)
 	assert.True(t, jsonFormat)
 	assert.False(t, jsonPrettyPrint)
 	assert.True(t, logLevelIsTrace)
+	assert.True(t, logFormatIsNotDefault)
 	assert.NotEmpty(t, env.ExecutedTraits)
 }
