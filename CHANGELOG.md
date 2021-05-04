@@ -10,12 +10,20 @@
 - Release 1.4.0 [\#2134](https://github.com/apache/camel-k/issues/2134)
 - Can't mount secrets with binary data [\#2009](https://github.com/apache/camel-k/issues/2009)
 - kamelet-binding : suport for error handling [\#1941](https://github.com/apache/camel-k/issues/1941)
+- Integration logging configuration [\#580](https://github.com/apache/camel-k/issues/580)
+- kamel run - compile errors should be more visible [\#185](https://github.com/apache/camel-k/issues/185)
 
 **Merged pull requests:**
 
+- Remove a reference to the old logging configuration page [\#2261](https://github.com/apache/camel-k/pull/2261) ([orpiske](https://github.com/orpiske))
+- Replaced the logging configuration documentation with the logging trait documentation [\#2259](https://github.com/apache/camel-k/pull/2259) ([orpiske](https://github.com/orpiske))
+- Support adjusting the log level for integrations [\#2258](https://github.com/apache/camel-k/pull/2258) ([orpiske](https://github.com/orpiske))
+- fix\(olm\): Update CSV base template [\#2257](https://github.com/apache/camel-k/pull/2257) ([astefanutti](https://github.com/astefanutti))
+- Fix typo [\#2254](https://github.com/apache/camel-k/pull/2254) ([apupier](https://github.com/apupier))
 - fix\(api\): Fix error handler types deepcopy generation [\#2253](https://github.com/apache/camel-k/pull/2253) ([astefanutti](https://github.com/astefanutti))
 - Added support for the json log format via the logging trait [\#2252](https://github.com/apache/camel-k/pull/2252) ([orpiske](https://github.com/orpiske))
 - Improve readability of error messages in Camel K [\#2245](https://github.com/apache/camel-k/pull/2245) ([orpiske](https://github.com/orpiske))
+- doc\(install\): operationalize options [\#2244](https://github.com/apache/camel-k/pull/2244) ([squakez](https://github.com/squakez))
 - fix\(ci\): Use Docker to build OLM index image [\#2242](https://github.com/apache/camel-k/pull/2242) ([astefanutti](https://github.com/astefanutti))
 - fix\(build\): Default to routine build strategy for local IntegrationPlatform [\#2240](https://github.com/apache/camel-k/pull/2240) ([astefanutti](https://github.com/astefanutti))
 - chore: ugprade Service Binding Operator v0.7.1 [\#2235](https://github.com/apache/camel-k/pull/2235) ([johnpoth](https://github.com/johnpoth))
@@ -213,7 +221,6 @@
 - Backport fix for \#2035: invalid YAML should not make the operator panic [\#2150](https://github.com/apache/camel-k/pull/2150) ([nicolaferraro](https://github.com/nicolaferraro))
 - update operator-lifecycle-manager [\#2072](https://github.com/apache/camel-k/pull/2072) ([akihikokuroda](https://github.com/akihikokuroda))
 - Backport \#2036 to 1.3.x branch [\#2050](https://github.com/apache/camel-k/pull/2050) ([astefanutti](https://github.com/astefanutti))
-- Backport \#2042 to 1.3.x branch [\#2046](https://github.com/apache/camel-k/pull/2046) ([astefanutti](https://github.com/astefanutti))
 - Backport \#2041 to 1.3.x branch [\#2045](https://github.com/apache/camel-k/pull/2045) ([astefanutti](https://github.com/astefanutti))
 - Backport fix to \#1992: allow accessing Strimzi "kafkatopics" instead of "topics" [\#1994](https://github.com/apache/camel-k/pull/1994) ([nicolaferraro](https://github.com/nicolaferraro))
 - \[Backport release-1.3.x\] Fix a little typo good for testing backport action [\#1990](https://github.com/apache/camel-k/pull/1990) ([github-actions[bot]](https://github.com/apps/github-actions))
@@ -351,7 +358,6 @@
 - Fix \#1549: auto-detect json in YAML [\#1809](https://github.com/apache/camel-k/pull/1809) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1771: use registry creds for pull and push and set Spectrum as default [\#1807](https://github.com/apache/camel-k/pull/1807) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add local run subcommand with basic support [\#1805](https://github.com/apache/camel-k/pull/1805) ([doru1004](https://github.com/doru1004))
-- Fix \#1562: remove support for main runtime [\#1804](https://github.com/apache/camel-k/pull/1804) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(ci\): simplify test configuration [\#1801](https://github.com/apache/camel-k/pull/1801) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#751: add guard to global operator [\#1800](https://github.com/apache/camel-k/pull/1800) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fixes ENTESB-15219: only use default values when user doesn't provide a kamelet property value in integration [\#1796](https://github.com/apache/camel-k/pull/1796) ([dhirajsb](https://github.com/dhirajsb))
@@ -416,6 +422,7 @@
 
 **Merged pull requests:**
 
+- Fix \#1562: remove support for main runtime [\#1804](https://github.com/apache/camel-k/pull/1804) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix ENTESB-15219: only use default values when user doesn't provide a kamelet property value in integration [\#1797](https://github.com/apache/camel-k/pull/1797) ([dhirajsb](https://github.com/dhirajsb))
 - Backport Kamelet changes to 1.2.x [\#1788](https://github.com/apache/camel-k/pull/1788) ([nicolaferraro](https://github.com/nicolaferraro))
 
@@ -1957,7 +1964,6 @@
 - chore\(release\): package examples to publish them during release [\#295](https://github.com/apache/camel-k/pull/295) ([nicolaferraro](https://github.com/nicolaferraro))
 - Allow to generate install resources if needed [\#294](https://github.com/apache/camel-k/pull/294) ([nicolaferraro](https://github.com/nicolaferraro))
 - Re-add missing commits [\#293](https://github.com/apache/camel-k/pull/293) ([nicolaferraro](https://github.com/nicolaferraro))
-- Inject camel-k version as environment variable [\#286](https://github.com/apache/camel-k/pull/286) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(log\): make dev-mode work in Knative [\#280](https://github.com/apache/camel-k/pull/280) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#221: use registry name instead of IP in Knative on Openshift [\#278](https://github.com/apache/camel-k/pull/278) ([nicolaferraro](https://github.com/nicolaferraro))
 - Determine active/passive endpoints from Catalog [\#277](https://github.com/apache/camel-k/pull/277) ([lburgazzoli](https://github.com/lburgazzoli))
@@ -2138,6 +2144,7 @@
 - chore\(kamel\): improve completion and context delete [\#111](https://github.com/apache/camel-k/pull/111) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(dep\): remove dependency on yaml.v1 [\#110](https://github.com/apache/camel-k/pull/110) ([lburgazzoli](https://github.com/lburgazzoli))
 - Add asciidoc documentation with sub-documents and some badges [\#109](https://github.com/apache/camel-k/pull/109) ([nicolaferraro](https://github.com/nicolaferraro))
+- Refactor build, deploy and run workflow [\#107](https://github.com/apache/camel-k/pull/107) ([lburgazzoli](https://github.com/lburgazzoli))
 - Bump version to 0.0.3-SNAPSHOT [\#105](https://github.com/apache/camel-k/pull/105) ([nicolaferraro](https://github.com/nicolaferraro))
 
 ## [0.0.2](https://github.com/apache/camel-k/tree/0.0.2) (2018-09-19)
@@ -2168,7 +2175,6 @@
 
 **Merged pull requests:**
 
-- Refactor build, deploy and run workflow [\#107](https://github.com/apache/camel-k/pull/107) ([lburgazzoli](https://github.com/lburgazzoli))
 - Fix golint findings, remove unused code [\#103](https://github.com/apache/camel-k/pull/103) ([lburgazzoli](https://github.com/lburgazzoli))
 - feat\(examples\): Add a Camel-caffeine Cache java sample [\#101](https://github.com/apache/camel-k/pull/101) ([oscerd](https://github.com/oscerd))
 - Add delete integration option [\#100](https://github.com/apache/camel-k/pull/100) ([dmvolod](https://github.com/dmvolod))
