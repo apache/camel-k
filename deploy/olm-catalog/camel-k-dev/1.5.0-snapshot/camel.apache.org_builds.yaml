@@ -77,7 +77,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: BuildSpec defines the desired state of Build
+            description: BuildSpec defines the Build to be executed
             properties:
               tasks:
                 items:
@@ -200,6 +200,8 @@ spec:
                                   type: object
                               type: object
                             timeout:
+                              description: 'Deprecated: use IntegrationPlatform.Spec.Build.Timeout
+                                instead'
                               type: string
                           type: object
                         name:
@@ -345,8 +347,6 @@ spec:
                           items:
                             type: string
                           type: array
-                        timeout:
-                          type: string
                       type: object
                     kaniko:
                       description: KanikoTask --
@@ -354,7 +354,7 @@ spec:
                         baseImage:
                           type: string
                         cache:
-                          description: KanikoTaskCache
+                          description: KanikoTaskCache --
                           properties:
                             enabled:
                               type: boolean
@@ -424,6 +424,8 @@ spec:
                       type: object
                   type: object
                 type: array
+              timeout:
+                type: string
             type: object
           status:
             description: BuildStatus defines the observed state of Build

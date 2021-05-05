@@ -25,9 +25,11 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 // Important: Run "make generate-deepcopy" to regenerate code after modifying this file
 
-// BuildSpec defines the desired state of Build
+// BuildSpec defines the Build to be executed
 type BuildSpec struct {
 	Tasks []Task `json:"tasks,omitempty"`
+	//
+	Timeout metav1.Duration `json:"timeout,omitempty"`
 }
 
 // Task --
@@ -56,7 +58,7 @@ type BuilderTask struct {
 	Maven        MavenSpec         `json:"maven,omitempty"`
 	BuildDir     string            `json:"buildDir,omitempty"`
 	Properties   map[string]string `json:"properties,omitempty"`
-	Timeout      metav1.Duration   `json:"timeout,omitempty"`
+	// Timeout      metav1.Duration   `json:"timeout,omitempty"`
 }
 
 // PublishTask --
@@ -84,7 +86,7 @@ type KanikoTask struct {
 	Cache           KanikoTaskCache `json:"cache,omitempty"`
 }
 
-// KanikoTaskCache
+// KanikoTaskCache --
 type KanikoTaskCache struct {
 	Enabled               *bool  `json:"enabled,omitempty"`
 	PersistentVolumeClaim string `json:"persistentVolumeClaim,omitempty"`

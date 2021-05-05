@@ -63,21 +63,24 @@ type TraitConfiguration struct {
 	RawMessage `json:",inline"`
 }
 
-// RawMessage is a raw encoded JSON value.
-// It implements Marshaler and Unmarshaler and can
-// be used to delay JSON decoding or precompute a JSON encoding.
 // +kubebuilder:validation:Type=object
 // +kubebuilder:validation:Format=""
 // +kubebuilder:pruning:PreserveUnknownFields
+
+// RawMessage is a raw encoded JSON value.
+// It implements Marshaler and Unmarshaler and can
+// be used to delay JSON decoding or precompute a JSON encoding.
 type RawMessage []byte
 
 // +kubebuilder:object:generate=false
+
 // Configurable --
 type Configurable interface {
 	Configurations() []ConfigurationSpec
 }
 
 // +kubebuilder:object:generate=false
+
 // PlatformInjectable --
 type PlatformInjectable interface {
 	SetIntegrationPlatform(platform *IntegrationPlatform)
@@ -94,7 +97,8 @@ type MavenSpec struct {
 	// and configured to be used as a trusted certificate(s) by the Maven commands.
 	// Note that the root CA certificates are also imported into the created keystore.
 	CASecret *corev1.SecretKeySelector `json:"caSecret,omitempty"`
-	Timeout  *metav1.Duration          `json:"timeout,omitempty"`
+	// Deprecated: use IntegrationPlatform.Spec.Build.Timeout instead
+	Timeout *metav1.Duration `json:"timeout,omitempty"`
 }
 
 // ValueSource --
@@ -140,7 +144,7 @@ const (
 	CapabilityCron = "cron"
 	// CapabilityPlatformHTTP --
 	CapabilityPlatformHTTP = "platform-http"
-	// CapabilityCircuitBreaker
+	// CapabilityCircuitBreaker --
 	CapabilityCircuitBreaker = "circuit-breaker"
 	// CapabilityTracing --
 	CapabilityTracing = "tracing"
@@ -149,6 +153,7 @@ const (
 )
 
 // +kubebuilder:object:generate=false
+
 // ResourceCondition is a common type for all conditions
 type ResourceCondition interface {
 	GetType() string
