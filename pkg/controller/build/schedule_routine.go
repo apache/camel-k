@@ -33,7 +33,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
-	camelevent "github.com/apache/camel-k/pkg/event"
+	"github.com/apache/camel-k/pkg/event"
 	"github.com/apache/camel-k/pkg/util/patch"
 )
 
@@ -100,14 +100,17 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1.Build
 	// Start the build asynchronously to avoid blocking the reconcile loop
 	action.routines.Store(build.Name, true)
 
-	// FIXME: Use context.WithTimeout
-	go action.runBuild(ctx, build)
+	go action.runBuild(build)
 
 	return nil, nil
 }
 
-func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Build) {
+func (action *scheduleRoutineAction) runBuild(build *v1.Build) {
 	defer action.routines.Delete(build.Name)
+
+	ctx := context.Background()
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, build.Spec.Timeout.Duration)
+	defer cancel()
 
 	now := metav1.Now()
 	status := v1.BuildStatus{
@@ -121,52 +124,59 @@ func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Bui
 	buildDir := ""
 
 	for i, task := range build.Spec.Tasks {
-		// Coordinate the build and context directories across the sequence of tasks
-		if t := task.Builder; t != nil {
-			if t.BuildDir == "" {
-				tmpDir, err := ioutil.TempDir(os.TempDir(), build.Name+"-")
-				if err != nil {
-					status.Failed(err)
+		select {
+		case <-ctxWithTimeout.Done():
+			status.Phase = v1.BuildPhaseInterrupted
+			break
+
+		default:
+			// Coordinate the build and context directories across the sequence of tasks
+			if t := task.Builder; t != nil {
+				if t.BuildDir == "" {
+					tmpDir, err := ioutil.TempDir(os.TempDir(), build.Name+"-")
+					if err != nil {
+						status.Failed(err)
+						break
+					}
+					t.BuildDir = tmpDir
+					// Deferring in the for loop is what we want here
+					defer os.RemoveAll(tmpDir)
+				}
+				buildDir = t.BuildDir
+			} else if t := task.Spectrum; t != nil && t.ContextDir == "" {
+				if buildDir == "" {
+					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
 					break
 				}
-				t.BuildDir = tmpDir
-				// Deferring in the for loop is what we want here
-				defer os.RemoveAll(tmpDir)
+				t.ContextDir = path.Join(buildDir, builder.ContextDir)
+			} else if t := task.S2i; t != nil && t.ContextDir == "" {
+				if buildDir == "" {
+					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
+					break
+				}
+				t.ContextDir = path.Join(buildDir, builder.ContextDir)
 			}
-			buildDir = t.BuildDir
-		} else if t := task.Spectrum; t != nil && t.ContextDir == "" {
-			if buildDir == "" {
-				status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
+
+			// Execute the task
+			status = action.builder.Build(build).Task(task).Do(ctxWithTimeout)
+
+			lastTask := i == len(build.Spec.Tasks)-1
+			taskFailed := status.Phase == v1.BuildPhaseFailed || status.Phase == v1.BuildPhaseError
+			if lastTask && !taskFailed {
+				status.Phase = v1.BuildPhaseSucceeded
+			}
+
+			if lastTask || taskFailed {
+				// Spare a redundant update
 				break
 			}
-			t.ContextDir = path.Join(buildDir, builder.ContextDir)
-		} else if t := task.S2i; t != nil && t.ContextDir == "" {
-			if buildDir == "" {
-				status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
+
+			// Update the Build status
+			err := action.updateBuildStatus(ctx, build, status)
+			if err != nil {
+				status.Failed(err)
 				break
 			}
-			t.ContextDir = path.Join(buildDir, builder.ContextDir)
-		}
-
-		// Execute the task
-		status = action.builder.Build(build).Task(task).Do(ctx)
-
-		lastTask := i == len(build.Spec.Tasks)-1
-		taskFailed := status.Phase == v1.BuildPhaseFailed || status.Phase == v1.BuildPhaseError
-		if lastTask && !taskFailed {
-			status.Phase = v1.BuildPhaseSucceeded
-		}
-
-		if lastTask || taskFailed {
-			// Spare a redundant update
-			break
-		}
-
-		// Update the Build status
-		err := action.updateBuildStatus(ctx, build, status)
-		if err != nil {
-			status.Failed(err)
-			break
 		}
 	}
 
@@ -197,7 +207,7 @@ func (action *scheduleRoutineAction) updateBuildStatus(ctx context.Context, buil
 	if target.Status.Phase != build.Status.Phase {
 		action.L.Info("Build state transition", "phase", target.Status.Phase)
 	}
-	camelevent.NotifyBuildUpdated(ctx, action.client, action.recorder, build, target)
+	event.NotifyBuildUpdated(ctx, action.client, action.recorder, build, target)
 	build.Status = target.Status
 	return nil
 }
