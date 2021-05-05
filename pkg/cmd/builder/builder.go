@@ -18,22 +18,24 @@ limitations under the License.
 package builder
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"os"
+	"os/signal"
 	"runtime"
+	"syscall"
 	"time"
 
 	"k8s.io/apimachinery/pkg/types"
 
-	controller "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/cancellable"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	logger "github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/patch"
@@ -59,7 +61,7 @@ func Run(namespace string, buildName string, taskName string) {
 	c, err := client.NewClient(false)
 	exitOnError(err, "")
 
-	ctx := cancellable.NewContext()
+	ctx := contextWithInterrupts(context.Background())
 
 	build := &v1.Build{}
 	exitOnError(
@@ -76,17 +78,19 @@ func Run(namespace string, buildName string, taskName string) {
 	exitOnError(err, "cannot create merge patch")
 	if len(p) > 0 {
 		exitOnError(
-			c.Status().Patch(ctx, target, controller.RawPatch(types.MergePatchType, p)),
+			c.Status().Patch(ctx, target, ctrl.RawPatch(types.MergePatchType, p)),
 			fmt.Sprintf("\n--- patch ---\n%s\n-------------\n", string(p)),
 		)
 	} else {
 		log.Info("Patch not applied (no difference)")
 	}
-	build.Status = target.Status
 
-	switch build.Status.Phase {
+	switch target.Status.Phase {
 	case v1.BuildPhaseFailed:
-		log.Error(nil, build.Status.Error)
+		log.Error(nil, target.Status.Error)
+		os.Exit(1)
+	case v1.BuildPhaseInterrupted:
+		log.Error(nil, "The build has been interrupted")
 		os.Exit(1)
 	default:
 		os.Exit(0)
@@ -98,4 +102,25 @@ func exitOnError(err error, msg string) {
 		log.Error(err, msg)
 		os.Exit(1)
 	}
+}
+
+var shutdownSignals = []os.Signal{os.Interrupt, syscall.SIGTERM}
+
+// contextWithInterrupts registers for SIGTERM and SIGINT. A stop channel is returned
+// which is closed on one of these signals. If a second signal is caught, the program
+// is terminated with exit code 1.
+func contextWithInterrupts(parent context.Context) context.Context {
+	ctx, cancel := context.WithCancel(parent)
+
+	c := make(chan os.Signal, 2)
+	signal.Notify(c, shutdownSignals...)
+	go func() {
+		<-c
+		cancel()
+		<-c
+		log.Error(nil, "The build has been interrupted")
+		os.Exit(1) // second signal. Exit directly.
+	}()
+
+	return ctx
 }
