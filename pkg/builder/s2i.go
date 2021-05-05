@@ -40,7 +40,6 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
 	"github.com/apache/camel-k/pkg/util/zip"
 )
@@ -188,31 +187,18 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 		return status.Failed(errors.Wrap(err, "no raw data retrieved"))
 	}
 
-	ocbuild := buildv1.Build{}
-	err = json.Unmarshal(data, &ocbuild)
+	s2iBuild := buildv1.Build{}
+	err = json.Unmarshal(data, &s2iBuild)
 	if err != nil {
 		return status.Failed(errors.Wrap(err, "cannot unmarshal instantiated binary response"))
 	}
 
-	// FIXME: Use context.WithTimeout
-	err = kubernetes.WaitCondition(ctx, t.c, &ocbuild, func(obj interface{}) (bool, error) {
-		if val, ok := obj.(*buildv1.Build); ok {
-			if val.Status.Phase == buildv1.BuildPhaseComplete {
-				if val.Status.Output.To != nil {
-					status.Digest = val.Status.Output.To.ImageDigest
-				}
-				return true, nil
-			} else if val.Status.Phase == buildv1.BuildPhaseCancelled ||
-				val.Status.Phase == buildv1.BuildPhaseFailed ||
-				val.Status.Phase == buildv1.BuildPhaseError {
-				return false, errors.New("build failed")
-			}
-		}
-		return false, nil
-	}, 5*time.Minute)
-
+	err = t.waitForS2iBuildCompletion(ctx, t.c, &s2iBuild)
 	if err != nil {
 		return status.Failed(err)
+	}
+	if s2iBuild.Status.Output.To != nil {
+		status.Digest = s2iBuild.Status.Output.To.ImageDigest
 	}
 
 	err = t.c.Get(ctx, ctrl.ObjectKeyFromObject(is), is)
@@ -244,4 +230,32 @@ func (t *s2iTask) getControllerReference() metav1.Object {
 		}
 	}
 	return owner
+}
+
+func (t *s2iTask) waitForS2iBuildCompletion(ctx context.Context, c client.Client, build *buildv1.Build) error {
+	key := ctrl.ObjectKeyFromObject(build)
+	for {
+		select {
+
+		case <-ctx.Done():
+			return ctx.Err()
+
+		case <-time.After(1 * time.Second):
+			err := c.Get(ctx, key, build)
+			if err != nil {
+				if apierrors.IsNotFound(err) {
+					continue
+				}
+				return err
+			}
+
+			if build.Status.Phase == buildv1.BuildPhaseComplete {
+				return nil
+			} else if build.Status.Phase == buildv1.BuildPhaseCancelled ||
+				build.Status.Phase == buildv1.BuildPhaseFailed ||
+				build.Status.Phase == buildv1.BuildPhaseError {
+				return errors.New("build failed")
+			}
+		}
+	}
 }
