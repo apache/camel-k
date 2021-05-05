@@ -6,15 +6,19 @@
 
 **Closed issues:**
 
+- Consolidate make targets used in Github actions [\#2263](https://github.com/apache/camel-k/issues/2263)
 - Update run-from-github page to correct github example path [\#2230](https://github.com/apache/camel-k/issues/2230)
 - Release 1.4.0 [\#2134](https://github.com/apache/camel-k/issues/2134)
 - Can't mount secrets with binary data [\#2009](https://github.com/apache/camel-k/issues/2009)
 - kamelet-binding : suport for error handling [\#1941](https://github.com/apache/camel-k/issues/1941)
+- builder: use structured logging for maven output [\#1783](https://github.com/apache/camel-k/issues/1783)
 - Integration logging configuration [\#580](https://github.com/apache/camel-k/issues/580)
 - kamel run - compile errors should be more visible [\#185](https://github.com/apache/camel-k/issues/185)
 
 **Merged pull requests:**
 
+- Consolidate make targets used in Github actions [\#2264](https://github.com/apache/camel-k/pull/2264) ([orpiske](https://github.com/orpiske))
+- Added support for displaying Maven logs in JSON [\#2262](https://github.com/apache/camel-k/pull/2262) ([orpiske](https://github.com/orpiske))
 - Remove a reference to the old logging configuration page [\#2261](https://github.com/apache/camel-k/pull/2261) ([orpiske](https://github.com/orpiske))
 - Replaced the logging configuration documentation with the logging trait documentation [\#2259](https://github.com/apache/camel-k/pull/2259) ([orpiske](https://github.com/orpiske))
 - Support adjusting the log level for integrations [\#2258](https://github.com/apache/camel-k/pull/2258) ([orpiske](https://github.com/orpiske))
@@ -221,6 +225,7 @@
 - Backport fix for \#2035: invalid YAML should not make the operator panic [\#2150](https://github.com/apache/camel-k/pull/2150) ([nicolaferraro](https://github.com/nicolaferraro))
 - update operator-lifecycle-manager [\#2072](https://github.com/apache/camel-k/pull/2072) ([akihikokuroda](https://github.com/akihikokuroda))
 - Backport \#2036 to 1.3.x branch [\#2050](https://github.com/apache/camel-k/pull/2050) ([astefanutti](https://github.com/astefanutti))
+- Backport \#2042 to 1.3.x branch [\#2046](https://github.com/apache/camel-k/pull/2046) ([astefanutti](https://github.com/astefanutti))
 - Backport \#2041 to 1.3.x branch [\#2045](https://github.com/apache/camel-k/pull/2045) ([astefanutti](https://github.com/astefanutti))
 - Backport fix to \#1992: allow accessing Strimzi "kafkatopics" instead of "topics" [\#1994](https://github.com/apache/camel-k/pull/1994) ([nicolaferraro](https://github.com/nicolaferraro))
 - \[Backport release-1.3.x\] Fix a little typo good for testing backport action [\#1990](https://github.com/apache/camel-k/pull/1990) ([github-actions[bot]](https://github.com/apps/github-actions))
@@ -358,6 +363,7 @@
 - Fix \#1549: auto-detect json in YAML [\#1809](https://github.com/apache/camel-k/pull/1809) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#1771: use registry creds for pull and push and set Spectrum as default [\#1807](https://github.com/apache/camel-k/pull/1807) ([nicolaferraro](https://github.com/nicolaferraro))
 - Add local run subcommand with basic support [\#1805](https://github.com/apache/camel-k/pull/1805) ([doru1004](https://github.com/doru1004))
+- Fix \#1562: remove support for main runtime [\#1804](https://github.com/apache/camel-k/pull/1804) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(ci\): simplify test configuration [\#1801](https://github.com/apache/camel-k/pull/1801) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix \#751: add guard to global operator [\#1800](https://github.com/apache/camel-k/pull/1800) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fixes ENTESB-15219: only use default values when user doesn't provide a kamelet property value in integration [\#1796](https://github.com/apache/camel-k/pull/1796) ([dhirajsb](https://github.com/dhirajsb))
@@ -422,7 +428,6 @@
 
 **Merged pull requests:**
 
-- Fix \#1562: remove support for main runtime [\#1804](https://github.com/apache/camel-k/pull/1804) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix ENTESB-15219: only use default values when user doesn't provide a kamelet property value in integration [\#1797](https://github.com/apache/camel-k/pull/1797) ([dhirajsb](https://github.com/dhirajsb))
 - Backport Kamelet changes to 1.2.x [\#1788](https://github.com/apache/camel-k/pull/1788) ([nicolaferraro](https://github.com/nicolaferraro))
 
