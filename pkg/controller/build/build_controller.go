@@ -255,11 +255,16 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 		}
 	}
 
-	// Requeue scheduling (resp. failed) build so that it re-enters the build (resp. recovery) working queue
 	if target.Status.Phase == v1.BuildPhaseScheduling || target.Status.Phase == v1.BuildPhaseFailed {
+		// Requeue scheduling (resp. failed) build so that it re-enters the build (resp. recovery) working queue
 		return reconcile.Result{
 			RequeueAfter: 5 * time.Second,
 		}, nil
+	}
+
+	if pl.Status.Build.BuildStrategy == v1.IntegrationPlatformBuildStrategyPod && target.Status.Phase == v1.BuildPhaseRunning {
+		// Requeue running Build to signal timeout to the Build pod
+		return reconcile.Result{RequeueAfter: 1 * time.Second}, nil
 	}
 
 	return reconcile.Result{}, nil

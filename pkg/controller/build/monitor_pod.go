@@ -19,9 +19,14 @@ package build
 
 import (
 	"context"
+	"os"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/tools/remotecommand"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
@@ -54,6 +59,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 
 	switch {
 	case pod == nil:
+		// Reschedule the Build
 		build.Status.Phase = v1.BuildPhaseScheduling
 
 	// Pod remains in pending phase when init containers execute
@@ -104,6 +110,21 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		observeBuildResult(build, build.Status.Phase, duration)
 	}
 
+	if (build.Status.Phase == v1.BuildPhasePending || build.Status.Phase == v1.BuildPhaseRunning) && time.Now().Sub(build.Status.StartedAt.Time) > build.Spec.Timeout.Duration {
+		// Send SIGTERM signal to running containers
+		err := action.signalTimeout(pod)
+		if err != nil {
+			return nil, err
+		}
+
+		build.Status.Phase = v1.BuildPhaseInterrupted
+		duration := metav1.Now().Sub(build.Status.StartedAt.Time)
+		build.Status.Duration = duration.String()
+
+		// Account for the Build metrics
+		observeBuildResult(build, build.Status.Phase, duration)
+	}
+
 	return build, nil
 }
 
@@ -114,4 +135,42 @@ func (action *monitorPodAction) isPodScheduled(pod *corev1.Pod) bool {
 		}
 	}
 	return false
+}
+
+func (action *monitorPodAction) signalTimeout(pod *corev1.Pod) error {
+	var containers []corev1.ContainerStatus
+	containers = append(pod.Status.InitContainerStatuses, pod.Status.ContainerStatuses...)
+	for _, container := range containers {
+		if container.State.Running != nil {
+			r := action.client.CoreV1().RESTClient().Post().
+				Resource("pods").
+				Namespace(pod.Namespace).
+				Name(pod.Name).
+				SubResource("exec").
+				Param("container", container.Name)
+
+			r.VersionedParams(&corev1.PodExecOptions{
+				Container: container.Name,
+				Command:   []string{"kill", "-SIGTERM", "1"},
+				Stdout:    true,
+				Stderr:    true,
+				TTY:       false,
+			}, scheme.ParameterCodec)
+
+			exec, err := remotecommand.NewSPDYExecutor(action.client.GetConfig(), "POST", r.URL())
+			if err != nil {
+				return err
+			}
+
+			err = exec.Stream(remotecommand.StreamOptions{
+				Stdout: os.Stdout,
+				Stderr: os.Stderr,
+				Tty:    false,
+			})
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
