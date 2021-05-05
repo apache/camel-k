@@ -52,7 +52,6 @@ func NewIntegrationList() IntegrationList {
 	}
 }
 
-// Sources return a new slice containing all the sources associated to the integration
 func (in *Integration) Initialize() {
 	profile := in.Status.Profile
 	if in.Spec.Profile != "" {

@@ -142,7 +142,6 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 		Runtime:      e.CamelCatalog.Runtime,
 		Dependencies: e.IntegrationKit.Spec.Dependencies,
 		Properties:   e.Platform.Status.Build.Properties,
-		Timeout:      e.Platform.Status.Build.GetTimeout(),
 		Maven:        e.Platform.Status.Build.Maven,
 	}
 

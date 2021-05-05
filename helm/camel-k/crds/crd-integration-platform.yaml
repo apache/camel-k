@@ -149,6 +149,8 @@ spec:
                             type: object
                         type: object
                       timeout:
+                        description: 'Deprecated: use IntegrationPlatform.Spec.Build.Timeout
+                          instead'
                         type: string
                     type: object
                   persistentVolumeClaim:
@@ -321,6 +323,8 @@ spec:
                             type: object
                         type: object
                       timeout:
+                        description: 'Deprecated: use IntegrationPlatform.Spec.Build.Timeout
+                          instead'
                         type: string
                     type: object
                   persistentVolumeClaim:

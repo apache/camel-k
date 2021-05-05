@@ -93,7 +93,8 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 				Labels:    kubernetes.FilterCamelCreatorLabels(kit.Labels),
 			},
 			Spec: v1.BuildSpec{
-				Tasks: env.BuildTasks,
+				Tasks:   env.BuildTasks,
+				Timeout: env.Platform.Status.Build.GetTimeout(),
 			},
 		}
 
