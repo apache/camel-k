@@ -208,7 +208,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		if err := installOpenShiftRoles(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 			return err
 		}
-		if err := installOpenShiftClusterRoleBinding(ctx, c, collection, cfg.Namespace); err != nil {
+		if err := installOpenShiftClusterRoleConsoleBinding(ctx, c, collection, cfg.Namespace); err != nil {
 			if k8serrors.IsForbidden(err) {
 				fmt.Println("Warning: the operator will not be able to manage ConsoleCLIDownload resources. Try installing the operator as cluster-admin.")
 			} else {
@@ -283,12 +283,12 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 	return nil
 }
 
-func installOpenShiftClusterRoleBinding(ctx context.Context, c client.Client, collection *kubernetes.Collection, namespace string) error {
+func installOpenShiftClusterRoleConsoleBinding(ctx context.Context, c client.Client, collection *kubernetes.Collection, namespace string) error {
 	var target *rbacv1.ClusterRoleBinding
-	existing, err := c.RbacV1().ClusterRoleBindings().Get(ctx, "camel-k-operator-openshift", metav1.GetOptions{})
+	existing, err := c.RbacV1().ClusterRoleBindings().Get(ctx, "camel-k-operator-console-openshift", metav1.GetOptions{})
 	if k8serrors.IsNotFound(err) {
 		existing = nil
-		obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString("/rbac/operator-cluster-role-binding-openshift.yaml"))
+		obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString("/rbac/operator-cluster-role-console-binding-openshift.yaml"))
 		if err != nil {
 			return err
 		}

@@ -318,7 +318,7 @@ traits:
     description: Can be used to enable or disable a trait. All traits share this common
       property.
   - name: discovery-cache
-    type: ./pkg/trait.discoveryCacheType
+    type: github.com/apache/camel-k/pkg/trait.discoveryCacheType
     description: Discovery client cache to be used, either `disabled`, `disk` or `memory`
       (default `memory`)
 - name: ingress
