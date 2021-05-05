@@ -15,46 +15,16 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-kind: Role
+kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: camel-k-builder
+  name: camel-k-builder-openshift
   labels:
     app: "camel-k"
-rules:
-- apiGroups:
-  - camel.apache.org
-  resources:
-  - "*"
-  verbs:
-  - "*"
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  - secrets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - get
-  - list
-  - watch
+subjects:
+- kind: ServiceAccount
+  name: camel-k-builder
+roleRef:
+  kind: Role
+  name: camel-k-builder-openshift
+  apiGroup: rbac.authorization.k8s.io

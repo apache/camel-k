@@ -40,16 +40,16 @@ func BuilderServiceAccountRoles(ctx context.Context, c client.Client, namespace 
 
 func installBuilderServiceAccountRolesOpenShift(ctx context.Context, c client.Client, namespace string) error {
 	return ResourcesOrCollect(ctx, c, namespace, nil, true, IdentityResourceCustomizer,
-		"/manager/builder-service-account.yaml",
-		"/rbac/builder-role-openshift.yaml",
-		"/rbac/builder-role-binding.yaml",
+		"/builder/builder-service-account.yaml",
+		"/builder/builder-role-openshift.yaml",
+		"/builder/builder-role-binding-openshift.yaml",
 	)
 }
 
 func installBuilderServiceAccountRolesKubernetes(ctx context.Context, c client.Client, namespace string) error {
 	return ResourcesOrCollect(ctx, c, namespace, nil, true, IdentityResourceCustomizer,
-		"/manager/builder-service-account.yaml",
-		"/rbac/builder-role-kubernetes.yaml",
-		"/rbac/builder-role-binding.yaml",
+		"/builder/builder-service-account.yaml",
+		"/builder/builder-role-kubernetes.yaml",
+		"/builder/builder-role-binding-kubernetes.yaml",
 	)
 }

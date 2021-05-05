@@ -18,7 +18,7 @@
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: camel-k-builder
+  name: camel-k-builder-kubernetes
   labels:
     app: "camel-k"
 rules:
@@ -58,46 +58,3 @@ rules:
   - get
   - list
   - watch
-- apiGroups:
-  - ""
-  - "build.openshift.io"
-  resources:
-  - buildconfigs
-  - buildconfigs/webhooks
-  - builds
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  - "image.openshift.io"
-  resources:
-  - imagestreamimages
-  - imagestreammappings
-  - imagestreams
-  - imagestreams/secrets
-  - imagestreamtags
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  - build.openshift.io
-  resources:
-  - buildconfigs/instantiate
-  - buildconfigs/instantiatebinary
-  - builds/clone
-  verbs:
-  - create
