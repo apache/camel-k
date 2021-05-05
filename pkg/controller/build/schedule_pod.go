@@ -215,19 +215,20 @@ func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1.Buil
 
 	pod.Labels = kubernetes.MergeCamelCreatorLabels(build.Labels, pod.Labels)
 
+	// TODO: Move the retrieval of the operator image into the controller
+	operatorImage, err := platform.GetCurrentOperatorImage(ctx, action.client)
+	if err != nil {
+		return nil, err
+	}
+	if operatorImage == "" {
+		action.operatorImage = defaults.ImageName + ":" + defaults.Version
+	} else {
+		action.operatorImage = operatorImage
+	}
+
 	for _, task := range build.Spec.Tasks {
 		if task.Builder != nil {
-			// TODO: Move the retrieval of the operator image into the controller
-			operatorImage, err := platform.GetCurrentOperatorImage(ctx, action.client)
-			if err != nil {
-				return nil, err
-			}
-			if operatorImage == "" {
-				action.operatorImage = defaults.ImageName + ":" + defaults.Version
-			} else {
-				action.operatorImage = operatorImage
-			}
-			action.addBuilderTaskToPod(build, task.Builder, pod)
+			action.addBuildTaskToPod(build, task.Builder.Name, pod)
 		} else if task.Buildah != nil {
 			err := action.addBuildahTaskToPod(ctx, build, task.Buildah, pod)
 			if err != nil {
@@ -238,6 +239,10 @@ func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1.Buil
 			if err != nil {
 				return nil, err
 			}
+		} else if task.S2i != nil {
+			action.addBuildTaskToPod(build, task.S2i.Name, pod)
+		} else if task.Spectrum != nil {
+			action.addBuildTaskToPod(build, task.Spectrum.Name, pod)
 		}
 	}
 
@@ -248,17 +253,19 @@ func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1.Buil
 	return pod, nil
 }
 
-func (action *schedulePodAction) addBuilderTaskToPod(build *v1.Build, task *v1.BuilderTask, pod *corev1.Pod) {
-	// Add the EmptyDir volume used to share the build state across tasks
-	pod.Spec.Volumes = append(pod.Spec.Volumes, corev1.Volume{
-		Name: builderVolume,
-		VolumeSource: corev1.VolumeSource{
-			EmptyDir: &corev1.EmptyDirVolumeSource{},
-		},
-	})
+func (action *schedulePodAction) addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
+	if !action.hasBuilderVolume(pod) {
+		// Add the EmptyDir volume used to share the build state across tasks
+		pod.Spec.Volumes = append(pod.Spec.Volumes, corev1.Volume{
+			Name: builderVolume,
+			VolumeSource: corev1.VolumeSource{
+				EmptyDir: &corev1.EmptyDirVolumeSource{},
+			},
+		})
+	}
 
 	container := corev1.Container{
-		Name:            task.Name,
+		Name:            taskName,
 		Image:           action.operatorImage,
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Command: []string{
@@ -269,7 +276,7 @@ func (action *schedulePodAction) addBuilderTaskToPod(build *v1.Build, task *v1.B
 			"--build-name",
 			build.Name,
 			"--task-name",
-			task.Name,
+			taskName,
 		},
 		WorkingDir: path.Join(builderDir, build.Name),
 	}

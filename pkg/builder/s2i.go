@@ -143,7 +143,20 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 	archive := path.Join(tmpDir, "archive.zip")
 	defer os.RemoveAll(tmpDir)
 
-	err = zip.Directory(t.task.ContextDir, archive)
+	contextDir := t.task.ContextDir
+	if contextDir == "" {
+		// Use the working directory.
+		// This is useful when the task is executed in-container,
+		// so that its WorkingDir can be used to share state and
+		// coordinate with other tasks.
+		pwd, err := os.Getwd()
+		if err != nil {
+			return status.Failed(err)
+		}
+		contextDir = path.Join(pwd, ContextDir)
+	}
+
+	err = zip.Directory(contextDir, archive)
 	if err != nil {
 		return status.Failed(errors.Wrap(err, "cannot zip context directory"))
 	}

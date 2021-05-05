@@ -20,13 +20,15 @@ package builder
 import (
 	"bufio"
 	"context"
-	spectrum "github.com/container-tools/spectrum/pkg/builder"
 	"io/ioutil"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
+
+	spectrum "github.com/container-tools/spectrum/pkg/builder"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
@@ -50,7 +52,20 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 		status.BaseImage = baseImage
 	}
 
-	libraryPath := path.Join(t.task.ContextDir, DependenciesDir)
+	contextDir := t.task.ContextDir
+	if contextDir == "" {
+		// Use the working directory.
+		// This is useful when the task is executed in-container,
+		// so that its WorkingDir can be used to share state and
+		// coordinate with other tasks.
+		pwd, err := os.Getwd()
+		if err != nil {
+			return status.Failed(err)
+		}
+		contextDir = path.Join(pwd, ContextDir)
+	}
+
+	libraryPath := path.Join(contextDir, DependenciesDir)
 	_, err := os.Stat(libraryPath)
 	if err != nil && os.IsNotExist(err) {
 		// this can only indicate that there are no more libraries to add to the base image,
@@ -106,7 +121,7 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 
 	go readSpectrumLogs(newStdR)
 	digest, err := spectrum.Build(options, libraryPath+":"+path.Join(DeploymentDir, DependenciesDir))
-	
+
 	if err != nil {
 		return status.Failed(err)
 	}
