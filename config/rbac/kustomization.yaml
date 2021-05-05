@@ -32,5 +32,5 @@ resources:
 - operator-role-binding-podmonitors.yaml
 - operator-role-binding-strimzi.yaml
 - operator-role-binding.yaml
-- operator-cluster-role-openshift.yaml
-- operator-cluster-role-binding-openshift.yaml
+- operator-cluster-role-console-openshift.yaml
+- operator-cluster-role-console-binding-openshift.yaml

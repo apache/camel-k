@@ -173,7 +173,7 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 			return err
 		}
 		if !ok || collection != nil {
-			err := installResource(ctx, c, collection, "/rbac/operator-cluster-role-openshift.yaml")
+			err := installResource(ctx, c, collection, "/rbac/operator-cluster-role-console-openshift.yaml")
 			if err != nil {
 				return err
 			}
