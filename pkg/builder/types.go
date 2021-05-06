@@ -19,7 +19,6 @@ package builder
 
 import (
 	"context"
-	"math"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
@@ -39,8 +38,6 @@ const (
 	ApplicationPackagePhase int32 = 30
 	// ApplicationPublishPhase --
 	ApplicationPublishPhase int32 = 40
-	// NotifyPhase --
-	NotifyPhase int32 = math.MaxInt32
 )
 
 func New(c client.Client) *Builder {
@@ -81,7 +78,6 @@ type builderContext struct {
 	Catalog           *camel.RuntimeCatalog
 	Build             v1.BuilderTask
 	BaseImage         string
-	Error             error
 	Namespace         string
 	Path              string
 	Artifacts         []v1.Artifact
