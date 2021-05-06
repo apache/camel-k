@@ -108,11 +108,12 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1.Build
 func (action *scheduleRoutineAction) runBuild(build *v1.Build) {
 	defer action.routines.Delete(build.Name)
 
+	now := metav1.Now()
+
 	ctx := context.Background()
-	ctxWithTimeout, cancel := context.WithTimeout(ctx, build.Spec.Timeout.Duration)
+	ctxWithTimeout, cancel := context.WithDeadline(ctx, now.Add(build.Spec.Timeout.Duration))
 	defer cancel()
 
-	now := metav1.Now()
 	status := v1.BuildStatus{
 		Phase:     v1.BuildPhaseRunning,
 		StartedAt: &now,
