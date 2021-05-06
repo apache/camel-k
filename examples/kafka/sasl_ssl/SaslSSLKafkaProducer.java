@@ -15,16 +15,20 @@
  * limitations under the License.
  */
 
-// kamel run --secret kafka-props SaslSSLKafkaConsumer.java --dev
+// kubectl create secret generic kafka-props --from-file application.properties
+// kamel run --secret kafka-props SaslSSLKafkaProducer.java --dev
 
 import org.apache.camel.builder.RouteBuilder;
 
-public class SaslSSLKafkaConsumer extends RouteBuilder {
+public class SaslSSLKafkaProducer extends RouteBuilder {
   @Override
   public void configure() throws Exception {
-	log.info("About to start route: Kafka -> Log ");
-	from("kafka:{{consumer.topic}}")
-    .routeId("FromKafka2Log")
-    .log("${body}");
+  log.info("About to start route: Timer -> Kafka ");
+  from("timer:foo")
+    .routeId("FromTimer2Kafka")
+    .setBody()
+      .simple("Message #${exchangeProperty.CamelTimerCounter}")
+	  .to("kafka:{{producer.topic}}")
+    .log("Message correctly sent to the topic!");
   }
 }
