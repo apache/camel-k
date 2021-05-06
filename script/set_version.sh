@@ -38,6 +38,16 @@ do
   fi
 done
 
+for f in $(find $location/../config/manifests/bases -type f -name "*.yaml");
+do
+  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    sed -i -r "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/${sanitized_image_name}:${version}/" $f
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    # Mac OSX
+    sed -i '' -E "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/${sanitized_image_name}:${version}/" $f
+  fi
+done
+
 # Update helm chart
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   sed -i -r "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/${sanitized_image_name}:${version}/" $location/../helm/camel-k/values.yaml

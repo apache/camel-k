@@ -6,18 +6,39 @@
 
 **Closed issues:**
 
+- Consolidate make targets used in Github actions [\#2263](https://github.com/apache/camel-k/issues/2263)
 - Update run-from-github page to correct github example path [\#2230](https://github.com/apache/camel-k/issues/2230)
 - Release 1.4.0 [\#2134](https://github.com/apache/camel-k/issues/2134)
+- PodSpecable Integration [\#2096](https://github.com/apache/camel-k/issues/2096)
 - Can't mount secrets with binary data [\#2009](https://github.com/apache/camel-k/issues/2009)
+- kamelet-binding : suport for error handling [\#1941](https://github.com/apache/camel-k/issues/1941)
+- builder: use structured logging for maven output [\#1783](https://github.com/apache/camel-k/issues/1783)
+- Add support for podtemplatespec / container in the Integration CRD [\#1657](https://github.com/apache/camel-k/issues/1657)
+- Integration logging configuration [\#580](https://github.com/apache/camel-k/issues/580)
+- kamel run - compile errors should be more visible [\#185](https://github.com/apache/camel-k/issues/185)
 
 **Merged pull requests:**
 
+- Added support for configuring the log format [\#2267](https://github.com/apache/camel-k/pull/2267) ([orpiske](https://github.com/orpiske))
+- Consolidate make targets used in Github actions [\#2264](https://github.com/apache/camel-k/pull/2264) ([orpiske](https://github.com/orpiske))
+- Added support for displaying Maven logs in JSON [\#2262](https://github.com/apache/camel-k/pull/2262) ([orpiske](https://github.com/orpiske))
+- Remove a reference to the old logging configuration page [\#2261](https://github.com/apache/camel-k/pull/2261) ([orpiske](https://github.com/orpiske))
+- Replaced the logging configuration documentation with the logging trait documentation [\#2259](https://github.com/apache/camel-k/pull/2259) ([orpiske](https://github.com/orpiske))
+- Support adjusting the log level for integrations [\#2258](https://github.com/apache/camel-k/pull/2258) ([orpiske](https://github.com/orpiske))
+- fix\(olm\): Update CSV base template [\#2257](https://github.com/apache/camel-k/pull/2257) ([astefanutti](https://github.com/astefanutti))
+- Fix typo [\#2254](https://github.com/apache/camel-k/pull/2254) ([apupier](https://github.com/apupier))
+- fix\(api\): Fix error handler types deepcopy generation [\#2253](https://github.com/apache/camel-k/pull/2253) ([astefanutti](https://github.com/astefanutti))
+- Added support for the json log format via the logging trait [\#2252](https://github.com/apache/camel-k/pull/2252) ([orpiske](https://github.com/orpiske))
+- Improve readability of error messages in Camel K [\#2245](https://github.com/apache/camel-k/pull/2245) ([orpiske](https://github.com/orpiske))
+- doc\(install\): operationalize options [\#2244](https://github.com/apache/camel-k/pull/2244) ([squakez](https://github.com/squakez))
 - fix\(ci\): Use Docker to build OLM index image [\#2242](https://github.com/apache/camel-k/pull/2242) ([astefanutti](https://github.com/astefanutti))
 - fix\(build\): Default to routine build strategy for local IntegrationPlatform [\#2240](https://github.com/apache/camel-k/pull/2240) ([astefanutti](https://github.com/astefanutti))
 - chore: ugprade Service Binding Operator v0.7.1 [\#2235](https://github.com/apache/camel-k/pull/2235) ([johnpoth](https://github.com/johnpoth))
 - chore: change references to use "main" [\#2234](https://github.com/apache/camel-k/pull/2234) ([nicolaferraro](https://github.com/nicolaferraro))
 - Bump version to 1.5.0-SNAPSHOT [\#2233](https://github.com/apache/camel-k/pull/2233) ([nicolaferraro](https://github.com/nicolaferraro))
 - issue2230- fix for run-from-github page [\#2231](https://github.com/apache/camel-k/pull/2231) ([bfitzpat](https://github.com/bfitzpat))
+- feat\(kamelets\): kamelet binding error handler [\#2217](https://github.com/apache/camel-k/pull/2217) ([squakez](https://github.com/squakez))
+- PodSpecable Integration [\#1861](https://github.com/apache/camel-k/pull/1861) ([mmelko](https://github.com/mmelko))
 
 ## [v1.4.0](https://github.com/apache/camel-k/tree/v1.4.0) (2021-04-16)
 
@@ -208,7 +229,6 @@
 - Backport fix for \#2035: invalid YAML should not make the operator panic [\#2150](https://github.com/apache/camel-k/pull/2150) ([nicolaferraro](https://github.com/nicolaferraro))
 - update operator-lifecycle-manager [\#2072](https://github.com/apache/camel-k/pull/2072) ([akihikokuroda](https://github.com/akihikokuroda))
 - Backport \#2036 to 1.3.x branch [\#2050](https://github.com/apache/camel-k/pull/2050) ([astefanutti](https://github.com/astefanutti))
-- Backport \#2042 to 1.3.x branch [\#2046](https://github.com/apache/camel-k/pull/2046) ([astefanutti](https://github.com/astefanutti))
 - Backport \#2041 to 1.3.x branch [\#2045](https://github.com/apache/camel-k/pull/2045) ([astefanutti](https://github.com/astefanutti))
 - Backport fix to \#1992: allow accessing Strimzi "kafkatopics" instead of "topics" [\#1994](https://github.com/apache/camel-k/pull/1994) ([nicolaferraro](https://github.com/nicolaferraro))
 - \[Backport release-1.3.x\] Fix a little typo good for testing backport action [\#1990](https://github.com/apache/camel-k/pull/1990) ([github-actions[bot]](https://github.com/apps/github-actions))
@@ -397,6 +417,7 @@
 - When building quarkus, properties should be part of the generate application.properties used to build the project [\#1763](https://github.com/apache/camel-k/issues/1763)
 - Ability to configure PodDisruptionBudget for integrations [\#1760](https://github.com/apache/camel-k/issues/1760)
 - Release 1.2.0 [\#1754](https://github.com/apache/camel-k/issues/1754)
+- Binary resources such as keystores are being corrupted [\#1750](https://github.com/apache/camel-k/issues/1750)
 - Add suport for gists [\#1740](https://github.com/apache/camel-k/issues/1740)
 - Update to k8s 0.18.8 [\#1698](https://github.com/apache/camel-k/issues/1698)
 - Error during unshare\(...\): Operation not permitted [\#1580](https://github.com/apache/camel-k/issues/1580)
@@ -428,7 +449,6 @@
 
 **Closed issues:**
 
-- Binary resources such as keystores are being corrupted [\#1750](https://github.com/apache/camel-k/issues/1750)
 - Propagate Kamelet icon on binding [\#1747](https://github.com/apache/camel-k/issues/1747)
 - Thread blocked calling knative REST [\#1720](https://github.com/apache/camel-k/issues/1720)
 - Automatic changelog update should not be run on forks [\#1717](https://github.com/apache/camel-k/issues/1717)
