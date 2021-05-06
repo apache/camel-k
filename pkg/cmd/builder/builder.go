@@ -86,11 +86,8 @@ func Run(namespace string, buildName string, taskName string) {
 	}
 
 	switch target.Status.Phase {
-	case v1.BuildPhaseFailed:
+	case v1.BuildPhaseFailed, v1.BuildPhaseInterrupted, v1.BuildPhaseError:
 		log.Error(nil, target.Status.Error)
-		os.Exit(1)
-	case v1.BuildPhaseInterrupted:
-		log.Error(nil, "The build has been interrupted")
 		os.Exit(1)
 	default:
 		os.Exit(0)

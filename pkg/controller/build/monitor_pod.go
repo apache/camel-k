@@ -59,8 +59,9 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 
 	switch {
 	case pod == nil:
-		// Reschedule the Build
-		build.Status.Phase = v1.BuildPhaseScheduling
+		// Emulate context cancellation
+		build.Status.Phase = v1.BuildPhaseInterrupted
+		build.Status.Error = context.Canceled.Error()
 
 	// Pod remains in pending phase when init containers execute
 	case pod.Status.Phase == corev1.PodPending && action.isPodScheduled(pod),
@@ -110,14 +111,16 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		observeBuildResult(build, build.Status.Phase, duration)
 	}
 
-	if (build.Status.Phase == v1.BuildPhasePending || build.Status.Phase == v1.BuildPhaseRunning) && time.Now().Sub(build.Status.StartedAt.Time) > build.Spec.Timeout.Duration {
+	if (build.Status.Phase == v1.BuildPhasePending || build.Status.Phase == v1.BuildPhaseRunning) &&
+		time.Now().Sub(build.Status.StartedAt.Time) > build.Spec.Timeout.Duration {
 		// Send SIGTERM signal to running containers
 		err := action.signalTimeout(pod)
 		if err != nil {
 			return nil, err
 		}
 
-		build.Status.Phase = v1.BuildPhaseInterrupted
+		build.Status.Phase = v1.BuildPhaseFailed
+		build.Status.Error = context.DeadlineExceeded.Error()
 		duration := metav1.Now().Sub(build.Status.StartedAt.Time)
 		build.Status.Duration = duration.String()
 

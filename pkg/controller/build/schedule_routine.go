@@ -123,11 +123,19 @@ func (action *scheduleRoutineAction) runBuild(build *v1.Build) {
 
 	buildDir := ""
 
+tasks:
 	for i, task := range build.Spec.Tasks {
 		select {
 		case <-ctxWithTimeout.Done():
-			status.Phase = v1.BuildPhaseInterrupted
-			break
+			if ctxWithTimeout.Err() == context.Canceled {
+				// Context canceled
+				status.Phase = v1.BuildPhaseInterrupted
+			} else {
+				// Context timeout
+				status.Phase = v1.BuildPhaseFailed
+			}
+			status.Error = ctxWithTimeout.Err().Error()
+			break tasks
 
 		default:
 			// Coordinate the build and context directories across the sequence of tasks
@@ -136,7 +144,7 @@ func (action *scheduleRoutineAction) runBuild(build *v1.Build) {
 					tmpDir, err := ioutil.TempDir(os.TempDir(), build.Name+"-")
 					if err != nil {
 						status.Failed(err)
-						break
+						break tasks
 					}
 					t.BuildDir = tmpDir
 					// Deferring in the for loop is what we want here
@@ -146,13 +154,13 @@ func (action *scheduleRoutineAction) runBuild(build *v1.Build) {
 			} else if t := task.Spectrum; t != nil && t.ContextDir == "" {
 				if buildDir == "" {
 					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
-					break
+					break tasks
 				}
 				t.ContextDir = path.Join(buildDir, builder.ContextDir)
 			} else if t := task.S2i; t != nil && t.ContextDir == "" {
 				if buildDir == "" {
 					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
-					break
+					break tasks
 				}
 				t.ContextDir = path.Join(buildDir, builder.ContextDir)
 			}
@@ -161,21 +169,23 @@ func (action *scheduleRoutineAction) runBuild(build *v1.Build) {
 			status = action.builder.Build(build).Task(task).Do(ctxWithTimeout)
 
 			lastTask := i == len(build.Spec.Tasks)-1
-			taskFailed := status.Phase == v1.BuildPhaseFailed || status.Phase == v1.BuildPhaseError
+			taskFailed := status.Phase == v1.BuildPhaseFailed ||
+				status.Phase == v1.BuildPhaseError ||
+				status.Phase == v1.BuildPhaseInterrupted
 			if lastTask && !taskFailed {
 				status.Phase = v1.BuildPhaseSucceeded
 			}
 
 			if lastTask || taskFailed {
 				// Spare a redundant update
-				break
+				break tasks
 			}
 
 			// Update the Build status
 			err := action.updateBuildStatus(ctx, build, status)
 			if err != nil {
 				status.Failed(err)
-				break
+				break tasks
 			}
 		}
 	}
