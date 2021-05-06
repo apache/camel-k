@@ -40,7 +40,7 @@ on:
       - 'NOTICE'
 
 jobs:
-  build:
+  upgrade:
 
     runs-on: ubuntu-20.04
 
