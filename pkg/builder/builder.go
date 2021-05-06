@@ -86,10 +86,6 @@ func (t *builderTask) Do(ctx context.Context) v1.BuildStatus {
 		})
 	}
 
-	if result.Phase == v1.BuildPhaseFailed {
-		return result
-	}
-
 	steps := make([]Step, 0)
 	for _, step := range t.task.Steps {
 		s, ok := stepsByID[step]
@@ -105,53 +101,57 @@ func (t *builderTask) Do(ctx context.Context) v1.BuildStatus {
 	})
 
 	t.log.Infof("steps: %v", steps)
+
+steps:
 	for _, step := range steps {
-		if c.Error != nil || result.Phase == v1.BuildPhaseInterrupted {
-			break
-		}
-
 		select {
-		case <-ctx.Done():
-			result.Phase = v1.BuildPhaseInterrupted
-		default:
-			l := t.log.WithValues(
-				"step", step.ID(),
-				"phase", strconv.FormatInt(int64(step.Phase()), 10),
-				"task", t.task.Name,
-			)
 
+		case <-ctx.Done():
+			if ctx.Err() == context.Canceled {
+				// Context canceled
+				result.Phase = v1.BuildPhaseInterrupted
+			} else {
+				// Context timeout
+				result.Phase = v1.BuildPhaseFailed
+			}
+			result.Error = ctx.Err().Error()
+			break steps
+
+		default:
+			l := t.log.WithValues("step", step.ID(), "phase", strconv.FormatInt(int64(step.Phase()), 10), "task", t.task.Name)
 			l.Infof("executing step")
 
 			start := time.Now()
 			c.Error = step.execute(&c)
 
-			if c.Error == nil {
-				l.Infof("step done in %f seconds", time.Since(start).Seconds())
-			} else {
+			if c.Error != nil {
 				l.Infof("step failed with error: %s", c.Error)
+				break steps
 			}
+
+			l.Infof("step done in %f seconds", time.Since(start).Seconds())
 		}
 	}
 
-	if result.Phase != v1.BuildPhaseInterrupted {
-		result.BaseImage = c.BaseImage
-
-		if c.Error != nil {
-			result.Error = c.Error.Error()
-			result.Phase = v1.BuildPhaseFailed
-		}
-
-		result.Artifacts = make([]v1.Artifact, 0, len(c.Artifacts))
-		result.Artifacts = append(result.Artifacts, c.Artifacts...)
-
-		t.log.Infof("dependencies: %s", t.task.Dependencies)
-		t.log.Infof("artifacts: %s", artifactIDs(c.Artifacts))
-		t.log.Infof("artifacts selected: %s", artifactIDs(c.SelectedArtifacts))
-		t.log.Infof("base image: %s", t.task.BaseImage)
-		t.log.Infof("resolved base image: %s", c.BaseImage)
-	} else {
+	if result.Phase == v1.BuildPhaseInterrupted {
 		t.log.Infof("build task %s interrupted", t.task.Name)
+		return result
 	}
+
+	if c.Error != nil {
+		result.Error = c.Error.Error()
+		result.Phase = v1.BuildPhaseFailed
+	}
+
+	result.BaseImage = c.BaseImage
+	result.Artifacts = make([]v1.Artifact, 0, len(c.Artifacts))
+	result.Artifacts = append(result.Artifacts, c.Artifacts...)
+
+	t.log.Infof("dependencies: %s", t.task.Dependencies)
+	t.log.Infof("artifacts: %s", artifactIDs(c.Artifacts))
+	t.log.Infof("artifacts selected: %s", artifactIDs(c.SelectedArtifacts))
+	t.log.Infof("base image: %s", t.task.BaseImage)
+	t.log.Infof("resolved base image: %s", c.BaseImage)
 
 	return result
 }
