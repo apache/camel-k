@@ -122,10 +122,10 @@ steps:
 			l.Infof("executing step")
 
 			start := time.Now()
-			c.Error = step.execute(&c)
-
-			if c.Error != nil {
-				l.Infof("step failed with error: %s", c.Error)
+			err := step.execute(&c)
+			if err != nil {
+				l.Infof("step failed with error: %s", err.Error())
+				result.Failed(err)
 				break steps
 			}
 
@@ -136,11 +136,6 @@ steps:
 	if result.Phase == v1.BuildPhaseInterrupted {
 		t.log.Infof("build task %s interrupted", t.task.Name)
 		return result
-	}
-
-	if c.Error != nil {
-		result.Error = c.Error.Error()
-		result.Phase = v1.BuildPhaseFailed
 	}
 
 	result.BaseImage = c.BaseImage
