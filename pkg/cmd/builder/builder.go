@@ -20,6 +20,7 @@ package builder
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -40,6 +41,8 @@ import (
 	logger "github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/patch"
 )
+
+const terminationMessagePath = "/dev/termination-log"
 
 var log = logger.WithName("builder")
 
@@ -88,6 +91,8 @@ func Run(namespace string, buildName string, taskName string) {
 	switch status.Phase {
 	case v1.BuildPhaseFailed, v1.BuildPhaseInterrupted, v1.BuildPhaseError:
 		log.Error(nil, status.Error)
+		// Write the error into the container termination message
+		writeTerminationMessage(status.Error)
 		os.Exit(1)
 	default:
 		os.Exit(0)
@@ -98,6 +103,13 @@ func exitOnError(err error, msg string) {
 	if err != nil {
 		log.Error(err, msg)
 		os.Exit(1)
+	}
+}
+
+func writeTerminationMessage(message string) {
+	err := ioutil.WriteFile(terminationMessagePath, []byte(message), 0644)
+	if err != nil {
+		log.Error(err, "cannot write termination message")
 	}
 }
 
@@ -114,6 +126,8 @@ func contextWithInterrupts(parent context.Context) context.Context {
 		cancel()
 		<-c
 		log.Error(nil, "The build has been interrupted")
+		// Write the container termination message
+		writeTerminationMessage("Pod terminated")
 		os.Exit(1)
 	}()
 

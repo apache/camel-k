@@ -19,6 +19,7 @@ package build
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"time"
 
@@ -61,7 +62,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 	case pod == nil:
 		// Emulate context cancellation
 		build.Status.Phase = v1.BuildPhaseInterrupted
-		build.Status.Error = "Build Pod deleted"
+		build.Status.Error = "Pod deleted"
 
 	case pod.Status.Phase == corev1.PodRunning,
 		// Pod remains in pending phase when init containers execute
@@ -106,14 +107,20 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 
 	case pod.Status.Phase == corev1.PodFailed:
 		phase := v1.BuildPhaseFailed
+		message := "Pod failed"
+		if terminationMessage := action.getTerminationMessage(pod); terminationMessage != "" {
+			message = terminationMessage
+		}
 		if pod.DeletionTimestamp != nil {
 			phase = v1.BuildPhaseInterrupted
+			message = "Pod deleted"
 		}
 		// Do not override errored build
 		if build.Status.Phase == v1.BuildPhaseError {
 			phase = v1.BuildPhaseError
 		}
 		build.Status.Phase = phase
+		build.Status.Error = message
 		finishedAt := action.getTerminatedTime(pod)
 		duration := finishedAt.Sub(build.Status.StartedAt.Time)
 		build.Status.Duration = duration.String()
@@ -195,4 +202,39 @@ func (action *monitorPodAction) getTerminatedTime(pod *corev1.Pod) metav1.Time {
 	}
 
 	return finishedAt
+}
+
+func (action *monitorPodAction) getTerminationMessage(pod *corev1.Pod) string {
+	var terminationMessages []terminationMessage
+
+	var containers []corev1.ContainerStatus
+	containers = append(containers, pod.Status.InitContainerStatuses...)
+	containers = append(containers, pod.Status.ContainerStatuses...)
+
+	for _, container := range containers {
+		if t := container.State.Terminated; t != nil && t.ExitCode != 0 && t.Message != "" {
+			terminationMessages = append(terminationMessages, terminationMessage{
+				Container: container.Name,
+				Message:   t.Message,
+			})
+		}
+	}
+
+	switch len(terminationMessages) {
+	case 0:
+		return ""
+	case 1:
+		return terminationMessages[0].Message
+	default:
+		message, err := json.Marshal(terminationMessages)
+		if err != nil {
+			return ""
+		}
+		return string(message)
+	}
+}
+
+type terminationMessage struct {
+	Container string `json:"container,omitempty"`
+	Message   string `json:"message,omitempty"`
 }
