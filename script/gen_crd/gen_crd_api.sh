@@ -16,13 +16,22 @@
 # limitations under the License.
 
 location=$(dirname $0)
-rootdir=$location/..
+rootdir=$location/../..
 
-echo "Generating API documentation..."
-$location/gen_crd/gen_crd_api.sh
-echo "Generating API documentation... done!"
+echo "Downloading gen-crd-api-reference-docs binary..."
+TMPFILE=`mktemp`
+TMPDIR=`mktemp -d`
+PWD=`pwd`
+wget -q --show-progress https://github.com/ahmetb/gen-crd-api-reference-docs/releases/download/v0.1.5/gen-crd-api-reference-docs_linux_amd64.tar.gz -O $TMPFILE
+tar -C $TMPDIR -xf $TMPFILE
 
-echo "Generating traits documentation..."
-cd $rootdir
-go run ./cmd/util/doc-gen --input-dirs ./pkg/trait --input-dirs ./addons/master --input-dirs ./addons/threescale --input-dirs ./addons/tracing
-echo "Generating traits documentation... done!"
+echo "Generating CRD API documentation..."
+$TMPDIR/gen-crd-api-reference-docs \
+    -config $location/gen-crd-api-config.json \
+    -template-dir $location/template \
+    -api-dir "github.com/apache/camel-k/pkg/apis/camel" \
+    -out-file $rootdir/docs/modules/ROOT/pages/apis/crds-html.adoc
+
+echo "Cleaning the gen-crd-api-reference-docs binary..."
+rm $TMPFILE
+rm -rf $TMPDIR
