@@ -189,6 +189,7 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1.Build) (*
 	}
 
 	build.Status.Phase = v1.BuildPhasePending
+	build.Status.StartedAt = &pod.CreationTimestamp
 
 	return build, nil
 }

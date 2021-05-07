@@ -61,33 +61,33 @@ func Run(namespace string, buildName string, taskName string) {
 	c, err := client.NewClient(false)
 	exitOnError(err, "")
 
-	ctx := contextWithInterrupts(context.Background())
+	ctx := context.Background()
+	cancelOnSignals := contextWithInterrupts(ctx)
 
 	build := &v1.Build{}
-	exitOnError(
-		c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: buildName}, build), "",
-	)
+	exitOnError(c.Get(cancelOnSignals, types.NamespacedName{Namespace: namespace, Name: buildName}, build), "")
 
-	status := builder.New(c).Build(build).TaskByName(taskName).Do(ctx)
+	status := builder.New(c).Build(build).TaskByName(taskName).Do(cancelOnSignals)
 	target := build.DeepCopy()
 	target.Status = status
-	// Copy the failure field from the build to persist recovery state
-	target.Status.Failure = build.Status.Failure
+	// Let the owning controller decide the resulting phase based on the Pod state.
+	// The Pod status acts as the interface with the controller, so that no assumptions
+	// is made on the build containers.
+	target.Status.Phase = v1.BuildPhaseNone
 	// Patch the build status with the result
 	p, err := patch.PositiveMergePatch(build, target)
 	exitOnError(err, "cannot create merge patch")
+
 	if len(p) > 0 {
 		exitOnError(
 			c.Status().Patch(ctx, target, ctrl.RawPatch(types.MergePatchType, p)),
 			fmt.Sprintf("\n--- patch ---\n%s\n-------------\n", string(p)),
 		)
-	} else {
-		log.Info("Patch not applied (no difference)")
 	}
 
-	switch target.Status.Phase {
+	switch status.Phase {
 	case v1.BuildPhaseFailed, v1.BuildPhaseInterrupted, v1.BuildPhaseError:
-		log.Error(nil, target.Status.Error)
+		log.Error(nil, status.Error)
 		os.Exit(1)
 	default:
 		os.Exit(0)
@@ -101,22 +101,20 @@ func exitOnError(err error, msg string) {
 	}
 }
 
-var shutdownSignals = []os.Signal{os.Interrupt, syscall.SIGTERM}
-
-// contextWithInterrupts registers for SIGTERM and SIGINT. A stop channel is returned
-// which is closed on one of these signals. If a second signal is caught, the program
+// contextWithInterrupts registers for SIGTERM and SIGINT. A context is returned
+// which is canceled on one of these signals. If a second signal is caught, the program
 // is terminated with exit code 1.
 func contextWithInterrupts(parent context.Context) context.Context {
 	ctx, cancel := context.WithCancel(parent)
 
 	c := make(chan os.Signal, 2)
-	signal.Notify(c, shutdownSignals...)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
 		cancel()
 		<-c
 		log.Error(nil, "The build has been interrupted")
-		os.Exit(1) // second signal. Exit directly.
+		os.Exit(1)
 	}()
 
 	return ctx
