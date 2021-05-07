@@ -15,6 +15,7 @@
 ** xref:architecture/runtime.adoc[Runtime]
 ** xref:architecture/traits.adoc[Traits]
 ** xref:architecture/sources.adoc[Sources]
+* xref:apis/camel.adoc[API]
 * xref:uninstalling.adoc[Uninstalling]
 * xref:contributing/developers.adoc[Contributing]
 ** xref:contributing/local-development.adoc[Local development]
