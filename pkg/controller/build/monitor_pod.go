@@ -29,8 +29,12 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/remotecommand"
 
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
+
+const timeoutAnnotation = "camel.apache.org/timeout"
 
 // NewMonitorPodAction creates a new monitor action for scheduled pod
 func NewMonitorPodAction() Action {
@@ -71,9 +75,13 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 			build.Status.Phase = v1.BuildPhaseRunning
 		}
 		if time.Now().Sub(build.Status.StartedAt.Time) > build.Spec.Timeout.Duration {
+			// Patch the Pod with an annotation, to identify termination signal
+			// has been sent because the Build has timed out
+			if err = action.addTimeoutAnnotation(ctx, pod, metav1.Now()); err != nil {
+				return nil, err
+			}
 			// Send SIGTERM signal to running containers
-			err := action.sigterm(pod)
-			if err != nil {
+			if err = action.sigterm(pod); err != nil {
 				// Requeue
 				return nil, err
 			}
@@ -81,6 +89,11 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 
 	case pod.Status.Phase == corev1.PodSucceeded:
 		build.Status.Phase = v1.BuildPhaseSucceeded
+		// Remove the annotation in case the Build succeeded, between
+		// the timeout deadline and the termination signal.
+		if err = action.removeTimeoutAnnotation(ctx, pod); err != nil {
+			return nil, err
+		}
 		finishedAt := action.getTerminatedTime(pod)
 		duration := finishedAt.Sub(build.Status.StartedAt.Time)
 		build.Status.Duration = duration.String()
@@ -114,6 +127,8 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		if pod.DeletionTimestamp != nil {
 			phase = v1.BuildPhaseInterrupted
 			message = "Pod deleted"
+		} else if _, ok := pod.GetAnnotations()[timeoutAnnotation]; ok {
+			message = "Build timeout"
 		}
 		// Do not override errored build
 		if build.Status.Phase == v1.BuildPhaseError {
@@ -181,6 +196,34 @@ func (action *monitorPodAction) sigterm(pod *corev1.Pod) error {
 		}
 	}
 
+	return nil
+}
+
+func (action *monitorPodAction) addTimeoutAnnotation(ctx context.Context, pod *corev1.Pod, time metav1.Time) error {
+	if _, ok := pod.GetAnnotations()[timeoutAnnotation]; ok {
+		return nil
+	}
+	return action.patchPod(ctx, pod, func(p *corev1.Pod) {
+		p.GetAnnotations()[timeoutAnnotation] = time.String()
+	})
+}
+
+func (action *monitorPodAction) removeTimeoutAnnotation(ctx context.Context, pod *corev1.Pod) error {
+	if _, ok := pod.GetAnnotations()[timeoutAnnotation]; !ok {
+		return nil
+	}
+	return action.patchPod(ctx, pod, func(p *corev1.Pod) {
+		delete(p.GetAnnotations(), timeoutAnnotation)
+	})
+}
+
+func (action *monitorPodAction) patchPod(ctx context.Context, pod *corev1.Pod, mutate func(*corev1.Pod)) error {
+	target := pod.DeepCopy()
+	mutate(target)
+	if err := action.client.Patch(ctx, target, ctrl.MergeFrom(pod)); err != nil {
+		return err
+	}
+	*pod = *target
 	return nil
 }
 
