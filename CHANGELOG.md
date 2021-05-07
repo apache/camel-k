@@ -6,7 +6,9 @@
 
 **Closed issues:**
 
+- kamelet-binding: improve conditions [\#2265](https://github.com/apache/camel-k/issues/2265)
 - Consolidate make targets used in Github actions [\#2263](https://github.com/apache/camel-k/issues/2263)
+- Camel K and Amazon EKS \(Elastic Kubernetes Service\) [\#2241](https://github.com/apache/camel-k/issues/2241)
 - Update run-from-github page to correct github example path [\#2230](https://github.com/apache/camel-k/issues/2230)
 - Release 1.4.0 [\#2134](https://github.com/apache/camel-k/issues/2134)
 - PodSpecable Integration [\#2096](https://github.com/apache/camel-k/issues/2096)
@@ -19,6 +21,8 @@
 
 **Merged pull requests:**
 
+- Use different job id names to avoid confusion when using GH CLI [\#2272](https://github.com/apache/camel-k/pull/2272) ([orpiske](https://github.com/orpiske))
+- Normalizes Maven build logs [\#2270](https://github.com/apache/camel-k/pull/2270) ([orpiske](https://github.com/orpiske))
 - Added support for configuring the log format [\#2267](https://github.com/apache/camel-k/pull/2267) ([orpiske](https://github.com/orpiske))
 - Consolidate make targets used in Github actions [\#2264](https://github.com/apache/camel-k/pull/2264) ([orpiske](https://github.com/orpiske))
 - Added support for displaying Maven logs in JSON [\#2262](https://github.com/apache/camel-k/pull/2262) ([orpiske](https://github.com/orpiske))
@@ -229,6 +233,7 @@
 - Backport fix for \#2035: invalid YAML should not make the operator panic [\#2150](https://github.com/apache/camel-k/pull/2150) ([nicolaferraro](https://github.com/nicolaferraro))
 - update operator-lifecycle-manager [\#2072](https://github.com/apache/camel-k/pull/2072) ([akihikokuroda](https://github.com/akihikokuroda))
 - Backport \#2036 to 1.3.x branch [\#2050](https://github.com/apache/camel-k/pull/2050) ([astefanutti](https://github.com/astefanutti))
+- Backport \#2042 to 1.3.x branch [\#2046](https://github.com/apache/camel-k/pull/2046) ([astefanutti](https://github.com/astefanutti))
 - Backport \#2041 to 1.3.x branch [\#2045](https://github.com/apache/camel-k/pull/2045) ([astefanutti](https://github.com/astefanutti))
 - Backport fix to \#1992: allow accessing Strimzi "kafkatopics" instead of "topics" [\#1994](https://github.com/apache/camel-k/pull/1994) ([nicolaferraro](https://github.com/nicolaferraro))
 - \[Backport release-1.3.x\] Fix a little typo good for testing backport action [\#1990](https://github.com/apache/camel-k/pull/1990) ([github-actions[bot]](https://github.com/apps/github-actions))
@@ -417,7 +422,6 @@
 - When building quarkus, properties should be part of the generate application.properties used to build the project [\#1763](https://github.com/apache/camel-k/issues/1763)
 - Ability to configure PodDisruptionBudget for integrations [\#1760](https://github.com/apache/camel-k/issues/1760)
 - Release 1.2.0 [\#1754](https://github.com/apache/camel-k/issues/1754)
-- Binary resources such as keystores are being corrupted [\#1750](https://github.com/apache/camel-k/issues/1750)
 - Add suport for gists [\#1740](https://github.com/apache/camel-k/issues/1740)
 - Update to k8s 0.18.8 [\#1698](https://github.com/apache/camel-k/issues/1698)
 - Error during unshare\(...\): Operation not permitted [\#1580](https://github.com/apache/camel-k/issues/1580)
@@ -449,6 +453,7 @@
 
 **Closed issues:**
 
+- Binary resources such as keystores are being corrupted [\#1750](https://github.com/apache/camel-k/issues/1750)
 - Propagate Kamelet icon on binding [\#1747](https://github.com/apache/camel-k/issues/1747)
 - Thread blocked calling knative REST [\#1720](https://github.com/apache/camel-k/issues/1720)
 - Automatic changelog update should not be run on forks [\#1717](https://github.com/apache/camel-k/issues/1717)
@@ -663,6 +668,7 @@
 - fix for \#1511 [\#1517](https://github.com/apache/camel-k/pull/1517) ([ipolyzos](https://github.com/ipolyzos))
 - CLI - Make kamel run handle github urls that are not raw [\#1515](https://github.com/apache/camel-k/pull/1515) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(release\): bump version to 1.1.0-SNAPSHOT and update OLM/HELM [\#1510](https://github.com/apache/camel-k/pull/1510) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore\(release\): bump runtime to 1.3.0 [\#1501](https://github.com/apache/camel-k/pull/1501) ([nicolaferraro](https://github.com/nicolaferraro))
 - feat: Prometheus support for Quarkus based on MicroProfile Metrics [\#1490](https://github.com/apache/camel-k/pull/1490) ([astefanutti](https://github.com/astefanutti))
 
 ## [1.0.1](https://github.com/apache/camel-k/tree/1.0.1) (2020-06-25)
@@ -829,7 +835,6 @@
 **Merged pull requests:**
 
 - chore\(ci\): fix ci repository configuration [\#1504](https://github.com/apache/camel-k/pull/1504) ([nicolaferraro](https://github.com/nicolaferraro))
-- chore\(release\): bump runtime to 1.3.0 [\#1501](https://github.com/apache/camel-k/pull/1501) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(jvm\): Bind all interfaces to restore remote debugging with newer JDK versions [\#1500](https://github.com/apache/camel-k/pull/1500) ([astefanutti](https://github.com/astefanutti))
 - Add stale action [\#1499](https://github.com/apache/camel-k/pull/1499) ([lburgazzoli](https://github.com/lburgazzoli))
 - feat: Add option to print JVM command in integration logs [\#1496](https://github.com/apache/camel-k/pull/1496) ([astefanutti](https://github.com/astefanutti))
