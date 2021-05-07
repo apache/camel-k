@@ -61,20 +61,27 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 	case pod == nil:
 		// Emulate context cancellation
 		build.Status.Phase = v1.BuildPhaseInterrupted
-		build.Status.Error = context.Canceled.Error()
+		build.Status.Error = "Build Pod deleted"
 
-	// Pod remains in pending phase when init containers execute
-	case pod.Status.Phase == corev1.PodPending && action.isPodScheduled(pod),
-		pod.Status.Phase == corev1.PodRunning:
-		build.Status.Phase = v1.BuildPhaseRunning
-		if build.Status.StartedAt == nil || build.Status.StartedAt.Time.IsZero() {
-			now := metav1.Now()
-			build.Status.StartedAt = &now
+	case pod.Status.Phase == corev1.PodRunning,
+		// Pod remains in pending phase when init containers execute
+		pod.Status.Phase == corev1.PodPending:
+		if action.isPodScheduled(pod) {
+			build.Status.Phase = v1.BuildPhaseRunning
+		}
+		if time.Now().Sub(build.Status.StartedAt.Time) > build.Spec.Timeout.Duration {
+			// Send SIGTERM signal to running containers
+			err := action.sigterm(pod)
+			if err != nil {
+				// Requeue
+				return nil, err
+			}
 		}
 
 	case pod.Status.Phase == corev1.PodSucceeded:
 		build.Status.Phase = v1.BuildPhaseSucceeded
-		duration := metav1.Now().Sub(build.Status.StartedAt.Time)
+		finishedAt := action.getTerminatedTime(pod)
+		duration := finishedAt.Sub(build.Status.StartedAt.Time)
 		build.Status.Duration = duration.String()
 
 		// Account for the Build metrics
@@ -99,29 +106,16 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 
 	case pod.Status.Phase == corev1.PodFailed:
 		phase := v1.BuildPhaseFailed
+		if pod.DeletionTimestamp != nil {
+			phase = v1.BuildPhaseInterrupted
+		}
 		// Do not override errored build
 		if build.Status.Phase == v1.BuildPhaseError {
 			phase = v1.BuildPhaseError
 		}
 		build.Status.Phase = phase
-		duration := metav1.Now().Sub(build.Status.StartedAt.Time)
-		build.Status.Duration = duration.String()
-
-		// Account for the Build metrics
-		observeBuildResult(build, build.Status.Phase, duration)
-	}
-
-	if (build.Status.Phase == v1.BuildPhasePending || build.Status.Phase == v1.BuildPhaseRunning) &&
-		time.Now().Sub(build.Status.StartedAt.Time) > build.Spec.Timeout.Duration {
-		// Send SIGTERM signal to running containers
-		err := action.signalTimeout(pod)
-		if err != nil {
-			return nil, err
-		}
-
-		build.Status.Phase = v1.BuildPhaseFailed
-		build.Status.Error = context.DeadlineExceeded.Error()
-		duration := metav1.Now().Sub(build.Status.StartedAt.Time)
+		finishedAt := action.getTerminatedTime(pod)
+		duration := finishedAt.Sub(build.Status.StartedAt.Time)
 		build.Status.Duration = duration.String()
 
 		// Account for the Build metrics
@@ -140,40 +134,65 @@ func (action *monitorPodAction) isPodScheduled(pod *corev1.Pod) bool {
 	return false
 }
 
-func (action *monitorPodAction) signalTimeout(pod *corev1.Pod) error {
+func (action *monitorPodAction) sigterm(pod *corev1.Pod) error {
 	var containers []corev1.ContainerStatus
-	containers = append(pod.Status.InitContainerStatuses, pod.Status.ContainerStatuses...)
+	containers = append(containers, pod.Status.InitContainerStatuses...)
+	containers = append(containers, pod.Status.ContainerStatuses...)
+
 	for _, container := range containers {
-		if container.State.Running != nil {
-			r := action.client.CoreV1().RESTClient().Post().
-				Resource("pods").
-				Namespace(pod.Namespace).
-				Name(pod.Name).
-				SubResource("exec").
-				Param("container", container.Name)
+		if container.State.Running == nil {
+			continue
+		}
 
-			r.VersionedParams(&corev1.PodExecOptions{
-				Container: container.Name,
-				Command:   []string{"kill", "-SIGTERM", "1"},
-				Stdout:    true,
-				Stderr:    true,
-				TTY:       false,
-			}, scheme.ParameterCodec)
+		r := action.client.CoreV1().RESTClient().Post().
+			Resource("pods").
+			Namespace(pod.Namespace).
+			Name(pod.Name).
+			SubResource("exec").
+			Param("container", container.Name)
 
-			exec, err := remotecommand.NewSPDYExecutor(action.client.GetConfig(), "POST", r.URL())
-			if err != nil {
-				return err
-			}
+		r.VersionedParams(&corev1.PodExecOptions{
+			Container: container.Name,
+			Command:   []string{"kill", "-SIGTERM", "1"},
+			Stdout:    true,
+			Stderr:    true,
+			TTY:       false,
+		}, scheme.ParameterCodec)
 
-			err = exec.Stream(remotecommand.StreamOptions{
-				Stdout: os.Stdout,
-				Stderr: os.Stderr,
-				Tty:    false,
-			})
-			if err != nil {
-				return err
-			}
+		exec, err := remotecommand.NewSPDYExecutor(action.client.GetConfig(), "POST", r.URL())
+		if err != nil {
+			return err
+		}
+
+		err = exec.Stream(remotecommand.StreamOptions{
+			Stdout: os.Stdout,
+			Stderr: os.Stderr,
+			Tty:    false,
+		})
+		if err != nil {
+			return err
 		}
 	}
+
 	return nil
+}
+
+func (action *monitorPodAction) getTerminatedTime(pod *corev1.Pod) metav1.Time {
+	var finishedAt metav1.Time
+
+	var containers []corev1.ContainerStatus
+	containers = append(containers, pod.Status.InitContainerStatuses...)
+	containers = append(containers, pod.Status.ContainerStatuses...)
+
+	for _, container := range containers {
+		if container.State.Terminated == nil {
+			// The container has not run
+			continue
+		}
+		if t := container.State.Terminated.FinishedAt; finishedAt.IsZero() || t.After(finishedAt.Time) {
+			finishedAt = t
+		}
+	}
+
+	return finishedAt
 }
