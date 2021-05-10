@@ -188,8 +188,14 @@ func (action *schedulePodAction) Handle(ctx context.Context, build *v1.Build) (*
 		queueDuration.Observe(time.Now().Sub(getBuildQueuingTime(build)).Seconds())
 	}
 
-	build.Status.Phase = v1.BuildPhasePending
-	build.Status.StartedAt = &pod.CreationTimestamp
+	// Reset the Build status, and transition it to pending phase
+	build.Status = v1.BuildStatus{
+		Phase:      v1.BuildPhasePending,
+		StartedAt:  &pod.CreationTimestamp,
+		Failure:    build.Status.Failure,
+		Platform:   build.Status.Platform,
+		Conditions: build.Status.Conditions,
+	}
 
 	return build, nil
 }

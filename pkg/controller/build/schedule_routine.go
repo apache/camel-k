@@ -74,12 +74,17 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1.Build
 		}
 	}
 
-	// Transition the build to pending state
-	// This must be done in the critical section rather than delegated to the controller
+	// Reset the Build status, and transition it to pending phase.
+	// This must be done in the critical section, rather than delegated to the controller.
 	err = action.patchBuildStatus(ctx, build, func(b *v1.Build) {
 		now := metav1.Now()
-		b.Status.Phase = v1.BuildPhasePending
-		b.Status.StartedAt = &now
+		b.Status = v1.BuildStatus{
+			Phase:      v1.BuildPhasePending,
+			StartedAt:  &now,
+			Failure:    b.Status.Failure,
+			Platform:   b.Status.Platform,
+			Conditions: b.Status.Conditions,
+		}
 	})
 	if err != nil {
 		return nil, err
