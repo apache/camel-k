@@ -23,9 +23,11 @@ import (
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/event"
 )
 
 func newScheduleRoutineAction(reader ctrl.Reader) Action {
@@ -101,6 +103,12 @@ func (action *scheduleRoutineAction) patchBuildStatus(ctx context.Context, build
 	if err := action.client.Status().Patch(ctx, target, ctrl.MergeFrom(build)); err != nil {
 		return err
 	}
+
+	if target.Status.Phase != build.Status.Phase {
+		action.L.Info("state transition", "phase-from", build.Status.Phase, "phase-to", target.Status.Phase)
+	}
+	event.NotifyBuildUpdated(ctx, action.client, action.recorder, build, target)
+
 	*build = *target
 	return nil
 }
