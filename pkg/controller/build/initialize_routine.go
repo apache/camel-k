@@ -23,8 +23,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// NewInitializeRoutineAction creates a new initialize action
-func NewInitializeRoutineAction() Action {
+func newInitializeRoutineAction() Action {
 	return &initializeRoutineAction{}
 }
 

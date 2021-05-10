@@ -36,8 +36,7 @@ import (
 
 const timeoutAnnotation = "camel.apache.org/timeout"
 
-// NewMonitorPodAction creates a new monitor action for scheduled pod
-func NewMonitorPodAction() Action {
+func newMonitorPodAction() Action {
 	return &monitorPodAction{}
 }
 

@@ -200,19 +200,19 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 	switch pl.Status.Build.BuildStrategy {
 	case v1.IntegrationPlatformBuildStrategyPod:
 		actions = []Action{
-			NewInitializePodAction(),
-			NewSchedulePodAction(r.reader),
-			NewMonitorPodAction(),
-			NewErrorRecoveryAction(),
-			NewErrorAction(),
+			newInitializePodAction(),
+			newSchedulePodAction(r.reader),
+			newMonitorPodAction(),
+			newErrorRecoveryAction(),
+			newErrorAction(),
 		}
 	case v1.IntegrationPlatformBuildStrategyRoutine:
 		actions = []Action{
-			NewInitializeRoutineAction(),
-			NewScheduleRoutineAction(r.reader),
-			NewMonitorRoutineAction(r.builder),
-			NewErrorRecoveryAction(),
-			NewErrorAction(),
+			newInitializeRoutineAction(),
+			newScheduleRoutineAction(r.reader),
+			newMonitorRoutineAction(r.builder),
+			newErrorRecoveryAction(),
+			newErrorAction(),
 		}
 	}
 

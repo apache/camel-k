@@ -38,8 +38,7 @@ import (
 
 var routines sync.Map
 
-// NewMonitorRoutineAction creates a new monitor action for scheduled routine
-func NewMonitorRoutineAction(b *builder.Builder) Action {
+func newMonitorRoutineAction(b *builder.Builder) Action {
 	return &monitorRoutineAction{
 		builder: b,
 	}

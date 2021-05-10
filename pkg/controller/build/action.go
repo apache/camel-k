@@ -20,26 +20,27 @@ package build
 import (
 	"context"
 
+	"k8s.io/client-go/tools/record"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
-	camelevent "github.com/apache/camel-k/pkg/event"
+	"github.com/apache/camel-k/pkg/event"
 	"github.com/apache/camel-k/pkg/util/log"
-	"k8s.io/client-go/tools/record"
 )
 
 // Action --
 type Action interface {
 	client.Injectable
 	log.Injectable
-	camelevent.Injectable
+	event.Injectable
 
-	// a user friendly name for the action
+	// Name returns user friendly name for the action
 	Name() string
 
-	// returns true if the action can handle the build
+	// CanHandle returns true if the action can handle the build
 	CanHandle(build *v1.Build) bool
 
-	// executes the handling function
+	// Handle executes the handling function
 	Handle(ctx context.Context, build *v1.Build) (*v1.Build, error)
 }
 
