@@ -19,39 +19,26 @@ package build
 
 import (
 	"context"
-	"fmt"
-	"io/ioutil"
-	"os"
-	"path"
 	"sync"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/event"
-	"github.com/apache/camel-k/pkg/util/patch"
 )
 
 // NewScheduleRoutineAction creates a new schedule routine action
-func NewScheduleRoutineAction(reader client.Reader, b *builder.Builder, r *sync.Map) Action {
+func NewScheduleRoutineAction(reader ctrl.Reader) Action {
 	return &scheduleRoutineAction{
-		reader:   reader,
-		builder:  b,
-		routines: r,
+		reader: reader,
 	}
 }
 
 type scheduleRoutineAction struct {
 	baseAction
-	lock     sync.Mutex
-	reader   client.Reader
-	builder  *builder.Builder
-	routines *sync.Map
+	lock   sync.Mutex
+	reader ctrl.Reader
 }
 
 // Name returns a common name of the action
@@ -73,7 +60,7 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1.Build
 	builds := &v1.BuildList{}
 	// We use the non-caching client as informers cache is not invalidated nor updated
 	// atomically by write operations
-	err := action.reader.List(ctx, builds, client.InNamespace(build.Namespace))
+	err := action.reader.List(ctx, builds, ctrl.InNamespace(build.Namespace))
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +76,11 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1.Build
 
 	// Transition the build to pending state
 	// This must be done in the critical section rather than delegated to the controller
-	err = action.updateBuildStatus(ctx, build, v1.BuildStatus{Phase: v1.BuildPhasePending})
+	err = action.patchBuildStatus(ctx, build, func(b *v1.Build) {
+		now := metav1.Now()
+		b.Status.Phase = v1.BuildPhasePending
+		b.Status.StartedAt = &now
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -97,128 +88,15 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1.Build
 	// Report the duration the Build has been waiting in the build queue
 	queueDuration.Observe(time.Now().Sub(getBuildQueuingTime(build)).Seconds())
 
-	// Start the build asynchronously to avoid blocking the reconcile loop
-	action.routines.Store(build.Name, true)
-
-	go action.runBuild(build)
-
 	return nil, nil
 }
 
-func (action *scheduleRoutineAction) runBuild(build *v1.Build) {
-	defer action.routines.Delete(build.Name)
-
-	now := metav1.Now()
-
-	ctx := context.Background()
-	ctxWithTimeout, cancel := context.WithDeadline(ctx, now.Add(build.Spec.Timeout.Duration))
-	defer cancel()
-
-	status := v1.BuildStatus{
-		Phase:     v1.BuildPhaseRunning,
-		StartedAt: &now,
-	}
-	if err := action.updateBuildStatus(ctx, build, status); err != nil {
-		return
-	}
-
-	buildDir := ""
-
-tasks:
-	for i, task := range build.Spec.Tasks {
-		select {
-		case <-ctxWithTimeout.Done():
-			if ctxWithTimeout.Err() == context.Canceled {
-				// Context canceled
-				status.Phase = v1.BuildPhaseInterrupted
-			} else {
-				// Context timeout
-				status.Phase = v1.BuildPhaseFailed
-			}
-			status.Error = ctxWithTimeout.Err().Error()
-			break tasks
-
-		default:
-			// Coordinate the build and context directories across the sequence of tasks
-			if t := task.Builder; t != nil {
-				if t.BuildDir == "" {
-					tmpDir, err := ioutil.TempDir(os.TempDir(), build.Name+"-")
-					if err != nil {
-						status.Failed(err)
-						break tasks
-					}
-					t.BuildDir = tmpDir
-					// Deferring in the for loop is what we want here
-					defer os.RemoveAll(tmpDir)
-				}
-				buildDir = t.BuildDir
-			} else if t := task.Spectrum; t != nil && t.ContextDir == "" {
-				if buildDir == "" {
-					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
-					break tasks
-				}
-				t.ContextDir = path.Join(buildDir, builder.ContextDir)
-			} else if t := task.S2i; t != nil && t.ContextDir == "" {
-				if buildDir == "" {
-					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
-					break tasks
-				}
-				t.ContextDir = path.Join(buildDir, builder.ContextDir)
-			}
-
-			// Execute the task
-			status = action.builder.Build(build).Task(task).Do(ctxWithTimeout)
-
-			lastTask := i == len(build.Spec.Tasks)-1
-			taskFailed := status.Phase == v1.BuildPhaseFailed ||
-				status.Phase == v1.BuildPhaseError ||
-				status.Phase == v1.BuildPhaseInterrupted
-			if lastTask && !taskFailed {
-				status.Phase = v1.BuildPhaseSucceeded
-			}
-
-			if lastTask || taskFailed {
-				// Spare a redundant update
-				break tasks
-			}
-
-			// Update the Build status
-			err := action.updateBuildStatus(ctx, build, status)
-			if err != nil {
-				status.Failed(err)
-				break tasks
-			}
-		}
-	}
-
-	duration := metav1.Now().Sub(build.Status.StartedAt.Time)
-	status.Duration = duration.String()
-	// Account for the Build metrics
-	observeBuildResult(build, status.Phase, duration)
-
-	_ = action.updateBuildStatus(ctx, build, status)
-}
-
-func (action *scheduleRoutineAction) updateBuildStatus(ctx context.Context, build *v1.Build, status v1.BuildStatus) error {
+func (action *scheduleRoutineAction) patchBuildStatus(ctx context.Context, build *v1.Build, mutate func(b *v1.Build)) error {
 	target := build.DeepCopy()
-	target.Status = status
-	// Copy the failure field from the build to persist recovery state
-	target.Status.Failure = build.Status.Failure
-	// Patch the build status with the result
-	p, err := patch.PositiveMergePatch(build, target)
-	if err != nil {
-		action.L.Errorf(err, "Cannot patch build status: %s", build.Name)
+	mutate(target)
+	if err := action.client.Status().Patch(ctx, target, ctrl.MergeFrom(build)); err != nil {
 		return err
 	}
-	err = action.client.Status().Patch(ctx, target, client.RawPatch(types.MergePatchType, p))
-	if err != nil {
-		action.L.Errorf(err, "Cannot update build status: %s", build.Name)
-		return err
-	}
-	if target.Status.Phase != build.Status.Phase {
-		action.L.Info("Build state transition", "phase", target.Status.Phase)
-	}
-	event.NotifyBuildUpdated(ctx, action.client, action.recorder, build, target)
-	build.Status = target.Status
+	*build = *target
 	return nil
 }

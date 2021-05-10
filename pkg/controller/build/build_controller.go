@@ -19,13 +19,13 @@ package build
 
 import (
 	"context"
-	"sync"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	"k8s.io/client-go/tools/record"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -135,7 +135,6 @@ type reconcileBuild struct {
 	reader   ctrl.Reader
 	scheme   *runtime.Scheme
 	builder  *builder.Builder
-	routines sync.Map
 	recorder record.EventRecorder
 }
 
@@ -210,8 +209,8 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 	case v1.IntegrationPlatformBuildStrategyRoutine:
 		actions = []Action{
 			NewInitializeRoutineAction(),
-			NewScheduleRoutineAction(r.reader, r.builder, &r.routines),
-			NewMonitorRoutineAction(&r.routines),
+			NewScheduleRoutineAction(r.reader),
+			NewMonitorRoutineAction(r.builder),
 			NewErrorRecoveryAction(),
 			NewErrorAction(),
 		}
