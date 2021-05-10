@@ -261,7 +261,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 		}, nil
 	}
 
-	if pl.Status.Build.BuildStrategy == v1.IntegrationPlatformBuildStrategyPod && target.Status.Phase == v1.BuildPhaseRunning {
+	if pl.Status.Build.BuildStrategy == v1.IntegrationPlatformBuildStrategyPod && (target.Status.Phase == v1.BuildPhasePending || target.Status.Phase == v1.BuildPhaseRunning) {
 		// Requeue running Build to signal timeout to the Build pod
 		return reconcile.Result{RequeueAfter: 1 * time.Second}, nil
 	}
