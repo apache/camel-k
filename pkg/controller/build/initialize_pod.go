@@ -26,13 +26,12 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// NewInitializePodAction creates a new initialize action
-func NewInitializePodAction() Action {
+func newInitializePodAction() Action {
 	return &initializePodAction{}
 }
 
@@ -67,7 +66,7 @@ func (action *initializePodAction) Handle(ctx context.Context, build *v1.Build) 
 	return build, nil
 }
 
-func deleteBuilderPod(ctx context.Context, client k8sclient.Writer, build *v1.Build) error {
+func deleteBuilderPod(ctx context.Context, client ctrl.Writer, build *v1.Build) error {
 	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -87,9 +86,9 @@ func deleteBuilderPod(ctx context.Context, client k8sclient.Writer, build *v1.Bu
 	return err
 }
 
-func getBuilderPod(ctx context.Context, client k8sclient.Reader, build *v1.Build) (*corev1.Pod, error) {
+func getBuilderPod(ctx context.Context, client ctrl.Reader, build *v1.Build) (*corev1.Pod, error) {
 	pod := corev1.Pod{}
-	err := client.Get(ctx, k8sclient.ObjectKey{Namespace: build.Namespace, Name: buildPodName(build)}, &pod)
+	err := client.Get(ctx, ctrl.ObjectKey{Namespace: build.Namespace, Name: buildPodName(build)}, &pod)
 	if err != nil && k8serrors.IsNotFound(err) {
 		return nil, nil
 	}

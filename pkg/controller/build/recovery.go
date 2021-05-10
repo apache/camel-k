@@ -28,9 +28,8 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// NewErrorRecoveryAction creates a new error recovering handling action for the build
-func NewErrorRecoveryAction() Action {
-	//TODO: externalize options
+func newErrorRecoveryAction() Action {
+	// TODO: externalize options
 	return &errorRecoveryAction{
 		backOff: backoff.Backoff{
 			Min:    5 * time.Second,

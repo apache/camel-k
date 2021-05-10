@@ -28,8 +28,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// NewScheduleRoutineAction creates a new schedule routine action
-func NewScheduleRoutineAction(reader ctrl.Reader) Action {
+func newScheduleRoutineAction(reader ctrl.Reader) Action {
 	return &scheduleRoutineAction{
 		reader: reader,
 	}

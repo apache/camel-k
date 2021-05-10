@@ -122,8 +122,7 @@ var (
 	}
 )
 
-// NewSchedulePodAction creates a new schedule action
-func NewSchedulePodAction(reader client.Reader) Action {
+func newSchedulePodAction(reader client.Reader) Action {
 	return &schedulePodAction{
 		reader: reader,
 	}

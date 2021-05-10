@@ -23,8 +23,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// NewErrorAction creates a new error action for scheduled routine
-func NewErrorAction() Action {
+func newErrorAction() Action {
 	return &errorAction{}
 }
 
