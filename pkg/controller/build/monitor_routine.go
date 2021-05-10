@@ -186,15 +186,22 @@ func (action *monitorRoutineAction) updateBuildStatus(ctx context.Context, build
 	p, err := patch.PositiveMergePatch(build, target)
 	if err != nil {
 		action.L.Errorf(err, "Cannot patch build status: %s", build.Name)
+		event.NotifyBuildError(ctx, action.client, action.recorder, build, target, err)
 		return err
+	}
+	if target.Status.Phase == v1.BuildPhaseFailed {
+		action.L.Errorf(nil, "Build %s failed: %s", build.Name, target.Status.Error)
+	} else if target.Status.Phase == v1.BuildPhaseError {
+		action.L.Errorf(nil, "Build %s errored: %s", build.Name, target.Status.Error)
 	}
 	err = action.client.Status().Patch(ctx, target, ctrl.RawPatch(types.MergePatchType, p))
 	if err != nil {
 		action.L.Errorf(err, "Cannot update build status: %s", build.Name)
+		event.NotifyBuildError(ctx, action.client, action.recorder, build, target, err)
 		return err
 	}
 	if target.Status.Phase != build.Status.Phase {
-		action.L.Info("Build state transition", "phase", target.Status.Phase)
+		action.L.Info("state transition", "phase-from", build.Status.Phase, "phase-to", target.Status.Phase)
 	}
 	event.NotifyBuildUpdated(ctx, action.client, action.recorder, build, target)
 	build.Status = target.Status
