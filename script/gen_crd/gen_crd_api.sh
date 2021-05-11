@@ -32,6 +32,9 @@ $TMPDIR/gen-crd-api-reference-docs \
     -api-dir "github.com/apache/camel-k/pkg/apis/camel" \
     -out-file $rootdir/docs/modules/ROOT/pages/apis/crds-html.adoc
 
+# Workaround: https://github.com/ahmetb/gen-crd-api-reference-docs/issues/33
+sed -i -E "s/%2f/\//" $rootdir/docs/modules/ROOT/pages/apis/crds-html.adoc
+
 echo "Cleaning the gen-crd-api-reference-docs binary..."
 rm $TMPFILE
 rm -rf $TMPDIR
