@@ -18,15 +18,15 @@ limitations under the License.
 package builder
 
 import (
+	"bufio"
 	"context"
+	spectrum "github.com/container-tools/spectrum/pkg/builder"
 	"io/ioutil"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
-
-	spectrum "github.com/container-tools/spectrum/pkg/builder"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
@@ -83,6 +83,15 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 		defer os.RemoveAll(registryConfigDir)
 	}
 
+	newStdR, newStdW, pipeErr := os.Pipe()
+	defer newStdW.Close()
+
+	if pipeErr != nil {
+		// In the unlikely case of an error, use stdout instead of aborting
+		log.Errorf(pipeErr, "Unable to remap I/O. Spectrum messages will be displayed on the stdout")
+		newStdW = os.Stdout
+	}
+
 	options := spectrum.Options{
 		PullInsecure:  pullInsecure,
 		PushInsecure:  t.task.Registry.Insecure,
@@ -90,12 +99,14 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 		PushConfigDir: registryConfigDir,
 		Base:          baseImage,
 		Target:        t.task.Image,
-		Stdout:        os.Stdout,
-		Stderr:        os.Stderr,
+		Stdout:        newStdW,
+		Stderr:        newStdW,
 		Recursive:     true,
 	}
 
+	go readSpectrumLogs(newStdR)
 	digest, err := spectrum.Build(options, libraryPath+":"+path.Join(DeploymentDir, DependenciesDir))
+	
 	if err != nil {
 		return status.Failed(err)
 	}
@@ -104,6 +115,15 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 	status.Digest = digest
 
 	return status
+}
+
+func readSpectrumLogs(newStdOut *os.File) {
+	scanner := bufio.NewScanner(newStdOut)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		log.Infof(line)
+	}
 }
 
 func mountSecret(ctx context.Context, c client.Client, namespace, name string) (string, error) {
