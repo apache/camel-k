@@ -28,10 +28,10 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
@@ -49,14 +49,14 @@ func TestOperatorUpgrade(t *testing.T) {
 		kamel, ok := os.LookupEnv("RELEASED_KAMEL_BIN")
 		Expect(ok).To(BeTrue())
 
-		//set KAMEL_BIN only for this test - don't override the ENV variable for all tests
+		// Set KAMEL_BIN only for this test - don't override the ENV variable for all tests
 		Expect(os.Setenv("KAMEL_BIN", kamel)).To(Succeed())
 
 		Expect(Kamel("install", "--olm=false", "--cluster-setup", "--force").Execute()).To(Succeed())
 		Expect(Kamel("install", "--olm=false", "-n", ns).Execute()).To(Succeed())
 
 		// Check the operator pod is running
-		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
 		// Refresh the test client to account for the newly installed CRDs
 		SyncClient()
@@ -67,11 +67,11 @@ func TestOperatorUpgrade(t *testing.T) {
 		// Run the Integration
 		name := "yaml"
 		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		// Check the Integration version
-		Eventually(IntegrationVersion(ns, "yaml")).Should(Equal(version))
-		kit := IntegrationKit(ns, "yaml")()
+		Eventually(IntegrationVersion(ns, name)).Should(Equal(version))
+		kit := IntegrationKit(ns, name)()
 
 		// Clear the KAMEL_BIN environment variable so that the current version is used from now on
 		Expect(os.Setenv("KAMEL_BIN", "")).To(Succeed())
@@ -84,27 +84,27 @@ func TestOperatorUpgrade(t *testing.T) {
 		// Check the operator image is the current built one
 		Eventually(OperatorImage(ns)).Should(Equal(image))
 		// Check the operator pod is running
-		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		// Check the IntegrationPlatform has been reconciled
 		Eventually(PlatformVersion(ns), TestTimeoutMedium).Should(Equal(defaults.Version))
 
 		// Check the Integration hasn't been upgraded
-		Consistently(IntegrationVersion(ns, "yaml"), 3*time.Second).Should(Equal(version))
+		Consistently(IntegrationVersion(ns, name), 3*time.Second).Should(Equal(version))
 
 		// Force the Integration upgrade
-		Expect(Kamel("rebuild", "yaml", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("rebuild", name, "-n", ns).Execute()).To(Succeed())
 
 		// Check the Integration version change
-		Eventually(IntegrationVersion(ns, "yaml")).Should(Equal(defaults.Version))
+		Eventually(IntegrationVersion(ns, name)).Should(Equal(defaults.Version))
 		// Check the previous kit is not garbage collected
 		Eventually(KitsWithVersion(ns, version)).Should(Equal(1))
 		// Check a new kit is created with the current version
 		Eventually(KitsWithVersion(ns, defaults.Version)).Should(Equal(1))
 		// Check the Integration uses the new kit
-		Eventually(IntegrationKit(ns, "yaml"), TestTimeoutMedium).ShouldNot(Equal(kit))
+		Eventually(IntegrationKit(ns, name), TestTimeoutMedium).ShouldNot(Equal(kit))
 		// Check the Integration runs correctly
-		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
