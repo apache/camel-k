@@ -142,6 +142,8 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 			// Clean up
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 			Expect(Kamel("uninstall", "-n", ns).Execute()).To(Succeed())
+			// Clean up cluster-wide resources that are not removed by OLM
+			Expect(Kamel("uninstall", "--all", "--olm=false").Execute()).To(Succeed())
 		})
 	})
 }
