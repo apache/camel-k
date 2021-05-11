@@ -117,17 +117,15 @@ jobs:
         # replace image
         $(cd config/manifests && kustomize edit set image "docker.io/apache/camel-k=${{ env.LOCAL_IMAGE }}")
 
-
-        # CSV the patch to force OLM upgrade
-        export RELEASE_VERSION=$(make get-version | grep -Po "\d.\d.\d")
+        # Patch CSV with the 'replaces' field to define the upgrade graph
         cat <<EOF > config/manifests/patch.yml
         apiVersion: operators.coreos.com/v1alpha1
         kind: ClusterServiceVersion
         metadata:
           namespace: placeholder
           name: camel-k.v$(make get-last-released-version)
-          annotations:
-            olm.skipRange: ">=1.0.0 <${RELEASE_VERSION}"
+        spec:
+          replaces: camel-k-operator.v$(make get-last-released-version)
         EOF
 
         echo "Patching CSV with"
@@ -142,7 +140,7 @@ jobs:
       run: |
         export LOCAL_IIB=$KIND_REGISTRY/apache/camel-k-iib:$(make get-version)
         echo "LOCAL_IIB=${LOCAL_IIB}" >> $GITHUB_ENV
-        opm index add --bundles ${{ env.LOCAL_IMAGE_BUNDLE }} -u docker --from-index quay.io/operatorhubio/catalog:latest --tag ${LOCAL_IIB} --skip-tls
+        opm index add --bundles ${{ env.LOCAL_IMAGE_BUNDLE }} -c docker --from-index quay.io/operatorhubio/catalog:latest --tag ${LOCAL_IIB} --skip-tls
         docker push ${LOCAL_IIB}
     - name: Run IT
       run: |
