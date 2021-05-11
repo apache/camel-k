@@ -18,11 +18,13 @@
 - kamelet-binding : suport for error handling [\#1941](https://github.com/apache/camel-k/issues/1941)
 - builder: use structured logging for maven output [\#1783](https://github.com/apache/camel-k/issues/1783)
 - Add support for podtemplatespec / container in the Integration CRD [\#1657](https://github.com/apache/camel-k/issues/1657)
+- Generate CRD documentation for website [\#1137](https://github.com/apache/camel-k/issues/1137)
 - Integration logging configuration [\#580](https://github.com/apache/camel-k/issues/580)
 - kamel run - compile errors should be more visible [\#185](https://github.com/apache/camel-k/issues/185)
 
 **Merged pull requests:**
 
+- Doc: generated API [\#2274](https://github.com/apache/camel-k/pull/2274) ([squakez](https://github.com/squakez))
 - Use different job id names to avoid confusion when using GH CLI [\#2272](https://github.com/apache/camel-k/pull/2272) ([orpiske](https://github.com/orpiske))
 - Normalizes Maven build logs [\#2270](https://github.com/apache/camel-k/pull/2270) ([orpiske](https://github.com/orpiske))
 - Added support for configuring the log format [\#2267](https://github.com/apache/camel-k/pull/2267) ([orpiske](https://github.com/orpiske))
