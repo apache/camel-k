@@ -36,9 +36,6 @@ import (
 )
 
 func TestOperatorUpgrade(t *testing.T) {
-	// Clean all cluster-wide resources that could corrupt the test run
-	Expect(Kamel("uninstall", "--all", "--olm=false").Execute()).To(Succeed())
-
 	WithNewTestNamespace(t, func(ns string) {
 		version, ok := os.LookupEnv("KAMEL_K_TEST_RELEASE_VERSION")
 		Expect(ok).To(BeTrue())
