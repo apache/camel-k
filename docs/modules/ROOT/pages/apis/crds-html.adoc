@@ -1,10 +1,10 @@
 <p>Packages:</p>
 <ul>
 <li>
-<a href="#camel.apache.org%2fv1">camel.apache.org/v1</a>
+<a href="#camel.apache.org/v1">camel.apache.org/v1</a>
 </li>
 <li>
-<a href="#camel.apache.org%2fv1alpha1">camel.apache.org/v1alpha1</a>
+<a href="#camel.apache.org/v1alpha1">camel.apache.org/v1alpha1</a>
 </li>
 </ul>
 <h2 id="camel.apache.org/v1">camel.apache.org/v1</h2>
@@ -5307,18 +5307,6 @@ ErrorHandlerParameters
 </tr>
 </thead>
 <tbody>
-<tr>
-<td>
-<code>baseErrorHandler</code></br>
-<em>
-<a href="#camel.apache.org/v1alpha1.baseErrorHandler">
-baseErrorHandler
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1alpha1.ErrorHandlerParameters">ErrorHandlerParameters
@@ -5365,18 +5353,6 @@ RawMessage
 </tr>
 </thead>
 <tbody>
-<tr>
-<td>
-<code>baseErrorHandler</code></br>
-<em>
-<a href="#camel.apache.org/v1alpha1.baseErrorHandler">
-baseErrorHandler
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
 <tr>
 <td>
 <code>RawMessage</code></br>
@@ -6500,5 +6476,5 @@ be used to delay JSON decoding or precompute a JSON encoding.</p>
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>bd0a199c</code>.
+on git commit <code>cca9858d</code>.
 </em></p>

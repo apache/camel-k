@@ -1,6 +1,7 @@
 {
     "hideMemberFields": [
-        "TypeMeta"
+        "TypeMeta",
+        "baseErrorHandler"
     ],
     "hideTypePatterns": [
         "ParseError$",
