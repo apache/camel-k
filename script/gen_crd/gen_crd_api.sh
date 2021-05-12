@@ -17,6 +17,7 @@
 
 location=$(dirname $0)
 rootdir=$location/../..
+crd_file=$rootdir/docs/modules/ROOT/pages/apis/crds-html.adoc
 
 echo "Downloading gen-crd-api-reference-docs binary..."
 TMPFILE=`mktemp`
@@ -30,10 +31,16 @@ $TMPDIR/gen-crd-api-reference-docs \
     -config $location/gen-crd-api-config.json \
     -template-dir $location/template \
     -api-dir "github.com/apache/camel-k/pkg/apis/camel" \
-    -out-file $rootdir/docs/modules/ROOT/pages/apis/crds-html.adoc
+    -out-file $crd_file
 
 # Workaround: https://github.com/ahmetb/gen-crd-api-reference-docs/issues/33
-sed -i -E "s/%2f/\//" $rootdir/docs/modules/ROOT/pages/apis/crds-html.adoc
+sed -i -E "s/%2f/\//" $crd_file
+
+# Valid HTML: https://github.com/ahmetb/gen-crd-api-reference-docs/issues/34
+sed -i -E "s/<\/code><\/br>/<\/code><br>/" $crd_file
+sed -i -E "s/<\/p><\/h3>/<\/h3>/" $crd_file
+sed -i ':a;N;$!ba;s/<p>\n<p>/<p>/g' $crd_file
+sed -i ':a;N;$!ba;s/<\/p>\n<\/p>/<\/p>/g' $crd_file
 
 echo "Cleaning the gen-crd-api-reference-docs binary..."
 rm $TMPFILE
