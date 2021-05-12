@@ -35,7 +35,6 @@ import (
 
 // Dump prints all information about the given namespace to debug errors
 func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
-
 	t.Logf("-------------------- start dumping namespace %s --------------------\n", ns)
 
 	camelClient, err := versioned.NewForConfig(c.GetConfig())
@@ -82,6 +81,19 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 			return err
 		}
 		t.Logf("---\n%s\n---\n", string(pdata))
+	}
+
+	builds, err := camelClient.CamelV1().Builds(ns).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	t.Logf("Found %d Builds:\n", len(builds.Items))
+	for _, build := range builds.Items {
+		data, err := kubernetes.ToYAML(&build)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(data))
 	}
 
 	cms, err := c.CoreV1().ConfigMaps(ns).List(ctx, metav1.ListOptions{})
