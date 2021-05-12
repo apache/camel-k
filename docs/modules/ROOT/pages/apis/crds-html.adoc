@@ -8,9 +8,7 @@
 </li>
 </ul>
 <h2 id="camel.apache.org/v1">camel.apache.org/v1</h2>
-<p>
 <p>Package v1 contains API Schema definitions for the camel v1 API group</p>
-</p>
 Resource Types:
 <ul><li>
 <a href="#camel.apache.org/v1.Build">Build</a>
@@ -25,9 +23,7 @@ Resource Types:
 </li></ul>
 <h3 id="camel.apache.org/v1.Build">Build
 </h3>
-<p>
 <p>Build is the Schema for the builds API</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -38,7 +34,7 @@ Resource Types:
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code><br>
 string</td>
 <td>
 <code>
@@ -48,14 +44,14 @@ camel.apache.org/v1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code><br>
 string
 </td>
 <td><code>Build</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -69,7 +65,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code><br>
 <em>
 <a href="#camel.apache.org/v1.BuildSpec">
 BuildSpec
@@ -82,7 +78,7 @@ BuildSpec
 <table>
 <tr>
 <td>
-<code>tasks</code></br>
+<code>tasks</code><br>
 <em>
 <a href="#camel.apache.org/v1.Task">
 []Task
@@ -97,7 +93,7 @@ BuildSpec
 </tr>
 <tr>
 <td>
-<code>status</code></br>
+<code>status</code><br>
 <em>
 <a href="#camel.apache.org/v1.BuildStatus">
 BuildStatus
@@ -111,9 +107,7 @@ BuildStatus
 </table>
 <h3 id="camel.apache.org/v1.CamelCatalog">CamelCatalog
 </h3>
-<p>
 <p>CamelCatalog is the Schema for the camelcatalogs API</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -124,7 +118,7 @@ BuildStatus
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code><br>
 string</td>
 <td>
 <code>
@@ -134,14 +128,14 @@ camel.apache.org/v1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code><br>
 string
 </td>
 <td><code>CamelCatalog</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -155,7 +149,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>status</code></br>
+<code>status</code><br>
 <em>
 <a href="#camel.apache.org/v1.CamelCatalogStatus">
 CamelCatalogStatus
@@ -167,7 +161,7 @@ CamelCatalogStatus
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code><br>
 <em>
 <a href="#camel.apache.org/v1.CamelCatalogSpec">
 CamelCatalogSpec
@@ -180,7 +174,7 @@ CamelCatalogSpec
 <table>
 <tr>
 <td>
-<code>runtime</code></br>
+<code>runtime</code><br>
 <em>
 <a href="#camel.apache.org/v1.RuntimeSpec">
 RuntimeSpec
@@ -192,7 +186,7 @@ RuntimeSpec
 </tr>
 <tr>
 <td>
-<code>artifacts</code></br>
+<code>artifacts</code><br>
 <em>
 <a href="#camel.apache.org/v1.CamelArtifact">
 map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelArtifact
@@ -204,7 +198,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelArtifact
 </tr>
 <tr>
 <td>
-<code>loaders</code></br>
+<code>loaders</code><br>
 <em>
 <a href="#camel.apache.org/v1.CamelLoader">
 map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelLoader
@@ -221,9 +215,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelLoader
 </table>
 <h3 id="camel.apache.org/v1.Integration">Integration
 </h3>
-<p>
 <p>Integration is the Schema for the integrations API</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -234,7 +226,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelLoader
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code><br>
 string</td>
 <td>
 <code>
@@ -244,14 +236,14 @@ camel.apache.org/v1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code><br>
 string
 </td>
 <td><code>Integration</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -265,7 +257,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationSpec">
 IntegrationSpec
@@ -278,7 +270,7 @@ IntegrationSpec
 <table>
 <tr>
 <td>
-<code>replicas</code></br>
+<code>replicas</code><br>
 <em>
 int32
 </em>
@@ -288,7 +280,7 @@ int32
 </tr>
 <tr>
 <td>
-<code>sources</code></br>
+<code>sources</code><br>
 <em>
 <a href="#camel.apache.org/v1.SourceSpec">
 []SourceSpec
@@ -300,7 +292,7 @@ int32
 </tr>
 <tr>
 <td>
-<code>flows</code></br>
+<code>flows</code><br>
 <em>
 <a href="#camel.apache.org/v1.Flow">
 []Flow
@@ -312,7 +304,7 @@ int32
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code><br>
 <em>
 <a href="#camel.apache.org/v1.ResourceSpec">
 []ResourceSpec
@@ -324,7 +316,7 @@ int32
 </tr>
 <tr>
 <td>
-<code>kit</code></br>
+<code>kit</code><br>
 <em>
 string
 </em>
@@ -335,7 +327,7 @@ string
 </tr>
 <tr>
 <td>
-<code>integrationKit</code></br>
+<code>integrationKit</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core">
 Kubernetes core/v1.ObjectReference
@@ -347,7 +339,7 @@ Kubernetes core/v1.ObjectReference
 </tr>
 <tr>
 <td>
-<code>dependencies</code></br>
+<code>dependencies</code><br>
 <em>
 []string
 </em>
@@ -357,7 +349,7 @@ Kubernetes core/v1.ObjectReference
 </tr>
 <tr>
 <td>
-<code>profile</code></br>
+<code>profile</code><br>
 <em>
 <a href="#camel.apache.org/v1.TraitProfile">
 TraitProfile
@@ -369,7 +361,7 @@ TraitProfile
 </tr>
 <tr>
 <td>
-<code>traits</code></br>
+<code>traits</code><br>
 <em>
 <a href="#camel.apache.org/v1.TraitSpec">
 map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
@@ -381,7 +373,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
 </tr>
 <tr>
 <td>
-<code>template</code></br>
+<code>template</code><br>
 <em>
 <a href="#camel.apache.org/v1.PodSpecTemplate">
 PodSpecTemplate
@@ -393,7 +385,7 @@ PodSpecTemplate
 </tr>
 <tr>
 <td>
-<code>configuration</code></br>
+<code>configuration</code><br>
 <em>
 <a href="#camel.apache.org/v1.ConfigurationSpec">
 []ConfigurationSpec
@@ -405,7 +397,7 @@ PodSpecTemplate
 </tr>
 <tr>
 <td>
-<code>repositories</code></br>
+<code>repositories</code><br>
 <em>
 []string
 </em>
@@ -415,7 +407,7 @@ PodSpecTemplate
 </tr>
 <tr>
 <td>
-<code>serviceAccountName</code></br>
+<code>serviceAccountName</code><br>
 <em>
 string
 </em>
@@ -428,7 +420,7 @@ string
 </tr>
 <tr>
 <td>
-<code>status</code></br>
+<code>status</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationStatus">
 IntegrationStatus
@@ -442,9 +434,7 @@ IntegrationStatus
 </table>
 <h3 id="camel.apache.org/v1.IntegrationKit">IntegrationKit
 </h3>
-<p>
 <p>IntegrationKit is the Schema for the integrationkits API</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -455,7 +445,7 @@ IntegrationStatus
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code><br>
 string</td>
 <td>
 <code>
@@ -465,14 +455,14 @@ camel.apache.org/v1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code><br>
 string
 </td>
 <td><code>IntegrationKit</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -486,7 +476,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationKitSpec">
 IntegrationKitSpec
@@ -499,7 +489,7 @@ IntegrationKitSpec
 <table>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code><br>
 <em>
 string
 </em>
@@ -509,7 +499,7 @@ string
 </tr>
 <tr>
 <td>
-<code>dependencies</code></br>
+<code>dependencies</code><br>
 <em>
 []string
 </em>
@@ -519,7 +509,7 @@ string
 </tr>
 <tr>
 <td>
-<code>profile</code></br>
+<code>profile</code><br>
 <em>
 <a href="#camel.apache.org/v1.TraitProfile">
 TraitProfile
@@ -531,7 +521,7 @@ TraitProfile
 </tr>
 <tr>
 <td>
-<code>traits</code></br>
+<code>traits</code><br>
 <em>
 <a href="#camel.apache.org/v1.TraitSpec">
 map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
@@ -543,7 +533,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
 </tr>
 <tr>
 <td>
-<code>configuration</code></br>
+<code>configuration</code><br>
 <em>
 <a href="#camel.apache.org/v1.ConfigurationSpec">
 []ConfigurationSpec
@@ -555,7 +545,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
 </tr>
 <tr>
 <td>
-<code>repositories</code></br>
+<code>repositories</code><br>
 <em>
 []string
 </em>
@@ -568,7 +558,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
 </tr>
 <tr>
 <td>
-<code>status</code></br>
+<code>status</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationKitStatus">
 IntegrationKitStatus
@@ -582,9 +572,7 @@ IntegrationKitStatus
 </table>
 <h3 id="camel.apache.org/v1.IntegrationPlatform">IntegrationPlatform
 </h3>
-<p>
 <p>IntegrationPlatform is the Schema for the integrationplatforms API</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -595,7 +583,7 @@ IntegrationKitStatus
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code><br>
 string</td>
 <td>
 <code>
@@ -605,14 +593,14 @@ camel.apache.org/v1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code><br>
 string
 </td>
 <td><code>IntegrationPlatform</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -626,7 +614,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformSpec">
 IntegrationPlatformSpec
@@ -639,7 +627,7 @@ IntegrationPlatformSpec
 <table>
 <tr>
 <td>
-<code>cluster</code></br>
+<code>cluster</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformCluster">
 IntegrationPlatformCluster
@@ -651,7 +639,7 @@ IntegrationPlatformCluster
 </tr>
 <tr>
 <td>
-<code>profile</code></br>
+<code>profile</code><br>
 <em>
 <a href="#camel.apache.org/v1.TraitProfile">
 TraitProfile
@@ -663,7 +651,7 @@ TraitProfile
 </tr>
 <tr>
 <td>
-<code>build</code></br>
+<code>build</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">
 IntegrationPlatformBuildSpec
@@ -675,7 +663,7 @@ IntegrationPlatformBuildSpec
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformResourcesSpec">
 IntegrationPlatformResourcesSpec
@@ -687,7 +675,7 @@ IntegrationPlatformResourcesSpec
 </tr>
 <tr>
 <td>
-<code>traits</code></br>
+<code>traits</code><br>
 <em>
 <a href="#camel.apache.org/v1.TraitSpec">
 map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
@@ -699,7 +687,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
 </tr>
 <tr>
 <td>
-<code>configuration</code></br>
+<code>configuration</code><br>
 <em>
 <a href="#camel.apache.org/v1.ConfigurationSpec">
 []ConfigurationSpec
@@ -711,7 +699,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
 </tr>
 <tr>
 <td>
-<code>kamelet</code></br>
+<code>kamelet</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformKameletSpec">
 IntegrationPlatformKameletSpec
@@ -726,7 +714,7 @@ IntegrationPlatformKameletSpec
 </tr>
 <tr>
 <td>
-<code>status</code></br>
+<code>status</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformStatus">
 IntegrationPlatformStatus
@@ -745,9 +733,7 @@ IntegrationPlatformStatus
 <a href="#camel.apache.org/v1.BuildStatus">BuildStatus</a>, 
 <a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>)
 </p>
-<p>
 <p>Artifact &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -758,7 +744,7 @@ IntegrationPlatformStatus
 <tbody>
 <tr>
 <td>
-<code>id</code></br>
+<code>id</code><br>
 <em>
 string
 </em>
@@ -768,7 +754,7 @@ string
 </tr>
 <tr>
 <td>
-<code>location</code></br>
+<code>location</code><br>
 <em>
 string
 </em>
@@ -778,7 +764,7 @@ string
 </tr>
 <tr>
 <td>
-<code>target</code></br>
+<code>target</code><br>
 <em>
 string
 </em>
@@ -788,7 +774,7 @@ string
 </tr>
 <tr>
 <td>
-<code>checksum</code></br>
+<code>checksum</code><br>
 <em>
 string
 </em>
@@ -808,9 +794,7 @@ string
 <a href="#camel.apache.org/v1.S2iTask">S2iTask</a>, 
 <a href="#camel.apache.org/v1.SpectrumTask">SpectrumTask</a>)
 </p>
-<p>
 <p>BaseTask &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -821,7 +805,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>name</code></br>
+<code>name</code><br>
 <em>
 string
 </em>
@@ -837,9 +821,7 @@ string
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.BuildStatus">BuildStatus</a>)
 </p>
-<p>
 <p>BuildCondition describes the state of a resource at a certain point.</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -850,7 +832,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code><br>
 <em>
 <a href="#camel.apache.org/v1.BuildConditionType">
 BuildConditionType
@@ -863,7 +845,7 @@ BuildConditionType
 </tr>
 <tr>
 <td>
-<code>status</code></br>
+<code>status</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core">
 Kubernetes core/v1.ConditionStatus
@@ -876,7 +858,7 @@ Kubernetes core/v1.ConditionStatus
 </tr>
 <tr>
 <td>
-<code>lastUpdateTime</code></br>
+<code>lastUpdateTime</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -889,7 +871,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>lastTransitionTime</code></br>
+<code>lastTransitionTime</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -902,7 +884,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>reason</code></br>
+<code>reason</code><br>
 <em>
 string
 </em>
@@ -913,7 +895,7 @@ string
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code><br>
 <em>
 string
 </em>
@@ -925,32 +907,26 @@ string
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1.BuildConditionType">BuildConditionType
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.BuildCondition">BuildCondition</a>)
 </p>
-<p>
 <p>BuildConditionType &ndash;</p>
-</p>
 <h3 id="camel.apache.org/v1.BuildPhase">BuildPhase
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.BuildStatus">BuildStatus</a>)
 </p>
-<p>
 <p>BuildPhase &ndash;</p>
-</p>
 <h3 id="camel.apache.org/v1.BuildSpec">BuildSpec
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.Build">Build</a>)
 </p>
-<p>
 <p>BuildSpec defines the desired state of Build</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -961,7 +937,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>tasks</code></br>
+<code>tasks</code><br>
 <em>
 <a href="#camel.apache.org/v1.Task">
 []Task
@@ -979,9 +955,7 @@ string
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.Build">Build</a>)
 </p>
-<p>
 <p>BuildStatus defines the observed state of Build</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -992,7 +966,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>phase</code></br>
+<code>phase</code><br>
 <em>
 <a href="#camel.apache.org/v1.BuildPhase">
 BuildPhase
@@ -1004,7 +978,7 @@ BuildPhase
 </tr>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code><br>
 <em>
 string
 </em>
@@ -1014,7 +988,7 @@ string
 </tr>
 <tr>
 <td>
-<code>digest</code></br>
+<code>digest</code><br>
 <em>
 string
 </em>
@@ -1024,7 +998,7 @@ string
 </tr>
 <tr>
 <td>
-<code>baseImage</code></br>
+<code>baseImage</code><br>
 <em>
 string
 </em>
@@ -1034,7 +1008,7 @@ string
 </tr>
 <tr>
 <td>
-<code>artifacts</code></br>
+<code>artifacts</code><br>
 <em>
 <a href="#camel.apache.org/v1.Artifact">
 []Artifact
@@ -1046,7 +1020,7 @@ string
 </tr>
 <tr>
 <td>
-<code>error</code></br>
+<code>error</code><br>
 <em>
 string
 </em>
@@ -1056,7 +1030,7 @@ string
 </tr>
 <tr>
 <td>
-<code>failure</code></br>
+<code>failure</code><br>
 <em>
 <a href="#camel.apache.org/v1.Failure">
 Failure
@@ -1068,7 +1042,7 @@ Failure
 </tr>
 <tr>
 <td>
-<code>startedAt</code></br>
+<code>startedAt</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -1080,7 +1054,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>platform</code></br>
+<code>platform</code><br>
 <em>
 string
 </em>
@@ -1090,7 +1064,7 @@ string
 </tr>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code><br>
 <em>
 <a href="#camel.apache.org/v1.BuildCondition">
 []BuildCondition
@@ -1102,7 +1076,7 @@ string
 </tr>
 <tr>
 <td>
-<code>duration</code></br>
+<code>duration</code><br>
 <em>
 string
 </em>
@@ -1120,9 +1094,7 @@ string
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.Task">Task</a>)
 </p>
-<p>
 <p>BuildahTask &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -1133,7 +1105,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>BaseTask</code></br>
+<code>BaseTask</code><br>
 <em>
 <a href="#camel.apache.org/v1.BaseTask">
 BaseTask
@@ -1148,7 +1120,7 @@ BaseTask
 </tr>
 <tr>
 <td>
-<code>PublishTask</code></br>
+<code>PublishTask</code><br>
 <em>
 <a href="#camel.apache.org/v1.PublishTask">
 PublishTask
@@ -1163,7 +1135,7 @@ PublishTask
 </tr>
 <tr>
 <td>
-<code>verbose</code></br>
+<code>verbose</code><br>
 <em>
 bool
 </em>
@@ -1173,7 +1145,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>httpProxySecret</code></br>
+<code>httpProxySecret</code><br>
 <em>
 string
 </em>
@@ -1189,9 +1161,7 @@ string
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.Task">Task</a>)
 </p>
-<p>
 <p>BuilderTask &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -1202,7 +1172,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>BaseTask</code></br>
+<code>BaseTask</code><br>
 <em>
 <a href="#camel.apache.org/v1.BaseTask">
 BaseTask
@@ -1217,7 +1187,7 @@ BaseTask
 </tr>
 <tr>
 <td>
-<code>baseImage</code></br>
+<code>baseImage</code><br>
 <em>
 string
 </em>
@@ -1227,7 +1197,7 @@ string
 </tr>
 <tr>
 <td>
-<code>runtime</code></br>
+<code>runtime</code><br>
 <em>
 <a href="#camel.apache.org/v1.RuntimeSpec">
 RuntimeSpec
@@ -1239,7 +1209,7 @@ RuntimeSpec
 </tr>
 <tr>
 <td>
-<code>sources</code></br>
+<code>sources</code><br>
 <em>
 <a href="#camel.apache.org/v1.SourceSpec">
 []SourceSpec
@@ -1251,7 +1221,7 @@ RuntimeSpec
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code><br>
 <em>
 <a href="#camel.apache.org/v1.ResourceSpec">
 []ResourceSpec
@@ -1263,7 +1233,7 @@ RuntimeSpec
 </tr>
 <tr>
 <td>
-<code>dependencies</code></br>
+<code>dependencies</code><br>
 <em>
 []string
 </em>
@@ -1273,7 +1243,7 @@ RuntimeSpec
 </tr>
 <tr>
 <td>
-<code>steps</code></br>
+<code>steps</code><br>
 <em>
 []string
 </em>
@@ -1283,7 +1253,7 @@ RuntimeSpec
 </tr>
 <tr>
 <td>
-<code>maven</code></br>
+<code>maven</code><br>
 <em>
 <a href="#camel.apache.org/v1.MavenSpec">
 MavenSpec
@@ -1295,7 +1265,7 @@ MavenSpec
 </tr>
 <tr>
 <td>
-<code>buildDir</code></br>
+<code>buildDir</code><br>
 <em>
 string
 </em>
@@ -1305,7 +1275,7 @@ string
 </tr>
 <tr>
 <td>
-<code>properties</code></br>
+<code>properties</code><br>
 <em>
 map[string]string
 </em>
@@ -1315,7 +1285,7 @@ map[string]string
 </tr>
 <tr>
 <td>
-<code>timeout</code></br>
+<code>timeout</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta">
 Kubernetes meta/v1.Duration
@@ -1333,9 +1303,7 @@ Kubernetes meta/v1.Duration
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.CamelCatalogSpec">CamelCatalogSpec</a>)
 </p>
-<p>
 <p>CamelArtifact &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -1346,7 +1314,7 @@ Kubernetes meta/v1.Duration
 <tbody>
 <tr>
 <td>
-<code>CamelArtifactDependency</code></br>
+<code>CamelArtifactDependency</code><br>
 <em>
 <a href="#camel.apache.org/v1.CamelArtifactDependency">
 CamelArtifactDependency
@@ -1361,7 +1329,7 @@ CamelArtifactDependency
 </tr>
 <tr>
 <td>
-<code>schemes</code></br>
+<code>schemes</code><br>
 <em>
 <a href="#camel.apache.org/v1.CamelScheme">
 []CamelScheme
@@ -1373,7 +1341,7 @@ CamelArtifactDependency
 </tr>
 <tr>
 <td>
-<code>languages</code></br>
+<code>languages</code><br>
 <em>
 []string
 </em>
@@ -1383,7 +1351,7 @@ CamelArtifactDependency
 </tr>
 <tr>
 <td>
-<code>dataformats</code></br>
+<code>dataformats</code><br>
 <em>
 []string
 </em>
@@ -1393,7 +1361,7 @@ CamelArtifactDependency
 </tr>
 <tr>
 <td>
-<code>dependencies</code></br>
+<code>dependencies</code><br>
 <em>
 <a href="#camel.apache.org/v1.CamelArtifactDependency">
 []CamelArtifactDependency
@@ -1405,7 +1373,7 @@ CamelArtifactDependency
 </tr>
 <tr>
 <td>
-<code>javaTypes</code></br>
+<code>javaTypes</code><br>
 <em>
 []string
 </em>
@@ -1422,9 +1390,7 @@ CamelArtifactDependency
 <a href="#camel.apache.org/v1.CamelArtifact">CamelArtifact</a>, 
 <a href="#camel.apache.org/v1.CamelSchemeScope">CamelSchemeScope</a>)
 </p>
-<p>
 <p>CamelArtifactDependency represent a maven&rsquo;s dependency</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -1435,7 +1401,7 @@ CamelArtifactDependency
 <tbody>
 <tr>
 <td>
-<code>MavenArtifact</code></br>
+<code>MavenArtifact</code><br>
 <em>
 <a href="#camel.apache.org/v1.MavenArtifact">
 MavenArtifact
@@ -1450,7 +1416,7 @@ MavenArtifact
 </tr>
 <tr>
 <td>
-<code>exclusions</code></br>
+<code>exclusions</code><br>
 <em>
 <a href="#camel.apache.org/v1.CamelArtifactExclusion">
 []CamelArtifactExclusion
@@ -1468,9 +1434,7 @@ MavenArtifact
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.CamelArtifactDependency">CamelArtifactDependency</a>)
 </p>
-<p>
 <p>CamelArtifactExclusion &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -1481,7 +1445,7 @@ MavenArtifact
 <tbody>
 <tr>
 <td>
-<code>groupId</code></br>
+<code>groupId</code><br>
 <em>
 string
 </em>
@@ -1491,7 +1455,7 @@ string
 </tr>
 <tr>
 <td>
-<code>artifactId</code></br>
+<code>artifactId</code><br>
 <em>
 string
 </em>
@@ -1507,9 +1471,7 @@ string
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.CamelCatalog">CamelCatalog</a>)
 </p>
-<p>
 <p>CamelCatalogSpec defines the desired state of CamelCatalog</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -1520,7 +1482,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>runtime</code></br>
+<code>runtime</code><br>
 <em>
 <a href="#camel.apache.org/v1.RuntimeSpec">
 RuntimeSpec
@@ -1532,7 +1494,7 @@ RuntimeSpec
 </tr>
 <tr>
 <td>
-<code>artifacts</code></br>
+<code>artifacts</code><br>
 <em>
 <a href="#camel.apache.org/v1.CamelArtifact">
 map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelArtifact
@@ -1544,7 +1506,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelArtifact
 </tr>
 <tr>
 <td>
-<code>loaders</code></br>
+<code>loaders</code><br>
 <em>
 <a href="#camel.apache.org/v1.CamelLoader">
 map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelLoader
@@ -1562,18 +1524,14 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelLoader
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.CamelCatalog">CamelCatalog</a>)
 </p>
-<p>
 <p>CamelCatalogStatus defines the observed state of CamelCatalog</p>
-</p>
 <h3 id="camel.apache.org/v1.CamelLoader">CamelLoader
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.CamelCatalogSpec">CamelCatalogSpec</a>)
 </p>
-<p>
 <p>CamelLoader &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -1584,7 +1542,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelLoader
 <tbody>
 <tr>
 <td>
-<code>MavenArtifact</code></br>
+<code>MavenArtifact</code><br>
 <em>
 <a href="#camel.apache.org/v1.MavenArtifact">
 MavenArtifact
@@ -1599,7 +1557,7 @@ MavenArtifact
 </tr>
 <tr>
 <td>
-<code>languages</code></br>
+<code>languages</code><br>
 <em>
 []string
 </em>
@@ -1609,7 +1567,7 @@ MavenArtifact
 </tr>
 <tr>
 <td>
-<code>dependencies</code></br>
+<code>dependencies</code><br>
 <em>
 <a href="#camel.apache.org/v1.MavenArtifact">
 []MavenArtifact
@@ -1627,9 +1585,7 @@ MavenArtifact
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.CamelArtifact">CamelArtifact</a>)
 </p>
-<p>
 <p>CamelScheme &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -1640,7 +1596,7 @@ MavenArtifact
 <tbody>
 <tr>
 <td>
-<code>id</code></br>
+<code>id</code><br>
 <em>
 string
 </em>
@@ -1650,7 +1606,7 @@ string
 </tr>
 <tr>
 <td>
-<code>passive</code></br>
+<code>passive</code><br>
 <em>
 bool
 </em>
@@ -1660,7 +1616,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>http</code></br>
+<code>http</code><br>
 <em>
 bool
 </em>
@@ -1670,7 +1626,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>consumer</code></br>
+<code>consumer</code><br>
 <em>
 <a href="#camel.apache.org/v1.CamelSchemeScope">
 CamelSchemeScope
@@ -1682,7 +1638,7 @@ CamelSchemeScope
 </tr>
 <tr>
 <td>
-<code>producer</code></br>
+<code>producer</code><br>
 <em>
 <a href="#camel.apache.org/v1.CamelSchemeScope">
 CamelSchemeScope
@@ -1700,9 +1656,7 @@ CamelSchemeScope
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.CamelScheme">CamelScheme</a>)
 </p>
-<p>
 <p>CamelSchemeScope contains scoped information about a scheme</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -1713,7 +1667,7 @@ CamelSchemeScope
 <tbody>
 <tr>
 <td>
-<code>dependencies</code></br>
+<code>dependencies</code><br>
 <em>
 <a href="#camel.apache.org/v1.CamelArtifactDependency">
 []CamelArtifactDependency
@@ -1731,9 +1685,7 @@ CamelSchemeScope
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.RuntimeSpec">RuntimeSpec</a>)
 </p>
-<p>
 <p>Capability &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -1744,7 +1696,7 @@ CamelSchemeScope
 <tbody>
 <tr>
 <td>
-<code>dependencies</code></br>
+<code>dependencies</code><br>
 <em>
 <a href="#camel.apache.org/v1.MavenArtifact">
 []MavenArtifact
@@ -1756,7 +1708,7 @@ CamelSchemeScope
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code><br>
 <em>
 map[string]string
 </em>
@@ -1768,9 +1720,7 @@ map[string]string
 </table>
 <h3 id="camel.apache.org/v1.Configurable">Configurable
 </h3>
-<p>
 <p>Configurable &ndash;</p>
-</p>
 <h3 id="camel.apache.org/v1.ConfigurationSpec">ConfigurationSpec
 </h3>
 <p>
@@ -1780,9 +1730,7 @@ map[string]string
 <a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
 <a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
 </p>
-<p>
 <p>ConfigurationSpec &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -1793,7 +1741,7 @@ map[string]string
 <tbody>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code><br>
 <em>
 string
 </em>
@@ -1803,7 +1751,7 @@ string
 </tr>
 <tr>
 <td>
-<code>value</code></br>
+<code>value</code><br>
 <em>
 string
 </em>
@@ -1820,9 +1768,7 @@ string
 <a href="#camel.apache.org/v1.ResourceSpec">ResourceSpec</a>, 
 <a href="#camel.apache.org/v1.SourceSpec">SourceSpec</a>)
 </p>
-<p>
 <p>DataSpec &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -1833,7 +1779,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>name</code></br>
+<code>name</code><br>
 <em>
 string
 </em>
@@ -1843,7 +1789,7 @@ string
 </tr>
 <tr>
 <td>
-<code>content</code></br>
+<code>content</code><br>
 <em>
 string
 </em>
@@ -1853,7 +1799,7 @@ string
 </tr>
 <tr>
 <td>
-<code>rawContent</code></br>
+<code>rawContent</code><br>
 <em>
 []byte
 </em>
@@ -1863,7 +1809,7 @@ string
 </tr>
 <tr>
 <td>
-<code>contentRef</code></br>
+<code>contentRef</code><br>
 <em>
 string
 </em>
@@ -1873,7 +1819,7 @@ string
 </tr>
 <tr>
 <td>
-<code>contentKey</code></br>
+<code>contentKey</code><br>
 <em>
 string
 </em>
@@ -1883,7 +1829,7 @@ string
 </tr>
 <tr>
 <td>
-<code>contentType</code></br>
+<code>contentType</code><br>
 <em>
 string
 </em>
@@ -1893,7 +1839,7 @@ string
 </tr>
 <tr>
 <td>
-<code>compression</code></br>
+<code>compression</code><br>
 <em>
 bool
 </em>
@@ -1911,9 +1857,7 @@ bool
 <a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>, 
 <a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
 </p>
-<p>
 <p>Failure &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -1924,7 +1868,7 @@ bool
 <tbody>
 <tr>
 <td>
-<code>reason</code></br>
+<code>reason</code><br>
 <em>
 string
 </em>
@@ -1934,7 +1878,7 @@ string
 </tr>
 <tr>
 <td>
-<code>time</code></br>
+<code>time</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -1946,7 +1890,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>recovery</code></br>
+<code>recovery</code><br>
 <em>
 <a href="#camel.apache.org/v1.FailureRecovery">
 FailureRecovery
@@ -1964,9 +1908,7 @@ FailureRecovery
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.Failure">Failure</a>)
 </p>
-<p>
 <p>FailureRecovery &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -1977,7 +1919,7 @@ FailureRecovery
 <tbody>
 <tr>
 <td>
-<code>attempt</code></br>
+<code>attempt</code><br>
 <em>
 int
 </em>
@@ -1987,7 +1929,7 @@ int
 </tr>
 <tr>
 <td>
-<code>attemptMax</code></br>
+<code>attemptMax</code><br>
 <em>
 int
 </em>
@@ -1997,7 +1939,7 @@ int
 </tr>
 <tr>
 <td>
-<code>attemptTime</code></br>
+<code>attemptTime</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -2017,9 +1959,7 @@ Kubernetes meta/v1.Time
 <a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
 <a href="#camel.apache.org/v1alpha1.KameletSpec">KameletSpec</a>)
 </p>
-<p>
 <p>Flow is an unstructured object representing a Camel Flow in YAML/JSON DSL</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -2030,7 +1970,7 @@ Kubernetes meta/v1.Time
 <tbody>
 <tr>
 <td>
-<code>RawMessage</code></br>
+<code>RawMessage</code><br>
 <em>
 <a href="#camel.apache.org/v1.RawMessage">
 RawMessage
@@ -2051,9 +1991,7 @@ RawMessage
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
 </p>
-<p>
 <p>IntegrationCondition describes the state of a resource at a certain point.</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -2064,7 +2002,7 @@ RawMessage
 <tbody>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationConditionType">
 IntegrationConditionType
@@ -2077,7 +2015,7 @@ IntegrationConditionType
 </tr>
 <tr>
 <td>
-<code>status</code></br>
+<code>status</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core">
 Kubernetes core/v1.ConditionStatus
@@ -2090,7 +2028,7 @@ Kubernetes core/v1.ConditionStatus
 </tr>
 <tr>
 <td>
-<code>lastUpdateTime</code></br>
+<code>lastUpdateTime</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -2103,7 +2041,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>lastTransitionTime</code></br>
+<code>lastTransitionTime</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -2116,7 +2054,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>firstTruthyTime</code></br>
+<code>firstTruthyTime</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -2129,7 +2067,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>reason</code></br>
+<code>reason</code><br>
 <em>
 string
 </em>
@@ -2140,7 +2078,7 @@ string
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code><br>
 <em>
 string
 </em>
@@ -2152,23 +2090,19 @@ string
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1.IntegrationConditionType">IntegrationConditionType
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationCondition">IntegrationCondition</a>)
 </p>
-<p>
 <p>IntegrationConditionType &ndash;</p>
-</p>
 <h3 id="camel.apache.org/v1.IntegrationKitCondition">IntegrationKitCondition
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>)
 </p>
-<p>
 <p>IntegrationKitCondition describes the state of a resource at a certain point.</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -2179,7 +2113,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationKitConditionType">
 IntegrationKitConditionType
@@ -2192,7 +2126,7 @@ IntegrationKitConditionType
 </tr>
 <tr>
 <td>
-<code>status</code></br>
+<code>status</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core">
 Kubernetes core/v1.ConditionStatus
@@ -2205,7 +2139,7 @@ Kubernetes core/v1.ConditionStatus
 </tr>
 <tr>
 <td>
-<code>lastUpdateTime</code></br>
+<code>lastUpdateTime</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -2218,7 +2152,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>lastTransitionTime</code></br>
+<code>lastTransitionTime</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -2231,7 +2165,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>reason</code></br>
+<code>reason</code><br>
 <em>
 string
 </em>
@@ -2242,7 +2176,7 @@ string
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code><br>
 <em>
 string
 </em>
@@ -2254,32 +2188,26 @@ string
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1.IntegrationKitConditionType">IntegrationKitConditionType
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationKitCondition">IntegrationKitCondition</a>)
 </p>
-<p>
 <p>IntegrationKitConditionType &ndash;</p>
-</p>
 <h3 id="camel.apache.org/v1.IntegrationKitPhase">IntegrationKitPhase
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>)
 </p>
-<p>
 <p>IntegrationKitPhase &ndash;</p>
-</p>
 <h3 id="camel.apache.org/v1.IntegrationKitSpec">IntegrationKitSpec
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationKit">IntegrationKit</a>)
 </p>
-<p>
 <p>IntegrationKitSpec defines the desired state of IntegrationKit</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -2290,7 +2218,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code><br>
 <em>
 string
 </em>
@@ -2300,7 +2228,7 @@ string
 </tr>
 <tr>
 <td>
-<code>dependencies</code></br>
+<code>dependencies</code><br>
 <em>
 []string
 </em>
@@ -2310,7 +2238,7 @@ string
 </tr>
 <tr>
 <td>
-<code>profile</code></br>
+<code>profile</code><br>
 <em>
 <a href="#camel.apache.org/v1.TraitProfile">
 TraitProfile
@@ -2322,7 +2250,7 @@ TraitProfile
 </tr>
 <tr>
 <td>
-<code>traits</code></br>
+<code>traits</code><br>
 <em>
 <a href="#camel.apache.org/v1.TraitSpec">
 map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
@@ -2334,7 +2262,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
 </tr>
 <tr>
 <td>
-<code>configuration</code></br>
+<code>configuration</code><br>
 <em>
 <a href="#camel.apache.org/v1.ConfigurationSpec">
 []ConfigurationSpec
@@ -2346,7 +2274,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
 </tr>
 <tr>
 <td>
-<code>repositories</code></br>
+<code>repositories</code><br>
 <em>
 []string
 </em>
@@ -2362,9 +2290,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationKit">IntegrationKit</a>)
 </p>
-<p>
 <p>IntegrationKitStatus defines the observed state of IntegrationKit</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -2375,7 +2301,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
 <tbody>
 <tr>
 <td>
-<code>phase</code></br>
+<code>phase</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationKitPhase">
 IntegrationKitPhase
@@ -2387,7 +2313,7 @@ IntegrationKitPhase
 </tr>
 <tr>
 <td>
-<code>baseImage</code></br>
+<code>baseImage</code><br>
 <em>
 string
 </em>
@@ -2397,7 +2323,7 @@ string
 </tr>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code><br>
 <em>
 string
 </em>
@@ -2407,7 +2333,7 @@ string
 </tr>
 <tr>
 <td>
-<code>digest</code></br>
+<code>digest</code><br>
 <em>
 string
 </em>
@@ -2417,7 +2343,7 @@ string
 </tr>
 <tr>
 <td>
-<code>artifacts</code></br>
+<code>artifacts</code><br>
 <em>
 <a href="#camel.apache.org/v1.Artifact">
 []Artifact
@@ -2429,7 +2355,7 @@ string
 </tr>
 <tr>
 <td>
-<code>failure</code></br>
+<code>failure</code><br>
 <em>
 <a href="#camel.apache.org/v1.Failure">
 Failure
@@ -2441,7 +2367,7 @@ Failure
 </tr>
 <tr>
 <td>
-<code>runtimeVersion</code></br>
+<code>runtimeVersion</code><br>
 <em>
 string
 </em>
@@ -2451,7 +2377,7 @@ string
 </tr>
 <tr>
 <td>
-<code>runtimeProvider</code></br>
+<code>runtimeProvider</code><br>
 <em>
 <a href="#camel.apache.org/v1.RuntimeProvider">
 RuntimeProvider
@@ -2463,7 +2389,7 @@ RuntimeProvider
 </tr>
 <tr>
 <td>
-<code>platform</code></br>
+<code>platform</code><br>
 <em>
 string
 </em>
@@ -2473,7 +2399,7 @@ string
 </tr>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationKitCondition">
 []IntegrationKitCondition
@@ -2485,7 +2411,7 @@ string
 </tr>
 <tr>
 <td>
-<code>version</code></br>
+<code>version</code><br>
 <em>
 string
 </em>
@@ -2496,32 +2422,26 @@ string
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1.IntegrationPhase">IntegrationPhase
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
 </p>
-<p>
 <p>IntegrationPhase &ndash;</p>
-</p>
 <h3 id="camel.apache.org/v1.IntegrationPlatformBuildPublishStrategy">IntegrationPlatformBuildPublishStrategy
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>)
 </p>
-<p>
 <p>IntegrationPlatformBuildPublishStrategy enumerates all implemented publish strategies</p>
-</p>
 <h3 id="camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>)
 </p>
-<p>
 <p>IntegrationPlatformBuildSpec contains platform related build information</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -2532,7 +2452,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>buildStrategy</code></br>
+<code>buildStrategy</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformBuildStrategy">
 IntegrationPlatformBuildStrategy
@@ -2544,7 +2464,7 @@ IntegrationPlatformBuildStrategy
 </tr>
 <tr>
 <td>
-<code>publishStrategy</code></br>
+<code>publishStrategy</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformBuildPublishStrategy">
 IntegrationPlatformBuildPublishStrategy
@@ -2556,7 +2476,7 @@ IntegrationPlatformBuildPublishStrategy
 </tr>
 <tr>
 <td>
-<code>runtimeVersion</code></br>
+<code>runtimeVersion</code><br>
 <em>
 string
 </em>
@@ -2566,7 +2486,7 @@ string
 </tr>
 <tr>
 <td>
-<code>runtimeProvider</code></br>
+<code>runtimeProvider</code><br>
 <em>
 <a href="#camel.apache.org/v1.RuntimeProvider">
 RuntimeProvider
@@ -2578,7 +2498,7 @@ RuntimeProvider
 </tr>
 <tr>
 <td>
-<code>baseImage</code></br>
+<code>baseImage</code><br>
 <em>
 string
 </em>
@@ -2588,7 +2508,7 @@ string
 </tr>
 <tr>
 <td>
-<code>properties</code></br>
+<code>properties</code><br>
 <em>
 map[string]string
 </em>
@@ -2598,7 +2518,7 @@ map[string]string
 </tr>
 <tr>
 <td>
-<code>registry</code></br>
+<code>registry</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformRegistrySpec">
 IntegrationPlatformRegistrySpec
@@ -2610,7 +2530,7 @@ IntegrationPlatformRegistrySpec
 </tr>
 <tr>
 <td>
-<code>timeout</code></br>
+<code>timeout</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta">
 Kubernetes meta/v1.Duration
@@ -2622,7 +2542,7 @@ Kubernetes meta/v1.Duration
 </tr>
 <tr>
 <td>
-<code>persistentVolumeClaim</code></br>
+<code>persistentVolumeClaim</code><br>
 <em>
 string
 </em>
@@ -2632,7 +2552,7 @@ string
 </tr>
 <tr>
 <td>
-<code>maven</code></br>
+<code>maven</code><br>
 <em>
 <a href="#camel.apache.org/v1.MavenSpec">
 MavenSpec
@@ -2644,7 +2564,7 @@ MavenSpec
 </tr>
 <tr>
 <td>
-<code>httpProxySecret</code></br>
+<code>httpProxySecret</code><br>
 <em>
 string
 </em>
@@ -2654,7 +2574,7 @@ string
 </tr>
 <tr>
 <td>
-<code>kanikoBuildCache</code></br>
+<code>kanikoBuildCache</code><br>
 <em>
 bool
 </em>
@@ -2665,32 +2585,26 @@ bool
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1.IntegrationPlatformBuildStrategy">IntegrationPlatformBuildStrategy
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>)
 </p>
-<p>
 <p>IntegrationPlatformBuildStrategy enumerates all implemented build strategies</p>
-</p>
 <h3 id="camel.apache.org/v1.IntegrationPlatformCluster">IntegrationPlatformCluster
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>)
 </p>
-<p>
 <p>IntegrationPlatformCluster is the kind of orchestration cluster the platform is installed into</p>
-</p>
 <h3 id="camel.apache.org/v1.IntegrationPlatformCondition">IntegrationPlatformCondition
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationPlatformStatus">IntegrationPlatformStatus</a>)
 </p>
-<p>
 <p>IntegrationPlatformCondition describes the state of a resource at a certain point.</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -2701,7 +2615,7 @@ bool
 <tbody>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformConditionType">
 IntegrationPlatformConditionType
@@ -2714,7 +2628,7 @@ IntegrationPlatformConditionType
 </tr>
 <tr>
 <td>
-<code>status</code></br>
+<code>status</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core">
 Kubernetes core/v1.ConditionStatus
@@ -2727,7 +2641,7 @@ Kubernetes core/v1.ConditionStatus
 </tr>
 <tr>
 <td>
-<code>lastUpdateTime</code></br>
+<code>lastUpdateTime</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -2740,7 +2654,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>lastTransitionTime</code></br>
+<code>lastTransitionTime</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -2753,7 +2667,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>reason</code></br>
+<code>reason</code><br>
 <em>
 string
 </em>
@@ -2764,7 +2678,7 @@ string
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code><br>
 <em>
 string
 </em>
@@ -2776,23 +2690,19 @@ string
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1.IntegrationPlatformConditionType">IntegrationPlatformConditionType
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationPlatformCondition">IntegrationPlatformCondition</a>)
 </p>
-<p>
 <p>IntegrationPlatformConditionType &ndash;</p>
-</p>
 <h3 id="camel.apache.org/v1.IntegrationPlatformKameletRepositorySpec">IntegrationPlatformKameletRepositorySpec
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationPlatformKameletSpec">IntegrationPlatformKameletSpec</a>)
 </p>
-<p>
 <p>IntegrationPlatformKameletRepositorySpec &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -2803,7 +2713,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>uri</code></br>
+<code>uri</code><br>
 <em>
 string
 </em>
@@ -2819,9 +2729,7 @@ string
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>)
 </p>
-<p>
 <p>IntegrationPlatformKameletSpec &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -2832,7 +2740,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>repositories</code></br>
+<code>repositories</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformKameletRepositorySpec">
 []IntegrationPlatformKameletRepositorySpec
@@ -2845,14 +2753,12 @@ string
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1.IntegrationPlatformPhase">IntegrationPlatformPhase
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationPlatformStatus">IntegrationPlatformStatus</a>)
 </p>
-<p>
 <p>IntegrationPlatformPhase &ndash;</p>
-</p>
 <h3 id="camel.apache.org/v1.IntegrationPlatformRegistrySpec">IntegrationPlatformRegistrySpec
 </h3>
 <p>
@@ -2860,9 +2766,7 @@ string
 <a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>, 
 <a href="#camel.apache.org/v1.PublishTask">PublishTask</a>)
 </p>
-<p>
 <p>IntegrationPlatformRegistrySpec &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -2873,7 +2777,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>insecure</code></br>
+<code>insecure</code><br>
 <em>
 bool
 </em>
@@ -2883,7 +2787,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>address</code></br>
+<code>address</code><br>
 <em>
 string
 </em>
@@ -2893,7 +2797,7 @@ string
 </tr>
 <tr>
 <td>
-<code>secret</code></br>
+<code>secret</code><br>
 <em>
 string
 </em>
@@ -2903,7 +2807,7 @@ string
 </tr>
 <tr>
 <td>
-<code>ca</code></br>
+<code>ca</code><br>
 <em>
 string
 </em>
@@ -2913,7 +2817,7 @@ string
 </tr>
 <tr>
 <td>
-<code>organization</code></br>
+<code>organization</code><br>
 <em>
 string
 </em>
@@ -2929,9 +2833,7 @@ string
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>)
 </p>
-<p>
 <p>IntegrationPlatformResourcesSpec contains platform related resources</p>
-</p>
 <h3 id="camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec
 </h3>
 <p>
@@ -2939,9 +2841,7 @@ string
 <a href="#camel.apache.org/v1.IntegrationPlatform">IntegrationPlatform</a>, 
 <a href="#camel.apache.org/v1.IntegrationPlatformStatus">IntegrationPlatformStatus</a>)
 </p>
-<p>
 <p>IntegrationPlatformSpec defines the desired state of IntegrationPlatform</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -2952,7 +2852,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>cluster</code></br>
+<code>cluster</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformCluster">
 IntegrationPlatformCluster
@@ -2964,7 +2864,7 @@ IntegrationPlatformCluster
 </tr>
 <tr>
 <td>
-<code>profile</code></br>
+<code>profile</code><br>
 <em>
 <a href="#camel.apache.org/v1.TraitProfile">
 TraitProfile
@@ -2976,7 +2876,7 @@ TraitProfile
 </tr>
 <tr>
 <td>
-<code>build</code></br>
+<code>build</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">
 IntegrationPlatformBuildSpec
@@ -2988,7 +2888,7 @@ IntegrationPlatformBuildSpec
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformResourcesSpec">
 IntegrationPlatformResourcesSpec
@@ -3000,7 +2900,7 @@ IntegrationPlatformResourcesSpec
 </tr>
 <tr>
 <td>
-<code>traits</code></br>
+<code>traits</code><br>
 <em>
 <a href="#camel.apache.org/v1.TraitSpec">
 map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
@@ -3012,7 +2912,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
 </tr>
 <tr>
 <td>
-<code>configuration</code></br>
+<code>configuration</code><br>
 <em>
 <a href="#camel.apache.org/v1.ConfigurationSpec">
 []ConfigurationSpec
@@ -3024,7 +2924,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
 </tr>
 <tr>
 <td>
-<code>kamelet</code></br>
+<code>kamelet</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformKameletSpec">
 IntegrationPlatformKameletSpec
@@ -3042,9 +2942,7 @@ IntegrationPlatformKameletSpec
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationPlatform">IntegrationPlatform</a>)
 </p>
-<p>
 <p>IntegrationPlatformStatus defines the observed state of IntegrationPlatform</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -3055,7 +2953,7 @@ IntegrationPlatformKameletSpec
 <tbody>
 <tr>
 <td>
-<code>IntegrationPlatformSpec</code></br>
+<code>IntegrationPlatformSpec</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformSpec">
 IntegrationPlatformSpec
@@ -3070,7 +2968,7 @@ IntegrationPlatformSpec
 </tr>
 <tr>
 <td>
-<code>phase</code></br>
+<code>phase</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformPhase">
 IntegrationPlatformPhase
@@ -3082,7 +2980,7 @@ IntegrationPlatformPhase
 </tr>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformCondition">
 []IntegrationPlatformCondition
@@ -3094,7 +2992,7 @@ IntegrationPlatformPhase
 </tr>
 <tr>
 <td>
-<code>version</code></br>
+<code>version</code><br>
 <em>
 string
 </em>
@@ -3111,9 +3009,7 @@ string
 <a href="#camel.apache.org/v1.Integration">Integration</a>, 
 <a href="#camel.apache.org/v1alpha1.KameletBindingSpec">KameletBindingSpec</a>)
 </p>
-<p>
 <p>IntegrationSpec defines the desired state of Integration</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -3124,7 +3020,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>replicas</code></br>
+<code>replicas</code><br>
 <em>
 int32
 </em>
@@ -3134,7 +3030,7 @@ int32
 </tr>
 <tr>
 <td>
-<code>sources</code></br>
+<code>sources</code><br>
 <em>
 <a href="#camel.apache.org/v1.SourceSpec">
 []SourceSpec
@@ -3146,7 +3042,7 @@ int32
 </tr>
 <tr>
 <td>
-<code>flows</code></br>
+<code>flows</code><br>
 <em>
 <a href="#camel.apache.org/v1.Flow">
 []Flow
@@ -3158,7 +3054,7 @@ int32
 </tr>
 <tr>
 <td>
-<code>resources</code></br>
+<code>resources</code><br>
 <em>
 <a href="#camel.apache.org/v1.ResourceSpec">
 []ResourceSpec
@@ -3170,7 +3066,7 @@ int32
 </tr>
 <tr>
 <td>
-<code>kit</code></br>
+<code>kit</code><br>
 <em>
 string
 </em>
@@ -3181,7 +3077,7 @@ string
 </tr>
 <tr>
 <td>
-<code>integrationKit</code></br>
+<code>integrationKit</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core">
 Kubernetes core/v1.ObjectReference
@@ -3193,7 +3089,7 @@ Kubernetes core/v1.ObjectReference
 </tr>
 <tr>
 <td>
-<code>dependencies</code></br>
+<code>dependencies</code><br>
 <em>
 []string
 </em>
@@ -3203,7 +3099,7 @@ Kubernetes core/v1.ObjectReference
 </tr>
 <tr>
 <td>
-<code>profile</code></br>
+<code>profile</code><br>
 <em>
 <a href="#camel.apache.org/v1.TraitProfile">
 TraitProfile
@@ -3215,7 +3111,7 @@ TraitProfile
 </tr>
 <tr>
 <td>
-<code>traits</code></br>
+<code>traits</code><br>
 <em>
 <a href="#camel.apache.org/v1.TraitSpec">
 map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
@@ -3227,7 +3123,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
 </tr>
 <tr>
 <td>
-<code>template</code></br>
+<code>template</code><br>
 <em>
 <a href="#camel.apache.org/v1.PodSpecTemplate">
 PodSpecTemplate
@@ -3239,7 +3135,7 @@ PodSpecTemplate
 </tr>
 <tr>
 <td>
-<code>configuration</code></br>
+<code>configuration</code><br>
 <em>
 <a href="#camel.apache.org/v1.ConfigurationSpec">
 []ConfigurationSpec
@@ -3251,7 +3147,7 @@ PodSpecTemplate
 </tr>
 <tr>
 <td>
-<code>repositories</code></br>
+<code>repositories</code><br>
 <em>
 []string
 </em>
@@ -3261,7 +3157,7 @@ PodSpecTemplate
 </tr>
 <tr>
 <td>
-<code>serviceAccountName</code></br>
+<code>serviceAccountName</code><br>
 <em>
 string
 </em>
@@ -3277,9 +3173,7 @@ string
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.Integration">Integration</a>)
 </p>
-<p>
 <p>IntegrationStatus defines the observed state of Integration</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -3290,7 +3184,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>phase</code></br>
+<code>phase</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPhase">
 IntegrationPhase
@@ -3302,7 +3196,7 @@ IntegrationPhase
 </tr>
 <tr>
 <td>
-<code>digest</code></br>
+<code>digest</code><br>
 <em>
 string
 </em>
@@ -3312,7 +3206,7 @@ string
 </tr>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code><br>
 <em>
 string
 </em>
@@ -3322,7 +3216,7 @@ string
 </tr>
 <tr>
 <td>
-<code>dependencies</code></br>
+<code>dependencies</code><br>
 <em>
 []string
 </em>
@@ -3332,7 +3226,7 @@ string
 </tr>
 <tr>
 <td>
-<code>profile</code></br>
+<code>profile</code><br>
 <em>
 <a href="#camel.apache.org/v1.TraitProfile">
 TraitProfile
@@ -3344,7 +3238,7 @@ TraitProfile
 </tr>
 <tr>
 <td>
-<code>kit</code></br>
+<code>kit</code><br>
 <em>
 string
 </em>
@@ -3355,7 +3249,7 @@ string
 </tr>
 <tr>
 <td>
-<code>integrationKit</code></br>
+<code>integrationKit</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core">
 Kubernetes core/v1.ObjectReference
@@ -3367,7 +3261,7 @@ Kubernetes core/v1.ObjectReference
 </tr>
 <tr>
 <td>
-<code>platform</code></br>
+<code>platform</code><br>
 <em>
 string
 </em>
@@ -3377,7 +3271,7 @@ string
 </tr>
 <tr>
 <td>
-<code>generatedSources</code></br>
+<code>generatedSources</code><br>
 <em>
 <a href="#camel.apache.org/v1.SourceSpec">
 []SourceSpec
@@ -3389,7 +3283,7 @@ string
 </tr>
 <tr>
 <td>
-<code>generatedResources</code></br>
+<code>generatedResources</code><br>
 <em>
 <a href="#camel.apache.org/v1.ResourceSpec">
 []ResourceSpec
@@ -3401,7 +3295,7 @@ string
 </tr>
 <tr>
 <td>
-<code>failure</code></br>
+<code>failure</code><br>
 <em>
 <a href="#camel.apache.org/v1.Failure">
 Failure
@@ -3413,7 +3307,7 @@ Failure
 </tr>
 <tr>
 <td>
-<code>runtimeVersion</code></br>
+<code>runtimeVersion</code><br>
 <em>
 string
 </em>
@@ -3423,7 +3317,7 @@ string
 </tr>
 <tr>
 <td>
-<code>runtimeProvider</code></br>
+<code>runtimeProvider</code><br>
 <em>
 <a href="#camel.apache.org/v1.RuntimeProvider">
 RuntimeProvider
@@ -3435,7 +3329,7 @@ RuntimeProvider
 </tr>
 <tr>
 <td>
-<code>configuration</code></br>
+<code>configuration</code><br>
 <em>
 <a href="#camel.apache.org/v1.ConfigurationSpec">
 []ConfigurationSpec
@@ -3447,7 +3341,7 @@ RuntimeProvider
 </tr>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationCondition">
 []IntegrationCondition
@@ -3459,7 +3353,7 @@ RuntimeProvider
 </tr>
 <tr>
 <td>
-<code>version</code></br>
+<code>version</code><br>
 <em>
 string
 </em>
@@ -3469,7 +3363,7 @@ string
 </tr>
 <tr>
 <td>
-<code>replicas</code></br>
+<code>replicas</code><br>
 <em>
 int32
 </em>
@@ -3479,7 +3373,7 @@ int32
 </tr>
 <tr>
 <td>
-<code>selector</code></br>
+<code>selector</code><br>
 <em>
 string
 </em>
@@ -3489,7 +3383,7 @@ string
 </tr>
 <tr>
 <td>
-<code>capabilities</code></br>
+<code>capabilities</code><br>
 <em>
 []string
 </em>
@@ -3499,7 +3393,7 @@ string
 </tr>
 <tr>
 <td>
-<code>lastInitTimestamp</code></br>
+<code>lastInitTimestamp</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -3518,9 +3412,7 @@ Kubernetes meta/v1.Time
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.Task">Task</a>)
 </p>
-<p>
 <p>KanikoTask &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -3531,7 +3423,7 @@ Kubernetes meta/v1.Time
 <tbody>
 <tr>
 <td>
-<code>BaseTask</code></br>
+<code>BaseTask</code><br>
 <em>
 <a href="#camel.apache.org/v1.BaseTask">
 BaseTask
@@ -3546,7 +3438,7 @@ BaseTask
 </tr>
 <tr>
 <td>
-<code>PublishTask</code></br>
+<code>PublishTask</code><br>
 <em>
 <a href="#camel.apache.org/v1.PublishTask">
 PublishTask
@@ -3561,7 +3453,7 @@ PublishTask
 </tr>
 <tr>
 <td>
-<code>verbose</code></br>
+<code>verbose</code><br>
 <em>
 bool
 </em>
@@ -3571,7 +3463,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>httpProxySecret</code></br>
+<code>httpProxySecret</code><br>
 <em>
 string
 </em>
@@ -3581,7 +3473,7 @@ string
 </tr>
 <tr>
 <td>
-<code>cache</code></br>
+<code>cache</code><br>
 <em>
 <a href="#camel.apache.org/v1.KanikoTaskCache">
 KanikoTaskCache
@@ -3599,9 +3491,7 @@ KanikoTaskCache
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.KanikoTask">KanikoTask</a>)
 </p>
-<p>
 <p>KanikoTaskCache</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -3612,7 +3502,7 @@ KanikoTaskCache
 <tbody>
 <tr>
 <td>
-<code>enabled</code></br>
+<code>enabled</code><br>
 <em>
 bool
 </em>
@@ -3622,7 +3512,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>persistentVolumeClaim</code></br>
+<code>persistentVolumeClaim</code><br>
 <em>
 string
 </em>
@@ -3633,14 +3523,12 @@ string
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1.Language">Language
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.SourceSpec">SourceSpec</a>)
 </p>
-<p>
 <p>Language &ndash;</p>
-</p>
 <h3 id="camel.apache.org/v1.MavenArtifact">MavenArtifact
 </h3>
 <p>
@@ -3650,9 +3538,7 @@ string
 <a href="#camel.apache.org/v1.Capability">Capability</a>, 
 <a href="#camel.apache.org/v1.RuntimeSpec">RuntimeSpec</a>)
 </p>
-<p>
 <p>MavenArtifact &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -3663,7 +3549,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>groupId</code></br>
+<code>groupId</code><br>
 <em>
 string
 </em>
@@ -3673,7 +3559,7 @@ string
 </tr>
 <tr>
 <td>
-<code>artifactId</code></br>
+<code>artifactId</code><br>
 <em>
 string
 </em>
@@ -3683,7 +3569,7 @@ string
 </tr>
 <tr>
 <td>
-<code>version</code></br>
+<code>version</code><br>
 <em>
 string
 </em>
@@ -3700,9 +3586,7 @@ string
 <a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>, 
 <a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>)
 </p>
-<p>
 <p>MavenSpec &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -3713,7 +3597,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>localRepository</code></br>
+<code>localRepository</code><br>
 <em>
 string
 </em>
@@ -3723,7 +3607,7 @@ string
 </tr>
 <tr>
 <td>
-<code>settings</code></br>
+<code>settings</code><br>
 <em>
 <a href="#camel.apache.org/v1.ValueSource">
 ValueSource
@@ -3735,7 +3619,7 @@ ValueSource
 </tr>
 <tr>
 <td>
-<code>caSecret</code></br>
+<code>caSecret</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector
@@ -3753,7 +3637,7 @@ Note that the root CA certificates are also imported into the created keystore.<
 </tr>
 <tr>
 <td>
-<code>timeout</code></br>
+<code>timeout</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta">
 Kubernetes meta/v1.Duration
@@ -3767,9 +3651,7 @@ Kubernetes meta/v1.Duration
 </table>
 <h3 id="camel.apache.org/v1.PlatformInjectable">PlatformInjectable
 </h3>
-<p>
 <p>PlatformInjectable &ndash;</p>
-</p>
 <h3 id="camel.apache.org/v1.PodSpec">PodSpec
 </h3>
 <p>
@@ -3788,7 +3670,7 @@ Kubernetes meta/v1.Duration
 <tbody>
 <tr>
 <td>
-<code>volumes</code></br>
+<code>volumes</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core">
 []Kubernetes core/v1.Volume
@@ -3800,7 +3682,7 @@ Kubernetes meta/v1.Duration
 </tr>
 <tr>
 <td>
-<code>initContainers</code></br>
+<code>initContainers</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core">
 []Kubernetes core/v1.Container
@@ -3812,7 +3694,7 @@ Kubernetes meta/v1.Duration
 </tr>
 <tr>
 <td>
-<code>containers</code></br>
+<code>containers</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core">
 []Kubernetes core/v1.Container
@@ -3824,7 +3706,7 @@ Kubernetes meta/v1.Duration
 </tr>
 <tr>
 <td>
-<code>ephemeralContainers</code></br>
+<code>ephemeralContainers</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#ephemeralcontainer-v1-core">
 []Kubernetes core/v1.EphemeralContainer
@@ -3836,7 +3718,7 @@ Kubernetes meta/v1.Duration
 </tr>
 <tr>
 <td>
-<code>restartPolicy</code></br>
+<code>restartPolicy</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#restartpolicy-v1-core">
 Kubernetes core/v1.RestartPolicy
@@ -3848,7 +3730,7 @@ Kubernetes core/v1.RestartPolicy
 </tr>
 <tr>
 <td>
-<code>terminationGracePeriodSeconds</code></br>
+<code>terminationGracePeriodSeconds</code><br>
 <em>
 int64
 </em>
@@ -3858,7 +3740,7 @@ int64
 </tr>
 <tr>
 <td>
-<code>activeDeadlineSeconds</code></br>
+<code>activeDeadlineSeconds</code><br>
 <em>
 int64
 </em>
@@ -3868,7 +3750,7 @@ int64
 </tr>
 <tr>
 <td>
-<code>dnsPolicy</code></br>
+<code>dnsPolicy</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#dnspolicy-v1-core">
 Kubernetes core/v1.DNSPolicy
@@ -3880,7 +3762,7 @@ Kubernetes core/v1.DNSPolicy
 </tr>
 <tr>
 <td>
-<code>nodeSelector</code></br>
+<code>nodeSelector</code><br>
 <em>
 map[string]string
 </em>
@@ -3890,7 +3772,7 @@ map[string]string
 </tr>
 <tr>
 <td>
-<code>topologySpreadConstraints</code></br>
+<code>topologySpreadConstraints</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#topologyspreadconstraint-v1-core">
 []Kubernetes core/v1.TopologySpreadConstraint
@@ -3920,7 +3802,7 @@ map[string]string
 <tbody>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code><br>
 <em>
 <a href="#camel.apache.org/v1.PodSpec">
 PodSpec
@@ -3933,7 +3815,7 @@ PodSpec
 <table>
 <tr>
 <td>
-<code>volumes</code></br>
+<code>volumes</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core">
 []Kubernetes core/v1.Volume
@@ -3945,7 +3827,7 @@ PodSpec
 </tr>
 <tr>
 <td>
-<code>initContainers</code></br>
+<code>initContainers</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core">
 []Kubernetes core/v1.Container
@@ -3957,7 +3839,7 @@ PodSpec
 </tr>
 <tr>
 <td>
-<code>containers</code></br>
+<code>containers</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core">
 []Kubernetes core/v1.Container
@@ -3969,7 +3851,7 @@ PodSpec
 </tr>
 <tr>
 <td>
-<code>ephemeralContainers</code></br>
+<code>ephemeralContainers</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#ephemeralcontainer-v1-core">
 []Kubernetes core/v1.EphemeralContainer
@@ -3981,7 +3863,7 @@ PodSpec
 </tr>
 <tr>
 <td>
-<code>restartPolicy</code></br>
+<code>restartPolicy</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#restartpolicy-v1-core">
 Kubernetes core/v1.RestartPolicy
@@ -3993,7 +3875,7 @@ Kubernetes core/v1.RestartPolicy
 </tr>
 <tr>
 <td>
-<code>terminationGracePeriodSeconds</code></br>
+<code>terminationGracePeriodSeconds</code><br>
 <em>
 int64
 </em>
@@ -4003,7 +3885,7 @@ int64
 </tr>
 <tr>
 <td>
-<code>activeDeadlineSeconds</code></br>
+<code>activeDeadlineSeconds</code><br>
 <em>
 int64
 </em>
@@ -4013,7 +3895,7 @@ int64
 </tr>
 <tr>
 <td>
-<code>dnsPolicy</code></br>
+<code>dnsPolicy</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#dnspolicy-v1-core">
 Kubernetes core/v1.DNSPolicy
@@ -4025,7 +3907,7 @@ Kubernetes core/v1.DNSPolicy
 </tr>
 <tr>
 <td>
-<code>nodeSelector</code></br>
+<code>nodeSelector</code><br>
 <em>
 map[string]string
 </em>
@@ -4035,7 +3917,7 @@ map[string]string
 </tr>
 <tr>
 <td>
-<code>topologySpreadConstraints</code></br>
+<code>topologySpreadConstraints</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#topologyspreadconstraint-v1-core">
 []Kubernetes core/v1.TopologySpreadConstraint
@@ -4058,9 +3940,7 @@ map[string]string
 <a href="#camel.apache.org/v1.KanikoTask">KanikoTask</a>, 
 <a href="#camel.apache.org/v1.SpectrumTask">SpectrumTask</a>)
 </p>
-<p>
 <p>PublishTask &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -4071,7 +3951,7 @@ map[string]string
 <tbody>
 <tr>
 <td>
-<code>contextDir</code></br>
+<code>contextDir</code><br>
 <em>
 string
 </em>
@@ -4081,7 +3961,7 @@ string
 </tr>
 <tr>
 <td>
-<code>baseImage</code></br>
+<code>baseImage</code><br>
 <em>
 string
 </em>
@@ -4091,7 +3971,7 @@ string
 </tr>
 <tr>
 <td>
-<code>image</code></br>
+<code>image</code><br>
 <em>
 string
 </em>
@@ -4101,7 +3981,7 @@ string
 </tr>
 <tr>
 <td>
-<code>registry</code></br>
+<code>registry</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationPlatformRegistrySpec">
 IntegrationPlatformRegistrySpec
@@ -4114,7 +3994,7 @@ IntegrationPlatformRegistrySpec
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1.RawMessage">RawMessage
-(<code>[]byte</code> alias)</p></h3>
+(<code>[]byte</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.BeanProperties">BeanProperties</a>, 
@@ -4125,16 +4005,12 @@ IntegrationPlatformRegistrySpec
 <a href="#camel.apache.org/v1.Flow">Flow</a>, 
 <a href="#camel.apache.org/v1.TraitConfiguration">TraitConfiguration</a>)
 </p>
-<p>
 <p>RawMessage is a raw encoded JSON value.
 It implements Marshaler and Unmarshaler and can
 be used to delay JSON decoding or precompute a JSON encoding.</p>
-</p>
 <h3 id="camel.apache.org/v1.ResourceCondition">ResourceCondition
 </h3>
-<p>
 <p>ResourceCondition is a common type for all conditions</p>
-</p>
 <h3 id="camel.apache.org/v1.ResourceSpec">ResourceSpec
 </h3>
 <p>
@@ -4143,9 +4019,7 @@ be used to delay JSON decoding or precompute a JSON encoding.</p>
 <a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
 <a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
 </p>
-<p>
 <p>ResourceSpec &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -4156,7 +4030,7 @@ be used to delay JSON decoding or precompute a JSON encoding.</p>
 <tbody>
 <tr>
 <td>
-<code>DataSpec</code></br>
+<code>DataSpec</code><br>
 <em>
 <a href="#camel.apache.org/v1.DataSpec">
 DataSpec
@@ -4171,7 +4045,7 @@ DataSpec
 </tr>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code><br>
 <em>
 <a href="#camel.apache.org/v1.ResourceType">
 ResourceType
@@ -4183,7 +4057,7 @@ ResourceType
 </tr>
 <tr>
 <td>
-<code>mountPath</code></br>
+<code>mountPath</code><br>
 <em>
 string
 </em>
@@ -4194,16 +4068,14 @@ string
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1.ResourceType">ResourceType
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.ResourceSpec">ResourceSpec</a>)
 </p>
-<p>
 <p>ResourceType &ndash;</p>
-</p>
 <h3 id="camel.apache.org/v1.RuntimeProvider">RuntimeProvider
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>, 
@@ -4211,9 +4083,7 @@ string
 <a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>, 
 <a href="#camel.apache.org/v1.RuntimeSpec">RuntimeSpec</a>)
 </p>
-<p>
 <p>RuntimeProvider &ndash;</p>
-</p>
 <h3 id="camel.apache.org/v1.RuntimeSpec">RuntimeSpec
 </h3>
 <p>
@@ -4221,9 +4091,7 @@ string
 <a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>, 
 <a href="#camel.apache.org/v1.CamelCatalogSpec">CamelCatalogSpec</a>)
 </p>
-<p>
 <p>RuntimeSpec &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -4234,7 +4102,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>version</code></br>
+<code>version</code><br>
 <em>
 string
 </em>
@@ -4244,7 +4112,7 @@ string
 </tr>
 <tr>
 <td>
-<code>provider</code></br>
+<code>provider</code><br>
 <em>
 <a href="#camel.apache.org/v1.RuntimeProvider">
 RuntimeProvider
@@ -4256,7 +4124,7 @@ RuntimeProvider
 </tr>
 <tr>
 <td>
-<code>applicationClass</code></br>
+<code>applicationClass</code><br>
 <em>
 string
 </em>
@@ -4266,7 +4134,7 @@ string
 </tr>
 <tr>
 <td>
-<code>dependencies</code></br>
+<code>dependencies</code><br>
 <em>
 <a href="#camel.apache.org/v1.MavenArtifact">
 []MavenArtifact
@@ -4278,7 +4146,7 @@ string
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code><br>
 <em>
 map[string]string
 </em>
@@ -4288,7 +4156,7 @@ map[string]string
 </tr>
 <tr>
 <td>
-<code>capabilities</code></br>
+<code>capabilities</code><br>
 <em>
 <a href="#camel.apache.org/v1.Capability">
 map[string]github.com/apache/camel-k/pkg/apis/camel/v1.Capability
@@ -4306,9 +4174,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.Capability
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.Task">Task</a>)
 </p>
-<p>
 <p>S2iTask &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -4319,7 +4185,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1.Capability
 <tbody>
 <tr>
 <td>
-<code>BaseTask</code></br>
+<code>BaseTask</code><br>
 <em>
 <a href="#camel.apache.org/v1.BaseTask">
 BaseTask
@@ -4334,7 +4200,7 @@ BaseTask
 </tr>
 <tr>
 <td>
-<code>contextDir</code></br>
+<code>contextDir</code><br>
 <em>
 string
 </em>
@@ -4344,7 +4210,7 @@ string
 </tr>
 <tr>
 <td>
-<code>tag</code></br>
+<code>tag</code><br>
 <em>
 string
 </em>
@@ -4363,9 +4229,7 @@ string
 <a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>, 
 <a href="#camel.apache.org/v1alpha1.KameletSpec">KameletSpec</a>)
 </p>
-<p>
 <p>SourceSpec &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -4376,7 +4240,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>DataSpec</code></br>
+<code>DataSpec</code><br>
 <em>
 <a href="#camel.apache.org/v1.DataSpec">
 DataSpec
@@ -4391,7 +4255,7 @@ DataSpec
 </tr>
 <tr>
 <td>
-<code>language</code></br>
+<code>language</code><br>
 <em>
 <a href="#camel.apache.org/v1.Language">
 Language
@@ -4403,7 +4267,7 @@ Language
 </tr>
 <tr>
 <td>
-<code>loader</code></br>
+<code>loader</code><br>
 <em>
 string
 </em>
@@ -4415,7 +4279,7 @@ interpret this source at runtime</p>
 </tr>
 <tr>
 <td>
-<code>interceptors</code></br>
+<code>interceptors</code><br>
 <em>
 []string
 </em>
@@ -4427,7 +4291,7 @@ uses to pre/post process sources</p>
 </tr>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code><br>
 <em>
 <a href="#camel.apache.org/v1.SourceType">
 SourceType
@@ -4440,7 +4304,7 @@ SourceType
 </tr>
 <tr>
 <td>
-<code>property-names</code></br>
+<code>property-names</code><br>
 <em>
 []string
 </em>
@@ -4452,7 +4316,7 @@ SourceType
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1.SourceType">SourceType
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.SourceSpec">SourceSpec</a>)
@@ -4465,9 +4329,7 @@ SourceType
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.Task">Task</a>)
 </p>
-<p>
 <p>SpectrumTask &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -4478,7 +4340,7 @@ SourceType
 <tbody>
 <tr>
 <td>
-<code>BaseTask</code></br>
+<code>BaseTask</code><br>
 <em>
 <a href="#camel.apache.org/v1.BaseTask">
 BaseTask
@@ -4493,7 +4355,7 @@ BaseTask
 </tr>
 <tr>
 <td>
-<code>PublishTask</code></br>
+<code>PublishTask</code><br>
 <em>
 <a href="#camel.apache.org/v1.PublishTask">
 PublishTask
@@ -4514,9 +4376,7 @@ PublishTask
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.BuildSpec">BuildSpec</a>)
 </p>
-<p>
 <p>Task &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -4527,7 +4387,7 @@ PublishTask
 <tbody>
 <tr>
 <td>
-<code>builder</code></br>
+<code>builder</code><br>
 <em>
 <a href="#camel.apache.org/v1.BuilderTask">
 BuilderTask
@@ -4539,7 +4399,7 @@ BuilderTask
 </tr>
 <tr>
 <td>
-<code>buildah</code></br>
+<code>buildah</code><br>
 <em>
 <a href="#camel.apache.org/v1.BuildahTask">
 BuildahTask
@@ -4551,7 +4411,7 @@ BuildahTask
 </tr>
 <tr>
 <td>
-<code>kaniko</code></br>
+<code>kaniko</code><br>
 <em>
 <a href="#camel.apache.org/v1.KanikoTask">
 KanikoTask
@@ -4563,7 +4423,7 @@ KanikoTask
 </tr>
 <tr>
 <td>
-<code>spectrum</code></br>
+<code>spectrum</code><br>
 <em>
 <a href="#camel.apache.org/v1.SpectrumTask">
 SpectrumTask
@@ -4575,7 +4435,7 @@ SpectrumTask
 </tr>
 <tr>
 <td>
-<code>s2i</code></br>
+<code>s2i</code><br>
 <em>
 <a href="#camel.apache.org/v1.S2iTask">
 S2iTask
@@ -4605,7 +4465,7 @@ S2iTask
 <tbody>
 <tr>
 <td>
-<code>RawMessage</code></br>
+<code>RawMessage</code><br>
 <em>
 <a href="#camel.apache.org/v1.RawMessage">
 RawMessage
@@ -4621,7 +4481,7 @@ RawMessage
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1.TraitProfile">TraitProfile
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationKitSpec">IntegrationKitSpec</a>, 
@@ -4629,9 +4489,7 @@ RawMessage
 <a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
 <a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
 </p>
-<p>
 <p>TraitProfile represents lists of traits that are enabled for the specific installation/integration</p>
-</p>
 <h3 id="camel.apache.org/v1.TraitSpec">TraitSpec
 </h3>
 <p>
@@ -4640,9 +4498,7 @@ RawMessage
 <a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>, 
 <a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>)
 </p>
-<p>
 <p>A TraitSpec contains the configuration of a trait</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -4653,7 +4509,7 @@ RawMessage
 <tbody>
 <tr>
 <td>
-<code>configuration</code></br>
+<code>configuration</code><br>
 <em>
 <a href="#camel.apache.org/v1.TraitConfiguration">
 TraitConfiguration
@@ -4672,9 +4528,7 @@ TraitConfiguration
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.MavenSpec">MavenSpec</a>)
 </p>
-<p>
 <p>ValueSource &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -4685,7 +4539,7 @@ TraitConfiguration
 <tbody>
 <tr>
 <td>
-<code>configMapKeyRef</code></br>
+<code>configMapKeyRef</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#configmapkeyselector-v1-core">
 Kubernetes core/v1.ConfigMapKeySelector
@@ -4698,7 +4552,7 @@ Kubernetes core/v1.ConfigMapKeySelector
 </tr>
 <tr>
 <td>
-<code>secretKeyRef</code></br>
+<code>secretKeyRef</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector
@@ -4713,9 +4567,7 @@ Kubernetes core/v1.SecretKeySelector
 </table>
 <hr/>
 <h2 id="camel.apache.org/v1alpha1">camel.apache.org/v1alpha1</h2>
-<p>
 <p>Package v1alpha1 contains API Schema definitions for the camel v1alpha1 API group</p>
-</p>
 Resource Types:
 <ul><li>
 <a href="#camel.apache.org/v1alpha1.Kamelet">Kamelet</a>
@@ -4724,9 +4576,7 @@ Resource Types:
 </li></ul>
 <h3 id="camel.apache.org/v1alpha1.Kamelet">Kamelet
 </h3>
-<p>
 <p>Kamelet is the Schema for the kamelets API</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -4737,7 +4587,7 @@ Resource Types:
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code><br>
 string</td>
 <td>
 <code>
@@ -4747,14 +4597,14 @@ camel.apache.org/v1alpha1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code><br>
 string
 </td>
 <td><code>Kamelet</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -4768,7 +4618,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletSpec">
 KameletSpec
@@ -4781,7 +4631,7 @@ KameletSpec
 <table>
 <tr>
 <td>
-<code>definition</code></br>
+<code>definition</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProps">
 JSONSchemaProps
@@ -4793,7 +4643,7 @@ JSONSchemaProps
 </tr>
 <tr>
 <td>
-<code>sources</code></br>
+<code>sources</code><br>
 <em>
 <a href="#camel.apache.org/v1.SourceSpec">
 []SourceSpec
@@ -4805,7 +4655,7 @@ JSONSchemaProps
 </tr>
 <tr>
 <td>
-<code>flow</code></br>
+<code>flow</code><br>
 <em>
 <a href="#camel.apache.org/v1.Flow">
 Flow
@@ -4817,7 +4667,7 @@ Flow
 </tr>
 <tr>
 <td>
-<code>authorization</code></br>
+<code>authorization</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.AuthorizationSpec">
 AuthorizationSpec
@@ -4829,7 +4679,7 @@ AuthorizationSpec
 </tr>
 <tr>
 <td>
-<code>types</code></br>
+<code>types</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.EventTypeSpec">
 map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventTypeSpec
@@ -4841,7 +4691,7 @@ map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apach
 </tr>
 <tr>
 <td>
-<code>dependencies</code></br>
+<code>dependencies</code><br>
 <em>
 []string
 </em>
@@ -4854,7 +4704,7 @@ map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apach
 </tr>
 <tr>
 <td>
-<code>status</code></br>
+<code>status</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletStatus">
 KameletStatus
@@ -4868,9 +4718,7 @@ KameletStatus
 </table>
 <h3 id="camel.apache.org/v1alpha1.KameletBinding">KameletBinding
 </h3>
-<p>
 <p>KameletBinding is the Schema for the kamelets binding API</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -4881,7 +4729,7 @@ KameletStatus
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code></br>
+<code>apiVersion</code><br>
 string</td>
 <td>
 <code>
@@ -4891,14 +4739,14 @@ camel.apache.org/v1alpha1
 </tr>
 <tr>
 <td>
-<code>kind</code></br>
+<code>kind</code><br>
 string
 </td>
 <td><code>KameletBinding</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code></br>
+<code>metadata</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -4912,7 +4760,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>spec</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingSpec">
 KameletBindingSpec
@@ -4925,7 +4773,7 @@ KameletBindingSpec
 <table>
 <tr>
 <td>
-<code>integration</code></br>
+<code>integration</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationSpec">
 IntegrationSpec
@@ -4938,7 +4786,7 @@ IntegrationSpec
 </tr>
 <tr>
 <td>
-<code>source</code></br>
+<code>source</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.Endpoint">
 Endpoint
@@ -4951,7 +4799,7 @@ Endpoint
 </tr>
 <tr>
 <td>
-<code>sink</code></br>
+<code>sink</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.Endpoint">
 Endpoint
@@ -4964,7 +4812,7 @@ Endpoint
 </tr>
 <tr>
 <td>
-<code>errorHandler</code></br>
+<code>errorHandler</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerSpec">
 ErrorHandlerSpec
@@ -4977,7 +4825,7 @@ ErrorHandlerSpec
 </tr>
 <tr>
 <td>
-<code>steps</code></br>
+<code>steps</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.Endpoint">
 []Endpoint
@@ -4993,7 +4841,7 @@ ErrorHandlerSpec
 </tr>
 <tr>
 <td>
-<code>status</code></br>
+<code>status</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingStatus">
 KameletBindingStatus
@@ -5011,18 +4859,14 @@ KameletBindingStatus
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletSpec">KameletSpec</a>)
 </p>
-<p>
 <p>AuthorizationSpec is TODO (oauth information)</p>
-</p>
 <h3 id="camel.apache.org/v1alpha1.BeanProperties">BeanProperties
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerBean">ErrorHandlerBean</a>)
 </p>
-<p>
 <p>BeanProperties represent an unstructured object properties to be set on a bean</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -5033,7 +4877,7 @@ KameletBindingStatus
 <tbody>
 <tr>
 <td>
-<code>RawMessage</code></br>
+<code>RawMessage</code><br>
 <em>
 <a href="#camel.apache.org/v1.RawMessage">
 RawMessage
@@ -5052,9 +4896,7 @@ RawMessage
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerDeadLetterChannel">ErrorHandlerDeadLetterChannel</a>, 
 <a href="#camel.apache.org/v1alpha1.KameletBindingSpec">KameletBindingSpec</a>)
 </p>
-<p>
 <p>Endpoint represents a source/sink external entity</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -5065,7 +4907,7 @@ RawMessage
 <tbody>
 <tr>
 <td>
-<code>ref</code></br>
+<code>ref</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core">
 Kubernetes core/v1.ObjectReference
@@ -5078,7 +4920,7 @@ Kubernetes core/v1.ObjectReference
 </tr>
 <tr>
 <td>
-<code>uri</code></br>
+<code>uri</code><br>
 <em>
 string
 </em>
@@ -5089,7 +4931,7 @@ string
 </tr>
 <tr>
 <td>
-<code>properties</code></br>
+<code>properties</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.EndpointProperties">
 EndpointProperties
@@ -5102,7 +4944,7 @@ EndpointProperties
 </tr>
 <tr>
 <td>
-<code>types</code></br>
+<code>types</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.EventTypeSpec">
 map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventTypeSpec
@@ -5121,9 +4963,7 @@ map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apach
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.Endpoint">Endpoint</a>)
 </p>
-<p>
 <p>EndpointProperties is a key/value struct represented as JSON raw to allow numeric/boolean values</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -5134,7 +4974,7 @@ map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apach
 <tbody>
 <tr>
 <td>
-<code>RawMessage</code></br>
+<code>RawMessage</code><br>
 <em>
 <a href="#camel.apache.org/v1.RawMessage">
 RawMessage
@@ -5150,19 +4990,15 @@ RawMessage
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1alpha1.EndpointType">EndpointType
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 </p>
 <h3 id="camel.apache.org/v1alpha1.ErrorHandler">ErrorHandler
 </h3>
-<p>
 <p>ErrorHandler is a generic interface that represent any type of error handler specification</p>
-</p>
 <h3 id="camel.apache.org/v1alpha1.ErrorHandlerBean">ErrorHandlerBean
 </h3>
-<p>
 <p>ErrorHandlerBean represents a bean error handler type</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -5173,7 +5009,7 @@ RawMessage
 <tbody>
 <tr>
 <td>
-<code>ErrorHandlerNone</code></br>
+<code>ErrorHandlerNone</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerNone">
 ErrorHandlerNone
@@ -5185,7 +5021,7 @@ ErrorHandlerNone
 </tr>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code><br>
 <em>
 string
 </em>
@@ -5195,7 +5031,7 @@ string
 </tr>
 <tr>
 <td>
-<code>properties</code></br>
+<code>properties</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.BeanProperties">
 BeanProperties
@@ -5209,9 +5045,7 @@ BeanProperties
 </table>
 <h3 id="camel.apache.org/v1alpha1.ErrorHandlerDeadLetterChannel">ErrorHandlerDeadLetterChannel
 </h3>
-<p>
 <p>ErrorHandlerDeadLetterChannel represents a dead letter channel error handler type</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -5222,7 +5056,7 @@ BeanProperties
 <tbody>
 <tr>
 <td>
-<code>ErrorHandlerLog</code></br>
+<code>ErrorHandlerLog</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerLog">
 ErrorHandlerLog
@@ -5234,7 +5068,7 @@ ErrorHandlerLog
 </tr>
 <tr>
 <td>
-<code>endpoint</code></br>
+<code>endpoint</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.Endpoint">
 Endpoint
@@ -5252,9 +5086,7 @@ Endpoint
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerDeadLetterChannel">ErrorHandlerDeadLetterChannel</a>)
 </p>
-<p>
 <p>ErrorHandlerLog represent a default (log) error handler type</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -5265,7 +5097,7 @@ Endpoint
 <tbody>
 <tr>
 <td>
-<code>ErrorHandlerNone</code></br>
+<code>ErrorHandlerNone</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerNone">
 ErrorHandlerNone
@@ -5277,7 +5109,7 @@ ErrorHandlerNone
 </tr>
 <tr>
 <td>
-<code>parameters</code></br>
+<code>parameters</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerParameters">
 ErrorHandlerParameters
@@ -5296,9 +5128,7 @@ ErrorHandlerParameters
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerBean">ErrorHandlerBean</a>, 
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerLog">ErrorHandlerLog</a>)
 </p>
-<p>
 <p>ErrorHandlerNone &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -5315,9 +5145,7 @@ ErrorHandlerParameters
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerLog">ErrorHandlerLog</a>)
 </p>
-<p>
 <p>ErrorHandlerParameters represent an unstructured object for error handler parameters</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -5328,7 +5156,7 @@ ErrorHandlerParameters
 <tbody>
 <tr>
 <td>
-<code>RawMessage</code></br>
+<code>RawMessage</code><br>
 <em>
 <a href="#camel.apache.org/v1.RawMessage">
 RawMessage
@@ -5342,9 +5170,7 @@ RawMessage
 </table>
 <h3 id="camel.apache.org/v1alpha1.ErrorHandlerRef">ErrorHandlerRef
 </h3>
-<p>
 <p>ErrorHandlerRef represents a reference to an error handler builder available in the registry</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -5355,7 +5181,7 @@ RawMessage
 <tbody>
 <tr>
 <td>
-<code>RawMessage</code></br>
+<code>RawMessage</code><br>
 <em>
 <a href="#camel.apache.org/v1.RawMessage">
 RawMessage
@@ -5373,9 +5199,7 @@ RawMessage
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingSpec">KameletBindingSpec</a>)
 </p>
-<p>
 <p>ErrorHandlerSpec represents an unstructured object for an error handler</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -5386,7 +5210,7 @@ RawMessage
 <tbody>
 <tr>
 <td>
-<code>RawMessage</code></br>
+<code>RawMessage</code><br>
 <em>
 <a href="#camel.apache.org/v1.RawMessage">
 RawMessage
@@ -5399,12 +5223,10 @@ RawMessage
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1alpha1.ErrorHandlerType">ErrorHandlerType
-(<code>string</code> alias)</p></h3>
-<p>
+(<code>string</code> alias)</h3>
 <p>ErrorHandlerType &ndash;</p>
-</p>
 <h3 id="camel.apache.org/v1alpha1.EventSlot">EventSlot
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 </p>
 <h3 id="camel.apache.org/v1alpha1.EventTypeSpec">EventTypeSpec
@@ -5426,7 +5248,7 @@ RawMessage
 <tbody>
 <tr>
 <td>
-<code>mediaType</code></br>
+<code>mediaType</code><br>
 <em>
 string
 </em>
@@ -5436,7 +5258,7 @@ string
 </tr>
 <tr>
 <td>
-<code>schema</code></br>
+<code>schema</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProps">
 JSONSchemaProps
@@ -5454,9 +5276,7 @@ JSONSchemaProps
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProps">JSONSchemaProps</a>)
 </p>
-<p>
 <p>ExternalDocumentation allows referencing an external resource for extended documentation.</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -5467,7 +5287,7 @@ JSONSchemaProps
 <tbody>
 <tr>
 <td>
-<code>description</code></br>
+<code>description</code><br>
 <em>
 string
 </em>
@@ -5477,7 +5297,7 @@ string
 </tr>
 <tr>
 <td>
-<code>url</code></br>
+<code>url</code><br>
 <em>
 string
 </em>
@@ -5494,10 +5314,8 @@ string
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProp">JSONSchemaProp</a>, 
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProps">JSONSchemaProps</a>)
 </p>
-<p>
 <p>JSON represents any valid JSON value.
 These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -5508,7 +5326,7 @@ These types are supported: bool, int64, float64, string, []interface{}, map[stri
 <tbody>
 <tr>
 <td>
-<code>RawMessage</code></br>
+<code>RawMessage</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.RawMessage">
 RawMessage
@@ -5541,7 +5359,7 @@ RawMessage
 <tbody>
 <tr>
 <td>
-<code>id</code></br>
+<code>id</code><br>
 <em>
 string
 </em>
@@ -5551,7 +5369,7 @@ string
 </tr>
 <tr>
 <td>
-<code>description</code></br>
+<code>description</code><br>
 <em>
 string
 </em>
@@ -5561,7 +5379,7 @@ string
 </tr>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code><br>
 <em>
 string
 </em>
@@ -5571,7 +5389,7 @@ string
 </tr>
 <tr>
 <td>
-<code>format</code></br>
+<code>format</code><br>
 <em>
 string
 </em>
@@ -5608,7 +5426,7 @@ string
 </tr>
 <tr>
 <td>
-<code>title</code></br>
+<code>title</code><br>
 <em>
 string
 </em>
@@ -5618,7 +5436,7 @@ string
 </tr>
 <tr>
 <td>
-<code>default</code></br>
+<code>default</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSON">
 JSON
@@ -5631,7 +5449,7 @@ JSON
 </tr>
 <tr>
 <td>
-<code>maximum</code></br>
+<code>maximum</code><br>
 <em>
 encoding/json.Number
 </em>
@@ -5641,7 +5459,7 @@ encoding/json.Number
 </tr>
 <tr>
 <td>
-<code>exclusiveMaximum</code></br>
+<code>exclusiveMaximum</code><br>
 <em>
 bool
 </em>
@@ -5651,7 +5469,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>minimum</code></br>
+<code>minimum</code><br>
 <em>
 encoding/json.Number
 </em>
@@ -5661,7 +5479,7 @@ encoding/json.Number
 </tr>
 <tr>
 <td>
-<code>exclusiveMinimum</code></br>
+<code>exclusiveMinimum</code><br>
 <em>
 bool
 </em>
@@ -5671,7 +5489,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>maxLength</code></br>
+<code>maxLength</code><br>
 <em>
 int64
 </em>
@@ -5681,7 +5499,7 @@ int64
 </tr>
 <tr>
 <td>
-<code>minLength</code></br>
+<code>minLength</code><br>
 <em>
 int64
 </em>
@@ -5691,7 +5509,7 @@ int64
 </tr>
 <tr>
 <td>
-<code>pattern</code></br>
+<code>pattern</code><br>
 <em>
 string
 </em>
@@ -5701,7 +5519,7 @@ string
 </tr>
 <tr>
 <td>
-<code>maxItems</code></br>
+<code>maxItems</code><br>
 <em>
 int64
 </em>
@@ -5711,7 +5529,7 @@ int64
 </tr>
 <tr>
 <td>
-<code>minItems</code></br>
+<code>minItems</code><br>
 <em>
 int64
 </em>
@@ -5721,7 +5539,7 @@ int64
 </tr>
 <tr>
 <td>
-<code>uniqueItems</code></br>
+<code>uniqueItems</code><br>
 <em>
 bool
 </em>
@@ -5731,7 +5549,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>maxProperties</code></br>
+<code>maxProperties</code><br>
 <em>
 int64
 </em>
@@ -5741,7 +5559,7 @@ int64
 </tr>
 <tr>
 <td>
-<code>minProperties</code></br>
+<code>minProperties</code><br>
 <em>
 int64
 </em>
@@ -5751,7 +5569,7 @@ int64
 </tr>
 <tr>
 <td>
-<code>multipleOf</code></br>
+<code>multipleOf</code><br>
 <em>
 encoding/json.Number
 </em>
@@ -5761,7 +5579,7 @@ encoding/json.Number
 </tr>
 <tr>
 <td>
-<code>enum</code></br>
+<code>enum</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSON">
 []JSON
@@ -5773,7 +5591,7 @@ encoding/json.Number
 </tr>
 <tr>
 <td>
-<code>example</code></br>
+<code>example</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSON">
 JSON
@@ -5785,7 +5603,7 @@ JSON
 </tr>
 <tr>
 <td>
-<code>nullable</code></br>
+<code>nullable</code><br>
 <em>
 bool
 </em>
@@ -5795,7 +5613,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>x-descriptors</code></br>
+<code>x-descriptors</code><br>
 <em>
 []string
 </em>
@@ -5813,9 +5631,7 @@ bool
 <a href="#camel.apache.org/v1alpha1.EventTypeSpec">EventTypeSpec</a>, 
 <a href="#camel.apache.org/v1alpha1.KameletSpec">KameletSpec</a>)
 </p>
-<p>
 <p>JSONSchemaProps is a JSON-Schema following Specification Draft 4 (<a href="http://json-schema.org/">http://json-schema.org/</a>).</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -5826,7 +5642,7 @@ bool
 <tbody>
 <tr>
 <td>
-<code>id</code></br>
+<code>id</code><br>
 <em>
 string
 </em>
@@ -5836,7 +5652,7 @@ string
 </tr>
 <tr>
 <td>
-<code>description</code></br>
+<code>description</code><br>
 <em>
 string
 </em>
@@ -5846,7 +5662,7 @@ string
 </tr>
 <tr>
 <td>
-<code>title</code></br>
+<code>title</code><br>
 <em>
 string
 </em>
@@ -5856,7 +5672,7 @@ string
 </tr>
 <tr>
 <td>
-<code>properties</code></br>
+<code>properties</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProp">
 map[string]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.JSONSchemaProp
@@ -5868,7 +5684,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.JSONSchemaProp
 </tr>
 <tr>
 <td>
-<code>required</code></br>
+<code>required</code><br>
 <em>
 []string
 </em>
@@ -5878,7 +5694,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.JSONSchemaProp
 </tr>
 <tr>
 <td>
-<code>example</code></br>
+<code>example</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSON">
 JSON
@@ -5890,7 +5706,7 @@ JSON
 </tr>
 <tr>
 <td>
-<code>externalDocs</code></br>
+<code>externalDocs</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.ExternalDocumentation">
 ExternalDocumentation
@@ -5902,7 +5718,7 @@ ExternalDocumentation
 </tr>
 <tr>
 <td>
-<code>$schema</code></br>
+<code>$schema</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSONSchemaURL">
 JSONSchemaURL
@@ -5914,7 +5730,7 @@ JSONSchemaURL
 </tr>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code><br>
 <em>
 string
 </em>
@@ -5925,23 +5741,19 @@ string
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1alpha1.JSONSchemaURL">JSONSchemaURL
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProps">JSONSchemaProps</a>)
 </p>
-<p>
 <p>JSONSchemaURL represents a schema url.</p>
-</p>
 <h3 id="camel.apache.org/v1alpha1.KameletBindingCondition">KameletBindingCondition
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingStatus">KameletBindingStatus</a>)
 </p>
-<p>
 <p>KameletBindingCondition describes the state of a resource at a certain point.</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -5952,7 +5764,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingConditionType">
 KameletBindingConditionType
@@ -5965,7 +5777,7 @@ KameletBindingConditionType
 </tr>
 <tr>
 <td>
-<code>status</code></br>
+<code>status</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core">
 Kubernetes core/v1.ConditionStatus
@@ -5978,7 +5790,7 @@ Kubernetes core/v1.ConditionStatus
 </tr>
 <tr>
 <td>
-<code>lastUpdateTime</code></br>
+<code>lastUpdateTime</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -5991,7 +5803,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>lastTransitionTime</code></br>
+<code>lastTransitionTime</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -6004,7 +5816,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>reason</code></br>
+<code>reason</code><br>
 <em>
 string
 </em>
@@ -6015,7 +5827,7 @@ string
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code><br>
 <em>
 string
 </em>
@@ -6027,7 +5839,7 @@ string
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1alpha1.KameletBindingConditionType">KameletBindingConditionType
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingCondition">KameletBindingCondition</a>)
@@ -6035,7 +5847,7 @@ string
 <p>
 </p>
 <h3 id="camel.apache.org/v1alpha1.KameletBindingPhase">KameletBindingPhase
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingStatus">KameletBindingStatus</a>)
@@ -6048,9 +5860,7 @@ string
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletBinding">KameletBinding</a>)
 </p>
-<p>
 <p>KameletBindingSpec &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -6061,7 +5871,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>integration</code></br>
+<code>integration</code><br>
 <em>
 <a href="#camel.apache.org/v1.IntegrationSpec">
 IntegrationSpec
@@ -6074,7 +5884,7 @@ IntegrationSpec
 </tr>
 <tr>
 <td>
-<code>source</code></br>
+<code>source</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.Endpoint">
 Endpoint
@@ -6087,7 +5897,7 @@ Endpoint
 </tr>
 <tr>
 <td>
-<code>sink</code></br>
+<code>sink</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.Endpoint">
 Endpoint
@@ -6100,7 +5910,7 @@ Endpoint
 </tr>
 <tr>
 <td>
-<code>errorHandler</code></br>
+<code>errorHandler</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerSpec">
 ErrorHandlerSpec
@@ -6113,7 +5923,7 @@ ErrorHandlerSpec
 </tr>
 <tr>
 <td>
-<code>steps</code></br>
+<code>steps</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.Endpoint">
 []Endpoint
@@ -6132,9 +5942,7 @@ ErrorHandlerSpec
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletBinding">KameletBinding</a>)
 </p>
-<p>
 <p>KameletBindingStatus &ndash;</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -6145,7 +5953,7 @@ ErrorHandlerSpec
 <tbody>
 <tr>
 <td>
-<code>phase</code></br>
+<code>phase</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingPhase">
 KameletBindingPhase
@@ -6158,7 +5966,7 @@ KameletBindingPhase
 </tr>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingCondition">
 []KameletBindingCondition
@@ -6177,9 +5985,7 @@ KameletBindingPhase
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletStatus">KameletStatus</a>)
 </p>
-<p>
 <p>KameletCondition describes the state of a resource at a certain point.</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -6190,7 +5996,7 @@ KameletBindingPhase
 <tbody>
 <tr>
 <td>
-<code>type</code></br>
+<code>type</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletConditionType">
 KameletConditionType
@@ -6203,7 +6009,7 @@ KameletConditionType
 </tr>
 <tr>
 <td>
-<code>status</code></br>
+<code>status</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core">
 Kubernetes core/v1.ConditionStatus
@@ -6216,7 +6022,7 @@ Kubernetes core/v1.ConditionStatus
 </tr>
 <tr>
 <td>
-<code>lastUpdateTime</code></br>
+<code>lastUpdateTime</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -6229,7 +6035,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>lastTransitionTime</code></br>
+<code>lastTransitionTime</code><br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -6242,7 +6048,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>reason</code></br>
+<code>reason</code><br>
 <em>
 string
 </em>
@@ -6253,7 +6059,7 @@ string
 </tr>
 <tr>
 <td>
-<code>message</code></br>
+<code>message</code><br>
 <em>
 string
 </em>
@@ -6265,7 +6071,7 @@ string
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1alpha1.KameletConditionType">KameletConditionType
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletCondition">KameletCondition</a>)
@@ -6273,7 +6079,7 @@ string
 <p>
 </p>
 <h3 id="camel.apache.org/v1alpha1.KameletPhase">KameletPhase
-(<code>string</code> alias)</p></h3>
+(<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletStatus">KameletStatus</a>)
@@ -6298,7 +6104,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>name</code></br>
+<code>name</code><br>
 <em>
 string
 </em>
@@ -6308,7 +6114,7 @@ string
 </tr>
 <tr>
 <td>
-<code>default</code></br>
+<code>default</code><br>
 <em>
 string
 </em>
@@ -6324,9 +6130,7 @@ string
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.Kamelet">Kamelet</a>)
 </p>
-<p>
 <p>KameletSpec defines the desired state of Kamelet</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -6337,7 +6141,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>definition</code></br>
+<code>definition</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProps">
 JSONSchemaProps
@@ -6349,7 +6153,7 @@ JSONSchemaProps
 </tr>
 <tr>
 <td>
-<code>sources</code></br>
+<code>sources</code><br>
 <em>
 <a href="#camel.apache.org/v1.SourceSpec">
 []SourceSpec
@@ -6361,7 +6165,7 @@ JSONSchemaProps
 </tr>
 <tr>
 <td>
-<code>flow</code></br>
+<code>flow</code><br>
 <em>
 <a href="#camel.apache.org/v1.Flow">
 Flow
@@ -6373,7 +6177,7 @@ Flow
 </tr>
 <tr>
 <td>
-<code>authorization</code></br>
+<code>authorization</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.AuthorizationSpec">
 AuthorizationSpec
@@ -6385,7 +6189,7 @@ AuthorizationSpec
 </tr>
 <tr>
 <td>
-<code>types</code></br>
+<code>types</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.EventTypeSpec">
 map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventTypeSpec
@@ -6397,7 +6201,7 @@ map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apach
 </tr>
 <tr>
 <td>
-<code>dependencies</code></br>
+<code>dependencies</code><br>
 <em>
 []string
 </em>
@@ -6413,9 +6217,7 @@ map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apach
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.Kamelet">Kamelet</a>)
 </p>
-<p>
 <p>KameletStatus defines the observed state of Kamelet</p>
-</p>
 <table>
 <thead>
 <tr>
@@ -6426,7 +6228,7 @@ map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apach
 <tbody>
 <tr>
 <td>
-<code>phase</code></br>
+<code>phase</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletPhase">
 KameletPhase
@@ -6438,7 +6240,7 @@ KameletPhase
 </tr>
 <tr>
 <td>
-<code>conditions</code></br>
+<code>conditions</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletCondition">
 []KameletCondition
@@ -6450,7 +6252,7 @@ KameletPhase
 </tr>
 <tr>
 <td>
-<code>properties</code></br>
+<code>properties</code><br>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletProperty">
 []KameletProperty
@@ -6463,18 +6265,16 @@ KameletPhase
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1alpha1.RawMessage">RawMessage
-(<code>[]byte</code> alias)</p></h3>
+(<code>[]byte</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.JSON">JSON</a>)
 </p>
-<p>
 <p>RawMessage is a raw encoded JSON value.
 It implements Marshaler and Unmarshaler and can
 be used to delay JSON decoding or precompute a JSON encoding.</p>
-</p>
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>cca9858d</code>.
+on git commit <code>65f49e5c</code>.
 </em></p>
