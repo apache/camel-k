@@ -66,15 +66,14 @@ func TestOperatorUpgrade(t *testing.T) {
 		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+
 		// Check the Integration version
 		Eventually(IntegrationVersion(ns, name)).Should(Equal(version))
-		kit := IntegrationKit(ns, name)()
 
 		// Clear the KAMEL_BIN environment variable so that the current version is used from now on
 		Expect(os.Setenv("KAMEL_BIN", "")).To(Succeed())
 
 		// Upgrade the operator by installing the current version
-		// FIXME: it seems forcing the installation does not re-install the CRDs
 		Expect(Kamel("install", "--olm=false", "--cluster-setup", "--force").Execute()).To(Succeed())
 		Expect(Kamel("install", "-n", ns, "--olm=false", "--force", "--operator-image", image).Execute()).To(Succeed())
 
@@ -86,19 +85,29 @@ func TestOperatorUpgrade(t *testing.T) {
 		Eventually(PlatformVersion(ns), TestTimeoutMedium).Should(Equal(defaults.Version))
 
 		// Check the Integration hasn't been upgraded
-		Consistently(IntegrationVersion(ns, name), 3*time.Second).Should(Equal(version))
+		Consistently(IntegrationVersion(ns, name), 5*time.Second, 1*time.Second).Should(Equal(version))
 
 		// Force the Integration upgrade
 		Expect(Kamel("rebuild", name, "-n", ns).Execute()).To(Succeed())
 
-		// Check the Integration version change
+		// Check the Integration version has been upgraded
 		Eventually(IntegrationVersion(ns, name)).Should(Equal(defaults.Version))
+
 		// Check the previous kit is not garbage collected
-		Eventually(KitsWithVersion(ns, version)).Should(Equal(1))
+		Eventually(Kits(ns, kitWithVersion(version))).Should(HaveLen(1))
 		// Check a new kit is created with the current version
-		Eventually(KitsWithVersion(ns, defaults.Version)).Should(Equal(1))
-		// Check the Integration uses the new kit
-		Eventually(IntegrationKit(ns, name), TestTimeoutMedium).ShouldNot(Equal(kit))
+		Eventually(Kits(ns, kitWithVersion(defaults.Version))).Should(HaveLen(1))
+		// Check the new kit is ready
+		Eventually(Kits(ns, kitWithVersion(defaults.Version), kitWithPhase(v1.IntegrationKitPhaseReady)),
+			TestTimeoutMedium).Should(HaveLen(1))
+
+		kit := Kits(ns, kitWithVersion(defaults.Version))()[0]
+
+		// Check the Integration uses the new image
+		Eventually(IntegrationKit(ns, name), TestTimeoutMedium).Should(Equal(kit.Name))
+		// Check the Integration Pod uses the new kit
+		Eventually(IntegrationPodImage(ns, name)).Should(Equal(kit.Status.Image))
+
 		// Check the Integration runs correctly
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -107,4 +116,12 @@ func TestOperatorUpgrade(t *testing.T) {
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		Expect(Kamel("uninstall", "--all", "--olm=false").Execute()).To(Succeed())
 	})
+}
+
+func kitWithVersion(version string) func(kit *v1.IntegrationKit) bool {
+	return func(kit *v1.IntegrationKit) bool { return kit.Status.Version == version }
+}
+
+func kitWithPhase(phase v1.IntegrationKitPhase) func(kit *v1.IntegrationKit) bool {
+	return func(kit *v1.IntegrationKit) bool { return kit.Status.Phase == phase }
 }
