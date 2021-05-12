@@ -575,25 +575,33 @@ func ScaleIntegration(ns string, name string, replicas int32) error {
 	})
 }
 
-func Kits(ns string) func() []v1.IntegrationKit {
+func Kits(ns string, filters ...func(*v1.IntegrationKit) bool) func() []v1.IntegrationKit {
 	return func() []v1.IntegrationKit {
-		lst := v1.NewIntegrationKitList()
-		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+		list := v1.NewIntegrationKitList()
+		if err := TestClient().List(TestContext, &list, ctrl.InNamespace(ns)); err != nil {
 			panic(err)
 		}
-		return lst.Items
-	}
-}
 
-func KitsWithVersion(ns string, version string) func() int {
-	return func() int {
-		count := 0
-		for _, k := range Kits(ns)() {
-			if k.Status.Version == version {
-				count++
+		if len(filters) == 0 {
+			filters = []func(*v1.IntegrationKit) bool{
+				func(kit *v1.IntegrationKit) bool {
+					return true
+				},
 			}
 		}
-		return count
+
+		var kits []v1.IntegrationKit
+	kits:
+		for _, kit := range list.Items {
+			for _, filter := range filters {
+				if !filter(&kit) {
+					continue kits
+				}
+			}
+			kits = append(kits, kit)
+		}
+
+		return kits
 	}
 }
 
