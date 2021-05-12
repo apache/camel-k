@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	. "github.com/onsi/gomega"
 
@@ -38,6 +39,7 @@ import (
 
 	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 const catalogSourceName = "test-camel-k-source"
@@ -88,9 +90,10 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 
 		name := "yaml"
 		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		// Check the Integration runs correctly
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+
 		// Check the Integration version matches that of the current operator
 		Expect(IntegrationVersion(ns, name)()).To(ContainSubstring(prevIPVersionPrefix))
 
@@ -128,16 +131,33 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 			// Clear the KAMEL_BIN environment variable so that the current version is used from now on
 			Expect(os.Setenv("KAMEL_BIN", "")).To(Succeed())
 
-			// Check the Integration is still running the old version
-			Expect(IntegrationVersion(ns, name)()).To(ContainSubstring(prevIPVersionPrefix))
+			// Check the Integration hasn't been upgraded
+			Consistently(IntegrationVersion(ns, name), 5*time.Second, 1*time.Second).Should(ContainSubstring(prevIPVersionPrefix))
 
 			// Rebuild the Integration
 			Expect(Kamel("rebuild", name, "-n", ns).Execute()).To(Succeed())
 
+			// Check the Integration version has been upgraded
+			Eventually(IntegrationVersion(ns, name)).Should(ContainSubstring(newIPVersionPrefix))
+
+			// Check the previous kit is not garbage collected
+			Eventually(Kits(ns, kitWithVersion(prevCSVVersion.String()))).Should(HaveLen(1))
+			// Check a new kit is created with the current version
+			Eventually(Kits(ns, kitWithVersion(defaults.Version))).Should(HaveLen(1))
+			// Check the new kit is ready
+			Eventually(Kits(ns, kitWithVersion(defaults.Version), kitWithPhase(v1.IntegrationKitPhaseReady)),
+				TestTimeoutMedium).Should(HaveLen(1))
+
+			kit := Kits(ns, kitWithVersion(defaults.Version))()[0]
+
+			// Check the Integration uses the new kit
+			Eventually(IntegrationKit(ns, name), TestTimeoutMedium).Should(Equal(kit.Name))
+			// Check the Integration Pod uses the new image
+			Eventually(IntegrationPodImage(ns, name)).Should(Equal(kit.Status.Image))
+
 			// Check the Integration runs correctly
 			Eventually(IntegrationPodPhase(ns, name)).Should(Equal(corev1.PodRunning))
-			// Check the Integration has upgraded
-			Eventually(IntegrationVersion(ns, name), TestTimeoutMedium).Should(ContainSubstring(newIPVersionPrefix))
+			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 			// Clean up
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
