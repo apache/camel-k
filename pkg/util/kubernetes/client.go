@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -173,4 +174,19 @@ func ResolveValueSource(ctx context.Context, client ctrl.Reader, namespace strin
 	}
 
 	return "", nil
+}
+
+// GetDeployment --
+func GetDeployment(context context.Context, client ctrl.Reader, name string, namespace string) (*appsv1.Deployment, error) {
+
+	key := ctrl.ObjectKey{
+		Name:      name,
+		Namespace: namespace,
+	}
+	deployment := appsv1.Deployment{}
+	if err := client.Get(context, key, &deployment); err != nil {
+		return nil, err
+	}
+
+	return &deployment, nil
 }

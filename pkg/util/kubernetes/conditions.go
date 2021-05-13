@@ -33,9 +33,9 @@ import (
 
 // nolint: gocritic
 func MirrorReadyCondition(ctx context.Context, c client.Client, it *v1.Integration) {
-	if isConditionTrue(it, v1.IntegrationConditionDeploymentAvailable) || isConditionTrue(it, v1.IntegrationConditionKnativeServiceAvailable) {
+	if IsConditionTrue(it, v1.IntegrationConditionDeploymentAvailable) || IsConditionTrue(it, v1.IntegrationConditionKnativeServiceAvailable) {
 		mirrorReadyConditionFromReplicaSet(ctx, c, it)
-	} else if isConditionTrue(it, v1.IntegrationConditionCronJobAvailable) {
+	} else if IsConditionTrue(it, v1.IntegrationConditionCronJobAvailable) {
 		mirrorReadyConditionFromCronJob(ctx, c, it)
 	} else {
 		it.Status.SetCondition(
@@ -112,7 +112,7 @@ func mirrorReadyConditionFromCronJob(ctx context.Context, c client.Client, it *v
 	}
 }
 
-func isConditionTrue(it *v1.Integration, conditionType v1.IntegrationConditionType) bool {
+func IsConditionTrue(it *v1.Integration, conditionType v1.IntegrationConditionType) bool {
 	cond := it.Status.GetCondition(conditionType)
 	if cond == nil {
 		return false
