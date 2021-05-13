@@ -108,6 +108,40 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		timeToFirstReadiness.Observe(duration.Seconds())
 	}
 
+	// the integration pod may be in running phase, but the corresponding container running the integration code
+	// may be in error state, in this case we should check the deployment status and set the integration status accordingly.
+	if kubernetes.IsConditionTrue(integration, v1.IntegrationConditionDeploymentAvailable) {
+		deployment, err := kubernetes.GetDeployment(ctx, action.client, integration.Name, integration.Namespace)
+		if err != nil {
+			return nil, err
+		}
+
+		deployUnavailable := false
+		progressingFailing := false
+		for _, c := range deployment.Status.Conditions {
+			// first, check if the container status is not available
+			if c.Type == appsv1.DeploymentAvailable {
+				deployUnavailable = c.Status == corev1.ConditionFalse
+			}
+			// second, check when it is progressing and reason is the replicas are available but the number of replicas are zero
+			// in this case, the container integration is failing
+			if c.Type == appsv1.DeploymentProgressing {
+				progressingFailing = c.Status == corev1.ConditionTrue && c.Reason == "NewReplicaSetAvailable" && deployment.Status.AvailableReplicas < 1
+			}
+		}
+		if deployUnavailable && progressingFailing {
+			notAvailableCondition := v1.IntegrationCondition{
+				Type:   v1.IntegrationConditionReady, 
+				Status: corev1.ConditionFalse,
+				Reason: v1.IntegrationConditionErrorReason,
+				Message: "The corresponding pod(s) may be in error state, look at the pod status or log for errors",
+			}
+			integration.Status.SetConditions(notAvailableCondition)
+			integration.Status.Phase = v1.IntegrationPhaseError
+			return integration, nil
+		}
+	}
+
 	return integration, nil
 }
 
