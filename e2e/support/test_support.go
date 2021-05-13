@@ -266,7 +266,7 @@ func Logs(ns, podName string, options corev1.PodLogOptions) func() string {
 	}
 }
 
-func StructuredLogs(ns, podName string, options corev1.PodLogOptions) []util.LogEntry {
+func StructuredLogs(ns, podName string, options corev1.PodLogOptions, ignoreParseErrors bool) []util.LogEntry {
 	byteReader, err := TestClient().CoreV1().Pods(ns).GetLogs(podName, &options).Stream(TestContext)
 	if err != nil {
 		log.Error(err, "Error while reading container logs")
@@ -285,8 +285,16 @@ func StructuredLogs(ns, podName string, options corev1.PodLogOptions) []util.Log
 		t := scanner.Text()
 		err := json.Unmarshal([]byte(t), &entry)
 		if err != nil {
-			continue
+			if ignoreParseErrors {
+				continue
+			} else {
+				log.Errorf(err, "Unable to parse structured content: %s", t)
+				return nil
+			}
 		}
+
+		log.Debug("Parsed: %s with phase '%s'\n", entry.Message, entry.Phase.Name)
+
 		entries = append(entries, entry)
 	}
 
