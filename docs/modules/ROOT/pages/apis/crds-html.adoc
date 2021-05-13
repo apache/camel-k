@@ -1,4573 +1,16 @@
 <p>Packages:</p>
 <ul>
 <li>
-<a href="#camel.apache.org/v1">camel.apache.org/v1</a>
-</li>
-<li>
 <a href="#camel.apache.org/v1alpha1">camel.apache.org/v1alpha1</a>
 </li>
+<li>
+<a href="#camel.apache.org/v1">camel.apache.org/v1</a>
+</li>
 </ul>
-<h2 id="camel.apache.org/v1">camel.apache.org/v1</h2>
-<p>Package v1 contains API Schema definitions for the camel v1 API group</p>
-Resource Types:
-<ul><li>
-<a href="#camel.apache.org/v1.Build">Build</a>
-</li><li>
-<a href="#camel.apache.org/v1.CamelCatalog">CamelCatalog</a>
-</li><li>
-<a href="#camel.apache.org/v1.Integration">Integration</a>
-</li><li>
-<a href="#camel.apache.org/v1.IntegrationKit">IntegrationKit</a>
-</li><li>
-<a href="#camel.apache.org/v1.IntegrationPlatform">IntegrationPlatform</a>
-</li></ul>
-<h3 id="camel.apache.org/v1.Build">Build
-</h3>
-<p>Build is the Schema for the builds API</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>apiVersion</code><br>
-string</td>
-<td>
-<code>
-camel.apache.org/v1
-</code>
-</td>
-</tr>
-<tr>
-<td>
-<code>kind</code><br>
-string
-</td>
-<td><code>Build</code></td>
-</tr>
-<tr>
-<td>
-<code>metadata</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
-Kubernetes meta/v1.ObjectMeta
-</a>
-</em>
-</td>
-<td>
-Refer to the Kubernetes API documentation for the fields of the
-<code>metadata</code> field.
-</td>
-</tr>
-<tr>
-<td>
-<code>spec</code><br>
-<em>
-<a href="#camel.apache.org/v1.BuildSpec">
-BuildSpec
-</a>
-</em>
-</td>
-<td>
-<br/>
-<br/>
-<table>
-<tr>
-<td>
-<code>tasks</code><br>
-<em>
-<a href="#camel.apache.org/v1.Task">
-[]Task
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code><br>
-<em>
-<a href="#camel.apache.org/v1.BuildStatus">
-BuildStatus
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.CamelCatalog">CamelCatalog
-</h3>
-<p>CamelCatalog is the Schema for the camelcatalogs API</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>apiVersion</code><br>
-string</td>
-<td>
-<code>
-camel.apache.org/v1
-</code>
-</td>
-</tr>
-<tr>
-<td>
-<code>kind</code><br>
-string
-</td>
-<td><code>CamelCatalog</code></td>
-</tr>
-<tr>
-<td>
-<code>metadata</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
-Kubernetes meta/v1.ObjectMeta
-</a>
-</em>
-</td>
-<td>
-Refer to the Kubernetes API documentation for the fields of the
-<code>metadata</code> field.
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code><br>
-<em>
-<a href="#camel.apache.org/v1.CamelCatalogStatus">
-CamelCatalogStatus
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>spec</code><br>
-<em>
-<a href="#camel.apache.org/v1.CamelCatalogSpec">
-CamelCatalogSpec
-</a>
-</em>
-</td>
-<td>
-<br/>
-<br/>
-<table>
-<tr>
-<td>
-<code>runtime</code><br>
-<em>
-<a href="#camel.apache.org/v1.RuntimeSpec">
-RuntimeSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>artifacts</code><br>
-<em>
-<a href="#camel.apache.org/v1.CamelArtifact">
-map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelArtifact
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>loaders</code><br>
-<em>
-<a href="#camel.apache.org/v1.CamelLoader">
-map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelLoader
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.Integration">Integration
-</h3>
-<p>Integration is the Schema for the integrations API</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>apiVersion</code><br>
-string</td>
-<td>
-<code>
-camel.apache.org/v1
-</code>
-</td>
-</tr>
-<tr>
-<td>
-<code>kind</code><br>
-string
-</td>
-<td><code>Integration</code></td>
-</tr>
-<tr>
-<td>
-<code>metadata</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
-Kubernetes meta/v1.ObjectMeta
-</a>
-</em>
-</td>
-<td>
-Refer to the Kubernetes API documentation for the fields of the
-<code>metadata</code> field.
-</td>
-</tr>
-<tr>
-<td>
-<code>spec</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationSpec">
-IntegrationSpec
-</a>
-</em>
-</td>
-<td>
-<br/>
-<br/>
-<table>
-<tr>
-<td>
-<code>replicas</code><br>
-<em>
-int32
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>sources</code><br>
-<em>
-<a href="#camel.apache.org/v1.SourceSpec">
-[]SourceSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>flows</code><br>
-<em>
-<a href="#camel.apache.org/v1.Flow">
-[]Flow
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>resources</code><br>
-<em>
-<a href="#camel.apache.org/v1.ResourceSpec">
-[]ResourceSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>kit</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>Deprecated: use the IntegrationKit field</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>integrationKit</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core">
-Kubernetes core/v1.ObjectReference
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>dependencies</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>profile</code><br>
-<em>
-<a href="#camel.apache.org/v1.TraitProfile">
-TraitProfile
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>traits</code><br>
-<em>
-<a href="#camel.apache.org/v1.TraitSpec">
-map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>template</code><br>
-<em>
-<a href="#camel.apache.org/v1.PodSpecTemplate">
-PodSpecTemplate
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>configuration</code><br>
-<em>
-<a href="#camel.apache.org/v1.ConfigurationSpec">
-[]ConfigurationSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>repositories</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>serviceAccountName</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationStatus">
-IntegrationStatus
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.IntegrationKit">IntegrationKit
-</h3>
-<p>IntegrationKit is the Schema for the integrationkits API</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>apiVersion</code><br>
-string</td>
-<td>
-<code>
-camel.apache.org/v1
-</code>
-</td>
-</tr>
-<tr>
-<td>
-<code>kind</code><br>
-string
-</td>
-<td><code>IntegrationKit</code></td>
-</tr>
-<tr>
-<td>
-<code>metadata</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
-Kubernetes meta/v1.ObjectMeta
-</a>
-</em>
-</td>
-<td>
-Refer to the Kubernetes API documentation for the fields of the
-<code>metadata</code> field.
-</td>
-</tr>
-<tr>
-<td>
-<code>spec</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationKitSpec">
-IntegrationKitSpec
-</a>
-</em>
-</td>
-<td>
-<br/>
-<br/>
-<table>
-<tr>
-<td>
-<code>image</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>dependencies</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>profile</code><br>
-<em>
-<a href="#camel.apache.org/v1.TraitProfile">
-TraitProfile
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>traits</code><br>
-<em>
-<a href="#camel.apache.org/v1.TraitSpec">
-map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>configuration</code><br>
-<em>
-<a href="#camel.apache.org/v1.ConfigurationSpec">
-[]ConfigurationSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>repositories</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationKitStatus">
-IntegrationKitStatus
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.IntegrationPlatform">IntegrationPlatform
-</h3>
-<p>IntegrationPlatform is the Schema for the integrationplatforms API</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>apiVersion</code><br>
-string</td>
-<td>
-<code>
-camel.apache.org/v1
-</code>
-</td>
-</tr>
-<tr>
-<td>
-<code>kind</code><br>
-string
-</td>
-<td><code>IntegrationPlatform</code></td>
-</tr>
-<tr>
-<td>
-<code>metadata</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
-Kubernetes meta/v1.ObjectMeta
-</a>
-</em>
-</td>
-<td>
-Refer to the Kubernetes API documentation for the fields of the
-<code>metadata</code> field.
-</td>
-</tr>
-<tr>
-<td>
-<code>spec</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformSpec">
-IntegrationPlatformSpec
-</a>
-</em>
-</td>
-<td>
-<br/>
-<br/>
-<table>
-<tr>
-<td>
-<code>cluster</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformCluster">
-IntegrationPlatformCluster
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>profile</code><br>
-<em>
-<a href="#camel.apache.org/v1.TraitProfile">
-TraitProfile
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>build</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">
-IntegrationPlatformBuildSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>resources</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformResourcesSpec">
-IntegrationPlatformResourcesSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>traits</code><br>
-<em>
-<a href="#camel.apache.org/v1.TraitSpec">
-map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>configuration</code><br>
-<em>
-<a href="#camel.apache.org/v1.ConfigurationSpec">
-[]ConfigurationSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>kamelet</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformKameletSpec">
-IntegrationPlatformKameletSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformStatus">
-IntegrationPlatformStatus
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.Artifact">Artifact
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuildStatus">BuildStatus</a>, 
-<a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>)
-</p>
-<p>Artifact &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>id</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>location</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>target</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>checksum</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.BaseTask">BaseTask
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuildahTask">BuildahTask</a>, 
-<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>, 
-<a href="#camel.apache.org/v1.KanikoTask">KanikoTask</a>, 
-<a href="#camel.apache.org/v1.S2iTask">S2iTask</a>, 
-<a href="#camel.apache.org/v1.SpectrumTask">SpectrumTask</a>)
-</p>
-<p>BaseTask &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>name</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.BuildCondition">BuildCondition
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuildStatus">BuildStatus</a>)
-</p>
-<p>BuildCondition describes the state of a resource at a certain point.</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>type</code><br>
-<em>
-<a href="#camel.apache.org/v1.BuildConditionType">
-BuildConditionType
-</a>
-</em>
-</td>
-<td>
-<p>Type of integration condition.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core">
-Kubernetes core/v1.ConditionStatus
-</a>
-</em>
-</td>
-<td>
-<p>Status of the condition, one of True, False, Unknown.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>lastUpdateTime</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
-Kubernetes meta/v1.Time
-</a>
-</em>
-</td>
-<td>
-<p>The last time this condition was updated.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>lastTransitionTime</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
-Kubernetes meta/v1.Time
-</a>
-</em>
-</td>
-<td>
-<p>Last time the condition transitioned from one status to another.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>reason</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>The reason for the condition&rsquo;s last transition.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>message</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>A human readable message indicating details about the transition.</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.BuildConditionType">BuildConditionType
-(<code>string</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuildCondition">BuildCondition</a>)
-</p>
-<p>BuildConditionType &ndash;</p>
-<h3 id="camel.apache.org/v1.BuildPhase">BuildPhase
-(<code>string</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuildStatus">BuildStatus</a>)
-</p>
-<p>BuildPhase &ndash;</p>
-<h3 id="camel.apache.org/v1.BuildSpec">BuildSpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.Build">Build</a>)
-</p>
-<p>BuildSpec defines the desired state of Build</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>tasks</code><br>
-<em>
-<a href="#camel.apache.org/v1.Task">
-[]Task
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.BuildStatus">BuildStatus
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.Build">Build</a>)
-</p>
-<p>BuildStatus defines the observed state of Build</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>phase</code><br>
-<em>
-<a href="#camel.apache.org/v1.BuildPhase">
-BuildPhase
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>image</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>digest</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>baseImage</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>artifacts</code><br>
-<em>
-<a href="#camel.apache.org/v1.Artifact">
-[]Artifact
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>error</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>failure</code><br>
-<em>
-<a href="#camel.apache.org/v1.Failure">
-Failure
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>startedAt</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
-Kubernetes meta/v1.Time
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>platform</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>conditions</code><br>
-<em>
-<a href="#camel.apache.org/v1.BuildCondition">
-[]BuildCondition
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>duration</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>Change to Duration / ISO 8601 when CRD uses OpenAPI spec v3
-<a href="https://github.com/OAI/OpenAPI-Specification/issues/845">https://github.com/OAI/OpenAPI-Specification/issues/845</a></p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.BuildahTask">BuildahTask
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.Task">Task</a>)
-</p>
-<p>BuildahTask &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>BaseTask</code><br>
-<em>
-<a href="#camel.apache.org/v1.BaseTask">
-BaseTask
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>BaseTask</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>PublishTask</code><br>
-<em>
-<a href="#camel.apache.org/v1.PublishTask">
-PublishTask
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>PublishTask</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>verbose</code><br>
-<em>
-bool
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>httpProxySecret</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.BuilderTask">BuilderTask
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.Task">Task</a>)
-</p>
-<p>BuilderTask &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>BaseTask</code><br>
-<em>
-<a href="#camel.apache.org/v1.BaseTask">
-BaseTask
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>BaseTask</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>baseImage</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>runtime</code><br>
-<em>
-<a href="#camel.apache.org/v1.RuntimeSpec">
-RuntimeSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>sources</code><br>
-<em>
-<a href="#camel.apache.org/v1.SourceSpec">
-[]SourceSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>resources</code><br>
-<em>
-<a href="#camel.apache.org/v1.ResourceSpec">
-[]ResourceSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>dependencies</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>steps</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>maven</code><br>
-<em>
-<a href="#camel.apache.org/v1.MavenSpec">
-MavenSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>buildDir</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>properties</code><br>
-<em>
-map[string]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>timeout</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta">
-Kubernetes meta/v1.Duration
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.CamelArtifact">CamelArtifact
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.CamelCatalogSpec">CamelCatalogSpec</a>)
-</p>
-<p>CamelArtifact &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>CamelArtifactDependency</code><br>
-<em>
-<a href="#camel.apache.org/v1.CamelArtifactDependency">
-CamelArtifactDependency
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>CamelArtifactDependency</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>schemes</code><br>
-<em>
-<a href="#camel.apache.org/v1.CamelScheme">
-[]CamelScheme
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>languages</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>dataformats</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>dependencies</code><br>
-<em>
-<a href="#camel.apache.org/v1.CamelArtifactDependency">
-[]CamelArtifactDependency
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>javaTypes</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.CamelArtifactDependency">CamelArtifactDependency
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.CamelArtifact">CamelArtifact</a>, 
-<a href="#camel.apache.org/v1.CamelSchemeScope">CamelSchemeScope</a>)
-</p>
-<p>CamelArtifactDependency represent a maven&rsquo;s dependency</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>MavenArtifact</code><br>
-<em>
-<a href="#camel.apache.org/v1.MavenArtifact">
-MavenArtifact
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>MavenArtifact</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>exclusions</code><br>
-<em>
-<a href="#camel.apache.org/v1.CamelArtifactExclusion">
-[]CamelArtifactExclusion
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.CamelArtifactExclusion">CamelArtifactExclusion
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.CamelArtifactDependency">CamelArtifactDependency</a>)
-</p>
-<p>CamelArtifactExclusion &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>groupId</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>artifactId</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.CamelCatalogSpec">CamelCatalogSpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.CamelCatalog">CamelCatalog</a>)
-</p>
-<p>CamelCatalogSpec defines the desired state of CamelCatalog</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>runtime</code><br>
-<em>
-<a href="#camel.apache.org/v1.RuntimeSpec">
-RuntimeSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>artifacts</code><br>
-<em>
-<a href="#camel.apache.org/v1.CamelArtifact">
-map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelArtifact
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>loaders</code><br>
-<em>
-<a href="#camel.apache.org/v1.CamelLoader">
-map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelLoader
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.CamelCatalogStatus">CamelCatalogStatus
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.CamelCatalog">CamelCatalog</a>)
-</p>
-<p>CamelCatalogStatus defines the observed state of CamelCatalog</p>
-<h3 id="camel.apache.org/v1.CamelLoader">CamelLoader
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.CamelCatalogSpec">CamelCatalogSpec</a>)
-</p>
-<p>CamelLoader &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>MavenArtifact</code><br>
-<em>
-<a href="#camel.apache.org/v1.MavenArtifact">
-MavenArtifact
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>MavenArtifact</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>languages</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>dependencies</code><br>
-<em>
-<a href="#camel.apache.org/v1.MavenArtifact">
-[]MavenArtifact
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.CamelScheme">CamelScheme
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.CamelArtifact">CamelArtifact</a>)
-</p>
-<p>CamelScheme &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>id</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>passive</code><br>
-<em>
-bool
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>http</code><br>
-<em>
-bool
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>consumer</code><br>
-<em>
-<a href="#camel.apache.org/v1.CamelSchemeScope">
-CamelSchemeScope
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>producer</code><br>
-<em>
-<a href="#camel.apache.org/v1.CamelSchemeScope">
-CamelSchemeScope
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.CamelSchemeScope">CamelSchemeScope
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.CamelScheme">CamelScheme</a>)
-</p>
-<p>CamelSchemeScope contains scoped information about a scheme</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>dependencies</code><br>
-<em>
-<a href="#camel.apache.org/v1.CamelArtifactDependency">
-[]CamelArtifactDependency
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.Capability">Capability
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.RuntimeSpec">RuntimeSpec</a>)
-</p>
-<p>Capability &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>dependencies</code><br>
-<em>
-<a href="#camel.apache.org/v1.MavenArtifact">
-[]MavenArtifact
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>metadata</code><br>
-<em>
-map[string]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.Configurable">Configurable
-</h3>
-<p>Configurable &ndash;</p>
-<h3 id="camel.apache.org/v1.ConfigurationSpec">ConfigurationSpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationKitSpec">IntegrationKitSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
-</p>
-<p>ConfigurationSpec &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>type</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>value</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.DataSpec">DataSpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.ResourceSpec">ResourceSpec</a>, 
-<a href="#camel.apache.org/v1.SourceSpec">SourceSpec</a>)
-</p>
-<p>DataSpec &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>name</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>content</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>rawContent</code><br>
-<em>
-[]byte
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>contentRef</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>contentKey</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>contentType</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>compression</code><br>
-<em>
-bool
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.Failure">Failure
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuildStatus">BuildStatus</a>, 
-<a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>, 
-<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
-</p>
-<p>Failure &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>reason</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>time</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
-Kubernetes meta/v1.Time
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>recovery</code><br>
-<em>
-<a href="#camel.apache.org/v1.FailureRecovery">
-FailureRecovery
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.FailureRecovery">FailureRecovery
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.Failure">Failure</a>)
-</p>
-<p>FailureRecovery &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>attempt</code><br>
-<em>
-int
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>attemptMax</code><br>
-<em>
-int
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>attemptTime</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
-Kubernetes meta/v1.Time
-</a>
-</em>
-</td>
-<td>
-<em>(Optional)</em>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.Flow">Flow
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
-<a href="#camel.apache.org/v1alpha1.KameletSpec">KameletSpec</a>)
-</p>
-<p>Flow is an unstructured object representing a Camel Flow in YAML/JSON DSL</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>RawMessage</code><br>
-<em>
-<a href="#camel.apache.org/v1.RawMessage">
-RawMessage
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>RawMessage</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.IntegrationCondition">IntegrationCondition
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
-</p>
-<p>IntegrationCondition describes the state of a resource at a certain point.</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>type</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationConditionType">
-IntegrationConditionType
-</a>
-</em>
-</td>
-<td>
-<p>Type of integration condition.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core">
-Kubernetes core/v1.ConditionStatus
-</a>
-</em>
-</td>
-<td>
-<p>Status of the condition, one of True, False, Unknown.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>lastUpdateTime</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
-Kubernetes meta/v1.Time
-</a>
-</em>
-</td>
-<td>
-<p>The last time this condition was updated.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>lastTransitionTime</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
-Kubernetes meta/v1.Time
-</a>
-</em>
-</td>
-<td>
-<p>Last time the condition transitioned from one status to another.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>firstTruthyTime</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
-Kubernetes meta/v1.Time
-</a>
-</em>
-</td>
-<td>
-<p>First time the condition status transitioned to True.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>reason</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>The reason for the condition&rsquo;s last transition.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>message</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>A human readable message indicating details about the transition.</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.IntegrationConditionType">IntegrationConditionType
-(<code>string</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationCondition">IntegrationCondition</a>)
-</p>
-<p>IntegrationConditionType &ndash;</p>
-<h3 id="camel.apache.org/v1.IntegrationKitCondition">IntegrationKitCondition
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>)
-</p>
-<p>IntegrationKitCondition describes the state of a resource at a certain point.</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>type</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationKitConditionType">
-IntegrationKitConditionType
-</a>
-</em>
-</td>
-<td>
-<p>Type of integration condition.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core">
-Kubernetes core/v1.ConditionStatus
-</a>
-</em>
-</td>
-<td>
-<p>Status of the condition, one of True, False, Unknown.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>lastUpdateTime</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
-Kubernetes meta/v1.Time
-</a>
-</em>
-</td>
-<td>
-<p>The last time this condition was updated.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>lastTransitionTime</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
-Kubernetes meta/v1.Time
-</a>
-</em>
-</td>
-<td>
-<p>Last time the condition transitioned from one status to another.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>reason</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>The reason for the condition&rsquo;s last transition.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>message</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>A human readable message indicating details about the transition.</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.IntegrationKitConditionType">IntegrationKitConditionType
-(<code>string</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationKitCondition">IntegrationKitCondition</a>)
-</p>
-<p>IntegrationKitConditionType &ndash;</p>
-<h3 id="camel.apache.org/v1.IntegrationKitPhase">IntegrationKitPhase
-(<code>string</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>)
-</p>
-<p>IntegrationKitPhase &ndash;</p>
-<h3 id="camel.apache.org/v1.IntegrationKitSpec">IntegrationKitSpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationKit">IntegrationKit</a>)
-</p>
-<p>IntegrationKitSpec defines the desired state of IntegrationKit</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>image</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>dependencies</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>profile</code><br>
-<em>
-<a href="#camel.apache.org/v1.TraitProfile">
-TraitProfile
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>traits</code><br>
-<em>
-<a href="#camel.apache.org/v1.TraitSpec">
-map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>configuration</code><br>
-<em>
-<a href="#camel.apache.org/v1.ConfigurationSpec">
-[]ConfigurationSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>repositories</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationKit">IntegrationKit</a>)
-</p>
-<p>IntegrationKitStatus defines the observed state of IntegrationKit</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>phase</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationKitPhase">
-IntegrationKitPhase
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>baseImage</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>image</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>digest</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>artifacts</code><br>
-<em>
-<a href="#camel.apache.org/v1.Artifact">
-[]Artifact
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>failure</code><br>
-<em>
-<a href="#camel.apache.org/v1.Failure">
-Failure
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>runtimeVersion</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>runtimeProvider</code><br>
-<em>
-<a href="#camel.apache.org/v1.RuntimeProvider">
-RuntimeProvider
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>platform</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>conditions</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationKitCondition">
-[]IntegrationKitCondition
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>version</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.IntegrationPhase">IntegrationPhase
-(<code>string</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
-</p>
-<p>IntegrationPhase &ndash;</p>
-<h3 id="camel.apache.org/v1.IntegrationPlatformBuildPublishStrategy">IntegrationPlatformBuildPublishStrategy
-(<code>string</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>)
-</p>
-<p>IntegrationPlatformBuildPublishStrategy enumerates all implemented publish strategies</p>
-<h3 id="camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>)
-</p>
-<p>IntegrationPlatformBuildSpec contains platform related build information</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>buildStrategy</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformBuildStrategy">
-IntegrationPlatformBuildStrategy
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>publishStrategy</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformBuildPublishStrategy">
-IntegrationPlatformBuildPublishStrategy
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>runtimeVersion</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>runtimeProvider</code><br>
-<em>
-<a href="#camel.apache.org/v1.RuntimeProvider">
-RuntimeProvider
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>baseImage</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>properties</code><br>
-<em>
-map[string]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>registry</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformRegistrySpec">
-IntegrationPlatformRegistrySpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>timeout</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta">
-Kubernetes meta/v1.Duration
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>persistentVolumeClaim</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>maven</code><br>
-<em>
-<a href="#camel.apache.org/v1.MavenSpec">
-MavenSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>httpProxySecret</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>kanikoBuildCache</code><br>
-<em>
-bool
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.IntegrationPlatformBuildStrategy">IntegrationPlatformBuildStrategy
-(<code>string</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>)
-</p>
-<p>IntegrationPlatformBuildStrategy enumerates all implemented build strategies</p>
-<h3 id="camel.apache.org/v1.IntegrationPlatformCluster">IntegrationPlatformCluster
-(<code>string</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>)
-</p>
-<p>IntegrationPlatformCluster is the kind of orchestration cluster the platform is installed into</p>
-<h3 id="camel.apache.org/v1.IntegrationPlatformCondition">IntegrationPlatformCondition
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatformStatus">IntegrationPlatformStatus</a>)
-</p>
-<p>IntegrationPlatformCondition describes the state of a resource at a certain point.</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>type</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformConditionType">
-IntegrationPlatformConditionType
-</a>
-</em>
-</td>
-<td>
-<p>Type of integration condition.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>status</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core">
-Kubernetes core/v1.ConditionStatus
-</a>
-</em>
-</td>
-<td>
-<p>Status of the condition, one of True, False, Unknown.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>lastUpdateTime</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
-Kubernetes meta/v1.Time
-</a>
-</em>
-</td>
-<td>
-<p>The last time this condition was updated.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>lastTransitionTime</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
-Kubernetes meta/v1.Time
-</a>
-</em>
-</td>
-<td>
-<p>Last time the condition transitioned from one status to another.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>reason</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>The reason for the condition&rsquo;s last transition.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>message</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>A human readable message indicating details about the transition.</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.IntegrationPlatformConditionType">IntegrationPlatformConditionType
-(<code>string</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatformCondition">IntegrationPlatformCondition</a>)
-</p>
-<p>IntegrationPlatformConditionType &ndash;</p>
-<h3 id="camel.apache.org/v1.IntegrationPlatformKameletRepositorySpec">IntegrationPlatformKameletRepositorySpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatformKameletSpec">IntegrationPlatformKameletSpec</a>)
-</p>
-<p>IntegrationPlatformKameletRepositorySpec &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>uri</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.IntegrationPlatformKameletSpec">IntegrationPlatformKameletSpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>)
-</p>
-<p>IntegrationPlatformKameletSpec &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>repositories</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformKameletRepositorySpec">
-[]IntegrationPlatformKameletRepositorySpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.IntegrationPlatformPhase">IntegrationPlatformPhase
-(<code>string</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatformStatus">IntegrationPlatformStatus</a>)
-</p>
-<p>IntegrationPlatformPhase &ndash;</p>
-<h3 id="camel.apache.org/v1.IntegrationPlatformRegistrySpec">IntegrationPlatformRegistrySpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>, 
-<a href="#camel.apache.org/v1.PublishTask">PublishTask</a>)
-</p>
-<p>IntegrationPlatformRegistrySpec &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>insecure</code><br>
-<em>
-bool
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>address</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>secret</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>ca</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>organization</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.IntegrationPlatformResourcesSpec">IntegrationPlatformResourcesSpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>)
-</p>
-<p>IntegrationPlatformResourcesSpec contains platform related resources</p>
-<h3 id="camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatform">IntegrationPlatform</a>, 
-<a href="#camel.apache.org/v1.IntegrationPlatformStatus">IntegrationPlatformStatus</a>)
-</p>
-<p>IntegrationPlatformSpec defines the desired state of IntegrationPlatform</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>cluster</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformCluster">
-IntegrationPlatformCluster
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>profile</code><br>
-<em>
-<a href="#camel.apache.org/v1.TraitProfile">
-TraitProfile
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>build</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">
-IntegrationPlatformBuildSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>resources</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformResourcesSpec">
-IntegrationPlatformResourcesSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>traits</code><br>
-<em>
-<a href="#camel.apache.org/v1.TraitSpec">
-map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>configuration</code><br>
-<em>
-<a href="#camel.apache.org/v1.ConfigurationSpec">
-[]ConfigurationSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>kamelet</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformKameletSpec">
-IntegrationPlatformKameletSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.IntegrationPlatformStatus">IntegrationPlatformStatus
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatform">IntegrationPlatform</a>)
-</p>
-<p>IntegrationPlatformStatus defines the observed state of IntegrationPlatform</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>IntegrationPlatformSpec</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformSpec">
-IntegrationPlatformSpec
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>IntegrationPlatformSpec</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>phase</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformPhase">
-IntegrationPlatformPhase
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>conditions</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformCondition">
-[]IntegrationPlatformCondition
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>version</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.IntegrationSpec">IntegrationSpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.Integration">Integration</a>, 
-<a href="#camel.apache.org/v1alpha1.KameletBindingSpec">KameletBindingSpec</a>)
-</p>
-<p>IntegrationSpec defines the desired state of Integration</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>replicas</code><br>
-<em>
-int32
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>sources</code><br>
-<em>
-<a href="#camel.apache.org/v1.SourceSpec">
-[]SourceSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>flows</code><br>
-<em>
-<a href="#camel.apache.org/v1.Flow">
-[]Flow
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>resources</code><br>
-<em>
-<a href="#camel.apache.org/v1.ResourceSpec">
-[]ResourceSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>kit</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>Deprecated: use the IntegrationKit field</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>integrationKit</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core">
-Kubernetes core/v1.ObjectReference
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>dependencies</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>profile</code><br>
-<em>
-<a href="#camel.apache.org/v1.TraitProfile">
-TraitProfile
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>traits</code><br>
-<em>
-<a href="#camel.apache.org/v1.TraitSpec">
-map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>template</code><br>
-<em>
-<a href="#camel.apache.org/v1.PodSpecTemplate">
-PodSpecTemplate
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>configuration</code><br>
-<em>
-<a href="#camel.apache.org/v1.ConfigurationSpec">
-[]ConfigurationSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>repositories</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>serviceAccountName</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.IntegrationStatus">IntegrationStatus
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.Integration">Integration</a>)
-</p>
-<p>IntegrationStatus defines the observed state of Integration</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>phase</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPhase">
-IntegrationPhase
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>digest</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>image</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>dependencies</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>profile</code><br>
-<em>
-<a href="#camel.apache.org/v1.TraitProfile">
-TraitProfile
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>kit</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>Deprecated: use the IntegrationKit field</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>integrationKit</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core">
-Kubernetes core/v1.ObjectReference
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>platform</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>generatedSources</code><br>
-<em>
-<a href="#camel.apache.org/v1.SourceSpec">
-[]SourceSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>generatedResources</code><br>
-<em>
-<a href="#camel.apache.org/v1.ResourceSpec">
-[]ResourceSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>failure</code><br>
-<em>
-<a href="#camel.apache.org/v1.Failure">
-Failure
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>runtimeVersion</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>runtimeProvider</code><br>
-<em>
-<a href="#camel.apache.org/v1.RuntimeProvider">
-RuntimeProvider
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>configuration</code><br>
-<em>
-<a href="#camel.apache.org/v1.ConfigurationSpec">
-[]ConfigurationSpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>conditions</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationCondition">
-[]IntegrationCondition
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>version</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>replicas</code><br>
-<em>
-int32
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>selector</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>capabilities</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>lastInitTimestamp</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
-Kubernetes meta/v1.Time
-</a>
-</em>
-</td>
-<td>
-<p>The timestamp representing the last time when this integration was initialized.</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.KanikoTask">KanikoTask
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.Task">Task</a>)
-</p>
-<p>KanikoTask &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>BaseTask</code><br>
-<em>
-<a href="#camel.apache.org/v1.BaseTask">
-BaseTask
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>BaseTask</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>PublishTask</code><br>
-<em>
-<a href="#camel.apache.org/v1.PublishTask">
-PublishTask
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>PublishTask</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>verbose</code><br>
-<em>
-bool
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>httpProxySecret</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>cache</code><br>
-<em>
-<a href="#camel.apache.org/v1.KanikoTaskCache">
-KanikoTaskCache
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.KanikoTaskCache">KanikoTaskCache
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.KanikoTask">KanikoTask</a>)
-</p>
-<p>KanikoTaskCache</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>enabled</code><br>
-<em>
-bool
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>persistentVolumeClaim</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.Language">Language
-(<code>string</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.SourceSpec">SourceSpec</a>)
-</p>
-<p>Language &ndash;</p>
-<h3 id="camel.apache.org/v1.MavenArtifact">MavenArtifact
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.CamelArtifactDependency">CamelArtifactDependency</a>, 
-<a href="#camel.apache.org/v1.CamelLoader">CamelLoader</a>, 
-<a href="#camel.apache.org/v1.Capability">Capability</a>, 
-<a href="#camel.apache.org/v1.RuntimeSpec">RuntimeSpec</a>)
-</p>
-<p>MavenArtifact &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>groupId</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>artifactId</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>version</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.MavenSpec">MavenSpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>, 
-<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>)
-</p>
-<p>MavenSpec &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>localRepository</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>settings</code><br>
-<em>
-<a href="#camel.apache.org/v1.ValueSource">
-ValueSource
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>caSecret</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector
-</a>
-</em>
-</td>
-<td>
-<p>The Secret name and key, containing the CA certificate(s) used to connect
-to remote Maven repositories.
-It can contain X.509 certificates, and PKCS#7 formatted certificate chains.
-A JKS formatted keystore is automatically created to store the CA certificate(s),
-and configured to be used as a trusted certificate(s) by the Maven commands.
-Note that the root CA certificates are also imported into the created keystore.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>timeout</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta">
-Kubernetes meta/v1.Duration
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.PlatformInjectable">PlatformInjectable
-</h3>
-<p>PlatformInjectable &ndash;</p>
-<h3 id="camel.apache.org/v1.PodSpec">PodSpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.PodSpecTemplate">PodSpecTemplate</a>)
-</p>
-<p>
-</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>volumes</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core">
-[]Kubernetes core/v1.Volume
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>initContainers</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core">
-[]Kubernetes core/v1.Container
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>containers</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core">
-[]Kubernetes core/v1.Container
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>ephemeralContainers</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#ephemeralcontainer-v1-core">
-[]Kubernetes core/v1.EphemeralContainer
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>restartPolicy</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#restartpolicy-v1-core">
-Kubernetes core/v1.RestartPolicy
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>terminationGracePeriodSeconds</code><br>
-<em>
-int64
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>activeDeadlineSeconds</code><br>
-<em>
-int64
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>dnsPolicy</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#dnspolicy-v1-core">
-Kubernetes core/v1.DNSPolicy
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>nodeSelector</code><br>
-<em>
-map[string]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>topologySpreadConstraints</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#topologyspreadconstraint-v1-core">
-[]Kubernetes core/v1.TopologySpreadConstraint
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.PodSpecTemplate">PodSpecTemplate
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>)
-</p>
-<p>
-</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>spec</code><br>
-<em>
-<a href="#camel.apache.org/v1.PodSpec">
-PodSpec
-</a>
-</em>
-</td>
-<td>
-<br/>
-<br/>
-<table>
-<tr>
-<td>
-<code>volumes</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core">
-[]Kubernetes core/v1.Volume
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>initContainers</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core">
-[]Kubernetes core/v1.Container
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>containers</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core">
-[]Kubernetes core/v1.Container
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>ephemeralContainers</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#ephemeralcontainer-v1-core">
-[]Kubernetes core/v1.EphemeralContainer
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>restartPolicy</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#restartpolicy-v1-core">
-Kubernetes core/v1.RestartPolicy
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>terminationGracePeriodSeconds</code><br>
-<em>
-int64
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>activeDeadlineSeconds</code><br>
-<em>
-int64
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>dnsPolicy</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#dnspolicy-v1-core">
-Kubernetes core/v1.DNSPolicy
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>nodeSelector</code><br>
-<em>
-map[string]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>topologySpreadConstraints</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#topologyspreadconstraint-v1-core">
-[]Kubernetes core/v1.TopologySpreadConstraint
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.PublishTask">PublishTask
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuildahTask">BuildahTask</a>, 
-<a href="#camel.apache.org/v1.KanikoTask">KanikoTask</a>, 
-<a href="#camel.apache.org/v1.SpectrumTask">SpectrumTask</a>)
-</p>
-<p>PublishTask &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>contextDir</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>baseImage</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>image</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>registry</code><br>
-<em>
-<a href="#camel.apache.org/v1.IntegrationPlatformRegistrySpec">
-IntegrationPlatformRegistrySpec
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.RawMessage">RawMessage
-(<code>[]byte</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1alpha1.BeanProperties">BeanProperties</a>, 
-<a href="#camel.apache.org/v1alpha1.EndpointProperties">EndpointProperties</a>, 
-<a href="#camel.apache.org/v1alpha1.ErrorHandlerParameters">ErrorHandlerParameters</a>, 
-<a href="#camel.apache.org/v1alpha1.ErrorHandlerRef">ErrorHandlerRef</a>, 
-<a href="#camel.apache.org/v1alpha1.ErrorHandlerSpec">ErrorHandlerSpec</a>, 
-<a href="#camel.apache.org/v1.Flow">Flow</a>, 
-<a href="#camel.apache.org/v1.TraitConfiguration">TraitConfiguration</a>)
-</p>
-<p>RawMessage is a raw encoded JSON value.
-It implements Marshaler and Unmarshaler and can
-be used to delay JSON decoding or precompute a JSON encoding.</p>
-<h3 id="camel.apache.org/v1.ResourceCondition">ResourceCondition
-</h3>
-<p>ResourceCondition is a common type for all conditions</p>
-<h3 id="camel.apache.org/v1.ResourceSpec">ResourceSpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>, 
-<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
-</p>
-<p>ResourceSpec &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>DataSpec</code><br>
-<em>
-<a href="#camel.apache.org/v1.DataSpec">
-DataSpec
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>DataSpec</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>type</code><br>
-<em>
-<a href="#camel.apache.org/v1.ResourceType">
-ResourceType
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>mountPath</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.ResourceType">ResourceType
-(<code>string</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.ResourceSpec">ResourceSpec</a>)
-</p>
-<p>ResourceType &ndash;</p>
-<h3 id="camel.apache.org/v1.RuntimeProvider">RuntimeProvider
-(<code>string</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>, 
-<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>, 
-<a href="#camel.apache.org/v1.RuntimeSpec">RuntimeSpec</a>)
-</p>
-<p>RuntimeProvider &ndash;</p>
-<h3 id="camel.apache.org/v1.RuntimeSpec">RuntimeSpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>, 
-<a href="#camel.apache.org/v1.CamelCatalogSpec">CamelCatalogSpec</a>)
-</p>
-<p>RuntimeSpec &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>version</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>provider</code><br>
-<em>
-<a href="#camel.apache.org/v1.RuntimeProvider">
-RuntimeProvider
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>applicationClass</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>dependencies</code><br>
-<em>
-<a href="#camel.apache.org/v1.MavenArtifact">
-[]MavenArtifact
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>metadata</code><br>
-<em>
-map[string]string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>capabilities</code><br>
-<em>
-<a href="#camel.apache.org/v1.Capability">
-map[string]github.com/apache/camel-k/pkg/apis/camel/v1.Capability
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.S2iTask">S2iTask
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.Task">Task</a>)
-</p>
-<p>S2iTask &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>BaseTask</code><br>
-<em>
-<a href="#camel.apache.org/v1.BaseTask">
-BaseTask
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>BaseTask</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>contextDir</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>tag</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.SourceSpec">SourceSpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>, 
-<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>, 
-<a href="#camel.apache.org/v1alpha1.KameletSpec">KameletSpec</a>)
-</p>
-<p>SourceSpec &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>DataSpec</code><br>
-<em>
-<a href="#camel.apache.org/v1.DataSpec">
-DataSpec
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>DataSpec</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>language</code><br>
-<em>
-<a href="#camel.apache.org/v1.Language">
-Language
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>loader</code><br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>Loader is an optional id of the org.apache.camel.k.RoutesLoader that will
-interpret this source at runtime</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>interceptors</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-<p>Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
-uses to pre/post process sources</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>type</code><br>
-<em>
-<a href="#camel.apache.org/v1.SourceType">
-SourceType
-</a>
-</em>
-</td>
-<td>
-<p>Type defines the kind of source described by this object</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>property-names</code><br>
-<em>
-[]string
-</em>
-</td>
-<td>
-<p>List of property names defined in the source (e.g. if type is &ldquo;template&rdquo;)</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.SourceType">SourceType
-(<code>string</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.SourceSpec">SourceSpec</a>)
-</p>
-<p>
-</p>
-<h3 id="camel.apache.org/v1.SpectrumTask">SpectrumTask
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.Task">Task</a>)
-</p>
-<p>SpectrumTask &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>BaseTask</code><br>
-<em>
-<a href="#camel.apache.org/v1.BaseTask">
-BaseTask
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>BaseTask</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>PublishTask</code><br>
-<em>
-<a href="#camel.apache.org/v1.PublishTask">
-PublishTask
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>PublishTask</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.Task">Task
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuildSpec">BuildSpec</a>)
-</p>
-<p>Task &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>builder</code><br>
-<em>
-<a href="#camel.apache.org/v1.BuilderTask">
-BuilderTask
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>buildah</code><br>
-<em>
-<a href="#camel.apache.org/v1.BuildahTask">
-BuildahTask
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>kaniko</code><br>
-<em>
-<a href="#camel.apache.org/v1.KanikoTask">
-KanikoTask
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>spectrum</code><br>
-<em>
-<a href="#camel.apache.org/v1.SpectrumTask">
-SpectrumTask
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>s2i</code><br>
-<em>
-<a href="#camel.apache.org/v1.S2iTask">
-S2iTask
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.TraitConfiguration">TraitConfiguration
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.TraitSpec">TraitSpec</a>)
-</p>
-<p>
-</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>RawMessage</code><br>
-<em>
-<a href="#camel.apache.org/v1.RawMessage">
-RawMessage
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>RawMessage</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.TraitProfile">TraitProfile
-(<code>string</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationKitSpec">IntegrationKitSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
-</p>
-<p>TraitProfile represents lists of traits that are enabled for the specific installation/integration</p>
-<h3 id="camel.apache.org/v1.TraitSpec">TraitSpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationKitSpec">IntegrationKitSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>)
-</p>
-<p>A TraitSpec contains the configuration of a trait</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>configuration</code><br>
-<em>
-<a href="#camel.apache.org/v1.TraitConfiguration">
-TraitConfiguration
-</a>
-</em>
-</td>
-<td>
-<p>TraitConfiguration &ndash;</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1.ValueSource">ValueSource
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.MavenSpec">MavenSpec</a>)
-</p>
-<p>ValueSource &ndash;</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>configMapKeyRef</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#configmapkeyselector-v1-core">
-Kubernetes core/v1.ConfigMapKeySelector
-</a>
-</em>
-</td>
-<td>
-<p>Selects a key of a ConfigMap.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>secretKeyRef</code><br>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector
-</a>
-</em>
-</td>
-<td>
-<p>Selects a key of a secret.</p>
-</td>
-</tr>
-</tbody>
-</table>
-<hr/>
 <h2 id="camel.apache.org/v1alpha1">camel.apache.org/v1alpha1</h2>
+<div>
 <p>Package v1alpha1 contains API Schema definitions for the camel v1alpha1 API group</p>
+</div>
 Resource Types:
 <ul><li>
 <a href="#camel.apache.org/v1alpha1.Kamelet">Kamelet</a>
@@ -4576,7 +19,9 @@ Resource Types:
 </li></ul>
 <h3 id="camel.apache.org/v1alpha1.Kamelet">Kamelet
 </h3>
+<div>
 <p>Kamelet is the Schema for the kamelets API</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -4587,7 +32,7 @@ Resource Types:
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code><br>
+<code>apiVersion</code></br>
 string</td>
 <td>
 <code>
@@ -4597,14 +42,14 @@ camel.apache.org/v1alpha1
 </tr>
 <tr>
 <td>
-<code>kind</code><br>
+<code>kind</code></br>
 string
 </td>
 <td><code>Kamelet</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code><br>
+<code>metadata</code><br/>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -4618,7 +63,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code><br>
+<code>spec</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletSpec">
 KameletSpec
@@ -4631,7 +76,7 @@ KameletSpec
 <table>
 <tr>
 <td>
-<code>definition</code><br>
+<code>definition</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProps">
 JSONSchemaProps
@@ -4643,7 +88,7 @@ JSONSchemaProps
 </tr>
 <tr>
 <td>
-<code>sources</code><br>
+<code>sources</code><br/>
 <em>
 <a href="#camel.apache.org/v1.SourceSpec">
 []SourceSpec
@@ -4655,7 +100,7 @@ JSONSchemaProps
 </tr>
 <tr>
 <td>
-<code>flow</code><br>
+<code>flow</code><br/>
 <em>
 <a href="#camel.apache.org/v1.Flow">
 Flow
@@ -4667,7 +112,7 @@ Flow
 </tr>
 <tr>
 <td>
-<code>authorization</code><br>
+<code>authorization</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.AuthorizationSpec">
 AuthorizationSpec
@@ -4679,7 +124,7 @@ AuthorizationSpec
 </tr>
 <tr>
 <td>
-<code>types</code><br>
+<code>types</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.EventTypeSpec">
 map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventTypeSpec
@@ -4691,7 +136,7 @@ map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apach
 </tr>
 <tr>
 <td>
-<code>dependencies</code><br>
+<code>dependencies</code><br/>
 <em>
 []string
 </em>
@@ -4704,7 +149,7 @@ map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apach
 </tr>
 <tr>
 <td>
-<code>status</code><br>
+<code>status</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletStatus">
 KameletStatus
@@ -4718,7 +163,9 @@ KameletStatus
 </table>
 <h3 id="camel.apache.org/v1alpha1.KameletBinding">KameletBinding
 </h3>
+<div>
 <p>KameletBinding is the Schema for the kamelets binding API</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -4729,7 +176,7 @@ KameletStatus
 <tbody>
 <tr>
 <td>
-<code>apiVersion</code><br>
+<code>apiVersion</code></br>
 string</td>
 <td>
 <code>
@@ -4739,14 +186,14 @@ camel.apache.org/v1alpha1
 </tr>
 <tr>
 <td>
-<code>kind</code><br>
+<code>kind</code></br>
 string
 </td>
 <td><code>KameletBinding</code></td>
 </tr>
 <tr>
 <td>
-<code>metadata</code><br>
+<code>metadata</code><br/>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
 Kubernetes meta/v1.ObjectMeta
@@ -4760,7 +207,7 @@ Refer to the Kubernetes API documentation for the fields of the
 </tr>
 <tr>
 <td>
-<code>spec</code><br>
+<code>spec</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingSpec">
 KameletBindingSpec
@@ -4773,7 +220,7 @@ KameletBindingSpec
 <table>
 <tr>
 <td>
-<code>integration</code><br>
+<code>integration</code><br/>
 <em>
 <a href="#camel.apache.org/v1.IntegrationSpec">
 IntegrationSpec
@@ -4786,7 +233,7 @@ IntegrationSpec
 </tr>
 <tr>
 <td>
-<code>source</code><br>
+<code>source</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.Endpoint">
 Endpoint
@@ -4799,7 +246,7 @@ Endpoint
 </tr>
 <tr>
 <td>
-<code>sink</code><br>
+<code>sink</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.Endpoint">
 Endpoint
@@ -4812,7 +259,7 @@ Endpoint
 </tr>
 <tr>
 <td>
-<code>errorHandler</code><br>
+<code>errorHandler</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerSpec">
 ErrorHandlerSpec
@@ -4825,7 +272,7 @@ ErrorHandlerSpec
 </tr>
 <tr>
 <td>
-<code>steps</code><br>
+<code>steps</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.Endpoint">
 []Endpoint
@@ -4841,7 +288,7 @@ ErrorHandlerSpec
 </tr>
 <tr>
 <td>
-<code>status</code><br>
+<code>status</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingStatus">
 KameletBindingStatus
@@ -4859,14 +306,18 @@ KameletBindingStatus
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletSpec">KameletSpec</a>)
 </p>
+<div>
 <p>AuthorizationSpec is TODO (oauth information)</p>
+</div>
 <h3 id="camel.apache.org/v1alpha1.BeanProperties">BeanProperties
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerBean">ErrorHandlerBean</a>)
 </p>
+<div>
 <p>BeanProperties represent an unstructured object properties to be set on a bean</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -4877,7 +328,7 @@ KameletBindingStatus
 <tbody>
 <tr>
 <td>
-<code>RawMessage</code><br>
+<code>RawMessage</code><br/>
 <em>
 <a href="#camel.apache.org/v1.RawMessage">
 RawMessage
@@ -4896,7 +347,9 @@ RawMessage
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerDeadLetterChannel">ErrorHandlerDeadLetterChannel</a>, 
 <a href="#camel.apache.org/v1alpha1.KameletBindingSpec">KameletBindingSpec</a>)
 </p>
+<div>
 <p>Endpoint represents a source/sink external entity</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -4907,7 +360,7 @@ RawMessage
 <tbody>
 <tr>
 <td>
-<code>ref</code><br>
+<code>ref</code><br/>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core">
 Kubernetes core/v1.ObjectReference
@@ -4920,7 +373,7 @@ Kubernetes core/v1.ObjectReference
 </tr>
 <tr>
 <td>
-<code>uri</code><br>
+<code>uri</code><br/>
 <em>
 string
 </em>
@@ -4931,7 +384,7 @@ string
 </tr>
 <tr>
 <td>
-<code>properties</code><br>
+<code>properties</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.EndpointProperties">
 EndpointProperties
@@ -4944,7 +397,7 @@ EndpointProperties
 </tr>
 <tr>
 <td>
-<code>types</code><br>
+<code>types</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.EventTypeSpec">
 map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventTypeSpec
@@ -4963,7 +416,9 @@ map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apach
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.Endpoint">Endpoint</a>)
 </p>
+<div>
 <p>EndpointProperties is a key/value struct represented as JSON raw to allow numeric/boolean values</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -4974,7 +429,7 @@ map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apach
 <tbody>
 <tr>
 <td>
-<code>RawMessage</code><br>
+<code>RawMessage</code><br/>
 <em>
 <a href="#camel.apache.org/v1.RawMessage">
 RawMessage
@@ -4991,14 +446,18 @@ RawMessage
 </table>
 <h3 id="camel.apache.org/v1alpha1.EndpointType">EndpointType
 (<code>string</code> alias)</h3>
-<p>
-</p>
+<div>
+</div>
 <h3 id="camel.apache.org/v1alpha1.ErrorHandler">ErrorHandler
 </h3>
+<div>
 <p>ErrorHandler is a generic interface that represent any type of error handler specification</p>
+</div>
 <h3 id="camel.apache.org/v1alpha1.ErrorHandlerBean">ErrorHandlerBean
 </h3>
+<div>
 <p>ErrorHandlerBean represents a bean error handler type</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -5009,7 +468,7 @@ RawMessage
 <tbody>
 <tr>
 <td>
-<code>ErrorHandlerNone</code><br>
+<code>ErrorHandlerNone</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerNone">
 ErrorHandlerNone
@@ -5021,7 +480,7 @@ ErrorHandlerNone
 </tr>
 <tr>
 <td>
-<code>type</code><br>
+<code>type</code><br/>
 <em>
 string
 </em>
@@ -5031,7 +490,7 @@ string
 </tr>
 <tr>
 <td>
-<code>properties</code><br>
+<code>properties</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.BeanProperties">
 BeanProperties
@@ -5045,7 +504,9 @@ BeanProperties
 </table>
 <h3 id="camel.apache.org/v1alpha1.ErrorHandlerDeadLetterChannel">ErrorHandlerDeadLetterChannel
 </h3>
+<div>
 <p>ErrorHandlerDeadLetterChannel represents a dead letter channel error handler type</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -5056,7 +517,7 @@ BeanProperties
 <tbody>
 <tr>
 <td>
-<code>ErrorHandlerLog</code><br>
+<code>ErrorHandlerLog</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerLog">
 ErrorHandlerLog
@@ -5068,7 +529,7 @@ ErrorHandlerLog
 </tr>
 <tr>
 <td>
-<code>endpoint</code><br>
+<code>endpoint</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.Endpoint">
 Endpoint
@@ -5086,7 +547,9 @@ Endpoint
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerDeadLetterChannel">ErrorHandlerDeadLetterChannel</a>)
 </p>
+<div>
 <p>ErrorHandlerLog represent a default (log) error handler type</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -5097,7 +560,7 @@ Endpoint
 <tbody>
 <tr>
 <td>
-<code>ErrorHandlerNone</code><br>
+<code>ErrorHandlerNone</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerNone">
 ErrorHandlerNone
@@ -5109,7 +572,7 @@ ErrorHandlerNone
 </tr>
 <tr>
 <td>
-<code>parameters</code><br>
+<code>parameters</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerParameters">
 ErrorHandlerParameters
@@ -5128,7 +591,9 @@ ErrorHandlerParameters
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerBean">ErrorHandlerBean</a>, 
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerLog">ErrorHandlerLog</a>)
 </p>
+<div>
 <p>ErrorHandlerNone &ndash;</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -5145,7 +610,9 @@ ErrorHandlerParameters
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerLog">ErrorHandlerLog</a>)
 </p>
+<div>
 <p>ErrorHandlerParameters represent an unstructured object for error handler parameters</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -5156,7 +623,7 @@ ErrorHandlerParameters
 <tbody>
 <tr>
 <td>
-<code>RawMessage</code><br>
+<code>RawMessage</code><br/>
 <em>
 <a href="#camel.apache.org/v1.RawMessage">
 RawMessage
@@ -5170,7 +637,9 @@ RawMessage
 </table>
 <h3 id="camel.apache.org/v1alpha1.ErrorHandlerRef">ErrorHandlerRef
 </h3>
+<div>
 <p>ErrorHandlerRef represents a reference to an error handler builder available in the registry</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -5181,7 +650,7 @@ RawMessage
 <tbody>
 <tr>
 <td>
-<code>RawMessage</code><br>
+<code>RawMessage</code><br/>
 <em>
 <a href="#camel.apache.org/v1.RawMessage">
 RawMessage
@@ -5199,7 +668,9 @@ RawMessage
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingSpec">KameletBindingSpec</a>)
 </p>
+<div>
 <p>ErrorHandlerSpec represents an unstructured object for an error handler</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -5210,7 +681,7 @@ RawMessage
 <tbody>
 <tr>
 <td>
-<code>RawMessage</code><br>
+<code>RawMessage</code><br/>
 <em>
 <a href="#camel.apache.org/v1.RawMessage">
 RawMessage
@@ -5224,11 +695,13 @@ RawMessage
 </table>
 <h3 id="camel.apache.org/v1alpha1.ErrorHandlerType">ErrorHandlerType
 (<code>string</code> alias)</h3>
+<div>
 <p>ErrorHandlerType &ndash;</p>
+</div>
 <h3 id="camel.apache.org/v1alpha1.EventSlot">EventSlot
 (<code>string</code> alias)</h3>
-<p>
-</p>
+<div>
+</div>
 <h3 id="camel.apache.org/v1alpha1.EventTypeSpec">EventTypeSpec
 </h3>
 <p>
@@ -5236,8 +709,8 @@ RawMessage
 <a href="#camel.apache.org/v1alpha1.Endpoint">Endpoint</a>, 
 <a href="#camel.apache.org/v1alpha1.KameletSpec">KameletSpec</a>)
 </p>
-<p>
-</p>
+<div>
+</div>
 <table>
 <thead>
 <tr>
@@ -5248,7 +721,7 @@ RawMessage
 <tbody>
 <tr>
 <td>
-<code>mediaType</code><br>
+<code>mediaType</code><br/>
 <em>
 string
 </em>
@@ -5258,7 +731,7 @@ string
 </tr>
 <tr>
 <td>
-<code>schema</code><br>
+<code>schema</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProps">
 JSONSchemaProps
@@ -5276,7 +749,9 @@ JSONSchemaProps
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProps">JSONSchemaProps</a>)
 </p>
+<div>
 <p>ExternalDocumentation allows referencing an external resource for extended documentation.</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -5287,7 +762,7 @@ JSONSchemaProps
 <tbody>
 <tr>
 <td>
-<code>description</code><br>
+<code>description</code><br/>
 <em>
 string
 </em>
@@ -5297,7 +772,7 @@ string
 </tr>
 <tr>
 <td>
-<code>url</code><br>
+<code>url</code><br/>
 <em>
 string
 </em>
@@ -5314,8 +789,10 @@ string
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProp">JSONSchemaProp</a>, 
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProps">JSONSchemaProps</a>)
 </p>
+<div>
 <p>JSON represents any valid JSON value.
 These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -5326,7 +803,7 @@ These types are supported: bool, int64, float64, string, []interface{}, map[stri
 <tbody>
 <tr>
 <td>
-<code>RawMessage</code><br>
+<code>RawMessage</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.RawMessage">
 RawMessage
@@ -5347,8 +824,8 @@ RawMessage
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProps">JSONSchemaProps</a>)
 </p>
-<p>
-</p>
+<div>
+</div>
 <table>
 <thead>
 <tr>
@@ -5359,7 +836,7 @@ RawMessage
 <tbody>
 <tr>
 <td>
-<code>id</code><br>
+<code>id</code><br/>
 <em>
 string
 </em>
@@ -5369,7 +846,7 @@ string
 </tr>
 <tr>
 <td>
-<code>description</code><br>
+<code>description</code><br/>
 <em>
 string
 </em>
@@ -5379,7 +856,7 @@ string
 </tr>
 <tr>
 <td>
-<code>type</code><br>
+<code>type</code><br/>
 <em>
 string
 </em>
@@ -5389,7 +866,7 @@ string
 </tr>
 <tr>
 <td>
-<code>format</code><br>
+<code>format</code><br/>
 <em>
 string
 </em>
@@ -5426,7 +903,7 @@ string
 </tr>
 <tr>
 <td>
-<code>title</code><br>
+<code>title</code><br/>
 <em>
 string
 </em>
@@ -5436,7 +913,7 @@ string
 </tr>
 <tr>
 <td>
-<code>default</code><br>
+<code>default</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSON">
 JSON
@@ -5449,7 +926,7 @@ JSON
 </tr>
 <tr>
 <td>
-<code>maximum</code><br>
+<code>maximum</code><br/>
 <em>
 encoding/json.Number
 </em>
@@ -5459,7 +936,7 @@ encoding/json.Number
 </tr>
 <tr>
 <td>
-<code>exclusiveMaximum</code><br>
+<code>exclusiveMaximum</code><br/>
 <em>
 bool
 </em>
@@ -5469,7 +946,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>minimum</code><br>
+<code>minimum</code><br/>
 <em>
 encoding/json.Number
 </em>
@@ -5479,7 +956,7 @@ encoding/json.Number
 </tr>
 <tr>
 <td>
-<code>exclusiveMinimum</code><br>
+<code>exclusiveMinimum</code><br/>
 <em>
 bool
 </em>
@@ -5489,7 +966,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>maxLength</code><br>
+<code>maxLength</code><br/>
 <em>
 int64
 </em>
@@ -5499,7 +976,7 @@ int64
 </tr>
 <tr>
 <td>
-<code>minLength</code><br>
+<code>minLength</code><br/>
 <em>
 int64
 </em>
@@ -5509,7 +986,7 @@ int64
 </tr>
 <tr>
 <td>
-<code>pattern</code><br>
+<code>pattern</code><br/>
 <em>
 string
 </em>
@@ -5519,7 +996,7 @@ string
 </tr>
 <tr>
 <td>
-<code>maxItems</code><br>
+<code>maxItems</code><br/>
 <em>
 int64
 </em>
@@ -5529,7 +1006,7 @@ int64
 </tr>
 <tr>
 <td>
-<code>minItems</code><br>
+<code>minItems</code><br/>
 <em>
 int64
 </em>
@@ -5539,7 +1016,7 @@ int64
 </tr>
 <tr>
 <td>
-<code>uniqueItems</code><br>
+<code>uniqueItems</code><br/>
 <em>
 bool
 </em>
@@ -5549,7 +1026,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>maxProperties</code><br>
+<code>maxProperties</code><br/>
 <em>
 int64
 </em>
@@ -5559,7 +1036,7 @@ int64
 </tr>
 <tr>
 <td>
-<code>minProperties</code><br>
+<code>minProperties</code><br/>
 <em>
 int64
 </em>
@@ -5569,7 +1046,7 @@ int64
 </tr>
 <tr>
 <td>
-<code>multipleOf</code><br>
+<code>multipleOf</code><br/>
 <em>
 encoding/json.Number
 </em>
@@ -5579,7 +1056,7 @@ encoding/json.Number
 </tr>
 <tr>
 <td>
-<code>enum</code><br>
+<code>enum</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSON">
 []JSON
@@ -5591,7 +1068,7 @@ encoding/json.Number
 </tr>
 <tr>
 <td>
-<code>example</code><br>
+<code>example</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSON">
 JSON
@@ -5603,7 +1080,7 @@ JSON
 </tr>
 <tr>
 <td>
-<code>nullable</code><br>
+<code>nullable</code><br/>
 <em>
 bool
 </em>
@@ -5613,7 +1090,7 @@ bool
 </tr>
 <tr>
 <td>
-<code>x-descriptors</code><br>
+<code>x-descriptors</code><br/>
 <em>
 []string
 </em>
@@ -5631,7 +1108,9 @@ bool
 <a href="#camel.apache.org/v1alpha1.EventTypeSpec">EventTypeSpec</a>, 
 <a href="#camel.apache.org/v1alpha1.KameletSpec">KameletSpec</a>)
 </p>
+<div>
 <p>JSONSchemaProps is a JSON-Schema following Specification Draft 4 (<a href="http://json-schema.org/">http://json-schema.org/</a>).</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -5642,7 +1121,7 @@ bool
 <tbody>
 <tr>
 <td>
-<code>id</code><br>
+<code>id</code><br/>
 <em>
 string
 </em>
@@ -5652,7 +1131,7 @@ string
 </tr>
 <tr>
 <td>
-<code>description</code><br>
+<code>description</code><br/>
 <em>
 string
 </em>
@@ -5662,7 +1141,7 @@ string
 </tr>
 <tr>
 <td>
-<code>title</code><br>
+<code>title</code><br/>
 <em>
 string
 </em>
@@ -5672,7 +1151,7 @@ string
 </tr>
 <tr>
 <td>
-<code>properties</code><br>
+<code>properties</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProp">
 map[string]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.JSONSchemaProp
@@ -5684,7 +1163,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.JSONSchemaProp
 </tr>
 <tr>
 <td>
-<code>required</code><br>
+<code>required</code><br/>
 <em>
 []string
 </em>
@@ -5694,7 +1173,7 @@ map[string]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.JSONSchemaProp
 </tr>
 <tr>
 <td>
-<code>example</code><br>
+<code>example</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSON">
 JSON
@@ -5706,7 +1185,7 @@ JSON
 </tr>
 <tr>
 <td>
-<code>externalDocs</code><br>
+<code>externalDocs</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.ExternalDocumentation">
 ExternalDocumentation
@@ -5718,7 +1197,7 @@ ExternalDocumentation
 </tr>
 <tr>
 <td>
-<code>$schema</code><br>
+<code>$schema</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSONSchemaURL">
 JSONSchemaURL
@@ -5730,7 +1209,7 @@ JSONSchemaURL
 </tr>
 <tr>
 <td>
-<code>type</code><br>
+<code>type</code><br/>
 <em>
 string
 </em>
@@ -5746,14 +1225,18 @@ string
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProps">JSONSchemaProps</a>)
 </p>
+<div>
 <p>JSONSchemaURL represents a schema url.</p>
+</div>
 <h3 id="camel.apache.org/v1alpha1.KameletBindingCondition">KameletBindingCondition
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingStatus">KameletBindingStatus</a>)
 </p>
+<div>
 <p>KameletBindingCondition describes the state of a resource at a certain point.</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -5764,7 +1247,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>type</code><br>
+<code>type</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingConditionType">
 KameletBindingConditionType
@@ -5777,7 +1260,7 @@ KameletBindingConditionType
 </tr>
 <tr>
 <td>
-<code>status</code><br>
+<code>status</code><br/>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core">
 Kubernetes core/v1.ConditionStatus
@@ -5790,7 +1273,7 @@ Kubernetes core/v1.ConditionStatus
 </tr>
 <tr>
 <td>
-<code>lastUpdateTime</code><br>
+<code>lastUpdateTime</code><br/>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -5803,7 +1286,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>lastTransitionTime</code><br>
+<code>lastTransitionTime</code><br/>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -5816,7 +1299,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>reason</code><br>
+<code>reason</code><br/>
 <em>
 string
 </em>
@@ -5827,7 +1310,7 @@ string
 </tr>
 <tr>
 <td>
-<code>message</code><br>
+<code>message</code><br/>
 <em>
 string
 </em>
@@ -5844,23 +1327,25 @@ string
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingCondition">KameletBindingCondition</a>)
 </p>
-<p>
-</p>
+<div>
+</div>
 <h3 id="camel.apache.org/v1alpha1.KameletBindingPhase">KameletBindingPhase
 (<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingStatus">KameletBindingStatus</a>)
 </p>
-<p>
-</p>
+<div>
+</div>
 <h3 id="camel.apache.org/v1alpha1.KameletBindingSpec">KameletBindingSpec
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletBinding">KameletBinding</a>)
 </p>
+<div>
 <p>KameletBindingSpec &ndash;</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -5871,7 +1356,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>integration</code><br>
+<code>integration</code><br/>
 <em>
 <a href="#camel.apache.org/v1.IntegrationSpec">
 IntegrationSpec
@@ -5884,7 +1369,7 @@ IntegrationSpec
 </tr>
 <tr>
 <td>
-<code>source</code><br>
+<code>source</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.Endpoint">
 Endpoint
@@ -5897,7 +1382,7 @@ Endpoint
 </tr>
 <tr>
 <td>
-<code>sink</code><br>
+<code>sink</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.Endpoint">
 Endpoint
@@ -5910,7 +1395,7 @@ Endpoint
 </tr>
 <tr>
 <td>
-<code>errorHandler</code><br>
+<code>errorHandler</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerSpec">
 ErrorHandlerSpec
@@ -5923,7 +1408,7 @@ ErrorHandlerSpec
 </tr>
 <tr>
 <td>
-<code>steps</code><br>
+<code>steps</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.Endpoint">
 []Endpoint
@@ -5942,7 +1427,9 @@ ErrorHandlerSpec
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletBinding">KameletBinding</a>)
 </p>
+<div>
 <p>KameletBindingStatus &ndash;</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -5953,7 +1440,7 @@ ErrorHandlerSpec
 <tbody>
 <tr>
 <td>
-<code>phase</code><br>
+<code>phase</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingPhase">
 KameletBindingPhase
@@ -5966,7 +1453,7 @@ KameletBindingPhase
 </tr>
 <tr>
 <td>
-<code>conditions</code><br>
+<code>conditions</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletBindingCondition">
 []KameletBindingCondition
@@ -5985,7 +1472,9 @@ KameletBindingPhase
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletStatus">KameletStatus</a>)
 </p>
+<div>
 <p>KameletCondition describes the state of a resource at a certain point.</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -5996,7 +1485,7 @@ KameletBindingPhase
 <tbody>
 <tr>
 <td>
-<code>type</code><br>
+<code>type</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletConditionType">
 KameletConditionType
@@ -6009,7 +1498,7 @@ KameletConditionType
 </tr>
 <tr>
 <td>
-<code>status</code><br>
+<code>status</code><br/>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core">
 Kubernetes core/v1.ConditionStatus
@@ -6022,7 +1511,7 @@ Kubernetes core/v1.ConditionStatus
 </tr>
 <tr>
 <td>
-<code>lastUpdateTime</code><br>
+<code>lastUpdateTime</code><br/>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -6035,7 +1524,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>lastTransitionTime</code><br>
+<code>lastTransitionTime</code><br/>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
 Kubernetes meta/v1.Time
@@ -6048,7 +1537,7 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>reason</code><br>
+<code>reason</code><br/>
 <em>
 string
 </em>
@@ -6059,7 +1548,7 @@ string
 </tr>
 <tr>
 <td>
-<code>message</code><br>
+<code>message</code><br/>
 <em>
 string
 </em>
@@ -6076,24 +1565,24 @@ string
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletCondition">KameletCondition</a>)
 </p>
-<p>
-</p>
+<div>
+</div>
 <h3 id="camel.apache.org/v1alpha1.KameletPhase">KameletPhase
 (<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletStatus">KameletStatus</a>)
 </p>
-<p>
-</p>
+<div>
+</div>
 <h3 id="camel.apache.org/v1alpha1.KameletProperty">KameletProperty
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.KameletStatus">KameletStatus</a>)
 </p>
-<p>
-</p>
+<div>
+</div>
 <table>
 <thead>
 <tr>
@@ -6104,7 +1593,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>name</code><br>
+<code>name</code><br/>
 <em>
 string
 </em>
@@ -6114,7 +1603,7 @@ string
 </tr>
 <tr>
 <td>
-<code>default</code><br>
+<code>default</code><br/>
 <em>
 string
 </em>
@@ -6130,7 +1619,9 @@ string
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.Kamelet">Kamelet</a>)
 </p>
+<div>
 <p>KameletSpec defines the desired state of Kamelet</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -6141,7 +1632,7 @@ string
 <tbody>
 <tr>
 <td>
-<code>definition</code><br>
+<code>definition</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProps">
 JSONSchemaProps
@@ -6153,7 +1644,7 @@ JSONSchemaProps
 </tr>
 <tr>
 <td>
-<code>sources</code><br>
+<code>sources</code><br/>
 <em>
 <a href="#camel.apache.org/v1.SourceSpec">
 []SourceSpec
@@ -6165,7 +1656,7 @@ JSONSchemaProps
 </tr>
 <tr>
 <td>
-<code>flow</code><br>
+<code>flow</code><br/>
 <em>
 <a href="#camel.apache.org/v1.Flow">
 Flow
@@ -6177,7 +1668,7 @@ Flow
 </tr>
 <tr>
 <td>
-<code>authorization</code><br>
+<code>authorization</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.AuthorizationSpec">
 AuthorizationSpec
@@ -6189,7 +1680,7 @@ AuthorizationSpec
 </tr>
 <tr>
 <td>
-<code>types</code><br>
+<code>types</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.EventTypeSpec">
 map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventTypeSpec
@@ -6201,7 +1692,7 @@ map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apach
 </tr>
 <tr>
 <td>
-<code>dependencies</code><br>
+<code>dependencies</code><br/>
 <em>
 []string
 </em>
@@ -6217,7 +1708,9 @@ map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apach
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.Kamelet">Kamelet</a>)
 </p>
+<div>
 <p>KameletStatus defines the observed state of Kamelet</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -6228,7 +1721,7 @@ map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot]github.com/apach
 <tbody>
 <tr>
 <td>
-<code>phase</code><br>
+<code>phase</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletPhase">
 KameletPhase
@@ -6240,7 +1733,7 @@ KameletPhase
 </tr>
 <tr>
 <td>
-<code>conditions</code><br>
+<code>conditions</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletCondition">
 []KameletCondition
@@ -6252,7 +1745,7 @@ KameletPhase
 </tr>
 <tr>
 <td>
-<code>properties</code><br>
+<code>properties</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.KameletProperty">
 []KameletProperty
@@ -6270,11 +1763,4712 @@ KameletPhase
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.JSON">JSON</a>)
 </p>
+<div>
 <p>RawMessage is a raw encoded JSON value.
 It implements Marshaler and Unmarshaler and can
 be used to delay JSON decoding or precompute a JSON encoding.</p>
-<hr/>
-<p><em>
-Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>65f49e5c</code>.
-</em></p>
+</div>
+<h2 id="camel.apache.org/v1">camel.apache.org/v1</h2>
+<div>
+<p>Package v1 contains API Schema definitions for the camel v1 API group</p>
+</div>
+Resource Types:
+<ul><li>
+<a href="#camel.apache.org/v1.Build">Build</a>
+</li><li>
+<a href="#camel.apache.org/v1.CamelCatalog">CamelCatalog</a>
+</li><li>
+<a href="#camel.apache.org/v1.Integration">Integration</a>
+</li><li>
+<a href="#camel.apache.org/v1.IntegrationKit">IntegrationKit</a>
+</li><li>
+<a href="#camel.apache.org/v1.IntegrationPlatform">IntegrationPlatform</a>
+</li></ul>
+<h3 id="camel.apache.org/v1.Build">Build
+</h3>
+<div>
+<p>Build is the Schema for the builds API</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>apiVersion</code></br>
+string</td>
+<td>
+<code>
+camel.apache.org/v1
+</code>
+</td>
+</tr>
+<tr>
+<td>
+<code>kind</code></br>
+string
+</td>
+<td><code>Build</code></td>
+</tr>
+<tr>
+<td>
+<code>metadata</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
+Kubernetes meta/v1.ObjectMeta
+</a>
+</em>
+</td>
+<td>
+Refer to the Kubernetes API documentation for the fields of the
+<code>metadata</code> field.
+</td>
+</tr>
+<tr>
+<td>
+<code>spec</code><br/>
+<em>
+<a href="#camel.apache.org/v1.BuildSpec">
+BuildSpec
+</a>
+</em>
+</td>
+<td>
+<br/>
+<br/>
+<table>
+<tr>
+<td>
+<code>tasks</code><br/>
+<em>
+<a href="#camel.apache.org/v1.Task">
+[]Task
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td>
+<code>status</code><br/>
+<em>
+<a href="#camel.apache.org/v1.BuildStatus">
+BuildStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.CamelCatalog">CamelCatalog
+</h3>
+<div>
+<p>CamelCatalog is the Schema for the camelcatalogs API</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>apiVersion</code></br>
+string</td>
+<td>
+<code>
+camel.apache.org/v1
+</code>
+</td>
+</tr>
+<tr>
+<td>
+<code>kind</code></br>
+string
+</td>
+<td><code>CamelCatalog</code></td>
+</tr>
+<tr>
+<td>
+<code>metadata</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
+Kubernetes meta/v1.ObjectMeta
+</a>
+</em>
+</td>
+<td>
+Refer to the Kubernetes API documentation for the fields of the
+<code>metadata</code> field.
+</td>
+</tr>
+<tr>
+<td>
+<code>status</code><br/>
+<em>
+<a href="#camel.apache.org/v1.CamelCatalogStatus">
+CamelCatalogStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>spec</code><br/>
+<em>
+<a href="#camel.apache.org/v1.CamelCatalogSpec">
+CamelCatalogSpec
+</a>
+</em>
+</td>
+<td>
+<br/>
+<br/>
+<table>
+<tr>
+<td>
+<code>runtime</code><br/>
+<em>
+<a href="#camel.apache.org/v1.RuntimeSpec">
+RuntimeSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>artifacts</code><br/>
+<em>
+<a href="#camel.apache.org/v1.CamelArtifact">
+map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelArtifact
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>loaders</code><br/>
+<em>
+<a href="#camel.apache.org/v1.CamelLoader">
+map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelLoader
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.Integration">Integration
+</h3>
+<div>
+<p>Integration is the Schema for the integrations API</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>apiVersion</code></br>
+string</td>
+<td>
+<code>
+camel.apache.org/v1
+</code>
+</td>
+</tr>
+<tr>
+<td>
+<code>kind</code></br>
+string
+</td>
+<td><code>Integration</code></td>
+</tr>
+<tr>
+<td>
+<code>metadata</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
+Kubernetes meta/v1.ObjectMeta
+</a>
+</em>
+</td>
+<td>
+Refer to the Kubernetes API documentation for the fields of the
+<code>metadata</code> field.
+</td>
+</tr>
+<tr>
+<td>
+<code>spec</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationSpec">
+IntegrationSpec
+</a>
+</em>
+</td>
+<td>
+<br/>
+<br/>
+<table>
+<tr>
+<td>
+<code>replicas</code><br/>
+<em>
+int32
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>sources</code><br/>
+<em>
+<a href="#camel.apache.org/v1.SourceSpec">
+[]SourceSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>flows</code><br/>
+<em>
+<a href="#camel.apache.org/v1.Flow">
+[]Flow
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>resources</code><br/>
+<em>
+<a href="#camel.apache.org/v1.ResourceSpec">
+[]ResourceSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>kit</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Deprecated: use the IntegrationKit field</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>integrationKit</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core">
+Kubernetes core/v1.ObjectReference
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>dependencies</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>profile</code><br/>
+<em>
+<a href="#camel.apache.org/v1.TraitProfile">
+TraitProfile
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>traits</code><br/>
+<em>
+<a href="#camel.apache.org/v1.TraitSpec">
+map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>template</code><br/>
+<em>
+<a href="#camel.apache.org/v1.PodSpecTemplate">
+PodSpecTemplate
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>configuration</code><br/>
+<em>
+<a href="#camel.apache.org/v1.ConfigurationSpec">
+[]ConfigurationSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>repositories</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>serviceAccountName</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td>
+<code>status</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationStatus">
+IntegrationStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.IntegrationKit">IntegrationKit
+</h3>
+<div>
+<p>IntegrationKit is the Schema for the integrationkits API</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>apiVersion</code></br>
+string</td>
+<td>
+<code>
+camel.apache.org/v1
+</code>
+</td>
+</tr>
+<tr>
+<td>
+<code>kind</code></br>
+string
+</td>
+<td><code>IntegrationKit</code></td>
+</tr>
+<tr>
+<td>
+<code>metadata</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
+Kubernetes meta/v1.ObjectMeta
+</a>
+</em>
+</td>
+<td>
+Refer to the Kubernetes API documentation for the fields of the
+<code>metadata</code> field.
+</td>
+</tr>
+<tr>
+<td>
+<code>spec</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationKitSpec">
+IntegrationKitSpec
+</a>
+</em>
+</td>
+<td>
+<br/>
+<br/>
+<table>
+<tr>
+<td>
+<code>image</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>dependencies</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>profile</code><br/>
+<em>
+<a href="#camel.apache.org/v1.TraitProfile">
+TraitProfile
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>traits</code><br/>
+<em>
+<a href="#camel.apache.org/v1.TraitSpec">
+map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>configuration</code><br/>
+<em>
+<a href="#camel.apache.org/v1.ConfigurationSpec">
+[]ConfigurationSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>repositories</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td>
+<code>status</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationKitStatus">
+IntegrationKitStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.IntegrationPlatform">IntegrationPlatform
+</h3>
+<div>
+<p>IntegrationPlatform is the Schema for the integrationplatforms API</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>apiVersion</code></br>
+string</td>
+<td>
+<code>
+camel.apache.org/v1
+</code>
+</td>
+</tr>
+<tr>
+<td>
+<code>kind</code></br>
+string
+</td>
+<td><code>IntegrationPlatform</code></td>
+</tr>
+<tr>
+<td>
+<code>metadata</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">
+Kubernetes meta/v1.ObjectMeta
+</a>
+</em>
+</td>
+<td>
+Refer to the Kubernetes API documentation for the fields of the
+<code>metadata</code> field.
+</td>
+</tr>
+<tr>
+<td>
+<code>spec</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformSpec">
+IntegrationPlatformSpec
+</a>
+</em>
+</td>
+<td>
+<br/>
+<br/>
+<table>
+<tr>
+<td>
+<code>cluster</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformCluster">
+IntegrationPlatformCluster
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>profile</code><br/>
+<em>
+<a href="#camel.apache.org/v1.TraitProfile">
+TraitProfile
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>build</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">
+IntegrationPlatformBuildSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>resources</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformResourcesSpec">
+IntegrationPlatformResourcesSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>traits</code><br/>
+<em>
+<a href="#camel.apache.org/v1.TraitSpec">
+map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>configuration</code><br/>
+<em>
+<a href="#camel.apache.org/v1.ConfigurationSpec">
+[]ConfigurationSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>kamelet</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformKameletSpec">
+IntegrationPlatformKameletSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td>
+<code>status</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformStatus">
+IntegrationPlatformStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.Artifact">Artifact
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.BuildStatus">BuildStatus</a>, 
+<a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>)
+</p>
+<div>
+<p>Artifact &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>id</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>location</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>target</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>checksum</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.BaseTask">BaseTask
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.BuildahTask">BuildahTask</a>, 
+<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>, 
+<a href="#camel.apache.org/v1.KanikoTask">KanikoTask</a>, 
+<a href="#camel.apache.org/v1.S2iTask">S2iTask</a>, 
+<a href="#camel.apache.org/v1.SpectrumTask">SpectrumTask</a>)
+</p>
+<div>
+<p>BaseTask &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.BuildCondition">BuildCondition
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.BuildStatus">BuildStatus</a>)
+</p>
+<div>
+<p>BuildCondition describes the state of a resource at a certain point.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>type</code><br/>
+<em>
+<a href="#camel.apache.org/v1.BuildConditionType">
+BuildConditionType
+</a>
+</em>
+</td>
+<td>
+<p>Type of integration condition.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>status</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core">
+Kubernetes core/v1.ConditionStatus
+</a>
+</em>
+</td>
+<td>
+<p>Status of the condition, one of True, False, Unknown.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>lastUpdateTime</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
+Kubernetes meta/v1.Time
+</a>
+</em>
+</td>
+<td>
+<p>The last time this condition was updated.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>lastTransitionTime</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
+Kubernetes meta/v1.Time
+</a>
+</em>
+</td>
+<td>
+<p>Last time the condition transitioned from one status to another.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>reason</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>The reason for the condition&rsquo;s last transition.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>message</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>A human readable message indicating details about the transition.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.BuildConditionType">BuildConditionType
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.BuildCondition">BuildCondition</a>)
+</p>
+<div>
+<p>BuildConditionType &ndash;</p>
+</div>
+<h3 id="camel.apache.org/v1.BuildPhase">BuildPhase
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.BuildStatus">BuildStatus</a>)
+</p>
+<div>
+<p>BuildPhase &ndash;</p>
+</div>
+<h3 id="camel.apache.org/v1.BuildSpec">BuildSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.Build">Build</a>)
+</p>
+<div>
+<p>BuildSpec defines the desired state of Build</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>tasks</code><br/>
+<em>
+<a href="#camel.apache.org/v1.Task">
+[]Task
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.BuildStatus">BuildStatus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.Build">Build</a>)
+</p>
+<div>
+<p>BuildStatus defines the observed state of Build</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>phase</code><br/>
+<em>
+<a href="#camel.apache.org/v1.BuildPhase">
+BuildPhase
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>image</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>digest</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>baseImage</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>artifacts</code><br/>
+<em>
+<a href="#camel.apache.org/v1.Artifact">
+[]Artifact
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>error</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>failure</code><br/>
+<em>
+<a href="#camel.apache.org/v1.Failure">
+Failure
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>startedAt</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
+Kubernetes meta/v1.Time
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>platform</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>conditions</code><br/>
+<em>
+<a href="#camel.apache.org/v1.BuildCondition">
+[]BuildCondition
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>duration</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Change to Duration / ISO 8601 when CRD uses OpenAPI spec v3
+<a href="https://github.com/OAI/OpenAPI-Specification/issues/845">https://github.com/OAI/OpenAPI-Specification/issues/845</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.BuildahTask">BuildahTask
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.Task">Task</a>)
+</p>
+<div>
+<p>BuildahTask &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>BaseTask</code><br/>
+<em>
+<a href="#camel.apache.org/v1.BaseTask">
+BaseTask
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>BaseTask</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>PublishTask</code><br/>
+<em>
+<a href="#camel.apache.org/v1.PublishTask">
+PublishTask
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>PublishTask</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>verbose</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>httpProxySecret</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.BuilderTask">BuilderTask
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.Task">Task</a>)
+</p>
+<div>
+<p>BuilderTask &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>BaseTask</code><br/>
+<em>
+<a href="#camel.apache.org/v1.BaseTask">
+BaseTask
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>BaseTask</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>baseImage</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>runtime</code><br/>
+<em>
+<a href="#camel.apache.org/v1.RuntimeSpec">
+RuntimeSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>sources</code><br/>
+<em>
+<a href="#camel.apache.org/v1.SourceSpec">
+[]SourceSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>resources</code><br/>
+<em>
+<a href="#camel.apache.org/v1.ResourceSpec">
+[]ResourceSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>dependencies</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>steps</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>maven</code><br/>
+<em>
+<a href="#camel.apache.org/v1.MavenSpec">
+MavenSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>buildDir</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>properties</code><br/>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>timeout</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta">
+Kubernetes meta/v1.Duration
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.CamelArtifact">CamelArtifact
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.CamelCatalogSpec">CamelCatalogSpec</a>)
+</p>
+<div>
+<p>CamelArtifact &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>CamelArtifactDependency</code><br/>
+<em>
+<a href="#camel.apache.org/v1.CamelArtifactDependency">
+CamelArtifactDependency
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>CamelArtifactDependency</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>schemes</code><br/>
+<em>
+<a href="#camel.apache.org/v1.CamelScheme">
+[]CamelScheme
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>languages</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>dataformats</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>dependencies</code><br/>
+<em>
+<a href="#camel.apache.org/v1.CamelArtifactDependency">
+[]CamelArtifactDependency
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>javaTypes</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.CamelArtifactDependency">CamelArtifactDependency
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.CamelArtifact">CamelArtifact</a>, 
+<a href="#camel.apache.org/v1.CamelSchemeScope">CamelSchemeScope</a>)
+</p>
+<div>
+<p>CamelArtifactDependency represent a maven&rsquo;s dependency</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>MavenArtifact</code><br/>
+<em>
+<a href="#camel.apache.org/v1.MavenArtifact">
+MavenArtifact
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>MavenArtifact</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>exclusions</code><br/>
+<em>
+<a href="#camel.apache.org/v1.CamelArtifactExclusion">
+[]CamelArtifactExclusion
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.CamelArtifactExclusion">CamelArtifactExclusion
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.CamelArtifactDependency">CamelArtifactDependency</a>)
+</p>
+<div>
+<p>CamelArtifactExclusion &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>groupId</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>artifactId</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.CamelCatalogSpec">CamelCatalogSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.CamelCatalog">CamelCatalog</a>)
+</p>
+<div>
+<p>CamelCatalogSpec defines the desired state of CamelCatalog</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>runtime</code><br/>
+<em>
+<a href="#camel.apache.org/v1.RuntimeSpec">
+RuntimeSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>artifacts</code><br/>
+<em>
+<a href="#camel.apache.org/v1.CamelArtifact">
+map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelArtifact
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>loaders</code><br/>
+<em>
+<a href="#camel.apache.org/v1.CamelLoader">
+map[string]github.com/apache/camel-k/pkg/apis/camel/v1.CamelLoader
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.CamelCatalogStatus">CamelCatalogStatus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.CamelCatalog">CamelCatalog</a>)
+</p>
+<div>
+<p>CamelCatalogStatus defines the observed state of CamelCatalog</p>
+</div>
+<h3 id="camel.apache.org/v1.CamelLoader">CamelLoader
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.CamelCatalogSpec">CamelCatalogSpec</a>)
+</p>
+<div>
+<p>CamelLoader &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>MavenArtifact</code><br/>
+<em>
+<a href="#camel.apache.org/v1.MavenArtifact">
+MavenArtifact
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>MavenArtifact</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>languages</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>dependencies</code><br/>
+<em>
+<a href="#camel.apache.org/v1.MavenArtifact">
+[]MavenArtifact
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.CamelScheme">CamelScheme
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.CamelArtifact">CamelArtifact</a>)
+</p>
+<div>
+<p>CamelScheme &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>id</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>passive</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>http</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>consumer</code><br/>
+<em>
+<a href="#camel.apache.org/v1.CamelSchemeScope">
+CamelSchemeScope
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>producer</code><br/>
+<em>
+<a href="#camel.apache.org/v1.CamelSchemeScope">
+CamelSchemeScope
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.CamelSchemeScope">CamelSchemeScope
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.CamelScheme">CamelScheme</a>)
+</p>
+<div>
+<p>CamelSchemeScope contains scoped information about a scheme</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>dependencies</code><br/>
+<em>
+<a href="#camel.apache.org/v1.CamelArtifactDependency">
+[]CamelArtifactDependency
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.Capability">Capability
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.RuntimeSpec">RuntimeSpec</a>)
+</p>
+<div>
+<p>Capability &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>dependencies</code><br/>
+<em>
+<a href="#camel.apache.org/v1.MavenArtifact">
+[]MavenArtifact
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code><br/>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.Configurable">Configurable
+</h3>
+<div>
+<p>Configurable &ndash;</p>
+</div>
+<h3 id="camel.apache.org/v1.ConfigurationSpec">ConfigurationSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationKitSpec">IntegrationKitSpec</a>, 
+<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>, 
+<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
+<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
+</p>
+<div>
+<p>ConfigurationSpec &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>type</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>value</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.DataSpec">DataSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.ResourceSpec">ResourceSpec</a>, 
+<a href="#camel.apache.org/v1.SourceSpec">SourceSpec</a>)
+</p>
+<div>
+<p>DataSpec &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>content</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>rawContent</code><br/>
+<em>
+[]byte
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>contentRef</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>contentKey</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>contentType</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>compression</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.Failure">Failure
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.BuildStatus">BuildStatus</a>, 
+<a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>, 
+<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
+</p>
+<div>
+<p>Failure &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>reason</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>time</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
+Kubernetes meta/v1.Time
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>recovery</code><br/>
+<em>
+<a href="#camel.apache.org/v1.FailureRecovery">
+FailureRecovery
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.FailureRecovery">FailureRecovery
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.Failure">Failure</a>)
+</p>
+<div>
+<p>FailureRecovery &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>attempt</code><br/>
+<em>
+int
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>attemptMax</code><br/>
+<em>
+int
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>attemptTime</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
+Kubernetes meta/v1.Time
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.Flow">Flow
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
+<a href="#camel.apache.org/v1alpha1.KameletSpec">KameletSpec</a>)
+</p>
+<div>
+<p>Flow is an unstructured object representing a Camel Flow in YAML/JSON DSL</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>RawMessage</code><br/>
+<em>
+<a href="#camel.apache.org/v1.RawMessage">
+RawMessage
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>RawMessage</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.IntegrationCondition">IntegrationCondition
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
+</p>
+<div>
+<p>IntegrationCondition describes the state of a resource at a certain point.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>type</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationConditionType">
+IntegrationConditionType
+</a>
+</em>
+</td>
+<td>
+<p>Type of integration condition.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>status</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core">
+Kubernetes core/v1.ConditionStatus
+</a>
+</em>
+</td>
+<td>
+<p>Status of the condition, one of True, False, Unknown.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>lastUpdateTime</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
+Kubernetes meta/v1.Time
+</a>
+</em>
+</td>
+<td>
+<p>The last time this condition was updated.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>lastTransitionTime</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
+Kubernetes meta/v1.Time
+</a>
+</em>
+</td>
+<td>
+<p>Last time the condition transitioned from one status to another.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>firstTruthyTime</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
+Kubernetes meta/v1.Time
+</a>
+</em>
+</td>
+<td>
+<p>First time the condition status transitioned to True.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>reason</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>The reason for the condition&rsquo;s last transition.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>message</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>A human readable message indicating details about the transition.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.IntegrationConditionType">IntegrationConditionType
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationCondition">IntegrationCondition</a>)
+</p>
+<div>
+<p>IntegrationConditionType &ndash;</p>
+</div>
+<h3 id="camel.apache.org/v1.IntegrationKitCondition">IntegrationKitCondition
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>)
+</p>
+<div>
+<p>IntegrationKitCondition describes the state of a resource at a certain point.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>type</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationKitConditionType">
+IntegrationKitConditionType
+</a>
+</em>
+</td>
+<td>
+<p>Type of integration condition.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>status</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core">
+Kubernetes core/v1.ConditionStatus
+</a>
+</em>
+</td>
+<td>
+<p>Status of the condition, one of True, False, Unknown.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>lastUpdateTime</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
+Kubernetes meta/v1.Time
+</a>
+</em>
+</td>
+<td>
+<p>The last time this condition was updated.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>lastTransitionTime</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
+Kubernetes meta/v1.Time
+</a>
+</em>
+</td>
+<td>
+<p>Last time the condition transitioned from one status to another.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>reason</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>The reason for the condition&rsquo;s last transition.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>message</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>A human readable message indicating details about the transition.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.IntegrationKitConditionType">IntegrationKitConditionType
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationKitCondition">IntegrationKitCondition</a>)
+</p>
+<div>
+<p>IntegrationKitConditionType &ndash;</p>
+</div>
+<h3 id="camel.apache.org/v1.IntegrationKitPhase">IntegrationKitPhase
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>)
+</p>
+<div>
+<p>IntegrationKitPhase &ndash;</p>
+</div>
+<h3 id="camel.apache.org/v1.IntegrationKitSpec">IntegrationKitSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationKit">IntegrationKit</a>)
+</p>
+<div>
+<p>IntegrationKitSpec defines the desired state of IntegrationKit</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>image</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>dependencies</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>profile</code><br/>
+<em>
+<a href="#camel.apache.org/v1.TraitProfile">
+TraitProfile
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>traits</code><br/>
+<em>
+<a href="#camel.apache.org/v1.TraitSpec">
+map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>configuration</code><br/>
+<em>
+<a href="#camel.apache.org/v1.ConfigurationSpec">
+[]ConfigurationSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>repositories</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationKit">IntegrationKit</a>)
+</p>
+<div>
+<p>IntegrationKitStatus defines the observed state of IntegrationKit</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>phase</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationKitPhase">
+IntegrationKitPhase
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>baseImage</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>image</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>digest</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>artifacts</code><br/>
+<em>
+<a href="#camel.apache.org/v1.Artifact">
+[]Artifact
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>failure</code><br/>
+<em>
+<a href="#camel.apache.org/v1.Failure">
+Failure
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>runtimeVersion</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>runtimeProvider</code><br/>
+<em>
+<a href="#camel.apache.org/v1.RuntimeProvider">
+RuntimeProvider
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>platform</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>conditions</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationKitCondition">
+[]IntegrationKitCondition
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>version</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.IntegrationPhase">IntegrationPhase
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
+</p>
+<div>
+<p>IntegrationPhase &ndash;</p>
+</div>
+<h3 id="camel.apache.org/v1.IntegrationPlatformBuildPublishStrategy">IntegrationPlatformBuildPublishStrategy
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>)
+</p>
+<div>
+<p>IntegrationPlatformBuildPublishStrategy enumerates all implemented publish strategies</p>
+</div>
+<h3 id="camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>)
+</p>
+<div>
+<p>IntegrationPlatformBuildSpec contains platform related build information</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>buildStrategy</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformBuildStrategy">
+IntegrationPlatformBuildStrategy
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>publishStrategy</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformBuildPublishStrategy">
+IntegrationPlatformBuildPublishStrategy
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>runtimeVersion</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>runtimeProvider</code><br/>
+<em>
+<a href="#camel.apache.org/v1.RuntimeProvider">
+RuntimeProvider
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>baseImage</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>properties</code><br/>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>registry</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformRegistrySpec">
+IntegrationPlatformRegistrySpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>timeout</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta">
+Kubernetes meta/v1.Duration
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>persistentVolumeClaim</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>maven</code><br/>
+<em>
+<a href="#camel.apache.org/v1.MavenSpec">
+MavenSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>httpProxySecret</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>kanikoBuildCache</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.IntegrationPlatformBuildStrategy">IntegrationPlatformBuildStrategy
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>)
+</p>
+<div>
+<p>IntegrationPlatformBuildStrategy enumerates all implemented build strategies</p>
+</div>
+<h3 id="camel.apache.org/v1.IntegrationPlatformCluster">IntegrationPlatformCluster
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>)
+</p>
+<div>
+<p>IntegrationPlatformCluster is the kind of orchestration cluster the platform is installed into</p>
+</div>
+<h3 id="camel.apache.org/v1.IntegrationPlatformCondition">IntegrationPlatformCondition
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationPlatformStatus">IntegrationPlatformStatus</a>)
+</p>
+<div>
+<p>IntegrationPlatformCondition describes the state of a resource at a certain point.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>type</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformConditionType">
+IntegrationPlatformConditionType
+</a>
+</em>
+</td>
+<td>
+<p>Type of integration condition.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>status</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core">
+Kubernetes core/v1.ConditionStatus
+</a>
+</em>
+</td>
+<td>
+<p>Status of the condition, one of True, False, Unknown.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>lastUpdateTime</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
+Kubernetes meta/v1.Time
+</a>
+</em>
+</td>
+<td>
+<p>The last time this condition was updated.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>lastTransitionTime</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
+Kubernetes meta/v1.Time
+</a>
+</em>
+</td>
+<td>
+<p>Last time the condition transitioned from one status to another.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>reason</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>The reason for the condition&rsquo;s last transition.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>message</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>A human readable message indicating details about the transition.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.IntegrationPlatformConditionType">IntegrationPlatformConditionType
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationPlatformCondition">IntegrationPlatformCondition</a>)
+</p>
+<div>
+<p>IntegrationPlatformConditionType &ndash;</p>
+</div>
+<h3 id="camel.apache.org/v1.IntegrationPlatformKameletRepositorySpec">IntegrationPlatformKameletRepositorySpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationPlatformKameletSpec">IntegrationPlatformKameletSpec</a>)
+</p>
+<div>
+<p>IntegrationPlatformKameletRepositorySpec &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>uri</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.IntegrationPlatformKameletSpec">IntegrationPlatformKameletSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>)
+</p>
+<div>
+<p>IntegrationPlatformKameletSpec &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>repositories</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformKameletRepositorySpec">
+[]IntegrationPlatformKameletRepositorySpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.IntegrationPlatformPhase">IntegrationPlatformPhase
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationPlatformStatus">IntegrationPlatformStatus</a>)
+</p>
+<div>
+<p>IntegrationPlatformPhase &ndash;</p>
+</div>
+<h3 id="camel.apache.org/v1.IntegrationPlatformRegistrySpec">IntegrationPlatformRegistrySpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>, 
+<a href="#camel.apache.org/v1.PublishTask">PublishTask</a>)
+</p>
+<div>
+<p>IntegrationPlatformRegistrySpec &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>insecure</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>address</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>secret</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>ca</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>organization</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.IntegrationPlatformResourcesSpec">IntegrationPlatformResourcesSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>)
+</p>
+<div>
+<p>IntegrationPlatformResourcesSpec contains platform related resources</p>
+</div>
+<h3 id="camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationPlatform">IntegrationPlatform</a>, 
+<a href="#camel.apache.org/v1.IntegrationPlatformStatus">IntegrationPlatformStatus</a>)
+</p>
+<div>
+<p>IntegrationPlatformSpec defines the desired state of IntegrationPlatform</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>cluster</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformCluster">
+IntegrationPlatformCluster
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>profile</code><br/>
+<em>
+<a href="#camel.apache.org/v1.TraitProfile">
+TraitProfile
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>build</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">
+IntegrationPlatformBuildSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>resources</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformResourcesSpec">
+IntegrationPlatformResourcesSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>traits</code><br/>
+<em>
+<a href="#camel.apache.org/v1.TraitSpec">
+map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>configuration</code><br/>
+<em>
+<a href="#camel.apache.org/v1.ConfigurationSpec">
+[]ConfigurationSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>kamelet</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformKameletSpec">
+IntegrationPlatformKameletSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.IntegrationPlatformStatus">IntegrationPlatformStatus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationPlatform">IntegrationPlatform</a>)
+</p>
+<div>
+<p>IntegrationPlatformStatus defines the observed state of IntegrationPlatform</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>IntegrationPlatformSpec</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformSpec">
+IntegrationPlatformSpec
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>IntegrationPlatformSpec</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>phase</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformPhase">
+IntegrationPlatformPhase
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>conditions</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformCondition">
+[]IntegrationPlatformCondition
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>version</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.IntegrationSpec">IntegrationSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.Integration">Integration</a>, 
+<a href="#camel.apache.org/v1alpha1.KameletBindingSpec">KameletBindingSpec</a>)
+</p>
+<div>
+<p>IntegrationSpec defines the desired state of Integration</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>replicas</code><br/>
+<em>
+int32
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>sources</code><br/>
+<em>
+<a href="#camel.apache.org/v1.SourceSpec">
+[]SourceSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>flows</code><br/>
+<em>
+<a href="#camel.apache.org/v1.Flow">
+[]Flow
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>resources</code><br/>
+<em>
+<a href="#camel.apache.org/v1.ResourceSpec">
+[]ResourceSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>kit</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Deprecated: use the IntegrationKit field</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>integrationKit</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core">
+Kubernetes core/v1.ObjectReference
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>dependencies</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>profile</code><br/>
+<em>
+<a href="#camel.apache.org/v1.TraitProfile">
+TraitProfile
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>traits</code><br/>
+<em>
+<a href="#camel.apache.org/v1.TraitSpec">
+map[string]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>template</code><br/>
+<em>
+<a href="#camel.apache.org/v1.PodSpecTemplate">
+PodSpecTemplate
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>configuration</code><br/>
+<em>
+<a href="#camel.apache.org/v1.ConfigurationSpec">
+[]ConfigurationSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>repositories</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>serviceAccountName</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.IntegrationStatus">IntegrationStatus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.Integration">Integration</a>)
+</p>
+<div>
+<p>IntegrationStatus defines the observed state of Integration</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>phase</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPhase">
+IntegrationPhase
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>digest</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>image</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>dependencies</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>profile</code><br/>
+<em>
+<a href="#camel.apache.org/v1.TraitProfile">
+TraitProfile
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>kit</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Deprecated: use the IntegrationKit field</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>integrationKit</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core">
+Kubernetes core/v1.ObjectReference
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>platform</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>generatedSources</code><br/>
+<em>
+<a href="#camel.apache.org/v1.SourceSpec">
+[]SourceSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>generatedResources</code><br/>
+<em>
+<a href="#camel.apache.org/v1.ResourceSpec">
+[]ResourceSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>failure</code><br/>
+<em>
+<a href="#camel.apache.org/v1.Failure">
+Failure
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>runtimeVersion</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>runtimeProvider</code><br/>
+<em>
+<a href="#camel.apache.org/v1.RuntimeProvider">
+RuntimeProvider
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>configuration</code><br/>
+<em>
+<a href="#camel.apache.org/v1.ConfigurationSpec">
+[]ConfigurationSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>conditions</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationCondition">
+[]IntegrationCondition
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>version</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>replicas</code><br/>
+<em>
+int32
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>selector</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>capabilities</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>lastInitTimestamp</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta">
+Kubernetes meta/v1.Time
+</a>
+</em>
+</td>
+<td>
+<p>The timestamp representing the last time when this integration was initialized.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.KanikoTask">KanikoTask
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.Task">Task</a>)
+</p>
+<div>
+<p>KanikoTask &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>BaseTask</code><br/>
+<em>
+<a href="#camel.apache.org/v1.BaseTask">
+BaseTask
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>BaseTask</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>PublishTask</code><br/>
+<em>
+<a href="#camel.apache.org/v1.PublishTask">
+PublishTask
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>PublishTask</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>verbose</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>httpProxySecret</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>cache</code><br/>
+<em>
+<a href="#camel.apache.org/v1.KanikoTaskCache">
+KanikoTaskCache
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.KanikoTaskCache">KanikoTaskCache
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.KanikoTask">KanikoTask</a>)
+</p>
+<div>
+<p>KanikoTaskCache</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>enabled</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>persistentVolumeClaim</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.Language">Language
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.SourceSpec">SourceSpec</a>)
+</p>
+<div>
+<p>Language &ndash;</p>
+</div>
+<h3 id="camel.apache.org/v1.MavenArtifact">MavenArtifact
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.CamelArtifactDependency">CamelArtifactDependency</a>, 
+<a href="#camel.apache.org/v1.CamelLoader">CamelLoader</a>, 
+<a href="#camel.apache.org/v1.Capability">Capability</a>, 
+<a href="#camel.apache.org/v1.RuntimeSpec">RuntimeSpec</a>)
+</p>
+<div>
+<p>MavenArtifact &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>groupId</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>artifactId</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>version</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.MavenSpec">MavenSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>, 
+<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>)
+</p>
+<div>
+<p>MavenSpec &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>localRepository</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>settings</code><br/>
+<em>
+<a href="#camel.apache.org/v1.ValueSource">
+ValueSource
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>caSecret</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<p>The Secret name and key, containing the CA certificate(s) used to connect
+to remote Maven repositories.
+It can contain X.509 certificates, and PKCS#7 formatted certificate chains.
+A JKS formatted keystore is automatically created to store the CA certificate(s),
+and configured to be used as a trusted certificate(s) by the Maven commands.
+Note that the root CA certificates are also imported into the created keystore.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>timeout</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta">
+Kubernetes meta/v1.Duration
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.PlatformInjectable">PlatformInjectable
+</h3>
+<div>
+<p>PlatformInjectable &ndash;</p>
+</div>
+<h3 id="camel.apache.org/v1.PodSpec">PodSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.PodSpecTemplate">PodSpecTemplate</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>volumes</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core">
+[]Kubernetes core/v1.Volume
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>initContainers</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core">
+[]Kubernetes core/v1.Container
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>containers</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core">
+[]Kubernetes core/v1.Container
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>ephemeralContainers</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#ephemeralcontainer-v1-core">
+[]Kubernetes core/v1.EphemeralContainer
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>restartPolicy</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#restartpolicy-v1-core">
+Kubernetes core/v1.RestartPolicy
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>terminationGracePeriodSeconds</code><br/>
+<em>
+int64
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>activeDeadlineSeconds</code><br/>
+<em>
+int64
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>dnsPolicy</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#dnspolicy-v1-core">
+Kubernetes core/v1.DNSPolicy
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>nodeSelector</code><br/>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>topologySpreadConstraints</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#topologyspreadconstraint-v1-core">
+[]Kubernetes core/v1.TopologySpreadConstraint
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.PodSpecTemplate">PodSpecTemplate
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>spec</code><br/>
+<em>
+<a href="#camel.apache.org/v1.PodSpec">
+PodSpec
+</a>
+</em>
+</td>
+<td>
+<br/>
+<br/>
+<table>
+<tr>
+<td>
+<code>volumes</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core">
+[]Kubernetes core/v1.Volume
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>initContainers</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core">
+[]Kubernetes core/v1.Container
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>containers</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core">
+[]Kubernetes core/v1.Container
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>ephemeralContainers</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#ephemeralcontainer-v1-core">
+[]Kubernetes core/v1.EphemeralContainer
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>restartPolicy</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#restartpolicy-v1-core">
+Kubernetes core/v1.RestartPolicy
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>terminationGracePeriodSeconds</code><br/>
+<em>
+int64
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>activeDeadlineSeconds</code><br/>
+<em>
+int64
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>dnsPolicy</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#dnspolicy-v1-core">
+Kubernetes core/v1.DNSPolicy
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>nodeSelector</code><br/>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>topologySpreadConstraints</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#topologyspreadconstraint-v1-core">
+[]Kubernetes core/v1.TopologySpreadConstraint
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.PublishTask">PublishTask
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.BuildahTask">BuildahTask</a>, 
+<a href="#camel.apache.org/v1.KanikoTask">KanikoTask</a>, 
+<a href="#camel.apache.org/v1.SpectrumTask">SpectrumTask</a>)
+</p>
+<div>
+<p>PublishTask &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>contextDir</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>baseImage</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>image</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>registry</code><br/>
+<em>
+<a href="#camel.apache.org/v1.IntegrationPlatformRegistrySpec">
+IntegrationPlatformRegistrySpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.RawMessage">RawMessage
+(<code>[]byte</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1alpha1.BeanProperties">BeanProperties</a>, 
+<a href="#camel.apache.org/v1alpha1.EndpointProperties">EndpointProperties</a>, 
+<a href="#camel.apache.org/v1alpha1.ErrorHandlerParameters">ErrorHandlerParameters</a>, 
+<a href="#camel.apache.org/v1alpha1.ErrorHandlerRef">ErrorHandlerRef</a>, 
+<a href="#camel.apache.org/v1alpha1.ErrorHandlerSpec">ErrorHandlerSpec</a>, 
+<a href="#camel.apache.org/v1.Flow">Flow</a>, 
+<a href="#camel.apache.org/v1.TraitConfiguration">TraitConfiguration</a>)
+</p>
+<div>
+<p>RawMessage is a raw encoded JSON value.
+It implements Marshaler and Unmarshaler and can
+be used to delay JSON decoding or precompute a JSON encoding.</p>
+</div>
+<h3 id="camel.apache.org/v1.ResourceCondition">ResourceCondition
+</h3>
+<div>
+<p>ResourceCondition is a common type for all conditions</p>
+</div>
+<h3 id="camel.apache.org/v1.ResourceSpec">ResourceSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>, 
+<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
+<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
+</p>
+<div>
+<p>ResourceSpec &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>DataSpec</code><br/>
+<em>
+<a href="#camel.apache.org/v1.DataSpec">
+DataSpec
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>DataSpec</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>type</code><br/>
+<em>
+<a href="#camel.apache.org/v1.ResourceType">
+ResourceType
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>mountPath</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.ResourceType">ResourceType
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.ResourceSpec">ResourceSpec</a>)
+</p>
+<div>
+<p>ResourceType &ndash;</p>
+</div>
+<h3 id="camel.apache.org/v1.RuntimeProvider">RuntimeProvider
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>, 
+<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>, 
+<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>, 
+<a href="#camel.apache.org/v1.RuntimeSpec">RuntimeSpec</a>)
+</p>
+<div>
+<p>RuntimeProvider &ndash;</p>
+</div>
+<h3 id="camel.apache.org/v1.RuntimeSpec">RuntimeSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>, 
+<a href="#camel.apache.org/v1.CamelCatalogSpec">CamelCatalogSpec</a>)
+</p>
+<div>
+<p>RuntimeSpec &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>version</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>provider</code><br/>
+<em>
+<a href="#camel.apache.org/v1.RuntimeProvider">
+RuntimeProvider
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>applicationClass</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>dependencies</code><br/>
+<em>
+<a href="#camel.apache.org/v1.MavenArtifact">
+[]MavenArtifact
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>metadata</code><br/>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>capabilities</code><br/>
+<em>
+<a href="#camel.apache.org/v1.Capability">
+map[string]github.com/apache/camel-k/pkg/apis/camel/v1.Capability
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.S2iTask">S2iTask
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.Task">Task</a>)
+</p>
+<div>
+<p>S2iTask &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>BaseTask</code><br/>
+<em>
+<a href="#camel.apache.org/v1.BaseTask">
+BaseTask
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>BaseTask</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>contextDir</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>tag</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.SourceSpec">SourceSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>, 
+<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
+<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>, 
+<a href="#camel.apache.org/v1alpha1.KameletSpec">KameletSpec</a>)
+</p>
+<div>
+<p>SourceSpec &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>DataSpec</code><br/>
+<em>
+<a href="#camel.apache.org/v1.DataSpec">
+DataSpec
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>DataSpec</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>language</code><br/>
+<em>
+<a href="#camel.apache.org/v1.Language">
+Language
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>loader</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Loader is an optional id of the org.apache.camel.k.RoutesLoader that will
+interpret this source at runtime</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>interceptors</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
+uses to pre/post process sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>type</code><br/>
+<em>
+<a href="#camel.apache.org/v1.SourceType">
+SourceType
+</a>
+</em>
+</td>
+<td>
+<p>Type defines the kind of source described by this object</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>property-names</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>List of property names defined in the source (e.g. if type is &ldquo;template&rdquo;)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.SourceType">SourceType
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.SourceSpec">SourceSpec</a>)
+</p>
+<div>
+</div>
+<h3 id="camel.apache.org/v1.SpectrumTask">SpectrumTask
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.Task">Task</a>)
+</p>
+<div>
+<p>SpectrumTask &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>BaseTask</code><br/>
+<em>
+<a href="#camel.apache.org/v1.BaseTask">
+BaseTask
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>BaseTask</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>PublishTask</code><br/>
+<em>
+<a href="#camel.apache.org/v1.PublishTask">
+PublishTask
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>PublishTask</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.Task">Task
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.BuildSpec">BuildSpec</a>)
+</p>
+<div>
+<p>Task &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>builder</code><br/>
+<em>
+<a href="#camel.apache.org/v1.BuilderTask">
+BuilderTask
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>buildah</code><br/>
+<em>
+<a href="#camel.apache.org/v1.BuildahTask">
+BuildahTask
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>kaniko</code><br/>
+<em>
+<a href="#camel.apache.org/v1.KanikoTask">
+KanikoTask
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>spectrum</code><br/>
+<em>
+<a href="#camel.apache.org/v1.SpectrumTask">
+SpectrumTask
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>s2i</code><br/>
+<em>
+<a href="#camel.apache.org/v1.S2iTask">
+S2iTask
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.TraitConfiguration">TraitConfiguration
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.TraitSpec">TraitSpec</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>RawMessage</code><br/>
+<em>
+<a href="#camel.apache.org/v1.RawMessage">
+RawMessage
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>RawMessage</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.TraitProfile">TraitProfile
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationKitSpec">IntegrationKitSpec</a>, 
+<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>, 
+<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
+<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
+</p>
+<div>
+<p>TraitProfile represents lists of traits that are enabled for the specific installation/integration</p>
+</div>
+<h3 id="camel.apache.org/v1.TraitSpec">TraitSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationKitSpec">IntegrationKitSpec</a>, 
+<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>, 
+<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>)
+</p>
+<div>
+<p>A TraitSpec contains the configuration of a trait</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>configuration</code><br/>
+<em>
+<a href="#camel.apache.org/v1.TraitConfiguration">
+TraitConfiguration
+</a>
+</em>
+</td>
+<td>
+<p>TraitConfiguration &ndash;</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="camel.apache.org/v1.ValueSource">ValueSource
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.MavenSpec">MavenSpec</a>)
+</p>
+<div>
+<p>ValueSource &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>configMapKeyRef</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#configmapkeyselector-v1-core">
+Kubernetes core/v1.ConfigMapKeySelector
+</a>
+</em>
+</td>
+<td>
+<p>Selects a key of a ConfigMap.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>secretKeyRef</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<p>Selects a key of a secret.</p>
+</td>
+</tr>
+</tbody>
+</table>
