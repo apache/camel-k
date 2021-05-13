@@ -23,6 +23,7 @@ echo "Downloading gen-crd-api-reference-docs binary..."
 TMPFILE=`mktemp`
 TMPDIR=`mktemp -d`
 PWD=`pwd`
+# TODO detect proper binary, based on the OS running this script
 wget -q --show-progress https://github.com/ahmetb/gen-crd-api-reference-docs/releases/download/v0.1.5/gen-crd-api-reference-docs_linux_amd64.tar.gz -O $TMPFILE
 tar -C $TMPDIR -xf $TMPFILE
 
@@ -35,12 +36,6 @@ $TMPDIR/gen-crd-api-reference-docs \
 
 # Workaround: https://github.com/ahmetb/gen-crd-api-reference-docs/issues/33
 sed -i -E "s/%2f/\//" $crd_file
-
-# Valid HTML: https://github.com/ahmetb/gen-crd-api-reference-docs/issues/34
-sed -i -E "s/<\/code><\/br>/<\/code><br>/" $crd_file
-sed -i -E "s/<\/p><\/h3>/<\/h3>/" $crd_file
-sed -i ':a;N;$!ba;s/<p>\n<p>/<p>/g' $crd_file
-sed -i ':a;N;$!ba;s/<\/p>\n<\/p>/<\/p>/g' $crd_file
 
 echo "Cleaning the gen-crd-api-reference-docs binary..."
 rm $TMPFILE
