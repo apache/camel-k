@@ -56,7 +56,7 @@ func TestMetrics(t *testing.T) {
 		pod := OperatorPod(ns)()
 		Expect(pod).NotTo(BeNil())
 
-		logs := StructuredLogs(ns, pod.Name, corev1.PodLogOptions{})
+		logs := StructuredLogs(ns, pod.Name, corev1.PodLogOptions{}, false)
 		Expect(logs).NotTo(BeEmpty())
 
 		response, err := TestClient().CoreV1().RESTClient().Get().
@@ -81,14 +81,19 @@ func TestMetrics(t *testing.T) {
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.build"),
 					"Message":     Equal("Build state transition"),
-					"Phase":       Equal(string(v1.BuildPhasePending)),
+					"Phase":       MatchFields(IgnoreExtras,
+						Fields{
+							"Name": Equal(string(v1.BuildPhasePending)),
+						}),
 					"RequestName": Equal(build.Name),
 				}), LogEntryNoop).
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.build"),
 					"Message":     Equal("Reconciling Build"),
 					"RequestName": Equal(build.Name),
-				}), func(l *LogEntry) { ts1 = l.Timestamp.Time }).
+				}), func(l *LogEntry) {
+					ts1 = l.Timestamp.Time
+				}).
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName": Equal("camel-k.builder"),
 					"Message":    HavePrefix("resolved base image:"),
@@ -97,7 +102,9 @@ func TestMetrics(t *testing.T) {
 					"LoggerName":  Equal("camel-k.controller.build"),
 					"Message":     Equal("Reconciling Build"),
 					"RequestName": Equal(build.Name),
-				}), func(l *LogEntry) { ts2 = l.Timestamp.Time }).
+				}), func(l *LogEntry) {
+					ts2 = l.Timestamp.Time
+				}).
 				Walk()
 			Expect(err).To(BeNil())
 			Expect(ts1).NotTo(BeZero())
@@ -337,7 +344,10 @@ func TestMetrics(t *testing.T) {
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.build"),
 					"Message":     Equal("Build state transition"),
-					"Phase":       Equal(string(v1.BuildPhasePending)),
+					"Phase":       MatchFields(IgnoreExtras,
+						Fields{
+							"Name": Equal(string(v1.BuildPhasePending)),
+					}),
 					"RequestName": Equal(build.Name),
 				}), func(l *LogEntry) { ts2 = l.Timestamp.Time }).
 				Walk()

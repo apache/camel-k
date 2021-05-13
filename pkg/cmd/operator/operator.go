@@ -21,6 +21,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"k8s.io/klog/v2"
 	"math/rand"
 	"os"
 	"runtime"
@@ -76,6 +77,8 @@ func Run(healthPort, monitoringPort int32) {
 	logf.SetLogger(zap.New(func(o *zap.Options) {
 		o.Development = false
 	}))
+
+	klog.SetLogger(log)
 
 	printVersion()
 
