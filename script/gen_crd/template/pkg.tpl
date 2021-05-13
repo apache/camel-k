@@ -18,9 +18,9 @@
 
     {{ with (index .GoPackages 0 )}}
         {{ with .DocComments }}
-        <p>
+        <div>
             {{ safe (renderComments .) }}
-        </p>
+        </div>
         {{ end }}
     {{ end }}
 
@@ -38,12 +38,6 @@
     {{ range (visibleTypes (sortedTypes .Types))}}
         {{ template "type" .  }}
     {{ end }}
-    <hr/>
 {{ end }}
-
-<p><em>
-    Generated with <code>gen-crd-api-reference-docs</code>
-    {{ with .gitCommit }} on git commit <code>{{ . }}</code>{{end}}.
-</em></p>
 
 {{ end }}
