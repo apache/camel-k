@@ -1,0 +1,25 @@
+[[installation-on-kind]]
+= Installing Camel K on Kind
+
+Installing Camel K on Kind, with a public registry, doesn't require any special configuration.
+
+
+Assuming you have Kind installed, then start by creating a cluster:
+
+```
+kind create cluster
+```
+
+Create a secret with your registry username and password:
+
+```
+kubectl -n default create secret docker-registry external-registry-secret --docker-username my-user --docker-password "password"
+```
+
+Install Camel K operator on the cluster in the default namespace:
+
+```
+kamel install --olm=false -n default --registry docker.io --organization my-org-or-username --registry-secret external-registry-secret --wait
+```
+
+Make sure to replace the `my-org-or-username` with your actual username or organization used to host the images.
