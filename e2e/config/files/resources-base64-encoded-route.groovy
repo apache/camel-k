@@ -1,3 +1,4 @@
+// camel-k: language=groovy
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -14,16 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
 
-public class ResourcesText extends org.apache.camel.builder.RouteBuilder {
+//
+// To run this integrations use:
+// kamel run --resource resources-data.txt --compression=true resources-base64-encoded-route.groovy --dev
+//
 
-    @Override
-    public void configure() throws Exception {
-        from("file:/etc/camel/resources/i-resource-000/?noop=true")
-                .log("${body}");
-    }
-
-}
+from('timer:resources-bas64')
+    .routeId('resources-base64')
+    .setBody()
+        .simple("resource:classpath:resources-data.txt")
+    .log('resource file base64 content is: ${body}')

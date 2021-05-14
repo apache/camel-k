@@ -1,3 +1,4 @@
+// camel-k: language=groovy
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -14,27 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
 
-public class ResourcesBinary extends org.apache.camel.builder.RouteBuilder {
+//
+// To run this integrations use:
+// kamel run --resource resources-data.txt resources-route.groovy --dev
+//
 
-    @Override
-    public void configure() throws Exception {
-        from("file:/etc/camel/resources/i-resource-000/?noop=true")
-                .unmarshal().zipFile()
-                .convertBodyTo(String.class)
-                .process(new ZipEntryProcessor());
-    }
-
-}
-
-class ZipEntryProcessor implements Processor {
-
-    @Override
-    public void process(Exchange exchange) throws Exception {
-        System.out.println(exchange.getIn().getBody().toString());
-    }
-
-}
+from('timer:resources')
+    .routeId('resources')
+    .setBody()
+        .simple("resource:classpath:resources-data.txt")
+    .log('resource file content is: ${body}')

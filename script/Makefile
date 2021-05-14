@@ -168,8 +168,8 @@ test-local: build
 	#go test -timeout 60m -v ./e2e/local -tags=integration
 
 test-resources: build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/resources -tags=integration
-	#go test -timeout 60m -v ./e2e/resources -tags=integration
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/config -tags=integration
+	#go test -timeout 60m -v ./e2e/config -tags=integration
 
 test-kamel-cli: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/common/cli -tags=integration
