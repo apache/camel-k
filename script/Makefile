@@ -152,6 +152,7 @@ test-integration: build
 	go test -timeout 60m -v ./e2e/common -tags=integration && \
 	go test -timeout 60m -v ./e2e/common/build -tags=integration && \
 	go test -timeout 60m -v ./e2e/common/cli -tags=integration && \
+	go test -timeout 60m -v ./e2e/common/config -tags=integration && \
 	go test -timeout 60m -v ./e2e/common/languages -tags=integration && \
 	go test -timeout 60m -v ./e2e/common/traits -tags=integration
 
@@ -166,10 +167,6 @@ test-builder: build
 test-local: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/local -tags=integration
 	#go test -timeout 60m -v ./e2e/local -tags=integration
-
-test-resources: build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/config -tags=integration
-	#go test -timeout 60m -v ./e2e/config -tags=integration
 
 test-kamel-cli: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/common/cli -tags=integration
