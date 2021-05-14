@@ -2,6 +2,12 @@
 
 This example shows how Camel K can be used to connect to a Kafka broker.
 
+## Authentication to Kafka
+
+We have a dedicated section to show [how to authenticate Camel K to Kafka](./sasl_ssl/).
+
+## Simple usage
+
 To run this example first set-up Kafka on your k8s cluster.
 A convenient way to do so is by using the Strimzi project, if you are using minikube follow these instructions at https://strimzi.io/quickstarts/minikube/
 
