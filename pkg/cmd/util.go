@@ -18,9 +18,7 @@ limitations under the License.
 package cmd
 
 import (
-	"bytes"
 	"context"
-	"encoding/base64"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -243,11 +241,10 @@ func fieldByMapstructureTagName(target reflect.Value, tagName string) (reflect.S
 }
 
 func compressToString(content []byte) (string, error) {
-	var b bytes.Buffer
-
-	if err := gzip.Compress(&b, content); err != nil {
+	bytes, err := gzip.CompressBase64(content)
+	if err != nil {
 		return "", err
 	}
 
-	return base64.StdEncoding.EncodeToString(b.Bytes()), nil
+	return string(bytes), nil
 }
