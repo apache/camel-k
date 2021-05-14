@@ -113,8 +113,8 @@ func TestTolerationTrait(t *testing.T) {
 			}))
 
 			// Check the Integration pod is running on a master node
-			Expect(Node(pod.Spec.NodeName)).NotTo(BeNil())
-			Expect(Node(pod.Spec.NodeName)).To(PointTo(MatchFields(IgnoreExtras, Fields{
+			Expect(Node(pod.Spec.NodeName)()).NotTo(BeNil())
+			Expect(Node(pod.Spec.NodeName)()).To(PointTo(MatchFields(IgnoreExtras, Fields{
 				"Spec": MatchFields(IgnoreExtras, Fields{
 					"Taints": ContainElement(v1.Taint{
 						Key:    "node-role.kubernetes.io/master",
