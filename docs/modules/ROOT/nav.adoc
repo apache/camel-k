@@ -5,6 +5,7 @@
 ** xref:installation/gke.adoc[Google Kubernetes Engine (GKE)]
 ** xref:installation/openshift.adoc[OpenShift]
 ** xref:installation/iks.adoc[IBM Kubernetes Service (IKS)]
+** xref:installation/kind.adoc[Kind]
 ** xref:installation/registry/registry.adoc[Configuring Registry]
 *** xref:installation/registry/digitalocean.adoc[DigitalOcean]
 *** xref:installation/registry/dockerhub.adoc[Docker Hub]
