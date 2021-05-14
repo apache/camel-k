@@ -36,6 +36,7 @@ build/_maven_overlay
 build/_kamelets
 build/_maven_overlay/
 build/maven/target/
+build/maven
 /api_*
 
 # envrc
