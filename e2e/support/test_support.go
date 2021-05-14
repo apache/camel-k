@@ -661,6 +661,36 @@ func Configmap(ns string, name string) func() *corev1.ConfigMap {
 	}
 }
 
+func NewPlainTextConfigmap(ns string, name string, data map[string]string) error {
+	cm := corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+		Data: data,
+	}
+	return TestClient().Create(TestContext, &cm)
+}
+
+func NewPlainTextSecret(ns string, name string, data map[string]string) error {
+	sec := corev1.Secret{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Secret",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+		StringData: data,
+	}
+	return TestClient().Create(TestContext, &sec)
+}
+
 func KnativeService(ns string, name string) func() *servingv1.Service {
 	return func() *servingv1.Service {
 		answer := servingv1.Service{
