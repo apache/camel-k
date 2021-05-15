@@ -21,12 +21,14 @@
 - kamelet-binding : suport for error handling [\#1941](https://github.com/apache/camel-k/issues/1941)
 - builder: use structured logging for maven output [\#1783](https://github.com/apache/camel-k/issues/1783)
 - Add support for podtemplatespec / container in the Integration CRD [\#1657](https://github.com/apache/camel-k/issues/1657)
+- Installation on a kind cluster [\#1468](https://github.com/apache/camel-k/issues/1468)
 - Generate CRD documentation for website [\#1137](https://github.com/apache/camel-k/issues/1137)
 - Integration logging configuration [\#580](https://github.com/apache/camel-k/issues/580)
 - kamel run - compile errors should be more visible [\#185](https://github.com/apache/camel-k/issues/185)
 
 **Merged pull requests:**
 
+- Added documentation about installing Camel K on Kind [\#2293](https://github.com/apache/camel-k/pull/2293) ([orpiske](https://github.com/orpiske))
 - chore\(e2e\): Assert upgraded integration Pod uses new version Kit [\#2285](https://github.com/apache/camel-k/pull/2285) ([astefanutti](https://github.com/astefanutti))
 - chore\(e2e\): Remove obsolete operator upgrade e2e test [\#2283](https://github.com/apache/camel-k/pull/2283) ([astefanutti](https://github.com/astefanutti))
 - fix\(doc\): broken links [\#2282](https://github.com/apache/camel-k/pull/2282) ([squakez](https://github.com/squakez))
