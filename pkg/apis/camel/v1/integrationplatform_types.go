@@ -108,6 +108,7 @@ var AllTraitProfiles = []TraitProfile{TraitProfileKubernetes, TraitProfileKnativ
 type IntegrationPlatformBuildSpec struct {
 	BuildStrategy         IntegrationPlatformBuildStrategy        `json:"buildStrategy,omitempty"`
 	PublishStrategy       IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
+	TargetRepository      string                                  `json:"targetRepository,omitempty"`
 	RuntimeVersion        string                                  `json:"runtimeVersion,omitempty"`
 	RuntimeProvider       RuntimeProvider                         `json:"runtimeProvider,omitempty"`
 	BaseImage             string                                  `json:"baseImage,omitempty"`

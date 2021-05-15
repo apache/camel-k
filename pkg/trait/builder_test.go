@@ -34,8 +34,8 @@ import (
 
 func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
 	environments := []*Environment{
-		createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I),
-		createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko),
+		createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I, ""),
+		createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko, ""),
 	}
 
 	for _, e := range environments {
@@ -55,8 +55,8 @@ func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
 
 func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 	environments := []*Environment{
-		createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I),
-		createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko),
+		createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I, ""),
+		createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko, ""),
 	}
 
 	for _, e := range environments {
@@ -75,7 +75,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 }
 
 func TestS2IBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I)
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I, "")
 	err := NewBuilderTestCatalog().apply(env)
 
 	assert.Nil(t, err)
@@ -88,7 +88,7 @@ func TestS2IBuilderTrait(t *testing.T) {
 }
 
 func TestKanikoBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko)
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko, "")
 	err := NewBuilderTestCatalog().apply(env)
 
 	assert.Nil(t, err)
@@ -100,7 +100,39 @@ func TestKanikoBuilderTrait(t *testing.T) {
 	assert.NotNil(t, env.BuildTasks[1].Kaniko)
 }
 
-func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.IntegrationPlatformBuildPublishStrategy) *Environment {
+func TestImageNameSingleRepository(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko, "camel-test-repo")
+	err := NewBuilderTestCatalog().apply(env)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, env.ExecutedTraits)
+	assert.NotNil(t, env.GetTrait("builder"))
+	assert.NotEmpty(t, env.BuildTasks)
+	assert.Len(t, env.BuildTasks, 2)
+	assert.NotNil(t, env.BuildTasks[0].Builder)
+	assert.NotNil(t, env.BuildTasks[1].Kaniko)
+
+	assert.Equal(t, env.BuildTasks[1].Kaniko.PublishTask.Image, "registry/test/camel-test-repo:test-kit-test-version")
+
+}
+
+func TestImageNameMultiRepository(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko, "")
+	err := NewBuilderTestCatalog().apply(env)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, env.ExecutedTraits)
+	assert.NotNil(t, env.GetTrait("builder"))
+	assert.NotEmpty(t, env.BuildTasks)
+	assert.Len(t, env.BuildTasks, 2)
+	assert.NotNil(t, env.BuildTasks[0].Builder)
+	assert.NotNil(t, env.BuildTasks[1].Kaniko)
+
+	assert.Equal(t, env.BuildTasks[1].Kaniko.PublishTask.Image, "registry/test/camel-k-test-kit:test-version")
+
+}
+
+func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.IntegrationPlatformBuildPublishStrategy, repositoryTarget string) *Environment {
 	c, err := camel.DefaultCatalog()
 	if err != nil {
 		panic(err)
@@ -121,8 +153,14 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 			},
 		},
 		IntegrationKit: &v1.IntegrationKit{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-kit",
+				Namespace: "ns",
+				ResourceVersion: "test-version",
+			},
 			Status: v1.IntegrationKitStatus{
 				Phase: v1.IntegrationKitPhaseBuildSubmitted,
+
 			},
 		},
 		Platform: &v1.IntegrationPlatform{
@@ -130,10 +168,11 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 				Cluster: cluster,
 				Build: v1.IntegrationPlatformBuildSpec{
 					PublishStrategy:  strategy,
-					Registry:         v1.IntegrationPlatformRegistrySpec{Address: "registry"},
+					Registry:         v1.IntegrationPlatformRegistrySpec{Address: "registry", Organization: "test"},
 					RuntimeVersion:   defaults.DefaultRuntimeVersion,
 					RuntimeProvider:  v1.RuntimeProviderQuarkus,
 					KanikoBuildCache: &kanikoCache,
+					TargetRepository: repositoryTarget,
 				},
 			},
 		},

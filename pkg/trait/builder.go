@@ -71,7 +71,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			},
 			PublishTask: v1.PublishTask{
 				BaseImage: e.Platform.Status.Build.BaseImage,
-				Image:     getImageName(e),
+				Image:     getImageName(e, e.Platform.Status.Build.TargetRepository),
 				Registry:  e.Platform.Status.Build.Registry,
 			},
 		}})
@@ -90,7 +90,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Name: "buildah",
 			},
 			PublishTask: v1.PublishTask{
-				Image:    getImageName(e),
+				Image:    getImageName(e, e.Platform.Status.Build.TargetRepository),
 				Registry: e.Platform.Status.Build.Registry,
 			},
 			HttpProxySecret: e.Platform.Status.Build.HTTPProxySecret,
@@ -103,7 +103,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Name: "kaniko",
 			},
 			PublishTask: v1.PublishTask{
-				Image:    getImageName(e),
+				Image:    getImageName(e, e.Platform.Status.Build.TargetRepository),
 				Registry: e.Platform.Status.Build.Registry,
 			},
 			Cache: v1.KanikoTaskCache{
@@ -146,10 +146,18 @@ func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
 	return task
 }
 
-func getImageName(e *Environment) string {
+func getImageName(e *Environment, repositoryTarget string) string {
 	organization := e.Platform.Status.Build.Registry.Organization
 	if organization == "" {
 		organization = e.Platform.Namespace
 	}
-	return e.Platform.Status.Build.Registry.Address + "/" + organization + "/camel-k-" + e.IntegrationKit.Name + ":" + e.IntegrationKit.ResourceVersion
+
+	var imageName string
+	if repositoryTarget == "" {
+		imageName = "/camel-k-" + e.IntegrationKit.Name + ":" + e.IntegrationKit.ResourceVersion;
+	} else {
+		imageName = "/" + repositoryTarget +  ":" + e.IntegrationKit.Name + "-" + e.IntegrationKit.ResourceVersion;
+	}
+
+	return e.Platform.Status.Build.Registry.Address + "/" + organization + imageName
 }
