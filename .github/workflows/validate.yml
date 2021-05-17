@@ -26,6 +26,11 @@ on:
     branches:
       - main
       - "release-*"
+
+concurrency:
+  group: ${{ github.head_ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-20.04

@@ -38,6 +38,11 @@ on:
       - 'KEYS'
       - 'LICENSE'
       - 'NOTICE'
+
+concurrency:
+  group: ${{ github.head_ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   build:
     strategy:
