@@ -81,10 +81,7 @@ func TestMetrics(t *testing.T) {
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.build"),
 					"Message":     Equal("Build state transition"),
-					"Phase":       MatchFields(IgnoreExtras,
-						Fields{
-							"Name": Equal(string(v1.BuildPhasePending)),
-						}),
+					"Phase":       Equal(string(v1.BuildPhasePending)),
 					"RequestName": Equal(build.Name),
 				}), LogEntryNoop).
 				AddStep(MatchFields(IgnoreExtras, Fields{
@@ -344,10 +341,7 @@ func TestMetrics(t *testing.T) {
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.build"),
 					"Message":     Equal("Build state transition"),
-					"Phase":       MatchFields(IgnoreExtras,
-						Fields{
-							"Name": Equal(string(v1.BuildPhasePending)),
-					}),
+					"Phase":       Equal(string(v1.BuildPhasePending)),
 					"RequestName": Equal(build.Name),
 				}), func(l *LogEntry) { ts2 = l.Timestamp.Time }).
 				Walk()

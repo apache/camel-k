@@ -293,8 +293,6 @@ func StructuredLogs(ns, podName string, options corev1.PodLogOptions, ignorePars
 			}
 		}
 
-		log.Debug("Parsed: %s with phase '%s'\n", entry.Message, entry.Phase.Name)
-
 		entries = append(entries, entry)
 	}
 

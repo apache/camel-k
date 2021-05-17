@@ -20,7 +20,6 @@ limitations under the License.
 package util
 
 import (
-	"encoding/json"
 	"math"
 	"strconv"
 	"time"
@@ -44,27 +43,6 @@ func (t *Time) UnmarshalJSON(s []byte) (err error) {
 	return nil
 }
 
-type Phase struct {
-	Name string
-}
-
-func (p *Phase) UnmarshalJSON(b []byte) error {
-	if b[0] != '"' {
-		var tmp int
-
-		json.Unmarshal(b, &tmp)
-		p.Name = strconv.Itoa(tmp)
-
-		return nil
-	}
-
-	if err := json.Unmarshal(b, &p.Name); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 type LogEntry struct {
 	// Zap
 	Level      zapcore.Level `json:"level,omitempty"`
@@ -79,7 +57,7 @@ type LogEntry struct {
 	// Camel K
 	Namespace string `json:"ns,omitempty"`
 	Name      string `json:"name,omitempty"`
-	Phase     Phase `json:"phase,omitempty"`
+	Phase     string `json:"phase,omitempty"`
 	PhaseFrom string `json:"phase-from,omitempty"`
 	PhaseTo   string `json:"phase-to,omitempty"`
 }

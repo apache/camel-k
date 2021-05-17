@@ -22,6 +22,7 @@ import (
 	"os"
 	"path"
 	"sort"
+	"strconv"
 	"time"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -115,7 +116,7 @@ func (t *builderTask) Do(ctx context.Context) v1.BuildStatus {
 		default:
 			l := t.log.WithValues(
 				"step", step.ID(),
-				"phase", step.Phase(),
+				"phase", strconv.FormatInt(int64(step.Phase()), 10),
 				"task", t.task.Name,
 			)
 
