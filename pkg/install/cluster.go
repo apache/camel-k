@@ -38,8 +38,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-// SetupClusterWideResourcesOrCollect --
-func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider client.Provider, collection *kubernetes.Collection, clusterType string) error {
+func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider client.Provider, collection *kubernetes.Collection, clusterType string, force bool) error {
 	// Get a client to install the CRD
 	c, err := clientProvider.Get()
 	if err != nil {
@@ -68,8 +67,8 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 		}
 	}
 	downgradeToCRDv1beta1 := func(object ctrl.Object) ctrl.Object {
-		//Deletes not allowed default values in v1beta1 integrations and kameletbidnings crd,
-		removeDefaultProtocolFromCRD := func(crd *apiextensionsv1beta1.CustomResourceDefinition, property string) {
+		// Remove default values in v1beta1 Integration and KameletBinding CRDs,
+		removeDefaultFromCrd := func(crd *apiextensionsv1beta1.CustomResourceDefinition, property string) {
 			defaultValue := apiextensionsv1beta1.JSONSchemaProps{
 				Default: nil,
 			}
@@ -78,7 +77,6 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 					Properties["spec"].Properties["template"].Properties["spec"].Properties[property].Items.Schema.
 					Properties["ports"].Items.Schema.Properties["protocol"] = defaultValue
 			}
-
 			if crd.Name == "kameletbindings.camel.apache.org" {
 				crd.Spec.Validation.OpenAPIV3Schema.Properties["spec"].Properties["integration"].Properties["template"].
 					Properties["spec"].Properties[property].Items.Schema.Properties["ports"].Items.Schema.
@@ -101,9 +99,9 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 				return nil
 			}
 
-			removeDefaultProtocolFromCRD(v1beta1Crd, "ephemeralContainers")
-			removeDefaultProtocolFromCRD(v1beta1Crd, "containers")
-			removeDefaultProtocolFromCRD(v1beta1Crd, "initContainers")
+			removeDefaultFromCrd(v1beta1Crd, "ephemeralContainers")
+			removeDefaultFromCrd(v1beta1Crd, "containers")
+			removeDefaultFromCrd(v1beta1Crd, "initContainers")
 
 			return v1beta1Crd
 		}
@@ -111,44 +109,44 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 	}
 
 	// Install CRD for Integration Platform (if needed)
-	if err := installCRD(ctx, c, "IntegrationPlatform", "v1", "camel.apache.org_integrationplatforms.yaml", downgradeToCRDv1beta1, collection); err != nil {
+	if err := installCRD(ctx, c, "IntegrationPlatform", "v1", "camel.apache.org_integrationplatforms.yaml", downgradeToCRDv1beta1, collection, force); err != nil {
 		return err
 	}
 
 	// Install CRD for Integration Kit (if needed)
-	if err := installCRD(ctx, c, "IntegrationKit", "v1", "camel.apache.org_integrationkits.yaml", downgradeToCRDv1beta1, collection); err != nil {
+	if err := installCRD(ctx, c, "IntegrationKit", "v1", "camel.apache.org_integrationkits.yaml", downgradeToCRDv1beta1, collection, force); err != nil {
 		return err
 	}
 
 	// Install CRD for Integration (if needed)
-	if err := installCRD(ctx, c, "Integration", "v1", "camel.apache.org_integrations.yaml", downgradeToCRDv1beta1, collection); err != nil {
+	if err := installCRD(ctx, c, "Integration", "v1", "camel.apache.org_integrations.yaml", downgradeToCRDv1beta1, collection, force); err != nil {
 		return err
 	}
 
 	// Install CRD for Camel Catalog (if needed)
-	if err := installCRD(ctx, c, "CamelCatalog", "v1", "camel.apache.org_camelcatalogs.yaml", downgradeToCRDv1beta1, collection); err != nil {
+	if err := installCRD(ctx, c, "CamelCatalog", "v1", "camel.apache.org_camelcatalogs.yaml", downgradeToCRDv1beta1, collection, force); err != nil {
 		return err
 	}
 
 	// Install CRD for Build (if needed)
-	if err := installCRD(ctx, c, "Build", "v1", "camel.apache.org_builds.yaml", downgradeToCRDv1beta1, collection); err != nil {
+	if err := installCRD(ctx, c, "Build", "v1", "camel.apache.org_builds.yaml", downgradeToCRDv1beta1, collection, force); err != nil {
 		return err
 	}
 
 	// Install CRD for Kamelet (if needed)
-	if err := installCRD(ctx, c, "Kamelet", "v1alpha1", "camel.apache.org_kamelets.yaml", downgradeToCRDv1beta1, collection); err != nil {
+	if err := installCRD(ctx, c, "Kamelet", "v1alpha1", "camel.apache.org_kamelets.yaml", downgradeToCRDv1beta1, collection, force); err != nil {
 		return err
 	}
 
 	// Install CRD for KameletBinding (if needed)
-	if err := installCRD(ctx, c, "KameletBinding", "v1alpha1", "camel.apache.org_kameletbindings.yaml", downgradeToCRDv1beta1, collection); err != nil {
+	if err := installCRD(ctx, c, "KameletBinding", "v1alpha1", "camel.apache.org_kameletbindings.yaml", downgradeToCRDv1beta1, collection, force); err != nil {
 		return err
 	}
 
 	// Don't wait if we're just collecting resources
 	if collection == nil {
 		// Wait for all CRDs to be installed before proceeding
-		if err := WaitForAllCRDInstallation(ctx, clientProvider, 25*time.Second); err != nil {
+		if err := WaitForAllCrdInstallation(ctx, clientProvider, 25*time.Second); err != nil {
 			return err
 		}
 	}
@@ -185,8 +183,7 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 	return nil
 }
 
-// WaitForAllCRDInstallation waits until all CRDs are installed
-func WaitForAllCRDInstallation(ctx context.Context, clientProvider client.Provider, timeout time.Duration) error {
+func WaitForAllCrdInstallation(ctx context.Context, clientProvider client.Provider, timeout time.Duration) error {
 	deadline := time.Now().Add(timeout)
 	for {
 		var c client.Client
@@ -195,7 +192,7 @@ func WaitForAllCRDInstallation(ctx context.Context, clientProvider client.Provid
 			return err
 		}
 		var inst bool
-		if inst, err = AreAllCRDInstalled(ctx, c); err != nil {
+		if inst, err = areAllCrdInstalled(ctx, c); err != nil {
 			return err
 		} else if inst {
 			return nil
@@ -208,43 +205,41 @@ func WaitForAllCRDInstallation(ctx context.Context, clientProvider client.Provid
 	}
 }
 
-// AreAllCRDInstalled check if all the required CRDs are installed
-func AreAllCRDInstalled(ctx context.Context, c client.Client) (bool, error) {
-	if ok, err := IsCRDInstalled(ctx, c, "IntegrationPlatform", "v1"); err != nil {
+func areAllCrdInstalled(ctx context.Context, c client.Client) (bool, error) {
+	if ok, err := isCrdInstalled(ctx, c, "IntegrationPlatform", "v1"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil
 	}
-	if ok, err := IsCRDInstalled(ctx, c, "IntegrationKit", "v1"); err != nil {
+	if ok, err := isCrdInstalled(ctx, c, "IntegrationKit", "v1"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil
 	}
-	if ok, err := IsCRDInstalled(ctx, c, "Integration", "v1"); err != nil {
+	if ok, err := isCrdInstalled(ctx, c, "Integration", "v1"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil
 	}
-	if ok, err := IsCRDInstalled(ctx, c, "CamelCatalog", "v1"); err != nil {
+	if ok, err := isCrdInstalled(ctx, c, "CamelCatalog", "v1"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil
 	}
-	if ok, err := IsCRDInstalled(ctx, c, "Build", "v1"); err != nil {
+	if ok, err := isCrdInstalled(ctx, c, "Build", "v1"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil
 	}
-	if ok, err := IsCRDInstalled(ctx, c, "Kamelet", "v1alpha1"); err != nil {
+	if ok, err := isCrdInstalled(ctx, c, "Kamelet", "v1alpha1"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil
 	}
-	return IsCRDInstalled(ctx, c, "KameletBinding", "v1alpha1")
+	return isCrdInstalled(ctx, c, "KameletBinding", "v1alpha1")
 }
 
-// IsCRDInstalled check if the given CRD kind is installed
-func IsCRDInstalled(ctx context.Context, c client.Client, kind string, version string) (bool, error) {
+func isCrdInstalled(ctx context.Context, c client.Client, kind string, version string) (bool, error) {
 	lst, err := c.Discovery().ServerResourcesForGroupVersion(fmt.Sprintf("camel.apache.org/%s", version))
 	if err != nil && k8serrors.IsNotFound(err) {
 		return false, nil
@@ -259,7 +254,7 @@ func IsCRDInstalled(ctx context.Context, c client.Client, kind string, version s
 	return false, nil
 }
 
-func installCRD(ctx context.Context, c client.Client, kind string, version string, resourceName string, converter ResourceCustomizer, collection *kubernetes.Collection) error {
+func installCRD(ctx context.Context, c client.Client, kind string, version string, resourceName string, converter ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	crd, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString("/crd/bases/"+resourceName))
 	if err != nil {
 		return err
@@ -276,20 +271,15 @@ func installCRD(ctx context.Context, c client.Client, kind string, version strin
 		return nil
 	}
 
-	installed, err := IsCRDInstalled(ctx, c, kind, version)
+	installed, err := isCrdInstalled(ctx, c, kind, version)
 	if err != nil {
 		return err
 	}
-	if installed {
+	if installed && !force {
 		return nil
 	}
 
-	err = c.Create(ctx, crd)
-	if err != nil && !k8serrors.IsAlreadyExists(err) {
-		return err
-	}
-
-	return nil
+	return kubernetes.ReplaceResource(ctx, c, crd)
 }
 
 func isClusterRoleInstalled(ctx context.Context, c client.Client, name string) (bool, error) {
@@ -320,7 +310,6 @@ func installResource(ctx context.Context, c client.Client, collection *kubernete
 	if err != nil {
 		return err
 	}
-
 	if collection != nil {
 		collection.Add(obj)
 		return nil
