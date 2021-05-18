@@ -38,7 +38,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
 	camelevent "github.com/apache/camel-k/pkg/event"
 	"github.com/apache/camel-k/pkg/platform"
@@ -62,7 +61,6 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 			client:   c,
 			reader:   mgr.GetAPIReader(),
 			scheme:   mgr.GetScheme(),
-			builder:  builder.New(c),
 			recorder: mgr.GetEventRecorderFor("camel-k-build-controller"),
 		},
 		schema.GroupVersionKind{
@@ -134,7 +132,6 @@ type reconcileBuild struct {
 	// like in the builds scheduling critical section
 	reader   ctrl.Reader
 	scheme   *runtime.Scheme
-	builder  *builder.Builder
 	recorder record.EventRecorder
 }
 
@@ -201,7 +198,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 	case v1.IntegrationPlatformBuildStrategyPod:
 		actions = []Action{
 			newInitializePodAction(),
-			newSchedulePodAction(r.reader),
+			newScheduleAction(r.reader),
 			newMonitorPodAction(),
 			newErrorRecoveryAction(),
 			newErrorAction(),
@@ -209,8 +206,8 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 	case v1.IntegrationPlatformBuildStrategyRoutine:
 		actions = []Action{
 			newInitializeRoutineAction(),
-			newScheduleRoutineAction(r.reader),
-			newMonitorRoutineAction(r.builder),
+			newScheduleAction(r.reader),
+			newMonitorRoutineAction(),
 			newErrorRecoveryAction(),
 			newErrorAction(),
 		}
