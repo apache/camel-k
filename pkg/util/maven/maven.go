@@ -183,11 +183,13 @@ func Run(ctx Context) error {
 
 		mavenLog, parseError := ParseLog(line)
 
-		if parseError != nil {
-			// Do not abort the build because parsing failed ... the build may have succeeded
-			Log.Error(parseError, "Unable to parse maven log")
-		} else {
+		if parseError == nil {
 			NormalizeLog(mavenLog)
+		} else {
+			// Why we are ignoring the parsing errors here: there are a few scenarios where this would likely occur.
+			// For example, if something outside of Maven outputs something (i.e.: the JDK, a misbehaved plugin,
+			// etc). The build may still have succeeded, though.
+			NonNormalizedLog(line)
 		}
 	}
 	Log.Debug("Finished parsing Maven output")
