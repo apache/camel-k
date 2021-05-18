@@ -271,3 +271,89 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 	assert.NotNil(t, i)
 	assert.Equal(t, "my-kit-4", i.Name)
 }
+
+func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
+	integration := &v1.Integration{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.IntegrationKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-integration",
+		},
+		Spec: v1.IntegrationSpec{
+			Traits: map[string]v1.TraitSpec{
+				"builder": test.TraitSpecFromMap(t, map[string]interface{}{
+					"enabled": "true",
+				}),
+			},
+		},
+	}
+
+	integrationKitSpec := &v1.IntegrationKit{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.IntegrationKitKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-kit",
+		},
+		Spec: v1.IntegrationKitSpec{
+			Traits: map[string]v1.TraitSpec{},
+		},
+	}
+
+	ok, err := HasMatchingTraits(integrationKitSpec, integration)
+	assert.Nil(t, err)
+	assert.False(t, ok)
+}
+
+func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
+	integration := &v1.Integration{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.IntegrationKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-integration",
+		},
+		Spec: v1.IntegrationSpec{
+			Traits: map[string]v1.TraitSpec{
+				"builder": test.TraitSpecFromMap(t, map[string]interface{}{
+					"enabled": "true",
+					"buildTimeProperties": []string{
+						"build-key1=build-value1",
+					},
+				}),
+			},
+		},
+	}
+
+	integrationKitSpec := &v1.IntegrationKit{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.IntegrationKitKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-kit",
+		},
+		Spec: v1.IntegrationKitSpec{
+			Traits: map[string]v1.TraitSpec{
+				"builder": test.TraitSpecFromMap(t, map[string]interface{}{
+					"enabled": "true",
+					"buildTimeProperties": []string{
+						"build-key1=build-value1",
+					},
+				}),
+			},
+		},
+	}
+
+	ok, err := HasMatchingTraits(integrationKitSpec, integration)
+	assert.Nil(t, err)
+	assert.True(t, ok)
+}
