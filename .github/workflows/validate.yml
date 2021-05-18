@@ -28,7 +28,7 @@ on:
       - "release-*"
 
 concurrency:
-  group: ${{ github.head_ref }}-${{ github.workflow }}
+  group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: true
 
 jobs:
