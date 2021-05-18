@@ -21,6 +21,7 @@ import (
 	"context"
 
 	"github.com/apache/camel-k/pkg/resources"
+	"github.com/apache/camel-k/pkg/util/defaults"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/install"
@@ -52,9 +53,11 @@ func (action *createAction) Handle(ctx context.Context, platform *v1.Integration
 		}
 	}
 
-	// Kamelet Catalog installed on platform reconciliation for cases where users install a global operator
-	if err := install.KameletCatalog(ctx, action.client, platform.Namespace); err != nil {
-		return nil, err
+	if defaults.InstallDefaultKamelets() {
+		// Kamelet Catalog installed on platform reconciliation for cases where users install a global operator
+		if err := install.KameletCatalog(ctx, action.client, platform.Namespace); err != nil {
+			return nil, err
+		}
 	}
 
 	platform.Status.Phase = v1.IntegrationPlatformPhaseReady

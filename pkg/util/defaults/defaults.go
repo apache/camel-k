@@ -42,4 +42,7 @@ const (
 
 	// ImageName --
 	ImageName = "docker.io/apache/camel-k"
+
+	// installDefaultKamelets --
+	installDefaultKamelets = true
 )

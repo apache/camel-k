@@ -17,12 +17,28 @@ limitations under the License.
 
 package defaults
 
-import "os"
+import (
+	"os"
+	"strconv"
 
-var baseImageOverrideEnvs = []string{"BASE_IMAGE", "RELATED_IMAGE_BASE"}
+	"github.com/apache/camel-k/pkg/util/log"
+)
 
 func BaseImage() string {
-	return envOrDefault(baseImage, baseImageOverrideEnvs...)
+	return envOrDefault(baseImage, "KAMEL_BASE_IMAGE", "RELATED_IMAGE_BASE")
+}
+
+func InstallDefaultKamelets() bool {
+	return boolEnvOrDefault(installDefaultKamelets, "KAMEL_INSTALL_DEFAULT_KAMELETS")
+}
+
+func boolEnvOrDefault(def bool, envs ...string) bool {
+	strVal := envOrDefault(strconv.FormatBool(def), envs...)
+	res, err := strconv.ParseBool(strVal)
+	if err != nil {
+		log.Error(err, "cannot parse boolean property", "property", def, "value", strVal)
+	}
+	return res
 }
 
 func envOrDefault(def string, envs ...string) string {
