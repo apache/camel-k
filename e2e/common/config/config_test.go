@@ -119,5 +119,25 @@ func TestRunConfigExamples(t *testing.T) {
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
+		// Build-Properties
+		t.Run("Build time property", func(t *testing.T) {
+			Expect(Kamel("run", "-n", ns, "./files/build-property-route.groovy", "--build-property", "quarkus.application.name=my-super-application").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "build-property-route"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationCondition(ns, "build-property-route", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "build-property-route"), TestTimeoutShort).Should(ContainSubstring("my-super-application"))
+			// Don't delete - we need it for next test execution
+		})
+
+		// We need to check also that the property (which is available in the IntegrationKit) is correctly replaced and we don't reuse the same kit
+		t.Run("Build time property updated", func(t *testing.T) {
+			Expect(Kamel("run", "-n", ns, "./files/build-property-route.groovy", "--name", "build-property-route-updated",
+				"--build-property", "quarkus.application.name=my-super-application-updated").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "build-property-route-updated"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationCondition(ns, "build-property-route-updated", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "build-property-route-updated"), TestTimeoutShort).Should(ContainSubstring("my-super-application-updated"))
+			// Verify the integration kits are different
+			Expect(IntegrationKit(ns, "build-property-route")).ShouldNot(Equal(IntegrationKit(ns, "build-property-route-updated")))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
 	})
 }
