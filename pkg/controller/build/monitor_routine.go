@@ -38,15 +38,12 @@ import (
 
 var routines sync.Map
 
-func newMonitorRoutineAction(b *builder.Builder) Action {
-	return &monitorRoutineAction{
-		builder: b,
-	}
+func newMonitorRoutineAction() Action {
+	return &monitorRoutineAction{}
 }
 
 type monitorRoutineAction struct {
 	baseAction
-	builder *builder.Builder
 }
 
 // Name returns a common name of the action
@@ -101,6 +98,7 @@ func (action *monitorRoutineAction) runBuild(build *v1.Build) {
 	}
 
 	buildDir := ""
+	Builder := builder.New(action.client)
 
 tasks:
 	for i, task := range build.Spec.Tasks {
@@ -145,7 +143,7 @@ tasks:
 			}
 
 			// Execute the task
-			status = action.builder.Build(build).Task(task).Do(ctxWithTimeout)
+			status = Builder.Build(build).Task(task).Do(ctxWithTimeout)
 
 			lastTask := i == len(build.Spec.Tasks)-1
 			taskFailed := status.Phase == v1.BuildPhaseFailed ||

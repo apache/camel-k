@@ -22,12 +22,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
@@ -64,41 +58,4 @@ func (action *initializePodAction) Handle(ctx context.Context, build *v1.Build) 
 	build.Status.Phase = v1.BuildPhaseScheduling
 
 	return build, nil
-}
-
-func deleteBuilderPod(ctx context.Context, client ctrl.Writer, build *v1.Build) error {
-	pod := corev1.Pod{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: corev1.SchemeGroupVersion.String(),
-			Kind:       "Pod",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: build.Namespace,
-			Name:      buildPodName(build),
-		},
-	}
-
-	err := client.Delete(ctx, &pod)
-	if err != nil && k8serrors.IsNotFound(err) {
-		return nil
-	}
-
-	return err
-}
-
-func getBuilderPod(ctx context.Context, client ctrl.Reader, build *v1.Build) (*corev1.Pod, error) {
-	pod := corev1.Pod{}
-	err := client.Get(ctx, ctrl.ObjectKey{Namespace: build.Namespace, Name: buildPodName(build)}, &pod)
-	if err != nil && k8serrors.IsNotFound(err) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	return &pod, nil
-}
-
-func buildPodName(build *v1.Build) string {
-	return "camel-k-" + build.Name + "-builder"
 }

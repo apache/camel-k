@@ -30,30 +30,30 @@ import (
 	"github.com/apache/camel-k/pkg/event"
 )
 
-func newScheduleRoutineAction(reader ctrl.Reader) Action {
-	return &scheduleRoutineAction{
+func newScheduleAction(reader ctrl.Reader) Action {
+	return &scheduleAction{
 		reader: reader,
 	}
 }
 
-type scheduleRoutineAction struct {
+type scheduleAction struct {
 	baseAction
 	lock   sync.Mutex
 	reader ctrl.Reader
 }
 
 // Name returns a common name of the action
-func (action *scheduleRoutineAction) Name() string {
-	return "schedule-routine"
+func (action *scheduleAction) Name() string {
+	return "schedule"
 }
 
 // CanHandle tells whether this action can handle the build
-func (action *scheduleRoutineAction) CanHandle(build *v1.Build) bool {
+func (action *scheduleAction) CanHandle(build *v1.Build) bool {
 	return build.Status.Phase == v1.BuildPhaseScheduling
 }
 
 // Handle handles the builds
-func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
+func (action *scheduleAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
 	// Enter critical section
 	action.lock.Lock()
 	defer action.lock.Unlock()
@@ -68,6 +68,8 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1.Build
 
 	// Emulate a serialized working queue to only allow one build to run at a given time.
 	// This is currently necessary for the incremental build to work as expected.
+	// We may want to explicitly manage build priority as opposed to relying on
+	// the reconcile loop to handle the queuing
 	for _, b := range builds.Items {
 		if b.Status.Phase == v1.BuildPhasePending || b.Status.Phase == v1.BuildPhaseRunning {
 			// Let's requeue the build in case one is already running
@@ -97,7 +99,7 @@ func (action *scheduleRoutineAction) Handle(ctx context.Context, build *v1.Build
 	return nil, nil
 }
 
-func (action *scheduleRoutineAction) patchBuildStatus(ctx context.Context, build *v1.Build, mutate func(b *v1.Build)) error {
+func (action *scheduleAction) patchBuildStatus(ctx context.Context, build *v1.Build, mutate func(b *v1.Build)) error {
 	target := build.DeepCopy()
 	mutate(target)
 	if err := action.client.Status().Patch(ctx, target, ctrl.MergeFrom(build)); err != nil {

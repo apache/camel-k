@@ -30,6 +30,9 @@ import (
 	"k8s.io/client-go/tools/remotecommand"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
+	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
@@ -61,15 +64,33 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		return nil, err
 	}
 
-	switch {
-	case pod == nil:
-		// Emulate context cancellation
-		build.Status.Phase = v1.BuildPhaseInterrupted
-		build.Status.Error = "Pod deleted"
+	if pod == nil {
+		switch build.Status.Phase {
 
-	case pod.Status.Phase == corev1.PodRunning,
+		case v1.BuildPhasePending:
+			if pod, err = newBuildPod(ctx, action.client, build); err != nil {
+				return nil, err
+			}
+			// Set the Build as the Pod owner and controller
+			if err = controllerutil.SetControllerReference(build, pod, action.client.GetScheme()); err != nil {
+				return nil, err
+			}
+			if err = action.client.Create(ctx, pod); err != nil {
+				return nil, errors.Wrap(err, "cannot create build pod")
+			}
+
+		case v1.BuildPhaseRunning:
+			// Emulate context cancellation
+			build.Status.Phase = v1.BuildPhaseInterrupted
+			build.Status.Error = "Pod deleted"
+			return build, nil
+		}
+	}
+
+	switch pod.Status.Phase {
+
+	case corev1.PodPending, corev1.PodRunning:
 		// Pod remains in pending phase when init containers execute
-		pod.Status.Phase == corev1.PodPending:
 		if action.isPodScheduled(pod) {
 			build.Status.Phase = v1.BuildPhaseRunning
 		}
@@ -86,7 +107,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 			}
 		}
 
-	case pod.Status.Phase == corev1.PodSucceeded:
+	case corev1.PodSucceeded:
 		build.Status.Phase = v1.BuildPhaseSucceeded
 		// Remove the annotation in case the Build succeeded, between
 		// the timeout deadline and the termination signal.
@@ -117,7 +138,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 			}
 		}
 
-	case pod.Status.Phase == corev1.PodFailed:
+	case corev1.PodFailed:
 		phase := v1.BuildPhaseFailed
 		message := "Pod failed"
 		if terminationMessage := action.getTerminationMessage(pod); terminationMessage != "" {

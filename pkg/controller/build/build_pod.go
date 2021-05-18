@@ -23,19 +23,18 @@ import (
 	"path"
 	"strconv"
 	"strings"
-	"sync"
-	"time"
+
+	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pkg/errors"
 
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -45,13 +44,6 @@ const (
 	builderDir    = "/builder"
 	builderVolume = "camel-k-builder"
 )
-
-type schedulePodAction struct {
-	baseAction
-	lock          sync.Mutex
-	reader        client.Reader
-	operatorImage string
-}
 
 type registryConfigMap struct {
 	fileName    string
@@ -122,84 +114,7 @@ var (
 	}
 )
 
-func newSchedulePodAction(reader client.Reader) Action {
-	return &schedulePodAction{
-		reader: reader,
-	}
-}
-
-// Name returns a common name of the action
-func (action *schedulePodAction) Name() string {
-	return "schedule-pod"
-}
-
-// CanHandle tells whether this action can handle the build
-func (action *schedulePodAction) CanHandle(build *v1.Build) bool {
-	return build.Status.Phase == v1.BuildPhaseScheduling
-}
-
-// Handle handles the builds
-func (action *schedulePodAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
-	// Enter critical section
-	action.lock.Lock()
-	defer action.lock.Unlock()
-
-	builds := &v1.BuildList{}
-	// We use the non-caching client as informers cache is not invalidated nor updated
-	// atomically by write operations
-	err := action.reader.List(ctx, builds, client.InNamespace(build.Namespace))
-	if err != nil {
-		return nil, err
-	}
-
-	// Emulate a serialized working queue to only allow one build to run at a given time.
-	// This is currently necessary for the incremental build to work as expected.
-	for _, b := range builds.Items {
-		if b.Status.Phase == v1.BuildPhasePending || b.Status.Phase == v1.BuildPhaseRunning {
-			// Let's requeue the build in case one is already running
-			return nil, nil
-		}
-	}
-
-	pod, err := getBuilderPod(ctx, action.client, build)
-	if err != nil {
-		return nil, err
-	}
-
-	if pod == nil {
-		// We may want to explicitly manage build priority as opposed to relying on
-		// the reconcile loop to handle the queuing
-		pod, err = action.newBuildPod(ctx, build)
-		if err != nil {
-			return nil, err
-		}
-
-		// Set the Build instance as the owner and controller
-		if err := controllerutil.SetControllerReference(build, pod, action.client.GetScheme()); err != nil {
-			return nil, err
-		}
-
-		if err := action.client.Create(ctx, pod); err != nil {
-			return nil, errors.Wrap(err, "cannot create build pod")
-		}
-
-		// Report the duration the Build has been waiting in the build queue
-		queueDuration.Observe(time.Now().Sub(getBuildQueuingTime(build)).Seconds())
-	}
-
-	// Reset the Build status, and transition it to pending phase
-	build.Status = v1.BuildStatus{
-		Phase:      v1.BuildPhasePending,
-		StartedAt:  &pod.CreationTimestamp,
-		Failure:    build.Status.Failure,
-		Platform:   build.Status.Platform,
-		Conditions: build.Status.Conditions,
-	}
-
-	return build, nil
-}
-
-func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1.Build) (*corev1.Pod, error) {
+func newBuildPod(ctx context.Context, c client.Client, build *v1.Build) (*corev1.Pod, error) {
 	pod := &corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -221,34 +136,32 @@ func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1.Buil
 
 	pod.Labels = kubernetes.MergeCamelCreatorLabels(build.Labels, pod.Labels)
 
-	// TODO: Move the retrieval of the operator image into the controller
-	operatorImage, err := platform.GetCurrentOperatorImage(ctx, action.client)
-	if err != nil {
-		return nil, err
-	}
-	if operatorImage == "" {
-		action.operatorImage = defaults.ImageName + ":" + defaults.Version
-	} else {
-		action.operatorImage = operatorImage
-	}
-
 	for _, task := range build.Spec.Tasks {
 		if task.Builder != nil {
-			action.addBuildTaskToPod(build, task.Builder.Name, pod)
+			err := addBuildTaskToPod(ctx, c, build, task.Builder.Name, pod)
+			if err != nil {
+				return nil, err
+			}
 		} else if task.Buildah != nil {
-			err := action.addBuildahTaskToPod(ctx, build, task.Buildah, pod)
+			err := addBuildahTaskToPod(ctx, c, build, task.Buildah, pod)
 			if err != nil {
 				return nil, err
 			}
 		} else if task.Kaniko != nil {
-			err := action.addKanikoTaskToPod(ctx, build, task.Kaniko, pod)
+			err := addKanikoTaskToPod(ctx, c, build, task.Kaniko, pod)
 			if err != nil {
 				return nil, err
 			}
 		} else if task.S2i != nil {
-			action.addBuildTaskToPod(build, task.S2i.Name, pod)
+			err := addBuildTaskToPod(ctx, c, build, task.S2i.Name, pod)
+			if err != nil {
+				return nil, err
+			}
 		} else if task.Spectrum != nil {
-			action.addBuildTaskToPod(build, task.Spectrum.Name, pod)
+			err := addBuildTaskToPod(ctx, c, build, task.Spectrum.Name, pod)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -259,8 +172,45 @@ func (action *schedulePodAction) newBuildPod(ctx context.Context, build *v1.Buil
 	return pod, nil
 }
 
-func (action *schedulePodAction) addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
-	if !action.hasBuilderVolume(pod) {
+func deleteBuilderPod(ctx context.Context, c ctrl.Writer, build *v1.Build) error {
+	pod := corev1.Pod{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: corev1.SchemeGroupVersion.String(),
+			Kind:       "Pod",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: build.Namespace,
+			Name:      buildPodName(build),
+		},
+	}
+
+	err := c.Delete(ctx, &pod)
+	if err != nil && k8serrors.IsNotFound(err) {
+		return nil
+	}
+
+	return err
+}
+
+func getBuilderPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.Pod, error) {
+	pod := corev1.Pod{}
+	err := c.Get(ctx, ctrl.ObjectKey{Namespace: build.Namespace, Name: buildPodName(build)}, &pod)
+	if err != nil && k8serrors.IsNotFound(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &pod, nil
+}
+
+func buildPodName(build *v1.Build) string {
+	return "camel-k-" + build.Name + "-builder"
+}
+
+func addBuildTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, taskName string, pod *corev1.Pod) error {
+	if !hasBuilderVolume(pod) {
 		// Add the EmptyDir volume used to share the build state across tasks
 		pod.Spec.Volumes = append(pod.Spec.Volumes, corev1.Volume{
 			Name: builderVolume,
@@ -270,9 +220,18 @@ func (action *schedulePodAction) addBuildTaskToPod(build *v1.Build, taskName str
 		})
 	}
 
+	// TODO: Move the retrieval of the operator image into the controller
+	operatorImage, err := platform.GetCurrentOperatorImage(ctx, c)
+	if err != nil {
+		return err
+	}
+	if operatorImage == "" {
+		operatorImage = defaults.ImageName + ":" + defaults.Version
+	}
+
 	container := corev1.Container{
 		Name:            taskName,
-		Image:           action.operatorImage,
+		Image:           operatorImage,
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Command: []string{
 			"kamel",
@@ -287,10 +246,11 @@ func (action *schedulePodAction) addBuildTaskToPod(build *v1.Build, taskName str
 		WorkingDir: path.Join(builderDir, build.Name),
 	}
 
-	action.addContainerToPod(build, container, pod)
+	addContainerToPod(build, container, pod)
+	return nil
 }
 
-func (action *schedulePodAction) addBuildahTaskToPod(ctx context.Context, build *v1.Build, task *v1.BuildahTask, pod *corev1.Pod) error {
+func addBuildahTaskToPod(ctx context.Context, c client.Client, build *v1.Build, task *v1.BuildahTask, pod *corev1.Pod) error {
 	bud := []string{
 		"buildah",
 		"bud",
@@ -321,7 +281,7 @@ func (action *schedulePodAction) addBuildahTaskToPod(ctx context.Context, build 
 	volumeMounts := make([]corev1.VolumeMount, 0)
 
 	if task.Registry.CA != "" {
-		config, err := action.getRegistryConfigMap(ctx, build.Namespace, task.Registry.CA, buildahRegistryConfigMaps)
+		config, err := getRegistryConfigMap(ctx, c, build.Namespace, task.Registry.CA, buildahRegistryConfigMaps)
 		if err != nil {
 			return err
 		}
@@ -334,7 +294,7 @@ func (action *schedulePodAction) addBuildahTaskToPod(ctx context.Context, build 
 
 	var auth string
 	if task.Registry.Secret != "" {
-		secret, err := action.getRegistrySecret(ctx, build.Namespace, task.Registry.Secret, buildahRegistrySecrets)
+		secret, err := getRegistrySecret(ctx, c, build.Namespace, task.Registry.Secret, buildahRegistrySecrets)
 		if err != nil {
 			return err
 		}
@@ -377,12 +337,12 @@ func (action *schedulePodAction) addBuildahTaskToPod(ctx context.Context, build 
 
 	pod.Spec.Volumes = append(pod.Spec.Volumes, volumes...)
 
-	action.addContainerToPod(build, container, pod)
+	addContainerToPod(build, container, pod)
 
 	return nil
 }
 
-func (action *schedulePodAction) addKanikoTaskToPod(ctx context.Context, build *v1.Build, task *v1.KanikoTask, pod *corev1.Pod) error {
+func addKanikoTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task *v1.KanikoTask, pod *corev1.Pod) error {
 	cache := false
 	if task.Cache.Enabled != nil && *task.Cache.Enabled {
 		cache = true
@@ -406,7 +366,7 @@ func (action *schedulePodAction) addKanikoTaskToPod(ctx context.Context, build *
 	volumeMounts := make([]corev1.VolumeMount, 0)
 
 	if task.Registry.Secret != "" {
-		secret, err := action.getRegistrySecret(ctx, build.Namespace, task.Registry.Secret, kanikoRegistrySecrets)
+		secret, err := getRegistrySecret(ctx, c, build.Namespace, task.Registry.Secret, kanikoRegistrySecrets)
 		if err != nil {
 			return err
 		}
@@ -430,9 +390,9 @@ func (action *schedulePodAction) addKanikoTaskToPod(ctx context.Context, build *
 
 		// Locate the kaniko warmer pod
 		pods := &corev1.PodList{}
-		err := action.client.List(ctx, pods,
-			client.InNamespace(build.Namespace),
-			client.MatchingLabels{
+		err := c.List(ctx, pods,
+			ctrl.InNamespace(build.Namespace),
+			ctrl.MatchingLabels{
 				"camel.apache.org/component": "kaniko-warmer",
 			})
 		if err != nil {
@@ -490,13 +450,13 @@ func (action *schedulePodAction) addKanikoTaskToPod(ctx context.Context, build *
 	pod.Spec.Affinity = affinity
 	pod.Spec.Volumes = append(pod.Spec.Volumes, volumes...)
 
-	action.addContainerToPod(build, container, pod)
+	addContainerToPod(build, container, pod)
 
 	return nil
 }
 
-func (action *schedulePodAction) addContainerToPod(build *v1.Build, container corev1.Container, pod *corev1.Pod) {
-	if action.hasBuilderVolume(pod) {
+func addContainerToPod(build *v1.Build, container corev1.Container, pod *corev1.Pod) {
+	if hasBuilderVolume(pod) {
 		container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
 			Name:      builderVolume,
 			MountPath: path.Join(builderDir, build.Name),
@@ -506,7 +466,7 @@ func (action *schedulePodAction) addContainerToPod(build *v1.Build, container co
 	pod.Spec.InitContainers = append(pod.Spec.InitContainers, container)
 }
 
-func (action *schedulePodAction) hasBuilderVolume(pod *corev1.Pod) bool {
+func hasBuilderVolume(pod *corev1.Pod) bool {
 	for _, volume := range pod.Spec.Volumes {
 		if volume.Name == builderVolume {
 			return true
@@ -515,9 +475,9 @@ func (action *schedulePodAction) hasBuilderVolume(pod *corev1.Pod) bool {
 	return false
 }
 
-func (action *schedulePodAction) getRegistryConfigMap(ctx context.Context, ns, name string, registryConfigMaps []registryConfigMap) (registryConfigMap, error) {
+func getRegistryConfigMap(ctx context.Context, c ctrl.Reader, ns, name string, registryConfigMaps []registryConfigMap) (registryConfigMap, error) {
 	config := corev1.ConfigMap{}
-	err := action.client.Get(ctx, client.ObjectKey{Namespace: ns, Name: name}, &config)
+	err := c.Get(ctx, ctrl.ObjectKey{Namespace: ns, Name: name}, &config)
 	if err != nil {
 		return registryConfigMap{}, err
 	}
@@ -554,9 +514,9 @@ func addRegistryConfigMap(name string, config registryConfigMap, volumes *[]core
 	})
 }
 
-func (action *schedulePodAction) getRegistrySecret(ctx context.Context, ns, name string, registrySecrets []registrySecret) (registrySecret, error) {
+func getRegistrySecret(ctx context.Context, c ctrl.Reader, ns, name string, registrySecrets []registrySecret) (registrySecret, error) {
 	secret := corev1.Secret{}
-	err := action.client.Get(ctx, client.ObjectKey{Namespace: ns, Name: name}, &secret)
+	err := c.Get(ctx, ctrl.ObjectKey{Namespace: ns, Name: name}, &secret)
 	if err != nil {
 		return registrySecret{}, err
 	}
