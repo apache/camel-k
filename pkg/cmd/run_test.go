@@ -409,6 +409,18 @@ func TestRunVolumeFlagWrongPVCFormat(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestRunBuildPropertyFlag(t *testing.T) {
+	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdRun,
+		"--build-property", "build-prop1=val1",
+		"--build-property", "build-prop2=val2",
+		integrationSource)
+	assert.Nil(t, err)
+	assert.Len(t, runCmdOptions.BuildProperties, 2)
+	assert.Equal(t, "build-prop1=val1", runCmdOptions.BuildProperties[0])
+	assert.Equal(t, "build-prop2=val2", runCmdOptions.BuildProperties[1])
+}
+
 func TestRunValidateArgs(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	args := []string{}

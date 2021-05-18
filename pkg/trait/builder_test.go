@@ -27,6 +27,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -149,4 +150,22 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 
 func NewBuilderTestCatalog() *Catalog {
 	return NewCatalog(context.TODO(), nil)
+}
+
+func TestBuildtimeConfigurationBuilderTrait(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.BuildTimeProperties = append(builderTrait.BuildTimeProperties, "build-time-prop1=build-time-value1")
+
+	err := builderTrait.Apply(env)
+
+	assert.Nil(t, err)
+	assert.Equal(t, "build-time-value1", env.BuildTasks[0].Builder.Properties["build-time-prop1"])
+}
+
+func createNominalBuilderTraitTest() *builderTrait {
+	builderTrait := newBuilderTrait().(*builderTrait)
+	builderTrait.Enabled = util.BoolP(true)
+
+	return builderTrait
 }

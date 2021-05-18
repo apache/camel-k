@@ -18,7 +18,9 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
 	"sort"
+	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
@@ -32,6 +34,8 @@ type builderTrait struct {
 	BaseTrait `property:",squash"`
 	// Enable verbose logging on build components that support it (e.g. Kaniko build pod).
 	Verbose *bool `property:"verbose" json:"verbose,omitempty"`
+	// A list of properties to be provided to the build task
+	BuildTimeProperties []string `property:"build-time-properties" json:"buildTimeProperties,omitempty"`
 }
 
 func newBuilderTrait() Trait {
@@ -59,7 +63,11 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *builderTrait) Apply(e *Environment) error {
-	builderTask := t.builderTask(e)
+	builderTask, err := t.builderTask(e)
+	if err != nil {
+		// Should we clean the failing integration kit as well?
+		return err
+	}
 
 	e.BuildTasks = append(e.BuildTasks, v1.Task{Builder: builderTask})
 
@@ -118,7 +126,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
+func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 	task := &v1.BuilderTask{
 		BaseTask: v1.BaseTask{
 			Name: "builder",
@@ -128,6 +136,22 @@ func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
 		Properties:   e.Platform.Status.Build.Properties,
 		Timeout:      e.Platform.Status.Build.GetTimeout(),
 		Maven:        e.Platform.Status.Build.Maven,
+	}
+
+	// initialize properties if nil
+	if task.Properties == nil {
+		task.Properties = make(map[string]string)
+	}
+	// User provided build time configuration properties
+	if t.BuildTimeProperties != nil {
+		for _, v := range t.BuildTimeProperties {
+			split := strings.Split(v, "=")
+			if len(split) != 2 {
+				return nil, fmt.Errorf("Build time configuration property must have key=value format, it was %v", v)
+			}
+
+			task.Properties[split[0]] = split[1]
+		}
 	}
 
 	steps := make([]builder.Step, 0)
@@ -143,7 +167,7 @@ func (t *builderTrait) builderTask(e *Environment) *v1.BuilderTask {
 
 	task.Steps = builder.StepIDsFor(steps...)
 
-	return task
+	return task, nil
 }
 
 func getImageName(e *Environment) string {
