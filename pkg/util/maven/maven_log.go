@@ -43,6 +43,8 @@ const (
 	FATAL = "FATAL"
 )
 
+var mavenLogger = log.WithName("maven.build")
+
 func ParseLog(line string) (mavenLog MavenLog, error error) {
 	error = json.Unmarshal([]byte(line), &mavenLog)
 
@@ -50,14 +52,16 @@ func ParseLog(line string) (mavenLog MavenLog, error error) {
 }
 
 func NormalizeLog(mavenLog MavenLog) {
-	logger := log.WithName("maven.build")
-
 	switch mavenLog.Level {
 	case DEBUG, TRACE:
-		logger.Debug(mavenLog.Msg)
+		mavenLogger.Debug(mavenLog.Msg)
 	case INFO, WARN:
-		logger.Info(mavenLog.Msg)
+		mavenLogger.Info(mavenLog.Msg)
 	case ERROR, FATAL:
-		logger.Errorf(nil, mavenLog.Msg)
+		mavenLogger.Errorf(nil, mavenLog.Msg)
 	}
+}
+
+func NonNormalizedLog(rawLog string) {
+	mavenLogger.Info(rawLog)
 }
