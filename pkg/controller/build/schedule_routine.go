@@ -20,6 +20,7 @@ package build
 import (
 	"context"
 	"fmt"
+	"github.com/apache/camel-k/pkg/util/log"
 	"io/ioutil"
 	"os"
 	"path"
@@ -158,6 +159,11 @@ func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Bui
 		}
 
 		if lastTask || taskFailed {
+			if taskFailed {
+				log.Errorf(nil, "Unable to complete the build: %s", status.Error)
+			}
+
+
 			// Spare a redundant update
 			break
 		}
@@ -165,6 +171,7 @@ func (action *scheduleRoutineAction) runBuild(ctx context.Context, build *v1.Bui
 		// Update the Build status
 		err := action.updateBuildStatus(ctx, build, status)
 		if err != nil {
+			log.Errorf(nil, "Unable to update build status: %s", status.Error)
 			status.Failed(err)
 			break
 		}
