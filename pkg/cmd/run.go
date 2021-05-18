@@ -79,6 +79,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a camel property")
+	cmd.Flags().StringArray("build-property", nil, "Add a build time property")
 	cmd.Flags().StringArray("configmap", nil, "Add a ConfigMap")
 	cmd.Flags().StringArray("secret", nil, "Add a Secret")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
@@ -127,6 +128,7 @@ type runCmdOptions struct {
 	OpenAPIs        []string `mapstructure:"open-apis" yaml:",omitempty"`
 	Dependencies    []string `mapstructure:"dependencies" yaml:",omitempty"`
 	Properties      []string `mapstructure:"properties" yaml:",omitempty"`
+	BuildProperties []string `mapstructure:"build-properties" yaml:",omitempty"`
 	ConfigMaps      []string `mapstructure:"configmaps" yaml:",omitempty"`
 	Secrets         []string `mapstructure:"secrets" yaml:",omitempty"`
 	Repositories    []string `mapstructure:"maven-repositories" yaml:",omitempty"`
@@ -505,7 +507,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 		}
 	}
 
-	err = resolvePodTemplate(context.Background(),o.PodTemplate, &integration.Spec)
+	err = resolvePodTemplate(context.Background(), o.PodTemplate, &integration.Spec)
 	if err != nil {
 		return nil, err
 	}
@@ -549,6 +551,10 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	}
 	for _, item := range o.Properties {
 		integration.Spec.AddConfiguration("property", item)
+	}
+	// convert each build configuration to a builder trait property
+	for _, item := range o.BuildProperties {
+		o.Traits = append(o.Traits, fmt.Sprintf("builder.build-time-properties=%s", item))
 	}
 	for _, item := range o.LoggingLevels {
 		integration.Spec.AddConfiguration("property", "logging.level."+item)
@@ -754,14 +760,14 @@ func resolvePodTemplate(ctx context.Context, templateSrc string, spec *v1.Integr
 	//template is inline
 	templateBytes := []byte(templateSrc)
 
-	jsonTemplate,err:= yaml.ToJSON(templateBytes)
-	if err!= nil {
+	jsonTemplate, err := yaml.ToJSON(templateBytes)
+	if err != nil {
 		jsonTemplate = templateBytes
 	}
 	err = json.Unmarshal(jsonTemplate, &template)
 
 	if err == nil {
-		spec.PodTemplate = &v1.PodSpecTemplate {
+		spec.PodTemplate = &v1.PodSpecTemplate{
 			Spec: template,
 		}
 	}
