@@ -122,6 +122,10 @@ func LookupKitForIntegration(ctx context.Context, c k8sclient.Reader, integratio
 
 // HasMatchingTraits compare traits defined on kit against those defined on integration.
 func HasMatchingTraits(kit *v1.IntegrationKit, integration *v1.Integration) (bool, error) {
+	// The kit has no trait, but the integration need some
+	if len(kit.Spec.Traits) == 0 && len(integration.Spec.Traits) > 0 {
+		return false, nil
+	}
 	for name, kitTrait := range kit.Spec.Traits {
 		intTrait, ok := integration.Spec.Traits[name]
 		if !ok {
@@ -153,7 +157,7 @@ func HasMatchingTraits(kit *v1.IntegrationKit, integration *v1.Integration) (boo
 				// in integration trait
 				return false, nil
 			}
-			if iv != cv {
+			if !equal(iv, cv) {
 				// skip it because trait configured on kit has a value that differs from
 				// the one configured on integration
 				return false, nil
@@ -162,4 +166,35 @@ func HasMatchingTraits(kit *v1.IntegrationKit, integration *v1.Integration) (boo
 	}
 
 	return true, nil
+}
+
+// We need to try to perform a slice equality in order to prevent a runtime panic
+func equal(a, b interface{}) bool {
+	aSlice, aOk := a.([]interface{})
+	bSlice, bOk := b.([]interface{})
+
+	if aOk && bOk {
+		// Both are slices
+		return sliceEqual(aSlice, bSlice)
+	}
+
+	if aOk || bOk {
+		// One of the 2 is a slice
+		return false
+	}
+
+	// None is a slice
+	return a == b
+}
+
+func sliceEqual(a, b []interface{}) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
 }
