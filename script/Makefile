@@ -20,6 +20,7 @@ LAST_RELEASED_VERSION := 1.4.0
 RUNTIME_VERSION := 1.7.0
 BUILDAH_VERSION := 1.14.0
 KANIKO_VERSION := 0.17.1
+INSTALL_DEFAULT_KAMELETS := true
 BASE_IMAGE := adoptopenjdk/openjdk11:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
 IMAGE_NAME := docker.io/apache/camel-k
@@ -116,6 +117,9 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // ImageName -- " >> $(VERSIONFILE)
 	@echo "  ImageName = \"$(IMAGE_NAME)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
+	@echo "  // installDefaultKamelets -- " >> $(VERSIONFILE)
+	@echo "  installDefaultKamelets = $(INSTALL_DEFAULT_KAMELETS)" >> $(VERSIONFILE)
 	@echo ")" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	gofmt -w pkg/util/defaults/defaults.go

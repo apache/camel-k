@@ -21,6 +21,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/go-logr/logr"
 
 	"github.com/apache/camel-k/pkg/client"
@@ -46,9 +47,13 @@ func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespac
 	}
 
 	if kameletNamespace != "" {
-		if err := KameletCatalog(ctx, c, kameletNamespace); err != nil {
-			log.Info("Cannot install bundled Kamelet Catalog: skipping.")
-			log.V(8).Info("Error while installing bundled Kamelet Catalog", "error", err)
+		if defaults.InstallDefaultKamelets() {
+			if err := KameletCatalog(ctx, c, kameletNamespace); err != nil {
+				log.Info("Cannot install bundled Kamelet Catalog: skipping.")
+				log.V(8).Info("Error while installing bundled Kamelet Catalog", "error", err)
+			}
+		} else {
+			log.Info("Kamelet Catalog installation is disabled")
 		}
 
 		if globalOperator {
