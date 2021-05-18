@@ -53,6 +53,9 @@ traits:
     type: bool
     description: Enable verbose logging on build components that support it (e.g.
       Kaniko build pod).
+  - name: build-time-properties
+    type: '[]string'
+    description: A list of properties to be provided to the build task
 - name: camel
   platform: true
   profiles:
