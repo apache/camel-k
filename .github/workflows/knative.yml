@@ -78,7 +78,7 @@ jobs:
     - name: Kubernetes KinD Cluster
       uses: container-tools/kind-action@v1
       with:
-        node_image: kindest/node:v1.20.2
+        node_image: kindest/node:v1.21.1@sha256:fae9a58f17f18f06aeac9772ca8b5ac680ebbed985e266f711d936e91d113bad
     - name: Info
       run: |
         kubectl version
@@ -197,7 +197,7 @@ jobs:
       - name: Kubernetes KinD Cluster
         uses: container-tools/kind-action@v1
         with:
-          node_image: kindest/node:v1.20.2
+          node_image: kindest/node:v1.21.1@sha256:fae9a58f17f18f06aeac9772ca8b5ac680ebbed985e266f711d936e91d113bad
       - name: Info
         run: |
           kubectl version
