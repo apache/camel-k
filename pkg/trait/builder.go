@@ -26,7 +26,10 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 	corev1 "k8s.io/api/core/v1"
 <<<<<<< HEAD
+<<<<<<< HEAD
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+=======
+>>>>>>> refactor(trait): property names and error condition
 =======
 >>>>>>> refactor(trait): property names and error condition
 )
@@ -74,9 +77,12 @@ func (t *builderTrait) Apply(e *Environment) error {
 		e.IntegrationKit.Status.SetCondition("IntegrationKitPropertiesFormatValid", corev1.ConditionFalse,
 			"IntegrationKitPropertiesFormatValid", fmt.Sprintf("One or more properties where not formatted as expected: %s", err.Error()))
 <<<<<<< HEAD
+<<<<<<< HEAD
 		if _, err := e.Client.CamelV1().IntegrationKits(e.IntegrationKit.Namespace).UpdateStatus(e.C, e.IntegrationKit, metav1.UpdateOptions{}); err != nil {
 			return err
 		}
+=======
+>>>>>>> refactor(trait): property names and error condition
 =======
 >>>>>>> refactor(trait): property names and error condition
 		return nil
