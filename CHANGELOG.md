@@ -12,6 +12,7 @@
 - Normalize Maven build log [\#2268](https://github.com/apache/camel-k/issues/2268)
 - kamelet-binding: improve conditions [\#2265](https://github.com/apache/camel-k/issues/2265)
 - Consolidate make targets used in Github actions [\#2263](https://github.com/apache/camel-k/issues/2263)
+- Flaky scale integration test or scale intermittent issue [\#2250](https://github.com/apache/camel-k/issues/2250)
 - Camel K and Amazon EKS \(Elastic Kubernetes Service\) [\#2241](https://github.com/apache/camel-k/issues/2241)
 - `kamel` run fails for remote files on windows [\#2239](https://github.com/apache/camel-k/issues/2239)
 - Update run-from-github page to correct github example path [\#2230](https://github.com/apache/camel-k/issues/2230)
@@ -29,6 +30,7 @@
 
 **Merged pull requests:**
 
+- Check if the environment can produce structured Maven logs before parsing them [\#2311](https://github.com/apache/camel-k/pull/2311) ([orpiske](https://github.com/orpiske))
 - chore\(ci\): Cancel running workflows when PRs are updated [\#2304](https://github.com/apache/camel-k/pull/2304) ([astefanutti](https://github.com/astefanutti))
 - chore: Make phase structured logging key a string [\#2303](https://github.com/apache/camel-k/pull/2303) ([astefanutti](https://github.com/astefanutti))
 - chore\(cli\): Update CRDs when force installing cluster resources [\#2301](https://github.com/apache/camel-k/pull/2301) ([astefanutti](https://github.com/astefanutti))
@@ -57,6 +59,7 @@
 - Fix typo [\#2254](https://github.com/apache/camel-k/pull/2254) ([apupier](https://github.com/apupier))
 - fix\(api\): Fix error handler types deepcopy generation [\#2253](https://github.com/apache/camel-k/pull/2253) ([astefanutti](https://github.com/astefanutti))
 - Added support for the json log format via the logging trait [\#2252](https://github.com/apache/camel-k/pull/2252) ([orpiske](https://github.com/orpiske))
+- fix\(ci\): Upgrade Kubernetes to version 1.21.1 [\#2251](https://github.com/apache/camel-k/pull/2251) ([astefanutti](https://github.com/astefanutti))
 - refactor\(example\): error handler using a real Kafka topic [\#2248](https://github.com/apache/camel-k/pull/2248) ([squakez](https://github.com/squakez))
 - fix\(source\): yaml route steps [\#2247](https://github.com/apache/camel-k/pull/2247) ([squakez](https://github.com/squakez))
 - Improve readability of error messages in Camel K [\#2245](https://github.com/apache/camel-k/pull/2245) ([orpiske](https://github.com/orpiske))
