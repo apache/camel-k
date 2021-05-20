@@ -24,6 +24,8 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // The builder trait is internally used to determine the best strategy to
@@ -35,7 +37,7 @@ type builderTrait struct {
 	// Enable verbose logging on build components that support it (e.g. Kaniko build pod).
 	Verbose *bool `property:"verbose" json:"verbose,omitempty"`
 	// A list of properties to be provided to the build task
-	BuildTimeProperties []string `property:"build-time-properties" json:"buildTimeProperties,omitempty"`
+	Properties []string `property:"properties" json:"properties,omitempty"`
 }
 
 func newBuilderTrait() Trait {
@@ -65,8 +67,13 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 func (t *builderTrait) Apply(e *Environment) error {
 	builderTask, err := t.builderTask(e)
 	if err != nil {
-		// Should we clean the failing integration kit as well?
-		return err
+		e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseError
+		e.IntegrationKit.Status.SetCondition("IntegrationKitPropertiesFormatValid", corev1.ConditionFalse,
+			"IntegrationKitPropertiesFormatValid", fmt.Sprintf("One or more properties where not formatted as expected: %s", err.Error()))
+		if _, err := e.Client.CamelV1().IntegrationKits(e.IntegrationKit.Namespace).UpdateStatus(e.C, e.IntegrationKit, metav1.UpdateOptions{}); err != nil {
+			return err
+		}
+		return nil
 	}
 
 	e.BuildTasks = append(e.BuildTasks, v1.Task{Builder: builderTask})
@@ -143,8 +150,8 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 		task.Properties = make(map[string]string)
 	}
 	// User provided build time configuration properties
-	if t.BuildTimeProperties != nil {
-		for _, v := range t.BuildTimeProperties {
+	if t.Properties != nil {
+		for _, v := range t.Properties {
 			split := strings.Split(v, "=")
 			if len(split) != 2 {
 				return nil, fmt.Errorf("Build time configuration property must have key=value format, it was %v", v)

@@ -554,7 +554,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	}
 	// convert each build configuration to a builder trait property
 	for _, item := range o.BuildProperties {
-		o.Traits = append(o.Traits, fmt.Sprintf("builder.build-time-properties=%s", item))
+		o.Traits = append(o.Traits, fmt.Sprintf("builder.properties=%s", item))
 	}
 	for _, item := range o.LoggingLevels {
 		integration.Spec.AddConfiguration("property", "logging.level."+item)
