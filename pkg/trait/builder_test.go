@@ -155,7 +155,7 @@ func NewBuilderTestCatalog() *Catalog {
 func TestBuildtimeConfigurationBuilderTrait(t *testing.T) {
 	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko)
 	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.BuildTimeProperties = append(builderTrait.BuildTimeProperties, "build-time-prop1=build-time-value1")
+	builderTrait.Properties = append(builderTrait.Properties, "build-time-prop1=build-time-value1")
 
 	err := builderTrait.Apply(env)
 
