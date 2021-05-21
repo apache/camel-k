@@ -65,7 +65,7 @@ func printVersion() {
 }
 
 // Run starts the Camel K operator
-func Run(healthPort, monitoringPort int32) {
+func Run(healthPort, monitoringPort int32, leaderElection bool) {
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	flag.Parse()
@@ -101,8 +101,6 @@ func Run(healthPort, monitoringPort int32) {
 		exitOnError(err, "cannot check permissions for creating Events")
 		log.Info("Event broadcasting is disabled because of missing permissions to create Events")
 	}
-
-	leaderElection := true
 
 	operatorNamespace := platform.GetOperatorNamespace()
 	if operatorNamespace == "" {
