@@ -50,7 +50,7 @@ func TestRunConfigExamples(t *testing.T) {
 		})
 
 		t.Run("Property file", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "./files/property-file-route.groovy", "--property-file", "./files/my.properties").Execute()).To(Succeed())
+			Expect(Kamel("run", "-n", ns, "./files/property-file-route.groovy", "--property", "file:./files/my.properties").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "property-file-route"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "property-file-route", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "property-file-route"), TestTimeoutShort).Should(ContainSubstring("hello world"))
@@ -137,6 +137,15 @@ func TestRunConfigExamples(t *testing.T) {
 			Eventually(IntegrationLogs(ns, "build-property-route-updated"), TestTimeoutShort).Should(ContainSubstring("my-super-application-updated"))
 			// Verify the integration kits are different
 			Expect(IntegrationKit(ns, "build-property-route")).ShouldNot(Equal(IntegrationKit(ns, "build-property-route-updated")))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
+		// Build-Properties file
+		t.Run("Build time property file", func(t *testing.T) {
+			Expect(Kamel("run", "-n", ns, "./files/build-property-file-route.groovy", "--build-property", "file:./files/quarkus.properties").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "build-property-file-route"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationCondition(ns, "build-property-file-route", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "build-property-file-route"), TestTimeoutShort).Should(ContainSubstring("my-super-application"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 	})
