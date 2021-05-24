@@ -19,7 +19,7 @@
 //
 // To run this integrations use:
 //
-// kamel run --property-file my.properties property-file-route.groovy --dev
+// kamel run --property file:my.properties property-file-route.groovy --dev
 //
 
 from('timer:property-file')
