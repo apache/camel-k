@@ -79,7 +79,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a camel property")
-	cmd.Flags().StringArray("build-property", nil, "Add a build time property")
+	cmd.Flags().StringArray("build-property", nil, "Add a build time property (syntax, my-key=my-value | file:/path/to/my-conf.properties)")
 	cmd.Flags().StringArray("configmap", nil, "Add a ConfigMap")
 	cmd.Flags().StringArray("secret", nil, "Add a Secret")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
@@ -229,6 +229,12 @@ func (o *runCmdOptions) validate() error {
 		return err
 	}
 
+	buildPropertyFiles := filterBuildPropertyFiles(o.BuildProperties)
+	err = validatePropertyFiles(buildPropertyFiles)
+	if err != nil {
+		return err
+	}
+
 	for _, label := range o.Labels {
 		parts := strings.Split(label, "=")
 		if len(parts) != 2 {
@@ -237,6 +243,17 @@ func (o *runCmdOptions) validate() error {
 	}
 
 	return nil
+}
+
+func filterBuildPropertyFiles(maybePropertyFiles []string) []string {
+	var propertyFiles []string
+	for _, maybePropertyFile := range maybePropertyFiles {
+		if strings.HasPrefix(maybePropertyFile, "file:") {
+			propertyFiles = append(propertyFiles, strings.Replace(maybePropertyFile, "file:", "", 1))
+		}
+	}
+
+	return propertyFiles
 }
 
 func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
@@ -554,7 +571,18 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	}
 	// convert each build configuration to a builder trait property
 	for _, item := range o.BuildProperties {
-		o.Traits = append(o.Traits, fmt.Sprintf("builder.properties=%s", item))
+		props, err := extractProperties(item)
+		if err != nil {
+			return nil, err
+		}
+		for _, k := range props.Keys() {
+			v, ok := props.Get(k)
+			if ok {
+				o.Traits = append(o.Traits, fmt.Sprintf("builder.properties=%s", escapePropertyFileItem(k)+"="+escapePropertyFileItem(v)))
+			} else {
+				return nil, err
+			}
+		}
 	}
 	for _, item := range o.LoggingLevels {
 		integration.Spec.AddConfiguration("property", "logging.level."+item)
@@ -640,6 +668,20 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 		fmt.Printf("integration \"%s\" updated\n", name)
 	}
 	return &integration, nil
+}
+
+// The function parse the value and if it is a file (file:/path/), it will parse as property file
+// otherwise return a single property built from the item passed as `key=value`
+func extractProperties(value string) (*properties.Properties, error) {
+	if !strings.HasPrefix(value, "file:") {
+		return keyValueProps(value)
+	}
+	// we already validated the existence of files during validate()
+	return loadPropertyFile(strings.Replace(value, "file:", "", 1))
+}
+
+func keyValueProps(value string) (*properties.Properties, error) {
+	return properties.Load([]byte(value), properties.UTF8)
 }
 
 func binaryOrTextResource(fileName string, data []byte, contentType string, base64Compression bool) (v1.ResourceSpec, error) {
