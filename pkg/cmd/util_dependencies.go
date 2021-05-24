@@ -362,15 +362,23 @@ func validateIntegrationFiles(args []string) error {
 
 func validatePropertyFiles(propertyFiles []string) error {
 	for _, fileName := range propertyFiles {
-		if !strings.HasSuffix(fileName, ".properties") {
-			return fmt.Errorf("supported property files must have a .properties extension: %s", fileName)
+		if err := validatePropertyFile(fileName); err != nil {
+			return err
 		}
+	}
 
-		if file, err := os.Stat(fileName); err != nil {
-			return errors.Wrapf(err, "unable to access property file %s", fileName)
-		} else if file.IsDir() {
-			return fmt.Errorf("property file %s is a directory", fileName)
-		}
+	return nil
+}
+
+func validatePropertyFile(fileName string) error {
+	if !strings.HasSuffix(fileName, ".properties") {
+		return fmt.Errorf("supported property files must have a .properties extension: %s", fileName)
+	}
+
+	if file, err := os.Stat(fileName); err != nil {
+		return errors.Wrapf(err, "unable to access property file %s", fileName)
+	} else if file.IsDir() {
+		return fmt.Errorf("property file %s is a directory", fileName)
 	}
 
 	return nil
