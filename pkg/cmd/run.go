@@ -78,7 +78,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArrayP("dependency", "d", nil, "A dependency that should be included, e.g., \"-d camel-mail\" for a Camel component, or \"-d mvn:org.my:app:1.0\" for a Maven dependency")
 	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
-	cmd.Flags().StringArrayP("property", "p", nil, "Add a camel property")
+	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property (syntax, my-key=my-value | file:/path/to/my-conf.properties)")
 	cmd.Flags().StringArray("build-property", nil, "Add a build time property (syntax, my-key=my-value | file:/path/to/my-conf.properties)")
 	cmd.Flags().StringArray("configmap", nil, "Add a ConfigMap")
 	cmd.Flags().StringArray("secret", nil, "Add a Secret")
@@ -96,7 +96,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArray("open-api", nil, "Add an OpenAPI v2 spec")
 	cmd.Flags().StringArrayP("volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
 	cmd.Flags().StringArrayP("env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
-	cmd.Flags().StringArray("property-file", nil, "Bind a property file to the integration. E.g. \"--property-file integration.properties\"")
+	cmd.Flags().StringArray("property-file", nil, "[Deprecated] Bind a property file to the integration. E.g. \"--property-file integration.properties\"")
 	cmd.Flags().StringArray("label", nil, "Add a label to the integration. E.g. \"--label my.company=hello\"")
 	cmd.Flags().StringArray("source", nil, "Add source file to your integration, this is added to the list of files listed as arguments of the command")
 	cmd.Flags().String("pod-template", "", "The path of the YAML file containing a PodSpec template to be used for the Integration pods")
@@ -136,9 +136,10 @@ type runCmdOptions struct {
 	LoggingLevels   []string `mapstructure:"logging-levels" yaml:",omitempty"`
 	Volumes         []string `mapstructure:"volumes" yaml:",omitempty"`
 	EnvVars         []string `mapstructure:"envs" yaml:",omitempty"`
-	PropertyFiles   []string `mapstructure:"property-files" yaml:",omitempty"`
-	Labels          []string `mapstructure:"labels" yaml:",omitempty"`
-	Sources         []string `mapstructure:"sources" yaml:",omitempty"`
+	// Deprecated: PropertyFiles has been deprecated in 1.5
+	PropertyFiles []string `mapstructure:"property-files" yaml:",omitempty"`
+	Labels        []string `mapstructure:"labels" yaml:",omitempty"`
+	Sources       []string `mapstructure:"sources" yaml:",omitempty"`
 }
 
 func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
@@ -224,13 +225,18 @@ func (o *runCmdOptions) validate() error {
 		}
 	}
 
+	// Deprecation warning
+	if o.PropertyFiles != nil {
+		fmt.Println("Warn: --property-files has been deprecated. You should use --property file:/path/to/conf.properties instead.")
+	}
 	err := validatePropertyFiles(o.PropertyFiles)
 	if err != nil {
 		return err
 	}
 
-	buildPropertyFiles := filterBuildPropertyFiles(o.BuildProperties)
-	err = validatePropertyFiles(buildPropertyFiles)
+	propertyFiles := filterBuildPropertyFiles(o.Properties)
+	propertyFiles = append(propertyFiles, filterBuildPropertyFiles(o.BuildProperties)...)
+	err = validatePropertyFiles(propertyFiles)
 	if err != nil {
 		return err
 	}
@@ -561,13 +567,18 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	for _, item := range o.Dependencies {
 		integration.Spec.AddDependency(item)
 	}
-	for _, pf := range o.PropertyFiles {
-		if err := addPropertyFile(pf, &integration.Spec); err != nil {
-			return nil, err
-		}
+	for _, item := range o.PropertyFiles {
+		// Deprecated: making it compatible with newer mechanism
+		o.Properties = append(o.Properties, "file:"+item)
 	}
 	for _, item := range o.Properties {
-		integration.Spec.AddConfiguration("property", item)
+		props, err := extractProperties(item)
+		if err != nil {
+			return nil, err
+		}
+		if err := addIntegrationProperties(props, &integration.Spec); err != nil {
+			return nil, err
+		}
 	}
 	// convert each build configuration to a builder trait property
 	for _, item := range o.BuildProperties {
@@ -756,11 +767,7 @@ func isLocalAndFileExists(fileName string) (bool, error) {
 	return !info.IsDir(), nil
 }
 
-func addPropertyFile(fileName string, spec *v1.IntegrationSpec) error {
-	props, err := loadPropertyFile(fileName)
-	if err != nil {
-		return err
-	}
+func addIntegrationProperties(props *properties.Properties, spec *v1.IntegrationSpec) error {
 	for _, k := range props.Keys() {
 		v, _ := props.Get(k)
 		spec.AddConfiguration(

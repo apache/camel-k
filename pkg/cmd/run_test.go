@@ -262,7 +262,9 @@ func TestAddPropertyFile(t *testing.T) {
 	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestPropertyFileContent), 0644))
 
 	spec := v1.IntegrationSpec{}
-	assert.Nil(t, addPropertyFile(tmpFile.Name(), &spec))
+	properties, err := extractProperties("file:" + tmpFile.Name())
+	assert.Nil(t, err)
+	assert.Nil(t, addIntegrationProperties(properties, &spec))
 	assert.Equal(t, 4, len(spec.Configuration))
 	assert.Equal(t, `a=b`, spec.Configuration[0].Value)
 	assert.Equal(t, `c\=d=e`, spec.Configuration[1].Value)
