@@ -82,12 +82,14 @@ func (t *routeTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 
 func (t *routeTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
-		e.Integration.Status.SetCondition(
-			v1.IntegrationConditionExposureAvailable,
-			corev1.ConditionFalse,
-			v1.IntegrationConditionRouteNotAvailableReason,
-			"explicitly disabled",
-		)
+		if e.Integration != nil {
+			e.Integration.Status.SetCondition(
+				v1.IntegrationConditionExposureAvailable,
+				corev1.ConditionFalse,
+				v1.IntegrationConditionRouteNotAvailableReason,
+				"explicitly disabled",
+			)
+		}
 
 		return false, nil
 	}
@@ -98,12 +100,14 @@ func (t *routeTrait) Configure(e *Environment) (bool, error) {
 
 	t.service = e.Resources.GetUserServiceForIntegration(e.Integration)
 	if t.service == nil {
-		e.Integration.Status.SetCondition(
-			v1.IntegrationConditionExposureAvailable,
-			corev1.ConditionFalse,
-			v1.IntegrationConditionRouteNotAvailableReason,
-			"no target service found",
-		)
+		if e.Integration != nil {
+			e.Integration.Status.SetCondition(
+				v1.IntegrationConditionExposureAvailable,
+				corev1.ConditionFalse,
+				v1.IntegrationConditionRouteNotAvailableReason,
+				"no target service found",
+			)
+		}
 
 		return false, nil
 	}

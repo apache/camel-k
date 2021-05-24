@@ -140,6 +140,20 @@ func TestRoute_Disabled(t *testing.T) {
 	assert.Nil(t, route)
 }
 
+func TestRoute_Configure_IntegrationKitOnly(t *testing.T) {
+	name := xid.New().String()
+	environment := createTestRouteEnvironment(t, name)
+	environment.Integration = nil
+
+	routeTrait := newRouteTrait().(*routeTrait)
+	enabled := false
+	routeTrait.Enabled = &enabled
+
+	result, err := routeTrait.Configure(environment)
+	assert.False(t, result)
+	assert.Nil(t, err)
+}
+
 func TestRoute_TLS(t *testing.T) {
 	name := xid.New().String()
 	environment := createTestRouteEnvironment(t, name)
