@@ -134,13 +134,18 @@ func (t *builderTrait) Apply(e *Environment) error {
 }
 
 func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
+	maven := e.Platform.Status.Build.Maven
+
+	// Add Maven repositories defined in the IntergrationKit
+	maven.Repositories = append(maven.Repositories, e.IntegrationKit.Spec.Repositories...)
+
 	task := &v1.BuilderTask{
 		BaseTask: v1.BaseTask{
 			Name: "builder",
 		},
 		Runtime:      e.CamelCatalog.Runtime,
 		Dependencies: e.IntegrationKit.Spec.Dependencies,
-		Maven:        e.Platform.Status.Build.Maven,
+		Maven:        maven,
 	}
 
 	if task.Maven.Properties == nil {
