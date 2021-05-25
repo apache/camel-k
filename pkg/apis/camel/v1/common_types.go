@@ -103,7 +103,8 @@ type MavenSpec struct {
 	// Note that the root CA certificates are also imported into the created keystore.
 	CASecret *corev1.SecretKeySelector `json:"caSecret,omitempty"`
 	// Deprecated: use IntegrationPlatform.Spec.Build.Timeout instead
-	Timeout *metav1.Duration `json:"timeout,omitempty"`
+	Timeout      *metav1.Duration `json:"timeout,omitempty"`
+	Repositories []string         `json:"repositories,omitempty"`
 }
 
 // ValueSource --

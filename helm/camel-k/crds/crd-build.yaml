@@ -162,6 +162,10 @@ spec:
                                 type: string
                               description: The Maven properties.
                               type: object
+                            repositories:
+                              items:
+                                type: string
+                              type: array
                             settings:
                               description: A reference to the ConfigMap or Secret
                                 key that contains the Maven settings.
