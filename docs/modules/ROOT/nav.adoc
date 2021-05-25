@@ -14,6 +14,7 @@
 *** xref:installation/registry/github.adoc[Github Packages]
 *** xref:installation/registry/gcr.adoc[Gcr.io]
 *** xref:installation/registry/icr.adoc[IBM Container Registry]
+*** xref:installation/registry/k3s.adoc[K3s]
 ** xref:installation/scheduling.adoc[Pod scheduling]
 * xref:running/running.adoc[Running]
 ** xref:running/dev-mode.adoc[Dev Mode]
