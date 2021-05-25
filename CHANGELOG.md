@@ -30,6 +30,7 @@
 
 **Merged pull requests:**
 
+- Updated the nav bar with all the installations [\#2322](https://github.com/apache/camel-k/pull/2322) ([oscerd](https://github.com/oscerd))
 - Check if the environment can produce structured Maven logs before parsing them [\#2311](https://github.com/apache/camel-k/pull/2311) ([orpiske](https://github.com/orpiske))
 - chore\(ci\): Cancel running workflows when PRs are updated [\#2304](https://github.com/apache/camel-k/pull/2304) ([astefanutti](https://github.com/astefanutti))
 - chore: Make phase structured logging key a string [\#2303](https://github.com/apache/camel-k/pull/2303) ([astefanutti](https://github.com/astefanutti))
