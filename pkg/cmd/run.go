@@ -78,10 +78,11 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArrayP("dependency", "d", nil, "A dependency that should be included, e.g., \"-d camel-mail\" for a Camel component, or \"-d mvn:org.my:app:1.0\" for a Maven dependency")
 	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
-	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or properties file (syntax, my-key=my-value | file:/path/to/my-conf.properties)")
-	cmd.Flags().StringArray("build-property", nil, "Add a build time property or properties file (syntax, my-key=my-value | file:/path/to/my-conf.properties)")
-	cmd.Flags().StringArray("configmap", nil, "Add a ConfigMap")
-	cmd.Flags().StringArray("secret", nil, "Add a Secret")
+	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or properties file (syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
+	cmd.Flags().StringArray("build-property", nil, "Add a build time property or properties file (syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
+	cmd.Flags().StringArray("config", nil, "Add runtime configuration from a Configmap, a Secret or a file (syntax: [configmap|secret|file]:name)")
+	cmd.Flags().StringArray("configmap", nil, "[Deprecated] Add a ConfigMap")
+	cmd.Flags().StringArray("secret", nil, "[Deprecated] Add a Secret")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
 	cmd.Flags().Bool("logs", false, "Print integration logs")
 	cmd.Flags().Bool("sync", false, "Synchronize the local source file with the cluster, republishing at each change")
@@ -129,6 +130,7 @@ type runCmdOptions struct {
 	Dependencies    []string `mapstructure:"dependencies" yaml:",omitempty"`
 	Properties      []string `mapstructure:"properties" yaml:",omitempty"`
 	BuildProperties []string `mapstructure:"build-properties" yaml:",omitempty"`
+	Configs         []string `mapstructure:"configs" yaml:",omitempty"`
 	ConfigMaps      []string `mapstructure:"configmaps" yaml:",omitempty"`
 	Secrets         []string `mapstructure:"secrets" yaml:",omitempty"`
 	Repositories    []string `mapstructure:"maven-repositories" yaml:",omitempty"`
@@ -227,8 +229,15 @@ func (o *runCmdOptions) validate() error {
 
 	// Deprecation warning
 	if o.PropertyFiles != nil {
-		fmt.Println("Warn: --property-files has been deprecated. You should use --property file:/path/to/conf.properties instead.")
+		fmt.Println("Warn: --property-file has been deprecated. You should use --property file:/path/to/conf.properties instead.")
 	}
+	if o.ConfigMaps != nil {
+		fmt.Println("Warn: --configmap has been deprecated. You should use --config configmap:my-configmap instead.")
+	}
+	if o.Secrets != nil {
+		fmt.Println("Warn: --secret has been deprecated. You should use --config secret:my-secret instead.")
+	}
+
 	err := validatePropertyFiles(o.PropertyFiles)
 	if err != nil {
 		return err
@@ -549,19 +558,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	}
 
 	for _, resource := range o.OpenAPIs {
-		data, _, compressed, err := loadTextContent(resource, o.Compression)
-		if err != nil {
-			return nil, err
-		}
-
-		integration.Spec.AddResources(v1.ResourceSpec{
-			DataSpec: v1.DataSpec{
-				Name:        path.Base(resource),
-				Content:     data,
-				Compression: compressed,
-			},
-			Type: v1.ResourceTypeOpenAPI,
-		})
+		addResource(resource, &integration.Spec, o.Compression, v1.ResourceTypeOpenAPI)
 	}
 
 	for _, item := range o.Dependencies {
@@ -597,6 +594,17 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	}
 	for _, item := range o.LoggingLevels {
 		integration.Spec.AddConfiguration("property", "logging.level."+item)
+	}
+	for _, item := range o.Configs {
+		if config, parseErr := ParseConfigOption(item); parseErr == nil {
+			if config.ConfigType == ConfigOptionTypeFile {
+				addResource(config.Value, &integration.Spec, o.Compression, v1.ResourceTypeData)
+			} else {
+				integration.Spec.AddConfiguration(string(config.ConfigType), config.Value)
+			}
+		} else {
+			return nil, parseErr
+		}
 	}
 	for _, item := range o.ConfigMaps {
 		integration.Spec.AddConfiguration("configmap", item)
@@ -679,6 +687,23 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 		fmt.Printf("integration \"%s\" updated\n", name)
 	}
 	return &integration, nil
+}
+
+func addResource(resourceLocation string, integrationSpec *v1.IntegrationSpec, enableCompression bool, resourceType v1.ResourceType) error {
+	if data, _, compressed, err := loadTextContent(resourceLocation, enableCompression); err == nil {
+		integrationSpec.AddResources(v1.ResourceSpec{
+			DataSpec: v1.DataSpec{
+				Name:        path.Base(resourceLocation),
+				Content:     data,
+				Compression: compressed,
+			},
+			Type: resourceType,
+		})
+	} else {
+		return err
+	}
+
+	return nil
 }
 
 // The function parse the value and if it is a file (file:/path/), it will parse as property file
