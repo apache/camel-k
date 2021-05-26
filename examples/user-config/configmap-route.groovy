@@ -20,7 +20,7 @@
 // To run this integrations use:
 //
 // kubectl create configmap my-cm --from-literal=my-configmap-key="configmap content"
-// kamel run --configmap my-cm configmap-route.groovy --dev
+// kamel run --config configmap:my-cm configmap-route.groovy --dev
 //
 
 from('timer:configmap')
