@@ -65,7 +65,7 @@ func TestRunConfigExamples(t *testing.T) {
 			cmData["my-configmap-key"] = "my-configmap-content"
 			NewPlainTextConfigmap(ns, "my-cm", cmData)
 
-			Expect(Kamel("run", "-n", ns, "./files/configmap-route.groovy", "--configmap", "my-cm").Execute()).To(Succeed())
+			Expect(Kamel("run", "-n", ns, "./files/configmap-route.groovy", "--config", "configmap:my-cm").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "configmap-route"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "configmap-route", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "configmap-route"), TestTimeoutShort).Should(ContainSubstring(cmData["my-configmap-key"]))
@@ -80,10 +80,20 @@ func TestRunConfigExamples(t *testing.T) {
 			secData["my-secret-key"] = "very top secret"
 			NewPlainTextSecret(ns, "my-sec", secData)
 
-			Expect(Kamel("run", "-n", ns, "./files/secret-route.groovy", "--secret", "my-sec").Execute()).To(Succeed())
+			Expect(Kamel("run", "-n", ns, "./files/secret-route.groovy", "--config", "secret:my-sec").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "secret-route"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "secret-route", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "secret-route"), TestTimeoutShort).Should(ContainSubstring(secData["my-secret-key"]))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
+		// File Configuration
+
+		t.Run("Plain text configuration file", func(t *testing.T) {
+			Expect(Kamel("run", "-n", ns, "./files/config-file-route.groovy", "--config", "file:./files/resources-data.txt").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "config-file-route"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationCondition(ns, "config-file-route", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "config-file-route"), TestTimeoutShort).Should(ContainSubstring("the file body"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 

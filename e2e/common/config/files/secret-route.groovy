@@ -20,7 +20,7 @@
 // To run this integrations use:
 //
 // kubectl create secret generic my-sec --from-literal=my-secret-key="very top secret"
-// kamel run --secret my-sec secret-route.groovy --dev
+// kamel run --config secret:my-sec secret-route.groovy --dev
 //
 
 from('timer:secret')
