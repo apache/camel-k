@@ -19,7 +19,6 @@ package trait
 
 import (
 	"context"
-	"encoding/json"
 	"reflect"
 	"sort"
 	"strings"
@@ -153,49 +152,6 @@ func (c *Catalog) GetTrait(id string) Trait {
 		}
 	}
 	return nil
-}
-
-func (c *Catalog) configure(env *Environment) error {
-	if env.Platform != nil && env.Platform.Status.Traits != nil {
-		if err := c.configureTraits(env.Platform.Status.Traits); err != nil {
-			return err
-		}
-	}
-	if env.IntegrationKit != nil && env.IntegrationKit.Spec.Traits != nil {
-		if err := c.configureTraits(env.IntegrationKit.Spec.Traits); err != nil {
-			return err
-		}
-	}
-	if env.Integration != nil && env.Integration.Spec.Traits != nil {
-		if err := c.configureTraits(env.Integration.Spec.Traits); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (c *Catalog) configureTraits(traits map[string]v1.TraitSpec) error {
-	for id, traitSpec := range traits {
-		catTrait := c.GetTrait(id)
-		if catTrait != nil {
-			trait := traitSpec
-			if err := decodeTraitSpec(&trait, catTrait); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-func decodeTraitSpec(in *v1.TraitSpec, target interface{}) error {
-	data, err := json.Marshal(&in.Configuration)
-	if err != nil {
-		return err
-	}
-
-	return json.Unmarshal(data, &target)
 }
 
 // ComputeTraitsProperties returns all key/value configuration properties that can be used to configure traits
