@@ -84,7 +84,7 @@ func kamelPreAddCommandInit(options *RootCmdOptions) *cobra.Command {
 		SilenceUsage:           true,
 	}
 
-	cmd.PersistentFlags().StringVar(&options.KubeConfig, "config", os.Getenv("KUBECONFIG"), "Path to the config file to use for CLI requests")
+	cmd.PersistentFlags().StringVar(&options.KubeConfig, "kube-config", os.Getenv("KUBECONFIG"), "Path to the kube config file to use for CLI requests")
 	cmd.PersistentFlags().StringVarP(&options.Namespace, "namespace", "n", "", "Namespace to use for all operations")
 
 	return &cmd

@@ -53,6 +53,7 @@ var (
 	// file options must be considered relative to the source files they belong to
 	fileOptions = map[string]bool{
 		"resource":      true,
+		"kube-client":   true,
 		"open-api":      true,
 		"property-file": true,
 	}
