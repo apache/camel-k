@@ -482,6 +482,97 @@ func TestKameletNamedConfigLookup(t *testing.T) {
 	assert.NotContains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret3"})
 }
 
+func TestKameletConditionFalse(t *testing.T) {
+	flow := `
+- from:
+    uri: kamelet:timer
+    steps:
+    - to: kamelet:none
+`
+	trait, environment := createKameletsTestEnvironment(
+		flow,
+		&v1alpha1.Kamelet{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "test",
+				Name:      "timer",
+			},
+			Spec: v1alpha1.KameletSpec{
+				Flow: marshalOrFail(map[string]interface{}{
+					"from": map[string]interface{}{
+						"uri": "timer:tick",
+					},
+				}),
+			},
+			Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
+		})
+
+	enabled, err := trait.Configure(environment)
+	assert.NoError(t, err)
+	assert.True(t, enabled)
+
+	err = trait.Apply(environment)
+	assert.Error(t, err)
+	assert.Len(t, environment.Integration.Status.Conditions, 1)
+
+	cond := environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable)
+	assert.Equal(t, corev1.ConditionFalse, cond.Status)
+	assert.Equal(t, v1.IntegrationConditionKameletsAvailableReason, cond.Reason)
+	assert.Contains(t, cond.Message, "timer found")
+	assert.Contains(t, cond.Message, "none not found")
+}
+
+func TestKameletConditionTrue(t *testing.T) {
+	flow := `
+- from:
+    uri: kamelet:timer
+    steps:
+    - to: kamelet:none
+`
+	trait, environment := createKameletsTestEnvironment(
+		flow,
+		&v1alpha1.Kamelet{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "test",
+				Name:      "timer",
+			},
+			Spec: v1alpha1.KameletSpec{
+				Flow: marshalOrFail(map[string]interface{}{
+					"from": map[string]interface{}{
+						"uri": "timer:tick",
+					},
+				}),
+			},
+			Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
+		},
+		&v1alpha1.Kamelet{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "test",
+				Name:      "none",
+			},
+			Spec: v1alpha1.KameletSpec{
+				Flow: marshalOrFail(map[string]interface{}{
+					"from": map[string]interface{}{
+						"uri": "timer:tick",
+					},
+				}),
+			},
+			Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
+		})
+
+	enabled, err := trait.Configure(environment)
+	assert.NoError(t, err)
+	assert.True(t, enabled)
+
+	err = trait.Apply(environment)
+	assert.NoError(t, err)
+	assert.Len(t, environment.Integration.Status.Conditions, 1)
+
+	cond := environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable)
+	assert.Equal(t, corev1.ConditionTrue, cond.Status)
+	assert.Equal(t, v1.IntegrationConditionKameletsAvailableReason, cond.Reason)
+	assert.Contains(t, cond.Message, "none,timer found")
+}
+
 func createKameletsTestEnvironment(flow string, objects ...runtime.Object) (*kameletsTrait, *Environment) {
 	catalog, _ := camel.DefaultCatalog()
 
