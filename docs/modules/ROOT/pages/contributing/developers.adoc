@@ -30,7 +30,7 @@ You can run checks via `make lint`, or you can install a GIT pre-commit hook and
 [[checking-out]]
 == Checking Out the Sources
 
-You can create a fork of this project from GitHub, then clone your fork with the `git` command line tool.
+You can create a fork of https://github.com/apache/camel-k[this project] from GitHub, then clone your fork with the `git` command line tool.
 
 [[structure]]
 == Structure
