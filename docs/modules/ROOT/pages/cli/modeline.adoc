@@ -67,7 +67,10 @@ The following is a partial list of useful options:
 |Option | Description
 
 |build-property
-|Add a build time property or properties file (syntax, my-key=my-value \| file:/path/to/my-conf.properties)"
+|Add a build time property or properties file (syntax: _[my-key=my-value\|file:/path/to/my-conf.properties]_
+
+|config
+|Add runtime configuration from a Configmap, a Secret or a file (syntax: _[configmap\|secret\|file]:name)_
 
 |dependency
 |An external library that should be included, e.g. for Maven dependencies `dependency=mvn:org.my:app:1.0`
@@ -88,7 +91,7 @@ The following is a partial list of useful options:
 |Trait profile used for deployment
 
 |property
-|Add a runtime property or properties file (syntax, my-key=my-value \| file:/path/to/my-conf.properties)
+|Add a runtime property or properties file (syntax: _[my-key=my-value\|file:/path/to/my-conf.properties]_)
 
 |resource
 |Add a resource
