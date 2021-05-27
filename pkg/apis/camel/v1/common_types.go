@@ -22,6 +22,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const TraitAnnotationPrefix = "trait.camel.apache.org/"
+
 // ConfigurationSpec --
 type ConfigurationSpec struct {
 	Type  string `json:"type"`
