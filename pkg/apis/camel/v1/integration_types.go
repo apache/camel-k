@@ -199,6 +199,13 @@ const (
 	IntegrationConditionReplicaSetReadyReason string = "ReplicaSetReady"
 	// IntegrationConditionReplicaSetNotReadyReason --
 	IntegrationConditionReplicaSetNotReadyReason string = "ReplicaSetNotReady"
+
+	// IntegrationConditionKameletsAvailable --
+	IntegrationConditionKameletsAvailable IntegrationConditionType = "KameletsAvailable"
+	// IntegrationConditionKameletsAvailableReason --
+	IntegrationConditionKameletsAvailableReason string = "KameletsAvailable"
+	// IntegrationConditionKameletsNotAvailableReason --
+	IntegrationConditionKameletsNotAvailableReason string = "KameletsNotAvailable"
 )
 
 // IntegrationCondition describes the state of a resource at a certain point.
@@ -242,5 +249,4 @@ type PodSpec struct {
 	NodeSelector map[string]string `json:"nodeSelector,omitempty" protobuf:"bytes,7,rep,name=nodeSelector"`
 
 	TopologySpreadConstraints []corev1.TopologySpreadConstraint `json:"topologySpreadConstraints,omitempty" patchStrategy:"merge" patchMergeKey:"topologyKey" protobuf:"bytes,33,opt,name=topologySpreadConstraints"`
-
 }

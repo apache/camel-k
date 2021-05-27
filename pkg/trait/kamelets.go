@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"sort"
@@ -139,30 +140,76 @@ func (t *kameletsTrait) Apply(e *Environment) error {
 	return nil
 }
 
+func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1alpha1.Kamelet, error) {
+	repo, err := repository.NewForPlatform(e.C, e.Client, e.Platform, e.Integration.Namespace, platform.GetOperatorNamespace())
+	if err != nil {
+		return nil, err
+	}
+
+	kamelets := make(map[string]*v1alpha1.Kamelet)
+	missingKamelets := make([]string, 0)
+	availableKamelets := make([]string, 0)
+
+	for _, key := range t.getKameletKeys() {
+		kamelet, err := repo.Get(e.C, key)
+		if err != nil {
+			return nil, err
+		}
+
+		if kamelet == nil {
+			missingKamelets = append(missingKamelets, key)
+		} else {
+			availableKamelets = append(availableKamelets, key)
+
+			// Initialize remote kamelets
+			kamelets[key], err = kameletutils.Initialize(kamelet)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	sort.Strings(availableKamelets)
+	sort.Strings(missingKamelets)
+
+	if len(missingKamelets) > 0 {
+		message := fmt.Sprintf("kamelets %s found, %s not found in repositories: %s",
+			strings.Join(availableKamelets, ","),
+			strings.Join(missingKamelets, ","),
+			repo.String())
+
+		e.Integration.Status.SetCondition(
+			v1.IntegrationConditionKameletsAvailable,
+			corev1.ConditionFalse,
+			v1.IntegrationConditionKameletsAvailableReason,
+			message,
+		)
+
+		return nil, errors.New(message)
+	}
+
+	e.Integration.Status.SetCondition(
+		v1.IntegrationConditionKameletsAvailable,
+		corev1.ConditionTrue,
+		v1.IntegrationConditionKameletsAvailableReason,
+		fmt.Sprintf("kamelets %s found in repositories: %s", strings.Join(availableKamelets, ","), repo.String()),
+	)
+
+	return kamelets, nil
+}
+
 func (t *kameletsTrait) addKamelets(e *Environment) error {
-	kameletKeys := t.getKameletKeys()
-	if len(kameletKeys) > 0 {
-		repo, err := repository.NewForPlatform(e.C, e.Client, e.Platform, e.Integration.Namespace, platform.GetOperatorNamespace())
+	if len(t.getKameletKeys()) > 0 {
+		kamelets, err := t.collectKamelets(e)
 		if err != nil {
 			return err
 		}
-		for _, k := range t.getKameletKeys() {
-			kamelet, err := repo.Get(e.C, k)
-			if err != nil {
-				return err
-			}
-			if kamelet == nil {
-				return fmt.Errorf("kamelet %s not found in any of the defined repositories: %s", k, repo.String())
-			}
 
-			// Initialize remote kamelets
-			kamelet, err = kameletutils.Initialize(kamelet)
-			if err != nil {
-				return err
-			}
+		for _, key := range t.getKameletKeys() {
+			kamelet := kamelets[key]
 
 			if kamelet.Status.Phase != v1alpha1.KameletPhaseReady {
-				return fmt.Errorf("kamelet %q is not %s: %s", k, v1alpha1.KameletPhaseReady, kamelet.Status.Phase)
+				return fmt.Errorf("kamelet %q is not %s: %s", key, v1alpha1.KameletPhaseReady, kamelet.Status.Phase)
 			}
 
 			if err := t.addKameletAsSource(e, kamelet); err != nil {
@@ -180,25 +227,13 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 
 func (t *kameletsTrait) configureApplicationProperties(e *Environment) error {
 	if len(t.getKameletKeys()) > 0 {
-		repo, err := repository.NewForPlatform(e.C, e.Client, e.Platform, e.Integration.Namespace, platform.GetOperatorNamespace())
+		kamelets, err := t.collectKamelets(e)
 		if err != nil {
 			return err
 		}
-		for _, k := range t.getKameletKeys() {
-			kamelet, err := repo.Get(e.C, k)
-			if err != nil {
-				return err
-			}
-			if kamelet == nil {
-				return fmt.Errorf("kamelet %s not found in any of the defined repositories: %s", k, repo.String())
-			}
 
-			// remote Kamelets may not be fully initialized
-			kamelet, err = kameletutils.Initialize(kamelet)
-			if err != nil {
-				return err
-			}
-
+		for _, key := range t.getKameletKeys() {
+			kamelet := kamelets[key]
 			// Configuring defaults from Kamelet
 			for _, prop := range kamelet.Status.Properties {
 				if prop.Default != "" {
