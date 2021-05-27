@@ -27,6 +27,7 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/bindings"
 	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/pkg/errors"
@@ -39,8 +40,10 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 	blockOwnerDeletion := true
 	it := v1.Integration{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: kameletbinding.Namespace,
-			Name:      kameletbinding.Name,
+			Namespace:   kameletbinding.Namespace,
+			Name:        kameletbinding.Name,
+			Annotations: util.CopyMap(kameletbinding.Annotations),
+			Labels:      util.CopyMap(kameletbinding.Labels),
 			OwnerReferences: []metav1.OwnerReference{
 				{
 					APIVersion:         kameletbinding.APIVersion,

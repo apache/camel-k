@@ -349,6 +349,18 @@ func SortedStringMapKeys(m map[string]string) []string {
 	return res
 }
 
+// CopyMap clones a map of strings
+func CopyMap(source map[string]string) map[string]string {
+	if source == nil {
+		return nil
+	}
+	dest := make(map[string]string, len(source))
+	for k, v := range source {
+		dest[k] = v
+	}
+	return dest
+}
+
 // DependenciesToJSON --
 func DependenciesToJSON(list []string) ([]byte, error) {
 	jsondata := map[string]interface{}{}
