@@ -203,6 +203,57 @@ func TestModelineRunBuildPropertyFiles(t *testing.T) {
 	assert.Equal(t, []string{"run", fileName, "--build-property=file:application.properties"}, flags)
 }
 
+func TestModelineRunConfigSecret(t *testing.T) {
+	dir, err := ioutil.TempDir("", "camel-k-test-")
+	assert.NoError(t, err)
+	defer os.RemoveAll(dir)
+
+	subDir := path.Join(dir, "sub")
+	err = os.Mkdir(subDir, 0777)
+	assert.NoError(t, err)
+
+	file := `
+		// camel-k: config=secret:my-secret
+	`
+	fileName := path.Join(subDir, "simple.groovy")
+	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	assert.NoError(t, err)
+
+	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
+	assert.NoError(t, err)
+	assert.NotNil(t, cmd)
+	assert.Equal(t, []string{"run", fileName, "--config=secret:my-secret"}, flags)
+}
+
+func TestModelineRunConfigFile(t *testing.T) {
+	dir, err := ioutil.TempDir("", "camel-k-test-")
+	assert.NoError(t, err)
+	defer os.RemoveAll(dir)
+
+	subDir := path.Join(dir, "sub")
+	err = os.Mkdir(subDir, 0777)
+	assert.NoError(t, err)
+
+	file := `
+		// camel-k: config=file:application.properties
+	`
+	fileName := path.Join(subDir, "simple.groovy")
+	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	assert.NoError(t, err)
+
+	propFile := `
+		a=b
+	`
+	propFileName := path.Join(dir, "application.properties")
+	err = ioutil.WriteFile(propFileName, []byte(propFile), 0777)
+	assert.NoError(t, err)
+
+	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
+	assert.NoError(t, err)
+	assert.NotNil(t, cmd)
+	assert.Equal(t, []string{"run", fileName, "--config=file:application.properties"}, flags)
+}
+
 func TestModelineInspectSimple(t *testing.T) {
 	dir, err := ioutil.TempDir("", "camel-k-test-")
 	assert.NoError(t, err)
