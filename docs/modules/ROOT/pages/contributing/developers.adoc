@@ -74,11 +74,11 @@ After a successful build, if you're connected to a Docker daemon, you can build 
 make images
 ----
 
-The above command produces a `camel-k` image with the name `docker.io/apache/camel-k`. Sometimes you might need to produce camel-k images that need to be pushed to the custom repository e.g. `docker.io/myrepo/camel-k`, to do that you can pass a parameter `imgDestination` to the make as shown below:
+The above command produces a `camel-k` image with the name `docker.io/apache/camel-k`. Sometimes you might need to produce `camel-k` images that need to be pushed to the custom repository e.g. `docker.io/myrepo/camel-k`, to do that you can pass a parameter `STAGING_IMAGE_NAME` to `make` as shown below:
 
 [source]
 ----
-make imgDestination='docker.io/myrepo' images
+make STAGING_IMAGE_NAME='docker.io/myrepo/camel-k' images-push-staging
 ----
 
 [[testing]]
@@ -139,6 +139,17 @@ This command assumes you have an already running Minishift instance.
 * Run `make install-minikube`: to build the project and install it in the current namespace on Minikube
 
 This command assumes you have an already running Minikube instance.
+
+=== For remote Kubernetes/OpenShift clusters
+
+If you have changed anything locally and want to apply the changes to a remote cluster, first push your `camel-k` image to a custom repository (see <<building>>) and run the following command (the image name `docker.io/myrepo/camel-k:1.5.0-SNAPSHOT` should be changed accordingly):
+
+[source]
+----
+kamel install --operator-image=docker.io/myrepo/camel-k:1.5.0-SNAPSHOT --operator-image-pull-policy=Always --olm=false
+----
+
+Note `--olm=false` is necessary as otherwise the OLM bundle version is preferred.
 
 === Use
 
