@@ -31,11 +31,11 @@ import (
 )
 
 func TestKamelVersionWorksOffline(t *testing.T) {
-	assert.Nil(t, Kamel("version", "--config", "non-existent-kubeconfig-file").Execute())
+	assert.Nil(t, Kamel("version", "--kube-config", "non-existent-kubeconfig-file").Execute())
 }
 
 func TestKamelHelpTraitWorksOffline(t *testing.T) {
-	traitCmd := Kamel("help", "trait", "--all", "--config", "non-existent-kubeconfig-file")
+	traitCmd := Kamel("help", "trait", "--all", "--kube-config", "non-existent-kubeconfig-file")
 	traitCmd.SetOut(ioutil.Discard)
 	assert.Nil(t, traitCmd.Execute())
 }
@@ -47,9 +47,9 @@ func TestKamelHelpOptionWorksOffline(t *testing.T) {
 }
 
 func TestKamelCompletionWorksOffline(t *testing.T) {
-	bashCmd := Kamel("completion", "bash", "--config", "non-existent-kubeconfig-file")
+	bashCmd := Kamel("completion", "bash", "--kube-config", "non-existent-kubeconfig-file")
 	bashCmd.SetOut(ioutil.Discard)
-	zshCmd := Kamel("completion", "zsh", "--config", "non-existent-kubeconfig-file")
+	zshCmd := Kamel("completion", "zsh", "--kube-config", "non-existent-kubeconfig-file")
 	zshCmd.SetOut(ioutil.Discard)
 	assert.Nil(t, bashCmd.Execute())
 	assert.Nil(t, zshCmd.Execute())
