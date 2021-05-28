@@ -245,7 +245,7 @@ func (t *cronTrait) Apply(e *Environment) error {
 		e.Interceptors = append(e.Interceptors, "cron")
 
 		cronJob := t.getCronJobFor(e)
-		maps := e.ComputeConfigMaps()
+		maps := e.computeConfigMaps()
 
 		e.Resources.AddAll(maps)
 		e.Resources.Add(cronJob)
@@ -269,7 +269,7 @@ func (t *cronTrait) getCronJobFor(e *Environment) *v1beta1.CronJob {
 
 	// Copy annotations from the integration resource
 	if e.Integration.Annotations != nil {
-		for k, v := range FilterTransferableAnnotations(e.Integration.Annotations) {
+		for k, v := range filterTransferableAnnotations(e.Integration.Annotations) {
 			annotations[k] = v
 		}
 	}
