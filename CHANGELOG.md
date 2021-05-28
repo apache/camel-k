@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- kamelets: add condition to report when an integration is stuck waiting for them  [\#2331](https://github.com/apache/camel-k/issues/2331)
 - Timeout when debugging the operator locally [\#2315](https://github.com/apache/camel-k/issues/2315)
 - Creating an IntegrationPlatform with the route Trait Crashes the Operator [\#2313](https://github.com/apache/camel-k/issues/2313)
 - Structured logs: remaining bits [\#2286](https://github.com/apache/camel-k/issues/2286)
@@ -19,6 +20,7 @@
 - `kamel` run fails for remote files on windows [\#2239](https://github.com/apache/camel-k/issues/2239)
 - Add a flag to enable/disable the installation of default kamelets [\#2237](https://github.com/apache/camel-k/issues/2237)
 - Update run-from-github page to correct github example path [\#2230](https://github.com/apache/camel-k/issues/2230)
+- Allow to configure traits using annotations [\#2165](https://github.com/apache/camel-k/issues/2165)
 - Release 1.4.0 [\#2134](https://github.com/apache/camel-k/issues/2134)
 - Dependency autoloading is not working correctly with YAML format [\#2098](https://github.com/apache/camel-k/issues/2098)
 - PodSpecable Integration [\#2096](https://github.com/apache/camel-k/issues/2096)
@@ -35,6 +37,10 @@
 
 **Merged pull requests:**
 
+- Fix \#2165: allow configuring traits via annotations [\#2338](https://github.com/apache/camel-k/pull/2338) ([nicolaferraro](https://github.com/nicolaferraro))
+- kamelets: add condition to report when an integration is stuck waiting for them [\#2337](https://github.com/apache/camel-k/pull/2337) ([lburgazzoli](https://github.com/lburgazzoli))
+- doc\(dev\): add instruction for deploying custom images to remote clusters [\#2336](https://github.com/apache/camel-k/pull/2336) ([tadayosi](https://github.com/tadayosi))
+- feat\(cmd/run\): property configuration refactoring [\#2329](https://github.com/apache/camel-k/pull/2329) ([squakez](https://github.com/squakez))
 - Added K3s to the registry section of navbar [\#2325](https://github.com/apache/camel-k/pull/2325) ([oscerd](https://github.com/oscerd))
 - Nav Bar: Titles fixed [\#2324](https://github.com/apache/camel-k/pull/2324) ([oscerd](https://github.com/oscerd))
 - Fix Route Trait Crash [\#2323](https://github.com/apache/camel-k/pull/2323) ([Kyle-Cooley](https://github.com/Kyle-Cooley))
@@ -54,6 +60,7 @@
 - fix\(test\) - toleration trait test [\#2294](https://github.com/apache/camel-k/pull/2294) ([tplevko](https://github.com/tplevko))
 - Added documentation about installing Camel K on Kind [\#2293](https://github.com/apache/camel-k/pull/2293) ([orpiske](https://github.com/orpiske))
 - Configure kubernetes to use structured log [\#2290](https://github.com/apache/camel-k/pull/2290) ([orpiske](https://github.com/orpiske))
+- fix\(doc\): camel website error fixes [\#2288](https://github.com/apache/camel-k/pull/2288) ([squakez](https://github.com/squakez))
 - chore\(e2e\): Assert upgraded integration Pod uses new version Kit [\#2285](https://github.com/apache/camel-k/pull/2285) ([astefanutti](https://github.com/astefanutti))
 - chore\(e2e\): Remove obsolete operator upgrade e2e test [\#2283](https://github.com/apache/camel-k/pull/2283) ([astefanutti](https://github.com/astefanutti))
 - fix\(doc\): broken links [\#2282](https://github.com/apache/camel-k/pull/2282) ([squakez](https://github.com/squakez))
