@@ -18,11 +18,14 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strconv"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/spf13/cobra"
 	k8errors "k8s.io/apimachinery/pkg/api/errors"
@@ -80,7 +83,7 @@ func (command *deleteCmdOptions) run(args []string) error {
 	if len(args) != 0 && !command.DeleteAll {
 		for _, arg := range args {
 			name := kubernetes.SanitizeName(arg)
-			err := DeleteIntegration(command.Context, c, name, command.Namespace)
+			integration, err := getIntegration(command.Context, c, name, command.Namespace)
 			if err != nil {
 				if k8errors.IsNotFound(err) {
 					fmt.Println("Integration " + name + " not found. Skipped.")
@@ -88,6 +91,10 @@ func (command *deleteCmdOptions) run(args []string) error {
 					return err
 				}
 			} else {
+				err := deleteIntegration(command.Context, c, integration)
+				if err != nil {
+					return err
+				}
 				fmt.Println("Integration " + name + " deleted")
 			}
 		}
@@ -106,7 +113,7 @@ func (command *deleteCmdOptions) run(args []string) error {
 		}
 		for _, integration := range integrationList.Items {
 			integration := integration // pin
-			err := c.Delete(command.Context, &integration)
+			err := deleteIntegration(command.Context, c, &integration)
 			if err != nil {
 				return err
 			}
@@ -119,4 +126,67 @@ func (command *deleteCmdOptions) run(args []string) error {
 	}
 
 	return nil
+}
+
+func getIntegration(ctx context.Context, c client.Client, name string, namespace string) (*v1.Integration, error) {
+	key := k8sclient.ObjectKey{
+		Name:      name,
+		Namespace: namespace,
+	}
+	answer := v1.NewIntegration(namespace, name)
+	if err := c.Get(ctx, key, &answer); err != nil {
+		return nil, err
+	}
+	return &answer, nil
+}
+
+func deleteIntegration(ctx context.Context, c client.Client, integration *v1.Integration) error {
+	deleted, binding, err := deleteKameletBindingIfExists(ctx, c, integration)
+	if err != nil {
+		return err
+	}
+	if deleted {
+		// Deleting KameletBinding will automatically clean up the integration
+		fmt.Println("KameletBinding " + binding + " deleted")
+		return nil
+	}
+	return c.Delete(ctx, integration)
+}
+
+func deleteKameletBindingIfExists(ctx context.Context, c client.Client, integration *v1.Integration) (bool, string, error) {
+	kind, name := findCreator(integration)
+	if kind != v1alpha1.KameletBindingKind || name == "" {
+		return false, "", nil
+	}
+
+	binding := v1alpha1.KameletBinding{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       kind,
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: integration.Namespace,
+			Name:      name,
+		},
+	}
+	err := c.Delete(ctx, &binding)
+	if k8errors.IsNotFound(err) {
+		// Simply skip if binding doesn't exist (could be deleted already)
+		return false, name, nil
+	}
+	return err == nil, name, err
+}
+
+func findCreator(integration *v1.Integration) (string, string) {
+	kind := integration.GetLabels()[kubernetes.CamelCreatorLabelKind]
+	name := integration.GetLabels()[kubernetes.CamelCreatorLabelName]
+	if kind == "" && name == "" {
+		// Look up in OwnerReferences in case creator labels are absent
+		for _, owner := range integration.GetOwnerReferences() {
+			if owner.Kind == v1alpha1.KameletBindingKind {
+				return owner.Kind, owner.Name
+			}
+		}
+	}
+	return kind, name
 }
