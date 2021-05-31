@@ -51,7 +51,7 @@ func loadRawContent(source string) ([]byte, string, error) {
 		case "https":
 			content, err = loadContentHTTP(u)
 		default:
-			return nil, "", fmt.Errorf("unsupported scheme %s", u.Scheme)
+			return nil, "", fmt.Errorf("missing file or unsupported scheme %s", u.Scheme)
 		}
 	}
 
