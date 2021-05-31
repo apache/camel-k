@@ -28,7 +28,11 @@ import (
 // BuildSpec defines the Build to be executed
 type BuildSpec struct {
 	Tasks []Task `json:"tasks,omitempty"`
-	//
+	// Timeout defines the Build maximum execution duration.
+	// The Build deadline is set to the Build start time plus the Timeout duration.
+	// If the Build deadline is exceeded, the Build context is canceled,
+	// and its phase set to BuildPhaseFailed.
+	// +kubebuilder:validation:Format=duration
 	Timeout metav1.Duration `json:"timeout,omitempty"`
 }
 
@@ -58,7 +62,6 @@ type BuilderTask struct {
 	Maven        MavenSpec         `json:"maven,omitempty"`
 	BuildDir     string            `json:"buildDir,omitempty"`
 	Properties   map[string]string `json:"properties,omitempty"`
-	// Timeout      metav1.Duration   `json:"timeout,omitempty"`
 }
 
 // PublishTask --
