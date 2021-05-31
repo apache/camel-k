@@ -30,6 +30,7 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/bindings"
 	"github.com/apache/camel-k/pkg/util/knative"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/pkg/errors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -56,6 +57,13 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 			},
 		},
 	}
+
+	// creator labels
+	if it.GetLabels() == nil {
+		it.SetLabels(make(map[string]string))
+	}
+	it.GetLabels()[kubernetes.CamelCreatorLabelKind] = kameletbinding.Kind
+	it.GetLabels()[kubernetes.CamelCreatorLabelName] = kameletbinding.Name
 
 	// start from the integration spec defined in the binding
 	if kameletbinding.Spec.Integration != nil {
