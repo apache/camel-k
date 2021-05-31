@@ -18,8 +18,14 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"path"
 	"regexp"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 // RunConfigOption represents a config option
@@ -68,4 +74,45 @@ func ParseConfigOption(item string) (*RunConfigOption, error) {
 		return nil, fmt.Errorf("invalid config option type %s", groups[1])
 	}
 	return newRunConfigOption(cot, groups[2]), nil
+}
+
+// ApplyConfigOption will set the proper option behavior to the IntegrationSpec
+func ApplyConfigOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec, c client.Client, namespace string, enableCompression bool) error {
+	switch config.ConfigType {
+	case ConfigOptionTypeConfigmap:
+		cm := kubernetes.LookupConfigmap(context.Background(), c, namespace, config.Value)
+		if cm == nil {
+			fmt.Printf("Warn: %s Configmap not found in %s namespace, make sure to provide it before the Integration can run\n",
+				config.Value, namespace)
+		} else if cm.BinaryData != nil {
+			return fmt.Errorf("you cannot provide a binary config, use a text file instead")
+		}
+		integrationSpec.AddConfiguration(string(config.ConfigType), config.Value)
+	case ConfigOptionTypeSecret:
+		secret := kubernetes.LookupSecret(context.Background(), c, namespace, config.Value)
+		if secret == nil {
+			fmt.Printf("Warn: %s Secret not found in %s namespace, make sure to provide it before the Integration can run\n",
+				config.Value, namespace)
+		}
+		integrationSpec.AddConfiguration(string(config.ConfigType), config.Value)
+	case ConfigOptionTypeFile:
+		// Don't allow a binary non compressed resource
+		rawData, contentType, err := loadRawContent(config.Value)
+		if err != nil {
+			return err
+		}
+		if !enableCompression && isBinary(contentType) {
+			return fmt.Errorf("you cannot provide a binary config, use a text file or check --resource flag instead")
+		}
+		resourceSpec, err := binaryOrTextResource(path.Base(config.Value), rawData, contentType, enableCompression)
+		if err != nil {
+			return err
+		}
+		integrationSpec.AddResources(resourceSpec)
+	default:
+		// Should never reach this
+		return fmt.Errorf("invalid config option type %s", config.ConfigType)
+	}
+
+	return nil
 }

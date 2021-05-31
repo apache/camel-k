@@ -597,10 +597,8 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	}
 	for _, item := range o.Configs {
 		if config, parseErr := ParseConfigOption(item); parseErr == nil {
-			if config.ConfigType == ConfigOptionTypeFile {
-				addResource(config.Value, &integration.Spec, o.Compression, v1.ResourceTypeData)
-			} else {
-				integration.Spec.AddConfiguration(string(config.ConfigType), config.Value)
+			if applyConfigOptionErr := ApplyConfigOption(config, &integration.Spec, c, namespace, o.Compression); applyConfigOptionErr != nil {
+				return nil, applyConfigOptionErr
 			}
 		} else {
 			return nil, parseErr
