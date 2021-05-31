@@ -425,6 +425,11 @@ spec:
                   type: object
                 type: array
               timeout:
+                description: Timeout defines the Build maximum execution duration.
+                  The Build deadline is set to the Build start time plus the Timeout
+                  duration. If the Build deadline is exceeded, the Build context is
+                  canceled, and its phase set to BuildPhaseFailed.
+                format: duration
                 type: string
             type: object
           status:
