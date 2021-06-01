@@ -22,6 +22,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 )
 
@@ -181,15 +182,15 @@ func TestSettingsGeneration(t *testing.T) {
 			Activation: Activation{
 				ActiveByDefault: true,
 			},
-			Repositories: []Repository{
+			Repositories: []v1.Repository{
 				{
 					ID:  "central",
 					URL: "https://repo.maven.apache.org/maven2",
-					Snapshots: RepositoryPolicy{
+					Snapshots: v1.RepositoryPolicy{
 						Enabled:        false,
 						ChecksumPolicy: "warn",
 					},
-					Releases: RepositoryPolicy{
+					Releases: v1.RepositoryPolicy{
 						Enabled:        true,
 						UpdatePolicy:   "never",
 						ChecksumPolicy: "fail",
@@ -208,7 +209,7 @@ func TestSettingsGeneration(t *testing.T) {
 }
 
 func TestDefaultSettingsGeneration(t *testing.T) {
-	settings := NewDefaultSettings([]Repository{}, []Mirror{})
+	settings := NewDefaultSettings([]v1.Repository{}, []Mirror{})
 
 	content, err := util.EncodeXML(settings)
 
@@ -219,7 +220,7 @@ func TestDefaultSettingsGeneration(t *testing.T) {
 }
 
 func TestDefaultSettingsGenerationWithAdditionalRepo(t *testing.T) {
-	repositories := []Repository{
+	repositories := []v1.Repository{
 		NewRepository("https://repo1.maven.org/maven2@id=central"),
 		NewRepository("https://foo.bar.org/repo@id=foo"),
 	}
@@ -237,7 +238,7 @@ func TestDefaultSettingsGenerationWithAdditionalRepo(t *testing.T) {
 }
 
 func TestCreateSettingsConfigMap(t *testing.T) {
-	settings := NewDefaultSettings([]Repository{}, []Mirror{})
+	settings := NewDefaultSettings([]v1.Repository{}, []Mirror{})
 
 	configMap, err := SettingsConfigMap("foo", "bar", settings)
 	assert.Nil(t, err)

@@ -453,7 +453,7 @@ ProxyPreserveHost On
 	})
 }
 
-func getRepositoryAttributes(repository maven.Repository) []string {
+func getRepositoryAttributes(repository v1.Repository) []string {
 	var attributes []string
 	if repository.ID != "" {
 		attributes = append(attributes, "@id="+repository.ID)

@@ -101,14 +101,14 @@ func ManageIntegrationDependencies(
 					}
 				}
 				if addRepo {
-					project.Repositories = append(project.Repositories, maven.Repository{
+					project.Repositories = append(project.Repositories, v1.Repository{
 						ID:  "jitpack.io-" + xid.New().String(),
 						URL: jitpack.RepoURL,
-						Releases: maven.RepositoryPolicy{
+						Releases: v1.RepositoryPolicy{
 							Enabled:        true,
 							ChecksumPolicy: "fail",
 						},
-						Snapshots: maven.RepositoryPolicy{
+						Snapshots: v1.RepositoryPolicy{
 							Enabled:        true,
 							ChecksumPolicy: "fail",
 						},

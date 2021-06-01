@@ -82,9 +82,7 @@ func generateQuarkusProject(ctx *builderContext) error {
 	p.Properties.AddAll(ctx.Build.Maven.Properties)
 
 	// Add Maven repositories
-	for _, repo := range ctx.Build.Maven.Repositories {
-		p.Repositories = append(p.Repositories, maven.NewRepository(repo))
-	}
+	p.Repositories = append(p.Repositories, ctx.Build.Maven.Repositories...)
 
 	ctx.Maven.Project = p
 

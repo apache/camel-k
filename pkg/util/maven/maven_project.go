@@ -21,6 +21,8 @@ import (
 	"bytes"
 	"encoding/xml"
 	"strings"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 func NewProject() Project {
@@ -157,14 +159,14 @@ func NewDependency(groupID string, artifactID string, version string) Dependency
 //
 // Will enable snapshots and sets the repo it to my-repo
 //
-func NewRepository(repo string) Repository {
-	r := Repository{
+func NewRepository(repo string) v1.Repository {
+	r := v1.Repository{
 		URL: repo,
-		Releases: RepositoryPolicy{
+		Releases: v1.RepositoryPolicy{
 			Enabled:        true,
 			ChecksumPolicy: "fail",
 		},
-		Snapshots: RepositoryPolicy{
+		Snapshots: v1.RepositoryPolicy{
 			Enabled:        false,
 			ChecksumPolicy: "fail",
 		},

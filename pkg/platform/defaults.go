@@ -203,7 +203,7 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1.Integration
 	}
 
 	if p.Status.Build.Maven.Settings.ConfigMapKeyRef == nil && p.Status.Build.Maven.Settings.SecretKeyRef == nil {
-		var repositories []maven.Repository
+		var repositories []v1.Repository
 		var mirrors []maven.Mirror
 		for i, c := range p.Status.Configuration {
 			if c.Type == "repository" {
