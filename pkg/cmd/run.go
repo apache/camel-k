@@ -545,7 +545,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	}
 
 	for _, resource := range o.Resources {
-		if config, parseErr := ParseConfigOption(resource); parseErr == nil {
+		if config, parseErr := ParseResourceOption(resource); parseErr == nil {
 			if applyResourceOptionErr := ApplyResourceOption(config, &integration.Spec, c, namespace, o.Compression); applyResourceOptionErr != nil {
 				return nil, applyResourceOptionErr
 			}

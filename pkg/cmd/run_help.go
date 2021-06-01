@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"path"
 	"regexp"
+	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
@@ -54,8 +55,27 @@ func newRunConfigOption(configType configOptionType, value string) *RunConfigOpt
 	}
 }
 
+// ParseResourceOption will parse and return a runConfigOption
+func ParseResourceOption(item string) (*RunConfigOption, error) {
+	// Deprecated: ensure backward compatibility with `--resource filename` format until version 1.5.x
+	// then replace with parseOption() func directly
+	option, err := parseOption(item)
+	if err != nil {
+		if strings.HasPrefix(err.Error(), "could not match configuration") {
+			fmt.Printf("Warn: --resource %s has been deprecated. You should use --resource file:%s instead.\n", item, item)
+			return newRunConfigOption(ConfigOptionTypeFile, item), nil
+		}
+		return nil, err
+	}
+	return option, nil
+}
+
 // ParseConfigOption will parse and return a runConfigOption
 func ParseConfigOption(item string) (*RunConfigOption, error) {
+	return parseOption(item)
+}
+
+func parseOption(item string) (*RunConfigOption, error) {
 	if !validConfigRegexp.MatchString(item) {
 		return nil, fmt.Errorf("could not match configuration %s, must match %v regular expression", item, validConfigRegexp)
 	}
