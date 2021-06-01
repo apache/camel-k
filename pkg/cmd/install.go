@@ -33,9 +33,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/apache/camel-k/pkg/apis"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/install"
@@ -512,12 +510,6 @@ func (o *installCmdOptions) decode(cmd *cobra.Command, _ []string) error {
 
 func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 	var result error
-
-	// Let's register only our own APIs
-	schema := runtime.NewScheme()
-	if err := apis.AddToScheme(schema); err != nil {
-		return err
-	}
 
 	if len(o.MavenRepositories) > 0 && o.MavenSettings != "" {
 		err := fmt.Errorf("incompatible options combinations: you cannot set both mavenRepository and mavenSettings")
