@@ -48,13 +48,17 @@ import (
 const True = "true"
 
 var (
-	basePath                 = "/etc/camel"
-	confDPath                = path.Join(basePath, "conf.d")
-	sourcesMountPath         = path.Join(basePath, "sources")
-	resourcesMountPath       = path.Join(basePath, "resources")
-	configMapsMountPath      = path.Join(confDPath, "_configmaps")
-	secretsMountPath         = path.Join(confDPath, "_secrets")
-	serviceBindingsMountPath = path.Join(confDPath, "_servicebindings")
+	basePath                  = "/etc/camel"
+	confDPath                 = path.Join(basePath, "conf.d")
+	sourcesMountPath          = path.Join(basePath, "sources")
+	dataDefaultMountPath      = path.Join(basePath, "data")
+	dataResourcesMountPath    = path.Join(dataDefaultMountPath, "resources")
+	dataConfigmapsMountPath   = path.Join(dataDefaultMountPath, "configmaps")
+	dataSecretsMountPath      = path.Join(dataDefaultMountPath, "secrets")
+	configResourcesMountPath  = path.Join(confDPath, "_resources")
+	configConfigmapsMountPath = path.Join(confDPath, "_configmaps")
+	configSecretsMountPath    = path.Join(confDPath, "_secrets")
+	serviceBindingsMountPath  = path.Join(confDPath, "_servicebindings")
 )
 
 // Identifiable represent an identifiable type
@@ -463,7 +467,7 @@ func (e *Environment) computeConfigMaps() []ctrl.Object {
 	}
 
 	for i, r := range e.Integration.Spec.Resources {
-		if r.Type != v1.ResourceTypeData {
+		if r.Type == v1.ResourceTypeOpenAPI {
 			continue
 		}
 		if r.ContentRef != "" {
@@ -601,7 +605,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	}
 
 	for i, r := range e.Integration.Resources() {
-		if r.Type != v1.ResourceTypeData {
+		if r.Type == v1.ResourceTypeOpenAPI {
 			continue
 		}
 
@@ -609,7 +613,8 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		refName := fmt.Sprintf("i-resource-%03d", i)
 		resName := strings.TrimPrefix(r.Name, "/")
 		cmKey := "content"
-		resPath := path.Join(resourcesMountPath, resName)
+		resourceMountPoint := getResourceMountPoint(r.Type)
+		resPath := path.Join(resourceMountPoint, resName)
 
 		if r.ContentRef != "" {
 			cmName = r.ContentRef
@@ -690,15 +695,15 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	//
 	// Volumes :: Additional ConfigMaps
 	//
-	for _, cmName := range e.collectConfigurationValues("configmap") {
-		refName := kubernetes.SanitizeLabel(cmName)
+	for _, configmaps := range e.collectConfigurations("configmap") {
+		refName := kubernetes.SanitizeLabel(configmaps["value"])
 
 		*vols = append(*vols, corev1.Volume{
 			Name: refName,
 			VolumeSource: corev1.VolumeSource{
 				ConfigMap: &corev1.ConfigMapVolumeSource{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: cmName,
+						Name: configmaps["value"],
 					},
 				},
 			},
@@ -706,7 +711,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 		*mnts = append(*mnts, corev1.VolumeMount{
 			Name:      refName,
-			MountPath: path.Join(configMapsMountPath, strings.ToLower(cmName)),
+			MountPath: path.Join(getConfigmapMountPoint(configmaps["resourceType"]), strings.ToLower(configmaps["value"])),
 			ReadOnly:  true,
 		})
 	}
@@ -732,21 +737,21 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 			MountPath: path.Join(serviceBindingsMountPath, strings.ToLower(sb)),
 		})
 	}
-	for _, secretName := range e.collectConfigurationValues("secret") {
-		refName := kubernetes.SanitizeLabel(secretName)
+	for _, secret := range e.collectConfigurations("secret") {
+		refName := kubernetes.SanitizeLabel(secret["value"])
 
 		*vols = append(*vols, corev1.Volume{
 			Name: refName,
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
-					SecretName: secretName,
+					SecretName: secret["value"],
 				},
 			},
 		})
 
 		*mnts = append(*mnts, corev1.VolumeMount{
 			Name:      refName,
-			MountPath: path.Join(secretsMountPath, strings.ToLower(secretName)),
+			MountPath: path.Join(getSecretMountPoint(secret["resourceType"]), strings.ToLower(secret["value"])),
 			ReadOnly:  true,
 		})
 	}
@@ -781,6 +786,33 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	}
 }
 
+func getResourceMountPoint(resourceType v1.ResourceType) string {
+	switch resourceType {
+	case v1.ResourceTypeData:
+		return dataResourcesMountPath
+	}
+	// Default, config type
+	return configResourcesMountPath
+}
+
+func getConfigmapMountPoint(resourceType string) string {
+	switch resourceType {
+	case "data":
+		return dataConfigmapsMountPath
+	}
+	// Default, config type
+	return configConfigmapsMountPath
+}
+
+func getSecretMountPoint(resourceType string) string {
+	switch resourceType {
+	case "data":
+		return dataSecretsMountPath
+	}
+	// Default, config type
+	return configSecretsMountPath
+}
+
 func (e *Environment) collectConfigurationValues(configurationType string) []string {
 	return collectConfigurationValues(configurationType, e.Platform, e.IntegrationKit, e.Integration)
 }
@@ -791,6 +823,10 @@ type variable struct {
 
 func (e *Environment) collectConfigurationPairs(configurationType string) []variable {
 	return collectConfigurationPairs(configurationType, e.Platform, e.IntegrationKit, e.Integration)
+}
+
+func (e *Environment) collectConfigurations(configurationType string) []map[string]string {
+	return collectConfigurations(configurationType, e.Platform, e.IntegrationKit, e.Integration)
 }
 
 func (e *Environment) getIntegrationContainer() *corev1.Container {

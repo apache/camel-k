@@ -487,7 +487,7 @@ func TestRunWithSavedValues(t *testing.T) {
 }*/
 
 func TestRunBinaryResource(t *testing.T) {
-	binaryResourceSpec, err := binaryOrTextResource("file.ext", []byte{1, 2, 3, 4}, "application/octet-stream", false)
+	binaryResourceSpec, err := binaryOrTextResource("file.ext", []byte{1, 2, 3, 4}, "application/octet-stream", false, v1.ResourceTypeData)
 	assert.Nil(t, err)
 	assert.Equal(t, "", binaryResourceSpec.Content)
 	assert.NotNil(t, binaryResourceSpec.RawContent)
@@ -499,7 +499,7 @@ func TestRunBinaryResource(t *testing.T) {
 func TestRunBinaryCompressedResource(t *testing.T) {
 	data := []byte{1, 2, 3, 4}
 	base64Compressed, _ := compressToString(data)
-	binaryResourceSpec, err := binaryOrTextResource("file.ext", data, "application/octet-stream", true)
+	binaryResourceSpec, err := binaryOrTextResource("file.ext", data, "application/octet-stream", true, v1.ResourceTypeData)
 	assert.Nil(t, err)
 	assert.Equal(t, base64Compressed, binaryResourceSpec.Content)
 	assert.Nil(t, binaryResourceSpec.RawContent)
@@ -509,7 +509,7 @@ func TestRunBinaryCompressedResource(t *testing.T) {
 }
 
 func TestRunTextResource(t *testing.T) {
-	textResourceSpec, err := binaryOrTextResource("file.ext", []byte("hello world"), "text/plain", false)
+	textResourceSpec, err := binaryOrTextResource("file.ext", []byte("hello world"), "text/plain", false, v1.ResourceTypeData)
 	assert.Nil(t, err)
 	assert.Equal(t, "hello world", textResourceSpec.Content)
 	assert.Nil(t, textResourceSpec.RawContent)
@@ -521,7 +521,7 @@ func TestRunTextResource(t *testing.T) {
 func TestRunTextCompressedResource(t *testing.T) {
 	data := []byte("hello horld")
 	base64Compressed, _ := compressToString(data)
-	textResourceSpec, err := binaryOrTextResource("file.ext", []byte("hello horld"), "text/plain", true)
+	textResourceSpec, err := binaryOrTextResource("file.ext", []byte("hello horld"), "text/plain", true, v1.ResourceTypeData)
 	assert.Nil(t, err)
 	assert.Equal(t, base64Compressed, textResourceSpec.Content)
 	assert.Nil(t, textResourceSpec.RawContent)

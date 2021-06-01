@@ -103,12 +103,12 @@ func TestApplyJvmTraitWithDeploymentResource(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	cp := strset.New("/etc/camel/resources", "./resources", "/mount/path").List()
+	cp := strset.New("./resources", "/mount/path").List()
 	sort.Strings(cp)
 
 	assert.Equal(t, []string{
 		"-cp",
-		"./resources:/etc/camel/resources:/mount/path",
+		"./resources:/mount/path",
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }
@@ -135,12 +135,12 @@ func TestApplyJvmTraitWithKNativeResource(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	cp := strset.New("/etc/camel/resources", "./resources", "/mount/path").List()
+	cp := strset.New("./resources", "/mount/path").List()
 	sort.Strings(cp)
 
 	assert.Equal(t, []string{
 		"-cp",
-		"./resources:/etc/camel/resources:/mount/path",
+		"./resources:/mount/path",
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, s.Spec.Template.Spec.Containers[0].Args)
 }

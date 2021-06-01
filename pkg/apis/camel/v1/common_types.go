@@ -26,8 +26,9 @@ const TraitAnnotationPrefix = "trait.camel.apache.org/"
 
 // ConfigurationSpec --
 type ConfigurationSpec struct {
-	Type  string `json:"type"`
-	Value string `json:"value"`
+	Type         string `json:"type"`
+	Value        string `json:"value"`
+	ResourceType string `json:"resourceType,omitempty"`
 }
 
 // Artifact --
@@ -196,9 +197,11 @@ type ResourceSpec struct {
 }
 
 const (
-	// ResourceTypeData --
+	// ResourceTypeData represents a generic data resource
 	ResourceTypeData ResourceType = "data"
-	// ResourceTypeOpenAPI --
+	// ResourceTypeConfig represents a config resource known to runtime
+	ResourceTypeConfig ResourceType = "config"
+	// ResourceTypeOpenAPI represents an OpenAPI config resource
 	ResourceTypeOpenAPI ResourceType = "openapi"
 )
 
