@@ -20,13 +20,12 @@ package cmd
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/olm"
-	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-
-	"github.com/stretchr/testify/assert"
+	"github.com/apache/camel-k/pkg/util/olm"
+	"github.com/apache/camel-k/pkg/util/test"
 )
 
 const cmdInstall = "install"
@@ -40,7 +39,7 @@ func initializeInstallCmdOptions(t *testing.T) (*installCmdOptions, *cobra.Comma
 }
 
 func addTestInstallCmd(options RootCmdOptions, rootCmd *cobra.Command) *installCmdOptions {
-	//add a testing version of install Command
+	// Add a testing version of install Command
 	installCmd, installOptions := newCmdInstall(&options)
 	installCmd.RunE = func(c *cobra.Command, args []string) error {
 		return nil
@@ -57,7 +56,7 @@ func TestInstallNoFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall)
 	assert.Nil(t, err)
-	//Check default expected values
+	// Check default expected values
 	assert.Equal(t, false, installCmdOptions.Wait)
 	assert.Equal(t, false, installCmdOptions.ClusterSetupOnly)
 	assert.Equal(t, false, installCmdOptions.SkipOperatorSetup)
@@ -170,9 +169,9 @@ func TestInstallKanikoBuildCacheFlag(t *testing.T) {
 
 func TestInstallLocalRepositoryFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--local-repository", "someString")
+	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--maven-local-repository", "someString")
 	assert.Nil(t, err)
-	assert.Equal(t, "someString", installCmdOptions.LocalRepository)
+	assert.Equal(t, "someString", installCmdOptions.MavenLocalRepository)
 }
 
 func TestInstallMavenRepositoryFlag(t *testing.T) {
@@ -333,9 +332,7 @@ func TestDecodeMavenSettings(t *testing.T) {
 	var err error
 	var val v1.ValueSource
 
-	//
 	// ConfigMap
-	//
 	val, err = decodeMavenSettings("configmap:maven-settings/s.xml")
 	assert.Nil(t, err)
 	assert.Nil(t, val.SecretKeyRef)
@@ -348,9 +345,7 @@ func TestDecodeMavenSettings(t *testing.T) {
 	assert.Equal(t, "maven-settings", val.ConfigMapKeyRef.Name)
 	assert.Empty(t, val.ConfigMapKeyRef.Key)
 
-	//
 	// Secrets
-	//
 	val, err = decodeMavenSettings("secret:maven-settings-secret/s.xml")
 	assert.Nil(t, err)
 	assert.Nil(t, val.ConfigMapKeyRef)
@@ -363,9 +358,7 @@ func TestDecodeMavenSettings(t *testing.T) {
 	assert.Equal(t, "maven-settings-secret", val.SecretKeyRef.Name)
 	assert.Empty(t, val.SecretKeyRef.Key)
 
-	//
 	// Errors
-	//
 	_, err = decodeMavenSettings("something:maven-settings-secret/s.xml")
 	assert.NotNil(t, err)
 	_, err = decodeMavenSettings("secret")

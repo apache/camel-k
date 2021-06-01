@@ -112,7 +112,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 		"operator (used in combination with the --global flag)")
 
 	// Maven
-	cmd.Flags().String("local-repository", "", "Location of the local Maven repository")
+	cmd.Flags().String("maven-local-repository", "", "Path of the local Maven repository")
 	cmd.Flags().StringArray("maven-property", nil, "Add a Maven property")
 	cmd.Flags().String("maven-settings", "", "Configure the source of the Maven settings (configmap|secret:name[/key])")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a Maven repository")
@@ -163,10 +163,10 @@ type installCmdOptions struct {
 	BaseImage               string   `mapstructure:"base-image"`
 	OperatorImage           string   `mapstructure:"operator-image"`
 	OperatorImagePullPolicy string   `mapstructure:"operator-image-pull-policy"`
-	LocalRepository         string   `mapstructure:"local-repository"`
 	BuildStrategy           string   `mapstructure:"build-strategy"`
 	BuildPublishStrategy    string   `mapstructure:"build-publish-strategy"`
 	BuildTimeout            string   `mapstructure:"build-timeout"`
+	MavenLocalRepository    string   `mapstructure:"maven-local-repository"`
 	MavenProperties         []string `mapstructure:"maven-properties"`
 	MavenRepositories       []string `mapstructure:"maven-repositories"`
 	MavenSettings           string   `mapstructure:"maven-settings"`
@@ -321,8 +321,8 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				}
 			}
 		}
-		if o.LocalRepository != "" {
-			platform.Spec.Build.Maven.LocalRepository = o.LocalRepository
+		if o.MavenLocalRepository != "" {
+			platform.Spec.Build.Maven.LocalRepository = o.MavenLocalRepository
 		}
 		if o.RuntimeVersion != "" {
 			platform.Spec.Build.RuntimeVersion = o.RuntimeVersion
