@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
@@ -71,10 +70,9 @@ func (t *builderTrait) Apply(e *Environment) error {
 		e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseError
 		e.IntegrationKit.Status.SetCondition("IntegrationKitPropertiesFormatValid", corev1.ConditionFalse,
 			"IntegrationKitPropertiesFormatValid", fmt.Sprintf("One or more properties where not formatted as expected: %s", err.Error()))
-		if _, err := e.Client.CamelV1().IntegrationKits(e.IntegrationKit.Namespace).UpdateStatus(e.C, e.IntegrationKit, metav1.UpdateOptions{}); err != nil {
+		if err := e.Client.Status().Update(e.C, e.IntegrationKit); err != nil {
 			return err
 		}
-
 		return nil
 	}
 
