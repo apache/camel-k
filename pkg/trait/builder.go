@@ -22,10 +22,11 @@ import (
 	"sort"
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/builder"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/builder"
 )
 
 // The builder trait is internally used to determine the best strategy to
@@ -141,23 +142,21 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 		},
 		Runtime:      e.CamelCatalog.Runtime,
 		Dependencies: e.IntegrationKit.Spec.Dependencies,
-		Properties:   e.Platform.Status.Build.Properties,
 		Maven:        e.Platform.Status.Build.Maven,
 	}
 
-	// initialize properties if nil
-	if task.Properties == nil {
-		task.Properties = make(map[string]string)
+	if task.Maven.Properties == nil {
+		task.Maven.Properties = make(map[string]string)
 	}
-	// User provided build time configuration properties
+	// User provided Maven properties
 	if t.Properties != nil {
 		for _, v := range t.Properties {
 			split := strings.Split(v, "=")
 			if len(split) != 2 {
-				return nil, fmt.Errorf("Build time configuration property must have key=value format, it was %v", v)
+				return nil, fmt.Errorf("maven property must have key=value format, it was %v", v)
 			}
 
-			task.Properties[split[0]] = split[1]
+			task.Maven.Properties[split[0]] = split[1]
 		}
 	}
 

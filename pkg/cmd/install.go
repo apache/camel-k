@@ -113,8 +113,9 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("olm-global-namespace", olm.DefaultGlobalNamespace, "A namespace containing an OperatorGroup that defines global scope for the "+
 		"operator (used in combination with the --global flag)")
 
-	// Maven settings
+	// Maven
 	cmd.Flags().String("local-repository", "", "Location of the local Maven repository")
+	cmd.Flags().StringArray("maven-property", nil, "Add a Maven property")
 	cmd.Flags().String("maven-settings", "", "Configure the source of the Maven settings (configmap|secret:name[/key])")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a Maven repository")
 	cmd.Flags().String("maven-ca-secret", "", "Configure the secret key containing the Maven CA certificates (secret/key)")
@@ -168,13 +169,13 @@ type installCmdOptions struct {
 	BuildStrategy           string   `mapstructure:"build-strategy"`
 	BuildPublishStrategy    string   `mapstructure:"build-publish-strategy"`
 	BuildTimeout            string   `mapstructure:"build-timeout"`
+	MavenProperties         []string `mapstructure:"maven-properties"`
 	MavenRepositories       []string `mapstructure:"maven-repositories"`
 	MavenSettings           string   `mapstructure:"maven-settings"`
 	MavenCASecret           string   `mapstructure:"maven-ca-secret"`
 	HealthPort              int32    `mapstructure:"health-port"`
 	Monitoring              bool     `mapstructure:"monitoring"`
 	MonitoringPort          int32    `mapstructure:"monitoring-port"`
-	Properties              []string `mapstructure:"properties"`
 	TraitProfile            string   `mapstructure:"trait-profile"`
 	Tolerations             []string `mapstructure:"tolerations"`
 	NodeSelectors           []string `mapstructure:"node-selectors"`
@@ -313,14 +314,12 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			platform.Spec.Build.Registry.Secret = generatedSecretName
 		}
 
-		if len(o.Properties) > 0 {
-			platform.Spec.Build.Properties = make(map[string]string)
-
-			for _, property := range o.Properties {
+		if len(o.MavenProperties) > 0 {
+			platform.Spec.Build.Maven.Properties = make(map[string]string)
+			for _, property := range o.MavenProperties {
 				kv := strings.Split(property, "=")
-
 				if len(kv) == 2 {
-					platform.Spec.Build.Properties[kv[0]] = kv[1]
+					platform.Spec.Build.Maven.Properties[kv[0]] = kv[1]
 				}
 			}
 		}

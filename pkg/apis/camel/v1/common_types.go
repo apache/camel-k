@@ -88,8 +88,13 @@ type PlatformInjectable interface {
 
 // MavenSpec --
 type MavenSpec struct {
-	LocalRepository string      `json:"localRepository,omitempty"`
-	Settings        ValueSource `json:"settings,omitempty"`
+	// The path of the local Maven repository.
+	LocalRepository string `json:"localRepository,omitempty"`
+	// The Maven properties.
+	Properties map[string]string `json:"properties,omitempty"`
+	// A reference to the ConfigMap or Secret key that contains
+	// the Maven settings.
+	Settings ValueSource `json:"settings,omitempty"`
 	// The Secret name and key, containing the CA certificate(s) used to connect
 	// to remote Maven repositories.
 	// It can contain X.509 certificates, and PKCS#7 formatted certificate chains.

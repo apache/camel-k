@@ -254,11 +254,11 @@ func TestInstallOutputFlag(t *testing.T) {
 func TestInstallPropertyFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall,
-		"--property", "someString1",
-		"--property", "someString2")
+		"--maven-property", "someString1",
+		"--maven-property", "someString2")
 	assert.Nil(t, err)
-	assert.Equal(t, "someString1", installCmdOptions.Properties[0])
-	assert.Equal(t, "someString2", installCmdOptions.Properties[1])
+	assert.Equal(t, "someString1", installCmdOptions.MavenProperties[0])
+	assert.Equal(t, "someString2", installCmdOptions.MavenProperties[1])
 }
 
 func TestInstallRegistryFlag(t *testing.T) {

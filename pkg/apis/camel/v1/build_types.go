@@ -61,7 +61,6 @@ type BuilderTask struct {
 	Steps        []string          `json:"steps,omitempty"`
 	Maven        MavenSpec         `json:"maven,omitempty"`
 	BuildDir     string            `json:"buildDir,omitempty"`
-	Properties   map[string]string `json:"properties,omitempty"`
 }
 
 // PublishTask --

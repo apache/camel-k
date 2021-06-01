@@ -155,9 +155,16 @@ spec:
                               - key
                               type: object
                             localRepository:
+                              description: The path of the local Maven repository.
                               type: string
+                            properties:
+                              additionalProperties:
+                                type: string
+                              description: The Maven properties.
+                              type: object
                             settings:
-                              description: ValueSource --
+                              description: A reference to the ConfigMap or Secret
+                                key that contains the Maven settings.
                               properties:
                                 configMapKeyRef:
                                   description: Selects a key of a ConfigMap.
@@ -206,10 +213,6 @@ spec:
                           type: object
                         name:
                           type: string
-                        properties:
-                          additionalProperties:
-                            type: string
-                          type: object
                         resources:
                           items:
                             description: ResourceSpec --
