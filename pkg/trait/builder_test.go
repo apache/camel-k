@@ -152,7 +152,7 @@ func NewBuilderTestCatalog() *Catalog {
 	return NewCatalog(context.TODO(), nil)
 }
 
-func TestBuildtimeConfigurationBuilderTrait(t *testing.T) {
+func TestMavenPropertyBuilderTrait(t *testing.T) {
 	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Properties = append(builderTrait.Properties, "build-time-prop1=build-time-value1")
@@ -160,7 +160,7 @@ func TestBuildtimeConfigurationBuilderTrait(t *testing.T) {
 	err := builderTrait.Apply(env)
 
 	assert.Nil(t, err)
-	assert.Equal(t, "build-time-value1", env.BuildTasks[0].Builder.Properties["build-time-prop1"])
+	assert.Equal(t, "build-time-value1", env.BuildTasks[0].Builder.Maven.Properties["build-time-prop1"])
 }
 
 func createNominalBuilderTraitTest() *builderTrait {

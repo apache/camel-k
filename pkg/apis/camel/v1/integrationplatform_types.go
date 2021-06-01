@@ -111,7 +111,6 @@ type IntegrationPlatformBuildSpec struct {
 	RuntimeVersion        string                                  `json:"runtimeVersion,omitempty"`
 	RuntimeProvider       RuntimeProvider                         `json:"runtimeProvider,omitempty"`
 	BaseImage             string                                  `json:"baseImage,omitempty"`
-	Properties            map[string]string                       `json:"properties,omitempty"`
 	Registry              IntegrationPlatformRegistrySpec         `json:"registry,omitempty"`
 	Timeout               *metav1.Duration                        `json:"timeout,omitempty"`
 	PersistentVolumeClaim string                                  `json:"persistentVolumeClaim,omitempty"`
