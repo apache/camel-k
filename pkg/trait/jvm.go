@@ -96,6 +96,8 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	classpath := strset.New()
 
 	classpath.Add("./resources")
+	classpath.Add(configResourcesMountPath)
+	classpath.Add(dataResourcesMountPath)
 
 	for _, artifact := range kit.Status.Artifacts {
 		classpath.Add(artifact.Target)

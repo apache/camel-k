@@ -16,13 +16,5 @@
  * limitations under the License.
  */
 
-//
-// To run this integrations use:
-// kamel run --resource resources-data.txt --compression=true resources-base64-encoded-route.groovy --dev
-//
-
-from('timer:resources-bas64')
-    .routeId('resources-base64')
-    .setBody()
-        .simple("resource:classpath:resources-data.txt")
-    .log('resource file base64 content is: ${body}')
+from('file:/etc/camel/data/configmaps/my-cm/?fileName=my-configmap-key&noop=true&idempotent=false')
+    .log('resource file content is: ${body}')

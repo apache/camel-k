@@ -16,14 +16,6 @@
  * limitations under the License.
  */
 
-//
-// Provide a build time configuration property (the application name)
-//
-// To run this integrations use:
-//
-// kamel run --build-property=quarkus.application.name=my-super-application build-property-route.groovy --dev
-//
-
 from('timer:build-property')
     .routeId('build-property')
     .log('The application name: {{quarkus.application.name}}')

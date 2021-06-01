@@ -16,12 +16,6 @@
  * limitations under the License.
  */
 
-//
-// To run this integrations use:
-//
-// kamel run -p my.message=test-property property-route.groovy --dev
-//
-
 from('timer:property')
     .routeId('property')
     .log('property content is: {{my.message}}')
