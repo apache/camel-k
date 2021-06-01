@@ -16,11 +16,6 @@
  * limitations under the License.
  */
 
-//
-// To run this integrations use:
-// kamel run --config file:resources-data.txt resources-route.groovy --dev
-//
-
 from('timer:resources')
     .routeId('resources')
     .setBody()

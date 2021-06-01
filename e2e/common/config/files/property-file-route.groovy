@@ -16,12 +16,6 @@
  * limitations under the License.
  */
 
-//
-// To run this integrations use:
-//
-// kamel run --property file:my.properties property-file-route.groovy --dev
-//
-
 from('timer:property-file')
     .routeId('property-file')
     .log('property file content is: {{my.key.1}} {{my.key.2}}')

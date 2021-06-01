@@ -16,10 +16,5 @@
  * limitations under the License.
  */
 
-//
-// To run this integrations use:
-// kamel run --resource resources-data.txt resources-route.groovy --dev
-//
-
-from('file:/etc/camel/resources/?fileName=resources-data.txt&noop=true&idempotent=false')
+from('file:/etc/camel/data/resources/?fileName=resources-data.txt&noop=true&idempotent=false')
     .log('resource file content is: ${body}')

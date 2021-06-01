@@ -16,12 +16,8 @@
  * limitations under the License.
  */
 
-//
-// To run this integrations use:
-// kamel run --resource resources-data.zip resources-binary-route.groovy -d camel-zipfile --dev
-//
-
-from('file:/etc/camel/resources/?fileName=resources-data.zip&noop=true&idempotent=false')
-    .routeId('resources-zip')
-    .unmarshal().zipFile()
-    .log('resource file unzipped content is: ${body}')
+from('timer:resources-bas64')
+    .routeId('resources-base64')
+    .setBody()
+        .simple("resource:classpath:resources-data.txt")
+    .log('resource file base64 content is: ${body}')

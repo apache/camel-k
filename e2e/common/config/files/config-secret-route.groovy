@@ -16,15 +16,8 @@
  * limitations under the License.
  */
 
-//
-// To run this integrations use:
-//
-// kubectl create configmap my-cm --from-literal=my-configmap-key="configmap content"
-// kamel run --config configmap:my-cm configmap-route.groovy --dev
-//
-
-from('timer:configmap')
-    .routeId('configmap')
+from('timer:secret')
+    .routeId('secret')
     .setBody()
-        .simple("resource:classpath:my-configmap-key")
-    .log('configmap content is: ${body}')
+        .simple("resource:classpath:my-secret-key")
+    .log('secret content is: ${body}')
