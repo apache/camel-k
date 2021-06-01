@@ -18,8 +18,10 @@
 
 //
 // To run this integrations use:
-// kamel run --resource resources-data.txt resources-route.groovy --dev
+// 
+// kubectl create configmap my-cm --from-literal=my-configmap-key="configmap content"
+// kamel run --resource configmap:my-cm resource-configmap-route.groovy --dev
 //
 
-from('file:/etc/camel/resources/?fileName=resources-data.txt&noop=true&idempotent=false')
+from('file:/etc/camel/data/configmaps/my-cm/?fileName=my-configmap-key&noop=true&idempotent=false')
     .log('resource file content is: ${body}')

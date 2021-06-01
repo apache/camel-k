@@ -18,10 +18,13 @@
 
 //
 // To run this integrations use:
-// kamel run --resource resources-data.zip resources-binary-route.groovy -d camel-zipfile --dev
+//
+// kubectl create configmap my-cm --from-literal=my-configmap-key="configmap content"
+// kamel run --config configmap:my-cm config-configmap-route.groovy --dev
 //
 
-from('file:/etc/camel/resources/?fileName=resources-data.zip&noop=true&idempotent=false')
-    .routeId('resources-zip')
-    .unmarshal().zipFile()
-    .log('resource file unzipped content is: ${body}')
+from('timer:configmap')
+    .routeId('configmap')
+    .setBody()
+        .simple("resource:classpath:my-configmap-key")
+    .log('configmap content is: ${body}')

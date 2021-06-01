@@ -18,11 +18,13 @@
 
 //
 // To run this integrations use:
-// kamel run --resource resources-data.txt --compression=true resources-base64-encoded-route.groovy --dev
+//
+// kubectl create secret generic my-sec --from-literal=my-secret-key="very top secret"
+// kamel run --config secret:my-sec config-secret-route.groovy --dev
 //
 
-from('timer:resources-bas64')
-    .routeId('resources-base64')
+from('timer:secret')
+    .routeId('secret')
     .setBody()
-        .simple("resource:classpath:resources-data.txt")
-    .log('resource file base64 content is: ${body}')
+        .simple("resource:classpath:my-secret-key")
+    .log('secret content is: ${body}')
