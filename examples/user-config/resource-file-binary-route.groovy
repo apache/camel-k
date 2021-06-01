@@ -18,11 +18,10 @@
 
 //
 // To run this integrations use:
-// kamel run --config file:resources-data.txt config-file-route.groovy --dev
+// kamel run --resource resources-data.zip resource-file-binary-route.groovy -d camel-zipfile --dev
 //
 
-from('timer:config-file')
-    .routeId('config-file')
-    .setBody()
-        .simple("resource:classpath:resources-data.txt")
-    .log('resource file content is: ${body}')
+from('file:/etc/camel/resources/?fileName=resources-data.zip&noop=true&idempotent=false')
+    .routeId('resources-zip')
+    .unmarshal().zipFile()
+    .log('resource file unzipped content is: ${body}')
