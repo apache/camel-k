@@ -81,6 +81,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or properties file (syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
 	cmd.Flags().StringArray("build-property", nil, "Add a build time property or properties file (syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
 	cmd.Flags().StringArray("config", nil, "Add runtime configuration from a Configmap, a Secret or a file (syntax: [configmap|secret|file]:name)")
+	cmd.Flags().StringArray("resource", nil, "Add runtime resource from a Configmap, a Secret or a file (syntax: [configmap|secret|file]:name)")
 	cmd.Flags().StringArray("configmap", nil, "[Deprecated] Add a ConfigMap")
 	cmd.Flags().StringArray("secret", nil, "[Deprecated] Add a Secret")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
@@ -93,7 +94,6 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArray("logging-level", nil, "Configure the logging level. e.g. \"--logging-level org.apache.camel=DEBUG\"")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().Bool("compression", false, "Enable storage of sources and resources as a compressed binary blobs")
-	cmd.Flags().StringArray("resource", nil, "Add a resource")
 	cmd.Flags().StringArray("open-api", nil, "Add an OpenAPI v2 spec")
 	cmd.Flags().StringArrayP("volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
 	cmd.Flags().StringArrayP("env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
@@ -545,16 +545,13 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	}
 
 	for _, resource := range o.Resources {
-		rawData, contentType, err := loadRawContent(resource)
-		if err != nil {
-			return nil, err
+		if config, parseErr := ParseConfigOption(resource); parseErr == nil {
+			if applyResourceOptionErr := ApplyResourceOption(config, &integration.Spec, c, namespace, o.Compression); applyResourceOptionErr != nil {
+				return nil, applyResourceOptionErr
+			}
+		} else {
+			return nil, parseErr
 		}
-
-		resourceSpec, err := binaryOrTextResource(path.Base(resource), rawData, contentType, o.Compression)
-		if err != nil {
-			return nil, err
-		}
-		integration.Spec.AddResources(resourceSpec)
 	}
 
 	for _, resource := range o.OpenAPIs {
@@ -716,35 +713,6 @@ func extractProperties(value string) (*properties.Properties, error) {
 
 func keyValueProps(value string) (*properties.Properties, error) {
 	return properties.Load([]byte(value), properties.UTF8)
-}
-
-func binaryOrTextResource(fileName string, data []byte, contentType string, base64Compression bool) (v1.ResourceSpec, error) {
-	resourceSpec := v1.ResourceSpec{
-		DataSpec: v1.DataSpec{
-			Name:        fileName,
-			ContentKey:  fileName,
-			ContentType: contentType,
-			Compression: false,
-		},
-		Type: v1.ResourceTypeData,
-	}
-
-	if !base64Compression && isBinary(contentType) {
-		resourceSpec.RawContent = data
-		return resourceSpec, nil
-	}
-	// either is a text resource or base64 compression is enabled
-	if base64Compression {
-		content, err := compressToString(data)
-		if err != nil {
-			return resourceSpec, err
-		}
-		resourceSpec.Content = content
-		resourceSpec.Compression = true
-	} else {
-		resourceSpec.Content = string(data)
-	}
-	return resourceSpec, nil
 }
 
 func (o *runCmdOptions) GetIntegrationName(sources []string) string {

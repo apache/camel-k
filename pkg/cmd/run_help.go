@@ -76,43 +76,82 @@ func ParseConfigOption(item string) (*RunConfigOption, error) {
 	return newRunConfigOption(cot, groups[2]), nil
 }
 
-// ApplyConfigOption will set the proper option behavior to the IntegrationSpec
-func ApplyConfigOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec, c client.Client, namespace string, enableCompression bool) error {
+func applyOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec,
+	c client.Client, namespace string, enableCompression bool, resourceType v1.ResourceType) error {
 	switch config.ConfigType {
 	case ConfigOptionTypeConfigmap:
 		cm := kubernetes.LookupConfigmap(context.Background(), c, namespace, config.Value)
 		if cm == nil {
 			fmt.Printf("Warn: %s Configmap not found in %s namespace, make sure to provide it before the Integration can run\n",
 				config.Value, namespace)
-		} else if cm.BinaryData != nil {
+		} else if resourceType != v1.ResourceTypeData && cm.BinaryData != nil {
 			return fmt.Errorf("you cannot provide a binary config, use a text file instead")
 		}
-		integrationSpec.AddConfiguration(string(config.ConfigType), config.Value)
+		integrationSpec.AddConfigurationAsResourceType(string(config.ConfigType), config.Value, string(resourceType))
 	case ConfigOptionTypeSecret:
 		secret := kubernetes.LookupSecret(context.Background(), c, namespace, config.Value)
 		if secret == nil {
 			fmt.Printf("Warn: %s Secret not found in %s namespace, make sure to provide it before the Integration can run\n",
 				config.Value, namespace)
 		}
-		integrationSpec.AddConfiguration(string(config.ConfigType), config.Value)
+		integrationSpec.AddConfigurationAsResourceType(string(config.ConfigType), config.Value, string(resourceType))
 	case ConfigOptionTypeFile:
 		// Don't allow a binary non compressed resource
 		rawData, contentType, err := loadRawContent(config.Value)
 		if err != nil {
 			return err
 		}
-		if !enableCompression && isBinary(contentType) {
+		if resourceType != v1.ResourceTypeData && !enableCompression && isBinary(contentType) {
 			return fmt.Errorf("you cannot provide a binary config, use a text file or check --resource flag instead")
 		}
-		resourceSpec, err := binaryOrTextResource(path.Base(config.Value), rawData, contentType, enableCompression)
+		resourceSpec, err := binaryOrTextResource(path.Base(config.Value), rawData, contentType, enableCompression, resourceType)
 		if err != nil {
 			return err
 		}
 		integrationSpec.AddResources(resourceSpec)
 	default:
 		// Should never reach this
-		return fmt.Errorf("invalid config option type %s", config.ConfigType)
+		return fmt.Errorf("invalid option type %s", config.ConfigType)
 	}
 
 	return nil
+}
+
+// ApplyConfigOption will set the proper --config option behavior to the IntegrationSpec
+func ApplyConfigOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec, c client.Client, namespace string, enableCompression bool) error {
+	return applyOption(config, integrationSpec, c, namespace, enableCompression, v1.ResourceTypeConfig)
+}
+
+// ApplyResourceOption will set the proper --resource option behavior to the IntegrationSpec
+func ApplyResourceOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec, c client.Client, namespace string, enableCompression bool) error {
+	return applyOption(config, integrationSpec, c, namespace, enableCompression, v1.ResourceTypeData)
+}
+
+func binaryOrTextResource(fileName string, data []byte, contentType string, base64Compression bool, resourceType v1.ResourceType) (v1.ResourceSpec, error) {
+	resourceSpec := v1.ResourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:        fileName,
+			ContentKey:  fileName,
+			ContentType: contentType,
+			Compression: false,
+		},
+		Type: resourceType,
+	}
+
+	if !base64Compression && isBinary(contentType) {
+		resourceSpec.RawContent = data
+		return resourceSpec, nil
+	}
+	// either is a text resource or base64 compression is enabled
+	if base64Compression {
+		content, err := compressToString(data)
+		if err != nil {
+			return resourceSpec, err
+		}
+		resourceSpec.Content = content
+		resourceSpec.Compression = true
+	} else {
+		resourceSpec.Content = string(data)
+	}
+	return resourceSpec, nil
 }

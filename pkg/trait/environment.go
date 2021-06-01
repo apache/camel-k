@@ -72,8 +72,8 @@ func (t *environmentTrait) Apply(e *Environment) error {
 		envvar.SetVal(&e.EnvVars, envVarCamelKIntegration, e.Integration.Name)
 	}
 	envvar.SetVal(&e.EnvVars, envVarCamelKRuntimeVersion, e.RuntimeVersion)
-	envvar.SetVal(&e.EnvVars, envVarMountPathConfigMaps, configMapsMountPath)
-	envvar.SetVal(&e.EnvVars, envVarMountPathSecrets, secretsMountPath)
+	envvar.SetVal(&e.EnvVars, envVarMountPathConfigMaps, configConfigmapsMountPath)
+	envvar.SetVal(&e.EnvVars, envVarMountPathSecrets, configSecretsMountPath)
 
 	if util.IsNilOrTrue(t.ContainerMeta) {
 		envvar.SetValFrom(&e.EnvVars, envVarNamespace, "metadata.namespace")

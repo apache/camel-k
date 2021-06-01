@@ -109,6 +109,15 @@ func (in *IntegrationSpec) AddConfiguration(confType string, confValue string) {
 	})
 }
 
+// AddConfigurationAsResourceType will set a configuration specified with a resource type
+func (in *IntegrationSpec) AddConfigurationAsResourceType(confType string, confValue string, resourceType string) {
+	in.Configuration = append(in.Configuration, ConfigurationSpec{
+		Type:         confType,
+		Value:        confValue,
+		ResourceType: resourceType,
+	})
+}
+
 // AddDependency --
 func (in *IntegrationSpec) AddDependency(dependency string) {
 	if in.Dependencies == nil {

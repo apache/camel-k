@@ -76,6 +76,34 @@ func collectConfigurationValues(configurationType string, configurable ...v1.Con
 	return s
 }
 
+func collectConfigurations(configurationType string, configurable ...v1.Configurable) []map[string]string {
+	var result []map[string]string
+
+	for _, c := range configurable {
+		c := c
+
+		if c == nil || reflect.ValueOf(c).IsNil() {
+			continue
+		}
+
+		entries := c.Configurations()
+		if entries == nil {
+			continue
+		}
+
+		for _, entry := range entries {
+			if entry.Type == configurationType {
+				var item = make(map[string]string)
+				item["value"] = entry.Value
+				item["resourceType"] = entry.ResourceType
+				result = append(result, item)
+			}
+		}
+	}
+
+	return result
+}
+
 func collectConfigurationPairs(configurationType string, configurable ...v1.Configurable) []variable {
 	result := make([]variable, 0)
 
