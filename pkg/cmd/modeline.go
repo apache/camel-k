@@ -53,9 +53,16 @@ var (
 	// file options must be considered relative to the source files they belong to
 	fileOptions = map[string]bool{
 		"resource":      true,
-		"kube-client":   true,
+		"kube-config":   true,
 		"open-api":      true,
 		"property-file": true,
+	}
+
+	// file format options are those options that admit multiple values, not only files (ie, key=value|configmap|secret|file syntax)
+	fileFormatOptions = map[string]bool{
+		"config":         true,
+		"property":       true,
+		"build-property": true,
 	}
 )
 
@@ -227,10 +234,32 @@ func extractModelineOptionsFromSource(resolvedSource Source) ([]modeline.Option,
 				o.Value = full
 				ops[i] = o
 			}
+		} else if fileFormatOptions[o.Name] && resolvedSource.Local {
+			baseDir := filepath.Dir(resolvedSource.Origin)
+			refPath := getRefPathOrProperty(o.Value)
+			if !filepath.IsAbs(refPath) {
+				full := getFullPathOrProperty(o.Value, path.Join(baseDir, refPath))
+				o.Value = full
+				ops[i] = o
+			}
 		}
 	}
 
 	return ops, nil
+}
+
+func getRefPathOrProperty(pathOrProperty string) string {
+	if strings.HasPrefix(pathOrProperty, "file:") {
+		return strings.Replace(pathOrProperty, "file:", "", 1)
+	}
+	return pathOrProperty
+}
+
+func getFullPathOrProperty(pathOrProperty string, fullPath string) string {
+	if strings.HasPrefix(pathOrProperty, "file:") {
+		return fmt.Sprintf("file:%s", fullPath)
+	}
+	return pathOrProperty
 }
 
 func expandModelineEnvVarOptions(ops []modeline.Option) ([]modeline.Option, error) {
