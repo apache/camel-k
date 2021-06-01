@@ -52,7 +52,6 @@ var (
 
 	// file options must be considered relative to the source files they belong to
 	fileOptions = map[string]bool{
-		"resource":      true,
 		"kube-config":   true,
 		"open-api":      true,
 		"property-file": true,
@@ -60,6 +59,7 @@ var (
 
 	// file format options are those options that admit multiple values, not only files (ie, key=value|configmap|secret|file syntax)
 	fileFormatOptions = map[string]bool{
+		"resource":       true,
 		"config":         true,
 		"property":       true,
 		"build-property": true,

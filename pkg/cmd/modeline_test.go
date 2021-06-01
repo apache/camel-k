@@ -277,6 +277,79 @@ func TestModelineRunConfigFile(t *testing.T) {
 	assert.Equal(t, []string{"run", fileName, fmt.Sprintf("--config=file:%s", propFileName)}, flags)
 }
 
+func TestModelineRunResourceConfigmap(t *testing.T) {
+	dir, err := ioutil.TempDir("", "camel-k-test-")
+	assert.NoError(t, err)
+	defer os.RemoveAll(dir)
+
+	subDir := path.Join(dir, "sub")
+	err = os.Mkdir(subDir, 0777)
+	assert.NoError(t, err)
+
+	file := `
+		// camel-k: resource=configmap:my-cm
+	`
+	fileName := path.Join(subDir, "simple.groovy")
+	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	assert.NoError(t, err)
+
+	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
+	assert.NoError(t, err)
+	assert.NotNil(t, cmd)
+	assert.Equal(t, []string{"run", fileName, "--resource=configmap:my-cm"}, flags)
+}
+
+func TestModelineRunResourceSecret(t *testing.T) {
+	dir, err := ioutil.TempDir("", "camel-k-test-")
+	assert.NoError(t, err)
+	defer os.RemoveAll(dir)
+
+	subDir := path.Join(dir, "sub")
+	err = os.Mkdir(subDir, 0777)
+	assert.NoError(t, err)
+
+	file := `
+		// camel-k: resource=secret:my-secret
+	`
+	fileName := path.Join(subDir, "simple.groovy")
+	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	assert.NoError(t, err)
+
+	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
+	assert.NoError(t, err)
+	assert.NotNil(t, cmd)
+	assert.Equal(t, []string{"run", fileName, "--resource=secret:my-secret"}, flags)
+}
+
+func TestModelineRunResourceFile(t *testing.T) {
+	dir, err := ioutil.TempDir("", "camel-k-test-")
+	assert.NoError(t, err)
+	defer os.RemoveAll(dir)
+
+	subDir := path.Join(dir, "sub")
+	err = os.Mkdir(subDir, 0777)
+	assert.NoError(t, err)
+
+	file := `
+		// camel-k: resource=file:application.properties
+	`
+	fileName := path.Join(subDir, "simple.groovy")
+	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	assert.NoError(t, err)
+
+	propFile := `
+		a=b
+	`
+	propFileName := path.Join(subDir, "application.properties")
+	err = ioutil.WriteFile(propFileName, []byte(propFile), 0777)
+	assert.NoError(t, err)
+
+	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
+	assert.NoError(t, err)
+	assert.NotNil(t, cmd)
+	assert.Equal(t, []string{"run", fileName, fmt.Sprintf("--resource=file:%s", propFileName)}, flags)
+}
+
 func TestModelineInspectSimple(t *testing.T) {
 	dir, err := ioutil.TempDir("", "camel-k-test-")
 	assert.NoError(t, err)
