@@ -104,7 +104,7 @@ type MavenSpec struct {
 	CASecret *corev1.SecretKeySelector `json:"caSecret,omitempty"`
 	// Deprecated: use IntegrationPlatform.Spec.Build.Timeout instead
 	Timeout      *metav1.Duration `json:"timeout,omitempty"`
-	Repositories []string         `json:"repositories,omitempty"`
+	Repositories []Repository     `json:"repositories,omitempty"`
 }
 
 // ValueSource --

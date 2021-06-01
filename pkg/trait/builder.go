@@ -26,6 +26,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
+	mvn "github.com/apache/camel-k/pkg/util/maven"
 )
 
 // The builder trait is internally used to determine the best strategy to
@@ -137,8 +138,9 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 	maven := e.Platform.Status.Build.Maven
 
 	// Add Maven repositories defined in the IntergrationKit
-	maven.Repositories = append(maven.Repositories, e.IntegrationKit.Spec.Repositories...)
-
+	for _, repo := range e.IntegrationKit.Spec.Repositories {
+		maven.Repositories = append(maven.Repositories, mvn.NewRepository(repo))
+	}
 	task := &v1.BuilderTask{
 		BaseTask: v1.BaseTask{
 			Name: "builder",

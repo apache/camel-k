@@ -20,6 +20,7 @@ package maven
 import (
 	"testing"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 
 	"github.com/stretchr/testify/assert"
@@ -101,27 +102,27 @@ func TestPomGeneration(t *testing.T) {
 			Version:    "1.0.0",
 		},
 	}
-	project.Repositories = []Repository{
+	project.Repositories = []v1.Repository{
 		{
 			ID:  "central",
 			URL: "https://repo.maven.apache.org/maven2",
-			Snapshots: RepositoryPolicy{
+			Snapshots: v1.RepositoryPolicy{
 				Enabled: false,
 			},
-			Releases: RepositoryPolicy{
+			Releases: v1.RepositoryPolicy{
 				Enabled:      true,
 				UpdatePolicy: "never",
 			},
 		},
 	}
-	project.PluginRepositories = []Repository{
+	project.PluginRepositories = []v1.Repository{
 		{
 			ID:  "central",
 			URL: "https://repo.maven.apache.org/maven2",
-			Snapshots: RepositoryPolicy{
+			Snapshots: v1.RepositoryPolicy{
 				Enabled: false,
 			},
-			Releases: RepositoryPolicy{
+			Releases: v1.RepositoryPolicy{
 				Enabled:      true,
 				UpdatePolicy: "never",
 			},

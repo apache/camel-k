@@ -162,6 +162,45 @@ spec:
                                 type: string
                               description: The Maven properties.
                               type: object
+                            repositories:
+                              items:
+                                description: Repository --
+                                properties:
+                                  id:
+                                    type: string
+                                  name:
+                                    type: string
+                                  releases:
+                                    description: RepositoryPolicy --
+                                    properties:
+                                      checksumPolicy:
+                                        type: string
+                                      enabled:
+                                        type: boolean
+                                      updatePolicy:
+                                        type: string
+                                    required:
+                                    - enabled
+                                    type: object
+                                  snapshots:
+                                    description: RepositoryPolicy --
+                                    properties:
+                                      checksumPolicy:
+                                        type: string
+                                      enabled:
+                                        type: boolean
+                                      updatePolicy:
+                                        type: string
+                                    required:
+                                    - enabled
+                                    type: object
+                                  url:
+                                    type: string
+                                required:
+                                - id
+                                - url
+                                type: object
+                              type: array
                             settings:
                               description: A reference to the ConfigMap or Secret
                                 key that contains the Maven settings.

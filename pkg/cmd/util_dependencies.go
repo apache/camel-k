@@ -126,7 +126,7 @@ func getTransitiveDependencies(
 	mc.Timeout = mvn.GetTimeout().Duration
 
 	if len(repositories) > 0 {
-		var repoList []maven.Repository
+		var repoList []v1.Repository
 		var mirrors []maven.Mirror
 		for i, repo := range repositories {
 			if strings.Contains(repo, "@mirrorOf=") {

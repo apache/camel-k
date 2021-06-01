@@ -24,6 +24,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 )
 
@@ -40,10 +41,10 @@ func NewSettings() Settings {
 	}
 }
 
-func NewDefaultSettings(repositories []Repository, mirrors []Mirror) Settings {
+func NewDefaultSettings(repositories []v1.Repository, mirrors []Mirror) Settings {
 	settings := NewSettings()
 
-	var additionalRepos []Repository
+	var additionalRepos []v1.Repository
 	for _, defaultRepo := range defaultMavenRepositories() {
 		if !containsRepo(repositories, defaultRepo.ID) {
 			additionalRepos = append(additionalRepos, defaultRepo)
@@ -95,14 +96,14 @@ func SettingsConfigMap(namespace string, name string, settings Settings) (*corev
 	return cm, nil
 }
 
-func defaultMavenRepositories() (repos []Repository) {
+func defaultMavenRepositories() (repos []v1.Repository) {
 	for _, repoDesc := range strings.Split(DefaultMavenRepositories, ",") {
 		repos = append(repos, NewRepository(repoDesc))
 	}
 	return
 }
 
-func containsRepo(repositories []Repository, id string) bool {
+func containsRepo(repositories []v1.Repository, id string) bool {
 	for _, r := range repositories {
 		if r.ID == id {
 			return true

@@ -23,23 +23,9 @@ import (
 	"fmt"
 	"io"
 	"time"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
-
-// Repository --
-type Repository struct {
-	ID        string           `xml:"id"`
-	Name      string           `xml:"name,omitempty"`
-	URL       string           `xml:"url"`
-	Snapshots RepositoryPolicy `xml:"snapshots,omitempty"`
-	Releases  RepositoryPolicy `xml:"releases,omitempty"`
-}
-
-// RepositoryPolicy --
-type RepositoryPolicy struct {
-	Enabled        bool   `xml:"enabled"`
-	UpdatePolicy   string `xml:"updatePolicy,omitempty"`
-	ChecksumPolicy string `xml:"checksumPolicy,omitempty"`
-}
 
 // Mirror --
 type Mirror struct {
@@ -198,8 +184,8 @@ type Project struct {
 	Properties           Properties            `xml:"properties,omitempty"`
 	DependencyManagement *DependencyManagement `xml:"dependencyManagement"`
 	Dependencies         []Dependency          `xml:"dependencies>dependency,omitempty"`
-	Repositories         []Repository          `xml:"repositories>repository,omitempty"`
-	PluginRepositories   []Repository          `xml:"pluginRepositories>pluginRepository,omitempty"`
+	Repositories         []v1.Repository       `xml:"repositories>repository,omitempty"`
+	PluginRepositories   []v1.Repository       `xml:"pluginRepositories>pluginRepository,omitempty"`
 	Build                *Build                `xml:"build,omitempty"`
 }
 
@@ -227,11 +213,11 @@ type Dependency struct {
 
 // Profile --
 type Profile struct {
-	ID                 string       `xml:"id"`
-	Activation         Activation   `xml:"activation,omitempty"`
-	Properties         Properties   `xml:"properties,omitempty"`
-	Repositories       []Repository `xml:"repositories>repository,omitempty"`
-	PluginRepositories []Repository `xml:"pluginRepositories>pluginRepository,omitempty"`
+	ID                 string          `xml:"id"`
+	Activation         Activation      `xml:"activation,omitempty"`
+	Properties         Properties      `xml:"properties,omitempty"`
+	Repositories       []v1.Repository `xml:"repositories>repository,omitempty"`
+	PluginRepositories []v1.Repository `xml:"pluginRepositories>pluginRepository,omitempty"`
 }
 
 // Activation --
