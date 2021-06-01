@@ -75,6 +75,8 @@ spec:
                 items:
                   description: ConfigurationSpec --
                   properties:
+                    resourceType:
+                      type: string
                     type:
                       type: string
                     value:
@@ -5434,6 +5436,8 @@ spec:
                 items:
                   description: ConfigurationSpec --
                   properties:
+                    resourceType:
+                      type: string
                     type:
                       type: string
                     value:
