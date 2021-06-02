@@ -31,8 +31,14 @@ import (
 
 // RunConfigOption represents a config option
 type RunConfigOption struct {
-	ConfigType configOptionType
-	Value      string
+	ConfigType      configOptionType
+	Value           string
+	destinationPath string
+}
+
+// DestinationPath is the location where the resource will be stored on destination
+func (runConfigOption *RunConfigOption) DestinationPath() string {
+	return runConfigOption.destinationPath
 }
 
 type configOptionType string
@@ -46,13 +52,23 @@ const (
 	ConfigOptionTypeFile configOptionType = "file"
 )
 
-var validConfigRegexp = regexp.MustCompile(`^(configmap|secret|file)\:([\w\.\-\_\:\/]+)$`)
+var validConfigRegexp = regexp.MustCompile(`^(configmap|secret|file)\:([\w\.\-\_\:\/@]+)$`)
 
 func newRunConfigOption(configType configOptionType, value string) *RunConfigOption {
+	optionValue, maybeDestinationPath := parseFileValue(value)
 	return &RunConfigOption{
-		ConfigType: configType,
-		Value:      value,
+		ConfigType:      configType,
+		Value:           optionValue,
+		destinationPath: maybeDestinationPath,
 	}
+}
+
+func parseFileValue(value string) (string, string) {
+	split := strings.SplitN(value, "@", 2)
+	if len(split) == 2 {
+		return split[0], split[1]
+	}
+	return value, ""
 }
 
 // ParseResourceOption will parse and return a runConfigOption
@@ -107,14 +123,14 @@ func applyOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec,
 		} else if resourceType != v1.ResourceTypeData && cm.BinaryData != nil {
 			return fmt.Errorf("you cannot provide a binary config, use a text file instead")
 		}
-		integrationSpec.AddConfigurationAsResourceType(string(config.ConfigType), config.Value, string(resourceType))
+		integrationSpec.AddConfigurationAsResource(string(config.ConfigType), config.Value, string(resourceType), config.DestinationPath())
 	case ConfigOptionTypeSecret:
 		secret := kubernetes.LookupSecret(context.Background(), c, namespace, config.Value)
 		if secret == nil {
 			fmt.Printf("Warn: %s Secret not found in %s namespace, make sure to provide it before the Integration can run\n",
 				config.Value, namespace)
 		}
-		integrationSpec.AddConfigurationAsResourceType(string(config.ConfigType), config.Value, string(resourceType))
+		integrationSpec.AddConfigurationAsResource(string(config.ConfigType), config.Value, string(resourceType), config.DestinationPath())
 	case ConfigOptionTypeFile:
 		// Don't allow a binary non compressed resource
 		rawData, contentType, err := loadRawContent(config.Value)
@@ -124,7 +140,7 @@ func applyOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec,
 		if resourceType != v1.ResourceTypeData && !enableCompression && isBinary(contentType) {
 			return fmt.Errorf("you cannot provide a binary config, use a text file or check --resource flag instead")
 		}
-		resourceSpec, err := binaryOrTextResource(path.Base(config.Value), rawData, contentType, enableCompression, resourceType)
+		resourceSpec, err := binaryOrTextResource(path.Base(config.Value), rawData, contentType, enableCompression, resourceType, config.DestinationPath())
 		if err != nil {
 			return err
 		}
@@ -147,10 +163,11 @@ func ApplyResourceOption(config *RunConfigOption, integrationSpec *v1.Integratio
 	return applyOption(config, integrationSpec, c, namespace, enableCompression, v1.ResourceTypeData)
 }
 
-func binaryOrTextResource(fileName string, data []byte, contentType string, base64Compression bool, resourceType v1.ResourceType) (v1.ResourceSpec, error) {
+func binaryOrTextResource(fileName string, data []byte, contentType string, base64Compression bool, resourceType v1.ResourceType, destinationPath string) (v1.ResourceSpec, error) {
 	resourceSpec := v1.ResourceSpec{
 		DataSpec: v1.DataSpec{
 			Name:        fileName,
+			Path:        destinationPath,
 			ContentKey:  fileName,
 			ContentType: contentType,
 			Compression: false,

@@ -613,8 +613,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		refName := fmt.Sprintf("i-resource-%03d", i)
 		resName := strings.TrimPrefix(r.Name, "/")
 		cmKey := "content"
-		resourceMountPoint := getResourceMountPoint(r.Type)
-		resPath := path.Join(resourceMountPoint, resName)
+		resPath := getResourcePath(resName, r.Path, r.Type)
 
 		if r.ContentRef != "" {
 			cmName = r.ContentRef
@@ -711,7 +710,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 		*mnts = append(*mnts, corev1.VolumeMount{
 			Name:      refName,
-			MountPath: path.Join(getConfigmapMountPoint(configmaps["resourceType"]), strings.ToLower(configmaps["value"])),
+			MountPath: getConfigmapMountPoint(configmaps["value"], configmaps["resourceMountPoint"], configmaps["resourceType"]),
 			ReadOnly:  true,
 		})
 	}
@@ -751,7 +750,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 		*mnts = append(*mnts, corev1.VolumeMount{
 			Name:      refName,
-			MountPath: path.Join(getSecretMountPoint(secret["resourceType"]), strings.ToLower(secret["value"])),
+			MountPath: getSecretMountPoint(secret["value"], secret["resourceMountPoint"], secret["resourceType"]),
 			ReadOnly:  true,
 		})
 	}
@@ -786,31 +785,44 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	}
 }
 
-func getResourceMountPoint(resourceType v1.ResourceType) string {
+func getResourcePath(resourceName string, maybePath string, resourceType v1.ResourceType) string {
+	// If the path is specified, we'll return it
+	if maybePath != "" {
+		return maybePath
+	}
+	// otherwise return a default path, according to the resource type
 	switch resourceType {
 	case v1.ResourceTypeData:
-		return dataResourcesMountPath
+		return path.Join(dataResourcesMountPath, resourceName)
 	}
 	// Default, config type
-	return configResourcesMountPath
+	return path.Join(configResourcesMountPath, resourceName)
 }
 
-func getConfigmapMountPoint(resourceType string) string {
+func getConfigmapMountPoint(resourceName string, maybeMountPoint string, resourceType string) string {
+	// If the mount point is specified, we'll return it
+	if maybeMountPoint != "" {
+		return maybeMountPoint
+	}
 	switch resourceType {
 	case "data":
-		return dataConfigmapsMountPath
+		return path.Join(dataConfigmapsMountPath, resourceName)
 	}
 	// Default, config type
-	return configConfigmapsMountPath
+	return path.Join(configConfigmapsMountPath, resourceName)
 }
 
-func getSecretMountPoint(resourceType string) string {
+func getSecretMountPoint(resourceName string, maybeMountPoint string, resourceType string) string {
+	// If the mount point is specified, we'll return it
+	if maybeMountPoint != "" {
+		return maybeMountPoint
+	}
 	switch resourceType {
 	case "data":
-		return dataSecretsMountPath
+		return path.Join(dataSecretsMountPath, resourceName)
 	}
 	// Default, config type
-	return configSecretsMountPath
+	return path.Join(configSecretsMountPath, resourceName)
 }
 
 func (e *Environment) collectConfigurationValues(configurationType string) []string {
