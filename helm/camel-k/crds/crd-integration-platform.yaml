@@ -235,6 +235,8 @@ spec:
                 items:
                   description: ConfigurationSpec --
                   properties:
+                    resourceMountPoint:
+                      type: string
                     resourceType:
                       type: string
                     type:
@@ -485,6 +487,8 @@ spec:
                 items:
                   description: ConfigurationSpec --
                   properties:
+                    resourceMountPoint:
+                      type: string
                     resourceType:
                       type: string
                     type:

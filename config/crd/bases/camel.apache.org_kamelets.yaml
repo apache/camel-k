@@ -247,6 +247,8 @@ spec:
                       type: string
                     name:
                       type: string
+                    path:
+                      type: string
                     property-names:
                       description: List of property names defined in the source (e.g.
                         if type is "template")
