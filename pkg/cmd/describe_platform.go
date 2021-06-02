@@ -37,6 +37,7 @@ func newDescribePlatformCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *de
 
 	cmd := cobra.Command{
 		Use:     "platform",
+		Aliases: []string{"ip"},
 		Short:   "Describe an Integration Platform",
 		Long:    `Describe an Integration Platform.`,
 		PreRunE: decode(&options),

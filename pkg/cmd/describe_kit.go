@@ -37,6 +37,7 @@ func newDescribeKitCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *describ
 
 	cmd := cobra.Command{
 		Use:     "kit",
+		Aliases: []string{"ik"},
 		Short:   "Describe an Integration Kit",
 		Long:    `Describe an Integration Kit.`,
 		PreRunE: decode(&options),
