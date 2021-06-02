@@ -85,6 +85,7 @@ func newCmdDescribe(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.AddCommand(cmdOnly(newDescribeKitCmd(rootCmdOptions)))
 	cmd.AddCommand(cmdOnly(newDescribeIntegrationCmd(rootCmdOptions)))
 	cmd.AddCommand(cmdOnly(newDescribePlatformCmd(rootCmdOptions)))
+	cmd.AddCommand(cmdOnly(newDescribeKameletCmd(rootCmdOptions)))
 
 	return &cmd
 }
