@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -96,7 +97,9 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 		// the required versions (camel and runtime) are not expressed as
 		// semver constraints
 		if exactVersionRegexp.MatchString(runtimeVersion) {
-			catalog, err = camel.GenerateCatalog(e.C, e.Client, ns, e.Platform.Status.Build.Maven, runtime, []maven.Dependency{})
+			ctx, cancel := context.WithTimeout(e.C, e.Platform.Status.Build.GetTimeout().Duration)
+			defer cancel()
+			catalog, err = camel.GenerateCatalog(ctx, e.Client, ns, e.Platform.Status.Build.Maven, runtime, []maven.Dependency{})
 			if err != nil {
 				return err
 			}

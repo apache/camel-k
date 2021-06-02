@@ -46,6 +46,13 @@ func NewProjectWithGAV(group string, artifact string, version string) Project {
 	return p
 }
 
+func (p Project) Command(context Context) *Command {
+	return &Command{
+		context: context,
+		project: p,
+	}
+}
+
 func (p Project) MarshalBytes() ([]byte, error) {
 	w := &bytes.Buffer{}
 	w.WriteString(xml.Header)
@@ -138,7 +145,37 @@ func (p *Project) AddDependencyExclusions(dep Dependency, exclusions ...Exclusio
 	}
 }
 
-// NewDependency create an new dependency from the given gav info
+type propertiesEntry struct {
+	XMLName xml.Name
+	Value   string `xml:",chardata"`
+}
+
+func (m Properties) AddAll(properties map[string]string) {
+	for k, v := range properties {
+		m[k] = v
+	}
+}
+
+func (m Properties) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	if len(m) == 0 {
+		return nil
+	}
+
+	err := e.EncodeToken(start)
+	if err != nil {
+		return err
+	}
+
+	for k, v := range m {
+		if err := e.Encode(propertiesEntry{XMLName: xml.Name{Local: k}, Value: v}); err != nil {
+			return err
+		}
+	}
+
+	return e.EncodeToken(start.End())
+}
+
+// NewDependency creates an new dependency from the given GAV
 func NewDependency(groupID string, artifactID string, version string) Dependency {
 	return Dependency{
 		GroupID:    groupID,
@@ -149,16 +186,14 @@ func NewDependency(groupID string, artifactID string, version string) Dependency
 	}
 }
 
+// NewRepository parses the given repository URL and generates the corresponding v1.Repository.
 //
-// NewRepository parse the given repo url ang generated the related struct.
-//
-// The repository can be customized by appending @instruction to the repository
-// uri, as example:
+// The repository can be customized by appending @param to the repository
+// URL, e.g.:
 //
 //     http://my-nexus:8081/repository/publicc@id=my-repo@snapshots
 //
-// Will enable snapshots and sets the repo it to my-repo
-//
+// That enables snapshots and sets the repository id to `my-repo`
 func NewRepository(repo string) v1.Repository {
 	r := v1.Repository{
 		URL: repo,

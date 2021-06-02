@@ -106,8 +106,8 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		log.Log.Info("No registry specified for publishing images")
 	}
 
-	if verbose && p.Status.Build.Maven.GetTimeout().Duration != 0 {
-		log.Log.Infof("Maven Timeout set to %s", p.Status.Build.Maven.GetTimeout().Duration)
+	if verbose && p.Status.Build.GetTimeout().Duration != 0 {
+		log.Log.Infof("Maven Timeout set to %s", p.Status.Build.GetTimeout().Duration)
 	}
 
 	return nil
@@ -184,24 +184,6 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1.Integration
 		}
 	}
 
-	if p.Status.Build.Maven.GetTimeout().Duration != 0 {
-		d := p.Status.Build.Maven.GetTimeout().Duration.Truncate(time.Second)
-
-		if verbose && p.Status.Build.Maven.GetTimeout().Duration != d {
-			log.Log.Infof("Maven timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.Build.Maven.GetTimeout().Duration, d)
-		}
-
-		p.Status.Build.Maven.Timeout = &metav1.Duration{
-			Duration: d,
-		}
-	}
-	if p.Status.Build.Maven.GetTimeout().Duration == 0 {
-		n := p.Status.Build.GetTimeout().Duration.Seconds() * 0.75
-		p.Status.Build.Maven.Timeout = &metav1.Duration{
-			Duration: (time.Duration(n) * time.Second).Truncate(time.Second),
-		}
-	}
-
 	if p.Status.Build.Maven.Settings.ConfigMapKeyRef == nil && p.Status.Build.Maven.Settings.SecretKeyRef == nil {
 		var repositories []v1.Repository
 		var mirrors []maven.Mirror
@@ -214,11 +196,11 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1.Integration
 					}
 					mirrors = append(mirrors, mirror)
 				} else {
-					repository := maven.NewRepository(c.Value)
-					if repository.ID == "" {
-						repository.ID = fmt.Sprintf("repository-%03d", i)
+					repo := maven.NewRepository(c.Value)
+					if repo.ID == "" {
+						repo.ID = fmt.Sprintf("repository-%03d", i)
 					}
-					repositories = append(repositories, repository)
+					repositories = append(repositories, repo)
 				}
 			}
 		}
@@ -260,7 +242,6 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1.Integration
 		log.Log.Infof("BaseImage set to %s", p.Status.Build.BaseImage)
 		log.Log.Infof("LocalRepository set to %s", p.Status.Build.Maven.LocalRepository)
 		log.Log.Infof("Timeout set to %s", p.Status.Build.GetTimeout())
-		log.Log.Infof("Maven Timeout set to %s", p.Status.Build.Maven.GetTimeout().Duration)
 	}
 
 	return nil

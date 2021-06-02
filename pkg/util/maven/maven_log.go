@@ -19,10 +19,11 @@ package maven
 
 import (
 	"encoding/json"
+
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
-type MavenLog struct {
+type mavenLog struct {
 	Level            string `json:"level"`
 	Ts               string `json:"ts"`
 	Logger           string `json:"logger"`
@@ -45,13 +46,13 @@ const (
 
 var mavenLogger = log.WithName("maven.build")
 
-func ParseLog(line string) (mavenLog MavenLog, error error) {
+func parseLog(line string) (mavenLog mavenLog, error error) {
 	error = json.Unmarshal([]byte(line), &mavenLog)
 
 	return mavenLog, error
 }
 
-func NormalizeLog(mavenLog MavenLog) {
+func normalizeLog(mavenLog mavenLog) {
 	switch mavenLog.Level {
 	case DEBUG, TRACE:
 		mavenLogger.Debug(mavenLog.Msg)
@@ -62,6 +63,6 @@ func NormalizeLog(mavenLog MavenLog) {
 	}
 }
 
-func NonNormalizedLog(rawLog string) {
+func nonNormalizedLog(rawLog string) {
 	mavenLogger.Info(rawLog)
 }

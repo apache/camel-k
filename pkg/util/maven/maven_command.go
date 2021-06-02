@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"math"
 	"os"
 	"os/exec"
 	"path"
@@ -38,8 +37,165 @@ import (
 
 var Log = log.WithName("maven")
 
-func GenerateProjectStructure(context Context) error {
-	if err := util.WriteFileWithBytesMarshallerContent(context.Path, "pom.xml", context.Project); err != nil {
+type Command struct {
+	context Context
+	project Project
+}
+
+func (c *Command) Do(ctx context.Context) error {
+	if err := generateProjectStructure(c.context, c.project); err != nil {
+		return err
+	}
+
+	mvnCmd := "mvn"
+	if c, ok := os.LookupEnv("MAVEN_CMD"); ok {
+		mvnCmd = c
+	}
+
+	args := make([]string, 0)
+	args = append(args, "--batch-mode")
+
+	if c.context.LocalRepository == "" {
+		args = append(args, "-Dcamel.noop=true")
+	} else if _, err := os.Stat(c.context.LocalRepository); err == nil {
+		args = append(args, "-Dmaven.repo.local="+c.context.LocalRepository)
+	}
+
+	settingsPath := path.Join(c.context.Path, "settings.xml")
+	settingsExists, err := util.FileExists(settingsPath)
+	if err != nil {
+		return err
+	}
+
+	if settingsExists {
+		args = append(args, "--settings", settingsPath)
+	}
+
+	args = append(args, c.context.AdditionalArguments...)
+
+	cmd := exec.CommandContext(ctx, mvnCmd, args...)
+	cmd.Dir = c.context.Path
+
+	var mavenOptions string
+	if len(c.context.ExtraMavenOpts) > 0 {
+		// Inherit the parent process environment
+		env := os.Environ()
+
+		mavenOpts, ok := os.LookupEnv("MAVEN_OPTS")
+		if !ok {
+			mavenOptions = strings.Join(c.context.ExtraMavenOpts, " ")
+			env = append(env, "MAVEN_OPTS="+mavenOptions)
+		} else {
+			var extraOptions []string
+			options := strings.Fields(mavenOpts)
+			for _, extraOption := range c.context.ExtraMavenOpts {
+				// Basic duplicated key detection, that should be improved
+				// to support a wider range of JVM options
+				key := strings.SplitN(extraOption, "=", 2)[0]
+				exists := false
+				for _, opt := range options {
+					if strings.HasPrefix(opt, key) {
+						exists = true
+						break
+					}
+				}
+				if !exists {
+					extraOptions = append(extraOptions, extraOption)
+				}
+			}
+
+			options = append(options, extraOptions...)
+			mavenOptions = strings.Join(options, " ")
+			for i, e := range env {
+				if strings.HasPrefix(e, "MAVEN_OPTS=") {
+					env[i] = "MAVEN_OPTS=" + mavenOptions
+					break
+				}
+			}
+		}
+
+		cmd.Env = env
+	}
+
+	Log.WithValues("MAVEN_OPTS", mavenOptions).Infof("executing: %s", strings.Join(cmd.Args, " "))
+
+	stdOut, err := cmd.StdoutPipe()
+	if err != nil {
+		return nil
+	}
+
+	err = cmd.Start()
+
+	if err != nil {
+		return err
+	}
+
+	scanner := bufio.NewScanner(stdOut)
+
+	Log.Debug("About to start parsing the Maven output")
+	for scanner.Scan() {
+		line := scanner.Text()
+		mavenLog, parseError := parseLog(line)
+		if parseError == nil {
+			normalizeLog(mavenLog)
+		} else {
+			// Why we are ignoring the parsing errors here: there are a few scenarios where this would likely occur.
+			// For example, if something outside of Maven outputs something (i.e.: the JDK, a misbehaved plugin,
+			// etc). The build may still have succeeded, though.
+			nonNormalizedLog(line)
+		}
+	}
+	Log.Debug("Finished parsing Maven output")
+
+	return cmd.Wait()
+}
+
+func NewContext(buildDir string) Context {
+	return Context{
+		Path:                buildDir,
+		AdditionalArguments: make([]string, 0),
+		AdditionalEntries:   make(map[string]interface{}),
+	}
+}
+
+type Context struct {
+	Path string
+	// Project             Project
+	ExtraMavenOpts      []string
+	SettingsContent     []byte
+	AdditionalArguments []string
+	AdditionalEntries   map[string]interface{}
+	// Timeout             time.Duration
+	LocalRepository string
+	// Stdout              io.Writer
+}
+
+func (c *Context) AddEntry(id string, entry interface{}) {
+	if c.AdditionalEntries == nil {
+		c.AdditionalEntries = make(map[string]interface{})
+	}
+
+	c.AdditionalEntries[id] = entry
+}
+
+func (c *Context) AddArgument(argument string) {
+	c.AdditionalArguments = append(c.AdditionalArguments, argument)
+}
+
+func (c *Context) AddArgumentf(format string, args ...interface{}) {
+	c.AdditionalArguments = append(c.AdditionalArguments, fmt.Sprintf(format, args...))
+}
+
+func (c *Context) AddArguments(arguments ...string) {
+	c.AdditionalArguments = append(c.AdditionalArguments, arguments...)
+}
+
+func (c *Context) AddSystemProperty(name string, value string) {
+	c.AddArgumentf("-D%s=%s", name, value)
+}
+
+func generateProjectStructure(context Context, project Project) error {
+	if err := util.WriteFileWithBytesMarshallerContent(context.Path, "pom.xml", project); err != nil {
 		return err
 	}
 
@@ -77,127 +233,7 @@ func GenerateProjectStructure(context Context) error {
 	return nil
 }
 
-func Run(ctx Context) error {
-	if err := GenerateProjectStructure(ctx); err != nil {
-		return err
-	}
-
-	mvnCmd := "mvn"
-	if c, ok := os.LookupEnv("MAVEN_CMD"); ok {
-		mvnCmd = c
-	}
-
-	args := make([]string, 0)
-	args = append(args, "--batch-mode")
-
-	if ctx.LocalRepository == "" {
-		args = append(args, "-Dcamel.noop=true")
-	} else if _, err := os.Stat(ctx.LocalRepository); err == nil {
-		args = append(args, "-Dmaven.repo.local="+ctx.LocalRepository)
-	}
-
-	settingsPath := path.Join(ctx.Path, "settings.xml")
-	settingsExists, err := util.FileExists(settingsPath)
-	if err != nil {
-		return err
-	}
-
-	if settingsExists {
-		args = append(args, "--settings", settingsPath)
-	}
-
-	args = append(args, ctx.AdditionalArguments...)
-
-	timeout := ctx.Timeout
-	if timeout == 0 {
-		timeout = math.MaxInt64
-	}
-
-	c, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-
-	cmd := exec.CommandContext(c, mvnCmd, args...)
-	cmd.Dir = ctx.Path
-
-	var mavenOptions string
-	if len(ctx.ExtraMavenOpts) > 0 {
-		// Inherit the parent process environment
-		env := os.Environ()
-
-		mavenOpts, ok := os.LookupEnv("MAVEN_OPTS")
-		if !ok {
-			mavenOptions = strings.Join(ctx.ExtraMavenOpts, " ")
-			env = append(env, "MAVEN_OPTS="+mavenOptions)
-		} else {
-			var extraOptions []string
-			options := strings.Fields(mavenOpts)
-			for _, extraOption := range ctx.ExtraMavenOpts {
-				// Basic duplicated key detection, that should be improved
-				// to support a wider range of JVM options
-				key := strings.SplitN(extraOption, "=", 2)[0]
-				exists := false
-				for _, opt := range options {
-					if strings.HasPrefix(opt, key) {
-						exists = true
-						break
-					}
-				}
-				if !exists {
-					extraOptions = append(extraOptions, extraOption)
-				}
-			}
-
-			options = append(options, extraOptions...)
-			mavenOptions = strings.Join(options, " ")
-			for i, e := range env {
-				if strings.HasPrefix(e, "MAVEN_OPTS=") {
-					env[i] = "MAVEN_OPTS=" + mavenOptions
-					break
-				}
-			}
-		}
-
-		cmd.Env = env
-	}
-
-	Log.WithValues("timeout", timeout.String(), "MAVEN_OPTS", mavenOptions).
-		Infof("executing: %s", strings.Join(cmd.Args, " "))
-
-	stdOut, error := cmd.StdoutPipe()
-	if error != nil {
-		return nil
-	}
-
-	error = cmd.Start()
-
-	if error != nil {
-		return error
-	}
-
-	scanner := bufio.NewScanner(stdOut)
-
-	Log.Debug("About to start parsing the Maven output")
-
-	for scanner.Scan() {
-		line := scanner.Text()
-
-		mavenLog, parseError := ParseLog(line)
-
-		if parseError == nil {
-			NormalizeLog(mavenLog)
-		} else {
-			// Why we are ignoring the parsing errors here: there are a few scenarios where this would likely occur.
-			// For example, if something outside of Maven outputs something (i.e.: the JDK, a misbehaved plugin,
-			// etc). The build may still have succeeded, though.
-			NonNormalizedLog(line)
-		}
-	}
-	Log.Debug("Finished parsing Maven output")
-
-	return cmd.Wait()
-}
-
-// ParseGAV decode a maven artifact id to a dependency definition.
+// ParseGAV decodes the provided Maven GAV into the corresponding Dependency.
 //
 // The artifact id is in the form of:
 //

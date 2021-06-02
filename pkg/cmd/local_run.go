@@ -155,8 +155,7 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 		}
 		dependencies = localBuildDependencies
 	} else {
-		// Fetch dependencies.
-		computedDependencies, err := getDependencies(args, command.AdditionalDependencies, command.MavenRepositories, true)
+		computedDependencies, err := getDependencies(command.Context, args, command.AdditionalDependencies, command.MavenRepositories, true)
 		if err != nil {
 			return err
 		}

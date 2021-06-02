@@ -83,10 +83,11 @@ func GenerateCatalog(
 		}
 	}
 
-	return GenerateCatalogCommon(settings, caCert, mvn, runtime, providerDependencies)
+	return GenerateCatalogCommon(ctx, settings, caCert, mvn, runtime, providerDependencies)
 }
 
 func GenerateCatalogCommon(
+	ctx context.Context,
 	settings string,
 	caCert []byte,
 	mvn v1.MavenSpec,
@@ -107,9 +108,8 @@ func GenerateCatalogCommon(
 
 	project := generateMavenProject(runtime.Version, providerDependencies)
 
-	mc := maven.NewContext(tmpDir, project)
+	mc := maven.NewContext(tmpDir)
 	mc.LocalRepository = mvn.LocalRepository
-	mc.Timeout = mvn.GetTimeout().Duration
 	mc.AddSystemProperty("catalog.path", tmpDir)
 	mc.AddSystemProperty("catalog.file", "catalog.yaml")
 	mc.AddSystemProperty("catalog.runtime", string(runtime.Provider))
@@ -132,7 +132,7 @@ func GenerateCatalogCommon(
 		)
 	}
 
-	err = maven.Run(mc)
+	err = project.Command(mc).Do(ctx)
 	if err != nil {
 		return nil, err
 	}
