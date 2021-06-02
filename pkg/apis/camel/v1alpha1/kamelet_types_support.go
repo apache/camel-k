@@ -18,6 +18,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"sort"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -137,6 +139,45 @@ func (in *KameletStatus) RemoveCondition(condType KameletConditionType) {
 	in.Conditions = newConditions
 }
 
+// SortedDefinitionPropertiesKeys returns the sorted keys of the Kamelet definition properties
+func (k *Kamelet) SortedDefinitionPropertiesKeys() []string {
+	if k.Spec.Definition == nil {
+		return []string{}
+	}
+	props := k.Spec.Definition.Properties
+	if len(props) == 0 {
+		return []string{}
+	}
+	res := make([]string, len(props))
+	i := 0
+	for key := range props {
+		res[i] = string(key)
+		i++
+	}
+	sort.Strings(res)
+	return res
+}
+
+// SortedTypesKeys returns the sorted keys of the Kamelet spec types
+func (k *Kamelet) SortedTypesKeys() []EventSlot {
+	types := k.Spec.Types
+	if len(types) == 0 {
+		return []EventSlot{}
+	}
+	strs := make([]string, len(types))
+	i := 0
+	for key := range types {
+		strs[i] = string(key)
+		i++
+	}
+	sort.Strings(strs)
+	res := make([]EventSlot, len(types))
+	for i, s := range strs {
+		res[i] = EventSlot(s)
+	}
+	return res
+}
+
 func ValidKameletName(name string) bool {
 	return !reservedKameletNames[name]
 }
@@ -149,4 +190,28 @@ func ValidKameletProperties(kamelet *Kamelet) bool {
 		return false
 	}
 	return true
+}
+
+// NewKamelet creates a new kamelet
+func NewKamelet(namespace string, name string) Kamelet {
+	return Kamelet{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: SchemeGroupVersion.String(),
+			Kind:       KameletKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+		},
+	}
+}
+
+// NewKameletList creates a new list of kamelets
+func NewKameletList() KameletList {
+	return KameletList{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: SchemeGroupVersion.String(),
+			Kind:       KameletKind,
+		},
+	}
 }
