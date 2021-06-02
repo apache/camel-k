@@ -28,6 +28,7 @@ func TestParseConfigOption(t *testing.T) {
 	validSecret := "secret:my-secret"
 	validFile := "file:/tmp/my-file.txt"
 	notValid := "someprotocol:wrong"
+	validLocation := "file:my-file.txt@/tmp/another-name.xml"
 
 	configmap, err := ParseConfigOption(validConfigMap)
 	assert.Nil(t, err)
@@ -43,4 +44,9 @@ func TestParseConfigOption(t *testing.T) {
 	assert.Equal(t, "/tmp/my-file.txt", file.Value)
 	_, err = ParseConfigOption(notValid)
 	assert.NotNil(t, err)
+	location, err := ParseConfigOption(validLocation)
+	assert.Nil(t, err)
+	assert.Equal(t, ConfigOptionTypeFile, location.ConfigType)
+	assert.Equal(t, "my-file.txt", location.Value)
+	assert.Equal(t, "/tmp/another-name.xml", location.DestinationPath())
 }

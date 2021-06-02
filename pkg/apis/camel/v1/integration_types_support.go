@@ -109,12 +109,13 @@ func (in *IntegrationSpec) AddConfiguration(confType string, confValue string) {
 	})
 }
 
-// AddConfigurationAsResourceType will set a configuration specified with a resource type
-func (in *IntegrationSpec) AddConfigurationAsResourceType(confType string, confValue string, resourceType string) {
+// AddConfigurationAsResource will set a configuration specified with a resource type
+func (in *IntegrationSpec) AddConfigurationAsResource(confType string, confValue string, resourceType string, resourceMountPoint string) {
 	in.Configuration = append(in.Configuration, ConfigurationSpec{
-		Type:         confType,
-		Value:        confValue,
-		ResourceType: resourceType,
+		Type:               confType,
+		Value:              confValue,
+		ResourceType:       resourceType,
+		ResourceMountPoint: resourceMountPoint,
 	})
 }
 
