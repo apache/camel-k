@@ -75,6 +75,8 @@ spec:
                 items:
                   description: ConfigurationSpec --
                   properties:
+                    resourceMountPoint:
+                      type: string
                     resourceType:
                       type: string
                     type:
@@ -188,6 +190,8 @@ spec:
                       type: string
                     name:
                       type: string
+                    path:
+                      type: string
                     rawContent:
                       format: byte
                       type: string
@@ -226,6 +230,8 @@ spec:
                         that will interpret this source at runtime
                       type: string
                     name:
+                      type: string
+                    path:
                       type: string
                     property-names:
                       description: List of property names defined in the source (e.g.
@@ -5424,6 +5430,8 @@ spec:
                 items:
                   description: ConfigurationSpec --
                   properties:
+                    resourceMountPoint:
+                      type: string
                     resourceType:
                       type: string
                     type:
@@ -5486,6 +5494,8 @@ spec:
                       type: string
                     name:
                       type: string
+                    path:
+                      type: string
                     rawContent:
                       format: byte
                       type: string
@@ -5522,6 +5532,8 @@ spec:
                         that will interpret this source at runtime
                       type: string
                     name:
+                      type: string
+                    path:
                       type: string
                     property-names:
                       description: List of property names defined in the source (e.g.
