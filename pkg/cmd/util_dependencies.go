@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -42,9 +43,9 @@ var additionalDependencyUsageMessage = `Additional top-level dependencies are sp
 <type>:<dependency-name>
 where <type> is one of {` + strings.Join(acceptedDependencyTypes, "|") + `}.`
 
-func getDependencies(args []string, additionalDependencies []string, repositories []string, allDependencies bool) ([]string, error) {
+func getDependencies(ctx context.Context, args []string, additionalDependencies []string, repositories []string, allDependencies bool) ([]string, error) {
 	// Fetch existing catalog or create new one if one does not already exist
-	catalog, err := createCamelCatalog()
+	catalog, err := createCamelCatalog(ctx)
 
 	// Get top-level dependencies
 	dependencies, err := getTopLevelDependencies(catalog, args)
@@ -67,7 +68,7 @@ func getDependencies(args []string, additionalDependencies []string, repositorie
 			util.StringSliceUniqueAdd(&dependencies, runtimeDep.GetDependencyID())
 		}
 
-		dependencies, err = getTransitiveDependencies(catalog, dependencies, repositories)
+		dependencies, err = getTransitiveDependencies(ctx, catalog, dependencies, repositories)
 		if err != nil {
 			return nil, err
 		}
@@ -101,29 +102,20 @@ func getTopLevelDependencies(catalog *camel.RuntimeCatalog, args []string) ([]st
 	return dependencies.List(), nil
 }
 
-func getTransitiveDependencies(
-	catalog *camel.RuntimeCatalog,
-	dependencies []string, repositories []string) ([]string, error) {
-
-	mvn := v1.MavenSpec{
-		LocalRepository: "",
-	}
-
-	// Create Maven project
+func getTransitiveDependencies(ctx context.Context, catalog *camel.RuntimeCatalog, dependencies []string, repositories []string) ([]string, error) {
 	project := builder.GenerateQuarkusProjectCommon(
 		catalog.CamelCatalogSpec.Runtime.Metadata["camel-quarkus.version"],
-		defaults.DefaultRuntimeVersion, catalog.CamelCatalogSpec.Runtime.Metadata["quarkus.version"])
+		defaults.DefaultRuntimeVersion,
+		catalog.CamelCatalogSpec.Runtime.Metadata["quarkus.version"],
+	)
 
-	// Inject dependencies into Maven project
 	err := camel.ManageIntegrationDependencies(&project, dependencies, catalog)
 	if err != nil {
 		return nil, err
 	}
 
-	// Maven local context to be used for generating the transitive dependencies
-	mc := maven.NewContext(util.MavenWorkingDirectory, project)
-	mc.LocalRepository = mvn.LocalRepository
-	mc.Timeout = mvn.GetTimeout().Duration
+	mc := maven.NewContext(util.MavenWorkingDirectory)
+	mc.LocalRepository = ""
 
 	if len(repositories) > 0 {
 		var repoList []v1.Repository
@@ -155,7 +147,7 @@ func getTransitiveDependencies(
 	// Make maven command less verbose
 	mc.AdditionalArguments = append(mc.AdditionalArguments, "-q")
 
-	err = builder.BuildQuarkusRunnerCommon(mc)
+	err = builder.BuildQuarkusRunnerCommon(ctx, mc, project)
 	if err != nil {
 		return nil, err
 	}
@@ -217,7 +209,7 @@ func getLocalBuildRoutes(integrationDirectory string) ([]string, error) {
 	return locallyBuiltRoutes, nil
 }
 
-func generateCatalog() (*camel.RuntimeCatalog, error) {
+func generateCatalog(ctx context.Context) (*camel.RuntimeCatalog, error) {
 	// A Camel catalog is required for this operation
 	settings := ""
 	mvn := v1.MavenSpec{
@@ -229,7 +221,7 @@ func generateCatalog() (*camel.RuntimeCatalog, error) {
 	}
 	var providerDependencies []maven.Dependency
 	var caCert []byte
-	catalog, err := camel.GenerateCatalogCommon(settings, caCert, mvn, runtime, providerDependencies)
+	catalog, err := camel.GenerateCatalogCommon(ctx, settings, caCert, mvn, runtime, providerDependencies)
 	if err != nil {
 		return nil, err
 	}
@@ -237,7 +229,7 @@ func generateCatalog() (*camel.RuntimeCatalog, error) {
 	return catalog, nil
 }
 
-func createCamelCatalog() (*camel.RuntimeCatalog, error) {
+func createCamelCatalog(ctx context.Context) (*camel.RuntimeCatalog, error) {
 	// Attempt to reuse existing Camel catalog if one is present
 	catalog, err := camel.DefaultCatalog()
 	if err != nil {
@@ -246,7 +238,7 @@ func createCamelCatalog() (*camel.RuntimeCatalog, error) {
 
 	// Generate catalog if one was not found
 	if catalog == nil {
-		catalog, err = generateCatalog()
+		catalog, err = generateCatalog(ctx)
 		if err != nil {
 			return nil, err
 		}

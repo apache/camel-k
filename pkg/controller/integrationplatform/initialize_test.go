@@ -22,15 +22,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/apache/camel-k/pkg/platform"
 	"github.com/rs/xid"
-
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/log"
-	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/pkg/util/test"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -54,10 +53,6 @@ func TestTimeouts_Default(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	n := answer.Status.Build.GetTimeout().Duration.Seconds() * 0.75
-	d := (time.Duration(n) * time.Second).Truncate(time.Second)
-
-	assert.Equal(t, d, answer.Status.Build.Maven.GetTimeout().Duration)
 	assert.Equal(t, 5*time.Minute, answer.Status.Build.GetTimeout().Duration)
 }
 
@@ -88,10 +83,6 @@ func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	n := answer.Status.Build.GetTimeout().Duration.Seconds() * 0.75
-	d := (time.Duration(n) * time.Second).Truncate(time.Second)
-
-	assert.Equal(t, d, answer.Status.Build.Maven.GetTimeout().Duration)
 	assert.Equal(t, 1*time.Minute, answer.Status.Build.GetTimeout().Duration)
 }
 
@@ -109,13 +100,6 @@ func TestTimeouts_Truncated(t *testing.T) {
 		Duration: bt,
 	}
 
-	mt, err := time.ParseDuration("2m1ms")
-	assert.Nil(t, err)
-
-	ip.Spec.Build.Maven.Timeout = &metav1.Duration{
-		Duration: mt,
-	}
-
 	c, err := test.NewFakeClient(&ip)
 	assert.Nil(t, err)
 
@@ -129,7 +113,6 @@ func TestTimeouts_Truncated(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	assert.Equal(t, 2*time.Minute, answer.Status.Build.Maven.GetTimeout().Duration)
 	assert.Equal(t, 5*time.Minute, answer.Status.Build.GetTimeout().Duration)
 }
 

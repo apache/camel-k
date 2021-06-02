@@ -73,13 +73,11 @@ type localInspectCmdOptions struct {
 }
 
 func (command *localInspectCmdOptions) validate(args []string) error {
-	// Validate integration files.
 	err := validateIntegrationFiles(args)
 	if err != nil {
 		return err
 	}
 
-	// Validate additional dependencies specified by the user.
 	err = validateAdditionalDependencies(command.AdditionalDependencies)
 	if err != nil {
 		return err
@@ -93,13 +91,11 @@ func (command *localInspectCmdOptions) init() error {
 }
 
 func (command *localInspectCmdOptions) run(args []string) error {
-	// Fetch dependencies.
-	dependencies, err := getDependencies(args, command.AdditionalDependencies, command.MavenRepositories, command.AllDependencies)
+	dependencies, err := getDependencies(command.Context, args, command.AdditionalDependencies, command.MavenRepositories, command.AllDependencies)
 	if err != nil {
 		return err
 	}
 
-	// Print dependencies.
 	err = outputDependencies(dependencies, command.OutputFormat)
 	if err != nil {
 		return err

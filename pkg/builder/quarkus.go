@@ -18,6 +18,7 @@ limitations under the License.
 package builder
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path"
@@ -145,10 +146,9 @@ func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion str
 }
 
 func buildQuarkusRunner(ctx *builderContext) error {
-	mc := maven.NewContext(path.Join(ctx.Path, "maven"), ctx.Maven.Project)
+	mc := maven.NewContext(path.Join(ctx.Path, "maven"))
 	mc.SettingsContent = ctx.Maven.SettingsData
 	mc.LocalRepository = ctx.Build.Maven.LocalRepository
-	mc.Timeout = ctx.Build.Maven.GetTimeout().Duration
 
 	if ctx.Maven.TrustStoreName != "" {
 		mc.ExtraMavenOpts = append(mc.ExtraMavenOpts,
@@ -157,7 +157,7 @@ func buildQuarkusRunner(ctx *builderContext) error {
 		)
 	}
 
-	err := BuildQuarkusRunnerCommon(mc)
+	err := BuildQuarkusRunnerCommon(ctx.C, mc, ctx.Maven.Project)
 	if err != nil {
 		return err
 	}
@@ -165,7 +165,7 @@ func buildQuarkusRunner(ctx *builderContext) error {
 	return nil
 }
 
-func BuildQuarkusRunnerCommon(mc maven.Context) error {
+func BuildQuarkusRunnerCommon(ctx context.Context, mc maven.Context, project maven.Project) error {
 	resourcesPath := path.Join(mc.Path, "src", "main", "resources")
 	if err := os.MkdirAll(resourcesPath, os.ModePerm); err != nil {
 		return errors.Wrap(err, "failure while creating resource folder")
@@ -182,8 +182,8 @@ func BuildQuarkusRunnerCommon(mc maven.Context) error {
 
 	mc.AddArgument("package")
 
-	// Build the project
-	if err := maven.Run(mc); err != nil {
+	// Run the Maven goal
+	if err := project.Command(mc).Do(ctx); err != nil {
 		return errors.Wrap(err, "failure while building project")
 	}
 
@@ -191,10 +191,9 @@ func BuildQuarkusRunnerCommon(mc maven.Context) error {
 }
 
 func computeQuarkusDependencies(ctx *builderContext) error {
-	mc := maven.NewContext(path.Join(ctx.Path, "maven"), ctx.Maven.Project)
+	mc := maven.NewContext(path.Join(ctx.Path, "maven"))
 	mc.SettingsContent = ctx.Maven.SettingsData
 	mc.LocalRepository = ctx.Build.Maven.LocalRepository
-	mc.Timeout = ctx.Build.Maven.GetTimeout().Duration
 
 	// Process artifacts list and add it to existing artifacts.
 	artifacts, err := ProcessQuarkusTransitiveDependencies(mc)

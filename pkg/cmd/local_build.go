@@ -167,15 +167,14 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 	var dependenciesList, propertyFilesList []string
 	routeFiles := args
 	if !command.BaseImage {
-		// Fetch dependencies.
-		dependencies, err := getDependencies(args, command.AdditionalDependencies, command.MavenRepositories, true)
+		dependencies, err := getDependencies(command.Context, args, command.AdditionalDependencies, command.MavenRepositories, true)
 		if err != nil {
 			return err
 		}
 
 		var propertyFiles []string
 		if !command.DependenciesOnly {
-			// Manage integration properties which may come from files or CLI.
+			// Manage integration properties which may come from files or CLI
 			propertyFiles, err = updateIntegrationProperties(command.Properties, command.PropertyFiles, false)
 			if err != nil {
 				return err

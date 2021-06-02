@@ -18,6 +18,7 @@ limitations under the License.
 package maven
 
 import (
+	"bytes"
 	"encoding/xml"
 	"strings"
 
@@ -31,6 +32,21 @@ import (
 // DefaultMavenRepositories is a comma separated list of default maven repositories
 // This variable can be overridden at build time
 var DefaultMavenRepositories = "https://repo.maven.apache.org/maven2@id=central"
+
+func (s Settings) MarshalBytes() ([]byte, error) {
+	w := &bytes.Buffer{}
+	w.WriteString(xml.Header)
+
+	e := xml.NewEncoder(w)
+	e.Indent("", "  ")
+
+	err := e.Encode(s)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return w.Bytes(), nil
+}
 
 func NewSettings() Settings {
 	return Settings{

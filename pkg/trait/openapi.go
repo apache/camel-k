@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -201,9 +202,8 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Res
 		return err
 	}
 
-	mc := maven.NewContext(tmpDir, project)
+	mc := maven.NewContext(tmpDir)
 	mc.LocalRepository = e.Platform.Status.Build.Maven.LocalRepository
-	mc.Timeout = e.Platform.Status.Build.Maven.GetTimeout().Duration
 	mc.AddArgument("-Dopenapi.spec=" + in)
 	mc.AddArgument("-Ddsl.out=" + out)
 
@@ -232,7 +232,9 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Res
 		)
 	}
 
-	err = maven.Run(mc)
+	ctx, cancel := context.WithTimeout(e.C, e.Platform.Status.Build.GetTimeout().Duration)
+	defer cancel()
+	err = project.Command(mc).Do(ctx)
 	if err != nil {
 		return err
 	}
