@@ -22,9 +22,23 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 	"strings"
 )
+
+const (
+	Megabyte = 1 << 20
+	Kilobyte = 1 << 10
+)
+
+func fileSize(source string) (int64, error) {
+	fi, err := os.Stat(source)
+	if err != nil {
+		return -1, err
+	}
+	return fi.Size(), nil
+}
 
 func loadRawContent(source string) ([]byte, string, error) {
 	var content []byte

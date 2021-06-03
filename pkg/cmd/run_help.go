@@ -132,6 +132,14 @@ func applyOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec,
 		}
 		integrationSpec.AddConfigurationAsResource(string(config.ConfigType), config.Value, string(resourceType), config.DestinationPath())
 	case ConfigOptionTypeFile:
+		// Don't allow a file size longer than 1 MiB
+		fileSize, err := fileSize(config.Value)
+		printSize := fmt.Sprintf("%.2f", float64(fileSize)/Megabyte)
+		if err != nil {
+			return err
+		} else if fileSize > Megabyte {
+			return fmt.Errorf("you cannot provide a file larger than 1 MB (it was %s MB), check configmap option or --volume instead", printSize)
+		}
 		// Don't allow a binary non compressed resource
 		rawData, contentType, err := loadRawContent(config.Value)
 		if err != nil {
