@@ -37,8 +37,6 @@ import (
 
 const kameletDirEnv = "KAMELET_CATALOG_DIR"
 const defaultKameletDir = "/kamelets/"
-const kameletBundledLabel = "camel.apache.org/kamelet.bundled"
-const kameletReadOnlyLabel = "camel.apache.org/kamelet.readonly"
 
 // KameletCatalog installs the bundled KameletCatalog into one namespace
 func KameletCatalog(ctx context.Context, c client.Client, namespace string) error {
@@ -93,8 +91,8 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 				if k.GetLabels() == nil {
 					k.SetLabels(make(map[string]string))
 				}
-				k.GetLabels()[kameletBundledLabel] = "true"
-				k.GetLabels()[kameletReadOnlyLabel] = "true"
+				k.GetLabels()[v1alpha1.KameletBundledLabel] = "true"
+				k.GetLabels()[v1alpha1.KameletReadOnlyLabel] = "true"
 
 				err := ObjectOrCollect(ctx, c, namespace, nil, true, k)
 
