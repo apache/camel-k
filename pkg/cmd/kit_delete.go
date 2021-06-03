@@ -35,7 +35,7 @@ func newKitDeleteCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitDelete
 	}
 
 	cmd := cobra.Command{
-		Use:     "delete",
+		Use:     "delete <name>",
 		Short:   "Delete an Integration Kit",
 		Long:    `Delete an Integration Kit.`,
 		PreRunE: decode(&options),
