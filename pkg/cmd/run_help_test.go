@@ -67,3 +67,18 @@ func TestFilterFileLocation(t *testing.T) {
 	assert.Equal(t, "app.properties", filteredOptions[1])
 	assert.Equal(t, "/validfile", filteredOptions[2])
 }
+
+func TestValidateFileLocation(t *testing.T) {
+	validLocation := "file:my-file.txt@/tmp/another-name.xml"
+	etcCamelLocation := "configmap:my-cm@/etc/camel/configmaps"
+	deploymentsDepsLocation := "secret:my-sec@/deployments/dependencies"
+
+	_, err := ParseConfigOption(validLocation)
+	assert.Nil(t, err)
+	_, err = ParseConfigOption(etcCamelLocation)
+	assert.NotNil(t, err)
+	assert.Equal(t, "you cannot mount a file under /etc/camel path", err.Error())
+	_, err = ParseConfigOption(deploymentsDepsLocation)
+	assert.NotNil(t, err)
+	assert.Equal(t, "you cannot mount a file under /deployments/dependencies path", err.Error())
+}

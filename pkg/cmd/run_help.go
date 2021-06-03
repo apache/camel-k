@@ -29,6 +29,8 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
+var invalidPaths = []string{"/etc/camel", "/deployments/dependencies"}
+
 // RunConfigOption represents a config option
 type RunConfigOption struct {
 	ConfigType      configOptionType
@@ -39,6 +41,19 @@ type RunConfigOption struct {
 // DestinationPath is the location where the resource will be stored on destination
 func (runConfigOption *RunConfigOption) DestinationPath() string {
 	return runConfigOption.destinationPath
+}
+
+// Validate checks if the DestinationPath exists and in case if it's a valid path
+func (runConfigOption *RunConfigOption) Validate() error {
+	if runConfigOption.destinationPath == "" {
+		return nil
+	}
+	for _, invalidPath := range invalidPaths {
+		if runConfigOption.destinationPath == invalidPath || strings.HasPrefix(runConfigOption.destinationPath, invalidPath+"/") {
+			return fmt.Errorf("you cannot mount a file under %s path", invalidPath)
+		}
+	}
+	return nil
 }
 
 type configOptionType string
@@ -79,7 +94,7 @@ func ParseResourceOption(item string) (*RunConfigOption, error) {
 	if err != nil {
 		if strings.HasPrefix(err.Error(), "could not match configuration") {
 			fmt.Printf("Warn: --resource %s has been deprecated. You should use --resource file:%s instead.\n", item, item)
-			return newRunConfigOption(ConfigOptionTypeFile, item), nil
+			return parseOption("file:" + item)
 		}
 		return nil, err
 	}
@@ -109,7 +124,11 @@ func parseOption(item string) (*RunConfigOption, error) {
 		// Should never reach this
 		return nil, fmt.Errorf("invalid config option type %s", groups[1])
 	}
-	return newRunConfigOption(cot, groups[2]), nil
+	configurationOption := newRunConfigOption(cot, groups[2])
+	if err := configurationOption.Validate(); err != nil {
+		return nil, err
+	}
+	return configurationOption, nil
 }
 
 func applyOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec,
