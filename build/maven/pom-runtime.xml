@@ -133,28 +133,6 @@
             <artifactId>camel-k-kamelet-reify-deployment</artifactId>
             <version>${runtime.version}</version>
         </dependency>
-
-        <!-- loaders -->
-        <dependency>
-            <groupId>org.apache.camel.k</groupId>
-            <artifactId>camel-k-loader-groovy</artifactId>
-            <version>${runtime.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel.k</groupId>
-            <artifactId>camel-k-loader-groovy-deployment</artifactId>
-            <version>${runtime.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel.k</groupId>
-            <artifactId>camel-k-loader-yaml</artifactId>
-            <version>${runtime.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel.k</groupId>
-            <artifactId>camel-k-loader-yaml-deployment</artifactId>
-            <version>${runtime.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.camel.k</groupId>
             <artifactId>camel-k-core-support</artifactId>
