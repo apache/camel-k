@@ -80,7 +80,11 @@ func (command *describeKitCommandOptions) run(args []string) error {
 	}
 
 	if err := c.Get(command.Context, kitKey, &kit); err == nil {
-		fmt.Print(command.describeIntegrationKit(kit))
+		if desc, err := command.describeIntegrationKit(kit); err == nil {
+			fmt.Print(desc)
+		} else {
+			fmt.Println(err)
+		}
 	} else {
 		fmt.Printf("IntegrationKit '%s' does not exist.\n", args[0])
 	}

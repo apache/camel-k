@@ -80,7 +80,11 @@ func (command *describePlatformCommandOptions) run(args []string) error {
 	}
 
 	if err := c.Get(command.Context, platformKey, &platform); err == nil {
-		fmt.Print(command.describeIntegrationPlatform(platform))
+		if desc, err := command.describeIntegrationPlatform(platform); err == nil {
+			fmt.Print(desc)
+		} else {
+			fmt.Println(err)
+		}
 	} else {
 		fmt.Printf("IntegrationPlatform '%s' does not exist.\n", args[0])
 	}
