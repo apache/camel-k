@@ -50,3 +50,20 @@ func TestParseConfigOption(t *testing.T) {
 	assert.Equal(t, "my-file.txt", location.Value)
 	assert.Equal(t, "/tmp/another-name.xml", location.DestinationPath())
 }
+
+func TestFilterFileLocation(t *testing.T) {
+	optionFileLocations := []string{
+		"file:/path/to/valid/file",
+		"file:app.properties",
+		"configmap:my-configmap",
+		"secret:my-secret",
+		"file:/validfile@/tmp/destination",
+	}
+
+	filteredOptions := filterFileLocation(optionFileLocations)
+
+	assert.Equal(t, 3, len(filteredOptions))
+	assert.Equal(t, "/path/to/valid/file", filteredOptions[0])
+	assert.Equal(t, "app.properties", filteredOptions[1])
+	assert.Equal(t, "/validfile", filteredOptions[2])
+}
