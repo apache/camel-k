@@ -85,7 +85,11 @@ func (command *describeIntegrationCommandOptions) run(args []string) error {
 	}
 
 	if err := c.Get(command.Context, key, &ctx); err == nil {
-		fmt.Print(command.describeIntegration(ctx))
+		if desc, err := command.describeIntegration(ctx); err == nil {
+			fmt.Print(desc)
+		} else {
+			fmt.Println(err)
+		}
 	} else {
 		fmt.Printf("Integration '%s' does not exist.\n", args[0])
 	}
