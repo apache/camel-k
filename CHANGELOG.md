@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - kamelets: add condition to report when an integration is stuck waiting for them  [\#2331](https://github.com/apache/camel-k/issues/2331)
+- maven-repository flag is not honored in the run command  [\#2327](https://github.com/apache/camel-k/issues/2327)
 - Timeout when debugging the operator locally [\#2315](https://github.com/apache/camel-k/issues/2315)
 - Creating an IntegrationPlatform with the route Trait Crashes the Operator [\#2313](https://github.com/apache/camel-k/issues/2313)
 - Integration container build errors are absent from the log messages [\#2306](https://github.com/apache/camel-k/issues/2306)
@@ -21,6 +22,7 @@
 - Camel K and Amazon EKS \(Elastic Kubernetes Service\) [\#2241](https://github.com/apache/camel-k/issues/2241)
 - `kamel` run fails for remote files on windows [\#2239](https://github.com/apache/camel-k/issues/2239)
 - Add a flag to enable/disable the installation of default kamelets [\#2237](https://github.com/apache/camel-k/issues/2237)
+- Create E2E test for Service Binding Operator [\#2236](https://github.com/apache/camel-k/issues/2236)
 - Update run-from-github page to correct github example path [\#2230](https://github.com/apache/camel-k/issues/2230)
 - Allow to configure traits using annotations [\#2165](https://github.com/apache/camel-k/issues/2165)
 - Release 1.4.0 [\#2134](https://github.com/apache/camel-k/issues/2134)
@@ -39,18 +41,24 @@
 
 **Merged pull requests:**
 
+- chore\(build\): Cancellable Maven operations [\#2348](https://github.com/apache/camel-k/pull/2348) ([astefanutti](https://github.com/astefanutti))
+- feat\(cli\): support k8s api shortnames for kit & platform with kamel describe [\#2346](https://github.com/apache/camel-k/pull/2346) ([tadayosi](https://github.com/tadayosi))
+- feat\(cli\): initial support for describing Kamelets with kamel describe \#2312 [\#2345](https://github.com/apache/camel-k/pull/2345) ([tadayosi](https://github.com/tadayosi))
 - chore\(api\): Encapsulate Maven properties [\#2344](https://github.com/apache/camel-k/pull/2344) ([astefanutti](https://github.com/astefanutti))
+- Add link to the github repo [\#2340](https://github.com/apache/camel-k/pull/2340) ([davidlanouette](https://github.com/davidlanouette))
 - Fix \#2165: allow configuring traits via annotations [\#2338](https://github.com/apache/camel-k/pull/2338) ([nicolaferraro](https://github.com/nicolaferraro))
 - kamelets: add condition to report when an integration is stuck waiting for them [\#2337](https://github.com/apache/camel-k/pull/2337) ([lburgazzoli](https://github.com/lburgazzoli))
 - doc\(dev\): add instruction for deploying custom images to remote clusters [\#2336](https://github.com/apache/camel-k/pull/2336) ([tadayosi](https://github.com/tadayosi))
 - feat\(cli\): make kamel delete command aware of KameletBindings [\#2332](https://github.com/apache/camel-k/pull/2332) ([tadayosi](https://github.com/tadayosi))
 - feat\(cmd/run\): property configuration refactoring [\#2329](https://github.com/apache/camel-k/pull/2329) ([squakez](https://github.com/squakez))
+- Extra repositories [\#2328](https://github.com/apache/camel-k/pull/2328) ([johnpoth](https://github.com/johnpoth))
 - Added K3s to the registry section of navbar [\#2325](https://github.com/apache/camel-k/pull/2325) ([oscerd](https://github.com/oscerd))
 - Nav Bar: Titles fixed [\#2324](https://github.com/apache/camel-k/pull/2324) ([oscerd](https://github.com/oscerd))
 - Fix Route Trait Crash [\#2323](https://github.com/apache/camel-k/pull/2323) ([Kyle-Cooley](https://github.com/Kyle-Cooley))
 - Updated the nav bar with all the installations [\#2322](https://github.com/apache/camel-k/pull/2322) ([oscerd](https://github.com/oscerd))
 - \[TEST\] Increase timeouts for slow infra [\#2319](https://github.com/apache/camel-k/pull/2319) ([bouskaJ](https://github.com/bouskaJ))
 - Fix \#2315: Add leader-election flag to Operator command [\#2316](https://github.com/apache/camel-k/pull/2316) ([johnpoth](https://github.com/johnpoth))
+- Fix \#2236: Add Service Binding E2E test [\#2314](https://github.com/apache/camel-k/pull/2314) ([johnpoth](https://github.com/johnpoth))
 - Check if the environment can produce structured Maven logs before parsing them [\#2311](https://github.com/apache/camel-k/pull/2311) ([orpiske](https://github.com/orpiske))
 - chore\(ci\): Use `github.ref` instead of `github.head_ref` as concurrency group key [\#2310](https://github.com/apache/camel-k/pull/2310) ([astefanutti](https://github.com/astefanutti))
 - feat\(cmd\): build-property flag [\#2309](https://github.com/apache/camel-k/pull/2309) ([squakez](https://github.com/squakez))
