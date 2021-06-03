@@ -200,3 +200,14 @@ func binaryOrTextResource(fileName string, data []byte, contentType string, base
 	}
 	return resourceSpec, nil
 }
+
+func filterFileLocation(maybeFileLocations []string) []string {
+	filteredOptions := make([]string, 0)
+	for _, option := range maybeFileLocations {
+		if strings.HasPrefix(option, "file:") {
+			localPath, _ := parseFileValue(strings.Replace(option, "file:", "", 1))
+			filteredOptions = append(filteredOptions, localPath)
+		}
+	}
+	return filteredOptions
+}

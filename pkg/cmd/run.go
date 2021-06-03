@@ -407,7 +407,10 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 	// Let's watch all relevant files when in dev mode
 	var files []string
 	files = append(files, sources...)
-	files = append(files, o.Resources...)
+	files = append(files, filterFileLocation(o.Resources)...)
+	files = append(files, filterFileLocation(o.Configs)...)
+	files = append(files, filterFileLocation(o.Properties)...)
+	files = append(files, filterFileLocation(o.BuildProperties)...)
 	files = append(files, o.PropertyFiles...)
 	files = append(files, o.OpenAPIs...)
 
