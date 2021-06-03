@@ -29,6 +29,7 @@ import (
 	"path"
 	"sort"
 	"strconv"
+	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
@@ -117,6 +118,13 @@ func ComputeForIntegration(integration *v1.Integration) (string, error) {
 			}
 		}
 		if _, err := hash.Write([]byte("]")); err != nil {
+			return "", err
+		}
+	}
+	// Integration traits as annotations
+	for _, k := range sortedTraitAnnotationsKeys(integration) {
+		v := integration.Annotations[k]
+		if _, err := hash.Write([]byte(fmt.Sprintf("%s=%v,", k, v))); err != nil {
 			return "", err
 		}
 	}
@@ -236,6 +244,17 @@ func sortedTraitSpecMapKeys(m map[string]v1.TraitSpec) []string {
 	for k := range m {
 		res[i] = k
 		i++
+	}
+	sort.Strings(res)
+	return res
+}
+
+func sortedTraitAnnotationsKeys(it *v1.Integration) []string {
+	res := make([]string, 0, len(it.Annotations))
+	for k := range it.Annotations {
+		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
+			res = append(res, k)
+		}
 	}
 	sort.Strings(res)
 	return res
