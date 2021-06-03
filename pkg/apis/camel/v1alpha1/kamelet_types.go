@@ -25,7 +25,15 @@ import (
 )
 
 const (
-	AnnotationIcon = "camel.apache.org/kamelet.icon"
+	AnnotationIcon       = "camel.apache.org/kamelet.icon"
+	KameletBundledLabel  = "camel.apache.org/kamelet.bundled"
+	KameletReadOnlyLabel = "camel.apache.org/kamelet.readonly"
+	KameletTypeLabel     = "camel.apache.org/kamelet.type"
+	KameletGroupLabel    = "camel.apache.org/kamelet.group"
+
+	KameletTypeSink   = "sink"
+	KameletTypeSource = "source"
+	KameletTypeAction = "action"
 )
 
 var (
