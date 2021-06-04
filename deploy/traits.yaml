@@ -221,6 +221,10 @@ traits:
       or a passive consumer (e.g. `direct` is a passive consumer).It's required that
       all periodic consumers have the same period and it can be expressed as cron
       schedule (e.g. `1m` can be expressed as `0/1 * * * *`,while `35m` or `50s` cannot).
+  - name: starting-deadline-seconds
+    type: int64
+    description: Optional deadline in seconds for starting the job if it misses scheduledtime
+      for any reason.  Missed jobs executions will be counted as failed ones.
 - name: dependencies
   platform: true
   profiles:
