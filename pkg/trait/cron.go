@@ -76,6 +76,9 @@ type cronTrait struct {
 	// It's required that all periodic consumers have the same period and it can be expressed as cron schedule (e.g. `1m` can be expressed as `0/1 * * * *`,
 	// while `35m` or `50s` cannot).
 	Auto *bool `property:"auto" json:"auto,omitempty"`
+	// Optional deadline in seconds for starting the job if it misses scheduled
+	// time for any reason.  Missed jobs executions will be counted as failed ones.
+	StartingDeadlineSeconds *int64 `property:"starting-deadline-seconds" json:"startingDeadlineSeconds,omitempty"`
 }
 
 var _ ControllerStrategySelector = &cronTrait{}
@@ -283,8 +286,9 @@ func (t *cronTrait) getCronJobFor(e *Environment) *v1beta1.CronJob {
 			Annotations: e.Integration.Annotations,
 		},
 		Spec: v1beta1.CronJobSpec{
-			Schedule:          t.Schedule,
-			ConcurrencyPolicy: v1beta1.ConcurrencyPolicy(t.ConcurrencyPolicy),
+			Schedule:                t.Schedule,
+			ConcurrencyPolicy:       v1beta1.ConcurrencyPolicy(t.ConcurrencyPolicy),
+			StartingDeadlineSeconds: t.StartingDeadlineSeconds,
 			JobTemplate: v1beta1.JobTemplateSpec{
 				Spec: batchv1.JobSpec{
 					Template: corev1.PodTemplateSpec{
