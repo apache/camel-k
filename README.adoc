@@ -62,7 +62,7 @@ For Minishift, this means executing `oc login -u system:admin` then `kamel insta
 After the initial setup, you can run a Camel integration on the cluster by executing:
 
 ```
-kamel run examples/Sample.java
+kamel run examples/languages/Sample.java
 ```
 
 During your first run you may see your console stuck with the following message:
