@@ -54,6 +54,11 @@ func (action *monitorAction) Handle(ctx context.Context, kit *v1.IntegrationKit)
 
 		return kit, nil
 	}
+	if kit.Spec.Image != "" && kit.Spec.Image != kit.Status.Image {
+		kit.Status.Phase = v1.IntegrationKitPhaseInitialization
+
+		return kit, nil
+	}
 
 	return nil, nil
 }
