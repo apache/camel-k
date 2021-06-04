@@ -76,6 +76,8 @@ type containerTrait struct {
 
 	// The main container name. It's named `integration` by default.
 	Name string `property:"name" json:"name,omitempty"`
+	// The main container image
+	Image string `property:"image" json:"image,omitempty"`
 
 	// ProbesEnabled enable/disable probes on the container (default `false`)
 	ProbesEnabled *bool `property:"probes-enabled" json:"probesEnabled,omitempty"`
@@ -141,7 +143,7 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 
 func (t *containerTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		t.configureDependencies(e)
+		return t.configureDependencies(e)
 	}
 
 	if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
@@ -156,21 +158,51 @@ func (t *containerTrait) IsPlatformTrait() bool {
 	return true
 }
 
-func (t *containerTrait) configureDependencies(e *Environment) {
-	if util.IsNilOrFalse(t.ProbesEnabled) {
-		return
-	}
-
+func (t *containerTrait) configureDependencies(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		if capability, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityHealth]; ok {
-			for _, dependency := range capability.Dependencies {
-				util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dependency.GetDependencyID())
+		if t.Image != "" {
+			if e.Integration.Spec.IntegrationKit != nil {
+				return fmt.Errorf(
+					"unsupported configuration: a container image has been set in conjunction with an IntegrationKit %v",
+					e.Integration.Spec.IntegrationKit)
+			}
+			if e.Integration.Spec.Kit != "" {
+				return fmt.Errorf(
+					"unsupported configuration: a container image has been set in conjunction with an IntegrationKit %s",
+					e.Integration.Spec.Kit)
 			}
 
-			// sort the dependencies to get always the same list if they don't change
-			sort.Strings(e.Integration.Status.Dependencies)
+			kitName := fmt.Sprintf("kit-%s", e.Integration.Name)
+			kit := v1.NewIntegrationKit(e.Integration.Namespace, kitName)
+			kit.Spec.Image = t.Image
+
+			// Add some information for post-processing, this may need to be refactored
+			// to a proper data structure
+			kit.Labels = map[string]string{
+				"camel.apache.org/kit.type":             v1.IntegrationKitTypeExternal,
+				"camel.apache.org/created.by.kind":      v1.IntegrationKind,
+				"camel.apache.org/created.by.name":      e.Integration.Name,
+				"camel.apache.org/created.by.namespace": e.Integration.Namespace,
+				"camel.apache.org/created.by.version":   e.Integration.ResourceVersion,
+			}
+
+			t.L.Infof("image %s", kit.Spec.Image)
+			e.Resources.Add(&kit)
+			e.Integration.SetIntegrationKit(&kit)
+		}
+		if util.IsTrue(t.ProbesEnabled) {
+			if capability, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityHealth]; ok {
+				for _, dependency := range capability.Dependencies {
+					util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dependency.GetDependencyID())
+				}
+
+				// sort the dependencies to get always the same list if they don't change
+				sort.Strings(e.Integration.Status.Dependencies)
+			}
 		}
 	}
+
+	return nil
 }
 
 // nolint:gocyclo
