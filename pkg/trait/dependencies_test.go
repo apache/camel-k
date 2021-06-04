@@ -238,7 +238,7 @@ func TestIntegrationCustomLoader(t *testing.T) {
 		[]string{
 			"camel:direct",
 			"camel:log",
-			"mvn:org.apache.camel.k:camel-k-loader-yaml",
+			"mvn:org.apache.camel.quarkus:camel-quarkus-yaml-dsl",
 			"mvn:org.apache.camel.k:camel-k-runtime"},
 		e.Integration.Status.Dependencies,
 	)
