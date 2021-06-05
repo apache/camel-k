@@ -6,7 +6,9 @@
 
 **Closed issues:**
 
+- Maven logs are no longer shown [\#2357](https://github.com/apache/camel-k/issues/2357)
 - kamelets: add condition to report when an integration is stuck waiting for them  [\#2331](https://github.com/apache/camel-k/issues/2331)
+- Property in cron trait to set `startingDeadlineSeconds` [\#2330](https://github.com/apache/camel-k/issues/2330)
 - maven-repository flag is not honored in the run command  [\#2327](https://github.com/apache/camel-k/issues/2327)
 - Timeout when debugging the operator locally [\#2315](https://github.com/apache/camel-k/issues/2315)
 - Creating an IntegrationPlatform with the route Trait Crashes the Operator [\#2313](https://github.com/apache/camel-k/issues/2313)
@@ -43,12 +45,15 @@
 
 **Merged pull requests:**
 
+- Update README to reflect where Sample.java is [\#2359](https://github.com/apache/camel-k/pull/2359) ([bentito](https://github.com/bentito))
+- Related to \#2165: account for annotations when checking if integratio… [\#2352](https://github.com/apache/camel-k/pull/2352) ([nicolaferraro](https://github.com/nicolaferraro))
 - feat\(cli\): add sub command kamel kamelet for get and delete \#2312 [\#2351](https://github.com/apache/camel-k/pull/2351) ([tadayosi](https://github.com/tadayosi))
 - fix\(cli\): stop printing \<nil\> at the end of kamel describe output [\#2350](https://github.com/apache/camel-k/pull/2350) ([tadayosi](https://github.com/tadayosi))
 - chore\(build\): Cancellable Maven operations [\#2348](https://github.com/apache/camel-k/pull/2348) ([astefanutti](https://github.com/astefanutti))
 - feat\(cli\): support k8s api shortnames for kit & platform with kamel describe [\#2346](https://github.com/apache/camel-k/pull/2346) ([tadayosi](https://github.com/tadayosi))
 - feat\(cli\): initial support for describing Kamelets with kamel describe \#2312 [\#2345](https://github.com/apache/camel-k/pull/2345) ([tadayosi](https://github.com/tadayosi))
 - chore\(api\): Encapsulate Maven properties [\#2344](https://github.com/apache/camel-k/pull/2344) ([astefanutti](https://github.com/astefanutti))
+- Starting deadline seconds [\#2342](https://github.com/apache/camel-k/pull/2342) ([zach-robinson](https://github.com/zach-robinson))
 - Add link to the github repo [\#2340](https://github.com/apache/camel-k/pull/2340) ([davidlanouette](https://github.com/davidlanouette))
 - feat\(cmd/run\): --config option flag [\#2339](https://github.com/apache/camel-k/pull/2339) ([squakez](https://github.com/squakez))
 - Fix \#2165: allow configuring traits via annotations [\#2338](https://github.com/apache/camel-k/pull/2338) ([nicolaferraro](https://github.com/nicolaferraro))
