@@ -30,6 +30,7 @@ type ConfigurationSpec struct {
 	Value              string `json:"value"`
 	ResourceType       string `json:"resourceType,omitempty"`
 	ResourceMountPoint string `json:"resourceMountPoint,omitempty"`
+	ResourceKey        string `json:"resourceKey,omitempty"`
 }
 
 // Artifact --

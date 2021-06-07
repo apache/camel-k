@@ -33,8 +33,9 @@ var invalidPaths = []string{"/etc/camel", "/deployments/dependencies"}
 
 // RunConfigOption represents a config option
 type RunConfigOption struct {
-	ConfigType      configOptionType
-	Value           string
+	configType      configOptionType
+	resourceName    string
+	resourceKey     string
 	destinationPath string
 }
 
@@ -43,11 +44,28 @@ func (runConfigOption *RunConfigOption) DestinationPath() string {
 	return runConfigOption.destinationPath
 }
 
-// Validate checks if the DestinationPath exists and in case if it's a valid path
+// Type is the type, converted as string
+func (runConfigOption *RunConfigOption) Type() string {
+	return string(runConfigOption.configType)
+}
+
+// Name is the name of the resource
+func (runConfigOption *RunConfigOption) Name() string {
+	return runConfigOption.resourceName
+}
+
+// Key is the key specified for the resource
+func (runConfigOption *RunConfigOption) Key() string {
+	return runConfigOption.resourceKey
+}
+
+// Validate checks if the DestinationPath is correctly configured
 func (runConfigOption *RunConfigOption) Validate() error {
 	if runConfigOption.destinationPath == "" {
 		return nil
 	}
+
+	// Check for invalid path
 	for _, invalidPath := range invalidPaths {
 		if runConfigOption.destinationPath == invalidPath || strings.HasPrefix(runConfigOption.destinationPath, invalidPath+"/") {
 			return fmt.Errorf("you cannot mount a file under %s path", invalidPath)
@@ -68,22 +86,42 @@ const (
 )
 
 var validConfigRegexp = regexp.MustCompile(`^(configmap|secret|file)\:([\w\.\-\_\:\/@]+)$`)
+var validResourceRegexp = regexp.MustCompile(`^([\w\.\-\_\:]+)(\/([\w\.\-\_\:]+))?(\@([\w\.\-\_\:\/]+))?$`)
 
 func newRunConfigOption(configType configOptionType, value string) *RunConfigOption {
-	optionValue, maybeDestinationPath := parseFileValue(value)
+	rn, mk, mp := parseResourceValue(configType, value)
 	return &RunConfigOption{
-		ConfigType:      configType,
-		Value:           optionValue,
-		destinationPath: maybeDestinationPath,
+		configType:      configType,
+		resourceName:    rn,
+		resourceKey:     mk,
+		destinationPath: mp,
 	}
 }
 
-func parseFileValue(value string) (string, string) {
+func parseResourceValue(configType configOptionType, value string) (resource string, maybeKey string, maybeDestinationPath string) {
+	if configType == ConfigOptionTypeFile {
+		resource, maybeDestinationPath = parseFileValue(value)
+		return resource, "", maybeDestinationPath
+	} else {
+		return parseCMOrSecretValue(value)
+	}
+}
+
+func parseFileValue(value string) (localPath string, maybeDestinationPath string) {
 	split := strings.SplitN(value, "@", 2)
 	if len(split) == 2 {
 		return split[0], split[1]
 	}
 	return value, ""
+}
+
+func parseCMOrSecretValue(value string) (resource string, maybeKey string, maybeDestinationPath string) {
+	if !validResourceRegexp.MatchString(value) {
+		return value, "", ""
+	}
+	// Must have 3 values
+	groups := validResourceRegexp.FindStringSubmatch(value)
+	return groups[1], groups[3], groups[5]
 }
 
 // ParseResourceOption will parse and return a runConfigOption
@@ -133,26 +171,26 @@ func parseOption(item string) (*RunConfigOption, error) {
 
 func applyOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec,
 	c client.Client, namespace string, enableCompression bool, resourceType v1.ResourceType) error {
-	switch config.ConfigType {
+	switch config.configType {
 	case ConfigOptionTypeConfigmap:
-		cm := kubernetes.LookupConfigmap(context.Background(), c, namespace, config.Value)
+		cm := kubernetes.LookupConfigmap(context.Background(), c, namespace, config.Name())
 		if cm == nil {
 			fmt.Printf("Warn: %s Configmap not found in %s namespace, make sure to provide it before the Integration can run\n",
-				config.Value, namespace)
+				config.Name(), namespace)
 		} else if resourceType != v1.ResourceTypeData && cm.BinaryData != nil {
 			return fmt.Errorf("you cannot provide a binary config, use a text file instead")
 		}
-		integrationSpec.AddConfigurationAsResource(string(config.ConfigType), config.Value, string(resourceType), config.DestinationPath())
+		integrationSpec.AddConfigurationAsResource(config.Type(), config.Name(), string(resourceType), config.DestinationPath(), config.Key())
 	case ConfigOptionTypeSecret:
-		secret := kubernetes.LookupSecret(context.Background(), c, namespace, config.Value)
+		secret := kubernetes.LookupSecret(context.Background(), c, namespace, config.Name())
 		if secret == nil {
 			fmt.Printf("Warn: %s Secret not found in %s namespace, make sure to provide it before the Integration can run\n",
-				config.Value, namespace)
+				config.Name(), namespace)
 		}
-		integrationSpec.AddConfigurationAsResource(string(config.ConfigType), config.Value, string(resourceType), config.DestinationPath())
+		integrationSpec.AddConfigurationAsResource(string(config.configType), config.Name(), string(resourceType), config.DestinationPath(), config.Key())
 	case ConfigOptionTypeFile:
 		// Don't allow a file size longer than 1 MiB
-		fileSize, err := fileSize(config.Value)
+		fileSize, err := fileSize(config.Name())
 		printSize := fmt.Sprintf("%.2f", float64(fileSize)/Megabyte)
 		if err != nil {
 			return err
@@ -160,21 +198,21 @@ func applyOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec,
 			return fmt.Errorf("you cannot provide a file larger than 1 MB (it was %s MB), check configmap option or --volume instead", printSize)
 		}
 		// Don't allow a binary non compressed resource
-		rawData, contentType, err := loadRawContent(config.Value)
+		rawData, contentType, err := loadRawContent(config.Name())
 		if err != nil {
 			return err
 		}
 		if resourceType != v1.ResourceTypeData && !enableCompression && isBinary(contentType) {
 			return fmt.Errorf("you cannot provide a binary config, use a text file or check --resource flag instead")
 		}
-		resourceSpec, err := binaryOrTextResource(path.Base(config.Value), rawData, contentType, enableCompression, resourceType, config.DestinationPath())
+		resourceSpec, err := binaryOrTextResource(path.Base(config.Name()), rawData, contentType, enableCompression, resourceType, config.DestinationPath())
 		if err != nil {
 			return err
 		}
 		integrationSpec.AddResources(resourceSpec)
 	default:
 		// Should never reach this
-		return fmt.Errorf("invalid option type %s", config.ConfigType)
+		return fmt.Errorf("invalid option type %s", config.configType)
 	}
 
 	return nil

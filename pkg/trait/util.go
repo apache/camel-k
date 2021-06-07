@@ -98,6 +98,7 @@ func collectConfigurations(configurationType string, configurable ...v1.Configur
 				item["value"] = entry.Value
 				item["resourceType"] = entry.ResourceType
 				item["resourceMountPoint"] = entry.ResourceMountPoint
+				item["resourceKey"] = entry.ResourceKey
 				result = append(result, item)
 			}
 		}

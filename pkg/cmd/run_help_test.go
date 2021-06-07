@@ -32,23 +32,106 @@ func TestParseConfigOption(t *testing.T) {
 
 	configmap, err := ParseConfigOption(validConfigMap)
 	assert.Nil(t, err)
-	assert.Equal(t, ConfigOptionTypeConfigmap, configmap.ConfigType)
-	assert.Equal(t, "my-config_map", configmap.Value)
+	assert.Equal(t, ConfigOptionTypeConfigmap, configmap.configType)
+	assert.Equal(t, "my-config_map", configmap.Name())
 	secret, err := ParseConfigOption(validSecret)
 	assert.Nil(t, err)
-	assert.Equal(t, ConfigOptionTypeSecret, secret.ConfigType)
-	assert.Equal(t, "my-secret", secret.Value)
+	assert.Equal(t, ConfigOptionTypeSecret, secret.configType)
+	assert.Equal(t, "my-secret", secret.Name())
 	file, err := ParseConfigOption(validFile)
 	assert.Nil(t, err)
-	assert.Equal(t, ConfigOptionTypeFile, file.ConfigType)
-	assert.Equal(t, "/tmp/my-file.txt", file.Value)
+	assert.Equal(t, ConfigOptionTypeFile, file.configType)
+	assert.Equal(t, "/tmp/my-file.txt", file.Name())
 	_, err = ParseConfigOption(notValid)
 	assert.NotNil(t, err)
 	location, err := ParseConfigOption(validLocation)
 	assert.Nil(t, err)
-	assert.Equal(t, ConfigOptionTypeFile, location.ConfigType)
-	assert.Equal(t, "my-file.txt", location.Value)
+	assert.Equal(t, ConfigOptionTypeFile, location.configType)
+	assert.Equal(t, "my-file.txt", location.Name())
 	assert.Equal(t, "/tmp/another-name.xml", location.DestinationPath())
+}
+
+func TestParseConfigOptionAllParams(t *testing.T) {
+	cm1 := "configmap:my-config_map/key@/tmp/my"
+	cm2 := "configmap:my-config_map/key"
+	cm3 := "configmap:my-config_map@/tmp/my"
+	cm4 := "configmap:my-config_map"
+	sec1 := "secret:sec/key@/tmp/sec"
+	sec2 := "secret:sec/key"
+	sec3 := "secret:sec@/tmp/sec"
+	sec4 := "secret:sec"
+	file1 := "file:/path/to/my-file.txt@/tmp/file.txt"
+	file2 := "file:/path/to/my-file.txt"
+
+	parsedCm1, err := ParseConfigOption(cm1)
+	assert.Nil(t, err)
+	assert.Equal(t, "configmap", parsedCm1.Type())
+	assert.Equal(t, "my-config_map", parsedCm1.Name())
+	assert.Equal(t, "key", parsedCm1.Key())
+	assert.Equal(t, "/tmp/my", parsedCm1.DestinationPath())
+
+	parsedCm2, err := ParseConfigOption(cm2)
+	assert.Nil(t, err)
+	assert.Equal(t, "configmap", parsedCm2.Type())
+	assert.Equal(t, "my-config_map", parsedCm2.Name())
+	assert.Equal(t, "key", parsedCm2.Key())
+	assert.Equal(t, "", parsedCm2.DestinationPath())
+
+	parsedCm3, err := ParseConfigOption(cm3)
+	assert.Nil(t, err)
+	assert.Equal(t, "configmap", parsedCm3.Type())
+	assert.Equal(t, "my-config_map", parsedCm3.Name())
+	assert.Equal(t, "", parsedCm3.Key())
+	assert.Equal(t, "/tmp/my", parsedCm3.DestinationPath())
+
+	parsedCm4, err := ParseConfigOption(cm4)
+	assert.Nil(t, err)
+	assert.Equal(t, "configmap", parsedCm4.Type())
+	assert.Equal(t, "my-config_map", parsedCm4.Name())
+	assert.Equal(t, "", parsedCm4.Key())
+	assert.Equal(t, "", parsedCm4.DestinationPath())
+
+	parsedSec1, err := ParseConfigOption(sec1)
+	assert.Nil(t, err)
+	assert.Equal(t, "secret", parsedSec1.Type())
+	assert.Equal(t, "sec", parsedSec1.Name())
+	assert.Equal(t, "key", parsedSec1.Key())
+	assert.Equal(t, "/tmp/sec", parsedSec1.DestinationPath())
+
+	parsedSec2, err := ParseConfigOption(sec2)
+	assert.Nil(t, err)
+	assert.Equal(t, "secret", parsedSec2.Type())
+	assert.Equal(t, "sec", parsedSec2.Name())
+	assert.Equal(t, "key", parsedSec2.Key())
+	assert.Equal(t, "", parsedSec2.DestinationPath())
+
+	parsedSec3, err := ParseConfigOption(sec3)
+	assert.Nil(t, err)
+	assert.Equal(t, "secret", parsedSec3.Type())
+	assert.Equal(t, "sec", parsedSec3.Name())
+	assert.Equal(t, "", parsedSec3.Key())
+	assert.Equal(t, "/tmp/sec", parsedSec3.DestinationPath())
+
+	parsedSec4, err := ParseConfigOption(sec4)
+	assert.Nil(t, err)
+	assert.Equal(t, "secret", parsedSec4.Type())
+	assert.Equal(t, "sec", parsedSec4.Name())
+	assert.Equal(t, "", parsedSec4.Key())
+	assert.Equal(t, "", parsedSec4.DestinationPath())
+
+	parsedFile1, err := ParseConfigOption(file1)
+	assert.Nil(t, err)
+	assert.Equal(t, "file", parsedFile1.Type())
+	assert.Equal(t, "/path/to/my-file.txt", parsedFile1.Name())
+	assert.Equal(t, "", parsedFile1.Key())
+	assert.Equal(t, "/tmp/file.txt", parsedFile1.DestinationPath())
+
+	parsedFile2, err := ParseConfigOption(file2)
+	assert.Nil(t, err)
+	assert.Equal(t, "file", parsedFile2.Type())
+	assert.Equal(t, "/path/to/my-file.txt", parsedFile2.Name())
+	assert.Equal(t, "", parsedFile2.Key())
+	assert.Equal(t, "", parsedFile2.DestinationPath())
 }
 
 func TestFilterFileLocation(t *testing.T) {
