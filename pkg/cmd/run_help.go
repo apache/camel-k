@@ -220,6 +220,10 @@ func applyOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec,
 
 // ApplyConfigOption will set the proper --config option behavior to the IntegrationSpec
 func ApplyConfigOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec, c client.Client, namespace string, enableCompression bool) error {
+	// A config option cannot specify destination path
+	if config.DestinationPath() != "" {
+		return fmt.Errorf("cannot specify a destination path for this option type")
+	}
 	return applyOption(config, integrationSpec, c, namespace, enableCompression, v1.ResourceTypeConfig)
 }
 
