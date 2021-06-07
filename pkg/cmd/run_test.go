@@ -251,6 +251,7 @@ a=b
 #d=c\=e
 #ignore=me
 f=g:h
+i=j\nk
 `
 
 func TestAddPropertyFile(t *testing.T) {
@@ -267,11 +268,12 @@ func TestAddPropertyFile(t *testing.T) {
 	properties, err := extractProperties("file:" + tmpFile.Name())
 	assert.Nil(t, err)
 	assert.Nil(t, addIntegrationProperties(properties, &spec))
-	assert.Equal(t, 2, len(spec.Configuration))
+	assert.Equal(t, 3, len(spec.Configuration))
 	assert.Equal(t, `a = b`, spec.Configuration[0].Value)
-	//assert.Equal(t, `c\=d=e`, spec.Configuration[1].Value)
-	//assert.Equal(t, `d=c\=e`, spec.Configuration[2].Value)
+	//assert.Equal(t, `c\=d = e`, spec.Configuration[1].Value)
+	//assert.Equal(t, `d = c\=e`, spec.Configuration[2].Value)
 	assert.Equal(t, `f = g:h`, spec.Configuration[1].Value)
+	assert.Equal(t, `i = j\nk`, spec.Configuration[2].Value)
 }
 
 func TestRunPropertyFileFlag(t *testing.T) {
@@ -291,6 +293,15 @@ func TestRunPropertyFileFlag(t *testing.T) {
 	assert.Nil(t, errExecute)
 	assert.Len(t, runCmdOptions.PropertyFiles, 1)
 	assert.Equal(t, tmpFile.Name(), runCmdOptions.PropertyFiles[0])
+}
+
+func TestRunProperty(t *testing.T) {
+	spec := v1.IntegrationSpec{}
+	properties, err := extractProperties(`key=value\nnewline`)
+	assert.Nil(t, err)
+	assert.Nil(t, addIntegrationProperties(properties, &spec))
+	assert.Equal(t, 1, len(spec.Configuration))
+	assert.Equal(t, `key = value\nnewline`, spec.Configuration[0].Value)
 }
 
 func TestRunResourceFlag(t *testing.T) {

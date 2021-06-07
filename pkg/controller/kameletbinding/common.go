@@ -20,7 +20,6 @@ package kameletbinding
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"sort"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -31,6 +30,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/bindings"
 	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/property"
 	"github.com/pkg/errors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -125,10 +125,21 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 		}
 	}
 
-	configureBinding(&it, from)
-	configureBinding(&it, steps...)
-	configureBinding(&it, to)
-	configureBinding(&it, errorHandler)
+	if err := configureBinding(&it, from); err != nil {
+		return nil, err
+	}
+
+	if err := configureBinding(&it, steps...); err != nil {
+		return nil, err
+	}
+
+	if err := configureBinding(&it, to); err != nil {
+		return nil, err
+	}
+
+	if err := configureBinding(&it, errorHandler); err != nil {
+		return nil, err
+	}
 
 	if it.Spec.Configuration != nil {
 		sort.SliceStable(it.Spec.Configuration, func(i, j int) bool {
@@ -178,7 +189,7 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 	return &it, nil
 }
 
-func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding) {
+func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding) error {
 	for _, b := range bindings {
 		if b == nil {
 			continue
@@ -190,12 +201,20 @@ func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding
 			integration.Spec.Traits[k] = v
 		}
 		for k, v := range b.ApplicationProperties {
+			entry, err := property.EncodePropertyFileEntry(k, v)
+
+			if err != nil {
+				return err
+			}
+
 			integration.Spec.Configuration = append(integration.Spec.Configuration, v1.ConfigurationSpec{
 				Type:  "property",
-				Value: fmt.Sprintf("%s=%s", k, v),
+				Value: entry,
 			})
 		}
 	}
+
+	return nil
 }
 
 func determineProfile(ctx context.Context, c client.Client, binding *v1alpha1.KameletBinding) (v1.TraitProfile, error) {
