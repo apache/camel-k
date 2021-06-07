@@ -123,6 +123,9 @@ traits:
   - name: name
     type: string
     description: The main container name. It's named `integration` by default.
+  - name: image
+    type: string
+    description: The main container image
   - name: probes-enabled
     type: bool
     description: ProbesEnabled enable/disable probes on the container (default `false`)
