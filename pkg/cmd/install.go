@@ -114,6 +114,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	// Maven
 	cmd.Flags().String("maven-local-repository", "", "Path of the local Maven repository")
 	cmd.Flags().StringArray("maven-property", nil, "Add a Maven property")
+	cmd.Flags().StringArray("maven-extension", nil, "Add a Maven build extension")
 	cmd.Flags().String("maven-settings", "", "Configure the source of the Maven settings (configmap|secret:name[/key])")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a Maven repository")
 	cmd.Flags().String("maven-ca-secret", "", "Configure the secret key containing the Maven CA certificates (secret/key)")
@@ -166,6 +167,7 @@ type installCmdOptions struct {
 	BuildStrategy           string   `mapstructure:"build-strategy"`
 	BuildPublishStrategy    string   `mapstructure:"build-publish-strategy"`
 	BuildTimeout            string   `mapstructure:"build-timeout"`
+	MavenExtensions         []string `mapstructure:"maven-extensions"`
 	MavenLocalRepository    string   `mapstructure:"maven-local-repository"`
 	MavenProperties         []string `mapstructure:"maven-properties"`
 	MavenRepositories       []string `mapstructure:"maven-repositories"`
@@ -321,6 +323,26 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				}
 			}
 		}
+
+		if size := len(o.MavenExtensions); size > 0 {
+			platform.Spec.Build.Maven.Extension = make([]v1.MavenArtifact, 0, size)
+			for _, extension := range o.MavenExtensions {
+				gav := strings.Split(extension, ":")
+				if len(gav) != 2 && len(gav) != 3 {
+					meg := fmt.Sprintf("Maven build extension GAV must match <groupId>:<artifactId>:<version>, found: %s", extension)
+					return errors.New(meg)
+				}
+				ext := v1.MavenArtifact{
+					GroupID:    gav[0],
+					ArtifactID: gav[1],
+				}
+				if len(gav) == 3 {
+					ext.Version = gav[2]
+				}
+				platform.Spec.Build.Maven.Extension = append(platform.Spec.Build.Maven.Extension, ext)
+			}
+		}
+
 		if o.MavenLocalRepository != "" {
 			platform.Spec.Build.Maven.LocalRepository = o.MavenLocalRepository
 		}

@@ -105,6 +105,8 @@ type MavenSpec struct {
 	// Deprecated: use IntegrationPlatform.Spec.Build.Timeout instead
 	Timeout      *metav1.Duration `json:"timeout,omitempty"`
 	Repositories []Repository     `json:"repositories,omitempty"`
+	// Maven build extensions https://maven.apache.org/guides/mini/guide-using-extensions.html
+	Extension []MavenArtifact `json:"extension,omitempty"`
 }
 
 // ValueSource --
@@ -117,9 +119,9 @@ type ValueSource struct {
 
 // MavenArtifact --
 type MavenArtifact struct {
-	GroupID    string `json:"groupId" yaml:"groupId"`
-	ArtifactID string `json:"artifactId" yaml:"artifactId"`
-	Version    string `json:"version,omitempty" yaml:"version,omitempty"`
+	GroupID    string `json:"groupId" yaml:"groupId" xml:"groupId"`
+	ArtifactID string `json:"artifactId" yaml:"artifactId" xml:"artifactId"`
+	Version    string `json:"version,omitempty" yaml:"version,omitempty" xml:"version,omitempty"`
 }
 
 // RuntimeSpec --

@@ -154,6 +154,22 @@ spec:
                               required:
                               - key
                               type: object
+                            extension:
+                              description: Maven build extensions https://maven.apache.org/guides/mini/guide-using-extensions.html
+                              items:
+                                description: MavenArtifact --
+                                properties:
+                                  artifactId:
+                                    type: string
+                                  groupId:
+                                    type: string
+                                  version:
+                                    type: string
+                                required:
+                                - artifactId
+                                - groupId
+                                type: object
+                              type: array
                             localRepository:
                               description: The path of the local Maven repository.
                               type: string

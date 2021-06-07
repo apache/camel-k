@@ -31,8 +31,9 @@ type Mirror struct {
 }
 
 type Build struct {
-	DefaultGoal string   `xml:"defaultGoal,omitempty"`
-	Plugins     []Plugin `xml:"plugins>plugin,omitempty"`
+	DefaultGoal string             `xml:"defaultGoal,omitempty"`
+	Plugins     []Plugin           `xml:"plugins>plugin,omitempty"`
+	Extensions  []v1.MavenArtifact `xml:"extensions>extension,omitempty"`
 }
 
 type Plugin struct {
