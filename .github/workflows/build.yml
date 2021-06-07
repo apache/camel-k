@@ -23,8 +23,10 @@ on:
       - main
       - "release-*"
     paths-ignore:
+      - 'docs/**'
       - 'proposals/**'
       - '**.adoc'
+      - '**.md'
       - 'KEYS'
       - 'LICENSE'
       - 'NOTICE'
@@ -33,7 +35,9 @@ on:
       - main
       - "release-*"
     paths-ignore:
+      - 'docs/**'
       - 'proposals/**'
+      - '**.md'
       - '**.adoc'
       - 'KEYS'
       - 'LICENSE'
