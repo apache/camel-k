@@ -25,6 +25,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util/property"
 	user "github.com/mitchellh/go-homedir"
 	"github.com/scylladb/go-set/strset"
 
@@ -93,14 +94,7 @@ func collectConfigurationPairs(configurationType string, configurable ...v1.Conf
 
 		for _, entry := range entries {
 			if entry.Type == configurationType {
-				pair := strings.SplitN(entry.Value, "=", 2)
-				var k, v string
-				if len(pair) >= 1 {
-					k = strings.TrimSpace(pair[0])
-				}
-				if len(pair) == 2 {
-					v = strings.TrimSpace(pair[1])
-				}
+				k, v := property.SplitPropertyFileEntry(entry.Value)
 				if k == "" {
 					continue
 				}

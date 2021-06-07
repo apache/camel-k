@@ -18,11 +18,9 @@ limitations under the License.
 package kameletbinding
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"sort"
-	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -32,7 +30,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/bindings"
 	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/magiconair/properties"
+	"github.com/apache/camel-k/pkg/util/property"
 	"github.com/pkg/errors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -129,7 +127,7 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 			it.Spec.Traits[k] = v
 		}
 		for k, v := range b.ApplicationProperties {
-			entry, err := toPropertyEntry(k, v)
+			entry, err := property.EncodePropertyFileEntry(k, v)
 			if err != nil {
 				return nil, err
 			}
@@ -197,18 +195,4 @@ func determineProfile(ctx context.Context, c client.Client, binding *v1alpha1.Ka
 		}
 	}
 	return v1.DefaultTraitProfile, nil
-}
-
-func toPropertyEntry(key, value string) (string, error) {
-	p := properties.NewProperties()
-	p.DisableExpansion = true
-	if _, _, err := p.Set(key, value); err != nil {
-		return "", err
-	}
-	buf := new(bytes.Buffer)
-	if _, err := p.Write(buf, properties.UTF8); err != nil {
-		return "", err
-	}
-	pair := strings.TrimSuffix(buf.String(), "\n")
-	return pair, nil
 }
