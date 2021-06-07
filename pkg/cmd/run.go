@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
