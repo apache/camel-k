@@ -252,7 +252,9 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		for _, envVar := range e.EnvVars {
 			envvar.SetVar(&container.Env, envVar)
 		}
-		if props := e.computeApplicationProperties(); props != nil {
+		if props, err := e.computeApplicationProperties(); err != nil {
+			return err
+		} else if props != nil {
 			e.Resources.Add(props)
 		}
 
@@ -291,7 +293,9 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 				envvar.SetVar(&container.Env, env)
 			}
 		}
-		if props := e.computeApplicationProperties(); props != nil {
+		if props, err := e.computeApplicationProperties(); err != nil {
+			return err
+		} else if props != nil {
 			e.Resources.Add(props)
 		}
 
@@ -318,7 +322,9 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		for _, envVar := range e.EnvVars {
 			envvar.SetVar(&container.Env, envVar)
 		}
-		if props := e.computeApplicationProperties(); props != nil {
+		if props, err := e.computeApplicationProperties(); err != nil {
+			return err
+		} else if props != nil {
 			e.Resources.Add(props)
 		}
 

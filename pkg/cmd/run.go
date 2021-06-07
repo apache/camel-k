@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -584,9 +585,13 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 			return nil, err
 		}
 		for _, k := range props.Keys() {
-			v, ok := props.Get(k)
+			_, ok := props.Get(k)
 			if ok {
-				o.Traits = append(o.Traits, fmt.Sprintf("builder.properties=%s", escapePropertyFileItem(k)+"="+escapePropertyFileItem(v)))
+				entry, err := toPropertyEntry(props, k)
+				if err != nil {
+					return nil, err
+				}
+				o.Traits = append(o.Traits, fmt.Sprintf("builder.properties=%s", entry))
 			} else {
 				return nil, err
 			}
@@ -788,10 +793,13 @@ func isLocalAndFileExists(fileName string) (bool, error) {
 
 func addIntegrationProperties(props *properties.Properties, spec *v1.IntegrationSpec) error {
 	for _, k := range props.Keys() {
-		v, _ := props.Get(k)
+		entry, err := toPropertyEntry(props, k)
+		if err != nil {
+			return err
+		}
 		spec.AddConfiguration(
 			"property",
-			escapePropertyFileItem(k)+"="+escapePropertyFileItem(v),
+			entry,
 		)
 	}
 	return nil
@@ -809,10 +817,19 @@ func loadPropertyFile(fileName string) (*properties.Properties, error) {
 	return p, nil
 }
 
-func escapePropertyFileItem(item string) string {
-	item = strings.ReplaceAll(item, `=`, `\=`)
-	item = strings.ReplaceAll(item, `:`, `\:`)
-	return item
+func toPropertyEntry(props *properties.Properties, key string) (string, error) {
+	value, _ := props.Get(key)
+	p := properties.NewProperties()
+	p.DisableExpansion = true
+	if _, _, err := p.Set(key, value); err != nil {
+		return "", err
+	}
+	buf := new(bytes.Buffer)
+	if _, err := p.Write(buf, properties.UTF8); err != nil {
+		return "", err
+	}
+	pair := strings.TrimSuffix(buf.String(), "\n")
+	return pair, nil
 }
 
 func resolvePodTemplate(ctx context.Context, templateSrc string, spec *v1.IntegrationSpec) (err error) {
