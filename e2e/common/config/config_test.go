@@ -64,6 +64,12 @@ func TestRunConfigExamples(t *testing.T) {
 		cmData["my-configmap-key"] = "my-configmap-content"
 		NewPlainTextConfigmap(ns, "my-cm", cmData)
 
+		// Store a configmap with multiple values
+		var cmDataMulti = make(map[string]string)
+		cmDataMulti["my-configmap-key"] = "should-not-see-it"
+		cmDataMulti["my-configmap-key-2"] = "my-configmap-content-2"
+		NewPlainTextConfigmap(ns, "my-cm-multi", cmDataMulti)
+
 		t.Run("Config configmap", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "./files/config-configmap-route.groovy", "--config", "configmap:my-cm").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "config-configmap-route"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
@@ -89,6 +95,17 @@ func TestRunConfigExamples(t *testing.T) {
 			Eventually(IntegrationPodPhase(ns, "resource-configmap-location-route"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "resource-configmap-location-route", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "resource-configmap-location-route"), TestTimeoutShort).Should(ContainSubstring(cmData["my-configmap-key"]))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("Resource configmap with filtered key and destination", func(t *testing.T) {
+			// We'll use the configmap contaning 2 values filtering only 1 key
+
+			Expect(Kamel("run", "-n", ns, "./files/resource-configmap-key-location-route.groovy", "--resource", "configmap:my-cm-multi/my-configmap-key-2@/tmp/app").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "resource-configmap-key-location-route"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationCondition(ns, "resource-configmap-key-location-route", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "resource-configmap-key-location-route"), TestTimeoutShort).ShouldNot(ContainSubstring(cmDataMulti["my-configmap-key"]))
+			Eventually(IntegrationLogs(ns, "resource-configmap-key-location-route"), TestTimeoutShort).Should(ContainSubstring(cmDataMulti["my-configmap-key-2"]))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
