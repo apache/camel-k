@@ -18,7 +18,6 @@ limitations under the License.
 package cmd
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -31,6 +30,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/apache/camel-k/pkg/util/property"
 	"github.com/magiconair/properties"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"

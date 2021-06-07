@@ -125,10 +125,21 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 		}
 	}
 
-	configureBinding(&it, from)
-	configureBinding(&it, steps...)
-	configureBinding(&it, to)
-	configureBinding(&it, errorHandler)
+	if err := configureBinding(&it, from); err != nil {
+		return nil, err
+	}
+
+	if err := configureBinding(&it, steps...); err != nil {
+		return nil, err
+	}
+
+	if err := configureBinding(&it, to); err != nil {
+		return nil, err
+	}
+
+	if err := configureBinding(&it, errorHandler); err != nil {
+		return nil, err
+	}
 
 	if it.Spec.Configuration != nil {
 		sort.SliceStable(it.Spec.Configuration, func(i, j int) bool {
@@ -178,7 +189,7 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 	return &it, nil
 }
 
-func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding) {
+func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding) error {
 	for _, b := range bindings {
 		if b == nil {
 			continue
@@ -190,13 +201,21 @@ func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding
 			integration.Spec.Traits[k] = v
 		}
 		for k, v := range b.ApplicationProperties {
+			entry, err := property.EncodePropertyFileEntry(k, v)
+
+			if err != nil {
+				return err
+			}
+
 			integration.Spec.Configuration = append(integration.Spec.Configuration, v1.ConfigurationSpec{
 				Type:  "property",
-				Value: property.EncodePropertyFileEntry(k, v),
+				Value: entry,
 			})
 		}
 
 	}
+
+	return nil
 }
 
 func determineProfile(ctx context.Context, c client.Client, binding *v1alpha1.KameletBinding) (v1.TraitProfile, error) {
