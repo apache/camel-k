@@ -1,0 +1,19 @@
+kind: KameletBinding
+apiVersion: camel.apache.org/v1alpha1
+metadata:
+  name: properties-binding
+spec:
+  source:
+    ref:
+      apiVersion: camel.apache.org/v1alpha1
+      kind: Kamelet
+      name: timer-source
+    properties:
+      message: |
+        {
+          "content": "thecontent",
+          "key2": "val2"
+        }
+      contentType: "application/json"
+  sink:
+    uri: http://probe-service/events
