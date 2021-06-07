@@ -20,8 +20,8 @@ package trait
 import (
 	"fmt"
 	"sort"
-	"strings"
 
+	"github.com/apache/camel-k/pkg/util/property"
 	corev1 "k8s.io/api/core/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -156,12 +156,12 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 	// User provided Maven properties
 	if t.Properties != nil {
 		for _, v := range t.Properties {
-			split := strings.SplitN(v, "=", 2)
-			if len(split) != 2 {
+			key, value := property.SplitPropertyFileEntry(v)
+			if len(key) == 0 || len(value) == 0 {
 				return nil, fmt.Errorf("maven property must have key=value format, it was %v", v)
 			}
 
-			task.Maven.Properties[split[0]] = split[1]
+			task.Maven.Properties[key] = value
 		}
 	}
 

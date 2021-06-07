@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"path"
@@ -26,7 +25,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/magiconair/properties"
+	"github.com/apache/camel-k/pkg/util/property"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
@@ -368,15 +367,10 @@ func (e *Environment) DetermineCatalogNamespace() string {
 
 func (e *Environment) computeApplicationProperties() (*corev1.ConfigMap, error) {
 	// application properties
-	props := properties.LoadMap(e.ApplicationProperties)
-	props.DisableExpansion = true
-	props.Sort()
-	buf := new(bytes.Buffer)
-	_, err := props.Write(buf, properties.UTF8)
+	applicationProperties, err := property.EncodePropertyFile(e.ApplicationProperties)
 	if err != nil {
 		return nil, errors.Wrapf(err, "could not compute application properties")
 	}
-	applicationProperties := buf.String()
 
 	if applicationProperties != "" {
 		return &corev1.ConfigMap{

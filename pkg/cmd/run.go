@@ -18,7 +18,6 @@ limitations under the License.
 package cmd
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -31,6 +30,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/apache/camel-k/pkg/util/property"
 	"github.com/magiconair/properties"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
@@ -585,9 +585,9 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 			return nil, err
 		}
 		for _, k := range props.Keys() {
-			_, ok := props.Get(k)
+			v, ok := props.Get(k)
 			if ok {
-				entry, err := toPropertyEntry(props, k)
+				entry, err := property.EncodePropertyFileEntry(k, v)
 				if err != nil {
 					return nil, err
 				}
@@ -793,7 +793,8 @@ func isLocalAndFileExists(fileName string) (bool, error) {
 
 func addIntegrationProperties(props *properties.Properties, spec *v1.IntegrationSpec) error {
 	for _, k := range props.Keys() {
-		entry, err := toPropertyEntry(props, k)
+		v, _ := props.Get(k)
+		entry, err := property.EncodePropertyFileEntry(k, v)
 		if err != nil {
 			return err
 		}
@@ -815,21 +816,6 @@ func loadPropertyFile(fileName string) (*properties.Properties, error) {
 		return nil, err
 	}
 	return p, nil
-}
-
-func toPropertyEntry(props *properties.Properties, key string) (string, error) {
-	value, _ := props.Get(key)
-	p := properties.NewProperties()
-	p.DisableExpansion = true
-	if _, _, err := p.Set(key, value); err != nil {
-		return "", err
-	}
-	buf := new(bytes.Buffer)
-	if _, err := p.Write(buf, properties.UTF8); err != nil {
-		return "", err
-	}
-	pair := strings.TrimSuffix(buf.String(), "\n")
-	return pair, nil
 }
 
 func resolvePodTemplate(ctx context.Context, templateSrc string, spec *v1.IntegrationSpec) (err error) {
