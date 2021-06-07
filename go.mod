@@ -18,7 +18,7 @@ require (
 	github.com/google/go-github/v32 v32.1.0
 	github.com/google/uuid v1.2.0
 	github.com/jpillora/backoff v1.0.0
-	github.com/magiconair/properties v1.8.1
+	github.com/magiconair/properties v1.8.5
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/onsi/gomega v1.10.3

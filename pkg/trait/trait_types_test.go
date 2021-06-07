@@ -18,6 +18,9 @@ limitations under the License.
 package trait
 
 import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -28,6 +31,19 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
+
+func TestMultilinePropertiesHandled(t *testing.T) {
+	e := Environment{
+		ApplicationProperties: map[string]string{
+			"prop": "multi\nline",
+		},
+		Integration: &v1.Integration{},
+	}
+	cm, err := e.computeApplicationProperties()
+	assert.NoError(t, err)
+	assert.NotNil(t, cm)
+	assert.Equal(t, "prop = multi\\nline\n", cm.Data["application.properties"])
+}
 
 func createNominalDeploymentTraitTest() (*Environment, *appsv1.Deployment) {
 	deployment := &appsv1.Deployment{

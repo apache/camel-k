@@ -156,7 +156,7 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 	// User provided Maven properties
 	if t.Properties != nil {
 		for _, v := range t.Properties {
-			split := strings.Split(v, "=")
+			split := strings.SplitN(v, "=", 2)
 			if len(split) != 2 {
 				return nil, fmt.Errorf("maven property must have key=value format, it was %v", v)
 			}
