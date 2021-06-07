@@ -695,7 +695,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	for _, configmaps := range e.collectConfigurations("configmap") {
 		refName := kubernetes.SanitizeLabel(configmaps["value"])
 
-		*vols = append(*vols, corev1.Volume{
+		configmapVolume := corev1.Volume{
 			Name: refName,
 			VolumeSource: corev1.VolumeSource{
 				ConfigMap: &corev1.ConfigMapVolumeSource{
@@ -704,7 +704,19 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 					},
 				},
 			},
-		})
+		}
+
+		// Filter the items selected, if specified
+		if configmaps["resourceKey"] != "" {
+			configmapVolume.VolumeSource.ConfigMap.Items = []corev1.KeyToPath{
+				{
+					Key:  configmaps["resourceKey"],
+					Path: configmaps["resourceKey"],
+				},
+			}
+		}
+
+		*vols = append(*vols, configmapVolume)
 
 		*mnts = append(*mnts, corev1.VolumeMount{
 			Name:      refName,
@@ -734,17 +746,30 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 			MountPath: path.Join(serviceBindingsMountPath, strings.ToLower(sb)),
 		})
 	}
+
 	for _, secret := range e.collectConfigurations("secret") {
 		refName := kubernetes.SanitizeLabel(secret["value"])
 
-		*vols = append(*vols, corev1.Volume{
+		secretVolume := corev1.Volume{
 			Name: refName,
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
 					SecretName: secret["value"],
 				},
 			},
-		})
+		}
+
+		// Filter the items selected, if specified
+		if secret["resourceKey"] != "" {
+			secretVolume.VolumeSource.Secret.Items = []corev1.KeyToPath{
+				{
+					Key:  secret["resourceKey"],
+					Path: secret["resourceKey"],
+				},
+			}
+		}
+
+		*vols = append(*vols, secretVolume)
 
 		*mnts = append(*mnts, corev1.VolumeMount{
 			Name:      refName,
