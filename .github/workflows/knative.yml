@@ -96,6 +96,7 @@ jobs:
 
         export SERVING_VERSION=v0.16.0
         export EVENTING_VERSION=v0.16.2
+        export KOURIER_VERSION=v0.16.0
         export SOURCES_VERSION=v0.16.0
 
         # Serving
@@ -103,7 +104,7 @@ jobs:
         curl -L -s https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
 
         # Kourier
-        kubectl apply --filename https://github.com/knative/net-kourier/releases/download/$SERVING_VERSION/kourier.yaml
+        kubectl apply --filename https://github.com/knative/net-kourier/releases/download/$KOURIER_VERSION/kourier.yaml
         kubectl patch configmap/config-network \
         --namespace knative-serving \
         --type merge \
@@ -219,6 +220,7 @@ jobs:
 
           export SERVING_VERSION=v0.16.0
           export EVENTING_VERSION=v0.16.2
+          export KOURIER_VERSION=v0.16.0
           export SOURCES_VERSION=v0.16.0
 
           # Serving
@@ -226,7 +228,7 @@ jobs:
           curl -L -s https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
 
           # Kourier
-          kubectl apply --filename https://github.com/knative/net-kourier/releases/download/$SERVING_VERSION/kourier.yaml
+          kubectl apply --filename https://github.com/knative/net-kourier/releases/download/$KOURIER_VERSION/kourier.yaml
           kubectl patch configmap/config-network \
           --namespace knative-serving \
           --type merge \
