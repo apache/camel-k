@@ -15,8 +15,4 @@ The main *Camel K* platform concepts are:
 
 1. The xref:architecture/operator.adoc[Operator] which is the intelligence that coordinates all the moving parts;
 2. The xref:architecture/runtime.adoc[Runtime] which provides the functionality to run the integration;
-3. The xref:architecture/traits.adoc[Traits] through which the behavior of the operator and the runtime can be customized.
-
-For information on how *Camel K* is able to provide *Sources* e.g. for the Knative platform:
-
-- The xref:architecture/sources.adoc[Sources] page describes how sources are internally materialized.
+3. The xref:architecture/traits.adoc[Traits] which configure the integration and the runtime.
