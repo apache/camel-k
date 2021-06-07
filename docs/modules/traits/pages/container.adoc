@@ -73,6 +73,10 @@ The following configuration options are available:
 | string
 | The main container name. It's named `integration` by default.
 
+| container.image
+| string
+| The main container image
+
 | container.probes-enabled
 | bool
 | ProbesEnabled enable/disable probes on the container (default `false`)
