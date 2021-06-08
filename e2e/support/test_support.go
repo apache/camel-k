@@ -1021,22 +1021,6 @@ func CreateKamelPod(ns string, name string, command ...string) error {
 	Knative
 */
 
-func CreateKnativeChannelv1Alpha1(ns string, name string) func() error {
-	return func() error {
-		channel := messaging.InMemoryChannel{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "InMemoryChannel",
-				APIVersion: messaging.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: ns,
-				Name:      name,
-			},
-		}
-		return TestClient().Create(TestContext, &channel)
-	}
-}
-
 func CreateKnativeChannelv1Beta1(ns string, name string) func() error {
 	return func() error {
 		channel := messaging.InMemoryChannel{
