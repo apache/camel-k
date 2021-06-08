@@ -48,6 +48,7 @@ func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 
 	i.discoverCapabilities(source, meta)
 	i.discoverDependencies(source, meta)
+	i.discoverKamelets(source, meta)
 
 	meta.ExposesHTTPServices = meta.ExposesHTTPServices || i.containsHTTPURIs(meta.FromURIs)
 	meta.PassiveEndpoints = i.hasOnlyPassiveEndpoints(meta.FromURIs)
@@ -86,6 +87,13 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 					i.addDependency(dfDep.GetDependencyID(), meta)
 				}
 			}
+		}
+	case "kamelet":
+		switch t := content.(type) {
+		case string:
+			AddKamelet(meta, "kamelet:"+t)
+		case map[interface{}]interface{}:
+			AddKamelet(meta, "kamelet:"+t["name"].(string))
 		}
 	}
 

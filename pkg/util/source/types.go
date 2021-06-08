@@ -37,6 +37,8 @@ type Metadata struct {
 	// RequiredCapabilities lists the capabilities required by the integration
 	// to run
 	RequiredCapabilities *strset.Set
+	// All kamelets
+	Kamelets []string
 }
 
 // NewMetadata --

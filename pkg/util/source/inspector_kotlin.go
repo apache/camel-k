@@ -42,8 +42,18 @@ func (i KotlinInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	meta.FromURIs = append(meta.FromURIs, from...)
 	meta.ToURIs = append(meta.ToURIs, to...)
 
+	kameletEips := util.FindAllDistinctStringSubmatch(
+		source.Content,
+		singleQuotedKameletEip,
+		doubleQuotedKameletEip)
+
+	for _, k := range kameletEips {
+		AddKamelet(meta, "kamelet:"+k)
+	}
+
 	i.discoverCapabilities(source, meta)
 	i.discoverDependencies(source, meta)
+	i.discoverKamelets(source, meta)
 
 	hasRest := restRegexp.MatchString(source.Content) || restClosureRegexp.MatchString(source.Content)
 	if hasRest {
