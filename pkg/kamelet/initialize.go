@@ -49,6 +49,15 @@ func Initialize(kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
 			fmt.Sprintf("Kamelet property %q is reserved and cannot be part of the schema", v1alpha1.KameletIDProperty),
 		)
 	}
+	if !v1alpha1.ValidKameletTemplate(kamelet) {
+		ok = false
+		target.Status.SetCondition(
+			v1alpha1.KameletConditionReady,
+			corev1.ConditionFalse,
+			v1alpha1.KameletConditionReasonInvalidTemplate,
+			`Kamelet can only specify one of "flow" or "template"`,
+		)
+	}
 
 	if !ok {
 		target.Status.Phase = v1alpha1.KameletPhaseError

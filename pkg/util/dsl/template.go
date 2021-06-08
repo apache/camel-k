@@ -15,59 +15,36 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package flow
+package dsl
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"io/ioutil"
 
 	yaml2 "gopkg.in/yaml.v2"
-
-	"k8s.io/apimachinery/pkg/util/yaml"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// FromYamlDSLString creates a slice of flows from a Camel YAML DSL string
-func FromYamlDSLString(flowsString string) ([]v1.Flow, error) {
-	return FromYamlDSL(bytes.NewReader([]byte(flowsString)))
-}
-
-// FromYamlDSL creates a slice of flows from a Camel YAML DSL stream
-func FromYamlDSL(reader io.Reader) ([]v1.Flow, error) {
-	buffered, err := ioutil.ReadAll(reader)
+// TemplateToYamlDSL converts a kamelet template into its Camel YAML DSL equivalent
+func TemplateToYamlDSL(template v1.Template, id string) ([]byte, error) {
+	data, err := json.Marshal(&template)
 	if err != nil {
 		return nil, err
 	}
-	var flows []v1.Flow
-	// Using the Kubernetes decoder to turn them into JSON before unmarshal.
-	// This avoids having map[interface{}]interface{} objects which are not JSON compatible.
-	jsonData, err := yaml.ToJSON(buffered)
-	if err != nil {
-		return nil, err
-	}
-
-	if err = json.Unmarshal(jsonData, &flows); err != nil {
-		return nil, err
-	}
-	return flows, err
-}
-
-// ToYamlDSL converts a flow into its Camel YAML DSL equivalent
-func ToYamlDSL(flows []v1.Flow) ([]byte, error) {
-	data, err := json.Marshal(&flows)
-	if err != nil {
-		return nil, err
-	}
-	jsondata := make([]map[string]interface{}, 0)
+	jsondata := make(map[string]interface{}, 0)
 	err = json.Unmarshal(data, &jsondata)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshalling json: %v", err)
 	}
-	yamldata, err := yaml2.Marshal(&jsondata)
+	if _, present := jsondata["id"]; !present {
+		jsondata["id"] = id
+	}
+	templateWrapper := make(map[string]interface{}, 2)
+	templateWrapper["template"] = jsondata
+	listWrapper := make([]interface{}, 0, 1)
+	listWrapper = append(listWrapper, templateWrapper)
+	yamldata, err := yaml2.Marshal(listWrapper)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling to yaml: %v", err)
 	}

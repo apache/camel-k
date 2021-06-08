@@ -214,8 +214,7 @@ spec:
                   type: string
                 type: array
               flow:
-                description: Flow is an unstructured object representing a Camel Flow
-                  in YAML/JSON DSL
+                description: 'Deprecated: use template'
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
               sources:
@@ -264,6 +263,11 @@ spec:
                       type: string
                   type: object
                 type: array
+              template:
+                description: Template is an unstructured object representing a Kamelet
+                  template in YAML/JSON DSL
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
               types:
                 additionalProperties:
                   properties:

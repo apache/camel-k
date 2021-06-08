@@ -180,6 +180,11 @@ type Flow struct {
 	RawMessage `json:",inline"`
 }
 
+// Template is an unstructured object representing a Kamelet template in YAML/JSON DSL
+type Template struct {
+	RawMessage `json:",inline"`
+}
+
 // RuntimeProvider --
 type RuntimeProvider string
 
