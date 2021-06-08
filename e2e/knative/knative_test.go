@@ -56,19 +56,6 @@ func TestRunServiceCombo(t *testing.T) {
 	})
 }
 
-func TestRunChannelComboV1Alpha1(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		Expect(CreateKnativeChannelv1Alpha1(ns, "messages")()).To(Succeed())
-		Expect(Kamel("install", "-n", ns, "--trait-profile", "knative").Execute()).To(Succeed())
-		Expect(Kamel("run", "-n", ns, "files/knativech2.groovy").Execute()).To(Succeed())
-		Expect(Kamel("run", "-n", ns, "files/knativech1.groovy").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "knativech2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationPodPhase(ns, "knativech1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationLogs(ns, "knativech2"), TestTimeoutMedium).Should(ContainSubstring("Received: Hello from knativech1"))
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
-
 func TestRunChannelComboV1Beta1(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(CreateKnativeChannelv1Beta1(ns, "messages")()).To(Succeed())
