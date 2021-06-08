@@ -1,0 +1,16 @@
+[[logging]]
+= Camel K Operator Logging
+
+The Camel K Operator logging is mostly managed by the Kubernetes infrastructure, with some specific aspects managed by
+Camel K itself. The operator uses https://kubernetes.io/blog/2020/09/04/kubernetes-1-19-introducing-structured-logs/[structured logs]
+so that the logs are more easily parseable.
+
+This includes the output of components managed by the operator, such as the maven build, and the integration container build.
+For example, the maven build logs should be displayed like this:
+
+
+```
+{"level":"info","ts":1620393185.321101,"logger":"camel-k.maven.build","msg":"Downloading from repository-000: http://my.repository.com:8081/artifactory/fuse-brno/org/jboss/shrinkwrap/resolver/shrinkwrap-resolver-bom/2.2.4/shrinkwrap-resolver-bom-2.2.4.pom"}
+```
+
+There are some exceptions to this, though, and they are mostly related to running the operator for development purposes.

@@ -91,7 +91,6 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().Bool("use-flows", true, "Write yaml sources as Flow objects in the integration custom resource")
 	cmd.Flags().String("profile", "", "Trait profile used for deployment")
 	cmd.Flags().StringArrayP("trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
-	cmd.Flags().StringArray("logging-level", nil, "Configure the logging level. e.g. \"--logging-level org.apache.camel=DEBUG\"")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().Bool("compression", false, "Enable storage of sources and resources as a compressed binary blobs")
 	cmd.Flags().StringArray("resource", nil, "Add a resource")
@@ -136,7 +135,6 @@ type runCmdOptions struct {
 	Secrets         []string `mapstructure:"secrets" yaml:",omitempty"`
 	Repositories    []string `mapstructure:"maven-repositories" yaml:",omitempty"`
 	Traits          []string `mapstructure:"traits" yaml:",omitempty"`
-	LoggingLevels   []string `mapstructure:"logging-levels" yaml:",omitempty"`
 	Volumes         []string `mapstructure:"volumes" yaml:",omitempty"`
 	EnvVars         []string `mapstructure:"envs" yaml:",omitempty"`
 	// Deprecated: PropertyFiles has been deprecated in 1.5
@@ -596,9 +594,6 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 				return nil, err
 			}
 		}
-	}
-	for _, item := range o.LoggingLevels {
-		integration.Spec.AddConfiguration("property", "logging.level."+item)
 	}
 	for _, item := range o.Configs {
 		if config, parseErr := ParseConfigOption(item); parseErr == nil {
