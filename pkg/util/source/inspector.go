@@ -58,6 +58,8 @@ var (
 	xqueryRegexp            = regexp.MustCompile(`.*\.xquery\s*\(.*\).*`)
 	xpathRegexp             = regexp.MustCompile(`.*\.?xpath\s*\(.*\).*`)
 	xtokenizeRegexp         = regexp.MustCompile(`.*\.xtokenize\s*\(.*\).*`)
+	singleQuotedKameletEip  = regexp.MustCompile(`kamelet\s*\(\s*'(?://)?([a-z0-9-.]+(/[a-z0-9-.]+)?)(?:$|[^a-z0-9-.].*)'`)
+	doubleQuotedKameletEip  = regexp.MustCompile(`kamelet\s*\(\s*"(?://)?([a-z0-9-.]+(/[a-z0-9-.]+)?)(?:$|[^a-z0-9-.].*)"`)
 
 	sourceCapabilities = map[*regexp.Regexp][]string{
 		circuitBreakerRegexp: {v1.CapabilityCircuitBreaker},
@@ -284,6 +286,16 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 				i.addDependency(dependency, meta)
 			}
 		}
+	}
+}
+
+// discoverDependencies inspects endpoints and extract kamelets
+func (i *baseInspector) discoverKamelets(source v1.SourceSpec, meta *Metadata) {
+	for _, uri := range meta.FromURIs {
+		AddKamelet(meta, uri)
+	}
+	for _, uri := range meta.ToURIs {
+		AddKamelet(meta, uri)
 	}
 }
 

@@ -327,3 +327,95 @@ func TestYAMLJson(t *testing.T) {
 		})
 	}
 }
+
+const YAMLKameletEipNoId = `
+- from:
+    uri: timer:tick
+    steps:
+    - kamelet: "foo"
+`
+
+const YAMLKameletEipInline = `
+- from:
+    uri: timer:tick
+    steps:
+    - kamelet: "foo/bar?baz=test"
+`
+const YAMLKameletEipMap = `
+- from:
+    uri: timer:tick
+    steps:
+    - kamelet: 
+        name: "foo/bar?baz=test"
+`
+const YAMLKameletEipMapWithParams = `
+- from:
+    uri: timer:tick
+    steps:
+    - kamelet: 
+        name: "foo/bar"
+        parameters:
+          baz:test
+`
+const YAMLKameletEndpoint = `
+- from:
+    uri: timer:tick
+    steps:
+    - to: "kamelet:foo/bar?baz=test"
+`
+
+func TestYAMLKamelet(t *testing.T) {
+	tc := []struct {
+		source   string
+		kamelets []string
+	}{
+		{
+			source:   YAMLKameletEipNoId,
+			kamelets: []string{"foo"},
+		},
+		{
+			source:   YAMLKameletEipInline,
+			kamelets: []string{"foo/bar"},
+		},
+		{
+			source:   YAMLKameletEipMap,
+			kamelets: []string{"foo/bar"},
+		},
+		{
+			source:   YAMLKameletEipMapWithParams,
+			kamelets: []string{"foo/bar"},
+		},
+		{
+			source:   YAMLKameletEndpoint,
+			kamelets: []string{"foo/bar"},
+		},
+	}
+
+	for i, test := range tc {
+		t.Run(fmt.Sprintf("TestYAMLKamelet-%d", i), func(t *testing.T) {
+			code := v1.SourceSpec{
+				DataSpec: v1.DataSpec{
+					Content: test.source,
+				},
+			}
+
+			catalog, err := camel.DefaultCatalog()
+			assert.Nil(t, err)
+
+			meta := NewMetadata()
+			inspector := YAMLInspector{
+				baseInspector: baseInspector{
+					catalog: catalog,
+				},
+			}
+
+			err = inspector.Extract(code, &meta)
+			assert.Nil(t, err)
+			assert.True(t, meta.RequiredCapabilities.IsEmpty())
+
+			for _, k := range test.kamelets {
+				assert.Contains(t, meta.Kamelets, k)
+			}
+		})
+	}
+}
