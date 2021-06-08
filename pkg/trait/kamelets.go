@@ -34,7 +34,7 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/digest"
-	"github.com/apache/camel-k/pkg/util/flow"
+	"github.com/apache/camel-k/pkg/util/dsl"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -260,16 +260,17 @@ func (t *kameletsTrait) configureApplicationProperties(e *Environment) error {
 func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1alpha1.Kamelet) error {
 	sources := make([]v1.SourceSpec, 0)
 
-	if kamelet.Spec.Flow != nil {
-
-		flowData, err := flow.ToYamlDSL([]v1.Flow{*kamelet.Spec.Flow})
+	if kamelet.Spec.Template != nil || kamelet.Spec.Flow != nil {
+		template := kamelet.Spec.Template
+		if template == nil {
+			// Backward compatibility with Kamelets using flow
+			template = &v1.Template{
+				RawMessage: kamelet.Spec.Flow.RawMessage,
+			}
+		}
+		flowData, err := dsl.TemplateToYamlDSL(*template, kamelet.Name)
 		if err != nil {
 			return err
-		}
-
-		propertyNames := make([]string, 0, len(kamelet.Status.Properties))
-		for _, p := range kamelet.Status.Properties {
-			propertyNames = append(propertyNames, p.Name)
 		}
 
 		flowSource := v1.SourceSpec{
@@ -277,11 +278,9 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1alpha1.Kam
 				Name:    fmt.Sprintf("%s.yaml", kamelet.Name),
 				Content: string(flowData),
 			},
-			Language:      v1.LanguageYaml,
-			Type:          v1.SourceTypeTemplate,
-			PropertyNames: propertyNames,
+			Language: v1.LanguageYaml,
 		}
-		flowSource, err = integrationSourceFromKameletSource(e, kamelet, flowSource, fmt.Sprintf("%s-kamelet-%s-flow", e.Integration.Name, kamelet.Name))
+		flowSource, err = integrationSourceFromKameletSource(e, kamelet, flowSource, fmt.Sprintf("%s-kamelet-%s-template", e.Integration.Name, kamelet.Name))
 		if err != nil {
 			return err
 		}
@@ -296,11 +295,7 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1alpha1.Kam
 		sources = append(sources, intSource)
 	}
 
-	kameletCounter := 0
 	for _, source := range sources {
-		if source.Type == v1.SourceTypeTemplate {
-			kameletCounter++
-		}
 		replaced := false
 		for idx, existing := range e.Integration.Status.GeneratedSources {
 			if existing.Name == source.Name {
@@ -311,10 +306,6 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1alpha1.Kam
 		if !replaced {
 			e.Integration.Status.GeneratedSources = append(e.Integration.Status.GeneratedSources, source)
 		}
-	}
-
-	if kameletCounter > 1 {
-		return fmt.Errorf(`kamelet %s contains %d sources of type "kamelet": at most one is allowed`, kamelet.Name, kameletCounter)
 	}
 
 	return nil
