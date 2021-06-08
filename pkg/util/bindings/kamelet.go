@@ -44,7 +44,6 @@ func (k KameletBindingProvider) Translate(ctx BindingContext, endpointCtx Endpoi
 	// it translates only Kamelet refs
 	if e.Ref.Kind == v1alpha1.KameletKind && gv.Group == v1alpha1.SchemeGroupVersion.Group {
 		kameletName := url.PathEscape(e.Ref.Name)
-		kameletURI := fmt.Sprintf("kamelet:%s", kameletName)
 
 		props, err := e.Properties.GetPropertyMap()
 		if err != nil {
@@ -57,21 +56,27 @@ func (k KameletBindingProvider) Translate(ctx BindingContext, endpointCtx Endpoi
 		} else {
 			id = endpointCtx.GenerateID()
 		}
-		kameletURI = fmt.Sprintf("%s/%s", kameletURI, url.PathEscape(id))
 
-		var applicationProperties map[string]string
+		binding := Binding{}
+		if endpointCtx.Type == v1alpha1.EndpointTypeAction {
+			binding.Step = map[string]interface{}{
+				"kamelet": map[string]interface{}{
+					"name": fmt.Sprintf("%s/%s", kameletName, url.PathEscape(id)),
+				},
+			}
+		} else {
+			binding.URI = fmt.Sprintf("kamelet:%s/%s", kameletName, url.PathEscape(id))
+		}
+
 		if len(props) > 0 {
-			applicationProperties = make(map[string]string, len(props))
+			binding.ApplicationProperties = make(map[string]string, len(props))
 			for k, v := range props {
 				propKey := fmt.Sprintf("camel.kamelet.%s.%s.%s", kameletName, id, k)
-				applicationProperties[propKey] = v
+				binding.ApplicationProperties[propKey] = v
 			}
 		}
 
-		return &Binding{
-			URI:                   kameletURI,
-			ApplicationProperties: applicationProperties,
-		}, nil
+		return &binding, nil
 	}
 	return nil, nil
 }
