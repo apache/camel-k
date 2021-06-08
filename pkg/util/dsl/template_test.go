@@ -15,39 +15,49 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package flow
+package dsl
 
 import (
-	"bytes"
-	"encoding/json"
 	"testing"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestReadWriteYaml(t *testing.T) {
-	// yaml in conventional form as marshalled by the go runtime
-	yaml := `- from:
-    steps:
-    - to: log:info
-    uri: timer:tick
+func TestTemplateReadWrite(t *testing.T) {
+	templateJSON := v1.Template{
+		RawMessage: []byte(`
+		{
+			"beans": [
+				{
+					"name": "myBean",
+					"type": "com.acme.MyBean"
+				}
+			],
+			"from": {
+				"uri": "kamelet:source",
+				"steps": [
+					{
+						"uri": "log:info"
+					}
+				]
+			}
+		}
+		`),
+	}
+
+	yamlBytes, err := TemplateToYamlDSL(templateJSON, "myid")
+	assert.NoError(t, err)
+	yaml := string(yamlBytes)
+	expected := `- template:
+    beans:
+    - name: myBean
+      type: com.acme.MyBean
+    from:
+      steps:
+      - uri: log:info
+      uri: kamelet:source
+    id: myid
 `
-
-	yamlReader := bytes.NewReader([]byte(yaml))
-	flows, err := FromYamlDSL(yamlReader)
-	assert.NoError(t, err)
-	assert.NotNil(t, flows)
-	assert.Len(t, flows, 1)
-
-	flow := map[string]interface{}{}
-	err = json.Unmarshal(flows[0].RawMessage, &flow)
-	assert.NoError(t, err)
-
-	assert.NotNil(t, flow["from"])
-	assert.Nil(t, flow["xx"])
-
-	data, err := ToYamlDSL(flows)
-	assert.NoError(t, err)
-	assert.NotNil(t, data)
-	assert.Equal(t, yaml, string(data))
+	assert.Equal(t, expected, yaml)
 }
