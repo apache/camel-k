@@ -68,6 +68,12 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 						meta.ToURIs = append(meta.ToURIs, a.Value)
 					}
 				}
+			case "kamelet":
+				for _, a := range se.Attr {
+					if a.Name.Local == "name" {
+						AddKamelet(meta, "kamelet:"+a.Value)
+					}
+				}
 			}
 
 			if dependency, ok := i.catalog.GetLanguageDependency(se.Name.Local); ok {
@@ -78,6 +84,7 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 
 	i.discoverCapabilities(source, meta)
 	i.discoverDependencies(source, meta)
+	i.discoverKamelets(source, meta)
 
 	meta.ExposesHTTPServices = meta.ExposesHTTPServices || i.containsHTTPURIs(meta.FromURIs)
 	meta.PassiveEndpoints = i.hasOnlyPassiveEndpoints(meta.FromURIs)
