@@ -36,6 +36,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+var endpointTypeSourceContext = bindings.EndpointContext{Type: v1alpha1.EndpointTypeSource}
+var endpointTypeSinkContext = bindings.EndpointContext{Type: v1alpha1.EndpointTypeSink}
+
 func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *v1alpha1.KameletBinding) (*v1.Integration, error) {
 	controller := true
 	blockOwnerDeletion := true
@@ -83,11 +86,11 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 		Profile:   profile,
 	}
 
-	from, err := bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1alpha1.EndpointTypeSource}, kameletbinding.Spec.Source)
+	from, err := bindings.Translate(bindingContext, endpointTypeSourceContext, kameletbinding.Spec.Source)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not determine source URI")
 	}
-	to, err := bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1alpha1.EndpointTypeSink}, kameletbinding.Spec.Sink)
+	to, err := bindings.Translate(bindingContext, endpointTypeSinkContext, kameletbinding.Spec.Sink)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not determine sink URI")
 	}
@@ -108,6 +111,18 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 			return nil, errors.Wrapf(err, "could not determine URI for step %d", idx)
 		}
 		steps = append(steps, stepBinding)
+	}
+
+	if to.Step == nil && to.URI == "" {
+		return nil, errors.Errorf("illegal step definition for sink step: either Step or URI should be provided")
+	}
+	if from.URI == "" {
+		return nil, errors.Errorf("illegal step definition for source step: URI should be provided")
+	}
+	for index, step := range steps {
+		if step.Step == nil && step.URI == "" {
+			return nil, errors.Errorf("illegal step definition for step %d: either Step or URI should be provided", index)
+		}
 	}
 
 	allBindings := make([]*bindings.Binding, 0, len(steps)+3)
@@ -145,13 +160,24 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 
 	dslSteps := make([]map[string]interface{}, 0)
 	for _, step := range steps {
-		dslSteps = append(dslSteps, map[string]interface{}{
-			"to": step.URI,
-		})
+		s := step.Step
+		if s == nil {
+			s = map[string]interface{}{
+				"to": step.URI,
+			}
+		}
+
+		dslSteps = append(dslSteps, s)
 	}
-	dslSteps = append(dslSteps, map[string]interface{}{
-		"to": to.URI,
-	})
+
+	s := to.Step
+	if s == nil {
+		s = map[string]interface{}{
+			"to": to.URI,
+		}
+	}
+
+	dslSteps = append(dslSteps, s)
 
 	flowFrom := map[string]interface{}{
 		"from": map[string]interface{}{
