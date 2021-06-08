@@ -19,20 +19,24 @@ package trait
 
 import (
 	"fmt"
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+
+	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
+
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	appsv1 "k8s.io/api/apps/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-//    The pod trait allows the customization of the Integration pods.
-//    It applies the `PodSpecTemplate` struct contained in the Integration `.spec.podTemplate` field, into the Integration deployment Pods template, using strategic merge patch.
+// The pod trait allows the customization of the Integration pods.
+// It applies the `PodSpecTemplate` struct contained in the Integration `.spec.podTemplate` field,
+// into the Integration deployment Pods template, using strategic merge patch.
 //
-//    This can be used to customize the container where Camel routes execute, by using the `integration` container name.
+// This can be used to customize the container where Camel routes execute,
+// by using the `integration` container name.
 //
 // +camel-k:trait=pod
 type podTrait struct {
@@ -54,10 +58,7 @@ func (t *podTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.IntegrationInPhase(
-		v1.IntegrationPhaseDeploying,
-		v1.IntegrationPhaseRunning,
-	), nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
 }
 
 func (t *podTrait) Apply(e *Environment) error {
@@ -65,7 +66,7 @@ func (t *podTrait) Apply(e *Environment) error {
 	var patchedPodSpec *corev1.PodSpec
 	strategy, err := e.DetermineControllerStrategy()
 	if err != nil {
-		return fmt.Errorf("unable to determine the controller stratedy")
+		return fmt.Errorf("unable to determine the controller strategy")
 	}
 	switch strategy {
 	case ControllerStrategyCronJob:
@@ -90,7 +91,7 @@ func (t *podTrait) Apply(e *Environment) error {
 		e.Resources.VisitKnativeService(func(s *serving.Service) {
 			if s.Name == e.Integration.Name {
 				if patchedPodSpec, err = t.applyChangesTo(&s.Spec.Template.Spec.PodSpec, changes); err == nil {
-					s.Spec.Template.Spec.PodSpec = * patchedPodSpec
+					s.Spec.Template.Spec.PodSpec = *patchedPodSpec
 				}
 			}
 		})
