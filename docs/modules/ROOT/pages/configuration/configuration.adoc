@@ -1,7 +1,7 @@
 [[configuration]]
 = Configure Integrations
 
-Properties associated to an integration can be configured either using a ConfigMap/Secret or by setting using the `--property` flag when running the integration.
+Runtime properties associated to an integration can be configured using the `--property` flag when running the integration. If the property is a *build time property* (ie, certain `Quarkus` configuration), then, you can use xref:configuration/build-time-properties.adoc[`--build-property`] instead.
 
 The property value can be used inside Camel K integrations using the *property placeholder* mechanism.
 
@@ -20,4 +20,4 @@ In order to give a value to the `my.message` property you can pass it using the 
 kamel run --property my.message="Hello World" examples/props.js
 ```
 
-An alternative, is to provide a value using a Kubernetes xref:configuration/configmap-secret.adoc[ConfigMap or Secret]
+For more details and advanced use cases, see the xref:configuration/runtime-properties.adoc[runtime properties] section.
