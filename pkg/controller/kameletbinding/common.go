@@ -125,32 +125,20 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 		}
 	}
 
-	allBindings := make([]*bindings.Binding, 0, len(steps)+3)
-	allBindings = append(allBindings, from)
-	allBindings = append(allBindings, steps...)
-	allBindings = append(allBindings, to)
-	if errorHandler != nil {
-		allBindings = append(allBindings, errorHandler)
-	}
+	configureBinding(&it, from)
+	configureBinding(&it, steps...)
+	configureBinding(&it, to)
+	configureBinding(&it, errorHandler)
 
-	propList := make([]string, 0)
-	for _, b := range allBindings {
-		if it.Spec.Traits == nil {
-			it.Spec.Traits = make(map[string]v1.TraitSpec)
-		}
-		for k, v := range b.Traits {
-			it.Spec.Traits[k] = v
-		}
-		for k, v := range b.ApplicationProperties {
-			propList = append(propList, fmt.Sprintf("%s=%s", k, v))
-		}
-	}
-
-	sort.Strings(propList)
-	for _, p := range propList {
-		it.Spec.Configuration = append(it.Spec.Configuration, v1.ConfigurationSpec{
-			Type:  "property",
-			Value: p,
+	if it.Spec.Configuration != nil {
+		sort.SliceStable(it.Spec.Configuration, func(i, j int) bool {
+			mi, mj := it.Spec.Configuration[i], it.Spec.Configuration[j]
+			switch {
+			case mi.Type != mj.Type:
+				return mi.Type < mj.Type
+			default:
+				return mi.Value < mj.Value
+			}
 		})
 	}
 
@@ -188,6 +176,26 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 	it.Spec.Flows = append(it.Spec.Flows, v1.Flow{RawMessage: encodedFrom})
 
 	return &it, nil
+}
+
+func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding) {
+	for _, b := range bindings {
+		if b == nil {
+			continue
+		}
+		if integration.Spec.Traits == nil {
+			integration.Spec.Traits = make(map[string]v1.TraitSpec)
+		}
+		for k, v := range b.Traits {
+			integration.Spec.Traits[k] = v
+		}
+		for k, v := range b.ApplicationProperties {
+			integration.Spec.Configuration = append(integration.Spec.Configuration, v1.ConfigurationSpec{
+				Type:  "property",
+				Value: fmt.Sprintf("%s=%s", k, v),
+			})
+		}
+	}
 }
 
 func determineProfile(ctx context.Context, c client.Client, binding *v1alpha1.KameletBinding) (v1.TraitProfile, error) {
