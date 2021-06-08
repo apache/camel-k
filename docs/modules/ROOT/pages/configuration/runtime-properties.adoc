@@ -1,0 +1,57 @@
+[[runtime-props]]
+= Runtime properties
+
+During the execution of an `Integration` you can provide a single property or a property file that will be made available at runtime.
+
+[[runtime-single-prop]]
+== Single property
+
+Imagine you have a generic `Route` and you set a placeholder for certain information (ie, _my.message_ variable):
+
+[source,groovy]
+.property-route.groovy
+----
+from('timer:property')
+    .log('property content is: {{my.message}}')
+----
+
+The simplest way to replace that variable with a real value is to use the `--property` flag (also shortcut by `-p`):
+
+----
+kamel run -p my.message=test-property property-route.groovy --dev
+----
+
+At runtime, that variable will be substituted by the value you've provided. You can provide more than one single `property` at once by just adding the flag repeatedly (ie, `--property prop1=val1 --property prop2=val2 ...`)
+
+[[runtime-props-file]]
+== Property File
+
+Another way to provide more property configuration at once is to use a *property file*.
+
+[source,properties]
+.my.properties
+----
+my.key.1=hello
+my.key.2=world
+----
+
+[source,groovy]
+.build-property-route.groovy
+----
+from('timer:property-file')
+    .routeId('property-file')
+    .log('property file content is: {{my.key.1}} {{my.key.2}}')
+----
+
+You'll need to provide a `property` _file_ flag when launching the application:
+
+----
+// kamel run --property file:my.properties property-file-route.groovy --dev
+----
+
+The property file is parsed and its properties configured on the `Integration`. As soon as the application starts, you will see the log with the expected configuration.
+
+[[runtime-build-time-conf]]
+== Build time properties
+
+If you're looking for *build-time properties configuration* you can look at the xref:configuration/build-time-properties.adoc[build-time properties] section.

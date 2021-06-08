@@ -1,0 +1,56 @@
+[[build-time-props]]
+= Build time properties
+
+You may be required to provide certain *build-time properties* that are needed only during the process of `Integration` building. Since Camel K version 1.5, we introduced a `--build-property` flag that will be handful in such circumstances. The property value may be also used inside Camel K integrations using the *property placeholder* mechanism.
+
+[[build-time-single-prop]]
+== Single property
+
+You will find this feature very useful when dealing with configuration that affects how `Quarkus` builds the `Integration`. For example, let's see how to override the default `quarkus.application.name` expected by any `Quarkus` application:
+
+[source,groovy]
+.build-property-route.groovy
+----
+from('timer:build-property')
+    .log('The application name: {{quarkus.application.name}}')
+----
+
+In order to give a value to the `quarkus.application.name` property you can pass it using the command line with the `--build-property` flag:
+
+----
+kamel run --build-property=quarkus.application.name=my-super-application build-property-route.groovy --dev
+----
+
+You can provide more than one single `build-property` at once by just adding the flag repeatedly (ie, `--build-property=prop1=val1 --build-property=prop2=val2 ...`)
+
+[[build-time-props-file]]
+== Property File
+
+Repeating the property flag when you have many *build time configuration* may be cumbersome. Usually you deal with property files instead. You will be able to use the _file_ syntax available for `--build-property` flag. Here, as an example you have a property files with 2 `Quarkus` properties:
+
+[source,properties]
+.quarkus.properties
+----
+quarkus.application.name = my-super-application
+quarkus.banner.enabled = true
+----
+
+[source,groovy]
+.build-property-route.groovy
+----
+from('timer:build-property')
+    .log('The application name: {{quarkus.application.name}}')
+----
+
+The `quarkus.banner.enabled` is configured to show the banner during the `Integration` startup. Let's use `--build-property` flag in conjunction with file:
+
+----
+kamel run --build-property=file:quarkus.properties build-property-file-route.groovy --dev
+----
+
+The property file is parsed and its properties configured on the `Integration`. As soon as the application starts, you will see the log with the expected configuration.
+
+[[build-time-runtime-conf]]
+== Run time properties
+
+If you're looking for *runtime properties configuration* you can look at the xref:configuration/runtime-properties.adoc[runtime properties] section.
