@@ -154,18 +154,6 @@ func TestRunLabelWrongFormatFlag(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestRunLoggingLevelFlag(t *testing.T) {
-	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun,
-		"--logging-level", "lev1",
-		"--logging-level", "lev2",
-		integrationSource)
-	assert.Nil(t, err)
-	assert.Len(t, runCmdOptions.LoggingLevels, 2)
-	assert.Equal(t, "lev1", runCmdOptions.LoggingLevels[0])
-	assert.Equal(t, "lev2", runCmdOptions.LoggingLevels[1])
-}
-
 func TestRunLogsFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--logs", integrationSource)
