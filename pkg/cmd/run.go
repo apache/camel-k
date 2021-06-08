@@ -47,7 +47,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/flow"
+	"github.com/apache/camel-k/pkg/util/dsl"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
 	"github.com/apache/camel-k/pkg/util/property"
@@ -531,7 +531,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(c client.Client, sources []str
 
 	for _, source := range resolvedSources {
 		if o.UseFlows && !o.Compression && (strings.HasSuffix(source.Name, ".yaml") || strings.HasSuffix(source.Name, ".yml")) {
-			flows, err := flow.FromYamlDSLString(source.Content)
+			flows, err := dsl.FromYamlDSLString(source.Content)
 			if err != nil {
 				return nil, err
 			}

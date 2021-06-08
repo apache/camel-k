@@ -43,8 +43,10 @@ var (
 
 // KameletSpec defines the desired state of Kamelet
 type KameletSpec struct {
-	Definition    *JSONSchemaProps            `json:"definition,omitempty"`
-	Sources       []camelv1.SourceSpec        `json:"sources,omitempty"`
+	Definition *JSONSchemaProps     `json:"definition,omitempty"`
+	Sources    []camelv1.SourceSpec `json:"sources,omitempty"`
+	Template   *camelv1.Template    `json:"template,omitempty"`
+	// Deprecated: use template
 	Flow          *camelv1.Flow               `json:"flow,omitempty"`
 	Authorization *AuthorizationSpec          `json:"authorization,omitempty"`
 	Types         map[EventSlot]EventTypeSpec `json:"types,omitempty"`
@@ -108,6 +110,8 @@ const (
 	KameletConditionReasonInvalidName string = "InvalidName"
 	// KameletConditionReasonInvalidProperty --
 	KameletConditionReasonInvalidProperty string = "InvalidProperty"
+	// KameletConditionReasonInvalidTemplate --
+	KameletConditionReasonInvalidTemplate string = "InvalidTemplate"
 )
 
 type KameletPhase string
