@@ -63,6 +63,12 @@ func (action *buildAction) Handle(ctx context.Context, kit *v1.IntegrationKit) (
 }
 
 func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.IntegrationKit) (*v1.IntegrationKit, error) {
+	if action.IsPlatformBuildDisabled(ctx, kit) {
+		// Kit should not have reached build stage if platform build strategy is disabled
+		kit.Status.Phase = v1.IntegrationKitPhaseCannotBuild
+		return kit, nil
+	}
+
 	build, err := kubernetes.GetBuild(ctx, action.client, kit.Name, kit.Namespace)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return nil, err

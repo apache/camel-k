@@ -119,6 +119,8 @@ type IntegrationPlatformBuildSpec struct {
 	KanikoBuildCache      *bool                                   `json:"kanikoBuildCache,omitempty"`
 }
 
+const IntegrationPlatformRegistryDisabled = "Disabled"
+
 // IntegrationPlatformRegistrySpec --
 type IntegrationPlatformRegistrySpec struct {
 	Insecure     bool   `json:"insecure,omitempty"`
@@ -146,6 +148,8 @@ const (
 	IntegrationPlatformBuildStrategyRoutine IntegrationPlatformBuildStrategy = "routine"
 	// IntegrationPlatformBuildStrategyPod performs the build in a pod
 	IntegrationPlatformBuildStrategyPod IntegrationPlatformBuildStrategy = "pod"
+	// IntegrationPlatformBuildStrategyDisabled disabled any building
+	IntegrationPlatformBuildStrategyDisabled IntegrationPlatformBuildStrategy = "Disabled"
 )
 
 // IntegrationPlatformBuildStrategies --
@@ -166,6 +170,8 @@ const (
 	IntegrationPlatformBuildPublishStrategyS2I IntegrationPlatformBuildPublishStrategy = "S2I"
 	// IntegrationPlatformBuildPublishStrategySpectrum --
 	IntegrationPlatformBuildPublishStrategySpectrum IntegrationPlatformBuildPublishStrategy = "Spectrum"
+	// IntegrationPlatformBuildPublishStrategyDisabled --
+	IntegrationPlatformBuildPublishStrategyDisabled IntegrationPlatformBuildPublishStrategy = "Disabled"
 )
 
 // IntegrationPlatformBuildPublishStrategies --
@@ -174,6 +180,7 @@ var IntegrationPlatformBuildPublishStrategies = []IntegrationPlatformBuildPublis
 	IntegrationPlatformBuildPublishStrategyKaniko,
 	IntegrationPlatformBuildPublishStrategyS2I,
 	IntegrationPlatformBuildPublishStrategySpectrum,
+	IntegrationPlatformBuildPublishStrategyDisabled,
 }
 
 // IntegrationPlatformPhase --

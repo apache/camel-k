@@ -355,7 +355,13 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		if o.BuildStrategy != "" {
 			platform.Spec.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategy(o.BuildStrategy)
 		}
-		if o.BuildPublishStrategy != "" {
+		//
+		// If the publish strategy has already been marked as disabled
+		// then do not override it,
+		// eg. if no registry has been specified on a kube cluster then
+		//     no builds can be executed regardless of the strategy.
+		//
+		if o.BuildPublishStrategy != "" && platform.Spec.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyDisabled {
 			platform.Spec.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategy(o.BuildPublishStrategy)
 		}
 		if o.BuildTimeout != "" {
@@ -512,6 +518,9 @@ func (o *installCmdOptions) decode(cmd *cobra.Command, _ []string) error {
 	}
 
 	o.registry.Address = viper.GetString(path + ".registry")
+	if o.registry.Address == "none" || o.registry.Address == "disabled" {
+		o.registry.Address = v1.IntegrationPlatformRegistryDisabled
+	}
 	o.registry.Organization = viper.GetString(path + ".organization")
 	o.registry.Secret = viper.GetString(path + ".registry-secret")
 	o.registry.Insecure = viper.GetBool(path + ".registry-insecure")

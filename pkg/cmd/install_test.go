@@ -382,3 +382,11 @@ func TestInstallMavenExtension(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "fi.yle.tools:aws-maven:1.4.2", installCmdOptions.MavenExtensions[0])
 }
+
+func TestInstallRegistryNone(t *testing.T) {
+	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdInstall,
+		"--registry", "none")
+	assert.Nil(t, err)
+	assert.Equal(t, v1.IntegrationPlatformRegistryDisabled, installCmdOptions.registry.Address)
+}

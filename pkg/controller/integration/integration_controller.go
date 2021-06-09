@@ -114,7 +114,9 @@ func add(mgr manager.Manager, r reconcile.Reconciler, cl client.Client) error {
 			kit := a.(*v1.IntegrationKit)
 			var requests []reconcile.Request
 
-			if kit.Status.Phase == v1.IntegrationKitPhaseReady || kit.Status.Phase == v1.IntegrationKitPhaseError {
+			if kit.Status.Phase == v1.IntegrationKitPhaseReady ||
+				kit.Status.Phase == v1.IntegrationKitPhaseError ||
+				kit.Status.Phase == v1.IntegrationKitPhaseCannotBuild {
 				list := &v1.IntegrationList{}
 
 				// Do global search in case of global operator (it may be using a global platform)

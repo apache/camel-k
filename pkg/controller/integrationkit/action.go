@@ -22,6 +22,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
@@ -51,4 +52,14 @@ func (action *baseAction) InjectClient(client client.Client) {
 
 func (action *baseAction) InjectLogger(log log.Logger) {
 	action.L = log
+}
+
+func (action *baseAction) IsPlatformBuildDisabled(ctx context.Context, kit *v1.IntegrationKit) bool {
+	pl, err := platform.GetOrFind(ctx, action.client, kit.Namespace, kit.Status.Platform, true)
+	if err != nil {
+		action.L.Errorf(err, "Cannot find the platform of integration kit: %s", kit.Name)
+		return false
+	}
+
+	return (pl.Spec.Build.BuildStrategy == v1.IntegrationPlatformBuildStrategyDisabled)
 }

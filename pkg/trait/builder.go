@@ -129,6 +129,8 @@ func (t *builderTrait) Apply(e *Environment) error {
 			HttpProxySecret: e.Platform.Status.Build.HTTPProxySecret,
 			Verbose:         t.Verbose,
 		}})
+	case v1.IntegrationPlatformBuildPublishStrategyDisabled:
+		// Nothing to do
 	}
 
 	return nil

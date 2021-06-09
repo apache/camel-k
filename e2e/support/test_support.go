@@ -22,8 +22,8 @@ limitations under the License.
 package support
 
 import (
-	"bytes"
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -554,9 +554,9 @@ func IntegrationSpecProfile(ns string, name string) func() v1.TraitProfile {
 	}
 }
 
-func IntegrationKit(ns string, name string) func() string {
+func IntegrationKit(ns string, itName string) func() string {
 	return func() string {
-		it := Integration(ns, name)()
+		it := Integration(ns, itName)()
 		if it == nil {
 			return ""
 		}
@@ -564,6 +564,27 @@ func IntegrationKit(ns string, name string) func() string {
 			return ""
 		}
 		return it.Status.IntegrationKit.Name
+	}
+}
+
+func IntegrationKitPhase(ns string, itName string) func() v1.IntegrationKitPhase {
+	return func() v1.IntegrationKitPhase {
+		kitName := IntegrationKit(ns, itName)()
+		if len(kitName) == 0 {
+			return ""
+		}
+
+		itk := v1.NewIntegrationKit(ns, kitName)
+		key := ctrl.ObjectKey{
+			Namespace: ns,
+			Name:      kitName,
+		}
+		if err := TestClient().Get(TestContext, key, &itk); err != nil && !k8serrors.IsNotFound(err) {
+			panic(err)
+		} else if err != nil && k8serrors.IsNotFound(err) {
+			return ""
+		}
+		return itk.Status.Phase
 	}
 }
 

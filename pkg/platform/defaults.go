@@ -80,6 +80,11 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I ||
 			p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategySpectrum {
 			p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyRoutine
+		} else if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyDisabled {
+			//
+			// If publish strategy has been set to disabled then there is no point doing any building
+			//
+			p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyDisabled
 		} else {
 			// The build output has to be shared via a volume
 			p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyPod
@@ -114,6 +119,11 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 }
 
 func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) error {
+	if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyDisabled {
+		// Nothing required for the registry configuration (probably disabled since the publish strategy is disabled)
+		return nil
+	}
+
 	if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift &&
 		p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I &&
 		p.Status.Build.Registry.Address == "" {

@@ -77,7 +77,8 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 			}
 		}
 
-		if kit.Status.Phase == v1.IntegrationKitPhaseError {
+		if kit.Status.Phase == v1.IntegrationKitPhaseError ||
+			kit.Status.Phase == v1.IntegrationKitPhaseCannotBuild {
 			integration.Status.Image = kit.Status.Image
 			integration.Status.Phase = v1.IntegrationPhaseError
 			integration.SetIntegrationKit(kit)

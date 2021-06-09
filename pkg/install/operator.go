@@ -422,25 +422,38 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 	pl := platformObject.(*v1.IntegrationPlatform)
 
 	if !isOpenShift {
-		pl.Spec.Build.Registry = registry
+		if registry.Address == v1.IntegrationPlatformRegistryDisabled {
+			//
+			// Leave no doubt that registry has been disabled in the integration platform
+			//
+			pl.Spec.Build.Registry.Address = string(v1.IntegrationPlatformRegistryDisabled)
+			//
+			// Cannot build on non-openshift clusters without a registry.
+			// Registry has been marked Disabled so set strategy & publish strategy as Disabled.
+			//
+			pl.Spec.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyDisabled
+			pl.Spec.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyDisabled
+		} else {
+			pl.Spec.Build.Registry = registry
 
-		// Kubernetes only (Minikube)
-		if registry.Address == "" {
-			// This operation should be done here in the installer
-			// because the operator is not allowed to look into the "kube-system" namespace
-			address, err := minikube.FindRegistry(ctx, c)
-			if err != nil {
-				return nil, err
-			}
-			if address == nil {
-				return nil, errors.New("cannot find automatically a registry where to push images")
-			}
+			// Kubernetes only (Minikube)
+			if registry.Address == "" {
+				// This operation should be done here in the installer
+				// because the operator is not allowed to look into the "kube-system" namespace
+				address, err := minikube.FindRegistry(ctx, c)
+				if err != nil {
+					return nil, err
+				}
+				if address == nil {
+					return nil, errors.New("Cannot determine a registry where to push images")
+				}
 
-			pl.Spec.Build.Registry.Address = *address
-			pl.Spec.Build.Registry.Insecure = true
-			if pl.Spec.Build.PublishStrategy == "" {
-				// Use spectrum in insecure dev clusters by default
-				pl.Spec.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategySpectrum
+				pl.Spec.Build.Registry.Address = *address
+				pl.Spec.Build.Registry.Insecure = true
+				if pl.Spec.Build.PublishStrategy == "" {
+					// Use spectrum in insecure dev clusters by default
+					pl.Spec.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategySpectrum
+				}
 			}
 		}
 	}

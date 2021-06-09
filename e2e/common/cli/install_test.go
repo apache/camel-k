@@ -25,8 +25,11 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 
 	. "github.com/apache/camel-k/e2e/support"
+	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 func TestBasicInstallation(t *testing.T) {
@@ -58,5 +61,23 @@ func TestMavenRepositoryInstallation(t *testing.T) {
 		Eventually(func() string {
 			return Configmap(ns, "camel-k-maven-settings")().Data["settings.xml"]
 		}).Should(ContainSubstring("https://my.repo.org/public/"))
+	})
+}
+
+func TestRegistryNoneInstallation(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns, "--registry", "none").Execute()).To(Succeed())
+		Eventually(Platform(ns)).ShouldNot(BeNil())
+
+		if ocp, err := openshift.IsOpenShift(TestClient()); ocp {
+			assert.Nil(t, err)
+			t.Skip("Test not applicable since Openshift always has a registry available.")
+			return
+		}
+
+		spec := Platform(ns)().Spec
+		assert.Equal(t, spec.Build.Registry.Address, string(v1.IntegrationPlatformRegistryDisabled))
+		assert.Equal(t, spec.Build.PublishStrategy, v1.IntegrationPlatformBuildPublishStrategyDisabled)
+		assert.Equal(t, spec.Build.BuildStrategy, v1.IntegrationPlatformBuildStrategyDisabled)
 	})
 }

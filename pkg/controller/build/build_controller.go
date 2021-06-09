@@ -211,6 +211,8 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 			newErrorRecoveryAction(),
 			newErrorAction(),
 		}
+	case v1.IntegrationPlatformBuildStrategyDisabled:
+		actions = []Action{}
 	}
 
 	for _, a := range actions {

@@ -26,12 +26,14 @@ import (
 
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
+	"github.com/stretchr/testify/assert"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 func TestRunExamplesFromGitHub(t *testing.T) {
@@ -102,6 +104,90 @@ func TestRunAndUpdate(t *testing.T) {
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magic value"))
+
+		// Clean up
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
+}
+
+//
+// Try and run integration specfying no registry on non-openshift cluster
+// Should leave integration in Error phase and the integration kit in Cannot Build phase
+//
+func TestRunNoRegistryCannotBuild(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns, "--registry", "none").Execute()).To(Succeed())
+		Eventually(Platform(ns)).ShouldNot(BeNil())
+
+		if ocp, err := openshift.IsOpenShift(TestClient()); ocp {
+			assert.Nil(t, err)
+			t.Skip("Test not applicable since Openshift always has a registry available.")
+			return
+		}
+
+		name := "run"
+		Expect(Kamel("run", "-n", ns, "files/run.yaml", "--name", name).Execute()).To(Succeed())
+		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(camelv1.IntegrationPhaseError))
+		Eventually(IntegrationKitPhase(ns, name), TestTimeoutShort).Should(Equal(camelv1.IntegrationKitPhaseCannotBuild))
+
+		// Clean up
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
+}
+
+//
+// Try and run already-built integration specfying no registry on non-openshift cluster
+//
+func TestRunNoRegistryRunBuiltIntegration(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		//
+		// Install kamel with registry and create an integration
+		//
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		Eventually(Platform(ns)).ShouldNot(BeNil())
+
+		if ocp, err := openshift.IsOpenShift(TestClient()); ocp {
+			assert.Nil(t, err)
+			t.Skip("Test not applicable since Openshift always has a registry available.")
+			return
+		}
+
+		//
+		// Creates an integration and ensures its ready
+		// This will build the dependent integration kit
+		//
+		name := "run"
+		Expect(Kamel("run", "-n", ns, "files/run.yaml", "--name", name).Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+
+		//
+		// Get the name of the integration kit
+		//
+		itk := IntegrationKit(ns, name)()
+		assert.NotEmpty(t, itk)
+
+		//
+		// Reinstall disabling the registry in the platform
+		//
+		Expect(Kamel("install", "-n", ns, "--force", "true", "--registry", "none").Execute()).To(Succeed())
+		Eventually(func() string {
+			return Platform(ns)().Spec.Build.Registry.Address
+		}).Should(Equal(camelv1.IntegrationPlatformRegistryDisabled))
+
+		spec := Platform(ns)().Spec
+		assert.Equal(t, spec.Build.PublishStrategy, camelv1.IntegrationPlatformBuildPublishStrategyDisabled)
+		assert.Equal(t, spec.Build.BuildStrategy, camelv1.IntegrationPlatformBuildStrategyDisabled)
+
+		//
+		// Platform now disabled due to --registry=none
+		// Run the same integration specifying the existing built kit
+		// Integration kit does not need any building so integration should just run
+		//
+		name2 := "run2"
+		Expect(Kamel("run", "-n", ns, "files/run.yaml", "--name", name2, "--kit", itk).Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, name2), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationCondition(ns, name2, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())

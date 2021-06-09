@@ -38,7 +38,8 @@ func (action *errorAction) Name() string {
 }
 
 func (action *errorAction) CanHandle(kit *v1.IntegrationKit) bool {
-	return kit.Status.Phase == v1.IntegrationKitPhaseError
+	return kit.Status.Phase == v1.IntegrationKitPhaseError ||
+		kit.Status.Phase == v1.IntegrationKitPhaseCannotBuild
 }
 
 func (action *errorAction) Handle(ctx context.Context, kit *v1.IntegrationKit) (*v1.IntegrationKit, error) {

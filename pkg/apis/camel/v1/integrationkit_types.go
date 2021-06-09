@@ -110,6 +110,8 @@ const (
 	IntegrationKitPhaseReady IntegrationKitPhase = "Ready"
 	// IntegrationKitPhaseError --
 	IntegrationKitPhaseError IntegrationKitPhase = "Error"
+	// IntegrationKitPhaseCannotBuild
+	IntegrationKitPhaseCannotBuild IntegrationKitPhase = "Cannot Build"
 
 	// IntegrationKitConditionPlatformAvailable --
 	IntegrationKitConditionPlatformAvailable IntegrationKitConditionType = "IntegrationPlatformAvailable"
