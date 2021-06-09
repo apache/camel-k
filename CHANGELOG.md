@@ -47,6 +47,8 @@
 
 **Merged pull requests:**
 
+- chore\(doc\): Fix Pod trait documentation formatting [\#2373](https://github.com/apache/camel-k/pull/2373) ([astefanutti](https://github.com/astefanutti))
+- chore\(e2e\): remove duplicate test in knative tests [\#2372](https://github.com/apache/camel-k/pull/2372) ([tadayosi](https://github.com/tadayosi))
 - chore\(doc\): Remove deprecated Camel Sources documentation [\#2368](https://github.com/apache/camel-k/pull/2368) ([astefanutti](https://github.com/astefanutti))
 - chore\(ci\): kourier versions not necessarily bound to knative-serving [\#2367](https://github.com/apache/camel-k/pull/2367) ([tadayosi](https://github.com/tadayosi))
 - chore\(ci\): Do not execute e2e tests on documentation changes [\#2366](https://github.com/apache/camel-k/pull/2366) ([astefanutti](https://github.com/astefanutti))
