@@ -1,7 +1,7 @@
 [[integration-logging]]
 = Camel K Integration Logging
 
-Starting with https://camel.apache.org/blog/2021/05/new-camel-k-logging-features/[Camel K 1.5], we introduced a new
+Starting with link:/blog/2021/05/new-camel-k-logging-features/[Camel K 1.5], we introduced a new
 xref:traits:logging.adoc[logging trait] that simplifies access to the logging configuration available on the runtime.
 
 
