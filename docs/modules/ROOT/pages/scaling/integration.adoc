@@ -5,24 +5,75 @@
 
 An Integration can be scaled using the `kubectl scale` command, e.g.:
 
-[source,sh]
+[source,console]
 ----
 $ kubectl scale it <integration_name> --replicas <number_of_replicas>
 ----
 
 This can also be achieved by editing the Integration resource directly, e.g.:
 
-[source,sh]
+[source,console]
 ----
 $ kubectl patch it <integration_name> -p '{"spec":{"replicas":<number_of_replicas>}}'
 ----
 
-The Integration also reports its number of replicas in the `.Status.Replicas` field, e.g.:
+The Integration also reports its number of replicas in the `.status.replicas` field, e.g.:
 
-[source,sh]
+[source,console]
 ----
 $ kubectl get it <integration_name> -o jsonpath='{.spec.replicas}'
 ----
+
+== Autoscaling with Knative
+
+An Integration that deploys as a Knative Service can automatically scale based on _incoming_ traffic, including scaling to zero.
+
+The _incoming_ traffic measures either as:
+
+* The number of simultaneous requests, that are processed by each replica at any given time;
+* Or the number of requests that are processed per second, per replica.
+
+That implies the Integration must expose a container port, that receives incoming requests, and complies with the https://github.com/knative/specs/blob/main/specs/serving/runtime-contract.md#protocols-and-ports[Knative runtime contract].
+This is the case when the Integration either:
+
+* Exposes an HTTP endpoint, using the Camel HTTP component or the REST DSL, e.g.:
++
+[source,javascript]
+----
+rest('/')
+  .produces("text/plain")
+  .get()
+    .route()
+    .transform().constant("Response");
+----
+* Or consumes Knative events, from a Broker or a Channel, using the Knative component, e.g.:
++
+[source,java]
+----
+from("knative:channel/events")
+  .convertBodyTo(String.class)
+  .to("log:info")
+----
+
+The Knative https://knative.dev/docs/serving/autoscaling/autoscaling-concepts/#supported-autoscaler-types[_Autoscaler_] can be configured using the xref:traits:knative-service.adoc[Knative Service] trait, e.g., to set the scaling upper bound (the maximum number of replicas):
+
+[source,console]
+----
+$ kamel run -t knative-service.max-scale=10
+----
+
+More information can be found in the Knative https://knative.dev/docs/serving/autoscaling/[Autoscaling] documentation.
+
+[NOTE]
+====
+When <<Manual Scaling,manually scaling>> an Integration, that deploys as a Knative Service, both https://knative.dev/docs/serving/autoscaling/scale-bounds/[scale bounds], i.e., `minScale` and `maxScale`, are set to the specified number of replicas.
+Scale bounds can be reset by removing the `.spec.replicas` field from the Integration, e.g., with:
+
+[source,console]
+----
+$ kubectl patch it <integration_name> --type=json -p='[{"op": "remove", "path": "/spec/replicas"}]'
+----
+====
 
 == Autoscaling with HPA
 
@@ -30,7 +81,7 @@ An Integration can automatically scale based on its CPU utilization and custom m
 
 For example, executing the following command creates an _autoscaler_ for the Integration, with target CPU utilization set to 80%, and the number of replicas between 2 and 5:
 
-[source,sh]
+[source,console]
 ----
 $ kubectl autoscale it <integration_name> --min=2 --max=5 --cpu-percent=80
 ----
@@ -65,3 +116,5 @@ spec:
 ----
 
 More information can be found in https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/[Horizontal Pod Autoscaler] from the Kubernetes documentation.
+
+NOTE: HPA can also be used with Knative, by installing the https://knative.dev/docs/install/install-extensions/#install-optional-serving-extensions[HPA autoscaling Serving extension].
