@@ -374,3 +374,11 @@ func TestInstallTolerationFlag(t *testing.T) {
 	assert.Equal(t, "key1=value1:NoSchedule", installCmdOptions.Tolerations[0])
 	assert.Equal(t, "key2=value2:NoExecute", installCmdOptions.Tolerations[1])
 }
+
+func TestInstallMavenExtension(t *testing.T) {
+	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdInstall,
+		"--maven-extension", "fi.yle.tools:aws-maven:1.4.2")
+	assert.Nil(t, err)
+	assert.Equal(t, "fi.yle.tools:aws-maven:1.4.2", installCmdOptions.MavenExtensions[0])
+}
