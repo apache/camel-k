@@ -360,6 +360,11 @@ To comply with the Knative specifications, in case an "http" or "https" URI is u
 
 You can configure an error handler in order to specify what to do when some event ends up with failure. See xref:kamelets/kameletbindings-error-handler.adoc[Kamelet Bindings Error Handler User Guide] for more detail.
 
+[[kamelets-troubleshooting]]
+== Troubleshooting
+
+A `Kamelet` is translated into a `Route` used from the `Ìntegration`. In order to troubleshoot any possible issue, you can have a look at the dedicated xref:troubleshooting/debugging.adoc#debugging-kamelets[troubleshoot section].
+
 [[kamelets-specification]]
 == Kamelet Specification
 
