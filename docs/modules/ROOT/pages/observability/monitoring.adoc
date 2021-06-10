@@ -15,7 +15,7 @@ To take full advantage of the Camel K monitoring capabilities, it is recommended
 
 You can deploy the Prometheus operator by running:
 
-[source,sh]
+[source,console]
 ----
 $ kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/v0.38.0/bundle.yaml
 ----
@@ -24,7 +24,7 @@ WARNING: Beware this installs the operator in the `default` namespace. You must 
 
 Then, you can create a `Prometheus` resource, that the operator will use as configuration to deploy a managed Prometheus instance:
 
-[source,sh]
+[source,console]
 ----
 $ cat <<EOF | kubectl apply -f -
 apiVersion: monitoring.coreos.com/v1
@@ -93,5 +93,5 @@ On OpenShift versions prior to 4.3, or if you do not want to change your cluster
 
 === What's Next
 
-- xref:observability/operator.adoc[Camel K operator monitoring]
-- xref:observability/integration.adoc[Camel K integration monitoring]
+- xref:observability/monitoring/operator.adoc[Camel K operator monitoring]
+- xref:observability/monitoring/integration.adoc[Camel K integration monitoring]
