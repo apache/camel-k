@@ -84,11 +84,10 @@ jobs:
       with:
         version: v0.11.0
         node_image: kindest/node:v1.21.1@sha256:fae9a58f17f18f06aeac9772ca8b5ac680ebbed985e266f711d936e91d113bad
-    - name: Info
+    - name: Install Nexus
       run: |
-        kubectl version
-        kubectl cluster-info
-        kubectl describe nodes
+        # Run before building operator so we won't need to wait for nexus to up
+        kubectl apply --filename e2e/support/files/nexus.yaml
     - name: Install Knative
       run: |
         # Prerequisites
@@ -121,7 +120,7 @@ jobs:
         curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/mt-channel-broker.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
 
         # Eventing sugar controller for injection
-        kubectl apply -f https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-sugar-controller.yaml
+        kubectl apply --filename https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-sugar-controller.yaml
 
         # Camel Sources
         kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/$SOURCES_VERSION/camel.yaml
@@ -135,6 +134,11 @@ jobs:
         kubectl wait --for=condition=Ready pod --all -n knative-eventing --timeout=60s
         echo "Waiting for all pods to be ready in knative-sources"
         kubectl wait --for=condition=Ready pod --all -n knative-sources --timeout=60s
+    - name: Info
+      run: |
+        kubectl version
+        kubectl cluster-info
+        kubectl describe nodes
 
     - name: Build Operator
       run: |

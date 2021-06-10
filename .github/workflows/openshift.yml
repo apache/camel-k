@@ -141,8 +141,18 @@ jobs:
 
         echo "openshift is deployed and reachable"
 
+    - name: Install Nexus
+      run: |
+        oc new-project nexus
+        oc apply -f e2e/support/files/nexus.yaml
+        oc project myproject
+
+        echo "Waiting for all pods to be ready in nexus"
+        oc wait --for=condition=Ready pod -l app=nexus -n nexus --timeout=300s
+
     - name: Info
       run: |
+        oc version
         oc describe nodes
     - name: Run IT
       #env:
