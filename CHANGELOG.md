@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- Cannot use camel-util dependency [\#2384](https://github.com/apache/camel-k/issues/2384)
+- Can't set multiline properties in Kamelet bindings [\#2361](https://github.com/apache/camel-k/issues/2361)
 - Maven logs are no longer shown [\#2357](https://github.com/apache/camel-k/issues/2357)
 - examples/RestDSL.java does not work [\#2349](https://github.com/apache/camel-k/issues/2349)
 - kamelets: add condition to report when an integration is stuck waiting for them  [\#2331](https://github.com/apache/camel-k/issues/2331)
@@ -37,6 +39,7 @@
 - api: provide java bindings [\#2082](https://github.com/apache/camel-k/issues/2082)
 - Kamelet file parameters [\#2080](https://github.com/apache/camel-k/issues/2080)
 - Can't mount secrets with binary data [\#2009](https://github.com/apache/camel-k/issues/2009)
+- Logging configuration does not affect integrations [\#2000](https://github.com/apache/camel-k/issues/2000)
 - kamelet-binding : suport for error handling [\#1941](https://github.com/apache/camel-k/issues/1941)
 - builder: use structured logging for maven output [\#1783](https://github.com/apache/camel-k/issues/1783)
 - Add support for podtemplatespec / container in the Integration CRD [\#1657](https://github.com/apache/camel-k/issues/1657)
@@ -47,8 +50,11 @@
 
 **Merged pull requests:**
 
+- Fixes website build [\#2385](https://github.com/apache/camel-k/pull/2385) ([oscerd](https://github.com/oscerd))
+- Removed the deprecated --logging-level option \(issue \#2000\) [\#2377](https://github.com/apache/camel-k/pull/2377) ([orpiske](https://github.com/orpiske))
 - chore\(doc\): Fix Pod trait documentation formatting [\#2373](https://github.com/apache/camel-k/pull/2373) ([astefanutti](https://github.com/astefanutti))
 - chore\(e2e\): remove duplicate test in knative tests [\#2372](https://github.com/apache/camel-k/pull/2372) ([tadayosi](https://github.com/tadayosi))
+- Fix \#2361: allow multiline properties by correctly encoding them [\#2369](https://github.com/apache/camel-k/pull/2369) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(doc\): Remove deprecated Camel Sources documentation [\#2368](https://github.com/apache/camel-k/pull/2368) ([astefanutti](https://github.com/astefanutti))
 - chore\(ci\): kourier versions not necessarily bound to knative-serving [\#2367](https://github.com/apache/camel-k/pull/2367) ([tadayosi](https://github.com/tadayosi))
 - chore\(ci\): Do not execute e2e tests on documentation changes [\#2366](https://github.com/apache/camel-k/pull/2366) ([astefanutti](https://github.com/astefanutti))
