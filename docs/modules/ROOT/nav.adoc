@@ -28,9 +28,12 @@
 ** xref:configuration/dependencies.adoc[Dependencies]
 ** xref:configuration/configmap-secret.adoc[ConfigMap/Secret]
 * Observability
+** xref:observability/logging.adoc[Logging]
+*** xref:observability/logging/operator.adoc[Operator]
+*** xref:observability/logging/integration.adoc[Integration]
 ** xref:observability/monitoring.adoc[Monitoring]
-*** xref:observability/operator.adoc[Operator]
-*** xref:observability/integration.adoc[Integration]
+*** xref:observability/monitoring/operator.adoc[Operator]
+*** xref:observability/monitoring/integration.adoc[Integration]
 * Scaling
 ** xref:scaling/integration.adoc[Integration]
 * xref:traits:traits.adoc[Traits]
