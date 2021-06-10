@@ -109,6 +109,19 @@ After you log in into your cluster, you can run the following command to execute
 make test-integration
 ----
 
+[NOTE]
+====
+Integration tests by default use a https://github.com/sonatype/docker-nexus3[Nexus Repository Manager] for Maven repository mirror to speed up test runs if it is discovered as `nexus` service in `nexus` namespace.
+
+To set up a Nexus instance in your cluster, run the following command:
+[source]
+----
+kubectl apply -f e2e/support/files/nexus.yaml
+----
+
+You can explicitly disable the usage of Nexus mirror in e2e testing by setting environment variable: `TEST_DISABLE_NEXUS=true`
+====
+
 [[running]]
 == Running
 
