@@ -32,7 +32,7 @@ import (
 const (
 	nexusNamespace   = "nexus"
 	nexusService     = "nexus"
-	nexusMavenMirror = "http://nexus.nexus/repository/maven-public/@id=nexus@mirrorOf=*"
+	nexusMavenMirror = "http://nexus.nexus/repository/maven-public/@id=nexus@mirrorOf=central"
 )
 
 func init() {
