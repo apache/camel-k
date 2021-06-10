@@ -8,7 +8,7 @@ NOTE: The Camel K monitoring architecture relies on https://prometheus.io[Promet
 
 The `kamel install` command provides the `--monitoring` option flag, that can be used to automatically creates the default resources required to monitor the Camel K operator, e.g.:
 
-[source,sh]
+[source,console]
 ----
 $ kamel install --monitoring=true
 ----
@@ -20,7 +20,7 @@ This creates:
 
 The `kamel install` command also provides the `--monitoring-port` option, that can be used to change the port of the operator monitoring endpoint, e.g.:
 
-[source,sh]
+[source,console]
 ----
 $ kamel install --monitoring=true --monitoring-port=8888
 ----

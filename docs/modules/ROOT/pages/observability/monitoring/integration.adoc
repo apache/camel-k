@@ -10,19 +10,20 @@ The xref:traits:prometheus.adoc[Prometheus trait] automates the configuration of
 
 The Prometheus trait can be enabled when running an integration, e.g.:
 
-[source,sh]
+[source,console]
 ----
-$ kamel run -t prometheus.enabled=true ...
+$ kamel run -t prometheus.enabled=true
 ----
 
 Alternatively, the Prometheus trait can be enabled globally once, by updating the integration platform, e.g.:
 
-[source,sh]
+[source,console]
 ----
 $ kubectl patch ip camel-k --type=merge -p '{"spec":{"traits":{"prometheus":{"configuration":{"enabled":true}}}}}'
 ----
 
 Or by directly editing the `IntegrationPlatform` resource, e.g.:
+
 [source, yaml]
 ----
 apiVersion: camel.apache.org/v1
@@ -58,14 +59,14 @@ The Prometheus trait automatically configures the resources necessary for the Pr
 By default, the Prometheus trait creates a `PodMonitor` resource, with the `camel.apache.org/integration` label, which must match the `podMonitorSelector` field from the `Prometheus` resource.
 Additional labels can be specified with the `pod-monitor-labels` parameter from the Prometheus trait, e.g.:
 
-[source,sh]
+[source,console]
 ----
 $ kamel run -t prometheus.pod-monitor-labels="label_to_be_match_by=prometheus_selector" ...
 ----
 
 The creation of the `PodMonitor` resource can be disabled using the `pod-monitor` parameter, e.g.:
 
-[source,sh]
+[source,console]
 ----
 $ kamel run -t prometheus.pod-monitor=false ...
 ----
@@ -82,7 +83,7 @@ The Prometheus Operator declares the `AlertManager` resource that can be used to
 
 Assuming an `AlertManager` resource already exists in your cluster, you can register a `PrometheusRule` resource that is used by Prometheus to trigger alerts, e.g.:
 
-[source,sh]
+[source,console]
 ----
 $ cat <<EOF | kubectl apply -f -
 apiVersion: monitoring.coreos.com/v1

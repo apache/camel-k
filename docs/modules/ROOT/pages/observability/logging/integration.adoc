@@ -1,0 +1,48 @@
+[[integration-logging]]
+= Camel K Integration Logging
+
+The xref:traits:logging.adoc[Logging trait] simplifies the logging configuration of the Integration runtime.
+
+NOTE: The Logging trait has been introduced in Camel K version 1.5.0. See the link:/blog/2021/05/new-camel-k-logging-features/[introductory blog post].
+
+[[integration-logging-level]]
+== Logging Level
+
+To configure the log level, the `level` option from the Logging trait can be used, e.g.:
+
+[source,console]
+----
+$ kamel run -t logging.level=DEBUG
+----
+
+[[integration-logging-format]]
+== Logging Format
+
+The format of the log messages can be configured using the `format` option, e.g.:
+
+[source,console]
+----
+$ kamel run -t logging.format='%d{HH:mm:ss} %-5p (%t) %s%e%n'
+----
+
+The supported values are those of
+https://quarkus.io/guides/logging[Quarkus logging] configuration, as it provides the logging framework, for Camel Quarkus which is leveraged by
+Camel K.
+
+[[integration-logging-structured]]
+== Structured Logs
+
+The Integration Pods can provide structured logs, to facilitate processing and parsing.
+This can be turned on or off, using the `json` option from the Logging trait, e.g.:
+
+[source,console]
+----
+$ kamel run -t logging.json=true
+----
+
+Subsequently, pretty JSON logs can be enabled with:
+
+[source,console]
+----
+$ kamel run -t logging.json=true -t logging.json-pretty-print=true
+----
