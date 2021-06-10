@@ -1,6 +1,8 @@
 [[logging]]
 = Camel K Logging
 
-The Camel K logging has two major areas. The first one is related to the logging provided by the
-xref:observability/operator-logging.adoc[operator itself], whereas the second is related to the
-xref:observability/integration-logging.adoc[integrations] ran by Camel K.
+Logs are an essential aspect of observability, and traditionally used to check nominal operation, or for troubleshooting.
+The following pages contain some details on the logging provided by the various Camel K components:
+
+- xref:observability/logging/operator.adoc[Camel K operator logging]
+- xref:observability/logging/integration.adoc[Camel K integration logging]

@@ -3,17 +3,17 @@
 
 NOTE: The following guide uses the terminology from the https://sre.google/sre-book/service-level-objectives/[Site Reliability Engineer] book.
 
-The Camel K operator exposes a monitoring endpoint, that publishes xref:observability/operator.adoc#metrics[metrics] indicating the _level of service_ provided to its users.
+The Camel K operator exposes a monitoring endpoint, that publishes xref:observability/monitoring/operator.adoc#metrics[metrics] indicating the _level of service_ provided to its users.
 These metrics materialize the Service Level Indicators (SLIs) for the Camel K operator.
 
 Service Level Objectives (SLOs) can be defined based on these SLIs.
-The xref:observability/operator.adoc#alerting[default alerts] created for the Camel K operator query the SLIs corresponding metrics, and match the SLOs for the Camel K operator, so that they fire up as soon as the _level of service_ is not met, and preemptive measures can be taken before beaching the Service Level Agreement (SLA) for the Camel K operator.
+The xref:observability/monitoring/operator.adoc#alerting[default alerts] created for the Camel K operator query the SLIs corresponding metrics, and match the SLOs for the Camel K operator, so that they fire up as soon as the _level of service_ is not met, and preemptive measures can be taken before beaching the Service Level Agreement (SLA) for the Camel K operator.
 
 [[operator-sops]]
 == Operator SOPs
 
-The following section lists the Standard Operating Procedures (SOPs), corresponding to the xref:observability/operator.adoc#alerting[default alerts], created for the Camel K operator.
-It assumes the operator has been installed according to the xref:observability/operator.adoc#installation[installation] section from the operator monitoring documentation.
+The following section lists the Standard Operating Procedures (SOPs), corresponding to the xref:observability/monitoring/operator.adoc#alerting[default alerts], created for the Camel K operator.
+It assumes the operator has been installed according to the xref:observability/monitoring/operator.adoc#installation[installation] section from the operator monitoring documentation.
 
 It documents the recommended troubleshooting actions, to be performed when a particular alert fires.
 It is meant to be a living document, to be improved iteratively over time, as users face problematic situations, and actions to troubleshoot and solve them are perfected.
@@ -46,7 +46,7 @@ It's firing when some reconciliation requests have failed.
 
 * Search the operator logs for errors, e.g.:
 +
-[source,sh]
+[source,console]
 ----
 $ kubectl logs deployment/camel-k-operator --since=1h \
 | jq -R 'fromjson?
@@ -56,7 +56,7 @@ Check the `error`, `errorVerbose` and `stacktrace` fields.
 
 * Inspect the resources corresponding to the errors, e.g.:
 +
-[source,sh]
+[source,console]
 ----
 $ kubectl logs deployment/camel-k-operator --since=1h \
 | jq -rR 'fromjson?
@@ -82,7 +82,7 @@ It's firing when more than 10% of the successful builds have their duration abov
 
 * Inspect the successful Builds whose duration is longer than 2 minutes, e.g.:
 +
-[source,sh]
+[source,console]
 ----
 $ kubectl get builds.camel.apache.org -o json \
 | jq -r '.items[]
@@ -108,7 +108,7 @@ It's firing when more than 1% of the successful builds have their duration above
 
 * Inspect the successful Builds whose duration is longer than 5 minutes, e.g.:
 +
-[source,sh]
+[source,console]
 ----
 $ kubectl get builds.camel.apache.org -o json \
 | jq -r '.items[]
@@ -134,7 +134,7 @@ It's firing when more than 1% of the builds have errored over at least 10 min.
 
 * Inspect the errored Builds, e.g.:
 +
-[source,sh]
+[source,console]
 ----
 $ kubectl get builds.camel.apache.org -o json \
 | jq -r '.items[]
@@ -157,7 +157,7 @@ It's firing when more than 1% of the builds have been queued for more than 1 min
 
 * Inspect the Builds that have been queued for more than 1 minutes, e.g.:
 +
-[source,sh]
+[source,console]
 ----
 $ kubectl get builds.camel.apache.org -o json \
 | jq -r '.items[]
@@ -183,7 +183,7 @@ It's firing when more than 1% of the builds have been queued for more than 5 min
 
 * Inspect the Builds that have been queued for more than 5 minutes, e.g.:
 +
-[source,sh]
+[source,console]
 ----
 $ kubectl get builds.camel.apache.org -o json \
 | jq -r '.items[]

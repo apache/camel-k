@@ -1,32 +1,34 @@
 = Debugging Camel K Integrations
 
-Sometimes integrations can fail or behave unexpectedly for unknown reasons and a developer needs to investigate the cause of such behavior.
+Sometimes an Integration can fail or behave unexpectedly for unknown reasons, and a developer needs to investigate the cause of such behavior.
 Attaching a Java debugger to an integration is a common way to start the investigation.
 
-Even if Camel K integrations run on a Kubernetes cluster, it's very easy to attach a Java debugger to the remote integration using the CLI.
+Even if the Integration Pods run on a Kubernetes cluster, it's very easy to attach a Java debugger to the remote Integration container using the CLI.
+
+== Debugging with VS Code
 
 If you're a VS Code user, you can watch this link:https://www.youtube.com/watch?v=cFPuxd1Je3c[video].
 
-Find below a more generic explanation using IntelliJ.
+== Debugging with IntelliJ IDEA
 
-Suppose you just launched an integration using the following command:
+Suppose you've started an Integration using the following command:
 
-[source,shell]
+[source,console]
 ----
-kamel run examples/Sample.java
+$ kamel run examples/Sample.java
 ----
 
-An integration named `sample` should be running in the cluster.
-You can use the `kamel debug` command to put it in "debug mode".
+An Integration named `sample` should be running in the cluster.
+You can use the `kamel debug` command to put it in _debug_ mode:
 
-[source,shell]
+[source,console]
 ----
-kamel debug sample
+$ kamel debug sample
 ----
 
 A possible output that you may find is the following:
 
-[source,shell]
+[source,console]
 ----
 $ kamel debug sample
 Enabling debug mode on integration "sample"...
@@ -37,18 +39,16 @@ Forwarding from 127.0.0.1:5005 -> 5005
 Forwarding from [::1]:5005 -> 5005
 ----
 
-As you can see in the logs, the CLI has configured the integration in debug mode (see option `-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005`)
-and started forwarding the local port 5005 on the workstation machine (local port can be changed using the `--port` option) to the container port 5005, where the JVM is waiting for a debugger.
+As you can see in the logs, the CLI has configured the integration in debug mode (see option `-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005`) and started forwarding the local port 5005 on the workstation machine (local port can be changed using the `--port` option) to the container port 5005, where the JVM is waiting for a debugger.
 
 The JVM is suspended and waits for a debugger to attach by default: this behavior can be turned off using the `--suspend=false` option.
 
-Last thing to do is, with your IDE opened on the **integration file (if using Java, Groovy or Kotlin), the Apache Camel project or the Camel K Runtime project**,
-to start a remote debugger on `localhost:5005`.
+Last thing to do is, with your IDE opened on the **integration file (if using Java, Groovy or Kotlin), the Apache Camel project, or the Camel K Runtime project**, to start a remote debugger on `localhost:5005`.
 
-The following picture shows the configuration of a remote debugger in IntelliJ Idea.
+The following picture shows the configuration of a remote debugger in IntelliJ IDEA:
 
-image::debugging/remote-debugger.png[Configuration of the remote debugger in IntelliJ Idea]
+image::debugging/remote-debugger.png[Configuration of the remote debugger in IntelliJ IDEA]
 
 Once you configure a debugger, you can **add breakpoints** to various part of the code, then connect the debugger to trigger the JVM startup.
 
-When the debugging session is finished, hitting *ctrl+c* on the terminal where the kamel CLI is running will restore the integration to its original status.
+When the debugging session is done, hitting kbd:[Ctrl+c] on the terminal where the kamel CLI is running will restore the integration to its original status.
