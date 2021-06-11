@@ -49,6 +49,12 @@ rules:
   - update
   - watch
 - apiGroups:
+  - ""
+  resources:
+  - pods/exec
+  verbs:
+  - create
+- apiGroups:
   - policy
   resources:
   - poddisruptionbudgets
