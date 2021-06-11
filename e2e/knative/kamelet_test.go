@@ -55,5 +55,6 @@ func TestKameletChange(t *testing.T) {
 		Eventually(IntegrationPodPhase(ns, "timer-binding"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 		Eventually(IntegrationCondition(ns, "timer-binding", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, "display"), TestTimeoutShort).Should(ContainSubstring("message is Hi"))
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

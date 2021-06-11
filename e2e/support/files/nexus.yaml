@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nexus
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexus
+  namespace: nexus
+spec:
+  selector:
+    app: nexus
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8081
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexus
+  namespace: nexus
+spec:
+  selector:
+    matchLabels:
+      app: nexus
+  template:
+    metadata:
+      labels:
+        app: nexus
+    spec:
+      containers:
+        - name: nexus
+          image: sonatype/nexus3
+          ports:
+            - containerPort: 8081
+              name: 8081-tcp
+          livenessProbe:
+            httpGet:
+              path: /service/rest/v1/status
+              port: 8081
+            initialDelaySeconds: 90
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /service/rest/v1/status
+              port: 8081
+            initialDelaySeconds: 90
+            periodSeconds: 3
+          volumeMounts:
+            - name: nexus-data
+              mountPath: /nexus-data
+      volumes:
+        - name: nexus-data
+          emptyDir: {}
