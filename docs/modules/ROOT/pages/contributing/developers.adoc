@@ -87,27 +87,11 @@ make STAGING_IMAGE_NAME='docker.io/myrepo/camel-k' images-push-staging
 Unit tests are executed automatically as part of the build. They use the standard go testing framework.
 
 Integration tests (aimed at ensuring that the code integrates correctly with Kubernetes and OpenShift), need special care.
-
-The **convention** used in this repo is to name tests `xxx_test.go`.
 Integration tests are all in the https://github.com/apache/camel-k/tree/main/e2e[/e2e] dir.
 
-Since both names end with `_test.go`, both would be executed by go during the build, so you need to put a special **build tag** to mark
-integration tests. An integration test should start with the following line:
+For more detail on integration testing, refer to the following documentation:
 
-[source]
-----
-// +build integration
-----
-
-Look into the https://github.com/apache/camel-k/tree/main/e2e[/e2e] directory for examples of integration tests.
-
-Before running an integration test, you need to be connected to a Kubernetes/OpenShift namespace.
-After you log in into your cluster, you can run the following command to execute **all** integration tests:
-
-[source]
-----
-make test-integration
-----
+- xref:contributing/e2e.adoc[End To End local integration test]
 
 [[running]]
 == Running
