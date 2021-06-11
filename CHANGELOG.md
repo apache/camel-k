@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - Cannot use camel-util dependency [\#2384](https://github.com/apache/camel-k/issues/2384)
+- Scaling documentation - Add section about knative [\#2380](https://github.com/apache/camel-k/issues/2380)
 - Can't set multiline properties in Kamelet bindings [\#2361](https://github.com/apache/camel-k/issues/2361)
 - Maven logs are no longer shown [\#2357](https://github.com/apache/camel-k/issues/2357)
 - examples/RestDSL.java does not work [\#2349](https://github.com/apache/camel-k/issues/2349)
@@ -32,6 +33,7 @@
 - Add a flag to enable/disable the installation of default kamelets [\#2237](https://github.com/apache/camel-k/issues/2237)
 - Create E2E test for Service Binding Operator [\#2236](https://github.com/apache/camel-k/issues/2236)
 - Update run-from-github page to correct github example path [\#2230](https://github.com/apache/camel-k/issues/2230)
+- SourceSpec Type default to empty [\#2223](https://github.com/apache/camel-k/issues/2223)
 - Allow to configure traits using annotations [\#2165](https://github.com/apache/camel-k/issues/2165)
 - Release 1.4.0 [\#2134](https://github.com/apache/camel-k/issues/2134)
 - Dependency autoloading is not working correctly with YAML format [\#2098](https://github.com/apache/camel-k/issues/2098)
@@ -50,6 +52,8 @@
 
 **Merged pull requests:**
 
+- chore\(doc\): Tidy observability documentation [\#2390](https://github.com/apache/camel-k/pull/2390) ([astefanutti](https://github.com/astefanutti))
+- chore\(doc\): Add autoscaling with Knative documentation [\#2386](https://github.com/apache/camel-k/pull/2386) ([astefanutti](https://github.com/astefanutti))
 - Fixes website build [\#2385](https://github.com/apache/camel-k/pull/2385) ([oscerd](https://github.com/oscerd))
 - Removed the deprecated --logging-level option \(issue \#2000\) [\#2377](https://github.com/apache/camel-k/pull/2377) ([orpiske](https://github.com/orpiske))
 - chore\(doc\): Fix Pod trait documentation formatting [\#2373](https://github.com/apache/camel-k/pull/2373) ([astefanutti](https://github.com/astefanutti))
