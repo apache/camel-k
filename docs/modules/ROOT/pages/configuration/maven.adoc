@@ -151,3 +151,171 @@ Alternatively, the Kamel CLI provides the `--maven-ca-secret` option, with the `
 ----
 $ kamel install --maven-ca-secret <secret_name>/<secret_key>
 ----
+
+[[maven-extensions]]
+== Maven Extensions
+
+The Maven https://maven.apache.org/guides/mini/guide-using-extensions.html[extensions] used by the Camel K operator while building integrations can be configured using the Kamel CLI through the `--maven-extension` option, e.g.:
+
+[source,console]
+----
+$ kamel install --maven-extension fi.yle.tools:aws-maven:1.4.2
+----
+
+The IntegrationPlatform resource stores extensions in the `spec.build.maven.extension` field, e.g:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: IntegrationPlatform
+metadata:
+  name: camel-k
+spec:
+  build:
+    maven:
+      extension:
+      - artifactId: aws-maven
+        groupId: fi.yle.tools
+        version: 1.4.2
+----
+
+The IntegrationPlatform resource can be edited directly, to add or remove extensions, e.g.:
+
+[source,console]
+----
+$ kubectl edit ip camel-k
+----
+
+Maven extensions are typically used to enable https://maven.apache.org/wagon/wagon-providers/[Wagon Providers], used for the transport of artifacts between repository. 
+
+[[use-case]]
+== S3 Bucket as a Maven Repository
+
+In this section, we will show how to configure Camel K to fetch artifacts from a https://aws.amazon.com/s3/[S3] bucket that's setup as a Maven repository. We will assume that the bucket is already up and running and configured correctly. We will also assume you know how to setup Maven locally to fetch artifacts from it.
+
+=== Custom Maven Settings
+
+The first thing that needs to be done is to create a Maven settings file configured to use the S3 bucket as a Maven repostory. The Maven settings file will be used by the Camel K operator so make sure your S3 instance is accessible in your cluster. +
+The Maven settings will contain all the information needed for Maven to access the S3 bucket namely your credentials, S3 URL and bucket name. This information will typically be located in the `server` and `repository` section of your Maven settings. For example when using https://min.io/[MinIO] as a S3 provider and https://github.com/Yleisradio/aws-maven/pull/20[`fi.yle.tools:aws-maven:1.4.3`] as a Wagon Provider, your Maven settings will look something like this: 
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <servers>
+    <server>
+      <id>minio-release</id>
+      <username>291cafe6-eceb-43dc-91b3-58be867d9da2</username>
+      <password>e383fed0-4645-45f6-acea-65f3748b96c8</password>
+      <configuration>
+        <wagonProvider>s3</wagonProvider>
+        <s3Provider>minio</s3Provider>
+        <endpoint>https://minio-tenant-1-hl.minio-tenant-1.svc.cluster.local:4430</endpoint>
+      </configuration>
+    </server>
+    <server>
+      <id>minio-snapshot</id>
+      <username>291cafe6-eceb-43dc-91b3-58be867d9da2</username>
+      <password>e383fed0-4645-45f6-acea-65f3748b96c8</password>
+      <configuration>
+        <wagonProvider>s3</wagonProvider>
+        <s3Provider>minio</s3Provider>
+        <endpoint>https://minio-tenant-1-hl.minio-tenant-1.svc.cluster.local:4430</endpoint>
+      </configuration>
+    </server>
+  </servers>
+  <profiles>
+    <profile>
+      <id>maven-settings</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <repositories>
+        <repository>
+          <id>central</id>
+          <url>https://repo.maven.apache.org/maven2</url>
+          <snapshots>
+            <enabled>false</enabled>
+            <checksumPolicy>fail</checksumPolicy>
+          </snapshots>
+          <releases>
+            <enabled>true</enabled>
+            <checksumPolicy>fail</checksumPolicy>
+          </releases>
+        </repository>
+        <repository>
+          <id>minio-release</id>
+          <name>MinIO Release Repository</name>
+          <url>s3://maven/release</url>
+        </repository>
+        <repository>
+          <id>minio-snapshot</id>
+          <name>MinIO Snapshot Repository</name>
+          <url>s3://maven/snapshot</url>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <url>https://repo.maven.apache.org/maven2</url>
+          <snapshots>
+            <enabled>false</enabled>
+            <checksumPolicy>fail</checksumPolicy>
+          </snapshots>
+          <releases>
+            <enabled>true</enabled>
+            <checksumPolicy>fail</checksumPolicy>
+          </releases>
+        </pluginRepository>
+        <pluginRepository>
+          <id>minio-snapshot</id>
+          <name>MinIO Snapshot Repository</name>
+          <url>s3://maven/snapshot</url>
+        </pluginRepository>
+             <pluginRepository>
+          <id>minio-release</id>
+          <name>MinIO Release Repository</name>
+          <url>s3://maven/release</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>yle-public</id>
+            <name>Yle public repository</name>
+            <url>https://maven.yle.fi/release</url>
+            <layout>default</layout>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+</settings>
+----
+Since these settings contains credentials, you will want to store it in a Kubernetes `secret`. As mentioned above, the `kubectl` CLI provides a convenient command to create a Secret from a file, e.g.:
+[source,console]
+----
+$ kubectl create secret generic camel-k-s3-maven-settings --from-file=maven-settings=maven_settings.xml
+----
+
+=== S3 TLS Certificates
+
+In most cases, you will need to add the certificate(s) served by your S3 instance to the list of certificate(s) trusted by the Camel K Operator when running Maven commands. Where/how to get the certificate(s) varies greatly depending on how your S3 instance is setup and will not be covered here. +
+Once retrieved, you should create a Kubernetes `secret` containing the certificate(s) similar to what is described in the section <<ca-certificates>>, e.g.:
+[source,console]
+----
+$ kubectl create secret generic s3-ca --from-file=s3-ca=ca.crt
+----
+
+=== Maven settings, certificates and extensions
+
+We are now ready to configure the Camel K operator to use your S3 bucket as a Maven repository. This can be done while installing the Operator using the Kamel CLI, e.g:
+[source,console]
+----
+$ kamel install --maven-settings secret:camel-k-s3-maven-settings/maven-settings --maven-ca-secret s3-ca/s3-ca --maven-extension fi.yle.tools:aws-maven:1.4.3
+----
+
+Maven dependencies hosted in your S3 bucket can now be used just like any other dependency when running an integration. For example when using the Kamel CLI using the `--dependency` option:
+[source,console]
+----
+$ kamel run S3.java --dependency=mvn:artfiactId:groupId:version
+----
+
+Enjoy !
