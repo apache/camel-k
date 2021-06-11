@@ -23,9 +23,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/openshift"
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -65,7 +63,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		return false, nil
 	}
 
@@ -111,21 +109,10 @@ func (t *pullSecretTrait) Apply(e *Environment) error {
 		})
 	}
 	if util.IsTrue(t.ImagePullerDelegation) {
-		if err := t.delegateImagePuller(e); err != nil {
-			return err
-		}
+		rb := t.newImagePullerRoleBinding(e)
+		e.Resources.Add(rb)
 	}
 
-	return nil
-}
-
-func (t *pullSecretTrait) delegateImagePuller(e *Environment) error {
-	// Applying the rolebinding directly because it's a resource in the operator namespace
-	// (different from the integration namespace when delegation is enabled).
-	rb := t.newImagePullerRoleBinding(e)
-	if err := kubernetes.ReplaceResource(e.C, e.Client, rb); err != nil {
-		return errors.Wrap(err, "error during the creation of the system:image-puller delegating role binding")
-	}
 	return nil
 }
 
