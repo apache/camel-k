@@ -41,6 +41,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
+	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/zip"
 )
 
@@ -195,6 +196,11 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 
 	err = t.waitForS2iBuildCompletion(ctx, t.c, &s2iBuild)
 	if err != nil {
+		if err == context.Canceled || err == context.DeadlineExceeded {
+			if err := t.cancelBuild(context.Background(), &s2iBuild); err != nil {
+				log.Errorf(err, "cannot cancel s2i Build: %s/%s", s2iBuild.Namespace, s2iBuild.Name)
+			}
+		}
 		return status.Failed(err)
 	}
 	if s2iBuild.Status.Output.To != nil {
@@ -258,4 +264,14 @@ func (t *s2iTask) waitForS2iBuildCompletion(ctx context.Context, c client.Client
 			}
 		}
 	}
+}
+
+func (t *s2iTask) cancelBuild(ctx context.Context, build *buildv1.Build) error {
+	target := build.DeepCopy()
+	target.Status.Cancelled = true
+	if err := t.c.Patch(ctx, target, ctrl.MergeFrom(build)); err != nil {
+		return err
+	}
+	*build = *target
+	return nil
 }
