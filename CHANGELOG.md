@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Add option to use Nexus repository mirror to speed up e2e testing [\#2387](https://github.com/apache/camel-k/issues/2387)
 - Cannot use camel-util dependency [\#2384](https://github.com/apache/camel-k/issues/2384)
 - Scaling documentation - Add section about knative [\#2380](https://github.com/apache/camel-k/issues/2380)
 - Can't set multiline properties in Kamelet bindings [\#2361](https://github.com/apache/camel-k/issues/2361)
@@ -36,6 +37,7 @@
 - SourceSpec Type default to empty [\#2223](https://github.com/apache/camel-k/issues/2223)
 - Allow to configure traits using annotations [\#2165](https://github.com/apache/camel-k/issues/2165)
 - Release 1.4.0 [\#2134](https://github.com/apache/camel-k/issues/2134)
+- Maven build extensions [\#2132](https://github.com/apache/camel-k/issues/2132)
 - Dependency autoloading is not working correctly with YAML format [\#2098](https://github.com/apache/camel-k/issues/2098)
 - PodSpecable Integration [\#2096](https://github.com/apache/camel-k/issues/2096)
 - api: provide java bindings [\#2082](https://github.com/apache/camel-k/issues/2082)
@@ -52,9 +54,13 @@
 
 **Merged pull requests:**
 
+- chore\(build\): Cancel s2i Build on context cancellation or timeout [\#2398](https://github.com/apache/camel-k/pull/2398) ([astefanutti](https://github.com/astefanutti))
+- fix\(RBAC\): Add permission to send termination signals to builder pods [\#2393](https://github.com/apache/camel-k/pull/2393) ([astefanutti](https://github.com/astefanutti))
+- chore\(e2e\): allow e2e to use nexus mirror to speed up testing \#2387 [\#2392](https://github.com/apache/camel-k/pull/2392) ([tadayosi](https://github.com/tadayosi))
 - chore\(doc\): Tidy observability documentation [\#2390](https://github.com/apache/camel-k/pull/2390) ([astefanutti](https://github.com/astefanutti))
 - chore\(doc\): Add autoscaling with Knative documentation [\#2386](https://github.com/apache/camel-k/pull/2386) ([astefanutti](https://github.com/astefanutti))
 - Fixes website build [\#2385](https://github.com/apache/camel-k/pull/2385) ([oscerd](https://github.com/oscerd))
+- S3 dependencies [\#2383](https://github.com/apache/camel-k/pull/2383) ([johnpoth](https://github.com/johnpoth))
 - Removed the deprecated --logging-level option \(issue \#2000\) [\#2377](https://github.com/apache/camel-k/pull/2377) ([orpiske](https://github.com/orpiske))
 - chore\(doc\): Fix Pod trait documentation formatting [\#2373](https://github.com/apache/camel-k/pull/2373) ([astefanutti](https://github.com/astefanutti))
 - chore\(e2e\): remove duplicate test in knative tests [\#2372](https://github.com/apache/camel-k/pull/2372) ([tadayosi](https://github.com/tadayosi))
