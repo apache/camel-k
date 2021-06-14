@@ -36,21 +36,21 @@ const (
 	defaultLogLevel                        = "INFO"
 )
 
-// This trait is used to control logging options (such as color and the format). The logging backend is provided by
-// Quarkus and configuration details for things like the the log format can be found on https://quarkus.io/guides/logging
+// The Logging trait is used to configure Integration runtime logging options (such as color and format).
+// The logging backend is provided by Quarkus, whose configuration is documented at https://quarkus.io/guides/logging.
 //
 // +camel-k:trait=logging
 type loggingTrait struct {
 	BaseTrait `property:",squash"`
 	// Colorize the log output
 	Color *bool `property:"color" json:"color,omitempty"`
-	// Log message format
+	// Logs message format
 	Format string `property:"format" json:"format,omitempty"`
-	// Adjust the log level for the integrations (defaults to INFO)
+	// Adjust the logging level (defaults to INFO)
 	Level string `property:"level" json:"level,omitempty"`
-	// Output the log in json format
+	// Output the logs in JSON
 	Json *bool `property:"json" json:"json,omitempty"`
-	// Enable "pretty printing" of the json log
+	// Enable "pretty printing" of the JSON logs
 	JsonPrettyPrint *bool `property:"json-pretty-print" json:"jsonPrettyPrint,omitempty"`
 }
 
@@ -75,13 +75,11 @@ func (l loggingTrait) Configure(environment *Environment) (bool, error) {
 }
 
 func (l loggingTrait) Apply(environment *Environment) error {
-
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		if *l.Json {
 			if environment.Integration.Status.Dependencies == nil {
 				environment.Integration.Status.Dependencies = make([]string, 0)
 			}
-
 			util.StringSliceUniqueAdd(&environment.Integration.Status.Dependencies, depQuarkusLoggingJson)
 		}
 
