@@ -76,7 +76,7 @@ jobs:
     - name: Set Go
       uses: actions/setup-go@v2
       with:
-        go-version: 1.13.x
+        go-version: 1.15.x
     - name: Set up operator-sdk
       run: |
         curl -L https://github.com/operator-framework/operator-sdk/releases/download/v1.3.0/operator-sdk_linux_amd64 -o operator-sdk
