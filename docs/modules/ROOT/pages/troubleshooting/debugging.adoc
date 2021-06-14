@@ -7,7 +7,7 @@ Even if the Integration Pods run on a Kubernetes cluster, it's very easy to atta
 
 == Debugging with VS Code
 
-If you're a VS Code user, you can watch this link:https://www.youtube.com/watch?v=cFPuxd1Je3c[video].
+If you're a VS Code user, you can watch this link:https://www.youtube.com/watch?v=pFj21YvzZm0&t=53s[video].
 
 == Debugging with IntelliJ IDEA
 
