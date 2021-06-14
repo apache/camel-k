@@ -56,7 +56,7 @@ require (
 	knative.dev/eventing v0.21.1
 	knative.dev/pkg v0.0.0-20210216013737-584933f8280b
 	knative.dev/serving v0.21.0
-	sigs.k8s.io/controller-runtime v0.7.2
+	sigs.k8s.io/controller-runtime v0.8.3
 )
 
 replace github.com/docker/docker => github.com/moby/moby v0.7.3-0.20190826074503-38ab9da00309 // Required by Helm
