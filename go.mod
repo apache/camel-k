@@ -36,9 +36,9 @@ require (
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
 	github.com/sirupsen/logrus v1.7.0
-	github.com/spf13/cobra v1.0.0
+	github.com/spf13/cobra v1.1.1
 	github.com/spf13/pflag v1.0.5
-	github.com/spf13/viper v1.6.2
+	github.com/spf13/viper v1.7.0
 	github.com/stoewer/go-strcase v1.2.0
 	github.com/stretchr/testify v1.6.1
 	go.uber.org/multierr v1.6.0
@@ -46,10 +46,10 @@ require (
 	golang.org/x/oauth2 v0.0.0-20210126194326-f9ce19ea3013
 	gopkg.in/inf.v0 v0.9.1
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/api v0.20.1
-	k8s.io/apiextensions-apiserver v0.19.8
-	k8s.io/apimachinery v0.20.1
-	k8s.io/client-go v12.0.0+incompatible
+	k8s.io/api v0.20.2
+	k8s.io/apiextensions-apiserver v0.20.2
+	k8s.io/apimachinery v0.20.2
+	k8s.io/client-go v0.20.2
 	k8s.io/gengo v0.0.0-20201214224949-b6c5ce23f027
 	k8s.io/klog/v2 v2.5.0
 	k8s.io/utils v0.0.0-20210111153108-fddb29f9d009
@@ -57,12 +57,6 @@ require (
 	knative.dev/pkg v0.0.0-20210216013737-584933f8280b
 	knative.dev/serving v0.21.0
 	sigs.k8s.io/controller-runtime v0.7.2
-)
-
-replace (
-	k8s.io/api => k8s.io/api v0.19.8
-	k8s.io/apimachinery => k8s.io/apimachinery v0.19.8
-	k8s.io/client-go => k8s.io/client-go v0.19.8
 )
 
 replace github.com/docker/docker => github.com/moby/moby v0.7.3-0.20190826074503-38ab9da00309 // Required by Helm
