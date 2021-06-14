@@ -577,9 +577,9 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: This trait is used to control logging options (such as color and the
-    format). The logging backend is provided by Quarkus and configuration details
-    for things like the the log format can be found on https://quarkus.io/guides/logging
+  description: The Logging trait is used to configure Integration runtime logging
+    options (such as color and format). The logging backend is provided by Quarkus,
+    whose configuration is documented at https://quarkus.io/guides/logging.
   properties:
   - name: enabled
     type: bool
@@ -590,16 +590,16 @@ traits:
     description: Colorize the log output
   - name: format
     type: string
-    description: Log message format
+    description: Logs message format
   - name: level
     type: string
-    description: Adjust the log level for the integrations (defaults to INFO)
+    description: Adjust the logging level (defaults to INFO)
   - name: json
     type: bool
-    description: Output the log in json format
+    description: Output the logs in JSON
   - name: json-pretty-print
     type: bool
-    description: Enable "pretty printing" of the json log
+    description: Enable "pretty printing" of the JSON logs
 - name: master
   platform: false
   profiles:
