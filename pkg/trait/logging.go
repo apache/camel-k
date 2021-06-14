@@ -31,7 +31,7 @@ const (
 	envVarQuarkusLogConsoleFormat          = "QUARKUS_LOG_CONSOLE_FORMAT"
 	envVarQuarkusLogConsoleJson            = "QUARKUS_LOG_CONSOLE_JSON"
 	envVarQuarkusLogConsoleJsonPrettyPrint = "QUARKUS_LOG_CONSOLE_JSON_PRETTY_PRINT"
-	depQuarkusLoggingJson                  = "mvn:io.quarkus:quarkus-logging-json"
+	depQuarkusLoggingJson                  = "quarkus-logging-json"
 	defaultLogFormat                       = ""
 	defaultLogLevel                        = "INFO"
 )
