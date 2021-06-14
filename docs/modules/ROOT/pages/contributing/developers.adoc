@@ -11,7 +11,7 @@ Camel K is built on top of Kubernetes through *Custom Resource Definitions*.
 
 In order to build the project, you need to comply with the following requirements:
 
-* **Go version 1.13+**: needed to compile and test the project. Refer to the https://golang.org/[Go website] for the installation.
+* **Go version 1.15+**: needed to compile and test the project. Refer to the https://golang.org/[Go website] for the installation.
 * **GNU Make**: used to define composite build actions. This should be already installed or available as a package if you have a good OS (https://www.gnu.org/software/make/).
 
 The Camel K Java runtime (camel-k-runtime) requires:

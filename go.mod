@@ -1,6 +1,6 @@
 module github.com/apache/camel-k
 
-go 1.13
+go 1.15
 
 require (
 	github.com/Masterminds/semver v1.5.0
