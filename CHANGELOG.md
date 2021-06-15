@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- ImagePullSecrets are not configured when the Integration is running [\#2394](https://github.com/apache/camel-k/issues/2394)
 - Add option to use Nexus repository mirror to speed up e2e testing [\#2387](https://github.com/apache/camel-k/issues/2387)
 - Cannot use camel-util dependency [\#2384](https://github.com/apache/camel-k/issues/2384)
 - Scaling documentation - Add section about knative [\#2380](https://github.com/apache/camel-k/issues/2380)
@@ -54,6 +55,12 @@
 
 **Merged pull requests:**
 
+- Update link to video to debug in VS Code [\#2406](https://github.com/apache/camel-k/pull/2406) ([apupier](https://github.com/apupier))
+- chore\(build\): Upgrade Go to version 1.15 [\#2404](https://github.com/apache/camel-k/pull/2404) ([astefanutti](https://github.com/astefanutti))
+- chore\(trait\): Polish Logging trait documentation [\#2403](https://github.com/apache/camel-k/pull/2403) ([astefanutti](https://github.com/astefanutti))
+- fix\(e2e\): Remove image pull secret e2e test race conditions [\#2402](https://github.com/apache/camel-k/pull/2402) ([astefanutti](https://github.com/astefanutti))
+- chore: Upgrade controller-runtime to v0.8.3 [\#2401](https://github.com/apache/camel-k/pull/2401) ([astefanutti](https://github.com/astefanutti))
+- fix\(trait\): ImagePullSecrets are not configured when the Integration is running [\#2399](https://github.com/apache/camel-k/pull/2399) ([claudio4j](https://github.com/claudio4j))
 - chore\(build\): Cancel s2i Build on context cancellation or timeout [\#2398](https://github.com/apache/camel-k/pull/2398) ([astefanutti](https://github.com/astefanutti))
 - fix\(RBAC\): Add permission to send termination signals to builder pods [\#2393](https://github.com/apache/camel-k/pull/2393) ([astefanutti](https://github.com/astefanutti))
 - chore\(e2e\): allow e2e to use nexus mirror to speed up testing \#2387 [\#2392](https://github.com/apache/camel-k/pull/2392) ([tadayosi](https://github.com/tadayosi))
