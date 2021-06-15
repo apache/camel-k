@@ -30,7 +30,6 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/apache/camel-k/pkg/util/property"
 	"github.com/magiconair/properties"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
@@ -51,6 +50,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/flow"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
+	"github.com/apache/camel-k/pkg/util/property"
 	"github.com/apache/camel-k/pkg/util/sync"
 	"github.com/apache/camel-k/pkg/util/watch"
 )
@@ -287,7 +287,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	integration, err := o.createIntegration(c, args, catalog)
+	integration, err := o.createOrUpdateIntegration(c, args, catalog)
 	if err != nil {
 		return err
 	}
@@ -438,7 +438,7 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 						newCmd.Args = o.validateArgs
 						newCmd.PreRunE = o.decode
 						newCmd.RunE = func(cmd *cobra.Command, args []string) error {
-							_, err := o.updateIntegrationCode(c, sources, catalog)
+							_, err := o.createOrUpdateIntegration(c, sources, catalog)
 							return err
 						}
 						newCmd.PostRunE = nil
@@ -461,18 +461,34 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 	return nil
 }
 
-func (o *runCmdOptions) createIntegration(c client.Client, sources []string, catalog *trait.Catalog) (*v1.Integration, error) {
-	return o.updateIntegrationCode(c, sources, catalog)
-}
-
 // nolint: gocyclo
-func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string, catalog *trait.Catalog) (*v1.Integration, error) {
+func (o *runCmdOptions) createOrUpdateIntegration(c client.Client, sources []string, catalog *trait.Catalog) (*v1.Integration, error) {
 	namespace := o.Namespace
-
 	name := o.GetIntegrationName(sources)
 
 	if name == "" {
 		return nil, errors.New("unable to determine integration name")
+	}
+
+	integration := &v1.Integration{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       v1.IntegrationKind,
+			APIVersion: v1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+		},
+	}
+
+	existing := &v1.Integration{}
+	err := c.Get(o.Context, ctrl.ObjectKeyFromObject(integration), existing)
+	if err == nil {
+		integration = existing.DeepCopy()
+	} else if k8serrors.IsNotFound(err) {
+		existing = nil
+	} else {
+		return nil, err
 	}
 
 	var integrationKit *corev1.ObjectReference
@@ -483,22 +499,12 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 		}
 	}
 
-	integration := v1.Integration{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       v1.IntegrationKind,
-			APIVersion: v1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-		},
-		Spec: v1.IntegrationSpec{
-			Dependencies:   make([]string, 0, len(o.Dependencies)),
-			IntegrationKit: integrationKit,
-			Configuration:  make([]v1.ConfigurationSpec, 0),
-			Repositories:   o.Repositories,
-			Profile:        v1.TraitProfileByName(o.Profile),
-		},
+	integration.Spec = v1.IntegrationSpec{
+		Dependencies:   make([]string, 0, len(o.Dependencies)),
+		IntegrationKit: integrationKit,
+		Configuration:  make([]v1.ConfigurationSpec, 0),
+		Repositories:   o.Repositories,
+		Profile:        v1.TraitProfileByName(o.Profile),
 	}
 
 	for _, label := range o.Labels {
@@ -557,7 +563,9 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	}
 
 	for _, resource := range o.OpenAPIs {
-		addResource(resource, &integration.Spec, o.Compression, v1.ResourceTypeOpenAPI)
+		if err = addResource(resource, &integration.Spec, o.Compression, v1.ResourceTypeOpenAPI); err != nil {
+			return nil, err
+		}
 	}
 
 	for _, item := range o.Dependencies {
@@ -617,7 +625,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 		integration.Spec.AddConfiguration("env", item)
 	}
 
-	if err := o.configureTraits(&integration, o.Traits, catalog); err != nil {
+	if err := o.configureTraits(integration, o.Traits, catalog); err != nil {
 		return nil, err
 	}
 
@@ -625,7 +633,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 	case "":
 		// continue..
 	case "yaml":
-		data, err := kubernetes.ToYAML(&integration)
+		data, err := kubernetes.ToYAML(integration)
 		if err != nil {
 			return nil, err
 		}
@@ -633,7 +641,7 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 		return nil, nil
 
 	case "json":
-		data, err := kubernetes.ToJSON(&integration)
+		data, err := kubernetes.ToJSON(integration)
 		if err != nil {
 			return nil, err
 		}
@@ -644,47 +652,22 @@ func (o *runCmdOptions) updateIntegrationCode(c client.Client, sources []string,
 		return nil, fmt.Errorf("invalid output format option '%s', should be one of: yaml|json", o.OutputFormat)
 	}
 
-	existed := false
-	err = c.Create(o.Context, &integration)
-	if err != nil && k8serrors.IsAlreadyExists(err) {
-		existed = true
-		existing := &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: integration.Namespace,
-				Name:      integration.Name,
-			},
-		}
-		err = c.Get(o.Context, ctrl.ObjectKeyFromObject(existing), existing)
-		if err != nil {
-			return nil, err
-		}
-		// Hold the resource from the operator controller
-		existing.Status.Phase = v1.IntegrationPhaseUpdating
-		err = c.Status().Update(o.Context, existing)
-		if err != nil {
-			return nil, err
-		}
-		// Update the spec
-		integration.ResourceVersion = existing.ResourceVersion
-		err = c.Update(o.Context, &integration)
-		if err != nil {
-			return nil, err
-		}
-		// Reset the status
-		integration.Status = v1.IntegrationStatus{}
-		err = c.Status().Update(o.Context, &integration)
+	if existing == nil {
+		err = c.Create(o.Context, integration)
+	} else {
+		err = c.Patch(o.Context, integration, ctrl.MergeFromWithOptions(existing, ctrl.MergeFromWithOptimisticLock{}))
 	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	if !existed {
-		fmt.Printf("integration \"%s\" created\n", name)
+	if existing == nil {
+		fmt.Printf("Integration \"%s\" created\n", name)
 	} else {
-		fmt.Printf("integration \"%s\" updated\n", name)
+		fmt.Printf("Integration \"%s\" updated\n", name)
 	}
-	return &integration, nil
+	return integration, nil
 }
 
 func addResource(resourceLocation string, integrationSpec *v1.IntegrationSpec, enableCompression bool, resourceType v1.ResourceType) error {
@@ -820,14 +803,14 @@ func resolvePodTemplate(ctx context.Context, templateSrc string, spec *v1.Integr
 	}
 	var template v1.PodSpec
 
-	//check if value is a path to the file
+	// check if value is a path to the file
 	if _, err := os.Stat(templateSrc); err == nil {
 		rsc, err := ResolveSources(ctx, []string{templateSrc}, false)
 		if err == nil && len(rsc) > 0 {
 			templateSrc = rsc[0].Content
 		}
 	}
-	//template is inline
+	// template is inline
 	templateBytes := []byte(templateSrc)
 
 	jsonTemplate, err := yaml.ToJSON(templateBytes)
