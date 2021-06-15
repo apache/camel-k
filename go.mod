@@ -51,7 +51,7 @@ require (
 	k8s.io/apimachinery v0.20.2
 	k8s.io/client-go v0.20.2
 	k8s.io/gengo v0.0.0-20201214224949-b6c5ce23f027
-	k8s.io/klog/v2 v2.5.0
+	k8s.io/klog/v2 v2.8.0
 	k8s.io/utils v0.0.0-20210111153108-fddb29f9d009
 	knative.dev/eventing v0.21.1
 	knative.dev/pkg v0.0.0-20210216013737-584933f8280b
