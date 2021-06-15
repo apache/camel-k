@@ -312,7 +312,6 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 		NewDeployAction(),
 		NewMonitorAction(),
 		NewErrorAction(),
-		NewNoopAction(),
 	}
 
 	for _, a := range actions {
