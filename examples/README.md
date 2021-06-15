@@ -25,7 +25,9 @@ In this section you can find a few examples of certain [`Camel` components](http
 |---|---|---|
 | AMQP | Component usage | [see examples](./amqp/)|
 | Caffeine | Component usage | [see examples](./caffeine/)|
+| Databases | Component usage | [see examples](./databases/)|
 | DNS | Component usage | [see examples](./dns/)|
+| HTTP/HTTPS | Component usage | [see examples](./http/)|
 | Kafka | Component usage | [see examples](./kafka/)|
 | Knative | Component usage | [see examples](./knative/)|
 

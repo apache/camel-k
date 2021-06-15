@@ -10,14 +10,14 @@ NOTE: you'll find `--resource` is very similar to the `--config` run flag. The m
 [[runtime-resource-file]]
 == Runtime file resource
 
-Most of the time you will deal with the need to provide your `Integration` with resource files you have stored in your local machine. In this case you can use the `--resource file:/path/to/file` flag that will copy that file under the _/etc/camel/data/resources/_ directory. You can look at the _resource destination path_ section at the bottom of this page to specify the destination file location.
+Most of the time you will deal with the need to provide your `Integration` with resource files you have stored in your local machine. In this case you can use the `--resource file:/path/to/file` flag that will copy that file under the _/etc/camel/resources/_ directory. You can look at the _resource destination path_ section at the bottom of this page to specify the destination file location.
 
 Let's see an example. We want to create an `Integration` unzipping and reading the content of a file we'll provide (ie, _resources-data.zip_):
 
 [source,groovy]
 .resource-file-binary-route.groovy
 ----
-from('file:/etc/camel/data/resources/?fileName=resources-data.zip&noop=true&idempotent=false')
+from('file:/etc/camel/resources/?fileName=resources-data.zip&noop=true&idempotent=false')
     .unmarshal().zipFile()
     .log('resource file unzipped content is: ${body}')
 ----
@@ -48,11 +48,11 @@ We want to use the materialized file in an integration:
 [source,groovy]
 .resource-configmap-route.groovy
 ----
-from('file:/etc/camel/data/configmaps/my-cm/?fileName=my-configmap-key&noop=true&idempotent=false')
+from('file:/etc/camel/resources/my-cm/?fileName=my-configmap-key&noop=true&idempotent=false')
     .log('resource file content is: ${body}')
 ----
 
-You can see that we're expecting to use a _my-configmap-key_ file stored in the default resource location (_/etc/camel/data/configmaps/_). In order to materialize the `Configmap` will be as easy as running the `--resource` _configmap_ syntax:
+You can see that we're expecting to use a _my-configmap-key_ file stored in the default resource location (_/etc/camel/resources/_). In order to materialize the `Configmap` will be as easy as running the `--resource` _configmap_ syntax:
 
 ----
 kamel run --resource configmap:my-cm resource-configmap-route.groovy --dev
@@ -78,11 +78,11 @@ We want to use the materialized secret file in an integration:
 [source,groovy]
 .resource-secret-route.groovy
 ----
-from('file:/etc/camel/data/secrets/my-sec/?fileName=my-secret-key&noop=true&idempotent=false')
+from('file:/etc/camel/resources/my-sec/?fileName=my-secret-key&noop=true&idempotent=false')
     .log('resource file content is: ${body}')
 ----
 
-You can see that we're expecting to use a _my-secret-key_ file stored in the default resource location (_/etc/camel/data/secrets/_). In order to materialize the `Secret` will be as easy as running the `--resource` _secret_ syntax:
+You can see that we're expecting to use a _my-secret-key_ file stored in the default resource location (_/etc/camel/resources/_). In order to materialize the `Secret` will be as easy as running the `--resource` _secret_ syntax:
 
 ----
 kamel run --resource secret:my-sec resource-secret-route.groovy --dev
