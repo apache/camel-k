@@ -104,12 +104,12 @@ func TestApplyJvmTraitWithDeploymentResource(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	cp := strset.New("./resources", configResourcesMountPath, dataResourcesMountPath, "/mount/path").List()
+	cp := strset.New("./resources", configResourcesMountPath, resourcesDefaultMountPath, "/mount/path").List()
 	sort.Strings(cp)
 
 	assert.Equal(t, []string{
 		"-cp",
-		fmt.Sprintf("./resources:%s:%s:/mount/path", configResourcesMountPath, dataResourcesMountPath),
+		fmt.Sprintf("./resources:%s:%s:/mount/path", configResourcesMountPath, resourcesDefaultMountPath),
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }
@@ -136,12 +136,12 @@ func TestApplyJvmTraitWithKNativeResource(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	cp := strset.New("./resources", configResourcesMountPath, dataResourcesMountPath, "/mount/path").List()
+	cp := strset.New("./resources", configResourcesMountPath, resourcesDefaultMountPath, "/mount/path").List()
 	sort.Strings(cp)
 
 	assert.Equal(t, []string{
 		"-cp",
-		fmt.Sprintf("./resources:%s:%s:/mount/path", configResourcesMountPath, dataResourcesMountPath),
+		fmt.Sprintf("./resources:%s:%s:/mount/path", configResourcesMountPath, resourcesDefaultMountPath),
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, s.Spec.Template.Spec.Containers[0].Args)
 }

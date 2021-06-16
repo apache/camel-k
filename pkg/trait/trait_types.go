@@ -49,10 +49,7 @@ var (
 	basePath                  = "/etc/camel"
 	confDPath                 = path.Join(basePath, "conf.d")
 	sourcesMountPath          = path.Join(basePath, "sources")
-	dataDefaultMountPath      = path.Join(basePath, "data")
-	dataResourcesMountPath    = path.Join(dataDefaultMountPath, "resources")
-	dataConfigmapsMountPath   = path.Join(dataDefaultMountPath, "configmaps")
-	dataSecretsMountPath      = path.Join(dataDefaultMountPath, "secrets")
+	resourcesDefaultMountPath = path.Join(basePath, "resources")
 	configResourcesMountPath  = path.Join(confDPath, "_resources")
 	configConfigmapsMountPath = path.Join(confDPath, "_configmaps")
 	configSecretsMountPath    = path.Join(confDPath, "_secrets")
@@ -816,7 +813,7 @@ func getResourcePath(resourceName string, maybePath string, resourceType v1.Reso
 	// otherwise return a default path, according to the resource type
 	switch resourceType {
 	case v1.ResourceTypeData:
-		return path.Join(dataResourcesMountPath, resourceName)
+		return path.Join(resourcesDefaultMountPath, resourceName)
 	}
 	// Default, config type
 	return path.Join(configResourcesMountPath, resourceName)
@@ -829,7 +826,7 @@ func getConfigmapMountPoint(resourceName string, maybeMountPoint string, resourc
 	}
 	switch resourceType {
 	case "data":
-		return path.Join(dataConfigmapsMountPath, resourceName)
+		return path.Join(resourcesDefaultMountPath, resourceName)
 	}
 	// Default, config type
 	return path.Join(configConfigmapsMountPath, resourceName)
@@ -842,7 +839,7 @@ func getSecretMountPoint(resourceName string, maybeMountPoint string, resourceTy
 	}
 	switch resourceType {
 	case "data":
-		return path.Join(dataSecretsMountPath, resourceName)
+		return path.Join(resourcesDefaultMountPath, resourceName)
 	}
 	// Default, config type
 	return path.Join(configSecretsMountPath, resourceName)

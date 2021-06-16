@@ -23,5 +23,5 @@
 // kamel run --resource configmap:my-cm resource-configmap-route.groovy --dev
 //
 
-from('file:/etc/camel/data/configmaps/my-cm/?fileName=my-configmap-key&noop=true&idempotent=false')
+from('file:/etc/camel/resources/my-cm/?fileName=my-configmap-key&noop=true&idempotent=false')
     .log('resource file content is: ${body}')
