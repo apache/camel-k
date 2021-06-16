@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- 02-serverless-api example fails in the camel-k-examples repo [\#2400](https://github.com/apache/camel-k/issues/2400)
 - ImagePullSecrets are not configured when the Integration is running [\#2394](https://github.com/apache/camel-k/issues/2394)
 - Add option to use Nexus repository mirror to speed up e2e testing [\#2387](https://github.com/apache/camel-k/issues/2387)
 - Cannot use camel-util dependency [\#2384](https://github.com/apache/camel-k/issues/2384)
@@ -55,6 +56,7 @@
 
 **Merged pull requests:**
 
+- chore: Upgrade Kubernetes API to v0.20.2 [\#2407](https://github.com/apache/camel-k/pull/2407) ([astefanutti](https://github.com/astefanutti))
 - Update link to video to debug in VS Code [\#2406](https://github.com/apache/camel-k/pull/2406) ([apupier](https://github.com/apupier))
 - chore\(build\): Upgrade Go to version 1.15 [\#2404](https://github.com/apache/camel-k/pull/2404) ([astefanutti](https://github.com/astefanutti))
 - chore\(trait\): Polish Logging trait documentation [\#2403](https://github.com/apache/camel-k/pull/2403) ([astefanutti](https://github.com/astefanutti))
