@@ -31,12 +31,10 @@
 //                                    --resource secret:my-self-signed-ssl@/etc/ssl/my-self-signed-ssl \
 //                                    -t container.port=8443 --dev
 
-// kamel run PlatformHttpsServer.java -p quarkus.http.ssl.certificate.file=/etc/ssl/my-self-signed-ssl/server.crt -p quarkus.http.ssl.certificate.key-file=/etc/ssl/my-self-signed-ssl/server.key --resource secret:my-self-signed-ssl@/etc/ssl/my-self-signed-ssl -t container.port=8443 --dev
-
 // Test
 //
 // recover the service location. If you're running on minikube, minikube service platform-https-server --url=true
-// curl -H "name:World" -k http://<service-location>/hello
+// curl -H "name:World" -k https://<service-location>/hello
 //
 
 import org.apache.camel.builder.RouteBuilder;
