@@ -871,35 +871,6 @@ func OperatorPod(ns string) func() *corev1.Pod {
 	}
 }
 
-func OperatorTryPodForceKill(ns string, timeSeconds int) {
-	pod := OperatorPod(ns)()
-	if pod != nil {
-		if err := TestClient().Delete(TestContext, pod, ctrl.GracePeriodSeconds(timeSeconds)); err != nil {
-			log.Error(err, "cannot forcefully kill the pod")
-		}
-	}
-}
-
-func ScaleOperator(ns string, replicas int32) func() error {
-	return func() error {
-		operator, err := TestClient().AppsV1().Deployments(ns).Get(TestContext, "camel-k-operator", metav1.GetOptions{})
-		if err != nil {
-			return err
-		}
-		operator.Spec.Replicas = &replicas
-		_, err = TestClient().AppsV1().Deployments(ns).Update(TestContext, operator, metav1.UpdateOptions{})
-		if err != nil {
-			return err
-		}
-
-		if replicas == 0 {
-			// speedup scale down by killing the pod
-			OperatorTryPodForceKill(ns, 10)
-		}
-		return nil
-	}
-}
-
 func Role(ns string) func() *rbacv1.Role {
 	return func() *rbacv1.Role {
 		lst := rbacv1.RoleList{
