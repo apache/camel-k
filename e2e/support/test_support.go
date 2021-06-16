@@ -741,6 +741,25 @@ func Deployment(ns string, name string) func() *appsv1.Deployment {
 	}
 }
 
+func DeploymentCondition(ns string, name string, conditionType appsv1.DeploymentConditionType) func() appsv1.DeploymentCondition {
+	return func() appsv1.DeploymentCondition {
+		deployment := Deployment(ns, name)()
+
+		condition := appsv1.DeploymentCondition{
+			Status: corev1.ConditionUnknown,
+		}
+
+		for _, c := range deployment.Status.Conditions {
+			if c.Type == conditionType {
+				condition = c
+				break
+			}
+		}
+
+		return condition
+	}
+}
+
 func Build(ns string, name string) func() *v1.Build {
 	return func() *v1.Build {
 		build := v1.NewBuild(ns, name)
