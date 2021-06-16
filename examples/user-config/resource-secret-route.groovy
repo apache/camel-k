@@ -23,5 +23,5 @@
 // kamel run --resource secret:my-sec resource-secret-route.groovy --dev
 //
 
-from('file:/etc/camel/data/secrets/my-sec/?fileName=my-secret-key&noop=true&idempotent=false')
+from('file:/etc/camel/my-sec/?fileName=my-secret-key&noop=true&idempotent=false')
     .log('resource file content is: ${body}')

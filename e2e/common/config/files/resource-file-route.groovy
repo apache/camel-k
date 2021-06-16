@@ -16,5 +16,5 @@
  * limitations under the License.
  */
 
-from('file:/etc/camel/data/resources/?fileName=resources-data.txt&noop=true&idempotent=false')
+from('file:/etc/camel/resources/?fileName=resources-data.txt&noop=true&idempotent=false')
     .log('resource file content is: ${body}')

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-from('file:/etc/camel/data/resources/?fileName=resources-data.zip&noop=true&idempotent=false')
+from('file:/etc/camel/resources/?fileName=resources-data.zip&noop=true&idempotent=false')
     .routeId('resources-zip')
     .unmarshal().zipFile()
     .log('resource file unzipped content is: ${body}')
