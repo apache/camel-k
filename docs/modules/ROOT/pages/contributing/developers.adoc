@@ -122,7 +122,7 @@ This command assumes you have an already running Minishift instance.
 
 * Run `make install-minikube`: to build the project and install it in the current namespace on Minikube
 
-This command assumes you have an already running Minikube instance.
+This command assumes you have an already running Minikube instance with registry enabled (can be enabled with `minikube addons enable registry`) and no previous Camel K instance installed.
 
 === For remote Kubernetes/OpenShift clusters
 
