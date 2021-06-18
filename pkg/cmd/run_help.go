@@ -85,7 +85,8 @@ const (
 	ConfigOptionTypeFile configOptionType = "file"
 )
 
-var validConfigRegexp = regexp.MustCompile(`^(configmap|secret|file)\:([\w\.\-\_\:\/@]+)$`)
+var validConfigSecretRegexp = regexp.MustCompile(`^(configmap|secret)\:([\w\.\-\_\:\/@]+)$`)
+var validFileRegexp = regexp.MustCompile(`^file\:([\w\.\-\_\:\/@" ]+)$`)
 var validResourceRegexp = regexp.MustCompile(`^([\w\.\-\_\:]+)(\/([\w\.\-\_\:]+))?(\@([\w\.\-\_\:\/]+))?$`)
 
 func newRunConfigOption(configType configOptionType, value string) *RunConfigOption {
@@ -130,7 +131,7 @@ func ParseResourceOption(item string) (*RunConfigOption, error) {
 	// then replace with parseOption() func directly
 	option, err := parseOption(item)
 	if err != nil {
-		if strings.HasPrefix(err.Error(), "could not match configuration") {
+		if strings.HasPrefix(err.Error(), "could not match config, secret or file configuration") {
 			fmt.Printf("Warn: --resource %s has been deprecated. You should use --resource file:%s instead.\n", item, item)
 			return parseOption("file:" + item)
 		}
@@ -145,24 +146,28 @@ func ParseConfigOption(item string) (*RunConfigOption, error) {
 }
 
 func parseOption(item string) (*RunConfigOption, error) {
-	if !validConfigRegexp.MatchString(item) {
-		return nil, fmt.Errorf("could not match configuration %s, must match %v regular expression", item, validConfigRegexp)
-	}
-	// Parse the regexp groups
-	groups := validConfigRegexp.FindStringSubmatch(item)
 	var cot configOptionType
-	switch groups[1] {
-	case "configmap":
-		cot = ConfigOptionTypeConfigmap
-	case "secret":
-		cot = ConfigOptionTypeSecret
-	case "file":
+	var value string
+	if validConfigSecretRegexp.MatchString(item) {
+		// parse as secret/configmap
+		groups := validConfigSecretRegexp.FindStringSubmatch(item)
+		switch groups[1] {
+		case "configmap":
+			cot = ConfigOptionTypeConfigmap
+		case "secret":
+			cot = ConfigOptionTypeSecret
+		}
+		value = groups[2]
+	} else if validFileRegexp.MatchString(item) {
+		//parse as file
+		groups := validFileRegexp.FindStringSubmatch(item)
 		cot = ConfigOptionTypeFile
-	default:
-		// Should never reach this
-		return nil, fmt.Errorf("invalid config option type %s", groups[1])
+		value = groups[1]
+	} else {
+		return nil, fmt.Errorf("could not match config, secret or file configuration as %s", item)
 	}
-	configurationOption := newRunConfigOption(cot, groups[2])
+
+	configurationOption := newRunConfigOption(cot, value)
 	if err := configurationOption.Validate(); err != nil {
 		return nil, err
 	}
