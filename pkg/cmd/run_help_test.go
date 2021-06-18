@@ -62,6 +62,7 @@ func TestParseConfigOptionAllParams(t *testing.T) {
 	sec4 := "secret:sec"
 	file1 := "file:/path/to/my-file.txt@/tmp/file.txt"
 	file2 := "file:/path/to/my-file.txt"
+	file3 := "file:/path to/my-file.txt"
 
 	parsedCm1, err := ParseConfigOption(cm1)
 	assert.Nil(t, err)
@@ -132,6 +133,13 @@ func TestParseConfigOptionAllParams(t *testing.T) {
 	assert.Equal(t, "/path/to/my-file.txt", parsedFile2.Name())
 	assert.Equal(t, "", parsedFile2.Key())
 	assert.Equal(t, "", parsedFile2.DestinationPath())
+
+	parsedFile3, err := ParseConfigOption(file3)
+	assert.Nil(t, err)
+	assert.Equal(t, "file", parsedFile3.Type())
+	assert.Equal(t, "/path to/my-file.txt", parsedFile3.Name())
+	assert.Equal(t, "", parsedFile3.Key())
+	assert.Equal(t, "", parsedFile3.DestinationPath())
 }
 
 func TestFilterFileLocation(t *testing.T) {
