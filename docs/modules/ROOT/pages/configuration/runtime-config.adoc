@@ -99,6 +99,37 @@ As soon as the `Integration` starts, the `Camel-K` operator will take care to mo
 
 NOTE: you can provide a `Secret` which is not yet available on the cluster. The `Integration` won't start until the resource will be made available.
 
+[[runtime-config-props]]
+== Configmap/Secret property references
+
+Each `Configmap`/`Secret` will be parsed as a property file and you will be able to use those properties inside your `Route` definition or, more in general, as you would do with any other xref:configuration/runtime-properties.adoc[runtime property]. As an example, you can create the following `Secret`:
+
+[source,text]
+.my.properties
+----
+my.key.1=hello
+my.key.2=world
+----
+----
+kubectl create secret generic my-secret-properties --from-file=my.properties
+----
+
+In our `Integration` we can simply refer the properties defined in the `Secret` as we'd do with any other property:
+
+[source,groovy]
+.config-secret-property-route.groovy
+----
+from('timer:secret')
+    .routeId('secret')
+    .log('{{my.key.1}} {{my.key.2}}')
+----
+
+We have to just provide the `--config` we are willing to use:
+
+----
+kamel run --config secret:my-secret-properties config-secret-property-route.groovy --dev
+----
+
 [[runtime-config-keys]]
 == Configmap/Secret key filtering
 

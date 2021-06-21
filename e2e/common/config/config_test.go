@@ -109,6 +109,19 @@ func TestRunConfigExamples(t *testing.T) {
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
+		// Store a configmap as property file
+		var cmDataProps = make(map[string]string)
+		cmDataProps["my.properties"] = "my.key.1=hello\nmy.key.2=world"
+		NewPlainTextConfigmap(ns, "my-cm-properties", cmDataProps)
+
+		t.Run("Config configmap as property file", func(t *testing.T) {
+			Expect(Kamel("run", "-n", ns, "./files/config-configmap-properties-route.groovy", "--config", "configmap:my-cm-properties").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "config-configmap-properties-route"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationCondition(ns, "config-configmap-properties-route", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "config-configmap-properties-route"), TestTimeoutShort).Should(ContainSubstring("hello world"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
 		// Secret
 
 		// Store a secret on the cluster
