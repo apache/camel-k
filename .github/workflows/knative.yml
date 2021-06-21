@@ -94,10 +94,10 @@ jobs:
         # Prerequisites
         sudo pip install yq
 
-        export SERVING_VERSION=v0.16.0
-        export EVENTING_VERSION=v0.16.2
-        export KOURIER_VERSION=v0.16.0
-        export SOURCES_VERSION=v0.16.0
+        export SERVING_VERSION=v0.23.1
+        export EVENTING_VERSION=v0.17.9
+        export KOURIER_VERSION=v0.23.0
+        export SOURCES_VERSION=v0.17.8
 
         # Serving
         kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml
@@ -218,10 +218,10 @@ jobs:
           # Prerequisites
           sudo pip install yq
 
-          export SERVING_VERSION=v0.16.0
-          export EVENTING_VERSION=v0.16.2
-          export KOURIER_VERSION=v0.16.0
-          export SOURCES_VERSION=v0.16.0
+          export SERVING_VERSION=v0.23.1
+          export EVENTING_VERSION=v0.17.9
+          export KOURIER_VERSION=v0.23.0
+          export SOURCES_VERSION=v0.17.8
 
           # Serving
           kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml
