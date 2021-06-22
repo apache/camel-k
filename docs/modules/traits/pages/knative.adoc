@@ -69,10 +69,6 @@ Can contain simple event types or full Camel URIs (to use a specific broker).
 | Enables filtering on events based on the header "ce-knativehistory". Since this header has been removed in newer versions of
 Knative, filtering is disabled by default.
 
-| knative.camel-source-compat
-| bool
-| Enables Knative CamelSource pre 0.15 compatibility fixes (will be removed in future versions).
-
 | knative.sink-binding
 | bool
 | Allows binding the integration to a sink via a Knative SinkBinding resource.
