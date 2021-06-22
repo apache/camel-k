@@ -97,7 +97,6 @@ jobs:
         export SERVING_VERSION=v0.23.1
         export EVENTING_VERSION=v0.23.2
         export KOURIER_VERSION=v0.23.0
-        export SOURCES_VERSION=v0.23.0
 
         # Serving
         kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml
@@ -123,9 +122,6 @@ jobs:
         # Eventing sugar controller for injection
         kubectl apply -f https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-sugar-controller.yaml
 
-        # Camel Sources
-        kubectl apply --filename https://github.com/knative-sandbox/eventing-camel/releases/download/$SOURCES_VERSION/camel.yaml
-
         # Wait for installation completed
         echo "Waiting for all pods to be ready in kourier-system"
         kubectl wait --for=condition=Ready pod --all -n kourier-system --timeout=60s
@@ -133,8 +129,6 @@ jobs:
         kubectl wait --for=condition=Ready pod --all -n knative-serving --timeout=60s
         echo "Waiting for all pods to be ready in knative-eventing"
         kubectl wait --for=condition=Ready pod --all -n knative-eventing --timeout=60s
-        echo "Waiting for all pods to be ready in knative-sources"
-        kubectl wait --for=condition=Ready pod --all -n knative-sources --timeout=60s
 
     - name: Build Operator
       run: |
@@ -221,7 +215,6 @@ jobs:
           export SERVING_VERSION=v0.23.1
           export EVENTING_VERSION=v0.23.2
           export KOURIER_VERSION=v0.23.0
-          export SOURCES_VERSION=v0.23.0
 
           # Serving
           kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml
@@ -247,9 +240,6 @@ jobs:
           # Eventing sugar controller for injection
           kubectl apply -f https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-sugar-controller.yaml
 
-          # Camel Sources
-          kubectl apply --filename https://github.com/knative-sandbox/eventing-camel/releases/download/$SOURCES_VERSION/camel.yaml
-
           # Wait for installation completed
           echo "Waiting for all pods to be ready in kourier-system"
           kubectl wait --for=condition=Ready pod --all -n kourier-system --timeout=60s
@@ -257,8 +247,6 @@ jobs:
           kubectl wait --for=condition=Ready pod --all -n knative-serving --timeout=60s
           echo "Waiting for all pods to be ready in knative-eventing"
           kubectl wait --for=condition=Ready pod --all -n knative-eventing --timeout=60s
-          echo "Waiting for all pods to be ready in knative-sources"
-          kubectl wait --for=condition=Ready pod --all -n knative-sources --timeout=60s
 
       - name: Build Operator
         run: |
