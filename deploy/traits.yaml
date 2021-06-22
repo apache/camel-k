@@ -446,6 +446,9 @@ traits:
   - name: options
     type: '[]string'
     description: A list of JVM options
+  - name: classpath
+    type: string
+    description: Additional JVM classpath (use `Linux` classpath separator)
 - name: kamelets
   platform: true
   profiles:

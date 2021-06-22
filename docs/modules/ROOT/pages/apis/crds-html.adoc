@@ -3688,6 +3688,7 @@ string
 <a href="#camel.apache.org/v1.CamelArtifactDependency">CamelArtifactDependency</a>, 
 <a href="#camel.apache.org/v1.CamelLoader">CamelLoader</a>, 
 <a href="#camel.apache.org/v1.Capability">Capability</a>, 
+<a href="#camel.apache.org/v1.MavenSpec">MavenSpec</a>, 
 <a href="#camel.apache.org/v1.RuntimeSpec">RuntimeSpec</a>)
 </p>
 <div>
@@ -3828,6 +3829,19 @@ Kubernetes meta/v1.Duration
 </em>
 </td>
 <td>
+</td>
+</tr>
+<tr>
+<td>
+<code>extension</code><br/>
+<em>
+<a href="#camel.apache.org/v1.MavenArtifact">
+[]MavenArtifact
+</a>
+</em>
+</td>
+<td>
+<p>Maven build extensions <a href="https://maven.apache.org/guides/mini/guide-using-extensions.html">https://maven.apache.org/guides/mini/guide-using-extensions.html</a></p>
 </td>
 </tr>
 </tbody>

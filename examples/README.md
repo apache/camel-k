@@ -43,3 +43,11 @@ As soon as you will learn the basic stuff, you will like to try the new advanced
 | Pulsar | Pulsar usage | [see examples](./pulsar/)|
 | Saga | Saga pattern example | [see examples](./saga/)|
 | Tekton | Tekton tutorial | [see examples](./tekton/)|
+
+## Traits usage examples
+
+Traits configuration will be very helpful to fine tune your `Integration`. Here a few examples:
+
+| Type  |  Description | Link  |
+|---|---|---|
+| JVM | How to use `JVM` trait| [see examples](./traits/jvm/)|

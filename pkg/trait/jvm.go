@@ -54,6 +54,8 @@ type jvmTrait struct {
 	DebugAddress string `property:"debug-address" json:"debugAddress,omitempty"`
 	// A list of JVM options
 	Options []string `property:"options" json:"options,omitempty"`
+	// Additional JVM classpath (use `Linux` classpath separator)
+	Classpath string `property:"classpath" json:"classpath,omitempty"`
 }
 
 func newJvmTrait() Trait {
@@ -98,6 +100,9 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	classpath.Add("./resources")
 	classpath.Add(configResourcesMountPath)
 	classpath.Add(resourcesDefaultMountPath)
+	if t.Classpath != "" {
+		classpath.Add(strings.Split(t.Classpath, ":")...)
+	}
 
 	for _, artifact := range kit.Status.Artifacts {
 		classpath.Add(artifact.Target)

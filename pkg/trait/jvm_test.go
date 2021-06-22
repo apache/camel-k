@@ -218,6 +218,39 @@ func TestApplyJvmTraitWithExternalKitType(t *testing.T) {
 	assert.Equal(t, "io.quarkus.bootstrap.runner.QuarkusEntryPoint", container.Args[2])
 }
 
+func TestApplyJvmTraitWithClasspath(t *testing.T) {
+	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+	trait.Classpath = "/path/to/my-dep.jar:/path/to/another/dep.jar"
+	d := appsv1.Deployment{
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name: defaultContainerName,
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									MountPath: "/mount/path",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	environment.Resources.Add(&d)
+	err := trait.Apply(environment)
+
+	assert.Nil(t, err)
+	assert.Equal(t, []string{
+		"-cp",
+		fmt.Sprintf("./resources:%s:%s:/mount/path:%s:%s", configResourcesMountPath, resourcesDefaultMountPath,
+			"/path/to/another/dep.jar", "/path/to/my-dep.jar"),
+		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
+	}, d.Spec.Template.Spec.Containers[0].Args)
+}
+
 func createNominalJvmTest(kitType string) (*jvmTrait, *Environment) {
 	catalog, _ := camel.DefaultCatalog()
 
