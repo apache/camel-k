@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- \(cmd/run\) Support quotes in resource/config file option [\#2417](https://github.com/apache/camel-k/issues/2417)
 - 02-serverless-api example fails in the camel-k-examples repo [\#2400](https://github.com/apache/camel-k/issues/2400)
 - ImagePullSecrets are not configured when the Integration is running [\#2394](https://github.com/apache/camel-k/issues/2394)
 - Add option to use Nexus repository mirror to speed up e2e testing [\#2387](https://github.com/apache/camel-k/issues/2387)
@@ -61,6 +62,9 @@
 
 **Merged pull requests:**
 
+- chore\(ci\): upgrade Knative versions in CI to latest possible [\#2420](https://github.com/apache/camel-k/pull/2420) ([tadayosi](https://github.com/tadayosi))
+- fix\(cli\): resource path with quotes and spaces [\#2419](https://github.com/apache/camel-k/pull/2419) ([squakez](https://github.com/squakez))
+- Precise requirements on Minikube instance for development [\#2416](https://github.com/apache/camel-k/pull/2416) ([apupier](https://github.com/apupier))
 - refactor\(trait\): use bool pointer util functions in knative trait [\#2415](https://github.com/apache/camel-k/pull/2415) ([tadayosi](https://github.com/tadayosi))
 - chore\(build\): Some more go.sum updates [\#2413](https://github.com/apache/camel-k/pull/2413) ([astefanutti](https://github.com/astefanutti))
 - chore\(e2e\): Check Deployment progressing condition after re-run [\#2412](https://github.com/apache/camel-k/pull/2412) ([astefanutti](https://github.com/astefanutti))
