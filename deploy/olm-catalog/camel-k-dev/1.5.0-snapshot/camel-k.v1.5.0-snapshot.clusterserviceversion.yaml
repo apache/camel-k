@@ -141,7 +141,7 @@ metadata:
           "spec": {
             "sink": {
               "ref": {
-                "apiVersion": "messaging.knative.dev/v1beta1",
+                "apiVersion": "messaging.knative.dev/v1",
                 "kind": "InMemoryChannel",
                 "name": "example"
               }

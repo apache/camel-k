@@ -50,8 +50,8 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	eventing "knative.dev/eventing/pkg/apis/eventing/v1beta1"
-	messaging "knative.dev/eventing/pkg/apis/messaging/v1beta1"
+	eventing "knative.dev/eventing/pkg/apis/eventing/v1"
+	messaging "knative.dev/eventing/pkg/apis/messaging/v1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	projectv1 "github.com/openshift/api/project/v1"
@@ -1011,7 +1011,7 @@ func CreateKamelPod(ns string, name string, command ...string) error {
 	Knative
 */
 
-func CreateKnativeChannelv1Beta1(ns string, name string) func() error {
+func CreateKnativeChannel(ns string, name string) func() error {
 	return func() error {
 		channel := messaging.InMemoryChannel{
 			TypeMeta: metav1.TypeMeta{

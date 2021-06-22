@@ -115,14 +115,14 @@ func TestBindings(t *testing.T) {
 			endpoint: v1alpha1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Broker",
-					APIVersion: "eventing.knative.dev/v1beta1",
+					APIVersion: "eventing.knative.dev/v1",
 					Name:       "default",
 				},
 				Properties: asEndpointProperties(map[string]string{
 					"type": "myeventtype",
 				}),
 			},
-			uri: "knative:event/myeventtype?apiVersion=eventing.knative.dev%2Fv1beta1&kind=Broker",
+			uri: "knative:event/myeventtype?apiVersion=eventing.knative.dev%2Fv1&kind=Broker",
 		},
 		{
 			endpointType: v1alpha1.EndpointTypeSource,

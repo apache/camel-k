@@ -23,7 +23,7 @@ spec:
   source:
     ref:
       kind: InMemoryChannel
-      apiVersion: messaging.knative.dev/v1beta1
+      apiVersion: messaging.knative.dev/v1
       name: messages
   sink:
     ref:

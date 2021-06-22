@@ -28,7 +28,7 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 
-	messaging "knative.dev/eventing/pkg/apis/messaging/v1beta1"
+	messaging "knative.dev/eventing/pkg/apis/messaging/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -39,7 +39,7 @@ func TestKameletChange(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 		Expect(CreateTimerKamelet(ns, "timer-source")()).To(Succeed())
-		Expect(CreateKnativeChannelv1Beta1(ns, "messages")()).To(Succeed())
+		Expect(CreateKnativeChannel(ns, "messages")()).To(Succeed())
 		Expect(Kamel("run", "-n", ns, "files/display.groovy", "-w").Execute()).To(Succeed())
 		ref := v1.ObjectReference{
 			Kind:       "InMemoryChannel",
