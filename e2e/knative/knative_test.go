@@ -58,7 +58,7 @@ func TestRunServiceCombo(t *testing.T) {
 
 func TestRunChannelComboV1Beta1(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(CreateKnativeChannelv1Beta1(ns, "messages")()).To(Succeed())
+		Expect(CreateKnativeChannel(ns, "messages")()).To(Succeed())
 		Expect(Kamel("install", "-n", ns, "--trait-profile", "knative").Execute()).To(Succeed())
 		Expect(Kamel("run", "-n", ns, "files/knativech2.groovy").Execute()).To(Succeed())
 		Expect(Kamel("run", "-n", ns, "files/knativech1.groovy").Execute()).To(Succeed())
@@ -71,7 +71,7 @@ func TestRunChannelComboV1Beta1(t *testing.T) {
 
 func TestRunChannelComboGetToPost(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(CreateKnativeChannelv1Beta1(ns, "messages")()).To(Succeed())
+		Expect(CreateKnativeChannel(ns, "messages")()).To(Succeed())
 		Expect(Kamel("install", "-n", ns, "--trait-profile", "knative").Execute()).To(Succeed())
 		Expect(Kamel("run", "-n", ns, "files/knativegetpost2.groovy").Execute()).To(Succeed())
 		Expect(Kamel("run", "-n", ns, "files/knativegetpost1.groovy").Execute()).To(Succeed())
@@ -84,8 +84,8 @@ func TestRunChannelComboGetToPost(t *testing.T) {
 
 func TestRunMultiChannelChain(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(CreateKnativeChannelv1Beta1(ns, "messages")()).To(Succeed())
-		Expect(CreateKnativeChannelv1Beta1(ns, "words")()).To(Succeed())
+		Expect(CreateKnativeChannel(ns, "messages")()).To(Succeed())
+		Expect(CreateKnativeChannel(ns, "words")()).To(Succeed())
 		Expect(Kamel("install", "-n", ns, "--trait-profile", "knative").Execute()).To(Succeed())
 		Expect(Kamel("run", "-n", ns, "files/knativemultihop3.groovy").Execute()).To(Succeed())
 		Expect(Kamel("run", "-n", ns, "files/knativemultihop2.groovy").Execute()).To(Succeed())

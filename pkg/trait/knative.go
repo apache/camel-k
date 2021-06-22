@@ -33,7 +33,7 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	eventing "knative.dev/eventing/pkg/apis/eventing/v1beta1"
+	eventing "knative.dev/eventing/pkg/apis/eventing/v1"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"

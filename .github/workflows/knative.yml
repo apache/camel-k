@@ -92,16 +92,16 @@ jobs:
     - name: Install Knative
       run: |
         # Prerequisites
-        sudo pip install yq
+        sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.6/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
 
         export SERVING_VERSION=v0.23.1
-        export EVENTING_VERSION=v0.17.9
+        export EVENTING_VERSION=v0.23.2
         export KOURIER_VERSION=v0.23.0
-        export SOURCES_VERSION=v0.17.8
+        export SOURCES_VERSION=v0.23.0
 
         # Serving
         kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml
-        curl -L -s https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+        curl -L -s https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-core.yaml | head -n -1 | yq e 'del(.spec.template.spec.containers[].resources)' - | kubectl apply -f -
 
         # Kourier
         kubectl apply --filename https://github.com/knative/net-kourier/releases/download/$KOURIER_VERSION/kourier.yaml
@@ -112,19 +112,19 @@ jobs:
 
         # Eventing
         kubectl apply --filename https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-crds.yaml
-        curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+        curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-core.yaml | head -n -1 | yq e 'del(.spec.template.spec.containers[].resources)' - | kubectl apply -f -
 
         # Eventing channels
-        curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/in-memory-channel.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+        curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/in-memory-channel.yaml | head -n -1 | yq e 'del(.spec.template.spec.containers[].resources)' - | kubectl apply -f -
 
         # Eventing broker
-        curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/mt-channel-broker.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+        curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/mt-channel-broker.yaml | head -n -1 | yq e 'del(.spec.template.spec.containers[].resources)' - | kubectl apply -f -
 
         # Eventing sugar controller for injection
         kubectl apply -f https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-sugar-controller.yaml
 
         # Camel Sources
-        kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/$SOURCES_VERSION/camel.yaml
+        kubectl apply --filename https://github.com/knative-sandbox/eventing-camel/releases/download/$SOURCES_VERSION/camel.yaml
 
         # Wait for installation completed
         echo "Waiting for all pods to be ready in kourier-system"
@@ -216,16 +216,16 @@ jobs:
       - name: Install Knative
         run: |
           # Prerequisites
-          sudo pip install yq
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.6/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
 
           export SERVING_VERSION=v0.23.1
-          export EVENTING_VERSION=v0.17.9
+          export EVENTING_VERSION=v0.23.2
           export KOURIER_VERSION=v0.23.0
-          export SOURCES_VERSION=v0.17.8
+          export SOURCES_VERSION=v0.23.0
 
           # Serving
           kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml
-          curl -L -s https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+          curl -L -s https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-core.yaml | head -n -1 | yq e 'del(.spec.template.spec.containers[].resources)' - | kubectl apply -f -
 
           # Kourier
           kubectl apply --filename https://github.com/knative/net-kourier/releases/download/$KOURIER_VERSION/kourier.yaml
@@ -236,19 +236,19 @@ jobs:
 
           # Eventing
           kubectl apply --filename https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-crds.yaml
-          curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-core.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+          curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-core.yaml | head -n -1 | yq e 'del(.spec.template.spec.containers[].resources)' - | kubectl apply -f -
 
           # Eventing channels
-          curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/in-memory-channel.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+          curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/in-memory-channel.yaml | head -n -1 | yq e 'del(.spec.template.spec.containers[].resources)' - | kubectl apply -f -
 
           # Eventing broker
-          curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/mt-channel-broker.yaml | yq 'del(.spec.template.spec.containers[]?.resources)' -y | kubectl apply -f -
+          curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/mt-channel-broker.yaml | head -n -1 | yq e 'del(.spec.template.spec.containers[].resources)' - | kubectl apply -f -
 
           # Eventing sugar controller for injection
           kubectl apply -f https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-sugar-controller.yaml
 
           # Camel Sources
-          kubectl apply --filename https://github.com/knative/eventing-contrib/releases/download/$SOURCES_VERSION/camel.yaml
+          kubectl apply --filename https://github.com/knative-sandbox/eventing-camel/releases/download/$SOURCES_VERSION/camel.yaml
 
           # Wait for installation completed
           echo "Waiting for all pods to be ready in kourier-system"

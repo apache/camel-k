@@ -21,17 +21,15 @@ import (
 	eventingv1 "knative.dev/eventing/pkg/apis/eventing/v1"
 	eventingv1beta1 "knative.dev/eventing/pkg/apis/eventing/v1beta1"
 	messagingv1 "knative.dev/eventing/pkg/apis/messaging/v1"
-	messagingv1beta1 "knative.dev/eventing/pkg/apis/messaging/v1beta1"
-	sourcesv1alpha1 "knative.dev/eventing/pkg/apis/sources/v1alpha1"
-	sourcesv1alpha2 "knative.dev/eventing/pkg/apis/sources/v1alpha2"
+	sourcesv1 "knative.dev/eventing/pkg/apis/sources/v1"
+	sourcesv1beta2 "knative.dev/eventing/pkg/apis/sources/v1beta2"
 )
 
 func init() {
 	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
 	AddToSchemes = append(AddToSchemes, eventingv1beta1.AddToScheme)
 	AddToSchemes = append(AddToSchemes, eventingv1.AddToScheme)
-	AddToSchemes = append(AddToSchemes, messagingv1beta1.AddToScheme)
 	AddToSchemes = append(AddToSchemes, messagingv1.AddToScheme)
-	AddToSchemes = append(AddToSchemes, sourcesv1alpha1.AddToScheme)
-	AddToSchemes = append(AddToSchemes, sourcesv1alpha2.AddToScheme)
+	AddToSchemes = append(AddToSchemes, sourcesv1.AddToScheme)
+	AddToSchemes = append(AddToSchemes, sourcesv1beta2.AddToScheme)
 }
