@@ -1,315 +1,76 @@
 :toc: macro
 :toclevels: 3
 
-= Apache Camel K
+= :camel: + :cloud: = Apache Camel K
 
 image:https://github.com/apache/camel-k/workflows/build/badge.svg["Build", link="https://github.com/apache/camel-k/actions/workflows/build.yml"]
+image:https://img.shields.io/github/license/openshift/origin.svg?maxAge=2592000["Licensed under Apache License version 2.0", link="https://www.apache.org/licenses/LICENSE-2.0"]
 image:https://goreportcard.com/badge/github.com/apache/camel-k["Go Report Card", link="https://goreportcard.com/report/github.com/apache/camel-k"]
 image:https://godoc.org/github.com/apache/camel-k?status.svg["GoDoc", link="https://godoc.org/github.com/apache/camel-k"]
-image:https://img.shields.io/github/license/openshift/origin.svg?maxAge=2592000["Licensed under Apache License version 2.0", link="https://www.apache.org/licenses/LICENSE-2.0"]
-image:https://img.shields.io/badge/zulip-join_chat-brightgreen.svg["Chat on Zulip", link="https://camel.zulipchat.com"]
-
 image:https://github.com/apache/camel-k/workflows/kubernetes/badge.svg["Kubernetes", link="https://github.com/apache/camel-k/actions/workflows/kubernetes.yml"]
 image:https://github.com/apache/camel-k/workflows/knative/badge.svg["Knative", link="https://github.com/apache/camel-k/actions/workflows/knative.yml"]
 image:https://github.com/apache/camel-k/actions/workflows/openshift.yml/badge.svg["OpenShift", link="https://github.com/apache/camel-k/actions/workflows/openshift.yml"]
+image:https://img.shields.io/badge/zulip-join_chat-brightgreen.svg["Chat on Zulip", link="https://camel.zulipchat.com"]
 
-Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless superpowers.
+Apache Camel K is a lightweight integration framework built from **Apache Camel** that runs natively on Kubernetes and is specifically designed for serverless and microservice architectures. Users of `Camel K` can instantly run integration code written in Camel DSL on their preferred **Cloud** provider.
 
-toc::[]
+https://camel.apache.org/camel-k/latest/[How does it work?]
 
-[[getting-started]]
-== Getting Started
+== :gear: Installation
 
-Camel K allows to run integrations directly on a Kubernetes or OpenShift cluster.
-To use it, you need to be connected to a cloud environment or to a local cluster created for development purposes.
+Camel K allows you to run integrations directly on a `Kubernetes` or `OpenShift` cluster. To use it, you need to be connected to a cloud environment or to a local cluster created for development purposes.
 
-If you need help on how to create a local development environment based on *CRC* or *Minikube*, you can follow the https://camel.apache.org/camel-k/latest/installation/installation.html[local cluster setup guide].
+https://camel.apache.org/camel-k/latest/installation/installation.html[Installation procedure.]
 
-[[installation]]
-=== Installation
+== :arrow_forward: Running an Integration
 
-Make sure you apply specific configuration settings for your cluster before installing Camel K. Customized instructions are needed for
-the following cluster types:
+You can use Camel DSL to define your `Integration`. Just save it in a file and use `kamel` command line interface (https://github.com/apache/camel-k/releases/latest[download latest release]) to run it. As an example, just try running:
 
-- https://camel.apache.org/camel-k/latest/installation/minikube.html[Minikube]
-- https://camel.apache.org/camel-k/latest/installation/crc.html[Red Hat CodeReady Containers (CRC)]
-- https://camel.apache.org/camel-k/latest/installation/gke.html[Google Kubernetes Engine (GKE)]
-- https://camel.apache.org/camel-k/latest/installation/openshift.html[OpenShift]
-- https://camel.apache.org/camel-k/latest/installation/iks.html[IBM Kubernetes Service (IKS)]
+[source,groovy]
+.hello.groovy
+----
+from('timer:tick?period=3000')
+  .setBody().constant('Hello world from Camel K')
+  .to('log:info')
+----
+----
+kamel run hello.groovy
+----
 
-Other cluster types (such as OpenShift clusters) should not need prior configuration.
+You can even run your integrations in a `dev` mode. Change the code and see the **changes automatically applied (instantly)** to the remote integration pod! We have provided link:/examples[more examples] that you can use to inspire your next `Integration` development.
 
-To start using Camel K you need the **"kamel"** binary, that can be used to both configure the cluster and run integrations.
-Look into the https://github.com/apache/camel-k/releases[release page] for latest version of the `kamel` tool.
+https://camel.apache.org/camel-k/latest/running/running.html[See more details.]
 
-If you want to contribute, you can also **build it from source!** Refer to the https://camel.apache.org/camel-k/latest/contributing/developers.html[contributing guide]
-for information on how to do it.
+== :camel: All the power from Apache Camel components
 
-Once you have the "kamel" binary, log into your cluster using the standard "oc" (OpenShift) or "kubectl" (Kubernetes) client tool and execute the following command to install Camel K:
+You can use any of the Apache Camel components available. The related dependencies will be resolved automatically.
 
-```
-kamel install
-```
+Discover more about https://camel.apache.org/camel-k/latest/configuration/dependencies.html[dependencies and components].
 
-This will configure the cluster with the Camel K custom resource definitions and install the operator on the current namespace.
+== :coffee: Not Just Java
 
-IMPORTANT: Custom Resource Definitions (CRD) are cluster-wide objects and you need admin rights to install them. Fortunately this
-operation can be done *once per cluster*. So, if the `kamel install` operation fails, you'll be asked to repeat it when logged as admin.
-For CRC, this means executing `oc login -u system:admin` then `kamel install --cluster-setup` only for first-time installation.
+Camel K supports multiple languages for writing integrations.
 
-=== Running an Integration
+See all the https://camel.apache.org/camel-k/latest/languages/languages.html[languages available].
 
-After the initial setup, you can run a Camel integration on the cluster by executing:
-
-```
-kamel run examples/languages/Sample.java
-```
-
-During your first run you may see your console stuck with the following message:
-
-```
-integration "sample" created
-integration "sample" in phase Waiting For Platform
-```
-
-NOTE: It will take some time for your integration to get started for the first time. This is because the camel-k operator has to pull and cache the camel-k builder images into the cluster's registry.
-
-You can follow this process by watching the pods in the namespace where the operator is running:
-
-```
-kubectl get pods -w
-```
-
-You should see something like:
-
-```
-$ kubectl get pods -w
-NAME                                READY   STATUS      RESTARTS   AGE
-camel-k-cache                       0/1     Completed   0          3m29s
-camel-k-groovy-builder              1/1     Running     0          32s
-camel-k-jvm                         0/1     Completed   0          61s
-camel-k-jvm-builder                 0/1     Completed   0          2m13s
-camel-k-operator-587b579567-fkz54   1/1     Running     1          43m
-camel-k-groovy   0/1   Pending   0     0s
-camel-k-groovy   0/1   ContainerCreating   0     0s
-camel-k-groovy   1/1   Running   0     2s
-camel-k-groovy   0/1   Completed   0     4s
-camel-k-kotlin-builder   0/1   Pending   0     0s
-camel-k-kotlin-builder   0/1   Pending   0     0s
-camel-k-kotlin-builder   0/1   ContainerCreating   0     0s
-camel-k-groovy-builder   0/1   Completed   0     75s
-...
-```
-
-After a couple of minutes you can see your integration running. To see the output log of your integration container get the pod id:
-
-```
-kubectl get pods | grep sample
-sample-67699569c4-724dv             1/1     Running     0          15m
-```
-
-And then see the logs using:
-
-```
-kubectl logs -f sample-67699569c4-724dv
-```
-
-An output like this should appear:
-
-```
-Starting the Java application using /opt/run-java/run-java.sh ...
-...
-2019-05-08 19:35:21.883 INFO  [main] DefaultCamelContext - Apache Camel 2.23.2 (CamelContext: camel-k) started in 0.874 seconds
-2019-05-08 19:35:22.889 INFO  [Camel (camel-k) thread #2 - timer://tick] route1 - Hello Camel K!
-2019-05-08 19:36:22.881 INFO  [Camel (camel-k) thread #2 - timer://tick] route1 - Hello Camel K!
-...
-```
-
-A "Sample.java" file is included in the link:/examples[/examples] folder of this repository. You can change the content of the file and execute the command again to see the changes.
-
-==== Configure Integration properties
-
-Properties associated to an integration can be configured either using a ConfigMap/Secret or by setting using the "--property" flag, i.e.
-
-```
-kamel run --property my.message=test examples/props.js
-```
-```
-kamel run --configmap=<your name here> examples/props.js
-```
-Note: to create the config map first create a file called application.properties which contains lines with key=value pairs
-e.g. my.message="The text to display"
-Create the config map in the usual manner e.g.
-```
-kubectl create configmap <your name here>  --from-file=application.properties
-```
-
-==== Configure Integration Logging
-
-camel-k runtime uses log4j2 as logging framework and can be configured through integration properties.
-If you need to change the logging level of various loggers, you can do so by using the `logging.level` prefix:
-
-```
-logging.level.org.apache.camel = DEBUG
-```
-
-==== Configure Integration Components
-
-camel-k component can be configured programmatically inside an integration or using properties with the following syntax.
-
-```
-camel.component.${scheme}.${property} = ${value}
-```
-
-As example if you want to change the queue size of the seda component, you can use the following property:
-
-```
-camel.component.seda.queueSize = 10
-```
-
-==== Configure Integration Volumes
-
-It's possible to mount persistent volumes into integration containers by using the `-v` or `--volume` flag. The format of volume flag value is similar to that of the docker CLI. But instead of specifying a host path to mount from, you reference the name of a `PersistentVolumeClaim` that you have already configured within the cluster. E.g
-
-```
-kamel run examples/Sample.java -v myPvcName:/some/path
-```
-
-==== Configure Environment Variables
-
-It's possible to configure environment variables for integration containers by using the `-e` or `--env` flag:
-
-```
-kamel run examples/Sample.java -e MY_ENV_VAR=some-value
-```
-
-=== Running Integrations in "Dev" Mode for Fast Feedback
-
-If you want to iterate quickly on an integration to have fast feedback on the code you're writing, you can use by running it in **"dev" mode**:
-
-```
-kamel run examples/Sample.java --dev
-```
-
-The `--dev` flag deploys immediately the integration and shows the integration logs in the console. You can then change the code and see
-the **changes automatically applied (instantly)** to the remote integration pod.
-
-The console follows automatically all redeploys of the integration.
-
-Here's an example of the output:
-
-```
-[nferraro@localhost camel-k]$ kamel run examples/Sample.java --dev
-integration "sample" created
-integration "sample" in phase Building
-integration "sample" in phase Deploying
-integration "sample" in phase Running
-[1] Monitoring pod sample-776db787c4-zjhfr[1] Starting the Java application using /opt/run-java/run-java.sh ...
-[1] exec java -javaagent:/opt/prometheus/jmx_prometheus_javaagent.jar=9779:/opt/prometheus/prometheus-config.yml -XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:+ExitOnOutOfMemoryError -cp .:/deployments/* org.apache.camel.k.jvm.Application
-[1] [INFO ] 2018-09-20 21:24:35.953 [main] Application - Routes: file:/etc/camel/conf/Sample.java
-[1] [INFO ] 2018-09-20 21:24:35.955 [main] Application - Language: java
-[1] [INFO ] 2018-09-20 21:24:35.956 [main] Application - Locations: file:/etc/camel/conf/application.properties
-[1] [INFO ] 2018-09-20 21:24:36.506 [main] DefaultCamelContext - Apache Camel 2.22.1 (CamelContext: camel-1) is starting
-[1] [INFO ] 2018-09-20 21:24:36.578 [main] ManagedManagementStrategy - JMX is enabled
-[1] [INFO ] 2018-09-20 21:24:36.680 [main] DefaultTypeConverter - Type converters loaded (core: 195, classpath: 0)
-[1] [INFO ] 2018-09-20 21:24:36.777 [main] DefaultCamelContext - StreamCaching is not in use. If using streams then its recommended to enable stream caching. See more details at http://camel.apache.org/stream-caching.html
-[1] [INFO ] 2018-09-20 21:24:36.817 [main] DefaultCamelContext - Route: route1 started and consuming from: timer://tick
-[1] [INFO ] 2018-09-20 21:24:36.818 [main] DefaultCamelContext - Total 1 routes, of which 1 are started
-[1] [INFO ] 2018-09-20 21:24:36.820 [main] DefaultCamelContext - Apache Camel 2.22.1 (CamelContext: camel-1) started in 0.314 seconds
-
-```
-
-=== Dependencies and Component Resolution
-
-Camel components used in an integration are automatically resolved. For example, take the following integration:
-
-```
-from("imap://admin@myserver.com")
-  .to("seda:output")
-```
-
-Since the integration is using the **"imap:" prefix**, Camel K is able to **automatically add the "camel-mail" component** to the list of required dependencies.
-This will be transparent to the user, that will just see the integration running.
-
-Automatic resolution is also a nice feature in `--dev` mode, because you are allowed to add all components you need without exiting the dev loop.
-
-You can also use the `-d` flag to pass additional explicit dependencies to the Camel client tool:
-
-```
-kamel run -d mvn:com.google.guava:guava:26.0-jre -d camel-mina2 Integration.java
-```
-
-=== Not Just Java
-
-Camel K supports multiple languages for writing integrations:
-
-.Languages
-[options="header"]
-|=======================
-| Language		| Description
-| Java				| Integrations written in Java DSL are supported.
-| XML				  | Integrations written in plain XML DSL are supported (Spring XML with <beans> or Blueprint XML with <blueprint> not supported).
-| YAML        | Integrations written in YAML DSL are supported.
-| Groovy			| Groovy `.groovy` files are supported (experimental).
-| JavaScript  | JavaScript `.js` files are supported (experimental).
-| Kotlin			| Kotlin Script `.kts` files are supported (experimental).
-|=======================
-
-More information about supported languages is provided in the https://camel.apache.org/camel-k/latest/languages/languages.html[languages guide].
-
-Integrations written in different languages are provided in the link:/examples[examples] directory.
-
-An example of integration written in JavaScript is the link:/examples/dns.js[/examples/dns.js] integration.
-Here's the content:
-
-```
-// Lookup every second the 'www.google.com' domain name and log the output
-from('timer:dns?period=1000')
-    .routeId('dns')
-    .setHeader('dns.domain')
-        .constant('www.google.com')
-    .to('dns:ip')
-    .to('log:dns');
-```
-
-To run it, you need just to execute:
-
-```
-kamel run examples/dns.js
-```
-
-=== Traits
+== :checkered_flag: Traits
 
 The details of how the integration is mapped into Kubernetes resources can be *customized using traits*.
-More information is provided in the https://camel.apache.org/camel-k/latest/traits/traits.html[traits section].
 
-=== Monitoring the Status
+More information is provided in the official documentation https://camel.apache.org/camel-k/latest/traits/traits.html[traits section].
 
-Camel K integrations follow a lifecycle composed of several steps before getting into the `Running` state.
-You can check the status of all integrations by executing the following command:
+== :cloud: Engineered thinking on Cloud Native
 
-```
-kamel get
-```
+Since the inception of the project, our goal was to bring `Apache Camel` to the cloud.
 
-[[contributing]]
-== Contributing
+See the https://camel.apache.org/camel-k/latest/architecture/architecture.html[software architecture defails].
+
+== :heart: Contributing
 
 We love contributions and we want to make Camel K great!
 
 Contributing is easy, just take a look at our https://camel.apache.org/camel-k/latest/contributing/developers.html[developer's guide].
 
-[[uninstalling]]
-== Uninstalling
+== :tickets: Licensing
 
-If you really need to, it is possible to completely uninstall Camel K from OpenShift or Kubernetes with the following command, using the "oc" or "kubectl" tool:
-
-```
-# kubectl on plain Kubernetes
-oc delete all,pvc,configmap,rolebindings,clusterrolebindings,secrets,sa,roles,clusterroles,crd -l 'app=camel-k'
-```
-
-[[licensing]]
-== Licensing
-
-This software is licensed under the terms you may find in the file named LICENSE in this directory.
+This software is licensed under the terms you may find in the file named link:LICENSE[LICENSE] in this directory.
