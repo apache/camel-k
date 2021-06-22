@@ -561,10 +561,6 @@ traits:
     description: Enables filtering on events based on the header "ce-knativehistory".
       Since this header has been removed in newer versions ofKnative, filtering is
       disabled by default.
-  - name: camel-source-compat
-    type: bool
-    description: Enables Knative CamelSource pre 0.15 compatibility fixes (will be
-      removed in future versions).
   - name: sink-binding
     type: bool
     description: Allows binding the integration to a sink via a Knative SinkBinding
