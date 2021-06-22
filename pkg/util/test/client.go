@@ -18,6 +18,7 @@ limitations under the License.
 package test
 
 import (
+	"context"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/apis"
@@ -103,6 +104,11 @@ func (c *FakeClient) GetConfig() *rest.Config {
 
 func (c *FakeClient) GetCurrentNamespace(kubeConfig string) (string, error) {
 	return "", nil
+}
+
+// Patch mimicks patch for server-side apply and simply creates the obj
+func (c *FakeClient) Patch(ctx context.Context, obj controller.Object, patch controller.Patch, opts ...controller.PatchOption) error {
+	return c.Create(ctx, obj)
 }
 
 func (c *FakeClient) Discovery() discovery.DiscoveryInterface {
