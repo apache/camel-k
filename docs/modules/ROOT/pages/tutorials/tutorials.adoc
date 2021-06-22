@@ -1,8 +1,8 @@
 [[tutorials]]
 = Camel K Tutorials
 
-The https://github.com/apache/camel-k-examples[apache/camel-k-examples] repository contains a curated collection of
+The https://github.com/apache/camel-k/tree/main/examples[apache/camel-k-examples] repository contains a curated collection of
 tutorials that drives you from the basics of Camel K to more advanced features.
 
 NOTE: The xref:tutorials/tekton/tekton.adoc[Tekton Pipelines] example is still available here and it's going to be migrated to
-the https://github.com/apache/camel-k-examples[apache/camel-k-examples] repository.
+the https://github.com/apache/camel-k/tree/main/examples[apache/camel-k-examples] repository.
