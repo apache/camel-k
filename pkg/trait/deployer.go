@@ -19,6 +19,7 @@ package trait
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -96,6 +97,9 @@ func (t *deployerTrait) Apply(e *Environment) error {
 					} else if isIncompatibleServerError(err) {
 						t.L.Info("Fallback to client-side apply to patch resources")
 						hasServerSideApply = false
+					} else {
+						// Keep server-side apply unless server is incompatible with it
+						return err
 					}
 				}
 				if err := t.clientSideApply(env, resource); err != nil {
@@ -151,6 +155,11 @@ func (t *deployerTrait) clientSideApply(env *Environment, resource ctrl.Object) 
 }
 
 func isIncompatibleServerError(err error) bool {
+	// First simpler check for older servers (i.e. OpenShift 3.11)
+	if strings.Contains(err.Error(), "415: Unsupported Media Type") {
+		return true
+	}
+
 	// 415: Unsupported media type means we're talking to a server which doesn't
 	// support server-side apply.
 	if _, ok := err.(*k8serrors.StatusError); !ok {
