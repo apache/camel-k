@@ -674,6 +674,21 @@ func NewPlainTextConfigmap(ns string, name string, data map[string]string) error
 	return TestClient().Create(TestContext, &cm)
 }
 
+func NewBinaryConfigmap(ns string, name string, data map[string][]byte) error {
+	cm := corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+		BinaryData: data,
+	}
+	return TestClient().Create(TestContext, &cm)
+}
+
 func NewPlainTextSecret(ns string, name string, data map[string]string) error {
 	sec := corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
