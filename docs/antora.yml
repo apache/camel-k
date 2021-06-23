@@ -1,6 +1,6 @@
 name: camel-k
 title: Camel K
-version: latest
+version: 1.4.x
 nav:
 - modules/ROOT/nav.adoc
 - modules/languages/nav-languages.adoc
