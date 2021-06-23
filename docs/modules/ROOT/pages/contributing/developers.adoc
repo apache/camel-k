@@ -111,13 +111,6 @@ If you want to install everything you have in your source code and see it runnin
 
 The commands assume you have an already running CRC instance and logged in correctly.
 
-=== For Minishift
-
-* Run `make install-minishift` (or just `make install`): to build the project and install it in the current namespace on Minishift
-* You can specify a different namespace with `make install-minishift project=myawesomeproject`
-
-This command assumes you have an already running Minishift instance.
-
 === For Minikube
 
 * Run `make install-minikube`: to build the project and install it in the current namespace on Minikube
@@ -189,7 +182,7 @@ When configuring the IDE task, make sure to add all required environment variabl
 
 After you set up the IDE task, with Java 11+ to be used by default, you can run and debug the operator process.
 
-NOTE: The operator can be fully debugged in Minishift, because it uses OpenShift S2I binary builds under the hood.
+NOTE: The operator can be fully debugged in CRC, because it uses OpenShift S2I binary builds under the hood.
 The build phase cannot be (currently) debugged in Minikube because the Kaniko builder requires that the operator and the publisher pod share a common persistent volume.
 
 [[publishing]]

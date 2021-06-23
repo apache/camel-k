@@ -23,7 +23,7 @@ toc::[]
 Camel K allows to run integrations directly on a Kubernetes or OpenShift cluster.
 To use it, you need to be connected to a cloud environment or to a local cluster created for development purposes.
 
-If you need help on how to create a local development environment based on *Minishift* or *Minikube*, you can follow the https://camel.apache.org/camel-k/latest/installation/installation.html[local cluster setup guide].
+If you need help on how to create a local development environment based on *CRC* or *Minikube*, you can follow the https://camel.apache.org/camel-k/latest/installation/installation.html[local cluster setup guide].
 
 [[installation]]
 === Installation
@@ -32,7 +32,7 @@ Make sure you apply specific configuration settings for your cluster before inst
 the following cluster types:
 
 - https://camel.apache.org/camel-k/latest/installation/minikube.html[Minikube]
-- https://camel.apache.org/camel-k/latest/installation/minishift.html[Minishift]
+- https://camel.apache.org/camel-k/latest/installation/crc.html[Red Hat CodeReady Containers (CRC)]
 - https://camel.apache.org/camel-k/latest/installation/gke.html[Google Kubernetes Engine (GKE)]
 - https://camel.apache.org/camel-k/latest/installation/openshift.html[OpenShift]
 - https://camel.apache.org/camel-k/latest/installation/iks.html[IBM Kubernetes Service (IKS)]
@@ -55,7 +55,7 @@ This will configure the cluster with the Camel K custom resource definitions and
 
 IMPORTANT: Custom Resource Definitions (CRD) are cluster-wide objects and you need admin rights to install them. Fortunately this
 operation can be done *once per cluster*. So, if the `kamel install` operation fails, you'll be asked to repeat it when logged as admin.
-For Minishift, this means executing `oc login -u system:admin` then `kamel install --cluster-setup` only for first-time installation.
+For CRC, this means executing `oc login -u system:admin` then `kamel install --cluster-setup` only for first-time installation.
 
 === Running an Integration
 
