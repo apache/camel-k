@@ -312,8 +312,6 @@ release-helm:
 
 install-crc:
 	./script/install_crc.sh $(VERSION)
-install-minishift:
-	./script/install_minishift.sh
 install-minikube:
 	./script/install_minikube.sh
 

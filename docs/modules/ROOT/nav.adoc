@@ -1,6 +1,5 @@
 * xref:installation/installation.adoc[Installation]
 ** xref:installation/minikube.adoc[Minikube]
-** xref:installation/minishift.adoc[Minishift]
 ** xref:installation/crc.adoc[Red Hat CodeReady Containers (CRC)]
 ** xref:installation/digitalocean.adoc[DigitalOcean Kubernetes Cluster]
 ** xref:installation/gke.adoc[Google Kubernetes Engine (GKE)]

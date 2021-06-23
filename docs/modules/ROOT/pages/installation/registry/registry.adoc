@@ -5,7 +5,7 @@ Every Camel K installation needs a container registry that will be used to host 
 
 A **default registry** is present in all the following supported installations:
 
-* **OpenShift**: all OpenShift installations (including Minishift, CRC and real clusters) provide an internal container registry that is used for the S2I (source to image)
+* **OpenShift**: all OpenShift installations (including CRC and real clusters) provide an internal container registry that is used for the S2I (source to image)
   feature. Camel K is able to leverage that registry.
 * **Minikube**: Minikube comes with a "registry addon" that can be enabled upon installation (see xref:installation/minikube.adoc[install guide for Minikube ]). Camel K automatically detects the address of the registry and configures
   it on the `IntegrationPlatform` when using the CLI (on `kamel install`).
