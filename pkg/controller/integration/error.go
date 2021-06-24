@@ -20,13 +20,8 @@ package integration
 import (
 	"context"
 
-	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
-
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/digest"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 // NewErrorAction creates a new error action for an integration
@@ -61,37 +56,15 @@ func (action *errorAction) Handle(ctx context.Context, integration *v1.Integrati
 		return integration, nil
 	}
 
-	if kubernetes.IsConditionTrue(integration, v1.IntegrationConditionDeploymentAvailable) {
-		deployment, err := kubernetes.GetDeployment(ctx, action.client, integration.Name, integration.Namespace)
-		if err != nil && k8serrors.IsNotFound(err) {
-			return nil, err
-		}
-
-		// if the integration is in error phase, check if the corresponding pod is running ok, the user may have updated the integration.
-		deployAvailable := false
-		progressingOk := false
-		for _, c := range deployment.Status.Conditions {
-			// first, check if the container is in available state
-			if c.Type == appsv1.DeploymentAvailable {
-				deployAvailable = c.Status == corev1.ConditionTrue
-			}
-			// second, check the progressing and the reasons
-			if c.Type == appsv1.DeploymentProgressing {
-				progressingOk = c.Status == corev1.ConditionTrue && (c.Reason == "NewReplicaSetAvailable" || c.Reason == "ReplicaSetUpdated")
-			}
-		}
-		if deployAvailable && progressingOk {
-			availableCondition := v1.IntegrationCondition{
-				Type:   v1.IntegrationConditionReady, 
-				Status: corev1.ConditionTrue,
-				Reason: v1.IntegrationConditionReplicaSetReadyReason,
-			}
-			integration.Status.SetConditions(availableCondition)
-			integration.Status.Phase = v1.IntegrationPhaseRunning
-			return integration, nil
-		}
+	err = setReadyCondition(ctx, action.client, integration)
+	if err != nil {
+		return nil, err
 	}
 
-	// TODO check also if deployment matches (e.g. replicas)
+	ready := integration.Status.GetCondition(v1.IntegrationConditionReady)
+	if ready == nil || ready.Reason != v1.IntegrationConditionErrorReason {
+		integration.Status.Phase = v1.IntegrationPhaseRunning
+	}
+
 	return nil, nil
 }
