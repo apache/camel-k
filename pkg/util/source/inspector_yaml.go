@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/uri"
 	yaml2 "gopkg.in/yaml.v2"
 )
 
@@ -117,7 +118,20 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 
 		if u, ok := t["uri"]; ok {
 			if v, isString := u.(string); isString {
-				maybeURI = v
+				builtURI := v
+				// Inject parameters into URIs to allow other parts of the operator to inspect them
+				if params, pok := t["parameters"]; pok {
+					if paramMap, pmok := params.(map[interface{}]interface{}); pmok {
+						params := make(map[string]string, len(paramMap))
+						for k, v := range paramMap {
+							ks := fmt.Sprintf("%v", k)
+							vs := fmt.Sprintf("%v", v)
+							params[ks] = vs
+						}
+						builtURI = uri.AppendParameters(builtURI, params)
+					}
+				}
+				maybeURI = builtURI
 			}
 		}
 
