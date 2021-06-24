@@ -44,6 +44,14 @@ func TestRunCronExample(t *testing.T) {
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
+		t.Run("cron-yaml", func(t *testing.T) {
+			Expect(Kamel("run", "-n", ns, "files/cron-yaml.yaml").Execute()).To(Succeed())
+			Eventually(IntegrationCronJob(ns, "cron-yaml"), TestTimeoutMedium).ShouldNot(BeNil())
+			Eventually(IntegrationCondition(ns, "cron-yaml", camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "cron-yaml"), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
 		t.Run("cron-timer", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "files/cron-timer.groovy").Execute()).To(Succeed())
 			Eventually(IntegrationCronJob(ns, "cron-timer"), TestTimeoutMedium).ShouldNot(BeNil())

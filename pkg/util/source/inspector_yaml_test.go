@@ -242,7 +242,7 @@ func TestYAMLRouteAndFromEquivalence(t *testing.T) {
 			inspector := NewtestYAMLInspector(t)
 			err := inspector.Extract(code, &meta)
 			assert.Nil(t, err)
-			assert.Equal(t, meta.FromURIs, []string{"timer:tick"})
+			assert.Equal(t, meta.FromURIs, []string{"timer:tick?period=5000"})
 			assert.Equal(t, meta.ToURIs, []string{"log:info"})
 			assert.True(t, meta.Dependencies.Has("camel:log"))
 			assert.True(t, meta.Dependencies.Has("camel:timer"))
@@ -415,6 +415,78 @@ func TestYAMLKamelet(t *testing.T) {
 
 			for _, k := range test.kamelets {
 				assert.Contains(t, meta.Kamelets, k)
+			}
+		})
+	}
+}
+
+const YAMLKameletExplicitParams = `
+- from:
+    uri: cron:tab
+    parameters:
+      schedule: "* * * * ?"
+    steps:
+    - to:
+        uri: knative:channel/a
+        parameters:
+          cloudEventsSpecVersion: "1.0"
+`
+
+const YAMLKameletExplicitNumericParams = `
+- from:
+    uri: timer:tick
+    parameters:
+      period: 1000
+    steps:
+    - log: "hello"
+`
+
+func TestYAMLExplicitParameters(t *testing.T) {
+	tc := []struct {
+		source   string
+		fromURIs []string
+		toURIs   []string
+	}{
+		{
+			source:   YAMLKameletExplicitParams,
+			fromURIs: []string{"cron:tab?schedule=%2A+%2A+%2A+%2A+%3F"},
+			toURIs:   []string{"knative:channel/a?cloudEventsSpecVersion=1.0"},
+		},
+		{
+			source:   YAMLKameletExplicitNumericParams,
+			fromURIs: []string{"timer:tick?period=1000"},
+		},
+	}
+
+	for i, test := range tc {
+		t.Run(fmt.Sprintf("TestYAMLExplicitParameters-%d", i), func(t *testing.T) {
+			code := v1.SourceSpec{
+				DataSpec: v1.DataSpec{
+					Content: test.source,
+				},
+			}
+
+			catalog, err := camel.DefaultCatalog()
+			assert.Nil(t, err)
+
+			meta := NewMetadata()
+			inspector := YAMLInspector{
+				baseInspector: baseInspector{
+					catalog: catalog,
+				},
+			}
+
+			err = inspector.Extract(code, &meta)
+			assert.Nil(t, err)
+			assert.True(t, meta.RequiredCapabilities.IsEmpty())
+
+			assert.Len(t, meta.FromURIs, len(test.fromURIs))
+			for _, k := range test.fromURIs {
+				assert.Contains(t, meta.FromURIs, k)
+			}
+			assert.Len(t, meta.ToURIs, len(test.toURIs))
+			for _, k := range test.toURIs {
+				assert.Contains(t, meta.ToURIs, k)
 			}
 		})
 	}
