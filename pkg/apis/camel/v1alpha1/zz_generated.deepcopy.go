@@ -656,6 +656,11 @@ func (in *KameletSpec) DeepCopyInto(out *KameletSpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.Template != nil {
+		in, out := &in.Template, &out.Template
+		*out = new(v1.Template)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Flow != nil {
 		in, out := &in.Flow, &out.Flow
 		*out = new(v1.Flow)
