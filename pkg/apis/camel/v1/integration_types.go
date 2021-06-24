@@ -56,7 +56,6 @@ type IntegrationStatus struct {
 	Platform           string                  `json:"platform,omitempty"`
 	GeneratedSources   []SourceSpec            `json:"generatedSources,omitempty"`
 	GeneratedResources []ResourceSpec          `json:"generatedResources,omitempty"`
-	Failure            *Failure                `json:"failure,omitempty"`
 	RuntimeVersion     string                  `json:"runtimeVersion,omitempty"`
 	RuntimeProvider    RuntimeProvider         `json:"runtimeProvider,omitempty"`
 	Configuration      []ConfigurationSpec     `json:"configuration,omitempty"`
