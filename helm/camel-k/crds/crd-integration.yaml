@@ -5453,33 +5453,6 @@ spec:
                 type: array
               digest:
                 type: string
-              failure:
-                description: Failure --
-                properties:
-                  reason:
-                    type: string
-                  recovery:
-                    description: FailureRecovery --
-                    properties:
-                      attempt:
-                        type: integer
-                      attemptMax:
-                        type: integer
-                      attemptTime:
-                        format: date-time
-                        type: string
-                    required:
-                    - attempt
-                    - attemptMax
-                    type: object
-                  time:
-                    format: date-time
-                    type: string
-                required:
-                - reason
-                - recovery
-                - time
-                type: object
               generatedResources:
                 items:
                   description: ResourceSpec --
