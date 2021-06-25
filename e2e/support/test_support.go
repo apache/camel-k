@@ -1372,3 +1372,15 @@ func GetOutputString(command *cobra.Command) string {
 
 	return buf.String()
 }
+
+func GetOutputStringAsync(cmd *cobra.Command) func() string {
+	var buffer bytes.Buffer
+	stdout := bufio.NewWriter(&buffer)
+
+	cmd.SetOut(stdout)
+	go cmd.Execute()
+
+	return func() string {
+		return buffer.String()
+	}
+}
