@@ -23,10 +23,6 @@
     <artifactId>camel-k-catalog-generator</artifactId>
     <version>1.0.0</version>
 
-    <properties>
-        <exclusion.list>qute</exclusion.list>
-    </properties>
-
     <build>
         <defaultGoal>generate-resources</defaultGoal>
         <plugins>
