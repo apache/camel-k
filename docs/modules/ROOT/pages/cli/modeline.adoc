@@ -94,7 +94,7 @@ The following is a partial list of useful options:
 |Add a runtime property or properties file (syntax: _[my-key=my-value\|file:/path/to/my-conf.properties]_)
 
 |resource
-|Add a runtime resource from a Configmap, a Secret or a file (syntax: _[configmap\|secret\|file]:name[/key][@path]_, where name represents the local file path or the configmap/secret name, key optionally represents the configmap/secret key to be filtered and path represents the destination path)
+|Add a runtime resource from a Configmap, Secret or file (syntax: _[configmap\|secret\|file]:name[/key][@path]_, where name represents the local file path or the configmap/secret name, key optionally represents the configmap/secret key to be filtered and path represents the destination path)
 
 |trait
 |Configure a trait, e.g. `trait=service.enabled=false`
