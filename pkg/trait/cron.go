@@ -240,7 +240,7 @@ func (t *cronTrait) Apply(e *Environment) error {
 			e.ApplicationProperties = make(map[string]string)
 		}
 
-		e.ApplicationProperties["camel.main.duration-max-messages"] = "1"
+		e.ApplicationProperties["camel.main.duration-max-idle-seconds"] = "5"
 		e.ApplicationProperties["loader.interceptor.cron.overridable-components"] = t.Components
 		e.Interceptors = append(e.Interceptors, "cron")
 
