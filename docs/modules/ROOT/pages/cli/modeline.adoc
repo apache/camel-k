@@ -70,7 +70,7 @@ The following is a partial list of useful options:
 |Add a build time property or properties file (syntax: _[my-key=my-value\|file:/path/to/my-conf.properties]_
 
 |config
-|Add a runtime configuration from a Configmap, a Secret or a file (syntax: _[configmap\|secret\|file]:name[/key]_, where name represents the local file path or the configmap/secret name and key optionally represents the configmap/secret key to be filtered)
+|Add a runtime configuration from a Configmap, Secret or file (syntax: _[configmap\|secret\|file]:name[/key]_, where name represents the local file path or the configmap/secret name and key optionally represents the configmap/secret key to be filtered)
 
 |dependency
 |An external library that should be included, e.g. for Maven dependencies `dependency=mvn:org.my:app:1.0`
