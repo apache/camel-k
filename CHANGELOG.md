@@ -73,6 +73,9 @@
 
 **Merged pull requests:**
 
+- Remove the unnecessary indefinite articles in the list. in documentat… [\#2452](https://github.com/apache/camel-k/pull/2452) ([apupier](https://github.com/apupier))
+- Remove the unnecessary indefinite articles in the list. in documentat… [\#2451](https://github.com/apache/camel-k/pull/2451) ([apupier](https://github.com/apupier))
+- Revert "Temporarily disable qute due to Camel Quarkus issue \#2701" [\#2447](https://github.com/apache/camel-k/pull/2447) ([orpiske](https://github.com/orpiske))
 - Fix \#2441: parse parameters in YAML DSL [\#2442](https://github.com/apache/camel-k/pull/2442) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(api\): Remove obsolete failure field From Integration API [\#2440](https://github.com/apache/camel-k/pull/2440) ([astefanutti](https://github.com/astefanutti))
 - doc: readme cleanup [\#2433](https://github.com/apache/camel-k/pull/2433) ([squakez](https://github.com/squakez))
