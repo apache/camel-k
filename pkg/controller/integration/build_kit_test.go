@@ -21,12 +21,13 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/test"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
@@ -79,7 +80,11 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	i, err := LookupKitForIntegration(context.TODO(), c, &v1.Integration{
+	a := buildKitAction{}
+	a.InjectLogger(log.Log)
+	a.InjectClient(c)
+
+	i, err := a.lookupKitForIntegration(context.TODO(), c, &v1.Integration{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1.SchemeGroupVersion.String(),
 			Kind:       v1.IntegrationKind,
@@ -104,8 +109,7 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T) {
 	c, err := test.NewFakeClient(
 		//
-		// Should be discarded because it contains both of the required traits but one
-		// contains a different configuration value
+		// Should be discarded because it does not contain the required traits
 		//
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
@@ -123,14 +127,6 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 				Dependencies: []string{
 					"camel-core",
 					"camel-irc",
-				},
-				Traits: map[string]v1.TraitSpec{
-					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": "true",
-					}),
-					"knative-service": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": "false",
-					}),
 				},
 			},
 			Status: v1.IntegrationKitStatus{
@@ -159,7 +155,7 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 					"camel-irc",
 				},
 				Traits: map[string]v1.TraitSpec{
-					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
+					"builder": test.TraitSpecFromMap(t, map[string]interface{}{
 						"enabled": "false",
 					}),
 				},
@@ -169,8 +165,8 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 			},
 		},
 		//
-		// Should be discarded because it contains both of the required traits but
-		// also an additional one
+		// Should NOT be discarded because it contains a subset of the required traits and
+		// same configuration values
 		//
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
@@ -190,45 +186,11 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 					"camel-irc",
 				},
 				Traits: map[string]v1.TraitSpec{
-					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
+					"builder": test.TraitSpecFromMap(t, map[string]interface{}{
 						"enabled": "true",
-					}),
-					"knative-service": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": "true",
-					}),
-					"gc": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": "true",
-					}),
-				},
-			},
-			Status: v1.IntegrationKitStatus{
-				Phase: v1.IntegrationKitPhaseReady,
-			},
-		},
-		//
-		// Should NOT be discarded because it contains a subset of the required traits and
-		// same configuration values
-		//
-		&v1.IntegrationKit{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1.SchemeGroupVersion.String(),
-				Kind:       v1.IntegrationKitKind,
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "ns",
-				Name:      "my-kit-4",
-				Labels: map[string]string{
-					"camel.apache.org/kit.type": v1.IntegrationKitTypePlatform,
-				},
-			},
-			Spec: v1.IntegrationKitSpec{
-				Dependencies: []string{
-					"camel-core",
-					"camel-irc",
-				},
-				Traits: map[string]v1.TraitSpec{
-					"knative": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": "true",
+						"properties": []string{
+							"build-key1=build-value1",
+						},
 					}),
 				},
 			},
@@ -240,7 +202,11 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 
 	assert.Nil(t, err)
 
-	i, err := LookupKitForIntegration(context.TODO(), c, &v1.Integration{
+	a := buildKitAction{}
+	a.InjectLogger(log.Log)
+	a.InjectClient(c)
+
+	i, err := a.lookupKitForIntegration(context.TODO(), c, &v1.Integration{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1.SchemeGroupVersion.String(),
 			Kind:       v1.IntegrationKind,
@@ -251,11 +217,11 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 		},
 		Spec: v1.IntegrationSpec{
 			Traits: map[string]v1.TraitSpec{
-				"knative": test.TraitSpecFromMap(t, map[string]interface{}{
+				"builder": test.TraitSpecFromMap(t, map[string]interface{}{
 					"enabled": "true",
-				}),
-				"knative-service": test.TraitSpecFromMap(t, map[string]interface{}{
-					"enabled": "true",
+					"properties": []string{
+						"build-key1=build-value1",
+					},
 				}),
 			},
 		},
@@ -269,7 +235,7 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, i)
-	assert.Equal(t, "my-kit-4", i.Name)
+	assert.Equal(t, "my-kit-3", i.Name)
 }
 
 func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
@@ -305,7 +271,10 @@ func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
 		},
 	}
 
-	ok, err := HasMatchingTraits(integrationKitSpec, integration)
+	a := buildKitAction{}
+	a.InjectLogger(log.Log)
+
+	ok, err := a.hasMatchingTraits(context.TODO(), integrationKitSpec, integration)
 	assert.Nil(t, err)
 	assert.False(t, ok)
 }
@@ -324,7 +293,7 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 			Traits: map[string]v1.TraitSpec{
 				"builder": test.TraitSpecFromMap(t, map[string]interface{}{
 					"enabled": "true",
-					"buildTimeProperties": []string{
+					"properties": []string{
 						"build-key1=build-value1",
 					},
 				}),
@@ -345,7 +314,7 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 			Traits: map[string]v1.TraitSpec{
 				"builder": test.TraitSpecFromMap(t, map[string]interface{}{
 					"enabled": "true",
-					"buildTimeProperties": []string{
+					"properties": []string{
 						"build-key1=build-value1",
 					},
 				}),
@@ -353,7 +322,10 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 		},
 	}
 
-	ok, err := HasMatchingTraits(integrationKitSpec, integration)
+	a := buildKitAction{}
+	a.InjectLogger(log.Log)
+
+	ok, err := a.hasMatchingTraits(context.TODO(), integrationKitSpec, integration)
 	assert.Nil(t, err)
 	assert.True(t, ok)
 }

@@ -308,7 +308,7 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 		NewWaitForBindingsAction(),
 		NewPlatformSetupAction(),
 		NewInitializeAction(),
-		NewBuildKitAction(),
+		newBuildKitAction(),
 		NewDeployAction(),
 		NewMonitorAction(),
 		NewErrorAction(),
