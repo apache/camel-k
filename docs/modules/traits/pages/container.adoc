@@ -81,11 +81,6 @@ The following configuration options are available:
 | bool
 | ProbesEnabled enable/disable probes on the container (default `false`)
 
-| container.probe-path
-| string
-| Path to access on the probe ( default `/health`). Note that this property is not supported
-on quarkus runtime and setting it will result in the integration failing to start.
-
 | container.liveness-initial-delay
 | int32
 | Number of seconds after the container has started before liveness probes are initiated.

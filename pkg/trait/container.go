@@ -81,9 +81,6 @@ type containerTrait struct {
 
 	// ProbesEnabled enable/disable probes on the container (default `false`)
 	ProbesEnabled *bool `property:"probes-enabled" json:"probesEnabled,omitempty"`
-	// Path to access on the probe ( default `/health`). Note that this property is not supported
-	// on quarkus runtime and setting it will result in the integration failing to start.
-	ProbePath string `property:"probe-path" json:"probePath,omitempty"`
 	// Number of seconds after the container has started before liveness probes are initiated.
 	LivenessInitialDelay int32 `property:"liveness-initial-delay" json:"livenessInitialDelay,omitempty"`
 	// Number of seconds after which the probe times out. Applies to the liveness probe.
@@ -118,7 +115,6 @@ func newContainerTrait() Trait {
 		ServicePortName: defaultContainerPortName,
 		Name:            defaultContainerName,
 		ProbesEnabled:   util.BoolP(false),
-		ProbePath:       defaultProbePath,
 	}
 }
 
@@ -233,9 +229,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	if t.Expose != nil && *t.Expose {
 		t.configureService(e, &container)
 	}
-	if err := t.configureCapabilities(e); err != nil {
-		return err
-	}
+	t.configureCapabilities(e)
 
 	portName := t.PortName
 	if portName == "" {
@@ -244,9 +238,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	// Deployment
 	if err := e.Resources.VisitDeploymentE(func(deployment *appsv1.Deployment) error {
 		if util.IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
-			if err := t.configureProbes(e, &container, t.Port, t.ProbePath); err != nil {
-				return err
-			}
+			t.configureProbes(&container, t.Port, defaultProbePath)
 		}
 
 		for _, envVar := range e.EnvVars {
@@ -274,9 +266,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	if err := e.Resources.VisitKnativeServiceE(func(service *serving.Service) error {
 		if util.IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
 			// don't set the port on Knative service as it is not allowed.
-			if err := t.configureProbes(e, &container, 0, t.ProbePath); err != nil {
-				return err
-			}
+			t.configureProbes(&container, 0, defaultProbePath)
 		}
 
 		for _, env := range e.EnvVars {
@@ -314,9 +304,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	// CronJob
 	if err := e.Resources.VisitCronJobE(func(cron *v1beta1.CronJob) error {
 		if util.IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
-			if err := t.configureProbes(e, &container, t.Port, t.ProbePath); err != nil {
-				return err
-			}
+			t.configureProbes(&container, t.Port, defaultProbePath)
 		}
 
 		for _, envVar := range e.EnvVars {
@@ -431,61 +419,15 @@ func (t *containerTrait) configureResources(_ *Environment, container *corev1.Co
 	}
 }
 
-func (t *containerTrait) configureHTTP(e *Environment) error {
-	switch e.CamelCatalog.Runtime.Provider {
-	case v1.RuntimeProviderQuarkus:
-		// Quarkus does not offer a runtime option to change http listening ports
-		return nil
-	default:
-		return fmt.Errorf("unsupported runtime: %s", e.CamelCatalog.Runtime.Provider)
-	}
-}
-
-func (t *containerTrait) configureCapabilities(e *Environment) error {
-	requiresHTTP := false
-
+func (t *containerTrait) configureCapabilities(e *Environment) {
 	if util.StringSliceExists(e.Integration.Status.Capabilities, v1.CapabilityRest) {
 		e.ApplicationProperties["camel.context.rest-configuration.component"] = "platform-http"
-		requiresHTTP = true
 	}
-
-	if util.StringSliceExists(e.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP) {
-		requiresHTTP = true
-	}
-
-	if requiresHTTP {
-		return t.configureHTTP(e)
-	}
-
-	return nil
 }
 
-func (t *containerTrait) configureProbes(e *Environment, container *corev1.Container, port int, path string) error {
-	if err := t.configureHTTP(e); err != nil {
-		return nil
-	}
-
-	switch e.CamelCatalog.Runtime.Provider {
-	case v1.RuntimeProviderQuarkus:
-		// Quarkus does not offer a runtime option to change the path of the health endpoint but there
-		// is a build time property:
-		//
-		//     quarkus.smallrye-health.root-path
-		//
-		// so failing in case user tries to change the path.
-		//
-		// NOTE: we could probably be more opinionated and make the path an internal detail.
-		if path != defaultProbePath {
-			return fmt.Errorf("health check root path can't be changed at runtimme on Quarkus")
-		}
-	default:
-		return fmt.Errorf("unsupported runtime: %s", e.CamelCatalog.Runtime.Provider)
-	}
-
+func (t *containerTrait) configureProbes(container *corev1.Container, port int, path string) {
 	container.LivenessProbe = t.newLivenessProbe(port, path)
 	container.ReadinessProbe = t.newReadinessProbe(port, path)
-
-	return nil
 }
 
 func (t *containerTrait) newLivenessProbe(port int, path string) *corev1.Probe {
