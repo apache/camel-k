@@ -38,13 +38,13 @@ spec:
 ----
 <1> Actives the Prometheus trait at the platform level
 
-The xref:latest@camel-quarkus::reference/extensions/microprofile-metrics.adoc[Camel Quarkus MicroProfile Metrics extension] is responsible for collecting and exposing metrics in the https://github.com/OpenObservability/OpenMetrics[OpenMetrics] text format.
+The xref:2.0.0@camel-quarkus::reference/extensions/microprofile-metrics.adoc[Camel Quarkus MicroProfile Metrics extension] is responsible for collecting and exposing metrics in the https://github.com/OpenObservability/OpenMetrics[OpenMetrics] text format.
 
 The MicroProfile Metrics extension registers and exposes the following metrics out-of-the-box:
 
 * https://github.com/eclipse/microprofile-metrics/blob/master/spec/src/main/asciidoc/required-metrics.adoc#required-metrics[JVM and operating system related metrics]
 
-* xref:latest@camel-quarkus::reference/extensions/microprofile-metrics.adoc#_camel_route_metrics[Camel specific metrics]
+* xref:2.0.0@camel-quarkus::reference/extensions/microprofile-metrics.adoc#_camel_route_metrics[Camel specific metrics]
 
 It is possible to extend this set of metrics by using either, or both:
 
