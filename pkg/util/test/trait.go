@@ -26,7 +26,6 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// TraitSpecFromMap --
 func TraitSpecFromMap(t *testing.T, spec map[string]interface{}) v1.TraitSpec {
 	var trait v1.TraitSpec
 
@@ -39,7 +38,6 @@ func TraitSpecFromMap(t *testing.T, spec map[string]interface{}) v1.TraitSpec {
 	return trait
 }
 
-// TraitSpecFromMap --
 func TraitSpecToMap(t *testing.T, spec v1.TraitSpec) map[string]string {
 	trait := make(map[string]string)
 
