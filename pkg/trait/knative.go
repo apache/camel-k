@@ -22,7 +22,6 @@ import (
 	"net/url"
 	"reflect"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -78,8 +77,6 @@ type knativeTrait struct {
 	// Enables filtering on events based on the header "ce-knativehistory". Since this header has been removed in newer versions of
 	// Knative, filtering is disabled by default.
 	FilterSourceChannels *bool `property:"filter-source-channels" json:"filterSourceChannels,omitempty"`
-	// Enables Knative CamelSource pre 0.15 compatibility fixes (will be removed in future versions).
-	CamelSourceCompat *bool `property:"camel-source-compat" json:"camelSourceCompat,omitempty"`
 	// Allows binding the integration to a sink via a Knative SinkBinding resource.
 	// This can be used when the integration targets a single sink.
 	// It's enabled by default when the integration targets a single sink
@@ -209,29 +206,6 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *knativeTrait) Apply(e *Environment) error {
-	// To be removed when Knative CamelSources < 0.15 will no longer be supported
-	// Older versions of Knative Sources use a loader rather than an interceptor
-	if util.IsNilOrTrue(t.CamelSourceCompat) {
-		for i, s := range e.Integration.Spec.Sources {
-			if s.Loader == "knative-source" {
-				s.Loader = ""
-				util.StringSliceUniqueAdd(&s.Interceptors, "knative-source")
-				e.Integration.Spec.Sources[i] = s
-			}
-		}
-	}
-	// End of temporary code
-
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		// Interceptor may have been set by a Knative CamelSource
-		if util.StringSliceExists(e.getAllInterceptors(), "knative-source") {
-			// Adding required libraries for Camel sources
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k:camel-knative")
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k:camel-k-knative")
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k:camel-k-knative-producer")
-		}
-	}
-
 	if util.IsTrue(t.SinkBinding) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k:camel-k-knative")
 	}
@@ -248,21 +222,6 @@ func (t *knativeTrait) Apply(e *Environment) error {
 		if t.Configuration != "" {
 			if err := env.Deserialize(t.Configuration); err != nil {
 				return err
-			}
-		}
-
-		// Convert deprecated Host and Port fields to URL field
-		// Can be removed once CamelSource controller migrate to the new API
-		for i, service := range env.Services {
-			if service.URL == "" {
-				URL := "http://" + service.Host
-				if service.Port != nil {
-					URL = URL + ":" + strconv.Itoa(*service.Port)
-				}
-				service.URL = URL
-				service.Host = ""
-				service.Port = nil
-				env.Services[i] = service
 			}
 		}
 
