@@ -18,21 +18,21 @@
 apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-1.7.0
+  name: camel-catalog-1.8.0-snapshot
   labels:
     app: camel-k
-    camel.apache.org/catalog.loader.version: 3.9.0
-    camel.apache.org/catalog.version: 3.9.0
-    camel.apache.org/runtime.version: 1.7.0
+    camel.apache.org/catalog.loader.version: 3.10.0
+    camel.apache.org/catalog.version: 3.10.0
+    camel.apache.org/runtime.version: 1.8.0-SNAPSHOT
 spec:
   runtime:
-    version: 1.7.0
+    version: 1.8.0-SNAPSHOT
     provider: quarkus
     applicationClass: io.quarkus.bootstrap.runner.QuarkusEntryPoint
     metadata:
-      camel-quarkus.version: 1.8.1
-      camel.version: 3.9.0
-      quarkus.version: 1.13.0.Final
+      camel-quarkus.version: 2.0.0-M2
+      camel.version: 3.10.0
+      quarkus.version: 2.0.0.CR3
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime
@@ -71,13 +71,6 @@ spec:
     camel-k-cron:
       groupId: org.apache.camel.k
       artifactId: camel-k-cron
-    camel-k-kamelet-reify:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-kamelet-reify
-      schemes:
-      - id: kamelet-reify
-        http: false
-        passive: false
     camel-k-knative:
       groupId: org.apache.camel.k
       artifactId: camel-k-knative
@@ -253,6 +246,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.avro.AvroComponent
+    camel-quarkus-aws-secrets-manager:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-secrets-manager
+      schemes:
+      - id: aws-secrets-manager
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.secretsmanager.SecretsManagerComponent
     camel-quarkus-aws2-athena:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-aws2-athena
@@ -432,6 +434,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.aws2.translate.Translate2Component
+    camel-quarkus-azure-cosmosdb:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-azure-cosmosdb
+      schemes:
+      - id: azure-cosmosdb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.azure.cosmosdb.CosmosDbComponent
     camel-quarkus-azure-eventhubs:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-azure-eventhubs
@@ -1115,6 +1126,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.google.drive.GoogleDriveComponent
+    camel-quarkus-google-functions:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-google-functions
+      schemes:
+      - id: google-functions
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.google.functions.GoogleCloudFunctionsComponent
     camel-quarkus-google-mail:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-google-mail
@@ -1150,6 +1170,15 @@ spec:
       javaTypes:
       - org.apache.camel.component.google.sheets.GoogleSheetsComponent
       - org.apache.camel.component.google.sheets.stream.GoogleSheetsStreamComponent
+    camel-quarkus-google-storage:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-google-storage
+      schemes:
+      - id: google-storage
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.google.storage.GoogleCloudStorageComponent
     camel-quarkus-graphql:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-graphql
@@ -1401,6 +1430,20 @@ spec:
       - json-jackson
       javaTypes:
       - org.apache.camel.component.jackson.JacksonDataFormat
+    camel-quarkus-jackson-avro:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jackson-avro
+      dataformats:
+      - avro-jackson
+      javaTypes:
+      - org.apache.camel.component.jackson.avro.JacksonAvroDataFormat
+    camel-quarkus-jackson-protobuf:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jackson-protobuf
+      dataformats:
+      - protobuf-jackson
+      javaTypes:
+      - org.apache.camel.component.jackson.protobuf.JacksonProtobufDataFormat
     camel-quarkus-jacksonxml:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-jacksonxml
@@ -1530,6 +1573,13 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.jooq.JooqComponent
+    camel-quarkus-joor:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-joor
+      languages:
+      - joor
+      javaTypes:
+      - org.apache.camel.language.joor.JoorLanguage
     camel-quarkus-jpa:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-jpa
@@ -1623,6 +1673,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.kamelet.KameletComponent
+    camel-quarkus-kamelet-reify:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-kamelet-reify
+      schemes:
+      - id: kamelet-reify
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.kameletreify.KameletReifyComponent
     camel-quarkus-kubernetes:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-kubernetes
@@ -2144,6 +2203,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.quickfixj.QuickfixjComponent
+    camel-quarkus-qute:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-qute
+      schemes:
+      - id: qute
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.qute.QuteComponent
     camel-quarkus-rabbitmq:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-rabbitmq
@@ -2851,8 +2919,8 @@ spec:
       - org.apache.camel.component.zookeepermaster.MasterComponent
   loaders:
     groovy:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-loader-groovy
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-groovy-dsl
       languages:
       - groovy
       metadata:
@@ -2893,8 +2961,8 @@ spec:
       metadata:
         native: "true"
     yaml:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-loader-yaml
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-yaml-dsl
       languages:
       - yaml
       metadata:
