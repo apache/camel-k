@@ -40,7 +40,7 @@ const (
 	defaultContainerPort     = 8080
 	defaultContainerPortName = "http"
 	defaultServicePort       = 80
-	defaultProbePath         = "/health"
+	defaultProbePath         = "/q/health"
 	containerTraitID         = "container"
 )
 
