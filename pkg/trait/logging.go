@@ -18,8 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"strconv"
-
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/envvar"
@@ -32,7 +30,6 @@ const (
 	envVarQuarkusLogConsoleJson            = "QUARKUS_LOG_CONSOLE_JSON"
 	envVarQuarkusLogConsoleJsonPrettyPrint = "QUARKUS_LOG_CONSOLE_JSON_PRETTY_PRINT"
 	depQuarkusLoggingJson                  = "quarkus-logging-json"
-	defaultLogFormat                       = ""
 	defaultLogLevel                        = "INFO"
 )
 
@@ -56,17 +53,13 @@ type loggingTrait struct {
 
 func newLoggingTraitTrait() Trait {
 	return &loggingTrait{
-		BaseTrait:       NewBaseTrait("logging", 800),
-		Color:           util.BoolP(true),
-		Format:          defaultLogFormat,
-		Level:           defaultLogLevel,
-		Json:            util.BoolP(false),
-		JsonPrettyPrint: util.BoolP(false),
+		BaseTrait: NewBaseTrait("logging", 800),
+		Level:     defaultLogLevel,
 	}
 }
 
 func (l loggingTrait) Configure(environment *Environment) (bool, error) {
-	if l.Enabled != nil && !*l.Enabled {
+	if util.IsFalse(l.Enabled) {
 		return false, nil
 	}
 
@@ -76,7 +69,7 @@ func (l loggingTrait) Configure(environment *Environment) (bool, error) {
 
 func (l loggingTrait) Apply(environment *Environment) error {
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		if *l.Json {
+		if util.IsTrue(l.Json) {
 			if environment.Integration.Status.Dependencies == nil {
 				environment.Integration.Status.Dependencies = make([]string, 0)
 			}
@@ -88,15 +81,17 @@ func (l loggingTrait) Apply(environment *Environment) error {
 
 	envvar.SetVal(&environment.EnvVars, envVarQuarkusLogLevel, l.Level)
 
-	if l.Format != defaultLogFormat {
+	if l.Format != "" {
 		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleFormat, l.Format)
 	}
 
-	envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJson, strconv.FormatBool(*l.Json))
-	envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJsonPrettyPrint, strconv.FormatBool(*l.JsonPrettyPrint))
-
-	if !*l.Json {
-		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleColor, strconv.FormatBool(*l.Color))
+	if util.IsTrue(l.Json) {
+		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJson, True)
+		if util.IsTrue(l.JsonPrettyPrint) {
+			envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJsonPrettyPrint, True)
+		}
+	} else if util.IsNilOrTrue(l.Color) {
+		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleColor, True)
 	}
 
 	return nil
