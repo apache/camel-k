@@ -1,7 +1,7 @@
 [[operator]]
 = Operator
 
-image::architecture/camel-k-operator.jpg[overview]
+image::architecture/camel-k-operator.jpg[overview, width=1024]
 
 Per the Kubernetes glossary, a controller is an application that implements a control-loop that **observes** the shared state of the cluster through the API server, **evaluates** the changes needed to move the current state toward the desired state and finally applies the changes to **reconcile** the resources to the desired state.
 

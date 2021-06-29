@@ -1,6 +1,6 @@
 [[runtime]]
 = Runtime
 
-image::architecture/camel-k-runtimes.jpg[runtimes]
+image::architecture/camel-k-runtimes.jpg[runtimes, width=1024]
 
 TBD
