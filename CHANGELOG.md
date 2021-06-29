@@ -73,6 +73,11 @@
 
 **Merged pull requests:**
 
+- chore: Remove unsupported probe-path property from container trait [\#2458](https://github.com/apache/camel-k/pull/2458) ([astefanutti](https://github.com/astefanutti))
+- fix: Filter influencing traits to lookup matching kits [\#2457](https://github.com/apache/camel-k/pull/2457) ([astefanutti](https://github.com/astefanutti))
+- Align to Quarkus documentation [\#2455](https://github.com/apache/camel-k/pull/2455) ([oscerd](https://github.com/oscerd))
+- fix: Unrecognized configuration from quarkus-logging-json [\#2454](https://github.com/apache/camel-k/pull/2454) ([astefanutti](https://github.com/astefanutti))
+- fix: Correct Quarkus default health probe path [\#2453](https://github.com/apache/camel-k/pull/2453) ([astefanutti](https://github.com/astefanutti))
 - Remove the unnecessary indefinite articles in the list. in documentat… [\#2452](https://github.com/apache/camel-k/pull/2452) ([apupier](https://github.com/apupier))
 - Remove the unnecessary indefinite articles in the list. in documentat… [\#2451](https://github.com/apache/camel-k/pull/2451) ([apupier](https://github.com/apupier))
 - Revert "Temporarily disable qute due to Camel Quarkus issue \#2701" [\#2447](https://github.com/apache/camel-k/pull/2447) ([orpiske](https://github.com/orpiske))
