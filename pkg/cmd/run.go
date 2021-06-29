@@ -287,7 +287,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	integration, err := o.createOrUpdateIntegration(c, args, catalog)
+	integration, err := o.createOrUpdateIntegration(cmd, c, args, catalog)
 	if err != nil {
 		return err
 	}
@@ -441,7 +441,7 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 						newCmd.Args = o.validateArgs
 						newCmd.PreRunE = o.decode
 						newCmd.RunE = func(cmd *cobra.Command, args []string) error {
-							_, err := o.createOrUpdateIntegration(c, sources, catalog)
+							_, err := o.createOrUpdateIntegration(cmd, c, sources, catalog)
 							return err
 						}
 						newCmd.PostRunE = nil
@@ -465,7 +465,7 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 }
 
 // nolint: gocyclo
-func (o *runCmdOptions) createOrUpdateIntegration(c client.Client, sources []string, catalog *trait.Catalog) (*v1.Integration, error) {
+func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.Client, sources []string, catalog *trait.Catalog) (*v1.Integration, error) {
 	namespace := o.Namespace
 	name := o.GetIntegrationName(sources)
 
@@ -637,7 +637,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(c client.Client, sources []str
 		if err != nil {
 			return nil, err
 		}
-		fmt.Print(string(data))
+		fmt.Fprint(cmd.OutOrStdout(), string(data))
 		return nil, nil
 
 	case "json":
@@ -645,7 +645,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(c client.Client, sources []str
 		if err != nil {
 			return nil, err
 		}
-		fmt.Print(string(data))
+		fmt.Fprint(cmd.OutOrStdout(), string(data))
 		return nil, nil
 
 	default:

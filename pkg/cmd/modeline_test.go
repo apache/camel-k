@@ -124,6 +124,30 @@ func TestModelineRunProperty(t *testing.T) {
 	assert.Equal(t, []string{"run", fileName, "--property=my-prop=my-val"}, flags)
 }
 
+func TestModelineRunDuplicatedProperties(t *testing.T) {
+	dir, err := ioutil.TempDir("", "camel-k-test-")
+	assert.NoError(t, err)
+	defer os.RemoveAll(dir)
+
+	subDir := path.Join(dir, "sub")
+	err = os.Mkdir(subDir, 0777)
+	assert.NoError(t, err)
+
+	file := `
+		// camel-k: property=prop1=false
+		// camel-k: property=prop2=false
+		// camel-k: property=foo=bar
+	`
+	fileName := path.Join(subDir, "simple.groovy")
+	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	assert.NoError(t, err)
+
+	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName, "-p", "prop1=true", "--property", "prop2=true"})
+	assert.NoError(t, err)
+	assert.NotNil(t, cmd)
+	assert.Equal(t, []string{"run", fileName, "-p", "prop1=true", "--property", "prop2=true", "--property=foo=bar"}, flags)
+}
+
 func TestModelineRunPropertyFiles(t *testing.T) {
 	dir, err := ioutil.TempDir("", "camel-k-test-")
 	assert.NoError(t, err)
@@ -202,6 +226,30 @@ func TestModelineRunBuildPropertyFiles(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, cmd)
 	assert.Equal(t, []string{"run", fileName, fmt.Sprintf("--build-property=file:%s", propFileName)}, flags)
+}
+
+func TestModelineRunDuplicateTraits(t *testing.T) {
+	dir, err := ioutil.TempDir("", "camel-k-test-")
+	assert.NoError(t, err)
+	defer os.RemoveAll(dir)
+
+	subDir := path.Join(dir, "sub")
+	err = os.Mkdir(subDir, 0777)
+	assert.NoError(t, err)
+
+	file := `
+		// camel-k: trait=trait1=false
+		// camel-k: trait=trait2=false
+		// camel-k: trait=foo=bar
+	`
+	fileName := path.Join(subDir, "simple.groovy")
+	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	assert.NoError(t, err)
+
+	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName, "-t", "trait1=true", "--trait", "trait2=true"})
+	assert.NoError(t, err)
+	assert.NotNil(t, cmd)
+	assert.Equal(t, []string{"run", fileName, "-t", "trait1=true", "--trait", "trait2=true", "--trait=foo=bar"}, flags)
 }
 
 func TestModelineRunConfigConfigmap(t *testing.T) {
