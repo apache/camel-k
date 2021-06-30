@@ -14,7 +14,7 @@
 # limitations under the License.
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION := 1.4.1-SNAPSHOT
+VERSION := 1.4.1
 OPERATOR_VERSION := $(subst -SNAPSHOT,,$(VERSION))
 LAST_RELEASED_VERSION := 1.4.0
 RUNTIME_VERSION := 1.7.0
@@ -245,7 +245,7 @@ ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
 else
 	cp kamel build/_output/bin
 endif
-	docker build -t $(IMAGE_NAME):$(VERSION) -f build/Dockerfile .
+	/usr/bin/docker build -t $(IMAGE_NAME):$(VERSION) -f build/Dockerfile .
 
 images-dev: bundle-kamelets test package-artifacts
 	mkdir -p build/_maven_output
@@ -255,14 +255,14 @@ ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
 else
 	cp kamel build/_output/bin
 endif
-	docker build -t $(IMAGE_NAME):$(VERSION) -f build/Dockerfile .
+	/usr/bin/docker build -t $(IMAGE_NAME):$(VERSION) -f build/Dockerfile .
 
 images-push:
-	docker push $(IMAGE_NAME):$(VERSION)
+	/usr/bin/docker push $(IMAGE_NAME):$(VERSION)
 
 images-push-staging:
-	docker tag $(IMAGE_NAME):$(VERSION) $(STAGING_IMAGE_NAME):$(VERSION)
-	docker push $(STAGING_IMAGE_NAME):$(VERSION)
+	/usr/bin/docker tag $(IMAGE_NAME):$(VERSION) $(STAGING_IMAGE_NAME):$(VERSION)
+	/usr/bin/docker push $(STAGING_IMAGE_NAME):$(VERSION)
 
 get-version:
 	@echo $(VERSION)
@@ -391,4 +391,4 @@ build-olm: generate-crd $(BUNDLE_CAMEL_APIS)
 
 # Build the bundle image.
 bundle-build: bundle
-	cd bundle && docker build -f Dockerfile -t $(METADATA_IMAGE_NAME) .
+	cd bundle && /usr/bin/docker build -f Dockerfile -t $(METADATA_IMAGE_NAME) .
