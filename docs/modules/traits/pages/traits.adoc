@@ -8,6 +8,7 @@ Camel K provide sensible defaults for all such traits, taking into account the d
 the integration is going to run into. However, it's possible for a **expert user** to configure them in
 order to obtain a different behavior.
 
+[[traits-configuration]]
 == Configuration
 
 Each trait has a unique ID that can be used to configure it using the command line tool.
@@ -31,8 +32,36 @@ NOTE: Some traits are applicable only to specific platforms (see the "profiles" 
 
 A trait may have additional properties that can be configured by the end user.
 
-See the trait description pages for more information on a specific trait:
+[[traits-integration-spec]]
+=== Configure the Integration spec
 
-There are indexCount:[] traits.
+Let's use a further example to show how to configure a trait in an `Integration`. If you want to set an additional `JVM` classpath pointing to a known dependency, we can use the CLI as we've seen above:
+
+[source,console]
+----
+$ kamel run --trait jvm.classpath=/path/to/my.jar MyIntegration.java
+----
+
+The command is creating an `Integration` with the configuration below:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: my-integration
+spec:
+  traits:
+    jvm:
+      configuration:
+        classpath: /path/to/my.jar
+...
+----
+
+The `.spec.traits` holds an array of traits, identified by their id (`jvm`, in this case). Then, the `.jvm.configuration.classpath` is the property we want to set. If you need to set a trait directly in the `Integration` spec, then, you should proceed in the way illustrated above.
+
+[[traits-list]]
+== List of available traits
+There are indexCount:[] traits. See each trait description page for more information on a specific trait:
 
 indexList::[]
