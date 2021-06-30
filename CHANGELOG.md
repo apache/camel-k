@@ -73,6 +73,8 @@
 
 **Merged pull requests:**
 
+- chore: Remove Camel Sources support from Knative trait [\#2460](https://github.com/apache/camel-k/pull/2460) ([astefanutti](https://github.com/astefanutti))
+- chore: Update embedded camel-catalog-1.8.0-SNAPSHOT.yaml [\#2459](https://github.com/apache/camel-k/pull/2459) ([astefanutti](https://github.com/astefanutti))
 - chore: Remove unsupported probe-path property from container trait [\#2458](https://github.com/apache/camel-k/pull/2458) ([astefanutti](https://github.com/astefanutti))
 - fix: Filter influencing traits to lookup matching kits [\#2457](https://github.com/apache/camel-k/pull/2457) ([astefanutti](https://github.com/astefanutti))
 - Align to Quarkus documentation [\#2455](https://github.com/apache/camel-k/pull/2455) ([oscerd](https://github.com/oscerd))
@@ -80,6 +82,7 @@
 - fix: Correct Quarkus default health probe path [\#2453](https://github.com/apache/camel-k/pull/2453) ([astefanutti](https://github.com/astefanutti))
 - Remove the unnecessary indefinite articles in the list. in documentat… [\#2452](https://github.com/apache/camel-k/pull/2452) ([apupier](https://github.com/apupier))
 - Remove the unnecessary indefinite articles in the list. in documentat… [\#2451](https://github.com/apache/camel-k/pull/2451) ([apupier](https://github.com/apupier))
+- fix cron trait issue [\#2448](https://github.com/apache/camel-k/pull/2448) ([liurui-1](https://github.com/liurui-1))
 - Revert "Temporarily disable qute due to Camel Quarkus issue \#2701" [\#2447](https://github.com/apache/camel-k/pull/2447) ([orpiske](https://github.com/orpiske))
 - Fix \#2441: parse parameters in YAML DSL [\#2442](https://github.com/apache/camel-k/pull/2442) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(api\): Remove obsolete failure field From Integration API [\#2440](https://github.com/apache/camel-k/pull/2440) ([astefanutti](https://github.com/astefanutti))
