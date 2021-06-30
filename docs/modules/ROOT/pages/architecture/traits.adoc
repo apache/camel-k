@@ -11,6 +11,7 @@ This page is dedicated to developers/engineers willing to dive more in the low l
 
 NOTE: This document reflects Camel K version 1.5. It may not reflect slight changes developed after this review.
 
+[[traits-life-cycle]]
 == Traits life cycle
 
 Traits are typically used to tune several aspects of an `Integration`. However, you will learn that we are using the same concept to influence the build of `IntegrationKits`. Therefore, we can distinguish between those traits that can be applied to either one or the other type. Another important thing to know is that the platform uses this mechanism to perform many common (hidden to the user) operations. We use to identify those trait as **platform traits**. Misusing a platform trait, may result in execution errors.
@@ -23,17 +24,12 @@ Another important concept related to the trait lifecycle is the **trait profile*
 
 A profile is useful to identify on which kind of cluster a trait has to run: vanilla `Kubernetes`, `Openshift` or OpenShift/Kubernetes clusters powered by `Knative`. The default is to allow a trait on any profile; each trait can specify a different behavior (ie, running a trait only for a profile as it happens with `Knative`).
 
+[[traits-configuration]]
 === Trait configuration
 
-A Camel K user will provide a trait configuration via CLI (`--trait` or `-t` flag) or setting directly its configuration into the `Integration` resource. Each trait has a unique id and can expose any kind of parameter ie, `kamel run -t [trait-id].[key]=[value]`. The operator will transform that _key_ and _value_ in the related trait variable.
+A Camel K user will provide a trait configuration via CLI (`--trait` or `-t` flag) or setting directly its configuration into the `Integration` resource. Each trait has a unique id and can expose any kind of parameter ie, `kamel run -t [trait-id].[key]=[value]`. The operator will transform that _key_ and _value_ in the related trait variable. You can have a further look at the xref:traits:traits.adoc#traits-configuration[configuration details].
 
-As an example, let's see what to do when you want to set an additional `JVM` classpath pointing to a known dependency on your `Integration`:
-
-[source,console]
-----
-$ kamel run --trait jvm.classpath=/path/to/my.jar MyIntegration.java
-----
-
+[[traits-interface]]
 === Trait interface
 
 In order to understand better the logic behind the trait managment, let's have a look at the `https://github.com/apache/camel-k/blob/main/pkg/trait/trait_types.go#L70[Trait]` interface:
@@ -54,12 +50,12 @@ type Trait interface {
 }
 ----
 
-Each trait will implement this interface. The most important functions that will be invoked by the xref:architecture/operator.adoc[Operator] are `Configure()` and `Apply()`. Basically, the `Configure()` function will set those inputs aforementioned (each trait has its own). The function is in charge to verify also the correctness of those expected parameters, where it makes sense (ie, a well expected `Kubernetes` resource name).
+Each trait will implement this interface. The most important methods that will be invoked by the xref:architecture/operator.adoc[Operator] are `Configure()` and `Apply()`. Basically, the `Configure()` method will set those inputs aforementioned (each trait has its own). The method is in charge to verify also the correctness of those expected parameters, where it makes sense (ie, a well expected `Kubernetes` resource name).
 
-Once configured, the `Apply()` function will be called along the build or initialization phase in order to do the business logic expected for it. The `environment` variable will give you all the below resources you will need to perform your operation (ie, the `Integration` or any Kubernetes resource attached to it). You can have a deeper look at the `https://github.com/apache/camel-k/blob/main/pkg/trait/trait_types.go#L188[Environment]` struct.
+Once configured, the `Apply()` method will be called along the build or initialization phase in order to do the business logic expected for it. The `environment` variable will give you all the below resources you will need to perform your operation (ie, the `Integration` or any Kubernetes resource attached to it). You can have a deeper look at the `https://github.com/apache/camel-k/blob/main/pkg/trait/trait_types.go#L188[Environment]` struct.
 
-The `Order()` function helps in resolving the order of execution of different traits. As every trait can be expected to be run before or after another trait, or any other controller operation.
+The `Order()` method helps in resolving the order of execution of different traits. As every trait can be expected to be run before or after another trait, or any other controller operation.
 
-The `InfluencesKit()`, `IsPlatformTrait()` and `RequiresIntegrationPlatform()` functions are easy to understand. They are used to determine if a trait has to influence an `IntegrationKit` build/initialization, if it's a platform trait (ie, needed by the platform itself) or are requiring the presence of an `IntegrationPlatform`.
+The `InfluencesKit()`, `IsPlatformTrait()` and `RequiresIntegrationPlatform()` methods are easy to understand. They are used to determine if a trait has to influence an `IntegrationKit` build/initialization, if it's a platform trait (ie, needed by the platform itself) or are requiring the presence of an `IntegrationPlatform`.
 
-Finally, through the `IsAllowedInProfile()` function we can override the default behavior (allow the trait for any profile). We must specify the profile we expect for this trait to be executed properly.
+Finally, through the `IsAllowedInProfile()` method we can override the default behavior (allow the trait for any profile). We must specify the profile we expect for this trait to be executed properly.
