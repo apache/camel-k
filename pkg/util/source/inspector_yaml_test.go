@@ -69,6 +69,18 @@ const YAMLInvalid = `
       - "log:out"
 `
 
+const YAMLInDepthChannel = `
+- from:
+    uri: knative:channel/mychannel
+    steps:
+      - choice:
+          when:
+          - simple: "${body}"
+            steps:
+            - to:
+                uri: knative:endpoint/service
+`
+
 func TestYAMLDependencies(t *testing.T) {
 	tests := []struct {
 		name                string
@@ -100,6 +112,14 @@ func TestYAMLDependencies(t *testing.T) {
 			name:   "invalid",
 			source: YAMLInvalid,
 			dependencies: []string{
+				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
+			},
+		},
+		{
+			name:   "in-depth",
+			source: YAMLInDepthChannel,
+			dependencies: []string{
+				`mvn:org.apache.camel.k:camel-k-knative-producer`,
 				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
 			},
 		},
