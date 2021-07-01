@@ -59,15 +59,6 @@ func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 
 func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata) error {
 	switch key {
-	case "route":
-		// process steps if they are defined in the route
-		if routeSteps, ok := content.(map[interface{}]interface{}); ok {
-			if steps, stepsFormatOk := routeSteps["steps"].([]interface{}); stepsFormatOk {
-				if err := i.parseStepsParam(steps, meta); err != nil {
-					return err
-				}
-			}
-		}
 	case "rest":
 		meta.ExposesHTTPServices = true
 		meta.RequiredCapabilities.Add(v1.CapabilityRest)
@@ -104,53 +95,62 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 	case string:
 		maybeURI = t
 	case map[interface{}]interface{}:
-		if u, ok := t["rest"]; ok {
-			return i.parseStep("rest", u, meta)
-		} else if u, ok := t["from"]; ok {
-			return i.parseStep("from", u, meta)
-		} else if u, ok := t["steps"]; ok {
-			if steps, stepsFormatOk := u.([]interface{}); stepsFormatOk {
-				if err := i.parseStepsParam(steps, meta); err != nil {
-					return err
-				}
-			}
-		}
+		for k, v := range t {
 
-		if u, ok := t["uri"]; ok {
-			if v, isString := u.(string); isString {
-				builtURI := v
-				// Inject parameters into URIs to allow other parts of the operator to inspect them
-				if params, pok := t["parameters"]; pok {
-					if paramMap, pmok := params.(map[interface{}]interface{}); pmok {
-						params := make(map[string]string, len(paramMap))
-						for k, v := range paramMap {
-							ks := fmt.Sprintf("%v", k)
-							vs := fmt.Sprintf("%v", v)
-							params[ks] = vs
-						}
-						builtURI = uri.AppendParameters(builtURI, params)
-					}
-				}
-				maybeURI = builtURI
-			}
-		}
-
-		if _, ok := t["language"]; ok {
-			if s, ok := t["language"].(string); ok {
-				if dependency, ok := i.catalog.GetLanguageDependency(s); ok {
-					i.addDependency(dependency, meta)
-				}
-			} else if m, ok := t["language"].(map[interface{}]interface{}); ok {
-				if err := i.parseStep("language", m, meta); err != nil {
-					return err
-				}
-			}
-		}
-
-		for k := range t {
 			if s, ok := k.(string); ok {
 				if dependency, ok := i.catalog.GetLanguageDependency(s); ok {
 					i.addDependency(dependency, meta)
+				}
+			}
+
+			switch k {
+			case "steps":
+				if steps, stepsFormatOk := v.([]interface{}); stepsFormatOk {
+					if err := i.parseStepsParam(steps, meta); err != nil {
+						return err
+					}
+				}
+			case "uri":
+				if vv, isString := v.(string); isString {
+					builtURI := vv
+					// Inject parameters into URIs to allow other parts of the operator to inspect them
+					if params, pok := t["parameters"]; pok {
+						if paramMap, pmok := params.(map[interface{}]interface{}); pmok {
+							params := make(map[string]string, len(paramMap))
+							for k, v := range paramMap {
+								ks := fmt.Sprintf("%v", k)
+								vs := fmt.Sprintf("%v", v)
+								params[ks] = vs
+							}
+							builtURI = uri.AppendParameters(builtURI, params)
+						}
+					}
+					maybeURI = builtURI
+				}
+			case "language":
+				if s, ok := v.(string); ok {
+					if dependency, ok := i.catalog.GetLanguageDependency(s); ok {
+						i.addDependency(dependency, meta)
+					}
+				} else if m, ok := v.(map[interface{}]interface{}); ok {
+					if err := i.parseStep("language", m, meta); err != nil {
+						return err
+					}
+				}
+			default:
+				// Always follow children because from/to uris can be nested
+				if ks, ok := k.(string); ok {
+					if _, ok := v.(map[interface{}]interface{}); ok {
+						if err := i.parseStep(ks, v, meta); err != nil {
+							return err
+						}
+					} else if ls, ok := v.([]interface{}); ok {
+						for _, el := range ls {
+							if err := i.parseStep(ks, el, meta); err != nil {
+								return err
+							}
+						}
+					}
 				}
 			}
 		}
