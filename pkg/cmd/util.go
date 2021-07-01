@@ -23,10 +23,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"reflect"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util/gzip"
+	"github.com/pkg/errors"
 
 	"github.com/mitchellh/mapstructure"
 
@@ -42,6 +44,12 @@ import (
 
 const (
 	offlineCommandLabel = "camel.apache.org/cmd.offline"
+
+	// Supported source schemes
+	gistScheme   = "gist"
+	githubScheme = "github"
+	httpScheme   = "http"
+	httpsScheme  = "https"
 )
 
 // DeleteIntegration --
@@ -247,4 +255,31 @@ func compressToString(content []byte) (string, error) {
 	}
 
 	return string(bytes), nil
+}
+
+func isLocalAndFileExists(uri string) (bool, error) {
+	if hasSupportedScheme(uri) {
+		// it's not a local file as it matches one of the supporting schemes
+		return false, nil
+	}
+	info, err := os.Stat(uri)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		// If it is a different error (ie, permission denied) we should report it back
+		return false, errors.Wrap(err, fmt.Sprintf("file system error while looking for %s", uri))
+	}
+	return !info.IsDir(), nil
+}
+
+func hasSupportedScheme(uri string) bool {
+	if strings.HasPrefix(strings.ToLower(uri), gistScheme+":") ||
+		strings.HasPrefix(strings.ToLower(uri), githubScheme+":") ||
+		strings.HasPrefix(strings.ToLower(uri), httpScheme+":") ||
+		strings.HasPrefix(strings.ToLower(uri), httpsScheme+":") {
+		return true
+	}
+
+	return false
 }

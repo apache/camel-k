@@ -728,18 +728,6 @@ func (o *runCmdOptions) configureTraits(integration *v1.Integration, options []s
 	return nil
 }
 
-func isLocalAndFileExists(fileName string) (bool, error) {
-	info, err := os.Stat(fileName)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false, nil
-		}
-		// If it is a different error (ie, permission denied) we should report it back
-		return false, errors.Wrap(err, fmt.Sprintf("file system error while looking for %s", fileName))
-	}
-	return !info.IsDir(), nil
-}
-
 func addIntegrationProperties(props *properties.Properties, spec *v1.IntegrationSpec) error {
 	for _, k := range props.Keys() {
 		v, _ := props.Get(k)

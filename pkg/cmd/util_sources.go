@@ -84,7 +84,7 @@ func ResolveSources(ctx context.Context, locations []string, compress bool) ([]S
 			}
 
 			switch {
-			case u.Scheme == "gist" || strings.HasPrefix(location, "https://gist.github.com/"):
+			case u.Scheme == gistScheme || strings.HasPrefix(location, "https://gist.github.com/"):
 				var tc *http.Client
 
 				if token, ok := os.LookupEnv("GITHUB_TOKEN"); ok {
@@ -133,7 +133,7 @@ func ResolveSources(ctx context.Context, locations []string, compress bool) ([]S
 					}
 					sources = append(sources, answer)
 				}
-			case u.Scheme == "github":
+			case u.Scheme == githubScheme:
 				answer := Source{
 					Name:     path.Base(location),
 					Origin:   location,
@@ -149,7 +149,7 @@ func ResolveSources(ctx context.Context, locations []string, compress bool) ([]S
 					return sources, err
 				}
 				sources = append(sources, answer)
-			case u.Scheme == "http":
+			case u.Scheme == httpScheme:
 				answer := Source{
 					Name:     path.Base(location),
 					Origin:   location,
@@ -165,7 +165,7 @@ func ResolveSources(ctx context.Context, locations []string, compress bool) ([]S
 					return sources, err
 				}
 				sources = append(sources, answer)
-			case u.Scheme == "https":
+			case u.Scheme == httpsScheme:
 				answer := Source{
 					Name:     path.Base(location),
 					Origin:   location,

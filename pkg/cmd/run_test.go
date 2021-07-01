@@ -565,13 +565,6 @@ func TestResolveJsonPodTemplate(t *testing.T) {
 	assert.Equal(t, 2, len(integrationSpec.PodTemplate.Spec.Containers))
 }
 
-func TestIsLocalFileAndExists(t *testing.T) {
-	value, err := isLocalAndFileExists("/root/test")
-	// must not panic because a permission error
-	assert.NotNil(t, err)
-	assert.False(t, value)
-}
-
 func TestExtractProperties_SingleKeyValue(t *testing.T) {
 	correctValues := []string{"key=val", "key = val", "key= val", " key   =  val"}
 	for _, val := range correctValues {
