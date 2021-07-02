@@ -4,8 +4,15 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v1.4.1...HEAD)
 
+**Closed issues:**
+
+- Oddity in channel name [\#2468](https://github.com/apache/camel-k/issues/2468)
+- No endpoint found for Smooks after explicitly adding dependency with kamel [\#2437](https://github.com/apache/camel-k/issues/2437)
+
 **Merged pull requests:**
 
+- Fix \#2468: parse all YAML nodes in the tree [\#2476](https://github.com/apache/camel-k/pull/2476) ([nicolaferraro](https://github.com/nicolaferraro))
+- doc\(architecture\): trait section [\#2465](https://github.com/apache/camel-k/pull/2465) ([squakez](https://github.com/squakez))
 - chore: Remove Camel Sources support from Knative trait [\#2460](https://github.com/apache/camel-k/pull/2460) ([astefanutti](https://github.com/astefanutti))
 - chore: Update embedded camel-catalog-1.8.0-SNAPSHOT.yaml [\#2459](https://github.com/apache/camel-k/pull/2459) ([astefanutti](https://github.com/astefanutti))
 - chore: Remove unsupported probe-path property from container trait [\#2458](https://github.com/apache/camel-k/pull/2458) ([astefanutti](https://github.com/astefanutti))
