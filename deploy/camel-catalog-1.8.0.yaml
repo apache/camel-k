@@ -18,21 +18,21 @@
 apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-1.8.0-snapshot
+  name: camel-catalog-1.8.0
   labels:
     app: camel-k
-    camel.apache.org/catalog.loader.version: 3.10.0
-    camel.apache.org/catalog.version: 3.10.0
-    camel.apache.org/runtime.version: 1.8.0-SNAPSHOT
+    camel.apache.org/catalog.loader.version: 3.11.0
+    camel.apache.org/catalog.version: 3.11.0
+    camel.apache.org/runtime.version: 1.8.0
 spec:
   runtime:
-    version: 1.8.0-SNAPSHOT
+    version: 1.8.0
     provider: quarkus
     applicationClass: io.quarkus.bootstrap.runner.QuarkusEntryPoint
     metadata:
-      camel-quarkus.version: 2.0.0-M2
-      camel.version: 3.10.0
-      quarkus.version: 2.0.0.CR3
+      camel-quarkus.version: 2.0.0
+      camel.version: 3.11.0
+      quarkus.version: 2.0.0.Final
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime
@@ -131,15 +131,6 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.amqp.AMQPComponent
-    camel-quarkus-apns:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-apns
-      schemes:
-      - id: apns
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.apns.ApnsComponent
     camel-quarkus-arangodb:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-arangodb
