@@ -6,11 +6,13 @@
 
 **Closed issues:**
 
+- \[cmd\] kamel run github|http|... fails on windows machine [\#2475](https://github.com/apache/camel-k/issues/2475)
 - Oddity in channel name [\#2468](https://github.com/apache/camel-k/issues/2468)
 - No endpoint found for Smooks after explicitly adding dependency with kamel [\#2437](https://github.com/apache/camel-k/issues/2437)
 
 **Merged pull requests:**
 
+- fix\(cmd/run\): windows scheme support [\#2477](https://github.com/apache/camel-k/pull/2477) ([squakez](https://github.com/squakez))
 - Fix \#2468: parse all YAML nodes in the tree [\#2476](https://github.com/apache/camel-k/pull/2476) ([nicolaferraro](https://github.com/nicolaferraro))
 - doc\(architecture\): trait section [\#2465](https://github.com/apache/camel-k/pull/2465) ([squakez](https://github.com/squakez))
 - chore: Remove Camel Sources support from Knative trait [\#2460](https://github.com/apache/camel-k/pull/2460) ([astefanutti](https://github.com/astefanutti))
