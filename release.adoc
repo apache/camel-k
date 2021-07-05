@@ -175,6 +175,9 @@ The release can be now announced to dev@camel.apache.org and users@camel.apache.
 
 A PMC member with access to the @ApacheCamel Twitter account should announce the release on Twitter as well.
 
+Download section on the website needs to be put in sync to display the new release.
+Checkout the website and put an entry under `content/releases/k` with the version of the new release (copy the last release as template).
+The milestone field in the release doc is the Github id for the milestone (e.g. for v1.4.1, the milestone is 22).
 
 [[post-release]]
 == Post Release
@@ -184,7 +187,7 @@ A PMC member with access to the @ApacheCamel Twitter account should announce the
 The https://github.com/operator-framework/community-operators[OperatorHub] downstream channel should be synced to publish the latest version
 of Camel K, so that it can be easily installed on platforms that support Operator Hub.
 
-To do so, the content of `/deploy/olm-catalog/camel-k/<version>` (and package manifest) should be uploaded to the "community-operators" repository (2 PRs, one for OpenShift and one for all other platforms).
+You can create the bundle using the `make bundle` command, then upload the CRD and CSV to the "community-operators" repository (2 PRs, one for OpenShift and one for all other platforms).
 
 === Helm
 
