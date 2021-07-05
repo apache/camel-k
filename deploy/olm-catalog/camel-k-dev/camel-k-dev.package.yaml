@@ -16,7 +16,7 @@
 # ---------------------------------------------------------------------------
 
 channels:
-- currentCSV: camel-k.v1.5.0-snapshot
+- currentCSV: camel-k.v1.5.0
   name: stable
 defaultChannel: stable
 packageName: camel-k-dev
