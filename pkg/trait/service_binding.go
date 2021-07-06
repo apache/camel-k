@@ -116,6 +116,10 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 				setCollectionReady(e, name, corev1.ConditionFalse)
 				return nil
 			}
+			if name == e.Integration.Name {
+				request := createServiceBinding(e, services, name)
+				e.Resources.Add(&request)
+			}
 		}
 	} else if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 		e.ServiceBindings = make(map[string]string)
@@ -134,7 +138,7 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 			}
 			e.ServiceBindings[name] = sb.Status.Secret
 			if name == e.Integration.Name {
-				request := createServiceBinding(e, services, e.Integration.Name)
+				request := createServiceBinding(e, services, name)
 				e.Resources.Add(&request)
 			}
 		}
