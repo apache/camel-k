@@ -6,10 +6,12 @@
 
 **Closed issues:**
 
+- ServiceBinding CR sometimes doesn't get created [\#2482](https://github.com/apache/camel-k/issues/2482)
 - Release 1.4.1 [\#2471](https://github.com/apache/camel-k/issues/2471)
 
 **Merged pull requests:**
 
+- Fix \#2482: ServiceBinding CR should tied to the IntegrationPhaseWaiti… [\#2483](https://github.com/apache/camel-k/pull/2483) ([johnpoth](https://github.com/johnpoth))
 - chore\(release\): prepare 1.5.0 release [\#2478](https://github.com/apache/camel-k/pull/2478) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(cmd/run\): windows scheme support [\#2477](https://github.com/apache/camel-k/pull/2477) ([squakez](https://github.com/squakez))
 - Fix \#2468: parse all YAML nodes in the tree [\#2476](https://github.com/apache/camel-k/pull/2476) ([nicolaferraro](https://github.com/nicolaferraro))
