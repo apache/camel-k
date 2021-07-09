@@ -4,6 +4,24 @@ This procedure describes all the steps required to release a new version of Apac
 It is not intended to be final, but rather a working document that needs to be updated when new requirements are found or
 the technical process changes.
 
+[[releasing-camel-kamelets]]
+== Releasing Camel Kamelets
+
+The https://github.com/apache/camel-kamelets[Camel Kamelets] repository contains some artifacts that need to be pushed into Maven together
+with a Camel K release.
+
+Follow instructions on https://github.com/apache/camel-kamelets[Camel Kamelets] for the commands needed to release it.
+
+Go to https://repository.apache.org/ and close the staging repository.
+
+A URL will be generated for the repository, like: https://repository.apache.org/content/repositories/orgapachecamel-xxxx. The URL needs to be communicated during the voting process.
+
+The source code for the created tag, with sha512sum and signature need to be copied in the Apache dev SVN at https://dist.apache.org/repos/dist/dev/camel/camel-kamelets/<version>.
+
+Commit all files to the SVN.
+
+Voting can start for camel-kamelets, or a combined vote with camel-k can be started later.
+
 [[releasing-camel-k-runtime]]
 == Releasing Camel K Runtime
 
@@ -54,8 +72,9 @@ First thing is to checkout main branch and sync with upstream.
 Next, the version of the runtime libraries to use need to be aligned in the Makefile (use the just released camel-k-runtime version if available).
 
 The following tasks need to be done:
-- Align RUNTIME_VERSION and RUNTIME_VERSION_CONSTRAINT in Makefile to latest runtime release
-- Align all libraries to the ones used in the chosen runtime (e.g. CAMEL_QUARKUS_VERSION and QUARKUS_VERSION, plus CONTRAINTs)
+- Align KAMELET_CATALOG_REPO_BRANCH in Makefile to latest released tag of the camel-kamelets repository
+- Align RUNTIME_VERSION in Makefile to latest runtime release
+- Align all libraries to the ones used in the chosen runtime (e.g. CAMEL_QUARKUS_VERSION and QUARKUS_VERSION)
 - Set STAGING_RUNTIME_REPO to the URL of the staging repo (if using a staged camel-k-runtime version)
 - Ensure LAST_RELEASED_VERSION points to latest released version of Camel K
 
@@ -161,6 +180,8 @@ docker push apache/camel-k:$VERSION
 
 Artifacts committed on https://dist.apache.org/repos/dist/dev/ before the voting process need to be copied to the
 Apache dist repository on: https://dist.apache.org/repos/dist/release/camel.
+
+The same should be done for camel-kamelets and camel-k-runtime in case of combined vote.
 
 Wait for maven mirrors to sync the new artifacts. This can take more than 1 hour sometimes.
 
