@@ -30,6 +30,9 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
 	"github.com/apache/camel-k/pkg/util/olm"
@@ -58,6 +61,7 @@ func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstall
 	cmd.Flags().Bool("skip-service-accounts", false, "Do not uninstall the Camel K Service Accounts in the current namespace")
 	cmd.Flags().Bool("skip-config-maps", false, "Do not uninstall the Camel K Config Maps in the current namespace")
 	cmd.Flags().Bool("skip-registry-secret", false, "Do not uninstall the Camel K Registry Secret in the current namespace")
+	cmd.Flags().Bool("skip-kamelets", false, "Do not uninstall the Kamelets in the current namespace")
 	cmd.Flags().Bool("global", false, "Indicates that a global installation is going to be uninstalled (affects OLM)")
 	cmd.Flags().Bool("olm", true, "Try to uninstall via OLM (Operator Lifecycle Manager) if available")
 	cmd.Flags().String("olm-operator-name", olm.DefaultOperatorName, "Name of the Camel K operator in the OLM source or marketplace")
@@ -81,6 +85,7 @@ type uninstallCmdOptions struct {
 	SkipServiceAccounts     bool `mapstructure:"skip-service-accounts"`
 	SkipConfigMaps          bool `mapstructure:"skip-config-maps"`
 	SkipRegistrySecret      bool `mapstructure:"skip-registry-secret"`
+	SkipKamelets            bool `mapstructure:"skip-kamelets"`
 	Global                  bool `mapstructure:"global"`
 	OlmEnabled              bool `mapstructure:"olm"`
 	UninstallAll            bool `mapstructure:"all"`
@@ -265,6 +270,13 @@ func (o *uninstallCmdOptions) uninstallNamespaceResources(ctx context.Context, c
 		fmt.Printf("Camel K Registry Secret removed from namespace %s\n", o.Namespace)
 	}
 
+	if !o.SkipKamelets {
+		if err := o.uninstallKamelets(ctx, c); err != nil {
+			return err
+		}
+		fmt.Printf("Kamelets removed from namespace %s\n", o.Namespace)
+	}
+
 	return nil
 }
 
@@ -355,7 +367,7 @@ func (o *uninstallCmdOptions) removeSubjectFromClusterRoleBindings(ctx context.C
 			if subject.Name == "camel-k-operator" && subject.Namespace == namespace {
 				clusterRoleBinding.Subjects = append(clusterRoleBinding.Subjects[:i], clusterRoleBinding.Subjects[i+1:]...)
 				crb := &clusterRoleBinding
-				crb, err = api.ClusterRoleBindings().Update(ctx, crb, metav1.UpdateOptions{})
+				_, err = api.ClusterRoleBindings().Update(ctx, crb, metav1.UpdateOptions{})
 				if err != nil {
 					return err
 				}
@@ -452,6 +464,22 @@ func (o *uninstallCmdOptions) uninstallRegistrySecret(ctx context.Context, c cli
 
 	for _, secret := range secretsList.Items {
 		err := api.Secrets(o.Namespace).Delete(ctx, secret.Name, metav1.DeleteOptions{})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *uninstallCmdOptions) uninstallKamelets(ctx context.Context, c client.Client) error {
+	kameletList := v1alpha1.NewKameletList()
+	if err := c.List(ctx, &kameletList, k8sclient.InNamespace(o.Namespace)); err != nil {
+		return err
+	}
+
+	for _, kamelet := range kameletList.Items {
+		err := c.Delete(ctx, &kamelet)
 		if err != nil {
 			return err
 		}
