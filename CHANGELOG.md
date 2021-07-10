@@ -7,14 +7,19 @@
 **Closed issues:**
 
 - ServiceBinding CR sometimes doesn't get created [\#2482](https://github.com/apache/camel-k/issues/2482)
+- V1.5.0 release without assets [\#2481](https://github.com/apache/camel-k/issues/2481)
 - Release 1.4.1 [\#2471](https://github.com/apache/camel-k/issues/2471)
+- Release 1.5.0 [\#2470](https://github.com/apache/camel-k/issues/2470)
+- Duplicated trait set as modeline and kamel run parameters causes error [\#2466](https://github.com/apache/camel-k/issues/2466)
 
 **Merged pull requests:**
 
+- chore\(sbo-trait\): Upgrade Service Binding Operator to v0.8.0 [\#2488](https://github.com/apache/camel-k/pull/2488) ([johnpoth](https://github.com/johnpoth))
 - Fix \#2482: ServiceBinding CR should tied to the IntegrationPhaseWaiti… [\#2483](https://github.com/apache/camel-k/pull/2483) ([johnpoth](https://github.com/johnpoth))
 - chore\(release\): prepare 1.5.0 release [\#2478](https://github.com/apache/camel-k/pull/2478) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(cmd/run\): windows scheme support [\#2477](https://github.com/apache/camel-k/pull/2477) ([squakez](https://github.com/squakez))
 - Fix \#2468: parse all YAML nodes in the tree [\#2476](https://github.com/apache/camel-k/pull/2476) ([nicolaferraro](https://github.com/nicolaferraro))
+- fix\(cli\) Duplicated trait set as modeline and kamel run parameters causes error [\#2467](https://github.com/apache/camel-k/pull/2467) ([claudio4j](https://github.com/claudio4j))
 - doc\(architecture\): trait section [\#2465](https://github.com/apache/camel-k/pull/2465) ([squakez](https://github.com/squakez))
 - chore: Remove Camel Sources support from Knative trait [\#2460](https://github.com/apache/camel-k/pull/2460) ([astefanutti](https://github.com/astefanutti))
 - chore: Update embedded camel-catalog-1.8.0-SNAPSHOT.yaml [\#2459](https://github.com/apache/camel-k/pull/2459) ([astefanutti](https://github.com/astefanutti))
