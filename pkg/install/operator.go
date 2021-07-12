@@ -410,7 +410,7 @@ func installServiceBindings(ctx context.Context, c client.Client, namespace stri
 
 // PlatformOrCollect --
 // nolint: lll
-func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string, namespace string, registry v1.IntegrationPlatformRegistrySpec, collection *kubernetes.Collection) (*v1.IntegrationPlatform, error) {
+func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string, namespace string, skipRegistrySetup bool, registry v1.IntegrationPlatformRegistrySpec, collection *kubernetes.Collection) (*v1.IntegrationPlatform, error) {
 	isOpenShift, err := isOpenShift(c, clusterType)
 	if err != nil {
 		return nil, err
@@ -421,7 +421,7 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 	}
 	pl := platformObject.(*v1.IntegrationPlatform)
 
-	if !isOpenShift {
+	if !isOpenShift && !skipRegistrySetup {
 		pl.Spec.Build.Registry = registry
 
 		// Kubernetes only (Minikube)
