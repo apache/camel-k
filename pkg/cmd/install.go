@@ -74,6 +74,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("cluster-type", "", "Set explicitly the cluster type to Kubernetes or OpenShift")
 	cmd.Flags().Bool("skip-operator-setup", false, "Do not install the operator in the namespace (in case there's a global one)")
 	cmd.Flags().Bool("skip-cluster-setup", false, "Skip the cluster-setup phase")
+	cmd.Flags().Bool("skip-registry-setup", false, "Skip the registry-setup phase (may negatively impact building of integrations)")
 	cmd.Flags().Bool("example", false, "Install example integration")
 	cmd.Flags().Bool("global", false, "Configure the operator to watch all namespaces. No integration platform is created. You can run integrations in a namespace by installing an integration platform: 'kamel install --skip-operator-setup -n my-namespace'")
 	cmd.Flags().Bool("force", false, "Force replacement of configuration resources when already present.")
@@ -152,6 +153,7 @@ type installCmdOptions struct {
 	ClusterSetupOnly        bool     `mapstructure:"cluster-setup"`
 	SkipOperatorSetup       bool     `mapstructure:"skip-operator-setup"`
 	SkipClusterSetup        bool     `mapstructure:"skip-cluster-setup"`
+	SkipRegistrySetup       bool     `mapstructure:"skip-registry-setup"`
 	ExampleSetup            bool     `mapstructure:"example"`
 	Global                  bool     `mapstructure:"global"`
 	KanikoBuildCache        bool     `mapstructure:"kaniko-build-cache"`
@@ -291,21 +293,26 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		}
 
 		generatedSecretName := ""
-		if o.registryAuth.IsSet() {
-			regData := o.registryAuth
-			regData.Registry = o.registry.Address
-			generatedSecretName, err = install.RegistrySecretOrCollect(o.Context, c, namespace, regData, collection, o.Force)
-			if err != nil {
-				return err
+
+		if !o.SkipRegistrySetup {
+			if o.registryAuth.IsSet() {
+				regData := o.registryAuth
+				regData.Registry = o.registry.Address
+				generatedSecretName, err = install.RegistrySecretOrCollect(o.Context, c, namespace, regData, collection, o.Force)
+				if err != nil {
+					return err
+				}
+			} else if o.RegistryAuthFile != "" {
+				generatedSecretName, err = install.RegistrySecretFromFileOrCollect(o.Context, c, namespace, o.RegistryAuthFile, collection, o.Force)
+				if err != nil {
+					return err
+				}
 			}
-		} else if o.RegistryAuthFile != "" {
-			generatedSecretName, err = install.RegistrySecretFromFileOrCollect(o.Context, c, namespace, o.RegistryAuthFile, collection, o.Force)
-			if err != nil {
-				return err
-			}
+		} else if o.SkipRegistrySetup {
+			fmt.Fprintln(cobraCmd.OutOrStdout(), "Camel K operator registry setup skipped")
 		}
 
-		platform, err := install.PlatformOrCollect(o.Context, c, o.ClusterType, namespace, o.registry, collection)
+		platform, err := install.PlatformOrCollect(o.Context, c, o.ClusterType, namespace, o.SkipRegistrySetup, o.registry, collection)
 		if err != nil {
 			return err
 		}

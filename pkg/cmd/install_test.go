@@ -314,6 +314,13 @@ func TestInstallSkipOperatorSetupFlag(t *testing.T) {
 	assert.Equal(t, true, installCmdOptions.SkipOperatorSetup)
 }
 
+func TestInstallSkipRegistrySetupFlag(t *testing.T) {
+	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--skip-registry-setup")
+	assert.Nil(t, err)
+	assert.Equal(t, true, installCmdOptions.SkipRegistrySetup)
+}
+
 func TestInstallTraitProfileFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--trait-profile", "someString")

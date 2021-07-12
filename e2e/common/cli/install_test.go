@@ -27,6 +27,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/apache/camel-k/e2e/support"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 func TestBasicInstallation(t *testing.T) {
@@ -58,5 +59,19 @@ func TestMavenRepositoryInstallation(t *testing.T) {
 		Eventually(func() string {
 			return Configmap(ns, "camel-k-maven-settings")().Data["settings.xml"]
 		}).Should(ContainSubstring("https://my.repo.org/public/"))
+	})
+}
+
+/*
+ * Expert mode where user does not want a registry configured
+ * so the Platform will have an empty Registry structure
+ */
+func TestSkipRegistryInstallation(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns, "--skip-registry-setup").Execute()).To(Succeed())
+		Eventually(Platform(ns)).ShouldNot(BeNil())
+		Eventually(func() v1.IntegrationPlatformRegistrySpec {
+			return Platform(ns)().Spec.Build.Registry
+		}, TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformRegistrySpec{}))
 	})
 }
