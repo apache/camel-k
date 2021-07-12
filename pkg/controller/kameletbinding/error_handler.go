@@ -27,9 +27,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-func maybeErrorHandler(errHandlConf v1alpha1.ErrorHandlerSpec, bindingContext bindings.BindingContext) (*bindings.Binding, error) {
+func maybeErrorHandler(errHandlConf *v1alpha1.ErrorHandlerSpec, bindingContext bindings.BindingContext) (*bindings.Binding, error) {
 	var errorHandlerBinding *bindings.Binding
-	if errHandlConf.RawMessage != nil {
+	if errHandlConf != nil && &errHandlConf.RawMessage != nil {
 		errorHandlerSpec, err := parseErrorHandler(errHandlConf.RawMessage)
 		if err != nil {
 			return nil, errors.Wrap(err, "could not parse error handler")
