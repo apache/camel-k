@@ -535,7 +535,11 @@ func (in *KameletBindingSpec) DeepCopyInto(out *KameletBindingSpec) {
 	}
 	in.Source.DeepCopyInto(&out.Source)
 	in.Sink.DeepCopyInto(&out.Sink)
-	in.ErrorHandler.DeepCopyInto(&out.ErrorHandler)
+	if in.ErrorHandler != nil {
+		in, out := &in.ErrorHandler, &out.ErrorHandler
+		*out = new(ErrorHandlerSpec)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Steps != nil {
 		in, out := &in.Steps, &out.Steps
 		*out = make([]Endpoint, len(*in))
