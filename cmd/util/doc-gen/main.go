@@ -31,7 +31,7 @@ func main() {
 	// Custom args.
 	customArgs := &generators.CustomArgs{}
 	pflag.CommandLine.StringVar(&customArgs.DocDir, "doc-dir", "./docs", "Root of the document directory.")
-	pflag.CommandLine.StringVar(&customArgs.DeployDir, "deploy-dir", "./deploy", "Root of the deploy directory.")
+	pflag.CommandLine.StringVar(&customArgs.DeployDir, "deploy-dir", "./resources", "Root of the deploy directory.")
 	pflag.CommandLine.StringVar(&customArgs.TraitPath, "traits-path", "modules/traits/pages", "Path to the traits directory.")
 	pflag.CommandLine.StringVar(&customArgs.NavPath, "nav-path", "modules/ROOT/nav.adoc", "Path to the navigation file.")
 	pflag.CommandLine.StringVar(&customArgs.ListPath, "list-path", "modules/traits/pages/traits.adoc", "Path to the trait list file.")
