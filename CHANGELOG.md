@@ -14,6 +14,7 @@
 
 **Merged pull requests:**
 
+- doc: remove programmatic datasource example [\#2491](https://github.com/apache/camel-k/pull/2491) ([squakez](https://github.com/squakez))
 - chore\(sbo-trait\): Upgrade Service Binding Operator to v0.8.0 [\#2488](https://github.com/apache/camel-k/pull/2488) ([johnpoth](https://github.com/johnpoth))
 - Fix \#2482: ServiceBinding CR should tied to the IntegrationPhaseWaiti… [\#2483](https://github.com/apache/camel-k/pull/2483) ([johnpoth](https://github.com/johnpoth))
 - chore\(release\): prepare 1.5.0 release [\#2478](https://github.com/apache/camel-k/pull/2478) ([nicolaferraro](https://github.com/nicolaferraro))
