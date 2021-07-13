@@ -22,8 +22,8 @@ limitations under the License.
 package support
 
 import (
-	"bytes"
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -946,6 +946,20 @@ func ServiceAccount(ns, name string) func() *corev1.ServiceAccount {
 			ctrl.MatchingLabels{
 				"app": "camel-k",
 			})
+		if err != nil {
+			panic(err)
+		}
+		if len(lst.Items) == 0 {
+			return nil
+		}
+		return &lst.Items[0]
+	}
+}
+
+func Kamelet(ns string) func() *v1alpha1.Kamelet {
+	return func() *v1alpha1.Kamelet {
+		lst := v1alpha1.NewKameletList()
+		err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns))
 		if err != nil {
 			panic(err)
 		}
