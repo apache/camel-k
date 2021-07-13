@@ -16,7 +16,7 @@
 /release-notes.md
 
 # Unuseful file
-/deploy/operator.yaml
+/resources/operator.yaml
 
 # Bundle directory
 /bundle

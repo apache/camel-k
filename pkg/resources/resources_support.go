@@ -28,7 +28,7 @@ import (
 )
 
 //
-//go:generate go run ../../cmd/util/vfs-gen deploy config
+//go:generate go run ../../cmd/util/vfs-gen resources config
 //
 // ResourceAsString returns the named resource content as string
 func ResourceAsString(name string) string {
