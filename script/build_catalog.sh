@@ -23,7 +23,7 @@ if [ "$#" -ge 1 ]; then
   shift 1
   $rootdir/mvnw -q \
     -f ${rootdir}/build/maven/pom-catalog.xml \
-    -Dcatalog.path=${rootdir}/deploy \
+    -Dcatalog.path=${rootdir}/resources \
     -Druntime.version=$runtimeVersion \
     -B \
     -U \
