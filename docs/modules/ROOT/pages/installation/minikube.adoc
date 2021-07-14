@@ -6,14 +6,8 @@ Follow the instructions in the https://github.com/kubernetes/minikube#installati
 
 Start a new instance of Minikube using the command:
 
-```
-minikube start
-```
-
-After the startup process is completed, you need to **enable the `registry` addon**:
-
-```
-minikube addons enable registry
+```bash
+minikube start --addons registry
 ```
 
 You can now proceed with the xref:installation/installation.adoc#procedure[standard Camel K installation procedure].
