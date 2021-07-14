@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"strings"
 	"testing"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -29,21 +30,7 @@ import (
 )
 
 func TestPullSecret(t *testing.T) {
-	e := &Environment{}
-	e.Integration = &v1.Integration{
-		Status: v1.IntegrationStatus{
-			Phase: v1.IntegrationPhaseDeploying,
-		},
-	}
-
-	deployment := appsv1.Deployment{
-		Spec: appsv1.DeploymentSpec{
-			Template: corev1.PodTemplateSpec{
-				Spec: corev1.PodSpec{},
-			},
-		},
-	}
-	e.Resources = kubernetes.NewCollection(&deployment)
+	e, deployment := getEnvironmentAndDeployment()
 
 	trait := newPullSecretTrait().(*pullSecretTrait)
 	trait.SecretName = "xxxy"
@@ -57,13 +44,56 @@ func TestPullSecret(t *testing.T) {
 }
 
 func TestPullSecretDoesNothingWhenNotSetOnPlatform(t *testing.T) {
+	e, _ := getEnvironmentAndDeployment()
+	e.Platform = &v1.IntegrationPlatform{}
+
+	trait := newPullSecretTrait()
+	enabled, err := trait.Configure(e)
+	assert.Nil(t, err)
+	assert.False(t, enabled)
+}
+
+func TestPullSecretAuto(t *testing.T) {
+	e, _ := getEnvironmentAndDeployment()
+
+	trait := newPullSecretTrait().(*pullSecretTrait)
+	trait.Auto = newFalse()
+	enabled, err := trait.Configure(e)
+	assert.Nil(t, err)
+	assert.False(t, enabled)
+}
+
+func TestPullSecretImagePullerDelegation(t *testing.T) {
+	e, _ := getEnvironmentAndDeployment()
+
+	trait := newPullSecretTrait().(*pullSecretTrait)
+	trait.Auto = newFalse()
+	trait.ImagePullerDelegation = newTrue()
+	enabled, err := trait.Configure(e)
+	assert.Nil(t, err)
+	assert.True(t, enabled)
+	assert.True(t, *trait.ImagePullerDelegation)
+
+	err = trait.Apply(e)
+	assert.Nil(t, err)
+
+	found := false
+	for _, item := range e.Resources.Items() {
+		found = strings.HasPrefix(item.GetName(), "camel-k-puller")
+		if found {
+			break
+		}
+	}
+	assert.True(t, found)
+}
+
+func getEnvironmentAndDeployment() (*Environment, *appsv1.Deployment) {
 	e := &Environment{}
 	e.Integration = &v1.Integration{
 		Status: v1.IntegrationStatus{
 			Phase: v1.IntegrationPhaseDeploying,
 		},
 	}
-	e.Platform = &v1.IntegrationPlatform{}
 
 	deployment := appsv1.Deployment{
 		Spec: appsv1.DeploymentSpec{
@@ -74,8 +104,15 @@ func TestPullSecretDoesNothingWhenNotSetOnPlatform(t *testing.T) {
 	}
 	e.Resources = kubernetes.NewCollection(&deployment)
 
-	trait := newPullSecretTrait()
-	enabled, err := trait.Configure(e)
-	assert.Nil(t, err)
-	assert.False(t, enabled)
+	return e, &deployment
+}
+
+func newFalse() *bool {
+	b := false
+	return &b
+}
+
+func newTrue() *bool {
+	b := true
+	return &b
 }
