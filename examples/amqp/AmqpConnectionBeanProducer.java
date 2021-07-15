@@ -15,27 +15,18 @@
  * limitations under the License.
  */
 
+// You can bundle your credentials as a secret properties file:
 //
-// To run this integrations use:
-//
-//     kamel run -e BROKER_URL=event-bus-amqp-0-svc.messaging.svc.cluster.local -d camel-amqp examples/amqp-bind-to-registry.java
-//
-import org.apache.camel.BindToRegistry;
+// kubectl create secret generic my-amqp --from-file=amqp.properties
+// 
+// kamel run AmqpConnectionBeanProducer.java --dev --config secret:my-amqp
 
-public class AMQPBindToRegistry extends org.apache.camel.builder.RouteBuilder {
-
-    @BindToRegistry
-    public javax.jms.ConnectionFactory connectionFactory() {
-        return new org.apache.qpid.jms.JmsConnectionFactory("amqp://" + java.lang.System.getenv("BROKER_URL"));
-    }
-
+public class AmqpConnectionBeanProducer extends org.apache.camel.builder.RouteBuilder {
     @Override
     public void configure() throws Exception {
-
-        from("timer:js?period=1000")
+        from("timer:foo?period=1000")
             .setBody()
                 .simple("Hello Camel K")
-            .to("amqp:topic:example?exchangePattern=InOnly");
-
+            .to("amqp:queue:example?exchangePattern=InOnly")
     }
 }

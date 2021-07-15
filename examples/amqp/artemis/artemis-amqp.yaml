@@ -1,0 +1,14 @@
+apiVersion: broker.amq.io/v2alpha4
+kind: ActiveMQArtemis
+metadata:
+  name: my-amqp
+spec:
+  deploymentPlan:
+    size: 1
+    image: placeholder
+  acceptors:
+  - name: amqp
+    protocols: amqp,openwire
+    port: 5672
+    sslEnabled: false
+    
