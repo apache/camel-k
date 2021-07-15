@@ -1,6 +1,6 @@
 # How to deploy a simple Postgres DB to Kubernetes cluster
 
-This is a very simple example to show how to create a Postgres database. **Note**, this is not ready for any production purposes.
+This is a very simple example to show how to create a Postgres database. **Note**, this is not ready for any production purpose.
 
 ## Create a Kubernetes Deployment
 ```
@@ -9,7 +9,7 @@ kubectl create -f postgres-storage.yaml
 kubectl create -f postgres-deployment.yaml
 kubectl create -f postgres-service.yaml
 ```
-## Thest the connection
+## Test the connection
 
 Connection credentials available in the _postgres-configmap.yaml_ descriptor.
 
