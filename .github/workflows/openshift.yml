@@ -155,7 +155,6 @@ jobs:
         # Compute registry parameters
         echo "Build project"
 
-        export IMAGE_NAME=docker.io/apache/camel-k:$(make get-version)
         make PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images
 
         # Make the Apache Snapshots or Apache Staging repository enabled by default
