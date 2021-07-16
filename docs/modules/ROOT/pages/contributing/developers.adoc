@@ -192,21 +192,6 @@ Publishing to an operator hub requires creation and submission of metadata, requ
 https://github.com/operator-framework/operator-registry/#manifest-format[format]. The
 https://sdk.operatorframework.io/docs/cli[operator-sdk] provides tools to help with the creation of this metadata.
 
-There are two formats for the publishing of the metadata:
-
-=== Package Manifests
-The legacy packaging format used for deploying the operator to an OLM registry. While deprecated in Openshift 4.5+,
-it is still supported and used on that and other cluster types. A single CSV is generated, comprising of the operator
-CRDs, and additional files. All versions of the operator metadata are located into a single directory.
-
-To generate the metadata for camel-k in the legacy format, use the following command:
-----
-make build-olm
-----
-The CSV and accompanying files are located in `deploy/olm-catalog`.
-
-NOTE: These files are under version control.
-
 === `bundles`
 The latest packaging format used for deploying the operator to an OLM registry. This generates a CSV and related metadata
 files in a directory named `bundle`. The directory contains a Dockerfile that allows for building the bundle into a
