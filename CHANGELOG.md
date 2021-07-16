@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- \[CMD\] `kamel bind` empty error handler [\#2493](https://github.com/apache/camel-k/issues/2493)
 - ServiceBinding CR sometimes doesn't get created [\#2482](https://github.com/apache/camel-k/issues/2482)
 - V1.5.0 release without assets [\#2481](https://github.com/apache/camel-k/issues/2481)
 - Release 1.4.1 [\#2471](https://github.com/apache/camel-k/issues/2471)
@@ -14,6 +15,7 @@
 
 **Merged pull requests:**
 
+- fix\(cmd/bind\): nullable error-handler [\#2496](https://github.com/apache/camel-k/pull/2496) ([squakez](https://github.com/squakez))
 - doc: remove programmatic datasource example [\#2491](https://github.com/apache/camel-k/pull/2491) ([squakez](https://github.com/squakez))
 - chore\(sbo-trait\): Upgrade Service Binding Operator to v0.8.0 [\#2488](https://github.com/apache/camel-k/pull/2488) ([johnpoth](https://github.com/johnpoth))
 - Fix \#2482: ServiceBinding CR should tied to the IntegrationPhaseWaiti… [\#2483](https://github.com/apache/camel-k/pull/2483) ([johnpoth](https://github.com/johnpoth))
