@@ -58,7 +58,6 @@ func TestResources(t *testing.T) {
 		}
 	}
 	assert.Contains(t, Resources("/templates"), "/templates/java.tmpl")
-	assert.Empty(t, Resources("/olm-catalog"))
 }
 
 func TestResourcesWithPrefix(t *testing.T) {

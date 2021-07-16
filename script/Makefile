@@ -14,9 +14,9 @@
 # limitations under the License.
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION ?= 1.5.0-SNAPSHOT
+VERSION ?= 1.6.0-SNAPSHOT
 OPERATOR_VERSION := $(subst -SNAPSHOT,,$(VERSION))
-LAST_RELEASED_VERSION := 1.4.1
+LAST_RELEASED_VERSION := 1.5.0
 RUNTIME_VERSION := 1.8.0
 BUILDAH_VERSION := 1.14.0
 KANIKO_VERSION := 0.17.1
@@ -33,12 +33,12 @@ LINT_DEADLINE := 10m
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
-STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1342
+STAGING_RUNTIME_REPO :=
 
 # Define here the repo containing the default Kamelet catalog (if any)
 KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
 # Optional branch for the default Kamelet catalog (change this to a tag before release)
-KAMELET_CATALOG_REPO_BRANCH := v0.3.0
+KAMELET_CATALOG_REPO_BRANCH := main
 
 # When packaging artifacts into the docker image, you can "copy" them from local maven
 # or "download" them from Apache Snapshots and Maven Central
@@ -298,12 +298,9 @@ package-examples:
 package-artifacts:
 	./script/package_maven_artifacts.sh $(RUNTIME_VERSION) $(PACKAGE_ARTIFACTS_STRATEGY) $(STAGING_RUNTIME_REPO)
 
-unsnapshot-olm:
-	./script/unsnapshot_olm.sh
+release: clean codegen set-module-version set-version build-resources check-licenses build images images-push cross-compile package-examples git-tag
 
-release: clean codegen set-module-version set-version build-resources check-licenses unsnapshot-olm build images images-push cross-compile package-examples git-tag
-
-release-staging: clean codegen set-module-version set-version build-resources check-licenses unsnapshot-olm build images images-push-staging cross-compile package-examples git-tag
+release-staging: clean codegen set-module-version set-version build-resources check-licenses build images images-push-staging cross-compile package-examples git-tag
 
 release-nightly: clean codegen set-module-version set-version build-resources build images images-push cross-compile package-examples
 
@@ -321,7 +318,7 @@ release-notes:
 get-staging-repo:
 	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
 
-.PHONY: build build-kamel build-resources build-olm unsnapshot-olm dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-strimzi
+.PHONY: build build-kamel build-resources dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-strimzi
 
 # find or download controller-gen if necessary
 controller-gen:
@@ -387,15 +384,6 @@ endif
 	@# Adds the licence headers to the csv file
 	./script/add_license.sh bundle/manifests ./script/headers/yaml.txt
 	operator-sdk bundle validate ./bundle
-
-#
-# Build old csv metadata. This is being phased out (not yet deprecated)
-# use 'make bundle' for newer bundle format
-#
-build-olm: generate-crd $(BUNDLE_CAMEL_APIS)
-	./script/build_olm.sh
-	@# Adds the licence headers to the csv file
-	./script/add_license.sh deploy/olm-catalog/camel-k-dev ./script/headers/yaml.txt
 
 # Build the bundle image.
 bundle-build: bundle
