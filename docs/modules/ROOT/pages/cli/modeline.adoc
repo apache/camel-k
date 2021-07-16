@@ -39,7 +39,7 @@ Full command: kamel run Hello.java --dependency mvn:org.my:application:1.0
 Multiple options can be specified for an integration.
 For example, the following modeline options enables 3scale and limits the integration container memory:
 
-.ThreeSscaleRest.java
+.ThreeScaleRest.java
 [source,java]
 ----
 // camel-k: trait=3scale.enabled=true trait=container.limit-memory=256Mi // <1>
