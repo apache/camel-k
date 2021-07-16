@@ -14,7 +14,7 @@
 # limitations under the License.
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION := 1.6.0-SNAPSHOT
+VERSION ?= 1.6.0-SNAPSHOT
 OPERATOR_VERSION := $(subst -SNAPSHOT,,$(VERSION))
 LAST_RELEASED_VERSION := 1.5.0
 RUNTIME_VERSION := 1.8.0
@@ -23,7 +23,7 @@ KANIKO_VERSION := 0.17.1
 INSTALL_DEFAULT_KAMELETS := true
 BASE_IMAGE := adoptopenjdk/openjdk11:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
-IMAGE_NAME := docker.io/apache/camel-k
+IMAGE_NAME ?= docker.io/apache/camel-k
 METADATA_IMAGE_NAME := $(IMAGE_NAME)-metadata
 RELEASE_GIT_REMOTE := upstream
 GIT_COMMIT := $(shell git rev-list -1 HEAD)
@@ -367,7 +367,7 @@ $(BUNDLE_CAMEL_APIS):
 	@# operator-sdk generate ... cannot execute across separate modules so need to temporarily move api
 	operator-sdk generate kustomize manifests --apis-dir $(addprefix api_, $@) -q
 	@# Adds the licence header to the csv file.
-	./script/add_license.sh config/manifests ./script/headers/yaml.txt
+	./script/add_license.sh config/manifests/bases ./script/headers/yaml.txt
 	./script/add_createdAt.sh config/manifests/bases
 	@# Clean up temporary working api directories
 	rm -rf api_*
