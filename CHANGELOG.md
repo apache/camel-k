@@ -9,14 +9,20 @@
 - \[CMD\] `kamel bind` empty error handler [\#2493](https://github.com/apache/camel-k/issues/2493)
 - ServiceBinding CR sometimes doesn't get created [\#2482](https://github.com/apache/camel-k/issues/2482)
 - V1.5.0 release without assets [\#2481](https://github.com/apache/camel-k/issues/2481)
+- Kamel uninstall should delete kamelets [\#2479](https://github.com/apache/camel-k/issues/2479)
 - Release 1.4.1 [\#2471](https://github.com/apache/camel-k/issues/2471)
 - Release 1.5.0 [\#2470](https://github.com/apache/camel-k/issues/2470)
 - Duplicated trait set as modeline and kamel run parameters causes error [\#2466](https://github.com/apache/camel-k/issues/2466)
 
 **Merged pull requests:**
 
+- chore\(examples\): AMQP connection bean [\#2508](https://github.com/apache/camel-k/pull/2508) ([squakez](https://github.com/squakez))
+- \[Examples\] Use correct folder in resource-secret-route example [\#2506](https://github.com/apache/camel-k/pull/2506) ([avano](https://github.com/avano))
+- chore\(trait\): pull-secret unit test [\#2505](https://github.com/apache/camel-k/pull/2505) ([squakez](https://github.com/squakez))
+- \#2358: Possible to skip configuring of registry when installing via cli [\#2497](https://github.com/apache/camel-k/pull/2497) ([phantomjinx](https://github.com/phantomjinx))
 - fix\(cmd/bind\): nullable error-handler [\#2496](https://github.com/apache/camel-k/pull/2496) ([squakez](https://github.com/squakez))
 - doc: remove programmatic datasource example [\#2491](https://github.com/apache/camel-k/pull/2491) ([squakez](https://github.com/squakez))
+- fix\(cli\): kamel uninstall should delete kamelets \#2479 [\#2489](https://github.com/apache/camel-k/pull/2489) ([tadayosi](https://github.com/tadayosi))
 - chore\(sbo-trait\): Upgrade Service Binding Operator to v0.8.0 [\#2488](https://github.com/apache/camel-k/pull/2488) ([johnpoth](https://github.com/johnpoth))
 - Fix \#2482: ServiceBinding CR should tied to the IntegrationPhaseWaiti… [\#2483](https://github.com/apache/camel-k/pull/2483) ([johnpoth](https://github.com/johnpoth))
 - chore\(release\): prepare 1.5.0 release [\#2478](https://github.com/apache/camel-k/pull/2478) ([nicolaferraro](https://github.com/nicolaferraro))
