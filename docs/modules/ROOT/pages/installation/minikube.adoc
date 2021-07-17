@@ -4,7 +4,7 @@
 You can run Camel K integrations on plain Kubernetes using the Minikube cluster creation tool.
 Follow the instructions in the https://github.com/kubernetes/minikube#installation[official doc] for the installation.
 
-Start a new instance of Minikube using the command:
+Start a new instance of Minikube with `registry` addon using the command:
 
 ```bash
 minikube start --addons registry
