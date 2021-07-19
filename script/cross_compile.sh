@@ -53,7 +53,7 @@ cross_compile () {
 	cp ${location}/../LICENSE ${targetdir}/
 	cp ${location}/../NOTICE ${targetdir}/
 
-	pushd . && cd ${targetdir} && tar -zcvf ../../${label}.tar.gz . && popd
+	pushd . && cd ${targetdir} && tar -zcvf ../../${label}.tar.gz $(ls -A) && popd
 }
 
 cross_compile ${basename}-${version}-linux-64bit linux amd64
