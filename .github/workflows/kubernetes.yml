@@ -93,9 +93,10 @@ jobs:
     - name: Build Operator
       run: |
         echo "Build project"
-        export LOCAL_IMAGE=$KIND_REGISTRY/apache/camel-k
-        echo "LOCAL_IMAGE=${LOCAL_IMAGE}:$(make get-version)" >> $GITHUB_ENV
-        make IMAGE_NAME=${LOCAL_IMAGE} PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images images-push
+        export CUSTOM_IMAGE=${KIND_REGISTRY}/apache/camel-k
+        echo "LOCAL_IMAGE_NAME=${CUSTOM_IMAGE}" >> $GITHUB_ENV
+        echo "LOCAL_IMAGE_VERSION=$(make get-version)" >> $GITHUB_ENV
+        make PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images images-push
 
         sudo mv ./kamel /usr/local/bin
     - name: Install Service Binding
@@ -119,17 +120,20 @@ jobs:
         kamel install --cluster-setup
 
         # Configure install options
+        export CUSTOM_IMAGE=${{ env.LOCAL_IMAGE_NAME }}
+        export CUSTOM_VERSION=${{ env.LOCAL_IMAGE_VERSION }}
         export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
         export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
         export KAMEL_INSTALL_REGISTRY=$KIND_REGISTRY
         export KAMEL_INSTALL_REGISTRY_INSECURE=true
-        export KAMEL_INSTALL_OPERATOR_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make get-version)
+        export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
 
         # Configure test options
-        export CAMEL_K_TEST_IMAGE_NAME=$KIND_REGISTRY/apache/camel-k
-        export CAMEL_K_TEST_IMAGE_VERSION=$(make get-version)
+        export CAMEL_K_TEST_IMAGE_NAME=${CUSTOM_IMAGE}
+        export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
 
         # Then run integration tests
         make test-integration
         make test-service-binding
         make test-quarkus-native
+        make test-kustomize

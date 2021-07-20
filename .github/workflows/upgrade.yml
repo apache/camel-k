@@ -77,11 +77,6 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: 1.15.x
-    - name: Set up operator-sdk
-      run: |
-        curl -L https://github.com/operator-framework/operator-sdk/releases/download/v1.3.0/operator-sdk_linux_amd64 -o operator-sdk
-        chmod +x operator-sdk
-        sudo mv operator-sdk /usr/local/bin/
     - name: Set up opm tool
       run: |
         curl -L https://github.com/operator-framework/operator-registry/releases/download/v1.16.1/linux-amd64-opm -o opm
@@ -111,9 +106,10 @@ jobs:
     - name: Build Operator
       run: |
         echo "Build project"
-        export LOCAL_IMAGE=$KIND_REGISTRY/apache/camel-k
-        echo "LOCAL_IMAGE=${LOCAL_IMAGE}:$(make get-version)" >> $GITHUB_ENV
-        make IMAGE_NAME=${LOCAL_IMAGE} PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images images-push
+        export CUSTOM_IMAGE=${KIND_REGISTRY}/apache/camel-k
+        echo "LOCAL_IMAGE_NAME=${CUSTOM_IMAGE}" >> $GITHUB_ENV
+        echo "LOCAL_IMAGE_VERSION=$(make get-version)" >> $GITHUB_ENV
+        make PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images images-push
     - name: Build Operator bundle
       run: |
         echo "Build Operator bundle"
@@ -124,30 +120,20 @@ jobs:
         make kustomize
 
         # replace image
-        $(cd config/manifests && kustomize edit set image "docker.io/apache/camel-k=${{ env.LOCAL_IMAGE }}")
+        $(cd config/manifests && kustomize edit set image "docker.io/apache/camel-k=${{ env.LOCAL_IMAGE_NAME }}:${{ env.LOCAL_IMAGE_VERSION }}")
 
         # Patch CSV with the 'replaces' field to define the upgrade graph
-        cat <<EOF > config/manifests/patch.yml
-        apiVersion: operators.coreos.com/v1alpha1
-        kind: ClusterServiceVersion
-        metadata:
-          namespace: placeholder
-          name: camel-k.v$(make get-version | grep -Po "\d.\d.\d")
-        spec:
-          replaces: camel-k-operator.v$(make get-last-released-version)
-        EOF
-
-        echo "Patching CSV with"
-        cat config/manifests/patch.yml
-        $(cd config/manifests && kustomize edit add patch patch.yml)
-
-        export LOCAL_IMAGE_BUNDLE=$KIND_REGISTRY/apache/camel-k-bundle:$(make get-version)
+        # Use sed as the manifest/bases file is not included in the kustomize config
+        BASE_VERSION=$(echo ${{ env.LOCAL_IMAGE_VERSION }} | grep -Po "\d.\d.\d")
+        sed -i "/  version: ${BASE_VERSION}/a \ \ replaces: camel-k-operator.v$(make get-last-released-version)" config/manifests/bases/camel-k.clusterserviceversion.yaml
+        export CUSTOM_IMAGE=${{ env.LOCAL_IMAGE_NAME }}
+        export LOCAL_IMAGE_BUNDLE=$KIND_REGISTRY/apache/camel-k-bundle:${{ env.LOCAL_IMAGE_VERSION }}
         echo "LOCAL_IMAGE_BUNDLE=${LOCAL_IMAGE_BUNDLE}" >> $GITHUB_ENV
-        make bundle-build METADATA_IMAGE_NAME=${LOCAL_IMAGE_BUNDLE} BUNDLE_METADATA_OPTS="--channels stable"
+        make bundle-build BUNDLE_IMAGE_NAME=${LOCAL_IMAGE_BUNDLE} DEFAULT_CHANNEL="stable" CHANNELS="stable"
         docker push ${LOCAL_IMAGE_BUNDLE}
     - name: Create new index image
       run: |
-        export LOCAL_IIB=$KIND_REGISTRY/apache/camel-k-iib:$(make get-version)
+        export LOCAL_IIB=$KIND_REGISTRY/apache/camel-k-iib:${{ env.LOCAL_IMAGE_VERSION }}
         echo "LOCAL_IIB=${LOCAL_IIB}" >> $GITHUB_ENV
         opm index add --bundles ${{ env.LOCAL_IMAGE_BUNDLE }} -c docker --from-index quay.io/operatorhubio/catalog:latest --tag ${LOCAL_IIB} --skip-tls
         docker push ${LOCAL_IIB}
@@ -157,6 +143,8 @@ jobs:
         export RELEASED_KAMEL_BIN=/usr/local/bin/kamel
 
         # Configure install options
+        export CUSTOM_IMAGE=${{ env.LOCAL_IMAGE_NAME }}
+        export CUSTOM_VERSION=${{ env.LOCAL_IMAGE_VERSION }}
         export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
         export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
         export KAMEL_INSTALL_REGISTRY=$KIND_REGISTRY
@@ -166,7 +154,7 @@ jobs:
         export CAMEL_K_PREV_IIB=quay.io/operatorhubio/catalog:latest
         export CAMEL_K_NEW_IIB=${{ env.LOCAL_IIB }}
         export KAMEL_K_TEST_RELEASE_VERSION=$(make get-last-released-version)
-        export KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make get-version)
+        export KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
 
         # Then run integration tests
         make test-upgrade
