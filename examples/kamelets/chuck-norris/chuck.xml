@@ -1,0 +1,4 @@
+<route>
+  <from uri="kamelet:chuck-norris-source"/>
+  <log message="${body}"/>
+</route>
