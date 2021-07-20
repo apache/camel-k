@@ -23,12 +23,11 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/digest"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 // NewMonitorAction creates a new monitoring action for an integration
@@ -77,10 +76,8 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	// Check replicas
 	replicaSets := &appsv1.ReplicaSetList{}
 	err = action.client.List(ctx, replicaSets,
-		k8sclient.InNamespace(integration.Namespace),
-		k8sclient.MatchingLabels{
-			v1.IntegrationLabel: integration.Name,
-		})
+		ctrl.InNamespace(integration.Namespace),
+		ctrl.MatchingLabels{v1.IntegrationLabel: integration.Name})
 	if err != nil {
 		return nil, err
 	}
@@ -94,52 +91,25 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		}
 	}
 
-	// Mirror ready condition from the owned resource (e.g.ReplicaSet, Deployment, CronJob, ...)
-	// into the owning integration
+	// Reconcile ready condition from the owned resource (e.g., Deployment, KnativeService, ReplicaSet, CronJob, ...)
 	previous := integration.Status.GetCondition(v1.IntegrationConditionReady)
-	kubernetes.MirrorReadyCondition(ctx, action.client, integration)
+	err = setReadyCondition(ctx, action.client, integration)
+	if err != nil {
+		return nil, err
+	}
+	next := integration.Status.GetCondition(v1.IntegrationConditionReady)
 
-	if next := integration.Status.GetCondition(v1.IntegrationConditionReady);
-		(previous == nil || previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero()) &&
-			next != nil && next.Status == corev1.ConditionTrue && !(next.FirstTruthyTime == nil || next.FirstTruthyTime.IsZero()) {
+	if (previous == nil || previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero()) &&
+		next != nil && next.Status == corev1.ConditionTrue && !(next.FirstTruthyTime == nil || next.FirstTruthyTime.IsZero()) {
 		// Observe the time to first readiness metric
 		duration := next.FirstTruthyTime.Time.Sub(integration.Status.InitializationTimestamp.Time)
 		action.L.Infof("First readiness after %s", duration)
 		timeToFirstReadiness.Observe(duration.Seconds())
 	}
 
-	// the integration pod may be in running phase, but the corresponding container running the integration code
-	// may be in error state, in this case we should check the deployment status and set the integration status accordingly.
-	if kubernetes.IsConditionTrue(integration, v1.IntegrationConditionDeploymentAvailable) {
-		deployment, err := kubernetes.GetDeployment(ctx, action.client, integration.Name, integration.Namespace)
-		if err != nil {
-			return nil, err
-		}
-
-		deployUnavailable := false
-		progressingFailing := false
-		for _, c := range deployment.Status.Conditions {
-			// first, check if the container status is not available
-			if c.Type == appsv1.DeploymentAvailable {
-				deployUnavailable = c.Status == corev1.ConditionFalse
-			}
-			// second, check when it is progressing and reason is the replicas are available but the number of replicas are zero
-			// in this case, the container integration is failing
-			if c.Type == appsv1.DeploymentProgressing {
-				progressingFailing = c.Status == corev1.ConditionTrue && c.Reason == "NewReplicaSetAvailable" && deployment.Status.AvailableReplicas < 1
-			}
-		}
-		if deployUnavailable && progressingFailing {
-			notAvailableCondition := v1.IntegrationCondition{
-				Type:   v1.IntegrationConditionReady, 
-				Status: corev1.ConditionFalse,
-				Reason: v1.IntegrationConditionErrorReason,
-				Message: "The corresponding pod(s) may be in error state, look at the pod status or log for errors",
-			}
-			integration.Status.SetConditions(notAvailableCondition)
-			integration.Status.Phase = v1.IntegrationPhaseError
-			return integration, nil
-		}
+	// Move the Integration to the error phase in case the ready condition has errored
+	if next != nil && next.Reason == v1.IntegrationConditionErrorReason {
+		integration.Status.Phase = v1.IntegrationPhaseError
 	}
 
 	return integration, nil
