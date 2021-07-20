@@ -15,16 +15,14 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: camel-k-edit
-  labels:
-    app: "camel-k"
-    # Add these permissions to the "admin" and "edit" default roles.
-    rbac.authorization.k8s.io/aggregate-to-admin: "true"
-    rbac.authorization.k8s.io/aggregate-to-edit: "true"
-rules:
-- apiGroups: ["camel.apache.org"]
-  resources: ["*"]
-  verbs: ["*"]
+- op: add
+  path: /spec/template/spec/containers/0/args
+  value:
+  - --monitoring-port=8080
+  - --health-port=8081
+- op: replace
+  path: /spec/template/spec/containers/0/ports/0/containerPort
+  value: 8080
+- op: replace
+  path: /spec/template/spec/containers/0/livenessProbe/httpGet/port
+  value: 8081

@@ -15,16 +15,14 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: camel-k-operator-console-openshift
-  labels:
-    app: "camel-k"
-subjects:
-- kind: ServiceAccount
-  name: camel-k-operator
-roleRef:
-  kind: ClusterRole
-  name: camel-k-operator-openshift
-  apiGroup: rbac.authorization.k8s.io
+#
+# rbac resources applicable for only openshift platforms
+#
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- operator-cluster-role-console-binding-openshift.yaml
+- operator-cluster-role-console-openshift.yaml
+- operator-role-openshift.yaml
+- operator-role-binding-openshift.yaml

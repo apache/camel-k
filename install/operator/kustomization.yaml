@@ -16,15 +16,36 @@
 # ---------------------------------------------------------------------------
 
 #
-# * patches/integration-platform-patch.yaml
-# customizes the integration platform custom resource
-# Edit the patch manually to add required configuration
+# Add patches for modifying the deployment
 #
+# * patch-image-pull-policy-always.yaml
+#   modifies the image pull policy property to "Always"
+#
+# * patch-monitoring-port.yaml
+#   modifies the monitoring port
+#
+# * patch-health-port.yaml
+#   modifies the health port
+#
+# * patch-watch-namespace-global.yaml
+#   modifies the WATCH_NAMESPACE env var to wildcard for all namespaces
+#
+# * patch-toleration.yaml
+#   modifies the tolerations configuraion of the deployment
+#   Edit the patch manually to add the required keys
+#
+# * patch-nodes-selector.yaml
+#   modifies the nodeSelector configuration of the deployment
+#   to bind the deployment to a particular labelled group of nodes
+#   Edit the patch manually to add the required configuration
+#
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 resources:
-- bases/camel_v1_integrationplatform.yaml
-- bases/camel_v1_integration.yaml
-- bases/camel_v1_integrationkit.yaml
-- bases/camel_v1_camelcatalog.yaml
-- bases/camel_v1_build.yaml
-- bases/camel_v1_kamelet.yaml
-- bases/camel_v1_kameletbinding.yaml
+- ../../config/manager
+
+patchesStrategicMerge:
+- patch-toleration.yaml
+- patch-node-selector.yaml
+- patch-resource-requirements.yaml

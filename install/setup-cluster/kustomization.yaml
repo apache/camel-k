@@ -14,17 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ---------------------------------------------------------------------------
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: camel-k-edit
-  labels:
-    app: "camel-k"
-    # Add these permissions to the "admin" and "edit" default roles.
-    rbac.authorization.k8s.io/aggregate-to-admin: "true"
-    rbac.authorization.k8s.io/aggregate-to-edit: "true"
-rules:
-- apiGroups: ["camel.apache.org"]
-  resources: ["*"]
-  verbs: ["*"]
+resources:
+- ../../config/crd
+- ../../config/rbac/user-cluster-role.yaml
