@@ -42,7 +42,7 @@ func TestBasicUninstall(t *testing.T) {
 		Eventually(Configmap(ns, "camel-k-maven-settings")).Should(BeNil())
 		Eventually(ServiceAccount(ns, "camel-k-operator")).Should(BeNil())
 		Eventually(OperatorPod(ns)).Should(BeNil())
-		Eventually(Kamelet(ns)).Should(BeNil())
+		Eventually(KameletList(ns)).Should(BeEmpty())
 	})
 }
 
@@ -107,9 +107,9 @@ func TestUninstallSkipKamelets(t *testing.T) {
 		// a successful new installation
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(Kamelet(ns)).ShouldNot(BeNil())
+		Eventually(KameletList(ns)).ShouldNot(BeEmpty())
 		// on uninstall it should remove everything except kamelets
 		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-kamelets").Execute()).To(Succeed())
-		Eventually(Kamelet(ns)).ShouldNot(BeNil())
+		Eventually(KameletList(ns)).ShouldNot(BeEmpty())
 	})
 }
