@@ -17,7 +17,7 @@
         xmlns="http://camel.apache.org/schema/spring"
         xsi:schemaLocation="
             http://camel.apache.org/schema/spring
-            http://camel.apache.org/schema/spring/camel-spring.xsd">
+            https://camel.apache.org/schema/spring/camel-spring.xsd">
 
     <route id="hello">
         <from uri="timer:hello?period=3000"/>
