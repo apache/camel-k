@@ -30,7 +30,8 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
+	exec "os/exec"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -224,6 +225,33 @@ func KamelWithContext(ctx context.Context, args ...string) *cobra.Command {
 	}
 	c.SetArgs(args)
 	return c
+}
+
+func Make(rule string, args ...string) *exec.Cmd {
+	return MakeWithContext(TestContext, rule, args...)
+}
+
+func MakeWithContext(ctx context.Context, rule string, args ...string) *exec.Cmd {
+	makeArgs := os.Getenv("MAKE_ARGS")
+	defaultArgs := strings.Fields(makeArgs)
+	args = append(defaultArgs, args...)
+
+	makeDir := os.Getenv("MAKE_DIR")
+	if makeDir == "" {
+		makeDir = "../../../install"
+	} else {
+		fmt.Printf("Using alternative make directory on path %s\n", makeDir)
+	}
+
+	if fi, e := os.Stat(makeDir); e != nil && os.IsNotExist(e) {
+		panic(e)
+	} else if !fi.Mode().IsDir() {
+		panic(e)
+	}
+
+	args = append([]string{"-C", makeDir, rule}, args...)
+
+	return exec.Command("make", args...)
 }
 
 /*
@@ -997,6 +1025,46 @@ func PlatformProfile(ns string) func() v1.TraitProfile {
 	}
 }
 
+func CRDs() func() []metav1.APIResource {
+	return func() []metav1.APIResource {
+
+		kinds := []string{
+			reflect.TypeOf(v1.Build{}).Name(),
+			reflect.TypeOf(v1.Integration{}).Name(),
+			reflect.TypeOf(v1.IntegrationKit{}).Name(),
+			reflect.TypeOf(v1.IntegrationPlatform{}).Name(),
+			reflect.TypeOf(v1alpha1.Kamelet{}).Name(),
+			reflect.TypeOf(v1alpha1.KameletBinding{}).Name(),
+		}
+
+		versions := []string{"v1", "v1alpha1"}
+		present := []metav1.APIResource{}
+
+		for _, version := range versions {
+			lst, err := TestClient().Discovery().ServerResourcesForGroupVersion("camel.apache.org/" + version)
+			if err != nil && k8serrors.IsNotFound(err) {
+				return nil
+			} else if err != nil {
+				panic(err)
+			}
+
+			for _, res := range lst.APIResources {
+				if strings.Contains(res.Name, "/") {
+					continue // ignore sub types like status
+				}
+
+				for _, k := range kinds {
+					if k == res.Kind {
+						present = append(present, res)
+					}
+				}
+			}
+		}
+
+		return present
+	}
+}
+
 func OperatorPod(ns string) func() *corev1.Pod {
 	return func() *corev1.Pod {
 		lst := corev1.PodList{
@@ -1020,8 +1088,59 @@ func OperatorPod(ns string) func() *corev1.Pod {
 	}
 }
 
-func Role(ns string) func() *rbacv1.Role {
-	return func() *rbacv1.Role {
+func OperatorTryPodForceKill(ns string, timeSeconds int) {
+	pod := OperatorPod(ns)()
+	if pod != nil {
+		if err := TestClient().Delete(TestContext, pod, ctrl.GracePeriodSeconds(timeSeconds)); err != nil {
+			log.Error(err, "cannot forcefully kill the pod")
+		}
+	}
+}
+
+func ScaleOperator(ns string, replicas int32) func() error {
+	return func() error {
+		operator, err := TestClient().AppsV1().Deployments(ns).Get(TestContext, "camel-k-operator", metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		operator.Spec.Replicas = &replicas
+		_, err = TestClient().AppsV1().Deployments(ns).Update(TestContext, operator, metav1.UpdateOptions{})
+		if err != nil {
+			return err
+		}
+
+		if replicas == 0 {
+			// speedup scale down by killing the pod
+			OperatorTryPodForceKill(ns, 10)
+		}
+		return nil
+	}
+}
+
+func ClusterRole() func() []rbacv1.ClusterRole {
+	return func() []rbacv1.ClusterRole {
+		lst := rbacv1.ClusterRoleList{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "ClusterRole",
+				APIVersion: rbacv1.SchemeGroupVersion.String(),
+			},
+		}
+		err := TestClient().List(TestContext, &lst,
+			ctrl.MatchingLabels{
+				"app": "camel-k",
+			})
+		if err != nil {
+			panic(err)
+		}
+		if len(lst.Items) == 0 {
+			return nil
+		}
+		return lst.Items
+	}
+}
+
+func Role(ns string) func() []rbacv1.Role {
+	return func() []rbacv1.Role {
 		lst := rbacv1.RoleList{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Role",
@@ -1039,7 +1158,7 @@ func Role(ns string) func() *rbacv1.Role {
 		if len(lst.Items) == 0 {
 			return nil
 		}
-		return &lst.Items[0]
+		return lst.Items
 	}
 }
 
@@ -1153,7 +1272,7 @@ func CreateOperatorRole(ns string) (err error) {
 		return err
 	}
 	if oc {
-		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/operator-role-openshift.yaml")
+		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/openshift/operator-role-openshift.yaml")
 	}
 	return nil
 }
@@ -1168,7 +1287,7 @@ func CreateOperatorRoleBinding(ns string) error {
 		return err
 	}
 	if oc {
-		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/operator-role-binding-openshift.yaml")
+		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/openshift/operator-role-binding-openshift.yaml")
 	}
 	return nil
 }
