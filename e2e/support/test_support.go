@@ -956,17 +956,30 @@ func ServiceAccount(ns, name string) func() *corev1.ServiceAccount {
 	}
 }
 
-func Kamelet(ns string) func() *v1alpha1.Kamelet {
-	return func() *v1alpha1.Kamelet {
+func KameletList(ns string) func() []v1alpha1.Kamelet {
+	return func() []v1alpha1.Kamelet {
 		lst := v1alpha1.NewKameletList()
 		err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns))
 		if err != nil {
 			panic(err)
 		}
-		if len(lst.Items) == 0 {
+		return lst.Items
+	}
+}
+
+func Kamelet(name string, ns string) func() *v1alpha1.Kamelet {
+	return func() *v1alpha1.Kamelet {
+		it := v1alpha1.NewKamelet(ns, name)
+		key := ctrl.ObjectKey{
+			Namespace: ns,
+			Name:      name,
+		}
+		if err := TestClient().Get(TestContext, key, &it); err != nil && !k8serrors.IsNotFound(err) {
+			panic(err)
+		} else if err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		}
-		return &lst.Items[0]
+		return &it
 	}
 }
 
