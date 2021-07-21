@@ -16,6 +16,7 @@
 
 **Merged pull requests:**
 
+- Use https instead of http for xsd location [\#2517](https://github.com/apache/camel-k/pull/2517) ([apupier](https://github.com/apupier))
 - Fix Typo [\#2511](https://github.com/apache/camel-k/pull/2511) ([mattheh](https://github.com/mattheh))
 - chore\(release\): bump version to 1.6.0-SNAPSHOT and remove deprecated … [\#2510](https://github.com/apache/camel-k/pull/2510) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(examples\): AMQP connection bean [\#2508](https://github.com/apache/camel-k/pull/2508) ([squakez](https://github.com/squakez))
