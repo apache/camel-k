@@ -34,14 +34,7 @@ on:
     branches:
       - main
       - "release-*"
-    paths-ignore:
-      - 'docs/**'
-      - 'proposals/**'
-      - '**.adoc'
-      - '**.md'
-      - 'KEYS'
-      - 'LICENSE'
-      - 'NOTICE'
+      - kustomize3
 
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}

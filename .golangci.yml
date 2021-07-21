@@ -58,7 +58,7 @@ issues:
         - unparam
         - varcheck
         - unused
-    - path: deploy/resources.go
+    - path: pkg/resources/resources.go
       linters:
         - stylecheck
         - golint

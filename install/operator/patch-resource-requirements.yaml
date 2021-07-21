@@ -15,16 +15,23 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: camel-k-operator-openshift
-  labels:
-    app: "camel-k"
-subjects:
-- kind: ServiceAccount
   name: camel-k-operator
-roleRef:
-  kind: ClusterRole
-  name: camel-k-operator-openshift
-  apiGroup: rbac.authorization.k8s.io
+spec:
+  template:
+    spec:
+      containers:
+        - name: camel-k-operator
+          resources:
+            #
+            # Add custom requirements on hardware resource allocation
+            # for the operator deployment
+            #
+            requests:
+              # memory: "64Mi"
+              # cpu: "250m"
+            limits:
+              # memory: "128Mi"
+              # cpu: "500m"

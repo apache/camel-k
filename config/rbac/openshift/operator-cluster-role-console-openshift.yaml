@@ -15,23 +15,17 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-kind: Role
+kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: camel-k-builder
+  name: camel-k-operator-console-openshift
   labels:
     app: "camel-k"
 rules:
 - apiGroups:
-  - camel.apache.org
+  - console.openshift.io
   resources:
-  - "*"
-  verbs:
-  - "*"
-- apiGroups:
-  - ""
-  resources:
-  - pods
+  - consoleclidownloads
   verbs:
   - create
   - delete
@@ -41,64 +35,3 @@ rules:
   - patch
   - update
   - watch
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  - secrets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  - "build.openshift.io"
-  resources:
-  - buildconfigs
-  - buildconfigs/webhooks
-  - builds
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  - "image.openshift.io"
-  resources:
-  - imagestreamimages
-  - imagestreammappings
-  - imagestreams
-  - imagestreams/secrets
-  - imagestreamtags
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  - build.openshift.io
-  attributeRestrictions: null
-  resources:
-  - buildconfigs/instantiate
-  - buildconfigs/instantiatebinary
-  - builds/clone
-  verbs:
-  - create

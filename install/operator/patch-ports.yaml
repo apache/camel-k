@@ -15,16 +15,14 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: camel-k-builder
-  labels:
-    app: "camel-k"
-subjects:
-- kind: ServiceAccount
-  name: camel-k-builder
-roleRef:
-  kind: Role
-  name: camel-k-builder
-  apiGroup: rbac.authorization.k8s.io
+- op: add
+  path: /spec/template/spec/containers/0/args
+  value:
+  - --monitoring-port=8080
+  - --health-port=8081
+- op: replace
+  path: /spec/template/spec/containers/0/ports/0/containerPort
+  value: 8080
+- op: replace
+  path: /spec/template/spec/containers/0/livenessProbe/httpGet/port
+  value: 8081
