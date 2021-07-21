@@ -22,6 +22,8 @@
 .PHONY: $(SUBDIRS)
 
 INSTALLDIR := $(RELEASE_NAME)-installer
+CONFIGDIR := ../../config
+
 RELEASEDIRS := ../crd ../example ../infrastructure ../manager ../operator ../platform ../prometheus ../rbac ../samples ../setup ../setup-cluster
 
 default: release
