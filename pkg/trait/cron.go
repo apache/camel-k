@@ -245,9 +245,9 @@ func (t *cronTrait) Apply(e *Environment) error {
 		e.Interceptors = append(e.Interceptors, "cron")
 
 		cronJob := t.getCronJobFor(e)
-		maps := e.computeConfigMaps()
+		//maps := e.computeConfigMaps()
 
-		e.Resources.AddAll(maps)
+		//e.Resources.AddAll(maps)
 		e.Resources.Add(cronJob)
 
 		e.Integration.Status.SetCondition(

@@ -171,9 +171,9 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 
 func (t *knativeServiceTrait) Apply(e *Environment) error {
 	ksvc := t.getServiceFor(e)
-	maps := e.computeConfigMaps()
+	//maps := e.computeConfigMaps()
 
-	e.Resources.AddAll(maps)
+	//e.Resources.AddAll(maps)
 	e.Resources.Add(ksvc)
 
 	e.Integration.Status.SetCondition(

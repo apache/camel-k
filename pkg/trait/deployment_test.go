@@ -103,21 +103,29 @@ func TestApplyDeploymentTraitWhileResolvingKitDoesNotSucceed(t *testing.T) {
 
 func TestApplyDeploymentTraitWhileDeployingIntegrationDoesSucceed(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
-	environment.Integration.Spec.Configuration = append(environment.Integration.Spec.Configuration, v1.ConfigurationSpec{
-		Type:  "property",
-		Value: "a=b",
-	})
-
 	err := deploymentTrait.Apply(environment)
-
 	assert.Nil(t, err)
 
-	assert.NotNil(t, environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
-		return cm.Labels["camel.apache.org/properties.type"] == "user"
-	}))
-	assert.Nil(t, environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
-		return cm.Labels["camel.apache.org/properties.type"] == "application"
-	}))
+	// TODO move this test under configuration trait
+	/*
+		testProps := make(map[string][]string)
+		testProps["properties"] = []string{"a=b", "c=d"}
+		traitProperties, err := json.Marshal(testProps)
+		assert.Nil(t, err)
+
+		environment.Integration.Spec.Traits["configuration"] = v1.TraitSpec{
+			Configuration: v1.TraitConfiguration{
+				RawMessage: traitProperties,
+			},
+		}
+
+		assert.NotNil(t, environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
+			return cm.Labels["camel.apache.org/properties.type"] == "user"
+		}))
+		assert.Nil(t, environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
+			return cm.Labels["camel.apache.org/properties.type"] == "application"
+		}))
+	*/
 
 	deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool { return true })
 	assert.NotNil(t, deployment)
@@ -184,6 +192,7 @@ func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 			},
 			Spec: v1.IntegrationSpec{
 				Replicas: &replicas,
+				Traits:   make(map[string]v1.TraitSpec),
 			},
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,

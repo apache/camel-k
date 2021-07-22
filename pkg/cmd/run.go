@@ -576,31 +576,18 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		o.Properties = append(o.Properties, "file:"+item)
 	}
 	for _, item := range o.Properties {
-		props, err := extractProperties(item)
-		if err != nil {
+		if propsTraits, err := convertToTraitParameter(item, "configuration.properties"); err != nil {
 			return nil, err
-		}
-		if err := addIntegrationProperties(props, &integration.Spec); err != nil {
-			return nil, err
+		} else {
+			o.Traits = append(o.Traits, propsTraits...)
 		}
 	}
 	// convert each build configuration to a builder trait property
 	for _, item := range o.BuildProperties {
-		props, err := extractProperties(item)
-		if err != nil {
+		if buildPropsTraits, err := convertToTraitParameter(item, "builder.properties"); err != nil {
 			return nil, err
-		}
-		for _, k := range props.Keys() {
-			v, ok := props.Get(k)
-			if ok {
-				entry, err := property.EncodePropertyFileEntry(k, v)
-				if err != nil {
-					return nil, err
-				}
-				o.Traits = append(o.Traits, fmt.Sprintf("builder.properties=%s", entry))
-			} else {
-				return nil, err
-			}
+		} else {
+			o.Traits = append(o.Traits, buildPropsTraits...)
 		}
 	}
 	for _, item := range o.Configs {
@@ -687,6 +674,28 @@ func addResource(resourceLocation string, integrationSpec *v1.IntegrationSpec, e
 	return nil
 }
 
+func convertToTraitParameter(value, traitParameter string) ([]string, error) {
+	traits := make([]string, 0)
+	props, err := extractProperties(value)
+	if err != nil {
+		return nil, err
+	}
+	for _, k := range props.Keys() {
+		v, ok := props.Get(k)
+		if ok {
+			entry, err := property.EncodePropertyFileEntry(k, v)
+			if err != nil {
+				return nil, err
+			}
+			traits = append(traits, fmt.Sprintf("%s=%s", traitParameter, entry))
+		} else {
+			return nil, err
+		}
+	}
+
+	return traits, nil
+}
+
 // The function parse the value and if it is a file (file:/path/), it will parse as property file
 // otherwise return a single property built from the item passed as `key=value`
 func extractProperties(value string) (*properties.Properties, error) {
@@ -725,21 +734,6 @@ func (o *runCmdOptions) configureTraits(integration *v1.Integration, options []s
 
 	integration.Spec.Traits = traits
 
-	return nil
-}
-
-func addIntegrationProperties(props *properties.Properties, spec *v1.IntegrationSpec) error {
-	for _, k := range props.Keys() {
-		v, _ := props.Get(k)
-		entry, err := property.EncodePropertyFileEntry(k, v)
-		if err != nil {
-			return err
-		}
-		spec.AddConfiguration(
-			"property",
-			entry,
-		)
-	}
 	return nil
 }
 
