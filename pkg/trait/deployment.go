@@ -99,10 +99,7 @@ func (t *deploymentTrait) ControllerStrategySelectorOrder() int {
 }
 
 func (t *deploymentTrait) Apply(e *Environment) error {
-	maps := e.computeConfigMaps()
 	deployment := t.getDeploymentFor(e)
-
-	e.Resources.AddAll(maps)
 	e.Resources.Add(deployment)
 
 	e.Integration.Status.SetCondition(

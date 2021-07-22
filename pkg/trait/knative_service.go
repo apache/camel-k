@@ -175,9 +175,6 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 	if err != nil {
 		return err
 	}
-	maps := e.computeConfigMaps()
-
-	e.Resources.AddAll(maps)
 	e.Resources.Add(ksvc)
 
 	e.Integration.Status.SetCondition(
