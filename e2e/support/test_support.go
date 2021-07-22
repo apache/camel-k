@@ -1226,7 +1226,7 @@ func CreateKnativeChannel(ns string, name string) func() error {
 	Kamelets
 */
 
-func CreateTimerKamelet(ns string, name string) func() error {
+func CreateKamelet(ns string, name string, flow map[string]interface{}, properties map[string]v1alpha1.JSONSchemaProp) func() error {
 	return func() error {
 		kamelet := v1alpha1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
@@ -1235,54 +1235,60 @@ func CreateTimerKamelet(ns string, name string) func() error {
 			},
 			Spec: v1alpha1.KameletSpec{
 				Definition: &v1alpha1.JSONSchemaProps{
-					Properties: map[string]v1alpha1.JSONSchemaProp{
-						"message": {
-							Type: "string",
-						},
-					},
+					Properties: properties,
 				},
-				Flow: asFlow(map[string]interface{}{
-					"from": map[string]interface{}{
-						"uri": "timer:tick",
-						"steps": []map[string]interface{}{
-							{
-								"set-body": map[string]interface{}{
-									"constant": "{{message}}",
-								},
-							},
-							{
-								"to": "kamelet:sink",
-							},
-						},
-					},
-				}),
+				Flow: asFlow(flow),
 			},
 		}
 		return TestClient().Create(TestContext, &kamelet)
 	}
 }
 
-func BindKameletTo(ns, name, from string, to corev1.ObjectReference, properties map[string]string) func() error {
-	return func() error {
-		kb := v1alpha1.KameletBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: ns,
-				Name:      name,
-			},
-			Spec: v1alpha1.KameletBindingSpec{
-				Source: v1alpha1.Endpoint{
-					Ref: &corev1.ObjectReference{
-						Kind:       "Kamelet",
-						APIVersion: v1alpha1.SchemeGroupVersion.String(),
-						Name:       from,
+func CreateTimerKamelet(ns string, name string) func() error {
+	props := map[string]v1alpha1.JSONSchemaProp{
+		"message": {
+			Type: "string",
+		},
+	}
+
+	flow := map[string]interface{}{
+		"from": map[string]interface{}{
+			"uri": "timer:tick",
+			"steps": []map[string]interface{}{
+				{
+					"set-body": map[string]interface{}{
+						"constant": "{{message}}",
 					},
-					Properties: asEndpointProperties(properties),
 				},
-				Sink: v1alpha1.Endpoint{
-					Ref:        &to,
-					Properties: asEndpointProperties(map[string]string{}),
+				{
+					"to": "kamelet:sink",
 				},
 			},
+		},
+	}
+
+	return CreateKamelet(ns, name, flow, props)
+}
+
+func BindKameletTo(ns string, name string, from corev1.ObjectReference, to corev1.ObjectReference, sourceProperties map[string]string, sinkProperties map[string]string) func() error {
+	return BindKameletToWithErrorHandler(ns, name, from, to, sourceProperties, sinkProperties, nil)
+}
+
+func BindKameletToWithErrorHandler(ns string, name string, from corev1.ObjectReference, to corev1.ObjectReference, sourceProperties map[string]string, sinkProperties map[string]string, errorHandler map[string]interface{}) func() error {
+	return func() error {
+		kb := v1alpha1.NewKameletBinding(ns, name)
+		kb.Spec = v1alpha1.KameletBindingSpec{
+			Source: v1alpha1.Endpoint{
+				Ref: &from,
+				Properties: asEndpointProperties(sourceProperties),
+			},
+			Sink: v1alpha1.Endpoint{
+				Ref:        &to,
+				Properties: asEndpointProperties(sinkProperties),
+			},
+		}
+		if errorHandler != nil {
+			kb.Spec.ErrorHandler = asErrorHandlerSpec(errorHandler)
 		}
 		return kubernetes.ReplaceResource(TestContext, TestClient(), &kb)
 	}
@@ -1294,6 +1300,16 @@ func asFlow(source map[string]interface{}) *v1.Flow {
 		panic(err)
 	}
 	return &v1.Flow{
+		RawMessage: bytes,
+	}
+}
+
+func asErrorHandlerSpec(source map[string]interface{}) *v1alpha1.ErrorHandlerSpec {
+	bytes, err := json.Marshal(source)
+	if err != nil {
+		panic(err)
+	}
+	return &v1alpha1.ErrorHandlerSpec{
 		RawMessage: bytes,
 	}
 }
