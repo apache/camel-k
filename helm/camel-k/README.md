@@ -69,21 +69,24 @@ The command removes all the Kubernetes resources installed.
 ## Configuration
 
 The following table lists the most commonly configured parameters of the
-CouchDB chart and their default values:
+Camel-K chart and their default values. The chart allows configuration of an `IntegrationPlatform` resource, which among others includes build properties and traits configuration. A full list of parameters can be found [in the operator specification][1].
 
-|           Parameter                |             Description                                     |                Default                 |
-|------------------------------------|-------------------------------------------------------------|----------------------------------------|
-| `platform.build.registry.address`  | The address of a container image registry to push images    |                                        |
-| `platform.build.registry.insecure` | Indicates if the registry is secured                        | true                                   |
-| `platform.cluster`                 | The kind of Kubernetes cluster (Kubernetes or OpenShift)    | `Kubernetes`                           |
-| `platform.profile`                 | The trait profile to use (Knative, Kubernetes or OpenShift) | auto                                   |
+|           Parameter                    |             Description                                                   |            Default             |
+|----------------------------------------|---------------------------------------------------------------------------|--------------------------------|
+| `platform.build.registry.address`      | The address of a container image registry to push images                  |                                |
+| `platform.build.registry.secret`       | A secret used to push/pull images to the Docker registry                  |                                |
+| `platform.build.registry.organization` | An organization on the Docker registry that can be used to publish images |                                |
+| `platform.build.registry.insecure`     | Indicates if the registry is not secured                                  | true                           |
+| `platform.cluster`                     | The kind of Kubernetes cluster (Kubernetes or OpenShift)                  | `Kubernetes`                   |
+| `platform.profile`                     | The trait profile to use (Knative, Kubernetes or OpenShift)               | auto                           |
 
 ## Contributing
 
 We'd like to hear your feedback and we love any kind of contribution!
 
-The main contact points for the Camel K project are the [GitHub repository][1]
-and the [Chat room][2].
+The main contact points for the Camel K project are the [GitHub repository][2]
+and the [Chat room][3].
 
-[1]: https://github.com/apache/camel-k
-[2]: https://camel.zulipchat.com
+[1]: https://camel.apache.org/camel-k/latest/architecture/cr/integration-platform.html
+[2]: https://github.com/apache/camel-k
+[3]: https://camel.zulipchat.com
