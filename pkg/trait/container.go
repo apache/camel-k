@@ -81,6 +81,8 @@ type containerTrait struct {
 
 	// ProbesEnabled enable/disable probes on the container (default `false`)
 	ProbesEnabled *bool `property:"probes-enabled" json:"probesEnabled,omitempty"`
+	// Scheme to use when connecting. Defaults to HTTP. Applies to the liveness probe.
+	LivenessScheme string `property:"liveness-scheme" json:"livenessScheme,omitempty"`
 	// Number of seconds after the container has started before liveness probes are initiated.
 	LivenessInitialDelay int32 `property:"liveness-initial-delay" json:"livenessInitialDelay,omitempty"`
 	// Number of seconds after which the probe times out. Applies to the liveness probe.
@@ -93,6 +95,8 @@ type containerTrait struct {
 	// Minimum consecutive failures for the probe to be considered failed after having succeeded.
 	// Applies to the liveness probe.
 	LivenessFailureThreshold int32 `property:"liveness-failure-threshold" json:"livenessFailureThreshold,omitempty"`
+	// Scheme to use when connecting. Defaults to HTTP. Applies to the readiness probe.
+	ReadinessScheme string `property:"readiness-scheme" json:"readinessScheme,omitempty"`
 	// Number of seconds after the container has started before readiness probes are initiated.
 	ReadinessInitialDelay int32 `property:"readiness-initial-delay" json:"readinessInitialDelay,omitempty"`
 	// Number of seconds after which the probe times out. Applies to the readiness probe.
@@ -115,6 +119,8 @@ func newContainerTrait() Trait {
 		ServicePortName: defaultContainerPortName,
 		Name:            defaultContainerName,
 		ProbesEnabled:   util.BoolP(false),
+		LivenessScheme:  string(corev1.URISchemeHTTP),
+		ReadinessScheme: string(corev1.URISchemeHTTP),
 	}
 }
 
@@ -433,6 +439,7 @@ func (t *containerTrait) configureProbes(container *corev1.Container, port int, 
 func (t *containerTrait) newLivenessProbe(port int, path string) *corev1.Probe {
 	action := corev1.HTTPGetAction{}
 	action.Path = path
+	action.Scheme = corev1.URIScheme(t.LivenessScheme)
 
 	if port > 0 {
 		action.Port = intstr.FromInt(port)
@@ -457,8 +464,9 @@ func (t *containerTrait) newReadinessProbe(port int, path string) *corev1.Probe 
 	p := corev1.Probe{
 		Handler: corev1.Handler{
 			HTTPGet: &corev1.HTTPGetAction{
-				Port: intstr.FromInt(port),
-				Path: path,
+				Port:   intstr.FromInt(port),
+				Path:   path,
+				Scheme: corev1.URIScheme(t.ReadinessScheme),
 			},
 		},
 	}

@@ -25,6 +25,7 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
@@ -97,9 +98,40 @@ func TestProbesOnDeployment(t *testing.T) {
 	assert.Equal(t, "", target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Host)
 	assert.Equal(t, int32(defaultContainerPort), target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Port.IntVal)
 	assert.Equal(t, defaultProbePath, target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Path)
+	assert.Equal(t, corev1.URISchemeHTTP, target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Scheme)
 	assert.Equal(t, "", target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Host)
 	assert.Equal(t, int32(defaultContainerPort), target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Port.IntVal)
 	assert.Equal(t, defaultProbePath, target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Path)
+	assert.Equal(t, corev1.URISchemeHTTP, target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Scheme)
+	assert.Equal(t, int32(1234), target.Spec.Template.Spec.Containers[0].LivenessProbe.TimeoutSeconds)
+}
+
+func TestProbesOnDeploymentWithCustomScheme(t *testing.T) {
+	target := appsv1.Deployment{}
+
+	env := newTestProbesEnv(t, v1.RuntimeProviderQuarkus)
+	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
+	env.Resources.Add(&target)
+
+	expose := true
+
+	ctr := newTestContainerTrait()
+	ctr.Expose = &expose
+	ctr.LivenessTimeout = 1234
+	ctr.LivenessScheme = "HTTPS"
+	ctr.ReadinessScheme = "HTTPS"
+
+	err := ctr.Apply(&env)
+	assert.Nil(t, err)
+
+	assert.Equal(t, "", target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Host)
+	assert.Equal(t, int32(defaultContainerPort), target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Port.IntVal)
+	assert.Equal(t, defaultProbePath, target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Path)
+	assert.Equal(t, corev1.URISchemeHTTPS, target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Scheme)
+	assert.Equal(t, "", target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Host)
+	assert.Equal(t, int32(defaultContainerPort), target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Port.IntVal)
+	assert.Equal(t, defaultProbePath, target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Path)
+	assert.Equal(t, corev1.URISchemeHTTPS, target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Scheme)
 	assert.Equal(t, int32(1234), target.Spec.Template.Spec.Containers[0].LivenessProbe.TimeoutSeconds)
 }
 
