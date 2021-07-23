@@ -14,10 +14,12 @@
 - Release 1.4.1 [\#2471](https://github.com/apache/camel-k/issues/2471)
 - Release 1.5.0 [\#2470](https://github.com/apache/camel-k/issues/2470)
 - Duplicated trait set as modeline and kamel run parameters causes error [\#2466](https://github.com/apache/camel-k/issues/2466)
+- Update Camel K Serverless api examples to not use --property-file [\#2463](https://github.com/apache/camel-k/issues/2463)
 
 **Merged pull requests:**
 
 - Use https instead of http for xsd location [\#2517](https://github.com/apache/camel-k/pull/2517) ([apupier](https://github.com/apupier))
+- Add classpath kamelet loading test [\#2516](https://github.com/apache/camel-k/pull/2516) ([bouskaJ](https://github.com/bouskaJ))
 - fix\(\#2514\): Fix tar.gz changes the uid/gid of cwd [\#2515](https://github.com/apache/camel-k/pull/2515) ([christophd](https://github.com/christophd))
 - Fix Typo [\#2511](https://github.com/apache/camel-k/pull/2511) ([mattheh](https://github.com/mattheh))
 - chore\(release\): bump version to 1.6.0-SNAPSHOT and remove deprecated … [\#2510](https://github.com/apache/camel-k/pull/2510) ([nicolaferraro](https://github.com/nicolaferraro))
