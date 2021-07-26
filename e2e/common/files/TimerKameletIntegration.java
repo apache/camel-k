@@ -19,11 +19,10 @@ import java.lang.Exception;
 import java.lang.Override;
 import org.apache.camel.builder.RouteBuilder;
 
-public class ChuckNorrisKamelet extends RouteBuilder {
+public class TimerKameletIntegration extends RouteBuilder {
     @Override
     public void configure() throws Exception {
-        from("kamelet:chuck-norris-source")
-            .setBody(simple("Received another joke: ${body}"))
+        from("kamelet:timer-source?message=important%20message")
             .to("log:info");
     }
 }

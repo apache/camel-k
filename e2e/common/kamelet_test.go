@@ -34,21 +34,20 @@ func TestKameletClasspathLoading(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
-		kameletName := "chuck-norris-source"
+		kameletName := "timer-source"
 		removeKamelet(kameletName , ns)
 
 		Eventually(Kamelet(kameletName, ns)).Should(BeNil())
 
-		Expect(Kamel("run", "files/ChuckNorrisKamelet.java", "-n", ns, "-t", "kamelets.enabled=false",
-			"-d", "github:apache.camel-kamelets:camel-kamelets-catalog:main-SNAPSHOT",
+		Expect(Kamel("run", "files/TimerKameletIntegration.java", "-n", ns, "-t", "kamelets.enabled=false",
+			"--resource", "file:files/timer-source.kamelet.yaml@/kamelets/timer-source.kamelet.yaml",
+			"-p camel.component.kamelet.location=file:/kamelets",
 			"-d", "camel:yaml-dsl",
 			// kamelet dependencies
-			"-d", "camel:timer",
-			"-d", "camel:jsonpath",
-			"-d", "camel:http").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "chuck-norris-kamelet"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			"-d", "camel:timer").Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, "timer-kamelet-integration"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 
-		Eventually(IntegrationLogs(ns, "chuck-norris-kamelet")).Should(ContainSubstring("Received another joke:"))
+		Eventually(IntegrationLogs(ns, "timer-kamelet-integration")).Should(ContainSubstring("important message"))
 
 		// Cleanup
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
