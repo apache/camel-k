@@ -58,6 +58,7 @@ cross_compile () {
 
 cross_compile ${basename}-${version}-linux-64bit linux amd64
 cross_compile ${basename}-${version}-mac-64bit darwin amd64
+cross_compile ${basename}-${version}-mac-arm64bit darwin arm64
 cross_compile ${basename}-${version}-windows-64bit windows amd64
 
 
