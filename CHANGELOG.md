@@ -18,6 +18,7 @@
 
 **Merged pull requests:**
 
+- \[test\] Remove 3rd party dependencies [\#2529](https://github.com/apache/camel-k/pull/2529) ([bouskaJ](https://github.com/bouskaJ))
 - Use https instead of http for xsd location [\#2517](https://github.com/apache/camel-k/pull/2517) ([apupier](https://github.com/apupier))
 - Add classpath kamelet loading test [\#2516](https://github.com/apache/camel-k/pull/2516) ([bouskaJ](https://github.com/bouskaJ))
 - fix\(\#2514\): Fix tar.gz changes the uid/gid of cwd [\#2515](https://github.com/apache/camel-k/pull/2515) ([christophd](https://github.com/christophd))
@@ -37,6 +38,7 @@
 - Fix \#2468: parse all YAML nodes in the tree [\#2476](https://github.com/apache/camel-k/pull/2476) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(cli\) Duplicated trait set as modeline and kamel run parameters causes error [\#2467](https://github.com/apache/camel-k/pull/2467) ([claudio4j](https://github.com/claudio4j))
 - doc\(architecture\): trait section [\#2465](https://github.com/apache/camel-k/pull/2465) ([squakez](https://github.com/squakez))
+- test: Missing cli e2e tests implementation [\#2461](https://github.com/apache/camel-k/pull/2461) ([vsokolov00](https://github.com/vsokolov00))
 - chore: Remove Camel Sources support from Knative trait [\#2460](https://github.com/apache/camel-k/pull/2460) ([astefanutti](https://github.com/astefanutti))
 - chore: Update embedded camel-catalog-1.8.0-SNAPSHOT.yaml [\#2459](https://github.com/apache/camel-k/pull/2459) ([astefanutti](https://github.com/astefanutti))
 - chore: Remove unsupported probe-path property from container trait [\#2458](https://github.com/apache/camel-k/pull/2458) ([astefanutti](https://github.com/astefanutti))
