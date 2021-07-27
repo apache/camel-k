@@ -18,7 +18,7 @@
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: camel-k-builder-kubernetes
+  name: camel-k-builder
   labels:
     app: "camel-k"
 subjects:
@@ -26,5 +26,5 @@ subjects:
   name: camel-k-builder
 roleRef:
   kind: Role
-  name: camel-k-builder-kubernetes
+  name: camel-k-builder
   apiGroup: rbac.authorization.k8s.io
