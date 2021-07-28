@@ -78,17 +78,20 @@ func (t *ownerTrait) Apply(e *Environment) error {
 	}
 
 	e.Resources.VisitMetaObject(func(res metav1.Object) {
-		references := []metav1.OwnerReference{
-			{
-				APIVersion:         e.Integration.APIVersion,
-				Kind:               e.Integration.Kind,
-				Name:               e.Integration.Name,
-				UID:                e.Integration.UID,
-				Controller:         &controller,
-				BlockOwnerDeletion: &blockOwnerDeletion,
-			},
+		// Avoid setting owner references across namespaces (resources are asynchronously refused by the api server)
+		if res.GetNamespace() == "" || res.GetNamespace() == e.Integration.Namespace {
+			references := []metav1.OwnerReference{
+				{
+					APIVersion:         e.Integration.APIVersion,
+					Kind:               e.Integration.Kind,
+					Name:               e.Integration.Name,
+					UID:                e.Integration.UID,
+					Controller:         &controller,
+					BlockOwnerDeletion: &blockOwnerDeletion,
+				},
+			}
+			res.SetOwnerReferences(references)
 		}
-		res.SetOwnerReferences(references)
 
 		// Transfer annotations
 		t.propagateLabelAndAnnotations(res, targetLabels, targetAnnotations)

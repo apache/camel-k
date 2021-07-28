@@ -122,6 +122,10 @@ func (t *pullSecretTrait) newImagePullerRoleBinding(e *Environment) *rbacv1.Role
 		serviceAccount = "default"
 	}
 	return &rbacv1.RoleBinding{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "RoleBinding",
+			APIVersion: rbacv1.SchemeGroupVersion.String(),
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: e.Integration.GetIntegrationKitNamespace(e.Platform),
 			Name:      fmt.Sprintf("camel-k-puller-%s", e.Integration.Namespace),
