@@ -19,6 +19,7 @@
 **Merged pull requests:**
 
 - \[test\] Remove 3rd party dependencies [\#2529](https://github.com/apache/camel-k/pull/2529) ([bouskaJ](https://github.com/bouskaJ))
+- Allow Probe Scheme to Be Customized [\#2527](https://github.com/apache/camel-k/pull/2527) ([Kyle-Cooley](https://github.com/Kyle-Cooley))
 - Use https instead of http for xsd location [\#2517](https://github.com/apache/camel-k/pull/2517) ([apupier](https://github.com/apupier))
 - Add classpath kamelet loading test [\#2516](https://github.com/apache/camel-k/pull/2516) ([bouskaJ](https://github.com/bouskaJ))
 - fix\(\#2514\): Fix tar.gz changes the uid/gid of cwd [\#2515](https://github.com/apache/camel-k/pull/2515) ([christophd](https://github.com/christophd))
