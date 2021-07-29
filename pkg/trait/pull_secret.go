@@ -23,7 +23,9 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/openshift"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -109,14 +111,41 @@ func (t *pullSecretTrait) Apply(e *Environment) error {
 		})
 	}
 	if util.IsTrue(t.ImagePullerDelegation) {
-		rb := t.newImagePullerRoleBinding(e)
-		e.Resources.Add(rb)
+		if err := t.delegateImagePuller(e); err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
+func (t *pullSecretTrait) delegateImagePuller(e *Environment) error {
+	// Applying the rolebinding directly because it's a resource in the operator namespace
+	// (different from the integration namespace when delegation is enabled).
+	rb := t.newImagePullerRoleBinding(e)
+	if err := kubernetes.ReplaceResource(e.C, e.Client, rb); err != nil {
+		return errors.Wrap(err, "error during the creation of the system:image-puller delegating role binding")
+	}
+	return nil
+}
+
 func (t *pullSecretTrait) newImagePullerRoleBinding(e *Environment) *rbacv1.RoleBinding {
+	targetNamespace := e.Integration.GetIntegrationKitNamespace(e.Platform)
+	var references []metav1.OwnerReference
+	if e.Platform != nil && e.Platform.Namespace == targetNamespace {
+		controller := true
+		blockOwnerDeletion := true
+		references = []metav1.OwnerReference{
+			{
+				APIVersion:         e.Platform.APIVersion,
+				Kind:               e.Platform.Kind,
+				Name:               e.Platform.Name,
+				UID:                e.Platform.UID,
+				Controller:         &controller,
+				BlockOwnerDeletion: &blockOwnerDeletion,
+			},
+		}
+	}
 	serviceAccount := e.Integration.Spec.ServiceAccountName
 	if serviceAccount == "" {
 		serviceAccount = "default"
@@ -127,8 +156,9 @@ func (t *pullSecretTrait) newImagePullerRoleBinding(e *Environment) *rbacv1.Role
 			APIVersion: rbacv1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: e.Integration.GetIntegrationKitNamespace(e.Platform),
-			Name:      fmt.Sprintf("camel-k-puller-%s", e.Integration.Namespace),
+			Namespace:       targetNamespace,
+			Name:            fmt.Sprintf("camel-k-puller-%s-%s", e.Integration.Namespace, serviceAccount),
+			OwnerReferences: references,
 		},
 		RoleRef: rbacv1.RoleRef{
 			Kind: "ClusterRole",
