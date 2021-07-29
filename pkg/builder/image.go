@@ -34,7 +34,7 @@ import (
 
 const (
 	ContextDir      = "context"
-	DeploymentDir   = "/deployments"
+	DeploymentDir   = "/home/nonroot"
 	DependenciesDir = "dependencies"
 )
 
@@ -118,17 +118,17 @@ func imageContext(ctx *builderContext, selector artifactsSelector) error {
 		return err
 	}
 
+	err = os.Chmod(path.Join(contextDir, runner), 0755)
+	if err != nil {
+		return err
+	}
+
 	// #nosec G202
 	dockerfile := []byte(`
-		FROM ` + ctx.BaseImage + `
-		ADD . ` + DeploymentDir + `
-
-		RUN chmod 775 ` + DeploymentDir + ` ` + DeploymentDir + `/` + runner + ` \
-		  && chown -R 1000 ` + DeploymentDir + ` \
-		  && chmod -R "g+rwX" ` + DeploymentDir + ` \
-		  && chown -R 1000:root ` + DeploymentDir + `
-
-		USER 1000
+		FROM quay.io/quarkus/quarkus-distroless-image:1.0
+		WORKDIR ` + DeploymentDir + `
+		COPY --chown=nonroot:root ` + runner + ` ` + runner + `
+		USER nonroot
 	`)
 
 	err = ioutil.WriteFile(path.Join(contextDir, "Dockerfile"), dockerfile, 0777)
