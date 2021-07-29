@@ -37,6 +37,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 // The JVM trait is used to configure the JVM that runs the integration.
@@ -185,13 +186,12 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	args = append(args, e.CamelCatalog.Runtime.ApplicationClass)
 
 	if IsNilOrTrue(t.PrintCommand) {
-		args = append([]string{"exec", "java"}, args...)
+		args = []string{"exec", "./camel-k-integration-" + defaults.Version + "-runner"}
 		container.Command = []string{"/bin/sh", "-c"}
 		cmd := strings.Join(args, " ")
 		container.Args = []string{"echo " + cmd + " && " + cmd}
 	} else {
-		container.Command = []string{"java"}
-		container.Args = args
+		container.Command = []string{"./camel-k-integration-" + defaults.Version + "-runner"}
 	}
 
 	container.WorkingDir = builder.DeploymentDir

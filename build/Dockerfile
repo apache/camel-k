@@ -13,11 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM adoptopenjdk/openjdk11:slim
+FROM quay.io/quarkus/ubi-quarkus-native-image:21.1.0-java11
+#FROM quay.io/quarkus/ubi-quarkus-mandrel:21.2.0.0-Final-java11
 
 ARG MAVEN_VERSION="3.6.3"
 ARG SHA="c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0"
 ARG BASE_URL="https://apache.osuosl.org/maven/maven-3/${MAVEN_VERSION}/binaries"
+
+USER 0
 
 RUN mkdir -p /usr/share/maven \
     && curl -Lso /tmp/maven.tar.gz ${BASE_URL}/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
@@ -33,8 +36,6 @@ COPY build/_maven_overlay/ /usr/share/maven/lib/
 ADD build/logback.xml /usr/share/maven/conf/
 
 ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=/usr/share/maven/conf/logback.xml"
-
-USER 0
 
 RUN chgrp -R 0 /tmp/artifacts/m2 \
     && chmod -R g=u /tmp/artifacts/m2 \
