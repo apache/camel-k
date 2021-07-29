@@ -18,10 +18,16 @@ limitations under the License.
 package builder
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"context"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -42,7 +48,6 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
 	"github.com/apache/camel-k/pkg/util/log"
-	"github.com/apache/camel-k/pkg/util/zip"
 )
 
 type s2iTask struct {
@@ -140,7 +145,7 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 	if err != nil {
 		return status.Failed(err)
 	}
-	archive := path.Join(tmpDir, "archive.zip")
+	archive := path.Join(tmpDir, "archive.tar.gz")
 	defer os.RemoveAll(tmpDir)
 
 	contextDir := t.task.ContextDir
@@ -156,14 +161,19 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 		contextDir = path.Join(pwd, ContextDir)
 	}
 
-	err = zip.Directory(contextDir, archive)
+	archiveFile, err := os.Create(archive)
 	if err != nil {
-		return status.Failed(errors.Wrap(err, "cannot zip context directory"))
+		return status.Failed(errors.Wrap(err, "cannot create tar archive"))
+	}
+
+	err = tarDir(contextDir, archiveFile)
+	if err != nil {
+		return status.Failed(errors.Wrap(err, "cannot tar context directory"))
 	}
 
 	resource, err := ioutil.ReadFile(archive)
 	if err != nil {
-		return status.Failed(errors.Wrap(err, "cannot fully read zip file "+archive))
+		return status.Failed(errors.Wrap(err, "cannot read tar file "+archive))
 	}
 
 	restClient, err := customclient.GetClientFor(t.c, "build.openshift.io", "v1")
@@ -274,4 +284,56 @@ func (t *s2iTask) cancelBuild(ctx context.Context, build *buildv1.Build) error {
 	}
 	*build = *target
 	return nil
+}
+
+func tarDir(src string, writers ...io.Writer) error {
+	// ensure the src actually exists before trying to tar it
+	if _, err := os.Stat(src); err != nil {
+		return fmt.Errorf("unable to tar files - %v", err.Error())
+	}
+
+	mw := io.MultiWriter(writers...)
+
+	gzw := gzip.NewWriter(mw)
+	defer gzw.Close()
+
+	tw := tar.NewWriter(gzw)
+	defer tw.Close()
+
+	return filepath.Walk(src, func(file string, fi os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !fi.Mode().IsRegular() {
+			return nil
+		}
+
+		header, err := tar.FileInfoHeader(fi, fi.Name())
+		if err != nil {
+			return err
+		}
+
+		// update the name to correctly reflect the desired destination when un-taring
+		header.Name = strings.TrimPrefix(strings.Replace(file, src, "", -1), string(filepath.Separator))
+
+		if err := tw.WriteHeader(header); err != nil {
+			return err
+		}
+
+		f, err := os.Open(file)
+		if err != nil {
+			return err
+		}
+
+		if _, err := io.Copy(tw, f); err != nil {
+			return err
+		}
+
+		// manually close here after each file operation; deferring would cause each file close
+		// to wait until all operations have completed.
+		f.Close()
+
+		return nil
+	})
 }
