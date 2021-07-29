@@ -18,19 +18,23 @@ limitations under the License.
 package trait
 
 import (
-	"strings"
+	"context"
 	"testing"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/test"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPullSecret(t *testing.T) {
-	e, deployment := getEnvironmentAndDeployment()
+	e, deployment := getEnvironmentAndDeployment(t)
 
 	trait := newPullSecretTrait().(*pullSecretTrait)
 	trait.SecretName = "xxxy"
@@ -44,7 +48,7 @@ func TestPullSecret(t *testing.T) {
 }
 
 func TestPullSecretDoesNothingWhenNotSetOnPlatform(t *testing.T) {
-	e, _ := getEnvironmentAndDeployment()
+	e, _ := getEnvironmentAndDeployment(t)
 	e.Platform = &v1.IntegrationPlatform{}
 
 	trait := newPullSecretTrait()
@@ -54,7 +58,7 @@ func TestPullSecretDoesNothingWhenNotSetOnPlatform(t *testing.T) {
 }
 
 func TestPullSecretAuto(t *testing.T) {
-	e, _ := getEnvironmentAndDeployment()
+	e, _ := getEnvironmentAndDeployment(t)
 
 	trait := newPullSecretTrait().(*pullSecretTrait)
 	trait.Auto = newFalse()
@@ -64,7 +68,7 @@ func TestPullSecretAuto(t *testing.T) {
 }
 
 func TestPullSecretImagePullerDelegation(t *testing.T) {
-	e, _ := getEnvironmentAndDeployment()
+	e, _ := getEnvironmentAndDeployment(t)
 
 	trait := newPullSecretTrait().(*pullSecretTrait)
 	trait.Auto = newFalse()
@@ -75,27 +79,35 @@ func TestPullSecretImagePullerDelegation(t *testing.T) {
 	assert.True(t, *trait.ImagePullerDelegation)
 
 	err = trait.Apply(e)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	found := false
-	for _, item := range e.Resources.Items() {
-		found = strings.HasPrefix(item.GetName(), "camel-k-puller")
-		if found {
-			break
-		}
+	var roleBinding rbacv1.RoleBinding
+	roleBindingKey := client.ObjectKey{
+		Namespace: "test",
+		Name:      "camel-k-puller-test-default",
 	}
-	assert.True(t, found)
+	err = e.Client.Get(e.C, roleBindingKey, &roleBinding)
+	assert.NoError(t, err)
+	assert.Len(t, roleBinding.Subjects, 1)
 }
 
-func getEnvironmentAndDeployment() (*Environment, *appsv1.Deployment) {
+func getEnvironmentAndDeployment(t *testing.T) (*Environment, *appsv1.Deployment) {
 	e := &Environment{}
 	e.Integration = &v1.Integration{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "myit",
+		},
 		Status: v1.IntegrationStatus{
 			Phase: v1.IntegrationPhaseDeploying,
 		},
 	}
 
 	deployment := appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "myit",
+		},
 		Spec: appsv1.DeploymentSpec{
 			Template: corev1.PodTemplateSpec{
 				Spec: corev1.PodSpec{},
@@ -103,6 +115,11 @@ func getEnvironmentAndDeployment() (*Environment, *appsv1.Deployment) {
 		},
 	}
 	e.Resources = kubernetes.NewCollection(&deployment)
+
+	var err error
+	e.C = context.TODO()
+	e.Client, err = test.NewFakeClient(e.Integration, &deployment)
+	assert.NoError(t, err)
 
 	return e, &deployment
 }
