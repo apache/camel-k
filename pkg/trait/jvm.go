@@ -185,15 +185,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	args = append(args, "-cp", strings.Join(items, ":"))
 	args = append(args, e.CamelCatalog.Runtime.ApplicationClass)
 
-	if IsNilOrTrue(t.PrintCommand) {
-		args = []string{"exec", "./camel-k-integration-" + defaults.Version + "-runner"}
-		container.Command = []string{"/bin/sh", "-c"}
-		cmd := strings.Join(args, " ")
-		container.Args = []string{"echo " + cmd + " && " + cmd}
-	} else {
-		container.Command = []string{"./camel-k-integration-" + defaults.Version + "-runner"}
-	}
-
+	container.Command = []string{"./camel-k-integration-" + defaults.Version + "-runner"}
 	container.WorkingDir = builder.DeploymentDir
 
 	return nil
