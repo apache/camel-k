@@ -29,6 +29,7 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/controller"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 const (
@@ -111,10 +112,22 @@ func imageContext(ctx *builderContext, selector artifactsSelector) error {
 		}
 	}
 
+	runner := "camel-k-integration-" + defaults.Version + "-runner"
+	_, err = util.CopyFile(path.Join(ctx.Path, "maven", "target", runner), path.Join(contextDir, runner))
+	if err != nil {
+		return err
+	}
+
 	// #nosec G202
 	dockerfile := []byte(`
 		FROM ` + ctx.BaseImage + `
 		ADD . ` + DeploymentDir + `
+
+		RUN chmod 775 ` + DeploymentDir + ` ` + DeploymentDir + `/` + runner + ` \
+		  && chown -R 1000 ` + DeploymentDir + ` \
+		  && chmod -R "g+rwX" ` + DeploymentDir + ` \
+		  && chown -R 1000:root ` + DeploymentDir + `
+
 		USER 1000
 	`)
 

@@ -109,7 +109,8 @@ func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion str
 	p.Properties["quarkus.banner.enabled"] = "false"
 
 	// set fast-jar packaging since it gives some startup time improvements
-	p.Properties["quarkus.package.type"] = "fast-jar"
+	p.Properties["quarkus.package.type"] = "native"
+	// p.Properties["quarkus.native.additional-build-args"] = "--language:js"
 
 	// DependencyManagement
 	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies,
