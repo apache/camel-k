@@ -78,7 +78,9 @@ func (t *ownerTrait) Apply(e *Environment) error {
 	}
 
 	e.Resources.VisitMetaObject(func(res metav1.Object) {
-		// Avoid setting owner references across namespaces (resources are asynchronously refused by the api server)
+		// Cross-namespace references are forbidden and also asynchronously refused
+		// by the api server (sometimes no error is thrown but the resource is not created).
+		// Ref: https://github.com/kubernetes/kubernetes/issues/65200
 		if res.GetNamespace() == "" || res.GetNamespace() == e.Integration.Namespace {
 			references := []metav1.OwnerReference{
 				{
