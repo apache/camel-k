@@ -15,9 +15,11 @@
 - Release 1.5.0 [\#2470](https://github.com/apache/camel-k/issues/2470)
 - Duplicated trait set as modeline and kamel run parameters causes error [\#2466](https://github.com/apache/camel-k/issues/2466)
 - Update Camel K Serverless api examples to not use --property-file [\#2463](https://github.com/apache/camel-k/issues/2463)
+- kamel CLI binary for apple silicon / arm [\#2022](https://github.com/apache/camel-k/issues/2022)
 
 **Merged pull requests:**
 
+- chore: add support for darwin/atm64 [\#2532](https://github.com/apache/camel-k/pull/2532) ([lburgazzoli](https://github.com/lburgazzoli))
 - \[test\] Remove 3rd party dependencies [\#2529](https://github.com/apache/camel-k/pull/2529) ([bouskaJ](https://github.com/bouskaJ))
 - Allow Probe Scheme to Be Customized [\#2527](https://github.com/apache/camel-k/pull/2527) ([Kyle-Cooley](https://github.com/Kyle-Cooley))
 - Use https instead of http for xsd location [\#2517](https://github.com/apache/camel-k/pull/2517) ([apupier](https://github.com/apupier))
