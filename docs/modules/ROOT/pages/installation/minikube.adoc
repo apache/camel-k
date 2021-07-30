@@ -16,4 +16,9 @@ After the startup process is completed, you need to **enable the `registry` addo
 minikube addons enable registry
 ```
 
+Alternatively, you can also start an instance with the `registry` addon in one command:
+```
+minikube start --addons registry
+```
+
 You can now proceed with the xref:installation/installation.adoc#procedure[standard Camel K installation procedure].
