@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Error in OpenShift image-pull delegation on IBM Cloud [\#2530](https://github.com/apache/camel-k/issues/2530)
 - camel-k-client tar.gz changes the uid/gid of cwd [\#2514](https://github.com/apache/camel-k/issues/2514)
 - \[CMD\] `kamel bind` empty error handler [\#2493](https://github.com/apache/camel-k/issues/2493)
 - ServiceBinding CR sometimes doesn't get created [\#2482](https://github.com/apache/camel-k/issues/2482)
@@ -19,6 +20,7 @@
 
 **Merged pull requests:**
 
+- Fix \#2530: fix type and do not add cross-namespace owner references [\#2535](https://github.com/apache/camel-k/pull/2535) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore: add support for darwin/atm64 [\#2532](https://github.com/apache/camel-k/pull/2532) ([lburgazzoli](https://github.com/lburgazzoli))
 - \[test\] Remove 3rd party dependencies [\#2529](https://github.com/apache/camel-k/pull/2529) ([bouskaJ](https://github.com/bouskaJ))
 - Allow Probe Scheme to Be Customized [\#2527](https://github.com/apache/camel-k/pull/2527) ([Kyle-Cooley](https://github.com/Kyle-Cooley))
