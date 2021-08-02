@@ -46,6 +46,7 @@ import (
 
 // True --
 const True = "true"
+const False = "false"
 
 var (
 	basePath                  = "/etc/camel"
