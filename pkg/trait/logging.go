@@ -90,8 +90,12 @@ func (l loggingTrait) Apply(environment *Environment) error {
 		if util.IsTrue(l.JsonPrettyPrint) {
 			envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJsonPrettyPrint, True)
 		}
-	} else if util.IsNilOrTrue(l.Color) {
-		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleColor, True)
+	} else {
+		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJson, False)
+
+		if util.IsNilOrTrue(l.Color) {
+			envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleColor, True)
+		}
 	}
 
 	return nil
