@@ -20,6 +20,7 @@
 
 **Merged pull requests:**
 
+- Forcelly set QUARKUS\_LOG\_CONSOLE\_JSON to false if the trait is not provided \(GH issue \#2539\) [\#2540](https://github.com/apache/camel-k/pull/2540) ([orpiske](https://github.com/orpiske))
 - Fix \#2530: fix type and do not add cross-namespace owner references [\#2535](https://github.com/apache/camel-k/pull/2535) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore: add support for darwin/atm64 [\#2532](https://github.com/apache/camel-k/pull/2532) ([lburgazzoli](https://github.com/lburgazzoli))
 - \[test\] Remove 3rd party dependencies [\#2529](https://github.com/apache/camel-k/pull/2529) ([bouskaJ](https://github.com/bouskaJ))
