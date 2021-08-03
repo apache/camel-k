@@ -27,7 +27,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -165,7 +164,7 @@ func TestMavenPropertyBuilderTrait(t *testing.T) {
 
 func createNominalBuilderTraitTest() *builderTrait {
 	builderTrait := newBuilderTrait().(*builderTrait)
-	builderTrait.Enabled = util.BoolP(true)
+	builderTrait.Enabled = BoolP(true)
 
 	return builderTrait
 }

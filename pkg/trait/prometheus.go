@@ -52,7 +52,7 @@ type prometheusTrait struct {
 func newPrometheusTrait() Trait {
 	return &prometheusTrait{
 		BaseTrait:  NewBaseTrait("prometheus", 1900),
-		PodMonitor: util.BoolP(true),
+		PodMonitor: BoolP(true),
 	}
 }
 
@@ -102,7 +102,7 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	condition.Message = fmt.Sprintf("%s(%d)", container.Name, containerPort.ContainerPort)
 
 	// Add the PodMonitor resource
-	if util.IsTrue(t.PodMonitor) {
+	if IsTrue(t.PodMonitor) {
 		portName := containerPort.Name
 		// Knative defaults to naming the userland container port "user-port".
 		// Let's rely on that default, granted it is not officially part of the Knative

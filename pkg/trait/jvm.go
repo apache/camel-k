@@ -62,7 +62,7 @@ func newJvmTrait() Trait {
 	return &jvmTrait{
 		BaseTrait:    NewBaseTrait("jvm", 2000),
 		DebugAddress: "*:5005",
-		PrintCommand: util.BoolP(true),
+		PrintCommand: BoolP(true),
 	}
 }
 
@@ -132,9 +132,9 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	args := container.Args
 
 	// Remote debugging
-	if util.IsTrue(t.Debug) {
+	if IsTrue(t.Debug) {
 		suspend := "n"
-		if util.IsTrue(t.DebugSuspend) {
+		if IsTrue(t.DebugSuspend) {
 			suspend = "y"
 		}
 		args = append(args,
@@ -184,7 +184,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	args = append(args, "-cp", strings.Join(items, ":"))
 	args = append(args, e.CamelCatalog.Runtime.ApplicationClass)
 
-	if util.IsNilOrTrue(t.PrintCommand) {
+	if IsNilOrTrue(t.PrintCommand) {
 		args = append([]string{"exec", "java"}, args...)
 		container.Command = []string{"/bin/sh", "-c"}
 		cmd := strings.Join(args, " ")

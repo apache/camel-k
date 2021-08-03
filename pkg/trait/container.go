@@ -118,7 +118,7 @@ func newContainerTrait() Trait {
 		ServicePort:     defaultServicePort,
 		ServicePortName: defaultContainerPortName,
 		Name:            defaultContainerName,
-		ProbesEnabled:   util.BoolP(false),
+		ProbesEnabled:   BoolP(false),
 		LivenessScheme:  string(corev1.URISchemeHTTP),
 		ReadinessScheme: string(corev1.URISchemeHTTP),
 	}
@@ -133,7 +133,7 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if util.IsNilOrTrue(t.Auto) {
+	if IsNilOrTrue(t.Auto) {
 		if t.Expose == nil {
 			e := e.Resources.GetServiceForIntegration(e.Integration) != nil
 			t.Expose = &e
@@ -192,7 +192,7 @@ func (t *containerTrait) configureDependencies(e *Environment) error {
 			e.Resources.Add(&kit)
 			e.Integration.SetIntegrationKit(&kit)
 		}
-		if util.IsTrue(t.ProbesEnabled) {
+		if IsTrue(t.ProbesEnabled) {
 			if capability, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityHealth]; ok {
 				for _, dependency := range capability.Dependencies {
 					util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dependency.GetDependencyID())
@@ -243,7 +243,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	}
 	// Deployment
 	if err := e.Resources.VisitDeploymentE(func(deployment *appsv1.Deployment) error {
-		if util.IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
+		if IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
 			t.configureProbes(&container, t.Port, defaultProbePath)
 		}
 
@@ -270,7 +270,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 
 	// Knative Service
 	if err := e.Resources.VisitKnativeServiceE(func(service *serving.Service) error {
-		if util.IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
+		if IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
 			// don't set the port on Knative service as it is not allowed.
 			t.configureProbes(&container, 0, defaultProbePath)
 		}
@@ -309,7 +309,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 
 	// CronJob
 	if err := e.Resources.VisitCronJobE(func(cron *v1beta1.CronJob) error {
-		if util.IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
+		if IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
 			t.configureProbes(&container, t.Port, defaultProbePath)
 		}
 

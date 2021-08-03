@@ -59,7 +59,7 @@ func newLoggingTraitTrait() Trait {
 }
 
 func (l loggingTrait) Configure(environment *Environment) (bool, error) {
-	if util.IsFalse(l.Enabled) {
+	if IsFalse(l.Enabled) {
 		return false, nil
 	}
 
@@ -69,7 +69,7 @@ func (l loggingTrait) Configure(environment *Environment) (bool, error) {
 
 func (l loggingTrait) Apply(environment *Environment) error {
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		if util.IsTrue(l.Json) {
+		if IsTrue(l.Json) {
 			if environment.Integration.Status.Dependencies == nil {
 				environment.Integration.Status.Dependencies = make([]string, 0)
 			}
@@ -85,15 +85,15 @@ func (l loggingTrait) Apply(environment *Environment) error {
 		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleFormat, l.Format)
 	}
 
-	if util.IsTrue(l.Json) {
+	if IsTrue(l.Json) {
 		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJson, True)
-		if util.IsTrue(l.JsonPrettyPrint) {
+		if IsTrue(l.JsonPrettyPrint) {
 			envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJsonPrettyPrint, True)
 		}
 	} else {
 		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJson, False)
 
-		if util.IsNilOrTrue(l.Color) {
+		if IsNilOrTrue(l.Color) {
 			envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleColor, True)
 		}
 	}

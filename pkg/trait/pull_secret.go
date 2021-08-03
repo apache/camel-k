@@ -22,7 +22,6 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	"github.com/pkg/errors"
@@ -61,7 +60,7 @@ func newPullSecretTrait() Trait {
 }
 
 func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
-	if util.IsFalse(t.Enabled) {
+	if IsFalse(t.Enabled) {
 		return false, nil
 	}
 
@@ -69,7 +68,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if util.IsNilOrTrue(t.Auto) {
+	if IsNilOrTrue(t.Auto) {
 		if t.SecretName == "" {
 			secret := e.Platform.Status.Build.Registry.Secret
 			if secret != "" {
@@ -99,7 +98,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 		}
 	}
 
-	return t.SecretName != "" || util.IsTrue(t.ImagePullerDelegation), nil
+	return t.SecretName != "" || IsTrue(t.ImagePullerDelegation), nil
 }
 
 func (t *pullSecretTrait) Apply(e *Environment) error {
@@ -110,7 +109,7 @@ func (t *pullSecretTrait) Apply(e *Environment) error {
 			})
 		})
 	}
-	if util.IsTrue(t.ImagePullerDelegation) {
+	if IsTrue(t.ImagePullerDelegation) {
 		if err := t.delegateImagePuller(e); err != nil {
 			return err
 		}

@@ -23,8 +23,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	corev1 "k8s.io/api/core/v1"
-
-	"github.com/apache/camel-k/pkg/util"
 )
 
 func TestConfigureTolerationTraitMissingTaint(t *testing.T) {
@@ -128,7 +126,7 @@ func TestTolerationValidTaints(t *testing.T) {
 
 func createNominalTolerationTrait() *tolerationTrait {
 	tolerationTrait := newTolerationTrait().(*tolerationTrait)
-	tolerationTrait.Enabled = util.BoolP(true)
+	tolerationTrait.Enabled = BoolP(true)
 	tolerationTrait.Taints = make([]string, 0)
 
 	return tolerationTrait

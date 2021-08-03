@@ -35,7 +35,6 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
@@ -148,8 +147,8 @@ func TestApplyJvmTraitWithKNativeResource(t *testing.T) {
 
 func TestApplyJvmTraitWithDebugEnabled(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	trait.Debug = util.BoolP(true)
-	trait.DebugSuspend = util.BoolP(true)
+	trait.Debug = BoolP(true)
+	trait.DebugSuspend = BoolP(true)
 
 	d := appsv1.Deployment{
 		Spec: appsv1.DeploymentSpec{
@@ -257,8 +256,8 @@ func createNominalJvmTest(kitType string) (*jvmTrait, *Environment) {
 	client, _ := test.NewFakeClient()
 
 	trait := newJvmTrait().(*jvmTrait)
-	trait.Enabled = util.BoolP(true)
-	trait.PrintCommand = util.BoolP(false)
+	trait.Enabled = BoolP(true)
+	trait.PrintCommand = BoolP(false)
 	trait.Ctx = context.TODO()
 	trait.Client = client
 
