@@ -23,7 +23,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -54,7 +53,7 @@ func newTolerationTrait() Trait {
 }
 
 func (t *tolerationTrait) Configure(e *Environment) (bool, error) {
-	if util.IsNilOrFalse(t.Enabled) {
+	if IsNilOrFalse(t.Enabled) {
 		return false, nil
 	}
 

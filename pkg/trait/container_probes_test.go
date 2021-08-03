@@ -28,7 +28,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
@@ -59,7 +58,7 @@ func newTestProbesEnv(t *testing.T, provider v1.RuntimeProvider) Environment {
 
 func newTestContainerTrait() *containerTrait {
 	tr := newContainerTrait().(*containerTrait)
-	tr.ProbesEnabled = util.BoolP(true)
+	tr.ProbesEnabled = BoolP(true)
 
 	return tr
 }

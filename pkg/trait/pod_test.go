@@ -12,7 +12,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -73,7 +72,7 @@ func TestChangeEnvVariables(t *testing.T) {
 
 func createPodTest(podSpecTemplate string) (*podTrait, *Environment, *appsv1.Deployment) {
 	trait := newPodTrait().(*podTrait)
-	trait.Enabled = util.BoolP(true)
+	trait.Enabled = BoolP(true)
 
 	var podSpec v1.PodSpec
 	if podSpecTemplate != "" {

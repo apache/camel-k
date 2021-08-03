@@ -104,7 +104,7 @@ func (t *knativeTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 }
 
 func (t *knativeTrait) Configure(e *Environment) (bool, error) {
-	if util.IsFalse(t.Enabled) {
+	if IsFalse(t.Enabled) {
 		return false, nil
 	}
 
@@ -112,7 +112,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if util.IsNilOrTrue(t.Auto) {
+	if IsNilOrTrue(t.Auto) {
 		if len(t.ChannelSources) == 0 {
 			items := make([]string, 0)
 			sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
@@ -206,7 +206,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *knativeTrait) Apply(e *Environment) error {
-	if util.IsTrue(t.SinkBinding) {
+	if IsTrue(t.SinkBinding) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k:camel-k-knative")
 	}
 
@@ -264,7 +264,7 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 				knativeapi.CamelMetaKnativeKind:       ref.Kind,
 				knativeapi.CamelMetaKnativeReply:      "false",
 			}
-			if util.IsTrue(t.FilterSourceChannels) {
+			if IsTrue(t.FilterSourceChannels) {
 				meta[knativeapi.CamelMetaFilterPrefix+knativeHistoryHeader] = loc.Host
 			}
 			svc := knativeapi.CamelServiceDefinition{
@@ -285,7 +285,7 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 		return err
 	}
 
-	if util.IsNilOrFalse(t.SinkBinding) {
+	if IsNilOrFalse(t.SinkBinding) {
 		// Sinks
 		err = t.ifServiceMissingDo(e, env, t.ChannelSinks, knativeapi.CamelServiceTypeChannel, knativeapi.CamelEndpointKindSink,
 			func(ref *corev1.ObjectReference, serviceURI string, urlProvider func() (*url.URL, error)) error {
@@ -345,7 +345,7 @@ func (t *knativeTrait) configureEndpoints(e *Environment, env *knativeapi.CamelE
 	}
 
 	// Sinks
-	if util.IsNilOrFalse(t.SinkBinding) {
+	if IsNilOrFalse(t.SinkBinding) {
 		err := t.ifServiceMissingDo(e, env, t.EndpointSinks, knativeapi.CamelServiceTypeEndpoint, knativeapi.CamelEndpointKindSink,
 			func(ref *corev1.ObjectReference, serviceURI string, urlProvider func() (*url.URL, error)) error {
 				loc, err := urlProvider()
@@ -403,7 +403,7 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 	}
 
 	// Sinks
-	if util.IsNilOrFalse(t.SinkBinding) {
+	if IsNilOrFalse(t.SinkBinding) {
 		err = t.ifServiceMissingDo(e, env, t.EventSinks, knativeapi.CamelServiceTypeEvent, knativeapi.CamelEndpointKindSink,
 			func(ref *corev1.ObjectReference, serviceURI string, urlProvider func() (*url.URL, error)) error {
 				loc, err := urlProvider()
@@ -444,7 +444,7 @@ func (t *knativeTrait) isSinkBindingAllowed(e *Environment) bool {
 }
 
 func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.CamelEnvironment) error {
-	if util.IsNilOrFalse(t.SinkBinding) {
+	if IsNilOrFalse(t.SinkBinding) {
 		return nil
 	}
 	var serviceType knativeapi.CamelServiceType
