@@ -85,10 +85,8 @@ func TestProbesOnDeployment(t *testing.T) {
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 	env.Resources.Add(&target)
 
-	expose := true
-
 	ctr := newTestContainerTrait()
-	ctr.Expose = &expose
+	ctr.Expose = BoolP(true)
 	ctr.LivenessTimeout = 1234
 
 	err := ctr.Apply(&env)
@@ -112,10 +110,8 @@ func TestProbesOnDeploymentWithCustomScheme(t *testing.T) {
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 	env.Resources.Add(&target)
 
-	expose := true
-
 	ctr := newTestContainerTrait()
-	ctr.Expose = &expose
+	ctr.Expose = BoolP(true)
 	ctr.LivenessTimeout = 1234
 	ctr.LivenessScheme = "HTTPS"
 	ctr.ReadinessScheme = "HTTPS"
@@ -158,10 +154,8 @@ func TestProbesOnKnativeService(t *testing.T) {
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 	env.Resources.Add(&target)
 
-	expose := true
-
 	ctr := newTestContainerTrait()
-	ctr.Expose = &expose
+	ctr.Expose = BoolP(true)
 	ctr.LivenessTimeout = 1234
 
 	err := ctr.Apply(&env)

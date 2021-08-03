@@ -57,7 +57,7 @@ func newPrometheusTrait() Trait {
 }
 
 func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
-	return t.Enabled != nil && *t.Enabled && e.IntegrationInPhase(
+	return IsTrue(t.Enabled) && e.IntegrationInPhase(
 		v1.IntegrationPhaseInitialization,
 		v1.IntegrationPhaseDeploying,
 		v1.IntegrationPhaseRunning,

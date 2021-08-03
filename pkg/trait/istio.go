@@ -52,7 +52,7 @@ func newIstioTrait() Trait {
 }
 
 func (t *istioTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && *t.Enabled {
+	if IsTrue(t.Enabled) {
 		return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
 	}
 

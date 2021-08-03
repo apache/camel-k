@@ -81,7 +81,7 @@ func (t *routeTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 }
 
 func (t *routeTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if IsFalse(t.Enabled) {
 		if e.Integration != nil {
 			e.Integration.Status.SetCondition(
 				v1.IntegrationConditionExposureAvailable,

@@ -43,7 +43,7 @@ func TestConfigureIngressTraitDoesSucceed(t *testing.T) {
 
 func TestConfigureDisabledIngressTraitDoesNotSucceed(t *testing.T) {
 	ingressTrait, environment := createNominalIngressTest()
-	ingressTrait.Enabled = new(bool)
+	ingressTrait.Enabled = BoolP(false)
 
 	configured, err := ingressTrait.Configure(environment)
 
@@ -67,8 +67,7 @@ func TestConfigureIngressTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 
 func TestConfigureAutoIngressTraitWithoutUserServiceDoesNotSucceed(t *testing.T) {
 	ingressTrait, environment := createNominalIngressTest()
-	auto := true
-	ingressTrait.Auto = &auto
+	ingressTrait.Auto = BoolP(true)
 	environment.Resources = kubernetes.NewCollection()
 
 	configured, err := ingressTrait.Configure(environment)
@@ -156,9 +155,8 @@ func TestApplyIngressTraitDoesSucceed(t *testing.T) {
 
 func createNominalIngressTest() (*ingressTrait, *Environment) {
 	trait := newIngressTrait().(*ingressTrait)
-	enabled := true
-	trait.Enabled = &enabled
-	trait.Auto = new(bool)
+	trait.Enabled = BoolP(true)
+	trait.Auto = BoolP(false)
 	trait.Host = "hostname"
 
 	environment := &Environment{

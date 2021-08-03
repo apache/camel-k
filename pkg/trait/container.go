@@ -125,7 +125,7 @@ func newContainerTrait() Trait {
 }
 
 func (t *containerTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if IsFalse(t.Enabled) {
 		return false, nil
 	}
 
@@ -232,7 +232,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 
 	t.configureResources(e, &container)
 
-	if t.Expose != nil && *t.Expose {
+	if IsTrue(t.Expose) {
 		t.configureService(e, &container)
 	}
 	t.configureCapabilities(e)

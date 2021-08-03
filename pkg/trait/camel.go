@@ -45,7 +45,7 @@ func newCamelTrait() Trait {
 }
 
 func (t *camelTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if IsFalse(t.Enabled) {
 		return false, errors.New("trait camel cannot be disabled")
 	}
 

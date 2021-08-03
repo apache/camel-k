@@ -94,8 +94,7 @@ func findPdb(resources *kubernetes.Collection) *v1beta1.PodDisruptionBudget {
 
 func createPdbTest() (*pdbTrait, *Environment, *appsv1.Deployment) {
 	trait := newPdbTrait().(*pdbTrait)
-	enabled := true
-	trait.Enabled = &enabled
+	trait.Enabled = BoolP(true)
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{

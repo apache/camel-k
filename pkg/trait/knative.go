@@ -193,8 +193,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		}
 		if t.FilterSourceChannels == nil {
 			// Filtering is no longer used by default
-			filter := false
-			t.FilterSourceChannels = &filter
+			t.FilterSourceChannels = BoolP(false)
 		}
 		if t.SinkBinding == nil {
 			allowed := t.isSinkBindingAllowed(e)

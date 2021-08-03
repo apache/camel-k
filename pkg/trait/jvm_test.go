@@ -68,7 +68,7 @@ func TestConfigureJvmTraitInWrongIntegrationKitPhaseDoesNotSucceed(t *testing.T)
 
 func TestConfigureJvmDisabledTraitDoesNotSucceed(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	trait.Enabled = new(bool)
+	trait.Enabled = BoolP(false)
 
 	configured, err := trait.Configure(environment)
 	assert.Nil(t, err)

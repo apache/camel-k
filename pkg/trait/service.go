@@ -54,12 +54,8 @@ func (t *serviceTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 		profile == v1.TraitProfileOpenShift
 }
 
-func (t *serviceTrait) isEnabled() bool {
-	return t.Enabled == nil || *t.Enabled
-}
-
 func (t *serviceTrait) Configure(e *Environment) (bool, error) {
-	if !t.isEnabled() {
+	if IsFalse(t.Enabled) {
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionServiceAvailable,
 			corev1.ConditionFalse,
@@ -74,7 +70,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if t.Auto == nil || *t.Auto {
+	if IsNilOrTrue(t.Auto) {
 		sources, err := kubernetes.ResolveIntegrationSources(t.Ctx, t.Client, e.Integration, e.Resources)
 		if err != nil {
 			e.Integration.Status.SetCondition(
@@ -103,18 +99,13 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 	return true, nil
 }
 
-func (t *serviceTrait) isNodePort() bool {
-	return t.NodePort == nil || *t.NodePort
-
-}
-
 func (t *serviceTrait) Apply(e *Environment) error {
 	svc := e.Resources.GetServiceForIntegration(e.Integration)
 	// add a new service if not already created
 	if svc == nil {
 		svc = getServiceFor(e)
 
-		if t.isNodePort() {
+		if IsNilOrTrue(t.NodePort) {
 			svc.Spec.Type = corev1.ServiceTypeNodePort
 		}
 	}

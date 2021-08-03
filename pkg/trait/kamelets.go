@@ -20,11 +20,12 @@ package trait
 import (
 	"errors"
 	"fmt"
-	"github.com/apache/camel-k/pkg/util/source"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util/source"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -87,7 +88,7 @@ func (t *kameletsTrait) IsPlatformTrait() bool {
 }
 
 func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if IsFalse(t.Enabled) {
 		return false, nil
 	}
 
@@ -95,7 +96,7 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if t.Auto == nil || *t.Auto {
+	if IsNilOrTrue(t.Auto) {
 		var kamelets []string
 		if t.List == "" {
 			sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)

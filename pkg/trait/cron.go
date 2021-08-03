@@ -114,7 +114,7 @@ func newCronTrait() Trait {
 }
 
 func (t *cronTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if IsFalse(t.Enabled) {
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionCronJobAvailable,
 			corev1.ConditionFalse,
@@ -140,7 +140,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if t.Auto == nil || *t.Auto {
+	if IsNilOrTrue(t.Auto) {
 		globalCron, err := t.getGlobalCron(e)
 		if err != nil {
 			e.Integration.Status.SetErrorCondition(
@@ -175,8 +175,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 			}
 			for _, fromURI := range fromURIs {
 				if uri.GetComponent(fromURI) == genericCronComponent {
-					_true := true
-					t.Fallback = &_true
+					t.Fallback = BoolP(true)
 					break
 				}
 			}
@@ -184,7 +183,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	// Fallback strategy can be implemented in any other controller
-	if t.Fallback != nil && *t.Fallback {
+	if IsTrue(t.Fallback) {
 		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
 			e.Integration.Status.SetCondition(
 				v1.IntegrationConditionCronJobAvailable,
@@ -225,7 +224,7 @@ func (t *cronTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityCron)
 
-		if t.Fallback != nil && *t.Fallback {
+		if IsTrue(t.Fallback) {
 			fallbackArtifact := e.CamelCatalog.GetArtifactByScheme(genericCronComponentFallbackScheme)
 			if fallbackArtifact == nil {
 				return fmt.Errorf("no fallback artifact for scheme %q has been found in camel catalog", genericCronComponentFallbackScheme)
@@ -235,7 +234,7 @@ func (t *cronTrait) Apply(e *Environment) error {
 		}
 	}
 
-	if (t.Fallback == nil || !*t.Fallback) && e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
+	if IsNilOrFalse(t.Fallback) && e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
 		if e.ApplicationProperties == nil {
 			e.ApplicationProperties = make(map[string]string)
 		}
@@ -312,16 +311,16 @@ func (t *cronTrait) getCronJobFor(e *Environment) *v1beta1.CronJob {
 // SelectControllerStrategy can be used to check if a CronJob can be generated given the integration and trait settings
 func (t *cronTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
 	cronStrategy := ControllerStrategyCronJob
-	if t.Enabled != nil && !*t.Enabled {
+	if IsFalse(t.Enabled) {
 		return nil, nil
 	}
-	if t.Fallback != nil && *t.Fallback {
+	if IsTrue(t.Fallback) {
 		return nil, nil
 	}
 	if t.Schedule != "" {
 		return &cronStrategy, nil
 	}
-	if t.Auto == nil || *t.Auto {
+	if IsNilOrTrue(t.Auto) {
 		globalCron, err := t.getGlobalCron(e)
 		if err == nil && globalCron != nil {
 			return &cronStrategy, nil

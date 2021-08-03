@@ -38,7 +38,7 @@ func TestConfigureQuarkusTraitShouldSucceed(t *testing.T) {
 
 func TestConfigureDisabledQuarkusTraitShouldFail(t *testing.T) {
 	quarkusTrait, environment := createNominalQuarkusTest()
-	quarkusTrait.Enabled = new(bool)
+	quarkusTrait.Enabled = BoolP(false)
 
 	configured, err := quarkusTrait.Configure(environment)
 
@@ -67,8 +67,7 @@ func TestQuarkusTraitAddBuildStepsShouldSucceed(t *testing.T) {
 
 func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
 	trait := newQuarkusTrait().(*quarkusTrait)
-	enabled := true
-	trait.Enabled = &enabled
+	trait.Enabled = BoolP(true)
 
 	environment := &Environment{
 		CamelCatalog: &camel.RuntimeCatalog{},
