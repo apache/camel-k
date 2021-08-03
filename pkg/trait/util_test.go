@@ -101,3 +101,24 @@ func TestCollectConfigurationPairs(t *testing.T) {
 		{Name: "p4", Value: "integration"},
 	})
 }
+
+func TestBoolPointerFunctions(t *testing.T) {
+	trueP := BoolP(true)
+	falseP := BoolP(false)
+
+	assert.True(t, IsTrue(trueP))
+	assert.False(t, IsTrue(falseP))
+	assert.False(t, IsTrue(nil))
+
+	assert.True(t, IsNilOrTrue(trueP))
+	assert.False(t, IsNilOrTrue(falseP))
+	assert.True(t, IsNilOrTrue(nil))
+
+	assert.False(t, IsFalse(trueP))
+	assert.True(t, IsFalse(falseP))
+	assert.False(t, IsFalse(nil))
+
+	assert.False(t, IsNilOrFalse(trueP))
+	assert.True(t, IsNilOrFalse(falseP))
+	assert.True(t, IsNilOrFalse(nil))
+}
