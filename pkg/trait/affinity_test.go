@@ -50,7 +50,7 @@ func TestConfigureAffinityTraitWithConflictingAffinitiesFails(t *testing.T) {
 
 func TestConfigureDisabledAffinityTraitFails(t *testing.T) {
 	affinityTrait := createNominalAffinityTest()
-	affinityTrait.Enabled = new(bool)
+	affinityTrait.Enabled = BoolP(false)
 	environment, _ := createNominalDeploymentTraitTest()
 	configured, err := affinityTrait.Configure(environment)
 
@@ -181,8 +181,7 @@ func testApplyPodAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, e
 
 func createNominalAffinityTest() *affinityTrait {
 	trait := newAffinityTrait().(*affinityTrait)
-	enabled := true
-	trait.Enabled = &enabled
+	trait.Enabled = BoolP(true)
 
 	return trait
 }

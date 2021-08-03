@@ -30,8 +30,7 @@ import (
 func TestTracingTraitOnQuarkus(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
 	tracing := NewTracingTrait()
-	enabled := true
-	tracing.(*tracingTrait).Enabled = &enabled
+	tracing.(*tracingTrait).Enabled = trait.BoolP(true)
 	tracing.(*tracingTrait).Endpoint = "http://endpoint3"
 	ok, err := tracing.Configure(e)
 	assert.Nil(t, err)

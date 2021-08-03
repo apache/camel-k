@@ -58,7 +58,7 @@ func newEnvironmentTrait() Trait {
 }
 
 func (t *environmentTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled == nil || *t.Enabled {
+	if IsNilOrTrue(t.Enabled) {
 		return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
 	}
 

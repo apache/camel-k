@@ -44,7 +44,7 @@ func newOwnerTrait() Trait {
 }
 
 func (t *ownerTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if IsFalse(t.Enabled) {
 		return false, nil
 	}
 

@@ -34,7 +34,7 @@ import (
 
 func TestConfigureDisabledDeploymentTraitDoesNotSucceed(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
-	deploymentTrait.Enabled = new(bool)
+	deploymentTrait.Enabled = BoolP(false)
 
 	configured, err := deploymentTrait.Configure(environment)
 
@@ -145,8 +145,7 @@ func TestApplyDeploymentTraitWhileRunningIntegrationDoesSucceed(t *testing.T) {
 
 func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 	trait := newDeploymentTrait().(*deploymentTrait)
-	enabled := true
-	trait.Enabled = &enabled
+	trait.Enabled = BoolP(true)
 	trait.Client, _ = test.NewFakeClient(&appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "integration-name",

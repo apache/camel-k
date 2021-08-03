@@ -50,7 +50,7 @@ func newPodTrait() Trait {
 }
 
 func (t *podTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if IsFalse(t.Enabled) {
 		return false, nil
 	}
 

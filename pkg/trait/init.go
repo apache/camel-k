@@ -41,7 +41,7 @@ func newInitTrait() Trait {
 }
 
 func (t *initTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if IsFalse(t.Enabled) {
 		return false, errors.New("trait init cannot be disabled")
 	}
 

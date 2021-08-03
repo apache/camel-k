@@ -57,7 +57,7 @@ func (t *ingressTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 }
 
 func (t *ingressTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if IsFalse(t.Enabled) {
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionExposureAvailable,
 			corev1.ConditionFalse,
@@ -71,7 +71,7 @@ func (t *ingressTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if t.Auto == nil || *t.Auto {
+	if IsNilOrTrue(t.Auto) {
 		hasService := e.Resources.GetUserServiceForIntegration(e.Integration) != nil
 		hasHost := t.Host != ""
 		enabled := hasService && hasHost

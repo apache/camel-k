@@ -76,11 +76,11 @@ func NewTracingTrait() trait.Trait {
 }
 
 func (t *tracingTrait) Configure(e *trait.Environment) (bool, error) {
-	if t.Enabled == nil || !*t.Enabled {
+	if trait.IsNilOrFalse(t.Enabled) {
 		return false, nil
 	}
 
-	if t.Auto == nil || *t.Auto {
+	if trait.IsNilOrTrue(t.Auto) {
 		if t.Endpoint == "" {
 			for _, locator := range discovery.TracingLocators {
 				endpoint, err := locator.FindEndpoint(e.C, t.Client, t.L, e)

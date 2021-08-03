@@ -91,7 +91,7 @@ func (t *knativeServiceTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 }
 
 func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if IsFalse(t.Enabled) {
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
@@ -139,7 +139,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if t.Auto == nil || *t.Auto {
+	if IsNilOrTrue(t.Auto) {
 		// Check the right value for minScale, as not all services are allowed to scale down to 0
 		if t.MinScale == nil {
 			sources, err := kubernetes.ResolveIntegrationSources(t.Ctx, t.Client, e.Integration, e.Resources)

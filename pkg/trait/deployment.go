@@ -44,7 +44,7 @@ func newDeploymentTrait() Trait {
 }
 
 func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if IsFalse(t.Enabled) {
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionDeploymentAvailable,
 			corev1.ConditionFalse,
@@ -86,7 +86,7 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *deploymentTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if IsFalse(t.Enabled) {
 		return nil, nil
 	}
 	deploymentStrategy := ControllerStrategyDeployment

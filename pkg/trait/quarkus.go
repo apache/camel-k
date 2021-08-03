@@ -38,12 +38,8 @@ func newQuarkusTrait() Trait {
 	}
 }
 
-func (t *quarkusTrait) isEnabled() bool {
-	return t.Enabled == nil || *t.Enabled
-}
-
 func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
-	return t.isEnabled(), nil
+	return IsNilOrTrue(t.Enabled), nil
 }
 
 func (t *quarkusTrait) Apply(e *Environment) error {

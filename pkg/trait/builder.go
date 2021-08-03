@@ -58,7 +58,7 @@ func (t *builderTrait) InfluencesKit() bool {
 }
 
 func (t *builderTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if IsFalse(t.Enabled) {
 		return false, nil
 	}
 

@@ -61,7 +61,7 @@ func TestPullSecretAuto(t *testing.T) {
 	e, _ := getEnvironmentAndDeployment(t)
 
 	trait := newPullSecretTrait().(*pullSecretTrait)
-	trait.Auto = newFalse()
+	trait.Auto = BoolP(false)
 	enabled, err := trait.Configure(e)
 	assert.Nil(t, err)
 	assert.False(t, enabled)
@@ -71,8 +71,8 @@ func TestPullSecretImagePullerDelegation(t *testing.T) {
 	e, _ := getEnvironmentAndDeployment(t)
 
 	trait := newPullSecretTrait().(*pullSecretTrait)
-	trait.Auto = newFalse()
-	trait.ImagePullerDelegation = newTrue()
+	trait.Auto = BoolP(false)
+	trait.ImagePullerDelegation = BoolP(true)
 	enabled, err := trait.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, enabled)
@@ -122,14 +122,4 @@ func getEnvironmentAndDeployment(t *testing.T) (*Environment, *appsv1.Deployment
 	assert.NoError(t, err)
 
 	return e, &deployment
-}
-
-func newFalse() *bool {
-	b := false
-	return &b
-}
-
-func newTrue() *bool {
-	b := true
-	return &b
 }

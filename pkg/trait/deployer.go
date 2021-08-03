@@ -170,7 +170,7 @@ func isIncompatibleServerError(err error) bool {
 }
 
 func (t *deployerTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if IsFalse(t.Enabled) {
 		return nil, nil
 	}
 	if t.Kind != "" {

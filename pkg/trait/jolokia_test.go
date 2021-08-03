@@ -208,7 +208,7 @@ func TestSetDefaultBoolJolokiaOptionShouldSucceed(t *testing.T) {
 func TestSetDefaultBoolJolokiaOptionShouldNotOverrideExistingValue(t *testing.T) {
 	trait := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
-	option := new(bool)
+	option := BoolP(false)
 
 	trait.setDefaultJolokiaOption(options, &option, "key", true)
 
@@ -251,7 +251,7 @@ func TestAddBoolPointerOptionToJolokiaOptions(t *testing.T) {
 	trait := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 
-	trait.addToJolokiaOptions(options, "key", new(bool))
+	trait.addToJolokiaOptions(options, "key", BoolP(false))
 
 	assert.Len(t, options, 1)
 	assert.Equal(t, "false", options["key"])
@@ -268,8 +268,7 @@ func TestAddWrongTypeOptionToJolokiaOptionsDoesNothing(t *testing.T) {
 
 func createNominalJolokiaTest() (*jolokiaTrait, *Environment) {
 	trait := newJolokiaTrait().(*jolokiaTrait)
-	enabled := true
-	trait.Enabled = &enabled
+	trait.Enabled = BoolP(true)
 
 	environment := &Environment{
 		Catalog: NewCatalog(context.TODO(), nil),

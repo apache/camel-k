@@ -40,7 +40,7 @@ func TestConfigureEnabledCamelTraitSucceeds(t *testing.T) {
 
 func TestConfigureDisabledCamelTraitFails(t *testing.T) {
 	trait, environment := createNominalCamelTest()
-	trait.Enabled = new(bool)
+	trait.Enabled = BoolP(false)
 
 	configured, err := trait.Configure(environment)
 	assert.NotNil(t, err)
@@ -72,8 +72,7 @@ func createNominalCamelTest() (*camelTrait, *Environment) {
 	client, _ := test.NewFakeClient()
 
 	trait := newCamelTrait().(*camelTrait)
-	enabled := true
-	trait.Enabled = &enabled
+	trait.Enabled = BoolP(true)
 
 	environment := &Environment{
 		CamelCatalog: &camel.RuntimeCatalog{

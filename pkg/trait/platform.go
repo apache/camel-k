@@ -48,7 +48,7 @@ func newPlatformTrait() Trait {
 }
 
 func (t *platformTrait) Configure(e *Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if IsFalse(t.Enabled) {
 		return false, nil
 	}
 
@@ -56,7 +56,7 @@ func (t *platformTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if t.Auto == nil || !*t.Auto {
+	if IsNilOrFalse(t.Auto) {
 		if e.Platform == nil {
 			if t.CreateDefault == nil {
 				// Calculate if the platform should be automatically created when missing.
@@ -102,13 +102,13 @@ func (t *platformTrait) Apply(e *Environment) error {
 func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlatform, error) {
 	pl, err := platform.GetOrFind(t.Ctx, t.Client, e.Integration.Namespace, e.Integration.Status.Platform, false)
 	if err != nil && k8serrors.IsNotFound(err) {
-		if t.CreateDefault != nil && *t.CreateDefault {
+		if IsTrue(t.CreateDefault) {
 			platformName := e.Integration.Status.Platform
 			if platformName == "" {
 				platformName = platform.DefaultPlatformName
 			}
 			namespace := e.Integration.Namespace
-			if t.Global != nil && *t.Global {
+			if IsTrue(t.Global) {
 				operatorNamespace := platform.GetOperatorNamespace()
 				if operatorNamespace != "" {
 					namespace = operatorNamespace
