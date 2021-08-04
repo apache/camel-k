@@ -20,18 +20,20 @@ package kubernetes
 import (
 	"strings"
 
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 const (
 	CamelCreatorLabelPrefix = "camel.apache.org/created.by"
 
-	CamelCreatorLabelKind = CamelCreatorLabelPrefix + ".kind"
-	CamelCreatorLabelName = CamelCreatorLabelPrefix + ".name"
+	CamelCreatorLabelKind      = CamelCreatorLabelPrefix + ".kind"
+	CamelCreatorLabelName      = CamelCreatorLabelPrefix + ".name"
+	CamelCreatorLabelNamespace = CamelCreatorLabelPrefix + ".namespace"
+	CamelCreatorLabelVersion   = CamelCreatorLabelPrefix + ".version"
 )
 
 // FilterCamelCreatorLabels is used to inherit the creator information among resources
@@ -57,16 +59,20 @@ func MergeCamelCreatorLabels(source map[string]string, target map[string]string)
 }
 
 // GetCamelCreator returns the Camel creator object referenced by this runtime object, if present
-func GetCamelCreator(obj runtime.Object) *v1.ObjectReference {
+func GetCamelCreator(obj runtime.Object) *corev1.ObjectReference {
 	if m, ok := obj.(metav1.Object); ok {
 		kind := m.GetLabels()[CamelCreatorLabelKind]
 		name := m.GetLabels()[CamelCreatorLabelName]
+		namespace, ok := m.GetLabels()[CamelCreatorLabelNamespace]
+		if !ok {
+			namespace = m.GetNamespace()
+		}
 		if kind != "" && name != "" {
-			return &v1.ObjectReference{
+			return &corev1.ObjectReference{
 				Kind:       kind,
-				Namespace:  m.GetNamespace(),
+				Namespace:  namespace,
 				Name:       name,
-				APIVersion: camelv1.SchemeGroupVersion.String(),
+				APIVersion: v1.SchemeGroupVersion.String(),
 			}
 		}
 	}

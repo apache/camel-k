@@ -122,13 +122,13 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 	// Add some information for post-processing, this may need to be refactored
 	// to a proper data structure
 	platformKit.Labels = map[string]string{
-		"camel.apache.org/kit.type":             v1.IntegrationKitTypePlatform,
-		"camel.apache.org/created.by.kind":      v1.IntegrationKind,
-		"camel.apache.org/created.by.name":      integration.Name,
-		"camel.apache.org/created.by.namespace": integration.Namespace,
-		"camel.apache.org/created.by.version":   integration.ResourceVersion,
-		"camel.apache.org/runtime.version":      integration.Status.RuntimeVersion,
-		"camel.apache.org/runtime.provider":     string(integration.Status.RuntimeProvider),
+		"camel.apache.org/kit.type":           v1.IntegrationKitTypePlatform,
+		"camel.apache.org/runtime.version":    integration.Status.RuntimeVersion,
+		"camel.apache.org/runtime.provider":   string(integration.Status.RuntimeProvider),
+		kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
+		kubernetes.CamelCreatorLabelName:      integration.Name,
+		kubernetes.CamelCreatorLabelNamespace: integration.Namespace,
+		kubernetes.CamelCreatorLabelVersion:   integration.ResourceVersion,
 	}
 
 	// Set the kit to have the same characteristics as the integrations
