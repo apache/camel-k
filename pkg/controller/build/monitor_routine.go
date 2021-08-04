@@ -68,7 +68,11 @@ func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1.Build)
 			build.Status.Error = "Build routine exists"
 			return build, nil
 		}
-		// Start the build asynchronously to avoid blocking the reconcile loop
+		status := v1.BuildStatus{Phase: v1.BuildPhaseRunning}
+		if err := action.updateBuildStatus(ctx, build, status); err != nil {
+			return nil, err
+		}
+		// Start the build asynchronously to avoid blocking the reconciliation loop
 		routines.Store(build.Name, true)
 		go action.runBuild(build)
 
@@ -92,11 +96,7 @@ func (action *monitorRoutineAction) runBuild(build *v1.Build) {
 	ctxWithTimeout, cancel := context.WithDeadline(ctx, build.Status.StartedAt.Add(build.Spec.Timeout.Duration))
 	defer cancel()
 
-	status := v1.BuildStatus{Phase: v1.BuildPhaseRunning}
-	if err := action.updateBuildStatus(ctx, build, status); err != nil {
-		return
-	}
-
+	status := v1.BuildStatus{}
 	buildDir := ""
 	Builder := builder.New(action.client)
 
