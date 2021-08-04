@@ -22,6 +22,7 @@ import (
 	"path"
 	"sort"
 
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -181,11 +182,11 @@ func (t *containerTrait) configureDependencies(e *Environment) error {
 			// Add some information for post-processing, this may need to be refactored
 			// to a proper data structure
 			kit.Labels = map[string]string{
-				"camel.apache.org/kit.type":             v1.IntegrationKitTypeExternal,
-				"camel.apache.org/created.by.kind":      v1.IntegrationKind,
-				"camel.apache.org/created.by.name":      e.Integration.Name,
-				"camel.apache.org/created.by.namespace": e.Integration.Namespace,
-				"camel.apache.org/created.by.version":   e.Integration.ResourceVersion,
+				"camel.apache.org/kit.type":           v1.IntegrationKitTypeExternal,
+				kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
+				kubernetes.CamelCreatorLabelName:      e.Integration.Name,
+				kubernetes.CamelCreatorLabelNamespace: e.Integration.Namespace,
+				kubernetes.CamelCreatorLabelVersion:   e.Integration.ResourceVersion,
 			}
 
 			t.L.Infof("image %s", kit.Spec.Image)
