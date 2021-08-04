@@ -21,15 +21,17 @@ import (
 	"context"
 	"fmt"
 
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/tools/record"
-	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -260,17 +262,21 @@ func NotifyBuildError(ctx context.Context, c client.Client, recorder record.Even
 }
 
 // nolint:lll
-func notifyIfPhaseUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, new runtime.Object, oldPhase, newPhase string, resourceType, name, reason, info string) {
+func notifyIfPhaseUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, new ctrl.Object, oldPhase, newPhase string, resourceType, name, reason, info string) {
 	// Update information about phase changes
 	if oldPhase != newPhase {
 		phase := newPhase
 		if phase == "" {
 			phase = "[none]"
 		}
-		recorder.Eventf(new, corev1.EventTypeNormal, reason, "%s %s in phase %q%s", resourceType, name, phase, info)
+		recorder.Eventf(new, corev1.EventTypeNormal, reason, "%s %q in phase %q%s", resourceType, name, phase, info)
 
 		if creatorRef, creator := getCreatorObject(ctx, c, new); creatorRef != nil && creator != nil {
-			recorder.Eventf(creator, corev1.EventTypeNormal, ReasonRelatedObjectChanged, "%s %s subresource %s (%s) changed phase to %q%s", creatorRef.Kind, creatorRef.Name, name, resourceType, phase, info)
+			if namespace := new.GetNamespace(); namespace == creatorRef.Namespace {
+				recorder.Eventf(creator, corev1.EventTypeNormal, ReasonRelatedObjectChanged, "%s %q, created by %s %q, changed phase to %q%s", resourceType, name, creatorRef.Kind, creatorRef.Name, phase, info)
+			} else {
+				recorder.Eventf(creator, corev1.EventTypeNormal, ReasonRelatedObjectChanged, "%s \"%s/%s\", created by %s %q, changed phase to %q%s", resourceType, namespace, name, creatorRef.Kind, creatorRef.Name, phase, info)
+			}
 		}
 	}
 }
@@ -305,12 +311,8 @@ func getCreatorObject(ctx context.Context, c client.Client, obj runtime.Object) 
 	if ref := kubernetes.GetCamelCreator(obj); ref != nil {
 		if ref.Kind == "Integration" {
 			it := v1.NewIntegration(ref.Namespace, ref.Name)
-			key := runtimeclient.ObjectKey{
-				Namespace: ref.Namespace,
-				Name:      ref.Name,
-			}
-			if err := c.Get(ctx, key, &it); err != nil {
-				log.Infof("Cannot get information about the Integration creating resource %v: %v", ref, err)
+			if err := c.Get(ctx, ctrl.ObjectKeyFromObject(&it), &it); err != nil {
+				log.Infof("Cannot get information about the creator Integration %v: %v", ref, err)
 				return nil, nil
 			}
 			return ref, &it
