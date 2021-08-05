@@ -21,6 +21,8 @@
 
 **Merged pull requests:**
 
+- fix: Fix cross-namespace creator resource events [\#2547](https://github.com/apache/camel-k/pull/2547) ([astefanutti](https://github.com/astefanutti))
+- fix\(builder\): Fix race-condition when Build transitions to running phase [\#2545](https://github.com/apache/camel-k/pull/2545) ([astefanutti](https://github.com/astefanutti))
 - Move bool pointer functions to trait package and use them throughout the traits [\#2543](https://github.com/apache/camel-k/pull/2543) ([tadayosi](https://github.com/tadayosi))
 - Forcelly set QUARKUS\_LOG\_CONSOLE\_JSON to false if the trait is not provided \(GH issue \#2539\) [\#2540](https://github.com/apache/camel-k/pull/2540) ([orpiske](https://github.com/orpiske))
 - Fix \#2530: fix type and do not add cross-namespace owner references [\#2535](https://github.com/apache/camel-k/pull/2535) ([nicolaferraro](https://github.com/nicolaferraro))
