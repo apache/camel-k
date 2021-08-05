@@ -72,11 +72,12 @@ First thing is to checkout main branch and sync with upstream.
 Next, the version of the runtime libraries to use need to be aligned in the Makefile (use the just released camel-k-runtime version if available).
 
 The following tasks need to be done:
-- Align KAMELET_CATALOG_REPO_BRANCH in Makefile to latest released tag of the camel-kamelets repository
-- Align RUNTIME_VERSION in Makefile to latest runtime release
-- Align all libraries to the ones used in the chosen runtime (e.g. CAMEL_QUARKUS_VERSION and QUARKUS_VERSION)
-- Set STAGING_RUNTIME_REPO to the URL of the staging repo (if using a staged camel-k-runtime version)
-- Ensure LAST_RELEASED_VERSION points to latest released version of Camel K
+
+- Align `KAMELET_CATALOG_REPO_BRANCH` in Makefile to latest released tag of the camel-kamelets repository
+- Align `RUNTIME_VERSION` in Makefile to latest runtime release
+- Align all libraries to the ones used in the chosen runtime (e.g. `CAMEL_QUARKUS_VERSION` and `QUARKUS_VERSION`)
+- Set `STAGING_RUNTIME_REPO` to the URL of the staging repo (if using a staged camel-k-runtime version)
+- Ensure `LAST_RELEASED_VERSION` points to latest released version of Camel K
 
 ```
 make clean codegen set-version build-resources check-licenses
