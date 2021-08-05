@@ -92,7 +92,6 @@ rules:
       - watch
   - apiGroups:
       - apps
-    attributeRestrictions: null
     resources:
       - daemonsets
     verbs:
@@ -136,7 +135,6 @@ rules:
   - apiGroups:
       - ""
       - build.openshift.io
-    attributeRestrictions: null
     resources:
       - buildconfigs/instantiate
       - buildconfigs/instantiatebinary
