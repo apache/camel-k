@@ -18,31 +18,64 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
-// The Quarkus trait activates the Quarkus runtime.
+type quarkusPackageType string
+
+const (
+	quarkusTraitId = "quarkus"
+
+	fastJarPackageType quarkusPackageType = "fast-jar"
+	nativePackageType  quarkusPackageType = "native"
+)
+
+// The Quarkus trait configures the Quarkus runtime.
 //
 // It's enabled by default.
 //
 // +camel-k:trait=quarkus
 type quarkusTrait struct {
 	BaseTrait `property:",squash"`
-	// The Quarkus runtime type (reserved for future use)
-	Native bool `property:"native" json:"native,omitempty"`
+	// The Quarkus package type, either `fast-jar` or `native` (default `fast-jar`)
+	PackageType *quarkusPackageType `property:"package-type" json:"packageType,omitempty"`
 }
 
 func newQuarkusTrait() Trait {
 	return &quarkusTrait{
-		BaseTrait: NewBaseTrait("quarkus", 700),
+		BaseTrait: NewBaseTrait(quarkusTraitId, 1700),
 	}
 }
 
 func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
-	return IsNilOrTrue(t.Enabled), nil
+	if IsFalse(t.Enabled) {
+		return false, nil
+	}
+
+	if t.PackageType == nil {
+		packageType := fastJarPackageType
+		t.PackageType = &packageType
+	}
+
+	return e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
+		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning), nil
 }
 
 func (t *quarkusTrait) Apply(e *Environment) error {
+	if t.isNativePackageType() {
+		container := e.getIntegrationContainer()
+		if container == nil {
+			return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
+		}
+
+		container.Command = []string{"./camel-k-integration-" + defaults.Version + "-runner"}
+		container.WorkingDir = builder.DeploymentDir
+	}
+
 	return nil
 }
 
@@ -58,4 +91,8 @@ func (t *quarkusTrait) InfluencesKit() bool {
 
 func (t *quarkusTrait) addBuildSteps(steps *[]builder.Step) {
 	*steps = append(*steps, builder.QuarkusSteps...)
+}
+
+func (t *quarkusTrait) isNativePackageType() bool {
+	return t.PackageType != nil && *t.PackageType == nativePackageType
 }

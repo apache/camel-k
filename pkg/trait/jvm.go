@@ -37,7 +37,6 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 // The JVM trait is used to configure the JVM that runs the integration.
@@ -70,6 +69,12 @@ func newJvmTrait() Trait {
 func (t *jvmTrait) Configure(e *Environment) (bool, error) {
 	if IsFalse(t.Enabled) {
 		return false, nil
+	}
+
+	if t := e.Catalog.GetTrait(quarkusTraitId); t != nil && t.(*quarkusTrait).isNativePackageType() {
+		if quarkus := t.(*quarkusTrait); IsNilOrTrue(quarkus.Enabled) && quarkus.isNativePackageType() {
+			return false, nil
+		}
 	}
 
 	return e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
@@ -185,8 +190,15 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	args = append(args, "-cp", strings.Join(items, ":"))
 	args = append(args, e.CamelCatalog.Runtime.ApplicationClass)
 
-	container.Command = []string{"./camel-k-integration-" + defaults.Version + "-runner"}
-	container.WorkingDir = builder.DeploymentDir
+	if IsNilOrTrue(t.PrintCommand) {
+		args = append([]string{"exec", "java"}, args...)
+		container.Command = []string{"/bin/sh", "-c"}
+		cmd := strings.Join(args, " ")
+		container.Args = []string{"echo " + cmd + " && " + cmd}
+	} else {
+		container.Command = []string{"java"}
+		container.Args = args
+	}
 
 	return nil
 }
