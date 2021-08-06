@@ -13,8 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM quay.io/quarkus/ubi-quarkus-native-image:21.1.0-java11
-#FROM quay.io/quarkus/ubi-quarkus-mandrel:21.2.0.0-Final-java11
+FROM quay.io/quarkus/ubi-quarkus-mandrel:21.2.0.0-Final-java11
 
 ARG MAVEN_VERSION="3.6.3"
 ARG SHA="c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0"
