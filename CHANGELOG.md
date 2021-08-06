@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Remove "attributeRestrictions" from operator-role.yaml [\#2549](https://github.com/apache/camel-k/issues/2549)
 - Error in OpenShift image-pull delegation on IBM Cloud [\#2530](https://github.com/apache/camel-k/issues/2530)
 - KameletBinding error handler nil map [\#2524](https://github.com/apache/camel-k/issues/2524)
 - camel-k-client tar.gz changes the uid/gid of cwd [\#2514](https://github.com/apache/camel-k/issues/2514)
@@ -21,6 +22,7 @@
 
 **Merged pull requests:**
 
+- chore\(rbac\): Remove attributeRestrictions fields [\#2552](https://github.com/apache/camel-k/pull/2552) ([astefanutti](https://github.com/astefanutti))
 - fix: Fix cross-namespace creator resource events [\#2547](https://github.com/apache/camel-k/pull/2547) ([astefanutti](https://github.com/astefanutti))
 - fix\(builder\): Fix race-condition when Build transitions to running phase [\#2545](https://github.com/apache/camel-k/pull/2545) ([astefanutti](https://github.com/astefanutti))
 - Move bool pointer functions to trait package and use them throughout the traits [\#2543](https://github.com/apache/camel-k/pull/2543) ([tadayosi](https://github.com/tadayosi))
