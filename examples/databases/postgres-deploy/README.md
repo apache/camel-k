@@ -15,7 +15,7 @@ Connection credentials available in the _postgres-configmap.yaml_ descriptor.
 
 ```
 kubectl get svc postgres
-psql -h <IP> -U postgresadmin1 --password -p <PORT> postgresdb
+psql -h <IP> -U postgresadmin --password -p <PORT> postgresdb
 ```
 ## Create a test database and table
 ```
