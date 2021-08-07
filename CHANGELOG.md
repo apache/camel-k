@@ -22,6 +22,7 @@
 
 **Merged pull requests:**
 
+- postgres user on readme was different than the one created on the yam… [\#2554](https://github.com/apache/camel-k/pull/2554) ([josetesan](https://github.com/josetesan))
 - chore\(rbac\): Remove attributeRestrictions fields [\#2552](https://github.com/apache/camel-k/pull/2552) ([astefanutti](https://github.com/astefanutti))
 - fix: Fix cross-namespace creator resource events [\#2547](https://github.com/apache/camel-k/pull/2547) ([astefanutti](https://github.com/astefanutti))
 - fix\(builder\): Fix race-condition when Build transitions to running phase [\#2545](https://github.com/apache/camel-k/pull/2545) ([astefanutti](https://github.com/astefanutti))
