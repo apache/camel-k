@@ -224,7 +224,13 @@ func (action *monitorPodAction) addTimeoutAnnotation(ctx context.Context, pod *c
 		return nil
 	}
 	return action.patchPod(ctx, pod, func(p *corev1.Pod) {
-		p.GetAnnotations()[timeoutAnnotation] = time.String()
+		if p.GetAnnotations() != nil {
+			p.GetAnnotations()[timeoutAnnotation] = time.String()
+		} else {
+			p.SetAnnotations(map[string]string{
+				timeoutAnnotation: time.String(),
+			})
+		}
 	})
 }
 
