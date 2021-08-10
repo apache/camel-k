@@ -148,11 +148,18 @@ func (in *IntegrationSpec) GetConfigurationProperty(property string) string {
 		if confSpec.Type == "property" && strings.HasPrefix(confSpec.Value, property) {
 			splitConf := strings.Split(confSpec.Value, "=")
 			if len(splitConf) > 1 {
-				return splitConf[1]
+				return trimFirstLeadingSpace(splitConf[1])
 			}
 		}
 	}
 	return ""
+}
+
+func trimFirstLeadingSpace(val string) string {
+	if strings.HasPrefix(val, " ") {
+		return val[1:]
+	}
+	return val
 }
 
 // AddOrReplaceGeneratedResources --
