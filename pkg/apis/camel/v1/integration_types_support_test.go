@@ -73,3 +73,28 @@ func TestAddDependency(t *testing.T) {
 	integration.AddDependency("file:dep")
 	assert.Equal(t, integration.Dependencies, []string{"file:dep"})
 }
+
+func TestGetConfigurationProperty(t *testing.T) {
+	integration := IntegrationSpec{}
+	integration.AddConfiguration("property", "key1=value1")
+	integration.AddConfiguration("property", "key2 = value2")
+	integration.AddConfiguration("property", "key3 = value with trailing space ")
+	integration.AddConfiguration("property", "key4 =  value with leading space")
+	integration.AddConfiguration("property", "key5 = ")
+	integration.AddConfiguration("property", "key6=")
+
+	missing := integration.GetConfigurationProperty("missing")
+	assert.Equal(t, "", missing)
+	v1 := integration.GetConfigurationProperty("key")
+	assert.Equal(t, "value1", v1)
+	v2 := integration.GetConfigurationProperty("key2")
+	assert.Equal(t, "value2", v2)
+	v3 := integration.GetConfigurationProperty("key3")
+	assert.Equal(t, "value with trailing space ", v3)
+	v4 := integration.GetConfigurationProperty("key4")
+	assert.Equal(t, " value with leading space", v4)
+	v5 := integration.GetConfigurationProperty("key5")
+	assert.Equal(t, "", v5)
+	v6 := integration.GetConfigurationProperty("key6")
+	assert.Equal(t, "", v6)
+}
