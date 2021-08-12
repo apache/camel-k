@@ -56,6 +56,7 @@ import (
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
+	configv1 "github.com/openshift/api/config/v1"
 	projectv1 "github.com/openshift/api/project/v1"
 	routev1 "github.com/openshift/api/route/v1"
 
@@ -120,6 +121,7 @@ func init() {
 	client.FastMapperAllowedAPIGroups["messaging.knative.dev"] = true
 	client.FastMapperAllowedAPIGroups["serving.knative.dev"] = true
 	client.FastMapperAllowedAPIGroups["operators.coreos.com"] = true
+	client.FastMapperAllowedAPIGroups["config.openshift.io"] = true
 	client.FastMapperAllowedAPIGroups["policy"] = true
 
 	var err error
@@ -1113,6 +1115,19 @@ func Kamelet(name string, ns string) func() *v1alpha1.Kamelet {
 		return &it
 	}
 }
+
+func ClusterDomainName() (string, error) {
+	dns := configv1.DNS{}
+	key := ctrl.ObjectKey{
+		Name:      "cluster",
+	}
+	err := TestClient().Get(TestContext, key, &dns)
+	if err != nil {
+		return "", err
+	}
+	return dns.Spec.BaseDomain, nil
+}
+
 
 /*
 	Tekton
