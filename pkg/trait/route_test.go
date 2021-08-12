@@ -35,6 +35,60 @@ import (
 	"github.com/apache/camel-k/pkg/util/test"
 )
 
+const (
+	host = "my-host1"
+	key = `-----BEGIN PRIVATE KEY-----
+MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAKulUTZ8B1qccZ8c
+DXRGSY08gW8KvLlcxxxGC4gZHNT3CBUF8n5R4KE30aZyYZ/rtsQZu05juZJxaJ0q
+mbe75dlQ5d+Xc9BMXeQg/MpTZw5TAN7OIdGYYpFBe+1PLZ6wEfjkYrMqMUcfq2Lq
+hTLdAbvBJnuRcYZLqmBeOQ8FTrKrAgMBAAECgYEAnkHRbEPU3/WISSQrP36iyCb2
+S/SBZwKkzmvCrBxDWhPeDswp9c/2JY76rNWfLzy8iXgUG8WUzvHje61Qh3gmBcKe
+bUaTGl4Vy8Ha1YBADo5RfRrdm0FE4tvgvu/TkqFqpBBZweu54285hk5zlG7n/D7Y
+dnNXUpu5MlNb5x3gW0kCQQDUL//cwcXUxY/evaJP4jSe+ZwEQZo+zXRLiPUulBoV
+aw28CVMuxdgwqAo1X1IKefPeUaf7RQu8gCKaRnpGuEuXAkEAzxZTfMmvmCUDIew4
+5Gk6bK265XQWdhcgiq254lpBGOYmDj9yCE7yA+zmASQwMsXTdQOi1hOCEyrXuSJ5
+c++EDQJAFh3WrnzoEPByuYXMmET8tSFRWMQ5vpgNqh3haHR5b4gUC2hxaiunCBNL
+1RpVY9AoUiDywGcG/SPh93CnKB3niwJBAKP7AtsifZgVXtiizB4aMThTjVYaSZrz
+D0Kg9DuHylpkDChmFu77TGrNUQgAVuYtfhb/bRblVa/F0hJ4eQHT3JUCQBVT68tb
+OgRUk0aP9tC3021VN82X6+klowSQN8oBPX8+TfDWSUilp/+j24Hky+Z29Do7yR/R
+qutnL92CvBlVLV4=
+-----END PRIVATE KEY-----
+`
+	cert = `-----BEGIN CERTIFICATE-----
+MIIBajCCARCgAwIBAgIUbYqrLSOSQHoxD8CwG6Bi2PJi9c8wCgYIKoZIzj0EAwIw
+EzERMA8GA1UEAxMIc3dhcm0tY2EwHhcNMTcwNDI0MjE0MzAwWhcNMzcwNDE5MjE0
+MzAwWjATMREwDwYDVQQDEwhzd2FybS1jYTBZMBMGByqGSM49AgEGCCqGSM49AwEH
+A0IABJk/VyMPYdaqDXJb/VXh5n/1Yuv7iNrxV3Qb3l06XD46seovcDWs3IZNV1lf
+3Skyr0ofcchipoiHkXBODojJydSjQjBAMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMB
+Af8EBTADAQH/MB0GA1UdDgQWBBRUXxuRcnFjDfR/RIAUQab8ZV/n4jAKBggqhkjO
+PQQDAgNIADBFAiAy+JTe6Uc3KyLCMiqGl2GyWGQqQDEcO3/YG36x7om65AIhAJvz
+pxv6zFeVEkAEEkqIYi0omA9+CjanB/6Bz4n1uw8H
+-----END CERTIFICATE-----
+`
+	caCert = `-----BEGIN CERTIFICATE-----
+BLAajCCARCgAwIBAgIUbYqrLSOSQHoxD8CwG6Bi2PJi9c8wCgYIKoZIzj0EAwIw
+EzERMA8GA1UEAxMIc3dhcm0tY2EwHhcNMTcwNDI0MjE0MzAwWhcNMzcwNDE5MjE0
+MzAwWjATMREwDwYDVQQDEwhzd2FybS1jYTBZMBMGByqGSM49AgEGCCqGSM49AwEH
+A0IABJk/VyMPYdaqDXJb/VXh5n/1Yuv7iNrxV3Qb3l06XD46seovcDWs3IZNV1lf
+3Skyr0ofcchipoiHkXBODojJydSjQjBAMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMB
+Af8EBTADAQH/MB0GA1UdDgQWBBRUXxuRcnFjDfR/RIAUQab8ZV/n4jAKBggqhkjO
+PQQDAgNIADBFAiAy+JTe6Uc3KyLCMiqGl2GyWGQqQDEcO3/YG36x7om65AIhAJvz
+pxv6zFeVEkAEEkqIYi0omA9+CjanB/6Bz4n1uw8H
+-----END CERTIFICATE-----
+`
+	destinationCaCert = `-----BEGIN CERTIFICATE-----
+FOOBARCCARCgAwIBAgIUbYqrLSOSQHoxD8CwG6Bi2PJi9c8wCgYIKoZIzj0EAwIw
+EzERMA8GA1UEAxMIc3dhcm0tY2EwHhcNMTcwNDI0MjE0MzAwWhcNMzcwNDE5MjE0
+MzAwWjATMREwDwYDVQQDEwhzd2FybS1jYTBZMBMGByqGSM49AgEGCCqGSM49AwEH
+A0IABJk/VyMPYdaqDXJb/VXh5n/1Yuv7iNrxV3Qb3l06XD46seovcDWs3IZNV1lf
+3Skyr0ofcchipoiHkXBODojJydSjQjBAMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMB
+Af8EBTADAQH/MB0GA1UdDgQWBBRUXxuRcnFjDfR/RIAUQab8ZV/n4jAKBggqhkjO
+PQQDAgNIADBFAiAy+JTe6Uc3KyLCMiqGl2GyWGQqQDEcO3/YG36x7om65AIhAJvz
+pxv6zFeVEkAEEkqIYi0omA9+CjanB/6Bz4n1uw8H
+-----END CERTIFICATE-----
+`
+)
+
 func createTestRouteEnvironment(t *testing.T, name string) *Environment {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
@@ -154,14 +208,14 @@ func TestRoute_Configure_IntegrationKitOnly(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestRoute_TLS(t *testing.T) {
+func TestRoute_Host(t *testing.T) {
 	name := xid.New().String()
 	environment := createTestRouteEnvironment(t, name)
 	traitsCatalog := environment.Catalog
 
 	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
 		"route": test.TraitSpecFromMap(t, map[string]interface{}{
-			"tlsTermination": string(routev1.TLSTerminationEdge),
+			"host": host,
 		}),
 	}
 
@@ -176,8 +230,110 @@ func TestRoute_TLS(t *testing.T) {
 	})
 
 	assert.NotNil(t, route)
+	assert.Equal(t, host, route.Spec.Host)
+	assert.Nil(t, route.Spec.TLS)
+}
+
+
+func TestRoute_TLS_reencrypt(t *testing.T) {
+	name := xid.New().String()
+	environment := createTestRouteEnvironment(t, name)
+	traitsCatalog := environment.Catalog
+
+	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
+		"route": test.TraitSpecFromMap(t, map[string]interface{}{
+			"tlsTermination": string(routev1.TLSTerminationReencrypt),
+			"host": host,
+			"tlsKey": key,
+			"tlsCertificate": cert,
+			"tlsCACertificate": caCert,
+			"tlsDestinationCACertificate": destinationCaCert,
+		}),
+	}
+	err := traitsCatalog.apply(environment)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("route"))
+
+	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
+		return r.ObjectMeta.Name == name
+	})
+
+	assert.NotNil(t, route)
+	assert.NotNil(t, route.Spec.TLS)
+	assert.Equal(t, routev1.TLSTerminationReencrypt, route.Spec.TLS.Termination)
+	assert.Equal(t, key, route.Spec.TLS.Key)
+	assert.Equal(t, host, route.Spec.Host)
+	assert.Equal(t, cert, route.Spec.TLS.Certificate)
+	assert.Equal(t, caCert, route.Spec.TLS.CACertificate)
+	assert.Equal(t, destinationCaCert, route.Spec.TLS.DestinationCACertificate)
+}
+
+func TestRoute_TLS_edge(t *testing.T) {
+	name := xid.New().String()
+	environment := createTestRouteEnvironment(t, name)
+	traitsCatalog := environment.Catalog
+
+	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
+		"route": test.TraitSpecFromMap(t, map[string]interface{}{
+			"tlsTermination": string(routev1.TLSTerminationEdge),
+			"host": host,
+			"tlsKey": key,
+			"tlsCertificate": cert,
+			"tlsCACertificate": caCert,
+		}),
+	}
+	err := traitsCatalog.apply(environment)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("route"))
+
+	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
+		return r.ObjectMeta.Name == name
+	})
+
+	assert.NotNil(t, route)
 	assert.NotNil(t, route.Spec.TLS)
 	assert.Equal(t, routev1.TLSTerminationEdge, route.Spec.TLS.Termination)
+	assert.Equal(t, key, route.Spec.TLS.Key)
+	assert.Equal(t, host, route.Spec.Host)
+	assert.Equal(t, cert, route.Spec.TLS.Certificate)
+	assert.Equal(t, caCert, route.Spec.TLS.CACertificate)
+	assert.Empty(t, route.Spec.TLS.DestinationCACertificate)
+}
+
+func TestRoute_TLS_passthrough(t *testing.T) {
+	name := xid.New().String()
+	environment := createTestRouteEnvironment(t, name)
+	traitsCatalog := environment.Catalog
+
+	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
+		"route": test.TraitSpecFromMap(t, map[string]interface{}{
+			"tlsTermination": string(routev1.TLSTerminationPassthrough),
+			"host": host,
+			"tlsInsecureEdgeTerminationPolicy": routev1.InsecureEdgeTerminationPolicyAllow,
+		}),
+	}
+	err := traitsCatalog.apply(environment)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("route"))
+
+	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
+		return r.ObjectMeta.Name == name
+	})
+
+	assert.NotNil(t, route)
+	assert.NotNil(t, route.Spec.TLS)
+	assert.Equal(t, routev1.TLSTerminationPassthrough, route.Spec.TLS.Termination)
+	assert.Equal(t, host, route.Spec.Host)
+	assert.Equal(t, routev1.InsecureEdgeTerminationPolicyAllow, route.Spec.TLS.InsecureEdgeTerminationPolicy)
+	assert.Empty(t, route.Spec.TLS.Certificate)
+	assert.Empty(t, route.Spec.TLS.CACertificate)
+	assert.Empty(t, route.Spec.TLS.DestinationCACertificate)
 }
 
 func TestRoute_WithCustomServicePort(t *testing.T) {
