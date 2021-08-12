@@ -9,6 +9,7 @@
 - controller: panic on nil annotation [\#2556](https://github.com/apache/camel-k/issues/2556)
 - Remove "attributeRestrictions" from operator-role.yaml [\#2549](https://github.com/apache/camel-k/issues/2549)
 - Error in OpenShift image-pull delegation on IBM Cloud [\#2530](https://github.com/apache/camel-k/issues/2530)
+- Runtime issue: cannot use KameletBinding error handler [\#2525](https://github.com/apache/camel-k/issues/2525)
 - KameletBinding error handler nil map [\#2524](https://github.com/apache/camel-k/issues/2524)
 - camel-k-client tar.gz changes the uid/gid of cwd [\#2514](https://github.com/apache/camel-k/issues/2514)
 - \[CMD\] `kamel bind` empty error handler [\#2493](https://github.com/apache/camel-k/issues/2493)
@@ -23,6 +24,8 @@
 
 **Merged pull requests:**
 
+- fix\(api\): property leading space [\#2564](https://github.com/apache/camel-k/pull/2564) ([squakez](https://github.com/squakez))
+- fix TestPermissionDenied should ignore darwin  [\#2561](https://github.com/apache/camel-k/pull/2561) ([Abirdcfly](https://github.com/Abirdcfly))
 - fix\(controller\): panic on nil annotation [\#2557](https://github.com/apache/camel-k/pull/2557) ([Abirdcfly](https://github.com/Abirdcfly))
 - postgres user on readme was different than the one created on the yam… [\#2554](https://github.com/apache/camel-k/pull/2554) ([josetesan](https://github.com/josetesan))
 - chore\(rbac\): Remove attributeRestrictions fields [\#2552](https://github.com/apache/camel-k/pull/2552) ([astefanutti](https://github.com/astefanutti))
