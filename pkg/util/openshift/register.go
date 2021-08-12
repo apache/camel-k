@@ -23,6 +23,7 @@ import (
 	apps "github.com/openshift/api/apps/v1"
 	authorization "github.com/openshift/api/authorization/v1"
 	build "github.com/openshift/api/build/v1"
+	config "github.com/openshift/api/config/v1"
 	console "github.com/openshift/api/console/v1"
 	image "github.com/openshift/api/image/v1"
 	project "github.com/openshift/api/project/v1"
@@ -46,6 +47,7 @@ func AddToScheme(scheme *runtime.Scheme) error {
 	err = doAdd(build.Install, scheme, err)
 	err = doAdd(authorization.Install, scheme, err)
 	err = doAdd(project.Install, scheme, err)
+	err = doAdd(config.Install, scheme, err)
 
 	// OpenShift console API
 	err = doAdd(console.Install, scheme, err)
