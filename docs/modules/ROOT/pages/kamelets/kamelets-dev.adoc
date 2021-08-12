@@ -580,7 +580,7 @@ with all the advantages that derive from a point of view of performance and reso
 
 If we managed to reduce our integration to contain only a Camel route, converting it to YAML is straightforward:
 
-.earthquake-source.kamelet.yaml
+.earthquake.yaml
 [source,yaml]
 ----
 # camel-k: language=yaml property=period=20000 property=lookAhead=120 dependency=camel-quarkus:caffeine dependency=camel-quarkus:http
