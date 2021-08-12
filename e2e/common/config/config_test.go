@@ -57,6 +57,14 @@ func TestRunConfigExamples(t *testing.T) {
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
+		t.Run("Property precedence", func(t *testing.T) {
+			Expect(Kamel("run", "-n", ns, "./files/property-file-route.groovy", "-p", "my.key.2=universe", "-p", "file:./files/my.properties").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "property-file-route"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationCondition(ns, "property-file-route", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "property-file-route"), TestTimeoutShort).Should(ContainSubstring("hello universe"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
 		// Configmap
 
 		// Store a configmap on the cluster
@@ -222,6 +230,14 @@ func TestRunConfigExamples(t *testing.T) {
 			Eventually(IntegrationPodPhase(ns, "build-property-file-route"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationCondition(ns, "build-property-file-route", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "build-property-file-route"), TestTimeoutShort).Should(ContainSubstring("my-super-application"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("Build time property file with precedence", func(t *testing.T) {
+			Expect(Kamel("run", "-n", ns, "./files/build-property-file-route.groovy", "--build-property", "quarkus.application.name=my-overridden-application", "--build-property", "file:./files/quarkus.properties").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "build-property-file-route"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationCondition(ns, "build-property-file-route", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "build-property-file-route"), TestTimeoutShort).Should(ContainSubstring("my-overridden-application"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
