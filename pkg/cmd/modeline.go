@@ -136,7 +136,7 @@ func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.
 	cliParamNames := []string{}
 	index := 0
 	for _, arg := range args {
-		if arg == "-p" || arg == "--property" || arg == "-t" || arg == "--trait" {
+		if arg == "-p" || arg == "--property" || arg == "-t" || arg == "--trait" || arg == "--build-property" {
 			// Property or trait is assumed to be in the form: <name>=<value>
 			splitValues := strings.Split(args[index+1], "=")
 			cliParamNames = append(cliParamNames, splitValues[0])
@@ -149,7 +149,7 @@ func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.
 	for _, o := range opts {
 		// Check if property name is given by user.
 		paramAlreadySpecifiedByUser := false
-		if o.Name == "property" || o.Name == "trait" {
+		if o.Name == "property" || o.Name == "trait" || o.Name == "build-property" {
 			paramComponents := strings.Split(o.Value, "=")
 			for _, paramName := range cliParamNames {
 				if paramName == paramComponents[0] {
