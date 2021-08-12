@@ -51,6 +51,11 @@ You'll need to provide a `property` _file_ flag when launching the application:
 
 The property file is parsed and its properties configured on the `Integration`. As soon as the application starts, you will see the log with the expected configuration.
 
+[[runtime-props-file-precedence]]
+== Property collision priority
+
+If you have a property repeated more than once, the general rule is that the last one declared in your `kamel run` statement will be taken in consideration. If the same property is found both in a single option declaration and inside a file, then, the single option will have higher priority and will be used.
+
 [[runtime-build-time-conf]]
 == Build time properties
 
