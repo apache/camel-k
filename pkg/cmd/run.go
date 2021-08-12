@@ -575,34 +575,33 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		// Deprecated: making it compatible with newer mechanism
 		o.Properties = append(o.Properties, "file:"+item)
 	}
-	for _, item := range o.Properties {
-		props, err := extractProperties(item)
-		if err != nil {
-			return nil, err
-		}
-		if err := addIntegrationProperties(props, &integration.Spec); err != nil {
-			return nil, err
-		}
+
+	props, err := mergePropertiesWithPrecedence(o.Properties)
+	if err != nil {
+		return nil, err
 	}
+	if err := addIntegrationProperties(props, &integration.Spec); err != nil {
+		return nil, err
+	}
+
 	// convert each build configuration to a builder trait property
-	for _, item := range o.BuildProperties {
-		props, err := extractProperties(item)
-		if err != nil {
-			return nil, err
-		}
-		for _, k := range props.Keys() {
-			v, ok := props.Get(k)
-			if ok {
-				entry, err := property.EncodePropertyFileEntry(k, v)
-				if err != nil {
-					return nil, err
-				}
-				o.Traits = append(o.Traits, fmt.Sprintf("builder.properties=%s", entry))
-			} else {
+	buildProps, err := mergePropertiesWithPrecedence(o.BuildProperties)
+	if err != nil {
+		return nil, err
+	}
+	for _, k := range buildProps.Keys() {
+		v, ok := buildProps.Get(k)
+		if ok {
+			entry, err := property.EncodePropertyFileEntry(k, v)
+			if err != nil {
 				return nil, err
 			}
+			o.Traits = append(o.Traits, fmt.Sprintf("builder.properties=%s", entry))
+		} else {
+			return nil, err
 		}
 	}
+
 	for _, item := range o.Configs {
 		if config, parseErr := ParseConfigOption(item); parseErr == nil {
 			if applyConfigOptionErr := ApplyConfigOption(config, &integration.Spec, c, namespace, o.Compression); applyConfigOptionErr != nil {
@@ -685,20 +684,6 @@ func addResource(resourceLocation string, integrationSpec *v1.IntegrationSpec, e
 	}
 
 	return nil
-}
-
-// The function parse the value and if it is a file (file:/path/), it will parse as property file
-// otherwise return a single property built from the item passed as `key=value`
-func extractProperties(value string) (*properties.Properties, error) {
-	if !strings.HasPrefix(value, "file:") {
-		return keyValueProps(value)
-	}
-	// we already validated the existence of files during validate()
-	return loadPropertyFile(strings.Replace(value, "file:", "", 1))
-}
-
-func keyValueProps(value string) (*properties.Properties, error) {
-	return properties.Load([]byte(value), properties.UTF8)
 }
 
 func (o *runCmdOptions) GetIntegrationName(sources []string) string {

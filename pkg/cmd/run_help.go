@@ -27,6 +27,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/magiconair/properties"
 )
 
 var invalidPaths = []string{"/etc/camel", "/deployments/dependencies"}
@@ -276,4 +277,39 @@ func filterFileLocation(maybeFileLocations []string) []string {
 		}
 	}
 	return filteredOptions
+}
+
+func mergePropertiesWithPrecedence(items []string) (*properties.Properties, error) {
+	loPrecedenceProps := properties.NewProperties()
+	hiPrecedenceProps := properties.NewProperties()
+	for _, item := range items {
+		prop, err := extractProperties(item)
+		if err != nil {
+			return nil, err
+		}
+		// We consider file props to have a lower priority versus single properties
+		if strings.HasPrefix(item, "file:") {
+			loPrecedenceProps.Merge(prop)
+		} else {
+			hiPrecedenceProps.Merge(prop)
+		}
+	}
+	// Any property contained in both collections will be merged
+	// giving precedence to the ones in hiPrecedenceProps
+	loPrecedenceProps.Merge(hiPrecedenceProps)
+	return loPrecedenceProps, nil
+}
+
+// The function parse the value and if it is a file (file:/path/), it will parse as property file
+// otherwise return a single property built from the item passed as `key=value`
+func extractProperties(value string) (*properties.Properties, error) {
+	if !strings.HasPrefix(value, "file:") {
+		return keyValueProps(value)
+	}
+	// we already validated the existence of files during validate()
+	return loadPropertyFile(strings.Replace(value, "file:", "", 1))
+}
+
+func keyValueProps(value string) (*properties.Properties, error) {
+	return properties.Load([]byte(value), properties.UTF8)
 }
