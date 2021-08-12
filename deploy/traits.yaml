@@ -830,8 +830,17 @@ traits:
   platform: false
   profiles:
   - OpenShift
-  description: The Route trait can be used to configure the creation of OpenShift
-    routes for the integration.
+  description: 'The Route trait can be used to configure the creation of OpenShift
+    routes for the integration. The certificate and key contents may be sourced either
+    from the local filesystem or in a Openshift `secret` object. The user may use
+    the parameters ending in `-secret` (example: `tls-certificate-secret`) to reference
+    a certificate stored in a `secret`. Parameters ending in `-secret` have higher
+    priorities and in case the same route parameter is set, for example: `tls-key-secret`
+    and `tls-key`, then `tls-key-secret` is used. The recommended approach to set
+    the key and certificates is to use `secrets` to store their contents and use the
+    following parameters to reference them: `tls-certificate-secret`, `tls-key-secret`,
+    `tls-ca-certificate-secret`, `tls-destination-ca-certificate-secret` See the examples
+    section at the end of this page to see the setup options.'
   properties:
   - name: enabled
     type: bool
@@ -843,19 +852,40 @@ traits:
   - name: tls-termination
     type: string
     description: The TLS termination type, like `edge`, `passthrough` or `reencrypt`.Refer
-      to the OpenShift documentation for additional information.
+      to the OpenShift route documentation for additional information.
   - name: tls-certificate
     type: string
-    description: The TLS certificate contents.Refer to the OpenShift documentation
+    description: The TLS certificate contents.Refer to the OpenShift route documentation
       for additional information.
+  - name: tls-certificate-secret
+    type: string
+    description: The secret name and key reference to the TLS certificate. The format
+      is "secret-name[/key-name]", the value represents the secret name, if there
+      is only one key in the secret it will be read, otherwise you can set a key name
+      separated with a "/".Refer to the OpenShift route documentation for additional
+      information.
   - name: tls-key
     type: string
-    description: The TLS certificate key contents.Refer to the OpenShift documentation
+    description: The TLS certificate key contents.Refer to the OpenShift route documentation
       for additional information.
+  - name: tls-key-secret
+    type: string
+    description: The secret name and key reference to the TLS certificate key. The
+      format is "secret-name[/key-name]", the value represents the secret name, if
+      there is only one key in the secret it will be read, otherwise you can set a
+      key name separated with a "/".Refer to the OpenShift route documentation for
+      additional information.
   - name: tls-ca-certificate
     type: string
-    description: The TLS cert authority certificate contents.Refer to the OpenShift
-      documentation for additional information.
+    description: The TLS CA certificate contents.Refer to the OpenShift route documentation
+      for additional information.
+  - name: tls-ca-certificate-secret
+    type: string
+    description: The secret name and key reference to the TLS CA certificate. The
+      format is "secret-name[/key-name]", the value represents the secret name, if
+      there is only one key in the secret it will be read, otherwise you can set a
+      key name separated with a "/".Refer to the OpenShift route documentation for
+      additional information.
   - name: tls-destination-ca-certificate
     type: string
     description: The destination CA certificate provides the contents of the ca certificate
@@ -864,11 +894,19 @@ traits:
       connection.If this field is not specified, the router may provide its own destination
       CA and perform hostname validation usingthe short service name (service.namespace.svc),
       which allows infrastructure generated certificates to automaticallyverify.Refer
-      to the OpenShift documentation for additional information.
+      to the OpenShift route documentation for additional information.
+  - name: tls-destination-ca-certificate-secret
+    type: string
+    description: The secret name and key reference to the destination CA certificate.
+      The format is "secret-name[/key-name]", the value represents the secret name,
+      if there is only one key in the secret it will be read, otherwise you can set
+      a key name separated with a "/".Refer to the OpenShift route documentation for
+      additional information.
   - name: tls-insecure-edge-termination-policy
     type: string
     description: To configure how to deal with insecure traffic, e.g. `Allow`, `Disable`
-      or `Redirect` traffic.Refer to the OpenShift documentation for additional information.
+      or `Redirect` traffic.Refer to the OpenShift route documentation for additional
+      information.
 - name: service-binding
   platform: false
   profiles:
