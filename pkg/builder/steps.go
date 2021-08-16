@@ -57,6 +57,18 @@ func NewStep(phase int32, task StepTask) Step {
 	return &s
 }
 
+func StepsFrom(ids ...string) ([]Step, error) {
+	steps := make([]Step, 0)
+	for _, id := range ids {
+		s, ok := stepsByID[id]
+		if !ok {
+			return steps, fmt.Errorf("unknown build step: %s", id)
+		}
+		steps = append(steps, s)
+	}
+	return steps, nil
+}
+
 func StepIDsFor(steps ...Step) []string {
 	IDs := make([]string, 0)
 	for _, step := range steps {

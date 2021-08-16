@@ -21,12 +21,12 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/apache/camel-k/pkg/util/property"
 	corev1 "k8s.io/api/core/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	mvn "github.com/apache/camel-k/pkg/util/maven"
+	"github.com/apache/camel-k/pkg/util/property"
 )
 
 // The builder trait is internally used to determine the best strategy to
@@ -137,7 +137,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 	maven := e.Platform.Status.Build.Maven
 
-	// Add Maven repositories defined in the IntergrationKit
+	// Add Maven repositories defined in the IntegrationKit
 	for _, repo := range e.IntegrationKit.Spec.Repositories {
 		maven.Repositories = append(maven.Repositories, mvn.NewRepository(repo))
 	}
@@ -167,9 +167,6 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 
 	steps := make([]builder.Step, 0)
 	steps = append(steps, builder.DefaultSteps...)
-
-	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
-	quarkus.addBuildSteps(&steps)
 
 	// sort steps by phase
 	sort.SliceStable(steps, func(i, j int) bool {

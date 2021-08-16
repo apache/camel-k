@@ -99,18 +99,17 @@ func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion str
 	p.Dependencies = make([]maven.Dependency, 0)
 	p.Build = &maven.Build{Plugins: make([]maven.Plugin, 0)}
 
-	// camel-quarkus does routes discovery at startup but we don't want
+	// camel-quarkus does route discovery at startup, but we don't want
 	// this to happen as routes are loaded at runtime and looking for
 	// routes at build time may try to load camel-k-runtime routes builder
-	// proxies which in some case may fail
+	// proxies which in some case may fail.
 	p.Properties["quarkus.camel.routes-discovery.enabled"] = "false"
 
-	// disable quarkus banner ...
+	// disable quarkus banner
 	p.Properties["quarkus.banner.enabled"] = "false"
 
-	// set fast-jar packaging since it gives some startup time improvements
-	p.Properties["quarkus.package.type"] = "native"
-	// p.Properties["quarkus.native.additional-build-args"] = "--language:js"
+	// set fast-jar packaging by default, since it gives some startup time improvements
+	p.Properties["quarkus.package.type"] = "fast-jar"
 
 	// DependencyManagement
 	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies,
@@ -199,7 +198,7 @@ func computeQuarkusDependencies(ctx *builderContext) error {
 	mc.SettingsContent = ctx.Maven.SettingsData
 	mc.LocalRepository = ctx.Build.Maven.LocalRepository
 
-	// Process artifacts list and add it to existing artifacts.
+	// Process artifacts list and add it to existing artifacts
 	artifacts, err := ProcessQuarkusTransitiveDependencies(mc)
 	if err != nil {
 		return err
@@ -212,7 +211,7 @@ func computeQuarkusDependencies(ctx *builderContext) error {
 func ProcessQuarkusTransitiveDependencies(mc maven.Context) ([]v1.Artifact, error) {
 	var artifacts []v1.Artifact
 
-	// Quarkus fast-jar format is split into various sub directories in quarkus-app
+	// Quarkus fast-jar format is split into various sub-directories in quarkus-app
 	quarkusAppDir := path.Join(mc.Path, "target", "quarkus-app")
 
 	// Discover application dependencies from the Quarkus fast-jar directory tree

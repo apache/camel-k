@@ -27,13 +27,22 @@ import (
 	"github.com/apache/camel-k/pkg/util/camel"
 )
 
-func TestConfigureQuarkusTraitShouldSucceed(t *testing.T) {
+func TestConfigureQuarkusTraitBuildSubmitted(t *testing.T) {
 	quarkusTrait, environment := createNominalQuarkusTest()
+	environment.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseBuildSubmitted
 
 	configured, err := quarkusTrait.Configure(environment)
 
 	assert.True(t, configured)
 	assert.Nil(t, err)
+
+	err = quarkusTrait.Apply(environment)
+	assert.Nil(t, err)
+
+	build := getBuilderTask(environment.BuildTasks)
+	assert.NotNil(t, t, build)
+
+	assert.Len(t, build.Steps, len(builder.QuarkusSteps)+1)
 }
 
 func TestConfigureDisabledQuarkusTraitShouldFail(t *testing.T) {
@@ -54,17 +63,6 @@ func TestApplyQuarkusTraitDoesNothing(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestQuarkusTraitAddBuildStepsShouldSucceed(t *testing.T) {
-	quarkusTrait, _ := createNominalQuarkusTest()
-
-	steps := make([]builder.Step, 0)
-	steps = append(steps, builder.DefaultSteps...)
-
-	quarkusTrait.addBuildSteps(&steps)
-
-	assert.Len(t, steps, len(builder.DefaultSteps)+len(builder.QuarkusSteps))
-}
-
 func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
 	trait := newQuarkusTrait().(*quarkusTrait)
 	trait.Enabled = BoolP(true)
@@ -78,6 +76,12 @@ func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
 						Language: v1.LanguageJavaSource,
 					},
 				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{},
+		BuildTasks: []v1.Task{
+			{
+				Builder: &v1.BuilderTask{},
 			},
 		},
 		Platform: &v1.IntegrationPlatform{},

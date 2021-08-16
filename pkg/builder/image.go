@@ -23,7 +23,8 @@ import (
 	"path"
 
 	"k8s.io/apimachinery/pkg/selection"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
@@ -34,11 +35,27 @@ import (
 
 const (
 	ContextDir      = "context"
-	DeploymentDir   = "/home/nonroot"
+	DeploymentDir   = "/deployments"
 	DependenciesDir = "dependencies"
 )
 
 type artifactsSelector func(ctx *builderContext) error
+
+func nativeImageContext(ctx *builderContext) error {
+	return imageContext(ctx, func(ctx *builderContext) error {
+		runner := "camel-k-integration-" + defaults.Version + "-runner"
+
+		ctx.BaseImage = "quay.io/quarkus/quarkus-distroless-image:1.0"
+		ctx.SelectedArtifacts = []v1.Artifact{
+			{
+				Location: path.Join(ctx.Path, "maven", "target", runner),
+				Target:   runner,
+			},
+		}
+
+		return nil
+	})
+}
 
 func standardImageContext(ctx *builderContext) error {
 	return imageContext(ctx, func(ctx *builderContext) error {
@@ -112,22 +129,10 @@ func imageContext(ctx *builderContext, selector artifactsSelector) error {
 		}
 	}
 
-	runner := "camel-k-integration-" + defaults.Version + "-runner"
-	_, err = util.CopyFile(path.Join(ctx.Path, "maven", "target", runner), path.Join(contextDir, runner))
-	if err != nil {
-		return err
-	}
-
-	err = os.Chmod(path.Join(contextDir, runner), 0755)
-	if err != nil {
-		return err
-	}
-
 	// #nosec G202
 	dockerfile := []byte(`
-		FROM quay.io/quarkus/quarkus-distroless-image:1.0
-		WORKDIR ` + DeploymentDir + `
-		COPY --chown=nonroot:root ` + runner + ` ` + runner + `
+		FROM ` + ctx.BaseImage + `
+		COPY --chown=nonroot:root . ` + DeploymentDir + `
 		USER nonroot
 	`)
 
@@ -140,9 +145,9 @@ func imageContext(ctx *builderContext, selector artifactsSelector) error {
 }
 
 func listPublishedImages(context *builderContext) ([]v1.IntegrationKitStatus, error) {
-	options := []k8sclient.ListOption{
-		k8sclient.InNamespace(context.Namespace),
-		k8sclient.MatchingLabels{
+	options := []ctrl.ListOption{
+		ctrl.InNamespace(context.Namespace),
+		ctrl.MatchingLabels{
 			"camel.apache.org/runtime.version":  context.Catalog.Runtime.Version,
 			"camel.apache.org/runtime.provider": string(context.Catalog.Runtime.Provider),
 		},
