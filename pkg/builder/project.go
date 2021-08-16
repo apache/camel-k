@@ -38,6 +38,8 @@ type steps struct {
 	IncrementalImageContext Step
 	NativeImageContext      Step
 	StandardImageContext    Step
+	ExecutableDockerfile    Step
+	JvmDockerfile           Step
 }
 
 var Steps = steps{
@@ -49,6 +51,8 @@ var Steps = steps{
 	IncrementalImageContext: NewStep(ApplicationPackagePhase, incrementalImageContext),
 	NativeImageContext:      NewStep(ApplicationPackagePhase, nativeImageContext),
 	StandardImageContext:    NewStep(ApplicationPackagePhase, standardImageContext),
+	ExecutableDockerfile:    NewStep(ApplicationPackagePhase+1, executableDockerfile),
+	JvmDockerfile:           NewStep(ApplicationPackagePhase+1, jvmDockerfile),
 }
 
 var DefaultSteps = []Step{

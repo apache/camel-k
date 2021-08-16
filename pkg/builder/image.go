@@ -57,12 +57,45 @@ func nativeImageContext(ctx *builderContext) error {
 	})
 }
 
+func executableDockerfile(ctx *builderContext) error {
+	// #nosec G202
+	dockerfile := []byte(`
+		FROM ` + ctx.BaseImage + `
+		WORKDIR ` + DeploymentDir + `
+		COPY --chown=nonroot:root . ` + DeploymentDir + `
+		USER nonroot
+	`)
+
+	err := ioutil.WriteFile(path.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0777)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func standardImageContext(ctx *builderContext) error {
 	return imageContext(ctx, func(ctx *builderContext) error {
 		ctx.SelectedArtifacts = ctx.Artifacts
 
 		return nil
 	})
+}
+
+func jvmDockerfile(ctx *builderContext) error {
+	// #nosec G202
+	dockerfile := []byte(`
+		FROM ` + ctx.BaseImage + `
+		ADD . ` + DeploymentDir + `
+		USER 1000
+	`)
+
+	err := ioutil.WriteFile(path.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0777)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func incrementalImageContext(ctx *builderContext) error {
@@ -127,18 +160,6 @@ func imageContext(ctx *builderContext, selector artifactsSelector) error {
 		if err := util.WriteFileWithContent(path.Join(contextDir, filePath), fileName, entry.Content); err != nil {
 			return nil
 		}
-	}
-
-	// #nosec G202
-	dockerfile := []byte(`
-		FROM ` + ctx.BaseImage + `
-		COPY --chown=nonroot:root . ` + DeploymentDir + `
-		USER nonroot
-	`)
-
-	err = ioutil.WriteFile(path.Join(contextDir, "Dockerfile"), dockerfile, 0777)
-	if err != nil {
-		return err
 	}
 
 	return nil
