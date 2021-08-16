@@ -71,8 +71,8 @@ func (t *jvmTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if t := e.Catalog.GetTrait(quarkusTraitId); t != nil && t.(*quarkusTrait).isNativePackageType() {
-		if quarkus := t.(*quarkusTrait); IsNilOrTrue(quarkus.Enabled) && quarkus.isNativePackageType() {
+	if trait := e.Catalog.GetTrait(quarkusTraitId); trait != nil {
+		if quarkus := trait.(*quarkusTrait); IsNilOrTrue(quarkus.Enabled) && quarkus.isNativePackageType() {
 			return false, nil
 		}
 	}
@@ -199,6 +199,8 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		container.Command = []string{"java"}
 		container.Args = args
 	}
+
+	container.WorkingDir = builder.DeploymentDir
 
 	return nil
 }
