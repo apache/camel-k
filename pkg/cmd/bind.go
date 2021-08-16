@@ -31,6 +31,8 @@ import (
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/cli-runtime/pkg/printers"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -47,8 +49,8 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 			if err := options.validate(cmd, args); err != nil {
 				return err
 			}
-			if err := options.run(args); err != nil {
-				fmt.Println(err.Error())
+			if err := options.run(cmd, args); err != nil {
+				fmt.Fprintln(cmd.OutOrStdout(), string(err.Error()))
 			}
 
 			return nil
@@ -124,7 +126,7 @@ func (o *bindCmdOptions) validate(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *bindCmdOptions) run(args []string) error {
+func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	source, err := o.decode(args[0], sourceKey)
 	if err != nil {
 		return err
@@ -160,32 +162,13 @@ func (o *bindCmdOptions) run(args []string) error {
 		}
 	}
 
-	switch o.OutputFormat {
-	case "":
-		// continue..
-	case "yaml":
-		data, err := kubernetes.ToYAML(&binding)
-		if err != nil {
-			return err
-		}
-		fmt.Print(string(data))
-		return nil
-
-	case "json":
-		data, err := kubernetes.ToJSON(&binding)
-		if err != nil {
-			return err
-		}
-		fmt.Print(string(data))
-		return nil
-
-	default:
-		return fmt.Errorf("invalid output format option '%s', should be one of: yaml|json", o.OutputFormat)
-	}
-
 	client, err := o.GetCmdClient()
 	if err != nil {
 		return err
+	}
+
+	if o.OutputFormat != "" {
+		return showOutput(cmd, &binding, o.OutputFormat, client.GetScheme())
 	}
 
 	existed := false
@@ -204,6 +187,14 @@ func (o *bindCmdOptions) run(args []string) error {
 		fmt.Printf("kamelet binding \"%s\" updated\n", name)
 	}
 	return nil
+}
+
+func showOutput(cmd *cobra.Command, binding *v1alpha1.KameletBinding, outputFormat string, scheme *runtime.Scheme) error {
+	printer := printers.NewTypeSetter(scheme)
+	printer.Delegate = &kubernetes.CLIPrinter{
+		Format: outputFormat,
+	}
+	return printer.PrintObj(binding, cmd.OutOrStdout())
 }
 
 func (o *bindCmdOptions) decode(res string, key string) (v1alpha1.Endpoint, error) {

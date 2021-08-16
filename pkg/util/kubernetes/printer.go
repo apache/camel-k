@@ -18,23 +18,33 @@ limitations under the License.
 package kubernetes
 
 import (
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/json"
+	"fmt"
+	"io"
 
-	"github.com/apache/camel-k/pkg/util"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// ToJSON marshal to json format
-func ToJSON(value runtime.Object) ([]byte, error) {
-	return json.Marshal(value)
+// CLIPrinter is delegated to print the runtime object
+type CLIPrinter struct {
+	// It accepts either yaml or json format
+	Format string
 }
 
-// ToYAML marshal to yaml format
-func ToYAML(value runtime.Object) ([]byte, error) {
-	data, err := ToJSON(value)
-	if err != nil {
-		return nil, err
+// PrintObj prints the obj in json|yaml format according to the type of the obj.
+func (p *CLIPrinter) PrintObj(obj runtime.Object, output io.Writer) error {
+	var data []byte
+	var err error
+	switch p.Format {
+	case "yaml":
+		data, err = ToYAML(obj)
+	case "json":
+		data, err = ToJSON(obj)
+	default:
+		err = fmt.Errorf("invalid output format option '%s', should be one of: yaml|json", p.Format)
 	}
-
-	return util.JSONToYAML(data)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(output, string(data))
+	return nil
 }
