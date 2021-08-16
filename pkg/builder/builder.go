@@ -86,14 +86,11 @@ func (t *builderTask) Do(ctx context.Context) v1.BuildStatus {
 		})
 	}
 
-	steps := make([]Step, 0)
-	for _, step := range t.task.Steps {
-		s, ok := stepsByID[step]
-		if !ok {
-			log.Info("Skipping unknown build step", "step", step)
-			continue
-		}
-		steps = append(steps, s)
+	steps, err := StepsFrom(t.task.Steps...)
+	if err != nil {
+		t.log.Errorf(err,"invalid builder steps: %s", t.task.Steps)
+		result.Failed(err)
+		return result
 	}
 	// Sort steps by phase
 	sort.SliceStable(steps, func(i, j int) bool {

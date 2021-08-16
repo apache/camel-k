@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"sort"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
@@ -61,19 +62,56 @@ func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
 		t.PackageType = &packageType
 	}
 
-	return e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
+	return e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) ||
+		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
 		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning), nil
 }
 
 func (t *quarkusTrait) Apply(e *Environment) error {
-	if t.isNativePackageType() {
-		container := e.getIntegrationContainer()
-		if container == nil {
-			return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
+	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
+		build := getBuilderTask(e.BuildTasks)
+		if build == nil {
+			return fmt.Errorf("unable to find builder task: %s", e.Integration.Name)
 		}
 
-		container.Command = []string{"./camel-k-integration-" + defaults.Version + "-runner"}
-		container.WorkingDir = builder.DeploymentDir
+		if build.Maven.Properties == nil {
+			build.Maven.Properties = make(map[string]string)
+		}
+
+		steps, err := builder.StepsFrom(build.Steps...)
+		if err != nil {
+			return err
+		}
+
+		steps = append(steps, builder.QuarkusSteps...)
+
+		if t.isNativePackageType() {
+			build.Maven.Properties["quarkus.package.type"] = string(nativePackageType)
+			steps = append(steps, builder.Steps.NativeImageContext)
+		} else {
+			build.Maven.Properties["quarkus.package.type"] = string(fastJarPackageType)
+			steps = append(steps, builder.Steps.IncrementalImageContext)
+		}
+
+		// Sort steps by phase
+		sort.SliceStable(steps, func(i, j int) bool {
+			return steps[i].Phase() < steps[j].Phase()
+		})
+
+		build.Steps = builder.StepIDsFor(steps...)
+	}
+
+	if e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
+		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning) {
+		if t.isNativePackageType() {
+			container := e.getIntegrationContainer()
+			if container == nil {
+				return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
+			}
+
+			container.Command = []string{"./camel-k-integration-" + defaults.Version + "-runner"}
+			container.WorkingDir = builder.DeploymentDir
+		}
 	}
 
 	return nil
@@ -89,10 +127,15 @@ func (t *quarkusTrait) InfluencesKit() bool {
 	return true
 }
 
-func (t *quarkusTrait) addBuildSteps(steps *[]builder.Step) {
-	*steps = append(*steps, builder.QuarkusSteps...)
-}
-
 func (t *quarkusTrait) isNativePackageType() bool {
 	return t.PackageType != nil && *t.PackageType == nativePackageType
+}
+
+func getBuilderTask(tasks []v1.Task) *v1.BuilderTask {
+	for i, task := range tasks {
+		if task.Builder != nil {
+			return tasks[i].Builder
+		}
+	}
+	return nil
 }

@@ -35,8 +35,9 @@ type steps struct {
 	GenerateProjectSettings Step
 	InjectDependencies      Step
 	SanitizeDependencies    Step
-	StandardImageContext    Step
 	IncrementalImageContext Step
+	NativeImageContext      Step
+	StandardImageContext    Step
 }
 
 var Steps = steps{
@@ -45,8 +46,9 @@ var Steps = steps{
 	GenerateProjectSettings: NewStep(ProjectGenerationPhase+1, generateProjectSettings),
 	InjectDependencies:      NewStep(ProjectGenerationPhase+2, injectDependencies),
 	SanitizeDependencies:    NewStep(ProjectGenerationPhase+3, sanitizeDependencies),
-	StandardImageContext:    NewStep(ApplicationPackagePhase, standardImageContext),
 	IncrementalImageContext: NewStep(ApplicationPackagePhase, incrementalImageContext),
+	NativeImageContext:      NewStep(ApplicationPackagePhase, nativeImageContext),
+	StandardImageContext:    NewStep(ApplicationPackagePhase, standardImageContext),
 }
 
 var DefaultSteps = []Step{
@@ -55,7 +57,6 @@ var DefaultSteps = []Step{
 	Steps.GenerateProjectSettings,
 	Steps.InjectDependencies,
 	Steps.SanitizeDependencies,
-	Steps.IncrementalImageContext,
 }
 
 func cleanUpBuildDir(ctx *builderContext) error {
