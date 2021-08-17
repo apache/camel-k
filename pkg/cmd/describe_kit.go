@@ -24,7 +24,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/indentedwriter"
@@ -74,12 +74,12 @@ func (command *describeKitCommandOptions) run(args []string) error {
 	}
 
 	kit := v1.NewIntegrationKit(command.Namespace, args[0])
-	kitKey := k8sclient.ObjectKey{
+	kitKey := ctrl.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      args[0],
 	}
 
-	if err := c.Get(command.Context, kitKey, &kit); err == nil {
+	if err := c.Get(command.Context, kitKey, kit); err == nil {
 		if desc, err := command.describeIntegrationKit(kit); err == nil {
 			fmt.Print(desc)
 		} else {
@@ -92,7 +92,7 @@ func (command *describeKitCommandOptions) run(args []string) error {
 	return nil
 }
 
-func (command *describeKitCommandOptions) describeIntegrationKit(kit v1.IntegrationKit) (string, error) {
+func (command *describeKitCommandOptions) describeIntegrationKit(kit *v1.IntegrationKit) (string, error) {
 	return indentedwriter.IndentedString(func(out io.Writer) error {
 		w := indentedwriter.NewWriter(out)
 

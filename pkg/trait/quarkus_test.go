@@ -55,12 +55,16 @@ func TestConfigureDisabledQuarkusTraitShouldFail(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestApplyQuarkusTraitDoesNothing(t *testing.T) {
+func TestApplyQuarkusTraitDefaultKitLayout(t *testing.T) {
 	quarkusTrait, environment := createNominalQuarkusTest()
 
-	err := quarkusTrait.Apply(environment)
-
+	configured, err := quarkusTrait.Configure(environment)
+	assert.True(t, configured)
 	assert.Nil(t, err)
+
+	err = quarkusTrait.Apply(environment)
+	assert.Nil(t, err)
+	assert.Equal(t, environment.IntegrationKit.Labels[v1.IntegrationKitLayoutLabel], v1.IntegrationKitLayoutFastJar)
 }
 
 func createNominalQuarkusTest() (*quarkusTrait, *Environment) {

@@ -77,7 +77,7 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 				}
 			}
 			kit := v1.NewIntegrationKit(kitNamespace, kitName)
-			integration.SetIntegrationKit(&kit)
+			integration.SetIntegrationKit(kit)
 		} else {
 			integration.Status.IntegrationKit = nil
 		}

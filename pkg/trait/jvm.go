@@ -88,10 +88,10 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		name := e.Integration.Status.IntegrationKit.Name
 		ns := e.Integration.GetIntegrationKitNamespace(e.Platform)
 		k := v1.NewIntegrationKit(ns, name)
-		if err := t.Client.Get(t.Ctx, ctrl.ObjectKeyFromObject(&k), &k); err != nil {
+		if err := t.Client.Get(t.Ctx, ctrl.ObjectKeyFromObject(k), k); err != nil {
 			return errors.Wrapf(err, "unable to find integration kit %s/%s, %s", ns, name, err)
 		}
-		kit = &k
+		kit = k
 	}
 
 	if kit == nil {
@@ -114,10 +114,10 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		classpath.Add(artifact.Target)
 	}
 
-	if kit.Labels["camel.apache.org/kit.type"] == v1.IntegrationKitTypeExternal {
+	if kit.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypeExternal {
 		// In case of an external created kit, we do not have any information about
-		// the classpath so we assume the all jars in /deployments/dependencies/ have
-		// to be taken into account
+		// the classpath, so we assume the all jars in /deployments/dependencies/ have
+		// to be taken into account.
 		dependencies := path.Join(builder.DeploymentDir, builder.DependenciesDir)
 		classpath.Add(
 			dependencies+"/*",

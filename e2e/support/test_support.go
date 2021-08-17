@@ -854,17 +854,13 @@ func DeploymentCondition(ns string, name string, conditionType appsv1.Deployment
 func Build(ns string, name string) func() *v1.Build {
 	return func() *v1.Build {
 		build := v1.NewBuild(ns, name)
-		key := ctrl.ObjectKey{
-			Namespace: ns,
-			Name:      name,
-		}
-		if err := TestClient().Get(TestContext, key, &build); err != nil && k8serrors.IsNotFound(err) {
+		if err := TestClient().Get(TestContext, ctrl.ObjectKeyFromObject(build), build); err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
 			log.Error(err, "Error while retrieving build "+name)
 			return nil
 		}
-		return &build
+		return build
 	}
 }
 

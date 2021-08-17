@@ -28,11 +28,11 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
 
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/openshift"
 )
@@ -57,7 +57,7 @@ func TestRunGlobalInstall(t *testing.T) {
 				Expect(Kamel("install", "-n", ns2, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
 
 				Expect(Kamel("run", "-n", ns2, "files/Java.java").Execute()).To(Succeed())
-				Eventually(IntegrationPodPhase(ns2, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+				Eventually(IntegrationPodPhase(ns2, "java"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns2, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 				Expect(Kamel("delete", "--all", "-n", ns2).Execute()).To(Succeed())
 				Expect(Kits(ns2)()).Should(HaveLen(1))
@@ -72,7 +72,7 @@ func TestRunGlobalInstall(t *testing.T) {
 				Expect(Kamel("install", "-n", ns3, "--olm=false").Execute()).To(Succeed())
 
 				Expect(Kamel("run", "-n", ns3, "files/Java.java").Execute()).To(Succeed())
-				Eventually(IntegrationPodPhase(ns3, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+				Eventually(IntegrationPodPhase(ns3, "java"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns3, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 				Expect(Kamel("delete", "--all", "-n", ns3).Execute()).To(Succeed())
 
@@ -85,7 +85,7 @@ func TestRunGlobalInstall(t *testing.T) {
 		t.Run("Global test on namespace without platform", func(t *testing.T) {
 			WithNewTestNamespace(t, func(ns4 string) {
 				Expect(Kamel("run", "-n", ns4, "files/Java.java").Execute()).To(Succeed())
-				Eventually(IntegrationPodPhase(ns4, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+				Eventually(IntegrationPodPhase(ns4, "java"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns4, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 				Expect(Kamel("delete", "--all", "-n", ns4).Execute()).To(Succeed())
 				Expect(Kits(ns4)()).Should(HaveLen(0))
@@ -98,7 +98,7 @@ func TestRunGlobalInstall(t *testing.T) {
 		t.Run("Global test on namespace without platform with external kit", func(t *testing.T) {
 			WithNewTestNamespace(t, func(ns5 string) {
 				Expect(Kamel("run", "-n", ns5, "files/Java.java").Execute()).To(Succeed())
-				Eventually(IntegrationPodPhase(ns5, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+				Eventually(IntegrationPodPhase(ns5, "java"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns5, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 				Expect(Kamel("delete", "--all", "-n", ns5).Execute()).To(Succeed())
 				Expect(Kits(ns5)()).Should(HaveLen(0))
@@ -107,22 +107,22 @@ func TestRunGlobalInstall(t *testing.T) {
 				if len(globalKits) == 1 {
 					kit := globalKits[0]
 					// external kit mirroring the global one
-					externalKit := camelv1.IntegrationKit{
+					externalKit := v1.IntegrationKit{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: ns5,
 							Name:      "external",
 							Labels: map[string]string{
-								"camel.apache.org/kit.type": camelv1.IntegrationKitTypeExternal,
+								v1.IntegrationKitTypeLabel: v1.IntegrationKitTypeExternal,
 							},
 						},
-						Spec: camelv1.IntegrationKitSpec{
+						Spec: v1.IntegrationKitSpec{
 							Image: kit.Status.Image,
 						},
 					}
 					Expect(TestClient().Create(TestContext, &externalKit)).Should(BeNil())
 
 					Expect(Kamel("run", "-n", ns5, "files/Java.java", "--name", "ext", "--kit", "external").Execute()).To(Succeed())
-					Eventually(IntegrationPodPhase(ns5, "ext"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+					Eventually(IntegrationPodPhase(ns5, "ext"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 					Eventually(IntegrationLogs(ns5, "ext"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 					Expect(IntegrationKit(ns5, "ext")()).Should(Equal("external"))
 					Expect(Kamel("delete", "--all", "-n", ns5).Execute()).To(Succeed())

@@ -25,7 +25,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/property"
 	user "github.com/mitchellh/go-homedir"
 	"github.com/scylladb/go-set/strset"
 
@@ -36,6 +35,7 @@ import (
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/property"
 )
 
 var exactVersionRegexp = regexp.MustCompile(`^(\d+)\.(\d+)\.([\w-.]+)$`)
@@ -46,8 +46,8 @@ func getIntegrationKit(ctx context.Context, c client.Client, integration *v1.Int
 		return nil, nil
 	}
 	kit := v1.NewIntegrationKit(integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name)
-	err := c.Get(ctx, ctrl.ObjectKeyFromObject(&kit), &kit)
-	return &kit, err
+	err := c.Get(ctx, ctrl.ObjectKeyFromObject(kit), kit)
+	return kit, err
 }
 
 func collectConfigurationValues(configurationType string, configurable ...v1.Configurable) []string {
@@ -221,7 +221,7 @@ func AddSourceDependencies(source v1.SourceSpec, catalog *camel.RuntimeCatalog) 
 	return dependencies
 }
 
-/// Bool pointer operations:
+// Bool pointer operations:
 
 // BoolP returns a pointer to a bool value
 func BoolP(b bool) *bool {

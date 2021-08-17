@@ -190,7 +190,7 @@ func (t *containerTrait) configureDependencies(e *Environment) error {
 			// Add some information for post-processing, this may need to be refactored
 			// to a proper data structure
 			kit.Labels = map[string]string{
-				"camel.apache.org/kit.type":           v1.IntegrationKitTypeExternal,
+				v1.IntegrationKitTypeLabel:           v1.IntegrationKitTypeExternal,
 				kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
 				kubernetes.CamelCreatorLabelName:      e.Integration.Name,
 				kubernetes.CamelCreatorLabelNamespace: e.Integration.Namespace,
@@ -198,8 +198,8 @@ func (t *containerTrait) configureDependencies(e *Environment) error {
 			}
 
 			t.L.Infof("image %s", kit.Spec.Image)
-			e.Resources.Add(&kit)
-			e.Integration.SetIntegrationKit(&kit)
+			e.Resources.Add(kit)
+			e.Integration.SetIntegrationKit(kit)
 		}
 		if IsTrue(t.ProbesEnabled) {
 			if capability, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityHealth]; ok {

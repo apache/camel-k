@@ -22,6 +22,7 @@ import (
 	"os"
 	"path"
 
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -29,7 +30,6 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/controller"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
@@ -166,19 +166,27 @@ func imageContext(ctx *builderContext, selector artifactsSelector) error {
 }
 
 func listPublishedImages(context *builderContext) ([]v1.IntegrationKitStatus, error) {
+	excludeNativeImages, err := labels.NewRequirement(v1.IntegrationKitLayoutLabel, selection.NotEquals, []string{
+		v1.IntegrationKitLayoutNative,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	options := []ctrl.ListOption{
 		ctrl.InNamespace(context.Namespace),
 		ctrl.MatchingLabels{
+			v1.IntegrationKitTypeLabel:          v1.IntegrationKitTypePlatform,
 			"camel.apache.org/runtime.version":  context.Catalog.Runtime.Version,
 			"camel.apache.org/runtime.provider": string(context.Catalog.Runtime.Provider),
 		},
-		controller.NewLabelSelector("camel.apache.org/kit.type", selection.Equals, []string{
-			v1.IntegrationKitTypePlatform,
-		}),
+		ctrl.MatchingLabelsSelector{
+			Selector: labels.NewSelector().Add(*excludeNativeImages),
+		},
 	}
 
 	list := v1.NewIntegrationKitList()
-	err := context.Client.List(context.C, &list, options...)
+	err = context.Client.List(context.C, &list, options...)
 	if err != nil {
 		return nil, err
 	}

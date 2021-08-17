@@ -23,8 +23,10 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
@@ -98,15 +100,15 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 	}
 
 	kit := v1.NewIntegrationKit(command.Namespace, args[0])
-	key := k8sclient.ObjectKey{
+	key := ctrl.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      args[0],
 	}
-	if err := c.Get(command.Context, key, &kit); err == nil {
+	if err := c.Get(command.Context, key, kit); err == nil {
 		// the integration kit already exists, let's check that it is
 		// not a platform one which is supposed to be "read only"
 
-		if kit.Labels["camel.apache.org/kit.type"] == v1.IntegrationKitTypePlatform {
+		if kit.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypePlatform {
 			fmt.Printf("integration kit \"%s\" is not editable\n", kit.Name)
 			return nil
 		}
@@ -114,7 +116,7 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 
 	kit = v1.NewIntegrationKit(command.Namespace, kubernetes.SanitizeName(args[0]))
 	kit.Labels = map[string]string{
-		"camel.apache.org/kit.type": v1.IntegrationKitTypeUser,
+		v1.IntegrationKitTypeLabel: v1.IntegrationKitTypeUser,
 	}
 	kit.Spec = v1.IntegrationKitSpec{
 		Dependencies:  make([]string, 0, len(command.Dependencies)),
@@ -126,7 +128,7 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 		// if the Image is set, the kit do not require any build but
 		// is be marked as external as the information about the classpath
 		// is missing so it cannot be used as base for other Kits
-		kit.Labels["camel.apache.org/kit.type"] = v1.IntegrationKitTypeExternal
+		kit.Labels[v1.IntegrationKitTypeLabel] = v1.IntegrationKitTypeExternal
 
 		// Set the Image to be used by the kit
 		kit.Spec.Image = command.Image
@@ -162,22 +164,22 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 			Value: item,
 		})
 	}
-	if err := command.configureTraits(&kit, command.Traits, catalog); err != nil {
+	if err := command.configureTraits(kit, command.Traits, catalog); err != nil {
 		return nil
 	}
 
 	existed := false
-	err = c.Create(command.Context, &kit)
+	err = c.Create(command.Context, kit)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		existed = true
 		existing := v1.NewIntegrationKit(kit.Namespace, kit.Name)
-		err = c.Get(command.Context, key, &existing)
+		err = c.Get(command.Context, key, existing)
 		if err != nil {
 			fmt.Print(err.Error())
 			return nil
 		}
 		kit.ResourceVersion = existing.ResourceVersion
-		err = c.Update(command.Context, &kit)
+		err = c.Update(command.Context, kit)
 	}
 
 	if err != nil {

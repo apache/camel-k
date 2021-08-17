@@ -32,57 +32,34 @@ import (
 )
 
 func GetIntegrationPlatform(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationPlatform, error) {
-	key := ctrl.ObjectKey{
-		Name:      name,
-		Namespace: namespace,
-	}
-
-	answer := v1.NewIntegrationPlatform(namespace, name)
-
-	if err := client.Get(context, key, &answer); err != nil {
+	platform := v1.NewIntegrationPlatform(namespace, name)
+	if err := client.Get(context, ctrl.ObjectKeyFromObject(&platform), &platform); err != nil {
 		return nil, err
 	}
 
-	return &answer, nil
+	return &platform, nil
 }
 
 func GetIntegrationKit(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationKit, error) {
-	key := ctrl.ObjectKey{
-		Name:      name,
-		Namespace: namespace,
-	}
-
-	answer := v1.NewIntegrationKit(namespace, name)
-
-	if err := client.Get(context, key, &answer); err != nil {
+	kit := v1.NewIntegrationKit(namespace, name)
+	if err := client.Get(context, ctrl.ObjectKeyFromObject(kit), kit); err != nil {
 		return nil, err
 	}
 
-	return &answer, nil
+	return kit, nil
 }
 
 func GetBuild(context context.Context, client client.Client, name string, namespace string) (*v1.Build, error) {
-	key := ctrl.ObjectKey{
-		Name:      name,
-		Namespace: namespace,
-	}
-
-	answer := v1.NewBuild(namespace, name)
-
-	if err := client.Get(context, key, &answer); err != nil {
+	build := v1.NewBuild(namespace, name)
+	if err := client.Get(context, ctrl.ObjectKeyFromObject(build), build); err != nil {
 		return nil, err
 	}
 
-	return &answer, nil
+	return build, nil
 }
 
 func GetConfigMap(context context.Context, client ctrl.Reader, name string, namespace string) (*corev1.ConfigMap, error) {
-	key := ctrl.ObjectKey{
-		Name:      name,
-		Namespace: namespace,
-	}
-
-	answer := corev1.ConfigMap{
+	configMap := &corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
 			APIVersion: "v1",
@@ -93,20 +70,15 @@ func GetConfigMap(context context.Context, client ctrl.Reader, name string, name
 		},
 	}
 
-	if err := client.Get(context, key, &answer); err != nil {
+	if err := client.Get(context, ctrl.ObjectKeyFromObject(configMap), configMap); err != nil {
 		return nil, err
 	}
 
-	return &answer, nil
+	return configMap, nil
 }
 
 func GetSecret(context context.Context, client ctrl.Reader, name string, namespace string) (*corev1.Secret, error) {
-	key := ctrl.ObjectKey{
-		Name:      name,
-		Namespace: namespace,
-	}
-
-	answer := corev1.Secret{
+	secret := &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Secret",
 			APIVersion: "v1",
@@ -117,11 +89,11 @@ func GetSecret(context context.Context, client ctrl.Reader, name string, namespa
 		},
 	}
 
-	if err := client.Get(context, key, &answer); err != nil {
+	if err := client.Get(context, ctrl.ObjectKeyFromObject(secret), secret); err != nil {
 		return nil, err
 	}
 
-	return &answer, nil
+	return secret, nil
 }
 
 // GetSecretRefValue returns the value of a secret in the supplied namespace
@@ -161,7 +133,6 @@ func GetConfigMapRefValue(ctx context.Context, client ctrl.Reader, namespace str
 	return "", fmt.Errorf("key %s not found in config map %s", selector.Key, selector.Name)
 }
 
-// ResolveValueSource --
 func ResolveValueSource(ctx context.Context, client ctrl.Reader, namespace string, valueSource *v1.ValueSource) (string, error) {
 	if valueSource.ConfigMapKeyRef != nil && valueSource.SecretKeyRef != nil {
 		return "", fmt.Errorf("value source has bot config map and secret configured")
@@ -176,17 +147,20 @@ func ResolveValueSource(ctx context.Context, client ctrl.Reader, namespace strin
 	return "", nil
 }
 
-// GetDeployment --
 func GetDeployment(context context.Context, client ctrl.Reader, name string, namespace string) (*appsv1.Deployment, error) {
-
-	key := ctrl.ObjectKey{
-		Name:      name,
-		Namespace: namespace,
+	deployment := &appsv1.Deployment{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Deployment",
+			APIVersion: appsv1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
 	}
-	deployment := appsv1.Deployment{}
-	if err := client.Get(context, key, &deployment); err != nil {
+	if err := client.Get(context, ctrl.ObjectKeyFromObject(deployment), deployment); err != nil {
 		return nil, err
 	}
 
-	return &deployment, nil
+	return deployment, nil
 }
