@@ -30,16 +30,17 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/pkg/errors"
-
-	"github.com/scylladb/go-set/strset"
 	yaml2 "gopkg.in/yaml.v2"
+
+	"github.com/pkg/errors"
+	"github.com/scylladb/go-set/strset"
 )
 
-/// Directories and file names:
+// Directories and file names:
 
-// MavenWorkingDirectory --  Directory used by Maven for an invocation of the kamel local command. By default a temporary folder will be used.
-var MavenWorkingDirectory string = ""
+// MavenWorkingDirectory is the directory used by Maven for an invocation of the kamel local command.
+// By default, a temporary folder will be used.
+var MavenWorkingDirectory = ""
 
 // DefaultDependenciesDirectoryName --
 const DefaultDependenciesDirectoryName = "dependencies"
@@ -69,16 +70,15 @@ var ContainerResourcesDirectory = "/etc/camel/resources"
 var QuarkusDependenciesBaseDirectory = "/quarkus-app"
 
 // ListOfLazyEvaluatedEnvVars -- List of unevaluated environment variables.
-// These are sensitive values or values that may have different values depending
+// These are sensitive values or values that may have different values depending on
 // where the integration is run (locally vs. the cloud). These environment variables
 // are evaluated at the time of the integration invocation.
-var ListOfLazyEvaluatedEnvVars []string = []string{}
+var ListOfLazyEvaluatedEnvVars = []string{}
 
 // CLIEnvVars -- List of CLI provided environment variables. They take precedence over
 // any environment variables with the same name.
-var CLIEnvVars []string = []string{}
+var CLIEnvVars = make([]string, 0)
 
-// StringSliceJoin --
 func StringSliceJoin(slices ...[]string) []string {
 	size := 0
 
@@ -95,7 +95,6 @@ func StringSliceJoin(slices ...[]string) []string {
 	return result
 }
 
-// StringSliceContains --
 func StringSliceContains(slice []string, items []string) bool {
 	for i := 0; i < len(items); i++ {
 		if !StringSliceExists(slice, items[i]) {
@@ -106,7 +105,6 @@ func StringSliceContains(slice []string, items []string) bool {
 	return true
 }
 
-// StringSliceExists --
 func StringSliceExists(slice []string, item string) bool {
 	for i := 0; i < len(slice); i++ {
 		if slice[i] == item {
@@ -117,7 +115,6 @@ func StringSliceExists(slice []string, item string) bool {
 	return false
 }
 
-// StringSliceContainsAnyOf --
 func StringSliceContainsAnyOf(slice []string, items ...string) bool {
 	for i := 0; i < len(slice); i++ {
 		for j := 0; j < len(items); j++ {
@@ -130,7 +127,7 @@ func StringSliceContainsAnyOf(slice []string, items ...string) bool {
 	return false
 }
 
-// StringSliceUniqueAdd append the given item if not already present in the slice
+// StringSliceUniqueAdd appends the given item if not already present in the slice
 func StringSliceUniqueAdd(slice *[]string, item string) bool {
 	if slice == nil {
 		newSlice := make([]string, 0)
@@ -147,7 +144,7 @@ func StringSliceUniqueAdd(slice *[]string, item string) bool {
 	return true
 }
 
-// StringSliceUniqueConcat append all the items of the "items" slice if they are not already present in the slice
+// StringSliceUniqueConcat appends all the items of the "items" slice if they are not already present in the slice
 func StringSliceUniqueConcat(slice *[]string, items []string) bool {
 	changed := false
 	for _, item := range items {
@@ -158,7 +155,6 @@ func StringSliceUniqueConcat(slice *[]string, items []string) bool {
 	return changed
 }
 
-// SubstringFrom --
 func SubstringFrom(s string, substr string) string {
 	index := strings.Index(s, substr)
 	if index != -1 {
@@ -167,7 +163,6 @@ func SubstringFrom(s string, substr string) string {
 	return ""
 }
 
-// EncodeXML --
 func EncodeXML(content interface{}) ([]byte, error) {
 	w := &bytes.Buffer{}
 	w.WriteString(xml.Header)
@@ -183,14 +178,13 @@ func EncodeXML(content interface{}) ([]byte, error) {
 	return w.Bytes(), nil
 }
 
-// CopyFile --
 func CopyFile(src, dst string) (int64, error) {
-	sourceFileStat, err := os.Stat(src)
+	stat, err := os.Stat(src)
 	if err != nil {
 		return 0, err
 	}
 
-	if !sourceFileStat.Mode().IsRegular() {
+	if !stat.Mode().IsRegular() {
 		return 0, fmt.Errorf("%s is not a regular file", src)
 	}
 
@@ -205,16 +199,16 @@ func CopyFile(src, dst string) (int64, error) {
 		return 0, err
 	}
 
-	destination, err := os.Create(dst)
+	destination, err := os.OpenFile(dst, os.O_RDWR|os.O_CREATE|os.O_TRUNC, stat.Mode())
 	if err != nil {
 		return 0, err
 	}
+
 	defer destination.Close()
 	nBytes, err := io.Copy(destination, source)
 	return nBytes, err
 }
 
-// WriteFileWithContent --
 func WriteFileWithContent(buildDir string, relativePath string, content []byte) error {
 	filePath := path.Join(buildDir, relativePath)
 	fileDir := path.Dir(filePath)
@@ -237,7 +231,6 @@ func WriteFileWithContent(buildDir string, relativePath string, content []byte) 
 	return nil
 }
 
-// WriteFileWithBytesMarshallerContent --
 func WriteFileWithBytesMarshallerContent(buildDir string, relativePath string, content BytesMarshaller) error {
 	data, err := content.MarshalBytes()
 	if err != nil {
@@ -247,7 +240,6 @@ func WriteFileWithBytesMarshallerContent(buildDir string, relativePath string, c
 	return WriteFileWithContent(buildDir, relativePath, data)
 }
 
-// FindAllDistinctStringSubmatch --
 func FindAllDistinctStringSubmatch(data string, regexps ...*regexp.Regexp) []string {
 	submatchs := strset.New()
 
@@ -264,7 +256,6 @@ func FindAllDistinctStringSubmatch(data string, regexps ...*regexp.Regexp) []str
 	return submatchs.List()
 }
 
-// FindNamedMatches ---
 func FindNamedMatches(expr string, str string) map[string]string {
 	regex := regexp.MustCompile(expr)
 	match := regex.FindStringSubmatch(str)
@@ -276,7 +267,6 @@ func FindNamedMatches(expr string, str string) map[string]string {
 	return results
 }
 
-// FileExists --
 func FileExists(name string) (bool, error) {
 	info, err := os.Stat(name)
 	if os.IsNotExist(err) {
@@ -286,7 +276,6 @@ func FileExists(name string) (bool, error) {
 	return !info.IsDir(), err
 }
 
-// DirectoryExists --
 func DirectoryExists(directory string) (bool, error) {
 	info, err := os.Stat(directory)
 	if os.IsNotExist(err) {
@@ -300,10 +289,9 @@ func DirectoryExists(directory string) (bool, error) {
 	return info.IsDir(), nil
 }
 
-// CreateDirectory --
 func CreateDirectory(directory string) error {
 	if directory != "" {
-		// If directory does not exist, create it.
+		// If directory does not exist, create it
 		directoryExists, err := DirectoryExists(directory)
 		if err != nil {
 			return err
@@ -320,12 +308,10 @@ func CreateDirectory(directory string) error {
 	return nil
 }
 
-// BytesMarshaller --
 type BytesMarshaller interface {
 	MarshalBytes() ([]byte, error)
 }
 
-// SortedMapKeys --
 func SortedMapKeys(m map[string]interface{}) []string {
 	res := make([]string, len(m))
 	i := 0
@@ -337,7 +323,6 @@ func SortedMapKeys(m map[string]interface{}) []string {
 	return res
 }
 
-// SortedStringMapKeys --
 func SortedStringMapKeys(m map[string]string) []string {
 	res := make([]string, len(m))
 	i := 0
@@ -361,14 +346,12 @@ func CopyMap(source map[string]string) map[string]string {
 	return dest
 }
 
-// DependenciesToJSON --
 func DependenciesToJSON(list []string) ([]byte, error) {
 	jsondata := map[string]interface{}{}
 	jsondata["dependencies"] = list
 	return json.Marshal(jsondata)
 }
 
-// DependenciesToYAML --
 func DependenciesToYAML(list []string) ([]byte, error) {
 	data, err := DependenciesToJSON(list)
 	if err != nil {
@@ -378,7 +361,6 @@ func DependenciesToYAML(list []string) ([]byte, error) {
 	return JSONToYAML(data)
 }
 
-// JSONToYAML --
 func JSONToYAML(src []byte) ([]byte, error) {
 	jsondata := map[string]interface{}{}
 	err := json.Unmarshal(src, &jsondata)
@@ -393,18 +375,16 @@ func JSONToYAML(src []byte) ([]byte, error) {
 	return yamldata, nil
 }
 
-// WriteToFile --
 func WriteToFile(filePath string, fileContents string) error {
 	err := ioutil.WriteFile(filePath, []byte(fileContents), 0777)
 	if err != nil {
 		return errors.Errorf("error writing file: %v", filePath)
 	}
 
-	// All went well, return true.
 	return nil
 }
 
-/// Local directories:
+// Local directories:
 
 // GetLocalPropertiesDir -- <mavenWorkingDirectory>/properties
 func GetLocalPropertiesDir() string {
@@ -421,7 +401,6 @@ func GetLocalRoutesDir() string {
 	return path.Join(MavenWorkingDirectory, DefaultRoutesDirectoryName)
 }
 
-// CreateLocalPropertiesDirectory --
 func CreateLocalPropertiesDirectory() error {
 	// Do not create a directory unless the maven directory contains a valid value.
 	if MavenWorkingDirectory == "" {
@@ -442,7 +421,6 @@ func CreateLocalPropertiesDirectory() error {
 	return nil
 }
 
-// CreateLocalDependenciesDirectory --
 func CreateLocalDependenciesDirectory() error {
 	// Do not create a directory unless the maven directory contains a valid value.
 	if MavenWorkingDirectory == "" {
@@ -463,7 +441,6 @@ func CreateLocalDependenciesDirectory() error {
 	return nil
 }
 
-// CreateLocalRoutesDirectory --
 func CreateLocalRoutesDirectory() error {
 	// Do not create a directory unless the maven directory contains a valid value.
 	if MavenWorkingDirectory == "" {
@@ -484,7 +461,6 @@ func CreateLocalRoutesDirectory() error {
 	return nil
 }
 
-// GetEnvironmentVariable --
 func GetEnvironmentVariable(variable string) (string, error) {
 	value, isPresent := os.LookupEnv(variable)
 	if !isPresent {
@@ -498,12 +474,12 @@ func GetEnvironmentVariable(variable string) (string, error) {
 	return value, nil
 }
 
-// EvaluateCLIAndLazyEnvVars -- Function that creates a list of environment
+// EvaluateCLIAndLazyEnvVars creates a list of environment
 // variables with entries VAR=value that can be passed when running the integration.
 func EvaluateCLIAndLazyEnvVars() ([]string, error) {
 	evaluatedEnvVars := []string{}
 
-	// Add CLI environment variables.
+	// Add CLI environment variables
 	setEnvVars := []string{}
 	for _, cliEnvVar := range CLIEnvVars {
 		// Mark variable name as set.
@@ -536,19 +512,21 @@ func EvaluateCLIAndLazyEnvVars() ([]string, error) {
 	return evaluatedEnvVars, nil
 }
 
-// CopyIntegrationFilesToDirectory --
 func CopyIntegrationFilesToDirectory(files []string, directory string) ([]string, error) {
-	// Create directory if one does not already exist.
+	// Create directory if one does not already exist
 	err := CreateDirectory(directory)
 	if err != nil {
 		return nil, err
 	}
 
-	// Coopy files to new location. Also create the list with relocated files.
-	relocatedFilesList := []string{}
+	// Copy files to new location. Also create the list with relocated files.
+	relocatedFilesList := make([]string, len(files))
 	for _, filePath := range files {
 		newFilePath := path.Join(directory, path.Base(filePath))
-		CopyFile(filePath, newFilePath)
+		_, err := CopyFile(filePath, newFilePath)
+		if err != nil {
+			return relocatedFilesList, err
+		}
 		relocatedFilesList = append(relocatedFilesList, newFilePath)
 	}
 
