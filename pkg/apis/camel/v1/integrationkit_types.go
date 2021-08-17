@@ -87,14 +87,23 @@ const (
 	// IntegrationKitKind --
 	IntegrationKitKind string = "IntegrationKit"
 
+	// IntegrationKitTypeLabel labels the kit type
+	IntegrationKitTypeLabel = "camel.apache.org/kit.type"
+
 	// IntegrationKitTypePlatform --
 	IntegrationKitTypePlatform = "platform"
-
 	// IntegrationKitTypeUser --
 	IntegrationKitTypeUser = "user"
-
 	// IntegrationKitTypeExternal --
 	IntegrationKitTypeExternal = "external"
+
+	// IntegrationKitLayoutLabel labels the kit layout
+	IntegrationKitLayoutLabel = "camel.apache.org/kit.layout"
+
+	// IntegrationKitLayoutFastJar labels a kit using the Quarkus fast-jar packaging
+	IntegrationKitLayoutFastJar = "fast-jar"
+	// IntegrationKitLayoutNative labels a kit using the Quarkus native packaging
+	IntegrationKitLayoutNative = "native"
 
 	// IntegrationKitPhaseNone --
 	IntegrationKitPhaseNone IntegrationKitPhase = ""

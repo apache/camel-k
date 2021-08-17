@@ -41,7 +41,7 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 				Namespace: "ns",
 				Name:      "my-kit-1",
 				Labels: map[string]string{
-					"camel.apache.org/kit.type": v1.IntegrationKitTypePlatform,
+					v1.IntegrationKitTypeLabel: v1.IntegrationKitTypePlatform,
 				},
 			},
 			Spec: v1.IntegrationKitSpec{
@@ -63,7 +63,7 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 				Namespace: "ns",
 				Name:      "my-kit-2",
 				Labels: map[string]string{
-					"camel.apache.org/kit.type": v1.IntegrationKitTypePlatform,
+					v1.IntegrationKitTypeLabel: v1.IntegrationKitTypePlatform,
 				},
 			},
 			Spec: v1.IntegrationKitSpec{
@@ -120,7 +120,7 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 				Namespace: "ns",
 				Name:      "my-kit-1",
 				Labels: map[string]string{
-					"camel.apache.org/kit.type": v1.IntegrationKitTypePlatform,
+					v1.IntegrationKitTypeLabel: v1.IntegrationKitTypePlatform,
 				},
 			},
 			Spec: v1.IntegrationKitSpec{
@@ -146,7 +146,7 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 				Namespace: "ns",
 				Name:      "my-kit-2",
 				Labels: map[string]string{
-					"camel.apache.org/kit.type": v1.IntegrationKitTypePlatform,
+					v1.IntegrationKitTypeLabel: v1.IntegrationKitTypePlatform,
 				},
 			},
 			Spec: v1.IntegrationKitSpec{
@@ -177,7 +177,7 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 				Namespace: "ns",
 				Name:      "my-kit-3",
 				Labels: map[string]string{
-					"camel.apache.org/kit.type": v1.IntegrationKitTypePlatform,
+					v1.IntegrationKitTypeLabel: v1.IntegrationKitTypePlatform,
 				},
 			},
 			Spec: v1.IntegrationKitSpec{

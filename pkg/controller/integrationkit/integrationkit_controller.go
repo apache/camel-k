@@ -206,7 +206,7 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 	targetLog := rlog.ForIntegrationKit(target)
 
 	if target.Status.Phase == v1.IntegrationKitPhaseNone || target.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
-		if target.Labels["camel.apache.org/kit.type"] == v1.IntegrationKitTypeExternal {
+		if target.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypeExternal {
 			target.Status.Phase = v1.IntegrationKitPhaseInitialization
 			return r.update(ctx, &instance, target)
 		} else {

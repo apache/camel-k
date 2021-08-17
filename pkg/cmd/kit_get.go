@@ -81,7 +81,7 @@ func (command *kitGetCommandOptions) run(cmd *cobra.Command) error {
 	w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 8, 1, '\t', 0)
 	fmt.Fprintln(w, "NAME\tPHASE\tTYPE\tIMAGE")
 	for _, ctx := range kitList.Items {
-		t := ctx.Labels["camel.apache.org/kit.type"]
+		t := ctx.Labels[v1.IntegrationKitTypeLabel]
 		u := command.User && t == v1.IntegrationKitTypeUser
 		e := command.External && t == v1.IntegrationKitTypeExternal
 		p := command.Platform && t == v1.IntegrationKitTypePlatform

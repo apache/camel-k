@@ -36,10 +36,9 @@ import (
 	"k8s.io/client-go/discovery/cached/disk"
 	"k8s.io/client-go/discovery/cached/memory"
 
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	util "github.com/apache/camel-k/pkg/util/controller"
 )
 
 var (
@@ -99,7 +98,7 @@ func (t *garbageCollectorTrait) Apply(e *Environment) error {
 		// are ready. This is to be added when the integration scale status is refined with ready replicas
 		e.PostActions = append(e.PostActions, func(env *Environment) error {
 			// The collection and deletion are performed asynchronously to avoid blocking
-			// the reconcile loop.
+			// the reconciliation loop.
 			go t.garbageCollectResources(env)
 			return nil
 		})
@@ -152,9 +151,9 @@ func (t *garbageCollectorTrait) deleteEachOf(gvks map[schema.GroupVersionKind]st
 				"kind":       gvk.Kind,
 			},
 		}
-		options := []client.ListOption{
-			client.InNamespace(e.Integration.Namespace),
-			util.MatchingSelector{Selector: selector},
+		options := []ctrl.ListOption{
+			ctrl.InNamespace(e.Integration.Namespace),
+			ctrl.MatchingLabelsSelector{Selector: selector},
 		}
 		if err := t.Client.List(context.TODO(), &resources, options...); err != nil {
 			if !k8serrors.IsNotFound(err) && !k8serrors.IsForbidden(err) {
@@ -168,7 +167,7 @@ func (t *garbageCollectorTrait) deleteEachOf(gvks map[schema.GroupVersionKind]st
 			if !t.canBeDeleted(e, r) {
 				continue
 			}
-			err := t.Client.Delete(context.TODO(), &r, client.PropagationPolicy(metav1.DeletePropagationBackground))
+			err := t.Client.Delete(context.TODO(), &r, ctrl.PropagationPolicy(metav1.DeletePropagationBackground))
 			if err != nil {
 				// The resource may have already been deleted
 				if !k8serrors.IsNotFound(err) {

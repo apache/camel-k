@@ -22,9 +22,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// NewBuild --
-func NewBuild(namespace string, name string) Build {
-	return Build{
+func NewBuild(namespace string, name string) *Build {
+	return &Build{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: SchemeGroupVersion.String(),
 			Kind:       BuildKind,
@@ -36,7 +35,6 @@ func NewBuild(namespace string, name string) Build {
 	}
 }
 
-// NewBuildList --
 func NewBuildList() BuildList {
 	return BuildList{
 		TypeMeta: metav1.TypeMeta{
@@ -50,7 +48,6 @@ func (buildPhase *BuildPhase) String() string {
 	return string(*buildPhase)
 }
 
-// SetIntegrationPlatform --
 func (in *Build) SetIntegrationPlatform(platform *IntegrationPlatform) {
 	cs := corev1.ConditionTrue
 
@@ -79,7 +76,6 @@ func (in *BuildStatus) Failed(err error) BuildStatus {
 	return *in
 }
 
-// SetCondition --
 func (in *BuildStatus) SetCondition(condType BuildConditionType, status corev1.ConditionStatus, reason string, message string) {
 	in.SetConditions(BuildCondition{
 		Type:               condType,
@@ -91,7 +87,6 @@ func (in *BuildStatus) SetCondition(condType BuildConditionType, status corev1.C
 	})
 }
 
-// SetErrorCondition --
 func (in *BuildStatus) SetErrorCondition(condType BuildConditionType, reason string, err error) {
 	in.SetConditions(BuildCondition{
 		Type:               condType,
@@ -145,7 +140,6 @@ func (in *BuildStatus) RemoveCondition(condType BuildConditionType) {
 
 var _ ResourceCondition = BuildCondition{}
 
-// GetConditions --
 func (in *BuildStatus) GetConditions() []ResourceCondition {
 	res := make([]ResourceCondition, 0, len(in.Conditions))
 	for _, c := range in.Conditions {
@@ -154,32 +148,26 @@ func (in *BuildStatus) GetConditions() []ResourceCondition {
 	return res
 }
 
-// GetType --
 func (c BuildCondition) GetType() string {
 	return string(c.Type)
 }
 
-// GetStatus --
 func (c BuildCondition) GetStatus() corev1.ConditionStatus {
 	return c.Status
 }
 
-// GetLastUpdateTime --
 func (c BuildCondition) GetLastUpdateTime() metav1.Time {
 	return c.LastUpdateTime
 }
 
-// GetLastTransitionTime --
 func (c BuildCondition) GetLastTransitionTime() metav1.Time {
 	return c.LastTransitionTime
 }
 
-// GetReason --
 func (c BuildCondition) GetReason() string {
 	return c.Reason
 }
 
-// GetMessage --
 func (c BuildCondition) GetMessage() string {
 	return c.Message
 }

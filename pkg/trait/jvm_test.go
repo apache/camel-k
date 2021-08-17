@@ -278,7 +278,7 @@ func createNominalJvmTest(kitType string) (*jvmTrait, *Environment) {
 				Namespace: "kit-namespace",
 				Name:      "kit-name",
 				Labels: map[string]string{
-					"camel.apache.org/kit.type": kitType,
+					v1.IntegrationKitTypeLabel: kitType,
 				},
 			},
 			Status: v1.IntegrationKitStatus{

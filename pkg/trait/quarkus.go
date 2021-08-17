@@ -62,13 +62,22 @@ func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
 		t.PackageType = &packageType
 	}
 
-	return e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) ||
-		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
-		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning), nil
+	return e.IntegrationKitInPhase(v1.IntegrationKitPhaseNone, v1.IntegrationKitPhaseBuildSubmitted) ||
+			e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
+			e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning),
+		nil
 }
 
 func (t *quarkusTrait) Apply(e *Environment) error {
-	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
+	switch e.IntegrationKit.Status.Phase {
+
+	case v1.IntegrationKitPhaseNone:
+		if e.IntegrationKit.Labels == nil {
+			e.IntegrationKit.Labels = make(map[string]string)
+		}
+		e.IntegrationKit.Labels[v1.IntegrationKitLayoutLabel] = string(*t.PackageType)
+
+	case v1.IntegrationKitPhaseBuildSubmitted:
 		build := getBuilderTask(e.BuildTasks)
 		if build == nil {
 			return fmt.Errorf("unable to find builder task: %s", e.Integration.Name)
@@ -99,11 +108,9 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 		})
 
 		build.Steps = builder.StepIDsFor(steps...)
-	}
 
-	if e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
-		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning) {
-		if t.isNativePackageType() {
+	case v1.IntegrationKitPhaseReady:
+		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) && t.isNativePackageType() {
 			container := e.getIntegrationContainer()
 			if container == nil {
 				return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)

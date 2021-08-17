@@ -26,6 +26,7 @@ import (
 	"github.com/rs/xid"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -34,7 +35,6 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/controller"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -63,7 +63,7 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 	}
 
 	if kit != nil {
-		if kit.Labels["camel.apache.org/kit.type"] == v1.IntegrationKitTypePlatform {
+		if kit.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypePlatform {
 			// This is a platform kit and as it is auto generated it may get
 			// out of sync if the integration that has generated it, has been
 			// amended to add/remove dependencies
@@ -116,13 +116,12 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 		return nil, err
 	}
 
-	platformKitName := fmt.Sprintf("kit-%s", xid.New())
-	platformKit := v1.NewIntegrationKit(integration.GetIntegrationKitNamespace(pl), platformKitName)
+	kit = v1.NewIntegrationKit(integration.GetIntegrationKitNamespace(pl), fmt.Sprintf("kit-%s", xid.New()))
 
 	// Add some information for post-processing, this may need to be refactored
 	// to a proper data structure
-	platformKit.Labels = map[string]string{
-		"camel.apache.org/kit.type":           v1.IntegrationKitTypePlatform,
+	kit.Labels = map[string]string{
+		v1.IntegrationKitTypeLabel:            v1.IntegrationKitTypePlatform,
 		"camel.apache.org/runtime.version":    integration.Status.RuntimeVersion,
 		"camel.apache.org/runtime.provider":   string(integration.Status.RuntimeProvider),
 		kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
@@ -132,19 +131,23 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 	}
 
 	// Set the kit to have the same characteristics as the integrations
-	platformKit.Spec = v1.IntegrationKitSpec{
+	kit.Spec = v1.IntegrationKitSpec{
 		Dependencies: integration.Status.Dependencies,
 		Repositories: integration.Spec.Repositories,
 		Traits:       action.filterKitTraits(ctx, integration.Spec.Traits),
 	}
 
-	if err := action.client.Create(ctx, &platformKit); err != nil {
+	if _, err := trait.Apply(ctx, action.client, integration, kit); err != nil {
+		return nil, err
+	}
+
+	if err := action.client.Create(ctx, kit); err != nil {
 		return nil, err
 	}
 
 	// Set the kit name so the next handle loop, will fall through the
 	// same path as integration with a user defined kit
-	integration.SetIntegrationKit(&platformKit)
+	integration.SetIntegrationKit(kit)
 
 	return integration, nil
 }
@@ -181,16 +184,23 @@ func (action *buildKitAction) lookupKitForIntegration(ctx context.Context, c ctr
 		return nil, err
 	}
 
+	kitTypes, err := labels.NewRequirement(v1.IntegrationKitTypeLabel, selection.In, []string{
+		v1.IntegrationKitTypePlatform,
+		v1.IntegrationKitTypeExternal,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	options := []ctrl.ListOption{
 		ctrl.InNamespace(integration.GetIntegrationKitNamespace(pl)),
 		ctrl.MatchingLabels{
 			"camel.apache.org/runtime.version":  integration.Status.RuntimeVersion,
 			"camel.apache.org/runtime.provider": string(integration.Status.RuntimeProvider),
 		},
-		controller.NewLabelSelector("camel.apache.org/kit.type", selection.In, []string{
-			v1.IntegrationKitTypePlatform,
-			v1.IntegrationKitTypeExternal,
-		}),
+		ctrl.MatchingLabelsSelector{
+			Selector: labels.NewSelector().Add(*kitTypes),
+		},
 	}
 
 	kits := v1.NewIntegrationKitList()

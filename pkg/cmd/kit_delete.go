@@ -21,12 +21,13 @@ import (
 	"errors"
 	"fmt"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
-
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/spf13/cobra"
 
 	k8errors "k8s.io/apimachinery/pkg/api/errors"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 func newKitDeleteCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitDeleteCommandOptions) {
@@ -82,14 +83,14 @@ func (command *kitDeleteCommandOptions) run(args []string) error {
 
 	if command.All {
 		kitList := v1.NewIntegrationKitList()
-		if err := c.List(command.Context, &kitList, k8sclient.InNamespace(command.Namespace)); err != nil {
+		if err := c.List(command.Context, &kitList, ctrl.InNamespace(command.Namespace)); err != nil {
 			return err
 		}
 
 		names = make([]string, 0, len(kitList.Items))
 		for _, item := range kitList.Items {
 			// only include non platform Kits
-			if item.Labels["camel.apache.org/kit.type"] != v1.IntegrationKitTypePlatform {
+			if item.Labels[v1.IntegrationKitTypeLabel] != v1.IntegrationKitTypePlatform {
 				names = append(names, item.Name)
 			}
 		}
@@ -105,21 +106,17 @@ func (command *kitDeleteCommandOptions) run(args []string) error {
 }
 
 func (command *kitDeleteCommandOptions) delete(name string) error {
-	ctx := v1.NewIntegrationKit(command.Namespace, name)
-	key := k8sclient.ObjectKey{
-		Namespace: command.Namespace,
-		Name:      name,
-	}
+	kit := v1.NewIntegrationKit(command.Namespace, name)
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
 	}
 
-	err = c.Get(command.Context, key, &ctx)
+	err = c.Get(command.Context, ctrl.ObjectKeyFromObject(kit), kit)
 
 	// pass through if the kit is not found
 	if err != nil && k8errors.IsNotFound(err) {
-		return fmt.Errorf("no integration kit found with name \"%s\"", ctx.Name)
+		return fmt.Errorf("no integration kit found with name \"%s\"", kit.Name)
 	}
 
 	// fail otherwise
@@ -129,25 +126,25 @@ func (command *kitDeleteCommandOptions) delete(name string) error {
 
 	// check that it is not a platform one which is supposed to be "read only"
 	// thus not managed by the end user
-	if ctx.Labels["camel.apache.org/kit.type"] == v1.IntegrationKitTypePlatform {
+	if kit.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypePlatform {
 		// skip platform Kits while deleting all Kits
 		if command.All {
 			return nil
 		}
 
-		return fmt.Errorf("integration kit \"%s\" is not editable", ctx.Name)
+		return fmt.Errorf("integration kit \"%s\" is not editable", kit.Name)
 	}
 
-	err = c.Delete(command.Context, &ctx)
+	err = c.Delete(command.Context, kit)
 
 	if err != nil && !k8errors.IsNotFound(err) {
-		return fmt.Errorf("error deleting integration kit \"%s\", %s", ctx.Name, err)
+		return fmt.Errorf("error deleting integration kit \"%s\", %s", kit.Name, err)
 	}
 	if err != nil && k8errors.IsNotFound(err) {
-		return fmt.Errorf("no integration kit found with name \"%s\"", ctx.Name)
+		return fmt.Errorf("no integration kit found with name \"%s\"", kit.Name)
 	}
 
-	fmt.Printf("integration kit \"%s\" has been deleted\n", ctx.Name)
+	fmt.Printf("integration kit \"%s\" has been deleted\n", kit.Name)
 
 	return err
 }
