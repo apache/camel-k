@@ -26,41 +26,33 @@ import (
 )
 
 func init() {
-	registerSteps(Steps)
+	registerSteps(Project)
+
+	Project.CommonSteps = []Step{
+		Project.CleanUpBuildDir,
+		Project.GenerateJavaKeystore,
+		Project.GenerateProjectSettings,
+		Project.InjectDependencies,
+		Project.SanitizeDependencies,
+	}
 }
 
-type steps struct {
+type projectSteps struct {
 	CleanUpBuildDir         Step
 	GenerateJavaKeystore    Step
 	GenerateProjectSettings Step
 	InjectDependencies      Step
 	SanitizeDependencies    Step
-	IncrementalImageContext Step
-	NativeImageContext      Step
-	StandardImageContext    Step
-	ExecutableDockerfile    Step
-	JvmDockerfile           Step
+
+	CommonSteps []Step
 }
 
-var Steps = steps{
+var Project = projectSteps{
 	CleanUpBuildDir:         NewStep(ProjectGenerationPhase-1, cleanUpBuildDir),
 	GenerateJavaKeystore:    NewStep(ProjectGenerationPhase, generateJavaKeystore),
 	GenerateProjectSettings: NewStep(ProjectGenerationPhase+1, generateProjectSettings),
 	InjectDependencies:      NewStep(ProjectGenerationPhase+2, injectDependencies),
 	SanitizeDependencies:    NewStep(ProjectGenerationPhase+3, sanitizeDependencies),
-	IncrementalImageContext: NewStep(ApplicationPackagePhase, incrementalImageContext),
-	NativeImageContext:      NewStep(ApplicationPackagePhase, nativeImageContext),
-	StandardImageContext:    NewStep(ApplicationPackagePhase, standardImageContext),
-	ExecutableDockerfile:    NewStep(ApplicationPackagePhase+1, executableDockerfile),
-	JvmDockerfile:           NewStep(ApplicationPackagePhase+1, jvmDockerfile),
-}
-
-var DefaultSteps = []Step{
-	Steps.CleanUpBuildDir,
-	Steps.GenerateJavaKeystore,
-	Steps.GenerateProjectSettings,
-	Steps.InjectDependencies,
-	Steps.SanitizeDependencies,
 }
 
 func cleanUpBuildDir(ctx *builderContext) error {

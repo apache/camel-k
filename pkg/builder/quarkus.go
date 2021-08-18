@@ -35,7 +35,13 @@ import (
 )
 
 func init() {
-	registerSteps(quarkus)
+	registerSteps(Quarkus)
+
+	Quarkus.CommonSteps = []Step{
+		Quarkus.LoadCamelQuarkusCatalog,
+		Quarkus.GenerateQuarkusProject,
+		Quarkus.BuildQuarkusRunner,
+	}
 }
 
 type quarkusSteps struct {
@@ -43,20 +49,15 @@ type quarkusSteps struct {
 	GenerateQuarkusProject     Step
 	BuildQuarkusRunner         Step
 	ComputeQuarkusDependencies Step
+
+	CommonSteps []Step
 }
 
-var quarkus = quarkusSteps{
+var Quarkus = quarkusSteps{
 	LoadCamelQuarkusCatalog:    NewStep(InitPhase, loadCamelQuarkusCatalog),
 	GenerateQuarkusProject:     NewStep(ProjectGenerationPhase, generateQuarkusProject),
 	BuildQuarkusRunner:         NewStep(ProjectBuildPhase, buildQuarkusRunner),
 	ComputeQuarkusDependencies: NewStep(ProjectBuildPhase+1, computeQuarkusDependencies),
-}
-
-var QuarkusSteps = []Step{
-	quarkus.LoadCamelQuarkusCatalog,
-	quarkus.GenerateQuarkusProject,
-	quarkus.BuildQuarkusRunner,
-	quarkus.ComputeQuarkusDependencies,
 }
 
 func loadCamelQuarkusCatalog(ctx *builderContext) error {

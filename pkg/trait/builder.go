@@ -166,7 +166,7 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 	}
 
 	steps := make([]builder.Step, 0)
-	steps = append(steps, builder.DefaultSteps...)
+	steps = append(steps, builder.Project.CommonSteps...)
 
 	// sort steps by phase
 	sort.SliceStable(steps, func(i, j int) bool {
