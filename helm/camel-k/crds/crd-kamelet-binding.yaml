@@ -43,6 +43,10 @@ spec:
       jsonPath: .status.phase
       name: Phase
       type: string
+    - description: The number of pods
+      jsonPath: .status.replicas
+      name: Replicas
+      type: integer
     name: v1alpha1
     schema:
       openAPIV3Schema:
@@ -5643,6 +5647,10 @@ spec:
                       type: object
                     type: object
                 type: object
+              replicas:
+                description: Replicas is the number of desired replicas for the binding
+                format: int32
+                type: integer
               sink:
                 description: Sink is the destination of the integration defined by
                   this binding
@@ -6331,9 +6339,20 @@ spec:
               phase:
                 description: Phase --
                 type: string
+              replicas:
+                description: Replicas is the number of actual replicas of the binding
+                format: int32
+                type: integer
+              selector:
+                description: Selector allows to identify pods belonging to the binding
+                type: string
             type: object
         type: object
     served: true
     storage: true
     subresources:
+      scale:
+        labelSelectorPath: .status.selector
+        specReplicasPath: .spec.replicas
+        statusReplicasPath: .status.replicas
       status: {}

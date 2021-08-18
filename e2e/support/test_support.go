@@ -582,6 +582,71 @@ func ScaleIntegration(ns string, name string, replicas int32) error {
 	})
 }
 
+func KameletBinding(ns string, name string) func() *v1alpha1.KameletBinding {
+	return func() *v1alpha1.KameletBinding {
+		klb := v1alpha1.NewKameletBinding(ns, name)
+		key := ctrl.ObjectKey{
+			Namespace: ns,
+			Name:      name,
+		}
+		if err := TestClient().Get(TestContext, key, &klb); err != nil && !k8serrors.IsNotFound(err) {
+			panic(err)
+		} else if err != nil && k8serrors.IsNotFound(err) {
+			return nil
+		}
+		return &klb
+	}
+}
+
+func KameletBindingSpecReplicas(ns string, name string) func() *int32 {
+	return func() *int32 {
+		klb := KameletBinding(ns, name)()
+		if klb == nil {
+			return nil
+		}
+		return klb.Spec.Replicas
+	}
+}
+
+func KameletBindingStatusReplicas(ns string, name string) func() *int32 {
+	return func() *int32 {
+		klb := KameletBinding(ns, name)()
+		if klb == nil {
+			return nil
+		}
+		return klb.Status.Replicas
+	}
+}
+
+func KameletBindingCondition(ns string, name string, conditionType v1alpha1.KameletBindingConditionType) func() corev1.ConditionStatus {
+	return func() corev1.ConditionStatus {
+		klb := KameletBinding(ns, name)()
+		if klb == nil {
+			return "KameletBindingMissing"
+		}
+		c := klb.Status.GetCondition(conditionType)
+		if c == nil {
+			return "ConditionMissing"
+		}
+		return c.Status
+	}
+}
+
+func UpdateKameletBinding(ns string, name string, upd func(it *v1alpha1.KameletBinding)) error {
+	klb := KameletBinding(ns, name)()
+	if klb == nil {
+		return fmt.Errorf("no kamelet binding named %s found", name)
+	}
+	upd(klb)
+	return TestClient().Update(TestContext, klb)
+}
+
+func ScaleKameletBinding(ns string, name string, replicas int32) error {
+	return UpdateKameletBinding(ns, name, func(klb *v1alpha1.KameletBinding) {
+		klb.Spec.Replicas = &replicas
+	})
+}
+
 func Kits(ns string, filters ...func(*v1.IntegrationKit) bool) func() []v1.IntegrationKit {
 	return func() []v1.IntegrationKit {
 		list := v1.NewIntegrationKitList()

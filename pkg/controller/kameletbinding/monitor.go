@@ -116,5 +116,10 @@ func (action *monitorAction) Handle(ctx context.Context, kameletbinding *v1alpha
 			"",
 		)
 	}
+
+	// Mirror status replicas and selector
+	target.Status.Replicas = it.Status.Replicas
+	target.Status.Selector = it.Status.Selector
+
 	return target, nil
 }
