@@ -360,6 +360,29 @@ To comply with the Knative specifications, in case an "http" or "https" URI is u
 
 You can configure an error handler in order to specify what to do when some event ends up with failure. See xref:kamelets/kameletbindings-error-handler.adoc[Kamelet Bindings Error Handler User Guide] for more detail.
 
+=== Trait via annotations
+
+You can easily tune your `KameletBinding` with xref:traits:traits.adoc[traits] configuration adding `.metadata.annotations`. Let's have a look at the following example:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  name: timer-2-log-annotation
+  annotations: # <1>
+    trait.camel.apache.org/logging.level: DEBUG
+    trait.camel.apache.org/logging.color: "false"
+spec:
+  source:
+    uri: timer:foo
+  sink:
+    uri: log:bar
+----
+<1> Include `.metadata.annotations` to specify the list of traits we want to configure
+
+In this example, we've set the `logging` trait to specify certain configuration we want to apply. You can do the same with all the traits available, just by setting `trait.camel.apache.org/trait-name.trait-property` with the expected value.
+
 [[kamelets-troubleshooting]]
 == Troubleshooting
 
@@ -400,6 +423,11 @@ The following annotations and labels are also defined on the resource:
 |An optional icon for the Kamelet in URI data format
 |`string`
 |E.g. `data:image/svg+xml;base64,PD94bW...`
+
+|`trait.camel.apache.org/trait-name.trait-property`
+|An optional configuration setting for a trait
+|`string`
+|E.g. `trait.camel.apache.org/logging.level: DEBUG`
 |===
 
 .Labels
