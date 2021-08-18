@@ -66,12 +66,14 @@ func nativeImageContext(ctx *builderContext) error {
 		runner := "camel-k-integration-" + defaults.Version + "-runner"
 
 		ctx.BaseImage = "quay.io/quarkus/quarkus-distroless-image:1.0"
-		ctx.SelectedArtifacts = []v1.Artifact{
+		ctx.Artifacts = []v1.Artifact{
 			{
+				ID:       runner,
 				Location: path.Join(ctx.Path, "maven", "target", runner),
 				Target:   runner,
 			},
 		}
+		ctx.SelectedArtifacts = ctx.Artifacts
 
 		return nil
 	})
