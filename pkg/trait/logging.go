@@ -19,7 +19,6 @@ package trait
 
 import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
@@ -29,7 +28,6 @@ const (
 	envVarQuarkusLogConsoleFormat          = "QUARKUS_LOG_CONSOLE_FORMAT"
 	envVarQuarkusLogConsoleJson            = "QUARKUS_LOG_CONSOLE_JSON"
 	envVarQuarkusLogConsoleJsonPrettyPrint = "QUARKUS_LOG_CONSOLE_JSON_PRETTY_PRINT"
-	depQuarkusLoggingJson                  = "mvn:io.quarkus:quarkus-logging-json"
 	defaultLogLevel                        = "INFO"
 )
 
@@ -63,22 +61,10 @@ func (l loggingTrait) Configure(environment *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return environment.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying,
-		v1.IntegrationPhaseRunning), nil
+	return environment.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
 }
 
 func (l loggingTrait) Apply(environment *Environment) error {
-	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		if IsTrue(l.Json) {
-			if environment.Integration.Status.Dependencies == nil {
-				environment.Integration.Status.Dependencies = make([]string, 0)
-			}
-			util.StringSliceUniqueAdd(&environment.Integration.Status.Dependencies, depQuarkusLoggingJson)
-		}
-
-		return nil
-	}
-
 	envvar.SetVal(&environment.EnvVars, envVarQuarkusLogLevel, l.Level)
 
 	if l.Format != "" {
@@ -91,6 +77,7 @@ func (l loggingTrait) Apply(environment *Environment) error {
 			envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJsonPrettyPrint, True)
 		}
 	} else {
+		// If the trait is false OR unset, we default to false.
 		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJson, False)
 
 		if IsNilOrTrue(l.Color) {
