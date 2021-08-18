@@ -128,7 +128,7 @@ func TestIntegrationScale(t *testing.T) {
 func TestKameletBindingScale(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		name := "binding"
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("install", "-n", ns, "-w").Execute()).To(Succeed())
 		Expect(Kamel("bind", "timer-source?message=HelloBinding", "log-sink", "-n", ns, "--name", name).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(v1.PodRunning))
 		Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
