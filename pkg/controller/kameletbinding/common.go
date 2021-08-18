@@ -73,6 +73,12 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 		it.Spec = *kameletbinding.Spec.Integration.DeepCopy()
 	}
 
+	// Set replicas (or override podspecable value) if present
+	if kameletbinding.Spec.Replicas != nil {
+		replicas := *kameletbinding.Spec.Replicas
+		it.Spec.Replicas = &replicas
+	}
+
 	profile, err := determineProfile(ctx, c, kameletbinding)
 	if err != nil {
 		return nil, err
