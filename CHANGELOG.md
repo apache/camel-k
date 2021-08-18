@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Modeline, build-property not checking if option also provided by the user [\#2569](https://github.com/apache/camel-k/issues/2569)
 - controller: panic on nil annotation [\#2556](https://github.com/apache/camel-k/issues/2556)
 - Remove "attributeRestrictions" from operator-role.yaml [\#2549](https://github.com/apache/camel-k/issues/2549)
 - Error in OpenShift image-pull delegation on IBM Cloud [\#2530](https://github.com/apache/camel-k/issues/2530)
@@ -24,6 +25,8 @@
 
 **Merged pull requests:**
 
+- ad \[FUSEQE-13946\] Probably incorrect integration name [\#2572](https://github.com/apache/camel-k/pull/2572) ([lfabriko](https://github.com/lfabriko))
+- fix\(cli\): modeline build-property check [\#2571](https://github.com/apache/camel-k/pull/2571) ([squakez](https://github.com/squakez))
 - fix\(api\): property leading space [\#2564](https://github.com/apache/camel-k/pull/2564) ([squakez](https://github.com/squakez))
 - fix TestPermissionDenied should ignore darwin  [\#2561](https://github.com/apache/camel-k/pull/2561) ([Abirdcfly](https://github.com/Abirdcfly))
 - fix\(controller\): panic on nil annotation [\#2557](https://github.com/apache/camel-k/pull/2557) ([Abirdcfly](https://github.com/Abirdcfly))
@@ -38,6 +41,7 @@
 - \[test\] Remove 3rd party dependencies [\#2529](https://github.com/apache/camel-k/pull/2529) ([bouskaJ](https://github.com/bouskaJ))
 - Allow Probe Scheme to Be Customized [\#2527](https://github.com/apache/camel-k/pull/2527) ([Kyle-Cooley](https://github.com/Kyle-Cooley))
 - fix\(controller\): panic on nil application properties [\#2526](https://github.com/apache/camel-k/pull/2526) ([squakez](https://github.com/squakez))
+- doc: Improve Helm configuration section and architecture integration platform [\#2521](https://github.com/apache/camel-k/pull/2521) ([toonalbers](https://github.com/toonalbers))
 - Use https instead of http for xsd location [\#2517](https://github.com/apache/camel-k/pull/2517) ([apupier](https://github.com/apupier))
 - Add classpath kamelet loading test [\#2516](https://github.com/apache/camel-k/pull/2516) ([bouskaJ](https://github.com/bouskaJ))
 - fix\(\#2514\): Fix tar.gz changes the uid/gid of cwd [\#2515](https://github.com/apache/camel-k/pull/2515) ([christophd](https://github.com/christophd))
