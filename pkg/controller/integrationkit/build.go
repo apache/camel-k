@@ -82,6 +82,8 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 			return nil, errors.New("undefined camel catalog")
 		}
 
+		labels := kubernetes.FilterCamelCreatorLabels(kit.Labels)
+		labels[v1.IntegrationKitLayoutLabel] = kit.Labels[v1.IntegrationKitLayoutLabel]
 		build = &v1.Build{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1.SchemeGroupVersion.String(),
@@ -90,7 +92,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: kit.Namespace,
 				Name:      kit.Name,
-				Labels:    kubernetes.FilterCamelCreatorLabels(kit.Labels),
+				Labels:    labels,
 			},
 			Spec: v1.BuildSpec{
 				Tasks:   env.BuildTasks,

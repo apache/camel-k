@@ -23,6 +23,8 @@ import (
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -58,10 +60,29 @@ func (action *scheduleAction) Handle(ctx context.Context, build *v1.Build) (*v1.
 	action.lock.Lock()
 	defer action.lock.Unlock()
 
+	layout := build.Labels[v1.IntegrationKitLayoutLabel]
+
+	// Native builds can be run in parallel, as incremental images is not applicable.
+	if layout == v1.IntegrationKitLayoutNative {
+		// Reset the Build status, and transition it to pending phase.
+		// This must be done in the critical section, rather than delegated to the controller.
+		return nil, action.toPendingPhase(ctx, build)
+	}
+
+	// We assume incremental images is only applicable across images whose layout is identical
+	withCompatibleLayout, err := labels.NewRequirement(v1.IntegrationKitLayoutLabel, selection.Equals, []string{layout})
+	if err != nil {
+		return nil, err
+	}
+
 	builds := &v1.BuildList{}
 	// We use the non-caching client as informers cache is not invalidated nor updated
 	// atomically by write operations
-	err := action.reader.List(ctx, builds, ctrl.InNamespace(build.Namespace))
+	err = action.reader.List(ctx, builds,
+		ctrl.InNamespace(build.Namespace),
+		ctrl.MatchingLabelsSelector{
+			Selector: labels.NewSelector().Add(*withCompatibleLayout),
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +90,7 @@ func (action *scheduleAction) Handle(ctx context.Context, build *v1.Build) (*v1.
 	// Emulate a serialized working queue to only allow one build to run at a given time.
 	// This is currently necessary for the incremental build to work as expected.
 	// We may want to explicitly manage build priority as opposed to relying on
-	// the reconcile loop to handle the queuing
+	// the reconciliation loop to handle the queuing.
 	for _, b := range builds.Items {
 		if b.Status.Phase == v1.BuildPhasePending || b.Status.Phase == v1.BuildPhaseRunning {
 			// Let's requeue the build in case one is already running
@@ -79,7 +100,11 @@ func (action *scheduleAction) Handle(ctx context.Context, build *v1.Build) (*v1.
 
 	// Reset the Build status, and transition it to pending phase.
 	// This must be done in the critical section, rather than delegated to the controller.
-	err = action.patchBuildStatus(ctx, build, func(b *v1.Build) {
+	return nil, action.toPendingPhase(ctx, build)
+}
+
+func (action *scheduleAction) toPendingPhase(ctx context.Context, build *v1.Build) error {
+	err := action.patchBuildStatus(ctx, build, func(b *v1.Build) {
 		now := metav1.Now()
 		b.Status = v1.BuildStatus{
 			Phase:      v1.BuildPhasePending,
@@ -90,13 +115,13 @@ func (action *scheduleAction) Handle(ctx context.Context, build *v1.Build) (*v1.
 		}
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Report the duration the Build has been waiting in the build queue
 	queueDuration.Observe(time.Now().Sub(getBuildQueuingTime(build)).Seconds())
 
-	return nil, nil
+	return nil
 }
 
 func (action *scheduleAction) patchBuildStatus(ctx context.Context, build *v1.Build, mutate func(b *v1.Build)) error {
