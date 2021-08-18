@@ -92,14 +92,14 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 			return err
 		}
 
-		steps = append(steps, builder.QuarkusSteps...)
+		steps = append(steps, builder.Quarkus.CommonSteps...)
 
 		if t.isNativePackageType() {
 			build.Maven.Properties["quarkus.package.type"] = string(nativePackageType)
-			steps = append(steps, builder.Steps.NativeImageContext, builder.Steps.ExecutableDockerfile)
+			steps = append(steps, builder.Image.NativeImageContext, builder.Image.ExecutableDockerfile)
 		} else {
 			build.Maven.Properties["quarkus.package.type"] = string(fastJarPackageType)
-			steps = append(steps, builder.Steps.IncrementalImageContext, builder.Steps.JvmDockerfile)
+			steps = append(steps, builder.Quarkus.ComputeQuarkusDependencies, builder.Image.IncrementalImageContext, builder.Image.JvmDockerfile)
 		}
 
 		// Sort steps by phase

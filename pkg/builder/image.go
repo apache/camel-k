@@ -39,6 +39,26 @@ const (
 	DependenciesDir = "dependencies"
 )
 
+func init() {
+	registerSteps(Image)
+}
+
+type imageSteps struct {
+	IncrementalImageContext Step
+	NativeImageContext      Step
+	StandardImageContext    Step
+	ExecutableDockerfile    Step
+	JvmDockerfile           Step
+}
+
+var Image = imageSteps{
+	IncrementalImageContext: NewStep(ApplicationPackagePhase, incrementalImageContext),
+	NativeImageContext:      NewStep(ApplicationPackagePhase, nativeImageContext),
+	StandardImageContext:    NewStep(ApplicationPackagePhase, standardImageContext),
+	ExecutableDockerfile:    NewStep(ApplicationPackagePhase+1, executableDockerfile),
+	JvmDockerfile:           NewStep(ApplicationPackagePhase+1, jvmDockerfile),
+}
+
 type artifactsSelector func(ctx *builderContext) error
 
 func nativeImageContext(ctx *builderContext) error {
