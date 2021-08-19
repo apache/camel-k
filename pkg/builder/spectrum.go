@@ -32,6 +32,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
@@ -65,16 +66,20 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 		contextDir = path.Join(pwd, ContextDir)
 	}
 
-	libraryPath := path.Join(contextDir, DependenciesDir)
-	_, err := os.Stat(libraryPath)
-	if err != nil && os.IsNotExist(err) {
-		// this can only indicate that there are no more libraries to add to the base image,
-		// because transitive resolution is the same even if spec differs
+	exists, err := util.DirectoryExists(contextDir)
+	if err != nil {
+		return status.Failed(err)
+	}
+	empty, err := util.DirectoryEmpty(contextDir)
+	if err != nil {
+		return status.Failed(err)
+	}
+	if !exists || empty {
+		// this can only indicate that there are no more resources to add to the base image,
+		// because transitive resolution is the same even if spec differs.
 		log.Infof("No new image to build, reusing existing image %s", baseImage)
 		status.Image = baseImage
 		return status
-	} else if err != nil {
-		return status.Failed(err)
 	}
 
 	pullInsecure := t.task.Registry.Insecure // incremental build case
@@ -120,7 +125,7 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 	}
 
 	go readSpectrumLogs(newStdR)
-	digest, err := spectrum.Build(options, libraryPath+":"+path.Join(DeploymentDir, DependenciesDir))
+	digest, err := spectrum.Build(options, contextDir+":"+path.Join(DeploymentDir))
 
 	if err != nil {
 		return status.Failed(err)

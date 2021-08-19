@@ -289,6 +289,20 @@ func DirectoryExists(directory string) (bool, error) {
 	return info.IsDir(), nil
 }
 
+func DirectoryEmpty(directory string) (bool, error) {
+	f, err := os.Open(directory)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+
+	_, err = f.Readdirnames(1)
+	if err == io.EOF {
+		return true, nil
+	}
+	return false, err
+}
+
 func CreateDirectory(directory string) error {
 	if directory != "" {
 		// If directory does not exist, create it
