@@ -19,12 +19,14 @@ package trait
 
 import (
 	"context"
+	"testing"
+
 	"github.com/google/uuid"
 	"k8s.io/apimachinery/pkg/types"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -326,4 +328,25 @@ func TestContainerWithCustomImageAndDeprecatedIntegrationKit(t *testing.T) {
 	err = traitCatalog.apply(&environment)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "unsupported configuration: a container image has been set in conjunction with an IntegrationKit")
+}
+
+func TestContainerWithImagePullPolicy(t *testing.T) {
+	target := appsv1.Deployment{}
+
+	env := newTestProbesEnv(t, v1.RuntimeProviderQuarkus)
+	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
+	env.Resources.Add(&target)
+
+	ctr := newTestContainerTrait()
+	ctr.ImagePullPolicy = "Always"
+
+	err := ctr.Apply(&env)
+	assert.Nil(t, err)
+	assert.Equal(t, corev1.PullAlways, target.Spec.Template.Spec.Containers[0].ImagePullPolicy)
+
+	ctr.ImagePullPolicy = "MustFail"
+
+	ok, err := ctr.Configure(&env)
+	assert.False(t, ok)
+	assert.NotNil(t, err)
 }

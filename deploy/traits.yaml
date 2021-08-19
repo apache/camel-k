@@ -126,6 +126,9 @@ traits:
   - name: image
     type: string
     description: The main container image
+  - name: image-pull-policy
+    type: PullPolicy
+    description: 'The pull policy: Always|Never|IfNotPresent'
   - name: probes-enabled
     type: bool
     description: ProbesEnabled enable/disable probes on the container (default `false`)

@@ -77,6 +77,10 @@ The following configuration options are available:
 | string
 | The main container image
 
+| container.image-pull-policy
+| PullPolicy
+| The pull policy: Always|Never|IfNotPresent
+
 | container.probes-enabled
 | bool
 | ProbesEnabled enable/disable probes on the container (default `false`)
