@@ -74,12 +74,12 @@ type containerTrait struct {
 	ServicePort int `property:"service-port" json:"servicePort,omitempty"`
 	// To configure under which service port name the container port is to be exposed (default `http`).
 	ServicePortName string `property:"service-port-name" json:"servicePortName,omitempty"`
-
 	// The main container name. It's named `integration` by default.
 	Name string `property:"name" json:"name,omitempty"`
 	// The main container image
 	Image string `property:"image" json:"image,omitempty"`
-
+	// The pull policy: Always|Never|IfNotPresent
+	ImagePullPolicy corev1.PullPolicy `property:"image-pull-policy" json:"imagePullPolicy,omitempty"`
 	// ProbesEnabled enable/disable probes on the container (default `false`)
 	ProbesEnabled *bool `property:"probes-enabled" json:"probesEnabled,omitempty"`
 	// Scheme to use when connecting. Defaults to HTTP. Applies to the liveness probe.
@@ -141,7 +141,15 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 		}
 	}
 
+	if !isValidPullPolicy(t.ImagePullPolicy) {
+		return false, fmt.Errorf("unsupported pull policy %s", t.ImagePullPolicy)
+	}
+
 	return true, nil
+}
+
+func isValidPullPolicy(policy corev1.PullPolicy) bool {
+	return policy == "" || policy == corev1.PullAlways || policy == corev1.PullIfNotPresent || policy == corev1.PullNever
 }
 
 func (t *containerTrait) Apply(e *Environment) error {
@@ -218,6 +226,10 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		Name:  t.Name,
 		Image: e.Integration.Status.Image,
 		Env:   make([]corev1.EnvVar, 0),
+	}
+
+	if t.ImagePullPolicy != "" {
+		container.ImagePullPolicy = t.ImagePullPolicy
 	}
 
 	// combine Environment of integration with platform, kit, integration
