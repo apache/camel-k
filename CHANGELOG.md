@@ -13,6 +13,7 @@
 - Runtime issue: cannot use KameletBinding error handler [\#2525](https://github.com/apache/camel-k/issues/2525)
 - KameletBinding error handler nil map [\#2524](https://github.com/apache/camel-k/issues/2524)
 - camel-k-client tar.gz changes the uid/gid of cwd [\#2514](https://github.com/apache/camel-k/issues/2514)
+- Liveness and Readiness Probes not Supported When Using HTTPS [\#2513](https://github.com/apache/camel-k/issues/2513)
 - \[CMD\] `kamel bind` empty error handler [\#2493](https://github.com/apache/camel-k/issues/2493)
 - ServiceBinding CR sometimes doesn't get created [\#2482](https://github.com/apache/camel-k/issues/2482)
 - V1.5.0 release without assets [\#2481](https://github.com/apache/camel-k/issues/2481)
