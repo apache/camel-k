@@ -51,8 +51,7 @@ func (action *buildKitAction) Name() string {
 }
 
 func (action *buildKitAction) CanHandle(integration *v1.Integration) bool {
-	return integration.Status.Phase == v1.IntegrationPhaseBuildingKit ||
-		integration.Status.Phase == v1.IntegrationPhaseResolvingKit
+	return integration.Status.Phase == v1.IntegrationPhaseBuildingKit
 }
 
 func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {

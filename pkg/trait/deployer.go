@@ -60,7 +60,6 @@ func (t *deployerTrait) Configure(e *Environment) (bool, error) {
 		v1.IntegrationPhaseWaitingForPlatform,
 		v1.IntegrationPhaseInitialization,
 		v1.IntegrationPhaseBuildingKit,
-		v1.IntegrationPhaseResolvingKit,
 		v1.IntegrationPhaseDeploying,
 		v1.IntegrationPhaseRunning,
 	), nil
@@ -69,7 +68,7 @@ func (t *deployerTrait) Configure(e *Environment) (bool, error) {
 func (t *deployerTrait) Apply(e *Environment) error {
 	switch e.Integration.Status.Phase {
 
-	case v1.IntegrationPhaseBuildingKit, v1.IntegrationPhaseResolvingKit:
+	case v1.IntegrationPhaseBuildingKit:
 		if e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) {
 			e.PostProcessors = append(e.PostProcessors, func(environment *Environment) error {
 				// trigger integration deploy
@@ -89,7 +88,7 @@ func (t *deployerTrait) Apply(e *Environment) error {
 				// is enabled. This is possible to fetch the OpenAPI endpoint, which returns
 				// the entire server API document, then lookup the resource PATCH endpoint, and
 				// check its list of accepted MIME types.
-				// As a simpler solution, we fallback to client-side apply at the first
+				// As a simpler solution, we fall back to client-side apply at the first
 				// 415 error, and assume server-side apply is not available globally.
 				if hasServerSideApply {
 					if err := t.serverSideApply(env, resource); err == nil {

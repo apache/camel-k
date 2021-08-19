@@ -45,7 +45,7 @@ func TestConfigurePrometheusTraitInRightPhaseDoesSucceed(t *testing.T) {
 
 func TestConfigurePrometheusTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 	trait, environment := createNominalPrometheusTest()
-	environment.Integration.Status.Phase = v1.IntegrationPhaseResolvingKit
+	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 
 	configured, err := trait.Configure(environment)
 

@@ -93,7 +93,7 @@ func TestConfigureDeploymentTraitWhileWaitingPlatformDoesNotSucceed(t *testing.T
 
 func TestApplyDeploymentTraitWhileResolvingKitDoesNotSucceed(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
-	environment.Integration.Status.Phase = v1.IntegrationPhaseResolvingKit
+	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 
 	configured, err := deploymentTrait.Configure(environment)
 

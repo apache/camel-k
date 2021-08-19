@@ -67,7 +67,7 @@ func TestApplyDeployerTraitInInitializationPhaseDoesSucceed(t *testing.T) {
 
 func TestApplyDeployerTraitInResolvingKitPhaseSkipPostActions(t *testing.T) {
 	deployerTrait, environment := createNominalDeployerTest()
-	environment.Integration.Status.Phase = v1.IntegrationPhaseResolvingKit
+	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 
 	err := deployerTrait.Apply(environment)
 

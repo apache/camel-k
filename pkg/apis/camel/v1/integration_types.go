@@ -116,9 +116,8 @@ const (
 	IntegrationPhaseWaitingForPlatform IntegrationPhase = "Waiting For Platform"
 	// IntegrationPhaseBuildingKit --
 	IntegrationPhaseBuildingKit IntegrationPhase = "Building Kit"
-	// IntegrationPhaseResolvingKit --
-	IntegrationPhaseResolvingKit IntegrationPhase = "Resolving Kit"
-	// IntegrationPhaseWaitingForBindings e.g Service Bindings --
+	// IntegrationPhaseWaitingForBindings means the Integration is currently waiting to be bound
+	// to other resources, e.g., Service Bindings.
 	IntegrationPhaseWaitingForBindings IntegrationPhase = "Waiting for Bindings"
 	// IntegrationPhaseDeploying --
 	IntegrationPhaseDeploying IntegrationPhase = "Deploying"
