@@ -3,8 +3,19 @@
 
 We love contributions!
 
-The project is written in https://golang.org/[go] and contains some parts written in Java for the https://github.com/apache/camel-k-runtime/[integration runtime].
+The https://github.com/apache/camel-k/[main project] is written in https://golang.org/[go] and contains some parts written in Java for the https://github.com/apache/camel-k-runtime/[integration runtime].
 Camel K is built on top of Kubernetes through *Custom Resource Definitions*.
+
+[[how]]
+== How can I contribute?
+
+There are many ways you can contribute to Camel K, not only software development, as well as with the rest of Camel community:
+
+* Contribute actively to development (see the section below)
+* Use it and report any feedback, improvement or bug you may find via https://github.com/apache/camel-k/[Github], link:/community/mailing-list/[mailing list] or https://camel.zulipchat.com[chat].
+* Contribute by writing missing documentation or blog posts about the features around Camel K
+* https://twitter.com/ApacheCamel[Tweet], like and socialize Camel K in your preferred social network
+* Enjoy the talks that the contributors submit in various conferences around the world
 
 [[requirements]]
 == Requirements
