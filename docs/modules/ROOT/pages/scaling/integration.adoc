@@ -21,7 +21,7 @@ The Integration also reports its number of replicas in the `.status.replicas` fi
 
 [source,console]
 ----
-$ kubectl get it <integration_name> -o jsonpath='{.spec.replicas}'
+$ kubectl get it <integration_name> -o jsonpath='{.status.replicas}'
 ----
 
 == Autoscaling with Knative
