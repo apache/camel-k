@@ -65,16 +65,6 @@ func TestApplyDeployerTraitInInitializationPhaseDoesSucceed(t *testing.T) {
 	assert.Len(t, environment.PostActions, 1)
 }
 
-func TestApplyDeployerTraitInResolvingKitPhaseSkipPostActions(t *testing.T) {
-	deployerTrait, environment := createNominalDeployerTest()
-	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
-
-	err := deployerTrait.Apply(environment)
-
-	assert.Nil(t, err)
-	assert.Len(t, environment.PostActions, 0)
-}
-
 func createNominalDeployerTest() (*deployerTrait, *Environment) {
 	trait := newDeployerTrait().(*deployerTrait)
 
