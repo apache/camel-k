@@ -96,10 +96,18 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 
 		if t.isNativePackageType() {
 			build.Maven.Properties["quarkus.package.type"] = string(nativePackageType)
-			steps = append(steps, builder.Image.NativeImageContext, builder.Image.ExecutableDockerfile)
+			steps = append(steps, builder.Image.NativeImageContext)
+			// Spectrum does not rely on Dockerfile to assemble the image
+			if e.Platform.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategySpectrum {
+				steps = append(steps, builder.Image.ExecutableDockerfile)
+			}
 		} else {
 			build.Maven.Properties["quarkus.package.type"] = string(fastJarPackageType)
-			steps = append(steps, builder.Quarkus.ComputeQuarkusDependencies, builder.Image.IncrementalImageContext, builder.Image.JvmDockerfile)
+			steps = append(steps, builder.Quarkus.ComputeQuarkusDependencies, builder.Image.IncrementalImageContext)
+			// Spectrum does not rely on Dockerfile to assemble the image
+			if e.Platform.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategySpectrum {
+				steps = append(steps, builder.Image.JvmDockerfile)
+			}
 		}
 
 		// Sort steps by phase
