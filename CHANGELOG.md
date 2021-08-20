@@ -14,6 +14,8 @@
 - KameletBinding error handler nil map [\#2524](https://github.com/apache/camel-k/issues/2524)
 - camel-k-client tar.gz changes the uid/gid of cwd [\#2514](https://github.com/apache/camel-k/issues/2514)
 - Liveness and Readiness Probes not Supported When Using HTTPS [\#2513](https://github.com/apache/camel-k/issues/2513)
+- container trait : add a flag to configure the image pull policy [\#2503](https://github.com/apache/camel-k/issues/2503)
+- \[Doc\] Trait annotations [\#2500](https://github.com/apache/camel-k/issues/2500)
 - \[CMD\] `kamel bind` empty error handler [\#2493](https://github.com/apache/camel-k/issues/2493)
 - ServiceBinding CR sometimes doesn't get created [\#2482](https://github.com/apache/camel-k/issues/2482)
 - V1.5.0 release without assets [\#2481](https://github.com/apache/camel-k/issues/2481)
@@ -26,6 +28,8 @@
 
 **Merged pull requests:**
 
+- feat\(trait\): container image pull policy [\#2583](https://github.com/apache/camel-k/pull/2583) ([squakez](https://github.com/squakez))
+- doc\(kamelets\): trait annotation usage and examples [\#2581](https://github.com/apache/camel-k/pull/2581) ([squakez](https://github.com/squakez))
 - ad \[FUSEQE-13946\] Probably incorrect integration name [\#2572](https://github.com/apache/camel-k/pull/2572) ([lfabriko](https://github.com/lfabriko))
 - fix\(cli\): modeline build-property check [\#2571](https://github.com/apache/camel-k/pull/2571) ([squakez](https://github.com/squakez))
 - fix\(api\): property leading space [\#2564](https://github.com/apache/camel-k/pull/2564) ([squakez](https://github.com/squakez))
@@ -249,6 +253,7 @@
 - chore : Fix links to the developers guide - needs to point to latest/contributing/developers.html [\#2102](https://github.com/apache/camel-k/pull/2102) ([cunningt](https://github.com/cunningt))
 - chore: Upgrade Knative to version 0.21.0 [\#2101](https://github.com/apache/camel-k/pull/2101) ([astefanutti](https://github.com/astefanutti))
 - chore: Rely on Lease from controller-runtime for leader election [\#2100](https://github.com/apache/camel-k/pull/2100) ([astefanutti](https://github.com/astefanutti))
+- tests: common/files are rewritten to yaml [\#2099](https://github.com/apache/camel-k/pull/2099) ([vsokolov00](https://github.com/vsokolov00))
 - Add missing classpath locations for external kits [\#2097](https://github.com/apache/camel-k/pull/2097) ([jamesnetherton](https://github.com/jamesnetherton))
 - fix: Use correct versions to access OLM APIs [\#2095](https://github.com/apache/camel-k/pull/2095) ([astefanutti](https://github.com/astefanutti))
 - Upgrade sbo [\#2094](https://github.com/apache/camel-k/pull/2094) ([johnpoth](https://github.com/johnpoth))
