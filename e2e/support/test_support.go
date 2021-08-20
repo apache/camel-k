@@ -36,9 +36,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/apache/camel-k/pkg/util/patch"
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
 	"github.com/spf13/cobra"
+	"k8s.io/apimachinery/pkg/types"
 
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
@@ -637,8 +639,16 @@ func UpdateKameletBinding(ns string, name string, upd func(it *v1alpha1.KameletB
 	if klb == nil {
 		return fmt.Errorf("no kamelet binding named %s found", name)
 	}
-	upd(klb)
-	return TestClient().Update(TestContext, klb)
+	target := klb.DeepCopy()
+	upd(target)
+	// For some reasons, full patch fails on some clusters
+	p, err := patch.PositiveMergePatch(klb, target)
+	if err != nil {
+		return err
+	} else if len(p) == 0 {
+		return nil
+	}
+	return TestClient().Patch(TestContext, target, ctrl.RawPatch(types.MergePatchType, p))
 }
 
 func ScaleKameletBinding(ns string, name string, replicas int32) error {
