@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - Modeline, build-property not checking if option also provided by the user [\#2569](https://github.com/apache/camel-k/issues/2569)
+- Kamel bind produces incomplete yaml files with -o yaml [\#2565](https://github.com/apache/camel-k/issues/2565)
 - controller: panic on nil annotation [\#2556](https://github.com/apache/camel-k/issues/2556)
 - Remove "attributeRestrictions" from operator-role.yaml [\#2549](https://github.com/apache/camel-k/issues/2549)
 - Error in OpenShift image-pull delegation on IBM Cloud [\#2530](https://github.com/apache/camel-k/issues/2530)
@@ -30,6 +31,7 @@
 
 - feat\(trait\): container image pull policy [\#2583](https://github.com/apache/camel-k/pull/2583) ([squakez](https://github.com/squakez))
 - doc\(kamelets\): trait annotation usage and examples [\#2581](https://github.com/apache/camel-k/pull/2581) ([squakez](https://github.com/squakez))
+- fix\(cmd/bind\): show expected kameletbinding [\#2575](https://github.com/apache/camel-k/pull/2575) ([squakez](https://github.com/squakez))
 - ad \[FUSEQE-13946\] Probably incorrect integration name [\#2572](https://github.com/apache/camel-k/pull/2572) ([lfabriko](https://github.com/lfabriko))
 - fix\(cli\): modeline build-property check [\#2571](https://github.com/apache/camel-k/pull/2571) ([squakez](https://github.com/squakez))
 - fix\(api\): property leading space [\#2564](https://github.com/apache/camel-k/pull/2564) ([squakez](https://github.com/squakez))
