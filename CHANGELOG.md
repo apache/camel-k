@@ -18,6 +18,7 @@
 - container trait : add a flag to configure the image pull policy [\#2503](https://github.com/apache/camel-k/issues/2503)
 - \[Doc\] Trait annotations [\#2500](https://github.com/apache/camel-k/issues/2500)
 - \[CMD\] `kamel bind` empty error handler [\#2493](https://github.com/apache/camel-k/issues/2493)
+- kamel 1.4.1 build failure [\#2484](https://github.com/apache/camel-k/issues/2484)
 - ServiceBinding CR sometimes doesn't get created [\#2482](https://github.com/apache/camel-k/issues/2482)
 - V1.5.0 release without assets [\#2481](https://github.com/apache/camel-k/issues/2481)
 - Kamel uninstall should delete kamelets [\#2479](https://github.com/apache/camel-k/issues/2479)
