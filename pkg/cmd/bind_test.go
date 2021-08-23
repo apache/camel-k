@@ -82,3 +82,79 @@ func TestBindOutputUnknownFormat(t *testing.T) {
 
 	assert.Equal(t, "invalid output format option 'fail', should be one of: yaml|json\n", output)
 }
+
+func TestBindErrorHandlerDLCKamelet(t *testing.T) {
+	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
+	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
+		"--error-handler", "dlc:my-kamelet", "-p", "error-handler.my-prop=value")
+	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
+
+	assert.Nil(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  creationTimestamp: null
+  name: my-to-my
+spec:
+  errorHandler:
+    dead-letter-channel:
+      endpoint:
+        properties:
+          my-prop: value
+        ref:
+          apiVersion: camel.apache.org/v1alpha1
+          kind: Kamelet
+          name: my-kamelet
+  sink:
+    uri: my:dst
+  source:
+    uri: my:src
+status: {}
+`, output)
+}
+
+func TestBindErrorHandlerNone(t *testing.T) {
+	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
+	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
+		"--error-handler", "none")
+	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
+
+	assert.Nil(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  creationTimestamp: null
+  name: my-to-my
+spec:
+  errorHandler:
+    none: null
+  sink:
+    uri: my:dst
+  source:
+    uri: my:src
+status: {}
+`, output)
+}
+
+func TestBindErrorHandlerRef(t *testing.T) {
+	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
+	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
+		"--error-handler", "ref:my-registry-reference")
+	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
+
+	assert.Nil(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  creationTimestamp: null
+  name: my-to-my
+spec:
+  errorHandler:
+    ref: my-registry-reference
+  sink:
+    uri: my:dst
+  source:
+    uri: my:src
+status: {}
+`, output)
+}
