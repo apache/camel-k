@@ -57,6 +57,7 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 		},
 	}
 
+    cmd.Flags().StringArrayP("connect", "c", nil, "A ServiceBinding or Provisioned Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
 	cmd.Flags().String("error-handler", "", `Add error handler (none|log|dlc:<endpoint>|bean:<type>|ref:<registry-ref>). DLC endpoints are expected in the format "[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
 	cmd.Flags().String("name", "", "Name for the binding")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
@@ -78,6 +79,7 @@ type bindCmdOptions struct {
 	*RootCmdOptions
 	ErrorHandler string   `mapstructure:"error-handler" yaml:",omitempty"`
 	Name         string   `mapstructure:"name" yaml:",omitempty"`
+	Connects     []string `mapstructure:"connects" yaml:",omitempty"`
 	OutputFormat string   `mapstructure:"output" yaml:",omitempty"`
 	Properties   []string `mapstructure:"properties" yaml:",omitempty"`
 	SkipChecks   bool     `mapstructure:"skip-checks" yaml:",omitempty"`
@@ -172,6 +174,24 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 			binding.Spec.Steps = append(binding.Spec.Steps, step)
 		}
 	}
+
+    if len(o.Connects) > 0 {
+        trait := make(map[string]interface{})
+        trait["serviceBindings"] = o.Connects
+        specs := make(map[string]v1.TraitSpec)
+        data, err := json.Marshal(trait)
+        if err != nil {
+            return err
+        }
+        var spec v1.TraitSpec
+        err = json.Unmarshal(data, &spec.Configuration)
+        if err != nil {
+            return err
+        }
+        specs["service-binding"] = spec
+        binding.Spec.Integration = &v1.IntegrationSpec{}
+        binding.Spec.Integration.Traits = specs
+    }
 
 	client, err := o.GetCmdClient()
 	if err != nil {
@@ -398,7 +418,7 @@ func (o *bindCmdOptions) checkCompliance(cmd *cobra.Command, endpoint v1alpha1.E
 						found = true
 					}
 				}
-				if !found {
+				if !found && len(o.Connects) == 0 {
 					return fmt.Errorf("binding is missing required property %q for Kamelet %q", reqProp, key.Name)
 				}
 			}
