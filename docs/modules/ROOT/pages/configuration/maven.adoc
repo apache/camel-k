@@ -195,7 +195,7 @@ In this section, we will show how to configure Camel K to fetch artifacts from a
 
 === Custom Maven Settings
 
-The first thing that needs to be done is to create a Maven settings file configured to use the S3 bucket as a Maven repostory. The Maven settings file will be used by the Camel K operator so make sure your S3 instance is accessible in your cluster. +
+The first thing that needs to be done is to create a Maven settings file configured to use the S3 bucket as a Maven repository. The Maven settings file will be used by the Camel K operator so make sure your S3 instance is accessible in your cluster. +
 The Maven settings will contain all the information needed for Maven to access the S3 bucket namely your credentials, S3 URL and bucket name. This information will typically be located in the `server` and `repository` section of your Maven settings. For example when using https://min.io/[MinIO] as a S3 provider and https://github.com/Yleisradio/aws-maven/pull/20[`fi.yle.tools:aws-maven:1.4.3`] as a Wagon Provider, your Maven settings will look something like this: 
 
 [source,xml]
