@@ -22,7 +22,7 @@ package fake
 import (
 	"context"
 
-	v1beta1 "github.com/apache/camel-k/addons/strimzi/duck/v1beta1"
+	v1beta2 "github.com/apache/camel-k/addons/strimzi/duck/v1beta2"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -32,29 +32,29 @@ import (
 
 // FakeKafkaTopics implements KafkaTopicInterface
 type FakeKafkaTopics struct {
-	Fake *FakeKafkaV1beta1
+	Fake *FakeKafkaV1beta2
 	ns   string
 }
 
-var kafkatopicsResource = schema.GroupVersionResource{Group: "kafka.strimzi.io", Version: "v1beta1", Resource: "kafkatopics"}
+var kafkatopicsResource = schema.GroupVersionResource{Group: "kafka.strimzi.io", Version: "v1beta2", Resource: "kafkatopics"}
 
-var kafkatopicsKind = schema.GroupVersionKind{Group: "kafka.strimzi.io", Version: "v1beta1", Kind: "KafkaTopic"}
+var kafkatopicsKind = schema.GroupVersionKind{Group: "kafka.strimzi.io", Version: "v1beta2", Kind: "KafkaTopic"}
 
 // Get takes name of the kafkaTopic, and returns the corresponding kafkaTopic object, and an error if there is any.
-func (c *FakeKafkaTopics) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.KafkaTopic, err error) {
+func (c *FakeKafkaTopics) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta2.KafkaTopic, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(kafkatopicsResource, c.ns, name), &v1beta1.KafkaTopic{})
+		Invokes(testing.NewGetAction(kafkatopicsResource, c.ns, name), &v1beta2.KafkaTopic{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*v1beta1.KafkaTopic), err
+	return obj.(*v1beta2.KafkaTopic), err
 }
 
 // List takes label and field selectors, and returns the list of KafkaTopics that match those selectors.
-func (c *FakeKafkaTopics) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.KafkaTopicList, err error) {
+func (c *FakeKafkaTopics) List(ctx context.Context, opts v1.ListOptions) (result *v1beta2.KafkaTopicList, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(kafkatopicsResource, kafkatopicsKind, c.ns, opts), &v1beta1.KafkaTopicList{})
+		Invokes(testing.NewListAction(kafkatopicsResource, kafkatopicsKind, c.ns, opts), &v1beta2.KafkaTopicList{})
 
 	if obj == nil {
 		return nil, err
@@ -64,8 +64,8 @@ func (c *FakeKafkaTopics) List(ctx context.Context, opts v1.ListOptions) (result
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1beta1.KafkaTopicList{ListMeta: obj.(*v1beta1.KafkaTopicList).ListMeta}
-	for _, item := range obj.(*v1beta1.KafkaTopicList).Items {
+	list := &v1beta2.KafkaTopicList{ListMeta: obj.(*v1beta2.KafkaTopicList).ListMeta}
+	for _, item := range obj.(*v1beta2.KafkaTopicList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
 		}

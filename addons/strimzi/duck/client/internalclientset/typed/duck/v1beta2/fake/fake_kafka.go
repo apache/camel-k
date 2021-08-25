@@ -22,7 +22,7 @@ package fake
 import (
 	"context"
 
-	v1beta1 "github.com/apache/camel-k/addons/strimzi/duck/v1beta1"
+	v1beta2 "github.com/apache/camel-k/addons/strimzi/duck/v1beta2"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -32,29 +32,29 @@ import (
 
 // FakeKafkas implements KafkaInterface
 type FakeKafkas struct {
-	Fake *FakeKafkaV1beta1
+	Fake *FakeKafkaV1beta2
 	ns   string
 }
 
-var kafkasResource = schema.GroupVersionResource{Group: "kafka.strimzi.io", Version: "v1beta1", Resource: "kafkas"}
+var kafkasResource = schema.GroupVersionResource{Group: "kafka.strimzi.io", Version: "v1beta2", Resource: "kafkas"}
 
-var kafkasKind = schema.GroupVersionKind{Group: "kafka.strimzi.io", Version: "v1beta1", Kind: "Kafka"}
+var kafkasKind = schema.GroupVersionKind{Group: "kafka.strimzi.io", Version: "v1beta2", Kind: "Kafka"}
 
 // Get takes name of the kafka, and returns the corresponding kafka object, and an error if there is any.
-func (c *FakeKafkas) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.Kafka, err error) {
+func (c *FakeKafkas) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta2.Kafka, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(kafkasResource, c.ns, name), &v1beta1.Kafka{})
+		Invokes(testing.NewGetAction(kafkasResource, c.ns, name), &v1beta2.Kafka{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*v1beta1.Kafka), err
+	return obj.(*v1beta2.Kafka), err
 }
 
 // List takes label and field selectors, and returns the list of Kafkas that match those selectors.
-func (c *FakeKafkas) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.KafkaList, err error) {
+func (c *FakeKafkas) List(ctx context.Context, opts v1.ListOptions) (result *v1beta2.KafkaList, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(kafkasResource, kafkasKind, c.ns, opts), &v1beta1.KafkaList{})
+		Invokes(testing.NewListAction(kafkasResource, kafkasKind, c.ns, opts), &v1beta2.KafkaList{})
 
 	if obj == nil {
 		return nil, err
@@ -64,8 +64,8 @@ func (c *FakeKafkas) List(ctx context.Context, opts v1.ListOptions) (result *v1b
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1beta1.KafkaList{ListMeta: obj.(*v1beta1.KafkaList).ListMeta}
-	for _, item := range obj.(*v1beta1.KafkaList).Items {
+	list := &v1beta2.KafkaList{ListMeta: obj.(*v1beta2.KafkaList).ListMeta}
+	for _, item := range obj.(*v1beta2.KafkaList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
 		}
