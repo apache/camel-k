@@ -11,6 +11,7 @@
 - controller: panic on nil annotation [\#2556](https://github.com/apache/camel-k/issues/2556)
 - Remove "attributeRestrictions" from operator-role.yaml [\#2549](https://github.com/apache/camel-k/issues/2549)
 - CLI parameter does not overwrite application.properties [\#2538](https://github.com/apache/camel-k/issues/2538)
+- Component: AtlasMap - NullPointerException [\#2534](https://github.com/apache/camel-k/issues/2534)
 - Error in OpenShift image-pull delegation on IBM Cloud [\#2530](https://github.com/apache/camel-k/issues/2530)
 - Runtime issue: cannot use KameletBinding error handler [\#2525](https://github.com/apache/camel-k/issues/2525)
 - KameletBinding error handler nil map [\#2524](https://github.com/apache/camel-k/issues/2524)
