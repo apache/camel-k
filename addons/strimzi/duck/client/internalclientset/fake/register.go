@@ -20,7 +20,7 @@ limitations under the License.
 package fake
 
 import (
-	kafkav1beta1 "github.com/apache/camel-k/addons/strimzi/duck/v1beta1"
+	kafkav1beta2 "github.com/apache/camel-k/addons/strimzi/duck/v1beta2"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -32,7 +32,7 @@ var scheme = runtime.NewScheme()
 var codecs = serializer.NewCodecFactory(scheme)
 
 var localSchemeBuilder = runtime.SchemeBuilder{
-	kafkav1beta1.AddToScheme,
+	kafkav1beta2.AddToScheme,
 }
 
 // AddToScheme adds all types of this clientset into the given scheme. This allows composition

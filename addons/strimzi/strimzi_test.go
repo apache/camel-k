@@ -22,8 +22,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/apache/camel-k/addons/strimzi/duck/v1beta1"
-	"github.com/apache/camel-k/addons/strimzi/duck/v1beta1/client/internalclientset/fake"
+	"github.com/apache/camel-k/addons/strimzi/duck/client/internalclientset/fake"
+	"github.com/apache/camel-k/addons/strimzi/duck/v1beta2"
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/bindings"
@@ -51,7 +51,7 @@ func TestStrimziDirect(t *testing.T) {
 		Ref: &v1.ObjectReference{
 			Kind:       "KafkaTopic",
 			Name:       "mytopic",
-			APIVersion: "kafka.strimzi.io/v1beta1",
+			APIVersion: "kafka.strimzi.io/v1beta2",
 		},
 		Properties: asEndpointProperties(map[string]string{
 			"brokers": "my-cluster-kafka-bootstrap:9092",
@@ -71,13 +71,13 @@ func TestStrimziLookup(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	cluster := v1beta1.Kafka{
+	cluster := v1beta2.Kafka{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "myclusterx",
 		},
-		Status: v1beta1.KafkaStatus{
-			Listeners: []v1beta1.KafkaStatusListener{
+		Status: v1beta2.KafkaStatus{
+			Listeners: []v1beta2.KafkaStatusListener{
 				{
 					Type: "tls",
 				},
@@ -89,19 +89,19 @@ func TestStrimziLookup(t *testing.T) {
 		},
 	}
 
-	topic := v1beta1.KafkaTopic{
+	topic := v1beta2.KafkaTopic{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "mytopicy",
 			Labels: map[string]string{
-				v1beta1.StrimziKafkaClusterLabel: "myclusterx",
+				v1beta2.StrimziKafkaClusterLabel: "myclusterx",
 			},
 		},
 	}
 
 	client := fake.NewSimpleClientset(&cluster, &topic)
 	provider := StrimziBindingProvider{
-		Client: client.KafkaV1beta1(),
+		Client: client,
 	}
 
 	bindingContext := bindings.BindingContext{
@@ -114,7 +114,7 @@ func TestStrimziLookup(t *testing.T) {
 		Ref: &v1.ObjectReference{
 			Kind:       "KafkaTopic",
 			Name:       "mytopicy",
-			APIVersion: "kafka.strimzi.io/v1beta1",
+			APIVersion: "kafka.strimzi.io/v1beta2",
 		},
 	}
 

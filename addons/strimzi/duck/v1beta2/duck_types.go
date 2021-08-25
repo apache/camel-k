@@ -16,13 +16,13 @@ limitations under the License.
 */
 
 // Package duck contains duck-types for accessing Strimzi resources
-package v1beta1
+package v1beta2
 
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 const (
 	StrimziGroup            = "kafka.strimzi.io"
-	StrimziVersion          = "v1beta1"
+	StrimziVersion          = "v1beta2"
 	StrimziKindTopic        = "KafkaTopic"
 	StrimziKindKafkaCluster = "Kafka"
 

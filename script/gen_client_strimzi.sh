@@ -29,11 +29,12 @@ cd $rootdir
 
 go run k8s.io/code-generator/cmd/client-gen \
   -h script/headers/default.txt \
-  --input duck/v1beta1 \
+  --input duck/v1beta2 \
   --input-base=github.com/apache/camel-k/addons/strimzi \
-  --output-package=github.com/apache/camel-k/addons/strimzi/duck/v1beta1/client
+  --output-package=github.com/apache/camel-k/addons/strimzi/duck/client
 
+rm -r ./addons/strimzi/duck/client || true
 
-rm -r ./addons/strimzi/duck/v1beta1/client || true
-mv github.com/apache/camel-k/addons/strimzi/duck/v1beta1/client ./addons/strimzi/duck/v1beta1/
+mv github.com/apache/camel-k/addons/strimzi/duck/client ./addons/strimzi/duck/
+
 rm -r ./github.com

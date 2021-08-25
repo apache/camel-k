@@ -18,4 +18,4 @@ limitations under the License.
 // Package duck contains a partial schema of the Strimzi APIs
 // +kubebuilder:object:generate=true
 // +groupName=kafka.strimzi.io
-package v1beta1
+package v1beta2

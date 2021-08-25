@@ -21,9 +21,8 @@ package strimzi
 import (
 	"fmt"
 
-	"github.com/apache/camel-k/addons/strimzi/duck/v1beta1"
-	"github.com/apache/camel-k/addons/strimzi/duck/v1beta1/client/internalclientset"
-	typedclient "github.com/apache/camel-k/addons/strimzi/duck/v1beta1/client/internalclientset/typed/duck/v1beta1"
+	"github.com/apache/camel-k/addons/strimzi/duck/client/internalclientset"
+	"github.com/apache/camel-k/addons/strimzi/duck/v1beta2"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/bindings"
 	"github.com/apache/camel-k/pkg/util/uri"
@@ -33,7 +32,7 @@ import (
 
 // StrimziBindingProvider allows to connect to a Kafka topic via KameletBinding
 type StrimziBindingProvider struct {
-	Client typedclient.KafkaV1beta1Interface
+	Client internalclientset.Interface
 }
 
 func (s StrimziBindingProvider) ID() string {
@@ -50,7 +49,7 @@ func (s StrimziBindingProvider) Translate(ctx bindings.BindingContext, _ binding
 		return nil, err
 	}
 
-	if gv.Group != v1beta1.StrimziGroup || endpoint.Ref.Kind != v1beta1.StrimziKindTopic {
+	if gv.Group != v1beta2.StrimziGroup || endpoint.Ref.Kind != v1beta2.StrimziKindTopic {
 		// Only operates on Strimzi Topics
 		return nil, nil
 	}
@@ -70,40 +69,26 @@ func (s StrimziBindingProvider) Translate(ctx bindings.BindingContext, _ binding
 			if err != nil {
 				return nil, err
 			}
-			s.Client = kafkaClient.KafkaV1beta1()
+			s.Client = kafkaClient
 		}
 
 		// look them up
-		topic, err := s.Client.KafkaTopics(ctx.Namespace).Get(ctx.Ctx, endpoint.Ref.Name, v1.GetOptions{})
+		topic, err := s.Client.KafkaV1beta2().KafkaTopics(ctx.Namespace).Get(ctx.Ctx, endpoint.Ref.Name, v1.GetOptions{})
 		if err != nil {
 			return nil, err
 		}
 
-		clusterName := topic.Labels[v1beta1.StrimziKafkaClusterLabel]
+		clusterName := topic.Labels[v1beta2.StrimziKafkaClusterLabel]
 		if clusterName == "" {
-			return nil, fmt.Errorf("no %q label defined on topic %s", v1beta1.StrimziKafkaClusterLabel, endpoint.Ref.Name)
+			return nil, fmt.Errorf("no %q label defined on topic %s", v1beta2.StrimziKafkaClusterLabel, endpoint.Ref.Name)
 		}
 
-		cluster, err := s.Client.Kafkas(ctx.Namespace).Get(ctx.Ctx, clusterName, v1.GetOptions{})
+		bootstrapServers, err := s.getBootstrapServers(ctx, clusterName)
 		if err != nil {
 			return nil, err
 		}
 
-		var listener *v1beta1.KafkaStatusListener
-		for _, l := range cluster.Status.Listeners {
-			if l.Type == v1beta1.StrimziListenerTypePlain {
-				listener = &l
-				break
-			}
-		}
-
-		if listener == nil {
-			return nil, fmt.Errorf("cluster %q has no listeners of type %q", clusterName, v1beta1.StrimziListenerTypePlain)
-		}
-		if listener.BootstrapServers == "" {
-			return nil, fmt.Errorf("cluster %q has no bootstrap servers in %q listener", clusterName, v1beta1.StrimziListenerTypePlain)
-		}
-		props["brokers"] = listener.BootstrapServers
+		props["brokers"] = bootstrapServers
 	}
 
 	kafkaURI := fmt.Sprintf("kafka:%s", endpoint.Ref.Name)
@@ -112,6 +97,30 @@ func (s StrimziBindingProvider) Translate(ctx bindings.BindingContext, _ binding
 	return &bindings.Binding{
 		URI: kafkaURI,
 	}, nil
+}
+
+func (s StrimziBindingProvider) getBootstrapServers(ctx bindings.BindingContext, clusterName string) (string, error) {
+	cluster, err := s.Client.KafkaV1beta2().Kafkas(ctx.Namespace).Get(ctx.Ctx, clusterName, v1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+
+	var listener *v1beta2.KafkaStatusListener
+	for _, l := range cluster.Status.Listeners {
+		if l.Type == v1beta2.StrimziListenerTypePlain {
+			listener = &l
+			break
+		}
+	}
+
+	if listener == nil {
+		return "", fmt.Errorf("cluster %q has no listeners of type %q", clusterName, v1beta2.StrimziListenerTypePlain)
+	}
+	if listener.BootstrapServers == "" {
+		return "", fmt.Errorf("cluster %q has no bootstrap servers in %q listener", clusterName, v1beta2.StrimziListenerTypePlain)
+	}
+
+	return listener.BootstrapServers, nil
 }
 
 func (s StrimziBindingProvider) Order() int {
