@@ -146,3 +146,18 @@ func (c *RuntimeCatalog) VisitSchemes(visitor func(string, v1.CamelScheme) bool)
 		}
 	}
 }
+
+// DecodeComponent parses an URI and return a camel artifact and a scheme
+func (c *RuntimeCatalog) DecodeComponent(uri string) (*v1.CamelArtifact, *v1.CamelScheme) {
+	uriSplit := strings.SplitN(uri, ":", 2)
+	if len(uriSplit) < 2 {
+		return nil, nil
+	}
+	uriStart := uriSplit[0]
+	scheme, ok := c.GetScheme(uriStart)
+	var schemeRef *v1.CamelScheme
+	if ok {
+		schemeRef = &scheme
+	}
+	return c.GetArtifactByScheme(uriStart), schemeRef
+}
