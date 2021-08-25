@@ -94,7 +94,7 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 		}
 
 		// TODO: We may want to make the Jolokia version configurable
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.jolokia:jolokia-jvm:jar:agent:1.6.2")
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.jolokia:jolokia-jvm:jar:1.7.0")
 
 		return nil
 	}
@@ -153,7 +153,7 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 		optionValues[i] = k + "=" + options[k]
 	}
 
-	container.Args = append(container.Args, "-javaagent:dependencies/lib/main/org.jolokia.jolokia-jvm-1.6.2-agent.jar="+strings.Join(optionValues, ","))
+	container.Args = append(container.Args, "-javaagent:dependencies/lib/main/org.jolokia.jolokia-jvm-1.7.0.jar="+strings.Join(optionValues, ","))
 
 	containerPort := corev1.ContainerPort{
 		Name:          "jolokia",
