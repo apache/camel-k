@@ -20,6 +20,8 @@ package integration
 import (
 	"context"
 
+	"github.com/pkg/errors"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
@@ -63,8 +65,13 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		return integration, nil
 	}
 
+	kit, err := kubernetes.GetIntegrationKit(ctx, action.client, integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to find integration kit %s/%s, %s", integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
+	}
+
 	// Run traits that are enabled for the running phase
-	_, err = trait.Apply(ctx, action.client, integration, nil)
+	_, err = trait.Apply(ctx, action.client, integration, kit)
 	if err != nil {
 		return nil, err
 	}
@@ -99,9 +106,8 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	previous := integration.Status.GetCondition(v1.IntegrationConditionReady)
 	kubernetes.MirrorReadyCondition(ctx, action.client, integration)
 
-	if next := integration.Status.GetCondition(v1.IntegrationConditionReady);
-		(previous == nil || previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero()) &&
-			next != nil && next.Status == corev1.ConditionTrue && !(next.FirstTruthyTime == nil || next.FirstTruthyTime.IsZero()) {
+	if next := integration.Status.GetCondition(v1.IntegrationConditionReady); (previous == nil || previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero()) &&
+		next != nil && next.Status == corev1.ConditionTrue && !(next.FirstTruthyTime == nil || next.FirstTruthyTime.IsZero()) {
 		// Observe the time to first readiness metric
 		duration := next.FirstTruthyTime.Time.Sub(integration.Status.InitializationTimestamp.Time)
 		action.L.Infof("First readiness after %s", duration)
@@ -131,9 +137,9 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		}
 		if deployUnavailable && progressingFailing {
 			notAvailableCondition := v1.IntegrationCondition{
-				Type:   v1.IntegrationConditionReady, 
-				Status: corev1.ConditionFalse,
-				Reason: v1.IntegrationConditionErrorReason,
+				Type:    v1.IntegrationConditionReady,
+				Status:  corev1.ConditionFalse,
+				Reason:  v1.IntegrationConditionErrorReason,
 				Message: "The corresponding pod(s) may be in error state, look at the pod status or log for errors",
 			}
 			integration.Status.SetConditions(notAvailableCondition)
