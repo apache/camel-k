@@ -15,10 +15,32 @@ This dependency resolution mechanism is transparent to the user, that will just 
 
 Automatic resolution is also a nice feature in xref:running/dev-mode.adoc[dev mode], because you are allowed to add all components you need *without exiting the dev loop*.
 
-You can explicitly add dependency explicitly using the `-d` flag. This is useful when you need to use dependencies that are not included in the Camel catalog. For example:
+NOTE: Camel K won't be able to automatically the dependencies when your routes specify dynamic URIs.
+
+[[dependencies-explicit]]
+== Add explicit dependencies
+
+You can explicitly add dependency using the `-d` flag of the `kamel run` command. This is useful when you need to use dependencies that are not included in the Camel catalog or when the URI of your routes cannot be automatically discovered (see Dynamic URIs). For example:
 
 ```
 kamel run -d mvn:com.google.guava:guava:26.0-jre -d camel-mina2 Integration.java
 ```
 
-This feature can also be disabled if needed (although we discourage you from doing it) by disabling the _dependencies_ trait (`-t dependencies.enabled=false`).
+With that command you will add a dependency of Guava and the Camel Mina component. This feature can also be disabled if needed (although we discourage you from doing it) by disabling the _dependencies_ trait (`-t dependencies.enabled=false`).
+
+[[dependencies-dynamic]]
+== Dynamic URIs
+
+Unfortunately, Camel K won't be able to always discover all your dependencies. When you are creating an URI dynamically, then you will also need to instruct Camel K on which is the expected component to load (via `-d` parameter). An example is illustrated in the following code snippet:
+
+[source,java]
+.DynamicURI.java
+----
+...
+String myTopic = "purchases"
+from("kafka:" + myTopic + "? ... ")
+    .to(...)
+...
+----
+
+Here the `from` URI is dynamically created from some variables that will be resolved at runtime. In cases like this, you will need to specify the component and the related dependency to be loaded in the `Integration`.
