@@ -18,12 +18,16 @@ limitations under the License.
 package trait
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
+
+	"github.com/rs/xid"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 type quarkusPackageType string
@@ -35,6 +39,11 @@ const (
 	nativePackageType  quarkusPackageType = "native"
 )
 
+var kitPriority = map[quarkusPackageType]string{
+	fastJarPackageType: "1000",
+	nativePackageType:  "2000",
+}
+
 // The Quarkus trait configures the Quarkus runtime.
 //
 // It's enabled by default.
@@ -42,8 +51,13 @@ const (
 // +camel-k:trait=quarkus
 type quarkusTrait struct {
 	BaseTrait `property:",squash"`
-	// The Quarkus package type, either `fast-jar` or `native` (default `fast-jar`)
-	PackageType *quarkusPackageType `property:"package-type" json:"packageType,omitempty"`
+	// The Quarkus package types, either `fast-jar` or `native` (default `fast-jar`).
+	// In case both `fast-jar` and `native` are specified, two IntegrationKits are created,
+	// with the `native` kit having precedence over the `fast-jar' one once ready.
+	// The order influences the resolution of the current IntegrationKit for the Integration.
+	// The IntegrationKit corresponding to the first package type will be assigned to the
+	// Integration in case no existing IntegrationKit that matches the Integration exists.
+	PackageTypes []quarkusPackageType `property:"package-type" json:"packageTypes,omitempty"`
 }
 
 func newQuarkusTrait() Trait {
@@ -52,30 +66,109 @@ func newQuarkusTrait() Trait {
 	}
 }
 
+// IsPlatformTrait overrides base class method
+func (t *quarkusTrait) IsPlatformTrait() bool {
+	return true
+}
+
+// InfluencesKit overrides base class method
+func (t *quarkusTrait) InfluencesKit() bool {
+	return true
+}
+
+var _ ComparableTrait = &quarkusTrait{}
+
+func (t *quarkusTrait) Matches(trait Trait) bool {
+	qt, ok := trait.(*quarkusTrait)
+	if !ok {
+		return false
+	}
+
+	if IsNilOrTrue(t.Enabled) && IsFalse(qt.Enabled) {
+		return false
+	}
+
+types:
+	for _, p1 := range t.PackageTypes {
+		for _, p2 := range qt.PackageTypes {
+			if p1 == p2 {
+				continue types
+			}
+		}
+		return false
+	}
+
+	return true
+}
+
 func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
 	if IsFalse(t.Enabled) {
 		return false, nil
 	}
 
-	if t.PackageType == nil {
-		packageType := fastJarPackageType
-		t.PackageType = &packageType
+	if len(t.PackageTypes) == 0 {
+		t.PackageTypes = []quarkusPackageType{fastJarPackageType}
 	}
 
-	return e.IntegrationKitInPhase(v1.IntegrationKitPhaseNone, v1.IntegrationKitPhaseBuildSubmitted) ||
+	return e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) ||
+			e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) ||
 			e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
 			e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning),
 		nil
 }
 
 func (t *quarkusTrait) Apply(e *Environment) error {
-	switch e.IntegrationKit.Status.Phase {
+	if e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) {
+		integration := e.Integration
 
-	case v1.IntegrationKitPhaseNone:
-		if e.IntegrationKit.Labels == nil {
-			e.IntegrationKit.Labels = make(map[string]string)
+		for _, packageType := range t.PackageTypes {
+			kit := v1.NewIntegrationKit(integration.GetIntegrationKitNamespace(e.Platform), fmt.Sprintf("kit-%s", xid.New()))
+
+			kit.Labels = map[string]string{
+				v1.IntegrationKitTypeLabel:            v1.IntegrationKitTypePlatform,
+				"camel.apache.org/runtime.version":    integration.Status.RuntimeVersion,
+				"camel.apache.org/runtime.provider":   string(integration.Status.RuntimeProvider),
+				v1.IntegrationKitLayoutLabel:          string(packageType),
+				v1.IntegrationKitPriorityLabel:        kitPriority[packageType],
+				kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
+				kubernetes.CamelCreatorLabelName:      integration.Name,
+				kubernetes.CamelCreatorLabelNamespace: integration.Namespace,
+				kubernetes.CamelCreatorLabelVersion:   integration.ResourceVersion,
+			}
+
+			traits := t.getKitTraits(e)
+			data, err := json.Marshal(traits[quarkusTraitId].Configuration)
+			if err != nil {
+				return err
+			}
+			trait := quarkusTrait{}
+			err = json.Unmarshal(data, &trait)
+			if err != nil {
+				return err
+			}
+			trait.PackageTypes = []quarkusPackageType{packageType}
+			data, err = json.Marshal(trait)
+			if err != nil {
+				return err
+			}
+			traits[quarkusTraitId] = v1.TraitSpec{
+				Configuration: v1.TraitConfiguration{
+					RawMessage: data,
+				},
+			}
+			kit.Spec = v1.IntegrationKitSpec{
+				Dependencies: e.Integration.Status.Dependencies,
+				Repositories: e.Integration.Spec.Repositories,
+				Traits:       traits,
+			}
+
+			e.IntegrationKits = append(e.IntegrationKits, *kit)
 		}
-		e.IntegrationKit.Labels[v1.IntegrationKitLayoutLabel] = string(*t.PackageType)
+
+		return nil
+	}
+
+	switch e.IntegrationKit.Status.Phase {
 
 	case v1.IntegrationKitPhaseBuildSubmitted:
 		build := getBuilderTask(e.BuildTasks)
@@ -94,7 +187,7 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 
 		steps = append(steps, builder.Quarkus.CommonSteps...)
 
-		if t.isNativePackageType() {
+		if t.hasNativePackageType(e) {
 			build.Maven.Properties["quarkus.package.type"] = string(nativePackageType)
 			steps = append(steps, builder.Image.NativeImageContext)
 			// Spectrum does not rely on Dockerfile to assemble the image
@@ -118,7 +211,7 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 		build.Steps = builder.StepIDsFor(steps...)
 
 	case v1.IntegrationKitPhaseReady:
-		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) && t.isNativePackageType() {
+		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) && t.hasNativePackageType(e) {
 			container := e.getIntegrationContainer()
 			if container == nil {
 				return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
@@ -132,18 +225,29 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 	return nil
 }
 
-// IsPlatformTrait overrides base class method
-func (t *quarkusTrait) IsPlatformTrait() bool {
-	return true
+func (t *quarkusTrait) getKitTraits(e *Environment) map[string]v1.TraitSpec {
+	traits := make(map[string]v1.TraitSpec)
+	for name, spec := range e.Integration.Spec.Traits {
+		t := e.Catalog.GetTrait(name)
+		if t != nil && !t.InfluencesKit() {
+			continue
+		}
+		traits[name] = spec
+	}
+	return traits
 }
 
-// InfluencesKit overrides base class method
-func (t *quarkusTrait) InfluencesKit() bool {
-	return true
-}
-
-func (t *quarkusTrait) isNativePackageType() bool {
-	return t.PackageType != nil && *t.PackageType == nativePackageType
+func (t *quarkusTrait) hasNativePackageType(e *Environment) bool {
+	switch types := t.PackageTypes; len(types) {
+	case 0:
+		return false
+	case 1:
+		return types[0] == nativePackageType
+	default:
+		// The Integration has more than one package types.
+		// Let's rely on the current IntegrationKit to resolve it.
+		return e.IntegrationKit.Labels[v1.IntegrationKitLayoutLabel] == v1.IntegrationKitLayoutNative
+	}
 }
 
 func getBuilderTask(tasks []v1.Task) *v1.BuilderTask {

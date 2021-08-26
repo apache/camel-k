@@ -84,7 +84,7 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 	a.InjectLogger(log.Log)
 	a.InjectClient(c)
 
-	i, err := a.lookupKitForIntegration(context.TODO(), c, &v1.Integration{
+	kits, err := a.lookupKitsForIntegration(context.TODO(), c, &v1.Integration{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1.SchemeGroupVersion.String(),
 			Kind:       v1.IntegrationKind,
@@ -102,8 +102,9 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 	})
 
 	assert.Nil(t, err)
-	assert.NotNil(t, i)
-	assert.Equal(t, "my-kit-2", i.Name)
+	assert.NotNil(t, kits)
+	assert.Len(t, kits, 1)
+	assert.Equal(t, "my-kit-2", kits[0].Name)
 }
 
 func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T) {
@@ -206,7 +207,7 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 	a.InjectLogger(log.Log)
 	a.InjectClient(c)
 
-	i, err := a.lookupKitForIntegration(context.TODO(), c, &v1.Integration{
+	kits, err := a.lookupKitsForIntegration(context.TODO(), c, &v1.Integration{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1.SchemeGroupVersion.String(),
 			Kind:       v1.IntegrationKind,
@@ -234,8 +235,9 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 	})
 
 	assert.Nil(t, err)
-	assert.NotNil(t, i)
-	assert.Equal(t, "my-kit-3", i.Name)
+	assert.NotNil(t, kits)
+	assert.Len(t, kits, 1)
+	assert.Equal(t, "my-kit-3", kits[0].Name)
 }
 
 func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
@@ -274,7 +276,7 @@ func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
 	a := buildKitAction{}
 	a.InjectLogger(log.Log)
 
-	ok, err := a.hasMatchingTraits(context.TODO(), integrationKitSpec, integration)
+	ok, err := a.hasMatchingTraits(integration, integrationKitSpec)
 	assert.Nil(t, err)
 	assert.False(t, ok)
 }
@@ -325,7 +327,7 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 	a := buildKitAction{}
 	a.InjectLogger(log.Log)
 
-	ok, err := a.hasMatchingTraits(context.TODO(), integrationKitSpec, integration)
+	ok, err := a.hasMatchingTraits(integration, integrationKitSpec)
 	assert.Nil(t, err)
 	assert.True(t, ok)
 }

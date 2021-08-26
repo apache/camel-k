@@ -97,6 +97,15 @@ type Trait interface {
 	Order() int
 }
 
+type Comparable interface {
+	Matches(Trait) bool
+}
+
+type ComparableTrait interface {
+	Trait
+	Comparable
+}
+
 // A list of named orders, useful for correctly binding addons
 const (
 	// TraitOrderBeforeControllerCreation can be used to inject configuration such as properties and environment variables
@@ -110,9 +119,6 @@ const (
 	TraitOrderPostProcessResources = 2450
 )
 
-/* Base trait */
-
-// NewBaseTrait --
 func NewBaseTrait(id string, order int) BaseTrait {
 	return BaseTrait{
 		TraitID:        ID(id),
@@ -173,8 +179,6 @@ func (trait *BaseTrait) Order() int {
 	return trait.ExecutionOrder
 }
 
-/* ControllerStrategySelector */
-
 // ControllerStrategySelector is the interface for traits that can determine the kind of controller that will run the integration.
 type ControllerStrategySelector interface {
 	// SelectControllerStrategy tells if the trait with current configuration can select a specific controller to use
@@ -183,18 +187,22 @@ type ControllerStrategySelector interface {
 	ControllerStrategySelectorOrder() int
 }
 
-/* Environment */
-
-// A Environment provides the context where the trait is executed
+// An Environment provides the context for the execution of the traits
 type Environment struct {
-	CamelCatalog          *camel.RuntimeCatalog
-	RuntimeVersion        string
-	Catalog               *Catalog
-	C                     context.Context
-	Client                client.Client
-	Platform              *v1.IntegrationPlatform
-	IntegrationKit        *v1.IntegrationKit
-	Integration           *v1.Integration
+	CamelCatalog   *camel.RuntimeCatalog
+	RuntimeVersion string
+	Catalog        *Catalog
+	C              context.Context
+	Client         client.Client
+	// The active Platform
+	Platform *v1.IntegrationPlatform
+	// The current Integration
+	Integration *v1.Integration
+	// The IntegrationKit associated to the Integration
+	IntegrationKit *v1.IntegrationKit
+	// The IntegrationKits to be created for the Integration
+	IntegrationKits []v1.IntegrationKit
+	// The resources owned by the Integration that are applied to the API server
 	Resources             *kubernetes.Collection
 	PostActions           []func(*Environment) error
 	PostStepProcessors    []func(*Environment) error
@@ -220,7 +228,6 @@ const (
 	DefaultControllerStrategy = ControllerStrategyDeployment
 )
 
-// GetTrait --
 func (e *Environment) GetTrait(id ID) Trait {
 	for _, t := range e.ExecutedTraits {
 		if t.ID() == id {
@@ -231,7 +238,6 @@ func (e *Environment) GetTrait(id ID) Trait {
 	return nil
 }
 
-// IntegrationInPhase --
 func (e *Environment) IntegrationInPhase(phases ...v1.IntegrationPhase) bool {
 	if e.Integration == nil {
 		return false
@@ -246,7 +252,6 @@ func (e *Environment) IntegrationInPhase(phases ...v1.IntegrationPhase) bool {
 	return false
 }
 
-// IntegrationKitInPhase --
 func (e *Environment) IntegrationKitInPhase(phases ...v1.IntegrationKitPhase) bool {
 	if e.IntegrationKit == nil {
 		return false
@@ -261,7 +266,6 @@ func (e *Environment) IntegrationKitInPhase(phases ...v1.IntegrationKitPhase) bo
 	return false
 }
 
-// InPhase --
 func (e *Environment) InPhase(c v1.IntegrationKitPhase, i v1.IntegrationPhase) bool {
 	return e.IntegrationKitInPhase(c) && e.IntegrationInPhase(i)
 }
@@ -346,7 +350,6 @@ func (e *Environment) GetIntegrationPodSpec() *corev1.PodSpec {
 	return nil
 }
 
-// DetermineCatalogNamespace --
 func (e *Environment) DetermineCatalogNamespace() string {
 	// Catalog is expected to be together with the platform
 	if e.Platform != nil && e.Platform.Namespace != "" {

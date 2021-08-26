@@ -18,6 +18,8 @@ limitations under the License.
 package v1
 
 import (
+	"strconv"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -74,6 +76,22 @@ func (in *IntegrationKit) SetIntegrationPlatform(platform *IntegrationPlatform) 
 
 	in.Status.SetCondition(IntegrationKitConditionPlatformAvailable, cs, IntegrationKitConditionPlatformAvailableReason, message)
 	in.Status.Platform = platform.Name
+}
+
+func (in *IntegrationKit) HasHigherPriorityThan(kit *IntegrationKit) bool {
+	p1 := 0
+	p2 := 0
+	if l, ok := in.Labels[IntegrationKitPriorityLabel]; ok {
+		if p, err := strconv.Atoi(l); err == nil {
+			p1 = p
+		}
+	}
+	if l, ok := kit.Labels[IntegrationKitPriorityLabel]; ok {
+		if p, err := strconv.Atoi(l); err == nil {
+			p2 = p
+		}
+	}
+	return p1 > p2
 }
 
 // GetCondition returns the condition with the provided type.
