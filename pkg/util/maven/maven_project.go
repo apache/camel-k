@@ -109,12 +109,12 @@ func (p *Project) AddDependencies(deps ...Dependency) {
 	}
 }
 
-// AddDependencyGAV a dependency to maven's dependencies
+// AddDependencyGAV adds a dependency to maven's dependencies
 func (p *Project) AddDependencyGAV(groupID string, artifactID string, version string) {
 	p.AddDependency(NewDependency(groupID, artifactID, version))
 }
 
-// AddEncodedDependencyGAV a dependency to maven's dependencies
+// AddEncodedDependencyGAV adds a dependency in GAV format to maven's dependencies
 func (p *Project) AddEncodedDependencyGAV(gav string) {
 	if d, err := ParseGAV(gav); err == nil {
 		// TODO: error handling
@@ -142,6 +142,13 @@ func (p *Project) AddDependencyExclusion(dep Dependency, exclusion Exclusion) {
 func (p *Project) AddDependencyExclusions(dep Dependency, exclusions ...Exclusion) {
 	for _, e := range exclusions {
 		p.AddDependencyExclusion(dep, e)
+	}
+}
+
+func (p *Project) AddEncodedDependencyExclusion(gav string, exclusion Exclusion) {
+	if d, err := ParseGAV(gav); err == nil {
+		// TODO: error handling
+		p.AddDependencyExclusion(d, exclusion)
 	}
 }
 
