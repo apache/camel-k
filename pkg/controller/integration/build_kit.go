@@ -74,18 +74,15 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 				integration.SetIntegrationKit(&v1.IntegrationKit{})
 				return integration, nil
 			}
-
 		}
 
 		if kit.Status.Phase == v1.IntegrationKitPhaseError {
-			integration.Status.Image = kit.Status.Image
 			integration.Status.Phase = v1.IntegrationPhaseError
 			integration.SetIntegrationKit(kit)
 			return integration, nil
 		}
 
 		if kit.Status.Phase == v1.IntegrationKitPhaseReady {
-			integration.Status.Image = kit.Status.Image
 			integration.Status.Phase = v1.IntegrationPhaseDeploying
 			integration.SetIntegrationKit(kit)
 			return integration, nil
@@ -106,8 +103,9 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 
 	var integrationKit *v1.IntegrationKit
 kits:
-	for i, kit := range env.IntegrationKits {
-		for j, k := range existingKits {
+	for _, kit := range env.IntegrationKits {
+		kit := kit
+		for i, k := range existingKits {
 			match, err := action.kitMatches(&kit, &k)
 			if err != nil {
 				return nil, err
@@ -116,7 +114,7 @@ kits:
 				if integrationKit == nil ||
 					integrationKit.Status.Phase != v1.IntegrationKitPhaseReady && k.Status.Phase == v1.IntegrationKitPhaseReady ||
 					integrationKit.Status.Phase == v1.IntegrationKitPhaseReady && k.Status.Phase == v1.IntegrationKitPhaseReady && k.HasHigherPriorityThan(integrationKit) {
-					integrationKit = &existingKits[j]
+					integrationKit = &existingKits[i]
 				}
 				continue kits
 			}
@@ -125,17 +123,17 @@ kits:
 			return nil, err
 		}
 		if integrationKit == nil {
-			integrationKit = &env.IntegrationKits[i]
+			integrationKit = &kit
 		}
 	}
 
 	// Set the kit name so the next handle loop, will fall through the
 	// same path as integration with a user defined kit
+	integration.SetIntegrationKit(integrationKit)
+
 	if integrationKit.Status.Phase == v1.IntegrationKitPhaseReady {
-		integration.Status.Image = integrationKit.Status.Image
 		integration.Status.Phase = v1.IntegrationPhaseDeploying
 	}
-	integration.SetIntegrationKit(integrationKit)
 
 	return integration, nil
 }
