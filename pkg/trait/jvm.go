@@ -71,14 +71,18 @@ func (t *jvmTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
+	if !e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) &&
+		!e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning) {
+		return false, nil
+	}
+
 	if trait := e.Catalog.GetTrait(quarkusTraitId); trait != nil {
-		if quarkus := trait.(*quarkusTrait); IsNilOrTrue(quarkus.Enabled) && quarkus.isNativePackageType() {
+		if quarkus := trait.(*quarkusTrait); IsNilOrTrue(quarkus.Enabled) && quarkus.hasNativePackageType(e) {
 			return false, nil
 		}
 	}
 
-	return e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
-		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning), nil
+	return true, nil
 }
 
 func (t *jvmTrait) Apply(e *Environment) error {
