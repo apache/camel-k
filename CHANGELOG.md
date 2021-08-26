@@ -35,6 +35,7 @@
 
 **Merged pull requests:**
 
+- chore\(strimzi\): upgrade API to v1beta2 [\#2595](https://github.com/apache/camel-k/pull/2595) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix typo [\#2588](https://github.com/apache/camel-k/pull/2588) ([mmacphail](https://github.com/mmacphail))
 - doc: contribute links [\#2584](https://github.com/apache/camel-k/pull/2584) ([squakez](https://github.com/squakez))
 - feat\(trait\): container image pull policy [\#2583](https://github.com/apache/camel-k/pull/2583) ([squakez](https://github.com/squakez))
