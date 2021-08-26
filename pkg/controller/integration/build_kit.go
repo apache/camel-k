@@ -20,10 +20,9 @@ package integration
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"reflect"
 
 	"github.com/pkg/errors"
-	"github.com/rs/xid"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
@@ -35,6 +34,7 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -55,38 +55,32 @@ func (action *buildKitAction) CanHandle(integration *v1.Integration) bool {
 }
 
 func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
-	kit, err := action.lookupKitForIntegration(ctx, action.client, integration)
-	if err != nil {
-		// TODO: we may need to add a wait strategy, i.e give up after some time
-		return nil, err
-	}
+	// TODO: we may need to add a timeout strategy, i.e give up after some time in case of an unrecoverable error.
 
-	if kit != nil {
+	if integration.Status.IntegrationKit != nil {
+		kit, err := kubernetes.GetIntegrationKit(ctx, action.client, integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
+		if err != nil {
+			return nil, errors.Wrapf(err, "unable to find integration kit %s/%s, %s", integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
+		}
+
 		if kit.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypePlatform {
-			// This is a platform kit and as it is auto generated it may get
-			// out of sync if the integration that has generated it, has been
-			// amended to add/remove dependencies
-
-			versionMatch := kit.Status.Version == integration.Status.Version
-
-			// TODO: this is a very simple check, we may need to provide a deps comparison strategy
-			dependenciesMatch := util.StringSliceContains(kit.Spec.Dependencies, integration.Status.Dependencies)
-
-			if !dependenciesMatch || !versionMatch {
-				// We need to re-generate a kit or search for a new one that
-				// satisfies integrations needs so let's remove the association
-				// with a kit
+			match, err := action.integrationMatches(integration, kit)
+			if err != nil {
+				return nil, err
+			} else if !match {
+				// We need to re-generate a kit, or search for a new one that
+				// matches the integration, so let's remove the association
+				// with the kit.
 				integration.SetIntegrationKit(&v1.IntegrationKit{})
-
 				return integration, nil
 			}
+
 		}
 
 		if kit.Status.Phase == v1.IntegrationKitPhaseError {
 			integration.Status.Image = kit.Status.Image
 			integration.Status.Phase = v1.IntegrationPhaseError
 			integration.SetIntegrationKit(kit)
-
 			return integration, nil
 		}
 
@@ -94,87 +88,59 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 			integration.Status.Image = kit.Status.Image
 			integration.Status.Phase = v1.IntegrationPhaseDeploying
 			integration.SetIntegrationKit(kit)
-
-			return integration, nil
-		}
-
-		if integration.Status.IntegrationKit == nil || integration.Status.IntegrationKit.Name == "" {
-			integration.SetIntegrationKit(kit)
-
 			return integration, nil
 		}
 
 		return nil, nil
 	}
 
-	pl, err := platform.GetCurrent(ctx, action.client, integration.Namespace)
-	if err != nil && !k8serrors.IsNotFound(err) {
+	existingKits, err := action.lookupKitsForIntegration(ctx, action.client, integration)
+	if err != nil {
 		return nil, err
 	}
 
-	kit = v1.NewIntegrationKit(integration.GetIntegrationKitNamespace(pl), fmt.Sprintf("kit-%s", xid.New()))
-
-	// Add some information for post-processing, this may need to be refactored
-	// to a proper data structure
-	kit.Labels = map[string]string{
-		v1.IntegrationKitTypeLabel:            v1.IntegrationKitTypePlatform,
-		"camel.apache.org/runtime.version":    integration.Status.RuntimeVersion,
-		"camel.apache.org/runtime.provider":   string(integration.Status.RuntimeProvider),
-		kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
-		kubernetes.CamelCreatorLabelName:      integration.Name,
-		kubernetes.CamelCreatorLabelNamespace: integration.Namespace,
-		kubernetes.CamelCreatorLabelVersion:   integration.ResourceVersion,
-	}
-
-	// Set the kit to have the same characteristics as the integrations
-	kit.Spec = v1.IntegrationKitSpec{
-		Dependencies: integration.Status.Dependencies,
-		Repositories: integration.Spec.Repositories,
-		Traits:       action.filterKitTraits(ctx, integration.Spec.Traits),
-	}
-
-	if _, err := trait.Apply(ctx, action.client, integration, kit); err != nil {
+	env, err := trait.Apply(ctx, action.client, integration, nil)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := action.client.Create(ctx, kit); err != nil {
-		return nil, err
+	var integrationKit *v1.IntegrationKit
+kits:
+	for i, kit := range env.IntegrationKits {
+		for j, k := range existingKits {
+			match, err := action.kitMatches(&kit, &k)
+			if err != nil {
+				return nil, err
+			}
+			if match {
+				if integrationKit == nil ||
+					integrationKit.Status.Phase != v1.IntegrationKitPhaseReady && k.Status.Phase == v1.IntegrationKitPhaseReady ||
+					integrationKit.Status.Phase == v1.IntegrationKitPhaseReady && k.Status.Phase == v1.IntegrationKitPhaseReady && k.HasHigherPriorityThan(integrationKit) {
+					integrationKit = &existingKits[j]
+				}
+				continue kits
+			}
+		}
+		if err := action.client.Create(ctx, &kit); err != nil {
+			return nil, err
+		}
+		if integrationKit == nil {
+			integrationKit = &env.IntegrationKits[i]
+		}
 	}
 
 	// Set the kit name so the next handle loop, will fall through the
 	// same path as integration with a user defined kit
-	integration.SetIntegrationKit(kit)
+	if integrationKit.Status.Phase == v1.IntegrationKitPhaseReady {
+		integration.Status.Image = integrationKit.Status.Image
+		integration.Status.Phase = v1.IntegrationPhaseDeploying
+	}
+	integration.SetIntegrationKit(integrationKit)
 
 	return integration, nil
 }
 
-func (action *buildKitAction) filterKitTraits(ctx context.Context, in map[string]v1.TraitSpec) map[string]v1.TraitSpec {
-	if len(in) == 0 {
-		return in
-	}
-	catalog := trait.NewCatalog(ctx, action.client)
-	out := make(map[string]v1.TraitSpec)
-	for name, conf := range in {
-		t := catalog.GetTrait(name)
-		if t != nil && !t.InfluencesKit() {
-			// We don't store the trait configuration if the trait cannot influence the kit behavior
-			continue
-		}
-		out[name] = conf
-	}
-	return out
-}
-
-func (action *buildKitAction) lookupKitForIntegration(ctx context.Context, c ctrl.Reader, integration *v1.Integration) (*v1.IntegrationKit, error) {
-	if integration.Status.IntegrationKit != nil {
-		kit, err := kubernetes.GetIntegrationKit(ctx, c, integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
-		if err != nil {
-			return nil, errors.Wrapf(err, "unable to find integration kit %s/%s, %s", integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
-		}
-
-		return kit, nil
-	}
-
+func (action *buildKitAction) lookupKitsForIntegration(ctx context.Context, c ctrl.Reader, integration *v1.Integration) ([]v1.IntegrationKit, error) {
 	pl, err := platform.GetCurrent(ctx, c, integration.Namespace)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return nil, err
@@ -199,111 +165,181 @@ func (action *buildKitAction) lookupKitForIntegration(ctx context.Context, c ctr
 		},
 	}
 
-	kits := v1.NewIntegrationKitList()
-	if err := c.List(ctx, &kits, options...); err != nil {
+	list := v1.NewIntegrationKitList()
+	if err := c.List(ctx, &list, options...); err != nil {
 		return nil, err
 	}
 
-	for _, kit := range kits.Items {
-		kit := kit // pin
-
-		if kit.Status.Phase == v1.IntegrationKitPhaseError {
-			continue
-		}
-
-		/*
-			TODO: moved to label selector
-			if kit.Status.RuntimeVersion != integration.Status.RuntimeVersion {
-				continue
-			}
-			if kit.Status.RuntimeProvider != integration.Status.RuntimeProvider {
-				continue
-			}
-		*/
-
-		if kit.Status.Version != integration.Status.Version {
-			continue
-		}
-
-		ideps := len(integration.Status.Dependencies)
-		cdeps := len(kit.Spec.Dependencies)
-
-		if ideps != cdeps {
-			continue
-		}
-
-		// When a platform kit is created it inherits the traits from the integrations and as
-		// some traits may influence the build thus the artifacts present on the container image,
-		// we need to take traits into account when looking up for compatible kits.
-		//
-		// It could also happen that an integration is updated and a trait is modified, if we do
-		// not include traits in the lookup, we may use a kit that does not have all the
-		// characteristics required by the integration.
-		//
-		// A kit can be used only if it contains a subset of the traits and related configurations
-		// declared on integration.
-		match, err := action.hasMatchingTraits(ctx, &kit, integration)
+	kits := make([]v1.IntegrationKit, 0)
+	for _, kit := range list.Items {
+		match, err := action.integrationMatches(integration, &kit)
 		if err != nil {
 			return nil, err
-		}
-		if !match {
+		} else if !match {
 			continue
 		}
-		if util.StringSliceContains(kit.Spec.Dependencies, integration.Status.Dependencies) {
-			return &kit, nil
-		}
+		kits = append(kits, kit)
 	}
 
-	return nil, nil
+	return kits, nil
 }
 
-// hasMatchingTraits compares traits defined on kit against those defined on integration
-func (action *buildKitAction) hasMatchingTraits(ctx context.Context, kit *v1.IntegrationKit, integration *v1.Integration) (bool, error) {
-	traits := action.filterKitTraits(ctx, integration.Spec.Traits)
-
-	// The kit has no trait, but the integration need some
-	if len(kit.Spec.Traits) == 0 && len(traits) > 0 {
+// integrationMatches returns whether the v1.IntegrationKit meets the requirements of the v1.Integration
+func (action *buildKitAction) integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bool, error) {
+	if kit.Status.Phase == v1.IntegrationKitPhaseError {
 		return false, nil
 	}
-	for name, kitTrait := range kit.Spec.Traits {
-		itTrait, ok := traits[name]
+	if kit.Status.Version != integration.Status.Version {
+		return false, nil
+	}
+	if len(integration.Status.Dependencies) != len(kit.Spec.Dependencies) {
+		return false, nil
+	}
+	// When a platform kit is created it inherits the traits from the integrations and as
+	// some traits may influence the build thus the artifacts present on the container image,
+	// we need to take traits into account when looking up for compatible kits.
+	//
+	// It could also happen that an integration is updated and a trait is modified, if we do
+	// not include traits in the lookup, we may use a kit that does not have all the
+	// characteristics required by the integration.
+	//
+	// A kit can be used only if it contains a subset of the traits and related configurations
+	// declared on integration.
+	if match, err := action.hasMatchingTraits(integration, kit); !match || err != nil {
+		return false, err
+	}
+	if !util.StringSliceContains(kit.Spec.Dependencies, integration.Status.Dependencies) {
+		return false, nil
+	}
+	return true, nil
+}
+
+// kitMatches returns whether the v1.IntegrationKit match
+func (action *buildKitAction) kitMatches(k1 *v1.IntegrationKit, k2 *v1.IntegrationKit) (bool, error) {
+	version := k1.Status.Version
+	if version == "" {
+		// Defaults with the version that is going to be set during the kit initialization
+		version = defaults.Version
+	}
+	if version != k2.Status.Version {
+		return false, nil
+	}
+	if len(k1.Spec.Dependencies) != len(k2.Spec.Dependencies) {
+		return false, nil
+	}
+	if len(k1.Spec.Traits) != len(k2.Spec.Traits) {
+		return false, nil
+	}
+	for name, kt1 := range k1.Spec.Traits {
+		kt2, ok := k2.Spec.Traits[name]
 		if !ok {
-			// skip it because trait configured on kit is not defined on integration
 			return false, nil
 		}
-		data, err := json.Marshal(itTrait.Configuration)
-		if err != nil {
+		match, err := action.hasMatchingTrait(&kt1, &kt2)
+		if !match || err != nil {
 			return false, err
 		}
-		itConf := make(map[string]interface{})
-		err = json.Unmarshal(data, &itConf)
-		if err != nil {
-			return false, err
+	}
+	if !util.StringSliceContains(k1.Spec.Dependencies, k2.Spec.Dependencies) {
+		return false, nil
+	}
+	return true, nil
+}
+
+// hasMatchingTraits compares the traits defined on the v1.Integration with those defined on the v1.IntegrationKit
+func (action *buildKitAction) hasMatchingTraits(integration *v1.Integration, kit *v1.IntegrationKit) (bool, error) {
+	catalog := trait.NewCatalog(context.TODO(), action.client)
+
+	traitCount := 0
+	for name, itTrait := range integration.Spec.Traits {
+		t := catalog.GetTrait(name)
+		if t != nil && !t.InfluencesKit() {
+			// We don't store the trait configuration if the trait cannot influence the kit behavior
+			continue
 		}
-		data, err = json.Marshal(kitTrait.Configuration)
-		if err != nil {
-			return false, err
+		traitCount++
+		kitTrait, ok := kit.Spec.Traits[name]
+		if !ok {
+			// skip it because trait configured on integration is not defined on kit
+			return false, nil
 		}
-		kitConf := make(map[string]interface{})
-		err = json.Unmarshal(data, &kitConf)
-		if err != nil {
-			return false, err
-		}
-		for ck, cv := range kitConf {
-			iv, ok := itConf[ck]
-			if !ok {
-				// skip it because trait configured on kit has a value that is not defined
-				// in integration trait
-				return false, nil
+		if ct, ok := t.(trait.ComparableTrait); ok {
+			comparable, err := action.hasComparableTrait(ct, &itTrait, &kitTrait)
+			if !comparable || err != nil {
+				return false, err
 			}
-			if !equal(iv, cv) {
-				// skip it because trait configured on kit has a value that differs from
-				// the one configured on integration
-				return false, nil
+		} else {
+			match, err := action.hasMatchingTrait(&itTrait, &kitTrait)
+			if !match || err != nil {
+				return false, err
 			}
 		}
 	}
 
+	// Check the number of influencing traits matches
+	if len(kit.Spec.Traits) != traitCount {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func (action *buildKitAction) hasComparableTrait(c trait.ComparableTrait, itTrait *v1.TraitSpec, kitTrait *v1.TraitSpec) (bool, error) {
+	it := reflect.New(reflect.TypeOf(c).Elem()).Interface()
+	data, err := json.Marshal(itTrait.Configuration)
+	if err != nil {
+		return false, err
+	}
+	err = json.Unmarshal(data, &it)
+	if err != nil {
+		return false, err
+	}
+
+	kt := reflect.New(reflect.TypeOf(c).Elem()).Interface()
+	data, err = json.Marshal(kitTrait.Configuration)
+	if err != nil {
+		return false, err
+	}
+	err = json.Unmarshal(data, &it)
+	if err != nil {
+		return false, err
+	}
+
+	return kt.(trait.ComparableTrait).Matches(it.(trait.Trait)), nil
+}
+
+func (action *buildKitAction) hasMatchingTrait(itTrait *v1.TraitSpec, kitTrait *v1.TraitSpec) (bool, error) {
+	data, err := json.Marshal(itTrait.Configuration)
+	if err != nil {
+		return false, err
+	}
+	itConf := make(map[string]interface{})
+	err = json.Unmarshal(data, &itConf)
+	if err != nil {
+		return false, err
+	}
+	data, err = json.Marshal(kitTrait.Configuration)
+	if err != nil {
+		return false, err
+	}
+	kitConf := make(map[string]interface{})
+	err = json.Unmarshal(data, &kitConf)
+	if err != nil {
+		return false, err
+	}
+	for ck, cv := range kitConf {
+		iv, ok := itConf[ck]
+		if !ok {
+			// skip it because trait configured on kit has a value that is not defined
+			// in integration trait
+			return false, nil
+		}
+		if !equal(iv, cv) {
+			// skip it because trait configured on kit has a value that differs from
+			// the one configured on integration
+			return false, nil
+		}
+	}
 	return true, nil
 }
 

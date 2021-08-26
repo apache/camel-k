@@ -44,7 +44,7 @@ type buildAction struct {
 }
 
 func (action *buildAction) Name() string {
-	return "build-submitted"
+	return "build"
 }
 
 func (action *buildAction) CanHandle(kit *v1.IntegrationKit) bool {

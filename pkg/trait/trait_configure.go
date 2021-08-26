@@ -23,9 +23,10 @@ import (
 	"reflect"
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 func (c *Catalog) configure(env *Environment) error {
@@ -149,7 +150,7 @@ func configureTrait(id string, config map[string]string, trait interface{}) erro
 	)
 
 	if err != nil {
-		return errors.Wrapf(err, "error while decoding trait configuration from annotations on trait %q", id)
+		return errors.Wrapf(err, "error while decoding trait configuration %q", id)
 	}
 
 	return decoder.Decode(config)

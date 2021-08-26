@@ -105,6 +105,9 @@ const (
 	// IntegrationKitLayoutNative labels a kit using the Quarkus native packaging
 	IntegrationKitLayoutNative = "native"
 
+	// IntegrationKitPriorityLabel labels the kit priority
+	IntegrationKitPriorityLabel = "camel.apache.org/kit.priority"
+
 	// IntegrationKitPhaseNone --
 	IntegrationKitPhaseNone IntegrationKitPhase = ""
 	// IntegrationKitPhaseInitialization --
