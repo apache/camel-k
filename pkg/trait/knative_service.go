@@ -142,7 +142,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 	if IsNilOrTrue(t.Auto) {
 		// Check the right value for minScale, as not all services are allowed to scale down to 0
 		if t.MinScale == nil {
-			sources, err := kubernetes.ResolveIntegrationSources(t.Ctx, t.Client, e.Integration, e.Resources)
+			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
 			if err != nil {
 				e.Integration.Status.SetErrorCondition(
 					v1.IntegrationConditionKnativeServiceAvailable,
@@ -247,7 +247,7 @@ func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*Control
 
 	var sources []v1.SourceSpec
 	var err error
-	if sources, err = kubernetes.ResolveIntegrationSources(t.Ctx, t.Client, e.Integration, e.Resources); err != nil {
+	if sources, err = kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources); err != nil {
 		return nil, err
 	}
 

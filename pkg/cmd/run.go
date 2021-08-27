@@ -276,7 +276,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	catalog := trait.NewCatalog(o.Context, c)
+	catalog := trait.NewCatalog(c)
 	tp := catalog.ComputeTraitsProperties()
 	for _, t := range o.Traits {
 		kv := strings.SplitN(t, "=", 2)

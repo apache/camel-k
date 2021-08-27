@@ -83,7 +83,7 @@ func (t *tracingTrait) Configure(e *trait.Environment) (bool, error) {
 	if trait.IsNilOrTrue(t.Auto) {
 		if t.Endpoint == "" {
 			for _, locator := range discovery.TracingLocators {
-				endpoint, err := locator.FindEndpoint(e.C, t.Client, t.L, e)
+				endpoint, err := locator.FindEndpoint(e.Ctx, t.Client, t.L, e)
 				if err != nil {
 					return false, err
 				}

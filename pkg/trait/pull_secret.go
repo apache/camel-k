@@ -74,7 +74,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 			if secret != "" {
 				key := client.ObjectKey{Namespace: e.Platform.Namespace, Name: secret}
 				obj := corev1.Secret{}
-				if err := t.Client.Get(t.Ctx, key, &obj); err != nil {
+				if err := t.Client.Get(e.Ctx, key, &obj); err != nil {
 					return false, err
 				}
 				if obj.Type == corev1.SecretTypeDockerConfigJson {
@@ -122,7 +122,7 @@ func (t *pullSecretTrait) delegateImagePuller(e *Environment) error {
 	// Applying the rolebinding directly because it's a resource in the operator namespace
 	// (different from the integration namespace when delegation is enabled).
 	rb := t.newImagePullerRoleBinding(e)
-	if err := kubernetes.ReplaceResource(e.C, e.Client, rb); err != nil {
+	if err := kubernetes.ReplaceResource(e.Ctx, e.Client, rb); err != nil {
 		return errors.Wrap(err, "error during the creation of the system:image-puller delegating role binding")
 	}
 	return nil

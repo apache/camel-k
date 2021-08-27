@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -39,7 +38,7 @@ func TestDefaultEnvironment(t *testing.T) {
 
 	env := Environment{
 		CamelCatalog: catalog,
-		Catalog:      NewCatalog(context.TODO(), nil),
+		Catalog:      NewCatalog(nil),
 		Integration: &v1.Integration{
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,
@@ -110,7 +109,7 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 
 	env := Environment{
 		CamelCatalog: c,
-		Catalog:      NewCatalog(context.TODO(), nil),
+		Catalog:      NewCatalog(nil),
 		Integration: &v1.Integration{
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,
@@ -176,7 +175,7 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 
 	env := Environment{
 		CamelCatalog: c,
-		Catalog:      NewCatalog(context.TODO(), nil),
+		Catalog:      NewCatalog(nil),
 		Integration: &v1.Integration{
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,
@@ -237,5 +236,5 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 }
 
 func NewEnvironmentTestCatalog() *Catalog {
-	return NewCatalog(context.TODO(), nil)
+	return NewCatalog(nil)
 }

@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"path"
 	"testing"
 
@@ -568,7 +567,7 @@ func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script s
 
 	res := &Environment{
 		CamelCatalog: catalog,
-		Catalog:      NewCatalog(context.TODO(), nil),
+		Catalog:      NewCatalog(nil),
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      TestDeploymentName,
@@ -608,5 +607,5 @@ func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script s
 }
 
 func NewTraitTestCatalog() *Catalog {
-	return NewCatalog(context.TODO(), nil)
+	return NewCatalog(nil)
 }

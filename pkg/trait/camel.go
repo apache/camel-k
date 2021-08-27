@@ -87,7 +87,7 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 		Provider: v1.RuntimeProviderQuarkus,
 	}
 
-	catalog, err := camel.LoadCatalog(e.C, e.Client, ns, runtime)
+	catalog, err := camel.LoadCatalog(e.Ctx, e.Client, ns, runtime)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 		// the required versions (camel and runtime) are not expressed as
 		// semver constraints
 		if exactVersionRegexp.MatchString(runtimeVersion) {
-			ctx, cancel := context.WithTimeout(e.C, e.Platform.Status.Build.GetTimeout().Duration)
+			ctx, cancel := context.WithTimeout(e.Ctx, e.Platform.Status.Build.GetTimeout().Duration)
 			defer cancel()
 			catalog, err = camel.GenerateCatalog(ctx, e.Client, ns, e.Platform.Status.Build.Maven, runtime, []maven.Dependency{})
 			if err != nil {
@@ -114,7 +114,7 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 			cx.Labels["camel.apache.org/runtime.provider"] = string(runtime.Provider)
 			cx.Labels["camel.apache.org/catalog.generated"] = True
 
-			err = e.Client.Create(e.C, &cx)
+			err = e.Client.Create(e.Ctx, &cx)
 			if err != nil {
 				return errors.Wrapf(err, "unable to create catalog runtime=%s, provider=%s, name=%s",
 					runtime.Version,

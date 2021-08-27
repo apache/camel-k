@@ -86,7 +86,7 @@ func TestPullSecretImagePullerDelegation(t *testing.T) {
 		Namespace: "test",
 		Name:      "camel-k-puller-test-default",
 	}
-	err = e.Client.Get(e.C, roleBindingKey, &roleBinding)
+	err = e.Client.Get(e.Ctx, roleBindingKey, &roleBinding)
 	assert.NoError(t, err)
 	assert.Len(t, roleBinding.Subjects, 1)
 }
@@ -117,7 +117,7 @@ func getEnvironmentAndDeployment(t *testing.T) (*Environment, *appsv1.Deployment
 	e.Resources = kubernetes.NewCollection(&deployment)
 
 	var err error
-	e.C = context.TODO()
+	e.Ctx = context.TODO()
 	e.Client, err = test.NewFakeClient(e.Integration, &deployment)
 	assert.NoError(t, err)
 

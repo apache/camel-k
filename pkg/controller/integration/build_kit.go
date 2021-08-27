@@ -246,7 +246,7 @@ func (action *buildKitAction) kitMatches(k1 *v1.IntegrationKit, k2 *v1.Integrati
 
 // hasMatchingTraits compares the traits defined on the v1.Integration with those defined on the v1.IntegrationKit
 func (action *buildKitAction) hasMatchingTraits(integration *v1.Integration, kit *v1.IntegrationKit) (bool, error) {
-	catalog := trait.NewCatalog(context.TODO(), action.client)
+	catalog := trait.NewCatalog(action.client)
 
 	traitCount := 0
 	for name, itTrait := range integration.Spec.Traits {

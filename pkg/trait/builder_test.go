@@ -108,9 +108,9 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 
 	kanikoCache := false
 	res := &Environment{
-		C:            context.TODO(),
+		Ctx:          context.TODO(),
 		CamelCatalog: c,
-		Catalog:      NewCatalog(context.TODO(), nil),
+		Catalog:      NewCatalog(nil),
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -148,7 +148,7 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 }
 
 func NewBuilderTestCatalog() *Catalog {
-	return NewCatalog(context.TODO(), nil)
+	return NewCatalog(nil)
 }
 
 func TestMavenPropertyBuilderTrait(t *testing.T) {

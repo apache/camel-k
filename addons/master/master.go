@@ -95,7 +95,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 
 	if t.Auto == nil || *t.Auto {
 		// Check if the master component has been used
-		sources, err := kubernetes.ResolveIntegrationSources(t.Ctx, t.Client, e.Integration, e.Resources)
+		sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
 		if err != nil {
 			return false, err
 		}
@@ -237,7 +237,7 @@ func (t *masterTrait) Apply(e *trait.Environment) error {
 }
 
 func (t *masterTrait) canUseLeases(e *trait.Environment) (bool, error) {
-	return kubernetes.CheckPermission(t.Ctx, t.Client, "coordination.k8s.io", "leases", e.Integration.Namespace, "", "create")
+	return kubernetes.CheckPermission(e.Ctx, t.Client, "coordination.k8s.io", "leases", e.Integration.Namespace, "", "create")
 }
 
 func findAdditionalDependencies(e *trait.Environment, meta metadata.IntegrationMetadata) (dependencies []string) {

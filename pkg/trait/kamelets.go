@@ -99,7 +99,7 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 	if IsNilOrTrue(t.Auto) {
 		var kamelets []string
 		if t.List == "" {
-			sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
+			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
 			if err != nil {
 				return false, err
 			}
@@ -142,7 +142,7 @@ func (t *kameletsTrait) Apply(e *Environment) error {
 }
 
 func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1alpha1.Kamelet, error) {
-	repo, err := repository.NewForPlatform(e.C, e.Client, e.Platform, e.Integration.Namespace, platform.GetOperatorNamespace())
+	repo, err := repository.NewForPlatform(e.Ctx, e.Client, e.Platform, e.Integration.Namespace, platform.GetOperatorNamespace())
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +152,7 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1alpha1.Ka
 	availableKamelets := make([]string, 0)
 
 	for _, key := range t.getKameletKeys() {
-		kamelet, err := repo.Get(e.C, key)
+		kamelet, err := repo.Get(e.Ctx, key)
 		if err != nil {
 			return nil, err
 		}
@@ -320,7 +320,7 @@ func (t *kameletsTrait) addConfigurationSecrets(e *Environment) error {
 		if k.configurationID != "" {
 			options.LabelSelector = fmt.Sprintf("%s=%s,%s=%s", kameletLabel, k.kamelet, kameletConfigurationLabel, k.configurationID)
 		}
-		secrets, err := t.Client.CoreV1().Secrets(e.Integration.Namespace).List(e.C, options)
+		secrets, err := t.Client.CoreV1().Secrets(e.Integration.Namespace).List(e.Ctx, options)
 		if err != nil {
 			return err
 		}

@@ -18,18 +18,15 @@ limitations under the License.
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-
-	"github.com/apache/camel-k/pkg/platform"
-
-	"github.com/apache/camel-k/pkg/trait"
-
-	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/spf13/cobra"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/trait"
+	"github.com/apache/camel-k/pkg/util/camel"
 )
 
 // ******************************
@@ -74,7 +71,7 @@ __kamel_dependency_type() {
 }
 
 __kamel_traits() {
-    local type_list="` + strings.Join(trait.NewCatalog(context.TODO(), nil).ComputeTraitsProperties(), " ") + `"
+    local type_list="` + strings.Join(trait.NewCatalog(nil).ComputeTraitsProperties(), " ") + `"
     COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
     compopt -o nospace
 }

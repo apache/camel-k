@@ -18,7 +18,6 @@ limitations under the License.
 package generators
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -64,7 +63,6 @@ type traitDocGen struct {
 	generatedTraitFiles []string
 }
 
-// NewTraitDocGen --
 func NewTraitDocGen(arguments *args.GeneratorArgs) generator.Generator {
 	return &traitDocGen{
 		DefaultGen: generator.DefaultGen{},
@@ -304,19 +302,13 @@ func writeFile(file *os.File, content []string) error {
 }
 
 func isPlatformTrait(traitID string) bool {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	catalog := trait.NewCatalog(ctx, nil)
+	catalog := trait.NewCatalog(nil)
 	t := catalog.GetTrait(traitID)
 	return t.IsPlatformTrait()
 }
 
 func determineProfiles(traitID string) (profiles []string) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	catalog := trait.NewCatalog(ctx, nil)
+	catalog := trait.NewCatalog(nil)
 	for _, p := range v1.AllTraitProfiles {
 		traits := catalog.TraitsForProfile(p)
 		for _, t := range traits {

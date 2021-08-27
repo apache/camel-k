@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -258,11 +257,10 @@ func createNominalJvmTest(kitType string) (*jvmTrait, *Environment) {
 	trait := newJvmTrait().(*jvmTrait)
 	trait.Enabled = BoolP(true)
 	trait.PrintCommand = BoolP(false)
-	trait.Ctx = context.TODO()
 	trait.Client = client
 
 	environment := &Environment{
-		Catalog:      NewCatalog(context.TODO(), nil),
+		Catalog:      NewCatalog(nil),
 		CamelCatalog: catalog,
 		Integration: &v1.Integration{
 			Status: v1.IntegrationStatus{

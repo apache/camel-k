@@ -71,7 +71,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	if IsNilOrTrue(t.Auto) {
-		sources, err := kubernetes.ResolveIntegrationSources(t.Ctx, t.Client, e.Integration, e.Resources)
+		sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
 		if err != nil {
 			e.Integration.Status.SetCondition(
 				v1.IntegrationConditionServiceAvailable,

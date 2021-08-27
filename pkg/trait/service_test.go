@@ -18,18 +18,17 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"testing"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/gzip"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/apache/camel-k/pkg/util/test"
 )
 
 const (
@@ -41,7 +40,7 @@ func TestServiceWithDefaults(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	traitCatalog := NewCatalog(context.TODO(), nil)
+	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
 	assert.NoError(t, err)
@@ -130,7 +129,7 @@ func TestService(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	traitCatalog := NewCatalog(context.TODO(), nil)
+	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
 	assert.NoError(t, err)
@@ -227,7 +226,7 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	traitCatalog := NewCatalog(context.TODO(), nil)
+	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -298,7 +297,7 @@ func TestServiceWithNodePort(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	traitCatalog := NewCatalog(context.TODO(), nil)
+	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
 	assert.NoError(t, err)
