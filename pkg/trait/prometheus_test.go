@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -124,7 +123,7 @@ func createNominalPrometheusTest() (*prometheusTrait, *Environment) {
 	}
 
 	environment := &Environment{
-		Catalog:      NewCatalog(context.TODO(), nil),
+		Catalog:      NewCatalog(nil),
 		CamelCatalog: camelCatalog,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{

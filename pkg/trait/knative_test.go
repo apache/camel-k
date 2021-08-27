@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -46,7 +45,7 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	traitCatalog := NewCatalog(context.TODO(), nil)
+	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -101,7 +100,7 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	c, err := NewFakeClient("ns")
 	assert.Nil(t, err)
 
-	tc := NewCatalog(context.TODO(), c)
+	tc := NewCatalog(c)
 
 	err = tc.configure(&environment)
 	assert.Nil(t, err)
@@ -151,7 +150,7 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	traitCatalog := NewCatalog(context.TODO(), nil)
+	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -220,7 +219,7 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 	c, err := NewFakeClient("ns")
 	assert.Nil(t, err)
 
-	tc := NewCatalog(context.TODO(), c)
+	tc := NewCatalog(c)
 
 	err = tc.configure(&environment)
 	assert.Nil(t, err)
@@ -288,7 +287,7 @@ func TestKnativePlatformHttpConfig(t *testing.T) {
 			c, err := NewFakeClient("ns")
 			assert.Nil(t, err)
 
-			tc := NewCatalog(context.TODO(), c)
+			tc := NewCatalog(c)
 
 			err = tc.configure(&environment)
 			assert.Nil(t, err)
@@ -335,7 +334,7 @@ func TestKnativePlatformHttpDependencies(t *testing.T) {
 			c, err := NewFakeClient("ns")
 			assert.Nil(t, err)
 
-			tc := NewCatalog(context.TODO(), c)
+			tc := NewCatalog(c)
 
 			err = tc.configure(&environment)
 			assert.Nil(t, err)
@@ -353,7 +352,7 @@ func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	traitCatalog := NewCatalog(context.TODO(), nil)
+	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
 		CamelCatalog: catalog,

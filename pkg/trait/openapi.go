@@ -146,7 +146,7 @@ func (t *openAPITrait) generateOpenAPIConfigMap(e *Environment, resource v1.Reso
 		Namespace: e.Integration.Namespace,
 		Name:      generatedContentName,
 	}
-	err := t.Client.Get(t.Ctx, key, &cm)
+	err := t.Client.Get(e.Ctx, key, &cm)
 	if err != nil && k8serrors.IsNotFound(err) {
 		return t.createNewOpenAPIConfigMap(e, resource, tmpDir, generatedContentName)
 	} else if err != nil {
@@ -207,7 +207,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Res
 	mc.AddArgument("-Dopenapi.spec=" + in)
 	mc.AddArgument("-Ddsl.out=" + out)
 
-	settings, err := kubernetes.ResolveValueSource(e.C, e.Client, e.Platform.Namespace, &e.Platform.Status.Build.Maven.Settings)
+	settings, err := kubernetes.ResolveValueSource(e.Ctx, e.Client, e.Platform.Namespace, &e.Platform.Status.Build.Maven.Settings)
 	if err != nil {
 		return err
 	}
@@ -216,13 +216,13 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Res
 	}
 
 	if e.Platform.Status.Build.Maven.CASecret != nil {
-		certData, err := kubernetes.GetSecretRefData(e.C, e.Client, e.Platform.Namespace, e.Platform.Status.Build.Maven.CASecret)
+		certData, err := kubernetes.GetSecretRefData(e.Ctx, e.Client, e.Platform.Namespace, e.Platform.Status.Build.Maven.CASecret)
 		if err != nil {
 			return err
 		}
 		trustStoreName := "trust.jks"
 		trustStorePass := jvm.NewKeystorePassword()
-		err = jvm.GenerateKeystore(e.C, tmpDir, trustStoreName, trustStorePass, certData)
+		err = jvm.GenerateKeystore(e.Ctx, tmpDir, trustStoreName, trustStorePass, certData)
 		if err != nil {
 			return err
 		}
@@ -232,7 +232,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Res
 		)
 	}
 
-	ctx, cancel := context.WithTimeout(e.C, e.Platform.Status.Build.GetTimeout().Duration)
+	ctx, cancel := context.WithTimeout(e.Ctx, e.Platform.Status.Build.GetTimeout().Duration)
 	defer cancel()
 	err = project.Command(mc).Do(ctx)
 	if err != nil {

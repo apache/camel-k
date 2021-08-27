@@ -84,7 +84,7 @@ func createNominalCamelTest() (*camelTrait, *Environment) {
 			},
 		},
 		Catalog: NewEnvironmentTestCatalog(),
-		C:       context.TODO(),
+		Ctx:     context.TODO(),
 		Client:  client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{

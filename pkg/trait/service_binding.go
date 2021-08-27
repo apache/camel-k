@@ -172,7 +172,7 @@ func (t *serviceBindingTrait) getServiceBinding(e *Environment, name string) (sb
 		Namespace: e.Integration.Namespace,
 		Name:      name,
 	}
-	return serviceBinding, t.Client.Get(t.Ctx, key, &serviceBinding)
+	return serviceBinding, t.Client.Get(e.Ctx, key, &serviceBinding)
 }
 
 func (t *serviceBindingTrait) parseProvisionedServices(e *Environment) ([]sb.Service, error) {

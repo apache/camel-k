@@ -115,7 +115,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 	if IsNilOrTrue(t.Auto) {
 		if len(t.ChannelSources) == 0 {
 			items := make([]string, 0)
-			sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
+			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
 			if err != nil {
 				return false, err
 			}
@@ -128,7 +128,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		}
 		if len(t.ChannelSinks) == 0 {
 			items := make([]string, 0)
-			sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
+			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
 			if err != nil {
 				return false, err
 			}
@@ -141,7 +141,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		}
 		if len(t.EndpointSources) == 0 {
 			items := make([]string, 0)
-			sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
+			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
 			if err != nil {
 				return false, err
 			}
@@ -154,7 +154,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		}
 		if len(t.EndpointSinks) == 0 {
 			items := make([]string, 0)
-			sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
+			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
 			if err != nil {
 				return false, err
 			}
@@ -167,7 +167,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		}
 		if len(t.EventSources) == 0 {
 			items := make([]string, 0)
-			sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
+			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
 			if err != nil {
 				return false, err
 			}
@@ -180,7 +180,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		}
 		if len(t.EventSinks) == 0 {
 			items := make([]string, 0)
-			sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
+			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
 			if err != nil {
 				return false, err
 			}
@@ -574,7 +574,7 @@ func (t *knativeTrait) withServiceDo(
 		if len(possibleRefs) == 1 {
 			actualRef = &possibleRefs[0]
 		} else {
-			actualRef, err = knativeutil.GetAddressableReference(t.Ctx, t.Client, possibleRefs, e.Integration.Namespace, ref.Name)
+			actualRef, err = knativeutil.GetAddressableReference(e.Ctx, t.Client, possibleRefs, e.Integration.Namespace, ref.Name)
 			if err != nil && k8serrors.IsNotFound(err) {
 				return errors.Errorf("cannot find %s", serviceType.ResourceDescription(ref.Name))
 			} else if err != nil {
@@ -583,7 +583,7 @@ func (t *knativeTrait) withServiceDo(
 		}
 
 		urlProvider := func() (*url.URL, error) {
-			targetURL, err := knativeutil.GetSinkURL(t.Ctx, t.Client, actualRef, e.Integration.Namespace)
+			targetURL, err := knativeutil.GetSinkURL(e.Ctx, t.Client, actualRef, e.Integration.Namespace)
 			if err != nil {
 				return nil, errors.Wrapf(err, "cannot determine address of %s", serviceType.ResourceDescription(ref.Name))
 			}

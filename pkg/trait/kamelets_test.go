@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"encoding/json"
 	"testing"
 
@@ -540,11 +539,10 @@ func createKameletsTestEnvironment(flow string, objects ...runtime.Object) (*kam
 
 	client, _ := test.NewFakeClient(objects...)
 	trait := newKameletsTrait().(*kameletsTrait)
-	trait.Ctx = context.TODO()
 	trait.Client = client
 
 	environment := &Environment{
-		Catalog:      NewCatalog(context.TODO(), client),
+		Catalog:      NewCatalog(client),
 		Client:       client,
 		CamelCatalog: catalog,
 		Integration: &v1.Integration{

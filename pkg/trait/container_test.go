@@ -41,7 +41,7 @@ func TestContainerWithDefaults(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	traitCatalog := NewCatalog(context.TODO(), nil)
+	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -96,7 +96,7 @@ func TestContainerWithCustomName(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	traitCatalog := NewCatalog(context.TODO(), nil)
+	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -159,10 +159,10 @@ func TestContainerWithCustomImage(t *testing.T) {
 	assert.Nil(t, err)
 
 	client, _ := test.NewFakeClient()
-	traitCatalog := NewCatalog(context.TODO(), nil)
+	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
-		C:            context.TODO(),
+		Ctx:          context.TODO(),
 		Client:       client,
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
@@ -230,10 +230,10 @@ func TestContainerWithCustomImageAndIntegrationKit(t *testing.T) {
 	assert.Nil(t, err)
 
 	client, _ := test.NewFakeClient()
-	traitCatalog := NewCatalog(context.TODO(), nil)
+	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
-		C:            context.TODO(),
+		Ctx:          context.TODO(),
 		Client:       client,
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
@@ -284,10 +284,10 @@ func TestContainerWithCustomImageAndDeprecatedIntegrationKit(t *testing.T) {
 	assert.Nil(t, err)
 
 	client, _ := test.NewFakeClient()
-	traitCatalog := NewCatalog(context.TODO(), nil)
+	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
-		C:            context.TODO(),
+		Ctx:          context.TODO(),
 		Client:       client,
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,

@@ -382,7 +382,7 @@ func (t *cronTrait) getGlobalCron(e *Environment) (*cronInfo, error) {
 func (t *cronTrait) getSourcesFromURIs(e *Environment) ([]string, error) {
 	var sources []v1.SourceSpec
 	var err error
-	if sources, err = kubernetes.ResolveIntegrationSources(t.Ctx, t.Client, e.Integration, e.Resources); err != nil {
+	if sources, err = kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources); err != nil {
 		return nil, err
 	}
 	meta := metadata.ExtractAll(e.CamelCatalog, sources)

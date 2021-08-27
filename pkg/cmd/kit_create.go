@@ -88,7 +88,7 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 		return err
 	}
 
-	catalog := trait.NewCatalog(command.Context, c)
+	catalog := trait.NewCatalog(c)
 	tp := catalog.ComputeTraitsProperties()
 	for _, t := range command.Traits {
 		kv := strings.SplitN(t, "=", 2)

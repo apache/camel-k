@@ -101,7 +101,7 @@ func (t *deployerTrait) serverSideApply(env *Environment, resource ctrl.Object) 
 	if err != nil {
 		return err
 	}
-	err = env.Client.Patch(env.C, target, ctrl.Apply, ctrl.ForceOwnership, ctrl.FieldOwner("camel-k-operator"))
+	err = env.Client.Patch(env.Ctx, target, ctrl.Apply, ctrl.ForceOwnership, ctrl.FieldOwner("camel-k-operator"))
 	if err != nil {
 		return errors.Wrapf(err, "error during apply resource: %v", resource)
 	}
@@ -109,7 +109,7 @@ func (t *deployerTrait) serverSideApply(env *Environment, resource ctrl.Object) 
 }
 
 func (t *deployerTrait) clientSideApply(env *Environment, resource ctrl.Object) error {
-	err := env.Client.Create(env.C, resource)
+	err := env.Client.Create(env.Ctx, resource)
 	if err == nil {
 		return nil
 	} else if !k8serrors.IsAlreadyExists(err) {
@@ -119,7 +119,7 @@ func (t *deployerTrait) clientSideApply(env *Environment, resource ctrl.Object) 
 	object.SetNamespace(resource.GetNamespace())
 	object.SetName(resource.GetName())
 	object.SetGroupVersionKind(resource.GetObjectKind().GroupVersionKind())
-	err = env.Client.Get(env.C, ctrl.ObjectKeyFromObject(object), object)
+	err = env.Client.Get(env.Ctx, ctrl.ObjectKeyFromObject(object), object)
 	if err != nil {
 		return err
 	}
@@ -130,7 +130,7 @@ func (t *deployerTrait) clientSideApply(env *Environment, resource ctrl.Object) 
 		// Avoid triggering a patch request for nothing
 		return nil
 	}
-	err = env.Client.Patch(env.C, resource, ctrl.RawPatch(types.MergePatchType, p))
+	err = env.Client.Patch(env.Ctx, resource, ctrl.RawPatch(types.MergePatchType, p))
 	if err != nil {
 		return errors.Wrapf(err, "error during patch resource: %v", resource)
 	}

@@ -37,7 +37,7 @@ func Apply(ctx context.Context, c client.Client, integration *v1.Integration, ki
 		return nil, err
 	}
 
-	catalog := NewCatalog(ctx, c)
+	catalog := NewCatalog(c)
 
 	// set the catalog
 	environment.Catalog = catalog
@@ -84,7 +84,7 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integr
 	}
 
 	env := Environment{
-		C:                     ctx,
+		Ctx:                   ctx,
 		Platform:              pl,
 		Client:                c,
 		IntegrationKit:        kit,

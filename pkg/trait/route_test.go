@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"testing"
 
 	"github.com/rs/xid"
@@ -41,7 +40,7 @@ func createTestRouteEnvironment(t *testing.T, name string) *Environment {
 
 	res := &Environment{
 		CamelCatalog: catalog,
-		Catalog:      NewCatalog(context.TODO(), nil),
+		Catalog:      NewCatalog(nil),
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      name,

@@ -18,13 +18,14 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/test"
-	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestTraitConfigurationFromAnnotations(t *testing.T) {
@@ -47,7 +48,7 @@ func TestTraitConfigurationFromAnnotations(t *testing.T) {
 			},
 		},
 	}
-	c := NewCatalog(context.Background(), nil)
+	c := NewCatalog(nil)
 	assert.NoError(t, c.configure(&env))
 	assert.True(t, *c.GetTrait("cron").(*cronTrait).Fallback)
 	assert.Equal(t, "annotated-policy", c.GetTrait("cron").(*cronTrait).ConcurrencyPolicy)
@@ -67,7 +68,7 @@ func TestFailOnWrongTraitAnnotations(t *testing.T) {
 			},
 		},
 	}
-	c := NewCatalog(context.Background(), nil)
+	c := NewCatalog(nil)
 	assert.Error(t, c.configure(&env))
 }
 
@@ -121,7 +122,7 @@ func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
 			},
 		},
 	}
-	c := NewCatalog(context.Background(), nil)
+	c := NewCatalog(nil)
 	assert.NoError(t, c.configure(&env))
 	assert.Equal(t, "schedule2", c.GetTrait("cron").(*cronTrait).Schedule)
 	assert.Equal(t, "cmp4", c.GetTrait("cron").(*cronTrait).Components)
@@ -142,7 +143,7 @@ func TestTraitListConfigurationFromAnnotations(t *testing.T) {
 			},
 		},
 	}
-	c := NewCatalog(context.Background(), nil)
+	c := NewCatalog(nil)
 	assert.NoError(t, c.configure(&env))
 	assert.Equal(t, []string{"opt1", "opt2"}, c.GetTrait("jolokia").(*jolokiaTrait).Options)
 	assert.Equal(t, []string{"Binding:xxx"}, c.GetTrait("service-binding").(*serviceBindingTrait).ServiceBindings)
@@ -161,7 +162,7 @@ func TestTraitSplitConfiguration(t *testing.T) {
 			},
 		},
 	}
-	c := NewCatalog(context.Background(), nil)
+	c := NewCatalog(nil)
 	assert.NoError(t, c.configure(&env))
 	assert.Equal(t, []string{"opt1", "opt2"}, c.GetTrait("owner").(*ownerTrait).TargetLabels)
 }

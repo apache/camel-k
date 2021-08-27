@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"reflect"
 	"sort"
 	"strings"
@@ -38,7 +37,7 @@ type Catalog struct {
 }
 
 // NewCatalog creates a new trait Catalog
-func NewCatalog(ctx context.Context, c client.Client) *Catalog {
+func NewCatalog(c client.Client) *Catalog {
 	var traitList = make([]Trait, 0, len(FactoryList))
 	for _, factory := range FactoryList {
 		traitList = append(traitList, factory())
@@ -56,9 +55,6 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 	}
 
 	for _, t := range catalog.allTraits() {
-		if ctx != nil {
-			t.InjectContext(ctx)
-		}
 		if c != nil {
 			t.InjectClient(c)
 		}

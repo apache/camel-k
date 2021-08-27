@@ -159,15 +159,12 @@ func NewContext(buildDir string) Context {
 }
 
 type Context struct {
-	Path string
-	// Project             Project
+	Path                string
 	ExtraMavenOpts      []string
 	SettingsContent     []byte
 	AdditionalArguments []string
 	AdditionalEntries   map[string]interface{}
-	// Timeout             time.Duration
-	LocalRepository string
-	// Stdout              io.Writer
+	LocalRepository     string
 }
 
 func (c *Context) AddEntry(id string, entry interface{}) {

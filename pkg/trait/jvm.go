@@ -92,7 +92,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		name := e.Integration.Status.IntegrationKit.Name
 		ns := e.Integration.GetIntegrationKitNamespace(e.Platform)
 		k := v1.NewIntegrationKit(ns, name)
-		if err := t.Client.Get(t.Ctx, ctrl.ObjectKeyFromObject(k), k); err != nil {
+		if err := t.Client.Get(e.Ctx, ctrl.ObjectKeyFromObject(k), k); err != nil {
 			return errors.Wrapf(err, "unable to find integration kit %s/%s, %s", ns, name, err)
 		}
 		kit = k

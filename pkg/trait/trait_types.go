@@ -25,12 +25,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/property"
 	"github.com/pkg/errors"
+
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -42,11 +43,13 @@ import (
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/pkg/util/property"
 )
 
-// True --
-const True = "true"
-const False = "false"
+const (
+	True  = "true"
+	False = "false"
+)
 
 var (
 	basePath                  = "/etc/camel"
@@ -71,9 +74,6 @@ type ID string
 type Trait interface {
 	Identifiable
 	client.Injectable
-
-	// InjectContext to inject a context
-	InjectContext(context.Context)
 
 	// Configure the trait
 	Configure(environment *Environment) (bool, error)
@@ -131,11 +131,10 @@ func NewBaseTrait(id string, order int) BaseTrait {
 type BaseTrait struct {
 	TraitID ID `json:"-"`
 	// Can be used to enable or disable a trait. All traits share this common property.
-	Enabled        *bool           `property:"enabled" json:"enabled,omitempty"`
-	Client         client.Client   `json:"-"`
-	Ctx            context.Context `json:"-"`
-	ExecutionOrder int             `json:"-"`
-	L              log.Logger      `json:"-"`
+	Enabled        *bool         `property:"enabled" json:"enabled,omitempty"`
+	Client         client.Client `json:"-"`
+	ExecutionOrder int           `json:"-"`
+	L              log.Logger    `json:"-"`
 }
 
 // ID returns the identifier of the trait
@@ -146,11 +145,6 @@ func (trait *BaseTrait) ID() ID {
 // InjectClient implements client.ClientInject and allows to inject a client into the trait
 func (trait *BaseTrait) InjectClient(c client.Client) {
 	trait.Client = c
-}
-
-// InjectContext allows to inject a context into the trait
-func (trait *BaseTrait) InjectContext(ctx context.Context) {
-	trait.Ctx = ctx
 }
 
 // InfluencesKit determines if the trait has any influence on Integration Kits
@@ -192,8 +186,10 @@ type Environment struct {
 	CamelCatalog   *camel.RuntimeCatalog
 	RuntimeVersion string
 	Catalog        *Catalog
-	C              context.Context
-	Client         client.Client
+	// The Go standard context for the traits execution
+	Ctx context.Context
+	// The client to the API server
+	Client client.Client
 	// The active Platform
 	Platform *v1.IntegrationPlatform
 	// The current Integration

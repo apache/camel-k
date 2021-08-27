@@ -71,7 +71,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 		e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseError
 		e.IntegrationKit.Status.SetCondition("IntegrationKitPropertiesFormatValid", corev1.ConditionFalse,
 			"IntegrationKitPropertiesFormatValid", fmt.Sprintf("One or more properties where not formatted as expected: %s", err.Error()))
-		if err := e.Client.Status().Update(e.C, e.IntegrationKit); err != nil {
+		if err := e.Client.Status().Update(e.Ctx, e.IntegrationKit); err != nil {
 			return err
 		}
 		return nil

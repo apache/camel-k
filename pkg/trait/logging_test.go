@@ -39,9 +39,9 @@ func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint b
 	}
 
 	res := &Environment{
-		C:            context.TODO(),
+		Ctx:          context.TODO(),
 		CamelCatalog: c,
-		Catalog:      NewCatalog(context.TODO(), nil),
+		Catalog:      NewCatalog(nil),
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -89,7 +89,7 @@ func createDefaultLoggingTestEnv(t *testing.T) *Environment {
 }
 
 func NewLoggingTestCatalog() *Catalog {
-	return NewCatalog(context.TODO(), nil)
+	return NewCatalog(nil)
 }
 
 func TestEmptyLoggingTrait(t *testing.T) {

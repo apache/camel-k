@@ -366,7 +366,7 @@ func TestConfigureTraits(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	catalog := trait.NewCatalog(runCmdOptions.Context, client)
+	catalog := trait.NewCatalog(client)
 
 	traits, err := configureTraits(runCmdOptions.Traits, catalog)
 

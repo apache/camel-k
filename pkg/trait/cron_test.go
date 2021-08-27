@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"strings"
 	"testing"
 
@@ -31,7 +30,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
-	k8sutils "github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
 )
 
@@ -224,7 +223,7 @@ func TestCronDeps(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	traitCatalog := NewCatalog(context.TODO(), nil)
+	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -269,14 +268,14 @@ func TestCronDeps(t *testing.T) {
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
-		Resources:      k8sutils.NewCollection(),
+		Resources:      kubernetes.NewCollection(),
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
 	c, err := NewFakeClient("ns")
 	assert.Nil(t, err)
 
-	tc := NewCatalog(context.TODO(), c)
+	tc := NewCatalog(c)
 
 	err = tc.apply(&environment)
 
@@ -294,7 +293,7 @@ func TestCronDepsFallback(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	traitCatalog := NewCatalog(context.TODO(), nil)
+	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -343,14 +342,14 @@ func TestCronDepsFallback(t *testing.T) {
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
-		Resources:      k8sutils.NewCollection(),
+		Resources:      kubernetes.NewCollection(),
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
 	c, err := NewFakeClient("ns")
 	assert.Nil(t, err)
 
-	tc := NewCatalog(context.TODO(), c)
+	tc := NewCatalog(c)
 
 	err = tc.apply(&environment)
 
@@ -369,7 +368,7 @@ func TestCronWithQuarkus(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	traitCatalog := NewCatalog(context.TODO(), nil)
+	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -418,14 +417,14 @@ func TestCronWithQuarkus(t *testing.T) {
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
-		Resources:      k8sutils.NewCollection(),
+		Resources:      kubernetes.NewCollection(),
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
 	c, err := NewFakeClient("ns")
 	assert.Nil(t, err)
 
-	tc := NewCatalog(context.TODO(), c)
+	tc := NewCatalog(c)
 
 	err = tc.apply(&environment)
 
