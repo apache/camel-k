@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Upgrade to Jolokia 1.7.0 [\#2593](https://github.com/apache/camel-k/issues/2593)
 - Modeline, build-property not checking if option also provided by the user [\#2569](https://github.com/apache/camel-k/issues/2569)
 - Kamel bind produces incomplete yaml files with -o yaml [\#2565](https://github.com/apache/camel-k/issues/2565)
 - controller: panic on nil annotation [\#2556](https://github.com/apache/camel-k/issues/2556)
@@ -20,6 +21,7 @@
 - container trait : add a flag to configure the image pull policy [\#2503](https://github.com/apache/camel-k/issues/2503)
 - \[Doc\] Feedback channels missing in contributing page [\#2502](https://github.com/apache/camel-k/issues/2502)
 - \[Doc\] Trait annotations [\#2500](https://github.com/apache/camel-k/issues/2500)
+- \[CMD\] `kamel bind --error-handler` feature [\#2494](https://github.com/apache/camel-k/issues/2494)
 - \[CMD\] `kamel bind` empty error handler [\#2493](https://github.com/apache/camel-k/issues/2493)
 - kamelet binding: make it scalable ? [\#2486](https://github.com/apache/camel-k/issues/2486)
 - kamel 1.4.1 build failure [\#2484](https://github.com/apache/camel-k/issues/2484)
@@ -36,7 +38,9 @@
 **Merged pull requests:**
 
 - chore\(strimzi\): upgrade API to v1beta2 [\#2595](https://github.com/apache/camel-k/pull/2595) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore\(jolokia\): upgrade to Jolokia 1.7.0 [\#2594](https://github.com/apache/camel-k/pull/2594) ([tadayosi](https://github.com/tadayosi))
 - Fix typo [\#2588](https://github.com/apache/camel-k/pull/2588) ([mmacphail](https://github.com/mmacphail))
+- feat\(cmd/bind\): error-handler setting [\#2587](https://github.com/apache/camel-k/pull/2587) ([squakez](https://github.com/squakez))
 - doc: contribute links [\#2584](https://github.com/apache/camel-k/pull/2584) ([squakez](https://github.com/squakez))
 - feat\(trait\): container image pull policy [\#2583](https://github.com/apache/camel-k/pull/2583) ([squakez](https://github.com/squakez))
 - Fix \#2486: make kamelet binding scalable [\#2582](https://github.com/apache/camel-k/pull/2582) ([nicolaferraro](https://github.com/nicolaferraro))
