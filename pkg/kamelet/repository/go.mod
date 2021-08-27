@@ -3,8 +3,8 @@ module github.com/apache/camel-k/pkg/kamelet/repository
 go 1.15
 
 require (
-	github.com/apache/camel-k/pkg/apis/camel v1.5.0
-	github.com/apache/camel-k/pkg/client/camel v1.5.0
+	github.com/apache/camel-k/pkg/apis/camel v1.5.1
+	github.com/apache/camel-k/pkg/client/camel v1.5.1
 	github.com/google/go-github/v32 v32.1.0
 	github.com/gregjones/httpcache v0.0.0-20180305231024-9cad4c3443a7
 	github.com/stretchr/testify v1.6.1
