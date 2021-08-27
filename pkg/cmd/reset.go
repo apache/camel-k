@@ -25,6 +25,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -100,6 +101,10 @@ func (o *resetCmdOptions) deleteAllIntegrations(c client.Client) (int, error) {
 	}
 	for _, i := range list.Items {
 		it := i
+		if isIntegrationOwned(it) {
+			// Deleting it directly is ineffective, deleting the controller will delete it
+			continue
+		}
 		if err := c.Delete(o.Context, &it); err != nil {
 			return 0, errors.Wrap(err, fmt.Sprintf("could not delete integration %s from namespace %s", it.Name, it.Namespace))
 		}
@@ -149,4 +154,17 @@ func (o *resetCmdOptions) resetIntegrationPlatform(c client.Client) error {
 	// Let's reset the status
 	platform.Status = v1.IntegrationPlatformStatus{}
 	return c.Status().Update(o.Context, &platform)
+}
+
+func isIntegrationOwned(it v1.Integration) bool {
+	for _, ref := range it.OwnerReferences {
+		gv, err := schema.ParseGroupVersion(ref.APIVersion)
+		if err != nil {
+			continue
+		}
+		if gv.Group == v1.SchemeGroupVersion.Group && ref.BlockOwnerDeletion != nil && *ref.BlockOwnerDeletion {
+			return true
+		}
+	}
+	return false
 }
