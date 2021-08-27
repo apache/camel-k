@@ -15,9 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-mvn dependency:get -Dartifact=ch.qos.logback:logback-core:1.2.3 -Ddest=$1
-mvn dependency:get -Dartifact=ch.qos.logback:logback-classic:1.2.3 -Ddest=$1
-mvn dependency:get -Dartifact=net.logstash.logback:logstash-logback-encoder:4.11 -Ddest=$1
-mvn dependency:get -Dartifact=com.fasterxml.jackson.core:jackson-annotations:2.9.10 -Ddest=$1
-mvn dependency:get -Dartifact=com.fasterxml.jackson.core:jackson-core:2.9.10 -Ddest=$1
-mvn dependency:get -Dartifact=com.fasterxml.jackson.core:jackson-databind:2.9.10.8 -Ddest=$1
+options=""
+if [ "$CI" = "true" ]; then
+  options="--batch-mode"
+fi
+
+mvn $options dependency:get -Dartifact=ch.qos.logback:logback-core:1.2.3 -Ddest=$1
+mvn $options dependency:get -Dartifact=ch.qos.logback:logback-classic:1.2.3 -Ddest=$1
+mvn $options dependency:get -Dartifact=net.logstash.logback:logstash-logback-encoder:4.11 -Ddest=$1
+mvn $options dependency:get -Dartifact=com.fasterxml.jackson.core:jackson-annotations:2.9.10 -Ddest=$1
+mvn $options dependency:get -Dartifact=com.fasterxml.jackson.core:jackson-core:2.9.10 -Ddest=$1
+mvn $options dependency:get -Dartifact=com.fasterxml.jackson.core:jackson-databind:2.9.10.8 -Ddest=$1
