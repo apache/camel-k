@@ -106,10 +106,6 @@ func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if len(t.PackageTypes) == 0 {
-		t.PackageTypes = []quarkusPackageType{fastJarPackageType}
-	}
-
 	return e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) ||
 			e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) ||
 			e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
@@ -119,50 +115,39 @@ func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
 
 func (t *quarkusTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) {
-		integration := e.Integration
-
-		for _, packageType := range t.PackageTypes {
-			kit := v1.NewIntegrationKit(integration.GetIntegrationKitNamespace(e.Platform), fmt.Sprintf("kit-%s", xid.New()))
-
-			kit.Labels = map[string]string{
-				v1.IntegrationKitTypeLabel:            v1.IntegrationKitTypePlatform,
-				"camel.apache.org/runtime.version":    integration.Status.RuntimeVersion,
-				"camel.apache.org/runtime.provider":   string(integration.Status.RuntimeProvider),
-				v1.IntegrationKitLayoutLabel:          string(packageType),
-				v1.IntegrationKitPriorityLabel:        kitPriority[packageType],
-				kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
-				kubernetes.CamelCreatorLabelName:      integration.Name,
-				kubernetes.CamelCreatorLabelNamespace: integration.Namespace,
-				kubernetes.CamelCreatorLabelVersion:   integration.ResourceVersion,
-			}
-
-			traits := t.getKitTraits(e)
-			data, err := json.Marshal(traits[quarkusTraitId].Configuration)
-			if err != nil {
-				return err
-			}
-			trait := quarkusTrait{}
-			err = json.Unmarshal(data, &trait)
-			if err != nil {
-				return err
-			}
-			trait.PackageTypes = []quarkusPackageType{packageType}
-			data, err = json.Marshal(trait)
-			if err != nil {
-				return err
-			}
-			traits[quarkusTraitId] = v1.TraitSpec{
-				Configuration: v1.TraitConfiguration{
-					RawMessage: data,
-				},
-			}
-			kit.Spec = v1.IntegrationKitSpec{
-				Dependencies: e.Integration.Status.Dependencies,
-				Repositories: e.Integration.Spec.Repositories,
-				Traits:       traits,
-			}
-
+		switch len(t.PackageTypes) {
+		case 0:
+			kit := t.newIntegrationKit(e, fastJarPackageType)
 			e.IntegrationKits = append(e.IntegrationKits, *kit)
+
+		case 1:
+			kit := t.newIntegrationKit(e, t.PackageTypes[0])
+			e.IntegrationKits = append(e.IntegrationKits, *kit)
+
+		default:
+			for _, packageType := range t.PackageTypes {
+				kit := t.newIntegrationKit(e, packageType)
+				data, err := json.Marshal(kit.Spec.Traits[quarkusTraitId].Configuration)
+				if err != nil {
+					return err
+				}
+				trait := quarkusTrait{}
+				err = json.Unmarshal(data, &trait)
+				if err != nil {
+					return err
+				}
+				trait.PackageTypes = []quarkusPackageType{packageType}
+				data, err = json.Marshal(trait)
+				if err != nil {
+					return err
+				}
+				kit.Spec.Traits[quarkusTraitId] = v1.TraitSpec{
+					Configuration: v1.TraitConfiguration{
+						RawMessage: data,
+					},
+				}
+				e.IntegrationKits = append(e.IntegrationKits, *kit)
+			}
 		}
 
 		return nil
@@ -223,6 +208,33 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 	}
 
 	return nil
+}
+
+func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPackageType) *v1.IntegrationKit {
+	integration := e.Integration
+	kit := v1.NewIntegrationKit(integration.GetIntegrationKitNamespace(e.Platform), fmt.Sprintf("kit-%s", xid.New()))
+
+	kit.Labels = map[string]string{
+		v1.IntegrationKitTypeLabel:            v1.IntegrationKitTypePlatform,
+		"camel.apache.org/runtime.version":    integration.Status.RuntimeVersion,
+		"camel.apache.org/runtime.provider":   string(integration.Status.RuntimeProvider),
+		v1.IntegrationKitLayoutLabel:          string(packageType),
+		v1.IntegrationKitPriorityLabel:        kitPriority[packageType],
+		kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
+		kubernetes.CamelCreatorLabelName:      integration.Name,
+		kubernetes.CamelCreatorLabelNamespace: integration.Namespace,
+		kubernetes.CamelCreatorLabelVersion:   integration.ResourceVersion,
+	}
+
+	traits := t.getKitTraits(e)
+
+	kit.Spec = v1.IntegrationKitSpec{
+		Dependencies: e.Integration.Status.Dependencies,
+		Repositories: e.Integration.Spec.Repositories,
+		Traits:       traits,
+	}
+
+	return kit
 }
 
 func (t *quarkusTrait) getKitTraits(e *Environment) map[string]v1.TraitSpec {
