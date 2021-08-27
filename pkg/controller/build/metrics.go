@@ -28,7 +28,10 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-const buildResultLabel = "result"
+const (
+	buildResultLabel = "result"
+	buildTypeLabel   = "type"
+)
 
 var (
 	buildDuration = prometheus.NewHistogramVec(
@@ -46,6 +49,7 @@ var (
 		},
 		[]string{
 			buildResultLabel,
+			buildTypeLabel,
 		},
 	)
 
@@ -57,10 +61,11 @@ var (
 		},
 		[]string{
 			buildResultLabel,
+			buildTypeLabel,
 		},
 	)
 
-	queueDuration = prometheus.NewHistogram(
+	queueDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name: "camel_k_build_queue_duration_seconds",
 			Help: "Camel K build queue duration",
@@ -72,12 +77,20 @@ var (
 				5 * time.Minute.Seconds(),
 			},
 		},
+		[]string{
+			buildTypeLabel,
+		},
 	)
 )
 
 func init() {
 	// Register custom metrics with the global prometheus registry
 	metrics.Registry.MustRegister(buildDuration, buildRecovery, queueDuration)
+}
+
+func observeBuildQueueDuration(build *v1.Build) {
+	queueDuration.WithLabelValues(build.Labels[v1.IntegrationKitLayoutLabel]).
+		Observe(time.Now().Sub(getBuildQueuingTime(build)).Seconds())
 }
 
 func observeBuildResult(build *v1.Build, phase v1.BuildPhase, duration time.Duration) {
@@ -89,8 +102,11 @@ func observeBuildResult(build *v1.Build, phase v1.BuildPhase, duration time.Dura
 		phase = v1.BuildPhaseError
 	}
 
-	buildRecovery.WithLabelValues(phase.String()).Observe(float64(attempt))
-	buildDuration.WithLabelValues(phase.String()).Observe(duration.Seconds())
+	resultLabel := phase.String()
+	typeLabel := build.Labels[v1.IntegrationKitLayoutLabel]
+
+	buildRecovery.WithLabelValues(resultLabel, typeLabel).Observe(float64(attempt))
+	buildDuration.WithLabelValues(resultLabel, typeLabel).Observe(duration.Seconds())
 }
 
 func getBuildAttemptFor(build *v1.Build) (int, int) {

@@ -115,6 +115,7 @@ func TestMetrics(t *testing.T) {
 						{
 							Label: []*prometheus.LabelPair{
 								label("result", "Succeeded"),
+								label("type", "fast-jar"),
 							},
 							Histogram: &prometheus.Histogram{
 								SampleCount: uint64P(1),
@@ -151,6 +152,7 @@ func TestMetrics(t *testing.T) {
 						{
 							Label: []*prometheus.LabelPair{
 								label("result", "Succeeded"),
+								label("type", "fast-jar"),
 							},
 							Histogram: &prometheus.Histogram{
 								SampleCount: uint64P(1),
@@ -367,6 +369,9 @@ func TestMetrics(t *testing.T) {
 					Type: metricTypeP(prometheus.MetricType_HISTOGRAM),
 					Metric: []*prometheus.Metric{
 						{
+							Label: []*prometheus.LabelPair{
+								label("type", "fast-jar"),
+							},
 							Histogram: &prometheus.Histogram{
 								SampleCount: uint64P(1),
 								SampleSum:   histogram.SampleSum,

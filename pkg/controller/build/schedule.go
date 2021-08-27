@@ -20,7 +20,6 @@ package build
 import (
 	"context"
 	"sync"
-	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -119,7 +118,7 @@ func (action *scheduleAction) toPendingPhase(ctx context.Context, build *v1.Buil
 	}
 
 	// Report the duration the Build has been waiting in the build queue
-	queueDuration.Observe(time.Now().Sub(getBuildQueuingTime(build)).Seconds())
+	observeBuildQueueDuration(build)
 
 	return nil
 }
