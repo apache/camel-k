@@ -19,13 +19,16 @@ package integration
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/pkg/errors"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
@@ -51,6 +54,7 @@ func (action *monitorAction) CanHandle(integration *v1.Integration) bool {
 }
 
 func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
+	// Check if the Integration has changed
 	hash, err := digest.ComputeForIntegration(integration)
 	if err != nil {
 		return nil, err
@@ -70,6 +74,29 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		return nil, errors.Wrapf(err, "unable to find integration kit %s/%s, %s", integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
 	}
 
+	// Check if an IntegrationKit with higher priority is ready
+	priority, ok := kit.Labels[v1.IntegrationKitPriorityLabel]
+	if !ok {
+		priority = "0"
+	}
+	withHigherPriority, err := labels.NewRequirement(v1.IntegrationKitPriorityLabel, selection.GreaterThan, []string{priority})
+	if err != nil {
+		return nil, err
+	}
+	kits, err := lookupKitsForIntegration(ctx, action.client, integration, ctrl.MatchingLabelsSelector{
+		Selector: labels.NewSelector().Add(*withHigherPriority),
+	})
+	if err != nil {
+		return nil, err
+	}
+	priorityReadyKit, err := findHighestPriorityReadyKit(kits)
+	if err != nil {
+		return nil, err
+	}
+	if priorityReadyKit != nil {
+		integration.SetIntegrationKit(priorityReadyKit)
+	}
+
 	// Run traits that are enabled for the running phase
 	_, err = trait.Apply(ctx, action.client, integration, kit)
 	if err != nil {
@@ -84,8 +111,8 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	// Check replicas
 	replicaSets := &appsv1.ReplicaSetList{}
 	err = action.client.List(ctx, replicaSets,
-		k8sclient.InNamespace(integration.Namespace),
-		k8sclient.MatchingLabels{
+		ctrl.InNamespace(integration.Namespace),
+		ctrl.MatchingLabels{
 			v1.IntegrationLabel: integration.Name,
 		})
 	if err != nil {
@@ -159,4 +186,26 @@ func findLatestReplicaSet(list *appsv1.ReplicaSetList) *appsv1.ReplicaSet {
 		}
 	}
 	return &latest
+}
+
+func findHighestPriorityReadyKit(kits []v1.IntegrationKit) (*v1.IntegrationKit, error) {
+	if len(kits) == 0 {
+		return nil, nil
+	}
+	var kit *v1.IntegrationKit
+	priority := 0
+	for i, k := range kits {
+		if k.Status.Phase != v1.IntegrationKitPhaseReady {
+			continue
+		}
+		p, err := strconv.Atoi(k.Labels[v1.IntegrationKitPriorityLabel])
+		if err != nil {
+			return nil, err
+		}
+		if p > priority {
+			kit = &kits[i]
+			priority = p
+		}
+	}
+	return kit, nil
 }

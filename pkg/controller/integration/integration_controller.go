@@ -49,8 +49,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/monitoring"
 )
 
-// Add creates a new Integration Controller and adds it to the Manager. The Manager will set fields on the Controller
-// and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
 	c, err := client.FromManager(mgr)
 	if err != nil {
@@ -59,7 +57,6 @@ func Add(mgr manager.Manager) error {
 	return add(mgr, newReconciler(mgr, c), c)
 }
 
-// newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	return monitoring.NewInstrumentedReconciler(
 		&reconcileIntegration{
@@ -75,7 +72,6 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	)
 }
 
-// add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler, cl client.Client) error {
 	// Create a new controller
 	c, err := controller.New("integration-controller", mgr, controller.Options{Reconciler: r})
@@ -92,7 +88,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler, cl client.Client) error {
 				newIntegration := e.ObjectNew.(*v1.Integration)
 				// Ignore updates to the integration status in which case metadata.Generation does not change,
 				// or except when the integration phase changes as it's used to transition from one phase
-				// to another
+				// to another.
 				return oldIntegration.Generation != newIntegration.Generation ||
 					oldIntegration.Status.Phase != newIntegration.Status.Phase
 			},
@@ -106,40 +102,46 @@ func add(mgr manager.Manager, r reconcile.Reconciler, cl client.Client) error {
 		return err
 	}
 
-	// Watch for IntegrationKit phase transitioning to ready or error and
-	// enqueue requests for any integrations that are in phase waiting for
-	// kit
+	// Watch for IntegrationKit phase transitioning to ready or error, and
+	// enqueue requests for any integration that matches the kit, in building
+	// or running phase.
 	err = c.Watch(&source.Kind{Type: &v1.IntegrationKit{}},
 		handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
 			kit := a.(*v1.IntegrationKit)
 			var requests []reconcile.Request
 
-			if kit.Status.Phase == v1.IntegrationKitPhaseReady || kit.Status.Phase == v1.IntegrationKitPhaseError {
-				list := &v1.IntegrationList{}
+			if kit.Status.Phase != v1.IntegrationKitPhaseReady && kit.Status.Phase != v1.IntegrationKitPhaseError {
+				return requests
+			}
 
-				// Do global search in case of global operator (it may be using a global platform)
-				var opts []ctrl.ListOption
-				if !platform.IsCurrentOperatorGlobal() {
-					opts = append(opts, ctrl.InNamespace(kit.Namespace))
+			list := &v1.IntegrationList{}
+			// Do global search in case of global operator (it may be using a global platform)
+			var opts []ctrl.ListOption
+			if !platform.IsCurrentOperatorGlobal() {
+				opts = append(opts, ctrl.InNamespace(kit.Namespace))
+			}
+			if err := mgr.GetClient().List(context.Background(), list, opts...); err != nil {
+				log.Error(err, "Failed to retrieve integration list")
+				return requests
+			}
+
+			for _, integration := range list.Items {
+				if match, err := integrationMatches(&integration, kit); err != nil {
+					log.Errorf(err, "Error matching integration %q with kit %q", integration.Name, kit.Name)
+					continue
+				} else if !match {
+					continue
 				}
-
-				if err := mgr.GetClient().List(context.TODO(), list, opts...); err != nil {
-					log.Error(err, "Failed to retrieve integration list")
-					return requests
+				if integration.Status.Phase == v1.IntegrationPhaseBuildingKit ||
+					integration.Status.Phase == v1.IntegrationPhaseRunning {
+					log.Infof("Kit %s ready, notify integration: %s", kit.Name, integration.Name)
+					requests = append(requests, reconcile.Request{
+						NamespacedName: types.NamespacedName{
+							Namespace: integration.Namespace,
+							Name:      integration.Name,
+						},
+					})
 				}
-
-				for _, integration := range list.Items {
-					if integration.Status.Phase == v1.IntegrationPhaseBuildingKit {
-						log.Infof("Kit %s ready, wake-up integration: %s", kit.Name, integration.Name)
-						requests = append(requests, reconcile.Request{
-							NamespacedName: types.NamespacedName{
-								Namespace: integration.Namespace,
-								Name:      integration.Name,
-							},
-						})
-					}
-				}
-
 			}
 
 			return requests
@@ -228,7 +230,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler, cl client.Client) error {
 		return err
 	}
 
-	// Watch cronjob to update the ready condition
+	// Watch for CronJob to update the ready condition
 	err = c.Watch(&source.Kind{Type: &v1beta1.CronJob{}}, &handler.EnqueueRequestForOwner{
 		OwnerType:    &v1.Integration{},
 		IsController: false,
@@ -261,7 +263,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler, cl client.Client) error {
 
 var _ reconcile.Reconciler = &reconcileIntegration{}
 
-// reconcileIntegration reconciles a Integration object
+// reconcileIntegration reconciles an Integration object
 type reconcileIntegration struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the API server
