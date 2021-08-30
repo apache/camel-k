@@ -84,7 +84,7 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 	a.InjectLogger(log.Log)
 	a.InjectClient(c)
 
-	kits, err := a.lookupKitsForIntegration(context.TODO(), c, &v1.Integration{
+	kits, err := lookupKitsForIntegration(context.TODO(), c, &v1.Integration{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1.SchemeGroupVersion.String(),
 			Kind:       v1.IntegrationKind,
@@ -207,7 +207,7 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 	a.InjectLogger(log.Log)
 	a.InjectClient(c)
 
-	kits, err := a.lookupKitsForIntegration(context.TODO(), c, &v1.Integration{
+	kits, err := lookupKitsForIntegration(context.TODO(), c, &v1.Integration{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1.SchemeGroupVersion.String(),
 			Kind:       v1.IntegrationKind,
@@ -276,7 +276,7 @@ func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
 	a := buildKitAction{}
 	a.InjectLogger(log.Log)
 
-	ok, err := a.hasMatchingTraits(integration, integrationKitSpec)
+	ok, err := hasMatchingTraits(integration, integrationKitSpec)
 	assert.Nil(t, err)
 	assert.False(t, ok)
 }
@@ -327,7 +327,7 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 	a := buildKitAction{}
 	a.InjectLogger(log.Log)
 
-	ok, err := a.hasMatchingTraits(integration, integrationKitSpec)
+	ok, err := hasMatchingTraits(integration, integrationKitSpec)
 	assert.Nil(t, err)
 	assert.True(t, ok)
 }
