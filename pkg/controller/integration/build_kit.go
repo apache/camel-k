@@ -298,7 +298,7 @@ func (action *buildKitAction) hasComparableTrait(c trait.ComparableTrait, itTrai
 	if err != nil {
 		return false, err
 	}
-	err = json.Unmarshal(data, &it)
+	err = json.Unmarshal(data, &kt)
 	if err != nil {
 		return false, err
 	}
