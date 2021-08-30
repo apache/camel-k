@@ -28,6 +28,28 @@ kamel run -d mvn:com.google.guava:guava:26.0-jre -d camel-mina2 Integration.java
 
 With that command you will add a dependency of Guava and the Camel Mina component. This feature can also be disabled if needed (although we discourage you from doing it) by disabling the _dependencies_ trait (`-t dependencies.enabled=false`).
 
+[[dependencies-kind]]
+== Kind of dependencies
+
+The `-d` flag of the `kamel run` command is flexible and support multiple kind of dependencies.
+
+*Camel dependencies* can be added directly using the `-d` flag like this:
+```
+kamel run -d camel-mina2 Integration.java
+```
+In this case, the dependency will be added with the correct version.
+
+*External dependencies* can be added using the `-d` flag, the `mvn` prefix, and the maven coordinates:
+```
+kamel run -d mvn:com.google.guava:guava:26.0-jre Integration.java
+```
+Note that if your dependencies belong to a private repository, this repository needs to be defined. See link:maven.adoc[Configure maven].
+
+*Jitpack dependencies* can be added using the `-d` flag, the `github` prefix, and the project in the form `github:user/repo/version`:
+```
+kamel run -d github:apache/commons-csv/1.1 Integration.java
+```
+
 [[dependencies-dynamic]]
 == Dynamic URIs
 
