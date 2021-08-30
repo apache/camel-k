@@ -383,6 +383,8 @@ spec:
 
 In this example, we've set the `logging` trait to specify certain configuration we want to apply. You can do the same with all the traits available, just by setting `trait.camel.apache.org/trait-name.trait-property` with the expected value.
 
+NOTE: if you need to specify an array of values, the syntax will be `trait.camel.apache.org/trait.conf: "[\"opt1\", \"opt2\", ...]"`
+
 [[kamelets-troubleshooting]]
 == Troubleshooting
 

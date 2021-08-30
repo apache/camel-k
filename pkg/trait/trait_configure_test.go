@@ -147,3 +147,21 @@ func TestTraitListConfigurationFromAnnotations(t *testing.T) {
 	assert.Equal(t, []string{"opt1", "opt2"}, c.GetTrait("jolokia").(*jolokiaTrait).Options)
 	assert.Equal(t, []string{"Binding:xxx"}, c.GetTrait("service-binding").(*serviceBindingTrait).ServiceBindings)
 }
+
+func TestTraitSplitConfiguration(t *testing.T) {
+	env := Environment{
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Annotations: map[string]string{
+					"trait.camel.apache.org/owner.target-labels": "[\"opt1\", \"opt2\"]",
+				},
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKubernetes,
+			},
+		},
+	}
+	c := NewCatalog(context.Background(), nil)
+	assert.NoError(t, c.configure(&env))
+	assert.Equal(t, []string{"opt1", "opt2"}, c.GetTrait("owner").(*ownerTrait).TargetLabels)
+}
