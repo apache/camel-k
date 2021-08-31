@@ -88,12 +88,26 @@ func (t *quarkusTrait) Matches(trait Trait) bool {
 		return false
 	}
 
-types:
-	for _, p1 := range t.PackageTypes {
-		for _, p2 := range qt.PackageTypes {
-			if p1 == p2 {
-				continue types
+	contains := func(types []quarkusPackageType, t quarkusPackageType) bool {
+		for _, ti := range qt.PackageTypes {
+			if t == ti {
+				return true
 			}
+		}
+		return false
+	}
+
+	if len(t.PackageTypes) == 0 && len(qt.PackageTypes) != 0 && !contains(qt.PackageTypes, fastJarPackageType) {
+		return false
+	}
+
+types:
+	for _, pt := range t.PackageTypes {
+		if pt == fastJarPackageType && len(qt.PackageTypes) == 0 {
+			continue
+		}
+		if contains(qt.PackageTypes, pt) {
+			continue types
 		}
 		return false
 	}

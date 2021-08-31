@@ -24,8 +24,6 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -97,7 +95,7 @@ kits:
 	for _, kit := range env.IntegrationKits {
 		kit := kit
 		for i, k := range existingKits {
-			match, err := action.kitMatches(&kit, &k)
+			match, err := kitMatches(&kit, &k)
 			if err != nil {
 				return nil, err
 			}
@@ -127,37 +125,4 @@ kits:
 	}
 
 	return integration, nil
-}
-
-
-// kitMatches returns whether the v1.IntegrationKit match
-func (action *buildKitAction) kitMatches(k1 *v1.IntegrationKit, k2 *v1.IntegrationKit) (bool, error) {
-	version := k1.Status.Version
-	if version == "" {
-		// Defaults with the version that is going to be set during the kit initialization
-		version = defaults.Version
-	}
-	if version != k2.Status.Version {
-		return false, nil
-	}
-	if len(k1.Spec.Dependencies) != len(k2.Spec.Dependencies) {
-		return false, nil
-	}
-	if len(k1.Spec.Traits) != len(k2.Spec.Traits) {
-		return false, nil
-	}
-	for name, kt1 := range k1.Spec.Traits {
-		kt2, ok := k2.Spec.Traits[name]
-		if !ok {
-			return false, nil
-		}
-		match, err := hasMatchingTrait(&kt1, &kt2)
-		if !match || err != nil {
-			return false, err
-		}
-	}
-	if !util.StringSliceContains(k1.Spec.Dependencies, k2.Spec.Dependencies) {
-		return false, nil
-	}
-	return true, nil
 }
