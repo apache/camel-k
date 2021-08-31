@@ -186,7 +186,9 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 
 		steps = append(steps, builder.Quarkus.CommonSteps...)
 
-		if t.hasNativePackageType(e) {
+		if native, err := t.isNativeKit(e); err != nil {
+			return err
+		} else if native {
 			build.Maven.Properties["quarkus.package.type"] = string(nativePackageType)
 			steps = append(steps, builder.Image.NativeImageContext)
 			// Spectrum does not rely on Dockerfile to assemble the image
@@ -210,7 +212,7 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 		build.Steps = builder.StepIDsFor(steps...)
 
 	case v1.IntegrationKitPhaseReady:
-		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) && t.hasNativePackageType(e) {
+		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) && t.isNativeIntegration(e) {
 			container := e.getIntegrationContainer()
 			if container == nil {
 				return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
@@ -263,17 +265,20 @@ func (t *quarkusTrait) getKitTraits(e *Environment) map[string]v1.TraitSpec {
 	return traits
 }
 
-func (t *quarkusTrait) hasNativePackageType(e *Environment) bool {
+func (t *quarkusTrait) isNativeKit(e *Environment) (bool, error) {
 	switch types := t.PackageTypes; len(types) {
 	case 0:
-		return false
+		return false, nil
 	case 1:
-		return types[0] == nativePackageType
+		return types[0] == nativePackageType, nil
 	default:
-		// The Integration has more than one package types.
-		// Let's rely on the current IntegrationKit to resolve it.
-		return e.IntegrationKit.Labels[v1.IntegrationKitLayoutLabel] == v1.IntegrationKitLayoutNative
+		return false, fmt.Errorf("kit %q has more than one package type", e.IntegrationKit.Name)
 	}
+}
+
+func (t *quarkusTrait) isNativeIntegration(e *Environment) bool {
+	// The current IntegrationKit determines the Integration runtime type
+	return e.IntegrationKit.Labels[v1.IntegrationKitLayoutLabel] == v1.IntegrationKitLayoutNative
 }
 
 func getBuilderTask(tasks []v1.Task) *v1.BuilderTask {
