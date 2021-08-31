@@ -77,7 +77,8 @@ func (t *jvmTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	if trait := e.Catalog.GetTrait(quarkusTraitId); trait != nil {
-		if quarkus := trait.(*quarkusTrait); IsNilOrTrue(quarkus.Enabled) && quarkus.hasNativePackageType(e) {
+		// The JVM trait must be disabled in case the current IntegrationKit corresponds to a native build
+		if quarkus := trait.(*quarkusTrait); IsNilOrTrue(quarkus.Enabled) && quarkus.isNativeIntegration(e) {
 			return false, nil
 		}
 	}
