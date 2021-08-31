@@ -22,7 +22,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 
@@ -32,11 +32,12 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 func lookupKitsForIntegration(ctx context.Context, c ctrl.Reader, integration *v1.Integration, options ...ctrl.ListOption) ([]v1.IntegrationKit, error) {
 	pl, err := platform.GetCurrent(ctx, c, integration.Namespace)
-	if err != nil && !k8serrors.IsNotFound(err) {
+	if err != nil && !errors.IsNotFound(err) {
 		return nil, err
 	}
 
@@ -106,7 +107,7 @@ func integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bo
 	//
 	// A kit can be used only if it contains a subset of the traits and related configurations
 	// declared on integration.
-	if match, err := hasMatchingTraits(integration, kit); !match || err != nil {
+	if match, err := hasMatchingTraits(integration.Spec.Traits, kit.Spec.Traits); !match || err != nil {
 		return false, err
 	}
 	if !util.StringSliceContains(kit.Spec.Dependencies, integration.Status.Dependencies) {
@@ -115,89 +116,110 @@ func integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bo
 	return true, nil
 }
 
-// hasMatchingTraits compares the traits defined on the v1.Integration with those defined on the v1.IntegrationKit
-func hasMatchingTraits(integration *v1.Integration, kit *v1.IntegrationKit) (bool, error) {
-	catalog := trait.NewCatalog(nil)
+// kitMatches returns whether the two v1.IntegrationKit match
+func kitMatches(kit1 *v1.IntegrationKit, kit2 *v1.IntegrationKit) (bool, error) {
+	version := kit1.Status.Version
+	if version == "" {
+		// Defaults with the version that is going to be set during the kit initialization
+		version = defaults.Version
+	}
+	if version != kit2.Status.Version {
+		return false, nil
+	}
+	if len(kit1.Spec.Dependencies) != len(kit2.Spec.Dependencies) {
+		return false, nil
+	}
+	if match, err := hasMatchingTraits(kit1.Spec.Traits, kit2.Spec.Traits); !match || err != nil {
+		return false, err
+	}
+	if !util.StringSliceContains(kit1.Spec.Dependencies, kit2.Spec.Dependencies) {
+		return false, nil
+	}
+	return true, nil
+}
 
-	traitCount := 0
-	for name, itTrait := range integration.Spec.Traits {
-		t := catalog.GetTrait(name)
+func hasMatchingTraits(traits1 map[string]v1.TraitSpec, traits2 map[string]v1.TraitSpec) (bool, error) {
+	catalog := trait.NewCatalog(nil)
+	for _, t := range catalog.AllTraits() {
 		if t != nil && !t.InfluencesKit() {
 			// We don't store the trait configuration if the trait cannot influence the kit behavior
 			continue
 		}
-		traitCount++
-		kitTrait, ok := kit.Spec.Traits[name]
-		if !ok {
-			// skip it because trait configured on integration is not defined on kit
-			return false, nil
+		id := string(t.ID())
+		t1, ok1 := traits1[id]
+		t2, ok2 := traits2[id]
+
+		if !ok1 && !ok2 {
+			continue
 		}
 		if ct, ok := t.(trait.ComparableTrait); ok {
-			comparable, err := hasComparableTrait(ct, &itTrait, &kitTrait)
-			if !comparable || err != nil {
+			if comparable, err := hasComparableTrait(ct, &t1, &t2); err != nil {
 				return false, err
+			} else if comparable {
+				continue
 			}
-		} else {
-			match, err := hasMatchingTrait(&itTrait, &kitTrait)
-			if !match || err != nil {
+		} else if ok1 && ok2 {
+			if match, err := hasMatchingTrait(&t1, &t2); err != nil {
 				return false, err
+			} else if match {
+				continue
 			}
 		}
-	}
-
-	// Check the number of influencing traits matches
-	if len(kit.Spec.Traits) != traitCount {
 		return false, nil
 	}
 
 	return true, nil
 }
 
-func hasComparableTrait(c trait.ComparableTrait, itTrait *v1.TraitSpec, kitTrait *v1.TraitSpec) (bool, error) {
-	it := reflect.New(reflect.TypeOf(c).Elem()).Interface()
-	data, err := json.Marshal(itTrait.Configuration)
-	if err != nil {
-		return false, err
-	}
-	err = json.Unmarshal(data, &it)
-	if err != nil {
-		return false, err
-	}
-
-	kt := reflect.New(reflect.TypeOf(c).Elem()).Interface()
-	data, err = json.Marshal(kitTrait.Configuration)
-	if err != nil {
-		return false, err
-	}
-	err = json.Unmarshal(data, &kt)
-	if err != nil {
-		return false, err
+func hasComparableTrait(t trait.ComparableTrait, ts1 *v1.TraitSpec, ts2 *v1.TraitSpec) (bool, error) {
+	t1 := reflect.New(reflect.TypeOf(t).Elem()).Interface()
+	if ts1.Configuration.RawMessage != nil {
+		data, err := json.Marshal(ts1.Configuration)
+		if err != nil {
+			return false, err
+		}
+		err = json.Unmarshal(data, &t1)
+		if err != nil {
+			return false, err
+		}
 	}
 
-	return kt.(trait.ComparableTrait).Matches(it.(trait.Trait)), nil
+	t2 := reflect.New(reflect.TypeOf(t).Elem()).Interface()
+	if ts2.Configuration.RawMessage != nil {
+		data, err := json.Marshal(ts2.Configuration)
+		if err != nil {
+			return false, err
+		}
+		err = json.Unmarshal(data, &t2)
+		if err != nil {
+			return false, err
+		}
+	}
+
+	return t2.(trait.ComparableTrait).Matches(t1.(trait.Trait)), nil
 }
 
-func hasMatchingTrait(itTrait *v1.TraitSpec, kitTrait *v1.TraitSpec) (bool, error) {
-	data, err := json.Marshal(itTrait.Configuration)
+func hasMatchingTrait(ts1 *v1.TraitSpec, ts2 *v1.TraitSpec) (bool, error) {
+	data, err := json.Marshal(ts1.Configuration)
 	if err != nil {
 		return false, err
 	}
-	itConf := make(map[string]interface{})
-	err = json.Unmarshal(data, &itConf)
+	t1 := make(map[string]interface{})
+	err = json.Unmarshal(data, &t1)
 	if err != nil {
 		return false, err
 	}
-	data, err = json.Marshal(kitTrait.Configuration)
+	data, err = json.Marshal(ts2.Configuration)
 	if err != nil {
 		return false, err
 	}
-	kitConf := make(map[string]interface{})
-	err = json.Unmarshal(data, &kitConf)
+	t2 := make(map[string]interface{})
+	err = json.Unmarshal(data, &t2)
 	if err != nil {
 		return false, err
 	}
-	for ck, cv := range kitConf {
-		iv, ok := itConf[ck]
+	for ck, cv := range t2 {
+		iv, ok := t1[ck]
 		if !ok {
 			// skip it because trait configured on kit has a value that is not defined
 			// in integration trait

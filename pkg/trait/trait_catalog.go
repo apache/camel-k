@@ -54,7 +54,7 @@ func NewCatalog(c client.Client) *Catalog {
 		traits: traitList,
 	}
 
-	for _, t := range catalog.allTraits() {
+	for _, t := range catalog.AllTraits() {
 		if c != nil {
 			t.InjectClient(c)
 		}
@@ -62,7 +62,7 @@ func NewCatalog(c client.Client) *Catalog {
 	return &catalog
 }
 
-func (c *Catalog) allTraits() []Trait {
+func (c *Catalog) AllTraits() []Trait {
 	return append([]Trait(nil), c.traits...)
 }
 
@@ -79,7 +79,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 // so care must be taken while changing the lists order.
 func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 	var res []Trait
-	for _, t := range c.allTraits() {
+	for _, t := range c.AllTraits() {
 		if t.IsAllowedInProfile(profile) {
 			res = append(res, t)
 		}
@@ -142,7 +142,7 @@ func (c *Catalog) apply(environment *Environment) error {
 
 // GetTrait returns the trait with the given ID
 func (c *Catalog) GetTrait(id string) Trait {
-	for _, t := range c.allTraits() {
+	for _, t := range c.AllTraits() {
 		if t.ID() == ID(id) {
 			return t
 		}
@@ -153,7 +153,7 @@ func (c *Catalog) GetTrait(id string) Trait {
 // ComputeTraitsProperties returns all key/value configuration properties that can be used to configure traits
 func (c *Catalog) ComputeTraitsProperties() []string {
 	results := make([]string, 0)
-	for _, trait := range c.allTraits() {
+	for _, trait := range c.AllTraits() {
 		trait := trait // pin
 		c.processFields(structs.Fields(trait), func(name string) {
 			results = append(results, string(trait.ID())+"."+name)
