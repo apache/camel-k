@@ -4,10 +4,25 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v1.5.1...HEAD)
 
+**Closed issues:**
+
+- How to define custom container specs ? [\#2606](https://github.com/apache/camel-k/issues/2606)
+- groupId is overriden by `camel-k-integration` using kafka consumer [\#2605](https://github.com/apache/camel-k/issues/2605)
+- kamelet binding : camel controller fail reconcile the kafka sink resource. [\#2528](https://github.com/apache/camel-k/issues/2528)
+- DeadLetterURI Dependency autodiscover [\#2492](https://github.com/apache/camel-k/issues/2492)
+- kamel bind -o yaml creates wrong data [\#2480](https://github.com/apache/camel-k/issues/2480)
+- Supporting Apache Camel 3.10 [\#2326](https://github.com/apache/camel-k/issues/2326)
+- No possibility to disable compression while executing `kamel run` [\#2227](https://github.com/apache/camel-k/issues/2227)
+- Wiretap to Kamelet does not work in YAML [\#2139](https://github.com/apache/camel-k/issues/2139)
+- More information needed about dependency resolution [\#2085](https://github.com/apache/camel-k/issues/2085)
+
 **Merged pull requests:**
 
+- Update dependencies.adoc [\#2607](https://github.com/apache/camel-k/pull/2607) ([mmacphail](https://github.com/mmacphail))
 - Fix \#2487: do not directly delete owned integrations on reset [\#2603](https://github.com/apache/camel-k/pull/2603) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(build\): use batch-mode for maven-overlay task in CI [\#2601](https://github.com/apache/camel-k/pull/2601) ([tadayosi](https://github.com/tadayosi))
+- doc\(dependencies\): note on dynamic URIs [\#2599](https://github.com/apache/camel-k/pull/2599) ([squakez](https://github.com/squakez))
+- fix\(kamelets\): error handler uri autodiscovery [\#2597](https://github.com/apache/camel-k/pull/2597) ([squakez](https://github.com/squakez))
 - chore\(strimzi\): upgrade API to v1beta2 [\#2595](https://github.com/apache/camel-k/pull/2595) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(jolokia\): upgrade to Jolokia 1.7.0 [\#2594](https://github.com/apache/camel-k/pull/2594) ([tadayosi](https://github.com/tadayosi))
 - Fix typo [\#2588](https://github.com/apache/camel-k/pull/2588) ([mmacphail](https://github.com/mmacphail))
