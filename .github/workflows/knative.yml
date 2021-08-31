@@ -190,8 +190,8 @@ jobs:
           go-version: 1.15.x
       - name: Get YAKS
         run: |
-          export YAKS_VERSION=0.4.0-202104120032
-          curl --fail -L https://github.com/citrusframework/yaks/releases/download/${YAKS_VERSION}/yaks-${YAKS_VERSION}-linux-64bit.tar.gz -o yaks.tar.gz
+          export YAKS_VERSION=0.4.0
+          curl --fail -L https://github.com/citrusframework/yaks/releases/download/v${YAKS_VERSION}/yaks-${YAKS_VERSION}-linux-64bit.tar.gz -o yaks.tar.gz
           tar -zxf yaks.tar.gz
           sudo mv yaks /usr/local/bin/
       - name: Kubernetes KinD Cluster
