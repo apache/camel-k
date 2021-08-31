@@ -43,7 +43,7 @@ In this case, the dependency will be added with the correct version.
 ```
 kamel run -d mvn:com.google.guava:guava:26.0-jre Integration.java
 ```
-Note that if your dependencies belong to a private repository, this repository needs to be defined. See link:maven.adoc[Configure maven].
+Note that if your dependencies belong to a private repository, this repository needs to be defined. See xref:configuration/maven.adoc[Configure maven].
 
 *Jitpack dependencies* can be added using the `-d` flag, the `github` prefix, and the project in the form `github:user/repo/version`:
 ```
