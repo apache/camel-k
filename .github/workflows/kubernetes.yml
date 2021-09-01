@@ -103,7 +103,7 @@ jobs:
       run: |
         echo "Installing Service Binding Operator"
 
-        export SERVICE_BINDING_VERSION=v0.8.0
+        export SERVICE_BINDING_VERSION=v0.9.1
         kubectl apply -f https://github.com/redhat-developer/service-binding-operator/releases/download/$SERVICE_BINDING_VERSION/release.yaml
         echo "Waiting for all pods to be ready in service-binding-operator"
         kubectl wait --for=condition=Ready pod --all -n service-binding-operator --timeout=60s
