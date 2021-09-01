@@ -38,14 +38,14 @@ import (
 	"github.com/apache/camel-k/pkg/util/reference"
 )
 
-// The Service Binding trait allows users to connect to Provisioned Services and ServiceBindings in Kubernetes:
+// The Service Binding trait allows users to connect to Services in Kubernetes:
 // https://github.com/k8s-service-bindings/spec#service-binding
 // As the specification is still evolving this is subject to change
 // +camel-k:trait=service-binding
 type serviceBindingTrait struct {
 	BaseTrait `property:",squash"`
-	// List of Provisioned Services and ServiceBindings in the form [[apigroup/]version:]kind:[namespace/]name
-	ServiceBindings []string `property:"service-bindings" json:"serviceBindings,omitempty"`
+	// List of Services in the form [[apigroup/]version:]kind:[namespace/]name
+	Services []string `property:"services" json:"services,omitempty"`
 }
 
 func newServiceBindingTrait() Trait {
@@ -59,7 +59,7 @@ func (t *serviceBindingTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if len(t.ServiceBindings) == 0 {
+	if len(t.Services) == 0 {
 		return false, nil
 	}
 
@@ -67,31 +67,17 @@ func (t *serviceBindingTrait) Configure(e *Environment) (bool, error) {
 		e.IntegrationInRunningPhases(), nil
 }
 
-func (i *impl) Process(binding interface{}) (bool, error) {
-	ctx, err := i.ctxProvider.Get(binding)
-	if err != nil {
-		return false, err
-	}
-	var status pipeline.FlowStatus
-	for _, h := range i.handlers {
-		h.Handle(ctx)
-		status = ctx.FlowStatus()
-		if status.Stop {
-			break
-		}
-	}
-
-	return status.Retry, status.Err
-}
-
 func (t *serviceBindingTrait) Apply(e *Environment) error {
-	services, err := t.parseProvisionedServices(e)
+	services, err := t.parseServices(e)
 	if err != nil {
 		return err
 	}
-	serviceBindings, err := t.parseServiceBindings(e)
-	if err != nil {
-		return err
+
+	serviceBindingCrd := []sb.ServiceBinding{}
+
+	for _, name := range services {
+		serviceBinding := createServiceBinding(e, services, e.Integration.Name)
+		append(serviceBindingCrd, serviceBinding)
 	}
 
 	var camelKFlow = []pipeline.Handler{
@@ -106,22 +92,7 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 
 	p := builder.Builder().WithHandlers(camelKFlow...).WithContextProvider(context.Provider(e.Client, context.ResourceLookup(e.Client.RESTMapper()))).Build()
 
-	serviceBindingCrd := []sb.ServiceBinding{}
-
-	for _, name := range serviceBindings {
-		if name == e.Integration.Name {
-			serviceBinding := createServiceBinding(e, services, e.Integration.Name)
-			append(serviceBindingCrd, serviceBinding)
-		} else {
-			serviceBinding, err := t.getServiceBinding(e, name)
-			// Do not throw an error if the ServiceBinding is not found and if we are managing it: we will create it
-			if err != nil {
-				return err
-			}
-			append(serviceBindingCrd, serviceBinding)
-		}
-	}
-
+	p.Process(serviceBindingCrd)
 	// construct Secret
 	name, secretExist := i.bindingSecretName()
 	data := i.bindingItemMap()
@@ -136,9 +107,6 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 		StringData: data,
 	}
 
-	if len(services) > 0 {
-		serviceBindings = append(serviceBindings, e.Integration.Name)
-	}
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		serviceBindingsCollectionReady := true
 		for _, name := range serviceBindings {
@@ -210,6 +178,23 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 	return nil
 }
 
+func (i *impl) Process(binding interface{}) (bool, error) {
+	ctx, err := i.ctxProvider.Get(binding)
+	if err != nil {
+		return false, err
+	}
+	var status pipeline.FlowStatus
+	for _, h := range i.handlers {
+		h.Handle(ctx)
+		status = ctx.FlowStatus()
+		if status.Stop {
+			break
+		}
+	}
+
+	return status.Retry, status.Err
+}
+
 func setCollectionReady(e *Environment, serviceBinding string, status corev1.ConditionStatus) {
 	e.Integration.Status.SetCondition(
 		v1.IntegrationConditionServiceBindingsCollectionReady,
@@ -237,10 +222,10 @@ func (t *serviceBindingTrait) getServiceBinding(e *Environment, name string) (sb
 	return serviceBinding, t.Client.Get(e.Ctx, key, &serviceBinding)
 }
 
-func (t *serviceBindingTrait) parseProvisionedServices(e *Environment) ([]sb.Service, error) {
+func (t *serviceBindingTrait) parseServices(e *Environment) ([]sb.Service, error) {
 	services := make([]sb.Service, 0)
 	converter := reference.NewConverter("")
-	for _, s := range t.ServiceBindings {
+	for _, s := range t.Services {
 		ref, err := converter.FromString(s)
 		if err != nil {
 			return services, err
@@ -263,30 +248,6 @@ func (t *serviceBindingTrait) parseProvisionedServices(e *Environment) ([]sb.Ser
 		services = append(services, service)
 	}
 	return services, nil
-}
-
-func (t *serviceBindingTrait) parseServiceBindings(e *Environment) ([]string, error) {
-	serviceBindings := make([]string, 0)
-	converter := reference.NewConverter("")
-	for _, s := range t.ServiceBindings {
-		ref, err := converter.FromString(s)
-		if err != nil {
-			return serviceBindings, err
-		}
-		if ref.Namespace == "" {
-			ref.Namespace = e.Integration.Namespace
-		}
-		if ref.Kind == "ServiceBinding" {
-			if ref.GroupVersionKind().GroupVersion().String() != sb.GroupVersion.String() {
-				return nil, fmt.Errorf("ServiceBinding: %q api version should be %q", s, sb.GroupVersion.String())
-			}
-			if ref.Namespace != e.Integration.Namespace {
-				return nil, fmt.Errorf("ServiceBinding: %s should be in the same namespace %s as the integration", s, e.Integration.Namespace)
-			}
-			serviceBindings = append(serviceBindings, ref.Name)
-		}
-	}
-	return serviceBindings, nil
 }
 
 func createServiceBinding(e *Environment, services []sb.Service, name string) sb.ServiceBinding {
