@@ -8,6 +8,8 @@
 
 - How to define custom container specs ? [\#2606](https://github.com/apache/camel-k/issues/2606)
 - groupId is overriden by `camel-k-integration` using kafka consumer [\#2605](https://github.com/apache/camel-k/issues/2605)
+- Release 1.5.1 [\#2590](https://github.com/apache/camel-k/issues/2590)
+- jitpack dependency is not resolved [\#2589](https://github.com/apache/camel-k/issues/2589)
 - kamelet binding : camel controller fail reconcile the kafka sink resource. [\#2528](https://github.com/apache/camel-k/issues/2528)
 - DeadLetterURI Dependency autodiscover [\#2492](https://github.com/apache/camel-k/issues/2492)
 - kamel bind -o yaml creates wrong data [\#2480](https://github.com/apache/camel-k/issues/2480)
@@ -18,6 +20,7 @@
 
 **Merged pull requests:**
 
+- fix\(ci\): Fix YAKS binary download [\#2610](https://github.com/apache/camel-k/pull/2610) ([astefanutti](https://github.com/astefanutti))
 - Update dependencies.adoc [\#2607](https://github.com/apache/camel-k/pull/2607) ([mmacphail](https://github.com/mmacphail))
 - Fix \#2487: do not directly delete owned integrations on reset [\#2603](https://github.com/apache/camel-k/pull/2603) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(build\): use batch-mode for maven-overlay task in CI [\#2601](https://github.com/apache/camel-k/pull/2601) ([tadayosi](https://github.com/tadayosi))
