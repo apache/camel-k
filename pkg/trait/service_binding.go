@@ -27,6 +27,12 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	sb "github.com/redhat-developer/service-binding-operator/api/v1alpha1"
+	"github.com/redhat-developer/service-binding-operator/pkg/reconcile/pipeline"
+	"github.com/redhat-developer/service-binding-operator/pkg/reconcile/pipeline/builder"
+	"github.com/redhat-developer/service-binding-operator/pkg/reconcile/pipeline/context"
+	"github.com/redhat-developer/service-binding-operator/pkg/reconcile/pipeline/handler/collect"
+	"github.com/redhat-developer/service-binding-operator/pkg/reconcile/pipeline/handler/mapping"
+	"github.com/redhat-developer/service-binding-operator/pkg/reconcile/pipeline/handler/naming"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/reference"
@@ -61,6 +67,23 @@ func (t *serviceBindingTrait) Configure(e *Environment) (bool, error) {
 		e.IntegrationInRunningPhases(), nil
 }
 
+func (i *impl) Process(binding interface{}) (bool, error) {
+	ctx, err := i.ctxProvider.Get(binding)
+	if err != nil {
+		return false, err
+	}
+	var status pipeline.FlowStatus
+	for _, h := range i.handlers {
+		h.Handle(ctx)
+		status = ctx.FlowStatus()
+		if status.Stop {
+			break
+		}
+	}
+
+	return status.Retry, status.Err
+}
+
 func (t *serviceBindingTrait) Apply(e *Environment) error {
 	services, err := t.parseProvisionedServices(e)
 	if err != nil {
@@ -70,6 +93,49 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 	if err != nil {
 		return err
 	}
+
+	var camelKFlow = []pipeline.Handler{
+		pipeline.HandlerFunc(collect.PreFlight),
+		pipeline.HandlerFunc(collect.ProvisionedService),
+		pipeline.HandlerFunc(collect.BindingDefinitions),
+		pipeline.HandlerFunc(collect.BindingItems),
+		pipeline.HandlerFunc(collect.OwnedResources),
+		pipeline.HandlerFunc(mapping.Handle),
+		pipeline.HandlerFunc(naming.Handle),
+	}
+
+	p := builder.Builder().WithHandlers(camelKFlow...).WithContextProvider(context.Provider(e.Client, context.ResourceLookup(e.Client.RESTMapper()))).Build()
+
+	serviceBindingCrd := []sb.ServiceBinding{}
+
+	for _, name := range serviceBindings {
+		if name == e.Integration.Name {
+			serviceBinding := createServiceBinding(e, services, e.Integration.Name)
+			append(serviceBindingCrd, serviceBinding)
+		} else {
+			serviceBinding, err := t.getServiceBinding(e, name)
+			// Do not throw an error if the ServiceBinding is not found and if we are managing it: we will create it
+			if err != nil {
+				return err
+			}
+			append(serviceBindingCrd, serviceBinding)
+		}
+	}
+
+	// construct Secret
+	name, secretExist := i.bindingSecretName()
+	data := i.bindingItemMap()
+	if len(data) == 0 {
+		return "", nil
+	}
+	secret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: i.bindingMeta.Namespace,
+			Name:      name,
+		},
+		StringData: data,
+	}
+
 	if len(services) > 0 {
 		serviceBindings = append(serviceBindings, e.Integration.Name)
 	}
