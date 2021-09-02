@@ -18,6 +18,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 
@@ -151,7 +152,9 @@ func (p *EndpointProperties) GetPropertyMap() (map[string]string, error) {
 
 	// Convert json property values to objects before getting their string representation
 	var props map[string]interface{}
-	if err := json.Unmarshal(p.RawMessage, &props); err != nil {
+	d := json.NewDecoder(bytes.NewReader(p.RawMessage))
+	d.UseNumber()
+	if err := d.Decode(&props); err != nil {
 		return nil, err
 	}
 	stringProps := make(map[string]string, len(props))
