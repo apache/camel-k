@@ -563,11 +563,11 @@ public class Earthquake extends RouteBuilder {
 }
 ----
 <1> Modeline header defines the two parameters with a "development" value
-<2> Placeholder `{{period}}` is used
-<3> Placeholder `{{lookAhead}}` is used
+<2> Placeholder `{\{period}}` is used
+<3> Placeholder `{\{lookAhead}}` is used
 
-This looks the same as before, but notice that the `period` and `lookAhead` parameters are set in the modeline, while the route uses the `{{period}}`
-and `{{lookAhead}}` placeholders instead of the actual values.
+This looks the same as before, but notice that the `period` and `lookAhead` parameters are set in the modeline, while the route uses the `{\{period}}`
+and `{\{lookAhead}}` placeholders instead of the actual values.
 
 As before, this integration can be tested with `kamel local run Earthquake.java` (the modeline parameters will be automatically added by the kamel CLI).
 
@@ -758,7 +758,7 @@ spec:
       # ...
 ----
 <1> The definition part starts with general information about the Kamelet
-<2> Definition of the period parameter (used with the `{{period}}` placeholder in the route)
+<2> Definition of the period parameter (used with the `{\{period}}` placeholder in the route)
 <3> Definition of the lookAhead parameter
 
 === Step 7: add metadata and sugar
