@@ -21,6 +21,8 @@ import (
 	"context"
 	"strings"
 
+	networking "k8s.io/api/networking/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	k8s "k8s.io/client-go/kubernetes"
 
@@ -41,12 +43,26 @@ var IdentityResourceCustomizer = func(object ctrl.Object) ctrl.Object {
 	return object
 }
 
+var RemoveIngressRoleCustomizer = func(object ctrl.Object) ctrl.Object {
+	if role, ok := object.(*rbacv1.Role); ok && role.Name == "camel-k-operator" {
+	rules:
+		for i, rule := range role.Rules {
+			for _, group := range rule.APIGroups {
+				if group == networking.GroupName {
+					role.Rules = append(role.Rules[:i], role.Rules[i+1:]...)
+					break rules
+				}
+			}
+		}
+	}
+	return object
+}
+
 // Resources installs named resources from the project resource directory
 func Resources(ctx context.Context, c client.Client, namespace string, force bool, customizer ResourceCustomizer, names ...string) error {
 	return ResourcesOrCollect(ctx, c, namespace, nil, force, customizer, names...)
 }
 
-// ResourcesOrCollect --
 func ResourcesOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection,
 	force bool, customizer ResourceCustomizer, names ...string) error {
 	for _, name := range names {

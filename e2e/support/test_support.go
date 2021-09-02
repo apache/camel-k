@@ -1071,7 +1071,13 @@ func CreateOperatorRole(ns string) (err error) {
 	if err != nil {
 		panic(err)
 	}
-	err = install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/operator-role-kubernetes.yaml")
+	customizer := install.IdentityResourceCustomizer
+	if oc {
+		// Remove Ingress permissions as it's not needed on OpenShift
+		// This should ideally be removed from the common RBAC manifest.
+		customizer = install.RemoveIngressRoleCustomizer
+	}
+	err = install.Resource(TestContext, TestClient(), ns, true, customizer, "/rbac/operator-role-kubernetes.yaml")
 	if err != nil {
 		return err
 	}

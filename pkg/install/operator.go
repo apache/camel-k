@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/types"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -31,6 +30,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -45,7 +45,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/patch"
 )
 
-// OperatorConfiguration --
 type OperatorConfiguration struct {
 	CustomImage           string
 	CustomImagePullPolicy string
@@ -59,12 +58,10 @@ type OperatorConfiguration struct {
 	ResourcesRequirements []string
 }
 
-// OperatorHealthConfiguration --
 type OperatorHealthConfiguration struct {
 	Port int32
 }
 
-// OperatorMonitoringConfiguration --
 type OperatorMonitoringConfiguration struct {
 	Enabled bool
 	Port    int32
@@ -72,6 +69,11 @@ type OperatorMonitoringConfiguration struct {
 
 // OperatorOrCollect installs the operator resources or adds them to the collector if present
 func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection, force bool) error {
+	isOpenShift, err := isOpenShift(c, cfg.ClusterType)
+	if err != nil {
+		return err
+	}
+
 	customizer := func(o ctrl.Object) ctrl.Object {
 		if cfg.CustomImage != "" {
 			if d, ok := o.(*appsv1.Deployment); ok {
@@ -186,6 +188,13 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 				}
 			}
 		}
+
+		if isOpenShift {
+			// Remove Ingress permissions as it's not needed on OpenShift
+			// This should ideally be removed from the common RBAC manifest.
+			RemoveIngressRoleCustomizer(o)
+		}
+
 		return o
 	}
 
@@ -195,10 +204,6 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 	}
 
 	// Install OpenShift RBAC resources if needed (roles and bindings)
-	isOpenShift, err := isOpenShift(c, cfg.ClusterType)
-	if err != nil {
-		return err
-	}
 	if isOpenShift {
 		if err := installOpenShiftRoles(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 			return err
@@ -448,7 +453,6 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 	return pl, nil
 }
 
-// ExampleOrCollect --
 func ExampleOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, IdentityResourceCustomizer,
 		"/samples/bases/camel_v1_integration.yaml",
