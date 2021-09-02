@@ -18,6 +18,7 @@ limitations under the License.
 package kamelet
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"sort"
@@ -92,7 +93,9 @@ func recomputeProperties(kamelet *v1alpha1.Kamelet) error {
 		defValue := ""
 		if v.Default != nil {
 			var val interface{}
-			if err := json.Unmarshal(v.Default.RawMessage, &val); err != nil {
+			d := json.NewDecoder(bytes.NewReader(v.Default.RawMessage))
+			d.UseNumber()
+			if err := d.Decode(&val); err != nil {
 				return errors.Wrapf(err, "cannot decode default value for property %q", k)
 			}
 			defValue = fmt.Sprintf("%v", val)
