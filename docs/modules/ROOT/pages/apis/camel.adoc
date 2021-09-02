@@ -1,5 +1,5 @@
 = Camel K API
 
 ++++
-include::crds-html.adoc[]
+include::partial$apis/crds-html.adoc[]
 ++++

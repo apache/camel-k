@@ -17,7 +17,7 @@
 
 location=$(dirname $0)
 rootdir=$location/../..
-crd_file=$rootdir/docs/modules/ROOT/pages/apis/crds-html.adoc
+crd_file=$rootdir/docs/modules/ROOT/partials/apis/crds-html.adoc
 
 echo "Downloading gen-crd-api-reference-docs binary..."
 TMPFILE=`mktemp`
