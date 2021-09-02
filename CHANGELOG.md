@@ -10,7 +10,9 @@
 - groupId is overriden by `camel-k-integration` using kafka consumer [\#2605](https://github.com/apache/camel-k/issues/2605)
 - Release 1.5.1 [\#2590](https://github.com/apache/camel-k/issues/2590)
 - jitpack dependency is not resolved [\#2589](https://github.com/apache/camel-k/issues/2589)
+- Evaluate/Cleanup logging trait dependency [\#2541](https://github.com/apache/camel-k/issues/2541)
 - kamelet binding : camel controller fail reconcile the kafka sink resource. [\#2528](https://github.com/apache/camel-k/issues/2528)
+- camel-k-integration override provided groupId name in Kafka component [\#2523](https://github.com/apache/camel-k/issues/2523)
 - DeadLetterURI Dependency autodiscover [\#2492](https://github.com/apache/camel-k/issues/2492)
 - kamel bind -o yaml creates wrong data [\#2480](https://github.com/apache/camel-k/issues/2480)
 - Supporting Apache Camel 3.10 [\#2326](https://github.com/apache/camel-k/issues/2326)
@@ -20,6 +22,9 @@
 
 **Merged pull requests:**
 
+- chore: Update embedded catalog to 1.9.0-SNAPSHOT runtime [\#2613](https://github.com/apache/camel-k/pull/2613) ([astefanutti](https://github.com/astefanutti))
+- fix\(ci\): Update latest release version to 1.5.1 [\#2612](https://github.com/apache/camel-k/pull/2612) ([astefanutti](https://github.com/astefanutti))
+- Bump Camel K Runtime to 1.9.x [\#2611](https://github.com/apache/camel-k/pull/2611) ([orpiske](https://github.com/orpiske))
 - fix\(ci\): Fix YAKS binary download [\#2610](https://github.com/apache/camel-k/pull/2610) ([astefanutti](https://github.com/astefanutti))
 - Update dependencies.adoc [\#2607](https://github.com/apache/camel-k/pull/2607) ([mmacphail](https://github.com/mmacphail))
 - Fix \#2487: do not directly delete owned integrations on reset [\#2603](https://github.com/apache/camel-k/pull/2603) ([nicolaferraro](https://github.com/nicolaferraro))
@@ -34,6 +39,7 @@
 - feat\(trait\): container image pull policy [\#2583](https://github.com/apache/camel-k/pull/2583) ([squakez](https://github.com/squakez))
 - Fix \#2486: make kamelet binding scalable [\#2582](https://github.com/apache/camel-k/pull/2582) ([nicolaferraro](https://github.com/nicolaferraro))
 - doc\(kamelets\): trait annotation usage and examples [\#2581](https://github.com/apache/camel-k/pull/2581) ([squakez](https://github.com/squakez))
+- Reworked logging trait dependencies [\#2580](https://github.com/apache/camel-k/pull/2580) ([orpiske](https://github.com/orpiske))
 - fix\(cmd/bind\): show expected kameletbinding [\#2575](https://github.com/apache/camel-k/pull/2575) ([squakez](https://github.com/squakez))
 - ad \[FUSEQE-13946\] Probably incorrect integration name [\#2572](https://github.com/apache/camel-k/pull/2572) ([lfabriko](https://github.com/lfabriko))
 - fix\(cli\): modeline build-property check [\#2571](https://github.com/apache/camel-k/pull/2571) ([squakez](https://github.com/squakez))
