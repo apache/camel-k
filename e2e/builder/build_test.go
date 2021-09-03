@@ -30,25 +30,51 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
+type kitOptions struct {
+	dependencies []string
+	traits       []string
+}
+
 func TestKitTimerToLogFullBuild(t *testing.T) {
-	doKitFullBuild(t, "timer-to-log", "camel:timer", "camel:log")
+	doKitFullBuild(t, "timer-to-log", kitOptions{
+		dependencies: []string{
+			"camel:timer", "camel:log",
+		},
+	})
 }
 
 func TestKitKnativeFullBuild(t *testing.T) {
-	doKitFullBuild(t, "knative", "camel:knative")
+	doKitFullBuild(t, "knative", kitOptions{
+		dependencies: []string{
+			"camel:knative",
+		},
+	})
 }
 
-func doKitFullBuild(t *testing.T, name string, dependencies ...string) {
+func TestKitTimerToLogFullNativeBuild(t *testing.T) {
+	doKitFullBuild(t, "timer-to-log", kitOptions{
+		dependencies: []string{
+			"camel:timer", "camel:log",
+		},
+		traits: []string{
+			"quarkus.package-type=native",
+		},
+	})
+}
+
+func doKitFullBuild(t *testing.T, name string, options kitOptions) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 		buildKitArgs := []string{"kit", "create", name, "-n", ns}
-		for _, dep := range dependencies {
-			buildKitArgs = append(buildKitArgs, "-d", dep)
+		for _, dependency := range options.dependencies {
+			buildKitArgs = append(buildKitArgs, "-d", dependency)
+		}
+		for _, trait := range options.traits {
+			buildKitArgs = append(buildKitArgs, "-t", trait)
 		}
 		Expect(Kamel(buildKitArgs...).Execute()).To(Succeed())
 		Eventually(Build(ns, name)).ShouldNot(BeNil())
-		Eventually(func() v1.BuildPhase {
-			return Build(ns, name)().Status.Phase
-		}, TestTimeoutMedium).Should(Equal(v1.BuildPhaseSucceeded))
+		Eventually(BuildPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.BuildPhaseSucceeded))
+		Eventually(KitPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationKitPhaseReady))
 	})
 }
