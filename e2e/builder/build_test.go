@@ -23,6 +23,7 @@ package builder
 
 import (
 	"testing"
+	"time"
 
 	. "github.com/onsi/gomega"
 
@@ -36,7 +37,7 @@ type kitOptions struct {
 }
 
 func TestKitTimerToLogFullBuild(t *testing.T) {
-	doKitFullBuild(t, "timer-to-log", kitOptions{
+	doKitFullBuild(t, "timer-to-log", "5m0s", TestTimeoutLong, kitOptions{
 		dependencies: []string{
 			"camel:timer", "camel:log",
 		},
@@ -44,7 +45,7 @@ func TestKitTimerToLogFullBuild(t *testing.T) {
 }
 
 func TestKitKnativeFullBuild(t *testing.T) {
-	doKitFullBuild(t, "knative", kitOptions{
+	doKitFullBuild(t, "knative", "5m0s", TestTimeoutLong, kitOptions{
 		dependencies: []string{
 			"camel:knative",
 		},
@@ -52,7 +53,7 @@ func TestKitKnativeFullBuild(t *testing.T) {
 }
 
 func TestKitTimerToLogFullNativeBuild(t *testing.T) {
-	doKitFullBuild(t, "timer-to-log", kitOptions{
+	doKitFullBuild(t, "timer-to-log", "15m0s", 2*TestTimeoutLong, kitOptions{
 		dependencies: []string{
 			"camel:timer", "camel:log",
 		},
@@ -62,9 +63,9 @@ func TestKitTimerToLogFullNativeBuild(t *testing.T) {
 	})
 }
 
-func doKitFullBuild(t *testing.T, name string, options kitOptions) {
+func doKitFullBuild(t *testing.T, name string, buildTimeout string, testTimeout time.Duration, options kitOptions) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("install", "-n", ns, "--build-timeout", buildTimeout).Execute()).To(Succeed())
 		buildKitArgs := []string{"kit", "create", name, "-n", ns}
 		for _, dependency := range options.dependencies {
 			buildKitArgs = append(buildKitArgs, "-d", dependency)
@@ -74,7 +75,7 @@ func doKitFullBuild(t *testing.T, name string, options kitOptions) {
 		}
 		Expect(Kamel(buildKitArgs...).Execute()).To(Succeed())
 		Eventually(Build(ns, name)).ShouldNot(BeNil())
-		Eventually(BuildPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(KitPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationKitPhaseReady))
+		Eventually(BuildPhase(ns, name), testTimeout).Should(Equal(v1.BuildPhaseSucceeded))
+		Eventually(KitPhase(ns, name), testTimeout).Should(Equal(v1.IntegrationKitPhaseReady))
 	})
 }
