@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Numeric values are not properly encoded in KameletBindings [\#2616](https://github.com/apache/camel-k/issues/2616)
 - How to define custom container specs ? [\#2606](https://github.com/apache/camel-k/issues/2606)
 - groupId is overriden by `camel-k-integration` using kafka consumer [\#2605](https://github.com/apache/camel-k/issues/2605)
 - Release 1.5.1 [\#2590](https://github.com/apache/camel-k/issues/2590)
@@ -15,17 +16,22 @@
 - camel-k-integration override provided groupId name in Kafka component [\#2523](https://github.com/apache/camel-k/issues/2523)
 - DeadLetterURI Dependency autodiscover [\#2492](https://github.com/apache/camel-k/issues/2492)
 - kamel bind -o yaml creates wrong data [\#2480](https://github.com/apache/camel-k/issues/2480)
+- propagate labels to deployments and pods [\#2446](https://github.com/apache/camel-k/issues/2446)
 - Supporting Apache Camel 3.10 [\#2326](https://github.com/apache/camel-k/issues/2326)
 - No possibility to disable compression while executing `kamel run` [\#2227](https://github.com/apache/camel-k/issues/2227)
+- `extensions/v1beta1` Ingress is deprecated [\#2157](https://github.com/apache/camel-k/issues/2157)
 - Wiretap to Kamelet does not work in YAML [\#2139](https://github.com/apache/camel-k/issues/2139)
 - More information needed about dependency resolution [\#2085](https://github.com/apache/camel-k/issues/2085)
 
 **Merged pull requests:**
 
+- Fix \#2616: correctly encode numbers in Kamelet parameters [\#2617](https://github.com/apache/camel-k/pull/2617) ([nicolaferraro](https://github.com/nicolaferraro))
+- \[website\] fix attribute usage, and put the crd html file in partials [\#2614](https://github.com/apache/camel-k/pull/2614) ([djencks](https://github.com/djencks))
 - chore: Update embedded catalog to 1.9.0-SNAPSHOT runtime [\#2613](https://github.com/apache/camel-k/pull/2613) ([astefanutti](https://github.com/astefanutti))
 - fix\(ci\): Update latest release version to 1.5.1 [\#2612](https://github.com/apache/camel-k/pull/2612) ([astefanutti](https://github.com/astefanutti))
 - Bump Camel K Runtime to 1.9.x [\#2611](https://github.com/apache/camel-k/pull/2611) ([orpiske](https://github.com/orpiske))
 - fix\(ci\): Fix YAKS binary download [\#2610](https://github.com/apache/camel-k/pull/2610) ([astefanutti](https://github.com/astefanutti))
+- doc\(kamelets\): trait array vaue syntax [\#2609](https://github.com/apache/camel-k/pull/2609) ([squakez](https://github.com/squakez))
 - Update dependencies.adoc [\#2607](https://github.com/apache/camel-k/pull/2607) ([mmacphail](https://github.com/mmacphail))
 - Fix \#2487: do not directly delete owned integrations on reset [\#2603](https://github.com/apache/camel-k/pull/2603) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(build\): use batch-mode for maven-overlay task in CI [\#2601](https://github.com/apache/camel-k/pull/2601) ([tadayosi](https://github.com/tadayosi))
@@ -274,6 +280,7 @@
 - Fix \#200: Add support for mirrorOf attribute [\#2089](https://github.com/apache/camel-k/pull/2089) ([bouskaJ](https://github.com/bouskaJ))
 - chore: Upgrade controller-runtime to version 0.7.2 [\#2087](https://github.com/apache/camel-k/pull/2087) ([astefanutti](https://github.com/astefanutti))
 - chore\(kamelets\): embed kamelet repository and remove lookup from gith… [\#2086](https://github.com/apache/camel-k/pull/2086) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore: Upgrade to `networking.k8s.io/v1` Ingress API [\#2084](https://github.com/apache/camel-k/pull/2084) ([astefanutti](https://github.com/astefanutti))
 - refactor\(trait\): affinity  [\#2078](https://github.com/apache/camel-k/pull/2078) ([squakez](https://github.com/squakez))
 - Upgrade Kubernetes to v0.19.8 and Service Binding operator to v0.4.1 [\#2076](https://github.com/apache/camel-k/pull/2076) ([astefanutti](https://github.com/astefanutti))
 - Fix deprecated annotation [\#2070](https://github.com/apache/camel-k/pull/2070) ([bouskaJ](https://github.com/bouskaJ))
