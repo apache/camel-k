@@ -37,14 +37,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	sb "github.com/redhat-developer/service-binding-operator/api/v1alpha1"
-
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	camelevent "github.com/apache/camel-k/pkg/event"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/digest"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/monitoring"
 )
@@ -239,25 +236,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler, cl client.Client) error {
 		return err
 	}
 
-	// Check the ServiceBinding CRD is present
-	if ok, err := kubernetes.IsAPIResourceInstalled(cl, sb.GroupVersion.String(), sb.GroupVersionKind.Kind); err != nil {
-		return err
-	} else if !ok {
-		log.Info("Service binding is disabled, install the Service Binding Operator if needed")
-	} else if ok, err := kubernetes.CheckPermission(context.TODO(), cl, sb.GroupVersion.Group, sb.GroupVersionResource.Resource, platform.GetOperatorWatchNamespace(), "", "create"); err != nil {
-		return err
-	} else if !ok {
-		log.Info("Service binding is disabled, the operator is not granted permission to create ServiceBindings!")
-	} else {
-		// Watch ServiceBindings and enqueue owning Integrations
-		err = c.Watch(&source.Kind{Type: &sb.ServiceBinding{}}, &handler.EnqueueRequestForOwner{
-			OwnerType:    &v1.Integration{},
-			IsController: true,
-		})
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
 

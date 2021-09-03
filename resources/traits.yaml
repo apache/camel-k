@@ -918,17 +918,17 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: 'The Service Binding trait allows users to connect to Provisioned Services
-    and ServiceBindings in Kubernetes: https://github.com/k8s-service-bindings/spec#service-binding
-    As the specification is still evolving this is subject to change'
+  description: 'The Service Binding trait allows users to connect to Services in Kubernetes:
+    https://github.com/k8s-service-bindings/spec#service-binding As the specification
+    is still evolving this is subject to change'
   properties:
   - name: enabled
     type: bool
     description: Can be used to enable or disable a trait. All traits share this common
       property.
-  - name: service-bindings
+  - name: services
     type: '[]string'
-    description: List of Provisioned Services and ServiceBindings in the form [[apigroup/]version:]kind:[namespace/]name
+    description: List of Services in the form [[apigroup/]version:]kind:[namespace/]name
 - name: service
   platform: false
   profiles:
