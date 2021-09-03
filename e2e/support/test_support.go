@@ -26,7 +26,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -36,11 +35,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/apache/camel-k/pkg/util/patch"
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
 	"github.com/spf13/cobra"
-	"k8s.io/apimachinery/pkg/types"
 
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
@@ -49,6 +46,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/pointer"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -70,6 +68,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/openshift"
+	"github.com/apache/camel-k/pkg/util/patch"
 
 	// let's enable addons in all tests
 	_ "github.com/apache/camel-k/addons"
@@ -569,6 +568,28 @@ func IntegrationKit(ns string, name string) func() string {
 	}
 }
 
+func Kit(ns, name string) func() *v1.IntegrationKit {
+	return func() *v1.IntegrationKit {
+		kit := v1.NewIntegrationKit(ns, name)
+		if err := TestClient().Get(TestContext, ctrl.ObjectKeyFromObject(kit), kit); err != nil && !k8serrors.IsNotFound(err) {
+			panic(err)
+		} else if err != nil && k8serrors.IsNotFound(err) {
+			return nil
+		}
+		return kit
+	}
+}
+
+func KitPhase(ns, name string) func() v1.IntegrationKitPhase {
+	return func() v1.IntegrationKitPhase {
+		kit := Kit(ns, name)()
+		if kit == nil {
+			return v1.IntegrationKitPhaseNone
+		}
+		return kit.Status.Phase
+	}
+}
+
 func UpdateIntegration(ns string, name string, upd func(it *v1.Integration)) error {
 	it := Integration(ns, name)()
 	if it == nil {
@@ -851,7 +872,7 @@ func DeploymentCondition(ns string, name string, conditionType appsv1.Deployment
 	}
 }
 
-func Build(ns string, name string) func() *v1.Build {
+func Build(ns, name string) func() *v1.Build {
 	return func() *v1.Build {
 		build := v1.NewBuild(ns, name)
 		if err := TestClient().Get(TestContext, ctrl.ObjectKeyFromObject(build), build); err != nil && k8serrors.IsNotFound(err) {
@@ -861,6 +882,16 @@ func Build(ns string, name string) func() *v1.Build {
 			return nil
 		}
 		return build
+	}
+}
+
+func BuildPhase(ns, name string) func() v1.BuildPhase {
+	return func() v1.BuildPhase {
+		build := Build(ns, name)()
+		if build != nil {
+			return build.Status.Phase
+		}
+		return v1.BuildPhaseNone
 	}
 }
 
@@ -891,17 +922,6 @@ func DeletePlatform(ns string) func() bool {
 			log.Error(err, "Got error while deleting the platform")
 		}
 		return false
-	}
-}
-
-func SetPlatformVersion(ns string, version string) func() error {
-	return func() error {
-		p := Platform(ns)()
-		if p == nil {
-			return errors.New("no platform found")
-		}
-		p.Status.Version = version
-		return TestClient().Status().Update(TestContext, p)
 	}
 }
 
