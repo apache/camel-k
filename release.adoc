@@ -149,10 +149,14 @@ kamel install --operator-image=camelk/camel-k:$CAMEL_K_VERSION --maven-repositor
 
 Release notes can be generated with:
 
-
 ```
-# Check that VERSION points to the current version and LAST_RELEASED_VERSION points to the immediately previous one
-make release-notes
+# previous version released on same branch, e.g. 1.5.0
+export PREV=a.b.c
+# current version to be released, e.g. 1.6.0
+export CUR=x.y.z
+# Branch where both tags are present
+export BRANCH=main
+./script/gen_release_notes.sh $PREV $CUR $BRANCH
 ```
 
 A `release-notes.md` file is generated and can be attached to the release github issue for reference.
