@@ -479,6 +479,25 @@ func Route(ns string, name string) func() *routev1.Route {
 	}
 }
 
+func RouteAdmitted(ns string, name string) func() bool {
+	return func() bool {
+		route := Route(ns, name)()
+		ingressReady := false
+		for _, ing := range route.Status.Ingress {
+			for _, cond := range ing.Conditions {
+				if cond.Type == routev1.RouteAdmitted {
+					if cond.Status == corev1.ConditionTrue {
+						ingressReady = true
+					} else {
+						return false
+					}
+				}
+			}
+		}
+		return ingressReady
+	}
+}
+
 func IntegrationCronJob(ns string, name string) func() *v1beta1.CronJob {
 	return func() *v1beta1.CronJob {
 		lst := v1beta1.CronJobList{
@@ -1063,7 +1082,7 @@ func Kamelet(name string, ns string) func() *v1alpha1.Kamelet {
 func ClusterDomainName() (string, error) {
 	dns := configv1.DNS{}
 	key := ctrl.ObjectKey{
-		Name:      "cluster",
+		Name: "cluster",
 	}
 	err := TestClient().Get(TestContext, key, &dns)
 	if err != nil {
@@ -1071,7 +1090,6 @@ func ClusterDomainName() (string, error) {
 	}
 	return dns.Spec.BaseDomain, nil
 }
-
 
 /*
 	Tekton
