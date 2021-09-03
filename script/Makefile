@@ -312,9 +312,6 @@ install-crc:
 install-minikube:
 	./script/install_minikube.sh
 
-release-notes:
-	./script/gen_release_notes.sh $(LAST_RELEASED_VERSION) $(VERSION)
-
 get-staging-repo:
 	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
 

@@ -17,14 +17,15 @@
 
 set -e
 
-if [ "$#" -ne 2 ]; then
-    echo "usage: $0 last-tag new-tag"
+if [ "$#" -ne 3 ]; then
+    echo "usage: $0 last-version new-version branch"
     exit 1
 fi
 
 location=$(dirname $0)
 last_tag=v$1
 new_tag=v$2
+branch=$3
 
 echo "Generating release notes for version $new_tag starting from tag $last_tag"
 
@@ -38,12 +39,12 @@ echo "Using start SHA $start_sha from tag $last_tag"
 set +e
 end_sha=$(git rev-list -n 1 $new_tag 2>&1)
 if [ $? -ne 0 ]; then
-	end_sha=$(git rev-parse upstream/main)
+	end_sha=$(git rev-parse upstream/$branch)
     if [ "$end_sha" == "" ]; then
     	echo "cannot determine current SHA from git"
     	exit 1
     fi
-    echo "Using end SHA $end_sha from upstream/main"
+    echo "Using end SHA $end_sha from upstream/$branch"
 else
 	echo "Using end SHA $end_sha from tag $new_tag"
 fi
@@ -52,18 +53,9 @@ set -e
 set +e
 which release-notes > /dev/null 2>&1
 if [ $? -ne 0 ]; then
-  echo "No \"release-notes\" command found. Please follow these steps to install it:"
-  echo "  1) git clone git@github.com:nicolaferraro/release.git"
-  echo "  2) cd release && go install ./cmd/release-notes/"
-  echo ""
+  echo "No \"release-notes\" command found. Please install it from https://github.com/kubernetes/release"
   exit 1
 fi
 set -e
 
-cli_version=$(release-notes --version)
-if [ "$cli_version" != "nicolaferraro" ]; then
-  echo "You must install a specific fork from nicolaferraro of the \"release-notes\" command"
-  exit 1
-fi
-
-release-notes --start-sha $start_sha --end-sha $end_sha --github-repo camel-k --github-org apache --release-version $new_tag --output $location/../release-notes.md --requiredAuthor ""
+release-notes --start-sha $start_sha --end-sha $end_sha --branch $branch --repo camel-k --org apache --output $location/../release-notes.md --required-author ""
