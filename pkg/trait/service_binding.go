@@ -58,12 +58,7 @@ func (t *serviceBindingTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.IntegrationInPhase(
-		v1.IntegrationPhaseInitialization,
-		v1.IntegrationPhaseWaitingForBindings,
-		v1.IntegrationPhaseDeploying,
-		v1.IntegrationPhaseRunning,
-	), nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), nil
 }
 
 func (t *serviceBindingTrait) Apply(e *Environment) error {
@@ -71,14 +66,13 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 	if err != nil {
 		return err
 	}
-	// let the retry policy be controlled by Camel-k
+	// let the SBO retry policy be controlled by Camel-k
 	err = process(ctx, getHandlers())
 	if err != nil {
 		return err
 	}
 
-	// construct Secret
-	secret := getSecret(ctx, e.Integration.Namespace)
+	secret := createSecret(ctx, e.Integration.Namespace)
 	if secret != nil {
 		e.Resources.Add(secret)
 		e.ApplicationProperties["quarkus.kubernetes-service-binding.enabled"] = "true"
@@ -182,7 +176,7 @@ func getHandlers() []pipeline.Handler {
 	}
 }
 
-func getSecret(ctx pipeline.Context, ns string) *corev1.Secret {
+func createSecret(ctx pipeline.Context, ns string) *corev1.Secret {
 	name := ctx.BindingSecretName()
 	items := ctx.BindingItems()
 	data := items.AsMap()
