@@ -116,9 +116,6 @@ const (
 	IntegrationPhaseWaitingForPlatform IntegrationPhase = "Waiting For Platform"
 	// IntegrationPhaseBuildingKit --
 	IntegrationPhaseBuildingKit IntegrationPhase = "Building Kit"
-	// IntegrationPhaseWaitingForBindings means the Integration is currently waiting to be bound
-	// to other resources, e.g., Service Bindings.
-	IntegrationPhaseWaitingForBindings IntegrationPhase = "Waiting for Bindings"
 	// IntegrationPhaseDeploying --
 	IntegrationPhaseDeploying IntegrationPhase = "Deploying"
 	// IntegrationPhaseRunning --
@@ -138,8 +135,6 @@ const (
 	IntegrationConditionKnativeServiceAvailable IntegrationConditionType = "KnativeServiceAvailable"
 	// IntegrationConditionCronJobAvailable --
 	IntegrationConditionCronJobAvailable IntegrationConditionType = "CronJobAvailable"
-	// IntegrationConditionServiceBindingsCollectionReady --
-	IntegrationConditionServiceBindingsCollectionReady IntegrationConditionType = "ServiceBindingsCollectionReady"
 	// IntegrationConditionExposureAvailable --
 	IntegrationConditionExposureAvailable IntegrationConditionType = "ExposureAvailable"
 	// IntegrationConditionPrometheusAvailable --
