@@ -77,8 +77,7 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 		e.Resources.Add(secret)
 		e.ApplicationProperties["quarkus.kubernetes-service-binding.enabled"] = "true"
 		e.ApplicationProperties["SERVICE_BINDING_ROOT"] = serviceBindingsMountPath
-		e.ServiceBindings = make(map[string]string)
-		e.ServiceBindings[e.Integration.Name] = secret.GetName()
+		e.ServiceBindingSecret = secret.GetName()
 	}
 	return nil
 }

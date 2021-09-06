@@ -209,7 +209,7 @@ type Environment struct {
 	EnvVars               []corev1.EnvVar
 	ApplicationProperties map[string]string
 	Interceptors          []string
-	ServiceBindings       map[string]string
+	ServiceBindingSecret  string
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration
@@ -732,8 +732,9 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	// Volumes :: Additional Secrets
 	//
 	// append Service Binding secrets
-	for sb, secret := range e.ServiceBindings {
-		refName := kubernetes.SanitizeLabel(sb)
+	if len(e.ServiceBindingSecret) > 0 {
+		secret := e.ServiceBindingSecret
+		refName := kubernetes.SanitizeLabel(secret)
 
 		*vols = append(*vols, corev1.Volume{
 			Name: refName,
@@ -746,7 +747,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 		*mnts = append(*mnts, corev1.VolumeMount{
 			Name:      refName,
-			MountPath: path.Join(serviceBindingsMountPath, strings.ToLower(sb)),
+			MountPath: path.Join(serviceBindingsMountPath, strings.ToLower(secret)),
 		})
 	}
 
