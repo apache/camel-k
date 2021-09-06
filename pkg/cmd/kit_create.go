@@ -135,14 +135,14 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 	}
 	for _, item := range command.Dependencies {
 		switch {
-		case strings.HasPrefix(item, "mvn:"):
-			kit.Spec.Dependencies = append(kit.Spec.Dependencies, item)
-		case strings.HasPrefix(item, "file:"):
-			kit.Spec.Dependencies = append(kit.Spec.Dependencies, item)
 		case strings.HasPrefix(item, "camel-quarkus-"):
 			kit.Spec.Dependencies = append(kit.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-quarkus-"))
+		case strings.HasPrefix(item, "camel-k-"):
+			kit.Spec.Dependencies = append(kit.Spec.Dependencies, "camel-k:"+strings.TrimPrefix(item, "camel-k-"))
 		case strings.HasPrefix(item, "camel-"):
 			kit.Spec.Dependencies = append(kit.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-"))
+		default:
+			kit.Spec.Dependencies = append(kit.Spec.Dependencies, item)
 		}
 	}
 
