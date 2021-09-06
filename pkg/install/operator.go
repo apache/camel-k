@@ -261,13 +261,6 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		fmt.Println("Warning: the operator will not be able to create Leases. Try installing as cluster-admin to allow management of Lease resources.")
 	}
 
-	if errmtr := installServiceBindings(ctx, c, cfg.Namespace, customizer, collection, force); errmtr != nil {
-		if k8serrors.IsAlreadyExists(errmtr) {
-			return errmtr
-		}
-		fmt.Println("Warning: the operator will not be able to lookup ServiceBinding resources. Try installing as cluster-admin to allow the lookup of ServiceBinding resources.")
-	}
-
 	if cfg.Monitoring.Enabled {
 		if err := installMonitoringResources(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 			if k8serrors.IsForbidden(err) {
@@ -403,13 +396,6 @@ func installLeaseBindings(ctx context.Context, c client.Client, namespace string
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
 		"/rbac/operator-role-leases.yaml",
 		"/rbac/operator-role-binding-leases.yaml",
-	)
-}
-
-func installServiceBindings(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
-	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-		"/rbac/operator-role-service-binding.yaml",
-		"/rbac/operator-role-binding-service-binding.yaml",
 	)
 }
 
