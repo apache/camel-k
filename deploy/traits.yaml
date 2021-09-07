@@ -249,8 +249,9 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The deployer trait can be used to explicitly select the kind of high
-    level resource that will deploy the integration.
+  description: The deployer trait is responsible for deploying the resources owned
+    by the integration, and can be used to explicitly select the underlying controller
+    that will manage the integration pods.
   properties:
   - name: enabled
     type: bool
@@ -807,15 +808,21 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The Quarkus trait activates the Quarkus runtime. It's enabled by default.
+  description: The Quarkus trait configures the Quarkus runtime. It's enabled by default.
   properties:
   - name: enabled
     type: bool
     description: Can be used to enable or disable a trait. All traits share this common
       property.
-  - name: native
-    type: bool
-    description: The Quarkus runtime type (reserved for future use)
+  - name: package-type
+    type: '[]./pkg/trait.quarkusPackageType'
+    description: The Quarkus package types, either `fast-jar` or `native` (default
+      `fast-jar`).In case both `fast-jar` and `native` are specified, two IntegrationKits
+      are created,with the `native` kit having precedence over the `fast-jar' one
+      once ready.The order influences the resolution of the current IntegrationKit
+      for the Integration.The IntegrationKit corresponding to the first package type
+      will be assigned to theIntegration in case no existing IntegrationKit that matches
+      the Integration exists.
 - name: route
   platform: false
   profiles:
