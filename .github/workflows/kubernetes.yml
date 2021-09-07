@@ -132,3 +132,4 @@ jobs:
         # Then run integration tests
         make test-integration
         make test-service-binding
+        make test-quarkus-native

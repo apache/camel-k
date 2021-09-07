@@ -94,14 +94,14 @@ func TestOperatorUpgrade(t *testing.T) {
 		Eventually(IntegrationVersion(ns, name)).Should(Equal(defaults.Version))
 
 		// Check the previous kit is not garbage collected
-		Eventually(Kits(ns, kitWithVersion(version))).Should(HaveLen(1))
+		Eventually(Kits(ns, KitWithVersion(version))).Should(HaveLen(1))
 		// Check a new kit is created with the current version
-		Eventually(Kits(ns, kitWithVersion(defaults.Version))).Should(HaveLen(1))
+		Eventually(Kits(ns, KitWithVersion(defaults.Version))).Should(HaveLen(1))
 		// Check the new kit is ready
-		Eventually(Kits(ns, kitWithVersion(defaults.Version), kitWithPhase(v1.IntegrationKitPhaseReady)),
+		Eventually(Kits(ns, KitWithVersion(defaults.Version), KitWithPhase(v1.IntegrationKitPhaseReady)),
 			TestTimeoutMedium).Should(HaveLen(1))
 
-		kit := Kits(ns, kitWithVersion(defaults.Version))()[0]
+		kit := Kits(ns, KitWithVersion(defaults.Version))()[0]
 
 		// Check the Integration uses the new image
 		Eventually(IntegrationKit(ns, name), TestTimeoutMedium).Should(Equal(kit.Name))
@@ -116,12 +116,4 @@ func TestOperatorUpgrade(t *testing.T) {
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		Expect(Kamel("uninstall", "--all", "--olm=false").Execute()).To(Succeed())
 	})
-}
-
-func kitWithVersion(version string) func(kit *v1.IntegrationKit) bool {
-	return func(kit *v1.IntegrationKit) bool { return kit.Status.Version == version }
-}
-
-func kitWithPhase(phase v1.IntegrationKitPhase) func(kit *v1.IntegrationKit) bool {
-	return func(kit *v1.IntegrationKit) bool { return kit.Status.Phase == phase }
 }
