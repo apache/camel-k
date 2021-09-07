@@ -161,28 +161,32 @@ test-integration: build
 	go test -timeout 60m -v ./e2e/common/traits -tags=integration
 
 test-knative: build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/knative -tags=integration
-	#go test -timeout 60m -v ./e2e/knative -tags=integration
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	go test -timeout 60m -v ./e2e/knative -tags=integration
 
 test-builder: build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/builder -tags=integration
-	#go test -timeout 60m -v ./e2e/builder -tags=integration
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	go test -timeout 60m -v ./e2e/builder -tags=integration
 
 test-local: build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/local -tags=integration
-	#go test -timeout 60m -v ./e2e/local -tags=integration
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	go test -timeout 60m -v ./e2e/local -tags=integration
 
 test-kamel-cli: build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/common/cli -tags=integration
-	#go test -timeout 60m -v ./e2e/common/cli -tags=integration
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	go test -timeout 60m -v ./e2e/common/cli -tags=integration
+
+test-quarkus-native: build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	go test -timeout 60m -v ./e2e/native -tags=integration
+
+test-service-binding: build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	go test -timeout 60m -v ./e2e/service-binding -tags=integration
 
 test-upgrade: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 60m -v ./e2e/upgrade -tags=integration
-
-test-service-binding: build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" go test -timeout 60m -v ./e2e/service-binding -tags=integration
-	#go test -timeout 60m -v ./e2e/service-binding -tags=integration
 
 build-kamel:
 # Ensure the binary is statically linked when building on Linux due to ABI changes in newer glibc 2.32, otherwise

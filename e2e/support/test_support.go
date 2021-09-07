@@ -46,6 +46,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/pointer"
 
@@ -678,26 +679,65 @@ func ScaleKameletBinding(ns string, name string, replicas int32) error {
 	})
 }
 
-func Kits(ns string, filters ...func(*v1.IntegrationKit) bool) func() []v1.IntegrationKit {
+type KitFilter interface {
+	Match(*v1.IntegrationKit) bool
+}
+
+func KitWithPhase(phase v1.IntegrationKitPhase) KitFilter {
+	return &kitFilter{
+		filter: func(kit *v1.IntegrationKit) bool {
+			return kit.Status.Phase == phase
+		},
+	}
+}
+
+func KitWithVersion(version string) KitFilter {
+	return &kitFilter{
+		filter: func(kit *v1.IntegrationKit) bool {
+			return kit.Status.Version == version
+		},
+	}
+}
+
+func KitWithLabels(kitLabels map[string]string) ctrl.ListOption {
+	return ctrl.MatchingLabelsSelector{
+		Selector: labels.Set(kitLabels).AsSelector(),
+	}
+}
+
+type kitFilter struct {
+	filter func(*v1.IntegrationKit) bool
+}
+
+func (f *kitFilter) Match(kit *v1.IntegrationKit) bool {
+	return f.filter(kit)
+}
+
+func Kits(ns string, options ...interface{}) func() []v1.IntegrationKit {
+	filters := make([]KitFilter, 0)
+	listOptions := []ctrl.ListOption{ctrl.InNamespace(ns)}
+	for _, option := range options {
+		switch o := option.(type) {
+		case KitFilter:
+			filters = append(filters, o)
+		case ctrl.ListOption:
+			listOptions = append(listOptions, o)
+		default:
+			panic(fmt.Errorf("unsupported kits option %q", o))
+		}
+	}
+
 	return func() []v1.IntegrationKit {
 		list := v1.NewIntegrationKitList()
-		if err := TestClient().List(TestContext, &list, ctrl.InNamespace(ns)); err != nil {
+		if err := TestClient().List(TestContext, &list, listOptions...); err != nil {
 			panic(err)
-		}
-
-		if len(filters) == 0 {
-			filters = []func(*v1.IntegrationKit) bool{
-				func(kit *v1.IntegrationKit) bool {
-					return true
-				},
-			}
 		}
 
 		var kits []v1.IntegrationKit
 	kits:
 		for _, kit := range list.Items {
 			for _, filter := range filters {
-				if !filter(&kit) {
+				if !filter.Match(&kit) {
 					continue kits
 				}
 			}
