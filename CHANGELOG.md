@@ -4,6 +4,11 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v1.6.0...HEAD)
 
+**Closed issues:**
+
+- Kamelet add support for tolerations [\#2602](https://github.com/apache/camel-k/issues/2602)
+- Release 1.6.0 [\#2591](https://github.com/apache/camel-k/issues/2591)
+
 **Merged pull requests:**
 
 - Fix \#2616: correctly encode numbers in Kamelet parameters [\#2617](https://github.com/apache/camel-k/pull/2617) ([nicolaferraro](https://github.com/nicolaferraro))
