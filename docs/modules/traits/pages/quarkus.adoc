@@ -5,6 +5,10 @@ The Quarkus trait configures the Quarkus runtime.
 
 It's enabled by default.
 
+NOTE: Compiling to a native executable, i.e. when using `package-type=native`, requires at least 4GiB of memory.
+Make sure enough memory is available for the Pod running the native build, that is either the operator Pod, or
+the build Pod, depending on the build strategy configured for the platform.
+
 
 This trait is available in the following profiles: **Kubernetes, Knative, OpenShift**.
 
@@ -32,11 +36,11 @@ The following configuration options are available:
 | quarkus.package-type
 | []./pkg/trait.quarkusPackageType
 | The Quarkus package types, either `fast-jar` or `native` (default `fast-jar`).
-In case both `fast-jar` and `native` are specified, two IntegrationKits are created,
-with the `native` kit having precedence over the `fast-jar' one once ready.
-The order influences the resolution of the current IntegrationKit for the Integration.
-The IntegrationKit corresponding to the first package type will be assigned to the
-Integration in case no existing IntegrationKit that matches the Integration exists.
+In case both `fast-jar` and `native` are specified, two `IntegrationKit` resources are created,
+with the `native` kit having precedence over the `fast-jar` one once ready.
+The order influences the resolution of the current kit for the integration.
+The kit corresponding to the first package type will be assigned to the
+integration in case no existing kit that matches the integration exists.
 
 |===
 
@@ -44,7 +48,17 @@ Integration in case no existing IntegrationKit that matches the Integration exis
 
 == Supported Camel Components
 
-When running with Quarkus enabled, then Camel K only supports out of the box, those Camel components that
-are available as Camel Quarkus Extensions.
+Camel K only supports the Camel components that are available as Camel Quarkus Extensions out-of-the-box. These extensions are listed in the xref:2.0.0@camel-quarkus::reference/index.adoc[Camel Quarkus documentation].
 
-You can see the list of extensions from the xref:2.0.0@camel-quarkus::reference/index.adoc[Camel Quarkus documentation].
+== Examples
+
+=== Automatic Rollout Deployment to Native Integration
+
+While the compilation to native executables produces integrations that start faster and consume less memory at runtime, the build process is resources intensive, and takes a longer time than the packaging to traditional Java applications.
+
+In order to combine the best of both worlds, it's possible to configure the Quarkus trait to run both traditional and native builds in parallel when running an integration, e.g.:
+
+[source,console]
+$ kamel run -t quarkus.package-type=fast-jar -t quarkus.package-type=native ...
+
+The integration pod will run as soon as the `fast-jar` build completes, and a rollout deployment to the `native` image will be triggered, as soon as the `native` build completes, with no service interruption.
