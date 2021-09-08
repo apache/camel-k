@@ -48,15 +48,19 @@ var kitPriority = map[quarkusPackageType]string{
 //
 // It's enabled by default.
 //
+// NOTE: Compiling to a native executable, i.e. when using `package-type=native`, requires at least 4GiB of memory.
+// Make sure enough memory is available for the Pod running the native build, that is either the operator Pod, or
+// the build Pod, depending on the build strategy configured for the platform.
+//
 // +camel-k:trait=quarkus
 type quarkusTrait struct {
 	BaseTrait `property:",squash"`
 	// The Quarkus package types, either `fast-jar` or `native` (default `fast-jar`).
-	// In case both `fast-jar` and `native` are specified, two IntegrationKits are created,
-	// with the `native` kit having precedence over the `fast-jar' one once ready.
-	// The order influences the resolution of the current IntegrationKit for the Integration.
-	// The IntegrationKit corresponding to the first package type will be assigned to the
-	// Integration in case no existing IntegrationKit that matches the Integration exists.
+	// In case both `fast-jar` and `native` are specified, two `IntegrationKit` resources are created,
+	// with the `native` kit having precedence over the `fast-jar` one once ready.
+	// The order influences the resolution of the current kit for the integration.
+	// The kit corresponding to the first package type will be assigned to the
+	// integration in case no existing kit that matches the integration exists.
 	PackageTypes []quarkusPackageType `property:"package-type" json:"packageTypes,omitempty"`
 }
 
