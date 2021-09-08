@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -84,6 +85,13 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 
 		labels := kubernetes.FilterCamelCreatorLabels(kit.Labels)
 		labels[v1.IntegrationKitLayoutLabel] = kit.Labels[v1.IntegrationKitLayoutLabel]
+		timeout := env.Platform.Status.Build.GetTimeout()
+		if layout := labels[v1.IntegrationKitLayoutLabel]; env.Platform.Spec.Build.Timeout == nil && layout == v1.IntegrationKitLayoutNative {
+			// Increase the timeout to a sensible default
+			timeout = metav1.Duration{
+				Duration: 10 * time.Minute,
+			}
+		}
 		build = &v1.Build{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1.SchemeGroupVersion.String(),
@@ -96,7 +104,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 			},
 			Spec: v1.BuildSpec{
 				Tasks:   env.BuildTasks,
-				Timeout: env.Platform.Status.Build.GetTimeout(),
+				Timeout: timeout,
 			},
 		}
 
