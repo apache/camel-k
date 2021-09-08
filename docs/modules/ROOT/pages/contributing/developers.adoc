@@ -75,7 +75,6 @@ make
 
 This executes a full build of the Go code. If you need to build the components separately you can execute:
 
-* `make build-operator`: to build the operator binary only.
 * `make build-kamel`: to build the `kamel` client tool only.
 
 After a successful build, if you're connected to a Docker daemon, you can build the operator Docker image by running:
