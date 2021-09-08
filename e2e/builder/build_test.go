@@ -22,6 +22,7 @@ limitations under the License.
 package builder
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -29,6 +30,7 @@ import (
 
 	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 type kitOptions struct {
@@ -37,7 +39,7 @@ type kitOptions struct {
 }
 
 func TestKitTimerToLogFullBuild(t *testing.T) {
-	doKitFullBuild(t, "timer-to-log", "5m0s", TestTimeoutLong, kitOptions{
+	doKitFullBuild(t, "timer-to-log", "300Mi", "5m0s", TestTimeoutLong, kitOptions{
 		dependencies: []string{
 			"camel:timer", "camel:log",
 		},
@@ -45,7 +47,7 @@ func TestKitTimerToLogFullBuild(t *testing.T) {
 }
 
 func TestKitKnativeFullBuild(t *testing.T) {
-	doKitFullBuild(t, "knative", "5m0s", TestTimeoutLong, kitOptions{
+	doKitFullBuild(t, "knative", "300mi", "5m0s", TestTimeoutLong, kitOptions{
 		dependencies: []string{
 			"camel-k-knative",
 		},
@@ -53,7 +55,7 @@ func TestKitKnativeFullBuild(t *testing.T) {
 }
 
 func TestKitTimerToLogFullNativeBuild(t *testing.T) {
-	doKitFullBuild(t, "timer-to-log", "15m0s", 2*TestTimeoutLong, kitOptions{
+	doKitFullBuild(t, "timer-to-log", "4Gi", "15m0s", 2*TestTimeoutLong, kitOptions{
 		dependencies: []string{
 			"camel:timer", "camel:log",
 		},
@@ -63,9 +65,21 @@ func TestKitTimerToLogFullNativeBuild(t *testing.T) {
 	})
 }
 
-func doKitFullBuild(t *testing.T, name string, buildTimeout string, testTimeout time.Duration, options kitOptions) {
+func doKitFullBuild(t *testing.T, name string, memoryLimit string, buildTimeout string, testTimeout time.Duration, options kitOptions) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--build-timeout", buildTimeout).Execute()).To(Succeed())
+		strategy := os.Getenv("KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY")
+		ocp, err := openshift.IsOpenShift(TestClient())
+		Expect(err).To(Succeed())
+
+		args := []string{"install", "-n", ns}
+		args = append(args, "--build-timeout", buildTimeout)
+		// TODO: configure build Pod resources if applicable
+		if strategy == "Spectrum" || ocp {
+			args = append(args, "--operator-resources", "limits.memory="+memoryLimit)
+		}
+
+		Expect(Kamel(args...).Execute()).To(Succeed())
+
 		buildKitArgs := []string{"kit", "create", name, "-n", ns}
 		for _, dependency := range options.dependencies {
 			buildKitArgs = append(buildKitArgs, "-d", dependency)
@@ -74,6 +88,7 @@ func doKitFullBuild(t *testing.T, name string, buildTimeout string, testTimeout 
 			buildKitArgs = append(buildKitArgs, "-t", trait)
 		}
 		Expect(Kamel(buildKitArgs...).Execute()).To(Succeed())
+
 		Eventually(Build(ns, name)).ShouldNot(BeNil())
 		Eventually(BuildPhase(ns, name), testTimeout).Should(Equal(v1.BuildPhaseSucceeded))
 		Eventually(KitPhase(ns, name), testTimeout).Should(Equal(v1.IntegrationKitPhaseReady))

@@ -39,7 +39,10 @@ var (
 
 func TestAutomaticRolloutDeploymentFromFastJarToNativeKit(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--build-timeout", "15m0s").Execute()).To(Succeed())
+		Expect(Kamel("install", "-n", ns,
+			"--build-timeout", "15m0s",
+			"--operator-resources", "limits.memory=4Gi",
+		).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		name := "jvm-to-native"
