@@ -9,6 +9,9 @@
 - Contribution missing in 1.6.0 release note [\#2621](https://github.com/apache/camel-k/issues/2621)
 - Kamelet add support for tolerations [\#2602](https://github.com/apache/camel-k/issues/2602)
 - Release 1.6.0 [\#2591](https://github.com/apache/camel-k/issues/2591)
+- Read certificates from secrets to setup TLS config for route trait [\#2574](https://github.com/apache/camel-k/issues/2574)
+- Document, or provide examples for, TLS configuration on OpenShift [\#1033](https://github.com/apache/camel-k/issues/1033)
+- support for quarkus in native mode [\#991](https://github.com/apache/camel-k/issues/991)
 
 **Merged pull requests:**
 
@@ -34,6 +37,7 @@
 - Fix \#2486: make kamelet binding scalable [\#2582](https://github.com/apache/camel-k/pull/2582) ([nicolaferraro](https://github.com/nicolaferraro))
 - doc\(kamelets\): trait annotation usage and examples [\#2581](https://github.com/apache/camel-k/pull/2581) ([squakez](https://github.com/squakez))
 - Reworked logging trait dependencies [\#2580](https://github.com/apache/camel-k/pull/2580) ([orpiske](https://github.com/orpiske))
+- trait: Add tests for route trait and read certificate from secrets [\#2577](https://github.com/apache/camel-k/pull/2577) ([claudio4j](https://github.com/claudio4j))
 - fix\(cmd/bind\): show expected kameletbinding [\#2575](https://github.com/apache/camel-k/pull/2575) ([squakez](https://github.com/squakez))
 - ad \[FUSEQE-13946\] Probably incorrect integration name [\#2572](https://github.com/apache/camel-k/pull/2572) ([lfabriko](https://github.com/lfabriko))
 - fix\(cli\): modeline build-property check [\#2571](https://github.com/apache/camel-k/pull/2571) ([squakez](https://github.com/squakez))
@@ -47,6 +51,7 @@
 - fix\(builder\): Fix race-condition when Build transitions to running phase [\#2545](https://github.com/apache/camel-k/pull/2545) ([astefanutti](https://github.com/astefanutti))
 - Move bool pointer functions to trait package and use them throughout the traits [\#2543](https://github.com/apache/camel-k/pull/2543) ([tadayosi](https://github.com/tadayosi))
 - Forcelly set QUARKUS\_LOG\_CONSOLE\_JSON to false if the trait is not provided \(GH issue \#2539\) [\#2540](https://github.com/apache/camel-k/pull/2540) ([orpiske](https://github.com/orpiske))
+- feat: Quarkus native build support [\#2536](https://github.com/apache/camel-k/pull/2536) ([astefanutti](https://github.com/astefanutti))
 - Fix \#2530: fix type and do not add cross-namespace owner references [\#2535](https://github.com/apache/camel-k/pull/2535) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore: add support for darwin/atm64 [\#2532](https://github.com/apache/camel-k/pull/2532) ([lburgazzoli](https://github.com/lburgazzoli))
 - \[test\] Remove 3rd party dependencies [\#2529](https://github.com/apache/camel-k/pull/2529) ([bouskaJ](https://github.com/bouskaJ))
