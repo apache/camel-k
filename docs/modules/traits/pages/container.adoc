@@ -79,7 +79,7 @@ The following configuration options are available:
 
 | container.image-pull-policy
 | PullPolicy
-| The pull policy: Always|Never|IfNotPresent
+| The pull policy: Always\|Never\|IfNotPresent
 
 | container.probes-enabled
 | bool
