@@ -205,11 +205,12 @@ func writeMembers(t *types.Type, traitID string, content *[]string) {
 				res = append(res, "| "+strings.TrimPrefix(m.Type.Name.Name, "*"))
 				first := true
 				for _, l := range filterOutTagsAndComments(m.CommentLines) {
+					escapedComment := escapeASCIIDoc(l)
 					if first {
-						res = append(res, "| "+l)
+						res = append(res, "| "+escapedComment)
 						first = false
 					} else {
-						res = append(res, l)
+						res = append(res, escapedComment)
 					}
 				}
 				res = append(res, "")
@@ -241,6 +242,11 @@ func filterOutTagsAndComments(comments []string) []string {
 		}
 	}
 	return res
+}
+
+// escapeAsciiDoc is in charge to escape those chars used for formatting purposes
+func escapeASCIIDoc(text string) string {
+	return strings.Replace(text, "|", "\\|", -1)
 }
 
 func split(doc []string, startMarker, endMarker string) (pre []string, post []string) {
