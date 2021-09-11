@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Container trait documentation messed up [\#2626](https://github.com/apache/camel-k/issues/2626)
 - Contribution missing in 1.6.0 release note [\#2621](https://github.com/apache/camel-k/issues/2621)
 - Kamelet add support for tolerations [\#2602](https://github.com/apache/camel-k/issues/2602)
 - Release 1.6.0 [\#2591](https://github.com/apache/camel-k/issues/2591)
@@ -15,6 +16,7 @@
 
 **Merged pull requests:**
 
+- fix\(doc\): escape characters in trait doc [\#2628](https://github.com/apache/camel-k/pull/2628) ([squakez](https://github.com/squakez))
 - chore\(release\): Update OLM base CSV manifest [\#2624](https://github.com/apache/camel-k/pull/2624) ([astefanutti](https://github.com/astefanutti))
 - Fix \#2616: correctly encode numbers in Kamelet parameters [\#2617](https://github.com/apache/camel-k/pull/2617) ([nicolaferraro](https://github.com/nicolaferraro))
 - \[website\] fix attribute usage, and put the crd html file in partials [\#2614](https://github.com/apache/camel-k/pull/2614) ([djencks](https://github.com/djencks))
