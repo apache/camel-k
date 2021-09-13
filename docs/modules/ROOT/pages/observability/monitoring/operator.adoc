@@ -46,19 +46,19 @@ The Camel K operator monitoring endpoint exposes the following metrics:
 | `HistogramVec`
 | Build duration
 | 30s, 1m, 1.5m, 2m, 5m, 10m
-| `result`: `Succeeded`\|`Error`
+| `result`, `type`: `Succeeded`\|`Error`, `fast-jar`\|`native`
 
 | `camel_k_build_recovery_attempts`
 | `Histogram`
 | Build recovery attempts
 | 0, 1, 2, 3, 4, 5
-| `result`: `Succeeded`\|`Error`
+| `result`, `type`: `Succeeded`\|`Error`, `fast-jar`\|`native`
 
 | `camel_k_build_queue_duration_seconds`
 | `Histogram`
 | Build queue duration
 | 5s, 15s, 30s, 1m, 5m,
-| N/A
+| `type`: `fast-jar`\|`native`
 
 | `camel_k_integration_first_readiness_seconds`
 | `Histogram`
