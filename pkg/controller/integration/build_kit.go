@@ -116,12 +116,13 @@ kits:
 		}
 	}
 
-	// Set the kit name so the next handle loop, will fall through the
-	// same path as integration with a user defined kit
-	integration.SetIntegrationKit(integrationKit)
-
-	if integrationKit.Status.Phase == v1.IntegrationKitPhaseReady {
-		integration.Status.Phase = v1.IntegrationPhaseDeploying
+	if integrationKit != nil {
+		// Set the kit name so the next handle loop, will fall through the
+		// same path as integration with a user defined kit
+		integration.SetIntegrationKit(integrationKit)
+		if integrationKit.Status.Phase == v1.IntegrationKitPhaseReady {
+			integration.Status.Phase = v1.IntegrationPhaseDeploying
+		}
 	}
 
 	return integration, nil

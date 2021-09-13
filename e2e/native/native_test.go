@@ -37,7 +37,7 @@ var (
 	withNativeLayout  = KitWithLabels(map[string]string{v1.IntegrationKitLayoutLabel: v1.IntegrationKitLayoutNative})
 )
 
-func TestAutomaticRolloutDeploymentFromFastJarToNativeKit(t *testing.T) {
+func TestNativeIntegrations(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns,
 			"--build-timeout", "15m0s",
@@ -45,47 +45,59 @@ func TestAutomaticRolloutDeploymentFromFastJarToNativeKit(t *testing.T) {
 		).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-		name := "jvm-to-native"
-		Expect(Kamel("run", "-n", ns, "yaml.yaml", "--name", name,
-			"-t", "quarkus.package-type=fast-jar",
-			"-t", "quarkus.package-type=native",
-		).Execute()).To(Succeed())
+		t.Run("unsupported integration source language", func(t *testing.T) {
+			name := "unsupported-java"
+			Expect(Kamel("run", "-n", ns, "Java.java", "--name", name,
+				"-t", "quarkus.package-type=native",
+			).Execute()).To(Succeed())
 
-		// Check that two Kits are created with distinct layout
-		Eventually(Kits(ns, withFastJarLayout)).Should(HaveLen(1))
-		Eventually(Kits(ns, withNativeLayout)).Should(HaveLen(1))
+			Eventually(IntegrationPhase(ns, name)).Should(Equal(v1.IntegrationPhaseError))
+			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionKitAvailable)).Should(Equal(corev1.ConditionFalse))
+		})
 
-		// Check the fast-jar Kit is ready
-		Eventually(Kits(ns, withFastJarLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
-			TestTimeoutMedium).Should(HaveLen(1))
+		t.Run("automatic rollout deployment from fast-jar to native kit", func(t *testing.T) {
+			name := "jvm-to-native"
+			Expect(Kamel("run", "-n", ns, "yaml.yaml", "--name", name,
+				"-t", "quarkus.package-type=fast-jar",
+				"-t", "quarkus.package-type=native",
+			).Execute()).To(Succeed())
 
-		fastJarKit := Kits(ns, withFastJarLayout, KitWithPhase(v1.IntegrationKitPhaseReady))()[0]
-		// Check the Integration uses the fast-jar Kit
-		Eventually(IntegrationKit(ns, name), TestTimeoutShort).Should(Equal(fastJarKit.Name))
-		// Check the Integration Pod uses the fast-jar Kit
-		Eventually(IntegrationPodImage(ns, name)).Should(Equal(fastJarKit.Status.Image))
+			// Check that two Kits are created with distinct layout
+			Eventually(Kits(ns, withFastJarLayout)).Should(HaveLen(1))
+			Eventually(Kits(ns, withNativeLayout)).Should(HaveLen(1))
 
-		// Check the Integration is ready
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			// Check the fast-jar Kit is ready
+			Eventually(Kits(ns, withFastJarLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
+				TestTimeoutMedium).Should(HaveLen(1))
 
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			fastJarKit := Kits(ns, withFastJarLayout, KitWithPhase(v1.IntegrationKitPhaseReady))()[0]
+			// Check the Integration uses the fast-jar Kit
+			Eventually(IntegrationKit(ns, name), TestTimeoutShort).Should(Equal(fastJarKit.Name))
+			// Check the Integration Pod uses the fast-jar Kit
+			Eventually(IntegrationPodImage(ns, name)).Should(Equal(fastJarKit.Status.Image))
 
-		// Check the native Kit is ready
-		Eventually(Kits(ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
-			TestTimeoutLong).Should(HaveLen(1))
+			// Check the Integration is ready
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
-		nativeKit := Kits(ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady))()[0]
-		// Check the Integration uses the native Kit
-		Eventually(IntegrationKit(ns, name), TestTimeoutShort).Should(Equal(nativeKit.Name))
-		// Check the Integration Pod uses the native Kit
-		Eventually(IntegrationPodImage(ns, name)).Should(Equal(nativeKit.Status.Image))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-		// Check the Integration is still ready
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			// Check the native Kit is ready
+			Eventually(Kits(ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
+				TestTimeoutLong).Should(HaveLen(1))
 
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			nativeKit := Kits(ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady))()[0]
+			// Check the Integration uses the native Kit
+			Eventually(IntegrationKit(ns, name), TestTimeoutShort).Should(Equal(nativeKit.Name))
+			// Check the Integration Pod uses the native Kit
+			Eventually(IntegrationPodImage(ns, name)).Should(Equal(nativeKit.Status.Image))
+
+			// Check the Integration is still ready
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		})
 
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
