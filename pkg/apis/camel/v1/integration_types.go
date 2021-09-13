@@ -195,6 +195,8 @@ const (
 	IntegrationConditionReplicaSetReadyReason string = "ReplicaSetReady"
 	// IntegrationConditionReplicaSetNotReadyReason --
 	IntegrationConditionReplicaSetNotReadyReason string = "ReplicaSetNotReady"
+	// IntegrationConditionUnsupportedLanguageReason --
+	IntegrationConditionUnsupportedLanguageReason string = "UnsupportedLanguage"
 
 	// IntegrationConditionKameletsAvailable --
 	IntegrationConditionKameletsAvailable IntegrationConditionType = "KameletsAvailable"

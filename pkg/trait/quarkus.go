@@ -24,6 +24,8 @@ import (
 
 	"github.com/rs/xid"
 
+	corev1 "k8s.io/api/core/v1"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/defaults"
@@ -48,9 +50,11 @@ var kitPriority = map[quarkusPackageType]string{
 //
 // It's enabled by default.
 //
-// NOTE: Compiling to a native executable, i.e. when using `package-type=native`, requires at least 4GiB of memory.
-// Make sure enough memory is available for the Pod running the native build, that is either the operator Pod, or
-// the build Pod, depending on the build strategy configured for the platform.
+// NOTE: Compiling to a native executable, i.e. when using `package-type=native`, is only supported
+// for kamelets, as well as YAML and XML integrations.
+// It also requires at least 4GiB of memory, so the Pod running the native build, that is either
+// the operator Pod, or the build Pod (depending on the build strategy configured for the platform),
+// must have enough memory available.
 //
 // +camel-k:trait=quarkus
 type quarkusTrait struct {
@@ -92,16 +96,7 @@ func (t *quarkusTrait) Matches(trait Trait) bool {
 		return false
 	}
 
-	contains := func(types []quarkusPackageType, t quarkusPackageType) bool {
-		for _, ti := range qt.PackageTypes {
-			if t == ti {
-				return true
-			}
-		}
-		return false
-	}
-
-	if len(t.PackageTypes) == 0 && len(qt.PackageTypes) != 0 && !contains(qt.PackageTypes, fastJarPackageType) {
+	if len(t.PackageTypes) == 0 && len(qt.PackageTypes) != 0 && !containsPackageType(qt.PackageTypes, fastJarPackageType) {
 		return false
 	}
 
@@ -110,7 +105,7 @@ types:
 		if pt == fastJarPackageType && len(qt.PackageTypes) == 0 {
 			continue
 		}
-		if contains(qt.PackageTypes, pt) {
+		if containsPackageType(qt.PackageTypes, pt) {
 			continue types
 		}
 		return false
@@ -133,6 +128,27 @@ func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
 
 func (t *quarkusTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) {
+		if containsPackageType(t.PackageTypes, nativePackageType) {
+			// Native compilation is only supported for a subset of languages,
+			// so let's check for compatibility, and fail-fast the Integration,
+			// to save compute resources and user time.
+			for _, source := range e.Integration.Sources() {
+				if language := source.InferLanguage(); language != v1.LanguageKamelet &&
+					language != v1.LanguageYaml &&
+					language != v1.LanguageXML {
+					t.L.ForIntegration(e.Integration).Infof("Integration %s contains a %s source that cannot be compiled to native executable", e.Integration.Namespace+"/"+e.Integration.Name, language)
+					e.Integration.Status.Phase = v1.IntegrationPhaseError
+					e.Integration.Status.SetCondition(
+						v1.IntegrationConditionKitAvailable,
+						corev1.ConditionFalse,
+						v1.IntegrationConditionUnsupportedLanguageReason,
+						fmt.Sprintf("native compilation for language %q is not supported", language))
+					// Let the calling controller handle the Integration update
+					return nil
+				}
+			}
+		}
+
 		switch len(t.PackageTypes) {
 		case 0:
 			kit := t.newIntegrationKit(e, fastJarPackageType)
@@ -292,4 +308,13 @@ func getBuilderTask(tasks []v1.Task) *v1.BuilderTask {
 		}
 	}
 	return nil
+}
+
+func containsPackageType(types []quarkusPackageType, t quarkusPackageType) bool {
+	for _, ti := range types {
+		if t == ti {
+			return true
+		}
+	}
+	return false
 }
