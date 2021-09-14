@@ -3,4 +3,32 @@
 
 image::architecture/camel-k-runtimes.jpg[runtimes, width=1024]
 
-TBD
+Camel runtime application is in charge to bridge the output produced by the operator during a `Build` to the Camel runtime. It will finally execute an application containing the `Route` as defined by `Camel K` user. It will take care of converting all the different configuration and tuning into something meaningful to `Apache Camel` framework. We use a java application, `camel-k-runtime` which is based on `camel-quarkus` to achieve the goal.
+
+NOTE: This document reflects Camel K version 1.6. It may not reflect slight changes developed after this review.
+
+[[runtime-quarkus]]
+== Based on Camel Quarkus
+
+https://github.com/apache/camel-k-runtime[Camel K runtime] is a java application in charge to prepare the Camel environment needed to run an `Integration`. The application is shipped as a java dependency with Camel K releases and uses Camel Quarkus under the hood.
+
+Camel Quarkus is an Apache Camel subproject that will make your Camel Integration run with the technology offered by https://quarkus.io/[Quarkus] project. Thanks to it, you will be able to reduce resource footprint and have a faster startup, which is a fundamental aspect of cloud native development.
+
+Learn more in the link:/camel-quarkus/[Camel Quarkus documentation section].
+
+[[runtime-duties]]
+== Runtime main duties
+
+The main goal of the Camel-k-runtime is to launch a Camel Quarkus application and setup the routes configured by the Camel K user. When a user run a new `Integration`, the xref:architecture/operator.adoc[`Operator`] will take care of building an application containing the `camel-k-runtime dependency`. During application startup, the camel-k-runtime will be in charge to take care of the following aspects:
+
+* Sources loading
+* Properties setting
+* Cron
+* Knative
+* Kamelet
+* Master
+* Webhook
+
+Basically the application will apply the configuration/customizations needed to run your application on Camel, transforming those configuration coming from the `Integration` spec into something meaningful to Camel framework.
+
+NOTE: Camel-k-runtime is a very fast evolving project. You may find more relevant details accessing directly to the https://github.com/apache/camel-k-runtime[application source code].
