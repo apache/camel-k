@@ -16,6 +16,7 @@
 
 **Merged pull requests:**
 
+- doc\(native\): Add package type tag to build metrics [\#2632](https://github.com/apache/camel-k/pull/2632) ([astefanutti](https://github.com/astefanutti))
 - fix\(doc\): escape characters in trait doc [\#2628](https://github.com/apache/camel-k/pull/2628) ([squakez](https://github.com/squakez))
 - chore\(release\): Update OLM base CSV manifest [\#2624](https://github.com/apache/camel-k/pull/2624) ([astefanutti](https://github.com/astefanutti))
 - Fix \#2616: correctly encode numbers in Kamelet parameters [\#2617](https://github.com/apache/camel-k/pull/2617) ([nicolaferraro](https://github.com/nicolaferraro))
