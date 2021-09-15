@@ -45,6 +45,7 @@
 ** xref:traits:affinity.adoc[Affinity]
 ** xref:traits:builder.adoc[Builder]
 ** xref:traits:camel.adoc[Camel]
+** xref:traits:configuration.adoc[Configuration]
 ** xref:traits:container.adoc[Container]
 ** xref:traits:cron.adoc[Cron]
 ** xref:traits:dependencies.adoc[Dependencies]
