@@ -7,16 +7,21 @@
 **Closed issues:**
 
 - Container trait documentation messed up [\#2626](https://github.com/apache/camel-k/issues/2626)
+- Bots to simplify project managment [\#2623](https://github.com/apache/camel-k/issues/2623)
 - Contribution missing in 1.6.0 release note [\#2621](https://github.com/apache/camel-k/issues/2621)
 - Kamelet add support for tolerations [\#2602](https://github.com/apache/camel-k/issues/2602)
 - Release 1.6.0 [\#2591](https://github.com/apache/camel-k/issues/2591)
 - Read certificates from secrets to setup TLS config for route trait [\#2574](https://github.com/apache/camel-k/issues/2574)
+- \[Doc\] Add documentation for architecture [\#2273](https://github.com/apache/camel-k/issues/2273)
 - Document, or provide examples for, TLS configuration on OpenShift [\#1033](https://github.com/apache/camel-k/issues/1033)
 - support for quarkus in native mode [\#991](https://github.com/apache/camel-k/issues/991)
 
 **Merged pull requests:**
 
+- doc: architecture \> runtime section [\#2634](https://github.com/apache/camel-k/pull/2634) ([squakez](https://github.com/squakez))
 - doc\(native\): Add package type tag to build metrics [\#2632](https://github.com/apache/camel-k/pull/2632) ([astefanutti](https://github.com/astefanutti))
+- chore\(native\): Fail-fast native build for unsupported languages [\#2631](https://github.com/apache/camel-k/pull/2631) ([astefanutti](https://github.com/astefanutti))
+- chore: stale bot configuration [\#2630](https://github.com/apache/camel-k/pull/2630) ([squakez](https://github.com/squakez))
 - fix\(doc\): escape characters in trait doc [\#2628](https://github.com/apache/camel-k/pull/2628) ([squakez](https://github.com/squakez))
 - chore\(release\): Update OLM base CSV manifest [\#2624](https://github.com/apache/camel-k/pull/2624) ([astefanutti](https://github.com/astefanutti))
 - Fix \#2616: correctly encode numbers in Kamelet parameters [\#2617](https://github.com/apache/camel-k/pull/2617) ([nicolaferraro](https://github.com/nicolaferraro))
