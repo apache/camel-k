@@ -143,6 +143,6 @@ type JSONSchemaURL string
 
 // ExternalDocumentation allows referencing an external resource for extended documentation.
 type ExternalDocumentation struct {
-	Description string `json:"description,omitempty""`
+	Description string `json:"description,omitempty"`
 	URL         string `json:"url,omitempty"`
 }

@@ -152,7 +152,7 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 	}
 
 	// Installing ClusterRoles
-	ok, err := isClusterRoleInstalled(ctx, c, "camel-k:edit")
+	ok, err := isClusterRoleInstalled(ctx, c, "camel-k-edit")
 	if err != nil {
 		return err
 	}
@@ -168,12 +168,12 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 		return err
 	}
 	if isOpenShift {
-		ok, err := isClusterRoleInstalled(ctx, c, "camel-k-operator-openshift")
+		ok, err := isClusterRoleInstalled(ctx, c, "camel-k-operator-console-openshift")
 		if err != nil {
 			return err
 		}
 		if !ok || collection != nil {
-			err := installResource(ctx, c, collection, "/rbac/operator-cluster-role-console-openshift.yaml")
+			err := installResource(ctx, c, collection, "/rbac/openshift/operator-cluster-role-console-openshift.yaml")
 			if err != nil {
 				return err
 			}

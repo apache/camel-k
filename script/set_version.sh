@@ -27,30 +27,29 @@ version=$1
 image_name=${2:-docker.io\/apache\/camel-k}
 sanitized_image_name=${image_name//\//\\\/}
 
-
 for f in $(find $location/../config/manager -type f -name "*.yaml");
 do
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    sed -i -r "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/${sanitized_image_name}:${version}/" $f
+    sed -i -r "s/image: .*/image: ${sanitized_image_name}:${version}/" $f
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     # Mac OSX
-    sed -i '' -E "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/${sanitized_image_name}:${version}/" $f
+    sed -i '' -E "s/image: .*/image: ${sanitized_image_name}:${version}/" $f
   fi
 done
 
 for f in $(find $location/../config/manifests/bases -type f -name "*.yaml");
 do
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    sed -i -r "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/${sanitized_image_name}:${version}/" $f
+    sed -i -r "s/containerImage: .*/containerImage: ${sanitized_image_name}:${version}/" $f
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     # Mac OSX
-    sed -i '' -E "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/${sanitized_image_name}:${version}/" $f
+    sed -i '' -E "s/containerImage: .*/containerImage: ${sanitized_image_name}:${version}/" $f
   fi
 done
 
 # Update helm chart
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  sed -i -r "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/${sanitized_image_name}:${version}/" $location/../helm/camel-k/values.yaml
+  sed -i -r "s/image: .*/image: ${sanitized_image_name}:${version}/" $location/../helm/camel-k/values.yaml
   sed -i -r "s/appVersion:\s([0-9]+[a-zA-Z0-9\-\.].*).*/appVersion: ${version}/" $location/../helm/camel-k/Chart.yaml
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   # Mac OSX

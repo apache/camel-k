@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: camel-k-operator
+spec:
+  template:
+    spec:
+      containers:
+        - name: camel-k-operator
+          imagePullPolicy: Always

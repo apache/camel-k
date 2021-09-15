@@ -288,7 +288,7 @@ func installOpenShiftClusterRoleConsoleBinding(ctx context.Context, c client.Cli
 	existing, err := c.RbacV1().ClusterRoleBindings().Get(ctx, "camel-k-operator-console-openshift", metav1.GetOptions{})
 	if k8serrors.IsNotFound(err) {
 		existing = nil
-		obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString("/rbac/operator-cluster-role-console-binding-openshift.yaml"))
+		obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString("/rbac/openshift/operator-cluster-role-console-binding-openshift.yaml"))
 		if err != nil {
 			return err
 		}
@@ -345,15 +345,15 @@ func installOpenShiftClusterRoleConsoleBinding(ctx context.Context, c client.Cli
 
 func installOpenShiftRoles(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-		"/rbac/operator-role-openshift.yaml",
-		"/rbac/operator-role-binding-openshift.yaml",
+		"/rbac/openshift/operator-role-openshift.yaml",
+		"/rbac/openshift/operator-role-binding-openshift.yaml",
 	)
 }
 
 func installKubernetesRoles(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
 		"/manager/operator-service-account.yaml",
-		"/rbac/operator-role-kubernetes.yaml",
+		"/rbac/operator-role.yaml",
 		"/rbac/operator-role-binding.yaml",
 	)
 }

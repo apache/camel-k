@@ -1148,7 +1148,7 @@ func CreateOperatorRole(ns string) (err error) {
 		// This should ideally be removed from the common RBAC manifest.
 		customizer = install.RemoveIngressRoleCustomizer
 	}
-	err = install.Resource(TestContext, TestClient(), ns, true, customizer, "/rbac/operator-role-kubernetes.yaml")
+	err = install.Resource(TestContext, TestClient(), ns, true, customizer, "/rbac/operator-role.yaml")
 	if err != nil {
 		return err
 	}
