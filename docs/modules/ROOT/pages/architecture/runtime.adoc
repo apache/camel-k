@@ -14,7 +14,7 @@ https://github.com/apache/camel-k-runtime[Camel K runtime] is a java application
 
 Camel Quarkus is an Apache Camel subproject that will make your Camel Integration run with the technology offered by https://quarkus.io/[Quarkus] project. Thanks to it, you will be able to reduce resource footprint and have a faster startup, which is a fundamental aspect of cloud native development.
 
-Learn more in the xref:latest@camel-quarkus:user-guide/index.adoc[Camel Quarkus documentation section].
+Learn more in the xref:latest@camel-quarkus::index.adoc[Camel Quarkus documentation section].
 
 [[runtime-duties]]
 == Runtime main duties
