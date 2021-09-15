@@ -15,16 +15,17 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-kind: ClusterRole
+kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: camel-k-edit
+  name: camel-k-operator-console-openshift
   labels:
     app: "camel-k"
-    # Add these permissions to the "admin" and "edit" default roles.
-    rbac.authorization.k8s.io/aggregate-to-admin: "true"
-    rbac.authorization.k8s.io/aggregate-to-edit: "true"
-rules:
-- apiGroups: ["camel.apache.org"]
-  resources: ["*"]
-  verbs: ["*"]
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+  namespace: placeholder
+roleRef:
+  kind: ClusterRole
+  name: camel-k-operator-console-openshift
+  apiGroup: rbac.authorization.k8s.io

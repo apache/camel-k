@@ -4,6 +4,7 @@
 # Binary files
 /kamel
 /license-check
+/**/platform-check
 
 # Config files
 /kamel-config.yaml
@@ -153,3 +154,10 @@ mvnw text eol=lf
 .history
 
 # End of https://www.gitignore.io/api/go,vim,emacs,visualstudiocode
+
+### config kustomize ###
+config/**/*.gen.tmpl
+config/**/*.gen.yaml
+config/**/*.gen.json
+
+release/*-installer*

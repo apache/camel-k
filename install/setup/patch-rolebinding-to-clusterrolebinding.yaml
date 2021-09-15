@@ -1,0 +1,9 @@
+- op: replace
+  path: /kind
+  value: ClusterRoleBinding
+- op: replace
+  path: /roleRef/kind
+  value: ClusterRole
+- op: add
+  path: /subjects/0/namespace
+  value: placeholder

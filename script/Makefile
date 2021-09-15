@@ -21,14 +21,35 @@ RUNTIME_VERSION := 1.9.0
 BUILDAH_VERSION := 1.14.0
 KANIKO_VERSION := 0.17.1
 INSTALL_DEFAULT_KAMELETS := true
+CONTROLLER_GEN_VERSION := v0.4.1
+OPERATOR_SDK_VERSION := v1.5.0
+KUSTOMIZE_VERSION := v4.1.2
 BASE_IMAGE := adoptopenjdk/openjdk11:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
-IMAGE_NAME ?= docker.io/apache/camel-k
-METADATA_IMAGE_NAME := $(IMAGE_NAME)-metadata
+IMAGE_NAME := docker.io/apache/camel-k
+
+#
+# Situations when user wants to override
+# the image name and version
+# - used in kustomize install
+# - used in making bundle
+# - need to preserve original image and version as used in other files
+#
+CUSTOM_IMAGE ?= $(IMAGE_NAME)
+CUSTOM_VERSION ?= $(VERSION)
+
+METADATA_IMAGE_NAME := $(CUSTOM_IMAGE)-metadata
+BUNDLE_IMAGE_NAME ?= $(CUSTOM_IMAGE)-bundle
 RELEASE_GIT_REMOTE := upstream
 GIT_COMMIT := $(shell git rev-list -1 HEAD)
 LINT_GOGC := 10
 LINT_DEADLINE := 10m
+
+
+# olm bundle vars
+CHANNELS ?= $(OPERATOR_VERSION)
+DEFAULT_CHANNEL ?= $(OPERATOR_VERSION)
+PACKAGE := camel-k
 
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
@@ -98,7 +119,7 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	@echo "const (" >> $(VERSIONFILE)
 	@echo "  // Version -- " >> $(VERSIONFILE)
-	@echo "  Version = \"$(VERSION)\"" >> $(VERSIONFILE)
+	@echo "  Version = \"$(CUSTOM_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // DefaultRuntimeVersion -- " >> $(VERSIONFILE)
 	@echo "  DefaultRuntimeVersion = \"$(RUNTIME_VERSION)\"" >> $(VERSIONFILE)
@@ -116,7 +137,7 @@ codegen:
 	@echo "  LocalRepository = \"$(LOCAL_REPOSITORY)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // ImageName -- " >> $(VERSIONFILE)
-	@echo "  ImageName = \"$(IMAGE_NAME)\"" >> $(VERSIONFILE)
+	@echo "  ImageName = \"$(CUSTOM_IMAGE)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // installDefaultKamelets -- " >> $(VERSIONFILE)
 	@echo "  installDefaultKamelets = $(INSTALL_DEFAULT_KAMELETS)" >> $(VERSIONFILE)
@@ -160,6 +181,7 @@ test-integration: build
 	go test -timeout 60m -v ./e2e/common/languages -tags=integration && \
 	go test -timeout 60m -v ./e2e/common/traits -tags=integration
 
+
 test-knative: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 60m -v ./e2e/knative -tags=integration
@@ -175,6 +197,10 @@ test-local: build
 test-kamel-cli: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 60m -v ./e2e/common/cli -tags=integration
+
+test-kustomize: build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	go test -timeout 60m -v ./e2e/common/kustomize -tags=integration
 
 test-quarkus-native: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
@@ -247,6 +273,9 @@ lint-fix:
 check-licenses:
 	./script/check_licenses.sh
 
+check-platform:
+	./script/check_platform.sh
+
 maven-overlay:
 	mkdir -p build/_maven_overlay
 	./script/maven_overlay.sh build/_maven_overlay
@@ -259,7 +288,7 @@ ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
 else
 	cp kamel build/_output/bin
 endif
-	docker build -t $(IMAGE_NAME):$(VERSION) -f build/Dockerfile .
+	docker build -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
 images-dev: bundle-kamelets test package-artifacts maven-overlay
 	mkdir -p build/_maven_output
@@ -269,35 +298,35 @@ ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
 else
 	cp kamel build/_output/bin
 endif
-	docker build -t $(IMAGE_NAME):$(VERSION) -f build/Dockerfile .
+	docker build -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
 images-push:
-	docker push $(IMAGE_NAME):$(VERSION)
+	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 
 images-push-staging:
-	docker tag $(IMAGE_NAME):$(VERSION) $(STAGING_IMAGE_NAME):$(VERSION)
-	docker push $(STAGING_IMAGE_NAME):$(VERSION)
+	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION) $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)
+	docker push $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)
 
 get-version:
-	@echo $(VERSION)
+	@echo $(CUSTOM_VERSION)
 
 get-last-released-version:
 	@echo $(LAST_RELEASED_VERSION)
 
 set-version:
-	./script/set_version.sh $(VERSION) $(IMAGE_NAME)
+	./script/set_version.sh $(CUSTOM_VERSION) $(CUSTOM_IMAGE)
 
 set-module-version:
-	./script/set_go_modules_version.sh $(VERSION)
+	./script/set_go_modules_version.sh $(CUSTOM_VERSION)
 
 git-tag:
-	./script/git_tag.sh $(VERSION) $(RELEASE_GIT_REMOTE)
+	./script/git_tag.sh $(CUSTOM_VERSION) $(RELEASE_GIT_REMOTE)
 
 cross-compile:
-	./script/cross_compile.sh $(VERSION) '$(GOFLAGS)'
+	./script/cross_compile.sh $(CUSTOM_VERSION) '$(GOFLAGS)'
 
 package-examples:
-	./script/package_examples.sh $(VERSION)
+	./script/package_examples.sh $(CUSTOM_VERSION)
 
 package-artifacts:
 	./script/package_maven_artifacts.sh $(RUNTIME_VERSION) $(PACKAGE_ARTIFACTS_STRATEGY) $(STAGING_RUNTIME_REPO)
@@ -312,7 +341,7 @@ release-helm:
 	./script/release_helm.sh
 
 install-crc:
-	./script/install_crc.sh $(VERSION)
+	./script/install_crc.sh $(CUSTOM_VERSION)
 install-minikube:
 	./script/install_minikube.sh
 
@@ -329,12 +358,19 @@ ifeq (, $(shell which controller-gen))
 	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
 	cd $$CONTROLLER_GEN_TMP_DIR ;\
 	go mod init tmp ;\
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1 ;\
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION) ;\
 	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
 	}
 CONTROLLER_GEN=$(GOBIN)/controller-gen
 else
 CONTROLLER_GEN=$(shell which controller-gen)
+endif
+
+.PHONY: kubectl kustomize operator-sdk
+
+kubectl:
+ifeq (, $(shell which kubectl))
+$(error "No kubectl found in PATH. Please install and re-run")
 endif
 
 kustomize:
@@ -344,12 +380,27 @@ ifeq (, $(shell which kustomize))
 	KUSTOMIZE_GEN_TMP_DIR=$$(mktemp -d) ;\
 	cd $$KUSTOMIZE_GEN_TMP_DIR ;\
 	go mod init tmp ;\
-	go get sigs.k8s.io/kustomize/kustomize/v3@v3.5.4 ;\
+	go get sigs.k8s.io/kustomize/kustomize/v4@$(KUSTOMIZE_VERSION) ;\
 	rm -rf $$KUSTOMIZE_GEN_TMP_DIR ;\
 	}
 KUSTOMIZE=$(GOBIN)/kustomize
 else
 KUSTOMIZE=$(shell which kustomize)
+endif
+
+operator-sdk:
+ifeq (, $(shell which operator-sdk))
+	@{ \
+	set -e ;\
+	curl \
+		-L https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_linux_amd64 \
+		-o operator-sdk ;\
+	chmod +x operator-sdk ;\
+	mv operator-sdk $(GOBIN)/ ;\
+	}
+OPERATOR_SDK=$(GOBIN)/operator-sdk
+else
+OPERATOR_SDK=$(shell which operator-sdk)
 endif
 
 .PHONY: generate-crd $(BUNDLE_CAMEL_APIS) bundle bundle-build
@@ -360,32 +411,49 @@ endif
 # - No way to add a licence header to the CRD other then post-script
 BUNDLE_CAMEL_APIS = v1 v1alpha1
 
-$(BUNDLE_CAMEL_APIS):
+$(BUNDLE_CAMEL_APIS): operator-sdk
 	@# Clean up api directory, copy over fresh version
 	rm -rf api_$@ && cp -rf pkg/apis api_$@
 	@# Remove the camel directory and re-copy only the required api
 	rm -rf api_$@/camel/* && cp -rf pkg/apis/camel/$@ api_$@/camel/
 	@# operator-sdk generate ... cannot execute across separate modules so need to temporarily move api
-	operator-sdk generate kustomize manifests --apis-dir $(addprefix api_, $@) -q
+	$(OPERATOR_SDK) generate kustomize manifests --apis-dir $(addprefix api_, $@) -q
 	@# Adds the licence header to the csv file.
 	./script/add_license.sh config/manifests/bases ./script/headers/yaml.txt
 	./script/add_createdAt.sh config/manifests/bases
 	@# Clean up temporary working api directories
 	rm -rf api_*
 
-bundle: generate-crd $(BUNDLE_CAMEL_APIS) kustomize
+# Options for 'bundle-build'
+ifneq ($(origin CHANNELS), undefined)
+BUNDLE_CHANNELS := --channels=$(CHANNELS)
+endif
+ifneq ($(origin DEFAULT_CHANNEL), undefined)
+BUNDLE_DEFAULT_CHANNEL := --default-channel=$(DEFAULT_CHANNEL)
+endif
+ifneq ($(origin PACKAGE), undefined)
+BUNDLE_PACKAGE := --package=$(PACKAGE)
+endif
+BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL) $(BUNDLE_PACKAGE)
+
+bundle: set-version generate-crd $(BUNDLE_CAMEL_APIS) kustomize operator-sdk
+	@# Sets the operator image to the preferred image:tag
+	@cd config/manifests && $(KUSTOMIZE) edit set image $(IMAGE_NAME)=$(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 	@# Build kustomize manifests
-	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle --overwrite --version $(OPERATOR_VERSION) $(BUNDLE_METADATA_OPTS)
+	@$(KUSTOMIZE) build config/manifests | \
+		$(OPERATOR_SDK) generate bundle \
+			-q --overwrite --version $(OPERATOR_VERSION) \
+			--kustomize-dir config/manifests $(BUNDLE_METADATA_OPTS)
 	@# Move the dockerfile into the bundle directory
 ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Darwin)
-	mv bundle.Dockerfile bundle/Dockerfile && sed -i '' 's/bundle\///g' bundle/Dockerfile
+	@mv bundle.Dockerfile bundle/Dockerfile && sed -i '' 's/bundle\///g' bundle/Dockerfile
 else
-	mv bundle.Dockerfile bundle/Dockerfile && sed -i 's/bundle\///g' bundle/Dockerfile
+	@mv bundle.Dockerfile bundle/Dockerfile && sed -i 's/bundle\///g' bundle/Dockerfile
 endif
 	@# Adds the licence headers to the csv file
 	./script/add_license.sh bundle/manifests ./script/headers/yaml.txt
-	operator-sdk bundle validate ./bundle
+	$(OPERATOR_SDK) bundle validate ./bundle
 
 # Build the bundle image.
 bundle-build: bundle
-	cd bundle && docker build -f Dockerfile -t $(METADATA_IMAGE_NAME) .
+	cd bundle && docker build -f Dockerfile -t $(BUNDLE_IMAGE_NAME) .
