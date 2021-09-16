@@ -18,6 +18,8 @@
 
 **Merged pull requests:**
 
+- Fix documentation for building website [\#2637](https://github.com/apache/camel-k/pull/2637) ([oscerd](https://github.com/oscerd))
+- Fixed website build [\#2636](https://github.com/apache/camel-k/pull/2636) ([oscerd](https://github.com/oscerd))
 - doc: architecture \> runtime section [\#2634](https://github.com/apache/camel-k/pull/2634) ([squakez](https://github.com/squakez))
 - doc\(native\): Add package type tag to build metrics [\#2632](https://github.com/apache/camel-k/pull/2632) ([astefanutti](https://github.com/astefanutti))
 - chore\(native\): Fail-fast native build for unsupported languages [\#2631](https://github.com/apache/camel-k/pull/2631) ([astefanutti](https://github.com/astefanutti))
