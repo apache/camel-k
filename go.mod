@@ -10,7 +10,7 @@ require (
 	github.com/apache/camel-k/pkg/kamelet/repository v0.0.0
 	github.com/container-tools/spectrum v0.3.4
 	github.com/containerd/continuity v0.0.0-20210208174643-50096c924a4e // indirect
-	github.com/evanphx/json-patch v4.9.0+incompatible
+	github.com/evanphx/json-patch v4.11.0+incompatible
 	github.com/fatih/structs v1.1.0
 	github.com/gertd/go-pluralize v0.1.1
 	github.com/go-logr/logr v0.4.0
@@ -40,7 +40,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.0
 	github.com/stoewer/go-strcase v1.2.0
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.7.0
 	go.uber.org/multierr v1.6.0
 	go.uber.org/zap v1.16.0
 	golang.org/x/oauth2 v0.0.0-20210413134643-5e61552d6c78
@@ -48,11 +48,11 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.20.2
 	k8s.io/apiextensions-apiserver v0.20.2
-	k8s.io/apimachinery v0.20.2
-	k8s.io/client-go v0.20.2
+	k8s.io/apimachinery v0.22.2
 	k8s.io/cli-runtime v0.20.2
+	k8s.io/client-go v0.20.2
 	k8s.io/gengo v0.0.0-20201214224949-b6c5ce23f027
-	k8s.io/klog/v2 v2.8.0
+	k8s.io/klog/v2 v2.9.0
 	k8s.io/utils v0.0.0-20210111153108-fddb29f9d009
 	knative.dev/eventing v0.23.2
 	knative.dev/pkg v0.0.0-20210510175900-4564797bf3b7
