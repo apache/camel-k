@@ -27,22 +27,22 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// The configuration trait is used to customize the Integration configuration such as properties and resources.
+// The runtime trait is used to customize the Integration runtime configuration such as properties and resources.
 //
-// +camel-k:trait=configuration
-type configurationTrait struct {
+// +camel-k:trait=runtime
+type runtimeTrait struct {
 	BaseTrait `property:",squash"`
 	// A list of properties to be provided to the Integration runtime
 	Properties []string `property:"properties" json:"properties,omitempty"`
 }
 
-func newConfigurationTrait() Trait {
-	return &configurationTrait{
-		BaseTrait: NewBaseTrait("configuration", 700),
+func newRuntimeTrait() Trait {
+	return &runtimeTrait{
+		BaseTrait: NewBaseTrait("runtime", 700),
 	}
 }
 
-func (t *configurationTrait) Configure(e *Environment) (bool, error) {
+func (t *runtimeTrait) Configure(e *Environment) (bool, error) {
 	if t.Enabled != nil && !*t.Enabled {
 		return false, nil
 	}
@@ -50,7 +50,7 @@ func (t *configurationTrait) Configure(e *Environment) (bool, error) {
 	return true, nil
 }
 
-func (t *configurationTrait) Apply(e *Environment) error {
+func (t *runtimeTrait) Apply(e *Environment) error {
 	if e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
 		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning) {
 		// Get all resources
@@ -65,11 +65,11 @@ func (t *configurationTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *configurationTrait) IsPlatformTrait() bool {
+func (t *runtimeTrait) IsPlatformTrait() bool {
 	return true
 }
 
-func (t *configurationTrait) computeUserProperties(e *Environment) []ctrl.Object {
+func (t *runtimeTrait) computeUserProperties(e *Environment) []ctrl.Object {
 	maps := make([]ctrl.Object, 0)
 
 	// combine properties of integration with kit, integration

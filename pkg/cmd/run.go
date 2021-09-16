@@ -582,7 +582,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	}
 	for _, key := range props.Keys() {
 		kv := fmt.Sprintf("%s=%s", key, props.GetString(key, ""))
-		if propsTraits, err := convertToTraitParameter(kv, "configuration.properties"); err != nil {
+		if propsTraits, err := convertToTraitParameter(kv, "runtime.properties"); err != nil {
 			return nil, err
 		} else {
 			o.Traits = append(o.Traits, propsTraits...)

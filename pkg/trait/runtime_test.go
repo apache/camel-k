@@ -31,10 +31,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestApplyConfigurationTraitWithProperties(t *testing.T) {
-	configurationTrait, environment := createNominalConfigurationTest()
-	configurationTrait.Properties = []string{"a=b", "c=d"}
-	err := configurationTrait.Apply(environment)
+func TestApplyruntimeTraitWithProperties(t *testing.T) {
+	runtimeTrait, environment := createNominalRuntimeTest()
+	runtimeTrait.Properties = []string{"a=b", "c=d"}
+	err := runtimeTrait.Apply(environment)
 	assert.Nil(t, err)
 
 	userPropertiesCm := environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
@@ -46,8 +46,8 @@ func TestApplyConfigurationTraitWithProperties(t *testing.T) {
 	}, userPropertiesCm.Data)
 }
 
-func createNominalConfigurationTest() (*configurationTrait, *Environment) {
-	trait := newConfigurationTrait().(*configurationTrait)
+func createNominalRuntimeTest() (*runtimeTrait, *Environment) {
+	trait := newRuntimeTrait().(*runtimeTrait)
 	trait.Enabled = BoolP(true)
 	trait.Client, _ = test.NewFakeClient(&appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
