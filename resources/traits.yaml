@@ -73,22 +73,6 @@ traits:
     type: string
     description: The camel-k-runtime version to use for the integration. It overrides
       the default version set in the Integration Platform.
-- name: configuration
-  platform: true
-  profiles:
-  - Kubernetes
-  - Knative
-  - OpenShift
-  description: The configuration trait is used to customize the Integration configuration
-    such as properties and resources.
-  properties:
-  - name: enabled
-    type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
-  - name: properties
-    type: '[]string'
-    description: A list of properties to be provided to the Integration runtime
 - name: container
   platform: true
   profiles:
@@ -924,6 +908,22 @@ traits:
     description: To configure how to deal with insecure traffic, e.g. `Allow`, `Disable`
       or `Redirect` traffic.Refer to the OpenShift route documentation for additional
       information.
+- name: runtime
+  platform: true
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The runtime trait is used to customize the Integration runtime configuration
+    such as properties and resources.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: properties
+    type: '[]string'
+    description: A list of properties to be provided to the Integration runtime
 - name: service-binding
   platform: false
   profiles:
