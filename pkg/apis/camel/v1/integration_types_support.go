@@ -314,7 +314,11 @@ func (in *Integration) SetIntegrationKit(kit *IntegrationKit) {
 		Namespace: kit.Namespace,
 		Name:      kit.Name,
 	}
-	in.Status.Image = kit.Status.Image
+	image := kit.Status.Image
+	if image == "" {
+		image = kit.Spec.Image
+	}
+	in.Status.Image = image
 }
 
 // GetIntegrationKitNamespace --
