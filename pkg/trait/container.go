@@ -154,7 +154,15 @@ func isValidPullPolicy(policy corev1.PullPolicy) bool {
 
 func (t *containerTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		return t.configureDependencies(e)
+		if err := t.configureDependencies(e); err != nil {
+			return err
+		}
+	}
+
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+		if err := t.configureImageIntegrationKit(e); err != nil {
+			return err
+		}
 	}
 
 	if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
@@ -170,49 +178,51 @@ func (t *containerTrait) IsPlatformTrait() bool {
 }
 
 func (t *containerTrait) configureDependencies(e *Environment) error {
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		if t.Image != "" {
-			if e.Integration.Spec.IntegrationKit != nil {
-				return fmt.Errorf(
-					"unsupported configuration: a container image has been set in conjunction with an IntegrationKit %v",
-					e.Integration.Spec.IntegrationKit)
-			}
-			if e.Integration.Spec.Kit != "" {
-				return fmt.Errorf(
-					"unsupported configuration: a container image has been set in conjunction with an IntegrationKit %s",
-					e.Integration.Spec.Kit)
+	if IsTrue(t.ProbesEnabled) {
+		if capability, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityHealth]; ok {
+			for _, dependency := range capability.Dependencies {
+				util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dependency.GetDependencyID())
 			}
 
-			kitName := fmt.Sprintf("kit-%s", e.Integration.Name)
-			kit := v1.NewIntegrationKit(e.Integration.Namespace, kitName)
-			kit.Spec.Image = t.Image
-
-			// Add some information for post-processing, this may need to be refactored
-			// to a proper data structure
-			kit.Labels = map[string]string{
-				v1.IntegrationKitTypeLabel:           v1.IntegrationKitTypeExternal,
-				kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
-				kubernetes.CamelCreatorLabelName:      e.Integration.Name,
-				kubernetes.CamelCreatorLabelNamespace: e.Integration.Namespace,
-				kubernetes.CamelCreatorLabelVersion:   e.Integration.ResourceVersion,
-			}
-
-			t.L.Infof("image %s", kit.Spec.Image)
-			e.Resources.Add(kit)
-			e.Integration.SetIntegrationKit(kit)
-		}
-		if IsTrue(t.ProbesEnabled) {
-			if capability, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityHealth]; ok {
-				for _, dependency := range capability.Dependencies {
-					util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dependency.GetDependencyID())
-				}
-
-				// sort the dependencies to get always the same list if they don't change
-				sort.Strings(e.Integration.Status.Dependencies)
-			}
+			// sort the dependencies to get always the same list if they don't change
+			sort.Strings(e.Integration.Status.Dependencies)
 		}
 	}
 
+	return nil
+}
+
+func (t *containerTrait) configureImageIntegrationKit(e *Environment) error {
+	if t.Image != "" {
+		if e.Integration.Spec.IntegrationKit != nil {
+			return fmt.Errorf(
+				"unsupported configuration: a container image has been set in conjunction with an IntegrationKit %v",
+				e.Integration.Spec.IntegrationKit)
+		}
+		if e.Integration.Spec.Kit != "" {
+			return fmt.Errorf(
+				"unsupported configuration: a container image has been set in conjunction with an IntegrationKit %s",
+				e.Integration.Spec.Kit)
+		}
+
+		kitName := fmt.Sprintf("kit-%s", e.Integration.Name)
+		kit := v1.NewIntegrationKit(e.Integration.Namespace, kitName)
+		kit.Spec.Image = t.Image
+
+		// Add some information for post-processing, this may need to be refactored
+		// to a proper data structure
+		kit.Labels = map[string]string{
+			v1.IntegrationKitTypeLabel:            v1.IntegrationKitTypeExternal,
+			kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
+			kubernetes.CamelCreatorLabelName:      e.Integration.Name,
+			kubernetes.CamelCreatorLabelNamespace: e.Integration.Namespace,
+			kubernetes.CamelCreatorLabelVersion:   e.Integration.ResourceVersion,
+		}
+
+		t.L.Infof("image %s", kit.Spec.Image)
+		e.Resources.Add(kit)
+		e.Integration.SetIntegrationKit(kit)
+	}
 	return nil
 }
 
