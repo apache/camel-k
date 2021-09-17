@@ -53,12 +53,12 @@ func (c *Command) Do(ctx context.Context) error {
 	}
 
 	args := make([]string, 0)
-	args = append(args, "--batch-mode")
+	args = append(args, "--no-transfer-progress", "-Dstyle.color=never")
 
-	if c.context.LocalRepository == "" {
-		args = append(args, "-Dcamel.noop=true")
-	} else if _, err := os.Stat(c.context.LocalRepository); err == nil {
-		args = append(args, "-Dmaven.repo.local="+c.context.LocalRepository)
+	if c.context.LocalRepository != "" {
+		if _, err := os.Stat(c.context.LocalRepository); err == nil {
+			args = append(args, "-Dmaven.repo.local="+c.context.LocalRepository)
+		}
 	}
 
 	settingsPath := path.Join(c.context.Path, "settings.xml")
