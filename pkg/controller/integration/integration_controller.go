@@ -311,9 +311,7 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 		NewPlatformSetupAction(),
 		NewInitializeAction(),
 		newBuildKitAction(),
-		NewDeployAction(),
 		NewMonitorAction(),
-		NewErrorAction(),
 	}
 
 	for _, a := range actions {

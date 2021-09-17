@@ -41,7 +41,7 @@ func TestConfigureDeployerTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 
 	configured, err := deployerTrait.Configure(environment)
 
-	assert.False(t, configured)
+	assert.True(t, configured)
 	assert.Nil(t, err)
 }
 

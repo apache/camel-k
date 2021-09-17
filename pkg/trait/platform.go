@@ -18,10 +18,11 @@ limitations under the License.
 package trait
 
 import (
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/openshift"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 // The platform trait is a base trait that is used to assign an integration platform to an integration.

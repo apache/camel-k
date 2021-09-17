@@ -55,7 +55,7 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if e.IntegrationInPhase(v1.IntegrationPhaseRunning) {
+	if e.IntegrationInPhase(v1.IntegrationPhaseRunning, v1.IntegrationPhaseError) {
 		condition := e.Integration.Status.GetCondition(v1.IntegrationConditionDeploymentAvailable)
 		return condition != nil && condition.Status == corev1.ConditionTrue, nil
 	}
@@ -98,34 +98,18 @@ func (t *deploymentTrait) ControllerStrategySelectorOrder() int {
 }
 
 func (t *deploymentTrait) Apply(e *Environment) error {
-	if e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
-		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning) {
-		maps := e.computeConfigMaps()
-		deployment := t.getDeploymentFor(e)
+	maps := e.computeConfigMaps()
+	deployment := t.getDeploymentFor(e)
 
-		e.Resources.AddAll(maps)
-		e.Resources.Add(deployment)
+	e.Resources.AddAll(maps)
+	e.Resources.Add(deployment)
 
-		e.Integration.Status.SetCondition(
-			v1.IntegrationConditionDeploymentAvailable,
-			corev1.ConditionTrue,
-			v1.IntegrationConditionDeploymentAvailableReason,
-			fmt.Sprintf("deployment name is %s", deployment.Name),
-		)
-
-		if e.IntegrationInPhase(v1.IntegrationPhaseRunning) {
-			// Reconcile the deployment replicas
-			replicas := e.Integration.Spec.Replicas
-			// Deployment replicas defaults to 1, so we avoid forcing
-			// an update to nil that will result to another update cycle
-			// back to that default value by the Deployment controller.
-			if replicas == nil {
-				one := int32(1)
-				replicas = &one
-			}
-			deployment.Spec.Replicas = replicas
-		}
-	}
+	e.Integration.Status.SetCondition(
+		v1.IntegrationConditionDeploymentAvailable,
+		corev1.ConditionTrue,
+		v1.IntegrationConditionDeploymentAvailableReason,
+		fmt.Sprintf("deployment name is %s", deployment.Name),
+	)
 
 	return nil
 }
@@ -177,6 +161,17 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			},
 		},
 	}
+
+	// Reconcile the deployment replicas
+	replicas := e.Integration.Spec.Replicas
+	// Deployment replicas defaults to 1, so we avoid forcing
+	// an update to nil that will result to another update cycle
+	// back to that default value by the Deployment controller.
+	if replicas == nil {
+		one := int32(1)
+		replicas = &one
+	}
+	deployment.Spec.Replicas = replicas
 
 	return &deployment
 }

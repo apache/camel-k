@@ -121,8 +121,7 @@ func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
 
 	return e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) ||
 			e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) ||
-			e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
-			e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning),
+			e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) && e.IntegrationInRunningPhases(),
 		nil
 }
 
@@ -232,7 +231,7 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 		build.Steps = builder.StepIDsFor(steps...)
 
 	case v1.IntegrationKitPhaseReady:
-		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) && t.isNativeIntegration(e) {
+		if e.IntegrationInRunningPhases() && t.isNativeIntegration(e) {
 			container := e.getIntegrationContainer()
 			if container == nil {
 				return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
