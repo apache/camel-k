@@ -89,7 +89,7 @@ func (g *traitMetaDataGen) GenerateType(context *generator.Context, t *types.Typ
 
 func (g *traitMetaDataGen) Finalize(c *generator.Context, w io.Writer) error {
 
-	deployDir := g.arguments.CustomArgs.(*CustomArgs).DeployDir
+	deployDir := g.arguments.CustomArgs.(*CustomArgs).ResourceDir
 	traitFile := "traits.yaml"
 	filename := path.Join(deployDir, traitFile)
 
