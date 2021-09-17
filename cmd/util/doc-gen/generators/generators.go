@@ -29,7 +29,7 @@ import (
 // CustomArgs --
 type CustomArgs struct {
 	DocDir    string
-	DeployDir string
+	ResourceDir string
 	TraitPath string
 	NavPath   string
 	ListPath  string
