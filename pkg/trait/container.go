@@ -22,7 +22,6 @@ import (
 	"path"
 	"sort"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -34,6 +33,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/envvar"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 const (
@@ -130,7 +130,7 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil
 	}
 
@@ -157,16 +157,12 @@ func (t *containerTrait) Apply(e *Environment) error {
 		if err := t.configureDependencies(e); err != nil {
 			return err
 		}
-	}
-
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
-		if err := t.configureImageIntegrationKit(e); err != nil {
-			return err
-		}
-	}
-
-	if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+	} else {
 		return t.configureContainer(e)
+	}
+
+	if err := t.configureImageIntegrationKit(e); err != nil {
+		return err
 	}
 
 	return nil

@@ -21,9 +21,10 @@ import (
 	"fmt"
 	"strings"
 
+	"gopkg.in/yaml.v2"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"gopkg.in/yaml.v2"
 )
 
 // The error-handler is a platform trait used to inject Error Handler source into the integration runtime.
@@ -52,7 +53,7 @@ func (t *errorHandlerTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil
 	}
 
@@ -65,7 +66,7 @@ func (t *errorHandlerTrait) Configure(e *Environment) (bool, error) {
 
 func (t *errorHandlerTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		// If the user configure directly the URI, we need to autodiscover the underlying component
+		// If the user configure directly the URI, we need to auto-discover the underlying component
 		// and add the related dependency
 		defaultErrorHandlerURI := e.Integration.Spec.GetConfigurationProperty(
 			fmt.Sprintf("%s.deadLetterUri", v1alpha1.ErrorHandlerAppPropertiesPrefix))

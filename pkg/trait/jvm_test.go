@@ -54,7 +54,7 @@ func TestConfigureJvmTraitInWrongIntegrationPhaseDoesNotSucceed(t *testing.T) {
 
 	configured, err := trait.Configure(environment)
 	assert.Nil(t, err)
-	assert.False(t, configured)
+	assert.True(t, configured)
 }
 
 func TestConfigureJvmTraitInWrongIntegrationKitPhaseDoesNotSucceed(t *testing.T) {

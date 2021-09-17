@@ -68,7 +68,7 @@ func (t *affinityTrait) Configure(e *Environment) (bool, error) {
 		return false, fmt.Errorf("both pod affinity and pod anti-affinity can't be set simultaneously")
 	}
 
-	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
+	return e.IntegrationInRunningPhases(), nil
 }
 
 func (t *affinityTrait) Apply(e *Environment) (err error) {

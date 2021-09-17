@@ -58,7 +58,7 @@ func (t *podTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
+	return e.IntegrationInRunningPhases(), nil
 }
 
 func (t *podTrait) Apply(e *Environment) error {

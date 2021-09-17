@@ -108,7 +108,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil
 	}
 
@@ -216,7 +216,7 @@ func (t *knativeTrait) Apply(e *Environment) error {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
 	}
 
-	if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+	if e.IntegrationInRunningPhases() {
 		env := knativeapi.NewCamelEnvironment()
 		if t.Configuration != "" {
 			if err := env.Deserialize(t.Configuration); err != nil {

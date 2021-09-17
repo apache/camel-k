@@ -22,7 +22,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -61,7 +60,7 @@ func (t *tolerationTrait) Configure(e *Environment) (bool, error) {
 		return false, fmt.Errorf("no taint was provided")
 	}
 
-	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
+	return e.IntegrationInRunningPhases(), nil
 }
 
 func (t *tolerationTrait) Apply(e *Environment) (err error) {

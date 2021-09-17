@@ -71,8 +71,11 @@ func (t *jvmTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
-		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning), nil
+	if !e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) || !e.IntegrationInRunningPhases() {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func (t *jvmTrait) Apply(e *Environment) error {

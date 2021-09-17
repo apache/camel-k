@@ -120,7 +120,7 @@ func (t *routeTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+	if !e.IntegrationInRunningPhases() {
 		return false, nil
 	}
 
@@ -278,7 +278,7 @@ func (t *routeTrait) readContentIfExists(secretName string) (string, error) {
 	if len(key) > 0 {
 		content := string(secret.Data[key])
 		if len(content) == 0 {
-			return "", fmt.Errorf("Could not find key %s in secret %s in namespace %s", key, secretName, t.service.Namespace)
+			return "", fmt.Errorf("could not find key %s in secret %s in namespace %s", key, secretName, t.service.Namespace)
 		}
 		return content, nil
 	}

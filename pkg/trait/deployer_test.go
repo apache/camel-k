@@ -42,7 +42,7 @@ func TestConfigureDeployerTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 
 	configured, err := deployerTrait.Configure(environment)
 
-	assert.False(t, configured)
+	assert.True(t, configured)
 	assert.Nil(t, err)
 }
 
@@ -63,16 +63,6 @@ func TestApplyDeployerTraitInInitializationPhaseDoesSucceed(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Len(t, environment.PostActions, 1)
-}
-
-func TestApplyDeployerTraitInResolvingKitPhaseSkipPostActions(t *testing.T) {
-	deployerTrait, environment := createNominalDeployerTest()
-	environment.Integration.Status.Phase = v1.IntegrationPhaseResolvingKit
-
-	err := deployerTrait.Apply(environment)
-
-	assert.Nil(t, err)
-	assert.Len(t, environment.PostActions, 0)
 }
 
 func createNominalDeployerTest() (*deployerTrait, *Environment) {
