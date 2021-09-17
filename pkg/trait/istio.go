@@ -23,11 +23,9 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// The Istio trait allows to configure properties related to the Istio service mesh,
+// The Istio trait allows configuring properties related to the Istio service mesh,
 // such as sidecar injection and outbound IP ranges.
 //
 // +camel-k:trait=istio
@@ -53,7 +51,7 @@ func newIstioTrait() Trait {
 
 func (t *istioTrait) Configure(e *Environment) (bool, error) {
 	if IsTrue(t.Enabled) {
-		return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
+		return e.IntegrationInRunningPhases(), nil
 	}
 
 	return false, nil

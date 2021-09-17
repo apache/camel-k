@@ -20,15 +20,17 @@ package trait
 import (
 	"fmt"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/openshift"
 	"github.com/pkg/errors"
+
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 // The Pull Secret trait sets a pull secret on the pod,
@@ -64,7 +66,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+	if !e.IntegrationInRunningPhases() {
 		return false, nil
 	}
 
@@ -72,7 +74,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 		if t.SecretName == "" {
 			secret := e.Platform.Status.Build.Registry.Secret
 			if secret != "" {
-				key := client.ObjectKey{Namespace: e.Platform.Namespace, Name: secret}
+				key := ctrl.ObjectKey{Namespace: e.Platform.Namespace, Name: secret}
 				obj := corev1.Secret{}
 				if err := t.Client.Get(e.Ctx, key, &obj); err != nil {
 					return false, err
@@ -119,7 +121,7 @@ func (t *pullSecretTrait) Apply(e *Environment) error {
 }
 
 func (t *pullSecretTrait) delegateImagePuller(e *Environment) error {
-	// Applying the rolebinding directly because it's a resource in the operator namespace
+	// Applying the RoleBinding directly because it's a resource in the operator namespace
 	// (different from the integration namespace when delegation is enabled).
 	rb := t.newImagePullerRoleBinding(e)
 	if err := kubernetes.ReplaceResource(e.Ctx, e.Client, rb); err != nil {

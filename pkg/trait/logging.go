@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
@@ -61,7 +60,7 @@ func (l loggingTrait) Configure(environment *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return environment.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
+	return environment.IntegrationInRunningPhases(), nil
 }
 
 func (l loggingTrait) Apply(environment *Environment) error {

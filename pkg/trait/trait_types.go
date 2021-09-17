@@ -248,6 +248,10 @@ func (e *Environment) IntegrationInPhase(phases ...v1.IntegrationPhase) bool {
 	return false
 }
 
+func (e *Environment) IntegrationInRunningPhases() bool {
+	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning, v1.IntegrationPhaseError)
+}
+
 func (e *Environment) IntegrationKitInPhase(phases ...v1.IntegrationKitPhase) bool {
 	if e.IntegrationKit == nil {
 		return false

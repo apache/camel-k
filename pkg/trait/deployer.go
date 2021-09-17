@@ -29,7 +29,6 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/patch"
 )
 
@@ -54,14 +53,7 @@ func newDeployerTrait() Trait {
 }
 
 func (t *deployerTrait) Configure(e *Environment) (bool, error) {
-	return e.IntegrationInPhase(
-		v1.IntegrationPhaseNone,
-		v1.IntegrationPhaseWaitingForBindings,
-		v1.IntegrationPhaseWaitingForPlatform,
-		v1.IntegrationPhaseInitialization,
-		v1.IntegrationPhaseDeploying,
-		v1.IntegrationPhaseRunning,
-	), nil
+	return e.Integration != nil && IsNilOrTrue(t.Enabled), nil
 }
 
 func (t *deployerTrait) Apply(e *Environment) error {

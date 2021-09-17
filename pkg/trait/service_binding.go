@@ -20,16 +20,16 @@ package trait
 import (
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/util/reference"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	sb "github.com/redhat-developer/service-binding-operator/api/v1alpha1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/reference"
 )
 
 // The Service Binding trait allows users to connect to Provisioned Services and ServiceBindings in Kubernetes:
@@ -57,12 +57,8 @@ func (t *serviceBindingTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	return e.IntegrationInPhase(
-		v1.IntegrationPhaseInitialization,
-		v1.IntegrationPhaseWaitingForBindings,
-		v1.IntegrationPhaseDeploying,
-		v1.IntegrationPhaseRunning,
-	), nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseWaitingForBindings) ||
+		e.IntegrationInRunningPhases(), nil
 }
 
 func (t *serviceBindingTrait) Apply(e *Environment) error {
@@ -121,7 +117,7 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 				e.Resources.Add(&request)
 			}
 		}
-	} else if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+	} else if e.IntegrationInRunningPhases() {
 		e.ServiceBindings = make(map[string]string)
 		for _, name := range serviceBindings {
 			sb, err := t.getServiceBinding(e, name)
@@ -168,7 +164,7 @@ func isCollectionReady(sb sb.ServiceBinding) bool {
 
 func (t *serviceBindingTrait) getServiceBinding(e *Environment, name string) (sb.ServiceBinding, error) {
 	serviceBinding := sb.ServiceBinding{}
-	key := k8sclient.ObjectKey{
+	key := ctrl.ObjectKey{
 		Namespace: e.Integration.Namespace,
 		Name:      name,
 	}

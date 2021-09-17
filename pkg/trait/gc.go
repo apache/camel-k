@@ -81,17 +81,14 @@ func (t *garbageCollectorTrait) Configure(e *Environment) (bool, error) {
 		t.DiscoveryCache = &s
 	}
 
-	return e.IntegrationInPhase(
-			v1.IntegrationPhaseInitialization,
-			v1.IntegrationPhaseDeploying,
-			v1.IntegrationPhaseRunning),
+	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(),
 		nil
 }
 
 func (t *garbageCollectorTrait) Apply(e *Environment) error {
 	switch e.Integration.Status.Phase {
 
-	case v1.IntegrationPhaseRunning:
+	case v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning, v1.IntegrationPhaseError:
 		// Register a post action that deletes the existing resources that are labelled
 		// with the previous integration generations.
 		// TODO: this should be refined so that it's run when all the replicas for the newer generation
