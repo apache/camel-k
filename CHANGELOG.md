@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- kamelet binding: scaling to 0 and the to 1 not working when a container image is provided [\#2638](https://github.com/apache/camel-k/issues/2638)
 - Container trait documentation messed up [\#2626](https://github.com/apache/camel-k/issues/2626)
 - Bots to simplify project managment [\#2623](https://github.com/apache/camel-k/issues/2623)
 - Contribution missing in 1.6.0 release note [\#2621](https://github.com/apache/camel-k/issues/2621)
@@ -18,6 +19,7 @@
 
 **Merged pull requests:**
 
+- Fix \#2638: sync owned integration kit to avoid gc [\#2639](https://github.com/apache/camel-k/pull/2639) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix documentation for building website [\#2637](https://github.com/apache/camel-k/pull/2637) ([oscerd](https://github.com/oscerd))
 - Fixed website build [\#2636](https://github.com/apache/camel-k/pull/2636) ([oscerd](https://github.com/oscerd))
 - doc: architecture \> runtime section [\#2634](https://github.com/apache/camel-k/pull/2634) ([squakez](https://github.com/squakez))
