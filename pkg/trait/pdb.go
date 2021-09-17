@@ -66,10 +66,7 @@ func (t *pdbTrait) Configure(e *Environment) (bool, error) {
 		return false, fmt.Errorf("both minAvailable and maxUnavailable can't be set simultaneously")
 	}
 
-	return e.IntegrationInPhase(
-		v1.IntegrationPhaseDeploying,
-		v1.IntegrationPhaseRunning,
-	), nil
+	return e.IntegrationInRunningPhases(), nil
 }
 
 func (t *pdbTrait) Apply(e *Environment) error {

@@ -20,6 +20,8 @@ package integration
 import (
 	"context"
 
+	"github.com/pkg/errors"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
@@ -45,10 +47,18 @@ func (action *monitorAction) Name() string {
 }
 
 func (action *monitorAction) CanHandle(integration *v1.Integration) bool {
-	return integration.Status.Phase == v1.IntegrationPhaseRunning
+	return integration.Status.Phase == v1.IntegrationPhaseDeploying ||
+		integration.Status.Phase == v1.IntegrationPhaseRunning ||
+		integration.Status.Phase == v1.IntegrationPhaseError
 }
 
 func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
+	// At that staged the Integration must have a Kit
+	if integration.Status.IntegrationKit == nil {
+		return nil, errors.Errorf("no kit set on integration %s", integration.Name)
+	}
+
+	// Check if the Integration requires a rebuild
 	hash, err := digest.ComputeForIntegration(integration)
 	if err != nil {
 		return nil, err
@@ -94,14 +104,18 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		}
 	}
 
-	// Mirror ready condition from the owned resource (e.g.ReplicaSet, Deployment, CronJob, ...)
+	// Reconcile Integration phase
+	if integration.Status.Phase == v1.IntegrationPhaseDeploying {
+		integration.Status.Phase = v1.IntegrationPhaseRunning
+	}
+
+	// Mirror ready condition from the owned resource (e.g., Deployment, CronJob, KnativeService ...)
 	// into the owning integration
 	previous := integration.Status.GetCondition(v1.IntegrationConditionReady)
 	kubernetes.MirrorReadyCondition(ctx, action.client, integration)
 
-	if next := integration.Status.GetCondition(v1.IntegrationConditionReady);
-		(previous == nil || previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero()) &&
-			next != nil && next.Status == corev1.ConditionTrue && !(next.FirstTruthyTime == nil || next.FirstTruthyTime.IsZero()) {
+	if next := integration.Status.GetCondition(v1.IntegrationConditionReady); (previous == nil || previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero()) &&
+		next != nil && next.Status == corev1.ConditionTrue && !(next.FirstTruthyTime == nil || next.FirstTruthyTime.IsZero()) {
 		// Observe the time to first readiness metric
 		duration := next.FirstTruthyTime.Time.Sub(integration.Status.InitializationTimestamp.Time)
 		action.L.Infof("First readiness after %s", duration)
@@ -116,29 +130,57 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 			return nil, err
 		}
 
-		deployUnavailable := false
-		progressingFailing := false
-		for _, c := range deployment.Status.Conditions {
-			// first, check if the container status is not available
-			if c.Type == appsv1.DeploymentAvailable {
-				deployUnavailable = c.Status == corev1.ConditionFalse
+		switch integration.Status.Phase {
+		case v1.IntegrationPhaseRunning:
+			deployUnavailable := false
+			progressingFailing := false
+			for _, c := range deployment.Status.Conditions {
+				// first, check if the container status is not available
+				if c.Type == appsv1.DeploymentAvailable {
+					deployUnavailable = c.Status == corev1.ConditionFalse
+				}
+				// second, check when it is progressing and reason is the replicas are available but the number of replicas are zero
+				// in this case, the container integration is failing
+				if c.Type == appsv1.DeploymentProgressing {
+					progressingFailing = c.Status == corev1.ConditionTrue && c.Reason == "NewReplicaSetAvailable" && deployment.Status.AvailableReplicas < 1
+				}
 			}
-			// second, check when it is progressing and reason is the replicas are available but the number of replicas are zero
-			// in this case, the container integration is failing
-			if c.Type == appsv1.DeploymentProgressing {
-				progressingFailing = c.Status == corev1.ConditionTrue && c.Reason == "NewReplicaSetAvailable" && deployment.Status.AvailableReplicas < 1
+			if deployUnavailable && progressingFailing {
+				notAvailableCondition := v1.IntegrationCondition{
+					Type:    v1.IntegrationConditionReady,
+					Status:  corev1.ConditionFalse,
+					Reason:  v1.IntegrationConditionErrorReason,
+					Message: "The corresponding pod(s) may be in error state, look at the pod status or log for errors",
+				}
+				integration.Status.SetConditions(notAvailableCondition)
+				integration.Status.Phase = v1.IntegrationPhaseError
+				return integration, nil
 			}
-		}
-		if deployUnavailable && progressingFailing {
-			notAvailableCondition := v1.IntegrationCondition{
-				Type:   v1.IntegrationConditionReady, 
-				Status: corev1.ConditionFalse,
-				Reason: v1.IntegrationConditionErrorReason,
-				Message: "The corresponding pod(s) may be in error state, look at the pod status or log for errors",
+
+		case v1.IntegrationPhaseError:
+			// if the integration is in error phase, check if the corresponding pod is running ok, the user may have updated the integration.
+			deployAvailable := false
+			progressingOk := false
+			for _, c := range deployment.Status.Conditions {
+				// first, check if the container is in available state
+				if c.Type == appsv1.DeploymentAvailable {
+					deployAvailable = c.Status == corev1.ConditionTrue
+				}
+				// second, check the progressing and the reasons
+				if c.Type == appsv1.DeploymentProgressing {
+					progressingOk = c.Status == corev1.ConditionTrue && (c.Reason == "NewReplicaSetAvailable" || c.Reason == "ReplicaSetUpdated")
+				}
 			}
-			integration.Status.SetConditions(notAvailableCondition)
-			integration.Status.Phase = v1.IntegrationPhaseError
-			return integration, nil
+			if deployAvailable && progressingOk {
+				availableCondition := v1.IntegrationCondition{
+					Type:   v1.IntegrationConditionReady,
+					Status: corev1.ConditionTrue,
+					Reason: v1.IntegrationConditionReplicaSetReadyReason,
+				}
+				integration.Status.SetConditions(availableCondition)
+				integration.Status.Phase = v1.IntegrationPhaseRunning
+				return integration, nil
+			}
 		}
 	}
 

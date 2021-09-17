@@ -25,7 +25,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/source"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -37,8 +38,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/dsl"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/apache/camel-k/pkg/util/source"
 )
 
 // The kamelets trait is a platform trait used to inject Kamelets into the integration runtime.
@@ -92,7 +92,7 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil
 	}
 
@@ -126,15 +126,14 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *kameletsTrait) Apply(e *Environment) error {
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseRunning) {
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases() {
 		if err := t.addKamelets(e); err != nil {
 			return err
 		}
 	}
-
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		return t.addConfigurationSecrets(e)
-	} else if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+	} else if e.IntegrationInRunningPhases() {
 		return t.configureApplicationProperties(e)
 	}
 

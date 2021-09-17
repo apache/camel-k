@@ -60,7 +60,7 @@ func TestConfigureIngressTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 
 	configured, err := ingressTrait.Configure(environment)
 
-	assert.False(t, configured)
+	assert.True(t, configured)
 	assert.Nil(t, err)
 	assert.Len(t, environment.Integration.Status.Conditions, 0)
 }

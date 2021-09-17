@@ -93,11 +93,8 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 
 		if kit.Status.Phase == v1.IntegrationKitPhaseReady {
 			integration.Status.Image = kit.Status.Image
+			integration.Status.Phase = v1.IntegrationPhaseDeploying
 			integration.SetIntegrationKit(kit)
-
-			if _, err := trait.Apply(ctx, action.client, integration, kit); err != nil {
-				return nil, err
-			}
 
 			return integration, nil
 		}
