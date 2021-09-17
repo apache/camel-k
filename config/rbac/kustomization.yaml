@@ -27,13 +27,14 @@ resources:
 - operator-role-knative.yaml
 - operator-role.yaml
 - operator-role-leases.yaml
-- operator-role-service-binding.yaml
 - operator-role-podmonitors.yaml
 - operator-role-strimzi.yaml
 - operator-role-binding-events.yaml
 - operator-role-binding-knative.yaml
 - operator-role-binding-leases.yaml
-- operator-role-binding-service-binding.yaml
 - operator-role-binding-podmonitors.yaml
 - operator-role-binding-strimzi.yaml
 - operator-role-binding.yaml
+- operator-cluster-role-custom-resource-definitions.yaml
+- operator-cluster-role-binding-custom-resource-definitions.yaml
+
