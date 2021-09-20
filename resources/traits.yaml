@@ -288,6 +288,10 @@ traits:
     type: bool
     description: Enables injection of `NAMESPACE` and `POD_NAME` environment variables
       (default `true`)
+  - name: vars
+    type: '[]string'
+    description: A list of variables to be created on the Pod. Must have KEY=VALUE
+      syntax (ie, MY_VAR="my value").
 - name: error-handler
   platform: true
   profiles:
