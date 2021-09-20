@@ -20,6 +20,7 @@ package trait
 import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/envvar"
+	"github.com/apache/camel-k/pkg/util/property"
 )
 
 // The environment trait is used internally to inject standard environment variables in the integration container,
@@ -30,6 +31,8 @@ type environmentTrait struct {
 	BaseTrait `property:",squash"`
 	// Enables injection of `NAMESPACE` and `POD_NAME` environment variables (default `true`)
 	ContainerMeta *bool `property:"container-meta" json:"containerMeta,omitempty"`
+	// A list of variables to be created on the Pod. Must have KEY=VALUE syntax (ie, MY_VAR="my value").
+	Vars []string `property:"vars" json:"vars,omitempty"`
 }
 
 const (
@@ -76,6 +79,13 @@ func (t *environmentTrait) Apply(e *Environment) error {
 	if IsNilOrTrue(t.ContainerMeta) {
 		envvar.SetValFrom(&e.EnvVars, envVarNamespace, "metadata.namespace")
 		envvar.SetValFrom(&e.EnvVars, envVarPodName, "metadata.name")
+	}
+
+	if t.Vars != nil {
+		for _, env := range t.Vars {
+			k, v := property.SplitPropertyFileEntry(env)
+			envvar.SetVal(&e.EnvVars, k, v)
+		}
 	}
 
 	return nil
