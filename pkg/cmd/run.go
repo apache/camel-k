@@ -621,7 +621,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		integration.Spec.AddConfiguration("volume", item)
 	}
 	for _, item := range o.EnvVars {
-		integration.Spec.AddConfiguration("env", item)
+		o.Traits = append(o.Traits, fmt.Sprintf("environment.vars=%s", item))
 	}
 
 	if err := o.configureTraits(integration, o.Traits, catalog); err != nil {
