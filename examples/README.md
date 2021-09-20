@@ -9,6 +9,7 @@ In this section you will find the most basic examples. Useful to start learning 
 | Type  |  Description | Link  |
 |---|---|---|
 | Languages | Simple integrations developed in various supported languages | [see examples](./languages/)|
+| Basic | Simple integrations with basic configuration | [see examples](./basic/)|
 | Cron | How to create a `cront` integration | [see examples](./cron/)|
 | User Config | Explore how to include a `property`, `secret`, `configmap` or file `resource` in your integration | [see examples](./user-config/)|
 | Processor | Show how to include `Processor`s logic | [see examples](./processor/)|
@@ -19,7 +20,6 @@ In this section you will find the most basic examples. Useful to start learning 
 ## Component usage examples
 
 In this section you can find a few examples of certain [`Camel` components](https://camel.apache.org/components/latest/index.html). This is a limited number of the wide variety of components supported by Apache Camel. You can also find useful examples [in this repository](https://github.com/apache/camel-k-examples).
-
 
 | Type  |  Description | Link  |
 |---|---|---|
@@ -50,4 +50,5 @@ Traits configuration will be very helpful to fine tune your `Integration`. Here 
 
 | Type  |  Description | Link  |
 |---|---|---|
-| JVM | How to use `JVM` trait| [see examples](./traits/jvm/)|
+| Container | How to customize with `container` trait| [see examples](./traits/container/)|
+| JVM | How to use `jvm` trait| [see examples](./traits/jvm/)|
