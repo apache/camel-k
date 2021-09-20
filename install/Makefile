@@ -50,21 +50,24 @@ MONITORING_PORT ?= 8080
 HEALTH_PORT ?= 8081
 
 CONFIG := ../config
-RBAC_OS := $(CONFIG)/rbac/openshift
+MANAGER := $(CONFIG)/manager
+SAMPLES := $(CONFIG)/samples
+RBAC := $(CONFIG)/rbac
+RBAC_OS := $(RBAC)/openshift
 RBAC_GLOBAL := global
 OPERATOR := operator
 PLACEHOLDER := placeholder
 YAML := yaml
 
 # Setup patches
-ROLE_TO_CROLE_PATCH := patch-role-to-clusterrole
-ROLEBIN_TO_CROLEBIN_PATCH := patch-rolebinding-to-clusterrolebinding
+ROLE_TO_CROLE_PATCH := $(RBAC)/patch-role-to-clusterrole
+ROLEBIN_TO_CROLEBIN_PATCH := $(RBAC)/patch-rolebinding-to-clusterrolebinding
 # Operator patches
 PORTS_PATCH := patch-ports
 IMAGE_PULL_POLICY_PATCH := patch-image-pull-policy-always
 WATCH_NAMESPACE_PATCH := patch-watch-namespace-global
 # Platform patches
-INT_PLATFORM_PATCH := platform/patch-integration-platform
+INT_PLATFORM_PATCH := patch-integration-platform
 
 #
 # Macro for editing kustomization to define
@@ -197,11 +200,16 @@ setup: setup-cluster
 	@$(call set-kustomize-namespace,$@)
 # If GLOBAL then add the conversion patches for all roles and rolebindings
 ifeq ($(GLOBAL),true)
-	@$(call add-remove-kind-patch,setup,add,$(ROLE_TO_CROLE_PATCH).$(YAML),Role)
-	@$(call add-remove-kind-patch,setup,add,$(ROLEBIN_TO_CROLEBIN_PATCH).$(YAML),RoleBinding)
+	@$(call add-remove-kind-patch,setup,add,../$(ROLE_TO_CROLE_PATCH).$(YAML),Role)
+	@$(call add-remove-kind-patch,setup,add,../$(ROLEBIN_TO_CROLEBIN_PATCH).$(YAML),RoleBinding)
 else
-	@$(call add-remove-kind-patch,setup,remove,$(ROLE_TO_CROLE_PATCH).$(YAML),Role)
-	@$(call add-remove-kind-patch,setup,remove,$(ROLEBIN_TO_CROLEBIN_PATCH).$(YAML),RoleBinding)
+	@$(call add-remove-kind-patch,setup,remove,../$(ROLE_TO_CROLE_PATCH).$(YAML),Role)
+	@$(call add-remove-kind-patch,setup,remove,../$(ROLEBIN_TO_CROLEBIN_PATCH).$(YAML),RoleBinding)
+endif
+ifeq ($(PLATFORM), openshift)
+	@for res in $(RBAC_OS)/operator-role*; do \
+		(cd $@ && $(KUSTOMIZE) edit add resource ../$$res); \
+	done
 endif
 #
 # Build the resources
@@ -223,10 +231,10 @@ endif
 # Customizes the port patch
 #
 .operator-port-patch:
-	@sed -i 's/--monitoring-port=.*/--monitoring-port=$(MONITORING_PORT)/' $(OPERATOR)/$(PORTS_PATCH).$(YAML)
-	@sed -i '/path:.*\/containerPort/,/- op/{s/value: .*/value: $(MONITORING_PORT)/}' $(OPERATOR)/$(PORTS_PATCH).$(YAML)
-	@sed -i 's/--health-port=.*/--health-port=$(HEALTH_PORT)/' $(OPERATOR)/$(PORTS_PATCH).$(YAML)
-	@sed -i '/path:.*\/httpGet\/port/,/- op/{s/value: .*/value: $(HEALTH_PORT)/}' $(OPERATOR)/$(PORTS_PATCH).$(YAML)
+	@sed -i 's/--monitoring-port=.*/--monitoring-port=$(MONITORING_PORT)/' $(MANAGER)/$(PORTS_PATCH).$(YAML)
+	@sed -i '/path:.*\/containerPort/,/- op/{s/value: .*/value: $(MONITORING_PORT)/}' $(MANAGER)/$(PORTS_PATCH).$(YAML)
+	@sed -i 's/--health-port=.*/--health-port=$(HEALTH_PORT)/' $(MANAGER)/$(PORTS_PATCH).$(YAML)
+	@sed -i '/path:.*\/httpGet\/port/,/- op/{s/value: .*/value: $(HEALTH_PORT)/}' $(MANAGER)/$(PORTS_PATCH).$(YAML)
 
 .operator-can-monitor: kubectl
 	@output=$$(kubectl get crd prometheusrules.monitoring.coreos.com 2>&1) || (echo "****" && echo "**** ERROR: Montoring not available as Prometheus CRDs not installed in cluster ****" && echo "****"; exit 1)
@@ -261,21 +269,21 @@ endif
 	@$(call set-kustomize-image,$@)
 # Set the WATCH NAMESPACE env var depending on GLOBAL var
 ifeq ($(GLOBAL), true)
-	@$(call add-remove-kind-patch,$@,add,$(WATCH_NAMESPACE_PATCH).$(YAML),Deployment)
+	@$(call add-remove-kind-patch,$(MANAGER),add,$(WATCH_NAMESPACE_PATCH).$(YAML),Deployment)
 else
-	@$(call add-remove-kind-patch,$@,remove,$(WATCH_NAMESPACE_PATCH).$(YAML),Deployment)
+	@$(call add-remove-kind-patch,$(MANAGER),remove,$(WATCH_NAMESPACE_PATCH).$(YAML),Deployment)
 endif
 # Set the ALWAYS_PULL_IMAGES config depending on var
 ifeq ($(ALWAYS_PULL_IMAGES),true)
-	@$(call add-remove-kind-patch,$@,add,$(IMAGE_PULL_POLICY_PATCH).$(YAML),Deployment)
+	@$(call add-remove-kind-patch,$(MANAGER),add,$(IMAGE_PULL_POLICY_PATCH).$(YAML),Deployment)
 else
-	@$(call add-remove-kind-patch,$@,remove,$(IMAGE_PULL_POLICY_PATCH).$(YAML),Deployment)
+	@$(call add-remove-kind-patch,$(MANAGER),remove,$(IMAGE_PULL_POLICY_PATCH).$(YAML),Deployment)
 endif
 # Set the PORTS depending on vars
 ifneq ($(MONITORING_PORT), 8080)
-	@$(call add-remove-kind-patch,$@,add,$(PORTS_PATCH).$(YAML),Deployment)
+	@$(call add-remove-kind-patch,$(MANAGER),add,$(PORTS_PATCH).$(YAML),Deployment)
 else ifneq ($(HEALTH_PORT), 8081)
-	@$(call add-remove-kind-patch,$@,add,$(PORTS_PATCH).$(YAML),Deployment)
+	@$(call add-remove-kind-patch,$(MANAGER),add,$(PORTS_PATCH).$(YAML),Deployment)
 endif
 ifeq ($(DRY_RUN), false)
 	@$(KUSTOMIZE) build $(KOPTIONS) $@ | kubectl apply -f -
@@ -289,13 +297,13 @@ endif
 # Customizes the samples patches for kubernetes
 #
 .platform-kubernetes-patch:
-	@sed -i 's/.*profile:.*/  profile: Kubernetes/' $(INT_PLATFORM_PATCH).$(YAML)
+	@sed -i 's/.*profile:.*/  profile: Kubernetes/' $(SAMPLES)/$(INT_PLATFORM_PATCH).$(YAML)
 
 #
 # Customizes the samples patches for openshift
 #
 .platform-openshift-patch:
-	@sed -i 's/.*profile:.*/  profile: Openshift/' $(INT_PLATFORM_PATCH).$(YAML)
+	@sed -i 's/.*profile:.*/  profile: Openshift/' $(SAMPLES)/$(INT_PLATFORM_PATCH).$(YAML)
 
 #
 # Install the integration platform

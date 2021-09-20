@@ -28,3 +28,6 @@ resources:
 - bases/camel_v1_build.yaml
 - bases/camel_v1_kamelet.yaml
 - bases/camel_v1_kameletbinding.yaml
+
+patchesStrategicMerge:
+- patch-integration-platform.yaml
