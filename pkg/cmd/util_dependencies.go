@@ -452,6 +452,39 @@ func updateIntegrationRoutes(routes []string) error {
 	return nil
 }
 
+func updateQuarkusDirectory() error {
+	err := util.CreateLocalQuarkusDirectory()
+	if err != nil {
+		return err
+	}
+
+	util.CopyQuarkusAppFiles(util.CustomQuarkusDirectoryName, util.GetLocalQuarkusDir())
+
+	return nil
+}
+
+func updateAppDirectory() error {
+	err := util.CreateLocalAppDirectory()
+	if err != nil {
+		return err
+	}
+
+	util.CopyAppFile(util.CustomAppDirectoryName, util.GetLocalAppDir())
+
+	return nil
+}
+
+func updateLibDirectory() error {
+	err := util.CreateLocalLibDirectory()
+	if err != nil {
+		return err
+	}
+
+	util.CopyLibFiles(util.CustomLibDirectoryName, util.GetLocalLibDir())
+
+	return nil
+}
+
 func createMavenWorkingDirectory() error {
 	// Create local Maven context
 	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "maven-")
@@ -482,4 +515,57 @@ func getCustomPropertiesDir(integrationDirectory string) string {
 
 func getCustomRoutesDir(integrationDirectory string) string {
 	return path.Join(integrationDirectory, "routes")
+}
+
+func getCustomQuarkusDir() (string, error) {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	return path.Join(currentDir, "quarkus"), nil
+}
+
+func getCustomLibDir() (string, error) {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	return path.Join(currentDir, "lib/main"), nil
+}
+
+func getCustomAppDir() (string, error) {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	return path.Join(currentDir, "app"), nil
+}
+
+func deleteLocalIntegrationDirs() error {
+	directory, err := getCustomQuarkusDir()
+	if err != nil {
+		return err
+	}
+
+	err = os.RemoveAll(directory)
+	if err != nil {
+		return err
+	}
+
+	err = os.RemoveAll("lib")
+	if err != nil {
+		return err
+	}
+
+	directory, err = getCustomAppDir()
+	if err != nil {
+		return err
+	}
+
+	err = os.RemoveAll(directory)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

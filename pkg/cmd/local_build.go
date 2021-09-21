@@ -221,9 +221,9 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 
 	// Integration directory can only be used when building an integration image or when we just
 	// build the integration without also building the image. A local build of the integration is
-	// represented by all the files that define	 the integration: dependencies, properties and routes.
+	// represented by all the files that define the integration: dependencies, properties and routes.
 
-	// The only case where we should not execute the image integration creation is when we want to
+	// The only case in which we should not execute the integration image creation is when we want to
 	// just output the files that comprise the integration locally.
 	if command.IntegrationDirectory != "" && command.Image == "" {
 		return nil
@@ -231,7 +231,7 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 
 	// Create and build integration image.
 	err := createAndBuildIntegrationImage(command.Context, command.ContainerRegistry, command.BaseImage,
-		command.Image, propertyFilesList, dependenciesList, routeFiles, cmd.OutOrStdout(), cmd.ErrOrStderr())
+		command.Image, propertyFilesList, dependenciesList, routeFiles, false, cmd.OutOrStdout(), cmd.ErrOrStderr())
 	if err != nil {
 		return err
 	}

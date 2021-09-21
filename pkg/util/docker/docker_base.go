@@ -129,6 +129,14 @@ func FullImageArg(dockerImage string) []string {
 	if len(imageComponents) == 2 {
 		// Image has a tag already.
 		return ImageArg(imageComponents[0], imageComponents[1])
+	} else if len(imageComponents) > 2 {
+		// Image has an image registry name with a colon inside it:
+		// localhost:5000
+		// and image also has a tag:
+		// localhost:5000/image:latest
+		// Assume tag is always included and is last in the imageComponents list.
+		last := len(imageComponents) - 1
+		return ImageArg(strings.Join(imageComponents[:last], ":"), imageComponents[last])
 	}
 
 	// Image has no tag, latest tag will be added automatically.

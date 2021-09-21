@@ -48,7 +48,7 @@ func CreateBaseImageDockerFile() error {
 }
 
 // CreateIntegrationImageDockerFile --
-func CreateIntegrationImageDockerFile(integrationRunCmd *exec.Cmd) error {
+func CreateIntegrationImageDockerFile(integrationRunCmd *exec.Cmd, startsFromLocalFolder bool) error {
 	dockerFile := []string{}
 
 	// Start from the base image that contains the maven install: <RegistryName>/<BaseImageName>
@@ -61,6 +61,20 @@ func CreateIntegrationImageDockerFile(integrationRunCmd *exec.Cmd) error {
 	dockerFile = append(dockerFile, COPY(util.DefaultRoutesDirectoryName, GetContainerRoutesDir()))
 	dockerFile = append(dockerFile, COPY(util.DefaultPropertiesDirectoryName, GetContainerPropertiesDir()))
 	dockerFile = append(dockerFile, COPY(util.DefaultDependenciesDirectoryName, GetContainerDependenciesDir()))
+
+	// Copy additional folder structure used for integrations built from a separately built local folder.
+	if startsFromLocalFolder {
+		dockerFile = append(dockerFile, RUNMakeDir(util.ContainerQuarkusDirectoryName))
+		dockerFile = append(dockerFile, RUNMakeDir(util.ContainerLibDirectoryName))
+		dockerFile = append(dockerFile, RUNMakeDir(util.ContainerAppDirectoryName))
+
+		dockerFile = append(dockerFile, WORKDIR("/workspace"))
+
+		dockerFile = append(dockerFile, COPY(util.CustomQuarkusDirectoryName, util.ContainerQuarkusDirectoryName))
+		dockerFile = append(dockerFile, COPY(util.CustomLibDirectoryName, util.ContainerLibDirectoryName))
+		dockerFile = append(dockerFile, COPY(util.CustomAppDirectoryName, util.ContainerAppDirectoryName))
+
+	}
 
 	// All Env variables the command requires need to be set in the container.
 	for _, keyValue := range integrationRunCmd.Env {

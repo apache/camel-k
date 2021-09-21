@@ -149,11 +149,40 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 
 	var dependencies []string
 	if hasIntegrationDir {
+		// Fetch local dependencies
 		localBuildDependencies, err := getLocalBuildDependencies(command.IntegrationDirectory)
 		if err != nil {
 			return err
 		}
 		dependencies = localBuildDependencies
+
+		// Local dependencies directory
+		localDependenciesDirectory := getCustomDependenciesDir(command.IntegrationDirectory)
+
+		// The quarkus application files need to be at a specific location i.e.:
+		// <current_working_folder>/quarkus/quarkus-application.dat
+		// <current_working_folder>/quarkus/generated-bytecode.jar
+		localQuarkusDir, err := getCustomQuarkusDir()
+		if err != nil {
+			return err
+		}
+		util.CopyQuarkusAppFiles(localDependenciesDirectory, localQuarkusDir)
+
+		// The dependency jar files need to be at a specific location i.e.:
+		// <current_working_folder>/lib/main/*.jar
+		localLibDirectory, err := getCustomLibDir()
+		if err != nil {
+			return err
+		}
+		util.CopyLibFiles(localDependenciesDirectory, localLibDirectory)
+
+		// The Camel-K jar file needs to be at a specific location i.e.:
+		// <current_working_folder>/app/camel-k-integration-X.X.X{-SNAPSHOT}.jar
+		localAppDirectory, err := getCustomAppDir()
+		if err != nil {
+			return err
+		}
+		util.CopyAppFile(localDependenciesDirectory, localAppDirectory)
 	} else {
 		computedDependencies, err := getDependencies(command.Context, args, command.AdditionalDependencies, command.MavenRepositories, true)
 		if err != nil {
@@ -190,7 +219,7 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 	// If this is a containerized local run, create, build and run the container image.
 	if command.Containerize {
 		// Create and build integration image.
-		err := createAndBuildIntegrationImage(command.Context, "", false, command.Image, propertyFiles, dependencies, routes, cmd.OutOrStdout(), cmd.ErrOrStderr())
+		err := createAndBuildIntegrationImage(command.Context, "", false, command.Image, propertyFiles, dependencies, routes, hasIntegrationDir, cmd.OutOrStdout(), cmd.ErrOrStderr())
 		if err != nil {
 			return err
 		}
@@ -224,6 +253,13 @@ func (command *localRunCmdOptions) deinit() error {
 		}
 
 		err = deleteDockerWorkingDirectory()
+		if err != nil {
+			return err
+		}
+	}
+
+	if command.IntegrationDirectory != "" {
+		err := deleteLocalIntegrationDirs()
 		if err != nil {
 			return err
 		}
