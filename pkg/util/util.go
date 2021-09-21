@@ -54,6 +54,15 @@ const DefaultRoutesDirectoryName = "routes"
 // DefaultWorkingDirectoryName --
 const DefaultWorkingDirectoryName = "workspace"
 
+// CustomQuarkusDirectoryName --
+const CustomQuarkusDirectoryName = "quarkus"
+
+// CustomAppDirectoryName --
+const CustomAppDirectoryName = "app"
+
+// CustomLibDirectoryName --
+const CustomLibDirectoryName = "lib/main"
+
 // ContainerDependenciesDirectory --
 var ContainerDependenciesDirectory = "/deployments/dependencies"
 
@@ -65,6 +74,15 @@ var ContainerRoutesDirectory = "/etc/camel/sources"
 
 // ContainerResourcesDirectory --
 var ContainerResourcesDirectory = "/etc/camel/resources"
+
+// ContainerQuarkusDirectoryName --
+const ContainerQuarkusDirectoryName = "/quarkus"
+
+// ContainerAppDirectoryName --
+const ContainerAppDirectoryName = "/app"
+
+// ContainerLibDirectoryName --
+const ContainerLibDirectoryName = "/lib/main"
 
 // QuarkusDependenciesBaseDirectory --
 var QuarkusDependenciesBaseDirectory = "/quarkus-app"
@@ -415,6 +433,21 @@ func GetLocalRoutesDir() string {
 	return path.Join(MavenWorkingDirectory, DefaultRoutesDirectoryName)
 }
 
+// GetLocalQuarkusDir -- <mavenWorkingDirectory>/quarkus
+func GetLocalQuarkusDir() string {
+	return path.Join(MavenWorkingDirectory, CustomQuarkusDirectoryName)
+}
+
+// GetLocalAppDir -- <mavenWorkingDirectory>/app
+func GetLocalAppDir() string {
+	return path.Join(MavenWorkingDirectory, CustomAppDirectoryName)
+}
+
+// GetLocalLibDir -- <mavenWorkingDirectory>/lib/main
+func GetLocalLibDir() string {
+	return path.Join(MavenWorkingDirectory, CustomLibDirectoryName)
+}
+
 func CreateLocalPropertiesDirectory() error {
 	// Do not create a directory unless the maven directory contains a valid value.
 	if MavenWorkingDirectory == "" {
@@ -468,6 +501,66 @@ func CreateLocalRoutesDirectory() error {
 
 	if !directoryExists {
 		err := os.MkdirAll(GetLocalRoutesDir(), 0777)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func CreateLocalQuarkusDirectory() error {
+	// Do not create a directory unless the maven directory contains a valid value.
+	if MavenWorkingDirectory == "" {
+		return nil
+	}
+
+	directoryExists, err := DirectoryExists(GetLocalQuarkusDir())
+	if err != nil {
+		return err
+	}
+
+	if !directoryExists {
+		err := os.MkdirAll(GetLocalQuarkusDir(), 0777)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func CreateLocalAppDirectory() error {
+	// Do not create a directory unless the maven directory contains a valid value.
+	if MavenWorkingDirectory == "" {
+		return nil
+	}
+
+	directoryExists, err := DirectoryExists(GetLocalAppDir())
+	if err != nil {
+		return err
+	}
+
+	if !directoryExists {
+		err := os.MkdirAll(GetLocalAppDir(), 0777)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func CreateLocalLibDirectory() error {
+	// Do not create a directory unless the maven directory contains a valid value.
+	if MavenWorkingDirectory == "" {
+		return nil
+	}
+
+	directoryExists, err := DirectoryExists(GetLocalLibDir())
+	if err != nil {
+		return err
+	}
+
+	if !directoryExists {
+		err := os.MkdirAll(GetLocalLibDir(), 0777)
 		if err != nil {
 			return err
 		}
@@ -545,4 +638,97 @@ func CopyIntegrationFilesToDirectory(files []string, directory string) ([]string
 	}
 
 	return relocatedFilesList, nil
+}
+
+func CopyQuarkusAppFiles(localDependenciesDirectory string, localQuarkusDir string) error {
+	// Create directory if one does not already exist
+	err := CreateDirectory(localQuarkusDir)
+	if err != nil {
+		return err
+	}
+
+	source := path.Join(localDependenciesDirectory, "quarkus-application.dat")
+	destination := path.Join(localQuarkusDir, "quarkus-application.dat")
+	_, err = CopyFile(source, destination)
+	if err != nil {
+		return err
+	}
+
+	source = path.Join(localDependenciesDirectory, "generated-bytecode.jar")
+	destination = path.Join(localQuarkusDir, "generated-bytecode.jar")
+	_, err = CopyFile(source, destination)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func getRegularFileNamesInDir(directory string) ([]string, error) {
+	var dirFiles []string
+	files, err := ioutil.ReadDir(directory)
+	for _, file := range files {
+		fileName := file.Name()
+
+		// Do not include hidden files or sub-directories.
+		if !file.IsDir() && !strings.HasPrefix(fileName, ".") {
+			dirFiles = append(dirFiles, fileName)
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return dirFiles, nil
+}
+
+func CopyLibFiles(localDependenciesDirectory string, localLibDirectory string) error {
+	// Create directory if one does not already exist
+	err := CreateDirectory(localLibDirectory)
+	if err != nil {
+		return err
+	}
+
+	fileNames, err := getRegularFileNamesInDir(localDependenciesDirectory)
+	if err != nil {
+		return err
+	}
+
+	for _, dependencyJar := range fileNames {
+		source := path.Join(localDependenciesDirectory, dependencyJar)
+		destination := path.Join(localLibDirectory, dependencyJar)
+		_, err = CopyFile(source, destination)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func CopyAppFile(localDependenciesDirectory string, localAppDirectory string) error {
+	// Create directory if one does not already exist
+	err := CreateDirectory(localAppDirectory)
+	if err != nil {
+		return err
+	}
+
+	fileNames, err := getRegularFileNamesInDir(localDependenciesDirectory)
+	if err != nil {
+		return err
+	}
+
+	for _, dependencyJar := range fileNames {
+		if strings.HasPrefix(dependencyJar, "camel-k-integration-") {
+			source := path.Join(localDependenciesDirectory, dependencyJar)
+			destination := path.Join(localAppDirectory, dependencyJar)
+			_, err = CopyFile(source, destination)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
