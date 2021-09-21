@@ -49,6 +49,11 @@ Note that if your dependencies belong to a private repository, this repository n
 ```
 kamel run -d github:apache/commons-csv/1.1 Integration.java
 ```
+If you use some other codebase with jitpack, f.e. bitbucket, just change the prefix, followed by your repo-path from jitpack
+```
+kamel run -d bitbucket:workspace/repo/[tag|branch|snapshot]
+```
+NOTE: works with other's too (gitlab, gitee, azure...)
 
 [[dependencies-dynamic]]
 == Dynamic URIs
