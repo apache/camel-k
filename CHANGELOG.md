@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Integration in error phase can't be scaled: why don't we just rebuild it? [\#2640](https://github.com/apache/camel-k/issues/2640)
 - kamelet binding: scaling to 0 and the to 1 not working when a container image is provided [\#2638](https://github.com/apache/camel-k/issues/2638)
 - Container trait documentation messed up [\#2626](https://github.com/apache/camel-k/issues/2626)
 - Bots to simplify project managment [\#2623](https://github.com/apache/camel-k/issues/2623)
@@ -16,10 +17,12 @@
 - \[Doc\] Add documentation for architecture [\#2273](https://github.com/apache/camel-k/issues/2273)
 - Document, or provide examples for, TLS configuration on OpenShift [\#1033](https://github.com/apache/camel-k/issues/1033)
 - support for quarkus in native mode [\#991](https://github.com/apache/camel-k/issues/991)
+- Release yaml files for installation [\#550](https://github.com/apache/camel-k/issues/550)
 
 **Merged pull requests:**
 
 - fix: Switch off color in Maven logs [\#2647](https://github.com/apache/camel-k/pull/2647) ([astefanutti](https://github.com/astefanutti))
+- fix: Unify post-build integration phases reconciliation [\#2645](https://github.com/apache/camel-k/pull/2645) ([astefanutti](https://github.com/astefanutti))
 - Fix \#2638: sync owned integration kit to avoid gc [\#2639](https://github.com/apache/camel-k/pull/2639) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix documentation for building website [\#2637](https://github.com/apache/camel-k/pull/2637) ([oscerd](https://github.com/oscerd))
 - Fixed website build [\#2636](https://github.com/apache/camel-k/pull/2636) ([oscerd](https://github.com/oscerd))
@@ -70,6 +73,7 @@
 - \[test\] Remove 3rd party dependencies [\#2529](https://github.com/apache/camel-k/pull/2529) ([bouskaJ](https://github.com/bouskaJ))
 - Allow Probe Scheme to Be Customized [\#2527](https://github.com/apache/camel-k/pull/2527) ([Kyle-Cooley](https://github.com/Kyle-Cooley))
 - fix\(controller\): panic on nil application properties [\#2526](https://github.com/apache/camel-k/pull/2526) ([squakez](https://github.com/squakez))
+- \[test\] add Kamelet errorHandler test [\#2522](https://github.com/apache/camel-k/pull/2522) ([bouskaJ](https://github.com/bouskaJ))
 - doc: Improve Helm configuration section and architecture integration platform [\#2521](https://github.com/apache/camel-k/pull/2521) ([toonalbers](https://github.com/toonalbers))
 - Use https instead of http for xsd location [\#2517](https://github.com/apache/camel-k/pull/2517) ([apupier](https://github.com/apupier))
 - Add classpath kamelet loading test [\#2516](https://github.com/apache/camel-k/pull/2516) ([bouskaJ](https://github.com/bouskaJ))
