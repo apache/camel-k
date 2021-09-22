@@ -486,14 +486,6 @@ func parsePrometheusData(data []byte) (map[string]*prometheus.MetricFamily, erro
 	return parser.TextToMetricFamilies(bytes.NewReader(data))
 }
 
-func EqualP(expected interface{}) types.GomegaMatcher {
-	return PointTo(Equal(expected))
-}
-
-func MatchFieldsP(options Options, fields Fields) types.GomegaMatcher {
-	return PointTo(MatchFields(options, fields))
-}
-
 func stringP(s string) *string {
 	return &s
 }
