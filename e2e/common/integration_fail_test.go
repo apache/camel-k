@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -27,10 +28,10 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gstruct"
 
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 func TestBadRouteIntegration(t *testing.T) {
@@ -40,9 +41,9 @@ func TestBadRouteIntegration(t *testing.T) {
 		t.Run("run bad java route", func(t *testing.T) {
 			name := "bad-route"
 			Expect(Kamel("run", "-n", ns, "files/BadRoute.java", "--name", name).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(camelv1.IntegrationPhaseError))
-			Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionFalse))
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
+			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
 
 			// Make sure the Integration can be scaled
 			Expect(ScaleIntegration(ns, name, 2)).To(Succeed())
@@ -52,7 +53,7 @@ func TestBadRouteIntegration(t *testing.T) {
 			Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
 				Should(gstruct.PointTo(BeNumerically("==", 2)))
 			// Check the Integration stays in error phase
-			Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(camelv1.IntegrationPhaseError))
+			Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
 		})
 
 		// Clean up

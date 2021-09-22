@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -1238,7 +1239,7 @@ func Kamelet(name string, ns string) func() *v1alpha1.Kamelet {
 func ClusterDomainName() (string, error) {
 	dns := configv1.DNS{}
 	key := ctrl.ObjectKey{
-		Name:      "cluster",
+		Name: "cluster",
 	}
 	err := TestClient().Get(TestContext, key, &dns)
 	if err != nil {
@@ -1246,7 +1247,6 @@ func ClusterDomainName() (string, error) {
 	}
 	return dns.Spec.BaseDomain, nil
 }
-
 
 /*
 	Tekton
@@ -1398,7 +1398,7 @@ func BindKameletToWithErrorHandler(ns string, name string, from corev1.ObjectRef
 		kb := v1alpha1.NewKameletBinding(ns, name)
 		kb.Spec = v1alpha1.KameletBindingSpec{
 			Source: v1alpha1.Endpoint{
-				Ref: &from,
+				Ref:        &from,
 				Properties: asEndpointProperties(sourceProperties),
 			},
 			Sink: v1alpha1.Endpoint{

@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 /*
@@ -27,7 +28,6 @@ import (
 	"testing"
 )
 
-// MakeTempCopy --
 func MakeTempCopy(t *testing.T, fileName string) string {
 	_, simpleName := path.Split(fileName)
 	var err error
@@ -59,7 +59,6 @@ func ReplaceInFile(t *testing.T, fileName string, old, new string) {
 	}
 }
 
-// MakeTempDir --
 func MakeTempDir(t *testing.T) string {
 	var tmpDir string
 	var err error

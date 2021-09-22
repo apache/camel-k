@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -22,17 +23,17 @@ limitations under the License.
 package knative
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"testing"
 
 	. "github.com/onsi/gomega"
 
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
 // Test that kamelet binding can be changed and changes propagated to integrations
@@ -42,25 +43,25 @@ func TestKameletChange(t *testing.T) {
 		Expect(CreateTimerKamelet(ns, "timer-source")()).To(Succeed())
 		Expect(CreateKnativeChannel(ns, "messages")()).To(Succeed())
 		Expect(Kamel("run", "-n", ns, "files/display.groovy", "-w").Execute()).To(Succeed())
-		from := v1.ObjectReference{
+		from := corev1.ObjectReference{
 			Kind:       "Kamelet",
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 			Name:       "timer-source",
 		}
 
-		to := v1.ObjectReference{
+		to := corev1.ObjectReference{
 			Kind:       "InMemoryChannel",
 			Name:       "messages",
 			APIVersion: messaging.SchemeGroupVersion.String(),
 		}
 		Expect(BindKameletTo(ns, "timer-binding", from, to, map[string]string{"message": "message is Hello"}, map[string]string{})()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "timer-binding"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationCondition(ns, "timer-binding", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+		Eventually(IntegrationPodPhase(ns, "timer-binding"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationCondition(ns, "timer-binding", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, "display"), TestTimeoutShort).Should(ContainSubstring("message is Hello"))
 
 		Expect(BindKameletTo(ns, "timer-binding", from, to, map[string]string{"message": "message is Hi"}, map[string]string{})()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "timer-binding"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationCondition(ns, "timer-binding", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+		Eventually(IntegrationPodPhase(ns, "timer-binding"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationCondition(ns, "timer-binding", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, "display"), TestTimeoutShort).Should(ContainSubstring("message is Hi"))
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
