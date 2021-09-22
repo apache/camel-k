@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -22,8 +23,9 @@ limitations under the License.
 package common
 
 import (
-	v1 "k8s.io/api/core/v1"
 	"testing"
+
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/onsi/gomega"
 
@@ -36,7 +38,7 @@ func TestKamelCLIDelete(t *testing.T) {
 
 		t.Run("delete running integration", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "../files/yaml.yaml").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Expect(Kamel("delete", "yaml", "-n", ns).Execute()).To(Succeed())
 			Eventually(Integration(ns, "yaml")).Should(BeNil())
 			Eventually(IntegrationPod(ns, "yaml")).Should(BeNil())
@@ -51,7 +53,7 @@ func TestKamelCLIDelete(t *testing.T) {
 
 		t.Run("delete integration from csv", func(t *testing.T) {
 			Expect(Kamel("run", "github:apache/camel-k/e2e/common/files/yaml.yaml", "-n", ns).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Expect(Kamel("delete", "yaml", "-n", ns).Execute()).To(Succeed())
 			Eventually(Integration(ns, "yaml")).Should(BeNil())
 			Eventually(IntegrationPod(ns, "yaml")).Should(BeNil())
@@ -60,8 +62,8 @@ func TestKamelCLIDelete(t *testing.T) {
 		t.Run("delete several integrations", func(t *testing.T) {
 			Expect(Kamel("run", "../files/yaml.yaml", "-n", ns).Execute()).To(Succeed())
 			Expect(Kamel("run", "../files/Java.java", "-n", ns).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Expect(Kamel("delete", "yaml", "-n", ns).Execute()).To(Succeed())
 			Eventually(Integration(ns, "yaml")).Should(BeNil())
 			Eventually(IntegrationPod(ns, "yaml")).Should(BeNil())
@@ -73,8 +75,8 @@ func TestKamelCLIDelete(t *testing.T) {
 		t.Run("delete all integrations", func(t *testing.T) {
 			Expect(Kamel("run", "../files/yaml.yaml", "-n", ns).Execute()).To(Succeed())
 			Expect(Kamel("run", "../files/Java.java", "-n", ns).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 			Eventually(Integration(ns, "yaml")).Should(BeNil())
 			Eventually(IntegrationPod(ns, "yaml")).Should(BeNil())

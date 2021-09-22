@@ -1,6 +1,7 @@
+//go:build integration
 // +build integration
 
-// To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "knative"
+// To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
 
 /*
 Licensed to the Apache Software Foundation (ASF) under one or more
@@ -25,7 +26,7 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
 )
@@ -35,7 +36,7 @@ func TestKameletClasspathLoading(t *testing.T) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		kameletName := "timer-source"
-		removeKamelet(kameletName , ns)
+		removeKamelet(kameletName, ns)
 
 		Eventually(Kamelet(kameletName, ns)).Should(BeNil())
 
@@ -45,7 +46,7 @@ func TestKameletClasspathLoading(t *testing.T) {
 			"-d", "camel:yaml-dsl",
 			// kamelet dependencies
 			"-d", "camel:timer").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "timer-kamelet-integration"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+		Eventually(IntegrationPodPhase(ns, "timer-kamelet-integration"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
 		Eventually(IntegrationLogs(ns, "timer-kamelet-integration")).Should(ContainSubstring("important message"))
 

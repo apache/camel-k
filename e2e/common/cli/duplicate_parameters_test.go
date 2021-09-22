@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -25,9 +26,10 @@ import (
 	"context"
 	"testing"
 
+	. "github.com/onsi/gomega"
+
 	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/cmd"
-	. "github.com/onsi/gomega"
 )
 
 func TestDuplicateParameters(t *testing.T) {

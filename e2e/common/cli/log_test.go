@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -22,9 +23,10 @@ limitations under the License.
 package common
 
 import (
-	v1 "k8s.io/api/core/v1"
 	"strings"
 	"testing"
+
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/onsi/gomega"
 
@@ -37,8 +39,8 @@ func TestKamelCLILog(t *testing.T) {
 
 		t.Run("check integration log", func(t *testing.T) {
 			Expect(Kamel("run", "../files/yaml.yaml", "-n", ns).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-			//first line of the integration logs
+			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			// first line of the integration logs
 			logs := strings.Split(IntegrationLogs(ns, "yaml")(), "\n")[0]
 			podName := IntegrationPod(ns, "yaml")().Name
 

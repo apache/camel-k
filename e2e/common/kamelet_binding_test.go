@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -22,12 +23,14 @@ limitations under the License.
 package common
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	v1 "k8s.io/api/core/v1"
 	"testing"
 
-	. "github.com/apache/camel-k/e2e/support"
 	. "github.com/onsi/gomega"
+
+	corev1 "k8s.io/api/core/v1"
+
+	. "github.com/apache/camel-k/e2e/support"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
 func TestErrorHandler(t *testing.T) {
@@ -36,13 +39,13 @@ func TestErrorHandler(t *testing.T) {
 
 		Expect(CreateErrorProducerKamelet(ns, "my-own-error-producer-source")()).To(Succeed())
 		Expect(CreateLogKamelet(ns, "my-own-log-sink")()).To(Succeed())
-		from := v1.ObjectReference{
+		from := corev1.ObjectReference{
 			Kind:       "Kamelet",
 			Name:       "my-own-error-producer-source",
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 		}
 
-		to := v1.ObjectReference{
+		to := corev1.ObjectReference{
 			Kind:       "Kamelet",
 			Name:       "my-own-log-sink",
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
@@ -65,7 +68,7 @@ func TestErrorHandler(t *testing.T) {
 
 			Expect(BindKameletToWithErrorHandler(ns, "throw-error-binding", from, to, map[string]string{"message": "throw Error"}, map[string]string{"loggerName": "integrationLogger"}, errorHandler)()).To(Succeed())
 
-			Eventually(IntegrationPodPhase(ns, "throw-error-binding"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "throw-error-binding"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).Should(ContainSubstring("kameletErrorHandler"))
 			Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("integrationLogger"))
 
@@ -75,7 +78,7 @@ func TestErrorHandler(t *testing.T) {
 
 			Expect(BindKameletToWithErrorHandler(ns, "no-error-binding", from, to, map[string]string{"message": "true"}, map[string]string{"loggerName": "integrationLogger"}, errorHandler)()).To(Succeed())
 
-			Eventually(IntegrationPodPhase(ns, "no-error-binding"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "no-error-binding"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, "no-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("kameletErrorHandler"))
 			Eventually(IntegrationLogs(ns, "no-error-binding"), TestTimeoutShort).Should(ContainSubstring("integrationLogger"))
 

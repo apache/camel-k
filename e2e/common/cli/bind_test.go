@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -22,8 +23,9 @@ limitations under the License.
 package common
 
 import (
-	v1 "k8s.io/api/core/v1"
 	"testing"
+
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/onsi/gomega"
 
@@ -37,7 +39,7 @@ func TestKamelCLIBind(t *testing.T) {
 
 		t.Run("bind timer to log", func(t *testing.T) {
 			Expect(Kamel("bind", "test-timer-source", "log:info", "-p", "source.message=helloTest", "-n", ns).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "test-timer-source-to-log"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "test-timer-source-to-log"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
 			Eventually(IntegrationLogs(ns, "test-timer-source-to-log")).Should(ContainSubstring("Body: helloTest"))
 			Expect(Kamel("bind", "test-timer-source", "log:info", "-p", "source.message=newText", "-n", ns).Execute()).To(Succeed())

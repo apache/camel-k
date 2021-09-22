@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -41,15 +42,15 @@ func init() {
 	// this hook can be also used to test a released version of the operator, e.g. the staging version during a voting period
 	// Uncomment the following lines and change references to enable the hook
 
-	//TestImageName = "docker.io/camelk/camel-k"
-	//TestImageVersion = "1.0.0-M2"
+	// TestImageName = "docker.io/camelk/camel-k"
+	// TestImageVersion = "1.0.0-M2"
 
-	//KamelHooks = append(KamelHooks, func(cmd []string) []string {
+	// KamelHooks = append(KamelHooks, func(cmd []string) []string {
 	//	if len(cmd) > 0 && cmd[0] == "install" {
 	//		cmd = append(cmd, "--operator-image=docker.io/camelk/camel-k:1.0.0-M2")
 	//		cmd = append(cmd, "--maven-repository=https://repository.apache.org/content/repositories/orgapachecamel-1156")
 	//	}
 	//	return cmd
-	//})
+	// })
 
 }

@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -23,8 +24,9 @@ package common
 
 import (
 	"fmt"
-	v1 "k8s.io/api/core/v1"
 	"testing"
+
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/onsi/gomega"
 
@@ -37,7 +39,7 @@ func TestKamelCLIGet(t *testing.T) {
 
 		t.Run("get integration", func(t *testing.T) {
 			Expect(Kamel("run", "../files/yaml.yaml", "-n", ns).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			// regex is used for the compatibility of tests between OC and vanilla K8
 			// kamel get may have different output depending og the platform
 			kitName := Integration(ns, "yaml")().Status.Kit
@@ -50,19 +52,19 @@ func TestKamelCLIGet(t *testing.T) {
 		t.Run("get several integrations", func(t *testing.T) {
 			Expect(Kamel("run", "../files/yaml.yaml", "-n", ns).Execute()).To(Succeed())
 			Expect(Kamel("run", "../files/Java.java", "-n", ns).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
 			kitName1 := Integration(ns, "java")().Status.IntegrationKit.Name
 			kitName2 := Integration(ns, "yaml")().Status.IntegrationKit.Name
-			regex := fmt.Sprintf("^NAME\tPHASE\tKIT\n\\s*java\tRunning\t" +
+			regex := fmt.Sprintf("^NAME\tPHASE\tKIT\n\\s*java\tRunning\t"+
 				"(%s/%s|%s)\n\\s*yaml\tRunning\t(%s/%s|%s)\n", ns, kitName1, kitName1, ns, kitName2, kitName2)
 			Expect(GetOutputString(Kamel("get", "-n", ns))).To(MatchRegexp(regex))
 
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
-		t.Run("get no integrations" , func(t *testing.T) {
+		t.Run("get no integrations", func(t *testing.T) {
 			Expect(GetOutputString(Kamel("get", "-n", ns))).NotTo(ContainSubstring("Running"))
 			Expect(GetOutputString(Kamel("get", "-n", ns))).NotTo(ContainSubstring("Building Kit"))
 		})

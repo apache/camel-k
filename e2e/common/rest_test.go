@@ -1,6 +1,7 @@
+//go:build integration
 // +build integration
 
-// To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "knative"
+// To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
 
 /*
 Licensed to the Apache Software Foundation (ASF) under one or more
@@ -30,7 +31,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
 
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/util/openshift"
@@ -49,14 +50,14 @@ func TestRunRest(t *testing.T) {
 
 		Expect(Kamel("install", "-n", ns, "--trait-profile", profile).Execute()).To(Succeed())
 		Expect(Kamel("run", "-n", ns, "files/rest-consumer.yaml").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "rest-consumer"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+		Eventually(IntegrationPodPhase(ns, "rest-consumer"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
 		t.Run("Service works", func(t *testing.T) {
 			name := "John"
 			service := Service(ns, "rest-consumer")
 			Eventually(service, TestTimeoutShort).ShouldNot(BeNil())
 			Expect(Kamel("run", "-n", ns, "files/rest-producer.yaml", "-p", "serviceName=rest-consumer", "-p", "name="+name).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "rest-producer"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "rest-producer"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, "rest-consumer"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
 			Eventually(IntegrationLogs(ns, "rest-producer"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("%s Doe", name)))
 		})

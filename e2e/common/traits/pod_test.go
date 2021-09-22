@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -24,10 +25,12 @@ package traits
 import (
 	"testing"
 
-	. "github.com/apache/camel-k/e2e/support"
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
-	v1 "k8s.io/api/core/v1"
+
+	corev1 "k8s.io/api/core/v1"
+
+	. "github.com/apache/camel-k/e2e/support"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 func TestPodTrait(t *testing.T) {
@@ -39,23 +42,23 @@ func TestPodTrait(t *testing.T) {
 			"--pod-template", "files/template.yaml",
 		).Execute()).To(Succeed())
 
-		//check integration is deployed
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+		// check integration is deployed
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
-		//check that integrations is working and reading data created by sidecar container
+		// check that integrations is working and reading data created by sidecar container
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Content from the sidecar container"))
-		//check that env var is injected
+		// check that env var is injected
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("hello from the template"))
 		pod := IntegrationPod(ns, name)()
 
-		//check if ENV variable is applied
+		// check if ENV variable is applied
 		envValue := getEnvVar("TEST_VARIABLE", pod.Spec)
 		Expect(envValue).To(Equal("hello from the template"))
 	})
 }
 
-func getEnvVar(name string, spec v1.PodSpec) string {
+func getEnvVar(name string, spec corev1.PodSpec) string {
 	for _, i := range spec.Containers[0].Env {
 		if i.Name == name {
 			return i.Value

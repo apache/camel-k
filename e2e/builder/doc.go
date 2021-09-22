@@ -1,6 +1,7 @@
+//go:build integration
 // +build integration
 
-// To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "builder"
+// To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
 
 /*
 Licensed to the Apache Software Foundation (ASF) under one or more

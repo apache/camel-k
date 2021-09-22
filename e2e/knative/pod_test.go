@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -24,10 +25,12 @@ package knative
 import (
 	"testing"
 
-	. "github.com/apache/camel-k/e2e/support"
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
-	v1 "k8s.io/api/core/v1"
+
+	corev1 "k8s.io/api/core/v1"
+
+	. "github.com/apache/camel-k/e2e/support"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 func TestPodTraitWithKnative(t *testing.T) {
@@ -35,11 +38,11 @@ func TestPodTraitWithKnative(t *testing.T) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 		Expect(Kamel("run", "-n", ns, "files/podtest-knative2.groovy",
 			"--pod-template", "files/template-knative.yaml").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "podtest-knative2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationCondition(ns, "podtest-knative2", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+		Eventually(IntegrationPodPhase(ns, "podtest-knative2"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationCondition(ns, "podtest-knative2", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Expect(Kamel("run", "-n", ns, "files/podtest-knative1.groovy").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "podtest-knative1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationCondition(ns, "podtest-knative1", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+		Eventually(IntegrationPodPhase(ns, "podtest-knative1"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationCondition(ns, "podtest-knative1", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 		Eventually(IntegrationLogs(ns, "podtest-knative1"), TestTimeoutShort).Should(ContainSubstring("hello from the template"))
 	})

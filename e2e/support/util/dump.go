@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 /*
@@ -25,7 +26,7 @@ import (
 	"fmt"
 	"testing"
 
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/pkg/client"
@@ -134,7 +135,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 		t.Logf("name=%s\n", pod.Name)
 		dumpConditions("  ", pod.Status.Conditions, t)
 		t.Logf("  logs:\n")
-		var allContainers []v1.Container
+		var allContainers []corev1.Container
 		allContainers = append(allContainers, pod.Spec.InitContainers...)
 		allContainers = append(allContainers, pod.Spec.Containers...)
 		for _, container := range allContainers {
@@ -151,7 +152,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	return nil
 }
 
-func dumpConditions(prefix string, conditions []v1.PodCondition, t *testing.T) {
+func dumpConditions(prefix string, conditions []corev1.PodCondition, t *testing.T) {
 	for _, cond := range conditions {
 		t.Logf("%scondition type=%s, status=%s, reason=%s, message=%q\n", prefix, cond.Type, cond.Status, cond.Reason, cond.Message)
 	}
@@ -159,7 +160,7 @@ func dumpConditions(prefix string, conditions []v1.PodCondition, t *testing.T) {
 
 func dumpLogs(ctx context.Context, c client.Client, prefix string, ns string, name string, container string, t *testing.T) error {
 	lines := int64(50)
-	stream, err := c.CoreV1().Pods(ns).GetLogs(name, &v1.PodLogOptions{
+	stream, err := c.CoreV1().Pods(ns).GetLogs(name, &corev1.PodLogOptions{
 		Container: container,
 		TailLines: &lines,
 	}).Stream(ctx)
