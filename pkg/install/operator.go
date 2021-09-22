@@ -45,6 +45,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/minikube"
 	"github.com/apache/camel-k/pkg/util/patch"
+	image "github.com/apache/camel-k/pkg/util/registry"
 )
 
 type OperatorConfiguration struct {
@@ -486,7 +487,6 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 		// Some OpenShift variants such as Microshift might not have a built-in registry
 		pl.Spec.Build.Registry = registry
 
-		// Kubernetes only (Minikube)
 		if !isOpenShift && registry.Address == "" {
 			// This operation should be done here in the installer
 			// because the operator is not allowed to look into the "kube-system" namespace
@@ -495,7 +495,15 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 				return nil, err
 			}
 			if address == nil {
-				return nil, errors.New("cannot find automatically a registry where to push images")
+				// try KEP-1755
+				address, err = image.GetRegistryAddress(ctx, c)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			if address == nil || *address == "" {
+				return nil, errors.New("cannot find a registry where to push images")
 			}
 
 			pl.Spec.Build.Registry.Address = *address
