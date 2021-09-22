@@ -78,7 +78,7 @@ jobs:
     - name: Set Go
       uses: actions/setup-go@v1
       with:
-        go-version: 1.15.x
+        go-version: 1.16.x
     - name: Kubernetes KinD Cluster
       uses: container-tools/kind-action@v1
       with:
@@ -94,9 +94,9 @@ jobs:
         # Prerequisites
         sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.6/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
 
-        export SERVING_VERSION=v0.23.1
-        export EVENTING_VERSION=v0.23.2
-        export KOURIER_VERSION=v0.23.0
+        export SERVING_VERSION=v0.26.0
+        export EVENTING_VERSION=v0.26.0
+        export KOURIER_VERSION=v0.26.0
 
         # Serving
         kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml
@@ -190,7 +190,7 @@ jobs:
       - name: Set Go
         uses: actions/setup-go@v1
         with:
-          go-version: 1.15.x
+          go-version: 1.16.x
       - name: Get YAKS
         run: |
           export YAKS_VERSION=0.4.0
@@ -215,9 +215,9 @@ jobs:
           # Prerequisites
           sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.6/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
 
-          export SERVING_VERSION=v0.23.1
-          export EVENTING_VERSION=v0.23.2
-          export KOURIER_VERSION=v0.23.0
+          export SERVING_VERSION=v0.26.0
+          export EVENTING_VERSION=v0.26.0
+          export KOURIER_VERSION=v0.26.0
 
           # Serving
           kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml
