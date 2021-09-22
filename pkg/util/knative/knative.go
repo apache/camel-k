@@ -43,7 +43,6 @@ import (
 	util "github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-// CreateSubscription ---
 func CreateSubscription(channelReference corev1.ObjectReference, serviceName string, path string) *messaging.Subscription {
 	return &messaging.Subscription{
 		TypeMeta: metav1.TypeMeta{
@@ -55,7 +54,7 @@ func CreateSubscription(channelReference corev1.ObjectReference, serviceName str
 			Name:      channelReference.Name + "-" + serviceName,
 		},
 		Spec: messaging.SubscriptionSpec{
-			Channel: corev1.ObjectReference{
+			Channel: duckv1.KReference{
 				APIVersion: channelReference.GroupVersionKind().GroupVersion().String(),
 				Kind:       channelReference.Kind,
 				Name:       channelReference.Name,
@@ -74,7 +73,6 @@ func CreateSubscription(channelReference corev1.ObjectReference, serviceName str
 	}
 }
 
-// CreateTrigger ---
 func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, eventType string, path string) *eventing.Trigger {
 	nameSuffix := ""
 	var attributes map[string]string
@@ -112,7 +110,6 @@ func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, e
 	}
 }
 
-// CreateSinkBinding ---
 func CreateSinkBinding(source corev1.ObjectReference, target corev1.ObjectReference) *sources.SinkBinding {
 	return &sources.SinkBinding{
 		TypeMeta: metav1.TypeMeta{
