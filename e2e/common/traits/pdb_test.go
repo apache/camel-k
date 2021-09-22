@@ -26,18 +26,18 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/gstruct"
+	. "github.com/onsi/gomega/gstruct"
 
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	policy "k8s.io/api/policy/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	. "github.com/apache/camel-k/e2e/support"
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 func TestPodDisruptionBudgetTrait(t *testing.T) {
@@ -50,52 +50,48 @@ func TestPodDisruptionBudgetTrait(t *testing.T) {
 			"-t", "pdb.min-available=2",
 		).Execute()).To(Succeed())
 
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		// Check PodDisruptionBudget
 		Eventually(podDisruptionBudget(ns, name), TestTimeoutShort).ShouldNot(BeNil())
 		pdb := podDisruptionBudget(ns, name)()
 		// Assert PDB Spec
-		Expect(pdb.Spec.MinAvailable).To(gstruct.PointTo(Equal(intstr.FromInt(2))))
+		Expect(pdb.Spec.MinAvailable).To(PointTo(Equal(intstr.FromInt(2))))
 		// Assert PDB Status
-		Eventually(podDisruptionBudget(ns, name), TestTimeoutShort).Should(gstruct.PointTo(gstruct.MatchFields(
-			gstruct.IgnoreExtras,
-			gstruct.Fields{
-				"Status": Equal(policy.PodDisruptionBudgetStatus{
-					ObservedGeneration: 1,
-					DisruptionsAllowed: 0,
-					CurrentHealthy:     1,
-					DesiredHealthy:     2,
-					ExpectedPods:       1,
+		Eventually(podDisruptionBudget(ns, name), TestTimeoutShort).
+			Should(MatchFieldsP(IgnoreExtras, Fields{
+				"Status": MatchFields(IgnoreExtras, Fields{
+					"ObservedGeneration": BeNumerically("==", 1),
+					"DisruptionsAllowed": BeNumerically("==", 0),
+					"CurrentHealthy":     BeNumerically("==", 1),
+					"DesiredHealthy":     BeNumerically("==", 2),
+					"ExpectedPods":       BeNumerically("==", 1),
 				}),
-			}),
-		))
+			}))
 
 		// Scale Integration
 		Expect(ScaleIntegration(ns, name, 2)).To(Succeed())
 		Eventually(IntegrationPods(ns, name), TestTimeoutMedium).Should(HaveLen(2))
 		Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
-			Should(gstruct.PointTo(BeNumerically("==", 2)))
-		Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Should(PointTo(BeNumerically("==", 2)))
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 		// Check PodDisruptionBudget
 		pdb = podDisruptionBudget(ns, name)()
 		Expect(pdb).NotTo(BeNil())
 		// Assert PDB Status according to the scale change
-		Eventually(podDisruptionBudget(ns, name), TestTimeoutShort).Should(gstruct.PointTo(gstruct.MatchFields(
-			gstruct.IgnoreExtras,
-			gstruct.Fields{
-				"Status": Equal(policy.PodDisruptionBudgetStatus{
-					ObservedGeneration: 1,
-					DisruptionsAllowed: 0,
-					CurrentHealthy:     2,
-					DesiredHealthy:     2,
-					ExpectedPods:       2,
+		Eventually(podDisruptionBudget(ns, name), TestTimeoutShort).
+			Should(MatchFieldsP(IgnoreExtras, Fields{
+				"Status": MatchFields(IgnoreExtras, Fields{
+					"ObservedGeneration": BeNumerically("==", 1),
+					"DisruptionsAllowed": BeNumerically("==", 0),
+					"CurrentHealthy":     BeNumerically("==", 2),
+					"DesiredHealthy":     BeNumerically("==", 2),
+					"ExpectedPods":       BeNumerically("==", 2),
 				}),
-			}),
-		))
+			}))
 
 		// Eviction attempt
 		pods := IntegrationPods(ns, name)()
@@ -127,8 +123,8 @@ func TestPodDisruptionBudgetTrait(t *testing.T) {
 		Expect(ScaleIntegration(ns, name, 3)).To(Succeed())
 		Eventually(IntegrationPods(ns, name), TestTimeoutMedium).Should(HaveLen(3))
 		Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
-			Should(gstruct.PointTo(BeNumerically("==", 3)))
-		Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Should(PointTo(BeNumerically("==", 3)))
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 		pods = IntegrationPods(ns, name)()
 		Expect(pods).To(HaveLen(3))
@@ -155,7 +151,7 @@ func podDisruptionBudget(ns string, name string) func() *policy.PodDisruptionBud
 				Name:      name,
 			},
 		}
-		err := TestClient().Get(TestContext, client.ObjectKeyFromObject(&pdb), &pdb)
+		err := TestClient().Get(TestContext, ctrl.ObjectKeyFromObject(&pdb), &pdb)
 		if err != nil && errors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
