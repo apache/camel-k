@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Alow fixed custom labels in any pod [\#2642](https://github.com/apache/camel-k/issues/2642)
 - Integration in error phase can't be scaled: why don't we just rebuild it? [\#2640](https://github.com/apache/camel-k/issues/2640)
 - kamelet binding: scaling to 0 and the to 1 not working when a container image is provided [\#2638](https://github.com/apache/camel-k/issues/2638)
 - Container trait documentation messed up [\#2626](https://github.com/apache/camel-k/issues/2626)
@@ -22,6 +23,7 @@
 **Merged pull requests:**
 
 - fix: Switch off color in Maven logs [\#2647](https://github.com/apache/camel-k/pull/2647) ([astefanutti](https://github.com/astefanutti))
+- Alow fixed custom labels in any pod [\#2646](https://github.com/apache/camel-k/pull/2646) ([claudio4j](https://github.com/claudio4j))
 - fix: Unify post-build integration phases reconciliation [\#2645](https://github.com/apache/camel-k/pull/2645) ([astefanutti](https://github.com/astefanutti))
 - Fix \#2638: sync owned integration kit to avoid gc [\#2639](https://github.com/apache/camel-k/pull/2639) ([nicolaferraro](https://github.com/nicolaferraro))
 - Fix documentation for building website [\#2637](https://github.com/apache/camel-k/pull/2637) ([oscerd](https://github.com/oscerd))
@@ -191,6 +193,7 @@
 - Configure kubernetes to use structured log [\#2290](https://github.com/apache/camel-k/pull/2290) ([orpiske](https://github.com/orpiske))
 - fix\(doc\): camel website error fixes [\#2288](https://github.com/apache/camel-k/pull/2288) ([squakez](https://github.com/squakez))
 - chore\(e2e\): Assert upgraded integration Pod uses new version Kit [\#2285](https://github.com/apache/camel-k/pull/2285) ([astefanutti](https://github.com/astefanutti))
+- Creates alternative kustomize installer for installation of the camel-k operator [\#2284](https://github.com/apache/camel-k/pull/2284) ([phantomjinx](https://github.com/phantomjinx))
 - chore\(e2e\): Remove obsolete operator upgrade e2e test [\#2283](https://github.com/apache/camel-k/pull/2283) ([astefanutti](https://github.com/astefanutti))
 - fix\(doc\): broken links [\#2282](https://github.com/apache/camel-k/pull/2282) ([squakez](https://github.com/squakez))
 - fix\(e2e\): Fix OLM upgrade e2e test [\#2281](https://github.com/apache/camel-k/pull/2281) ([astefanutti](https://github.com/astefanutti))
