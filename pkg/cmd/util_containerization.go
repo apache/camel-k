@@ -157,13 +157,22 @@ func createAndBuildIntegrationImage(ctx context.Context, containerRegistry strin
 	}
 
 	// Copy quarkus files in maven subdirectory
-	updateQuarkusDirectory()
+	err = updateQuarkusDirectory()
+	if err != nil {
+		return err
+	}
 
 	// Copy app files in maven subdirectory
-	updateAppDirectory()
+	err = updateAppDirectory()
+	if err != nil {
+		return err
+	}
 
 	// Copy lib files in maven subdirectory
-	updateLibDirectory()
+	err = updateLibDirectory()
+	if err != nil {
+		return err
+	}
 
 	// Get integration run command to be run inside the container. This means the command
 	// has to be created with the paths which will be valid inside the container.

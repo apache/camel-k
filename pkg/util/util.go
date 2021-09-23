@@ -647,18 +647,17 @@ func CopyQuarkusAppFiles(localDependenciesDirectory string, localQuarkusDir stri
 		return err
 	}
 
-	source := path.Join(localDependenciesDirectory, "quarkus-application.dat")
-	destination := path.Join(localQuarkusDir, "quarkus-application.dat")
-	_, err = CopyFile(source, destination)
-	if err != nil {
-		return err
-	}
-
-	source = path.Join(localDependenciesDirectory, "generated-bytecode.jar")
-	destination = path.Join(localQuarkusDir, "generated-bytecode.jar")
-	_, err = CopyFile(source, destination)
-	if err != nil {
-		return err
+	// Transfer all files with a .dat extension and all files with a *-bytecode.jar suffix.
+	files, err := getRegularFileNamesInDir(localDependenciesDirectory)
+	for _, file := range files {
+		if strings.HasSuffix(file, ".dat") || strings.HasSuffix(file, "-bytecode.jar") {
+			source := path.Join(localDependenciesDirectory, file)
+			destination := path.Join(localQuarkusDir, file)
+			_, err = CopyFile(source, destination)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
