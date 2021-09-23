@@ -41,11 +41,11 @@ func newDescribeKitCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *describ
 		Short:   "Describe an Integration Kit",
 		Long:    `Describe an Integration Kit.`,
 		PreRunE: decode(&options),
-		RunE: func(_ *cobra.Command, args []string) error {
-			if err := options.validate(args); err != nil {
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := options.validate(cmd, args); err != nil {
 				return err
 			}
-			if err := options.run(args); err != nil {
+			if err := options.run(cmd, args); err != nil {
 				fmt.Println(err.Error())
 			}
 
@@ -60,14 +60,14 @@ type describeKitCommandOptions struct {
 	*RootCmdOptions
 }
 
-func (command *describeKitCommandOptions) validate(args []string) error {
+func (command *describeKitCommandOptions) validate(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return errors.New("describe expects a kit name argument")
 	}
 	return nil
 }
 
-func (command *describeKitCommandOptions) run(args []string) error {
+func (command *describeKitCommandOptions) run(cmd *cobra.Command, args []string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
@@ -80,7 +80,7 @@ func (command *describeKitCommandOptions) run(args []string) error {
 	}
 
 	if err := c.Get(command.Context, kitKey, kit); err == nil {
-		if desc, err := command.describeIntegrationKit(kit); err == nil {
+		if desc, err := command.describeIntegrationKit(cmd, kit); err == nil {
 			fmt.Print(desc)
 		} else {
 			fmt.Println(err)
@@ -92,9 +92,9 @@ func (command *describeKitCommandOptions) run(args []string) error {
 	return nil
 }
 
-func (command *describeKitCommandOptions) describeIntegrationKit(kit *v1.IntegrationKit) (string, error) {
+func (command *describeKitCommandOptions) describeIntegrationKit(cmd *cobra.Command, kit *v1.IntegrationKit) (string, error) {
 	return indentedwriter.IndentedString(func(out io.Writer) error {
-		w := indentedwriter.NewWriter(out)
+		w := indentedwriter.NewWriter(cmd.OutOrStdout())
 
 		describeObjectMeta(w, kit.ObjectMeta)
 

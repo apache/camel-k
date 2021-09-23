@@ -21,6 +21,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -53,7 +54,7 @@ type dumpCmdOptions struct {
 	LogLines int `mapstructure:"logLines"`
 }
 
-func (o *dumpCmdOptions) dump(_ *cobra.Command, args []string) error {
+func (o *dumpCmdOptions) dump(cmd *cobra.Command, args []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		return err
@@ -67,12 +68,12 @@ func (o *dumpCmdOptions) dump(_ *cobra.Command, args []string) error {
 		dumpNamespace(o.Context, c, o.Namespace, writer, o.LogLines)
 		defer writer.Close()
 	} else {
-		dumpNamespace(o.Context, c, o.Namespace, os.Stdout, o.LogLines)
+		dumpNamespace(o.Context, c, o.Namespace, cmd.OutOrStdout(), o.LogLines)
 	}
 	return nil
 }
 
-func dumpNamespace(ctx context.Context, c client.Client, ns string, out *os.File, logLines int) error {
+func dumpNamespace(ctx context.Context, c client.Client, ns string, out io.Writer, logLines int) error {
 
 	camelClient, err := versioned.NewForConfig(c.GetConfig())
 	if err != nil {
@@ -173,13 +174,13 @@ func dumpNamespace(ctx context.Context, c client.Client, ns string, out *os.File
 	return nil
 }
 
-func dumpConditions(prefix string, conditions []v1.PodCondition, out *os.File) {
+func dumpConditions(prefix string, conditions []v1.PodCondition, out io.Writer) {
 	for _, cond := range conditions {
 		fmt.Fprintf(out, "%scondition type=%s, status=%s, reason=%s, message=%q\n", prefix, cond.Type, cond.Status, cond.Reason, cond.Message)
 	}
 }
 
-func dumpLogs(ctx context.Context, c client.Client, prefix string, ns string, name string, container string, out *os.File, logLines int) error {
+func dumpLogs(ctx context.Context, c client.Client, prefix string, ns string, name string, container string, out io.Writer, logLines int) error {
 	lines := int64(logLines)
 	stream, err := c.CoreV1().Pods(ns).GetLogs(name, &v1.PodLogOptions{
 		Container: container,

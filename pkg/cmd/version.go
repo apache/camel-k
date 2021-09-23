@@ -20,7 +20,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-
 	"github.com/Masterminds/semver"
 	"github.com/spf13/cobra"
 
@@ -67,36 +66,36 @@ func (o *versionCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
 	return o.RootCmdOptions.preRun(cmd, args)
 }
 
-func (o *versionCmdOptions) run(_ *cobra.Command, _ []string) error {
+func (o *versionCmdOptions) run(cmd *cobra.Command, _ []string) error {
 	if o.Operator {
 		c, err := o.GetCmdClient()
 		if err != nil {
 			return err
 		}
-		displayOperatorVersion(o.Context, c, o.Namespace)
+		displayOperatorVersion(cmd, o.Context, c, o.Namespace)
 	} else {
-		displayClientVersion()
+		displayClientVersion(cmd)
 	}
 	return nil
 }
 
-func displayClientVersion() {
+func displayClientVersion(cmd *cobra.Command) {
 	if VersionVariant != "" {
-		fmt.Printf("Camel K Client %s %s\n", VersionVariant, defaults.Version)
+		fmt.Fprintf(cmd.OutOrStdout(), "Camel K Client %s %s\n", VersionVariant, defaults.Version)
 	} else {
-		fmt.Printf("Camel K Client %s\n", defaults.Version)
+		fmt.Fprintf(cmd.OutOrStdout(), "Camel K Client %s\n", defaults.Version)
 	}
 }
 
-func displayOperatorVersion(ctx context.Context, c client.Client, namespace string) {
+func displayOperatorVersion(cmd *cobra.Command, ctx context.Context, c client.Client, namespace string) {
 	operatorVersion, err := operatorVersion(ctx, c, namespace)
 	if err != nil {
-		fmt.Printf("Unable to retrieve operator version: %s\n", err)
+		fmt.Fprintf(cmd.OutOrStdout(), "Unable to retrieve operator version: %s\n", err)
 	} else {
 		if operatorVersion == "" {
-		  fmt.Printf("Unable to retrieve operator version: The IntegrationPlatform resource hasn't been reconciled yet!")
+			fmt.Fprintf(cmd.OutOrStdout(), "Unable to retrieve operator version: The IntegrationPlatform resource hasn't been reconciled yet!")
 		} else {
-		  fmt.Printf("Camel K Operator %s\n", operatorVersion)
+			fmt.Fprintf(cmd.OutOrStdout(), "Camel K Operator %s\n", operatorVersion)
 		}
 	}
 }
