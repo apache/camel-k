@@ -71,7 +71,6 @@ func CreateIntegrationImageDockerFile(integrationRunCmd *exec.Cmd, startsFromLoc
 		dockerFile = append(dockerFile, COPY(util.CustomQuarkusDirectoryName, util.ContainerQuarkusDirectoryName))
 		dockerFile = append(dockerFile, COPY(util.CustomLibDirectoryName, util.ContainerLibDirectoryName))
 		dockerFile = append(dockerFile, COPY(util.CustomAppDirectoryName, util.ContainerAppDirectoryName))
-
 	}
 
 	// All Env variables the command requires need to be set in the container.
