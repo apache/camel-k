@@ -1644,18 +1644,9 @@ func NewTestNamespace(injectKnativeBroker bool) ctrl.Object {
 
 func GetOutputString(command *cobra.Command) string {
 	var buf bytes.Buffer
-	reader, writer, err := os.Pipe()
-	if err != nil {
-		panic(err)
-	}
 
-	command.SetOut(writer)
+	command.SetOut(&buf)
 	command.Execute()
-
-	writer.Close()
-	defer reader.Close()
-
-	buf.ReadFrom(reader)
 
 	return buf.String()
 }
