@@ -41,11 +41,11 @@ func newDescribePlatformCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *de
 		Short:   "Describe an Integration Platform",
 		Long:    `Describe an Integration Platform.`,
 		PreRunE: decode(&options),
-		RunE: func(_ *cobra.Command, args []string) error {
-			if err := options.validate(args); err != nil {
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := options.validate(cmd, args); err != nil {
 				return err
 			}
-			if err := options.run(args); err != nil {
+			if err := options.run(cmd, args); err != nil {
 				fmt.Println(err.Error())
 			}
 
@@ -60,14 +60,14 @@ type describePlatformCommandOptions struct {
 	*RootCmdOptions
 }
 
-func (command *describePlatformCommandOptions) validate(args []string) error {
+func (command *describePlatformCommandOptions) validate(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return errors.New("describe expects a platform name argument")
 	}
 	return nil
 }
 
-func (command *describePlatformCommandOptions) run(args []string) error {
+func (command *describePlatformCommandOptions) run(cmd *cobra.Command, args []string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
@@ -80,21 +80,21 @@ func (command *describePlatformCommandOptions) run(args []string) error {
 	}
 
 	if err := c.Get(command.Context, platformKey, &platform); err == nil {
-		if desc, err := command.describeIntegrationPlatform(platform); err == nil {
+		if desc, err := command.describeIntegrationPlatform(cmd, platform); err == nil {
 			fmt.Print(desc)
 		} else {
 			fmt.Println(err)
 		}
 	} else {
-		fmt.Printf("IntegrationPlatform '%s' does not exist.\n", args[0])
+		fmt.Fprintf(cmd.OutOrStdout(), "IntegrationPlatform '%s' does not exist.\n", args[0])
 	}
 
 	return nil
 }
 
-func (command *describePlatformCommandOptions) describeIntegrationPlatform(platform v1.IntegrationPlatform) (string, error) {
+func (command *describePlatformCommandOptions) describeIntegrationPlatform(cmd *cobra.Command, platform v1.IntegrationPlatform) (string, error) {
 	return indentedwriter.IndentedString(func(out io.Writer) error {
-		w := indentedwriter.NewWriter(out)
+		w := indentedwriter.NewWriter(cmd.OutOrStdout())
 		describeObjectMeta(w, platform.ObjectMeta)
 		w.Write(0, "Phase:\t%s\n", platform.Status.Phase)
 		w.Write(0, "Version:\t%s\n", platform.Status.Version)

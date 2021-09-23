@@ -42,11 +42,11 @@ func newDescribeKameletCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *des
 		Short:   "Describe a Kamelet",
 		Long:    `Describe a Kamelet.`,
 		PreRunE: decode(&options),
-		RunE: func(_ *cobra.Command, args []string) error {
-			if err := options.validate(args); err != nil {
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := options.validate(cmd, args); err != nil {
 				return err
 			}
-			if err := options.run(args); err != nil {
+			if err := options.run(cmd, args); err != nil {
 				fmt.Println(err.Error())
 			}
 
@@ -61,14 +61,14 @@ type describeKameletCommandOptions struct {
 	*RootCmdOptions
 }
 
-func (command *describeKameletCommandOptions) validate(args []string) error {
+func (command *describeKameletCommandOptions) validate(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return errors.New("describe expects a Kamelet name argument")
 	}
 	return nil
 }
 
-func (command *describeKameletCommandOptions) run(args []string) error {
+func (command *describeKameletCommandOptions) run(cmd *cobra.Command, args []string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
@@ -81,7 +81,7 @@ func (command *describeKameletCommandOptions) run(args []string) error {
 	}
 
 	if err := c.Get(command.Context, kameletKey, &kamelet); err == nil {
-		if desc, err := command.describeKamelet(kamelet); err == nil {
+		if desc, err := command.describeKamelet(cmd, kamelet); err == nil {
 			fmt.Print(desc)
 		} else {
 			fmt.Println(err)
@@ -93,9 +93,9 @@ func (command *describeKameletCommandOptions) run(args []string) error {
 	return nil
 }
 
-func (command *describeKameletCommandOptions) describeKamelet(kamelet v1alpha1.Kamelet) (string, error) {
+func (command *describeKameletCommandOptions) describeKamelet(cmd *cobra.Command, kamelet v1alpha1.Kamelet) (string, error) {
 	return indentedwriter.IndentedString(func(out io.Writer) error {
-		w := indentedwriter.NewWriter(out)
+		w := indentedwriter.NewWriter(cmd.OutOrStdout())
 
 		describeObjectMeta(w, kamelet.ObjectMeta)
 

@@ -43,11 +43,11 @@ func newDescribeIntegrationCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, 
 		Short:   "Describe an Integration",
 		Long:    `Describe an Integration.`,
 		PreRunE: decode(&options),
-		RunE: func(_ *cobra.Command, args []string) error {
-			if err := options.validate(args); err != nil {
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := options.validate(cmd, args); err != nil {
 				return err
 			}
-			if err := options.run(args); err != nil {
+			if err := options.run(cmd, args); err != nil {
 				fmt.Println(err.Error())
 			}
 
@@ -65,14 +65,14 @@ type describeIntegrationCommandOptions struct {
 	showSourceContent bool `mapstructure:"show-source-content"`
 }
 
-func (command *describeIntegrationCommandOptions) validate(args []string) error {
+func (command *describeIntegrationCommandOptions) validate(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return errors.New("describe expects an integration name argument")
 	}
 	return nil
 }
 
-func (command *describeIntegrationCommandOptions) run(args []string) error {
+func (command *describeIntegrationCommandOptions) run(cmd *cobra.Command, args []string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
@@ -85,21 +85,21 @@ func (command *describeIntegrationCommandOptions) run(args []string) error {
 	}
 
 	if err := c.Get(command.Context, key, &ctx); err == nil {
-		if desc, err := command.describeIntegration(ctx); err == nil {
+		if desc, err := command.describeIntegration(cmd, ctx); err == nil {
 			fmt.Print(desc)
 		} else {
 			fmt.Println(err)
 		}
 	} else {
-		fmt.Printf("Integration '%s' does not exist.\n", args[0])
+		fmt.Fprintf(cmd.OutOrStdout(), "Integration '%s' does not exist.\n", args[0])
 	}
 
 	return nil
 }
 
-func (command *describeIntegrationCommandOptions) describeIntegration(i v1.Integration) (string, error) {
+func (command *describeIntegrationCommandOptions) describeIntegration(cmd *cobra.Command, i v1.Integration) (string, error) {
 	return indentedwriter.IndentedString(func(out io.Writer) error {
-		w := indentedwriter.NewWriter(out)
+		w := indentedwriter.NewWriter(cmd.OutOrStdout())
 
 		describeObjectMeta(w, i.ObjectMeta)
 
