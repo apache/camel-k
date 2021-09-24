@@ -49,7 +49,6 @@ func init() {
 	AddToTraits(newPullSecretTrait)
 	AddToTraits(newQuarkusTrait)
 	AddToTraits(newRouteTrait)
-	AddToTraits(newRuntimeTrait)
 	AddToTraits(newServiceTrait)
 	AddToTraits(newServiceBindingTrait)
 	AddToTraits(newTolerationTrait)

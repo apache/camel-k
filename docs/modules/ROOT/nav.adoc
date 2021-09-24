@@ -71,7 +71,6 @@
 ** xref:traits:pull-secret.adoc[Pull Secret]
 ** xref:traits:quarkus.adoc[Quarkus]
 ** xref:traits:route.adoc[Route]
-** xref:traits:runtime.adoc[Runtime]
 ** xref:traits:service-binding.adoc[Service Binding]
 ** xref:traits:service.adoc[Service]
 ** xref:traits:toleration.adoc[Toleration]

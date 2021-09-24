@@ -21,10 +21,12 @@ import (
 	"context"
 	"testing"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
@@ -90,12 +92,42 @@ func createNominalCamelTest() (*camelTrait, *Environment) {
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "namespace",
 			},
+			Spec: v1.IntegrationSpec{
+				Traits: make(map[string]v1.TraitSpec),
+			},
 			Status: v1.IntegrationStatus{
 				RuntimeVersion: "0.0.1",
+				Phase:          v1.IntegrationPhaseDeploying,
 			},
 		},
-		IntegrationKit: &v1.IntegrationKit{},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "namespace",
+			},
+		},
+		Resources:             kubernetes.NewCollection(),
+		ApplicationProperties: make(map[string]string),
 	}
 
 	return trait, environment
+}
+
+func TestApplyCamelTraitWithProperties(t *testing.T) {
+	camelTrait, environment := createNominalCamelTest()
+	camelTrait.Properties = []string{"a=b", "c=d"}
+	err := camelTrait.Apply(environment)
+	assert.Nil(t, err)
+
+	userPropertiesCm := environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
+		return cm.Labels["camel.apache.org/properties.type"] == "user"
+	})
+	assert.NotNil(t, userPropertiesCm)
+	assert.Equal(t, map[string]string{
+		"application.properties": "a=b\nc=d\n",
+	}, userPropertiesCm.Data)
 }

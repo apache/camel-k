@@ -73,6 +73,9 @@ traits:
     type: string
     description: The camel-k-runtime version to use for the integration. It overrides
       the default version set in the Integration Platform.
+  - name: properties
+    type: '[]string'
+    description: A list of properties to be provided to the Integration runtime
 - name: container
   platform: true
   profiles:
@@ -322,7 +325,7 @@ traits:
     description: Can be used to enable or disable a trait. All traits share this common
       property.
   - name: discovery-cache
-    type: github.com/apache/camel-k/pkg/trait.discoveryCacheType
+    type: ./pkg/trait.discoveryCacheType
     description: Discovery client cache to be used, either `disabled`, `disk` or `memory`
       (default `memory`)
 - name: ingress
@@ -351,7 +354,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The Istio trait allows to configure properties related to the Istio
+  description: The Istio trait allows configuring properties related to the Istio
     service mesh, such as sidecar injection and outbound IP ranges.
   properties:
   - name: enabled
@@ -912,22 +915,6 @@ traits:
     description: To configure how to deal with insecure traffic, e.g. `Allow`, `Disable`
       or `Redirect` traffic.Refer to the OpenShift route documentation for additional
       information.
-- name: runtime
-  platform: true
-  profiles:
-  - Kubernetes
-  - Knative
-  - OpenShift
-  description: The runtime trait is used to customize the Integration runtime configuration
-    such as properties and resources.
-  properties:
-  - name: enabled
-    type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
-  - name: properties
-    type: '[]string'
-    description: A list of properties to be provided to the Integration runtime
 - name: service-binding
   platform: false
   profiles:
