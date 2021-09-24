@@ -14,6 +14,7 @@
 - Contribution missing in 1.6.0 release note [\#2621](https://github.com/apache/camel-k/issues/2621)
 - Kamelet add support for tolerations [\#2602](https://github.com/apache/camel-k/issues/2602)
 - Release 1.6.0 [\#2591](https://github.com/apache/camel-k/issues/2591)
+- Should we move to go 1.16 / 1.17 ? [\#2579](https://github.com/apache/camel-k/issues/2579)
 - Read certificates from secrets to setup TLS config for route trait [\#2574](https://github.com/apache/camel-k/issues/2574)
 - \[Doc\] Add documentation for architecture [\#2273](https://github.com/apache/camel-k/issues/2273)
 - Document, or provide examples for, TLS configuration on OpenShift [\#1033](https://github.com/apache/camel-k/issues/1033)
@@ -22,6 +23,9 @@
 
 **Merged pull requests:**
 
+- chore\(ci\): Use `github.head_ref` as concurrency group key [\#2657](https://github.com/apache/camel-k/pull/2657) ([astefanutti](https://github.com/astefanutti))
+- chore\(build\): Upgrade Go dependencies [\#2655](https://github.com/apache/camel-k/pull/2655) ([astefanutti](https://github.com/astefanutti))
+- Fix local builds from directory for containerized and non-containerized uses. [\#2654](https://github.com/apache/camel-k/pull/2654) ([doru1004](https://github.com/doru1004))
 - fix: Switch off color in Maven logs [\#2647](https://github.com/apache/camel-k/pull/2647) ([astefanutti](https://github.com/astefanutti))
 - Alow fixed custom labels in any pod [\#2646](https://github.com/apache/camel-k/pull/2646) ([claudio4j](https://github.com/claudio4j))
 - fix: Unify post-build integration phases reconciliation [\#2645](https://github.com/apache/camel-k/pull/2645) ([astefanutti](https://github.com/astefanutti))
