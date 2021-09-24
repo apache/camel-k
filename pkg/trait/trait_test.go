@@ -277,31 +277,19 @@ func TestConfigureVolumesAndMountsTextResourcesAndProperties(t *testing.T) {
 	vols := make([]corev1.Volume, 0)
 	mnts := make([]corev1.VolumeMount, 0)
 
-	env.Resources.AddAll(env.computeConfigMaps())
 	env.configureVolumesAndMounts(&vols, &mnts)
 
-	assert.Len(t, vols, 8)
-	assert.Len(t, mnts, 8)
+	assert.Len(t, vols, 7)
+	assert.Len(t, mnts, 7)
 
-	v := findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "test-user-properties" })
-	assert.NotNil(t, v)
-	assert.NotNil(t, v.VolumeSource.ConfigMap)
-	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
-	assert.Equal(t, "application.properties", v.VolumeSource.ConfigMap.Items[0].Key)
-	assert.Equal(t, "user.properties", v.VolumeSource.ConfigMap.Items[0].Path)
-
-	m := findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
-	assert.NotNil(t, m)
-	assert.Equal(t, "/etc/camel/conf.d/user.properties", m.MountPath)
-
-	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm1" })
+	v := findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm1" })
 	assert.NotNil(t, v)
 	assert.NotNil(t, v.VolumeSource.ConfigMap)
 	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
 	assert.Equal(t, "my-key1", v.VolumeSource.ConfigMap.Items[0].Key)
 	assert.Equal(t, "res1.txt", v.VolumeSource.ConfigMap.Items[0].Path)
 
-	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "i-resource-000" })
+	m := findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "i-resource-000" })
 	assert.NotNil(t, m)
 	assert.Equal(t, "/etc/m1", m.MountPath)
 
@@ -401,7 +389,6 @@ func TestConfigureVolumesAndMountsSources(t *testing.T) {
 	vols := make([]corev1.Volume, 0)
 	mnts := make([]corev1.VolumeMount, 0)
 
-	env.Resources.AddAll(env.computeConfigMaps())
 	env.configureVolumesAndMounts(&vols, &mnts)
 
 	assert.Len(t, vols, 2)
@@ -464,7 +451,6 @@ func TestConfigureVolumesAndMountsBinaryAndTextResources(t *testing.T) {
 	vols := make([]corev1.Volume, 0)
 	mnts := make([]corev1.VolumeMount, 0)
 
-	env.Resources.AddAll(env.computeConfigMaps())
 	env.configureVolumesAndMounts(&vols, &mnts)
 
 	assert.Len(t, vols, 2)
