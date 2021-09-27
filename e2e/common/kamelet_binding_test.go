@@ -106,7 +106,7 @@ func CreateLogKamelet(ns string, name string) func() error {
 			Type: "string",
 		},
 	}
-	return CreateKamelet(ns, name, flow, props)
+	return CreateKamelet(ns, name, flow, props, nil)
 }
 
 func CreateErrorProducerKamelet(ns string, name string) func() error {
@@ -137,5 +137,5 @@ func CreateErrorProducerKamelet(ns string, name string) func() error {
 		},
 	}
 
-	return CreateKamelet(ns, name, flow, props)
+	return CreateKamelet(ns, name, flow, props, nil)
 }

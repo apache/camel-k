@@ -82,7 +82,7 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 				}
 			}
 
-			if existing == nil || existing.Annotations[kamelVersionAnnotation] != defaults.Version {
+			if existing == nil || existing.Labels[v1alpha1.KameletBundledLabel] == "true" {
 				if k.GetAnnotations() == nil {
 					k.SetAnnotations(make(map[string]string))
 				}
