@@ -261,7 +261,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		fmt.Println("Warning: the operator will not be able to create Leases. Try installing as cluster-admin to allow management of Lease resources.")
 	}
 
-	if errmtr := installCustomResourceDefinitions(ctx, c, cfg.Namespace, customizer, collection, force); errmtr != nil {
+	if errmtr := installClusterRoleBinding(ctx, c, collection, cfg.Namespace, "camel-k-operator-custom-resource-definitions", "/rbac/operator-cluster-role-binding-custom-resource-definitions.yaml"); errmtr != nil {
 		fmt.Println("Warning: the operator will not be able to get CustomResourceDefinitions resources and the service-binding trait will fail if used. Try installing the operator as cluster-admin.")
 	}
 
@@ -401,19 +401,6 @@ func installLeaseBindings(ctx context.Context, c client.Client, namespace string
 		"/rbac/operator-role-leases.yaml",
 		"/rbac/operator-role-binding-leases.yaml",
 	)
-}
-
-func installCustomResourceDefinitions(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
-	ok, err := isClusterRoleInstalled(ctx, c, "camel-k-operator-custom-resource-definitions")
-	if err != nil {
-		return err
-	}
-	if !ok {
-		if err := installResource(ctx, c, collection, "/rbac/operator-cluster-role-custom-resource-definitions.yaml"); err != nil {
-			return err
-		}
-	}
-	return installClusterRoleBinding(ctx, c, collection, namespace, "camel-k-operator-custom-resource-definitions", "/rbac/operator-cluster-role-binding-custom-resource-definitions.yaml")
 }
 
 // PlatformOrCollect --
