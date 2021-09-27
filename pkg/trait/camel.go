@@ -80,8 +80,7 @@ func (t *camelTrait) Apply(e *Environment) error {
 		e.IntegrationKit.Status.RuntimeProvider = e.CamelCatalog.Runtime.Provider
 	}
 
-	if e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
-		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning) {
+	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) && e.IntegrationInRunningPhases() {
 		// Get all resources
 		maps := t.computeConfigMaps(e)
 		if t.Properties != nil {
