@@ -1236,6 +1236,19 @@ func Kamelet(name string, ns string) func() *v1alpha1.Kamelet {
 	}
 }
 
+func KameletHasLabel(name string, ns string, label string) func() bool {
+	return func() bool {
+		k := Kamelet(name, ns)()
+		if k == nil {
+			return false
+		}
+		if _, ok := k.Labels[label]; ok {
+			return true
+		}
+		return false
+	}
+}
+
 func ClusterDomainName() (string, error) {
 	dns := configv1.DNS{}
 	key := ctrl.ObjectKey{
@@ -1345,12 +1358,13 @@ func CreateKnativeChannel(ns string, name string) func() error {
 	Kamelets
 */
 
-func CreateKamelet(ns string, name string, flow map[string]interface{}, properties map[string]v1alpha1.JSONSchemaProp) func() error {
+func CreateKamelet(ns string, name string, flow map[string]interface{}, properties map[string]v1alpha1.JSONSchemaProp, labels map[string]string) func() error {
 	return func() error {
 		kamelet := v1alpha1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: ns,
 				Name:      name,
+				Labels:    labels,
 			},
 			Spec: v1alpha1.KameletSpec{
 				Definition: &v1alpha1.JSONSchemaProps{
@@ -1386,7 +1400,7 @@ func CreateTimerKamelet(ns string, name string) func() error {
 		},
 	}
 
-	return CreateKamelet(ns, name, flow, props)
+	return CreateKamelet(ns, name, flow, props, nil)
 }
 
 func BindKameletTo(ns string, name string, from corev1.ObjectReference, to corev1.ObjectReference, sourceProperties map[string]string, sinkProperties map[string]string) func() error {
