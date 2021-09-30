@@ -36,7 +36,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-// NewMonitorAction creates a new monitoring action for an integration
 func NewMonitorAction() Action {
 	return &monitorAction{}
 }
@@ -115,25 +114,32 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	// to list the pods owned by the integration.
 	integration.Status.Selector = v1.IntegrationLabel + "=" + integration.Name
 
-	// Check replicas
-	replicaSets := &appsv1.ReplicaSetList{}
-	err = action.client.List(ctx, replicaSets,
+	// Update the replicas count
+	pendingPods := &corev1.PodList{}
+	err = action.client.List(ctx, pendingPods,
 		ctrl.InNamespace(integration.Namespace),
-		ctrl.MatchingLabels{
-			v1.IntegrationLabel: integration.Name,
-		})
+		ctrl.MatchingLabels{v1.IntegrationLabel: integration.Name},
+		ctrl.MatchingFields{"status.phase": string(corev1.PodPending)})
 	if err != nil {
 		return nil, err
 	}
-
-	// And update the scale status accordingly
-	if len(replicaSets.Items) > 0 {
-		replicaSet := findLatestReplicaSet(replicaSets)
-		replicas := replicaSet.Status.Replicas
-		if integration.Status.Replicas == nil || replicas != *integration.Status.Replicas {
-			integration.Status.Replicas = &replicas
-		}
+	runningPods := &corev1.PodList{}
+	err = action.client.List(ctx, runningPods,
+		ctrl.InNamespace(integration.Namespace),
+		ctrl.MatchingLabels{v1.IntegrationLabel: integration.Name},
+		ctrl.MatchingFields{"status.phase": string(corev1.PodRunning)})
+	if err != nil {
+		return nil, err
 	}
+	nonTerminatingPods := 0
+	for _, pod := range runningPods.Items {
+		if pod.DeletionTimestamp != nil {
+			continue
+		}
+		nonTerminatingPods++
+	}
+	podCount := int32(len(pendingPods.Items) + nonTerminatingPods)
+	integration.Status.Replicas = &podCount
 
 	// Reconcile Integration phase
 	if integration.Status.Phase == v1.IntegrationPhaseDeploying {
@@ -216,16 +222,6 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	}
 
 	return integration, nil
-}
-
-func findLatestReplicaSet(list *appsv1.ReplicaSetList) *appsv1.ReplicaSet {
-	latest := list.Items[0]
-	for i, rs := range list.Items[1:] {
-		if latest.CreationTimestamp.Before(&rs.CreationTimestamp) {
-			latest = list.Items[i+1]
-		}
-	}
-	return &latest
 }
 
 func findHighestPriorityReadyKit(kits []v1.IntegrationKit) (*v1.IntegrationKit, error) {
