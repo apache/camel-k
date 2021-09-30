@@ -19,12 +19,10 @@ package platform
 
 import (
 	"context"
-	"errors"
 	"os"
 	"strings"
 
 	coordination "k8s.io/api/coordination/v1"
-	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -36,25 +34,7 @@ const operatorPodNameEnvVariable = "POD_NAME"
 
 const OperatorLockName = "camel-k-lock"
 
-// GetCurrentOperatorImage returns the image currently used by the running operator if present (when running out of cluster, it may be absent).
-func GetCurrentOperatorImage(ctx context.Context, c ctrl.Reader) (string, error) {
-	ns := GetOperatorNamespace()
-	name := GetOperatorPodName()
-	if ns == "" || name == "" {
-		return "", nil
-	}
-
-	pod := v1.Pod{}
-	if err := c.Get(ctx, ctrl.ObjectKey{Namespace: ns, Name: name}, &pod); err != nil && k8serrors.IsNotFound(err) {
-		return "", nil
-	} else if err != nil {
-		return "", err
-	}
-	if len(pod.Spec.Containers) == 0 {
-		return "", errors.New("no containers found in operator pod")
-	}
-	return pod.Spec.Containers[0].Image, nil
-}
+var OperatorImage string
 
 // IsCurrentOperatorGlobal returns true if the operator is configured to watch all namespaces
 func IsCurrentOperatorGlobal() bool {

@@ -39,12 +39,15 @@ import (
 
 const timeoutAnnotation = "camel.apache.org/timeout"
 
-func newMonitorPodAction() Action {
-	return &monitorPodAction{}
+func newMonitorPodAction(reader ctrl.Reader) Action {
+	return &monitorPodAction{
+		reader: reader,
+	}
 }
 
 type monitorPodAction struct {
 	baseAction
+	reader ctrl.Reader
 }
 
 // Name returns a common name of the action
@@ -59,7 +62,7 @@ func (action *monitorPodAction) CanHandle(build *v1.Build) bool {
 
 // Handle handles the builds
 func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
-	pod, err := getBuilderPod(ctx, action.client, build)
+	pod, err := getBuilderPod(ctx, action.reader, build)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +71,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		switch build.Status.Phase {
 
 		case v1.BuildPhasePending:
-			if pod, err = newBuildPod(ctx, action.client, build); err != nil {
+			if pod, err = newBuildPod(ctx, action.reader, build); err != nil {
 				return nil, err
 			}
 			// Set the Build as the Pod owner and controller

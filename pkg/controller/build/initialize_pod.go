@@ -20,17 +20,22 @@ package build
 import (
 	"context"
 
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-func newInitializePodAction() Action {
-	return &initializePodAction{}
+func newInitializePodAction(reader ctrl.Reader) Action {
+	return &initializePodAction{
+		reader: reader,
+	}
 }
 
 type initializePodAction struct {
 	baseAction
+	reader ctrl.Reader
 }
 
 // Name returns a common name of the action
@@ -49,7 +54,7 @@ func (action *initializePodAction) Handle(ctx context.Context, build *v1.Build) 
 		return nil, errors.Wrap(err, "cannot delete build pod")
 	}
 
-	pod, err := getBuilderPod(ctx, action.client, build)
+	pod, err := getBuilderPod(ctx, action.reader, build)
 	if err != nil || pod != nil {
 		// We return and wait for the pod to be deleted before de-queue the build pod.
 		return nil, err
