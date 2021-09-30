@@ -21,21 +21,17 @@ import (
 	"context"
 	"time"
 
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
 	"k8s.io/client-go/tools/record"
 
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
@@ -54,7 +50,6 @@ func Add(mgr manager.Manager) error {
 	return add(mgr, newReconciler(mgr, c))
 }
 
-// newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	return monitoring.NewInstrumentedReconciler(
 		&reconcileBuild{
@@ -71,54 +66,23 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	)
 }
 
-// add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	// Create a new controller
-	c, err := controller.New("build-controller", mgr, controller.Options{Reconciler: r})
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to primary resource Build
-	err = c.Watch(&source.Kind{Type: &v1.Build{}},
-		&handler.EnqueueRequestForObject{},
-		predicate.Funcs{
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldBuild := e.ObjectOld.(*v1.Build)
-				newBuild := e.ObjectNew.(*v1.Build)
-				// Ignore updates to the build status in which case metadata.Generation does not change,
-				// or except when the build phase changes as it's used to transition from one phase
-				// to another
-				return oldBuild.Generation != newBuild.Generation ||
-					oldBuild.Status.Phase != newBuild.Status.Phase
-			},
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to secondary resource Pods and requeue the owner Build
-	err = c.Watch(&source.Kind{Type: &corev1.Pod{}},
-		&handler.EnqueueRequestForOwner{
-			IsController: true,
-			OwnerType:    &v1.Build{},
-		},
-		predicate.Funcs{
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldPod := e.ObjectOld.(*corev1.Pod)
-				newPod := e.ObjectNew.(*corev1.Pod)
-				// Ignore updates to the build pods except when the pod phase changes
-				// as it's used to transition the builds from one phase to another
-				return oldPod.Status.Phase != newPod.Status.Phase
-			},
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return builder.ControllerManagedBy(mgr).
+		Named("build-controller").
+		// Watch for changes to primary resource Build
+		For(&v1.Build{}, builder.WithPredicates(
+			predicate.Funcs{
+				UpdateFunc: func(e event.UpdateEvent) bool {
+					oldBuild := e.ObjectOld.(*v1.Build)
+					newBuild := e.ObjectNew.(*v1.Build)
+					// Ignore updates to the build status in which case metadata.Generation does not change,
+					// or except when the build phase changes as it's used to transition from one phase
+					// to another
+					return oldBuild.Generation != newBuild.Generation ||
+						oldBuild.Status.Phase != newBuild.Status.Phase
+				},
+			})).
+		Complete(r)
 }
 
 var _ reconcile.Reconciler = &reconcileBuild{}
@@ -253,13 +217,12 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 
 	if target.Status.Phase == v1.BuildPhaseScheduling || target.Status.Phase == v1.BuildPhaseFailed {
 		// Requeue scheduling (resp. failed) build so that it re-enters the build (resp. recovery) working queue
-		return reconcile.Result{
-			RequeueAfter: 5 * time.Second,
-		}, nil
+		return reconcile.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
-	if pl.Status.Build.BuildStrategy == v1.IntegrationPlatformBuildStrategyPod && (target.Status.Phase == v1.BuildPhasePending || target.Status.Phase == v1.BuildPhaseRunning) {
-		// Requeue running Build to signal timeout to the Build pod
+	if pl.Status.Build.BuildStrategy == v1.IntegrationPlatformBuildStrategyPod &&
+		(target.Status.Phase == v1.BuildPhasePending || target.Status.Phase == v1.BuildPhaseRunning) {
+		// Requeue running Build to poll Pod and signal timeout
 		return reconcile.Result{RequeueAfter: 1 * time.Second}, nil
 	}
 
