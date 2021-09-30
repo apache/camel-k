@@ -57,6 +57,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	return monitoring.NewInstrumentedReconciler(
 		&reconcileIntegrationPlatform{
 			client:   c,
+			reader:   mgr.GetAPIReader(),
 			scheme:   mgr.GetScheme(),
 			recorder: mgr.GetEventRecorderFor("camel-k-integration-platform-controller"),
 		},
@@ -108,7 +109,9 @@ var _ reconcile.Reconciler = &reconcileIntegrationPlatform{}
 type reconcileIntegrationPlatform struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the API server
-	client   client.Client
+	client client.Client
+	// Non-caching client
+	reader   ctrl.Reader
 	scheme   *runtime.Scheme
 	recorder record.EventRecorder
 }
@@ -148,7 +151,7 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 
 	actions := []Action{
 		NewInitializeAction(),
-		NewWarmAction(),
+		NewWarmAction(r.reader),
 		NewCreateAction(),
 		NewMonitorAction(),
 	}
