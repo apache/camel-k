@@ -21,7 +21,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"k8s.io/klog/v2"
 	"math/rand"
 	"os"
 	"runtime"
@@ -32,11 +31,13 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"k8s.io/client-go/tools/record"
+	"k8s.io/klog/v2"
 
-	ctrl "sigs.k8s.io/controller-runtime"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
 	"github.com/apache/camel-k/pkg/apis"
@@ -51,7 +52,6 @@ import (
 
 var log = logf.Log.WithName("cmd")
 
-// GitCommit --
 var GitCommit string
 
 func printVersion() {
@@ -124,7 +124,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool) {
 		log.Info("Leader election is disabled!")
 	}
 
-	mgr, err := ctrl.NewManager(c.GetConfig(), ctrl.Options{
+	mgr, err := manager.New(c.GetConfig(), manager.Options{
 		Namespace:                     watchNamespace,
 		EventBroadcaster:              broadcaster,
 		LeaderElection:                leaderElection,
@@ -136,6 +136,14 @@ func Run(healthPort, monitoringPort int32, leaderElection bool) {
 		MetricsBindAddress:            ":" + strconv.Itoa(int(monitoringPort)),
 	})
 	exitOnError(err, "")
+
+	exitOnError(
+		mgr.GetFieldIndexer().IndexField(context.Background(), &corev1.Pod{}, "status.phase",
+			func(obj ctrl.Object) []string {
+				return []string{string(obj.(*corev1.Pod).Status.Phase)}
+			}),
+		"unable to set up field indexer for status.phase: %v",
+	)
 
 	log.Info("Configuring manager")
 	exitOnError(mgr.AddHealthzCheck("health-probe", healthz.Ping), "Unable add liveness check")
