@@ -29,10 +29,13 @@ import (
 
 	coordination "k8s.io/api/coordination/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog/v2"
 
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -41,6 +44,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
 	"github.com/apache/camel-k/pkg/apis"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/controller"
 	"github.com/apache/camel-k/pkg/event"
@@ -124,6 +128,9 @@ func Run(healthPort, monitoringPort int32, leaderElection bool) {
 		log.Info("Leader election is disabled!")
 	}
 
+	podLabelSelector, err := labels.NewRequirement(v1.IntegrationLabel, selection.Exists, []string{})
+	exitOnError(err, "cannot create Pod labels selector")
+
 	mgr, err := manager.New(c.GetConfig(), manager.Options{
 		Namespace:                     watchNamespace,
 		EventBroadcaster:              broadcaster,
@@ -134,6 +141,15 @@ func Run(healthPort, monitoringPort int32, leaderElection bool) {
 		LeaderElectionReleaseOnCancel: true,
 		HealthProbeBindAddress:        ":" + strconv.Itoa(int(healthPort)),
 		MetricsBindAddress:            ":" + strconv.Itoa(int(monitoringPort)),
+		NewCache: cache.BuilderWithOptions(
+			cache.Options{
+				SelectorsByObject: cache.SelectorsByObject{
+					&corev1.Pod{}: {
+						Label: labels.NewSelector().Add(*podLabelSelector),
+					},
+				},
+			},
+		),
 	})
 	exitOnError(err, "")
 
