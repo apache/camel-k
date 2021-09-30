@@ -25,16 +25,20 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// NewWarmAction returns a action that creates resources needed by the platform
-func NewWarmAction() Action {
-	return &warmAction{}
+func NewWarmAction(reader ctrl.Reader) Action {
+	return &warmAction{
+		reader: reader,
+	}
 }
 
 type warmAction struct {
 	baseAction
+	reader ctrl.Reader
 }
 
 func (action *warmAction) Name() string {
@@ -58,7 +62,7 @@ func (action *warmAction) Handle(ctx context.Context, platform *v1.IntegrationPl
 		},
 	}
 
-	err := action.client.Get(ctx, types.NamespacedName{Namespace: pod.Namespace, Name: pod.Name}, &pod)
+	err := action.reader.Get(ctx, types.NamespacedName{Namespace: pod.Namespace, Name: pod.Name}, &pod)
 	if err != nil {
 		return nil, err
 	}
