@@ -34,7 +34,6 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -114,7 +113,7 @@ var (
 	}
 )
 
-func newBuildPod(ctx context.Context, c client.Client, build *v1.Build) (*corev1.Pod, error) {
+func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.Pod, error) {
 	pod := &corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -138,7 +137,7 @@ func newBuildPod(ctx context.Context, c client.Client, build *v1.Build) (*corev1
 
 	for _, task := range build.Spec.Tasks {
 		if task.Builder != nil {
-			err := addBuildTaskToPod(ctx, c, build, task.Builder.Name, pod)
+			err := addBuildTaskToPod(build, task.Builder.Name, pod)
 			if err != nil {
 				return nil, err
 			}
@@ -153,12 +152,12 @@ func newBuildPod(ctx context.Context, c client.Client, build *v1.Build) (*corev1
 				return nil, err
 			}
 		} else if task.S2i != nil {
-			err := addBuildTaskToPod(ctx, c, build, task.S2i.Name, pod)
+			err := addBuildTaskToPod(build, task.S2i.Name, pod)
 			if err != nil {
 				return nil, err
 			}
 		} else if task.Spectrum != nil {
-			err := addBuildTaskToPod(ctx, c, build, task.Spectrum.Name, pod)
+			err := addBuildTaskToPod(build, task.Spectrum.Name, pod)
 			if err != nil {
 				return nil, err
 			}
@@ -209,7 +208,7 @@ func buildPodName(build *v1.Build) string {
 	return "camel-k-" + build.Name + "-builder"
 }
 
-func addBuildTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, taskName string, pod *corev1.Pod) error {
+func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) error {
 	if !hasBuilderVolume(pod) {
 		// Add the EmptyDir volume used to share the build state across tasks
 		pod.Spec.Volumes = append(pod.Spec.Volumes, corev1.Volume{
@@ -220,11 +219,7 @@ func addBuildTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task
 		})
 	}
 
-	// TODO: Move the retrieval of the operator image into the controller
-	operatorImage, err := platform.GetCurrentOperatorImage(ctx, c)
-	if err != nil {
-		return err
-	}
+	operatorImage := platform.OperatorImage
 	if operatorImage == "" {
 		operatorImage = defaults.ImageName + ":" + defaults.Version
 	}
@@ -250,7 +245,7 @@ func addBuildTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task
 	return nil
 }
 
-func addBuildahTaskToPod(ctx context.Context, c client.Client, build *v1.Build, task *v1.BuildahTask, pod *corev1.Pod) error {
+func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task *v1.BuildahTask, pod *corev1.Pod) error {
 	bud := []string{
 		"buildah",
 		"bud",

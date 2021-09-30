@@ -161,9 +161,9 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 	switch pl.Status.Build.BuildStrategy {
 	case v1.IntegrationPlatformBuildStrategyPod:
 		actions = []Action{
-			newInitializePodAction(),
+			newInitializePodAction(r.reader),
 			newScheduleAction(r.reader),
-			newMonitorPodAction(),
+			newMonitorPodAction(r.reader),
 			newErrorRecoveryAction(),
 			newErrorAction(),
 		}

@@ -29,6 +29,7 @@ import (
 
 	coordination "k8s.io/api/coordination/v1"
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
@@ -118,6 +119,10 @@ func Run(healthPort, monitoringPort int32, leaderElection bool) {
 		}
 	}
 
+	// Set the operator container image if it runs in-container
+	platform.OperatorImage, err = getOperatorImage(context.TODO(), c)
+	exitOnError(err, "cannot get operator container image")
+
 	if ok, err := kubernetes.CheckPermission(context.TODO(), c, coordination.GroupName, "leases", operatorNamespace, "", "create"); err != nil || !ok {
 		leaderElection = false
 		exitOnError(err, "cannot check permissions for creating Leases")
@@ -182,6 +187,26 @@ func getWatchNamespace() (string, error) {
 		return "", fmt.Errorf("%s must be set", platform.OperatorWatchNamespaceEnvVariable)
 	}
 	return ns, nil
+}
+
+// getOperatorImage returns the image currently used by the running operator if present (when running out of cluster, it may be absent).
+func getOperatorImage(ctx context.Context, c ctrl.Reader) (string, error) {
+	ns := platform.GetOperatorNamespace()
+	name := platform.GetOperatorPodName()
+	if ns == "" || name == "" {
+		return "", nil
+	}
+
+	pod := corev1.Pod{}
+	if err := c.Get(ctx, ctrl.ObjectKey{Namespace: ns, Name: name}, &pod); err != nil && k8serrors.IsNotFound(err) {
+		return "", nil
+	} else if err != nil {
+		return "", err
+	}
+	if len(pod.Spec.Containers) == 0 {
+		return "", fmt.Errorf("no containers found in operator pod")
+	}
+	return pod.Spec.Containers[0].Image, nil
 }
 
 func exitOnError(err error, msg string) {
