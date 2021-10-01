@@ -218,7 +218,23 @@ func TestMetrics(t *testing.T) {
 				platformRequeuedCount = *platformRequeued.Histogram.SampleCount
 			}
 
-			Expect(platformReconciliations).To(BeNumerically("==", platformReconciledCount+platformRequeuedCount))
+			platformErrored := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
+				MatchFieldsP(IgnoreExtras, Fields{
+					"Label": ConsistOf(
+						label("group", v1.SchemeGroupVersion.Group),
+						label("version", v1.SchemeGroupVersion.Version),
+						label("kind", "IntegrationPlatform"),
+						label("namespace", ns),
+						label("result", "Errored"),
+						label("tag", "PlatformError"),
+					),
+				}))
+			platformErroredCount := uint64(0)
+			if platformErrored != nil {
+				platformErroredCount = *platformErrored.Histogram.SampleCount
+			}
+
+			Expect(platformReconciliations).To(BeNumerically("==", platformReconciledCount+platformRequeuedCount+platformErroredCount))
 
 			// Count the number of Integration reconciliations
 			integrationReconciliations, err := counter.Count(MatchFields(IgnoreExtras, Fields{
