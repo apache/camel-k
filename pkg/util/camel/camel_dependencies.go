@@ -89,17 +89,6 @@ func ManageIntegrationDependencies(
 			gav := strings.TrimPrefix(d, "mvn:")
 
 			project.AddEncodedDependencyGAV(gav)
-			// TODO hack for tools.jar dependency issue in jolokia-jvm
-			// this block should be removed once the jolokia-jvm pom issue
-			// is resolved
-			// https://github.com/rhuss/jolokia/issues/473
-			if strings.Contains(gav, "org.jolokia:jolokia-jvm") {
-				me := maven.Exclusion{
-					GroupID:    "com.sun",
-					ArtifactID: "tools",
-				}
-				project.AddEncodedDependencyExclusion(gav, me)
-			}
 		default:
 			if dep := jitpack.ToDependency(d); dep != nil {
 				project.AddDependency(*dep)
