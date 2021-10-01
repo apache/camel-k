@@ -19,6 +19,7 @@ package kamelet
 
 import (
 	"context"
+	goruntime "runtime"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -26,14 +27,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/record"
 
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
@@ -52,7 +52,6 @@ func Add(mgr manager.Manager) error {
 	return add(mgr, newReconciler(mgr, c))
 }
 
-// newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	return monitoring.NewInstrumentedReconciler(
 		&reconcileKamelet{
@@ -68,38 +67,30 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	)
 }
 
-// add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	// Create a new controller
-	c, err := controller.New("kamelet-controller", mgr, controller.Options{Reconciler: r})
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to primary resource Kamelet
-	err = c.Watch(&source.Kind{Type: &v1alpha1.Kamelet{}},
-		&handler.EnqueueRequestForObject{},
-		predicate.Funcs{
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldKamelet := e.ObjectOld.(*v1alpha1.Kamelet)
-				newKamelet := e.ObjectNew.(*v1alpha1.Kamelet)
-				// Ignore updates to the kamelet status in which case metadata.Generation
-				// does not change, or except when the kamelet phase changes as it's used
-				// to transition from one phase to another
-				return oldKamelet.Generation != newKamelet.Generation ||
-					oldKamelet.Status.Phase != newKamelet.Status.Phase
-			},
-			DeleteFunc: func(e event.DeleteEvent) bool {
-				// Evaluates to false if the object has been confirmed deleted
-				return !e.DeleteStateUnknown
-			},
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return builder.ControllerManagedBy(mgr).
+		Named("kamelet-controller").
+		// Watch for changes to primary resource Kamelet
+		For(&v1alpha1.Kamelet{}, builder.WithPredicates(
+			predicate.Funcs{
+				UpdateFunc: func(e event.UpdateEvent) bool {
+					oldKamelet := e.ObjectOld.(*v1alpha1.Kamelet)
+					newKamelet := e.ObjectNew.(*v1alpha1.Kamelet)
+					// Ignore updates to the Kamelet status in which case metadata.Generation
+					// does not change, or except when the Kamelet phase changes as it's used
+					// to transition from one phase to another
+					return oldKamelet.Generation != newKamelet.Generation ||
+						oldKamelet.Status.Phase != newKamelet.Status.Phase
+				},
+				DeleteFunc: func(e event.DeleteEvent) bool {
+					// Evaluates to false if the object has been confirmed deleted
+					return !e.DeleteStateUnknown
+				},
+			})).
+		WithOptions(controller.Options{
+			MaxConcurrentReconciles: goruntime.GOMAXPROCS(0),
+		}).
+		Complete(r)
 }
 
 var _ reconcile.Reconciler = &reconcileKamelet{}
