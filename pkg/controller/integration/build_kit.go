@@ -24,6 +24,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
+	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -45,6 +46,18 @@ func (action *buildKitAction) CanHandle(integration *v1.Integration) bool {
 
 func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	// TODO: we may need to add a timeout strategy, i.e give up after some time in case of an unrecoverable error.
+
+	// Check if the Integration has changed and requires a rebuild
+	hash, err := digest.ComputeForIntegration(integration)
+	if err != nil {
+		return nil, err
+	}
+	if hash != integration.Status.Digest {
+		action.L.Info("Integration needs a rebuild")
+		integration.Initialize()
+		integration.Status.Digest = hash
+		return integration, nil
+	}
 
 	if integration.Status.IntegrationKit != nil {
 		kit, err := kubernetes.GetIntegrationKit(ctx, action.client, integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
