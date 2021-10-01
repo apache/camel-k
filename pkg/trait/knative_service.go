@@ -33,18 +33,21 @@ import (
 )
 
 const (
+	// Auto-scaling annotations
 	knativeServingClassAnnotation    = "autoscaling.knative.dev/class"
 	knativeServingMetricAnnotation   = "autoscaling.knative.dev/metric"
 	knativeServingTargetAnnotation   = "autoscaling.knative.dev/target"
 	knativeServingMinScaleAnnotation = "autoscaling.knative.dev/minScale"
 	knativeServingMaxScaleAnnotation = "autoscaling.knative.dev/maxScale"
+	// Rollout annotation
+	knativeServingRolloutDurationAnnotation = "serving.knative.dev/rolloutDuration"
 )
 
-// The Knative Service trait allows to configure options when running the integration as Knative service instead of
+// The Knative Service trait allows configuring options when running the Integration as a Knative service, instead of
 // a standard Kubernetes Deployment.
 //
-// Running integrations as Knative Services adds auto-scaling (and scaling-to-zero) features, but those features
-// are only meaningful when the routes use a HTTP endpoint consumer.
+// Running an Integration as a Knative Service enables auto-scaling (and scaling-to-zero), but those features
+// are only relevant when the Camel route(s) use(s) an HTTP endpoint consumer.
 //
 // +camel-k:trait=knative-service
 type knativeServiceTrait struct {
@@ -71,6 +74,10 @@ type knativeServiceTrait struct {
 	//
 	// Refer to the Knative documentation for more information.
 	MaxScale *int `property:"max-scale" json:"maxScale,omitempty"`
+	// Enables to gradually shift traffic to the latest Revision and sets the rollout duration.
+	// It's disabled by default and must be expressed as a Golang `time.Duration` string representation,
+	// rounded to a second precision.
+	RolloutDuration string `property:"rollout-duration" json:"rolloutDuration,omitempty"`
 	// Automatically deploy the integration as Knative service when all conditions hold:
 	//
 	// * Integration is using the Knative profile
@@ -214,29 +221,38 @@ func (t *knativeServiceTrait) ControllerStrategySelectorOrder() int {
 }
 
 func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, error) {
-	// Copy annotations from the integration resource
-	annotations := make(map[string]string)
+	serviceAnnotations := make(map[string]string)
 	if e.Integration.Annotations != nil {
-		for k, v := range filterTransferableAnnotations(e.Integration.Annotations) {
-			annotations[k] = v
+		for k, v := range e.Integration.Annotations {
+			serviceAnnotations[k] = v
 		}
 	}
+	// Set Knative rollout
+	if t.RolloutDuration != "" {
+		serviceAnnotations[knativeServingRolloutDurationAnnotation] = t.RolloutDuration
+	}
 
-	// Set Knative auto-scaling behavior
+	revisionAnnotations := make(map[string]string)
+	if e.Integration.Annotations != nil {
+		for k, v := range filterTransferableAnnotations(e.Integration.Annotations) {
+			revisionAnnotations[k] = v
+		}
+	}
+	// Set Knative auto-scaling
 	if t.Class != "" {
-		annotations[knativeServingClassAnnotation] = t.Class
+		revisionAnnotations[knativeServingClassAnnotation] = t.Class
 	}
 	if t.Metric != "" {
-		annotations[knativeServingMetricAnnotation] = t.Metric
+		revisionAnnotations[knativeServingMetricAnnotation] = t.Metric
 	}
 	if t.Target != nil {
-		annotations[knativeServingTargetAnnotation] = strconv.Itoa(*t.Target)
+		revisionAnnotations[knativeServingTargetAnnotation] = strconv.Itoa(*t.Target)
 	}
 	if t.MinScale != nil && *t.MinScale > 0 {
-		annotations[knativeServingMinScaleAnnotation] = strconv.Itoa(*t.MinScale)
+		revisionAnnotations[knativeServingMinScaleAnnotation] = strconv.Itoa(*t.MinScale)
 	}
 	if t.MaxScale != nil && *t.MaxScale > 0 {
-		annotations[knativeServingMaxScaleAnnotation] = strconv.Itoa(*t.MaxScale)
+		revisionAnnotations[knativeServingMaxScaleAnnotation] = strconv.Itoa(*t.MaxScale)
 	}
 
 	svc := serving.Service{
@@ -250,14 +266,14 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 			Labels: map[string]string{
 				v1.IntegrationLabel: e.Integration.Name,
 			},
-			Annotations: e.Integration.Annotations,
+			Annotations: serviceAnnotations,
 		},
 		Spec: serving.ServiceSpec{
 			ConfigurationSpec: serving.ConfigurationSpec{
 				Template: serving.RevisionTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
 						Labels:      label.AddLabels(e.Integration.Name),
-						Annotations: annotations,
+						Annotations: revisionAnnotations,
 					},
 					Spec: serving.RevisionSpec{
 						PodSpec: corev1.PodSpec{
