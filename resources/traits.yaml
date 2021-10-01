@@ -487,10 +487,10 @@ traits:
   platform: false
   profiles:
   - Knative
-  description: The Knative Service trait allows to configure options when running
-    the integration as Knative service instead of a standard Kubernetes Deployment.
-    Running integrations as Knative Services adds auto-scaling (and scaling-to-zero)
-    features, but those features are only meaningful when the routes use a HTTP endpoint
+  description: The Knative Service trait allows configuring options when running the
+    Integration as a Knative service, instead of a standard Kubernetes Deployment.
+    Running an Integration as a Knative Service enables auto-scaling (and scaling-to-zero),
+    but those features are only relevant when the Camel route(s) use(s) an HTTP endpoint
     consumer.
   properties:
   - name: enabled
@@ -523,6 +523,11 @@ traits:
     description: An upper bound for the number of Pods that can be running in parallel
       for the integration.Knative has its own cap value that depends on the installation.Refer
       to the Knative documentation for more information.
+  - name: rollout-duration
+    type: string
+    description: Enables to gradually shift traffic to the latest Revision and sets
+      the rollout duration.It's disabled by default and must be expressed as a Golang
+      `time.Duration` string representation,rounded to a second precision.
   - name: auto
     type: bool
     description: Automatically deploy the integration as Knative service when all
