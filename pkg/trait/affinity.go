@@ -53,7 +53,7 @@ type affinityTrait struct {
 
 func newAffinityTrait() Trait {
 	return &affinityTrait{
-		BaseTrait:       NewBaseTrait("affinity", 1300),
+		BaseTrait:       NewBaseTrait("affinity", 1500),
 		PodAffinity:     BoolP(false),
 		PodAntiAffinity: BoolP(false),
 	}
