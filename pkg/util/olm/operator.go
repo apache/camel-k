@@ -25,6 +25,7 @@ import (
 	"github.com/pkg/errors"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/kubectl/pkg/cmd/set/env"
 
 	runtime "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -139,7 +140,7 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 
 // Install creates a subscription for the OLM package
 func Install(ctx context.Context, client client.Client, namespace string, global bool, options Options, collection *kubernetes.Collection,
-	tolerations []string, nodeSelectors []string, resourcesRequirements []string) (bool, error) {
+	tolerations []string, nodeSelectors []string, resourcesRequirements []string, envVars []string) (bool, error) {
 	options = fillDefaults(options)
 	if installed, err := IsOperatorInstalled(ctx, client, namespace, global, options); err != nil {
 		return false, err
@@ -179,6 +180,10 @@ func Install(ctx context.Context, client client.Client, namespace string, global
 	err = maybeSetResourcesRequirements(&sub, resourcesRequirements)
 	if err != nil {
 		return false, errors.Wrap(err, fmt.Sprintf("could not set resources requirements"))
+	}
+	err = maybeSetEnvVars(&sub, envVars)
+	if err != nil {
+		return false, errors.Wrap(err, fmt.Sprintf("could not set environment variables"))
 	}
 
 	if collection != nil {
@@ -243,6 +248,17 @@ func maybeSetResourcesRequirements(sub *operatorsv1alpha1.Subscription, reqArray
 			return err
 		}
 		sub.Spec.Config.Resources = resourcesReq
+	}
+	return nil
+}
+
+func maybeSetEnvVars(sub *operatorsv1alpha1.Subscription, envVars []string) error {
+	if envVars != nil {
+		vars, _, err := env.ParseEnv(envVars, nil)
+		if err != nil {
+			return err
+		}
+		sub.Spec.Config.Env = vars
 	}
 	return nil
 }

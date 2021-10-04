@@ -53,6 +53,7 @@ require (
 	k8s.io/client-go v0.21.4
 	k8s.io/gengo v0.0.0-20210203185629-de9496dff47b
 	k8s.io/klog/v2 v2.9.0
+	k8s.io/kubectl v0.21.4
 	k8s.io/utils v0.0.0-20210802155522-efc7438f0176
 	knative.dev/eventing v0.26.0
 	knative.dev/pkg v0.0.0-20210919202233-5ae482141474
