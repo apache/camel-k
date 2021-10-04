@@ -113,7 +113,7 @@ As soon as the `Integration` starts, it will log the events on the `ok` log chan
 
 If you're curious to know what was going on in the DLC side, you can use the example you found in [kafka sasl ssl consumer](../kafka/sasl_ssl/):
 
-´´´
+```
 kamel run --secret kafka-props SaslSSLKafkaConsumer.java --dev
 ...
 [1] 2021-04-29 08:57:08,636 INFO  [org.apa.kaf.com.uti.AppInfoParser] (Camel (camel-1) thread #0 - KafkaConsumer[my-first-test]) Kafka commitId: 448719dc99a19793
