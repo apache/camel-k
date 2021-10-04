@@ -40,7 +40,7 @@ type kitOptions struct {
 }
 
 func TestKitTimerToLogFullBuild(t *testing.T) {
-	doKitFullBuild(t, "timer-to-log", "300mi", "5m0s", TestTimeoutLong, kitOptions{
+	doKitFullBuild(t, "timer-to-log", "300Mi", "5m0s", TestTimeoutLong, kitOptions{
 		dependencies: []string{
 			"camel:timer", "camel:log",
 		},
@@ -48,7 +48,7 @@ func TestKitTimerToLogFullBuild(t *testing.T) {
 }
 
 func TestKitKnativeFullBuild(t *testing.T) {
-	doKitFullBuild(t, "knative", "300mi", "5m0s", TestTimeoutLong, kitOptions{
+	doKitFullBuild(t, "knative", "300Mi", "5m0s", TestTimeoutLong, kitOptions{
 		dependencies: []string{
 			"camel-k-knative",
 		},
