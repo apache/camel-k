@@ -119,6 +119,7 @@ jobs:
         export KAMEL_INSTALL_REGISTRY=$KIND_REGISTRY
         export KAMEL_INSTALL_REGISTRY_INSECURE=true
         export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
+        export KAMEL_INSTALL_DEFAULT_KAMELETS=false
 
         # Configure test options
         export CAMEL_K_TEST_IMAGE_NAME=${CUSTOM_IMAGE}
