@@ -127,10 +127,11 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().Bool("monitoring", false, "To enable or disable the operator monitoring")
 	cmd.Flags().Int("monitoring-port", 8080, "The port of the metrics endpoint")
 
-	// Pod settings
+	// Operator settings
 	cmd.Flags().StringArray("toleration", nil, "Add a Toleration to the operator Pod")
 	cmd.Flags().StringArray("node-selector", nil, "Add a NodeSelector to the operator Pod")
-	cmd.Flags().StringArray("operator-resources", nil, "Define the resources requests and limits assigned to the operator Pod as <requestType.requestResource=value> (ie, limits.memory=256Mi)")
+	cmd.Flags().StringArray("operator-resources", nil, "Define the resources requests and limits assigned to the operator Pod as <requestType.requestResource=value> (i.e., limits.memory=256Mi)")
+	cmd.Flags().StringArray("operator-env-vars", nil, "Add an environment variable to set in the operator Pod(s), as <name=value>")
 
 	// save
 	cmd.Flags().Bool("save", false, "Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
@@ -183,6 +184,7 @@ type installCmdOptions struct {
 	NodeSelectors           []string `mapstructure:"node-selectors"`
 	HTTPProxySecret         string   `mapstructure:"http-proxy-secret"`
 	ResourcesRequirements   []string `mapstructure:"operator-resources"`
+	EnvVars                 []string `mapstructure:"operator-env-vars"`
 
 	registry         v1.RegistrySpec
 	registryAuth     registry.Auth
@@ -229,7 +231,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			fmt.Fprintln(cobraCmd.OutOrStdout(), "OLM is available in the cluster")
 			var installed bool
 			if installed, err = olm.Install(o.Context, olmClient, o.Namespace, o.Global, o.olmOptions, collection,
-				o.Tolerations, o.NodeSelectors, o.ResourcesRequirements); err != nil {
+				o.Tolerations, o.NodeSelectors, o.ResourcesRequirements, o.EnvVars); err != nil {
 				return err
 			}
 			if !installed {
@@ -283,6 +285,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				Tolerations:           o.Tolerations,
 				NodeSelectors:         o.NodeSelectors,
 				ResourcesRequirements: o.ResourcesRequirements,
+				EnvVars:               o.EnvVars,
 			}
 			err = install.OperatorOrCollect(o.Context, c, cfg, collection, o.Force)
 			if err != nil {
