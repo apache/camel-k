@@ -49,10 +49,11 @@ require (
 	k8s.io/api v0.20.2
 	k8s.io/apiextensions-apiserver v0.20.2
 	k8s.io/apimachinery v0.20.2
-	k8s.io/client-go v0.20.2
 	k8s.io/cli-runtime v0.20.2
+	k8s.io/client-go v0.20.2
 	k8s.io/gengo v0.0.0-20201214224949-b6c5ce23f027
 	k8s.io/klog/v2 v2.8.0
+	k8s.io/kubectl v0.20.2
 	k8s.io/utils v0.0.0-20210111153108-fddb29f9d009
 	knative.dev/eventing v0.23.2
 	knative.dev/pkg v0.0.0-20210510175900-4564797bf3b7
