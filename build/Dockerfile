@@ -18,7 +18,7 @@ FROM quay.io/quarkus/ubi-quarkus-mandrel:21.2.0.0-Final-java11
 ARG MAVEN_VERSION="3.8.2"
 ARG MAVEN_HOME="/usr/share/maven"
 ARG SHA="b0bf39460348b2d8eae1c861ced6c3e8a077b6e761fb3d4669be5de09490521a74db294cf031b0775b2dfcd57bd82246e42ce10904063ef8e3806222e686f222"
-ARG BASE_URL="https://apache.osuosl.org/maven/maven-3/${MAVEN_VERSION}/binaries"
+ARG BASE_URL="https://downloads.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries"
 
 USER 0
 
