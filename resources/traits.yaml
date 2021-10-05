@@ -273,7 +273,15 @@ traits:
   - OpenShift
   description: The Deployment trait is responsible for generating the Kubernetes deployment
     that will make sure the integration will run in the cluster.
-  properties: []
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: progress-deadline-seconds
+    type: int32
+    description: The maximum time in seconds for the deployment to make progress before
+      itis considered to be failed. It defaults to 60s.
 - name: environment
   platform: true
   profiles:

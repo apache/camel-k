@@ -20,15 +20,15 @@ package trait
 import (
 	"testing"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
-
 	"github.com/stretchr/testify/assert"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestConfigureDisabledDeploymentTraitDoesNotSucceed(t *testing.T) {
@@ -44,7 +44,7 @@ func TestConfigureDisabledDeploymentTraitDoesNotSucceed(t *testing.T) {
 	assert.Equal(t, "explicitly disabled", conditions[0].Message)
 }
 
-func TestConfigureDeploymentTraitWhileIntegrationIsRuningDoesSucceed(t *testing.T) {
+func TestConfigureDeploymentTraitWhileIntegrationIsRunningDoesSucceed(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
 	environment.Integration.Status.SetCondition(
 		v1.IntegrationConditionDeploymentAvailable,
@@ -127,6 +127,23 @@ func TestApplyDeploymentTraitWhileRunningIntegrationDoesSucceed(t *testing.T) {
 	assert.NotNil(t, deployment)
 	assert.Equal(t, "integration-name", deployment.Name)
 	assert.Equal(t, int32(3), *deployment.Spec.Replicas)
+	assert.Equal(t, int32(60), *deployment.Spec.ProgressDeadlineSeconds)
+}
+
+func TestApplyDeploymentTraitWithProgressDeadline(t *testing.T) {
+	deploymentTrait, environment := createNominalDeploymentTest()
+	progressDeadlineSeconds := int32(120)
+	deploymentTrait.ProgressDeadlineSeconds = &progressDeadlineSeconds
+	environment.Integration.Status.Phase = v1.IntegrationPhaseRunning
+
+	err := deploymentTrait.Apply(environment)
+
+	assert.Nil(t, err)
+
+	deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool { return true })
+	assert.NotNil(t, deployment)
+	assert.Equal(t, "integration-name", deployment.Name)
+	assert.Equal(t, int32(120), *deployment.Spec.ProgressDeadlineSeconds)
 }
 
 func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
