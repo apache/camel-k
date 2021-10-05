@@ -224,7 +224,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		if err := installOpenShiftRoles(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 			return err
 		}
-		if err := installClusterRoleBinding(ctx, c, collection, cfg.Namespace, "camel-k-operator-console-openshift", "/rbac/operator-cluster-role-console-binding-openshift.yaml"); err != nil {
+		if err := installClusterRoleBinding(ctx, c, collection, cfg.Namespace, "camel-k-operator-console-openshift", "/rbac/openshift/operator-cluster-role-console-binding-openshift.yaml"); err != nil {
 			if k8serrors.IsForbidden(err) {
 				fmt.Println("Warning: the operator will not be able to manage ConsoleCLIDownload resources. Try installing the operator as cluster-admin.")
 			} else {
