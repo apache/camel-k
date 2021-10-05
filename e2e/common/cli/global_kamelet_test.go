@@ -46,10 +46,10 @@ func TestRunGlobalKamelet(t *testing.T) {
 		}
 	}
 
-	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--global", "--force").Execute()).To(Succeed())
+	test := func(operatorNamespace string) {
+		Expect(Kamel("install", "-n", operatorNamespace, "--global", "--force").Execute()).To(Succeed())
 
-		Expect(CreateTimerKamelet(ns, "my-own-timer-source")()).To(Succeed())
+		Expect(CreateTimerKamelet(operatorNamespace, "my-own-timer-source")()).To(Succeed())
 
 		// NS2: namespace without operator
 		WithNewTestNamespace(t, func(ns2 string) {
@@ -61,6 +61,17 @@ func TestRunGlobalKamelet(t *testing.T) {
 			Expect(Kamel("delete", "--all", "-n", ns2).Execute()).To(Succeed())
 		})
 
-		Expect(Kamel("uninstall", "-n", ns, "--skip-cluster-roles=false", "--skip-cluster-role-bindings=false").Execute()).To(Succeed())
-	})
+		Expect(Kamel("uninstall", "-n", operatorNamespace, "--skip-crd", "--skip-cluster-roles=false", "--skip-cluster-role-bindings=false").Execute()).To(Succeed())
+	}
+
+	ocp, err := openshift.IsOpenShift(TestClient())
+	assert.Nil(t, err)
+	if ocp {
+		// global operators are always installed in the openshift-operators namespace
+		RegisterTestingT(t)
+		test("openshift-operators")
+	}else {
+		// create new namespace for the global operator
+		WithNewTestNamespace(t, test)
+	}
 }
