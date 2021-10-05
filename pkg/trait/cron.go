@@ -80,6 +80,10 @@ type cronTrait struct {
 	// Optional deadline in seconds for starting the job if it misses scheduled
 	// time for any reason.  Missed jobs executions will be counted as failed ones.
 	StartingDeadlineSeconds *int64 `property:"starting-deadline-seconds" json:"startingDeadlineSeconds,omitempty"`
+	// Specifies the duration in seconds, relative to the start time, that the job
+	// may be continuously active before it is considered to be failed.
+	// It defaults to 60s.
+	ActiveDeadlineSeconds *int64 `property:"active-deadline-seconds" json:"activeDeadlineSeconds,omitempty"`
 }
 
 var _ ControllerStrategySelector = &cronTrait{}
@@ -258,12 +262,16 @@ func (t *cronTrait) Apply(e *Environment) error {
 }
 
 func (t *cronTrait) getCronJobFor(e *Environment) *v1beta1.CronJob {
-	// Copy annotations from the integration resource
 	annotations := make(map[string]string)
 	if e.Integration.Annotations != nil {
 		for k, v := range filterTransferableAnnotations(e.Integration.Annotations) {
 			annotations[k] = v
 		}
+	}
+
+	deadline := int64(60)
+	if t.ActiveDeadlineSeconds != nil {
+		deadline = *t.ActiveDeadlineSeconds
 	}
 
 	cronjob := v1beta1.CronJob{
@@ -285,6 +293,7 @@ func (t *cronTrait) getCronJobFor(e *Environment) *v1beta1.CronJob {
 			StartingDeadlineSeconds: t.StartingDeadlineSeconds,
 			JobTemplate: v1beta1.JobTemplateSpec{
 				Spec: batchv1.JobSpec{
+					ActiveDeadlineSeconds: &deadline,
 					Template: corev1.PodTemplateSpec{
 						ObjectMeta: metav1.ObjectMeta{
 							Labels:      label.AddLabels(e.Integration.Name),
