@@ -301,7 +301,11 @@ func installClusterRoleBinding(ctx context.Context, c client.Client, collection 
 	existing, err := c.RbacV1().ClusterRoleBindings().Get(ctx, name, metav1.GetOptions{})
 	if k8serrors.IsNotFound(err) {
 		existing = nil
-		obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString(path))
+		yaml := resources.ResourceAsString(path)
+		if yaml == "" {
+			return errors.Errorf("resource file %v not found", path)
+		}
+		obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), yaml)
 		if err != nil {
 			return err
 		}
