@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -28,7 +29,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
 
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/util/openshift"
@@ -45,21 +46,32 @@ func TestRunGlobalKamelet(t *testing.T) {
 		}
 	}
 
-	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--global").Execute()).To(Succeed())
+	test := func(operatorNamespace string) {
+		Expect(Kamel("install", "-n", operatorNamespace, "--global", "--force").Execute()).To(Succeed())
 
-		Expect(CreateTimerKamelet(ns, "my-own-timer-source")()).To(Succeed())
+		Expect(CreateTimerKamelet(operatorNamespace, "my-own-timer-source")()).To(Succeed())
 
 		// NS2: namespace without operator
 		WithNewTestNamespace(t, func(ns2 string) {
 			Expect(Kamel("install", "-n", ns2, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
 
 			Expect(Kamel("run", "-n", ns2, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns2, "timer-kamelet-usage"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns2, "timer-kamelet-usage"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns2, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
 			Expect(Kamel("delete", "--all", "-n", ns2).Execute()).To(Succeed())
 		})
 
-		Expect(Kamel("uninstall", "-n", ns, "--skip-cluster-roles=false", "--skip-cluster-role-bindings=false").Execute()).To(Succeed())
-	})
+		Expect(Kamel("uninstall", "-n", operatorNamespace, "--skip-crd", "--skip-cluster-roles=false", "--skip-cluster-role-bindings=false").Execute()).To(Succeed())
+	}
+
+	ocp, err := openshift.IsOpenShift(TestClient())
+	assert.Nil(t, err)
+	if ocp {
+		// global operators are always installed in the openshift-operators namespace
+		RegisterTestingT(t)
+		test("openshift-operators")
+	}else {
+		// create new namespace for the global operator
+		WithNewTestNamespace(t, test)
+	}
 }
