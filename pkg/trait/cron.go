@@ -24,7 +24,7 @@ import (
 	"strings"
 
 	batchv1 "k8s.io/api/batch/v1"
-	"k8s.io/api/batch/v1beta1"
+	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -84,6 +84,9 @@ type cronTrait struct {
 	// may be continuously active before it is considered to be failed.
 	// It defaults to 60s.
 	ActiveDeadlineSeconds *int64 `property:"active-deadline-seconds" json:"activeDeadlineSeconds,omitempty"`
+	// Specifies the number of retries before marking the job failed.
+	// It defaults to 2.
+	BackoffLimit *int32 `property:"backoff-limit" json:"backoffLimit,omitempty"`
 }
 
 var _ ControllerStrategySelector = &cronTrait{}
@@ -169,7 +172,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 		}
 
 		if t.ConcurrencyPolicy == "" {
-			t.ConcurrencyPolicy = string(v1beta1.ForbidConcurrent)
+			t.ConcurrencyPolicy = string(batchv1beta1.ForbidConcurrent)
 		}
 
 		if (t.Schedule == "" && t.Components == "") && t.Fallback == nil {
@@ -261,7 +264,7 @@ func (t *cronTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *cronTrait) getCronJobFor(e *Environment) *v1beta1.CronJob {
+func (t *cronTrait) getCronJobFor(e *Environment) *batchv1beta1.CronJob {
 	annotations := make(map[string]string)
 	if e.Integration.Annotations != nil {
 		for k, v := range filterTransferableAnnotations(e.Integration.Annotations) {
@@ -269,15 +272,20 @@ func (t *cronTrait) getCronJobFor(e *Environment) *v1beta1.CronJob {
 		}
 	}
 
-	deadline := int64(60)
+	activeDeadline := int64(60)
 	if t.ActiveDeadlineSeconds != nil {
-		deadline = *t.ActiveDeadlineSeconds
+		activeDeadline = *t.ActiveDeadlineSeconds
 	}
 
-	cronjob := v1beta1.CronJob{
+	backoffLimit := int32(2)
+	if t.BackoffLimit != nil {
+		backoffLimit = *t.BackoffLimit
+	}
+
+	cronjob := batchv1beta1.CronJob{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "CronJob",
-			APIVersion: v1beta1.SchemeGroupVersion.String(),
+			APIVersion: batchv1beta1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      e.Integration.Name,
@@ -287,13 +295,14 @@ func (t *cronTrait) getCronJobFor(e *Environment) *v1beta1.CronJob {
 			},
 			Annotations: e.Integration.Annotations,
 		},
-		Spec: v1beta1.CronJobSpec{
+		Spec: batchv1beta1.CronJobSpec{
 			Schedule:                t.Schedule,
-			ConcurrencyPolicy:       v1beta1.ConcurrencyPolicy(t.ConcurrencyPolicy),
+			ConcurrencyPolicy:       batchv1beta1.ConcurrencyPolicy(t.ConcurrencyPolicy),
 			StartingDeadlineSeconds: t.StartingDeadlineSeconds,
-			JobTemplate: v1beta1.JobTemplateSpec{
+			JobTemplate: batchv1beta1.JobTemplateSpec{
 				Spec: batchv1.JobSpec{
-					ActiveDeadlineSeconds: &deadline,
+					ActiveDeadlineSeconds: &activeDeadline,
+					BackoffLimit:          &backoffLimit,
 					Template: corev1.PodTemplateSpec{
 						ObjectMeta: metav1.ObjectMeta{
 							Labels:      label.AddLabels(e.Integration.Name),
