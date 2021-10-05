@@ -237,6 +237,15 @@ traits:
     type: int64
     description: Optional deadline in seconds for starting the job if it misses scheduledtime
       for any reason.  Missed jobs executions will be counted as failed ones.
+  - name: active-deadline-seconds
+    type: int64
+    description: Specifies the duration in seconds, relative to the start time, that
+      the jobmay be continuously active before it is considered to be failed.It defaults
+      to 60s.
+  - name: backoff-limit
+    type: int32
+    description: Specifies the number of retries before marking the job failed.It
+      defaults to 2.
 - name: dependencies
   platform: true
   profiles:
