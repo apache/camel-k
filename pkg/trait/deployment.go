@@ -34,6 +34,9 @@ import (
 // +camel-k:trait=deployment
 type deploymentTrait struct {
 	BaseTrait `property:",squash"`
+	// The maximum time in seconds for the deployment to make progress before it
+	// is considered to be failed. It defaults to 60s.
+	ProgressDeadlineSeconds *int32 `property:"progress-deadline-seconds" json:"progressDeadlineSeconds,omitempty"`
 }
 
 var _ ControllerStrategySelector = &deploymentTrait{}
@@ -126,6 +129,11 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 		}
 	}
 
+	deadline := int32(60)
+	if t.ProgressDeadlineSeconds != nil {
+		deadline = *t.ProgressDeadlineSeconds
+	}
+
 	deployment := appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Deployment",
@@ -140,7 +148,8 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			Annotations: annotations,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: e.Integration.Spec.Replicas,
+			ProgressDeadlineSeconds: &deadline,
+			Replicas:                e.Integration.Spec.Replicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
 					v1.IntegrationLabel: e.Integration.Name,

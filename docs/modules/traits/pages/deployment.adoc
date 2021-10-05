@@ -16,7 +16,7 @@ WARNING: The deployment trait is a *platform trait*: disabling it may compromise
 Trait properties can be specified when running any integration with the CLI:
 [source,console]
 ----
-$ kamel run --trait deployment.[key]=[value] integration.groovy
+$ kamel run --trait deployment.[key]=[value] --trait deployment.[key2]=[value2] integration.groovy
 ----
 The following configuration options are available:
 
@@ -27,6 +27,11 @@ The following configuration options are available:
 | deployment.enabled
 | bool
 | Can be used to enable or disable a trait. All traits share this common property.
+
+| deployment.progress-deadline-seconds
+| int32
+| The maximum time in seconds for the deployment to make progress before it
+is considered to be failed. It defaults to 60s.
 
 |===
 
