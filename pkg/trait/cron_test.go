@@ -24,6 +24,7 @@ import (
 	passert "github.com/magiconair/properties/assert"
 	"github.com/stretchr/testify/assert"
 
+	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -364,7 +365,7 @@ func TestCronDepsFallback(t *testing.T) {
 	assert.Contains(t, environment.Integration.Status.Dependencies, "mvn:org.apache.camel.k:camel-k-cron")
 }
 
-func TestCronWithQuarkus(t *testing.T) {
+func TestCronWithActiveDeadline(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
@@ -394,8 +395,8 @@ func TestCronWithQuarkus(t *testing.T) {
 				},
 				Resources: []v1.ResourceSpec{},
 				Traits: map[string]v1.TraitSpec{
-					"quarkus": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": true,
+					"cron": test.TraitSpecFromMap(t, map[string]interface{}{
+						"activeDeadlineSeconds": 120,
 					}),
 				},
 			},
@@ -405,16 +406,7 @@ func TestCronWithQuarkus(t *testing.T) {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
-					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-		},
+		Platform:       &v1.IntegrationPlatform{},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
@@ -430,10 +422,14 @@ func TestCronWithQuarkus(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait("quarkus"))
 
 	ct := environment.GetTrait("cron").(*cronTrait)
 	assert.NotNil(t, ct)
 	assert.Nil(t, ct.Fallback)
 	assert.Contains(t, environment.Interceptors, "cron")
+
+	cronJob := environment.Resources.GetCronJob(func(job *batchv1beta1.CronJob) bool { return true })
+	assert.NotNil(t, cronJob)
+	assert.NotNil(t, cronJob.Spec.JobTemplate.Spec.ActiveDeadlineSeconds)
+	assert.EqualValues(t, *cronJob.Spec.JobTemplate.Spec.ActiveDeadlineSeconds, 120)
 }
