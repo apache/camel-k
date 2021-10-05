@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Provide automatic PR creation to update "peripheral" go dependencies [\#2663](https://github.com/apache/camel-k/issues/2663)
 - Alow fixed custom labels in any pod [\#2642](https://github.com/apache/camel-k/issues/2642)
 - Integration in error phase can't be scaled: why don't we just rebuild it? [\#2640](https://github.com/apache/camel-k/issues/2640)
 - kamelet binding: scaling to 0 and the to 1 not working when a container image is provided [\#2638](https://github.com/apache/camel-k/issues/2638)
@@ -25,7 +26,12 @@
 
 **Merged pull requests:**
 
+- chore\(cli\): Add operator env vars option to install CLI [\#2673](https://github.com/apache/camel-k/pull/2673) ([astefanutti](https://github.com/astefanutti))
+- fix\(ci\): Disable default Kamelets installation for builder e2e tests [\#2672](https://github.com/apache/camel-k/pull/2672) ([astefanutti](https://github.com/astefanutti))
+- fix\(build\): Update Maven binary download URL [\#2671](https://github.com/apache/camel-k/pull/2671) ([astefanutti](https://github.com/astefanutti))
 - chore: Parallel Kamelets reconciliation [\#2668](https://github.com/apache/camel-k/pull/2668) ([astefanutti](https://github.com/astefanutti))
+- fix: Affinity trait must run after the Knative Service trait [\#2666](https://github.com/apache/camel-k/pull/2666) ([astefanutti](https://github.com/astefanutti))
+- chore : automatic PR creation to update "peripheral" go dependencies [\#2664](https://github.com/apache/camel-k/pull/2664) ([apupier](https://github.com/apupier))
 - feat: Consistent Integration scale status [\#2662](https://github.com/apache/camel-k/pull/2662) ([astefanutti](https://github.com/astefanutti))
 - chore: refresh kamelets also when operator version does not change an… [\#2661](https://github.com/apache/camel-k/pull/2661) ([nicolaferraro](https://github.com/nicolaferraro))
 - Make quarkus dependencies management more robust [\#2658](https://github.com/apache/camel-k/pull/2658) ([doru1004](https://github.com/doru1004))
