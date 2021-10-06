@@ -436,11 +436,13 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 	}
 	pl := platformObject.(*v1.IntegrationPlatform)
 
-	if !isOpenShift && !skipRegistrySetup {
+	if !skipRegistrySetup {
+		// Let's apply registry settings whether it's OpenShift or not
+		// Some OpenShift variants such as Microshift might not have a built-in registry
 		pl.Spec.Build.Registry = registry
 
 		// Kubernetes only (Minikube)
-		if registry.Address == "" {
+		if !isOpenShift && registry.Address == "" {
 			// This operation should be done here in the installer
 			// because the operator is not allowed to look into the "kube-system" namespace
 			address, err := minikube.FindRegistry(ctx, c)
