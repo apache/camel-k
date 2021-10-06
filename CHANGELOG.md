@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Error: Object 'Kind' is missing in 'null' [\#2674](https://github.com/apache/camel-k/issues/2674)
 - Provide automatic PR creation to update "peripheral" go dependencies [\#2663](https://github.com/apache/camel-k/issues/2663)
 - Alow fixed custom labels in any pod [\#2642](https://github.com/apache/camel-k/issues/2642)
 - Integration in error phase can't be scaled: why don't we just rebuild it? [\#2640](https://github.com/apache/camel-k/issues/2640)
@@ -26,10 +27,16 @@
 
 **Merged pull requests:**
 
+- feat: Add active-deadline-seconds and backoff-limit options to cron trait [\#2678](https://github.com/apache/camel-k/pull/2678) ([astefanutti](https://github.com/astefanutti))
+- feat: Add progress-deadline-seconds option to deployment trait [\#2677](https://github.com/apache/camel-k/pull/2677) ([astefanutti](https://github.com/astefanutti))
+- fix\(cli\): kamel install fails with error: Object 'Kind' is missing in 'null' [\#2676](https://github.com/apache/camel-k/pull/2676) ([tadayosi](https://github.com/tadayosi))
+- doc\(dev\): update required Go version to 1.16 [\#2675](https://github.com/apache/camel-k/pull/2675) ([tadayosi](https://github.com/tadayosi))
 - chore\(cli\): Add operator env vars option to install CLI [\#2673](https://github.com/apache/camel-k/pull/2673) ([astefanutti](https://github.com/astefanutti))
 - fix\(ci\): Disable default Kamelets installation for builder e2e tests [\#2672](https://github.com/apache/camel-k/pull/2672) ([astefanutti](https://github.com/astefanutti))
 - fix\(build\): Update Maven binary download URL [\#2671](https://github.com/apache/camel-k/pull/2671) ([astefanutti](https://github.com/astefanutti))
+- fix: Handle Integration changes while waiting for Kit build [\#2670](https://github.com/apache/camel-k/pull/2670) ([astefanutti](https://github.com/astefanutti))
 - chore: Parallel Kamelets reconciliation [\#2668](https://github.com/apache/camel-k/pull/2668) ([astefanutti](https://github.com/astefanutti))
+- feat\(native\): Add support for Knative service gradual roll-out [\#2667](https://github.com/apache/camel-k/pull/2667) ([astefanutti](https://github.com/astefanutti))
 - fix: Affinity trait must run after the Knative Service trait [\#2666](https://github.com/apache/camel-k/pull/2666) ([astefanutti](https://github.com/astefanutti))
 - chore : automatic PR creation to update "peripheral" go dependencies [\#2664](https://github.com/apache/camel-k/pull/2664) ([apupier](https://github.com/apupier))
 - feat: Consistent Integration scale status [\#2662](https://github.com/apache/camel-k/pull/2662) ([astefanutti](https://github.com/astefanutti))
