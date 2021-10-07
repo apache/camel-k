@@ -19,6 +19,8 @@ package integration
 
 import (
 	"context"
+	"reflect"
+	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1beta1 "k8s.io/api/batch/v1beta1"
@@ -38,6 +40,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
+	"knative.dev/serving/pkg/apis/serving"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -45,6 +48,7 @@ import (
 	camelevent "github.com/apache/camel-k/pkg/event"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/digest"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/monitoring"
 )
@@ -54,7 +58,7 @@ func Add(mgr manager.Manager) error {
 	if err != nil {
 		return err
 	}
-	return add(mgr, newReconciler(mgr, c))
+	return add(mgr, c, newReconciler(mgr, c))
 }
 
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
@@ -72,8 +76,8 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	)
 }
 
-func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	return builder.ControllerManagedBy(mgr).
+func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
+	b := builder.ControllerManagedBy(mgr).
 		Named("integration-controller").
 		// Watch for changes to primary resource Integration
 		For(&v1.Integration{}, builder.WithPredicates(
@@ -110,7 +114,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				if !platform.IsCurrentOperatorGlobal() {
 					opts = append(opts, ctrl.InNamespace(kit.Namespace))
 				}
-				if err := mgr.GetClient().List(context.Background(), list, opts...); err != nil {
+				if err := c.List(context.Background(), list, opts...); err != nil {
 					log.Error(err, "Failed to retrieve integration list")
 					return requests
 				}
@@ -152,7 +156,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 						opts = append(opts, ctrl.InNamespace(p.Namespace))
 					}
 
-					if err := mgr.GetClient().List(context.Background(), list, opts...); err != nil {
+					if err := c.List(context.Background(), list, opts...); err != nil {
 						log.Error(err, "Failed to list integrations")
 						return requests
 					}
@@ -174,8 +178,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			})).
 		// Watch for the owned Deployments
 		Owns(&appsv1.Deployment{}).
-		// Watch for the owned Knative Services
-		Owns(&servingv1.Service{}).
 		// Watch for the owned CronJobs
 		Owns(&batchv1beta1.CronJob{}).
 		// Watch for the Integration Pods
@@ -190,8 +192,23 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 						},
 					},
 				}
-			})).
-		Complete(r)
+			}))
+
+	// Watch for the owned Knative Services conditionally
+	if ok, err := kubernetes.IsAPIResourceInstalled(c, servingv1.SchemeGroupVersion.String(), reflect.TypeOf(servingv1.Service{}).Name()); err != nil {
+		return err
+	} else if ok {
+		// Check for permission to watch the ConsoleCLIDownload resource
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		defer cancel()
+		if ok, err = kubernetes.CheckPermission(ctx, c, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); err != nil {
+			return err
+		} else if ok {
+			b.Owns(&servingv1.Service{})
+		}
+	}
+
+	return b.Complete(r)
 }
 
 var _ reconcile.Reconciler = &reconcileIntegration{}
