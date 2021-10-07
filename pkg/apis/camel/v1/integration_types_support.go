@@ -377,7 +377,7 @@ func (in *IntegrationStatus) SetConditions(conditions ...IntegrationCondition) {
 				// Do not update LastTransitionTime if the status of the condition doesn't change
 				condition.LastTransitionTime = currentCond.LastTransitionTime
 			}
-			if !(currentCond.FirstTruthyTime != nil || currentCond.FirstTruthyTime.IsZero()) {
+			if currentCond.FirstTruthyTime != nil && !currentCond.FirstTruthyTime.IsZero() {
 				// Preserve FirstTruthyTime
 				condition.FirstTruthyTime = currentCond.FirstTruthyTime.DeepCopy()
 			}
