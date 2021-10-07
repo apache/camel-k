@@ -18,113 +18,50 @@ limitations under the License.
 package kubernetes
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"strconv"
-
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/client"
 	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/batch/v1beta1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	knative "knative.dev/pkg/apis"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
-// nolint: gocritic
-func MirrorReadyCondition(ctx context.Context, c client.Client, it *v1.Integration) {
-	if IsConditionTrue(it, v1.IntegrationConditionDeploymentAvailable) || IsConditionTrue(it, v1.IntegrationConditionKnativeServiceAvailable) {
-		mirrorReadyConditionFromReplicaSet(ctx, c, it)
-	} else if IsConditionTrue(it, v1.IntegrationConditionCronJobAvailable) {
-		mirrorReadyConditionFromCronJob(ctx, c, it)
-	} else {
-		it.Status.SetCondition(
-			v1.IntegrationConditionReady,
-			corev1.ConditionUnknown,
-			"",
-			"",
-		)
-	}
-}
-
-func mirrorReadyConditionFromReplicaSet(ctx context.Context, c client.Client, it *v1.Integration) {
-	list := appsv1.ReplicaSetList{}
-	opts := runtimeclient.MatchingLabels{
-		v1.IntegrationLabel: it.Name,
-	}
-	if err := c.List(ctx, &list, opts, runtimeclient.InNamespace(it.Namespace)); err != nil {
-		setReadyConditionError(it, err)
-		return
-	}
-
-	if len(list.Items) == 0 {
-		setReadyConditionError(it, errors.New("replicaset not found"))
-		return
-	}
-
-	var rs *appsv1.ReplicaSet
-	for _, r := range list.Items {
-		r := r
-		if r.Labels["camel.apache.org/generation"] == strconv.FormatInt(it.Generation, 10) {
-			rs = &r
+func GetPodCondition(pod corev1.Pod, conditionType corev1.PodConditionType) *corev1.PodCondition {
+	for i := range pod.Status.Conditions {
+		condition := pod.Status.Conditions[i]
+		if condition.Type == conditionType {
+			return &condition
 		}
 	}
-	if rs == nil {
-		rs = &list.Items[0]
-	}
-	var replicas int32 = 1
-	if rs.Spec.Replicas != nil {
-		replicas = *rs.Spec.Replicas
-	}
-	// The Integration is considered ready when the number of replicas
-	// reported to be ready is larger or equal to the specified number
-	// of replicas. This avoid reporting a falsy readiness condition
-	// when the Integration is being down-scaled.
-	if replicas <= rs.Status.ReadyReplicas {
-		it.Status.SetCondition(
-			v1.IntegrationConditionReady,
-			corev1.ConditionTrue,
-			v1.IntegrationConditionReplicaSetReadyReason,
-			"",
-		)
-	} else {
-		it.Status.SetCondition(
-			v1.IntegrationConditionReady,
-			corev1.ConditionFalse,
-			v1.IntegrationConditionReplicaSetNotReadyReason,
-			"",
-		)
-	}
+	return nil
 }
 
-func mirrorReadyConditionFromCronJob(ctx context.Context, c client.Client, it *v1.Integration) {
-	cronJob := v1beta1.CronJob{}
-	if err := c.Get(ctx, runtimeclient.ObjectKey{Namespace: it.Namespace, Name: it.Name}, &cronJob); err != nil {
-		setReadyConditionError(it, err)
-	} else {
-		// CronJob status is not tracked by Kubernetes
-		it.Status.SetCondition(
-			v1.IntegrationConditionReady,
-			corev1.ConditionTrue,
-			v1.IntegrationConditionCronJobCreatedReason,
-			"",
-		)
+func GetDeploymentCondition(deployment appsv1.Deployment, conditionType appsv1.DeploymentConditionType) *appsv1.DeploymentCondition {
+	for i := range deployment.Status.Conditions {
+		condition := deployment.Status.Conditions[i]
+		if condition.Type == conditionType {
+			return &condition
+		}
 	}
+	return nil
 }
 
-func IsConditionTrue(it *v1.Integration, conditionType v1.IntegrationConditionType) bool {
-	cond := it.Status.GetCondition(conditionType)
-	if cond == nil {
-		return false
+func GetKnativeServiceCondition(service servingv1.Service, conditionType knative.ConditionType) *knative.Condition {
+	for i := range service.Status.Conditions {
+		condition := service.Status.Conditions[i]
+		if condition.Type == conditionType {
+			return &condition
+		}
 	}
-	return cond.Status == corev1.ConditionTrue
+	return nil
 }
 
-func setReadyConditionError(it *v1.Integration, err error) {
-	it.Status.SetCondition(
-		v1.IntegrationConditionReady,
-		corev1.ConditionUnknown,
-		v1.IntegrationConditionErrorReason,
-		fmt.Sprintf("%v", err),
-	)
+func GetJobCondition(job batchv1.Job, conditionType batchv1.JobConditionType) *batchv1.JobCondition {
+	for i := range job.Status.Conditions {
+		condition := job.Status.Conditions[i]
+		if condition.Type == conditionType {
+			return &condition
+		}
+	}
+	return nil
 }

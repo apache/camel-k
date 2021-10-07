@@ -20,6 +20,8 @@ package integration
 import (
 	"context"
 
+	appsv1 "k8s.io/api/apps/v1"
+	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -35,6 +37,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
@@ -168,6 +172,12 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 				return requests
 			})).
+		// Watch for the owned Deployments
+		Owns(&appsv1.Deployment{}).
+		// Watch for the owned Knative Services
+		Owns(&servingv1.Service{}).
+		// Watch for the owned CronJobs
+		Owns(&batchv1beta1.CronJob{}).
 		// Watch for the Integration Pods
 		Watches(&source.Kind{Type: &corev1.Pod{}},
 			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {

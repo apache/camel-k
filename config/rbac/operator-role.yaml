@@ -83,8 +83,6 @@ rules:
   - apps
   resources:
   - deployments
-  - replicasets
-  - statefulsets
   verbs:
   - create
   - delete
@@ -108,9 +106,9 @@ rules:
   - update
   - watch
 - apiGroups:
-  - apps
+  - batch
   resources:
-  - daemonsets
+  - jobs
   verbs:
   - get
   - list

@@ -27,6 +27,9 @@ import (
 	"strconv"
 	"time"
 
+	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
+	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	coordination "k8s.io/api/coordination/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -43,6 +46,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
+
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	"github.com/apache/camel-k/pkg/apis"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -133,8 +138,9 @@ func Run(healthPort, monitoringPort int32, leaderElection bool) {
 		log.Info("Leader election is disabled!")
 	}
 
-	podLabelSelector, err := labels.NewRequirement(v1.IntegrationLabel, selection.Exists, []string{})
-	exitOnError(err, "cannot create Pod labels selector")
+	hasIntegrationLabel, err := labels.NewRequirement(v1.IntegrationLabel, selection.Exists, []string{})
+	exitOnError(err, "cannot create Integration label selector")
+	selector := labels.NewSelector().Add(*hasIntegrationLabel)
 
 	mgr, err := manager.New(c.GetConfig(), manager.Options{
 		Namespace:                     watchNamespace,
@@ -149,9 +155,11 @@ func Run(healthPort, monitoringPort int32, leaderElection bool) {
 		NewCache: cache.BuilderWithOptions(
 			cache.Options{
 				SelectorsByObject: cache.SelectorsByObject{
-					&corev1.Pod{}: {
-						Label: labels.NewSelector().Add(*podLabelSelector),
-					},
+					&corev1.Pod{}:           {Label: selector},
+					&appsv1.Deployment{}:    {Label: selector},
+					&batchv1beta1.CronJob{}: {Label: selector},
+					&batchv1.Job{}:          {Label: selector},
+					&servingv1.Service{}:    {Label: selector},
 				},
 			},
 		),
