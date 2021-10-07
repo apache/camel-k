@@ -24,8 +24,9 @@ package builder
 
 import (
 	"os"
-	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"testing"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
@@ -51,7 +52,7 @@ func TestRunGlobalInstall(t *testing.T) {
 	}
 
 	test := func(operatorNamespace string) {
-		Expect(Kamel("install", "-n", operatorNamespace, "--global").Execute()).To(Succeed())
+		Expect(Kamel("install", "-n", operatorNamespace, "--global", "--force").Execute()).To(Succeed())
 
 		t.Run("Global test on namespace with platform", func(t *testing.T) {
 			WithNewTestNamespace(t, func(ns2 string) {
@@ -146,9 +147,9 @@ func TestRunGlobalInstall(t *testing.T) {
 		// global operators are always installed in the openshift-operators namespace
 		RegisterTestingT(t)
 		test("openshift-operators")
-	}else {
+	} else {
 		// create new namespace for the global operator
-		WithNewTestNamespace(t,test)
+		WithNewTestNamespace(t, test)
 	}
 }
 

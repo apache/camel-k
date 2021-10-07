@@ -32,7 +32,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -72,7 +71,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		Named("kamelet-controller").
 		// Watch for changes to primary resource Kamelet
 		For(&v1alpha1.Kamelet{}, builder.WithPredicates(
-			predicate.Funcs{
+			platform.FilteringFuncs{
 				UpdateFunc: func(e event.UpdateEvent) bool {
 					oldKamelet := e.ObjectOld.(*v1alpha1.Kamelet)
 					newKamelet := e.ObjectNew.(*v1alpha1.Kamelet)
@@ -135,6 +134,12 @@ func (r *reconcileKamelet) Reconcile(ctx context.Context, request reconcile.Requ
 		}
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
+	}
+
+	// Only process resources assigned to the operator
+	if !platform.IsOperatorHandler(&instance) {
+		rlog.Info("Ignoring request because resource is not assigned to current operator")
+		return reconcile.Result{}, nil
 	}
 
 	actions := []Action{

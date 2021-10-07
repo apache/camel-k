@@ -261,6 +261,11 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 		kubernetes.CamelCreatorLabelVersion:   integration.ResourceVersion,
 	}
 
+	operatorID := defaults.OperatorID()
+	if operatorID != "" {
+		kit.Labels[v1.OperatorIDLabel] = operatorID
+	}
+
 	traits := t.getKitTraits(e)
 
 	kit.Spec = v1.IntegrationKitSpec{

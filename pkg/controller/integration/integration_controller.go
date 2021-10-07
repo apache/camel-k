@@ -32,7 +32,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
@@ -73,7 +72,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		Named("integration-controller").
 		// Watch for changes to primary resource Integration
 		For(&v1.Integration{}, builder.WithPredicates(
-			predicate.Funcs{
+			platform.FilteringFuncs{
 				UpdateFunc: func(e event.UpdateEvent) bool {
 					oldIntegration := e.ObjectOld.(*v1.Integration)
 					newIntegration := e.ObjectNew.(*v1.Integration)
@@ -224,6 +223,12 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 		}
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
+	}
+
+	// Only process resources assigned to the operator
+	if !platform.IsOperatorHandler(&instance) {
+		rlog.Info("Ignoring request because resource is not assigned to current operator")
+		return reconcile.Result{}, nil
 	}
 
 	target := instance.DeepCopy()

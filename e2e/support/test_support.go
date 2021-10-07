@@ -39,6 +39,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -422,6 +423,18 @@ func IntegrationCondition(ns string, name string, conditionType v1.IntegrationCo
 	}
 }
 
+func AssignIntegrationToOperator(ns, name, operator string) error {
+	it := Integration(ns, name)()
+	if it == nil {
+		return fmt.Errorf("cannot assign integration %q to operator: integration not found", name)
+	}
+	if it.Labels == nil {
+		it.Labels = make(map[string]string)
+	}
+	it.Labels[v1.OperatorIDLabel] = operator
+	return TestClient().Update(TestContext, it)
+}
+
 func Lease(ns string, name string) func() *coordination.Lease {
 	return func() *coordination.Lease {
 		lease := coordination.Lease{}
@@ -708,6 +721,18 @@ func ScaleKameletBinding(ns string, name string, replicas int32) error {
 	return UpdateKameletBinding(ns, name, func(klb *v1alpha1.KameletBinding) {
 		klb.Spec.Replicas = &replicas
 	})
+}
+
+func AssignKameletBindingToOperator(ns, name, operator string) error {
+	klb := KameletBinding(ns, name)()
+	if klb == nil {
+		return fmt.Errorf("cannot assign kamelet binding %q to operator: kamelet binding not found", name)
+	}
+	if klb.Labels == nil {
+		klb.Labels = make(map[string]string)
+	}
+	klb.Labels[v1.OperatorIDLabel] = operator
+	return TestClient().Update(TestContext, klb)
 }
 
 type KitFilter interface {
@@ -1026,6 +1051,18 @@ func PlatformProfile(ns string) func() v1.TraitProfile {
 	}
 }
 
+func AssignPlatformToOperator(ns, operator string) error {
+	pl := Platform(ns)()
+	if pl == nil {
+		return errors.New("cannot assign platform to operator: no platform found")
+	}
+	if pl.Labels == nil {
+		pl.Labels = make(map[string]string)
+	}
+	pl.Labels[v1.OperatorIDLabel] = operator
+	return TestClient().Update(TestContext, pl)
+}
+
 func CRDs() func() []metav1.APIResource {
 	return func() []metav1.APIResource {
 
@@ -1098,24 +1135,22 @@ func OperatorTryPodForceKill(ns string, timeSeconds int) {
 	}
 }
 
-func ScaleOperator(ns string, replicas int32) func() error {
-	return func() error {
-		operator, err := TestClient().AppsV1().Deployments(ns).Get(TestContext, "camel-k-operator", metav1.GetOptions{})
-		if err != nil {
-			return err
-		}
-		operator.Spec.Replicas = &replicas
-		_, err = TestClient().AppsV1().Deployments(ns).Update(TestContext, operator, metav1.UpdateOptions{})
-		if err != nil {
-			return err
-		}
-
-		if replicas == 0 {
-			// speedup scale down by killing the pod
-			OperatorTryPodForceKill(ns, 10)
-		}
-		return nil
+func ScaleOperator(ns string, replicas int32) error {
+	operator, err := TestClient().AppsV1().Deployments(ns).Get(TestContext, "camel-k-operator", metav1.GetOptions{})
+	if err != nil {
+		return err
 	}
+	operator.Spec.Replicas = &replicas
+	_, err = TestClient().AppsV1().Deployments(ns).Update(TestContext, operator, metav1.UpdateOptions{})
+	if err != nil {
+		return err
+	}
+
+	if replicas == 0 {
+		// speedup scale down by killing the pod
+		OperatorTryPodForceKill(ns, 10)
+	}
+	return nil
 }
 
 func ClusterRole() func() []rbacv1.ClusterRole {

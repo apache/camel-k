@@ -22,8 +22,12 @@ import (
 	"os"
 	"strings"
 
+	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	coordination "k8s.io/api/coordination/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -99,3 +103,76 @@ func IsOperatorAllowedOnNamespace(ctx context.Context, c ctrl.Reader, namespace 
 	}
 	return !alreadyOwned, nil
 }
+
+func IsOperatorHandler(object ctrl.Object) bool {
+	if object == nil {
+		return true
+	}
+	resourceID := object.GetLabels()[camelv1.OperatorIDLabel]
+	operatorID := defaults.OperatorID()
+	return resourceID == operatorID
+}
+
+// FilteringFuncs do preliminary checks to determine if certain events should be handled by the controller
+// based on labels on the resources (e.g. camel.apache.org/operator.id) and the operator configuration,
+// before handing the computation over to the user code.
+type FilteringFuncs struct {
+	// Create returns true if the Create event should be processed
+	CreateFunc func(event.CreateEvent) bool
+
+	// Delete returns true if the Delete event should be processed
+	DeleteFunc func(event.DeleteEvent) bool
+
+	// Update returns true if the Update event should be processed
+	UpdateFunc func(event.UpdateEvent) bool
+
+	// Generic returns true if the Generic event should be processed
+	GenericFunc func(event.GenericEvent) bool
+}
+
+func (f FilteringFuncs) Create(e event.CreateEvent) bool {
+	if !IsOperatorHandler(e.Object) {
+		return false
+	}
+	if f.CreateFunc != nil {
+		return f.CreateFunc(e)
+	}
+	return true
+}
+
+func (f FilteringFuncs) Delete(e event.DeleteEvent) bool {
+	if !IsOperatorHandler(e.Object) {
+		return false
+	}
+	if f.DeleteFunc != nil {
+		return f.DeleteFunc(e)
+	}
+	return true
+}
+
+func (f FilteringFuncs) Update(e event.UpdateEvent) bool {
+	if !IsOperatorHandler(e.ObjectNew) {
+		return false
+	}
+	if e.ObjectOld != nil && e.ObjectNew != nil &&
+		e.ObjectOld.GetLabels()[camelv1.OperatorIDLabel] != e.ObjectNew.GetLabels()[camelv1.OperatorIDLabel] {
+		// Always force reconciliation when the object becomes managed by the current operator
+		return true
+	}
+	if f.UpdateFunc != nil {
+		return f.UpdateFunc(e)
+	}
+	return true
+}
+
+func (f FilteringFuncs) Generic(e event.GenericEvent) bool {
+	if !IsOperatorHandler(e.Object) {
+		return false
+	}
+	if f.GenericFunc != nil {
+		return f.GenericFunc(e)
+	}
+	return true
+}
+
+var _ predicate.Predicate = FilteringFuncs{}

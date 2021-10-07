@@ -22,6 +22,7 @@ import (
 	"path"
 	"sort"
 
+	"github.com/apache/camel-k/pkg/util/defaults"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -213,6 +214,11 @@ func (t *containerTrait) configureImageIntegrationKit(e *Environment) error {
 			kubernetes.CamelCreatorLabelName:      e.Integration.Name,
 			kubernetes.CamelCreatorLabelNamespace: e.Integration.Namespace,
 			kubernetes.CamelCreatorLabelVersion:   e.Integration.ResourceVersion,
+		}
+
+		operatorID := defaults.OperatorID()
+		if operatorID != "" {
+			kit.Labels[v1.OperatorIDLabel] = operatorID
 		}
 
 		t.L.Infof("image %s", kit.Spec.Image)

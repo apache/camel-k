@@ -72,6 +72,7 @@ func TestMetrics(t *testing.T) {
 		Expect(build).NotTo(BeNil())
 
 		t.Run("Build duration metric", func(t *testing.T) {
+			RegisterTestingT(t)
 			// Get the duration from the Build status
 			duration, err := time.ParseDuration(build.Status.Duration)
 			Expect(err).To(BeNil())
@@ -130,6 +131,7 @@ func TestMetrics(t *testing.T) {
 		})
 
 		t.Run("Build recovery attempts metric", func(t *testing.T) {
+			RegisterTestingT(t)
 			// Check there are no failures reported in the Build status
 			Expect(build.Status.Failure).To(BeNil())
 
@@ -167,6 +169,7 @@ func TestMetrics(t *testing.T) {
 		})
 
 		t.Run("reconciliation duration metric", func(t *testing.T) {
+			RegisterTestingT(t)
 			Expect(metrics).To(HaveKeyWithValue("camel_k_reconciliation_duration_seconds",
 				PointTo(MatchFields(IgnoreExtras, Fields{
 					"Name": EqualP("camel_k_reconciliation_duration_seconds"),
@@ -345,6 +348,7 @@ func TestMetrics(t *testing.T) {
 		})
 
 		t.Run("Build queue duration metric", func(t *testing.T) {
+			RegisterTestingT(t)
 			var ts1, ts2 time.Time
 			// The start queuing time is taken from the creation time
 			ts1 = build.CreationTimestamp.Time
@@ -401,6 +405,7 @@ func TestMetrics(t *testing.T) {
 		})
 
 		t.Run("Integration first readiness metric", func(t *testing.T) {
+			RegisterTestingT(t)
 			var ts1, ts2 time.Time
 
 			// The start time is taken from the Integration status initialization timestamp
