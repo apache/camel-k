@@ -42,11 +42,14 @@ var endpointTypeSinkContext = bindings.EndpointContext{Type: v1alpha1.EndpointTy
 func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *v1alpha1.KameletBinding) (*v1.Integration, error) {
 	controller := true
 	blockOwnerDeletion := true
+	annotations := util.CopyMap(kameletbinding.Annotations)
+	delete(annotations, v1alpha1.AnnotationIcon) // avoid propagating the icon to the integration as it's heavyweight and not needed
+
 	it := v1.Integration{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:   kameletbinding.Namespace,
 			Name:        kameletbinding.Name,
-			Annotations: util.CopyMap(kameletbinding.Annotations),
+			Annotations: annotations,
 			Labels:      util.CopyMap(kameletbinding.Labels),
 			OwnerReferences: []metav1.OwnerReference{
 				{
