@@ -182,14 +182,24 @@ const (
 	IntegrationConditionJolokiaAvailableReason string = "JolokiaAvailable"
 	// IntegrationConditionProbesAvailableReason --
 	IntegrationConditionProbesAvailableReason string = "ProbesAvailable"
-	// IntegrationConditionErrorReason --
-	IntegrationConditionErrorReason string = "Error"
+
+	// IntegrationConditionKnativeServiceReadyReason --
+	IntegrationConditionKnativeServiceReadyReason string = "KnativeServiceReady"
+	// IntegrationConditionDeploymentReadyReason --
+	IntegrationConditionDeploymentReadyReason string = "DeploymentReady"
+	// IntegrationConditionDeploymentProgressingReason --
+	IntegrationConditionDeploymentProgressingReason string = "DeploymentProgressing"
 	// IntegrationConditionCronJobCreatedReason --
 	IntegrationConditionCronJobCreatedReason string = "CronJobCreated"
-	// IntegrationConditionReplicaSetReadyReason --
-	IntegrationConditionReplicaSetReadyReason string = "ReplicaSetReady"
-	// IntegrationConditionReplicaSetNotReadyReason --
-	IntegrationConditionReplicaSetNotReadyReason string = "ReplicaSetNotReady"
+	// IntegrationConditionCronJobActiveReason --
+	IntegrationConditionCronJobActiveReason string = "CronJobActive"
+	// IntegrationConditionLastJobSucceededReason --
+	IntegrationConditionLastJobSucceededReason string = "LastJobSucceeded"
+	// IntegrationConditionLastJobFailedReason --
+	IntegrationConditionLastJobFailedReason string = "LastJobFailed"
+	// IntegrationConditionErrorReason --
+	IntegrationConditionErrorReason string = "Error"
+
 	// IntegrationConditionUnsupportedLanguageReason --
 	IntegrationConditionUnsupportedLanguageReason string = "UnsupportedLanguage"
 
