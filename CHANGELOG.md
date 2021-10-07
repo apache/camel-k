@@ -20,13 +20,16 @@
 - Read certificates from secrets to setup TLS config for route trait [\#2574](https://github.com/apache/camel-k/issues/2574)
 - Issue when trying to configure env vars with annotations [\#2512](https://github.com/apache/camel-k/issues/2512)
 - kamel cli output redirection doesn't work for some commands [\#2495](https://github.com/apache/camel-k/issues/2495)
+- install: optional registry [\#2358](https://github.com/apache/camel-k/issues/2358)
 - \[Doc\] Add documentation for architecture [\#2273](https://github.com/apache/camel-k/issues/2273)
+- Provide kustomize installation configuration for install of camel-k [\#1979](https://github.com/apache/camel-k/issues/1979)
 - Document, or provide examples for, TLS configuration on OpenShift [\#1033](https://github.com/apache/camel-k/issues/1033)
 - support for quarkus in native mode [\#991](https://github.com/apache/camel-k/issues/991)
 - Release yaml files for installation [\#550](https://github.com/apache/camel-k/issues/550)
 
 **Merged pull requests:**
 
+- fix\(cli\): apply --registry\* flags even on OpenShift for kamel install [\#2681](https://github.com/apache/camel-k/pull/2681) ([tadayosi](https://github.com/tadayosi))
 - feat: Add active-deadline-seconds and backoff-limit options to cron trait [\#2678](https://github.com/apache/camel-k/pull/2678) ([astefanutti](https://github.com/astefanutti))
 - feat: Add progress-deadline-seconds option to deployment trait [\#2677](https://github.com/apache/camel-k/pull/2677) ([astefanutti](https://github.com/astefanutti))
 - fix\(cli\): kamel install fails with error: Object 'Kind' is missing in 'null' [\#2676](https://github.com/apache/camel-k/pull/2676) ([tadayosi](https://github.com/tadayosi))
