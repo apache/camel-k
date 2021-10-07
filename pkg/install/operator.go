@@ -189,7 +189,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 					o = &rbacv1.ClusterRoleBinding{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: cfg.Namespace,
-							Name:      rb.Name,
+							Name:      fmt.Sprintf("%s-%s", rb.Name, cfg.Namespace),
 							Labels: map[string]string{
 								"app": "camel-k",
 							},
