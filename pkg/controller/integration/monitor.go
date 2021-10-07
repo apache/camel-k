@@ -280,6 +280,9 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 	}
 	// Check running container statuses
 	for _, pod := range runningPods {
+		if pod.DeletionTimestamp != nil {
+			continue
+		}
 		containers := append(pod.Status.InitContainerStatuses, pod.Status.ContainerStatuses...)
 		for _, container := range containers {
 			// Check the container state
