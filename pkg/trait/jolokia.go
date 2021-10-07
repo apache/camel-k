@@ -89,7 +89,7 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 
 		switch e.CamelCatalog.Runtime.Provider {
 		case v1.RuntimeProviderQuarkus:
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-management")
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel-quarkus:management")
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel:jaxb")
 		}
 
