@@ -22,7 +22,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const TraitAnnotationPrefix = "trait.camel.apache.org/"
+const (
+	TraitAnnotationPrefix = "trait.camel.apache.org/"
+	OperatorIDLabel       = "camel.apache.org/operator.id"
+)
 
 // ConfigurationSpec --
 type ConfigurationSpec struct {

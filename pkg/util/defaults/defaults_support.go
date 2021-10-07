@@ -32,6 +32,10 @@ func InstallDefaultKamelets() bool {
 	return boolEnvOrDefault(installDefaultKamelets, "KAMEL_INSTALL_DEFAULT_KAMELETS")
 }
 
+func OperatorID() string {
+	return envOrDefault("", "KAMEL_OPERATOR_ID")
+}
+
 func boolEnvOrDefault(def bool, envs ...string) bool {
 	strVal := envOrDefault(strconv.FormatBool(def), envs...)
 	res, err := strconv.ParseBool(strVal)

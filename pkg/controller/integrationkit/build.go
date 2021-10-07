@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/pkg/errors"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -85,6 +86,10 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 
 		labels := kubernetes.FilterCamelCreatorLabels(kit.Labels)
 		labels[v1.IntegrationKitLayoutLabel] = kit.Labels[v1.IntegrationKitLayoutLabel]
+		operatorID := defaults.OperatorID()
+		if operatorID != "" {
+			labels[v1.OperatorIDLabel] = operatorID
+		}
 		timeout := env.Platform.Status.Build.GetTimeout()
 		if layout := labels[v1.IntegrationKitLayoutLabel]; env.Platform.Spec.Build.Timeout == nil && layout == v1.IntegrationKitLayoutNative {
 			// Increase the timeout to a sensible default

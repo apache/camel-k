@@ -31,7 +31,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
@@ -81,7 +80,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to primary resource IntegrationKit
 	err = c.Watch(&source.Kind{Type: &v1.IntegrationKit{}},
 		&handler.EnqueueRequestForObject{},
-		predicate.Funcs{
+		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
 				oldIntegrationKit := e.ObjectOld.(*v1.IntegrationKit)
 				newIntegrationKit := e.ObjectNew.(*v1.IntegrationKit)
@@ -107,7 +106,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			IsController: true,
 			OwnerType:    &v1.IntegrationKit{},
 		},
-		predicate.Funcs{
+		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
 				oldBuild := e.ObjectOld.(*v1.Build)
 				newBuild := e.ObjectNew.(*v1.Build)
@@ -200,6 +199,12 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 		}
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
+	}
+
+	// Only process resources assigned to the operator
+	if !platform.IsOperatorHandler(&instance) {
+		rlog.Info("Ignoring request because resource is not assigned to current operator")
+		return reconcile.Result{}, nil
 	}
 
 	target := instance.DeepCopy()

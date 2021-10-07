@@ -47,7 +47,7 @@ func TestRunGlobalKamelet(t *testing.T) {
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--global").Execute()).To(Succeed())
+		Expect(Kamel("install", "-n", ns, "--global", "--force").Execute()).To(Succeed())
 
 		Expect(CreateTimerKamelet(ns, "my-own-timer-source")()).To(Succeed())
 

@@ -30,7 +30,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -71,7 +70,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		Named("build-controller").
 		// Watch for changes to primary resource Build
 		For(&v1.Build{}, builder.WithPredicates(
-			predicate.Funcs{
+			platform.FilteringFuncs{
 				UpdateFunc: func(e event.UpdateEvent) bool {
 					oldBuild := e.ObjectOld.(*v1.Build)
 					newBuild := e.ObjectNew.(*v1.Build)
@@ -128,6 +127,12 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 		}
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
+	}
+
+	// Only process resources assigned to the operator
+	if !platform.IsOperatorHandler(&instance) {
+		rlog.Info("Ignoring request because resource is not assigned to current operator")
+		return reconcile.Result{}, nil
 	}
 
 	target := instance.DeepCopy()
