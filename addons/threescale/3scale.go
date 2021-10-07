@@ -20,9 +20,9 @@ package threescale
 import (
 	"strconv"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/trait"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/apache/camel-k/pkg/trait"
 )
 
 // The 3scale trait can be used to automatically create annotations that allow
@@ -85,7 +85,7 @@ func (t *threeScaleTrait) Configure(e *trait.Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
+	if !e.IntegrationInRunningPhases() {
 		return false, nil
 	}
 

@@ -85,7 +85,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil
 	}
 
@@ -157,7 +157,6 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 }
 
 func (t *masterTrait) Apply(e *trait.Environment) error {
-
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityMaster)
 
@@ -166,7 +165,7 @@ func (t *masterTrait) Apply(e *trait.Environment) error {
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dep)
 		}
 
-	} else if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+	} else if e.IntegrationInRunningPhases() {
 		serviceAccount := e.Integration.Spec.ServiceAccountName
 		if serviceAccount == "" {
 			serviceAccount = "default"
