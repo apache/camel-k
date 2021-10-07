@@ -34,6 +34,19 @@ func ManageIntegrationDependencies(
 	catalog *RuntimeCatalog) error {
 
 	// Add dependencies from build
+	err := addDependencies(project, dependencies, catalog)
+	if err != nil {
+		return err
+	}
+	// Add dependencies from catalog
+	addDependenciesFromCatalog(project, catalog)
+	// Post process dependencies
+	postProcessDependencies(project, catalog)
+
+	return nil
+}
+
+func addDependencies(project *maven.Project, dependencies []string, catalog *RuntimeCatalog) error {
 	for _, d := range dependencies {
 		switch {
 		case strings.HasPrefix(d, "bom:"):
@@ -119,8 +132,10 @@ func ManageIntegrationDependencies(
 			}
 		}
 	}
+	return nil
+}
 
-	// Add dependencies from catalog
+func addDependenciesFromCatalog(project *maven.Project, catalog *RuntimeCatalog) {
 	deps := make([]maven.Dependency, len(project.Dependencies))
 	copy(deps, project.Dependencies)
 
@@ -145,9 +160,10 @@ func ManageIntegrationDependencies(
 			}
 		}
 	}
+}
 
-	// Post process dependencies
-	deps = make([]maven.Dependency, len(project.Dependencies))
+func postProcessDependencies(project *maven.Project, catalog *RuntimeCatalog) {
+	deps := make([]maven.Dependency, len(project.Dependencies))
 	copy(deps, project.Dependencies)
 
 	for _, d := range deps {
@@ -167,8 +183,6 @@ func ManageIntegrationDependencies(
 			}
 		}
 	}
-
-	return nil
 }
 
 // SanitizeIntegrationDependencies --
