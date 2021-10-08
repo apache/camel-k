@@ -148,6 +148,9 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	// Reconcile Integration phase
 	if integration.Status.Phase == v1.IntegrationPhaseDeploying {
 		integration.Status.Phase = v1.IntegrationPhaseRunning
+		// let's return to mark the transition and wait for another reconciliation cycle
+		// so that caches have more time to catch-up
+		return integration, nil
 	}
 
 	previous := integration.Status.GetCondition(v1.IntegrationConditionReady)
