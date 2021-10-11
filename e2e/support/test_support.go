@@ -31,7 +31,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	exec "os/exec"
+	"os/exec"
 	"reflect"
 	"strings"
 	"testing"
@@ -622,17 +622,34 @@ func KitPhase(ns, name string) func() v1.IntegrationKitPhase {
 	}
 }
 
-func UpdateIntegration(ns string, name string, upd func(it *v1.Integration)) error {
+func UpdateIntegration(ns string, name string, mutate func(it *v1.Integration)) error {
 	it := Integration(ns, name)()
 	if it == nil {
 		return fmt.Errorf("no integration named %s found", name)
 	}
-	upd(it)
-	return TestClient().Update(TestContext, it)
+	target := it.DeepCopy()
+	mutate(target)
+	return TestClient().Update(TestContext, target)
+}
+
+func PatchIntegration(ns string, name string, mutate func(it *v1.Integration)) error {
+	it := Integration(ns, name)()
+	if it == nil {
+		return fmt.Errorf("no integration named %s found", name)
+	}
+	target := it.DeepCopy()
+	mutate(target)
+	p, err := patch.PositiveMergePatch(it, target)
+	if err != nil {
+		return err
+	} else if len(p) == 0 {
+		return nil
+	}
+	return TestClient().Patch(TestContext, target, ctrl.RawPatch(types.MergePatchType, p))
 }
 
 func ScaleIntegration(ns string, name string, replicas int32) error {
-	return UpdateIntegration(ns, name, func(it *v1.Integration) {
+	return PatchIntegration(ns, name, func(it *v1.Integration) {
 		it.Spec.Replicas = &replicas
 	})
 }
