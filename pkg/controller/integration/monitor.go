@@ -153,19 +153,9 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		return integration, nil
 	}
 
-	previous := integration.Status.GetCondition(v1.IntegrationConditionReady)
-
 	err = action.updateIntegrationPhaseAndReadyCondition(ctx, integration, pendingPods.Items, runningPods.Items)
 	if err != nil {
 		return nil, err
-	}
-
-	if next := integration.Status.GetCondition(v1.IntegrationConditionReady); (previous == nil || previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero()) &&
-		next != nil && next.Status == corev1.ConditionTrue && !(next.FirstTruthyTime == nil || next.FirstTruthyTime.IsZero()) {
-		// Observe the time to first readiness metric
-		duration := next.FirstTruthyTime.Time.Sub(integration.Status.InitializationTimestamp.Time)
-		action.L.Infof("First readiness after %s", duration)
-		timeToFirstReadiness.Observe(duration.Seconds())
 	}
 
 	return integration, nil
