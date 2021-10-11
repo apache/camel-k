@@ -83,13 +83,22 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 		For(&v1.Integration{}, builder.WithPredicates(
 			predicate.Funcs{
 				UpdateFunc: func(e event.UpdateEvent) bool {
-					oldIntegration := e.ObjectOld.(*v1.Integration)
-					newIntegration := e.ObjectNew.(*v1.Integration)
+					old := e.ObjectOld.(*v1.Integration)
+					it := e.ObjectNew.(*v1.Integration)
+					// Observe the time to first readiness metric
+					previous := old.Status.GetCondition(v1.IntegrationConditionReady)
+					if next := it.Status.GetCondition(v1.IntegrationConditionReady); (previous == nil || previous.Status != corev1.ConditionTrue && (previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero())) &&
+						next != nil && next.Status == corev1.ConditionTrue && next.FirstTruthyTime != nil && !next.FirstTruthyTime.IsZero() {
+						duration := next.FirstTruthyTime.Time.Sub(it.Status.InitializationTimestamp.Time)
+						Log.WithValues("request-namespace", it.Namespace, "request-name", it.Name).
+							ForIntegration(it).Infof("First readiness after %s", duration)
+						timeToFirstReadiness.Observe(duration.Seconds())
+					}
 					// Ignore updates to the integration status in which case metadata.Generation does not change,
 					// or except when the integration phase changes as it's used to transition from one phase
 					// to another.
-					return oldIntegration.Generation != newIntegration.Generation ||
-						oldIntegration.Status.Phase != newIntegration.Status.Phase
+					return old.Generation != it.Generation ||
+						old.Status.Phase != it.Status.Phase
 				},
 				DeleteFunc: func(e event.DeleteEvent) bool {
 					// Evaluates to false if the object has been confirmed deleted
