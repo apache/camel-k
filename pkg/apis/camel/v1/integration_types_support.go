@@ -20,7 +20,6 @@ package v1
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -351,12 +350,12 @@ func (in *IntegrationStatus) SetErrorCondition(condType IntegrationConditionType
 // reason then we are not going to update.
 func (in *IntegrationStatus) SetConditions(conditions ...IntegrationCondition) {
 	// Round to second precision, as meta.Time fields are marshalled in RFC3339 format
-	now := metav1.NewTime(time.Now().Round(time.Second))
+	now := metav1.Now().Rfc3339Copy()
 	for _, condition := range conditions {
 		currentCond := in.GetCondition(condition.Type)
 
 		if currentCond != nil && currentCond.Status == condition.Status && currentCond.Reason == condition.Reason && currentCond.Message == condition.Message {
-			return
+			break
 		}
 
 		if condition.LastUpdateTime.IsZero() {
