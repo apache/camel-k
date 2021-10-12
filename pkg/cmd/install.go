@@ -184,7 +184,7 @@ type installCmdOptions struct {
 	HTTPProxySecret         string   `mapstructure:"http-proxy-secret"`
 	ResourcesRequirements   []string `mapstructure:"operator-resources"`
 
-	registry         v1.IntegrationPlatformRegistrySpec
+	registry         v1.RegistrySpec
 	registryAuth     registry.Auth
 	RegistryAuthFile string `mapstructure:"registry-auth-file"`
 
@@ -360,7 +360,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			platform.Spec.Build.BaseImage = o.BaseImage
 		}
 		if o.BuildStrategy != "" {
-			platform.Spec.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategy(o.BuildStrategy)
+			platform.Spec.Build.BuildStrategy = v1.BuildStrategy(o.BuildStrategy)
 		}
 		if o.BuildPublishStrategy != "" {
 			platform.Spec.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategy(o.BuildPublishStrategy)
@@ -574,7 +574,7 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 
 	if o.BuildStrategy != "" {
 		found := false
-		for _, s := range v1.IntegrationPlatformBuildStrategies {
+		for _, s := range v1.BuildStrategies {
 			if string(s) == o.BuildStrategy {
 				found = true
 				break
@@ -582,7 +582,7 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 		}
 		if !found {
 			var strategies []string
-			for _, s := range v1.IntegrationPlatformBuildStrategies {
+			for _, s := range v1.BuildStrategies {
 				strategies = append(strategies, string(s))
 			}
 			return fmt.Errorf("unknown build strategy: %s. One of [%s] is expected", o.BuildStrategy, strings.Join(strategies, ", "))
