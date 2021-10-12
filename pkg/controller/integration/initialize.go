@@ -86,7 +86,8 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 	integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 	integration.Status.Version = defaults.Version
 	if timestamp := integration.Status.InitializationTimestamp; timestamp == nil || timestamp.IsZero() {
-		now := metav1.Now()
+		// Round to second precision, as meta.Time fields are marshalled in RFC3339 format
+		now := metav1.Now().Rfc3339Copy()
 		integration.Status.InitializationTimestamp = &now
 	}
 
