@@ -23,8 +23,9 @@ import (
 )
 
 const (
-	TraitAnnotationPrefix = "trait.camel.apache.org/"
-	OperatorIDLabel       = "camel.apache.org/operator.id"
+	TraitAnnotationPrefix  = "trait.camel.apache.org/"
+	OperatorIDLabel        = "camel.apache.org/operator.id"
+	SecondaryPlatformLabel = "camel.apache.org/secondary.platform"
 )
 
 // BuildStrategy specifies how the Build should be executed

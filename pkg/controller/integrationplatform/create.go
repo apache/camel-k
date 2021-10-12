@@ -20,6 +20,7 @@ package integrationplatform
 import (
 	"context"
 
+	platformutil "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/resources"
 	"github.com/apache/camel-k/pkg/util/defaults"
 
@@ -53,7 +54,7 @@ func (action *createAction) Handle(ctx context.Context, platform *v1.Integration
 		}
 	}
 
-	if defaults.InstallDefaultKamelets() {
+	if !platformutil.IsSecondary(platform) && defaults.InstallDefaultKamelets() {
 		// Kamelet Catalog installed on platform reconciliation for cases where users install a global operator
 		if err := install.KameletCatalog(ctx, action.client, platform.Namespace); err != nil {
 			return nil, err
