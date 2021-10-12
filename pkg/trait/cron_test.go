@@ -262,7 +262,7 @@ func TestCronDeps(t *testing.T) {
 				Cluster: v1.IntegrationPlatformClusterOpenShift,
 				Build: v1.IntegrationPlatformBuildSpec{
 					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
-					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
+					Registry:        v1.RegistrySpec{Address: "registry"},
 				},
 				Profile: v1.TraitProfileKnative,
 			},
@@ -336,7 +336,7 @@ func TestCronDepsFallback(t *testing.T) {
 				Cluster: v1.IntegrationPlatformClusterOpenShift,
 				Build: v1.IntegrationPlatformBuildSpec{
 					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
-					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
+					Registry:        v1.RegistrySpec{Address: "registry"},
 				},
 				Profile: v1.TraitProfileKnative,
 			},
@@ -411,7 +411,7 @@ func TestCronWithQuarkus(t *testing.T) {
 				Cluster: v1.IntegrationPlatformClusterOpenShift,
 				Build: v1.IntegrationPlatformBuildSpec{
 					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
-					Registry:        v1.IntegrationPlatformRegistrySpec{Address: "registry"},
+					Registry:        v1.RegistrySpec{Address: "registry"},
 				},
 				Profile: v1.TraitProfileKnative,
 			},

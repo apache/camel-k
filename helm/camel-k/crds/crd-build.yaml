@@ -79,7 +79,15 @@ spec:
           spec:
             description: BuildSpec defines the Build to be executed
             properties:
+              strategy:
+                description: The strategy that should be used to perform the Build.
+                enum:
+                - routine
+                - pod
+                type: string
               tasks:
+                description: The sequence of Build tasks to be performed as part of
+                  the Build execution.
                 items:
                   description: Task --
                   properties:
@@ -97,7 +105,8 @@ spec:
                         name:
                           type: string
                         registry:
-                          description: IntegrationPlatformRegistrySpec --
+                          description: RegistrySpec provides the configuration for
+                            the container registry
                           properties:
                             address:
                               type: string
@@ -432,7 +441,8 @@ spec:
                         name:
                           type: string
                         registry:
-                          description: IntegrationPlatformRegistrySpec --
+                          description: RegistrySpec provides the configuration for
+                            the container registry
                           properties:
                             address:
                               type: string
@@ -470,7 +480,8 @@ spec:
                         name:
                           type: string
                         registry:
-                          description: IntegrationPlatformRegistrySpec --
+                          description: RegistrySpec provides the configuration for
+                            the container registry
                           properties:
                             address:
                               type: string
@@ -530,7 +541,7 @@ spec:
                       format: date-time
                       type: string
                     message:
-                      description: A human readable message indicating details about
+                      description: A human-readable message indicating details about
                         the transition.
                       type: string
                     reason:
@@ -586,8 +597,6 @@ spec:
                 type: string
               phase:
                 description: BuildPhase --
-                type: string
-              platform:
                 type: string
               startedAt:
                 format: date-time

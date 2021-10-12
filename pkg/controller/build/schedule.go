@@ -85,7 +85,6 @@ func (action *scheduleAction) Handle(ctx context.Context, build *v1.Build) (*v1.
 			Phase:      v1.BuildPhasePending,
 			StartedAt:  &now,
 			Failure:    b.Status.Failure,
-			Platform:   b.Status.Platform,
 			Conditions: b.Status.Conditions,
 		}
 	})

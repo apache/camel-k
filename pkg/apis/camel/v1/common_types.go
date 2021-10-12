@@ -24,6 +24,22 @@ import (
 
 const TraitAnnotationPrefix = "trait.camel.apache.org/"
 
+// BuildStrategy specifies how the Build should be executed
+// +kubebuilder:validation:Enum=routine;pod
+type BuildStrategy string
+
+const (
+	// BuildStrategyRoutine performs the build in a routine
+	BuildStrategyRoutine BuildStrategy = "routine"
+	// BuildStrategyPod performs the build in a pod
+	BuildStrategyPod BuildStrategy = "pod"
+)
+
+var BuildStrategies = []BuildStrategy{
+	BuildStrategyRoutine,
+	BuildStrategyPod,
+}
+
 // ConfigurationSpec --
 type ConfigurationSpec struct {
 	Type               string `json:"type"`
@@ -82,13 +98,6 @@ type Configurable interface {
 	Configurations() []ConfigurationSpec
 }
 
-// +kubebuilder:object:generate=false
-
-// PlatformInjectable --
-type PlatformInjectable interface {
-	SetIntegrationPlatform(platform *IntegrationPlatform)
-}
-
 // MavenSpec --
 type MavenSpec struct {
 	// The path of the local Maven repository.
@@ -110,6 +119,15 @@ type MavenSpec struct {
 	Repositories []Repository     `json:"repositories,omitempty"`
 	// Maven build extensions https://maven.apache.org/guides/mini/guide-using-extensions.html
 	Extension []MavenArtifact `json:"extension,omitempty"`
+}
+
+// RegistrySpec provides the configuration for the container registry
+type RegistrySpec struct {
+	Insecure     bool   `json:"insecure,omitempty"`
+	Address      string `json:"address,omitempty"`
+	Secret       string `json:"secret,omitempty"`
+	CA           string `json:"ca,omitempty"`
+	Organization string `json:"organization,omitempty"`
 }
 
 // ValueSource --

@@ -27,7 +27,10 @@ import (
 
 // BuildSpec defines the Build to be executed
 type BuildSpec struct {
+	// The sequence of Build tasks to be performed as part of the Build execution.
 	Tasks []Task `json:"tasks,omitempty"`
+	// The strategy that should be used to perform the Build.
+	Strategy BuildStrategy `json:"strategy,omitempty"`
 	// Timeout defines the Build maximum execution duration.
 	// The Build deadline is set to the Build start time plus the Timeout duration.
 	// If the Build deadline is exceeded, the Build context is canceled,
@@ -53,22 +56,22 @@ type BaseTask struct {
 // BuilderTask --
 type BuilderTask struct {
 	BaseTask     `json:",inline"`
-	BaseImage    string            `json:"baseImage,omitempty"`
-	Runtime      RuntimeSpec       `json:"runtime,omitempty"`
-	Sources      []SourceSpec      `json:"sources,omitempty"`
-	Resources    []ResourceSpec    `json:"resources,omitempty"`
-	Dependencies []string          `json:"dependencies,omitempty"`
-	Steps        []string          `json:"steps,omitempty"`
-	Maven        MavenSpec         `json:"maven,omitempty"`
-	BuildDir     string            `json:"buildDir,omitempty"`
+	BaseImage    string         `json:"baseImage,omitempty"`
+	Runtime      RuntimeSpec    `json:"runtime,omitempty"`
+	Sources      []SourceSpec   `json:"sources,omitempty"`
+	Resources    []ResourceSpec `json:"resources,omitempty"`
+	Dependencies []string       `json:"dependencies,omitempty"`
+	Steps        []string       `json:"steps,omitempty"`
+	Maven        MavenSpec      `json:"maven,omitempty"`
+	BuildDir     string         `json:"buildDir,omitempty"`
 }
 
 // PublishTask --
 type PublishTask struct {
-	ContextDir string                          `json:"contextDir,omitempty"`
-	BaseImage  string                          `json:"baseImage,omitempty"`
-	Image      string                          `json:"image,omitempty"`
-	Registry   IntegrationPlatformRegistrySpec `json:"registry,omitempty"`
+	ContextDir string       `json:"contextDir,omitempty"`
+	BaseImage  string       `json:"baseImage,omitempty"`
+	Image      string       `json:"image,omitempty"`
+	Registry   RegistrySpec `json:"registry,omitempty"`
 }
 
 // BuildahTask --
@@ -117,7 +120,6 @@ type BuildStatus struct {
 	Error      string           `json:"error,omitempty"`
 	Failure    *Failure         `json:"failure,omitempty"`
 	StartedAt  *metav1.Time     `json:"startedAt,omitempty"`
-	Platform   string           `json:"platform,omitempty"`
 	Conditions []BuildCondition `json:"conditions,omitempty"`
 	// Change to Duration / ISO 8601 when CRD uses OpenAPI spec v3
 	// https://github.com/OAI/OpenAPI-Specification/issues/845
@@ -138,8 +140,6 @@ const (
 	BuildPhaseNone BuildPhase = ""
 	// BuildPhaseInitialization --
 	BuildPhaseInitialization BuildPhase = "Initialization"
-	// BuildPhaseWaitingForPlatform --
-	BuildPhaseWaitingForPlatform BuildPhase = "Waiting For Platform"
 	// BuildPhaseScheduling --
 	BuildPhaseScheduling BuildPhase = "Scheduling"
 	// BuildPhasePending --
@@ -154,11 +154,6 @@ const (
 	BuildPhaseInterrupted = "Interrupted"
 	// BuildPhaseError --
 	BuildPhaseError BuildPhase = "Error"
-
-	// BuildConditionPlatformAvailable --
-	BuildConditionPlatformAvailable BuildConditionType = "IntegrationPlatformAvailable"
-	// BuildConditionPlatformAvailableReason --
-	BuildConditionPlatformAvailableReason string = "IntegrationPlatformAvailable"
 )
 
 // +genclient
@@ -203,6 +198,6 @@ type BuildCondition struct {
 	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
 	// The reason for the condition's last transition.
 	Reason string `json:"reason,omitempty"`
-	// A human readable message indicating details about the transition.
+	// A human-readable message indicating details about the transition.
 	Message string `json:"message,omitempty"`
 }
