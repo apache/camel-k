@@ -48,17 +48,6 @@ func (buildPhase *BuildPhase) String() string {
 	return string(*buildPhase)
 }
 
-func (in *Build) SetIntegrationPlatform(platform *IntegrationPlatform) {
-	cs := corev1.ConditionTrue
-
-	if platform.Status.Phase != IntegrationPlatformPhaseReady {
-		cs = corev1.ConditionFalse
-	}
-
-	in.Status.SetCondition(BuildConditionPlatformAvailable, cs, BuildConditionPlatformAvailableReason, platform.Name)
-	in.Status.Platform = platform.Name
-}
-
 // GetCondition returns the condition with the provided type.
 func (in *BuildStatus) GetCondition(condType BuildConditionType) *BuildCondition {
 	for i := range in.Conditions {

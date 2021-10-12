@@ -79,10 +79,10 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		// Use the fastest strategy that they support (routine when possible)
 		if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I ||
 			p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategySpectrum {
-			p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyRoutine
+			p.Status.Build.BuildStrategy = v1.BuildStrategyRoutine
 		} else {
 			// The build output has to be shared via a volume
-			p.Status.Build.BuildStrategy = v1.IntegrationPlatformBuildStrategyPod
+			p.Status.Build.BuildStrategy = v1.BuildStrategyPod
 		}
 	}
 
@@ -91,7 +91,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		return err
 	}
 
-	if p.Status.Build.BuildStrategy == v1.IntegrationPlatformBuildStrategyPod {
+	if p.Status.Build.BuildStrategy == v1.BuildStrategyPod {
 		if err := createBuilderServiceAccount(ctx, c, p); err != nil {
 			return errors.Wrap(err, "cannot ensure service account is present")
 		}

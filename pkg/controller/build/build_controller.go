@@ -138,33 +138,10 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 	target := instance.DeepCopy()
 	targetLog := rlog.ForBuild(target)
 
-	pl, err := platform.GetOrFind(ctx, r.client, target.Namespace, target.Status.Platform, true)
-	if target.Status.Phase == v1.BuildPhaseNone || target.Status.Phase == v1.BuildPhaseWaitingForPlatform {
-		if err != nil || pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
-			target.Status.Phase = v1.BuildPhaseWaitingForPlatform
-		} else {
-			target.Status.Phase = v1.BuildPhaseInitialization
-		}
-
-		if instance.Status.Phase != target.Status.Phase {
-			if err != nil {
-				target.Status.SetErrorCondition(v1.BuildConditionPlatformAvailable, v1.BuildConditionPlatformAvailableReason, err)
-			}
-
-			if pl != nil {
-				target.SetIntegrationPlatform(pl)
-			}
-
-			return r.update(ctx, &instance, target)
-		}
-
-		return reconcile.Result{}, err
-	}
-
 	var actions []Action
 
-	switch pl.Status.Build.BuildStrategy {
-	case v1.IntegrationPlatformBuildStrategyPod:
+	switch instance.Spec.Strategy {
+	case v1.BuildStrategyPod:
 		actions = []Action{
 			newInitializePodAction(r.reader),
 			newScheduleAction(r.reader),
@@ -172,7 +149,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 			newErrorRecoveryAction(),
 			newErrorAction(),
 		}
-	case v1.IntegrationPlatformBuildStrategyRoutine:
+	case v1.BuildStrategyRoutine:
 		actions = []Action{
 			newInitializeRoutineAction(),
 			newScheduleAction(r.reader),
@@ -225,7 +202,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 		return reconcile.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
-	if pl.Status.Build.BuildStrategy == v1.IntegrationPlatformBuildStrategyPod &&
+	if target.Spec.Strategy == v1.BuildStrategyPod &&
 		(target.Status.Phase == v1.BuildPhasePending || target.Status.Phase == v1.BuildPhaseRunning) {
 		// Requeue running Build to poll Pod and signal timeout
 		return reconcile.Result{RequeueAfter: 1 * time.Second}, nil

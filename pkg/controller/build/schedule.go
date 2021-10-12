@@ -109,7 +109,6 @@ func (action *scheduleAction) toPendingPhase(ctx context.Context, build *v1.Buil
 			Phase:      v1.BuildPhasePending,
 			StartedAt:  &now,
 			Failure:    b.Status.Failure,
-			Platform:   b.Status.Platform,
 			Conditions: b.Status.Conditions,
 		}
 	})
