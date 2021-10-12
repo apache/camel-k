@@ -225,7 +225,7 @@ type IntegrationCondition struct {
 	FirstTruthyTime *metav1.Time `json:"firstTruthyTime,omitempty"`
 	// The reason for the condition's last transition.
 	Reason string `json:"reason,omitempty"`
-	// A human readable message indicating details about the transition.
+	// A human-readable message indicating details about the transition.
 	Message string `json:"message,omitempty"`
 }
 type PodSpecTemplate struct {

@@ -71,8 +71,8 @@ func TestSkipRegistryInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns, "--skip-registry-setup").Execute()).To(Succeed())
 		Eventually(Platform(ns)).ShouldNot(BeNil())
-		Eventually(func() v1.IntegrationPlatformRegistrySpec {
+		Eventually(func() v1.RegistrySpec {
 			return Platform(ns)().Spec.Build.Registry
-		}, TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformRegistrySpec{}))
+		}, TestTimeoutMedium).Should(Equal(v1.RegistrySpec{}))
 	})
 }

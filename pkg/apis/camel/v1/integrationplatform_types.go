@@ -106,26 +106,17 @@ var AllTraitProfiles = []TraitProfile{TraitProfileKubernetes, TraitProfileKnativ
 
 // IntegrationPlatformBuildSpec contains platform related build information
 type IntegrationPlatformBuildSpec struct {
-	BuildStrategy         IntegrationPlatformBuildStrategy        `json:"buildStrategy,omitempty"`
+	BuildStrategy         BuildStrategy                           `json:"buildStrategy,omitempty"`
 	PublishStrategy       IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
 	RuntimeVersion        string                                  `json:"runtimeVersion,omitempty"`
 	RuntimeProvider       RuntimeProvider                         `json:"runtimeProvider,omitempty"`
 	BaseImage             string                                  `json:"baseImage,omitempty"`
-	Registry              IntegrationPlatformRegistrySpec         `json:"registry,omitempty"`
+	Registry              RegistrySpec                            `json:"registry,omitempty"`
 	Timeout               *metav1.Duration                        `json:"timeout,omitempty"`
 	PersistentVolumeClaim string                                  `json:"persistentVolumeClaim,omitempty"`
 	Maven                 MavenSpec                               `json:"maven,omitempty"`
 	HTTPProxySecret       string                                  `json:"httpProxySecret,omitempty"`
 	KanikoBuildCache      *bool                                   `json:"kanikoBuildCache,omitempty"`
-}
-
-// IntegrationPlatformRegistrySpec --
-type IntegrationPlatformRegistrySpec struct {
-	Insecure     bool   `json:"insecure,omitempty"`
-	Address      string `json:"address,omitempty"`
-	Secret       string `json:"secret,omitempty"`
-	CA           string `json:"ca,omitempty"`
-	Organization string `json:"organization,omitempty"`
 }
 
 // IntegrationPlatformKameletSpec --
@@ -136,22 +127,6 @@ type IntegrationPlatformKameletSpec struct {
 // IntegrationPlatformKameletRepositorySpec --
 type IntegrationPlatformKameletRepositorySpec struct {
 	URI string `json:"uri,omitempty"`
-}
-
-// IntegrationPlatformBuildStrategy enumerates all implemented build strategies
-type IntegrationPlatformBuildStrategy string
-
-const (
-	// IntegrationPlatformBuildStrategyRoutine performs the build in a routine
-	IntegrationPlatformBuildStrategyRoutine IntegrationPlatformBuildStrategy = "routine"
-	// IntegrationPlatformBuildStrategyPod performs the build in a pod
-	IntegrationPlatformBuildStrategyPod IntegrationPlatformBuildStrategy = "pod"
-)
-
-// IntegrationPlatformBuildStrategies --
-var IntegrationPlatformBuildStrategies = []IntegrationPlatformBuildStrategy{
-	IntegrationPlatformBuildStrategyRoutine,
-	IntegrationPlatformBuildStrategyPod,
 }
 
 // IntegrationPlatformBuildPublishStrategy enumerates all implemented publish strategies
@@ -212,6 +187,6 @@ type IntegrationPlatformCondition struct {
 	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
 	// The reason for the condition's last transition.
 	Reason string `json:"reason,omitempty"`
-	// A human readable message indicating details about the transition.
+	// A human-readable message indicating details about the transition.
 	Message string `json:"message,omitempty"`
 }

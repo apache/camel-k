@@ -71,8 +71,10 @@ spec:
                   baseImage:
                     type: string
                   buildStrategy:
-                    description: IntegrationPlatformBuildStrategy enumerates all implemented
-                      build strategies
+                    description: BuildStrategy specifies how the Build should be executed
+                    enum:
+                    - routine
+                    - pod
                     type: string
                   httpProxySecret:
                     type: string
@@ -222,7 +224,8 @@ spec:
                       all implemented publish strategies
                     type: string
                   registry:
-                    description: IntegrationPlatformRegistrySpec --
+                    description: RegistrySpec provides the configuration for the container
+                      registry
                     properties:
                       address:
                         type: string
@@ -309,8 +312,10 @@ spec:
                   baseImage:
                     type: string
                   buildStrategy:
-                    description: IntegrationPlatformBuildStrategy enumerates all implemented
-                      build strategies
+                    description: BuildStrategy specifies how the Build should be executed
+                    enum:
+                    - routine
+                    - pod
                     type: string
                   httpProxySecret:
                     type: string
@@ -460,7 +465,8 @@ spec:
                       all implemented publish strategies
                     type: string
                   registry:
-                    description: IntegrationPlatformRegistrySpec --
+                    description: RegistrySpec provides the configuration for the container
+                      registry
                     properties:
                       address:
                         type: string
@@ -500,7 +506,7 @@ spec:
                       format: date-time
                       type: string
                     message:
-                      description: A human readable message indicating details about
+                      description: A human-readable message indicating details about
                         the transition.
                       type: string
                     reason:
