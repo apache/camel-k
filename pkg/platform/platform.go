@@ -23,6 +23,8 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -80,7 +82,7 @@ func find(ctx context.Context, c k8sclient.Reader, namespace string, active bool
 
 // findLocal returns the currently installed platform or any platform existing in local namespace
 func findLocal(ctx context.Context, c k8sclient.Reader, namespace string, active bool) (*v1.IntegrationPlatform, error) {
-	lst, err := ListPlatforms(ctx, c, namespace)
+	lst, err := ListPrimaryPlatforms(ctx, c, namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -101,8 +103,24 @@ func findLocal(ctx context.Context, c k8sclient.Reader, namespace string, active
 	return nil, k8serrors.NewNotFound(v1.Resource("IntegrationPlatform"), DefaultPlatformName)
 }
 
-// ListPlatforms returns all platforms installed in a given namespace (only one will be active)
-func ListPlatforms(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatformList, error) {
+// ListPrimaryPlatforms returns all non-secondary platforms installed in a given namespace (only one will be active)
+func ListPrimaryPlatforms(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatformList, error) {
+	lst := v1.NewIntegrationPlatformList()
+	primaryPlatform, err := labels.NewRequirement(v1.SecondaryPlatformLabel, selection.DoesNotExist, []string{})
+	if err != nil {
+		return nil, err
+	}
+	opt := k8sclient.MatchingLabelsSelector{
+		labels.NewSelector().Add(*primaryPlatform),
+	}
+	if err := c.List(ctx, &lst, k8sclient.InNamespace(namespace), opt); err != nil {
+		return nil, err
+	}
+	return &lst, nil
+}
+
+// ListAllPlatforms returns all platforms installed in a given namespace
+func ListAllPlatforms(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatformList, error) {
 	lst := v1.NewIntegrationPlatformList()
 	if err := c.List(ctx, &lst, k8sclient.InNamespace(namespace)); err != nil {
 		return nil, err
@@ -113,6 +131,14 @@ func ListPlatforms(ctx context.Context, c k8sclient.Reader, namespace string) (*
 // IsActive determines if the given platform is being used
 func IsActive(p *v1.IntegrationPlatform) bool {
 	return p.Status.Phase != "" && p.Status.Phase != v1.IntegrationPlatformPhaseDuplicate
+}
+
+// IsSecondary determines if the given platform is marked as secondary
+func IsSecondary(p *v1.IntegrationPlatform) bool {
+	if l, ok := p.Labels[v1.SecondaryPlatformLabel]; ok && l == "true" {
+		return true
+	}
+	return false
 }
 
 // GetProfile returns the current profile of the platform (if present) or returns the default one for the cluster
