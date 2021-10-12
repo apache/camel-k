@@ -29,6 +29,7 @@
 
 **Merged pull requests:**
 
+- feat: Comprehensive Integration error status [\#2682](https://github.com/apache/camel-k/pull/2682) ([astefanutti](https://github.com/astefanutti))
 - fix\(cli\): apply --registry\* flags even on OpenShift for kamel install [\#2681](https://github.com/apache/camel-k/pull/2681) ([tadayosi](https://github.com/tadayosi))
 - feat: Add active-deadline-seconds and backoff-limit options to cron trait [\#2678](https://github.com/apache/camel-k/pull/2678) ([astefanutti](https://github.com/astefanutti))
 - feat: Add progress-deadline-seconds option to deployment trait [\#2677](https://github.com/apache/camel-k/pull/2677) ([astefanutti](https://github.com/astefanutti))
