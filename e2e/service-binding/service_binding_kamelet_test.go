@@ -35,7 +35,7 @@ import (
 
 func TestKameletServiceBindingTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--operator-image-pull-policy", "Always").Execute()).To(Succeed())
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		// Create our mock service config
 		message := "hello"
@@ -60,10 +60,13 @@ func TestKameletServiceBindingTrait(t *testing.T) {
 
 		Expect(CreateTimerKamelet(ns, "timer-source")()).To(Succeed())
 
-		Expect(Kamel("bind", "timer-source", "log:info", "--connect", serviceRef, "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("bind", "timer-source", "log:info",
+			"-p", "source.message=Hello+world",
+			"--connect", serviceRef, "-n", ns).
+			Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "timer-source-to-log"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
-		Eventually(IntegrationLogs(ns, "timer-source-to-log")).Should(ContainSubstring("Body: hello"))
+		Eventually(IntegrationLogs(ns, "timer-source-to-log")).Should(ContainSubstring("Body: Hello+world"))
 
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
