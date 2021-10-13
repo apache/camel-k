@@ -19,9 +19,12 @@ package platform
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
@@ -33,8 +36,39 @@ const (
 	DefaultPlatformName = "camel-k"
 )
 
-// GetCurrent returns the currently installed platform (local or global)
-func GetCurrent(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatform, error) {
+func GetForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object) (*v1.IntegrationPlatform, error) {
+	ref, err := extractPlatformSelector(o)
+	if err != nil {
+		return nil, err
+	}
+	if ref != nil {
+		return get(ctx, c, ref.Namespace, ref.Name)
+	}
+	return getCurrent(ctx, c, o.GetNamespace())
+}
+
+func extractPlatformSelector(o k8sclient.Object) (*corev1.ObjectReference, error) {
+	selectedPlatform := o.GetAnnotations()[v1.PlatformSelectorAnnotation]
+	if selectedPlatform == "" {
+		return nil, nil
+	}
+	parts := strings.Split(selectedPlatform, "/")
+	if len(parts) == 0 || len(parts) > 2 {
+		return nil, fmt.Errorf("Invalid platform selector: expected \"[namespace/]name\", got %q", selectedPlatform)
+	}
+	namespace := o.GetNamespace()
+	if len(parts) == 2 {
+		namespace = parts[0]
+	}
+	name := parts[len(parts)-1]
+	return &corev1.ObjectReference{
+		Namespace: namespace,
+		Name:      name,
+	}, nil
+}
+
+// getCurrent returns the currently installed platform (local or global)
+func getCurrent(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatform, error) {
 	return find(ctx, c, namespace, true)
 }
 

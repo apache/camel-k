@@ -145,6 +145,7 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 		BaseTask: v1.BaseTask{
 			Name: "builder",
 		},
+		BaseImage:    e.Platform.Status.Build.BaseImage,
 		Runtime:      e.CamelCatalog.Runtime,
 		Dependencies: e.IntegrationKit.Spec.Dependencies,
 		Maven:        maven,
