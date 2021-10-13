@@ -88,7 +88,7 @@ func (t *builderTask) Do(ctx context.Context) v1.BuildStatus {
 
 	steps, err := StepsFrom(t.task.Steps...)
 	if err != nil {
-		t.log.Errorf(err,"invalid builder steps: %s", t.task.Steps)
+		t.log.Errorf(err, "invalid builder steps: %s", t.task.Steps)
 		result.Failed(err)
 		return result
 	}

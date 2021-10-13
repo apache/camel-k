@@ -68,7 +68,7 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 			kitName := integration.Spec.IntegrationKit.Name
 
 			if kitNamespace == "" {
-				pl, err := platform.GetCurrent(ctx, action.client, integration.Namespace)
+				pl, err := platform.GetForResource(ctx, action.client, integration)
 				if err != nil && !k8serrors.IsNotFound(err) {
 					return nil, err
 				}

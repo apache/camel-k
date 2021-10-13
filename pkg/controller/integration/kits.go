@@ -36,7 +36,7 @@ import (
 )
 
 func lookupKitsForIntegration(ctx context.Context, c ctrl.Reader, integration *v1.Integration, options ...ctrl.ListOption) ([]v1.IntegrationKit, error) {
-	pl, err := platform.GetCurrent(ctx, c, integration.Namespace)
+	pl, err := platform.GetForResource(ctx, c, integration)
 	if err != nil && !errors.IsNotFound(err) {
 		return nil, err
 	}

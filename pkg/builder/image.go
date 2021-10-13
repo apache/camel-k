@@ -28,7 +28,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
@@ -146,11 +145,10 @@ func incrementalImageContext(ctx *builderContext) error {
 				}
 			}
 		} else {
-			pl, err := platform.GetCurrent(ctx.C, ctx, ctx.Namespace)
-			if err != nil {
-				return err
+			if ctx.BaseImage == "" {
+				// TODO: transient workaround to be removed in 1.8.x
+				ctx.BaseImage = defaults.BaseImage()
 			}
-			ctx.BaseImage = pl.Status.Build.BaseImage
 		}
 
 		return nil

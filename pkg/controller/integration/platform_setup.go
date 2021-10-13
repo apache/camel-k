@@ -55,7 +55,7 @@ func (action *platformSetupAction) Handle(ctx context.Context, integration *v1.I
 		return nil, err
 	}
 
-	pl, err := platform.GetCurrent(ctx, action.client, integration.Namespace)
+	pl, err := platform.GetForResource(ctx, action.client, integration)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return nil, err
 	} else if pl != nil {
