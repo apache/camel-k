@@ -20,6 +20,7 @@ package integration
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -27,7 +28,6 @@ import (
 	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
-	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 
@@ -109,7 +109,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	}
 
 	// Run traits that are enabled for the phase
-	_, err = trait.Apply(ctx, action.client, integration, kit)
+	environment, err := trait.Apply(ctx, action.client, integration, kit)
 	if err != nil {
 		return nil, err
 	}
@@ -146,15 +146,11 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	podCount := int32(len(pendingPods.Items) + nonTerminatingPods)
 	integration.Status.Replicas = &podCount
 
-	// Reconcile Integration phase
+	// Reconcile Integration phase and ready condition
 	if integration.Status.Phase == v1.IntegrationPhaseDeploying {
 		integration.Status.Phase = v1.IntegrationPhaseRunning
-		// let's return to mark the transition and wait for another reconciliation cycle
-		// so that caches have more time to catch-up
-		return integration, nil
 	}
-
-	err = action.updateIntegrationPhaseAndReadyCondition(ctx, integration, pendingPods.Items, runningPods.Items)
+	err = action.updateIntegrationPhaseAndReadyCondition(ctx, environment, integration, pendingPods.Items, runningPods.Items)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +158,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	return integration, nil
 }
 
-func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context.Context, integration *v1.Integration, pendingPods []corev1.Pod, runningPods []corev1.Pod) error {
+func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context.Context, environment *trait.Environment, integration *v1.Integration, pendingPods []corev1.Pod, runningPods []corev1.Pod) error {
 	var controller ctrl.Object
 	var lastCompletedJob *batchv1.Job
 
@@ -176,18 +172,16 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 		return fmt.Errorf("unsupported controller for integration %s", integration.Name)
 	}
 
+	// Retrieve the controller updated from the deployer trait execution
+	controller = environment.Resources.GetController(func(object ctrl.Object) bool {
+		return reflect.TypeOf(controller) == reflect.TypeOf(object)
+	})
+	if controller == nil {
+		return fmt.Errorf("unable to retrieve controller for integration %s", integration.Name)
+	}
+
 	switch c := controller.(type) {
 	case *appsv1.Deployment:
-		// Check the Deployment exists
-		if err := action.client.Get(ctx, ctrl.ObjectKeyFromObject(integration), c); err != nil {
-			if errors.IsNotFound(err) {
-				integration.Status.Phase = v1.IntegrationPhaseError
-				setReadyConditionError(integration, err.Error())
-				return nil
-			} else {
-				return err
-			}
-		}
 		// Check the Deployment progression
 		if progressing := kubernetes.GetDeploymentCondition(*c, appsv1.DeploymentProgressing); progressing != nil && progressing.Status == corev1.ConditionFalse && progressing.Reason == "ProgressDeadlineExceeded" {
 			integration.Status.Phase = v1.IntegrationPhaseError
@@ -196,16 +190,6 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 		}
 
 	case *servingv1.Service:
-		// Check the KnativeService exists
-		if err := action.client.Get(ctx, ctrl.ObjectKeyFromObject(integration), c); err != nil {
-			if errors.IsNotFound(err) {
-				integration.Status.Phase = v1.IntegrationPhaseError
-				setReadyConditionError(integration, err.Error())
-				return nil
-			} else {
-				return err
-			}
-		}
 		// Check the KnativeService conditions
 		if ready := kubernetes.GetKnativeServiceCondition(*c, servingv1.ServiceConditionReady); ready.IsFalse() && ready.GetReason() == "RevisionFailed" {
 			integration.Status.Phase = v1.IntegrationPhaseError
@@ -214,16 +198,6 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 		}
 
 	case *batchv1beta1.CronJob:
-		// Check the CronJob exists
-		if err := action.client.Get(ctx, ctrl.ObjectKeyFromObject(integration), c); err != nil {
-			if errors.IsNotFound(err) {
-				integration.Status.Phase = v1.IntegrationPhaseError
-				setReadyConditionError(integration, err.Error())
-				return nil
-			} else {
-				return err
-			}
-		}
 		// Check latest job result
 		if lastScheduleTime := c.Status.LastScheduleTime; lastScheduleTime != nil && len(c.Status.Active) == 0 {
 			jobs := batchv1.JobList{}

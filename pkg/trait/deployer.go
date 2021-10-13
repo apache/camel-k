@@ -18,12 +18,12 @@ limitations under the License.
 package trait
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/pkg/errors"
-
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -95,17 +95,18 @@ func (t *deployerTrait) serverSideApply(env *Environment, resource ctrl.Object) 
 	}
 	err = env.Client.Patch(env.Ctx, target, ctrl.Apply, ctrl.ForceOwnership, ctrl.FieldOwner("camel-k-operator"))
 	if err != nil {
-		return errors.Wrapf(err, "error during apply resource: %v", resource)
+		return fmt.Errorf("error during apply resource: %s/%s: %s", resource.GetNamespace(), resource.GetName(), err)
 	}
-	return nil
+	// Update the resource with the response returned from the API server
+	return t.unstructuredToRuntimeObject(target, resource)
 }
 
 func (t *deployerTrait) clientSideApply(env *Environment, resource ctrl.Object) error {
 	err := env.Client.Create(env.Ctx, resource)
 	if err == nil {
 		return nil
-	} else if !k8serrors.IsAlreadyExists(err) {
-		return errors.Wrapf(err, "error during create resource: %v", resource)
+	} else if !errors.IsAlreadyExists(err) {
+		return fmt.Errorf("error during create resource: %s/%s: %s", resource.GetNamespace(), resource.GetName(), err)
 	}
 	object := &unstructured.Unstructured{}
 	object.SetNamespace(resource.GetNamespace())
@@ -119,14 +120,22 @@ func (t *deployerTrait) clientSideApply(env *Environment, resource ctrl.Object) 
 	if err != nil {
 		return err
 	} else if len(p) == 0 {
-		// Avoid triggering a patch request for nothing
-		return nil
+		// Update the resource with the object returned from the API server
+		return t.unstructuredToRuntimeObject(object, resource)
 	}
 	err = env.Client.Patch(env.Ctx, resource, ctrl.RawPatch(types.MergePatchType, p))
 	if err != nil {
-		return errors.Wrapf(err, "error during patch resource: %v", resource)
+		return fmt.Errorf("error during patch %s/%s: %s", resource.GetNamespace(), resource.GetName(), err)
 	}
 	return nil
+}
+
+func (t *deployerTrait) unstructuredToRuntimeObject(u *unstructured.Unstructured, obj ctrl.Object) error {
+	data, err := json.Marshal(u)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(data, obj)
 }
 
 func isIncompatibleServerError(err error) bool {
@@ -137,11 +146,11 @@ func isIncompatibleServerError(err error) bool {
 
 	// 415: Unsupported media type means we're talking to a server which doesn't
 	// support server-side apply.
-	if _, ok := err.(*k8serrors.StatusError); !ok {
+	if _, ok := err.(*errors.StatusError); !ok {
 		// Non-StatusError means the error isn't because the server is incompatible.
 		return false
 	}
-	return err.(*k8serrors.StatusError).Status().Code == http.StatusUnsupportedMediaType
+	return err.(*errors.StatusError).Status().Code == http.StatusUnsupportedMediaType
 }
 
 func (t *deployerTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
