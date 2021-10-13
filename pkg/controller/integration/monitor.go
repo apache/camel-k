@@ -26,6 +26,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
@@ -300,12 +301,30 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 		if r := integration.Spec.Replicas; r != nil {
 			replicas = *r
 		}
-		if c.Status.UpdatedReplicas == replicas && c.Status.ReadyReplicas == replicas {
+		// The Deployment status reports updated and ready replicas separately,
+		// so that the number of ready replicas also accounts for older versions.
+		// We compare the Integration PodSpec to that of the Pod in order to make
+		// sure we account for up-to-date version.
+		var readyPods []corev1.Pod
+		for _, pod := range runningPods {
+			if ready := kubernetes.GetPodCondition(pod, corev1.PodReady); ready == nil || ready.Status != corev1.ConditionTrue {
+				continue
+			}
+			if equality.Semantic.DeepDerivative(c.Spec.Template.Spec, pod.Spec) {
+				readyPods = append(readyPods, pod)
+			}
+		}
+		readyReplicas := int32(len(readyPods))
+		// The Integration is considered ready when the number of replicas
+		// reported to be ready is larger than or equal to the specified number
+		// of replicas. This avoids reporting a falsy readiness condition
+		// when the Integration is being down-scaled.
+		if readyReplicas >= replicas {
 			setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionDeploymentReadyReason, fmt.Sprintf("%d/%d ready replicas", c.Status.ReadyReplicas, replicas))
 		} else if c.Status.UpdatedReplicas < replicas {
 			setReadyCondition(integration, corev1.ConditionFalse, v1.IntegrationConditionDeploymentProgressingReason, fmt.Sprintf("%d/%d updated replicas", c.Status.UpdatedReplicas, replicas))
 		} else {
-			setReadyCondition(integration, corev1.ConditionFalse, v1.IntegrationConditionDeploymentProgressingReason, fmt.Sprintf("%d/%d ready replicas", c.Status.ReadyReplicas, replicas))
+			setReadyCondition(integration, corev1.ConditionFalse, v1.IntegrationConditionDeploymentProgressingReason, fmt.Sprintf("%d/%d ready replicas", readyReplicas, replicas))
 		}
 
 	case *servingv1.Service:
