@@ -31,6 +31,7 @@
 
 **Merged pull requests:**
 
+- fix: Integration readiness status should account for updated replicas [\#2691](https://github.com/apache/camel-k/pull/2691) ([astefanutti](https://github.com/astefanutti))
 - fix\(e2e\): Resolve kamel bind e2e test conflict [\#2686](https://github.com/apache/camel-k/pull/2686) ([astefanutti](https://github.com/astefanutti))
 - Fix \#1943: allow multiple operators to reconcile label filtered resources [\#2683](https://github.com/apache/camel-k/pull/2683) ([nicolaferraro](https://github.com/nicolaferraro))
 - feat: Comprehensive Integration error status [\#2682](https://github.com/apache/camel-k/pull/2682) ([astefanutti](https://github.com/astefanutti))
