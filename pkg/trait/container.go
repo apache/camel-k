@@ -220,6 +220,11 @@ func (t *containerTrait) configureImageIntegrationKit(e *Environment) error {
 		if operatorID != "" {
 			kit.Labels[v1.OperatorIDLabel] = operatorID
 		}
+		if v, ok := e.Integration.Annotations[v1.PlatformSelectorAnnotation]; ok {
+			kit.Annotations = map[string]string{
+				v1.PlatformSelectorAnnotation: v,
+			}
+		}
 
 		t.L.Infof("image %s", kit.Spec.Image)
 		e.Resources.Add(kit)

@@ -265,6 +265,11 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 	if operatorID != "" {
 		kit.Labels[v1.OperatorIDLabel] = operatorID
 	}
+	if v, ok := integration.Annotations[v1.PlatformSelectorAnnotation]; ok {
+		kit.Annotations = map[string]string{
+			v1.PlatformSelectorAnnotation: v,
+		}
+	}
 
 	traits := t.getKitTraits(e)
 

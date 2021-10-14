@@ -216,7 +216,7 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 			return r.update(ctx, &instance, target)
 		} else {
 			// Platform is always local to the kit
-			pl, err := platform.GetOrFindLocal(ctx, r.client, target.Namespace, target.Status.Platform, true)
+			pl, err := platform.GetOrFindLocalForResource(ctx, r.client, target, true)
 			if err != nil || pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
 				target.Status.Phase = v1.IntegrationKitPhaseWaitingForPlatform
 			} else {

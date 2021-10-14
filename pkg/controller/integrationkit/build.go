@@ -90,6 +90,13 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 		if operatorID != "" {
 			labels[v1.OperatorIDLabel] = operatorID
 		}
+		var annotations map[string]string
+		if v, ok := kit.Annotations[v1.PlatformSelectorAnnotation]; ok {
+			annotations = map[string]string{
+				v1.PlatformSelectorAnnotation: v,
+			}
+		}
+
 		timeout := env.Platform.Status.Build.GetTimeout()
 		if layout := labels[v1.IntegrationKitLayoutLabel]; env.Platform.Spec.Build.Timeout == nil && layout == v1.IntegrationKitLayoutNative {
 			// Increase the timeout to a sensible default
@@ -103,9 +110,10 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 				Kind:       v1.BuildKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Namespace: kit.Namespace,
-				Name:      kit.Name,
-				Labels:    labels,
+				Namespace:   kit.Namespace,
+				Name:        kit.Name,
+				Labels:      labels,
+				Annotations: annotations,
 			},
 			Spec: v1.BuildSpec{
 				Strategy: env.Platform.Status.Build.BuildStrategy,
