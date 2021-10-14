@@ -19,12 +19,9 @@ package platform
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -47,12 +44,8 @@ func GetOrFindLocalForResource(ctx context.Context, c k8sclient.Reader, o k8scli
 }
 
 func getOrFindForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object, active bool, local bool) (*v1.IntegrationPlatform, error) {
-	ref, err := extractPlatformSelector(o)
-	if err != nil {
-		return nil, err
-	}
-	if ref != nil {
-		return get(ctx, c, ref.Namespace, ref.Name)
+	if selectedPlatform, ok := o.GetAnnotations()[v1.PlatformSelectorAnnotation]; ok {
+		return get(ctx, c, o.GetNamespace(), selectedPlatform)
 	}
 	if it, ok := o.(*v1.Integration); ok {
 		return getOrFind(ctx, c, it.Namespace, it.Status.Platform, active, local)
@@ -62,26 +55,6 @@ func getOrFindForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.O
 		return getOrFind(ctx, c, b.Namespace, b.Status.Platform, active, local)
 	}
 	return find(ctx, c, o.GetNamespace(), active, local)
-}
-
-func extractPlatformSelector(o k8sclient.Object) (*corev1.ObjectReference, error) {
-	selectedPlatform := o.GetAnnotations()[v1.PlatformSelectorAnnotation]
-	if selectedPlatform == "" {
-		return nil, nil
-	}
-	parts := strings.Split(selectedPlatform, "/")
-	if len(parts) == 0 || len(parts) > 2 {
-		return nil, fmt.Errorf("Invalid platform selector: expected \"[namespace/]name\", got %q", selectedPlatform)
-	}
-	namespace := o.GetNamespace()
-	if len(parts) == 2 {
-		namespace = parts[0]
-	}
-	name := parts[len(parts)-1]
-	return &corev1.ObjectReference{
-		Namespace: namespace,
-		Name:      name,
-	}, nil
 }
 
 func getOrFind(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool, local bool) (*v1.IntegrationPlatform, error) {
