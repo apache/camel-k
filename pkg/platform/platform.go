@@ -26,8 +26,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/selection"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -167,15 +165,24 @@ func findLocal(ctx context.Context, c k8sclient.Reader, namespace string, active
 
 // ListPrimaryPlatforms returns all non-secondary platforms installed in a given namespace (only one will be active)
 func ListPrimaryPlatforms(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatformList, error) {
-	lst := v1.NewIntegrationPlatformList()
-	primaryPlatform, err := labels.NewRequirement(v1.SecondaryPlatformLabel, selection.DoesNotExist, []string{})
+	lst, err := ListAllPlatforms(ctx, c, namespace)
 	if err != nil {
 		return nil, err
 	}
-	opt := k8sclient.MatchingLabelsSelector{
-		labels.NewSelector().Add(*primaryPlatform),
+
+	filtered := v1.NewIntegrationPlatformList()
+	for _, pl := range lst.Items {
+		if val, present := pl.Annotations[v1.SecondaryPlatformAnnotation]; !present || val != "true" {
+			filtered.Items = append(filtered.Items, pl)
+		}
 	}
-	if err := c.List(ctx, &lst, k8sclient.InNamespace(namespace), opt); err != nil {
+	return &filtered, nil
+}
+
+// ListAllPlatforms returns all platforms installed in a given namespace
+func ListAllPlatforms(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatformList, error) {
+	lst := v1.NewIntegrationPlatformList()
+	if err := c.List(ctx, &lst, k8sclient.InNamespace(namespace)); err != nil {
 		return nil, err
 	}
 	return &lst, nil
@@ -188,7 +195,7 @@ func IsActive(p *v1.IntegrationPlatform) bool {
 
 // IsSecondary determines if the given platform is marked as secondary
 func IsSecondary(p *v1.IntegrationPlatform) bool {
-	if l, ok := p.Labels[v1.SecondaryPlatformLabel]; ok && l == "true" {
+	if l, ok := p.Annotations[v1.SecondaryPlatformAnnotation]; ok && l == "true" {
 		return true
 	}
 	return false

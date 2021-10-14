@@ -428,10 +428,10 @@ func AssignIntegrationToOperator(ns, name, operator string) error {
 	if it == nil {
 		return fmt.Errorf("cannot assign integration %q to operator: integration not found", name)
 	}
-	if it.Labels == nil {
-		it.Labels = make(map[string]string)
+	if it.Annotations == nil {
+		it.Annotations = make(map[string]string)
 	}
-	it.Labels[v1.OperatorIDLabel] = operator
+	it.Annotations[v1.OperatorIDAnnotation] = operator
 	return TestClient().Update(TestContext, it)
 }
 
@@ -745,10 +745,10 @@ func AssignKameletBindingToOperator(ns, name, operator string) error {
 	if klb == nil {
 		return fmt.Errorf("cannot assign kamelet binding %q to operator: kamelet binding not found", name)
 	}
-	if klb.Labels == nil {
-		klb.Labels = make(map[string]string)
+	if klb.Annotations == nil {
+		klb.Annotations = make(map[string]string)
 	}
-	klb.Labels[v1.OperatorIDLabel] = operator
+	klb.Annotations[v1.OperatorIDAnnotation] = operator
 	return TestClient().Update(TestContext, klb)
 }
 
@@ -1073,10 +1073,10 @@ func AssignPlatformToOperator(ns, operator string) error {
 	if pl == nil {
 		return errors.New("cannot assign platform to operator: no platform found")
 	}
-	if pl.Labels == nil {
-		pl.Labels = make(map[string]string)
+	if pl.Annotations == nil {
+		pl.Annotations = make(map[string]string)
 	}
-	pl.Labels[v1.OperatorIDLabel] = operator
+	pl.Annotations[v1.OperatorIDAnnotation] = operator
 	return TestClient().Update(TestContext, pl)
 }
 
