@@ -261,14 +261,15 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 		kubernetes.CamelCreatorLabelVersion:   integration.ResourceVersion,
 	}
 
-	operatorID := defaults.OperatorID()
-	if operatorID != "" {
-		kit.Labels[v1.OperatorIDLabel] = operatorID
+	if kit.Annotations == nil {
+		kit.Annotations = make(map[string]string)
 	}
 	if v, ok := integration.Annotations[v1.PlatformSelectorAnnotation]; ok {
-		kit.Annotations = map[string]string{
-			v1.PlatformSelectorAnnotation: v,
-		}
+		kit.Annotations[v1.PlatformSelectorAnnotation] = v
+	}
+	operatorID := defaults.OperatorID()
+	if operatorID != "" {
+		kit.Annotations[v1.OperatorIDAnnotation] = operatorID
 	}
 
 	traits := t.getKitTraits(e)

@@ -86,15 +86,14 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 
 		labels := kubernetes.FilterCamelCreatorLabels(kit.Labels)
 		labels[v1.IntegrationKitLayoutLabel] = kit.Labels[v1.IntegrationKitLayoutLabel]
+
+		var annotations = make(map[string]string)
+		if v, ok := kit.Annotations[v1.PlatformSelectorAnnotation]; ok {
+			annotations[v1.PlatformSelectorAnnotation] = v
+		}
 		operatorID := defaults.OperatorID()
 		if operatorID != "" {
-			labels[v1.OperatorIDLabel] = operatorID
-		}
-		var annotations map[string]string
-		if v, ok := kit.Annotations[v1.PlatformSelectorAnnotation]; ok {
-			annotations = map[string]string{
-				v1.PlatformSelectorAnnotation: v,
-			}
+			annotations[v1.OperatorIDAnnotation] = operatorID
 		}
 
 		timeout := env.Platform.Status.Build.GetTimeout()

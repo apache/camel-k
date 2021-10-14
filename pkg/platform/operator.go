@@ -108,7 +108,7 @@ func IsOperatorHandler(object ctrl.Object) bool {
 	if object == nil {
 		return true
 	}
-	resourceID := object.GetLabels()[camelv1.OperatorIDLabel]
+	resourceID := object.GetAnnotations()[camelv1.OperatorIDAnnotation]
 	operatorID := defaults.OperatorID()
 	return resourceID == operatorID
 }
@@ -155,7 +155,7 @@ func (f FilteringFuncs) Update(e event.UpdateEvent) bool {
 		return false
 	}
 	if e.ObjectOld != nil && e.ObjectNew != nil &&
-		e.ObjectOld.GetLabels()[camelv1.OperatorIDLabel] != e.ObjectNew.GetLabels()[camelv1.OperatorIDLabel] {
+		e.ObjectOld.GetAnnotations()[camelv1.OperatorIDAnnotation] != e.ObjectNew.GetAnnotations()[camelv1.OperatorIDAnnotation] {
 		// Always force reconciliation when the object becomes managed by the current operator
 		return true
 	}
