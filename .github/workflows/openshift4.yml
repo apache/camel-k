@@ -118,6 +118,24 @@ jobs:
         # push image to internal registry
         LOCAL_IMAGE=image-registry.openshift-image-registry.svc:5000/apache/camel-k
         make IMAGE_NAME=${LOCAL_IMAGE} images images-push
+    - name: Set up DNS for OpenShift routes
+      run: |
+        OPENSHIFT_ROUTER_IP=`oc -n openshift-ingress get svc router-internal-default -ojsonpath='{ .spec.clusterIP }'`
+
+        # systemd-resolved
+        sudo systemctl stop systemd-resolved
+        sudo rm -f /etc/resolv.conf
+        sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+        sudo sh -c 'echo "DNS=127.0.0.1 8.8.8.8 8.8.4.4" >> /etc/systemd/resolved.conf'
+
+        # dnsmasq
+        sudo apt-get install -y dnsmasq
+        sudo systemctl stop dnsmasq
+        sudo sh -c "echo 'address=/.cluster.local/$OPENSHIFT_ROUTER_IP' >> /etc/dnsmasq.conf"
+        sudo sed -i 's/^#bind-interfaces/bind-interfaces/' /etc/dnsmasq.conf
+
+        sudo systemctl start systemd-resolved
+        sudo systemctl start dnsmasq
     - name: Info
       run: |
         oc cluster-info
