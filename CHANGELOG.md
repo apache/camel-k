@@ -31,7 +31,10 @@
 
 **Merged pull requests:**
 
+- chore\(runtime\): update to Camel K Runtime 1.10.0-SNAPSHOT [\#2694](https://github.com/apache/camel-k/pull/2694) ([tadayosi](https://github.com/tadayosi))
+- chore: Bypass cache round-trips to reconcile integration status [\#2692](https://github.com/apache/camel-k/pull/2692) ([astefanutti](https://github.com/astefanutti))
 - fix: Integration readiness status should account for updated replicas [\#2691](https://github.com/apache/camel-k/pull/2691) ([astefanutti](https://github.com/astefanutti))
+- chore\(builder\): Self-defined Build spec [\#2688](https://github.com/apache/camel-k/pull/2688) ([astefanutti](https://github.com/astefanutti))
 - fix\(e2e\): Resolve kamel bind e2e test conflict [\#2686](https://github.com/apache/camel-k/pull/2686) ([astefanutti](https://github.com/astefanutti))
 - Fix \#1943: allow multiple operators to reconcile label filtered resources [\#2683](https://github.com/apache/camel-k/pull/2683) ([nicolaferraro](https://github.com/nicolaferraro))
 - feat: Comprehensive Integration error status [\#2682](https://github.com/apache/camel-k/pull/2682) ([astefanutti](https://github.com/astefanutti))
