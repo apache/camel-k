@@ -1,0 +1,185 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: openshift4
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "release-*"
+    paths-ignore:
+      - 'docs/**'
+      - 'proposals/**'
+      - '**.adoc'
+      - '**.md'
+      - 'KEYS'
+      - 'LICENSE'
+      - 'NOTICE'
+  push:
+    branches:
+      - main
+      - "release-*"
+    paths-ignore:
+      - 'docs/**'
+      - 'proposals/**'
+      - '**.adoc'
+      - '**.md'
+      - 'KEYS'
+      - 'LICENSE'
+      - 'NOTICE'
+
+concurrency:
+  group: ${{ github.head_ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  openshift-it:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Cleanup
+      run: |
+        ls -lart
+        echo "Initial status:"
+        df -h
+
+        echo "Cleaning up resources:"
+        sudo swapoff -a
+        sudo rm -f /swapfile
+        sudo apt clean
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf "/usr/local/share/boost"
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+        docker rmi $(docker image ls -aq)
+
+        echo "Final status:"
+        df -h
+    - name: Set up JDK 11
+      uses: AdoptOpenJDK/install-jdk@v1
+      with:
+        version: "11"
+    - name: Set Go
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.16.x
+    - name: Get OpenShift Client (oc)
+      run: |
+        export OPENSHIFT_VERSION=4.7.0-0.okd-2021-08-22-163618
+        DOWNLOAD_URL=https://github.com/openshift/okd/releases/download/$OPENSHIFT_VERSION/openshift-client-linux-$OPENSHIFT_VERSION.tar.gz
+        wget -O client.tar.gz ${DOWNLOAD_URL}
+        tar -xf client.tar.gz oc
+        sudo mv oc /usr/local/bin/oc
+        sudo chmod 755 /usr/local/bin/oc
+    - name: Microshift OpenShift Cluster
+      uses: container-tools/microshift-action@v0.1
+      with:
+        version: 4.7.0-0.microshift-2021-08-31-224727
+    - name: Build Operator
+      run: |
+        echo "Build project"
+        make PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts
+    - name: Set up internal registry
+      run: |
+        # Custom internal registry for Microshift
+        oc apply -f e2e/support/files/microshift-registry.yaml
+
+        # Setting registry as insecure
+        # crio
+        sudo bash -c "cat <<EOF >> /etc/containers/registries.conf
+        [registries.insecure]
+        registries = ['image-registry.openshift-image-registry.svc:5000']
+        EOF"
+        sudo systemctl restart crio
+
+        # docker
+        patch=".\"insecure-registries\" = [\"image-registry.openshift-image-registry.svc:5000\""]
+        sudo jq "$patch" /etc/docker/daemon.json > /tmp/daemon.json.tmp && sudo mv /tmp/daemon.json.tmp /etc/docker/daemon.json
+        cat /etc/docker/daemon.json
+        sudo systemctl restart docker
+
+        # push image to internal registry
+        LOCAL_IMAGE=image-registry.openshift-image-registry.svc:5000/apache/camel-k
+        make IMAGE_NAME=${LOCAL_IMAGE} images images-push
+    - name: Info
+      run: |
+        oc cluster-info
+        oc describe nodes
+    - name: Run IT
+      #env:
+      #  TEST_DOCKER_HUB_USERNAME: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+      #  TEST_DOCKER_HUB_PASSWORD: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
+      #  TEST_GITHUB_PACKAGES_REPO: ${{ secrets.TEST_GITHUB_PACKAGES_REPO }}
+      #  TEST_GITHUB_PACKAGES_USERNAME: ${{ secrets.TEST_GITHUB_PACKAGES_USERNAME }}
+      #  TEST_GITHUB_PACKAGES_PASSWORD: ${{ secrets.TEST_GITHUB_PACKAGES_PASSWORD }}
+      run: |
+        echo "Installing camel k cluster resources"
+        ./kamel install --cluster-setup
+
+        # Configure install options
+        export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
+        export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
+        export KAMEL_INSTALL_REGISTRY=image-registry.openshift-image-registry.svc:5000
+        export KAMEL_INSTALL_REGISTRY_INSECURE=true
+        export KAMEL_INSTALL_OPERATOR_IMAGE=$KAMEL_INSTALL_REGISTRY/apache/camel-k:$(make get-version)
+
+        # Aggregate pod eviction permission to the default admin role
+        cat <<EOF | oc apply -f -
+        kind: ClusterRole
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:eviction
+          labels:
+            app: "camel-k"
+            rbac.authorization.k8s.io/aggregate-to-admin: "true"
+        rules:
+        - apiGroups: [""]
+          resources: ["pods/eviction"]
+          verbs: ["create"]
+        EOF
+
+        # Aggregate nodes permission to the default admin role
+        cat <<EOF | oc apply -f -
+        kind: ClusterRole
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:nodes
+        rules:
+        - apiGroups: [""]
+          resources: ["nodes"]
+          verbs: ["get","list"]
+        EOF
+        cat <<EOF | oc apply -f -
+        kind: ClusterRoleBinding
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:nodes
+        subjects:
+        - kind: User
+          name: developer
+        roleRef:
+          kind: ClusterRole
+          name: camel-k-test:nodes
+          apiGroup: rbac.authorization.k8s.io
+        EOF
+
+        # Then run integration tests
+        make test-integration
+        make test-builder

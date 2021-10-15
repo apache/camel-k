@@ -32,16 +32,21 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 func TestPlatformlessRun(t *testing.T) {
-	needsExternalRepo := os.Getenv("STAGING_RUNTIME_REPO") != "" || os.Getenv("KAMEL_INSTALL_MAVEN_REPOSITORIES") != ""
+	// TODO: Not run on OpenShift 4 CI until Microshift provides a built-in internal registry
+	needsExternalRepo := os.Getenv("STAGING_RUNTIME_REPO") != "" || os.Getenv("KAMEL_INSTALL_MAVEN_REPOSITORIES") != "" || os.Getenv("KAMEL_INSTALL_REGISTRY") != ""
 	ocp, err := openshift.IsOpenShift(TestClient())
 	assert.Nil(t, err)
-	if needsExternalRepo || !ocp {
-		t.Skip("This test is for OpenShift only and cannot work when a custom platform configuration is needed")
+	if needsExternalRepo {
+		if ocp {
+			t.Skip("This test doesn't run on OpenShift 4 CI until Microshift provides a built-in internal registry")
+		} else {
+			t.Skip("This test is for OpenShift only and cannot work when a custom platform configuration is needed")
+		}
 		return
 	}
 
