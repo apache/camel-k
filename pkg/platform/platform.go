@@ -51,8 +51,6 @@ func getOrFindForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.O
 		return getOrFind(ctx, c, it.Namespace, it.Status.Platform, active, local)
 	} else if ik, ok := o.(*v1.IntegrationKit); ok {
 		return getOrFind(ctx, c, ik.Namespace, ik.Status.Platform, active, local)
-	} else if b, ok := o.(*v1.Build); ok {
-		return getOrFind(ctx, c, b.Namespace, b.Status.Platform, active, local)
 	}
 	return find(ctx, c, o.GetNamespace(), active, local)
 }

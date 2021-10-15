@@ -87,7 +87,8 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 					// Observe the time to first readiness metric
 					previous := old.Status.GetCondition(v1.IntegrationConditionReady)
 					if next := it.Status.GetCondition(v1.IntegrationConditionReady); (previous == nil || previous.Status != corev1.ConditionTrue && (previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero())) &&
-						next != nil && next.Status == corev1.ConditionTrue && next.FirstTruthyTime != nil && !next.FirstTruthyTime.IsZero() {
+						next != nil && next.Status == corev1.ConditionTrue && next.FirstTruthyTime != nil && !next.FirstTruthyTime.IsZero() &&
+						it.Status.InitializationTimestamp != nil {
 						duration := next.FirstTruthyTime.Time.Sub(it.Status.InitializationTimestamp.Time)
 						Log.WithValues("request-namespace", it.Namespace, "request-name", it.Name).
 							ForIntegration(it).Infof("First readiness after %s", duration)
