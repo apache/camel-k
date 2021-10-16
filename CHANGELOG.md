@@ -50,6 +50,7 @@
 - chore: Parallel Kamelets reconciliation [\#2668](https://github.com/apache/camel-k/pull/2668) ([astefanutti](https://github.com/astefanutti))
 - feat\(native\): Add support for Knative service gradual roll-out [\#2667](https://github.com/apache/camel-k/pull/2667) ([astefanutti](https://github.com/astefanutti))
 - fix: Affinity trait must run after the Knative Service trait [\#2666](https://github.com/apache/camel-k/pull/2666) ([astefanutti](https://github.com/astefanutti))
+- chore\(jolokia\): upgrade to Jolokia 1.7.1 [\#2665](https://github.com/apache/camel-k/pull/2665) ([tadayosi](https://github.com/tadayosi))
 - chore : automatic PR creation to update "peripheral" go dependencies [\#2664](https://github.com/apache/camel-k/pull/2664) ([apupier](https://github.com/apupier))
 - feat: Consistent Integration scale status [\#2662](https://github.com/apache/camel-k/pull/2662) ([astefanutti](https://github.com/astefanutti))
 - chore: refresh kamelets also when operator version does not change an… [\#2661](https://github.com/apache/camel-k/pull/2661) ([nicolaferraro](https://github.com/nicolaferraro))
