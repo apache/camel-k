@@ -37,6 +37,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
@@ -366,6 +367,16 @@ func IntegrationPod(ns string, name string) func() *corev1.Pod {
 			return nil
 		}
 		return &pods[0]
+	}
+}
+
+func IntegrationPodHas(ns string, name string, predicate func(pod *corev1.Pod) bool) func() bool {
+	return func() bool {
+		pod := IntegrationPod(ns, name)()
+		if pod == nil {
+			return false
+		}
+		return predicate(pod)
 	}
 }
 
@@ -1018,7 +1029,21 @@ func Platform(ns string) func() *v1.IntegrationPlatform {
 			return nil
 		}
 		if len(lst.Items) > 1 {
-			panic("multiple integration platforms found in namespace " + ns)
+			var pl *v1.IntegrationPlatform
+			for _, p := range lst.Items {
+				p := p
+				if platform.IsSecondary(&p) {
+					continue
+				}
+				if pl != nil {
+					panic("multiple primary integration platforms found in namespace " + ns)
+				}
+				pl = &p
+			}
+			if pl == nil {
+				panic(fmt.Sprintf("multiple integration platforms found in namespace %q but no one is primary", ns))
+			}
+			return pl
 		}
 		return &lst.Items[0]
 	}
@@ -1078,6 +1103,22 @@ func AssignPlatformToOperator(ns, operator string) error {
 	}
 	pl.Annotations[v1.OperatorIDAnnotation] = operator
 	return TestClient().Update(TestContext, pl)
+}
+
+func ConfigureSecondayPlatfromWith(ns string, customizer func(pl *v1.IntegrationPlatform)) error {
+	pl := Platform(ns)()
+	if pl == nil {
+		return errors.New("cannot find primary platform")
+	}
+	if pl.Annotations == nil {
+		pl.Annotations = make(map[string]string)
+	}
+	pl.Annotations[v1.SecondaryPlatformAnnotation] = "true"
+	pl.ObjectMeta.ResourceVersion = ""
+	pl.Name = ""
+	pl.Status = v1.IntegrationPlatformStatus{}
+	customizer(pl)
+	return TestClient().Create(TestContext, pl)
 }
 
 func CRDs() func() []metav1.APIResource {
@@ -1505,6 +1546,16 @@ func asEndpointProperties(props map[string]string) *v1alpha1.EndpointProperties 
 		panic(err)
 	}
 	return &v1alpha1.EndpointProperties{
+		RawMessage: bytes,
+	}
+}
+
+func AsTraitConfiguration(props map[string]string) v1.TraitConfiguration {
+	bytes, err := json.Marshal(props)
+	if err != nil {
+		panic(err)
+	}
+	return v1.TraitConfiguration{
 		RawMessage: bytes,
 	}
 }
