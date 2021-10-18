@@ -28,18 +28,16 @@ jobs:
     - uses: actions/stale@v3
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        days-before-stale: 30
-        days-before-close: 7
-        only-labels: waiting-for-feedback
-        remove-stale-when-updated: true
-        operations-per-run: 30
-        stale-issue-label: stale
-        exempt-issue-label: never-stale
-        stale-issue-message: |
-          This issue is stale because it has been open 30 days with no activity.
-          Remove stale label or comment or this will be closed in 7 days.
-        stale-pr-label: stale
-        exempt-pr-label: never-stale
-        stale-pr-message: |
-          This PR is stale because it has been open 30 days with no activity.
-          Remove stale label or comment or this will be closed in 7 days.
+        daysUntilStale: 90
+        daysUntilClose: 15
+        exemptLabels:
+          - status/never-stale
+        staleLabel: status/stale
+        markComment: >
+          This issue has been automatically marked as stale due to 90 days of inactivity. 
+          It will be closed if no further activity occurs within 15 days.
+          If you think that’s incorrect or the issue should never stale, please simply write any comment.
+          Thanks for your contributions!
+        closeComment: false
+        only: issues
+        operations-per-run: 10
