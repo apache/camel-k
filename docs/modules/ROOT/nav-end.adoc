@@ -14,6 +14,7 @@
 *** xref:architecture/cr/camel-catalog.adoc[CamelCatalog]
 ** xref:architecture/runtime.adoc[Runtime]
 ** xref:architecture/traits.adoc[Traits]
+** xref:architecture/advanced.adoc[Advanced Installation]
 * xref:apis/camel.adoc[API]
 * xref:uninstalling.adoc[Uninstalling]
 * xref:contributing/developers.adoc[Contributing]

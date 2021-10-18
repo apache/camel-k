@@ -1,0 +1,76 @@
+[[advanced-installation]]
+= Advanced Installation
+
+This section provides information about special installation modes for the Camel K operator.
+These are advanced configuration options that normally are not needed by Camel K users,
+ but they may be useful for particular use cases.
+
+[[advanced-installation-multiple-operators]]
+== Multiple Operators and Selective Upgrades
+
+It's possible to setup multiple Camel K operators in a cluster to watch the same namespaces. It's not
+possible to configure Camel K this way using OLM (Operator Hub), since OLM prevents two operators from watching the same namespaces,
+but it's technically possible to achieve this setup manually.
+
+A typical example is when you install two global operators in different namespaces (e.g. `kamel install --global --olm=false -n camel-ns-1` and `kamel install --global --olm=false -n camel-ns-2`).
+In this  situation, both operators will watch the same resources in the cluster, so that if a user creates an integration in any namespace,
+both operators will contend the integration and the reconciliation will most probably result in an error (actual behavior is undefined).
+
+To avoid contention, it's possible to specify for each operator an ID and then assign any custom resource (CR) to a specific operator using an annotation.
+The assigned operator will be responsible for the reconciliation of the annotated CR.
+
+In detail, the Camel K operator supports the environment variable `KAMEL_OPERATOR_ID`. The value is an identifier that can be equal to any string (e.g. `KAMEL_OPERATOR_ID=operator-1`).
+Once the operator is assigned an ID, it will *only reconcile* Camel custom resources that are assigned to that ID (unannotated resources will be ignored as well).
+
+To assign a resource to a specific operator, the user can annotate it with `camel.apache.org/operator.id`. For example:
+
+[source,yaml]
+----
+kind: Integration
+apiVersion: camel.apache.org/v1
+metadata:
+  annotations:
+    camel.apache.org/operator.id: operator-1
+# ...
+----
+
+The annotation can be put on any resource belonging to the "camel.apache.org" group.
+
+NOTE: When a resource creates additional resources in order to proceed with the reconciliation (for example
+an Integration may create an IntegrationKit, which in turn creates a Build resource), the annotation will be propagated to
+all resources created in the process, so they'll be all reconciled by the same operator.
+
+By using the `camel.apache.org/operator.id` annotation, it's possible to move integrations between two or more operators running different
+versions of the Camel K platform, i.e. *selectively upgrading or downgrading* them.
+
+[[advanced-installation-multiple-platforms]]
+== Configuring Multiple Integration Platforms
+
+Any running Camel K integration is associated to a shared IntegrationPlatform resource that contains general configuration options.
+The integration platform is located in the integration namespace (or also in the operator namespace, in case of global installation)
+and typically only one ("primary", see later) integration platform is allowed to obtain a "Ready" state in a namespace, while others get the "Duplicate" state (i.e. IntegrationPlatform resources
+are somewhat "singleton" in a namespace).
+
+There's a way to allow two or more integration platforms to get a "Ready" state in a namespace and for them to be used by integrations:
+platforms can be marked with the annotation `camel.apache.org/secondary.platform=true`.
+That annotation marks the platform as *secondary* so that it will never be used as default platform during the reconciliation of an integration,
+unless explicitly selected (any resource belonging to the "camel.apache.org" group can select a particular integration platform).
+Secondary platforms are also allowed to reach the "Ready" state without becoming "Duplicate".
+
+To specify which integration platform should be used to reconcile a specific CR, the CR can be annotated like in the following example:
+
+[source,yaml]
+----
+kind: Integration
+apiVersion: camel.apache.org/v1
+metadata:
+  annotations:
+    camel.apache.org/platform.id: my-platform-name
+# ...
+----
+
+The value of the `camel.apache.org/platform.id` annotation must match the name of an IntegrationPlatform custom resource, in the annotated resource namespace or
+also in the operator namespace.
+
+The selection of a secondary IntegrationPlatform enables new configuration scenarios, for example, sharing global configuration options for groups of integrations, or also
+providing per-operator specific configuration options e.g. when you install multiple global operators in the same namespace.
