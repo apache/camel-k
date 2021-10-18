@@ -50,7 +50,7 @@ integration in case no existing kit that matches the integration exists.
 
 == Supported Camel Components
 
-Camel K only supports the Camel components that are available as Camel Quarkus Extensions out-of-the-box. These extensions are listed in the xref:2.0.0@camel-quarkus::reference/index.adoc[Camel Quarkus documentation].
+Camel K only supports the Camel components that are available as Camel Quarkus Extensions out-of-the-box. These extensions are listed in the xref:camel-quarkus::reference/index.adoc[Camel Quarkus documentation].
 
 == Examples
 
