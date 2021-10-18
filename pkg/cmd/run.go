@@ -98,6 +98,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArrayP("volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
 	cmd.Flags().StringArrayP("env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
 	cmd.Flags().StringArray("property-file", nil, "[Deprecated] Bind a property file to the integration. E.g. \"--property-file integration.properties\"")
+	cmd.Flags().StringArray("annotation", nil, "Add an annotation to the integration. E.g. \"--annotation my.company=hello\"")
 	cmd.Flags().StringArray("label", nil, "Add a label to the integration. E.g. \"--label my.company=hello\"")
 	cmd.Flags().StringArray("source", nil, "Add source file to your integration, this is added to the list of files listed as arguments of the command")
 	cmd.Flags().String("pod-template", "", "The path of the YAML file containing a PodSpec template to be used for the Integration pods")
@@ -140,6 +141,7 @@ type runCmdOptions struct {
 	// Deprecated: PropertyFiles has been deprecated in 1.5
 	PropertyFiles []string `mapstructure:"property-files" yaml:",omitempty"`
 	Labels        []string `mapstructure:"labels" yaml:",omitempty"`
+	Annotations   []string `mapstructure:"annotations" yaml:",omitempty"`
 	Sources       []string `mapstructure:"sources" yaml:",omitempty"`
 }
 
@@ -253,6 +255,13 @@ func (o *runCmdOptions) validate() error {
 		parts := strings.Split(label, "=")
 		if len(parts) != 2 {
 			return fmt.Errorf(`invalid label specification %s. Expected "<labelkey>=<labelvalue>"`, label)
+		}
+	}
+
+	for _, annotation := range o.Annotations {
+		parts := strings.SplitN(annotation, "=", 2)
+		if len(parts) != 2 {
+			return fmt.Errorf(`invalid annotation specification %s. Expected "<annotationkey>=<annotationvalue>"`, annotation)
 		}
 	}
 
@@ -517,6 +526,16 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 				integration.Labels = make(map[string]string)
 			}
 			integration.Labels[parts[0]] = parts[1]
+		}
+	}
+
+	for _, annotation := range o.Annotations {
+		parts := strings.SplitN(annotation, "=", 2)
+		if len(parts) == 2 {
+			if integration.Annotations == nil {
+				integration.Annotations = make(map[string]string)
+			}
+			integration.Annotations[parts[0]] = parts[1]
 		}
 	}
 
