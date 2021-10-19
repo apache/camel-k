@@ -323,7 +323,9 @@ git-tag:
 	./script/git_tag.sh $(CUSTOM_VERSION) $(RELEASE_GIT_REMOTE)
 
 cross-compile:
-	./script/cross_compile.sh $(CUSTOM_VERSION) '$(GOFLAGS)'
+	# we must wrap the goldflags parameters with quotes as they will need to 
+	# be processed as a single argument by the cross compile script
+	./script/cross_compile.sh $(CUSTOM_VERSION) $(subst ","\",$(GOFLAGS))
 
 package-examples:
 	./script/package_examples.sh $(CUSTOM_VERSION)
