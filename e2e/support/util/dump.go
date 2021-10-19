@@ -54,7 +54,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	t.Logf("Found %d platforms:\n", len(pls.Items))
 	for _, p := range pls.Items {
 		ref := p
-		pdata, err := kubernetes.ToYAML(&ref)
+		pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
 		if err != nil {
 			return err
 		}
@@ -68,7 +68,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	t.Logf("Found %d integrations:\n", len(its.Items))
 	for _, integration := range its.Items {
 		ref := integration
-		pdata, err := kubernetes.ToYAML(&ref)
+		pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
 		if err != nil {
 			return err
 		}
@@ -82,7 +82,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	t.Logf("Found %d integration kits:\n", len(iks.Items))
 	for _, ik := range iks.Items {
 		ref := ik
-		pdata, err := kubernetes.ToYAML(&ref)
+		pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
 		if err != nil {
 			return err
 		}
@@ -95,7 +95,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	}
 	t.Logf("Found %d builds:\n", len(builds.Items))
 	for _, build := range builds.Items {
-		data, err := kubernetes.ToYAML(&build)
+		data, err := kubernetes.ToYAMLNoManagedFields(&build)
 		if err != nil {
 			return err
 		}
@@ -109,7 +109,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	t.Logf("Found %d config maps:\n", len(cms.Items))
 	for _, cm := range cms.Items {
 		ref := cm
-		pdata, err := kubernetes.ToYAML(&ref)
+		pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
 		if err != nil {
 			return err
 		}
@@ -123,7 +123,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	t.Logf("Found %d deployments:\n", len(iks.Items))
 	for _, deployment := range deployments.Items {
 		ref := deployment
-		data, err := kubernetes.ToYAML(&ref)
+		data, err := kubernetes.ToYAMLNoManagedFields(&ref)
 		if err != nil {
 			return err
 		}
@@ -160,7 +160,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	t.Logf("\nFound %d services:\n", len(svcs.Items))
 	for _, svc := range svcs.Items {
 		ref := svc
-		data, err := kubernetes.ToYAML(&ref)
+		data, err := kubernetes.ToYAMLNoManagedFields(&ref)
 		if err != nil {
 			return err
 		}
@@ -181,7 +181,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 		t.Logf("\nFound %d routes:\n", len(routes.Items))
 		for _, route := range routes.Items {
 			ref := route
-			data, err := kubernetes.ToYAML(&ref)
+			data, err := kubernetes.ToYAMLNoManagedFields(&ref)
 			if err != nil {
 				return err
 			}

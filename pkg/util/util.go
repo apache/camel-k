@@ -394,12 +394,26 @@ func DependenciesToYAML(list []string) ([]byte, error) {
 }
 
 func JSONToYAML(src []byte) ([]byte, error) {
+	mapdata, err := JSONToMap(src)
+	if err != nil {
+		return nil, err
+	}
+
+	return MapToYAML(mapdata)
+}
+
+func JSONToMap(src []byte) (map[string]interface{}, error) {
 	jsondata := map[string]interface{}{}
 	err := json.Unmarshal(src, &jsondata)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshalling json: %v", err)
 	}
-	yamldata, err := yaml2.Marshal(&jsondata)
+
+	return jsondata, nil
+}
+
+func MapToYAML(src map[string]interface{}) ([]byte, error) {
+	yamldata, err := yaml2.Marshal(&src)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling to yaml: %v", err)
 	}
