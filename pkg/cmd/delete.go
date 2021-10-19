@@ -106,7 +106,6 @@ func (command *deleteCmdOptions) run(args []string) error {
 			},
 		}
 
-		//Looks like Operator SDK doesn't support deletion of all objects with one command
 		err := c.List(command.Context, &integrationList, k8sclient.InNamespace(command.Namespace))
 		if err != nil {
 			return err

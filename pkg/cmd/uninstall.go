@@ -25,16 +25,14 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"k8s.io/client-go/kubernetes"
-
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
 	"github.com/apache/camel-k/pkg/util/olm"
 )
 
@@ -138,7 +136,7 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 	}
 
 	if !o.SkipIntegrationPlatform {
-		if err = o.uninstallIntegrationPlatform(o.Context); err != nil {
+		if err = o.uninstallIntegrationPlatform(o.Context, c); err != nil {
 			return err
 		}
 		fmt.Fprintf(cmd.OutOrStdout(), "Camel K Integration Platform removed from namespace %s\n", o.Namespace)
@@ -280,8 +278,8 @@ func (o *uninstallCmdOptions) uninstallNamespaceResources(ctx context.Context, c
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallCrd(ctx context.Context, c kubernetes.Interface) error {
-	restClient, err := customclient.GetClientFor(c, "apiextensions.k8s.io", "v1")
+func (o *uninstallCmdOptions) uninstallCrd(ctx context.Context, c client.Client) error {
+	restClient, err := kubernetes.GetClientFor(c, "apiextensions.k8s.io", "v1")
 	if err != nil {
 		return err
 	}
@@ -415,19 +413,14 @@ func (o *uninstallCmdOptions) uninstallServiceAccounts(ctx context.Context, c cl
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallIntegrationPlatform(ctx context.Context) error {
-	api, err := customclient.GetDefaultDynamicClientFor("integrationplatforms", o.Namespace)
-	if err != nil {
-		return err
-	}
-
-	integrationPlatforms, err := api.List(ctx, defaultListOptions)
+func (o *uninstallCmdOptions) uninstallIntegrationPlatform(ctx context.Context, c client.Client) error {
+	integrationPlatforms, err := c.CamelV1().IntegrationPlatforms(o.Namespace).List(ctx, defaultListOptions)
 	if err != nil {
 		return err
 	}
 
 	for _, integrationPlatform := range integrationPlatforms.Items {
-		err := api.Delete(ctx, integrationPlatform.GetName(), metav1.DeleteOptions{})
+		err := c.CamelV1().IntegrationPlatforms(o.Namespace).Delete(ctx, integrationPlatform.GetName(), metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}
@@ -474,7 +467,7 @@ func (o *uninstallCmdOptions) uninstallRegistrySecret(ctx context.Context, c cli
 
 func (o *uninstallCmdOptions) uninstallKamelets(ctx context.Context, c client.Client) error {
 	kameletList := v1alpha1.NewKameletList()
-	if err := c.List(ctx, &kameletList, k8sclient.InNamespace(o.Namespace)); err != nil {
+	if err := c.List(ctx, &kameletList, ctrl.InNamespace(o.Namespace)); err != nil {
 		return err
 	}
 
