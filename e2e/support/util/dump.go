@@ -29,9 +29,14 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+
+	routev1 "github.com/openshift/api/route/v1"
+
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 // Dump prints all information about the given namespace to debug errors
@@ -88,7 +93,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	if err != nil {
 		return err
 	}
-	t.Logf("Found %d Builds:\n", len(builds.Items))
+	t.Logf("Found %d builds:\n", len(builds.Items))
 	for _, build := range builds.Items {
 		data, err := kubernetes.ToYAML(&build)
 		if err != nil {
@@ -101,7 +106,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	if err != nil {
 		return err
 	}
-	t.Logf("Found %d ConfigMaps:\n", len(cms.Items))
+	t.Logf("Found %d config maps:\n", len(cms.Items))
 	for _, cm := range cms.Items {
 		ref := cm
 		pdata, err := kubernetes.ToYAML(&ref)
@@ -145,6 +150,42 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 			if err != nil {
 				t.Logf("%sERROR while reading the logs: %v\n", pad, err)
 			}
+		}
+	}
+
+	svcs, err := c.CoreV1().Services(ns).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	t.Logf("\nFound %d services:\n", len(svcs.Items))
+	for _, svc := range svcs.Items {
+		ref := svc
+		data, err := kubernetes.ToYAML(&ref)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(data))
+	}
+
+	if ocp, err := openshift.IsOpenShift(c); err == nil && ocp {
+		routes := routev1.RouteList{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Route",
+				APIVersion: routev1.SchemeGroupVersion.String(),
+			},
+		}
+		err := c.List(ctx, &routes, ctrl.InNamespace(ns))
+		if err != nil {
+			return err
+		}
+		t.Logf("\nFound %d routes:\n", len(routes.Items))
+		for _, route := range routes.Items {
+			ref := route
+			data, err := kubernetes.ToYAML(&ref)
+			if err != nil {
+				return err
+			}
+			t.Logf("---\n%s\n---\n", string(data))
 		}
 	}
 
