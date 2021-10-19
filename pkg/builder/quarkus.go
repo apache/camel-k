@@ -217,6 +217,10 @@ func ProcessQuarkusTransitiveDependencies(mc maven.Context) ([]v1.Artifact, erro
 
 	// Discover application dependencies from the Quarkus fast-jar directory tree
 	err := filepath.Walk(quarkusAppDir, func(filePath string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
 		fileRelPath := strings.Replace(filePath, quarkusAppDir, "", 1)
 
 		if !info.IsDir() {
