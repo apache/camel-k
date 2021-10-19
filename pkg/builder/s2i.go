@@ -46,7 +46,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/kubernetes/customclient"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
@@ -176,7 +176,7 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 		return status.Failed(errors.Wrap(err, "cannot read tar file "+archive))
 	}
 
-	restClient, err := customclient.GetClientFor(t.c, "build.openshift.io", "v1")
+	restClient, err := kubernetes.GetClientFor(t.c, "build.openshift.io", "v1")
 	if err != nil {
 		return status.Failed(err)
 	}

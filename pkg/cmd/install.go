@@ -499,20 +499,24 @@ func (o *installCmdOptions) printOutput(collection *kubernetes.Collection) error
 
 // nolint:errcheck
 func (o *installCmdOptions) waitForPlatformReady(cmd *cobra.Command, platform *v1.IntegrationPlatform) error {
+	c, err := o.GetCmdClient()
+	if err != nil {
+		return err
+	}
+
 	handler := func(i *v1.IntegrationPlatform) bool {
 		if i.Status.Phase == v1.IntegrationPlatformPhaseReady || i.Status.Phase == v1.IntegrationPlatformPhaseError {
 			return false
 		}
-
 		return true
 	}
 
-	go watch.HandleIntegrationPlatformEvents(o.Context, platform, func(event *corev1.Event) bool {
+	go watch.HandleIntegrationPlatformEvents(o.Context, c, platform, func(event *corev1.Event) bool {
 		fmt.Fprintln(cmd.OutOrStdout(), event.Message)
 		return true
 	})
 
-	return watch.HandlePlatformStateChanges(o.Context, platform, handler)
+	return watch.HandlePlatformStateChanges(o.Context, c, platform, handler)
 }
 
 func (o *installCmdOptions) decode(cmd *cobra.Command, _ []string) error {

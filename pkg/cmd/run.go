@@ -319,14 +319,14 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 	if o.Logs || o.Dev || o.Wait {
 		// nolint: errcheck
-		go watch.HandleIntegrationEvents(o.Context, integration, func(event *corev1.Event) bool {
+		go watch.HandleIntegrationEvents(o.Context, c, integration, func(event *corev1.Event) bool {
 			fmt.Fprintln(cmd.OutOrStdout(), event.Message)
 			return true
 		})
 	}
 	if o.Wait || o.Dev {
 		for {
-			integrationPhase, err := o.waitForIntegrationReady(cmd, integration)
+			integrationPhase, err := o.waitForIntegrationReady(cmd, c, integration)
 			if err != nil {
 				return err
 			}
@@ -384,7 +384,7 @@ func (o *runCmdOptions) postRun(cmd *cobra.Command, args []string) error {
 }
 
 // nolint:errcheck
-func (o *runCmdOptions) waitForIntegrationReady(cmd *cobra.Command, integration *v1.Integration) (*v1.IntegrationPhase, error) {
+func (o *runCmdOptions) waitForIntegrationReady(cmd *cobra.Command, c client.Client, integration *v1.Integration) (*v1.IntegrationPhase, error) {
 	handler := func(i *v1.Integration) bool {
 		//
 		// TODO when we add health checks, we should Wait until they are passed
@@ -400,7 +400,7 @@ func (o *runCmdOptions) waitForIntegrationReady(cmd *cobra.Command, integration 
 		return true
 	}
 
-	return watch.HandleIntegrationStateChanges(o.Context, integration, handler)
+	return watch.HandleIntegrationStateChanges(o.Context, c, integration, handler)
 }
 
 func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sources []string, catalog *trait.Catalog) error {
