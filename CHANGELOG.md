@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Stale bot action failing [\#2698](https://github.com/apache/camel-k/issues/2698)
 - Error: Object 'Kind' is missing in 'null' [\#2674](https://github.com/apache/camel-k/issues/2674)
 - Provide automatic PR creation to update "peripheral" go dependencies [\#2663](https://github.com/apache/camel-k/issues/2663)
 - Alow fixed custom labels in any pod [\#2642](https://github.com/apache/camel-k/issues/2642)
@@ -31,14 +32,19 @@
 
 **Merged pull requests:**
 
+- fix: Avoid operator panic when Quarkus fast-jar directory is empty [\#2704](https://github.com/apache/camel-k/pull/2704) ([astefanutti](https://github.com/astefanutti))
+- CI test dump improvements [\#2700](https://github.com/apache/camel-k/pull/2700) ([tadayosi](https://github.com/tadayosi))
+- fix\(ci\): broken stale action [\#2699](https://github.com/apache/camel-k/pull/2699) ([squakez](https://github.com/squakez))
 - chore\(runtime\): update to Camel K Runtime 1.10.0-SNAPSHOT [\#2694](https://github.com/apache/camel-k/pull/2694) ([tadayosi](https://github.com/tadayosi))
 - chore: Bypass cache round-trips to reconcile integration status [\#2692](https://github.com/apache/camel-k/pull/2692) ([astefanutti](https://github.com/astefanutti))
 - fix: Integration readiness status should account for updated replicas [\#2691](https://github.com/apache/camel-k/pull/2691) ([astefanutti](https://github.com/astefanutti))
+- fix: Round meta.Time fields to second precision as they are marshalled in RFC3339 format [\#2689](https://github.com/apache/camel-k/pull/2689) ([astefanutti](https://github.com/astefanutti))
 - chore\(builder\): Self-defined Build spec [\#2688](https://github.com/apache/camel-k/pull/2688) ([astefanutti](https://github.com/astefanutti))
 - fix\(e2e\): Resolve kamel bind e2e test conflict [\#2686](https://github.com/apache/camel-k/pull/2686) ([astefanutti](https://github.com/astefanutti))
 - Fix \#1943: allow multiple operators to reconcile label filtered resources [\#2683](https://github.com/apache/camel-k/pull/2683) ([nicolaferraro](https://github.com/nicolaferraro))
 - feat: Comprehensive Integration error status [\#2682](https://github.com/apache/camel-k/pull/2682) ([astefanutti](https://github.com/astefanutti))
 - fix\(cli\): apply --registry\* flags even on OpenShift for kamel install [\#2681](https://github.com/apache/camel-k/pull/2681) ([tadayosi](https://github.com/tadayosi))
+- \[TEST\] Missing cli tests were added [\#2680](https://github.com/apache/camel-k/pull/2680) ([vsokolov00](https://github.com/vsokolov00))
 - feat: Add active-deadline-seconds and backoff-limit options to cron trait [\#2678](https://github.com/apache/camel-k/pull/2678) ([astefanutti](https://github.com/astefanutti))
 - feat: Add progress-deadline-seconds option to deployment trait [\#2677](https://github.com/apache/camel-k/pull/2677) ([astefanutti](https://github.com/astefanutti))
 - fix\(cli\): kamel install fails with error: Object 'Kind' is missing in 'null' [\#2676](https://github.com/apache/camel-k/pull/2676) ([tadayosi](https://github.com/tadayosi))
