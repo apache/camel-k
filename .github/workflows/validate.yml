@@ -44,9 +44,10 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Lint
-        run: |
-          curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b . v1.20.1
-          ./golangci-lint config path
-          ./golangci-lint --version
-          GOGC=20 ./golangci-lint run --verbose --deadline 15m --config .golangci.yml
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        env:
+          GOGC: 20
+        with:
+          version: v1.42
+          args: --verbose --deadline 15m --config .golangci.yml
