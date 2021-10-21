@@ -6,7 +6,9 @@
 
 **Closed issues:**
 
+- kamel install: cannot find k8s-certificates [\#2702](https://github.com/apache/camel-k/issues/2702)
 - Stale bot action failing [\#2698](https://github.com/apache/camel-k/issues/2698)
+- panic: runtime error: invalid memory address or nil pointer dereference when running a simple integration [\#2697](https://github.com/apache/camel-k/issues/2697)
 - Error: Object 'Kind' is missing in 'null' [\#2674](https://github.com/apache/camel-k/issues/2674)
 - Provide automatic PR creation to update "peripheral" go dependencies [\#2663](https://github.com/apache/camel-k/issues/2663)
 - Alow fixed custom labels in any pod [\#2642](https://github.com/apache/camel-k/issues/2642)
@@ -32,7 +34,10 @@
 
 **Merged pull requests:**
 
+- fix\(ci\): proper action/staleV3 configuration [\#2707](https://github.com/apache/camel-k/pull/2707) ([squakez](https://github.com/squakez))
 - fix: Avoid operator panic when Quarkus fast-jar directory is empty [\#2704](https://github.com/apache/camel-k/pull/2704) ([astefanutti](https://github.com/astefanutti))
+- fix: Use a single operator and CLI client globally [\#2703](https://github.com/apache/camel-k/pull/2703) ([astefanutti](https://github.com/astefanutti))
+- fix\(script\): goldflag with empty space [\#2701](https://github.com/apache/camel-k/pull/2701) ([squakez](https://github.com/squakez))
 - CI test dump improvements [\#2700](https://github.com/apache/camel-k/pull/2700) ([tadayosi](https://github.com/tadayosi))
 - fix\(ci\): broken stale action [\#2699](https://github.com/apache/camel-k/pull/2699) ([squakez](https://github.com/squakez))
 - chore\(runtime\): update to Camel K Runtime 1.10.0-SNAPSHOT [\#2694](https://github.com/apache/camel-k/pull/2694) ([tadayosi](https://github.com/tadayosi))
@@ -66,6 +71,7 @@
 - chore\(build\): Upgrade Go dependencies [\#2655](https://github.com/apache/camel-k/pull/2655) ([astefanutti](https://github.com/astefanutti))
 - Fix local builds from directory for containerized and non-containerized uses. [\#2654](https://github.com/apache/camel-k/pull/2654) ([doru1004](https://github.com/doru1004))
 - \[TEST\] Global test - support for openshift [\#2653](https://github.com/apache/camel-k/pull/2653) ([bouskaJ](https://github.com/bouskaJ))
+- Update dependencies.adoc [\#2651](https://github.com/apache/camel-k/pull/2651) ([hadoken79](https://github.com/hadoken79))
 - feat\(trait\): environment variables [\#2650](https://github.com/apache/camel-k/pull/2650) ([squakez](https://github.com/squakez))
 - fix: Switch off color in Maven logs [\#2647](https://github.com/apache/camel-k/pull/2647) ([astefanutti](https://github.com/astefanutti))
 - Alow fixed custom labels in any pod [\#2646](https://github.com/apache/camel-k/pull/2646) ([claudio4j](https://github.com/claudio4j))
