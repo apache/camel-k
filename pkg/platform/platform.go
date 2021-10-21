@@ -176,6 +176,8 @@ func IsSecondary(p *v1.IntegrationPlatform) bool {
 func GetProfile(p *v1.IntegrationPlatform) v1.TraitProfile {
 	if p.Status.Profile != "" {
 		return p.Status.Profile
+	} else if p.Spec.Profile != "" {
+		return p.Spec.Profile
 	}
 
 	switch p.Status.Cluster {

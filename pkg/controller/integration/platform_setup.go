@@ -78,6 +78,10 @@ func determineBestProfile(ctx context.Context, c client.Client, integration *v1.
 		// Use platform profile if set
 		return p.Status.Profile
 	}
+	if p.Spec.Profile != "" {
+		// Use platform spec profile if set
+		return p.Spec.Profile
+	}
 	if knative.IsEnabledInNamespace(ctx, c, integration.Namespace) {
 		return v1.TraitProfileKnative
 	}
