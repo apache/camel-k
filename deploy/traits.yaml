@@ -346,7 +346,7 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The Istio trait allows to configure properties related to the Istio
+  description: The Istio trait allows configuring properties related to the Istio
     service mesh, such as sidecar injection and outbound IP ranges.
   properties:
   - name: enabled
