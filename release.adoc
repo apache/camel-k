@@ -161,6 +161,35 @@ export BRANCH=main
 
 A `release-notes.md` file is generated and can be attached to the release github issue for reference.
 
+[[documentation]]
+== Documentation updates
+
+In order that the newly released versions of camel-k and camel-k-runtime appear in the Camel website, follow these steps:
+
+. In camel-k `docs/antora.yml`:
+.. Set the `version` appropriately, e.g. `1.7.x`
+.. Remove the `prerelease` and `display_version`.
+.. Set the `asciidoc.attributes.camel-version` to the appropriate released camel docs version, e.g. `3.12.x`.
+. In the camel-k-runtime corresponding to the camel-k release `docs/antora.yml` set the `version` to the same value as in step 1.a.
+. After the vote has passed, update the camel-website `antora-playbook.yml`
+`content.sources` section for camel-k and camel-k-runtime to use the newly released versions, replacing the previous released version.
+
+NOTE: this needs work, 1.6.x doesn't appear to have a corresponding camel-k-runtime
+[source,yaml]
+----
+    - url: https://github.com/apache/camel-k.git
+      branches:
+        - main
+#        Release-1.6.x does not work because there is no corresponding camel-k-runtime version for languages.
+#        - release-1.6.x
+        - release-1.4.x
+      start_path: docs
+
+    - url: https://github.com/apache/camel-k-runtime.git
+      branches:
+        - main
+      start_path: docs
+----
 
 [[voting]]
 == Voting
