@@ -50,8 +50,18 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 	newIIB := os.Getenv("CAMEL_K_NEW_IIB")
 	kamel := os.Getenv("RELEASED_KAMEL_BIN")
 
+	// optional options
+	prevUpdateChannel := os.Getenv("CAMEL_K_PREV_UPGRADE_CHANNEL")
+	newUpdateChannel := os.Getenv("CAMEL_K_NEW_UPGRADE_CHANNEL")
+
 	if prevIIB == "" || newIIB == "" {
 		t.Skip("OLM Upgrade test requires the CAMEL_K_PREV_IIB and CAMEL_K_NEW_IIB environment variables")
+	}
+
+	crossChannelUpgrade := false
+	if prevUpdateChannel != "" && newUpdateChannel != "" && prevUpdateChannel != newUpdateChannel {
+		crossChannelUpgrade = true
+		t.Logf("Testing cross-OLM channel upgrade %s -> %s", prevUpdateChannel, newUpdateChannel)
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
@@ -61,7 +71,13 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 		// Set KAMEL_BIN only for this test - don't override the ENV variable for all tests
 		Expect(os.Setenv("KAMEL_BIN", kamel)).To(Succeed())
 
-		Expect(Kamel("install", "-n", ns, "--olm=true", "--olm-source", catalogSourceName, "--olm-source-namespace", ns).Execute()).To(Succeed())
+		args := []string{"install", "-n", ns, "--olm=true", "--olm-source", catalogSourceName, "--olm-source-namespace", ns}
+
+		if crossChannelUpgrade {
+			args = append(args, "--olm-channel", os.Getenv("CAMEL_K_PREV_UPGRADE_CHANNEL"))
+		}
+
+		Expect(Kamel(args...).Execute()).To(Succeed())
 
 		// Find the only one Camel-K CSV
 		noAdditionalConditions := func(csv olm.ClusterServiceVersion) bool {
@@ -102,6 +118,14 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 			// Trigger Camel K operator upgrade by updating the CatalogSource with the new index image
 			Expect(createOrUpdateCatalogSource(ns, catalogSourceName, newIIB)).To(Succeed())
 
+			if crossChannelUpgrade {
+				t.Log("Updating Camel-K subscription OLM update channel.")
+				s := ckSubscription(ns)()
+				ctrlutil.CreateOrUpdate(TestContext, TestClient(), s, func() error {
+					s.Spec.Channel = newUpdateChannel
+					return nil
+				})
+			}
 			// Check the previous CSV is being replaced
 			Eventually(clusterServiceVersionPhase(func(csv olm.ClusterServiceVersion) bool {
 				return csv.Spec.Version.Version.String() == prevCSVVersion.Version.String()
