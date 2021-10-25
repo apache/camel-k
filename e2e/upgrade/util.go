@@ -90,3 +90,18 @@ func catalogSourcePhase(ns, name string) func() string {
 		return ""
 	}
 }
+
+func ckSubscription(ns string) func() *olm.Subscription {
+	return func() *olm.Subscription {
+		lst := olm.SubscriptionList{}
+		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+			panic(err)
+		}
+		for _, s := range lst.Items {
+			if strings.Contains(s.Name, "camel-k") {
+				return &s
+			}
+		}
+		return nil
+	}
+}
