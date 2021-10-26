@@ -72,3 +72,5 @@ replace (
 	github.com/apache/camel-k/pkg/client/camel => ./pkg/client/camel
 	github.com/apache/camel-k/pkg/kamelet/repository => ./pkg/kamelet/repository
 )
+
+replace github.com/apache/camel-k => github.com/edify42/camel-k v1.6.1-beta
