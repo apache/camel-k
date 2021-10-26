@@ -20,6 +20,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+
 	"github.com/Masterminds/semver"
 	"github.com/spf13/cobra"
 
@@ -72,7 +73,7 @@ func (o *versionCmdOptions) run(cmd *cobra.Command, _ []string) error {
 		if err != nil {
 			return err
 		}
-		displayOperatorVersion(cmd, o.Context, c, o.Namespace)
+		displayOperatorVersion(o.Context, cmd, c, o.Namespace)
 	} else {
 		displayClientVersion(cmd)
 	}
@@ -87,7 +88,7 @@ func displayClientVersion(cmd *cobra.Command) {
 	}
 }
 
-func displayOperatorVersion(cmd *cobra.Command, ctx context.Context, c client.Client, namespace string) {
+func displayOperatorVersion(ctx context.Context, cmd *cobra.Command, c client.Client, namespace string) {
 	operatorVersion, err := operatorVersion(ctx, c, namespace)
 	if err != nil {
 		fmt.Fprintf(cmd.OutOrStdout(), "Unable to retrieve operator version: %s\n", err)
@@ -107,11 +108,11 @@ func operatorVersion(ctx context.Context, c client.Client, namespace string) (st
 		Name:      "camel-k",
 	}
 
-	if err := c.Get(ctx, platformKey, &platform); err == nil {
-		return platform.Status.Version, nil
-	} else {
+	if err := c.Get(ctx, platformKey, &platform); err != nil {
 		return "", err
 	}
+
+	return platform.Status.Version, nil
 }
 
 func compatibleVersions(aVersion, bVersion string) bool {

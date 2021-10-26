@@ -23,7 +23,7 @@ import (
 
 //nolint:deadcode,unused
 func newTestCmdKit(options *RootCmdOptions) *cobra.Command {
-	//add a testing version of kit Command
+	// add a testing version of kit Command
 	kitCmd := newCmdKit(options)
 	kitCmd.ResetCommands()
 

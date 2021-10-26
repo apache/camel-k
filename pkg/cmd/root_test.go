@@ -29,6 +29,8 @@ import (
 )
 
 func kamelTestPostAddCommandInit(t *testing.T, rootCmd *cobra.Command) {
+	t.Helper()
+
 	err := kamelPostAddCommandInit(rootCmd)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
@@ -47,7 +49,7 @@ func kamelTestPreAddCommandInit() (*RootCmdOptions, *cobra.Command) {
 }
 
 func TestLoadFromEnvVar(t *testing.T) {
-	//shows how to include a "," character inside an env value see VAR1 value
+	// shows how to include a "," character inside an env value see VAR1 value
 	os.Setenv("KAMEL_RUN_ENVS", "\"VAR1=value,\"\"othervalue\"\"\",VAR2=value2")
 
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
@@ -65,10 +67,10 @@ func TestLoadFromEnvVar(t *testing.T) {
 }
 
 func TestLoadFromFile(t *testing.T) {
-	//shows how to include a "," character inside a property value see VAR1 value
-	var propertiesFile = []byte(`kamel.run.envs: "VAR1=value,""othervalue""",VAR2=value2`)
+	// shows how to include a "," character inside a property value see VAR1 value
+	propertiesFile := []byte(`kamel.run.envs: "VAR1=value,""othervalue""",VAR2=value2`)
 	viper.SetConfigType("properties")
-	readViperConfigFromBytes(propertiesFile, t)
+	readViperConfigFromBytes(t, propertiesFile)
 
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 
@@ -86,9 +88,9 @@ func TestLoadFromFile(t *testing.T) {
 
 func TestPrecedenceEnvVarOverFile(t *testing.T) {
 	os.Setenv("KAMEL_RUN_ENVS", "VAR1=envVar")
-	var propertiesFile = []byte(`kamel.run.envs: VAR2=file`)
+	propertiesFile := []byte(`kamel.run.envs: VAR2=file`)
 	viper.SetConfigType("properties")
-	readViperConfigFromBytes(propertiesFile, t)
+	readViperConfigFromBytes(t, propertiesFile)
 
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 
@@ -106,9 +108,9 @@ func TestPrecedenceEnvVarOverFile(t *testing.T) {
 
 func TestPrecedenceCommandLineOverEverythingElse(t *testing.T) {
 	os.Setenv("KAMEL_RUN_ENVS", "VAR1=envVar")
-	var propertiesFile = []byte(`kamel.run.envs: VAR2=file`)
+	propertiesFile := []byte(`kamel.run.envs: VAR2=file`)
 	viper.SetConfigType("properties")
-	readViperConfigFromBytes(propertiesFile, t)
+	readViperConfigFromBytes(t, propertiesFile)
 
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 
@@ -124,7 +126,9 @@ func TestPrecedenceCommandLineOverEverythingElse(t *testing.T) {
 	}
 }
 
-func readViperConfigFromBytes(propertiesFile []byte, t *testing.T) {
+func readViperConfigFromBytes(t *testing.T, propertiesFile []byte) {
+	t.Helper()
+
 	unexpectedErr := viper.ReadConfig(bytes.NewReader(propertiesFile))
 	if unexpectedErr != nil {
 		t.Fatalf("Unexpected error: %v", unexpectedErr)

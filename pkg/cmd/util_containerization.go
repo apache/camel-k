@@ -33,7 +33,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-/// Local Docker file system management functions.
+// Local Docker file system management functions.
 
 func createDockerBaseWorkingDirectory() error {
 	// Create local docker base directory.
@@ -82,7 +82,7 @@ func setDockerNetworkName(networkName string) {
 }
 
 func setDockerEnvVars(envVars []string) {
-	if envVars != nil && len(envVars) > 0 {
+	if len(envVars) > 0 {
 		util.CLIEnvVars = envVars
 	}
 }
@@ -209,7 +209,7 @@ func createAndBuildIntegrationImage(ctx context.Context, containerRegistry strin
 func runIntegrationImage(ctx context.Context, image string, stdout, stderr io.Writer) error {
 	// Stop the child process before exiting
 	dockerCtx, cancel := context.WithCancel(ctx)
-	cs := make(chan os.Signal)
+	cs := make(chan os.Signal, 1)
 	signal.Notify(cs, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-cs

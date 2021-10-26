@@ -61,20 +61,25 @@ func (o *dumpCmdOptions) dump(cmd *cobra.Command, args []string) error {
 	}
 	if len(args) == 1 {
 		fileName := args[0]
-		writer, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0777)
+		writer, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0o777)
 		if err != nil {
 			return err
 		}
-		dumpNamespace(o.Context, c, o.Namespace, writer, o.LogLines)
+		err = dumpNamespace(o.Context, c, o.Namespace, writer, o.LogLines)
+		if err != nil {
+			return err
+		}
 		defer writer.Close()
 	} else {
-		dumpNamespace(o.Context, c, o.Namespace, cmd.OutOrStdout(), o.LogLines)
+		err := dumpNamespace(o.Context, c, o.Namespace, cmd.OutOrStdout(), o.LogLines)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
 func dumpNamespace(ctx context.Context, c client.Client, ns string, out io.Writer, logLines int) error {
-
 	camelClient, err := versioned.NewForConfig(c.GetConfig())
 	if err != nil {
 		return err

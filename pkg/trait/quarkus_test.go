@@ -70,7 +70,7 @@ func TestApplyQuarkusTraitDefaultKitLayout(t *testing.T) {
 }
 
 func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
-	trait := newQuarkusTrait().(*quarkusTrait)
+	trait, _ := newQuarkusTrait().(*quarkusTrait)
 	trait.Enabled = BoolP(true)
 
 	environment := &Environment{

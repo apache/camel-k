@@ -20,7 +20,6 @@ package trait
 import (
 	"errors"
 	"fmt"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -66,14 +65,9 @@ func newConfigurationKey(kamelet, configurationID string) configurationKey {
 
 const (
 	contentKey = "content"
-	schemaKey  = "schema"
 
 	kameletLabel              = "camel.apache.org/kamelet"
 	kameletConfigurationLabel = "camel.apache.org/kamelet.configuration"
-)
-
-var (
-	kameletNameRegexp = regexp.MustCompile("kamelet:(?://)?([a-z0-9-.]+(/[a-z0-9-.]+)?)(?:$|[^a-z0-9-.].*)")
 )
 
 func newKameletsTrait() Trait {
@@ -260,6 +254,7 @@ func (t *kameletsTrait) configureApplicationProperties(e *Environment) error {
 func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1alpha1.Kamelet) error {
 	sources := make([]v1.SourceSpec, 0)
 
+	// nolint: staticcheck
 	if kamelet.Spec.Template != nil || kamelet.Spec.Flow != nil {
 		template := kamelet.Spec.Template
 		if template == nil {
@@ -313,7 +308,7 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1alpha1.Kam
 
 func (t *kameletsTrait) addConfigurationSecrets(e *Environment) error {
 	for _, k := range t.getConfigurationKeys() {
-		var options = metav1.ListOptions{
+		options := metav1.ListOptions{
 			LabelSelector: fmt.Sprintf("%s=%s", kameletLabel, k.kamelet),
 		}
 		if k.configurationID != "" {

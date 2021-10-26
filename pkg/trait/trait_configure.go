@@ -148,7 +148,6 @@ func configureTrait(id string, config map[string]string, trait interface{}) erro
 			ErrorUnused:      true,
 		},
 	)
-
 	if err != nil {
 		return errors.Wrapf(err, "error while decoding trait configuration %q", id)
 	}

@@ -538,7 +538,7 @@ func createKameletsTestEnvironment(flow string, objects ...runtime.Object) (*kam
 	catalog, _ := camel.DefaultCatalog()
 
 	client, _ := test.NewFakeClient(objects...)
-	trait := newKameletsTrait().(*kameletsTrait)
+	trait, _ := newKameletsTrait().(*kameletsTrait)
 	trait.Client = client
 
 	environment := &Environment{

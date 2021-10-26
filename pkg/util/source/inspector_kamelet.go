@@ -21,9 +21,7 @@ import (
 	"regexp"
 )
 
-var (
-	kameletNameRegexp = regexp.MustCompile("kamelet:(?://)?([a-z0-9-.]+(/[a-z0-9-.]+)?)(?:$|[^a-z0-9-.].*)")
-)
+var kameletNameRegexp = regexp.MustCompile("kamelet:(?://)?([a-z0-9-.]+(/[a-z0-9-.]+)?)(?:$|[^a-z0-9-.].*)")
 
 func ExtractKamelets(uris []string) (kamelets []string) {
 	for _, uri := range uris {

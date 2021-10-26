@@ -99,33 +99,33 @@ func (command *describeKameletCommandOptions) describeKamelet(cmd *cobra.Command
 
 		describeObjectMeta(w, kamelet.ObjectMeta)
 
-		w.Write(0, "Phase:\t%s\n", kamelet.Status.Phase)
+		w.Writef(0, "Phase:\t%s\n", kamelet.Status.Phase)
 
 		// Definition
 		def := kamelet.Spec.Definition
 		if def != nil {
-			w.Write(0, "Definition:\n")
-			w.Write(1, "Title:\t%s\n", def.Title)
-			w.Write(1, "Description:\n")
+			w.Writef(0, "Definition:\n")
+			w.Writef(1, "Title:\t%s\n", def.Title)
+			w.Writef(1, "Description:\n")
 			for _, s := range strings.Split(def.Description, "\n") {
-				w.Write(2, "%s\n", s)
+				w.Writef(2, "%s\n", s)
 			}
 			if len(def.Required) > 0 {
-				w.Write(1, "Required:\n")
+				w.Writef(1, "Required:\n")
 				for _, req := range def.Required {
-					w.Write(2, "%s\n", req)
+					w.Writef(2, "%s\n", req)
 				}
 			}
 			if len(def.Properties) > 0 {
-				w.Write(1, "Properties:\n")
+				w.Writef(1, "Properties:\n")
 				for _, k := range kamelet.SortedDefinitionPropertiesKeys() {
 					p := def.Properties[k]
-					w.Write(2, "%s:\n", k)
-					w.Write(3, "Title:\t%s\n", p.Title)
-					w.Write(3, "Description:\t%s\n", p.Description)
-					w.Write(3, "Type:\t%s\n", p.Type)
+					w.Writef(2, "%s:\n", k)
+					w.Writef(3, "Title:\t%s\n", p.Title)
+					w.Writef(3, "Description:\t%s\n", p.Description)
+					w.Writef(3, "Type:\t%s\n", p.Type)
 					if p.Default != nil {
-						w.Write(3, "Default:\t%s\n", p.Default)
+						w.Writef(3, "Default:\t%s\n", p.Default)
 					}
 				}
 			}
@@ -133,36 +133,36 @@ func (command *describeKameletCommandOptions) describeKamelet(cmd *cobra.Command
 
 		// Types
 		if len(kamelet.Spec.Types) > 0 {
-			w.Write(0, "Types:\n")
+			w.Writef(0, "Types:\n")
 			for _, k := range kamelet.SortedTypesKeys() {
 				t := kamelet.Spec.Types[k]
-				w.Write(1, "%s:\n", k)
-				w.Write(2, "Media Type: %s\n", t.MediaType)
+				w.Writef(1, "%s:\n", k)
+				w.Writef(2, "Media Type: %s\n", t.MediaType)
 			}
 		}
 
-		// Flow
-		// TODO pretty print flow data
-		flow := kamelet.Spec.Flow
-		if flow != nil {
-			w.Write(0, "Flow:\n")
-			w.Write(1, "%s\n", string(flow.RawMessage))
+		// Template
+		// TODO pretty print template data
+		template := kamelet.Spec.Template
+		if template != nil {
+			w.Writef(0, "Template:\n")
+			w.Writef(1, "%s\n", string(template.RawMessage))
 		}
 
 		// Dependencies
 		if len(kamelet.Spec.Dependencies) > 0 {
-			w.Write(0, "Dependencies:\t\n")
+			w.Writef(0, "Dependencies:\t\n")
 			for _, d := range kamelet.Spec.Dependencies {
-				w.Write(1, "%s\n", d)
+				w.Writef(1, "%s\n", d)
 			}
 		}
 
 		// Sources
 		if len(kamelet.Spec.Sources) > 0 {
-			w.Write(0, "Sources:\t\n")
-			w.Write(1, "Name\tLanguage\tCompression\tRef\tRef Key\n")
+			w.Writef(0, "Sources:\t\n")
+			w.Writef(1, "Name\tLanguage\tCompression\tRef\tRef Key\n")
 			for _, s := range kamelet.Spec.Sources {
-				w.Write(1, "%s\t%s\t%t\t%s\t%s\n",
+				w.Writef(1, "%s\t%s\t%t\t%s\t%s\n",
 					s.Name,
 					s.InferLanguage(),
 					s.Compression,

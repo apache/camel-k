@@ -41,6 +41,8 @@ func TestOwner(t *testing.T) {
 }
 
 func SetUpOwnerEnvironment(t *testing.T) *Environment {
+	t.Helper()
+
 	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "camel:core")
 	env.Integration.Spec.Traits = map[string]v1.TraitSpec{
 		"owner": test.TraitSpecFromMap(t, map[string]interface{}{
@@ -63,6 +65,8 @@ func SetUpOwnerEnvironment(t *testing.T) *Environment {
 }
 
 func ValidateOwnerResources(t *testing.T, env *Environment, withOwnerRef bool) {
+	t.Helper()
+
 	assert.NotEmpty(t, env.Resources.Items())
 
 	env.Resources.VisitMetaObject(func(res metav1.Object) {
@@ -85,6 +89,8 @@ func ValidateOwnerResources(t *testing.T, env *Environment, withOwnerRef bool) {
 }
 
 func ValidateLabelsAndAnnotations(t *testing.T, res metav1.Object) {
+	t.Helper()
+
 	assert.Contains(t, res.GetLabels(), "com.mycompany/mylabel1")
 	assert.Equal(t, "myvalue1", res.GetLabels()["com.mycompany/mylabel1"])
 

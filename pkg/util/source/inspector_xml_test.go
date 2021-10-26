@@ -19,12 +19,12 @@ package source
 
 import (
 	"fmt"
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const XMLKameletEip = `
@@ -36,6 +36,7 @@ const XMLKameletEip = `
   </route>
 </camelContext>
 `
+
 const XMLKameletEndpoint = `
 <camelContext xmlns="http://camel.apache.org/schema/spring">
   <route>

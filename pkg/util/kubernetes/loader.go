@@ -45,11 +45,12 @@ func LoadResourceFromYaml(scheme *runtime.Scheme, data string) (ctrl.Object, err
 	if err != nil {
 		return nil, err
 	}
-	if o, ok := ro.(ctrl.Object); !ok {
-		return nil, err
-	} else {
-		return o, nil
+	o, ok := ro.(ctrl.Object)
+	if !ok {
+		return nil, fmt.Errorf("type assertion failed: %v", ro)
 	}
+
+	return o, nil
 }
 
 // LoadRawResourceFromYaml loads a k8s resource from a yaml definition without making assumptions on the underlying type
@@ -75,11 +76,11 @@ func runtimeObjectFromUnstructured(scheme *runtime.Scheme, u *unstructured.Unstr
 
 	b, err := u.MarshalJSON()
 	if err != nil {
-		return nil, fmt.Errorf("error running MarshalJSON on unstructured object: %v", err)
+		return nil, fmt.Errorf("error running MarshalJSON on unstructured object: %w", err)
 	}
 	ro, _, err := decoder.Decode(b, &gvk, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode json data with gvk(%v): %v", gvk.String(), err)
+		return nil, fmt.Errorf("failed to decode json data with gvk(%v): %w", gvk.String(), err)
 	}
 	return ro, nil
 }

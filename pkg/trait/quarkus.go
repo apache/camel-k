@@ -35,7 +35,7 @@ import (
 type quarkusPackageType string
 
 const (
-	quarkusTraitId = "quarkus"
+	quarkusTraitID = "quarkus"
 
 	fastJarPackageType quarkusPackageType = "fast-jar"
 	nativePackageType  quarkusPackageType = "native"
@@ -70,7 +70,7 @@ type quarkusTrait struct {
 
 func newQuarkusTrait() Trait {
 	return &quarkusTrait{
-		BaseTrait: NewBaseTrait(quarkusTraitId, 1700),
+		BaseTrait: NewBaseTrait(quarkusTraitID, 1700),
 	}
 }
 
@@ -160,7 +160,7 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 		default:
 			for _, packageType := range t.PackageTypes {
 				kit := t.newIntegrationKit(e, packageType)
-				data, err := json.Marshal(kit.Spec.Traits[quarkusTraitId].Configuration)
+				data, err := json.Marshal(kit.Spec.Traits[quarkusTraitID].Configuration)
 				if err != nil {
 					return err
 				}
@@ -174,7 +174,7 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 				if err != nil {
 					return err
 				}
-				kit.Spec.Traits[quarkusTraitId] = v1.TraitSpec{
+				kit.Spec.Traits[quarkusTraitID] = v1.TraitSpec{
 					Configuration: v1.TraitConfiguration{
 						RawMessage: data,
 					},
@@ -205,9 +205,12 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 
 		steps = append(steps, builder.Quarkus.CommonSteps...)
 
-		if native, err := t.isNativeKit(e); err != nil {
+		native, err := t.isNativeKit(e)
+		if err != nil {
 			return err
-		} else if native {
+		}
+
+		if native {
 			build.Maven.Properties["quarkus.package.type"] = string(nativePackageType)
 			steps = append(steps, builder.Image.NativeImageContext)
 			// Spectrum does not rely on Dockerfile to assemble the image

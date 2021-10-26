@@ -82,7 +82,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 
 	kit, err := kubernetes.GetIntegrationKit(ctx, action.client, integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
 	if err != nil {
-		return nil, fmt.Errorf("unable to find integration kit %s/%s, %s", integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
+		return nil, fmt.Errorf("unable to find integration kit %s/%s: %w", integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
 	}
 
 	// Check if an IntegrationKit with higher priority is ready
@@ -162,13 +162,14 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 	var controller ctrl.Object
 	var lastCompletedJob *batchv1.Job
 
-	if isConditionTrue(integration, v1.IntegrationConditionDeploymentAvailable) {
+	switch {
+	case isConditionTrue(integration, v1.IntegrationConditionDeploymentAvailable):
 		controller = &appsv1.Deployment{}
-	} else if isConditionTrue(integration, v1.IntegrationConditionKnativeServiceAvailable) {
+	case isConditionTrue(integration, v1.IntegrationConditionKnativeServiceAvailable):
 		controller = &servingv1.Service{}
-	} else if isConditionTrue(integration, v1.IntegrationConditionCronJobAvailable) {
+	case isConditionTrue(integration, v1.IntegrationConditionCronJobAvailable):
 		controller = &batchv1beta1.CronJob{}
-	} else {
+	default:
 		return fmt.Errorf("unsupported controller for integration %s", integration.Name)
 	}
 
@@ -236,7 +237,9 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 	}
 	// Check pending container statuses
 	for _, pod := range pendingPods {
-		containers := append(pod.Status.InitContainerStatuses, pod.Status.ContainerStatuses...)
+		var containers []corev1.ContainerStatus
+		containers = append(containers, pod.Status.InitContainerStatuses...)
+		containers = append(containers, pod.Status.ContainerStatuses...)
 		for _, container := range containers {
 			// Check the images are pulled
 			if waiting := container.State.Waiting; waiting != nil && waiting.Reason == "ImagePullBackOff" {
@@ -251,7 +254,9 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 		if pod.DeletionTimestamp != nil {
 			continue
 		}
-		containers := append(pod.Status.InitContainerStatuses, pod.Status.ContainerStatuses...)
+		var containers []corev1.ContainerStatus
+		containers = append(containers, pod.Status.InitContainerStatuses...)
+		containers = append(containers, pod.Status.ContainerStatuses...)
 		for _, container := range containers {
 			// Check the container state
 			if waiting := container.State.Waiting; waiting != nil && waiting.Reason == "CrashLoopBackOff" {
@@ -293,11 +298,12 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 		// reported to be ready is larger than or equal to the specified number
 		// of replicas. This avoids reporting a falsy readiness condition
 		// when the Integration is being down-scaled.
-		if readyReplicas >= replicas {
+		switch {
+		case readyReplicas >= replicas:
 			setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionDeploymentReadyReason, fmt.Sprintf("%d/%d ready replicas", c.Status.ReadyReplicas, replicas))
-		} else if c.Status.UpdatedReplicas < replicas {
+		case c.Status.UpdatedReplicas < replicas:
 			setReadyCondition(integration, corev1.ConditionFalse, v1.IntegrationConditionDeploymentProgressingReason, fmt.Sprintf("%d/%d updated replicas", c.Status.UpdatedReplicas, replicas))
-		} else {
+		default:
 			setReadyCondition(integration, corev1.ConditionFalse, v1.IntegrationConditionDeploymentProgressingReason, fmt.Sprintf("%d/%d ready replicas", readyReplicas, replicas))
 		}
 
@@ -310,17 +316,18 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 		}
 
 	case *batchv1beta1.CronJob:
-		if c.Status.LastScheduleTime == nil {
+		switch {
+		case c.Status.LastScheduleTime == nil:
 			setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionCronJobCreatedReason, "cronjob created")
-		} else if len(c.Status.Active) > 0 {
+		case len(c.Status.Active) > 0:
 			setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionCronJobActiveReason, "cronjob active")
-		} else if c.Spec.SuccessfulJobsHistoryLimit != nil && *c.Spec.SuccessfulJobsHistoryLimit == 0 && c.Spec.FailedJobsHistoryLimit != nil && *c.Spec.FailedJobsHistoryLimit == 0 {
+		case c.Spec.SuccessfulJobsHistoryLimit != nil && *c.Spec.SuccessfulJobsHistoryLimit == 0 && c.Spec.FailedJobsHistoryLimit != nil && *c.Spec.FailedJobsHistoryLimit == 0:
 			setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionCronJobCreatedReason, "no jobs history available")
-		} else if lastCompletedJob != nil {
+		case lastCompletedJob != nil:
 			if complete := kubernetes.GetJobCondition(*lastCompletedJob, batchv1.JobComplete); complete != nil && complete.Status == corev1.ConditionTrue {
 				setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionLastJobSucceededReason, fmt.Sprintf("last job %s completed successfully", lastCompletedJob.Name))
 			}
-		} else {
+		default:
 			integration.Status.SetCondition(v1.IntegrationConditionReady, corev1.ConditionUnknown, "", "")
 		}
 	}

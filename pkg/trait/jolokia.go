@@ -33,6 +33,7 @@ import (
 // See https://jolokia.org/reference/html/agents.html
 //
 // +camel-k:trait=jolokia
+// nolint: tagliatelle
 type jolokiaTrait struct {
 	BaseTrait `property:",squash"`
 	// The PEM encoded CA certification file path, used to verify client certificates,
@@ -87,8 +88,7 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 		// Add the Camel management and Jolokia agent dependencies
 		// Also add the Camel JAXB dependency, that's required by Hawtio
 
-		switch e.CamelCatalog.Runtime.Provider {
-		case v1.RuntimeProviderQuarkus:
+		if e.CamelCatalog.Runtime.Provider == v1.RuntimeProviderQuarkus {
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel-quarkus:management")
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel:jaxb")
 		}
@@ -181,22 +181,22 @@ func (t *jolokiaTrait) setDefaultJolokiaOption(options map[string]string, option
 	switch o := option.(type) {
 	case **bool:
 		if *o == nil {
-			v := value.(bool)
+			v, _ := value.(bool)
 			*o = &v
 		}
 	case **int:
 		if *o == nil {
-			v := value.(int)
+			v, _ := value.(int)
 			*o = &v
 		}
 	case **string:
 		if *o == nil {
-			v := value.(string)
+			v, _ := value.(string)
 			*o = &v
 		}
 	case *[]string:
 		if len(*o) == 0 {
-			*o = value.([]string)
+			*o, _ = value.([]string)
 		}
 	}
 }

@@ -88,12 +88,11 @@ func (o *debugCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Fprintf(cmd.OutOrStdout(), "Enabling debug mode on integration %q...\n", name)
-	it, err = o.toggleDebug(c, it, true)
-	if err != nil {
+	if _, err := o.toggleDebug(c, it, true); err != nil {
 		return err
 	}
 
-	cs := make(chan os.Signal)
+	cs := make(chan os.Signal, 1)
 	signal.Notify(cs, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-cs
@@ -103,6 +102,10 @@ func (o *debugCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 		fmt.Printf("Disabling debug mode on integration %q\n", name)
 		it, err := c.Integrations(o.Namespace).Get(o.Context, name, metav1.GetOptions{})
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 		_, err = o.toggleDebug(c, it, false)
 		if err != nil {
 			fmt.Println(err)
@@ -128,6 +131,7 @@ func (o *debugCmdOptions) run(cmd *cobra.Command, args []string) error {
 	return kubernetes.PortForward(o.Context, cmdClient, o.Namespace, selector, o.Port, o.RemotePort, cmd.OutOrStdout(), cmd.ErrOrStderr())
 }
 
+// nolint: unparam
 func (o *debugCmdOptions) toggleDebug(c *camelv1.CamelV1Client, it *v1.Integration, active bool) (*v1.Integration, error) {
 	if it.Spec.Traits == nil {
 		it.Spec.Traits = make(map[string]v1.TraitSpec)

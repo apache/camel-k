@@ -83,9 +83,7 @@ func assembleIntegrationRunCommand(ctx context.Context, properties []string, dep
 		if err != nil {
 			return nil, err
 		}
-		for _, envVar := range setEnvVars {
-			cmd.Env = append(cmd.Env, envVar)
-		}
+		cmd.Env = append(cmd.Env, setEnvVars...)
 	} else {
 		// If we are running in containerized or just building an image, we should
 		// not evaluate the variables at this point since we are only generating the

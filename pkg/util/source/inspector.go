@@ -29,7 +29,7 @@ import (
 type catalog2deps func(*camel.RuntimeCatalog) []string
 
 const (
-	defaultJsonDataFormat = "json-jackson"
+	defaultJSONDataFormat = "json-jackson"
 )
 
 var (
@@ -68,14 +68,14 @@ var (
 	sourceDependencies = map[*regexp.Regexp]catalog2deps{
 		jsonLibraryRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			res := make([]string, 0)
-			if jsonDF := catalog.GetArtifactByDataFormat(defaultJsonDataFormat); jsonDF != nil {
+			if jsonDF := catalog.GetArtifactByDataFormat(defaultJSONDataFormat); jsonDF != nil {
 				res = append(res, jsonDF.GetDependencyID())
 			}
 			return res
 		},
 		jsonLanguageRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			res := make([]string, 0)
-			if jsonDF := catalog.GetArtifactByDataFormat(defaultJsonDataFormat); jsonDF != nil {
+			if jsonDF := catalog.GetArtifactByDataFormat(defaultJSONDataFormat); jsonDF != nil {
 				res = append(res, jsonDF.GetDependencyID())
 			}
 			return res
@@ -290,6 +290,7 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 }
 
 // discoverDependencies inspects endpoints and extract kamelets
+// nolint: unparam
 func (i *baseInspector) discoverKamelets(source v1.SourceSpec, meta *Metadata) {
 	for _, uri := range meta.FromURIs {
 		AddKamelet(meta, uri)

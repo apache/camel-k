@@ -146,7 +146,7 @@ func (o *resetCmdOptions) resetIntegrationPlatform(c client.Client) error {
 		return errors.Wrap(err, fmt.Sprintf("could not retrieve integration platform from namespace %s", o.Namespace))
 	}
 	if len(list.Items) > 1 {
-		return errors.New(fmt.Sprintf("expected 1 integration platform in the namespace, found: %d", len(list.Items)))
+		return fmt.Errorf("expected 1 integration platform in the namespace, found: %d", len(list.Items))
 	} else if len(list.Items) == 0 {
 		return errors.New("no integration platforms found in the namespace: run \"kamel install\" to install the platform")
 	}

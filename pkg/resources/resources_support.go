@@ -83,9 +83,9 @@ func DirExists(dirName string) bool {
 	return true
 }
 
-// ResourcesWithPrefix lists all file names that begins with the give path prefix
+// WithPrefix lists all file names that begins with the give path prefix
 // If pathPrefix is a path of directories then be sure to end it with a '/'
-func ResourcesWithPrefix(pathPrefix string) []string {
+func WithPrefix(pathPrefix string) []string {
 	dirPath := filepath.Dir(pathPrefix)
 
 	var res []string

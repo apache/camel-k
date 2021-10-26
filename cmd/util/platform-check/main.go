@@ -28,16 +28,16 @@ import (
 )
 
 func main() {
-	fmt.Println(platformId())
+	fmt.Println(platformID())
 }
 
-func platformId() string {
-	client := ApiClient()
+func platformID() string {
+	client := APIClient()
 	_, apiResourceLists, err := client.Discovery().ServerGroupsAndResources()
 	exitOnError(err)
 
 	for _, apiResList := range apiResourceLists {
-		// Should be version independant just in case image api is ever upgraded
+		// Should be version independent just in case image api is ever upgraded
 		if strings.Contains(apiResList.GroupVersion, "image.openshift.io") {
 			return "openshift"
 		}
@@ -60,7 +60,7 @@ func RestConfig() (c *rest.Config) {
 	return restConfig
 }
 
-func ApiClient() kubernetes.Interface {
+func APIClient() kubernetes.Interface {
 	apiClient, err := kubernetes.NewForConfig(RestConfig())
 	exitOnError(err)
 

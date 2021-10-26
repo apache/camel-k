@@ -70,7 +70,7 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	integrationId := args[0]
+	integrationID := args[0]
 
 	integration := v1.Integration{
 		TypeMeta: metav1.TypeMeta{
@@ -79,21 +79,20 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: o.Namespace,
-			Name:      integrationId,
+			Name:      integrationID,
 		},
 	}
 	key := k8sclient.ObjectKey{
 		Namespace: o.Namespace,
-		Name:      integrationId,
+		Name:      integrationID,
 	}
 
-	var pollTimeout = 600 * time.Second // 10 minutes should be adequate for a timeout
-	var pollInterval = 2 * time.Second
-	var currLogMsg = ""
-	var newLogMsg = ""
+	pollTimeout := 600 * time.Second // 10 minutes should be adequate for a timeout
+	pollInterval := 2 * time.Second
+	currLogMsg := ""
+	newLogMsg := ""
 
 	err = wait.PollImmediate(pollInterval, pollTimeout, func() (done bool, err error) {
-
 		//
 		// Reduce repetition of messages by tracking the last message
 		// and checking if its different from the new message
@@ -116,7 +115,7 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 			//
 			// Don't have an integration yet so log and wait
 			//
-			newLogMsg = fmt.Sprintf("Integration '%s' not yet available. Will keep checking ...", integrationId)
+			newLogMsg = fmt.Sprintf("Integration '%s' not yet available. Will keep checking ...", integrationID)
 			return false, nil
 		}
 
@@ -129,19 +128,18 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 			//
 			// Found the running integration so step over to scraping its pod log
 			//
-			fmt.Printf("Integration '%s' is now running. Showing log ...\n", integrationId)
+			fmt.Printf("Integration '%s' is now running. Showing log ...\n", integrationID)
 			if err := k8slog.Print(o.Context, c, &integration, cmd.OutOrStdout()); err != nil {
 				return false, err
-			} else {
-				return true, nil
 			}
-			break
+
+			return true, nil
 		case "Building Kit":
 			//
 			// This phase can take a while so check progress using
 			// the associated Integration Kit's progress
 			//
-			newLogMsg = fmt.Sprintf("The building kit for integration '%s' is being initialised. This may take some time ...", integrationId)
+			newLogMsg = fmt.Sprintf("The building kit for integration '%s' is being initialised. This may take some time ...", integrationID)
 			if integration.Status.IntegrationKit == nil {
 				//
 				// Not created yet so wait quietly
@@ -173,24 +171,22 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 					// Not created yet so wait quietly
 					//
 					return false, nil
-				} else {
-					//
-					// Integration kit query made an error
-					//
-					return false, err
 				}
+				//
+				// Integration kit query made an error
+				//
+				return false, err
 			}
 
 			//
 			// Found the building kit so output its phase
 			//
-			newLogMsg = fmt.Sprintf("The building kit for integration '%s' is at: %s", integrationId, integrationKit.Status.Phase)
-			break
+			newLogMsg = fmt.Sprintf("The building kit for integration '%s' is at: %s", integrationID, integrationKit.Status.Phase)
 		default:
 			//
 			// Integration is still building, deploying or even in error
 			//
-			newLogMsg = fmt.Sprintf("Integration '%s' is at: %s ...", integrationId, phase)
+			newLogMsg = fmt.Sprintf("Integration '%s' is at: %s ...", integrationID, phase)
 		}
 
 		return false, nil

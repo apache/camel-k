@@ -86,9 +86,11 @@ const (
 	ConfigOptionTypeFile configOptionType = "file"
 )
 
-var validConfigSecretRegexp = regexp.MustCompile(`^(configmap|secret)\:([\w\.\-\_\:\/@]+)$`)
-var validFileRegexp = regexp.MustCompile(`^file\:([\w\.\-\_\:\/@" ]+)$`)
-var validResourceRegexp = regexp.MustCompile(`^([\w\.\-\_\:]+)(\/([\w\.\-\_\:]+))?(\@([\w\.\-\_\:\/]+))?$`)
+var (
+	validConfigSecretRegexp = regexp.MustCompile(`^(configmap|secret)\:([\w\.\-\_\:\/@]+)$`)
+	validFileRegexp         = regexp.MustCompile(`^file\:([\w\.\-\_\:\/@" ]+)$`)
+	validResourceRegexp     = regexp.MustCompile(`^([\w\.\-\_\:]+)(\/([\w\.\-\_\:]+))?(\@([\w\.\-\_\:\/]+))?$`)
+)
 
 func newRunConfigOption(configType configOptionType, value string) *RunConfigOption {
 	rn, mk, mp := parseResourceValue(configType, value)
@@ -104,9 +106,9 @@ func parseResourceValue(configType configOptionType, value string) (resource str
 	if configType == ConfigOptionTypeFile {
 		resource, maybeDestinationPath = parseFileValue(value)
 		return resource, "", maybeDestinationPath
-	} else {
-		return parseCMOrSecretValue(value)
 	}
+
+	return parseCMOrSecretValue(value)
 }
 
 func parseFileValue(value string) (localPath string, maybeDestinationPath string) {
@@ -114,6 +116,7 @@ func parseFileValue(value string) (localPath string, maybeDestinationPath string
 	if len(split) == 2 {
 		return split[0], split[1]
 	}
+
 	return value, ""
 }
 
@@ -123,6 +126,7 @@ func parseCMOrSecretValue(value string) (resource string, maybeKey string, maybe
 	}
 	// Must have 3 values
 	groups := validResourceRegexp.FindStringSubmatch(value)
+
 	return groups[1], groups[3], groups[5]
 }
 
@@ -138,6 +142,7 @@ func ParseResourceOption(item string) (*RunConfigOption, error) {
 		}
 		return nil, err
 	}
+
 	return option, nil
 }
 
@@ -149,7 +154,8 @@ func ParseConfigOption(item string) (*RunConfigOption, error) {
 func parseOption(item string) (*RunConfigOption, error) {
 	var cot configOptionType
 	var value string
-	if validConfigSecretRegexp.MatchString(item) {
+	switch {
+	case validConfigSecretRegexp.MatchString(item):
 		// parse as secret/configmap
 		groups := validConfigSecretRegexp.FindStringSubmatch(item)
 		switch groups[1] {
@@ -159,12 +165,12 @@ func parseOption(item string) (*RunConfigOption, error) {
 			cot = ConfigOptionTypeSecret
 		}
 		value = groups[2]
-	} else if validFileRegexp.MatchString(item) {
-		//parse as file
+	case validFileRegexp.MatchString(item):
+		// parse as file
 		groups := validFileRegexp.FindStringSubmatch(item)
 		cot = ConfigOptionTypeFile
 		value = groups[1]
-	} else {
+	default:
 		return nil, fmt.Errorf("could not match config, secret or file configuration as %s", item)
 	}
 

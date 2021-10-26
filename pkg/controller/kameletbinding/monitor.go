@@ -91,7 +91,8 @@ func (action *monitorAction) Handle(ctx context.Context, kameletbinding *v1alpha
 
 	// Map integration phases to KameletBinding phases
 	target := kameletbinding.DeepCopy()
-	if it.Status.Phase == v1.IntegrationPhaseRunning {
+	switch it.Status.Phase {
+	case v1.IntegrationPhaseRunning:
 		target.Status.Phase = v1alpha1.KameletBindingPhaseReady
 		target.Status.SetCondition(
 			v1alpha1.KameletBindingConditionReady,
@@ -99,7 +100,7 @@ func (action *monitorAction) Handle(ctx context.Context, kameletbinding *v1alpha
 			"",
 			"",
 		)
-	} else if it.Status.Phase == v1.IntegrationPhaseError {
+	case v1.IntegrationPhaseError:
 		target.Status.Phase = v1alpha1.KameletBindingPhaseError
 		target.Status.SetCondition(
 			v1alpha1.KameletBindingConditionReady,
@@ -107,7 +108,7 @@ func (action *monitorAction) Handle(ctx context.Context, kameletbinding *v1alpha
 			string(target.Status.Phase),
 			"",
 		)
-	} else {
+	default:
 		target.Status.Phase = v1alpha1.KameletBindingPhaseCreating
 		target.Status.SetCondition(
 			v1alpha1.KameletBindingConditionReady,

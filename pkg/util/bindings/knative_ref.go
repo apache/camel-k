@@ -69,9 +69,11 @@ func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointCtx End
 	var serviceURI string
 	if *serviceType == knativeapis.CamelServiceTypeEvent {
 		// TODO enable this when the runtime will support changing the broker name (https://github.com/apache/camel-k-runtime/issues/535)
-		//if props["name"] == "" {
-		//	props["name"] = e.Ref.Name
-		//}
+		/*
+			if props["name"] == "" {
+				props["name"] = e.Ref.Name
+			}
+		*/
 		if eventType, ok := props["type"]; ok {
 			// consume prop
 			delete(props, "type")

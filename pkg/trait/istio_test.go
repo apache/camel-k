@@ -35,6 +35,8 @@ import (
 )
 
 func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service, enabled bool) Environment {
+	t.Helper()
+
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 

@@ -42,6 +42,7 @@ func boolEnvOrDefault(def bool, envs ...string) bool {
 	if err != nil {
 		log.Error(err, "cannot parse boolean property", "property", def, "value", strVal)
 	}
+
 	return res
 }
 
@@ -51,5 +52,6 @@ func envOrDefault(def string, envs ...string) string {
 			return val
 		}
 	}
+
 	return def
 }

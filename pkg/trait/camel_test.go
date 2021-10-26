@@ -73,7 +73,7 @@ func TestApplyCamelTraitWithoutEnvironmentCatalogAndUnmatchableVersionFails(t *t
 func createNominalCamelTest() (*camelTrait, *Environment) {
 	client, _ := test.NewFakeClient()
 
-	trait := newCamelTrait().(*camelTrait)
+	trait, _ := newCamelTrait().(*camelTrait)
 	trait.Enabled = BoolP(true)
 
 	environment := &Environment{

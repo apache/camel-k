@@ -23,6 +23,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
+// nolint: stylecheck
 type mavenLog struct {
 	Level            string `json:"level"`
 	Ts               string `json:"ts"`

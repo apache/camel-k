@@ -44,7 +44,7 @@ func TestListPublishedImages(t *testing.T) {
 				Namespace: "ns",
 				Name:      "my-kit-1",
 				Labels: map[string]string{
-					v1.IntegrationKitTypeLabel:         v1.IntegrationKitTypePlatform,
+					v1.IntegrationKitTypeLabel:          v1.IntegrationKitTypePlatform,
 					"camel.apache.org/runtime.version":  catalog.Runtime.Version,
 					"camel.apache.org/runtime.provider": string(catalog.Runtime.Provider),
 				},
@@ -65,7 +65,7 @@ func TestListPublishedImages(t *testing.T) {
 				Namespace: "ns",
 				Name:      "my-kit-2",
 				Labels: map[string]string{
-					v1.IntegrationKitTypeLabel:         v1.IntegrationKitTypePlatform,
+					v1.IntegrationKitTypeLabel:          v1.IntegrationKitTypePlatform,
 					"camel.apache.org/runtime.version":  catalog.Runtime.Version,
 					"camel.apache.org/runtime.provider": string(catalog.Runtime.Provider),
 				},

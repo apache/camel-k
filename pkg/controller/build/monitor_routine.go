@@ -19,6 +19,7 @@ package build
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -104,7 +105,7 @@ tasks:
 	for i, task := range build.Spec.Tasks {
 		select {
 		case <-ctxWithTimeout.Done():
-			if ctxWithTimeout.Err() == context.Canceled {
+			if errors.Is(ctxWithTimeout.Err(), context.Canceled) {
 				// Context canceled
 				status.Phase = v1.BuildPhaseInterrupted
 			} else {
@@ -112,6 +113,7 @@ tasks:
 				status.Phase = v1.BuildPhaseFailed
 			}
 			status.Error = ctxWithTimeout.Err().Error()
+
 			break tasks
 
 		default:
@@ -121,6 +123,7 @@ tasks:
 					tmpDir, err := ioutil.TempDir(os.TempDir(), build.Name+"-")
 					if err != nil {
 						status.Failed(err)
+
 						break tasks
 					}
 					t.BuildDir = tmpDir

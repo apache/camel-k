@@ -32,10 +32,10 @@ func TemplateToYamlDSL(template v1.Template, id string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	jsondata := make(map[string]interface{}, 0)
+	jsondata := make(map[string]interface{})
 	err = json.Unmarshal(data, &jsondata)
 	if err != nil {
-		return nil, fmt.Errorf("error unmarshalling json: %v", err)
+		return nil, fmt.Errorf("error unmarshalling json: %w", err)
 	}
 	if _, present := jsondata["id"]; !present {
 		jsondata["id"] = id
@@ -46,7 +46,7 @@ func TemplateToYamlDSL(template v1.Template, id string) ([]byte, error) {
 	listWrapper = append(listWrapper, templateWrapper)
 	yamldata, err := yaml2.Marshal(listWrapper)
 	if err != nil {
-		return nil, fmt.Errorf("error marshalling to yaml: %v", err)
+		return nil, fmt.Errorf("error marshalling to yaml: %w", err)
 	}
 
 	return yamldata, nil

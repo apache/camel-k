@@ -30,5 +30,6 @@ func IsOpenShift(client kubernetes.Interface) (bool, error) {
 	} else if err != nil {
 		return false, err
 	}
+
 	return true, nil
 }

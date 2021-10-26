@@ -107,7 +107,7 @@ func ResolveSources(ctx context.Context, locations []string, compress bool) ([]S
 				}
 
 				if gistID == "" {
-					return sources, fmt.Errorf("unable to determing gist id from %s", location)
+					return sources, fmt.Errorf("unable to determining gist id from %s", location)
 				}
 
 				gists, _, err := gc.Gists.Get(ctx, gistID)
@@ -182,7 +182,7 @@ func ResolveSources(ctx context.Context, locations []string, compress bool) ([]S
 				}
 				sources = append(sources, answer)
 			default:
-				return sources, fmt.Errorf("Missing file or unsupported scheme in %s", location)
+				return sources, fmt.Errorf("missing file or unsupported scheme in %s", location)
 			}
 		}
 	}

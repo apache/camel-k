@@ -24,11 +24,9 @@ import (
 	"fmt"
 )
 
-var (
-	knownServersByRegistry = map[string]string{
-		"docker.io": "https://index.docker.io/v1/",
-	}
-)
+var knownServersByRegistry = map[string]string{
+	"docker.io": "https://index.docker.io/v1/",
+}
 
 // Auth contains basic information for authenticating against a container registry
 type Auth struct {
@@ -60,6 +58,7 @@ func (a Auth) validate() error {
 	if a.getActualServer() == "" || a.Username == "" {
 		return errors.New("not enough information to generate a registry authentication file")
 	}
+
 	return nil
 }
 
@@ -69,6 +68,7 @@ func (a Auth) GenerateDockerConfig() ([]byte, error) {
 		return nil, err
 	}
 	content := a.generateDockerConfigObject()
+
 	return json.Marshal(content)
 }
 
@@ -89,6 +89,7 @@ func (a Auth) getActualServer() string {
 	if p, ok := knownServersByRegistry[a.Registry]; ok {
 		return p
 	}
+
 	return a.Registry
 }
 

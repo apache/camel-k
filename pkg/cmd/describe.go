@@ -31,33 +31,33 @@ import (
 )
 
 func describeObjectMeta(w *indentedwriter.Writer, om metav1.ObjectMeta) {
-	w.Write(0, "Name:\t%s\n", om.Name)
-	w.Write(0, "Namespace:\t%s\n", om.Namespace)
+	w.Writef(0, "Name:\t%s\n", om.Name)
+	w.Writef(0, "Namespace:\t%s\n", om.Namespace)
 
 	if len(om.GetLabels()) > 0 {
-		w.Write(0, "Labels:")
+		w.Writef(0, "Labels:")
 		for k, v := range om.Labels {
-			w.Write(0, "\t%s=%s\n", k, strings.TrimSpace(v))
+			w.Writef(0, "\t%s=%s\n", k, strings.TrimSpace(v))
 		}
 	}
 
 	if len(om.GetAnnotations()) > 0 {
-		w.Write(0, "Annotations:")
+		w.Writef(0, "Annotations:")
 		for k, v := range om.Annotations {
-			w.Write(0, "\t%s=%s\n", k, strings.TrimSpace(v))
+			w.Writef(0, "\t%s=%s\n", k, strings.TrimSpace(v))
 		}
 	}
 
-	w.Write(0, "Creation Timestamp:\t%s\n", om.CreationTimestamp.Format(time.RFC1123Z))
+	w.Writef(0, "Creation Timestamp:\t%s\n", om.CreationTimestamp.Format(time.RFC1123Z))
 }
 
 func describeTraits(w *indentedwriter.Writer, traits map[string]v1.TraitSpec) error {
 	if len(traits) > 0 {
-		w.Write(0, "Traits:\n")
+		w.Writef(0, "Traits:\n")
 
 		for trait := range traits {
-			w.Write(1, "%s:\n", strings.Title(trait))
-			//TODO: print the whole TraitSpec as Yaml
+			w.Writef(1, "%s:\n", strings.Title(trait))
+			// TODO: print the whole TraitSpec as Yaml
 			data, err := json.Marshal(traits[trait])
 			if err != nil {
 				return err
@@ -68,7 +68,7 @@ func describeTraits(w *indentedwriter.Writer, traits map[string]v1.TraitSpec) er
 				return err
 			}
 			for k, v := range config {
-				w.Write(2, "%s:\t%v\n", strings.Title(k), v)
+				w.Writef(2, "%s:\t%v\n", strings.Title(k), v)
 			}
 		}
 	}

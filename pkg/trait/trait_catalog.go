@@ -38,7 +38,7 @@ type Catalog struct {
 
 // NewCatalog creates a new trait Catalog
 func NewCatalog(c client.Client) *Catalog {
-	var traitList = make([]Trait, 0, len(FactoryList))
+	traitList := make([]Trait, 0, len(FactoryList))
 	for _, factory := range FactoryList {
 		traitList = append(traitList, factory())
 	}
@@ -98,6 +98,7 @@ func (c *Catalog) apply(environment *Environment) error {
 	for _, trait := range traits {
 		if environment.Platform == nil && trait.RequiresIntegrationPlatform() {
 			c.L.Debug("Skipping trait because of missing integration platform: %s", trait.ID())
+
 			continue
 		}
 		applicable = true

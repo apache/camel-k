@@ -36,7 +36,6 @@ import (
 )
 
 func main() {
-
 	var rootDir string
 	var destDir string
 
@@ -147,7 +146,7 @@ limitations under the License.
 	var finalContent []byte
 	finalContent = append(finalContent, []byte(header)...)
 	finalContent = append(finalContent, content...)
-	if err := ioutil.WriteFile(resourceFile, finalContent, 0777); err != nil {
+	if err := ioutil.WriteFile(resourceFile, finalContent, 0o777); err != nil {
 		log.Fatalln(err)
 	}
 }
@@ -223,7 +222,7 @@ func checkDir(dirName string) error {
 		return err
 	}
 	if !dir.IsDir() {
-		return fmt.Errorf("path %s is not a directory\n", dirName)
+		return fmt.Errorf("path %s is not a directory", dirName)
 	}
 
 	return nil

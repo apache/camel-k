@@ -136,31 +136,23 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.P
 	pod.Labels = kubernetes.MergeCamelCreatorLabels(build.Labels, pod.Labels)
 
 	for _, task := range build.Spec.Tasks {
-		if task.Builder != nil {
-			err := addBuildTaskToPod(build, task.Builder.Name, pod)
-			if err != nil {
-				return nil, err
-			}
-		} else if task.Buildah != nil {
+		switch {
+		case task.Builder != nil:
+			addBuildTaskToPod(build, task.Builder.Name, pod)
+		case task.Buildah != nil:
 			err := addBuildahTaskToPod(ctx, c, build, task.Buildah, pod)
 			if err != nil {
 				return nil, err
 			}
-		} else if task.Kaniko != nil {
+		case task.Kaniko != nil:
 			err := addKanikoTaskToPod(ctx, c, build, task.Kaniko, pod)
 			if err != nil {
 				return nil, err
 			}
-		} else if task.S2i != nil {
-			err := addBuildTaskToPod(build, task.S2i.Name, pod)
-			if err != nil {
-				return nil, err
-			}
-		} else if task.Spectrum != nil {
-			err := addBuildTaskToPod(build, task.Spectrum.Name, pod)
-			if err != nil {
-				return nil, err
-			}
+		case task.S2i != nil:
+			addBuildTaskToPod(build, task.S2i.Name, pod)
+		case task.Spectrum != nil:
+			addBuildTaskToPod(build, task.Spectrum.Name, pod)
 		}
 	}
 
@@ -208,7 +200,7 @@ func buildPodName(build *v1.Build) string {
 	return "camel-k-" + build.Name + "-builder"
 }
 
-func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) error {
+func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 	if !hasBuilderVolume(pod) {
 		// Add the EmptyDir volume used to share the build state across tasks
 		pod.Spec.Volumes = append(pod.Spec.Volumes, corev1.Volume{
@@ -242,7 +234,6 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) error 
 	}
 
 	addContainerToPod(build, container, pod)
-	return nil
 }
 
 func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task *v1.BuildahTask, pod *corev1.Pod) error {

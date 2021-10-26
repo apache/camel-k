@@ -107,7 +107,7 @@ func exitOnError(err error, msg string) {
 }
 
 func writeTerminationMessage(message string) {
-	err := ioutil.WriteFile(terminationMessagePath, []byte(message), 0644)
+	err := ioutil.WriteFile(terminationMessagePath, []byte(message), 0o644)
 	if err != nil {
 		log.Error(err, "cannot write termination message")
 	}

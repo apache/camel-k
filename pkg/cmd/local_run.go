@@ -166,7 +166,10 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 		if err != nil {
 			return err
 		}
-		util.CopyQuarkusAppFiles(localDependenciesDirectory, localQuarkusDir)
+		err = util.CopyQuarkusAppFiles(localDependenciesDirectory, localQuarkusDir)
+		if err != nil {
+			return err
+		}
 
 		// The dependency jar files need to be at a specific location i.e.:
 		// <current_working_folder>/lib/main/*.jar
@@ -174,7 +177,10 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 		if err != nil {
 			return err
 		}
-		util.CopyLibFiles(localDependenciesDirectory, localLibDirectory)
+		err = util.CopyLibFiles(localDependenciesDirectory, localLibDirectory)
+		if err != nil {
+			return err
+		}
 
 		// The Camel-K jar file needs to be at a specific location i.e.:
 		// <current_working_folder>/app/camel-k-integration-X.X.X{-SNAPSHOT}.jar
@@ -182,7 +188,10 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 		if err != nil {
 			return err
 		}
-		util.CopyAppFile(localDependenciesDirectory, localAppDirectory)
+		err = util.CopyAppFile(localDependenciesDirectory, localAppDirectory)
+		if err != nil {
+			return err
+		}
 	} else {
 		computedDependencies, err := getDependencies(command.Context, args, command.AdditionalDependencies, command.MavenRepositories, true)
 		if err != nil {

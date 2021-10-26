@@ -28,6 +28,8 @@ import (
 )
 
 func NewtestYAMLInspector(t *testing.T) YAMLInspector {
+	t.Helper()
+
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
@@ -348,7 +350,7 @@ func TestYAMLJson(t *testing.T) {
 	}
 }
 
-const YAMLKameletEipNoId = `
+const YAMLKameletEipNoID = `
 - from:
     uri: timer:tick
     steps:
@@ -361,6 +363,7 @@ const YAMLKameletEipInline = `
     steps:
     - kamelet: "foo/bar?baz=test"
 `
+
 const YAMLKameletEipMap = `
 - from:
     uri: timer:tick
@@ -368,6 +371,7 @@ const YAMLKameletEipMap = `
     - kamelet: 
         name: "foo/bar?baz=test"
 `
+
 const YAMLKameletEipMapWithParams = `
 - from:
     uri: timer:tick
@@ -377,6 +381,7 @@ const YAMLKameletEipMapWithParams = `
         parameters:
           baz:test
 `
+
 const YAMLKameletEndpoint = `
 - from:
     uri: timer:tick
@@ -390,7 +395,7 @@ func TestYAMLKamelet(t *testing.T) {
 		kamelets []string
 	}{
 		{
-			source:   YAMLKameletEipNoId,
+			source:   YAMLKameletEipNoID,
 			kamelets: []string{"foo"},
 		},
 		{

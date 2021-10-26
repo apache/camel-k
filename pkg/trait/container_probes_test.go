@@ -32,9 +32,12 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
+// nolint: unparam
 func newTestProbesEnv(t *testing.T, provider v1.RuntimeProvider) Environment {
-	var catalog *camel.RuntimeCatalog = nil
-	var err error = nil
+	t.Helper()
+
+	var catalog *camel.RuntimeCatalog
+	var err error
 
 	switch provider {
 	case v1.RuntimeProviderQuarkus:
@@ -57,7 +60,7 @@ func newTestProbesEnv(t *testing.T, provider v1.RuntimeProvider) Environment {
 }
 
 func newTestContainerTrait() *containerTrait {
-	tr := newContainerTrait().(*containerTrait)
+	tr, _ := newContainerTrait().(*containerTrait)
 	tr.ProbesEnabled = BoolP(true)
 
 	return tr

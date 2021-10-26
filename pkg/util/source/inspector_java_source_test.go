@@ -19,18 +19,19 @@ package source
 
 import (
 	"fmt"
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const JavaSourceKameletEip = `
 from("direct:start")
     .kamelet("foo/bar?baz=test")
 `
+
 const JavaSourceKameletEndpoint = `
 from("direct:start")
     .to("kamelet:foo/bar?baz=test")

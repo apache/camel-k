@@ -88,14 +88,13 @@ func (g *traitMetaDataGen) GenerateType(context *generator.Context, t *types.Typ
 }
 
 func (g *traitMetaDataGen) Finalize(c *generator.Context, w io.Writer) error {
-
 	deployDir := g.arguments.CustomArgs.(*CustomArgs).ResourceDir
 	traitFile := "traits.yaml"
 	filename := path.Join(deployDir, traitFile)
 
 	var file *os.File
 	var err error
-	if file, err = os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0777); err != nil {
+	if file, err = os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0o777); err != nil {
 		return err
 	}
 	if err = file.Truncate(0); err != nil {
@@ -125,7 +124,7 @@ func (g *traitMetaDataGen) getTraitID(t *types.Type) string {
 }
 
 func (g *traitMetaDataGen) buildDescription(t *types.Type, traitID string, td *traitMetaData) {
-	var desc = []string(nil)
+	desc := []string(nil)
 	desc = append(desc, g.filterOutTagsAndComments(t.CommentLines)...)
 	td.Name = traitID
 	td.Description = ""
@@ -145,7 +144,7 @@ func (g *traitMetaDataGen) buildDescription(t *types.Type, traitID string, td *t
 
 func (g *traitMetaDataGen) buildFields(t *types.Type, td *traitMetaData) {
 	if len(t.Members) > 1 {
-		var res = []string(nil)
+		res := []string(nil)
 		g.buildMembers(t, &res, td)
 	}
 }

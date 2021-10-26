@@ -30,7 +30,10 @@ import (
 
 const cmdInstall = "install"
 
+// nolint: unparam
 func initializeInstallCmdOptions(t *testing.T) (*installCmdOptions, *cobra.Command, RootCmdOptions) {
+	t.Helper()
+
 	options, rootCmd := kamelTestPreAddCommandInit()
 	installCmdOptions := addTestInstallCmd(*options, rootCmd)
 	kamelTestPostAddCommandInit(t, rootCmd)
@@ -153,6 +156,7 @@ func TestInstallHealthFlag(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, int32(7777), installCmdOptions.HealthPort)
 }
+
 func TestInstallHttpProxySecretFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--http-proxy-secret", "someString")

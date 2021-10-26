@@ -23,6 +23,7 @@ import (
 )
 
 // NewCmdLocal -- Add local kamel subcommand with several other subcommands of its own.
+// nolint: unparam
 func newCmdLocal(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd := cobra.Command{
 		Use:   "local [sub-command]",

@@ -27,7 +27,10 @@ import (
 
 const cmdBind = "bind"
 
+// nolint: unparam
 func initializeBindCmdOptions(t *testing.T) (*bindCmdOptions, *cobra.Command, RootCmdOptions) {
+	t.Helper()
+
 	options, rootCmd := kamelTestPreAddCommandInit()
 	bindCmdOptions := addTestBindCmd(*options, rootCmd)
 	kamelTestPostAddCommandInit(t, rootCmd)
@@ -36,7 +39,7 @@ func initializeBindCmdOptions(t *testing.T) (*bindCmdOptions, *cobra.Command, Ro
 }
 
 func addTestBindCmd(options RootCmdOptions, rootCmd *cobra.Command) *bindCmdOptions {
-	//add a testing version of bind Command
+	// add a testing version of bind Command
 	bindCmd, bindOptions := newCmdBind(&options)
 	bindCmd.PersistentPreRunE = func(c *cobra.Command, args []string) error {
 		return nil

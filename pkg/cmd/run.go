@@ -55,9 +55,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/watch"
 )
 
-var (
-	traitConfigRegexp = regexp.MustCompile(`^([a-z0-9-]+)((?:\.[a-z0-9-]+)+)=(.*)$`)
-)
+var traitConfigRegexp = regexp.MustCompile(`^([a-z0-9-]+)((?:\.[a-z0-9-]+)+)=(.*)$`)
 
 func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) {
 	options := runCmdOptions{
@@ -138,7 +136,7 @@ type runCmdOptions struct {
 	Traits          []string `mapstructure:"traits" yaml:",omitempty"`
 	Volumes         []string `mapstructure:"volumes" yaml:",omitempty"`
 	EnvVars         []string `mapstructure:"envs" yaml:",omitempty"`
-	// Deprecated: PropertyFiles has been deprecated in 1.5
+	// Deprecated: since 1.5
 	PropertyFiles []string `mapstructure:"property-files" yaml:",omitempty"`
 	Labels        []string `mapstructure:"labels" yaml:",omitempty"`
 	Annotations   []string `mapstructure:"annotations" yaml:",omitempty"`
@@ -146,7 +144,6 @@ type runCmdOptions struct {
 }
 
 func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
-
 	// *************************************************************************
 	//
 	// WARNING: this is an hack, well a huge one
@@ -302,7 +299,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if o.Dev {
-		cs := make(chan os.Signal)
+		cs := make(chan os.Signal, 1)
 		signal.Notify(cs, os.Interrupt, syscall.SIGTERM)
 		go func() {
 			<-cs
@@ -392,7 +389,6 @@ func (o *runCmdOptions) postRun(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// nolint:errcheck
 func (o *runCmdOptions) waitForIntegrationReady(cmd *cobra.Command, c client.Client, integration *v1.Integration) (*v1.IntegrationPhase, error) {
 	handler := func(i *v1.Integration) bool {
 		//
@@ -445,6 +441,7 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 						newCmd.SetErr(cmd.ErrOrStderr())
 						if err != nil {
 							fmt.Println("Unable to sync integration: ", err.Error())
+
 							continue
 						}
 						newCmd.Args = o.validateArgs
@@ -495,11 +492,12 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 
 	existing := &v1.Integration{}
 	err := c.Get(o.Context, ctrl.ObjectKeyFromObject(integration), existing)
-	if err == nil {
+	switch {
+	case err == nil:
 		integration = existing.DeepCopy()
-	} else if k8serrors.IsNotFound(err) {
+	case k8serrors.IsNotFound(err):
 		existing = nil
-	} else {
+	default:
 		return nil, err
 	}
 
@@ -601,11 +599,11 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	}
 	for _, key := range props.Keys() {
 		kv := fmt.Sprintf("%s=%s", key, props.GetString(key, ""))
-		if propsTraits, err := convertToTraitParameter(kv, "camel.properties"); err != nil {
+		propsTraits, err := convertToTraitParameter(kv, "camel.properties")
+		if err != nil {
 			return nil, err
-		} else {
-			o.Traits = append(o.Traits, propsTraits...)
 		}
+		o.Traits = append(o.Traits, propsTraits...)
 	}
 
 	// convert each build configuration to a builder trait property
@@ -615,11 +613,11 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	}
 	for _, key := range buildProps.Keys() {
 		kv := fmt.Sprintf("%s=%s", key, buildProps.GetString(key, ""))
-		if buildPropsTraits, err := convertToTraitParameter(kv, "builder.properties"); err != nil {
+		buildPropsTraits, err := convertToTraitParameter(kv, "builder.properties")
+		if err != nil {
 			return nil, err
-		} else {
-			o.Traits = append(o.Traits, buildPropsTraits...)
 		}
+		o.Traits = append(o.Traits, buildPropsTraits...)
 	}
 
 	for _, item := range o.Configs {
@@ -864,7 +862,6 @@ func configureTrait(config map[string]interface{}, trait interface{}) error {
 			Result:           &trait,
 		},
 	)
-
 	if err != nil {
 		return err
 	}

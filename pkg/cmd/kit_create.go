@@ -165,7 +165,7 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 		})
 	}
 	if err := command.configureTraits(kit, command.Traits, catalog); err != nil {
-		return nil
+		return err
 	}
 
 	existed := false

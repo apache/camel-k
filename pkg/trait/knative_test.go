@@ -105,7 +105,7 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	err = tc.configure(&environment)
 	assert.Nil(t, err)
 
-	tr := tc.GetTrait("knative").(*knativeTrait)
+	tr, _ := tc.GetTrait("knative").(*knativeTrait)
 	ok, err := tr.Configure(&environment)
 	assert.Nil(t, err)
 	assert.True(t, ok)
@@ -224,7 +224,7 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 	err = tc.configure(&environment)
 	assert.Nil(t, err)
 
-	tr := tc.GetTrait("knative").(*knativeTrait)
+	tr, _ := tc.GetTrait("knative").(*knativeTrait)
 
 	ok, err := tr.Configure(&environment)
 	assert.Nil(t, err)
@@ -349,6 +349,8 @@ func TestKnativePlatformHttpDependencies(t *testing.T) {
 }
 
 func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
+	t.Helper()
+
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 

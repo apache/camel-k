@@ -170,6 +170,7 @@ func StringSliceUniqueConcat(slice *[]string, items []string) bool {
 			changed = true
 		}
 	}
+
 	return changed
 }
 
@@ -178,6 +179,7 @@ func SubstringFrom(s string, substr string) string {
 	if index != -1 {
 		return s[index:]
 	}
+
 	return ""
 }
 
@@ -188,8 +190,7 @@ func EncodeXML(content interface{}) ([]byte, error) {
 	e := xml.NewEncoder(w)
 	e.Indent("", "  ")
 
-	err := e.Encode(content)
-	if err != nil {
+	if err := e.Encode(content); err != nil {
 		return []byte{}, err
 	}
 
@@ -212,7 +213,7 @@ func CopyFile(src, dst string) (int64, error) {
 	}
 	defer source.Close()
 
-	err = os.MkdirAll(path.Dir(dst), 0777)
+	err = os.MkdirAll(path.Dir(dst), 0o777)
 	if err != nil {
 		return 0, err
 	}
@@ -224,6 +225,7 @@ func CopyFile(src, dst string) (int64, error) {
 
 	defer destination.Close()
 	nBytes, err := io.Copy(destination, source)
+
 	return nBytes, err
 }
 
@@ -231,7 +233,7 @@ func WriteFileWithContent(buildDir string, relativePath string, content []byte) 
 	filePath := path.Join(buildDir, relativePath)
 	fileDir := path.Dir(filePath)
 	// Create dir if not present
-	err := os.MkdirAll(fileDir, 0777)
+	err := os.MkdirAll(fileDir, 0o777)
 	if err != nil {
 		return errors.Wrap(err, "could not create dir for file "+relativePath)
 	}
@@ -315,7 +317,7 @@ func DirectoryEmpty(directory string) (bool, error) {
 	defer f.Close()
 
 	_, err = f.Readdirnames(1)
-	if err == io.EOF {
+	if errors.Is(err, io.EOF) {
 		return true, nil
 	}
 	return false, err
@@ -330,7 +332,7 @@ func CreateDirectory(directory string) error {
 		}
 
 		if !directoryExists {
-			err := os.MkdirAll(directory, 0777)
+			err := os.MkdirAll(directory, 0o777)
 			if err != nil {
 				return err
 			}
@@ -406,7 +408,7 @@ func JSONToMap(src []byte) (map[string]interface{}, error) {
 	jsondata := map[string]interface{}{}
 	err := json.Unmarshal(src, &jsondata)
 	if err != nil {
-		return nil, fmt.Errorf("error unmarshalling json: %v", err)
+		return nil, fmt.Errorf("error unmarshalling json: %w", err)
 	}
 
 	return jsondata, nil
@@ -415,14 +417,14 @@ func JSONToMap(src []byte) (map[string]interface{}, error) {
 func MapToYAML(src map[string]interface{}) ([]byte, error) {
 	yamldata, err := yaml2.Marshal(&src)
 	if err != nil {
-		return nil, fmt.Errorf("error marshalling to yaml: %v", err)
+		return nil, fmt.Errorf("error marshalling to yaml: %w", err)
 	}
 
 	return yamldata, nil
 }
 
 func WriteToFile(filePath string, fileContents string) error {
-	err := ioutil.WriteFile(filePath, []byte(fileContents), 0777)
+	err := ioutil.WriteFile(filePath, []byte(fileContents), 0o777)
 	if err != nil {
 		return errors.Errorf("error writing file: %v", filePath)
 	}
@@ -474,7 +476,7 @@ func CreateLocalPropertiesDirectory() error {
 	}
 
 	if !directoryExists {
-		err := os.MkdirAll(GetLocalPropertiesDir(), 0777)
+		err := os.MkdirAll(GetLocalPropertiesDir(), 0o777)
 		if err != nil {
 			return err
 		}
@@ -494,7 +496,7 @@ func CreateLocalDependenciesDirectory() error {
 	}
 
 	if !directoryExists {
-		err := os.MkdirAll(GetLocalDependenciesDir(), 0777)
+		err := os.MkdirAll(GetLocalDependenciesDir(), 0o777)
 		if err != nil {
 			return err
 		}
@@ -514,7 +516,7 @@ func CreateLocalRoutesDirectory() error {
 	}
 
 	if !directoryExists {
-		err := os.MkdirAll(GetLocalRoutesDir(), 0777)
+		err := os.MkdirAll(GetLocalRoutesDir(), 0o777)
 		if err != nil {
 			return err
 		}
@@ -534,7 +536,7 @@ func CreateLocalQuarkusDirectory() error {
 	}
 
 	if !directoryExists {
-		err := os.MkdirAll(GetLocalQuarkusDir(), 0777)
+		err := os.MkdirAll(GetLocalQuarkusDir(), 0o777)
 		if err != nil {
 			return err
 		}
@@ -554,7 +556,7 @@ func CreateLocalAppDirectory() error {
 	}
 
 	if !directoryExists {
-		err := os.MkdirAll(GetLocalAppDir(), 0777)
+		err := os.MkdirAll(GetLocalAppDir(), 0o777)
 		if err != nil {
 			return err
 		}
@@ -574,7 +576,7 @@ func CreateLocalLibDirectory() error {
 	}
 
 	if !directoryExists {
-		err := os.MkdirAll(GetLocalLibDir(), 0777)
+		err := os.MkdirAll(GetLocalLibDir(), 0o777)
 		if err != nil {
 			return err
 		}
@@ -617,6 +619,7 @@ func EvaluateCLIAndLazyEnvVars() ([]string, error) {
 		for _, setEnvVar := range setEnvVars {
 			if setEnvVar == lazyEnvVar {
 				alreadySet = true
+
 				break
 			}
 		}
@@ -641,7 +644,7 @@ func CopyIntegrationFilesToDirectory(files []string, directory string) ([]string
 	}
 
 	// Copy files to new location. Also create the list with relocated files.
-	relocatedFilesList := make([]string, len(files))
+	relocatedFilesList := []string{}
 	for _, filePath := range files {
 		newFilePath := path.Join(directory, path.Base(filePath))
 		_, err := CopyFile(filePath, newFilePath)
@@ -663,6 +666,9 @@ func CopyQuarkusAppFiles(localDependenciesDirectory string, localQuarkusDir stri
 
 	// Transfer all files with a .dat extension and all files with a *-bytecode.jar suffix.
 	files, err := getRegularFileNamesInDir(localDependenciesDirectory)
+	if err != nil {
+		return err
+	}
 	for _, file := range files {
 		if strings.HasSuffix(file, ".dat") || strings.HasSuffix(file, "-bytecode.jar") {
 			source := path.Join(localDependenciesDirectory, file)

@@ -65,7 +65,7 @@ func TestApplyDeployerTraitInInitializationPhaseDoesSucceed(t *testing.T) {
 }
 
 func createNominalDeployerTest() (*deployerTrait, *Environment) {
-	trait := newDeployerTrait().(*deployerTrait)
+	trait, _ := newDeployerTrait().(*deployerTrait)
 
 	environment := &Environment{
 		Catalog: NewCatalog(nil),

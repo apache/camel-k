@@ -70,6 +70,7 @@ func newCatalogVersionCollection(catalogs []v1.CamelCatalog) CatalogVersionColle
 		rv, err := semver.NewVersion(catalogs[i].Spec.Runtime.Version)
 		if err != nil {
 			log.Debugf("Invalid semver version (runtime) %s", rv)
+
 			continue
 		}
 

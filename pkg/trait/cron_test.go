@@ -283,7 +283,7 @@ func TestCronDeps(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 
-	ct := environment.GetTrait("cron").(*cronTrait)
+	ct, _ := environment.GetTrait("cron").(*cronTrait)
 	assert.NotNil(t, ct)
 	assert.Nil(t, ct.Fallback)
 	assert.True(t, util.StringSliceExists(environment.Integration.Status.Capabilities, v1.CapabilityCron))
@@ -357,7 +357,7 @@ func TestCronDepsFallback(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 
-	ct := environment.GetTrait("cron").(*cronTrait)
+	ct, _ := environment.GetTrait("cron").(*cronTrait)
 	assert.NotNil(t, ct)
 	assert.NotNil(t, ct.Fallback)
 	assert.True(t, util.StringSliceExists(environment.Integration.Status.Capabilities, v1.CapabilityCron))
@@ -423,7 +423,7 @@ func TestCronWithActiveDeadline(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 
-	ct := environment.GetTrait("cron").(*cronTrait)
+	ct, _ := environment.GetTrait("cron").(*cronTrait)
 	assert.NotNil(t, ct)
 	assert.Nil(t, ct.Fallback)
 	assert.Contains(t, environment.Interceptors, "cron")
@@ -496,7 +496,7 @@ func TestCronWithBackoffLimit(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 
-	ct := environment.GetTrait("cron").(*cronTrait)
+	ct, _ := environment.GetTrait("cron").(*cronTrait)
 	assert.NotNil(t, ct)
 	assert.Nil(t, ct.Fallback)
 	assert.Contains(t, environment.Interceptors, "cron")

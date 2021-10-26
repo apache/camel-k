@@ -113,7 +113,7 @@ func TestPrometheusTraitGetPodMonitor(t *testing.T) {
 }
 
 func createNominalPrometheusTest() (*prometheusTrait, *Environment) {
-	trait := newPrometheusTrait().(*prometheusTrait)
+	trait, _ := newPrometheusTrait().(*prometheusTrait)
 	enabled := true
 	trait.Enabled = &enabled
 

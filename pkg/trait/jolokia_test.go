@@ -143,7 +143,7 @@ func TestApplyJolokiaTraitWithUnparseableOptionShouldReturnError(t *testing.T) {
 }
 
 func TestSetDefaultJolokiaOptionShouldNotOverrideOptionsMap(t *testing.T) {
-	trait := newJolokiaTrait().(*jolokiaTrait)
+	trait, _ := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{"key": "value"}
 	optionValue := ""
 
@@ -153,7 +153,7 @@ func TestSetDefaultJolokiaOptionShouldNotOverrideOptionsMap(t *testing.T) {
 }
 
 func TestSetDefaultStringJolokiaOptionShouldSucceed(t *testing.T) {
-	trait := newJolokiaTrait().(*jolokiaTrait)
+	trait, _ := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 	var option *string
 
@@ -163,7 +163,7 @@ func TestSetDefaultStringJolokiaOptionShouldSucceed(t *testing.T) {
 }
 
 func TestSetDefaultStringJolokiaOptionShouldNotOverrideExistingValue(t *testing.T) {
-	trait := newJolokiaTrait().(*jolokiaTrait)
+	trait, _ := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 	optionValue := "existing-value"
 	option := &optionValue
@@ -174,7 +174,7 @@ func TestSetDefaultStringJolokiaOptionShouldNotOverrideExistingValue(t *testing.
 }
 
 func TestSetDefaultIntJolokiaOptionShouldSucceed(t *testing.T) {
-	trait := newJolokiaTrait().(*jolokiaTrait)
+	trait, _ := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 	var option *int
 
@@ -184,7 +184,7 @@ func TestSetDefaultIntJolokiaOptionShouldSucceed(t *testing.T) {
 }
 
 func TestSetDefaultIntJolokiaOptionShouldNotOverrideExistingValue(t *testing.T) {
-	trait := newJolokiaTrait().(*jolokiaTrait)
+	trait, _ := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 	optionValue := 1
 	option := &optionValue
@@ -195,7 +195,7 @@ func TestSetDefaultIntJolokiaOptionShouldNotOverrideExistingValue(t *testing.T) 
 }
 
 func TestSetDefaultBoolJolokiaOptionShouldSucceed(t *testing.T) {
-	trait := newJolokiaTrait().(*jolokiaTrait)
+	trait, _ := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 	var option *bool
 
@@ -205,7 +205,7 @@ func TestSetDefaultBoolJolokiaOptionShouldSucceed(t *testing.T) {
 }
 
 func TestSetDefaultBoolJolokiaOptionShouldNotOverrideExistingValue(t *testing.T) {
-	trait := newJolokiaTrait().(*jolokiaTrait)
+	trait, _ := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 	option := BoolP(false)
 
@@ -215,7 +215,7 @@ func TestSetDefaultBoolJolokiaOptionShouldNotOverrideExistingValue(t *testing.T)
 }
 
 func TestAddStringOptionToJolokiaOptions(t *testing.T) {
-	trait := newJolokiaTrait().(*jolokiaTrait)
+	trait, _ := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 	optionValue := "value"
 
@@ -226,7 +226,7 @@ func TestAddStringOptionToJolokiaOptions(t *testing.T) {
 }
 
 func TestAddIntOptionToJolokiaOptions(t *testing.T) {
-	trait := newJolokiaTrait().(*jolokiaTrait)
+	trait, _ := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 
 	trait.addToJolokiaOptions(options, "key", 1)
@@ -236,7 +236,7 @@ func TestAddIntOptionToJolokiaOptions(t *testing.T) {
 }
 
 func TestAddIntPointerOptionToJolokiaOptions(t *testing.T) {
-	trait := newJolokiaTrait().(*jolokiaTrait)
+	trait, _ := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 	optionValue := 1
 
@@ -247,7 +247,7 @@ func TestAddIntPointerOptionToJolokiaOptions(t *testing.T) {
 }
 
 func TestAddBoolPointerOptionToJolokiaOptions(t *testing.T) {
-	trait := newJolokiaTrait().(*jolokiaTrait)
+	trait, _ := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 
 	trait.addToJolokiaOptions(options, "key", BoolP(false))
@@ -257,7 +257,7 @@ func TestAddBoolPointerOptionToJolokiaOptions(t *testing.T) {
 }
 
 func TestAddWrongTypeOptionToJolokiaOptionsDoesNothing(t *testing.T) {
-	trait := newJolokiaTrait().(*jolokiaTrait)
+	trait, _ := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 
 	trait.addToJolokiaOptions(options, "key", new(rune))
@@ -266,7 +266,7 @@ func TestAddWrongTypeOptionToJolokiaOptionsDoesNothing(t *testing.T) {
 }
 
 func createNominalJolokiaTest() (*jolokiaTrait, *Environment) {
-	trait := newJolokiaTrait().(*jolokiaTrait)
+	trait, _ := newJolokiaTrait().(*jolokiaTrait)
 	trait.Enabled = BoolP(true)
 
 	environment := &Environment{

@@ -37,7 +37,7 @@ func TestModelineRunSimple(t *testing.T) {
 		// camel-k: dependency=mvn:org.my:lib:1.0
 	`
 	fileName := path.Join(dir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
@@ -68,7 +68,7 @@ func TestModelineRunChain(t *testing.T) {
 		// camel-k: dependency=mvn:org.my:lib:2.0
 	`
 	fileName := path.Join(dir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", "-d", "mvn:org.my:lib2:1.0", fileName})
@@ -86,14 +86,14 @@ func TestModelineRunMultipleFiles(t *testing.T) {
 		// camel-k: dependency=mvn:org.my:lib1:3.0
 	`
 	fileName := path.Join(dir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
 	file2 := `
 		// camel-k: dependency=mvn:org.my:lib2:3.0
 	`
 	fileName2 := path.Join(dir, "ext.groovy")
-	err = ioutil.WriteFile(fileName2, []byte(file2), 0777)
+	err = ioutil.WriteFile(fileName2, []byte(file2), 0o777)
 	assert.NoError(t, err)
 
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName, fileName2})
@@ -108,14 +108,14 @@ func TestModelineRunProperty(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	subDir := path.Join(dir, "sub")
-	err = os.Mkdir(subDir, 0777)
+	err = os.Mkdir(subDir, 0o777)
 	assert.NoError(t, err)
 
 	file := `
 		// camel-k: property=my-prop=my-val
 	`
 	fileName := path.Join(subDir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
@@ -130,7 +130,7 @@ func TestModelineRunDuplicatedProperties(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	subDir := path.Join(dir, "sub")
-	err = os.Mkdir(subDir, 0777)
+	err = os.Mkdir(subDir, 0o777)
 	assert.NoError(t, err)
 
 	file := `
@@ -139,7 +139,7 @@ func TestModelineRunDuplicatedProperties(t *testing.T) {
 		// camel-k: property=foo=bar
 	`
 	fileName := path.Join(subDir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName, "-p", "prop1=true", "--property", "prop2=true"})
@@ -154,7 +154,7 @@ func TestModelineRunDuplicatedBuildProperties(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	subDir := path.Join(dir, "sub")
-	err = os.Mkdir(subDir, 0777)
+	err = os.Mkdir(subDir, 0o777)
 	assert.NoError(t, err)
 
 	file := `
@@ -163,15 +163,19 @@ func TestModelineRunDuplicatedBuildProperties(t *testing.T) {
 		// camel-k: build-property=foo=bar
 	`
 	fileName := path.Join(subDir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
-	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName,
-		"--build-property", "prop1=true", "--build-property", "prop2=true"})
+	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{
+		"kamel", "run", fileName,
+		"--build-property", "prop1=true", "--build-property", "prop2=true",
+	})
 	assert.NoError(t, err)
 	assert.NotNil(t, cmd)
-	assert.Equal(t, []string{"run", fileName, "--build-property", "prop1=true", "--build-property", "prop2=true",
-		"--build-property=foo=bar"}, flags)
+	assert.Equal(t, []string{
+		"run", fileName, "--build-property", "prop1=true", "--build-property", "prop2=true",
+		"--build-property=foo=bar",
+	}, flags)
 }
 
 func TestModelineRunPropertyFiles(t *testing.T) {
@@ -180,21 +184,21 @@ func TestModelineRunPropertyFiles(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	subDir := path.Join(dir, "sub")
-	err = os.Mkdir(subDir, 0777)
+	err = os.Mkdir(subDir, 0o777)
 	assert.NoError(t, err)
 
 	file := `
 		// camel-k: property=file:application.properties
 	`
 	fileName := path.Join(subDir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
 	propFile := `
 		a=b
 	`
 	propFileName := path.Join(subDir, "application.properties")
-	err = ioutil.WriteFile(propFileName, []byte(propFile), 0777)
+	err = ioutil.WriteFile(propFileName, []byte(propFile), 0o777)
 	assert.NoError(t, err)
 
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
@@ -209,14 +213,14 @@ func TestModelineRunBuildProperty(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	subDir := path.Join(dir, "sub")
-	err = os.Mkdir(subDir, 0777)
+	err = os.Mkdir(subDir, 0o777)
 	assert.NoError(t, err)
 
 	file := `
 		// camel-k: build-property=my-build-prop=my-val
 	`
 	fileName := path.Join(subDir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
@@ -231,21 +235,21 @@ func TestModelineRunBuildPropertyFiles(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	subDir := path.Join(dir, "sub")
-	err = os.Mkdir(subDir, 0777)
+	err = os.Mkdir(subDir, 0o777)
 	assert.NoError(t, err)
 
 	file := `
 		// camel-k: build-property=file:application.properties
 	`
 	fileName := path.Join(subDir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
 	propFile := `
 		a=b
 	`
 	propFileName := path.Join(subDir, "application.properties")
-	err = ioutil.WriteFile(propFileName, []byte(propFile), 0777)
+	err = ioutil.WriteFile(propFileName, []byte(propFile), 0o777)
 	assert.NoError(t, err)
 
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
@@ -260,7 +264,7 @@ func TestModelineRunDuplicateTraits(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	subDir := path.Join(dir, "sub")
-	err = os.Mkdir(subDir, 0777)
+	err = os.Mkdir(subDir, 0o777)
 	assert.NoError(t, err)
 
 	file := `
@@ -269,7 +273,7 @@ func TestModelineRunDuplicateTraits(t *testing.T) {
 		// camel-k: trait=foo=bar
 	`
 	fileName := path.Join(subDir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName, "-t", "trait1=true", "--trait", "trait2=true"})
@@ -284,14 +288,14 @@ func TestModelineRunConfigConfigmap(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	subDir := path.Join(dir, "sub")
-	err = os.Mkdir(subDir, 0777)
+	err = os.Mkdir(subDir, 0o777)
 	assert.NoError(t, err)
 
 	file := `
 		// camel-k: config=configmap:my-cm
 	`
 	fileName := path.Join(subDir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
@@ -306,14 +310,14 @@ func TestModelineRunConfigSecret(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	subDir := path.Join(dir, "sub")
-	err = os.Mkdir(subDir, 0777)
+	err = os.Mkdir(subDir, 0o777)
 	assert.NoError(t, err)
 
 	file := `
 		// camel-k: config=secret:my-secret
 	`
 	fileName := path.Join(subDir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
@@ -328,21 +332,21 @@ func TestModelineRunConfigFile(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	subDir := path.Join(dir, "sub")
-	err = os.Mkdir(subDir, 0777)
+	err = os.Mkdir(subDir, 0o777)
 	assert.NoError(t, err)
 
 	file := `
 		// camel-k: config=file:application.properties
 	`
 	fileName := path.Join(subDir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
 	propFile := `
 		a=b
 	`
 	propFileName := path.Join(subDir, "application.properties")
-	err = ioutil.WriteFile(propFileName, []byte(propFile), 0777)
+	err = ioutil.WriteFile(propFileName, []byte(propFile), 0o777)
 	assert.NoError(t, err)
 
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
@@ -357,14 +361,14 @@ func TestModelineRunResourceConfigmap(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	subDir := path.Join(dir, "sub")
-	err = os.Mkdir(subDir, 0777)
+	err = os.Mkdir(subDir, 0o777)
 	assert.NoError(t, err)
 
 	file := `
 		// camel-k: resource=configmap:my-cm
 	`
 	fileName := path.Join(subDir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
@@ -379,14 +383,14 @@ func TestModelineRunResourceSecret(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	subDir := path.Join(dir, "sub")
-	err = os.Mkdir(subDir, 0777)
+	err = os.Mkdir(subDir, 0o777)
 	assert.NoError(t, err)
 
 	file := `
 		// camel-k: resource=secret:my-secret
 	`
 	fileName := path.Join(subDir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
@@ -401,21 +405,21 @@ func TestModelineRunResourceFile(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	subDir := path.Join(dir, "sub")
-	err = os.Mkdir(subDir, 0777)
+	err = os.Mkdir(subDir, 0o777)
 	assert.NoError(t, err)
 
 	file := `
 		// camel-k: resource=file:application.properties
 	`
 	fileName := path.Join(subDir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
 	propFile := `
 		a=b
 	`
 	propFileName := path.Join(subDir, "application.properties")
-	err = ioutil.WriteFile(propFileName, []byte(propFile), 0777)
+	err = ioutil.WriteFile(propFileName, []byte(propFile), 0o777)
 	assert.NoError(t, err)
 
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
@@ -433,7 +437,7 @@ func TestModelineInspectSimple(t *testing.T) {
 		// camel-k: dependency=mvn:org.my:lib:1.0
 	`
 	fileName := path.Join(dir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "local", "inspect", fileName})
@@ -452,7 +456,7 @@ func TestModelineInspectMultipleDeps(t *testing.T) {
 		// camel-k: dependency=camel-k:camel-dep
 	`
 	fileName := path.Join(dir, "simple.groovy")
-	err = ioutil.WriteFile(fileName, []byte(file), 0777)
+	err = ioutil.WriteFile(fileName, []byte(file), 0o777)
 	assert.NoError(t, err)
 
 	cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "local", "inspect", fileName})

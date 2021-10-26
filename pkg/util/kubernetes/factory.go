@@ -26,9 +26,11 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
-var validTaintRegexp = regexp.MustCompile(`^([\w\/_\-\.]+)(=)?([\w_\-\.]+)?:(NoSchedule|NoExecute|PreferNoSchedule):?(\d*)?$`)
-var validNodeSelectorRegexp = regexp.MustCompile(`^([\w\/_\-\.]+)=([\w_\-\.]+)$`)
-var validResourceRequirementsRegexp = regexp.MustCompile(`^(requests|limits)\.(memory|cpu)=([\w\.]+)$`)
+var (
+	validTaintRegexp                = regexp.MustCompile(`^([\w\/_\-\.]+)(=)?([\w_\-\.]+)?:(NoSchedule|NoExecute|PreferNoSchedule):?(\d*)?$`)
+	validNodeSelectorRegexp         = regexp.MustCompile(`^([\w\/_\-\.]+)=([\w_\-\.]+)$`)
+	validResourceRequirementsRegexp = regexp.MustCompile(`^(requests|limits)\.(memory|cpu)=([\w\.]+)$`)
+)
 
 // NewTolerations build an array of Tolerations from an array of string
 func NewTolerations(taints []string) ([]corev1.Toleration, error) {

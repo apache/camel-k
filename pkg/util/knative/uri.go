@@ -26,8 +26,10 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-var uriRegexp = regexp.MustCompile(`^knative:[/]*(channel|endpoint|event)(?:[?].*|$|/([A-Za-z0-9.-]+)(?:[/?].*|$))`)
-var plainNameRegexp = regexp.MustCompile(`^[A-Za-z0-9.-]+$`)
+var (
+	uriRegexp       = regexp.MustCompile(`^knative:[/]*(channel|endpoint|event)(?:[?].*|$|/([A-Za-z0-9.-]+)(?:[/?].*|$))`)
+	plainNameRegexp = regexp.MustCompile(`^[A-Za-z0-9.-]+$`)
+)
 
 const (
 	paramAPIVersion = "apiVersion"

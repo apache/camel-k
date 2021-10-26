@@ -97,7 +97,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		if action.isPodScheduled(pod) {
 			build.Status.Phase = v1.BuildPhaseRunning
 		}
-		if time.Now().Sub(build.Status.StartedAt.Time) > build.Spec.Timeout.Duration {
+		if time.Since(build.Status.StartedAt.Time) > build.Spec.Timeout.Duration {
 			// Patch the Pod with an annotation, to identify termination signal
 			// has been sent because the Build has timed out
 			if err = action.addTimeoutAnnotation(ctx, pod, metav1.Now()); err != nil {
@@ -127,9 +127,11 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		for _, task := range build.Spec.Tasks {
 			if t := task.Buildah; t != nil {
 				build.Status.Image = t.Image
+
 				break
 			} else if t := task.Kaniko; t != nil {
 				build.Status.Image = t.Image
+
 				break
 			}
 		}
@@ -137,6 +139,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		for _, container := range pod.Status.ContainerStatuses {
 			if container.Name == "buildah" {
 				build.Status.Digest = container.State.Terminated.Message
+
 				break
 			}
 		}

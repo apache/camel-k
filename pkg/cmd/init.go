@@ -24,8 +24,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/apache/camel-k/pkg/resources"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/resources"
 	"github.com/spf13/cobra"
 )
 
@@ -98,7 +98,7 @@ func (o *initCmdOptions) writeFromTemplate(language v1.Language, fileName string
 	if err != nil {
 		return err
 	}
-	out, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0777)
+	out, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0o777)
 	if err != nil {
 		return err
 	}

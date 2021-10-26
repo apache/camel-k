@@ -26,9 +26,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//nolint:deadcode,unused
 func addTestUninstallCmd(options *RootCmdOptions, rootCmd *cobra.Command) *uninstallCmdOptions {
-	//add a testing version of install Command
+	// add a testing version of install Command
 	uninstallCmd, installOptions := newCmdUninstall(options)
 	uninstallCmd.RunE = func(c *cobra.Command, args []string) error {
 		return nil

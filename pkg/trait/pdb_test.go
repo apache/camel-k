@@ -48,10 +48,11 @@ func TestConfigurePdbTraitDoesNotSucceed(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.False(t, configured)
 }
+
 func TestPdbIsCreatedWithoutParametersEnabled(t *testing.T) {
 	pdbTrait, environment, _ := createPdbTest()
 
-	pdb := pdbCreatedCheck(pdbTrait, environment, t)
+	pdb := pdbCreatedCheck(t, pdbTrait, environment)
 	assert.Equal(t, int32(1), pdb.Spec.MaxUnavailable.IntVal)
 }
 
@@ -59,7 +60,7 @@ func TestPdbIsCreatedWithMaxUnavailable(t *testing.T) {
 	pdbTrait, environment, _ := createPdbTest()
 	pdbTrait.MaxUnavailable = "1"
 
-	pdb := pdbCreatedCheck(pdbTrait, environment, t)
+	pdb := pdbCreatedCheck(t, pdbTrait, environment)
 	assert.Equal(t, int32(1), pdb.Spec.MaxUnavailable.IntVal)
 }
 
@@ -67,11 +68,13 @@ func TestPdbIsCreatedWithMinAvailable(t *testing.T) {
 	pdbTrait, environment, _ := createPdbTest()
 	pdbTrait.MinAvailable = "2"
 
-	pdb := pdbCreatedCheck(pdbTrait, environment, t)
+	pdb := pdbCreatedCheck(t, pdbTrait, environment)
 	assert.Equal(t, int32(2), pdb.Spec.MinAvailable.IntVal)
 }
 
-func pdbCreatedCheck(pdbTrait *pdbTrait, environment *Environment, t *testing.T) *v1beta1.PodDisruptionBudget {
+func pdbCreatedCheck(t *testing.T, pdbTrait *pdbTrait, environment *Environment) *v1beta1.PodDisruptionBudget {
+	t.Helper()
+
 	err := pdbTrait.Apply(environment)
 	assert.Nil(t, err)
 	pdb := findPdb(environment.Resources)
@@ -92,8 +95,9 @@ func findPdb(resources *kubernetes.Collection) *v1beta1.PodDisruptionBudget {
 	return nil
 }
 
+// nolint: unparam
 func createPdbTest() (*pdbTrait, *Environment, *appsv1.Deployment) {
-	trait := newPdbTrait().(*pdbTrait)
+	trait, _ := newPdbTrait().(*pdbTrait)
 	trait.Enabled = BoolP(true)
 
 	deployment := &appsv1.Deployment{

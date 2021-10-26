@@ -30,9 +30,9 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/olm"
 )
 
@@ -108,7 +108,6 @@ func (o *uninstallCmdOptions) decode(cmd *cobra.Command, _ []string) error {
 	return nil
 }
 
-// nolint: gocyclo
 func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {

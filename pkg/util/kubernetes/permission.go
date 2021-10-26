@@ -30,7 +30,7 @@ import (
 // in the cluster.
 // E.g. checkPermission(client, olmv1alpha1.GroupName, "clusterserviceversions", namespace, "camel-k", "get")
 //
-// nolint:unparam
+
 func CheckPermission(ctx context.Context, client kubernetes.Interface, group, resource, namespace, name, verb string) (bool, error) {
 	sarReview := &authorizationv1.SelfSubjectAccessReview{
 		Spec: authorizationv1.SelfSubjectAccessReviewSpec{
@@ -50,7 +50,7 @@ func CheckPermission(ctx context.Context, client kubernetes.Interface, group, re
 			return false, nil
 		}
 		return false, err
-	} else {
-		return sar.Status.Allowed, nil
 	}
+
+	return sar.Status.Allowed, nil
 }

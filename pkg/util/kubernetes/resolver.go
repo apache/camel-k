@@ -59,7 +59,7 @@ func Resolve(data *v1.DataSpec, mapLookup func(string) (*corev1.ConfigMap, error
 	// if it is a reference, get the content from the
 	// referenced ConfigMap
 	if data.ContentRef != "" {
-		//look up the ConfigMap from the kubernetes cluster
+		// look up the ConfigMap from the kubernetes cluster
 		cm, err := mapLookup(data.ContentRef)
 		if err != nil {
 			return err
@@ -121,7 +121,6 @@ func ResolveIntegrationSources(
 }
 
 // ResolveIntegrationResources --
-// nolint: lll
 func ResolveIntegrationResources(
 	context context.Context,
 	client controller.Reader,

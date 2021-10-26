@@ -27,6 +27,8 @@ import (
 )
 
 func TraitSpecFromMap(t *testing.T, spec map[string]interface{}) v1.TraitSpec {
+	t.Helper()
+
 	var trait v1.TraitSpec
 
 	data, err := json.Marshal(spec)
@@ -39,6 +41,8 @@ func TraitSpecFromMap(t *testing.T, spec map[string]interface{}) v1.TraitSpec {
 }
 
 func TraitSpecToMap(t *testing.T, spec v1.TraitSpec) map[string]string {
+	t.Helper()
+
 	trait := make(map[string]string)
 
 	data, err := json.Marshal(spec.Configuration)

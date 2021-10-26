@@ -45,10 +45,10 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 		return err
 	}
 
-	isApiExtensionsV1 := true
+	isAPIExtensionsV1 := true
 	_, err = c.Discovery().ServerResourcesForGroupVersion("apiextensions.k8s.io/v1")
 	if err != nil && k8serrors.IsNotFound(err) {
-		isApiExtensionsV1 = false
+		isAPIExtensionsV1 = false
 	} else if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 	if err != nil {
 		return err
 	}
-	if !isApiExtensionsV1 {
+	if !isAPIExtensionsV1 {
 		err = apiextensionsv1beta1.AddToScheme(c.GetScheme())
 		if err != nil {
 			return err
@@ -84,8 +84,11 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 			}
 		}
 
-		if !isApiExtensionsV1 {
-			v1Crd := object.(*apiextensionsv1.CustomResourceDefinition)
+		if !isAPIExtensionsV1 {
+			v1Crd, ok := object.(*apiextensionsv1.CustomResourceDefinition)
+			if !ok {
+				return nil
+			}
 			v1beta1Crd := &apiextensionsv1beta1.CustomResourceDefinition{}
 			crd := &apiextensions.CustomResourceDefinition{}
 
@@ -202,7 +205,7 @@ func WaitForAllCrdInstallation(ctx context.Context, clientProvider client.Provid
 			return err
 		}
 		var inst bool
-		if inst, err = areAllCrdInstalled(ctx, c); err != nil {
+		if inst, err = areAllCrdInstalled(c); err != nil {
 			return err
 		} else if inst {
 			return nil
@@ -215,41 +218,41 @@ func WaitForAllCrdInstallation(ctx context.Context, clientProvider client.Provid
 	}
 }
 
-func areAllCrdInstalled(ctx context.Context, c client.Client) (bool, error) {
-	if ok, err := isCrdInstalled(ctx, c, "IntegrationPlatform", "v1"); err != nil {
+func areAllCrdInstalled(c client.Client) (bool, error) {
+	if ok, err := isCrdInstalled(c, "IntegrationPlatform", "v1"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil
 	}
-	if ok, err := isCrdInstalled(ctx, c, "IntegrationKit", "v1"); err != nil {
+	if ok, err := isCrdInstalled(c, "IntegrationKit", "v1"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil
 	}
-	if ok, err := isCrdInstalled(ctx, c, "Integration", "v1"); err != nil {
+	if ok, err := isCrdInstalled(c, "Integration", "v1"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil
 	}
-	if ok, err := isCrdInstalled(ctx, c, "CamelCatalog", "v1"); err != nil {
+	if ok, err := isCrdInstalled(c, "CamelCatalog", "v1"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil
 	}
-	if ok, err := isCrdInstalled(ctx, c, "Build", "v1"); err != nil {
+	if ok, err := isCrdInstalled(c, "Build", "v1"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil
 	}
-	if ok, err := isCrdInstalled(ctx, c, "Kamelet", "v1alpha1"); err != nil {
+	if ok, err := isCrdInstalled(c, "Kamelet", "v1alpha1"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil
 	}
-	return isCrdInstalled(ctx, c, "KameletBinding", "v1alpha1")
+	return isCrdInstalled(c, "KameletBinding", "v1alpha1")
 }
 
-func isCrdInstalled(ctx context.Context, c client.Client, kind string, version string) (bool, error) {
+func isCrdInstalled(c client.Client, kind string, version string) (bool, error) {
 	lst, err := c.Discovery().ServerResourcesForGroupVersion(fmt.Sprintf("camel.apache.org/%s", version))
 	if err != nil && k8serrors.IsNotFound(err) {
 		return false, nil
@@ -281,7 +284,7 @@ func installCRD(ctx context.Context, c client.Client, kind string, version strin
 		return nil
 	}
 
-	installed, err := isCrdInstalled(ctx, c, kind, version)
+	installed, err := isCrdInstalled(c, kind, version)
 	if err != nil {
 		return err
 	}

@@ -20,10 +20,10 @@ package test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRuntimeContainsEmbeddedArtifacts(t *testing.T) {

@@ -25,7 +25,7 @@ import (
 )
 
 func addTestLocalRunCmd(rootCmdOptions *RootCmdOptions, rootCmd *cobra.Command) *localRunCmdOptions {
-	//add a testing version of run Command
+	// add a testing version of run Command
 	localCmd := newCmdLocal(rootCmdOptions)
 	localRunCmd, localRunCmdOptions := newCmdLocalRun(rootCmdOptions)
 	localRunCmd.RunE = func(c *cobra.Command, args []string) error {

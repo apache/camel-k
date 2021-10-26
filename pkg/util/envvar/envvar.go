@@ -44,9 +44,7 @@ func Remove(vars *[]corev1.EnvVar, name string) {
 
 // SetVal --
 func SetVal(vars *[]corev1.EnvVar, name string, value string) {
-	envVar := Get(*vars, name)
-
-	if envVar != nil {
+	if envVar := Get(*vars, name); envVar != nil {
 		envVar.Value = value
 		envVar.ValueFrom = nil
 	} else {
@@ -76,9 +74,7 @@ func SetVar(vars *[]corev1.EnvVar, newEnvVar corev1.EnvVar) {
 
 // SetValFrom --
 func SetValFrom(vars *[]corev1.EnvVar, name string, path string) {
-	envVar := Get(*vars, name)
-
-	if envVar != nil {
+	if envVar := Get(*vars, name); envVar != nil {
 		envVar.Value = ""
 		envVar.ValueFrom = &corev1.EnvVarSource{
 			FieldRef: &corev1.ObjectFieldSelector{

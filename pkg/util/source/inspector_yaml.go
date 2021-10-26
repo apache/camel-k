@@ -69,7 +69,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 	case "marshal":
 		if cm, ok := content.(map[interface{}]interface{}); ok {
 			if js, jsOk := cm["json"]; jsOk {
-				dataFormatID := defaultJsonDataFormat
+				dataFormatID := defaultJSONDataFormat
 				if jsContent, jsContentOk := js.(map[interface{}]interface{}); jsContentOk {
 					if lib, libOk := jsContent["library"]; libOk {
 						dataFormatID = strings.ToLower(fmt.Sprintf("json-%s", lib))
@@ -167,6 +167,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 	return nil
 }
 
+// TODO nolint: gocyclo
 func (i YAMLInspector) parseStepsParam(steps []interface{}, meta *Metadata) error {
 	for _, raw := range steps {
 		if step, stepFormatOk := raw.(map[interface{}]interface{}); stepFormatOk {

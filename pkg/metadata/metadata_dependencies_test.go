@@ -640,6 +640,7 @@ const yamlWithRest = `
         - to: "log:info"
         - to: "direct:hello"
 `
+
 const yamlWithCircuitBreaker = `
 - from:
     uri: "direct:start"

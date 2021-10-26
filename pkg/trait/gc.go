@@ -99,6 +99,7 @@ func (t *garbageCollectorTrait) Apply(e *Environment) error {
 			go t.garbageCollectResources(env)
 			return nil
 		})
+
 		fallthrough
 
 	default:
@@ -156,6 +157,7 @@ func (t *garbageCollectorTrait) deleteEachOf(gvks map[schema.GroupVersionKind]st
 			if !k8serrors.IsNotFound(err) && !k8serrors.IsForbidden(err) {
 				t.L.ForIntegration(e.Integration).Errorf(err, "cannot list child resources: %v", gvk)
 			}
+
 			continue
 		}
 

@@ -157,9 +157,9 @@ func TestExpressions(t *testing.T) {
 		},
 	}
 
-	for i, tc := range tests {
+	for i, test := range tests {
+		tc := test
 		t.Run(fmt.Sprintf("%d-%s", i, tc.name), func(t *testing.T) {
-
 			var converter *Converter
 			if tc.defaultPrefix != nil {
 				converter = NewConverter(*tc.defaultPrefix)
@@ -185,5 +185,4 @@ func TestExpressions(t *testing.T) {
 			}
 		})
 	}
-
 }

@@ -56,6 +56,7 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 	}
 
 	if integration.Status.IntegrationKit == nil {
+		// nolint: staticcheck
 		if integration.Spec.IntegrationKit == nil && integration.Spec.Kit != "" {
 			// TODO: temporary fallback until deprecated field gets removed
 			integration.Spec.IntegrationKit = &corev1.ObjectReference{
