@@ -747,13 +747,17 @@ func (e *Environment) collectConfigurations(configurationType string) []map[stri
 	return collectConfigurations(configurationType, e.Platform, e.IntegrationKit, e.Integration)
 }
 
-func (e *Environment) GetIntegrationContainer() *corev1.Container {
+func (e *Environment) GetIntegrationContainerName() string {
 	containerName := defaultContainerName
 	dt := e.Catalog.GetTrait(containerTraitID)
 	if dt != nil {
 		containerName = dt.(*containerTrait).Name
 	}
+	return containerName
+}
 
+func (e *Environment) GetIntegrationContainer() *corev1.Container {
+	containerName := e.GetIntegrationContainerName()
 	return e.Resources.GetContainerByName(containerName)
 }
 

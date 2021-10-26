@@ -19,6 +19,7 @@ package integration
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -28,6 +29,7 @@ import (
 	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 
@@ -40,6 +42,9 @@ import (
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
+
+// The key used for propagating error details from Camel health to MicroProfile Health (See CAMEL-17138)
+const runtimeHealthCheckErrorMessage = "error.message"
 
 func NewMonitorAction() Action {
 	return &monitorAction{}
@@ -161,6 +166,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context.Context, environment *trait.Environment, integration *v1.Integration, pendingPods []corev1.Pod, runningPods []corev1.Pod) error {
 	var controller ctrl.Object
 	var lastCompletedJob *batchv1.Job
+	var podSpec corev1.PodSpec
 
 	switch {
 	case isConditionTrue(integration, v1.IntegrationConditionDeploymentAvailable):
@@ -189,6 +195,7 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 			setReadyConditionError(integration, progressing.Message)
 			return nil
 		}
+		podSpec = c.Spec.Template.Spec
 
 	case *servingv1.Service:
 		// Check the KnativeService conditions
@@ -197,6 +204,7 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 			setReadyConditionError(integration, ready.Message)
 			return nil
 		}
+		podSpec = c.Spec.Template.Spec.PodSpec
 
 	case *batchv1beta1.CronJob:
 		// Check latest job result
@@ -224,6 +232,7 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 				}
 			}
 		}
+		podSpec = c.Spec.JobTemplate.Spec.Template.Spec
 	}
 
 	// Check Pods statuses
@@ -274,6 +283,26 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 
 	integration.Status.Phase = v1.IntegrationPhaseRunning
 
+	var readyPods []corev1.Pod
+	var unreadyPods []corev1.Pod
+	for _, pod := range runningPods {
+		// We compare the Integration PodSpec to that of the Pod in order to make
+		// sure we account for up-to-date version.
+		if !equality.Semantic.DeepDerivative(podSpec, pod.Spec) {
+			continue
+		}
+		ready := kubernetes.GetPodCondition(pod, corev1.PodReady)
+		if ready == nil {
+			continue
+		}
+		switch ready.Status {
+		case corev1.ConditionTrue:
+			readyPods = append(readyPods, pod)
+		case corev1.ConditionFalse:
+			unreadyPods = append(unreadyPods, pod)
+		}
+	}
+
 	switch c := controller.(type) {
 	case *appsv1.Deployment:
 		replicas := int32(1)
@@ -282,27 +311,18 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 		}
 		// The Deployment status reports updated and ready replicas separately,
 		// so that the number of ready replicas also accounts for older versions.
-		// We compare the Integration PodSpec to that of the Pod in order to make
-		// sure we account for up-to-date version.
-		var readyPods []corev1.Pod
-		for _, pod := range runningPods {
-			if ready := kubernetes.GetPodCondition(pod, corev1.PodReady); ready == nil || ready.Status != corev1.ConditionTrue {
-				continue
-			}
-			if equality.Semantic.DeepDerivative(c.Spec.Template.Spec, pod.Spec) {
-				readyPods = append(readyPods, pod)
-			}
-		}
 		readyReplicas := int32(len(readyPods))
-		// The Integration is considered ready when the number of replicas
-		// reported to be ready is larger than or equal to the specified number
-		// of replicas. This avoids reporting a falsy readiness condition
-		// when the Integration is being down-scaled.
 		switch {
 		case readyReplicas >= replicas:
+			// The Integration is considered ready when the number of replicas
+			// reported to be ready is larger than or equal to the specified number
+			// of replicas. This avoids reporting a falsy readiness condition
+			// when the Integration is being down-scaled.
 			setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionDeploymentReadyReason, fmt.Sprintf("%d/%d ready replicas", c.Status.ReadyReplicas, replicas))
+
 		case c.Status.UpdatedReplicas < replicas:
 			setReadyCondition(integration, corev1.ConditionFalse, v1.IntegrationConditionDeploymentProgressingReason, fmt.Sprintf("%d/%d updated replicas", c.Status.UpdatedReplicas, replicas))
+
 		default:
 			setReadyCondition(integration, corev1.ConditionFalse, v1.IntegrationConditionDeploymentProgressingReason, fmt.Sprintf("%d/%d ready replicas", readyReplicas, replicas))
 		}
@@ -319,17 +339,67 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 		switch {
 		case c.Status.LastScheduleTime == nil:
 			setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionCronJobCreatedReason, "cronjob created")
+
 		case len(c.Status.Active) > 0:
 			setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionCronJobActiveReason, "cronjob active")
+
 		case c.Spec.SuccessfulJobsHistoryLimit != nil && *c.Spec.SuccessfulJobsHistoryLimit == 0 && c.Spec.FailedJobsHistoryLimit != nil && *c.Spec.FailedJobsHistoryLimit == 0:
 			setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionCronJobCreatedReason, "no jobs history available")
+
 		case lastCompletedJob != nil:
 			if complete := kubernetes.GetJobCondition(*lastCompletedJob, batchv1.JobComplete); complete != nil && complete.Status == corev1.ConditionTrue {
 				setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionLastJobSucceededReason, fmt.Sprintf("last job %s completed successfully", lastCompletedJob.Name))
 			}
+
 		default:
 			integration.Status.SetCondition(v1.IntegrationConditionReady, corev1.ConditionUnknown, "", "")
 		}
+	}
+
+	// Finally, call the readiness probes of the non-ready Pods directly,
+	// to retrieve insights from the Camel runtime.
+	var runtimeNotReadyMessages []string
+	for _, pod := range unreadyPods {
+		if ready := kubernetes.GetPodCondition(pod, corev1.PodReady); ready.Reason != "ContainersNotReady" {
+			continue
+		}
+		container := getIntegrationContainer(environment, &pod)
+		if container == nil {
+			return fmt.Errorf("integration container not found in Pod %s/%s", pod.Namespace, pod.Name)
+		}
+		if probe := container.ReadinessProbe; probe != nil && probe.HTTPGet != nil {
+			body, err := proxyGetHTTPProbe(ctx, action.client, probe, &pod)
+			if err == nil {
+				continue
+			}
+			if !k8serrors.IsServiceUnavailable(err) {
+				return err
+			}
+			health := HealthCheck{}
+			err = json.Unmarshal(body, &health)
+			if err != nil {
+				return err
+			}
+			for _, check := range health.Checks {
+				if check.Name != "camel-readiness-checks" {
+					continue
+				}
+				if check.Status == HealthCheckStateUp {
+					continue
+				}
+				if _, ok := check.Data[runtimeHealthCheckErrorMessage]; ok {
+					integration.Status.Phase = v1.IntegrationPhaseError
+				}
+				runtimeNotReadyMessages = append(runtimeNotReadyMessages, fmt.Sprintf("Pod %s runtime is not ready: %s", pod.Name, check.Data))
+			}
+		}
+	}
+	if len(runtimeNotReadyMessages) > 0 {
+		reason := v1.IntegrationConditionRuntimeNotReadyReason
+		if integration.Status.Phase == v1.IntegrationPhaseError {
+			reason = v1.IntegrationConditionErrorReason
+		}
+		setReadyCondition(integration, corev1.ConditionFalse, reason, fmt.Sprintf("%s", runtimeNotReadyMessages))
 	}
 
 	return nil
@@ -355,6 +425,16 @@ func findHighestPriorityReadyKit(kits []v1.IntegrationKit) (*v1.IntegrationKit, 
 		}
 	}
 	return kit, nil
+}
+
+func getIntegrationContainer(environment *trait.Environment, pod *corev1.Pod) *corev1.Container {
+	name := environment.GetIntegrationContainerName()
+	for i, container := range pod.Spec.Containers {
+		if container.Name == name {
+			return &pod.Spec.Containers[i]
+		}
+	}
+	return nil
 }
 
 func isConditionTrue(integration *v1.Integration, conditionType v1.IntegrationConditionType) bool {
