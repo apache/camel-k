@@ -21,4 +21,8 @@ package v1beta2
 
 type KafkaExpansion interface{}
 
+type KafkaConnectExpansion interface{}
+
+type KafkaConnectorExpansion interface{}
+
 type KafkaTopicExpansion interface{}

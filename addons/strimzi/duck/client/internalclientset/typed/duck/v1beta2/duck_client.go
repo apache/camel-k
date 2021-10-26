@@ -28,6 +28,8 @@ import (
 type KafkaV1beta2Interface interface {
 	RESTClient() rest.Interface
 	KafkasGetter
+	KafkaConnectsGetter
+	KafkaConnectorsGetter
 	KafkaTopicsGetter
 }
 
@@ -38,6 +40,14 @@ type KafkaV1beta2Client struct {
 
 func (c *KafkaV1beta2Client) Kafkas(namespace string) KafkaInterface {
 	return newKafkas(c, namespace)
+}
+
+func (c *KafkaV1beta2Client) KafkaConnects(namespace string) KafkaConnectInterface {
+	return newKafkaConnects(c, namespace)
+}
+
+func (c *KafkaV1beta2Client) KafkaConnectors(namespace string) KafkaConnectorInterface {
+	return newKafkaConnectors(c, namespace)
 }
 
 func (c *KafkaV1beta2Client) KafkaTopics(namespace string) KafkaTopicInterface {

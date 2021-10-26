@@ -33,6 +33,14 @@ func (c *FakeKafkaV1beta2) Kafkas(namespace string) v1beta2.KafkaInterface {
 	return &FakeKafkas{c, namespace}
 }
 
+func (c *FakeKafkaV1beta2) KafkaConnects(namespace string) v1beta2.KafkaConnectInterface {
+	return &FakeKafkaConnects{c, namespace}
+}
+
+func (c *FakeKafkaV1beta2) KafkaConnectors(namespace string) v1beta2.KafkaConnectorInterface {
+	return &FakeKafkaConnectors{c, namespace}
+}
+
 func (c *FakeKafkaV1beta2) KafkaTopics(namespace string) v1beta2.KafkaTopicInterface {
 	return &FakeKafkaTopics{c, namespace}
 }

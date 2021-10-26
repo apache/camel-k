@@ -83,3 +83,62 @@ type KafkaList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Kafka `json:"items"`
 }
+
+// +genclient
+// +genclient:onlyVerbs=get,list,watch
+// +genclient:noStatus
+// +kubebuilder:object:root=true
+
+// KafkaConnect is the duck of a KafkaConnect
+type KafkaConnect struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Status            KafkaConnectStatus `json:"status,omitempty"`
+}
+
+// KafkaConnectStatus contains the relevant info of the KafkaConnect status
+type KafkaConnectStatus struct {
+	Conditions         []KafkaConnectStatusConditions `json:"conditions,omitempty"`
+	LabelSelector      string                         `json:"labelSelector,omitempty"`
+	ObservedGeneration int64                          `json:"observedGeneration,omitempty"`
+	Replicas           int64                          `json:"replicas,omitempty"`
+	URL                string                         `json:"url,omitempty"`
+}
+
+// KafkaConnectStatusConditions contains listener information
+type KafkaConnectStatusConditions struct {
+	LastTransitionTime string `json:"lastTransitionTime,omitempty"`
+	Message            string `json:"message,omitempty"`
+	Reason             string `json:"reason,omitempty"`
+	Status             string `json:"status,omitempty"`
+	Type               string `json:"type,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// KafkaConnectList contains a list of KafkaConnect
+type KafkaConnectList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []KafkaConnect `json:"items"`
+}
+
+// +genclient
+// +genclient:onlyVerbs=get,list,watch
+// +genclient:noStatus
+// +kubebuilder:object:root=true
+
+// KafkaConnector is the duck of a KafkaConnector
+type KafkaConnector struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// KafkaConnectorList contains a list of KafkaConnector
+type KafkaConnectorList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []KafkaConnector `json:"items"`
+}
