@@ -66,4 +66,9 @@ replace github.com/docker/docker => github.com/moby/moby v0.7.3-0.20190826074503
 // Using a fork that removes the https ping before using http in case of insecure registry (for Spectrum)
 replace github.com/google/go-containerregistry => github.com/nicolaferraro/go-containerregistry v0.0.0-20200428072705-e7aced86aca8
 
-
+// Local modules
+replace (
+	github.com/apache/camel-k/pkg/apis/camel => ./pkg/apis/camel
+	github.com/apache/camel-k/pkg/client/camel => ./pkg/client/camel
+	github.com/apache/camel-k/pkg/kamelet/repository => ./pkg/kamelet/repository
+)
