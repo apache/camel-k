@@ -54,6 +54,12 @@ rules:
   verbs:
   - create
 - apiGroups:
+  - ""
+  resources:
+  - pods/proxy
+  verbs:
+  - get
+- apiGroups:
   - policy
   resources:
   - poddisruptionbudgets

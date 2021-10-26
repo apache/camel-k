@@ -197,6 +197,8 @@ const (
 	IntegrationConditionLastJobSucceededReason string = "LastJobSucceeded"
 	// IntegrationConditionLastJobFailedReason --
 	IntegrationConditionLastJobFailedReason string = "LastJobFailed"
+	// IntegrationConditionRuntimeNotReadyReason --
+	IntegrationConditionRuntimeNotReadyReason string = "RuntimeNotReady"
 	// IntegrationConditionErrorReason --
 	IntegrationConditionErrorReason string = "Error"
 
