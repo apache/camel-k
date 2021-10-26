@@ -112,7 +112,6 @@ func (t *tracingTrait) Configure(e *trait.Environment) (bool, error) {
 }
 
 func (t *tracingTrait) Apply(e *trait.Environment) error {
-
 	util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityTracing)
 
 	if e.CamelCatalog != nil {

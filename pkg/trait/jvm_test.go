@@ -254,7 +254,7 @@ func createNominalJvmTest(kitType string) (*jvmTrait, *Environment) {
 
 	client, _ := test.NewFakeClient()
 
-	trait := newJvmTrait().(*jvmTrait)
+	trait, _ := newJvmTrait().(*jvmTrait)
 	trait.Enabled = BoolP(true)
 	trait.PrintCommand = BoolP(false)
 	trait.Client = client

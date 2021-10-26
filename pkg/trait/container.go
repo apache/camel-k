@@ -51,6 +51,7 @@ const (
 // It also provides configuration for Services associated to the container.
 //
 // +camel-k:trait=container
+// nolint: tagliatelle
 type containerTrait struct {
 	BaseTrait `property:",squash"`
 
@@ -196,6 +197,7 @@ func (t *containerTrait) configureImageIntegrationKit(e *Environment) error {
 				"unsupported configuration: a container image has been set in conjunction with an IntegrationKit %v",
 				e.Integration.Spec.IntegrationKit)
 		}
+		// nolint: staticcheck
 		if e.Integration.Spec.Kit != "" {
 			return fmt.Errorf(
 				"unsupported configuration: a container image has been set in conjunction with an IntegrationKit %s",
@@ -234,7 +236,6 @@ func (t *containerTrait) configureImageIntegrationKit(e *Environment) error {
 	return nil
 }
 
-// nolint:gocyclo
 func (t *containerTrait) configureContainer(e *Environment) error {
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)

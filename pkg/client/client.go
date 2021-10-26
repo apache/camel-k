@@ -18,6 +18,7 @@ limitations under the License.
 package client
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -171,6 +172,7 @@ func FromManager(manager manager.Manager) (Client, error) {
 	if camelClientset, err = camel.NewForConfig(manager.GetConfig()); err != nil {
 		return nil, err
 	}
+
 	return &defaultClient{
 		Client:    manager.GetClient(),
 		Interface: clientset,
@@ -203,6 +205,7 @@ func getDefaultKubeConfigFile() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return filepath.Join(dir, ".kube", "config"), nil
 }
 
@@ -242,7 +245,10 @@ func GetCurrentNamespace(kubeconfig string) (string, error) {
 		return "", err
 	}
 
-	clientcmdconfig := decoded.(*clientcmdapi.Config)
+	clientcmdconfig, ok := decoded.(*clientcmdapi.Config)
+	if !ok {
+		return "", fmt.Errorf("type assertion failed: %v", decoded)
+	}
 
 	cc := clientcmd.NewDefaultClientConfig(*clientcmdconfig, &clientcmd.ConfigOverrides{})
 	ns, _, err := cc.Namespace()

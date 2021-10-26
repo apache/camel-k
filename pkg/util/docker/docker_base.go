@@ -28,16 +28,16 @@ import (
 var RegistryName = ""
 
 // BaseImageName -- base image name.
-var BaseImageName string = "integration-base-image"
+var BaseImageName = "integration-base-image"
 
 // BaseWorkingDirectory -- directory used by Docker to construct the base image.
-var BaseWorkingDirectory string = ""
+var BaseWorkingDirectory = ""
 
 // IntegrationWorkingDirectory -- directory used by Docker to construct the integration image.
-var IntegrationWorkingDirectory string = ""
+var IntegrationWorkingDirectory = ""
 
 // NetworkName -- network used by Docker when running the image.
-var NetworkName string = "host"
+var NetworkName = "host"
 
 // Internal variables.
 var (

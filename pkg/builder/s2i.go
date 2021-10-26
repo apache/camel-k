@@ -206,7 +206,7 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 
 	err = t.waitForS2iBuildCompletion(ctx, t.c, &s2iBuild)
 	if err != nil {
-		if err == context.Canceled || err == context.DeadlineExceeded {
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 			if err := t.cancelBuild(context.Background(), &s2iBuild); err != nil {
 				log.Errorf(err, "cannot cancel s2i Build: %s/%s", s2iBuild.Namespace, s2iBuild.Name)
 			}
@@ -289,7 +289,7 @@ func (t *s2iTask) cancelBuild(ctx context.Context, build *buildv1.Build) error {
 func tarDir(src string, writers ...io.Writer) error {
 	// ensure the src actually exists before trying to tar it
 	if _, err := os.Stat(src); err != nil {
-		return fmt.Errorf("unable to tar files - %v", err.Error())
+		return fmt.Errorf("unable to tar files: %w", err)
 	}
 
 	mw := io.MultiWriter(writers...)
@@ -315,7 +315,7 @@ func tarDir(src string, writers ...io.Writer) error {
 		}
 
 		// update the name to correctly reflect the desired destination when un-taring
-		header.Name = strings.TrimPrefix(strings.Replace(file, src, "", -1), string(filepath.Separator))
+		header.Name = strings.TrimPrefix(strings.ReplaceAll(file, src, ""), string(filepath.Separator))
 
 		if err := tw.WriteHeader(header); err != nil {
 			return err

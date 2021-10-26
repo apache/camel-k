@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/log"
@@ -32,7 +33,6 @@ import (
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/portforward"
 	"k8s.io/client-go/transport/spdy"
-	"net/http"
 )
 
 func PortForward(ctx context.Context, c client.Client, ns, labelSelector string, localPort, remotePort uint, stdOut, stdErr io.Writer) error {
@@ -85,18 +85,27 @@ func PortForward(ctx context.Context, c client.Client, ns, labelSelector string,
 
 			switch e.Type {
 			case watch.Added:
-				pod := e.Object.(*corev1.Pod)
+				pod, ok := e.Object.(*corev1.Pod)
+				if !ok {
+					return fmt.Errorf("type assertion failed: %v", e.Object)
+				}
 				if err := setupPortForward(pod); err != nil {
 					return err
 				}
 			case watch.Modified:
-				pod := e.Object.(*corev1.Pod)
+				pod, ok := e.Object.(*corev1.Pod)
+				if !ok {
+					return fmt.Errorf("type assertion failed: %v", e.Object)
+				}
 				if err := setupPortForward(pod); err != nil {
 					return err
 				}
 			case watch.Deleted:
 				if forwardPod != nil && e.Object != nil {
-					deletedPod := e.Object.(*corev1.Pod)
+					deletedPod, ok := e.Object.(*corev1.Pod)
+					if !ok {
+						return fmt.Errorf("type assertion failed: %v", e.Object)
+					}
 					if deletedPod.Name == forwardPod.Name {
 						forwardCtxCancel()
 						forwardPod = nil
@@ -145,10 +154,8 @@ func portFowardPod(ctx context.Context, config *restclient.Config, ns, pod strin
 
 	go func() {
 		// Stop the port forwarder when the context ends
-		select {
-		case <-ctx.Done():
-			close(stopChan)
-		}
+		<-ctx.Done()
+		close(stopChan)
 	}()
 
 	select {

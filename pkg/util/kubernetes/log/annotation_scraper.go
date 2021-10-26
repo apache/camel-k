@@ -69,8 +69,7 @@ func (s *SelectorScraper) Start(ctx context.Context) *bufio.Reader {
 }
 
 func (s *SelectorScraper) periodicSynchronize(ctx context.Context, out *bufio.Writer, clientCloser func() error) {
-	err := s.synchronize(ctx, out)
-	if err != nil {
+	if err := s.synchronize(ctx, out); err != nil {
 		s.L.Info("Could not synchronize log")
 	}
 	select {

@@ -171,7 +171,7 @@ func (t *masterTrait) Apply(e *trait.Environment) error {
 			serviceAccount = "default"
 		}
 
-		var templateData = struct {
+		templateData := struct {
 			Namespace      string
 			Name           string
 			ServiceAccount string

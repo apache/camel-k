@@ -23,8 +23,10 @@ import (
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
-const RepoURL = "https://jitpack.io"
-const LatestVersion = "master-SNAPSHOT"
+const (
+	RepoURL       = "https://jitpack.io"
+	LatestVersion = "master-SNAPSHOT"
+)
 
 func ToDependency(dependencyID string) *maven.Dependency {
 	gav := ""
@@ -51,7 +53,7 @@ func ToDependency(dependencyID string) *maven.Dependency {
 		return nil
 	}
 
-	gav = strings.Replace(gav, "/", ":", -1)
+	gav = strings.ReplaceAll(gav, "/", ":")
 	dep, err := maven.ParseGAV(gav)
 	if err != nil {
 		return nil

@@ -46,7 +46,7 @@ func newCmdLocalBuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localBui
 			if err := options.run(cmd, args); err != nil {
 				fmt.Println(err.Error())
 			}
-			if err := options.deinit(args); err != nil {
+			if err := options.deinit(); err != nil {
 				return err
 			}
 
@@ -239,14 +239,23 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 	return nil
 }
 
-func (command *localBuildCmdOptions) deinit(args []string) error {
+func (command *localBuildCmdOptions) deinit() error {
 	// If base image construction is enabled delete the directory for it.
-	deleteDockerBaseWorkingDirectory()
+	err := deleteDockerBaseWorkingDirectory()
+	if err != nil {
+		return err
+	}
 
 	// If integration files are provided delete the maven project folder.
 	if !command.BaseImage {
-		deleteDockerWorkingDirectory()
-		deleteMavenWorkingDirectory()
+		err = deleteDockerWorkingDirectory()
+		if err != nil {
+			return err
+		}
+		err = deleteMavenWorkingDirectory()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

@@ -90,7 +90,7 @@ func init() {
 
 func observeBuildQueueDuration(build *v1.Build) {
 	queueDuration.WithLabelValues(build.Labels[v1.IntegrationKitLayoutLabel]).
-		Observe(time.Now().Sub(getBuildQueuingTime(build)).Seconds())
+		Observe(time.Since(getBuildQueuingTime(build)).Seconds())
 }
 
 func observeBuildResult(build *v1.Build, phase v1.BuildPhase, duration time.Duration) {

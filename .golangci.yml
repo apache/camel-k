@@ -19,22 +19,60 @@ linters-settings:
   lll:
     line-length: 170
 linters:
-  enable-all: true
-  disable:
-    - dupl
-    - gochecknoinits
-    - gochecknoglobals
-    - funlen
-    - godox
-    - whitespace
-    - gocognit
-    - wsl
+  disable-all: true
+  enable:
+    - asciicheck
+    - bodyclose
+    - deadcode
+    - depguard
+    - dogsled
+    - durationcheck
+    - errcheck
+    - errname
+    - errorlint
+    - exportloopref
+    - forcetypeassert
+    - gocritic
+    - gofmt
+    - gofumpt
+    - goheader
+    - goimports
+    - gomodguard
+    - goprintffuncname
+    - gosimple
+    - govet
+    - ifshort
+    - importas
+    - ineffassign
+#    - lll
+    - makezero
+    - misspell
+    - nakedret
+    - nilerr
+    - nolintlint
+    - prealloc
+    - promlinter
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    - structcheck
+    - stylecheck
+    - thelper
+    - tparallel
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+    - wastedassign
+
 issues:
   exclude-rules:
     - path: pkg/client/clientset
       linters:
         - stylecheck
-        - golint
+        - revive
         - deadcode
         - lll
         - unparam
@@ -43,7 +81,7 @@ issues:
     - path: pkg/client/informers
       linters:
         - stylecheck
-        - golint
+        - revive
         - deadcode
         - lll
         - unparam
@@ -52,7 +90,7 @@ issues:
     - path: pkg/client/listers
       linters:
         - stylecheck
-        - golint
+        - revive
         - deadcode
         - lll
         - unparam
@@ -61,7 +99,7 @@ issues:
     - path: pkg/resources/resources.go
       linters:
         - stylecheck
-        - golint
+        - revive
         - deadcode
         - lll
         - unparam

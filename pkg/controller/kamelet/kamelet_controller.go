@@ -73,8 +73,14 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		For(&v1alpha1.Kamelet{}, builder.WithPredicates(
 			platform.FilteringFuncs{
 				UpdateFunc: func(e event.UpdateEvent) bool {
-					oldKamelet := e.ObjectOld.(*v1alpha1.Kamelet)
-					newKamelet := e.ObjectNew.(*v1alpha1.Kamelet)
+					oldKamelet, ok := e.ObjectOld.(*v1alpha1.Kamelet)
+					if !ok {
+						return false
+					}
+					newKamelet, ok := e.ObjectNew.(*v1alpha1.Kamelet)
+					if !ok {
+						return false
+					}
 					// Ignore updates to the Kamelet status in which case metadata.Generation
 					// does not change, or except when the Kamelet phase changes as it's used
 					// to transition from one phase to another
@@ -157,39 +163,41 @@ func (r *reconcileKamelet) Reconcile(ctx context.Context, request reconcile.Requ
 		a.InjectClient(r.client)
 		a.InjectLogger(targetLog)
 
-		if a.CanHandle(target) {
-			targetLog.Infof("Invoking action %s", a.Name())
+		if !a.CanHandle(target) {
+			continue
+		}
 
-			phaseFrom := target.Status.Phase
+		targetLog.Infof("Invoking action %s", a.Name())
 
-			target, err = a.Handle(ctx, target)
-			if err != nil {
+		phaseFrom := target.Status.Phase
+
+		target, err = a.Handle(ctx, target)
+		if err != nil {
+			camelevent.NotifyKameletError(ctx, r.client, r.recorder, &instance, target, err)
+			return reconcile.Result{}, err
+		}
+
+		if target != nil {
+			if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(&instance)); err != nil {
 				camelevent.NotifyKameletError(ctx, r.client, r.recorder, &instance, target, err)
 				return reconcile.Result{}, err
 			}
 
-			if target != nil {
-				if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(&instance)); err != nil {
-					camelevent.NotifyKameletError(ctx, r.client, r.recorder, &instance, target, err)
-					return reconcile.Result{}, err
-				}
+			targetPhase = target.Status.Phase
 
-				targetPhase = target.Status.Phase
-
-				if targetPhase != phaseFrom {
-					targetLog.Info(
-						"state transition",
-						"phase-from", phaseFrom,
-						"phase-to", target.Status.Phase,
-					)
-				}
+			if targetPhase != phaseFrom {
+				targetLog.Info(
+					"state transition",
+					"phase-from", phaseFrom,
+					"phase-to", target.Status.Phase,
+				)
 			}
-
-			// handle one action at time so the resource
-			// is always at its latest state
-			camelevent.NotifyKameletUpdated(ctx, r.client, r.recorder, &instance, target)
-			break
 		}
+
+		// handle one action at time so the resource
+		// is always at its latest state
+		camelevent.NotifyKameletUpdated(ctx, r.client, r.recorder, &instance, target)
+		break
 	}
 
 	if targetPhase == v1alpha1.KameletPhaseReady {

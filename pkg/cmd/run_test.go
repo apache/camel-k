@@ -30,10 +30,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const cmdRun = "run"
-const integrationSource = "example.js"
+const (
+	cmdRun            = "run"
+	integrationSource = "example.js"
+)
 
+// nolint: unparam
 func initializeRunCmdOptions(t *testing.T) (*runCmdOptions, *cobra.Command, RootCmdOptions) {
+	t.Helper()
+
 	options, rootCmd := kamelTestPreAddCommandInit()
 	runCmdOptions := addTestRunCmd(*options, rootCmd)
 	kamelTestPostAddCommandInit(t, rootCmd)
@@ -42,7 +47,7 @@ func initializeRunCmdOptions(t *testing.T) (*runCmdOptions, *cobra.Command, Root
 }
 
 func addTestRunCmd(options RootCmdOptions, rootCmd *cobra.Command) *runCmdOptions {
-	//add a testing version of run Command
+	// add a testing version of run Command
 	runCmd, runOptions := newCmdRun(&options)
 	runCmd.RunE = func(c *cobra.Command, args []string) error {
 		return nil
@@ -59,7 +64,7 @@ func TestRunNoFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, integrationSource)
 	assert.Nil(t, err)
-	//Check default expected values
+	// Check default expected values
 	assert.Equal(t, false, runCmdOptions.Wait)
 	assert.Equal(t, false, runCmdOptions.Logs)
 	assert.Equal(t, false, runCmdOptions.Sync)
@@ -250,7 +255,7 @@ func TestAddPropertyFile(t *testing.T) {
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestPropertyFileContent), 0644))
+	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestPropertyFileContent), 0o644))
 
 	properties, err := convertToTraitParameter("file:"+tmpFile.Name(), "trait.properties")
 	assert.Nil(t, err)
@@ -268,7 +273,7 @@ func TestRunPropertyFileFlag(t *testing.T) {
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestPropertyFileContent), 0644))
+	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestPropertyFileContent), 0o644))
 
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, errExecute := test.ExecuteCommand(rootCmd, cmdRun,
@@ -374,6 +379,8 @@ func TestConfigureTraits(t *testing.T) {
 }
 
 func assertTraitConfiguration(t *testing.T, traits map[string]v1.TraitSpec, trait string, expected string) {
+	t.Helper()
+
 	assert.Contains(t, traits, trait)
 	assert.Equal(t, expected, string(traits[trait].Configuration.RawMessage))
 }
@@ -432,7 +439,7 @@ func TestRunValidateArgs(t *testing.T) {
 	args = []string{"missing_file"}
 	err = runCmdOptions.validateArgs(rootCmd, args)
 	assert.NotNil(t, err)
-	assert.Equal(t, "One of the provided sources is not reachable: Missing file or unsupported scheme in missing_file", err.Error())
+	assert.Equal(t, "One of the provided sources is not reachable: missing file or unsupported scheme in missing_file", err.Error())
 }
 
 //
@@ -525,7 +532,7 @@ func TestRunTextCompressedResource(t *testing.T) {
 }
 
 func TestResolvePodTemplate(t *testing.T) {
-	//runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
+	// runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	templateText := `
 containers:
   - name: integration
@@ -545,7 +552,7 @@ volumes:
 	assert.Nil(t, err)
 	assert.NotNil(t, integrationSpec.PodTemplate)
 	assert.Equal(t, 1, len(integrationSpec.PodTemplate.Spec.Containers))
-	//assert.Equal(t, 1,len(integrationSpec.PodTemplate.Spec.Containers[0].VolumeMounts))
+	// assert.Equal(t, 1,len(integrationSpec.PodTemplate.Spec.Containers[0].VolumeMounts))
 }
 
 func TestResolveJsonPodTemplate(t *testing.T) {

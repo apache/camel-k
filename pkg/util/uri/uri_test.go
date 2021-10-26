@@ -88,7 +88,6 @@ func TestQueryParameter(t *testing.T) {
 			assert.Equal(t, thetest.expected, param)
 		})
 	}
-
 }
 
 func TestAppendParameters(t *testing.T) {

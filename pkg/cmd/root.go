@@ -75,7 +75,7 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 }
 
 func kamelPreAddCommandInit(options *RootCmdOptions) *cobra.Command {
-	var cmd = cobra.Command{
+	cmd := cobra.Command{
 		BashCompletionFunction: bashCompletionFunction,
 		PersistentPreRunE:      options.preRun,
 		Use:                    "kamel",
@@ -120,7 +120,7 @@ func kamelPostAddCommandInit(cmd *cobra.Command) error {
 	))
 
 	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+		if !errors.As(err, &viper.ConfigFileNotFoundError{}) {
 			return err
 		}
 	}
@@ -195,14 +195,14 @@ func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 		// Furthermore, there can be any incompatibilities, as the install command deploys
 		// the operator version it's compatible with.
 		if cmd.Use != installCommand && cmd.Use != operatorCommand {
-			checkAndShowCompatibilityWarning(cmd, command.Context, c, command.Namespace)
+			checkAndShowCompatibilityWarning(command.Context, cmd, c, command.Namespace)
 		}
 	}
 
 	return nil
 }
 
-func checkAndShowCompatibilityWarning(cmd *cobra.Command, ctx context.Context, c client.Client, namespace string) {
+func checkAndShowCompatibilityWarning(ctx context.Context, cmd *cobra.Command, c client.Client, namespace string) {
 	operatorVersion, err := operatorVersion(ctx, c, namespace)
 	if err != nil {
 		if k8serrors.IsNotFound(err) {

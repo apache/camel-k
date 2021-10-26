@@ -42,19 +42,19 @@ var (
 	queryRegexp      = regexp.MustCompile(`^[^?]*[?](?P<query>.*)$`)
 
 	templates = map[string]corev1.ObjectReference{
-		"kamelet": corev1.ObjectReference{
+		"kamelet": {
 			Kind:       "Kamelet",
 			APIVersion: camelv1alpha1.SchemeGroupVersion.String(),
 		},
-		"channel": corev1.ObjectReference{
+		"channel": {
 			Kind:       "Channel",
 			APIVersion: messagingv1.SchemeGroupVersion.String(),
 		},
-		"broker": corev1.ObjectReference{
+		"broker": {
 			Kind:       "Broker",
 			APIVersion: eventingv1.SchemeGroupVersion.String(),
 		},
-		"ksvc": corev1.ObjectReference{
+		"ksvc": {
 			Kind:       "Service",
 			APIVersion: servingv1.SchemeGroupVersion.String(),
 		},
@@ -92,8 +92,7 @@ func (c *Converter) PropertiesFromString(str string) (map[string]string, error) 
 		for _, match := range queryRegexp.FindAllStringSubmatch(str, -1) {
 			for idx, text := range match {
 				groupName := groupNames[idx]
-				switch groupName {
-				case "query":
+				if groupName == "query" {
 					query = text
 				}
 			}

@@ -32,9 +32,11 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const OperatorWatchNamespaceEnvVariable = "WATCH_NAMESPACE"
-const operatorNamespaceEnvVariable = "NAMESPACE"
-const operatorPodNameEnvVariable = "POD_NAME"
+const (
+	OperatorWatchNamespaceEnvVariable = "WATCH_NAMESPACE"
+	operatorNamespaceEnvVariable      = "NAMESPACE"
+	operatorPodNameEnvVariable        = "POD_NAME"
+)
 
 const OperatorLockName = "camel-k-lock"
 

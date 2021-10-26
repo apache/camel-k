@@ -19,6 +19,7 @@ package integration
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"time"
 
@@ -82,8 +83,14 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 		For(&v1.Integration{}, builder.WithPredicates(
 			platform.FilteringFuncs{
 				UpdateFunc: func(e event.UpdateEvent) bool {
-					old := e.ObjectOld.(*v1.Integration)
-					it := e.ObjectNew.(*v1.Integration)
+					old, ok := e.ObjectOld.(*v1.Integration)
+					if !ok {
+						return false
+					}
+					it, ok := e.ObjectNew.(*v1.Integration)
+					if !ok {
+						return false
+					}
 					// Observe the time to first readiness metric
 					previous := old.Status.GetCondition(v1.IntegrationConditionReady)
 					if next := it.Status.GetCondition(v1.IntegrationConditionReady); (previous == nil || previous.Status != corev1.ConditionTrue && (previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero())) &&
@@ -110,8 +117,12 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 		// or running phase.
 		Watches(&source.Kind{Type: &v1.IntegrationKit{}},
 			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
-				kit := a.(*v1.IntegrationKit)
 				var requests []reconcile.Request
+				kit, ok := a.(*v1.IntegrationKit)
+				if !ok {
+					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve integration list")
+					return requests
+				}
 
 				if kit.Status.Phase != v1.IntegrationKitPhaseReady && kit.Status.Phase != v1.IntegrationKitPhaseError {
 					return requests
@@ -131,6 +142,7 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 				for _, integration := range list.Items {
 					if match, err := integrationMatches(&integration, kit); err != nil {
 						log.Errorf(err, "Error matching integration %q with kit %q", integration.Name, kit.Name)
+
 						continue
 					} else if !match {
 						continue
@@ -153,8 +165,12 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 		// requests for any integrations that are in phase waiting for platform
 		Watches(&source.Kind{Type: &v1.IntegrationPlatform{}},
 			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
-				p := a.(*v1.IntegrationPlatform)
 				var requests []reconcile.Request
+				p, ok := a.(*v1.IntegrationPlatform)
+				if !ok {
+					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to list integrations")
+					return requests
+				}
 
 				if p.Status.Phase == v1.IntegrationPlatformPhaseReady {
 					list := &v1.IntegrationList{}
@@ -192,7 +208,11 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 		// Watch for the Integration Pods
 		Watches(&source.Kind{Type: &corev1.Pod{}},
 			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
-				pod := a.(*corev1.Pod)
+				pod, ok := a.(*corev1.Pod)
+				if !ok {
+					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to list integration pods")
+					return []reconcile.Request{}
+				}
 				return []reconcile.Request{
 					{
 						NamespacedName: types.NamespacedName{

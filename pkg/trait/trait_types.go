@@ -697,10 +697,10 @@ func getResourcePath(resourceName string, maybePath string, resourceType v1.Reso
 		return maybePath
 	}
 	// otherwise return a default path, according to the resource type
-	switch resourceType {
-	case v1.ResourceTypeData:
+	if resourceType == v1.ResourceTypeData {
 		return path.Join(resourcesDefaultMountPath, resourceName)
 	}
+
 	// Default, config type
 	return path.Join(configResourcesMountPath, resourceName)
 }
@@ -710,10 +710,10 @@ func getConfigmapMountPoint(resourceName string, maybeMountPoint string, resourc
 	if maybeMountPoint != "" {
 		return maybeMountPoint
 	}
-	switch resourceType {
-	case "data":
+	if resourceType == "data" {
 		return path.Join(resourcesDefaultMountPath, resourceName)
 	}
+
 	// Default, config type
 	return path.Join(configConfigmapsMountPath, resourceName)
 }
@@ -723,10 +723,10 @@ func getSecretMountPoint(resourceName string, maybeMountPoint string, resourceTy
 	if maybeMountPoint != "" {
 		return maybeMountPoint
 	}
-	switch resourceType {
-	case "data":
+	if resourceType == "data" {
 		return path.Join(resourcesDefaultMountPath, resourceName)
 	}
+
 	// Default, config type
 	return path.Join(configSecretsMountPath, resourceName)
 }
@@ -781,6 +781,7 @@ func (e *Environment) getIntegrationContainerPort() *corev1.ContainerPort {
 	return nil
 }
 
+// nolint: unused
 func (e *Environment) getAllInterceptors() []string {
 	res := make([]string, 0)
 	util.StringSliceUniqueConcat(&res, e.Interceptors)

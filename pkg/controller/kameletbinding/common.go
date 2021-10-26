@@ -36,8 +36,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var endpointTypeSourceContext = bindings.EndpointContext{Type: v1alpha1.EndpointTypeSource}
-var endpointTypeSinkContext = bindings.EndpointContext{Type: v1alpha1.EndpointTypeSink}
+var (
+	endpointTypeSourceContext = bindings.EndpointContext{Type: v1alpha1.EndpointTypeSource}
+	endpointTypeSinkContext   = bindings.EndpointContext{Type: v1alpha1.EndpointTypeSink}
+)
 
 func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *v1alpha1.KameletBinding) (*v1.Integration, error) {
 	controller := true
@@ -211,7 +213,6 @@ func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding
 		}
 		for k, v := range b.ApplicationProperties {
 			entry, err := property.EncodePropertyFileEntry(k, v)
-
 			if err != nil {
 				return err
 			}

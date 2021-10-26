@@ -61,16 +61,16 @@ func TestResources(t *testing.T) {
 }
 
 func TestResourcesWithPrefix(t *testing.T) {
-	assert.Contains(t, ResourcesWithPrefix("/manager/"), "/manager/operator-service-account.yaml")
-	assert.Contains(t, ResourcesWithPrefix("/manager/op"), "/manager/operator-service-account.yaml")
-	assert.Contains(t, ResourcesWithPrefix("/manager/operator-service-account"), "/manager/operator-service-account.yaml")
+	assert.Contains(t, WithPrefix("/manager/"), "/manager/operator-service-account.yaml")
+	assert.Contains(t, WithPrefix("/manager/op"), "/manager/operator-service-account.yaml")
+	assert.Contains(t, WithPrefix("/manager/operator-service-account"), "/manager/operator-service-account.yaml")
 
-	assert.Contains(t, ResourcesWithPrefix("/traits"), "/traits.yaml")
+	assert.Contains(t, WithPrefix("/traits"), "/traits.yaml")
 
 	// directory needs the slash on the end
-	assert.NotContains(t, ResourcesWithPrefix("/manager"), "/manager/operator-service-account.yaml")
+	assert.NotContains(t, WithPrefix("/manager"), "/manager/operator-service-account.yaml")
 	// need to get to at least the same directory as the required files
-	assert.NotContains(t, ResourcesWithPrefix("/"), "/manager/operator-service-account.yaml")
+	assert.NotContains(t, WithPrefix("/"), "/manager/operator-service-account.yaml")
 }
 
 func TestTemplateResource(t *testing.T) {
@@ -78,7 +78,7 @@ func TestTemplateResource(t *testing.T) {
 	name := "myintegration-master"
 	ns := "test-nm"
 
-	var templateData = struct {
+	templateData := struct {
 		Namespace      string
 		Name           string
 		ServiceAccount string

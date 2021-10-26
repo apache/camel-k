@@ -26,7 +26,7 @@ import (
 )
 
 func TestConversion(t *testing.T) {
-	var vals = []struct {
+	vals := []struct {
 		prefixID  string
 		prefixGav string
 	}{

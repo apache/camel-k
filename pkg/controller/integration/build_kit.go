@@ -118,6 +118,7 @@ kits:
 					integrationKit.Status.Phase == v1.IntegrationKitPhaseReady && k.Status.Phase == v1.IntegrationKitPhaseReady && k.HasHigherPriorityThan(integrationKit) {
 					integrationKit = &existingKits[i]
 				}
+
 				continue kits
 			}
 		}

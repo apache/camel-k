@@ -50,6 +50,7 @@ var RemoveIngressRoleCustomizer = func(object ctrl.Object) ctrl.Object {
 			for _, group := range rule.APIGroups {
 				if group == networking.GroupName {
 					role.Rules = append(role.Rules[:i], role.Rules[i+1:]...)
+
 					break rules
 				}
 			}

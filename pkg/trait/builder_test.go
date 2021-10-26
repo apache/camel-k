@@ -163,7 +163,7 @@ func TestMavenPropertyBuilderTrait(t *testing.T) {
 }
 
 func createNominalBuilderTraitTest() *builderTrait {
-	builderTrait := newBuilderTrait().(*builderTrait)
+	builderTrait, _ := newBuilderTrait().(*builderTrait)
 	builderTrait.Enabled = BoolP(true)
 
 	return builderTrait

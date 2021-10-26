@@ -40,8 +40,7 @@ func (s Settings) MarshalBytes() ([]byte, error) {
 	e := xml.NewEncoder(w)
 	e.Indent("", "  ")
 
-	err := e.Encode(s)
-	if err != nil {
+	if err := e.Encode(s); err != nil {
 		return []byte{}, err
 	}
 

@@ -96,6 +96,7 @@ func (c *Command) Do(ctx context.Context) error {
 				for _, opt := range options {
 					if strings.HasPrefix(opt, key) {
 						exists = true
+
 						break
 					}
 				}
@@ -121,7 +122,7 @@ func (c *Command) Do(ctx context.Context) error {
 
 	stdOut, err := cmd.StdoutPipe()
 	if err != nil {
-		return nil
+		return err
 	}
 
 	err = cmd.Start()

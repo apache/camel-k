@@ -35,8 +35,10 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-const kameletDirEnv = "KAMELET_CATALOG_DIR"
-const defaultKameletDir = "/kamelets/"
+const (
+	kameletDirEnv     = "KAMELET_CATALOG_DIR"
+	defaultKameletDir = "/kamelets/"
+)
 
 // KameletCatalog installs the bundled KameletCatalog into one namespace
 func KameletCatalog(ctx context.Context, c client.Client, namespace string) error {
@@ -44,12 +46,14 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 	if kameletDir == "" {
 		kameletDir = defaultKameletDir
 	}
-	if d, err := os.Stat(kameletDir); err != nil && os.IsNotExist(err) {
+	d, err := os.Stat(kameletDir)
+	switch {
+	case err != nil && os.IsNotExist(err):
 		return nil
-	} else if err != nil {
+	case err != nil:
 		return err
-	} else if !d.IsDir() {
-		return fmt.Errorf("Kamelet directory %q is a file", kameletDir)
+	case !d.IsDir():
+		return fmt.Errorf("kamelet directory %q is a file", kameletDir)
 	}
 
 	files, err := ioutil.ReadDir(kameletDir)
@@ -95,7 +99,6 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 				k.GetLabels()[v1alpha1.KameletReadOnlyLabel] = "true"
 
 				err := ObjectOrCollect(ctx, c, namespace, nil, true, k)
-
 				if err != nil {
 					return errors.Wrapf(err, "could not create resource from file %q", path.Join(kameletDir, file.Name()))
 				}

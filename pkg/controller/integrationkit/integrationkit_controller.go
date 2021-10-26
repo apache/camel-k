@@ -19,6 +19,7 @@ package integrationkit
 
 import (
 	"context"
+	"fmt"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -82,8 +83,14 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		&handler.EnqueueRequestForObject{},
 		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldIntegrationKit := e.ObjectOld.(*v1.IntegrationKit)
-				newIntegrationKit := e.ObjectNew.(*v1.IntegrationKit)
+				oldIntegrationKit, ok := e.ObjectOld.(*v1.IntegrationKit)
+				if !ok {
+					return false
+				}
+				newIntegrationKit, ok := e.ObjectNew.(*v1.IntegrationKit)
+				if !ok {
+					return false
+				}
 				// Ignore updates to the integration kit status in which case metadata.Generation
 				// does not change, or except when the integration kit phase changes as it's used
 				// to transition from one phase to another
@@ -108,8 +115,14 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		},
 		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldBuild := e.ObjectOld.(*v1.Build)
-				newBuild := e.ObjectNew.(*v1.Build)
+				oldBuild, ok := e.ObjectOld.(*v1.Build)
+				if !ok {
+					return false
+				}
+				newBuild, ok := e.ObjectNew.(*v1.Build)
+				if !ok {
+					return false
+				}
 				// Ignore updates to the build CR except when the build phase changes
 				// as it's used to transition the integration kit from one phase
 				// to another during the image build
@@ -125,8 +138,12 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// requests for any integration kits that are in phase waiting for platform
 	err = c.Watch(&source.Kind{Type: &v1.IntegrationPlatform{}},
 		handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
-			p := a.(*v1.IntegrationPlatform)
 			var requests []reconcile.Request
+			p, ok := a.(*v1.IntegrationPlatform)
+			if !ok {
+				log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to list integration kits")
+				return requests
+			}
 
 			if p.Status.Phase == v1.IntegrationPlatformPhaseReady {
 				list := &v1.IntegrationKitList{}
@@ -214,28 +231,29 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 		if target.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypeExternal {
 			target.Status.Phase = v1.IntegrationKitPhaseInitialization
 			return r.update(ctx, &instance, target)
-		} else {
-			// Platform is always local to the kit
-			pl, err := platform.GetOrFindLocalForResource(ctx, r.client, target, true)
-			if err != nil || pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
-				target.Status.Phase = v1.IntegrationKitPhaseWaitingForPlatform
-			} else {
-				target.Status.Phase = v1.IntegrationKitPhaseInitialization
-			}
-
-			if instance.Status.Phase != target.Status.Phase {
-				if err != nil {
-					target.Status.SetErrorCondition(v1.IntegrationKitConditionPlatformAvailable, v1.IntegrationKitConditionPlatformAvailableReason, err)
-				}
-
-				if pl != nil {
-					target.SetIntegrationPlatform(pl)
-				}
-
-				return r.update(ctx, &instance, target)
-			}
-			return reconcile.Result{}, err
 		}
+
+		// Platform is always local to the kit
+		pl, err := platform.GetOrFindLocalForResource(ctx, r.client, target, true)
+		if err != nil || pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
+			target.Status.Phase = v1.IntegrationKitPhaseWaitingForPlatform
+		} else {
+			target.Status.Phase = v1.IntegrationKitPhaseInitialization
+		}
+
+		if instance.Status.Phase != target.Status.Phase {
+			if err != nil {
+				target.Status.SetErrorCondition(v1.IntegrationKitConditionPlatformAvailable, v1.IntegrationKitConditionPlatformAvailableReason, err)
+			}
+
+			if pl != nil {
+				target.SetIntegrationPlatform(pl)
+			}
+
+			return r.update(ctx, &instance, target)
+		}
+
+		return reconcile.Result{}, err
 	}
 
 	actions := []Action{

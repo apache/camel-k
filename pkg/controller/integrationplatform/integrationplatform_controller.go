@@ -81,8 +81,14 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		&handler.EnqueueRequestForObject{},
 		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldIntegrationPlatform := e.ObjectOld.(*v1.IntegrationPlatform)
-				newIntegrationPlatform := e.ObjectNew.(*v1.IntegrationPlatform)
+				oldIntegrationPlatform, ok := e.ObjectOld.(*v1.IntegrationPlatform)
+				if !ok {
+					return false
+				}
+				newIntegrationPlatform, ok := e.ObjectNew.(*v1.IntegrationPlatform)
+				if !ok {
+					return false
+				}
 				// Ignore updates to the integration platform status in which case metadata.Generation
 				// does not change, or except when the integration platform phase changes as it's used
 				// to transition from one phase to another

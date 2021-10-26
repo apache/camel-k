@@ -429,7 +429,7 @@ func getCronForURI(camelURI string) *cronInfo {
 // Specific extractors
 
 // timerToCronInfo converts a timer endpoint to a Kubernetes cron schedule
-// nolint: gocritic
+
 func timerToCronInfo(camelURI string) *cronInfo {
 	if uri.GetQueryParameter(camelURI, "delay") != "" ||
 		uri.GetQueryParameter(camelURI, "repeatCount") != "" ||

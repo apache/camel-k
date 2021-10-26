@@ -283,11 +283,12 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 
 	if cfg.Monitoring.Enabled {
 		if err := installMonitoringResources(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
-			if k8serrors.IsForbidden(err) {
+			switch {
+			case k8serrors.IsForbidden(err):
 				fmt.Println("Warning: the creation of monitoring resources is not allowed. Try installing as cluster-admin to allow the creation of monitoring resources.")
-			} else if meta.IsNoMatchError(errors.Cause(err)) {
+			case meta.IsNoMatchError(errors.Cause(err)):
 				fmt.Println("Warning: the creation of the monitoring resources failed: ", err)
-			} else {
+			default:
 				return err
 			}
 		}
@@ -299,7 +300,8 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 func installClusterRoleBinding(ctx context.Context, c client.Client, collection *kubernetes.Collection, namespace string, name string, path string) error {
 	var target *rbacv1.ClusterRoleBinding
 	existing, err := c.RbacV1().ClusterRoleBindings().Get(ctx, name, metav1.GetOptions{})
-	if k8serrors.IsNotFound(err) {
+	switch {
+	case k8serrors.IsNotFound(err):
 		existing = nil
 		yaml := resources.ResourceAsString(path)
 		if yaml == "" {
@@ -309,10 +311,11 @@ func installClusterRoleBinding(ctx context.Context, c client.Client, collection 
 		if err != nil {
 			return err
 		}
+		// nolint: forcetypeassert
 		target = obj.(*rbacv1.ClusterRoleBinding)
-	} else if err != nil {
+	case err != nil:
 		return err
-	} else {
+	default:
 		target = existing.DeepCopy()
 	}
 
@@ -321,10 +324,12 @@ func installClusterRoleBinding(ctx context.Context, c client.Client, collection 
 		if subject.Name == "camel-k-operator" {
 			if subject.Namespace == namespace {
 				bound = true
+
 				break
 			} else if subject.Namespace == "" {
 				target.Subjects[i].Namespace = namespace
 				bound = true
+
 				break
 			}
 		}
@@ -345,19 +350,20 @@ func installClusterRoleBinding(ctx context.Context, c client.Client, collection 
 
 	if existing == nil {
 		return c.Create(ctx, target)
-	} else {
-		// The ClusterRoleBinding.Subjects field does not have a patchStrategy key in its field tag,
-		// so a strategic merge patch would use the default patch strategy, which is replace.
-		// Let's compute a simple JSON merge patch from the existing resource, and patch it.
-		p, err := patch.PositiveMergePatch(existing, target)
-		if err != nil {
-			return err
-		} else if len(p) == 0 {
-			// Avoid triggering a patch request for nothing
-			return nil
-		}
-		return c.Patch(ctx, existing, ctrl.RawPatch(types.MergePatchType, p))
 	}
+
+	// The ClusterRoleBinding.Subjects field does not have a patchStrategy key in its field tag,
+	// so a strategic merge patch would use the default patch strategy, which is replace.
+	// Let's compute a simple JSON merge patch from the existing resource, and patch it.
+	p, err := patch.PositiveMergePatch(existing, target)
+	if err != nil {
+		return err
+	} else if len(p) == 0 {
+		// Avoid triggering a patch request for nothing
+		return nil
+	}
+
+	return c.Patch(ctx, existing, ctrl.RawPatch(types.MergePatchType, p))
 }
 
 func installOpenShiftRoles(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
@@ -434,7 +440,10 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 	if err != nil {
 		return nil, err
 	}
-	pl := platformObject.(*v1.IntegrationPlatform)
+	pl, ok := platformObject.(*v1.IntegrationPlatform)
+	if !ok {
+		return nil, fmt.Errorf("type assertion failed: %v", platformObject)
+	}
 
 	if !skipRegistrySetup {
 		// Let's apply registry settings whether it's OpenShift or not

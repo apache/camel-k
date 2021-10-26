@@ -52,7 +52,8 @@ func loadRawContent(source string) ([]byte, string, error) {
 	if ok {
 		content, err = ioutil.ReadFile(source)
 	} else {
-		u, err := url.Parse(source)
+		var u *url.URL
+		u, err = url.Parse(source)
 		if err != nil {
 			return nil, "", err
 		}
@@ -98,7 +99,6 @@ func loadTextContent(source string, base64Compression bool) (string, string, boo
 }
 
 func loadContentHTTP(u *url.URL) ([]byte, error) {
-	// nolint: gosec
 	resp, err := http.Get(u.String())
 	if err != nil {
 		return []byte{}, err

@@ -98,37 +98,37 @@ func (command *describeKitCommandOptions) describeIntegrationKit(cmd *cobra.Comm
 
 		describeObjectMeta(w, kit.ObjectMeta)
 
-		w.Write(0, "Phase:\t%s\n", kit.Status.Phase)
-		w.Write(0, "Runtime Version:\t%s\n", kit.Status.RuntimeVersion)
-		w.Write(0, "Image:\t%s\n", kit.Status.Image)
-		w.Write(0, "Version:\t%s\n", kit.Status.Version)
+		w.Writef(0, "Phase:\t%s\n", kit.Status.Phase)
+		w.Writef(0, "Runtime Version:\t%s\n", kit.Status.RuntimeVersion)
+		w.Writef(0, "Image:\t%s\n", kit.Status.Image)
+		w.Writef(0, "Version:\t%s\n", kit.Status.Version)
 
 		if len(kit.Status.Artifacts) > 0 {
-			w.Write(0, "Artifacts:\t\n")
+			w.Writef(0, "Artifacts:\t\n")
 			for _, artifact := range kit.Status.Artifacts {
-				w.Write(1, "%s\n", artifact.ID)
+				w.Writef(1, "%s\n", artifact.ID)
 			}
 		}
 
 		if len(kit.Spec.Configuration) > 0 {
-			w.Write(0, "Configuration:\n")
+			w.Writef(0, "Configuration:\n")
 			for _, config := range kit.Spec.Configuration {
-				w.Write(1, "Type:\t%s\n", config.Type)
-				w.Write(1, "Value:\t%s\n", config.Value)
+				w.Writef(1, "Type:\t%s\n", config.Type)
+				w.Writef(1, "Value:\t%s\n", config.Value)
 			}
 		}
 
 		if len(kit.Spec.Dependencies) > 0 {
-			w.Write(0, "Dependencies:\t\n")
+			w.Writef(0, "Dependencies:\t\n")
 			for _, dependency := range kit.Spec.Dependencies {
-				w.Write(1, "%s\n", dependency)
+				w.Writef(1, "%s\n", dependency)
 			}
 		}
 
 		if len(kit.Spec.Repositories) > 0 {
-			w.Write(0, "Repositories:\n")
+			w.Writef(0, "Repositories:\n")
 			for _, repository := range kit.Spec.Repositories {
-				w.Write(1, "%s\n", repository)
+				w.Writef(1, "%s\n", repository)
 			}
 		}
 

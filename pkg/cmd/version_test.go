@@ -27,7 +27,10 @@ import (
 
 const cmdVersion = "version"
 
+// nolint: unparam
 func initializeVersionCmdOptions(t *testing.T) (*versionCmdOptions, *cobra.Command, RootCmdOptions) {
+	t.Helper()
+
 	options, rootCmd := kamelTestPreAddCommandInit()
 	versionCmdOptions := addTestVersionCmd(*options, rootCmd)
 	kamelTestPostAddCommandInit(t, rootCmd)
@@ -36,7 +39,7 @@ func initializeVersionCmdOptions(t *testing.T) (*versionCmdOptions, *cobra.Comma
 }
 
 func addTestVersionCmd(options RootCmdOptions, rootCmd *cobra.Command) *versionCmdOptions {
-	//add a testing version of version Command
+	// add a testing version of version Command
 	versionCmd, versionOptions := newCmdVersion(&options)
 	versionCmd.RunE = func(c *cobra.Command, args []string) error {
 		return nil

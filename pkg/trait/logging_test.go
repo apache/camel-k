@@ -33,6 +33,8 @@ import (
 )
 
 func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint bool, logLevel string, logFormat string) *Environment {
+	t.Helper()
+
 	c, err := camel.DefaultCatalog()
 	if err != nil {
 		panic(err)
@@ -85,6 +87,8 @@ func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint b
 }
 
 func createDefaultLoggingTestEnv(t *testing.T) *Environment {
+	t.Helper()
+
 	return createLoggingTestEnv(t, true, false, false, defaultLogLevel, "")
 }
 
@@ -112,13 +116,13 @@ func TestEmptyLoggingTrait(t *testing.T) {
 			}
 		}
 
-		if e.Name == envVarQuarkusLogConsoleJson {
+		if e.Name == envVarQuarkusLogConsoleJSON {
 			if e.Value == "true" {
 				jsonFormat = true
 			}
 		}
 
-		if e.Name == envVarQuarkusLogConsoleJsonPrettyPrint {
+		if e.Name == envVarQuarkusLogConsoleJSONPrettyPrint {
 			if e.Value == "true" {
 				jsonPrettyPrint = true
 			}
@@ -164,13 +168,13 @@ func TestJsonLoggingTrait(t *testing.T) {
 			}
 		}
 
-		if e.Name == envVarQuarkusLogConsoleJson {
+		if e.Name == envVarQuarkusLogConsoleJSON {
 			if e.Value == "true" {
 				jsonFormat = true
 			}
 		}
 
-		if e.Name == envVarQuarkusLogConsoleJsonPrettyPrint {
+		if e.Name == envVarQuarkusLogConsoleJSONPrettyPrint {
 			if e.Value == "true" {
 				jsonPrettyPrint = true
 			}

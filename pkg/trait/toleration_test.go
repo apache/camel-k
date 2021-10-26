@@ -70,6 +70,8 @@ func TestApplyPodTolerationLabelsDefault(t *testing.T) {
 }
 
 func testApplyPodTolerationLabelsDefault(t *testing.T, trait *tolerationTrait, environment *Environment, tolerations *[]corev1.Toleration) {
+	t.Helper()
+
 	err := trait.Apply(environment)
 
 	assert.Nil(t, err)
@@ -96,6 +98,8 @@ func TestApplyPodTolerationLabelsTolerationSeconds(t *testing.T) {
 }
 
 func testApplyPodTolerationLabelsTolerationSeconds(t *testing.T, trait *tolerationTrait, environment *Environment, tolerations *[]corev1.Toleration) {
+	t.Helper()
+
 	err := trait.Apply(environment)
 
 	assert.Nil(t, err)
@@ -125,7 +129,7 @@ func TestTolerationValidTaints(t *testing.T) {
 }
 
 func createNominalTolerationTrait() *tolerationTrait {
-	tolerationTrait := newTolerationTrait().(*tolerationTrait)
+	tolerationTrait, _ := newTolerationTrait().(*tolerationTrait)
 	tolerationTrait.Enabled = BoolP(true)
 	tolerationTrait.Taints = make([]string, 0)
 

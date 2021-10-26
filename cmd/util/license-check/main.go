@@ -25,7 +25,6 @@ import (
 )
 
 func main() {
-
 	if len(os.Args) != 3 {
 		fmt.Println(`Use "license-check <file> <license>`)
 		os.Exit(1)
@@ -52,5 +51,4 @@ func main() {
 		os.Stderr.WriteString(fmt.Sprintf("file %s does not contain license\n", fileName))
 		os.Exit(1)
 	}
-
 }

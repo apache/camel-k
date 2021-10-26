@@ -138,7 +138,7 @@ func (command *kitDeleteCommandOptions) delete(name string) error {
 	err = c.Delete(command.Context, kit)
 
 	if err != nil && !k8errors.IsNotFound(err) {
-		return fmt.Errorf("error deleting integration kit \"%s\", %s", kit.Name, err)
+		return fmt.Errorf("error deleting integration kit \"%s\": %w", kit.Name, err)
 	}
 	if err != nil && k8errors.IsNotFound(err) {
 		return fmt.Errorf("no integration kit found with name \"%s\"", kit.Name)

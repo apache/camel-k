@@ -45,7 +45,7 @@ func HandleIntegrationStateChanges(ctx context.Context, c client.Client, integra
 
 	var lastObservedState *v1.IntegrationPhase
 
-	var handlerWrapper = func(it *v1.Integration) bool {
+	handlerWrapper := func(it *v1.Integration) bool {
 		if lastObservedState == nil || *lastObservedState != it.Status.Phase {
 			lastObservedState = &it.Status.Phase
 			if !handler(it) {
@@ -106,13 +106,14 @@ func HandleIntegrationEvents(ctx context.Context, c client.Client, integration *
 			if !ok {
 				return nil
 			}
-			if e.Object != nil {
-				if evt, ok := e.Object.(*corev1.Event); ok {
-					if isAllowed(lastEvent, evt, integration.CreationTimestamp.UnixNano()) {
-						lastEvent = evt
-						if !handler(evt) {
-							return nil
-						}
+			if e.Object == nil {
+				continue
+			}
+			if evt, ok := e.Object.(*corev1.Event); ok {
+				if isAllowed(lastEvent, evt, integration.CreationTimestamp.UnixNano()) {
+					lastEvent = evt
+					if !handler(evt) {
+						return nil
 					}
 				}
 			}
@@ -136,7 +137,7 @@ func HandlePlatformStateChanges(ctx context.Context, c client.Client, platform *
 
 	var lastObservedState *v1.IntegrationPlatformPhase
 
-	var handlerWrapper = func(pl *v1.IntegrationPlatform) bool {
+	handlerWrapper := func(pl *v1.IntegrationPlatform) bool {
 		if lastObservedState == nil || *lastObservedState != pl.Status.Phase {
 			lastObservedState = &pl.Status.Phase
 			if !handler(pl) {

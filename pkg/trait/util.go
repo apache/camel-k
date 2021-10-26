@@ -94,7 +94,7 @@ func collectConfigurations(configurationType string, configurable ...v1.Configur
 
 		for _, entry := range entries {
 			if entry.Type == configurationType {
-				var item = make(map[string]string)
+				item := make(map[string]string)
 				item["value"] = entry.Value
 				item["resourceType"] = entry.ResourceType
 				item["resourceMountPoint"] = entry.ResourceMountPoint

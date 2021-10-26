@@ -39,7 +39,7 @@ func main() {
 	crd := os.Args[1]
 	schema := os.Args[2]
 	path := os.Args[3]
-	isArray := "true" == os.Args[4]
+	isArray := os.Args[4] == "true"
 	destination := os.Args[5]
 
 	if err := generate(crd, schema, path, isArray, destination); err != nil {
@@ -53,6 +53,7 @@ func generate(crdFilename, dslFilename, path string, isArray bool, destination s
 		return err
 	}
 	if !isArray && dslSchema["type"] == "array" {
+		// nolint: forcetypeassert
 		dslSchema = dslSchema["items"].(map[string]interface{})
 	}
 
@@ -96,7 +97,7 @@ func generate(crdFilename, dslFilename, path string, isArray bool, destination s
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(destination, result, 0666)
+	return ioutil.WriteFile(destination, result, 0o666)
 }
 
 func remapRef(ref string) string {
@@ -105,11 +106,12 @@ func remapRef(ref string) string {
 
 func rebaseRefs(schema map[string]interface{}) {
 	for k, v := range schema {
-		if k == "$ref" && reflect.TypeOf(v).Kind() == reflect.String {
+		switch {
+		case k == "$ref" && reflect.TypeOf(v).Kind() == reflect.String:
 			schema[k] = remapRef(fmt.Sprintf("%v", v))
-		} else if reflect.TypeOf(v).Kind() == reflect.Map {
+		case reflect.TypeOf(v).Kind() == reflect.Map:
 			rebaseRefs(v.(map[string]interface{}))
-		} else if reflect.TypeOf(v).Kind() == reflect.Slice {
+		case reflect.TypeOf(v).Kind() == reflect.Slice:
 			for _, vv := range v.([]interface{}) {
 				if reflect.TypeOf(vv).Kind() == reflect.Map {
 					rebaseRefs(vv.(map[string]interface{}))
@@ -145,7 +147,11 @@ func loadCrdSchema(filename string) (*apiextensionsv1.JSONSchemaProps, error) {
 	if err != nil {
 		return nil, err
 	}
-	crd := obj.(*apiextensionsv1.CustomResourceDefinition)
+	crd, ok := obj.(*apiextensionsv1.CustomResourceDefinition)
+	if !ok {
+		return nil, fmt.Errorf("type assertion failed: %v", obj)
+	}
+
 	return crd.Spec.Versions[0].Schema.OpenAPIV3Schema, nil
 }
 

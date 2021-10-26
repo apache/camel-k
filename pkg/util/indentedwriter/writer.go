@@ -40,14 +40,14 @@ func NewWriter(out io.Writer) *Writer {
 	return &Writer{out: out}
 }
 
-// Write --
-func (iw *Writer) Write(indentLevel int, format string, i ...interface{}) {
+// Writef --
+func (iw *Writer) Writef(indentLevel int, format string, i ...interface{}) {
 	fmt.Fprint(iw.out, strings.Repeat("  ", indentLevel))
 	fmt.Fprintf(iw.out, format, i...)
 }
 
-// Writeln --
-func (iw *Writer) Writeln(indentLevel int, format string, i ...interface{}) {
+// Writelnf --
+func (iw *Writer) Writelnf(indentLevel int, format string, i ...interface{}) {
 	fmt.Fprint(iw.out, strings.Repeat("  ", indentLevel))
 	fmt.Fprintf(iw.out, format, i...)
 	fmt.Fprint(iw.out, "\n")

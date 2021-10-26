@@ -31,6 +31,7 @@ import (
 )
 
 // StrimziBindingProvider allows to connect to a Kafka topic via KameletBinding
+// nolint: revive
 type StrimziBindingProvider struct {
 	Client internalclientset.Interface
 }
@@ -105,22 +106,17 @@ func (s StrimziBindingProvider) getBootstrapServers(ctx bindings.BindingContext,
 		return "", err
 	}
 
-	var listener *v1beta2.KafkaStatusListener
 	for _, l := range cluster.Status.Listeners {
 		if l.Type == v1beta2.StrimziListenerTypePlain {
-			listener = &l
-			break
+			if l.BootstrapServers == "" {
+				return "", fmt.Errorf("cluster %q has no bootstrap servers in %q listener", clusterName, v1beta2.StrimziListenerTypePlain)
+			}
+
+			return l.BootstrapServers, nil
 		}
 	}
 
-	if listener == nil {
-		return "", fmt.Errorf("cluster %q has no listeners of type %q", clusterName, v1beta2.StrimziListenerTypePlain)
-	}
-	if listener.BootstrapServers == "" {
-		return "", fmt.Errorf("cluster %q has no bootstrap servers in %q listener", clusterName, v1beta2.StrimziListenerTypePlain)
-	}
-
-	return listener.BootstrapServers, nil
+	return "", fmt.Errorf("cluster %q has no listeners of type %q", clusterName, v1beta2.StrimziListenerTypePlain)
 }
 
 func (s StrimziBindingProvider) Order() int {

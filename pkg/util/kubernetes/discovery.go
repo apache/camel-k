@@ -21,6 +21,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/kubernetes"
 )
+
 func IsAPIResourceInstalled(c kubernetes.Interface, groupVersion string, kind string) (bool, error) {
 	resources, err := c.Discovery().ServerResourcesForGroupVersion(groupVersion)
 	if err != nil {

@@ -81,6 +81,8 @@ func TestApplyEmptyAffinityLabelsDoesSucceed(t *testing.T) {
 }
 
 func testApplyEmptyAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, environment *Environment, affinity *corev1.Affinity) {
+	t.Helper()
+
 	err := trait.Apply(environment)
 
 	assert.Nil(t, err)
@@ -102,6 +104,8 @@ func TestApplyNodeAffinityLabelsDoesSucceed(t *testing.T) {
 }
 
 func testApplyNodeAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, environment *Environment, podSpec *corev1.PodSpec) {
+	t.Helper()
+
 	err := trait.Apply(environment)
 
 	assert.Nil(t, err)
@@ -130,6 +134,8 @@ func TestApplyPodAntiAffinityLabelsDoesSucceed(t *testing.T) {
 }
 
 func testApplyPodAntiAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, environment *Environment, podSpec *corev1.PodSpec) {
+	t.Helper()
+
 	err := trait.Apply(environment)
 
 	assert.Nil(t, err)
@@ -163,6 +169,8 @@ func TestApplyPodAffinityLabelsDoesSucceed(t *testing.T) {
 }
 
 func testApplyPodAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, environment *Environment, podSpec *corev1.PodSpec) {
+	t.Helper()
+
 	err := trait.Apply(environment)
 
 	assert.Nil(t, err)
@@ -180,7 +188,7 @@ func testApplyPodAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, e
 }
 
 func createNominalAffinityTest() *affinityTrait {
-	trait := newAffinityTrait().(*affinityTrait)
+	trait, _ := newAffinityTrait().(*affinityTrait)
 	trait.Enabled = BoolP(true)
 
 	return trait

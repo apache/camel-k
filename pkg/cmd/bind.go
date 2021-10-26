@@ -50,14 +50,14 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 				return err
 			}
 			if err := options.run(cmd, args); err != nil {
-				fmt.Fprintln(cmd.OutOrStdout(), string(err.Error()))
+				fmt.Fprintln(cmd.OutOrStdout(), err.Error())
 			}
 
 			return nil
 		},
 	}
 
-    cmd.Flags().StringArrayP("connect", "c", nil, "A ServiceBinding or Provisioned Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
+	cmd.Flags().StringArrayP("connect", "c", nil, "A ServiceBinding or Provisioned Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
 	cmd.Flags().String("error-handler", "", `Add error handler (none|log|dlc:<endpoint>|bean:<type>|ref:<registry-ref>). DLC endpoints are expected in the format "[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
 	cmd.Flags().String("name", "", "Name for the binding")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
@@ -175,23 +175,23 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-    if len(o.Connects) > 0 {
-        trait := make(map[string]interface{})
-        trait["serviceBindings"] = o.Connects
-        specs := make(map[string]v1.TraitSpec)
-        data, err := json.Marshal(trait)
-        if err != nil {
-            return err
-        }
-        var spec v1.TraitSpec
-        err = json.Unmarshal(data, &spec.Configuration)
-        if err != nil {
-            return err
-        }
-        specs["service-binding"] = spec
-        binding.Spec.Integration = &v1.IntegrationSpec{}
-        binding.Spec.Integration.Traits = specs
-    }
+	if len(o.Connects) > 0 {
+		trait := make(map[string]interface{})
+		trait["serviceBindings"] = o.Connects
+		specs := make(map[string]v1.TraitSpec)
+		data, err := json.Marshal(trait)
+		if err != nil {
+			return err
+		}
+		var spec v1.TraitSpec
+		err = json.Unmarshal(data, &spec.Configuration)
+		if err != nil {
+			return err
+		}
+		specs["service-binding"] = spec
+		binding.Spec.Integration = &v1.IntegrationSpec{}
+		binding.Spec.Integration.Traits = specs
+	}
 
 	client, err := o.GetCmdClient()
 	if err != nil {
@@ -229,7 +229,7 @@ func showOutput(cmd *cobra.Command, binding *v1alpha1.KameletBinding, outputForm
 }
 
 func (o *bindCmdOptions) parseErrorHandler() (*v1alpha1.ErrorHandlerSpec, error) {
-	var errHandlMap = make(map[string]interface{})
+	errHandlMap := make(map[string]interface{})
 	errHandlType, errHandlValue, err := parseErrorHandlerByType(o.ErrorHandler)
 	if err != nil {
 		return nil, err

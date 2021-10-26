@@ -52,9 +52,7 @@ const (
 	adocNavMarkerEnd   = adocCommonMarkerEnd + " (trait-nav)"
 )
 
-var (
-	tagTraitID = regexp.MustCompile(fmt.Sprintf("%s=([a-z0-9-]+)", regexp.QuoteMeta(tagTrait)))
-)
+var tagTraitID = regexp.MustCompile(fmt.Sprintf("%s=([a-z0-9-]+)", regexp.QuoteMeta(tagTrait)))
 
 // traitDocGen produces documentation about traits
 type traitDocGen struct {
@@ -197,24 +195,26 @@ func writeMembers(t *types.Type, traitID string, content *[]string) {
 	res := append([]string(nil), *content...)
 	for _, m := range t.Members {
 		prop := reflect.StructTag(m.Tags).Get("property")
-		if prop != "" {
-			if strings.Contains(prop, "squash") {
-				writeMembers(m.Type, traitID, &res)
-			} else {
-				res = append(res, "| "+traitID+"."+prop)
-				res = append(res, "| "+strings.TrimPrefix(m.Type.Name.Name, "*"))
-				first := true
-				for _, l := range filterOutTagsAndComments(m.CommentLines) {
-					escapedComment := escapeASCIIDoc(l)
-					if first {
-						res = append(res, "| "+escapedComment)
-						first = false
-					} else {
-						res = append(res, escapedComment)
-					}
+		if prop == "" {
+			continue
+		}
+
+		if strings.Contains(prop, "squash") {
+			writeMembers(m.Type, traitID, &res)
+		} else {
+			res = append(res, "| "+traitID+"."+prop)
+			res = append(res, "| "+strings.TrimPrefix(m.Type.Name.Name, "*"))
+			first := true
+			for _, l := range filterOutTagsAndComments(m.CommentLines) {
+				escapedComment := escapeASCIIDoc(l)
+				if first {
+					res = append(res, "| "+escapedComment)
+					first = false
+				} else {
+					res = append(res, escapedComment)
 				}
-				res = append(res, "")
 			}
+			res = append(res, "")
 		}
 	}
 	*content = res
@@ -246,7 +246,7 @@ func filterOutTagsAndComments(comments []string) []string {
 
 // escapeAsciiDoc is in charge to escape those chars used for formatting purposes
 func escapeASCIIDoc(text string) string {
-	return strings.Replace(text, "|", "\\|", -1)
+	return strings.ReplaceAll(text, "|", "\\|")
 }
 
 func split(doc []string, startMarker, endMarker string) (pre []string, post []string) {
@@ -275,7 +275,7 @@ func split(doc []string, startMarker, endMarker string) (pre []string, post []st
 }
 
 func readFile(filename string) (file *os.File, content []string, err error) {
-	if file, err = os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0777); err != nil {
+	if file, err = os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0o777); err != nil {
 		return file, content, err
 	}
 

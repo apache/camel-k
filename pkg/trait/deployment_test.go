@@ -147,7 +147,7 @@ func TestApplyDeploymentTraitWithProgressDeadline(t *testing.T) {
 }
 
 func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
-	trait := newDeploymentTrait().(*deploymentTrait)
+	trait, _ := newDeploymentTrait().(*deploymentTrait)
 	trait.Enabled = BoolP(true)
 	trait.Client, _ = test.NewFakeClient(&appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{

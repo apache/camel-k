@@ -144,6 +144,7 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 			for _, secret := range sa.Secrets {
 				if strings.Contains(secret.Name, "camel-k-builder-dockercfg") {
 					p.Status.Build.Registry.Secret = secret.Name
+
 					break
 				}
 			}

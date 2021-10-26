@@ -36,7 +36,7 @@ import (
 func TestPullSecret(t *testing.T) {
 	e, deployment := getEnvironmentAndDeployment(t)
 
-	trait := newPullSecretTrait().(*pullSecretTrait)
+	trait, _ := newPullSecretTrait().(*pullSecretTrait)
 	trait.SecretName = "xxxy"
 	enabled, err := trait.Configure(e)
 	assert.Nil(t, err)
@@ -60,7 +60,7 @@ func TestPullSecretDoesNothingWhenNotSetOnPlatform(t *testing.T) {
 func TestPullSecretAuto(t *testing.T) {
 	e, _ := getEnvironmentAndDeployment(t)
 
-	trait := newPullSecretTrait().(*pullSecretTrait)
+	trait, _ := newPullSecretTrait().(*pullSecretTrait)
 	trait.Auto = BoolP(false)
 	enabled, err := trait.Configure(e)
 	assert.Nil(t, err)
@@ -70,7 +70,7 @@ func TestPullSecretAuto(t *testing.T) {
 func TestPullSecretImagePullerDelegation(t *testing.T) {
 	e, _ := getEnvironmentAndDeployment(t)
 
-	trait := newPullSecretTrait().(*pullSecretTrait)
+	trait, _ := newPullSecretTrait().(*pullSecretTrait)
 	trait.Auto = BoolP(false)
 	trait.ImagePullerDelegation = BoolP(true)
 	enabled, err := trait.Configure(e)
@@ -92,6 +92,8 @@ func TestPullSecretImagePullerDelegation(t *testing.T) {
 }
 
 func getEnvironmentAndDeployment(t *testing.T) (*Environment, *appsv1.Deployment) {
+	t.Helper()
+
 	e := &Environment{}
 	e.Integration = &v1.Integration{
 		ObjectMeta: metav1.ObjectMeta{

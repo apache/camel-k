@@ -46,6 +46,9 @@ where <type> is one of {` + strings.Join(acceptedDependencyTypes, "|") + `}.`
 func getDependencies(ctx context.Context, args []string, additionalDependencies []string, repositories []string, allDependencies bool) ([]string, error) {
 	// Fetch existing catalog or create new one if one does not already exist
 	catalog, err := createCamelCatalog(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	// Get top-level dependencies
 	dependencies, err := getTopLevelDependencies(catalog, args)
@@ -54,11 +57,7 @@ func getDependencies(ctx context.Context, args []string, additionalDependencies 
 	}
 
 	// Add additional user-provided dependencies
-	if additionalDependencies != nil {
-		for _, additionalDependency := range additionalDependencies {
-			dependencies = append(dependencies, additionalDependency)
-		}
-	}
+	dependencies = append(dependencies, additionalDependencies...)
 
 	// Compute transitive dependencies
 	if allDependencies {
@@ -159,7 +158,7 @@ func getTransitiveDependencies(ctx context.Context, catalog *camel.RuntimeCatalo
 	}
 
 	// Dump dependencies in the dependencies directory and construct the list of dependencies
-	var transitiveDependencies []string
+	transitiveDependencies := []string{}
 	for _, entry := range artifacts {
 		transitiveDependencies = append(transitiveDependencies, entry.Location)
 	}
@@ -286,7 +285,6 @@ func printDependencies(format string, dependencies []string) error {
 
 func validateFile(file string) error {
 	fileExists, err := util.FileExists(file)
-
 	if err != nil {
 		return err
 	}
@@ -312,12 +310,10 @@ func validateFiles(args []string) error {
 
 func validateAdditionalDependencies(additionalDependencies []string) error {
 	// Validate list of additional dependencies i.e. make sure that each dependency has a valid type
-	if additionalDependencies != nil {
-		for _, additionalDependency := range additionalDependencies {
-			isValid := validateDependency(additionalDependency)
-			if !isValid {
-				return errors.New("Unexpected type for user-provided dependency: " + additionalDependency + ". " + additionalDependencyUsageMessage)
-			}
+	for _, additionalDependency := range additionalDependencies {
+		isValid := validateDependency(additionalDependency)
+		if !isValid {
+			return errors.New("Unexpected type for user-provided dependency: " + additionalDependency + ". " + additionalDependencyUsageMessage)
 		}
 	}
 
@@ -344,8 +340,7 @@ func validateIntegrationFiles(args []string) error {
 	}
 
 	// Validate integration files.
-	err := validateFiles(args)
-	if err != nil {
+	if err := validateFiles(args); err != nil {
 		return err
 	}
 
@@ -385,7 +380,7 @@ func updateIntegrationProperties(properties []string, propertyFiles []string, ha
 	}
 
 	// Relocate properties files to this integration's property directory.
-	var relocatedPropertyFiles []string
+	relocatedPropertyFiles := []string{}
 	for _, propertyFile := range propertyFiles {
 		relocatedPropertyFile := path.Join(util.GetLocalPropertiesDir(), path.Base(propertyFile))
 		_, err = util.CopyFile(propertyFile, relocatedPropertyFile)
@@ -399,7 +394,7 @@ func updateIntegrationProperties(properties []string, propertyFiles []string, ha
 		// Output list of properties to property file if any CLI properties were given.
 		if len(properties) > 0 {
 			propertyFilePath := path.Join(util.GetLocalPropertiesDir(), "CLI.properties")
-			err = ioutil.WriteFile(propertyFilePath, []byte(strings.Join(properties, "\n")), 0777)
+			err = ioutil.WriteFile(propertyFilePath, []byte(strings.Join(properties, "\n")), 0o777)
 			if err != nil {
 				return nil, err
 			}
@@ -458,7 +453,8 @@ func updateQuarkusDirectory() error {
 		return err
 	}
 
-	util.CopyQuarkusAppFiles(util.CustomQuarkusDirectoryName, util.GetLocalQuarkusDir())
+	// ignore error if custom dir doesn't exist
+	_ = util.CopyQuarkusAppFiles(util.CustomQuarkusDirectoryName, util.GetLocalQuarkusDir())
 
 	return nil
 }
@@ -469,7 +465,8 @@ func updateAppDirectory() error {
 		return err
 	}
 
-	util.CopyAppFile(util.CustomAppDirectoryName, util.GetLocalAppDir())
+	// ignore error if custom dir doesn't exist
+	_ = util.CopyAppFile(util.CustomAppDirectoryName, util.GetLocalAppDir())
 
 	return nil
 }
@@ -480,7 +477,8 @@ func updateLibDirectory() error {
 		return err
 	}
 
-	util.CopyLibFiles(util.CustomLibDirectoryName, util.GetLocalLibDir())
+	// ignore error if custom dir doesn't exist
+	_ = util.CopyLibFiles(util.CustomLibDirectoryName, util.GetLocalLibDir())
 
 	return nil
 }

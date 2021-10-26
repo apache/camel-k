@@ -171,19 +171,19 @@ func Install(ctx context.Context, client client.Client, namespace string, global
 	// Additional configuration
 	err := maybeSetTolerations(&sub, tolerations)
 	if err != nil {
-		return false, errors.Wrap(err, fmt.Sprintf("could not set tolerations"))
+		return false, errors.Wrap(err, "could not set tolerations")
 	}
 	err = maybeSetNodeSelectors(&sub, nodeSelectors)
 	if err != nil {
-		return false, errors.Wrap(err, fmt.Sprintf("could not set node selectors"))
+		return false, errors.Wrap(err, "could not set node selectors")
 	}
 	err = maybeSetResourcesRequirements(&sub, resourcesRequirements)
 	if err != nil {
-		return false, errors.Wrap(err, fmt.Sprintf("could not set resources requirements"))
+		return false, errors.Wrap(err, "could not set resources requirements")
 	}
 	err = maybeSetEnvVars(&sub, envVars)
 	if err != nil {
-		return false, errors.Wrap(err, fmt.Sprintf("could not set environment variables"))
+		return false, errors.Wrap(err, "could not set environment variables")
 	}
 
 	if collection != nil {

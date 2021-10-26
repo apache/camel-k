@@ -46,7 +46,7 @@ func (action *createAction) CanHandle(platform *v1.IntegrationPlatform) bool {
 }
 
 func (action *createAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
-	for _, k := range resources.ResourcesWithPrefix("/camel-catalog-") {
+	for _, k := range resources.WithPrefix("/camel-catalog-") {
 		action.L.Infof("Installing camel catalog: %s", k)
 		err := install.Resources(ctx, action.client, platform.Namespace, true, install.IdentityResourceCustomizer, k)
 		if err != nil {

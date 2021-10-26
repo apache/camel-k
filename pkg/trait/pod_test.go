@@ -87,8 +87,9 @@ func TestChangeEnvVariables(t *testing.T) {
 	assert.Equal(t, containsEnvVariables(templateSpec, "integration", "CAMEL_K_DIGEST"), "new_value")
 }
 
+// nolint: unparam
 func createPodTest(podSpecTemplate string) (*podTrait, *Environment, *appsv1.Deployment) {
-	trait := newPodTrait().(*podTrait)
+	trait, _ := newPodTrait().(*podTrait)
 	trait.Enabled = BoolP(true)
 
 	var podSpec v1.PodSpec
@@ -184,6 +185,8 @@ func getContainer(containers []corev1.Container, name string) *corev1.Container 
 }
 
 func testPodTemplateSpec(t *testing.T, template string) corev1.PodTemplateSpec {
+	t.Helper()
+
 	trait, environment, _ := createPodTest(template)
 
 	_, err := trait.Configure(environment)

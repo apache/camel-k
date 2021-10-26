@@ -153,7 +153,7 @@ func TestApplyIngressTraitDoesSucceed(t *testing.T) {
 }
 
 func createNominalIngressTest() (*ingressTrait, *Environment) {
-	trait := newIngressTrait().(*ingressTrait)
+	trait, _ := newIngressTrait().(*ingressTrait)
 	trait.Enabled = BoolP(true)
 	trait.Auto = BoolP(false)
 	trait.Host = "hostname"

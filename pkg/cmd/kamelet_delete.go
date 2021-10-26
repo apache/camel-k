@@ -118,9 +118,8 @@ func (command *kameletDeleteCommandOptions) delete(name string) error {
 	if err != nil {
 		if k8errors.IsNotFound(err) {
 			return fmt.Errorf("no kamelet found with name \"%s\"", name)
-		} else {
-			return err
 		}
+		return err
 	}
 
 	// check that it is not a bundled nor read-only one which is supposed to belong to platform
@@ -137,9 +136,8 @@ func (command *kameletDeleteCommandOptions) delete(name string) error {
 	if err != nil {
 		if k8errors.IsNotFound(err) {
 			return fmt.Errorf("no kamelet found with name \"%s\"", name)
-		} else {
-			return fmt.Errorf("error deleting kamelet \"%s\", %s", name, err)
 		}
+		return fmt.Errorf("error deleting kamelet \"%s\": %w", name, err)
 	}
 	fmt.Printf("kamelet \"%s\" has been deleted\n", name)
 	return nil

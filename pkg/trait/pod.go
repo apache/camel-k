@@ -109,12 +109,12 @@ func (t *podTrait) applyChangesTo(podSpec *corev1.PodSpec, changes v1.PodSpec) (
 		return
 	}
 
-	sourceJson, err := json.Marshal(podSpec)
+	sourceJSON, err := json.Marshal(podSpec)
 	if err != nil {
 		return
 	}
 
-	patched, err := strategicpatch.StrategicMergePatch(sourceJson, patch, corev1.PodSpec{})
+	patched, err := strategicpatch.StrategicMergePatch(sourceJSON, patch, corev1.PodSpec{})
 	if err != nil {
 		return
 	}

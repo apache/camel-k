@@ -27,7 +27,10 @@ import (
 
 const subCmdKit = "create"
 
+// nolint: unparam
 func initializeKitCreateCmdOptions(t *testing.T) (*kitCreateCommandOptions, *cobra.Command, RootCmdOptions) {
+	t.Helper()
+
 	options, rootCmd := kamelTestPreAddCommandInit()
 	kitCreateCmdOptions := addTestKitCreateCmd(*options, rootCmd)
 	kamelTestPostAddCommandInit(t, rootCmd)
@@ -36,7 +39,7 @@ func initializeKitCreateCmdOptions(t *testing.T) (*kitCreateCommandOptions, *cob
 }
 
 func addTestKitCreateCmd(options RootCmdOptions, rootCmd *cobra.Command) *kitCreateCommandOptions {
-	//add a testing version of kit create Command
+	// add a testing version of kit create Command
 	kitCreateCmd, kitCreateOptions := newKitCreateCmd(&options)
 	kitCreateCmd.RunE = func(c *cobra.Command, args []string) error {
 		return nil

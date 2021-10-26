@@ -29,7 +29,6 @@ import (
 )
 
 func TestPlatformTraitChangeStatus(t *testing.T) {
-
 	table := []struct {
 		name         string
 		initialPhase v1.IntegrationPhase
@@ -56,7 +55,7 @@ func TestPlatformTraitChangeStatus(t *testing.T) {
 				},
 			}
 
-			trait := newPlatformTrait().(*platformTrait)
+			trait, _ := newPlatformTrait().(*platformTrait)
 			trait.CreateDefault = BoolP(false)
 
 			var err error
@@ -90,7 +89,7 @@ func TestPlatformTraitCreatesDefaultPlatform(t *testing.T) {
 		},
 	}
 
-	trait := newPlatformTrait().(*platformTrait)
+	trait, _ := newPlatformTrait().(*platformTrait)
 	trait.CreateDefault = BoolP(true)
 
 	var err error
@@ -112,7 +111,6 @@ func TestPlatformTraitCreatesDefaultPlatform(t *testing.T) {
 }
 
 func TestPlatformTraitExisting(t *testing.T) {
-
 	table := []struct {
 		name          string
 		platformPhase v1.IntegrationPlatformPhase
@@ -146,7 +144,7 @@ func TestPlatformTraitExisting(t *testing.T) {
 				},
 			}
 
-			trait := newPlatformTrait().(*platformTrait)
+			trait, _ := newPlatformTrait().(*platformTrait)
 			trait.CreateDefault = BoolP(true)
 
 			var err error

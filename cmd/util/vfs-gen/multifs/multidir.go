@@ -79,10 +79,8 @@ func (m *multiFS) bind(dirName string) error {
 	for _, nfo := range fileInfos {
 		path := "/" + nfo.Name()
 
-		for _, ex := range m.exclude {
-			if strings.HasPrefix(path, ex) {
-				continue // skip
-			}
+		if m.excluded(path) {
+			continue // skip
 		}
 
 		if nfo.IsDir() {
@@ -95,6 +93,16 @@ func (m *multiFS) bind(dirName string) error {
 	}
 
 	return nil
+}
+
+func (m *multiFS) excluded(path string) bool {
+	for _, ex := range m.exclude {
+		if strings.HasPrefix(path, ex) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (m *multiFS) Open(path string) (http.File, error) {
@@ -130,7 +138,7 @@ func (d *dirInfo) Stat() (os.FileInfo, error) { return d, nil }
 
 func (d *dirInfo) Name() string       { return d.name }
 func (d *dirInfo) Size() int64        { return 0 }
-func (d *dirInfo) Mode() os.FileMode  { return 0755 | os.ModeDir }
+func (d *dirInfo) Mode() os.FileMode  { return 0o755 | os.ModeDir }
 func (d *dirInfo) ModTime() time.Time { return time.Time{} } // Actual mod time is not computed because it's expensive and rarely needed.
 func (d *dirInfo) IsDir() bool        { return true }
 func (d *dirInfo) Sys() interface{}   { return nil }

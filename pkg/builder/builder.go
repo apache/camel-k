@@ -19,6 +19,7 @@ package builder
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path"
 	"sort"
@@ -104,7 +105,7 @@ steps:
 		select {
 
 		case <-ctx.Done():
-			if ctx.Err() == context.Canceled {
+			if errors.Is(ctx.Err(), context.Canceled) {
 				// Context canceled
 				result.Phase = v1.BuildPhaseInterrupted
 			} else {

@@ -47,6 +47,8 @@ func TestTracingTraitOnQuarkus(t *testing.T) {
 }
 
 func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, error)) *trait.Environment {
+	t.Helper()
+
 	catalog, err := catalogGen()
 	assert.Nil(t, err)
 

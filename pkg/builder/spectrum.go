@@ -126,7 +126,6 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 
 	go readSpectrumLogs(newStdR)
 	digest, err := spectrum.Build(options, contextDir+":"+path.Join(DeploymentDir))
-
 	if err != nil {
 		return status.Failed(err)
 	}
@@ -159,7 +158,7 @@ func mountSecret(ctx context.Context, c client.Client, namespace, name string) (
 	}
 
 	for file, content := range secret.Data {
-		if err := ioutil.WriteFile(filepath.Join(dir, remap(file)), content, 0600); err != nil {
+		if err := ioutil.WriteFile(filepath.Join(dir, remap(file)), content, 0o600); err != nil {
 			os.RemoveAll(dir)
 			return "", err
 		}

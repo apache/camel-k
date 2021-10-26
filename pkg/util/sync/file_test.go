@@ -45,7 +45,7 @@ func TestFile(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	expectedNumChanges := 3
 	for i := 0; i < expectedNumChanges; i++ {
-		if err := ioutil.WriteFile(fileName, []byte("data-"+strconv.Itoa(i)), 0777); err != nil {
+		if err := ioutil.WriteFile(fileName, []byte("data-"+strconv.Itoa(i)), 0o777); err != nil {
 			t.Error(err)
 		}
 		time.Sleep(350 * time.Millisecond)

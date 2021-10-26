@@ -104,7 +104,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool) {
 	// admin users, that are not granted create permission on Events by default.
 	broadcaster := record.NewBroadcaster()
 	defer broadcaster.Shutdown()
-	// nolint: gocritic
+
 	if ok, err := kubernetes.CheckPermission(context.TODO(), c, corev1.GroupName, "events", watchNamespace, "", "create"); err != nil || !ok {
 		// Do not sink Events to the server as they'll be rejected
 		broadcaster = event.NewSinkLessBroadcaster(broadcaster)

@@ -193,7 +193,7 @@ func getSinkURI(ctx context.Context, c client.Client, sink *corev1.ObjectReferen
 	t := duckv1.AddressableType{}
 	err = duck.FromUnstructured(u, &t)
 	if err != nil {
-		return "", fmt.Errorf("failed to deserialize sink %s: %v", objIdentifier, err)
+		return "", fmt.Errorf("failed to deserialize sink %s: %w", objIdentifier, err)
 	}
 
 	if t.Status.Address == nil || t.Status.Address.URL == nil {

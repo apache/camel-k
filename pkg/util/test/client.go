@@ -49,7 +49,7 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 		return nil, err
 	}
 
-	c := fake.NewFakeClientWithScheme(scheme, initObjs...)
+	c := fake.NewClientBuilder().WithScheme(scheme).WithRuntimeObjects(initObjs...).Build()
 
 	camelClientset := fakecamelclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
 		return strings.Contains(gvk.Group, "camel")

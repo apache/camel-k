@@ -79,8 +79,14 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		&handler.EnqueueRequestForObject{},
 		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldKameletBinding := e.ObjectOld.(*v1alpha1.KameletBinding)
-				newKameletBinding := e.ObjectNew.(*v1alpha1.KameletBinding)
+				oldKameletBinding, ok := e.ObjectOld.(*v1alpha1.KameletBinding)
+				if !ok {
+					return false
+				}
+				newKameletBinding, ok := e.ObjectNew.(*v1alpha1.KameletBinding)
+				if !ok {
+					return false
+				}
 				// Ignore updates to the kameletBinding status in which case metadata.Generation
 				// does not change, or except when the kameletBinding phase changes as it's used
 				// to transition from one phase to another

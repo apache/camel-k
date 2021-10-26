@@ -105,7 +105,7 @@ func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.
 	}
 
 	err = target.ParseFlags(flags)
-	if err == pflag.ErrHelp {
+	if errors.Is(err, pflag.ErrHelp) {
 		return rootCmd, args, nil
 	} else if err != nil {
 		return nil, nil, err

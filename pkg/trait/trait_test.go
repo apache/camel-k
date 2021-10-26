@@ -149,7 +149,7 @@ func TestTraitDecode(t *testing.T) {
 	})
 	env.Integration.Spec.Traits["service"] = svcTrait
 
-	ctr := newContainerTrait().(*containerTrait)
+	ctr, _ := newContainerTrait().(*containerTrait)
 	err := decodeTraitSpec(&svcTrait, ctr)
 
 	assert.Nil(t, err)
@@ -494,8 +494,10 @@ func TestOnlySomeTraitsInfluenceBuild(t *testing.T) {
 
 func TestOnlySomeTraitsArePlatform(t *testing.T) {
 	c := NewTraitTestCatalog()
-	platformTraits := []string{"builder", "camel", "jvm", "runtime", "container", "dependencies", "deployer",
-		"deployment", "environment", "error-handler", "kamelets", "openapi", "owner", "platform", "quarkus"}
+	platformTraits := []string{
+		"builder", "camel", "jvm", "runtime", "container", "dependencies", "deployer",
+		"deployment", "environment", "error-handler", "kamelets", "openapi", "owner", "platform", "quarkus",
+	}
 
 	for _, trait := range c.AllTraits() {
 		if trait.IsPlatformTrait() {
@@ -542,6 +544,8 @@ func findVVolumeMount(vols []corev1.VolumeMount, condition func(corev1.VolumeMou
 }
 
 func processTestEnv(t *testing.T, env *Environment) *kubernetes.Collection {
+	t.Helper()
+
 	catalog := NewTraitTestCatalog()
 	err := catalog.apply(env)
 	assert.Nil(t, err)
@@ -549,6 +553,8 @@ func processTestEnv(t *testing.T, env *Environment) *kubernetes.Collection {
 }
 
 func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script string) *Environment {
+	t.Helper()
+
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 

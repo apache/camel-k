@@ -263,20 +263,22 @@ func NotifyBuildError(ctx context.Context, c client.Client, recorder record.Even
 
 // nolint:lll
 func notifyIfPhaseUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, new ctrl.Object, oldPhase, newPhase string, resourceType, name, reason, info string) {
-	// Update information about phase changes
-	if oldPhase != newPhase {
-		phase := newPhase
-		if phase == "" {
-			phase = "[none]"
-		}
-		recorder.Eventf(new, corev1.EventTypeNormal, reason, "%s %q in phase %q%s", resourceType, name, phase, info)
+	if oldPhase == newPhase {
+		return
+	}
 
-		if creatorRef, creator := getCreatorObject(ctx, c, new); creatorRef != nil && creator != nil {
-			if namespace := new.GetNamespace(); namespace == creatorRef.Namespace {
-				recorder.Eventf(creator, corev1.EventTypeNormal, ReasonRelatedObjectChanged, "%s %q, created by %s %q, changed phase to %q%s", resourceType, name, creatorRef.Kind, creatorRef.Name, phase, info)
-			} else {
-				recorder.Eventf(creator, corev1.EventTypeNormal, ReasonRelatedObjectChanged, "%s \"%s/%s\", created by %s %q, changed phase to %q%s", resourceType, namespace, name, creatorRef.Kind, creatorRef.Name, phase, info)
-			}
+	// Update information about phase changes
+	phase := newPhase
+	if phase == "" {
+		phase = "[none]"
+	}
+	recorder.Eventf(new, corev1.EventTypeNormal, reason, "%s %q in phase %q%s", resourceType, name, phase, info)
+
+	if creatorRef, creator := getCreatorObject(ctx, c, new); creatorRef != nil && creator != nil {
+		if namespace := new.GetNamespace(); namespace == creatorRef.Namespace {
+			recorder.Eventf(creator, corev1.EventTypeNormal, ReasonRelatedObjectChanged, "%s %q, created by %s %q, changed phase to %q%s", resourceType, name, creatorRef.Kind, creatorRef.Name, phase, info)
+		} else {
+			recorder.Eventf(creator, corev1.EventTypeNormal, ReasonRelatedObjectChanged, "%s \"%s/%s\", created by %s %q, changed phase to %q%s", resourceType, namespace, name, creatorRef.Kind, creatorRef.Name, phase, info)
 		}
 	}
 }

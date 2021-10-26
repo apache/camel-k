@@ -28,7 +28,10 @@ import (
 
 const cmdOperator = "operator"
 
+// nolint: unparam
 func initializeOperatorCmdOptions(t *testing.T) (*operatorCmdOptions, *cobra.Command, RootCmdOptions) {
+	t.Helper()
+
 	options, rootCmd := kamelTestPreAddCommandInit()
 	operatorCmdOptions := addTestOperatorCmd(*options, rootCmd)
 	kamelTestPostAddCommandInit(t, rootCmd)
@@ -36,8 +39,9 @@ func initializeOperatorCmdOptions(t *testing.T) (*operatorCmdOptions, *cobra.Com
 	return operatorCmdOptions, rootCmd, *options
 }
 
+// nolint: unparam
 func addTestOperatorCmd(options RootCmdOptions, rootCmd *cobra.Command) *operatorCmdOptions {
-	//add a testing version of operator Command
+	// add a testing version of operator Command
 	operatorCmd, operatorOptions := newCmdOperator()
 	operatorCmd.RunE = func(c *cobra.Command, args []string) error {
 		return nil
@@ -54,7 +58,7 @@ func TestOperatorNoFlag(t *testing.T) {
 	operatorCmdOptions, rootCmd, _ := initializeOperatorCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdOperator)
 	assert.Nil(t, err)
-	//Check default expected values
+	// Check default expected values
 	assert.Equal(t, int32(8081), operatorCmdOptions.HealthPort)
 	assert.Equal(t, int32(8080), operatorCmdOptions.MonitoringPort)
 }

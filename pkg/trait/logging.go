@@ -25,8 +25,8 @@ const (
 	envVarQuarkusLogLevel                  = "QUARKUS_LOG_LEVEL"
 	envVarQuarkusLogConsoleColor           = "QUARKUS_LOG_CONSOLE_COLOR"
 	envVarQuarkusLogConsoleFormat          = "QUARKUS_LOG_CONSOLE_FORMAT"
-	envVarQuarkusLogConsoleJson            = "QUARKUS_LOG_CONSOLE_JSON"
-	envVarQuarkusLogConsoleJsonPrettyPrint = "QUARKUS_LOG_CONSOLE_JSON_PRETTY_PRINT"
+	envVarQuarkusLogConsoleJSON            = "QUARKUS_LOG_CONSOLE_JSON"
+	envVarQuarkusLogConsoleJSONPrettyPrint = "QUARKUS_LOG_CONSOLE_JSON_PRETTY_PRINT"
 	defaultLogLevel                        = "INFO"
 )
 
@@ -43,9 +43,9 @@ type loggingTrait struct {
 	// Adjust the logging level (defaults to INFO)
 	Level string `property:"level" json:"level,omitempty"`
 	// Output the logs in JSON
-	Json *bool `property:"json" json:"json,omitempty"`
+	JSON *bool `property:"json" json:"json,omitempty"`
 	// Enable "pretty printing" of the JSON logs
-	JsonPrettyPrint *bool `property:"json-pretty-print" json:"jsonPrettyPrint,omitempty"`
+	JSONPrettyPrint *bool `property:"json-pretty-print" json:"jsonPrettyPrint,omitempty"`
 }
 
 func newLoggingTraitTrait() Trait {
@@ -70,14 +70,14 @@ func (l loggingTrait) Apply(environment *Environment) error {
 		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleFormat, l.Format)
 	}
 
-	if IsTrue(l.Json) {
-		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJson, True)
-		if IsTrue(l.JsonPrettyPrint) {
-			envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJsonPrettyPrint, True)
+	if IsTrue(l.JSON) {
+		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJSON, True)
+		if IsTrue(l.JSONPrettyPrint) {
+			envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJSONPrettyPrint, True)
 		}
 	} else {
 		// If the trait is false OR unset, we default to false.
-		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJson, False)
+		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJSON, False)
 
 		if IsNilOrTrue(l.Color) {
 			envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleColor, True)
