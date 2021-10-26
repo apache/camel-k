@@ -4,6 +4,10 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v1.6.1...HEAD)
 
+**Closed issues:**
+
+- Use environment independent `operator-sdk` CLI version [\#2167](https://github.com/apache/camel-k/issues/2167)
+
 **Merged pull requests:**
 
 - fix refs to camel-quarkus docs to point to latest released version [\#2708](https://github.com/apache/camel-k/pull/2708) ([djencks](https://github.com/djencks))
