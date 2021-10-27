@@ -133,6 +133,16 @@ func StringSliceExists(slice []string, item string) bool {
 	return false
 }
 
+func StringContainsPrefix(slice []string, prefix string) bool {
+	for i := 0; i < len(slice); i++ {
+		if strings.HasPrefix(slice[i], prefix) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func StringSliceContainsAnyOf(slice []string, items ...string) bool {
 	for i := 0; i < len(slice); i++ {
 		for j := 0; j < len(items); j++ {
