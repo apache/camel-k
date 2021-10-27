@@ -14,13 +14,13 @@ image:https://img.shields.io/badge/zulip-join_chat-brightgreen.svg["Chat on Zuli
 
 Apache Camel K is a lightweight integration framework built from **Apache Camel** that runs natively on Kubernetes and is specifically designed for serverless and microservice architectures. Users of `Camel K` can instantly run integration code written in Camel DSL on their preferred **Cloud** provider.
 
-https://camel.apache.org/camel-k/latest/[How does it work?]
+https://camel.apache.org/camel-k/next/[How does it work?]
 
 == :gear: Installation
 
 Camel K allows you to run integrations directly on a `Kubernetes` or `OpenShift` cluster. To use it, you need to be connected to a cloud environment or to a local cluster created for development purposes.
 
-https://camel.apache.org/camel-k/latest/installation/installation.html[Installation procedure.]
+https://camel.apache.org/camel-k/next/installation/installation.html[Installation procedure.]
 
 == :arrow_forward: Running an Integration
 
@@ -39,37 +39,37 @@ kamel run hello.groovy
 
 You can even run your integrations in a `dev` mode. Change the code and see the **changes automatically applied (instantly)** to the remote integration pod! We have provided link:/examples[more examples] that you can use to inspire your next `Integration` development.
 
-https://camel.apache.org/camel-k/latest/running/running.html[See more details.]
+https://camel.apache.org/camel-k/next/running/running.html[See more details.]
 
 == :camel: All the power from Apache Camel components
 
 You can use any of the Apache Camel components available. The related dependencies will be resolved automatically.
 
-Discover more about https://camel.apache.org/camel-k/latest/configuration/dependencies.html[dependencies and components].
+Discover more about https://camel.apache.org/camel-k/next/configuration/dependencies.html[dependencies and components].
 
 == :coffee: Not Just Java
 
 Camel K supports multiple languages for writing integrations.
 
-See all the https://camel.apache.org/camel-k/latest/languages/languages.html[languages available].
+See all the https://camel.apache.org/camel-k/next/languages/languages.html[languages available].
 
 == :checkered_flag: Traits
 
 The details of how the integration is mapped into Kubernetes resources can be *customized using traits*.
 
-More information is provided in the official documentation https://camel.apache.org/camel-k/latest/traits/traits.html[traits section].
+More information is provided in the official documentation https://camel.apache.org/camel-k/next/traits/traits.html[traits section].
 
 == :cloud: Engineered thinking on Cloud Native
 
 Since the inception of the project, our goal was to bring `Apache Camel` to the cloud.
 
-See the https://camel.apache.org/camel-k/latest/architecture/architecture.html[software architecture defails].
+See the https://camel.apache.org/camel-k/next/architecture/architecture.html[software architecture defails].
 
 == :heart: Contributing
 
 We love contributions and we want to make Camel K great!
 
-Contributing is easy, just take a look at our https://camel.apache.org/camel-k/latest/contributing/developers.html[developer's guide].
+Contributing is easy, just take a look at our https://camel.apache.org/camel-k/next/contributing/developers.html[developer's guide].
 
 == :tickets: Licensing
 
