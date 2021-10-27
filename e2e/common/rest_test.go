@@ -23,10 +23,11 @@ limitations under the License.
 package common
 
 import (
-	"bytes"
 	"fmt"
+	"io"
 	"net/http"
 	"testing"
+	"time"
 
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
@@ -57,7 +58,7 @@ func TestRunRest(t *testing.T) {
 			service := Service(ns, "rest-consumer")
 			Eventually(service, TestTimeoutShort).ShouldNot(BeNil())
 			Expect(Kamel("run", "-n", ns, "files/rest-producer.yaml", "-p", "serviceName=rest-consumer", "-p", "name="+name).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "rest-producer"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "rest-producer"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, "rest-consumer"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
 			Eventually(IntegrationLogs(ns, "rest-producer"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("%s Doe", name)))
 		})
@@ -67,10 +68,10 @@ func TestRunRest(t *testing.T) {
 				name := "Peter"
 				route := Route(ns, "rest-consumer")
 				Eventually(route, TestTimeoutShort).ShouldNot(BeNil())
-				response := httpRequest(t, fmt.Sprintf("http://%s/customers/%s", route().Spec.Host, name))
-				assert.Equal(t, fmt.Sprintf("%s Doe", name), response)
+				Eventually(RouteStatus(ns, "rest-consumer"), TestTimeoutMedium).Should(Equal("True"))
+				url := fmt.Sprintf("http://%s/customers/%s", route().Spec.Host, name)
+				Eventually(httpRequest(url), TestTimeoutMedium).Should(Equal(fmt.Sprintf("%s Doe", name)))
 				Eventually(IntegrationLogs(ns, "rest-consumer"), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
-
 			})
 		}
 
@@ -79,20 +80,20 @@ func TestRunRest(t *testing.T) {
 	})
 }
 
-func httpRequest(t *testing.T, url string) string {
-	response, err := http.Get(url)
-	defer func() {
-		if response != nil {
-			_ = response.Body.Close()
+func httpRequest(url string) func() (string, error) {
+	return func() (string, error) {
+		client := &http.Client{Timeout: 3 * time.Second}
+		response, err := client.Get(url)
+		if err != nil {
+			return "", err
 		}
-	}()
+		defer response.Body.Close()
 
-	assert.Nil(t, err)
+		body, err := io.ReadAll(response.Body)
+		if err != nil {
+			return "", err
+		}
 
-	buf := new(bytes.Buffer)
-
-	_, err = buf.ReadFrom(response.Body)
-	assert.Nil(t, err)
-
-	return buf.String()
+		return string(body), nil
+	}
 }

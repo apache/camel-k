@@ -101,9 +101,7 @@ func TestRunRoutes(t *testing.T) {
 			// otherwise the route is unavailable and the http request will fail
 			time.Sleep(waitBeforeHttpRequest)
 			url := fmt.Sprintf("http://%s/hello?name=Simple", route().Spec.Host)
-			response, err := httpRequest(t, url, false)
-			assert.Nil(t, err)
-			assert.Equal(t, "Hello Simple", response)
+			Eventually(httpRequest(url, false), TestTimeoutShort).Should(Equal("Hello Simple"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
@@ -119,9 +117,7 @@ func TestRunRoutes(t *testing.T) {
 			// otherwise the route is unavailable and the http request will fail
 			time.Sleep(waitBeforeHttpRequest)
 			url := fmt.Sprintf("https://%s/hello?name=TLS_Edge", route().Spec.Host)
-			response, err := httpRequest(t, url, true)
-			assert.Nil(t, err)
-			assert.Equal(t, "Hello TLS_Edge", response)
+			Eventually(httpRequest(url, true), TestTimeoutShort).Should(Equal("Hello TLS_Edge"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
@@ -142,9 +138,7 @@ func TestRunRoutes(t *testing.T) {
 			time.Sleep(waitBeforeHttpRequest)
 			code := "TLS_EdgeCustomCertificate"
 			url := fmt.Sprintf("https://%s/hello?name=%s", route().Spec.Host, code)
-			response, err := httpRequest(t, url, true)
-			assert.Nil(t, err)
-			assert.Equal(t, "Hello "+code, response)
+			Eventually(httpRequest(url, true), TestTimeoutShort).Should(Equal("Hello " + code))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
@@ -169,9 +163,7 @@ func TestRunRoutes(t *testing.T) {
 			time.Sleep(waitBeforeHttpRequest)
 			code := "TLS_Passthrough"
 			url := fmt.Sprintf("https://%s/hello?name=%s", route().Spec.Host, code)
-			response, err := httpRequest(t, url, true)
-			assert.Nil(t, err)
-			assert.Equal(t, "Hello "+code, response)
+			Eventually(httpRequest(url, true), TestTimeoutShort).Should(Equal("Hello " + code))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
@@ -201,16 +193,35 @@ func TestRunRoutes(t *testing.T) {
 			time.Sleep(waitBeforeHttpRequest)
 			code := "TLS_Reencrypt"
 			url := fmt.Sprintf("https://%s/hello?name=%s", route().Spec.Host, code)
-			response, err := httpRequest(t, url, true)
-			assert.Nil(t, err)
-			assert.Equal(t, "Hello "+code, response)
+			Eventually(httpRequest(url, true), TestTimeoutShort).Should(Equal("Hello " + code))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 		Expect(TestClient().Delete(TestContext, &secret)).To(Succeed())
 	})
 }
 
-func httpRequest(t *testing.T, url string, tlsEnabled bool) (string, error) {
+func httpRequest(url string, tlsEnabled bool) func() (string, error) {
+	return func() (string, error) {
+		client, err := httpClient(tlsEnabled, 3*time.Second)
+		if err != nil {
+			return "", err
+		}
+		response, err := client.Get(url)
+		if err != nil {
+			return "", err
+		}
+		defer response.Body.Close()
+
+		buf := new(bytes.Buffer)
+		_, err = buf.ReadFrom(response.Body)
+		if err != nil {
+			return "", err
+		}
+		return buf.String(), nil
+	}
+}
+
+func httpClient(tlsEnabled bool, timeout time.Duration) (*http.Client, error) {
 	var client http.Client
 	if tlsEnabled {
 		var transCfg http.Transport
@@ -233,25 +244,8 @@ func httpRequest(t *testing.T, url string, tlsEnabled bool) (string, error) {
 	} else {
 		client = http.Client{}
 	}
-	response, err := client.Get(url)
-	defer func() {
-		if response != nil {
-			_ = response.Body.Close()
-		}
-	}()
-	if err != nil {
-		fmt.Printf("Error making HTTP request. %s\n", err)
-		return "", err
-	}
-	assert.Nil(t, err)
-	buf := new(bytes.Buffer)
-	_, err = buf.ReadFrom(response.Body)
-	if err != nil {
-		fmt.Printf("Error reading the HTTP response. %s\n", err)
-		return "", err
-	}
-	assert.Nil(t, err)
-	return buf.String(), nil
+	client.Timeout = timeout
+	return &client, nil
 }
 
 func createSecret(ns string) (corev1.Secret, error) {

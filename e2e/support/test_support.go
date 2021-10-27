@@ -532,6 +532,16 @@ func Route(ns string, name string) func() *routev1.Route {
 	}
 }
 
+func RouteStatus(ns string, name string) func() string {
+	return func() string {
+		route := Route(ns, name)()
+		if route == nil || len(route.Status.Ingress) == 0 {
+			return ""
+		}
+		return string(route.Status.Ingress[0].Conditions[0].Status)
+	}
+}
+
 func IntegrationCronJob(ns string, name string) func() *v1beta1.CronJob {
 	return func() *v1beta1.CronJob {
 		lst := v1beta1.CronJobList{
