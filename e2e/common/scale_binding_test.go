@@ -112,7 +112,7 @@ func TestKameletBindingScale(t *testing.T) {
 
 			// Setter
 			bindingScale.Spec.Replicas = 1
-			bindingScale, err = camel.CamelV1alpha1().KameletBindings(ns).UpdateScale(TestContext, name, bindingScale, metav1.UpdateOptions{})
+			_, err = camel.CamelV1alpha1().KameletBindings(ns).UpdateScale(TestContext, name, bindingScale, metav1.UpdateOptions{})
 			Expect(err).To(BeNil())
 
 			// Check the readiness condition is still truthy as down-scaling in kamelet binding
