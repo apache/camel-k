@@ -27,6 +27,7 @@ import (
 
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gstruct"
+	"github.com/stretchr/testify/assert"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,9 +41,17 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
+	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 func TestKameletBindingScale(t *testing.T) {
+	ocp, err := openshift.IsOpenShift(TestClient())
+	assert.Nil(t, err)
+	if ocp {
+		t.Skip("TODO: Temporarily disabled as this test is flaky on OpenShift 3")
+		return
+	}
+
 	WithNewTestNamespace(t, func(ns string) {
 		name := "binding"
 		Expect(Kamel("install", "-n", ns, "-w").Execute()).To(Succeed())
