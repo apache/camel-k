@@ -6,12 +6,17 @@
 
 **Closed issues:**
 
+- Release 1.6.1 [\#2713](https://github.com/apache/camel-k/issues/2713)
 - build: update to latest golangci-lint [\#2333](https://github.com/apache/camel-k/issues/2333)
 - Use environment independent `operator-sdk` CLI version [\#2167](https://github.com/apache/camel-k/issues/2167)
 
 **Merged pull requests:**
 
+- update site links to point to 'next' [\#2722](https://github.com/apache/camel-k/pull/2722) ([jbpratt](https://github.com/jbpratt))
+- chore: Set indent size for Go files in .editorconfig [\#2721](https://github.com/apache/camel-k/pull/2721) ([astefanutti](https://github.com/astefanutti))
+- Some more e2e stabilisation & improvements [\#2720](https://github.com/apache/camel-k/pull/2720) ([tadayosi](https://github.com/tadayosi))
 - camel k main latest to next [\#2716](https://github.com/apache/camel-k/pull/2716) ([djencks](https://github.com/djencks))
+- \[TEST\] Add cross-channel upgrade test feature [\#2715](https://github.com/apache/camel-k/pull/2715) ([bouskaJ](https://github.com/bouskaJ))
 - chore\(ci\): update to golangci-lint 1.42.x and use golangci/golangci-lint-action [\#2714](https://github.com/apache/camel-k/pull/2714) ([tadayosi](https://github.com/tadayosi))
 - fix refs to camel-quarkus docs to point to latest released version [\#2708](https://github.com/apache/camel-k/pull/2708) ([djencks](https://github.com/djencks))
 - fix\(ci\): proper action/staleV3 configuration [\#2707](https://github.com/apache/camel-k/pull/2707) ([squakez](https://github.com/squakez))
