@@ -34,8 +34,6 @@ spec:
       camel.version: 3.11.2
       quarkus.version: 2.3.0.Final
     dependencies:
-    - groupId: io.quarkus
-      artifactId: quarkus-logging-json
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime
     capabilities:
