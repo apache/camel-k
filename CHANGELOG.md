@@ -12,6 +12,7 @@
 
 **Merged pull requests:**
 
+- chore\(e2e\): temporarily disable TestKameletBindingScale test for OpenShift 3 [\#2723](https://github.com/apache/camel-k/pull/2723) ([tadayosi](https://github.com/tadayosi))
 - update site links to point to 'next' [\#2722](https://github.com/apache/camel-k/pull/2722) ([jbpratt](https://github.com/jbpratt))
 - chore: Set indent size for Go files in .editorconfig [\#2721](https://github.com/apache/camel-k/pull/2721) ([astefanutti](https://github.com/astefanutti))
 - Some more e2e stabilisation & improvements [\#2720](https://github.com/apache/camel-k/pull/2720) ([tadayosi](https://github.com/tadayosi))
