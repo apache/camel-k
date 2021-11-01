@@ -41,10 +41,16 @@ import (
 	. "github.com/apache/camel-k/e2e/support"
 	. "github.com/apache/camel-k/e2e/support/util"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 func TestMetrics(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
+		if ocp, err := openshift.IsOpenShift(TestClient()); err == nil && ocp {
+			t.Skip("TODO: Unstable on Microshift. Let's skip it until we can make it more stable")
+			return
+		}
+
 		name := "java"
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 		Expect(Kamel("run", "-n", ns, "files/Java.java",

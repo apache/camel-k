@@ -63,7 +63,7 @@ func TestMasterTrait(t *testing.T) {
 				"-t", "owner.target-labels=leader-group").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "second"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationLogs(ns, "second"), TestTimeoutShort).Should(ContainSubstring("started in"))
-			Eventually(IntegrationLogs(ns, "second"), 30*time.Second).ShouldNot(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationLogs(ns, "second"), 60*time.Second).ShouldNot(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 	})

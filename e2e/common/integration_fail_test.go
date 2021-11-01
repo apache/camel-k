@@ -50,8 +50,7 @@ func TestBadRouteIntegration(t *testing.T) {
 			// Check the scale cascades into the Deployment scale
 			Eventually(IntegrationPods(ns, name), TestTimeoutShort).Should(HaveLen(2))
 			// Check it also cascades into the Integration scale subresource Status field
-			Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
-				Should(gstruct.PointTo(BeNumerically("==", 2)))
+			Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).Should(gstruct.PointTo(BeNumerically("==", 2)))
 			// Check the Integration stays in error phase
 			Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
 		})

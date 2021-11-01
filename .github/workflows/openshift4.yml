@@ -18,6 +18,9 @@
 name: openshift4
 
 on:
+  workflow_dispatch:
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -80,18 +83,22 @@ jobs:
       uses: actions/setup-go@v1
       with:
         go-version: 1.16.x
-    - name: Get OpenShift Client (oc)
-      run: |
-        export OPENSHIFT_VERSION=4.7.0-0.okd-2021-08-22-163618
-        DOWNLOAD_URL=https://github.com/openshift/okd/releases/download/$OPENSHIFT_VERSION/openshift-client-linux-$OPENSHIFT_VERSION.tar.gz
-        wget -O client.tar.gz ${DOWNLOAD_URL}
-        tar -xf client.tar.gz oc
-        sudo mv oc /usr/local/bin/oc
-        sudo chmod 755 /usr/local/bin/oc
     - name: Microshift OpenShift Cluster
       uses: container-tools/microshift-action@v0.1
       with:
         version: 4.7.0-0.microshift-2021-08-31-224727
+    - name: Microshift additional setup
+      run: |
+        # DNS used for route trait tests
+        oc apply -f https://raw.githubusercontent.com/openshift/api/release-4.7/config/v1/0000_10_config-operator_01_dns.crd.yaml
+        cat <<EOF | oc apply -f -
+        apiVersion: config.openshift.io/v1
+        kind: DNS
+        metadata:
+          name: cluster
+        spec:
+          baseDomain: cluster.local
+        EOF
     - name: Build Operator
       run: |
         echo "Build project"
@@ -117,21 +124,24 @@ jobs:
 
         # push image to internal registry
         LOCAL_IMAGE=image-registry.openshift-image-registry.svc:5000/apache/camel-k
-        make IMAGE_NAME=${LOCAL_IMAGE} images images-push
-    - name: Set up DNS for OpenShift routes
+        make IMAGE_NAME=${LOCAL_IMAGE} images
+        # Check if registry is up before pushing image
+        curl -sS -4 --retry 60 --retry-connrefused --connect-timeout 3 --max-time 300 image-registry.openshift-image-registry.svc.cluster.local:5000/v2/ && echo
+        make IMAGE_NAME=${LOCAL_IMAGE} images-push
+    - name: Set up DNS for OpenShift Route
       run: |
         OPENSHIFT_ROUTER_IP=`oc -n openshift-ingress get svc router-internal-default -ojsonpath='{ .spec.clusterIP }'`
+        echo "OpenShift router cluster IP = $OPENSHIFT_ROUTER_IP"
 
         # systemd-resolved
         sudo systemctl stop systemd-resolved
-        sudo rm -f /etc/resolv.conf
-        sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
-        sudo sh -c 'echo "DNS=127.0.0.1 8.8.8.8 8.8.4.4" >> /etc/systemd/resolved.conf'
+        sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+        sudo sh -c 'echo "DNS=127.0.0.1 8.8.8.8" >> /etc/systemd/resolved.conf'
 
         # dnsmasq
         sudo apt-get install -y dnsmasq
         sudo systemctl stop dnsmasq
-        sudo sh -c "echo 'address=/.cluster.local/$OPENSHIFT_ROUTER_IP' >> /etc/dnsmasq.conf"
+        sudo sh -c "echo 'address=/cluster.local/$OPENSHIFT_ROUTER_IP' >> /etc/dnsmasq.conf"
         sudo sed -i 's/^#bind-interfaces/bind-interfaces/' /etc/dnsmasq.conf
 
         sudo systemctl start systemd-resolved
@@ -156,7 +166,17 @@ jobs:
         export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
         export KAMEL_INSTALL_REGISTRY=image-registry.openshift-image-registry.svc:5000
         export KAMEL_INSTALL_REGISTRY_INSECURE=true
-        export KAMEL_INSTALL_OPERATOR_IMAGE=$KAMEL_INSTALL_REGISTRY/apache/camel-k:$(make get-version)
+        export CUSTOM_IMAGE=${KAMEL_INSTALL_REGISTRY}/apache/camel-k
+        export CUSTOM_VERSION=$(make get-version)
+        export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
+
+        # Explicitly disable OLM
+        export KAMEL_INSTALL_OLM=false
+        export KAMEL_UNINSTALL_OLM=false
+
+        # Configure test options
+        export CAMEL_K_TEST_IMAGE_NAME=${CUSTOM_IMAGE}
+        export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
 
         # Aggregate pod eviction permission to the default admin role
         cat <<EOF | oc apply -f -
@@ -191,7 +211,7 @@ jobs:
           name: camel-k-test:nodes
         subjects:
         - kind: User
-          name: developer
+          name: user
         roleRef:
           kind: ClusterRole
           name: camel-k-test:nodes

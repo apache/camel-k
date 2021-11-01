@@ -68,7 +68,7 @@ func TestErrorHandler(t *testing.T) {
 
 			Expect(BindKameletToWithErrorHandler(ns, "throw-error-binding", from, to, map[string]string{"message": "throw Error"}, map[string]string{"loggerName": "integrationLogger"}, errorHandler)()).To(Succeed())
 
-			Eventually(IntegrationPodPhase(ns, "throw-error-binding"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "throw-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).Should(ContainSubstring("kameletErrorHandler"))
 			Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("integrationLogger"))
 

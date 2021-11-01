@@ -26,6 +26,7 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
 )
@@ -41,6 +42,7 @@ func TestTektonLikeBehavior(t *testing.T) {
 		Eventually(OperatorPod(ns)).Should(BeNil())
 		Expect(CreateKamelPod(ns, "tekton-task", "install", "--skip-cluster-setup", "--force")).To(Succeed())
 
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+		Eventually(OperatorPod(ns), TestTimeoutShort).ShouldNot(BeNil())
+		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 	})
 }
