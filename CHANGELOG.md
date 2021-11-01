@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - Release 1.6.1 [\#2713](https://github.com/apache/camel-k/issues/2713)
+- Building with buildah not working [\#2685](https://github.com/apache/camel-k/issues/2685)
 - build: update to latest golangci-lint [\#2333](https://github.com/apache/camel-k/issues/2333)
 - Use environment independent `operator-sdk` CLI version [\#2167](https://github.com/apache/camel-k/issues/2167)
 
