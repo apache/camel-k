@@ -185,17 +185,22 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 
 	dslSteps = append(dslSteps, s)
 
-	flowFrom := map[string]interface{}{
-		"from": map[string]interface{}{
-			"uri":   from.URI,
+	fromWrapper := map[string]interface{}{
+		"uri": from.URI,
+	}
+
+	flowRoute := map[string]interface{}{
+		"route": map[string]interface{}{
+			"id":    "binding",
+			"from":  fromWrapper,
 			"steps": dslSteps,
 		},
 	}
-	encodedFrom, err := json.Marshal(flowFrom)
+	encodedRoute, err := json.Marshal(flowRoute)
 	if err != nil {
 		return nil, err
 	}
-	it.Spec.Flows = append(it.Spec.Flows, v1.Flow{RawMessage: encodedFrom})
+	it.Spec.Flows = append(it.Spec.Flows, v1.Flow{RawMessage: encodedRoute})
 
 	return &it, nil
 }
