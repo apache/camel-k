@@ -297,6 +297,10 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 		fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the operator will not be able to get CustomResourceDefinitions resources and the service-binding trait will fail if used. Try installing the operator as cluster-admin.")
 	}
 
+	if err = installNamespacedRoleBinding(ctx, c, collection, cfg.Namespace, "/rbac/operator-role-binding-local-registry.yaml"); err != nil {
+		fmt.Println(cmd.ErrOrStderr(), "Warning: the operator won't be able to detect a local image registry via KEP-1755")
+	}
+
 	if cfg.Monitoring.Enabled {
 		if err := installMonitoringResources(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 			switch {
@@ -311,6 +315,51 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 	}
 
 	return nil
+}
+
+func installNamespacedRoleBinding(ctx context.Context, c client.Client, collection *kubernetes.Collection, namespace string, path string) error {
+	yaml, err := resources.ResourceAsString(path)
+	if err != nil {
+		return err
+	}
+	if yaml == "" {
+		return errors.Errorf("resource file %v not found", path)
+	}
+	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), yaml)
+	if err != nil {
+		return err
+	}
+	// nolint: forcetypeassert
+	target := obj.(*rbacv1.RoleBinding)
+
+	bound := false
+	for i, subject := range target.Subjects {
+		if subject.Name == "camel-k-operator" {
+			if subject.Namespace == namespace {
+				bound = true
+				break
+			} else if subject.Namespace == "" || subject.Namespace == "placeholder" {
+				target.Subjects[i].Namespace = namespace
+				bound = true
+				break
+			}
+		}
+	}
+
+	if !bound {
+		target.Subjects = append(target.Subjects, rbacv1.Subject{
+			Kind:      "ServiceAccount",
+			Namespace: namespace,
+			Name:      "camel-k-operator",
+		})
+	}
+
+	if collection != nil {
+		collection.Add(target)
+		return nil
+	}
+
+	return c.Create(ctx, target)
 }
 
 func installClusterRoleBinding(ctx context.Context, c client.Client, collection *kubernetes.Collection, namespace string, name string, path string) error {

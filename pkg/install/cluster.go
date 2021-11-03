@@ -177,6 +177,12 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 		}
 	}
 
+	ok, err = isClusterRoleInstalled(ctx, c, "camel-k-operator-local-registry")
+	if err == nil && !ok {
+		// nolint: errcheck
+		installResource(ctx, c, collection, "/rbac/operator-cluster-role-local-registry.yaml")
+	}
+
 	isOpenShift, err := isOpenShift(c, clusterType)
 	if err != nil {
 		return err

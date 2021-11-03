@@ -35,9 +35,8 @@ func GetRegistryAddress(ctx context.Context, c client.Client) (*string, error) {
 	if err != nil {
 		if k8errors.IsNotFound(err) {
 			return nil, nil
-		} else {
-			return nil, err
 		}
+		return nil, err
 	}
 	if data, ok := config.Data["localRegistryHosting.v1"]; ok {
 		result := LocalRegistryHostingV1{}
