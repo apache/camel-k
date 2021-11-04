@@ -24,6 +24,7 @@ import (
 	"k8s.io/client-go/dynamic"
 
 	sb "github.com/redhat-developer/service-binding-operator/apis/binding/v1alpha1"
+	"github.com/redhat-developer/service-binding-operator/pkg/client/kubernetes"
 	"github.com/redhat-developer/service-binding-operator/pkg/reconcile/pipeline"
 	"github.com/redhat-developer/service-binding-operator/pkg/reconcile/pipeline/context"
 	"github.com/redhat-developer/service-binding-operator/pkg/reconcile/pipeline/handler/collect"
@@ -92,7 +93,7 @@ func (t *serviceBindingTrait) getContext(e *Environment) (pipeline.Context, erro
 	if err != nil {
 		return nil, err
 	}
-	ctxProvider := context.Provider(dyn, context.ResourceLookup(e.Client.RESTMapper()))
+	ctxProvider := context.Provider(dyn, e.Client.AuthorizationV1().SubjectAccessReviews(), kubernetes.ResourceLookup(e.Client.RESTMapper()))
 	ctx, err := ctxProvider.Get(serviceBinding)
 	if err != nil {
 		return nil, err
