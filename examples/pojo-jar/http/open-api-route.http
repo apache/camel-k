@@ -1,0 +1,40 @@
+###
+# All users
+#
+GET {{host}}/users
+Content-Type: application/json
+
+###
+# One user
+#
+GET {{host}}/users/123
+Content-Type: application/json
+
+###
+# Get department
+#
+# => 404 does not respect Accept and doesn't care about param type
+#
+GET {{host}}/users/123/departments/david
+Content-Type: application/json
+Accept: application/json
+
+###
+# Update user
+#
+# => if body not sent 400
+# => Validations e.g. NotBlank, NotNull
+#
+PUT {{host}}/users
+Content-Type: application/json
+
+{
+  "id": 123,
+  "name": "Joe Ding"
+}
+
+###
+# OpenApi => does not work
+#
+GET {{host}}/api-doc/openapi.yaml
+Content-Type: application/json
