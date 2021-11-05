@@ -11,6 +11,7 @@ require (
 	github.com/container-tools/spectrum v0.3.4
 	github.com/containerd/continuity v0.0.0-20210208174643-50096c924a4e // indirect
 	github.com/evanphx/json-patch v4.11.0+incompatible
+	github.com/fatih/camelcase v1.0.0 // indirect
 	github.com/fatih/structs v1.1.0
 	github.com/gertd/go-pluralize v0.1.1
 	github.com/go-logr/logr v0.4.0

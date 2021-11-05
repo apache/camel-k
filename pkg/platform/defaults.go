@@ -20,6 +20,7 @@ package platform
 import (
 	"context"
 	"fmt"
+	"runtime"
 	"strings"
 	"time"
 
@@ -237,6 +238,7 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1.Integration
 			URI: repository.DefaultRemoteRepository,
 		})
 	}
+	setStatusAdditionalInfo(p)
 
 	if verbose {
 		log.Log.Infof("RuntimeVersion set to %s", p.Status.Build.RuntimeVersion)
@@ -246,6 +248,18 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1.Integration
 	}
 
 	return nil
+}
+
+func setStatusAdditionalInfo(platform *v1.IntegrationPlatform) {
+	platform.Status.Info = make(map[string]string)
+	if platform.Spec.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyBuildah {
+		platform.Status.Info["buildahVersion"] = defaults.BuildahVersion
+	} else if platform.Spec.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko {
+		platform.Status.Info["kanikoVersion"] = defaults.KanikoVersion
+	}
+	platform.Status.Info["goVersion"] = runtime.Version()
+	platform.Status.Info["goOS"] = runtime.GOOS
+	platform.Status.Info["gitCommit"] = defaults.GitCommit
 }
 
 func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Client, p *v1.IntegrationPlatform, settings maven.Settings) error {

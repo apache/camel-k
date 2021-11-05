@@ -47,6 +47,7 @@ type IntegrationPlatformStatus struct {
 	Phase      IntegrationPlatformPhase       `json:"phase,omitempty"`
 	Conditions []IntegrationPlatformCondition `json:"conditions,omitempty"`
 	Version    string                         `json:"version,omitempty"`
+	Info       map[string]string              `json:"info,omitempty"`
 }
 
 // +genclient

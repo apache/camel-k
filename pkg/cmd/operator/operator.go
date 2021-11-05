@@ -62,8 +62,6 @@ import (
 
 var log = logf.Log.WithName("cmd")
 
-var GitCommit string
-
 func printVersion() {
 	log.Info(fmt.Sprintf("Go Version: %s", runtime.Version()))
 	log.Info(fmt.Sprintf("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH))
@@ -71,7 +69,7 @@ func printVersion() {
 	log.Info(fmt.Sprintf("Kaniko Version: %v", defaults.KanikoVersion))
 	log.Info(fmt.Sprintf("Camel K Operator Version: %v", defaults.Version))
 	log.Info(fmt.Sprintf("Camel K Default Runtime Version: %v", defaults.DefaultRuntimeVersion))
-	log.Info(fmt.Sprintf("Camel K Git Commit: %v", GitCommit))
+	log.Info(fmt.Sprintf("Camel K Git Commit: %v", defaults.GitCommit))
 }
 
 // Run starts the Camel K operator

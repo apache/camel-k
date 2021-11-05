@@ -542,6 +542,10 @@ spec:
                   - value
                   type: object
                 type: array
+              info:
+                additionalProperties:
+                  type: string
+                type: object
               kamelet:
                 description: IntegrationPlatformKameletSpec --
                 properties:
