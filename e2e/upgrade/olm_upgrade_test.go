@@ -101,7 +101,7 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 
 		prevCSVVersion = clusterServiceVersion(noAdditionalConditions, ns)().Spec.Version
 		prevIPVersionPrefix = fmt.Sprintf("%d.%d", prevCSVVersion.Version.Major, prevCSVVersion.Version.Minor)
-		t.Logf("Upgrading from Previous CSV Version: %s", prevCSVVersion.Version.String())
+		t.Logf("Using Previous CSV Version: %s", prevCSVVersion.Version.String())
 
 		// Check the operator pod is running
 		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
