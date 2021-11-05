@@ -65,6 +65,7 @@ func TestErrorHandler(t *testing.T) {
 				}}}
 
 		t.Run("throw error test", func(t *testing.T) {
+			RegisterTestingT(t)
 
 			Expect(BindKameletToWithErrorHandler(ns, "throw-error-binding", from, to, map[string]string{"message": "throw Error"}, map[string]string{"loggerName": "integrationLogger"}, errorHandler)()).To(Succeed())
 
@@ -75,6 +76,7 @@ func TestErrorHandler(t *testing.T) {
 		})
 
 		t.Run("don't throw error test", func(t *testing.T) {
+			RegisterTestingT(t)
 
 			Expect(BindKameletToWithErrorHandler(ns, "no-error-binding", from, to, map[string]string{"message": "true"}, map[string]string{"loggerName": "integrationLogger"}, errorHandler)()).To(Succeed())
 

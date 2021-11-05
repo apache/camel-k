@@ -39,6 +39,7 @@ func TestBadRouteIntegration(t *testing.T) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		t.Run("run bad java route", func(t *testing.T) {
+			RegisterTestingT(t)
 			name := "bad-route"
 			Expect(Kamel("run", "-n", ns, "files/BadRoute.java", "--name", name).Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
