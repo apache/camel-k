@@ -46,3 +46,6 @@ const (
 	// installDefaultKamelets --
 	installDefaultKamelets = true
 )
+
+//GitCommit must be provided during application build
+var GitCommit string

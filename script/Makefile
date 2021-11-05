@@ -82,7 +82,12 @@ GOBIN=$(shell go env GOBIN)
 endif
 
 # Build
-GOLDFLAGS += -X github.com/apache/camel-k/pkg/cmd/operator.GitCommit=$(GIT_COMMIT)
+ifdef GIT_COMMIT
+GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/defaults.GitCommit=$(GIT_COMMIT)
+else
+$(warning Could not retrieve a valid Git Commit)
+endif
+
 GOFLAGS = -ldflags "$(GOLDFLAGS)" -trimpath
 
 define LICENSE_HEADER
@@ -107,6 +112,7 @@ default: test
 
 # Generates the version file
 codegen:
+	$(info Regenerating $(VERSIONFILE))
 	@echo "/*" > $(VERSIONFILE)
 	@echo "$$LICENSE_HEADER" >> $(VERSIONFILE)
 	@echo "*/" >> $(VERSIONFILE)
@@ -143,6 +149,10 @@ codegen:
 	@echo "  installDefaultKamelets = $(INSTALL_DEFAULT_KAMELETS)" >> $(VERSIONFILE)
 	@echo ")" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
+	@echo "//GitCommit must be provided during application build" >> $(VERSIONFILE)
+	@echo "var GitCommit string" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
+
 	gofmt -w pkg/util/defaults/defaults.go
 
 generate: generate-deepcopy generate-crd generate-client generate-doc generate-json-schema generate-strimzi
@@ -180,7 +190,6 @@ test-integration: build
 	go test -timeout 60m -v ./e2e/common/config -tags=integration && \
 	go test -timeout 60m -v ./e2e/common/languages -tags=integration && \
 	go test -timeout 60m -v ./e2e/common/traits -tags=integration
-
 
 test-knative: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \

@@ -18,8 +18,10 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
@@ -41,12 +43,6 @@ func initializeVersionCmdOptions(t *testing.T) (*versionCmdOptions, *cobra.Comma
 func addTestVersionCmd(options RootCmdOptions, rootCmd *cobra.Command) *versionCmdOptions {
 	// add a testing version of version Command
 	versionCmd, versionOptions := newCmdVersion(&options)
-	versionCmd.RunE = func(c *cobra.Command, args []string) error {
-		return nil
-	}
-	versionCmd.PostRunE = func(c *cobra.Command, args []string) error {
-		return nil
-	}
 	versionCmd.Args = test.ArbitraryArgs
 	rootCmd.AddCommand(versionCmd)
 	return versionOptions
@@ -58,11 +54,26 @@ func TestVersionNonExistingFlag(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestVersionClient(t *testing.T) {
+	_, rootCmd, _ := initializeVersionCmdOptions(t)
+	output, err := test.ExecuteCommand(rootCmd, cmdVersion)
+	assert.Nil(t, err)
+	assert.Equal(t, fmt.Sprintf("Camel K Client %s\n", defaults.Version), output)
+}
+
 func TestVersionOperatorFlag(t *testing.T) {
 	versionCmdOptions, rootCmd, _ := initializeVersionCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdVersion, "--operator")
 	assert.Nil(t, err)
 	assert.Equal(t, true, versionCmdOptions.Operator)
+}
+
+func TestVersionClientVerbose(t *testing.T) {
+	versionCmdOptions, rootCmd, _ := initializeVersionCmdOptions(t)
+	output, err := test.ExecuteCommand(rootCmd, cmdVersion, "-v")
+	assert.Nil(t, err)
+	assert.Equal(t, true, versionCmdOptions.Verbose)
+	assert.Equal(t, fmt.Sprintf("Camel K Client %s\nGit Commit: %s\n", defaults.Version, defaults.GitCommit), output)
 }
 
 func TestCompatibleVersions(t *testing.T) {
