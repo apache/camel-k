@@ -6,14 +6,32 @@
 
 **Closed issues:**
 
+- ErrorHandler for stopping a route when an error occurs [\#2724](https://github.com/apache/camel-k/issues/2724)
 - Release 1.6.1 [\#2713](https://github.com/apache/camel-k/issues/2713)
 - Building with buildah not working [\#2685](https://github.com/apache/camel-k/issues/2685)
 - Flaky TestKameletBindingScale test? [\#2660](https://github.com/apache/camel-k/issues/2660)
+- CloudEvent header mapping is confusing [\#2501](https://github.com/apache/camel-k/issues/2501)
+- `Kamel local` chokes on traits [\#2499](https://github.com/apache/camel-k/issues/2499)
+- Revisit saga example [\#2472](https://github.com/apache/camel-k/issues/2472)
+- kamel run command creates 2 pods [\#2469](https://github.com/apache/camel-k/issues/2469)
+- Trying to use bean method call \#class:com.mongodb.client.MongoClients\#create\("mongodb://foo"\) throws ClassNotFoundException [\#2444](https://github.com/apache/camel-k/issues/2444)
+- kamelet binding: support for openapi ? [\#2409](https://github.com/apache/camel-k/issues/2409)
+- kamel uninstall should uninstall everything by default [\#2405](https://github.com/apache/camel-k/issues/2405)
+- `kamel run --maven-repository` doesn't work when we have `@mirrorOf=*` at `kamel install` [\#2391](https://github.com/apache/camel-k/issues/2391)
+- kamel subcommand for kamelet bindings? [\#2363](https://github.com/apache/camel-k/issues/2363)
+- build: install required binaries in a temporary subdirectory of the project [\#2335](https://github.com/apache/camel-k/issues/2335)
 - build: update to latest golangci-lint [\#2333](https://github.com/apache/camel-k/issues/2333)
+- "cannot find symbol" issue in camel-k releases v1.4.0 [\#2317](https://github.com/apache/camel-k/issues/2317)
+- Leverage KinD multi-nodes cluster setup for CI [\#2302](https://github.com/apache/camel-k/issues/2302)
+- Docs validation CI workflow [\#2278](https://github.com/apache/camel-k/issues/2278)
+- Kamel reset fails with KameletBinding [\#2221](https://github.com/apache/camel-k/issues/2221)
+- Kamel dump: make the command smarter [\#2189](https://github.com/apache/camel-k/issues/2189)
 - Use environment independent `operator-sdk` CLI version [\#2167](https://github.com/apache/camel-k/issues/2167)
 
 **Merged pull requests:**
 
+- chore\(sbo\): upgrade Servce Binding Operator to 1.0.0 GA [\#2729](https://github.com/apache/camel-k/pull/2729) ([johnpoth](https://github.com/johnpoth))
+- Fix \#2724: assign an ID to the binding main route [\#2727](https://github.com/apache/camel-k/pull/2727) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(e2e\): temporarily disable TestKameletBindingScale test for OpenShift 3 [\#2723](https://github.com/apache/camel-k/pull/2723) ([tadayosi](https://github.com/tadayosi))
 - update site links to point to 'next' [\#2722](https://github.com/apache/camel-k/pull/2722) ([jbpratt](https://github.com/jbpratt))
 - chore: Set indent size for Go files in .editorconfig [\#2721](https://github.com/apache/camel-k/pull/2721) ([astefanutti](https://github.com/astefanutti))
