@@ -26,7 +26,9 @@
 - Docs validation CI workflow [\#2278](https://github.com/apache/camel-k/issues/2278)
 - Kamel reset fails with KameletBinding [\#2221](https://github.com/apache/camel-k/issues/2221)
 - Kamel dump: make the command smarter [\#2189](https://github.com/apache/camel-k/issues/2189)
+- Refactoring dump function [\#2172](https://github.com/apache/camel-k/issues/2172)
 - Use environment independent `operator-sdk` CLI version [\#2167](https://github.com/apache/camel-k/issues/2167)
+- Extend config docs to reflect all possibilities coming from camel [\#2153](https://github.com/apache/camel-k/issues/2153)
 
 **Merged pull requests:**
 
