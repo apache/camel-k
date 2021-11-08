@@ -24,7 +24,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/olm"
 	"github.com/apache/camel-k/pkg/util/test"
 )
 
@@ -70,12 +69,12 @@ func TestInstallNoFlag(t *testing.T) {
 	assert.Equal(t, false, installCmdOptions.Save)
 	assert.Equal(t, false, installCmdOptions.Force)
 	assert.Equal(t, true, installCmdOptions.Olm)
-	assert.Equal(t, olm.DefaultOperatorName, installCmdOptions.olmOptions.OperatorName)
-	assert.Equal(t, olm.DefaultPackage, installCmdOptions.olmOptions.Package)
-	assert.Equal(t, olm.DefaultChannel, installCmdOptions.olmOptions.Channel)
-	assert.Equal(t, olm.DefaultSource, installCmdOptions.olmOptions.Source)
-	assert.Equal(t, olm.DefaultSourceNamespace, installCmdOptions.olmOptions.SourceNamespace)
-	assert.Equal(t, olm.DefaultGlobalNamespace, installCmdOptions.olmOptions.GlobalNamespace)
+	assert.Equal(t, "", installCmdOptions.olmOptions.OperatorName)
+	assert.Equal(t, "", installCmdOptions.olmOptions.Package)
+	assert.Equal(t, "", installCmdOptions.olmOptions.Channel)
+	assert.Equal(t, "", installCmdOptions.olmOptions.Source)
+	assert.Equal(t, "", installCmdOptions.olmOptions.SourceNamespace)
+	assert.Equal(t, "", installCmdOptions.olmOptions.GlobalNamespace)
 	assert.Equal(t, int32(8081), installCmdOptions.HealthPort)
 	assert.Equal(t, false, installCmdOptions.Monitoring)
 	assert.Equal(t, int32(8080), installCmdOptions.MonitoringPort)

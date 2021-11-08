@@ -102,14 +102,14 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 
 	// OLM
 	cmd.Flags().Bool("olm", true, "Try to install everything via OLM (Operator Lifecycle Manager) if available")
-	cmd.Flags().String("olm-operator-name", olm.DefaultOperatorName, "Name of the Camel K operator in the OLM source or marketplace")
-	cmd.Flags().String("olm-package", olm.DefaultPackage, "Name of the Camel K package in the OLM source or marketplace")
-	cmd.Flags().String("olm-channel", olm.DefaultChannel, "Name of the Camel K channel in the OLM source or marketplace")
-	cmd.Flags().String("olm-source", olm.DefaultSource, "Name of the OLM source providing the Camel K package (defaults to the standard Operator Hub source)")
-	cmd.Flags().String("olm-source-namespace", olm.DefaultSourceNamespace, "Namespace where the OLM source is available")
-	cmd.Flags().String("olm-starting-csv", olm.DefaultStartingCSV, "Allow to install a specific version from the operator source instead of latest available "+
+	cmd.Flags().String("olm-operator-name", "", "Name of the Camel K operator in the OLM source or marketplace")
+	cmd.Flags().String("olm-package", "", "Name of the Camel K package in the OLM source or marketplace")
+	cmd.Flags().String("olm-channel", "", "Name of the Camel K channel in the OLM source or marketplace")
+	cmd.Flags().String("olm-source", "", "Name of the OLM source providing the Camel K package (defaults to the standard Operator Hub source)")
+	cmd.Flags().String("olm-source-namespace", "", "Namespace where the OLM source is available")
+	cmd.Flags().String("olm-starting-csv", "", "Allow to install a specific version from the operator source instead of latest available "+
 		"from the channel")
-	cmd.Flags().String("olm-global-namespace", olm.DefaultGlobalNamespace, "A namespace containing an OperatorGroup that defines global scope for the "+
+	cmd.Flags().String("olm-global-namespace", "", "A namespace containing an OperatorGroup that defines global scope for the "+
 		"operator (used in combination with the --global flag)")
 
 	// Maven

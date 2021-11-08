@@ -34,6 +34,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 // The following properties can be overridden at build time via ldflags
@@ -73,7 +74,10 @@ type Options struct {
 
 // IsOperatorInstalled tells if a OLM CSV or a Subscription is already installed in the namespace
 func IsOperatorInstalled(ctx context.Context, client client.Client, namespace string, global bool, options Options) (bool, error) {
-	options = fillDefaults(options)
+	options, err := fillDefaults(options, client)
+	if err != nil {
+		return false, err
+	}
 	// CSV is present in current namespace for both local and global installation modes
 	if csv, err := findCSV(ctx, client, namespace, options); err != nil {
 		return false, err
@@ -141,7 +145,10 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 // Install creates a subscription for the OLM package
 func Install(ctx context.Context, client client.Client, namespace string, global bool, options Options, collection *kubernetes.Collection,
 	tolerations []string, nodeSelectors []string, resourcesRequirements []string, envVars []string) (bool, error) {
-	options = fillDefaults(options)
+	options, err := fillDefaults(options, client)
+	if err != nil {
+		return false, err
+	}
 	if installed, err := IsOperatorInstalled(ctx, client, namespace, global, options); err != nil {
 		return false, err
 	} else if installed {
@@ -169,7 +176,7 @@ func Install(ctx context.Context, client client.Client, namespace string, global
 		},
 	}
 	// Additional configuration
-	err := maybeSetTolerations(&sub, tolerations)
+	err = maybeSetTolerations(&sub, tolerations)
 	if err != nil {
 		return false, errors.Wrap(err, "could not set tolerations")
 	}
@@ -265,6 +272,10 @@ func maybeSetEnvVars(sub *operatorsv1alpha1.Subscription, envVars []string) erro
 
 // Uninstall removes CSV and subscription from the namespace
 func Uninstall(ctx context.Context, client client.Client, namespace string, global bool, options Options) error {
+	options, err := fillDefaults(options, client)
+	if err != nil {
+		return err
+	}
 	sub, err := findSubscription(ctx, client, namespace, global, options)
 	if err != nil {
 		return err
@@ -333,7 +344,7 @@ func findOperatorGroup(ctx context.Context, client client.Client, namespace stri
 	return nil, nil
 }
 
-func fillDefaults(o Options) Options {
+func fillDefaults(o Options, client client.Client) (Options, error) {
 	if o.OperatorName == "" {
 		o.OperatorName = DefaultOperatorName
 	}
@@ -343,17 +354,35 @@ func fillDefaults(o Options) Options {
 	if o.Channel == "" {
 		o.Channel = DefaultChannel
 	}
-	if o.Source == "" {
-		o.Source = DefaultSource
-	}
-	if o.SourceNamespace == "" {
-		o.SourceNamespace = DefaultSourceNamespace
-	}
 	if o.StartingCSV == "" {
 		o.StartingCSV = DefaultStartingCSV
 	}
-	if o.GlobalNamespace == "" {
-		o.GlobalNamespace = DefaultGlobalNamespace
+	isOCP, err := openshift.IsOpenShift(client)
+	if err != nil {
+		return o, err
 	}
-	return o
+	if isOCP {
+		if o.Source == "" {
+			o.Source = DefaultSource
+		}
+		if o.SourceNamespace == "" {
+			o.SourceNamespace = DefaultSourceNamespace
+		}
+		if o.GlobalNamespace == "" {
+			o.GlobalNamespace = DefaultGlobalNamespace
+		}
+	} else {
+		// Use a different set of defaults value
+		if o.Source == "" {
+			o.Source = "operatorhubio-catalog"
+		}
+		if o.SourceNamespace == "" {
+			o.SourceNamespace = "olm"
+		}
+		if o.GlobalNamespace == "" {
+			o.GlobalNamespace = "operators"
+		}
+	}
+
+	return o, nil
 }
