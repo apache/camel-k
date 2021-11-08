@@ -62,9 +62,9 @@ func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstall
 	cmd.Flags().Bool("skip-kamelets", false, "Do not uninstall the Kamelets in the current namespace")
 	cmd.Flags().Bool("global", false, "Indicates that a global installation is going to be uninstalled (affects OLM)")
 	cmd.Flags().Bool("olm", true, "Try to uninstall via OLM (Operator Lifecycle Manager) if available")
-	cmd.Flags().String("olm-operator-name", olm.DefaultOperatorName, "Name of the Camel K operator in the OLM source or marketplace")
-	cmd.Flags().String("olm-package", olm.DefaultPackage, "Name of the Camel K package in the OLM source or marketplace")
-	cmd.Flags().String("olm-global-namespace", olm.DefaultGlobalNamespace, "A namespace containing an OperatorGroup that defines "+
+	cmd.Flags().String("olm-operator-name", "", "Name of the Camel K operator in the OLM source or marketplace")
+	cmd.Flags().String("olm-package", "", "Name of the Camel K package in the OLM source or marketplace")
+	cmd.Flags().String("olm-global-namespace", "", "A namespace containing an OperatorGroup that defines "+
 		"global scope for the operator (used in combination with the --global flag)")
 	cmd.Flags().Bool("all", false, "Do uninstall all Camel K resources")
 
