@@ -94,16 +94,16 @@ jobs:
         # Prerequisites
         sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.6/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
 
-        export SERVING_VERSION=v0.26.0
-        export EVENTING_VERSION=v0.26.0
-        export KOURIER_VERSION=v0.26.0
+        export SERVING_VERSION=knative-v1.0.0
+        export EVENTING_VERSION=knative-v1.0.0
+        export KOURIER_VERSION=knative-v1.0.0
 
         # Serving
         kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml
         curl -L -s https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-core.yaml | head -n -1 | yq e 'del(.spec.template.spec.containers[].resources)' - | kubectl apply -f -
 
         # Kourier
-        kubectl apply --filename https://github.com/knative/net-kourier/releases/download/$KOURIER_VERSION/kourier.yaml
+        kubectl apply --filename https://github.com/knative-sandbox/net-kourier/releases/download/$KOURIER_VERSION/kourier.yaml
         kubectl patch configmap/config-network \
         --namespace knative-serving \
         --type merge \
@@ -215,16 +215,16 @@ jobs:
           # Prerequisites
           sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.6/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
 
-          export SERVING_VERSION=v0.26.0
-          export EVENTING_VERSION=v0.26.0
-          export KOURIER_VERSION=v0.26.0
+          export SERVING_VERSION=knative-v1.0.0
+          export EVENTING_VERSION=knative-v1.0.0
+          export KOURIER_VERSION=knative-v1.0.0
 
           # Serving
           kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml
           curl -L -s https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-core.yaml | head -n -1 | yq e 'del(.spec.template.spec.containers[].resources)' - | kubectl apply -f -
 
           # Kourier
-          kubectl apply --filename https://github.com/knative/net-kourier/releases/download/$KOURIER_VERSION/kourier.yaml
+          kubectl apply --filename https://github.com/knative-sandbox/net-kourier/releases/download/$KOURIER_VERSION/kourier.yaml
           kubectl patch configmap/config-network \
           --namespace knative-serving \
           --type merge \
