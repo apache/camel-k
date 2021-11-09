@@ -24,7 +24,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -331,22 +330,37 @@ func TestContainerWithCustomImageAndDeprecatedIntegrationKit(t *testing.T) {
 }
 
 func TestContainerWithImagePullPolicy(t *testing.T) {
-	target := appsv1.Deployment{}
-
-	env := newTestProbesEnv(t, v1.RuntimeProviderQuarkus)
-	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
-	env.Resources.Add(&target)
-
-	ctr := newTestContainerTrait()
-	ctr.ImagePullPolicy = "Always"
-
-	err := ctr.Apply(&env)
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
-	assert.Equal(t, corev1.PullAlways, target.Spec.Template.Spec.Containers[0].ImagePullPolicy)
 
-	ctr.ImagePullPolicy = "MustFail"
+	client, _ := test.NewFakeClient()
+	traitCatalog := NewCatalog(nil)
 
-	ok, err := ctr.Configure(&env)
-	assert.False(t, ok)
-	assert.NotNil(t, err)
+	environment := Environment{
+		Ctx:          context.TODO(),
+		Client:       client,
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Integration: &v1.Integration{
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKubernetes,
+				Traits: map[string]v1.TraitSpec{
+					"container": test.TraitSpecFromMap(t, map[string]interface{}{
+						"imagePullPolicy": "Always",
+					}),
+				},
+			},
+		},
+		Platform:  &v1.IntegrationPlatform{},
+		Resources: kubernetes.NewCollection(),
+	}
+	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
+	environment.Platform.ResyncStatusFullConfig()
+
+	err = traitCatalog.apply(&environment)
+	assert.Nil(t, err)
+
+	container := environment.GetIntegrationContainer()
+
+	assert.Equal(t, corev1.PullAlways, container.ImagePullPolicy)
 }

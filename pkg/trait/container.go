@@ -20,9 +20,7 @@ package trait
 import (
 	"fmt"
 	"path"
-	"sort"
 
-	"github.com/apache/camel-k/pkg/util/defaults"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -33,6 +31,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
@@ -42,7 +41,6 @@ const (
 	defaultContainerPort     = 8080
 	defaultContainerPortName = "http"
 	defaultServicePort       = 80
-	defaultProbePath         = "/q/health"
 	containerTraitID         = "container"
 )
 
@@ -82,48 +80,62 @@ type containerTrait struct {
 	Image string `property:"image" json:"image,omitempty"`
 	// The pull policy: Always|Never|IfNotPresent
 	ImagePullPolicy corev1.PullPolicy `property:"image-pull-policy" json:"imagePullPolicy,omitempty"`
-	// ProbesEnabled enable/disable probes on the container (default `false`)
-	ProbesEnabled *bool `property:"probes-enabled" json:"probesEnabled,omitempty"`
+
+	// DeprecatedProbesEnabled enable/disable probes on the container (default `false`)
+	// Deprecated: replaced by the health trait.
+	DeprecatedProbesEnabled *bool `property:"probes-enabled" json:"probesEnabled,omitempty"`
 	// Scheme to use when connecting. Defaults to HTTP. Applies to the liveness probe.
-	LivenessScheme string `property:"liveness-scheme" json:"livenessScheme,omitempty"`
+	// Deprecated: replaced by the health trait.
+	DeprecatedLivenessScheme string `property:"liveness-scheme" json:"livenessScheme,omitempty"`
 	// Number of seconds after the container has started before liveness probes are initiated.
-	LivenessInitialDelay int32 `property:"liveness-initial-delay" json:"livenessInitialDelay,omitempty"`
+	// Deprecated: replaced by the health trait.
+	DeprecatedLivenessInitialDelay int32 `property:"liveness-initial-delay" json:"livenessInitialDelay,omitempty"`
 	// Number of seconds after which the probe times out. Applies to the liveness probe.
-	LivenessTimeout int32 `property:"liveness-timeout" json:"livenessTimeout,omitempty"`
+	// Deprecated: replaced by the health trait.
+	DeprecatedLivenessTimeout int32 `property:"liveness-timeout" json:"livenessTimeout,omitempty"`
 	// How often to perform the probe. Applies to the liveness probe.
-	LivenessPeriod int32 `property:"liveness-period" json:"livenessPeriod,omitempty"`
+	// Deprecated: replaced by the health trait.
+	DeprecatedLivenessPeriod int32 `property:"liveness-period" json:"livenessPeriod,omitempty"`
 	// Minimum consecutive successes for the probe to be considered successful after having failed.
 	// Applies to the liveness probe.
-	LivenessSuccessThreshold int32 `property:"liveness-success-threshold" json:"livenessSuccessThreshold,omitempty"`
+	// Deprecated: replaced by the health trait.
+	DeprecatedLivenessSuccessThreshold int32 `property:"liveness-success-threshold" json:"livenessSuccessThreshold,omitempty"`
 	// Minimum consecutive failures for the probe to be considered failed after having succeeded.
 	// Applies to the liveness probe.
-	LivenessFailureThreshold int32 `property:"liveness-failure-threshold" json:"livenessFailureThreshold,omitempty"`
+	// Deprecated: replaced by the health trait.
+	DeprecatedLivenessFailureThreshold int32 `property:"liveness-failure-threshold" json:"livenessFailureThreshold,omitempty"`
 	// Scheme to use when connecting. Defaults to HTTP. Applies to the readiness probe.
-	ReadinessScheme string `property:"readiness-scheme" json:"readinessScheme,omitempty"`
+	// Deprecated: replaced by the health trait.
+	DeprecatedReadinessScheme string `property:"readiness-scheme" json:"readinessScheme,omitempty"`
 	// Number of seconds after the container has started before readiness probes are initiated.
-	ReadinessInitialDelay int32 `property:"readiness-initial-delay" json:"readinessInitialDelay,omitempty"`
+	// Deprecated: replaced by the health trait.
+	DeprecatedReadinessInitialDelay int32 `property:"readiness-initial-delay" json:"readinessInitialDelay,omitempty"`
 	// Number of seconds after which the probe times out. Applies to the readiness probe.
-	ReadinessTimeout int32 `property:"readiness-timeout" json:"readinessTimeout,omitempty"`
+	// Deprecated: replaced by the health trait.
+	DeprecatedReadinessTimeout int32 `property:"readiness-timeout" json:"readinessTimeout,omitempty"`
 	// How often to perform the probe. Applies to the readiness probe.
-	ReadinessPeriod int32 `property:"readiness-period" json:"readinessPeriod,omitempty"`
+	// Deprecated: replaced by the health trait.
+	DeprecatedReadinessPeriod int32 `property:"readiness-period" json:"readinessPeriod,omitempty"`
 	// Minimum consecutive successes for the probe to be considered successful after having failed.
 	// Applies to the readiness probe.
-	ReadinessSuccessThreshold int32 `property:"readiness-success-threshold" json:"readinessSuccessThreshold,omitempty"`
+	// Deprecated: replaced by the health trait.
+	DeprecatedReadinessSuccessThreshold int32 `property:"readiness-success-threshold" json:"readinessSuccessThreshold,omitempty"`
 	// Minimum consecutive failures for the probe to be considered failed after having succeeded.
 	// Applies to the readiness probe.
-	ReadinessFailureThreshold int32 `property:"readiness-failure-threshold" json:"readinessFailureThreshold,omitempty"`
+	// Deprecated: replaced by the health trait.
+	DeprecatedReadinessFailureThreshold int32 `property:"readiness-failure-threshold" json:"readinessFailureThreshold,omitempty"`
 }
 
 func newContainerTrait() Trait {
 	return &containerTrait{
-		BaseTrait:       NewBaseTrait(containerTraitID, 1600),
-		Port:            defaultContainerPort,
-		ServicePort:     defaultServicePort,
-		ServicePortName: defaultContainerPortName,
-		Name:            defaultContainerName,
-		ProbesEnabled:   BoolP(false),
-		LivenessScheme:  string(corev1.URISchemeHTTP),
-		ReadinessScheme: string(corev1.URISchemeHTTP),
+		BaseTrait:                 NewBaseTrait(containerTraitID, 1600),
+		Port:                      defaultContainerPort,
+		ServicePort:               defaultServicePort,
+		ServicePortName:           defaultContainerPortName,
+		Name:                      defaultContainerName,
+		DeprecatedProbesEnabled:   BoolP(false),
+		DeprecatedLivenessScheme:  string(corev1.URISchemeHTTP),
+		DeprecatedReadinessScheme: string(corev1.URISchemeHTTP),
 	}
 }
 
@@ -156,38 +168,14 @@ func isValidPullPolicy(policy corev1.PullPolicy) bool {
 
 func (t *containerTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		if err := t.configureDependencies(e); err != nil {
-			return err
-		}
-	} else {
-		return t.configureContainer(e)
+		return t.configureImageIntegrationKit(e)
 	}
-
-	if err := t.configureImageIntegrationKit(e); err != nil {
-		return err
-	}
-
-	return nil
+	return t.configureContainer(e)
 }
 
 // IsPlatformTrait overrides base class method
 func (t *containerTrait) IsPlatformTrait() bool {
 	return true
-}
-
-func (t *containerTrait) configureDependencies(e *Environment) error {
-	if IsTrue(t.ProbesEnabled) {
-		if capability, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityHealth]; ok {
-			for _, dependency := range capability.Dependencies {
-				util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dependency.GetDependencyID())
-			}
-
-			// sort the dependencies to get always the same list if they don't change
-			sort.Strings(e.Integration.Status.Dependencies)
-		}
-	}
-
-	return nil
 }
 
 func (t *containerTrait) configureImageIntegrationKit(e *Environment) error {
@@ -269,16 +257,8 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	}
 	t.configureCapabilities(e)
 
-	portName := t.PortName
-	if portName == "" {
-		portName = defaultContainerPortName
-	}
 	// Deployment
 	if err := e.Resources.VisitDeploymentE(func(deployment *appsv1.Deployment) error {
-		if IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
-			t.configureProbes(&container, t.Port, defaultProbePath)
-		}
-
 		for _, envVar := range e.EnvVars {
 			envvar.SetVar(&container.Env, envVar)
 		}
@@ -302,11 +282,6 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 
 	// Knative Service
 	if err := e.Resources.VisitKnativeServiceE(func(service *serving.Service) error {
-		if IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
-			// don't set the port on Knative service as it is not allowed.
-			t.configureProbes(&container, 0, defaultProbePath)
-		}
-
 		for _, env := range e.EnvVars {
 			switch {
 			case env.ValueFrom == nil:
@@ -341,10 +316,6 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 
 	// CronJob
 	if err := e.Resources.VisitCronJobE(func(cron *v1beta1.CronJob) error {
-		if IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
-			t.configureProbes(&container, t.Port, defaultProbePath)
-		}
-
 		for _, envVar := range e.EnvVars {
 			envvar.SetVar(&container.Env, envVar)
 		}
@@ -461,53 +432,4 @@ func (t *containerTrait) configureCapabilities(e *Environment) {
 	if util.StringSliceExists(e.Integration.Status.Capabilities, v1.CapabilityRest) {
 		e.ApplicationProperties["camel.context.rest-configuration.component"] = "platform-http"
 	}
-}
-
-func (t *containerTrait) configureProbes(container *corev1.Container, port int, path string) {
-	container.LivenessProbe = t.newLivenessProbe(port, path)
-	container.ReadinessProbe = t.newReadinessProbe(port, path)
-}
-
-func (t *containerTrait) newLivenessProbe(port int, path string) *corev1.Probe {
-	action := corev1.HTTPGetAction{}
-	action.Path = path
-	action.Scheme = corev1.URIScheme(t.LivenessScheme)
-
-	if port > 0 {
-		action.Port = intstr.FromInt(port)
-	}
-
-	p := corev1.Probe{
-		Handler: corev1.Handler{
-			HTTPGet: &action,
-		},
-	}
-
-	p.InitialDelaySeconds = t.LivenessInitialDelay
-	p.TimeoutSeconds = t.LivenessTimeout
-	p.PeriodSeconds = t.LivenessPeriod
-	p.SuccessThreshold = t.LivenessSuccessThreshold
-	p.FailureThreshold = t.LivenessFailureThreshold
-
-	return &p
-}
-
-func (t *containerTrait) newReadinessProbe(port int, path string) *corev1.Probe {
-	p := corev1.Probe{
-		Handler: corev1.Handler{
-			HTTPGet: &corev1.HTTPGetAction{
-				Port:   intstr.FromInt(port),
-				Path:   path,
-				Scheme: corev1.URIScheme(t.ReadinessScheme),
-			},
-		},
-	}
-
-	p.InitialDelaySeconds = t.ReadinessInitialDelay
-	p.TimeoutSeconds = t.ReadinessTimeout
-	p.PeriodSeconds = t.ReadinessPeriod
-	p.SuccessThreshold = t.ReadinessSuccessThreshold
-	p.FailureThreshold = t.ReadinessFailureThreshold
-
-	return &p
 }

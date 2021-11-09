@@ -235,7 +235,7 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 
 	case v1.IntegrationKitPhaseReady:
 		if e.IntegrationInRunningPhases() && t.isNativeIntegration(e) {
-			container := e.getIntegrationContainer()
+			container := e.GetIntegrationContainer()
 			if container == nil {
 				return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
 			}

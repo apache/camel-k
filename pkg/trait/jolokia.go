@@ -99,7 +99,7 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 		return nil
 	}
 
-	container := e.getIntegrationContainer()
+	container := e.GetIntegrationContainer()
 	if container == nil {
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionJolokiaAvailable,

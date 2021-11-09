@@ -134,53 +134,60 @@ traits:
     description: 'The pull policy: Always|Never|IfNotPresent'
   - name: probes-enabled
     type: bool
-    description: ProbesEnabled enable/disable probes on the container (default `false`)
+    description: 'DeprecatedProbesEnabled enable/disable probes on the container (default
+      `false`)Deprecated: replaced by the health trait.'
   - name: liveness-scheme
     type: string
-    description: Scheme to use when connecting. Defaults to HTTP. Applies to the liveness
-      probe.
+    description: 'Scheme to use when connecting. Defaults to HTTP. Applies to the
+      liveness probe.Deprecated: replaced by the health trait.'
   - name: liveness-initial-delay
     type: int32
-    description: Number of seconds after the container has started before liveness
-      probes are initiated.
+    description: 'Number of seconds after the container has started before liveness
+      probes are initiated.Deprecated: replaced by the health trait.'
   - name: liveness-timeout
     type: int32
-    description: Number of seconds after which the probe times out. Applies to the
-      liveness probe.
+    description: 'Number of seconds after which the probe times out. Applies to the
+      liveness probe.Deprecated: replaced by the health trait.'
   - name: liveness-period
     type: int32
-    description: How often to perform the probe. Applies to the liveness probe.
+    description: 'How often to perform the probe. Applies to the liveness probe.Deprecated:
+      replaced by the health trait.'
   - name: liveness-success-threshold
     type: int32
-    description: Minimum consecutive successes for the probe to be considered successful
-      after having failed.Applies to the liveness probe.
+    description: 'Minimum consecutive successes for the probe to be considered successful
+      after having failed.Applies to the liveness probe.Deprecated: replaced by the
+      health trait.'
   - name: liveness-failure-threshold
     type: int32
-    description: Minimum consecutive failures for the probe to be considered failed
-      after having succeeded.Applies to the liveness probe.
+    description: 'Minimum consecutive failures for the probe to be considered failed
+      after having succeeded.Applies to the liveness probe.Deprecated: replaced by
+      the health trait.'
   - name: readiness-scheme
     type: string
-    description: Scheme to use when connecting. Defaults to HTTP. Applies to the readiness
-      probe.
+    description: 'Scheme to use when connecting. Defaults to HTTP. Applies to the
+      readiness probe.Deprecated: replaced by the health trait.'
   - name: readiness-initial-delay
     type: int32
-    description: Number of seconds after the container has started before readiness
-      probes are initiated.
+    description: 'Number of seconds after the container has started before readiness
+      probes are initiated.Deprecated: replaced by the health trait.'
   - name: readiness-timeout
     type: int32
-    description: Number of seconds after which the probe times out. Applies to the
-      readiness probe.
+    description: 'Number of seconds after which the probe times out. Applies to the
+      readiness probe.Deprecated: replaced by the health trait.'
   - name: readiness-period
     type: int32
-    description: How often to perform the probe. Applies to the readiness probe.
+    description: 'How often to perform the probe. Applies to the readiness probe.Deprecated:
+      replaced by the health trait.'
   - name: readiness-success-threshold
     type: int32
-    description: Minimum consecutive successes for the probe to be considered successful
-      after having failed.Applies to the readiness probe.
+    description: 'Minimum consecutive successes for the probe to be considered successful
+      after having failed.Applies to the readiness probe.Deprecated: replaced by the
+      health trait.'
   - name: readiness-failure-threshold
     type: int32
-    description: Minimum consecutive failures for the probe to be considered failed
-      after having succeeded.Applies to the readiness probe.
+    description: 'Minimum consecutive failures for the probe to be considered failed
+      after having succeeded.Applies to the readiness probe.Deprecated: replaced by
+      the health trait.'
 - name: cron
   platform: false
   profiles:
@@ -345,6 +352,69 @@ traits:
     type: ./pkg/trait.discoveryCacheType
     description: Discovery client cache to be used, either `disabled`, `disk` or `memory`
       (default `memory`)
+- name: health
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The health trait is responsible for configuring the health probes on
+    the integration container. It's disabled by default.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: liveness-probe-enabled
+    type: bool
+    description: Configures the liveness probe for the integration container (default
+      `false`).
+  - name: liveness-scheme
+    type: string
+    description: Scheme to use when connecting to the liveness probe (default `HTTP`).
+  - name: liveness-initial-delay
+    type: int32
+    description: Number of seconds after the container has started before the liveness
+      probe is initiated.
+  - name: liveness-timeout
+    type: int32
+    description: Number of seconds after which the liveness probe times out.
+  - name: liveness-period
+    type: int32
+    description: How often to perform the liveness probe.
+  - name: liveness-success-threshold
+    type: int32
+    description: Minimum consecutive successes for the liveness probe to be considered
+      successful after having failed.
+  - name: liveness-failure-threshold
+    type: int32
+    description: Minimum consecutive failures for the liveness probe to be considered
+      failed after having succeeded.
+  - name: readiness-probe-enabled
+    type: bool
+    description: Configures the readiness probe for the integration container (default
+      `true`).
+  - name: readiness-scheme
+    type: string
+    description: Scheme to use when connecting to the readiness probe (default `HTTP`).
+  - name: readiness-initial-delay
+    type: int32
+    description: Number of seconds after the container has started before the readiness
+      probe is initiated.
+  - name: readiness-timeout
+    type: int32
+    description: Number of seconds after which the readiness probe times out.
+  - name: readiness-period
+    type: int32
+    description: How often to perform the readiness probe.
+  - name: readiness-success-threshold
+    type: int32
+    description: Minimum consecutive successes for the readiness probe to be considered
+      successful after having failed.
+  - name: readiness-failure-threshold
+    type: int32
+    description: Minimum consecutive failures for the readiness probe to be considered
+      failed after having succeeded.
 - name: ingress
   platform: false
   profiles:

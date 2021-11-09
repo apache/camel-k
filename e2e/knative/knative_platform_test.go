@@ -71,7 +71,7 @@ func TestKnativePlatform(t *testing.T) {
 			Eventually(IntegrationPhase(ns, "yaml")).Should(Equal(v1.IntegrationPhaseRunning))
 			Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!!!"))
 			// It should keep the old profile saved in status
-			Eventually(IntegrationProfile(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.TraitProfile(string(cluster))))
+			Eventually(IntegrationProfile(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.TraitProfile(cluster)))
 
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
