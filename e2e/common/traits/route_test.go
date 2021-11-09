@@ -93,7 +93,7 @@ func TestRunRoutes(t *testing.T) {
 		// Insecure Route / No TLS
 		// =============================
 		t.Run("Route unsecure http works", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/PlatformHttpServer.java").Execute()).To(Succeed())
+			Expect(Kamel("run", "-n", ns, "--profile", "OpenShift", "files/PlatformHttpServer.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, integrationName), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			route := Route(ns, integrationName)
 			Eventually(route, TestTimeoutMedium).ShouldNot(BeNil())
@@ -112,7 +112,7 @@ func TestRunRoutes(t *testing.T) {
 		// =============================
 
 		t.Run("Route Edge https works", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/PlatformHttpServer.java", "-t", "route.tls-termination=edge").Execute()).To(Succeed())
+			Expect(Kamel("run", "-n", ns, "--profile", "OpenShift", "files/PlatformHttpServer.java", "-t", "route.tls-termination=edge").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, integrationName), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			route := Route(ns, integrationName)
 			Eventually(route, TestTimeoutMedium).ShouldNot(BeNil())
@@ -131,7 +131,7 @@ func TestRunRoutes(t *testing.T) {
 		// =============================
 
 		t.Run("Route Edge (custom certificate) https works", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/PlatformHttpServer.java",
+			Expect(Kamel("run", "-n", ns, "--profile", "OpenShift", "files/PlatformHttpServer.java",
 				"-t", "route.tls-termination=edge",
 				"-t", "route.tls-certificate-secret=" + refCert,
 				"-t", "route.tls-key-secret=" + refKey,
@@ -155,7 +155,7 @@ func TestRunRoutes(t *testing.T) {
 		// =============================
 
 		t.Run("Route passthrough https works", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/PlatformHttpServer.java",
+			Expect(Kamel("run", "-n", ns, "--profile", "OpenShift", "files/PlatformHttpServer.java",
 				// the --resource mounts the certificates inside secret as files in the integration pod
 				"--resource", "secret:" + secretName + "@/etc/ssl/" + secretName,
 				// quarkus platform-http uses these two properties to setup the HTTP endpoint with TLS support
@@ -183,7 +183,7 @@ func TestRunRoutes(t *testing.T) {
 		// =============================
 
 		t.Run("Route Reencrypt https works", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/PlatformHttpServer.java",
+			Expect(Kamel("run", "-n", ns, "--profile", "OpenShift", "files/PlatformHttpServer.java",
 				// the --resource mounts the certificates inside secret as files in the integration pod
 				"--resource", "secret:" + secretName + "@/etc/ssl/" + secretName,
 				// quarkus platform-http uses these two properties to setup the HTTP endpoint with TLS support
