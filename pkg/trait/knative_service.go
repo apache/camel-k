@@ -33,6 +33,8 @@ import (
 )
 
 const (
+	knativeServiceTraitID = "knative-service"
+
 	// Auto-scaling annotations
 	knativeServingClassAnnotation    = "autoscaling.knative.dev/class"
 	knativeServingMetricAnnotation   = "autoscaling.knative.dev/metric"
@@ -89,7 +91,7 @@ var _ ControllerStrategySelector = &knativeServiceTrait{}
 
 func newKnativeServiceTrait() Trait {
 	return &knativeServiceTrait{
-		BaseTrait: NewBaseTrait("knative-service", 1400),
+		BaseTrait: NewBaseTrait(knativeServiceTraitID, 1400),
 	}
 }
 

@@ -132,7 +132,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		)
 	}
 
-	container := e.getIntegrationContainer()
+	container := e.GetIntegrationContainer()
 	if container == nil {
 		return nil
 	}

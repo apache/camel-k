@@ -53,6 +53,7 @@
 ** xref:traits:environment.adoc[Environment]
 ** xref:traits:error-handler.adoc[Error Handler]
 ** xref:traits:gc.adoc[Gc]
+** xref:traits:health.adoc[Health]
 ** xref:traits:ingress.adoc[Ingress]
 ** xref:traits:istio.adoc[Istio]
 ** xref:traits:jolokia.adoc[Jolokia]

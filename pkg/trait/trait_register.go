@@ -31,6 +31,7 @@ func init() {
 	AddToTraits(newEnvironmentTrait)
 	AddToTraits(newErrorHandlerTrait)
 	AddToTraits(newGarbageCollectorTrait)
+	AddToTraits(newHealthTrait)
 	AddToTraits(newIngressTrait)
 	AddToTraits(newIstioTrait)
 	AddToTraits(newJolokiaTrait)

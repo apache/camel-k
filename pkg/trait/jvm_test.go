@@ -201,7 +201,7 @@ func TestApplyJvmTraitWithExternalKitType(t *testing.T) {
 	err := trait.Apply(environment)
 	assert.Nil(t, err)
 
-	container := environment.getIntegrationContainer()
+	container := environment.GetIntegrationContainer()
 
 	assert.Equal(t, 3, len(container.Args))
 	assert.Equal(t, "-cp", container.Args[0])

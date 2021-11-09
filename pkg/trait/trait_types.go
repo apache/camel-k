@@ -747,7 +747,7 @@ func (e *Environment) collectConfigurations(configurationType string) []map[stri
 	return collectConfigurations(configurationType, e.Platform, e.IntegrationKit, e.Integration)
 }
 
-func (e *Environment) getIntegrationContainer() *corev1.Container {
+func (e *Environment) GetIntegrationContainer() *corev1.Container {
 	containerName := defaultContainerName
 	dt := e.Catalog.GetTrait(containerTraitID)
 	if dt != nil {
@@ -758,7 +758,7 @@ func (e *Environment) getIntegrationContainer() *corev1.Container {
 }
 
 func (e *Environment) getIntegrationContainerPort() *corev1.ContainerPort {
-	container := e.getIntegrationContainer()
+	container := e.GetIntegrationContainer()
 	if container == nil {
 		return nil
 	}
