@@ -32,6 +32,7 @@
 
 **Merged pull requests:**
 
+- fix\(e2e\): Update latest released version to fix upgrade tests [\#2734](https://github.com/apache/camel-k/pull/2734) ([astefanutti](https://github.com/astefanutti))
 - chore\(sbo\): upgrade Servce Binding Operator to 1.0.0 GA [\#2729](https://github.com/apache/camel-k/pull/2729) ([johnpoth](https://github.com/johnpoth))
 - Fix \#2724: assign an ID to the binding main route [\#2727](https://github.com/apache/camel-k/pull/2727) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(e2e\): temporarily disable TestKameletBindingScale test for OpenShift 3 [\#2723](https://github.com/apache/camel-k/pull/2723) ([tadayosi](https://github.com/tadayosi))
