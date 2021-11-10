@@ -82,9 +82,9 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The Container trait can be used to configure properties of the container
+  description: 'The Container trait can be used to configure properties of the container
     where the integration will run. It also provides configuration for Services associated
-    to the container.
+    to the container. nolint: tagliatelle'
   properties:
   - name: enabled
     type: bool
@@ -463,8 +463,8 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The Jolokia trait activates and configures the Jolokia Java agent.
-    See https://jolokia.org/reference/html/agents.html
+  description: 'The Jolokia trait activates and configures the Jolokia Java agent.
+    See https://jolokia.org/reference/html/agents.html nolint: tagliatelle'
   properties:
   - name: enabled
     type: bool
@@ -940,7 +940,7 @@ traits:
     the key and certificates is to use `secrets` to store their contents and use the
     following parameters to reference them: `tls-certificate-secret`, `tls-key-secret`,
     `tls-ca-certificate-secret`, `tls-destination-ca-certificate-secret` See the examples
-    section at the end of this page to see the setup options.'
+    section at the end of this page to see the setup options. nolint: tagliatelle'
   properties:
   - name: enabled
     type: bool

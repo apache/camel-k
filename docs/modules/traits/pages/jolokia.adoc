@@ -5,6 +5,7 @@ The Jolokia trait activates and configures the Jolokia Java agent.
 
 See https://jolokia.org/reference/html/agents.html
 
+nolint: tagliatelle
 
 This trait is available in the following profiles: **Kubernetes, Knative, OpenShift**.
 

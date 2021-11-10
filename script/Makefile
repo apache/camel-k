@@ -17,7 +17,7 @@ VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION ?= 1.7.0-SNAPSHOT
 OPERATOR_VERSION := $(subst -SNAPSHOT,,$(VERSION))
 LAST_RELEASED_VERSION := 1.6.1
-RUNTIME_VERSION := 1.10.0-SNAPSHOT
+RUNTIME_VERSION := 1.10.0
 BUILDAH_VERSION := 1.14.0
 KANIKO_VERSION := 0.17.1
 INSTALL_DEFAULT_KAMELETS := true
@@ -54,12 +54,12 @@ PACKAGE := camel-k
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
-STAGING_RUNTIME_REPO :=
+STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1374
 
 # Define here the repo containing the default Kamelet catalog (if any)
 KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
 # Optional branch for the default Kamelet catalog (change this to a tag before release)
-KAMELET_CATALOG_REPO_BRANCH := main
+KAMELET_CATALOG_REPO_BRANCH := v0.5.0
 
 # When packaging artifacts into the docker image, you can "copy" them from local maven
 # or "download" them from Apache Snapshots and Maven Central

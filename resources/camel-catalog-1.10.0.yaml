@@ -18,21 +18,21 @@
 apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-1.10.0-snapshot
+  name: camel-catalog-1.10.0
   labels:
     app: camel-k
-    camel.apache.org/catalog.loader.version: 3.11.2
-    camel.apache.org/catalog.version: 3.11.2
-    camel.apache.org/runtime.version: 1.10.0-SNAPSHOT
+    camel.apache.org/catalog.loader.version: 3.12.0
+    camel.apache.org/catalog.version: 3.12.0
+    camel.apache.org/runtime.version: 1.10.0
 spec:
   runtime:
-    version: 1.10.0-SNAPSHOT
+    version: 1.10.0
     provider: quarkus
     applicationClass: io.quarkus.bootstrap.runner.QuarkusEntryPoint
     metadata:
-      camel-quarkus.version: 2.3.0
-      camel.version: 3.11.2
-      quarkus.version: 2.3.0.Final
+      camel-quarkus.version: 2.4.0
+      camel.version: 3.12.0
+      quarkus.version: 2.4.0.Final
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime

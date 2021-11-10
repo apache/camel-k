@@ -5,6 +5,8 @@ The Container trait can be used to configure properties of the container where t
 
 It also provides configuration for Services associated to the container.
 
+nolint: tagliatelle
+
 This trait is available in the following profiles: **Kubernetes, Knative, OpenShift**.
 
 WARNING: The container trait is a *platform trait*: disabling it may compromise the platform functionality.

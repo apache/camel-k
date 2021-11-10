@@ -90,6 +90,20 @@ BuildSpec
 </em>
 </td>
 <td>
+<p>The sequence of Build tasks to be performed as part of the Build execution.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>strategy</code><br/>
+<em>
+<a href="#camel.apache.org/v1.BuildStrategy">
+BuildStrategy
+</a>
+</em>
+</td>
+<td>
+<p>The strategy that should be used to perform the Build.</p>
 </td>
 </tr>
 <tr>
@@ -935,7 +949,7 @@ string
 </em>
 </td>
 <td>
-<p>A human readable message indicating details about the transition.</p>
+<p>A human-readable message indicating details about the transition.</p>
 </td>
 </tr>
 </tbody>
@@ -985,6 +999,20 @@ string
 </em>
 </td>
 <td>
+<p>The sequence of Build tasks to be performed as part of the Build execution.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>strategy</code><br/>
+<em>
+<a href="#camel.apache.org/v1.BuildStrategy">
+BuildStrategy
+</a>
+</em>
+</td>
+<td>
+<p>The strategy that should be used to perform the Build.</p>
 </td>
 </tr>
 <tr>
@@ -1112,16 +1140,6 @@ Kubernetes meta/v1.Time
 </tr>
 <tr>
 <td>
-<code>platform</code><br/>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
 <code>conditions</code><br/>
 <em>
 <a href="#camel.apache.org/v1.BuildCondition">
@@ -1146,6 +1164,16 @@ string
 </tr>
 </tbody>
 </table>
+<h3 id="camel.apache.org/v1.BuildStrategy">BuildStrategy
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.BuildSpec">BuildSpec</a>, 
+<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>)
+</p>
+<div>
+<p>BuildStrategy specifies how the Build should be executed</p>
+</div>
 <h3 id="camel.apache.org/v1.BuildahTask">BuildahTask
 </h3>
 <p>
@@ -2195,7 +2223,7 @@ string
 </em>
 </td>
 <td>
-<p>A human readable message indicating details about the transition.</p>
+<p>A human-readable message indicating details about the transition.</p>
 </td>
 </tr>
 </tbody>
@@ -2297,7 +2325,7 @@ string
 </em>
 </td>
 <td>
-<p>A human readable message indicating details about the transition.</p>
+<p>A human-readable message indicating details about the transition.</p>
 </td>
 </tr>
 </tbody>
@@ -2583,8 +2611,8 @@ string
 <td>
 <code>buildStrategy</code><br/>
 <em>
-<a href="#camel.apache.org/v1.IntegrationPlatformBuildStrategy">
-IntegrationPlatformBuildStrategy
+<a href="#camel.apache.org/v1.BuildStrategy">
+BuildStrategy
 </a>
 </em>
 </td>
@@ -2639,8 +2667,8 @@ string
 <td>
 <code>registry</code><br/>
 <em>
-<a href="#camel.apache.org/v1.IntegrationPlatformRegistrySpec">
-IntegrationPlatformRegistrySpec
+<a href="#camel.apache.org/v1.RegistrySpec">
+RegistrySpec
 </a>
 </em>
 </td>
@@ -2703,15 +2731,6 @@ bool
 </tr>
 </tbody>
 </table>
-<h3 id="camel.apache.org/v1.IntegrationPlatformBuildStrategy">IntegrationPlatformBuildStrategy
-(<code>string</code> alias)</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>)
-</p>
-<div>
-<p>IntegrationPlatformBuildStrategy enumerates all implemented build strategies</p>
-</div>
 <h3 id="camel.apache.org/v1.IntegrationPlatformCluster">IntegrationPlatformCluster
 (<code>string</code> alias)</h3>
 <p>
@@ -2809,7 +2828,7 @@ string
 </em>
 </td>
 <td>
-<p>A human readable message indicating details about the transition.</p>
+<p>A human-readable message indicating details about the transition.</p>
 </td>
 </tr>
 </tbody>
@@ -2892,76 +2911,6 @@ string
 <div>
 <p>IntegrationPlatformPhase &ndash;</p>
 </div>
-<h3 id="camel.apache.org/v1.IntegrationPlatformRegistrySpec">IntegrationPlatformRegistrySpec
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>, 
-<a href="#camel.apache.org/v1.PublishTask">PublishTask</a>)
-</p>
-<div>
-<p>IntegrationPlatformRegistrySpec &ndash;</p>
-</div>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>insecure</code><br/>
-<em>
-bool
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>address</code><br/>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>secret</code><br/>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>ca</code><br/>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>organization</code><br/>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
 <h3 id="camel.apache.org/v1.IntegrationPlatformResourcesSpec">IntegrationPlatformResourcesSpec
 </h3>
 <p>
@@ -3833,11 +3782,6 @@ Kubernetes meta/v1.Duration
 </tr>
 </tbody>
 </table>
-<h3 id="camel.apache.org/v1.PlatformInjectable">PlatformInjectable
-</h3>
-<div>
-<p>PlatformInjectable &ndash;</p>
-</div>
 <h3 id="camel.apache.org/v1.PodSpec">PodSpec
 </h3>
 <p>
@@ -4171,8 +4115,8 @@ string
 <td>
 <code>registry</code><br/>
 <em>
-<a href="#camel.apache.org/v1.IntegrationPlatformRegistrySpec">
-IntegrationPlatformRegistrySpec
+<a href="#camel.apache.org/v1.RegistrySpec">
+RegistrySpec
 </a>
 </em>
 </td>
@@ -4199,6 +4143,76 @@ IntegrationPlatformRegistrySpec
 It implements Marshaler and Unmarshaler and can
 be used to delay JSON decoding or precompute a JSON encoding.</p>
 </div>
+<h3 id="camel.apache.org/v1.RegistrySpec">RegistrySpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>, 
+<a href="#camel.apache.org/v1.PublishTask">PublishTask</a>)
+</p>
+<div>
+<p>RegistrySpec provides the configuration for the container registry</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>insecure</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>address</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>secret</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>ca</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>organization</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="camel.apache.org/v1.Repository">Repository
 </h3>
 <p>
@@ -6540,7 +6554,7 @@ string
 </em>
 </td>
 <td>
-<p>A human readable message indicating details about the transition.</p>
+<p>A human-readable message indicating details about the transition.</p>
 </td>
 </tr>
 </tbody>
