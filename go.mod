@@ -5,9 +5,9 @@ go 1.16
 require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/Microsoft/hcsshim v0.8.15 // indirect
-	github.com/apache/camel-k/pkg/apis/camel v0.0.0
-	github.com/apache/camel-k/pkg/client/camel v0.0.0
-	github.com/apache/camel-k/pkg/kamelet/repository v0.0.0
+	github.com/apache/camel-k/pkg/apis/camel v1.7.0
+	github.com/apache/camel-k/pkg/client/camel v1.7.0
+	github.com/apache/camel-k/pkg/kamelet/repository v1.7.0
 	github.com/container-tools/spectrum v0.3.4
 	github.com/containerd/continuity v0.0.0-20210208174643-50096c924a4e // indirect
 	github.com/evanphx/json-patch v4.11.0+incompatible
