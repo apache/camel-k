@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- 02-serverless-api example fails in the camel-k-examples repo \(same as \#2400\) [\#2738](https://github.com/apache/camel-k/issues/2738)
 - ErrorHandler for stopping a route when an error occurs [\#2724](https://github.com/apache/camel-k/issues/2724)
 - Release 1.6.1 [\#2713](https://github.com/apache/camel-k/issues/2713)
 - Building with buildah not working [\#2685](https://github.com/apache/camel-k/issues/2685)
@@ -33,6 +34,7 @@
 **Merged pull requests:**
 
 - fix\(e2e\): Update latest released version to fix upgrade tests [\#2734](https://github.com/apache/camel-k/pull/2734) ([astefanutti](https://github.com/astefanutti))
+- chore: Upgrade Knative to version 1.0.0 [\#2733](https://github.com/apache/camel-k/pull/2733) ([astefanutti](https://github.com/astefanutti))
 - chore\(sbo\): upgrade Servce Binding Operator to 1.0.0 GA [\#2729](https://github.com/apache/camel-k/pull/2729) ([johnpoth](https://github.com/johnpoth))
 - Fix \#2724: assign an ID to the binding main route [\#2727](https://github.com/apache/camel-k/pull/2727) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(e2e\): temporarily disable TestKameletBindingScale test for OpenShift 3 [\#2723](https://github.com/apache/camel-k/pull/2723) ([tadayosi](https://github.com/tadayosi))
