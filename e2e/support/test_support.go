@@ -40,6 +40,7 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
+	"github.com/onsi/gomega/format"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
@@ -167,7 +168,10 @@ func init() {
 		}
 	}
 
+	// Gomega settings
 	gomega.SetDefaultEventuallyTimeout(TestTimeoutShort)
+	// Disable object truncation on test results
+	format.MaxLength = 0
 
 }
 
