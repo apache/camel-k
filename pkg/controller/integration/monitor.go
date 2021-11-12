@@ -298,8 +298,12 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 		}
 		switch ready.Status {
 		case corev1.ConditionTrue:
+			// We still account terminating Pods to handle rolling deployments
 			readyPods = append(readyPods, pod)
 		case corev1.ConditionFalse:
+			if pod.DeletionTimestamp != nil {
+				continue
+			}
 			unreadyPods = append(unreadyPods, pod)
 		}
 	}
@@ -319,7 +323,8 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 			// reported to be ready is larger than or equal to the specified number
 			// of replicas. This avoids reporting a falsy readiness condition
 			// when the Integration is being down-scaled.
-			setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionDeploymentReadyReason, fmt.Sprintf("%d/%d ready replicas", c.Status.ReadyReplicas, replicas))
+			setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionDeploymentReadyReason, fmt.Sprintf("%d/%d ready replicas", readyReplicas, replicas))
+			return nil
 
 		case c.Status.UpdatedReplicas < replicas:
 			setReadyCondition(integration, corev1.ConditionFalse, v1.IntegrationConditionDeploymentProgressingReason, fmt.Sprintf("%d/%d updated replicas", c.Status.UpdatedReplicas, replicas))
@@ -332,24 +337,28 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 		ready := kubernetes.GetKnativeServiceCondition(*c, servingv1.ServiceConditionReady)
 		if ready.IsTrue() {
 			setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionKnativeServiceReadyReason, "")
-		} else {
-			setReadyCondition(integration, corev1.ConditionFalse, ready.GetReason(), ready.GetMessage())
+			return nil
 		}
+		setReadyCondition(integration, corev1.ConditionFalse, ready.GetReason(), ready.GetMessage())
 
 	case *batchv1beta1.CronJob:
 		switch {
 		case c.Status.LastScheduleTime == nil:
 			setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionCronJobCreatedReason, "cronjob created")
+			return nil
 
 		case len(c.Status.Active) > 0:
 			setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionCronJobActiveReason, "cronjob active")
+			return nil
 
 		case c.Spec.SuccessfulJobsHistoryLimit != nil && *c.Spec.SuccessfulJobsHistoryLimit == 0 && c.Spec.FailedJobsHistoryLimit != nil && *c.Spec.FailedJobsHistoryLimit == 0:
 			setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionCronJobCreatedReason, "no jobs history available")
+			return nil
 
 		case lastCompletedJob != nil:
 			if complete := kubernetes.GetJobCondition(*lastCompletedJob, batchv1.JobComplete); complete != nil && complete.Status == corev1.ConditionTrue {
 				setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionLastJobSucceededReason, fmt.Sprintf("last job %s completed successfully", lastCompletedJob.Name))
+				return nil
 			}
 
 		default:
