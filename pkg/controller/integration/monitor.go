@@ -20,6 +20,7 @@ package integration
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -372,8 +373,13 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 			if err == nil {
 				continue
 			}
+			if errors.Is(err, context.DeadlineExceeded) {
+				runtimeNotReadyMessages = append(runtimeNotReadyMessages, fmt.Sprintf("readiness probe timed out for Pod %s/%s", pod.Namespace, pod.Name))
+				continue
+			}
 			if !k8serrors.IsServiceUnavailable(err) {
-				return err
+				runtimeNotReadyMessages = append(runtimeNotReadyMessages, fmt.Sprintf("readiness probe failed for Pod %s/%s: %s", pod.Namespace, pod.Name, err.Error()))
+				continue
 			}
 			health := HealthCheck{}
 			err = json.Unmarshal(body, &health)
