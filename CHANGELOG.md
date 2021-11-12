@@ -7,12 +7,19 @@
 **Closed issues:**
 
 - Camel-K - uninstall and namespace deletion w/ k8s let all Camel-K Integrations in this namespace alive [\#2533](https://github.com/apache/camel-k/issues/2533)
+- Wait for dependencies  [\#2151](https://github.com/apache/camel-k/issues/2151)
+- Secret type not supported with buildah on K3S [\#2136](https://github.com/apache/camel-k/issues/2136)
+- OLM installation may fail with default values [\#2113](https://github.com/apache/camel-k/issues/2113)
+- Expose operator information [\#1947](https://github.com/apache/camel-k/issues/1947)
 
 **Merged pull requests:**
 
+- chore\(e2e\): disable object truncation on test results [\#2745](https://github.com/apache/camel-k/pull/2745) ([tadayosi](https://github.com/tadayosi))
 - feat: Health trait [\#2740](https://github.com/apache/camel-k/pull/2740) ([astefanutti](https://github.com/astefanutti))
+- feat\(cmd\): OLM default discovery [\#2735](https://github.com/apache/camel-k/pull/2735) ([squakez](https://github.com/squakez))
 - fix\(e2e\): Update latest released version to fix upgrade tests [\#2734](https://github.com/apache/camel-k/pull/2734) ([astefanutti](https://github.com/astefanutti))
 - chore: Upgrade Knative to version 1.0.0 [\#2733](https://github.com/apache/camel-k/pull/2733) ([astefanutti](https://github.com/astefanutti))
+- feat\(cmd\): operator additional info [\#2730](https://github.com/apache/camel-k/pull/2730) ([squakez](https://github.com/squakez))
 - chore\(sbo\): upgrade Servce Binding Operator to 1.0.0 GA [\#2729](https://github.com/apache/camel-k/pull/2729) ([johnpoth](https://github.com/johnpoth))
 - Fix \#2724: assign an ID to the binding main route [\#2727](https://github.com/apache/camel-k/pull/2727) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(e2e\): temporarily disable TestKameletBindingScale test for OpenShift 3 [\#2723](https://github.com/apache/camel-k/pull/2723) ([tadayosi](https://github.com/tadayosi))
