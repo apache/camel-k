@@ -368,7 +368,7 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 			return fmt.Errorf("integration container not found in Pod %s/%s", pod.Namespace, pod.Name)
 		}
 		if probe := container.ReadinessProbe; probe != nil && probe.HTTPGet != nil {
-			body, err := proxyGetHTTPProbe(ctx, action.client, probe, &pod)
+			body, err := proxyGetHTTPProbe(ctx, action.client, probe, &pod, container)
 			if err == nil {
 				continue
 			}
