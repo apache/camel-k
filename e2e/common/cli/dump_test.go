@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -22,10 +23,11 @@ limitations under the License.
 package common
 
 import (
-	v1 "k8s.io/api/core/v1"
 	"testing"
 
 	. "github.com/onsi/gomega"
+
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
 )
@@ -42,7 +44,7 @@ func TestKamelCLIDump(t *testing.T) {
 		t.Run("dump non-empty namespace", func(t *testing.T) {
 			Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 			Expect(Kamel("run", "files/yaml.yaml", "-n", ns).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, "yaml")).Should(ContainSubstring("Magicstring!"))
 
 			dump := GetOutputString(Kamel("dump", "-n", ns))

@@ -424,15 +424,39 @@ func IntegrationStatusReplicas(ns string, name string) func() *int32 {
 	}
 }
 
-func IntegrationCondition(ns string, name string, conditionType v1.IntegrationConditionType) func() corev1.ConditionStatus {
-	return func() corev1.ConditionStatus {
+func IntegrationCondition(ns string, name string, conditionType v1.IntegrationConditionType) func() *v1.IntegrationCondition {
+	return func() *v1.IntegrationCondition {
 		it := Integration(ns, name)()
 		if it == nil {
-			return "IntegrationMissing"
+			return nil
 		}
 		c := it.Status.GetCondition(conditionType)
 		if c == nil {
-			return "ConditionMissing"
+			return nil
+		}
+		return c
+	}
+}
+
+func IntegrationConditionReason(c *v1.IntegrationCondition) string {
+	if c == nil {
+		return ""
+	}
+	return c.Reason
+}
+
+func IntegrationConditionMessage(c *v1.IntegrationCondition) string {
+	if c == nil {
+		return ""
+	}
+	return c.Message
+}
+
+func IntegrationConditionStatus(ns string, name string, conditionType v1.IntegrationConditionType) func() corev1.ConditionStatus {
+	return func() corev1.ConditionStatus {
+		c := IntegrationCondition(ns, name, conditionType)()
+		if c == nil {
+			return "Unknown"
 		}
 		return c.Status
 	}

@@ -40,7 +40,7 @@ func TestRunSimpleGroovyExamples(t *testing.T) {
 		t.Run("run groovy", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "files/groovy.groovy").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "groovy"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationCondition(ns, "groovy", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "groovy", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "groovy"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})

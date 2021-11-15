@@ -45,7 +45,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Simple property", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "./files/property-route.groovy", "-p", "my.message=test-property").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "property-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "property-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "property-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "property-route"), TestTimeoutShort).Should(ContainSubstring("test-property"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -53,7 +53,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Property file", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "./files/property-file-route.groovy", "--property", "file:./files/my.properties").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "property-file-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "property-file-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "property-file-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "property-file-route"), TestTimeoutShort).Should(ContainSubstring("hello world"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -61,7 +61,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Property precedence", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "./files/property-file-route.groovy", "-p", "my.key.2=universe", "-p", "file:./files/my.properties").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "property-file-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "property-file-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "property-file-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "property-file-route"), TestTimeoutShort).Should(ContainSubstring("hello universe"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -82,7 +82,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Config configmap", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "./files/config-configmap-route.groovy", "--config", "configmap:my-cm").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "config-configmap-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "config-configmap-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "config-configmap-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "config-configmap-route"), TestTimeoutShort).Should(ContainSubstring(cmData["my-configmap-key"]))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -92,7 +92,7 @@ func TestRunConfigExamples(t *testing.T) {
 
 			Expect(Kamel("run", "-n", ns, "./files/resource-configmap-route.groovy", "--resource", "configmap:my-cm").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "resource-configmap-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "resource-configmap-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "resource-configmap-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "resource-configmap-route"), TestTimeoutShort).Should(ContainSubstring(cmData["my-configmap-key"]))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -102,7 +102,7 @@ func TestRunConfigExamples(t *testing.T) {
 
 			Expect(Kamel("run", "-n", ns, "./files/resource-configmap-location-route.groovy", "--resource", "configmap:my-cm@/tmp/app").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "resource-configmap-location-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "resource-configmap-location-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "resource-configmap-location-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "resource-configmap-location-route"), TestTimeoutShort).Should(ContainSubstring(cmData["my-configmap-key"]))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -112,7 +112,7 @@ func TestRunConfigExamples(t *testing.T) {
 
 			Expect(Kamel("run", "-n", ns, "./files/resource-configmap-key-location-route.groovy", "--resource", "configmap:my-cm-multi/my-configmap-key-2@/tmp/app").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "resource-configmap-key-location-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "resource-configmap-key-location-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "resource-configmap-key-location-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "resource-configmap-key-location-route"), TestTimeoutShort).ShouldNot(ContainSubstring(cmDataMulti["my-configmap-key"]))
 			Eventually(IntegrationLogs(ns, "resource-configmap-key-location-route"), TestTimeoutShort).Should(ContainSubstring(cmDataMulti["my-configmap-key-2"]))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
@@ -126,7 +126,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Config configmap as property file", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "./files/config-configmap-properties-route.groovy", "--config", "configmap:my-cm-properties").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "config-configmap-properties-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "config-configmap-properties-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "config-configmap-properties-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "config-configmap-properties-route"), TestTimeoutShort).Should(ContainSubstring("hello world"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -141,7 +141,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Config secret", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "./files/config-secret-route.groovy", "--config", "secret:my-sec").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "config-secret-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "config-secret-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "config-secret-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "config-secret-route"), TestTimeoutShort).Should(ContainSubstring(secData["my-secret-key"]))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -149,7 +149,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Resource secret", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "./files/resource-secret-route.groovy", "--resource", "secret:my-sec").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "resource-secret-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "resource-secret-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "resource-secret-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "resource-secret-route"), TestTimeoutShort).Should(ContainSubstring(secData["my-secret-key"]))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -159,7 +159,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Plain text configuration file", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "./files/config-file-route.groovy", "--config", "file:./files/resources-data.txt").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "config-file-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "config-file-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "config-file-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "config-file-route"), TestTimeoutShort).Should(ContainSubstring("the file body"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -169,7 +169,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Plain text resource file", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "./files/resource-file-route.groovy", "--resource", "file:./files/resources-data.txt").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "resource-file-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "resource-file-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "resource-file-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "resource-file-route"), TestTimeoutShort).Should(ContainSubstring("the file body"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -177,7 +177,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Plain text resource file with destination path", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "./files/resource-file-location-route.groovy", "--resource", "file:./files/resources-data.txt@/tmp/file.txt").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "resource-file-location-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "resource-file-location-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "resource-file-location-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "resource-file-location-route"), TestTimeoutShort).Should(ContainSubstring("the file body"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -185,7 +185,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Binary (zip) resource file", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "./files/resource-file-binary-route.groovy", "--resource", "file:./files/resources-data.zip", "-d", "camel-zipfile").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "resource-file-binary-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "resource-file-binary-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "resource-file-binary-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "resource-file-binary-route"), TestTimeoutShort).Should(ContainSubstring("the file body"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -199,7 +199,7 @@ func TestRunConfigExamples(t *testing.T) {
 
 			Expect(Kamel("run", "-n", ns, "./files/resource-file-base64-encoded-route.groovy", "--resource", "file:./files/resources-data.txt", "--compression=true").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "resource-file-base64-encoded-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "resource-file-base64-encoded-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "resource-file-base64-encoded-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "resource-file-base64-encoded-route"), TestTimeoutShort).Should(ContainSubstring(string(expectedBytes)))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -208,7 +208,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Build time property", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "./files/build-property-route.groovy", "--build-property", "quarkus.application.name=my-super-application").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "build-property-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "build-property-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "build-property-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "build-property-route"), TestTimeoutShort).Should(ContainSubstring("my-super-application"))
 			// Don't delete - we need it for next test execution
 		})
@@ -218,7 +218,7 @@ func TestRunConfigExamples(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "./files/build-property-route.groovy", "--name", "build-property-route-updated",
 				"--build-property", "quarkus.application.name=my-super-application-updated").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "build-property-route-updated"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "build-property-route-updated", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "build-property-route-updated", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "build-property-route-updated"), TestTimeoutShort).Should(ContainSubstring("my-super-application-updated"))
 			// Verify the integration kits are different
 			Expect(IntegrationKit(ns, "build-property-route")).ShouldNot(Equal(IntegrationKit(ns, "build-property-route-updated")))
@@ -229,7 +229,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Build time property file", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "./files/build-property-file-route.groovy", "--build-property", "file:./files/quarkus.properties").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "build-property-file-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "build-property-file-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "build-property-file-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "build-property-file-route"), TestTimeoutShort).Should(ContainSubstring("my-super-application"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -237,7 +237,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Build time property file with precedence", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "./files/build-property-file-route.groovy", "--build-property", "quarkus.application.name=my-overridden-application", "--build-property", "file:./files/quarkus.properties").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "build-property-file-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "build-property-file-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "build-property-file-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "build-property-file-route"), TestTimeoutShort).Should(ContainSubstring("my-overridden-application"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})

@@ -53,7 +53,7 @@ func TestNativeIntegrations(t *testing.T) {
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPhase(ns, name)).Should(Equal(v1.IntegrationPhaseError))
-			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionKitAvailable)).Should(Equal(corev1.ConditionFalse))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionKitAvailable)).Should(Equal(corev1.ConditionFalse))
 		})
 
 		t.Run("automatic rollout deployment from fast-jar to native kit", func(t *testing.T) {
@@ -79,7 +79,7 @@ func TestNativeIntegrations(t *testing.T) {
 
 			// Check the Integration is ready
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
@@ -95,7 +95,7 @@ func TestNativeIntegrations(t *testing.T) {
 
 			// Check the Integration is still ready
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		})
