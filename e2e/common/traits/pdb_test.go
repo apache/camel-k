@@ -52,7 +52,7 @@ func TestPodDisruptionBudgetTrait(t *testing.T) {
 		).Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		// Check PodDisruptionBudget
@@ -77,7 +77,7 @@ func TestPodDisruptionBudgetTrait(t *testing.T) {
 		Eventually(IntegrationPods(ns, name), TestTimeoutMedium).Should(HaveLen(2))
 		Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
 			Should(PointTo(BeNumerically("==", 2)))
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 		// Check PodDisruptionBudget
 		pdb = podDisruptionBudget(ns, name)()
@@ -125,7 +125,7 @@ func TestPodDisruptionBudgetTrait(t *testing.T) {
 		Eventually(IntegrationPods(ns, name), TestTimeoutMedium).Should(HaveLen(3))
 		Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
 			Should(PointTo(BeNumerically("==", 3)))
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 		pods = IntegrationPods(ns, name)()
 		Expect(pods).To(HaveLen(3))

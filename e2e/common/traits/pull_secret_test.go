@@ -27,10 +27,10 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
@@ -47,7 +47,7 @@ func TestPullSecretTrait(t *testing.T) {
 				"-t", "pull-secret.enabled=true",
 				"-t", "pull-secret.secret-name=dummy-secret").Execute()).To(Succeed())
 			// pod may not run because the pull secret is dummy
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Or(Equal(v1.PodRunning), Equal(v1.PodPending)))
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Or(Equal(corev1.PodRunning), Equal(corev1.PodPending)))
 
 			pod := IntegrationPod(ns, name)()
 			Expect(pod.Spec.ImagePullSecrets).NotTo(BeEmpty())
@@ -58,8 +58,8 @@ func TestPullSecretTrait(t *testing.T) {
 			name := "java2"
 			Expect(Kamel("run", "-n", ns, "files/Java.java", "--name", name,
 				"-t", "pull-secret.enabled=false").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			pod := IntegrationPod(ns, name)()
@@ -76,8 +76,8 @@ func TestPullSecretTrait(t *testing.T) {
 			t.Run("Image pull secret is automatically set by default", func(t *testing.T) {
 				name := "java3"
 				Expect(Kamel("run", "-n", ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
-				Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(v1.PodRunning))
-				Eventually(IntegrationCondition(ns, name, camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+				Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 				pod := IntegrationPod(ns, name)()

@@ -28,11 +28,11 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 func TestAffinityTrait(t *testing.T) {
@@ -53,14 +53,14 @@ func TestAffinityTrait(t *testing.T) {
 					"--name", "java1",
 					"-t", "affinity.enabled=true",
 					"-t", fmt.Sprintf("affinity.node-affinity-labels=kubernetes.io/hostname in(%s)", hostname)).Execute()).To(Succeed())
-				Eventually(IntegrationPodPhase(ns, "java1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-				Eventually(IntegrationCondition(ns, "java1", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+				Eventually(IntegrationPodPhase(ns, "java1"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationConditionStatus(ns, "java1", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 				Eventually(IntegrationLogs(ns, "java1"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 				pod := IntegrationPod(ns, "java1")()
 				Expect(pod.Spec.Affinity).NotTo(BeNil())
-				Expect(pod.Spec.Affinity.NodeAffinity).To(Equal(&v1.NodeAffinity{
-					RequiredDuringSchedulingIgnoredDuringExecution: nodeSelector("kubernetes.io/hostname", v1.NodeSelectorOpIn, hostname),
+				Expect(pod.Spec.Affinity.NodeAffinity).To(Equal(&corev1.NodeAffinity{
+					RequiredDuringSchedulingIgnoredDuringExecution: nodeSelector("kubernetes.io/hostname", corev1.NodeSelectorOpIn, hostname),
 				}))
 				Expect(pod.Spec.NodeName).To(Equal(hostname))
 
@@ -73,14 +73,14 @@ func TestAffinityTrait(t *testing.T) {
 				"--name", "java2",
 				"-t", "affinity.enabled=true",
 				"-t", "affinity.pod-affinity-labels=camel.apache.org/integration").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "java2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationCondition(ns, "java2", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationPodPhase(ns, "java2"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "java2", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "java2"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			pod := IntegrationPod(ns, "java2")()
 			Expect(pod.Spec.Affinity).NotTo(BeNil())
-			Expect(pod.Spec.Affinity.PodAffinity).To(Equal(&v1.PodAffinity{
-				RequiredDuringSchedulingIgnoredDuringExecution: []v1.PodAffinityTerm{
+			Expect(pod.Spec.Affinity.PodAffinity).To(Equal(&corev1.PodAffinity{
+				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
 					podAffinityTerm("camel.apache.org/integration", metav1.LabelSelectorOpExists, "kubernetes.io/hostname"),
 				},
 			}))
@@ -93,14 +93,14 @@ func TestAffinityTrait(t *testing.T) {
 				"--name", "java3",
 				"-t", "affinity.enabled=true",
 				"-t", "affinity.pod-anti-affinity-labels=camel.apache.org/integration").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "java3"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationCondition(ns, "java3", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationPodPhase(ns, "java3"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "java3", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "java3"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			pod := IntegrationPod(ns, "java3")()
 			Expect(pod.Spec.Affinity).NotTo(BeNil())
-			Expect(pod.Spec.Affinity.PodAntiAffinity).To(Equal(&v1.PodAntiAffinity{
-				RequiredDuringSchedulingIgnoredDuringExecution: []v1.PodAffinityTerm{
+			Expect(pod.Spec.Affinity.PodAntiAffinity).To(Equal(&corev1.PodAntiAffinity{
+				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
 					podAffinityTerm("camel.apache.org/integration", metav1.LabelSelectorOpExists, "kubernetes.io/hostname"),
 				},
 			}))
@@ -110,7 +110,7 @@ func TestAffinityTrait(t *testing.T) {
 	})
 }
 
-func selectSchedulableNode() (*v1.Node, error) {
+func selectSchedulableNode() (*corev1.Node, error) {
 	nodes, err := TestClient().CoreV1().Nodes().List(TestContext, metav1.ListOptions{})
 	if err != nil {
 		return nil, err
@@ -123,11 +123,11 @@ func selectSchedulableNode() (*v1.Node, error) {
 	return nil, fmt.Errorf("no node available")
 }
 
-func nodeSelector(key string, operator v1.NodeSelectorOperator, value string) *v1.NodeSelector {
-	return &v1.NodeSelector{
-		NodeSelectorTerms: []v1.NodeSelectorTerm{
+func nodeSelector(key string, operator corev1.NodeSelectorOperator, value string) *corev1.NodeSelector {
+	return &corev1.NodeSelector{
+		NodeSelectorTerms: []corev1.NodeSelectorTerm{
 			{
-				MatchExpressions: []v1.NodeSelectorRequirement{
+				MatchExpressions: []corev1.NodeSelectorRequirement{
 					{
 						Key:      key,
 						Operator: operator,
@@ -139,8 +139,8 @@ func nodeSelector(key string, operator v1.NodeSelectorOperator, value string) *v
 	}
 }
 
-func podAffinityTerm(key string, operator metav1.LabelSelectorOperator, topologyKey string) v1.PodAffinityTerm {
-	return v1.PodAffinityTerm{
+func podAffinityTerm(key string, operator metav1.LabelSelectorOperator, topologyKey string) corev1.PodAffinityTerm {
+	return corev1.PodAffinityTerm{
 		LabelSelector: &metav1.LabelSelector{
 			MatchExpressions: []metav1.LabelSelectorRequirement{
 				{

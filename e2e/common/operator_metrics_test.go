@@ -51,7 +51,7 @@ func TestMetrics(t *testing.T) {
 			"-t", "prometheus.enabled=true",
 			"-t", "prometheus.pod-monitor=false").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		pod := OperatorPod(ns)()

@@ -57,7 +57,7 @@ func TestKameletBindingScale(t *testing.T) {
 		Expect(Kamel("install", "-n", ns, "-w").Execute()).To(Succeed())
 		Expect(Kamel("bind", "timer-source?message=HelloBinding", "log-sink", "-n", ns, "--name", name).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(KameletBindingCondition(ns, name, v1alpha1.KameletBindingConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("HelloBinding"))
 
@@ -73,7 +73,7 @@ func TestKameletBindingScale(t *testing.T) {
 			Eventually(KameletBindingStatusReplicas(ns, name), TestTimeoutShort).
 				Should(gstruct.PointTo(BeNumerically("==", 3)))
 			// Check the readiness condition becomes truthy back
-			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
 			// Finally check the readiness condition becomes truthy back on kamelet binding
 			Eventually(KameletBindingCondition(ns, name, v1alpha1.KameletBindingConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
 		})
@@ -130,7 +130,7 @@ func TestKameletBindingScale(t *testing.T) {
 			Eventually(KameletBindingSpecReplicas(ns, name), TestTimeoutShort).
 				Should(gstruct.PointTo(BeNumerically("==", 1)))
 			// Check the readiness condition is still truthy as down-scaling
-			Expect(IntegrationCondition(ns, name, v1.IntegrationConditionReady)()).To(Equal(corev1.ConditionTrue))
+			Expect(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady)()).To(Equal(corev1.ConditionTrue))
 			// Check the Integration scale subresource Spec field
 			Eventually(IntegrationSpecReplicas(ns, name), TestTimeoutShort).
 				Should(gstruct.PointTo(BeNumerically("==", 1)))

@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -25,9 +26,10 @@ import (
 	"testing"
 	"time"
 
+	. "github.com/onsi/gomega"
+
 	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	. "github.com/onsi/gomega"
 )
 
 const preExistingKameletMarker = "pre-existing-kamelet"

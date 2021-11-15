@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -22,12 +23,12 @@ limitations under the License.
 package common
 
 import (
-	"github.com/apache/camel-k/pkg/util/defaults"
 	"testing"
 
 	. "github.com/onsi/gomega"
 
 	. "github.com/apache/camel-k/e2e/support"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 func TestKamelCLIVersion(t *testing.T) {

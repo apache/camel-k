@@ -40,7 +40,7 @@ func TestStructuredLogs(t *testing.T) {
 		Expect(Kamel("run", "-n", ns, "files/Java.java",
 			"-t", "logging.format=json").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 		pod := OperatorPod(ns)()
 		Expect(pod).NotTo(BeNil())

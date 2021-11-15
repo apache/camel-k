@@ -44,7 +44,7 @@ func TestPodTrait(t *testing.T) {
 
 		// check integration is deployed
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 		// check that integrations is working and reading data created by sidecar container
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Content from the sidecar container"))

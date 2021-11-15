@@ -39,10 +39,10 @@ func TestPodTraitWithKnative(t *testing.T) {
 		Expect(Kamel("run", "-n", ns, "files/podtest-knative2.groovy",
 			"--pod-template", "files/template-knative.yaml").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "podtest-knative2"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationCondition(ns, "podtest-knative2", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, "podtest-knative2", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Expect(Kamel("run", "-n", ns, "files/podtest-knative1.groovy").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "podtest-knative1"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationCondition(ns, "podtest-knative1", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, "podtest-knative1", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 		Eventually(IntegrationLogs(ns, "podtest-knative1"), TestTimeoutShort).Should(ContainSubstring("hello from the template"))
 	})

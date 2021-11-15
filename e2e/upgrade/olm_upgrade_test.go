@@ -109,7 +109,7 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
 		// Check the Integration runs correctly
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 		// Check the Integration version matches that of the current operator
 		Expect(IntegrationVersion(ns, name)()).To(ContainSubstring(prevIPVersionPrefix))
@@ -182,7 +182,7 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 
 			// Check the Integration runs correctly
 			Eventually(IntegrationPodPhase(ns, name)).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 			// Clean up
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())

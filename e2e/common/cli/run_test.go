@@ -42,7 +42,7 @@ func TestRunExamplesFromGitHub(t *testing.T) {
 		t.Run("run java from GitHub", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "github:apache/camel-k/e2e/common/files/Java.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -50,7 +50,7 @@ func TestRunExamplesFromGitHub(t *testing.T) {
 		t.Run("run java from GitHub (RAW)", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "https://raw.githubusercontent.com/apache/camel-k/main/e2e/common/files/Java.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -59,7 +59,7 @@ func TestRunExamplesFromGitHub(t *testing.T) {
 			name := "github-gist-id"
 			Expect(Kamel("run", "-n", ns, "--name", name, "gist:e2c3f9a5fd0d9e79b21b04809786f17a").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Tick!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
@@ -69,7 +69,7 @@ func TestRunExamplesFromGitHub(t *testing.T) {
 			name := "github-gist-url"
 			Expect(Kamel("run", "-n", ns, "--name", name, "https://gist.github.com/lburgazzoli/e2c3f9a5fd0d9e79b21b04809786f17a").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Tick!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
@@ -87,7 +87,7 @@ func TestRunAndUpdate(t *testing.T) {
 		name := "run"
 		Expect(Kamel("run", "-n", ns, "files/run.yaml", "--name", name).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magic default"))
 
 		// Re-run the Integration with an updated configuration
@@ -101,7 +101,7 @@ func TestRunAndUpdate(t *testing.T) {
 
 		// Check the new configuration is taken into account
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magic value"))
 
 		// Clean up
