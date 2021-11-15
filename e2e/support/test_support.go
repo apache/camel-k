@@ -91,6 +91,7 @@ const kubeConfigEnvVar = "KUBECONFIG"
 var TestTimeoutShort = 1 * time.Minute
 var TestTimeoutMedium = 5 * time.Minute
 var TestTimeoutLong = 10 * time.Minute
+var NoOlmOperatorImage string
 
 var TestContext context.Context
 var testClient client.Client
@@ -162,6 +163,14 @@ func init() {
 			TestTimeoutMedium = duration
 		} else {
 			fmt.Printf("Can't parse CAMEL_K_TEST_TIMEOUT_MEDIUM. Using default value: %s", TestTimeoutMedium)
+		}
+	}
+
+	if imageNoOlm, ok := os.LookupEnv("CAMEL_K_TEST_NO_OLM_OPERATOR_IMAGE"); ok {
+		if imageNoOlm != "" {
+			NoOlmOperatorImage = imageNoOlm
+		} else {
+			fmt.Printf("Can't parse CAMEL_K_TEST_NO_OLM_OPERATOR_IMAGE. Using default value from kamel")
 		}
 	}
 
