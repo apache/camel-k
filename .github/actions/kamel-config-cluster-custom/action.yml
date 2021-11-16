@@ -21,48 +21,92 @@ description: 'Provides configuration for acessing a custom kubernetes cluster'
 runs:
   using: "composite"
   steps:
+    - name: Read platform-config variable to temporary file & override PLATFORM_TYPE if platform config defined
+      shell: bash
+      run: |
+        export PLATFORM_CONFIG=/tmp/platform-config.json
+
+        touch "${PLATFORM_CONFIG}"
+        if [ -z "${{ env.PLATFORM_CONFIG_DATA }}" ]; then
+          echo "Error: No PLATFORM_CONFIG_DATA has been defined"
+          exit 1
+        fi
+
+        cat << EOF > "${PLATFORM_CONFIG}"
+        ${{ env.PLATFORM_CONFIG_DATA }}
+        EOF
+
+        if [ ! -f "${PLATFORM_CONFIG}" ]; then
+          echo "Error: No file ${PLATFORM_CONFIG} has been created"
+          exit 1
+        fi
+
+        if [ -s "${PLATFORM_CONFIG}" ]; then
+          echo "Info: Platform configuration defined"
+          echo "PLATFORM_CONFIG=${PLATFORM_CONFIG}" >> $GITHUB_ENV
+        else
+          echo "Error: No platform configuration defined"
+          exit 1
+        fi
+
+    - name: Platform-config JSON to variables
+      uses: antifree/json-to-variables@v1.0.1
+      with:
+        filename: ${{ env.PLATFORM_CONFIG }}
+        prefix: 'e2e'
+
     - id: connect-cluster
       name: Connect to cluster
       shell: bash
       run: |
-        if [ -z "${KUBE_CONFIG_DATA}" ]; then
-          echo "Error: KUBE_CONFIG_DATA secret cannot be found"
+        if [ -z "${{ env.e2e_kube-config-data }}" ]; then
+          echo "Error: kube config data property cannot be found"
           exit 1
         fi
 
-        if [ -z "${KUBE_ADMIN_USER_CTX}" ]; then
-          echo "Error: KUBE_ADMIN_USER_CTX secret cannot be found"
+        if [ -z "${{ env.e2e_kube-admin-user-ctx }}" ]; then
+          echo "Error: kube admin context property cannot be found"
           exit 1
         fi
 
-        if [ -z "${KUBE_USER_CTX}" ]; then
-          echo "Error: KUBE_USER_CTX secret cannot be found"
+        if [ -z "${{ env.e2e_kube-user-ctx }}" ]; then
+          echo "Error: kube user context property cannot be found"
           exit 1
         fi
 
-        # IMAGE_REGISTRY & IMAGE_REGISTRY_INSECURE are optional
+        if [ -z "${{ env.e2e_image-registry-pull-host }}" ]; then
+          echo "Error: image registry pull host property cannot be found"
+          exit 1
+        fi
+
+        if [ -z "${{ env.e2e_image-registry-push-host }}" ]; then
+          echo "Error: image registry build host property cannot be found"
+          exit 1
+        fi
+
+        if [ -n "${{ env.e2e_image-registry-user }}" ] && [ -n "${{ env.e2e_image-registry-token }}" ]; then
+          echo "Secured registry in use so login with docker"
+          docker login \
+            -u "${{ env.e2e_image-registry-user }}" \
+            -p "${{ env.e2e_image-registry-token }}" \
+            "${{ env.e2e_image-registry-push-host }}"
+        fi
 
         # Copy the kube config to the correct location for kubectl
         mkdir -p $HOME/.kube
-        echo -n "${KUBE_CONFIG_DATA}" | base64 -d > ${HOME}/.kube/config
+        echo -n "${{ env.e2e_kube-config-data }}" | base64 -d > ${HOME}/.kube/config
         if [ ! -f ${HOME}/.kube/config ]; then
           echo "Error: kube config file not created correctly"
           exit 1
         fi
 
         set -e
-        kubectl config use-context "${KUBE_ADMIN_USER_CTX}"
+        kubectl config use-context "${{ env.e2e_kube-admin-user-ctx }}"
         if [ $? != 0 ]; then
           echo "Error: Failed to select kube admin context. Is the config and context correct?"
           exit 1
         fi
         set +e
-
-        # Export the context variables
-        echo "KUBE_ADMIN_USER_CTX=${KUBE_ADMIN_USER_CTX}" >> $GITHUB_ENV
-        echo "KUBE_USER_CTX=${KUBE_USER_CTX}" >> $GITHUB_ENV
-        echo "IMAGE_REGISTRY=${IMAGE_REGISTRY}" >> $GITHUB_ENV
-        echo "IMAGE_REGISTRY_INSECURE=${IMAGE_REGISTRY_INSECURE}" >> $GITHUB_ENV
 
     - id: info
       name: Info
@@ -128,4 +172,44 @@ runs:
         EOF
 
         # Set the context to the user
-        kubectl config use-context "${{ env.KUBE_USER_CTX }}"
+        kubectl config use-context "${{ env.e2e_kube-user-ctx }}"
+
+    - id: extract-config
+      shell: bash
+      run: |
+        echo "IMAGE_REGISTRY_PUSH_HOST=${{ env.e2e_image-registry-push-host }}" >> $GITHUB_ENV
+        echo "IMAGE_REGISTRY_PULL_HOST=${{ env.e2e_image-registry-pull-host }}" >> $GITHUB_ENV
+        echo "IMAGE_REGISTRY_INSECURE=${{ env.e2e_image-registry-insecure }}" >> $GITHUB_ENV
+
+        #
+        # Export the image namespace if defined in the platform config
+        #
+        if [ -n "${{ env.e2e_image-namespace }}" ]; then
+          echo "IMAGE_NAMESPACE=${{ env.e2e_image-namespace }}" >> $GITHUB_ENV
+        fi
+
+        #
+        # Export the context used for admin and user
+        #
+        echo "KUBE_ADMIN_USER_CTX=${{ env.e2e_kube-admin-user-ctx }}" >> $GITHUB_ENV
+        echo "KUBE_USER_CTX=${{ env.e2e_kube-user-ctx }}" >> $GITHUB_ENV
+
+        #
+        # Export the flag for installing olm
+        #
+        echo "INSTALL_OLM=${{ env.e2e_install-olm }}" >> $GITHUB_ENV
+
+        #
+        # Clear out environment variables no longer required
+        #
+        echo "PLATFORM_CONFIG=" >> $GITHUB_ENV
+        echo "e2e_image-registry-push-host=" >> $GITHUB_ENV
+        echo "e2e_image-registry-pull-host=" >> $GITHUB_ENV
+        echo "e2e_image-namespace=" >> $GITHUB_ENV
+        echo "e2e_image-registry-user=" >> $GITHUB_ENV
+        echo "e2e_image-registry-token=" >> $GITHUB_ENV
+        echo "e2e_image-registry-insecure=" >> $GITHUB_ENV
+        echo "e2e_kube-admin-user-ctx=" >> $GITHUB_ENV
+        echo "e2e_kube-config-data=" >> $GITHUB_ENV
+        echo "e2e_kube-user-ctx=" >> $GITHUB_ENV
+        echo "e2e_install-olm=" >> $GITHUB_ENV

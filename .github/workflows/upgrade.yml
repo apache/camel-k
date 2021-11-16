@@ -49,7 +49,6 @@ concurrency:
 
 jobs:
   upgrade:
-
     runs-on: ubuntu-20.04
 
     steps:
@@ -59,75 +58,7 @@ jobs:
         persist-credentials: false
         submodules: recursive
 
-    - id: prepare-env
-      name: Prepare Test Environment
-      uses: ./.github/actions/kamel-prepare-env
+    - name: Execute Upgrade Tests
+      uses: ./.github/actions/e2e-upgrade
       with:
-        install-opm: true
-
-    - id: configure-platform
-      name: Configure Platform
-      uses: ./.github/actions/kamel-config-cluster
-      with:
-        cluster-type: ${{ steps.prepare-env.outputs.cluster-platform }}
-        olm: true
-
-    - name: Get Released Kamel CLI
-      shell: bash
-      run: |
-        export KAMEL_VERSION=$(make get-last-released-version)
-        curl -L https://github.com/apache/camel-k/releases/download/v${KAMEL_VERSION}/camel-k-client-${KAMEL_VERSION}-linux-64bit.tar.gz -o /tmp/kamel.tar.gz
-        pushd /tmp && tar -zxf kamel.tar.gz && popd > /dev/null
-        if [ ! -x /tmp/kamel ]; then
-          echo "ERROR: No ${KAMEL_VERSION} downloaded correctly"
-          exit 1
-        fi
-        sudo mv /tmp/kamel /usr/local/bin/
-        if [ $? == 0 ]; then
-          echo "Kamel version installed: $(kamel version)"
-        else
-          echo "ERROR: Failed to install kamel binary ${KAMEL_VERSION}"
-          exit 1
-        fi
-
-    - id: build-kamel-binary
-      name: Build Kamel Binary
-      uses: ./.github/actions/kamel-build
-      with:
-        image-registry: ${{ steps.configure-platform.outputs.image-registry }}
-        # Avoid overwriting last-released version of binary
-        install-kamel-binary: false
-
-    - id: build-kamel-bundle
-      name: Build Kamel Metadata Bundle
-      uses: ./.github/actions/kamel-build-bundle
-      with:
-        image-registry: ${{ steps.configure-platform.outputs.image-registry }}
-        local-image-name: ${{ steps.build-kamel-binary.outputs.local-image-name }}
-        local-image-version: ${{ steps.build-kamel-binary.outputs.local-image-version }}
-
-    - name: Run IT
-      run: |
-        # Use the last released Kamel CLI
-        export RELEASED_KAMEL_BIN=/usr/local/bin/kamel
-
-        echo "Kamel version: $(${RELEASED_KAMEL_BIN} version)"
-
-        # Configure install options
-        export CUSTOM_IMAGE=${{ steps.build-kamel-binary.outputs.local-image-name }}
-        export CUSTOM_VERSION=${{ steps.build-kamel-binary.outputs.local-image-version }}
-        export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
-        export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
-        export KAMEL_INSTALL_REGISTRY=${{ steps.configure-platform.outputs.image-registry }}
-        export KAMEL_INSTALL_REGISTRY_INSECURE=${{ steps.configure-platform.outputs.image-registry-insecure }}
-
-        # Configure test options
-        export CAMEL_K_PREV_IIB=quay.io/operatorhubio/catalog:latest
-        export CAMEL_K_NEW_IIB=${{ steps.build-kamel-bundle.outputs.local-image-bundle-index }}
-        export KAMEL_K_TEST_RELEASE_VERSION=$(make get-last-released-version)
-        export KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
-        export CAMEL_K_PREV_UPGRADE_CHANNEL=${{ env.PREV_XY_CHANNEL }}
-        export CAMEL_K_NEW_UPGRADE_CHANNEL=${{ env.NEW_XY_CHANNEL }}
-
-        # Then run integration tests
-        make test-upgrade
+        platform-config: ${{ secrets.E2E_PLATFORM_CONFIG }}

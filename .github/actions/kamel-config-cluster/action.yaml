@@ -23,29 +23,26 @@ inputs:
     description: 'The type of cluster required: [kind, ocp3, custom]'
     required: true
     default: 'kind'
-  kube-config-data:
-    description: 'The kube-config-data - required for custom config only'
+  platform-config:
+    description: 'The JSON configuration of the platform - required for custom platform type only'
     required: false
-  kube-admin-user-ctx:
-    description: 'The kube-admin-user-ctx - required for custom config only'
-    required: false
-  kube-user-ctx:
-    description: 'The kube-user-ctx - required for custom config only'
-    required: false
-  image-registry:
-    description: 'The image-registry - required for custom config only'
-    required: false
-  image-registry-insecure:
-    description: 'The image-registry-insecure - required for custom config only'
-    required: false
-  olm:
-    description: 'Check for & install OLM alongside cluster for bundle-related operations'
-    required: false
-    default: false
 
 runs:
   using: "composite"
   steps:
+    - name: Override platform type if there is a custom platform-config
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.platform-config }}" ]; then
+          #
+          # Have custom platform-config so override platform-type
+          #
+          echo "PLATFORM_TYPE=custom" >> $GITHUB_ENV
+        else
+          echo "Info: No platform configuration supplied."
+          echo "PLATFORM_TYPE=${{ inputs.cluster-type }}" >> $GITHUB_ENV
+        fi
+
     #
     # TODO
     # Due to lack of if in steps, need to use conditional action which
@@ -57,7 +54,7 @@ runs:
       name: Maybe Execute Kind Cluster
       uses: ./.github/actions/conditional
       with:
-        if: ${{ inputs.cluster-type == 'kind' }}
+        if: ${{ env.PLATFORM_TYPE == 'kind' }}
         step: |
           uses: ./.github/actions/kamel-config-cluster-kind
 
@@ -65,7 +62,7 @@ runs:
       name: Maybe Execute Minishift Cluster
       uses: ./.github/actions/conditional
       with:
-        if: ${{ inputs.cluster-type == 'ocp3' }}
+        if: ${{ env.PLATFORM_TYPE == 'ocp3' }}
         step: |
           uses: ./.github/actions/kamel-config-cluster-ocp3
 
@@ -73,13 +70,9 @@ runs:
       name: Maybe Execute Custom Cluster
       uses: ./.github/actions/conditional
       env:
-        KUBE_CONFIG_DATA: ${{ inputs.kube-config-data }}
-        KUBE_ADMIN_USER_CTX: ${{ inputs.kube-admin-user-ctx }}
-        KUBE_USER_CTX: ${{ inputs.kube-user-ctx }}
-        IMAGE_REGISTRY: ${{ inputs.image-registry }}
-        IMAGE_REGISTRY_INSECURE: ${{ inputs.image-registry-insecure }}
+        PLATFORM_CONFIG_DATA: ${{ inputs.platform-config }}
       with:
-        if: ${{ inputs.cluster-type == 'custom' }}
+        if: ${{ env.PLATFORM_TYPE == 'custom' }}
         step: |
           uses: ./.github/actions/kamel-config-cluster-custom
 
@@ -87,7 +80,7 @@ runs:
       name: Execute Invalid Cluster
       uses: ./.github/actions/conditional
       with:
-        if: ${{ inputs.cluster-type != 'kind' &&  inputs.cluster-type != 'ocp3' &&  inputs.cluster-type != 'custom' }}
+        if: ${{ env.PLATFORM_TYPE != 'kind' &&  env.PLATFORM_TYPE != 'ocp3' &&  env.PLATFORM_TYPE != 'custom' }}
         step: |
           shell: bash
           run: |
@@ -96,11 +89,34 @@ runs:
 
     - id: platform-info
       shell: bash
+      env:
+        DEFAULT_IMAGE_NAMESPACE: 'apache'
       run: |
-        echo "::set-output name=registry::$(echo ${{ env.IMAGE_REGISTRY }})"
-        echo "::set-output name=registry-insecure::$(echo ${{ env.IMAGE_REGISTRY_INSECURE }})"
+        echo "::set-output name=image-registry-push-host::$(echo ${{ env.IMAGE_REGISTRY_PUSH_HOST }})"
+        echo "::set-output name=image-registry-pull-host::$(echo ${{ env.IMAGE_REGISTRY_PULL_HOST }})"
+        echo "::set-output name=image-registry-insecure::$(echo ${{ env.IMAGE_REGISTRY_INSECURE }})"
         echo "::set-output name=kube-admin-user-ctx::$(echo ${{ env.KUBE_ADMIN_USER_CTX }})"
         echo "::set-output name=kube-user-ctx::$(echo ${{ env.KUBE_USER_CTX }})"
+        echo "::set-output name=install-olm::$(echo ${{ env.INSTALL_OLM }})"
+
+        if [ -n "${{ env.IMAGE_NAMESPACE }}" ]; then
+          echo "::set-output name=image-namespace::$(echo ${{ env.IMAGE_NAMESPACE }})"
+        else
+          echo "::set-output name=image-namespace::$(echo ${{ env.DEFAULT_IMAGE_NAMESPACE }})"
+        fi
+
+        #
+        # Clear out environment variables
+        #
+        echo "TEST_PLATFORM_CLUSTER=" >> $GITHUB_ENV
+        echo "IMAGE_REGISTRY_PUSH_HOST=" >> $GITHUB_ENV
+        echo "IMAGE_REGISTRY_PULL_HOST=" >> $GITHUB_ENV
+        echo "IMAGE_REGISTRY_INSECURE=" >> $GITHUB_ENV
+        echo "KUBE_ADMIN_USER_CTX=" >> $GITHUB_ENV
+        echo "KUBE_USER_CTX=" >> $GITHUB_ENV
+        echo "INSTALL_OLM=" >> $GITHUB_ENV
+        echo "IMAGE_NAMESPACE=" >> $GITHUB_ENV
+        echo "DEFAULT_IMAGE_NAMESPACE=" >> $GITHUB_ENV
 
       #
       # Install opm if required
@@ -122,9 +138,9 @@ runs:
       name: Install OLM
       shell: bash
       run: |
-        if [ "${{ inputs.olm }}" != "true" ]; then
-          # OLM not required
-          echo "OLM not required"
+        if [ "${{ steps.platform-info.outputs.install-olm }}" == "false" ]; then
+          # OLM explicitly not required - installed by default
+          echo "OLM install not required for this cluster"
           exit 0
         fi
 
@@ -162,12 +178,18 @@ runs:
         echo "Complete"
 
 outputs:
-  image-registry:
-    description: "Registry for storing images"
-    value: ${{ steps.platform-info.outputs.registry }}
+  image-registry-push-host:
+    description: "Registry for storing images host push interface"
+    value: ${{ steps.platform-info.outputs.image-registry-push-host }}
+  image-registry-pull-host:
+    description: "Registry for storing images host pull interface"
+    value: ${{ steps.platform-info.outputs.image-registry-pull-host }}
   image-registry-insecure:
-    description: "Whether the image registry require secure/authenticated access"
-    value: ${{ steps.platform-info.outputs.registry-insecure }}
+    description: "Whether the image registry requires secure/authenticated access"
+    value: ${{ steps.platform-info.outputs.image-registry-insecure }}
+  image-namespace:
+    description: "Registry namespace for storing images"
+    value: ${{ steps.platform-info.outputs.image-namespace }}
   kube-admin-user-ctx:
     description: "The admin user context of the cluster"
     value: ${{ steps.platform-info.outputs.kube-admin-user-ctx }}
