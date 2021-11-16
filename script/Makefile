@@ -22,7 +22,7 @@ BUILDAH_VERSION := 1.14.0
 KANIKO_VERSION := 0.17.1
 INSTALL_DEFAULT_KAMELETS := true
 CONTROLLER_GEN_VERSION := v0.4.1
-OPERATOR_SDK_VERSION := v1.5.0
+OPERATOR_SDK_VERSION := v1.14.0
 KUSTOMIZE_VERSION := v4.1.2
 BASE_IMAGE := adoptopenjdk/openjdk11:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
@@ -402,6 +402,11 @@ ifeq (, $(shell which operator-sdk))
 	}
 OPERATOR_SDK=$(GOBIN)/operator-sdk
 else
+	@{ \
+	echo -n "operator-sdk already installed: "; \
+  operator-sdk version | sed -n 's/.*"v\([^"]*\)".*/\1/p'; \
+	echo " If this is less than $(OPERATOR_SDK_VERSION) then please consider moving it aside and allowing the approved version to be downloaded."; \
+	}
 OPERATOR_SDK=$(shell which operator-sdk)
 endif
 
