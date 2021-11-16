@@ -188,5 +188,7 @@ runs:
     - id: extract-kube-config
       shell: bash
       run: |
-        echo "IMAGE_REGISTRY=" >> $GITHUB_ENV
+        echo "IMAGE_REGISTRY_PUSH_HOST=" >> $GITHUB_ENV
+        echo "IMAGE_REGISTRY_PULL_HOST=" >> $GITHUB_ENV
         echo "IMAGE_REGISTRY_INSECURE=false" >> $GITHUB_ENV
+        echo "INSTALL_OLM=false" >> $GITHUB_ENV

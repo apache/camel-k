@@ -37,7 +37,9 @@ runs:
     - id: extract-config
       shell: bash
       run: |
-        echo "IMAGE_REGISTRY=${{ env.KIND_REGISTRY }}" >> $GITHUB_ENV
+        # Kind has the same interface for both pushing and pulling images in its registry
+        echo "IMAGE_REGISTRY_PUSH_HOST=${{ env.KIND_REGISTRY }}" >> $GITHUB_ENV
+        echo "IMAGE_REGISTRY_PULL_HOST=${{ env.KIND_REGISTRY }}" >> $GITHUB_ENV
         echo "IMAGE_REGISTRY_INSECURE=true" >> $GITHUB_ENV
 
         #
@@ -46,3 +48,9 @@ runs:
         #
         echo "KUBE_ADMIN_USER_CTX=$(kubectl config current-context)" >> $GITHUB_ENV
         echo "KUBE_USER_CTX=$(kubectl config current-context)" >> $GITHUB_ENV
+
+        #
+        # Export the flag for installing olm
+        #
+        echo "INSTALL_OLM=true" >> $GITHUB_ENV
+

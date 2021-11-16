@@ -19,9 +19,16 @@ name: kamel-build-bundle
 description: 'Builds kamel operator metadata bundle'
 
 inputs:
-  image-registry:
-    description: 'Location of image registry to push bundle'
-    required: true
+  image-registry-push-host:
+    description: 'Location of image registry push host'
+    required: false
+  image-registry-pull-host:
+    description: 'Location of image registry pull host'
+    required: false
+  image-namespace:
+    description: 'Namespace in which to store the image'
+    required: false
+    default: 'apache'
   local-image-name:
     description: 'Reference of the camel-k image'
     required: true
@@ -44,11 +51,32 @@ runs:
           exit 1
         fi
 
-        # replace image
-        $(cd config/manifests && kustomize edit set image "docker.io/apache/camel-k=${{ inputs.local-image-name }}:${{ inputs.local-image-version }}")
+        if [ -z "${{ inputs.local-image-name }}" ]; then
+          echo "Error: local-image-name not defined"
+          exit 1
+        fi
 
+        if [ -z "${{ inputs.local-image-version }}" ]; then
+          echo "Error: local-image-version not defined"
+          exit 1
+        fi
+
+        if [ -z "${{ inputs.image-registry-push-host }}" ]; then
+          echo "Error: image-registry-push-host not defined"
+          exit 1
+        fi
+
+        if [ -z "${{ inputs.image-registry-pull-host }}" ]; then
+          echo "Error: image-registry-pull-host not defined"
+          exit 1
+        fi
+
+        #
+        # Build with the PUSH host to ensure the correct image:tag
+        # for docker to push the image.
+        #
+        export LOCAL_IMAGE_BUNDLE=${{ inputs.image-registry-push-host }}/${{ inputs.image-namespace }}/camel-k-bundle:${{ inputs.local-image-version }}
         export CUSTOM_IMAGE=${{ inputs.local-image-name }}
-        export LOCAL_IMAGE_BUNDLE=${{ inputs.image-registry }}/apache/camel-k-bundle:${{ inputs.local-image-version }}
 
         export PREV_XY_CHANNEL=stable-$(make get-last-released-version | grep -Po "\d.\d")
         echo "PREV_XY_CHANNEL=${PREV_XY_CHANNEL}" >> $GITHUB_ENV
@@ -62,22 +90,92 @@ runs:
 
         docker push ${LOCAL_IMAGE_BUNDLE}
 
+        #
+        # Use the PULL host to ensure the correct image:tag
+        # is passed into the tests for the deployment to pull from
+        #
+        export LOCAL_IMAGE_BUNDLE=${{ inputs.image-registry-pull-host }}/${{ inputs.image-namespace }}/camel-k-bundle:${{ inputs.local-image-version }}
         echo "::set-output name=local-image-bundle::$(echo ${LOCAL_IMAGE_BUNDLE})"
 
     - id: build-index-image
       name: Create New Index Image
       shell: bash
       run: |
-        export LOCAL_IIB=${{ inputs.image-registry }}/apache/camel-k-iib:${{ inputs.local-image-version }}
+        export LOCAL_IIB=${{ inputs.image-registry-push-host }}/${{ inputs.image-namespace }}/camel-k-iib:${{ inputs.local-image-version }}
         if ! command -v opm &> /dev/null
         then
           echo "opm could not be found. Has it not been installed?"
           exit 1
         fi
 
-        opm index add --bundles ${{ steps.build-bundle-image.outputs.local-image-bundle }} -c docker --from-index quay.io/operatorhubio/catalog:latest --tag ${LOCAL_IIB} --skip-tls
+        # Shorten the vars
+        PUSH_REGISTRY=${{ inputs.image-registry-push-host }}
+        PULL_REGISTRY=${{ inputs.image-registry-pull-host }}
+
+        #
+        # opm requires an active pull registry from which to verify (if not download) the bundle image
+        # Since the image-registry-pull-host may not be visible (eg. in the case of openshift), we need
+        # to fake the registry to allow opm to complete its task of creating an index image.
+        #
+        # 1. Add and alias to the hosts file for the name of the image-registry
+        # 2. Run a container of registry:2 docker image on the same port as the image-registry (port 80 if not present)
+        # 3. Tag and them push the image to the registry using docker
+        # 4. Run opm
+        #
+
+        if [ "${PULL_REGISTRY}" != "${PUSH_REGISTRY}" ]; then
+          #
+          # With the registry interfaces different then good chance that
+          # pull registry is not externally accessible, eg. openshift
+          #
+
+          PULL_HOST=$(echo ${PULL_REGISTRY} | sed -e 's/\(.*\):.*/\1/')
+          PULL_PORT=$(echo ${PULL_REGISTRY} | sed -e 's/.*:\([0-9]\+\).*/\1/')
+          if [ -z "${PULL_PORT}" ]; then
+            # Use standard http port
+            PULL_PORT=80
+          fi
+
+          echo "Impersonating registry at ${PULL_HOST}:${PULL_PORT}"
+
+          #
+          # Update both ipv4 and ipv6 addresses if they exist
+          # 127.0.0.1 localhost
+          # ::1     localhost ip6-localhost ip6-loopback
+          sudo sed -i "s/\(localhost.*\)/\1 ${PULL_HOST}/g" /etc/hosts
+
+          #
+          # Bring up the registry:2 instance if not already started
+          #
+          reg=$(docker ps -q -f name=triage-registry)
+          if [ -z "${reg}" ]; then
+            docker run -d -p ${PULL_PORT}:5000 --name triage-registry registry:2
+          fi
+
+          #
+          # Tag the bundle image
+          #
+          docker tag \
+            ${PUSH_REGISTRY}/${{ inputs.image-namespace }}/camel-k-bundle:${{ inputs.local-image-version }} \
+            ${{ steps.build-bundle-image.outputs.local-image-bundle }}
+
+          # Push the bundle image to the registry
+          #
+          docker push ${{ steps.build-bundle-image.outputs.local-image-bundle }}
+        fi
+
+        #
+        # Construct an index image containing the newly built bundle image
+        #
+        opm index add \
+          -c docker --skip-tls \
+          --bundles ${{ steps.build-bundle-image.outputs.local-image-bundle }} \
+          --from-index quay.io/operatorhubio/catalog:latest \
+          --tag ${LOCAL_IIB}
+
         docker push ${LOCAL_IIB}
 
+        export LOCAL_IIB=${{ inputs.image-registry-pull-host }}/${{ inputs.image-namespace }}/camel-k-iib:${{ inputs.local-image-version }}
         echo "::set-output name=local-image-bundle-index::$(echo ${LOCAL_IIB})"
 
 outputs:

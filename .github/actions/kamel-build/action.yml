@@ -19,9 +19,16 @@ name: kamel-build
 description: 'Builds kamel operator binary'
 
 inputs:
-  image-registry:
-    description: 'Location of image registry if required'
+  image-registry-push-host:
+    description: 'Location of image registry push host'
     required: false
+  image-registry-pull-host:
+    description: 'Location of image registry pull host'
+    required: false
+  image-namespace:
+    description: 'Namespace in which to store the image'
+    required: false
+    default: 'apache'
   make-rules:
     description: 'Override the default make rules'
     required: false
@@ -39,9 +46,12 @@ runs:
       run: |
         echo "Build Kamel from source"
 
-        if [ -n "${{ inputs.image-registry }}" ]; then
-          export CUSTOM_IMAGE=${{ inputs.image-registry }}/apache/camel-k
-          echo "::set-output name=custom-img::$(echo ${CUSTOM_IMAGE})"
+        if [ -n "${{ inputs.image-registry-push-host }}" ]; then
+          #
+          # Build with the PUSH host to ensure the correct image:tag
+          # for docker to push the image.
+          #
+          export CUSTOM_IMAGE=${{ inputs.image-registry-push-host }}/${{ inputs.image-namespace }}/camel-k
         fi
 
         RULES="PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images"
@@ -49,7 +59,7 @@ runs:
           RULES="${{ inputs.make-rules }}"
         fi
 
-        if [ -n "${{ inputs.image-registry }}" ]; then
+        if [ -n "${{ inputs.image-registry-push-host }}" ]; then
           RULES="${RULES} images-push"
         fi
 
@@ -61,14 +71,15 @@ runs:
           echo "Kamel version installed: $(kamel version)"
         fi
 
-        echo "::set-output name=local-img-name::$(make get-image)"
+        #
+        # Use the PULL host to ensure the correct image:tag
+        # is passed into the tests for the deployment to pull from
+        #
+        export LOCAL_IMAGE_NAME=${{ inputs.image-registry-pull-host }}/${{ inputs.image-namespace }}/camel-k
+        echo "::set-output name=local-img-name::$(echo ${LOCAL_IMAGE_NAME})"
         echo "::set-output name=local-img-version::$(make get-version)"
 
-
 outputs:
-  custom-image:
-    description: "Reference of the camel-k image"
-    value: ${{ steps.build-operator.outputs.custom-img }}
   local-image-name:
     description: "Reference of the camel-k image"
     value: ${{ steps.build-operator.outputs.local-img-name }}
