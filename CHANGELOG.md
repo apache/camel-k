@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - Cannot deploy XML integration with undertow [\#2746](https://github.com/apache/camel-k/issues/2746)
+- Release 1.7.0 [\#2743](https://github.com/apache/camel-k/issues/2743)
 - Camel-K - uninstall and namespace deletion w/ k8s let all Camel-K Integrations in this namespace alive [\#2533](https://github.com/apache/camel-k/issues/2533)
 - Reduce time for first Integration start [\#2520](https://github.com/apache/camel-k/issues/2520)
 - Install Error [\#2498](https://github.com/apache/camel-k/issues/2498)
