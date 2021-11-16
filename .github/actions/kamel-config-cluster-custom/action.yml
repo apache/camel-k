@@ -50,7 +50,7 @@ runs:
         fi
 
     - name: Platform-config JSON to variables
-      uses: antifree/json-to-variables@v1.0.1
+      uses: ./.github/actions/json-to-variables
       with:
         filename: ${{ env.PLATFORM_CONFIG }}
         prefix: 'e2e'
