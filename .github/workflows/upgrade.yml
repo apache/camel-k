@@ -75,10 +75,19 @@ jobs:
       shell: bash
       run: |
         export KAMEL_VERSION=$(make get-last-released-version)
-        curl -L https://github.com/apache/camel-k/releases/download/v${KAMEL_VERSION}/camel-k-client-${KAMEL_VERSION}-linux-64bit.tar.gz -o kamel.tar.gz
-        tar -zxf kamel.tar.gz
-        sudo mv kamel /usr/local/bin/
-        echo "Kamel version installed: $(kamel version)"
+        curl -L https://github.com/apache/camel-k/releases/download/v${KAMEL_VERSION}/camel-k-client-${KAMEL_VERSION}-linux-64bit.tar.gz -o /tmp/kamel.tar.gz
+        pushd /tmp && tar -zxf kamel.tar.gz && popd > /dev/null
+        if [ ! -x /tmp/kamel ]; then
+          echo "ERROR: No ${KAMEL_VERSION} downloaded correctly"
+          exit 1
+        fi
+        sudo mv /tmp/kamel /usr/local/bin/
+        if [ $? == 0 ]; then
+          echo "Kamel version installed: $(kamel version)"
+        else
+          echo "ERROR: Failed to install kamel binary ${KAMEL_VERSION}"
+          exit 1
+        fi
 
     - id: build-kamel-binary
       name: Build Kamel Binary

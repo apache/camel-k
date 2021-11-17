@@ -1824,6 +1824,14 @@ func NewTestNamespace(injectKnativeBroker bool) ctrl.Object {
 	return obj
 }
 
+func UninstallKamel(t *testing.T, args ...string) {
+	uargs := []string{"uninstall"}
+	uargs = append(uargs, args...)
+	if err := Kamel(uargs...).Execute(); err != nil {
+		t.Logf("Warning: An error occurred whilst trying to uninstall kamel: %s", err.Error())
+	}
+}
+
 func GetOutputString(command *cobra.Command) string {
 	var buf bytes.Buffer
 
