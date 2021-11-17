@@ -23,6 +23,7 @@ limitations under the License.
 package common
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -117,6 +118,26 @@ func TestIntegrationScale(t *testing.T) {
 			// Finally check it cascades into the Integration scale subresource Status field
 			Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
 				Should(gstruct.PointTo(BeNumerically("==", 1)))
+		})
+
+		t.Run("Scale integration with external image", func(t *testing.T) {
+			RegisterTestingT(t)
+
+			image := IntegrationPodImage(ns, name)()
+			Expect(image).NotTo(BeEmpty())
+			// Save resources by deleting the integration
+			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
+
+			Expect(Kamel("run", "-n", ns, "files/Java.java", "--name", "pre-built", "-t", fmt.Sprintf("container.image=%s", image)).Execute()).To(Succeed())
+			Eventually(IntegrationPhase(ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+			Eventually(IntegrationPodPhase(ns, "pre-built"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Expect(ScaleIntegration(ns, "pre-built", 0)).To(Succeed())
+			Eventually(IntegrationPod(ns, "pre-built"), TestTimeoutMedium).Should(BeNil())
+			Expect(ScaleIntegration(ns, "pre-built", 1)).To(Succeed())
+			Eventually(IntegrationPhase(ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+			Eventually(IntegrationPodPhase(ns, "pre-built"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+
+			Expect(Kamel("delete", "pre-built", "-n", ns).Execute()).To(Succeed())
 		})
 
 		// Clean up
