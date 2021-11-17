@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Could not pull base image - Build kit failed \(No matching credentials were found, falling back on anonymous\) [\#2748](https://github.com/apache/camel-k/issues/2748)
 - Cannot deploy XML integration with undertow [\#2746](https://github.com/apache/camel-k/issues/2746)
 - Release 1.7.0 [\#2743](https://github.com/apache/camel-k/issues/2743)
 - Camel-K - uninstall and namespace deletion w/ k8s let all Camel-K Integrations in this namespace alive [\#2533](https://github.com/apache/camel-k/issues/2533)
@@ -15,9 +16,11 @@
 - Secret type not supported with buildah on K3S [\#2136](https://github.com/apache/camel-k/issues/2136)
 - OLM installation may fail with default values [\#2113](https://github.com/apache/camel-k/issues/2113)
 - Expose operator information [\#1947](https://github.com/apache/camel-k/issues/1947)
+- not able to use json: MethodNotFoundException [\#1915](https://github.com/apache/camel-k/issues/1915)
 
 **Merged pull requests:**
 
+- chore\(release\): Remove staging repository [\#2750](https://github.com/apache/camel-k/pull/2750) ([astefanutti](https://github.com/astefanutti))
 - chore\(e2e\): disable object truncation on test results [\#2745](https://github.com/apache/camel-k/pull/2745) ([tadayosi](https://github.com/tadayosi))
 - feat: Health trait [\#2740](https://github.com/apache/camel-k/pull/2740) ([astefanutti](https://github.com/astefanutti))
 - feat\(cmd\): OLM default discovery [\#2735](https://github.com/apache/camel-k/pull/2735) ([squakez](https://github.com/squakez))
