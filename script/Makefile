@@ -16,6 +16,7 @@
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION ?= 1.9.0-SNAPSHOT
 OPERATOR_VERSION := $(subst -SNAPSHOT,,$(VERSION))
+LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION := 1.8.0
 RUNTIME_VERSION := 1.11.0
 BUILDAH_VERSION := 1.14.0
@@ -50,6 +51,12 @@ LINT_DEADLINE := 10m
 CHANNELS ?= $(OPERATOR_VERSION)
 DEFAULT_CHANNEL ?= $(OPERATOR_VERSION)
 PACKAGE := camel-k
+CSV_VERSION := $(CUSTOM_VERSION:-SNAPSHOT=)
+CSV_DISPLAY_NAME := Camel K Operator
+CSV_SUPPORT := Camel
+CSV_REPLACES := $(LAST_RELEASED_IMAGE_NAME).v$(LAST_RELEASED_VERSION)
+CSV_FILENAME := $(PACKAGE).clusterserviceversion.yaml
+CSV_PATH := config/manifests/bases/$(CSV_FILENAME)
 
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
@@ -325,6 +332,9 @@ get-image:
 get-version:
 	@echo $(CUSTOM_VERSION)
 
+get-last-released-img-name:
+	@echo $(LAST_RELEASED_IMAGE_NAME)
+
 get-last-released-version:
 	@echo $(LAST_RELEASED_VERSION)
 
@@ -338,7 +348,7 @@ git-tag:
 	./script/git_tag.sh $(CUSTOM_VERSION) $(RELEASE_GIT_REMOTE)
 
 cross-compile:
-	# we must wrap the goldflags parameters with quotes as they will need to 
+	# we must wrap the goldflags parameters with quotes as they will need to
 	# be processed as a single argument by the cross compile script
 	./script/cross_compile.sh $(CUSTOM_VERSION) $(subst ","\",$(GOFLAGS))
 
@@ -464,7 +474,22 @@ BUNDLE_PACKAGE := --package=$(PACKAGE)
 endif
 BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL) $(BUNDLE_PACKAGE)
 
-bundle: set-version generate-crd $(BUNDLE_CAMEL_APIS) kustomize operator-sdk
+#
+# Tailor the manifest according to default values for this project
+# Note. to successfully make the bundle the name must match that specified in the PROJECT file
+#
+pre-bundle:
+# bundle name must match that which appears in PROJECT file
+	@sed -i 's/projectName: .*/projectName: $(PACKAGE)/' PROJECT
+	@sed -i 's~^    containerImage: .*~    containerImage: $(CUSTOM_IMAGE):$(CUSTOM_VERSION)~' $(CSV_PATH)
+	@sed -i 's/^    support: .*/    support: $(CSV_SUPPORT)/' $(CSV_PATH)
+	@sed -i 's/^  name: .*.\(v.*\)/  name: $(PACKAGE).v$(CSV_VERSION)/' $(CSV_PATH)
+	@sed -i 's/^  displayName: .*/  displayName: $(CSV_DISPLAY_NAME)/' $(CSV_PATH)
+	@sed -i 's/^  replaces: .*/  replaces: $(CSV_REPLACES)/' $(CSV_PATH)
+	@sed -i 's/^  version: .*/  version: $(CSV_VERSION)/' $(CSV_PATH)
+	@sed -i '/  version: ${CSV_VERSION}/a \ \ replaces: $(CSV_REPLACES)' $(CSV_PATH)
+
+bundle: set-version generate-crd $(BUNDLE_CAMEL_APIS) kustomize operator-sdk pre-bundle
 	@# Sets the operator image to the preferred image:tag
 	@cd config/manifests && $(KUSTOMIZE) edit set image $(IMAGE_NAME)=$(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 	@# Build kustomize manifests

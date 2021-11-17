@@ -47,18 +47,19 @@ runs:
         # replace image
         $(cd config/manifests && kustomize edit set image "docker.io/apache/camel-k=${{ inputs.local-image-name }}:${{ inputs.local-image-version }}")
 
-        # Patch CSV with the 'replaces' field to define the upgrade graph
-        # Use sed as the manifest/bases file is not included in the kustomize config
-        BASE_VERSION=$(echo ${{ inputs.local-image-version }} | grep -Po "\d.\d.\d")
-        sed -i "/  version: ${BASE_VERSION}/a \ \ replaces: camel-k-operator.v$(make get-last-released-version)" config/manifests/bases/camel-k.clusterserviceversion.yaml
-
         export CUSTOM_IMAGE=${{ inputs.local-image-name }}
         export LOCAL_IMAGE_BUNDLE=${{ inputs.image-registry }}/apache/camel-k-bundle:${{ inputs.local-image-version }}
+
         export PREV_XY_CHANNEL=stable-$(make get-last-released-version | grep -Po "\d.\d")
         echo "PREV_XY_CHANNEL=${PREV_XY_CHANNEL}" >> $GITHUB_ENV
         export NEW_XY_CHANNEL=stable-$(make get-version | grep -Po "\d.\d")
         echo "NEW_XY_CHANNEL=${NEW_XY_CHANNEL}" >> $GITHUB_ENV
-        make bundle-build BUNDLE_IMAGE_NAME=${LOCAL_IMAGE_BUNDLE} DEFAULT_CHANNEL="${NEW_XY_CHANNEL}" CHANNELS="${NEW_XY_CHANNEL}"
+
+        make bundle-build \
+          BUNDLE_IMAGE_NAME=${LOCAL_IMAGE_BUNDLE} \
+          DEFAULT_CHANNEL="${NEW_XY_CHANNEL}" \
+          CHANNELS="${NEW_XY_CHANNEL}"
+
         docker push ${LOCAL_IMAGE_BUNDLE}
 
         echo "::set-output name=local-image-bundle::$(echo ${LOCAL_IMAGE_BUNDLE})"

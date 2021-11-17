@@ -38,6 +38,8 @@ import (
 
 func TestOperatorUpgrade(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
+		defer UninstallKamel(t, "--all", "--olm=false")
+
 		version, ok := os.LookupEnv("KAMEL_K_TEST_RELEASE_VERSION")
 		Expect(ok).To(BeTrue())
 
@@ -112,9 +114,5 @@ func TestOperatorUpgrade(t *testing.T) {
 		// Check the Integration runs correctly
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-
-		// Clean up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-		Expect(Kamel("uninstall", "--all", "--olm=false").Execute()).To(Succeed())
 	})
 }

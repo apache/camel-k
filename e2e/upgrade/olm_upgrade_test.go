@@ -46,6 +46,9 @@ import (
 const catalogSourceName = "test-camel-k-source"
 
 func TestOLMAutomaticUpgrade(t *testing.T) {
+	// Clean up cluster-wide resources that are not removed by OLM
+	defer UninstallKamel(t, "--all", "--olm=false")
+
 	prevIIB := os.Getenv("CAMEL_K_PREV_IIB")
 	newIIB := os.Getenv("CAMEL_K_NEW_IIB")
 	kamel := os.Getenv("RELEASED_KAMEL_BIN")
@@ -98,6 +101,7 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 
 		prevCSVVersion = clusterServiceVersion(noAdditionalConditions, ns)().Spec.Version
 		prevIPVersionPrefix = fmt.Sprintf("%d.%d", prevCSVVersion.Version.Major, prevCSVVersion.Version.Minor)
+		t.Logf("Upgrading from Previous CSV Version: %s", prevCSVVersion.Version.String())
 
 		// Check the operator pod is running
 		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
@@ -192,8 +196,6 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 			// Clean up
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 			Expect(Kamel("uninstall", "-n", ns).Execute()).To(Succeed())
-			// Clean up cluster-wide resources that are not removed by OLM
-			Expect(Kamel("uninstall", "--all", "--olm=false").Execute()).To(Succeed())
 		})
 	})
 }
