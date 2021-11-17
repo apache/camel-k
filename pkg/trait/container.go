@@ -167,8 +167,8 @@ func isValidPullPolicy(policy corev1.PullPolicy) bool {
 }
 
 func (t *containerTrait) Apply(e *Environment) error {
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		return t.configureImageIntegrationKit(e)
+	if err := t.configureImageIntegrationKit(e); err != nil {
+		return err
 	}
 	return t.configureContainer(e)
 }
