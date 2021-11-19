@@ -12,6 +12,7 @@
 - Camel-K - uninstall and namespace deletion w/ k8s let all Camel-K Integrations in this namespace alive [\#2533](https://github.com/apache/camel-k/issues/2533)
 - Reduce time for first Integration start [\#2520](https://github.com/apache/camel-k/issues/2520)
 - Install Error [\#2498](https://github.com/apache/camel-k/issues/2498)
+- If the pod is in CrashLoopBackOff, the phase is reported as Running [\#2445](https://github.com/apache/camel-k/issues/2445)
 - Wait for dependencies  [\#2151](https://github.com/apache/camel-k/issues/2151)
 - Secret type not supported with buildah on K3S [\#2136](https://github.com/apache/camel-k/issues/2136)
 - OLM installation may fail with default values [\#2113](https://github.com/apache/camel-k/issues/2113)
