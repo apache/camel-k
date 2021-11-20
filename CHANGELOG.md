@@ -27,6 +27,7 @@
 - feat\(cmd\): OLM default discovery [\#2735](https://github.com/apache/camel-k/pull/2735) ([squakez](https://github.com/squakez))
 - fix\(e2e\): Update latest released version to fix upgrade tests [\#2734](https://github.com/apache/camel-k/pull/2734) ([astefanutti](https://github.com/astefanutti))
 - chore: Upgrade Knative to version 1.0.0 [\#2733](https://github.com/apache/camel-k/pull/2733) ([astefanutti](https://github.com/astefanutti))
+- Add pojo-jar example [\#2731](https://github.com/apache/camel-k/pull/2731) ([dweber019](https://github.com/dweber019))
 - feat\(cmd\): operator additional info [\#2730](https://github.com/apache/camel-k/pull/2730) ([squakez](https://github.com/squakez))
 - chore\(sbo\): upgrade Servce Binding Operator to 1.0.0 GA [\#2729](https://github.com/apache/camel-k/pull/2729) ([johnpoth](https://github.com/johnpoth))
 - Fix \#2724: assign an ID to the binding main route [\#2727](https://github.com/apache/camel-k/pull/2727) ([nicolaferraro](https://github.com/nicolaferraro))
