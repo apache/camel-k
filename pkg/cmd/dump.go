@@ -21,9 +21,10 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/apache/camel-k/pkg/util"
 	"io"
 	"os"
+
+	"github.com/apache/camel-k/pkg/util"
 
 	"github.com/spf13/cobra"
 	v1 "k8s.io/api/core/v1"

@@ -20,9 +20,10 @@ package log
 import (
 	"bufio"
 	"context"
-	"go.uber.org/multierr"
 	"io"
 	"time"
+
+	"go.uber.org/multierr"
 
 	klog "github.com/apache/camel-k/pkg/util/log"
 	"github.com/pkg/errors"

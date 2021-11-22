@@ -19,12 +19,13 @@ package generators
 
 import (
 	"fmt"
-	"github.com/apache/camel-k/pkg/util"
 	"io"
 	"os"
 	"path"
 	"reflect"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util"
 
 	"gopkg.in/yaml.v2"
 	"k8s.io/gengo/args"

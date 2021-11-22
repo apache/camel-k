@@ -19,10 +19,11 @@ package client
 
 import (
 	"fmt"
-	"github.com/apache/camel-k/pkg/util"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/apache/camel-k/pkg/util"
 
 	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	camelv1alpha1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"

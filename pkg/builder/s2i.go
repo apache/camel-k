@@ -22,7 +22,6 @@ import (
 	"compress/gzip"
 	"context"
 	"fmt"
-	"github.com/apache/camel-k/pkg/util"
 	"io"
 	"io/ioutil"
 	"os"
@@ -30,6 +29,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/apache/camel-k/pkg/util"
 
 	"github.com/pkg/errors"
 

@@ -20,11 +20,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/apache/camel-k/pkg/util"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util"
 
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	clientscheme "k8s.io/client-go/kubernetes/scheme"

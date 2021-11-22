@@ -19,7 +19,6 @@ package generators
 
 import (
 	"fmt"
-	"github.com/apache/camel-k/pkg/util"
 	"io"
 	"os"
 	"path"
@@ -27,6 +26,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util"
 
 	"k8s.io/gengo/args"
 	"k8s.io/gengo/generator"

@@ -20,11 +20,12 @@ package install
 import (
 	"context"
 	"fmt"
-	"github.com/apache/camel-k/pkg/util"
 	"io/ioutil"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util"
 
 	"github.com/pkg/errors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
