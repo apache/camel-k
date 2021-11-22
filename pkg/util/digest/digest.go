@@ -18,7 +18,8 @@ limitations under the License.
 package digest
 
 import (
-	// nolint: gosec
+	// this is needed to generate an SHA1 sum for Jars
+	// #nosec G505
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/base64"
@@ -262,17 +263,21 @@ func sortedTraitAnnotationsKeys(it *v1.Integration) []string {
 func ComputeSHA1(elem ...string) (string, error) {
 	file := path.Join(elem...)
 
-	f, err := util.Open(file)
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-
 	// #nosec G401
 	h := sha1.New()
-	if _, err := io.Copy(h, f); err != nil {
-		return "", err
-	}
 
-	return base64.StdEncoding.EncodeToString(h.Sum(nil)), nil
+	err := util.WithFileReader(file, func(file io.Reader) error {
+		if _, err := io.Copy(h, file); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	var sum string
+
+	if err != nil {
+		sum = base64.StdEncoding.EncodeToString(h.Sum(nil))
+	}
+	return sum, err
 }

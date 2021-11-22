@@ -104,6 +104,7 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 	}
 
 	newStdR, newStdW, pipeErr := os.Pipe()
+	// #nosec G307
 	defer newStdW.Close()
 
 	if pipeErr != nil {

@@ -90,17 +90,15 @@ func (g *traitDocGen) GenerateType(context *generator.Context, t *types.Type, ou
 
 	g.generatedTraitFiles = append(g.generatedTraitFiles, traitFile)
 
-	file, content, err := readFile(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
+	return util.WithFileContent(filename, func(file *os.File, data []byte) error {
+		content := strings.Split(string(data), "\n")
 
-	writeTitle(traitID, &content)
-	writeDescription(t, traitID, &content)
-	writeFields(t, traitID, &content)
+		writeTitle(traitID, &content)
+		writeDescription(t, traitID, &content)
+		writeFields(t, traitID, &content)
 
-	return writeFile(file, content)
+		return writeFile(file, content)
+	})
 }
 
 func (g *traitDocGen) Finalize(c *generator.Context, w io.Writer) error {
@@ -112,25 +110,23 @@ func (g *traitDocGen) FinalizeNav(*generator.Context) error {
 	navPath := g.arguments.CustomArgs.(*CustomArgs).NavPath
 	filename := path.Join(docDir, navPath)
 
-	file, content, err := readFile(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
+	return util.WithFileContent(filename, func(file *os.File, data []byte) error {
+		content := strings.Split(string(data), "\n")
 
-	pre, post := split(content, adocNavMarkerStart, adocNavMarkerEnd)
+		pre, post := split(content, adocNavMarkerStart, adocNavMarkerEnd)
 
-	content = append([]string(nil), pre...)
-	content = append(content, adocNavMarkerStart)
-	sort.Strings(g.generatedTraitFiles)
-	for _, t := range g.generatedTraitFiles {
-		name := traitNameFromFile(t)
-		content = append(content, "** xref:traits:"+t+"["+name+"]")
-	}
-	content = append(content, adocNavMarkerEnd)
-	content = append(content, post...)
+		content = append([]string(nil), pre...)
+		content = append(content, adocNavMarkerStart)
+		sort.Strings(g.generatedTraitFiles)
+		for _, t := range g.generatedTraitFiles {
+			name := traitNameFromFile(t)
+			content = append(content, "** xref:traits:"+t+"["+name+"]")
+		}
+		content = append(content, adocNavMarkerEnd)
+		content = append(content, post...)
 
-	return writeFile(file, content)
+		return writeFile(file, content)
+	})
 }
 
 func traitNameFromFile(file string) string {

@@ -198,7 +198,7 @@ func generateProjectStructure(context Context, project Project) error {
 	}
 
 	if context.SettingsContent != nil {
-		if err := util.WriteFileWithContent(context.Path, "settings.xml", context.SettingsContent); err != nil {
+		if err := util.WriteFileWithContent(path.Join(context.Path, "settings.xml"), context.SettingsContent); err != nil {
 			return err
 		}
 	}
@@ -221,7 +221,7 @@ func generateProjectStructure(context Context, project Project) error {
 		if len(bytes) > 0 {
 			Log.Infof("write entry: %s (%d bytes)", k, len(bytes))
 
-			err = util.WriteFileWithContent(context.Path, k, bytes)
+			err = util.WriteFileWithContent(path.Join(context.Path, k), bytes)
 			if err != nil {
 				return err
 			}

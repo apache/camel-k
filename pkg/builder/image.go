@@ -175,7 +175,8 @@ func imageContext(ctx *builderContext, selector artifactsSelector) error {
 
 	for _, entry := range ctx.Resources {
 		filePath, fileName := path.Split(entry.Target)
-		if err := util.WriteFileWithContent(path.Join(contextDir, filePath), fileName, entry.Content); err != nil {
+		fullPath := path.Join(contextDir, filePath, fileName)
+		if err := util.WriteFileWithContent(fullPath, entry.Content); err != nil {
 			return err
 		}
 	}

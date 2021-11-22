@@ -55,29 +55,21 @@ type dumpCmdOptions struct {
 	LogLines int `mapstructure:"logLines"`
 }
 
-func (o *dumpCmdOptions) dump(cmd *cobra.Command, args []string) error {
+func (o *dumpCmdOptions) dump(cmd *cobra.Command, args []string) (err error) {
 	c, err := o.GetCmdClient()
 	if err != nil {
-		return err
+		return
 	}
+
 	if len(args) == 1 {
-		fileName := args[0]
-		writer, err := util.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0o777)
-		if err != nil {
-			return err
-		}
-		err = dumpNamespace(o.Context, c, o.Namespace, writer, o.LogLines)
-		if err != nil {
-			return err
-		}
-		defer writer.Close()
+		err = util.WithFile(args[0], os.O_RDWR|os.O_CREATE, 0o644, func(file *os.File) error {
+			return dumpNamespace(o.Context, c, o.Namespace, file, o.LogLines)
+		})
 	} else {
-		err := dumpNamespace(o.Context, c, o.Namespace, cmd.OutOrStdout(), o.LogLines)
-		if err != nil {
-			return err
-		}
+		err = dumpNamespace(o.Context, c, o.Namespace, cmd.OutOrStdout(), o.LogLines)
 	}
-	return nil
+
+	return
 }
 
 func dumpNamespace(ctx context.Context, c client.Client, ns string, out io.Writer, logLines int) error {

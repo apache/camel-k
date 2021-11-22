@@ -99,13 +99,10 @@ func (o *initCmdOptions) writeFromTemplate(language v1.Language, fileName string
 	if err != nil {
 		return err
 	}
-	out, err := util.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0o777)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
 
-	return tmpl.Execute(out, params)
+	return util.WithFile(fileName, os.O_RDWR|os.O_CREATE, 0o644, func(file *os.File) error {
+		return tmpl.Execute(file, params)
+	})
 }
 
 func (o *initCmdOptions) extractLanguage(fileName string) *v1.Language {

@@ -88,27 +88,24 @@ func (g *traitMetaDataGen) GenerateType(context *generator.Context, t *types.Typ
 	return nil
 }
 
-func (g *traitMetaDataGen) Finalize(c *generator.Context, w io.Writer) error {
+func (g *traitMetaDataGen) Finalize(c *generator.Context, w io.Writer) (err error) {
 	deployDir := g.arguments.CustomArgs.(*CustomArgs).ResourceDir
 	traitFile := "traits.yaml"
 	filename := path.Join(deployDir, traitFile)
 
-	var file *os.File
-	var err error
-	if file, err = util.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0o777); err != nil {
-		return err
-	}
-	if err = file.Truncate(0); err != nil {
-		return err
-	}
-	defer file.Close()
+	return util.WithFile(filename, os.O_RDWR|os.O_CREATE, 0o777, func(file *os.File) error {
+		if err := file.Truncate(0); err != nil {
+			return err
+		}
 
-	data, err := yaml.Marshal(g.Root)
-	if err != nil {
-		fmt.Fprintf(file, "error: %v", err)
-	}
-	fmt.Fprintf(file, "%s", string(data))
-	return nil
+		data, err := yaml.Marshal(g.Root)
+		if err != nil {
+			fmt.Fprintf(file, "error: %v", err)
+		}
+		fmt.Fprintf(file, "%s", string(data))
+
+		return nil
+	})
 }
 
 func (g *traitMetaDataGen) getTraitID(t *types.Type) string {
