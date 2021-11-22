@@ -67,14 +67,15 @@ func lookupKitsForIntegration(ctx context.Context, c ctrl.Reader, integration *v
 	}
 
 	kits := make([]v1.IntegrationKit, 0)
-	for _, kit := range list.Items {
-		match, err := integrationMatches(integration, &kit)
+	for i := range list.Items {
+		kit := &list.Items[i]
+		match, err := integrationMatches(integration, kit)
 		if err != nil {
 			return nil, err
 		} else if !match {
 			continue
 		}
-		kits = append(kits, kit)
+		kits = append(kits, *kit)
 	}
 
 	return kits, nil
