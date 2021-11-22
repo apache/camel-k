@@ -19,9 +19,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/apache/camel-k/pkg/util"
 	"os"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util"
 )
 
 func main() {

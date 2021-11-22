@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"go.uber.org/multierr"
 	"io"
 	"io/ioutil"
 	"os"
@@ -31,6 +30,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+
+	"go.uber.org/multierr"
 
 	yaml2 "gopkg.in/yaml.v2"
 

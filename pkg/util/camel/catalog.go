@@ -19,10 +19,11 @@ package camel
 
 import (
 	"context"
-	"github.com/apache/camel-k/pkg/util"
 	"io/ioutil"
 	"os"
 	"path"
+
+	"github.com/apache/camel-k/pkg/util"
 
 	yaml2 "gopkg.in/yaml.v2"
 

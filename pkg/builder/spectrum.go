@@ -20,13 +20,14 @@ package builder
 import (
 	"bufio"
 	"context"
-	"go.uber.org/multierr"
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"go.uber.org/multierr"
 
 	spectrum "github.com/container-tools/spectrum/pkg/builder"
 

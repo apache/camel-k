@@ -19,11 +19,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/apache/camel-k/pkg/util"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/apache/camel-k/pkg/util"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/resources"

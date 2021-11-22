@@ -20,7 +20,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/apache/camel-k/pkg/util"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -29,6 +28,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/apache/camel-k/pkg/util"
 
 	"github.com/apache/camel-k/cmd/util/vfs-gen/multifs"
 	"github.com/apache/camel-k/pkg/base"

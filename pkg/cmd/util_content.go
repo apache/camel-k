@@ -19,13 +19,14 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/apache/camel-k/pkg/util"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util"
 )
 
 const (
