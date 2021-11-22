@@ -34,7 +34,7 @@ func TestValidatePropertyFiles_ShouldSucceed(t *testing.T) {
 	}
 
 	assert.Nil(t, tmpFile1.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile1.Name(), []byte("key=value"), 0o644))
+	assert.Nil(t, ioutil.WriteFile(tmpFile1.Name(), []byte("key=value"), 0o400))
 
 	inputValues := []string{tmpFile1.Name()}
 	err = validatePropertyFiles(inputValues)
@@ -50,7 +50,7 @@ func TestValidatePropertyFiles_ShouldFailNotAPropertiesFile(t *testing.T) {
 	}
 
 	assert.Nil(t, tmpFile1.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile1.Name(), []byte("key=value"), 0o644))
+	assert.Nil(t, ioutil.WriteFile(tmpFile1.Name(), []byte("key=value"), 0o400))
 
 	inputValues := []string{tmpFile1.Name()}
 	err = validatePropertyFiles(inputValues)

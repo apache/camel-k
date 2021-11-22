@@ -97,7 +97,7 @@ func generate(crdFilename, dslFilename, path string, isArray bool, destination s
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(destination, result, 0o666)
+	return ioutil.WriteFile(destination, result, 0o600)
 }
 
 func remapRef(ref string) string {

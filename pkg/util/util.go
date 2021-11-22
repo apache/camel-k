@@ -434,7 +434,7 @@ func MapToYAML(src map[string]interface{}) ([]byte, error) {
 }
 
 func WriteToFile(filePath string, fileContents string) error {
-	err := ioutil.WriteFile(filePath, []byte(fileContents), 0o777)
+	err := ioutil.WriteFile(filePath, []byte(fileContents), 0o400)
 	if err != nil {
 		return errors.Errorf("error writing file: %v", filePath)
 	}

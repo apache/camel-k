@@ -146,7 +146,7 @@ limitations under the License.
 	var finalContent []byte
 	finalContent = append(finalContent, []byte(header)...)
 	finalContent = append(finalContent, content...)
-	if err := ioutil.WriteFile(resourceFile, finalContent, 0o777); err != nil {
+	if err := ioutil.WriteFile(resourceFile, finalContent, 0o600); err != nil {
 		log.Fatalln(err)
 	}
 }
