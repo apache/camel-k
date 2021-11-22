@@ -161,7 +161,7 @@ func imageContext(ctx *builderContext, selector artifactsSelector) error {
 
 	contextDir := path.Join(ctx.Path, ContextDir)
 
-	err = os.MkdirAll(contextDir, 0o777)
+	err = os.MkdirAll(contextDir, 0o700)
 	if err != nil {
 		return err
 	}

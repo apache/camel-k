@@ -224,7 +224,7 @@ func CopyFile(src, dst string) (int64, error) {
 	}
 	defer source.Close()
 
-	err = os.MkdirAll(path.Dir(dst), 0o777)
+	err = os.MkdirAll(path.Dir(dst), 0o700)
 	if err != nil {
 		return 0, err
 	}
@@ -244,7 +244,7 @@ func WriteFileWithContent(buildDir string, relativePath string, content []byte) 
 	filePath := path.Join(buildDir, relativePath)
 	fileDir := path.Dir(filePath)
 	// Create dir if not present
-	err := os.MkdirAll(fileDir, 0o777)
+	err := os.MkdirAll(fileDir, 0o700)
 	if err != nil {
 		return errors.Wrap(err, "could not create dir for file "+relativePath)
 	}
@@ -343,7 +343,7 @@ func CreateDirectory(directory string) error {
 		}
 
 		if !directoryExists {
-			err := os.MkdirAll(directory, 0o777)
+			err := os.MkdirAll(directory, 0o700)
 			if err != nil {
 				return err
 			}
@@ -487,7 +487,7 @@ func CreateLocalPropertiesDirectory() error {
 	}
 
 	if !directoryExists {
-		err := os.MkdirAll(GetLocalPropertiesDir(), 0o777)
+		err := os.MkdirAll(GetLocalPropertiesDir(), 0o700)
 		if err != nil {
 			return err
 		}
@@ -507,7 +507,7 @@ func CreateLocalDependenciesDirectory() error {
 	}
 
 	if !directoryExists {
-		err := os.MkdirAll(GetLocalDependenciesDir(), 0o777)
+		err := os.MkdirAll(GetLocalDependenciesDir(), 0o700)
 		if err != nil {
 			return err
 		}
@@ -527,7 +527,7 @@ func CreateLocalRoutesDirectory() error {
 	}
 
 	if !directoryExists {
-		err := os.MkdirAll(GetLocalRoutesDir(), 0o777)
+		err := os.MkdirAll(GetLocalRoutesDir(), 0o700)
 		if err != nil {
 			return err
 		}
@@ -547,7 +547,7 @@ func CreateLocalQuarkusDirectory() error {
 	}
 
 	if !directoryExists {
-		err := os.MkdirAll(GetLocalQuarkusDir(), 0o777)
+		err := os.MkdirAll(GetLocalQuarkusDir(), 0o700)
 		if err != nil {
 			return err
 		}
@@ -567,7 +567,7 @@ func CreateLocalAppDirectory() error {
 	}
 
 	if !directoryExists {
-		err := os.MkdirAll(GetLocalAppDir(), 0o777)
+		err := os.MkdirAll(GetLocalAppDir(), 0o700)
 		if err != nil {
 			return err
 		}
@@ -587,7 +587,7 @@ func CreateLocalLibDirectory() error {
 	}
 
 	if !directoryExists {
-		err := os.MkdirAll(GetLocalLibDir(), 0o777)
+		err := os.MkdirAll(GetLocalLibDir(), 0o700)
 		if err != nil {
 			return err
 		}
