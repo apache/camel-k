@@ -20,6 +20,7 @@ package log
 import (
 	"bufio"
 	"context"
+	"go.uber.org/multierr"
 	"io"
 	"time"
 
@@ -65,8 +66,9 @@ func (s *PodScraper) Start(ctx context.Context) *bufio.Reader {
 	bufPipeIn := bufio.NewReader(pipeIn)
 	bufPipeOut := bufio.NewWriter(pipeOut)
 	closeFun := func() error {
-		bufPipeOut.Flush()
-		return pipeOut.Close()
+		return multierr.Append(
+			bufPipeOut.Flush(),
+			pipeOut.Close())
 	}
 	go s.doScrape(ctx, bufPipeOut, closeFun)
 	return bufPipeIn
@@ -101,7 +103,11 @@ func (s *PodScraper) doScrape(ctx context.Context, out *bufio.Writer, clientClos
 		if err != nil {
 			break
 		}
-		out.Flush()
+
+		err = out.Flush()
+		if err != nil {
+			break
+		}
 	}
 
 	s.handleAndRestart(ctx, err, 5*time.Second, out, clientCloser)

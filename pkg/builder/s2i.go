@@ -333,8 +333,6 @@ func tarDir(src string, writers ...io.Writer) error {
 
 		// manually close here after each file operation; deferring would cause each file close
 		// to wait until all operations have completed.
-		f.Close()
-
-		return nil
+		return f.Close()
 	})
 }

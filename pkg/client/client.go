@@ -198,7 +198,10 @@ func initialize(kubeconfig string) {
 			panic(err)
 		}
 	}
-	os.Setenv(kubeConfigEnvVar, kubeconfig)
+
+	if err := os.Setenv(kubeConfigEnvVar, kubeconfig); err != nil {
+		panic(err)
+	}
 }
 
 func getDefaultKubeConfigFile() (string, error) {

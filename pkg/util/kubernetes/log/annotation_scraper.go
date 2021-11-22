@@ -20,6 +20,7 @@ package log
 import (
 	"bufio"
 	"context"
+	"go.uber.org/multierr"
 	"io"
 	"strconv"
 	"sync"
@@ -61,8 +62,9 @@ func (s *SelectorScraper) Start(ctx context.Context) *bufio.Reader {
 	bufPipeIn := bufio.NewReader(pipeIn)
 	bufPipeOut := bufio.NewWriter(pipeOut)
 	closeFun := func() error {
-		bufPipeOut.Flush()
-		return pipeOut.Close()
+		return multierr.Append(
+			bufPipeOut.Flush(),
+			pipeOut.Close())
 	}
 	go s.periodicSynchronize(ctx, bufPipeOut, closeFun)
 	return bufPipeIn
@@ -152,7 +154,10 @@ func (s *SelectorScraper) addPodScraper(ctx context.Context, podName string, out
 				s.L.Error(err, "Cannot write to output")
 				return
 			}
-			out.Flush()
+			if err := out.Flush(); err != nil {
+				s.L.Error(err, "Cannot flush output")
+				return
+			}
 			if podCtx.Err() != nil {
 				return
 			}
