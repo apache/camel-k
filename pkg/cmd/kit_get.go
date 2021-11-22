@@ -90,7 +90,6 @@ func (command *kitGetCommandOptions) run(cmd *cobra.Command) error {
 			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", ctx.Name, string(ctx.Status.Phase), t, ctx.Status.Image)
 		}
 	}
-	w.Flush()
 
-	return nil
+	return w.Flush()
 }

@@ -20,6 +20,7 @@ package builder
 import (
 	"bufio"
 	"context"
+	"go.uber.org/multierr"
 	"io/ioutil"
 	"os"
 	"path"
@@ -154,13 +155,17 @@ func mountSecret(ctx context.Context, c client.Client, namespace, name string) (
 
 	secret, err := c.CoreV1().Secrets(namespace).Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
-		os.RemoveAll(dir)
+		if removeErr := os.RemoveAll(dir); removeErr != nil {
+			err = multierr.Append(err, removeErr)
+		}
 		return "", err
 	}
 
 	for file, content := range secret.Data {
 		if err := ioutil.WriteFile(filepath.Join(dir, remap(file)), content, 0o600); err != nil {
-			os.RemoveAll(dir)
+			if removeErr := os.RemoveAll(dir); removeErr != nil {
+				err = multierr.Append(err, removeErr)
+			}
 			return "", err
 		}
 	}

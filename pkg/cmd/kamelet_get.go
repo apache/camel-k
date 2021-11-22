@@ -133,7 +133,6 @@ func (command *kameletGetCommandOptions) run(cmd *cobra.Command) error {
 			readOnly,
 			kl.Spec.Definition.Title)
 	}
-	w.Flush()
 
-	return nil
+	return w.Flush()
 }
