@@ -90,9 +90,14 @@ pxv6zFeVEkAEEkqIYi0omA9+CjanB/6Bz4n1uw8H
 	tlsKeySecretName        = "tls-test"
 	tlsKeySecretOnlyKeyName = "tls.key"
 
-	tlsMultipleSecretsName     = "tls-multiple-test"
+	// Potential hardcoded credentials
+	// #nosec G101
+	tlsMultipleSecretsName = "tls-multiple-test"
+	// #nosec G101
 	tlsMultipleSecretsCert1Key = "cert1.crt"
+	// #nosec G101
 	tlsMultipleSecretsCert2Key = "cert2.crt"
+	// #nosec G101
 	tlsMultipleSecretsCert3Key = "cert3.crt"
 )
 
