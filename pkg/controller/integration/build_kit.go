@@ -107,8 +107,9 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 kits:
 	for _, kit := range env.IntegrationKits {
 		kit := kit
-		for i, k := range existingKits {
-			match, err := kitMatches(&kit, &k)
+		for i := range existingKits {
+			k := &existingKits[i]
+			match, err := kitMatches(&kit, k)
 			if err != nil {
 				return nil, err
 			}
@@ -116,7 +117,7 @@ kits:
 				if integrationKit == nil ||
 					integrationKit.Status.Phase != v1.IntegrationKitPhaseReady && k.Status.Phase == v1.IntegrationKitPhaseReady ||
 					integrationKit.Status.Phase == v1.IntegrationKitPhaseReady && k.Status.Phase == v1.IntegrationKitPhaseReady && k.HasHigherPriorityThan(integrationKit) {
-					integrationKit = &existingKits[i]
+					integrationKit = k
 				}
 
 				continue kits

@@ -369,16 +369,17 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 	// Finally, call the readiness probes of the non-ready Pods directly,
 	// to retrieve insights from the Camel runtime.
 	var runtimeNotReadyMessages []string
-	for _, pod := range unreadyPods {
-		if ready := kubernetes.GetPodCondition(pod, corev1.PodReady); ready.Reason != "ContainersNotReady" {
+	for i := range unreadyPods {
+		pod := &unreadyPods[i]
+		if ready := kubernetes.GetPodCondition(*pod, corev1.PodReady); ready.Reason != "ContainersNotReady" {
 			continue
 		}
-		container := getIntegrationContainer(environment, &pod)
+		container := getIntegrationContainer(environment, pod)
 		if container == nil {
 			return fmt.Errorf("integration container not found in Pod %s/%s", pod.Namespace, pod.Name)
 		}
 		if probe := container.ReadinessProbe; probe != nil && probe.HTTPGet != nil {
-			body, err := proxyGetHTTPProbe(ctx, action.client, probe, &pod, container)
+			body, err := proxyGetHTTPProbe(ctx, action.client, probe, pod, container)
 			if err == nil {
 				continue
 			}

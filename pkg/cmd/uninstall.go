@@ -359,12 +359,11 @@ func (o *uninstallCmdOptions) removeSubjectFromClusterRoleBindings(ctx context.C
 	}
 
 	// Remove the subject corresponding to this operator install
-	for _, clusterRoleBinding := range clusterRoleBindings.Items {
+	for crbIndex, clusterRoleBinding := range clusterRoleBindings.Items {
 		for i, subject := range clusterRoleBinding.Subjects {
 			if subject.Name == "camel-k-operator" && subject.Namespace == namespace {
 				clusterRoleBinding.Subjects = append(clusterRoleBinding.Subjects[:i], clusterRoleBinding.Subjects[i+1:]...)
-				crb := &clusterRoleBinding
-				_, err = api.ClusterRoleBindings().Update(ctx, crb, metav1.UpdateOptions{})
+				_, err = api.ClusterRoleBindings().Update(ctx, &clusterRoleBindings.Items[crbIndex], metav1.UpdateOptions{})
 				if err != nil {
 					return err
 				}
@@ -470,10 +469,10 @@ func (o *uninstallCmdOptions) uninstallKamelets(ctx context.Context, c client.Cl
 		return err
 	}
 
-	for _, kamelet := range kameletList.Items {
+	for i := range kameletList.Items {
 		// remove only platform Kamelets (use-defined Kamelets should be skipped)
-		if kamelet.Labels[v1alpha1.KameletBundledLabel] == "true" {
-			err := c.Delete(ctx, &kamelet)
+		if kameletList.Items[i].Labels[v1alpha1.KameletBundledLabel] == "true" {
+			err := c.Delete(ctx, &kameletList.Items[i])
 			if err != nil {
 				return err
 			}

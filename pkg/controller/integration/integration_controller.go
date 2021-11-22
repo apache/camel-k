@@ -139,8 +139,9 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 					return requests
 				}
 
-				for _, integration := range list.Items {
-					if match, err := integrationMatches(&integration, kit); err != nil {
+				for i := range list.Items {
+					integration := &list.Items[i]
+					if match, err := integrationMatches(integration, kit); err != nil {
 						log.Errorf(err, "Error matching integration %q with kit %q", integration.Name, kit.Name)
 
 						continue
