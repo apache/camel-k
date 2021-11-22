@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/apache/camel-k/pkg/util"
 	"os"
 	"path/filepath"
 	"strings"
@@ -98,7 +99,7 @@ func (o *initCmdOptions) writeFromTemplate(language v1.Language, fileName string
 	if err != nil {
 		return err
 	}
-	out, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0o777)
+	out, err := util.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0o777)
 	if err != nil {
 		return err
 	}

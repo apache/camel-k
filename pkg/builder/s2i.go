@@ -22,6 +22,7 @@ import (
 	"compress/gzip"
 	"context"
 	"fmt"
+	"github.com/apache/camel-k/pkg/util"
 	"io"
 	"io/ioutil"
 	"os"
@@ -171,7 +172,7 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 		return status.Failed(errors.Wrap(err, "cannot tar context directory"))
 	}
 
-	resource, err := ioutil.ReadFile(archive)
+	resource, err := util.ReadFile(archive)
 	if err != nil {
 		return status.Failed(errors.Wrap(err, "cannot read tar file "+archive))
 	}
@@ -321,7 +322,7 @@ func tarDir(src string, writers ...io.Writer) error {
 			return err
 		}
 
-		f, err := os.Open(file)
+		f, err := util.Open(file)
 		if err != nil {
 			return err
 		}

@@ -20,6 +20,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/apache/camel-k/pkg/util"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -122,7 +123,7 @@ func rebaseRefs(schema map[string]interface{}) {
 }
 
 func loadDslSchema(filename string) (map[string]interface{}, error) {
-	bytes, err := ioutil.ReadFile(filename)
+	bytes, err := util.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +135,7 @@ func loadDslSchema(filename string) (map[string]interface{}, error) {
 }
 
 func loadCrdSchema(filename string) (*apiextensionsv1.JSONSchemaProps, error) {
-	bytes, err := ioutil.ReadFile(filename)
+	bytes, err := util.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}

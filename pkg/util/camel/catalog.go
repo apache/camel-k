@@ -19,6 +19,7 @@ package camel
 
 import (
 	"context"
+	"github.com/apache/camel-k/pkg/util"
 	"io/ioutil"
 	"os"
 	"path"
@@ -137,7 +138,7 @@ func GenerateCatalogCommon(
 		return nil, err
 	}
 
-	content, err := ioutil.ReadFile(path.Join(tmpDir, "catalog.yaml"))
+	content, err := util.ReadFile(path.Join(tmpDir, "catalog.yaml"))
 	if err != nil {
 		return nil, err
 	}

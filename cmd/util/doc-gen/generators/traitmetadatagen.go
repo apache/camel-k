@@ -19,6 +19,7 @@ package generators
 
 import (
 	"fmt"
+	"github.com/apache/camel-k/pkg/util"
 	"io"
 	"os"
 	"path"
@@ -94,7 +95,7 @@ func (g *traitMetaDataGen) Finalize(c *generator.Context, w io.Writer) error {
 
 	var file *os.File
 	var err error
-	if file, err = os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0o777); err != nil {
+	if file, err = util.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0o777); err != nil {
 		return err
 	}
 	if err = file.Truncate(0); err != nil {

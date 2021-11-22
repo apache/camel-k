@@ -26,6 +26,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -217,7 +218,7 @@ func CopyFile(src, dst string) (int64, error) {
 		return 0, fmt.Errorf("%s is not a regular file", src)
 	}
 
-	source, err := os.Open(src)
+	source, err := Open(src)
 	if err != nil {
 		return 0, err
 	}
@@ -228,7 +229,7 @@ func CopyFile(src, dst string) (int64, error) {
 		return 0, err
 	}
 
-	destination, err := os.OpenFile(dst, os.O_RDWR|os.O_CREATE|os.O_TRUNC, stat.Mode())
+	destination, err := OpenFile(dst, os.O_RDWR|os.O_CREATE|os.O_TRUNC, stat.Mode())
 	if err != nil {
 		return 0, err
 	}
@@ -320,7 +321,7 @@ func DirectoryExists(directory string) (bool, error) {
 }
 
 func DirectoryEmpty(directory string) (bool, error) {
-	f, err := os.Open(directory)
+	f, err := Open(directory)
 	if err != nil {
 		return false, err
 	}
@@ -760,4 +761,20 @@ func CopyAppFile(localDependenciesDirectory string, localAppDirectory string) er
 	}
 
 	return nil
+}
+
+// Open a safe wrapper of os.Open.
+func Open(name string) (*os.File, error) {
+	return os.Open(filepath.Clean(name))
+}
+
+// OpenFile a safe wrapper of os.OpenFile.
+func OpenFile(name string, flag int, perm os.FileMode) (*os.File, error) {
+	// #nosec G304
+	return os.OpenFile(filepath.Clean(name), flag, perm)
+}
+
+// ReadFile a safe wrapper of os.ReadFile.
+func ReadFile(filename string) ([]byte, error) {
+	return os.ReadFile(filepath.Clean(filename))
 }

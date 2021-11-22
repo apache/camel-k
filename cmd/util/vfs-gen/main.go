@@ -20,6 +20,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/apache/camel-k/pkg/util"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -139,7 +140,7 @@ limitations under the License.
 */
 
 `
-	content, err := ioutil.ReadFile(resourceFile)
+	content, err := util.ReadFile(resourceFile)
 	if err != nil {
 		log.Fatalln(err)
 	}

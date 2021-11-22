@@ -21,6 +21,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/apache/camel-k/pkg/util"
 	"io"
 	"os"
 
@@ -61,7 +62,7 @@ func (o *dumpCmdOptions) dump(cmd *cobra.Command, args []string) error {
 	}
 	if len(args) == 1 {
 		fileName := args[0]
-		writer, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0o777)
+		writer, err := util.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0o777)
 		if err != nil {
 			return err
 		}

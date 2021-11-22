@@ -20,7 +20,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -206,7 +205,7 @@ func ResolveLocalSource(location string, compress bool) (Source, error) {
 		Local:    true,
 	}
 
-	content, err := ioutil.ReadFile(location)
+	content, err := util.ReadFile(location)
 	if err != nil {
 		return Source{}, err
 	}

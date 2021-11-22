@@ -21,7 +21,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/signal"
 	"path"
@@ -754,7 +753,7 @@ func (o *runCmdOptions) configureTraits(integration *v1.Integration, options []s
 }
 
 func loadPropertyFile(fileName string) (*properties.Properties, error) {
-	file, err := ioutil.ReadFile(fileName)
+	file, err := util.ReadFile(fileName)
 	if err != nil {
 		return nil, err
 	}

@@ -19,7 +19,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"github.com/apache/camel-k/pkg/util"
 	"os"
 	"strings"
 )
@@ -33,14 +33,14 @@ func main() {
 	fileName := os.Args[1]
 	licenseName := os.Args[2]
 
-	fileBin, err := ioutil.ReadFile(fileName)
+	fileBin, err := util.ReadFile(fileName)
 	if err != nil {
 		os.Stderr.WriteString(fmt.Sprintf("cannot read file %s: %v\n", fileName, err))
 		os.Exit(1)
 	}
 	file := string(fileBin)
 
-	licenseBin, err := ioutil.ReadFile(licenseName)
+	licenseBin, err := util.ReadFile(licenseName)
 	if err != nil {
 		os.Stderr.WriteString(fmt.Sprintf("cannot read file %s: %v\n", licenseName, err))
 		os.Exit(1)
