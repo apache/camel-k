@@ -58,7 +58,7 @@ func TestStrimziDirect(t *testing.T) {
 		}),
 	}
 
-	binding, err := StrimziBindingProvider{}.Translate(bindingContext, bindings.EndpointContext{
+	binding, err := BindingProvider{}.Translate(bindingContext, bindings.EndpointContext{
 		Type: v1alpha1.EndpointTypeSink,
 	}, endpoint)
 	assert.NoError(t, err)
@@ -100,7 +100,7 @@ func TestStrimziLookup(t *testing.T) {
 	}
 
 	client := fake.NewSimpleClientset(&cluster, &topic)
-	provider := StrimziBindingProvider{
+	provider := BindingProvider{
 		Client: client,
 	}
 

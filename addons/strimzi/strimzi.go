@@ -30,17 +30,16 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-// StrimziBindingProvider allows to connect to a Kafka topic via KameletBinding
-// nolint: revive
-type StrimziBindingProvider struct {
+// BindingProvider allows to connect to a Kafka topic via KameletBinding
+type BindingProvider struct {
 	Client internalclientset.Interface
 }
 
-func (s StrimziBindingProvider) ID() string {
+func (s BindingProvider) ID() string {
 	return "strimzi"
 }
 
-func (s StrimziBindingProvider) Translate(ctx bindings.BindingContext, _ bindings.EndpointContext, endpoint v1alpha1.Endpoint) (*bindings.Binding, error) {
+func (s BindingProvider) Translate(ctx bindings.BindingContext, _ bindings.EndpointContext, endpoint v1alpha1.Endpoint) (*bindings.Binding, error) {
 	if endpoint.Ref == nil {
 		// React only on refs
 		return nil, nil
@@ -100,7 +99,7 @@ func (s StrimziBindingProvider) Translate(ctx bindings.BindingContext, _ binding
 	}, nil
 }
 
-func (s StrimziBindingProvider) getBootstrapServers(ctx bindings.BindingContext, clusterName string) (string, error) {
+func (s BindingProvider) getBootstrapServers(ctx bindings.BindingContext, clusterName string) (string, error) {
 	cluster, err := s.Client.KafkaV1beta2().Kafkas(ctx.Namespace).Get(ctx.Ctx, clusterName, v1.GetOptions{})
 	if err != nil {
 		return "", err
@@ -119,6 +118,6 @@ func (s StrimziBindingProvider) getBootstrapServers(ctx bindings.BindingContext,
 	return "", fmt.Errorf("cluster %q has no listeners of type %q", clusterName, v1beta2.StrimziListenerTypePlain)
 }
 
-func (s StrimziBindingProvider) Order() int {
+func (s BindingProvider) Order() int {
 	return bindings.OrderStandard
 }
