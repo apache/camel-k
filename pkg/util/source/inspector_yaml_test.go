@@ -126,7 +126,8 @@ func TestYAMLDependencies(t *testing.T) {
 			},
 		},
 	}
-	for _, test := range tests {
+	for i := range tests {
+		test := tests[i]
 		t.Run(test.name, func(t *testing.T) {
 			code := v1.SourceSpec{
 				DataSpec: v1.DataSpec{
@@ -329,7 +330,8 @@ func TestYAMLJson(t *testing.T) {
 		},
 	}
 
-	for i, test := range tc {
+	for i := range tc {
+		test := tc[i]
 		t.Run(fmt.Sprintf("%s-%d", test.dependency, i), func(t *testing.T) {
 			code := v1.SourceSpec{
 				DataSpec: v1.DataSpec{
@@ -417,7 +419,8 @@ func TestYAMLKamelet(t *testing.T) {
 		},
 	}
 
-	for i, test := range tc {
+	for i := range tc {
+		test := tc[i]
 		t.Run(fmt.Sprintf("TestYAMLKamelet-%d", i), func(t *testing.T) {
 			code := v1.SourceSpec{
 				DataSpec: v1.DataSpec{
@@ -484,7 +487,8 @@ func TestYAMLExplicitParameters(t *testing.T) {
 		},
 	}
 
-	for i, test := range tc {
+	for i := range tc {
+		test := tc[i]
 		t.Run(fmt.Sprintf("TestYAMLExplicitParameters-%d", i), func(t *testing.T) {
 			code := v1.SourceSpec{
 				DataSpec: v1.DataSpec{

@@ -202,7 +202,8 @@ func TestBindings(t *testing.T) {
 		},
 	}
 
-	for i, tc := range testcases {
+	for i := range testcases {
+		tc := testcases[i]
 		t.Run(fmt.Sprintf("test-%d-%s", i, tc.uri), func(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
