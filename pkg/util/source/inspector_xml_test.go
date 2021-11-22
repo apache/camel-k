@@ -61,7 +61,8 @@ func TestXMLKamelet(t *testing.T) {
 		},
 	}
 
-	for i, test := range tc {
+	for i := range tc {
+		test := tc[i]
 		t.Run(fmt.Sprintf("TestXMLKamelet-%d", i), func(t *testing.T) {
 			code := v1.SourceSpec{
 				DataSpec: v1.DataSpec{

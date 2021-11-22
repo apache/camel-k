@@ -134,7 +134,8 @@ func TestAppendParameters(t *testing.T) {
 		},
 	}
 
-	for i, test := range tests {
+	for i := range tests {
+		test := tests[i]
 		t.Run(fmt.Sprintf("appendParameters-%d-%s", i, test.expected), func(t *testing.T) {
 			uri := AppendParameters(test.prefix, test.params)
 			assert.Equal(t, test.expected, uri)
@@ -172,7 +173,8 @@ func TestCamelURIFormat(t *testing.T) {
 		},
 	}
 
-	for i, tc := range tests {
+	for i := range tests {
+		tc := tests[i]
 		t.Run(fmt.Sprintf("%d-%s", i, tc.uri), func(t *testing.T) {
 			assert.Equal(t, !tc.invalid, HasCamelURIFormat(tc.uri))
 		})

@@ -189,8 +189,8 @@ func BigFilesFilter(size int) func(path string, fi os.FileInfo) bool {
 func calcExclusions(root string, dirNames []string) []string {
 	var exclusions []string
 
-	for _, dirName := range dirNames {
-		dirName = filepath.Join(root, dirName)
+	for _, name := range dirNames {
+		dirName := filepath.Join(root, name)
 		if err := filepath.Walk(dirName, func(resPath string, info os.FileInfo, err error) error {
 			if info.IsDir() {
 				ignoreFileName := path.Join(resPath, ".vfsignore")
