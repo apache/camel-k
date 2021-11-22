@@ -47,6 +47,6 @@ func SanitizeLabel(name string) string {
 	return name
 }
 
-func isDisallowedStartEndChar(rune rune) bool {
-	return !unicode.IsLetter(rune) && !unicode.IsNumber(rune)
+func isDisallowedStartEndChar(r rune) bool {
+	return !unicode.IsLetter(r) && !unicode.IsNumber(r)
 }

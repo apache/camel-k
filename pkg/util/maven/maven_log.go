@@ -47,10 +47,9 @@ const (
 
 var mavenLogger = log.WithName("maven.build")
 
-func parseLog(line string) (mavenLog mavenLog, error error) {
-	error = json.Unmarshal([]byte(line), &mavenLog)
-
-	return mavenLog, error
+func parseLog(line string) (l mavenLog, err error) {
+	err = json.Unmarshal([]byte(line), &l)
+	return
 }
 
 func normalizeLog(mavenLog mavenLog) {
