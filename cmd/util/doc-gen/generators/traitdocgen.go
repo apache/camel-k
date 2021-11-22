@@ -270,19 +270,6 @@ func split(doc []string, startMarker, endMarker string) (pre []string, post []st
 	return pre, post
 }
 
-func readFile(filename string) (file *os.File, content []string, err error) {
-	if file, err = util.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0o777); err != nil {
-		return file, content, err
-	}
-
-	bytes, err := util.ReadFile(filename)
-	if err != nil {
-		return file, content, err
-	}
-	content = strings.Split(string(bytes), "\n")
-	return file, content, nil
-}
-
 func writeFile(file *os.File, content []string) error {
 	if err := file.Truncate(0); err != nil {
 		return err
