@@ -19,54 +19,22 @@ linters-settings:
   lll:
     line-length: 170
 linters:
-  disable-all: true
-  enable:
-    - asciicheck
-    - bodyclose
-    - deadcode
-    - depguard
-    - dogsled
-    - durationcheck
-    - errcheck
-    - errname
-    - errorlint
-    - exportloopref
-    - forcetypeassert
-    - gocritic
-    - gofmt
-    - gofumpt
-    - goheader
-    - goimports
-    - gomodguard
-    - goprintffuncname
-    - gosimple
-    - govet
-    - ifshort
-    - importas
-    - ineffassign
-#    - lll
-    - makezero
-    - misspell
-    - nakedret
-    - nilerr
-    - nolintlint
-    - prealloc
-    - promlinter
-    - revive
-    - rowserrcheck
-    - sqlclosecheck
-    - staticcheck
-    - structcheck
-    - stylecheck
-    - thelper
-    - tparallel
-    - typecheck
-    - unconvert
-    - unparam
-    - unused
-    - varcheck
-    - wastedassign
-    - gosec
+  enable-all: true
+  disable:
+    - dupl
+    - forbidigo
+    - funlen
+    - gomoddirectives
+    - godox
+    - gomnd
+    - gochecknoinits
+    - gocognit
+    - godot
+    - lll
+    - nestif
+    - cyclop
+    - exhaustivestruct
+    - gochecknoglobals
 
 issues:
   exclude-rules:

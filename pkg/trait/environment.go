@@ -48,7 +48,7 @@ const (
 	//   pkg/trait/environment.go:41: G101: Potential hardcoded credentials (gosec)
 	//	   envVarMountPathSecrets     = "CAMEL_K_MOUNT_PATH_SECRETS"
 	//
-	// nolint: gosec
+	// #nosec G101
 	envVarMountPathSecrets = "CAMEL_K_MOUNT_PATH_SECRETS"
 )
 

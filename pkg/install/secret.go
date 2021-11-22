@@ -19,8 +19,7 @@ package install
 
 import (
 	"context"
-	"io/ioutil"
-
+	"github.com/apache/camel-k/pkg/util"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -43,7 +42,7 @@ func RegistrySecretOrCollect(ctx context.Context, c client.Client, namespace str
 
 // RegistrySecretFromFileOrCollect generates a secret from a docker-config.json file and creates it on the cluster (or appends it to the collection)
 func RegistrySecretFromFileOrCollect(ctx context.Context, c client.Client, namespace string, file string, collection *kubernetes.Collection, force bool) (string, error) {
-	secretData, err := ioutil.ReadFile(file)
+	secretData, err := util.ReadFile(file)
 	if err != nil {
 		return "", err
 	}

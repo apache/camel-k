@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/apache/camel-k/pkg/util"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -50,7 +51,7 @@ func loadRawContent(source string) ([]byte, string, error) {
 	}
 
 	if ok {
-		content, err = ioutil.ReadFile(source)
+		content, err = util.ReadFile(source)
 	} else {
 		var u *url.URL
 		u, err = url.Parse(source)

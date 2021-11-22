@@ -20,6 +20,7 @@ package install
 import (
 	"context"
 	"fmt"
+	"github.com/apache/camel-k/pkg/util"
 	"io/ioutil"
 	"os"
 	"path"
@@ -66,7 +67,7 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 			continue
 		}
 
-		content, err := ioutil.ReadFile(path.Join(kameletDir, file.Name()))
+		content, err := util.ReadFile(path.Join(kameletDir, file.Name()))
 		if err != nil {
 			return err
 		}

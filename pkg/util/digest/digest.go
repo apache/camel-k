@@ -25,7 +25,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"path"
 	"sort"
 	"strconv"
@@ -263,13 +262,13 @@ func sortedTraitAnnotationsKeys(it *v1.Integration) []string {
 func ComputeSHA1(elem ...string) (string, error) {
 	file := path.Join(elem...)
 
-	f, err := os.Open(file)
+	f, err := util.Open(file)
 	if err != nil {
 		return "", err
 	}
 	defer f.Close()
 
-	// nolint: gosec
+	// #nosec G401
 	h := sha1.New()
 	if _, err := io.Copy(h, f); err != nil {
 		return "", err

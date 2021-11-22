@@ -239,7 +239,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Res
 		return err
 	}
 
-	content, err = ioutil.ReadFile(out)
+	content, err = util.ReadFile(out)
 	if err != nil {
 		return err
 	}

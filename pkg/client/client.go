@@ -19,6 +19,7 @@ package client
 
 import (
 	"fmt"
+	"github.com/apache/camel-k/pkg/util"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -231,7 +232,7 @@ func GetCurrentNamespace(kubeconfig string) (string, error) {
 		return "default", nil
 	}
 
-	data, err := ioutil.ReadFile(kubeconfig)
+	data, err := util.ReadFile(kubeconfig)
 	if err != nil {
 		return "", err
 	}
