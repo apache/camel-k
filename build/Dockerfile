@@ -15,10 +15,10 @@
 
 FROM quay.io/quarkus/ubi-quarkus-mandrel:21.2.0.0-Final-java11
 
-ARG MAVEN_VERSION="3.8.3"
+ARG MAVEN_VERSION="3.8.4"
 ARG MAVEN_HOME="/usr/share/maven"
-ARG SHA="1c12a5df43421795054874fd54bb8b37d242949133b5bf6052a063a13a93f13a20e6e9dae2b3d85b9c7034ec977bbc2b6e7f66832182b9c863711d78bfe60faa"
-ARG BASE_URL="https://downloads.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries"
+ARG SHA="a9b2d825eacf2e771ed5d6b0e01398589ac1bfa4171f36154d1b5787879605507802f699da6f7cfc80732a5282fd31b28e4cd6052338cbef0fa1358b48a5e3c8"
+ARG BASE_URL="https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries"
 
 USER 0
 
