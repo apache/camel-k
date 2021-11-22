@@ -37,17 +37,10 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-      - name: Cache modules
-        uses: actions/cache@v1
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         env:
           GOGC: 20
         with:
-          version: v1.42
+          version: v1.43.0
           args: --verbose --deadline 15m --config .golangci.yml
