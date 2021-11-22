@@ -27,6 +27,8 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/kubectl/pkg/cmd/set/env"
 
+	k8sclient "k8s.io/client-go/kubernetes"
+
 	runtime "sigs.k8s.io/controller-runtime/pkg/client"
 
 	operatorsv1 "github.com/operator-framework/api/pkg/operators/v1"
@@ -344,7 +346,7 @@ func findOperatorGroup(ctx context.Context, client client.Client, namespace stri
 	return nil, nil
 }
 
-func fillDefaults(o Options, client client.Client) (Options, error) {
+func fillDefaults(o Options, client k8sclient.Interface) (Options, error) {
 	if o.OperatorName == "" {
 		o.OperatorName = DefaultOperatorName
 	}
