@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"go.uber.org/multierr"
 	"io"
 	"io/ioutil"
 	"os"
@@ -208,67 +209,52 @@ func EncodeXML(content interface{}) ([]byte, error) {
 	return w.Bytes(), nil
 }
 
-func CopyFile(src, dst string) (int64, error) {
+func CopyFile(src, dst string) (nBytes int64, err error) {
 	stat, err := os.Stat(src)
 	if err != nil {
-		return 0, err
+		return
 	}
 
 	if !stat.Mode().IsRegular() {
-		return 0, fmt.Errorf("%s is not a regular file", src)
+		err = fmt.Errorf("%s is not a regular file", src)
+		return
 	}
 
 	source, err := Open(src)
 	if err != nil {
-		return 0, err
+		return
 	}
-	defer source.Close()
+
+	defer func() {
+		err = Close(err, source)
+	}()
 
 	err = os.MkdirAll(path.Dir(dst), 0o700)
 	if err != nil {
-		return 0, err
+		return
 	}
 
 	destination, err := OpenFile(dst, os.O_RDWR|os.O_CREATE|os.O_TRUNC, stat.Mode())
 	if err != nil {
-		return 0, err
+		return
 	}
 
-	defer destination.Close()
-	nBytes, err := io.Copy(destination, source)
+	defer func() {
+		err = Close(err, destination)
+	}()
 
-	return nBytes, err
+	nBytes, err = io.Copy(destination, source)
+
+	return
 }
 
-func WriteFileWithContent(buildDir string, relativePath string, content []byte) error {
-	filePath := path.Join(buildDir, relativePath)
-	fileDir := path.Dir(filePath)
-	// Create dir if not present
-	err := os.MkdirAll(fileDir, 0o700)
-	if err != nil {
-		return errors.Wrap(err, "could not create dir for file "+relativePath)
-	}
-	// Create file
-	file, err := os.Create(filePath)
-	if err != nil {
-		return errors.Wrap(err, "could not create file "+relativePath)
-	}
-	defer file.Close()
-
-	_, err = file.Write(content)
-	if err != nil {
-		return errors.Wrap(err, "could not write to file "+relativePath)
-	}
-	return nil
-}
-
-func WriteFileWithBytesMarshallerContent(buildDir string, relativePath string, content BytesMarshaller) error {
+func WriteFileWithBytesMarshallerContent(basePath string, filePath string, content BytesMarshaller) error {
 	data, err := content.MarshalBytes()
 	if err != nil {
 		return err
 	}
 
-	return WriteFileWithContent(buildDir, relativePath, data)
+	return WriteFileWithContent(path.Join(basePath, filePath), data)
 }
 
 func FindAllDistinctStringSubmatch(data string, regexps ...*regexp.Regexp) []string {
@@ -320,18 +306,22 @@ func DirectoryExists(directory string) (bool, error) {
 	return info.IsDir(), nil
 }
 
-func DirectoryEmpty(directory string) (bool, error) {
+func DirectoryEmpty(directory string) (ok bool, err error) {
 	f, err := Open(directory)
 	if err != nil {
-		return false, err
+		return
 	}
-	defer f.Close()
+
+	defer func() {
+		err = Close(err, f)
+	}()
 
 	_, err = f.Readdirnames(1)
 	if errors.Is(err, io.EOF) {
-		return true, nil
+		ok = true
 	}
-	return false, err
+
+	return
 }
 
 func CreateDirectory(directory string) error {
@@ -777,4 +767,66 @@ func OpenFile(name string, flag int, perm os.FileMode) (*os.File, error) {
 // ReadFile a safe wrapper of os.ReadFile.
 func ReadFile(filename string) ([]byte, error) {
 	return os.ReadFile(filepath.Clean(filename))
+}
+
+func Close(err error, closer io.Closer) error {
+	return multierr.Append(err, closer.Close())
+}
+
+// WithFile a safe wrapper to process a file.
+func WithFile(name string, flag int, perm os.FileMode, consumer func(file *os.File) error) error {
+	// #nosec G304
+	file, err := os.OpenFile(filepath.Clean(name), flag, perm)
+	if err == nil {
+		err = consumer(file)
+	}
+
+	return Close(err, file)
+}
+
+// WithFileReader a safe wrapper to process a file.
+func WithFileReader(name string, consumer func(reader io.Reader) error) error {
+	// #nosec G304
+	file, err := os.Open(filepath.Clean(name))
+	if err == nil {
+		err = consumer(file)
+	}
+
+	return Close(err, file)
+}
+
+// WithFileContent a safe wrapper to process a file content.
+func WithFileContent(name string, consumer func(file *os.File, data []byte) error) error {
+	return WithFile(name, os.O_RDWR|os.O_CREATE, 0o644, func(file *os.File) error {
+		content, err := ReadFile(name)
+		if err != nil {
+			return err
+		}
+
+		return consumer(file, content)
+	})
+}
+
+// WriteFileWithContent a safe wrapper to write content to a file.
+func WriteFileWithContent(filePath string, content []byte) error {
+	fileDir := path.Dir(filePath)
+
+	// Create dir if not present
+	err := os.MkdirAll(fileDir, 0o700)
+	if err != nil {
+		return errors.Wrap(err, "could not create dir for file "+filePath)
+	}
+
+	// Create file
+	file, err := os.Create(filePath)
+	if err != nil {
+		return errors.Wrap(err, "could not create file "+filePath)
+	}
+
+	_, err = file.Write(content)
+	if err != nil {
+		err = errors.Wrap(err, "could not write to file "+filePath)
+	}
+
+	return Close(err, file)
 }
