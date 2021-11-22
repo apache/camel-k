@@ -18,6 +18,8 @@
 linters-settings:
   lll:
     line-length: 170
+  goconst:
+    ignore-tests: true
 linters:
   enable-all: true
   disable:
@@ -35,6 +37,27 @@ linters:
     - cyclop
     - exhaustivestruct
     - gochecknoglobals
+    - testpackage
+    - goerr113
+    - varnamelen
+    - tagliatelle
+    - paralleltest
+    - wrapcheck
+    - ireturn
+    - gofumpt
+    - gci
+    - wsl
+    - goconst
+    - tenv
+    - whitespace
+    - gocyclo
+    - nlreturn
+    - nilnil
+    - exhaustive
+    - noctx
+    - nakedret
+    - contextcheck
+    - maligned
 
 issues:
   exclude-rules:
