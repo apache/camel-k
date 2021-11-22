@@ -372,6 +372,7 @@ const YAMLKameletEipMap = `
         name: "foo/bar?baz=test"
 `
 
+// #nosec G101
 const YAMLKameletEipMapWithParams = `
 - from:
     uri: timer:tick
