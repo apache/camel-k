@@ -255,7 +255,7 @@ func TestAddPropertyFile(t *testing.T) {
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestPropertyFileContent), 0o644))
+	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestPropertyFileContent), 0o400))
 
 	properties, err := convertToTraitParameter("file:"+tmpFile.Name(), "trait.properties")
 	assert.Nil(t, err)
@@ -273,7 +273,7 @@ func TestRunPropertyFileFlag(t *testing.T) {
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestPropertyFileContent), 0o644))
+	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestPropertyFileContent), 0o400))
 
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, errExecute := test.ExecuteCommand(rootCmd, cmdRun,

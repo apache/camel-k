@@ -199,7 +199,7 @@ func TestExtractProperties_FromFile(t *testing.T) {
 	key=value
 	#key2=value2
 	my.key=value
-	`), 0o644))
+	`), 0o400))
 
 	props, err := extractProperties("file:" + tmpFile1.Name())
 	assert.Nil(t, err)
@@ -223,7 +223,7 @@ func TestExtractPropertiesFromFileAndSingleValue(t *testing.T) {
 	key=value
 	#key2=value2
 	my.key=value
-	`), 0o644))
+	`), 0o400))
 
 	properties := []string{"key=override", "file:" + tmpFile1.Name(), "my.key = override"}
 	props, err := mergePropertiesWithPrecedence(properties)

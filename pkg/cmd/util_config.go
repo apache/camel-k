@@ -139,7 +139,7 @@ func (cfg *Config) Delete(path string) {
 func (cfg *Config) Save() error {
 	root := filepath.Dir(cfg.location)
 	if _, err := os.Stat(root); os.IsNotExist(err) {
-		if e := os.MkdirAll(root, 0o700); e != nil {
+		if e := os.MkdirAll(root, 0o600); e != nil {
 			return e
 		}
 	}
@@ -148,7 +148,7 @@ func (cfg *Config) Save() error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(cfg.location, data, 0o644)
+	return ioutil.WriteFile(cfg.location, data, 0o600)
 }
 
 func (cfg *Config) navigate(values map[string]interface{}, prefix string, create bool) map[string]interface{} {

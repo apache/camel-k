@@ -394,7 +394,7 @@ func updateIntegrationProperties(properties []string, propertyFiles []string, ha
 		// Output list of properties to property file if any CLI properties were given.
 		if len(properties) > 0 {
 			propertyFilePath := path.Join(util.GetLocalPropertiesDir(), "CLI.properties")
-			err = ioutil.WriteFile(propertyFilePath, []byte(strings.Join(properties, "\n")), 0o777)
+			err = ioutil.WriteFile(propertyFilePath, []byte(strings.Join(properties, "\n")), 0o600)
 			if err != nil {
 				return nil, err
 			}

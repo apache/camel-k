@@ -87,7 +87,7 @@ func executableDockerfile(ctx *builderContext) error {
 		USER nonroot
 	`)
 
-	err := ioutil.WriteFile(path.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o777)
+	err := ioutil.WriteFile(path.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
 	if err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func jvmDockerfile(ctx *builderContext) error {
 		USER 1000
 	`)
 
-	err := ioutil.WriteFile(path.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o777)
+	err := ioutil.WriteFile(path.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
 	if err != nil {
 		return err
 	}

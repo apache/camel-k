@@ -192,7 +192,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Res
 	in := path.Join(tmpDir, resource.Name)
 	out := path.Join(tmpDir, "openapi-dsl.xml")
 
-	err = ioutil.WriteFile(in, content, 0o644)
+	err = ioutil.WriteFile(in, content, 0o400)
 	if err != nil {
 		return err
 	}

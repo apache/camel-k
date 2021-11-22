@@ -37,7 +37,7 @@ func TestRawBinaryContentType(t *testing.T) {
 		t.Error(err)
 	}
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte{1, 2, 3, 4, 5, 6}, 0o644))
+	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte{1, 2, 3, 4, 5, 6}, 0o400))
 
 	data, contentType, err := loadRawContent(tmpFile.Name())
 	assert.Nil(t, err)
@@ -52,7 +52,7 @@ func TestRawApplicationContentType(t *testing.T) {
 		t.Error(err)
 	}
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o644))
+	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
 
 	data, contentType, err := loadRawContent(tmpFile.Name())
 	assert.Nil(t, err)
@@ -67,7 +67,7 @@ func TestTextContentType(t *testing.T) {
 		t.Error(err)
 	}
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o644))
+	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
 
 	data, contentType, compressed, err := loadTextContent(tmpFile.Name(), false)
 	assert.Nil(t, err)
@@ -83,7 +83,7 @@ func TestTextCompressed(t *testing.T) {
 		t.Error(err)
 	}
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o644))
+	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
 
 	data, contentType, compressed, err := loadTextContent(tmpFile.Name(), true)
 	assert.Nil(t, err)
