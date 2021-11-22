@@ -21,6 +21,7 @@ import (
 	"bufio"
 	"context"
 	"go.uber.org/multierr"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -138,7 +139,7 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 	return status
 }
 
-func readSpectrumLogs(newStdOut *os.File) {
+func readSpectrumLogs(newStdOut io.Reader) {
 	scanner := bufio.NewScanner(newStdOut)
 
 	for scanner.Scan() {

@@ -220,7 +220,7 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func showOutput(cmd *cobra.Command, binding *v1alpha1.KameletBinding, outputFormat string, scheme *runtime.Scheme) error {
+func showOutput(cmd *cobra.Command, binding *v1alpha1.KameletBinding, outputFormat string, scheme runtime.ObjectTyper) error {
 	printer := printers.NewTypeSetter(scheme)
 	printer.Delegate = &kubernetes.CLIPrinter{
 		Format: outputFormat,

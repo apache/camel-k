@@ -132,7 +132,7 @@ func (o *debugCmdOptions) run(cmd *cobra.Command, args []string) error {
 }
 
 // nolint: unparam
-func (o *debugCmdOptions) toggleDebug(c *camelv1.CamelV1Client, it *v1.Integration, active bool) (*v1.Integration, error) {
+func (o *debugCmdOptions) toggleDebug(c camelv1.IntegrationsGetter, it *v1.Integration, active bool) (*v1.Integration, error) {
 	if it.Spec.Traits == nil {
 		it.Spec.Traits = make(map[string]v1.TraitSpec)
 	}

@@ -99,7 +99,7 @@ func loadTextContent(source string, base64Compression bool) (string, string, boo
 	return string(content), contentType, false, nil
 }
 
-func loadContentHTTP(u *url.URL) ([]byte, error) {
+func loadContentHTTP(u fmt.Stringer) ([]byte, error) {
 	resp, err := http.Get(u.String())
 	if err != nil {
 		return []byte{}, err
