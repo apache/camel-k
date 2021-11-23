@@ -37,10 +37,15 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
+      - name: Install Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.16.x
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         env:
           GOGC: 20
         with:
           version: v1.43.0
+          skip-go-installation: true
           args: --verbose --deadline 15m --config .golangci.yml
