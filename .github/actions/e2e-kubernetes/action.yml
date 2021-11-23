@@ -47,6 +47,8 @@ runs:
       image-namespace: ${{ env.CLUSTER_IMAGE_NAMESPACE }}
       # Builds the bundle if an OLM is available - depends on cluster being tested
       build-bundle: ${{ env.CLUSTER_HAS_OLM }}
+      # Can be empty and so catalog source will not be created
+      catalog-source-namespace: ${{ env.CLUSTER_CATALOG_SOURCE_NAMESPACE }}
 
   - id: install-kamel-cluster-setup
     name: Install Kamel Cluster Setup
@@ -61,6 +63,14 @@ runs:
       # Cluster environment
       export CUSTOM_IMAGE=${{ env.BUILD_BINARY_LOCAL_IMAGE_NAME }}
       export CUSTOM_VERSION=${{ env.BUILD_BINARY_LOCAL_IMAGE_VERSION }}
+
+      #
+      # If bundle has been built and installed then use it
+      #
+      if [ -n "${{ env.BUILD_BUNDLE_CATALOG_SOURCE }}" ]; then
+        export KAMEL_INSTALL_OLM_SOURCE_NAMESPACE=${{ env.CLUSTER_IMAGE_NAMESPACE }}
+        export KAMEL_INSTALL_OLM_SOURCE=${{ env.BUILD_BUNDLE_CATALOG_SOURCE }}
+      fi
 
       export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
       export KAMEL_INSTALL_REGISTRY=${{ env.CLUSTER_IMAGE_REGISTRY_PULL_HOST }}
