@@ -231,7 +231,7 @@ func CopyFile(src, dst string) (nBytes int64, err error) {
 	}()
 
 	// we need to have group and other to be able to access the directory as the user
-	//in the container may not be the same as the one owning the files
+	// in the container may not be the same as the one owning the files
 	//
 	// #nosec G301
 	err = os.MkdirAll(path.Dir(dst), 0o755)
