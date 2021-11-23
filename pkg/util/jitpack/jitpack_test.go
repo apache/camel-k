@@ -55,7 +55,7 @@ func TestConversion(t *testing.T) {
 			assert.NotNil(t, d)
 			assert.Equal(t, val.prefixGav+".u", d.GroupID)
 			assert.Equal(t, "r", d.ArtifactID)
-			assert.Equal(t, LatestVersion, d.Version)
+			assert.Equal(t, DefaultVersion, d.Version)
 		})
 	}
 }
