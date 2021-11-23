@@ -31,6 +31,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -245,8 +246,8 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	}
 
 	envvar.SetVal(&container.Env, "CAMEL_K_DIGEST", e.Integration.Status.Digest)
-	envvar.SetVal(&container.Env, "CAMEL_K_CONF", path.Join(basePath, "application.properties"))
-	envvar.SetVal(&container.Env, "CAMEL_K_CONF_D", confDPath)
+	envvar.SetVal(&container.Env, "CAMEL_K_CONF", path.Join(camel.BasePath, "application.properties"))
+	envvar.SetVal(&container.Env, "CAMEL_K_CONF_D", camel.ConfDPath)
 
 	e.addSourcesProperties()
 

@@ -19,15 +19,21 @@ package cmd
 
 import (
 	"context"
+	"crypto/sha1"
 	"fmt"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/magiconair/properties"
+	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var invalidPaths = []string{"/etc/camel", "/deployments/dependencies"}
@@ -181,8 +187,9 @@ func parseOption(item string) (*RunConfigOption, error) {
 	return configurationOption, nil
 }
 
-func applyOption(ctx context.Context, config *RunConfigOption, integrationSpec *v1.IntegrationSpec,
-	c client.Client, namespace string, enableCompression bool, resourceType v1.ResourceType) error {
+func applyOption(ctx context.Context, config *RunConfigOption, integration *v1.Integration,
+	c client.Client, namespace string, enableCompression bool, resourceType v1.ResourceType) (*corev1.ConfigMap, error) {
+	var maybeGenCm *corev1.ConfigMap
 	switch config.configType {
 	case ConfigOptionTypeConfigmap:
 		cm := kubernetes.LookupConfigmap(ctx, c, namespace, config.Name())
@@ -190,58 +197,97 @@ func applyOption(ctx context.Context, config *RunConfigOption, integrationSpec *
 			fmt.Printf("Warn: %s Configmap not found in %s namespace, make sure to provide it before the Integration can run\n",
 				config.Name(), namespace)
 		} else if resourceType != v1.ResourceTypeData && cm.BinaryData != nil {
-			return fmt.Errorf("you cannot provide a binary config, use a text file instead")
+			return maybeGenCm, fmt.Errorf("you cannot provide a binary config, use a text file instead")
 		}
-		integrationSpec.AddConfigurationAsResource(config.Type(), config.Name(), string(resourceType), config.DestinationPath(), config.Key())
 	case ConfigOptionTypeSecret:
 		secret := kubernetes.LookupSecret(ctx, c, namespace, config.Name())
 		if secret == nil {
 			fmt.Printf("Warn: %s Secret not found in %s namespace, make sure to provide it before the Integration can run\n",
 				config.Name(), namespace)
 		}
-		integrationSpec.AddConfigurationAsResource(string(config.configType), config.Name(), string(resourceType), config.DestinationPath(), config.Key())
 	case ConfigOptionTypeFile:
-		// Don't allow a file size longer than 1 MiB
-		fileSize, err := fileSize(config.Name())
-		printSize := fmt.Sprintf("%.2f", float64(fileSize)/Megabyte)
-		if err != nil {
-			return err
-		} else if fileSize > Megabyte {
-			return fmt.Errorf("you cannot provide a file larger than 1 MB (it was %s MB), check configmap option or --volume instead", printSize)
-		}
 		// Don't allow a binary non compressed resource
 		rawData, contentType, err := loadRawContent(ctx, config.Name())
 		if err != nil {
-			return err
+			return maybeGenCm, err
 		}
 		if resourceType != v1.ResourceTypeData && !enableCompression && isBinary(contentType) {
-			return fmt.Errorf("you cannot provide a binary config, use a text file or check --resource flag instead")
+			return maybeGenCm, fmt.Errorf("you cannot provide a binary config, use a text file or check --resource flag instead")
 		}
 		resourceSpec, err := binaryOrTextResource(path.Base(config.Name()), rawData, contentType, enableCompression, resourceType, config.DestinationPath())
 		if err != nil {
-			return err
+			return maybeGenCm, err
 		}
-		integrationSpec.AddResources(resourceSpec)
+		maybeGenCm, err = convertFileToConfigmap(ctx, c, resourceSpec, config, integration.Namespace, resourceType)
+		if err != nil {
+			return maybeGenCm, err
+		}
 	default:
 		// Should never reach this
-		return fmt.Errorf("invalid option type %s", config.configType)
+		return maybeGenCm, fmt.Errorf("invalid option type %s", config.configType)
 	}
 
-	return nil
+	integration.Spec.AddConfigurationAsResource(config.Type(), config.Name(), string(resourceType), config.DestinationPath(), config.Key())
+
+	return maybeGenCm, nil
 }
 
-// ApplyConfigOption will set the proper --config option behavior to the IntegrationSpec.
-func ApplyConfigOption(ctx context.Context, config *RunConfigOption, integrationSpec *v1.IntegrationSpec, c client.Client, namespace string, enableCompression bool) error {
+func convertFileToConfigmap(ctx context.Context, c client.Client, resourceSpec v1.ResourceSpec, config *RunConfigOption,
+	namespace string, resourceType v1.ResourceType) (*corev1.ConfigMap, error) {
+	if config.DestinationPath() == "" {
+		config.resourceKey = filepath.Base(config.Name())
+		// As we are changing the resource to a configmap type
+		// we need to declare the mount path not to use the
+		// default behavior of a configmap (which include a subdirectory with the configmap name)
+		if resourceType == v1.ResourceTypeData {
+			config.destinationPath = camel.ResourcesDefaultMountPath
+		} else {
+			config.destinationPath = camel.ConfigResourcesMountPath
+		}
+	} else {
+		config.resourceKey = filepath.Base(config.DestinationPath())
+		config.destinationPath = filepath.Dir(config.DestinationPath())
+	}
+	genCmName := fmt.Sprintf("cm-%s", hashFrom([]byte(resourceSpec.Content), resourceSpec.RawContent))
+	cm := kubernetes.NewConfigmap(namespace, genCmName, config.Name(), config.Key(), resourceSpec.Content, resourceSpec.RawContent)
+	err := c.Create(ctx, cm)
+	if err != nil {
+		if k8serrors.IsAlreadyExists(err) {
+			// We'll reuse it, as is
+		} else {
+			return cm, err
+		}
+	}
+	config.configType = ConfigOptionTypeConfigmap
+	config.resourceName = cm.Name
+
+	return cm, nil
+}
+
+func hashFrom(contents ...[]byte) string {
+	// SHA1 because we need to limit the lenght to less than 64 chars
+	hash := sha1.New()
+	for _, c := range contents {
+		hash.Write(c)
+	}
+
+	return fmt.Sprintf("%x", hash.Sum(nil))
+}
+
+// ApplyConfigOption will set the proper --config option behavior to the IntegrationSpec
+func ApplyConfigOption(ctx context.Context, config *RunConfigOption, integration *v1.Integration, c client.Client,
+	namespace string, enableCompression bool) (*corev1.ConfigMap, error) {
 	// A config option cannot specify destination path
 	if config.DestinationPath() != "" {
-		return fmt.Errorf("cannot specify a destination path for this option type")
+		return nil, fmt.Errorf("cannot specify a destination path for this option type")
 	}
-	return applyOption(ctx, config, integrationSpec, c, namespace, enableCompression, v1.ResourceTypeConfig)
+	return applyOption(ctx, config, integration, c, namespace, enableCompression, v1.ResourceTypeConfig)
 }
 
-// ApplyResourceOption will set the proper --resource option behavior to the IntegrationSpec.
-func ApplyResourceOption(ctx context.Context, config *RunConfigOption, integrationSpec *v1.IntegrationSpec, c client.Client, namespace string, enableCompression bool) error {
-	return applyOption(ctx, config, integrationSpec, c, namespace, enableCompression, v1.ResourceTypeData)
+// ApplyResourceOption will set the proper --resource option behavior to the IntegrationSpec
+func ApplyResourceOption(ctx context.Context, config *RunConfigOption, integration *v1.Integration, c client.Client,
+	namespace string, enableCompression bool) (*corev1.ConfigMap, error) {
+	return applyOption(ctx, config, integration, c, namespace, enableCompression, v1.ResourceTypeData)
 }
 
 func binaryOrTextResource(fileName string, data []byte, contentType string, base64Compression bool, resourceType v1.ResourceType, destinationPath string) (v1.ResourceSpec, error) {
@@ -318,4 +364,30 @@ func extractProperties(value string) (*properties.Properties, error) {
 
 func keyValueProps(value string) (*properties.Properties, error) {
 	return properties.Load([]byte(value), properties.UTF8)
+}
+
+func bindGeneratedConfigmapsToIntegration(ctx context.Context, c client.Client, i *v1.Integration, configmaps []*corev1.ConfigMap) error {
+	controller := true
+	blockOwnerDeletion := true
+	for _, cm := range configmaps {
+		cm.ObjectMeta.Labels[v1.IntegrationLabel] = i.Name
+		cm.ObjectMeta.Labels["camel.apache.org/autogenerated"] = "true"
+		// set owner references
+		cm.ObjectMeta.OwnerReferences = []metav1.OwnerReference{
+			{
+				Kind:               v1.IntegrationKind,
+				APIVersion:         v1.SchemeGroupVersion.String(),
+				Name:               i.Name,
+				UID:                i.UID,
+				Controller:         &controller,
+				BlockOwnerDeletion: &blockOwnerDeletion,
+			},
+		}
+		err := c.Update(ctx, cm)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

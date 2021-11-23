@@ -37,6 +37,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/camel"
 )
 
 // The JVM trait is used to configure the JVM that runs the integration.
@@ -108,8 +109,8 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	classpath := strset.New()
 
 	classpath.Add("./resources")
-	classpath.Add(configResourcesMountPath)
-	classpath.Add(resourcesDefaultMountPath)
+	classpath.Add(camel.ConfigResourcesMountPath)
+	classpath.Add(camel.ResourcesDefaultMountPath)
 	if t.Classpath != "" {
 		classpath.Add(strings.Split(t.Classpath, ":")...)
 	}

@@ -568,10 +568,26 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		return nil, err
 	}
 
+	generatedConfigmaps := make([]*corev1.ConfigMap, 0)
+
 	for _, resource := range o.Resources {
 		if config, parseErr := ParseResourceOption(resource); parseErr == nil {
-			if applyResourceOptionErr := ApplyResourceOption(o.Context, config, &integration.Spec, c, namespace, o.Compression); applyResourceOptionErr != nil {
+			if genCm, applyResourceOptionErr := ApplyResourceOption(o.Context, config, integration, c, namespace, o.Compression); applyResourceOptionErr != nil {
 				return nil, applyResourceOptionErr
+			} else if genCm != nil {
+				generatedConfigmaps = append(generatedConfigmaps, genCm)
+			}
+		} else {
+			return nil, parseErr
+		}
+	}
+
+	for _, item := range o.Configs {
+		if config, parseErr := ParseConfigOption(item); parseErr == nil {
+			if genCm, applyConfigOptionErr := ApplyConfigOption(o.Context, config, integration, c, namespace, o.Compression); applyConfigOptionErr != nil {
+				return nil, applyConfigOptionErr
+			} else if genCm != nil {
+				generatedConfigmaps = append(generatedConfigmaps, genCm)
 			}
 		} else {
 			return nil, parseErr
@@ -619,15 +635,6 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		o.Traits = append(o.Traits, buildPropsTraits...)
 	}
 
-	for _, item := range o.Configs {
-		if config, parseErr := ParseConfigOption(item); parseErr == nil {
-			if applyConfigOptionErr := ApplyConfigOption(o.Context, config, &integration.Spec, c, namespace, o.Compression); applyConfigOptionErr != nil {
-				return nil, applyConfigOptionErr
-			}
-		} else {
-			return nil, parseErr
-		}
-	}
 	for _, item := range o.ConfigMaps {
 		integration.Spec.AddConfiguration("configmap", item)
 	}
@@ -670,18 +677,21 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 
 	if existing == nil {
 		err = c.Create(o.Context, integration)
+		fmt.Printf("Integration \"%s\" created\n", name)
 	} else {
 		err = c.Patch(o.Context, integration, ctrl.MergeFromWithOptions(existing, ctrl.MergeFromWithOptimisticLock{}))
+		fmt.Printf("Integration \"%s\" updated\n", name)
 	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	if existing == nil {
-		fmt.Printf("Integration \"%s\" created\n", name)
-	} else {
-		fmt.Printf("Integration \"%s\" updated\n", name)
+	if generatedConfigmaps != nil {
+		err = bindGeneratedConfigmapsToIntegration(o.Context, c, integration, generatedConfigmaps)
+		if err != nil {
+			return integration, err
+		}
 	}
 	return integration, nil
 }

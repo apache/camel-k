@@ -24,6 +24,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var (
@@ -113,4 +114,35 @@ func NewResourceRequirements(reqs []string) (corev1.ResourceRequirements, error)
 	}
 
 	return resReq, nil
+}
+
+// NewConfigmap will create a Configmap
+func NewConfigmap(namespace, cmName, originalFilename string, generatedKey string,
+	textData string, binaryData []byte) *corev1.ConfigMap {
+	immutable := true
+	cm := corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      cmName,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"camel.apache.org/original-path": originalFilename,
+			},
+		},
+		Immutable: &immutable,
+	}
+	if textData != "" {
+		cm.Data = map[string]string{
+			generatedKey: textData,
+		}
+	}
+	if binaryData != nil {
+		cm.BinaryData = map[string][]byte{
+			generatedKey: binaryData,
+		}
+	}
+	return &cm
 }

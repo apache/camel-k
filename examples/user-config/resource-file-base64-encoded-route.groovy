@@ -18,7 +18,7 @@
 
 //
 // To run this integrations use:
-// kamel run --resource resources-data.txt --compression=true resource-file-base64-encoded-route.groovy --dev
+// kamel run --resource file:resources-data.txt --compression=true resource-file-base64-encoded-route.groovy --dev
 //
 
 from('timer:resources-bas64')

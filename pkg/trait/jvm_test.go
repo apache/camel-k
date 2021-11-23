@@ -102,12 +102,12 @@ func TestApplyJvmTraitWithDeploymentResource(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	cp := strset.New("./resources", configResourcesMountPath, resourcesDefaultMountPath, "/mount/path").List()
+	cp := strset.New("./resources", camel.ConfigResourcesMountPath, camel.ResourcesDefaultMountPath, "/mount/path").List()
 	sort.Strings(cp)
 
 	assert.Equal(t, []string{
 		"-cp",
-		fmt.Sprintf("./resources:%s:%s:/mount/path", configResourcesMountPath, resourcesDefaultMountPath),
+		fmt.Sprintf("./resources:%s:%s:/mount/path", camel.ConfigResourcesMountPath, camel.ResourcesDefaultMountPath),
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }
@@ -134,12 +134,12 @@ func TestApplyJvmTraitWithKNativeResource(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	cp := strset.New("./resources", configResourcesMountPath, resourcesDefaultMountPath, "/mount/path").List()
+	cp := strset.New("./resources", camel.ConfigResourcesMountPath, camel.ResourcesDefaultMountPath, "/mount/path").List()
 	sort.Strings(cp)
 
 	assert.Equal(t, []string{
 		"-cp",
-		fmt.Sprintf("./resources:%s:%s:/mount/path", configResourcesMountPath, resourcesDefaultMountPath),
+		fmt.Sprintf("./resources:%s:%s:/mount/path", camel.ConfigResourcesMountPath, camel.ResourcesDefaultMountPath),
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, s.Spec.Template.Spec.Containers[0].Args)
 }
@@ -243,7 +243,7 @@ func TestApplyJvmTraitWithClasspath(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, []string{
 		"-cp",
-		fmt.Sprintf("./resources:%s:%s:/mount/path:%s:%s", configResourcesMountPath, resourcesDefaultMountPath,
+		fmt.Sprintf("./resources:%s:%s:/mount/path:%s:%s", camel.ConfigResourcesMountPath, camel.ResourcesDefaultMountPath,
 			"/path/to/another/dep.jar", "/path/to/my-dep.jar"),
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, d.Spec.Template.Spec.Containers[0].Args)

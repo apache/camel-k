@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/reference"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -77,7 +78,7 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 	if secret != nil {
 		e.Resources.Add(secret)
 		e.ApplicationProperties["quarkus.kubernetes-service-binding.enabled"] = "true"
-		e.ApplicationProperties["SERVICE_BINDING_ROOT"] = serviceBindingsMountPath
+		e.ApplicationProperties["SERVICE_BINDING_ROOT"] = camel.ServiceBindingsMountPath
 		e.ServiceBindingSecret = secret.GetName()
 	}
 	return nil
