@@ -230,7 +230,11 @@ func CopyFile(src, dst string) (nBytes int64, err error) {
 		err = Close(err, source)
 	}()
 
-	err = os.MkdirAll(path.Dir(dst), 0o700)
+	// we need to have group and other to be able to access the directory as the user
+	//in the container may not be the same as the one owning the files
+	//
+	// #nosec G301
+	err = os.MkdirAll(path.Dir(dst), 0o755)
 	if err != nil {
 		return
 	}
@@ -334,7 +338,8 @@ func CreateDirectory(directory string) error {
 		}
 
 		if !directoryExists {
-			err := os.MkdirAll(directory, 0o700)
+			// #nosec G301
+			err := os.MkdirAll(directory, 0o755)
 			if err != nil {
 				return err
 			}
