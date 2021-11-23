@@ -23,12 +23,8 @@ runs:
   steps:
     - name: Get OpenShift Client (oc)
       shell: bash
+      if: ${{ env.CLUSTER_OCP3_CONFIGURED != 'true' }}
       run: |
-        if [ "${{ env.CLUSTER_CONFIGURED }}" == "true" ]; then
-          echo "Cluster configuration already performed ... skipping"
-          exit 0
-        fi
-
         export OPENSHIFT_VERSION=v3.11.0
         export OPENSHIFT_COMMIT=0cbc58b
         export MAVEN_OPTS=-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
@@ -57,12 +53,8 @@ runs:
     - id: start-openshift
       name: Start OpenShift Cluster
       shell: bash
+      if: ${{ env.CLUSTER_OCP3_CONFIGURED != 'true' }}
       run: |
-        if [ "${{ env.CLUSTER_CONFIGURED }}" == "true" ]; then
-          echo "Cluster configuration already performed ... skipping"
-          exit 0
-        fi
-
         # Figure out this host's IP address
         IP_ADDR="$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)"
 
@@ -76,7 +68,7 @@ runs:
         oc login -u system:admin
 
         # Export the context used for admin login
-        echo "KUBE_ADMIN_USER_CTX=$(oc config current-context)" >> $GITHUB_ENV
+        echo "CLUSTER_KUBE_ADMIN_USER_CTX=$(oc config current-context)" >> $GITHUB_ENV
 
         # Wait until we have a ready node in openshift
         TIMEOUT=0
@@ -100,23 +92,15 @@ runs:
     - id: info
       name: Info
       shell: bash
+      if: ${{ env.CLUSTER_OCP3_CONFIGURED != 'true' }}
       run: |
-        if [ "${{ env.CLUSTER_CONFIGURED }}" == "true" ]; then
-          echo "Cluster configuration already performed ... skipping"
-          exit 0
-        fi
-
         oc describe nodes
 
     - id: configure-developer-user
       name: Configure Developer User
       shell: bash
+      if: ${{ env.CLUSTER_OCP3_CONFIGURED != 'true' }}
       run: |
-        if [ "${{ env.CLUSTER_CONFIGURED }}" == "true" ]; then
-          echo "Cluster configuration already performed ... skipping"
-          exit 0
-        fi
-
         # Aggregate pod eviction permission to the default admin role
         cat <<EOF | oc apply -f -
         kind: ClusterRole
@@ -202,23 +186,19 @@ runs:
         oc login -u developer
 
         # Export the context used for developer login
-        echo "KUBE_USER_CTX=$(oc config current-context)" >> $GITHUB_ENV
+        echo "CLUSTER_KUBE_USER_CTX=$(oc config current-context)" >> $GITHUB_ENV
 
 
     - id: extract-kube-config
       shell: bash
+      if: ${{ env.CLUSTER_OCP3_CONFIGURED != 'true' }}
       run: |
-        if [ "${{ env.CLUSTER_CONFIGURED }}" == "true" ]; then
-          echo "Cluster configuration already performed ... skipping"
-          exit 0
-        fi
-
-        echo "IMAGE_REGISTRY_PUSH_HOST=" >> $GITHUB_ENV
-        echo "IMAGE_REGISTRY_PULL_HOST=" >> $GITHUB_ENV
-        echo "IMAGE_REGISTRY_INSECURE=false" >> $GITHUB_ENV
-        echo "HAS_OLM=true" >> $GITHUB_ENV
+        echo "CLUSTER_IMAGE_REGISTRY_PUSH_HOST=" >> $GITHUB_ENV
+        echo "CLUSTER_IMAGE_REGISTRY_PULL_HOST=" >> $GITHUB_ENV
+        echo "CLUSTER_IMAGE_REGISTRY_INSECURE=false" >> $GITHUB_ENV
+        echo "CLUSTER_HAS_OLM=true" >> $GITHUB_ENV
 
         #
         # Avoid configuring the cluster repeatedly
         #
-        echo "CLUSTER_CONFIGURED=true" >> $GITHUB_ENV
+        echo "CLUSTER_OCP3_CONFIGURED=true" >> $GITHUB_ENV

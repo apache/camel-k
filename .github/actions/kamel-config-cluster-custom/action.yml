@@ -18,65 +18,59 @@
 name: kamel-config-cluster-custom
 description: 'Provides configuration for acessing a custom kubernetes cluster'
 
+inputs:
+  cluster-config-data:
+    description: 'The JSON configuration of the cluster'
+    required: true
+
 runs:
   using: "composite"
   steps:
-    - name: Read platform-config variable to temporary file & override PLATFORM_TYPE if platform config defined
+    - name: Read cluster-config-data variable to temporary file & override CLUSTER_TYPE if cluster config defined
       shell: bash
+      if: ${{ env.CLUSTER_CUSTOM_CONFIGURED != 'true' }}
       run: |
-        if [ "${{ env.CLUSTER_CONFIGURED }}" == "true" ]; then
-          echo "Cluster configuration already performed ... skipping"
-          exit 0
+        export CLUSTER_CONFIG_FILE=/tmp/cluster-config.json
+
+        if [ -f ${CLUSTER_CONFIG_FILE} ]; then
+          rm -f ${CLUSTER_CONFIG_FILE}
         fi
 
-        export PLATFORM_CONFIG=/tmp/platform-config.json
-
-        if [ -f ${PLATFORM_CONFIG} ]; then
-          rm -f ${PLATFORM_CONFIG}
-        fi
-
-        touch "${PLATFORM_CONFIG}"
-        if [ -z "${{ env.PLATFORM_CONFIG_DATA }}" ]; then
-          echo "Error: No PLATFORM_CONFIG_DATA has been defined"
+        touch "${CLUSTER_CONFIG_FILE}"
+        if [ -z "${{ inputs.cluster-config-data }}" ]; then
+          echo "Error: No cluster-config-data parameter has been defined"
           exit 1
         fi
 
-        cat << EOF > "${PLATFORM_CONFIG}"
-        ${{ env.PLATFORM_CONFIG_DATA }}
+        cat << EOF > "${CLUSTER_CONFIG_FILE}"
+        ${{ inputs.cluster-config-data }}
         EOF
 
-        if [ ! -f "${PLATFORM_CONFIG}" ]; then
-          echo "Error: No file ${PLATFORM_CONFIG} has been created"
+        if [ ! -f "${CLUSTER_CONFIG_FILE}" ]; then
+          echo "Error: No file ${CLUSTER_CONFIG_FILE} has been created"
           exit 1
         fi
 
-        if [ -s "${PLATFORM_CONFIG}" ]; then
-          echo "Info: Platform configuration defined"
-          echo "PLATFORM_CONFIG=${PLATFORM_CONFIG}" >> $GITHUB_ENV
+        if [ -s "${CLUSTER_CONFIG_FILE}" ]; then
+          echo "Info: Cluster configuration defined"
+          echo "CLUSTER_CONFIG_FILE=${CLUSTER_CONFIG_FILE}" >> $GITHUB_ENV
         else
-          echo "Error: No platform configuration defined"
+          echo "Error: No cluster configuration defined"
           exit 1
         fi
 
-    - name: Platform-config JSON to variables
-      uses: ./.github/actions/conditional
+    - name: Cluster config JSON to variables
+      uses: ./.github/actions/json-to-variables
+      if: ${{ env.CLUSTER_CUSTOM_CONFIGURED != 'true' }}
       with:
-        if: ${{ env.CLUSTER_CONFIGURED != 'true' }}
-        step: |
-          uses: ./.github/actions/json-to-variables
-          with:
-            filename: ${{ env.PLATFORM_CONFIG }}
-            prefix: 'e2e'
+        filename: ${{ env.CLUSTER_CONFIG_FILE }}
+        prefix: 'e2e'
 
     - id: connect-cluster
       name: Connect to cluster
       shell: bash
+      if: ${{ env.CLUSTER_CUSTOM_CONFIGURED != 'true' }}
       run: |
-        if [ "${{ env.CLUSTER_CONFIGURED }}" == "true" ]; then
-          echo "Cluster configuration already performed ... skipping"
-          exit 0
-        fi
-
         if [ -z "${{ env.e2e_kube-config-data }}" ]; then
           echo "Error: kube config data property cannot be found"
           exit 1
@@ -129,23 +123,15 @@ runs:
     - id: info
       name: Info
       shell: bash
+      if: ${{ env.CLUSTER_CUSTOM_CONFIGURED != 'true' }}
       run: |
-        if [ "${{ env.CLUSTER_CONFIGURED }}" == "true" ]; then
-          echo "Cluster configuration already performed ... skipping"
-          exit 0
-        fi
-
         kubectl describe nodes
 
     - id: configure-developer-user
       name: Configure Developer User
       shell: bash
+      if: ${{ env.CLUSTER_CUSTOM_CONFIGURED != 'true' }}
       run: |
-        if [ "${{ env.CLUSTER_CONFIGURED }}" == "true" ]; then
-          echo "Cluster configuration already performed ... skipping"
-          exit 0
-        fi
-
         # Aggregate pod eviction permission to the default admin role
         cat <<EOF | kubectl apply -f -
         kind: ClusterRole
@@ -205,35 +191,31 @@ runs:
 
     - id: extract-config
       shell: bash
+      if: ${{ env.CLUSTER_CUSTOM_CONFIGURED != 'true' }}
       run: |
-        if [ "${{ env.CLUSTER_CONFIGURED }}" == "true" ]; then
-          echo "Cluster configuration already performed ... skipping"
-          exit 0
-        fi
-
-        echo "IMAGE_REGISTRY_PUSH_HOST=${{ env.e2e_image-registry-push-host }}" >> $GITHUB_ENV
-        echo "IMAGE_REGISTRY_PULL_HOST=${{ env.e2e_image-registry-pull-host }}" >> $GITHUB_ENV
-        echo "IMAGE_REGISTRY_INSECURE=${{ env.e2e_image-registry-insecure }}" >> $GITHUB_ENV
+        echo "CLUSTER_IMAGE_REGISTRY_PUSH_HOST=${{ env.e2e_image-registry-push-host }}" >> $GITHUB_ENV
+        echo "CLUSTER_IMAGE_REGISTRY_PULL_HOST=${{ env.e2e_image-registry-pull-host }}" >> $GITHUB_ENV
+        echo "CLUSTER_IMAGE_REGISTRY_INSECURE=${{ env.e2e_image-registry-insecure }}" >> $GITHUB_ENV
 
         #
-        # Export the image namespace if defined in the platform config
+        # Export the image namespace if defined in the cluster config
         #
         if [ -n "${{ env.e2e_image-namespace }}" ]; then
-          echo "IMAGE_NAMESPACE=${{ env.e2e_image-namespace }}" >> $GITHUB_ENV
+          echo "CLUSTER_IMAGE_NAMESPACE=${{ env.e2e_image-namespace }}" >> $GITHUB_ENV
         fi
 
         #
         # Export the context used for admin and user
         #
-        echo "KUBE_ADMIN_USER_CTX=${{ env.e2e_kube-admin-user-ctx }}" >> $GITHUB_ENV
-        echo "KUBE_USER_CTX=${{ env.e2e_kube-user-ctx }}" >> $GITHUB_ENV
+        echo "CLUSTER_KUBE_ADMIN_USER_CTX=${{ env.e2e_kube-admin-user-ctx }}" >> $GITHUB_ENV
+        echo "CLUSTER_KUBE_USER_CTX=${{ env.e2e_kube-user-ctx }}" >> $GITHUB_ENV
 
         #
         # Export the flag for olm capability
         #
-        echo "HAS_OLM=${{ env.e2e_has-olm }}" >> $GITHUB_ENV
+        echo "CLUSTER_HAS_OLM=${{ env.e2e_has-olm }}" >> $GITHUB_ENV
 
         #
         # Avoid configuring the cluster repeatedly
         #
-        echo "CLUSTER_CONFIGURED=true" >> $GITHUB_ENV
+        echo "CLUSTER_CUSTOM_CONFIGURED=true" >> $GITHUB_ENV

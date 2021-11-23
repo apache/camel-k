@@ -23,53 +23,42 @@ runs:
   steps:
     - id: install-cluster
       name: Install Cluster
-      uses: ./.github/actions/conditional
+      uses: container-tools/kind-action@v1
+      if: ${{ env.CLUSTER_KIND_CONFIGURED != 'true' }}
       with:
-        if: ${{ env.CLUSTER_CONFIGURED != 'true' }}
-        step: |
-          uses: container-tools/kind-action@v1
-          with:
-            version: v0.11.0
-            node_image: kindest/node:v1.21.1@sha256:fae9a58f17f18f06aeac9772ca8b5ac680ebbed985e266f711d936e91d113bad
+        version: v0.11.0
+        node_image: kindest/node:v1.21.1@sha256:fae9a58f17f18f06aeac9772ca8b5ac680ebbed985e266f711d936e91d113bad
 
     - id: info
       name: Info
       shell: bash
+      if: ${{ env.CLUSTER_KIND_CONFIGURED != 'true' }}
       run: |
-        if [ "${{ env.CLUSTER_CONFIGURED }}" == "true" ]; then
-          echo "Cluster configuration already performed ... skipping"
-          exit 0
-        fi
-
         kubectl cluster-info
         kubectl describe nodes
 
     - id: extract-config
       shell: bash
+      if: ${{ env.CLUSTER_KIND_CONFIGURED != 'true' }}
       run: |
-        if [ "${{ env.CLUSTER_CONFIGURED }}" == "true" ]; then
-          echo "Cluster configuration already performed ... skipping"
-          exit 0
-        fi
-
         # Kind has the same interface for both pushing and pulling images in its registry
-        echo "IMAGE_REGISTRY_PUSH_HOST=${{ env.KIND_REGISTRY }}" >> $GITHUB_ENV
-        echo "IMAGE_REGISTRY_PULL_HOST=${{ env.KIND_REGISTRY }}" >> $GITHUB_ENV
-        echo "IMAGE_REGISTRY_INSECURE=true" >> $GITHUB_ENV
+        echo "CLUSTER_IMAGE_REGISTRY_PUSH_HOST=${{ env.KIND_REGISTRY }}" >> $GITHUB_ENV
+        echo "CLUSTER_IMAGE_REGISTRY_PULL_HOST=${{ env.KIND_REGISTRY }}" >> $GITHUB_ENV
+        echo "CLUSTER_IMAGE_REGISTRY_INSECURE=true" >> $GITHUB_ENV
 
         #
         # Export the context used for admin and user
         # Since kind has no rbac switched on then these can be the same
         #
-        echo "KUBE_ADMIN_USER_CTX=$(kubectl config current-context)" >> $GITHUB_ENV
-        echo "KUBE_USER_CTX=$(kubectl config current-context)" >> $GITHUB_ENV
+        echo "CLUSTER_KUBE_ADMIN_USER_CTX=$(kubectl config current-context)" >> $GITHUB_ENV
+        echo "CLUSTER_KUBE_USER_CTX=$(kubectl config current-context)" >> $GITHUB_ENV
 
         #
         # Export the flag for olm capability
         #
-        echo "HAS_OLM=false" >> $GITHUB_ENV
+        echo "CLUSTER_HAS_OLM=false" >> $GITHUB_ENV
 
         #
         # Avoid configuring the cluster repeatedly
         #
-        echo "CLUSTER_CONFIGURED=true" >> $GITHUB_ENV
+        echo "CLUSTER_KIND_CONFIGURED=true" >> $GITHUB_ENV

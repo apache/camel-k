@@ -16,7 +16,7 @@
 # ---------------------------------------------------------------------------
 
 name: kamel-prepare-env
-description: 'Initialise the test environment with tools'
+description: 'Initialise the test environment with tools. (Will only run once per workflow)'
 
 runs:
   using: "composite"
@@ -28,22 +28,19 @@ runs:
     # clean-up since that step removes all docker image in order to
     # claim back as much space as possible.
     #
+    # Expects env file with following vars:
+    # TEST_CLUSTER
+    #
     - id: read-env-file
       uses: ./.github/actions/action-dotenv-to-setenv
+      if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       with:
         env-file: .github/.env
 
     - name: Cleanup
       shell: bash
+      if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       run: |
-        #
-        # Only perform the cleaning once.
-        #
-        if [ "${{ env.ENV_PREPARED }}" == "true" ]; then
-          echo "Cleaning of docker already performed ... skipping"
-          exit 0
-        fi
-
         ls -lart
         echo "Initial status:"
         df -h
@@ -69,34 +66,21 @@ runs:
         df -h
 
     - name: Set up JDK 11
-      uses: ./.github/actions/conditional
+      uses: AdoptOpenJDK/install-jdk@v1
+      if: ${{ env.ENV_PREPARED != 'true' }}
       with:
-        if: ${{ env.ENV_PREPARED != 'true' }}
-        step: |
-          uses: AdoptOpenJDK/install-jdk@v1
-          with:
-            version: "11"
+        version: "11"
 
     - name: Set Go
-      uses: ./.github/actions/conditional
+      uses: actions/setup-go@v2 # Version 2 adds GOBIN to PATH
+      if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       with:
-        if: ${{ env.ENV_PREPARED != 'true' }}
-        step: |
-          uses: actions/setup-go@v2 # Version 2 adds GOBIN to PATH
-          with:
-            go-version: 1.16.x
+        go-version: 1.16.x
 
     - name: (Re-)install kustomize
       shell: bash
+      if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       run: |
-        #
-        # Only perform the kustomize install once.
-        #
-        if [ "${{ env.ENV_PREPARED }}" == "true" ]; then
-          echo "Install of kustomize already performed ... skipping"
-          exit 0
-        fi
-
         # reinstall kustomize to be always on the same version
         sudo rm $(which kustomize)
         make kustomize
@@ -109,30 +93,17 @@ runs:
     # Install a version of kubectl for generic access to cluster
     #
     - id: install-kubectl
-      uses: ./.github/actions/conditional
+      uses: azure/setup-kubectl@v1
+      if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       with:
-        if: ${{ env.ENV_PREPARED != 'true' }}
-        step: |
-          uses: azure/setup-kubectl@v1
-          with:
-            version: 'latest'
+        version: 'latest'
 
-    - id: report-platform
-      name: Report Platform
+    - id: complete-action
+      name: Environment Prepared
       shell: bash
+      if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       run : |
-        if [ -n "${{ env.TEST_PLATFORM_CLUSTER }}" ]; then
-          echo "::set-output name=platform::$(echo ${{ env.TEST_PLATFORM_CLUSTER }})"
-        else
-          echo "::set-output name=platform::$(echo kind)"
-        fi
-
         #
         # Avoid preparing the environment repeatedly
         #
-        echo "ENV_PREPARED=true" >> $GITHUB_ENV
-
-outputs:
-  cluster-platform:
-    description: "Preferred environment set by .env file (default 'kind')"
-    value: ${{ steps.report-platform.outputs.platform }}
+        echo "KAMEL_PREPARE_ENV=true" >> $GITHUB_ENV

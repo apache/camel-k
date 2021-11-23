@@ -29,10 +29,6 @@ inputs:
     description: 'Namespace in which to store the image'
     required: false
     default: 'apache'
-  install-kamel-binary:
-    description: 'Install the kamel binary onto the path'
-    required: false
-    default: true
   make-rules:
     description: 'Override the default make rules'
     required: false
@@ -52,7 +48,6 @@ runs:
         image-registry-pull-host: ${{ inputs.image-registry-pull-host }}
         image-namespace: ${{ inputs.image-namespace }}
         make-rules: ${{ inputs.make-rules }}
-        install-kamel-binary: ${{ inputs.install-kamel-binary }}
 
     #
     # By default do not build the image bundle
@@ -60,24 +55,10 @@ runs:
     - id: build-kamel-bundle
       name: Build Kamel Metadata Bundle
       uses: ./.github/actions/kamel-build-bundle
-      if: ${{ inputs.build-bundle != true }}
+      if: ${{ inputs.build-bundle == 'true' }}
       with:
         image-registry-push-host: ${{ inputs.image-registry-push-host }}
         image-registry-pull-host: ${{ inputs.image-registry-pull-host }}
         image-namespace: ${{ inputs.image-namespace }}
-        local-image-name: ${{ steps.build-kamel-binary.outputs.local-image-name }}
-        local-image-version: ${{ steps.build-kamel-binary.outputs.local-image-version }}
-
-outputs:
-  local-image-name:
-    description: "Reference of the camel-k image"
-    value: ${{ steps.build-kamel-binary.outputs.local-image-name }}
-  local-image-version:
-    description: "Reference of the camel-k image version"
-    value: ${{ steps.build-kamel-binary.outputs.local-image-version }}
-  local-image-bundle:
-    description: "Reference of the camel-k metadata bundle image"
-    value: ${{ steps.build-kamel-bundle.outputs.local-image-bundle }}
-  local-image-bundle-index:
-    description: "Reference of the camel-k metadata bundle index image"
-    value: ${{ steps.build-kamel-bundle.outputs.local-image-bundle-index }}
+        local-image-name: ${{ env.BUILD_BINARY_LOCAL_IMAGE_NAME }}
+        local-image-version: ${{ env.BUILD_BINARY_LOCAL_IMAGE_VERSION }}

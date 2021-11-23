@@ -19,7 +19,7 @@ name: e2e-upgrade
 description: 'End-to-End tests for upgrading to new version'
 
 inputs:
-  platform-config:
+  cluster-config-data:
     description: 'The configuration of the underlying cluster (if cluster-type is custom)'
     required: false
 
@@ -31,12 +31,12 @@ runs:
     name: Prepare Test Environment
     uses: ./.github/actions/kamel-prepare-env
 
-  - id: configure-platform
-    name: Configure Platform
+  - id: configure-cluster
+    name: Configure Cluster
     uses: ./.github/actions/kamel-config-cluster
     with:
-      cluster-type: ${{ steps.prepare-env.outputs.cluster-platform }}
-      platform-config: ${{ inputs.platform-config }}
+      cluster-type: ${{ env.TEST_CLUSTER }}
+      cluster-config-data: ${{ inputs.cluster-config-data }}
       require-olm: true
 
   - name: Get Released Kamel CLI
@@ -51,13 +51,13 @@ runs:
       fi
 
       #
-      # Note: cannot use GITHUB_ENV vars is same script as it was defined
+      # Note: cannot use GITHUB_ENV vars in same script as it was defined
       #
       export RELEASED_KAMEL_BINARY=/tmp/kamel-${KAMEL_VERSION}
-      echo "RELEASED_KAMEL_BINARY=${RELEASED_KAMEL_BINARY}" >> $GITHUB_ENV
       mv /tmp/kamel ${RELEASED_KAMEL_BINARY}
       if [ $? == 0 ]; then
         echo "Info: Kamel version installed: $(${RELEASED_KAMEL_BINARY} version)"
+        echo "E2E_UPGRADE_RELEASED_KAMEL_BINARY=${RELEASED_KAMEL_BINARY}" >> $GITHUB_ENV
       else
         echo "Error: Failed to install kamel binary ${KAMEL_VERSION}"
         exit 1
@@ -67,44 +67,36 @@ runs:
     name: Build Kamel
     uses: ./.github/actions/kamel-build
     with:
-      image-registry-push-host: ${{ steps.configure-platform.outputs.image-registry-push-host }}
-      image-registry-pull-host: ${{ steps.configure-platform.outputs.image-registry-pull-host }}
-      image-namespace: ${{ steps.configure-platform.outputs.image-namespace }}
+      image-registry-push-host: ${{ env.CLUSTER_IMAGE_REGISTRY_PUSH_HOST }}
+      image-registry-pull-host: ${{ env.CLUSTER_IMAGE_REGISTRY_PULL_HOST }}
+      image-namespace: ${{ env.CLUSTER_IMAGE_NAMESPACE }}
       # Builds the bundle if an OLM is available.
-      # Since configure-platform requires OLM then this should be true
-      build-bundle: ${{ steps.configure-platform.outputs.olm-available }}
-      kube-admin-user-ctx: ${{ steps.configure-platform.outputs.kube-admin-user-ctx }}
+      # Since configure-cluster requires OLM then this should be true
+      build-bundle: ${{ env.CLUSTER_HAS_OLM }}
+      kube-admin-user-ctx: ${{ env.CLUSTER_KUBE_ADMIN_USER_CTX }}
 
   - name: Run IT
     shell: bash
     run: |
       # Use the last released Kamel CLI
-      export RELEASED_KAMEL_BIN=${{ env.RELEASED_KAMEL_BINARY }}
+      export RELEASED_KAMEL_BIN=${{ env.E2E_UPGRADE_RELEASED_KAMEL_BINARY }}
 
       echo "Kamel version: $(${RELEASED_KAMEL_BIN} version)"
 
       # Configure install options
-      export CUSTOM_IMAGE=${{ steps.build-kamel.outputs.local-image-name }}
-      export CUSTOM_VERSION=${{ steps.build-kamel.outputs.local-image-version }}
+      export CUSTOM_IMAGE=${{ env.BUILD_BINARY_LOCAL_IMAGE_NAME }}
+      export CUSTOM_VERSION=${{ env.BUILD_BINARY_LOCAL_IMAGE_VERSION }}
       export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
-      export KAMEL_INSTALL_REGISTRY=${{ steps.configure-platform.outputs.image-registry-pull-host }}
-      export KAMEL_INSTALL_REGISTRY_INSECURE=${{ steps.configure-platform.outputs.image-registry-insecure }}
+      export KAMEL_INSTALL_REGISTRY=${{ env.CLUSTER_IMAGE_REGISTRY_PULL_HOST }}
+      export KAMEL_INSTALL_REGISTRY_INSECURE=${{ env.CLUSTER_IMAGE_REGISTRY_INSECURE }}
 
       # Despite building a bundle we don't want it installed immediately so no OLM_INDEX_BUNDLE var
 
       # Configure test options
       export CAMEL_K_PREV_IIB=quay.io/operatorhubio/catalog:latest
-      export CAMEL_K_NEW_IIB=${{ steps.build-kamel.outputs.local-image-bundle-index }}
+      export CAMEL_K_NEW_IIB=${{ env.BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX }}
       export KAMEL_K_TEST_RELEASE_VERSION=$(make get-last-released-version)
       export KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
 
       # Then run integration tests
       make test-upgrade
-
-  - name: Cleanup-Tests
-    if: ${{ always() }}
-    shell: bash
-    run: |
-      if [ -n "${{ env.PLATFORM_CONFIG }}" ]; then
-        rm -f ${{ env.PLATFORM_CONFIG }}
-      fi

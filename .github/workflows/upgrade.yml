@@ -61,4 +61,4 @@ jobs:
     - name: Execute Upgrade Tests
       uses: ./.github/actions/e2e-upgrade
       with:
-        platform-config: ${{ secrets.E2E_PLATFORM_CONFIG }}
+        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
