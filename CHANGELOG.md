@@ -6,9 +6,11 @@
 
 **Closed issues:**
 
+- How can I find the log file location in the integration pod?  [\#2762](https://github.com/apache/camel-k/issues/2762)
 - Could not pull base image - Build kit failed \(No matching credentials were found, falling back on anonymous\) [\#2748](https://github.com/apache/camel-k/issues/2748)
 - Cannot deploy XML integration with undertow [\#2746](https://github.com/apache/camel-k/issues/2746)
 - Release 1.7.0 [\#2743](https://github.com/apache/camel-k/issues/2743)
+- Kamelet: default KameletBindings configuration settings [\#2558](https://github.com/apache/camel-k/issues/2558)
 - Camel-K - uninstall and namespace deletion w/ k8s let all Camel-K Integrations in this namespace alive [\#2533](https://github.com/apache/camel-k/issues/2533)
 - Reduce time for first Integration start [\#2520](https://github.com/apache/camel-k/issues/2520)
 - Install Error [\#2498](https://github.com/apache/camel-k/issues/2498)
@@ -22,6 +24,7 @@
 
 **Merged pull requests:**
 
+- chore\(build\): Upgrade Maven to version 3.8.4 [\#2767](https://github.com/apache/camel-k/pull/2767) ([astefanutti](https://github.com/astefanutti))
 - chore\(release\): Remove staging repository [\#2750](https://github.com/apache/camel-k/pull/2750) ([astefanutti](https://github.com/astefanutti))
 - chore\(e2e\): disable object truncation on test results [\#2745](https://github.com/apache/camel-k/pull/2745) ([tadayosi](https://github.com/tadayosi))
 - feat: Health trait [\#2740](https://github.com/apache/camel-k/pull/2740) ([astefanutti](https://github.com/astefanutti))
