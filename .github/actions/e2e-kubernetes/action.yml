@@ -19,7 +19,7 @@ name: e2e-kubernetes
 description: 'End-to-End tests for 80/20 use-cases'
 
 inputs:
-  platform-config:
+  cluster-config-data:
     description: 'The configuration of the underlying cluster (if cluster-type is custom)'
     required: false
 
@@ -31,40 +31,40 @@ runs:
     name: Prepare Test Environment
     uses: ./.github/actions/kamel-prepare-env
 
-  - id: configure-platform
+  - id: configure-cluster
     name: Configure Platform
     uses: ./.github/actions/kamel-config-cluster
     with:
-      cluster-type: ${{ steps.prepare-env.outputs.cluster-platform }}
-      platform-config: ${{ inputs.platform-config }}
+      cluster-type: ${{ env.TEST_CLUSTER }}
+      cluster-config-data: ${{ inputs.cluster-config-data }}
 
   - id: build-kamel
     name: Build Kamel
     uses: ./.github/actions/kamel-build
     with:
-      image-registry-push-host: ${{ steps.configure-platform.outputs.image-registry-push-host }}
-      image-registry-pull-host: ${{ steps.configure-platform.outputs.image-registry-pull-host }}
-      image-namespace: ${{ steps.configure-platform.outputs.image-namespace }}
+      image-registry-push-host: ${{ env.CLUSTER_IMAGE_REGISTRY_PUSH_HOST }}
+      image-registry-pull-host: ${{ env.CLUSTER_IMAGE_REGISTRY_PULL_HOST }}
+      image-namespace: ${{ env.CLUSTER_IMAGE_NAMESPACE }}
       # Builds the bundle if an OLM is available - depends on cluster being tested
-      build-bundle: ${{ steps.configure-platform.outputs.olm-available }}
+      build-bundle: ${{ env.CLUSTER_HAS_OLM }}
 
   - id: install-kamel-cluster-setup
     name: Install Kamel Cluster Setup
     uses: ./.github/actions/kamel-install-cluster-setup
     with:
-      kube-admin-user-ctx: ${{ steps.configure-platform.outputs.kube-admin-user-ctx }}
+      kube-admin-user-ctx: ${{ env.CLUSTER_KUBE_ADMIN_USER_CTX }}
 
   - id: run-it
     name: Run IT
     shell: bash
     run: |
       # Cluster environment
-      export CUSTOM_IMAGE=${{ steps.build-kamel.outputs.local-image-name }}
-      export CUSTOM_VERSION=${{ steps.build-kamel.outputs.local-image-version }}
+      export CUSTOM_IMAGE=${{ env.BUILD_BINARY_LOCAL_IMAGE_NAME }}
+      export CUSTOM_VERSION=${{ env.BUILD_BINARY_LOCAL_IMAGE_VERSION }}
 
       export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
-      export KAMEL_INSTALL_REGISTRY=${{ steps.configure-platform.outputs.image-registry-pull-host }}
-      export KAMEL_INSTALL_REGISTRY_INSECURE=${{ steps.configure-platform.outputs.image-registry-insecure }}
+      export KAMEL_INSTALL_REGISTRY=${{ env.CLUSTER_IMAGE_REGISTRY_PULL_HOST }}
+      export KAMEL_INSTALL_REGISTRY_INSECURE=${{ env.CLUSTER_IMAGE_REGISTRY_INSECURE }}
       export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
       export CAMEL_K_TEST_IMAGE_NAME=${CUSTOM_IMAGE}
       export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}

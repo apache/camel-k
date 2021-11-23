@@ -4,10 +4,6 @@
 [submodule ".github/actions/changelog"]
 	path = .github/actions/changelog
 	url = https://github.com/CharMixer/auto-changelog-action
-[submodule ".github/actions/conditional"]
-	path = .github/actions/conditional
-	url = https://github.com/ChristopherHX/conditional.git
-	branch = 3fce4b7a3171a839b482306f9fd3aba0c2112a24
 [submodule ".github/actions/action-dotenv-to-setenv"]
 	path = .github/actions/action-dotenv-to-setenv
         url = https://github.com/c-py/action-dotenv-to-setenv.git

@@ -69,14 +69,5 @@ runs:
         # Use the PULL host to ensure the correct image:tag
         # is passed into the tests for the deployment to pull from
         #
-        export LOCAL_IMAGE_NAME=${{ inputs.image-registry-pull-host }}/${{ inputs.image-namespace }}/camel-k
-        echo "::set-output name=local-img-name::$(echo ${LOCAL_IMAGE_NAME})"
-        echo "::set-output name=local-img-version::$(make get-version)"
-
-outputs:
-  local-image-name:
-    description: "Reference of the camel-k image"
-    value: ${{ steps.build-operator.outputs.local-img-name }}
-  local-image-version:
-    description: "Reference of the camel-k image version"
-    value: ${{ steps.build-operator.outputs.local-img-version }}
+        echo "BUILD_BINARY_LOCAL_IMAGE_NAME=${{ inputs.image-registry-pull-host }}/${{ inputs.image-namespace }}/camel-k" >> $GITHUB_ENV
+        echo "BUILD_BINARY_LOCAL_IMAGE_VERSION=$(make get-version)" >> $GITHUB_ENV

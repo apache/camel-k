@@ -16,15 +16,15 @@
 # ---------------------------------------------------------------------------
 
 name: kamel-config-cluster
-description: 'Delegates to respective cluster action depending on type of requested platform'
+description: 'Delegates to respective cluster action depending on type of requested cluster'
 
 inputs:
   cluster-type:
     description: 'The type of cluster required: [kind, ocp3, custom]'
     required: true
     default: 'kind'
-  platform-config:
-    description: 'The JSON configuration of the platform - required for custom platform type only'
+  cluster-config-data:
+    description: 'The JSON configuration of the cluster - required for custom cluster type only'
     required: false
   require-olm:
     description: 'If OLM is not available by default ensure that it is installed'
@@ -33,79 +33,51 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Override platform type if there is a custom platform-config
+    - name: Override cluster type if there is a custom cluster-config
       shell: bash
       run: |
-        if [ -n "${{ inputs.platform-config }}" ]; then
+        if [ -n "${{ inputs.cluster-config-data }}" ]; then
           #
-          # Have custom platform-config so override platform-type
+          # Have custom cluster-config-data so override cluster-type
           #
-          echo "PLATFORM_TYPE=custom" >> $GITHUB_ENV
+          echo "CLUSTER_TYPE=custom" >> $GITHUB_ENV
         else
-          echo "Info: No platform configuration supplied."
-          echo "PLATFORM_TYPE=${{ inputs.cluster-type }}" >> $GITHUB_ENV
+          echo "Info: No cluster configuration supplied."
+          echo "CLUSTER_TYPE=${{ inputs.cluster-type }}" >> $GITHUB_ENV
         fi
 
-    #
-    # TODO
-    # Due to lack of if in steps, need to use conditional action which
-    # does not currently include output support so have to put all vars
-    # as environment vars. When either ChristopherHX or github support allow
-    # for alternative then update accordingly.
-    #
     - id: execute-kind
       name: Maybe Execute Kind Cluster
-      uses: ./.github/actions/conditional
-      with:
-        if: ${{ env.PLATFORM_TYPE == 'kind' }}
-        step: |
-          uses: ./.github/actions/kamel-config-cluster-kind
+      uses: ./.github/actions/kamel-config-cluster-kind
+      if: ${{ env.CLUSTER_TYPE == 'kind' }}
 
     - id: execute-ocp3
       name: Maybe Execute Minishift Cluster
-      uses: ./.github/actions/conditional
-      with:
-        if: ${{ env.PLATFORM_TYPE == 'ocp3' }}
-        step: |
-          uses: ./.github/actions/kamel-config-cluster-ocp3
+      uses: ./.github/actions/kamel-config-cluster-ocp3
+      if: ${{ env.CLUSTER_TYPE == 'ocp3' }}
 
     - id: execute-custom
       name: Maybe Execute Custom Cluster
-      uses: ./.github/actions/conditional
-      env:
-        PLATFORM_CONFIG_DATA: ${{ inputs.platform-config }}
+      uses: ./.github/actions/kamel-config-cluster-custom
+      if: ${{ env.CLUSTER_TYPE == 'custom' }}
       with:
-        if: ${{ env.PLATFORM_TYPE == 'custom' }}
-        step: |
-          uses: ./.github/actions/kamel-config-cluster-custom
+        cluster-config-data: ${{ inputs.cluster-config-data }}
 
     - id: execute-invalid
       name: Execute Invalid Cluster
-      uses: ./.github/actions/conditional
-      with:
-        if: ${{ env.PLATFORM_TYPE != 'kind' &&  env.PLATFORM_TYPE != 'ocp3' &&  env.PLATFORM_TYPE != 'custom' }}
-        step: |
-          shell: bash
-          run: |
-            echo "Error: Unrecognised platform request for type of cluster. Should be kind, ocp3 or custom."
-            exit 1
+      if: ${{ env.CLUSTER_TYPE != 'kind' &&  env.CLUSTER_TYPE != 'ocp3' &&  env.CLUSTER_TYPE != 'custom' }}
+      shell: bash
+      run: |
+        echo "Error: Unrecognised cluster request for type of cluster. Should be kind, ocp3 or custom."
+        exit 1
 
-    - id: platform-info
+    - id: image-namespace
       shell: bash
       env:
         DEFAULT_IMAGE_NAMESPACE: 'apache'
       run: |
-        echo "::set-output name=image-registry-push-host::$(echo ${{ env.IMAGE_REGISTRY_PUSH_HOST }})"
-        echo "::set-output name=image-registry-pull-host::$(echo ${{ env.IMAGE_REGISTRY_PULL_HOST }})"
-        echo "::set-output name=image-registry-insecure::$(echo ${{ env.IMAGE_REGISTRY_INSECURE }})"
-        echo "::set-output name=kube-admin-user-ctx::$(echo ${{ env.KUBE_ADMIN_USER_CTX }})"
-        echo "::set-output name=kube-user-ctx::$(echo ${{ env.KUBE_USER_CTX }})"
-        echo "::set-output name=has-olm::$(echo ${{ env.HAS_OLM }})"
-
-        if [ -n "${{ env.IMAGE_NAMESPACE }}" ]; then
-          echo "::set-output name=image-namespace::$(echo ${{ env.IMAGE_NAMESPACE }})"
-        else
-          echo "::set-output name=image-namespace::$(echo ${{ env.DEFAULT_IMAGE_NAMESPACE }})"
+        if [ -z "${{ env.CLUSTER_IMAGE_NAMESPACE }}" ]; then
+          echo "CLUSTER_IMAGE_NAMESPACE=apache" >> $GITHUB_ENV
         fi
 
       #
@@ -128,17 +100,16 @@ runs:
       name: Install OLM
       shell: bash
       run: |
-        if [ "${{ steps.platform-info.outputs.has-olm }}" == "true" ]; then
+        if [ "${{ env.CLUSTER_HAS_OLM }}" == "true" ]; then
           # OLM already installed by default
           echo "OLM already available in cluster"
-          echo "::set-output name=has-olm::$(echo true)"
           exit 0
         fi
 
         if [ "${{ inputs.require-olm }}" != "true" ]; then
           # OLM not explicitly requested
           echo "OLM not explicity required for testing"
-          echo "::set-output name=has-olm::$(echo false)"
+          echo "CLUSTER_HAS_OLM=false" >> $GITHUB_ENV
           exit 0
         fi
 
@@ -152,7 +123,7 @@ runs:
         # Need to be admin so switch to the admin context
         #
         echo "Change to kube admin context"
-        kubectl config use-context "${{ steps.platform-info.outputs.kube-admin-user-ctx }}"
+        kubectl config use-context "${{ env.CLUSTER_KUBE_ADMIN_USER_CTX }}"
 
         set +e
         echo "Check if OLM is already installed"
@@ -174,27 +145,4 @@ runs:
         kubectl config use-context "${ctx}"
 
         echo "Complete"
-        echo "::set-output name=has-olm::$(echo true)"
-
-outputs:
-  image-registry-push-host:
-    description: "Registry for storing images host push interface"
-    value: ${{ steps.platform-info.outputs.image-registry-push-host }}
-  image-registry-pull-host:
-    description: "Registry for storing images host pull interface"
-    value: ${{ steps.platform-info.outputs.image-registry-pull-host }}
-  image-registry-insecure:
-    description: "Whether the image registry requires secure/authenticated access"
-    value: ${{ steps.platform-info.outputs.image-registry-insecure }}
-  image-namespace:
-    description: "Registry namespace for storing images"
-    value: ${{ steps.platform-info.outputs.image-namespace }}
-  kube-admin-user-ctx:
-    description: "The admin user context of the cluster"
-    value: ${{ steps.platform-info.outputs.kube-admin-user-ctx }}
-  kube-user-ctx:
-    description: "The user context of the cluster"
-    value: ${{ steps.platform-info.outputs.kube-user-ctx }}
-  olm-available:
-    description: "Whether an OLM service is available in the cluster"
-    value: ${{ steps.install-olm.outputs.has-olm }}
+        echo "CLUSTER_HAS_OLM=true" >> $GITHUB_ENV
