@@ -30,7 +30,7 @@ metadata:
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
     repository: https://github.com/apache/camel-k
     support: Camel
-  name: camel-k.v1.7.0
+  name: camel-k.v1.8.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
