@@ -48,18 +48,7 @@ const (
 	False = "false"
 )
 
-var (
-	basePath                  = "/etc/camel"
-	confDPath                 = path.Join(basePath, "conf.d")
-	sourcesMountPath          = path.Join(basePath, "sources")
-	resourcesDefaultMountPath = path.Join(basePath, "resources")
-	configResourcesMountPath  = path.Join(confDPath, "_resources")
-	configConfigmapsMountPath = path.Join(confDPath, "_configmaps")
-	configSecretsMountPath    = path.Join(confDPath, "_secrets")
-	serviceBindingsMountPath  = path.Join(confDPath, "_servicebindings")
-)
-
-// Identifiable represent an identifiable type.
+// Identifiable represent an identifiable type
 type Identifiable interface {
 	ID() ID
 }
@@ -403,7 +392,7 @@ func (e *Environment) addSourcesProperties() {
 	}
 	for i, s := range e.Integration.Sources() {
 		srcName := strings.TrimPrefix(s.Name, "/")
-		src := "file:" + path.Join(sourcesMountPath, srcName)
+		src := "file:" + path.Join(camel.SourcesMountPath, srcName)
 		e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].location", i)] = src
 
 		simpleName := srcName
@@ -457,7 +446,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		}
 		resName := strings.TrimPrefix(s.Name, "/")
 		refName := fmt.Sprintf("i-source-%03d", i)
-		resPath := path.Join(sourcesMountPath, resName)
+		resPath := path.Join(camel.SourcesMountPath, resName)
 
 		*vols = append(*vols, corev1.Volume{
 			Name: refName,
@@ -538,9 +527,9 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 			var mountPath string
 			switch propertiesType {
 			case "application":
-				mountPath = path.Join(basePath, resName)
+				mountPath = path.Join(camel.BasePath, resName)
 			case "user":
-				mountPath = path.Join(confDPath, resName)
+				mountPath = path.Join(camel.ConfDPath, resName)
 			}
 
 			if propertiesType != "" {
@@ -626,7 +615,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 		*mnts = append(*mnts, corev1.VolumeMount{
 			Name:      refName,
-			MountPath: path.Join(serviceBindingsMountPath, strings.ToLower(secret)),
+			MountPath: path.Join(camel.ServiceBindingsMountPath, strings.ToLower(secret)),
 		})
 	}
 
@@ -698,11 +687,11 @@ func getResourcePath(resourceName string, maybePath string, resourceType v1.Reso
 	}
 	// otherwise return a default path, according to the resource type
 	if resourceType == v1.ResourceTypeData {
-		return path.Join(resourcesDefaultMountPath, resourceName)
+		return path.Join(camel.ResourcesDefaultMountPath, resourceName)
 	}
 
 	// Default, config type
-	return path.Join(configResourcesMountPath, resourceName)
+	return path.Join(camel.ConfigResourcesMountPath, resourceName)
 }
 
 func getConfigmapMountPoint(resourceName string, maybeMountPoint string, resourceType string) string {
@@ -711,11 +700,11 @@ func getConfigmapMountPoint(resourceName string, maybeMountPoint string, resourc
 		return maybeMountPoint
 	}
 	if resourceType == "data" {
-		return path.Join(resourcesDefaultMountPath, resourceName)
+		return path.Join(camel.ResourcesDefaultMountPath, resourceName)
 	}
 
 	// Default, config type
-	return path.Join(configConfigmapsMountPath, resourceName)
+	return path.Join(camel.ConfigConfigmapsMountPath, resourceName)
 }
 
 func getSecretMountPoint(resourceName string, maybeMountPoint string, resourceType string) string {
@@ -724,11 +713,11 @@ func getSecretMountPoint(resourceName string, maybeMountPoint string, resourceTy
 		return maybeMountPoint
 	}
 	if resourceType == "data" {
-		return path.Join(resourcesDefaultMountPath, resourceName)
+		return path.Join(camel.ResourcesDefaultMountPath, resourceName)
 	}
 
 	// Default, config type
-	return path.Join(configSecretsMountPath, resourceName)
+	return path.Join(camel.ConfigSecretsMountPath, resourceName)
 }
 
 func (e *Environment) collectConfigurationValues(configurationType string) []string {
