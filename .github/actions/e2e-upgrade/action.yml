@@ -101,3 +101,7 @@ runs:
 
       # Then run integration tests
       make test-upgrade
+
+  - name: Cleanup
+    uses: ./.github/actions/kamel-cleanup
+    if: ${{ always() }}

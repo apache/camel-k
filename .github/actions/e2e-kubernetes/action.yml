@@ -84,3 +84,7 @@ runs:
       make test-service-binding
       make test-quarkus-native
       make test-kustomize
+
+  - name: Cleanup
+    uses: ./.github/actions/kamel-cleanup
+    if: ${{ always() }}
