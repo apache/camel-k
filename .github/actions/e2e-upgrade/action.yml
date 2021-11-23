@@ -73,7 +73,8 @@ runs:
       # Builds the bundle if an OLM is available.
       # Since configure-cluster requires OLM then this should be true
       build-bundle: ${{ env.CLUSTER_HAS_OLM }}
-      kube-admin-user-ctx: ${{ env.CLUSTER_KUBE_ADMIN_USER_CTX }}
+      # Can be empty and so catalog source will not be created
+      catalog-source-namespace: ${{ env.CLUSTER_CATALOG_SOURCE_NAMESPACE }}
 
   - name: Run IT
     shell: bash

@@ -35,6 +35,9 @@ inputs:
   local-image-version:
     description: "Reference of the camel-k image version"
     required: true
+  catalog-source-namespace:
+    description: 'Namespace in which to install the catalog source for the bundle (if required)'
+    required: false
 
 runs:
   using: "composite"
@@ -185,3 +188,38 @@ runs:
 
         docker push ${LOCAL_IIB}
         echo "BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX=${{ inputs.image-registry-pull-host }}/${{ inputs.image-namespace }}/camel-k-iib:${{ inputs.local-image-version }}" >> $GITHUB_ENV
+
+    - id: build-image-catalog
+      name: Create a new catalog to host the index image
+      shell: bash
+      run: |
+
+        if [ -z "${{ inputs.catalog-source-namespace }}" ]; then
+          echo "No catalog source namespace defined ... skipping catalog source creation"
+          exit 0
+        fi
+
+        kubectl get ns ${{ inputs.catalog-source-namespace }} &> /dev/null
+        if [ $? != 0 ]; then
+          echo "Error: Catalog source cannot be created as namespace ${{ inputs.catalog-source-namespace }} does not exist."
+          exit 1
+        fi
+
+        export BUILD_CATALOG_SOURCE="camel-k-test-source"
+        echo "BUILD_BUNDLE_CATALOG_SOURCE=${BUILD_CATALOG_SOURCE}" >> $GITHUB_ENV
+
+        cat <<EOF | kubectl apply -f -
+        apiVersion: operators.coreos.com/v1alpha1
+        kind: CatalogSource
+        metadata:
+          name: ${BUILD_CATALOG_SOURCE}
+          namespace: ${{ inputs.image-namespace }}
+        spec:
+          displayName: OLM upgrade test Catalog
+          image: ${{ env.BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX }}
+          sourceType: grpc
+          publisher: grpc
+          updateStrategy:
+            registryPoll:
+              interval: 1m0s
+        EOF

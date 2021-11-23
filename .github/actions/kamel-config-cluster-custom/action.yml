@@ -196,6 +196,7 @@ runs:
         echo "CLUSTER_IMAGE_REGISTRY_PUSH_HOST=${{ env.e2e_image-registry-push-host }}" >> $GITHUB_ENV
         echo "CLUSTER_IMAGE_REGISTRY_PULL_HOST=${{ env.e2e_image-registry-pull-host }}" >> $GITHUB_ENV
         echo "CLUSTER_IMAGE_REGISTRY_INSECURE=${{ env.e2e_image-registry-insecure }}" >> $GITHUB_ENV
+        echo "CLUSTER_CATALOG_SOURCE_NAMESPACE=${{ env.e2e_catalog-source-namespace }}" >> $GITHUB_ENV
 
         #
         # Export the image namespace if defined in the cluster config

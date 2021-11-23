@@ -36,6 +36,9 @@ inputs:
     description: 'Build a bundle for install into OLM catalog'
     required: true
     default: false
+  catalog-source-namespace:
+    description: 'Namespace in which to install the catalog source for the bundle (if required)'
+    required: false
 
 runs:
   using: "composite"
@@ -62,3 +65,4 @@ runs:
         image-namespace: ${{ inputs.image-namespace }}
         local-image-name: ${{ env.BUILD_BINARY_LOCAL_IMAGE_NAME }}
         local-image-version: ${{ env.BUILD_BINARY_LOCAL_IMAGE_VERSION }}
+        catalog-source-namespace: ${{ inputs.catalog-source-namespace }}
