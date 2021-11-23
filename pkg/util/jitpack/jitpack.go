@@ -24,10 +24,13 @@ import (
 )
 
 const (
-	RepoURL       = "https://jitpack.io"
-	LatestVersion = "master-SNAPSHOT"
+	// RepoURL is the Jitpack repository url
+	RepoURL = "https://jitpack.io"
+	// DefaultVersion is the default branch/version to use
+	DefaultVersion = "main-SNAPSHOT"
 )
 
+// ToDependency converts a jitpack dependency into Dependency struct
 func ToDependency(dependencyID string) *maven.Dependency {
 	gav := ""
 
@@ -62,7 +65,7 @@ func ToDependency(dependencyID string) *maven.Dependency {
 	// if no version is set, then use master-SNAPSHOT which
 	// targets the latest snapshot from the master branch
 	if dep.Version == "" {
-		dep.Version = LatestVersion
+		dep.Version = DefaultVersion
 	}
 
 	return &dep
