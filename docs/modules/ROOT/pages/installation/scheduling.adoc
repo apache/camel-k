@@ -1,7 +1,7 @@
 [[scheduling-infra-pod]]
 = Scheduling infrastructure Pods and Resource managment
 
-During the installation procedure you will be able to provide information on how to best "operationalize" your infrastructure. Through the configuration of `--node-selector`, `--toleration` and `--operator-resources` you will be able to drive the operator `Pod`s scheduling and to be able to assign resources.
+During the installation procedure you will be able to provide information on how to best "operationalize" your infrastructure. Through the configuration of `--node-selector`, `--toleration` and `--operator-resources` you will be able to drive the operator `Pods` scheduling and to be able to assign resources.
 
 The usage of these advanced properties assumes you're familiar with the https://kubernetes.io/docs/concepts/scheduling-eviction/[Kubernetes Scheduling] concepts and configurations.
 
@@ -11,7 +11,7 @@ NOTE: the aforementioned flags setting will work both with `OLM` installation an
 == Scheduling
 
 === Node Selectors
-The most basic operation we provide is to let you assign Camel K operator `Pod`s to a specific cluster `Node` via `--node-selector` option. The functionality is based on https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/[`NodeSelector` Kubernetes feature]. As an example, you can schedule Camel K infra `Pod`s to a specific `Node` of your cluster:
+The most basic operation we provide is to let you assign Camel K operator `Pods` to a specific cluster `Node` via `--node-selector` option. The functionality is based on https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/[`NodeSelector` Kubernetes feature]. As an example, you can schedule Camel K infra `Pods` to a specific `Node` of your cluster:
 
 ```
 kamel install --node-selector kubernetes.io/hostname=ip-172-20-114-199.ec2.internal ...
@@ -20,13 +20,13 @@ kamel install --node-selector kubernetes.io/hostname=ip-172-20-114-199.ec2.inter
 The option will accept any `key=value` pair as specified and supported by Kubernetes. You can specify more than one `node-selector`.
 
 === Tolerations
-The `--toleration` option will let you tolerate a Camel K infra `Pod` to support any matching `Taint` according the https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/[`Taint` and `Toleration` Kubernetes feature]. As an example, let's suppose we have a node tainted as "dedicated=camel-k:NoSchedule". In order to allow the infra `Pod`s to be scheduled on that `Node` we can provide the following option during installation procedure:
+The `--toleration` option will let you tolerate a Camel K infra `Pod` to support any matching `Taint` according the https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/[`Taint` and `Toleration` Kubernetes feature]. As an example, let's suppose we have a node tainted as "dedicated=camel-k:NoSchedule". In order to allow the infra `Pods` to be scheduled on that `Node` we can provide the following option during installation procedure:
 
 ```
 kamel install --toleration dedicated=camel-k:NoSchedule ...
 ```
 
-The option accept a value in the following format `Key[=Value]:Effect[:Seconds]` where the values in squared bracket are considered optional and `Effect` must admit any of the `Taint`s accepted values: `NoSchedule`, `PreferNoSchedule`, `NoExecute`. You can specify more than one `toleration`.
+The option accept a value in the following format `Key[=Value]:Effect[:Seconds]` where the values in squared bracket are considered optional and `Effect` must admit any of the `Taints` accepted values: `NoSchedule`, `PreferNoSchedule`, `NoExecute`. You can specify more than one `toleration`.
 
 [[scheduling-infra-pod-resources]]
 == Resources
@@ -40,3 +40,19 @@ kamel install --operator-resources requests.cpu=256m --operator-resources limits
 The value expected by the option are in the form `requestType.requestResource=value` where `requestType` must be either `requests` or `limits`, `requestResource` must be either `cpu` or `memory` and `value` expressed in the numeric value as expected by the resource. You can specify more than one `operator-resources`.
 
 NOTE: if you specify a limit, but does not specify a request, Kubernetes automatically assigns a request that matches the limit.
+
+=== Suggested configuration
+
+The main contributor to compute resources consumption is likely to be the Maven builds that are performed in the operator `Pod` (assuming you use the default build strategy). So the resource requirements should be defined accordingly. The following requirements are sensible defaults that should work in most cases:
+
+```
+resources:
+  limits:
+    cpu: "1"
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+```
+
+Note that if you plan to perform **native builds**, then the memory requirements must be increased significantly. Also the CPU requirements are rather "soft", in the sense that it won't break the operator, but it'll perform slower in general.
