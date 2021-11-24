@@ -273,10 +273,10 @@ dep:
 	go mod tidy
 
 lint:
-	GOGC=$(LINT_GOGC) golangci-lint run --verbose --deadline $(LINT_DEADLINE)
+	GOGC=$(LINT_GOGC) golangci-lint run --out-format tab --deadline $(LINT_DEADLINE)
 
 lint-fix:
-	GOGC=$(LINT_GOGC) golangci-lint run --verbose --deadline $(LINT_DEADLINE) --fix
+	GOGC=$(LINT_GOGC) golangci-lint run --out-format tab --deadline $(LINT_DEADLINE) --fix
 
 
 check-licenses:
