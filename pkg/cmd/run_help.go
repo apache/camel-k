@@ -181,11 +181,11 @@ func parseOption(item string) (*RunConfigOption, error) {
 	return configurationOption, nil
 }
 
-func applyOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec,
+func applyOption(ctx context.Context, config *RunConfigOption, integrationSpec *v1.IntegrationSpec,
 	c client.Client, namespace string, enableCompression bool, resourceType v1.ResourceType) error {
 	switch config.configType {
 	case ConfigOptionTypeConfigmap:
-		cm := kubernetes.LookupConfigmap(context.Background(), c, namespace, config.Name())
+		cm := kubernetes.LookupConfigmap(ctx, c, namespace, config.Name())
 		if cm == nil {
 			fmt.Printf("Warn: %s Configmap not found in %s namespace, make sure to provide it before the Integration can run\n",
 				config.Name(), namespace)
@@ -194,7 +194,7 @@ func applyOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec,
 		}
 		integrationSpec.AddConfigurationAsResource(config.Type(), config.Name(), string(resourceType), config.DestinationPath(), config.Key())
 	case ConfigOptionTypeSecret:
-		secret := kubernetes.LookupSecret(context.Background(), c, namespace, config.Name())
+		secret := kubernetes.LookupSecret(ctx, c, namespace, config.Name())
 		if secret == nil {
 			fmt.Printf("Warn: %s Secret not found in %s namespace, make sure to provide it before the Integration can run\n",
 				config.Name(), namespace)
@@ -210,7 +210,7 @@ func applyOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec,
 			return fmt.Errorf("you cannot provide a file larger than 1 MB (it was %s MB), check configmap option or --volume instead", printSize)
 		}
 		// Don't allow a binary non compressed resource
-		rawData, contentType, err := loadRawContent(context.Background(), config.Name())
+		rawData, contentType, err := loadRawContent(ctx, config.Name())
 		if err != nil {
 			return err
 		}
@@ -231,17 +231,17 @@ func applyOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec,
 }
 
 // ApplyConfigOption will set the proper --config option behavior to the IntegrationSpec.
-func ApplyConfigOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec, c client.Client, namespace string, enableCompression bool) error {
+func ApplyConfigOption(ctx context.Context, config *RunConfigOption, integrationSpec *v1.IntegrationSpec, c client.Client, namespace string, enableCompression bool) error {
 	// A config option cannot specify destination path
 	if config.DestinationPath() != "" {
 		return fmt.Errorf("cannot specify a destination path for this option type")
 	}
-	return applyOption(config, integrationSpec, c, namespace, enableCompression, v1.ResourceTypeConfig)
+	return applyOption(ctx, config, integrationSpec, c, namespace, enableCompression, v1.ResourceTypeConfig)
 }
 
 // ApplyResourceOption will set the proper --resource option behavior to the IntegrationSpec.
-func ApplyResourceOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec, c client.Client, namespace string, enableCompression bool) error {
-	return applyOption(config, integrationSpec, c, namespace, enableCompression, v1.ResourceTypeData)
+func ApplyResourceOption(ctx context.Context, config *RunConfigOption, integrationSpec *v1.IntegrationSpec, c client.Client, namespace string, enableCompression bool) error {
+	return applyOption(ctx, config, integrationSpec, c, namespace, enableCompression, v1.ResourceTypeData)
 }
 
 func binaryOrTextResource(fileName string, data []byte, contentType string, base64Compression bool, resourceType v1.ResourceType, destinationPath string) (v1.ResourceSpec, error) {
