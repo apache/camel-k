@@ -1,6 +1,6 @@
 = Camel K CLI (kamel)
 
-The Camel K command line interface (kamel) is the main entry point for running integrations on a Kubernetes cluster.
+The Camel K command line interface, `kamel`, is the main entry point for running integrations on a Kubernetes cluster.
 
 Releases of the Camel K CLI are available on:
 

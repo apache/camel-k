@@ -1,5 +1,5 @@
 [[dev-mode]]
-= Running in Dev Mode
+= Running an Integration in Dev Mode
 
 Camel K provides a specific flag for quickly iterating on integrations during development and have fast feedbacks on the code you're writing.
 It's called *dev mode*.
