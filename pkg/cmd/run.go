@@ -570,7 +570,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 
 	for _, resource := range o.Resources {
 		if config, parseErr := ParseResourceOption(resource); parseErr == nil {
-			if applyResourceOptionErr := ApplyResourceOption(config, &integration.Spec, c, namespace, o.Compression); applyResourceOptionErr != nil {
+			if applyResourceOptionErr := ApplyResourceOption(o.Context, config, &integration.Spec, c, namespace, o.Compression); applyResourceOptionErr != nil {
 				return nil, applyResourceOptionErr
 			}
 		} else {
@@ -621,7 +621,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 
 	for _, item := range o.Configs {
 		if config, parseErr := ParseConfigOption(item); parseErr == nil {
-			if applyConfigOptionErr := ApplyConfigOption(config, &integration.Spec, c, namespace, o.Compression); applyConfigOptionErr != nil {
+			if applyConfigOptionErr := ApplyConfigOption(o.Context, config, &integration.Spec, c, namespace, o.Compression); applyConfigOptionErr != nil {
 				return nil, applyConfigOptionErr
 			}
 		} else {
