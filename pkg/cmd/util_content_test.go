@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -30,7 +31,7 @@ import (
 )
 
 func TestRawContentFileMissing(t *testing.T) {
-	_, _, err := loadRawContent("dsadas")
+	_, _, err := loadRawContent(context.TODO(), "dsadas")
 	assert.NotNil(t, err)
 }
 
@@ -43,7 +44,7 @@ func TestRawBinaryContentType(t *testing.T) {
 	assert.Nil(t, tmpFile.Close())
 	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte{1, 2, 3, 4, 5, 6}, 0o400))
 
-	data, contentType, err := loadRawContent(tmpFile.Name())
+	data, contentType, err := loadRawContent(context.TODO(), tmpFile.Name())
 	assert.Nil(t, err)
 	assert.Equal(t, []byte{1, 2, 3, 4, 5, 6}, data)
 	assert.True(t, isBinary(contentType))
@@ -58,7 +59,7 @@ func TestRawApplicationContentType(t *testing.T) {
 	assert.Nil(t, tmpFile.Close())
 	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
 
-	data, contentType, err := loadRawContent(tmpFile.Name())
+	data, contentType, err := loadRawContent(context.TODO(), tmpFile.Name())
 	assert.Nil(t, err)
 	assert.Equal(t, `{"hello":"world"}`, string(data))
 	assert.False(t, isBinary(contentType))
@@ -73,7 +74,7 @@ func TestTextContentType(t *testing.T) {
 	assert.Nil(t, tmpFile.Close())
 	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
 
-	data, contentType, compressed, err := loadTextContent(tmpFile.Name(), false)
+	data, contentType, compressed, err := loadTextContent(context.TODO(), tmpFile.Name(), false)
 	assert.Nil(t, err)
 	assert.Equal(t, `{"hello":"world"}`, data)
 	assert.False(t, isBinary(contentType))
@@ -89,7 +90,7 @@ func TestTextCompressed(t *testing.T) {
 	assert.Nil(t, tmpFile.Close())
 	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
 
-	data, contentType, compressed, err := loadTextContent(tmpFile.Name(), true)
+	data, contentType, compressed, err := loadTextContent(context.TODO(), tmpFile.Name(), true)
 	assert.Nil(t, err)
 	assert.NotEqual(t, `{"hello":"world"}`, data)
 	assert.False(t, isBinary(contentType))
@@ -105,14 +106,14 @@ func TestIsBinary(t *testing.T) {
 func TestContentHttp(t *testing.T) {
 	expected := "the content"
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = fmt.Fprintf(w, expected)
+		_, _ = fmt.Fprint(w, expected)
 	}))
 	defer svr.Close()
 
 	u, err := url.Parse(svr.URL)
 	assert.Nil(t, err)
 
-	data, err := loadContentHTTP(u)
+	data, err := loadContentHTTP(context.TODO(), u)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, data)
 	assert.Equal(t, expected, string(data))

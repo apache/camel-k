@@ -210,7 +210,7 @@ func applyOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec,
 			return fmt.Errorf("you cannot provide a file larger than 1 MB (it was %s MB), check configmap option or --volume instead", printSize)
 		}
 		// Don't allow a binary non compressed resource
-		rawData, contentType, err := loadRawContent(config.Name())
+		rawData, contentType, err := loadRawContent(context.Background(), config.Name())
 		if err != nil {
 			return err
 		}

@@ -579,7 +579,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	}
 
 	for _, resource := range o.OpenAPIs {
-		if err = addResource(resource, &integration.Spec, o.Compression, v1.ResourceTypeOpenAPI); err != nil {
+		if err = addResource(o.Context, resource, &integration.Spec, o.Compression, v1.ResourceTypeOpenAPI); err != nil {
 			return nil, err
 		}
 	}
@@ -686,8 +686,8 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	return integration, nil
 }
 
-func addResource(resourceLocation string, integrationSpec *v1.IntegrationSpec, enableCompression bool, resourceType v1.ResourceType) error {
-	if data, _, compressed, err := loadTextContent(resourceLocation, enableCompression); err == nil {
+func addResource(ctx context.Context, resourceLocation string, integrationSpec *v1.IntegrationSpec, enableCompression bool, resourceType v1.ResourceType) error {
+	if data, _, compressed, err := loadTextContent(ctx, resourceLocation, enableCompression); err == nil {
 		integrationSpec.AddResources(v1.ResourceSpec{
 			DataSpec: v1.DataSpec{
 				Name:        path.Base(resourceLocation),

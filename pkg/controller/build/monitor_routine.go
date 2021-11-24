@@ -75,6 +75,8 @@ func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1.Build)
 		}
 		// Start the build asynchronously to avoid blocking the reconciliation loop
 		routines.Store(build.Name, true)
+
+		// nolint: contextcheck
 		go action.runBuild(build)
 
 	case v1.BuildPhaseRunning:

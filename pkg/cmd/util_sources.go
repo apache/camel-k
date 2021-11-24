@@ -140,7 +140,7 @@ func ResolveSources(ctx context.Context, locations []string, compress bool) ([]S
 					Compress: compress,
 				}
 
-				content, err := loadContentGitHub(u)
+				content, err := loadContentGitHub(ctx, u)
 				if err != nil {
 					return sources, err
 				}
@@ -156,7 +156,7 @@ func ResolveSources(ctx context.Context, locations []string, compress bool) ([]S
 					Compress: compress,
 				}
 
-				content, err := loadContentHTTP(u)
+				content, err := loadContentHTTP(ctx, u)
 				if err != nil {
 					return sources, err
 				}
@@ -172,7 +172,7 @@ func ResolveSources(ctx context.Context, locations []string, compress bool) ([]S
 					Compress: compress,
 				}
 
-				content, err := loadContentHTTP(u)
+				content, err := loadContentHTTP(ctx, u)
 				if err != nil {
 					return sources, err
 				}

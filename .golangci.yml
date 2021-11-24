@@ -55,6 +55,5 @@ linters:
     - nilnil
     - exhaustive
     - nakedret
-    - contextcheck
     - maligned
 
