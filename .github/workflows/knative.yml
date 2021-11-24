@@ -58,111 +58,21 @@ jobs:
         persist-credentials: false
         submodules: recursive
 
-    - id: prepare-env
-      name: Prepare Test Environment
-      uses: ./.github/actions/kamel-prepare-env
-
-    - id: configure-platform
-      name: Configure Platform
-      uses: ./.github/actions/kamel-config-cluster
+    - name: Execute KNative Tests
+      uses: ./.github/actions/e2e-knative
       with:
-        cluster-type: ${{ steps.prepare-env.outputs.cluster-platform }}
-
-    - name: Install Knative
-      uses: ./.github/actions/kamel-install-knative
-
-    - id: build-kamel-binary
-      name: Build Kamel Binary
-      uses: ./.github/actions/kamel-build-binary
-      with:
-        image-registry: ${{ steps.configure-platform.outputs.image-registry }}
-
-    - name: Install Kamel Cluster Setup
-      uses: ./.github/actions/kamel-install-cluster-setup
-      with:
-        kube-admin-user-ctx: ${{ steps.configure-platform.outputs.kube-admin-user-ctx }}
-
-    - name: Run IT
-      run: |
-        # Cluster environment
-        export KAMEL_INSTALL_REGISTRY=${{ steps.configure-platform.outputs.image-registry }}
-        export KAMEL_INSTALL_REGISTRY_INSECURE=${{ steps.configure-platform.outputs.image-registry-insecure }}
-        export CUSTOM_IMAGE=${{ steps.build-kamel-binary.outputs.local-image-name }}
-        export CUSTOM_VERSION=${{ steps.build-kamel-binary.outputs.local-image-version }}
-        export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
-        export CAMEL_K_TEST_IMAGE_NAME=${CUSTOM_IMAGE}
-        export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
-
-        # Test options
-        export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
-        export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
-        export KAMEL_INSTALL_OPERATOR_ENV_VARS=KAMEL_INSTALL_DEFAULT_KAMELETS=false
-
-        # Then run integration tests
-        make test-knative
+        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
 
   yaks:
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          persist-credentials: false
-          submodules: recursive
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+        submodules: recursive
 
-      - id: prepare-env
-        name: Prepare Test Environment
-        uses: ./.github/actions/kamel-prepare-env
-
-      - name: Get YAKS
-        run: |
-          export YAKS_VERSION=0.4.0
-          curl --fail -L https://github.com/citrusframework/yaks/releases/download/v${YAKS_VERSION}/yaks-${YAKS_VERSION}-linux-64bit.tar.gz -o yaks.tar.gz
-          tar -zxf yaks.tar.gz
-          sudo mv yaks /usr/local/bin/
-
-      - id: configure-platform
-        name: Configure Platform
-        uses: ./.github/actions/kamel-config-cluster
-        with:
-          cluster-type: ${{ steps.prepare-env.outputs.cluster-platform }}
-
-      - name: Install YAKS
-        run: |
-          yaks install --cluster-setup
-
-      - name: Install Knative
-        uses: ./.github/actions/kamel-install-knative
-
-      - id: build-kamel-binary
-        name: Build Kamel Binary
-        uses: ./.github/actions/kamel-build-binary
-        with:
-          image-registry: ${{ steps.configure-platform.outputs.image-registry }}
-
-      - name: Install Kamel Cluster Setup
-        uses: ./.github/actions/kamel-install-cluster-setup
-        with:
-          kube-admin-user-ctx: ${{ steps.configure-platform.outputs.kube-admin-user-ctx }}
-
-      - name: Run IT
-        run: |
-          # Cluster environment
-          export KAMEL_INSTALL_REGISTRY=${{ steps.configure-platform.outputs.image-registry }}
-          export KAMEL_INSTALL_REGISTRY_INSECURE=${{ steps.configure-platform.outputs.image-registry-insecure }}
-          export CUSTOM_IMAGE=${{ steps.build-kamel-binary.outputs.local-image-name }}
-          export CUSTOM_VERSION=${{ steps.build-kamel-binary.outputs.local-image-version }}
-          export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
-          export CAMEL_K_TEST_IMAGE_NAME=${CUSTOM_IMAGE}
-          export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
-
-          # Test options
-          export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
-          export KAMEL_INSTALL_OPERATOR_ENV_VARS=KAMEL_INSTALL_DEFAULT_KAMELETS=false
-          export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
-
-          # Install Yaks globally
-          yaks install
-
-          # Then run integration tests
-          yaks test e2e/yaks/common
+    - name: Execute KNative YAKS Tests
+      uses: ./.github/actions/e2e-knative-yaks
+      with:
+        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}

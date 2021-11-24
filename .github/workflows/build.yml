@@ -63,17 +63,5 @@ jobs:
         persist-credentials: false
         submodules: recursive
 
-    - id: prepare-env
-      name: Prepare Test Environment
-      uses: ./.github/actions/kamel-prepare-env
-
-    - name: Cache modules
-      uses: actions/cache@v1
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-
-    - name: Test
-      run: make
+    - name: Execute Build Tests
+      uses: ./.github/actions/e2e-build
