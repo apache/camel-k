@@ -19,7 +19,7 @@ package source
 
 import "github.com/scylladb/go-set/strset"
 
-// Metadata --
+// Metadata --.
 type Metadata struct {
 	// All starting URIs of defined routes
 	FromURIs []string
@@ -41,7 +41,7 @@ type Metadata struct {
 	Kamelets []string
 }
 
-// NewMetadata --
+// NewMetadata --.
 func NewMetadata() Metadata {
 	return Metadata{
 		FromURIs:             make([]string, 0),

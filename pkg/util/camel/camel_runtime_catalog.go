@@ -23,7 +23,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// NewRuntimeCatalog --
+// NewRuntimeCatalog --.
 func NewRuntimeCatalog(spec v1.CamelCatalogSpec) *RuntimeCatalog {
 	catalog := RuntimeCatalog{}
 	catalog.CamelCatalogSpec = spec
@@ -69,7 +69,7 @@ func NewRuntimeCatalog(spec v1.CamelCatalogSpec) *RuntimeCatalog {
 	return &catalog
 }
 
-// RuntimeCatalog --
+// RuntimeCatalog --.
 type RuntimeCatalog struct {
 	v1.CamelCatalogSpec
 
@@ -80,7 +80,7 @@ type RuntimeCatalog struct {
 	javaTypeDependencies map[string]string
 }
 
-// HasArtifact --
+// HasArtifact --.
 func (c *RuntimeCatalog) HasArtifact(artifact string) bool {
 	if !strings.HasPrefix(artifact, "camel-") {
 		artifact = "camel-" + artifact
@@ -91,7 +91,7 @@ func (c *RuntimeCatalog) HasArtifact(artifact string) bool {
 	return ok
 }
 
-// GetArtifactByScheme returns the artifact corresponding to the given component scheme
+// GetArtifactByScheme returns the artifact corresponding to the given component scheme.
 func (c *RuntimeCatalog) GetArtifactByScheme(scheme string) *v1.CamelArtifact {
 	if id, ok := c.artifactByScheme[scheme]; ok {
 		if artifact, present := c.Artifacts[id]; present {
@@ -101,7 +101,7 @@ func (c *RuntimeCatalog) GetArtifactByScheme(scheme string) *v1.CamelArtifact {
 	return nil
 }
 
-// GetArtifactByDataFormat returns the artifact corresponding to the given data format
+// GetArtifactByDataFormat returns the artifact corresponding to the given data format.
 func (c *RuntimeCatalog) GetArtifactByDataFormat(dataFormat string) *v1.CamelArtifact {
 	if id, ok := c.artifactByDataFormat[dataFormat]; ok {
 		if artifact, present := c.Artifacts[id]; present {
@@ -111,25 +111,25 @@ func (c *RuntimeCatalog) GetArtifactByDataFormat(dataFormat string) *v1.CamelArt
 	return nil
 }
 
-// GetScheme returns the scheme definition for the given scheme id
+// GetScheme returns the scheme definition for the given scheme id.
 func (c *RuntimeCatalog) GetScheme(id string) (v1.CamelScheme, bool) {
 	scheme, ok := c.schemesByID[id]
 	return scheme, ok
 }
 
-// GetLanguageDependency returns the maven dependency for the given language name
+// GetLanguageDependency returns the maven dependency for the given language name.
 func (c *RuntimeCatalog) GetLanguageDependency(language string) (string, bool) {
 	language, ok := c.languageDependencies[language]
 	return language, ok
 }
 
-// GetJavaTypeDependency returns the maven dependency for the given type name
+// GetJavaTypeDependency returns the maven dependency for the given type name.
 func (c *RuntimeCatalog) GetJavaTypeDependency(camelType string) (string, bool) {
 	javaType, ok := c.javaTypeDependencies[camelType]
 	return javaType, ok
 }
 
-// VisitArtifacts --
+// VisitArtifacts --.
 func (c *RuntimeCatalog) VisitArtifacts(visitor func(string, v1.CamelArtifact) bool) {
 	for id, artifact := range c.Artifacts {
 		if !visitor(id, artifact) {
@@ -138,7 +138,7 @@ func (c *RuntimeCatalog) VisitArtifacts(visitor func(string, v1.CamelArtifact) b
 	}
 }
 
-// VisitSchemes --
+// VisitSchemes --.
 func (c *RuntimeCatalog) VisitSchemes(visitor func(string, v1.CamelScheme) bool) {
 	for id, scheme := range c.schemesByID {
 		if !visitor(id, scheme) {
@@ -147,7 +147,7 @@ func (c *RuntimeCatalog) VisitSchemes(visitor func(string, v1.CamelScheme) bool)
 	}
 }
 
-// DecodeComponent parses an URI and return a camel artifact and a scheme
+// DecodeComponent parses an URI and return a camel artifact and a scheme.
 func (c *RuntimeCatalog) DecodeComponent(uri string) (*v1.CamelArtifact, *v1.CamelScheme) {
 	uriSplit := strings.SplitN(uri, ":", 2)
 	if len(uriSplit) < 2 {

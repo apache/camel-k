@@ -33,7 +33,7 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// newCmdDelete --
+// newCmdDelete --.
 func newCmdDelete(rootCmdOptions *RootCmdOptions) (*cobra.Command, *deleteCmdOptions) {
 	options := deleteCmdOptions{
 		RootCmdOptions: rootCmdOptions,

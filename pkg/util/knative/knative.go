@@ -141,7 +141,7 @@ func CreateSinkBinding(source corev1.ObjectReference, target corev1.ObjectRefere
 	}
 }
 
-// GetAddressableReference looks up the resource among all given types and returns an object reference to it
+// GetAddressableReference looks up the resource among all given types and returns an object reference to it.
 func GetAddressableReference(ctx context.Context, c client.Client,
 	possibleReferences []corev1.ObjectReference, namespace string, name string) (*corev1.ObjectReference, error) {
 
@@ -160,7 +160,7 @@ func GetAddressableReference(ctx context.Context, c client.Client,
 	return nil, k8serrors.NewNotFound(schema.GroupResource{}, name)
 }
 
-// GetSinkURL returns the sink as *url.URL
+// GetSinkURL returns the sink as *url.URL.
 func GetSinkURL(ctx context.Context, c client.Client, sink *corev1.ObjectReference, namespace string) (*url.URL, error) {
 	res, err := getSinkURI(ctx, c, sink, namespace)
 	if err != nil {

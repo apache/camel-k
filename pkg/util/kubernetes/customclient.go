@@ -25,7 +25,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 )
 
-// GetClientFor returns a RESTClient for the given group and version
+// GetClientFor returns a RESTClient for the given group and version.
 func GetClientFor(c client.Client, group string, version string) (*rest.RESTClient, error) {
 	conf := rest.CopyConfig(c.GetConfig())
 	conf.NegotiatedSerializer = serializer.NewCodecFactory(c.GetScheme())

@@ -25,7 +25,7 @@ import (
 	src "github.com/apache/camel-k/pkg/util/source"
 )
 
-// ExtractAll returns metadata information from all listed source codes
+// ExtractAll returns metadata information from all listed source codes.
 func ExtractAll(catalog *camel.RuntimeCatalog, sources []v1.SourceSpec) IntegrationMetadata {
 	// neutral metadata
 	meta := src.NewMetadata()
@@ -59,7 +59,7 @@ func merge(m1 src.Metadata, m2 src.Metadata) src.Metadata {
 	}
 }
 
-// Extract returns metadata information from the source code
+// Extract returns metadata information from the source code.
 func Extract(catalog *camel.RuntimeCatalog, source v1.SourceSpec) IntegrationMetadata {
 	if source.ContentRef != "" {
 		panic("source must be dereferenced before calling this method")
@@ -82,7 +82,7 @@ func Extract(catalog *camel.RuntimeCatalog, source v1.SourceSpec) IntegrationMet
 	}
 }
 
-// Each --
+// Each --.
 func Each(catalog *camel.RuntimeCatalog, sources []v1.SourceSpec, consumer func(int, IntegrationMetadata) bool) {
 	for i, s := range sources {
 		meta := Extract(catalog, s)

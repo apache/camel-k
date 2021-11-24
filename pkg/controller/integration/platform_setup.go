@@ -29,7 +29,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/knative"
 )
 
-// NewPlatformSetupAction creates a new platform-setup action
+// NewPlatformSetupAction creates a new platform-setup action.
 func NewPlatformSetupAction() Action {
 	return &platformSetupAction{}
 }
@@ -38,18 +38,18 @@ type platformSetupAction struct {
 	baseAction
 }
 
-// Name returns a common name of the action
+// Name returns a common name of the action.
 func (action *platformSetupAction) Name() string {
 	return "platform-setup"
 }
 
-// CanHandle tells whether this action can handle the integration
+// CanHandle tells whether this action can handle the integration.
 func (action *platformSetupAction) CanHandle(integration *v1.Integration) bool {
 	return integration.Status.Phase == v1.IntegrationPhaseNone ||
 		integration.Status.Phase == v1.IntegrationPhaseWaitingForPlatform
 }
 
-// Handle handles the integrations
+// Handle handles the integrations.
 func (action *platformSetupAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	if _, err := trait.Apply(ctx, action.client, integration, nil); err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func (action *platformSetupAction) Handle(ctx context.Context, integration *v1.I
 	return integration, nil
 }
 
-// DetermineBestProfile tries to detect the best trait profile for the integration
+// DetermineBestProfile tries to detect the best trait profile for the integration.
 func determineBestProfile(ctx context.Context, c client.Client, integration *v1.Integration, p *v1.IntegrationPlatform) v1.TraitProfile {
 	if integration.Spec.Profile != "" {
 		return integration.Spec.Profile

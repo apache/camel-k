@@ -26,7 +26,7 @@ import (
 	"k8s.io/gengo/namer"
 )
 
-// CustomArgs --
+// CustomArgs --.
 type CustomArgs struct {
 	DocDir      string
 	ResourceDir string
@@ -48,7 +48,7 @@ func DefaultNameSystem() string {
 	return "default"
 }
 
-// Packages --
+// Packages --.
 func Packages(context *generator.Context, arguments *args.GeneratorArgs) (packages generator.Packages) {
 	for _, i := range context.Inputs {
 		pkg := context.Universe[i]

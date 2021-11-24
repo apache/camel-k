@@ -40,7 +40,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-// NewFakeClient ---
+// NewFakeClient ---.
 func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 	scheme := clientscheme.Scheme
 
@@ -78,7 +78,7 @@ func filterObjects(scheme *runtime.Scheme, input []runtime.Object, filter func(g
 	return res
 }
 
-// FakeClient ---
+// FakeClient ---.
 type FakeClient struct {
 	controller.Client
 	kubernetes.Interface
@@ -93,7 +93,7 @@ func (c *FakeClient) CamelV1alpha1() camelv1alpha1.CamelV1alpha1Interface {
 	return c.camel.CamelV1alpha1()
 }
 
-// GetScheme ---
+// GetScheme ---.
 func (c *FakeClient) GetScheme() *runtime.Scheme {
 	return clientscheme.Scheme
 }
@@ -106,7 +106,7 @@ func (c *FakeClient) GetCurrentNamespace(kubeConfig string) (string, error) {
 	return "", nil
 }
 
-// Patch mimicks patch for server-side apply and simply creates the obj
+// Patch mimicks patch for server-side apply and simply creates the obj.
 func (c *FakeClient) Patch(ctx context.Context, obj controller.Object, patch controller.Patch, opts ...controller.PatchOption) error {
 	return c.Create(ctx, obj)
 }

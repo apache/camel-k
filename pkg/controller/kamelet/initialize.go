@@ -24,7 +24,7 @@ import (
 	kameletutils "github.com/apache/camel-k/pkg/kamelet"
 )
 
-// NewInitializeAction returns a action that initializes the kamelet configuration when not provided by the user
+// NewInitializeAction returns a action that initializes the kamelet configuration when not provided by the user.
 func NewInitializeAction() Action {
 	return &initializeAction{}
 }

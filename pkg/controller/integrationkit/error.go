@@ -24,7 +24,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/digest"
 )
 
-// NewErrorAction creates a new error handling action for the kit
+// NewErrorAction creates a new error handling action for the kit.
 func NewErrorAction() Action {
 	return &errorAction{}
 }

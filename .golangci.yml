@@ -31,7 +31,6 @@ linters:
     - gomnd
     - gochecknoinits
     - gocognit
-    - godot
     - lll
     - nestif
     - cyclop

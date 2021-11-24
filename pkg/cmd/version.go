@@ -33,7 +33,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
-// VersionVariant may be overridden at build time
+// VersionVariant may be overridden at build time.
 var VersionVariant = ""
 
 const (

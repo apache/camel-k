@@ -34,26 +34,26 @@ import (
 )
 
 const (
-	// DefaultConfigName is the default config name
+	// DefaultConfigName is the default config name.
 	DefaultConfigName = "kamel-config"
 
-	// DefaultConfigLocation is the main place where the kamel content is stored
+	// DefaultConfigLocation is the main place where the kamel content is stored.
 	DefaultConfigLocation = DefaultConfigName + ".yaml"
 
-	// KamelTagName ---
+	// KamelTagName ---.
 	KamelTagName = "kamel"
 
-	// MapstructureTagName ---
+	// MapstructureTagName ---.
 	MapstructureTagName = "mapstructure"
 )
 
-// Config is a helper class to manipulate kamel configuration files
+// Config is a helper class to manipulate kamel configuration files.
 type Config struct {
 	location string
 	content  map[string]interface{}
 }
 
-// LoadConfiguration loads a kamel configuration file
+// LoadConfiguration loads a kamel configuration file.
 func LoadConfiguration() (*Config, error) {
 	config := Config{
 		location: viper.ConfigFileUsed(),
@@ -81,7 +81,7 @@ func LoadConfiguration() (*Config, error) {
 	return &config, nil
 }
 
-// Update ---
+// Update ---.
 func (cfg *Config) Update(cmd *cobra.Command, nodeID string, data interface{}, changedOnly bool) {
 	values := make(map[string]interface{})
 
@@ -117,7 +117,7 @@ func (cfg *Config) Update(cmd *cobra.Command, nodeID string, data interface{}, c
 	}
 }
 
-// SetNode allows to replace a subtree with a given content
+// SetNode allows to replace a subtree with a given content.
 func (cfg *Config) SetNode(nodeID string, nodeValues map[string]interface{}) {
 	cfg.Delete(nodeID)
 	node := cfg.navigate(cfg.content, nodeID, true)
@@ -127,7 +127,7 @@ func (cfg *Config) SetNode(nodeID string, nodeValues map[string]interface{}) {
 	}
 }
 
-// Delete allows to remove a sub tree from the kamel content
+// Delete allows to remove a sub tree from the kamel content.
 func (cfg *Config) Delete(path string) {
 	leaf := cfg.navigate(cfg.content, path, false)
 	for k := range leaf {
@@ -135,7 +135,7 @@ func (cfg *Config) Delete(path string) {
 	}
 }
 
-// Save ---
+// Save ---.
 func (cfg *Config) Save() error {
 	root := filepath.Dir(cfg.location)
 	if _, err := os.Stat(root); os.IsNotExist(err) {

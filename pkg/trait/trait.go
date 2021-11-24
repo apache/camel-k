@@ -59,7 +59,7 @@ func Apply(ctx context.Context, c client.Client, integration *v1.Integration, ki
 	return environment, nil
 }
 
-// newEnvironment creates a Environment from the given data
+// newEnvironment creates a Environment from the given data.
 func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integration, kit *v1.IntegrationKit) (*Environment, error) {
 	if integration == nil && ctx == nil {
 		return nil, errors.New("neither integration nor kit are set")

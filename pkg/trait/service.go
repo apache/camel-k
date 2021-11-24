@@ -31,7 +31,7 @@ import (
 //
 // It's enabled by default if the integration depends on a Camel component that can expose a HTTP endpoint.
 //
-// +camel-k:trait=service
+// +camel-k:trait=service.
 type serviceTrait struct {
 	BaseTrait `property:",squash"`
 	// To automatically detect from the code if a Service needs to be created.
@@ -48,7 +48,7 @@ func newServiceTrait() Trait {
 	}
 }
 
-// IsAllowedInProfile overrides default
+// IsAllowedInProfile overrides default.
 func (t *serviceTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 	return profile == v1.TraitProfileKubernetes ||
 		profile == v1.TraitProfileOpenShift

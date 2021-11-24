@@ -31,17 +31,17 @@ type errorAction struct {
 	baseAction
 }
 
-// Name returns a common name of the action
+// Name returns a common name of the action.
 func (action *errorAction) Name() string {
 	return "error"
 }
 
-// CanHandle tells whether this action can handle the build
+// CanHandle tells whether this action can handle the build.
 func (action *errorAction) CanHandle(build *v1.Build) bool {
 	return build.Status.Phase == v1.BuildPhaseError
 }
 
-// Handle handles the builds
+// Handle handles the builds.
 func (action *errorAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
 	return nil, nil
 }

@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	// DefaultPlatformName is the standard name used for the integration platform
+	// DefaultPlatformName is the standard name used for the integration platform.
 	DefaultPlatformName = "camel-k"
 )
 
@@ -62,7 +62,7 @@ func getOrFind(ctx context.Context, c k8sclient.Reader, namespace string, name s
 	return getOrFindAny(ctx, c, namespace, name, active)
 }
 
-// getOrFindAny returns the named platform or any other platform in the local namespace or the global one
+// getOrFindAny returns the named platform or any other platform in the local namespace or the global one.
 func getOrFindAny(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool) (*v1.IntegrationPlatform, error) {
 	if name != "" {
 		return get(ctx, c, namespace, name)
@@ -71,7 +71,7 @@ func getOrFindAny(ctx context.Context, c k8sclient.Reader, namespace string, nam
 	return findAny(ctx, c, namespace, active)
 }
 
-// getOrFindLocal returns the named platform or any other platform in the local namespace
+// getOrFindLocal returns the named platform or any other platform in the local namespace.
 func getOrFindLocal(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool) (*v1.IntegrationPlatform, error) {
 	if name != "" {
 		return kubernetes.GetIntegrationPlatform(ctx, c, name, namespace)
@@ -80,7 +80,7 @@ func getOrFindLocal(ctx context.Context, c k8sclient.Reader, namespace string, n
 	return findLocal(ctx, c, namespace, active)
 }
 
-// get returns the given platform in the given namespace or the global one
+// get returns the given platform in the given namespace or the global one.
 func get(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1.IntegrationPlatform, error) {
 	p, err := kubernetes.GetIntegrationPlatform(ctx, c, name, namespace)
 	if err != nil && k8serrors.IsNotFound(err) {
@@ -99,7 +99,7 @@ func find(ctx context.Context, c k8sclient.Reader, namespace string, active bool
 	return findAny(ctx, c, namespace, active)
 }
 
-// findAny returns the currently installed platform or any platform existing in local or operator namespace
+// findAny returns the currently installed platform or any platform existing in local or operator namespace.
 func findAny(ctx context.Context, c k8sclient.Reader, namespace string, active bool) (*v1.IntegrationPlatform, error) {
 	p, err := findLocal(ctx, c, namespace, active)
 	if err != nil && k8serrors.IsNotFound(err) {
@@ -111,7 +111,7 @@ func findAny(ctx context.Context, c k8sclient.Reader, namespace string, active b
 	return p, err
 }
 
-// findLocal returns the currently installed platform or any platform existing in local namespace
+// findLocal returns the currently installed platform or any platform existing in local namespace.
 func findLocal(ctx context.Context, c k8sclient.Reader, namespace string, active bool) (*v1.IntegrationPlatform, error) {
 	lst, err := ListPrimaryPlatforms(ctx, c, namespace)
 	if err != nil {
@@ -134,7 +134,7 @@ func findLocal(ctx context.Context, c k8sclient.Reader, namespace string, active
 	return nil, k8serrors.NewNotFound(v1.Resource("IntegrationPlatform"), DefaultPlatformName)
 }
 
-// ListPrimaryPlatforms returns all non-secondary platforms installed in a given namespace (only one will be active)
+// ListPrimaryPlatforms returns all non-secondary platforms installed in a given namespace (only one will be active).
 func ListPrimaryPlatforms(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatformList, error) {
 	lst, err := ListAllPlatforms(ctx, c, namespace)
 	if err != nil {
@@ -150,7 +150,7 @@ func ListPrimaryPlatforms(ctx context.Context, c k8sclient.Reader, namespace str
 	return &filtered, nil
 }
 
-// ListAllPlatforms returns all platforms installed in a given namespace
+// ListAllPlatforms returns all platforms installed in a given namespace.
 func ListAllPlatforms(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatformList, error) {
 	lst := v1.NewIntegrationPlatformList()
 	if err := c.List(ctx, &lst, k8sclient.InNamespace(namespace)); err != nil {
@@ -159,12 +159,12 @@ func ListAllPlatforms(ctx context.Context, c k8sclient.Reader, namespace string)
 	return &lst, nil
 }
 
-// IsActive determines if the given platform is being used
+// IsActive determines if the given platform is being used.
 func IsActive(p *v1.IntegrationPlatform) bool {
 	return p.Status.Phase != "" && p.Status.Phase != v1.IntegrationPlatformPhaseDuplicate
 }
 
-// IsSecondary determines if the given platform is marked as secondary
+// IsSecondary determines if the given platform is marked as secondary.
 func IsSecondary(p *v1.IntegrationPlatform) bool {
 	if l, ok := p.Annotations[v1.SecondaryPlatformAnnotation]; ok && l == "true" {
 		return true
@@ -172,7 +172,7 @@ func IsSecondary(p *v1.IntegrationPlatform) bool {
 	return false
 }
 
-// GetProfile returns the current profile of the platform (if present) or returns the default one for the cluster
+// GetProfile returns the current profile of the platform (if present) or returns the default one for the cluster.
 func GetProfile(p *v1.IntegrationPlatform) v1.TraitProfile {
 	if p.Status.Profile != "" {
 		return p.Status.Profile

@@ -24,7 +24,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 )
 
-// BuilderServiceAccountRoles installs the builder service account and related roles in the given namespace
+// BuilderServiceAccountRoles installs the builder service account and related roles in the given namespace.
 func BuilderServiceAccountRoles(ctx context.Context, c client.Client, namespace string, cluster v1.IntegrationPlatformCluster) error {
 	if cluster == v1.IntegrationPlatformClusterOpenShift {
 		if err := installBuilderServiceAccountRolesOpenShift(ctx, c, namespace); err != nil {

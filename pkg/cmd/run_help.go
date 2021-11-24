@@ -32,7 +32,7 @@ import (
 
 var invalidPaths = []string{"/etc/camel", "/deployments/dependencies"}
 
-// RunConfigOption represents a config option
+// RunConfigOption represents a config option.
 type RunConfigOption struct {
 	configType      configOptionType
 	resourceName    string
@@ -40,27 +40,27 @@ type RunConfigOption struct {
 	destinationPath string
 }
 
-// DestinationPath is the location where the resource will be stored on destination
+// DestinationPath is the location where the resource will be stored on destination.
 func (runConfigOption *RunConfigOption) DestinationPath() string {
 	return runConfigOption.destinationPath
 }
 
-// Type is the type, converted as string
+// Type is the type, converted as string.
 func (runConfigOption *RunConfigOption) Type() string {
 	return string(runConfigOption.configType)
 }
 
-// Name is the name of the resource
+// Name is the name of the resource.
 func (runConfigOption *RunConfigOption) Name() string {
 	return runConfigOption.resourceName
 }
 
-// Key is the key specified for the resource
+// Key is the key specified for the resource.
 func (runConfigOption *RunConfigOption) Key() string {
 	return runConfigOption.resourceKey
 }
 
-// Validate checks if the DestinationPath is correctly configured
+// Validate checks if the DestinationPath is correctly configured.
 func (runConfigOption *RunConfigOption) Validate() error {
 	if runConfigOption.destinationPath == "" {
 		return nil
@@ -78,11 +78,11 @@ func (runConfigOption *RunConfigOption) Validate() error {
 type configOptionType string
 
 const (
-	// ConfigOptionTypeConfigmap --
+	// ConfigOptionTypeConfigmap --.
 	ConfigOptionTypeConfigmap configOptionType = "configmap"
-	// ConfigOptionTypeSecret --
+	// ConfigOptionTypeSecret --.
 	ConfigOptionTypeSecret configOptionType = "secret"
-	// ConfigOptionTypeFile --
+	// ConfigOptionTypeFile --.
 	ConfigOptionTypeFile configOptionType = "file"
 )
 
@@ -130,7 +130,7 @@ func parseCMOrSecretValue(value string) (resource string, maybeKey string, maybe
 	return groups[1], groups[3], groups[5]
 }
 
-// ParseResourceOption will parse and return a runConfigOption
+// ParseResourceOption will parse and return a runConfigOption.
 func ParseResourceOption(item string) (*RunConfigOption, error) {
 	// Deprecated: ensure backward compatibility with `--resource filename` format until version 1.5.x
 	// then replace with parseOption() func directly
@@ -146,7 +146,7 @@ func ParseResourceOption(item string) (*RunConfigOption, error) {
 	return option, nil
 }
 
-// ParseConfigOption will parse and return a runConfigOption
+// ParseConfigOption will parse and return a runConfigOption.
 func ParseConfigOption(item string) (*RunConfigOption, error) {
 	return parseOption(item)
 }
@@ -230,7 +230,7 @@ func applyOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec,
 	return nil
 }
 
-// ApplyConfigOption will set the proper --config option behavior to the IntegrationSpec
+// ApplyConfigOption will set the proper --config option behavior to the IntegrationSpec.
 func ApplyConfigOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec, c client.Client, namespace string, enableCompression bool) error {
 	// A config option cannot specify destination path
 	if config.DestinationPath() != "" {
@@ -239,7 +239,7 @@ func ApplyConfigOption(config *RunConfigOption, integrationSpec *v1.IntegrationS
 	return applyOption(config, integrationSpec, c, namespace, enableCompression, v1.ResourceTypeConfig)
 }
 
-// ApplyResourceOption will set the proper --resource option behavior to the IntegrationSpec
+// ApplyResourceOption will set the proper --resource option behavior to the IntegrationSpec.
 func ApplyResourceOption(config *RunConfigOption, integrationSpec *v1.IntegrationSpec, c client.Client, namespace string, enableCompression bool) error {
 	return applyOption(config, integrationSpec, c, namespace, enableCompression, v1.ResourceTypeData)
 }
@@ -307,7 +307,7 @@ func mergePropertiesWithPrecedence(items []string) (*properties.Properties, erro
 }
 
 // The function parse the value and if it is a file (file:/path/), it will parse as property file
-// otherwise return a single property built from the item passed as `key=value`
+// otherwise return a single property built from the item passed as `key=value`.
 func extractProperties(value string) (*properties.Properties, error) {
 	if !strings.HasPrefix(value, "file:") {
 		return keyValueProps(value)

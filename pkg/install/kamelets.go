@@ -42,7 +42,7 @@ const (
 	defaultKameletDir = "/kamelets/"
 )
 
-// KameletCatalog installs the bundled KameletCatalog into one namespace
+// KameletCatalog installs the bundled KameletCatalog into one namespace.
 func KameletCatalog(ctx context.Context, c client.Client, namespace string) error {
 	kameletDir := os.Getenv(kameletDirEnv)
 	if kameletDir == "" {
@@ -112,7 +112,7 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 	return nil
 }
 
-// KameletViewerRole installs the role that allows any user ro access kamelets in the global namespace
+// KameletViewerRole installs the role that allows any user ro access kamelets in the global namespace.
 func KameletViewerRole(ctx context.Context, c client.Client, namespace string) error {
 	if err := Resource(ctx, c, namespace, true, IdentityResourceCustomizer, "/viewer/user-global-kamelet-viewer-role.yaml"); err != nil {
 		return err

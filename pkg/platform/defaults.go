@@ -45,7 +45,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/patch"
 )
 
-// BuilderServiceAccount --
+// BuilderServiceAccount --.
 const BuilderServiceAccount = "camel-k-builder"
 
 // ConfigureDefaults fills with default values all missing details about the integration platform.

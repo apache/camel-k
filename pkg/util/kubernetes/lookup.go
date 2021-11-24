@@ -27,7 +27,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// LookupConfigmap will look for any k8s Configmap with a given name in a given namespace
+// LookupConfigmap will look for any k8s Configmap with a given name in a given namespace.
 func LookupConfigmap(ctx context.Context, c client.Client, ns string, name string) *corev1.ConfigMap {
 	cm := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
@@ -51,7 +51,7 @@ func LookupConfigmap(ctx context.Context, c client.Client, ns string, name strin
 	return &cm
 }
 
-// LookupSecret will look for any k8s Secret with a given name in a given namespace
+// LookupSecret will look for any k8s Secret with a given name in a given namespace.
 func LookupSecret(ctx context.Context, c client.Client, ns string, name string) *corev1.Secret {
 	secret := corev1.Secret{
 		TypeMeta: metav1.TypeMeta{

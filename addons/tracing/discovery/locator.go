@@ -25,10 +25,10 @@ import (
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
-// TracingLocators contains available tracing locators
+// TracingLocators contains available tracing locators.
 var TracingLocators []TracingLocator
 
-// TracingLocator is able to find the address of an available tracing endpoint
+// TracingLocator is able to find the address of an available tracing endpoint.
 type TracingLocator interface {
 	FindEndpoint(context.Context, client.Client, log.Logger, *trait.Environment) (string, error)
 }

@@ -33,7 +33,7 @@ const (
 // The Logging trait is used to configure Integration runtime logging options (such as color and format).
 // The logging backend is provided by Quarkus, whose configuration is documented at https://quarkus.io/guides/logging.
 //
-// +camel-k:trait=logging
+// +camel-k:trait=logging.
 type loggingTrait struct {
 	BaseTrait `property:",squash"`
 	// Colorize the log output

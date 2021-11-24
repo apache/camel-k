@@ -35,53 +35,53 @@ import (
 )
 
 const (
-	// ReasonIntegrationPhaseUpdated --
+	// ReasonIntegrationPhaseUpdated --.
 	ReasonIntegrationPhaseUpdated = "IntegrationPhaseUpdated"
-	// ReasonIntegrationConditionChanged --
+	// ReasonIntegrationConditionChanged --.
 	ReasonIntegrationConditionChanged = "IntegrationConditionChanged"
-	// ReasonIntegrationError --
+	// ReasonIntegrationError --.
 	ReasonIntegrationError = "IntegrationError"
 
-	// ReasonIntegrationKitPhaseUpdated --
+	// ReasonIntegrationKitPhaseUpdated --.
 	ReasonIntegrationKitPhaseUpdated = "IntegrationKitPhaseUpdated"
-	// ReasonIntegrationKitConditionChanged --
+	// ReasonIntegrationKitConditionChanged --.
 	ReasonIntegrationKitConditionChanged = "IntegrationKitConditionChanged"
-	// ReasonIntegrationKitError --
+	// ReasonIntegrationKitError --.
 	ReasonIntegrationKitError = "IntegrationKitError"
 
-	// ReasonIntegrationPlatformPhaseUpdated --
+	// ReasonIntegrationPlatformPhaseUpdated --.
 	ReasonIntegrationPlatformPhaseUpdated = "IntegrationPlatformPhaseUpdated"
-	// ReasonIntegrationPlatformConditionChanged --
+	// ReasonIntegrationPlatformConditionChanged --.
 	ReasonIntegrationPlatformConditionChanged = "IntegrationPlatformConditionChanged"
-	// ReasonIntegrationPlatformError --
+	// ReasonIntegrationPlatformError --.
 	ReasonIntegrationPlatformError = "IntegrationPlatformError"
 
-	// ReasonBuildPhaseUpdated --
+	// ReasonBuildPhaseUpdated --.
 	ReasonBuildPhaseUpdated = "BuildPhaseUpdated"
-	// ReasonBuildConditionChanged --
+	// ReasonBuildConditionChanged --.
 	ReasonBuildConditionChanged = "BuildConditionChanged"
-	// ReasonBuildError --
+	// ReasonBuildError --.
 	ReasonBuildError = "BuildError"
 
-	// ReasonKameletError --
+	// ReasonKameletError --.
 	ReasonKameletError = "KameletError"
-	// ReasonKameletConditionChanged --
+	// ReasonKameletConditionChanged --.
 	ReasonKameletConditionChanged = "KameletConditionChanged"
-	// ReasonKameletPhaseUpdated --
+	// ReasonKameletPhaseUpdated --.
 	ReasonKameletPhaseUpdated = "KameletPhaseUpdated"
 
-	// ReasonKameletBindingError --
+	// ReasonKameletBindingError --.
 	ReasonKameletBindingError = "KameletBindingError"
-	// ReasonKameletBindingConditionChanged --
+	// ReasonKameletBindingConditionChanged --.
 	ReasonKameletBindingConditionChanged = "KameletBindingConditionChanged"
-	// ReasonKameletBindingPhaseUpdated --
+	// ReasonKameletBindingPhaseUpdated --.
 	ReasonKameletBindingPhaseUpdated = "KameletBindingPhaseUpdated"
 
-	// ReasonRelatedObjectChanged --
+	// ReasonRelatedObjectChanged --.
 	ReasonRelatedObjectChanged = "ReasonRelatedObjectChanged"
 )
 
-// NotifyIntegrationError automatically generates error events when the integration reconcile cycle phase has an error
+// NotifyIntegrationError automatically generates error events when the integration reconcile cycle phase has an error.
 func NotifyIntegrationError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.Integration, err error) {
 	it := old
 	if newResource != nil {
@@ -93,7 +93,7 @@ func NotifyIntegrationError(ctx context.Context, c client.Client, recorder recor
 	recorder.Eventf(it, corev1.EventTypeWarning, ReasonIntegrationError, "Cannot reconcile Integration %s: %v", it.Name, err)
 }
 
-// NotifyIntegrationUpdated automatically generates events when the integration changes
+// NotifyIntegrationUpdated automatically generates events when the integration changes.
 func NotifyIntegrationUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.Integration) {
 	if newResource == nil {
 		return
@@ -110,7 +110,7 @@ func NotifyIntegrationUpdated(ctx context.Context, c client.Client, recorder rec
 	notifyIfPhaseUpdated(ctx, c, recorder, newResource, oldPhase, string(newResource.Status.Phase), "Integration", newResource.Name, ReasonIntegrationPhaseUpdated, "")
 }
 
-// NotifyIntegrationKitUpdated automatically generates events when an integration kit changes
+// NotifyIntegrationKitUpdated automatically generates events when an integration kit changes.
 func NotifyIntegrationKitUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.IntegrationKit) {
 	if newResource == nil {
 		return
@@ -127,7 +127,7 @@ func NotifyIntegrationKitUpdated(ctx context.Context, c client.Client, recorder 
 	notifyIfPhaseUpdated(ctx, c, recorder, newResource, oldPhase, string(newResource.Status.Phase), "Integration Kit", newResource.Name, ReasonIntegrationKitPhaseUpdated, "")
 }
 
-// NotifyIntegrationKitError automatically generates error events when the integration kit reconcile cycle phase has an error
+// NotifyIntegrationKitError automatically generates error events when the integration kit reconcile cycle phase has an error.
 func NotifyIntegrationKitError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.IntegrationKit, err error) {
 	kit := old
 	if newResource != nil {
@@ -139,7 +139,7 @@ func NotifyIntegrationKitError(ctx context.Context, c client.Client, recorder re
 	recorder.Eventf(kit, corev1.EventTypeWarning, ReasonIntegrationKitError, "Cannot reconcile Integration Kit %s: %v", kit.Name, err)
 }
 
-// NotifyIntegrationPlatformUpdated automatically generates events when an integration platform changes
+// NotifyIntegrationPlatformUpdated automatically generates events when an integration platform changes.
 func NotifyIntegrationPlatformUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.IntegrationPlatform) {
 	if newResource == nil {
 		return
@@ -156,7 +156,7 @@ func NotifyIntegrationPlatformUpdated(ctx context.Context, c client.Client, reco
 	notifyIfPhaseUpdated(ctx, c, recorder, newResource, oldPhase, string(newResource.Status.Phase), "Integration Platform", newResource.Name, ReasonIntegrationPlatformPhaseUpdated, "")
 }
 
-// NotifyIntegrationPlatformError automatically generates error events when the integration Platform reconcile cycle phase has an error
+// NotifyIntegrationPlatformError automatically generates error events when the integration Platform reconcile cycle phase has an error.
 func NotifyIntegrationPlatformError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.IntegrationPlatform, err error) {
 	p := old
 	if newResource != nil {
@@ -168,7 +168,7 @@ func NotifyIntegrationPlatformError(ctx context.Context, c client.Client, record
 	recorder.Eventf(p, corev1.EventTypeWarning, ReasonIntegrationPlatformError, "Cannot reconcile Integration Platform %s: %v", p.Name, err)
 }
 
-// NotifyKameletUpdated automatically generates events when a Kamelet changes
+// NotifyKameletUpdated automatically generates events when a Kamelet changes.
 func NotifyKameletUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1alpha1.Kamelet) {
 	if newResource == nil {
 		return
@@ -185,7 +185,7 @@ func NotifyKameletUpdated(ctx context.Context, c client.Client, recorder record.
 	notifyIfPhaseUpdated(ctx, c, recorder, newResource, oldPhase, string(newResource.Status.Phase), "Kamelet", newResource.Name, ReasonKameletPhaseUpdated, "")
 }
 
-// NotifyKameletError automatically generates error events when the kamelet reconcile cycle phase has an error
+// NotifyKameletError automatically generates error events when the kamelet reconcile cycle phase has an error.
 func NotifyKameletError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1alpha1.Kamelet, err error) {
 	k := old
 	if newResource != nil {
@@ -197,7 +197,7 @@ func NotifyKameletError(ctx context.Context, c client.Client, recorder record.Ev
 	recorder.Eventf(k, corev1.EventTypeWarning, ReasonKameletError, "Cannot reconcile Kamelet %s: %v", k.Name, err)
 }
 
-// NotifyKameletBindingUpdated automatically generates events when a KameletBinding changes
+// NotifyKameletBindingUpdated automatically generates events when a KameletBinding changes.
 func NotifyKameletBindingUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1alpha1.KameletBinding) {
 	if newResource == nil {
 		return
@@ -214,7 +214,7 @@ func NotifyKameletBindingUpdated(ctx context.Context, c client.Client, recorder 
 	notifyIfPhaseUpdated(ctx, c, recorder, newResource, oldPhase, string(newResource.Status.Phase), "KameletBinding", newResource.Name, ReasonKameletBindingPhaseUpdated, "")
 }
 
-// NotifyKameletBindingError automatically generates error events when the kameletBinding reconcile cycle phase has an error
+// NotifyKameletBindingError automatically generates error events when the kameletBinding reconcile cycle phase has an error.
 func NotifyKameletBindingError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1alpha1.KameletBinding, err error) {
 	k := old
 	if newResource != nil {
@@ -226,7 +226,7 @@ func NotifyKameletBindingError(ctx context.Context, c client.Client, recorder re
 	recorder.Eventf(k, corev1.EventTypeWarning, ReasonKameletError, "Cannot reconcile KameletBinding %s: %v", k.Name, err)
 }
 
-// NotifyBuildUpdated automatically generates events when a build changes
+// NotifyBuildUpdated automatically generates events when a build changes.
 func NotifyBuildUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.Build) {
 	if newResource == nil {
 		return
@@ -249,7 +249,7 @@ func NotifyBuildUpdated(ctx context.Context, c client.Client, recorder record.Ev
 	notifyIfPhaseUpdated(ctx, c, recorder, newResource, oldPhase, string(newResource.Status.Phase), "Build", newResource.Name, ReasonBuildPhaseUpdated, info)
 }
 
-// NotifyBuildError automatically generates error events when the build reconcile cycle phase has an error
+// NotifyBuildError automatically generates error events when the build reconcile cycle phase has an error.
 func NotifyBuildError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.Build, err error) {
 	p := old
 	if newResource != nil {

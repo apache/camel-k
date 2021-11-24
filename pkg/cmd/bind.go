@@ -36,7 +36,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// newCmdBind --
+// newCmdBind --.
 func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions) {
 	options := bindCmdOptions{
 		RootCmdOptions: rootCmdOptions,

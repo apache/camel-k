@@ -31,7 +31,7 @@ import (
 // The Deployment trait is responsible for generating the Kubernetes deployment that will make sure
 // the integration will run in the cluster.
 //
-// +camel-k:trait=deployment
+// +camel-k:trait=deployment.
 type deploymentTrait struct {
 	BaseTrait `property:",squash"`
 	// The maximum time in seconds for the deployment to make progress before it
@@ -115,7 +115,7 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 	return nil
 }
 
-// IsPlatformTrait overrides base class method
+// IsPlatformTrait overrides base class method.
 func (t *deploymentTrait) IsPlatformTrait() bool {
 	return true
 }

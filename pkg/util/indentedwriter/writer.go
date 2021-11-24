@@ -25,7 +25,7 @@ import (
 	"text/tabwriter"
 )
 
-// Flusher --
+// Flusher --.
 type Flusher interface {
 	Flush()
 }
@@ -35,32 +35,32 @@ type Writer struct {
 	out io.Writer
 }
 
-// NewWriter --
+// NewWriter --.
 func NewWriter(out io.Writer) *Writer {
 	return &Writer{out: out}
 }
 
-// Writef --
+// Writef --.
 func (iw *Writer) Writef(indentLevel int, format string, i ...interface{}) {
 	fmt.Fprint(iw.out, strings.Repeat("  ", indentLevel))
 	fmt.Fprintf(iw.out, format, i...)
 }
 
-// Writelnf --
+// Writelnf --.
 func (iw *Writer) Writelnf(indentLevel int, format string, i ...interface{}) {
 	fmt.Fprint(iw.out, strings.Repeat("  ", indentLevel))
 	fmt.Fprintf(iw.out, format, i...)
 	fmt.Fprint(iw.out, "\n")
 }
 
-// Flush --
+// Flush --.
 func (iw *Writer) Flush() {
 	if f, ok := iw.out.(Flusher); ok {
 		f.Flush()
 	}
 }
 
-// IndentedString --
+// IndentedString --.
 func IndentedString(f func(io.Writer) error) (string, error) {
 	var out tabwriter.Writer
 	buf := &bytes.Buffer{}

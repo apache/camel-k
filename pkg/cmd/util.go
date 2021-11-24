@@ -45,14 +45,14 @@ import (
 const (
 	offlineCommandLabel = "camel.apache.org/cmd.offline"
 
-	// Supported source schemes
+	// Supported source schemes.
 	gistScheme   = "gist"
 	githubScheme = "github"
 	httpScheme   = "http"
 	httpsScheme  = "https"
 )
 
-// DeleteIntegration --
+// DeleteIntegration --.
 func DeleteIntegration(ctx context.Context, c client.Client, name string, namespace string) error {
 	integration := v1.Integration{
 		TypeMeta: metav1.TypeMeta{

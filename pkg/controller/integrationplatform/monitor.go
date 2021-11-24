@@ -25,7 +25,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
-// NewMonitorAction returns an action that monitors the integration platform after it's fully initialized
+// NewMonitorAction returns an action that monitors the integration platform after it's fully initialized.
 func NewMonitorAction() Action {
 	return &monitorAction{}
 }

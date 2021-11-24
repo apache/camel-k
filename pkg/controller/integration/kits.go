@@ -81,7 +81,7 @@ func lookupKitsForIntegration(ctx context.Context, c ctrl.Reader, integration *v
 	return kits, nil
 }
 
-// integrationMatches returns whether the v1.IntegrationKit meets the requirements of the v1.Integration
+// integrationMatches returns whether the v1.IntegrationKit meets the requirements of the v1.Integration.
 func integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bool, error) {
 	if kit.Status.Phase == v1.IntegrationKitPhaseError {
 		return false, nil
@@ -117,7 +117,7 @@ func integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bo
 	return true, nil
 }
 
-// kitMatches returns whether the two v1.IntegrationKit match
+// kitMatches returns whether the two v1.IntegrationKit match.
 func kitMatches(kit1 *v1.IntegrationKit, kit2 *v1.IntegrationKit) (bool, error) {
 	version := kit1.Status.Version
 	if version == "" {
@@ -235,7 +235,7 @@ func hasMatchingTrait(ts1 *v1.TraitSpec, ts2 *v1.TraitSpec) (bool, error) {
 	return true, nil
 }
 
-// We need to try to perform a slice equality in order to prevent a runtime panic
+// We need to try to perform a slice equality in order to prevent a runtime panic.
 func equal(a, b interface{}) bool {
 	aSlice, aOk := a.([]interface{})
 	bSlice, bOk := b.([]interface{})

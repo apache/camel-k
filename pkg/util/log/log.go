@@ -26,7 +26,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-// Log --
+// Log --.
 var Log Logger
 
 func init() {
@@ -35,61 +35,61 @@ func init() {
 	}
 }
 
-// Injectable identifies objects that can receive a Logger
+// Injectable identifies objects that can receive a Logger.
 type Injectable interface {
 	InjectLogger(Logger)
 }
 
-// Logger --
+// Logger --.
 type Logger struct {
 	delegate logr.Logger
 }
 
-// Debugf --
+// Debugf --.
 func (l Logger) Debugf(format string, args ...interface{}) {
 	l.delegate.V(1).Info(fmt.Sprintf(format, args...))
 }
 
-// Infof --
+// Infof --.
 func (l Logger) Infof(format string, args ...interface{}) {
 	l.delegate.Info(fmt.Sprintf(format, args...))
 }
 
-// Errorf --
+// Errorf --.
 func (l Logger) Errorf(err error, format string, args ...interface{}) {
 	l.delegate.Error(err, fmt.Sprintf(format, args...))
 }
 
-// Debug --
+// Debug --.
 func (l Logger) Debug(msg string, keysAndValues ...interface{}) {
 	l.delegate.V(1).Info(msg, keysAndValues...)
 }
 
-// Info --
+// Info --.
 func (l Logger) Info(msg string, keysAndValues ...interface{}) {
 	l.delegate.Info(msg, keysAndValues...)
 }
 
-// Error --
+// Error --.
 func (l Logger) Error(err error, msg string, keysAndValues ...interface{}) {
 	l.delegate.Error(err, msg, keysAndValues...)
 }
 
-// WithName --
+// WithName --.
 func (l Logger) WithName(name string) Logger {
 	return Logger{
 		delegate: l.delegate.WithName(name),
 	}
 }
 
-// WithValues --
+// WithValues --.
 func (l Logger) WithValues(keysAndValues ...interface{}) Logger {
 	return Logger{
 		delegate: l.delegate.WithValues(keysAndValues...),
 	}
 }
 
-// ForBuild --
+// ForBuild --.
 func (l Logger) ForBuild(target *v1.Build) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,
@@ -99,7 +99,7 @@ func (l Logger) ForBuild(target *v1.Build) Logger {
 	)
 }
 
-// ForIntegration --
+// ForIntegration --.
 func (l Logger) ForIntegration(target *v1.Integration) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,
@@ -109,7 +109,7 @@ func (l Logger) ForIntegration(target *v1.Integration) Logger {
 	)
 }
 
-// ForIntegrationKit --
+// ForIntegrationKit --.
 func (l Logger) ForIntegrationKit(target *v1.IntegrationKit) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,
@@ -119,7 +119,7 @@ func (l Logger) ForIntegrationKit(target *v1.IntegrationKit) Logger {
 	)
 }
 
-// ForIntegrationPlatform --
+// ForIntegrationPlatform --.
 func (l Logger) ForIntegrationPlatform(target *v1.IntegrationPlatform) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,
@@ -129,7 +129,7 @@ func (l Logger) ForIntegrationPlatform(target *v1.IntegrationPlatform) Logger {
 	)
 }
 
-// ForKamelet --
+// ForKamelet --.
 func (l Logger) ForKamelet(target *v1alpha1.Kamelet) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,
@@ -139,7 +139,7 @@ func (l Logger) ForKamelet(target *v1alpha1.Kamelet) Logger {
 	)
 }
 
-// ForKameletBinding --
+// ForKameletBinding --.
 func (l Logger) ForKameletBinding(target *v1alpha1.KameletBinding) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,
@@ -155,27 +155,27 @@ func (l Logger) ForKameletBinding(target *v1alpha1.KameletBinding) Logger {
 //
 // ***********************************
 
-// WithName --
+// WithName --.
 func WithName(name string) Logger {
 	return Log.WithName(name)
 }
 
-// WithValues --
+// WithValues --.
 func WithValues(keysAndValues ...interface{}) Logger {
 	return Log.WithValues(keysAndValues...)
 }
 
-// ForIntegration --
+// ForIntegration --.
 func ForIntegration(target *v1.Integration) Logger {
 	return Log.ForIntegration(target)
 }
 
-// ForIntegrationKit --
+// ForIntegrationKit --.
 func ForIntegrationKit(target *v1.IntegrationKit) Logger {
 	return Log.ForIntegrationKit(target)
 }
 
-// ForIntegrationPlatform --
+// ForIntegrationPlatform --.
 func ForIntegrationPlatform(target *v1.IntegrationPlatform) Logger {
 	return Log.ForIntegrationPlatform(target)
 }
@@ -186,32 +186,32 @@ func ForIntegrationPlatform(target *v1.IntegrationPlatform) Logger {
 //
 // ***********************************
 
-// Debugf --
+// Debugf --.
 func Debugf(format string, args ...interface{}) {
 	Log.Debugf(format, args...)
 }
 
-// Infof --
+// Infof --.
 func Infof(format string, args ...interface{}) {
 	Log.Infof(format, args...)
 }
 
-// Errorf --
+// Errorf --.
 func Errorf(err error, format string, args ...interface{}) {
 	Log.Errorf(err, format, args...)
 }
 
-// Debug --
+// Debug --.
 func Debug(msg string, keysAndValues ...interface{}) {
 	Log.Debug(msg, keysAndValues...)
 }
 
-// Info --
+// Info --.
 func Info(msg string, keysAndValues ...interface{}) {
 	Log.Info(msg, keysAndValues...)
 }
 
-// Error --
+// Error --.
 func Error(err error, msg string, keysAndValues ...interface{}) {
 	Log.Error(err, msg, keysAndValues...)
 }

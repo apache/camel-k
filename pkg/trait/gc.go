@@ -58,7 +58,7 @@ const (
 
 // The GC Trait garbage-collects all resources that are no longer necessary upon integration updates.
 //
-// +camel-k:trait=gc
+// +camel-k:trait=gc.
 type garbageCollectorTrait struct {
 	BaseTrait `property:",squash"`
 	// Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`)

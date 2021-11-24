@@ -36,7 +36,7 @@ func RegisterBindingProvider(bp BindingProvider) {
 	})
 }
 
-// Translate execute all chained binding providers, returning the first success or the first error
+// Translate execute all chained binding providers, returning the first success or the first error.
 func Translate(ctx BindingContext, endpointCtx EndpointContext, endpoint v1alpha1.Endpoint) (*Binding, error) {
 	if err := validateEndpoint(ctx, endpoint); err != nil {
 		return nil, err

@@ -32,7 +32,7 @@ import (
 // The builder trait is internally used to determine the best strategy to
 // build and configure IntegrationKits.
 //
-// +camel-k:trait=builder
+// +camel-k:trait=builder.
 type builderTrait struct {
 	BaseTrait `property:",squash"`
 	// Enable verbose logging on build components that support it (e.g. Kaniko build pod).
@@ -47,12 +47,12 @@ func newBuilderTrait() Trait {
 	}
 }
 
-// IsPlatformTrait overrides base class method
+// IsPlatformTrait overrides base class method.
 func (t *builderTrait) IsPlatformTrait() bool {
 	return true
 }
 
-// InfluencesKit overrides base class method
+// InfluencesKit overrides base class method.
 func (t *builderTrait) InfluencesKit() bool {
 	return true
 }

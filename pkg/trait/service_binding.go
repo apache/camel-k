@@ -37,7 +37,7 @@ import (
 // The Service Binding trait allows users to connect to Services in Kubernetes:
 // https://github.com/k8s-service-bindings/spec#service-binding
 // As the specification is still evolving this is subject to change
-// +camel-k:trait=service-binding
+// +camel-k:trait=service-binding.
 type serviceBindingTrait struct {
 	BaseTrait `property:",squash"`
 	// List of Services in the form [[apigroup/]version:]kind:[namespace/]name

@@ -40,7 +40,7 @@ import (
 //
 // The Prometheus trait is disabled by default.
 //
-// +camel-k:trait=prometheus
+// +camel-k:trait=prometheus.
 type prometheusTrait struct {
 	BaseTrait `property:",squash"`
 	// Whether a `PodMonitor` resource is created (default `true`).

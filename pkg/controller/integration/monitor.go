@@ -44,7 +44,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-// The key used for propagating error details from Camel health to MicroProfile Health (See CAMEL-17138)
+// The key used for propagating error details from Camel health to MicroProfile Health (See CAMEL-17138).
 const runtimeHealthCheckErrorMessage = "error.message"
 
 func NewMonitorAction() Action {

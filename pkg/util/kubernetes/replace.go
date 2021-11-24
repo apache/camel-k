@@ -36,7 +36,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 )
 
-// ReplaceResource allows to completely replace a resource on Kubernetes, taking care of immutable fields and resource versions
+// ReplaceResource allows to completely replace a resource on Kubernetes, taking care of immutable fields and resource versions.
 func ReplaceResource(ctx context.Context, c client.Client, res ctrl.Object) error {
 	err := c.Create(ctx, res)
 	if err != nil && k8serrors.IsAlreadyExists(err) {

@@ -47,7 +47,7 @@ import (
 
 // The OpenAPI DSL trait is internally used to allow creating integrations from a OpenAPI specs.
 //
-// +camel-k:trait=openapi
+// +camel-k:trait=openapi.
 type openAPITrait struct {
 	BaseTrait `property:",squash"`
 }
@@ -58,7 +58,7 @@ func newOpenAPITrait() Trait {
 	}
 }
 
-// IsPlatformTrait overrides base class method
+// IsPlatformTrait overrides base class method.
 func (t *openAPITrait) IsPlatformTrait() bool {
 	return true
 }

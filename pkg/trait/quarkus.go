@@ -56,7 +56,7 @@ var kitPriority = map[quarkusPackageType]string{
 // the operator Pod, or the build Pod (depending on the build strategy configured for the platform),
 // must have enough memory available.
 //
-// +camel-k:trait=quarkus
+// +camel-k:trait=quarkus.
 type quarkusTrait struct {
 	BaseTrait `property:",squash"`
 	// The Quarkus package types, either `fast-jar` or `native` (default `fast-jar`).
@@ -74,12 +74,12 @@ func newQuarkusTrait() Trait {
 	}
 }
 
-// IsPlatformTrait overrides base class method
+// IsPlatformTrait overrides base class method.
 func (t *quarkusTrait) IsPlatformTrait() bool {
 	return true
 }
 
-// InfluencesKit overrides base class method
+// InfluencesKit overrides base class method.
 func (t *quarkusTrait) InfluencesKit() bool {
 	return true
 }

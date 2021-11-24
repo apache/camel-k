@@ -173,7 +173,7 @@ func (t *containerTrait) Apply(e *Environment) error {
 	return t.configureContainer(e)
 }
 
-// IsPlatformTrait overrides base class method
+// IsPlatformTrait overrides base class method.
 func (t *containerTrait) IsPlatformTrait() bool {
 	return true
 }

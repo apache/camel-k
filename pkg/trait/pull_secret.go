@@ -44,7 +44,7 @@ import (
 //
 // If your registry does not need authentication for pulling images, you can disable this trait.
 //
-// +camel-k:trait=pull-secret
+// +camel-k:trait=pull-secret.
 type pullSecretTrait struct {
 	BaseTrait `property:",squash"`
 	// The pull secret name to set on the Pod. If left empty this is automatically taken from the `IntegrationPlatform` registry configuration.

@@ -27,7 +27,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 )
 
-// OperatorStartupOptionalTools tries to install optional tools at operator startup and warns if something goes wrong
+// OperatorStartupOptionalTools tries to install optional tools at operator startup and warns if something goes wrong.
 func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespace string, operatorNamespace string, log logr.Logger) {
 	// Try to register the OpenShift CLI Download link if possible
 	if err := OpenShiftConsoleDownloadLink(ctx, c); err != nil {

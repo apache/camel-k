@@ -30,7 +30,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-// BindingProvider allows to connect to a Kafka topic via KameletBinding
+// BindingProvider allows to connect to a Kafka topic via KameletBinding.
 type BindingProvider struct {
 	Client internalclientset.Interface
 }

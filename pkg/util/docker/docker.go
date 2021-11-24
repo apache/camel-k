@@ -27,7 +27,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// CreateBaseImageDockerFile --
+// CreateBaseImageDockerFile --.
 func CreateBaseImageDockerFile() error {
 	dockerFile := []string{}
 
@@ -47,7 +47,7 @@ func CreateBaseImageDockerFile() error {
 	return nil
 }
 
-// CreateIntegrationImageDockerFile --
+// CreateIntegrationImageDockerFile --.
 func CreateIntegrationImageDockerFile(integrationRunCmd *exec.Cmd, startsFromLocalFolder bool) error {
 	dockerFile := []string{}
 
@@ -92,7 +92,7 @@ func CreateIntegrationImageDockerFile(integrationRunCmd *exec.Cmd, startsFromLoc
 	return nil
 }
 
-// BuildBaseImageArgs --
+// BuildBaseImageArgs --.
 func BuildBaseImageArgs() []string {
 	// Construct the docker command:
 	//
@@ -102,7 +102,7 @@ func BuildBaseImageArgs() []string {
 	return BuildImageArgs(BaseWorkingDirectory, GetBaseImagePath(), BaseWorkingDirectory)
 }
 
-// BuildIntegrationImageArgs --
+// BuildIntegrationImageArgs --.
 func BuildIntegrationImageArgs(imagePath string) []string {
 	// Construct the docker command:
 	//
@@ -111,7 +111,7 @@ func BuildIntegrationImageArgs(imagePath string) []string {
 	return BuildImageArgs(IntegrationWorkingDirectory, imagePath, util.MavenWorkingDirectory)
 }
 
-// RunIntegrationImageArgs --
+// RunIntegrationImageArgs --.
 func RunIntegrationImageArgs(imagePath string) ([]string, error) {
 	// Construct the docker command:
 	//
@@ -150,7 +150,7 @@ func ContainerizeFilePaths(currentFilePaths []string, newDir string) []string {
 	return newFilePaths
 }
 
-// ContainerizeDependencyPaths -- make dependency paths valid given a valid container directory in newDir
+// ContainerizeDependencyPaths -- make dependency paths valid given a valid container directory in newDir.
 func ContainerizeDependencyPaths(dependencyPaths []string, newDir string) []string {
 	newDependencyPaths := []string{}
 	for _, currentDependencyPath := range dependencyPaths {

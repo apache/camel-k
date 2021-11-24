@@ -25,7 +25,7 @@ import (
 	"io/ioutil"
 )
 
-// Compress --
+// Compress --.
 func Compress(buffer io.Writer, data []byte) error {
 	gz := g.NewWriter(buffer)
 
@@ -42,7 +42,7 @@ func Compress(buffer io.Writer, data []byte) error {
 	return nil
 }
 
-// CompressBase64 --
+// CompressBase64 --.
 func CompressBase64(data []byte) ([]byte, error) {
 	var b bytes.Buffer
 
@@ -53,7 +53,7 @@ func CompressBase64(data []byte) ([]byte, error) {
 	return []byte(base64.StdEncoding.EncodeToString(b.Bytes())), nil
 }
 
-// Uncompress --
+// Uncompress --.
 func Uncompress(buffer io.Writer, data []byte) error {
 	b := bytes.NewBuffer(data)
 	gz, err := g.NewReader(b)
@@ -76,7 +76,7 @@ func Uncompress(buffer io.Writer, data []byte) error {
 	return nil
 }
 
-// UncompressBase64 --
+// UncompressBase64 --.
 func UncompressBase64(data []byte) ([]byte, error) {
 	d, err := base64.StdEncoding.DecodeString(string(data))
 	if err != nil {

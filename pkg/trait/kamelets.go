@@ -42,7 +42,7 @@ import (
 
 // The kamelets trait is a platform trait used to inject Kamelets into the integration runtime.
 //
-// +camel-k:trait=kamelets
+// +camel-k:trait=kamelets.
 type kameletsTrait struct {
 	BaseTrait `property:",squash"`
 	// Automatically inject all referenced Kamelets and their default configuration (enabled by default)
@@ -76,7 +76,7 @@ func newKameletsTrait() Trait {
 	}
 }
 
-// IsPlatformTrait overrides base class method
+// IsPlatformTrait overrides base class method.
 func (t *kameletsTrait) IsPlatformTrait() bool {
 	return true
 }

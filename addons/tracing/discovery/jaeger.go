@@ -67,7 +67,7 @@ func (loc *JaegerTracingLocator) FindEndpoint(ctx context.Context, c client.Clie
 	return "", nil
 }
 
-// registering the locator
+// registering the locator.
 func init() {
 	TracingLocators = append(TracingLocators, &JaegerTracingLocator{}, &JaegerTracingLocator{allowHeadless: true})
 }

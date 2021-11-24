@@ -27,7 +27,7 @@ import (
 
 type registerFunction func(*runtime.Scheme) error
 
-// AddToScheme adds monitoring types to the scheme
+// AddToScheme adds monitoring types to the scheme.
 func AddToScheme(scheme *runtime.Scheme) error {
 	var err error
 

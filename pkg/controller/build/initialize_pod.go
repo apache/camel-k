@@ -38,17 +38,17 @@ type initializePodAction struct {
 	reader ctrl.Reader
 }
 
-// Name returns a common name of the action
+// Name returns a common name of the action.
 func (action *initializePodAction) Name() string {
 	return "initialize-pod"
 }
 
-// CanHandle tells whether this action can handle the build
+// CanHandle tells whether this action can handle the build.
 func (action *initializePodAction) CanHandle(build *v1.Build) bool {
 	return build.Status.Phase == "" || build.Status.Phase == v1.BuildPhaseInitialization
 }
 
-// Handle handles the builds
+// Handle handles the builds.
 func (action *initializePodAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
 	if err := deleteBuilderPod(ctx, action.client, build); err != nil {
 		return nil, errors.Wrap(err, "cannot delete build pod")

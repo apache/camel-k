@@ -59,15 +59,15 @@ var (
 	serviceBindingsMountPath  = path.Join(confDPath, "_servicebindings")
 )
 
-// Identifiable represent an identifiable type
+// Identifiable represent an identifiable type.
 type Identifiable interface {
 	ID() ID
 }
 
-// ID uniquely identifies a trait
+// ID uniquely identifies a trait.
 type ID string
 
-// Trait is the interface of all traits
+// Trait is the interface of all traits.
 type Trait interface {
 	Identifiable
 	client.Injectable
@@ -103,7 +103,7 @@ type ComparableTrait interface {
 	Comparable
 }
 
-// A list of named orders, useful for correctly binding addons
+// A list of named orders, useful for correctly binding addons.
 const (
 	// TraitOrderBeforeControllerCreation can be used to inject configuration such as properties and environment variables
 	// into the running integration, before the actual controller is created.
@@ -124,7 +124,7 @@ func NewBaseTrait(id string, order int) BaseTrait {
 	}
 }
 
-// BaseTrait is the root trait with noop implementations for hooks
+// BaseTrait is the root trait with noop implementations for hooks.
 type BaseTrait struct {
 	TraitID ID `json:"-"`
 	// Can be used to enable or disable a trait. All traits share this common property.
@@ -134,17 +134,17 @@ type BaseTrait struct {
 	L              log.Logger    `json:"-"`
 }
 
-// ID returns the identifier of the trait
+// ID returns the identifier of the trait.
 func (trait *BaseTrait) ID() ID {
 	return trait.TraitID
 }
 
-// InjectClient implements client.ClientInject and allows to inject a client into the trait
+// InjectClient implements client.ClientInject and allows to inject a client into the trait.
 func (trait *BaseTrait) InjectClient(c client.Client) {
 	trait.Client = c
 }
 
-// InfluencesKit determines if the trait has any influence on Integration Kits
+// InfluencesKit determines if the trait has any influence on Integration Kits.
 func (trait *BaseTrait) InfluencesKit() bool {
 	return false
 }
@@ -154,18 +154,18 @@ func (trait *BaseTrait) IsPlatformTrait() bool {
 	return false
 }
 
-// RequiresIntegrationPlatform indicates that the trait cannot work without an integration platform set
+// RequiresIntegrationPlatform indicates that the trait cannot work without an integration platform set.
 func (trait *BaseTrait) RequiresIntegrationPlatform() bool {
 	// All traits require a platform by default
 	return true
 }
 
-// IsAllowedInProfile returns true for any profile by default
+// IsAllowedInProfile returns true for any profile by default.
 func (trait *BaseTrait) IsAllowedInProfile(v1.TraitProfile) bool {
 	return true
 }
 
-// Order contains the order value provided during initialization
+// Order contains the order value provided during initialization.
 func (trait *BaseTrait) Order() int {
 	return trait.ExecutionOrder
 }
@@ -178,7 +178,7 @@ type ControllerStrategySelector interface {
 	ControllerStrategySelectorOrder() int
 }
 
-// An Environment provides the context for the execution of the traits
+// An Environment provides the context for the execution of the traits.
 type Environment struct {
 	CamelCatalog   *camel.RuntimeCatalog
 	RuntimeVersion string
@@ -209,10 +209,10 @@ type Environment struct {
 	ServiceBindingSecret  string
 }
 
-// ControllerStrategy is used to determine the kind of controller that needs to be created for the integration
+// ControllerStrategy is used to determine the kind of controller that needs to be created for the integration.
 type ControllerStrategy string
 
-// List of controller strategies
+// List of controller strategies.
 const (
 	ControllerStrategyDeployment     ControllerStrategy = "deployment"
 	ControllerStrategyKnativeService ControllerStrategy = "knative-service"
@@ -270,7 +270,7 @@ func (e *Environment) InPhase(c v1.IntegrationKitPhase, i v1.IntegrationPhase) b
 // DetermineProfile determines the TraitProfile of the environment.
 // First looking at the Integration.Spec for a Profile,
 // next looking at the IntegrationKit.Spec
-// and lastly the Platform Profile
+// and lastly the Platform Profile.
 func (e *Environment) DetermineProfile() v1.TraitProfile {
 	if e.Integration != nil {
 		if e.Integration.Status.Profile != "" {
@@ -292,7 +292,7 @@ func (e *Environment) DetermineProfile() v1.TraitProfile {
 	return v1.DefaultTraitProfile
 }
 
-// DetermineControllerStrategy determines the type of controller that should be used for the integration
+// DetermineControllerStrategy determines the type of controller that should be used for the integration.
 func (e *Environment) DetermineControllerStrategy() (ControllerStrategy, error) {
 	defaultStrategy := DefaultControllerStrategy
 	for _, creator := range e.getControllerStrategyChoosers() {
@@ -318,7 +318,7 @@ func (e *Environment) getControllerStrategyChoosers() (res []ControllerStrategyS
 	return res
 }
 
-// GetIntegrationPodSpec return the Integration Template Pod Specification, regardless of the deployment strategy
+// GetIntegrationPodSpec return the Integration Template Pod Specification, regardless of the deployment strategy.
 func (e *Environment) GetIntegrationPodSpec() *corev1.PodSpec {
 	// Deployment
 	deployment := e.Resources.GetDeployment(func(d *appsv1.Deployment) bool {

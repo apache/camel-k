@@ -89,7 +89,7 @@ func (p *Project) ReplaceDependency(dep Dependency) {
 	}
 }
 
-// AddDependency adds a dependency to maven's dependencies
+// AddDependency adds a dependency to maven's dependencies.
 func (p *Project) AddDependency(dep Dependency) {
 	for _, d := range p.Dependencies {
 		// Check if the given dependency is already included in the dependency list
@@ -101,19 +101,19 @@ func (p *Project) AddDependency(dep Dependency) {
 	p.Dependencies = append(p.Dependencies, dep)
 }
 
-// AddDependencies adds dependencies to maven's dependencies
+// AddDependencies adds dependencies to maven's dependencies.
 func (p *Project) AddDependencies(deps ...Dependency) {
 	for _, d := range deps {
 		p.AddDependency(d)
 	}
 }
 
-// AddDependencyGAV adds a dependency to maven's dependencies
+// AddDependencyGAV adds a dependency to maven's dependencies.
 func (p *Project) AddDependencyGAV(groupID string, artifactID string, version string) {
 	p.AddDependency(NewDependency(groupID, artifactID, version))
 }
 
-// AddEncodedDependencyGAV adds a dependency in GAV format to maven's dependencies
+// AddEncodedDependencyGAV adds a dependency in GAV format to maven's dependencies.
 func (p *Project) AddEncodedDependencyGAV(gav string) {
 	if d, err := ParseGAV(gav); err == nil {
 		// TODO: error handling
@@ -181,7 +181,7 @@ func (m Properties) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return e.EncodeToken(start.End())
 }
 
-// NewDependency creates an new dependency from the given GAV
+// NewDependency creates an new dependency from the given GAV.
 func NewDependency(groupID string, artifactID string, version string) Dependency {
 	return Dependency{
 		GroupID:    groupID,
@@ -199,7 +199,7 @@ func NewDependency(groupID string, artifactID string, version string) Dependency
 //
 //     http://my-nexus:8081/repository/publicc@id=my-repo@snapshots
 //
-// That enables snapshots and sets the repository id to `my-repo`
+// That enables snapshots and sets the repository id to `my-repo`.
 func NewRepository(repo string) v1.Repository {
 	r := v1.Repository{
 		URL: repo,

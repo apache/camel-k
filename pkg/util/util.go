@@ -45,49 +45,49 @@ import (
 // By default, a temporary folder will be used.
 var MavenWorkingDirectory = ""
 
-// DefaultDependenciesDirectoryName --
+// DefaultDependenciesDirectoryName --.
 const DefaultDependenciesDirectoryName = "dependencies"
 
-// DefaultPropertiesDirectoryName --
+// DefaultPropertiesDirectoryName --.
 const DefaultPropertiesDirectoryName = "properties"
 
-// DefaultRoutesDirectoryName --
+// DefaultRoutesDirectoryName --.
 const DefaultRoutesDirectoryName = "routes"
 
-// DefaultWorkingDirectoryName --
+// DefaultWorkingDirectoryName --.
 const DefaultWorkingDirectoryName = "workspace"
 
-// CustomQuarkusDirectoryName --
+// CustomQuarkusDirectoryName --.
 const CustomQuarkusDirectoryName = "quarkus"
 
-// CustomAppDirectoryName --
+// CustomAppDirectoryName --.
 const CustomAppDirectoryName = "app"
 
-// CustomLibDirectoryName --
+// CustomLibDirectoryName --.
 const CustomLibDirectoryName = "lib/main"
 
-// ContainerDependenciesDirectory --
+// ContainerDependenciesDirectory --.
 var ContainerDependenciesDirectory = "/deployments/dependencies"
 
-// ContainerPropertiesDirectory --
+// ContainerPropertiesDirectory --.
 var ContainerPropertiesDirectory = "/etc/camel/conf.d"
 
-// ContainerRoutesDirectory --
+// ContainerRoutesDirectory --.
 var ContainerRoutesDirectory = "/etc/camel/sources"
 
-// ContainerResourcesDirectory --
+// ContainerResourcesDirectory --.
 var ContainerResourcesDirectory = "/etc/camel/resources"
 
-// ContainerQuarkusDirectoryName --
+// ContainerQuarkusDirectoryName --.
 const ContainerQuarkusDirectoryName = "/quarkus"
 
-// ContainerAppDirectoryName --
+// ContainerAppDirectoryName --.
 const ContainerAppDirectoryName = "/app"
 
-// ContainerLibDirectoryName --
+// ContainerLibDirectoryName --.
 const ContainerLibDirectoryName = "/lib/main"
 
-// QuarkusDependenciesBaseDirectory --
+// QuarkusDependenciesBaseDirectory --.
 var QuarkusDependenciesBaseDirectory = "/quarkus-app"
 
 // ListOfLazyEvaluatedEnvVars -- List of unevaluated environment variables.
@@ -158,7 +158,7 @@ func StringSliceContainsAnyOf(slice []string, items ...string) bool {
 	return false
 }
 
-// StringSliceUniqueAdd appends the given item if not already present in the slice
+// StringSliceUniqueAdd appends the given item if not already present in the slice.
 func StringSliceUniqueAdd(slice *[]string, item string) bool {
 	if slice == nil {
 		newSlice := make([]string, 0)
@@ -175,7 +175,7 @@ func StringSliceUniqueAdd(slice *[]string, item string) bool {
 	return true
 }
 
-// StringSliceUniqueConcat appends all the items of the "items" slice if they are not already present in the slice
+// StringSliceUniqueConcat appends all the items of the "items" slice if they are not already present in the slice.
 func StringSliceUniqueConcat(slice *[]string, items []string) bool {
 	changed := false
 	for _, item := range items {
@@ -375,7 +375,7 @@ func SortedStringMapKeys(m map[string]string) []string {
 	return res
 }
 
-// CopyMap clones a map of strings
+// CopyMap clones a map of strings.
 func CopyMap(source map[string]string) map[string]string {
 	if source == nil {
 		return nil
@@ -441,32 +441,32 @@ func WriteToFile(filePath string, fileContents string) error {
 
 // Local directories:
 
-// GetLocalPropertiesDir -- <mavenWorkingDirectory>/properties
+// GetLocalPropertiesDir -- <mavenWorkingDirectory>/properties.
 func GetLocalPropertiesDir() string {
 	return path.Join(MavenWorkingDirectory, DefaultPropertiesDirectoryName)
 }
 
-// GetLocalDependenciesDir --<mavenWorkingDirectory>/dependencies
+// GetLocalDependenciesDir --<mavenWorkingDirectory>/dependencies.
 func GetLocalDependenciesDir() string {
 	return path.Join(MavenWorkingDirectory, DefaultDependenciesDirectoryName)
 }
 
-// GetLocalRoutesDir -- <mavenWorkingDirectory>/routes
+// GetLocalRoutesDir -- <mavenWorkingDirectory>/routes.
 func GetLocalRoutesDir() string {
 	return path.Join(MavenWorkingDirectory, DefaultRoutesDirectoryName)
 }
 
-// GetLocalQuarkusDir -- <mavenWorkingDirectory>/quarkus
+// GetLocalQuarkusDir -- <mavenWorkingDirectory>/quarkus.
 func GetLocalQuarkusDir() string {
 	return path.Join(MavenWorkingDirectory, CustomQuarkusDirectoryName)
 }
 
-// GetLocalAppDir -- <mavenWorkingDirectory>/app
+// GetLocalAppDir -- <mavenWorkingDirectory>/app.
 func GetLocalAppDir() string {
 	return path.Join(MavenWorkingDirectory, CustomAppDirectoryName)
 }
 
-// GetLocalLibDir -- <mavenWorkingDirectory>/lib/main
+// GetLocalLibDir -- <mavenWorkingDirectory>/lib/main.
 func GetLocalLibDir() string {
 	return path.Join(MavenWorkingDirectory, CustomLibDirectoryName)
 }

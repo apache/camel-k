@@ -26,7 +26,7 @@ import (
 // The environment trait is used internally to inject standard environment variables in the integration container,
 // such as `NAMESPACE`, `POD_NAME` and others.
 //
-// +camel-k:trait=environment
+// +camel-k:trait=environment.
 type environmentTrait struct {
 	BaseTrait `property:",squash"`
 	// Enables injection of `NAMESPACE` and `POD_NAME` environment variables (default `true`)
@@ -91,7 +91,7 @@ func (t *environmentTrait) Apply(e *Environment) error {
 	return nil
 }
 
-// IsPlatformTrait overrides base class method
+// IsPlatformTrait overrides base class method.
 func (t *environmentTrait) IsPlatformTrait() bool {
 	return true
 }

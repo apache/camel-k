@@ -170,7 +170,7 @@ func NamedFilesFilter(names ...string) func(path string, fi os.FileInfo) bool {
 }
 
 //
-// If file is bigger than maximum size (in bytes) then exclude
+// If file is bigger than maximum size (in bytes) then exclude.
 //
 func BigFilesFilter(size int) func(path string, fi os.FileInfo) bool {
 	return func(path string, fi os.FileInfo) bool {
@@ -230,7 +230,7 @@ func checkDir(dirName string) error {
 	return nil
 }
 
-// modTimeFS wraps http.FileSystem to set mod time to 0 for all files
+// modTimeFS wraps http.FileSystem to set mod time to 0 for all files.
 type modTimeFS struct {
 	fs http.FileSystem
 }

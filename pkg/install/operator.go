@@ -69,7 +69,7 @@ type OperatorMonitoringConfiguration struct {
 	Port    int32
 }
 
-// OperatorOrCollect installs the operator resources or adds them to the collector if present
+// OperatorOrCollect installs the operator resources or adds them to the collector if present.
 func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection, force bool) error {
 	isOpenShift, err := isOpenShift(c, cfg.ClusterType)
 	if err != nil {

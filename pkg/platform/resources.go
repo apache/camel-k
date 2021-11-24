@@ -19,24 +19,24 @@ package platform
 
 import "strings"
 
-// DefaultKits --
+// DefaultKits --.
 var DefaultKits = []string{
 	"platform-integration-kit-jvm.yaml",
 	"platform-integration-kit-groovy.yaml",
 	"platform-integration-kit-kotlin.yaml",
 }
 
-// KnativeKits --
+// KnativeKits --.
 var KnativeKits = []string{
 	"platform-integration-kit-knative.yaml",
 }
 
-// GetKits --
+// GetKits --.
 func GetKits() []string {
 	return append(DefaultKits, KnativeKits...)
 }
 
-// GetKitsNames --
+// GetKitsNames --.
 func GetKitsNames() []string {
 	ctxs := GetKits()
 	names := make([]string, 0, len(ctxs))

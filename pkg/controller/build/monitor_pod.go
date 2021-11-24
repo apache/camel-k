@@ -50,17 +50,17 @@ type monitorPodAction struct {
 	reader ctrl.Reader
 }
 
-// Name returns a common name of the action
+// Name returns a common name of the action.
 func (action *monitorPodAction) Name() string {
 	return "monitor-pod"
 }
 
-// CanHandle tells whether this action can handle the build
+// CanHandle tells whether this action can handle the build.
 func (action *monitorPodAction) CanHandle(build *v1.Build) bool {
 	return build.Status.Phase == v1.BuildPhasePending || build.Status.Phase == v1.BuildPhaseRunning
 }
 
-// Handle handles the builds
+// Handle handles the builds.
 func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
 	pod, err := getBuilderPod(ctx, action.reader, build)
 	if err != nil {

@@ -52,7 +52,7 @@ func printVersion() {
 	log.Info(fmt.Sprintf("Camel K Version: %v", defaults.Version))
 }
 
-// Run a build resource in the specified namespace
+// Run a build resource in the specified namespace.
 func Run(namespace string, buildName string, taskName string) {
 	logf.SetLogger(zap.New(func(o *zap.Options) {
 		o.Development = false

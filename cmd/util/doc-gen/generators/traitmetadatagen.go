@@ -33,7 +33,7 @@ import (
 	"k8s.io/gengo/types"
 )
 
-// traitMetaDataGen produces YAML documentation about trait descriptions
+// traitMetaDataGen produces YAML documentation about trait descriptions.
 type traitMetaDataGen struct {
 	generator.DefaultGen
 	arguments *args.GeneratorArgs
@@ -58,7 +58,7 @@ type traitPropertyMetaData struct {
 	Description string `yaml:"description"`
 }
 
-// NewtraitMetaDataGen --
+// NewtraitMetaDataGen --.
 func NewtraitMetaDataGen(arguments *args.GeneratorArgs) generator.Generator {
 	return &traitMetaDataGen{
 		DefaultGen: generator.DefaultGen{},

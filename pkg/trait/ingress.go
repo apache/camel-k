@@ -33,7 +33,7 @@ import (
 //
 // It's enabled by default whenever a Service is added to the integration (through the `service` trait).
 //
-// +camel-k:trait=ingress
+// +camel-k:trait=ingress.
 type ingressTrait struct {
 	BaseTrait `property:",squash"`
 	// **Required**. To configure the host exposed by the ingress.
@@ -49,7 +49,7 @@ func newIngressTrait() Trait {
 	}
 }
 
-// IsAllowedInProfile overrides default
+// IsAllowedInProfile overrides default.
 func (t *ingressTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 	return profile == v1.TraitProfileKubernetes
 }

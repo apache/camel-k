@@ -27,7 +27,7 @@ import (
 	"github.com/rs/xid"
 )
 
-// ManageIntegrationDependencies --
+// ManageIntegrationDependencies --.
 func ManageIntegrationDependencies(
 	project *maven.Project,
 	dependencies []string,
@@ -185,7 +185,7 @@ func postProcessDependencies(project *maven.Project, catalog *RuntimeCatalog) {
 	}
 }
 
-// SanitizeIntegrationDependencies --
+// SanitizeIntegrationDependencies --.
 func SanitizeIntegrationDependencies(dependencies []maven.Dependency) error {
 	for i := 0; i < len(dependencies); i++ {
 		dep := dependencies[i]

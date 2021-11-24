@@ -36,7 +36,7 @@ import (
 // The deployer trait is responsible for deploying the resources owned by the integration, and can be used
 // to explicitly select the underlying controller that will manage the integration pods.
 //
-// +camel-k:trait=deployer
+// +camel-k:trait=deployer.
 type deployerTrait struct {
 	BaseTrait `property:",squash"`
 	// Allows to explicitly select the desired deployment kind between `deployment`, `cron-job` or `knative-service` when creating the resources for running the integration.
@@ -173,12 +173,12 @@ func (t *deployerTrait) ControllerStrategySelectorOrder() int {
 	return 0
 }
 
-// IsPlatformTrait overrides base class method
+// IsPlatformTrait overrides base class method.
 func (t *deployerTrait) IsPlatformTrait() bool {
 	return true
 }
 
-// RequiresIntegrationPlatform overrides base class method
+// RequiresIntegrationPlatform overrides base class method.
 func (t *deployerTrait) RequiresIntegrationPlatform() bool {
 	return false
 }

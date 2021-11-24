@@ -40,7 +40,7 @@ import (
 
 var exactVersionRegexp = regexp.MustCompile(`^(\d+)\.(\d+)\.([\w-.]+)$`)
 
-// getIntegrationKit retrieves the kit set on the integration
+// getIntegrationKit retrieves the kit set on the integration.
 func getIntegrationKit(ctx context.Context, c client.Client, integration *v1.Integration) (*v1.IntegrationKit, error) {
 	if integration.Status.IntegrationKit == nil {
 		return nil, nil
@@ -223,12 +223,12 @@ func AddSourceDependencies(source v1.SourceSpec, catalog *camel.RuntimeCatalog) 
 
 // Bool pointer operations:
 
-// BoolP returns a pointer to a bool value
+// BoolP returns a pointer to a bool value.
 func BoolP(b bool) *bool {
 	return &b
 }
 
-// IsTrue checks if the bool pointer is defined and true
+// IsTrue checks if the bool pointer is defined and true.
 func IsTrue(b *bool) bool {
 	return b != nil && *b
 }
@@ -239,7 +239,7 @@ func IsNilOrTrue(b *bool) bool {
 	return b == nil || *b
 }
 
-// IsFalse checks if the bool pointer is defined and false
+// IsFalse checks if the bool pointer is defined and false.
 func IsFalse(b *bool) bool {
 	return b != nil && !*b
 }
