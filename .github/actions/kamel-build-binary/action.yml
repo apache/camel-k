@@ -40,8 +40,6 @@ runs:
       name: Build Kamel Operator
       shell: bash
       run: |
-        echo "Build Kamel from source"
-
         if [ -n "${{ inputs.image-registry-push-host }}" ]; then
           #
           # Build with the PUSH host to ensure the correct image:tag
@@ -50,16 +48,30 @@ runs:
           export CUSTOM_IMAGE=${{ inputs.image-registry-push-host }}/${{ inputs.image-namespace }}/camel-k
         fi
 
-        RULES="PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images"
-        if [ -n "${{ inputs.make-rules }}" ]; then
-          RULES="${{ inputs.make-rules }}"
-        fi
+        if [ -n "${{ env.DEBUG_USE_EXISTING_IMAGE }}" ] && [ -n "${CUSTOM_IMAGE}" ]; then
+          echo "Fetching Kamel from existing build"
 
-        if [ -n "${{ inputs.image-registry-push-host }}" ]; then
-          RULES="${RULES} images-push"
-        fi
+          docker pull ${{ env.DEBUG_USE_EXISTING_IMAGE }}
+          id=$(docker create ${{ env.DEBUG_USE_EXISTING_IMAGE }})
+          docker cp $id:/usr/local/bin/kamel .
 
-        make ${RULES}
+          docker tag ${{ env.DEBUG_USE_EXISTING_IMAGE }} ${CUSTOM_IMAGE}:$(make get-version)
+          docker push ${CUSTOM_IMAGE}:$(make get-version)
+        else
+
+          echo "Build Kamel from source"
+
+          RULES="PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images"
+          if [ -n "${{ inputs.make-rules }}" ]; then
+            RULES="${{ inputs.make-rules }}"
+          fi
+
+          if [ -n "${{ inputs.image-registry-push-host }}" ]; then
+            RULES="${RULES} images-push"
+          fi
+
+          make ${RULES}
+        fi
 
         echo "Moving kamel binary to /usr/local/bin"
         sudo mv ./kamel /usr/local/bin
