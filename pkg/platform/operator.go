@@ -42,7 +42,7 @@ const OperatorLockName = "camel-k-lock"
 
 var OperatorImage string
 
-// IsCurrentOperatorGlobal returns true if the operator is configured to watch all namespaces
+// IsCurrentOperatorGlobal returns true if the operator is configured to watch all namespaces.
 func IsCurrentOperatorGlobal() bool {
 	if watchNamespace, envSet := os.LookupEnv(OperatorWatchNamespaceEnvVariable); !envSet || strings.TrimSpace(watchNamespace) == "" {
 		return true
@@ -50,7 +50,7 @@ func IsCurrentOperatorGlobal() bool {
 	return false
 }
 
-// GetOperatorWatchNamespace returns the namespace the operator watches
+// GetOperatorWatchNamespace returns the namespace the operator watches.
 func GetOperatorWatchNamespace() string {
 	if namespace, envSet := os.LookupEnv(OperatorWatchNamespaceEnvVariable); envSet {
 		return namespace
@@ -58,7 +58,7 @@ func GetOperatorWatchNamespace() string {
 	return ""
 }
 
-// GetOperatorNamespace returns the namespace where the current operator is located (if set)
+// GetOperatorNamespace returns the namespace where the current operator is located (if set).
 func GetOperatorNamespace() string {
 	if podNamespace, envSet := os.LookupEnv(operatorNamespaceEnvVariable); envSet {
 		return podNamespace
@@ -66,7 +66,7 @@ func GetOperatorNamespace() string {
 	return ""
 }
 
-// GetOperatorPodName returns the pod that is running the current operator (if any)
+// GetOperatorPodName returns the pod that is running the current operator (if any).
 func GetOperatorPodName() string {
 	if podName, envSet := os.LookupEnv(operatorPodNameEnvVariable); envSet {
 		return podName
@@ -74,7 +74,7 @@ func GetOperatorPodName() string {
 	return ""
 }
 
-// IsNamespaceLocked tells if the namespace contains a lock indicating that an operator owns it
+// IsNamespaceLocked tells if the namespace contains a lock indicating that an operator owns it.
 func IsNamespaceLocked(ctx context.Context, c ctrl.Reader, namespace string) (bool, error) {
 	if namespace == "" {
 		return false, nil
@@ -89,7 +89,7 @@ func IsNamespaceLocked(ctx context.Context, c ctrl.Reader, namespace string) (bo
 	return true, nil
 }
 
-// IsOperatorAllowedOnNamespace returns true if the current operator is allowed to react on changes in the given namespace
+// IsOperatorAllowedOnNamespace returns true if the current operator is allowed to react on changes in the given namespace.
 func IsOperatorAllowedOnNamespace(ctx context.Context, c ctrl.Reader, namespace string) (bool, error) {
 	if !IsCurrentOperatorGlobal() {
 		return true, nil

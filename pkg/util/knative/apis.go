@@ -25,7 +25,7 @@ import (
 )
 
 var (
-	// KnownChannelKinds are known channel kinds belonging to Knative
+	// KnownChannelKinds are known channel kinds belonging to Knative.
 	KnownChannelKinds = []GroupVersionKindResource{
 		{
 			GroupVersionKind: schema.GroupVersionKind{
@@ -85,7 +85,7 @@ var (
 		},
 	}
 
-	// KnownEndpointKinds are known endpoint kinds belonging to Knative
+	// KnownEndpointKinds are known endpoint kinds belonging to Knative.
 	KnownEndpointKinds = []GroupVersionKindResource{
 		{
 			GroupVersionKind: schema.GroupVersionKind{
@@ -113,7 +113,7 @@ var (
 		},
 	}
 
-	// KnownBrokerKinds are known broker kinds belonging to Knative
+	// KnownBrokerKinds are known broker kinds belonging to Knative.
 	KnownBrokerKinds = []GroupVersionKindResource{
 		{
 			GroupVersionKind: schema.GroupVersionKind{
@@ -134,7 +134,7 @@ var (
 	}
 
 	// RequiredKinds are Knative kinds used by Camel K for materializing integrations.
-	// They must be present on the cluster
+	// They must be present on the cluster.
 	RequiredKinds = []GroupVersionKindResource{
 		{
 			GroupVersionKind: schema.GroupVersionKind{
@@ -147,7 +147,7 @@ var (
 	}
 )
 
-// GroupVersionKindResource --
+// GroupVersionKindResource --.
 type GroupVersionKindResource struct {
 	schema.GroupVersionKind
 	Resource string

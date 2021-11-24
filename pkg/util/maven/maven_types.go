@@ -52,7 +52,7 @@ type Execution struct {
 
 type Properties map[string]string
 
-// Settings models a Maven settings
+// Settings models a Maven settings.
 type Settings struct {
 	XMLName           xml.Name
 	XMLNs             string    `xml:"xmlns,attr"`
@@ -63,7 +63,7 @@ type Settings struct {
 	Mirrors           []Mirror  `xml:"mirrors>mirror,omitempty"`
 }
 
-// Project models a Maven project
+// Project models a Maven project.
 type Project struct {
 	XMLName              xml.Name
 	XMLNs                string                `xml:"xmlns,attr"`
@@ -81,18 +81,18 @@ type Project struct {
 	Build                *Build                `xml:"build,omitempty"`
 }
 
-// Exclusion models a dependency exclusion
+// Exclusion models a dependency exclusion.
 type Exclusion struct {
 	GroupID    string `xml:"groupId" yaml:"groupId"`
 	ArtifactID string `xml:"artifactId" yaml:"artifactId"`
 }
 
-// DependencyManagement models dependency management
+// DependencyManagement models dependency management.
 type DependencyManagement struct {
 	Dependencies []Dependency `xml:"dependencies>dependency,omitempty"`
 }
 
-// Dependency models a dependency
+// Dependency models a dependency.
 type Dependency struct {
 	GroupID    string       `xml:"groupId" yaml:"groupId"`
 	ArtifactID string       `xml:"artifactId" yaml:"artifactId"`

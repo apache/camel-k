@@ -100,7 +100,7 @@ func assembleIntegrationRunCommand(ctx context.Context, properties []string, dep
 	return cmd, nil
 }
 
-// RunLocalIntegrationRunCommand --
+// RunLocalIntegrationRunCommand --.
 func RunLocalIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string, propertiesDir string, stdout, stderr io.Writer) error {
 	cmd, err := assembleIntegrationRunCommand(ctx, properties, dependencies, routes, propertiesDir, stdout, stderr, true)
 	if err != nil {
@@ -119,7 +119,7 @@ func RunLocalIntegrationRunCommand(ctx context.Context, properties []string, dep
 	return nil
 }
 
-// GetContainerIntegrationRunCommand --
+// GetContainerIntegrationRunCommand --.
 func GetContainerIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string, stdout, stderr io.Writer) (*exec.Cmd, error) {
 	// This is the integration command which will be run inside the container. Therefore all paths need to
 	// be valid container paths.

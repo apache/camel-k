@@ -29,7 +29,7 @@ import (
 
 // The PDB trait allows to configure the PodDisruptionBudget resource for the Integration pods.
 //
-// +camel-k:trait=pdb
+// +camel-k:trait=pdb.
 type pdbTrait struct {
 	BaseTrait `property:",squash"`
 	// The number of pods for the Integration that must still be available after an eviction.

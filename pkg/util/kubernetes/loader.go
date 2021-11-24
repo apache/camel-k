@@ -29,7 +29,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// LoadResourceFromYaml loads a k8s resource from a yaml definition
+// LoadResourceFromYaml loads a k8s resource from a yaml definition.
 func LoadResourceFromYaml(scheme *runtime.Scheme, data string) (ctrl.Object, error) {
 	source := []byte(data)
 	jsonSource, err := yaml.ToJSON(source)
@@ -53,7 +53,7 @@ func LoadResourceFromYaml(scheme *runtime.Scheme, data string) (ctrl.Object, err
 	return o, nil
 }
 
-// LoadRawResourceFromYaml loads a k8s resource from a yaml definition without making assumptions on the underlying type
+// LoadRawResourceFromYaml loads a k8s resource from a yaml definition without making assumptions on the underlying type.
 func LoadRawResourceFromYaml(data string) (runtime.Object, error) {
 	source := []byte(data)
 	jsonSource, err := yaml.ToJSON(source)

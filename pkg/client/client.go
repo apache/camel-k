@@ -55,7 +55,7 @@ const (
 	kubeConfigEnvVar         = "KUBECONFIG"
 )
 
-// Client is an abstraction for a k8s client
+// Client is an abstraction for a k8s client.
 type Client interface {
 	controller.Client
 	kubernetes.Interface
@@ -66,12 +66,12 @@ type Client interface {
 	GetCurrentNamespace(kubeConfig string) (string, error)
 }
 
-// Injectable identifies objects that can receive a Client
+// Injectable identifies objects that can receive a Client.
 type Injectable interface {
 	InjectClient(Client)
 }
 
-// Provider is used to provide a new instance of the Client each time it's required
+// Provider is used to provide a new instance of the Client each time it's required.
 type Provider struct {
 	Get func() (Client, error)
 }
@@ -84,7 +84,7 @@ type defaultClient struct {
 	config *rest.Config
 }
 
-// Check interface compliance
+// Check interface compliance.
 var _ Client = &defaultClient{}
 
 func (c *defaultClient) CamelV1() camelv1.CamelV1Interface {
@@ -107,14 +107,14 @@ func (c *defaultClient) GetCurrentNamespace(kubeConfig string) (string, error) {
 	return GetCurrentNamespace(kubeConfig)
 }
 
-// NewOutOfClusterClient creates a new k8s client that can be used from outside the cluster
+// NewOutOfClusterClient creates a new k8s client that can be used from outside the cluster.
 func NewOutOfClusterClient(kubeconfig string) (Client, error) {
 	initialize(kubeconfig)
 	// using fast discovery from outside the cluster
 	return NewClient(true)
 }
 
-// NewClient creates a new k8s client that can be used from outside or in the cluster
+// NewClient creates a new k8s client that can be used from outside or in the cluster.
 func NewClient(fastDiscovery bool) (Client, error) {
 	// Get a config to talk to the apiserver
 	cfg, err := config.GetConfig()
@@ -163,7 +163,7 @@ func NewClient(fastDiscovery bool) (Client, error) {
 	}, nil
 }
 
-// FromManager creates a new k8s client from a manager object
+// FromManager creates a new k8s client from a manager object.
 func FromManager(manager manager.Manager) (Client, error) {
 	var err error
 	var clientset kubernetes.Interface
@@ -184,7 +184,7 @@ func FromManager(manager manager.Manager) (Client, error) {
 	}, nil
 }
 
-// init initialize the k8s client for usage outside the cluster
+// init initialize the k8s client for usage outside the cluster.
 func initialize(kubeconfig string) {
 	if kubeconfig == "" {
 		// skip out-of-cluster initialization if inside the container
@@ -214,7 +214,7 @@ func getDefaultKubeConfigFile() (string, error) {
 	return filepath.Join(dir, ".kube", "config"), nil
 }
 
-// GetCurrentNamespace --
+// GetCurrentNamespace --.
 func GetCurrentNamespace(kubeconfig string) (string, error) {
 	if kubeconfig == "" {
 		kubeContainer, err := shouldUseContainerMode()

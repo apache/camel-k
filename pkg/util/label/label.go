@@ -36,7 +36,7 @@ var AdditionalLabels = ""
 
 var FixedLabels = map[string]string{}
 
-// parses the labels early on and fail fast if there are errors
+// parses the labels early on and fail fast if there are errors.
 func init() {
 	checkAdditionalLabels()
 }
@@ -52,7 +52,7 @@ func checkAdditionalLabels() {
 	}
 }
 
-// parses the AdditionalLabels variable and returns as map[string]string
+// parses the AdditionalLabels variable and returns as map[string]string.
 func AddLabels(integration string) map[string]string {
 	definitiveLabels := labels.Set{
 		v1.IntegrationLabel: integration,

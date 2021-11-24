@@ -24,7 +24,7 @@ import (
 	kameletutils "github.com/apache/camel-k/pkg/kamelet"
 )
 
-// NewMonitorAction returns an action that monitors the kamelet after it's fully initialized
+// NewMonitorAction returns an action that monitors the kamelet after it's fully initialized.
 func NewMonitorAction() Action {
 	return &monitorAction{}
 }

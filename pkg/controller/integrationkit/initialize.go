@@ -25,7 +25,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
-// NewInitializeAction creates a new initialization handling action for the kit
+// NewInitializeAction creates a new initialization handling action for the kit.
 func NewInitializeAction() Action {
 	return &initializeAction{}
 }

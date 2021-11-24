@@ -25,7 +25,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// EncodePropertyFileEntry converts the given key/value pair into a .properties file entry
+// EncodePropertyFileEntry converts the given key/value pair into a .properties file entry.
 func EncodePropertyFileEntry(key, value string) (string, error) {
 	p := properties.NewProperties()
 	p.DisableExpansion = true
@@ -40,7 +40,7 @@ func EncodePropertyFileEntry(key, value string) (string, error) {
 	return pair, nil
 }
 
-// EncodePropertyFile encodes a property map into a .properties file
+// EncodePropertyFile encodes a property map into a .properties file.
 func EncodePropertyFile(sourceProperties map[string]string) (string, error) {
 	props := properties.LoadMap(sourceProperties)
 	props.DisableExpansion = true
@@ -53,7 +53,7 @@ func EncodePropertyFile(sourceProperties map[string]string) (string, error) {
 	return buf.String(), nil
 }
 
-// SplitPropertyFileEntry splits an encoded property into key/value pair, without decoding the content
+// SplitPropertyFileEntry splits an encoded property into key/value pair, without decoding the content.
 func SplitPropertyFileEntry(entry string) (string, string) {
 	pair := strings.SplitN(entry, "=", 2)
 	var k, v string

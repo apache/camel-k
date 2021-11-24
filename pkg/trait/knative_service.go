@@ -35,13 +35,13 @@ import (
 const (
 	knativeServiceTraitID = "knative-service"
 
-	// Auto-scaling annotations
+	// Auto-scaling annotations.
 	knativeServingClassAnnotation    = "autoscaling.knative.dev/class"
 	knativeServingMetricAnnotation   = "autoscaling.knative.dev/metric"
 	knativeServingTargetAnnotation   = "autoscaling.knative.dev/target"
 	knativeServingMinScaleAnnotation = "autoscaling.knative.dev/minScale"
 	knativeServingMaxScaleAnnotation = "autoscaling.knative.dev/maxScale"
-	// Rollout annotation
+	// Rollout annotation.
 	knativeServingRolloutDurationAnnotation = "serving.knative.dev/rolloutDuration"
 )
 
@@ -51,7 +51,7 @@ const (
 // Running an Integration as a Knative Service enables auto-scaling (and scaling-to-zero), but those features
 // are only relevant when the Camel route(s) use(s) an HTTP endpoint consumer.
 //
-// +camel-k:trait=knative-service
+// +camel-k:trait=knative-service.
 type knativeServiceTrait struct {
 	BaseTrait `property:",squash"`
 	// Configures the Knative autoscaling class property (e.g. to set `hpa.autoscaling.knative.dev` or `kpa.autoscaling.knative.dev` autoscaling).
@@ -95,7 +95,7 @@ func newKnativeServiceTrait() Trait {
 	}
 }
 
-// IsAllowedInProfile overrides default
+// IsAllowedInProfile overrides default.
 func (t *knativeServiceTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 	return profile == v1.TraitProfileKnative
 }

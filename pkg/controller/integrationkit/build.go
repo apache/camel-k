@@ -36,7 +36,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-// NewBuildAction creates a new build request handling action for the kit
+// NewBuildAction creates a new build request handling action for the kit.
 func NewBuildAction() Action {
 	return &buildAction{}
 }

@@ -32,7 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// NewInitializeAction returns a action that initializes the kamelet binding configuration when not provided by the user
+// NewInitializeAction returns a action that initializes the kamelet binding configuration when not provided by the user.
 func NewInitializeAction() Action {
 	return &initializeAction{}
 }

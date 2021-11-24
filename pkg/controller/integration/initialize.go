@@ -30,7 +30,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
-// NewInitializeAction creates a new initialize action
+// NewInitializeAction creates a new initialize action.
 func NewInitializeAction() Action {
 	return &initializeAction{}
 }
@@ -39,17 +39,17 @@ type initializeAction struct {
 	baseAction
 }
 
-// Name returns a common name of the action
+// Name returns a common name of the action.
 func (action *initializeAction) Name() string {
 	return "initialize"
 }
 
-// CanHandle tells whether this action can handle the integration
+// CanHandle tells whether this action can handle the integration.
 func (action *initializeAction) CanHandle(integration *v1.Integration) bool {
 	return integration.Status.Phase == v1.IntegrationPhaseInitialization
 }
 
-// Handle handles the integrations
+// Handle handles the integrations.
 func (action *initializeAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	if _, err := trait.Apply(ctx, action.client, integration, nil); err != nil {
 		return nil, err

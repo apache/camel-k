@@ -50,7 +50,7 @@ import (
 // - `cron`, `quartz`: when the cron expression does not contain seconds (or the "seconds" part is set to 0). E.g.
 //   `cron:tab?schedule=0/2${plus}*{plus}*{plus}*{plus}?` or `quartz:trigger?cron=0{plus}0/2{plus}*{plus}*{plus}*{plus}?`.
 //
-// +camel-k:trait=cron
+// +camel-k:trait=cron.
 type cronTrait struct {
 	BaseTrait `property:",squash"`
 	// The CronJob schedule for the whole integration. If multiple routes are declared, they must have the same schedule for this
@@ -91,13 +91,13 @@ type cronTrait struct {
 
 var _ ControllerStrategySelector = &cronTrait{}
 
-// cronInfo contains information about cron schedules present in the code
+// cronInfo contains information about cron schedules present in the code.
 type cronInfo struct {
 	components []string
 	schedule   string
 }
 
-// cronExtractor extracts cron information from a Camel URI
+// cronExtractor extracts cron information from a Camel URI.
 type cronExtractor func(string) *cronInfo
 
 const (
@@ -321,7 +321,7 @@ func (t *cronTrait) getCronJobFor(e *Environment) *batchv1beta1.CronJob {
 	return &cronjob
 }
 
-// SelectControllerStrategy can be used to check if a CronJob can be generated given the integration and trait settings
+// SelectControllerStrategy can be used to check if a CronJob can be generated given the integration and trait settings.
 func (t *cronTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
 	cronStrategy := ControllerStrategyCronJob
 	if IsFalse(t.Enabled) {
@@ -465,7 +465,7 @@ func timerToCronInfo(camelURI string) *cronInfo {
 	return nil
 }
 
-// quartzToCronInfo converts a quartz endpoint to a Kubernetes cron schedule
+// quartzToCronInfo converts a quartz endpoint to a Kubernetes cron schedule.
 func quartzToCronInfo(camelURI string) *cronInfo {
 	if uri.GetQueryParameter(camelURI, "fireNow") != "" ||
 		uri.GetQueryParameter(camelURI, "customCalendar") != "" ||
@@ -482,7 +482,7 @@ func quartzToCronInfo(camelURI string) *cronInfo {
 	return nil
 }
 
-// cronToCronInfo converts a cron endpoint to a Kubernetes cron schedule
+// cronToCronInfo converts a cron endpoint to a Kubernetes cron schedule.
 func cronToCronInfo(camelURI string) *cronInfo {
 	// Camel cron URIs have 5 to 7 components.
 	schedule := uri.GetQueryParameter(camelURI, "schedule")

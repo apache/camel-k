@@ -41,29 +41,29 @@ import (
 
 // The following properties can be overridden at build time via ldflags
 
-// DefaultOperatorName is the Camel K operator name in OLM
+// DefaultOperatorName is the Camel K operator name in OLM.
 var DefaultOperatorName = "camel-k-operator"
 
-// DefaultPackage is the Camel K package in OLM
+// DefaultPackage is the Camel K package in OLM.
 var DefaultPackage = "camel-k"
 
-// DefaultChannel is the distribution channel in Operator Hub
+// DefaultChannel is the distribution channel in Operator Hub.
 var DefaultChannel = "stable"
 
-// DefaultSource is the name of the operator source where the operator is published
+// DefaultSource is the name of the operator source where the operator is published.
 var DefaultSource = "community-operators"
 
-// DefaultSourceNamespace is the namespace of the operator source
+// DefaultSourceNamespace is the namespace of the operator source.
 var DefaultSourceNamespace = "openshift-marketplace"
 
-// DefaultStartingCSV contains the specific version to install
+// DefaultStartingCSV contains the specific version to install.
 var DefaultStartingCSV = ""
 
 // DefaultGlobalNamespace indicates a namespace containing an OperatorGroup that enables the operator to watch all namespaces.
 // It will be used in global installation mode.
 var DefaultGlobalNamespace = "openshift-operators"
 
-// Options contains information about an operator in OLM
+// Options contains information about an operator in OLM.
 type Options struct {
 	OperatorName    string
 	Package         string
@@ -74,7 +74,7 @@ type Options struct {
 	GlobalNamespace string
 }
 
-// IsOperatorInstalled tells if a OLM CSV or a Subscription is already installed in the namespace
+// IsOperatorInstalled tells if a OLM CSV or a Subscription is already installed in the namespace.
 func IsOperatorInstalled(ctx context.Context, client client.Client, namespace string, global bool, options Options) (bool, error) {
 	options, err := fillDefaults(options, client)
 	if err != nil {
@@ -96,7 +96,7 @@ func IsOperatorInstalled(ctx context.Context, client client.Client, namespace st
 	return false, nil
 }
 
-// HasPermissionToInstall checks if the current user/serviceaccount has the right permissions to install camel k via OLM
+// HasPermissionToInstall checks if the current user/serviceaccount has the right permissions to install camel k via OLM.
 func HasPermissionToInstall(ctx context.Context, client client.Client, namespace string, global bool, options Options) (bool, error) {
 	if ok, err := kubernetes.CheckPermission(ctx, client, operatorsv1alpha1.GroupName, "clusterserviceversions", namespace, options.Package, "list"); err != nil {
 		return false, err
@@ -144,7 +144,7 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 	return true, nil
 }
 
-// Install creates a subscription for the OLM package
+// Install creates a subscription for the OLM package.
 func Install(ctx context.Context, client client.Client, namespace string, global bool, options Options, collection *kubernetes.Collection,
 	tolerations []string, nodeSelectors []string, resourcesRequirements []string, envVars []string) (bool, error) {
 	options, err := fillDefaults(options, client)
@@ -272,7 +272,7 @@ func maybeSetEnvVars(sub *operatorsv1alpha1.Subscription, envVars []string) erro
 	return nil
 }
 
-// Uninstall removes CSV and subscription from the namespace
+// Uninstall removes CSV and subscription from the namespace.
 func Uninstall(ctx context.Context, client client.Client, namespace string, global bool, options Options) error {
 	options, err := fillDefaults(options, client)
 	if err != nil {

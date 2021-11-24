@@ -41,7 +41,7 @@ import (
 // NOTE: this trait adds special permissions to the integration service account in order to read/write configmaps and read pods.
 // It's recommended to use a different service account than "default" when running the integration.
 //
-// +camel-k:trait=master
+// +camel-k:trait=master.
 type masterTrait struct {
 	trait.BaseTrait `property:",squash"`
 	// Enables automatic configuration of the trait.
@@ -64,7 +64,7 @@ type masterTrait struct {
 	delegateDependencies []string `json:"-"`
 }
 
-// NewMasterTrait --
+// NewMasterTrait --.
 func NewMasterTrait() trait.Trait {
 	return &masterTrait{
 		BaseTrait: trait.NewBaseTrait("master", trait.TraitOrderBeforeControllerCreation),

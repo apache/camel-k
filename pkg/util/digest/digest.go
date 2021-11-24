@@ -38,7 +38,7 @@ import (
 )
 
 // ComputeForIntegration a digest of the fields that are relevant for the deployment
-// Produces a digest that can be used as docker image tag
+// Produces a digest that can be used as docker image tag.
 func ComputeForIntegration(integration *v1.Integration) (string, error) {
 	hash := sha256.New()
 	// Integration version is relevant
@@ -135,7 +135,7 @@ func ComputeForIntegration(integration *v1.Integration) (string, error) {
 }
 
 // ComputeForIntegrationKit a digest of the fields that are relevant for the deployment
-// Produces a digest that can be used as docker image tag
+// Produces a digest that can be used as docker image tag.
 func ComputeForIntegrationKit(kit *v1.IntegrationKit) (string, error) {
 	hash := sha256.New()
 	// Kit version is relevant
@@ -159,7 +159,7 @@ func ComputeForIntegrationKit(kit *v1.IntegrationKit) (string, error) {
 	return digest, nil
 }
 
-// ComputeForResource returns a digest for the specific resource
+// ComputeForResource returns a digest for the specific resource.
 func ComputeForResource(res v1.ResourceSpec) (string, error) {
 	hash := sha256.New()
 	// Operator version is relevant
@@ -194,7 +194,7 @@ func ComputeForResource(res v1.ResourceSpec) (string, error) {
 	return digest, nil
 }
 
-// ComputeForSource returns a digest for the specific source
+// ComputeForSource returns a digest for the specific source.
 func ComputeForSource(s v1.SourceSpec) (string, error) {
 	hash := sha256.New()
 	// Operator version is relevant

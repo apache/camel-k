@@ -17,5 +17,5 @@ limitations under the License.
 
 package builder
 
-// KanikoCacheDir is the cache directory for Kaniko builds (mounted into the Kaniko pod)
+// KanikoCacheDir is the cache directory for Kaniko builds (mounted into the Kaniko pod).
 const KanikoCacheDir = "/kaniko/cache"

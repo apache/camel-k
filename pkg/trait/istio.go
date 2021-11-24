@@ -28,7 +28,7 @@ import (
 // The Istio trait allows configuring properties related to the Istio service mesh,
 // such as sidecar injection and outbound IP ranges.
 //
-// +camel-k:trait=istio
+// +camel-k:trait=istio.
 type istioTrait struct {
 	BaseTrait `property:",squash"`
 	// Configures a (comma-separated) list of CIDR subnets that should not be intercepted by the Istio proxy (`10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` by default).

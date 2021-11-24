@@ -117,7 +117,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 var _ reconcile.Reconciler = &ReconcileKameletBinding{}
 
-// ReconcileKameletBinding reconciles a KameletBinding object
+// ReconcileKameletBinding reconciles a KameletBinding object.
 type ReconcileKameletBinding struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the API server

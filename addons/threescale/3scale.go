@@ -30,7 +30,7 @@ import (
 //
 // The 3scale trait is disabled by default.
 //
-// +camel-k:trait=3scale
+// +camel-k:trait=3scale.
 type threeScaleTrait struct {
 	trait.BaseTrait `property:",squash"`
 	// Enables automatic configuration of the trait.
@@ -46,33 +46,33 @@ type threeScaleTrait struct {
 }
 
 const (
-	// ThreeScaleSchemeAnnotation --
+	// ThreeScaleSchemeAnnotation --.
 	ThreeScaleSchemeAnnotation = "discovery.3scale.net/scheme"
-	// ThreeScaleSchemeDefaultValue --
+	// ThreeScaleSchemeDefaultValue --.
 	ThreeScaleSchemeDefaultValue = "http"
 
-	// ThreeScalePortAnnotation --
+	// ThreeScalePortAnnotation --.
 	ThreeScalePortAnnotation = "discovery.3scale.net/port"
-	// ThreeScalePortDefaultValue --
+	// ThreeScalePortDefaultValue --.
 	ThreeScalePortDefaultValue = 80
 
-	// ThreeScalePathAnnotation --
+	// ThreeScalePathAnnotation --.
 	ThreeScalePathAnnotation = "discovery.3scale.net/path"
-	// ThreeScalePathDefaultValue --
+	// ThreeScalePathDefaultValue --.
 	ThreeScalePathDefaultValue = "/"
 
-	// ThreeScaleDescriptionPathAnnotation --
+	// ThreeScaleDescriptionPathAnnotation --.
 	ThreeScaleDescriptionPathAnnotation = "discovery.3scale.net/description-path"
-	// ThreeScaleDescriptionPathDefaultValue --
+	// ThreeScaleDescriptionPathDefaultValue --.
 	ThreeScaleDescriptionPathDefaultValue = "/openapi.json"
 
-	// ThreeScaleDiscoveryLabel --
+	// ThreeScaleDiscoveryLabel --.
 	ThreeScaleDiscoveryLabel = "discovery.3scale.net"
-	// ThreeScaleDiscoveryLabelEnabled --
+	// ThreeScaleDiscoveryLabelEnabled --.
 	ThreeScaleDiscoveryLabelEnabled = "true"
 )
 
-// NewThreeScaleTrait --
+// NewThreeScaleTrait --.
 func NewThreeScaleTrait() trait.Trait {
 	return &threeScaleTrait{
 		BaseTrait: trait.NewBaseTrait("3scale", trait.TraitOrderPostProcessResources),

@@ -34,7 +34,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Source ---
+// Source ---.
 type Source struct {
 	Origin   string
 	Location string
@@ -59,7 +59,7 @@ func (s *Source) setContent(content []byte) error {
 	return nil
 }
 
-// ResolveSources ---
+// ResolveSources ---.
 func ResolveSources(ctx context.Context, locations []string, compress bool) ([]Source, error) {
 	sources := make([]Source, 0, len(locations))
 
@@ -189,7 +189,7 @@ func ResolveSources(ctx context.Context, locations []string, compress bool) ([]S
 	return sources, nil
 }
 
-// ResolveLocalSource --
+// ResolveLocalSource --.
 func ResolveLocalSource(location string, compress bool) (Source, error) {
 	if _, err := os.Stat(location); err != nil && os.IsNotExist(err) {
 		return Source{}, errors.Wrapf(err, "file %s does not exist", location)

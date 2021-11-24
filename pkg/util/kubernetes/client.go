@@ -96,7 +96,7 @@ func GetSecret(context context.Context, client ctrl.Reader, name string, namespa
 	return secret, nil
 }
 
-// GetSecretRefValue returns the value of a secret in the supplied namespace
+// GetSecretRefValue returns the value of a secret in the supplied namespace.
 func GetSecretRefValue(ctx context.Context, client ctrl.Reader, namespace string, selector *corev1.SecretKeySelector) (string, error) {
 	data, err := GetSecretRefData(ctx, client, namespace, selector)
 	if err != nil {
@@ -105,7 +105,7 @@ func GetSecretRefValue(ctx context.Context, client ctrl.Reader, namespace string
 	return string(data), nil
 }
 
-// GetSecretRefData returns the value of a secret in the supplied namespace
+// GetSecretRefData returns the value of a secret in the supplied namespace.
 func GetSecretRefData(ctx context.Context, client ctrl.Reader, namespace string, selector *corev1.SecretKeySelector) ([]byte, error) {
 	secret, err := GetSecret(ctx, client, selector.Name, namespace)
 	if err != nil {
@@ -119,7 +119,7 @@ func GetSecretRefData(ctx context.Context, client ctrl.Reader, namespace string,
 	return nil, fmt.Errorf("key %s not found in secret %s", selector.Key, selector.Name)
 }
 
-// GetConfigMapRefValue returns the value of a configmap in the supplied namespace
+// GetConfigMapRefValue returns the value of a configmap in the supplied namespace.
 func GetConfigMapRefValue(ctx context.Context, client ctrl.Reader, namespace string, selector *corev1.ConfigMapKeySelector) (string, error) {
 	cm, err := GetConfigMap(ctx, client, selector.Name, namespace)
 	if err != nil {

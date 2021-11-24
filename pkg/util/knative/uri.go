@@ -37,7 +37,7 @@ const (
 	paramBrokerName = "name"
 )
 
-// FilterURIs returns all Knative URIs of the given type from a slice
+// FilterURIs returns all Knative URIs of the given type from a slice.
 func FilterURIs(uris []string, kind knativev1.CamelServiceType) []string {
 	res := make([]string, 0)
 	for _, uri := range uris {
@@ -48,7 +48,7 @@ func FilterURIs(uris []string, kind knativev1.CamelServiceType) []string {
 	return res
 }
 
-// NormalizeToURI produces a Knative uri of the given service type if the argument is a plain string
+// NormalizeToURI produces a Knative uri of the given service type if the argument is a plain string.
 func NormalizeToURI(kind knativev1.CamelServiceType, uriOrString string) string {
 	if plainNameRegexp.MatchString(uriOrString) {
 		return fmt.Sprintf("knative://%s/%s", string(kind), uriOrString)
@@ -56,7 +56,7 @@ func NormalizeToURI(kind knativev1.CamelServiceType, uriOrString string) string 
 	return uriOrString
 }
 
-// ExtractObjectReference returns a reference to the object described in the Knative URI
+// ExtractObjectReference returns a reference to the object described in the Knative URI.
 func ExtractObjectReference(uri string) (v1.ObjectReference, error) {
 	if isKnativeURI(knativev1.CamelServiceTypeEvent, uri) {
 		name := uriutils.GetQueryParameter(uri, paramBrokerName)
@@ -83,7 +83,7 @@ func ExtractObjectReference(uri string) (v1.ObjectReference, error) {
 	}, nil
 }
 
-// ExtractEventType extract the eventType from a event URI
+// ExtractEventType extract the eventType from a event URI.
 func ExtractEventType(uri string) string {
 	return matchOrEmpty(uriRegexp, 2, uri)
 }

@@ -37,7 +37,7 @@ const (
 //
 // It's disabled by default.
 //
-// +camel-k:trait=health
+// +camel-k:trait=health.
 type healthTrait struct {
 	BaseTrait `property:",squash"`
 

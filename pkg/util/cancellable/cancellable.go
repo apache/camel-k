@@ -19,19 +19,19 @@ package cancellable
 
 import "context"
 
-// Context --
+// A Context with cancellation trait.
 type Context interface {
 	context.Context
 
 	Cancel()
 }
 
-// NewContext --
+// NewContext returns an empty cancelable Context.
 func NewContext() Context {
 	return NewContextWithParent(context.TODO())
 }
 
-// NewContextWithParent --
+// NewContextWithParent returns an empty cancelable Context with a parent.
 func NewContextWithParent(parent context.Context) Context {
 	c, cc := context.WithCancel(parent)
 

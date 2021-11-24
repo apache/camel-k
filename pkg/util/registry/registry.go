@@ -28,7 +28,7 @@ var knownServersByRegistry = map[string]string{
 	"docker.io": "https://index.docker.io/v1/",
 }
 
-// Auth contains basic information for authenticating against a container registry
+// Auth contains basic information for authenticating against a container registry.
 type Auth struct {
 	Server   string
 	Username string
@@ -46,14 +46,14 @@ type dockerConfig struct {
 	Auth string `json:"auth,omitempty"`
 }
 
-// IsSet returns if information has been set on the object
+// IsSet returns if information has been set on the object.
 func (a Auth) IsSet() bool {
 	return a.Server != "" ||
 		a.Username != "" ||
 		a.Password != ""
 }
 
-// validate checks if all fields are populated correctly
+// validate checks if all fields are populated correctly.
 func (a Auth) validate() error {
 	if a.getActualServer() == "" || a.Username == "" {
 		return errors.New("not enough information to generate a registry authentication file")
@@ -62,7 +62,7 @@ func (a Auth) validate() error {
 	return nil
 }
 
-// GenerateDockerConfig generates a Docker compatible config.json file
+// GenerateDockerConfig generates a Docker compatible config.json file.
 func (a Auth) GenerateDockerConfig() ([]byte, error) {
 	if err := a.validate(); err != nil {
 		return nil, err

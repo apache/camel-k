@@ -28,15 +28,15 @@ import (
 )
 
 const (
-	// InitPhase --
+	// InitPhase --.
 	InitPhase int32 = 0
-	// ProjectGenerationPhase --
+	// ProjectGenerationPhase --.
 	ProjectGenerationPhase int32 = 10
-	// ProjectBuildPhase --
+	// ProjectBuildPhase --.
 	ProjectBuildPhase int32 = 20
-	// ApplicationPackagePhase --
+	// ApplicationPackagePhase --.
 	ApplicationPackagePhase int32 = 30
-	// ApplicationPublishPhase --
+	// ApplicationPublishPhase --.
 	ApplicationPublishPhase int32 = 40
 )
 

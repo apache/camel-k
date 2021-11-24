@@ -24,7 +24,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// CLIPrinter is delegated to print the runtime object
+// CLIPrinter is delegated to print the runtime object.
 type CLIPrinter struct {
 	// It accepts either yaml or json format
 	Format string

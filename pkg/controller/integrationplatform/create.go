@@ -28,7 +28,7 @@ import (
 	"github.com/apache/camel-k/pkg/install"
 )
 
-// NewCreateAction returns a action that creates resources needed by the platform
+// NewCreateAction returns a action that creates resources needed by the platform.
 func NewCreateAction() Action {
 	return &createAction{}
 }

@@ -38,7 +38,7 @@ const kamelCommandLongDescription = `Apache Camel K is a lightweight integration
 superpowers.
 `
 
-// RootCmdOptions --
+// RootCmdOptions --.
 type RootCmdOptions struct {
 	RootContext   context.Context    `mapstructure:"-"`
 	Context       context.Context    `mapstructure:"-"`
@@ -48,7 +48,7 @@ type RootCmdOptions struct {
 	Namespace     string             `mapstructure:"namespace"`
 }
 
-// NewKamelCommand --
+// NewKamelCommand --.
 func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 	childCtx, childCancel := context.WithCancel(ctx)
 	options := RootCmdOptions{
@@ -217,7 +217,7 @@ func checkAndShowCompatibilityWarning(ctx context.Context, cmd *cobra.Command, c
 	}
 }
 
-// GetCmdClient returns the client that can be used from command line tools
+// GetCmdClient returns the client that can be used from command line tools.
 func (command *RootCmdOptions) GetCmdClient() (client.Client, error) {
 	// Get the pre-computed client
 	if command._client != nil {
@@ -228,7 +228,7 @@ func (command *RootCmdOptions) GetCmdClient() (client.Client, error) {
 	return command._client, err
 }
 
-// GetCamelCmdClient returns a client to access the Camel resources
+// GetCamelCmdClient returns a client to access the Camel resources.
 func (command *RootCmdOptions) GetCamelCmdClient() (*camelv1.CamelV1Client, error) {
 	c, err := command.GetCmdClient()
 	if err != nil {
@@ -237,7 +237,7 @@ func (command *RootCmdOptions) GetCamelCmdClient() (*camelv1.CamelV1Client, erro
 	return camelv1.NewForConfig(c.GetConfig())
 }
 
-// NewCmdClient returns a new client that can be used from command line tools
+// NewCmdClient returns a new client that can be used from command line tools.
 func (command *RootCmdOptions) NewCmdClient() (client.Client, error) {
 	return client.NewOutOfClusterClient(command.KubeConfig)
 }

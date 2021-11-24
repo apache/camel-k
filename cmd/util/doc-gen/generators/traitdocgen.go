@@ -55,7 +55,7 @@ const (
 
 var tagTraitID = regexp.MustCompile(fmt.Sprintf("%s=([a-z0-9-]+)", regexp.QuoteMeta(tagTrait)))
 
-// traitDocGen produces documentation about traits
+// traitDocGen produces documentation about traits.
 type traitDocGen struct {
 	generator.DefaultGen
 	arguments           *args.GeneratorArgs
@@ -241,7 +241,7 @@ func filterOutTagsAndComments(comments []string) []string {
 	return res
 }
 
-// escapeAsciiDoc is in charge to escape those chars used for formatting purposes
+// escapeAsciiDoc is in charge to escape those chars used for formatting purposes.
 func escapeASCIIDoc(text string) string {
 	return strings.ReplaceAll(text, "|", "\\|")
 }

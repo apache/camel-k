@@ -30,7 +30,7 @@ import (
 )
 
 // DefaultMavenRepositories is a comma separated list of default maven repositories
-// This variable can be overridden at build time
+// This variable can be overridden at build time.
 var DefaultMavenRepositories = "https://repo.maven.apache.org/maven2@id=central"
 
 func (s Settings) MarshalBytes() ([]byte, error) {

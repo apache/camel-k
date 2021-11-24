@@ -17,7 +17,7 @@ limitations under the License.
 
 package modeline
 
-// Option represents a key/(optional)value modeline option
+// Option represents a key/(optional)value modeline option.
 type Option struct {
 	Name  string
 	Value string

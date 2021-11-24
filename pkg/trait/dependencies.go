@@ -29,7 +29,7 @@ import (
 // The Dependencies trait is internally used to automatically add runtime dependencies based on the
 // integration that the user wants to run.
 //
-// +camel-k:trait=dependencies
+// +camel-k:trait=dependencies.
 type dependenciesTrait struct {
 	BaseTrait `property:",squash"`
 }
@@ -88,7 +88,7 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 	return nil
 }
 
-// IsPlatformTrait overrides base class method
+// IsPlatformTrait overrides base class method.
 func (t *dependenciesTrait) IsPlatformTrait() bool {
 	return true
 }

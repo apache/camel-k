@@ -19,5 +19,5 @@ package integration
 
 import "github.com/apache/camel-k/pkg/util/log"
 
-// Log --
+// Log --.
 var Log = log.Log.WithName("controller").WithName("integration")

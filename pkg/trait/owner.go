@@ -29,7 +29,7 @@ import (
 // The Owner trait ensures that all created resources belong to the integration being created
 // and transfers annotations and labels on the integration onto these owned resources.
 //
-// +camel-k:trait=owner
+// +camel-k:trait=owner.
 type ownerTrait struct {
 	BaseTrait `property:",squash"`
 	// The set of annotations to be transferred
@@ -111,7 +111,7 @@ func (t *ownerTrait) Apply(e *Environment) error {
 	return nil
 }
 
-// IsPlatformTrait overrides base class method
+// IsPlatformTrait overrides base class method.
 func (t *ownerTrait) IsPlatformTrait() bool {
 	return true
 }

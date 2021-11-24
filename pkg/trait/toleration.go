@@ -38,7 +38,7 @@ import (
 //
 // It's disabled by default.
 //
-// +camel-k:trait=toleration
+// +camel-k:trait=toleration.
 type tolerationTrait struct {
 	BaseTrait `property:",squash"`
 	// The list of taints to tolerate, in the form `Key[=Value]:Effect[:Seconds]`

@@ -29,7 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// NewMonitorAction returns an action that monitors the kamelet binding after it's fully initialized
+// NewMonitorAction returns an action that monitors the kamelet binding after it's fully initialized.
 func NewMonitorAction() Action {
 	return &monitorAction{}
 }

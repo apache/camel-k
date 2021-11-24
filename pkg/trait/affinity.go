@@ -34,7 +34,7 @@ import (
 //
 // It's disabled by default.
 //
-// +camel-k:trait=affinity
+// +camel-k:trait=affinity.
 type affinityTrait struct {
 	BaseTrait `property:",squash"`
 	// Always co-locates multiple replicas of the integration in the same node (default *false*).

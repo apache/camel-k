@@ -30,12 +30,12 @@ import (
 //
 //go:generate go run ../../cmd/util/vfs-gen resources config
 //
-// ResourceAsString returns the named resource content as string
+// ResourceAsString returns the named resource content as string.
 func ResourceAsString(name string) string {
 	return string(Resource(name))
 }
 
-// Resource provides an easy access to embedded assets
+// Resource provides an easy access to embedded assets.
 func Resource(name string) []byte {
 	name = strings.Trim(name, " ")
 	if !strings.HasPrefix(name, "/") {
@@ -57,7 +57,7 @@ func Resource(name string) []byte {
 	return data
 }
 
-// TemplateResource loads a file resource as go template and processes it using the given parameters
+// TemplateResource loads a file resource as go template and processes it using the given parameters.
 func TemplateResource(name string, params interface{}) (string, error) {
 	rawData := ResourceAsString(name)
 	if rawData == "" {
@@ -75,7 +75,7 @@ func TemplateResource(name string, params interface{}) (string, error) {
 	return buf.String(), nil
 }
 
-// DirExists tells if a directory exists and can be listed for files
+// DirExists tells if a directory exists and can be listed for files.
 func DirExists(dirName string) bool {
 	if _, err := assets.Open(dirName); err != nil {
 		return false
@@ -84,7 +84,7 @@ func DirExists(dirName string) bool {
 }
 
 // WithPrefix lists all file names that begins with the give path prefix
-// If pathPrefix is a path of directories then be sure to end it with a '/'
+// If pathPrefix is a path of directories then be sure to end it with a '/'.
 func WithPrefix(pathPrefix string) []string {
 	dirPath := filepath.Dir(pathPrefix)
 
@@ -98,7 +98,7 @@ func WithPrefix(pathPrefix string) []string {
 	return res
 }
 
-// Resources lists all file names in the given path (starts with '/')
+// Resources lists all file names in the given path (starts with '/').
 func Resources(dirName string) []string {
 	dir, err := assets.Open(dirName)
 	if err != nil {

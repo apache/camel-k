@@ -159,12 +159,12 @@ var (
 	}
 )
 
-// Inspector --
+// Inspector --.
 type Inspector interface {
 	Extract(v1.SourceSpec, *Metadata) error
 }
 
-// InspectorForLanguage --
+// InspectorForLanguage --.
 func InspectorForLanguage(catalog *camel.RuntimeCatalog, language v1.Language) Inspector {
 	switch language {
 	case v1.LanguageJavaSource:
@@ -215,7 +215,7 @@ func (i baseInspector) Extract(v1.SourceSpec, *Metadata) error {
 	return nil
 }
 
-// discoverDependencies returns a list of dependencies required by the given source code
+// discoverDependencies returns a list of dependencies required by the given source code.
 func (i *baseInspector) discoverCapabilities(source v1.SourceSpec, meta *Metadata) {
 	uris := util.StringSliceJoin(meta.FromURIs, meta.ToURIs)
 
@@ -236,7 +236,7 @@ func (i *baseInspector) discoverCapabilities(source v1.SourceSpec, meta *Metadat
 	}
 }
 
-// discoverDependencies returns a list of dependencies required by the given source code
+// discoverDependencies returns a list of dependencies required by the given source code.
 func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadata) {
 	for _, uri := range meta.FromURIs {
 		candidateComp, scheme := i.catalog.DecodeComponent(uri)
@@ -304,7 +304,7 @@ func (i *baseInspector) addDependency(dependency string, meta *Metadata) {
 	meta.Dependencies.Add(dependency)
 }
 
-// hasOnlyPassiveEndpoints returns true if the source has no endpoint that needs to remain always active
+// hasOnlyPassiveEndpoints returns true if the source has no endpoint that needs to remain always active.
 func (i *baseInspector) hasOnlyPassiveEndpoints(fromURIs []string) bool {
 	passivePlusHTTP := make(map[string]bool)
 	i.catalog.VisitSchemes(func(id string, scheme v1.CamelScheme) bool {

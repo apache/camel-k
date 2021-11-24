@@ -36,7 +36,7 @@ import (
 
 // The Camel trait can be used to configure versions of Apache Camel K runtime and related libraries, it cannot be disabled.
 //
-// +camel-k:trait=camel
+// +camel-k:trait=camel.
 type camelTrait struct {
 	BaseTrait `property:",squash"`
 	// The camel-k-runtime version to use for the integration. It overrides the default version set in the Integration Platform.
@@ -165,7 +165,7 @@ func (t *camelTrait) determineRuntimeVersion(e *Environment) string {
 	return e.Platform.Status.Build.RuntimeVersion
 }
 
-// IsPlatformTrait overrides base class method
+// IsPlatformTrait overrides base class method.
 func (t *camelTrait) IsPlatformTrait() bool {
 	return true
 }

@@ -36,7 +36,7 @@ const (
 	CamelCreatorLabelVersion   = CamelCreatorLabelPrefix + ".version"
 )
 
-// FilterCamelCreatorLabels is used to inherit the creator information among resources
+// FilterCamelCreatorLabels is used to inherit the creator information among resources.
 func FilterCamelCreatorLabels(source map[string]string) map[string]string {
 	res := make(map[string]string)
 	for k, v := range source {
@@ -47,7 +47,7 @@ func FilterCamelCreatorLabels(source map[string]string) map[string]string {
 	return res
 }
 
-// MergeCamelCreatorLabels is used to inject the creator information from another set of labels
+// MergeCamelCreatorLabels is used to inject the creator information from another set of labels.
 func MergeCamelCreatorLabels(source map[string]string, target map[string]string) map[string]string {
 	if target == nil {
 		target = make(map[string]string)
@@ -58,7 +58,7 @@ func MergeCamelCreatorLabels(source map[string]string, target map[string]string)
 	return target
 }
 
-// GetCamelCreator returns the Camel creator object referenced by this runtime object, if present
+// GetCamelCreator returns the Camel creator object referenced by this runtime object, if present.
 func GetCamelCreator(obj runtime.Object) *corev1.ObjectReference {
 	if m, ok := obj.(metav1.Object); ok {
 		kind := m.GetLabels()[CamelCreatorLabelKind]

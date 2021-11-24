@@ -72,7 +72,7 @@ func printVersion() {
 	log.Info(fmt.Sprintf("Camel K Git Commit: %v", defaults.GitCommit))
 }
 
-// Run starts the Camel K operator
+// Run starts the Camel K operator.
 func Run(healthPort, monitoringPort int32, leaderElection bool) {
 	rand.Seed(time.Now().UTC().UnixNano())
 
@@ -186,7 +186,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool) {
 	exitOnError(mgr.Start(signals.SetupSignalHandler()), "manager exited non-zero")
 }
 
-// getWatchNamespace returns the Namespace the operator should be watching for changes
+// getWatchNamespace returns the Namespace the operator should be watching for changes.
 func getWatchNamespace() (string, error) {
 	ns, found := os.LookupEnv(platform.OperatorWatchNamespaceEnvVariable)
 	if !found {

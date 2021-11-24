@@ -52,7 +52,7 @@ import (
 //
 // The trait is enabled by default when the Knative profile is active.
 //
-// +camel-k:trait=knative
+// +camel-k:trait=knative.
 type knativeTrait struct {
 	BaseTrait `property:",squash"`
 	// Can be used to inject a Knative complete configuration in JSON format.
@@ -98,7 +98,7 @@ func newKnativeTrait() Trait {
 	return t
 }
 
-// IsAllowedInProfile overrides default
+// IsAllowedInProfile overrides default.
 func (t *knativeTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 	return profile == v1.TraitProfileKnative
 }

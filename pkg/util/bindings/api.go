@@ -33,7 +33,7 @@ const (
 	OrderLast     = 100
 )
 
-// Binding represents how a Kubernetes object is represented in Camel K resources
+// Binding represents how a Kubernetes object is represented in Camel K resources.
 type Binding struct {
 	// URI is the Camel URI equivalent
 	URI string
@@ -45,7 +45,7 @@ type Binding struct {
 	ApplicationProperties map[string]string
 }
 
-// BindingProvider maps a KameletBinding endpoint into Camel K resources
+// BindingProvider maps a KameletBinding endpoint into Camel K resources.
 type BindingProvider interface {
 	// ID returns the name of the binding provider
 	ID() string

@@ -26,7 +26,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// TemplateToYamlDSL converts a kamelet template into its Camel YAML DSL equivalent
+// TemplateToYamlDSL converts a kamelet template into its Camel YAML DSL equivalent.
 func TemplateToYamlDSL(template v1.Template, id string) ([]byte, error) {
 	data, err := json.Marshal(&template)
 	if err != nil {

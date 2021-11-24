@@ -41,7 +41,7 @@ import (
 
 // The JVM trait is used to configure the JVM that runs the integration.
 //
-// +camel-k:trait=jvm
+// +camel-k:trait=jvm.
 type jvmTrait struct {
 	BaseTrait `property:",squash"`
 	// Activates remote debugging, so that a debugger can be attached to the JVM, e.g., using port-forwarding
@@ -209,7 +209,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	return nil
 }
 
-// IsPlatformTrait overrides base class method
+// IsPlatformTrait overrides base class method.
 func (t *jvmTrait) IsPlatformTrait() bool {
 	return true
 }

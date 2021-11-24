@@ -31,7 +31,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
-// NewInitializeAction returns a action that initializes the platform configuration when not provided by the user
+// NewInitializeAction returns a action that initializes the platform configuration when not provided by the user.
 func NewInitializeAction() Action {
 	return &initializeAction{}
 }

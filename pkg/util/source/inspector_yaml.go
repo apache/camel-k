@@ -26,12 +26,12 @@ import (
 	yaml2 "gopkg.in/yaml.v2"
 )
 
-// YAMLInspector --
+// YAMLInspector --.
 type YAMLInspector struct {
 	baseInspector
 }
 
-// Extract --
+// Extract --.
 func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	definitions := make([]map[string]interface{}, 0)
 
@@ -167,7 +167,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 	return nil
 }
 
-// TODO nolint: gocyclo
+// TODO nolint: gocyclo.
 func (i YAMLInspector) parseStepsParam(steps []interface{}, meta *Metadata) error {
 	for _, raw := range steps {
 		if step, stepFormatOk := raw.(map[interface{}]interface{}); stepFormatOk {

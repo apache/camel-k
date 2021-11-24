@@ -38,7 +38,7 @@ import (
 // This can be used to customize the container where Camel routes execute,
 // by using the `integration` container name.
 //
-// +camel-k:trait=pod
+// +camel-k:trait=pod.
 type podTrait struct {
 	BaseTrait `property:",squash"`
 }

@@ -24,12 +24,12 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// XMLInspector --
+// XMLInspector --.
 type XMLInspector struct {
 	baseInspector
 }
 
-// Extract --
+// Extract --.
 func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	content := strings.NewReader(source.Content)
 	decoder := xml.NewDecoder(content)
