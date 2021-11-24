@@ -1,0 +1,93 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: e2e-knative
+description: 'End-to-End tests for knative use-cases'
+
+inputs:
+  cluster-config-data:
+    description: 'The configuration of the underlying cluster (if cluster-type is custom)'
+    required: false
+
+runs:
+  using: "composite"
+
+  steps:
+  - id: prepare-env
+    name: Prepare Test Environment
+    uses: ./.github/actions/kamel-prepare-env
+
+  - id: configure-cluster
+    name: Configure Platform
+    uses: ./.github/actions/kamel-config-cluster
+    with:
+      cluster-type: ${{ env.TEST_CLUSTER }}
+      cluster-config-data: ${{ inputs.cluster-config-data }}
+
+  - name: Install Knative
+    uses: ./.github/actions/kamel-install-knative
+
+  - id: build-kamel
+    name: Build Kamel
+    uses: ./.github/actions/kamel-build
+    with:
+      image-registry-push-host: ${{ env.CLUSTER_IMAGE_REGISTRY_PUSH_HOST }}
+      image-registry-pull-host: ${{ env.CLUSTER_IMAGE_REGISTRY_PULL_HOST }}
+      image-namespace: ${{ env.CLUSTER_IMAGE_NAMESPACE }}
+      # Builds the bundle if an OLM is available - depends on cluster being tested
+      build-bundle: ${{ env.CLUSTER_HAS_OLM }}
+      # Can be empty and so catalog source will not be created
+      catalog-source-namespace: ${{ env.CLUSTER_CATALOG_SOURCE_NAMESPACE }}
+
+  - id: install-kamel-cluster-setup
+    name: Install Kamel Cluster Setup
+    uses: ./.github/actions/kamel-install-cluster-setup
+    with:
+      kube-admin-user-ctx: ${{ env.CLUSTER_KUBE_ADMIN_USER_CTX }}
+
+  - id: run-it
+    name: Run IT
+    shell: bash
+    run: |
+      # Cluster environment
+      export CUSTOM_IMAGE=${{ env.BUILD_BINARY_LOCAL_IMAGE_NAME }}
+      export CUSTOM_VERSION=${{ env.BUILD_BINARY_LOCAL_IMAGE_VERSION }}
+
+      #
+      # If bundle has been built and installed then use it
+      #
+      if [ -n "${{ env.BUILD_BUNDLE_CATALOG_SOURCE }}" ]; then
+        export KAMEL_INSTALL_OLM_SOURCE_NAMESPACE=${{ env.CLUSTER_IMAGE_NAMESPACE }}
+        export KAMEL_INSTALL_OLM_SOURCE=${{ env.BUILD_BUNDLE_CATALOG_SOURCE }}
+      fi
+
+      export KAMEL_INSTALL_REGISTRY=${{ env.CLUSTER_IMAGE_REGISTRY_PULL_HOST }}
+      export KAMEL_INSTALL_REGISTRY_INSECURE=${{ env.CLUSTER_IMAGE_REGISTRY_INSECURE }}
+      export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
+      export CAMEL_K_TEST_IMAGE_NAME=${CUSTOM_IMAGE}
+      export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
+
+      # Test options
+      export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
+      export KAMEL_INSTALL_OPERATOR_ENV_VARS=KAMEL_INSTALL_DEFAULT_KAMELETS=false
+
+      # Then run integration tests
+      make test-knative
+
+  - name: Cleanup
+    uses: ./.github/actions/kamel-cleanup
+    if: ${{ always() }}

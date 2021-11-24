@@ -15,49 +15,21 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: local
+name: kamel-install-yaks
+description: 'Install YAKS artifacts'
+runs:
+  using: "composite"
+  steps:
+    - id: get-yaks
+      name: Get YAKS
+      shell: bash
+      run: |
+        export YAKS_VERSION=0.4.0
+        curl --fail -L https://github.com/citrusframework/yaks/releases/download/v${YAKS_VERSION}/yaks-${YAKS_VERSION}-linux-64bit.tar.gz -o yaks.tar.gz
+        tar -zxf yaks.tar.gz
+        sudo mv yaks /usr/local/bin/
 
-on:
-  pull_request:
-    branches:
-      - main
-      - "release-*"
-    paths-ignore:
-      - 'docs/**'
-      - 'proposals/**'
-      - '**.adoc'
-      - '**.md'
-      - 'KEYS'
-      - 'LICENSE'
-      - 'NOTICE'
-  push:
-    branches:
-      - main
-      - "release-*"
-    paths-ignore:
-      - 'docs/**'
-      - 'proposals/**'
-      - '**.adoc'
-      - '**.md'
-      - 'KEYS'
-      - 'LICENSE'
-      - 'NOTICE'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
-  cancel-in-progress: true
-
-jobs:
-  local-it:
-
-    runs-on: ubuntu-20.04
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-        persist-credentials: false
-        submodules: recursive
-
-    - name: Execute Local Tests
-      uses: ./.github/actions/e2e-local
+    - name: Install YAKS
+      shell: bash
+      run: |
+        yaks install --cluster-setup

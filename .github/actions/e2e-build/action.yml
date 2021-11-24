@@ -15,49 +15,26 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: local
+name: e2e-build
+description: 'End-to-End tests for build use-cases'
 
-on:
-  pull_request:
-    branches:
-      - main
-      - "release-*"
-    paths-ignore:
-      - 'docs/**'
-      - 'proposals/**'
-      - '**.adoc'
-      - '**.md'
-      - 'KEYS'
-      - 'LICENSE'
-      - 'NOTICE'
-  push:
-    branches:
-      - main
-      - "release-*"
-    paths-ignore:
-      - 'docs/**'
-      - 'proposals/**'
-      - '**.adoc'
-      - '**.md'
-      - 'KEYS'
-      - 'LICENSE'
-      - 'NOTICE'
+runs:
+  using: "composite"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
-  cancel-in-progress: true
+  steps:
 
-jobs:
-  local-it:
+  - id: prepare-env
+    name: Prepare Test Environment
+    uses: ./.github/actions/kamel-prepare-env
 
-    runs-on: ubuntu-20.04
+  - name: Cache modules
+    uses: actions/cache@v1
+    with:
+      path: ~/go/pkg/mod
+      key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      restore-keys: |
+        ${{ runner.os }}-go-
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-        persist-credentials: false
-        submodules: recursive
-
-    - name: Execute Local Tests
-      uses: ./.github/actions/e2e-local
+  - name: Test
+    shell: bash
+    run: make
