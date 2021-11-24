@@ -71,6 +71,16 @@ runs:
       shell: bash
       if: ${{ env.CLUSTER_CUSTOM_CONFIGURED != 'true' }}
       run: |
+        echo "::add-mask::${{ env.e2e_kube-config-data }}"
+        echo "::add-mask::${{ env.e2e_kube-admin-user-ctx }}"
+        echo "::add-mask::${{ env.e2e_kube-user-ctx }}"
+        echo "::add-mask::${{ env.e2e_image-registry-pull-host }}"
+        echo "::add-mask::${{ env.e2e_image-registry-push-host }}"
+        echo "::add-mask::${{ env.e2e_image-registry-user }}"
+        echo "::add-mask::${{ env.e2e_image-registry-token }}"
+        echo "::add-mask::${{ env.e2e_image-namespace }}"
+        echo "::add-mask::${{ env.e2e_catalog-source-namespace }}"
+
         if [ -z "${{ env.e2e_kube-config-data }}" ]; then
           echo "Error: kube config data property cannot be found"
           exit 1
