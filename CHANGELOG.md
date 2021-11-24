@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- Dry run kamel run [\#2769](https://github.com/apache/camel-k/issues/2769)
+- Is there any resources requirements for camel-k operator Deployment? [\#2768](https://github.com/apache/camel-k/issues/2768)
 - How can I find the log file location in the integration pod?  [\#2762](https://github.com/apache/camel-k/issues/2762)
 - Could not pull base image - Build kit failed \(No matching credentials were found, falling back on anonymous\) [\#2748](https://github.com/apache/camel-k/issues/2748)
 - Cannot deploy XML integration with undertow [\#2746](https://github.com/apache/camel-k/issues/2746)
@@ -24,6 +26,8 @@
 
 **Merged pull requests:**
 
+- doc\(install\): suggested resource configuration [\#2774](https://github.com/apache/camel-k/pull/2774) ([squakez](https://github.com/squakez))
+- chore\(release\): Update latest released version and OLM base CSV manifest [\#2770](https://github.com/apache/camel-k/pull/2770) ([astefanutti](https://github.com/astefanutti))
 - chore\(build\): Upgrade Maven to version 3.8.4 [\#2767](https://github.com/apache/camel-k/pull/2767) ([astefanutti](https://github.com/astefanutti))
 - chore\(release\): Remove staging repository [\#2750](https://github.com/apache/camel-k/pull/2750) ([astefanutti](https://github.com/astefanutti))
 - chore\(e2e\): disable object truncation on test results [\#2745](https://github.com/apache/camel-k/pull/2745) ([tadayosi](https://github.com/tadayosi))
