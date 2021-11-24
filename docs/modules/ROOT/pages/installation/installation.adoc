@@ -51,3 +51,8 @@ You're now ready to xref:running/running.adoc[run some integrations].
 
 Camel K is also available in Helm Hub for installation.
 Follow the instructions on the https://hub.helm.sh/charts/camel-k/camel-k[Camel K] page for more information.
+
+[[advanced]]
+== Advanced configuration
+
+Camel K installation can be configured with certain special settings available for experienced users. You can manage resources such as limiting memory and CPU, provide a policy for `Pod` scheduling and `Toleration`. You can also configure the application to run multiple operators on the same namespace. Have a look at the "advanced" section under the "installation" menu.

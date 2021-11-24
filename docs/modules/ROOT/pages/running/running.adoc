@@ -1,8 +1,8 @@
-[[running]]
-= Running
+[[running-integration]]
+= Running an Integration
 
 After completing the xref:installation/installation.adoc[installation] you should be connected to a Kubernetes/OpenShift cluster
-and have the "kamel" CLI correctly configured.
+and have the `kamel` CLI correctly configured.
 
 Ensure you're connected to the cluster by executing a simple command using the Kubernetes CLI:
 
@@ -28,15 +28,31 @@ You can run it on the cluster by executing:
 kamel run hello.groovy
 ```
 
-Integrations can be written in multiple languages. We provide an archive with common examples in the https://github.com/apache/camel-k/releases[release page].
+Integrations can be written in multiple languages. We are collecting examples in our https://github.com/apache/camel-k/[Github repository].
 
-You can change the content of the `hello.groovy` file and execute the command again to see the changes, or use the xref:running/dev-mode.adoc[dev mode] to have even quicker turnaround times.
-
-== Monitoring the Status
+[[monitoring-integration]]
+== Monitoring the application status
 
 Camel K integrations follow a lifecycle composed of several steps before getting into the `Running` state.
+
 You can check the status of all integrations by executing the following command:
 
 ```
 kamel get
 ```
+
+[[logging-integration]]
+== Log the standard output
+
+Camel K integrations follow a lifecycle composed of several steps before getting into the `Running` state.
+
+You can check the status of all integrations by executing the following command:
+
+```
+kamel logs hello
+```
+
+[[dev-mode-integration]]
+== Running an Integration in Development mode
+
+Camel K provide a very nice **dev mode** feature that will allow you to apply any change to your Integration code reactively. Check out the xref:running/dev-mode.adoc[Camel K dev mode]

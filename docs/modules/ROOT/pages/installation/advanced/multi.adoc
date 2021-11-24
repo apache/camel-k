@@ -1,10 +1,3 @@
-[[advanced-installation]]
-= Advanced Installation
-
-This section provides information about special installation modes for the Camel K operator.
-These are advanced configuration options that normally are not needed by Camel K users,
- but they may be useful for particular use cases.
-
 [[advanced-installation-multiple-operators]]
 == Multiple Operators and Selective Upgrades
 

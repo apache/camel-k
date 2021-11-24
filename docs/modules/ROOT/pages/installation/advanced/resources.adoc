@@ -1,5 +1,5 @@
 [[scheduling-infra-pod]]
-= Scheduling infrastructure Pods and Resource managment
+= Infrastructure Pods and Resource managment
 
 During the installation procedure you will be able to provide information on how to best "operationalize" your infrastructure. Through the configuration of `--node-selector`, `--toleration` and `--operator-resources` you will be able to drive the operator `Pods` scheduling and to be able to assign resources.
 
