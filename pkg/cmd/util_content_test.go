@@ -18,7 +18,11 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"os"
 	"testing"
 
@@ -96,4 +100,20 @@ func TestIsBinary(t *testing.T) {
 	assert.True(t, isBinary("image/jpeg"))
 	assert.True(t, isBinary("application/zip"))
 	assert.False(t, isBinary("text/plain"))
+}
+
+func TestContentHttp(t *testing.T) {
+	expected := "the content"
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = fmt.Fprintf(w, expected)
+	}))
+	defer svr.Close()
+
+	u, err := url.Parse(svr.URL)
+	assert.Nil(t, err)
+
+	data, err := loadContentHTTP(u)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, data)
+	assert.Equal(t, expected, string(data))
 }
