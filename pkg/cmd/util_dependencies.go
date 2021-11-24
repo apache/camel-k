@@ -51,7 +51,7 @@ func getDependencies(ctx context.Context, args []string, additionalDependencies 
 	}
 
 	// Get top-level dependencies
-	dependencies, err := getTopLevelDependencies(catalog, args)
+	dependencies, err := getTopLevelDependencies(ctx, catalog, args)
 	if err != nil {
 		return nil, err
 	}
@@ -75,13 +75,13 @@ func getDependencies(ctx context.Context, args []string, additionalDependencies 
 	return dependencies, nil
 }
 
-func getTopLevelDependencies(catalog *camel.RuntimeCatalog, args []string) ([]string, error) {
+func getTopLevelDependencies(ctx context.Context, catalog *camel.RuntimeCatalog, args []string) ([]string, error) {
 	// List of top-level dependencies
 	dependencies := strset.New()
 
 	// Invoke the dependency inspector code for each source file
 	for _, source := range args {
-		data, _, _, err := loadTextContent(source, false)
+		data, _, _, err := loadTextContent(ctx, source, false)
 		if err != nil {
 			return []string{}, err
 		}

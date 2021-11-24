@@ -43,7 +43,7 @@ func fileSize(source string) (int64, error) {
 	return fi.Size(), nil
 }
 
-func loadRawContent(source string) ([]byte, string, error) {
+func loadRawContent(ctx context.Context, source string) ([]byte, string, error) {
 	var content []byte
 	var err error
 
@@ -63,11 +63,11 @@ func loadRawContent(source string) ([]byte, string, error) {
 
 		switch u.Scheme {
 		case "github":
-			content, err = loadContentGitHub(u)
+			content, err = loadContentGitHub(ctx, u)
 		case "http":
-			content, err = loadContentHTTP(u)
+			content, err = loadContentHTTP(ctx, u)
 		case "https":
-			content, err = loadContentHTTP(u)
+			content, err = loadContentHTTP(ctx, u)
 		default:
 			return nil, "", fmt.Errorf("missing file or unsupported scheme %s", u.Scheme)
 		}
@@ -87,8 +87,8 @@ func isBinary(contentType string) bool {
 	return !strings.HasPrefix(contentType, "text")
 }
 
-func loadTextContent(source string, base64Compression bool) (string, string, bool, error) {
-	content, contentType, err := loadRawContent(source)
+func loadTextContent(ctx context.Context, source string, base64Compression bool) (string, string, bool, error) {
+	content, contentType, err := loadRawContent(ctx, source)
 	if err != nil {
 		return "", "", false, err
 	}
@@ -101,8 +101,8 @@ func loadTextContent(source string, base64Compression bool) (string, string, boo
 	return string(content), contentType, false, nil
 }
 
-func loadContentHTTP(u fmt.Stringer) ([]byte, error) {
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, u.String(), nil)
+func loadContentHTTP(ctx context.Context, u fmt.Stringer) ([]byte, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func loadContentHTTP(u fmt.Stringer) ([]byte, error) {
 	return io.ReadAll(resp.Body)
 }
 
-func loadContentGitHub(u *url.URL) ([]byte, error) {
+func loadContentGitHub(ctx context.Context, u *url.URL) ([]byte, error) {
 	src := u.Scheme + ":" + u.Opaque
 	re := regexp.MustCompile(`^github:([^/]+)/([^/]+)/(.+)$`)
 
@@ -144,5 +144,5 @@ func loadContentGitHub(u *url.URL) ([]byte, error) {
 		return []byte{}, err
 	}
 
-	return loadContentHTTP(rawURL)
+	return loadContentHTTP(ctx, rawURL)
 }

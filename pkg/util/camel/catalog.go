@@ -124,7 +124,7 @@ func GenerateCatalogCommon(
 	if caCert != nil {
 		trustStoreName := "trust.jks"
 		trustStorePass := jvm.NewKeystorePassword()
-		err := jvm.GenerateKeystore(context.Background(), tmpDir, trustStoreName, trustStorePass, caCert)
+		err := jvm.GenerateKeystore(ctx, tmpDir, trustStoreName, trustStorePass, caCert)
 		if err != nil {
 			return nil, err
 		}
