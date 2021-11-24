@@ -18,8 +18,9 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -101,7 +102,14 @@ func loadTextContent(source string, base64Compression bool) (string, string, boo
 }
 
 func loadContentHTTP(u fmt.Stringer) ([]byte, error) {
-	resp, err := http.Get(u.String())
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	c := &http.Client{}
+
+	resp, err := c.Do(req)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -113,12 +121,7 @@ func loadContentHTTP(u fmt.Stringer) ([]byte, error) {
 		return []byte{}, fmt.Errorf("the provided URL %s is not reachable, error code is %d", u.String(), resp.StatusCode)
 	}
 
-	content, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	return content, nil
+	return io.ReadAll(resp.Body)
 }
 
 func loadContentGitHub(u *url.URL) ([]byte, error) {

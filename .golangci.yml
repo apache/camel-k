@@ -54,7 +54,6 @@ linters:
     - nlreturn
     - nilnil
     - exhaustive
-    - noctx
     - nakedret
     - contextcheck
     - maligned
