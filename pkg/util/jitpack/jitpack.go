@@ -24,13 +24,13 @@ import (
 )
 
 const (
-	// RepoURL is the Jitpack repository url
+	// RepoURL is the Jitpack repository url.
 	RepoURL = "https://jitpack.io"
-	// DefaultVersion is the default branch/version to use
+	// DefaultVersion is the default branch/version to use.
 	DefaultVersion = "main-SNAPSHOT"
 )
 
-// ToDependency converts a jitpack dependency into Dependency struct
+// ToDependency converts a jitpack dependency into Dependency struct.
 func ToDependency(dependencyID string) *maven.Dependency {
 	gav := ""
 
