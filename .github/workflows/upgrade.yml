@@ -154,7 +154,7 @@ jobs:
       run: |
         export LOCAL_IIB=$KIND_REGISTRY/apache/camel-k-iib:$(make get-version)
         echo "LOCAL_IIB=${LOCAL_IIB}" >> $GITHUB_ENV
-        opm index add --bundles ${{ env.LOCAL_IMAGE_BUNDLE }} -c docker --from-index quay.io/operatorhubio/catalog:latest --tag ${LOCAL_IIB} --skip-tls
+        sudo opm index add --bundles ${{ env.LOCAL_IMAGE_BUNDLE }} -c docker --from-index quay.io/operatorhubio/catalog:latest --tag ${LOCAL_IIB} --skip-tls
         docker push ${LOCAL_IIB}
     - name: Run IT
       run: |
