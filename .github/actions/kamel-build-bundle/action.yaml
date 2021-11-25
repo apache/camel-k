@@ -179,8 +179,13 @@ runs:
 
         #
         # Construct an index image containing the newly built bundle image
+        #   Bug:
+        #     https://github.com/operator-framework/operator-registry/issues/870
+        #   Workaround:
+        #     image catalog layers contain root owned files so fails with `permission denied` error.
+        #     Running with sudo fixes this error (alternative is to switch to podman)
         #
-        opm index add \
+        sudo opm index add \
           -c docker --skip-tls \
           --bundles ${{ env.BUILD_BUNDLE_LOCAL_IMAGE }} \
           --from-index quay.io/operatorhubio/catalog:latest \
