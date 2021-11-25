@@ -79,7 +79,7 @@ jobs:
         go-version: 1.16.x
     - name: Set up opm tool
       run: |
-        curl -L https://github.com/operator-framework/operator-registry/releases/download/v1.16.1/linux-amd64-opm -o opm
+        curl -L https://github.com/operator-framework/operator-registry/releases/download/v1.19.5/linux-amd64-opm -o opm
         chmod +x opm
         sudo mv opm /usr/local/bin/
     - name: Kubernetes KinD Cluster
@@ -127,13 +127,13 @@ jobs:
         BASE_VERSION=$(echo ${{ env.LOCAL_IMAGE_VERSION }} | grep -Po "\d.\d.\d")
         sed -i "/  version: ${BASE_VERSION}/a \ \ replaces: camel-k-operator.v$(make get-last-released-version)" config/manifests/bases/camel-k.clusterserviceversion.yaml
         export CUSTOM_IMAGE=${{ env.LOCAL_IMAGE_NAME }}
-        export LOCAL_IMAGE_BUNDLE=$KIND_REGISTRY/apache/camel-k-bundle:${{ env.LOCAL_IMAGE_VERSION }}
+        export LOCAL_IMAGE_BUNDLE=${KIND_REGISTRY}/apache/camel-k-bundle:${{ env.LOCAL_IMAGE_VERSION }}
         echo "LOCAL_IMAGE_BUNDLE=${LOCAL_IMAGE_BUNDLE}" >> $GITHUB_ENV
         make bundle-build BUNDLE_IMAGE_NAME=${LOCAL_IMAGE_BUNDLE} DEFAULT_CHANNEL="stable" CHANNELS="stable"
         docker push ${LOCAL_IMAGE_BUNDLE}
     - name: Create new index image
       run: |
-        export LOCAL_IIB=$KIND_REGISTRY/apache/camel-k-iib:${{ env.LOCAL_IMAGE_VERSION }}
+        export LOCAL_IIB=${KIND_REGISTRY}/apache/camel-k-iib:${{ env.LOCAL_IMAGE_VERSION }}
         echo "LOCAL_IIB=${LOCAL_IIB}" >> $GITHUB_ENV
         opm index add --bundles ${{ env.LOCAL_IMAGE_BUNDLE }} -c docker --from-index quay.io/operatorhubio/catalog:latest --tag ${LOCAL_IIB} --skip-tls
         docker push ${LOCAL_IIB}
@@ -147,7 +147,7 @@ jobs:
         export CUSTOM_VERSION=${{ env.LOCAL_IMAGE_VERSION }}
         export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
         export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
-        export KAMEL_INSTALL_REGISTRY=$KIND_REGISTRY
+        export KAMEL_INSTALL_REGISTRY=${KIND_REGISTRY}
         export KAMEL_INSTALL_REGISTRY_INSECURE=true
 
         # Configure test options
