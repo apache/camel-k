@@ -129,7 +129,7 @@ func NewConfigmap(namespace, cmName, originalFilename string, generatedKey strin
 			Name:      cmName,
 			Namespace: namespace,
 			Labels: map[string]string{
-				"camel.apache.org/original-path": originalFilename,
+				"camel.apache.org/filename": originalFilename,
 			},
 		},
 		Immutable: &immutable,
