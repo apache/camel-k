@@ -17,7 +17,7 @@
 *** xref:installation/registry/k3s.adoc[K3s]
 ** Advanced
 *** xref:installation/advanced/resources.adoc[Resource management]
-*** xref:architecture/advanced/multi.adoc[Multiple Operators]
+*** xref:installation/advanced/multi.adoc[Multiple Operators]
 * Command Line Interface
 ** xref:cli/cli.adoc[Kamel CLI]
 ** xref:cli/modeline.adoc[Modeline]
