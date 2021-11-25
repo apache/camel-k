@@ -50,9 +50,7 @@ func createDockerBaseWorkingDirectory() error {
 
 func deleteDockerBaseWorkingDirectory() error {
 	// Remove directory used for computing the dependencies.
-	defer os.RemoveAll(docker.BaseWorkingDirectory)
-
-	return nil
+	return os.RemoveAll(docker.BaseWorkingDirectory)
 }
 
 func createDockerWorkingDirectory() error {
@@ -70,9 +68,7 @@ func createDockerWorkingDirectory() error {
 
 func deleteDockerWorkingDirectory() error {
 	// Remove directory used for computing the dependencies.
-	defer os.RemoveAll(docker.IntegrationWorkingDirectory)
-
-	return nil
+	return os.RemoveAll(docker.IntegrationWorkingDirectory)
 }
 
 func setDockerNetworkName(networkName string) {

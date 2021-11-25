@@ -92,7 +92,11 @@ func (o *initCmdOptions) writeFromTemplate(language v1.Language, fileName string
 	params := TemplateParameters{
 		Name: simpleName,
 	}
-	rawData := resources.ResourceAsString(fmt.Sprintf("/templates/%s.tmpl", language))
+
+	rawData, err := resources.ResourceAsString(fmt.Sprintf("/templates/%s.tmpl", language))
+	if err != nil {
+		return err
+	}
 	if rawData == "" {
 		return fmt.Errorf("cannot find template for language %s", string(language))
 	}

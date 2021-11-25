@@ -101,8 +101,13 @@ func (command *traitHelpCommandOptions) run(cmd *cobra.Command, args []string) e
 	var traitDescriptions []*traitDescription
 	catalog := trait.NewCatalog(nil)
 
-	traitMetaData := &traitMetaData{}
-	err := yaml.Unmarshal(resources.Resource("/traits.yaml"), traitMetaData)
+	content, err := resources.Resource("/traits.yaml")
+	if err != nil {
+		return err
+	}
+
+	traitMetaData := traitMetaData{}
+	err = yaml.Unmarshal(content, &traitMetaData)
 	if err != nil {
 		return err
 	}

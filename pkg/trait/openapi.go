@@ -27,6 +27,8 @@ import (
 	"strconv"
 	"strings"
 
+	"go.uber.org/multierr"
+
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -95,14 +97,14 @@ func (t *openAPITrait) Apply(e *Environment) error {
 		return err
 	}
 
-	defer os.RemoveAll(tmpDir)
-
 	for i, resource := range e.Integration.Spec.Resources {
 		if resource.Type != v1.ResourceTypeOpenAPI {
 			continue
 		}
 		if resource.Name == "" {
-			return fmt.Errorf("no name defined for the openapi resource: %v", resource)
+			return multierr.Append(
+				fmt.Errorf("no name defined for the openapi resource: %v", resource),
+				os.RemoveAll(tmpDir))
 		}
 
 		generatedContentName := fmt.Sprintf("%s-openapi-%03d", e.Integration.Name, i)
@@ -137,7 +139,7 @@ func (t *openAPITrait) Apply(e *Environment) error {
 		e.Integration.Status.GeneratedSources = generatedSources
 	}
 
-	return nil
+	return os.RemoveAll(tmpDir)
 }
 
 func (t *openAPITrait) generateOpenAPIConfigMap(e *Environment, resource v1.ResourceSpec, tmpDir, generatedContentName string) error {

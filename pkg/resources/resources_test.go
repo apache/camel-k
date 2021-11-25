@@ -22,34 +22,94 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/yaml"
+
+	"github.com/stretchr/testify/assert"
 )
 
+func NoErrorAndNotEmptyBytes(t *testing.T, path string, callable func(path string) ([]byte, error)) {
+	t.Helper()
+
+	object, err := callable(path)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, object)
+}
+func NoErrorAndNotEmptyString(t *testing.T, path string, callable func(path string) (string, error)) {
+	t.Helper()
+
+	object, err := callable(path)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, object)
+}
+
+func NoErrorAndContains(t *testing.T, path string, contains string, callable func(path string) ([]string, error)) {
+	t.Helper()
+
+	elements, err := callable(path)
+
+	assert.Nil(t, err)
+	assert.Contains(t, elements, contains)
+}
+func NoErrorAndNotContains(t *testing.T, path string, contains string, callable func(path string) ([]string, error)) {
+	t.Helper()
+
+	elements, err := callable(path)
+
+	assert.Nil(t, err)
+	assert.NotContains(t, elements, contains)
+}
+func NoErrorAndEmpty(t *testing.T, path string, callable func(path string) ([]string, error)) {
+	t.Helper()
+
+	elements, err := callable(path)
+
+	assert.Nil(t, err)
+	assert.Empty(t, elements)
+}
+
+func ErrorBytes(t *testing.T, path string, callable func(path string) ([]byte, error)) {
+	t.Helper()
+
+	_, err := callable(path)
+	assert.NotNil(t, err)
+}
+func ErrorString(t *testing.T, path string, callable func(path string) (string, error)) {
+
+	t.Helper()
+
+	_, err := callable(path)
+	assert.NotNil(t, err)
+}
+
 func TestGetResource(t *testing.T) {
-	assert.NotEmpty(t, Resource("manager/operator-service-account.yaml"))
-	assert.NotEmpty(t, Resource("/manager/operator-service-account.yaml"))
-	assert.NotEmpty(t, ResourceAsString("manager/operator-service-account.yaml"))
-	assert.NotEmpty(t, ResourceAsString("/manager/operator-service-account.yaml"))
-	assert.Contains(t, Resources("/manager"), "/manager/operator-service-account.yaml")
+	NoErrorAndNotEmptyBytes(t, "manager/operator-service-account.yaml", Resource)
+	NoErrorAndNotEmptyBytes(t, "/manager/operator-service-account.yaml", Resource)
+	NoErrorAndNotEmptyString(t, "manager/operator-service-account.yaml", ResourceAsString)
+	NoErrorAndNotEmptyString(t, "/manager/operator-service-account.yaml", ResourceAsString)
+	NoErrorAndContains(t, "/manager", "/manager/operator-service-account.yaml", Resources)
 }
 
 func TestGetNoResource(t *testing.T) {
-	assert.Empty(t, Resource("manager/operator-service-account.json"))
-	assert.Empty(t, Resource("/manager/operator-service-account.json"))
-	assert.Empty(t, ResourceAsString("manager/operator-service-account.json"))
-	assert.Empty(t, ResourceAsString("/manager/operator-service-account.json"))
-	assert.NotContains(t, Resources("/"), "/manager/operator-service-account.json")
+	ErrorBytes(t, "manager/operator-service-account.json", Resource)
+	ErrorBytes(t, "/manager/operator-service-account.json", Resource)
+	ErrorString(t, "manager/operator-service-account.json", ResourceAsString)
+	ErrorString(t, "/manager/operator-service-account.json", ResourceAsString)
+	NoErrorAndNotContains(t, "/", "/manager/operator-service-account.json", Resources)
 }
 
 func TestResources(t *testing.T) {
-	assert.Contains(t, Resources("/manager"), "/manager/operator-service-account.yaml")
-	assert.Contains(t, Resources("/manager/"), "/manager/operator-service-account.yaml")
-	assert.NotContains(t, Resources("/manager"), "kustomize.yaml")
-	assert.Empty(t, Resources("/dirnotexist"))
+	NoErrorAndContains(t, "/manager", "/manager/operator-service-account.yaml", Resources)
+	NoErrorAndContains(t, "/manager/", "/manager/operator-service-account.yaml", Resources)
+	NoErrorAndNotContains(t, "/manager/", "kustomize.yaml", Resources)
+	NoErrorAndEmpty(t, "/dirnotexist", Resources)
 
-	for _, res := range Resources("/") {
+	items, err := Resources("/")
+	assert.Nil(t, err)
+
+	for _, res := range items {
 		if strings.Contains(res, "java.tmpl") {
 			assert.Fail(t, "Resources should not return nested files")
 		}
@@ -57,20 +117,21 @@ func TestResources(t *testing.T) {
 			assert.Fail(t, "Resources should not return nested dirs")
 		}
 	}
-	assert.Contains(t, Resources("/templates"), "/templates/java.tmpl")
+
+	NoErrorAndContains(t, "/templates", "/templates/java.tmpl", Resources)
 }
 
 func TestResourcesWithPrefix(t *testing.T) {
-	assert.Contains(t, WithPrefix("/manager/"), "/manager/operator-service-account.yaml")
-	assert.Contains(t, WithPrefix("/manager/op"), "/manager/operator-service-account.yaml")
-	assert.Contains(t, WithPrefix("/manager/operator-service-account"), "/manager/operator-service-account.yaml")
-
-	assert.Contains(t, WithPrefix("/traits"), "/traits.yaml")
+	NoErrorAndContains(t, "/manager/", "/manager/operator-service-account.yaml", WithPrefix)
+	NoErrorAndContains(t, "/manager/op", "/manager/operator-service-account.yaml", WithPrefix)
+	NoErrorAndContains(t, "/manager/operator-service-account", "/manager/operator-service-account.yaml", WithPrefix)
+	NoErrorAndContains(t, "/traits", "/traits.yaml", WithPrefix)
 
 	// directory needs the slash on the end
-	assert.NotContains(t, WithPrefix("/manager"), "/manager/operator-service-account.yaml")
+	NoErrorAndNotContains(t, "/manager", "/manager/operator-service-account.yaml", WithPrefix)
+
 	// need to get to at least the same directory as the required files
-	assert.NotContains(t, WithPrefix("/"), "/manager/operator-service-account.yaml")
+	NoErrorAndNotContains(t, "/", "/manager/operator-service-account.yaml", WithPrefix)
 }
 
 func TestTemplateResource(t *testing.T) {
@@ -103,11 +164,11 @@ func TestTemplateResource(t *testing.T) {
 }
 
 func TestCRDResources(t *testing.T) {
-	assert.NotEmpty(t, Resource("/crd/bases/camel.apache.org_builds.yaml"))
-	assert.NotEmpty(t, Resource("/crd/bases/camel.apache.org_camelcatalogs.yaml"))
-	assert.NotEmpty(t, Resource("/crd/bases/camel.apache.org_integrationkits.yaml"))
-	assert.NotEmpty(t, Resource("/crd/bases/camel.apache.org_integrationplatforms.yaml"))
-	assert.NotEmpty(t, Resource("/crd/bases/camel.apache.org_integrations.yaml"))
-	assert.NotEmpty(t, Resource("/crd/bases/camel.apache.org_kameletbindings.yaml"))
-	assert.NotEmpty(t, Resource("/crd/bases/camel.apache.org_kamelets.yaml"))
+	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_builds.yaml", Resource)
+	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_camelcatalogs.yaml", Resource)
+	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_integrationkits.yaml", Resource)
+	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_integrationplatforms.yaml", Resource)
+	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_integrations.yaml", Resource)
+	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_kameletbindings.yaml", Resource)
+	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_kamelets.yaml", Resource)
 }

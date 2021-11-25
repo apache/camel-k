@@ -20,23 +20,27 @@ package resources
 import (
 	"bytes"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
 
-	"github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/pkg/util"
+
+	"github.com/pkg/errors"
 )
 
 //
 //go:generate go run ../../cmd/util/vfs-gen resources config
 //
 // ResourceAsString returns the named resource content as string.
-func ResourceAsString(name string) string {
-	return string(Resource(name))
+func ResourceAsString(name string) (string, error) {
+	data, err := Resource(name)
+	return string(data), err
 }
 
-// Resource provides an easy access to embedded assets.
-func Resource(name string) []byte {
+// Resource provides an easy way to access to embedded assets.
+func Resource(name string) ([]byte, error) {
 	name = strings.Trim(name, " ")
 	if !strings.HasPrefix(name, "/") {
 		name = "/" + name
@@ -44,25 +48,28 @@ func Resource(name string) []byte {
 
 	file, err := assets.Open(name)
 	if err != nil {
-		log.Error(err, "cannot access resource file", "file", name)
-		return nil
+		return nil, errors.Wrapf(err, "cannot access resource file %s", name)
 	}
-	defer file.Close()
 
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
-		log.Error(err, "error while reading resource file", "file", name)
-		return nil
+		_ = file.Close()
+		return nil, errors.Wrapf(err, "cannot access resource file %s", name)
 	}
-	return data
+
+	return data, file.Close()
 }
 
 // TemplateResource loads a file resource as go template and processes it using the given parameters.
 func TemplateResource(name string, params interface{}) (string, error) {
-	rawData := ResourceAsString(name)
+	rawData, err := ResourceAsString(name)
+	if err != nil {
+		return "", err
+	}
 	if rawData == "" {
 		return "", nil
 	}
+
 	tmpl, err := template.New(name).Parse(rawData)
 	if err != nil {
 		return "", err
@@ -72,6 +79,7 @@ func TemplateResource(name string, params interface{}) (string, error) {
 	if err := tmpl.Execute(&buf, params); err != nil {
 		return "", err
 	}
+
 	return buf.String(), nil
 }
 
@@ -85,46 +93,56 @@ func DirExists(dirName string) bool {
 
 // WithPrefix lists all file names that begins with the give path prefix
 // If pathPrefix is a path of directories then be sure to end it with a '/'.
-func WithPrefix(pathPrefix string) []string {
+func WithPrefix(pathPrefix string) ([]string, error) {
 	dirPath := filepath.Dir(pathPrefix)
 
+	paths, err := Resources(dirPath)
+	if err != nil {
+		return nil, err
+	}
+
 	var res []string
-	for _, path := range Resources(dirPath) {
-		if result, _ := filepath.Match(pathPrefix+"*", path); result {
-			res = append(res, path)
+	for i := range paths {
+		if result, _ := filepath.Match(pathPrefix+"*", paths[i]); result {
+			res = append(res, paths[i])
 		}
 	}
 
-	return res
+	return res, nil
 }
 
 // Resources lists all file names in the given path (starts with '/').
-func Resources(dirName string) []string {
+func Resources(dirName string) ([]string, error) {
 	dir, err := assets.Open(dirName)
 	if err != nil {
-		log.Error(err, "error while listing resource files", "dir", dirName)
-		return nil
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+
+		return nil, errors.Wrapf(err, "error while listing resource files %s", dirName)
 	}
-	defer dir.Close()
+
 	info, err := dir.Stat()
 	if err != nil {
-		log.Error(err, "error while doing stat on directory", "dir", dirName)
-		return nil
+		return nil, dir.Close()
 	}
 	if !info.IsDir() {
-		log.Error(err, "location is not a directory", "dir", dirName)
-		return nil
+		util.CloseQuietly(dir)
+		return nil, errors.Wrapf(err, "location %s is not a directory", dirName)
 	}
+
 	files, err := dir.Readdir(-1)
 	if err != nil {
-		log.Error(err, "error while listing files on directory", "dir", dirName)
-		return nil
+		util.CloseQuietly(dir)
+		return nil, errors.Wrapf(err, "error while listing files on directory %s", dirName)
 	}
+
 	var res []string
 	for _, f := range files {
 		if !f.IsDir() {
 			res = append(res, filepath.Join(dirName, f.Name()))
 		}
 	}
-	return res
+
+	return res, dir.Close()
 }
