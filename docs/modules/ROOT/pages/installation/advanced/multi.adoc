@@ -1,5 +1,5 @@
 [[advanced-installation-multiple-operators]]
-== Multiple Operators and Selective Upgrades
+= Multiple Operators and Selective Upgrades
 
 It's possible to setup multiple Camel K operators in a cluster to watch the same namespaces. It's not
 possible to configure Camel K this way using OLM (Operator Hub), since OLM prevents two operators from watching the same namespaces,
