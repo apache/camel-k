@@ -779,6 +779,12 @@ func Close(err error, closer io.Closer) error {
 	return multierr.Append(err, closer.Close())
 }
 
+// CloseQuietly unconditionally close an io.Closer
+// It should not be used to replace the Close statement(s).
+func CloseQuietly(closer io.Closer) {
+	_ = closer.Close()
+}
+
 // WithFile a safe wrapper to process a file.
 func WithFile(name string, flag int, perm os.FileMode, consumer func(file *os.File) error) error {
 	// #nosec G304
@@ -835,4 +841,17 @@ func WriteFileWithContent(filePath string, content []byte) error {
 	}
 
 	return Close(err, file)
+}
+
+// WithTempDir a safe wrapper to deal with temporary directories.
+func WithTempDir(pattern string, consumer func(string) error) error {
+	tmpDir, err := ioutil.TempDir("", pattern)
+	if err != nil {
+		return err
+	}
+
+	consumerErr := consumer(tmpDir)
+	removeErr := os.RemoveAll(tmpDir)
+
+	return multierr.Append(consumerErr, removeErr)
 }

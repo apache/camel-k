@@ -31,7 +31,9 @@ import (
 func TestFile(t *testing.T) {
 	file, err := os.CreateTemp("", "camel-k-test-*")
 	assert.Nil(t, err)
-	defer os.Remove(file.Name())
+	defer func() {
+		_ = os.Remove(file.Name())
+	}()
 
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(100*time.Second))
 	defer cancel()

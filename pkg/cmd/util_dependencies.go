@@ -498,9 +498,7 @@ func createMavenWorkingDirectory() error {
 
 func deleteMavenWorkingDirectory() error {
 	// Remove directory used for computing the dependencies
-	defer os.RemoveAll(util.MavenWorkingDirectory)
-
-	return nil
+	return os.RemoveAll(util.MavenWorkingDirectory)
 }
 
 func getCustomDependenciesDir(integrationDirectory string) string {

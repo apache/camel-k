@@ -188,7 +188,7 @@ func dumpLogs(ctx context.Context, c client.Client, prefix string, ns string, na
 	if err != nil {
 		return err
 	}
-	defer stream.Close()
+
 	scanner := bufio.NewScanner(stream)
 	printed := false
 	for scanner.Scan() {
@@ -198,5 +198,5 @@ func dumpLogs(ctx context.Context, c client.Client, prefix string, ns string, na
 	if !printed {
 		fmt.Fprintf(out, "%s[no logs available]\n", prefix)
 	}
-	return nil
+	return stream.Close()
 }

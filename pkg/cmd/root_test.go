@@ -50,7 +50,9 @@ func kamelTestPreAddCommandInit() (*RootCmdOptions, *cobra.Command) {
 
 func TestLoadFromEnvVar(t *testing.T) {
 	// shows how to include a "," character inside an env value see VAR1 value
-	os.Setenv("KAMEL_RUN_ENVS", "\"VAR1=value,\"\"othervalue\"\"\",VAR2=value2")
+	if err := os.Setenv("KAMEL_RUN_ENVS", "\"VAR1=value,\"\"othervalue\"\"\",VAR2=value2"); err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
 
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 
@@ -87,7 +89,10 @@ func TestLoadFromFile(t *testing.T) {
 }
 
 func TestPrecedenceEnvVarOverFile(t *testing.T) {
-	os.Setenv("KAMEL_RUN_ENVS", "VAR1=envVar")
+	if err := os.Setenv("KAMEL_RUN_ENVS", "VAR1=envVar"); err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
 	propertiesFile := []byte(`kamel.run.envs: VAR2=file`)
 	viper.SetConfigType("properties")
 	readViperConfigFromBytes(t, propertiesFile)
@@ -107,7 +112,10 @@ func TestPrecedenceEnvVarOverFile(t *testing.T) {
 }
 
 func TestPrecedenceCommandLineOverEverythingElse(t *testing.T) {
-	os.Setenv("KAMEL_RUN_ENVS", "VAR1=envVar")
+	if err := os.Setenv("KAMEL_RUN_ENVS", "VAR1=envVar"); err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
 	propertiesFile := []byte(`kamel.run.envs: VAR2=file`)
 	viper.SetConfigType("properties")
 	readViperConfigFromBytes(t, propertiesFile)

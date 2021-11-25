@@ -59,7 +59,10 @@ func TestCreate(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, list.Items)
 
-	for _, k := range resources.WithPrefix("/camel-catelog-") {
+	items, err := resources.WithPrefix("/camel-catelog-")
+	assert.Nil(t, err)
+
+	for _, k := range items {
 		found := false
 
 		for _, c := range list.Items {

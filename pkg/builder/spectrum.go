@@ -103,12 +103,10 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 		if err != nil {
 			return status.Failed(err)
 		}
-		defer os.RemoveAll(registryConfigDir)
 	}
 
 	newStdR, newStdW, pipeErr := os.Pipe()
-	// #nosec G307
-	defer newStdW.Close()
+	defer util.CloseQuietly(newStdW)
 
 	if pipeErr != nil {
 		// In the unlikely case of an error, use stdout instead of aborting
@@ -131,11 +129,18 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 	go readSpectrumLogs(newStdR)
 	digest, err := spectrum.Build(options, contextDir+":"+path.Join(DeploymentDir))
 	if err != nil {
+		_ = os.RemoveAll(registryConfigDir)
 		return status.Failed(err)
 	}
 
 	status.Image = t.task.Image
 	status.Digest = digest
+
+	if registryConfigDir != "" {
+		if err := os.RemoveAll(registryConfigDir); err != nil {
+			return status.Failed(err)
+		}
+	}
 
 	return status
 }

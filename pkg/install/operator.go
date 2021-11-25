@@ -302,12 +302,18 @@ func installClusterRoleBinding(ctx context.Context, c client.Client, collection 
 	existing, err := c.RbacV1().ClusterRoleBindings().Get(ctx, name, metav1.GetOptions{})
 	switch {
 	case k8serrors.IsNotFound(err):
+
+		content, err := resources.ResourceAsString(path)
+		if err != nil {
+			return err
+		}
+
 		existing = nil
-		yaml := resources.ResourceAsString(path)
-		if yaml == "" {
+		if content == "" {
 			return errors.Errorf("resource file %v not found", path)
 		}
-		obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), yaml)
+
+		obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), content)
 		if err != nil {
 			return err
 		}
@@ -436,10 +442,17 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 	if err != nil {
 		return nil, err
 	}
-	platformObject, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString("/samples/bases/camel_v1_integrationplatform.yaml"))
+
+	content, err := resources.ResourceAsString("/samples/bases/camel_v1_integrationplatform.yaml")
 	if err != nil {
 		return nil, err
 	}
+
+	platformObject, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), content)
+	if err != nil {
+		return nil, err
+	}
+
 	pl, ok := platformObject.(*v1.IntegrationPlatform)
 	if !ok {
 		return nil, fmt.Errorf("type assertion failed: %v", platformObject)

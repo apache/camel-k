@@ -19,11 +19,12 @@ package builder
 
 import (
 	"archive/tar"
+	"bufio"
 	"compress/gzip"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -38,8 +39,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/util/json"
-
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -143,93 +142,96 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 		return status.Failed(errors.Wrap(err, "cannot create image stream"))
 	}
 
-	tmpDir, err := ioutil.TempDir(os.TempDir(), t.build.Name+"-s2i-")
-	if err != nil {
-		return status.Failed(err)
-	}
-	archive := path.Join(tmpDir, "archive.tar.gz")
-	defer os.RemoveAll(tmpDir)
+	err = util.WithTempDir(t.build.Name+"-s2i-", func(tmpDir string) error {
+		archive := path.Join(tmpDir, "archive.tar.gz")
 
-	contextDir := t.task.ContextDir
-	if contextDir == "" {
-		// Use the working directory.
-		// This is useful when the task is executed in-container,
-		// so that its WorkingDir can be used to share state and
-		// coordinate with other tasks.
-		pwd, err := os.Getwd()
-		if err != nil {
-			return status.Failed(err)
-		}
-		contextDir = path.Join(pwd, ContextDir)
-	}
-
-	archiveFile, err := os.Create(archive)
-	if err != nil {
-		return status.Failed(errors.Wrap(err, "cannot create tar archive"))
-	}
-
-	err = tarDir(contextDir, archiveFile)
-	if err != nil {
-		return status.Failed(errors.Wrap(err, "cannot tar context directory"))
-	}
-
-	resource, err := util.ReadFile(archive)
-	if err != nil {
-		return status.Failed(errors.Wrap(err, "cannot read tar file "+archive))
-	}
-
-	restClient, err := kubernetes.GetClientFor(t.c, "build.openshift.io", "v1")
-	if err != nil {
-		return status.Failed(err)
-	}
-
-	r := restClient.Post().
-		Namespace(t.build.Namespace).
-		Body(resource).
-		Resource("buildconfigs").
-		Name("camel-k-" + t.build.Name).
-		SubResource("instantiatebinary").
-		Do(ctx)
-
-	if r.Error() != nil {
-		return status.Failed(errors.Wrap(r.Error(), "cannot instantiate binary"))
-	}
-
-	data, err := r.Raw()
-	if err != nil {
-		return status.Failed(errors.Wrap(err, "no raw data retrieved"))
-	}
-
-	s2iBuild := buildv1.Build{}
-	err = json.Unmarshal(data, &s2iBuild)
-	if err != nil {
-		return status.Failed(errors.Wrap(err, "cannot unmarshal instantiated binary response"))
-	}
-
-	err = t.waitForS2iBuildCompletion(ctx, t.c, &s2iBuild)
-	if err != nil {
-		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-			// nolint: contextcheck
-			if err := t.cancelBuild(context.Background(), &s2iBuild); err != nil {
-				log.Errorf(err, "cannot cancel s2i Build: %s/%s", s2iBuild.Namespace, s2iBuild.Name)
+		contextDir := t.task.ContextDir
+		if contextDir == "" {
+			// Use the working directory.
+			// This is useful when the task is executed in-container,
+			// so that its WorkingDir can be used to share state and
+			// coordinate with other tasks.
+			pwd, err := os.Getwd()
+			if err != nil {
+				return err
 			}
+			contextDir = path.Join(pwd, ContextDir)
 		}
-		return status.Failed(err)
-	}
-	if s2iBuild.Status.Output.To != nil {
-		status.Digest = s2iBuild.Status.Output.To.ImageDigest
-	}
 
-	err = t.c.Get(ctx, ctrl.ObjectKeyFromObject(is), is)
+		archiveFile, err := os.Create(archive)
+		if err != nil {
+			return errors.Wrap(err, "cannot create tar archive")
+		}
+
+		err = tarDir(contextDir, archiveFile)
+		if err != nil {
+			return errors.Wrap(err, "cannot tar context directory")
+		}
+
+		f, err := util.Open(archive)
+		if err != nil {
+			return err
+		}
+
+		restClient, err := kubernetes.GetClientFor(t.c, "build.openshift.io", "v1")
+		if err != nil {
+			return err
+		}
+
+		r := restClient.Post().
+			Namespace(t.build.Namespace).
+			Body(bufio.NewReader(f)).
+			Resource("buildconfigs").
+			Name("camel-k-" + t.build.Name).
+			SubResource("instantiatebinary").
+			Do(ctx)
+
+		if r.Error() != nil {
+			return errors.Wrap(r.Error(), "cannot instantiate binary")
+		}
+
+		data, err := r.Raw()
+		if err != nil {
+			return errors.Wrap(err, "no raw data retrieved")
+		}
+
+		s2iBuild := buildv1.Build{}
+		err = json.Unmarshal(data, &s2iBuild)
+		if err != nil {
+			return errors.Wrap(err, "cannot unmarshal instantiated binary response")
+		}
+
+		err = t.waitForS2iBuildCompletion(ctx, t.c, &s2iBuild)
+		if err != nil {
+			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+				// nolint: contextcheck
+				if err := t.cancelBuild(context.Background(), &s2iBuild); err != nil {
+					log.Errorf(err, "cannot cancel s2i Build: %s/%s", s2iBuild.Namespace, s2iBuild.Name)
+				}
+			}
+			return err
+		}
+		if s2iBuild.Status.Output.To != nil {
+			status.Digest = s2iBuild.Status.Output.To.ImageDigest
+		}
+
+		err = t.c.Get(ctx, ctrl.ObjectKeyFromObject(is), is)
+		if err != nil {
+			return err
+		}
+
+		if is.Status.DockerImageRepository == "" {
+			return errors.New("dockerImageRepository not available in ImageStream")
+		}
+
+		status.Image = is.Status.DockerImageRepository + ":" + t.task.Tag
+
+		return f.Close()
+	})
+
 	if err != nil {
 		return status.Failed(err)
 	}
-
-	if is.Status.DockerImageRepository == "" {
-		return status.Failed(errors.New("dockerImageRepository not available in ImageStream"))
-	}
-
-	status.Image = is.Status.DockerImageRepository + ":" + t.task.Tag
 
 	return status
 }
@@ -298,10 +300,10 @@ func tarDir(src string, writers ...io.Writer) error {
 	mw := io.MultiWriter(writers...)
 
 	gzw := gzip.NewWriter(mw)
-	defer gzw.Close()
+	defer util.CloseQuietly(gzw)
 
 	tw := tar.NewWriter(gzw)
-	defer tw.Close()
+	defer util.CloseQuietly(tw)
 
 	return filepath.Walk(src, func(file string, fi os.FileInfo, err error) error {
 		if err != nil {

@@ -268,7 +268,12 @@ func isCrdInstalled(c client.Client, kind string, version string) (bool, error) 
 }
 
 func installCRD(ctx context.Context, c client.Client, kind string, version string, resourceName string, converter ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
-	crd, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString("/crd/bases/"+resourceName))
+	content, err := resources.ResourceAsString("/crd/bases/" + resourceName)
+	if err != nil {
+		return err
+	}
+
+	crd, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), content)
 	if err != nil {
 		return err
 	}
@@ -319,7 +324,12 @@ func isResourceInstalled(ctx context.Context, c client.Client, object ctrl.Objec
 }
 
 func installResource(ctx context.Context, c client.Client, collection *kubernetes.Collection, resource string) error {
-	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), resources.ResourceAsString(resource))
+	content, err := resources.ResourceAsString(resource)
+	if err != nil {
+		return err
+	}
+
+	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), content)
 	if err != nil {
 		return err
 	}
