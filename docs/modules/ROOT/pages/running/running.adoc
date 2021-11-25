@@ -56,3 +56,49 @@ kamel logs hello
 == Running an Integration in Development mode
 
 Camel K provide a very nice **dev mode** feature that will allow you to apply any change to your Integration code reactively. Check out the xref:running/dev-mode.adoc[Camel K dev mode]
+
+[[no-cli-integration]]
+== Running an Integration without CLI
+
+You can run your integration also if you have no CLI available. `kamel` CLI manages a lot of fancy features but you can create an Integration Custom Resource (see the xref:apis/camel.adoc[API section] related to Integration) with all the configuration expected to run your application.
+
+As an example, let's get the result of a **dry run** for a sample route: 
+
+```
+kamel run Sample.java -o yaml
+```
+
+It will return the expected Integration custom resource (you can type it manually according to the specification linked above):
+
+```
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  creationTimestamp: null
+  name: my-integration
+  namespace: default
+spec:
+  sources:
+  - content: "
+    import org.apache.camel.builder.RouteBuilder;
+    public class Sample extends RouteBuilder {
+      @Override
+      public void configure()
+      throws Exception {
+        from(\"timer:tick\")
+        .log(\"Hello Integration!\");
+       }
+      }"
+    name: Sample.java
+status: {}
+```
+
+We can save this custom resource in a yaml file, ie, `my-integration.yaml`. Once done, we can run the integration storing the Integration custom resource, via `kubectl`, UI, API call or whichever mean we have to call our Kubernetes cluster. In our example, we'll do this through `kubectl` CLI:
+
+```
+kubectl apply -f my-integration.yaml
+...
+integration.camel.apache.org/my-integration created
+```
+
+The operator will now take care to run the Integration accordingly.
