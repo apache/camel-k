@@ -21,12 +21,18 @@ description: 'Cleans up the target cluster, removing any e2e test resources'
 runs:
   using: "composite"
   steps:
-    - id: remove-installed-camel-crds
-      name: Remove Installed Camel CRDs
+    - id: remove-installed-kamel
+      name: Remove Installed Kamel
       shell: bash
       if: ${{ always() }}
       run: |
         set +e
+        if command -v kamel &> /dev/null
+        then
+          kamel uninstall --olm=false --all
+        fi
+
+        # Ensure the CRDs are removed
         kubectl get crds | grep camel | awk '{print $1}' | xargs kubectl delete crd &> /dev/null
         set -e
 
