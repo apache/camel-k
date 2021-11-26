@@ -42,7 +42,7 @@ import (
 // The following properties can be overridden at build time via ldflags
 
 // DefaultOperatorName is the Camel K operator name in OLM.
-var DefaultOperatorName = "camel-k-operator"
+var DefaultOperatorName = "camel-k"
 
 // DefaultPackage is the Camel K package in OLM.
 var DefaultPackage = "camel-k"
