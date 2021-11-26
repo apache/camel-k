@@ -19,7 +19,7 @@ package cmd
 
 import (
 	"context"
-	"crypto/sha1"
+	"crypto/sha1" //nolint
 	"fmt"
 	"path"
 	"path/filepath"
@@ -264,8 +264,9 @@ func convertFileToConfigmap(ctx context.Context, c client.Client, resourceSpec v
 	return cm, nil
 }
 
+//nolint
 func hashFrom(contents ...[]byte) string {
-	// SHA1 because we need to limit the lenght to less than 64 chars
+	// SHA1 because we need to limit the length to less than 64 chars
 	hash := sha1.New()
 	for _, c := range contents {
 		hash.Write(c)
@@ -274,7 +275,7 @@ func hashFrom(contents ...[]byte) string {
 	return fmt.Sprintf("%x", hash.Sum(nil))
 }
 
-// ApplyConfigOption will set the proper --config option behavior to the IntegrationSpec
+// ApplyConfigOption will set the proper --config option behavior to the IntegrationSpec.
 func ApplyConfigOption(ctx context.Context, config *RunConfigOption, integration *v1.Integration, c client.Client,
 	namespace string, enableCompression bool) (*corev1.ConfigMap, error) {
 	// A config option cannot specify destination path
@@ -284,7 +285,7 @@ func ApplyConfigOption(ctx context.Context, config *RunConfigOption, integration
 	return applyOption(ctx, config, integration, c, namespace, enableCompression, v1.ResourceTypeConfig)
 }
 
-// ApplyResourceOption will set the proper --resource option behavior to the IntegrationSpec
+// ApplyResourceOption will set the proper --resource option behavior to the IntegrationSpec.
 func ApplyResourceOption(ctx context.Context, config *RunConfigOption, integration *v1.Integration, c client.Client,
 	namespace string, enableCompression bool) (*corev1.ConfigMap, error) {
 	return applyOption(ctx, config, integration, c, namespace, enableCompression, v1.ResourceTypeData)

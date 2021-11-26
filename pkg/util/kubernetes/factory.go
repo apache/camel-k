@@ -116,7 +116,7 @@ func NewResourceRequirements(reqs []string) (corev1.ResourceRequirements, error)
 	return resReq, nil
 }
 
-// NewConfigmap will create a Configmap
+// NewConfigmap will create a Configmap.
 func NewConfigmap(namespace, cmName, originalFilename string, generatedKey string,
 	textData string, binaryData []byte) *corev1.ConfigMap {
 	immutable := true

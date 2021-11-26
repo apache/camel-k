@@ -48,7 +48,7 @@ const (
 	False = "false"
 )
 
-// Identifiable represent an identifiable type
+// Identifiable represent an identifiable type.
 type Identifiable interface {
 	ID() ID
 }
