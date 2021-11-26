@@ -1673,12 +1673,6 @@ func InvokeUserTestCode(t *testing.T, ns string, doRun func(string)) {
 			if err := util.Dump(TestContext, TestClient(), ns, t); err != nil {
 				t.Logf("Error while dumping namespace %s: %v\n", ns, err)
 			}
-
-			//
-			// Ensure everything is removed after dumping
-			// in order to ensure a clean cluster
-			//
-			uninstallKamelInternal(t, "--all", "--olm=false")
 		}
 	}()
 
@@ -1815,23 +1809,6 @@ func NewTestNamespace(injectKnativeBroker bool) ctrl.Object {
 		}
 	}
 	return obj
-}
-
-func uninstallKamelInternal(t *testing.T, args ...string) {
-	uargs := []string{"uninstall"}
-	uargs = append(uargs, args...)
-	if err := Kamel(uargs...).Execute(); err != nil {
-		t.Logf("Warning: An error occurred whilst trying to uninstall kamel: %s", err.Error())
-	}
-}
-
-func UninstallKamel(t *testing.T, args ...string) {
-	if t.Failed() {
-		// then dump needs to execute first
-		return
-	}
-
-	uninstallKamelInternal(t, args...)
 }
 
 func GetOutputString(command *cobra.Command) string {
