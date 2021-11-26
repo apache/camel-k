@@ -98,6 +98,7 @@ runs:
       export CAMEL_K_NEW_IIB=${{ env.BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX }}
       export KAMEL_K_TEST_RELEASE_VERSION=$(make get-last-released-version)
       export KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
+      export CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE=${{ env.CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE }}
 
       # Then run integration tests
       make test-upgrade

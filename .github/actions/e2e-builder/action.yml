@@ -82,6 +82,7 @@ runs:
       export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
       export CAMEL_K_TEST_IMAGE_NAME=${CUSTOM_IMAGE}
       export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
+      export CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE=${{ env.CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE }}
 
       # Then run integration tests
       make test-builder

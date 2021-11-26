@@ -1728,6 +1728,12 @@ func DeleteKnativeBroker(ns metav1.Object) {
 }
 
 func DeleteTestNamespace(t *testing.T, ns ctrl.Object) {
+	value, saveNS := os.LookupEnv("CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE")
+	if t.Failed() && saveNS && value == "true" {
+		t.Logf("Warning: retaining failed test project %q", ns.GetName())
+		return
+	}
+
 	var oc bool
 	var err error
 	if oc, err = openshift.IsOpenShift(TestClient()); err != nil {
