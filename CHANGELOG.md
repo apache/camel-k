@@ -8,11 +8,13 @@
 
 - Dry run kamel run [\#2769](https://github.com/apache/camel-k/issues/2769)
 - Is there any resources requirements for camel-k operator Deployment? [\#2768](https://github.com/apache/camel-k/issues/2768)
+- Jitpack still configured with `master` branch [\#2764](https://github.com/apache/camel-k/issues/2764)
 - How can I find the log file location in the integration pod?  [\#2762](https://github.com/apache/camel-k/issues/2762)
 - Add 1.7.x documentation tag [\#2753](https://github.com/apache/camel-k/issues/2753)
 - Could not pull base image - Build kit failed \(No matching credentials were found, falling back on anonymous\) [\#2748](https://github.com/apache/camel-k/issues/2748)
 - Cannot deploy XML integration with undertow [\#2746](https://github.com/apache/camel-k/issues/2746)
 - Release 1.7.0 [\#2743](https://github.com/apache/camel-k/issues/2743)
+- topicName [\#2567](https://github.com/apache/camel-k/issues/2567)
 - Kamelet: default KameletBindings configuration settings [\#2558](https://github.com/apache/camel-k/issues/2558)
 - Camel-K - uninstall and namespace deletion w/ k8s let all Camel-K Integrations in this namespace alive [\#2533](https://github.com/apache/camel-k/issues/2533)
 - Reduce time for first Integration start [\#2520](https://github.com/apache/camel-k/issues/2520)
@@ -27,8 +29,14 @@
 
 **Merged pull requests:**
 
+- fix\(doc\): header complain [\#2787](https://github.com/apache/camel-k/pull/2787) ([squakez](https://github.com/squakez))
+- doc: no CLI integration run [\#2783](https://github.com/apache/camel-k/pull/2783) ([squakez](https://github.com/squakez))
+- fix\(ci\): Fix OLM upgrade e2e tests [\#2782](https://github.com/apache/camel-k/pull/2782) ([astefanutti](https://github.com/astefanutti))
+- fix\(doc\): broken links [\#2781](https://github.com/apache/camel-k/pull/2781) ([squakez](https://github.com/squakez))
+- lint [\#2780](https://github.com/apache/camel-k/pull/2780) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore: Upgrade Spectrum and go-containerregistry [\#2779](https://github.com/apache/camel-k/pull/2779) ([astefanutti](https://github.com/astefanutti))
 - doc: cleaning [\#2778](https://github.com/apache/camel-k/pull/2778) ([squakez](https://github.com/squakez))
+- fix\(build\): default jitpack to main [\#2775](https://github.com/apache/camel-k/pull/2775) ([squakez](https://github.com/squakez))
 - doc\(install\): suggested resource configuration [\#2774](https://github.com/apache/camel-k/pull/2774) ([squakez](https://github.com/squakez))
 - chore\(release\): Update latest released version and OLM base CSV manifest [\#2770](https://github.com/apache/camel-k/pull/2770) ([astefanutti](https://github.com/astefanutti))
 - chore\(build\): Upgrade Maven to version 3.8.4 [\#2767](https://github.com/apache/camel-k/pull/2767) ([astefanutti](https://github.com/astefanutti))
