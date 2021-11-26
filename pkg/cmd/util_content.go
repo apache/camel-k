@@ -23,7 +23,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"regexp"
 	"strings"
 
@@ -31,17 +30,11 @@ import (
 )
 
 const (
+	// Megabyte represent the related unit.
 	Megabyte = 1 << 20
+	// Kilobyte represent the related unit.
 	Kilobyte = 1 << 10
 )
-
-func fileSize(source string) (int64, error) {
-	fi, err := os.Stat(source)
-	if err != nil {
-		return -1, err
-	}
-	return fi.Size(), nil
-}
 
 func loadRawContent(ctx context.Context, source string) ([]byte, string, error) {
 	var content []byte
