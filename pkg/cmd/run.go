@@ -50,6 +50,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
 	"github.com/apache/camel-k/pkg/util/property"
+	"github.com/apache/camel-k/pkg/util/resource"
 	"github.com/apache/camel-k/pkg/util/sync"
 	"github.com/apache/camel-k/pkg/util/watch"
 )
@@ -570,8 +571,8 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 
 	generatedConfigmaps := make([]*corev1.ConfigMap, 0)
 
-	for _, resource := range o.Resources {
-		if config, parseErr := ParseResourceOption(resource); parseErr == nil {
+	for _, res := range o.Resources {
+		if config, parseErr := resource.ParseResource(res); parseErr == nil {
 			if genCm, applyResourceOptionErr := ApplyResourceOption(o.Context, config, integration, c, namespace, o.Compression); applyResourceOptionErr != nil {
 				return nil, applyResourceOptionErr
 			} else if genCm != nil {
@@ -583,7 +584,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	}
 
 	for _, item := range o.Configs {
-		if config, parseErr := ParseConfigOption(item); parseErr == nil {
+		if config, parseErr := resource.ParseConfig(item); parseErr == nil {
 			if genCm, applyConfigOptionErr := ApplyConfigOption(o.Context, config, integration, c, namespace, o.Compression); applyConfigOptionErr != nil {
 				return nil, applyConfigOptionErr
 			} else if genCm != nil {
