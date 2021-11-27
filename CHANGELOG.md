@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- how i use build-property on Integration crd [\#2789](https://github.com/apache/camel-k/issues/2789)
 - Dry run kamel run [\#2769](https://github.com/apache/camel-k/issues/2769)
 - Is there any resources requirements for camel-k operator Deployment? [\#2768](https://github.com/apache/camel-k/issues/2768)
 - Jitpack still configured with `master` branch [\#2764](https://github.com/apache/camel-k/issues/2764)
@@ -30,6 +31,7 @@
 **Merged pull requests:**
 
 - fix\(doc\): header complain [\#2787](https://github.com/apache/camel-k/pull/2787) ([squakez](https://github.com/squakez))
+- fix\(lint\): error return value are not checked [\#2786](https://github.com/apache/camel-k/pull/2786) ([lburgazzoli](https://github.com/lburgazzoli))
 - doc: no CLI integration run [\#2783](https://github.com/apache/camel-k/pull/2783) ([squakez](https://github.com/squakez))
 - fix\(ci\): Fix OLM upgrade e2e tests [\#2782](https://github.com/apache/camel-k/pull/2782) ([astefanutti](https://github.com/astefanutti))
 - fix\(doc\): broken links [\#2781](https://github.com/apache/camel-k/pull/2781) ([squakez](https://github.com/squakez))
