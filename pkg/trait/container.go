@@ -35,6 +35,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	utilResource "github.com/apache/camel-k/pkg/util/resource"
 )
 
 const (
@@ -81,6 +82,10 @@ type containerTrait struct {
 	Image string `property:"image" json:"image,omitempty"`
 	// The pull policy: Always|Never|IfNotPresent
 	ImagePullPolicy corev1.PullPolicy `property:"image-pull-policy" json:"imagePullPolicy,omitempty"`
+	// A list of configuration pointing to configmap/secret
+	Configs []string `property:"configs" json:"configs,omitempty"`
+	// A list of resources pointing to configmap/secret
+	Resources []string `property:"resources" json:"resources,omitempty"`
 
 	// DeprecatedProbesEnabled enable/disable probes on the container (default `false`)
 	// Deprecated: replaced by the health trait.
@@ -269,11 +274,10 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 			e.Resources.Add(props)
 		}
 
-		e.configureVolumesAndMounts(
-			&deployment.Spec.Template.Spec.Volumes,
-			&container.VolumeMounts,
-		)
-
+		err := t.configureVolumesAndMounts(e, &deployment.Spec.Template.Spec.Volumes, &container.VolumeMounts)
+		if err != nil {
+			return err
+		}
 		deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, container)
 
 		return nil
@@ -339,6 +343,37 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	}
 
 	return nil
+}
+
+func (t *containerTrait) configureVolumesAndMounts(e *Environment, vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) error {
+	// Volumes declared in the Integration resources
+	e.configureVolumesAndMounts(vols, mnts)
+	// Volumes declared in the trait config/resource options
+	for _, c := range t.Configs {
+		if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
+			t.mountResource(e, vols, mnts, conf)
+		} else {
+			return parseErr
+		}
+	}
+	for _, r := range t.Resources {
+		if res, parseErr := utilResource.ParseResource(r); parseErr == nil {
+			t.mountResource(e, vols, mnts, res)
+		} else {
+			return parseErr
+		}
+	}
+
+	return nil
+}
+
+func (t *containerTrait) mountResource(e *Environment, vols *[]corev1.Volume, mnts *[]corev1.VolumeMount, conf *utilResource.Config) {
+	refName := kubernetes.SanitizeLabel(conf.Name())
+	vol := getVolume(refName, string(conf.StorageType()), conf.Name(), conf.Key(), conf.Key())
+	mnt := getMount(refName, conf.DestinationPath(), "")
+
+	*vols = append(*vols, *vol)
+	*mnts = append(*mnts, *mnt)
 }
 
 func (t *containerTrait) configureService(e *Environment, container *corev1.Container) {
