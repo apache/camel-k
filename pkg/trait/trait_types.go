@@ -447,30 +447,11 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		resName := strings.TrimPrefix(s.Name, "/")
 		refName := fmt.Sprintf("i-source-%03d", i)
 		resPath := path.Join(camel.SourcesMountPath, resName)
+		vol := getVolume(refName, "configmap", cmName, cmKey, resName)
+		mnt := getMount(refName, resPath, resName)
 
-		*vols = append(*vols, corev1.Volume{
-			Name: refName,
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: cmName,
-					},
-					Items: []corev1.KeyToPath{
-						{
-							Key:  cmKey,
-							Path: resName,
-						},
-					},
-				},
-			},
-		})
-
-		*mnts = append(*mnts, corev1.VolumeMount{
-			Name:      refName,
-			MountPath: resPath,
-			ReadOnly:  true,
-			SubPath:   resName,
-		})
+		*vols = append(*vols, *vol)
+		*mnts = append(*mnts, *mnt)
 	}
 
 	for i, r := range e.Integration.Resources() {
@@ -493,30 +474,11 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		if r.MountPath != "" {
 			resPath = r.MountPath
 		}
+		vol := getVolume(refName, "configmap", cmName, cmKey, resName)
+		mnt := getMount(refName, resPath, resName)
 
-		*vols = append(*vols, corev1.Volume{
-			Name: refName,
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: cmName,
-					},
-					Items: []corev1.KeyToPath{
-						{
-							Key:  cmKey,
-							Path: resName,
-						},
-					},
-				},
-			},
-		})
-
-		*mnts = append(*mnts, corev1.VolumeMount{
-			Name:      refName,
-			MountPath: resPath,
-			ReadOnly:  true,
-			SubPath:   resName,
-		})
+		*vols = append(*vols, *vol)
+		*mnts = append(*mnts, *mnt)
 	}
 
 	if e.Resources != nil {
@@ -533,29 +495,12 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 			}
 
 			if propertiesType != "" {
-				*vols = append(*vols, corev1.Volume{
-					Name: propertiesType + "-properties",
-					VolumeSource: corev1.VolumeSource{
-						ConfigMap: &corev1.ConfigMapVolumeSource{
-							LocalObjectReference: corev1.LocalObjectReference{
-								Name: configMap.Name,
-							},
-							Items: []corev1.KeyToPath{
-								{
-									Key:  "application.properties",
-									Path: resName,
-								},
-							},
-						},
-					},
-				})
+				refName := propertiesType + "-properties"
+				vol := getVolume(refName, "configmap", configMap.Name, "application.properties", resName)
+				mnt := getMount(refName, mountPath, resName)
 
-				*mnts = append(*mnts, corev1.VolumeMount{
-					Name:      propertiesType + "-properties",
-					MountPath: mountPath,
-					ReadOnly:  true,
-					SubPath:   resName,
-				})
+				*vols = append(*vols, *vol)
+				*mnts = append(*mnts, *mnt)
 			}
 		})
 	}
@@ -565,89 +510,36 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	//
 	for _, configmaps := range e.collectConfigurations("configmap") {
 		refName := kubernetes.SanitizeLabel(configmaps["value"])
+		mountPath := getConfigmapMountPoint(configmaps["value"], configmaps["resourceMountPoint"], configmaps["resourceType"])
+		vol := getVolume(refName, "configmap", configmaps["value"], configmaps["resourceKey"], configmaps["resourceKey"])
+		mnt := getMount(refName, mountPath, "")
 
-		configmapVolume := corev1.Volume{
-			Name: refName,
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: configmaps["value"],
-					},
-				},
-			},
-		}
-
-		// Filter the items selected, if specified
-		if configmaps["resourceKey"] != "" {
-			configmapVolume.VolumeSource.ConfigMap.Items = []corev1.KeyToPath{
-				{
-					Key:  configmaps["resourceKey"],
-					Path: configmaps["resourceKey"],
-				},
-			}
-		}
-
-		*vols = append(*vols, configmapVolume)
-
-		*mnts = append(*mnts, corev1.VolumeMount{
-			Name:      refName,
-			MountPath: getConfigmapMountPoint(configmaps["value"], configmaps["resourceMountPoint"], configmaps["resourceType"]),
-			ReadOnly:  true,
-		})
+		*vols = append(*vols, *vol)
+		*mnts = append(*mnts, *mnt)
 	}
 
 	//
 	// Volumes :: Additional Secrets
 	//
+	for _, secret := range e.collectConfigurations("secret") {
+		refName := kubernetes.SanitizeLabel(secret["value"])
+		mountPath := getSecretMountPoint(secret["value"], secret["resourceMountPoint"], secret["resourceType"])
+		vol := getVolume(refName, "secret", secret["value"], secret["resourceKey"], secret["resourceKey"])
+		mnt := getMount(refName, mountPath, "")
+
+		*vols = append(*vols, *vol)
+		*mnts = append(*mnts, *mnt)
+	}
 	// append Service Binding secrets
 	if len(e.ServiceBindingSecret) > 0 {
 		secret := e.ServiceBindingSecret
 		refName := kubernetes.SanitizeLabel(secret)
+		mountPath := path.Join(camel.ServiceBindingsMountPath, strings.ToLower(secret))
+		vol := getVolume(refName, "secret", secret, "", "")
+		mnt := getMount(refName, mountPath, "")
 
-		*vols = append(*vols, corev1.Volume{
-			Name: refName,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: secret,
-				},
-			},
-		})
-
-		*mnts = append(*mnts, corev1.VolumeMount{
-			Name:      refName,
-			MountPath: path.Join(camel.ServiceBindingsMountPath, strings.ToLower(secret)),
-		})
-	}
-
-	for _, secret := range e.collectConfigurations("secret") {
-		refName := kubernetes.SanitizeLabel(secret["value"])
-
-		secretVolume := corev1.Volume{
-			Name: refName,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: secret["value"],
-				},
-			},
-		}
-
-		// Filter the items selected, if specified
-		if secret["resourceKey"] != "" {
-			secretVolume.VolumeSource.Secret.Items = []corev1.KeyToPath{
-				{
-					Key:  secret["resourceKey"],
-					Path: secret["resourceKey"],
-				},
-			}
-		}
-
-		*vols = append(*vols, secretVolume)
-
-		*mnts = append(*mnts, corev1.VolumeMount{
-			Name:      refName,
-			MountPath: getSecretMountPoint(secret["value"], secret["resourceMountPoint"], secret["resourceType"]),
-			ReadOnly:  true,
-		})
+		*vols = append(*vols, *vol)
+		*mnts = append(*mnts, *mnt)
 	}
 
 	//
@@ -664,20 +556,67 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		mountPath := configParts[1]
 		volumeName := pvcName + "-data"
 
-		*vols = append(*vols, corev1.Volume{
-			Name: volumeName,
-			VolumeSource: corev1.VolumeSource{
-				PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-					ClaimName: pvcName,
-				},
-			},
-		})
-
-		*mnts = append(*mnts, corev1.VolumeMount{
-			Name:      volumeName,
-			MountPath: mountPath,
-		})
+		vol := getVolume(volumeName, "pvc", pvcName, "", "")
+		mnt := getMount(volumeName, mountPath, "")
+		*vols = append(*vols, *vol)
+		*mnts = append(*mnts, *mnt)
 	}
+}
+
+func getVolume(volName, storageType, storageName, filterKey, filterValue string) *corev1.Volume {
+	items := convertToKeyToPath(filterKey, filterValue)
+	volume := corev1.Volume{
+		Name:         volName,
+		VolumeSource: corev1.VolumeSource{},
+	}
+	switch storageType {
+	case "configmap":
+		volume.VolumeSource.ConfigMap = &corev1.ConfigMapVolumeSource{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: storageName,
+			},
+			Items: items,
+		}
+	case "secret":
+		volume.VolumeSource.Secret = &corev1.SecretVolumeSource{
+			SecretName: storageName,
+			Items:      items,
+		}
+	case "pvc":
+		volume.VolumeSource.PersistentVolumeClaim = &corev1.PersistentVolumeClaimVolumeSource{
+			ClaimName: storageName,
+		}
+	}
+
+	return &volume
+}
+
+func getMount(volName, mountPath, subPath string) *corev1.VolumeMount {
+	mount := corev1.VolumeMount{
+		Name:      volName,
+		MountPath: mountPath,
+		ReadOnly:  true,
+	}
+	if subPath != "" {
+		mount.SubPath = subPath
+	}
+
+	return &mount
+}
+
+func convertToKeyToPath(k, v string) []corev1.KeyToPath {
+	if k == "" {
+		return nil
+	}
+
+	kp := []corev1.KeyToPath{
+		{
+			Key:  k,
+			Path: v,
+		},
+	}
+
+	return kp
 }
 
 func getResourcePath(resourceName string, maybePath string, resourceType v1.ResourceType) string {
