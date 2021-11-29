@@ -113,8 +113,8 @@ traits:
     description: To configure a different port exposed by the container (default `8080`).
   - name: port-name
     type: string
-    description: To configure a different port name for the port exposed by the container
-      (default `http`).
+    description: To configure a different port name for the port exposed by the container.
+      It defaults to `http` only when the `expose` parameter is true.
   - name: service-port
     type: int
     description: To configure under which service port the container port is to be
@@ -349,7 +349,7 @@ traits:
     description: Can be used to enable or disable a trait. All traits share this common
       property.
   - name: discovery-cache
-    type: ./pkg/trait.discoveryCacheType
+    type: github.com/apache/camel-k/pkg/trait.discoveryCacheType
     description: Discovery client cache to be used, either `disabled`, `disk` or `memory`
       (default `memory`)
 - name: health
@@ -919,7 +919,7 @@ traits:
     description: Can be used to enable or disable a trait. All traits share this common
       property.
   - name: package-type
-    type: '[]./pkg/trait.quarkusPackageType'
+    type: '[]github.com/apache/camel-k/pkg/trait.quarkusPackageType'
     description: The Quarkus package types, either `fast-jar` or `native` (default
       `fast-jar`).In case both `fast-jar` and `native` are specified, two `IntegrationKit`
       resources are created,with the `native` kit having precedence over the `fast-jar`

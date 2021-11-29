@@ -60,7 +60,7 @@ The following configuration options are available:
 
 | container.port-name
 | string
-| To configure a different port name for the port exposed by the container (default `http`).
+| To configure a different port name for the port exposed by the container. It defaults to `http` only when the `expose` parameter is true.
 
 | container.service-port
 | int
