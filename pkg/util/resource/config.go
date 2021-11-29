@@ -37,7 +37,8 @@ var invalidPaths = []string{"/etc/camel", "/deployments/dependencies"}
 
 // Config represents a config option.
 type Config struct {
-	configType      StorageType
+	storageType     StorageType
+	contentType     ContentType
 	resourceName    string
 	resourceKey     string
 	destinationPath string
@@ -48,9 +49,14 @@ func (config *Config) DestinationPath() string {
 	return config.destinationPath
 }
 
-// Type is the type, converted as string.
-func (config *Config) Type() StorageType {
-	return config.configType
+// StorageType is the type of storage used for the configuration.
+func (config *Config) StorageType() StorageType {
+	return config.storageType
+}
+
+// ContentType is the type of content used for the configuration.
+func (config *Config) ContentType() ContentType {
+	return config.contentType
 }
 
 // Name is the name of the resource.
@@ -90,24 +96,35 @@ const (
 	StorageTypeFile StorageType = "file"
 )
 
+// ContentType represent what kind of a content is, either data or purely text configuration.
+type ContentType string
+
+const (
+	// ContentTypeData can contain binary content, won't be parsed to look for user properties.
+	ContentTypeData ContentType = "data"
+	// ContentTypeText can't contain binary content, will be parsed to look for user properties.
+	ContentTypeText ContentType = "text"
+)
+
 var (
 	validConfigSecretRegexp = regexp.MustCompile(`^(configmap|secret)\:([\w\.\-\_\:\/@]+)$`)
 	validFileRegexp         = regexp.MustCompile(`^file\:([\w\.\-\_\:\/@" ]+)$`)
 	validResourceRegexp     = regexp.MustCompile(`^([\w\.\-\_\:]+)(\/([\w\.\-\_\:]+))?(\@([\w\.\-\_\:\/]+))?$`)
 )
 
-func newConfig(configType StorageType, value string) *Config {
-	rn, mk, mp := parseResourceValue(configType, value)
+func newConfig(storageType StorageType, contentType ContentType, value string) *Config {
+	rn, mk, mp := parseResourceValue(storageType, value)
 	return &Config{
-		configType:      configType,
+		storageType:     storageType,
+		contentType:     contentType,
 		resourceName:    rn,
 		resourceKey:     mk,
 		destinationPath: mp,
 	}
 }
 
-func parseResourceValue(configType StorageType, value string) (resource string, maybeKey string, maybeDestinationPath string) {
-	if configType == StorageTypeFile {
+func parseResourceValue(storageType StorageType, value string) (resource string, maybeKey string, maybeDestinationPath string) {
+	if storageType == StorageTypeFile {
 		resource, maybeDestinationPath = ParseFileValue(value)
 		return resource, "", maybeDestinationPath
 	}
@@ -139,25 +156,25 @@ func parseCMOrSecretValue(value string) (resource string, maybeKey string, maybe
 // ParseResource will parse and return a Config.
 func ParseResource(item string) (*Config, error) {
 	// Deprecated: ensure backward compatibility with `--resource filename` format until version 1.5.x
-	// then replace with parseOption() func directly
-	option, err := parse(item)
+	// then replace with parse() func directly
+	resource, err := parse(item, ContentTypeData)
 	if err != nil {
 		if strings.HasPrefix(err.Error(), "could not match config, secret or file configuration") {
 			fmt.Printf("Warn: --resource %s has been deprecated. You should use --resource file:%s instead.\n", item, item)
-			return parse("file:" + item)
+			return parse("file:"+item, ContentTypeData)
 		}
 		return nil, err
 	}
 
-	return option, nil
+	return resource, nil
 }
 
 // ParseConfig will parse and return a Config.
 func ParseConfig(item string) (*Config, error) {
-	return parse(item)
+	return parse(item, ContentTypeText)
 }
 
-func parse(item string) (*Config, error) {
+func parse(item string, contentType ContentType) (*Config, error) {
 	var cot StorageType
 	var value string
 	switch {
@@ -180,7 +197,7 @@ func parse(item string) (*Config, error) {
 		return nil, fmt.Errorf("could not match config, secret or file configuration as %s", item)
 	}
 
-	configurationOption := newConfig(cot, value)
+	configurationOption := newConfig(cot, contentType, value)
 	if err := configurationOption.Validate(); err != nil {
 		return nil, err
 	}
@@ -216,7 +233,7 @@ func ConvertFileToConfigmap(ctx context.Context, c client.Client, resourceSpec v
 			return cm, err
 		}
 	}
-	config.configType = StorageTypeConfigmap
+	config.storageType = StorageTypeConfigmap
 	config.resourceName = cm.Name
 
 	return cm, nil

@@ -65,7 +65,7 @@ func ApplyResourceOption(ctx context.Context, config *resource.Config, integrati
 func applyOption(ctx context.Context, config *resource.Config, integration *v1.Integration,
 	c client.Client, namespace string, enableCompression bool, resourceType v1.ResourceType) (*corev1.ConfigMap, error) {
 	var maybeGenCm *corev1.ConfigMap
-	switch config.Type() {
+	switch config.StorageType() {
 	case resource.StorageTypeConfigmap:
 		cm := kubernetes.LookupConfigmap(ctx, c, namespace, config.Name())
 		if cm == nil {
@@ -99,10 +99,10 @@ func applyOption(ctx context.Context, config *resource.Config, integration *v1.I
 		}
 	default:
 		// Should never reach this
-		return maybeGenCm, fmt.Errorf("invalid option type %s", config.Type())
+		return maybeGenCm, fmt.Errorf("invalid option type %s", config.StorageType())
 	}
 
-	integration.Spec.AddConfigurationAsResource(string(config.Type()), config.Name(), string(resourceType), config.DestinationPath(), config.Key())
+	integration.Spec.AddConfigurationAsResource(string(config.StorageType()), config.Name(), string(resourceType), config.DestinationPath(), config.Key())
 
 	return maybeGenCm, nil
 }
