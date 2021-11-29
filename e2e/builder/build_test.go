@@ -90,7 +90,7 @@ func doKitFullBuild(t *testing.T, name string, memoryLimit string, buildTimeout 
 		}
 		Expect(Kamel(buildKitArgs...).Execute()).To(Succeed())
 
-		Eventually(Build(ns, name)).ShouldNot(BeNil())
+		Eventually(Build(ns, name), testTimeout).ShouldNot(BeNil())
 		Eventually(BuildPhase(ns, name), testTimeout).Should(Equal(v1.BuildPhaseSucceeded))
 		Eventually(KitPhase(ns, name), testTimeout).Should(Equal(v1.IntegrationKitPhaseReady))
 	})
