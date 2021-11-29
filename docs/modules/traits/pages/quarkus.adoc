@@ -36,7 +36,7 @@ The following configuration options are available:
 | Can be used to enable or disable a trait. All traits share this common property.
 
 | quarkus.package-type
-| []./pkg/trait.quarkusPackageType
+| []github.com/apache/camel-k/pkg/trait.quarkusPackageType
 | The Quarkus package types, either `fast-jar` or `native` (default `fast-jar`).
 In case both `fast-jar` and `native` are specified, two `IntegrationKit` resources are created,
 with the `native` kit having precedence over the `fast-jar` one once ready.

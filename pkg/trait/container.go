@@ -68,7 +68,7 @@ type containerTrait struct {
 	Expose *bool `property:"expose" json:"expose,omitempty"`
 	// To configure a different port exposed by the container (default `8080`).
 	Port int `property:"port" json:"port,omitempty"`
-	// To configure a different port name for the port exposed by the container. it defaults to `http` only when the `expose` parameter is true.
+	// To configure a different port name for the port exposed by the container. It defaults to `http` only when the `expose` parameter is true.
 	PortName string `property:"port-name" json:"portName,omitempty"`
 	// To configure under which service port the container port is to be exposed (default `80`).
 	ServicePort int `property:"service-port" json:"servicePort,omitempty"`
