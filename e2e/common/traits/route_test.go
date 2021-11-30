@@ -34,6 +34,7 @@ import (
 	"math/big"
 	rand2 "math/rand"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
@@ -69,7 +70,18 @@ var certPem []byte
 // then in this case the HTTP client validates the TLS certificate.
 var skipClientTLSVerification = true
 
+/*
+ * TODO
+ * Test needs to be modified as route for unsecured http is not created on OCP.
+ * Already skipped when executed using Kind since cluster does not support route API.
+ *
+ * Adding CAMEL_K_TEST_SKIP_PROBLEMATIC env var for the moment.
+ */
 func TestRunRoutes(t *testing.T) {
+	if os.Getenv("CAMEL_K_TEST_SKIP_PROBLEMATIC") == "true" {
+		t.Skip("WARNING: Test marked as problematic ... skipping")
+	}
+
 	WithNewTestNamespace(t, func(ns string) {
 		ocp, err := openshift.IsOpenShift(TestClient())
 		if !ocp {

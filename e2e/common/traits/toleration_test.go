@@ -23,6 +23,7 @@ limitations under the License.
 package traits
 
 import (
+	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -35,7 +36,18 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
+/*
+ * TODO
+ * Test needs to be modified as taint test for java3 integration does not work on OCP.
+ * Already skipped when executed using Kind since that is only a single-node cluster.
+ *
+ * Adding CAMEL_K_TEST_SKIP_PROBLEMATIC env var for the moment.
+ */
 func TestTolerationTrait(t *testing.T) {
+	if os.Getenv("CAMEL_K_TEST_SKIP_PROBLEMATIC") == "true" {
+		t.Skip("WARNING: Test marked as problematic ... skipping")
+	}
+
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
