@@ -24,7 +24,7 @@ TMPFILE=`mktemp`
 TMPDIR=`mktemp -d`
 PWD=`pwd`
 # TODO detect proper binary, based on the OS running this script
-wget -q --show-progress https://github.com/ahmetb/gen-crd-api-reference-docs/releases/download/v0.1.5/gen-crd-api-reference-docs_linux_amd64.tar.gz -O $TMPFILE
+wget -v https://github.com/ahmetb/gen-crd-api-reference-docs/releases/download/v0.1.5/gen-crd-api-reference-docs_linux_amd64.tar.gz -O $TMPFILE
 tar -C $TMPDIR -xf $TMPFILE
 
 echo "Generating CRD API documentation..."
