@@ -25,9 +25,40 @@ rules:
 - apiGroups:
   - camel.apache.org
   resources:
-  - "*"
+  - builds
+  - camelcatalogs
+  - integrationkits
+  - integrationplatforms
+  - integrations
+  - kameletbindings
+  - kamelets
   verbs:
-  - "*"
+  - create
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - builds
+  verbs:
+  - delete
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - builds/status
+  - camelcatalogs/status
+  - integrationkits/status
+  - integrationplatforms/status
+  - integrations/status
+  - kameletbindings/status
+  - kamelets/status
+  verbs:
+  - get
+  - patch
+  - update
 - apiGroups:
   - ""
   resources:
