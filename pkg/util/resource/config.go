@@ -208,7 +208,7 @@ func parse(item string, contentType ContentType) (*Config, error) {
 // taking care to create the Configmap on the cluster. The method will change the value of config parameter
 // to reflect the conversion applied transparently.
 func ConvertFileToConfigmap(ctx context.Context, c client.Client, resourceSpec v1.ResourceSpec, config *Config,
-	namespace string, resourceType v1.ResourceType) (*corev1.ConfigMap, error) {
+	namespace string, integrationName string, resourceType v1.ResourceType) (*corev1.ConfigMap, error) {
 	if config.DestinationPath() == "" {
 		config.resourceKey = filepath.Base(config.Name())
 		// As we are changing the resource to a configmap type
@@ -223,7 +223,7 @@ func ConvertFileToConfigmap(ctx context.Context, c client.Client, resourceSpec v
 		config.resourceKey = filepath.Base(config.DestinationPath())
 		config.destinationPath = filepath.Dir(config.DestinationPath())
 	}
-	genCmName := fmt.Sprintf("cm-%s", hashFrom([]byte(resourceSpec.Content), resourceSpec.RawContent))
+	genCmName := fmt.Sprintf("cm-%s", hashFrom([]byte(integrationName), []byte(resourceSpec.Content), resourceSpec.RawContent))
 	cm := kubernetes.NewConfigmap(namespace, genCmName, filepath.Base(config.Name()), config.Key(), resourceSpec.Content, resourceSpec.RawContent)
 	err := c.Create(ctx, cm)
 	if err != nil {
