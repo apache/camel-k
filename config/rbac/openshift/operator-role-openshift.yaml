@@ -23,6 +23,16 @@ metadata:
     app: "camel-k"
 rules:
 - apiGroups:
+  - camel.apache.org
+  resources:
+  - builds/finalizers
+  - integrationkits/finalizers
+  - integrationplatforms/finalizers
+  - integrations/finalizers
+  - kameletbindings/finalizers
+  verbs:
+  - update
+- apiGroups:
   - ""
   - "build.openshift.io"
   resources:
