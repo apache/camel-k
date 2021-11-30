@@ -11,6 +11,7 @@
 - Is there any resources requirements for camel-k operator Deployment? [\#2768](https://github.com/apache/camel-k/issues/2768)
 - Jitpack still configured with `master` branch [\#2764](https://github.com/apache/camel-k/issues/2764)
 - How can I find the log file location in the integration pod?  [\#2762](https://github.com/apache/camel-k/issues/2762)
+- Default value of trait container.port-name is missing from catalog [\#2761](https://github.com/apache/camel-k/issues/2761)
 - Add 1.7.x documentation tag [\#2753](https://github.com/apache/camel-k/issues/2753)
 - Could not pull base image - Build kit failed \(No matching credentials were found, falling back on anonymous\) [\#2748](https://github.com/apache/camel-k/issues/2748)
 - Cannot deploy XML integration with undertow [\#2746](https://github.com/apache/camel-k/issues/2746)
@@ -30,6 +31,7 @@
 
 **Merged pull requests:**
 
+- Fix doc port name [\#2790](https://github.com/apache/camel-k/pull/2790) ([oscerd](https://github.com/oscerd))
 - fix\(doc\): header complain [\#2787](https://github.com/apache/camel-k/pull/2787) ([squakez](https://github.com/squakez))
 - fix\(lint\): error return value are not checked [\#2786](https://github.com/apache/camel-k/pull/2786) ([lburgazzoli](https://github.com/lburgazzoli))
 - doc: no CLI integration run [\#2783](https://github.com/apache/camel-k/pull/2783) ([squakez](https://github.com/squakez))
