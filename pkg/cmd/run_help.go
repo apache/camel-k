@@ -33,8 +33,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var invalidPaths = []string{"/etc/camel", "/deployments/dependencies"}
-
 //nolint
 func hashFrom(contents ...[]byte) string {
 	// SHA1 because we need to limit the length to less than 64 chars
@@ -93,7 +91,7 @@ func applyOption(ctx context.Context, config *resource.Config, integration *v1.I
 		if err != nil {
 			return maybeGenCm, err
 		}
-		maybeGenCm, err = resource.ConvertFileToConfigmap(ctx, c, resourceSpec, config, integration.Namespace, resourceType)
+		maybeGenCm, err = resource.ConvertFileToConfigmap(ctx, c, resourceSpec, config, integration.Namespace, integration.Name, resourceType)
 		if err != nil {
 			return maybeGenCm, err
 		}

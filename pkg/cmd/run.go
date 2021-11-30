@@ -226,13 +226,13 @@ func (o *runCmdOptions) validate() error {
 	}
 
 	// Deprecation warning
-	if o.PropertyFiles != nil {
+	if o.PropertyFiles != nil && len(o.PropertyFiles) > 0 {
 		fmt.Println("Warn: --property-file has been deprecated. You should use --property file:/path/to/conf.properties instead.")
 	}
-	if o.ConfigMaps != nil {
+	if o.ConfigMaps != nil && len(o.ConfigMaps) > 0 {
 		fmt.Println("Warn: --configmap has been deprecated. You should use --config configmap:my-configmap instead.")
 	}
-	if o.Secrets != nil {
+	if o.Secrets != nil && len(o.Secrets) > 0 {
 		fmt.Println("Warn: --secret has been deprecated. You should use --config secret:my-secret instead.")
 	}
 

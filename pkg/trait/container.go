@@ -255,31 +255,31 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	envvar.SetVal(&container.Env, "CAMEL_K_CONF_D", camel.ConfDPath)
 
 	e.addSourcesProperties()
+	if props, err := e.computeApplicationProperties(); err != nil {
+		return err
+	} else if props != nil {
+		e.Resources.Add(props)
+	}
 
 	t.configureResources(e, &container)
-
 	if IsTrue(t.Expose) {
 		t.configureService(e, &container)
 	}
 	t.configureCapabilities(e)
+
+	var volumes *[]corev1.Volume
+	var containers *[]corev1.Container
+	visited := false
 
 	// Deployment
 	if err := e.Resources.VisitDeploymentE(func(deployment *appsv1.Deployment) error {
 		for _, envVar := range e.EnvVars {
 			envvar.SetVar(&container.Env, envVar)
 		}
-		if props, err := e.computeApplicationProperties(); err != nil {
-			return err
-		} else if props != nil {
-			e.Resources.Add(props)
-		}
 
-		err := t.configureVolumesAndMounts(e, &deployment.Spec.Template.Spec.Volumes, &container.VolumeMounts)
-		if err != nil {
-			return err
-		}
-		deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, container)
-
+		volumes = &deployment.Spec.Template.Spec.Volumes
+		containers = &deployment.Spec.Template.Spec.Containers
+		visited = true
 		return nil
 	}); err != nil {
 		return err
@@ -301,19 +301,10 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 				envvar.SetVar(&container.Env, env)
 			}
 		}
-		if props, err := e.computeApplicationProperties(); err != nil {
-			return err
-		} else if props != nil {
-			e.Resources.Add(props)
-		}
 
-		e.configureVolumesAndMounts(
-			&service.Spec.ConfigurationSpec.Template.Spec.Volumes,
-			&container.VolumeMounts,
-		)
-
-		service.Spec.ConfigurationSpec.Template.Spec.Containers = append(service.Spec.ConfigurationSpec.Template.Spec.Containers, container)
-
+		volumes = &service.Spec.ConfigurationSpec.Template.Spec.Volumes
+		containers = &service.Spec.ConfigurationSpec.Template.Spec.Containers
+		visited = true
 		return nil
 	}); err != nil {
 		return err
@@ -324,41 +315,40 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		for _, envVar := range e.EnvVars {
 			envvar.SetVar(&container.Env, envVar)
 		}
-		if props, err := e.computeApplicationProperties(); err != nil {
-			return err
-		} else if props != nil {
-			e.Resources.Add(props)
-		}
 
-		e.configureVolumesAndMounts(
-			&cron.Spec.JobTemplate.Spec.Template.Spec.Volumes,
-			&container.VolumeMounts,
-		)
-
-		cron.Spec.JobTemplate.Spec.Template.Spec.Containers = append(cron.Spec.JobTemplate.Spec.Template.Spec.Containers, container)
-
+		volumes = &cron.Spec.JobTemplate.Spec.Template.Spec.Volumes
+		containers = &cron.Spec.JobTemplate.Spec.Template.Spec.Containers
+		visited = true
 		return nil
 	}); err != nil {
 		return err
 	}
 
+	if visited {
+		// Volumes declared in the Integration resources
+		e.configureVolumesAndMounts(volumes, &container.VolumeMounts)
+		// Volumes declared in the trait config/resource options
+		err := t.configureVolumesAndMounts(volumes, &container.VolumeMounts)
+		if err != nil {
+			return err
+		}
+		*containers = append(*containers, container)
+	}
+
 	return nil
 }
 
-func (t *containerTrait) configureVolumesAndMounts(e *Environment, vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) error {
-	// Volumes declared in the Integration resources
-	e.configureVolumesAndMounts(vols, mnts)
-	// Volumes declared in the trait config/resource options
+func (t *containerTrait) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) error {
 	for _, c := range t.Configs {
 		if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
-			t.mountResource(e, vols, mnts, conf)
+			t.mountResource(vols, mnts, conf)
 		} else {
 			return parseErr
 		}
 	}
 	for _, r := range t.Resources {
 		if res, parseErr := utilResource.ParseResource(r); parseErr == nil {
-			t.mountResource(e, vols, mnts, res)
+			t.mountResource(vols, mnts, res)
 		} else {
 			return parseErr
 		}
@@ -367,7 +357,7 @@ func (t *containerTrait) configureVolumesAndMounts(e *Environment, vols *[]corev
 	return nil
 }
 
-func (t *containerTrait) mountResource(e *Environment, vols *[]corev1.Volume, mnts *[]corev1.VolumeMount, conf *utilResource.Config) {
+func (t *containerTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount, conf *utilResource.Config) {
 	refName := kubernetes.SanitizeLabel(conf.Name())
 	vol := getVolume(refName, string(conf.StorageType()), conf.Name(), conf.Key(), conf.Key())
 	mnt := getMount(refName, conf.DestinationPath(), "")
