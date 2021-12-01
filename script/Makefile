@@ -403,9 +403,15 @@ operator-sdk:
 ifeq (, $(shell which operator-sdk))
 	@{ \
 	set -e ;\
-	curl \
-		-L https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_linux_amd64 \
-		-o operator-sdk ;\
+	if [ "$(shell uname -s 2>/dev/null || echo Unknown)" == "Darwin" ] ; then \
+		curl \
+			-L https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_darwin_amd64 \
+			-o operator-sdk ; \
+	else \
+		curl \
+			-L https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_linux_amd64 \
+			-o operator-sdk ; \
+	fi ;\
 	chmod +x operator-sdk ;\
 	mv operator-sdk $(GOBIN)/ ;\
 	}
