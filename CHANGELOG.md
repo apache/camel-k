@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Makefile: for the generate-doc target don't use show-progress for wget [\#2791](https://github.com/apache/camel-k/issues/2791)
 - how i use build-property on Integration crd [\#2789](https://github.com/apache/camel-k/issues/2789)
 - Dry run kamel run [\#2769](https://github.com/apache/camel-k/issues/2769)
 - Is there any resources requirements for camel-k operator Deployment? [\#2768](https://github.com/apache/camel-k/issues/2768)
@@ -16,6 +17,7 @@
 - Could not pull base image - Build kit failed \(No matching credentials were found, falling back on anonymous\) [\#2748](https://github.com/apache/camel-k/issues/2748)
 - Cannot deploy XML integration with undertow [\#2746](https://github.com/apache/camel-k/issues/2746)
 - Release 1.7.0 [\#2743](https://github.com/apache/camel-k/issues/2743)
+- Camel K SEDA Queue full Issue [\#2725](https://github.com/apache/camel-k/issues/2725)
 - topicName [\#2567](https://github.com/apache/camel-k/issues/2567)
 - Kamelet: default KameletBindings configuration settings [\#2558](https://github.com/apache/camel-k/issues/2558)
 - Camel-K - uninstall and namespace deletion w/ k8s let all Camel-K Integrations in this namespace alive [\#2533](https://github.com/apache/camel-k/issues/2533)
@@ -31,6 +33,7 @@
 
 **Merged pull requests:**
 
+- Makefile: for the generate-doc target don't use show-progress for wget [\#2792](https://github.com/apache/camel-k/pull/2792) ([oscerd](https://github.com/oscerd))
 - Fix doc port name [\#2790](https://github.com/apache/camel-k/pull/2790) ([oscerd](https://github.com/oscerd))
 - fix\(doc\): header complain [\#2787](https://github.com/apache/camel-k/pull/2787) ([squakez](https://github.com/squakez))
 - fix\(lint\): error return value are not checked [\#2786](https://github.com/apache/camel-k/pull/2786) ([lburgazzoli](https://github.com/lburgazzoli))
@@ -45,6 +48,7 @@
 - chore\(release\): Update latest released version and OLM base CSV manifest [\#2770](https://github.com/apache/camel-k/pull/2770) ([astefanutti](https://github.com/astefanutti))
 - chore\(build\): Upgrade Maven to version 3.8.4 [\#2767](https://github.com/apache/camel-k/pull/2767) ([astefanutti](https://github.com/astefanutti))
 - gosec [\#2766](https://github.com/apache/camel-k/pull/2766) ([lburgazzoli](https://github.com/lburgazzoli))
+- Update the operator-sdk version [\#2755](https://github.com/apache/camel-k/pull/2755) ([phantomjinx](https://github.com/phantomjinx))
 - Fix \#2638: fix condition for external kit and add test [\#2754](https://github.com/apache/camel-k/pull/2754) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore\(release\): Remove staging repository [\#2750](https://github.com/apache/camel-k/pull/2750) ([astefanutti](https://github.com/astefanutti))
 - chore\(e2e\): disable object truncation on test results [\#2745](https://github.com/apache/camel-k/pull/2745) ([tadayosi](https://github.com/tadayosi))
