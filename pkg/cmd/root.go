@@ -30,7 +30,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/apache/camel-k/pkg/client"
-	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
@@ -194,7 +194,7 @@ func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 		// reconciled. Hence the compatibility check is skipped for the install and the operator command.
 		// Furthermore, there can be any incompatibilities, as the install command deploys
 		// the operator version it's compatible with.
-		if cmd.Use != installCommand && cmd.Use != operatorCommand {
+		if cmd.Use != builderCommand && cmd.Use != installCommand && cmd.Use != operatorCommand {
 			checkAndShowCompatibilityWarning(command.Context, cmd, c, command.Namespace)
 		}
 	}
@@ -229,12 +229,12 @@ func (command *RootCmdOptions) GetCmdClient() (client.Client, error) {
 }
 
 // GetCamelCmdClient returns a client to access the Camel resources.
-func (command *RootCmdOptions) GetCamelCmdClient() (*camelv1.CamelV1Client, error) {
+func (command *RootCmdOptions) GetCamelCmdClient() (*v1.CamelV1Client, error) {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return nil, err
 	}
-	return camelv1.NewForConfig(c.GetConfig())
+	return v1.NewForConfig(c.GetConfig())
 }
 
 // NewCmdClient returns a new client that can be used from command line tools.
