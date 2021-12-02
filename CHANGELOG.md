@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- CXF Support [\#2799](https://github.com/apache/camel-k/issues/2799)
+- Update documentation about monitoring metrics using Prometheus Operator 0.38.0 [\#2794](https://github.com/apache/camel-k/issues/2794)
 - Makefile: for the generate-doc target don't use show-progress for wget [\#2791](https://github.com/apache/camel-k/issues/2791)
 - how i use build-property on Integration crd [\#2789](https://github.com/apache/camel-k/issues/2789)
 - Dry run kamel run [\#2769](https://github.com/apache/camel-k/issues/2769)
@@ -18,8 +20,10 @@
 - Cannot deploy XML integration with undertow [\#2746](https://github.com/apache/camel-k/issues/2746)
 - Release 1.7.0 [\#2743](https://github.com/apache/camel-k/issues/2743)
 - Camel K SEDA Queue full Issue [\#2725](https://github.com/apache/camel-k/issues/2725)
+- Google storage component doesn't work [\#2576](https://github.com/apache/camel-k/issues/2576)
 - topicName [\#2567](https://github.com/apache/camel-k/issues/2567)
 - Kamelet: default KameletBindings configuration settings [\#2558](https://github.com/apache/camel-k/issues/2558)
+- Multiple of the examples fail on Minikube [\#2537](https://github.com/apache/camel-k/issues/2537)
 - Camel-K - uninstall and namespace deletion w/ k8s let all Camel-K Integrations in this namespace alive [\#2533](https://github.com/apache/camel-k/issues/2533)
 - Reduce time for first Integration start [\#2520](https://github.com/apache/camel-k/issues/2520)
 - Install Error [\#2498](https://github.com/apache/camel-k/issues/2498)
@@ -33,6 +37,8 @@
 
 **Merged pull requests:**
 
+- fix\(doc\): Update Prometheus Operator setup documentation [\#2795](https://github.com/apache/camel-k/pull/2795) ([astefanutti](https://github.com/astefanutti))
+- chore\(RBAC\): Remove wildcards from roles [\#2793](https://github.com/apache/camel-k/pull/2793) ([astefanutti](https://github.com/astefanutti))
 - Makefile: for the generate-doc target don't use show-progress for wget [\#2792](https://github.com/apache/camel-k/pull/2792) ([oscerd](https://github.com/oscerd))
 - Fix doc port name [\#2790](https://github.com/apache/camel-k/pull/2790) ([oscerd](https://github.com/oscerd))
 - fix\(doc\): header complain [\#2787](https://github.com/apache/camel-k/pull/2787) ([squakez](https://github.com/squakez))
