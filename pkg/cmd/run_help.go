@@ -44,65 +44,47 @@ func hashFrom(contents ...[]byte) string {
 	return fmt.Sprintf("%x", hash.Sum(nil))
 }
 
-// ApplyConfigOption will set the proper --config option behavior to the IntegrationSpec.
-func ApplyConfigOption(ctx context.Context, config *resource.Config, integration *v1.Integration, c client.Client,
-	namespace string, enableCompression bool) (*corev1.ConfigMap, error) {
-	// A config option cannot specify destination path
-	if config.DestinationPath() != "" {
-		return nil, fmt.Errorf("cannot specify a destination path for this option type")
-	}
-	return applyOption(ctx, config, integration, c, namespace, enableCompression, v1.ResourceTypeConfig)
-}
-
-// ApplyResourceOption will set the proper --resource option behavior to the IntegrationSpec.
-func ApplyResourceOption(ctx context.Context, config *resource.Config, integration *v1.Integration, c client.Client,
-	namespace string, enableCompression bool) (*corev1.ConfigMap, error) {
-	return applyOption(ctx, config, integration, c, namespace, enableCompression, v1.ResourceTypeData)
-}
-
-func applyOption(ctx context.Context, config *resource.Config, integration *v1.Integration,
-	c client.Client, namespace string, enableCompression bool, resourceType v1.ResourceType) (*corev1.ConfigMap, error) {
-	var maybeGenCm *corev1.ConfigMap
+func parseConfigAndGenCm(ctx context.Context, c client.Client, config *resource.Config, integration *v1.Integration, enableCompression bool) (*corev1.ConfigMap, error) {
 	switch config.StorageType() {
 	case resource.StorageTypeConfigmap:
-		cm := kubernetes.LookupConfigmap(ctx, c, namespace, config.Name())
+		cm := kubernetes.LookupConfigmap(ctx, c, integration.Namespace, config.Name())
 		if cm == nil {
 			fmt.Printf("Warn: %s Configmap not found in %s namespace, make sure to provide it before the Integration can run\n",
-				config.Name(), namespace)
-		} else if resourceType != v1.ResourceTypeData && cm.BinaryData != nil {
-			return maybeGenCm, fmt.Errorf("you cannot provide a binary config, use a text file instead")
+				config.Name(), integration.Namespace)
+		} else if config.ContentType() != resource.ContentTypeData && cm.BinaryData != nil {
+			return nil, fmt.Errorf("you cannot provide a binary config, use a text file instead")
 		}
 	case resource.StorageTypeSecret:
-		secret := kubernetes.LookupSecret(ctx, c, namespace, config.Name())
+		secret := kubernetes.LookupSecret(ctx, c, integration.Namespace, config.Name())
 		if secret == nil {
 			fmt.Printf("Warn: %s Secret not found in %s namespace, make sure to provide it before the Integration can run\n",
-				config.Name(), namespace)
+				config.Name(), integration.Namespace)
 		}
 	case resource.StorageTypeFile:
 		// Don't allow a binary non compressed resource
 		rawData, contentType, err := loadRawContent(ctx, config.Name())
 		if err != nil {
-			return maybeGenCm, err
+			return nil, err
 		}
-		if resourceType != v1.ResourceTypeData && !enableCompression && isBinary(contentType) {
-			return maybeGenCm, fmt.Errorf("you cannot provide a binary config, use a text file or check --resource flag instead")
+		if config.ContentType() != resource.ContentTypeData && !enableCompression && isBinary(contentType) {
+			return nil, fmt.Errorf("you cannot provide a binary config, use a text file or check --resource flag instead")
+		}
+		resourceType := v1.ResourceTypeData
+		if config.ContentType() == resource.ContentTypeText {
+			resourceType = v1.ResourceTypeConfig
 		}
 		resourceSpec, err := binaryOrTextResource(path.Base(config.Name()), rawData, contentType, enableCompression, resourceType, config.DestinationPath())
 		if err != nil {
-			return maybeGenCm, err
+			return nil, err
 		}
-		maybeGenCm, err = resource.ConvertFileToConfigmap(ctx, c, resourceSpec, config, integration.Namespace, integration.Name, resourceType)
-		if err != nil {
-			return maybeGenCm, err
-		}
+
+		return resource.ConvertFileToConfigmap(ctx, c, config, integration.Namespace, integration.Name, resourceSpec.Content, resourceSpec.RawContent)
 	default:
 		// Should never reach this
-		return maybeGenCm, fmt.Errorf("invalid option type %s", config.StorageType())
+		return nil, fmt.Errorf("invalid option type %s", config.StorageType())
 	}
 
-	integration.Spec.AddConfigurationAsResource(string(config.StorageType()), config.Name(), string(resourceType), config.DestinationPath(), config.Key())
-
-	return maybeGenCm, nil
+	return nil, nil
 }
 
 func binaryOrTextResource(fileName string, data []byte, contentType string, base64Compression bool, resourceType v1.ResourceType, destinationPath string) (v1.ResourceSpec, error) {

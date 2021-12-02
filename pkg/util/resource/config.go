@@ -25,15 +25,12 @@ import (
 	"regexp"
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
-
-var invalidPaths = []string{"/etc/camel", "/deployments/dependencies"}
 
 // Config represents a config option.
 type Config struct {
@@ -69,19 +66,17 @@ func (config *Config) Key() string {
 	return config.resourceKey
 }
 
-// Validate checks if the DestinationPath is correctly configured.
-func (config *Config) Validate() error {
-	if config.destinationPath == "" {
-		return nil
+// String represents the unparsed value of the resource.
+func (config *Config) String() string {
+	s := fmt.Sprintf("%s:%s", config.storageType, config.resourceName)
+	if config.resourceKey != "" {
+		s = fmt.Sprintf("%s/%s", s, config.resourceKey)
+	}
+	if config.destinationPath != "" {
+		s = fmt.Sprintf("%s@%s", s, config.destinationPath)
 	}
 
-	// Check for invalid path
-	for _, invalidPath := range invalidPaths {
-		if config.destinationPath == invalidPath || strings.HasPrefix(config.destinationPath, invalidPath+"/") {
-			return fmt.Errorf("you cannot mount a file under %s path", invalidPath)
-		}
-	}
-	return nil
+	return s
 }
 
 // StorageType represent a resource/config type such as configmap, secret or local file.
@@ -153,7 +148,7 @@ func parseCMOrSecretValue(value string) (resource string, maybeKey string, maybe
 	return groups[1], groups[3], groups[5]
 }
 
-// ParseResource will parse and return a Config.
+// ParseResource will parse a resource and return a Config.
 func ParseResource(item string) (*Config, error) {
 	// Deprecated: ensure backward compatibility with `--resource filename` format until version 1.5.x
 	// then replace with parse() func directly
@@ -169,7 +164,7 @@ func ParseResource(item string) (*Config, error) {
 	return resource, nil
 }
 
-// ParseConfig will parse and return a Config.
+// ParseConfig will parse a config and return a Config.
 func ParseConfig(item string) (*Config, error) {
 	return parse(item, ContentTypeText)
 }
@@ -197,24 +192,20 @@ func parse(item string, contentType ContentType) (*Config, error) {
 		return nil, fmt.Errorf("could not match config, secret or file configuration as %s", item)
 	}
 
-	configurationOption := newConfig(cot, contentType, value)
-	if err := configurationOption.Validate(); err != nil {
-		return nil, err
-	}
-	return configurationOption, nil
+	return newConfig(cot, contentType, value), nil
 }
 
 // ConvertFileToConfigmap convert a local file resource type in a configmap type
 // taking care to create the Configmap on the cluster. The method will change the value of config parameter
 // to reflect the conversion applied transparently.
-func ConvertFileToConfigmap(ctx context.Context, c client.Client, resourceSpec v1.ResourceSpec, config *Config,
-	namespace string, integrationName string, resourceType v1.ResourceType) (*corev1.ConfigMap, error) {
+func ConvertFileToConfigmap(ctx context.Context, c client.Client, config *Config, namespace string, integrationName string,
+	content string, rawContent []byte) (*corev1.ConfigMap, error) {
 	if config.DestinationPath() == "" {
 		config.resourceKey = filepath.Base(config.Name())
 		// As we are changing the resource to a configmap type
 		// we need to declare the mount path not to use the
 		// default behavior of a configmap (which include a subdirectory with the configmap name)
-		if resourceType == v1.ResourceTypeData {
+		if config.ContentType() == ContentTypeData {
 			config.destinationPath = camel.ResourcesDefaultMountPath
 		} else {
 			config.destinationPath = camel.ConfigResourcesMountPath
@@ -223,8 +214,8 @@ func ConvertFileToConfigmap(ctx context.Context, c client.Client, resourceSpec v
 		config.resourceKey = filepath.Base(config.DestinationPath())
 		config.destinationPath = filepath.Dir(config.DestinationPath())
 	}
-	genCmName := fmt.Sprintf("cm-%s", hashFrom([]byte(integrationName), []byte(resourceSpec.Content), resourceSpec.RawContent))
-	cm := kubernetes.NewConfigmap(namespace, genCmName, filepath.Base(config.Name()), config.Key(), resourceSpec.Content, resourceSpec.RawContent)
+	genCmName := fmt.Sprintf("cm-%s", hashFrom([]byte(integrationName), []byte(content), rawContent))
+	cm := kubernetes.NewConfigmap(namespace, genCmName, filepath.Base(config.Name()), config.Key(), content, rawContent)
 	err := c.Create(ctx, cm)
 	if err != nil {
 		if k8serrors.IsAlreadyExists(err) {

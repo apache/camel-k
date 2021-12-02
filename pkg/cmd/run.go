@@ -570,29 +570,35 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	}
 
 	generatedConfigmaps := make([]*corev1.ConfigMap, 0)
-
 	for _, res := range o.Resources {
-		if config, parseErr := resource.ParseResource(res); parseErr == nil {
-			if genCm, applyResourceOptionErr := ApplyResourceOption(o.Context, config, integration, c, namespace, o.Compression); applyResourceOptionErr != nil {
-				return nil, applyResourceOptionErr
-			} else if genCm != nil {
-				generatedConfigmaps = append(generatedConfigmaps, genCm)
-			}
-		} else {
-			return nil, parseErr
+		config, err := resource.ParseResource(res)
+		if err != nil {
+			return nil, err
 		}
+		// We try to autogenerate a configmap
+		maybeGenCm, err := parseConfigAndGenCm(o.Context, c, config, integration, o.Compression)
+		if err != nil {
+			return nil, err
+		}
+		if maybeGenCm != nil {
+			generatedConfigmaps = append(generatedConfigmaps, maybeGenCm)
+		}
+		o.Traits = append(o.Traits, convertToTrait(config.String(), "container.resources"))
 	}
-
-	for _, item := range o.Configs {
-		if config, parseErr := resource.ParseConfig(item); parseErr == nil {
-			if genCm, applyConfigOptionErr := ApplyConfigOption(o.Context, config, integration, c, namespace, o.Compression); applyConfigOptionErr != nil {
-				return nil, applyConfigOptionErr
-			} else if genCm != nil {
-				generatedConfigmaps = append(generatedConfigmaps, genCm)
-			}
-		} else {
-			return nil, parseErr
+	for _, conf := range o.Configs {
+		config, err := resource.ParseResource(conf)
+		if err != nil {
+			return nil, err
 		}
+		// We try to autogenerate a configmap
+		maybeGenCm, err := parseConfigAndGenCm(o.Context, c, config, integration, o.Compression)
+		if err != nil {
+			return nil, err
+		}
+		if maybeGenCm != nil {
+			generatedConfigmaps = append(generatedConfigmaps, maybeGenCm)
+		}
+		o.Traits = append(o.Traits, convertToTrait(config.String(), "container.configs"))
 	}
 
 	for _, resource := range o.OpenAPIs {
@@ -712,6 +718,10 @@ func addResource(ctx context.Context, resourceLocation string, integrationSpec *
 	}
 
 	return nil
+}
+
+func convertToTrait(value, traitParameter string) string {
+	return fmt.Sprintf("%s=%s", traitParameter, value)
 }
 
 func convertToTraitParameter(value, traitParameter string) ([]string, error) {
