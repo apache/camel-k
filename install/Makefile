@@ -59,6 +59,9 @@ OPERATOR := operator
 PLACEHOLDER := placeholder
 YAML := yaml
 
+# Fetch the latest image name - may override the original constant
+IMAGE_NAME := $(shell grep image: $(MANAGER)/operator-deployment.yaml | sed 's/.*image: \(.*\):.*/\1/')
+
 # Setup patches
 ROLE_TO_CROLE_PATCH := $(RBAC)/patch-role-to-clusterrole
 ROLEBIN_TO_CROLEBIN_PATCH := $(RBAC)/patch-rolebinding-to-clusterrolebinding
@@ -77,6 +80,7 @@ INT_PLATFORM_PATCH := patch-integration-platform
 #
 define set-kustomize-image
 	$(if $(filter $(IMAGE_NAME),$(CUSTOM_IMAGE):$(CUSTOM_VERSION)),,\
+
 		@cd $(1) && $(KUSTOMIZE) edit set image $(IMAGE_NAME)=$(CUSTOM_IMAGE):$(CUSTOM_VERSION))
 endef
 
