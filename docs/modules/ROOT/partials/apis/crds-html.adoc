@@ -3090,6 +3090,16 @@ string
 <td>
 </td>
 </tr>
+<tr>
+<td>
+<code>info</code><br/>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1.IntegrationSpec">IntegrationSpec
