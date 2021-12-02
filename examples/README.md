@@ -17,6 +17,7 @@ In this section you will find the most basic examples. Useful to start learning 
 | Open API | `Open API` support | [see examples](./openapi/)|
 | Rest | Produce/Consume `REST`ful services | [see examples](./rest/)|
 | Modeline | [Camel K modeline support](https://camel.apache.org/camel-k/latest/cli/modeline.html) | [see examples](./modeline/)|
+| Volumes | Produce/Consume files attached to a `PVC` | [see examples](./volumes/)|
 
 ## Component usage examples
 
