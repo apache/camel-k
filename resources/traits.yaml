@@ -132,6 +132,20 @@ traits:
   - name: image-pull-policy
     type: PullPolicy
     description: 'The pull policy: Always|Never|IfNotPresent'
+  - name: configs
+    type: '[]string'
+    description: 'A list of configuration pointing to configmap/secret. Syntax: [configmap|secret|file]:name[key],
+      where name represents the local file path or the configmap/secret name and key
+      optionally represents the configmap/secret key to be filtered'
+  - name: resources
+    type: '[]string'
+    description: 'A list of resources pointing to configmap/secret. Syntax: [configmap|secret|file]:name[/key][@path],
+      where name represents the local file path or the configmap/secret name, key
+      optionally represents the configmap/secret key to be filtered and path represents
+      the destination path'
+  - name: volumes
+    type: '[]string'
+    description: 'A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]'
   - name: probes-enabled
     type: bool
     description: 'DeprecatedProbesEnabled enable/disable probes on the container (default

@@ -81,6 +81,18 @@ The following configuration options are available:
 | PullPolicy
 | The pull policy: Always\|Never\|IfNotPresent
 
+| container.configs
+| []string
+| A list of configuration pointing to configmap/secret. Syntax: [configmap\|secret\|file]:name[key], where name represents the local file path or the configmap/secret name and key optionally represents the configmap/secret key to be filtered
+
+| container.resources
+| []string
+| A list of resources pointing to configmap/secret. Syntax: [configmap\|secret\|file]:name[/key][@path], where name represents the local file path or the configmap/secret name, key optionally represents the configmap/secret key to be filtered and path represents the destination path
+
+| container.volumes
+| []string
+| A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]
+
 | container.probes-enabled
 | bool
 | DeprecatedProbesEnabled enable/disable probes on the container (default `false`)
