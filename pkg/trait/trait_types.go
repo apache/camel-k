@@ -510,7 +510,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	//
 	for _, configmaps := range e.collectConfigurations("configmap") {
 		refName := kubernetes.SanitizeLabel(configmaps["value"])
-		mountPath := getConfigmapMountPoint(configmaps["value"], configmaps["resourceMountPoint"], configmaps["resourceType"])
+		mountPath := getMountPoint(configmaps["value"], configmaps["resourceMountPoint"], "configmap", configmaps["resourceType"])
 		vol := getVolume(refName, "configmap", configmaps["value"], configmaps["resourceKey"], configmaps["resourceKey"])
 		mnt := getMount(refName, mountPath, "")
 
@@ -523,7 +523,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	//
 	for _, secret := range e.collectConfigurations("secret") {
 		refName := kubernetes.SanitizeLabel(secret["value"])
-		mountPath := getSecretMountPoint(secret["value"], secret["resourceMountPoint"], secret["resourceType"])
+		mountPath := getMountPoint(secret["value"], secret["resourceMountPoint"], "secret", secret["resourceType"])
 		vol := getVolume(refName, "secret", secret["value"], secret["resourceKey"], secret["resourceKey"])
 		mnt := getMount(refName, mountPath, "")
 
@@ -633,30 +633,19 @@ func getResourcePath(resourceName string, maybePath string, resourceType v1.Reso
 	return path.Join(camel.ConfigResourcesMountPath, resourceName)
 }
 
-func getConfigmapMountPoint(resourceName string, maybeMountPoint string, resourceType string) string {
-	// If the mount point is specified, we'll return it
-	if maybeMountPoint != "" {
-		return maybeMountPoint
+func getMountPoint(resourceName string, mountPoint string, storagetype, resourceType string) string {
+	if mountPoint != "" {
+		return mountPoint
 	}
 	if resourceType == "data" {
 		return path.Join(camel.ResourcesDefaultMountPath, resourceName)
 	}
-
-	// Default, config type
-	return path.Join(camel.ConfigConfigmapsMountPath, resourceName)
-}
-
-func getSecretMountPoint(resourceName string, maybeMountPoint string, resourceType string) string {
-	// If the mount point is specified, we'll return it
-	if maybeMountPoint != "" {
-		return maybeMountPoint
-	}
-	if resourceType == "data" {
-		return path.Join(camel.ResourcesDefaultMountPath, resourceName)
+	defaultMountPoint := camel.ConfigConfigmapsMountPath
+	if storagetype == "secret" {
+		defaultMountPoint = camel.ConfigSecretsMountPath
 	}
 
-	// Default, config type
-	return path.Join(camel.ConfigSecretsMountPath, resourceName)
+	return path.Join(defaultMountPoint, resourceName)
 }
 
 func (e *Environment) collectConfigurationValues(configurationType string) []string {

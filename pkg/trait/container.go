@@ -360,7 +360,9 @@ func (t *containerTrait) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *
 func (t *containerTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount, conf *utilResource.Config) {
 	refName := kubernetes.SanitizeLabel(conf.Name())
 	vol := getVolume(refName, string(conf.StorageType()), conf.Name(), conf.Key(), conf.Key())
-	mnt := getMount(refName, conf.DestinationPath(), "")
+	mntPath := getMountPoint(conf.Name(), conf.DestinationPath(), string(conf.StorageType()), string(conf.ContentType()))
+	// No need to specify a subpath, as we mount the entire configmap/secret
+	mnt := getMount(refName, mntPath, "")
 
 	*vols = append(*vols, *vol)
 	*mnts = append(*mnts, *mnt)

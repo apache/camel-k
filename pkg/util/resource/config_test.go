@@ -141,18 +141,3 @@ func TestParseConfigOptionAllParams(t *testing.T) {
 	assert.Equal(t, "", parsedFile3.Key())
 	assert.Equal(t, "", parsedFile3.DestinationPath())
 }
-
-func TestValidateFileLocation(t *testing.T) {
-	validLocation := "file:my-file.txt@/tmp/another-name.xml"
-	etcCamelLocation := "configmap:my-cm@/etc/camel/configmaps"
-	deploymentsDepsLocation := "secret:my-sec@/deployments/dependencies"
-
-	_, err := ParseConfig(validLocation)
-	assert.Nil(t, err)
-	_, err = ParseConfig(etcCamelLocation)
-	assert.NotNil(t, err)
-	assert.Equal(t, "you cannot mount a file under /etc/camel path", err.Error())
-	_, err = ParseConfig(deploymentsDepsLocation)
-	assert.NotNil(t, err)
-	assert.Equal(t, "you cannot mount a file under /deployments/dependencies path", err.Error())
-}
