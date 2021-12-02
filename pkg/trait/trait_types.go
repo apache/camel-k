@@ -448,7 +448,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		refName := fmt.Sprintf("i-source-%03d", i)
 		resPath := path.Join(camel.SourcesMountPath, resName)
 		vol := getVolume(refName, "configmap", cmName, cmKey, resName)
-		mnt := getMount(refName, resPath, resName)
+		mnt := getMount(refName, resPath, resName, true)
 
 		*vols = append(*vols, *vol)
 		*mnts = append(*mnts, *mnt)
@@ -475,7 +475,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 			resPath = r.MountPath
 		}
 		vol := getVolume(refName, "configmap", cmName, cmKey, resName)
-		mnt := getMount(refName, resPath, resName)
+		mnt := getMount(refName, resPath, resName, true)
 
 		*vols = append(*vols, *vol)
 		*mnts = append(*mnts, *mnt)
@@ -497,7 +497,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 			if propertiesType != "" {
 				refName := propertiesType + "-properties"
 				vol := getVolume(refName, "configmap", configMap.Name, "application.properties", resName)
-				mnt := getMount(refName, mountPath, resName)
+				mnt := getMount(refName, mountPath, resName, true)
 
 				*vols = append(*vols, *vol)
 				*mnts = append(*mnts, *mnt)
@@ -512,7 +512,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		refName := kubernetes.SanitizeLabel(configmaps["value"])
 		mountPath := getMountPoint(configmaps["value"], configmaps["resourceMountPoint"], "configmap", configmaps["resourceType"])
 		vol := getVolume(refName, "configmap", configmaps["value"], configmaps["resourceKey"], configmaps["resourceKey"])
-		mnt := getMount(refName, mountPath, "")
+		mnt := getMount(refName, mountPath, "", true)
 
 		*vols = append(*vols, *vol)
 		*mnts = append(*mnts, *mnt)
@@ -525,7 +525,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		refName := kubernetes.SanitizeLabel(secret["value"])
 		mountPath := getMountPoint(secret["value"], secret["resourceMountPoint"], "secret", secret["resourceType"])
 		vol := getVolume(refName, "secret", secret["value"], secret["resourceKey"], secret["resourceKey"])
-		mnt := getMount(refName, mountPath, "")
+		mnt := getMount(refName, mountPath, "", true)
 
 		*vols = append(*vols, *vol)
 		*mnts = append(*mnts, *mnt)
@@ -536,7 +536,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		refName := kubernetes.SanitizeLabel(secret)
 		mountPath := path.Join(camel.ServiceBindingsMountPath, strings.ToLower(secret))
 		vol := getVolume(refName, "secret", secret, "", "")
-		mnt := getMount(refName, mountPath, "")
+		mnt := getMount(refName, mountPath, "", true)
 
 		*vols = append(*vols, *vol)
 		*mnts = append(*mnts, *mnt)
@@ -557,7 +557,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		volumeName := pvcName + "-data"
 
 		vol := getVolume(volumeName, "pvc", pvcName, "", "")
-		mnt := getMount(volumeName, mountPath, "")
+		mnt := getMount(volumeName, mountPath, "", false)
 		*vols = append(*vols, *vol)
 		*mnts = append(*mnts, *mnt)
 	}
@@ -591,11 +591,11 @@ func getVolume(volName, storageType, storageName, filterKey, filterValue string)
 	return &volume
 }
 
-func getMount(volName, mountPath, subPath string) *corev1.VolumeMount {
+func getMount(volName, mountPath, subPath string, readOnly bool) *corev1.VolumeMount {
 	mount := corev1.VolumeMount{
 		Name:      volName,
 		MountPath: mountPath,
-		ReadOnly:  true,
+		ReadOnly:  readOnly,
 	}
 	if subPath != "" {
 		mount.SubPath = subPath

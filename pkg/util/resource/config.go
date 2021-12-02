@@ -89,6 +89,8 @@ const (
 	StorageTypeSecret StorageType = "secret"
 	// StorageTypeFile --.
 	StorageTypeFile StorageType = "file"
+	// StorageTypePVC --.
+	StorageTypePVC StorageType = "pvc"
 )
 
 // ContentType represent what kind of a content is, either data or purely text configuration.
@@ -162,6 +164,21 @@ func ParseResource(item string) (*Config, error) {
 	}
 
 	return resource, nil
+}
+
+// ParseVolume will parse a volume and return a Config.
+func ParseVolume(item string) (*Config, error) {
+	configParts := strings.Split(item, ":")
+
+	if len(configParts) != 2 {
+		return nil, fmt.Errorf("could not match pvc as %s", item)
+	}
+
+	return &Config{
+		storageType:     StorageTypePVC,
+		resourceName:    configParts[0],
+		destinationPath: configParts[1],
+	}, nil
 }
 
 // ParseConfig will parse a config and return a Config.

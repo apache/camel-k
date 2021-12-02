@@ -82,10 +82,12 @@ type containerTrait struct {
 	Image string `property:"image" json:"image,omitempty"`
 	// The pull policy: Always|Never|IfNotPresent
 	ImagePullPolicy corev1.PullPolicy `property:"image-pull-policy" json:"imagePullPolicy,omitempty"`
-	// A list of configuration pointing to configmap/secret
+	// A list of configuration pointing to configmap/secret. Syntax: [configmap|secret|file]:name[key], where name represents the local file path or the configmap/secret name and key optionally represents the configmap/secret key to be filtered
 	Configs []string `property:"configs" json:"configs,omitempty"`
-	// A list of resources pointing to configmap/secret
+	// A list of resources pointing to configmap/secret. Syntax: [configmap|secret|file]:name[/key][@path], where name represents the local file path or the configmap/secret name, key optionally represents the configmap/secret key to be filtered and path represents the destination path
 	Resources []string `property:"resources" json:"resources,omitempty"`
+	// A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]
+	Volumes []string `property:"volumes" json:"volumes,omitempty"`
 
 	// DeprecatedProbesEnabled enable/disable probes on the container (default `false`)
 	// Deprecated: replaced by the health trait.
@@ -353,6 +355,13 @@ func (t *containerTrait) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *
 			return parseErr
 		}
 	}
+	for _, v := range t.Volumes {
+		if vol, parseErr := utilResource.ParseVolume(v); parseErr == nil {
+			t.mountResource(vols, mnts, vol)
+		} else {
+			return parseErr
+		}
+	}
 
 	return nil
 }
@@ -361,8 +370,12 @@ func (t *containerTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.Vol
 	refName := kubernetes.SanitizeLabel(conf.Name())
 	vol := getVolume(refName, string(conf.StorageType()), conf.Name(), conf.Key(), conf.Key())
 	mntPath := getMountPoint(conf.Name(), conf.DestinationPath(), string(conf.StorageType()), string(conf.ContentType()))
+	readOnly := true
+	if conf.StorageType() == utilResource.StorageTypePVC {
+		readOnly = false
+	}
 	// No need to specify a subpath, as we mount the entire configmap/secret
-	mnt := getMount(refName, mntPath, "")
+	mnt := getMount(refName, mntPath, "", readOnly)
 
 	*vols = append(*vols, *vol)
 	*mnts = append(*mnts, *mnt)
