@@ -31,23 +31,25 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apache/camel-k/pkg/util"
-
-	"github.com/pkg/errors"
-
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
+
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	ctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
+	"github.com/pkg/errors"
 
 	buildv1 "github.com/openshift/api/build/v1"
 	imagev1 "github.com/openshift/api/image/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
@@ -173,7 +175,9 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 			return err
 		}
 
-		restClient, err := kubernetes.GetClientFor(t.c, "build.openshift.io", "v1")
+		restClient, err := apiutil.RESTClientForGVK(
+			schema.GroupVersionKind{Group: "build.openshift.io", Version: "v1"}, false,
+			t.c.GetConfig(), serializer.NewCodecFactory(t.c.GetScheme()))
 		if err != nil {
 			return err
 		}
