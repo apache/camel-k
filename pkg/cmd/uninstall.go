@@ -27,12 +27,14 @@ import (
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/olm"
 )
 
@@ -278,7 +280,9 @@ func (o *uninstallCmdOptions) uninstallNamespaceResources(ctx context.Context, c
 }
 
 func (o *uninstallCmdOptions) uninstallCrd(ctx context.Context, c client.Client) error {
-	restClient, err := kubernetes.GetClientFor(c, "apiextensions.k8s.io", "v1")
+	restClient, err := apiutil.RESTClientForGVK(
+		schema.GroupVersionKind{Group: "apiextensions.k8s.io", Version: "v1"}, false,
+		c.GetConfig(), serializer.NewCodecFactory(c.GetScheme()))
 	if err != nil {
 		return err
 	}

@@ -21,7 +21,6 @@ import (
 	"context"
 	"fmt"
 
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -145,22 +144,4 @@ func ResolveValueSource(ctx context.Context, client ctrl.Reader, namespace strin
 	}
 
 	return "", nil
-}
-
-func GetDeployment(context context.Context, client ctrl.Reader, name string, namespace string) (*appsv1.Deployment, error) {
-	deployment := &appsv1.Deployment{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Deployment",
-			APIVersion: appsv1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-	}
-	if err := client.Get(context, ctrl.ObjectKeyFromObject(deployment), deployment); err != nil {
-		return nil, err
-	}
-
-	return deployment, nil
 }
