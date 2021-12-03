@@ -29,7 +29,6 @@ rules:
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
@@ -37,16 +36,34 @@ rules:
   - watch
 - apiGroups:
   - eventing.knative.dev
-  - messaging.knative.dev
-  - sources.knative.dev
   resources:
-  - "*"
+  - triggers
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
   - update
-  - watch
+- apiGroups:
+  - messaging.knative.dev
+  resources:
+  - subscriptions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+- apiGroups:
+  - sources.knative.dev
+  resources:
+  - sinkbindings
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
