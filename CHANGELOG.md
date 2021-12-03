@@ -37,6 +37,9 @@
 
 **Merged pull requests:**
 
+- chore\(build\): Upgrade base image to ubi-quarkus-mandrel:21.3.0.0 [\#2798](https://github.com/apache/camel-k/pull/2798) ([astefanutti](https://github.com/astefanutti))
+- fix\(build\): Fix OLM bundle generation on Mac OS [\#2797](https://github.com/apache/camel-k/pull/2797) ([astefanutti](https://github.com/astefanutti))
+- fix\(cli\): Skip version compatibility check for builder command [\#2796](https://github.com/apache/camel-k/pull/2796) ([astefanutti](https://github.com/astefanutti))
 - fix\(doc\): Update Prometheus Operator setup documentation [\#2795](https://github.com/apache/camel-k/pull/2795) ([astefanutti](https://github.com/astefanutti))
 - chore\(RBAC\): Remove wildcards from roles [\#2793](https://github.com/apache/camel-k/pull/2793) ([astefanutti](https://github.com/astefanutti))
 - Makefile: for the generate-doc target don't use show-progress for wget [\#2792](https://github.com/apache/camel-k/pull/2792) ([oscerd](https://github.com/oscerd))
