@@ -37,6 +37,9 @@
 
 **Merged pull requests:**
 
+- chore\(ci\): Better GitHub Actions concurrency group [\#2811](https://github.com/apache/camel-k/pull/2811) ([astefanutti](https://github.com/astefanutti))
+- fix\(OLM\): Remove aggregated cluster roles from OLM bundle [\#2809](https://github.com/apache/camel-k/pull/2809) ([astefanutti](https://github.com/astefanutti))
+- chore: Remove custom REST client [\#2806](https://github.com/apache/camel-k/pull/2806) ([astefanutti](https://github.com/astefanutti))
 - chore\(build\): Upgrade base image to ubi-quarkus-mandrel:21.3.0.0 [\#2798](https://github.com/apache/camel-k/pull/2798) ([astefanutti](https://github.com/astefanutti))
 - fix\(build\): Fix OLM bundle generation on Mac OS [\#2797](https://github.com/apache/camel-k/pull/2797) ([astefanutti](https://github.com/astefanutti))
 - fix\(cli\): Skip version compatibility check for builder command [\#2796](https://github.com/apache/camel-k/pull/2796) ([astefanutti](https://github.com/astefanutti))
