@@ -41,6 +41,7 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -93,7 +94,14 @@ func Run(healthPort, monitoringPort int32, leaderElection bool) {
 	watchNamespace, err := getWatchNamespace()
 	exitOnError(err, "failed to get watch namespace")
 
-	c, err := client.NewClient(false)
+	cfg, err := config.GetConfig()
+	exitOnError(err, "cannot get client config")
+	// Increase maximum burst that is used by client-side throttling,
+	// to prevent the requests made to apply the bundled Kamelets
+	// from being throttled.
+	cfg.QPS = 20
+	cfg.Burst = 200
+	c, err := client.NewClientWithConfig(false, cfg)
 	exitOnError(err, "cannot initialize client")
 
 	// We do not rely on the event broadcaster managed by controller runtime,
@@ -178,7 +186,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool) {
 	exitOnError(controller.AddToManager(mgr), "")
 
 	log.Info("Installing operator resources")
-	installCtx, installCancel := context.WithTimeout(context.TODO(), 1*time.Minute)
+	installCtx, installCancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer installCancel()
 	install.OperatorStartupOptionalTools(installCtx, c, watchNamespace, operatorNamespace, log)
 
