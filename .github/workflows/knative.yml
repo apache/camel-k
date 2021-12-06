@@ -62,6 +62,7 @@ jobs:
       uses: ./.github/actions/e2e-knative
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
 
   yaks:
     runs-on: ubuntu-20.04
@@ -76,3 +77,4 @@ jobs:
       uses: ./.github/actions/e2e-knative-yaks
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}

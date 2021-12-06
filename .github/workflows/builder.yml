@@ -66,4 +66,5 @@ jobs:
       uses: ./.github/actions/e2e-builder
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
         publisher: ${{ matrix.publisher }}

@@ -62,3 +62,4 @@ jobs:
       uses: ./.github/actions/e2e-upgrade
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}

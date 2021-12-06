@@ -24,7 +24,10 @@ inputs:
     required: true
     default: 'kind'
   cluster-config-data:
-    description: 'The JSON configuration of the cluster - required for custom cluster type only'
+    description: 'Variables for the cluster configuration - required for custom cluster type only'
+    required: false
+  cluster-kube-config-data:
+    description: 'Base16 encoded kube config - required for custom cluster type only'
     required: false
   require-olm:
     description: 'If OLM is not available by default ensure that it is installed'
@@ -62,6 +65,7 @@ runs:
       if: ${{ env.CLUSTER_TYPE == 'custom' }}
       with:
         cluster-config-data: ${{ inputs.cluster-config-data }}
+        cluster-kube-config-data: ${{ inputs.cluster-kube-config-data }}
 
     - id: execute-invalid
       name: Execute Invalid Cluster
@@ -71,14 +75,45 @@ runs:
         echo "Error: Unrecognised cluster request for type of cluster. Should be kind, ocp3 or custom."
         exit 1
 
-    - id: image-namespace
+    - id: cluster-config
+      name: Extract the config from the cluster
       shell: bash
-      env:
-        DEFAULT_IMAGE_NAMESPACE: 'apache'
       run: |
-        if [ -z "${{ env.CLUSTER_IMAGE_NAMESPACE }}" ]; then
-          echo "CLUSTER_IMAGE_NAMESPACE=apache" >> $GITHUB_ENV
-        fi
+        case ${{ env.CLUSTER_TYPE }} in
+        kind)
+          # Does not require cluster-catalog-source-namespace
+          ./.github/actions/kamel-config-cluster/output-config.sh \
+            -a "${{ steps.execute-kind.outputs.cluster-kube-admin-user-ctx }}" \
+            -n "${{ steps.execute-kind.outputs.cluster-image-namespace }}" \
+            -o "${{ steps.execute-kind.outputs.cluster-has-olm }}" \
+            -p "${{ steps.execute-kind.outputs.cluster-image-registry-push-host }}" \
+            -q "${{ steps.execute-kind.outputs.cluster-image-registry-pull-host }}" \
+            -s "${{ steps.execute-kind.outputs.cluster-image-registry-insecure }}" \
+            -u "${{ steps.execute-kind.outputs.cluster-kube-user-ctx }}"
+            ;;
+        custom)
+          ./.github/actions/kamel-config-cluster/output-config.sh \
+            -a "${{ steps.execute-custom.outputs.cluster-kube-admin-user-ctx }}" \
+            -c "${{ steps.execute-custom.outputs.cluster-catalog-source-namespace }}" \
+            -n "${{ steps.execute-custom.outputs.cluster-image-namespace }}" \
+            -o "${{ steps.execute-custom.outputs.cluster-has-olm }}" \
+            -p "${{ steps.execute-custom.outputs.cluster-image-registry-push-host }}" \
+            -q "${{ steps.execute-custom.outputs.cluster-image-registry-pull-host }}" \
+            -s "${{ steps.execute-custom.outputs.cluster-image-registry-insecure }}" \
+            -u "${{ steps.execute-custom.outputs.cluster-kube-user-ctx }}"
+            ;;
+        ocp3)
+          # Does not require cluster-catalog-source-namespace
+          ./.github/actions/kamel-config-cluster/output-config.sh \
+            -a "${{ steps.execute-ocp3.outputs.cluster-kube-admin-user-ctx }}" \
+            -n "${{ steps.execute-ocp3.outputs.cluster-image-namespace }}" \
+            -o "${{ steps.execute-ocp3.outputs.cluster-has-olm }}" \
+            -p "${{ steps.execute-ocp3.outputs.cluster-image-registry-push-host }}" \
+            -q "${{ steps.execute-ocp3.outputs.cluster-image-registry-pull-host }}" \
+            -s "${{ steps.execute-ocp3.outputs.cluster-image-registry-insecure }}" \
+            -u "${{ steps.execute-ocp3.outputs.cluster-kube-user-ctx }}"
+            ;;
+        esac
 
       #
       # Install opm if required
@@ -100,16 +135,17 @@ runs:
       name: Install OLM
       shell: bash
       run: |
-        if [ "${{ env.CLUSTER_HAS_OLM }}" == "true" ]; then
+        if [ "${{ steps.cluster-config.outputs.cluster-has-olm }}" == "true" ]; then
           # OLM already installed by default
           echo "OLM already available in cluster"
+          echo "::set-output name=cluster-has-olm::${{ steps.cluster-config.outputs.cluster-has-olm }}"
           exit 0
         fi
 
         if [ "${{ inputs.require-olm }}" != "true" ]; then
           # OLM not explicitly requested
           echo "OLM not explicity required for testing"
-          echo "CLUSTER_HAS_OLM=false" >> $GITHUB_ENV
+          echo "::set-output name=cluster-has-olm::$(echo false)"
           exit 0
         fi
 
@@ -123,7 +159,7 @@ runs:
         # Need to be admin so switch to the admin context
         #
         echo "Change to kube admin context"
-        kubectl config use-context "${{ env.CLUSTER_KUBE_ADMIN_USER_CTX }}"
+        kubectl config use-context "${{ steps.cluster-config.outputs.cluster-kube-admin-user-ctx }}"
 
         set +e
         echo "Check if OLM is already installed"
@@ -144,5 +180,31 @@ runs:
         echo "Return to original kube context"
         kubectl config use-context "${ctx}"
 
+        echo "::set-output name=cluster-has-olm::$(echo true)"
         echo "Complete"
-        echo "CLUSTER_HAS_OLM=true" >> $GITHUB_ENV
+
+outputs:
+  cluster-image-registry-push-host:
+    description: "The image registry to which to push images"
+    value: ${{ steps.cluster-config.outputs.cluster-image-registry-push-host }}
+  cluster-image-registry-pull-host:
+    description: "The image registry from which to pull images"
+    value: ${{ steps.cluster-config.outputs.cluster-image-registry-pull-host }}
+  cluster-image-registry-insecure:
+    description: "Whether the pull registry is insecure"
+    value: ${{ steps.cluster-config.outputs.cluster-image-registry-insecure }}
+  cluster-catalog-source-namespace:
+    description: "The namespace in which to install the OLM catalog source"
+    value: ${{ steps.cluster-config.outputs.cluster-catalog-source-namespace }}
+  cluster-image-namespace:
+    description: "The namespace to install the camel-k images"
+    value: ${{ steps.cluster-config.outputs.cluster-image-namespace }}
+  cluster-kube-admin-user-ctx:
+    description: "The context of the kube admin user"
+    value: ${{ steps.cluster-config.outputs.cluster-kube-admin-user-ctx }}
+  cluster-kube-user-ctx:
+    description: "The context of the kube user"
+    value: ${{ steps.cluster-config.outputs.cluster-kube-user-ctx }}
+  cluster-has-olm:
+    description: "Does the cluster have OLM"
+    value: ${{ steps.install-olm.outputs.cluster-has-olm }}

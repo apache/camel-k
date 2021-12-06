@@ -20,127 +20,26 @@ description: 'Provides configuration for acessing a custom kubernetes cluster'
 
 inputs:
   cluster-config-data:
-    description: 'The JSON configuration of the cluster'
+    description: 'Non-Secure Variables for the cluster configuration'
+    required: true
+  cluster-kube-config-data:
+    description: 'Base16 encoded kube config'
     required: true
 
 runs:
   using: "composite"
   steps:
-    - name: Read cluster-config-data variable to temporary file & override CLUSTER_TYPE if cluster config defined
-      shell: bash
-      if: ${{ env.CLUSTER_CUSTOM_CONFIGURED != 'true' }}
-      run: |
-        export CLUSTER_CONFIG_FILE=/tmp/cluster-config.json
-
-        if [ -f ${CLUSTER_CONFIG_FILE} ]; then
-          rm -f ${CLUSTER_CONFIG_FILE}
-        fi
-
-        touch "${CLUSTER_CONFIG_FILE}"
-        if [ -z "${{ inputs.cluster-config-data }}" ]; then
-          echo "Error: No cluster-config-data parameter has been defined"
-          exit 1
-        fi
-
-        cat << EOF > "${CLUSTER_CONFIG_FILE}"
-        ${{ inputs.cluster-config-data }}
-        EOF
-
-        if [ ! -f "${CLUSTER_CONFIG_FILE}" ]; then
-          echo "Error: No file ${CLUSTER_CONFIG_FILE} has been created"
-          exit 1
-        fi
-
-        if [ -s "${CLUSTER_CONFIG_FILE}" ]; then
-          echo "Info: Cluster configuration defined"
-          echo "CLUSTER_CONFIG_FILE=${CLUSTER_CONFIG_FILE}" >> $GITHUB_ENV
-        else
-          echo "Error: No cluster configuration defined"
-          exit 1
-        fi
-
-    - name: Cluster config JSON to variables
-      uses: ./.github/actions/json-to-variables
-      if: ${{ env.CLUSTER_CUSTOM_CONFIGURED != 'true' }}
-      with:
-        filename: ${{ env.CLUSTER_CONFIG_FILE }}
-        prefix: 'e2e'
-
     - id: connect-cluster
       name: Connect to cluster
       shell: bash
-      if: ${{ env.CLUSTER_CUSTOM_CONFIGURED != 'true' }}
       run: |
-        echo "::add-mask::${{ env.e2e_kube-config-data }}"
-        echo "::add-mask::${{ env.e2e_kube-admin-user-ctx }}"
-        echo "::add-mask::${{ env.e2e_kube-user-ctx }}"
-        echo "::add-mask::${{ env.e2e_image-registry-pull-host }}"
-        echo "::add-mask::${{ env.e2e_image-registry-push-host }}"
-        echo "::add-mask::${{ env.e2e_image-registry-user }}"
-        echo "::add-mask::${{ env.e2e_image-registry-token }}"
-        echo "::add-mask::${{ env.e2e_image-namespace }}"
-        echo "::add-mask::${{ env.e2e_catalog-source-namespace }}"
-
-        if [ -z "${{ env.e2e_kube-config-data }}" ]; then
-          echo "Error: kube config data property cannot be found"
-          exit 1
-        fi
-
-        if [ -z "${{ env.e2e_kube-admin-user-ctx }}" ]; then
-          echo "Error: kube admin context property cannot be found"
-          exit 1
-        fi
-
-        if [ -z "${{ env.e2e_kube-user-ctx }}" ]; then
-          echo "Error: kube user context property cannot be found"
-          exit 1
-        fi
-
-        if [ -z "${{ env.e2e_image-registry-pull-host }}" ]; then
-          echo "Error: image registry pull host property cannot be found"
-          exit 1
-        fi
-
-        if [ -z "${{ env.e2e_image-registry-push-host }}" ]; then
-          echo "Error: image registry build host property cannot be found"
-          exit 1
-        fi
-
-        if [ -n "${{ env.e2e_image-registry-user }}" ] && [ -n "${{ env.e2e_image-registry-token }}" ]; then
-          echo "Secured registry in use so login with docker"
-          docker login \
-            -u "${{ env.e2e_image-registry-user }}" \
-            -p "${{ env.e2e_image-registry-token }}" \
-            "${{ env.e2e_image-registry-push-host }}"
-        fi
-
-        # Copy the kube config to the correct location for kubectl
-        mkdir -p $HOME/.kube
-        echo -n "${{ env.e2e_kube-config-data }}" | base64 -d > ${HOME}/.kube/config
-        if [ ! -f ${HOME}/.kube/config ]; then
-          echo "Error: kube config file not created correctly"
-          exit 1
-        fi
-
-        set -e
-        kubectl config use-context "${{ env.e2e_kube-admin-user-ctx }}"
-        if [ $? != 0 ]; then
-          echo "Error: Failed to select kube admin context. Is the config and context correct?"
-          exit 1
-        fi
-        set +e
-
-    - id: info
-      name: Info
-      shell: bash
-      if: ${{ env.CLUSTER_CUSTOM_CONFIGURED != 'true' }}
-      run: |
-        kubectl describe nodes
+        ./.github/actions/kamel-config-cluster-custom/connect-cluster.sh \
+          -c "${{ inputs.cluster-config-data }}" \
+          -k "${{ inputs.cluster-kube-config-data }}"
 
     - id: configure-developer-user
       name: Configure Developer User
       shell: bash
-      if: ${{ env.CLUSTER_CUSTOM_CONFIGURED != 'true' }}
       run: |
         # Aggregate pod eviction permission to the default admin role
         cat <<EOF | kubectl apply -f -
@@ -197,36 +96,30 @@ runs:
         EOF
 
         # Set the context to the user
-        kubectl config use-context "${{ env.e2e_kube-user-ctx }}"
+        kubectl config use-context ${{ steps.connect-cluster.outputs.cluster-kube-user-ctx }}
 
-    - id: extract-config
-      shell: bash
-      if: ${{ env.CLUSTER_CUSTOM_CONFIGURED != 'true' }}
-      run: |
-        echo "CLUSTER_IMAGE_REGISTRY_PUSH_HOST=${{ env.e2e_image-registry-push-host }}" >> $GITHUB_ENV
-        echo "CLUSTER_IMAGE_REGISTRY_PULL_HOST=${{ env.e2e_image-registry-pull-host }}" >> $GITHUB_ENV
-        echo "CLUSTER_IMAGE_REGISTRY_INSECURE=${{ env.e2e_image-registry-insecure }}" >> $GITHUB_ENV
-        echo "CLUSTER_CATALOG_SOURCE_NAMESPACE=${{ env.e2e_catalog-source-namespace }}" >> $GITHUB_ENV
-
-        #
-        # Export the image namespace if defined in the cluster config
-        #
-        if [ -n "${{ env.e2e_image-namespace }}" ]; then
-          echo "CLUSTER_IMAGE_NAMESPACE=${{ env.e2e_image-namespace }}" >> $GITHUB_ENV
-        fi
-
-        #
-        # Export the context used for admin and user
-        #
-        echo "CLUSTER_KUBE_ADMIN_USER_CTX=${{ env.e2e_kube-admin-user-ctx }}" >> $GITHUB_ENV
-        echo "CLUSTER_KUBE_USER_CTX=${{ env.e2e_kube-user-ctx }}" >> $GITHUB_ENV
-
-        #
-        # Export the flag for olm capability
-        #
-        echo "CLUSTER_HAS_OLM=${{ env.e2e_has-olm }}" >> $GITHUB_ENV
-
-        #
-        # Avoid configuring the cluster repeatedly
-        #
-        echo "CLUSTER_CUSTOM_CONFIGURED=true" >> $GITHUB_ENV
+outputs:
+  cluster-image-registry-push-host:
+    description: "The image registry to which to push images"
+    value: ${{ steps.connect-cluster.outputs.cluster-image-registry-push-host }}
+  cluster-image-registry-pull-host:
+    description: "The image registry from which to pull images"
+    value: ${{ steps.connect-cluster.outputs.cluster-image-registry-pull-host }}
+  cluster-image-registry-insecure:
+    description: "Whether the pull registry is insecure"
+    value: ${{ steps.connect-cluster.outputs.cluster-image-registry-insecure }}
+  cluster-catalog-source-namespace:
+    description: "The namespace in which to install the OLM catalog source"
+    value: ${{ steps.connect-cluster.outputs.cluster-catalog-source-namespace }}
+  cluster-image-namespace:
+    description: "The namespace to install the camel-k images"
+    value: ${{ steps.connect-cluster.outputs.cluster-image-namespace }}
+  cluster-kube-admin-user-ctx:
+    description: "The context of the kube admin user"
+    value: ${{ steps.connect-cluster.outputs.cluster-kube-admin-user-ctx }}
+  cluster-kube-user-ctx:
+    description: "The context of the kube user"
+    value: ${{ steps.connect-cluster.outputs.cluster-kube-user-ctx }}
+  cluster-has-olm:
+    description: "Does the cluster have OLM"
+    value: ${{ steps.connect-cluster.outputs.cluster-has-olm }}

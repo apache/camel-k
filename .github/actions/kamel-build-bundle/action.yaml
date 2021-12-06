@@ -97,7 +97,9 @@ runs:
         # Use the PULL host to ensure the correct image:tag
         # is passed into the tests for the deployment to pull from
         #
-        echo "BUILD_BUNDLE_LOCAL_IMAGE=${{ inputs.image-registry-pull-host }}/${{ inputs.image-namespace }}/camel-k-bundle:${{ inputs.local-image-version }}" >> $GITHUB_ENV
+        BUILD_BUNDLE_LOCAL_IMAGE="${{ inputs.image-registry-pull-host }}/${{ inputs.image-namespace }}/camel-k-bundle:${{ inputs.local-image-version }}"
+        echo "::set-output name=build-bundle-local-image::${BUILD_BUNDLE_LOCAL_IMAGE}"
+
 
     - id: install-opm
       name: Install opm if required
@@ -170,11 +172,11 @@ runs:
           #
           docker tag \
             ${PUSH_REGISTRY}/${{ inputs.image-namespace }}/camel-k-bundle:${{ inputs.local-image-version }} \
-            ${{ env.BUILD_BUNDLE_LOCAL_IMAGE }}
+            ${{ steps.build-bundle-image.outputs.build-bundle-local-image }}
 
           # Push the bundle image to the registry
           #
-          docker push ${{ env.BUILD_BUNDLE_LOCAL_IMAGE }}
+          docker push ${{ steps.build-bundle-image.outputs.build-bundle-local-image }}
         fi
 
         #
@@ -187,12 +189,13 @@ runs:
         #
         sudo opm index add \
           -c docker --skip-tls \
-          --bundles ${{ env.BUILD_BUNDLE_LOCAL_IMAGE }} \
+          --bundles ${{ steps.build-bundle-image.outputs.build-bundle-local-image }} \
           --from-index quay.io/operatorhubio/catalog:latest \
           --tag ${LOCAL_IIB}
 
         docker push ${LOCAL_IIB}
-        echo "BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX=${{ inputs.image-registry-pull-host }}/${{ inputs.image-namespace }}/camel-k-iib:${{ inputs.local-image-version }}" >> $GITHUB_ENV
+        BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX="${{ inputs.image-registry-pull-host }}/${{ inputs.image-namespace }}/camel-k-iib:${{ inputs.local-image-version }}"
+        echo "::set-output name=build-bundle-image-bundle-index::${BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX}"
 
     - id: build-image-catalog
       name: Create a new catalog to host the index image
@@ -211,7 +214,7 @@ runs:
         fi
 
         export BUILD_CATALOG_SOURCE="camel-k-test-source"
-        echo "BUILD_BUNDLE_CATALOG_SOURCE=${BUILD_CATALOG_SOURCE}" >> $GITHUB_ENV
+        echo "::set-output name=build-bundle-catalog-source-name::${BUILD_CATALOG_SOURCE}"
 
         cat <<EOF | kubectl apply -f -
         apiVersion: operators.coreos.com/v1alpha1
@@ -221,10 +224,21 @@ runs:
           namespace: ${{ inputs.image-namespace }}
         spec:
           displayName: OLM upgrade test Catalog
-          image: ${{ env.BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX }}
+          image: ${{ steps.build-index-image.outputs.build-bundle-image-bundle-index }}
           sourceType: grpc
           publisher: grpc
           updateStrategy:
             registryPoll:
               interval: 1m0s
         EOF
+
+outputs:
+  build-bundle-local-image:
+    description: "Full name of the bundle image"
+    value: ${{ steps.build-bundle-image.outputs.build-bundle-local-image }}
+  build-bundle-image-bundle-index:
+    description: "Full name of the bundle index image"
+    value: ${{ steps.build-index-image.outputs.build-bundle-image-bundle-index }}
+  build-bundle-catalog-source-name:
+    description: "Name of the catalog source for the build bundle image"
+    value: ${{ steps.build-image-catalog.outputs.build-bundle-catalog-source-name }}

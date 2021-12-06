@@ -63,6 +63,23 @@ runs:
         image-registry-push-host: ${{ inputs.image-registry-push-host }}
         image-registry-pull-host: ${{ inputs.image-registry-pull-host }}
         image-namespace: ${{ inputs.image-namespace }}
-        local-image-name: ${{ env.BUILD_BINARY_LOCAL_IMAGE_NAME }}
-        local-image-version: ${{ env.BUILD_BINARY_LOCAL_IMAGE_VERSION }}
+        local-image-name: ${{ steps.build-kamel-binary.outputs.build-binary-local-image-name }}
+        local-image-version: ${{ steps.build-kamel-binary.outputs.build-binary-local-image-version }}
         catalog-source-namespace: ${{ inputs.catalog-source-namespace }}
+
+outputs:
+  build-binary-local-image-name:
+    description: "Full name of the binary operator image"
+    value: ${{ steps.build-kamel-binary.outputs.build-binary-local-image-name }}
+  build-binary-local-image-version:
+    description: "Version & tag of the binary operator image"
+    value: ${{ steps.build-kamel-binary.outputs.build-binary-local-image-version }}
+  build-bundle-local-image:
+    description: "Full name of the bundle image"
+    value: ${{ steps.build-kamel-bundle.outputs.build-bundle-local-image }}
+  build-bundle-image-bundle-index:
+    description: "Full name of the bundle index image"
+    value: ${{ steps.build-kamel-bundle.outputs.build-bundle-image-bundle-index }}
+  build-bundle-catalog-source-name:
+    description: "Name of the catalog source for the build bundle image"
+    value: ${{ steps.build-kamel-bundle.outputs.build-bundle-catalog-source-name }}

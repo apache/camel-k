@@ -81,5 +81,15 @@ runs:
         # Use the PULL host to ensure the correct image:tag
         # is passed into the tests for the deployment to pull from
         #
-        echo "BUILD_BINARY_LOCAL_IMAGE_NAME=${{ inputs.image-registry-pull-host }}/${{ inputs.image-namespace }}/camel-k" >> $GITHUB_ENV
-        echo "BUILD_BINARY_LOCAL_IMAGE_VERSION=$(make get-version)" >> $GITHUB_ENV
+        BUILD_BINARY_LOCAL_IMAGE_NAME="${{ inputs.image-registry-pull-host }}/${{ inputs.image-namespace }}/camel-k"
+        BUILD_BINARY_LOCAL_IMAGE_VERSION="$(make get-version)"
+        echo "::set-output name=build-binary-local-image-name::${BUILD_BINARY_LOCAL_IMAGE_NAME}"
+        echo "::set-output name=build-binary-local-image-version::${BUILD_BINARY_LOCAL_IMAGE_VERSION}"
+
+outputs:
+  build-binary-local-image-name:
+    description: "Full name of the binary operator image"
+    value: ${{ steps.build-operator.outputs.build-binary-local-image-name }}
+  build-binary-local-image-version:
+    description: "Version & tag of the binary operator image"
+    value: ${{ steps.build-operator.outputs.build-binary-local-image-version }}
