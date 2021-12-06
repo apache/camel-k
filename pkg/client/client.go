@@ -23,10 +23,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/apache/camel-k/pkg/util"
-
-	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
-	camelv1alpha1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"
 	user "github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -36,18 +32,21 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"k8s.io/client-go/kubernetes"
-	clientscheme "k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	clientcmdlatest "k8s.io/client-go/tools/clientcmd/api/latest"
 
-	controller "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/apache/camel-k/pkg/apis"
 	camel "github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
+	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
+	camelv1alpha1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util"
 )
 
 const (
@@ -57,7 +56,7 @@ const (
 
 // Client is an abstraction for a k8s client.
 type Client interface {
-	controller.Client
+	ctrl.Client
 	kubernetes.Interface
 	CamelV1() camelv1.CamelV1Interface
 	CamelV1alpha1() camelv1alpha1.CamelV1alpha1Interface
@@ -77,7 +76,7 @@ type Provider struct {
 }
 
 type defaultClient struct {
-	controller.Client
+	ctrl.Client
 	kubernetes.Interface
 	camel  camel.Interface
 	scheme *runtime.Scheme
@@ -116,16 +115,20 @@ func NewOutOfClusterClient(kubeconfig string) (Client, error) {
 
 // NewClient creates a new k8s client that can be used from outside or in the cluster.
 func NewClient(fastDiscovery bool) (Client, error) {
-	// Get a config to talk to the apiserver
 	cfg, err := config.GetConfig()
 	if err != nil {
 		return nil, err
 	}
+	return NewClientWithConfig(fastDiscovery, cfg)
+}
 
-	scheme := clientscheme.Scheme
+// NewClientWithConfig creates a new k8s client that can be used from outside or in the cluster.
+func NewClientWithConfig(fastDiscovery bool, cfg *rest.Config) (Client, error) {
+	clientScheme := scheme.Scheme
 
 	// Setup Scheme for all resources
-	if err := apis.AddToScheme(scheme); err != nil {
+	err := apis.AddToScheme(clientScheme)
+	if err != nil {
 		return nil, err
 	}
 
@@ -145,11 +148,11 @@ func NewClient(fastDiscovery bool) (Client, error) {
 	}
 
 	// Create a new client to avoid using cache (enabled by default with controller-runtime client)
-	clientOptions := controller.Options{
-		Scheme: scheme,
+	clientOptions := ctrl.Options{
+		Scheme: clientScheme,
 		Mapper: mapper,
 	}
-	dynClient, err := controller.New(cfg, clientOptions)
+	dynClient, err := ctrl.New(cfg, clientOptions)
 	if err != nil {
 		return nil, err
 	}
