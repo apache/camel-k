@@ -50,6 +50,7 @@ func init() {
 	AddToTraits(newPrometheusTrait)
 	AddToTraits(newPullSecretTrait)
 	AddToTraits(newQuarkusTrait)
+	AddToTraits(newRegistryTrait)
 	AddToTraits(newRouteTrait)
 	AddToTraits(newServiceTrait)
 	AddToTraits(newServiceBindingTrait)

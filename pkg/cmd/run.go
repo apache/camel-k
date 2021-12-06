@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -28,6 +29,7 @@ import (
 	"strings"
 	"syscall"
 
+	spectrum "github.com/container-tools/spectrum/pkg/builder"
 	"github.com/magiconair/properties"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -46,9 +48,11 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/dsl"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
+	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/property"
 	"github.com/apache/camel-k/pkg/util/resource"
 	"github.com/apache/camel-k/pkg/util/sync"
@@ -561,8 +565,61 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		return nil, err
 	}
 
+	list := v1.NewIntegrationPlatformList()
+	if err := c.List(o.Context, &list, ctrl.InNamespace(integration.Namespace)); err != nil {
+		return nil, errors.Wrap(err, fmt.Sprintf("could not retrieve integration platform from namespace %s", o.Namespace))
+	}
+	if len(list.Items) > 1 {
+		return nil, fmt.Errorf("expected 1 integration platform in the namespace, found: %d", len(list.Items))
+	} else if len(list.Items) == 0 {
+		return nil, errors.New("no integration platforms found in the namespace: run \"kamel install\" to install the platform")
+	}
+	platform := list.Items[0]
+	registry := platform.Spec.Build.Registry.Address
+	insecure := platform.Spec.Build.Registry.Insecure
+
 	for _, item := range o.Dependencies {
-		integration.Spec.AddDependency(item)
+		// TODO: accept URLs
+		// TODO: accept other resources through Maven types (i.e not just JARs)
+		if strings.HasPrefix(item, "file://") && strings.HasSuffix(item, ".jar") {
+			newStdR, newStdW, _ := os.Pipe()
+			defer newStdW.Close()
+
+			fileInfo, err := os.Stat(item[6:])
+			if err != nil {
+				return nil, err
+			}
+			mapping := item[6:] + ":" + "."
+
+			version := defaults.Version
+			artifactId := name + "-" + strings.TrimSuffix(fileInfo.Name(), ".jar")
+			artifactPath := "/org/apache/camel/k/external/" + artifactId + "/" + version + "/" + artifactId + "-" + version + ".jar"
+			artifactPath = strings.ToLower(artifactPath)
+			target := registry + artifactPath + ":" + version
+			options := spectrum.Options{
+				PullInsecure:  true,
+				PushInsecure:  insecure,
+				PullConfigDir: "",
+				PushConfigDir: "",
+				Base:          "",
+				Target:        target,
+				Stdout:        cmd.OutOrStdout(),
+				Stderr:        cmd.OutOrStderr(),
+				Recursive:     false,
+			}
+
+			go readSpectrumLogs(newStdR)
+			_, err = spectrum.Build(options, mapping)
+			if err != nil {
+				return nil, err
+			}
+
+			// let's enable the registry trait
+			o.Traits = append(o.Traits, "registry.enabled=true")
+			integration.Spec.AddDependency("mvn:org.apache.camel.k.external:" + artifactId + ":" + version)
+		} else {
+			integration.Spec.AddDependency(item)
+		}
 	}
 
 	props, err := mergePropertiesWithPrecedence(o.Properties)
@@ -734,4 +791,13 @@ func resolvePodTemplate(ctx context.Context, templateSrc string, spec *v1.Integr
 		}
 	}
 	return err
+}
+
+func readSpectrumLogs(newStdOut *os.File) {
+	scanner := bufio.NewScanner(newStdOut)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		log.Infof(line)
+	}
 }
