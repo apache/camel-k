@@ -8,7 +8,3 @@
 	path = .github/actions/action-dotenv-to-setenv
         url = https://github.com/c-py/action-dotenv-to-setenv.git
 	branch = tags/v3
-[submodule ".github/actions/json-to-variables"]
-	path = .github/actions/json-to-variables
-	url = https://github.com/antifree/json-to-variables.git
-	branch = tags/v1.0.1

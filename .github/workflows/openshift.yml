@@ -63,26 +63,32 @@ jobs:
       name: Prepare Test Environment
       uses: ./.github/actions/kamel-prepare-env
 
-    - id: configure-platform
+    - id: config-cluster
       name: Configure Platform
       uses: ./.github/actions/kamel-config-cluster
       with:
         cluster-type: 'ocp3'
 
-    - id: build-kamel-binary
-      name: Build Kamel Binary
-      uses: ./.github/actions/kamel-build-binary
+    - id: build-kamel
+      name: Build Kamel
+      uses: ./.github/actions/kamel-build
+      with:
+        image-registry-push-host: ${{ steps.config-cluster.outputs.cluster-image-registry-push-host }}
+        image-registry-pull-host: ${{ steps.config-cluster.outputs.cluster-image-registry-pull-host }}
+        image-namespace: ${{ steps.config-cluster.outputs.cluster-image-namespace }}
+        # Builds the bundle if an OLM is available - depends on cluster being tested
+        build-bundle: ${{ steps.config-cluster.outputs.cluster-has-olm }}
+        # Can be empty and so catalog source will not be created
+        catalog-source-namespace: ${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}
 
-    - name: Install Kamel Cluster Setup
+    - id: install-kamel-cluster-setup
+      name: Install Kamel Cluster Setup
       uses: ./.github/actions/kamel-install-cluster-setup
       with:
-        kube-admin-user-ctx: ${{ steps.configure-platform.outputs.kube-admin-user-ctx }}
+        kube-admin-user-ctx: ${{ steps.config-cluster.outputs.cluster-kube-admin-user-ctx }}
 
     - name: Run IT
       run: |
-        # Make the Apache Snapshots or Apache Staging repository enabled by default
-        export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
-
         # Then run integration tests
         make test-integration
         make test-builder

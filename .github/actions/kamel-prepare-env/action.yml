@@ -103,9 +103,6 @@ runs:
       shell: bash
       if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       run : |
-
-        echo "::add-mask::${{ env.DEBUG_USE_EXISTING_IMAGE }}"
-
         #
         # Avoid preparing the environment repeatedly
         #

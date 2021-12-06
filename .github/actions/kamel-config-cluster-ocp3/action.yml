@@ -67,9 +67,6 @@ runs:
         oc cluster up --public-hostname=$IP_ADDR --enable=persistent-volumes,registry,router
         oc login -u system:admin
 
-        # Export the context used for admin login
-        echo "CLUSTER_KUBE_ADMIN_USER_CTX=$(oc config current-context)" >> $GITHUB_ENV
-
         # Wait until we have a ready node in openshift
         TIMEOUT=0
         TIMEOUT_COUNT=60
@@ -89,6 +86,11 @@ runs:
 
         echo "openshift is deployed and reachable"
 
+        #
+        # Avoid configuring the cluster repeatedly
+        #
+        echo "CLUSTER_OCP3_CONFIGURED=true" >> $GITHUB_ENV
+
     - id: info
       name: Info
       shell: bash
@@ -99,8 +101,12 @@ runs:
     - id: configure-developer-user
       name: Configure Developer User
       shell: bash
-      if: ${{ env.CLUSTER_OCP3_CONFIGURED != 'true' }}
       run: |
+        oc login -u system:admin
+
+        # Export the context used for admin login
+        echo "::set-output name=cluster-kube-admin-user-ctx::$(oc config current-context)"
+
         # Aggregate pod eviction permission to the default admin role
         cat <<EOF | oc apply -f -
         kind: ClusterRole
@@ -186,19 +192,38 @@ runs:
         oc login -u developer
 
         # Export the context used for developer login
-        echo "CLUSTER_KUBE_USER_CTX=$(oc config current-context)" >> $GITHUB_ENV
+        echo "::set-output name=cluster-kube-user-ctx::$(oc config current-context)"
 
-
-    - id: extract-kube-config
+    - id: extract-config
       shell: bash
       if: ${{ env.CLUSTER_OCP3_CONFIGURED != 'true' }}
       run: |
-        echo "CLUSTER_IMAGE_REGISTRY_PUSH_HOST=" >> $GITHUB_ENV
-        echo "CLUSTER_IMAGE_REGISTRY_PULL_HOST=" >> $GITHUB_ENV
-        echo "CLUSTER_IMAGE_REGISTRY_INSECURE=false" >> $GITHUB_ENV
-        echo "CLUSTER_HAS_OLM=true" >> $GITHUB_ENV
+        echo "::set-output name=cluster-image-registry-pull-host::"
+        echo "::set-output name=cluster-image-registry-pull-host::"
+        echo "::set-output name=cluster-image-registry-insecure::$(echo true)"
+        echo "::set-output name=cluster-has-olm::$(echo false)"
+        echo "::set-output name=cluster-image-namespace::$(echo apache)"
+        /* cluster-catalog-source-namespace intentionally blank due to using straight docker */
 
-        #
-        # Avoid configuring the cluster repeatedly
-        #
-        echo "CLUSTER_OCP3_CONFIGURED=true" >> $GITHUB_ENV
+outputs:
+  cluster-image-registry-push-host:
+    description: "The image registry to which to push images"
+    value: ${{ steps.extract-config.outputs.cluster-image-registry-push-host }}
+  cluster-image-registry-pull-host:
+    description: "The image registry from which to pull images"
+    value: ${{ steps.extract-config.outputs.cluster-image-registry-pull-host }}
+  cluster-image-registry-insecure:
+    description: "Whether the pull registry is insecure"
+    value: ${{ steps.extract-config.outputs.cluster-image-registry-insecure }}
+  cluster-image-namespace:
+    description: "The namespace to install the camel-k images"
+    value: ${{ steps.extract-config.outputs.cluster-image-namespace }}
+  cluster-kube-admin-user-ctx:
+    description: "The context of the kube admin user"
+    value: ${{ steps.configure-developer-user.outputs.cluster-kube-admin-user-ctx }}
+  cluster-kube-user-ctx:
+    description: "The context of the kube user"
+    value: ${{ steps.configure-developer-user.outputs.cluster-kube-user-ctx }}
+  cluster-has-olm:
+    description: "Does the cluster have OLM"
+    value: ${{ steps.extract-config.outputs.cluster-has-olm }}

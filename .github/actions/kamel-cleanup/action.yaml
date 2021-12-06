@@ -18,6 +18,11 @@
 name: kamel-cleanup
 description: 'Cleans up the target cluster, removing any e2e test resources'
 
+inputs:
+  build-bundle-catalog-source:
+    description: "Name of the catalog source for the build bundle image"
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -41,15 +46,15 @@ runs:
       shell: bash
       if: ${{ always() }}
       run: |
-        if [ -z "${{ env.BUILD_BUNDLE_CATALOG_SOURCE }}" ]; then
+        if [ -z "${{ inputs.build-bundle-catalog-source-name }}" ]; then
           # Catalog source never defined so nothing to do
           exit 0
         fi
 
         set +e
-        CATALOG_NS=$(kubectl get catalogsource --all-namespaces | grep ${{ env.BUILD_BUNDLE_CATALOG_SOURCE }} | awk {'print $1'})
+        CATALOG_NS=$(kubectl get catalogsource --all-namespaces | grep ${{ inputs.build-bundle-catalog-source-name }} | awk {'print $1'})
         for ns in ${CATALOG_NS}
         do
-          kubectl delete CatalogSource ${{ env.BUILD_BUNDLE_CATALOG_SOURCE }} -n ${ns}
+          kubectl delete CatalogSource ${{ inputs.build-bundle-catalog-source-name }} -n ${ns}
         done
         set -e

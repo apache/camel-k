@@ -22,6 +22,9 @@ inputs:
   cluster-config-data:
     description: 'The configuration of the underlying cluster (if cluster-type is custom)'
     required: false
+  cluster-kube-config-data:
+    description: 'Base16 encoded kube config - required for custom cluster type only'
+    required: false
 
 runs:
   using: "composite"
@@ -31,50 +34,51 @@ runs:
     name: Prepare Test Environment
     uses: ./.github/actions/kamel-prepare-env
 
-  - id: configure-cluster
+  - id: config-cluster
     name: Configure Platform
     uses: ./.github/actions/kamel-config-cluster
     with:
       cluster-type: ${{ env.TEST_CLUSTER }}
       cluster-config-data: ${{ inputs.cluster-config-data }}
+      cluster-kube-config-data: ${{ inputs.cluster-kube-config-data }}
 
   - id: build-kamel
     name: Build Kamel
     uses: ./.github/actions/kamel-build
     with:
-      image-registry-push-host: ${{ env.CLUSTER_IMAGE_REGISTRY_PUSH_HOST }}
-      image-registry-pull-host: ${{ env.CLUSTER_IMAGE_REGISTRY_PULL_HOST }}
-      image-namespace: ${{ env.CLUSTER_IMAGE_NAMESPACE }}
+      image-registry-push-host: ${{ steps.config-cluster.outputs.cluster-image-registry-push-host }}
+      image-registry-pull-host: ${{ steps.config-cluster.outputs.cluster-image-registry-pull-host }}
+      image-namespace: ${{ steps.config-cluster.outputs.cluster-image-namespace }}
       # Builds the bundle if an OLM is available - depends on cluster being tested
-      build-bundle: ${{ env.CLUSTER_HAS_OLM }}
+      build-bundle: ${{ steps.config-cluster.outputs.cluster-has-olm }}
       # Can be empty and so catalog source will not be created
-      catalog-source-namespace: ${{ env.CLUSTER_CATALOG_SOURCE_NAMESPACE }}
+      catalog-source-namespace: ${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}
 
   - id: install-kamel-cluster-setup
     name: Install Kamel Cluster Setup
     uses: ./.github/actions/kamel-install-cluster-setup
     with:
-      kube-admin-user-ctx: ${{ env.CLUSTER_KUBE_ADMIN_USER_CTX }}
+      kube-admin-user-ctx: ${{ steps.config-cluster.outputs.cluster-kube-admin-user-ctx }}
 
   - id: run-it
     name: Run IT
     shell: bash
     run: |
       # Cluster environment
-      export CUSTOM_IMAGE=${{ env.BUILD_BINARY_LOCAL_IMAGE_NAME }}
-      export CUSTOM_VERSION=${{ env.BUILD_BINARY_LOCAL_IMAGE_VERSION }}
+      export CUSTOM_IMAGE=${{ steps.build-kamel.outputs.build-binary-local-image-name }}
+      export CUSTOM_VERSION=${{ steps.build-kamel.outputs.build-binary-local-image-version }}
 
       #
       # If bundle has been built and installed then use it
       #
-      if [ -n "${{ env.BUILD_BUNDLE_CATALOG_SOURCE }}" ]; then
-        export KAMEL_INSTALL_OLM_SOURCE_NAMESPACE=${{ env.CLUSTER_IMAGE_NAMESPACE }}
-        export KAMEL_INSTALL_OLM_SOURCE=${{ env.BUILD_BUNDLE_CATALOG_SOURCE }}
+      if [ -n "${{ steps.build-kamel.outputs.build-bundle-catalog-source-name }}" ]; then
+        export KAMEL_INSTALL_OLM_SOURCE_NAMESPACE=${{ steps.config-cluster.outputs.cluster-image-namespace }}
+        export KAMEL_INSTALL_OLM_SOURCE=${{ steps.build-kamel.outputs.build-bundle-catalog-source-name }}
       fi
 
       export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
-      export KAMEL_INSTALL_REGISTRY=${{ env.CLUSTER_IMAGE_REGISTRY_PULL_HOST }}
-      export KAMEL_INSTALL_REGISTRY_INSECURE=${{ env.CLUSTER_IMAGE_REGISTRY_INSECURE }}
+      export KAMEL_INSTALL_REGISTRY=${{ steps.config-cluster.outputs.cluster-image-registry-pull-host }}
+      export KAMEL_INSTALL_REGISTRY_INSECURE=${{steps.config-cluster.outputs.cluster-image-registry-insecure }}
       export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
 
       export CAMEL_K_TEST_IMAGE_NAME=${CUSTOM_IMAGE}
@@ -90,3 +94,5 @@ runs:
   - name: Cleanup
     uses: ./.github/actions/kamel-cleanup
     if: ${{ always() }}
+    with:
+      build-bundle-catalog-source: ${{ steps.build-kamel.outputs.build-bundle-catalog-source-name }}
