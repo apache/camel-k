@@ -17,7 +17,7 @@
  */
 
 //
-//  kamel run --dev --name greetings --open-api examples/greetings-api.json examples/greetings.groovy
+//  kamel run --dev --name greetings --open-api greetings-api.json greetings.groovy
 // 
 
 from('direct:greeting-api')

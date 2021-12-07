@@ -27,8 +27,6 @@ import (
 	"strconv"
 	"strings"
 
-	"go.uber.org/multierr"
-
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -52,6 +50,8 @@ import (
 // +camel-k:trait=openapi.
 type openAPITrait struct {
 	BaseTrait `property:",squash"`
+	// The configmaps holding the spec of the OpenAPI
+	Configmaps []string `property:"configmaps" json:"configmaps,omitempty"`
 }
 
 func newOpenAPITrait() Trait {
@@ -85,6 +85,10 @@ func (t *openAPITrait) Configure(e *Environment) (bool, error) {
 		}
 	}
 
+	if t.Configmaps != nil {
+		return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil
+	}
+
 	return false, nil
 }
 
@@ -97,26 +101,63 @@ func (t *openAPITrait) Apply(e *Environment) error {
 		return err
 	}
 
-	for i, resource := range e.Integration.Spec.Resources {
+	generatedFromResources, err := t.generateFromResources(e, tmpDir)
+	if err != nil {
+		return os.RemoveAll(tmpDir)
+	}
+	generatedFromConfigmaps, err := t.generateFromConfigmaps(e, tmpDir)
+	if err != nil {
+		return os.RemoveAll(tmpDir)
+	}
+	if generatedFromConfigmaps != nil && len(generatedFromConfigmaps) > 0 {
+		generatedFromResources = append(generatedFromResources, generatedFromConfigmaps...)
+	}
+	e.Integration.Status.GeneratedSources = generatedFromResources
+
+	return os.RemoveAll(tmpDir)
+}
+
+func (t *openAPITrait) generateFromResources(e *Environment, tmpDir string) ([]v1.SourceSpec, error) {
+	dataSpecs := make([]v1.DataSpec, 0, len(e.Integration.Spec.Resources))
+	for _, resource := range e.Integration.Spec.Resources {
 		if resource.Type != v1.ResourceTypeOpenAPI {
 			continue
 		}
 		if resource.Name == "" {
-			return multierr.Append(
-				fmt.Errorf("no name defined for the openapi resource: %v", resource),
-				os.RemoveAll(tmpDir))
+			return nil, fmt.Errorf("no name defined for the openapi resource: %v", resource)
 		}
+		dataSpecs = append(dataSpecs, resource.DataSpec)
+	}
 
+	return t.generateFromDataSpecs(e, tmpDir, dataSpecs)
+}
+
+func (t *openAPITrait) generateFromConfigmaps(e *Environment, tmpDir string) ([]v1.SourceSpec, error) {
+	dataSpecs := make([]v1.DataSpec, 0, len(t.Configmaps))
+	for _, configmap := range t.Configmaps {
+		cm := kubernetes.LookupConfigmap(e.Ctx, e.Client, e.Integration.Namespace, configmap)
+		// Iterate over each configmap key which may hold a different OpenAPI spec
+		for k, v := range cm.Data {
+			dataSpecs = append(dataSpecs, v1.DataSpec{
+				Name:        k,
+				Content:     v,
+				Compression: false,
+			})
+		}
+	}
+
+	return t.generateFromDataSpecs(e, tmpDir, dataSpecs)
+}
+
+func (t *openAPITrait) generateFromDataSpecs(e *Environment, tmpDir string, specs []v1.DataSpec) ([]v1.SourceSpec, error) {
+	generatedSources := make([]v1.SourceSpec, 0, len(e.Integration.Status.GeneratedSources))
+	for i, resource := range specs {
 		generatedContentName := fmt.Sprintf("%s-openapi-%03d", e.Integration.Name, i)
-
+		generatedSourceName := strings.TrimSuffix(resource.Name, filepath.Ext(resource.Name)) + ".xml"
 		// Generate configmap or reuse existing one
 		if err := t.generateOpenAPIConfigMap(e, resource, tmpDir, generatedContentName); err != nil {
-			return errors.Wrapf(err, "cannot generate configmap for openapi resource %s", resource.Name)
+			return nil, errors.Wrapf(err, "cannot generate configmap for openapi resource %s", resource.Name)
 		}
-
-		generatedSourceName := strings.TrimSuffix(resource.Name, filepath.Ext(resource.Name)) + ".xml"
-		generatedSources := make([]v1.SourceSpec, 0, len(e.Integration.Status.GeneratedSources))
-
 		if e.Integration.Status.GeneratedSources != nil {
 			// Filter out the previously generated source
 			for _, x := range e.Integration.Status.GeneratedSources {
@@ -135,14 +176,12 @@ func (t *openAPITrait) Apply(e *Environment) error {
 			},
 			Language: v1.LanguageXML,
 		})
-
-		e.Integration.Status.GeneratedSources = generatedSources
 	}
 
-	return os.RemoveAll(tmpDir)
+	return generatedSources, nil
 }
 
-func (t *openAPITrait) generateOpenAPIConfigMap(e *Environment, resource v1.ResourceSpec, tmpDir, generatedContentName string) error {
+func (t *openAPITrait) generateOpenAPIConfigMap(e *Environment, resource v1.DataSpec, tmpDir, generatedContentName string) error {
 	cm := corev1.ConfigMap{}
 	key := client.ObjectKey{
 		Namespace: e.Integration.Namespace,
@@ -176,7 +215,7 @@ func (t *openAPITrait) generateOpenAPIConfigMap(e *Environment, resource v1.Reso
 	return t.createNewOpenAPIConfigMap(e, resource, tmpDir, generatedContentName)
 }
 
-func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.ResourceSpec, tmpDir, generatedContentName string) error {
+func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.DataSpec, tmpDir, generatedContentName string) error {
 	tmpDir = path.Join(tmpDir, generatedContentName)
 	err := os.MkdirAll(tmpDir, os.ModePerm)
 	if err != nil {

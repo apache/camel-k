@@ -160,7 +160,7 @@ func ComputeForIntegrationKit(kit *v1.IntegrationKit) (string, error) {
 }
 
 // ComputeForResource returns a digest for the specific resource.
-func ComputeForResource(res v1.ResourceSpec) (string, error) {
+func ComputeForResource(res v1.DataSpec) (string, error) {
 	hash := sha256.New()
 	// Operator version is relevant
 	if _, err := hash.Write([]byte(defaults.Version)); err != nil {
@@ -173,16 +173,10 @@ func ComputeForResource(res v1.ResourceSpec) (string, error) {
 	if _, err := hash.Write([]byte(res.Name)); err != nil {
 		return "", err
 	}
-	if _, err := hash.Write([]byte(res.Type)); err != nil {
-		return "", err
-	}
 	if _, err := hash.Write([]byte(res.ContentKey)); err != nil {
 		return "", err
 	}
 	if _, err := hash.Write([]byte(res.ContentRef)); err != nil {
-		return "", err
-	}
-	if _, err := hash.Write([]byte(res.MountPath)); err != nil {
 		return "", err
 	}
 	if _, err := hash.Write([]byte(strconv.FormatBool(res.Compression))); err != nil {
