@@ -27,10 +27,13 @@ import (
 
 // IntegrationSpec defines the desired state of Integration
 type IntegrationSpec struct {
-	Replicas  *int32         `json:"replicas,omitempty"`
-	Sources   []SourceSpec   `json:"sources,omitempty"`
-	Flows     []Flow         `json:"flows,omitempty"`
-	Resources []ResourceSpec `json:"resources,omitempty"`
+	Replicas *int32       `json:"replicas,omitempty"`
+	Sources  []SourceSpec `json:"sources,omitempty"`
+	Flows    []Flow       `json:"flows,omitempty"`
+	// Deprecated:
+	// Use container trait (container.resources) to manage resources
+	// Use openapi trait (openapi.configmaps) to manage OpenAPIs specifications
+	Resources []ResourceSpec `json:"resources,deprecatedInFavorOf,omitempty,deprecated"`
 	// Deprecated: use the IntegrationKit field
 	Kit            string                  `json:"kit,omitempty"`
 	IntegrationKit *corev1.ObjectReference `json:"integrationKit,omitempty"`

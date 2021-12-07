@@ -100,21 +100,22 @@ func (t *openAPITrait) Apply(e *Environment) error {
 	if err != nil {
 		return err
 	}
+	defer os.RemoveAll(tmpDir)
 
 	generatedFromResources, err := t.generateFromResources(e, tmpDir)
 	if err != nil {
-		return os.RemoveAll(tmpDir)
+		return err
 	}
 	generatedFromConfigmaps, err := t.generateFromConfigmaps(e, tmpDir)
 	if err != nil {
-		return os.RemoveAll(tmpDir)
+		return err
 	}
-	if generatedFromConfigmaps != nil && len(generatedFromConfigmaps) > 0 {
+	if len(generatedFromConfigmaps) > 0 {
 		generatedFromResources = append(generatedFromResources, generatedFromConfigmaps...)
 	}
 	e.Integration.Status.GeneratedSources = generatedFromResources
 
-	return os.RemoveAll(tmpDir)
+	return nil
 }
 
 func (t *openAPITrait) generateFromResources(e *Environment, tmpDir string) ([]v1.SourceSpec, error) {
@@ -136,6 +137,9 @@ func (t *openAPITrait) generateFromConfigmaps(e *Environment, tmpDir string) ([]
 	dataSpecs := make([]v1.DataSpec, 0, len(t.Configmaps))
 	for _, configmap := range t.Configmaps {
 		cm := kubernetes.LookupConfigmap(e.Ctx, e.Client, e.Integration.Namespace, configmap)
+		if cm == nil {
+			return nil, fmt.Errorf("could not find any configmap with name: %s", configmap)
+		}
 		// Iterate over each configmap key which may hold a different OpenAPI spec
 		for k, v := range cm.Data {
 			dataSpecs = append(dataSpecs, v1.DataSpec{

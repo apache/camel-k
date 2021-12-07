@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"path"
 	"reflect"
 	"regexp"
 	"strings"
@@ -92,7 +91,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArrayP("trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().Bool("compression", false, "Enable storage of sources and resources as a compressed binary blobs")
-	cmd.Flags().StringArray("open-api", nil, "Add an OpenAPI v2 spec")
+	cmd.Flags().StringArray("open-api", nil, "Add an OpenAPI spec (syntax: [configmap|file]:name)")
 	cmd.Flags().StringArrayP("volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
 	cmd.Flags().StringArrayP("env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
 	cmd.Flags().StringArray("property-file", nil, "[Deprecated] Bind a property file to the integration. E.g. \"--property-file integration.properties\"")
@@ -262,6 +261,13 @@ func (o *runCmdOptions) validate() error {
 		}
 	}
 
+	for _, openapi := range o.OpenAPIs {
+		// We support only local file and cluster configmaps
+		if !(strings.HasPrefix(openapi, "file:") || strings.HasPrefix(openapi, "configmap:")) {
+			return fmt.Errorf(`invalid openapi specification "%s". It supports only file or configmap`, openapi)
+		}
+	}
+
 	return nil
 }
 
@@ -417,7 +423,7 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 	files = append(files, filterFileLocation(o.Properties)...)
 	files = append(files, filterFileLocation(o.BuildProperties)...)
 	files = append(files, o.PropertyFiles...)
-	files = append(files, o.OpenAPIs...)
+	files = append(files, filterFileLocation(o.OpenAPIs)...)
 
 	for _, s := range files {
 		ok, err := isLocalAndFileExists(s)
@@ -570,42 +576,21 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	}
 
 	generatedConfigmaps := make([]*corev1.ConfigMap, 0)
-	for _, res := range o.Resources {
-		config, err := resource.ParseResource(res)
-		if err != nil {
-			return nil, err
-		}
-		// We try to autogenerate a configmap
-		maybeGenCm, err := parseConfigAndGenCm(o.Context, c, config, integration, o.Compression)
-		if err != nil {
-			return nil, err
-		}
-		if maybeGenCm != nil {
-			generatedConfigmaps = append(generatedConfigmaps, maybeGenCm)
-		}
-		o.Traits = append(o.Traits, convertToTrait(config.String(), "container.resources"))
+	resCms, err := o.parseAndConvertToTrait(c, integration, o.Resources, resource.ParseResource, func(c *resource.Config) string { return c.String() }, "container.resources")
+	if err != nil {
+		return nil, err
 	}
-	for _, conf := range o.Configs {
-		config, err := resource.ParseResource(conf)
-		if err != nil {
-			return nil, err
-		}
-		// We try to autogenerate a configmap
-		maybeGenCm, err := parseConfigAndGenCm(o.Context, c, config, integration, o.Compression)
-		if err != nil {
-			return nil, err
-		}
-		if maybeGenCm != nil {
-			generatedConfigmaps = append(generatedConfigmaps, maybeGenCm)
-		}
-		o.Traits = append(o.Traits, convertToTrait(config.String(), "container.configs"))
+	generatedConfigmaps = append(generatedConfigmaps, resCms...)
+	confCms, err := o.parseAndConvertToTrait(c, integration, o.Configs, resource.ParseConfig, func(c *resource.Config) string { return c.String() }, "container.configs")
+	if err != nil {
+		return nil, err
 	}
-
-	for _, resource := range o.OpenAPIs {
-		if err = addResource(o.Context, resource, &integration.Spec, o.Compression, v1.ResourceTypeOpenAPI); err != nil {
-			return nil, err
-		}
+	generatedConfigmaps = append(generatedConfigmaps, confCms...)
+	oAPICms, err := o.parseAndConvertToTrait(c, integration, o.OpenAPIs, resource.ParseConfig, func(c *resource.Config) string { return c.Name() }, "openapi.configmaps")
+	if err != nil {
+		return nil, err
 	}
+	generatedConfigmaps = append(generatedConfigmaps, oAPICms...)
 
 	for _, item := range o.Dependencies {
 		integration.Spec.AddDependency(item)
@@ -703,21 +688,28 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	return integration, nil
 }
 
-func addResource(ctx context.Context, resourceLocation string, integrationSpec *v1.IntegrationSpec, enableCompression bool, resourceType v1.ResourceType) error {
-	if data, _, compressed, err := loadTextContent(ctx, resourceLocation, enableCompression); err == nil {
-		integrationSpec.AddResources(v1.ResourceSpec{
-			DataSpec: v1.DataSpec{
-				Name:        path.Base(resourceLocation),
-				Content:     data,
-				Compression: compressed,
-			},
-			Type: resourceType,
-		})
-	} else {
-		return err
+func (o *runCmdOptions) parseAndConvertToTrait(
+	c client.Client, integration *v1.Integration, params []string,
+	parse func(string) (*resource.Config, error),
+	convert func(*resource.Config) string,
+	traitParam string) ([]*corev1.ConfigMap, error) {
+	generatedCms := make([]*corev1.ConfigMap, 0)
+	for _, param := range params {
+		config, err := parse(param)
+		if err != nil {
+			return nil, err
+		}
+		// We try to autogenerate a configmap
+		maybeGenCm, err := parseConfigAndGenCm(o.Context, c, config, integration, o.Compression)
+		if err != nil {
+			return nil, err
+		}
+		if maybeGenCm != nil {
+			generatedCms = append(generatedCms, maybeGenCm)
+		}
+		o.Traits = append(o.Traits, convertToTrait(convert(config), traitParam))
 	}
-
-	return nil
+	return generatedCms, nil
 }
 
 func convertToTrait(value, traitParameter string) string {
