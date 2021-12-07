@@ -35,8 +35,13 @@ func newRegistryTrait() Trait {
 	}
 }
 
+// InfluencesKit overrides base class method
+func (t *registryTrait) InfluencesKit() bool {
+	return true
+}
+
 func (t *registryTrait) Configure(e *Environment) (bool, error) {
-	//by default disable
+	// disabled by default
 	if IsNilOrFalse(t.Enabled) {
 		return false, nil
 	}
@@ -45,26 +50,23 @@ func (t *registryTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *registryTrait) Apply(e *Environment) error {
-	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
-		build := getBuilderTask(e.BuildTasks)
-		ext := v1.MavenArtifact{
-			GroupID:    "com.github.johnpoth",
-			ArtifactID: "wagon-oci-distribution",
-			Version:    "1.0-SNAPSHOT",
-		}
-		policy := v1.RepositoryPolicy{
-			Enabled: true,
-		}
-		repo := v1.Repository{
-			ID:        "image-registry",
-			URL:       "oci://" + e.Platform.Spec.Build.Registry.Address,
-			Snapshots: policy,
-			Releases:  policy,
-		}
-		// configure Maven to lookup dependencies in the Image registry
-		build.Maven.Repositories = append(build.Maven.Repositories, repo)
-		build.Maven.Extension = append(build.Maven.Extension, ext)
+	build := getBuilderTask(e.BuildTasks)
+	ext := v1.MavenArtifact{
+		GroupID:    "com.github.johnpoth",
+		ArtifactID: "wagon-oci-distribution",
+		Version:    "1.0-SNAPSHOT",
 	}
-
+	policy := v1.RepositoryPolicy{
+		Enabled: true,
+	}
+	repo := v1.Repository{
+		ID:        "image-registry",
+		URL:       "oci://" + e.Platform.Spec.Build.Registry.Address,
+		Snapshots: policy,
+		Releases:  policy,
+	}
+	// configure Maven to lookup dependencies in the Image registry
+	build.Maven.Repositories = append(build.Maven.Repositories, repo)
+	build.Maven.Extension = append(build.Maven.Extension, ext)
 	return nil
 }

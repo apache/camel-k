@@ -565,58 +565,23 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		return nil, err
 	}
 
-	list := v1.NewIntegrationPlatformList()
-	if err := c.List(o.Context, &list, ctrl.InNamespace(integration.Namespace)); err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("could not retrieve integration platform from namespace %s", o.Namespace))
-	}
-	if len(list.Items) > 1 {
-		return nil, fmt.Errorf("expected 1 integration platform in the namespace, found: %d", len(list.Items))
-	} else if len(list.Items) == 0 {
-		return nil, errors.New("no integration platforms found in the namespace: run \"kamel install\" to install the platform")
-	}
-	platform := list.Items[0]
-	registry := platform.Spec.Build.Registry.Address
-	insecure := platform.Spec.Build.Registry.Insecure
+	var platform *v1.IntegrationPlatform
 
 	for _, item := range o.Dependencies {
 		// TODO: accept URLs
 		// TODO: accept other resources through Maven types (i.e not just JARs)
 		if strings.HasPrefix(item, "file://") && strings.HasSuffix(item, ".jar") {
-			newStdR, newStdW, _ := os.Pipe()
-			defer newStdW.Close()
-
-			fileInfo, err := os.Stat(item[6:])
-			if err != nil {
-				return nil, err
+			if platform == nil {
+				// let's also enable the registry trait
+				o.Traits = append(o.Traits, "registry.enabled=true")
+				platform, err = getPlatform(c, o.Context, integration.Namespace)
+				if err != nil {
+					return nil, err
+				}
 			}
-			mapping := item[6:] + ":" + "."
-
-			version := defaults.Version
-			artifactId := name + "-" + strings.TrimSuffix(fileInfo.Name(), ".jar")
-			artifactPath := "/org/apache/camel/k/external/" + artifactId + "/" + version + "/" + artifactId + "-" + version + ".jar"
-			artifactPath = strings.ToLower(artifactPath)
-			target := registry + artifactPath + ":" + version
-			options := spectrum.Options{
-				PullInsecure:  true,
-				PushInsecure:  insecure,
-				PullConfigDir: "",
-				PushConfigDir: "",
-				Base:          "",
-				Target:        target,
-				Stdout:        cmd.OutOrStdout(),
-				Stderr:        cmd.OutOrStderr(),
-				Recursive:     false,
+			if err := uploadDependency(platform, item, name, cmd, integration); err != nil {
+				return nil, errors.Wrap(err, fmt.Sprintf("Error trying to upload %s to the Image Registry.", item))
 			}
-
-			go readSpectrumLogs(newStdR)
-			_, err = spectrum.Build(options, mapping)
-			if err != nil {
-				return nil, err
-			}
-
-			// let's enable the registry trait
-			o.Traits = append(o.Traits, "registry.enabled=true")
-			integration.Spec.AddDependency("mvn:org.apache.camel.k.external:" + artifactId + ":" + version)
 		} else {
 			integration.Spec.AddDependency(item)
 		}
@@ -791,6 +756,57 @@ func resolvePodTemplate(ctx context.Context, templateSrc string, spec *v1.Integr
 		}
 	}
 	return err
+}
+
+func getPlatform(c client.Client, context context.Context, ns string) (*v1.IntegrationPlatform, error) {
+	list := v1.NewIntegrationPlatformList()
+	if err := c.List(context, &list, ctrl.InNamespace(ns)); err != nil {
+		return nil, errors.Wrap(err, fmt.Sprintf("could not retrieve integration platform from namespace %s", ns))
+	}
+	if len(list.Items) > 1 {
+		return nil, fmt.Errorf("expected 1 integration platform in the namespace, found: %d", len(list.Items))
+	} else if len(list.Items) == 0 {
+		return nil, errors.New("no integration platforms found in the namespace: run \"kamel install\" to install the platform")
+	}
+	return &list.Items[0], nil
+}
+
+func uploadDependency(platform *v1.IntegrationPlatform, item string, name string, cmd *cobra.Command, integration *v1.Integration) error {
+	registry := platform.Spec.Build.Registry.Address
+	insecure := platform.Spec.Build.Registry.Insecure
+	newStdR, newStdW, _ := os.Pipe()
+	defer newStdW.Close()
+
+	fileInfo, err := os.Stat(item[6:])
+	if err != nil {
+		return err
+	}
+	mapping := item[6:] + ":" + "."
+
+	version := defaults.Version
+	artifactId := name + "-" + strings.TrimSuffix(fileInfo.Name(), ".jar")
+	artifactPath := "/org/apache/camel/k/external/" + artifactId + "/" + version + "/" + artifactId + "-" + version + ".jar"
+	artifactPath = strings.ToLower(artifactPath)
+	target := registry + artifactPath + ":" + version
+	options := spectrum.Options{
+		PullInsecure:  true,
+		PushInsecure:  insecure,
+		PullConfigDir: "",
+		PushConfigDir: "",
+		Base:          "",
+		Target:        target,
+		Stdout:        cmd.OutOrStdout(),
+		Stderr:        cmd.OutOrStderr(),
+		Recursive:     false,
+	}
+
+	go readSpectrumLogs(newStdR)
+	_, err = spectrum.Build(options, mapping)
+	if err != nil {
+		return err
+	}
+	integration.Spec.AddDependency("mvn:org.apache.camel.k.external:" + artifactId + ":" + version)
+	return nil
 }
 
 func readSpectrumLogs(newStdOut *os.File) {
