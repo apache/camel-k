@@ -32,15 +32,20 @@ type IntegrationSpec struct {
 	Flows     []Flow         `json:"flows,omitempty"`
 	Resources []ResourceSpec `json:"resources,omitempty"`
 	// Deprecated: use the IntegrationKit field
-	Kit                string                  `json:"kit,omitempty"`
-	IntegrationKit     *corev1.ObjectReference `json:"integrationKit,omitempty"`
-	Dependencies       []string                `json:"dependencies,omitempty"`
-	Profile            TraitProfile            `json:"profile,omitempty"`
-	Traits             map[string]TraitSpec    `json:"traits,omitempty"`
-	PodTemplate        *PodSpecTemplate        `json:"template,omitempty"`
-	Configuration      []ConfigurationSpec     `json:"configuration,omitempty"`
-	Repositories       []string                `json:"repositories,omitempty"`
-	ServiceAccountName string                  `json:"serviceAccountName,omitempty"`
+	Kit            string                  `json:"kit,omitempty"`
+	IntegrationKit *corev1.ObjectReference `json:"integrationKit,omitempty"`
+	Dependencies   []string                `json:"dependencies,omitempty"`
+	Profile        TraitProfile            `json:"profile,omitempty"`
+	Traits         map[string]TraitSpec    `json:"traits,omitempty"`
+	PodTemplate    *PodSpecTemplate        `json:"template,omitempty"`
+	// Deprecated:
+	// Use camel trait (camel.properties) to manage properties
+	// Use container trait (container.configs) to manage configs
+	// Use container trait (container.resources) to manage resources
+	// Use container trait (container.volumes) to manage volumes
+	Configuration      []ConfigurationSpec `json:"configuration,omitempty"`
+	Repositories       []string            `json:"repositories,omitempty"`
+	ServiceAccountName string              `json:"serviceAccountName,omitempty"`
 }
 
 // IntegrationStatus defines the observed state of Integration
