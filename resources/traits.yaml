@@ -774,7 +774,14 @@ traits:
   - OpenShift
   description: The OpenAPI DSL trait is internally used to allow creating integrations
     from a OpenAPI specs.
-  properties: []
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: configmaps
+    type: '[]string'
+    description: The configmaps holding the spec of the OpenAPI
 - name: owner
   platform: true
   profiles:

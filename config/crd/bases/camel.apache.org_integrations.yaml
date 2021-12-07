@@ -72,6 +72,10 @@ spec:
             description: IntegrationSpec defines the desired state of Integration
             properties:
               configuration:
+                description: 'Deprecated: Use camel trait (camel.properties) to manage
+                  properties Use container trait (container.configs) to manage configs
+                  Use container trait (container.resources) to manage resources Use
+                  container trait (container.volumes) to manage volumes'
                 items:
                   description: ConfigurationSpec --
                   properties:
@@ -175,6 +179,9 @@ spec:
                   type: string
                 type: array
               resources:
+                description: 'Deprecated: Use container trait (container.resources)
+                  to manage resources Use openapi trait (openapi.configmaps) to manage
+                  OpenAPIs specifications'
                 items:
                   description: ResourceSpec --
                   properties:
