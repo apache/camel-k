@@ -23,6 +23,7 @@
 - Google storage component doesn't work [\#2576](https://github.com/apache/camel-k/issues/2576)
 - topicName [\#2567](https://github.com/apache/camel-k/issues/2567)
 - Kamelet: default KameletBindings configuration settings [\#2558](https://github.com/apache/camel-k/issues/2558)
+- Trying to run Sample.java in Kind cluster [\#2542](https://github.com/apache/camel-k/issues/2542)
 - Multiple of the examples fail on Minikube [\#2537](https://github.com/apache/camel-k/issues/2537)
 - Camel-K - uninstall and namespace deletion w/ k8s let all Camel-K Integrations in this namespace alive [\#2533](https://github.com/apache/camel-k/issues/2533)
 - Reduce time for first Integration start [\#2520](https://github.com/apache/camel-k/issues/2520)
@@ -39,6 +40,7 @@
 
 - chore\(ci\): Better GitHub Actions concurrency group [\#2811](https://github.com/apache/camel-k/pull/2811) ([astefanutti](https://github.com/astefanutti))
 - fix\(OLM\): Remove aggregated cluster roles from OLM bundle [\#2809](https://github.com/apache/camel-k/pull/2809) ([astefanutti](https://github.com/astefanutti))
+- chore\(RBAC\): Remove wildcards from Knative role [\#2807](https://github.com/apache/camel-k/pull/2807) ([astefanutti](https://github.com/astefanutti))
 - chore: Remove custom REST client [\#2806](https://github.com/apache/camel-k/pull/2806) ([astefanutti](https://github.com/astefanutti))
 - chore\(build\): Upgrade base image to ubi-quarkus-mandrel:21.3.0.0 [\#2798](https://github.com/apache/camel-k/pull/2798) ([astefanutti](https://github.com/astefanutti))
 - fix\(build\): Fix OLM bundle generation on Mac OS [\#2797](https://github.com/apache/camel-k/pull/2797) ([astefanutti](https://github.com/astefanutti))
