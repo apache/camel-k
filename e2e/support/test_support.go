@@ -1367,17 +1367,11 @@ func Kamelet(name string, ns string) func() *v1alpha1.Kamelet {
 	}
 }
 
-func KameletHasLabel(name string, ns string, label string) func() bool {
-	return func() bool {
-		k := Kamelet(name, ns)()
-		if k == nil {
-			return false
-		}
-		if _, ok := k.Labels[label]; ok {
-			return true
-		}
-		return false
+func KameletLabels(kamelet *v1alpha1.Kamelet) map[string]string {
+	if kamelet == nil {
+		return map[string]string{}
 	}
+	return kamelet.GetLabels()
 }
 
 func ClusterDomainName() (string, error) {

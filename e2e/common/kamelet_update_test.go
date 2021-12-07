@@ -32,26 +32,26 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
-const preExistingKameletMarker = "pre-existing-kamelet"
+const customLabel = "custom-label"
 
-func TestKameletUpgrade(t *testing.T) {
-
+func TestBundleKameletUpdate(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(createOperatorManagedKamelet(ns, "http-sink")()).To(Succeed()) // Going to be replaced
-		Expect(createUserManagedKamelet(ns, "ftp-sink")()).To(Succeed())      // Left intact by the operator
-		// Leverages the fact that the default kamelet catalog contains embedded "http-sink" and "ftp-sink"
+		Expect(createBundleKamelet(ns, "http-sink")()).To(Succeed()) // Going to be replaced
+		Expect(createUserKamelet(ns, "user-sink")()).To(Succeed())   // Left intact by the operator
 
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
-		Eventually(KameletHasLabel("http-sink", ns, preExistingKameletMarker)).Should(BeFalse())
-		Consistently(KameletHasLabel("ftp-sink", ns, preExistingKameletMarker), 5*time.Second, 1*time.Second).Should(BeTrue())
+		Eventually(Kamelet("http-sink", ns)).
+			Should(WithTransform(KameletLabels, HaveKeyWithValue(customLabel, "true")))
+		Consistently(Kamelet("user-sink", ns), 5*time.Second, 1*time.Second).
+			Should(WithTransform(KameletLabels, HaveKeyWithValue(customLabel, "true")))
 
 		// Cleanup
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})
 }
 
-func createOperatorManagedKamelet(ns string, name string) func() error {
+func createBundleKamelet(ns string, name string) func() error {
 	flow := map[string]interface{}{
 		"from": map[string]interface{}{
 			"uri": "kamelet:source",
@@ -59,13 +59,13 @@ func createOperatorManagedKamelet(ns string, name string) func() error {
 	}
 
 	labels := map[string]string{
-		preExistingKameletMarker:     "true",
+		customLabel:                  "true",
 		v1alpha1.KameletBundledLabel: "true",
 	}
 	return CreateKamelet(ns, name, flow, nil, labels)
 }
 
-func createUserManagedKamelet(ns string, name string) func() error {
+func createUserKamelet(ns string, name string) func() error {
 	flow := map[string]interface{}{
 		"from": map[string]interface{}{
 			"uri": "kamelet:source",
@@ -73,7 +73,7 @@ func createUserManagedKamelet(ns string, name string) func() error {
 	}
 
 	labels := map[string]string{
-		preExistingKameletMarker: "true",
+		customLabel: "true",
 	}
 	return CreateKamelet(ns, name, flow, nil, labels)
 }
