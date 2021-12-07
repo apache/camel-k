@@ -190,13 +190,22 @@ func TestRunNameFlag(t *testing.T) {
 func TestRunOpenApiFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun,
-		"--open-api", "oapi1",
-		"--open-api", "oapi2",
+		"--open-api", "file:oapi1",
+		"--open-api", "configmap:oapi2",
 		integrationSource)
 	assert.Nil(t, err)
 	assert.Len(t, runCmdOptions.OpenAPIs, 2)
-	assert.Equal(t, "oapi1", runCmdOptions.OpenAPIs[0])
-	assert.Equal(t, "oapi2", runCmdOptions.OpenAPIs[1])
+	assert.Equal(t, "file:oapi1", runCmdOptions.OpenAPIs[0])
+	assert.Equal(t, "configmap:oapi2", runCmdOptions.OpenAPIs[1])
+}
+
+func TestRunOpenApiInvalidFlag(t *testing.T) {
+	_, rootCmd, _ := initializeRunCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdRun,
+		"--open-api", "secret:oapi1",
+		"--open-api", "oapi2",
+		integrationSource)
+	assert.NotNil(t, err)
 }
 
 func TestRunOutputFlag(t *testing.T) {
