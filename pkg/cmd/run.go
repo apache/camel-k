@@ -24,6 +24,8 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"strings"
@@ -566,11 +568,11 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	}
 
 	var platform *v1.IntegrationPlatform
-
 	for _, item := range o.Dependencies {
 		// TODO: accept URLs
 		// TODO: accept other resources through Maven types (i.e not just JARs)
-		if strings.HasPrefix(item, "file://") && strings.HasSuffix(item, ".jar") {
+		// TODO: it'd be cool to automatically detect pom file in JARs and upload them
+		if strings.HasPrefix(item, "file://") && (strings.HasSuffix(item, ".jar") || strings.HasSuffix(item, ".pom")) {
 			if platform == nil {
 				// let's also enable the registry trait
 				o.Traits = append(o.Traits, "registry.enabled=true")
@@ -771,21 +773,24 @@ func getPlatform(c client.Client, context context.Context, ns string) (*v1.Integ
 	return &list.Items[0], nil
 }
 
-func uploadDependency(platform *v1.IntegrationPlatform, item string, name string, cmd *cobra.Command, integration *v1.Integration) error {
+func uploadDependency(platform *v1.IntegrationPlatform, item string, integrationName string, cmd *cobra.Command, integration *v1.Integration) error {
 	registry := platform.Spec.Build.Registry.Address
 	insecure := platform.Spec.Build.Registry.Insecure
 	newStdR, newStdW, _ := os.Pipe()
 	defer newStdW.Close()
 
-	fileInfo, err := os.Stat(item[6:])
+	// spectrum expects absolute paths but let's allow users to specify relative paths
+	abs, err := filepath.Abs(item[7:])
 	if err != nil {
 		return err
 	}
-	mapping := item[6:] + ":" + "."
-
+	filename, ext := getFilenameAndExtension(abs)
+	artifactId := integrationName + "-" + filename
 	version := defaults.Version
-	artifactId := name + "-" + strings.TrimSuffix(fileInfo.Name(), ".jar")
-	artifactPath := "/org/apache/camel/k/external/" + artifactId + "/" + version + "/" + artifactId + "-" + version + ".jar"
+	groupId := "org.apache.camel.k.external"
+	groupIdHttpPath := strings.ReplaceAll(groupId, ".", "/")
+	artifactPath := fmt.Sprintf("/%s/%s/%s/%s-%s%s", groupIdHttpPath, artifactId, version, artifactId, version, ext)
+	// Image repository names must be lower case
 	artifactPath = strings.ToLower(artifactPath)
 	target := registry + artifactPath + ":" + version
 	options := spectrum.Options{
@@ -801,12 +806,23 @@ func uploadDependency(platform *v1.IntegrationPlatform, item string, name string
 	}
 
 	go readSpectrumLogs(newStdR)
-	_, err = spectrum.Build(options, mapping)
+	_, err = spectrum.Build(options, fmt.Sprintf("%s:.", abs))
 	if err != nil {
 		return err
 	}
-	integration.Spec.AddDependency("mvn:org.apache.camel.k.external:" + artifactId + ":" + version)
+	fmt.Printf("Uploaded: %s to %s \n", item, target)
+	if strings.HasSuffix(item, ".jar") {
+		dependency := fmt.Sprintf("mvn:%s:%s:%s", groupId, artifactId, version)
+		fmt.Printf("Added %s to the Integration's dependency list \n", dependency)
+		integration.Spec.AddDependency(dependency)
+	}
 	return nil
+}
+
+func getFilenameAndExtension(abs string) (string, string) {
+	extension := filepath.Ext(abs)
+	name := filepath.Base(abs)
+	return name[0 : len(name)-len(extension)], extension
 }
 
 func readSpectrumLogs(newStdOut *os.File) {
