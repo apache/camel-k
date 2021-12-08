@@ -27,6 +27,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 
 	"golang.org/x/sync/errgroup"
 
@@ -36,6 +37,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
@@ -50,7 +52,15 @@ const (
 	defaultKameletDir = "/kamelets/"
 )
 
-var hasServerSideApply = true
+var (
+	log = logf.Log
+
+	hasServerSideApply atomic.Value
+)
+
+func init() {
+	hasServerSideApply.Store(true)
+}
 
 // KameletCatalog installs the bundled Kamelets into the specified namespace.
 func KameletCatalog(ctx context.Context, c client.Client, namespace string) error {
@@ -121,13 +131,14 @@ func applyKamelet(ctx context.Context, c client.Client, path string, namespace s
 	kamelet.GetLabels()[v1alpha1.KameletBundledLabel] = "true"
 	kamelet.GetLabels()[v1alpha1.KameletReadOnlyLabel] = "true"
 
-	if hasServerSideApply {
+	if v := hasServerSideApply.Load(); v.(bool) {
 		err := serverSideApply(ctx, c, kamelet)
 		switch {
 		case err == nil:
 			return nil
 		case isIncompatibleServerError(err):
-			hasServerSideApply = false
+			log.Info("Fallback to client-side apply for installing bundled Kamelets")
+			hasServerSideApply.Store(false)
 		default:
 			return fmt.Errorf("could not apply Kamelet from file %q: %w", path, err)
 		}
