@@ -38,6 +38,7 @@
 
 **Merged pull requests:**
 
+- feat: Faster operator startup [\#2814](https://github.com/apache/camel-k/pull/2814) ([astefanutti](https://github.com/astefanutti))
 - chore\(ci\): Better GitHub Actions concurrency group [\#2811](https://github.com/apache/camel-k/pull/2811) ([astefanutti](https://github.com/astefanutti))
 - fix\(OLM\): Remove aggregated cluster roles from OLM bundle [\#2809](https://github.com/apache/camel-k/pull/2809) ([astefanutti](https://github.com/astefanutti))
 - chore\(RBAC\): Remove wildcards from Knative role [\#2807](https://github.com/apache/camel-k/pull/2807) ([astefanutti](https://github.com/astefanutti))
