@@ -125,14 +125,16 @@ func applyKamelet(ctx context.Context, c client.Client, path string, namespace s
 		err := serverSideApply(ctx, c, kamelet)
 		switch {
 		case err == nil:
-			break
+			return nil
 		case isIncompatibleServerError(err):
 			hasServerSideApply = false
 		default:
 			return fmt.Errorf("could not apply Kamelet from file %q: %w", path, err)
 		}
-	} else {
-		return clientSideApply(ctx, c, kamelet)
+	}
+	err = clientSideApply(ctx, c, kamelet)
+	if err != nil {
+		return fmt.Errorf("could not apply Kamelet from file %q: %w", path, err)
 	}
 
 	return nil
