@@ -21,9 +21,10 @@ import (
 	"fmt"
 	"strings"
 
+	yaml2 "gopkg.in/yaml.v2"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/uri"
-	yaml2 "gopkg.in/yaml.v2"
 )
 
 // YAMLInspector --.
@@ -160,7 +161,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 		switch key {
 		case "from":
 			meta.FromURIs = append(meta.FromURIs, maybeURI)
-		case "to":
+		case "to", "to-d":
 			meta.ToURIs = append(meta.ToURIs, maybeURI)
 		}
 	}
