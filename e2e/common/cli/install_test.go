@@ -49,7 +49,7 @@ func TestKitMainInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 		Expect(Kamel("kit", "create", "timer", "-d", "camel:timer", "-n", ns).Execute()).To(Succeed())
-		Eventually(Build(ns, "timer")).ShouldNot(BeNil())
+		Eventually(Build(ns, "timer"), TestTimeoutMedium).ShouldNot(BeNil())
 	})
 }
 
