@@ -53,8 +53,8 @@ func (t *registryTrait) Apply(e *Environment) error {
 	build := getBuilderTask(e.BuildTasks)
 	ext := v1.MavenArtifact{
 		GroupID:    "com.github.johnpoth",
-		ArtifactID: "wagon-oci-distribution",
-		Version:    "1.0-SNAPSHOT",
+		ArtifactID: "wagon-docker-registry",
+		Version:    "0.1.0",
 	}
 	policy := v1.RepositoryPolicy{
 		Enabled: true,
