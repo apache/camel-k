@@ -40,7 +40,7 @@ func TestOpenAPIService(t *testing.T) {
 			"run",
 			"-n", ns,
 			"--name", "petstore",
-			"--open-api", "files/petstore-api.yaml",
+			"--open-api", "file:files/petstore-api.yaml",
 			"files/petstore.groovy",
 		).Execute()).To(Succeed())
 
@@ -65,7 +65,7 @@ func TestOpenAPIDeployment(t *testing.T) {
 			"run",
 			"-n", ns,
 			"--name", "petstore",
-			"--open-api", "files/petstore-api.yaml",
+			"--open-api", "file:files/petstore-api.yaml",
 			"files/petstore.groovy",
 		).Execute()).To(Succeed())
 
