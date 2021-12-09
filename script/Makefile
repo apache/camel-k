@@ -194,44 +194,44 @@ test: build
 
 test-integration: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/common -tags=integration && \
-	go test -timeout 60m -v ./e2e/common/build -tags=integration && \
-	go test -timeout 60m -v ./e2e/common/cli -tags=integration && \
-	go test -timeout 60m -v ./e2e/common/config -tags=integration && \
-	go test -timeout 60m -v ./e2e/common/languages -tags=integration && \
-	go test -timeout 60m -v ./e2e/common/traits -tags=integration
+	go test -timeout 60m -v ./e2e/common -tags=integration $(TEST_INTEGRATION_COMMON_RUN) && \
+	go test -timeout 60m -v ./e2e/common/build -tags=integration $(TEST_INTEGRATION_COMMON_BUILD_RUN) && \
+	go test -timeout 60m -v ./e2e/common/cli -tags=integration $(TEST_INTEGRATION_COMMON_CLI_RUN) && \
+	go test -timeout 60m -v ./e2e/common/config -tags=integration $(TEST_INTEGRATION_COMMON_CONFIG_RUN) && \
+	go test -timeout 60m -v ./e2e/common/languages -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) && \
+	go test -timeout 60m -v ./e2e/common/traits -tags=integration $(TEST_INTEGRATION_COMMON_TRAITS_RUN)
 
 test-knative: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/knative -tags=integration
+	go test -timeout 60m -v ./e2e/knative -tags=integration $(TEST_KNATIVE_RUN)
 
 test-builder: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/builder -tags=integration
+	go test -timeout 60m -v ./e2e/builder -tags=integration $(TEST_BUILDER_RUN)
 
 test-local: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/local -tags=integration
+	go test -timeout 60m -v ./e2e/local -tags=integration $(TEST_LOCAL_RUN)
 
 test-kamel-cli: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/common/cli -tags=integration
+	go test -timeout 60m -v ./e2e/common/cli -tags=integration $(TEST_KAMEL_CLI)
 
 test-kustomize: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/common/kustomize -tags=integration
+	go test -timeout 60m -v ./e2e/common/kustomize -tags=integration $(TEST_KUSTOMIZE_RUN)
 
 test-quarkus-native: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/native -tags=integration
+	go test -timeout 60m -v ./e2e/native -tags=integration $(TEST_QUARKUS_RUN)
 
 test-service-binding: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/service-binding -tags=integration
+	go test -timeout 60m -v ./e2e/service-binding -tags=integration $(TEST_SERVICE_RUN)
 
 test-upgrade: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/upgrade -tags=integration
+	go test -timeout 60m -v ./e2e/upgrade -tags=integration $(TEST_UPGRADE_RUN)
 
 build-kamel:
 # Ensure the binary is statically linked when building on Linux due to ABI changes in newer glibc 2.32, otherwise
