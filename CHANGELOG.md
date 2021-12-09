@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Integration with To-D can't find Kamelet [\#2819](https://github.com/apache/camel-k/issues/2819)
 - CXF Support [\#2799](https://github.com/apache/camel-k/issues/2799)
 - Update documentation about monitoring metrics using Prometheus Operator 0.38.0 [\#2794](https://github.com/apache/camel-k/issues/2794)
 - Makefile: for the generate-doc target don't use show-progress for wget [\#2791](https://github.com/apache/camel-k/issues/2791)
@@ -38,6 +39,8 @@
 
 **Merged pull requests:**
 
+- fix\(yaml\): Take to-d into account while parsing YAML DSL steps [\#2822](https://github.com/apache/camel-k/pull/2822) ([astefanutti](https://github.com/astefanutti))
+- fix: First bundle Kamelets install with client-side apply [\#2821](https://github.com/apache/camel-k/pull/2821) ([astefanutti](https://github.com/astefanutti))
 - feat: Faster operator startup [\#2814](https://github.com/apache/camel-k/pull/2814) ([astefanutti](https://github.com/astefanutti))
 - chore\(ci\): Better GitHub Actions concurrency group [\#2811](https://github.com/apache/camel-k/pull/2811) ([astefanutti](https://github.com/astefanutti))
 - fix\(OLM\): Remove aggregated cluster roles from OLM bundle [\#2809](https://github.com/apache/camel-k/pull/2809) ([astefanutti](https://github.com/astefanutti))
