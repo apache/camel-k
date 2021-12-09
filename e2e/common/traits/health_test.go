@@ -25,6 +25,7 @@ package traits
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -35,7 +36,17 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
+/*
+ * TODO
+ * Test has issues on OCP4. See TODO comment in-test for details.
+ *
+ * Adding CAMEL_K_TEST_SKIP_PROBLEMATIC env var for the moment.
+ */
 func TestHealthTrait(t *testing.T) {
+	if os.Getenv("CAMEL_K_TEST_SKIP_PROBLEMATIC") == "true" {
+		t.Skip("WARNING: Test marked as problematic ... skipping")
+	}
+
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
@@ -74,6 +85,18 @@ func TestHealthTrait(t *testing.T) {
 			// Check the ready condition has turned falsy
 			Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
 			// And it contains details about the runtime state
+
+			//
+			// TODO
+			// Integration has different runtime state reporting on OCP4
+			//
+			// lastProbeTime: null
+			// lastTransitionTime: "2021-12-08T20:12:14Z"
+			// message: 'containers with unready status: [integration]'
+			// reason: ContainersNotReady
+			// status: "False"
+			// type: Ready
+			//
 			Eventually(IntegrationCondition(ns, "java", v1.IntegrationConditionReady), TestTimeoutMedium).Should(And(
 				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
 				WithTransform(IntegrationConditionMessage, HavePrefix(fmt.Sprintf("[Pod %s runtime is not ready: map[consumer:route1:DOWN context:UP", pod.Name))),
