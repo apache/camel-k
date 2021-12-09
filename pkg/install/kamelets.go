@@ -27,6 +27,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"sync/atomic"
 
 	"golang.org/x/sync/errgroup"
@@ -56,11 +57,8 @@ var (
 	log = logf.Log
 
 	hasServerSideApply atomic.Value
+	tryServerSideApply sync.Once
 )
-
-func init() {
-	hasServerSideApply.Store(true)
-}
 
 // KameletCatalog installs the bundled Kamelets into the specified namespace.
 func KameletCatalog(ctx context.Context, c client.Client, namespace string) error {
@@ -92,7 +90,36 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 		}
 		// We may want to throttle the creation of Go routines if the number of bundled Kamelets increases.
 		g.Go(func() error {
-			return applyKamelet(gCtx, c, path.Join(kameletDir, f.Name()), namespace)
+			kamelet, err := loadKamelet(path.Join(kameletDir, f.Name()), namespace, c.GetScheme())
+			if err != nil {
+				return err
+			}
+			once := false
+			tryServerSideApply.Do(func() {
+				once = true
+				if err = serverSideApply(gCtx, c, kamelet); err != nil {
+					if isIncompatibleServerError(err) {
+						log.Info("Fallback to client-side apply for installing bundled Kamelets")
+						hasServerSideApply.Store(false)
+						err = nil
+					} else {
+						tryServerSideApply = sync.Once{}
+					}
+				} else {
+					hasServerSideApply.Store(true)
+				}
+			})
+			if err != nil {
+				return err
+			}
+			if v := hasServerSideApply.Load(); v.(bool) {
+				if !once {
+					return serverSideApply(gCtx, c, kamelet)
+				}
+			} else {
+				return clientSideApply(gCtx, c, kamelet)
+			}
+			return nil
 		})
 		return nil
 	})
@@ -101,54 +128,6 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 	}
 
 	return g.Wait()
-}
-
-func applyKamelet(ctx context.Context, c client.Client, path string, namespace string) error {
-	content, err := util.ReadFile(path)
-	if err != nil {
-		return err
-	}
-
-	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), string(content))
-	if err != nil {
-		return err
-	}
-	kamelet, ok := obj.(*v1alpha1.Kamelet)
-	if !ok {
-		return fmt.Errorf("cannot load Kamelet from file %q", path)
-	}
-
-	kamelet.Namespace = namespace
-
-	if kamelet.GetAnnotations() == nil {
-		kamelet.SetAnnotations(make(map[string]string))
-	}
-	kamelet.GetAnnotations()[kamelVersionAnnotation] = defaults.Version
-
-	if kamelet.GetLabels() == nil {
-		kamelet.SetLabels(make(map[string]string))
-	}
-	kamelet.GetLabels()[v1alpha1.KameletBundledLabel] = "true"
-	kamelet.GetLabels()[v1alpha1.KameletReadOnlyLabel] = "true"
-
-	if v := hasServerSideApply.Load(); v.(bool) {
-		err := serverSideApply(ctx, c, kamelet)
-		switch {
-		case err == nil:
-			return nil
-		case isIncompatibleServerError(err):
-			log.Info("Fallback to client-side apply for installing bundled Kamelets")
-			hasServerSideApply.Store(false)
-		default:
-			return fmt.Errorf("could not apply Kamelet from file %q: %w", path, err)
-		}
-	}
-	err = clientSideApply(ctx, c, kamelet)
-	if err != nil {
-		return fmt.Errorf("could not apply Kamelet from file %q: %w", path, err)
-	}
-
-	return nil
 }
 
 func serverSideApply(ctx context.Context, c client.Client, resource runtime.Object) error {
@@ -196,6 +175,37 @@ func isIncompatibleServerError(err error) bool {
 	}
 	// Non-StatusError means the error isn't because the server is incompatible.
 	return false
+}
+
+func loadKamelet(path string, namespace string, scheme *runtime.Scheme) (*v1alpha1.Kamelet, error) {
+	content, err := util.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	obj, err := kubernetes.LoadResourceFromYaml(scheme, string(content))
+	if err != nil {
+		return nil, err
+	}
+	kamelet, ok := obj.(*v1alpha1.Kamelet)
+	if !ok {
+		return nil, fmt.Errorf("cannot load Kamelet from file %q", path)
+	}
+
+	kamelet.Namespace = namespace
+
+	if kamelet.GetAnnotations() == nil {
+		kamelet.SetAnnotations(make(map[string]string))
+	}
+	kamelet.GetAnnotations()[kamelVersionAnnotation] = defaults.Version
+
+	if kamelet.GetLabels() == nil {
+		kamelet.SetLabels(make(map[string]string))
+	}
+	kamelet.GetLabels()[v1alpha1.KameletBundledLabel] = "true"
+	kamelet.GetLabels()[v1alpha1.KameletReadOnlyLabel] = "true"
+
+	return kamelet, nil
 }
 
 // KameletViewerRole installs the role that allows any user ro access kamelets in the global namespace.
