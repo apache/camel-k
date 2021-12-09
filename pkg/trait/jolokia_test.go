@@ -77,7 +77,7 @@ func TestApplyJolokiaTraitForOpenShiftProfileShouldSucceed(t *testing.T) {
 	assert.NotNil(t, container)
 
 	assert.Equal(t, container.Args, []string{
-		"-javaagent:dependencies/lib/main/org.jolokia.jolokia-jvm-1.7.1.jar=caCert=/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt," +
+		"-javaagent:dependencies/lib/main/org.jolokia.jolokia-jvm-1.7.1.jar=caCert=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt," +
 			"clientPrincipal.1=cn=system:master-proxy,clientPrincipal.2=cn=hawtio-online.hawtio.svc," +
 			"clientPrincipal.3=cn=fuse-console.fuse.svc,discoveryEnabled=false,extendedClientCheck=true," +
 			"host=*,port=8778,protocol=https,useSslClientAuthentication=true",

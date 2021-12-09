@@ -38,7 +38,7 @@ type jolokiaTrait struct {
 	BaseTrait `property:",squash"`
 	// The PEM encoded CA certification file path, used to verify client certificates,
 	// applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
-	// (default `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt` for OpenShift).
+	// (default `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` for OpenShift).
 	CaCert *string `property:"ca-cert" json:"CACert,omitempty"`
 	// The principal(s) which must be given in a client certificate to allow access to the Jolokia endpoint,
 	// applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
@@ -122,7 +122,7 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 	// Configure HTTPS by default for OpenShift
 	if e.DetermineProfile() == v1.TraitProfileOpenShift {
 		t.setDefaultJolokiaOption(options, &t.Protocol, "protocol", "https")
-		t.setDefaultJolokiaOption(options, &t.CaCert, "caCert", "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt")
+		t.setDefaultJolokiaOption(options, &t.CaCert, "caCert", "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
 		t.setDefaultJolokiaOption(options, &t.ExtendedClientCheck, "extendedClientCheck", true)
 		t.setDefaultJolokiaOption(options, &t.UseSslClientAuthentication, "useSslClientAuthentication", true)
 		t.setDefaultJolokiaOption(options, &t.ClientPrincipal, "clientPrincipal", []string{

@@ -474,7 +474,7 @@ traits:
     type: string
     description: The PEM encoded CA certification file path, used to verify client
       certificates,applicable when `protocol` is `https` and `use-ssl-client-authentication`
-      is `true`(default `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt`
+      is `true`(default `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`
       for OpenShift).
   - name: client-principal
     type: '[]string'

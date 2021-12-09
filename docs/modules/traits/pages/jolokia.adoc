@@ -32,7 +32,7 @@ The following configuration options are available:
 | string
 | The PEM encoded CA certification file path, used to verify client certificates,
 applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
-(default `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt` for OpenShift).
+(default `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` for OpenShift).
 
 | jolokia.client-principal
 | []string
