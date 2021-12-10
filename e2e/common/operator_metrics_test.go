@@ -26,6 +26,7 @@ import (
 	"bytes"
 	"fmt"
 	"math"
+	"os"
 	"testing"
 	"time"
 
@@ -170,6 +171,17 @@ func TestMetrics(t *testing.T) {
 				},
 			))
 		})
+
+		/*
+		 * TODO
+		 * The duration_seconds tests keep randomly failing on OCP4 with slightly different duration values
+		 * May need to lessen the strict checking parameters
+		 *
+		 * Adding CAMEL_K_TEST_SKIP_PROBLEMATIC env var for the moment.
+		 */
+		if os.Getenv("CAMEL_K_TEST_SKIP_PROBLEMATIC") == "true" {
+			t.Skip("WARNING: Test marked as problematic ... skipping")
+		}
 
 		t.Run("reconciliation duration metric", func(t *testing.T) {
 			RegisterTestingT(t)
