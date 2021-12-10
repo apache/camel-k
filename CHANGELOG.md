@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- Outdated `ca-cert` path for Jolokia trait [\#2827](https://github.com/apache/camel-k/issues/2827)
+- Kafka component propagating headers is supported? [\#2825](https://github.com/apache/camel-k/issues/2825)
 - Integration with To-D can't find Kamelet [\#2819](https://github.com/apache/camel-k/issues/2819)
 - CXF Support [\#2799](https://github.com/apache/camel-k/issues/2799)
 - Update documentation about monitoring metrics using Prometheus Operator 0.38.0 [\#2794](https://github.com/apache/camel-k/issues/2794)
@@ -39,6 +41,7 @@
 
 **Merged pull requests:**
 
+- chore: Try SSA for Kamelet install only once [\#2823](https://github.com/apache/camel-k/pull/2823) ([astefanutti](https://github.com/astefanutti))
 - fix\(yaml\): Take to-d into account while parsing YAML DSL steps [\#2822](https://github.com/apache/camel-k/pull/2822) ([astefanutti](https://github.com/astefanutti))
 - fix: First bundle Kamelets install with client-side apply [\#2821](https://github.com/apache/camel-k/pull/2821) ([astefanutti](https://github.com/astefanutti))
 - feat: Faster operator startup [\#2814](https://github.com/apache/camel-k/pull/2814) ([astefanutti](https://github.com/astefanutti))
