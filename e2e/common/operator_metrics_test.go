@@ -252,6 +252,16 @@ func TestMetrics(t *testing.T) {
 			Expect(err).To(BeNil())
 			Expect(integrationReconciliations).To(BeNumerically(">", 0))
 
+			fmt.Println("********* Logs containing reconciling Integration")
+			for _, log := range logs {
+				if log.Message == `Reconciling Integration` {
+					fmt.Println(log)
+				}
+			}
+			fmt.Println("********* Number of expected reconciliation count")
+			fmt.Println(integrationReconciliations)
+			fmt.Println("******************************")
+
 			// Check it matches the observation in the corresponding metric
 			Expect(metrics["camel_k_reconciliation_duration_seconds"]).To(PointTo(MatchFields(IgnoreExtras,
 				Fields{
