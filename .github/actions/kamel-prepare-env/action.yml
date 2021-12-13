@@ -18,6 +18,12 @@
 name: kamel-prepare-env
 description: 'Initialise the test environment with tools'
 
+inputs:
+  install-opm:
+    description: 'Install opm alongside cluster for bundle-related operations'
+    required: false
+    default: false
+
 runs:
   using: "composite"
   steps:
@@ -88,6 +94,19 @@ runs:
       uses: azure/setup-kubectl@v1
       with:
         version: 'latest'
+
+    #
+    # Install opm if required
+    #
+    - id: install-opm
+      name: Install opm if required
+      shell: bash
+      run: |
+        if [ "${{ inputs.install-opm }}" == "true" ]; then
+          curl -L https://github.com/operator-framework/operator-registry/releases/download/v1.19.5/linux-amd64-opm -o opm
+          chmod +x opm
+          sudo mv opm /usr/local/bin/
+        fi
 
     - id: report-platform
       name: Report Platform
