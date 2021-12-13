@@ -387,6 +387,55 @@ func TestConfigureTraits(t *testing.T) {
 	assertTraitConfiguration(t, traits, "prometheus", `{"podMonitor":false}`)
 }
 
+type customTrait struct {
+	trait.BaseTrait `property:",squash"`
+	// SimpleMap
+	SimpleMap  map[string]string            `property:"simple-map" json:"simpleMap,omitempty"`
+	DoubleMap  map[string]map[string]string `property:"double-map" json:"doubleMap,omitempty"`
+	SliceOfMap []map[string]string          `property:"slice-of-map" json:"sliceOfMap,omitempty"`
+}
+
+func (c customTrait) Configure(environment *trait.Environment) (bool, error) {
+	panic("implement me")
+}
+func (c customTrait) Apply(environment *trait.Environment) error {
+	panic("implement me")
+}
+
+var _ trait.Trait = &customTrait{}
+
+type customTraitFinder struct {
+}
+
+func (finder customTraitFinder) GetTrait(id string) trait.Trait {
+	if id == "custom" {
+		return &customTrait{}
+	}
+	return nil
+}
+
+func TestTraitsNestedConfig(t *testing.T) {
+	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, "run",
+		"--trait", "custom.simple-map.a=b",
+		"--trait", "custom.simple-map.y=z",
+		"--trait", "custom.double-map.m.n=q",
+		"--trait", "custom.double-map.m.o=w",
+		"--trait", "custom.slice-of-map[0].f=g",
+		"--trait", "custom.slice-of-map[3].f=h",
+		"--trait", "custom.slice-of-map[2].f=i",
+		"example.js")
+	if err != nil {
+		t.Error(err)
+	}
+	catalog := &customTraitFinder{}
+	traits, err := configureTraits(runCmdOptions.Traits, catalog)
+
+	assert.Nil(t, err)
+	assert.Len(t, traits, 1)
+	assertTraitConfiguration(t, traits, "custom", `{"simpleMap":{"a":"b","y":"z"},"doubleMap":{"m":{"n":"q","o":"w"}},"sliceOfMap":[{"f":"g"},null,{"f":"i"},{"f":"h"}]}`)
+}
+
 func assertTraitConfiguration(t *testing.T, traits map[string]v1.TraitSpec, trait string, expected string) {
 	t.Helper()
 

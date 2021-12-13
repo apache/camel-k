@@ -23,6 +23,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 
@@ -88,7 +89,7 @@ func decodeTraitSpec(in *v1.TraitSpec, target interface{}) error {
 }
 
 func (c *Catalog) configureTraitsFromAnnotations(annotations map[string]string) error {
-	options := make(map[string]map[string]string, len(annotations))
+	options := make(map[string]map[string]interface{}, len(annotations))
 	for k, v := range annotations {
 		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
 			configKey := strings.TrimPrefix(k, v1.TraitAnnotationPrefix)
@@ -97,9 +98,24 @@ func (c *Catalog) configureTraitsFromAnnotations(annotations map[string]string) 
 				id := parts[0]
 				prop := parts[1]
 				if _, ok := options[id]; !ok {
-					options[id] = make(map[string]string)
+					options[id] = make(map[string]interface{})
 				}
-				options[id][prop] = v
+
+				propParts := util.ConfigTreePropertySplit(prop)
+				var current = options[id]
+				if len(propParts) > 1 {
+					c, err := util.NavigateConfigTree(current, propParts[0:len(propParts)-1])
+					if err != nil {
+						return err
+					}
+					if cc, ok := c.(map[string]interface{}); ok {
+						current = cc
+					} else {
+						return errors.New(`invalid array specification: to set an array value use the ["v1", "v2"] format`)
+					}
+				}
+				current[prop] = v
+
 			} else {
 				return fmt.Errorf("wrong format for trait annotation %q: missing trait ID", k)
 			}
@@ -108,7 +124,7 @@ func (c *Catalog) configureTraitsFromAnnotations(annotations map[string]string) 
 	return c.configureFromOptions(options)
 }
 
-func (c *Catalog) configureFromOptions(traits map[string]map[string]string) error {
+func (c *Catalog) configureFromOptions(traits map[string]map[string]interface{}) error {
 	for id, config := range traits {
 		t := c.GetTrait(id)
 		if t != nil {
@@ -121,7 +137,7 @@ func (c *Catalog) configureFromOptions(traits map[string]map[string]string) erro
 	return nil
 }
 
-func configureTrait(id string, config map[string]string, trait interface{}) error {
+func configureTrait(id string, config map[string]interface{}, trait interface{}) error {
 	md := mapstructure.Metadata{}
 
 	var valueConverter mapstructure.DecodeHookFuncKind = func(sourceKind reflect.Kind, targetKind reflect.Kind, data interface{}) (interface{}, error) {

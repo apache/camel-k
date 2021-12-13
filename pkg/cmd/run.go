@@ -54,7 +54,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/watch"
 )
 
-var traitConfigRegexp = regexp.MustCompile(`^([a-z0-9-]+)((?:\.[a-z0-9-]+)+)=(.*)$`)
+var traitConfigRegexp = regexp.MustCompile(`^([a-z0-9-]+)((?:\[[0-9]+\]|\.[a-z0-9-]+)+)=(.*)$`)
 
 func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) {
 	options := runCmdOptions{
@@ -794,7 +794,7 @@ func resolvePodTemplate(ctx context.Context, templateSrc string, spec *v1.Integr
 	return err
 }
 
-func configureTraits(options []string, catalog *trait.Catalog) (map[string]v1.TraitSpec, error) {
+func configureTraits(options []string, catalog trait.Finder) (map[string]v1.TraitSpec, error) {
 	traits := make(map[string]map[string]interface{})
 
 	for _, option := range options {
@@ -803,23 +803,39 @@ func configureTraits(options []string, catalog *trait.Catalog) (map[string]v1.Tr
 			return nil, errors.New("unrecognized config format (expected \"<trait>.<prop>=<value>\"): " + option)
 		}
 		id := parts[1]
-		prop := parts[2][1:]
+		fullProp := parts[2][1:]
 		value := parts[3]
 		if _, ok := traits[id]; !ok {
 			traits[id] = make(map[string]interface{})
 		}
-		switch v := traits[id][prop].(type) {
+
+		propParts := util.ConfigTreePropertySplit(fullProp)
+		var current = traits[id]
+		if len(propParts) > 1 {
+			c, err := util.NavigateConfigTree(current, propParts[0:len(propParts)-1])
+			if err != nil {
+				return nil, err
+			}
+			if cc, ok := c.(map[string]interface{}); ok {
+				current = cc
+			} else {
+				return nil, errors.New("trait configuration cannot end with a slice")
+			}
+		}
+
+		prop := propParts[len(propParts)-1]
+		switch v := current[prop].(type) {
 		case []string:
-			traits[id][prop] = append(v, value)
+			current[prop] = append(v, value)
 		case string:
 			// Aggregate multiple occurrences of the same option into a string array, to emulate POSIX conventions.
 			// This enables executing:
 			// $ kamel run -t <trait>.<property>=<value_1> ... -t <trait>.<property>=<value_N>
 			// Or:
 			// $ kamel run --trait <trait>.<property>=<value_1>,...,<trait>.<property>=<value_N>
-			traits[id][prop] = []string{v, value}
+			current[prop] = []string{v, value}
 		case nil:
-			traits[id][prop] = value
+			current[prop] = value
 		}
 	}
 

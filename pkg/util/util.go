@@ -29,6 +29,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 
 	"go.uber.org/multierr"
@@ -854,4 +855,80 @@ func WithTempDir(pattern string, consumer func(string) error) error {
 	removeErr := os.RemoveAll(tmpDir)
 
 	return multierr.Append(consumerErr, removeErr)
+}
+
+// Parses a property spec and returns its parts.
+func ConfigTreePropertySplit(property string) []string {
+	var res = make([]string, 0)
+	initialParts := strings.Split(property, ".")
+	for _, p := range initialParts {
+		cur := p
+		var tmp []string
+		for strings.Contains(cur[1:], "[") && strings.HasSuffix(cur, "]") {
+			pos := strings.LastIndex(cur, "[")
+			tmp = append(tmp, cur[pos:])
+			cur = cur[0:pos]
+		}
+		if len(cur) > 0 {
+			tmp = append(tmp, cur)
+		}
+		for i := len(tmp) - 1; i >= 0; i = i - 1 {
+			res = append(res, tmp[i])
+		}
+	}
+	return res
+}
+
+// NavigateConfigTree switch to the element in the tree represented by the "nodes" spec and creates intermediary
+// nodes if missing. Nodes specs starting with "[" and ending in "]" are treated as slice indexes.
+func NavigateConfigTree(current interface{}, nodes []string) (interface{}, error) {
+	if len(nodes) == 0 {
+		return current, nil
+	}
+	isSlice := func(idx int) bool {
+		if idx >= len(nodes) {
+			return false
+		}
+		return strings.HasPrefix(nodes[idx], "[") && strings.HasSuffix(nodes[idx], "]")
+	}
+	makeNext := func() interface{} {
+		if isSlice(1) {
+			slice := make([]interface{}, 0)
+			return &slice
+		} else {
+			return make(map[string]interface{})
+		}
+	}
+	switch c := current.(type) {
+	case map[string]interface{}:
+		var next interface{}
+		if n, ok := c[nodes[0]]; ok {
+			next = n
+		} else {
+			next = makeNext()
+			c[nodes[0]] = next
+		}
+		return NavigateConfigTree(next, nodes[1:])
+	case *[]interface{}:
+		if !isSlice(0) {
+			return nil, fmt.Errorf("attempting to set map value %q into a slice", nodes[0])
+		}
+		pos, err := strconv.Atoi(nodes[0][1 : len(nodes[0])-1])
+		if err != nil {
+			return nil, errors.Wrapf(err, "value %q inside brackets is not numeric", nodes[0])
+		}
+		var next interface{}
+		if len(*c) > pos && (*c)[pos] != nil {
+			next = (*c)[pos]
+		} else {
+			next = makeNext()
+			for len(*c) <= pos {
+				*c = append(*c, nil)
+			}
+			(*c)[pos] = next
+		}
+		return NavigateConfigTree(next, nodes[1:])
+	default:
+		return nil, errors.New("invalid node type in configuration")
+	}
 }
