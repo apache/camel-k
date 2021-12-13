@@ -24,7 +24,16 @@ runs:
     - name: Read platform-config variable to temporary file & override PLATFORM_TYPE if platform config defined
       shell: bash
       run: |
+        if [ "${{ env.CLUSTER_CONFIGURED }}" == "true" ]; then
+          echo "Cluster configuration already performed ... skipping"
+          exit 0
+        fi
+
         export PLATFORM_CONFIG=/tmp/platform-config.json
+
+        if [ -f ${PLATFORM_CONFIG} ]; then
+          rm -f ${PLATFORM_CONFIG}
+        fi
 
         touch "${PLATFORM_CONFIG}"
         if [ -z "${{ env.PLATFORM_CONFIG_DATA }}" ]; then
@@ -50,15 +59,24 @@ runs:
         fi
 
     - name: Platform-config JSON to variables
-      uses: ./.github/actions/json-to-variables
+      uses: ./.github/actions/conditional
       with:
-        filename: ${{ env.PLATFORM_CONFIG }}
-        prefix: 'e2e'
+        if: ${{ env.CLUSTER_CONFIGURED != 'true' }}
+        step: |
+          uses: ./.github/actions/json-to-variables
+          with:
+            filename: ${{ env.PLATFORM_CONFIG }}
+            prefix: 'e2e'
 
     - id: connect-cluster
       name: Connect to cluster
       shell: bash
       run: |
+        if [ "${{ env.CLUSTER_CONFIGURED }}" == "true" ]; then
+          echo "Cluster configuration already performed ... skipping"
+          exit 0
+        fi
+
         if [ -z "${{ env.e2e_kube-config-data }}" ]; then
           echo "Error: kube config data property cannot be found"
           exit 1
@@ -112,14 +130,24 @@ runs:
       name: Info
       shell: bash
       run: |
+        if [ "${{ env.CLUSTER_CONFIGURED }}" == "true" ]; then
+          echo "Cluster configuration already performed ... skipping"
+          exit 0
+        fi
+
         kubectl describe nodes
 
     - id: configure-developer-user
       name: Configure Developer User
       shell: bash
       run: |
+        if [ "${{ env.CLUSTER_CONFIGURED }}" == "true" ]; then
+          echo "Cluster configuration already performed ... skipping"
+          exit 0
+        fi
+
         # Aggregate pod eviction permission to the default admin role
-        cat <<EOF | oc apply -f -
+        cat <<EOF | kubectl apply -f -
         kind: ClusterRole
         apiVersion: rbac.authorization.k8s.io/v1
         metadata:
@@ -133,7 +161,7 @@ runs:
         EOF
 
         # Grant nodes permission to the default developer user
-        cat <<EOF | oc apply -f -
+        cat <<EOF | kubectl apply -f -
         kind: ClusterRole
         apiVersion: rbac.authorization.k8s.io/v1
         metadata:
@@ -143,7 +171,8 @@ runs:
           resources: ["nodes"]
           verbs: ["get","list"]
         EOF
-        cat <<EOF | oc apply -f -
+
+        cat <<EOF | kubectl apply -f -
         kind: ClusterRoleBinding
         apiVersion: rbac.authorization.k8s.io/v1
         metadata:
@@ -177,6 +206,11 @@ runs:
     - id: extract-config
       shell: bash
       run: |
+        if [ "${{ env.CLUSTER_CONFIGURED }}" == "true" ]; then
+          echo "Cluster configuration already performed ... skipping"
+          exit 0
+        fi
+
         echo "IMAGE_REGISTRY_PUSH_HOST=${{ env.e2e_image-registry-push-host }}" >> $GITHUB_ENV
         echo "IMAGE_REGISTRY_PULL_HOST=${{ env.e2e_image-registry-pull-host }}" >> $GITHUB_ENV
         echo "IMAGE_REGISTRY_INSECURE=${{ env.e2e_image-registry-insecure }}" >> $GITHUB_ENV
@@ -195,21 +229,11 @@ runs:
         echo "KUBE_USER_CTX=${{ env.e2e_kube-user-ctx }}" >> $GITHUB_ENV
 
         #
-        # Export the flag for installing olm
+        # Export the flag for olm capability
         #
-        echo "INSTALL_OLM=${{ env.e2e_install-olm }}" >> $GITHUB_ENV
+        echo "HAS_OLM=${{ env.e2e_has-olm }}" >> $GITHUB_ENV
 
         #
-        # Clear out environment variables no longer required
+        # Avoid configuring the cluster repeatedly
         #
-        echo "PLATFORM_CONFIG=" >> $GITHUB_ENV
-        echo "e2e_image-registry-push-host=" >> $GITHUB_ENV
-        echo "e2e_image-registry-pull-host=" >> $GITHUB_ENV
-        echo "e2e_image-namespace=" >> $GITHUB_ENV
-        echo "e2e_image-registry-user=" >> $GITHUB_ENV
-        echo "e2e_image-registry-token=" >> $GITHUB_ENV
-        echo "e2e_image-registry-insecure=" >> $GITHUB_ENV
-        echo "e2e_kube-admin-user-ctx=" >> $GITHUB_ENV
-        echo "e2e_kube-config-data=" >> $GITHUB_ENV
-        echo "e2e_kube-user-ctx=" >> $GITHUB_ENV
-        echo "e2e_install-olm=" >> $GITHUB_ENV
+        echo "CLUSTER_CONFIGURED=true" >> $GITHUB_ENV

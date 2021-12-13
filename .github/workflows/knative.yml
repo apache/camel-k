@@ -73,7 +73,7 @@ jobs:
 
     - id: build-kamel-binary
       name: Build Kamel Binary
-      uses: ./.github/actions/kamel-build
+      uses: ./.github/actions/kamel-build-binary
       with:
         image-registry: ${{ steps.configure-platform.outputs.image-registry }}
 
@@ -136,7 +136,7 @@ jobs:
 
       - id: build-kamel-binary
         name: Build Kamel Binary
-        uses: ./.github/actions/kamel-build
+        uses: ./.github/actions/kamel-build-binary
         with:
           image-registry: ${{ steps.configure-platform.outputs.image-registry }}
 

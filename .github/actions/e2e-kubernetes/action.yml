@@ -15,8 +15,8 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: e2e-upgrade
-description: 'End-to-End tests for upgrading to new version'
+name: e2e-kubernetes
+description: 'End-to-End tests for 80/20 use-cases'
 
 inputs:
   platform-config:
@@ -37,31 +37,6 @@ runs:
     with:
       cluster-type: ${{ steps.prepare-env.outputs.cluster-platform }}
       platform-config: ${{ inputs.platform-config }}
-      require-olm: true
-
-  - name: Get Released Kamel CLI
-    shell: bash
-    run: |
-      export KAMEL_VERSION=$(make get-last-released-version)
-      curl -L https://github.com/apache/camel-k/releases/download/v${KAMEL_VERSION}/camel-k-client-${KAMEL_VERSION}-linux-64bit.tar.gz -o /tmp/kamel.tar.gz
-      pushd /tmp && tar -zxf kamel.tar.gz && popd > /dev/null
-      if [ ! -x /tmp/kamel ]; then
-        echo "Error: No ${KAMEL_VERSION} downloaded correctly"
-        exit 1
-      fi
-
-      #
-      # Note: cannot use GITHUB_ENV vars is same script as it was defined
-      #
-      export RELEASED_KAMEL_BINARY=/tmp/kamel-${KAMEL_VERSION}
-      echo "RELEASED_KAMEL_BINARY=${RELEASED_KAMEL_BINARY}" >> $GITHUB_ENV
-      mv /tmp/kamel ${RELEASED_KAMEL_BINARY}
-      if [ $? == 0 ]; then
-        echo "Info: Kamel version installed: $(${RELEASED_KAMEL_BINARY} version)"
-      else
-        echo "Error: Failed to install kamel binary ${KAMEL_VERSION}"
-        exit 1
-      fi
 
   - id: build-kamel
     name: Build Kamel
@@ -70,41 +45,32 @@ runs:
       image-registry-push-host: ${{ steps.configure-platform.outputs.image-registry-push-host }}
       image-registry-pull-host: ${{ steps.configure-platform.outputs.image-registry-pull-host }}
       image-namespace: ${{ steps.configure-platform.outputs.image-namespace }}
-      # Builds the bundle if an OLM is available.
-      # Since configure-platform requires OLM then this should be true
+      # Builds the bundle if an OLM is available - depends on cluster being tested
       build-bundle: ${{ steps.configure-platform.outputs.olm-available }}
+
+  - id: install-kamel-cluster-setup
+    name: Install Kamel Cluster Setup
+    uses: ./.github/actions/kamel-install-cluster-setup
+    with:
       kube-admin-user-ctx: ${{ steps.configure-platform.outputs.kube-admin-user-ctx }}
 
-  - name: Run IT
+  - id: run-it
+    name: Run IT
     shell: bash
     run: |
-      # Use the last released Kamel CLI
-      export RELEASED_KAMEL_BIN=${{ env.RELEASED_KAMEL_BINARY }}
-
-      echo "Kamel version: $(${RELEASED_KAMEL_BIN} version)"
-
-      # Configure install options
+      # Cluster environment
       export CUSTOM_IMAGE=${{ steps.build-kamel.outputs.local-image-name }}
       export CUSTOM_VERSION=${{ steps.build-kamel.outputs.local-image-version }}
+
       export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
       export KAMEL_INSTALL_REGISTRY=${{ steps.configure-platform.outputs.image-registry-pull-host }}
       export KAMEL_INSTALL_REGISTRY_INSECURE=${{ steps.configure-platform.outputs.image-registry-insecure }}
-
-      # Despite building a bundle we don't want it installed immediately so no OLM_INDEX_BUNDLE var
-
-      # Configure test options
-      export CAMEL_K_PREV_IIB=quay.io/operatorhubio/catalog:latest
-      export CAMEL_K_NEW_IIB=${{ steps.build-kamel.outputs.local-image-bundle-index }}
-      export KAMEL_K_TEST_RELEASE_VERSION=$(make get-last-released-version)
-      export KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
+      export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
+      export CAMEL_K_TEST_IMAGE_NAME=${CUSTOM_IMAGE}
+      export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
 
       # Then run integration tests
-      make test-upgrade
-
-  - name: Cleanup-Tests
-    if: ${{ always() }}
-    shell: bash
-    run: |
-      if [ -n "${{ env.PLATFORM_CONFIG }}" ]; then
-        rm -f ${{ env.PLATFORM_CONFIG }}
-      fi
+      make test-integration
+      make test-service-binding
+      make test-quarkus-native
+      make test-kustomize

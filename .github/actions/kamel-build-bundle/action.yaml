@@ -97,6 +97,14 @@ runs:
         export LOCAL_IMAGE_BUNDLE=${{ inputs.image-registry-pull-host }}/${{ inputs.image-namespace }}/camel-k-bundle:${{ inputs.local-image-version }}
         echo "::set-output name=local-image-bundle::$(echo ${LOCAL_IMAGE_BUNDLE})"
 
+    - id: install-opm
+      name: Install opm if required
+      shell: bash
+      run: |
+        curl -L https://github.com/operator-framework/operator-registry/releases/download/v1.16.1/linux-amd64-opm -o opm
+        chmod +x opm
+        sudo mv opm /usr/local/bin/
+
     - id: build-index-image
       name: Create New Index Image
       shell: bash

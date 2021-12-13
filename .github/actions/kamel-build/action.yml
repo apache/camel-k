@@ -16,7 +16,7 @@
 # ---------------------------------------------------------------------------
 
 name: kamel-build
-description: 'Builds kamel operator binary'
+description: 'Builds kamel operator image and the bundle'
 
 inputs:
   image-registry-push-host:
@@ -29,60 +29,55 @@ inputs:
     description: 'Namespace in which to store the image'
     required: false
     default: 'apache'
-  make-rules:
-    description: 'Override the default make rules'
-    required: false
   install-kamel-binary:
     description: 'Install the kamel binary onto the path'
     required: false
     default: true
+  make-rules:
+    description: 'Override the default make rules'
+    required: false
+  build-bundle:
+    description: 'Build a bundle for install into OLM catalog'
+    required: true
+    default: false
 
 runs:
   using: "composite"
   steps:
-    - id: build-operator
-      name: Build Kamel Operator
-      shell: bash
-      run: |
-        echo "Build Kamel from source"
+    - id: build-kamel-binary
+      name: Build Kamel Binary
+      uses: ./.github/actions/kamel-build-binary
+      with:
+        image-registry-push-host: ${{ inputs.image-registry-push-host }}
+        image-registry-pull-host: ${{ inputs.image-registry-pull-host }}
+        image-namespace: ${{ inputs.image-namespace }}
+        make-rules: ${{ inputs.make-rules }}
+        install-kamel-binary: ${{ inputs.install-kamel-binary }}
 
-        if [ -n "${{ inputs.image-registry-push-host }}" ]; then
-          #
-          # Build with the PUSH host to ensure the correct image:tag
-          # for docker to push the image.
-          #
-          export CUSTOM_IMAGE=${{ inputs.image-registry-push-host }}/${{ inputs.image-namespace }}/camel-k
-        fi
-
-        RULES="PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images"
-        if [ -n "${{ inputs.make-rules }}" ]; then
-          RULES="${{ inputs.make-rules }}"
-        fi
-
-        if [ -n "${{ inputs.image-registry-push-host }}" ]; then
-          RULES="${RULES} images-push"
-        fi
-
-        make ${RULES}
-
-        if [ "${{ inputs.install-kamel-binary }}" == "true" ]; then
-          echo "Moving kamel binary to /usr/local/bin"
-          sudo mv ./kamel /usr/local/bin
-          echo "Kamel version installed: $(kamel version)"
-        fi
-
-        #
-        # Use the PULL host to ensure the correct image:tag
-        # is passed into the tests for the deployment to pull from
-        #
-        export LOCAL_IMAGE_NAME=${{ inputs.image-registry-pull-host }}/${{ inputs.image-namespace }}/camel-k
-        echo "::set-output name=local-img-name::$(echo ${LOCAL_IMAGE_NAME})"
-        echo "::set-output name=local-img-version::$(make get-version)"
+    #
+    # By default do not build the image bundle
+    #
+    - id: build-kamel-bundle
+      name: Build Kamel Metadata Bundle
+      uses: ./.github/actions/kamel-build-bundle
+      if: ${{ inputs.build-bundle != true }}
+      with:
+        image-registry-push-host: ${{ inputs.image-registry-push-host }}
+        image-registry-pull-host: ${{ inputs.image-registry-pull-host }}
+        image-namespace: ${{ inputs.image-namespace }}
+        local-image-name: ${{ steps.build-kamel-binary.outputs.local-image-name }}
+        local-image-version: ${{ steps.build-kamel-binary.outputs.local-image-version }}
 
 outputs:
   local-image-name:
     description: "Reference of the camel-k image"
-    value: ${{ steps.build-operator.outputs.local-img-name }}
+    value: ${{ steps.build-kamel-binary.outputs.local-image-name }}
   local-image-version:
     description: "Reference of the camel-k image version"
-    value: ${{ steps.build-operator.outputs.local-img-version }}
+    value: ${{ steps.build-kamel-binary.outputs.local-image-version }}
+  local-image-bundle:
+    description: "Reference of the camel-k metadata bundle image"
+    value: ${{ steps.build-kamel-bundle.outputs.local-image-bundle }}
+  local-image-bundle-index:
+    description: "Reference of the camel-k metadata bundle index image"
+    value: ${{ steps.build-kamel-bundle.outputs.local-image-bundle-index }}
