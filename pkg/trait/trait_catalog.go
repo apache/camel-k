@@ -182,3 +182,9 @@ func (c *Catalog) processFields(fields []*structs.Field, processor func(string))
 		}
 	}
 }
+
+type Finder interface {
+	GetTrait(id string) Trait
+}
+
+var _ Finder = &Catalog{}
