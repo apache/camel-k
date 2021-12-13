@@ -26,6 +26,9 @@ inputs:
   platform-config:
     description: 'The JSON configuration of the platform - required for custom platform type only'
     required: false
+  require-olm:
+    description: 'If OLM is not available by default ensure that it is installed'
+    default: false
 
 runs:
   using: "composite"
@@ -97,26 +100,13 @@ runs:
         echo "::set-output name=image-registry-insecure::$(echo ${{ env.IMAGE_REGISTRY_INSECURE }})"
         echo "::set-output name=kube-admin-user-ctx::$(echo ${{ env.KUBE_ADMIN_USER_CTX }})"
         echo "::set-output name=kube-user-ctx::$(echo ${{ env.KUBE_USER_CTX }})"
-        echo "::set-output name=install-olm::$(echo ${{ env.INSTALL_OLM }})"
+        echo "::set-output name=has-olm::$(echo ${{ env.HAS_OLM }})"
 
         if [ -n "${{ env.IMAGE_NAMESPACE }}" ]; then
           echo "::set-output name=image-namespace::$(echo ${{ env.IMAGE_NAMESPACE }})"
         else
           echo "::set-output name=image-namespace::$(echo ${{ env.DEFAULT_IMAGE_NAMESPACE }})"
         fi
-
-        #
-        # Clear out environment variables
-        #
-        echo "TEST_PLATFORM_CLUSTER=" >> $GITHUB_ENV
-        echo "IMAGE_REGISTRY_PUSH_HOST=" >> $GITHUB_ENV
-        echo "IMAGE_REGISTRY_PULL_HOST=" >> $GITHUB_ENV
-        echo "IMAGE_REGISTRY_INSECURE=" >> $GITHUB_ENV
-        echo "KUBE_ADMIN_USER_CTX=" >> $GITHUB_ENV
-        echo "KUBE_USER_CTX=" >> $GITHUB_ENV
-        echo "INSTALL_OLM=" >> $GITHUB_ENV
-        echo "IMAGE_NAMESPACE=" >> $GITHUB_ENV
-        echo "DEFAULT_IMAGE_NAMESPACE=" >> $GITHUB_ENV
 
       #
       # Install opm if required
@@ -138,9 +128,17 @@ runs:
       name: Install OLM
       shell: bash
       run: |
-        if [ "${{ steps.platform-info.outputs.install-olm }}" == "false" ]; then
-          # OLM explicitly not required - installed by default
-          echo "OLM install not required for this cluster"
+        if [ "${{ steps.platform-info.outputs.has-olm }}" == "true" ]; then
+          # OLM already installed by default
+          echo "OLM already available in cluster"
+          echo "::set-output name=has-olm::$(echo true)"
+          exit 0
+        fi
+
+        if [ "${{ inputs.require-olm }}" != "true" ]; then
+          # OLM not explicitly requested
+          echo "OLM not explicity required for testing"
+          echo "::set-output name=has-olm::$(echo false)"
           exit 0
         fi
 
@@ -176,6 +174,7 @@ runs:
         kubectl config use-context "${ctx}"
 
         echo "Complete"
+        echo "::set-output name=has-olm::$(echo true)"
 
 outputs:
   image-registry-push-host:
@@ -196,3 +195,6 @@ outputs:
   kube-user-ctx:
     description: "The user context of the cluster"
     value: ${{ steps.platform-info.outputs.kube-user-ctx }}
+  olm-available:
+    description: "Whether an OLM service is available in the cluster"
+    value: ${{ steps.install-olm.outputs.has-olm }}

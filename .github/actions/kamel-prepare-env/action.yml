@@ -18,12 +18,6 @@
 name: kamel-prepare-env
 description: 'Initialise the test environment with tools'
 
-inputs:
-  install-opm:
-    description: 'Install opm alongside cluster for bundle-related operations'
-    required: false
-    default: false
-
 runs:
   using: "composite"
   steps:
@@ -42,6 +36,14 @@ runs:
     - name: Cleanup
       shell: bash
       run: |
+        #
+        # Only perform the cleaning once.
+        #
+        if [ "${{ env.ENV_PREPARED }}" == "true" ]; then
+          echo "Cleaning of docker already performed ... skipping"
+          exit 0
+        fi
+
         ls -lart
         echo "Initial status:"
         df -h
@@ -67,18 +69,34 @@ runs:
         df -h
 
     - name: Set up JDK 11
-      uses: AdoptOpenJDK/install-jdk@v1
+      uses: ./.github/actions/conditional
       with:
-        version: "11"
+        if: ${{ env.ENV_PREPARED != 'true' }}
+        step: |
+          uses: AdoptOpenJDK/install-jdk@v1
+          with:
+            version: "11"
 
     - name: Set Go
-      uses: actions/setup-go@v2 # Version 2 adds GOBIN to PATH
+      uses: ./.github/actions/conditional
       with:
-        go-version: 1.16.x
+        if: ${{ env.ENV_PREPARED != 'true' }}
+        step: |
+          uses: actions/setup-go@v2 # Version 2 adds GOBIN to PATH
+          with:
+            go-version: 1.16.x
 
     - name: (Re-)install kustomize
       shell: bash
       run: |
+        #
+        # Only perform the kustomize install once.
+        #
+        if [ "${{ env.ENV_PREPARED }}" == "true" ]; then
+          echo "Install of kustomize already performed ... skipping"
+          exit 0
+        fi
+
         # reinstall kustomize to be always on the same version
         sudo rm $(which kustomize)
         make kustomize
@@ -91,22 +109,13 @@ runs:
     # Install a version of kubectl for generic access to cluster
     #
     - id: install-kubectl
-      uses: azure/setup-kubectl@v1
+      uses: ./.github/actions/conditional
       with:
-        version: 'latest'
-
-    #
-    # Install opm if required
-    #
-    - id: install-opm
-      name: Install opm if required
-      shell: bash
-      run: |
-        if [ "${{ inputs.install-opm }}" == "true" ]; then
-          curl -L https://github.com/operator-framework/operator-registry/releases/download/v1.19.5/linux-amd64-opm -o opm
-          chmod +x opm
-          sudo mv opm /usr/local/bin/
-        fi
+        if: ${{ env.ENV_PREPARED != 'true' }}
+        step: |
+          uses: azure/setup-kubectl@v1
+          with:
+            version: 'latest'
 
     - id: report-platform
       name: Report Platform
@@ -117,6 +126,11 @@ runs:
         else
           echo "::set-output name=platform::$(echo kind)"
         fi
+
+        #
+        # Avoid preparing the environment repeatedly
+        #
+        echo "ENV_PREPARED=true" >> $GITHUB_ENV
 
 outputs:
   cluster-platform:

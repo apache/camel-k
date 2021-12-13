@@ -65,7 +65,7 @@ jobs:
 
     - id: build-kamel-binary
       name: Build Kamel Binary
-      uses: ./.github/actions/kamel-build
+      uses: ./.github/actions/kamel-build-binary
       with:
         make-rules: 'build-kamel'
 

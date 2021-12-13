@@ -71,7 +71,7 @@ jobs:
 
     - id: build-kamel-binary
       name: Build Kamel Binary
-      uses: ./.github/actions/kamel-build
+      uses: ./.github/actions/kamel-build-binary
 
     - name: Install Kamel Cluster Setup
       uses: ./.github/actions/kamel-install-cluster-setup

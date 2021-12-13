@@ -40,7 +40,10 @@ runs:
         #
         kubectl config use-context "${{ inputs.kube-admin-user-ctx }}"
 
-        kamel install --cluster-setup
+        #
+        # Ensure built binary CRDs are always installed by turning off olm
+        #
+        kamel install --cluster-setup --olm=false
 
         #
         # Change back to original context
