@@ -26,6 +26,7 @@ import (
 	"bytes"
 	"fmt"
 	"math"
+	"strings"
 	"testing"
 	"time"
 
@@ -53,6 +54,10 @@ func TestMetrics(t *testing.T) {
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		it := Integration(ns, name)()
+		Expect(it).NotTo(BeNil())
+
+		Expect(Kamel("delete", "-n", ns, "java").Execute()).To(Succeed())
 
 		pod := OperatorPod(ns)()
 		Expect(pod).NotTo(BeNil())
@@ -66,8 +71,6 @@ func TestMetrics(t *testing.T) {
 		metrics, err := parsePrometheusData(response)
 		Expect(err).To(BeNil())
 
-		it := Integration(ns, name)()
-		Expect(it).NotTo(BeNil())
 		build := Build(ns, it.Status.IntegrationKit.Name)()
 		Expect(build).NotTo(BeNil())
 
@@ -254,7 +257,7 @@ func TestMetrics(t *testing.T) {
 
 			fmt.Println("********* Logs containing reconciling Integration")
 			for _, log := range logs {
-				if log.Message == `Reconciling Integration` {
+				if log.Message == `Reconciling Integration` || strings.HasPrefix(log.Message, "********* Reconcile:") {
 					fmt.Println(log)
 				}
 			}

@@ -26,6 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -65,6 +66,9 @@ func NewInstrumentedReconciler(rec reconcile.Reconciler, gvk schema.GroupVersion
 }
 
 func (r *instrumentedReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
+	var Log = log.Log.WithName("controller").WithName("integration")
+	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
+
 	timer := NewTimer()
 
 	res, err := r.reconciler.Reconcile(ctx, request)
@@ -80,6 +84,10 @@ func (r *instrumentedReconciler) Reconcile(ctx context.Context, request reconcil
 	if err != nil {
 		// Controller errors are tagged as platform errors
 		labels[tagLabel] = string(platformError)
+	}
+
+	if labels[kindLabel] == "Integration" {
+		rlog.Info("********* Reconcile: ", labels, err)
 	}
 
 	timer.ObserveDurationInSeconds(loopDuration.With(labels))
