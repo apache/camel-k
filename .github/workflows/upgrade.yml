@@ -62,13 +62,14 @@ jobs:
     - id: prepare-env
       name: Prepare Test Environment
       uses: ./.github/actions/kamel-prepare-env
+      with:
+        install-opm: true
 
     - id: configure-platform
       name: Configure Platform
       uses: ./.github/actions/kamel-config-cluster
       with:
         cluster-type: ${{ steps.prepare-env.outputs.cluster-platform }}
-        opm: true
         olm: true
 
     - name: Get Released Kamel CLI

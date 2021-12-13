@@ -38,10 +38,6 @@ inputs:
   image-registry-insecure:
     description: 'The image-registry-insecure - required for custom config only'
     required: false
-  opm:
-    description: 'Install opm alongside cluster for bundle-related operations'
-    required: false
-    default: false
   olm:
     description: 'Check for & install OLM alongside cluster for bundle-related operations'
     required: false
