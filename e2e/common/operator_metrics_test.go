@@ -58,6 +58,7 @@ func TestMetrics(t *testing.T) {
 		Expect(it).NotTo(BeNil())
 
 		Expect(Kamel("delete", "-n", ns, "java").Execute()).To(Succeed())
+		Expect(Integration(ns, name)()).To(BeNil())
 
 		pod := OperatorPod(ns)()
 		Expect(pod).NotTo(BeNil())
@@ -282,6 +283,10 @@ func TestMetrics(t *testing.T) {
 						),
 						"Histogram": MatchFieldsP(IgnoreExtras, Fields{
 							"SampleCount": EqualP(uint64(integrationReconciliations)),
+							/*"Bucket": ContainElement(MatchFieldsP(IgnoreExtras, Fields{
+								"CumulativeCount": EqualP(uint64(integrationReconciliations)),
+								"UpperBound":      EqualP(uint64P(5)),
+							})),*/
 						}),
 					})),
 				},

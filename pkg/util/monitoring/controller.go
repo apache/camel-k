@@ -19,6 +19,7 @@ package monitoring
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -86,12 +87,11 @@ func (r *instrumentedReconciler) Reconcile(ctx context.Context, request reconcil
 		labels[tagLabel] = string(platformError)
 	}
 
+	t := timer.ObserveDurationInSeconds(loopDuration.With(labels))
+
 	if labels[kindLabel] == "Integration" {
-		rlog.Info("********* Reconcile: ", labels, err)
+		rlog.Info(fmt.Sprintf("********* Reconcile: %v %v %v", labels, err, t))
 	}
-
-	timer.ObserveDurationInSeconds(loopDuration.With(labels))
-
 	return res, err
 }
 
