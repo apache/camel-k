@@ -49,7 +49,8 @@ func TestMetrics(t *testing.T) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 		Expect(Kamel("run", "-n", ns, "files/Java.java",
 			"-t", "prometheus.enabled=true",
-			"-t", "prometheus.pod-monitor=false").Execute()).To(Succeed())
+			"-t", "prometheus.pod-monitor=false",
+		).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -253,26 +254,22 @@ func TestMetrics(t *testing.T) {
 			Expect(integrationReconciliations).To(BeNumerically(">", 0))
 
 			// Check it matches the observation in the corresponding metric
-			Expect(metrics["camel_k_reconciliation_duration_seconds"]).To(PointTo(MatchFields(IgnoreExtras,
-				Fields{
-					"Name": EqualP("camel_k_reconciliation_duration_seconds"),
-					"Help": EqualP("Camel K reconciliation loop duration"),
-					"Type": EqualP(prometheus.MetricType_HISTOGRAM),
-					"Metric": ContainElement(MatchFieldsP(IgnoreExtras, Fields{
-						"Label": ConsistOf(
-							label("group", v1.SchemeGroupVersion.Group),
-							label("version", v1.SchemeGroupVersion.Version),
-							label("kind", "Integration"),
-							label("namespace", it.Namespace),
-							label("result", "Reconciled"),
-							label("tag", ""),
-						),
-						"Histogram": MatchFieldsP(IgnoreExtras, Fields{
-							"SampleCount": EqualP(uint64(integrationReconciliations)),
-						}),
-					})),
-				},
-			)))
+			integrationReconciled := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
+				MatchFieldsP(IgnoreExtras, Fields{
+					"Label": ConsistOf(
+						label("group", v1.SchemeGroupVersion.Group),
+						label("version", v1.SchemeGroupVersion.Version),
+						label("kind", "Integration"),
+						label("namespace", it.Namespace),
+						label("result", "Reconciled"),
+						label("tag", ""),
+					),
+				}))
+			Expect(integrationReconciled).NotTo(BeNil())
+			integrationReconciledCount := *integrationReconciled.Histogram.SampleCount
+			Expect(integrationReconciledCount).To(BeNumerically(">", 0))
+
+			Expect(integrationReconciliations).To(BeNumerically("==", integrationReconciledCount))
 
 			// Count the number of IntegrationKit reconciliations
 			integrationKitReconciliations, err := counter.Count(MatchFields(IgnoreExtras, Fields{
@@ -285,26 +282,22 @@ func TestMetrics(t *testing.T) {
 			Expect(integrationKitReconciliations).To(BeNumerically(">", 0))
 
 			// Check it matches the observation in the corresponding metric
-			Expect(metrics["camel_k_reconciliation_duration_seconds"]).To(PointTo(MatchFields(IgnoreExtras,
-				Fields{
-					"Name": EqualP("camel_k_reconciliation_duration_seconds"),
-					"Help": EqualP("Camel K reconciliation loop duration"),
-					"Type": EqualP(prometheus.MetricType_HISTOGRAM),
-					"Metric": ContainElement(MatchFieldsP(IgnoreExtras, Fields{
-						"Label": ConsistOf(
-							label("group", v1.SchemeGroupVersion.Group),
-							label("version", v1.SchemeGroupVersion.Version),
-							label("kind", "IntegrationKit"),
-							label("namespace", it.Status.IntegrationKit.Namespace),
-							label("result", "Reconciled"),
-							label("tag", ""),
-						),
-						"Histogram": MatchFieldsP(IgnoreExtras, Fields{
-							"SampleCount": EqualP(uint64(integrationKitReconciliations)),
-						}),
-					})),
-				},
-			)))
+			integrationKitReconciled := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
+				MatchFieldsP(IgnoreExtras, Fields{
+					"Label": ConsistOf(
+						label("group", v1.SchemeGroupVersion.Group),
+						label("version", v1.SchemeGroupVersion.Version),
+						label("kind", "IntegrationKit"),
+						label("namespace", it.Status.IntegrationKit.Namespace),
+						label("result", "Reconciled"),
+						label("tag", ""),
+					),
+				}))
+			Expect(integrationKitReconciled).NotTo(BeNil())
+			integrationKitReconciledCount := *integrationKitReconciled.Histogram.SampleCount
+			Expect(integrationKitReconciledCount).To(BeNumerically(">", 0))
+
+			Expect(integrationKitReconciliations).To(BeNumerically("==", integrationKitReconciledCount))
 
 			// Count the number of Build reconciliations
 			buildReconciliations, err := counter.Count(MatchFields(IgnoreExtras, Fields{
