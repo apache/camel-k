@@ -47,7 +47,7 @@ func (c *Command) Do(ctx context.Context) error {
 		return err
 	}
 
-	mvnCmd := "mvn"
+	mvnCmd := "mvnd"
 	if c, ok := os.LookupEnv("MAVEN_CMD"); ok {
 		mvnCmd = c
 	}
@@ -118,7 +118,9 @@ func (c *Command) Do(ctx context.Context) error {
 		cmd.Env = env
 	}
 
-	Log.WithValues("MAVEN_OPTS", mavenOptions).Infof("executing: %s", strings.Join(cmd.Args, " "))
+	Log.WithValues("MAVEN_OPTS", mavenOptions).
+		WithValues("PWD", c.context.Path).
+		Infof("executing: %s", strings.Join(cmd.Args, " "))
 
 	stdOut, err := cmd.StdoutPipe()
 	if err != nil {
