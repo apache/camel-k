@@ -20,6 +20,7 @@ package monitoring
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -91,6 +92,28 @@ func (r *instrumentedReconciler) Reconcile(ctx context.Context, request reconcil
 
 	if labels[kindLabel] == "Integration" {
 		rlog.Info(fmt.Sprintf("********* Reconcile: %v %v %v", labels, err, t))
+		mfs, _ := metrics.Registry.Gather()
+		for _, mf := range mfs {
+			if mf != nil && mf.Metric != nil {
+				for _, m := range mf.Metric {
+					if m != nil && m.Label != nil && m.Histogram != nil && m.Histogram.SampleCount != nil {
+						found := false
+						for _, lp := range m.Label {
+							if *lp.Name == "kind" && *lp.Value == "Integration" {
+								found = true
+							}
+
+						}
+						if found {
+							rlog.Info(fmt.Sprintf("********* Reconcile: %v %s", m.Label, strconv.FormatUint(*m.Histogram.SampleCount, 10)))
+						} else {
+							rlog.Info(fmt.Sprintf("********* Reconcile: not found..."))
+						}
+					}
+				}
+			}
+		}
+
 	}
 	return res, err
 }
