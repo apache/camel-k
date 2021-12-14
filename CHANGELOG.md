@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Log4j Security Issue [\#2830](https://github.com/apache/camel-k/issues/2830)
 - Outdated `ca-cert` path for Jolokia trait [\#2827](https://github.com/apache/camel-k/issues/2827)
 - Kafka component propagating headers is supported? [\#2825](https://github.com/apache/camel-k/issues/2825)
 - Integration with To-D can't find Kamelet [\#2819](https://github.com/apache/camel-k/issues/2819)
@@ -23,6 +24,7 @@
 - Cannot deploy XML integration with undertow [\#2746](https://github.com/apache/camel-k/issues/2746)
 - Release 1.7.0 [\#2743](https://github.com/apache/camel-k/issues/2743)
 - Camel K SEDA Queue full Issue [\#2725](https://github.com/apache/camel-k/issues/2725)
+- How to set map properties in the kamelet parameters via the yaml definition? [\#2608](https://github.com/apache/camel-k/issues/2608)
 - Google storage component doesn't work [\#2576](https://github.com/apache/camel-k/issues/2576)
 - topicName [\#2567](https://github.com/apache/camel-k/issues/2567)
 - Kamelet: default KameletBindings configuration settings [\#2558](https://github.com/apache/camel-k/issues/2558)
