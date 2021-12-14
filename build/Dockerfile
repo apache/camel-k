@@ -22,26 +22,32 @@ ARG BASE_URL="https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/bin
 
 USER 0
 
-RUN mkdir -p ${MAVEN_HOME} \
-    && curl -Lso /tmp/maven.tar.gz ${BASE_URL}/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
-    && echo "${SHA} /tmp/maven.tar.gz" | sha512sum -c - \
-    && tar -xzC ${MAVEN_HOME} --strip-components=1 -f /tmp/maven.tar.gz \
-    && rm -v /tmp/maven.tar.gz \
-    && ln -s ${MAVEN_HOME}/bin/mvn /usr/bin/mvn \
-    && rm ${MAVEN_HOME}/lib/maven-slf4j-provider*
+RUN microdnf update && microdnf install procps
+
+RUN temp=$(mktemp -d) \
+&& curl -Lso "$temp"/mvnd.zip https://github.com/mvndaemon/mvnd/releases/download/0.7.1/mvnd-0.7.1-linux-amd64.zip \
+&& unzip -d "$temp" "$temp"/mvnd.zip \
+&& rm -v "$temp"/mvnd.zip \
+&& mkdir -p "$MAVEN_HOME" \
+&& mv "$temp"/*/* "$MAVEN_HOME" \
+&& rmdir "$temp"/* "$temp" \
+&& ln -s ${MAVEN_HOME}/bin/mvnd /usr/bin/mvnd
+
+RUN mkdir /.m2
+RUN chgrp -R 0 /.m2 \
+&& chmod -R g=u /.m2
 
 ADD build/_maven_output /tmp/artifacts/m2
 ADD build/_kamelets /kamelets
-COPY build/_maven_overlay/ /usr/share/maven/lib/
-ADD build/logback.xml /usr/share/maven/conf/
+#COPY build/_maven_overlay/ /usr/share/maven/lib/
+#ADD build/logback.xml /usr/share/maven/conf/
 
-ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=/usr/share/maven/conf/logback.xml"
+#ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=/usr/share/maven/conf/logback.xml"
 
 RUN chgrp -R 0 /tmp/artifacts/m2 \
-    && chmod -R g=u /tmp/artifacts/m2 \
-    && chgrp -R 0 /kamelets \
-    && chmod -R g=u /kamelets
+&& chmod -R g=u /tmp/artifacts/m2 \
+&& chgrp -R 0 /kamelets \
+&& chmod -R g=u /kamelets
 
-USER 1000
-
+#USER 1000
 ADD build/_output/bin/kamel /usr/local/bin/kamel
