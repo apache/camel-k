@@ -201,12 +201,12 @@ type ResourceCondition interface {
 
 // Flow is an unstructured object representing a Camel Flow in YAML/JSON DSL
 type Flow struct {
-	RawMessage `json:",inline"`
+	YamlDsl `json:",inline"`
 }
 
 // Template is an unstructured object representing a Kamelet template in YAML/JSON DSL
 type Template struct {
-	RawMessage `json:",inline"`
+	YamlDsl `json:",inline"`
 }
 
 // RuntimeProvider --

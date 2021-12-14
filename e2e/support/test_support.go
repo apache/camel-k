@@ -1557,9 +1557,12 @@ func asFlow(source map[string]interface{}) *v1.Flow {
 	if err != nil {
 		panic(err)
 	}
-	return &v1.Flow{
-		RawMessage: bytes,
+	flow := &v1.Flow{}
+	err = json.Unmarshal(bytes, flow)
+	if err != nil {
+		panic(err)
 	}
+	return flow
 }
 
 func asErrorHandlerSpec(source map[string]interface{}) *v1alpha1.ErrorHandlerSpec {

@@ -259,9 +259,7 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1alpha1.Kam
 		template := kamelet.Spec.Template
 		if template == nil {
 			// Backward compatibility with Kamelets using flow
-			template = &v1.Template{
-				RawMessage: kamelet.Spec.Flow.RawMessage,
-			}
+			template.YamlDsl = kamelet.Spec.Flow.YamlDsl
 		}
 		flowData, err := dsl.TemplateToYamlDSL(*template, kamelet.Name)
 		if err != nil {

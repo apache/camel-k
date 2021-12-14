@@ -22,6 +22,11 @@ import (
 	"encoding/json"
 	"sort"
 
+	"github.com/pkg/errors"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
@@ -31,9 +36,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/property"
-	"github.com/pkg/errors"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var (
@@ -164,43 +166,45 @@ func createIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 		})
 	}
 
-	dslSteps := make([]map[string]interface{}, 0)
+	var dslSteps []*v1.OrgApacheCamelModelProcessorDefinition
 	for _, step := range steps {
-		s := step.Step
-		if s == nil {
-			s = map[string]interface{}{
-				"to": step.URI,
+		s := &v1.OrgApacheCamelModelProcessorDefinition{}
+		if step.Step != nil {
+			if data, err := json.Marshal(step.Step); err != nil {
+				return nil, err
+			} else if err = json.Unmarshal(data, s); err != nil {
+				return nil, err
 			}
+		} else {
+			s.To = step.URI
 		}
-
 		dslSteps = append(dslSteps, s)
 	}
 
-	s := to.Step
-	if s == nil {
-		s = map[string]interface{}{
-			"to": to.URI,
-		}
+	s := &v1.OrgApacheCamelModelProcessorDefinition{}
+	if to.Step != nil {
+		s.To = to.Step
+	} else {
+		s.To = to.URI
 	}
-
 	dslSteps = append(dslSteps, s)
 
 	fromWrapper := map[string]interface{}{
 		"uri": from.URI,
 	}
 
-	flowRoute := map[string]interface{}{
-		"route": map[string]interface{}{
-			"id":    "binding",
-			"from":  fromWrapper,
-			"steps": dslSteps,
+	id := "binding"
+	flowRoute := v1.Flow{
+		YamlDsl: v1.YamlDsl{
+			Route: &v1.OrgApacheCamelModelRouteDefinition{
+				Id:    id,
+				From:  &fromWrapper,
+				Steps: dslSteps,
+			},
 		},
 	}
-	encodedRoute, err := json.Marshal(flowRoute)
-	if err != nil {
-		return nil, err
-	}
-	it.Spec.Flows = append(it.Spec.Flows, v1.Flow{RawMessage: encodedRoute})
+
+	it.Spec.Flows = append(it.Spec.Flows, flowRoute)
 
 	return &it, nil
 }

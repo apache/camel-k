@@ -25,9 +25,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/dsl"
 	"github.com/apache/camel-k/pkg/util/indentedwriter"
 )
 
@@ -75,7 +76,7 @@ func (command *describeKameletCommandOptions) run(cmd *cobra.Command, args []str
 	}
 
 	kamelet := v1alpha1.NewKamelet(command.Namespace, args[0])
-	kameletKey := k8sclient.ObjectKey{
+	kameletKey := ctrl.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      args[0],
 	}
@@ -145,8 +146,12 @@ func (command *describeKameletCommandOptions) describeKamelet(cmd *cobra.Command
 		// TODO pretty print template data
 		template := kamelet.Spec.Template
 		if template != nil {
-			w.Writef(0, "Template:\n")
-			w.Writef(1, "%s\n", string(template.RawMessage))
+			if data, err := dsl.TemplateToYamlDSL(*template, kamelet.Name); err != nil {
+				return err
+			} else {
+				w.Writef(0, "Template:\n")
+				w.Writef(1, "%s\n", string(data))
+			}
 		}
 
 		// Dependencies
