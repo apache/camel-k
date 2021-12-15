@@ -155,7 +155,7 @@ codegen:
 
 	gofmt -w pkg/util/defaults/defaults.go
 
-generate: generate-deepcopy generate-crd generate-client generate-doc generate-json-schema generate-strimzi
+generate: generate-deepcopy generate-crd generate-client generate-doc generate-json-schema generate-keda generate-strimzi
 
 generate-client:
 	./script/gen_client.sh
@@ -172,6 +172,10 @@ generate-deepcopy: controller-gen
 generate-json-schema:
 	# Skip since the YAML DSL schema has been moved to apache/camel
 	#./script/gen_json_schema.sh $(RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
+
+generate-keda:
+	cd addons/keda/duck && $(CONTROLLER_GEN) paths="./..." object
+	./script/gen_client_keda.sh
 
 generate-strimzi:
 	cd addons/strimzi/duck && $(CONTROLLER_GEN) paths="./..." object
@@ -359,7 +363,7 @@ install-minikube:
 get-staging-repo:
 	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
 
-.PHONY: build build-kamel build-resources dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-strimzi
+.PHONY: build build-kamel build-resources dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-keda generate-strimzi
 
 # find or download controller-gen if necessary
 controller-gen:

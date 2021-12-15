@@ -570,6 +570,29 @@ traits:
   - name: list
     type: string
     description: Comma separated list of Kamelet names to load into the current integration
+- name: keda
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The Keda trait can be used for automatic integration with Keda autoscalers.
+    The Keda trait is disabled by default.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: auto
+    type: bool
+    description: Enables automatic configuration of the trait.
+  - name: camel-case-conversion
+    type: bool
+    description: Convert metadata properties to camelCase (needed because trait properties
+      use kebab-case). Enabled by default.
+  - name: triggers
+    type: '[]github.com/apache/camel-k/addons/keda.kedaTrigger'
+    description: Triggers
 - name: knative-service
   platform: false
   profiles:
