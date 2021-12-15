@@ -269,7 +269,39 @@ func TestMetrics(t *testing.T) {
 			integrationReconciledCount := *integrationReconciled.Histogram.SampleCount
 			Expect(integrationReconciledCount).To(BeNumerically(">", 0))
 
-			Expect(integrationReconciliations).To(BeNumerically("==", integrationReconciledCount))
+			integrationRequeued := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
+				MatchFieldsP(IgnoreExtras, Fields{
+					"Label": ConsistOf(
+						label("group", v1.SchemeGroupVersion.Group),
+						label("version", v1.SchemeGroupVersion.Version),
+						label("kind", "Integration"),
+						label("namespace", it.Namespace),
+						label("result", "Requeued"),
+						label("tag", ""),
+					),
+				}))
+			integrationRequeuedCount := uint64(0)
+			if integrationRequeued != nil {
+				integrationRequeuedCount = *integrationRequeued.Histogram.SampleCount
+			}
+
+			integrationErrored := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
+				MatchFieldsP(IgnoreExtras, Fields{
+					"Label": ConsistOf(
+						label("group", v1.SchemeGroupVersion.Group),
+						label("version", v1.SchemeGroupVersion.Version),
+						label("kind", "Integration"),
+						label("namespace", it.Namespace),
+						label("result", "Errored"),
+						label("tag", "PlatformError"),
+					),
+				}))
+			integrationErroredCount := uint64(0)
+			if integrationErrored != nil {
+				integrationErroredCount = *integrationErrored.Histogram.SampleCount
+			}
+
+			Expect(integrationReconciliations).To(BeNumerically("==", integrationReconciledCount+integrationRequeuedCount+integrationErroredCount))
 
 			// Count the number of IntegrationKit reconciliations
 			integrationKitReconciliations, err := counter.Count(MatchFields(IgnoreExtras, Fields{
