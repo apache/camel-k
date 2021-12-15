@@ -117,6 +117,12 @@ func (c *FakeClient) Discovery() discovery.DiscoveryInterface {
 	}
 }
 
+func (c *FakeClient) ServerOrClientSideApplier() client.ServerOrClientSideApplier {
+	return client.ServerOrClientSideApplier{
+		Client: c,
+	}
+}
+
 type FakeDiscovery struct {
 	discovery.DiscoveryInterface
 }

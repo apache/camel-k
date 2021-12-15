@@ -117,7 +117,7 @@ func (t *kedaTrait) getScaledObject(e *trait.Environment) (*kedav1alpha1.ScaledO
 
 func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 	ctrlRef := t.getTopControllerReference(e)
-
+	applier := e.Client.ServerOrClientSideApplier()
 	if ctrlRef.Kind == camelv1alpha1.KameletBindingKind {
 		// Update the KameletBinding directly (do not add it to env resources, it's the integration parent)
 		key := client.ObjectKey{
@@ -131,7 +131,7 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 		if klb.Spec.Replicas == nil {
 			one := int32(1)
 			klb.Spec.Replicas = &one
-			if err := e.Client.Update(e.Ctx, &klb); err != nil {
+			if err := applier.Apply(e.Ctx, &klb); err != nil {
 				return err
 			}
 		}
@@ -139,7 +139,7 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 		if e.Integration.Spec.Replicas == nil {
 			one := int32(1)
 			e.Integration.Spec.Replicas = &one
-			if err := e.Client.Update(e.Ctx, e.Integration); err != nil {
+			if err := applier.Apply(e.Ctx, e.Integration); err != nil {
 				return err
 			}
 		}
