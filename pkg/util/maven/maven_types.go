@@ -42,6 +42,7 @@ type Plugin struct {
 	Version      string       `xml:"version,omitempty"`
 	Executions   []Execution  `xml:"executions>execution,omitempty"`
 	Dependencies []Dependency `xml:"dependencies>dependency,omitempty"`
+	Extensions   bool         `xml:"extensions,omitempty"`
 }
 
 type Execution struct {
