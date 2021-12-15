@@ -143,6 +143,7 @@ func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion str
 					},
 				},
 			},
+			Extensions: true,
 		},
 	)
 
