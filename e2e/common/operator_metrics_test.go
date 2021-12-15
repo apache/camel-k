@@ -435,7 +435,18 @@ func TestMetrics(t *testing.T) {
 			durationFromLogs := ts2.Sub(ts1)
 
 			// Check both durations match
-			Expect(math.Abs((durationFromLogs - duration).Seconds())).To(BeNumerically("<", 1))
+			Expect(math.Abs((durationFromLogs - duration).Seconds())).To(BeNumerically("<=", 1))
+
+			// Retrieve the first readiness duration from the metric
+			Expect(metrics).To(HaveKey("camel_k_integration_first_readiness_seconds"))
+			metric := metrics["camel_k_integration_first_readiness_seconds"].Metric
+			Expect(metric).To(HaveLen(1))
+			histogram := metric[0].Histogram
+			Expect(histogram).NotTo(BeNil())
+
+			// Check both durations match
+			d := duration.Seconds()
+			Expect(math.Abs(*histogram.SampleSum - d)).To(BeNumerically("<=", 1))
 
 			// Check the duration is correctly observed in the corresponding metric
 			Expect(metrics).To(HaveKey("camel_k_integration_first_readiness_seconds"))
@@ -448,7 +459,7 @@ func TestMetrics(t *testing.T) {
 						{
 							Histogram: &prometheus.Histogram{
 								SampleCount: uint64P(1),
-								SampleSum:   float64P(duration.Seconds()),
+								SampleSum:   histogram.SampleSum,
 								Bucket:      buckets(duration.Seconds(), []float64{5, 10, 30, 60, 120, math.Inf(1)}),
 							},
 						},
