@@ -25,6 +25,7 @@
 - Release 1.7.0 [\#2743](https://github.com/apache/camel-k/issues/2743)
 - Camel K SEDA Queue full Issue [\#2725](https://github.com/apache/camel-k/issues/2725)
 - How to set map properties in the kamelet parameters via the yaml definition? [\#2608](https://github.com/apache/camel-k/issues/2608)
+- Provide a way to specify exclusions for a dependency [\#2598](https://github.com/apache/camel-k/issues/2598)
 - Google storage component doesn't work [\#2576](https://github.com/apache/camel-k/issues/2576)
 - topicName [\#2567](https://github.com/apache/camel-k/issues/2567)
 - Kamelet: default KameletBindings configuration settings [\#2558](https://github.com/apache/camel-k/issues/2558)
@@ -36,10 +37,17 @@
 - If the pod is in CrashLoopBackOff, the phase is reported as Running [\#2445](https://github.com/apache/camel-k/issues/2445)
 - Wait for dependencies  [\#2151](https://github.com/apache/camel-k/issues/2151)
 - Secret type not supported with buildah on K3S [\#2136](https://github.com/apache/camel-k/issues/2136)
+- Camel K doesn't automatically create an endpoint to view the Openapi doc that it was built with. [\#2135](https://github.com/apache/camel-k/issues/2135)
 - Ability to pre-build integrations [\#2129](https://github.com/apache/camel-k/issues/2129)
+- Kamelet using Java DSL [\#2117](https://github.com/apache/camel-k/issues/2117)
+- Add sample using Flink [\#2116](https://github.com/apache/camel-k/issues/2116)
 - OLM installation may fail with default values [\#2113](https://github.com/apache/camel-k/issues/2113)
+- Runtime reload configmap/secret when they change [\#2106](https://github.com/apache/camel-k/issues/2106)
+- Kamelet - Possible to pre configure component options [\#2081](https://github.com/apache/camel-k/issues/2081)
+- Monitor integration related events [\#2025](https://github.com/apache/camel-k/issues/2025)
 - Expose operator information [\#1947](https://github.com/apache/camel-k/issues/1947)
 - not able to use json: MethodNotFoundException [\#1915](https://github.com/apache/camel-k/issues/1915)
+- Kamel 1.0 fails on install on mac [\#1543](https://github.com/apache/camel-k/issues/1543)
 
 **Merged pull requests:**
 
