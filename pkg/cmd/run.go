@@ -292,8 +292,11 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	tp := catalog.ComputeTraitsProperties()
 	for _, t := range o.Traits {
 		kv := strings.SplitN(t, "=", 2)
-
-		if !util.StringSliceExists(tp, kv[0]) {
+		prefix := kv[0]
+		if strings.Contains(prefix, "[") {
+			prefix = prefix[0:strings.Index(prefix, "[")]
+		}
+		if !util.StringSliceExists(tp, prefix) {
 			fmt.Printf("Error: %s is not a valid trait property\n", t)
 			return nil
 		}

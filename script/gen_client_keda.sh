@@ -15,14 +15,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
+
 location=$(dirname $0)
 rootdir=$location/..
 
-echo "Generating API documentation..."
-$location/gen_crd/gen_crd_api.sh
-echo "Generating API documentation... done!"
+unset GOPATH
+GO111MODULE=on
 
-echo "Generating traits documentation..."
+echo "Generating boilerplate code for Keda addon..."
+
 cd $rootdir
-go run ./cmd/util/doc-gen --input-dirs github.com/apache/camel-k/pkg/trait --input-dirs github.com/apache/camel-k/addons/keda --input-dirs github.com/apache/camel-k/addons/master --input-dirs github.com/apache/camel-k/addons/threescale --input-dirs github.com/apache/camel-k/addons/tracing
-echo "Generating traits documentation... done!"
+
+go run k8s.io/code-generator/cmd/deepcopy-gen \
+  -h ./script/headers/default.txt \
+  --input-dirs=github.com/apache/camel-k/addons/keda
