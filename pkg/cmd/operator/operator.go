@@ -27,6 +27,8 @@ import (
 	"strconv"
 	"time"
 
+	"go.uber.org/automaxprocs/maxprocs"
+
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	batchv1beta1 "k8s.io/api/batch/v1beta1"
@@ -88,6 +90,9 @@ func Run(healthPort, monitoringPort int32, leaderElection bool) {
 	}))
 
 	klog.SetLogger(log)
+
+	_, err := maxprocs.Set(maxprocs.Logger(func(f string, a ...interface{}) { log.Info(fmt.Sprintf(f, a)) }))
+	exitOnError(err, "failed to set GOMAXPROCS from cgroups")
 
 	printVersion()
 
