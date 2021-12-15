@@ -54,6 +54,7 @@ func (c *Command) Do(ctx context.Context) error {
 
 	args := make([]string, 0)
 	args = append(args, "--no-transfer-progress", "-Dstyle.color=never")
+	args = append(args, "-Dmvnd.daemonStorage=/.mvnd")
 
 	if c.context.LocalRepository != "" {
 		if _, err := os.Stat(c.context.LocalRepository); err == nil {

@@ -33,6 +33,10 @@ RUN temp=$(mktemp -d) \
 && rmdir "$temp"/* "$temp" \
 && ln -s ${MAVEN_HOME}/bin/mvnd /usr/bin/mvnd
 
+RUN mkdir /.mvnd
+RUN chgrp -R 0 /.mvnd \
+&& chmod -R g=u /.mvnd
+
 RUN mkdir /.m2
 RUN chgrp -R 0 /.m2 \
 && chmod -R g=u /.m2
@@ -49,5 +53,5 @@ RUN chgrp -R 0 /tmp/artifacts/m2 \
 && chgrp -R 0 /kamelets \
 && chmod -R g=u /kamelets
 
-#USER 1000
+USER 1000
 ADD build/_output/bin/kamel /usr/local/bin/kamel
