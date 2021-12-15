@@ -43,7 +43,18 @@ type kedaTrait struct {
 	CamelCaseConversion *bool `property:"camel-case-conversion" json:"camelCaseConversion,omitempty"`
 	// Set the spec->replicas field on the top level controller to an explicit value if missing, to allow Keda to recognize it as a scalable resource
 	HackControllerReplicas *bool `property:"hack-controller-replicas" json:"hackControllerReplicas,omitempty"`
-	// Triggers
+	// Interval (seconds) to check each trigger on (minimum 10 seconds)
+	PollingInterval *int32 `property:"polling-interval" json:"pollingInterval,omitempty"`
+	// The wait period between the last active trigger reported and scaling the resource back to 0
+	CooldownPeriod *int32 `property:"cooldown-period" json:"cooldownPeriod,omitempty"`
+	// Enabling this property allows KEDA to scale the resource down to the specified number of replicas
+	IdleReplicaCount *int32 `property:"idle-replica-count" json:"idleReplicaCount,omitempty"`
+	// Minimum number of replicas
+	MinReplicaCount *int32 `property:"min-replica-count" json:"minReplicaCount,omitempty"`
+	// Maximum number of replicas
+	MaxReplicaCount *int32 `property:"max-replica-count" json:"maxReplicaCount,omitempty"`
+	// Definition of triggers according to the Keda format. Each trigger must contain `type` field corresponding
+	// to the name of a Keda autoscaler and a key/value map named `metadata` containing specific trigger options.
 	Triggers []kedaTrigger `property:"triggers" json:"triggers,omitempty"`
 }
 
@@ -95,7 +106,21 @@ func (t *kedaTrait) getScaledObject(e *trait.Environment) (*kedav1alpha1.ScaledO
 	}
 	obj := kedav1alpha1.NewScaledObject(e.Integration.Namespace, e.Integration.Name)
 	obj.Spec.ScaleTargetRef = t.getTopControllerReference(e)
-
+	if t.PollingInterval != nil {
+		obj.Spec.PollingInterval = t.PollingInterval
+	}
+	if t.CooldownPeriod != nil {
+		obj.Spec.CooldownPeriod = t.CooldownPeriod
+	}
+	if t.IdleReplicaCount != nil {
+		obj.Spec.IdleReplicaCount = t.IdleReplicaCount
+	}
+	if t.MinReplicaCount != nil {
+		obj.Spec.MinReplicaCount = t.MinReplicaCount
+	}
+	if t.MaxReplicaCount != nil {
+		obj.Spec.MaxReplicaCount = t.MaxReplicaCount
+	}
 	for _, trigger := range t.Triggers {
 		meta := make(map[string]string)
 		for k, v := range trigger.Metadata {
