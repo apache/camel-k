@@ -23,6 +23,22 @@ kamel run -p my.message=test-property property-route.groovy --dev
 
 At runtime, that variable will be substituted by the value you've provided. You can provide more than one single `property` at once by just adding the flag repeatedly (ie, `--property prop1=val1 --property prop2=val2 ...`)
 
+You can also use runtime properties in Camel endpoints, for example to make the timer
+period configurable you can do as follows:
+
+[source,groovy]
+.property-route.groovy
+----
+from('timer:property?period={{triggerPeriod}}')
+    .log('property content is: {{my.message}}')
+----
+
+The simplest way to replace that variable with a real value is to use the `--property` flag (also shortcut by `-p`):
+
+----
+kamel run -p my.message=test-property -p triggerPeriod=3000 property-route.groovy --dev
+----
+
 [[runtime-props-file]]
 == Property File
 
