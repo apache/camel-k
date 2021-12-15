@@ -63,6 +63,7 @@ type Client interface {
 	GetScheme() *runtime.Scheme
 	GetConfig() *rest.Config
 	GetCurrentNamespace(kubeConfig string) (string, error)
+	ServerOrClientSideApplier() ServerOrClientSideApplier
 }
 
 // Injectable identifies objects that can receive a Client.
