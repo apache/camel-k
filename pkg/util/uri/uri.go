@@ -28,7 +28,7 @@ import (
 )
 
 var uriRegexp = regexp.MustCompile(`^[a-z0-9+][a-zA-Z0-9-+]*:.*$`)
-
+var pathExtractorRegexp = regexp.MustCompile(`^[a-z0-9+][a-zA-Z0-9-+]*:(?://){0,1}[^/?]+/([^?]+)(?:[?].*){0,1}$`)
 var queryExtractorRegexp = `^[^?]+\?(?:|.*[&])%s=([^&]+)(?:[&].*|$)`
 
 // HasCamelURIFormat tells if a given string may belong to a Camel URI, without checking any catalog.
@@ -55,6 +55,19 @@ func GetQueryParameter(uri string, param string) string {
 		return ""
 	}
 	return res
+}
+
+// GetPathSegment returns the path segment of the URI corresponding to the given position (0 based), if present
+func GetPathSegment(uri string, pos int) string {
+	match := pathExtractorRegexp.FindStringSubmatch(uri)
+	if len(match) > 1 {
+		fullPath := match[1]
+		parts := strings.Split(fullPath, "/")
+		if pos >= 0 && pos < len(parts) {
+			return parts[pos]
+		}
+	}
+	return ""
 }
 
 func matchOrEmpty(reg *regexp.Regexp, str string) string {

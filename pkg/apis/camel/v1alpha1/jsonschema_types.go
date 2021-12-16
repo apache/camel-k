@@ -74,7 +74,7 @@ type JSONSchemaProp struct {
 	Enum             []JSON       `json:"enum,omitempty"`
 	Example          *JSON        `json:"example,omitempty"`
 	Nullable         bool         `json:"nullable,omitempty"`
-	// The list of descriptors that determine which UI components to use on different views
+	// XDescriptors is a list of extended properties that trigger a custom behavior in external systems
 	XDescriptors []string `json:"x-descriptors,omitempty"`
 }
 
@@ -89,6 +89,8 @@ type JSONSchemaProps struct {
 	ExternalDocs *ExternalDocumentation    `json:"externalDocs,omitempty"`
 	Schema       JSONSchemaURL             `json:"$schema,omitempty"`
 	Type         string                    `json:"type,omitempty"`
+	// XDescriptors is a list of extended properties that trigger a custom behavior in external systems
+	XDescriptors []string `json:"x-descriptors,omitempty"`
 }
 
 // RawMessage is a raw encoded JSON value.

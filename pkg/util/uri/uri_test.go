@@ -180,3 +180,70 @@ func TestCamelURIFormat(t *testing.T) {
 		})
 	}
 }
+
+func TestPathSegment(t *testing.T) {
+	tests := []struct {
+		uri      string
+		pos      int
+		expected string
+	}{
+		{
+			uri: "direct:endpoint",
+			pos: 0,
+		},
+		{
+			uri: "direct:endpoint",
+			pos: 12,
+		},
+		{
+			uri: "kamelet:endpoint/",
+			pos: 0,
+		},
+		{
+			uri:      "kamelet:endpoint/s",
+			pos:      0,
+			expected: "s",
+		},
+		{
+			uri: "kamelet:endpoint/s",
+			pos: 1,
+		},
+		{
+			uri:      "kamelet://endpoint/s",
+			pos:      0,
+			expected: "s",
+		},
+		{
+			uri:      "kamelet://endpoint/s/p",
+			pos:      0,
+			expected: "s",
+		},
+		{
+			uri:      "kamelet://endpoint/s/p",
+			pos:      1,
+			expected: "p",
+		},
+		{
+			uri:      "kamelet://endpoint/s/p?param=n",
+			pos:      1,
+			expected: "p",
+		},
+		{
+			uri:      "kamelet://endpoint/s/p?param=n&p2=n2",
+			pos:      1,
+			expected: "p",
+		},
+		{
+			uri: "kamelet://endpoint/s/p?param=n&p2=n2",
+			pos: 2,
+		},
+	}
+
+	for _, test := range tests {
+		thetest := test
+		t.Run(thetest.uri, func(t *testing.T) {
+			param := GetPathSegment(thetest.uri, thetest.pos)
+			assert.Equal(t, thetest.expected, param)
+		})
+	}
+}

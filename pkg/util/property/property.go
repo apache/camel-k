@@ -65,3 +65,14 @@ func SplitPropertyFileEntry(entry string) (string, string) {
 	}
 	return k, v
 }
+
+// DecodePropertyFileEntry returns the decoded value corresponding to the given key in the entry.
+func DecodePropertyFileValue(entry, key string) (string, error) {
+	p := properties.NewProperties()
+	p.DisableExpansion = true
+	if err := p.Load([]byte(entry), properties.UTF8); err != nil {
+		return "", err
+	}
+	val, _ := p.Get(key)
+	return val, nil
+}
