@@ -49,6 +49,7 @@ func (c *defaultClient) ServerOrClientSideApplier() ServerOrClientSideApplier {
 func (a *ServerOrClientSideApplier) Apply(ctx context.Context, object ctrl.Object) error {
 	once := false
 	var err error
+	needsRetry := false
 	a.tryServerSideApply.Do(func() {
 		once = true
 		if err = a.serverSideApply(ctx, object); err != nil {
@@ -57,12 +58,15 @@ func (a *ServerOrClientSideApplier) Apply(ctx context.Context, object ctrl.Objec
 				a.hasServerSideApply.Store(false)
 				err = nil
 			} else {
-				a.tryServerSideApply = sync.Once{}
+				needsRetry = true
 			}
 		} else {
 			a.hasServerSideApply.Store(true)
 		}
 	})
+	if needsRetry {
+		a.tryServerSideApply = sync.Once{}
+	}
 	if err != nil {
 		return err
 	}
