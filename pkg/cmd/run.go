@@ -570,9 +570,8 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	var platform *v1.IntegrationPlatform
 	for _, item := range o.Dependencies {
 		// TODO: accept URLs
-		// TODO: accept other resources through Maven types (i.e not just JARs)
 		// TODO: it'd be cool to automatically detect pom file in JARs and upload them
-		if strings.HasPrefix(item, "file://") && (strings.HasSuffix(item, ".jar") || strings.HasSuffix(item, ".pom")) {
+		if strings.HasPrefix(item, "file://") {
 			if platform == nil {
 				// let's also enable the registry trait
 				o.Traits = append(o.Traits, "registry.enabled=true")
@@ -811,8 +810,8 @@ func uploadDependency(platform *v1.IntegrationPlatform, item string, integration
 		return err
 	}
 	fmt.Printf("Uploaded: %s to %s \n", item, target)
-	if strings.HasSuffix(item, ".jar") {
-		dependency := fmt.Sprintf("mvn:%s:%s:%s", groupId, artifactId, version)
+	if !strings.HasSuffix(item, ".pom") {
+		dependency := fmt.Sprintf("mvn:%s:%s:%s:%s", groupId, artifactId, version, ext)
 		fmt.Printf("Added %s to the Integration's dependency list \n", dependency)
 		integration.Spec.AddDependency(dependency)
 	}
