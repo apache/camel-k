@@ -23,6 +23,7 @@
 - Could not pull base image - Build kit failed \(No matching credentials were found, falling back on anonymous\) [\#2748](https://github.com/apache/camel-k/issues/2748)
 - Cannot deploy XML integration with undertow [\#2746](https://github.com/apache/camel-k/issues/2746)
 - Release 1.7.0 [\#2743](https://github.com/apache/camel-k/issues/2743)
+- \[E2E\] Reconciliation duration metric failure [\#2742](https://github.com/apache/camel-k/issues/2742)
 - Camel K SEDA Queue full Issue [\#2725](https://github.com/apache/camel-k/issues/2725)
 - How to set map properties in the kamelet parameters via the yaml definition? [\#2608](https://github.com/apache/camel-k/issues/2608)
 - Provide a way to specify exclusions for a dependency [\#2598](https://github.com/apache/camel-k/issues/2598)
@@ -45,12 +46,16 @@
 - Runtime reload configmap/secret when they change [\#2106](https://github.com/apache/camel-k/issues/2106)
 - Kamelet - Possible to pre configure component options [\#2081](https://github.com/apache/camel-k/issues/2081)
 - Monitor integration related events [\#2025](https://github.com/apache/camel-k/issues/2025)
+- Switch to UBI minimal  [\#2007](https://github.com/apache/camel-k/issues/2007)
 - Expose operator information [\#1947](https://github.com/apache/camel-k/issues/1947)
 - not able to use json: MethodNotFoundException [\#1915](https://github.com/apache/camel-k/issues/1915)
 - Kamel 1.0 fails on install on mac [\#1543](https://github.com/apache/camel-k/issues/1543)
 
 **Merged pull requests:**
 
+- feat: Set GOMAXPROCS based on CPU quota [\#2837](https://github.com/apache/camel-k/pull/2837) ([astefanutti](https://github.com/astefanutti))
+- fix\(e2e\): Account for requeued and errored integration reconciliations [\#2836](https://github.com/apache/camel-k/pull/2836) ([astefanutti](https://github.com/astefanutti))
+- fix\(e2e\): Avoid nested Gomega fields matcher [\#2833](https://github.com/apache/camel-k/pull/2833) ([astefanutti](https://github.com/astefanutti))
 - chore: Try SSA for Kamelet install only once [\#2823](https://github.com/apache/camel-k/pull/2823) ([astefanutti](https://github.com/astefanutti))
 - fix\(yaml\): Take to-d into account while parsing YAML DSL steps [\#2822](https://github.com/apache/camel-k/pull/2822) ([astefanutti](https://github.com/astefanutti))
 - fix: First bundle Kamelets install with client-side apply [\#2821](https://github.com/apache/camel-k/pull/2821) ([astefanutti](https://github.com/astefanutti))
