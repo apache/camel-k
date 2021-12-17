@@ -24,13 +24,13 @@ import (
 )
 
 const (
-	KedaGroup   = "keda.sh"
-	KedaVersion = "v1alpha1"
+	KEDAGroup   = "keda.sh"
+	KEDAVersion = "v1alpha1"
 )
 
 var (
 	// SchemeGroupVersion is group version used to register these objects.
-	SchemeGroupVersion = schema.GroupVersion{Group: KedaGroup, Version: KedaVersion}
+	SchemeGroupVersion = schema.GroupVersion{Group: KEDAGroup, Version: KEDAVersion}
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme.
 	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
