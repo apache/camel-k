@@ -89,8 +89,6 @@ type JSONSchemaProps struct {
 	ExternalDocs *ExternalDocumentation    `json:"externalDocs,omitempty"`
 	Schema       JSONSchemaURL             `json:"$schema,omitempty"`
 	Type         string                    `json:"type,omitempty"`
-	// XDescriptors is a list of extended properties that trigger a custom behavior in external systems
-	XDescriptors []string `json:"x-descriptors,omitempty"`
 }
 
 // RawMessage is a raw encoded JSON value.
