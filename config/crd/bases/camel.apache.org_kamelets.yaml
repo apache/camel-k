@@ -193,8 +193,8 @@ spec:
                         uniqueItems:
                           type: boolean
                         x-descriptors:
-                          description: The list of descriptors that determine which
-                            UI components to use on different views
+                          description: XDescriptors is a list of extended properties
+                            that trigger a custom behavior in external systems
                           items:
                             type: string
                           type: array
@@ -405,8 +405,8 @@ spec:
                               uniqueItems:
                                 type: boolean
                               x-descriptors:
-                                description: The list of descriptors that determine
-                                  which UI components to use on different views
+                                description: XDescriptors is a list of extended properties
+                                  that trigger a custom behavior in external systems
                                 items:
                                   type: string
                                 type: array

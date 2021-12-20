@@ -62,27 +62,34 @@ const (
 )
 
 // The KEDA trait can be used for automatic integration with KEDA autoscalers.
+// The trait can be either manually configured using the `triggers` option or automatically configured
+// via markers in the Kamelets.
+//
+// For information on how to use KEDA enabled Kamelets with the KEDA trait, refer to
+// xref:kamelets/kamelets-user.adoc#kamelet-keda-user[the KEDA section in the Kamelets user guide].
+// If you want to create Kamelets that contain KEDA metadata, refer to
+// xref:kamelets/kamelets-dev.adoc#kamelet-keda-dev[the KEDA section in the Kamelets development guide].
 //
 // The KEDA trait is disabled by default.
 //
 // +camel-k:trait=keda.
 type kedaTrait struct {
 	trait.BaseTrait `property:",squash"`
-	// Enables automatic configuration of the trait.
+	// Enables automatic configuration of the trait. Allows the trait to infer KEDA triggers from the Kamelets.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
-	// Convert metadata properties to camelCase (needed because trait properties use kebab-case). Disabled by default.
+	// Convert metadata properties to camelCase (needed because Camel K trait properties use kebab-case from command line). Disabled by default.
 	CamelCaseConversion *bool `property:"camel-case-conversion" json:"camelCaseConversion,omitempty"`
-	// Set the spec->replicas field on the top level controller to an explicit value if missing, to allow KEDA to recognize it as a scalable resource
+	// Set the spec->replicas field on the top level controller to an explicit value if missing, to allow KEDA to recognize it as a scalable resource.
 	HackControllerReplicas *bool `property:"hack-controller-replicas" json:"hackControllerReplicas,omitempty"`
-	// Interval (seconds) to check each trigger on (minimum 10 seconds)
+	// Interval (seconds) to check each trigger on (minimum 10 seconds).
 	PollingInterval *int32 `property:"polling-interval" json:"pollingInterval,omitempty"`
-	// The wait period between the last active trigger reported and scaling the resource back to 0
+	// The wait period between the last active trigger reported and scaling the resource back to 0.
 	CooldownPeriod *int32 `property:"cooldown-period" json:"cooldownPeriod,omitempty"`
-	// Enabling this property allows KEDA to scale the resource down to the specified number of replicas
+	// Enabling this property allows KEDA to scale the resource down to the specified number of replicas.
 	IdleReplicaCount *int32 `property:"idle-replica-count" json:"idleReplicaCount,omitempty"`
-	// Minimum number of replicas
+	// Minimum number of replicas.
 	MinReplicaCount *int32 `property:"min-replica-count" json:"minReplicaCount,omitempty"`
-	// Maximum number of replicas
+	// Maximum number of replicas.
 	MaxReplicaCount *int32 `property:"max-replica-count" json:"maxReplicaCount,omitempty"`
 	// Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
 	// to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options.
@@ -244,6 +251,7 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 		if e.Integration.Spec.Replicas == nil {
 			one := int32(1)
 			e.Integration.Spec.Replicas = &one
+			// Update the Integration directly as the spec section is not merged by default
 			if err := e.Client.Update(e.Ctx, e.Integration); err != nil {
 				return err
 			}
