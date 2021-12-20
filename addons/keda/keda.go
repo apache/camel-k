@@ -93,14 +93,16 @@ type kedaTrait struct {
 	MaxReplicaCount *int32 `property:"max-replica-count" json:"maxReplicaCount,omitempty"`
 	// Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
 	// to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options.
+	// An optional `authentication-secret` can be declared per trigger and the operator will link each entry of
+	// the secret to a KEDA authentication parameter.
 	Triggers []kedaTrigger `property:"triggers" json:"triggers,omitempty"`
 }
 
 type kedaTrigger struct {
-	Type     string            `property:"type" json:"type,omitempty"`
-	Metadata map[string]string `property:"metadata" json:"metadata,omitempty"`
-
-	authentication map[string]string
+	Type                 string            `property:"type" json:"type,omitempty"`
+	Metadata             map[string]string `property:"metadata" json:"metadata,omitempty"`
+	AuthenticationSecret string            `property:"authentication-secret" json:"authenticationSecret,omitempty"`
+	authentication       map[string]string
 }
 
 // NewKedaTrait --.
@@ -177,9 +179,12 @@ func (t *kedaTrait) addScalingResources(e *trait.Environment) error {
 			meta[kk] = v
 		}
 		var authenticationRef *kedav1alpha1.ScaledObjectAuthRef
+		if len(trigger.authentication) > 0 && trigger.AuthenticationSecret != "" {
+			return errors.New("an authentication secret cannot be provided for auto-configured triggers")
+		}
+		extConfigName := fmt.Sprintf("%s-keda-%d", e.Integration.Name, idx)
 		if len(trigger.authentication) > 0 {
 			// Save all authentication config in a secret
-			extConfigName := fmt.Sprintf("%s-keda-%d", e.Integration.Name, idx)
 			secret := v1.Secret{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "Secret",
@@ -208,6 +213,42 @@ func (t *kedaTrait) addScalingResources(e *trait.Environment) error {
 				triggerAuth.Spec.SecretTargetRef = append(triggerAuth.Spec.SecretTargetRef, kedav1alpha1.AuthSecretTargetRef{
 					Parameter: k,
 					Name:      extConfigName,
+					Key:       k,
+				})
+			}
+			e.Resources.Add(&triggerAuth)
+			authenticationRef = &kedav1alpha1.ScaledObjectAuthRef{
+				Name: extConfigName,
+			}
+		} else if trigger.AuthenticationSecret != "" {
+			s := v1.Secret{}
+			key := client.ObjectKey{
+				Namespace: e.Integration.Namespace,
+				Name:      trigger.AuthenticationSecret,
+			}
+			if err := e.Client.Get(e.Ctx, key, &s); err != nil {
+				return errors.Wrapf(err, "could not load secret named %q in namespace %q", trigger.AuthenticationSecret, e.Integration.Namespace)
+			}
+			// Fill a TriggerAuthentication from the secret
+			triggerAuth := kedav1alpha1.TriggerAuthentication{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "TriggerAuthentication",
+					APIVersion: kedav1alpha1.SchemeGroupVersion.String(),
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: e.Integration.Namespace,
+					Name:      extConfigName,
+				},
+			}
+			sortedKeys := make([]string, 0, len(s.Data))
+			for k := range s.Data {
+				sortedKeys = append(sortedKeys, k)
+			}
+			sort.Strings(sortedKeys)
+			for _, k := range sortedKeys {
+				triggerAuth.Spec.SecretTargetRef = append(triggerAuth.Spec.SecretTargetRef, kedav1alpha1.AuthSecretTargetRef{
+					Parameter: k,
+					Name:      s.Name,
 					Key:       k,
 				})
 			}
