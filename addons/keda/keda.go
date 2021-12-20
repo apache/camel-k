@@ -123,7 +123,6 @@ func (t *kedaTrait) Configure(e *trait.Environment) (bool, error) {
 
 	if t.Auto == nil || *t.Auto {
 		if err := t.populateTriggersFromKamelets(e); err != nil {
-			// TODO: set condition
 			return false, err
 		}
 	}

@@ -622,7 +622,9 @@ traits:
     type: '[]github.com/apache/camel-k/addons/keda.kedaTrigger'
     description: Definition of triggers according to the KEDA format. Each trigger
       must contain `type` field correspondingto the name of a KEDA autoscaler and
-      a key/value map named `metadata` containing specific trigger options.
+      a key/value map named `metadata` containing specific trigger options.An optional
+      `authentication-secret` can be declared per trigger and the operator will link
+      each entry ofthe secret to a KEDA authentication parameter.
 - name: knative-service
   platform: false
   profiles:

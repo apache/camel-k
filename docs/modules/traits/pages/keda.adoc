@@ -70,6 +70,8 @@ The following configuration options are available:
 | []github.com/apache/camel-k/addons/keda.kedaTrigger
 | Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
 to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options.
+An optional `authentication-secret` can be declared per trigger and the operator will link each entry of
+the secret to a KEDA authentication parameter.
 
 |===
 
