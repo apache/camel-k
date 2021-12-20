@@ -42,7 +42,7 @@ import (
 	scase "github.com/stoewer/go-strcase"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -222,7 +222,7 @@ func (t *kedaTrait) addScalingResources(e *trait.Environment) error {
 			}
 		} else if trigger.AuthenticationSecret != "" {
 			s := v1.Secret{}
-			key := client.ObjectKey{
+			key := ctrl.ObjectKey{
 				Namespace: e.Integration.Namespace,
 				Name:      trigger.AuthenticationSecret,
 			}
@@ -273,7 +273,7 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 	ctrlRef := t.getTopControllerReference(e)
 	if ctrlRef.Kind == camelv1alpha1.KameletBindingKind {
 		// Update the KameletBinding directly (do not add it to env resources, it's the integration parent)
-		key := client.ObjectKey{
+		key := ctrl.ObjectKey{
 			Namespace: e.Integration.Namespace,
 			Name:      ctrlRef.Name,
 		}
