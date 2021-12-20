@@ -70,7 +70,7 @@ type kedaTrait struct {
 	trait.BaseTrait `property:",squash"`
 	// Enables automatic configuration of the trait.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
-	// Convert metadata properties to camelCase (needed because trait properties use kebab-case). Enabled by default.
+	// Convert metadata properties to camelCase (needed because trait properties use kebab-case). Disabled by default.
 	CamelCaseConversion *bool `property:"camel-case-conversion" json:"camelCaseConversion,omitempty"`
 	// Set the spec->replicas field on the top level controller to an explicit value if missing, to allow KEDA to recognize it as a scalable resource
 	HackControllerReplicas *bool `property:"hack-controller-replicas" json:"hackControllerReplicas,omitempty"`
@@ -164,7 +164,7 @@ func (t *kedaTrait) addScalingResources(e *trait.Environment) error {
 		meta := make(map[string]string)
 		for k, v := range trigger.Metadata {
 			kk := k
-			if t.CamelCaseConversion == nil || *t.CamelCaseConversion {
+			if t.CamelCaseConversion != nil && *t.CamelCaseConversion {
 				kk = scase.LowerCamelCase(k)
 			}
 			meta[kk] = v
