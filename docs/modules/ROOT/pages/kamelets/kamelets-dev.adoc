@@ -1427,3 +1427,122 @@ If everything goes well, you should receive a message during the test execution.
 For a more specific test that checks also the content sent to Telegram, you should add additional Gherking steps
 to get and verify the actual message via other Telegram APIs. We're not going in so much details for this example,
 but the Gherkin file highlighted above is a good approximation of the backbone you'll find in tests for Kamelets of type "sink".
+
+== KEDA Integration
+
+Kamelets of type `source` can be augmented with https://keda.sh/[KEDA] metadata to automatically configure autoscalers.
+
+The additional KEDA metadata is needed for the following purposes:
+
+- Map Kamelet properties to corresponding KEDA parameters
+- Distinguish which KEDA parameters are needed for authentication (and need to be placed in a `Secret`)
+- Mark KEDA parameters as required to signal an error during reconciliation
+
+[[kamelet-keda-dev]]
+=== Basic properties to KEDA parameter mapping
+
+Any Kamelet property can be mapped to a KEDA parameter by simply declaring the mapping in the `x-descriptors` list.
+For example:
+
+.aws-sqs-source.kamelet.yaml
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: Kamelet
+metadata:
+  name: aws-sqs-source
+  labels:
+    camel.apache.org/kamelet.type: "source"
+spec:
+  definition:
+    # ...
+    properties:
+      queueNameOrArn:
+        title: Queue Name
+        description: The SQS Queue Name or ARN
+        type: string
+        x-descriptors:
+        - urn:keda:metadata:queueURL # <1>
+        - urn:keda:required # <2>
+# ...
+----
+<1> The Kamelet property `queueNameOrArn` corresponds to a KEDA metadata parameter named `queueURL`
+<2> The `queueURL` parameter is required by KEDA
+
+In the example above, the `queueNameOrArn` Kamelet property is declared to correspond to a KEDA *metadata* parameter named `queueURL`, using the `urn:keda:metadata:` prefix.
+The `queueURL` parameter is documented in the https://keda.sh/docs/2.5/scalers/aws-sqs/[the KEDA AWS SQS Queue scaler] together with other options
+required by KEDA to configure an autoscaler (it can be a full queue URL or a simple queue name).
+By using the marker descriptor `urn:keda:required`, it is also marked as required by KEDA.
+
+The `queueURL` is a *metadata* parameter for the autoscaler. In order to configure *authentication* parameters, the syntax is slightly different:
+
+.aws-sqs-source.kamelet.yaml
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: Kamelet
+metadata:
+  name: aws-sqs-source
+  labels:
+    camel.apache.org/kamelet.type: "source"
+spec:
+  definition:
+    # ...
+    properties:
+      # ...
+      accessKey:
+        title: Access Key
+        description: The access key obtained from AWS
+        type: string
+        format: password
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:password
+        - urn:camel:group:credentials
+        - urn:keda:authentication:awsAccessKeyID <1>
+        - urn:keda:required
+# ...
+----
+<1> The Kamelet property `access` corresponds to a KEDA authentication parameter named `awsAccessKeyID`
+
+This time the property mapping uses the `urn:keda:authentication:` prefix, declaring it as a KEDA authentication parameter.
+The difference between the two approaches is that authentication parameters will be injected into a secret by the Camel K
+operator and linked to the KEDA ScaledObject using a TriggerAuthentication (refer to the https://keda.sh/[KEDA documentation] for more info).
+
+=== Advanced KEDA property mapping
+
+There are cases where KEDA requires some static values to be set in a ScaledObject or also values computed from multiple Kamelet properties.
+To deal with these cases it's possible to use annotations on the Kamelet prefixed with `camel.apache.org/keda.metadata.` (for metadata parameters)
+or `camel.apache.org/keda.authentication.` (for authentication parameters). Those annotations can contain plain fixed values or also *templates* (using the Go syntax).
+
+For example:
+
+.my-source.kamelet.yaml
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: Kamelet
+metadata:
+  name: my-source
+  labels:
+    camel.apache.org/kamelet.type: "source"
+  annotations:
+    camel.apache.org/keda.authentication.sasl: "plaintext" # <1>
+    camel.apache.org/keda.metadata.queueLength: "5" # <2>
+    camel.apache.org/keda.metadata.queueAddress: "https://myhost.com/queues/{{.queueName}}" # <3>
+spec:
+  definition:
+    # ...
+    properties:
+      queueName:
+        title: Queue Name
+        description: The Queue Name
+        type: string
+# ...
+----
+<1> An authentication parameter with a fixed value
+<2> A metadata parameter with a fixed value
+<3> A metadata parameter with a valued computed from a template
+
+When using the template syntax, all Kamelet properties are available as fields. The default values are used in case they are missing from the user configuration.
+
+For information on how to use Kamelets with KEDA, see the xref:kamelets/kamelets-user.adoc#kamelet-keda-user[KEDA section in the user guide].

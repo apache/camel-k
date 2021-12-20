@@ -615,3 +615,42 @@ Kamelets, however, can also contain additional sources in the `spec` -> `sources
 (not necessarily route templates) and will be added once to all the integrations where the Kamelet is used.
 They main role is to do advanced configuration of the integration context where the Kamelet is used, such as registering
 beans in the registry or adding customizers.
+
+[[kamelet-keda-user]]
+== KEDA enabled Kamelets
+
+Some Kamelets are enhanced with KEDA metadata to allow users to automatically configure autoscalers on them.
+Kamelets with KEDA features can be distinguished by the presence of the annotation `camel.apache.org/keda.type`,
+which is set to the name of a specific KEDA autoscaler.
+
+A KEDA enabled Kamelet can be used in the same way as any other Kamelet, in a binding or in an integration.
+KEDA autoscalers are not enabled by default: they need to be manually enabled by the user via the `keda` trait.
+
+In a KameletBinding, the KEDA trait can be enabled using annotations:
+
+.my-keda-binding.yaml
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  name: my-keda-binding
+  annotations:
+    trait.camel.apache.org/keda.enabled: "true"
+spec:
+  source:
+  # ...
+  sink:
+  # ...
+----
+
+In an integration, it can be enabled using `kamel run` args, for example:
+
+[source,shell]
+----
+kamel run my-keda-integration.yaml -t keda.enabled=true
+----
+
+NOTE: Make sure that the `my-keda-integration` uses at least one KEDA enabled Kamelet, otherwise enabling KEDA (without other options) will have no effect.
+
+For information on how to create KEDA enabled Kamelets, see the xref:kamelets/kamelets-dev.adoc#kamelet-keda-dev[KEDA section in the development guide].
