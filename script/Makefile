@@ -175,7 +175,6 @@ generate-json-schema:
 
 generate-keda:
 	cd addons/keda/duck && $(CONTROLLER_GEN) paths="./..." object
-	./script/gen_client_keda.sh
 
 generate-strimzi:
 	cd addons/strimzi/duck && $(CONTROLLER_GEN) paths="./..." object
