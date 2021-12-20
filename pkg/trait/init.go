@@ -33,7 +33,7 @@ type initTrait struct {
 	BaseTrait `property:",squash"`
 }
 
-func newInitTrait() Trait {
+func NewInitTrait() Trait {
 	return &initTrait{
 		BaseTrait: NewBaseTrait("init", 1),
 	}

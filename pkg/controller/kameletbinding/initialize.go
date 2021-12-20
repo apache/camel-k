@@ -50,7 +50,7 @@ func (action *initializeAction) CanHandle(kameletbinding *v1alpha1.KameletBindin
 }
 
 func (action *initializeAction) Handle(ctx context.Context, kameletbinding *v1alpha1.KameletBinding) (*v1alpha1.KameletBinding, error) {
-	it, err := createIntegrationFor(ctx, action.client, kameletbinding)
+	it, err := CreateIntegrationFor(ctx, action.client, kameletbinding)
 	if err != nil {
 		return nil, err
 	}
