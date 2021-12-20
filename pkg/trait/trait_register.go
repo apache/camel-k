@@ -32,7 +32,7 @@ func init() {
 	AddToTraits(newErrorHandlerTrait)
 	AddToTraits(newGarbageCollectorTrait)
 	AddToTraits(newHealthTrait)
-	AddToTraits(newInitTrait)
+	AddToTraits(NewInitTrait)
 	AddToTraits(newIngressTrait)
 	AddToTraits(newIstioTrait)
 	AddToTraits(newJolokiaTrait)

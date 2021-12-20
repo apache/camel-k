@@ -70,7 +70,7 @@ func (action *monitorAction) Handle(ctx context.Context, kameletbinding *v1alpha
 	}
 
 	// Check if the integration needs to be changed
-	expected, err := createIntegrationFor(ctx, action.client, kameletbinding)
+	expected, err := CreateIntegrationFor(ctx, action.client, kameletbinding)
 	if err != nil {
 		return nil, err
 	}
