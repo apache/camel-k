@@ -38,7 +38,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/source"
 	"github.com/apache/camel-k/pkg/util/uri"
 	"github.com/pkg/errors"
-	scase "github.com/stoewer/go-strcase"
+	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -76,8 +76,6 @@ type kedaTrait struct {
 	trait.BaseTrait `property:",squash"`
 	// Enables automatic configuration of the trait. Allows the trait to infer KEDA triggers from the Kamelets.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
-	// Convert metadata properties to camelCase (needed because Camel K trait properties use kebab-case from command line). Disabled by default.
-	CamelCaseConversion *bool `property:"camel-case-conversion" json:"camelCaseConversion,omitempty"`
 	// Set the spec->replicas field on the top level controller to an explicit value if missing, to allow KEDA to recognize it as a scalable resource.
 	HackControllerReplicas *bool `property:"hack-controller-replicas" json:"hackControllerReplicas,omitempty"`
 	// Interval (seconds) to check each trigger on.
@@ -170,11 +168,7 @@ func (t *kedaTrait) addScalingResources(e *trait.Environment) error {
 	for idx, trigger := range t.Triggers {
 		meta := make(map[string]string)
 		for k, v := range trigger.Metadata {
-			kk := k
-			if t.CamelCaseConversion != nil && *t.CamelCaseConversion {
-				kk = scase.LowerCamelCase(k)
-			}
-			meta[kk] = v
+			meta[k] = v
 		}
 		var authenticationRef *kedav1alpha1.ScaledObjectAuthRef
 		if len(trigger.authentication) > 0 && trigger.AuthenticationSecret != "" {
@@ -269,28 +263,25 @@ func (t *kedaTrait) addScalingResources(e *trait.Environment) error {
 
 func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 	ctrlRef := t.getTopControllerReference(e)
+	scale := autoscalingv1.Scale{
+		Spec: autoscalingv1.ScaleSpec{
+			Replicas: int32(1),
+		},
+	}
+	scalesClient, err := e.Client.ScalesClient()
+	if err != nil {
+		return err
+	}
 	if ctrlRef.Kind == camelv1alpha1.KameletBindingKind {
-		// Update the KameletBinding directly (do not add it to env resources, it's the integration parent)
-		key := ctrl.ObjectKey{
-			Namespace: e.Integration.Namespace,
-			Name:      ctrlRef.Name,
-		}
-		klb := camelv1alpha1.KameletBinding{}
-		if err := e.Client.Get(e.Ctx, key, &klb); err != nil {
+		scale.ObjectMeta.Name = ctrlRef.Name
+		_, err = scalesClient.Scales(e.Integration.Namespace).Update(e.Ctx, camelv1alpha1.SchemeGroupVersion.WithResource("kameletbindings").GroupResource(), &scale, metav1.UpdateOptions{})
+		if err != nil {
 			return err
 		}
-		if klb.Spec.Replicas == nil {
-			one := int32(1)
-			klb.Spec.Replicas = &one
-			if err := e.Client.Update(e.Ctx, &klb); err != nil {
-				return err
-			}
-		}
 	} else if e.Integration.Spec.Replicas == nil {
-		one := int32(1)
-		e.Integration.Spec.Replicas = &one
-		// Update the Integration directly as the spec section is not merged by default
-		if err := e.Client.Update(e.Ctx, e.Integration); err != nil {
+		scale.ObjectMeta.Name = e.Integration.Name
+		_, err = scalesClient.Scales(e.Integration.Namespace).Update(e.Ctx, camelv1.SchemeGroupVersion.WithResource("integrations").GroupResource(), &scale, metav1.UpdateOptions{})
+		if err != nil {
 			return err
 		}
 	}

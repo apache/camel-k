@@ -38,10 +38,6 @@ The following configuration options are available:
 | bool
 | Enables automatic configuration of the trait. Allows the trait to infer KEDA triggers from the Kamelets.
 
-| keda.camel-case-conversion
-| bool
-| Convert metadata properties to camelCase (needed because Camel K trait properties use kebab-case from command line). Disabled by default.
-
 | keda.hack-controller-replicas
 | bool
 | Set the spec->replicas field on the top level controller to an explicit value if missing, to allow KEDA to recognize it as a scalable resource.

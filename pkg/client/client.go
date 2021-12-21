@@ -26,6 +26,7 @@ import (
 	user "github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"k8s.io/client-go/scale"
 
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -64,6 +65,7 @@ type Client interface {
 	GetConfig() *rest.Config
 	GetCurrentNamespace(kubeConfig string) (string, error)
 	ServerOrClientSideApplier() ServerOrClientSideApplier
+	ScalesClient() (scale.ScalesGetter, error)
 }
 
 // Injectable identifies objects that can receive a Client.

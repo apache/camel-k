@@ -35,7 +35,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var (
@@ -348,14 +347,58 @@ func TestHackReplicas(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, res)
 	assert.NoError(t, keda.Apply(env))
-	it := camelv1.Integration{}
-	key := client.ObjectKey{
-		Namespace: "test",
-		Name:      "my-it",
-	}
-	assert.NoError(t, env.Client.Get(env.Ctx, key, &it))
-	assert.NotNil(t, it.Spec.Replicas)
-	assert.Equal(t, int32(1), *it.Spec.Replicas)
+	scalesClient, err := env.Client.ScalesClient()
+	assert.NoError(t, err)
+	sc, err := scalesClient.Scales("test").Get(env.Ctx, camelv1.SchemeGroupVersion.WithResource("integrations").GroupResource(), "my-it", metav1.GetOptions{})
+	assert.NoError(t, err)
+	assert.Equal(t, int32(1), sc.Spec.Replicas)
+}
+
+func TestHackKLBReplicas(t *testing.T) {
+	keda, _ := NewKedaTrait().(*kedaTrait)
+	keda.Enabled = &testingTrue
+	keda.Auto = &testingFalse
+	keda.Triggers = append(keda.Triggers, kedaTrigger{
+		Type: "custom",
+		Metadata: map[string]string{
+			"a": "b",
+		},
+	})
+	keda.HackControllerReplicas = &testingTrue
+	env := createBasicTestEnvironment(
+		&camelv1alpha1.KameletBinding{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "test",
+				Name:      "my-klb",
+			},
+		},
+		&camelv1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "test",
+				Name:      "my-it",
+				OwnerReferences: []metav1.OwnerReference{
+					{
+						APIVersion: camelv1alpha1.SchemeGroupVersion.String(),
+						Kind:       "KameletBinding",
+						Name:       "my-klb",
+					},
+				},
+			},
+			Status: camelv1.IntegrationStatus{
+				Phase: camelv1.IntegrationPhaseInitialization,
+			},
+		},
+	)
+
+	res, err := keda.Configure(env)
+	assert.NoError(t, err)
+	assert.True(t, res)
+	assert.NoError(t, keda.Apply(env))
+	scalesClient, err := env.Client.ScalesClient()
+	assert.NoError(t, err)
+	sc, err := scalesClient.Scales("test").Get(env.Ctx, camelv1alpha1.SchemeGroupVersion.WithResource("kameletbindings").GroupResource(), "my-klb", metav1.GetOptions{})
+	assert.NoError(t, err)
+	assert.Equal(t, int32(1), sc.Spec.Replicas)
 }
 
 func getScaledObject(e *trait.Environment) *v1alpha1.ScaledObject {

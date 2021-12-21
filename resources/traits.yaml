@@ -593,10 +593,6 @@ traits:
     type: bool
     description: Enables automatic configuration of the trait. Allows the trait to
       infer KEDA triggers from the Kamelets.
-  - name: camel-case-conversion
-    type: bool
-    description: Convert metadata properties to camelCase (needed because Camel K
-      trait properties use kebab-case from command line). Disabled by default.
   - name: hack-controller-replicas
     type: bool
     description: Set the spec->replicas field on the top level controller to an explicit
