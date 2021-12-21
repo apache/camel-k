@@ -57,7 +57,7 @@ func GetQueryParameter(uri string, param string) string {
 	return res
 }
 
-// GetPathSegment returns the path segment of the URI corresponding to the given position (0 based), if present
+// GetPathSegment returns the path segment of the URI corresponding to the given position (0 based), if present.
 func GetPathSegment(uri string, pos int) string {
 	match := pathExtractorRegexp.FindStringSubmatch(uri)
 	if len(match) > 1 {

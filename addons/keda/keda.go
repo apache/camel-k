@@ -27,7 +27,6 @@ import (
 
 	kedav1alpha1 "github.com/apache/camel-k/addons/keda/duck/v1alpha1"
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	camelv1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/kamelet/repository"
 	"github.com/apache/camel-k/pkg/metadata"
@@ -46,18 +45,18 @@ import (
 )
 
 const (
-	// kameletURNMetadataPrefix allows binding Kamelet properties to KEDA metadata
+	// kameletURNMetadataPrefix allows binding Kamelet properties to KEDA metadata.
 	kameletURNMetadataPrefix = "urn:keda:metadata:"
-	// kameletURNAuthenticationPrefix allows binding Kamelet properties to KEDA authentication options
+	// kameletURNAuthenticationPrefix allows binding Kamelet properties to KEDA authentication options.
 	kameletURNAuthenticationPrefix = "urn:keda:authentication:"
-	// kameletURNRequiredTag is used to mark properties required by KEDA
+	// kameletURNRequiredTag is used to mark properties required by KEDA.
 	kameletURNRequiredTag = "urn:keda:required"
 
-	// kameletAnnotationType indicates the scaler type associated to a Kamelet
+	// kameletAnnotationType indicates the scaler type associated to a Kamelet.
 	kameletAnnotationType = "camel.apache.org/keda.type"
-	// kameletAnnotationMetadataPrefix is used to define virtual metadata fields computed from Kamelet properties
+	// kameletAnnotationMetadataPrefix is used to define virtual metadata fields computed from Kamelet properties.
 	kameletAnnotationMetadataPrefix = "camel.apache.org/keda.metadata."
-	// kameletAnnotationAuthenticationPrefix is used to define virtual authentication fields computed from Kamelet properties
+	// kameletAnnotationAuthenticationPrefix is used to define virtual authentication fields computed from Kamelet properties.
 	kameletAnnotationAuthenticationPrefix = "camel.apache.org/keda.authentication."
 )
 
@@ -66,9 +65,9 @@ const (
 // via markers in the Kamelets.
 //
 // For information on how to use KEDA enabled Kamelets with the KEDA trait, refer to
-// xref:kamelets/kamelets-user.adoc#kamelet-keda-user[the KEDA section in the Kamelets user guide].
+// xref:ROOT:kamelets/kamelets-user.adoc#kamelet-keda-user[the KEDA section in the Kamelets user guide].
 // If you want to create Kamelets that contain KEDA metadata, refer to
-// xref:kamelets/kamelets-dev.adoc#kamelet-keda-dev[the KEDA section in the Kamelets development guide].
+// xref:ROOT:kamelets/kamelets-dev.adoc#kamelet-keda-dev[the KEDA section in the Kamelets development guide].
 //
 // The KEDA trait is disabled by default.
 //
@@ -287,14 +286,12 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 				return err
 			}
 		}
-	} else {
-		if e.Integration.Spec.Replicas == nil {
-			one := int32(1)
-			e.Integration.Spec.Replicas = &one
-			// Update the Integration directly as the spec section is not merged by default
-			if err := e.Client.Update(e.Ctx, e.Integration); err != nil {
-				return err
-			}
+	} else if e.Integration.Spec.Replicas == nil {
+		one := int32(1)
+		e.Integration.Spec.Replicas = &one
+		// Update the Integration directly as the spec section is not merged by default
+		if err := e.Client.Update(e.Ctx, e.Integration); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -302,7 +299,7 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 
 func (t *kedaTrait) getTopControllerReference(e *trait.Environment) *v1.ObjectReference {
 	for _, o := range e.Integration.OwnerReferences {
-		if o.Kind == v1alpha1.KameletBindingKind && strings.HasPrefix(o.APIVersion, v1alpha1.SchemeGroupVersion.Group) {
+		if o.Kind == camelv1alpha1.KameletBindingKind && strings.HasPrefix(o.APIVersion, camelv1alpha1.SchemeGroupVersion.Group) {
 			return &v1.ObjectReference{
 				APIVersion: o.APIVersion,
 				Kind:       o.Kind,
@@ -349,7 +346,7 @@ func (t *kedaTrait) populateTriggersFromKamelets(e *trait.Environment) error {
 	}
 
 	sortedKamelets := make([]string, 0, len(kameletURIs))
-	for kamelet, _ := range kameletURIs {
+	for kamelet := range kameletURIs {
 		sortedKamelets = append(sortedKamelets, kamelet)
 	}
 	sort.Strings(sortedKamelets)
@@ -495,7 +492,7 @@ func (t *kedaTrait) evaluateTemplateParameters(e *trait.Environment, kamelet *ca
 	return paramValues, authenticationParam, nil
 }
 
-func (t *kedaTrait) getKameletPropertyValue(e *trait.Environment, kamelet *v1alpha1.Kamelet, kameletURI, prop string) (string, error) {
+func (t *kedaTrait) getKameletPropertyValue(e *trait.Environment, kamelet *camelv1alpha1.Kamelet, kameletURI, prop string) (string, error) {
 	// From top priority to lowest
 	if v := uri.GetQueryParameter(kameletURI, prop); v != "" {
 		return v, nil

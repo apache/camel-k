@@ -28,23 +28,17 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"k8s.io/apimachinery/pkg/runtime"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 const (
 	kameletDirEnv     = "KAMELET_CATALOG_DIR"
 	defaultKameletDir = "/kamelets/"
-)
-
-var (
-	log = logf.Log
 )
 
 // KameletCatalog installs the bundled Kamelets into the specified namespace.

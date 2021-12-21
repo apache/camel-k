@@ -417,7 +417,7 @@ func (o *runCmdOptions) waitForIntegrationReady(cmd *cobra.Command, c client.Cli
 	return watch.HandleIntegrationStateChanges(o.Context, c, integration, handler)
 }
 
-func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sources []string, catalog *trait.Catalog) error {
+func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sources []string, catalog trait.Finder) error {
 	// Let's watch all relevant files when in dev mode
 	var files []string
 	files = append(files, sources...)
@@ -480,7 +480,7 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 }
 
 // nolint: gocyclo
-func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.Client, sources []string, catalog *trait.Catalog) (*v1.Integration, error) {
+func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.Client, sources []string, catalog trait.Finder) (*v1.Integration, error) {
 	namespace := o.Namespace
 	name := o.GetIntegrationName(sources)
 
@@ -738,7 +738,7 @@ func (o *runCmdOptions) GetIntegrationName(sources []string) string {
 	return name
 }
 
-func (o *runCmdOptions) configureTraits(integration *v1.Integration, options []string, catalog *trait.Catalog) error {
+func (o *runCmdOptions) configureTraits(integration *v1.Integration, options []string, catalog trait.Finder) error {
 	// configure ServiceBinding trait
 	for _, sb := range o.Connects {
 		bindings := fmt.Sprintf("service-binding.services=%s", sb)
