@@ -48,7 +48,7 @@ The following configuration options are available:
 
 | keda.polling-interval
 | int32
-| Interval (seconds) to check each trigger on (minimum 10 seconds).
+| Interval (seconds) to check each trigger on.
 
 | keda.cooldown-period
 | int32

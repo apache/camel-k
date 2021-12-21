@@ -603,7 +603,7 @@ traits:
       value if missing, to allow KEDA to recognize it as a scalable resource.
   - name: polling-interval
     type: int32
-    description: Interval (seconds) to check each trigger on (minimum 10 seconds).
+    description: Interval (seconds) to check each trigger on.
   - name: cooldown-period
     type: int32
     description: The wait period between the last active trigger reported and scaling
