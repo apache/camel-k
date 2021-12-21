@@ -30,6 +30,7 @@ import (
 	"github.com/pkg/errors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -49,6 +50,7 @@ func (c *defaultClient) ServerOrClientSideApplier() ServerOrClientSideApplier {
 func (a *ServerOrClientSideApplier) Apply(ctx context.Context, object ctrl.Object) error {
 	once := false
 	var err error
+	// nolint: ifshort
 	needsRetry := false
 	a.tryServerSideApply.Do(func() {
 		once = true
@@ -80,7 +82,7 @@ func (a *ServerOrClientSideApplier) Apply(ctx context.Context, object ctrl.Objec
 	return nil
 }
 
-func (a *ServerOrClientSideApplier) serverSideApply(ctx context.Context, resource ctrl.Object) error {
+func (a *ServerOrClientSideApplier) serverSideApply(ctx context.Context, resource runtime.Object) error {
 	target, err := patch.PositiveApplyPatch(resource)
 	if err != nil {
 		return err

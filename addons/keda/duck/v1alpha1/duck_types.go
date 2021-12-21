@@ -27,7 +27,7 @@ import (
 // +genclient:noStatus
 // +kubebuilder:object:root=true
 
-// ScaledObject is a specification for a ScaledObject resource
+// ScaledObject is a specification for a ScaledObject resource.
 type ScaledObject struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -35,7 +35,7 @@ type ScaledObject struct {
 	Spec ScaledObjectSpec `json:"spec"`
 }
 
-// ScaledObjectSpec is the spec for a ScaledObject resource
+// ScaledObjectSpec is the spec for a ScaledObject resource.
 type ScaledObjectSpec struct {
 	ScaleTargetRef *v1.ObjectReference `json:"scaleTargetRef"`
 	// +optional
@@ -52,7 +52,7 @@ type ScaledObjectSpec struct {
 	Triggers []ScaleTriggers `json:"triggers"`
 }
 
-// ScaleTriggers reference the scaler that will be used
+// ScaleTriggers reference the scaler that will be used.
 type ScaleTriggers struct {
 	Type string `json:"type"`
 	// +optional
@@ -65,7 +65,7 @@ type ScaleTriggers struct {
 }
 
 // ScaledObjectAuthRef points to the TriggerAuthentication or ClusterTriggerAuthentication object that
-// is used to authenticate the scaler with the environment
+// is used to authenticate the scaler with the environment.
 type ScaledObjectAuthRef struct {
 	Name string `json:"name"`
 	// Kind of the resource being referred to. Defaults to TriggerAuthentication.
@@ -87,7 +87,7 @@ type ScaledObjectList struct {
 // +genclient:noStatus
 // +kubebuilder:object:root=true
 
-// TriggerAuthentication defines how a trigger can authenticate
+// TriggerAuthentication defines how a trigger can authenticate.
 type TriggerAuthentication struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -95,13 +95,13 @@ type TriggerAuthentication struct {
 	Spec TriggerAuthenticationSpec `json:"spec"`
 }
 
-// TriggerAuthenticationSpec defines the various ways to authenticate
+// TriggerAuthenticationSpec defines the various ways to authenticate.
 type TriggerAuthenticationSpec struct {
 	// +optional
 	SecretTargetRef []AuthSecretTargetRef `json:"secretTargetRef,omitempty"`
 }
 
-// AuthSecretTargetRef is used to authenticate using a reference to a secret
+// AuthSecretTargetRef is used to authenticate using a reference to a secret.
 type AuthSecretTargetRef struct {
 	Parameter string `json:"parameter"`
 	Name      string `json:"name"`
@@ -110,7 +110,7 @@ type AuthSecretTargetRef struct {
 
 // +kubebuilder:object:root=true
 
-// TriggerAuthenticationList contains a list of TriggerAuthentication
+// TriggerAuthenticationList contains a list of TriggerAuthentication.
 type TriggerAuthenticationList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`

@@ -133,17 +133,17 @@ func TestKameletAutoDetection(t *testing.T) {
 			Spec: camelv1alpha1.KameletSpec{
 				Definition: &camelv1alpha1.JSONSchemaProps{
 					Properties: map[string]camelv1alpha1.JSONSchemaProp{
-						"a": camelv1alpha1.JSONSchemaProp{
+						"a": {
 							XDescriptors: []string{
 								"urn:keda:metadata:a",
 							},
 						},
-						"b": camelv1alpha1.JSONSchemaProp{
+						"b": {
 							XDescriptors: []string{
 								"urn:keda:metadata:bb",
 							},
 						},
-						"c": camelv1alpha1.JSONSchemaProp{
+						"c": {
 							XDescriptors: []string{
 								"urn:keda:authentication:cc",
 							},
@@ -248,17 +248,17 @@ func TestKameletBindingAutoDetection(t *testing.T) {
 			Spec: camelv1alpha1.KameletSpec{
 				Definition: &camelv1alpha1.JSONSchemaProps{
 					Properties: map[string]camelv1alpha1.JSONSchemaProp{
-						"a": camelv1alpha1.JSONSchemaProp{
+						"a": {
 							XDescriptors: []string{
 								"urn:keda:metadata:a",
 							},
 						},
-						"b": camelv1alpha1.JSONSchemaProp{
+						"b": {
 							XDescriptors: []string{
 								"urn:keda:metadata:bb",
 							},
 						},
-						"c": camelv1alpha1.JSONSchemaProp{
+						"c": {
 							XDescriptors: []string{
 								"urn:keda:authentication:cc",
 							},

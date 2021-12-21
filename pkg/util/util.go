@@ -872,7 +872,7 @@ func ConfigTreePropertySplit(property string) []string {
 		if len(cur) > 0 {
 			tmp = append(tmp, cur)
 		}
-		for i := len(tmp) - 1; i >= 0; i = i - 1 {
+		for i := len(tmp) - 1; i >= 0; i-- {
 			res = append(res, tmp[i])
 		}
 	}
@@ -895,9 +895,8 @@ func NavigateConfigTree(current interface{}, nodes []string) (interface{}, error
 		if isSlice(1) {
 			slice := make([]interface{}, 0)
 			return &slice
-		} else {
-			return make(map[string]interface{})
 		}
+		return make(map[string]interface{})
 	}
 	switch c := current.(type) {
 	case map[string]interface{}:

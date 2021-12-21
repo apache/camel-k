@@ -6,9 +6,9 @@ The trait can be either manually configured using the `triggers` option or autom
 via markers in the Kamelets.
 
 For information on how to use KEDA enabled Kamelets with the KEDA trait, refer to
-xref:kamelets/kamelets-user.adoc#kamelet-keda-user[the KEDA section in the Kamelets user guide].
+xref:ROOT:kamelets/kamelets-user.adoc#kamelet-keda-user[the KEDA section in the Kamelets user guide].
 If you want to create Kamelets that contain KEDA metadata, refer to
-xref:kamelets/kamelets-dev.adoc#kamelet-keda-dev[the KEDA section in the Kamelets development guide].
+xref:ROOT:kamelets/kamelets-dev.adoc#kamelet-keda-dev[the KEDA section in the Kamelets development guide].
 
 The KEDA trait is disabled by default.
 
