@@ -80,7 +80,7 @@ type kedaTrait struct {
 	CamelCaseConversion *bool `property:"camel-case-conversion" json:"camelCaseConversion,omitempty"`
 	// Set the spec->replicas field on the top level controller to an explicit value if missing, to allow KEDA to recognize it as a scalable resource.
 	HackControllerReplicas *bool `property:"hack-controller-replicas" json:"hackControllerReplicas,omitempty"`
-	// Interval (seconds) to check each trigger on (minimum 10 seconds).
+	// Interval (seconds) to check each trigger on.
 	PollingInterval *int32 `property:"polling-interval" json:"pollingInterval,omitempty"`
 	// The wait period between the last active trigger reported and scaling the resource back to 0.
 	CooldownPeriod *int32 `property:"cooldown-period" json:"cooldownPeriod,omitempty"`
