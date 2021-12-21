@@ -33,10 +33,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/restmapper"
-	"k8s.io/client-go/scale"
-
 	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
@@ -67,12 +63,7 @@ func TestIntegrationScale(t *testing.T) {
 
 		t.Run("Scale integration with polymorphic client", func(t *testing.T) {
 			RegisterTestingT(t)
-			// Polymorphic scale client
-			groupResources, err := restmapper.GetAPIGroupResources(TestClient().Discovery())
-			Expect(err).To(BeNil())
-			mapper := restmapper.NewDiscoveryRESTMapper(groupResources)
-			resolver := scale.NewDiscoveryScaleKindResolver(TestClient().Discovery())
-			scaleClient, err := scale.NewForConfig(TestClient().GetConfig(), mapper, dynamic.LegacyAPIPathResolverFunc, resolver)
+			scaleClient, err := TestClient().ScalesClient()
 			Expect(err).To(BeNil())
 
 			// Patch the integration scale subresource

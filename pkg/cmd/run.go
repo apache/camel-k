@@ -54,7 +54,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/watch"
 )
 
-var traitConfigRegexp = regexp.MustCompile(`^([a-z0-9-]+)((?:\[[0-9]+\]|\.[a-z0-9-]+)+)=(.*)$`)
+var traitConfigRegexp = regexp.MustCompile(`^([a-z0-9-]+)((?:\.[a-z0-9-]+)(?:\[[0-9]+\]|\.[A-Za-z0-9-_]+)*)=(.*)$`)
 
 func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) {
 	options := runCmdOptions{
