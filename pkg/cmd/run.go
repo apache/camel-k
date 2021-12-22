@@ -50,6 +50,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/dsl"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
@@ -796,6 +797,9 @@ func uploadDependency(platform *v1.IntegrationPlatform, item string, integration
 	artifactPath := fmt.Sprintf("%s/%s/%s/%s-%s%s", groupIdHttpPath, artifactId, version, artifactId, version, ext)
 	// Image repository names must be lower case
 	artifactPath = strings.ToLower(artifactPath)
+	if platform.Spec.Cluster == v1.IntegrationPlatformClusterOpenShift {
+		artifactPath = fmt.Sprintf("%s/%s", integration.Namespace, strings.ReplaceAll(artifactPath, "/", "_"))
+	}
 	target := fmt.Sprintf("%s/%s:%s", registry, artifactPath, version)
 	options := spectrum.Options{
 		PullInsecure:  true,

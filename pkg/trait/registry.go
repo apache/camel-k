@@ -54,19 +54,26 @@ func (t *registryTrait) Apply(e *Environment) error {
 	ext := v1.MavenArtifact{
 		GroupID:    "com.github.johnpoth",
 		ArtifactID: "wagon-docker-registry",
-		Version:    "0.1.0",
+		Version:    "0.2.0-SNAPSHOT",
 	}
 	policy := v1.RepositoryPolicy{
 		Enabled: true,
 	}
-	repo := v1.Repository{
-		ID:        "image-registry",
-		URL:       "oci://" + e.Platform.Spec.Build.Registry.Address,
-		Snapshots: policy,
-		Releases:  policy,
+	// TODO: If we are running on openshift then then fetch the credentials
+	// needed to lookup the image registry
+	// append namespace to the repository URL
+	// current workaround is to setup Maven manually during installation
+	if e.Platform.Spec.Cluster != v1.IntegrationPlatformClusterOpenShift {
+		repo := v1.Repository{
+			ID:        "image-registry",
+			URL:       "oci://" + e.Platform.Spec.Build.Registry.Address,
+			Snapshots: policy,
+			Releases:  policy,
+		}
+		// configure Maven to lookup dependencies in the Image registry
+		build.Maven.Repositories = append(build.Maven.Repositories, repo)
 	}
-	// configure Maven to lookup dependencies in the Image registry
-	build.Maven.Repositories = append(build.Maven.Repositories, repo)
+
 	build.Maven.Extension = append(build.Maven.Extension, ext)
 	return nil
 }
