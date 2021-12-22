@@ -50,7 +50,6 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/dsl"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
@@ -778,8 +777,14 @@ func uploadDependency(platform *v1.IntegrationPlatform, item string, integration
 	newStdR, newStdW, _ := os.Pipe()
 	defer newStdW.Close()
 
+	path := item[7:]
+	i := strings.Index(path, ":")
+	targetPath := path
+	if i > 0 {
+		targetPath = path[i:]
+	}
 	// spectrum expects absolute paths but let's allow users to specify relative paths
-	abs, err := filepath.Abs(item[7:])
+	abs, err := filepath.Abs(path)
 	if err != nil {
 		return err
 	}
@@ -788,10 +793,10 @@ func uploadDependency(platform *v1.IntegrationPlatform, item string, integration
 	version := defaults.Version
 	groupId := "org.apache.camel.k.external"
 	groupIdHttpPath := strings.ReplaceAll(groupId, ".", "/")
-	artifactPath := fmt.Sprintf("/%s/%s/%s/%s-%s%s", groupIdHttpPath, artifactId, version, artifactId, version, ext)
+	artifactPath := fmt.Sprintf("%s/%s/%s/%s-%s%s", groupIdHttpPath, artifactId, version, artifactId, version, ext)
 	// Image repository names must be lower case
 	artifactPath = strings.ToLower(artifactPath)
-	target := registry + artifactPath + ":" + version
+	target := fmt.Sprintf("%s/%s:%s", registry, artifactPath, version)
 	options := spectrum.Options{
 		PullInsecure:  true,
 		PushInsecure:  insecure,
@@ -810,8 +815,14 @@ func uploadDependency(platform *v1.IntegrationPlatform, item string, integration
 		return err
 	}
 	fmt.Printf("Uploaded: %s to %s \n", item, target)
-	if !strings.HasSuffix(item, ".pom") {
-		dependency := fmt.Sprintf("mvn:%s:%s:%s:%s", groupId, artifactId, version, ext)
+	// JARs will be added to the pom.xml
+	if strings.HasSuffix(item, ".jar") {
+		dependency := fmt.Sprintf("mvn:%s:%s:%s:%s", groupId, artifactId, ext[1:], version)
+		fmt.Printf("Added %s to the Integration's dependency list \n", dependency)
+		integration.Spec.AddDependency(dependency)
+	// Everything else will be mounted on the container filesystem
+	} else if !strings.HasSuffix(item, ".pom") {
+		dependency := fmt.Sprintf("docker-mvn:%s:%s:%s:%s@%s", groupId, artifactId, ext[1:], version, targetPath)
 		fmt.Printf("Added %s to the Integration's dependency list \n", dependency)
 		integration.Spec.AddDependency(dependency)
 	}

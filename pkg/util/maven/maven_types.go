@@ -45,9 +45,10 @@ type Plugin struct {
 }
 
 type Execution struct {
-	ID    string   `xml:"id,omitempty"`
-	Phase string   `xml:"phase,omitempty"`
-	Goals []string `xml:"goals>goal,omitempty"`
+	ID            string     `xml:"id,omitempty"`
+	Phase         string     `xml:"phase,omitempty"`
+	Goals         []string   `xml:"goals>goal,omitempty"`
+	Configuration Properties `xml:"configuration,omitempty"`
 }
 
 type Properties map[string]string
