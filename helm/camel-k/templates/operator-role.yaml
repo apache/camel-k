@@ -53,8 +53,10 @@ rules:
   - camelcatalogs/status
   - integrationkits/status
   - integrationplatforms/status
+  - integrations/scale
   - integrations/status
   - kameletbindings/status
+  - kameletbindings/scale
   - kamelets/status
   verbs:
   - get
