@@ -19,7 +19,6 @@ package v1alpha1
 
 import (
 	"encoding/json"
-	"fmt"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
@@ -153,66 +152,6 @@ func (e ErrorHandlerDeadLetterChannel) Configuration() (map[string]interface{}, 
 	return properties, err
 }
 
-// ErrorHandlerRef represents a reference to an error handler builder available in the registry
-type ErrorHandlerRef struct {
-	baseErrorHandler
-	v1.RawMessage
-}
-
-// Type --
-func (e ErrorHandlerRef) Type() ErrorHandlerType {
-	return ErrorHandlerTypeRef
-}
-
-// Configuration --
-func (e ErrorHandlerRef) Configuration() (map[string]interface{}, error) {
-	var refName string
-	err := json.Unmarshal(e.RawMessage, &refName)
-	if err != nil {
-		return nil, err
-	}
-
-	properties := map[string]interface{}{
-		ErrorHandlerRefName: refName,
-	}
-
-	return properties, nil
-}
-
-// ErrorHandlerBean represents a bean error handler type
-type ErrorHandlerBean struct {
-	ErrorHandlerNone
-	BeanType       *string         `json:"type,omitempty"`
-	BeanProperties *BeanProperties `json:"properties,omitempty"`
-}
-
-// Type --
-func (e ErrorHandlerBean) Type() ErrorHandlerType {
-	return ErrorHandlerTypeBean
-}
-
-// Configuration --
-func (e ErrorHandlerBean) Configuration() (map[string]interface{}, error) {
-	properties, err := e.ErrorHandlerNone.Configuration()
-	if err != nil {
-		return nil, err
-	}
-	properties[ErrorHandlerAppPropertiesPrefix] = fmt.Sprintf("#class:%v", *e.BeanType)
-
-	if e.BeanProperties != nil {
-		var beanProperties map[string]interface{}
-		err := json.Unmarshal(e.BeanProperties.RawMessage, &beanProperties)
-		if err != nil {
-			return nil, err
-		}
-		for key, value := range beanProperties {
-			properties[ErrorHandlerAppPropertiesPrefix+"."+key] = value
-		}
-	}
-
-	return properties, err
-}
-
 // ErrorHandlerType --
 type ErrorHandlerType string
 
@@ -224,8 +163,4 @@ const (
 	ErrorHandlerTypeLog ErrorHandlerType = "log"
 	// ErrorHandlerTypeDeadLetterChannel --
 	ErrorHandlerTypeDeadLetterChannel ErrorHandlerType = "dead-letter-channel"
-	// ErrorHandlerTypeRef --
-	ErrorHandlerTypeRef ErrorHandlerType = "ref"
-	// ErrorHandlerTypeBean --
-	ErrorHandlerTypeBean ErrorHandlerType = "bean"
 )

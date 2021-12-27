@@ -101,34 +101,3 @@ func TestParseErrorHandlerDLCWithParametersDoesSucceed(t *testing.T) {
 	assert.Equal(t, "value1", parameters["camel.beans.defaultErrorHandler.param1"])
 	assert.Equal(t, "value2", parameters["camel.beans.defaultErrorHandler.param2"])
 }
-
-func TestParseErrorHandlerBeanWithParamsDoesSucceed(t *testing.T) {
-	beanErrorHandler, err := parseErrorHandler(
-		[]byte(`{
-			"bean": {
-				"type": "com.acme.MyType",
-				"properties": 
-					{"beanProp1": "value1", "beanProp2": "value2"}
-			}
-		}`),
-	)
-	assert.Nil(t, err)
-	assert.Equal(t, v1alpha1.ErrorHandlerTypeBean, beanErrorHandler.Type())
-	parameters, err := beanErrorHandler.Configuration()
-	assert.Nil(t, err)
-	assert.Equal(t, "#class:com.acme.MyType", parameters[v1alpha1.ErrorHandlerAppPropertiesPrefix])
-	assert.Equal(t, v1alpha1.ErrorHandlerRefDefaultName, parameters[v1alpha1.ErrorHandlerRefName])
-	assert.Equal(t, "value1", parameters["camel.beans.defaultErrorHandler.beanProp1"])
-	assert.Equal(t, "value2", parameters["camel.beans.defaultErrorHandler.beanProp2"])
-}
-
-func TestParseErrorHandlerRefDoesSucceed(t *testing.T) {
-	refErrorHandler, err := parseErrorHandler(
-		[]byte(`{"ref": "my-registry-ref"}`),
-	)
-	assert.Nil(t, err)
-	assert.Equal(t, v1alpha1.ErrorHandlerTypeRef, refErrorHandler.Type())
-	parameters, err := refErrorHandler.Configuration()
-	assert.Nil(t, err)
-	assert.Equal(t, "my-registry-ref", parameters[v1alpha1.ErrorHandlerRefName])
-}

@@ -23,7 +23,7 @@ spec:
 [[kameletbindings-error-handler-types]]
 == Error Handler Types
 
-We have different types of error handler: `ǹone`, `log`, `dead-letter-channel`, `bean`, `ref`. The `errorHandler` parameter is optional.
+We have different types of error handler: `ǹone`, `log` and `dead-letter-channel`. The `errorHandler` parameter is optional.
 
 [[kameletbindings-error-handler-none]]
 === No error handler
@@ -104,52 +104,3 @@ spec:
 <2> Properties belonging to the endpoint (in this example, to the `Kamelet` named error handler)
 <3> Parameters belonging to the `dead-letter-channel` error handler type
 
-[[kameletbindings-error-handler-bean]]
-=== Bean error handler
-
-With the `Bean` error handler you can extend the functionality of the Error Handler by providing a custom bean to be used as Error Handler.
-
-[source,yaml]
-----
-apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
-metadata:
-  name: my-kamelet-binding
-spec:
-  source:
-...
-  sink: 
-...
-  errorHandler: 
-    bean:
-      type: "org.apache.camel.builder.DeadLetterChannelBuilder" # <1>
-      properties: # <2>
-        deadLetterUri: log:error
-        ... 
-----
-<1> Fully qualified name of the ErrorHandlerBuilder
-<2> Properties expected by your type
-
-[[kameletbindings-error-handler-ref]]
-=== Ref error handler
-
-With the `Ref` error handler you can use any `Bean` that is expected to be found in the Camel registry at runtime.
-
-[source,yaml]
-----
-apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
-metadata:
-  name: my-kamelet-binding
-spec:
-  source:
-...
-  sink: 
-...
-  errorHandler: 
-    ref: my-custom-builder # <1>
-... 
-----
-<1> The name of the bean to be looked up at runtime
-
-NOTE: make sure to have the `ref` correctly bind at runtime.

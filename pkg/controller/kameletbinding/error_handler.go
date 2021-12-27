@@ -76,10 +76,6 @@ func parseErrorHandler(rawMessage v1.RawMessage) (v1alpha1.ErrorHandler, error) 
 			dst = new(v1alpha1.ErrorHandlerLog)
 		case v1alpha1.ErrorHandlerTypeDeadLetterChannel:
 			dst = new(v1alpha1.ErrorHandlerDeadLetterChannel)
-		case v1alpha1.ErrorHandlerTypeRef:
-			dst = new(v1alpha1.ErrorHandlerRef)
-		case v1alpha1.ErrorHandlerTypeBean:
-			dst = new(v1alpha1.ErrorHandlerBean)
 		default:
 			return nil, errors.Errorf("Unknown error handler type %s", errHandlType)
 		}

@@ -58,7 +58,7 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 	}
 
 	cmd.Flags().StringArrayP("connect", "c", nil, "A ServiceBinding or Provisioned Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
-	cmd.Flags().String("error-handler", "", `Add error handler (none|log|dlc:<endpoint>|bean:<type>|ref:<registry-ref>). DLC endpoints are expected in the format "[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
+	cmd.Flags().String("error-handler", "", `Add error handler (none|log|dlc:<endpoint>). DLC endpoints are expected in the format "[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
 	cmd.Flags().String("name", "", "Name for the binding")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().StringArrayP("property", "p", nil, `Add a binding property in the form of "source.<key>=<value>", "sink.<key>=<value>", "error-handler.<key>=<value>" or "step-<n>.<key>=<value>"`)
@@ -247,12 +247,6 @@ func (o *bindCmdOptions) parseErrorHandler() (*v1alpha1.ErrorHandlerSpec, error)
 		errHandlMap["dead-letter-channel"] = map[string]interface{}{
 			"endpoint": dlcSpec,
 		}
-	case "bean":
-		errHandlMap["bean"] = map[string]interface{}{
-			"type": errHandlValue,
-		}
-	case "ref":
-		errHandlMap["ref"] = errHandlValue
 	default:
 		return nil, fmt.Errorf("invalid error handler type %s", o.ErrorHandler)
 	}
