@@ -1,5 +1,5 @@
 # Kamelets Binding Error Handler example
-This example shows how to create a simple _source_ `Kamelet` which sends periodically events (and certain failures). The events are consumed by a log _sink_ in a `KameletBinding`. With the support of the `ErrorHandler` we will be able to redirect all errors to a `Dead Letter Channel` _error-handler_ `Kamelet` whose goal is to store the events in a `Kafka` topic and provide a nice log notifying us about the error happened.
+This example shows how to create a simple _source_ `Kamelet` which sends periodically events (and certain failures). The events are consumed by a log _sink_ in a `KameletBinding`. With the support of the `ErrorHandler` we will be able to redirect all errors to a `Sink` _error-handler_ `Kamelet` whose goal is to store the events in a `Kafka` topic and provide a nice log notifying us about the error happened.
 
 ## Incremental ID Source Kamelet
 First of all, you must install the _incremental-id-source_ Kamelet defined in `incremental-id-source.kamelet.yaml` file. This source will emit events every second with an autoincrement counter that will be forced to fail when the number 0 is caught. With this trick, we will simulate possible event faults.
@@ -81,11 +81,11 @@ log-sink                Ready
 incremental-id-source   Ready
 ```
 ## Error Handler Kamelet Binding
-We can now create a `KameletBinding` which is started by the _incremental-id-source_ `Kamelet` and log events to _log-sink_ `Kamelet`. As this will sporadically fail, we can configure an _errorHandler_ with the _error-handler_ `Kamelet` as **Dead Letter Channel**. We want to configure also some redelivery policies (1 retry, with a 2000 milliseconds delay). We can declare it as in `kamelet-binding-error-handler.yaml` file:
+We can now create a `KameletBinding` which is started by the _incremental-id-source_ `Kamelet` and log events to _log-sink_ `Kamelet`. As this will sporadically fail, we can configure an _errorHandler_ with the _error-handler_ `Kamelet` as **Sink**. We want to configure also some redelivery policies (1 retry, with a 2000 milliseconds delay). We can declare it as in `kamelet-binding-error-handler.yaml` file:
 ```
 ...
   errorHandler:
-    dead-letter-channel:
+    sink:
       endpoint:
         ref:
           kind: Kamelet

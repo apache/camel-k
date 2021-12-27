@@ -52,7 +52,7 @@ func TestErrorHandler(t *testing.T) {
 		}
 
 		errorHandler := map[string]interface{}{
-			"dead-letter-channel": map[string]interface{}{
+			"sink": map[string]interface{}{
 				"endpoint": map[string]interface{}{
 					"ref": map[string]string{
 						"kind":       "Kamelet",

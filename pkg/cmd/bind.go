@@ -58,7 +58,7 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 	}
 
 	cmd.Flags().StringArrayP("connect", "c", nil, "A ServiceBinding or Provisioned Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
-	cmd.Flags().String("error-handler", "", `Add error handler (none|log|dlc:<endpoint>). DLC endpoints are expected in the format "[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
+	cmd.Flags().String("error-handler", "", `Add error handler (none|log|sink:<endpoint>). Sink endpoints are expected in the format "[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
 	cmd.Flags().String("name", "", "Name for the binding")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().StringArrayP("property", "p", nil, `Add a binding property in the form of "source.<key>=<value>", "sink.<key>=<value>", "error-handler.<key>=<value>" or "step-<n>.<key>=<value>"`)
@@ -239,13 +239,13 @@ func (o *bindCmdOptions) parseErrorHandler() (*v1alpha1.ErrorHandlerSpec, error)
 		errHandlMap["none"] = nil
 	case "log":
 		errHandlMap["log"] = nil
-	case "dlc":
-		dlcSpec, err := o.decode(errHandlValue, errorHandlerKey)
+	case "sink":
+		sinkSpec, err := o.decode(errHandlValue, errorHandlerKey)
 		if err != nil {
 			return nil, err
 		}
-		errHandlMap["dead-letter-channel"] = map[string]interface{}{
-			"endpoint": dlcSpec,
+		errHandlMap["sink"] = map[string]interface{}{
+			"endpoint": sinkSpec,
 		}
 	default:
 		return nil, fmt.Errorf("invalid error handler type %s", o.ErrorHandler)
@@ -259,8 +259,7 @@ func (o *bindCmdOptions) parseErrorHandler() (*v1alpha1.ErrorHandlerSpec, error)
 
 func parseErrorHandlerByType(value string) (string, string, error) {
 	errHandlSplit := strings.SplitN(value, ":", 2)
-	if (errHandlSplit[0] == "dlc" || errHandlSplit[0] == "bean" || errHandlSplit[0] == "ref") &&
-		len(errHandlSplit) != 2 {
+	if (errHandlSplit[0] == "sink") && len(errHandlSplit) != 2 {
 		return "", "", fmt.Errorf("invalid error handler syntax. Type %s needs a configuration (ie %s:value)",
 			errHandlSplit[0], errHandlSplit[0])
 	}

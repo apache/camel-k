@@ -3090,6 +3090,16 @@ string
 <td>
 </td>
 </tr>
+<tr>
+<td>
+<code>info</code><br/>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1.IntegrationSpec">IntegrationSpec
@@ -4132,7 +4142,6 @@ RegistrySpec
 <a href="#camel.apache.org/v1alpha1.BeanProperties">BeanProperties</a>, 
 <a href="#camel.apache.org/v1alpha1.EndpointProperties">EndpointProperties</a>, 
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerParameters">ErrorHandlerParameters</a>, 
-<a href="#camel.apache.org/v1alpha1.ErrorHandlerRef">ErrorHandlerRef</a>, 
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerSpec">ErrorHandlerSpec</a>, 
 <a href="#camel.apache.org/v1.Flow">Flow</a>, 
 <a href="#camel.apache.org/v1.Template">Template</a>, 
@@ -5278,10 +5287,6 @@ KameletBindingStatus
 </div>
 <h3 id="camel.apache.org/v1alpha1.BeanProperties">BeanProperties
 </h3>
-<p>
-(<em>Appears on:</em>
-<a href="#camel.apache.org/v1alpha1.ErrorHandlerBean">ErrorHandlerBean</a>)
-</p>
 <div>
 <p>BeanProperties represent an unstructured object properties to be set on a bean</p>
 </div>
@@ -5311,7 +5316,7 @@ RawMessage
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1alpha1.ErrorHandlerDeadLetterChannel">ErrorHandlerDeadLetterChannel</a>, 
+<a href="#camel.apache.org/v1alpha1.ErrorHandlerSink">ErrorHandlerSink</a>, 
 <a href="#camel.apache.org/v1alpha1.KameletBindingSpec">KameletBindingSpec</a>)
 </p>
 <div>
@@ -5420,99 +5425,11 @@ RawMessage
 <div>
 <p>ErrorHandler is a generic interface that represent any type of error handler specification</p>
 </div>
-<h3 id="camel.apache.org/v1alpha1.ErrorHandlerBean">ErrorHandlerBean
-</h3>
-<div>
-<p>ErrorHandlerBean represents a bean error handler type</p>
-</div>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>ErrorHandlerNone</code><br/>
-<em>
-<a href="#camel.apache.org/v1alpha1.ErrorHandlerNone">
-ErrorHandlerNone
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>type</code><br/>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>properties</code><br/>
-<em>
-<a href="#camel.apache.org/v1alpha1.BeanProperties">
-BeanProperties
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="camel.apache.org/v1alpha1.ErrorHandlerDeadLetterChannel">ErrorHandlerDeadLetterChannel
-</h3>
-<div>
-<p>ErrorHandlerDeadLetterChannel represents a dead letter channel error handler type</p>
-</div>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>ErrorHandlerLog</code><br/>
-<em>
-<a href="#camel.apache.org/v1alpha1.ErrorHandlerLog">
-ErrorHandlerLog
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
-<code>endpoint</code><br/>
-<em>
-<a href="#camel.apache.org/v1alpha1.Endpoint">
-Endpoint
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-</tbody>
-</table>
 <h3 id="camel.apache.org/v1alpha1.ErrorHandlerLog">ErrorHandlerLog
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1alpha1.ErrorHandlerDeadLetterChannel">ErrorHandlerDeadLetterChannel</a>)
+<a href="#camel.apache.org/v1alpha1.ErrorHandlerSink">ErrorHandlerSink</a>)
 </p>
 <div>
 <p>ErrorHandlerLog represent a default (log) error handler type</p>
@@ -5555,7 +5472,6 @@ ErrorHandlerParameters
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1alpha1.ErrorHandlerBean">ErrorHandlerBean</a>, 
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerLog">ErrorHandlerLog</a>)
 </p>
 <div>
@@ -5602,10 +5518,10 @@ RawMessage
 </tr>
 </tbody>
 </table>
-<h3 id="camel.apache.org/v1alpha1.ErrorHandlerRef">ErrorHandlerRef
+<h3 id="camel.apache.org/v1alpha1.ErrorHandlerSink">ErrorHandlerSink
 </h3>
 <div>
-<p>ErrorHandlerRef represents a reference to an error handler builder available in the registry</p>
+<p>ErrorHandlerSink represents a sink error handler type which behave like a dead letter channel</p>
 </div>
 <table>
 <thead>
@@ -5617,10 +5533,22 @@ RawMessage
 <tbody>
 <tr>
 <td>
-<code>RawMessage</code><br/>
+<code>ErrorHandlerLog</code><br/>
 <em>
-<a href="#camel.apache.org/v1.RawMessage">
-RawMessage
+<a href="#camel.apache.org/v1alpha1.ErrorHandlerLog">
+ErrorHandlerLog
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>endpoint</code><br/>
+<em>
+<a href="#camel.apache.org/v1alpha1.Endpoint">
+Endpoint
 </a>
 </em>
 </td>

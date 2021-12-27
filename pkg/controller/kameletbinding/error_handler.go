@@ -35,7 +35,7 @@ func maybeErrorHandler(errHandlConf *v1alpha1.ErrorHandlerSpec, bindingContext b
 			return nil, errors.Wrap(err, "could not parse error handler")
 		}
 		// We need to get the translated URI from any referenced resource (ie, kamelets)
-		if errorHandlerSpec.Type() == v1alpha1.ErrorHandlerTypeDeadLetterChannel {
+		if errorHandlerSpec.Type() == v1alpha1.ErrorHandlerTypeSink {
 			errorHandlerBinding, err = bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1alpha1.EndpointTypeErrorHandler}, *errorHandlerSpec.Endpoint())
 			if err != nil {
 				return nil, errors.Wrap(err, "could not determine error handler URI")
@@ -74,8 +74,11 @@ func parseErrorHandler(rawMessage v1.RawMessage) (v1alpha1.ErrorHandler, error) 
 			dst = new(v1alpha1.ErrorHandlerNone)
 		case v1alpha1.ErrorHandlerTypeLog:
 			dst = new(v1alpha1.ErrorHandlerLog)
+		// Deprecated: left for compatibility for some version
 		case v1alpha1.ErrorHandlerTypeDeadLetterChannel:
-			dst = new(v1alpha1.ErrorHandlerDeadLetterChannel)
+			dst = new(v1alpha1.ErrorHandlerSink)
+		case v1alpha1.ErrorHandlerTypeSink:
+			dst = new(v1alpha1.ErrorHandlerSink)
 		default:
 			return nil, errors.Errorf("Unknown error handler type %s", errHandlType)
 		}
@@ -103,7 +106,7 @@ func setErrorHandlerConfiguration(errorHandlerBinding *bindings.Binding, errorHa
 	for key, value := range properties {
 		errorHandlerBinding.ApplicationProperties[key] = fmt.Sprintf("%v", value)
 	}
-	if errorHandler.Type() == v1alpha1.ErrorHandlerTypeDeadLetterChannel && errorHandlerBinding.URI != "" {
+	if errorHandler.Type() == v1alpha1.ErrorHandlerTypeSink && errorHandlerBinding.URI != "" {
 		errorHandlerBinding.ApplicationProperties[fmt.Sprintf("%s.deadLetterUri", v1alpha1.ErrorHandlerAppPropertiesPrefix)] = fmt.Sprintf("%v", errorHandlerBinding.URI)
 	}
 	return nil
