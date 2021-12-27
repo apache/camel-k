@@ -20,6 +20,7 @@ package trait
 import (
 	"fmt"
 	"path"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
@@ -82,9 +83,9 @@ type containerTrait struct {
 	Image string `property:"image" json:"image,omitempty"`
 	// The pull policy: Always|Never|IfNotPresent
 	ImagePullPolicy corev1.PullPolicy `property:"image-pull-policy" json:"imagePullPolicy,omitempty"`
-	// A list of configuration pointing to configmap/secret. Syntax: [configmap|secret|file]:name[key], where name represents the local file path or the configmap/secret name and key optionally represents the configmap/secret key to be filtered
+	// A list of configuration pointing to configmap/secret. Syntax: [configmap|secret]:name[key], where name represents the resource name and key optionally represents the resource key to be filtered
 	Configs []string `property:"configs" json:"configs,omitempty"`
-	// A list of resources pointing to configmap/secret. Syntax: [configmap|secret|file]:name[/key][@path], where name represents the local file path or the configmap/secret name, key optionally represents the configmap/secret key to be filtered and path represents the destination path
+	// A list of resources pointing to configmap/secret. Syntax: [configmap|secret]:name[/key][@path], where name represents the resource name, key optionally represents the resource key to be filtered and path represents the destination path
 	Resources []string `property:"resources" json:"resources,omitempty"`
 	// A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]
 	Volumes []string `property:"volumes" json:"volumes,omitempty"`
@@ -165,6 +166,23 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 
 	if !isValidPullPolicy(t.ImagePullPolicy) {
 		return false, fmt.Errorf("unsupported pull policy %s", t.ImagePullPolicy)
+	}
+
+	// Validate resources and pvcs
+	for _, c := range t.Configs {
+		if !strings.HasPrefix(c, "configmap:") && !strings.HasPrefix(c, "secret:") {
+			return false, fmt.Errorf("unsupported config %s, must be a configmap or secret resource", c)
+		}
+	}
+	for _, r := range t.Resources {
+		if !strings.HasPrefix(r, "configmap:") && !strings.HasPrefix(r, "secret:") {
+			return false, fmt.Errorf("unsupported resource %s, must be a configmap or secret resource", r)
+		}
+	}
+	for _, r := range t.Volumes {
+		if !strings.HasPrefix(r, "pvc:") {
+			return false, fmt.Errorf("unsupported volume %s, must be a pvc", r)
+		}
 	}
 
 	return true, nil
