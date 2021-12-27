@@ -125,24 +125,24 @@ func (e ErrorHandlerLog) Configuration() (map[string]interface{}, error) {
 	return properties, nil
 }
 
-// ErrorHandlerDeadLetterChannel represents a dead letter channel error handler type
-type ErrorHandlerDeadLetterChannel struct {
+// ErrorHandlerSink represents a sink error handler type which behave like a dead letter channel
+type ErrorHandlerSink struct {
 	ErrorHandlerLog
 	DLCEndpoint *Endpoint `json:"endpoint,omitempty"`
 }
 
 // Type --
-func (e ErrorHandlerDeadLetterChannel) Type() ErrorHandlerType {
-	return ErrorHandlerTypeDeadLetterChannel
+func (e ErrorHandlerSink) Type() ErrorHandlerType {
+	return ErrorHandlerTypeSink
 }
 
 // Endpoint --
-func (e ErrorHandlerDeadLetterChannel) Endpoint() *Endpoint {
+func (e ErrorHandlerSink) Endpoint() *Endpoint {
 	return e.DLCEndpoint
 }
 
 // Configuration --
-func (e ErrorHandlerDeadLetterChannel) Configuration() (map[string]interface{}, error) {
+func (e ErrorHandlerSink) Configuration() (map[string]interface{}, error) {
 	properties, err := e.ErrorHandlerLog.Configuration()
 	if err != nil {
 		return nil, err
@@ -161,6 +161,8 @@ const (
 	ErrorHandlerTypeNone ErrorHandlerType = "none"
 	// ErrorHandlerTypeLog --
 	ErrorHandlerTypeLog ErrorHandlerType = "log"
-	// ErrorHandlerTypeDeadLetterChannel --
+	// ErrorHandlerTypeSink --
+	ErrorHandlerTypeSink ErrorHandlerType = "sink"
+	// ErrorHandlerTypeDeadLetterChannel Deprecated in favour of ErrorHandlerTypeSink
 	ErrorHandlerTypeDeadLetterChannel ErrorHandlerType = "dead-letter-channel"
 )

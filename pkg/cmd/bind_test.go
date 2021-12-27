@@ -89,7 +89,7 @@ func TestBindOutputUnknownFormat(t *testing.T) {
 func TestBindErrorHandlerDLCKamelet(t *testing.T) {
 	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
 	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
-		"--error-handler", "dlc:my-kamelet", "-p", "error-handler.my-prop=value")
+		"--error-handler", "sink:my-kamelet", "-p", "error-handler.my-prop=value")
 	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
 
 	assert.Nil(t, err)
@@ -100,7 +100,7 @@ metadata:
   name: my-to-my
 spec:
   errorHandler:
-    dead-letter-channel:
+    sink:
       endpoint:
         properties:
           my-prop: value
