@@ -139,10 +139,10 @@ status: {}
 `, output)
 }
 
-func TestBindErrorHandlerRef(t *testing.T) {
+func TestBindErrorHandlerLog(t *testing.T) {
 	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
 	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
-		"--error-handler", "ref:my-registry-reference")
+		"--error-handler", "log")
 	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
 
 	assert.Nil(t, err)
@@ -153,7 +153,7 @@ metadata:
   name: my-to-my
 spec:
   errorHandler:
-    ref: my-registry-reference
+    log: null
   sink:
     uri: my:dst
   source:
