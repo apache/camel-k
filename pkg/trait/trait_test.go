@@ -495,7 +495,7 @@ func TestOnlySomeTraitsInfluenceBuild(t *testing.T) {
 func TestOnlySomeTraitsArePlatform(t *testing.T) {
 	c := NewTraitTestCatalog()
 	platformTraits := []string{
-		"builder", "camel", "jvm", "runtime", "container", "dependencies", "deployer",
+		"builder", "camel", "jvm", "runtime", "container", "mount", "dependencies", "deployer",
 		"deployment", "environment", "error-handler", "kamelets", "openapi", "owner", "platform", "quarkus",
 	}
 

@@ -67,6 +67,7 @@
 ** xref:traits:knative.adoc[Knative]
 ** xref:traits:logging.adoc[Logging]
 ** xref:traits:master.adoc[Master]
+** xref:traits:mount.adoc[Mount]
 ** xref:traits:openapi.adoc[Openapi]
 ** xref:traits:owner.adoc[Owner]
 ** xref:traits:pdb.adoc[Pdb]

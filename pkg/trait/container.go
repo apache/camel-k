@@ -20,7 +20,6 @@ package trait
 import (
 	"fmt"
 	"path"
-	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
@@ -36,7 +35,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	utilResource "github.com/apache/camel-k/pkg/util/resource"
 )
 
 const (
@@ -83,12 +81,6 @@ type containerTrait struct {
 	Image string `property:"image" json:"image,omitempty"`
 	// The pull policy: Always|Never|IfNotPresent
 	ImagePullPolicy corev1.PullPolicy `property:"image-pull-policy" json:"imagePullPolicy,omitempty"`
-	// A list of configuration pointing to configmap/secret. Syntax: [configmap|secret]:name[key], where name represents the resource name and key optionally represents the resource key to be filtered
-	Configs []string `property:"configs" json:"configs,omitempty"`
-	// A list of resources pointing to configmap/secret. Syntax: [configmap|secret]:name[/key][@path], where name represents the resource name, key optionally represents the resource key to be filtered and path represents the destination path
-	Resources []string `property:"resources" json:"resources,omitempty"`
-	// A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]
-	Volumes []string `property:"volumes" json:"volumes,omitempty"`
 
 	// DeprecatedProbesEnabled enable/disable probes on the container (default `false`)
 	// Deprecated: replaced by the health trait.
@@ -166,23 +158,6 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 
 	if !isValidPullPolicy(t.ImagePullPolicy) {
 		return false, fmt.Errorf("unsupported pull policy %s", t.ImagePullPolicy)
-	}
-
-	// Validate resources and pvcs
-	for _, c := range t.Configs {
-		if !strings.HasPrefix(c, "configmap:") && !strings.HasPrefix(c, "secret:") {
-			return false, fmt.Errorf("unsupported config %s, must be a configmap or secret resource", c)
-		}
-	}
-	for _, r := range t.Resources {
-		if !strings.HasPrefix(r, "configmap:") && !strings.HasPrefix(r, "secret:") {
-			return false, fmt.Errorf("unsupported resource %s, must be a configmap or secret resource", r)
-		}
-	}
-	for _, r := range t.Volumes {
-		if !strings.HasPrefix(r, "pvc:") {
-			return false, fmt.Errorf("unsupported volume %s, must be a pvc", r)
-		}
 	}
 
 	return true, nil
@@ -287,7 +262,6 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	}
 	t.configureCapabilities(e)
 
-	var volumes *[]corev1.Volume
 	var containers *[]corev1.Container
 	visited := false
 
@@ -297,7 +271,6 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 			envvar.SetVar(&container.Env, envVar)
 		}
 
-		volumes = &deployment.Spec.Template.Spec.Volumes
 		containers = &deployment.Spec.Template.Spec.Containers
 		visited = true
 		return nil
@@ -322,7 +295,6 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 			}
 		}
 
-		volumes = &service.Spec.ConfigurationSpec.Template.Spec.Volumes
 		containers = &service.Spec.ConfigurationSpec.Template.Spec.Containers
 		visited = true
 		return nil
@@ -336,7 +308,6 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 			envvar.SetVar(&container.Env, envVar)
 		}
 
-		volumes = &cron.Spec.JobTemplate.Spec.Template.Spec.Volumes
 		containers = &cron.Spec.JobTemplate.Spec.Template.Spec.Containers
 		visited = true
 		return nil
@@ -345,58 +316,10 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	}
 
 	if visited {
-		// Volumes declared in the Integration resources
-		e.configureVolumesAndMounts(volumes, &container.VolumeMounts)
-		// Volumes declared in the trait config/resource options
-		err := t.configureVolumesAndMounts(volumes, &container.VolumeMounts)
-		if err != nil {
-			return err
-		}
 		*containers = append(*containers, container)
 	}
 
 	return nil
-}
-
-func (t *containerTrait) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) error {
-	for _, c := range t.Configs {
-		if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
-			t.mountResource(vols, mnts, conf)
-		} else {
-			return parseErr
-		}
-	}
-	for _, r := range t.Resources {
-		if res, parseErr := utilResource.ParseResource(r); parseErr == nil {
-			t.mountResource(vols, mnts, res)
-		} else {
-			return parseErr
-		}
-	}
-	for _, v := range t.Volumes {
-		if vol, parseErr := utilResource.ParseVolume(v); parseErr == nil {
-			t.mountResource(vols, mnts, vol)
-		} else {
-			return parseErr
-		}
-	}
-
-	return nil
-}
-
-func (t *containerTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount, conf *utilResource.Config) {
-	refName := kubernetes.SanitizeLabel(conf.Name())
-	vol := getVolume(refName, string(conf.StorageType()), conf.Name(), conf.Key(), conf.Key())
-	mntPath := getMountPoint(conf.Name(), conf.DestinationPath(), string(conf.StorageType()), string(conf.ContentType()))
-	readOnly := true
-	if conf.StorageType() == utilResource.StorageTypePVC {
-		readOnly = false
-	}
-	// No need to specify a subpath, as we mount the entire configmap/secret
-	mnt := getMount(refName, mntPath, "", readOnly)
-
-	*vols = append(*vols, *vol)
-	*mnts = append(*mnts, *mnt)
 }
 
 func (t *containerTrait) configureService(e *Environment, container *corev1.Container) {

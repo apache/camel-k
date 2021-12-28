@@ -576,12 +576,12 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	}
 
 	generatedConfigmaps := make([]*corev1.ConfigMap, 0)
-	resCms, err := o.parseAndConvertToTrait(c, integration, o.Resources, resource.ParseResource, func(c *resource.Config) string { return c.String() }, "container.resources")
+	resCms, err := o.parseAndConvertToTrait(c, integration, o.Resources, resource.ParseResource, func(c *resource.Config) string { return c.String() }, "mount.resources")
 	if err != nil {
 		return nil, err
 	}
 	generatedConfigmaps = append(generatedConfigmaps, resCms...)
-	confCms, err := o.parseAndConvertToTrait(c, integration, o.Configs, resource.ParseConfig, func(c *resource.Config) string { return c.String() }, "container.configs")
+	confCms, err := o.parseAndConvertToTrait(c, integration, o.Configs, resource.ParseConfig, func(c *resource.Config) string { return c.String() }, "mount.configs")
 	if err != nil {
 		return nil, err
 	}
