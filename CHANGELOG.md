@@ -10,6 +10,7 @@
 - Outdated `ca-cert` path for Jolokia trait [\#2827](https://github.com/apache/camel-k/issues/2827)
 - Kafka component propagating headers is supported? [\#2825](https://github.com/apache/camel-k/issues/2825)
 - Integration with To-D can't find Kamelet [\#2819](https://github.com/apache/camel-k/issues/2819)
+- KameletBinding - Make error handler more simpler [\#2815](https://github.com/apache/camel-k/issues/2815)
 - CXF Support [\#2799](https://github.com/apache/camel-k/issues/2799)
 - Update documentation about monitoring metrics using Prometheus Operator 0.38.0 [\#2794](https://github.com/apache/camel-k/issues/2794)
 - Makefile: for the generate-doc target don't use show-progress for wget [\#2791](https://github.com/apache/camel-k/issues/2791)
@@ -55,6 +56,7 @@
 
 **Merged pull requests:**
 
+- chore\(kamelet\): remove bean and ref error handler types [\#2843](https://github.com/apache/camel-k/pull/2843) ([squakez](https://github.com/squakez))
 - feat: Set GOMAXPROCS based on CPU quota [\#2837](https://github.com/apache/camel-k/pull/2837) ([astefanutti](https://github.com/astefanutti))
 - fix\(e2e\): Account for requeued and errored integration reconciliations [\#2836](https://github.com/apache/camel-k/pull/2836) ([astefanutti](https://github.com/astefanutti))
 - fix\(e2e\): Avoid nested Gomega fields matcher [\#2833](https://github.com/apache/camel-k/pull/2833) ([astefanutti](https://github.com/astefanutti))
