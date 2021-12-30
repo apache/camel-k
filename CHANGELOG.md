@@ -20,6 +20,7 @@
 - Jitpack still configured with `master` branch [\#2764](https://github.com/apache/camel-k/issues/2764)
 - How can I find the log file location in the integration pod?  [\#2762](https://github.com/apache/camel-k/issues/2762)
 - Default value of trait container.port-name is missing from catalog [\#2761](https://github.com/apache/camel-k/issues/2761)
+- How to remove Kamelets installation when installing IntegrationPlatform CRD? [\#2756](https://github.com/apache/camel-k/issues/2756)
 - Add 1.7.x documentation tag [\#2753](https://github.com/apache/camel-k/issues/2753)
 - Could not pull base image - Build kit failed \(No matching credentials were found, falling back on anonymous\) [\#2748](https://github.com/apache/camel-k/issues/2748)
 - Cannot deploy XML integration with undertow [\#2746](https://github.com/apache/camel-k/issues/2746)
@@ -50,8 +51,15 @@
 - Kamelet - Possible to pre configure component options [\#2081](https://github.com/apache/camel-k/issues/2081)
 - Monitor integration related events [\#2025](https://github.com/apache/camel-k/issues/2025)
 - Switch to UBI minimal  [\#2007](https://github.com/apache/camel-k/issues/2007)
+- AMQP connection factory injection example improvement [\#1961](https://github.com/apache/camel-k/issues/1961)
+- Option to declare capabilities an integration requires [\#1948](https://github.com/apache/camel-k/issues/1948)
 - Expose operator information [\#1947](https://github.com/apache/camel-k/issues/1947)
 - not able to use json: MethodNotFoundException [\#1915](https://github.com/apache/camel-k/issues/1915)
+- hotrod-client.properties not picked up [\#1898](https://github.com/apache/camel-k/issues/1898)
+- Using -SNAPSHOT prevents rebuilding past commits [\#1878](https://github.com/apache/camel-k/issues/1878)
+- './kamel run xxx' and 'make test-integration' pod failures on Ubuntu 16.04 \(with minikube\) [\#1869](https://github.com/apache/camel-k/issues/1869)
+- GitHub Packages registry cannot be used as expected [\#1860](https://github.com/apache/camel-k/issues/1860)
+- Camel sslContextParameter not working [\#1815](https://github.com/apache/camel-k/issues/1815)
 - Kamel 1.0 fails on install on mac [\#1543](https://github.com/apache/camel-k/issues/1543)
 
 **Merged pull requests:**
