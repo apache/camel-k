@@ -78,6 +78,11 @@
 - Kamel run issue [\#1551](https://github.com/apache/camel-k/issues/1551)
 - Kamel 1.0 fails on install on mac [\#1543](https://github.com/apache/camel-k/issues/1543)
 - kamel run that can auto discover/guess what to include and run [\#1409](https://github.com/apache/camel-k/issues/1409)
+- traits: support capabilities [\#1331](https://github.com/apache/camel-k/issues/1331)
+- Cannot append/override stored properties [\#1323](https://github.com/apache/camel-k/issues/1323)
+- CLI log could use some kind of feedback when waiting for pod to spin up [\#1283](https://github.com/apache/camel-k/issues/1283)
+- Kaniko in builder pod failed to push image to docker registry [\#1282](https://github.com/apache/camel-k/issues/1282)
+- Add a trait\(?\) to enable default REST DSL endpoint [\#1239](https://github.com/apache/camel-k/issues/1239)
 
 **Merged pull requests:**
 
