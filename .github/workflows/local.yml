@@ -60,6 +60,16 @@ jobs:
       with:
         persist-credentials: false
         submodules: recursive
+        go-version: 1.17.x
+    - name: Build Kamel
+      run: |
+        echo "Build project"
+        make build-kamel
+        sudo mv ./kamel /usr/local/bin
+    - name: Run IT
+      run: |
+        # Configure staging repos
+        export KAMEL_LOCAL_RUN_MAVEN_REPOSITORIES=$(make get-staging-repo)
 
     - name: Execute Local Tests
       uses: ./.github/actions/e2e-local

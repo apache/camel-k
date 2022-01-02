@@ -60,6 +60,17 @@ jobs:
       with:
         persist-credentials: false
         submodules: recursive
+        go-version: 1.17.x
+    - name: Get OpenShift Client (oc)
+      run: |
+        export OPENSHIFT_VERSION=v3.11.0
+        export OPENSHIFT_COMMIT=0cbc58b
+        export MAVEN_OPTS=-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+
+        sudo rm -f /etc/resolv.conf
+        sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+        sudo sh -c 'echo "DNS=8.8.8.8 4.4.4.4" >> /etc/systemd/resolved.conf'
+        sudo service systemd-resolved restart
 
     - id: prepare-env
       name: Prepare Test Environment

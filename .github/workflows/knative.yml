@@ -71,6 +71,29 @@ jobs:
       with:
         persist-credentials: false
         submodules: recursive
+        go-version: 1.17.x
+    - name: Kubernetes KinD Cluster
+      uses: container-tools/kind-action@v1
+      with:
+        version: v0.11.0
+        node_image: kindest/node:v1.21.1@sha256:fae9a58f17f18f06aeac9772ca8b5ac680ebbed985e266f711d936e91d113bad
+    - name: Info
+      run: |
+        kubectl version
+        kubectl cluster-info
+        kubectl describe nodes
+    - name: Install Knative
+      run: |
+        # Prerequisites
+        sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.6/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
+
+        export SERVING_VERSION=knative-v1.0.0
+        export EVENTING_VERSION=knative-v1.0.0
+        export KOURIER_VERSION=knative-v1.0.0
+
+        # Serving
+        kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml
+        curl -L -s https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-core.yaml | head -n -1 | yq e 'del(.spec.template.spec.containers[].resources)' - | kubectl apply -f -
 
     - name: Convert input parameters to env vars
       shell: bash
@@ -94,6 +117,121 @@ jobs:
       with:
         persist-credentials: false
         submodules: recursive
+      - name: Cleanup
+        run: |
+          ls -lart
+          echo "Initial status:"
+          df -h
+
+          echo "Cleaning up resources:"
+          sudo swapoff -a
+          sudo rm -f /swapfile
+          sudo apt clean
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          docker rmi $(docker image ls -aq)
+
+          echo "Final status:"
+          df -h
+      - name: Set up JDK 11
+        uses: AdoptOpenJDK/install-jdk@v1
+        with:
+          version: "11"
+      - name: Set Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.17.x
+      - name: Get YAKS
+        run: |
+          export YAKS_VERSION=0.4.0
+          curl --fail -L https://github.com/citrusframework/yaks/releases/download/v${YAKS_VERSION}/yaks-${YAKS_VERSION}-linux-64bit.tar.gz -o yaks.tar.gz
+          tar -zxf yaks.tar.gz
+          sudo mv yaks /usr/local/bin/
+      - name: Kubernetes KinD Cluster
+        uses: container-tools/kind-action@v1
+        with:
+          version: v0.11.0
+          node_image: kindest/node:v1.21.1@sha256:fae9a58f17f18f06aeac9772ca8b5ac680ebbed985e266f711d936e91d113bad
+      - name: Info
+        run: |
+          kubectl version
+          kubectl cluster-info
+          kubectl describe nodes
+      - name: Install YAKS
+        run: |
+          yaks install --cluster-setup
+      - name: Install Knative
+        run: |
+          # Prerequisites
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.6/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
+
+          export SERVING_VERSION=knative-v1.0.0
+          export EVENTING_VERSION=knative-v1.0.0
+          export KOURIER_VERSION=knative-v1.0.0
+
+          # Serving
+          kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml
+          curl -L -s https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-core.yaml | head -n -1 | yq e 'del(.spec.template.spec.containers[].resources)' - | kubectl apply -f -
+
+          # Kourier
+          kubectl apply --filename https://github.com/knative-sandbox/net-kourier/releases/download/$KOURIER_VERSION/kourier.yaml
+          kubectl patch configmap/config-network \
+          --namespace knative-serving \
+          --type merge \
+          --patch '{"data":{"ingress.class":"kourier.ingress.networking.knative.dev"}}'
+
+          # Eventing
+          kubectl apply --filename https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-crds.yaml
+          curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-core.yaml | head -n -1 | yq e 'del(.spec.template.spec.containers[].resources)' - | kubectl apply -f -
+
+          # Eventing channels
+          curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/in-memory-channel.yaml | head -n -1 | yq e 'del(.spec.template.spec.containers[].resources)' - | kubectl apply -f -
+
+          # Eventing broker
+          curl -L -s https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/mt-channel-broker.yaml | head -n -1 | yq e 'del(.spec.template.spec.containers[].resources)' - | kubectl apply -f -
+
+          # Eventing sugar controller for injection
+          kubectl apply -f https://github.com/knative/eventing/releases/download/$EVENTING_VERSION/eventing-sugar-controller.yaml
+
+          # Wait for installation completed
+          echo "Waiting for all pods to be ready in kourier-system"
+          kubectl wait --for=condition=Ready pod --all -n kourier-system --timeout=60s
+          echo "Waiting for all pods to be ready in knative-serving"
+          kubectl wait --for=condition=Ready pod --all -n knative-serving --timeout=60s
+          echo "Waiting for all pods to be ready in knative-eventing"
+          kubectl wait --for=condition=Ready pod --all -n knative-eventing --timeout=60s
+
+      - name: Build Operator
+        run: |
+          echo "Build project"
+          export CUSTOM_IMAGE=${KIND_REGISTRY}/apache/camel-k
+          echo "LOCAL_IMAGE_NAME=${CUSTOM_IMAGE}" >> $GITHUB_ENV
+          echo "LOCAL_IMAGE_VERSION=$(make get-version)" >> $GITHUB_ENV
+          make PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images images-push
+
+          sudo mv ./kamel /usr/local/bin
+      - name: Run IT
+        run: |
+          echo "Installing camel k cluster resources"
+          kamel install --cluster-setup
+
+          # Configure install options
+          export CUSTOM_IMAGE=${{ env.LOCAL_IMAGE_NAME }}
+          export CUSTOM_VERSION=${{ env.LOCAL_IMAGE_VERSION }}
+          export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
+          export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
+          export KAMEL_INSTALL_REGISTRY=$KIND_REGISTRY
+          export KAMEL_INSTALL_REGISTRY_INSECURE=true
+          export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
+
+          # Configure test options
+          export CAMEL_K_TEST_IMAGE_NAME=$KIND_REGISTRY/apache/camel-k
+          export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
+
+          # Install Yaks globally
+          yaks install
 
     - name: Execute Knative YAKS Tests
       uses: ./.github/actions/e2e-knative-yaks
