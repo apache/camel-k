@@ -71,51 +71,9 @@ jobs:
       with:
         persist-credentials: false
         submodules: recursive
+    - name: Set Go
+      uses: actions/setup-go@v2
         go-version: 1.17.x
-    - name: Set up opm tool
-      run: |
-        curl -L https://github.com/operator-framework/operator-registry/releases/download/v1.19.5/linux-amd64-opm -o opm
-        chmod +x opm
-        sudo mv opm /usr/local/bin/
-    - name: Kubernetes KinD Cluster
-      uses: container-tools/kind-action@v1
-      with:
-        version: v0.11.0
-        node_image: kindest/node:v1.21.1@sha256:fae9a58f17f18f06aeac9772ca8b5ac680ebbed985e266f711d936e91d113bad
-    - name: Info
-      run: |
-        kubectl cluster-info
-        kubectl describe nodes
-    - name: Install OLM
-      run: |
-        kubectl apply -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.17.0/crds.yaml
-        # wait for a while to be sure CRDs are installed
-        sleep 1
-        kubectl apply -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.17.0/olm.yaml
-    - name: Get Kamel CLI
-      run: |
-        export KAMEL_VERSION=$(make get-last-released-version)
-        curl -L https://github.com/apache/camel-k/releases/download/v${KAMEL_VERSION}/camel-k-client-${KAMEL_VERSION}-linux-64bit.tar.gz -o kamel.tar.gz
-        tar -zxf kamel.tar.gz
-        sudo mv kamel /usr/local/bin/
-    - name: Build Operator
-      run: |
-        echo "Build project"
-        export CUSTOM_IMAGE=${KIND_REGISTRY}/apache/camel-k
-        echo "LOCAL_IMAGE_NAME=${CUSTOM_IMAGE}" >> $GITHUB_ENV
-        echo "LOCAL_IMAGE_VERSION=$(make get-version)" >> $GITHUB_ENV
-        make PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images images-push
-    - name: Build Operator bundle
-      run: |
-        echo "Build Operator bundle"
-
-        # reinstall kustomize to be always on the same version
-        sudo rm $(which kustomize)
-
-        make kustomize
-
-        # replace image
-        $(cd config/manifests && kustomize edit set image "docker.io/apache/camel-k=${{ env.LOCAL_IMAGE_NAME }}:${{ env.LOCAL_IMAGE_VERSION }}")
 
     - name: Convert input parameters to env vars
       shell: bash

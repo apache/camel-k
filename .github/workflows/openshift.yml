@@ -57,44 +57,12 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Cleanup
-      run: |
-        ls -lart
-        echo "Initial status:"
-        df -h
-
-        echo "Cleaning up resources:"
-        sudo swapoff -a
-        sudo rm -f /swapfile
-        sudo apt clean
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /opt/ghc
-        sudo rm -rf "/usr/local/share/boost"
-        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-        docker rmi $(docker image ls -aq)
-
-        echo "Final status:"
-        df -h
-    - name: Set up JDK 11
-      uses: AdoptOpenJDK/install-jdk@v1
-      with:
-        version: "11"
-    - name: Set Go
-      uses: actions/setup-go@v2
       with:
         persist-credentials: false
         submodules: recursive
+    - name: Set Go
+      uses: actions/setup-go@v2
         go-version: 1.17.x
-    - name: Get OpenShift Client (oc)
-      run: |
-        export OPENSHIFT_VERSION=v3.11.0
-        export OPENSHIFT_COMMIT=0cbc58b
-        export MAVEN_OPTS=-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
-
-        sudo rm -f /etc/resolv.conf
-        sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
-        sudo sh -c 'echo "DNS=8.8.8.8 4.4.4.4" >> /etc/systemd/resolved.conf'
-        sudo service systemd-resolved restart
 
     - id: prepare-env
       name: Prepare Test Environment

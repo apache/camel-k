@@ -57,39 +57,12 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Cleanup
-      run: |
-        ls -lart
-        echo "Initial status:"
-        df -h
-
-        echo "Cleaning up resources:"
-        sudo swapoff -a
-        sudo rm -f /swapfile
-        sudo apt clean
-        docker rmi $(docker image ls -aq)
-
-        echo "Final status:"
-        df -h
-    - name: Set up JDK 11
-      uses: AdoptOpenJDK/install-jdk@v1
-      with:
-        version: "11"
-    - name: Set Go
-      uses: actions/setup-go@v2
       with:
         persist-credentials: false
         submodules: recursive
+    - name: Set Go
+      uses: actions/setup-go@v2
         go-version: 1.17.x
-    - name: Build Kamel
-      run: |
-        echo "Build project"
-        make build-kamel
-        sudo mv ./kamel /usr/local/bin
-    - name: Run IT
-      run: |
-        # Configure staging repos
-        export KAMEL_LOCAL_RUN_MAVEN_REPOSITORIES=$(make get-staging-repo)
 
     - name: Execute Local Tests
       uses: ./.github/actions/e2e-local

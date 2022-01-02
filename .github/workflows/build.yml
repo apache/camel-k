@@ -59,10 +59,6 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-    - name: Set up JDK 11
-      uses: AdoptOpenJDK/install-jdk@v1
-      with:
-        version: "11"
     - name: Install Go
       uses: actions/setup-go@v2
       with:
