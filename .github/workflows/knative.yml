@@ -78,7 +78,7 @@ jobs:
     - name: Set Go
       uses: actions/setup-go@v1
       with:
-        go-version: 1.16.x
+        go-version: 1.17.x
     - name: Kubernetes KinD Cluster
       uses: container-tools/kind-action@v1
       with:
@@ -190,7 +190,7 @@ jobs:
       - name: Set Go
         uses: actions/setup-go@v1
         with:
-          go-version: 1.16.x
+          go-version: 1.17.x
       - name: Get YAKS
         run: |
           export YAKS_VERSION=0.4.0
