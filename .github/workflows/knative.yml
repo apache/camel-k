@@ -68,6 +68,30 @@ jobs:
 
     - name: Checkout code
       uses: actions/checkout@v2
+    - name: Cleanup
+      run: |
+        ls -lart
+        echo "Initial status:"
+        df -h
+
+        echo "Cleaning up resources:"
+        sudo swapoff -a
+        sudo rm -f /swapfile
+        sudo apt clean
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf "/usr/local/share/boost"
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+        docker rmi $(docker image ls -aq)
+
+        echo "Final status:"
+        df -h
+    - name: Set up JDK 11
+      uses: AdoptOpenJDK/install-jdk@v1
+      with:
+        version: "11"
+    - name: Set Go
+      uses: actions/setup-go@v2
       with:
         persist-credentials: false
         submodules: recursive
@@ -140,7 +164,7 @@ jobs:
         with:
           version: "11"
       - name: Set Go
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v2
         with:
           go-version: 1.17.x
       - name: Get YAKS
