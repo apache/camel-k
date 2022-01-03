@@ -62,3 +62,24 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
+
+func TestLocalFilesAreMountedInContainerInDefaultPath(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		name := "laughing-route"
+
+		// Create integration that reads a file mounted into the container filesystem that was downloaded from the Image Registry
+		Expect(Kamel("run", "files/LaunghingRoute.java",
+			"--name", name,
+			"-d", "file://files/laugh.txt",
+			"-n", ns,
+		).Execute()).To(Succeed())
+
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("haha"))
+
+		// Clean up
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
+}
