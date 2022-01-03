@@ -50,8 +50,6 @@ func (c *defaultClient) ServerOrClientSideApplier() ServerOrClientSideApplier {
 func (a *ServerOrClientSideApplier) Apply(ctx context.Context, object ctrl.Object) error {
 	once := false
 	var err error
-	// nolint: ifshort
-	needsRetry := false
 	a.tryServerSideApply.Do(func() {
 		once = true
 		if err = a.serverSideApply(ctx, object); err != nil {
@@ -59,17 +57,13 @@ func (a *ServerOrClientSideApplier) Apply(ctx context.Context, object ctrl.Objec
 				log.Info("Fallback to client-side apply for installing resources")
 				a.hasServerSideApply.Store(false)
 				err = nil
-			} else {
-				needsRetry = true
 			}
 		} else {
 			a.hasServerSideApply.Store(true)
 		}
 	})
-	if needsRetry {
-		a.tryServerSideApply = sync.Once{}
-	}
 	if err != nil {
+		a.tryServerSideApply = sync.Once{}
 		return err
 	}
 	if v := a.hasServerSideApply.Load(); v.(bool) {
