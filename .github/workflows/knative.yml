@@ -94,9 +94,9 @@ jobs:
         # Prerequisites
         sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.6/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
 
-        export SERVING_VERSION=knative-v1.0.0
-        export EVENTING_VERSION=knative-v1.0.0
-        export KOURIER_VERSION=knative-v1.0.0
+        export SERVING_VERSION=knative-v1.1.0
+        export EVENTING_VERSION=knative-v1.1.0
+        export KOURIER_VERSION=knative-v1.1.0
 
         # Serving
         kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml
@@ -215,9 +215,9 @@ jobs:
           # Prerequisites
           sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.6/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
 
-          export SERVING_VERSION=knative-v1.0.0
-          export EVENTING_VERSION=knative-v1.0.0
-          export KOURIER_VERSION=knative-v1.0.0
+          export SERVING_VERSION=knative-v1.1.0
+          export EVENTING_VERSION=knative-v1.1.0
+          export KOURIER_VERSION=knative-v1.1.0
 
           # Serving
           kubectl apply --filename https://github.com/knative/serving/releases/download/$SERVING_VERSION/serving-crds.yaml

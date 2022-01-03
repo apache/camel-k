@@ -52,13 +52,13 @@ require (
 	k8s.io/apimachinery v0.21.4
 	k8s.io/cli-runtime v0.21.4
 	k8s.io/client-go v0.21.4
-	k8s.io/gengo v0.0.0-20210915205010-39e73c8a59cd
+	k8s.io/gengo v0.0.0-20211129171323-c02415ce4185
 	k8s.io/klog/v2 v2.9.0
 	k8s.io/kubectl v0.21.4
 	k8s.io/utils v0.0.0-20210802155522-efc7438f0176
-	knative.dev/eventing v0.27.0
-	knative.dev/pkg v0.0.0-20211104101302-51b9e7f161b4
-	knative.dev/serving v0.27.0
+	knative.dev/eventing v0.28.0
+	knative.dev/pkg v0.0.0-20211206113427-18589ac7627e
+	knative.dev/serving v0.28.0
 	sigs.k8s.io/controller-runtime v0.9.7
 )
 
