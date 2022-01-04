@@ -70,8 +70,6 @@
 - Regression on CLI 1.0.0 injecting routes file? [\#1651](https://github.com/apache/camel-k/issues/1651)
 - Add the option to deploy a CamelSource Integration from the CLI [\#1650](https://github.com/apache/camel-k/issues/1650)
 - Grafana dashboards [\#1630](https://github.com/apache/camel-k/issues/1630)
-- kamelets: distribution model documentation [\#1576](https://github.com/apache/camel-k/issues/1576)
-- kamelets: architecture documentation [\#1573](https://github.com/apache/camel-k/issues/1573)
 - Kaniko produces " UNAUTHORIZED: authentication required" error when building an integration route with Dockerhub [\#1572](https://github.com/apache/camel-k/issues/1572)
 - Buildah produces "stderr: permission denied" when building an integration route with Dockerhub  [\#1571](https://github.com/apache/camel-k/issues/1571)
 - Running in Azure AKS with ACR Registry [\#1566](https://github.com/apache/camel-k/issues/1566)
@@ -86,6 +84,7 @@
 
 **Merged pull requests:**
 
+- chore: Upgrade Knative to version 1.1.0 [\#2846](https://github.com/apache/camel-k/pull/2846) ([astefanutti](https://github.com/astefanutti))
 - chore\(kamelet\): remove bean and ref error handler types [\#2843](https://github.com/apache/camel-k/pull/2843) ([squakez](https://github.com/squakez))
 - AFTER camel-website \#740: local build v2 [\#2839](https://github.com/apache/camel-k/pull/2839) ([djencks](https://github.com/djencks))
 - feat: Set GOMAXPROCS based on CPU quota [\#2837](https://github.com/apache/camel-k/pull/2837) ([astefanutti](https://github.com/astefanutti))
