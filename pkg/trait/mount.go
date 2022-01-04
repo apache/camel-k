@@ -39,7 +39,7 @@ import (
 type mountTrait struct {
 	BaseTrait `property:",squash"`
 	// A list of configuration pointing to configmap/secret.
-	// The configuration are expected to be ÙTF-8 resources as they are processed by runtime Camel Context and tried to be parsed as property files.
+	// The configuration are expected to be UTF-8 resources as they are processed by runtime Camel Context and tried to be parsed as property files.
 	// They are also made available on the classpath in order to ease their usage directly from the Route.
 	// Syntax: [configmap|secret]:name[key], where name represents the resource name and key optionally represents the resource key to be filtered
 	Configs []string `property:"configs" json:"configs,omitempty"`
