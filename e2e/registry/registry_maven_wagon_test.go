@@ -83,3 +83,26 @@ func TestLocalFilesAreMountedInContainerInDefaultPath(t *testing.T) {
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
+
+func TestLocalFilesAreMountedInContainerInCustomPath(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		name := "laughing-route"
+		customMount := "this/is/a/custom/path/"
+
+		// Create integration that reads a file mounted into the container filesystem with a custom path
+		Expect(Kamel("run", "files/LaunghingRoute.java",
+			"--name", name,
+			"-p", fmt.Sprintf("location=%s", customMount),
+			"-d", fmt.Sprintf("file://files/laugh.txt:%slaugh.txt", customMount),
+			"-n", ns,
+		).Execute()).To(Succeed())
+
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("haha"))
+
+		// Clean up
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
+}

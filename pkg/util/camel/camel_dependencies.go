@@ -114,6 +114,7 @@ func addDependencies(project *maven.Project, dependencies []string, catalog *Run
 			}
 			plugin := getOrCreateBuildPlugin(project, "com.googlecode.maven-download-plugin", "download-maven-plugin", "1.6.7")
 			exec := maven.Execution{
+				ID:    fmt.Sprint(len(plugin.Executions)),
 				Phase: "package",
 				Goals: []string{
 					"artifact",
@@ -161,10 +162,10 @@ func addDependencies(project *maven.Project, dependencies []string, catalog *Run
 	return nil
 }
 
-func getOrCreateBuildPlugin(project *maven.Project, groupID string, artifactID string, version string) maven.Plugin {
-	for _, plugin := range project.Build.Plugins {
+func getOrCreateBuildPlugin(project *maven.Project, groupID string, artifactID string, version string) *maven.Plugin {
+	for i, plugin := range project.Build.Plugins {
 		if plugin.GroupID == groupID && plugin.ArtifactID == artifactID && plugin.Version == version {
-			return plugin
+			return &project.Build.Plugins[i]
 		}
 	}
 	plugin := maven.Plugin{
@@ -174,7 +175,7 @@ func getOrCreateBuildPlugin(project *maven.Project, groupID string, artifactID s
 		Executions: []maven.Execution{},
 	}
 	project.Build.Plugins = append(project.Build.Plugins, plugin)
-	return plugin
+	return &project.Build.Plugins[len(project.Build.Plugins)-1]
 }
 
 func addDependenciesFromCatalog(project *maven.Project, catalog *RuntimeCatalog) {

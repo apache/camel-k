@@ -779,13 +779,15 @@ func uploadDependency(platform *v1.IntegrationPlatform, item string, integration
 	defer newStdW.Close()
 
 	path := item[7:]
-	i := strings.Index(path, ":")
 	targetPath := path
+	localPath := path
+	i := strings.Index(path, ":")
 	if i > 0 {
-		targetPath = path[i:]
+		targetPath = path[i+1:]
+		localPath = path[:i]
 	}
 	// spectrum expects absolute paths but let's allow users to specify relative paths
-	abs, err := filepath.Abs(path)
+	abs, err := filepath.Abs(localPath)
 	if err != nil {
 		return err
 	}
@@ -824,7 +826,7 @@ func uploadDependency(platform *v1.IntegrationPlatform, item string, integration
 		dependency := fmt.Sprintf("mvn:%s:%s:%s:%s", groupId, artifactId, ext[1:], version)
 		fmt.Printf("Added %s to the Integration's dependency list \n", dependency)
 		integration.Spec.AddDependency(dependency)
-	// Everything else will be mounted on the container filesystem
+		// Everything else will be mounted on the container filesystem
 	} else if !strings.HasSuffix(item, ".pom") {
 		dependency := fmt.Sprintf("docker-mvn:%s:%s:%s:%s@%s", groupId, artifactId, ext[1:], version, targetPath)
 		fmt.Printf("Added %s to the Integration's dependency list \n", dependency)

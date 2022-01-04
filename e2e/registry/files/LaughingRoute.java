@@ -1,3 +1,5 @@
+// camel-k: property=location=files/
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -21,7 +23,7 @@ public class LaughingRoute extends RouteBuilder {
 
   @Override
   public void configure() throws Exception {
-	  from("file:files/")
+	  from("file:{{location}}")
         .convertBodyTo(String.class)
         .log("${body}");
   }
