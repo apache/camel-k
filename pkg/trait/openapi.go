@@ -140,6 +140,10 @@ func (t *openAPITrait) generateFromConfigmaps(e *Environment, tmpDir string) ([]
 		if cm == nil {
 			return nil, fmt.Errorf("could not find any configmap with name: %s", configmap)
 		}
+		if cm.ObjectMeta.Labels[kubernetes.ConfigMapAutogenLabel] == "true" {
+			refCm := kubernetes.NewConfigMap(e.Integration.Namespace, configmap, "", "", "", nil)
+			e.Resources.Add(refCm)
+		}
 		// Iterate over each configmap key which may hold a different OpenAPI spec
 		for k, v := range cm.Data {
 			dataSpecs = append(dataSpecs, v1.DataSpec{

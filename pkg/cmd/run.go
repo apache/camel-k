@@ -575,22 +575,18 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		return nil, err
 	}
 
-	generatedConfigmaps := make([]*corev1.ConfigMap, 0)
-	resCms, err := o.parseAndConvertToTrait(c, integration, o.Resources, resource.ParseResource, func(c *resource.Config) string { return c.String() }, "mount.resources")
+	err = o.parseAndConvertToTrait(c, integration, o.Resources, resource.ParseResource, func(c *resource.Config) string { return c.String() }, "mount.resources")
 	if err != nil {
 		return nil, err
 	}
-	generatedConfigmaps = append(generatedConfigmaps, resCms...)
-	confCms, err := o.parseAndConvertToTrait(c, integration, o.Configs, resource.ParseConfig, func(c *resource.Config) string { return c.String() }, "mount.configs")
+	err = o.parseAndConvertToTrait(c, integration, o.Configs, resource.ParseConfig, func(c *resource.Config) string { return c.String() }, "mount.configs")
 	if err != nil {
 		return nil, err
 	}
-	generatedConfigmaps = append(generatedConfigmaps, confCms...)
-	oAPICms, err := o.parseAndConvertToTrait(c, integration, o.OpenAPIs, resource.ParseConfig, func(c *resource.Config) string { return c.Name() }, "openapi.configmaps")
+	err = o.parseAndConvertToTrait(c, integration, o.OpenAPIs, resource.ParseConfig, func(c *resource.Config) string { return c.Name() }, "openapi.configmaps")
 	if err != nil {
 		return nil, err
 	}
-	generatedConfigmaps = append(generatedConfigmaps, oAPICms...)
 
 	for _, item := range o.Dependencies {
 		integration.Spec.AddDependency(item)
@@ -679,12 +675,6 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		return nil, err
 	}
 
-	if generatedConfigmaps != nil {
-		err = bindGeneratedConfigmapsToIntegration(o.Context, c, integration, generatedConfigmaps)
-		if err != nil {
-			return integration, err
-		}
-	}
 	return integration, nil
 }
 
@@ -692,24 +682,20 @@ func (o *runCmdOptions) parseAndConvertToTrait(
 	c client.Client, integration *v1.Integration, params []string,
 	parse func(string) (*resource.Config, error),
 	convert func(*resource.Config) string,
-	traitParam string) ([]*corev1.ConfigMap, error) {
-	generatedCms := make([]*corev1.ConfigMap, 0)
+	traitParam string) error {
 	for _, param := range params {
 		config, err := parse(param)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		// We try to autogenerate a configmap
-		maybeGenCm, err := parseConfigAndGenCm(o.Context, c, config, integration, o.Compression)
+		_, err = parseConfigAndGenCm(o.Context, c, config, integration, o.Compression)
 		if err != nil {
-			return nil, err
-		}
-		if maybeGenCm != nil {
-			generatedCms = append(generatedCms, maybeGenCm)
+			return err
 		}
 		o.Traits = append(o.Traits, convertToTrait(convert(config), traitParam))
 	}
-	return generatedCms, nil
+	return nil
 }
 
 func convertToTrait(value, traitParameter string) string {

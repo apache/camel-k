@@ -33,6 +33,12 @@ var (
 	validResourceRequirementsRegexp = regexp.MustCompile(`^(requests|limits)\.(memory|cpu)=([\w\.]+)$`)
 )
 
+// ConfigMapAutogenLabel -- .
+const ConfigMapAutogenLabel = "camel.apache.org/generated"
+
+// ConfigMapOriginalFileNameLabel -- .
+const ConfigMapOriginalFileNameLabel = "camel.apache.org/filename"
+
 // NewTolerations build an array of Tolerations from an array of string.
 func NewTolerations(taints []string) ([]corev1.Toleration, error) {
 	tolerations := make([]corev1.Toleration, 0)
@@ -116,8 +122,8 @@ func NewResourceRequirements(reqs []string) (corev1.ResourceRequirements, error)
 	return resReq, nil
 }
 
-// NewConfigmap will create a Configmap.
-func NewConfigmap(namespace, cmName, originalFilename string, generatedKey string,
+// NewConfigMap will create a ConfigMap.
+func NewConfigMap(namespace, cmName, originalFilename string, generatedKey string,
 	textData string, binaryData []byte) *corev1.ConfigMap {
 	immutable := true
 	cm := corev1.ConfigMap{
@@ -129,7 +135,8 @@ func NewConfigmap(namespace, cmName, originalFilename string, generatedKey strin
 			Name:      cmName,
 			Namespace: namespace,
 			Labels: map[string]string{
-				"camel.apache.org/filename": originalFilename,
+				ConfigMapOriginalFileNameLabel: originalFilename,
+				ConfigMapAutogenLabel:          "true",
 			},
 		},
 		Immutable: &immutable,
