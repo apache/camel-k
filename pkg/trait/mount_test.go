@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -114,7 +115,7 @@ func TestMountVolumesIntegrationPhaseInitialization(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait("mount"))
+	assert.Nil(t, environment.GetTrait("mount"))
 
 	s := environment.Resources.GetDeployment(func(service *appsv1.Deployment) bool {
 		return service.Name == "hello"
@@ -124,12 +125,15 @@ func TestMountVolumesIntegrationPhaseInitialization(t *testing.T) {
 
 func getNominalEnv(t *testing.T, traitCatalog *Catalog) *Environment {
 	t.Helper()
+	fakeClient, _ := test.NewFakeClient()
 	catalog, _ := camel.DefaultCatalog()
 	compressedRoute, _ := gzip.CompressBase64([]byte(`from("undertow:test").log("hello")`))
 
 	return &Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Ctx:          context.Background(),
+		Client:       fakeClient,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "hello",
