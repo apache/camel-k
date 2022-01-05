@@ -88,7 +88,7 @@ oc new-project camel-pipelines
 Any running container that needs to interact with the Kubernetes API (in our case, to create deployment and integration resources) must
 have special permissions granted to its service account.
 
-Download the link:{attachmentsdir}/tekton/camel-k-pipeline-permissions.yaml[camel-k-pipeline-permissions.yaml] file and save it into a directory in your hard drive.
+Download the xref:attachment$tekton/camel-k-pipeline-permissions.yaml[camel-k-pipeline-permissions.yaml] file and save it into a directory in your hard drive.
 Then install it using the `oc` client tool:
 
 [source,bash]
@@ -101,7 +101,7 @@ that is authorized to create the same kind of resources that the Camel K operato
 
 === Creating the Pipeline Definition
 
-Let's now create the pipeline definition. Download the link:{attachmentsdir}/tekton/camel-k-pipeline-task-definition.yaml[camel-k-pipeline-task-definition.yaml] file
+Let's now create the pipeline definition. Download the xref:attachment$tekton/camel-k-pipeline-task-definition.yaml[camel-k-pipeline-task-definition.yaml] file
 and apply it to the cluster:
 
 [source,bash]
@@ -191,7 +191,7 @@ The repo will be now used as input for the <<camel-k-task-run-integration,run-in
 
 === Triggering a Pipeline Execution
 
-Everything is now ready to be executed and the last thing missing is a trigger. Download the link:{attachmentsdir}/tekton/camel-k-pipeline-task-run.yaml[camel-k-pipeline-task-run.yaml] file
+Everything is now ready to be executed and the last thing missing is a trigger. Download the xref:attachment$tekton/camel-k-pipeline-task-run.yaml[camel-k-pipeline-task-run.yaml] file
 and apply it to the cluster:
 
 [source,bash]
