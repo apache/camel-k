@@ -239,6 +239,35 @@ from('timer:tick')
 You can run this integration without specifying other parameters, the Kamelet endpoint will be implicitly configured by the Camel K operator that will
 automatically mount the secret into the integration Pod.
 
+[[kamelets-default-catalog]]
+== Kamelets Catalog
+
+When you install a Camel K Operator, you will have automatically a wide set of canned Kamelets available to be used. The catalog and the related documentation is available at link:/camel-kamelets/next/index.html[Apache Kamelets Catalog]. There is a CLI command very useful to have a quick list of the available Kamelets:
+[source,shell]
+----
+$ kamel kamelet get
+----
+
+These Kamelets are installed by default when you install Camel K operator. You will be able to use them without worrying to install each of them, just look at the documentation and be ready to experiment how easy they are.
+
+[[kamelets-custom-catalog]]
+=== Use a custom Catalog
+
+You can overwrite the default catalog by adding certain configuration to the `IntegrationPlatform`. In order to add a new repository, you must edit the `IntegrationPlatfom` and edit the `.spec.kamelet.repositories[].uri` field, which expects an array of repository URIs where you can host your catalog of Kamelets, ie: 
+[source,yaml]
+----
+spec:
+  ...
+  kamelet:
+    repositories:
+    - uri: github:my-org/my-repo
+  ...
+----
+
+By default the value is null, which means they fallback to the Apache Kamelets Catalog.
+
+NOTE: this option is experimental and may be subjected to changes in future versions.
+
 [[kamelets-usage-binding]]
 == Binding Kamelets
 
