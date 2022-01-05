@@ -85,11 +85,17 @@ runs:
       export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
       export CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE=${{ env.CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE }}
 
-      # Then run integration tests
-      make test-integration
-      make test-service-binding
-      make test-quarkus-native
-      make test-kustomize
+      # Then run all integration tests rather than ending on first failure
+      set -e
+      exit_code=0
+      make test-integration || exit_code=1
+      make test-service-binding || exit_code=1
+      make test-quarkus-native || exit_code=1
+      make test-kustomize || exit_code=1
+      set +e
+
+      echo "Tests completed with exit code: ${exit_code}"
+      exit ${exit_code}
 
   - name: Cleanup
     uses: ./.github/actions/kamel-cleanup
