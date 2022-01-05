@@ -23,6 +23,8 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -55,6 +57,17 @@ func GetBuild(context context.Context, client client.Client, name string, namesp
 	}
 
 	return build, nil
+}
+
+// GetUnstructured provides a generic unstructured K8S object. Useful in order to retrieve a non cached version of an object.
+func GetUnstructured(context context.Context, client ctrl.Reader, gvk schema.GroupVersionKind, name string, namespace string) (*unstructured.Unstructured, error) {
+	object := &unstructured.Unstructured{}
+	object.SetNamespace(namespace)
+	object.SetName(name)
+	object.SetGroupVersionKind(gvk)
+	err := client.Get(context, ctrl.ObjectKeyFromObject(object), object)
+
+	return object, err
 }
 
 func GetConfigMap(context context.Context, client ctrl.Reader, name string, namespace string) (*corev1.ConfigMap, error) {
