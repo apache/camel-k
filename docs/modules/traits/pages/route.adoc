@@ -11,7 +11,6 @@ The recommended approach to set the key and certificates is to use `secrets` to 
 following parameters to reference them: `tls-certificate-secret`, `tls-key-secret`, `tls-ca-certificate-secret`, `tls-destination-ca-certificate-secret`
 See the examples section at the end of this page to see the setup options.
 
-nolint: tagliatelle
 
 This trait is available in the following profiles: **OpenShift**.
 
