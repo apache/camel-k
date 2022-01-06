@@ -25,7 +25,7 @@ import (
 
 	yaml2 "gopkg.in/yaml.v2"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/resources"
@@ -64,13 +64,18 @@ func catalogForRuntimeProvider(provider v1.RuntimeProvider) (*RuntimeCatalog, er
 
 func GenerateCatalog(
 	ctx context.Context,
-	client k8sclient.Reader,
+	client ctrl.Reader,
 	namespace string,
 	mvn v1.MavenSpec,
 	runtime v1.RuntimeSpec,
 	providerDependencies []maven.Dependency) (*RuntimeCatalog, error) {
 
-	settings, err := kubernetes.ResolveValueSource(ctx, client, namespace, &mvn.Settings)
+	userSettings, err := kubernetes.ResolveValueSource(ctx, client, namespace, &mvn.Settings)
+	if err != nil {
+		return nil, err
+	}
+	settings := maven.NewSettings()
+	globalSettings, err := settings.MarshalBytes()
 	if err != nil {
 		return nil, err
 	}
@@ -83,12 +88,13 @@ func GenerateCatalog(
 		}
 	}
 
-	return GenerateCatalogCommon(ctx, settings, caCert, mvn, runtime, providerDependencies)
+	return GenerateCatalogCommon(ctx, globalSettings, []byte(userSettings), caCert, mvn, runtime, providerDependencies)
 }
 
 func GenerateCatalogCommon(
 	ctx context.Context,
-	settings string,
+	globalSettings []byte,
+	userSettings []byte,
 	caCert []byte,
 	mvn v1.MavenSpec,
 	runtime v1.RuntimeSpec,
@@ -114,9 +120,11 @@ func GenerateCatalogCommon(
 	mc.AddSystemProperty("catalog.file", "catalog.yaml")
 	mc.AddSystemProperty("catalog.runtime", string(runtime.Provider))
 
-	mc.SettingsContent = nil
-	if settings != "" {
-		mc.SettingsContent = []byte(settings)
+	if globalSettings != nil {
+		mc.GlobalSettings = globalSettings
+	}
+	if userSettings != nil {
+		mc.UserSettings = userSettings
 	}
 
 	if caCert != nil {
