@@ -40,51 +40,12 @@ runs:
       name: Build Kamel Operator
       shell: bash
       run: |
-        if [ -n "${{ inputs.image-registry-push-host }}" ]; then
-          #
-          # Build with the PUSH host to ensure the correct image:tag
-          # for docker to push the image.
-          #
-          export CUSTOM_IMAGE=${{ inputs.image-registry-push-host }}/${{ inputs.image-namespace }}/camel-k
-        fi
-
-        if [ -n "${{ env.DEBUG_USE_EXISTING_IMAGE }}" ] && [ -n "${CUSTOM_IMAGE}" ]; then
-          echo "Fetching Kamel from existing build"
-
-          docker pull ${{ env.DEBUG_USE_EXISTING_IMAGE }}
-          id=$(docker create ${{ env.DEBUG_USE_EXISTING_IMAGE }})
-          docker cp $id:/usr/local/bin/kamel .
-
-          docker tag ${{ env.DEBUG_USE_EXISTING_IMAGE }} ${CUSTOM_IMAGE}:$(make get-version)
-          docker push ${CUSTOM_IMAGE}:$(make get-version)
-        else
-
-          echo "Build Kamel from source"
-
-          RULES="PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images"
-          if [ -n "${{ inputs.make-rules }}" ]; then
-            RULES="${{ inputs.make-rules }}"
-          fi
-
-          if [ -n "${{ inputs.image-registry-push-host }}" ]; then
-            RULES="${RULES} images-push"
-          fi
-
-          make ${RULES}
-        fi
-
-        echo "Moving kamel binary to /usr/local/bin"
-        sudo mv ./kamel /usr/local/bin
-        echo "Kamel version installed: $(kamel version)"
-
-        #
-        # Use the PULL host to ensure the correct image:tag
-        # is passed into the tests for the deployment to pull from
-        #
-        BUILD_BINARY_LOCAL_IMAGE_NAME="${{ inputs.image-registry-pull-host }}/${{ inputs.image-namespace }}/camel-k"
-        BUILD_BINARY_LOCAL_IMAGE_VERSION="$(make get-version)"
-        echo "::set-output name=build-binary-local-image-name::${BUILD_BINARY_LOCAL_IMAGE_NAME}"
-        echo "::set-output name=build-binary-local-image-version::${BUILD_BINARY_LOCAL_IMAGE_VERSION}"
+        ./.github/actions/kamel-build-binary/build-binary.sh \
+          -i "${{ inputs.image-namespace }}" \
+          -l "${{ inputs.image-registry-pull-host }}" \
+          -m "${{ inputs.make-rules }}" \
+          -s "${{ inputs.image-registry-push-host }}" \
+          -x "${{ env.DEBUG_USE_EXISTING_IMAGE }}"
 
 outputs:
   build-binary-local-image-name:
