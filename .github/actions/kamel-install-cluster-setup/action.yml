@@ -30,25 +30,8 @@ runs:
       name: Install Camel-K Cluster Resources
       shell: bash
       run: |
-        #
-        # Get current context
-        #
-        ctx=$(kubectl config current-context)
-
-        #
-        # Need to be admin so switch to the admin context
-        #
-        kubectl config use-context "${{ inputs.kube-admin-user-ctx }}"
-
-        #
-        # Ensure built binary CRDs are always installed by turning off olm
-        #
-        kamel install --cluster-setup --olm=false
-
-        #
-        # Change back to original context
-        #
-        kubectl config use-context "${ctx}"
+        ./.github/actions/kamel-install-cluster-setup/install-cluster-setup.sh \
+          -a "${{ inputs.kube-admin-user-ctx }}"
 
     - id: post-execution
       shell: bash

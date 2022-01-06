@@ -47,59 +47,12 @@ runs:
       name: Build Operator bundle
       shell: bash
       run: |
-        echo "Build Operator bundle"
-        if ! command -v kustomize &> /dev/null
-        then
-          echo "kustomize could not be found. Has it not been installed?"
-          exit 1
-        fi
-
-        if [ -z "${{ inputs.local-image-name }}" ]; then
-          echo "Error: local-image-name not defined"
-          exit 1
-        fi
-
-        if [ -z "${{ inputs.local-image-version }}" ]; then
-          echo "Error: local-image-version not defined"
-          exit 1
-        fi
-
-        if [ -z "${{ inputs.image-registry-push-host }}" ]; then
-          echo "Error: image-registry-push-host not defined"
-          exit 1
-        fi
-
-        if [ -z "${{ inputs.image-registry-pull-host }}" ]; then
-          echo "Error: image-registry-pull-host not defined"
-          exit 1
-        fi
-
-        #
-        # Build with the PUSH host to ensure the correct image:tag
-        # for docker to push the image.
-        #
-        export LOCAL_IMAGE_BUNDLE=${{ inputs.image-registry-push-host }}/${{ inputs.image-namespace }}/camel-k-bundle:${{ inputs.local-image-version }}
-        export CUSTOM_IMAGE=${{ inputs.local-image-name }}
-
-        export PREV_XY_CHANNEL=stable-$(make get-last-released-version | grep -Po "\d.\d")
-        echo "PREV_XY_CHANNEL=${PREV_XY_CHANNEL}" >> $GITHUB_ENV
-        export NEW_XY_CHANNEL=stable-$(make get-version | grep -Po "\d.\d")
-        echo "NEW_XY_CHANNEL=${NEW_XY_CHANNEL}" >> $GITHUB_ENV
-
-        make bundle-build \
-          BUNDLE_IMAGE_NAME=${LOCAL_IMAGE_BUNDLE} \
-          DEFAULT_CHANNEL="${NEW_XY_CHANNEL}" \
-          CHANNELS="${NEW_XY_CHANNEL}"
-
-        docker push ${LOCAL_IMAGE_BUNDLE}
-
-        #
-        # Use the PULL host to ensure the correct image:tag
-        # is passed into the tests for the deployment to pull from
-        #
-        BUILD_BUNDLE_LOCAL_IMAGE="${{ inputs.image-registry-pull-host }}/${{ inputs.image-namespace }}/camel-k-bundle:${{ inputs.local-image-version }}"
-        echo "::set-output name=build-bundle-local-image::${BUILD_BUNDLE_LOCAL_IMAGE}"
-
+        ./.github/actions/kamel-build-bundle/build-bundle-image.sh \
+          -i "${{ inputs.image-namespace }}" \
+          -l "${{ inputs.image-registry-pull-host }}" \
+          -n "${{ inputs.local-image-name }}" \
+          -s "${{ inputs.image-registry-push-host }}" \
+          -v "${{ inputs.local-image-version }}"
 
     - id: install-opm
       name: Install opm if required
@@ -116,121 +69,22 @@ runs:
       name: Create New Index Image
       shell: bash
       run: |
-        export LOCAL_IIB=${{ inputs.image-registry-push-host }}/${{ inputs.image-namespace }}/camel-k-iib:${{ inputs.local-image-version }}
-        if ! command -v opm &> /dev/null
-        then
-          echo "opm could not be found. Has it not been installed?"
-          exit 1
-        fi
-
-        # Shorten the vars
-        PUSH_REGISTRY=${{ inputs.image-registry-push-host }}
-        PULL_REGISTRY=${{ inputs.image-registry-pull-host }}
-
-        #
-        # opm requires an active pull registry from which to verify (if not download) the bundle image
-        # Since the image-registry-pull-host may not be visible (eg. in the case of openshift), we need
-        # to fake the registry to allow opm to complete its task of creating an index image.
-        #
-        # 1. Add and alias to the hosts file for the name of the image-registry
-        # 2. Run a container of registry:2 docker image on the same port as the image-registry (port 80 if not present)
-        # 3. Tag and them push the image to the registry using docker
-        # 4. Run opm
-        #
-
-        if [ "${PULL_REGISTRY}" != "${PUSH_REGISTRY}" ]; then
-          #
-          # With the registry interfaces different then good chance that
-          # pull registry is not externally accessible, eg. openshift
-          #
-
-          PULL_HOST=$(echo ${PULL_REGISTRY} | sed -e 's/\(.*\):.*/\1/')
-          PULL_PORT=$(echo ${PULL_REGISTRY} | sed -e 's/.*:\([0-9]\+\).*/\1/')
-          if [ -z "${PULL_PORT}" ]; then
-            # Use standard http port
-            PULL_PORT=80
-          fi
-
-          echo "Impersonating registry at ${PULL_HOST}:${PULL_PORT}"
-
-          #
-          # Update both ipv4 and ipv6 addresses if they exist
-          # 127.0.0.1 localhost
-          # ::1     localhost ip6-localhost ip6-loopback
-          sudo sed -i "s/\(localhost.*\)/\1 ${PULL_HOST}/g" /etc/hosts
-
-          #
-          # Bring up the registry:2 instance if not already started
-          #
-          reg=$(docker ps -q -f name=triage-registry)
-          if [ -z "${reg}" ]; then
-            docker run -d -p ${PULL_PORT}:5000 --name triage-registry registry:2
-          fi
-
-          #
-          # Tag the bundle image
-          #
-          docker tag \
-            ${PUSH_REGISTRY}/${{ inputs.image-namespace }}/camel-k-bundle:${{ inputs.local-image-version }} \
-            ${{ steps.build-bundle-image.outputs.build-bundle-local-image }}
-
-          # Push the bundle image to the registry
-          #
-          docker push ${{ steps.build-bundle-image.outputs.build-bundle-local-image }}
-        fi
-
-        #
-        # Construct an index image containing the newly built bundle image
-        #   Bug:
-        #     https://github.com/operator-framework/operator-registry/issues/870
-        #   Workaround:
-        #     image catalog layers contain root owned files so fails with `permission denied` error.
-        #     Running with sudo fixes this error (alternative is to switch to podman)
-        #
-        sudo opm index add \
-          -c docker --skip-tls \
-          --bundles ${{ steps.build-bundle-image.outputs.build-bundle-local-image }} \
-          --from-index quay.io/operatorhubio/catalog:latest \
-          --tag ${LOCAL_IIB}
-
-        docker push ${LOCAL_IIB}
-        BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX="${{ inputs.image-registry-pull-host }}/${{ inputs.image-namespace }}/camel-k-iib:${{ inputs.local-image-version }}"
-        echo "::set-output name=build-bundle-image-bundle-index::${BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX}"
+        ./.github/actions/kamel-build-bundle/build-index-image.sh \
+          -b "${{ steps.build-bundle-image.outputs.build-bundle-local-image }}" \
+          -i "${{ inputs.image-namespace }}" \
+          -l "${{ inputs.image-registry-pull-host }}" \
+          -n "${{ inputs.local-image-name }}" \
+          -s "${{ inputs.image-registry-push-host }}" \
+          -v "${{ inputs.local-image-version }}"
 
     - id: build-image-catalog
       name: Create a new catalog to host the index image
       shell: bash
       run: |
-
-        if [ -z "${{ inputs.catalog-source-namespace }}" ]; then
-          echo "No catalog source namespace defined ... skipping catalog source creation"
-          exit 0
-        fi
-
-        kubectl get ns ${{ inputs.catalog-source-namespace }} &> /dev/null
-        if [ $? != 0 ]; then
-          echo "Error: Catalog source cannot be created as namespace ${{ inputs.catalog-source-namespace }} does not exist."
-          exit 1
-        fi
-
-        export BUILD_CATALOG_SOURCE="camel-k-test-source"
-        echo "::set-output name=build-bundle-catalog-source-name::${BUILD_CATALOG_SOURCE}"
-
-        cat <<EOF | kubectl apply -f -
-        apiVersion: operators.coreos.com/v1alpha1
-        kind: CatalogSource
-        metadata:
-          name: ${BUILD_CATALOG_SOURCE}
-          namespace: ${{ inputs.image-namespace }}
-        spec:
-          displayName: OLM upgrade test Catalog
-          image: ${{ steps.build-index-image.outputs.build-bundle-image-bundle-index }}
-          sourceType: grpc
-          publisher: grpc
-          updateStrategy:
-            registryPoll:
-              interval: 1m0s
-        EOF
+        ./.github/actions/kamel-build-bundle/build-image-catalog.sh \
+          -c "${{ inputs.catalog-source-namespace }}" \
+          -i "${{ inputs.image-namespace }}" \
+          -x "${{ steps.build-index-image.outputs.build-bundle-image-bundle-index }}"
 
 outputs:
   build-bundle-local-image:

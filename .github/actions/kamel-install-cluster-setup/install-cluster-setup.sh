@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -15,21 +17,52 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: kamel-cleanup
-description: 'Cleans up the target cluster, removing any e2e test resources'
+####
+#
+# Install the kamel setup using the admin context
+#
+####
 
-inputs:
-  build-bundle-catalog-source:
-    description: "Name of the catalog source for the build bundle image"
-    required: true
+set -e
 
-runs:
-  using: "composite"
-  steps:
-    - id: remove-installed-kamel
-      name: Remove Installed Kamel
-      shell: bash
-      if: ${{ always() }}
-      run: |
-        ./.github/actions/kamel-cleanup/cleanup.sh \
-          -c "${{ inputs.build-bundle-catalog-source-name }}"
+while getopts ":a:" opt; do
+  case "${opt}" in
+    a)
+      KUBE_ADMIN_CTX=${OPTARG}
+      ;;
+    :)
+      echo "ERROR: Option -$OPTARG requires an argument"
+      exit 1
+      ;;
+    \?)
+      echo "ERROR: Invalid option -$OPTARG"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+
+if [ -z "${KUBE_ADMIN_CTX}" ]; then
+  echo "Error: kube-admin-user-ctx not defined"
+  exit 1
+fi
+
+#
+# Get current context
+#
+ctx=$(kubectl config current-context)
+
+#
+# Need to be admin so switch to the admin context
+#
+kubectl config use-context "${KUBE_ADMIN_CTX}"
+
+#
+# Ensure built binary CRDs are always installed by turning off olm
+#
+kamel install --cluster-setup --olm=false
+
+#
+# Change back to original context
+#
+kubectl config use-context "${ctx}"
