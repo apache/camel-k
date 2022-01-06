@@ -74,7 +74,7 @@ func TestMavenSettingsFromConfigMap(t *testing.T) {
 	err = Steps.GenerateProjectSettings.execute(&ctx)
 	assert.Nil(t, err)
 
-	assert.Equal(t, []byte("setting-data"), ctx.Maven.SettingsData)
+	assert.Equal(t, []byte("setting-data"), ctx.Maven.UserSettings)
 }
 
 func TestMavenSettingsFromSecret(t *testing.T) {
@@ -121,5 +121,5 @@ func TestMavenSettingsFromSecret(t *testing.T) {
 	err = Steps.GenerateProjectSettings.execute(&ctx)
 	assert.Nil(t, err)
 
-	assert.Equal(t, []byte("setting-data"), ctx.Maven.SettingsData)
+	assert.Equal(t, []byte("setting-data"), ctx.Maven.UserSettings)
 }

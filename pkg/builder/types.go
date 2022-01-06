@@ -85,7 +85,8 @@ type builderContext struct {
 	Resources         []resource
 	Maven             struct {
 		Project        maven.Project
-		SettingsData   []byte
+		UserSettings   []byte
+		GlobalSettings []byte
 		TrustStoreName string
 		TrustStorePass string
 	}

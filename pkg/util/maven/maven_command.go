@@ -62,12 +62,16 @@ func (c *Command) Do(ctx context.Context) error {
 	}
 
 	settingsPath := path.Join(c.context.Path, "settings.xml")
-	settingsExists, err := util.FileExists(settingsPath)
-	if err != nil {
+	if settingsExists, err := util.FileExists(settingsPath); err != nil {
 		return err
+	} else if settingsExists {
+		args = append(args, "--global-settings", settingsPath)
 	}
 
-	if settingsExists {
+	settingsPath = path.Join(c.context.Path, "user-settings.xml")
+	if settingsExists, err := util.FileExists(settingsPath); err != nil {
+		return err
+	} else if settingsExists {
 		args = append(args, "--settings", settingsPath)
 	}
 
@@ -162,7 +166,8 @@ type Context struct {
 	Path string
 	// Project             Project
 	ExtraMavenOpts      []string
-	SettingsContent     []byte
+	GlobalSettings      []byte
+	UserSettings        []byte
 	AdditionalArguments []string
 	AdditionalEntries   map[string]interface{}
 	// Timeout             time.Duration
@@ -199,8 +204,14 @@ func generateProjectStructure(context Context, project Project) error {
 		return err
 	}
 
-	if context.SettingsContent != nil {
-		if err := util.WriteFileWithContent(context.Path, "settings.xml", context.SettingsContent); err != nil {
+	if context.GlobalSettings != nil {
+		if err := util.WriteFileWithContent(context.Path, "settings.xml", context.GlobalSettings); err != nil {
+			return err
+		}
+	}
+
+	if context.UserSettings != nil {
+		if err := util.WriteFileWithContent(context.Path, "user-settings.xml", context.UserSettings); err != nil {
 			return err
 		}
 	}
