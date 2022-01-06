@@ -60,6 +60,7 @@ type Settings struct {
 	XsiSchemaLocation string    `xml:"xsi:schemaLocation,attr"`
 	LocalRepository   string    `xml:"localRepository"`
 	Profiles          []Profile `xml:"profiles>profile,omitempty"`
+	Proxies           []Proxy   `xml:"proxies>proxy,omitempty"`
 	Mirrors           []Mirror  `xml:"mirrors>mirror,omitempty"`
 }
 
@@ -119,4 +120,15 @@ type Activation struct {
 type PropertyActivation struct {
 	Name  string `xml:"name"`
 	Value string `xml:"value"`
+}
+
+type Proxy struct {
+	ID            string `xml:"id"`
+	Active        bool   `xml:"active"`
+	Protocol      string `xml:"protocol"`
+	Host          string `xml:"host"`
+	Port          string `xml:"port,omitempty"`
+	Username      string `xml:"username,omitempty"`
+	Password      string `xml:"password,omitempty"`
+	NonProxyHosts string `xml:"nonProxyHosts,omitempty"`
 }

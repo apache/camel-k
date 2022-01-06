@@ -54,6 +54,7 @@ const expectedSettings = `<?xml version="1.0" encoding="UTF-8"?>
       <pluginRepositories></pluginRepositories>
     </profile>
   </profiles>
+  <proxies></proxies>
   <mirrors></mirrors>
 </settings>`
 
@@ -97,6 +98,7 @@ const expectedDefaultSettings = `<?xml version="1.0" encoding="UTF-8"?>
       </pluginRepositories>
     </profile>
   </profiles>
+  <proxies></proxies>
   <mirrors></mirrors>
 </settings>`
 
@@ -164,6 +166,7 @@ const expectedDefaultSettingsWithExtraRepo = `<?xml version="1.0" encoding="UTF-
       </pluginRepositories>
     </profile>
   </profiles>
+  <proxies></proxies>
   <mirrors>
     <mirror>
       <id>foo</id>
@@ -174,7 +177,9 @@ const expectedDefaultSettingsWithExtraRepo = `<?xml version="1.0" encoding="UTF-
 </settings>`
 
 func TestSettingsGeneration(t *testing.T) {
-	settings := NewSettings()
+	settings, err := NewSettings()
+	assert.Nil(t, err)
+
 	settings.LocalRepository = "/tmp/artifacts/m2"
 	settings.Profiles = []Profile{
 		{
