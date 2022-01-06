@@ -140,7 +140,7 @@ func getTransitiveDependencies(ctx context.Context, catalog *camel.RuntimeCatalo
 		if err != nil {
 			return nil, err
 		}
-		mc.SettingsContent = settingsData
+		mc.UserSettings = settingsData
 	}
 
 	// Make maven command less verbose
@@ -210,7 +210,6 @@ func getLocalBuildRoutes(integrationDirectory string) ([]string, error) {
 
 func generateCatalog(ctx context.Context) (*camel.RuntimeCatalog, error) {
 	// A Camel catalog is required for this operation
-	settings := ""
 	mvn := v1.MavenSpec{
 		LocalRepository: "",
 	}
@@ -220,7 +219,7 @@ func generateCatalog(ctx context.Context) (*camel.RuntimeCatalog, error) {
 	}
 	var providerDependencies []maven.Dependency
 	var caCert []byte
-	catalog, err := camel.GenerateCatalogCommon(ctx, settings, caCert, mvn, runtime, providerDependencies)
+	catalog, err := camel.GenerateCatalogCommon(ctx, nil, nil, caCert, mvn, runtime, providerDependencies)
 	if err != nil {
 		return nil, err
 	}

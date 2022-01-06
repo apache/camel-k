@@ -124,7 +124,7 @@ func (t *openAPITrait) Apply(e *Environment) error {
 			}
 		}
 
-		// Add an additional source that references the config map
+		// Add a source that references the config map
 		generatedSources = append(generatedSources, v1.SourceSpec{
 			DataSpec: v1.DataSpec{
 				Name:        generatedSourceName,
@@ -207,13 +207,18 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Res
 	mc.AddArgument("-Dopenapi.spec=" + in)
 	mc.AddArgument("-Ddsl.out=" + out)
 
-	settings, err := kubernetes.ResolveValueSource(e.Ctx, e.Client, e.Platform.Namespace, &e.Platform.Status.Build.Maven.Settings)
+	if settings, err := kubernetes.ResolveValueSource(e.Ctx, e.Client, e.Platform.Namespace, &e.Platform.Status.Build.Maven.Settings); err != nil {
+		return err
+	} else if settings != "" {
+		mc.UserSettings = []byte(settings)
+	}
+
+	settings := maven.NewSettings()
+	data, err := settings.MarshalBytes()
 	if err != nil {
 		return err
 	}
-	if settings != "" {
-		mc.SettingsContent = []byte(settings)
-	}
+	mc.GlobalSettings = data
 
 	if e.Platform.Status.Build.Maven.CASecret != nil {
 		certData, err := kubernetes.GetSecretRefData(e.Ctx, e.Client, e.Platform.Namespace, e.Platform.Status.Build.Maven.CASecret)
