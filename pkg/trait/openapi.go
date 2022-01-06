@@ -33,7 +33,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
@@ -142,7 +142,7 @@ func (t *openAPITrait) Apply(e *Environment) error {
 
 func (t *openAPITrait) generateOpenAPIConfigMap(e *Environment, resource v1.ResourceSpec, tmpDir, generatedContentName string) error {
 	cm := corev1.ConfigMap{}
-	key := client.ObjectKey{
+	key := ctrl.ObjectKey{
 		Namespace: e.Integration.Namespace,
 		Name:      generatedContentName,
 	}
@@ -213,12 +213,15 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Res
 		mc.UserSettings = []byte(settings)
 	}
 
-	settings := maven.NewSettings()
-	data, err := settings.MarshalBytes()
-	if err != nil {
+	if settings, err := maven.NewSettings(maven.ProxyFromEnvironment); err != nil {
 		return err
+	} else {
+		data, err := settings.MarshalBytes()
+		if err != nil {
+			return err
+		}
+		mc.GlobalSettings = data
 	}
-	mc.GlobalSettings = data
 
 	if e.Platform.Status.Build.Maven.CASecret != nil {
 		certData, err := kubernetes.GetSecretRefData(e.C, e.Client, e.Platform.Namespace, e.Platform.Status.Build.Maven.CASecret)
