@@ -25,4 +25,14 @@ nav:
 
 asciidoc:
   attributes:
-    camel-version: 3.11.x
+    camel-kamelets-version: 0.4.0 # Makefile KAMELET_CATALOG_REPO_BRANCH
+    camel-kamelets-docs-version: 0.4.x # Makefile KAMELET_CATALOG_REPO_BRANCH
+    camel-k-runtime-version: 1.9.1 # Makefile RUNTIME_VERSION
+    camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # Makefile BUNDLE_CAMEL_APIS
+    # from camel-k-runtime parent pom:
+    camel-version: 3.11.2
+    camel-docs-version: 3.11.x
+    camel-quarkus-version: 2.3.0
+    camel-quarkus-docs-version: 2.3.x
+    quarkus-version: 2.3.0.Final
+    graalvm-version: 21.2.0
