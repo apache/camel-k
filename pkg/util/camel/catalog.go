@@ -84,7 +84,10 @@ func GenerateCatalog(
 	if err != nil {
 		return nil, err
 	}
-	settings := maven.NewSettings()
+	settings, err := maven.NewSettings(maven.ProxyFromEnvironment)
+	if err != nil {
+		return nil, err
+	}
 	globalSettings, err := settings.MarshalBytes()
 	if err != nil {
 		return nil, err

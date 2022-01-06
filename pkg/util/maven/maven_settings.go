@@ -18,7 +18,6 @@ limitations under the License.
 package maven
 
 import (
-	"bytes"
 	"encoding/xml"
 	"strings"
 
@@ -34,30 +33,38 @@ import (
 var DefaultMavenRepositories = "https://repo.maven.apache.org/maven2@id=central"
 
 func (s Settings) MarshalBytes() ([]byte, error) {
-	w := &bytes.Buffer{}
-	w.WriteString(xml.Header)
-
-	e := xml.NewEncoder(w)
-	e.Indent("", "  ")
-
-	if err := e.Encode(s); err != nil {
-		return []byte{}, err
-	}
-
-	return w.Bytes(), nil
+	return util.EncodeXML(s)
 }
 
-func NewSettings() Settings {
-	return Settings{
+type SettingsOption interface {
+	apply(settings *Settings) error
+}
+
+func NewSettings(options ...SettingsOption) (Settings, error) {
+	settings := Settings{
 		XMLName:           xml.Name{Local: "settings"},
 		XMLNs:             "http://maven.apache.org/SETTINGS/1.0.0",
 		XMLNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
 		XsiSchemaLocation: "http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd",
 	}
+
+	for _, option := range options {
+		err := option.apply(&settings)
+		if err != nil {
+			return Settings{}, err
+		}
+	}
+
+	return settings, nil
 }
 
 func NewDefaultSettings(repositories []v1.Repository, mirrors []Mirror) Settings {
-	settings := NewSettings()
+	settings := Settings{
+		XMLName:           xml.Name{Local: "settings"},
+		XMLNs:             "http://maven.apache.org/SETTINGS/1.0.0",
+		XMLNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
+		XsiSchemaLocation: "http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd",
+	}
 
 	var additionalRepos []v1.Repository
 	for _, defaultRepo := range defaultMavenRepositories() {

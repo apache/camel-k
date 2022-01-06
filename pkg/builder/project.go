@@ -94,7 +94,10 @@ func generateProjectSettings(ctx *builderContext) error {
 		ctx.Maven.UserSettings = []byte(val)
 	}
 
-	settings := maven.NewSettings()
+	settings, err := maven.NewSettings(maven.ProxyFromEnvironment)
+	if err != nil {
+		return err
+	}
 	data, err := settings.MarshalBytes()
 	if err != nil {
 		return err
