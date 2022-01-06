@@ -66,11 +66,11 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 func TestLocalFilesAreMountedInContainerInDefaultPath(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
-		name := "laughing-route"
+		name := "laughing-route-default-path"
 
-		// Create integration that reads a file mounted into the container filesystem that was downloaded from the Image Registry
-		Expect(Kamel("run", "files/LaunghingRoute.java",
+		Expect(Kamel("run", "files/LaughingRoute.java",
 			"--name", name,
+			"-p", "location=files/",
 			"-d", "file://files/laugh.txt",
 			"-n", ns,
 		).Execute()).To(Succeed())
@@ -87,20 +87,41 @@ func TestLocalFilesAreMountedInContainerInDefaultPath(t *testing.T) {
 func TestLocalFilesAreMountedInContainerInCustomPath(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
-		name := "laughing-route"
-		customMount := "this/is/a/custom/path/"
+		name := "laughing-route-custom-path"
+		customPath := "this/is/a/custom/path/"
 
-		// Create integration that reads a file mounted into the container filesystem with a custom path
-		Expect(Kamel("run", "files/LaunghingRoute.java",
+		Expect(Kamel("run", "files/LaughingRoute.java",
 			"--name", name,
-			"-p", fmt.Sprintf("location=%s", customMount),
-			"-d", fmt.Sprintf("file://files/laugh.txt:%slaugh.txt", customMount),
+			"-p", fmt.Sprintf("location=%s", customPath),
+			"-d", fmt.Sprintf("file://files/laugh.txt:%slaugh.txt", customPath),
 			"-n", ns,
 		).Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("haha"))
+
+		// Clean up
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
+}
+
+func TestLocalDirectoryIsMountedInContainer(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		name := "laughing-route-directory"
+
+		Expect(Kamel("run", "files/LaughingRoute.java",
+			"--name", name,
+			"-p", "location=files/laughs",
+			"-d", fmt.Sprintf("file://files/laughs/"),
+			"-n", ns,
+		).Execute()).To(Succeed())
+
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("haha"))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("hehe"))
 
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
