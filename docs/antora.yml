@@ -5,3 +5,17 @@ nav:
 - modules/ROOT/nav.adoc
 - modules/languages/nav-languages.adoc
 - modules/ROOT/nav-end.adoc
+
+asciidoc:
+  attributes:
+    camel-kamelets-version: 0.2.1 # Makefile KAMELET_CATALOG_REPO_BRANCH
+    camel-kamelets-docs-version: 0.2.x # Makefile KAMELET_CATALOG_REPO_BRANCH
+    camel-k-runtime-version: 1.7.0 # Makefile RUNTIME_VERSION
+    camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # Makefile BUNDLE_CAMEL_APIS
+    # from camel-k-runtime parent pom:
+    camel-version: 3.9.0
+    camel-docs-version: 3.9.x
+    camel-quarkus-version: 1.8.1
+    camel-quarkus-docs-version: 1.8.x
+    quarkus-version: 1.13.0.Final
+    graalvm-version: 21.0.0

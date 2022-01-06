@@ -1,5 +1,26 @@
 = Apache Camel K
 
+[NOTE]
+--
+This version ({page-component-display-version}) of {page-component-title} depends on:
+
+* https://github.com/apache/camel-k-runtime.git[camel-k-runtime] (undocumented) at version {camel-k-runtime-version}, and therefore:
+//** xref:{camel-quarkus-docs-version}@camel-quarkus::index.adoc[] at version {camel-quarkus-version}.
+** https://github.com/apache/camel-quarkus.git[camel-quarkus] at version {camel-quarkus-version} (no longer documented).
+//** xref:{camel-docs-version}@components::index.adoc[Camel] at version {camel-version}.
+** https://github.com/apache/camel.git[Camel] at version {camel-version} (no longer documented).
+** https://quarkus.io[Quarkus] at version {quarkus-version}.
+** https://www.graalvm.org[GraalVM] at version {graalvm-version}.
+//* xref:{camel-kamelets-docs-version}@camel-kamelets::index.adoc[] at version {camel-kamelets-version}.
+* https://github.com/apache/camel-kamelets.git[camel-kamelets] at version {camel-kamelets-version} (never documented).
+
+ifdef::lts[This long term service release will be supported until {lts}.]
+ifndef::lts[]
+ifdef::prerelease[This is the development version of {page-component-title}. It should not be used in production.]
+ifndef::prerelease[This release will not be updated, but rather replaced by a new release.]
+endif::[]
+--
+
 Apache Camel K is a lightweight integration framework built from Apache Camel that runs natively on Kubernetes and is specifically designed for serverless and microservice architectures.
 
 Users of Camel K can instantly run integration code written in Camel DSL on their preferred cloud (Kubernetes or OpenShift).
