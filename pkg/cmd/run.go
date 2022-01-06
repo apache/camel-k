@@ -18,10 +18,10 @@ limitations under the License.
 package cmd
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"os"
 	"os/signal"
 	"path"
@@ -54,7 +54,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/dsl"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
-	"github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/property"
 	"github.com/apache/camel-k/pkg/util/resource"
 	"github.com/apache/camel-k/pkg/util/sync"
@@ -773,79 +773,130 @@ func getPlatform(c client.Client, context context.Context, ns string) (*v1.Integ
 }
 
 func uploadDependency(platform *v1.IntegrationPlatform, item string, integrationName string, cmd *cobra.Command, integration *v1.Integration) error {
-	registry := platform.Spec.Build.Registry.Address
-	insecure := platform.Spec.Build.Registry.Insecure
-	newStdR, newStdW, _ := os.Pipe()
-	defer newStdW.Close()
-
-	path := item[7:]
-	targetPath := path
+	path := strings.TrimPrefix(item, "file://")
 	localPath := path
+	targetPath := ""
 	i := strings.Index(path, ":")
 	if i > 0 {
 		targetPath = path[i+1:]
 		localPath = path[:i]
 	}
-	// spectrum expects absolute paths but let's allow users to specify relative paths
-	abs, err := filepath.Abs(localPath)
-	if err != nil {
-		return err
-	}
-	filename, ext := getFilenameAndExtension(abs)
-	artifactId := integrationName + "-" + filename
-	version := defaults.Version
-	groupId := "org.apache.camel.k.external"
-	groupIdHttpPath := strings.ReplaceAll(groupId, ".", "/")
-	artifactPath := fmt.Sprintf("%s/%s/%s/%s-%s%s", groupIdHttpPath, artifactId, version, artifactId, version, ext)
-	// Image repository names must be lower case
-	artifactPath = strings.ToLower(artifactPath)
-	if platform.Spec.Cluster == v1.IntegrationPlatformClusterOpenShift {
-		artifactPath = fmt.Sprintf("%s/%s", integration.Namespace, strings.ReplaceAll(artifactPath, "/", "_"))
-	}
-	target := fmt.Sprintf("%s/%s:%s", registry, artifactPath, version)
-	options := spectrum.Options{
-		PullInsecure:  true,
-		PushInsecure:  insecure,
-		PullConfigDir: "",
-		PushConfigDir: "",
-		Base:          "",
-		Target:        target,
-		Stdout:        cmd.OutOrStdout(),
-		Stderr:        cmd.OutOrStderr(),
-		Recursive:     false,
-	}
+	options := getSpectrumOptions(platform, cmd)
 
-	go readSpectrumLogs(newStdR)
-	_, err = spectrum.Build(options, fmt.Sprintf("%s:.", abs))
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Uploaded: %s to %s \n", item, target)
+	filepath.WalkDir(localPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		dependency, err := createMavenDependency(integrationName, path, localPath)
+		if err != nil {
+			return err
+		}
+		artifactHttpPath := getArtifactHttpPath(dependency, platform, integration.Namespace)
+		options.Target = fmt.Sprintf("%s/%s:%s", platform.Spec.Build.Registry.Address, artifactHttpPath, dependency.Version)
+		_, err = spectrum.Build(options, fmt.Sprintf("%s:.", path))
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Uploaded: %s to %s \n", item, options.Target)
+		return addToDependencyList(dependency, integration, targetPath, path)
+	})
+	return nil
+}
+
+func addToDependencyList(dependency maven.Dependency, integration *v1.Integration, targetPath string, localPath string) error {
 	// JARs will be added to the pom.xml
-	if strings.HasSuffix(item, ".jar") {
-		dependency := fmt.Sprintf("mvn:%s:%s:%s:%s", groupId, artifactId, ext[1:], version)
+	// Everything else will be mounted on the container filesystem except for pom files
+	if strings.HasSuffix(localPath, ".jar") {
+		dependency := fmt.Sprintf("mvn:%s:%s:%s:%s", dependency.GroupID, dependency.ArtifactID, dependency.Type, dependency.Version)
 		fmt.Printf("Added %s to the Integration's dependency list \n", dependency)
 		integration.Spec.AddDependency(dependency)
-		// Everything else will be mounted on the container filesystem
-	} else if !strings.HasSuffix(item, ".pom") {
-		dependency := fmt.Sprintf("docker-mvn:%s:%s:%s:%s@%s", groupId, artifactId, ext[1:], version, targetPath)
+	} else if !strings.HasSuffix(localPath, ".pom") {
+		// If the target path is a directory then append it's local relative path to it
+		containerPath := localPath
+		if targetPath != "" {
+			if filepath.Ext(targetPath) == "" {
+				containerPath = filepath.Join(targetPath, localPath)
+			} else {
+				containerPath = targetPath
+			}
+		}
+		dependency := fmt.Sprintf("docker-mvn:%s:%s:%s:%s@%s", dependency.GroupID, dependency.ArtifactID, dependency.Type, dependency.Version, containerPath)
 		fmt.Printf("Added %s to the Integration's dependency list \n", dependency)
 		integration.Spec.AddDependency(dependency)
 	}
 	return nil
 }
 
-func getFilenameAndExtension(abs string) (string, string) {
-	extension := filepath.Ext(abs)
-	name := filepath.Base(abs)
-	return name[0 : len(name)-len(extension)], extension
+func getSpectrumOptions(platform *v1.IntegrationPlatform, cmd *cobra.Command) spectrum.Options {
+	insecure := platform.Spec.Build.Registry.Insecure
+	options := spectrum.Options{
+		PullInsecure:  true,
+		PushInsecure:  insecure,
+		PullConfigDir: "",
+		PushConfigDir: "",
+		Base:          "",
+		Stdout:        cmd.OutOrStdout(),
+		Stderr:        cmd.OutOrStderr(),
+		Recursive:     false,
+	}
+	return options
 }
 
-func readSpectrumLogs(newStdOut *os.File) {
-	scanner := bufio.NewScanner(newStdOut)
-
-	for scanner.Scan() {
-		line := scanner.Text()
-		log.Infof(line)
+func getArtifactHttpPath(dependency maven.Dependency, platform *v1.IntegrationPlatform, ns string) string {
+	groupIdHttpPath := strings.ReplaceAll(dependency.GroupID, ".", "/")
+	artifactHttpPath := fmt.Sprintf("%s/%s/%s/%s-%s.%s", groupIdHttpPath, dependency.ArtifactID, dependency.Version, dependency.ArtifactID, dependency.Version, dependency.Type)
+	// Image repository names must be lower case
+	artifactHttpPath = strings.ToLower(artifactHttpPath)
+	// OpenShift doesn't accept path seperators in repository names
+	// OpenShift expects the project namespace in the first element of the path
+	if platform.Spec.Cluster == v1.IntegrationPlatformClusterOpenShift {
+		artifactHttpPath = fmt.Sprintf("%s/%s", ns, strings.ReplaceAll(artifactHttpPath, "/", "_"))
 	}
+	return artifactHttpPath
+}
+
+func createMavenDependency(integrationName string, path string, localPath string) (maven.Dependency, error) {
+	dirName, err := getDirName(localPath)
+	if err != nil {
+		return maven.Dependency{}, err
+	}
+	fileRelPath, ext, err := getFileRelativePathAndExtension(path, dirName)
+	if err != nil {
+		return maven.Dependency{}, err
+	}
+	// let's set the artifactId using the integration name and the file's relative path
+	// we use the relative path in case of nested files that might have the same name
+	// we replace the file seperators with dots to comply with Maven GAV naming conventions.
+	artifactId := integrationName + "-" + strings.ReplaceAll(fileRelPath, string(os.PathSeparator), ".")
+	dependency := maven.Dependency{
+		GroupID:    "org.apache.camel.k.external",
+		ArtifactID: artifactId,
+		Type:       ext,
+		Version:    defaults.Version,
+	}
+	return dependency, nil
+}
+
+func getFileRelativePathAndExtension(path string, dirName string) (string, string, error) {
+	extension := filepath.Ext(path)
+	name, err := filepath.Rel(dirName, path)
+	if err != nil {
+		return "", "", err
+	}
+	return name[0 : len(name)-len(extension)], extension[1:], nil
+}
+
+func getDirName(path string) (string, error) {
+	parentDir := path
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		return "", err
+	}
+	if !fileInfo.IsDir() {
+		parentDir = filepath.Dir(parentDir)
+	}
+	return parentDir, nil
 }
