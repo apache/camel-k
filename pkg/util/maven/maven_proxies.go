@@ -58,6 +58,14 @@ func parseProxyFromEnvVar(proxyEnvVar string) (Proxy, error) {
 		Host:     u.Hostname(),
 		Port:     u.Port(),
 	}
+	if proxy.Port == "" {
+		switch proxy.Protocol {
+		case "http":
+			proxy.Port = "80"
+		case "https":
+			proxy.Port = "443"
+		}
+	}
 	if user := u.User; user != nil {
 		proxy.Username = user.Username()
 		if password, set := user.Password(); set {
