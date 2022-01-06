@@ -23,6 +23,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/jvm"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/maven"
 )
 
 func init() {
@@ -90,8 +91,15 @@ func generateProjectSettings(ctx *builderContext) error {
 		return err
 	}
 	if val != "" {
-		ctx.Maven.SettingsData = []byte(val)
+		ctx.Maven.UserSettings = []byte(val)
 	}
+
+	settings := maven.NewSettings()
+	data, err := settings.MarshalBytes()
+	if err != nil {
+		return err
+	}
+	ctx.Maven.GlobalSettings = data
 
 	return nil
 }
