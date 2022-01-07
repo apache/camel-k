@@ -18,27 +18,33 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"regexp"
 	"strings"
 	"time"
 
-	"go.uber.org/multierr"
-
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"go.uber.org/multierr"
+
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/olm"
+	"github.com/apache/camel-k/pkg/util/patch"
 	"github.com/apache/camel-k/pkg/util/registry"
 	"github.com/apache/camel-k/pkg/util/watch"
 )
@@ -383,8 +389,37 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		}
 
 		if len(o.MavenRepositories) > 0 {
-			for _, r := range o.MavenRepositories {
-				platform.AddConfiguration("repository", r)
+			var repositories []v1.Repository
+			var mirrors []maven.Mirror
+
+			for i, r := range o.MavenRepositories {
+				if strings.Contains(r, "@mirrorOf=") {
+					mirror := maven.NewMirror(r)
+					if mirror.ID == "" {
+						mirror.ID = fmt.Sprintf("mirror-%03d", i)
+					}
+					mirrors = append(mirrors, mirror)
+				} else {
+					repository := maven.NewRepository(r)
+					if repository.ID == "" {
+						repository.ID = fmt.Sprintf("repository-%03d", i)
+					}
+					repositories = append(repositories, repository)
+				}
+			}
+
+			settings := maven.NewDefaultSettings(repositories, mirrors)
+
+			err := createDefaultMavenSettingsConfigMap(o.Context, c, namespace, platform.Name, settings)
+			if err != nil {
+				return err
+			}
+
+			platform.Spec.Build.Maven.Settings.ConfigMapKeyRef = &corev1.ConfigMapKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: platform.Name + "-maven-settings",
+				},
+				Key: "settings.xml",
 			}
 		}
 
@@ -674,4 +709,39 @@ func decodeSecretKeySelector(secretKey string) (*corev1.SecretKeySelector, error
 		},
 		Key: match[2],
 	}, nil
+}
+
+func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Client, namespace, name string, settings maven.Settings) error {
+	cm, err := maven.SettingsConfigMap(namespace, name, settings)
+	if err != nil {
+		return err
+	}
+
+	err = client.Create(ctx, cm)
+	if err != nil && !k8serrors.IsAlreadyExists(err) {
+		return err
+	} else if k8serrors.IsAlreadyExists(err) {
+		existing := &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: cm.Namespace,
+				Name:      cm.Name,
+			},
+		}
+		err = client.Get(ctx, ctrl.ObjectKeyFromObject(existing), existing)
+		if err != nil {
+			return err
+		}
+
+		p, err := patch.PositiveMergePatch(existing, cm)
+		if err != nil {
+			return err
+		} else if len(p) != 0 {
+			err = client.Patch(ctx, cm, ctrl.RawPatch(types.MergePatchType, p))
+			if err != nil {
+				return errors.Wrap(err, "error during patch resource")
+			}
+		}
+	}
+
+	return nil
 }
