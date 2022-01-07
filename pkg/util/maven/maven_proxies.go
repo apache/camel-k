@@ -33,6 +33,7 @@ func (_ proxyFromEnvironment) apply(settings *Settings) error {
 		if err != nil {
 			return err
 		}
+		proxy.ID = "http-proxy"
 		settings.Proxies = append(settings.Proxies, proxy)
 	}
 
@@ -41,6 +42,7 @@ func (_ proxyFromEnvironment) apply(settings *Settings) error {
 		if err != nil {
 			return err
 		}
+		proxy.ID = "https-proxy"
 		settings.Proxies = append(settings.Proxies, proxy)
 	}
 
@@ -58,15 +60,11 @@ func parseProxyFromEnvVar(proxyEnvVar string) (Proxy, error) {
 		Host:     u.Hostname(),
 		Port:     u.Port(),
 	}
-	switch proxy.Protocol {
-	case "http":
-		proxy.ID = "http-proxy"
-		if proxy.Port == "" {
+	if proxy.Port == "" {
+		switch proxy.Protocol {
+		case "http":
 			proxy.Port = "80"
-		}
-	case "https":
-		proxy.ID = "https-proxy"
-		if proxy.Port == "" {
+		case "https":
 			proxy.Port = "443"
 		}
 	}
