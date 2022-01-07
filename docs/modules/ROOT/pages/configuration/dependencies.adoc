@@ -45,15 +45,28 @@ kamel run -d mvn:com.google.guava:guava:26.0-jre Integration.java
 ```
 Note that if your dependencies belong to a private repository, this repository needs to be defined. See xref:configuration/maven.adoc[Configure maven].
 
-*Jitpack dependencies* can be added using the `-d` flag, the `github` prefix, and the project in the form `github:user/repo/version`:
+[[dependencies-kind-jitpack]]
+=== Jitpack dependencies
+
+If your dependency is not published in a `maven` repository you will find very useful https://jitpack.io/[Jitpack] as a way to provide any custom dependency to your runtime Integration environment. In certain occasion you will find useful to include not only your route definition, but also some helper class or any other class which has to be used while defining the Integration behavior. With Jitpack you will be able to compile on the fly a java project hosted in a remote repository and use the produced package as a dependency of your Integration.
+
+The usage is the same as defined above for any maven dependency. It can be added using the `-d` flag, but, this time, you need to define the prefix as expected for the project repository you are using (ie, `github`). It has to be provided in the form `repository-kind:user/repo/version`. As an example, you can provide the Apache Commons CSV dependency by executing:
+
 ```
 kamel run -d github:apache/commons-csv/1.1 Integration.java
 ```
-If you use some other codebase with jitpack, f.e. bitbucket, just change the prefix, followed by your repo-path from jitpack
+
+We support the most important public code repositories:
+
 ```
-kamel run -d bitbucket:workspace/repo/[tag|branch|snapshot]
+github:user/repo/version
+gitlab:user/repo/version
+bitbucket:user/repo/version
+gitee:user/repo/version
+azure:user/repo/version
 ```
-NOTE: works with other's too (gitlab, gitee, azure...)
+
+The `version` can be omitted when you are willing to use the `main` branch. Otherwise it will represent the branch or tag used in the project repo. You can have a look at the https://github.com/apache/camel-k/tree/main/examples/jitpack[Camel K Jitpack example] to have a complete experience about how to include a dependency with this mechanism.
 
 [[dependencies-dynamic]]
 == Dynamic URIs
