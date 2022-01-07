@@ -135,8 +135,9 @@ func (t *builderTrait) Apply(e *Environment) error {
 }
 
 func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
-	maven := e.Platform.Status.Build.Maven
-
+	maven := v1.MavenBuildSpec{
+		MavenSpec: e.Platform.Status.Build.Maven,
+	}
 	// Add Maven repositories defined in the IntegrationKit
 	for _, repo := range e.IntegrationKit.Spec.Repositories {
 		maven.Repositories = append(maven.Repositories, mvn.NewRepository(repo))
