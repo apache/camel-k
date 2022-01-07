@@ -227,7 +227,7 @@ spec:
                       type: string
                     dependencies:
                       items:
-                        description: MavenArtifact --
+                        description: MavenArtifact defines a Maven artifact
                         properties:
                           artifactId:
                             type: string
@@ -264,7 +264,7 @@ spec:
                       properties:
                         dependencies:
                           items:
-                            description: MavenArtifact --
+                            description: MavenArtifact defines a Maven artifact
                             properties:
                               artifactId:
                                 type: string
@@ -287,7 +287,7 @@ spec:
                     type: object
                   dependencies:
                     items:
-                      description: MavenArtifact --
+                      description: MavenArtifact defines a Maven artifact
                       properties:
                         artifactId:
                           type: string

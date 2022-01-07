@@ -58,13 +58,15 @@ func TestMavenSettingsFromConfigMap(t *testing.T) {
 		Namespace: "ns",
 		Build: v1.BuilderTask{
 			Runtime: catalog.Runtime,
-			Maven: v1.MavenSpec{
-				Settings: v1.ValueSource{
-					ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{
-							Name: "maven-settings",
+			Maven: v1.MavenBuildSpec{
+				MavenSpec: v1.MavenSpec{
+					Settings: v1.ValueSource{
+						ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: "maven-settings",
+							},
+							Key: "settings.xml",
 						},
-						Key: "settings.xml",
 					},
 				},
 			},
@@ -105,13 +107,15 @@ func TestMavenSettingsFromSecret(t *testing.T) {
 		Namespace: "ns",
 		Build: v1.BuilderTask{
 			Runtime: catalog.Runtime,
-			Maven: v1.MavenSpec{
-				Settings: v1.ValueSource{
-					SecretKeyRef: &corev1.SecretKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{
-							Name: "maven-settings",
+			Maven: v1.MavenBuildSpec{
+				MavenSpec: v1.MavenSpec{
+					Settings: v1.ValueSource{
+						SecretKeyRef: &corev1.SecretKeySelector{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: "maven-settings",
+							},
+							Key: "settings.xml",
 						},
-						Key: "settings.xml",
 					},
 				},
 			},
