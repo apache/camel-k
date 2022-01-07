@@ -22,6 +22,9 @@ inputs:
   build-bundle-catalog-source:
     description: "Name of the catalog source for the build bundle image"
     required: true
+  image-namespace:
+    description: "Installed location of the images if resident on the cluster (only applies to clusters with partnered registries)"
+    required: false
 
 runs:
   using: "composite"
@@ -32,4 +35,5 @@ runs:
       if: ${{ always() }}
       run: |
         ./.github/actions/kamel-cleanup/cleanup.sh \
-          -c "${{ inputs.build-bundle-catalog-source-name }}"
+          -c "${{ inputs.build-bundle-catalog-source }}" \
+          -i "${{ inputs.image-namespace }}"

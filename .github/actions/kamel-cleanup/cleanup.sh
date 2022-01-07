@@ -25,10 +25,13 @@
 
 set -e
 
-while getopts ":c:" opt; do
+while getopts ":c:i:" opt; do
   case "${opt}" in
     c)
       BUILD_CATALOG_SOURCE=${OPTARG}
+      ;;
+    i)
+      IMAGE_NAMESPACE=${OPTARG}
       ;;
     :)
       echo "ERROR: Option -$OPTARG requires an argument"
@@ -55,6 +58,19 @@ fi
 kubectl get crds | grep camel | awk '{print $1}' | xargs kubectl delete crd &> /dev/null
 set -e
 
+if [ -n "${IMAGE_NAMESPACE}" ]; then
+  imgstreams="camel-k camel-k-bundle camel-k-iib"
+  set +e
+  for cis in ${imgstreams}
+  do
+    if kubectl get is ${cis} -n ${IMAGE_NAMESPACE} &> /dev/null
+    then
+      kubectl delete is ${cis} -n ${IMAGE_NAMESPACE}
+    fi
+  done
+  set -e
+fi
+
 #
 # Remove Catalog Source
 #
@@ -62,6 +78,7 @@ if [ -z "${BUILD_CATALOG_SOURCE}" ]; then
   # Catalog source never defined so nothing to do
   exit 0
 fi
+
 
 set +e
 CATALOG_NS=$(kubectl get catalogsource --all-namespaces | grep ${BUILD_CATALOG_SOURCE} | awk {'print $1'})

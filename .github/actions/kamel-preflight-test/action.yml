@@ -1,0 +1,55 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: kamel-preflight-test
+description: 'Does a preflight-test to check the operator can be installed correctly'
+
+inputs:
+  build-catalog-source:
+    description: "The name of the bundle catalog (only installed in the cluster if OLM is used)"
+    required: false
+  image-namespace:
+    description: 'Namespace in which the image is stored'
+    required: true
+  image-registry-host:
+    description: 'Location of image registry host'
+    required: true
+  image-name:
+    description: 'Reference of the camel-k image'
+    required: true
+  image-registry-insecure:
+    description: "Whether the registry is insecure"
+    required: true
+  image-version:
+    description: "Reference of the camel-k image version"
+    required: true
+
+runs:
+  using: "composite"
+
+  steps:
+  - id: preflight-test
+    name: Execute Preflight Test
+    shell: bash
+    run: |
+      ./.github/actions/kamel-preflight-test/preflight-test.sh \
+        -c "${{ inputs.build-catalog-source }}" \
+        -i "${{ inputs.image-namespace }}" \
+        -l "${{ inputs.image-registry-host }}" \
+        -n "${{ inputs.image-name }}" \
+        -s "${{ inputs.image-registry-insecure }}" \
+        -v "${{ inputs.image-version }}"
