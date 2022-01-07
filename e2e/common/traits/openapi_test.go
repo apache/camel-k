@@ -34,6 +34,34 @@ import (
 	. "github.com/apache/camel-k/e2e/support"
 )
 
+func TestOpenAPI(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+
+		Expect(Kamel(
+			"run",
+			"-n", ns,
+			"--name", "petstore",
+			"--open-api", "file:files/openapi/petstore-api.yaml",
+			"files/openapi/petstore.groovy",
+		).Execute()).To(Succeed())
+
+		Eventually(IntegrationPodPhase(ns, "petstore"), TestTimeoutLong).
+			Should(Equal(corev1.PodRunning))
+		Eventually(Deployment(ns, "petstore"), TestTimeoutLong).
+			Should(Not(BeNil()))
+
+		Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
+			Should(ContainSubstring("Started listPets (rest://get:/v1:/pets)"))
+		Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
+			Should(ContainSubstring("Started createPets (rest://post:/v1:/pets)"))
+		Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
+			Should(ContainSubstring("Started showPetById (rest://get:/v1:/pets/%7BpetId%7D)"))
+
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
+}
+
 func TestOpenAPIConfigmap(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
