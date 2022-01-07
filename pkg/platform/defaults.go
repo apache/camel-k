@@ -83,7 +83,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		}
 	}
 
-	err := setPlatformDefaults(ctx, c, p, verbose)
+	err := setPlatformDefaults(p, verbose)
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	return nil
 }
 
-func setPlatformDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPlatform, verbose bool) error {
+func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 	if p.Status.Build.RuntimeVersion == "" {
 		p.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	}
