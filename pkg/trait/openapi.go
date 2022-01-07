@@ -262,15 +262,15 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 		mc.UserSettings = []byte(settings)
 	}
 
-	if settings, err := maven.NewSettings(maven.DefaultRepositories, maven.ProxyFromEnvironment); err != nil {
+	settings, err := maven.NewSettings(maven.DefaultRepositories, maven.ProxyFromEnvironment)
+	if err != nil {
 		return err
-	} else {
-		data, err := settings.MarshalBytes()
-		if err != nil {
-			return err
-		}
-		mc.GlobalSettings = data
 	}
+	data, err := settings.MarshalBytes()
+	if err != nil {
+		return err
+	}
+	mc.GlobalSettings = data
 
 	if e.Platform.Status.Build.Maven.CASecret != nil {
 		certData, err := kubernetes.GetSecretRefData(e.Ctx, e.Client, e.Platform.Namespace, e.Platform.Status.Build.Maven.CASecret)

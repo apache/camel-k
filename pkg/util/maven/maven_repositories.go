@@ -27,6 +27,7 @@ var DefaultRepositories = &defaultRepositories{}
 
 type defaultRepositories struct{}
 
+// nolint: unparam
 func (o defaultRepositories) apply(settings *Settings) error {
 	for _, repository := range defaultMavenRepositories() {
 		upsertRepository(repository, &settings.Profiles[0].Repositories)

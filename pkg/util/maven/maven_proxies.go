@@ -27,7 +27,7 @@ var ProxyFromEnvironment = proxyFromEnvironment{}
 
 type proxyFromEnvironment struct{}
 
-func (_ proxyFromEnvironment) apply(settings *Settings) error {
+func (proxyFromEnvironment) apply(settings *Settings) error {
 	if httpProxy := os.Getenv("HTTP_PROXY"); httpProxy != "" {
 		proxy, err := parseProxyFromEnvVar(httpProxy)
 		if err != nil {
