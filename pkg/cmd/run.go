@@ -80,7 +80,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 
 	cmd.Flags().String("name", "", "The integration name")
 	cmd.Flags().StringArrayP("connect", "c", nil, "A Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
-	cmd.Flags().StringArrayP("dependency", "d", nil, "A dependency that should be included, e.g., \"-d camel-mail\" for a Camel component, or \"-d mvn:org.my:app:1.0\" for a Maven dependency. For local files use the \"file://\" prefix (experimental)")
+	cmd.Flags().StringArrayP("dependency", "d", nil, "A dependency that should be included, e.g., \"-d camel-mail\" for a Camel component, \"-d mvn:org.my:app:1.0\" for a Maven dependency or \"file://localPath[:targetPath]\" for local files (experimental)")
 	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or properties file (syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
@@ -782,6 +782,10 @@ func uploadDependency(platform *v1.IntegrationPlatform, item string, integration
 		localPath = path[:i]
 	}
 	options := getSpectrumOptions(platform, cmd)
+	dirName, err := getDirName(localPath)
+	if err != nil {
+		return err
+	}
 
 	filepath.WalkDir(localPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -790,7 +794,7 @@ func uploadDependency(platform *v1.IntegrationPlatform, item string, integration
 		if d.IsDir() {
 			return nil
 		}
-		dependency, err := createMavenDependency(integrationName, path, localPath)
+		dependency, err := createMavenDependency(integrationName, path, localPath, dirName)
 		if err != nil {
 			return err
 		}
@@ -801,12 +805,12 @@ func uploadDependency(platform *v1.IntegrationPlatform, item string, integration
 			return err
 		}
 		fmt.Printf("Uploaded: %s to %s \n", item, options.Target)
-		return addToDependencyList(dependency, integration, targetPath, path)
+		return addToDependencyList(dependency, integration, targetPath, path, dirName)
 	})
 	return nil
 }
 
-func addToDependencyList(dependency maven.Dependency, integration *v1.Integration, targetPath string, localPath string) error {
+func addToDependencyList(dependency maven.Dependency, integration *v1.Integration, targetPath string, localPath string, dirName string) error {
 	// JARs will be added to the pom.xml
 	// Everything else will be mounted on the container filesystem except for pom files
 	if strings.HasSuffix(localPath, ".jar") {
@@ -814,16 +818,14 @@ func addToDependencyList(dependency maven.Dependency, integration *v1.Integratio
 		fmt.Printf("Added %s to the Integration's dependency list \n", dependency)
 		integration.Spec.AddDependency(dependency)
 	} else if !strings.HasSuffix(localPath, ".pom") {
-		// If the target path is a directory then append it's local relative path to it
-		containerPath := localPath
-		if targetPath != "" {
-			if filepath.Ext(targetPath) == "" {
-				containerPath = filepath.Join(targetPath, localPath)
-			} else {
-				containerPath = targetPath
+		if filepath.Ext(targetPath) == "" {
+			localRelativePath, err := filepath.Rel(dirName, localPath)
+			if err != nil {
+				return err
 			}
+			targetPath = filepath.Join(targetPath, localRelativePath)
 		}
-		dependency := fmt.Sprintf("docker-mvn:%s:%s:%s:%s@%s", dependency.GroupID, dependency.ArtifactID, dependency.Type, dependency.Version, containerPath)
+		dependency := fmt.Sprintf("docker-mvn:%s:%s:%s:%s@%s", dependency.GroupID, dependency.ArtifactID, dependency.Type, dependency.Version, targetPath)
 		fmt.Printf("Added %s to the Integration's dependency list \n", dependency)
 		integration.Spec.AddDependency(dependency)
 	}
@@ -858,11 +860,7 @@ func getArtifactHttpPath(dependency maven.Dependency, platform *v1.IntegrationPl
 	return artifactHttpPath
 }
 
-func createMavenDependency(integrationName string, path string, localPath string) (maven.Dependency, error) {
-	dirName, err := getDirName(localPath)
-	if err != nil {
-		return maven.Dependency{}, err
-	}
+func createMavenDependency(integrationName string, path string, localPath string, dirName string) (maven.Dependency, error) {
 	fileRelPath, ext, err := getFileRelativePathAndExtension(path, dirName)
 	if err != nil {
 		return maven.Dependency{}, err

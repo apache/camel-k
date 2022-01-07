@@ -65,14 +65,14 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 
 func TestLocalFilesAreMountedInContainerInDefaultPath(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		// Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 		name := "laughing-route-default-path"
 
 		Expect(Kamel("run", "files/LaughingRoute.java",
 			"--name", name,
-			"-p", "location=files/",
+			"-p", "location=.?filename=laugh.txt",
 			"-d", "file://files/laugh.txt",
-			"-n", ns,
+			"-n", "camel-k",
 		).Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
@@ -113,8 +113,8 @@ func TestLocalDirectoryIsMountedInContainer(t *testing.T) {
 
 		Expect(Kamel("run", "files/LaughingRoute.java",
 			"--name", name,
-			"-p", "location=files/laughs",
-			"-d", fmt.Sprintf("file://files/laughs/"),
+			"-p", "location=files/",
+			"-d", fmt.Sprintf("file://files/laughs/:files/"),
 			"-n", ns,
 		).Execute()).To(Succeed())
 
