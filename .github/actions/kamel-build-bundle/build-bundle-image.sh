@@ -87,6 +87,19 @@ if [ -z "${REGISTRY_PULL_HOST}" ]; then
 fi
 
 #
+# Using a custom single cluster can allow for use-case that old camel-k images are cached
+# (see https://cloud.redhat.com/blog/image-garbage-collection-in-openshift). This is not an
+# issue on ephemeral clusters like kind.
+# Therefore, need to edit the bundle CSV to ensure the ImagePullPolicy of the camel-k image is
+# set to "Always" to mandate that the new image is always pulled.
+#
+# Use kustomize to patch the deployment resource
+#
+pushd config/manager > /dev/null
+kustomize edit add patch --path patch-image-pull-policy-always.yaml --kind Deployment
+popd
+
+#
 # Build with the PUSH host to ensure the correct image:tag
 # for docker to push the image.
 #
