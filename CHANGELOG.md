@@ -22,6 +22,7 @@
 - Default value of trait container.port-name is missing from catalog [\#2761](https://github.com/apache/camel-k/issues/2761)
 - How to remove Kamelets installation when installing IntegrationPlatform CRD? [\#2756](https://github.com/apache/camel-k/issues/2756)
 - Add 1.7.x documentation tag [\#2753](https://github.com/apache/camel-k/issues/2753)
+- Generated bundle created from `make bundle` contains separate service-account resource [\#2749](https://github.com/apache/camel-k/issues/2749)
 - Could not pull base image - Build kit failed \(No matching credentials were found, falling back on anonymous\) [\#2748](https://github.com/apache/camel-k/issues/2748)
 - Cannot deploy XML integration with undertow [\#2746](https://github.com/apache/camel-k/issues/2746)
 - Release 1.7.0 [\#2743](https://github.com/apache/camel-k/issues/2743)
