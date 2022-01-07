@@ -58,11 +58,15 @@ func parseProxyFromEnvVar(proxyEnvVar string) (Proxy, error) {
 		Host:     u.Hostname(),
 		Port:     u.Port(),
 	}
-	if proxy.Port == "" {
-		switch proxy.Protocol {
-		case "http":
+	switch proxy.Protocol {
+	case "http":
+		proxy.ID = "http-proxy"
+		if proxy.Port == "" {
 			proxy.Port = "80"
-		case "https":
+		}
+	case "https":
+		proxy.ID = "https-proxy"
+		if proxy.Port == "" {
 			proxy.Port = "443"
 		}
 	}
