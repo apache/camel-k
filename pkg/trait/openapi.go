@@ -145,10 +145,10 @@ func (t *openAPITrait) generateFromConfigmaps(e *Environment, tmpDir string) ([]
 			e.Resources.Add(refCm)
 		}
 		// Iterate over each configmap key which may hold a different OpenAPI spec
-		for k, v := range cm.UnstructuredContent()["data"].(map[string]string) {
+		for k, v := range cm.UnstructuredContent()["data"].(map[string]interface{}) {
 			dataSpecs = append(dataSpecs, v1.DataSpec{
 				Name:        k,
-				Content:     v,
+				Content:     v.(string),
 				Compression: false,
 			})
 		}

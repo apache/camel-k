@@ -17,7 +17,7 @@
  */
 
 //
-//  kamel run --dev --name petstore --open-api petstore-api.yaml petstore.groovy
+//  kamel run --dev --name petstore --open-api file:petstore-api.yaml petstore.groovy
 // 
 
 from('direct:listPets')
