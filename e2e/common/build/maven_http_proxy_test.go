@@ -31,6 +31,7 @@ import (
 	"fmt"
 	"math/big"
 	rand2 "math/rand"
+	"strings"
 	"testing"
 	"time"
 
@@ -294,14 +295,24 @@ ProxyVia Off
 			}),
 		))
 
+		svc := Service("default", "kubernetes")()
+		Expect(svc).NotTo(BeNil())
+
+		// It may be needed to populate the values from the cluster, machine and service network CIDRs
+		noProxy := []string{
+			".cluster.local",
+			".svc",
+			"localhost",
+		}
+		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
+
 		// Install Camel K with the HTTP proxy
 		Expect(Kamel("install", "-n", ns,
 			"--operator-env-vars", fmt.Sprintf("HTTP_PROXY=http://%s", hostname),
 			// FIXME: TLS handshake issue
 			// "--operator-env-vars", fmt.Sprintf("HTTPS_PROXY=https://%s", hostname),
 			// "--maven-ca-secret", secret.Name+"/"+corev1.TLSCertKey,
-			// FIXME: use the cluster network CIDR
-			"--operator-env-vars", "NO_PROXY=.cluster.local,.svc,10.0.0.0/16,127.0.0.1,172.17.0.0/18,172.21.0.0/16",
+			"--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","),
 		).Execute()).To(Succeed())
 
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
