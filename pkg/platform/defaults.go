@@ -19,7 +19,6 @@ package platform
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -39,9 +38,7 @@ import (
 	"github.com/apache/camel-k/pkg/kamelet/repository"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/log"
-	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/openshift"
-	"github.com/apache/camel-k/pkg/util/patch"
 )
 
 // BuilderServiceAccount --
@@ -184,42 +181,6 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1.Integration
 		}
 	}
 
-	if p.Status.Build.Maven.Settings.ConfigMapKeyRef == nil && p.Status.Build.Maven.Settings.SecretKeyRef == nil {
-		var repositories []v1.Repository
-		var mirrors []maven.Mirror
-		for i, c := range p.Status.Configuration {
-			if c.Type == "repository" {
-				if strings.Contains(c.Value, "@mirrorOf=") {
-					mirror := maven.NewMirror(c.Value)
-					if mirror.ID == "" {
-						mirror.ID = fmt.Sprintf("mirror-%03d", i)
-					}
-					mirrors = append(mirrors, mirror)
-				} else {
-					repo := maven.NewRepository(c.Value)
-					if repo.ID == "" {
-						repo.ID = fmt.Sprintf("repository-%03d", i)
-					}
-					repositories = append(repositories, repo)
-				}
-			}
-		}
-
-		settings := maven.NewDefaultSettings(repositories, mirrors)
-
-		err := createDefaultMavenSettingsConfigMap(ctx, c, p, settings)
-		if err != nil {
-			return err
-		}
-
-		p.Status.Build.Maven.Settings.ConfigMapKeyRef = &corev1.ConfigMapKeySelector{
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: p.Name + "-maven-settings",
-			},
-			Key: "settings.xml",
-		}
-	}
-
 	if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && p.Status.Build.KanikoBuildCache == nil {
 		// Default to disabling Kaniko cache warmer
 		// Using the cache warmer pod seems unreliable with the current Kaniko version
@@ -242,41 +203,6 @@ func setPlatformDefaults(ctx context.Context, c client.Client, p *v1.Integration
 		log.Log.Infof("BaseImage set to %s", p.Status.Build.BaseImage)
 		log.Log.Infof("LocalRepository set to %s", p.Status.Build.Maven.LocalRepository)
 		log.Log.Infof("Timeout set to %s", p.Status.Build.GetTimeout())
-	}
-
-	return nil
-}
-
-func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Client, p *v1.IntegrationPlatform, settings maven.Settings) error {
-	cm, err := maven.SettingsConfigMap(p.Namespace, p.Name, settings)
-	if err != nil {
-		return err
-	}
-
-	err = client.Create(ctx, cm)
-	if err != nil && !k8serrors.IsAlreadyExists(err) {
-		return err
-	} else if k8serrors.IsAlreadyExists(err) {
-		existing := &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: cm.Namespace,
-				Name:      cm.Name,
-			},
-		}
-		err = client.Get(ctx, ctrl.ObjectKeyFromObject(existing), existing)
-		if err != nil {
-			return err
-		}
-
-		p, err := patch.PositiveMergePatch(existing, cm)
-		if err != nil {
-			return err
-		} else if len(p) != 0 {
-			err = client.Patch(ctx, cm, ctrl.RawPatch(types.MergePatchType, p))
-			if err != nil {
-				return errors.Wrap(err, "error during patch resource")
-			}
-		}
 	}
 
 	return nil
