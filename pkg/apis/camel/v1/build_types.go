@@ -62,8 +62,15 @@ type BuilderTask struct {
 	Resources    []ResourceSpec `json:"resources,omitempty"`
 	Dependencies []string       `json:"dependencies,omitempty"`
 	Steps        []string       `json:"steps,omitempty"`
-	Maven        MavenSpec      `json:"maven,omitempty"`
+	Maven        MavenBuildSpec `json:"maven,omitempty"`
 	BuildDir     string         `json:"buildDir,omitempty"`
+}
+
+// MavenBuildSpec --
+type MavenBuildSpec struct {
+	MavenSpec `json:",inline"`
+	// The Maven repositories.
+	Repositories []Repository `json:"repositories,omitempty"`
 }
 
 // PublishTask --

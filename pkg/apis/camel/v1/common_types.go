@@ -104,29 +104,6 @@ type Configurable interface {
 	Configurations() []ConfigurationSpec
 }
 
-// MavenSpec --
-type MavenSpec struct {
-	// The path of the local Maven repository.
-	LocalRepository string `json:"localRepository,omitempty"`
-	// The Maven properties.
-	Properties map[string]string `json:"properties,omitempty"`
-	// A reference to the ConfigMap or Secret key that contains
-	// the Maven settings.
-	Settings ValueSource `json:"settings,omitempty"`
-	// The Secret name and key, containing the CA certificate(s) used to connect
-	// to remote Maven repositories.
-	// It can contain X.509 certificates, and PKCS#7 formatted certificate chains.
-	// A JKS formatted keystore is automatically created to store the CA certificate(s),
-	// and configured to be used as a trusted certificate(s) by the Maven commands.
-	// Note that the root CA certificates are also imported into the created keystore.
-	CASecret *corev1.SecretKeySelector `json:"caSecret,omitempty"`
-	// Deprecated: use IntegrationPlatform.Spec.Build.Timeout instead
-	Timeout      *metav1.Duration `json:"timeout,omitempty"`
-	Repositories []Repository     `json:"repositories,omitempty"`
-	// Maven build extensions https://maven.apache.org/guides/mini/guide-using-extensions.html
-	Extension []MavenArtifact `json:"extension,omitempty"`
-}
-
 // RegistrySpec provides the configuration for the container registry
 type RegistrySpec struct {
 	Insecure     bool   `json:"insecure,omitempty"`
@@ -142,13 +119,6 @@ type ValueSource struct {
 	ConfigMapKeyRef *corev1.ConfigMapKeySelector `json:"configMapKeyRef,omitempty"`
 	// Selects a key of a secret.
 	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty"`
-}
-
-// MavenArtifact --
-type MavenArtifact struct {
-	GroupID    string `json:"groupId" yaml:"groupId" xml:"groupId"`
-	ArtifactID string `json:"artifactId" yaml:"artifactId" xml:"artifactId"`
-	Version    string `json:"version,omitempty" yaml:"version,omitempty" xml:"version,omitempty"`
 }
 
 // RuntimeSpec --
