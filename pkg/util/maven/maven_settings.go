@@ -19,7 +19,6 @@ package maven
 
 import (
 	"encoding/xml"
-	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -46,6 +45,14 @@ func NewSettings(options ...SettingsOption) (Settings, error) {
 		XMLNs:             "http://maven.apache.org/SETTINGS/1.0.0",
 		XMLNsXsi:          "http://www.w3.org/2001/XMLSchema-instance",
 		XsiSchemaLocation: "http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd",
+		Profiles: []Profile{
+			{
+				ID: "camel-k",
+				Activation: Activation{
+					ActiveByDefault: true,
+				},
+			},
+		},
 	}
 
 	for _, option := range options {
@@ -92,6 +99,15 @@ func NewDefaultSettings(repositories []v1.Repository, mirrors []Mirror) Settings
 	return settings
 }
 
+func containsRepo(repositories []v1.Repository, id string) bool {
+	for _, r := range repositories {
+		if r.ID == id {
+			return true
+		}
+	}
+	return false
+}
+
 func SettingsConfigMap(namespace string, name string, settings Settings) (*corev1.ConfigMap, error) {
 	data, err := util.EncodeXML(settings)
 	if err != nil {
@@ -116,20 +132,4 @@ func SettingsConfigMap(namespace string, name string, settings Settings) (*corev
 	}
 
 	return cm, nil
-}
-
-func defaultMavenRepositories() (repos []v1.Repository) {
-	for _, repoDesc := range strings.Split(DefaultMavenRepositories, ",") {
-		repos = append(repos, NewRepository(repoDesc))
-	}
-	return
-}
-
-func containsRepo(repositories []v1.Repository, id string) bool {
-	for _, r := range repositories {
-		if r.ID == id {
-			return true
-		}
-	}
-	return false
 }
