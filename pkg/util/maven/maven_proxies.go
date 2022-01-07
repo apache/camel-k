@@ -77,10 +77,14 @@ func parseProxyFromEnvVar(proxyEnvVar string) (Proxy, error) {
 		}
 	}
 	if noProxy := os.Getenv("NO_PROXY"); noProxy != "" {
-		nonProxyHosts := strings.ReplaceAll(noProxy, " ", "")
-		nonProxyHosts = strings.ReplaceAll(nonProxyHosts, ",", "|")
-		nonProxyHosts = strings.ReplaceAll(nonProxyHosts, "|.", "|*.")
-		proxy.NonProxyHosts = nonProxyHosts
+		// Convert to the format expected by the JVM http.nonProxyHosts system property
+		hosts := strings.Split(strings.ReplaceAll(noProxy, " ", ""), ",")
+		for i, host := range hosts {
+			if strings.HasPrefix(host, ".") {
+				hosts[i] = strings.Replace(host, ".", "*.", 1)
+			}
+		}
+		proxy.NonProxyHosts = strings.Join(hosts, "|")
 	}
 
 	return proxy, nil
