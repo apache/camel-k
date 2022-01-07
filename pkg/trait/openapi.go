@@ -262,7 +262,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 		mc.UserSettings = []byte(settings)
 	}
 
-	if settings, err := maven.NewSettings(maven.ProxyFromEnvironment); err != nil {
+	if settings, err := maven.NewSettings(maven.DefaultRepositories, maven.ProxyFromEnvironment); err != nil {
 		return err
 	} else {
 		data, err := settings.MarshalBytes()
