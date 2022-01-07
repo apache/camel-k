@@ -134,7 +134,7 @@ spec:
                             type: string
                           type: array
                         maven:
-                          description: MavenSpec --
+                          description: MavenBuildSpec --
                           properties:
                             caSecret:
                               description: The Secret name and key, containing the
@@ -164,9 +164,9 @@ spec:
                               - key
                               type: object
                             extension:
-                              description: Maven build extensions https://maven.apache.org/guides/mini/guide-using-extensions.html
+                              description: The Maven build extensions. See https://maven.apache.org/guides/mini/guide-using-extensions.html.
                               items:
-                                description: MavenArtifact --
+                                description: MavenArtifact defines a Maven artifact
                                 properties:
                                   artifactId:
                                     type: string
@@ -188,15 +188,17 @@ spec:
                               description: The Maven properties.
                               type: object
                             repositories:
+                              description: The Maven repositories.
                               items:
-                                description: Repository --
+                                description: Repository defines a Maven repository
                                 properties:
                                   id:
                                     type: string
                                   name:
                                     type: string
                                   releases:
-                                    description: RepositoryPolicy --
+                                    description: RepositoryPolicy defines the policy
+                                      associated to a Maven repository
                                     properties:
                                       checksumPolicy:
                                         type: string
@@ -208,7 +210,8 @@ spec:
                                     - enabled
                                     type: object
                                   snapshots:
-                                    description: RepositoryPolicy --
+                                    description: RepositoryPolicy defines the policy
+                                      associated to a Maven repository
                                     properties:
                                       checksumPolicy:
                                         type: string
@@ -316,7 +319,7 @@ spec:
                                 properties:
                                   dependencies:
                                     items:
-                                      description: MavenArtifact --
+                                      description: MavenArtifact defines a Maven artifact
                                       properties:
                                         artifactId:
                                           type: string
@@ -339,7 +342,7 @@ spec:
                               type: object
                             dependencies:
                               items:
-                                description: MavenArtifact --
+                                description: MavenArtifact defines a Maven artifact
                                 properties:
                                   artifactId:
                                     type: string
