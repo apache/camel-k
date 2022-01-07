@@ -121,7 +121,8 @@ export KAMEL_INSTALL_REGISTRY_INSECURE=${REGISTRY_INSECURE}
 export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
 
 # Will only have an effect if olm=false
-# since, for OLM, the csv determine the policy
+# since, for OLM, the csv determines the policy.
+# (see kamel-build-bundle/build-bundle-image.sh)
 export KAMEL_INSTALL_OPERATOR_IMAGE_PULL_POLICY="Always"
 
 #
