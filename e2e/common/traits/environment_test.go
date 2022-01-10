@@ -46,6 +46,7 @@ func TestEnvironmentTrait(t *testing.T) {
 			".cluster.local",
 			".svc",
 			"localhost",
+			".apache.org",
 		}
 		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
 
