@@ -129,7 +129,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 
 	container := e.getIntegrationContainer()
 	if container == nil {
-		return nil
+		return fmt.Errorf("unable to find integration container")
 	}
 
 	// Build the container command
