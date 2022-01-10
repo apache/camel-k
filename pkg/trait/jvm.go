@@ -178,15 +178,15 @@ func (t *jvmTrait) Apply(e *Environment) error {
 			return err
 		}
 		if !util.StringSliceContainsAnyOf(t.Options, "http.proxyHost") {
-			args = append(args, "-Dhttp.proxyHost="+u.Hostname())
+			args = append(args, fmt.Sprintf("-Dhttp.proxyHost=%q", u.Hostname()))
 		}
 		if port := u.Port(); !util.StringSliceContainsAnyOf(t.Options, "http.proxyPort") && port != "" {
-			args = append(args, "-Dhttp.proxyPort="+u.Port())
+			args = append(args, fmt.Sprintf("-Dhttp.proxyPort=%q", u.Port()))
 		}
 		if user := u.User; !util.StringSliceContainsAnyOf(t.Options, "http.proxyUser") && user != nil {
-			args = append(args, "-Dhttp.proxyUser="+user.Username())
+			args = append(args, fmt.Sprintf("-Dhttp.proxyUser=%q", user.Username()))
 			if password, ok := user.Password(); !util.StringSliceContainsAnyOf(t.Options, "http.proxyUser") && ok {
-				args = append(args, "-Dhttp.proxyPassword="+password)
+				args = append(args, fmt.Sprintf("-Dhttp.proxyPassword=%q", password))
 			}
 		}
 	}
@@ -197,15 +197,15 @@ func (t *jvmTrait) Apply(e *Environment) error {
 			return err
 		}
 		if !util.StringSliceContainsAnyOf(t.Options, "https.proxyHost") {
-			args = append(args, "-Dhttps.proxyHost="+u.Hostname())
+			args = append(args, fmt.Sprintf("-Dhttps.proxyHost=%q", u.Hostname()))
 		}
 		if port := u.Port(); !util.StringSliceContainsAnyOf(t.Options, "https.proxyPort") && port != "" {
-			args = append(args, "-Dhttps.proxyPort="+u.Port())
+			args = append(args, fmt.Sprintf("-Dhttps.proxyPort=%q", u.Port()))
 		}
 		if user := u.User; !util.StringSliceContainsAnyOf(t.Options, "https.proxyUser") && user != nil {
-			args = append(args, "-Dhttps.proxyUser="+user.Username())
+			args = append(args, fmt.Sprintf("-Dhttps.proxyUser=%q", user.Username()))
 			if password, ok := user.Password(); !util.StringSliceContainsAnyOf(t.Options, "https.proxyUser") && ok {
-				args = append(args, "-Dhttps.proxyPassword="+password)
+				args = append(args, fmt.Sprintf("-Dhttps.proxyPassword=%q", password))
 			}
 		}
 	}
@@ -219,7 +219,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 					hosts[i] = strings.Replace(host, ".", "*.", 1)
 				}
 			}
-			args = append(args, "-Dhttp.nonProxyHosts="+strings.Join(hosts, "|"))
+			args = append(args, fmt.Sprintf("-Dhttp.nonProxyHosts=%q", strings.Join(hosts, "|")))
 		}
 	}
 
