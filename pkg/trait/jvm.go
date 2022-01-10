@@ -212,7 +212,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 					hosts[i] = strings.Replace(host, ".", "*.", 1)
 				}
 			}
-			args = append(args, "-Dhttps.nonProxyHosts="+strings.Join(hosts, "|"))
+			args = append(args, "-Dhttp.nonProxyHosts="+strings.Join(hosts, "|"))
 		}
 	}
 
