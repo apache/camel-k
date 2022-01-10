@@ -40,8 +40,9 @@ const (
 
 	// camel-k-operator, 			 camel-k-operator-events,
 	// camel-k-operator-knative, 	 camel-k-operator-leases,
-	// camel-k-operator-podmonitors, camel-k-operator-strimzi
-	ExpKubePromoteRoles = 6
+	// camel-k-operator-podmonitors, camel-k-operator-strimzi,
+	// camel-k-operator-keda
+	ExpKubePromoteRoles = 7
 
 	// camel-k-edit
 	// camel-k-operator-custom-resource-definitions
