@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"net/url"
 	"path"
 	"sort"
 	"strings"
@@ -37,6 +38,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
 // The JVM trait is used to configure the JVM that runs the integration.
@@ -161,6 +163,59 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		args = append(args, t.Options...)
 	}
 
+	// Translate HTTP proxy environment variables, that are set by the environment trait,
+	// into corresponding JVM system properties.
+	if HTTPProxy := envvar.Get(container.Env, "HTTP_PROXY"); HTTPProxy != nil {
+		u, err := url.Parse(HTTPProxy.Value)
+		if err != nil {
+			return err
+		}
+		if !util.StringSliceContainsAnyOf(t.Options, "http.proxyHost") {
+			args = append(args, "-Dhttp.proxyHost="+u.Hostname())
+		}
+		if !util.StringSliceContainsAnyOf(t.Options, "http.proxyPort") {
+			args = append(args, "-Dhttp.proxyPort="+u.Port())
+		}
+		if user := u.User; !util.StringSliceContainsAnyOf(t.Options, "http.proxyUser") && user != nil {
+			args = append(args, "-Dhttp.proxyUser="+user.Username())
+			if password, ok := user.Password(); !util.StringSliceContainsAnyOf(t.Options, "http.proxyUser") && ok {
+				args = append(args, "-Dhttp.proxyPassword="+password)
+			}
+		}
+	}
+
+	if HTTPSProxy := envvar.Get(container.Env, "HTTPS_PROXY"); HTTPSProxy != nil {
+		u, err := url.Parse(HTTPSProxy.Value)
+		if err != nil {
+			return err
+		}
+		if !util.StringSliceContainsAnyOf(t.Options, "https.proxyHost") {
+			args = append(args, "-Dhttps.proxyHost="+u.Hostname())
+		}
+		if !util.StringSliceContainsAnyOf(t.Options, "https.proxyPort") {
+			args = append(args, "-Dhttps.proxyPort="+u.Port())
+		}
+		if user := u.User; !util.StringSliceContainsAnyOf(t.Options, "https.proxyUser") && user != nil {
+			args = append(args, "-Dhttps.proxyUser="+user.Username())
+			if password, ok := user.Password(); !util.StringSliceContainsAnyOf(t.Options, "https.proxyUser") && ok {
+				args = append(args, "-Dhttps.proxyPassword="+password)
+			}
+		}
+	}
+
+	if noProxy := envvar.Get(container.Env, "NO_PROXY"); noProxy != nil {
+		if !util.StringSliceContainsAnyOf(t.Options, "http.nonProxyHosts") {
+			// Convert to the format expected by the JVM http.nonProxyHosts system property
+			hosts := strings.Split(strings.ReplaceAll(noProxy.Value, " ", ""), ",")
+			for i, host := range hosts {
+				if strings.HasPrefix(host, ".") {
+					hosts[i] = strings.Replace(host, ".", "*.", 1)
+				}
+			}
+			args = append(args, "-Dhttps.nonProxyHosts="+strings.Join(hosts, "|"))
+		}
+	}
+
 	// Tune JVM maximum heap size based on the container memory limit, if any.
 	// This is configured off-container, thus is limited to explicit user configuration.
 	// We may want to inject a wrapper script into the container image, so that it can
@@ -183,8 +238,8 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	items := classpath.List()
 	// Keep class path sorted so that it's consistent over reconciliation cycles
 	sort.Strings(items)
-
 	args = append(args, "-cp", strings.Join(items, ":"))
+
 	args = append(args, e.CamelCatalog.Runtime.ApplicationClass)
 
 	if IsNilOrTrue(t.PrintCommand) {
