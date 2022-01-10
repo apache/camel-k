@@ -18,6 +18,8 @@ limitations under the License.
 package trait
 
 import (
+	"os"
+
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/property"
@@ -31,6 +33,8 @@ type environmentTrait struct {
 	BaseTrait `property:",squash"`
 	// Enables injection of `NAMESPACE` and `POD_NAME` environment variables (default `true`)
 	ContainerMeta *bool `property:"container-meta" json:"containerMeta,omitempty"`
+	// Propagates the `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY` environment variables (default `true`)
+	HTTPProxy *bool `property:"http-proxy" json:"httpProxy,omitempty"`
 	// A list of variables to be created on the Pod. Must have KEY=VALUE syntax (ie, MY_VAR="my value").
 	Vars []string `property:"vars" json:"vars,omitempty"`
 }
@@ -79,6 +83,18 @@ func (t *environmentTrait) Apply(e *Environment) error {
 	if IsNilOrTrue(t.ContainerMeta) {
 		envvar.SetValFrom(&e.EnvVars, envVarNamespace, "metadata.namespace")
 		envvar.SetValFrom(&e.EnvVars, envVarPodName, "metadata.name")
+	}
+
+	if IsNilOrTrue(t.HTTPProxy) {
+		if HTTPProxy, ok := os.LookupEnv("HTTP_PROXY"); ok {
+			envvar.SetVal(&e.EnvVars, "HTTP_PROXY", HTTPProxy)
+		}
+		if HTTPSProxy, ok := os.LookupEnv("HTTPS_PROXY"); ok {
+			envvar.SetVal(&e.EnvVars, "HTTPS_PROXY", HTTPSProxy)
+		}
+		if noProxy, ok := os.LookupEnv("NO_PROXY"); ok {
+			envvar.SetVal(&e.EnvVars, "NO_PROXY", noProxy)
+		}
 	}
 
 	if t.Vars != nil {
