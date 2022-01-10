@@ -117,25 +117,10 @@ func getTransitiveDependencies(ctx context.Context, catalog *camel.RuntimeCatalo
 	mc.LocalRepository = ""
 
 	if len(repositories) > 0 {
-		var repoList []v1.Repository
-		var mirrors []maven.Mirror
-		for i, repo := range repositories {
-			if strings.Contains(repo, "@mirrorOf=") {
-				mirror := maven.NewMirror(repo)
-				if mirror.ID == "" {
-					mirror.ID = fmt.Sprintf("mirror-%03d", i)
-				}
-				mirrors = append(mirrors, mirror)
-			} else {
-				repository := maven.NewRepository(repo)
-				if repository.ID == "" {
-					repository.ID = fmt.Sprintf("repository-%03d", i)
-				}
-				repoList = append(repoList, repository)
-			}
+		settings, err := maven.NewSettings(maven.DefaultRepositories, maven.Repositories(repositories...))
+		if err != nil {
+			return nil, err
 		}
-
-		settings := maven.NewDefaultSettings(repoList, mirrors)
 		settingsData, err := util.EncodeXML(settings)
 		if err != nil {
 			return nil, err

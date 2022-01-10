@@ -64,7 +64,7 @@ const expectedDefaultSettings = `<?xml version="1.0" encoding="UTF-8"?>
   <localRepository></localRepository>
   <profiles>
     <profile>
-      <id>maven-settings</id>
+      <id>camel-k</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
@@ -108,7 +108,7 @@ const expectedDefaultSettingsWithExtraRepo = `<?xml version="1.0" encoding="UTF-
   <localRepository></localRepository>
   <profiles>
     <profile>
-      <id>maven-settings</id>
+      <id>camel-k</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
@@ -214,7 +214,8 @@ func TestSettingsGeneration(t *testing.T) {
 }
 
 func TestDefaultSettingsGeneration(t *testing.T) {
-	settings := NewDefaultSettings([]v1.Repository{}, []Mirror{})
+	settings, err := NewSettings(DefaultRepositories)
+	assert.Nil(t, err)
 
 	content, err := util.EncodeXML(settings)
 
@@ -225,14 +226,13 @@ func TestDefaultSettingsGeneration(t *testing.T) {
 }
 
 func TestDefaultSettingsGenerationWithAdditionalRepo(t *testing.T) {
-	repositories := []v1.Repository{
-		NewRepository("https://repo1.maven.org/maven2@id=central"),
-		NewRepository("https://foo.bar.org/repo@id=foo"),
+	repositories := []string{
+		"https://repo1.maven.org/maven2@id=central",
+		"https://foo.bar.org/repo@id=foo",
+		"https://foo.bar.org/repo@id=foo@mirrorOf=*",
 	}
-	mirrors := []Mirror{
-		NewMirror("https://foo.bar.org/repo@id=foo@mirrorOf=*"),
-	}
-	settings := NewDefaultSettings(repositories, mirrors)
+	settings, err := NewSettings(Repositories(repositories...))
+	assert.Nil(t, err)
 
 	content, err := util.EncodeXML(settings)
 
@@ -240,19 +240,4 @@ func TestDefaultSettingsGenerationWithAdditionalRepo(t *testing.T) {
 	assert.NotNil(t, settings)
 
 	assert.Equal(t, expectedDefaultSettingsWithExtraRepo, string(content))
-}
-
-func TestCreateSettingsConfigMap(t *testing.T) {
-	settings := NewDefaultSettings([]v1.Repository{}, []Mirror{})
-
-	configMap, err := SettingsConfigMap("foo", "bar", settings)
-	assert.Nil(t, err)
-	assert.NotNil(t, configMap)
-
-	content, err := util.EncodeXML(settings)
-
-	assert.Nil(t, err)
-	assert.NotNil(t, settings)
-
-	assert.Equal(t, string(content), configMap.Data["settings.xml"])
 }
