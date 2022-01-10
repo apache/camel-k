@@ -19,8 +19,13 @@ package cmd
 
 import (
 	"context"
+	"crypto/md5"
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"hash"
+	"io"
 	"io/fs"
 	"os"
 	"os/signal"
@@ -787,7 +792,7 @@ func uploadDependency(platform *v1.IntegrationPlatform, item string, integration
 		return err
 	}
 
-	filepath.WalkDir(localPath, func(path string, d fs.DirEntry, err error) error {
+	return filepath.WalkDir(localPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -805,9 +810,52 @@ func uploadDependency(platform *v1.IntegrationPlatform, item string, integration
 			return err
 		}
 		fmt.Printf("Uploaded: %s to %s \n", item, options.Target)
-		return addToDependencyList(dependency, integration, targetPath, path, dirName)
+		if err := addToDependencyList(dependency, integration, targetPath, path, dirName); err != nil {
+			return err
+		}
+		return uploadChecksumFiles(integrationName, path, options, platform, artifactHttpPath, dependency)
 	})
-	return nil
+}
+
+func uploadChecksumFiles(integrationName string, path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHttpPath string, dependency maven.Dependency) error {
+	return util.WithTempDir(integrationName, func(tmpDir string) error {
+		if err := uploadChecksumFile(md5.New(), tmpDir, ".md5", integrationName, path, options, platform, artifactHttpPath, dependency); err != nil {
+			return err
+		}
+		return uploadChecksumFile(sha1.New(), tmpDir, ".sha1", integrationName, path, options, platform, artifactHttpPath, dependency)
+	})
+}
+
+func uploadChecksumFile(hash hash.Hash, tmpDir string, ext string, integrationName string, path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHttpPath string, dependency maven.Dependency) error {
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	_, err = io.Copy(hash, file)
+	if err != nil {
+		return err
+	}
+
+	filepath := filepath.Join(tmpDir, filepath.Base(path)+ext)
+
+	if err = writeChecksumToFile(filepath, hash); err != nil {
+		return err
+	}
+	options.Target = fmt.Sprintf("%s/%s%s:%s", platform.Spec.Build.Registry.Address, artifactHttpPath, ext, dependency.Version)
+	_, err = spectrum.Build(options, fmt.Sprintf("%s:.", filepath))
+	return err
+}
+
+func writeChecksumToFile(filepath string, hash hash.Hash) error {
+	file, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(hex.EncodeToString(hash.Sum(nil)))
+	return err
 }
 
 func addToDependencyList(dependency maven.Dependency, integration *v1.Integration, targetPath string, localPath string, dirName string) error {

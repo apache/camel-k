@@ -57,7 +57,8 @@ func (t *registryTrait) Apply(e *Environment) error {
 		Version:    "0.2.0-SNAPSHOT",
 	}
 	policy := v1.RepositoryPolicy{
-		Enabled: true,
+		Enabled:        true,
+		ChecksumPolicy: "fail",
 	}
 	// TODO: If we are running on openshift then then fetch the credentials
 	// needed to lookup the image registry
