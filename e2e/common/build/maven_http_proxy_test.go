@@ -309,7 +309,7 @@ ProxyVia Off
 		// Install Camel K with the HTTP proxy
 		Expect(Kamel("install", "-n", ns,
 			"--operator-env-vars", fmt.Sprintf("HTTP_PROXY=http://%s", hostname),
-			// FIXME: TLS handshake issue
+			// TODO: enable TLS for the HTTPS proxy when Maven supports it
 			// "--operator-env-vars", fmt.Sprintf("HTTPS_PROXY=https://%s", hostname),
 			// "--maven-ca-secret", secret.Name+"/"+corev1.TLSCertKey,
 			"--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","),
