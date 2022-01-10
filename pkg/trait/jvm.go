@@ -180,7 +180,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		if !util.StringSliceContainsAnyOf(t.Options, "http.proxyHost") {
 			args = append(args, "-Dhttp.proxyHost="+u.Hostname())
 		}
-		if !util.StringSliceContainsAnyOf(t.Options, "http.proxyPort") {
+		if port := u.Port(); !util.StringSliceContainsAnyOf(t.Options, "http.proxyPort") && port != "" {
 			args = append(args, "-Dhttp.proxyPort="+u.Port())
 		}
 		if user := u.User; !util.StringSliceContainsAnyOf(t.Options, "http.proxyUser") && user != nil {
@@ -199,7 +199,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		if !util.StringSliceContainsAnyOf(t.Options, "https.proxyHost") {
 			args = append(args, "-Dhttps.proxyHost="+u.Hostname())
 		}
-		if !util.StringSliceContainsAnyOf(t.Options, "https.proxyPort") {
+		if port := u.Port(); !util.StringSliceContainsAnyOf(t.Options, "https.proxyPort") && port != "" {
 			args = append(args, "-Dhttps.proxyPort="+u.Port())
 		}
 		if user := u.User; !util.StringSliceContainsAnyOf(t.Options, "https.proxyUser") && user != nil {
