@@ -18,16 +18,16 @@ limitations under the License.
 package maven
 
 import (
+	"fmt"
 	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-var DefaultRepositories = &defaultRepositories{}
+var DefaultRepositories = defaultRepositories{}
 
 type defaultRepositories struct{}
 
-// nolint: unparam
 func (o defaultRepositories) apply(settings *Settings) error {
 	for _, repository := range defaultMavenRepositories() {
 		upsertRepository(repository, &settings.Profiles[0].Repositories)
@@ -43,6 +43,36 @@ func defaultMavenRepositories() (repositories []v1.Repository) {
 	return
 }
 
+func Repositories(repositories ...string) SettingsOption {
+	return extraRepositories{
+		repositories: repositories,
+	}
+}
+
+type extraRepositories struct {
+	repositories []string
+}
+
+func (o extraRepositories) apply(settings *Settings) error {
+	for i, r := range o.repositories {
+		if strings.Contains(r, "@mirrorOf=") {
+			mirror := NewMirror(r)
+			if mirror.ID == "" {
+				mirror.ID = fmt.Sprintf("mirror-%03d", i)
+			}
+			upsertMirror(mirror, &settings.Mirrors)
+		} else {
+			repository := NewRepository(r)
+			if repository.ID == "" {
+				repository.ID = fmt.Sprintf("repository-%03d", i)
+			}
+			upsertRepository(repository, &settings.Profiles[0].Repositories)
+			upsertRepository(repository, &settings.Profiles[0].PluginRepositories)
+		}
+	}
+	return nil
+}
+
 func upsertRepository(repository v1.Repository, repositories *[]v1.Repository) {
 	for i, r := range *repositories {
 		if r.ID == repository.ID {
@@ -51,4 +81,14 @@ func upsertRepository(repository v1.Repository, repositories *[]v1.Repository) {
 		}
 	}
 	*repositories = append(*repositories, repository)
+}
+
+func upsertMirror(mirror Mirror, mirrors *[]Mirror) {
+	for i, r := range *mirrors {
+		if r.ID == mirror.ID {
+			(*mirrors)[i] = mirror
+			return
+		}
+	}
+	*mirrors = append(*mirrors, mirror)
 }

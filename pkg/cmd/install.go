@@ -41,6 +41,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/install"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/olm"
@@ -389,32 +390,14 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		}
 
 		if len(o.MavenRepositories) > 0 {
-			var repositories []v1.Repository
-			var mirrors []maven.Mirror
-
-			for i, r := range o.MavenRepositories {
-				if strings.Contains(r, "@mirrorOf=") {
-					mirror := maven.NewMirror(r)
-					if mirror.ID == "" {
-						mirror.ID = fmt.Sprintf("mirror-%03d", i)
-					}
-					mirrors = append(mirrors, mirror)
-				} else {
-					repository := maven.NewRepository(r)
-					if repository.ID == "" {
-						repository.ID = fmt.Sprintf("repository-%03d", i)
-					}
-					repositories = append(repositories, repository)
-				}
-			}
-
-			settings := maven.NewDefaultSettings(repositories, mirrors)
-
-			err := createDefaultMavenSettingsConfigMap(o.Context, c, namespace, platform.Name, settings)
+			settings, err := maven.NewSettings(maven.Repositories(o.MavenRepositories...))
 			if err != nil {
 				return err
 			}
-
+			err = createDefaultMavenSettingsConfigMap(o.Context, c, namespace, platform.Name, settings)
+			if err != nil {
+				return err
+			}
 			platform.Spec.Build.Maven.Settings.ConfigMapKeyRef = &corev1.ConfigMapKeySelector{
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: platform.Name + "-maven-settings",
@@ -712,7 +695,7 @@ func decodeSecretKeySelector(secretKey string) (*corev1.SecretKeySelector, error
 }
 
 func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Client, namespace, name string, settings maven.Settings) error {
-	cm, err := maven.SettingsConfigMap(namespace, name, settings)
+	cm, err := settingsConfigMap(namespace, name, settings)
 	if err != nil {
 		return err
 	}
@@ -744,4 +727,30 @@ func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Clie
 	}
 
 	return nil
+}
+
+func settingsConfigMap(namespace string, name string, settings maven.Settings) (*corev1.ConfigMap, error) {
+	data, err := util.EncodeXML(settings)
+	if err != nil {
+		return nil, err
+	}
+
+	cm := &corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name + "-maven-settings",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "camel-k",
+			},
+		},
+		Data: map[string]string{
+			"settings.xml": string(data),
+		},
+	}
+
+	return cm, nil
 }
