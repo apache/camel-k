@@ -32,6 +32,10 @@ The following configuration options are available:
 | bool
 | Enables injection of `NAMESPACE` and `POD_NAME` environment variables (default `true`)
 
+| environment.http-proxy
+| bool
+| Propagates the `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY` environment variables (default `true`)
+
 | environment.vars
 | []string
 | A list of variables to be created on the Pod. Must have KEY=VALUE syntax (ie, MY_VAR="my value").

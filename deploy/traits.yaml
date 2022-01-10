@@ -287,6 +287,10 @@ traits:
     type: bool
     description: Enables injection of `NAMESPACE` and `POD_NAME` environment variables
       (default `true`)
+  - name: http-proxy
+    type: bool
+    description: Propagates the `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY` environment
+      variables (default `true`)
   - name: vars
     type: '[]string'
     description: A list of variables to be created on the Pod. Must have KEY=VALUE
