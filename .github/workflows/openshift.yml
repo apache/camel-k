@@ -216,6 +216,34 @@ jobs:
           verbs: ["update"]
         EOF
 
+        # Grant read permission on the Kubernetes Service to the default developer user
+        # Required by the HTTP proxy tests
+        cat <<EOF | oc apply -f -
+        kind: ClusterRole
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:kubernetes-service
+        rules:
+        - apiGroups: [""]
+          resources: ["services"]
+          verbs: ["get"]
+          resourceNames: ["kubernetes"]
+        EOF
+        cat <<EOF | oc apply -f -
+        kind: RoleBinding
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          namespace: default
+          name: camel-k-test:kubernetes-service
+        subjects:
+        - kind: User
+          name: developer
+        roleRef:
+          kind: ClusterRole
+          name: camel-k-test:kubernetes-service
+          apiGroup: rbac.authorization.k8s.io
+        EOF
+
         # Login as normal user
         oc login -u developer
 
