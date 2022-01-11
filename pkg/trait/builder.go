@@ -109,8 +109,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Image:    getImageName(e),
 				Registry: e.Platform.Status.Build.Registry,
 			},
-			HttpProxySecret: e.Platform.Status.Build.HTTPProxySecret,
-			Verbose:         t.Verbose,
+			Verbose: t.Verbose,
 		}})
 
 	case v1.IntegrationPlatformBuildPublishStrategyKaniko:
@@ -126,8 +125,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Enabled:               e.Platform.Status.Build.KanikoBuildCache,
 				PersistentVolumeClaim: e.Platform.Status.Build.PersistentVolumeClaim,
 			},
-			HttpProxySecret: e.Platform.Status.Build.HTTPProxySecret,
-			Verbose:         t.Verbose,
+			Verbose: t.Verbose,
 		}})
 	}
 

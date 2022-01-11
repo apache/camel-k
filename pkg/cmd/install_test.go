@@ -156,13 +156,6 @@ func TestInstallHealthFlag(t *testing.T) {
 	assert.Equal(t, int32(7777), installCmdOptions.HealthPort)
 }
 
-func TestInstallHttpProxySecretFlag(t *testing.T) {
-	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--http-proxy-secret", "someString")
-	assert.Nil(t, err)
-	assert.Equal(t, "someString", installCmdOptions.HTTPProxySecret)
-}
-
 func TestInstallKanikoBuildCacheFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--kaniko-build-cache")
