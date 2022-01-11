@@ -20,17 +20,18 @@ package build
 import (
 	"context"
 	"fmt"
+	"os"
 	"path"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
@@ -244,6 +245,7 @@ func addBuildTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task
 			taskName,
 		},
 		WorkingDir: path.Join(builderDir, build.Name),
+		Env:        proxyFromEnvironment(),
 	}
 
 	addContainerToPod(build, container, pod)
@@ -314,6 +316,7 @@ func addBuildahTaskToPod(ctx context.Context, c client.Client, build *v1.Build, 
 		push = append(push[:2], append([]string{"--tls-verify=false"}, push[2:]...)...)
 	}
 
+	env = append(env, proxyFromEnvironment()...)
 	env = append(env, proxySecretEnvVars(task.HttpProxySecret)...)
 
 	args := []string{
@@ -378,6 +381,7 @@ func addKanikoTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, tas
 		args = append(args, "--insecure-pull")
 	}
 
+	env = append(env, proxyFromEnvironment()...)
 	env = append(env, proxySecretEnvVars(task.HttpProxySecret)...)
 
 	if cache {
@@ -584,4 +588,31 @@ func proxySecretEnvVar(name string, secret string) corev1.EnvVar {
 			},
 		},
 	}
+}
+
+func proxyFromEnvironment() []corev1.EnvVar {
+	var envVars []corev1.EnvVar
+
+	if httpProxy, ok := os.LookupEnv("HTTP_PROXY"); ok {
+		envVars = append(envVars, corev1.EnvVar{
+			Name:  "HTTP_PROXY",
+			Value: httpProxy,
+		})
+	}
+
+	if httpsProxy, ok := os.LookupEnv("HTTPS_PROXY"); ok {
+		envVars = append(envVars, corev1.EnvVar{
+			Name:  "HTTPS_PROXY",
+			Value: httpsProxy,
+		})
+	}
+
+	if noProxy, ok := os.LookupEnv("NO_PROXY"); ok {
+		envVars = append(envVars, corev1.EnvVar{
+			Name:  "NO_PROXY",
+			Value: noProxy,
+		})
+	}
+
+	return envVars
 }
