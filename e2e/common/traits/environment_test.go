@@ -76,7 +76,18 @@ func TestEnvironmentTrait(t *testing.T) {
 
 			Expect(IntegrationPod(ns, "java")()).To(WithTransform(podEnvVars, And(
 				ContainElement(corev1.EnvVar{Name: "CAMEL_K_VERSION", Value: defaults.Version}),
-				ContainElement(corev1.EnvVar{Name: "NAMESPACE", Value: ns}),
+				ContainElement(corev1.EnvVar{Name: "NAMESPACE", ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{
+						APIVersion: "v1",
+						FieldPath:  "metadata.namespace",
+					},
+				}}),
+				ContainElement(corev1.EnvVar{Name: "POD_NAME", ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{
+						APIVersion: "v1",
+						FieldPath:  "metadata.name",
+					},
+				}}),
 				ContainElement(corev1.EnvVar{Name: "HTTP_PROXY", Value: httpProxy}),
 				ContainElement(corev1.EnvVar{Name: "NO_PROXY", Value: strings.Join(noProxy, ",")}),
 			)))
@@ -92,7 +103,18 @@ func TestEnvironmentTrait(t *testing.T) {
 
 			Expect(IntegrationPod(ns, "java")()).To(WithTransform(podEnvVars, And(
 				ContainElement(corev1.EnvVar{Name: "CAMEL_K_VERSION", Value: defaults.Version}),
-				ContainElement(corev1.EnvVar{Name: "NAMESPACE", Value: ns}),
+				ContainElement(corev1.EnvVar{Name: "NAMESPACE", ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{
+						APIVersion: "v1",
+						FieldPath:  "metadata.namespace",
+					},
+				}}),
+				ContainElement(corev1.EnvVar{Name: "POD_NAME", ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{
+						APIVersion: "v1",
+						FieldPath:  "metadata.name",
+					},
+				}}),
 				ContainElement(corev1.EnvVar{Name: "HTTP_PROXY", Value: "http://custom.proxy"}),
 				ContainElement(corev1.EnvVar{Name: "NO_PROXY", Value: strings.Join(noProxy, ",")}),
 			)))
@@ -108,7 +130,18 @@ func TestEnvironmentTrait(t *testing.T) {
 
 			Expect(IntegrationPod(ns, "java")()).To(WithTransform(podEnvVars, And(
 				ContainElement(corev1.EnvVar{Name: "CAMEL_K_VERSION", Value: defaults.Version}),
-				ContainElement(corev1.EnvVar{Name: "NAMESPACE", Value: ns}),
+				ContainElement(corev1.EnvVar{Name: "NAMESPACE", ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{
+						APIVersion: "v1",
+						FieldPath:  "metadata.namespace",
+					},
+				}}),
+				ContainElement(corev1.EnvVar{Name: "POD_NAME", ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{
+						APIVersion: "v1",
+						FieldPath:  "metadata.name",
+					},
+				}}),
 				Not(ContainElement(corev1.EnvVar{Name: "HTTP_PROXY", Value: httpProxy})),
 				Not(ContainElement(corev1.EnvVar{Name: "NO_PROXY", Value: strings.Join(noProxy, ",")})),
 			)))
