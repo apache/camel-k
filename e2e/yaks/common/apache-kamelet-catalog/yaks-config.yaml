@@ -21,6 +21,6 @@ config:
 pre:
 - name: installation
   run: |
-    kamel install -n $YAKS_NAMESPACE
+    kamel install -w -n $YAKS_NAMESPACE
 
     kamel run logger.groovy -w -n $YAKS_NAMESPACE
