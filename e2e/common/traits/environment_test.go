@@ -24,6 +24,7 @@ package traits
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -38,21 +39,32 @@ import (
 
 func TestEnvironmentTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		// Retrieve the Kubernetes Service ClusterIPs to populate the NO_PROXY environment variable
-		svc := Service("default", "kubernetes")()
-		Expect(svc).NotTo(BeNil())
-
+		// HTTP proxy configuration
+		httpProxy := "http://proxy"
 		noProxy := []string{
 			".cluster.local",
 			".svc",
 			"localhost",
 			".apache.org",
 		}
+
+		// Retrieve the Kubernetes Service ClusterIPs to populate the NO_PROXY environment variable
+		svc := Service("default", "kubernetes")()
+		Expect(svc).NotTo(BeNil())
+
 		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
+
+		// Retrieve the internal container registry to populate the NO_PROXY environment variable
+		if registry, ok := os.LookupEnv("KAMEL_INSTALL_REGISTRY"); ok {
+			domain := RegistryRegexp.FindString(registry)
+			Expect(domain).NotTo(BeNil())
+			domain = strings.Split(domain, ":")[0]
+			noProxy = append(noProxy, domain)
+		}
 
 		// Install Camel K with the HTTP proxy environment variable
 		Expect(Kamel("install", "-n", ns,
-			"--operator-env-vars", fmt.Sprintf("HTTP_PROXY=http://proxy"),
+			"--operator-env-vars", fmt.Sprintf("HTTP_PROXY=%s", httpProxy),
 			"--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","),
 		).Execute()).To(Succeed())
 
@@ -65,7 +77,7 @@ func TestEnvironmentTrait(t *testing.T) {
 			Expect(IntegrationPod(ns, "java")()).To(WithTransform(podEnvVars, And(
 				ContainElement(corev1.EnvVar{Name: "CAMEL_K_VERSION", Value: defaults.Version}),
 				ContainElement(corev1.EnvVar{Name: "NAMESPACE", Value: ns}),
-				ContainElement(corev1.EnvVar{Name: "HTTP_PROXY", Value: "http://proxy"}),
+				ContainElement(corev1.EnvVar{Name: "HTTP_PROXY", Value: httpProxy}),
 				ContainElement(corev1.EnvVar{Name: "NO_PROXY", Value: strings.Join(noProxy, ",")}),
 			)))
 		})
@@ -97,7 +109,7 @@ func TestEnvironmentTrait(t *testing.T) {
 			Expect(IntegrationPod(ns, "java")()).To(WithTransform(podEnvVars, And(
 				ContainElement(corev1.EnvVar{Name: "CAMEL_K_VERSION", Value: defaults.Version}),
 				ContainElement(corev1.EnvVar{Name: "NAMESPACE", Value: ns}),
-				Not(ContainElement(corev1.EnvVar{Name: "HTTP_PROXY", Value: "http://proxy"})),
+				Not(ContainElement(corev1.EnvVar{Name: "HTTP_PROXY", Value: httpProxy})),
 				Not(ContainElement(corev1.EnvVar{Name: "NO_PROXY", Value: strings.Join(noProxy, ",")})),
 			)))
 		})
