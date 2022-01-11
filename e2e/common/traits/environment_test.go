@@ -69,12 +69,13 @@ func TestEnvironmentTrait(t *testing.T) {
 		).Execute()).To(Succeed())
 
 		t.Run("Run integration with default environment", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/Java.java").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			name := "java-default"
+			Expect(Kamel("run", "-n", ns, "--name", name, "files/Java.java").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			Expect(IntegrationPod(ns, "java")()).To(WithTransform(podEnvVars, And(
+			Expect(IntegrationPod(ns, name)()).To(WithTransform(podEnvVars, And(
 				ContainElement(corev1.EnvVar{Name: "CAMEL_K_VERSION", Value: defaults.Version}),
 				ContainElement(corev1.EnvVar{Name: "NAMESPACE", ValueFrom: &corev1.EnvVarSource{
 					FieldRef: &corev1.ObjectFieldSelector{
@@ -94,14 +95,16 @@ func TestEnvironmentTrait(t *testing.T) {
 		})
 
 		t.Run("Run integration with custom environment", func(t *testing.T) {
+			name := "java-custom-proxy"
 			Expect(Kamel("run", "-n", ns, "files/Java.java",
-				"-t", "environment.vars=\"HTTP_PROXY=http://custom.proxy\"",
+				"--name", name,
+				"-t", "environment.vars=HTTP_PROXY=http://custom.proxy",
 			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			Expect(IntegrationPod(ns, "java")()).To(WithTransform(podEnvVars, And(
+			Expect(IntegrationPod(ns, name)()).To(WithTransform(podEnvVars, And(
 				ContainElement(corev1.EnvVar{Name: "CAMEL_K_VERSION", Value: defaults.Version}),
 				ContainElement(corev1.EnvVar{Name: "NAMESPACE", ValueFrom: &corev1.EnvVarSource{
 					FieldRef: &corev1.ObjectFieldSelector{
@@ -121,14 +124,16 @@ func TestEnvironmentTrait(t *testing.T) {
 		})
 
 		t.Run("Run integration without default HTTP proxy environment", func(t *testing.T) {
+			name := "java-no-proxy"
 			Expect(Kamel("run", "-n", ns, "files/Java.java",
+				"--name", name,
 				"-t", "environment.http-proxy=false",
 			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationCondition(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			Expect(IntegrationPod(ns, "java")()).To(WithTransform(podEnvVars, And(
+			Expect(IntegrationPod(ns, name)()).To(WithTransform(podEnvVars, And(
 				ContainElement(corev1.EnvVar{Name: "CAMEL_K_VERSION", Value: defaults.Version}),
 				ContainElement(corev1.EnvVar{Name: "NAMESPACE", ValueFrom: &corev1.EnvVarSource{
 					FieldRef: &corev1.ObjectFieldSelector{
