@@ -1763,6 +1763,22 @@ func CreateKnativeChannel(ns string, name string) func() error {
 	}
 }
 
+func CreateKnativeBroker(ns string, name string) func() error {
+	return func() error {
+		broker := eventing.Broker{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Broker",
+				APIVersion: eventing.SchemeGroupVersion.String(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: ns,
+				Name:      name,
+			},
+		}
+		return TestClient().Create(TestContext, &broker)
+	}
+}
+
 /*
 	Kamelets
 */

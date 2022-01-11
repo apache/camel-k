@@ -34,6 +34,7 @@ func BuildCamelServiceDefinition(name string, endpointKind CamelEndpointKind, se
 			CamelMetaEndpointKind:      string(endpointKind),
 			CamelMetaKnativeAPIVersion: apiVersion,
 			CamelMetaKnativeKind:       kind,
+			CamelMetaKnativeName:       name,
 		},
 	}
 

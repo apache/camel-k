@@ -354,6 +354,7 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 						knativeapi.CamelMetaEndpointKind:      string(knativeapi.CamelEndpointKindSource),
 						knativeapi.CamelMetaKnativeAPIVersion: ref.APIVersion,
 						knativeapi.CamelMetaKnativeKind:       ref.Kind,
+						knativeapi.CamelMetaKnativeName:       ref.Name,
 						knativeapi.CamelMetaKnativeReply:      "false",
 					},
 				}
