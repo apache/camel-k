@@ -42,6 +42,8 @@ on:
       - 'KEYS'
       - 'LICENSE'
       - 'NOTICE'
+  workflow_dispatch:
+    inputs:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
