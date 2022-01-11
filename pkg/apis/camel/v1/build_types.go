@@ -83,19 +83,17 @@ type PublishTask struct {
 
 // BuildahTask --
 type BuildahTask struct {
-	BaseTask        `json:",inline"`
-	PublishTask     `json:",inline"`
-	Verbose         *bool  `json:"verbose,omitempty"`
-	HttpProxySecret string `json:"httpProxySecret,omitempty"`
+	BaseTask    `json:",inline"`
+	PublishTask `json:",inline"`
+	Verbose     *bool `json:"verbose,omitempty"`
 }
 
 // KanikoTask --
 type KanikoTask struct {
-	BaseTask        `json:",inline"`
-	PublishTask     `json:",inline"`
-	Verbose         *bool           `json:"verbose,omitempty"`
-	HttpProxySecret string          `json:"httpProxySecret,omitempty"`
-	Cache           KanikoTaskCache `json:"cache,omitempty"`
+	BaseTask    `json:",inline"`
+	PublishTask `json:",inline"`
+	Verbose     *bool           `json:"verbose,omitempty"`
+	Cache       KanikoTaskCache `json:"cache,omitempty"`
 }
 
 // KanikoTaskCache --
