@@ -43,6 +43,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+
 	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
@@ -325,7 +327,22 @@ ProxyVia Off
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-		// TODO: assert the proxy logs
+		proxies := corev1.PodList{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Pod",
+				APIVersion: corev1.SchemeGroupVersion.String(),
+			},
+		}
+		err = TestClient().List(TestContext, &proxies,
+			ctrl.InNamespace(ns),
+			ctrl.MatchingLabels(deployment.Spec.Selector.MatchLabels),
+		)
+		Expect(err).To(Succeed())
+		Expect(proxies.Items).To(HaveLen(1))
+
+		logs := Logs(ns, proxies.Items[0].Name, corev1.PodLogOptions{})()
+		Expect(logs).NotTo(BeEmpty())
+		Expect(logs).To(ContainSubstring("\"CONNECT repo.maven.apache.org:443 HTTP/1.1\" 200"))
 
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
