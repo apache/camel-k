@@ -303,7 +303,6 @@ func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, ta
 	}
 
 	env = append(env, proxyFromEnvironment()...)
-	env = append(env, proxySecretEnvVars(task.HttpProxySecret)...)
 
 	args := []string{
 		strings.Join(bud, " "),
@@ -368,7 +367,6 @@ func addKanikoTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, tas
 	}
 
 	env = append(env, proxyFromEnvironment()...)
-	env = append(env, proxySecretEnvVars(task.HttpProxySecret)...)
 
 	if cache {
 		// Co-locate with the Kaniko warmer pod for sharing the host path volume as the current
@@ -545,34 +543,6 @@ func addRegistrySecret(name string, secret registrySecret, volumes *[]corev1.Vol
 			Name:  secret.refEnv,
 			Value: path.Join(secret.mountPath, secret.destination),
 		})
-	}
-}
-
-func proxySecretEnvVars(secret string) []corev1.EnvVar {
-	if secret == "" {
-		return []corev1.EnvVar{}
-	}
-
-	return []corev1.EnvVar{
-		proxySecretEnvVar("HTTP_PROXY", secret),
-		proxySecretEnvVar("HTTPS_PROXY", secret),
-		proxySecretEnvVar("NO_PROXY", secret),
-	}
-}
-
-func proxySecretEnvVar(name string, secret string) corev1.EnvVar {
-	optional := true
-	return corev1.EnvVar{
-		Name: name,
-		ValueFrom: &corev1.EnvVarSource{
-			SecretKeyRef: &corev1.SecretKeySelector{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: secret,
-				},
-				Key:      name,
-				Optional: &optional,
-			},
-		},
 	}
 }
 
