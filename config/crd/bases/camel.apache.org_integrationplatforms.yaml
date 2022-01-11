@@ -76,8 +76,6 @@ spec:
                     - routine
                     - pod
                     type: string
-                  httpProxySecret:
-                    type: string
                   kanikoBuildCache:
                     type: boolean
                   maven:
@@ -277,8 +275,6 @@ spec:
                     enum:
                     - routine
                     - pod
-                    type: string
-                  httpProxySecret:
                     type: string
                   kanikoBuildCache:
                     type: boolean

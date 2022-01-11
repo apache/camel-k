@@ -98,8 +98,6 @@ spec:
                           type: string
                         contextDir:
                           type: string
-                        httpProxySecret:
-                          type: string
                         image:
                           type: string
                         name:
@@ -436,8 +434,6 @@ spec:
                               type: string
                           type: object
                         contextDir:
-                          type: string
-                        httpProxySecret:
                           type: string
                         image:
                           type: string
