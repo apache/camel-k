@@ -320,6 +320,7 @@ func (t *knativeTrait) createSubscription(e *Environment, ref *corev1.ObjectRefe
 func (t *knativeTrait) configureEndpoints(e *Environment, env *knativeapi.CamelEnvironment) error {
 	// Sources
 	serviceSources := t.extractServices(t.EndpointSources, knativeapi.CamelServiceTypeEndpoint)
+	t.L.Infof("  >>> knative.configureEndpoints - serviceSources: %v", serviceSources)
 	for _, endpoint := range serviceSources {
 		ref, err := knativeutil.ExtractObjectReference(endpoint)
 		if err != nil {
@@ -340,6 +341,7 @@ func (t *knativeTrait) configureEndpoints(e *Environment, env *knativeapi.CamelE
 				// knative.reply is left to default ("true") in case of simple service
 			},
 		}
+		t.L.Infof("  >>> knative.configureEndpoints - CamelServiceDefinition: %v", svc)
 		env.Services = append(env.Services, svc)
 	}
 
@@ -369,6 +371,7 @@ func (t *knativeTrait) configureEndpoints(e *Environment, env *knativeapi.CamelE
 
 func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvironment) error {
 	// Sources
+	t.L.Info("  >>> knative.configureEvents")
 	err := t.withServiceDo(false, e, env, t.EventSources, knativeapi.CamelServiceTypeEvent, knativeapi.CamelEndpointKindSource,
 		func(ref *corev1.ObjectReference, serviceURI string, _ func() (*url.URL, error)) error {
 			// Iterate over all, without skipping duplicates
@@ -389,9 +392,11 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 						knativeapi.CamelMetaEndpointKind:      string(knativeapi.CamelEndpointKindSource),
 						knativeapi.CamelMetaKnativeAPIVersion: ref.APIVersion,
 						knativeapi.CamelMetaKnativeKind:       ref.Kind,
+						knativeapi.CamelMetaKnativeName:       ref.Name,
 						knativeapi.CamelMetaKnativeReply:      "false",
 					},
 				}
+				t.L.Infof("  >>> knative.configureEvents - service: %v", svc)
 				env.Services = append(env.Services, svc)
 			}
 

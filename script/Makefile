@@ -309,7 +309,7 @@ else
 endif
 	docker build -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
-images-dev: bundle-kamelets test package-artifacts maven-overlay
+images-dev: test
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
 ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)

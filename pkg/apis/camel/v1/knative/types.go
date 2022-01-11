@@ -75,6 +75,7 @@ const (
 	CamelMetaKnativeKind       = "knative.kind"
 	CamelMetaKnativeAPIVersion = "knative.apiVersion"
 	CamelMetaKnativeReply      = "knative.reply"
+	CamelMetaKnativeName       = "knative.name"
 
 	CamelMetaEndpointKind = "camel.endpoint.kind"
 
