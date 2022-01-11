@@ -73,7 +73,7 @@ jobs:
         persist-credentials: false
         submodules: recursive
 
-    - name: Execute KNative YAKS Tests
+    - name: Execute Knative YAKS Tests
       uses: ./.github/actions/e2e-knative-yaks
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
