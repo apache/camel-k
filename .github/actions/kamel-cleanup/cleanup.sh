@@ -25,13 +25,16 @@
 
 set -e
 
-while getopts ":c:i:" opt; do
+while getopts ":c:i:x:" opt; do
   case "${opt}" in
     c)
       BUILD_CATALOG_SOURCE=${OPTARG}
       ;;
     i)
       IMAGE_NAMESPACE=${OPTARG}
+      ;;
+    x)
+      SAVE_NAMESPACES=${OPTARG}
       ;;
     :)
       echo "ERROR: Option -$OPTARG requires an argument"
@@ -44,6 +47,12 @@ while getopts ":c:i:" opt; do
   esac
 done
 shift $((OPTIND-1))
+
+
+if [ "${SAVE_NAMESPACES}" == "true" ]; then
+  echo "Skipping cleanup since SAVE_NAMESPACES has been set to true"
+  exit 0
+fi
 
 #
 # Remove installed kamel
@@ -59,6 +68,7 @@ kubectl get crds | grep camel | awk '{print $1}' | xargs kubectl delete crd &> /
 set -e
 
 if [ -n "${IMAGE_NAMESPACE}" ]; then
+  echo -n "Removing compiled image streams ... "
   imgstreams="camel-k camel-k-bundle camel-k-iib"
   set +e
   for cis in ${imgstreams}
@@ -69,21 +79,28 @@ if [ -n "${IMAGE_NAMESPACE}" ]; then
     fi
   done
   set -e
+  echo "Done"
 fi
 
 #
 # Remove Catalog Source
 #
-if [ -z "${BUILD_CATALOG_SOURCE}" ]; then
-  # Catalog source never defined so nothing to do
-  exit 0
+if [ -n "${BUILD_CATALOG_SOURCE}" ]; then
+  set +e
+  echo -n "Removing testing catalogsource ... "
+  kubectl get catalogsource --all-namespaces | \
+    grep ${BUILD_CATALOG_SOURCE} | awk {'print $1'} | \
+    xargs kubectl delete CatalogSource &> /dev/null
+  if [ $? == 0 ]; then
+    echo "Done"
+  else
+    echo
+  fi
+
+  set -e
 fi
 
-
-set +e
-CATALOG_NS=$(kubectl get catalogsource --all-namespaces | grep ${BUILD_CATALOG_SOURCE} | awk {'print $1'})
-for ns in ${CATALOG_NS}
-do
-  kubectl delete CatalogSource ${BUILD_CATALOG_SOURCE} -n ${ns}
-done
-set -e
+#
+# Remove KNative resources
+#
+./.github/actions/kamel-cleanup/cleanup-knative.sh

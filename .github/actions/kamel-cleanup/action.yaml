@@ -36,4 +36,5 @@ runs:
       run: |
         ./.github/actions/kamel-cleanup/cleanup.sh \
           -c "${{ inputs.build-bundle-catalog-source }}" \
-          -i "${{ inputs.image-namespace }}"
+          -i "${{ inputs.image-namespace }}" \
+          -x "${{ env.CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE }}"

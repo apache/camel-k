@@ -69,30 +69,18 @@ runs:
     env:
       KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY: ${{ inputs.publisher }}
     run: |
-      # Cluster environment
-      export CUSTOM_IMAGE=${{ steps.build-kamel.outputs.build-binary-local-image-name }}
-      export CUSTOM_VERSION=${{ steps.build-kamel.outputs.build-binary-local-image-version }}
-
-      #
-      # If bundle has been built and installed then use it
-      #
-      if [ -n "${{ steps.build-kamel.outputs.build-bundle-catalog-source-name }}" ]; then
-        export KAMEL_INSTALL_OLM_SOURCE_NAMESPACE=${{ steps.config-cluster.outputs.cluster-image-namespace }}
-        export KAMEL_INSTALL_OLM_SOURCE=${{ steps.build-kamel.outputs.build-bundle-catalog-source-name }}
-      fi
-
-      export KAMEL_INSTALL_REGISTRY=${{ steps.config-cluster.outputs.cluster-image-registry-pull-host }}
-      export KAMEL_INSTALL_REGISTRY_INSECURE=${{steps.config-cluster.outputs.cluster-image-registry-insecure }}
-      export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
-      export CAMEL_K_TEST_IMAGE_NAME=${CUSTOM_IMAGE}
-      export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
-      export CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE=${{ env.CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE }}
-
-      # Then run integration tests
-      make test-builder
+      ./.github/actions/e2e-builder/exec-tests.sh \
+        -c "${{ steps.build-kamel.outputs.build-bundle-catalog-source-name }}" \
+        -i "${{ steps.config-cluster.outputs.cluster-image-namespace }}" \
+        -l "${{ steps.config-cluster.outputs.cluster-image-registry-pull-host }}" \
+        -n "${{ steps.build-kamel.outputs.build-binary-local-image-name }}" \
+        -s "${{steps.config-cluster.outputs.cluster-image-registry-insecure }}" \
+        -v "${{ steps.build-kamel.outputs.build-binary-local-image-version }}" \
+        -x "${{ env.CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE }}"
 
   - name: Cleanup
     uses: ./.github/actions/kamel-cleanup
     if: ${{ always() }}
     with:
       build-bundle-catalog-source: ${{ steps.build-kamel.outputs.build-bundle-catalog-source-name }}
+      image-namespace: ${{ steps.config-cluster.outputs.cluster-image-namespace }}
