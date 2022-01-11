@@ -84,32 +84,19 @@ runs:
   - name: Run IT
     shell: bash
     run: |
-      # Use the last released Kamel CLI
-      export RELEASED_KAMEL_BIN=${{ steps.released-kamel-cli.outputs.released-kamel-binary }}
-
-      echo "Kamel version: $(${RELEASED_KAMEL_BIN} version)"
-
-      # Configure install options
-      export CUSTOM_IMAGE=${{ steps.build-kamel.outputs.build-binary-local-image-name }}
-      export CUSTOM_VERSION=${{ steps.build-kamel.outputs.build-binary-local-image-version }}
-      export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
-      export KAMEL_INSTALL_REGISTRY=${{ steps.config-cluster.outputs.cluster-image-registry-pull-host }}
-      export KAMEL_INSTALL_REGISTRY_INSECURE=${{steps.config-cluster.outputs.cluster-image-registry-insecure }}
-
-      # Despite building a bundle we don't want it installed immediately so no OLM_INDEX_BUNDLE var
-
-      # Configure test options
-      export CAMEL_K_PREV_IIB=quay.io/operatorhubio/catalog:latest
-      export CAMEL_K_NEW_IIB=${{ steps.build-kamel.outputs.build-bundle-image-bundle-index }}
-      export KAMEL_K_TEST_RELEASE_VERSION=$(make get-last-released-version)
-      export KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
-      export CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE=${{ env.CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE }}
-
-      # Then run integration tests
-      make test-upgrade
+      # Note different parameters due to alternative installation
+      ./.github/actions/e2e-upgrade/exec-tests.sh \
+        -b "${{ steps.released-kamel-cli.outputs.released-kamel-binary }}" \
+        -d "${{ steps.build-kamel.outputs.build-bundle-image-bundle-index }}" \
+        -l "${{ steps.config-cluster.outputs.cluster-image-registry-pull-host }}" \
+        -n "${{ steps.build-kamel.outputs.build-binary-local-image-name }}" \
+        -s "${{ steps.config-cluster.outputs.cluster-image-registry-insecure }}" \
+        -v "${{ steps.build-kamel.outputs.build-binary-local-image-version }}" \
+        -x "${{ env.CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE }}"
 
   - name: Cleanup
     uses: ./.github/actions/kamel-cleanup
     if: ${{ always() }}
     with:
       build-bundle-catalog-source: ${{ steps.build-kamel.outputs.build-bundle-catalog-source-name }}
+      image-namespace: ${{ steps.config-cluster.outputs.cluster-image-namespace }}
