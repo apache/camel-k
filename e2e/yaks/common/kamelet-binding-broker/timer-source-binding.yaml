@@ -26,12 +26,12 @@ spec:
       apiVersion: camel.apache.org/v1alpha1
       name: timer-source
     properties:
-      message: Hello Custom Event
+      message: Hello Custom Event from sample-broker
       period: 1000
   sink:
     ref:
       kind: Broker
       apiVersion: eventing.knative.dev/v1
-      name: default
+      name: sample-broker
     properties:
       type: custom-type

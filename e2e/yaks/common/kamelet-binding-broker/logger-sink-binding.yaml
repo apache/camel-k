@@ -24,7 +24,7 @@ spec:
     ref:
       kind: Broker
       apiVersion: eventing.knative.dev/v1
-      name: default
+      name: sample-broker
     properties:
       type: custom-type
   sink:
