@@ -1,5 +1,6 @@
 = Configure Maven
 
+[[maven-settings]]
 == Maven Settings
 
 The Maven settings, used by the Camel K operator, can be provided in a ConfigMap or a Secret.
@@ -114,6 +115,17 @@ WARNING: The `--maven-settings` and `--maven-repository` options are mutually ex
 
 You can find more information in the https://maven.apache.org/guides/introduction/introduction-to-repositories.html[Introduction to Repositories] from the Maven documentation.
 
+[[http-proxy]]
+== HTTP Proxy
+
+HTTP proxy can be configured on the Camel K operator Deployment, with the usual `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` environment variables.
+
+The operator automatically configures Maven according to the values of these variables.
+
+See the xref:configuration/http-proxy.adoc[HTTP proxy] documentation for more details.
+
+The generated configuration can be overwritten in the <<maven-settings>> if necessary.
+
 [[ca-certificates]]
 == CA Certificates
 
@@ -131,6 +143,7 @@ A JKS formatted keystore is automatically created to store the CA certificate(s)
 The root CA certificates are also imported into the created keystore.
 
 The created Secret can then be referenced in the IntegrationPlatform resource, from the `spec.build.maven.caSecret` field, e.g.:
+
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1
@@ -191,12 +204,18 @@ Maven extensions are typically used to enable https://maven.apache.org/wagon/wag
 [[use-case]]
 == S3 Bucket as a Maven Repository
 
-In this section, we will show how to configure Camel K to fetch artifacts from a https://aws.amazon.com/s3/[S3] bucket that's setup as a Maven repository. We will assume that the bucket is already up and running and configured correctly. We will also assume you know how to setup Maven locally to fetch artifacts from it.
+In this section, we will show how to configure Camel K to fetch artifacts from a https://aws.amazon.com/s3/[S3] bucket that's set up as a Maven repository.
+We will assume that the bucket is already up and running and configured correctly. We will also assume you know how to set up Maven locally to fetch artifacts from it.
 
 === Custom Maven Settings
 
-The first thing that needs to be done is to create a Maven settings file configured to use the S3 bucket as a Maven repository. The Maven settings file will be used by the Camel K operator so make sure your S3 instance is accessible in your cluster. +
-The Maven settings will contain all the information needed for Maven to access the S3 bucket namely your credentials, S3 URL and bucket name. This information will typically be located in the `server` and `repository` section of your Maven settings. For example when using https://min.io/[MinIO] as a S3 provider and https://github.com/Yleisradio/aws-maven/pull/20[`fi.yle.tools:aws-maven:1.4.3`] as a Wagon Provider, your Maven settings will look something like this: 
+The first thing that needs to be done is to create a Maven settings file configured to use the S3 bucket as a Maven repository.
+The Maven settings file will be used by the Camel K operator so make sure your S3 instance is accessible in your cluster.
+
+The Maven settings will contain all the information needed for Maven to access the S3 bucket namely your credentials, S3 URL and bucket name.
+This information will typically be located in the `server` and `repository` section of your Maven settings.
+
+For example when using https://min.io/[MinIO] as a S3 provider and https://github.com/Yleisradio/aws-maven/pull/20[`fi.yle.tools:aws-maven:1.4.3`] as a Wagon Provider, your Maven settings will look something like this:
 
 [source,xml]
 ----
@@ -289,7 +308,10 @@ xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.
   </profiles>
 </settings>
 ----
-Since these settings contains credentials, you will want to store it in a Kubernetes `secret`. As mentioned above, the `kubectl` CLI provides a convenient command to create a Secret from a file, e.g.:
+
+Since these settings contains credentials, you will want to store it in a Kubernetes Secret.
+As mentioned above, the `kubectl` CLI provides a convenient command to create a Secret from a file, e.g.:
+
 [source,console]
 ----
 $ kubectl create secret generic camel-k-s3-maven-settings --from-file=maven-settings=maven_settings.xml
@@ -297,8 +319,10 @@ $ kubectl create secret generic camel-k-s3-maven-settings --from-file=maven-sett
 
 === S3 TLS Certificates
 
-In most cases, you will need to add the certificate(s) served by your S3 instance to the list of certificate(s) trusted by the Camel K Operator when running Maven commands. Where/how to get the certificate(s) varies greatly depending on how your S3 instance is setup and will not be covered here. +
-Once retrieved, you should create a Kubernetes `secret` containing the certificate(s) similar to what is described in the section <<ca-certificates>>, e.g.:
+In most cases, you will need to add the certificate(s) served by your S3 instance to the list of certificate(s) trusted by the Camel K Operator when running Maven commands.
+Where/how to get the certificate(s) varies greatly depending on how your S3 instance is set up, and will not be covered here.
+Once retrieved, you should create a Kubernetes Secret containing the certificate(s) similar to what is described in the section <<ca-certificates>>, e.g.:
+
 [source,console]
 ----
 $ kubectl create secret generic s3-ca --from-file=s3-ca=ca.crt
@@ -306,13 +330,17 @@ $ kubectl create secret generic s3-ca --from-file=s3-ca=ca.crt
 
 === Maven settings, certificates and extensions
 
-We are now ready to configure the Camel K operator to use your S3 bucket as a Maven repository. This can be done while installing the Operator using the Kamel CLI, e.g:
+We are now ready to configure the Camel K operator to use your S3 bucket as a Maven repository.
+This can be done while installing the Operator using the Kamel CLI, e.g:
+
 [source,console]
 ----
 $ kamel install --maven-settings secret:camel-k-s3-maven-settings/maven-settings --maven-ca-secret s3-ca/s3-ca --maven-extension fi.yle.tools:aws-maven:1.4.3
 ----
 
-Maven dependencies hosted in your S3 bucket can now be used just like any other dependency when running an integration. For example when using the Kamel CLI using the `--dependency` option:
+Maven dependencies hosted in your S3 bucket can now be used just like any other dependency when running an integration.
+For example when using the Kamel CLI using the `--dependency` option:
+
 [source,console]
 ----
 $ kamel run S3.java --dependency=mvn:artfiactId:groupId:version
