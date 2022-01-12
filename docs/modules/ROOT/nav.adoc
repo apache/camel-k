@@ -32,6 +32,7 @@
 ** xref:configuration/runtime-properties.adoc[Properties]
 ** xref:configuration/runtime-config.adoc[Runtime configuration]
 ** xref:configuration/runtime-resources.adoc[Runtime resources]
+** xref:configuration/http-proxy.adoc[HTTP Proxy]
 ** xref:configuration/maven.adoc[Maven]
 * Observability
 ** xref:observability/logging.adoc[Logging]
