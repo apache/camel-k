@@ -49,10 +49,11 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
+var httpdTlsMountPath = "/etc/tls/private"
+
 func TestMavenProxy(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		hostname := fmt.Sprintf("%s.%s.svc", "proxy", ns)
-		tlsMountPath := "/etc/tls/private"
 
 		// Generate the TLS certificate
 		serialNumber := big.NewInt(rand2.Int63())
@@ -107,184 +108,15 @@ func TestMavenProxy(t *testing.T) {
 		}
 		Expect(TestClient().Create(TestContext, secret)).To(Succeed())
 
-		// HTTPD configuration
-		config := &corev1.ConfigMap{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "ConfigMap",
-				APIVersion: corev1.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: ns,
-				Name:      "httpd-config",
-			},
-			Data: map[string]string{
-				"httpd.conf": fmt.Sprintf(`
-ServerRoot "/etc/httpd
-
-PidFile /var/run/httpd/httpd.pid"
-
-LoadModule mpm_event_module /usr/local/apache2/modules/mod_mpm_event.so
-LoadModule authn_core_module /usr/local/apache2/modules/mod_authn_core.so
-LoadModule authz_core_module /usr/local/apache2/modules/mod_authz_core.so
-LoadModule proxy_module /usr/local/apache2/modules/mod_proxy.so
-LoadModule proxy_http_module /usr/local/apache2/modules/mod_proxy_http.so
-LoadModule proxy_connect_module /usr/local/apache2/modules/mod_proxy_connect.so
-LoadModule headers_module /usr/local/apache2/modules/mod_headers.so
-LoadModule setenvif_module /usr/local/apache2/modules/mod_setenvif.so
-LoadModule version_module /usr/local/apache2/modules/mod_version.so
-LoadModule log_config_module /usr/local/apache2/modules/mod_log_config.so
-LoadModule env_module /usr/local/apache2/modules/mod_env.so
-LoadModule unixd_module /usr/local/apache2/modules/mod_unixd.so
-LoadModule status_module /usr/local/apache2/modules/mod_status.so
-LoadModule autoindex_module /usr/local/apache2/modules/mod_autoindex.so
-LoadModule ssl_module /usr/local/apache2/modules/mod_ssl.so
-
-Mutex posixsem
-
-LogFormat "%%h %%l %%u %%t \"%%r\" %%>s %%b" common
-CustomLog /dev/stdout common
-ErrorLog /dev/stderr
-
-LogLevel warn
-
-Listen 8080
-Listen 8443
-
-ServerName %s
-
-ProxyRequests On
-ProxyVia Off
-
-<VirtualHost *:8443>
-  SSLEngine on
-
-  SSLCertificateFile "%s/%s"
-  SSLCertificateKeyFile "%s/%s"
-
-  AllowEncodedSlashes NoDecode
-</VirtualHost>
-`,
-					hostname, tlsMountPath, corev1.TLSCertKey, tlsMountPath, corev1.TLSPrivateKeyKey,
-				),
-			},
-		}
+		// HTTPD ConfigMap
+		config := newHTTPDConfigMap(ns, hostname)
 		Expect(TestClient().Create(TestContext, config)).To(Succeed())
 
-		// Deploy HTTPD
-		// $ curl --proxy-cacert ca.crt --proxy https://proxy.http-proxy.svc:443 https://www.google.com
-		// https://github.com/curl/curl/pull/1127
-		deployment := &appsv1.Deployment{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Deployment",
-				APIVersion: appsv1.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: ns,
-				Name:      "proxy",
-			},
-			Spec: appsv1.DeploymentSpec{
-				Selector: &metav1.LabelSelector{
-					MatchLabels: map[string]string{
-						"app": "proxy",
-					},
-				},
-				Template: corev1.PodTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{
-						Labels: map[string]string{
-							"app": "proxy",
-						},
-					},
-					Spec: corev1.PodSpec{
-						Containers: []corev1.Container{
-							{
-								Name:    "httpd",
-								Image:   "httpd:2.4.46",
-								Command: []string{"httpd", "-f", "/etc/httpd/httpd.conf", "-DFOREGROUND"},
-								Ports: []corev1.ContainerPort{
-									{
-										Name:          "http",
-										ContainerPort: 8080,
-									},
-									{
-										Name:          "https",
-										ContainerPort: 8443,
-									},
-								},
-								VolumeMounts: []corev1.VolumeMount{
-									{
-										Name:      "tls",
-										MountPath: tlsMountPath,
-										ReadOnly:  true,
-									},
-									{
-										Name:      "httpd-conf",
-										MountPath: "/etc/httpd",
-										ReadOnly:  true,
-									},
-									{
-										Name:      "httpd-run",
-										MountPath: "/var/run/httpd",
-									},
-								},
-							},
-						},
-						Volumes: []corev1.Volume{
-							{
-								Name: "tls",
-								VolumeSource: corev1.VolumeSource{
-									Secret: &corev1.SecretVolumeSource{
-										SecretName: secret.Name,
-									},
-								},
-							},
-							{
-								Name: "httpd-conf",
-								VolumeSource: corev1.VolumeSource{
-									ConfigMap: &corev1.ConfigMapVolumeSource{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: config.Name,
-										},
-									},
-								},
-							},
-							{
-								Name: "httpd-run",
-								VolumeSource: corev1.VolumeSource{
-									EmptyDir: &corev1.EmptyDirVolumeSource{},
-								},
-							},
-						},
-					},
-				},
-			},
-		}
+		// HTTPD Deployment
+		deployment := newHTTPDDeployment(ns, config.Name, secret.Name)
 		Expect(TestClient().Create(TestContext, deployment)).To(Succeed())
 
-		service := &corev1.Service{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Service",
-				APIVersion: corev1.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: ns,
-				Name:      deployment.Name,
-			},
-			Spec: corev1.ServiceSpec{
-				Selector: deployment.Spec.Template.Labels,
-				Ports: []corev1.ServicePort{
-					{
-						Name:       "http",
-						Port:       80,
-						TargetPort: intstr.FromString("http"),
-					},
-					{
-						Name:       "https",
-						Port:       443,
-						TargetPort: intstr.FromString("https"),
-					},
-				},
-			},
-		}
+		service := newHTTPDService(deployment)
 		Expect(TestClient().Create(TestContext, service)).To(Succeed())
 
 		// Wait for the Deployment to become ready
@@ -351,4 +183,185 @@ ProxyVia Off
 		Expect(TestClient().Delete(TestContext, secret)).To(Succeed())
 		Expect(TestClient().Delete(TestContext, config)).To(Succeed())
 	})
+}
+
+func newHTTPDConfigMap(ns, hostname string) *corev1.ConfigMap {
+	return &corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      "httpd-config",
+		},
+		Data: map[string]string{
+			"httpd.conf": fmt.Sprintf(`
+ServerRoot "/etc/httpd
+
+PidFile /var/run/httpd/httpd.pid"
+
+LoadModule mpm_event_module /usr/local/apache2/modules/mod_mpm_event.so
+LoadModule authn_core_module /usr/local/apache2/modules/mod_authn_core.so
+LoadModule authz_core_module /usr/local/apache2/modules/mod_authz_core.so
+LoadModule proxy_module /usr/local/apache2/modules/mod_proxy.so
+LoadModule proxy_http_module /usr/local/apache2/modules/mod_proxy_http.so
+LoadModule proxy_connect_module /usr/local/apache2/modules/mod_proxy_connect.so
+LoadModule headers_module /usr/local/apache2/modules/mod_headers.so
+LoadModule setenvif_module /usr/local/apache2/modules/mod_setenvif.so
+LoadModule version_module /usr/local/apache2/modules/mod_version.so
+LoadModule log_config_module /usr/local/apache2/modules/mod_log_config.so
+LoadModule env_module /usr/local/apache2/modules/mod_env.so
+LoadModule unixd_module /usr/local/apache2/modules/mod_unixd.so
+LoadModule status_module /usr/local/apache2/modules/mod_status.so
+LoadModule autoindex_module /usr/local/apache2/modules/mod_autoindex.so
+LoadModule ssl_module /usr/local/apache2/modules/mod_ssl.so
+
+Mutex posixsem
+
+LogFormat "%%h %%l %%u %%t \"%%r\" %%>s %%b" common
+CustomLog /dev/stdout common
+ErrorLog /dev/stderr
+
+LogLevel warn
+
+Listen 8080
+Listen 8443
+
+ServerName %s
+
+ProxyRequests On
+ProxyVia Off
+
+<VirtualHost *:8443>
+  SSLEngine on
+
+  SSLCertificateFile "%s/%s"
+  SSLCertificateKeyFile "%s/%s"
+
+  AllowEncodedSlashes NoDecode
+</VirtualHost>
+`,
+				hostname, httpdTlsMountPath, corev1.TLSCertKey, httpdTlsMountPath, corev1.TLSPrivateKeyKey,
+			),
+		},
+	}
+}
+
+func newHTTPDDeployment(ns, configName, secretName string) *appsv1.Deployment {
+	// $ curl --proxy-cacert ca.crt --proxy https://proxy.http-proxy.svc:443 https://www.google.com
+	// https://github.com/curl/curl/pull/1127
+	return &appsv1.Deployment{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Deployment",
+			APIVersion: appsv1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      "proxy",
+		},
+		Spec: appsv1.DeploymentSpec{
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app": "proxy",
+				},
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app": "proxy",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:    "httpd",
+							Image:   "httpd:2.4.46",
+							Command: []string{"httpd", "-f", "/etc/httpd/httpd.conf", "-DFOREGROUND"},
+							Ports: []corev1.ContainerPort{
+								{
+									Name:          "http",
+									ContainerPort: 8080,
+								},
+								{
+									Name:          "https",
+									ContainerPort: 8443,
+								},
+							},
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "tls",
+									MountPath: httpdTlsMountPath,
+									ReadOnly:  true,
+								},
+								{
+									Name:      "httpd-conf",
+									MountPath: "/etc/httpd",
+									ReadOnly:  true,
+								},
+								{
+									Name:      "httpd-run",
+									MountPath: "/var/run/httpd",
+								},
+							},
+						},
+					},
+					Volumes: []corev1.Volume{
+						{
+							Name: "tls",
+							VolumeSource: corev1.VolumeSource{
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: secretName,
+								},
+							},
+						},
+						{
+							Name: "httpd-conf",
+							VolumeSource: corev1.VolumeSource{
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: configName,
+									},
+								},
+							},
+						},
+						{
+							Name: "httpd-run",
+							VolumeSource: corev1.VolumeSource{
+								EmptyDir: &corev1.EmptyDirVolumeSource{},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func newHTTPDService(deployment *appsv1.Deployment) *corev1.Service {
+	return &corev1.Service{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Service",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: deployment.Namespace,
+			Name:      deployment.Name,
+		},
+		Spec: corev1.ServiceSpec{
+			Selector: deployment.Spec.Template.Labels,
+			Ports: []corev1.ServicePort{
+				{
+					Name:       "http",
+					Port:       80,
+					TargetPort: intstr.FromString("http"),
+				},
+				{
+					Name:       "https",
+					Port:       443,
+					TargetPort: intstr.FromString("https"),
+				},
+			},
+		},
+	}
 }
