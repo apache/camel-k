@@ -1239,16 +1239,6 @@ bool
 <td>
 </td>
 </tr>
-<tr>
-<td>
-<code>httpProxySecret</code><br/>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1.BuilderTask">BuilderTask
@@ -1353,8 +1343,8 @@ RuntimeSpec
 <td>
 <code>maven</code><br/>
 <em>
-<a href="#camel.apache.org/v1.MavenSpec">
-MavenSpec
+<a href="#camel.apache.org/v1.MavenBuildSpec">
+MavenBuildSpec
 </a>
 </em>
 </td>
@@ -2719,16 +2709,6 @@ MavenSpec
 </tr>
 <tr>
 <td>
-<code>httpProxySecret</code><br/>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
 <code>kanikoBuildCache</code><br/>
 <em>
 bool
@@ -3573,16 +3553,6 @@ bool
 </tr>
 <tr>
 <td>
-<code>httpProxySecret</code><br/>
-<em>
-string
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
 <code>cache</code><br/>
 <em>
 <a href="#camel.apache.org/v1.KanikoTaskCache">
@@ -3654,7 +3624,7 @@ string
 <a href="#camel.apache.org/v1.RuntimeSpec">RuntimeSpec</a>)
 </p>
 <div>
-<p>MavenArtifact &ndash;</p>
+<p>MavenArtifact defines a Maven artifact</p>
 </div>
 <table>
 <thead>
@@ -3696,12 +3666,59 @@ string
 </tr>
 </tbody>
 </table>
+<h3 id="camel.apache.org/v1.MavenBuildSpec">MavenBuildSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>)
+</p>
+<div>
+<p>MavenBuildSpec &ndash;</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>MavenSpec</code><br/>
+<em>
+<a href="#camel.apache.org/v1.MavenSpec">
+MavenSpec
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>MavenSpec</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>repositories</code><br/>
+<em>
+<a href="#camel.apache.org/v1.Repository">
+[]Repository
+</a>
+</em>
+</td>
+<td>
+<p>The Maven repositories.</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="camel.apache.org/v1.MavenSpec">MavenSpec
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>, 
-<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>)
+<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>, 
+<a href="#camel.apache.org/v1.MavenBuildSpec">MavenBuildSpec</a>)
 </p>
 <div>
 <p>MavenSpec &ndash;</p>
@@ -3783,18 +3800,6 @@ Kubernetes meta/v1.Duration
 </tr>
 <tr>
 <td>
-<code>repositories</code><br/>
-<em>
-<a href="#camel.apache.org/v1.Repository">
-[]Repository
-</a>
-</em>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td>
 <code>extension</code><br/>
 <em>
 <a href="#camel.apache.org/v1.MavenArtifact">
@@ -3803,7 +3808,8 @@ Kubernetes meta/v1.Duration
 </em>
 </td>
 <td>
-<p>Maven build extensions <a href="https://maven.apache.org/guides/mini/guide-using-extensions.html">https://maven.apache.org/guides/mini/guide-using-extensions.html</a></p>
+<p>The Maven build extensions.
+See <a href="https://maven.apache.org/guides/mini/guide-using-extensions.html">https://maven.apache.org/guides/mini/guide-using-extensions.html</a>.</p>
 </td>
 </tr>
 </tbody>
@@ -4242,10 +4248,10 @@ string
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.MavenSpec">MavenSpec</a>)
+<a href="#camel.apache.org/v1.MavenBuildSpec">MavenBuildSpec</a>)
 </p>
 <div>
-<p>Repository &ndash;</p>
+<p>Repository defines a Maven repository</p>
 </div>
 <table>
 <thead>
@@ -4318,7 +4324,7 @@ RepositoryPolicy
 <a href="#camel.apache.org/v1.Repository">Repository</a>)
 </p>
 <div>
-<p>RepositoryPolicy &ndash;</p>
+<p>RepositoryPolicy defines the policy associated to a Maven repository</p>
 </div>
 <table>
 <thead>
