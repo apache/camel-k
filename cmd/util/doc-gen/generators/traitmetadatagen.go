@@ -124,7 +124,7 @@ func (g *traitMetaDataGen) getTraitID(t *types.Type) string {
 
 func (g *traitMetaDataGen) buildDescription(t *types.Type, traitID string, td *traitMetaData) {
 	desc := []string(nil)
-	desc = append(desc, g.filterOutTagsAndComments(t.CommentLines)...)
+	desc = append(desc, filterOutTagsAndComments(t.CommentLines)...)
 	td.Name = traitID
 	td.Description = ""
 	for _, line := range desc {
@@ -166,15 +166,4 @@ func (g *traitMetaDataGen) buildMembers(t *types.Type, content *[]string, td *tr
 			}
 		}
 	}
-}
-
-func (g *traitMetaDataGen) filterOutTagsAndComments(comments []string) []string {
-	res := make([]string, 0, len(comments))
-	for _, l := range comments {
-		if !strings.HasPrefix(strings.TrimLeft(l, " \t"), "+") &&
-			!strings.HasPrefix(strings.TrimLeft(l, " \t"), "TODO:") {
-			res = append(res, l)
-		}
-	}
-	return res
 }
