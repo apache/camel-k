@@ -81,7 +81,7 @@ spec:
 <1> Deactivates the propagation of HTTP proxy environment variables at the platform level
 
 [[openshift]]
-=== OpenShift
+== OpenShift
 
 On OpenShift 4, cluster-wide egress proxy can be configured by editing the `cluster` Proxy resource:
 
