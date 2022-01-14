@@ -1,0 +1,180 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: kamel-config-cluster
+description: 'Delegates to respective cluster action depending on type of requested platform'
+
+inputs:
+  cluster-type:
+    description: 'The type of cluster required: [kind, ocp3, custom]'
+    required: true
+    default: 'kind'
+  kube-config-data:
+    description: 'The kube-config-data - required for custom config only'
+    required: false
+  kube-admin-user-ctx:
+    description: 'The kube-admin-user-ctx - required for custom config only'
+    required: false
+  kube-user-ctx:
+    description: 'The kube-user-ctx - required for custom config only'
+    required: false
+  image-registry:
+    description: 'The image-registry - required for custom config only'
+    required: false
+  image-registry-insecure:
+    description: 'The image-registry-insecure - required for custom config only'
+    required: false
+  opm:
+    description: 'Install opm alongside cluster for bundle-related operations'
+    required: false
+    default: false
+  olm:
+    description: 'Check for & install OLM alongside cluster for bundle-related operations'
+    required: false
+    default: false
+
+runs:
+  using: "composite"
+  steps:
+    #
+    # TODO
+    # Due to lack of if in steps, need to use conditional action which
+    # does not currently include output support so have to put all vars
+    # as environment vars. When either ChristopherHX or github support allow
+    # for alternative then update accordingly.
+    #
+    - id: execute-kind
+      name: Maybe Execute Kind Cluster
+      uses: ./.github/actions/conditional
+      with:
+        if: ${{ inputs.cluster-type == 'kind' }}
+        step: |
+          uses: ./.github/actions/kamel-config-cluster-kind
+
+    - id: execute-ocp3
+      name: Maybe Execute Minishift Cluster
+      uses: ./.github/actions/conditional
+      with:
+        if: ${{ inputs.cluster-type == 'ocp3' }}
+        step: |
+          uses: ./.github/actions/kamel-config-cluster-ocp3
+
+    - id: execute-custom
+      name: Maybe Execute Custom Cluster
+      uses: ./.github/actions/conditional
+      env:
+        KUBE_CONFIG_DATA: ${{ inputs.kube-config-data }}
+        KUBE_ADMIN_USER_CTX: ${{ inputs.kube-admin-user-ctx }}
+        KUBE_USER_CTX: ${{ inputs.kube-user-ctx }}
+        IMAGE_REGISTRY: ${{ inputs.image-registry }}
+        IMAGE_REGISTRY_INSECURE: ${{ inputs.image-registry-insecure }}
+      with:
+        if: ${{ inputs.cluster-type == 'custom' }}
+        step: |
+          uses: ./.github/actions/kamel-config-cluster-custom
+
+    - id: execute-invalid
+      name: Execute Invalid Cluster
+      uses: ./.github/actions/conditional
+      with:
+        if: ${{ inputs.cluster-type != 'kind' &&  inputs.cluster-type != 'ocp3' &&  inputs.cluster-type != 'custom' }}
+        step: |
+          shell: bash
+          run: |
+            echo "Error: Unrecognised platform request for type of cluster. Should be kind, ocp3 or custom."
+            exit 1
+
+    - id: platform-info
+      shell: bash
+      run: |
+        echo "::set-output name=registry::$(echo ${{ env.IMAGE_REGISTRY }})"
+        echo "::set-output name=registry-insecure::$(echo ${{ env.IMAGE_REGISTRY_INSECURE }})"
+        echo "::set-output name=kube-admin-user-ctx::$(echo ${{ env.KUBE_ADMIN_USER_CTX }})"
+        echo "::set-output name=kube-user-ctx::$(echo ${{ env.KUBE_USER_CTX }})"
+
+      #
+      # Install opm if required
+      #
+    - id: install-opm
+      name: Install opm if required
+      shell: bash
+      run: |
+        if [ "${{ inputs.opm }}" == "true" ]; then
+          curl -L https://github.com/operator-framework/operator-registry/releases/download/v1.19.5/linux-amd64-opm -o opm
+          chmod +x opm
+          sudo mv opm /usr/local/bin/
+        fi
+
+      #
+      # Install OLM if required
+      #
+    - id: install-olm
+      name: Install OLM
+      shell: bash
+      run: |
+        if [ "${{ inputs.olm }}" != "true" ]; then
+          # OLM not required
+          echo "OLM not required"
+          exit 0
+        fi
+
+        #
+        # Get current context
+        #
+        echo "Cache current kube context"
+        ctx=$(kubectl config current-context)
+
+        #
+        # Need to be admin so switch to the admin context
+        #
+        echo "Change to kube admin context"
+        kubectl config use-context "${{ steps.platform-info.outputs.kube-admin-user-ctx }}"
+
+        set +e
+        echo "Check if OLM is already installed"
+        kubectl get deployments --all-namespaces | grep olm-operator
+        if [ $? != 0 ]; then
+          set -e
+          echo "OLM not detected on cluster so downloading and installing"
+          kubectl apply -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.17.0/crds.yaml
+          # wait for a while to be sure CRDs are installed
+          sleep 1
+          kubectl apply -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.17.0/olm.yaml
+        fi
+        set -e
+
+        #
+        # Change back to original context
+        #
+        echo "Return to original kube context"
+        kubectl config use-context "${ctx}"
+
+        echo "Complete"
+
+outputs:
+  image-registry:
+    description: "Registry for storing images"
+    value: ${{ steps.platform-info.outputs.registry }}
+  image-registry-insecure:
+    description: "Whether the image registry require secure/authenticated access"
+    value: ${{ steps.platform-info.outputs.registry-insecure }}
+  kube-admin-user-ctx:
+    description: "The admin user context of the cluster"
+    value: ${{ steps.platform-info.outputs.kube-admin-user-ctx }}
+  kube-user-ctx:
+    description: "The user context of the cluster"
+    value: ${{ steps.platform-info.outputs.kube-user-ctx }}

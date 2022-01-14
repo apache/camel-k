@@ -1,0 +1,192 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: kamel-config-cluster-ocp3
+description: 'Provides configuration for making available kubernetes cluster on ocp3'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get OpenShift Client (oc)
+      shell: bash
+      run: |
+        export OPENSHIFT_VERSION=v3.11.0
+        export OPENSHIFT_COMMIT=0cbc58b
+        export MAVEN_OPTS=-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+
+        sudo rm -f /etc/resolv.conf
+        sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+        sudo sh -c 'echo "DNS=8.8.8.8 4.4.4.4" >> /etc/systemd/resolved.conf'
+        sudo service systemd-resolved restart
+
+        # set docker0 to promiscuous mode
+        sudo ip link set docker0 promisc on
+
+        # Download and install the oc binary
+        sudo mount --make-shared /
+
+        sudo service docker stop
+        sudo echo '{"insecure-registries": ["172.30.0.0/16"]}' | sudo tee /etc/docker/daemon.json > /dev/null
+        sudo service docker start
+
+        DOWNLOAD_URL=https://github.com/openshift/origin/releases/download/$OPENSHIFT_VERSION/openshift-origin-client-tools-$OPENSHIFT_VERSION-$OPENSHIFT_COMMIT-linux-64bit.tar.gz
+        wget -O client.tar.gz ${DOWNLOAD_URL}
+        tar xvzOf client.tar.gz > oc.bin
+        sudo mv oc.bin /usr/local/bin/oc
+        sudo chmod 755 /usr/local/bin/oc
+
+    - id: start-openshift
+      name: Start OpenShift Cluster
+      shell: bash
+      run: |
+        # Figure out this host's IP address
+        IP_ADDR="$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)"
+
+        # Setup cluster dir
+        sudo mkdir -p /home/runner/lib/oc
+        sudo chmod 777 /home/runner/lib/oc
+        cd /home/runner/lib/oc
+
+        # Start OpenShift
+        oc cluster up --public-hostname=$IP_ADDR --enable=persistent-volumes,registry,router
+        oc login -u system:admin
+
+        # Export the context used for admin login
+        echo "KUBE_ADMIN_USER_CTX=$(oc config current-context)" >> $GITHUB_ENV
+
+        # Wait until we have a ready node in openshift
+        TIMEOUT=0
+        TIMEOUT_COUNT=60
+        until [ $TIMEOUT -eq $TIMEOUT_COUNT ]; do
+          if [ -n "$(oc get nodes | grep Ready)" ]; then
+            break
+          fi
+          echo "openshift is not up yet"
+          TIMEOUT=$((TIMEOUT+1))
+          sleep 5
+        done
+
+        if [ $TIMEOUT -eq $TIMEOUT_COUNT ]; then
+          echo "Failed to start openshift"
+          exit 1
+        fi
+
+        echo "openshift is deployed and reachable"
+
+    - id: info
+      name: Info
+      shell: bash
+      run: |
+        oc describe nodes
+
+    - id: configure-developer-user
+      name: Configure Developer User
+      shell: bash
+      run: |
+        # Aggregate pod eviction permission to the default admin role
+        cat <<EOF | oc apply -f -
+        kind: ClusterRole
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:eviction
+          labels:
+            rbac.authorization.k8s.io/aggregate-to-admin: "true"
+        rules:
+        - apiGroups: [""]
+          resources: ["pods/eviction"]
+          verbs: ["create"]
+        EOF
+
+        # Grant nodes permission to the default developer user
+        cat <<EOF | oc apply -f -
+        kind: ClusterRole
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:nodes
+        rules:
+        - apiGroups: [""]
+          resources: ["nodes"]
+          verbs: ["get","list"]
+        EOF
+        cat <<EOF | oc apply -f -
+        kind: ClusterRoleBinding
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:nodes
+        subjects:
+        - kind: User
+          name: developer
+        roleRef:
+          kind: ClusterRole
+          name: camel-k-test:nodes
+          apiGroup: rbac.authorization.k8s.io
+        EOF
+
+        # Aggregate finalizers permission to the default admin role
+        cat <<EOF | oc apply -f -
+        kind: ClusterRole
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:finalizers
+          labels:
+            rbac.authorization.k8s.io/aggregate-to-admin: "true"
+        rules:
+        - apiGroups: ["camel.apache.org"]
+          resources: ["*/finalizers"]
+          verbs: ["update"]
+        EOF
+
+        # Grant read permission on the Kubernetes Service to the default developer user
+        # Required by the HTTP proxy tests
+        cat <<EOF | oc apply -f -
+        kind: ClusterRole
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:kubernetes-service
+        rules:
+        - apiGroups: [""]
+          resources: ["services"]
+          verbs: ["get"]
+          resourceNames: ["kubernetes"]
+        EOF
+        cat <<EOF | oc apply -f -
+        kind: RoleBinding
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          namespace: default
+          name: camel-k-test:kubernetes-service
+        subjects:
+        - kind: User
+          name: developer
+        roleRef:
+          kind: ClusterRole
+          name: camel-k-test:kubernetes-service
+          apiGroup: rbac.authorization.k8s.io
+        EOF
+
+        # Login as normal user
+        oc login -u developer
+
+        # Export the context used for developer login
+        echo "KUBE_USER_CTX=$(oc config current-context)" >> $GITHUB_ENV
+
+
+    - id: extract-kube-config
+      shell: bash
+      run: |
+        echo "IMAGE_REGISTRY=" >> $GITHUB_ENV
+        echo "IMAGE_REGISTRY_INSECURE=false" >> $GITHUB_ENV

@@ -58,72 +58,53 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Cleanup
-      run: |
-        ls -lart
-        echo "Initial status:"
-        df -h
-
-        echo "Cleaning up resources:"
-        sudo swapoff -a
-        sudo rm -f /swapfile
-        sudo apt clean
-        docker rmi $(docker image ls -aq)
-
-        echo "Final status:"
-        df -h
-    - name: Set up JDK 11
-      uses: AdoptOpenJDK/install-jdk@v1
       with:
-        version: "11"
-    - name: Set Go
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.16.x
-    - name: Kubernetes KinD Cluster
-      uses: container-tools/kind-action@v1
-      with:
-        version: v0.11.0
-        node_image: kindest/node:v1.21.1@sha256:fae9a58f17f18f06aeac9772ca8b5ac680ebbed985e266f711d936e91d113bad
-    - name: Info
-      run: |
-        kubectl cluster-info
-        kubectl describe nodes
-    - name: Build Operator
-      run: |
-        echo "Build project"
-        export CUSTOM_IMAGE=${KIND_REGISTRY}/apache/camel-k
-        echo "LOCAL_IMAGE_NAME=${CUSTOM_IMAGE}" >> $GITHUB_ENV
-        echo "LOCAL_IMAGE_VERSION=$(make get-version)" >> $GITHUB_ENV
-        make PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images images-push
+        persist-credentials: false
+        submodules: recursive
 
-        sudo mv ./kamel /usr/local/bin
+    - id: prepare-env
+      name: Prepare Test Environment
+      uses: ./.github/actions/kamel-prepare-env
+
+    - id: configure-platform
+      name: Configure Platform
+      uses: ./.github/actions/kamel-config-cluster
+      with:
+        cluster-type: ${{ steps.prepare-env.outputs.cluster-platform }}
+        kube-config-data: ${{ secrets.KUBE_CONFIG_DATA }}
+        kube-admin-user-ctx: ${{ secrets.KUBE_ADMIN_USER_CTX }}
+        kube-user-ctx: ${{ secrets.KUBE_USER_CTX }}
+        image-registry: ${{ secrets.IMAGE_REGISTRY }}
+        image-registry-insecure: ${{ secrets.IMAGE_REGISTRY_INSECURE }}
+
+
+    - id: build-kamel-binary
+      name: Build Kamel Binary
+      uses: ./.github/actions/kamel-build
+      with:
+        image-registry: ${{ steps.configure-platform.outputs.image-registry }}
+
+    - name: Install Kamel Cluster Setup
+      uses: ./.github/actions/kamel-install-cluster-setup
+      with:
+        kube-admin-user-ctx: ${{ steps.configure-platform.outputs.kube-admin-user-ctx }}
+
     - name: Run IT
-      # Disable registry tests as not compatible with KinD
-      #env:
-      #  TEST_DOCKER_HUB_USERNAME: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
-      #  TEST_DOCKER_HUB_PASSWORD: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
-      #  TEST_GITHUB_PACKAGES_REPO: ${{ secrets.TEST_GITHUB_PACKAGES_REPO }}
-      #  TEST_GITHUB_PACKAGES_USERNAME: ${{ secrets.TEST_GITHUB_PACKAGES_USERNAME }}
-      #  TEST_GITHUB_PACKAGES_PASSWORD: ${{ secrets.TEST_GITHUB_PACKAGES_PASSWORD }}
       env:
         KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY: ${{ matrix.publisher }}
       run: |
-        echo "Installing camel k cluster resources"
-        kamel install --cluster-setup
-
-        # Configure install options
-        export CUSTOM_IMAGE=${{ env.LOCAL_IMAGE_NAME }}
-        export CUSTOM_VERSION=${{ env.LOCAL_IMAGE_VERSION }}
-        export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
-        export KAMEL_INSTALL_REGISTRY=$KIND_REGISTRY
-        export KAMEL_INSTALL_REGISTRY_INSECURE=true
+        # Cluster environment
+        export KAMEL_INSTALL_REGISTRY=${{ steps.configure-platform.outputs.image-registry }}
+        export KAMEL_INSTALL_REGISTRY_INSECURE=${{ steps.configure-platform.outputs.image-registry-insecure }}
+        export CUSTOM_IMAGE=${{ steps.build-kamel-binary.outputs.local-image-name }}
+        export CUSTOM_VERSION=${{ steps.build-kamel-binary.outputs.local-image-version }}
         export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
-        export KAMEL_INSTALL_OPERATOR_ENV_VARS=KAMEL_INSTALL_DEFAULT_KAMELETS=false
-
-        # Configure test options
         export CAMEL_K_TEST_IMAGE_NAME=${CUSTOM_IMAGE}
         export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
+
+        # Test options
+        export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
+        export KAMEL_INSTALL_OPERATOR_ENV_VARS=KAMEL_INSTALL_DEFAULT_KAMELETS=false
 
         # Then run integration tests
         make test-builder

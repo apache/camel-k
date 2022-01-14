@@ -1,0 +1,131 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: kamel-config-cluster-custom
+description: 'Provides configuration for acessing a custom kubernetes cluster'
+
+runs:
+  using: "composite"
+  steps:
+    - id: connect-cluster
+      name: Connect to cluster
+      shell: bash
+      run: |
+        if [ -z "${KUBE_CONFIG_DATA}" ]; then
+          echo "Error: KUBE_CONFIG_DATA secret cannot be found"
+          exit 1
+        fi
+
+        if [ -z "${KUBE_ADMIN_USER_CTX}" ]; then
+          echo "Error: KUBE_ADMIN_USER_CTX secret cannot be found"
+          exit 1
+        fi
+
+        if [ -z "${KUBE_USER_CTX}" ]; then
+          echo "Error: KUBE_USER_CTX secret cannot be found"
+          exit 1
+        fi
+
+        # IMAGE_REGISTRY & IMAGE_REGISTRY_INSECURE are optional
+
+        # Copy the kube config to the correct location for kubectl
+        mkdir -p $HOME/.kube
+        echo -n "${KUBE_CONFIG_DATA}" | base64 -d > ${HOME}/.kube/config
+        if [ ! -f ${HOME}/.kube/config ]; then
+          echo "Error: kube config file not created correctly"
+          exit 1
+        fi
+
+        set -e
+        kubectl config use-context "${KUBE_ADMIN_USER_CTX}"
+        if [ $? != 0 ]; then
+          echo "Error: Failed to select kube admin context. Is the config and context correct?"
+          exit 1
+        fi
+        set +e
+
+        # Export the context variables
+        echo "KUBE_ADMIN_USER_CTX=${KUBE_ADMIN_USER_CTX}" >> $GITHUB_ENV
+        echo "KUBE_USER_CTX=${KUBE_USER_CTX}" >> $GITHUB_ENV
+        echo "IMAGE_REGISTRY=${IMAGE_REGISTRY}" >> $GITHUB_ENV
+        echo "IMAGE_REGISTRY_INSECURE=${IMAGE_REGISTRY_INSECURE}" >> $GITHUB_ENV
+
+    - id: info
+      name: Info
+      shell: bash
+      run: |
+        kubectl describe nodes
+
+    - id: configure-developer-user
+      name: Configure Developer User
+      shell: bash
+      run: |
+        # Aggregate pod eviction permission to the default admin role
+        cat <<EOF | oc apply -f -
+        kind: ClusterRole
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:eviction
+          labels:
+            rbac.authorization.k8s.io/aggregate-to-admin: "true"
+        rules:
+        - apiGroups: [""]
+          resources: ["pods/eviction"]
+          verbs: ["create"]
+        EOF
+
+        # Grant nodes permission to the default developer user
+        cat <<EOF | oc apply -f -
+        kind: ClusterRole
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:nodes
+        rules:
+        - apiGroups: [""]
+          resources: ["nodes"]
+          verbs: ["get","list"]
+        EOF
+        cat <<EOF | oc apply -f -
+        kind: ClusterRoleBinding
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:nodes
+        subjects:
+        - kind: User
+          name: developer
+        roleRef:
+          kind: ClusterRole
+          name: camel-k-test:nodes
+          apiGroup: rbac.authorization.k8s.io
+        EOF
+
+        # Aggregate finalizers permission to the default admin role
+        cat <<EOF | oc apply -f -
+        kind: ClusterRole
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:finalizers
+          labels:
+            rbac.authorization.k8s.io/aggregate-to-admin: "true"
+        rules:
+        - apiGroups: ["camel.apache.org"]
+          resources: ["*/finalizers"]
+          verbs: ["update"]
+        EOF
+
+        # Set the context to the user
+        kubectl config use-context "${{ env.KUBE_USER_CTX }}"
