@@ -71,6 +71,12 @@ runs:
       image-registry-insecure: ${{steps.config-cluster.outputs.cluster-image-registry-insecure }}
       image-version: ${{ steps.build-kamel.outputs.build-binary-local-image-version }}
 
+  - id: report-problematic
+    name: List Tests Marked As Problematic
+    uses: ./.github/actions/kamel-report-problematic
+    with:
+      test-suite: common
+
   - id: run-it
     name: Run IT
     shell: bash

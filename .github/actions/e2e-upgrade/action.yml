@@ -81,6 +81,12 @@ runs:
       # Can be empty and so catalog source will not be created
       catalog-source-namespace: ${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}
 
+  - id: report-problematic
+    name: List Tests Marked As Problematic
+    uses: ./.github/actions/kamel-report-problematic
+    with:
+      test-suite: upgrade
+
   - name: Run IT
     shell: bash
     run: |
