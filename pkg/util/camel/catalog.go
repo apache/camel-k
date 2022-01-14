@@ -120,6 +120,7 @@ func GenerateCatalogCommon(
 
 		mc := maven.NewContext(tmpDir)
 		mc.LocalRepository = mvn.LocalRepository
+		mc.AdditionalArguments = mvn.CLIOptions
 		mc.AddSystemProperty("catalog.path", tmpDir)
 		mc.AddSystemProperty("catalog.file", "catalog.yaml")
 		mc.AddSystemProperty("catalog.runtime", string(runtime.Provider))

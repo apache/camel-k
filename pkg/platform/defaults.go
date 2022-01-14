@@ -162,6 +162,13 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 	if p.Status.Build.Maven.LocalRepository == "" {
 		p.Status.Build.Maven.LocalRepository = defaults.LocalRepository
 	}
+	if len(p.Status.Build.Maven.CLIOptions) == 0 {
+		p.Status.Build.Maven.CLIOptions = []string{
+			"-V",
+			"--no-transfer-progress",
+			"-Dstyle.color=never",
+		}
+	}
 	if p.Status.Build.PersistentVolumeClaim == "" {
 		p.Status.Build.PersistentVolumeClaim = p.Name
 	}

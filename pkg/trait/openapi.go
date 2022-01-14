@@ -253,6 +253,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 
 	mc := maven.NewContext(tmpDir)
 	mc.LocalRepository = e.Platform.Status.Build.Maven.LocalRepository
+	mc.AdditionalArguments = e.Platform.Status.Build.Maven.CLIOptions
 	mc.AddArgument("-Dopenapi.spec=" + in)
 	mc.AddArgument("-Ddsl.out=" + out)
 
