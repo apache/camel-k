@@ -23,6 +23,7 @@ limitations under the License.
 package common
 
 import (
+	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -32,7 +33,23 @@ import (
 
 // TestTektonLikeBehavior verifies that the kamel binary can be invoked from within the Camel K image.
 // This feature is used in Tekton pipelines.
+
+/*
+ * TODO
+ * Test has issues on OCP4.
+ * Since that cluster installs via OLM, permissions are required for the
+ * service account doing the install to access the OLM, eg. get:subscriptions.
+ *
+ * Need to change the service account used to execute this test as do not
+ * want to extend the permissions of the operator service account
+ *
+ * Adding CAMEL_K_TEST_SKIP_PROBLEMATIC env var for the moment.
+ */
 func TestTektonLikeBehavior(t *testing.T) {
+	if os.Getenv("CAMEL_K_TEST_SKIP_PROBLEMATIC") == "true" {
+		t.Skip("WARNING: Test marked as problematic ... skipping")
+	}
+
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(CreateOperatorServiceAccount(ns)).To(Succeed())
 		Expect(CreateOperatorRole(ns)).To(Succeed())
