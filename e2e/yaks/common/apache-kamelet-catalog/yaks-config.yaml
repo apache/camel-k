@@ -23,4 +23,6 @@ pre:
   run: |
     kamel install -w -n $YAKS_NAMESPACE
 
+    kubectl wait kamelets.camel.apache.org/timer-source --for=condition=Ready --timeout=120s -n $YAKS_NAMESPACE
+
     kamel run logger.groovy -w -n $YAKS_NAMESPACE
