@@ -27,6 +27,16 @@ import (
 	"path"
 	"strings"
 	"time"
+
+	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/log"
+)
+
+var (
+	logger = log.WithName("keytool")
+
+	loggerInfo  = func(s string) { logger.Info(s) }
+	loggerError = func(s string) { logger.Error(nil, s) }
 )
 
 func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePass string, data []byte) error {
@@ -34,10 +44,9 @@ func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePa
 	cmd := exec.CommandContext(ctx, "keytool", args...)
 	cmd.Dir = keystoreDir
 	cmd.Stdin = bytes.NewReader(data)
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-
-	err := cmd.Run()
+	// keytool logs info messages to stderr, as stdout is used to output results,
+	// otherwise it logs error messages to stdout.
+	err := util.RunAndLog(ctx, cmd, loggerError, loggerInfo)
 	if err != nil {
 		return err
 	}
@@ -51,10 +60,9 @@ func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePa
 		args := strings.Fields(fmt.Sprintf("-importkeystore -noprompt -srckeystore %s -srcstorepass %s -destkeystore %s -deststorepass %s", caCertsPath, "changeit", keystoreName, keystorePass))
 		cmd := exec.CommandContext(ctx, "keytool", args...)
 		cmd.Dir = keystoreDir
-		cmd.Stderr = os.Stderr
-		cmd.Stdout = os.Stdout
-
-		err := cmd.Run()
+		// keytool logs info messages to stderr, as stdout is used to output results,
+		// otherwise it logs error messages to stdout.
+		err := util.RunAndLog(ctx, cmd, loggerError, loggerInfo)
 		if err != nil {
 			return err
 		}
@@ -63,6 +71,7 @@ func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePa
 	return nil
 }
 
+// NewKeystorePassword generates a random password.
 // The keytool CLI mandates a password at least 6 characters long
 // to access any key stores.
 func NewKeystorePassword() string {
