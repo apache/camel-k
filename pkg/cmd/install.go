@@ -124,6 +124,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("maven-settings", "", "Configure the source of the Maven settings (configmap|secret:name[/key])")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a Maven repository")
 	cmd.Flags().String("maven-ca-secret", "", "Configure the secret key containing the Maven CA certificates (secret/key)")
+	cmd.Flags().StringArray("maven-cli-option", nil, "Add a default Maven CLI option to the list of arguments for Maven commands")
 
 	// health
 	cmd.Flags().Int("health-port", 8081, "The port of the health endpoint")
@@ -181,6 +182,7 @@ type installCmdOptions struct {
 	MavenRepositories       []string `mapstructure:"maven-repositories"`
 	MavenSettings           string   `mapstructure:"maven-settings"`
 	MavenCASecret           string   `mapstructure:"maven-ca-secret"`
+	MavenCLIOptions         []string `mapstructure:"maven-cli-options"`
 	HealthPort              int32    `mapstructure:"health-port"`
 	Monitoring              bool     `mapstructure:"monitoring"`
 	MonitoringPort          int32    `mapstructure:"monitoring-port"`
@@ -360,6 +362,11 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		if o.MavenLocalRepository != "" {
 			platform.Spec.Build.Maven.LocalRepository = o.MavenLocalRepository
 		}
+
+		if len(o.MavenCLIOptions) > 0 {
+			platform.Spec.Build.Maven.CLIOptions = o.MavenCLIOptions
+		}
+
 		if o.RuntimeVersion != "" {
 			platform.Spec.Build.RuntimeVersion = o.RuntimeVersion
 		}
