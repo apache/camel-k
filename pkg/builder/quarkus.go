@@ -154,6 +154,7 @@ func buildQuarkusRunner(ctx *builderContext) error {
 	mc.GlobalSettings = ctx.Maven.GlobalSettings
 	mc.UserSettings = ctx.Maven.UserSettings
 	mc.LocalRepository = ctx.Build.Maven.LocalRepository
+	mc.AdditionalArguments = ctx.Build.Maven.CLIOptions
 
 	if ctx.Maven.TrustStoreName != "" {
 		mc.ExtraMavenOpts = append(mc.ExtraMavenOpts,
@@ -200,6 +201,7 @@ func computeQuarkusDependencies(ctx *builderContext) error {
 	mc.GlobalSettings = ctx.Maven.GlobalSettings
 	mc.UserSettings = ctx.Maven.UserSettings
 	mc.LocalRepository = ctx.Build.Maven.LocalRepository
+	mc.AdditionalArguments = ctx.Build.Maven.CLIOptions
 
 	// Process artifacts list and add it to existing artifacts
 	artifacts, err := ProcessQuarkusTransitiveDependencies(mc)

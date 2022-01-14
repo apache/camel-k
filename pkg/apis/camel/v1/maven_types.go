@@ -43,6 +43,10 @@ type MavenSpec struct {
 	// The Maven build extensions.
 	// See https://maven.apache.org/guides/mini/guide-using-extensions.html.
 	Extension []MavenArtifact `json:"extension,omitempty"`
+	// The CLI options that are appended to the list of arguments for Maven commands,
+	// e.g., `-V,--no-transfer-progress,-Dstyle.color=never`.
+	// See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.
+	CLIOptions []string `json:"cliOptions,omitempty"`
 }
 
 // Repository defines a Maven repository

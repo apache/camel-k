@@ -52,7 +52,7 @@ func (c *Command) Do(ctx context.Context) error {
 	}
 
 	args := make([]string, 0)
-	args = append(args, "--no-transfer-progress", "-Dstyle.color=never")
+	args = append(args, c.context.AdditionalArguments...)
 
 	if c.context.LocalRepository != "" {
 		if _, err := os.Stat(c.context.LocalRepository); err == nil {
@@ -73,8 +73,6 @@ func (c *Command) Do(ctx context.Context) error {
 	} else if settingsExists {
 		args = append(args, "--settings", settingsPath)
 	}
-
-	args = append(args, c.context.AdditionalArguments...)
 
 	cmd := exec.CommandContext(ctx, mvnCmd, args...)
 	cmd.Dir = c.context.Path
