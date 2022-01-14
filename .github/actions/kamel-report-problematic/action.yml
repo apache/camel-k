@@ -15,35 +15,21 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: e2e-local
-description: 'End-to-End tests for local use-cases'
+name: kamel-report-problematic
+description: 'Reports the number of tests labelled as problematic in test suite'
+
+inputs:
+  test-suite:
+    description: "The test suite to be analysed"
+    required: true
 
 runs:
   using: "composite"
-
   steps:
-  - id: prepare-env
-    name: Prepare Test Environment
-    uses: ./.github/actions/kamel-prepare-env
-
-  - id: build-kamel
-    name: Build Kamel
-    uses: ./.github/actions/kamel-build
-    with:
-      make-rules: 'build-kamel'
-
-  - id: report-problematic
-    name: List Tests Marked As Problematic
-    uses: ./.github/actions/kamel-report-problematic
-    with:
-      test-suite: local
-
-  - id: run-it
-    name: Run IT
-    shell: bash
-    run: |
-      # Configure staging repos
-      export KAMEL_LOCAL_RUN_MAVEN_REPOSITORIES=$(make get-staging-repo)
-
-      # Then run integration tests
-      make test-local
+    - id: report-problematic
+      name: Report Tests Marked As Problematic
+      shell: bash
+      if: ${{ always() }}
+      run: |
+        ./.github/actions/kamel-report-problematic/report-problematic.sh \
+          -t "${{ inputs.test-suite }}"

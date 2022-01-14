@@ -63,6 +63,23 @@ runs:
     with:
       kube-admin-user-ctx: ${{ steps.config-cluster.outputs.cluster-kube-admin-user-ctx }}
 
+  - id: preflight-test
+    name: Preflight Check Test
+    uses: ./.github/actions/kamel-preflight-test
+    with:
+      build-catalog-source: ${{ steps.build-kamel.outputs.build-bundle-catalog-source-name }}
+      image-namespace: ${{ steps.config-cluster.outputs.cluster-image-namespace }}
+      image-registry-host: ${{ steps.config-cluster.outputs.cluster-image-registry-pull-host }}
+      image-name: ${{ steps.build-kamel.outputs.build-binary-local-image-name }}
+      image-registry-insecure: ${{steps.config-cluster.outputs.cluster-image-registry-insecure }}
+      image-version: ${{ steps.build-kamel.outputs.build-binary-local-image-version }}
+
+  - id: report-problematic
+    name: List Tests Marked As Problematic
+    uses: ./.github/actions/kamel-report-problematic
+    with:
+      test-suite: knative
+
   - id: run-it
     name: Run IT
     shell: bash
