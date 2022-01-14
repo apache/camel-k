@@ -24,6 +24,7 @@
 - How can I find the log file location in the integration pod?  [\#2762](https://github.com/apache/camel-k/issues/2762)
 - Default value of trait container.port-name is missing from catalog [\#2761](https://github.com/apache/camel-k/issues/2761)
 - Trait catalog provided by kamel CLI contains a description mentioning "the end of this page"  [\#2760](https://github.com/apache/camel-k/issues/2760)
+- Document dependency on camel-quarkus \(and camel\) [\#2759](https://github.com/apache/camel-k/issues/2759)
 - How to remove Kamelets installation when installing IntegrationPlatform CRD? [\#2756](https://github.com/apache/camel-k/issues/2756)
 - Add 1.7.x documentation tag [\#2753](https://github.com/apache/camel-k/issues/2753)
 - Generated bundle created from `make bundle` contains separate service-account resource [\#2749](https://github.com/apache/camel-k/issues/2749)
@@ -93,6 +94,8 @@
 
 **Merged pull requests:**
 
+- fix http-proxy-docs [\#2874](https://github.com/apache/camel-k/pull/2874) ([djencks](https://github.com/djencks))
+-  camel-website \#701: RI info \(main\) [\#2868](https://github.com/apache/camel-k/pull/2868) ([djencks](https://github.com/djencks))
 - feat: Global HTTP proxy support [\#2858](https://github.com/apache/camel-k/pull/2858) ([astefanutti](https://github.com/astefanutti))
 - doc\(jitpack\): detailed info and link to example [\#2857](https://github.com/apache/camel-k/pull/2857) ([squakez](https://github.com/squakez))
 - fix\(doc\): filter nolint comments in documentation trait [\#2851](https://github.com/apache/camel-k/pull/2851) ([squakez](https://github.com/squakez))
