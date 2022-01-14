@@ -424,6 +424,8 @@ ProxyPreserveHost On
 			"--maven-repository", fmt.Sprintf(`https://%s/repository/maven-public/@id=central-internal@mirrorOf=central`, hostname),
 			"--maven-repository", fmt.Sprintf(`https://%s/repository/%s/%s`, hostname, stagingRepository.ID, strings.Join(getRepositoryAttributes(stagingRepository), "")),
 			"--maven-ca-secret", secret.Name+"/"+corev1.TLSCertKey,
+			// Active batch mode to assert dependencies download
+			"--maven-cli-option", "--batch-mode",
 		).Execute()).To(Succeed())
 
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
