@@ -18,7 +18,6 @@ limitations under the License.
 package maven
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -124,35 +123,7 @@ func (c *Command) Do(ctx context.Context) error {
 
 	Log.WithValues("MAVEN_OPTS", mavenOptions).Infof("executing: %s", strings.Join(cmd.Args, " "))
 
-	stdOut, err := cmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-
-	err = cmd.Start()
-
-	if err != nil {
-		return err
-	}
-
-	scanner := bufio.NewScanner(stdOut)
-
-	Log.Debug("About to start parsing the Maven output")
-	for scanner.Scan() {
-		line := scanner.Text()
-		mavenLog, parseError := parseLog(line)
-		if parseError == nil {
-			normalizeLog(mavenLog)
-		} else {
-			// Why we are ignoring the parsing errors here: there are a few scenarios where this would likely occur.
-			// For example, if something outside of Maven outputs something (i.e.: the JDK, a misbehaved plugin,
-			// etc). The build may still have succeeded, though.
-			nonNormalizedLog(line)
-		}
-	}
-	Log.Debug("Finished parsing Maven output")
-
-	return cmd.Wait()
+	return util.RunAndLog(ctx, cmd, mavenLogHandler, mavenLogHandler)
 }
 
 func NewContext(buildDir string) Context {

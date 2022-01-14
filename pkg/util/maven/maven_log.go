@@ -47,6 +47,18 @@ const (
 
 var mavenLogger = log.WithName("maven.build")
 
+func mavenLogHandler(s string) {
+	mavenLog, parseError := parseLog(s)
+	if parseError == nil {
+		normalizeLog(mavenLog)
+	} else {
+		// Why we are ignoring the parsing errors here: there are a few scenarios where this would likely occur.
+		// For example, if something outside of Maven outputs something (i.e.: the JDK, a misbehaved plugin,
+		// etc). The build may still have succeeded, though.
+		nonNormalizedLog(s)
+	}
+}
+
 func parseLog(line string) (l mavenLog, err error) {
 	err = json.Unmarshal([]byte(line), &l)
 	return
