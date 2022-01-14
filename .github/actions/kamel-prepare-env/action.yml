@@ -1,0 +1,105 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: kamel-prepare-env
+description: 'Initialise the test environment with tools'
+
+runs:
+  using: "composite"
+  steps:
+    #
+    # This is a docker action so its pre-builds the image prior to
+    # running it. The building occurs prior to all steps regardless
+    # of where its located to run. Therefore, it must be run prior to
+    # clean-up since that step removes all docker image in order to
+    # claim back as much space as possible.
+    #
+    - id: read-env-file
+      uses: ./.github/actions/action-dotenv-to-setenv
+      with:
+        env-file: .github/.env
+
+    - name: Cleanup
+      shell: bash
+      run: |
+        ls -lart
+        echo "Initial status:"
+        df -h
+
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          echo "Cleaning up resources:"
+          sudo swapoff -a
+          sudo rm -f /swapfile
+          sudo apt clean
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          df -kh
+          docker rmi $(docker image ls -aq) || true # Don't fail if image is not present
+          df -kh
+        else
+          echo "OS $RUNNER_OS is not yet supported"
+          exit 1
+        fi
+
+        echo "Final status:"
+        df -h
+
+    - name: Set up JDK 11
+      uses: AdoptOpenJDK/install-jdk@v1
+      with:
+        version: "11"
+
+    - name: Set Go
+      uses: actions/setup-go@v2 # Version 2 adds GOBIN to PATH
+      with:
+        go-version: 1.16.x
+
+    - name: (Re-)install kustomize
+      shell: bash
+      run: |
+        # reinstall kustomize to be always on the same version
+        sudo rm $(which kustomize)
+        make kustomize
+
+        # Add kustomize to PATH
+        echo "${{ env.GOPATH }}/bin" >> $GITHUB_PATH
+        which kustomize || { echo 'kustomize not found' ; exit 1; }
+
+    #
+    # Install a version of kubectl for generic access to cluster
+    #
+    - id: install-kubectl
+      uses: azure/setup-kubectl@v1
+      with:
+        version: 'latest'
+
+    - id: report-platform
+      name: Report Platform
+      shell: bash
+      run : |
+        if [ -n "${{ env.TEST_PLATFORM_CLUSTER }}" ]; then
+          echo "::set-output name=platform::$(echo ${{ env.TEST_PLATFORM_CLUSTER }})"
+        else
+          echo "::set-output name=platform::$(echo kind)"
+        fi
+
+outputs:
+  cluster-platform:
+    description: "Preferred environment set by .env file (default 'kind')"
+    value: ${{ steps.report-platform.outputs.platform }}

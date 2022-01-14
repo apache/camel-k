@@ -55,197 +55,33 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Cleanup
-      run: |
-        ls -lart
-        echo "Initial status:"
-        df -h
-
-        echo "Cleaning up resources:"
-        sudo swapoff -a
-        sudo rm -f /swapfile
-        sudo apt clean
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /opt/ghc
-        sudo rm -rf "/usr/local/share/boost"
-        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-        docker rmi $(docker image ls -aq)
-
-        echo "Final status:"
-        df -h
-    - name: Set up JDK 11
-      uses: AdoptOpenJDK/install-jdk@v1
       with:
-        version: "11"
-    - name: Set Go
-      uses: actions/setup-go@v1
+        persist-credentials: false
+        submodules: recursive
+
+    - id: prepare-env
+      name: Prepare Test Environment
+      uses: ./.github/actions/kamel-prepare-env
+
+    - id: configure-platform
+      name: Configure Platform
+      uses: ./.github/actions/kamel-config-cluster
       with:
-        go-version: 1.16.x
-    - name: Get OpenShift Client (oc)
-      run: |
-        export OPENSHIFT_VERSION=v3.11.0
-        export OPENSHIFT_COMMIT=0cbc58b
-        export MAVEN_OPTS=-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+        cluster-type: 'ocp3'
 
-        sudo rm -f /etc/resolv.conf
-        sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
-        sudo sh -c 'echo "DNS=8.8.8.8 4.4.4.4" >> /etc/systemd/resolved.conf'
-        sudo service systemd-resolved restart
+    - id: build-kamel-binary
+      name: Build Kamel Binary
+      uses: ./.github/actions/kamel-build
 
-        # set docker0 to promiscuous mode
-        sudo ip link set docker0 promisc on
+    - name: Install Kamel Cluster Setup
+      uses: ./.github/actions/kamel-install-cluster-setup
+      with:
+        kube-admin-user-ctx: ${{ steps.configure-platform.outputs.kube-admin-user-ctx }}
 
-        # Download and install the oc binary
-        sudo mount --make-shared /
-
-        sudo service docker stop
-        sudo echo '{"insecure-registries": ["172.30.0.0/16"]}' | sudo tee /etc/docker/daemon.json > /dev/null
-        sudo service docker start
-
-        DOWNLOAD_URL=https://github.com/openshift/origin/releases/download/$OPENSHIFT_VERSION/openshift-origin-client-tools-$OPENSHIFT_VERSION-$OPENSHIFT_COMMIT-linux-64bit.tar.gz
-        wget -O client.tar.gz ${DOWNLOAD_URL}
-        tar xvzOf client.tar.gz > oc.bin
-        sudo mv oc.bin /usr/local/bin/oc
-        sudo chmod 755 /usr/local/bin/oc
-
-    - name: Start OpenShift Cluster
-      run: |
-        # Figure out this host's IP address
-        IP_ADDR="$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)"
-
-        # Setup cluster dir
-        sudo mkdir -p /home/runner/lib/oc
-        sudo chmod 777 /home/runner/lib/oc
-        cd /home/runner/lib/oc
-
-        # Start OpenShift
-        oc cluster up --public-hostname=$IP_ADDR --enable=persistent-volumes,registry,router
-        oc login -u system:admin
-
-        # Wait until we have a ready node in openshift
-        TIMEOUT=0
-        TIMEOUT_COUNT=60
-        until [ $TIMEOUT -eq $TIMEOUT_COUNT ]; do
-          if [ -n "$(oc get nodes | grep Ready)" ]; then
-            break
-          fi
-          echo "openshift is not up yet"
-          TIMEOUT=$((TIMEOUT+1))
-          sleep 5
-        done
-
-        if [ $TIMEOUT -eq $TIMEOUT_COUNT ]; then
-          echo "Failed to start openshift"
-          exit 1
-        fi
-
-        echo "openshift is deployed and reachable"
-
-    - name: Info
-      run: |
-        oc describe nodes
     - name: Run IT
-      #env:
-      #  TEST_DOCKER_HUB_USERNAME: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
-      #  TEST_DOCKER_HUB_PASSWORD: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
-      #  TEST_GITHUB_PACKAGES_REPO: ${{ secrets.TEST_GITHUB_PACKAGES_REPO }}
-      #  TEST_GITHUB_PACKAGES_USERNAME: ${{ secrets.TEST_GITHUB_PACKAGES_USERNAME }}
-      #  TEST_GITHUB_PACKAGES_PASSWORD: ${{ secrets.TEST_GITHUB_PACKAGES_PASSWORD }}
       run: |
-        # Compute registry parameters
-        echo "Build project"
-
-        make PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images
-
         # Make the Apache Snapshots or Apache Staging repository enabled by default
         export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
-
-        echo "installing camel k cluster resources"
-        ./kamel install --cluster-setup
-
-        # Aggregate pod eviction permission to the default admin role
-        cat <<EOF | oc apply -f -
-        kind: ClusterRole
-        apiVersion: rbac.authorization.k8s.io/v1
-        metadata:
-          name: camel-k-test:eviction
-          labels:
-            rbac.authorization.k8s.io/aggregate-to-admin: "true"
-        rules:
-        - apiGroups: [""]
-          resources: ["pods/eviction"]
-          verbs: ["create"]
-        EOF
-
-        # Grant nodes permission to the default developer user
-        cat <<EOF | oc apply -f -
-        kind: ClusterRole
-        apiVersion: rbac.authorization.k8s.io/v1
-        metadata:
-          name: camel-k-test:nodes
-        rules:
-        - apiGroups: [""]
-          resources: ["nodes"]
-          verbs: ["get","list"]
-        EOF
-        cat <<EOF | oc apply -f -
-        kind: ClusterRoleBinding
-        apiVersion: rbac.authorization.k8s.io/v1
-        metadata:
-          name: camel-k-test:nodes
-        subjects:
-        - kind: User
-          name: developer
-        roleRef:
-          kind: ClusterRole
-          name: camel-k-test:nodes
-          apiGroup: rbac.authorization.k8s.io
-        EOF
-
-        # Aggregate finalizers permission to the default admin role
-        cat <<EOF | oc apply -f -
-        kind: ClusterRole
-        apiVersion: rbac.authorization.k8s.io/v1
-        metadata:
-          name: camel-k-test:finalizers
-          labels:
-            rbac.authorization.k8s.io/aggregate-to-admin: "true"
-        rules:
-        - apiGroups: ["camel.apache.org"]
-          resources: ["*/finalizers"]
-          verbs: ["update"]
-        EOF
-
-        # Grant read permission on the Kubernetes Service to the default developer user
-        # Required by the HTTP proxy tests
-        cat <<EOF | oc apply -f -
-        kind: ClusterRole
-        apiVersion: rbac.authorization.k8s.io/v1
-        metadata:
-          name: camel-k-test:kubernetes-service
-        rules:
-        - apiGroups: [""]
-          resources: ["services"]
-          verbs: ["get"]
-          resourceNames: ["kubernetes"]
-        EOF
-        cat <<EOF | oc apply -f -
-        kind: RoleBinding
-        apiVersion: rbac.authorization.k8s.io/v1
-        metadata:
-          namespace: default
-          name: camel-k-test:kubernetes-service
-        subjects:
-        - kind: User
-          name: developer
-        roleRef:
-          kind: ClusterRole
-          name: camel-k-test:kubernetes-service
-          apiGroup: rbac.authorization.k8s.io
-        EOF
-
-        # Login as normal user
-        oc login -u developer
 
         # Then run integration tests
         make test-integration

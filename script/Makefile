@@ -319,6 +319,9 @@ images-push-staging:
 	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION) $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)
 	docker push $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)
 
+get-image:
+	@echo $(CUSTOM_IMAGE)
+
 get-version:
 	@echo $(CUSTOM_VERSION)
 

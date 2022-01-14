@@ -55,108 +55,65 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Cleanup
-      run: |
-        ls -lart
-        echo "Initial status:"
-        df -h
+      with:
+        persist-credentials: false
+        submodules: recursive
 
-        echo "Cleaning up resources:"
-        sudo swapoff -a
-        sudo rm -f /swapfile
-        sudo apt clean
-        docker rmi $(docker image ls -aq)
+    - id: prepare-env
+      name: Prepare Test Environment
+      uses: ./.github/actions/kamel-prepare-env
 
-        echo "Final status:"
-        df -h
-    - name: Set up JDK 11
-      uses: AdoptOpenJDK/install-jdk@v1
+    - id: configure-platform
+      name: Configure Platform
+      uses: ./.github/actions/kamel-config-cluster
       with:
-        version: "11"
-    - name: Set Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.16.x
-    - name: Set up opm tool
-      run: |
-        curl -L https://github.com/operator-framework/operator-registry/releases/download/v1.19.5/linux-amd64-opm -o opm
-        chmod +x opm
-        sudo mv opm /usr/local/bin/
-    - name: Kubernetes KinD Cluster
-      uses: container-tools/kind-action@v1
-      with:
-        version: v0.11.0
-        node_image: kindest/node:v1.21.1@sha256:fae9a58f17f18f06aeac9772ca8b5ac680ebbed985e266f711d936e91d113bad
-    - name: Info
-      run: |
-        kubectl cluster-info
-        kubectl describe nodes
-    - name: Install OLM
-      run: |
-        kubectl apply -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.17.0/crds.yaml
-        # wait for a while to be sure CRDs are installed
-        sleep 1
-        kubectl apply -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.17.0/olm.yaml
-    - name: Get Kamel CLI
+        cluster-type: ${{ steps.prepare-env.outputs.cluster-platform }}
+        opm: true
+        olm: true
+
+    - name: Get Released Kamel CLI
+      shell: bash
       run: |
         export KAMEL_VERSION=$(make get-last-released-version)
         curl -L https://github.com/apache/camel-k/releases/download/v${KAMEL_VERSION}/camel-k-client-${KAMEL_VERSION}-linux-64bit.tar.gz -o kamel.tar.gz
         tar -zxf kamel.tar.gz
         sudo mv kamel /usr/local/bin/
-    - name: Build Operator
-      run: |
-        echo "Build project"
-        export CUSTOM_IMAGE=${KIND_REGISTRY}/apache/camel-k
-        echo "LOCAL_IMAGE_NAME=${CUSTOM_IMAGE}" >> $GITHUB_ENV
-        echo "LOCAL_IMAGE_VERSION=$(make get-version)" >> $GITHUB_ENV
-        make PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images images-push
-    - name: Build Operator bundle
-      run: |
-        echo "Build Operator bundle"
+        echo "Kamel version installed: $(kamel version)"
 
-        # reinstall kustomize to be always on the same version
-        sudo rm $(which kustomize)
+    - id: build-kamel-binary
+      name: Build Kamel Binary
+      uses: ./.github/actions/kamel-build
+      with:
+        image-registry: ${{ steps.configure-platform.outputs.image-registry }}
+        # Avoid overwriting last-released version of binary
+        install-kamel-binary: false
 
-        make kustomize
+    - id: build-kamel-bundle
+      name: Build Kamel Metadata Bundle
+      uses: ./.github/actions/kamel-build-bundle
+      with:
+        image-registry: ${{ steps.configure-platform.outputs.image-registry }}
+        local-image-name: ${{ steps.build-kamel-binary.outputs.local-image-name }}
+        local-image-version: ${{ steps.build-kamel-binary.outputs.local-image-version }}
 
-        # replace image
-        $(cd config/manifests && kustomize edit set image "docker.io/apache/camel-k=${{ env.LOCAL_IMAGE_NAME }}:${{ env.LOCAL_IMAGE_VERSION }}")
-
-        # Patch CSV with the 'replaces' field to define the upgrade graph
-        # Use sed as the manifest/bases file is not included in the kustomize config
-        BASE_VERSION=$(echo ${{ env.LOCAL_IMAGE_VERSION }} | grep -Po "\d.\d.\d")
-        sed -i "/  version: ${BASE_VERSION}/a \ \ replaces: camel-k-operator.v$(make get-last-released-version)" config/manifests/bases/camel-k.clusterserviceversion.yaml
-        export CUSTOM_IMAGE=${{ env.LOCAL_IMAGE_NAME }}
-        export LOCAL_IMAGE_BUNDLE=${KIND_REGISTRY}/apache/camel-k-bundle:${{ env.LOCAL_IMAGE_VERSION }}
-        echo "LOCAL_IMAGE_BUNDLE=${LOCAL_IMAGE_BUNDLE}" >> $GITHUB_ENV
-        export PREV_XY_CHANNEL=stable-$(make get-last-released-version | grep -Po "\d.\d")
-        echo "PREV_XY_CHANNEL=${PREV_XY_CHANNEL}" >> $GITHUB_ENV
-        export NEW_XY_CHANNEL=stable-$(make get-version | grep -Po "\d.\d")
-        echo "NEW_XY_CHANNEL=${NEW_XY_CHANNEL}" >> $GITHUB_ENV
-        make bundle-build BUNDLE_IMAGE_NAME=${LOCAL_IMAGE_BUNDLE} DEFAULT_CHANNEL="${NEW_XY_CHANNEL}" CHANNELS="${NEW_XY_CHANNEL}"
-        docker push ${LOCAL_IMAGE_BUNDLE}
-    - name: Create new index image
-      run: |
-        export LOCAL_IIB=${KIND_REGISTRY}/apache/camel-k-iib:${{ env.LOCAL_IMAGE_VERSION }}
-        echo "LOCAL_IIB=${LOCAL_IIB}" >> $GITHUB_ENV
-        sudo opm index add --bundles ${{ env.LOCAL_IMAGE_BUNDLE }} -c docker --from-index quay.io/operatorhubio/catalog:latest --tag ${LOCAL_IIB} --skip-tls
-        docker push ${LOCAL_IIB}
     - name: Run IT
       run: |
         # Use the last released Kamel CLI
         export RELEASED_KAMEL_BIN=/usr/local/bin/kamel
 
+        echo "Kamel version: $(${RELEASED_KAMEL_BIN} version)"
+
         # Configure install options
-        export CUSTOM_IMAGE=${{ env.LOCAL_IMAGE_NAME }}
-        export CUSTOM_VERSION=${{ env.LOCAL_IMAGE_VERSION }}
+        export CUSTOM_IMAGE=${{ steps.build-kamel-binary.outputs.local-image-name }}
+        export CUSTOM_VERSION=${{ steps.build-kamel-binary.outputs.local-image-version }}
         export KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY=Spectrum
         export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
-        export KAMEL_INSTALL_REGISTRY=${KIND_REGISTRY}
-        export KAMEL_INSTALL_REGISTRY_INSECURE=true
+        export KAMEL_INSTALL_REGISTRY=${{ steps.configure-platform.outputs.image-registry }}
+        export KAMEL_INSTALL_REGISTRY_INSECURE=${{ steps.configure-platform.outputs.image-registry-insecure }}
 
         # Configure test options
         export CAMEL_K_PREV_IIB=quay.io/operatorhubio/catalog:latest
-        export CAMEL_K_NEW_IIB=${{ env.LOCAL_IIB }}
+        export CAMEL_K_NEW_IIB=${{ steps.build-kamel-bundle.outputs.local-image-bundle-index }}
         export KAMEL_K_TEST_RELEASE_VERSION=$(make get-last-released-version)
         export KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
         export CAMEL_K_PREV_UPGRADE_CHANNEL=${{ env.PREV_XY_CHANNEL }}

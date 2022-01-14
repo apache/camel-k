@@ -1,0 +1,77 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: kamel-build
+description: 'Builds kamel operator binary'
+
+inputs:
+  image-registry:
+    description: 'Location of image registry if required'
+    required: false
+  make-rules:
+    description: 'Override the default make rules'
+    required: false
+  install-kamel-binary:
+    description: 'Install the kamel binary onto the path'
+    required: false
+    default: true
+
+runs:
+  using: "composite"
+  steps:
+    - id: build-operator
+      name: Build Kamel Operator
+      shell: bash
+      run: |
+        echo "Build Kamel from source"
+
+        if [ -n "${{ inputs.image-registry }}" ]; then
+          export CUSTOM_IMAGE=${{ inputs.image-registry }}/apache/camel-k
+          echo "::set-output name=custom-img::$(echo ${CUSTOM_IMAGE})"
+        fi
+
+        RULES="PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images"
+        if [ -n "${{ inputs.make-rules }}" ]; then
+          RULES="${{ inputs.make-rules }}"
+        fi
+
+        if [ -n "${{ inputs.image-registry }}" ]; then
+          RULES="${RULES} images-push"
+        fi
+
+        make ${RULES}
+
+        if [ "${{ inputs.install-kamel-binary }}" == "true" ]; then
+          echo "Moving kamel binary to /usr/local/bin"
+          sudo mv ./kamel /usr/local/bin
+          echo "Kamel version installed: $(kamel version)"
+        fi
+
+        echo "::set-output name=local-img-name::$(make get-image)"
+        echo "::set-output name=local-img-version::$(make get-version)"
+
+
+outputs:
+  custom-image:
+    description: "Reference of the camel-k image"
+    value: ${{ steps.build-operator.outputs.custom-img }}
+  local-image-name:
+    description: "Reference of the camel-k image"
+    value: ${{ steps.build-operator.outputs.local-img-name }}
+  local-image-version:
+    description: "Reference of the camel-k image version"
+    value: ${{ steps.build-operator.outputs.local-img-version }}
