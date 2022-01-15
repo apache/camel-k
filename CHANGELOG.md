@@ -98,6 +98,7 @@
 -  camel-website \#701: RI info \(main\) [\#2868](https://github.com/apache/camel-k/pull/2868) ([djencks](https://github.com/djencks))
 - feat: Global HTTP proxy support [\#2858](https://github.com/apache/camel-k/pull/2858) ([astefanutti](https://github.com/astefanutti))
 - doc\(jitpack\): detailed info and link to example [\#2857](https://github.com/apache/camel-k/pull/2857) ([squakez](https://github.com/squakez))
+- \#2852 Update Antora usage and move diagram source \(main\) [\#2853](https://github.com/apache/camel-k/pull/2853) ([djencks](https://github.com/djencks))
 - fix\(doc\): filter nolint comments in documentation trait [\#2851](https://github.com/apache/camel-k/pull/2851) ([squakez](https://github.com/squakez))
 - doc\(kamelets\): custom repository [\#2849](https://github.com/apache/camel-k/pull/2849) ([squakez](https://github.com/squakez))
 - chore: Upgrade Knative to version 1.1.0 [\#2846](https://github.com/apache/camel-k/pull/2846) ([astefanutti](https://github.com/astefanutti))
