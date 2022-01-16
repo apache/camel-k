@@ -90,7 +90,14 @@
 - CLI log could use some kind of feedback when waiting for pod to spin up [\#1283](https://github.com/apache/camel-k/issues/1283)
 - Kaniko in builder pod failed to push image to docker registry [\#1282](https://github.com/apache/camel-k/issues/1282)
 - Add a trait\(?\) to enable default REST DSL endpoint [\#1239](https://github.com/apache/camel-k/issues/1239)
+- Multi-architecture support [\#1238](https://github.com/apache/camel-k/issues/1238)
+- Camel-K Doesn't Create a Service or Ingress for an Integration [\#1232](https://github.com/apache/camel-k/issues/1232)
+- Performance and Architectural Questions On Camel-K [\#1196](https://github.com/apache/camel-k/issues/1196)
+- Transactions with Camel K [\#1128](https://github.com/apache/camel-k/issues/1128)
 - Investigate integration with Keda [\#1107](https://github.com/apache/camel-k/issues/1107)
+- Camel K doesn't support kubernetes services of type loadbalancer [\#1070](https://github.com/apache/camel-k/issues/1070)
+- Camel K Operator don't ignore commented endpoint in the JAVA DSL source [\#1057](https://github.com/apache/camel-k/issues/1057)
+- Kamel cli should send exit code when integration in --dev mode is deleted [\#938](https://github.com/apache/camel-k/issues/938)
 
 **Merged pull requests:**
 
