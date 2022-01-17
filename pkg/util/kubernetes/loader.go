@@ -29,7 +29,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// LoadResourceFromYaml loads a k8s resource from a yaml definition.
+// LoadResourceFromYaml returns a Kubernetes resource from its serialized YAML definition.
 func LoadResourceFromYaml(scheme *runtime.Scheme, data string) (ctrl.Object, error) {
 	source := []byte(data)
 	jsonSource, err := yaml.ToJSON(source)
@@ -53,19 +53,18 @@ func LoadResourceFromYaml(scheme *runtime.Scheme, data string) (ctrl.Object, err
 	return o, nil
 }
 
-// LoadRawResourceFromYaml loads a k8s resource from a yaml definition without making assumptions on the underlying type.
-func LoadRawResourceFromYaml(data string) (runtime.Object, error) {
-	source := []byte(data)
-	jsonSource, err := yaml.ToJSON(source)
+// LoadUnstructuredFromYaml returns an unstructured resource from its serialized YAML definition.
+func LoadUnstructuredFromYaml(data string) (ctrl.Object, error) {
+	source, err := yaml.ToJSON([]byte(data))
 	if err != nil {
 		return nil, err
 	}
-	var objmap map[string]interface{}
-	if err = json.Unmarshal(jsonSource, &objmap); err != nil {
+	var obj map[string]interface{}
+	if err = json.Unmarshal(source, &obj); err != nil {
 		return nil, err
 	}
 	return &unstructured.Unstructured{
-		Object: objmap,
+		Object: obj,
 	}, nil
 }
 
