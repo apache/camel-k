@@ -90,7 +90,7 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 		}
 		// We may want to throttle the creation of Go routines if the number of bundled Kamelets increases.
 		g.Go(func() error {
-			kamelet, err := loadKamelet(path.Join(kameletDir, f.Name()), namespace, c.GetScheme())
+			kamelet, err := loadKamelet(path.Join(kameletDir, f.Name()), namespace)
 			if err != nil {
 				return err
 			}
@@ -177,22 +177,22 @@ func isIncompatibleServerError(err error) bool {
 	return false
 }
 
-func loadKamelet(path string, namespace string, scheme *runtime.Scheme) (*v1alpha1.Kamelet, error) {
+func loadKamelet(path string, namespace string) (ctrl.Object, error) {
 	content, err := util.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	obj, err := kubernetes.LoadResourceFromYaml(scheme, string(content))
+	kamelet, err := kubernetes.LoadUnstructuredFromYaml(string(content))
 	if err != nil {
 		return nil, err
 	}
-	kamelet, ok := obj.(*v1alpha1.Kamelet)
-	if !ok {
-		return nil, fmt.Errorf("cannot load Kamelet from file %q", path)
+	gvk := kamelet.GetObjectKind().GroupVersionKind()
+	if gvk.Group != v1alpha1.SchemeGroupVersion.Group || gvk.Kind != "Kamelet" {
+		return nil, fmt.Errorf("file %q does not define a Kamelet", path)
 	}
 
-	kamelet.Namespace = namespace
+	kamelet.SetNamespace(namespace)
 
 	if kamelet.GetAnnotations() == nil {
 		kamelet.SetAnnotations(make(map[string]string))
