@@ -62,7 +62,7 @@ func (t *deployerTrait) Apply(e *Environment) error {
 	e.PostActions = append(e.PostActions, func(env *Environment) error {
 		for _, resource := range env.Resources.Items() {
 			// We assume that server-side apply is enabled by default.
-			// It is currently convoluted to check pro-actively whether server-side apply
+			// It is currently convoluted to check proactively whether server-side apply
 			// is enabled. This is possible to fetch the OpenAPI endpoint, which returns
 			// the entire server API document, then lookup the resource PATCH endpoint, and
 			// check its list of accepted MIME types.
@@ -92,7 +92,7 @@ func (t *deployerTrait) Apply(e *Environment) error {
 }
 
 func (t *deployerTrait) serverSideApply(env *Environment, resource ctrl.Object) error {
-	target, err := patch.PositiveApplyPatch(resource)
+	target, err := patch.ApplyPatch(resource)
 	if err != nil {
 		return err
 	}
@@ -119,7 +119,7 @@ func (t *deployerTrait) clientSideApply(env *Environment, resource ctrl.Object) 
 	if err != nil {
 		return err
 	}
-	p, err := patch.PositiveMergePatch(object, resource)
+	p, err := patch.MergePatch(object, resource)
 	if err != nil {
 		return err
 	} else if len(p) == 0 {

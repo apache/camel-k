@@ -368,7 +368,7 @@ func installClusterRoleBinding(ctx context.Context, c client.Client, collection 
 	// The ClusterRoleBinding.Subjects field does not have a patchStrategy key in its field tag,
 	// so a strategic merge patch would use the default patch strategy, which is replace.
 	// Let's compute a simple JSON merge patch from the existing resource, and patch it.
-	p, err := patch.PositiveMergePatch(existing, target)
+	p, err := patch.MergePatch(existing, target)
 	if err != nil {
 		return err
 	} else if len(p) == 0 {

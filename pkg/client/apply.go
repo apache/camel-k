@@ -77,7 +77,7 @@ func (a *ServerOrClientSideApplier) Apply(ctx context.Context, object ctrl.Objec
 }
 
 func (a *ServerOrClientSideApplier) serverSideApply(ctx context.Context, resource runtime.Object) error {
-	target, err := patch.PositiveApplyPatch(resource)
+	target, err := patch.ApplyPatch(resource)
 	if err != nil {
 		return err
 	}
@@ -99,7 +99,7 @@ func (a *ServerOrClientSideApplier) clientSideApply(ctx context.Context, resourc
 	if err != nil {
 		return err
 	}
-	p, err := patch.PositiveMergePatch(object, resource)
+	p, err := patch.MergePatch(object, resource)
 	if err != nil {
 		return err
 	} else if len(p) == 0 {

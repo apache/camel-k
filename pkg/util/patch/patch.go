@@ -27,60 +27,63 @@ import (
 	"k8s.io/apimachinery/pkg/util/json"
 )
 
-func PositiveMergePatch(source interface{}, target interface{}) ([]byte, error) {
+func MergePatch(source interface{}, target interface{}) ([]byte, error) {
 	sourceJSON, err := json.Marshal(source)
 	if err != nil {
 		return nil, err
 	}
-
 	targetJSON, err := json.Marshal(target)
 	if err != nil {
 		return nil, err
 	}
-
 	mergePatch, err := jsonpatch.CreateMergePatch(sourceJSON, targetJSON)
 	if err != nil {
 		return nil, err
 	}
 
-	var positivePatch map[string]interface{}
-	err = json.Unmarshal(mergePatch, &positivePatch)
-	if err != nil {
-		return nil, err
+	switch target.(type) {
+	case *unstructured.Unstructured:
+		// Take the JSON merge patch as is for unstructured objects
+		return mergePatch, nil
+	default:
+		// Otherwise, for typed objects, remove null fields from the JSON merge patch,
+		// so that values managed by controllers server-side are not deleted.
+		var positivePatch map[string]interface{}
+		err = json.Unmarshal(mergePatch, &positivePatch)
+		if err != nil {
+			return nil, err
+		}
+		removeNilValues(reflect.ValueOf(positivePatch), reflect.Value{})
+		// Return an empty patch if no keys remain
+		if len(positivePatch) == 0 {
+			return make([]byte, 0), nil
+		}
+		return json.Marshal(positivePatch)
 	}
-
-	// The following is a work-around to remove null fields from the JSON merge patch,
-	// so that values defaulted by controllers server-side are not deleted.
-	// It's generally acceptable as these values are orthogonal to the values managed
-	// by the traits.
-	removeNilValues(reflect.ValueOf(positivePatch), reflect.Value{})
-
-	// Return an empty patch if no keys remain
-	if len(positivePatch) == 0 {
-		return make([]byte, 0), nil
-	}
-
-	return json.Marshal(positivePatch)
 }
 
-func PositiveApplyPatch(source runtime.Object) (*unstructured.Unstructured, error) {
-	sourceJSON, err := json.Marshal(source)
-	if err != nil {
-		return nil, err
+func ApplyPatch(source runtime.Object) (*unstructured.Unstructured, error) {
+	switch s := source.(type) {
+	case *unstructured.Unstructured:
+		// Directly take the unstructured object as apply patch
+		return s, nil
+	default:
+		// Otherwise, for typed objects, remove null fields from the apply patch,
+		// so that ownership is not taken for non-managed fields.
+		// See https://github.com/kubernetes/enhancements/tree/master/keps/sig-api-machinery/2155-clientgo-apply
+		sourceJSON, err := json.Marshal(source)
+		if err != nil {
+			return nil, err
+		}
+		var positivePatch map[string]interface{}
+		err = json.Unmarshal(sourceJSON, &positivePatch)
+		if err != nil {
+			return nil, err
+		}
+		removeNilValues(reflect.ValueOf(positivePatch), reflect.Value{})
+
+		return &unstructured.Unstructured{Object: positivePatch}, nil
 	}
-
-	var positivePatch map[string]interface{}
-	err = json.Unmarshal(sourceJSON, &positivePatch)
-	if err != nil {
-		return nil, err
-	}
-
-	// The following is a work-around to remove null fields from the apply patch,
-	// so that ownership is not taken for non-managed fields.
-	// See https://github.com/kubernetes/enhancements/tree/master/keps/sig-api-machinery/2155-clientgo-apply
-	removeNilValues(reflect.ValueOf(positivePatch), reflect.Value{})
-
-	return &unstructured.Unstructured{Object: positivePatch}, nil
 }
 
 func removeNilValues(v reflect.Value, parent reflect.Value) {

@@ -78,7 +78,7 @@ func Run(namespace string, buildName string, taskName string) {
 	// is made on the build containers.
 	target.Status.Phase = v1.BuildPhaseNone
 	// Patch the build status with the result
-	p, err := patch.PositiveMergePatch(build, target)
+	p, err := patch.MergePatch(build, target)
 	exitOnError(err, "cannot create merge patch")
 
 	if len(p) > 0 {

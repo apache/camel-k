@@ -85,7 +85,7 @@ func (action *initializeAction) propagateIcon(ctx context.Context, binding *v1al
 	if _, ok := clone.Annotations[v1alpha1.AnnotationIcon]; !ok {
 		clone.Annotations[v1alpha1.AnnotationIcon] = icon
 	}
-	p, err := patch.PositiveMergePatch(binding, clone)
+	p, err := patch.MergePatch(binding, clone)
 	if err != nil {
 		action.L.Errorf(err, "cannot compute patch to update icon for kamelet binding %q", binding.Name)
 		return
