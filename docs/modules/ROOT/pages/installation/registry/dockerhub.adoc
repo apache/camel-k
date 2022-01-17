@@ -33,7 +33,7 @@ Another possibility is to upload to the cluster your entire list of push/pull se
 # First login to your registry and provide credentials
 docker login
 # Then create a secret from your credentials file (may contain passwords for other registries)
-create secret generic your-secret-name --from-file ~/.docker/config.json
+kubectl create secret generic your-secret-name --from-file ~/.docker/config.json
 ----
 
 After you've created the secret, you can link it to Camel K during installation:
