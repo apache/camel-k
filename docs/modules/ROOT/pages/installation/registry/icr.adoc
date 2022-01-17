@@ -3,9 +3,9 @@
 
 You can use a Namespace of IBM Container Registry to host Camel K images.
 
-In order to push images to `gcr.io`, you need to provide a valid key to Camel K.
+In order to push images to `icr.io`, you need to provide a valid key to Camel K.
 
-The fast way to obtain create a Namespace on ICR is by https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli[IBM Command line tool]:
+The fast way to obtain a Namespace on ICR is by https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli[IBM Command line tool]:
 
 - Install https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli[IBM Command line tool]:
 +
