@@ -98,6 +98,9 @@
 - Camel K doesn't support kubernetes services of type loadbalancer [\#1070](https://github.com/apache/camel-k/issues/1070)
 - Camel K Operator don't ignore commented endpoint in the JAVA DSL source [\#1057](https://github.com/apache/camel-k/issues/1057)
 - Kamel cli should send exit code when integration in --dev mode is deleted [\#938](https://github.com/apache/camel-k/issues/938)
+- Kafka example not building on OpenShit v4.? - latest crc version on Mac [\#918](https://github.com/apache/camel-k/issues/918)
+- Documenting expected behavior with certain potential collisions [\#870](https://github.com/apache/camel-k/issues/870)
+- no matches for kind "BuildConfig" in version "build.openshift.io/v1" [\#739](https://github.com/apache/camel-k/issues/739)
 
 **Merged pull requests:**
 
