@@ -701,7 +701,7 @@ func PatchIntegration(ns string, name string, mutate func(it *v1.Integration)) e
 	}
 	target := it.DeepCopy()
 	mutate(target)
-	p, err := patch.PositiveMergePatch(it, target)
+	p, err := patch.MergePatch(it, target)
 	if err != nil {
 		return err
 	} else if len(p) == 0 {
@@ -774,7 +774,7 @@ func UpdateKameletBinding(ns string, name string, upd func(it *v1alpha1.KameletB
 	target := klb.DeepCopy()
 	upd(target)
 	// For some reasons, full patch fails on some clusters
-	p, err := patch.PositiveMergePatch(klb, target)
+	p, err := patch.MergePatch(klb, target)
 	if err != nil {
 		return err
 	} else if len(p) == 0 {

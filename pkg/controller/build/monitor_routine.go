@@ -186,7 +186,7 @@ func (action *monitorRoutineAction) updateBuildStatus(ctx context.Context, build
 	// Copy the failure field from the build to persist recovery state
 	target.Status.Failure = build.Status.Failure
 	// Patch the build status with the result
-	p, err := patch.PositiveMergePatch(build, target)
+	p, err := patch.MergePatch(build, target)
 	if err != nil {
 		action.L.Errorf(err, "Cannot patch build status: %s", build.Name)
 		event.NotifyBuildError(ctx, action.client, action.recorder, build, target, err)

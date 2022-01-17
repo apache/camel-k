@@ -715,7 +715,7 @@ func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Clie
 			return err
 		}
 
-		p, err := patch.PositiveMergePatch(existing, cm)
+		p, err := patch.MergePatch(existing, cm)
 		if err != nil {
 			return err
 		} else if len(p) != 0 {

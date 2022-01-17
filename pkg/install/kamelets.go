@@ -131,7 +131,7 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 }
 
 func serverSideApply(ctx context.Context, c client.Client, resource runtime.Object) error {
-	target, err := patch.PositiveApplyPatch(resource)
+	target, err := patch.ApplyPatch(resource)
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func clientSideApply(ctx context.Context, c client.Client, resource ctrl.Object)
 	if err != nil {
 		return err
 	}
-	p, err := patch.PositiveMergePatch(object, resource)
+	p, err := patch.MergePatch(object, resource)
 	if err != nil {
 		return err
 	} else if len(p) == 0 {
