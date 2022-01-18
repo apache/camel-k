@@ -19,6 +19,7 @@ package install
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -33,7 +34,6 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -139,25 +139,15 @@ func serverSideApply(ctx context.Context, c client.Client, resource runtime.Obje
 }
 
 func clientSideApply(ctx context.Context, c client.Client, resource ctrl.Object) error {
-	err := c.Create(ctx, resource)
-	if err == nil {
+	if err := c.Create(ctx, resource); err == nil {
 		return nil
 	} else if !k8serrors.IsAlreadyExists(err) {
 		return fmt.Errorf("error during create resource: %s/%s: %w", resource.GetNamespace(), resource.GetName(), err)
 	}
-	object := &unstructured.Unstructured{}
-	object.SetNamespace(resource.GetNamespace())
-	object.SetName(resource.GetName())
-	object.SetGroupVersionKind(resource.GetObjectKind().GroupVersionKind())
-	err = c.Get(ctx, ctrl.ObjectKeyFromObject(object), object)
+	// Directly use the serialized resource as JSON merge patch since it's prescriptive
+	p, err := json.Marshal(resource)
 	if err != nil {
 		return err
-	}
-	p, err := patch.MergePatch(object, resource)
-	if err != nil {
-		return err
-	} else if len(p) == 0 {
-		return nil
 	}
 	return c.Patch(ctx, resource, ctrl.RawPatch(types.MergePatchType, p))
 }
