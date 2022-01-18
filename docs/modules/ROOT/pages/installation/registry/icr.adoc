@@ -1,11 +1,14 @@
 [[configuring-container-registry]]
 = Configuring a Namespace on IBM Container Registry (ICR)
 
-You can use a Namespace of IBM Container Registry to host Camel K images.
+You can use a namespace of IBM Container Registry to host Camel K images.
 
-In order to push images to `icr.io`, you need to provide a valid key to Camel K.
+In order to push images to `icr.io`, you need to provide valid credentials (secret) to Camel K.
 
-The fast way to obtain a Namespace on ICR is by https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli[IBM Command line tool]:
+[[creating-namespace]]
+== Creating a Namespace
+
+The fast way to obtain a namespace on ICR is by https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli[IBM Command line tool]:
 
 - Install https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli[IBM Command line tool]:
 +
@@ -13,7 +16,7 @@ The fast way to obtain a Namespace on ICR is by https://cloud.ibm.com/docs/cli?t
 ----
 $ ibmcloud plugin install container-registry -r 'IBM Cloud'
 ----
-- Log in to your IBM Cloud account.
+- Log in to your IBM Cloud account:
 +
 [source,console]
 ----
@@ -30,4 +33,30 @@ $ ibmcloud cr region-set us-south
 [source,console]
 ----
 $ ibmcloud cr namespace-add <my_namespace>
+----
+
+[[providing-registry-secret]]
+== Providing Registry Secret
+
+Once you have a registry namespace, create a secret with the credentials in order for Camel K to access it.
+
+Firstly, make sure to log in to ICR so that the local Docker config file has the credentials for it:
+
+[source,console]
+----
+$ ibmcloud cr login
+----
+
+Then create a secret with the Docker config file `$HOME/.docker/config.json` (or in case of Podman, `$XDG_RUNTIME_DIR/containers/auth.json`):
+
+[source,console]
+----
+$ kubectl create secret generic my-icr-secret --from-file=.dockerconfigjson=$HOME/.docker/config.json --type=kubernetes.io/dockerconfigjson
+----
+
+Now you can proceed to install Camel K with the following command:
+
+[source,console]
+----
+$ kamel install --registry <region>.icr.io --organization <my_namespace> --registry-secret my-icr-secret
 ----

@@ -1,19 +1,22 @@
 [[installation-on-iks]]
 = Installing Camel K on IBM Kubernetes Service (IKS)
 
-This guide assumes you've already created an IBM Kubernetes cluster on https://cloud.ibm.com, also installed the https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli[IBM Command line tool] and kubectl command
+This guide assumes you've already created an IBM Kubernetes cluster on https://cloud.ibm.com, also installed the https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli[IBM Command line tool] and `kubectl` command.
 
-On the list of kubernetes clusters for you account, you need to select the cluster and copy the (_clusterId_) to add the cluster `ibmcloud ks cluster config --cluster <clusterid>`
+On the list of kubernetes clusters for you account, you need to select the cluster and copy the (_clusterId_) to add the cluster: `ibmcloud ks cluster config --cluster <clusterid>`
 
 After executing the configuration string, you should be able to execute:
 
 ```
 kubectl get pods --all-namespaces
 ```
-NOTE: IKS provide an internal container registry feature. Camel K is able to leverage that registry.
+[NOTE]
+====
+IKS provide an internal container registry feature. Camel K is able to leverage that registry.
 
 You could create a customized namespace on xref:installation/registry/icr.adoc[IBM container registry] in order to host your integration images.
-please take note of the namespace and region created to configure them on the installation step.
+Please take note of the namespace and region created to configure them on the installation step.
+====
 
 You can now download *kamel* CLI tool the from https://github.com/apache/camel-k/releases[release page]
 and put it on your system path.
