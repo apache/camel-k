@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Update Antora usage [\#2852](https://github.com/apache/camel-k/issues/2852)
 - Log4j Security Issue [\#2830](https://github.com/apache/camel-k/issues/2830)
 - Outdated `ca-cert` path for Jolokia trait [\#2827](https://github.com/apache/camel-k/issues/2827)
 - Kafka component propagating headers is supported? [\#2825](https://github.com/apache/camel-k/issues/2825)
@@ -85,6 +86,7 @@
 - Kamel 1.0 fails on install on mac [\#1543](https://github.com/apache/camel-k/issues/1543)
 - kamel run that can auto discover/guess what to include and run [\#1409](https://github.com/apache/camel-k/issues/1409)
 - Honor cluster PROXY settings [\#1402](https://github.com/apache/camel-k/issues/1402)
+- Configurable maven options [\#1332](https://github.com/apache/camel-k/issues/1332)
 - traits: support capabilities [\#1331](https://github.com/apache/camel-k/issues/1331)
 - Cannot append/override stored properties [\#1323](https://github.com/apache/camel-k/issues/1323)
 - CLI log could use some kind of feedback when waiting for pod to spin up [\#1283](https://github.com/apache/camel-k/issues/1283)
@@ -101,10 +103,17 @@
 - Kafka example not building on OpenShit v4.? - latest crc version on Mac [\#918](https://github.com/apache/camel-k/issues/918)
 - Documenting expected behavior with certain potential collisions [\#870](https://github.com/apache/camel-k/issues/870)
 - no matches for kind "BuildConfig" in version "build.openshift.io/v1" [\#739](https://github.com/apache/camel-k/issues/739)
+- Tekton build strategy [\#682](https://github.com/apache/camel-k/issues/682)
+- Add camel-k-runtime to the root readme [\#630](https://github.com/apache/camel-k/issues/630)
+- support versions like 2.21.0.tag-730075-anothertag-00002 in version matching [\#617](https://github.com/apache/camel-k/issues/617)
+- Camel K with Java routes without public class and imports ... [\#605](https://github.com/apache/camel-k/issues/605)
 
 **Merged pull requests:**
 
+- feat\(maven\): Configurable Maven CLI options [\#2879](https://github.com/apache/camel-k/pull/2879) ([astefanutti](https://github.com/astefanutti))
+- fix\(log\): Structure keytool logs [\#2878](https://github.com/apache/camel-k/pull/2878) ([astefanutti](https://github.com/astefanutti))
 - fix http-proxy-docs [\#2874](https://github.com/apache/camel-k/pull/2874) ([djencks](https://github.com/djencks))
+- fix: filter lint comment in traits [\#2873](https://github.com/apache/camel-k/pull/2873) ([squakez](https://github.com/squakez))
 -  camel-website \#701: RI info \(main\) [\#2868](https://github.com/apache/camel-k/pull/2868) ([djencks](https://github.com/djencks))
 - feat: Global HTTP proxy support [\#2858](https://github.com/apache/camel-k/pull/2858) ([astefanutti](https://github.com/astefanutti))
 - doc\(jitpack\): detailed info and link to example [\#2857](https://github.com/apache/camel-k/pull/2857) ([squakez](https://github.com/squakez))
