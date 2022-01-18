@@ -44,6 +44,6 @@ echo "Cloning repository $repo on branch $branch to bundle kamelets..."
 rm -rf ./tmp_kamelet_catalog
 git clone -b $branch --single-branch --depth 1 $repo ./tmp_kamelet_catalog
 
-cp ./tmp_kamelet_catalog/*.kamelet.yaml $target
+cp ./tmp_kamelet_catalog/kamelets/*.kamelet.yaml $target
 
 rm -rf ./tmp_kamelet_catalog
