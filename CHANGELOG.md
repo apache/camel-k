@@ -110,6 +110,8 @@
 
 **Merged pull requests:**
 
+- doc: add more details about installation on IKS/ICR [\#2882](https://github.com/apache/camel-k/pull/2882) ([tadayosi](https://github.com/tadayosi))
+- fix: Install Kamelets as unstructured resources [\#2881](https://github.com/apache/camel-k/pull/2881) ([astefanutti](https://github.com/astefanutti))
 - feat\(maven\): Configurable Maven CLI options [\#2879](https://github.com/apache/camel-k/pull/2879) ([astefanutti](https://github.com/astefanutti))
 - fix\(log\): Structure keytool logs [\#2878](https://github.com/apache/camel-k/pull/2878) ([astefanutti](https://github.com/astefanutti))
 - fix http-proxy-docs [\#2874](https://github.com/apache/camel-k/pull/2874) ([djencks](https://github.com/djencks))
