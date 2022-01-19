@@ -18,15 +18,18 @@ limitations under the License.
 package cmd
 
 import (
+	"archive/zip"
 	"context"
 	"crypto/md5"
 	"crypto/sha1"
 	"encoding/hex"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"hash"
 	"io"
 	"io/fs"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"path"
@@ -575,7 +578,6 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	var platform *v1.IntegrationPlatform
 	for _, item := range o.Dependencies {
 		// TODO: accept URLs
-		// TODO: it'd be cool to automatically detect pom file in JARs and upload them
 		if strings.HasPrefix(item, "file://") {
 			if platform == nil {
 				// let's also enable the registry trait
@@ -585,7 +587,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 					return nil, err
 				}
 			}
-			if err := uploadDependency(platform, item, name, cmd, integration); err != nil {
+			if err := uploadFileOrDirectory(platform, item, name, cmd, integration); err != nil {
 				return nil, errors.Wrap(err, fmt.Sprintf("Error trying to upload %s to the Image Registry.", item))
 			}
 		} else {
@@ -777,7 +779,7 @@ func getPlatform(c client.Client, context context.Context, ns string) (*v1.Integ
 	return &list.Items[0], nil
 }
 
-func uploadDependency(platform *v1.IntegrationPlatform, item string, integrationName string, cmd *cobra.Command, integration *v1.Integration) error {
+func uploadFileOrDirectory(platform *v1.IntegrationPlatform, item string, integrationName string, cmd *cobra.Command, integration *v1.Integration) error {
 	path := strings.TrimPrefix(item, "file://")
 	localPath := path
 	targetPath := ""
@@ -799,34 +801,195 @@ func uploadDependency(platform *v1.IntegrationPlatform, item string, integration
 		if d.IsDir() {
 			return nil
 		}
-		dependency, err := createMavenDependency(integrationName, path, localPath, dirName)
+		// Let's try to build a default Maven GAV from the path
+		gav, err := createDefaultGav(path, dirName, integrationName)
 		if err != nil {
 			return err
 		}
-		artifactHttpPath := getArtifactHttpPath(dependency, platform, integration.Namespace)
-		options.Target = fmt.Sprintf("%s/%s:%s", platform.Spec.Build.Registry.Address, artifactHttpPath, dependency.Version)
-		_, err = spectrum.Build(options, fmt.Sprintf("%s:.", path))
+		// When uploading, there are three cases: POM files, JAR files and the rest which will be mounted on the filesystem
+		if isPom(path) {
+			gav := extractGavFromPom(path, gav)
+			return uploadAsMavenArtifact(gav, path, platform, integration.Namespace, options)
+		} else if isJar(path) {
+			// Try to upload pom in JAR and extract it's GAV
+			gav = uploadPomFromJar(gav, path, platform, integration.Namespace, options)
+			// add JAR to dependency list
+			dependency := fmt.Sprintf("mvn:%s:%s:%s:%s", gav.GroupID, gav.ArtifactID, gav.Type, gav.Version)
+			fmt.Printf("Added %s to the Integration's dependency list \n", dependency)
+			integration.Spec.AddDependency(dependency)
+			// Upload JAR
+			return uploadAsMavenArtifact(gav, path, platform, integration.Namespace, options)
+		} else {
+			mountPath, err := getMountPath(targetPath, dirName, path)
+			if err != nil {
+				return err
+			}
+			dependency := fmt.Sprintf("docker-mvn:%s:%s:%s:%s@%s", gav.GroupID, gav.ArtifactID, gav.Type, gav.Version, mountPath)
+			fmt.Printf("Added %s to the Integration's dependency list \n", dependency)
+			integration.Spec.AddDependency(dependency)
+			return uploadAsMavenArtifact(gav, path, platform, integration.Namespace, options)
+		}
+	})
+}
+
+func getMountPath(targetPath string, dirName string, path string) (string, error) {
+	// if the target path is a file then use that as the exact mount path
+	if filepath.Ext(targetPath) != "" {
+		return targetPath, nil
+	}
+	// else build a mount path based on the filename relative to the base directory
+	// (in case we are uploading multiple files with the same name)
+	localRelativePath, err := filepath.Rel(dirName, path)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(targetPath, localRelativePath), nil
+}
+
+func uploadPomFromJar(gav maven.Dependency, path string, platform *v1.IntegrationPlatform, ns string, options spectrum.Options) maven.Dependency {
+	util.WithTempDir("camel-k", func(tmpDir string) error {
+		extractPomToPath := filepath.Join(tmpDir, "pom.xml")
+		jar, err := zip.OpenReader(path)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Uploaded: %s to %s \n", item, options.Target)
-		if err := addToDependencyList(dependency, integration, targetPath, path, dirName); err != nil {
+		defer jar.Close()
+		regPom := regexp.MustCompile(`META-INF/maven/.*/.*/pom\.xml`)
+		regPomProperties := regexp.MustCompile(`META-INF/maven/.*/.*/pom\.properties`)
+		foundPom := false
+		foundProperties := false
+		pomExtracted := false
+		for _, f := range jar.File {
+			if regPom.MatchString(f.Name) {
+				foundPom = true
+				pomExtracted = extractFromZip(extractPomToPath, f, path)
+			} else if regPomProperties.MatchString(f.Name) {
+				foundProperties = true
+				if dep, ok := extractGav(f, path); ok {
+					gav = dep
+				}
+			}
+			if foundPom && foundProperties {
+				break
+			}
+		}
+		if pomExtracted {
+			gav.Type = "pom"
+			// Swallow error as this is not a mandatory step
+			uploadAsMavenArtifact(gav, extractPomToPath, platform, ns, options)
+		}
+		return nil
+	})
+	gav.Type = "jar"
+	return gav
+}
+
+func extractFromZip(dst string, src *zip.File, tarPath string) bool {
+	file, err := os.Create(dst)
+	if err != nil {
+		return false
+	}
+	defer file.Close()
+	rc, err := src.Open()
+	if err != nil {
+		return false
+	}
+	defer rc.Close()
+	_, err = io.Copy(file, rc)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func extractGav(src *zip.File, localPath string) (maven.Dependency, bool) {
+	rc, err := src.Open()
+	if err != nil {
+		return maven.Dependency{}, false
+	}
+	defer rc.Close()
+	data, err := ioutil.ReadAll(rc)
+	if err != nil {
+		fmt.Printf("Error while reading pom.properties from [%s], switching to default: \n %s err \n", localPath, err)
+		return maven.Dependency{}, false
+	}
+	prop, err := properties.Load(data, properties.UTF8)
+	if err != nil {
+		fmt.Printf("Error while reading pom.properties from [%s], switching to default: \n %s err \n", localPath, err)
+		return maven.Dependency{}, false
+	}
+
+	groupId, ok := prop.Get("groupId")
+	if !ok {
+		fmt.Printf("Couldn't find groupId property while reading pom.properties from [%s], switching to default \n", localPath)
+		return maven.Dependency{}, false
+	}
+	artifactId, ok := prop.Get("artifactId")
+	if !ok {
+		fmt.Printf("Couldn't find artifactId property while reading pom.properties from [%s], switching to default \n", localPath)
+		return maven.Dependency{}, false
+	}
+	version, ok := prop.Get("version")
+	if !ok {
+		fmt.Printf("Couldn't find version property while reading pom.properties from [%s], switching to default \n", localPath)
+		return maven.Dependency{}, false
+	}
+	return maven.Dependency{
+		GroupID:    groupId,
+		ArtifactID: artifactId,
+		Type:       "jar",
+		Version:    version,
+	}, true
+}
+
+func uploadAsMavenArtifact(dependency maven.Dependency, path string, platform *v1.IntegrationPlatform, ns string, options spectrum.Options) error {
+	artifactHttpPath := getArtifactHttpPath(dependency, platform, ns)
+	options.Target = fmt.Sprintf("%s/%s:%s", platform.Spec.Build.Registry.Address, artifactHttpPath, dependency.Version)
+	_, err := spectrum.Build(options, fmt.Sprintf("%s:.", path))
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Uploaded: %s to %s \n", path, options.Target)
+	return uploadChecksumFiles(path, options, platform, artifactHttpPath, dependency)
+}
+
+// Currently swallows errors because our Project model is incomplete
+// Most of the time it is irrelevant for our use case (GAV)
+func extractGavFromPom(path string, gav maven.Dependency) maven.Dependency {
+	var project maven.Project
+	file, err := os.Open(path)
+	if err != nil {
+		return gav
+	}
+	defer file.Close()
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		return gav
+	}
+	xml.Unmarshal(content, &project)
+	if project.GroupID != "" {
+		gav.GroupID = project.GroupID
+	}
+	if project.ArtifactID != "" {
+		gav.ArtifactID = project.ArtifactID
+	}
+	if project.Version != "" {
+		gav.Version = project.Version
+	}
+	gav.Type = "pom"
+	return gav
+}
+
+func uploadChecksumFiles(path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHttpPath string, dependency maven.Dependency) error {
+	return util.WithTempDir("camel-k", func(tmpDir string) error {
+		if err := uploadChecksumFile(md5.New(), tmpDir, ".md5", path, options, platform, artifactHttpPath, dependency); err != nil {
 			return err
 		}
-		return uploadChecksumFiles(integrationName, path, options, platform, artifactHttpPath, dependency)
+		return uploadChecksumFile(sha1.New(), tmpDir, ".sha1", path, options, platform, artifactHttpPath, dependency)
 	})
 }
 
-func uploadChecksumFiles(integrationName string, path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHttpPath string, dependency maven.Dependency) error {
-	return util.WithTempDir(integrationName, func(tmpDir string) error {
-		if err := uploadChecksumFile(md5.New(), tmpDir, ".md5", integrationName, path, options, platform, artifactHttpPath, dependency); err != nil {
-			return err
-		}
-		return uploadChecksumFile(sha1.New(), tmpDir, ".sha1", integrationName, path, options, platform, artifactHttpPath, dependency)
-	})
-}
-
-func uploadChecksumFile(hash hash.Hash, tmpDir string, ext string, integrationName string, path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHttpPath string, dependency maven.Dependency) error {
+func uploadChecksumFile(hash hash.Hash, tmpDir string, ext string, path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHttpPath string, dependency maven.Dependency) error {
 	file, err := os.Open(path)
 	if err != nil {
 		return err
@@ -858,28 +1021,6 @@ func writeChecksumToFile(filepath string, hash hash.Hash) error {
 	return err
 }
 
-func addToDependencyList(dependency maven.Dependency, integration *v1.Integration, targetPath string, localPath string, dirName string) error {
-	// JARs will be added to the pom.xml
-	// Everything else will be mounted on the container filesystem except for pom files
-	if strings.HasSuffix(localPath, ".jar") {
-		dependency := fmt.Sprintf("mvn:%s:%s:%s:%s", dependency.GroupID, dependency.ArtifactID, dependency.Type, dependency.Version)
-		fmt.Printf("Added %s to the Integration's dependency list \n", dependency)
-		integration.Spec.AddDependency(dependency)
-	} else if !strings.HasSuffix(localPath, ".pom") {
-		if filepath.Ext(targetPath) == "" {
-			localRelativePath, err := filepath.Rel(dirName, localPath)
-			if err != nil {
-				return err
-			}
-			targetPath = filepath.Join(targetPath, localRelativePath)
-		}
-		dependency := fmt.Sprintf("docker-mvn:%s:%s:%s:%s@%s", dependency.GroupID, dependency.ArtifactID, dependency.Type, dependency.Version, targetPath)
-		fmt.Printf("Added %s to the Integration's dependency list \n", dependency)
-		integration.Spec.AddDependency(dependency)
-	}
-	return nil
-}
-
 func getSpectrumOptions(platform *v1.IntegrationPlatform, cmd *cobra.Command) spectrum.Options {
 	insecure := platform.Spec.Build.Registry.Insecure
 	options := spectrum.Options{
@@ -908,22 +1049,32 @@ func getArtifactHttpPath(dependency maven.Dependency, platform *v1.IntegrationPl
 	return artifactHttpPath
 }
 
-func createMavenDependency(integrationName string, path string, localPath string, dirName string) (maven.Dependency, error) {
+func createDefaultGav(path string, dirName string, integrationName string) (maven.Dependency, error) {
+	// let's set the default ArtifactId using the integration name and the file's relative path
+	// we use the relative path in case of nested files that might have the same name
+	// we replace the file separators with dots to comply with Maven GAV naming conventions.
 	fileRelPath, ext, err := getFileRelativePathAndExtension(path, dirName)
 	if err != nil {
 		return maven.Dependency{}, err
 	}
-	// let's set the artifactId using the integration name and the file's relative path
-	// we use the relative path in case of nested files that might have the same name
-	// we replace the file seperators with dots to comply with Maven GAV naming conventions.
-	artifactId := integrationName + "-" + strings.ReplaceAll(fileRelPath, string(os.PathSeparator), ".")
-	dependency := maven.Dependency{
-		GroupID:    "org.apache.camel.k.external",
-		ArtifactID: artifactId,
+
+	defaultArtifactId := integrationName + "-" + strings.ReplaceAll(fileRelPath, string(os.PathSeparator), ".")
+	defaultGroupId := "org.apache.camel.k.external"
+	defaultVersion := defaults.Version
+
+	return maven.Dependency{
+		GroupID:    defaultGroupId,
+		ArtifactID: defaultArtifactId,
 		Type:       ext,
-		Version:    defaults.Version,
-	}
-	return dependency, nil
+		Version:    defaultVersion,
+	}, nil
+}
+
+func isPom(path string) bool {
+	return strings.HasSuffix(path, ".pom") || strings.HasSuffix(path, "pom.xml")
+}
+func isJar(path string) bool {
+	return strings.HasSuffix(path, ".jar")
 }
 
 func getFileRelativePathAndExtension(path string, dirName string) (string, string, error) {
