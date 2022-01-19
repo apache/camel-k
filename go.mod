@@ -4,9 +4,9 @@ go 1.16
 
 require (
 	github.com/Masterminds/semver v1.5.0
-	github.com/apache/camel-k/pkg/apis/camel v0.0.0
-	github.com/apache/camel-k/pkg/client/camel v0.0.0
-	github.com/apache/camel-k/pkg/kamelet/repository v0.0.0
+	github.com/apache/camel-k/pkg/apis/camel v1.8.0
+	github.com/apache/camel-k/pkg/client/camel v1.8.0
+	github.com/apache/camel-k/pkg/kamelet/repository v1.8.0
 	github.com/container-tools/spectrum v0.3.7
 	github.com/evanphx/json-patch v4.11.0+incompatible
 	github.com/fatih/camelcase v1.0.0

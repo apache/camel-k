@@ -14,7 +14,7 @@
 # limitations under the License.
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION ?= 1.8.0-SNAPSHOT
+VERSION ?= 1.8.0
 OPERATOR_VERSION := $(subst -SNAPSHOT,,$(VERSION))
 LAST_RELEASED_VERSION := 1.7.0
 RUNTIME_VERSION := 1.11.0
@@ -40,7 +40,7 @@ CUSTOM_VERSION ?= $(VERSION)
 
 METADATA_IMAGE_NAME := $(CUSTOM_IMAGE)-metadata
 BUNDLE_IMAGE_NAME ?= $(CUSTOM_IMAGE)-bundle
-RELEASE_GIT_REMOTE := upstream
+RELEASE_GIT_REMOTE := origin
 GIT_COMMIT := $(shell git rev-list -1 HEAD)
 LINT_GOGC := 10
 LINT_DEADLINE := 10m
