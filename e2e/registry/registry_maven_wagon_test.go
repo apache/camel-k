@@ -127,3 +127,27 @@ func TestLocalDirectoryIsMountedInContainer(t *testing.T) {
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
+
+func TestExtractPomFromJar(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+
+		// Create integration that should decrypt foobar and log it
+		name := "foobar-decryption-pom-extraction"
+		jar, err := filepath.Abs("files/sample-decryption-1.0.jar")
+		assert.Nil(t, err)
+
+		Expect(Kamel("run", "files/FoobarDecryption.java",
+			"--name", name,
+			"-d", fmt.Sprintf("file://%s", jar),
+			"-n", ns,
+		).Execute()).To(Succeed())
+
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("foobar"))
+
+		// Clean up
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
+}
