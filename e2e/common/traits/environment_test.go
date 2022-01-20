@@ -24,7 +24,6 @@ package traits
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
@@ -41,26 +40,7 @@ func TestEnvironmentTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		// HTTP proxy configuration
 		httpProxy := "http://proxy"
-		noProxy := []string{
-			".cluster.local",
-			".svc",
-			"localhost",
-			".apache.org",
-		}
-
-		// Retrieve the Kubernetes Service ClusterIPs to populate the NO_PROXY environment variable
-		svc := Service("default", "kubernetes")()
-		Expect(svc).NotTo(BeNil())
-
-		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
-
-		// Retrieve the internal container registry to populate the NO_PROXY environment variable
-		if registry, ok := os.LookupEnv("KAMEL_INSTALL_REGISTRY"); ok {
-			domain := RegistryRegexp.FindString(registry)
-			Expect(domain).NotTo(BeNil())
-			domain = strings.Split(domain, ":")[0]
-			noProxy = append(noProxy, domain)
-		}
+		noProxy := []string{"*"}
 
 		// Install Camel K with the HTTP proxy environment variable
 		Expect(Kamel("install", "-n", ns,
