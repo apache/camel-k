@@ -5793,10 +5793,10 @@ spec:
                                       with any non digit characters mixed in - ssn:
                                       a U.S. social security number following the
                                       regex ^\\\\d{3}[- ]?\\\\d{2}[- ]?\\\\d{4}$ -
-                                      hexcolor: an hexadecimal color code like \"#FFFFFF:
+                                      hexcolor: an hexadecimal color code like \"#FFFFFF\"
                                       following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
                                       - rgbcolor: an RGB color code like rgb like
-                                      \"rgb(255,255,2559\" - byte: base64 encoded
+                                      \"rgb(255,255,255)\" - byte: base64 encoded
                                       binary data - password: any kind of string -
                                       date: a date string like \"2006-01-02\" as defined
                                       by full-date in RFC3339 - duration: a duration
@@ -6008,10 +6008,10 @@ spec:
                                       with any non digit characters mixed in - ssn:
                                       a U.S. social security number following the
                                       regex ^\\\\d{3}[- ]?\\\\d{2}[- ]?\\\\d{4}$ -
-                                      hexcolor: an hexadecimal color code like \"#FFFFFF:
+                                      hexcolor: an hexadecimal color code like \"#FFFFFF\"
                                       following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
                                       - rgbcolor: an RGB color code like rgb like
-                                      \"rgb(255,255,2559\" - byte: base64 encoded
+                                      \"rgb(255,255,255)\" - byte: base64 encoded
                                       binary data - password: any kind of string -
                                       date: a date string like \"2006-01-02\" as defined
                                       by full-date in RFC3339 - duration: a duration
@@ -6228,9 +6228,9 @@ spec:
                                         a U.S. social security number following the
                                         regex ^\\\\d{3}[- ]?\\\\d{2}[- ]?\\\\d{4}$
                                         - hexcolor: an hexadecimal color code like
-                                        \"#FFFFFF: following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
+                                        \"#FFFFFF\" following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
                                         - rgbcolor: an RGB color code like rgb like
-                                        \"rgb(255,255,2559\" - byte: base64 encoded
+                                        \"rgb(255,255,255)\" - byte: base64 encoded
                                         binary data - password: any kind of string
                                         - date: a date string like \"2006-01-02\"
                                         as defined by full-date in RFC3339 - duration:
