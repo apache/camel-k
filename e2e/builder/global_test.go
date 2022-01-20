@@ -62,6 +62,7 @@ func TestRunGlobalInstall(t *testing.T) {
 				Expect(Kamel("run", "-n", ns2, "files/Java.java").Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(ns2, "java"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns2, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+				Expect(IntegrationConditionMessage(IntegrationCondition(ns2, "java", v1.IntegrationConditionPlatformAvailable)())).To(MatchRegexp(ns2 + "\\/.*"))
 				kit := IntegrationKit(ns2, "java")()
 				Expect(Kamel("delete", "--all", "-n", ns2).Execute()).To(Succeed())
 				Expect(Kits(ns2)()).Should(WithTransform(integrationKitsToNamesTransform(), ContainElement(kit)))
@@ -78,6 +79,7 @@ func TestRunGlobalInstall(t *testing.T) {
 				Expect(Kamel("run", "-n", ns3, "files/Java.java").Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(ns3, "java"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns3, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+				Expect(IntegrationConditionMessage(IntegrationCondition(ns3, "java", v1.IntegrationConditionPlatformAvailable)())).To(MatchRegexp(ns3 + "\\/.*"))
 				Expect(Kamel("delete", "--all", "-n", ns3).Execute()).To(Succeed())
 
 				Expect(Lease(ns3, platform.OperatorLockName)()).ShouldNot(BeNil(),
@@ -91,6 +93,7 @@ func TestRunGlobalInstall(t *testing.T) {
 				Expect(Kamel("run", "-n", ns4, "files/Java.java").Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(ns4, "java"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns4, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+				Expect(IntegrationConditionMessage(IntegrationCondition(ns4, "java", v1.IntegrationConditionPlatformAvailable)())).To(MatchRegexp(operatorNamespace + "\\/.*"))
 				kit := IntegrationKit(ns4, "java")()
 				Expect(Kamel("delete", "--all", "-n", ns4).Execute()).To(Succeed())
 				Expect(Kits(ns4)()).Should(WithTransform(integrationKitsToNamesTransform(), Not(ContainElement(kit))))
@@ -105,6 +108,7 @@ func TestRunGlobalInstall(t *testing.T) {
 				Expect(Kamel("run", "-n", ns5, "files/Java.java").Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(ns5, "java"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns5, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+				Expect(IntegrationConditionMessage(IntegrationCondition(ns5, "java", v1.IntegrationConditionPlatformAvailable)())).To(MatchRegexp(operatorNamespace + "\\/.*"))
 				kit := IntegrationKit(ns5, "java")()
 				Expect(Kamel("delete", "--all", "-n", ns5).Execute()).To(Succeed())
 				Expect(Kits(ns5)()).Should(WithTransform(integrationKitsToNamesTransform(), Not(ContainElement(kit))))
