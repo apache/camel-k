@@ -28,6 +28,7 @@ nav:
 # On release, update this to the appropriate released camel version.
 asciidoc:
   attributes:
+    requires: "'util=camel-website-util,ck=xref:js/ck.js'"
     camel-kamelets-version: 0.5.0 # Makefile KAMELET_CATALOG_REPO_BRANCH
     camel-kamelets-docs-version: 0.5.x # Makefile KAMELET_CATALOG_REPO_BRANCH
     camel-k-runtime-version: 1.10.0 # Makefile RUNTIME_VERSION
@@ -39,3 +40,4 @@ asciidoc:
     camel-quarkus-docs-version: 2.4.x
     quarkus-version: 2.4.0.Final
     graalvm-version: 21.2.0
+    graalvm-docs-version: 21.3
