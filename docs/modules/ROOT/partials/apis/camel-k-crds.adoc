@@ -1,0 +1,3119 @@
+[#_camel_apache_org_v1]
+== camel.apache.org/v1
+
+Package v1 contains API Schema definitions for the camel v1 API group
+
+==  Resource Types
+
+[#_camel_apache_org_v1_Build]
+=== Build
+
+Build is the Schema for the builds API
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`apiVersion` +
+string
+|`camel.apache.org/v1`
+
+|`kind` +
+string
+|`Build`
+|`metadata` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+|
+
+
+
+
+Refer to the Kubernetes API documentation for the fields of the `metadata` field.
+|`spec` +
+*xref:#_camel_apache_org_v1_BuildSpec[BuildSpec]*
+|
+
+
+
+
+|`status` +
+*xref:#_camel_apache_org_v1_BuildStatus[BuildStatus]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_CamelCatalog]
+=== CamelCatalog
+
+CamelCatalog is the Schema for the camelcatalogs API
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`apiVersion` +
+string
+|`camel.apache.org/v1`
+
+|`kind` +
+string
+|`CamelCatalog`
+|`metadata` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+|
+
+
+
+
+Refer to the Kubernetes API documentation for the fields of the `metadata` field.
+|`status` +
+*xref:#_camel_apache_org_v1_CamelCatalogStatus[CamelCatalogStatus]*
+|
+
+
+
+
+|`spec` +
+*xref:#_camel_apache_org_v1_CamelCatalogSpec[CamelCatalogSpec]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_Integration]
+=== Integration
+
+Integration is the Schema for the integrations API
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`apiVersion` +
+string
+|`camel.apache.org/v1`
+
+|`kind` +
+string
+|`Integration`
+|`metadata` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+|
+
+
+
+
+Refer to the Kubernetes API documentation for the fields of the `metadata` field.
+|`spec` +
+*xref:#_camel_apache_org_v1_IntegrationSpec[IntegrationSpec]*
+|
+
+
+
+
+|`status` +
+*xref:#_camel_apache_org_v1_IntegrationStatus[IntegrationStatus]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationKit]
+=== IntegrationKit
+
+IntegrationKit is the Schema for the integrationkits API
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`apiVersion` +
+string
+|`camel.apache.org/v1`
+
+|`kind` +
+string
+|`IntegrationKit`
+|`metadata` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+|
+
+
+
+
+Refer to the Kubernetes API documentation for the fields of the `metadata` field.
+|`spec` +
+*xref:#_camel_apache_org_v1_IntegrationKitSpec[IntegrationKitSpec]*
+|
+
+
+
+
+|`status` +
+*xref:#_camel_apache_org_v1_IntegrationKitStatus[IntegrationKitStatus]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationPlatform]
+=== IntegrationPlatform
+
+IntegrationPlatform is the Schema for the integrationplatforms API
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`apiVersion` +
+string
+|`camel.apache.org/v1`
+
+|`kind` +
+string
+|`IntegrationPlatform`
+|`metadata` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+|
+
+
+
+
+Refer to the Kubernetes API documentation for the fields of the `metadata` field.
+|`spec` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformSpec[IntegrationPlatformSpec]*
+|
+
+
+
+
+|`status` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformStatus[IntegrationPlatformStatus]*
+|
+
+
+
+
+
+|===
+
+== Internal Types
+
+[#_camel_apache_org_v1_Artifact]
+=== Artifact
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildStatus, BuildStatus>>
+* <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
+
+Artifact --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`id` +
+string
+|
+
+
+
+
+|`location` +
+string
+|
+
+
+
+
+|`target` +
+string
+|
+
+
+
+
+|`checksum` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_BaseTask]
+=== BaseTask
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildahTask, BuildahTask>>
+* <<#_camel_apache_org_v1_BuilderTask, BuilderTask>>
+* <<#_camel_apache_org_v1_KanikoTask, KanikoTask>>
+* <<#_camel_apache_org_v1_S2iTask, S2iTask>>
+* <<#_camel_apache_org_v1_SpectrumTask, SpectrumTask>>
+
+BaseTask --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`name` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_BuildCondition]
+=== BuildCondition
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildStatus, BuildStatus>>
+
+BuildCondition describes the state of a resource at a certain point.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+*xref:#_camel_apache_org_v1_BuildConditionType[BuildConditionType]*
+|
+
+
+Type of integration condition.
+
+|`status` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+|
+
+
+Status of the condition, one of True, False, Unknown.
+
+|`lastUpdateTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+The last time this condition was updated.
+
+|`lastTransitionTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+Last time the condition transitioned from one status to another.
+
+|`reason` +
+string
+|
+
+
+The reason for the condition's last transition.
+
+|`message` +
+string
+|
+
+
+A human-readable message indicating details about the transition.
+
+
+|===
+
+[#_camel_apache_org_v1_BuildConditionType]
+=== BuildConditionType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildCondition, BuildCondition>>
+
+BuildConditionType --
+
+
+[#_camel_apache_org_v1_BuildPhase]
+=== BuildPhase(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildStatus, BuildStatus>>
+
+BuildPhase --
+
+
+[#_camel_apache_org_v1_BuildSpec]
+=== BuildSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Build, Build>>
+
+BuildSpec defines the Build to be executed
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`tasks` +
+*xref:#_camel_apache_org_v1_Task[[\]Task]*
+|
+
+
+The sequence of Build tasks to be performed as part of the Build execution.
+
+|`strategy` +
+*xref:#_camel_apache_org_v1_BuildStrategy[BuildStrategy]*
+|
+
+
+The strategy that should be used to perform the Build.
+
+|`timeout` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta[Kubernetes meta/v1.Duration]*
+|
+
+
+Timeout defines the Build maximum execution duration.
+The Build deadline is set to the Build start time plus the Timeout duration.
+If the Build deadline is exceeded, the Build context is canceled,
+and its phase set to BuildPhaseFailed.
+
+
+|===
+
+[#_camel_apache_org_v1_BuildStatus]
+=== BuildStatus
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Build, Build>>
+
+BuildStatus defines the observed state of Build
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`phase` +
+*xref:#_camel_apache_org_v1_BuildPhase[BuildPhase]*
+|
+
+
+
+
+|`image` +
+string
+|
+
+
+
+
+|`digest` +
+string
+|
+
+
+
+
+|`baseImage` +
+string
+|
+
+
+
+
+|`artifacts` +
+*xref:#_camel_apache_org_v1_Artifact[[\]Artifact]*
+|
+
+
+
+
+|`error` +
+string
+|
+
+
+
+
+|`failure` +
+*xref:#_camel_apache_org_v1_Failure[Failure]*
+|
+
+
+
+
+|`startedAt` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+
+
+|`conditions` +
+*xref:#_camel_apache_org_v1_BuildCondition[[\]BuildCondition]*
+|
+
+
+
+
+|`duration` +
+string
+|
+
+
+Change to Duration / ISO 8601 when CRD uses OpenAPI spec v3
+https://github.com/OAI/OpenAPI-Specification/issues/845
+
+
+|===
+
+[#_camel_apache_org_v1_BuildStrategy]
+=== BuildStrategy(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildSpec, BuildSpec>>
+* <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
+
+BuildStrategy specifies how the Build should be executed
+
+
+[#_camel_apache_org_v1_BuildahTask]
+=== BuildahTask
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Task, Task>>
+
+BuildahTask --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`BaseTask` +
+*xref:#_camel_apache_org_v1_BaseTask[BaseTask]*
+|(Members of `BaseTask` are embedded into this type.)
+
+
+
+
+|`PublishTask` +
+*xref:#_camel_apache_org_v1_PublishTask[PublishTask]*
+|(Members of `PublishTask` are embedded into this type.)
+
+
+
+
+|`verbose` +
+bool
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_BuilderTask]
+=== BuilderTask
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Task, Task>>
+
+BuilderTask --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`BaseTask` +
+*xref:#_camel_apache_org_v1_BaseTask[BaseTask]*
+|(Members of `BaseTask` are embedded into this type.)
+
+
+
+
+|`baseImage` +
+string
+|
+
+
+
+
+|`runtime` +
+*xref:#_camel_apache_org_v1_RuntimeSpec[RuntimeSpec]*
+|
+
+
+
+
+|`sources` +
+*xref:#_camel_apache_org_v1_SourceSpec[[\]SourceSpec]*
+|
+
+
+
+
+|`resources` +
+*xref:#_camel_apache_org_v1_ResourceSpec[[\]ResourceSpec]*
+|
+
+
+
+
+|`dependencies` +
+[]string
+|
+
+
+
+
+|`steps` +
+[]string
+|
+
+
+
+
+|`maven` +
+*xref:#_camel_apache_org_v1_MavenBuildSpec[MavenBuildSpec]*
+|
+
+
+
+
+|`buildDir` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_CamelArtifact]
+=== CamelArtifact
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelCatalogSpec, CamelCatalogSpec>>
+
+CamelArtifact --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`CamelArtifactDependency` +
+*xref:#_camel_apache_org_v1_CamelArtifactDependency[CamelArtifactDependency]*
+|(Members of `CamelArtifactDependency` are embedded into this type.)
+
+
+
+
+|`schemes` +
+*xref:#_camel_apache_org_v1_CamelScheme[[\]CamelScheme]*
+|
+
+
+
+
+|`languages` +
+[]string
+|
+
+
+
+
+|`dataformats` +
+[]string
+|
+
+
+
+
+|`dependencies` +
+*xref:#_camel_apache_org_v1_CamelArtifactDependency[[\]CamelArtifactDependency]*
+|
+
+
+
+
+|`javaTypes` +
+[]string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_CamelArtifactDependency]
+=== CamelArtifactDependency
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelArtifact, CamelArtifact>>
+* <<#_camel_apache_org_v1_CamelSchemeScope, CamelSchemeScope>>
+
+CamelArtifactDependency represent a maven's dependency
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`MavenArtifact` +
+*xref:#_camel_apache_org_v1_MavenArtifact[MavenArtifact]*
+|(Members of `MavenArtifact` are embedded into this type.)
+
+
+
+
+|`exclusions` +
+*xref:#_camel_apache_org_v1_CamelArtifactExclusion[[\]CamelArtifactExclusion]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_CamelArtifactExclusion]
+=== CamelArtifactExclusion
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelArtifactDependency, CamelArtifactDependency>>
+
+CamelArtifactExclusion --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`groupId` +
+string
+|
+
+
+
+
+|`artifactId` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_CamelCatalogSpec]
+=== CamelCatalogSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelCatalog, CamelCatalog>>
+
+CamelCatalogSpec defines the desired state of CamelCatalog
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`runtime` +
+*xref:#_camel_apache_org_v1_RuntimeSpec[RuntimeSpec]*
+|
+
+
+
+
+|`artifacts` +
+*xref:#_camel_apache_org_v1_CamelArtifact[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.CamelArtifact]*
+|
+
+
+
+
+|`loaders` +
+*xref:#_camel_apache_org_v1_CamelLoader[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.CamelLoader]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_CamelCatalogStatus]
+=== CamelCatalogStatus
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelCatalog, CamelCatalog>>
+
+CamelCatalogStatus defines the observed state of CamelCatalog
+
+
+[#_camel_apache_org_v1_CamelLoader]
+=== CamelLoader
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelCatalogSpec, CamelCatalogSpec>>
+
+CamelLoader --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`MavenArtifact` +
+*xref:#_camel_apache_org_v1_MavenArtifact[MavenArtifact]*
+|(Members of `MavenArtifact` are embedded into this type.)
+
+
+
+
+|`languages` +
+[]string
+|
+
+
+
+
+|`dependencies` +
+*xref:#_camel_apache_org_v1_MavenArtifact[[\]MavenArtifact]*
+|
+
+
+
+
+|`metadata` +
+map[string]string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_CamelScheme]
+=== CamelScheme
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelArtifact, CamelArtifact>>
+
+CamelScheme --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`id` +
+string
+|
+
+
+
+
+|`passive` +
+bool
+|
+
+
+
+
+|`http` +
+bool
+|
+
+
+
+
+|`consumer` +
+*xref:#_camel_apache_org_v1_CamelSchemeScope[CamelSchemeScope]*
+|
+
+
+
+
+|`producer` +
+*xref:#_camel_apache_org_v1_CamelSchemeScope[CamelSchemeScope]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_CamelSchemeScope]
+=== CamelSchemeScope
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelScheme, CamelScheme>>
+
+CamelSchemeScope contains scoped information about a scheme
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`dependencies` +
+*xref:#_camel_apache_org_v1_CamelArtifactDependency[[\]CamelArtifactDependency]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_Capability]
+=== Capability
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_RuntimeSpec, RuntimeSpec>>
+
+Capability --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`dependencies` +
+*xref:#_camel_apache_org_v1_MavenArtifact[[\]MavenArtifact]*
+|
+
+
+
+
+|`metadata` +
+map[string]string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_Configurable]
+=== Configurable
+
+Configurable --
+
+
+[#_camel_apache_org_v1_ConfigurationSpec]
+=== ConfigurationSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitSpec, IntegrationKitSpec>>
+* <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
+* <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+
+ConfigurationSpec --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+string
+|
+
+
+
+
+|`value` +
+string
+|
+
+
+
+
+|`resourceType` +
+string
+|
+
+
+
+
+|`resourceMountPoint` +
+string
+|
+
+
+
+
+|`resourceKey` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_DataSpec]
+=== DataSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_ResourceSpec, ResourceSpec>>
+* <<#_camel_apache_org_v1_SourceSpec, SourceSpec>>
+
+DataSpec --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`name` +
+string
+|
+
+
+
+
+|`path` +
+string
+|
+
+
+
+
+|`content` +
+string
+|
+
+
+
+
+|`rawContent` +
+[]byte
+|
+
+
+
+
+|`contentRef` +
+string
+|
+
+
+
+
+|`contentKey` +
+string
+|
+
+
+
+
+|`contentType` +
+string
+|
+
+
+
+
+|`compression` +
+bool
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_Failure]
+=== Failure
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildStatus, BuildStatus>>
+* <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
+
+Failure --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`reason` +
+string
+|
+
+
+
+
+|`time` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+
+
+|`recovery` +
+*xref:#_camel_apache_org_v1_FailureRecovery[FailureRecovery]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_FailureRecovery]
+=== FailureRecovery
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Failure, Failure>>
+
+FailureRecovery --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`attempt` +
+int
+|
+
+
+
+
+|`attemptMax` +
+int
+|
+
+
+
+
+|`attemptTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+*(Optional)*
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_Flow]
+=== Flow
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+
+Flow is an unstructured object representing a Camel Flow in YAML/JSON DSL
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`RawMessage` +
+*xref:#_camel_apache_org_v1_RawMessage[RawMessage]*
+|(Members of `RawMessage` are embedded into this type.)
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationCondition]
+=== IntegrationCondition
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+
+IntegrationCondition describes the state of a resource at a certain point.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+*xref:#_camel_apache_org_v1_IntegrationConditionType[IntegrationConditionType]*
+|
+
+
+Type of integration condition.
+
+|`status` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+|
+
+
+Status of the condition, one of True, False, Unknown.
+
+|`lastUpdateTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+The last time this condition was updated.
+
+|`lastTransitionTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+Last time the condition transitioned from one status to another.
+
+|`firstTruthyTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+First time the condition status transitioned to True.
+
+|`reason` +
+string
+|
+
+
+The reason for the condition's last transition.
+
+|`message` +
+string
+|
+
+
+A human-readable message indicating details about the transition.
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationConditionType]
+=== IntegrationConditionType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationCondition, IntegrationCondition>>
+
+IntegrationConditionType --
+
+
+[#_camel_apache_org_v1_IntegrationKitCondition]
+=== IntegrationKitCondition
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
+
+IntegrationKitCondition describes the state of a resource at a certain point.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+*xref:#_camel_apache_org_v1_IntegrationKitConditionType[IntegrationKitConditionType]*
+|
+
+
+Type of integration condition.
+
+|`status` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+|
+
+
+Status of the condition, one of True, False, Unknown.
+
+|`lastUpdateTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+The last time this condition was updated.
+
+|`lastTransitionTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+Last time the condition transitioned from one status to another.
+
+|`reason` +
+string
+|
+
+
+The reason for the condition's last transition.
+
+|`message` +
+string
+|
+
+
+A human-readable message indicating details about the transition.
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationKitConditionType]
+=== IntegrationKitConditionType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitCondition, IntegrationKitCondition>>
+
+IntegrationKitConditionType --
+
+
+[#_camel_apache_org_v1_IntegrationKitPhase]
+=== IntegrationKitPhase(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
+
+IntegrationKitPhase --
+
+
+[#_camel_apache_org_v1_IntegrationKitSpec]
+=== IntegrationKitSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKit, IntegrationKit>>
+
+IntegrationKitSpec defines the desired state of IntegrationKit
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`image` +
+string
+|
+
+
+
+
+|`dependencies` +
+[]string
+|
+
+
+
+
+|`profile` +
+*xref:#_camel_apache_org_v1_TraitProfile[TraitProfile]*
+|
+
+
+
+
+|`traits` +
+*xref:#_camel_apache_org_v1_TraitSpec[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec]*
+|
+
+
+
+
+|`configuration` +
+*xref:#_camel_apache_org_v1_ConfigurationSpec[[\]ConfigurationSpec]*
+|
+
+
+
+
+|`repositories` +
+[]string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationKitStatus]
+=== IntegrationKitStatus
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKit, IntegrationKit>>
+
+IntegrationKitStatus defines the observed state of IntegrationKit
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`phase` +
+*xref:#_camel_apache_org_v1_IntegrationKitPhase[IntegrationKitPhase]*
+|
+
+
+
+
+|`baseImage` +
+string
+|
+
+
+
+
+|`image` +
+string
+|
+
+
+
+
+|`digest` +
+string
+|
+
+
+
+
+|`artifacts` +
+*xref:#_camel_apache_org_v1_Artifact[[\]Artifact]*
+|
+
+
+
+
+|`failure` +
+*xref:#_camel_apache_org_v1_Failure[Failure]*
+|
+
+
+
+
+|`runtimeVersion` +
+string
+|
+
+
+
+
+|`runtimeProvider` +
+*xref:#_camel_apache_org_v1_RuntimeProvider[RuntimeProvider]*
+|
+
+
+
+
+|`platform` +
+string
+|
+
+
+
+
+|`conditions` +
+*xref:#_camel_apache_org_v1_IntegrationKitCondition[[\]IntegrationKitCondition]*
+|
+
+
+
+
+|`version` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationPhase]
+=== IntegrationPhase(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+
+IntegrationPhase --
+
+
+[#_camel_apache_org_v1_IntegrationPlatformBuildPublishStrategy]
+=== IntegrationPlatformBuildPublishStrategy(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
+
+IntegrationPlatformBuildPublishStrategy enumerates all implemented publish strategies
+
+
+[#_camel_apache_org_v1_IntegrationPlatformBuildSpec]
+=== IntegrationPlatformBuildSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
+
+IntegrationPlatformBuildSpec contains platform related build information
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`buildStrategy` +
+*xref:#_camel_apache_org_v1_BuildStrategy[BuildStrategy]*
+|
+
+
+
+
+|`publishStrategy` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformBuildPublishStrategy[IntegrationPlatformBuildPublishStrategy]*
+|
+
+
+
+
+|`runtimeVersion` +
+string
+|
+
+
+
+
+|`runtimeProvider` +
+*xref:#_camel_apache_org_v1_RuntimeProvider[RuntimeProvider]*
+|
+
+
+
+
+|`baseImage` +
+string
+|
+
+
+
+
+|`registry` +
+*xref:#_camel_apache_org_v1_RegistrySpec[RegistrySpec]*
+|
+
+
+
+
+|`timeout` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta[Kubernetes meta/v1.Duration]*
+|
+
+
+
+
+|`persistentVolumeClaim` +
+string
+|
+
+
+
+
+|`maven` +
+*xref:#_camel_apache_org_v1_MavenSpec[MavenSpec]*
+|
+
+
+
+
+|`kanikoBuildCache` +
+bool
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationPlatformCluster]
+=== IntegrationPlatformCluster(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
+
+IntegrationPlatformCluster is the kind of orchestration cluster the platform is installed into
+
+
+[#_camel_apache_org_v1_IntegrationPlatformCondition]
+=== IntegrationPlatformCondition
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformStatus, IntegrationPlatformStatus>>
+
+IntegrationPlatformCondition describes the state of a resource at a certain point.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformConditionType[IntegrationPlatformConditionType]*
+|
+
+
+Type of integration condition.
+
+|`status` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+|
+
+
+Status of the condition, one of True, False, Unknown.
+
+|`lastUpdateTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+The last time this condition was updated.
+
+|`lastTransitionTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+Last time the condition transitioned from one status to another.
+
+|`reason` +
+string
+|
+
+
+The reason for the condition's last transition.
+
+|`message` +
+string
+|
+
+
+A human-readable message indicating details about the transition.
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationPlatformConditionType]
+=== IntegrationPlatformConditionType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformCondition, IntegrationPlatformCondition>>
+
+IntegrationPlatformConditionType --
+
+
+[#_camel_apache_org_v1_IntegrationPlatformKameletRepositorySpec]
+=== IntegrationPlatformKameletRepositorySpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformKameletSpec, IntegrationPlatformKameletSpec>>
+
+IntegrationPlatformKameletRepositorySpec --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`uri` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationPlatformKameletSpec]
+=== IntegrationPlatformKameletSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
+
+IntegrationPlatformKameletSpec --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`repositories` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformKameletRepositorySpec[[\]IntegrationPlatformKameletRepositorySpec]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationPlatformPhase]
+=== IntegrationPlatformPhase(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformStatus, IntegrationPlatformStatus>>
+
+IntegrationPlatformPhase --
+
+
+[#_camel_apache_org_v1_IntegrationPlatformResourcesSpec]
+=== IntegrationPlatformResourcesSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
+
+IntegrationPlatformResourcesSpec contains platform related resources
+
+
+[#_camel_apache_org_v1_IntegrationPlatformSpec]
+=== IntegrationPlatformSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatform, IntegrationPlatform>>
+* <<#_camel_apache_org_v1_IntegrationPlatformStatus, IntegrationPlatformStatus>>
+
+IntegrationPlatformSpec defines the desired state of IntegrationPlatform
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`cluster` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformCluster[IntegrationPlatformCluster]*
+|
+
+
+
+
+|`profile` +
+*xref:#_camel_apache_org_v1_TraitProfile[TraitProfile]*
+|
+
+
+
+
+|`build` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformBuildSpec[IntegrationPlatformBuildSpec]*
+|
+
+
+
+
+|`resources` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformResourcesSpec[IntegrationPlatformResourcesSpec]*
+|
+
+
+
+
+|`traits` +
+*xref:#_camel_apache_org_v1_TraitSpec[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec]*
+|
+
+
+
+
+|`configuration` +
+*xref:#_camel_apache_org_v1_ConfigurationSpec[[\]ConfigurationSpec]*
+|
+
+
+
+
+|`kamelet` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformKameletSpec[IntegrationPlatformKameletSpec]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationPlatformStatus]
+=== IntegrationPlatformStatus
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatform, IntegrationPlatform>>
+
+IntegrationPlatformStatus defines the observed state of IntegrationPlatform
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`IntegrationPlatformSpec` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformSpec[IntegrationPlatformSpec]*
+|(Members of `IntegrationPlatformSpec` are embedded into this type.)
+
+
+
+
+|`phase` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformPhase[IntegrationPlatformPhase]*
+|
+
+
+
+
+|`conditions` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformCondition[[\]IntegrationPlatformCondition]*
+|
+
+
+
+
+|`version` +
+string
+|
+
+
+
+
+|`info` +
+map[string]string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationSpec]
+=== IntegrationSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Integration, Integration>>
+
+IntegrationSpec defines the desired state of Integration
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`replicas` +
+int32
+|
+
+
+
+
+|`sources` +
+*xref:#_camel_apache_org_v1_SourceSpec[[\]SourceSpec]*
+|
+
+
+
+
+|`flows` +
+*xref:#_camel_apache_org_v1_Flow[[\]Flow]*
+|
+
+
+
+
+|`resources` +
+*xref:#_camel_apache_org_v1_ResourceSpec[[\]ResourceSpec]*
+|
+
+
+Deprecated:
+Use container trait (container.resources) to manage resources
+Use openapi trait (openapi.configmaps) to manage OpenAPIs specifications
+
+|`kit` +
+string
+|
+
+
+Deprecated: use the IntegrationKit field
+
+|`integrationKit` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core[Kubernetes core/v1.ObjectReference]*
+|
+
+
+
+
+|`dependencies` +
+[]string
+|
+
+
+
+
+|`profile` +
+*xref:#_camel_apache_org_v1_TraitProfile[TraitProfile]*
+|
+
+
+
+
+|`traits` +
+*xref:#_camel_apache_org_v1_TraitSpec[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec]*
+|
+
+
+
+
+|`template` +
+*xref:#_camel_apache_org_v1_PodSpecTemplate[PodSpecTemplate]*
+|
+
+
+
+
+|`configuration` +
+*xref:#_camel_apache_org_v1_ConfigurationSpec[[\]ConfigurationSpec]*
+|
+
+
+Deprecated:
+Use camel trait (camel.properties) to manage properties
+Use container trait (container.configs) to manage configs
+Use container trait (container.resources) to manage resources
+Use container trait (container.volumes) to manage volumes
+
+|`repositories` +
+[]string
+|
+
+
+
+
+|`serviceAccountName` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationStatus]
+=== IntegrationStatus
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Integration, Integration>>
+
+IntegrationStatus defines the observed state of Integration
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`phase` +
+*xref:#_camel_apache_org_v1_IntegrationPhase[IntegrationPhase]*
+|
+
+
+
+
+|`digest` +
+string
+|
+
+
+
+
+|`image` +
+string
+|
+
+
+
+
+|`dependencies` +
+[]string
+|
+
+
+
+
+|`profile` +
+*xref:#_camel_apache_org_v1_TraitProfile[TraitProfile]*
+|
+
+
+
+
+|`kit` +
+string
+|
+
+
+Deprecated: use the IntegrationKit field
+
+|`integrationKit` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core[Kubernetes core/v1.ObjectReference]*
+|
+
+
+
+
+|`platform` +
+string
+|
+
+
+
+
+|`generatedSources` +
+*xref:#_camel_apache_org_v1_SourceSpec[[\]SourceSpec]*
+|
+
+
+
+
+|`generatedResources` +
+*xref:#_camel_apache_org_v1_ResourceSpec[[\]ResourceSpec]*
+|
+
+
+
+
+|`runtimeVersion` +
+string
+|
+
+
+
+
+|`runtimeProvider` +
+*xref:#_camel_apache_org_v1_RuntimeProvider[RuntimeProvider]*
+|
+
+
+
+
+|`configuration` +
+*xref:#_camel_apache_org_v1_ConfigurationSpec[[\]ConfigurationSpec]*
+|
+
+
+
+
+|`conditions` +
+*xref:#_camel_apache_org_v1_IntegrationCondition[[\]IntegrationCondition]*
+|
+
+
+
+
+|`version` +
+string
+|
+
+
+
+
+|`replicas` +
+int32
+|
+
+
+
+
+|`selector` +
+string
+|
+
+
+
+
+|`capabilities` +
+[]string
+|
+
+
+
+
+|`lastInitTimestamp` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+The timestamp representing the last time when this integration was initialized.
+
+
+|===
+
+[#_camel_apache_org_v1_KanikoTask]
+=== KanikoTask
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Task, Task>>
+
+KanikoTask --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`BaseTask` +
+*xref:#_camel_apache_org_v1_BaseTask[BaseTask]*
+|(Members of `BaseTask` are embedded into this type.)
+
+
+
+
+|`PublishTask` +
+*xref:#_camel_apache_org_v1_PublishTask[PublishTask]*
+|(Members of `PublishTask` are embedded into this type.)
+
+
+
+
+|`verbose` +
+bool
+|
+
+
+
+
+|`cache` +
+*xref:#_camel_apache_org_v1_KanikoTaskCache[KanikoTaskCache]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_KanikoTaskCache]
+=== KanikoTaskCache
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_KanikoTask, KanikoTask>>
+
+KanikoTaskCache --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`enabled` +
+bool
+|
+
+
+
+
+|`persistentVolumeClaim` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_Language]
+=== Language(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_SourceSpec, SourceSpec>>
+
+Language --
+
+
+[#_camel_apache_org_v1_MavenArtifact]
+=== MavenArtifact
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelArtifactDependency, CamelArtifactDependency>>
+* <<#_camel_apache_org_v1_CamelLoader, CamelLoader>>
+* <<#_camel_apache_org_v1_Capability, Capability>>
+* <<#_camel_apache_org_v1_MavenSpec, MavenSpec>>
+* <<#_camel_apache_org_v1_RuntimeSpec, RuntimeSpec>>
+
+MavenArtifact defines a Maven artifact
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`groupId` +
+string
+|
+
+
+
+
+|`artifactId` +
+string
+|
+
+
+
+
+|`version` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_MavenBuildSpec]
+=== MavenBuildSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuilderTask, BuilderTask>>
+
+MavenBuildSpec --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`MavenSpec` +
+*xref:#_camel_apache_org_v1_MavenSpec[MavenSpec]*
+|(Members of `MavenSpec` are embedded into this type.)
+
+
+
+
+|`repositories` +
+*xref:#_camel_apache_org_v1_Repository[[\]Repository]*
+|
+
+
+The Maven repositories.
+
+
+|===
+
+[#_camel_apache_org_v1_MavenSpec]
+=== MavenSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
+* <<#_camel_apache_org_v1_MavenBuildSpec, MavenBuildSpec>>
+
+MavenSpec --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`localRepository` +
+string
+|
+
+
+The path of the local Maven repository.
+
+|`properties` +
+map[string]string
+|
+
+
+The Maven properties.
+
+|`settings` +
+*xref:#_camel_apache_org_v1_ValueSource[ValueSource]*
+|
+
+
+A reference to the ConfigMap or Secret key that contains
+the Maven settings.
+
+|`caSecret` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#secretkeyselector-v1-core[Kubernetes core/v1.SecretKeySelector]*
+|
+
+
+The Secret name and key, containing the CA certificate(s) used to connect
+to remote Maven repositories.
+It can contain X.509 certificates, and PKCS#7 formatted certificate chains.
+A JKS formatted keystore is automatically created to store the CA certificate(s),
+and configured to be used as a trusted certificate(s) by the Maven commands.
+Note that the root CA certificates are also imported into the created keystore.
+
+|`timeout` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta[Kubernetes meta/v1.Duration]*
+|
+
+
+Deprecated: use IntegrationPlatform.Spec.Build.Timeout instead
+
+|`extension` +
+*xref:#_camel_apache_org_v1_MavenArtifact[[\]MavenArtifact]*
+|
+
+
+The Maven build extensions.
+See https://maven.apache.org/guides/mini/guide-using-extensions.html.
+
+|`cliOptions` +
+[]string
+|
+
+
+The CLI options that are appended to the list of arguments for Maven commands,
+e.g., `-V,--no-transfer-progress,-Dstyle.color=never`.
+See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.
+
+
+|===
+
+[#_camel_apache_org_v1_PodSpec]
+=== PodSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_PodSpecTemplate, PodSpecTemplate>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`volumes` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core[[\]Kubernetes core/v1.Volume]*
+|
+
+
+
+
+|`initContainers` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core[[\]Kubernetes core/v1.Container]*
+|
+
+
+
+
+|`containers` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core[[\]Kubernetes core/v1.Container]*
+|
+
+
+
+
+|`ephemeralContainers` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#ephemeralcontainer-v1-core[[\]Kubernetes core/v1.EphemeralContainer]*
+|
+
+
+
+
+|`restartPolicy` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#restartpolicy-v1-core[Kubernetes core/v1.RestartPolicy]*
+|
+
+
+
+
+|`terminationGracePeriodSeconds` +
+int64
+|
+
+
+
+
+|`activeDeadlineSeconds` +
+int64
+|
+
+
+
+
+|`dnsPolicy` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#dnspolicy-v1-core[Kubernetes core/v1.DNSPolicy]*
+|
+
+
+
+
+|`nodeSelector` +
+map[string]string
+|
+
+
+
+
+|`topologySpreadConstraints` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#topologyspreadconstraint-v1-core[[\]Kubernetes core/v1.TopologySpreadConstraint]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_PodSpecTemplate]
+=== PodSpecTemplate
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`spec` +
+*xref:#_camel_apache_org_v1_PodSpec[PodSpec]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_PublishTask]
+=== PublishTask
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildahTask, BuildahTask>>
+* <<#_camel_apache_org_v1_KanikoTask, KanikoTask>>
+* <<#_camel_apache_org_v1_SpectrumTask, SpectrumTask>>
+
+PublishTask --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`contextDir` +
+string
+|
+
+
+
+
+|`baseImage` +
+string
+|
+
+
+
+
+|`image` +
+string
+|
+
+
+
+
+|`registry` +
+*xref:#_camel_apache_org_v1_RegistrySpec[RegistrySpec]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_RawMessage]
+=== RawMessage(`[]byte` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Flow, Flow>>
+* <<#_camel_apache_org_v1_Template, Template>>
+* <<#_camel_apache_org_v1_TraitConfiguration, TraitConfiguration>>
+
+RawMessage is a raw encoded JSON value.
+It implements Marshaler and Unmarshaler and can
+be used to delay JSON decoding or precompute a JSON encoding.
+
+
+[#_camel_apache_org_v1_RegistrySpec]
+=== RegistrySpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
+* <<#_camel_apache_org_v1_PublishTask, PublishTask>>
+
+RegistrySpec provides the configuration for the container registry
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`insecure` +
+bool
+|
+
+
+
+
+|`address` +
+string
+|
+
+
+
+
+|`secret` +
+string
+|
+
+
+
+
+|`ca` +
+string
+|
+
+
+
+
+|`organization` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_Repository]
+=== Repository
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_MavenBuildSpec, MavenBuildSpec>>
+
+Repository defines a Maven repository
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`id` +
+string
+|
+
+
+
+
+|`name` +
+string
+|
+
+
+
+
+|`url` +
+string
+|
+
+
+
+
+|`snapshots` +
+*xref:#_camel_apache_org_v1_RepositoryPolicy[RepositoryPolicy]*
+|
+
+
+
+
+|`releases` +
+*xref:#_camel_apache_org_v1_RepositoryPolicy[RepositoryPolicy]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_RepositoryPolicy]
+=== RepositoryPolicy
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Repository, Repository>>
+
+RepositoryPolicy defines the policy associated to a Maven repository
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`enabled` +
+bool
+|
+
+
+
+
+|`updatePolicy` +
+string
+|
+
+
+
+
+|`checksumPolicy` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_ResourceCondition]
+=== ResourceCondition
+
+ResourceCondition is a common type for all conditions
+
+
+[#_camel_apache_org_v1_ResourceSpec]
+=== ResourceSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuilderTask, BuilderTask>>
+* <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+
+ResourceSpec --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`DataSpec` +
+*xref:#_camel_apache_org_v1_DataSpec[DataSpec]*
+|(Members of `DataSpec` are embedded into this type.)
+
+
+
+
+|`type` +
+*xref:#_camel_apache_org_v1_ResourceType[ResourceType]*
+|
+
+
+
+
+|`mountPath` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_ResourceType]
+=== ResourceType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_ResourceSpec, ResourceSpec>>
+
+ResourceType --
+
+
+[#_camel_apache_org_v1_RuntimeProvider]
+=== RuntimeProvider(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
+* <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+* <<#_camel_apache_org_v1_RuntimeSpec, RuntimeSpec>>
+
+RuntimeProvider --
+
+
+[#_camel_apache_org_v1_RuntimeSpec]
+=== RuntimeSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuilderTask, BuilderTask>>
+* <<#_camel_apache_org_v1_CamelCatalogSpec, CamelCatalogSpec>>
+
+RuntimeSpec --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`version` +
+string
+|
+
+
+
+
+|`provider` +
+*xref:#_camel_apache_org_v1_RuntimeProvider[RuntimeProvider]*
+|
+
+
+
+
+|`applicationClass` +
+string
+|
+
+
+
+
+|`dependencies` +
+*xref:#_camel_apache_org_v1_MavenArtifact[[\]MavenArtifact]*
+|
+
+
+
+
+|`metadata` +
+map[string]string
+|
+
+
+
+
+|`capabilities` +
+*xref:#_camel_apache_org_v1_Capability[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.Capability]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_S2iTask]
+=== S2iTask
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Task, Task>>
+
+S2iTask --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`BaseTask` +
+*xref:#_camel_apache_org_v1_BaseTask[BaseTask]*
+|(Members of `BaseTask` are embedded into this type.)
+
+
+
+
+|`contextDir` +
+string
+|
+
+
+
+
+|`tag` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_SourceSpec]
+=== SourceSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuilderTask, BuilderTask>>
+* <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+
+SourceSpec --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`DataSpec` +
+*xref:#_camel_apache_org_v1_DataSpec[DataSpec]*
+|(Members of `DataSpec` are embedded into this type.)
+
+
+
+
+|`language` +
+*xref:#_camel_apache_org_v1_Language[Language]*
+|
+
+
+
+
+|`loader` +
+string
+|
+
+
+Loader is an optional id of the org.apache.camel.k.RoutesLoader that will
+interpret this source at runtime
+
+|`interceptors` +
+[]string
+|
+
+
+Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
+uses to pre/post process sources
+
+|`type` +
+*xref:#_camel_apache_org_v1_SourceType[SourceType]*
+|
+
+
+Type defines the kind of source described by this object
+
+|`property-names` +
+[]string
+|
+
+
+List of property names defined in the source (e.g. if type is "template")
+
+
+|===
+
+[#_camel_apache_org_v1_SourceType]
+=== SourceType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_SourceSpec, SourceSpec>>
+
+
+
+
+[#_camel_apache_org_v1_SpectrumTask]
+=== SpectrumTask
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Task, Task>>
+
+SpectrumTask --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`BaseTask` +
+*xref:#_camel_apache_org_v1_BaseTask[BaseTask]*
+|(Members of `BaseTask` are embedded into this type.)
+
+
+
+
+|`PublishTask` +
+*xref:#_camel_apache_org_v1_PublishTask[PublishTask]*
+|(Members of `PublishTask` are embedded into this type.)
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_Task]
+=== Task
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildSpec, BuildSpec>>
+
+Task --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`builder` +
+*xref:#_camel_apache_org_v1_BuilderTask[BuilderTask]*
+|
+
+
+
+
+|`buildah` +
+*xref:#_camel_apache_org_v1_BuildahTask[BuildahTask]*
+|
+
+
+
+
+|`kaniko` +
+*xref:#_camel_apache_org_v1_KanikoTask[KanikoTask]*
+|
+
+
+
+
+|`spectrum` +
+*xref:#_camel_apache_org_v1_SpectrumTask[SpectrumTask]*
+|
+
+
+
+
+|`s2i` +
+*xref:#_camel_apache_org_v1_S2iTask[S2iTask]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_Template]
+=== Template
+
+Template is an unstructured object representing a Kamelet template in YAML/JSON DSL
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`RawMessage` +
+*xref:#_camel_apache_org_v1_RawMessage[RawMessage]*
+|(Members of `RawMessage` are embedded into this type.)
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_TraitConfiguration]
+=== TraitConfiguration
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_TraitSpec, TraitSpec>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`RawMessage` +
+*xref:#_camel_apache_org_v1_RawMessage[RawMessage]*
+|(Members of `RawMessage` are embedded into this type.)
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_TraitProfile]
+=== TraitProfile(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitSpec, IntegrationKitSpec>>
+* <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
+* <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+
+TraitProfile represents lists of traits that are enabled for the specific installation/integration
+
+
+[#_camel_apache_org_v1_TraitSpec]
+=== TraitSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitSpec, IntegrationKitSpec>>
+* <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
+* <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+
+A TraitSpec contains the configuration of a trait
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`configuration` +
+*xref:#_camel_apache_org_v1_TraitConfiguration[TraitConfiguration]*
+|
+
+
+TraitConfiguration --
+
+
+|===
+
+[#_camel_apache_org_v1_ValueSource]
+=== ValueSource
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_MavenSpec, MavenSpec>>
+
+ValueSource --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`configMapKeyRef` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#configmapkeyselector-v1-core[Kubernetes core/v1.ConfigMapKeySelector]*
+|
+
+
+Selects a key of a ConfigMap.
+
+|`secretKeyRef` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#secretkeyselector-v1-core[Kubernetes core/v1.SecretKeySelector]*
+|
+
+
+Selects a key of a secret.
+
+
+|===
