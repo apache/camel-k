@@ -60,7 +60,7 @@ Camel K provide a very nice **dev mode** feature that will allow you to apply an
 [[no-cli-integration]]
 == Running an Integration without CLI
 
-You can run your integration also if you have no CLI available. `kamel` CLI manages a lot of fancy features but you can create an Integration Custom Resource (see the xref:apis/camel.adoc[API section] related to Integration) with all the configuration expected to run your application.
+You can run your integration also if you have no CLI available. `kamel` CLI manages a lot of fancy features but you can create an xref:apis/camel-k.adoc#_camel_apache_org_v1_Integration[Integration Custom Resource] with all the configuration expected to run your application.
 
 As an example, let's get the result of a **dry run** for a sample route: 
 
