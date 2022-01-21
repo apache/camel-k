@@ -11,6 +11,10 @@
         {
             "typeMatchPrefix": "^k8s\\.io/(api|apimachinery/pkg/apis)/",
             "docsURLTemplate": "https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#{{lower .TypeIdentifier}}-{{arrIndex .PackageSegments -1}}-{{arrIndex .PackageSegments -2}}"
+        },
+        {
+          "typeMatchPrefix": "^github\\.com/apache/camel-k/pkg/apis/camel/v1\\.",
+          "docsURLTemplate": "xref:apis/camel-k.adoc#_camel_apache_org_v1_{{.TypeIdentifier}}"
         }
     ],
     "typeDisplayNamePrefixOverrides": {
