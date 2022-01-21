@@ -1,0 +1,1161 @@
+[#_camel_apache_org_v1alpha1]
+== camel.apache.org/v1alpha1
+
+Package v1alpha1 contains API Schema definitions for the camel v1alpha1 API group
+
+==  Resource Types
+
+[#_camel_apache_org_v1alpha1_Kamelet]
+=== Kamelet
+
+Kamelet is the Schema for the kamelets API
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`apiVersion` +
+string
+|`camel.apache.org/v1alpha1`
+
+|`kind` +
+string
+|`Kamelet`
+|`metadata` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+|
+
+
+
+
+Refer to the Kubernetes API documentation for the fields of the `metadata` field.
+|`spec` +
+*xref:#_camel_apache_org_v1alpha1_KameletSpec[KameletSpec]*
+|
+
+
+
+
+|`status` +
+*xref:#_camel_apache_org_v1alpha1_KameletStatus[KameletStatus]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_KameletBinding]
+=== KameletBinding
+
+KameletBinding is the Schema for the kamelets binding API
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`apiVersion` +
+string
+|`camel.apache.org/v1alpha1`
+
+|`kind` +
+string
+|`KameletBinding`
+|`metadata` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+|
+
+
+
+
+Refer to the Kubernetes API documentation for the fields of the `metadata` field.
+|`spec` +
+*xref:#_camel_apache_org_v1alpha1_KameletBindingSpec[KameletBindingSpec]*
+|
+
+
+
+
+|`status` +
+*xref:#_camel_apache_org_v1alpha1_KameletBindingStatus[KameletBindingStatus]*
+|
+
+
+
+
+
+|===
+
+== Internal Types
+
+[#_camel_apache_org_v1alpha1_AuthorizationSpec]
+=== AuthorizationSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_KameletSpec, KameletSpec>>
+
+AuthorizationSpec is TODO (oauth information)
+
+
+[#_camel_apache_org_v1alpha1_BeanProperties]
+=== BeanProperties
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_ErrorHandlerBean, ErrorHandlerBean>>
+
+BeanProperties represent an unstructured object properties to be set on a bean
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`RawMessage` +
+*xref:apis/camel-k.adoc#_camel_apache_org_v1_RawMessage[github.com/apache/camel-k/pkg/apis/camel/v1.RawMessage]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_Endpoint]
+=== Endpoint
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_ErrorHandlerDeadLetterChannel, ErrorHandlerDeadLetterChannel>>
+* <<#_camel_apache_org_v1alpha1_KameletBindingSpec, KameletBindingSpec>>
+
+Endpoint represents a source/sink external entity
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`ref` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core[Kubernetes core/v1.ObjectReference]*
+|
+
+
+Ref can be used to declare a Kubernetes resource as source/sink endpoint
+
+|`uri` +
+string
+|
+
+
+URI can alternatively be used to specify the (Camel) endpoint explicitly
+
+|`properties` +
+*xref:#_camel_apache_org_v1alpha1_EndpointProperties[EndpointProperties]*
+|
+
+
+Properties are a key value representation of endpoint properties
+
+|`types` +
+*xref:#_camel_apache_org_v1alpha1_EventTypeSpec[map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot\]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventTypeSpec]*
+|
+
+
+Types defines the schema of the data produced/consumed by the endpoint
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_EndpointProperties]
+=== EndpointProperties
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_Endpoint, Endpoint>>
+
+EndpointProperties is a key/value struct represented as JSON raw to allow numeric/boolean values
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`RawMessage` +
+*xref:apis/camel-k.adoc#_camel_apache_org_v1_RawMessage[github.com/apache/camel-k/pkg/apis/camel/v1.RawMessage]*
+|(Members of `RawMessage` are embedded into this type.)
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_EndpointType]
+=== EndpointType(`string` alias)
+
+
+
+
+[#_camel_apache_org_v1alpha1_ErrorHandler]
+=== ErrorHandler
+
+ErrorHandler is a generic interface that represent any type of error handler specification
+
+
+[#_camel_apache_org_v1alpha1_ErrorHandlerBean]
+=== ErrorHandlerBean
+
+ErrorHandlerBean represents a bean error handler type
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`ErrorHandlerNone` +
+*xref:#_camel_apache_org_v1alpha1_ErrorHandlerNone[ErrorHandlerNone]*
+|
+
+
+
+
+|`type` +
+string
+|
+
+
+
+
+|`properties` +
+*xref:#_camel_apache_org_v1alpha1_BeanProperties[BeanProperties]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_ErrorHandlerDeadLetterChannel]
+=== ErrorHandlerDeadLetterChannel
+
+ErrorHandlerDeadLetterChannel represents a dead letter channel error handler type
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`ErrorHandlerLog` +
+*xref:#_camel_apache_org_v1alpha1_ErrorHandlerLog[ErrorHandlerLog]*
+|
+
+
+
+
+|`endpoint` +
+*xref:#_camel_apache_org_v1alpha1_Endpoint[Endpoint]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_ErrorHandlerLog]
+=== ErrorHandlerLog
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_ErrorHandlerDeadLetterChannel, ErrorHandlerDeadLetterChannel>>
+
+ErrorHandlerLog represent a default (log) error handler type
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`ErrorHandlerNone` +
+*xref:#_camel_apache_org_v1alpha1_ErrorHandlerNone[ErrorHandlerNone]*
+|
+
+
+
+
+|`parameters` +
+*xref:#_camel_apache_org_v1alpha1_ErrorHandlerParameters[ErrorHandlerParameters]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_ErrorHandlerNone]
+=== ErrorHandlerNone
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_ErrorHandlerBean, ErrorHandlerBean>>
+* <<#_camel_apache_org_v1alpha1_ErrorHandlerLog, ErrorHandlerLog>>
+
+ErrorHandlerNone --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_ErrorHandlerParameters]
+=== ErrorHandlerParameters
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_ErrorHandlerLog, ErrorHandlerLog>>
+
+ErrorHandlerParameters represent an unstructured object for error handler parameters
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`RawMessage` +
+*xref:apis/camel-k.adoc#_camel_apache_org_v1_RawMessage[github.com/apache/camel-k/pkg/apis/camel/v1.RawMessage]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_ErrorHandlerRef]
+=== ErrorHandlerRef
+
+ErrorHandlerRef represents a reference to an error handler builder available in the registry
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`RawMessage` +
+*xref:apis/camel-k.adoc#_camel_apache_org_v1_RawMessage[github.com/apache/camel-k/pkg/apis/camel/v1.RawMessage]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_ErrorHandlerSpec]
+=== ErrorHandlerSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_KameletBindingSpec, KameletBindingSpec>>
+
+ErrorHandlerSpec represents an unstructured object for an error handler
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`RawMessage` +
+*xref:apis/camel-k.adoc#_camel_apache_org_v1_RawMessage[github.com/apache/camel-k/pkg/apis/camel/v1.RawMessage]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_ErrorHandlerType]
+=== ErrorHandlerType(`string` alias)
+
+ErrorHandlerType --
+
+
+[#_camel_apache_org_v1alpha1_EventSlot]
+=== EventSlot(`string` alias)
+
+
+
+
+[#_camel_apache_org_v1alpha1_EventTypeSpec]
+=== EventTypeSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_Endpoint, Endpoint>>
+* <<#_camel_apache_org_v1alpha1_KameletSpec, KameletSpec>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`mediaType` +
+string
+|
+
+
+
+
+|`schema` +
+*xref:#_camel_apache_org_v1alpha1_JSONSchemaProps[JSONSchemaProps]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_ExternalDocumentation]
+=== ExternalDocumentation
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_JSONSchemaProps, JSONSchemaProps>>
+
+ExternalDocumentation allows referencing an external resource for extended documentation.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`description` +
+string
+|
+
+
+
+
+|`url` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_JSON]
+=== JSON
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_JSONSchemaProp, JSONSchemaProp>>
+* <<#_camel_apache_org_v1alpha1_JSONSchemaProps, JSONSchemaProps>>
+
+JSON represents any valid JSON value.
+These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`RawMessage` +
+*xref:#_camel_apache_org_v1alpha1_RawMessage[RawMessage]*
+|(Members of `RawMessage` are embedded into this type.)
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_JSONSchemaProp]
+=== JSONSchemaProp
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_JSONSchemaProps, JSONSchemaProps>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`id` +
+string
+|
+
+
+
+
+|`description` +
+string
+|
+
+
+
+
+|`type` +
+string
+|
+
+
+
+
+|`format` +
+string
+|
+
+
+format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:
+
+- bsonobjectid: a bson object ID, i.e. a 24 characters hex string
+- uri: an URI as parsed by Golang net/url.ParseRequestURI
+- email: an email address as parsed by Golang net/mail.ParseAddress
+- hostname: a valid representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034].
+- ipv4: an IPv4 IP as parsed by Golang net.ParseIP
+- ipv6: an IPv6 IP as parsed by Golang net.ParseIP
+- cidr: a CIDR as parsed by Golang net.ParseCIDR
+- mac: a MAC address as parsed by Golang net.ParseMAC
+- uuid: an UUID that allows uppercase defined by the regex (?i)^[0-9a-f]\{8}-?[0-9a-f]\{4}-?[0-9a-f]\{4}-?[0-9a-f]\{4}-?[0-9a-f]\{12}$
+- uuid3: an UUID3 that allows uppercase defined by the regex (?i)^[0-9a-f]\{8}-?[0-9a-f]\{4}-?3[0-9a-f]\{3}-?[0-9a-f]\{4}-?[0-9a-f]\{12}$
+- uuid4: an UUID4 that allows uppercase defined by the regex (?i)^[0-9a-f]\{8}-?[0-9a-f]\{4}-?4[0-9a-f]\{3}-?[89ab][0-9a-f]\{3}-?[0-9a-f]\{12}$
+- uuid5: an UUID5 that allows uppercase defined by the regex (?i)^[0-9a-f]\{8}-?[0-9a-f]\{4}-?5[0-9a-f]\{3}-?[89ab][0-9a-f]\{3}-?[0-9a-f]\{12}$
+- isbn: an ISBN10 or ISBN13 number string like "0321751043" or "978-0321751041"
+- isbn10: an ISBN10 number string like "0321751043"
+- isbn13: an ISBN13 number string like "978-0321751041"
+- creditcard: a credit card number defined by the regex ^(?:4[0-9]\{12}(?:[0-9]\{3})?{vbar}5[1-5][0-9]\{14}{vbar}6(?:011{vbar}5[0-9][0-9])[0-9]\{12}{vbar}3[47][0-9]\{13}{vbar}3(?:0[0-5]{vbar}[68][0-9])[0-9]\{11}{vbar}(?:2131{vbar}1800{vbar}35\\d\{3})\\d\{11})$ with any non digit characters mixed in
+- ssn: a U.S. social security number following the regex ^\\d\{3}[- ]?\\d\{2}[- ]?\\d\{4}$
+- hexcolor: an hexadecimal color code like "\#FFFFFF" following the regex ^#?([0-9a-fA-F]\{3}{vbar}[0-9a-fA-F]\{6})$
+- rgbcolor: an RGB color code like rgb like "rgb(255,255,255)"
+- byte: base64 encoded binary data
+- password: any kind of string
+- date: a date string like "2006-01-02" as defined by full-date in RFC3339
+- duration: a duration string like "22 ns" as parsed by Golang time.ParseDuration or compatible with Scala duration format
+- datetime: a date time string like "2014-12-15T19:30:20.000Z" as defined by date-time in RFC3339.
+
+|`title` +
+string
+|
+
+
+
+
+|`default` +
+*xref:#_camel_apache_org_v1alpha1_JSON[JSON]*
+|
+
+
+default is a default value for undefined object fields.
+
+|`maximum` +
+encoding/json.Number
+|
+
+
+
+
+|`exclusiveMaximum` +
+bool
+|
+
+
+
+
+|`minimum` +
+encoding/json.Number
+|
+
+
+
+
+|`exclusiveMinimum` +
+bool
+|
+
+
+
+
+|`maxLength` +
+int64
+|
+
+
+
+
+|`minLength` +
+int64
+|
+
+
+
+
+|`pattern` +
+string
+|
+
+
+
+
+|`maxItems` +
+int64
+|
+
+
+
+
+|`minItems` +
+int64
+|
+
+
+
+
+|`uniqueItems` +
+bool
+|
+
+
+
+
+|`maxProperties` +
+int64
+|
+
+
+
+
+|`minProperties` +
+int64
+|
+
+
+
+
+|`multipleOf` +
+encoding/json.Number
+|
+
+
+
+
+|`enum` +
+*xref:#_camel_apache_org_v1alpha1_JSON[[\]JSON]*
+|
+
+
+
+
+|`example` +
+*xref:#_camel_apache_org_v1alpha1_JSON[JSON]*
+|
+
+
+
+
+|`nullable` +
+bool
+|
+
+
+
+
+|`x-descriptors` +
+[]string
+|
+
+
+The list of descriptors that determine which UI components to use on different views
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_JSONSchemaProps]
+=== JSONSchemaProps
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_EventTypeSpec, EventTypeSpec>>
+* <<#_camel_apache_org_v1alpha1_KameletSpec, KameletSpec>>
+
+JSONSchemaProps is a JSON-Schema following Specification Draft 4 (http://json-schema.org/).
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`id` +
+string
+|
+
+
+
+
+|`description` +
+string
+|
+
+
+
+
+|`title` +
+string
+|
+
+
+
+
+|`properties` +
+*xref:#_camel_apache_org_v1alpha1_JSONSchemaProp[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.JSONSchemaProp]*
+|
+
+
+
+
+|`required` +
+[]string
+|
+
+
+
+
+|`example` +
+*xref:#_camel_apache_org_v1alpha1_JSON[JSON]*
+|
+
+
+
+
+|`externalDocs` +
+*xref:#_camel_apache_org_v1alpha1_ExternalDocumentation[ExternalDocumentation]*
+|
+
+
+
+
+|`$schema` +
+*xref:#_camel_apache_org_v1alpha1_JSONSchemaURL[JSONSchemaURL]*
+|
+
+
+
+
+|`type` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_JSONSchemaURL]
+=== JSONSchemaURL(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_JSONSchemaProps, JSONSchemaProps>>
+
+JSONSchemaURL represents a schema url.
+
+
+[#_camel_apache_org_v1alpha1_KameletBindingCondition]
+=== KameletBindingCondition
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_KameletBindingStatus, KameletBindingStatus>>
+
+KameletBindingCondition describes the state of a resource at a certain point.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+*xref:#_camel_apache_org_v1alpha1_KameletBindingConditionType[KameletBindingConditionType]*
+|
+
+
+Type of kameletBinding condition.
+
+|`status` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+|
+
+
+Status of the condition, one of True, False, Unknown.
+
+|`lastUpdateTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+The last time this condition was updated.
+
+|`lastTransitionTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+Last time the condition transitioned from one status to another.
+
+|`reason` +
+string
+|
+
+
+The reason for the condition's last transition.
+
+|`message` +
+string
+|
+
+
+A human readable message indicating details about the transition.
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_KameletBindingConditionType]
+=== KameletBindingConditionType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_KameletBindingCondition, KameletBindingCondition>>
+
+
+
+
+[#_camel_apache_org_v1alpha1_KameletBindingPhase]
+=== KameletBindingPhase(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_KameletBindingStatus, KameletBindingStatus>>
+
+
+
+
+[#_camel_apache_org_v1alpha1_KameletBindingSpec]
+=== KameletBindingSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_KameletBinding, KameletBinding>>
+
+KameletBindingSpec --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`integration` +
+*xref:apis/camel-k.adoc#_camel_apache_org_v1_IntegrationSpec[github.com/apache/camel-k/pkg/apis/camel/v1.IntegrationSpec]*
+|
+
+
+Integration is an optional integration used to specify custom parameters
+
+|`source` +
+*xref:#_camel_apache_org_v1alpha1_Endpoint[Endpoint]*
+|
+
+
+Source is the starting point of the integration defined by this binding
+
+|`sink` +
+*xref:#_camel_apache_org_v1alpha1_Endpoint[Endpoint]*
+|
+
+
+Sink is the destination of the integration defined by this binding
+
+|`errorHandler` +
+*xref:#_camel_apache_org_v1alpha1_ErrorHandlerSpec[ErrorHandlerSpec]*
+|
+
+
+ErrorHandler is an optional handler called upon an error occuring in the integration
+
+|`steps` +
+*xref:#_camel_apache_org_v1alpha1_Endpoint[[\]Endpoint]*
+|
+
+
+Steps contains an optional list of intermediate steps that are executed between the Source and the Sink
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_KameletBindingStatus]
+=== KameletBindingStatus
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_KameletBinding, KameletBinding>>
+
+KameletBindingStatus --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`phase` +
+*xref:#_camel_apache_org_v1alpha1_KameletBindingPhase[KameletBindingPhase]*
+|
+
+
+Phase --
+
+|`conditions` +
+*xref:#_camel_apache_org_v1alpha1_KameletBindingCondition[[\]KameletBindingCondition]*
+|
+
+
+Conditions --
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_KameletCondition]
+=== KameletCondition
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_KameletStatus, KameletStatus>>
+
+KameletCondition describes the state of a resource at a certain point.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+*xref:#_camel_apache_org_v1alpha1_KameletConditionType[KameletConditionType]*
+|
+
+
+Type of kamelet condition.
+
+|`status` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+|
+
+
+Status of the condition, one of True, False, Unknown.
+
+|`lastUpdateTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+The last time this condition was updated.
+
+|`lastTransitionTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+Last time the condition transitioned from one status to another.
+
+|`reason` +
+string
+|
+
+
+The reason for the condition's last transition.
+
+|`message` +
+string
+|
+
+
+A human readable message indicating details about the transition.
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_KameletConditionType]
+=== KameletConditionType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_KameletCondition, KameletCondition>>
+
+
+
+
+[#_camel_apache_org_v1alpha1_KameletPhase]
+=== KameletPhase(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_KameletStatus, KameletStatus>>
+
+
+
+
+[#_camel_apache_org_v1alpha1_KameletProperty]
+=== KameletProperty
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_KameletStatus, KameletStatus>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`name` +
+string
+|
+
+
+
+
+|`default` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_KameletSpec]
+=== KameletSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_Kamelet, Kamelet>>
+
+KameletSpec defines the desired state of Kamelet
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`definition` +
+*xref:#_camel_apache_org_v1alpha1_JSONSchemaProps[JSONSchemaProps]*
+|
+
+
+
+
+|`sources` +
+*xref:apis/camel-k.adoc#_camel_apache_org_v1_SourceSpec[[\]github.com/apache/camel-k/pkg/apis/camel/v1.SourceSpec]*
+|
+
+
+
+
+|`flow` +
+*xref:apis/camel-k.adoc#_camel_apache_org_v1_Flow[github.com/apache/camel-k/pkg/apis/camel/v1.Flow]*
+|
+
+
+
+
+|`authorization` +
+*xref:#_camel_apache_org_v1alpha1_AuthorizationSpec[AuthorizationSpec]*
+|
+
+
+
+
+|`types` +
+*xref:#_camel_apache_org_v1alpha1_EventTypeSpec[map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot\]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventTypeSpec]*
+|
+
+
+
+
+|`dependencies` +
+[]string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_KameletStatus]
+=== KameletStatus
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_Kamelet, Kamelet>>
+
+KameletStatus defines the observed state of Kamelet
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`phase` +
+*xref:#_camel_apache_org_v1alpha1_KameletPhase[KameletPhase]*
+|
+
+
+
+
+|`conditions` +
+*xref:#_camel_apache_org_v1alpha1_KameletCondition[[\]KameletCondition]*
+|
+
+
+
+
+|`properties` +
+*xref:#_camel_apache_org_v1alpha1_KameletProperty[[\]KameletProperty]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_RawMessage]
+=== RawMessage(`[]byte` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_JSON, JSON>>
+
+RawMessage is a raw encoded JSON value.
+It implements Marshaler and Unmarshaler and can
+be used to delay JSON decoding or precompute a JSON encoding.
