@@ -73,8 +73,8 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 
 		args := []string{"install", "-n", ns, "--olm=true", "--olm-source", catalogSourceName, "--olm-source-namespace", ns}
 
-		if crossChannelUpgrade {
-			args = append(args, "--olm-channel", os.Getenv("CAMEL_K_PREV_UPGRADE_CHANNEL"))
+		if prevUpdateChannel != "" {
+			args = append(args, "--olm-channel", prevUpdateChannel)
 		}
 
 		Expect(Kamel(args...).Execute()).To(Succeed())
