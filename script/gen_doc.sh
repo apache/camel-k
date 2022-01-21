@@ -18,7 +18,11 @@
 location=$(dirname $0)
 rootdir=$location/..
 
-echo "Generating traits documentation..."
+echo "Generating API documentation..."
+$location/gen_crd/gen_crd_api.sh
+echo "Generating API documentation... done!"
 
+echo "Generating traits documentation..."
 cd $rootdir
 go run ./cmd/util/doc-gen --input-dirs ./pkg/trait --input-dirs ./addons/master --input-dirs ./addons/threescale --input-dirs ./addons/tracing
+echo "Generating traits documentation... done!"
