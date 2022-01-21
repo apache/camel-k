@@ -4,8 +4,14 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v1.8.0...HEAD)
 
+**Closed issues:**
+
+- Stale bot is setting issue `stale` where marked as `never-stale` [\#2893](https://github.com/apache/camel-k/issues/2893)
+- camel-k-client binary is missing in the latest release assets [\#2892](https://github.com/apache/camel-k/issues/2892)
+
 **Merged pull requests:**
 
+- Update stale.yaml [\#2894](https://github.com/apache/camel-k/pull/2894) ([squakez](https://github.com/squakez))
 - Fix \#2788: use kamelets 0.7.0 and align with new dir structure [\#2887](https://github.com/apache/camel-k/pull/2887) ([nicolaferraro](https://github.com/nicolaferraro))
 - doc: add more details about installation on IKS/ICR [\#2882](https://github.com/apache/camel-k/pull/2882) ([tadayosi](https://github.com/tadayosi))
 - fix: Install Kamelets as unstructured resources [\#2881](https://github.com/apache/camel-k/pull/2881) ([astefanutti](https://github.com/astefanutti))
