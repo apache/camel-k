@@ -143,7 +143,12 @@ jobs:
 
         export LOCAL_IMAGE_BUNDLE=$KIND_REGISTRY/apache/camel-k-bundle:$(make get-version)
         echo "LOCAL_IMAGE_BUNDLE=${LOCAL_IMAGE_BUNDLE}" >> $GITHUB_ENV
+        export PREV_XY_CHANNEL=stable-$(make get-last-released-version | grep -Po "\d.\d")
+        echo "PREV_XY_CHANNEL=${PREV_XY_CHANNEL}" >> $GITHUB_ENV
+        export NEW_XY_CHANNEL=stable-$(make get-version | grep -Po "\d.\d")
+        echo "NEW_XY_CHANNEL=${NEW_XY_CHANNEL}" >> $GITHUB_ENV
         make bundle-build METADATA_IMAGE_NAME=${LOCAL_IMAGE_BUNDLE} BUNDLE_METADATA_OPTS="--channels stable"
+        make bundle-build METADATA_IMAGE_NAME=${LOCAL_IMAGE_BUNDLE} BUNDLE_METADATA_OPTS="--default-channel=${NEW_XY_CHANNEL} --channels=stable,${NEW_XY_CHANNEL}"
         docker push ${LOCAL_IMAGE_BUNDLE}
     - name: Create new index image
       run: |
@@ -167,6 +172,8 @@ jobs:
         export CAMEL_K_NEW_IIB=${{ env.LOCAL_IIB }}
         export KAMEL_K_TEST_RELEASE_VERSION=$(make get-last-released-version)
         export KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make get-version)
+        export CAMEL_K_PREV_UPGRADE_CHANNEL=${{ env.PREV_XY_CHANNEL }}
+        export CAMEL_K_NEW_UPGRADE_CHANNEL=${{ env.NEW_XY_CHANNEL }}
 
         # Then run integration tests
         make test-upgrade
