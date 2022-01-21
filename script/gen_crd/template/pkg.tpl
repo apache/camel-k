@@ -1,43 +1,32 @@
-{{ define "packages" }}
+{{ define "packages" -}}
+{{ range .packages -}}
 
-{{ with .packages}}
-<p>Packages:</p>
-<ul>
-    {{ range . }}
-    <li>
-        <a href="#{{- packageAnchorID . -}}">{{ packageDisplayName . }}</a>
-    </li>
-    {{ end }}
-</ul>
-{{ end}}
+[#{{ packageAnchorID . }}]
+== {{ packageDisplayName . }}
 
-{{ range .packages }}
-    <h2 id="{{- packageAnchorID . -}}">
-        {{- packageDisplayName . -}}
-    </h2>
+    {{- with (index .GoPackages 0 ) -}}
+        {{- with .DocComments }}
 
-    {{ with (index .GoPackages 0 )}}
-        {{ with .DocComments }}
-        <div>
-            {{ safe (renderComments .) }}
-        </div>
-        {{ end }}
-    {{ end }}
+{{ renderComments . }}
+        {{- end -}}
+    {{- end }}
 
-    Resource Types:
-    <ul>
+==  Resource Types
+
     {{- range (visibleTypes (sortedTypes .Types)) -}}
-        {{ if isExportedType . -}}
-        <li>
-            <a href="{{ linkForType . }}">{{ typeDisplayName . }}</a>
-        </li>
-        {{- end }}
+        {{- if isExportedType . -}}
+            {{- template "type" .  }}
+        {{- end -}}
+    {{- end }}
+
+== Internal Types
+
+    {{- range (visibleTypes (sortedTypes .Types)) -}}
+        {{- if not (isExportedType .) -}}
+            {{- template "type" .  }}
+        {{- end -}}
     {{- end -}}
-    </ul>
 
-    {{ range (visibleTypes (sortedTypes .Types))}}
-        {{ template "type" .  }}
-    {{ end }}
-{{ end }}
+{{- end -}}
 
-{{ end }}
+{{- end }}
