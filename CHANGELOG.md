@@ -8,6 +8,7 @@
 
 - Stale bot is setting issue `stale` where marked as `never-stale` [\#2893](https://github.com/apache/camel-k/issues/2893)
 - camel-k-client binary is missing in the latest release assets [\#2892](https://github.com/apache/camel-k/issues/2892)
+- Change autogen doc template to adoc [\#2289](https://github.com/apache/camel-k/issues/2289)
 
 **Merged pull requests:**
 
