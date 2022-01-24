@@ -45,7 +45,7 @@ var (
 type KameletSpec struct {
 	Definition *JSONSchemaProps     `json:"definition,omitempty"`
 	Sources    []camelv1.SourceSpec `json:"sources,omitempty"`
-	Template   *Template    `json:"template,omitempty"`
+	Template   *Template            `json:"template,omitempty"`
 	// Deprecated: use template
 	Flow          *camelv1.Flow               `json:"flow,omitempty"`
 	Authorization *AuthorizationSpec          `json:"authorization,omitempty"`
