@@ -138,7 +138,7 @@ func dumpNamespace(ctx context.Context, c client.Client, ns string, out io.Write
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(out, "Found %d deployments:\n", len(iks.Items))
+	fmt.Fprintf(out, "Found %d deployments:\n", len(deployments.Items))
 	for _, deployment := range deployments.Items {
 		ref := deployment
 		data, err := kubernetes.ToYAML(&ref)
