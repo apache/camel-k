@@ -5871,9 +5871,6 @@ spec:
                     description: 'UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids'
                     type: string
                 type: object
-              kit:
-                description: 'Deprecated: use the IntegrationKit field'
-                type: string
               lastInitTimestamp:
                 description: The timestamp representing the last time when this integration
                   was initialized.
