@@ -1911,13 +1911,6 @@ Deprecated:
 Use container trait (container.resources) to manage resources
 Use openapi trait (openapi.configmaps) to manage OpenAPIs specifications
 
-|`kit` +
-string
-|
-
-
-Deprecated: use the IntegrationKit field
-
 |`integrationKit` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core[Kubernetes core/v1.ObjectReference]*
 |
@@ -2523,7 +2516,6 @@ string
 *Appears on:*
 
 * <<#_camel_apache_org_v1_Flow, Flow>>
-* <<#_camel_apache_org_v1_Template, Template>>
 * <<#_camel_apache_org_v1_TraitConfiguration, TraitConfiguration>>
 
 RawMessage is a raw encoded JSON value.
@@ -2990,26 +2982,6 @@ Task --
 |`s2i` +
 *xref:#_camel_apache_org_v1_S2iTask[S2iTask]*
 |
-
-
-
-
-
-|===
-
-[#_camel_apache_org_v1_Template]
-=== Template
-
-Template is an unstructured object representing a Kamelet template in YAML/JSON DSL
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`RawMessage` +
-*xref:#_camel_apache_org_v1_RawMessage[RawMessage]*
-|(Members of `RawMessage` are embedded into this type.)
 
 
 
