@@ -121,10 +121,12 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 			if crossChannelUpgrade {
 				t.Log("Updating Camel-K subscription OLM update channel.")
 				s := ckSubscription(ns)()
-				ctrlutil.CreateOrUpdate(TestContext, TestClient(), s, func() error {
+				r, err := ctrlutil.CreateOrUpdate(TestContext, TestClient(), s, func() error {
 					s.Spec.Channel = newUpdateChannel
 					return nil
 				})
+				Expect(err).To(BeNil())
+				Expect(r).To(Equal(ctrlutil.OperationResultUpdated))
 			}
 			// Check the previous CSV is being replaced
 			Eventually(clusterServiceVersionPhase(func(csv olm.ClusterServiceVersion) bool {
