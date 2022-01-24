@@ -51,13 +51,11 @@ type IntegrationSpec struct {
 
 // IntegrationStatus defines the observed state of Integration
 type IntegrationStatus struct {
-	Phase        IntegrationPhase `json:"phase,omitempty"`
-	Digest       string           `json:"digest,omitempty"`
-	Image        string           `json:"image,omitempty"`
-	Dependencies []string         `json:"dependencies,omitempty"`
-	Profile      TraitProfile     `json:"profile,omitempty"`
-	// Deprecated: use the IntegrationKit field
-	Kit                string                  `json:"kit,omitempty"`
+	Phase              IntegrationPhase        `json:"phase,omitempty"`
+	Digest             string                  `json:"digest,omitempty"`
+	Image              string                  `json:"image,omitempty"`
+	Dependencies       []string                `json:"dependencies,omitempty"`
+	Profile            TraitProfile            `json:"profile,omitempty"`
 	IntegrationKit     *corev1.ObjectReference `json:"integrationKit,omitempty"`
 	Platform           string                  `json:"platform,omitempty"`
 	GeneratedSources   []SourceSpec            `json:"generatedSources,omitempty"`

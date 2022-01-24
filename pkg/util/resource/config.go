@@ -152,18 +152,7 @@ func parseCMOrSecretValue(value string) (resource string, maybeKey string, maybe
 
 // ParseResource will parse a resource and return a Config.
 func ParseResource(item string) (*Config, error) {
-	// Deprecated: ensure backward compatibility with `--resource filename` format until version 1.5.x
-	// then replace with parse() func directly
-	resource, err := parse(item, ContentTypeData)
-	if err != nil {
-		if strings.HasPrefix(err.Error(), "could not match config, secret or file configuration") {
-			fmt.Printf("Warn: --resource %s has been deprecated. You should use --resource file:%s instead.\n", item, item)
-			return parse("file:"+item, ContentTypeData)
-		}
-		return nil, err
-	}
-
-	return resource, nil
+	return parse(item, ContentTypeData)
 }
 
 // ParseVolume will parse a volume and return a Config.
