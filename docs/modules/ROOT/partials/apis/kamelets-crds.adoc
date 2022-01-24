@@ -112,7 +112,7 @@ BeanProperties represent an unstructured object properties to be set on a bean
 |Description
 
 |`RawMessage` +
-*xref:apis/camel-k.adoc#_camel_apache_org_v1_RawMessage[github.com/apache/camel-k/pkg/apis/camel/v1.RawMessage]*
+*xref:#_camel_apache_org_v1alpha1_RawMessage[RawMessage]*
 |
 
 
@@ -182,7 +182,7 @@ EndpointProperties is a key/value struct represented as JSON raw to allow numeri
 |Description
 
 |`RawMessage` +
-*xref:apis/camel-k.adoc#_camel_apache_org_v1_RawMessage[github.com/apache/camel-k/pkg/apis/camel/v1.RawMessage]*
+*xref:#_camel_apache_org_v1alpha1_RawMessage[RawMessage]*
 |(Members of `RawMessage` are embedded into this type.)
 
 
@@ -266,7 +266,7 @@ ErrorHandlerParameters represent an unstructured object for error handler parame
 |Description
 
 |`RawMessage` +
-*xref:apis/camel-k.adoc#_camel_apache_org_v1_RawMessage[github.com/apache/camel-k/pkg/apis/camel/v1.RawMessage]*
+*xref:#_camel_apache_org_v1alpha1_RawMessage[RawMessage]*
 |
 
 
@@ -317,7 +317,7 @@ ErrorHandlerSpec represents an unstructured object for an error handler
 |Description
 
 |`RawMessage` +
-*xref:apis/camel-k.adoc#_camel_apache_org_v1_RawMessage[github.com/apache/camel-k/pkg/apis/camel/v1.RawMessage]*
+*xref:#_camel_apache_org_v1alpha1_RawMessage[RawMessage]*
 |
 
 
@@ -1043,7 +1043,7 @@ KameletSpec defines the desired state of Kamelet
 
 
 |`template` +
-*xref:apis/camel-k.adoc#_camel_apache_org_v1_Template[github.com/apache/camel-k/pkg/apis/camel/v1.Template]*
+*xref:#_camel_apache_org_v1alpha1_Template[Template]*
 |
 
 
@@ -1123,8 +1123,38 @@ KameletStatus defines the observed state of Kamelet
 
 *Appears on:*
 
+* <<#_camel_apache_org_v1alpha1_BeanProperties, BeanProperties>>
+* <<#_camel_apache_org_v1alpha1_EndpointProperties, EndpointProperties>>
+* <<#_camel_apache_org_v1alpha1_ErrorHandlerParameters, ErrorHandlerParameters>>
+* <<#_camel_apache_org_v1alpha1_ErrorHandlerSpec, ErrorHandlerSpec>>
 * <<#_camel_apache_org_v1alpha1_JSON, JSON>>
+* <<#_camel_apache_org_v1alpha1_Template, Template>>
 
 RawMessage is a raw encoded JSON value.
 It implements Marshaler and Unmarshaler and can
 be used to delay JSON decoding or precompute a JSON encoding.
+
+
+[#_camel_apache_org_v1alpha1_Template]
+=== Template
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_KameletSpec, KameletSpec>>
+
+Template is an unstructured object representing a Kamelet template in YAML/JSON DSL
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`RawMessage` +
+*xref:#_camel_apache_org_v1alpha1_RawMessage[RawMessage]*
+|(Members of `RawMessage` are embedded into this type.)
+
+
+
+
+
+|===

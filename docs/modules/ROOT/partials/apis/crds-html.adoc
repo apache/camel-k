@@ -2078,8 +2078,7 @@ Kubernetes meta/v1.Time
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
-<a href="#camel.apache.org/v1alpha1.KameletSpec">KameletSpec</a>)
+<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>)
 </p>
 <div>
 <p>Flow is an unstructured object representing a Camel Flow in YAML/JSON DSL</p>
@@ -5064,19 +5063,6 @@ Template
 </tr>
 <tr>
 <td>
-<code>flow</code><br/>
-<em>
-<a href="#camel.apache.org/v1.Flow">
-Flow
-</a>
-</em>
-</td>
-<td>
-<p>Deprecated: use template</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>authorization</code><br/>
 <em>
 <a href="#camel.apache.org/v1alpha1.AuthorizationSpec">
@@ -6592,19 +6578,6 @@ Template
 </em>
 </td>
 <td>
-</td>
-</tr>
-<tr>
-<td>
-<code>flow</code><br/>
-<em>
-<a href="#camel.apache.org/v1.Flow">
-Flow
-</a>
-</em>
-</td>
-<td>
-<p>Deprecated: use template</p>
 </td>
 </tr>
 <tr>

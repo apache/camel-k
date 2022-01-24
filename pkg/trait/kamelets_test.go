@@ -87,7 +87,7 @@ func TestKameletLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: marshalOrFail(map[string]interface{}{
+			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
@@ -131,7 +131,7 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: marshalOrFail(map[string]interface{}{
+			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
@@ -230,7 +230,7 @@ func TestMultipleKamelets(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: marshalOrFail(map[string]interface{}{
+			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
@@ -256,7 +256,7 @@ func TestMultipleKamelets(t *testing.T) {
 			Name:      "logger",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: marshalOrFail(map[string]interface{}{
+			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "tbd:endpoint",
 					"steps": []interface{}{
@@ -325,7 +325,7 @@ func TestKameletConfigLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: marshalOrFail(map[string]interface{}{
+			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
@@ -388,7 +388,7 @@ func TestKameletNamedConfigLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: marshalOrFail(map[string]interface{}{
+			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
@@ -458,7 +458,7 @@ func TestKameletConditionFalse(t *testing.T) {
 				Name:      "timer",
 			},
 			Spec: v1alpha1.KameletSpec{
-				Flow: marshalOrFail(map[string]interface{}{
+				Template: templateOrFail(map[string]interface{}{
 					"from": map[string]interface{}{
 						"uri": "timer:tick",
 					},
@@ -497,7 +497,7 @@ func TestKameletConditionTrue(t *testing.T) {
 				Name:      "timer",
 			},
 			Spec: v1alpha1.KameletSpec{
-				Flow: marshalOrFail(map[string]interface{}{
+				Template: templateOrFail(map[string]interface{}{
 					"from": map[string]interface{}{
 						"uri": "timer:tick",
 					},
@@ -511,7 +511,7 @@ func TestKameletConditionTrue(t *testing.T) {
 				Name:      "none",
 			},
 			Spec: v1alpha1.KameletSpec{
-				Flow: marshalOrFail(map[string]interface{}{
+				Template: templateOrFail(map[string]interface{}{
 					"from": map[string]interface{}{
 						"uri": "timer:tick",
 					},
@@ -571,11 +571,11 @@ func createKameletsTestEnvironment(flow string, objects ...runtime.Object) (*kam
 	return trait, environment
 }
 
-func marshalOrFail(flow map[string]interface{}) *v1.Flow {
-	data, err := json.Marshal(flow)
+func templateOrFail(template map[string]interface{}) *v1.Template {
+	data, err := json.Marshal(template)
 	if err != nil {
 		panic(err)
 	}
-	f := v1.Flow{RawMessage: data}
-	return &f
+	t := v1.Template{RawMessage: data}
+	return &t
 }

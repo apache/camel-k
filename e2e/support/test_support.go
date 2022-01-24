@@ -1519,7 +1519,7 @@ func CreateKnativeChannel(ns string, name string) func() error {
 	Kamelets
 */
 
-func CreateKamelet(ns string, name string, flow map[string]interface{}, properties map[string]v1alpha1.JSONSchemaProp, labels map[string]string) func() error {
+func CreateKamelet(ns string, name string, template map[string]interface{}, properties map[string]v1alpha1.JSONSchemaProp, labels map[string]string) func() error {
 	return func() error {
 		kamelet := v1alpha1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
@@ -1531,7 +1531,7 @@ func CreateKamelet(ns string, name string, flow map[string]interface{}, properti
 				Definition: &v1alpha1.JSONSchemaProps{
 					Properties: properties,
 				},
-				Flow: asFlow(flow),
+				Template: asTemplate(template),
 			},
 		}
 		return TestClient().Create(TestContext, &kamelet)
@@ -1588,12 +1588,12 @@ func BindKameletToWithErrorHandler(ns string, name string, from corev1.ObjectRef
 	}
 }
 
-func asFlow(source map[string]interface{}) *v1.Flow {
+func asTemplate(source map[string]interface{}) *v1.Template {
 	bytes, err := json.Marshal(source)
 	if err != nil {
 		panic(err)
 	}
-	return &v1.Flow{
+	return &v1.Template{
 		RawMessage: bytes,
 	}
 }
