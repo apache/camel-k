@@ -164,9 +164,6 @@ spec:
                     description: 'UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids'
                     type: string
                 type: object
-              kit:
-                description: 'Deprecated: use the IntegrationKit field'
-                type: string
               profile:
                 description: TraitProfile represents lists of traits that are enabled
                   for the specific installation/integration
