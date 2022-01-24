@@ -87,18 +87,6 @@ func TestRunCompressionFlag(t *testing.T) {
 	assert.Equal(t, true, runCmdOptions.Compression)
 }
 
-func TestRunConfigMapFlag(t *testing.T) {
-	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun,
-		"--configmap", "configMap1",
-		"--configmap", "configMap2",
-		integrationSource)
-	assert.Nil(t, err)
-	assert.Len(t, runCmdOptions.ConfigMaps, 2)
-	assert.Equal(t, "configMap1", runCmdOptions.ConfigMaps[0])
-	assert.Equal(t, "configMap2", runCmdOptions.ConfigMaps[1])
-}
-
 func TestRunDependencyFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun,
@@ -236,15 +224,6 @@ func TestRunPropertyFlag(t *testing.T) {
 	assert.Equal(t, "property3", runCmdOptions.Properties[2])
 }
 
-func TestRunPropertyFileFlagMissingFileExtension(t *testing.T) {
-	_, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun,
-		"--property-file", "file1",
-		"--property-file", "file2",
-		integrationSource)
-	assert.NotNil(t, err)
-}
-
 const TestPropertyFileContent = `
 a=b
 # There's an issue in the properties lib: https://github.com/magiconair/properties/issues/59
@@ -274,25 +253,6 @@ func TestAddPropertyFile(t *testing.T) {
 	assert.Equal(t, `trait.properties=i = j\nk`, properties[2])
 }
 
-func TestRunPropertyFileFlag(t *testing.T) {
-	var tmpFile *os.File
-	var err error
-	if tmpFile, err = ioutil.TempFile("", "camel-k-*.properties"); err != nil {
-		t.Error(err)
-	}
-
-	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestPropertyFileContent), 0o400))
-
-	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, errExecute := test.ExecuteCommand(rootCmd, cmdRun,
-		"--property-file", tmpFile.Name(),
-		integrationSource)
-	assert.Nil(t, errExecute)
-	assert.Len(t, runCmdOptions.PropertyFiles, 1)
-	assert.Equal(t, tmpFile.Name(), runCmdOptions.PropertyFiles[0])
-}
-
 func TestRunProperty(t *testing.T) {
 	properties, err := convertToTraitParameter(`key=value\nnewline`, "trait.properties")
 	assert.Nil(t, err)
@@ -317,18 +277,6 @@ func TestRunSaveFlag(t *testing.T) {
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--save", integrationSource)
 	assert.Nil(t, err)
 	assert.Equal(t, true, runCmdOptions.Save)
-}
-
-func TestRunSecretFlag(t *testing.T) {
-	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun,
-		"--secret", "secret1",
-		"--secret", "secret2",
-		integrationSource)
-	assert.Nil(t, err)
-	assert.Len(t, runCmdOptions.Secrets, 2)
-	assert.Equal(t, "secret1", runCmdOptions.Secrets[0])
-	assert.Equal(t, "secret2", runCmdOptions.Secrets[1])
 }
 
 func TestRunSourceFlag(t *testing.T) {
