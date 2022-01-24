@@ -198,7 +198,7 @@ Then the integration can be run with the following command:
 
 [source,shell]
 ----
-kamel run example.groovy --property-file example.properties
+kamel run example.groovy --property file:example.properties
 ----
 
 ==== 3. Implicit configuration using secrets

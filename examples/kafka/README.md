@@ -21,7 +21,7 @@ IMPORTANT: The kafka.host value in application.properties needs to be set to the
 
 Finally run this sample using the command:
 ```
-./kamel run examples/kafka/SampleKafkaConsumer.java --configmap=kafka.props
+./kamel run examples/kafka/SampleKafkaConsumer.java --config=configmap:kafka.props
 ```
 
 To create messages to be read use the producer command from the Strimzi page:

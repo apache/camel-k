@@ -16,7 +16,7 @@
  */
 
 // kubectl create secret generic kafka-props --from-file application.properties
-// kamel run --secret kafka-props SaslSSLKafkaProducer.java --dev
+// kamel run --config secret:kafka-props SaslSSLKafkaProducer.java --dev
 
 import org.apache.camel.builder.RouteBuilder;
 

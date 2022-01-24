@@ -19,7 +19,7 @@ kubectl create secret generic kafka-props --from-file application.properties
 At this stage, run a producer integration to fill the topic with a message, every 10 seconds:
 
 ```
-kamel run --secret kafka-props SaslSSLKafkaProducer.java --dev
+kamel run --config secret:kafka-props SaslSSLKafkaProducer.java --dev
 ```
 
 The producer will create a new message every 10 seconds, push into the topic and log some information.
@@ -38,7 +38,7 @@ The producer will create a new message every 10 seconds, push into the topic and
 Now, open another shell and run the consumer integration using the command:
 
 ```
-kamel run --secret kafka-props SaslSSLKafkaConsumer.java --dev
+kamel run --config secret:kafka-props SaslSSLKafkaConsumer.java --dev
 ```
 
 A consumer will start logging the events found in the Topic:
