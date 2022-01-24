@@ -25,6 +25,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/reference"
 	"github.com/apache/camel-k/pkg/util/uri"
@@ -64,6 +65,7 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 	cmd.Flags().StringArrayP("property", "p", nil, `Add a binding property in the form of "source.<key>=<value>", "sink.<key>=<value>", "error-handler.<key>=<value>" or "step-<n>.<key>=<value>"`)
 	cmd.Flags().Bool("skip-checks", false, "Do not verify the binding for compliance with Kamelets and other Kubernetes resources")
 	cmd.Flags().StringArray("step", nil, `Add binding steps as Kubernetes resources. Endpoints are expected in the format "[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
+	cmd.Flags().StringArrayP("trait", "t", nil, `Add a trait to the corresponding Integration.`)
 
 	return &cmd, &options
 }
@@ -84,6 +86,7 @@ type bindCmdOptions struct {
 	Properties   []string `mapstructure:"properties" yaml:",omitempty"`
 	SkipChecks   bool     `mapstructure:"skip-checks" yaml:",omitempty"`
 	Steps        []string `mapstructure:"steps" yaml:",omitempty"`
+	Traits       []string `mapstructure:"traits" yaml:",omitempty"`
 }
 
 func (o *bindCmdOptions) validate(cmd *cobra.Command, args []string) error {
@@ -128,10 +131,22 @@ func (o *bindCmdOptions) validate(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	return nil
+	client, err := o.GetCmdClient()
+	if err != nil {
+		return err
+	}
+	catalog := trait.NewCatalog(client)
+
+	return validateTraits(catalog, o.Traits)
 }
 
 func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
+	client, err := o.GetCmdClient()
+	if err != nil {
+		return err
+	}
+	catalog := trait.NewCatalog(client)
+
 	source, err := o.decode(args[0], sourceKey)
 	if err != nil {
 		return err
@@ -174,28 +189,19 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 			binding.Spec.Steps = append(binding.Spec.Steps, step)
 		}
 	}
-
-	if len(o.Connects) > 0 {
-		trait := make(map[string]interface{})
-		trait["serviceBindings"] = o.Connects
-		specs := make(map[string]v1.TraitSpec)
-		data, err := json.Marshal(trait)
-		if err != nil {
-			return err
-		}
-		var spec v1.TraitSpec
-		err = json.Unmarshal(data, &spec.Configuration)
-		if err != nil {
-			return err
-		}
-		specs["service-binding"] = spec
-		binding.Spec.Integration = &v1.IntegrationSpec{}
-		binding.Spec.Integration.Traits = specs
+	for _, item := range o.Connects {
+		o.Traits = append(o.Traits, fmt.Sprintf("service-binding.services=%s", item))
 	}
 
-	client, err := o.GetCmdClient()
-	if err != nil {
-		return err
+	if len(o.Traits) > 0 {
+		if binding.Spec.Integration == nil {
+			binding.Spec.Integration = &v1.IntegrationSpec{}
+		}
+		traits, err := configureTraits(o.Traits, catalog)
+		if err != nil {
+			return err
+		}
+		binding.Spec.Integration.Traits = traits
 	}
 
 	if o.OutputFormat != "" {

@@ -29,7 +29,6 @@ import (
 	"syscall"
 
 	"github.com/magiconair/properties"
-	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -37,7 +36,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/cli-runtime/pkg/printers"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -245,7 +246,13 @@ func (o *runCmdOptions) validate() error {
 		}
 	}
 
-	return nil
+	client, err := o.GetCmdClient()
+	if err != nil {
+		return err
+	}
+	catalog := trait.NewCatalog(client)
+
+	return validateTraits(catalog, o.Traits)
 }
 
 func filterBuildPropertyFiles(maybePropertyFiles []string) []string {
@@ -266,18 +273,6 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	catalog := trait.NewCatalog(c)
-	tp := catalog.ComputeTraitsProperties()
-	for _, t := range o.Traits {
-		kv := strings.SplitN(t, "=", 2)
-		prefix := kv[0]
-		if strings.Contains(prefix, "[") {
-			prefix = prefix[0:strings.Index(prefix, "[")]
-		}
-		if !util.StringSliceExists(tp, prefix) {
-			return fmt.Errorf("%s is not a valid trait property", t)
-		}
-	}
-
 	integration, err := o.createOrUpdateIntegration(cmd, c, args, catalog)
 	if err != nil {
 		return err
@@ -603,32 +598,19 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	for _, item := range o.EnvVars {
 		o.Traits = append(o.Traits, fmt.Sprintf("environment.vars=%s", item))
 	}
-
-	if err := o.configureTraits(integration, o.Traits, catalog); err != nil {
-		return nil, err
+	for _, item := range o.Connects {
+		o.Traits = append(o.Traits, fmt.Sprintf("service-binding.services=%s", item))
+	}
+	if len(o.Traits) > 0 {
+		traits, err := configureTraits(o.Traits, catalog)
+		if err != nil {
+			return nil, err
+		}
+		integration.Spec.Traits = traits
 	}
 
-	switch o.OutputFormat {
-	case "":
-		// continue..
-	case "yaml":
-		data, err := kubernetes.ToYAML(integration)
-		if err != nil {
-			return nil, err
-		}
-		fmt.Fprint(cmd.OutOrStdout(), string(data))
-		return nil, nil
-
-	case "json":
-		data, err := kubernetes.ToJSON(integration)
-		if err != nil {
-			return nil, err
-		}
-		fmt.Fprint(cmd.OutOrStdout(), string(data))
-		return nil, nil
-
-	default:
-		return nil, fmt.Errorf("invalid output format option '%s', should be one of: yaml|json", o.OutputFormat)
+	if o.OutputFormat != "" {
+		return nil, showIntegrationOutput(cmd, integration, o.OutputFormat, c.GetScheme())
 	}
 
 	if existing == nil {
@@ -644,6 +626,14 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	}
 
 	return integration, nil
+}
+
+func showIntegrationOutput(cmd *cobra.Command, integration *v1.Integration, outputFormat string, scheme runtime.ObjectTyper) error {
+	printer := printers.NewTypeSetter(scheme)
+	printer.Delegate = &kubernetes.CLIPrinter{
+		Format: outputFormat,
+	}
+	return printer.PrintObj(integration, cmd.OutOrStdout())
 }
 
 func (o *runCmdOptions) parseAndConvertToTrait(
@@ -703,22 +693,6 @@ func (o *runCmdOptions) GetIntegrationName(sources []string) string {
 	return name
 }
 
-func (o *runCmdOptions) configureTraits(integration *v1.Integration, options []string, catalog trait.Finder) error {
-	// configure ServiceBinding trait
-	for _, sb := range o.Connects {
-		bindings := fmt.Sprintf("service-binding.services=%s", sb)
-		options = append(options, bindings)
-	}
-	traits, err := configureTraits(options, catalog)
-	if err != nil {
-		return err
-	}
-
-	integration.Spec.Traits = traits
-
-	return nil
-}
-
 func loadPropertyFile(fileName string) (*properties.Properties, error) {
 	file, err := util.ReadFile(fileName)
 	if err != nil {
@@ -760,93 +734,4 @@ func resolvePodTemplate(ctx context.Context, templateSrc string, spec *v1.Integr
 		}
 	}
 	return err
-}
-
-func configureTraits(options []string, catalog trait.Finder) (map[string]v1.TraitSpec, error) {
-	traits := make(map[string]map[string]interface{})
-
-	for _, option := range options {
-		parts := traitConfigRegexp.FindStringSubmatch(option)
-		if len(parts) < 4 {
-			return nil, errors.New("unrecognized config format (expected \"<trait>.<prop>=<value>\"): " + option)
-		}
-		id := parts[1]
-		fullProp := parts[2][1:]
-		value := parts[3]
-		if _, ok := traits[id]; !ok {
-			traits[id] = make(map[string]interface{})
-		}
-
-		propParts := util.ConfigTreePropertySplit(fullProp)
-		var current = traits[id]
-		if len(propParts) > 1 {
-			c, err := util.NavigateConfigTree(current, propParts[0:len(propParts)-1])
-			if err != nil {
-				return nil, err
-			}
-			if cc, ok := c.(map[string]interface{}); ok {
-				current = cc
-			} else {
-				return nil, errors.New("trait configuration cannot end with a slice")
-			}
-		}
-
-		prop := propParts[len(propParts)-1]
-		switch v := current[prop].(type) {
-		case []string:
-			current[prop] = append(v, value)
-		case string:
-			// Aggregate multiple occurrences of the same option into a string array, to emulate POSIX conventions.
-			// This enables executing:
-			// $ kamel run -t <trait>.<property>=<value_1> ... -t <trait>.<property>=<value_N>
-			// Or:
-			// $ kamel run --trait <trait>.<property>=<value_1>,...,<trait>.<property>=<value_N>
-			current[prop] = []string{v, value}
-		case nil:
-			current[prop] = value
-		}
-	}
-
-	specs := make(map[string]v1.TraitSpec)
-	for id, config := range traits {
-		t := catalog.GetTrait(id)
-		if t != nil {
-			// let's take a clone to prevent default values set at runtime from being serialized
-			zero := reflect.New(reflect.TypeOf(t)).Interface()
-			err := configureTrait(config, zero)
-			if err != nil {
-				return nil, err
-			}
-			data, err := json.Marshal(zero)
-			if err != nil {
-				return nil, err
-			}
-			var spec v1.TraitSpec
-			err = json.Unmarshal(data, &spec.Configuration)
-			if err != nil {
-				return nil, err
-			}
-			specs[id] = spec
-		}
-	}
-
-	return specs, nil
-}
-
-func configureTrait(config map[string]interface{}, trait interface{}) error {
-	md := mapstructure.Metadata{}
-
-	decoder, err := mapstructure.NewDecoder(
-		&mapstructure.DecoderConfig{
-			Metadata:         &md,
-			WeaklyTypedInput: true,
-			TagName:          "property",
-			Result:           &trait,
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	return decoder.Decode(config)
 }
