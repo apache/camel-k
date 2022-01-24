@@ -161,3 +161,33 @@ spec:
 status: {}
 `, output)
 }
+
+func TestBindTraits(t *testing.T) {
+	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
+	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml", "-t", "mount.configs=configmap:my-cm", "-c", "my-service-binding")
+	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
+
+	assert.Nil(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  creationTimestamp: null
+  name: my-to-my
+spec:
+  integration:
+    traits:
+      mount:
+        configuration:
+          configs:
+          - configmap:my-cm
+      service-binding:
+        configuration:
+          services:
+          - my-service-binding
+  sink:
+    uri: my:dst
+  source:
+    uri: my:src
+status: {}
+`, output)
+}
