@@ -221,7 +221,7 @@ From the main branch:
 
 ```
 ./script/set-version.sh <released-version>
-make generate-helm
+make release-helm
 ```
 
 Commit to the main branch the tar.gz file and the updated index that have been generated in `/docs/charts` and the updated `Chart.yaml`.
