@@ -278,57 +278,6 @@ func TestContainerWithCustomImageAndIntegrationKit(t *testing.T) {
 	assert.Contains(t, err.Error(), "unsupported configuration: a container image has been set in conjunction with an IntegrationKit")
 }
 
-func TestContainerWithCustomImageAndDeprecatedIntegrationKit(t *testing.T) {
-	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
-
-	client, _ := test.NewFakeClient()
-	traitCatalog := NewCatalog(nil)
-
-	environment := Environment{
-		Ctx:          context.TODO(),
-		Client:       client,
-		CamelCatalog: catalog,
-		Catalog:      traitCatalog,
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      ServiceTestName,
-				Namespace: "ns",
-				UID:       types.UID(uuid.NewString()),
-			},
-			Status: v1.IntegrationStatus{
-				Phase: v1.IntegrationPhaseInitialization,
-			},
-			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
-				Traits: map[string]v1.TraitSpec{
-					"container": test.TraitSpecFromMap(t, map[string]interface{}{
-						"image": "foo/bar:1.0.0",
-					}),
-				},
-				Kit: "bad-" + ServiceTestName,
-			},
-		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-				},
-			},
-		},
-		EnvVars:        make([]corev1.EnvVar, 0),
-		ExecutedTraits: make([]Trait, 0),
-		Resources:      kubernetes.NewCollection(),
-	}
-	environment.Platform.ResyncStatusFullConfig()
-
-	err = traitCatalog.apply(&environment)
-	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "unsupported configuration: a container image has been set in conjunction with an IntegrationKit")
-}
-
 func TestContainerWithImagePullPolicy(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)

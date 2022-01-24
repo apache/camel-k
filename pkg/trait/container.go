@@ -186,12 +186,6 @@ func (t *containerTrait) configureImageIntegrationKit(e *Environment) error {
 				"unsupported configuration: a container image has been set in conjunction with an IntegrationKit %v",
 				e.Integration.Spec.IntegrationKit)
 		}
-		// nolint: staticcheck
-		if e.Integration.Spec.Kit != "" {
-			return fmt.Errorf(
-				"unsupported configuration: a container image has been set in conjunction with an IntegrationKit %s",
-				e.Integration.Spec.Kit)
-		}
 
 		kitName := fmt.Sprintf("kit-%s", e.Integration.Name)
 		kit := v1.NewIntegrationKit(e.Integration.Namespace, kitName)

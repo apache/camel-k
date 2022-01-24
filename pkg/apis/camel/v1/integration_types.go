@@ -33,9 +33,7 @@ type IntegrationSpec struct {
 	// Deprecated:
 	// Use container trait (container.resources) to manage resources
 	// Use openapi trait (openapi.configmaps) to manage OpenAPIs specifications
-	Resources []ResourceSpec `json:"resources,omitempty"`
-	// Deprecated: use the IntegrationKit field
-	Kit            string                  `json:"kit,omitempty"`
+	Resources      []ResourceSpec          `json:"resources,omitempty"`
 	IntegrationKit *corev1.ObjectReference `json:"integrationKit,omitempty"`
 	Dependencies   []string                `json:"dependencies,omitempty"`
 	Profile        TraitProfile            `json:"profile,omitempty"`
