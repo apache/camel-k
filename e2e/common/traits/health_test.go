@@ -76,7 +76,7 @@ func TestHealthTrait(t *testing.T) {
 			// And it contains details about the runtime state
 			Eventually(IntegrationCondition(ns, "java", v1.IntegrationConditionReady)).Should(And(
 				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
-				WithTransform(IntegrationConditionMessage, Equal(fmt.Sprintf("[Pod %s runtime is not ready: map[context:UP route:route1:DOWN]]", pod.Name))),
+				WithTransform(IntegrationConditionMessage, HavePrefix(fmt.Sprintf("[Pod %s runtime is not ready: map[consumer:route1:DOWN context:UP", pod.Name))),
 			))
 			// Check the Integration is still in running phase
 			Eventually(IntegrationPhase(ns, "java"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
