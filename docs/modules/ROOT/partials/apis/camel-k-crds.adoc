@@ -2339,13 +2339,6 @@ A JKS formatted keystore is automatically created to store the CA certificate(s)
 and configured to be used as a trusted certificate(s) by the Maven commands.
 Note that the root CA certificates are also imported into the created keystore.
 
-|`timeout` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta[Kubernetes meta/v1.Duration]*
-|
-
-
-Deprecated: use IntegrationPlatform.Spec.Build.Timeout instead
-
 |`extension` +
 *xref:#_camel_apache_org_v1_MavenArtifact[[\]MavenArtifact]*
 |

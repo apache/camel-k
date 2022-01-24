@@ -788,14 +788,11 @@ traits:
       add dependencies required by delegate endpoints.E.g. when using `master:lockname:timer`,
       then `camel:timer` is automatically added to the set of dependencies.It's enabled
       by default.
-  - name: configmap
-    type: string
-    description: 'Name of the configmap that will be used to store the lock. Defaults
-      to "<integration-name>-lock".Deprecated: replaced by "resource-name".'
   - name: resource-name
     type: string
-    description: Name of the configmap/lease resource that will be used to store the
-      lock. Defaults to "<integration-name>-lock".
+    description: Name of the configmap that will be used to store the lock. Defaults
+      to "<integration-name>-lock".Name of the configmap/lease resource that will
+      be used to store the lock. Defaults to "<integration-name>-lock".
   - name: resource-type
     type: string
     description: Type of Kubernetes resource to use for locking ("ConfigMap" or "Lease").
