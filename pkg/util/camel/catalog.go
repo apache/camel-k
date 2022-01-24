@@ -125,10 +125,10 @@ func GenerateCatalogCommon(
 		mc.AddSystemProperty("catalog.file", "catalog.yaml")
 		mc.AddSystemProperty("catalog.runtime", string(runtime.Provider))
 
-		if globalSettings != nil {
+		if len(globalSettings) > 0 {
 			mc.GlobalSettings = globalSettings
 		}
-		if userSettings != nil {
+		if len(userSettings) > 0 {
 			mc.UserSettings = userSettings
 		}
 
