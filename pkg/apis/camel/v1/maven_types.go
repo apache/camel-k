@@ -19,7 +19,6 @@ package v1
 
 import (
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // MavenSpec --
@@ -38,8 +37,6 @@ type MavenSpec struct {
 	// and configured to be used as a trusted certificate(s) by the Maven commands.
 	// Note that the root CA certificates are also imported into the created keystore.
 	CASecret *corev1.SecretKeySelector `json:"caSecret,omitempty"`
-	// Deprecated: use IntegrationPlatform.Spec.Build.Timeout instead
-	Timeout *metav1.Duration `json:"timeout,omitempty"`
 	// The Maven build extensions.
 	// See https://maven.apache.org/guides/mini/guide-using-extensions.html.
 	Extension []MavenArtifact `json:"extension,omitempty"`

@@ -1276,11 +1276,6 @@ func (in *MavenSpec) DeepCopyInto(out *MavenSpec) {
 		*out = new(corev1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Timeout != nil {
-		in, out := &in.Timeout, &out.Timeout
-		*out = new(metav1.Duration)
-		**out = **in
-	}
 	if in.Extension != nil {
 		in, out := &in.Extension, &out.Extension
 		*out = make([]MavenArtifact, len(*in))

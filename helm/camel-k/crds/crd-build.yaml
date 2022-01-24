@@ -278,10 +278,6 @@ spec:
                                   - key
                                   type: object
                               type: object
-                            timeout:
-                              description: 'Deprecated: use IntegrationPlatform.Spec.Build.Timeout
-                                instead'
-                              type: string
                           type: object
                         name:
                           type: string
