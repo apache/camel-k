@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"github.com/apache/camel-k/pkg/util"
 
@@ -33,6 +34,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/tar"
 )
 
 func newCmdDump(rootCmdOptions *RootCmdOptions) (*cobra.Command, *dumpCmdOptions) {
@@ -48,12 +50,14 @@ func newCmdDump(rootCmdOptions *RootCmdOptions) (*cobra.Command, *dumpCmdOptions
 	}
 
 	cmd.Flags().Int("logLines", 100, "Number of log lines to dump")
+	cmd.Flags().Bool("compressed", false, "If the log file must be compressed in a tar.")
 	return &cmd, &options
 }
 
 type dumpCmdOptions struct {
 	*RootCmdOptions
-	LogLines int `mapstructure:"logLines"`
+	LogLines   int  `mapstructure:"logLines"`
+	Compressed bool `mapstructure:"compressed" yaml:",omitempty"`
 }
 
 func (o *dumpCmdOptions) dump(cmd *cobra.Command, args []string) (err error) {
@@ -64,13 +68,20 @@ func (o *dumpCmdOptions) dump(cmd *cobra.Command, args []string) (err error) {
 
 	if len(args) == 1 {
 		err = util.WithFile(args[0], os.O_RDWR|os.O_CREATE, 0o644, func(file *os.File) error {
-			return dumpNamespace(o.Context, c, o.Namespace, file, o.LogLines)
+			if !o.Compressed {
+				return dumpNamespace(o.Context, c, o.Namespace, file, o.LogLines)
+			}
+			err = dumpNamespace(o.Context, c, o.Namespace, file, o.LogLines)
+			if err != nil {
+				return err
+			}
+			tar.CreateTarFile([]string{file.Name()}, "dump."+file.Name()+"."+time.Now().Format(time.RFC3339)+".tar.gz")
+			return nil
 		})
 	} else {
-		err = dumpNamespace(o.Context, c, o.Namespace, cmd.OutOrStdout(), o.LogLines)
+		return dumpNamespace(o.Context, c, o.Namespace, cmd.OutOrStdout(), o.LogLines)
 	}
-
-	return
+	return nil
 }
 
 func dumpNamespace(ctx context.Context, c client.Client, ns string, out io.Writer, logLines int) error {
