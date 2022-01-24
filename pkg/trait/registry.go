@@ -67,7 +67,7 @@ func (t *registryTrait) Apply(e *Environment) error {
 	if e.Platform.Spec.Cluster != v1.IntegrationPlatformClusterOpenShift {
 		repo := v1.Repository{
 			ID:        "image-registry",
-			URL:       "oci://" + e.Platform.Spec.Build.Registry.Address,
+			URL:       "docker://" + e.Platform.Spec.Build.Registry.Address,
 			Snapshots: policy,
 			Releases:  policy,
 		}
