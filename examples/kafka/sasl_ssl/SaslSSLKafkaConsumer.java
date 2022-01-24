@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// kamel run --secret kafka-props SaslSSLKafkaConsumer.java --dev
+// kamel run --config secret:kafka-props SaslSSLKafkaConsumer.java --dev
 
 import org.apache.camel.builder.RouteBuilder;
 

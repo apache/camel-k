@@ -80,8 +80,6 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArray("build-property", nil, "Add a build time property or properties file (syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
 	cmd.Flags().StringArray("config", nil, "Add a runtime configuration from a Configmap, a Secret or a file (syntax: [configmap|secret|file]:name[/key], where name represents the local file path or the configmap/secret name and key optionally represents the configmap/secret key to be filtered)")
 	cmd.Flags().StringArray("resource", nil, "Add a runtime resource from a Configmap, a Secret or a file (syntax: [configmap|secret|file]:name[/key][@path], where name represents the local file path or the configmap/secret name, key optionally represents the configmap/secret key to be filtered and path represents the destination path)")
-	cmd.Flags().StringArray("configmap", nil, "[Deprecated] Add a ConfigMap")
-	cmd.Flags().StringArray("secret", nil, "[Deprecated] Add a Secret")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
 	cmd.Flags().Bool("logs", false, "Print integration logs")
 	cmd.Flags().Bool("sync", false, "Synchronize the local source file with the cluster, republishing at each change")
@@ -94,7 +92,6 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArray("open-api", nil, "Add an OpenAPI spec (syntax: [configmap|file]:name)")
 	cmd.Flags().StringArrayP("volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
 	cmd.Flags().StringArrayP("env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
-	cmd.Flags().StringArray("property-file", nil, "[Deprecated] Bind a property file to the integration. E.g. \"--property-file integration.properties\"")
 	cmd.Flags().StringArray("annotation", nil, "Add an annotation to the integration. E.g. \"--annotation my.company=hello\"")
 	cmd.Flags().StringArray("label", nil, "Add a label to the integration. E.g. \"--label my.company=hello\"")
 	cmd.Flags().StringArray("source", nil, "Add source file to your integration, this is added to the list of files listed as arguments of the command")
@@ -129,17 +126,13 @@ type runCmdOptions struct {
 	Properties      []string `mapstructure:"properties" yaml:",omitempty"`
 	BuildProperties []string `mapstructure:"build-properties" yaml:",omitempty"`
 	Configs         []string `mapstructure:"configs" yaml:",omitempty"`
-	ConfigMaps      []string `mapstructure:"configmaps" yaml:",omitempty"`
-	Secrets         []string `mapstructure:"secrets" yaml:",omitempty"`
 	Repositories    []string `mapstructure:"maven-repositories" yaml:",omitempty"`
 	Traits          []string `mapstructure:"traits" yaml:",omitempty"`
 	Volumes         []string `mapstructure:"volumes" yaml:",omitempty"`
 	EnvVars         []string `mapstructure:"envs" yaml:",omitempty"`
-	// Deprecated: since 1.5
-	PropertyFiles []string `mapstructure:"property-files" yaml:",omitempty"`
-	Labels        []string `mapstructure:"labels" yaml:",omitempty"`
-	Annotations   []string `mapstructure:"annotations" yaml:",omitempty"`
-	Sources       []string `mapstructure:"sources" yaml:",omitempty"`
+	Labels          []string `mapstructure:"labels" yaml:",omitempty"`
+	Annotations     []string `mapstructure:"annotations" yaml:",omitempty"`
+	Sources         []string `mapstructure:"sources" yaml:",omitempty"`
 }
 
 func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
@@ -224,25 +217,9 @@ func (o *runCmdOptions) validate() error {
 		}
 	}
 
-	// Deprecation warning
-	if o.PropertyFiles != nil && len(o.PropertyFiles) > 0 {
-		fmt.Println("Warn: --property-file has been deprecated. You should use --property file:/path/to/conf.properties instead.")
-	}
-	if o.ConfigMaps != nil && len(o.ConfigMaps) > 0 {
-		fmt.Println("Warn: --configmap has been deprecated. You should use --config configmap:my-configmap instead.")
-	}
-	if o.Secrets != nil && len(o.Secrets) > 0 {
-		fmt.Println("Warn: --secret has been deprecated. You should use --config secret:my-secret instead.")
-	}
-
-	err := validatePropertyFiles(o.PropertyFiles)
-	if err != nil {
-		return err
-	}
-
 	propertyFiles := filterBuildPropertyFiles(o.Properties)
 	propertyFiles = append(propertyFiles, filterBuildPropertyFiles(o.BuildProperties)...)
-	err = validatePropertyFiles(propertyFiles)
+	err := validatePropertyFiles(propertyFiles)
 	if err != nil {
 		return err
 	}
@@ -424,7 +401,6 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 	files = append(files, filterFileLocation(o.Configs)...)
 	files = append(files, filterFileLocation(o.Properties)...)
 	files = append(files, filterFileLocation(o.BuildProperties)...)
-	files = append(files, o.PropertyFiles...)
 	files = append(files, filterFileLocation(o.OpenAPIs)...)
 
 	for _, s := range files {
@@ -593,10 +569,6 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	for _, item := range o.Dependencies {
 		integration.Spec.AddDependency(item)
 	}
-	for _, item := range o.PropertyFiles {
-		// Deprecated: making it compatible with newer mechanism
-		o.Properties = append(o.Properties, "file:"+item)
-	}
 
 	props, err := mergePropertiesWithPrecedence(o.Properties)
 	if err != nil {
@@ -625,12 +597,6 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		o.Traits = append(o.Traits, buildPropsTraits...)
 	}
 
-	for _, item := range o.ConfigMaps {
-		integration.Spec.AddConfiguration("configmap", item)
-	}
-	for _, item := range o.Secrets {
-		integration.Spec.AddConfiguration("secret", item)
-	}
 	for _, item := range o.Volumes {
 		o.Traits = append(o.Traits, fmt.Sprintf("mount.volumes=%s", item))
 	}

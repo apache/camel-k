@@ -46,7 +46,7 @@ func TestRunSimpleJavaExamples(t *testing.T) {
 		})
 
 		t.Run("run java with properties", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/Prop.java", "--property-file", "files/prop.properties").Execute()).To(Succeed())
+			Expect(Kamel("run", "-n", ns, "files/Prop.java", "--property", "file:files/prop.properties").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "prop"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "prop", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "prop"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
