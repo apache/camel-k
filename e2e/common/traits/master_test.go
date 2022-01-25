@@ -72,7 +72,7 @@ func TestMasterTrait(t *testing.T) {
 				"--label", "leader-group=same",
 				"-t", "master.label-key=leader-group",
 				"-t", "master.label-value=same",
-				"-t", "master.configmap=first-lock",
+				"-t", "master.resource-name=first-lock",
 				"-t", "owner.target-labels=leader-group").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "second"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, "second"), TestTimeoutShort).Should(ContainSubstring("started in"))
