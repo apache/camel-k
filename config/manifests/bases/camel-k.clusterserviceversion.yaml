@@ -31,7 +31,7 @@ metadata:
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
     repository: https://github.com/apache/camel-k
     support: Camel
-  name: camel-k.v1.8.0
+  name: camel-k.v1.8.1
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -156,4 +156,4 @@ spec:
   selector:
     matchLabels:
       name: camel-k-operator
-  version: 1.8.0-snapshot
+  version: 1.8.1-snapshot
