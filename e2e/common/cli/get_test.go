@@ -42,7 +42,7 @@ func TestKamelCLIGet(t *testing.T) {
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			// regex is used for the compatibility of tests between OC and vanilla K8
 			// kamel get may have different output depending og the platform
-			kitName := Integration(ns, "yaml")().Status.Kit
+			kitName := Integration(ns, "yaml")().Status.IntegrationKit.Name
 			regex := fmt.Sprintf("^NAME\tPHASE\tKIT\n\\s*yaml\tRunning\t(%s/%s|%s)", ns, kitName, kitName)
 			Expect(GetOutputString(Kamel("get", "-n", ns))).To(MatchRegexp(regex))
 
