@@ -8,10 +8,19 @@
 
 - Stale bot is setting issue `stale` where marked as `never-stale` [\#2893](https://github.com/apache/camel-k/issues/2893)
 - camel-k-client binary is missing in the latest release assets [\#2892](https://github.com/apache/camel-k/issues/2892)
+- Release 1.8.0 [\#2848](https://github.com/apache/camel-k/issues/2848)
 - Change autogen doc template to adoc [\#2289](https://github.com/apache/camel-k/issues/2289)
 
 **Merged pull requests:**
 
+- chore: Bump version to 1.9.0-SNAPSHOT [\#2930](https://github.com/apache/camel-k/pull/2930) ([astefanutti](https://github.com/astefanutti))
+- fix: Camel Catalog generation fails with empty Maven effective settings [\#2929](https://github.com/apache/camel-k/pull/2929) ([astefanutti](https://github.com/astefanutti))
+- Release Documentation: It's release-helm and not generate-helm command [\#2919](https://github.com/apache/camel-k/pull/2919) ([oscerd](https://github.com/oscerd))
+- \[Backport main\] Updated the helm index.yml file, by only adding the latest helm chart [\#2918](https://github.com/apache/camel-k/pull/2918) ([github-actions[bot]](https://github.com/apps/github-actions))
+- \[Backport main\] Helm release and next [\#2914](https://github.com/apache/camel-k/pull/2914) ([github-actions[bot]](https://github.com/apps/github-actions))
+- fix\(e2e\): Update health tests based on Camel 3.14 new health check responses [\#2911](https://github.com/apache/camel-k/pull/2911) ([astefanutti](https://github.com/astefanutti))
+- camel-website \#701 camel-k RI table setup \(main\) [\#2906](https://github.com/apache/camel-k/pull/2906) ([djencks](https://github.com/djencks))
+- fix\(e2e\): Use X.Y channels for OLM upgrade e2e tests [\#2901](https://github.com/apache/camel-k/pull/2901) ([astefanutti](https://github.com/astefanutti))
 - Update stale.yaml [\#2894](https://github.com/apache/camel-k/pull/2894) ([squakez](https://github.com/squakez))
 - Fix \#2788: use kamelets 0.7.0 and align with new dir structure [\#2887](https://github.com/apache/camel-k/pull/2887) ([nicolaferraro](https://github.com/nicolaferraro))
 - doc: add more details about installation on IKS/ICR [\#2882](https://github.com/apache/camel-k/pull/2882) ([tadayosi](https://github.com/tadayosi))
@@ -884,8 +893,6 @@
 - Leverage KinD multi-nodes cluster setup for CI [\#2302](https://github.com/apache/camel-k/issues/2302)
 - Docs validation CI workflow [\#2278](https://github.com/apache/camel-k/issues/2278)
 - Kamel reset fails with KameletBinding [\#2221](https://github.com/apache/camel-k/issues/2221)
-- Kamel dump: make the command smarter [\#2189](https://github.com/apache/camel-k/issues/2189)
-- Refactoring dump function [\#2172](https://github.com/apache/camel-k/issues/2172)
 - Use environment independent `operator-sdk` CLI version [\#2167](https://github.com/apache/camel-k/issues/2167)
 - Extend config docs to reflect all possibilities coming from camel [\#2153](https://github.com/apache/camel-k/issues/2153)
 - Separate readiness and liveness probe [\#1610](https://github.com/apache/camel-k/issues/1610)
