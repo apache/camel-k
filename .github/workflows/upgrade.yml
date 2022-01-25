@@ -133,7 +133,7 @@ jobs:
         echo "PREV_XY_CHANNEL=${PREV_XY_CHANNEL}" >> $GITHUB_ENV
         export NEW_XY_CHANNEL=stable-$(make get-version | grep -Po "\d.\d")
         echo "NEW_XY_CHANNEL=${NEW_XY_CHANNEL}" >> $GITHUB_ENV
-        make bundle-build BUNDLE_IMAGE_NAME=${LOCAL_IMAGE_BUNDLE} DEFAULT_CHANNEL="${NEW_XY_CHANNEL}" CHANNELS="stable,${NEW_XY_CHANNEL}"
+        make bundle-build BUNDLE_IMAGE_NAME=${LOCAL_IMAGE_BUNDLE} DEFAULT_CHANNEL="${NEW_XY_CHANNEL}" CHANNELS="${NEW_XY_CHANNEL}"
         docker push ${LOCAL_IMAGE_BUNDLE}
     - name: Create new index image
       run: |
