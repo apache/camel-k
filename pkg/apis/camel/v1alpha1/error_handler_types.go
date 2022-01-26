@@ -34,17 +34,17 @@ const ErrorHandlerAppPropertiesPrefix = "camel.beans.defaultErrorHandler"
 
 // ErrorHandlerSpec represents an unstructured object for an error handler
 type ErrorHandlerSpec struct {
-	v1.RawMessage `json:",omitempty"`
+	RawMessage `json:",omitempty"`
 }
 
 // ErrorHandlerParameters represent an unstructured object for error handler parameters
 type ErrorHandlerParameters struct {
-	v1.RawMessage `json:",omitempty"`
+	RawMessage `json:",omitempty"`
 }
 
 // BeanProperties represent an unstructured object properties to be set on a bean
 type BeanProperties struct {
-	v1.RawMessage `json:",omitempty"`
+	RawMessage `json:",omitempty"`
 }
 
 // +kubebuilder:object:generate=false
