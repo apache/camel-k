@@ -122,7 +122,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		if cfg.EnvVars != nil {
 			if d, ok := o.(*appsv1.Deployment); ok {
 				if d.Labels["camel.apache.org/component"] == "operator" {
-					envVars, _, err := env.ParseEnv(cfg.EnvVars, nil)
+					envVars, _, _, err := env.ParseEnv(cfg.EnvVars, nil)
 					if err != nil {
 						fmt.Println("Warning: could not parse environment variables!")
 					}

@@ -47,15 +47,15 @@ require (
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gopkg.in/inf.v0 v0.9.1
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/api v0.21.4
-	k8s.io/apiextensions-apiserver v0.21.4
-	k8s.io/apimachinery v0.21.4
-	k8s.io/cli-runtime v0.21.4
-	k8s.io/client-go v0.21.4
+	k8s.io/api v0.22.5
+	k8s.io/apiextensions-apiserver v0.22.5
+	k8s.io/apimachinery v0.22.5
+	k8s.io/cli-runtime v0.22.5
+	k8s.io/client-go v0.22.5
 	k8s.io/gengo v0.0.0-20211129171323-c02415ce4185
 	k8s.io/klog/v2 v2.9.0
-	k8s.io/kubectl v0.21.4
-	k8s.io/utils v0.0.0-20210802155522-efc7438f0176
+	k8s.io/kubectl v0.22.5
+	k8s.io/utils v0.0.0-20210819203725-bdf08cb9a70a
 	knative.dev/eventing v0.28.0
 	knative.dev/pkg v0.0.0-20211206113427-18589ac7627e
 	knative.dev/serving v0.28.0
