@@ -31,9 +31,9 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 
-	ctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/operator-framework/api/pkg/lib/version"
 	olm "github.com/operator-framework/api/pkg/operators/v1alpha1"
@@ -119,15 +119,18 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 			Expect(createOrUpdateCatalogSource(ns, catalogSourceName, newIIB)).To(Succeed())
 
 			if crossChannelUpgrade {
-				t.Log("Updating Camel-K subscription OLM update channel.")
-				s := ckSubscription(ns)()
-				r, err := ctrlutil.CreateOrUpdate(TestContext, TestClient(), s, func() error {
-					s.Spec.Channel = newUpdateChannel
-					return nil
-				})
+				t.Log("Patching Camel-K OLM subscription channel.")
+				subscription, err := getSubscription(ns)
 				Expect(err).To(BeNil())
-				Expect(r).To(Equal(ctrlutil.OperationResultUpdated))
+				Expect(subscription).NotTo(BeNil())
+
+				// Patch the Subscription to avoid conflicts with concurrent updates performed by OLM
+				patch := fmt.Sprintf("{\"spec\":{\"channel\":%q}}", newUpdateChannel)
+				Expect(TestClient().Patch(TestContext, subscription, ctrl.RawPatch(types.MergePatchType, []byte(patch)))).To(Succeed())
+				// Assert the response back from the API server
+				Expect(subscription.Spec.Channel).To(Equal(newUpdateChannel))
 			}
+
 			// Check the previous CSV is being replaced
 			Eventually(clusterServiceVersionPhase(func(csv olm.ClusterServiceVersion) bool {
 				return csv.Spec.Version.Version.String() == prevCSVVersion.Version.String()
@@ -193,25 +196,4 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 			Expect(Kamel("uninstall", "--all", "--olm=false").Execute()).To(Succeed())
 		})
 	})
-}
-
-func createOrUpdateCatalogSource(ns, name, image string) error {
-	catalogSource := &olm.CatalogSource{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      name,
-		},
-	}
-
-	_, err := ctrlutil.CreateOrUpdate(TestContext, TestClient(), catalogSource, func() error {
-		catalogSource.Spec = olm.CatalogSourceSpec{
-			Image:       image,
-			SourceType:  "grpc",
-			DisplayName: "OLM upgrade test Catalog",
-			Publisher:   "grpc",
-		}
-		return nil
-	})
-
-	return err
 }

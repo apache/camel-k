@@ -30,6 +30,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	olm "github.com/operator-framework/api/pkg/operators/v1alpha1"
 
@@ -59,6 +60,27 @@ func clusterServiceVersionPhase(conditions func(olm.ClusterServiceVersion) bool,
 		}
 		return ""
 	}
+}
+
+func createOrUpdateCatalogSource(ns, name, image string) error {
+	catalogSource := &olm.CatalogSource{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+	}
+
+	_, err := ctrlutil.CreateOrUpdate(TestContext, TestClient(), catalogSource, func() error {
+		catalogSource.Spec = olm.CatalogSourceSpec{
+			Image:       image,
+			SourceType:  "grpc",
+			DisplayName: "OLM upgrade test Catalog",
+			Publisher:   "grpc",
+		}
+		return nil
+	})
+
+	return err
 }
 
 func catalogSource(ns, name string) func() *olm.CatalogSource {
@@ -92,17 +114,15 @@ func catalogSourcePhase(ns, name string) func() string {
 	}
 }
 
-func ckSubscription(ns string) func() *olm.Subscription {
-	return func() *olm.Subscription {
-		lst := olm.SubscriptionList{}
-		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
-			panic(err)
-		}
-		for _, s := range lst.Items {
-			if strings.Contains(s.Name, "camel-k") {
-				return &s
-			}
-		}
-		return nil
+func getSubscription(ns string) (*olm.Subscription, error) {
+	lst := olm.SubscriptionList{}
+	if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+		return nil, err
 	}
+	for _, s := range lst.Items {
+		if strings.Contains(s.Name, "camel-k") {
+			return &s, nil
+		}
+	}
+	return nil, nil
 }
