@@ -44,6 +44,18 @@ on:
       - 'NOTICE'
   workflow_dispatch:
     inputs:
+      pre-built-kamel-image:
+        description: 'Kamel image url for skipping building of kamel stages. Used for debugging'
+        required: false
+      skip-problematic:
+        description: 'Whether tests marked as problematic should be skipped - false by default (sets CAMEL_K_TEST_SKIP_PROBLEMATIC)'
+        required: false
+        default: false
+      test-filters:
+        description: |
+          Filter the tests in this test suite by assigning the test pattern to TEST_KNATIVE_RUN,
+          eg. TEST_KNATIVE_RUN=TestBasic will only run tests prefixed with 'TestBasic'
+        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -63,6 +75,14 @@ jobs:
       with:
         persist-credentials: false
         submodules: recursive
+
+    - name: Convert input parameters to env vars
+      shell: bash
+      run: |
+        ./.github/workflows/manual-exec-process-inputs.sh \
+          -i "${{ github.event.inputs.pre-built-kamel-image }}" \
+          -p "${{ github.event.inputs.skip-problematic }}" \
+          -t "${{ github.event.inputs.test-filters }}"
 
     - name: Execute Builder Tests
       uses: ./.github/actions/e2e-builder

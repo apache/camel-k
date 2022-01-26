@@ -17,18 +17,26 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-####
-#
-# Find all test that are labelled as problematic
-#
-####
-
 set -e
 
-while getopts ":t:" opt; do
+#
+# Used to unit testing this script
+#
+if [ -z "$GITHUB_ENV" ]; then
+  GITHUB_ENV="/tmp/GITHUB_ENV"
+  rm -f "${GITHUB_ENV}"
+fi
+
+while getopts ":i:p:t:" opt; do
   case "${opt}" in
+    i)
+      PRE_BUILT_IMAGE=${OPTARG}
+      ;;
+    p)
+      SKIP_PROBLEMATIC=${OPTARG}
+      ;;
     t)
-      TEST_SUITE=${OPTARG}
+      TEST_FILTERS=${OPTARG}
       ;;
     :)
       echo "ERROR: Option -$OPTARG requires an argument"
@@ -42,47 +50,28 @@ while getopts ":t:" opt; do
 done
 shift $((OPTIND-1))
 
-if [ -z "${TEST_SUITE}" ]; then
-  echo "Error: ${0} -t <test-suite>"
-  exit 1
+if [ -n "${PRE_BUILT_IMAGE}" ]; then
+  echo "DEBUG_USE_EXISTING_IMAGE=${PRE_BUILT_IMAGE}" >> $GITHUB_ENV
 fi
 
-TEST_DIR="./e2e/${TEST_SUITE}"
-
-if [ ! -d "${TEST_DIR}" ]; then
-  echo "No e2e directory available ... exiting"
-  exit 0
+#
+# Avoid problematic tests only if parameter set to true
+#
+if [ "${SKIP_PROBLEMATIC}" == "true" ]; then
+  echo "CAMEL_K_TEST_SKIP_PROBLEMATIC=true" >> $GITHUB_ENV
 fi
 
-PROBLEMATIC=()
-while IFS= read -r -d '' f
-do
+#
+# Adds -run args to filter tests in test suites
+#
+if [ -n "${TEST_FILTERS}" ]; then
+  filters=($(echo ${TEST_FILTERS} | tr "," "\n"))
 
-  func=""
-  while IFS= read -r line
+  #Print the split string
+  for filter in "${filters[@]}"
   do
-    if [[ "${line}" =~ ^" * " ]]; then
-      continue
-    elif [[ "${line}" =~ ^func* ]]; then
-      func=$(echo "${line}" | sed -n "s/func \([a-zA-Z0-9]\+\).*/\1/p")
-    elif [[ "${line}" =~ CAMEL_K_TEST_SKIP_PROBLEMATIC ]]; then
-      PROBLEMATIC[${#PROBLEMATIC[*]}]="${f}::${func}"
-    fi
-  done < ${f}
-
-done < <(find "${TEST_DIR}" -name "*.go" -print0)
-
-if [ "${CAMEL_K_TEST_SKIP_PROBLEMATIC}" == "true" ]; then
-  if [ ${#PROBLEMATIC[*]} -gt 0 ]; then
-    echo "=== Problematic Tests (${#PROBLEMATIC[*]}) ==="
-    for prob in "${PROBLEMATIC[@]}"
-    do
-      echo "  ${prob}"
-    done
-    echo "==="
-  else
-    echo "=== No Tests marked as Problematic ==="
-  fi
-else
-  echo "=== All tests to be executed, including those marked as problematic (${#PROBLEMATIC[*]}) ==="
+    pair=($(echo ${filter} | tr "=" " "))
+    echo "Adding run filter for ${pair[0]} tests"
+    echo "${pair[0]}=-run ${pair[1]}" >> $GITHUB_ENV
+  done
 fi
