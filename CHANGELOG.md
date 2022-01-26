@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Enabling prometheus causes KameletBindings to be stuck in status "Creating" [\#2896](https://github.com/apache/camel-k/issues/2896)
 - Stale bot is setting issue `stale` where marked as `never-stale` [\#2893](https://github.com/apache/camel-k/issues/2893)
 - camel-k-client binary is missing in the latest release assets [\#2892](https://github.com/apache/camel-k/issues/2892)
 - Release 1.8.0 [\#2848](https://github.com/apache/camel-k/issues/2848)
@@ -13,6 +14,7 @@
 
 **Merged pull requests:**
 
+- fix: Fix number of found deployments in dump [\#2933](https://github.com/apache/camel-k/pull/2933) ([christophd](https://github.com/christophd))
 - chore: Bump version to 1.9.0-SNAPSHOT [\#2930](https://github.com/apache/camel-k/pull/2930) ([astefanutti](https://github.com/astefanutti))
 - fix: Camel Catalog generation fails with empty Maven effective settings [\#2929](https://github.com/apache/camel-k/pull/2929) ([astefanutti](https://github.com/astefanutti))
 - Release Documentation: It's release-helm and not generate-helm command [\#2919](https://github.com/apache/camel-k/pull/2919) ([oscerd](https://github.com/oscerd))
