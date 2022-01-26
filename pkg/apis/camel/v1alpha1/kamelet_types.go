@@ -45,12 +45,17 @@ var (
 type KameletSpec struct {
 	Definition *JSONSchemaProps     `json:"definition,omitempty"`
 	Sources    []camelv1.SourceSpec `json:"sources,omitempty"`
-	Template   *camelv1.Template    `json:"template,omitempty"`
+	Template   *Template    `json:"template,omitempty"`
 	// Deprecated: use template
 	Flow          *camelv1.Flow               `json:"flow,omitempty"`
 	Authorization *AuthorizationSpec          `json:"authorization,omitempty"`
 	Types         map[EventSlot]EventTypeSpec `json:"types,omitempty"`
 	Dependencies  []string                    `json:"dependencies,omitempty"`
+}
+
+// Template is an unstructured object representing a Kamelet template in YAML/JSON DSL
+type Template struct {
+	RawMessage `json:",inline"`
 }
 
 type EventTypeSpec struct {
