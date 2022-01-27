@@ -50,8 +50,8 @@ func TestOperatorUpgrade(t *testing.T) {
 		// Set KAMEL_BIN only for this test - don't override the ENV variable for all tests
 		Expect(os.Setenv("KAMEL_BIN", kamel)).To(Succeed())
 
-		Expect(Kamel("install", "--olm=false", "--cluster-setup", "--force").Execute()).To(Succeed())
-		Expect(Kamel("install", "--olm=false", "-n", ns).Execute()).To(Succeed())
+		// Should both install the CRDs and kamel in the given namespace
+		Expect(Kamel("install", "--olm=false", "--force", "-n", ns).Execute()).To(Succeed())
 
 		// Check the operator pod is running
 		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
