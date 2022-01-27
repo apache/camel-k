@@ -246,6 +246,10 @@ spec:
                       items:
                         type: string
                       type: array
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      type: object
                     version:
                       type: string
                   required:
