@@ -19,8 +19,6 @@ package v1alpha1
 
 import (
 	"encoding/json"
-
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
 // ErrorHandlerRefName --
