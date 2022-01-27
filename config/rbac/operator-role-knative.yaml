@@ -80,5 +80,6 @@ rules:
   resources:
   - channels
   - inmemorychannels
+  - kafkachannels
   verbs:
   - get
