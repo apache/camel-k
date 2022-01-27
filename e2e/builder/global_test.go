@@ -51,7 +51,7 @@ func TestRunGlobalInstall(t *testing.T) {
 		}
 	}
 
-	test := func(operatorNamespace string) {
+	WithGlobalOperatorNamespace(t, func(operatorNamespace string) {
 		Expect(Kamel("install", "-n", operatorNamespace, "--global", "--force").Execute()).To(Succeed())
 
 		t.Run("Global test on namespace with platform", func(t *testing.T) {
@@ -143,18 +143,7 @@ func TestRunGlobalInstall(t *testing.T) {
 		})
 
 		Expect(Kamel("uninstall", "-n", operatorNamespace, "--skip-crd", "--skip-cluster-roles").Execute()).To(Succeed())
-	}
-
-	ocp, err := openshift.IsOpenShift(TestClient())
-	assert.Nil(t, err)
-	if ocp {
-		// global operators are always installed in the openshift-operators namespace
-		RegisterTestingT(t)
-		test("openshift-operators")
-	} else {
-		// create new namespace for the global operator
-		WithNewTestNamespace(t, test)
-	}
+	})
 }
 
 func integrationKitsToNamesTransform() func([]v1.IntegrationKit) []string {
