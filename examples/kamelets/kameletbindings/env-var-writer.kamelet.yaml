@@ -22,7 +22,7 @@ metadata:
 spec:
   definition:
     title: "Log some env vars"   
-  flow:
+  template:
     from:
       uri: kamelet:source
       steps:

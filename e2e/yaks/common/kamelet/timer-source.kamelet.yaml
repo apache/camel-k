@@ -43,7 +43,7 @@ spec:
       schema:
         id: text.camel.apache.org
         type: string
-  flow:
+  template:
     from:
       uri: timer:tick
       parameters:
