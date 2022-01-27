@@ -257,13 +257,14 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1alpha1.Kam
 	// nolint: staticcheck
 	if kamelet.Spec.Template != nil || kamelet.Spec.Flow != nil {
 		template := kamelet.Spec.Template
-		//if template == nil {
-		//	// Backward compatibility with Kamelets using flow
-		//	var bytes []byte = kamelet.Spec.Flow.RawMessage
-		//	template = &v1alpha1.Template{
-		//		RawMessage: v1alpha1.RawMessage{bytes},
-		//	}
-		//}
+		if template == nil {
+			// Backward compatibility with Kamelets using flow
+			var bytes []byte = kamelet.Spec.Flow.RawMessage
+			template = &v1alpha1.Template{
+				RawMessage: make(v1alpha1.RawMessage, len(bytes)),
+			}
+			copy(template.RawMessage, bytes)
+		}
 		flowData, err := dsl.TemplateToYamlDSL(*template, kamelet.Name)
 		if err != nil {
 			return err
