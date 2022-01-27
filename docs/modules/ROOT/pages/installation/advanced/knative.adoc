@@ -1,0 +1,85 @@
+[[knative-sinks]]
+= Knative Sinks
+
+A https://knative.dev/docs/eventing/sinks[Knative Sink] can be referenced in a producer path of the Camel Knative component, e.g.:
+
+[source,java]
+----
+from('timer:tick')
+  .setBody().constant('event')
+  .to('knative:event/broker')
+----
+
+Or as the value of the `sink` field in a `KameletBinding` resource, e.g.:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  name: timer-source-binding
+spec:
+  source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1alpha1
+      name: timer-source
+    properties:
+      message: Event
+  sink:
+    ref:
+      kind: Broker
+      apiVersion: eventing.knative.dev/v1
+      name: broker
+    properties:
+      type: type
+----
+
+In the above examples, the Knative Sink is a https://knative.dev/docs/eventing/broker/[Knative Broker].
+However, a Knative Sink can be any Kubernetes resource that's _addressable_, i.e., whose URL can be retrieved by reading its `status.address.url`.
+
+This is what the Camel K operator does to resolve the Sink URLs, so that events can be sent to.
+That requires the ServiceAccount that runs the operator to be granted permission to GET these resources, while it configures the integration runtime.
+
+As the set of resources is arbitrary, and cannot be known _a-priori_, these permissions must be added to a Camel K operator Role, or ClusterRole, that's bound to the `camel-k-operator` ServiceAccount.
+
+For the above examples, that sink into an `eventing.knative.dev/broker` resource, this can be achieved by creating the following resources:
+
+.operator-role-knative-sinks.yaml
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-operator-knative-sinks
+rules:
+- apiGroups:
+  - eventing.knative.dev
+  resources:
+  - brokers
+  verbs:
+  - get
+----
+
+.operator-rolebinding-knative-sinks.yaml
+[source,yaml]
+----
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-knative-sinks
+  labels:
+    app: "camel-k"
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+  namespace: camel-k
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: camel-k-operator-knative-sinks
+----
+
+These resources apply when the Camel K operator is deployed in _global_ mode, into the `camel-k` namespace, and should be adapted depending on how the operator is actually deployed.
