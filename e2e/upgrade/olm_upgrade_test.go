@@ -168,6 +168,10 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 			// Rebuild the Integration
 			Expect(Kamel("rebuild", name, "-n", ns).Execute()).To(Succeed())
 
+			// Check the Integration runs correctly
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+
 			// Check the Integration version has been upgraded
 			Eventually(IntegrationVersion(ns, name)).Should(ContainSubstring(newIPVersionPrefix))
 
