@@ -48,7 +48,7 @@ spec:
         ...              
       log-message:
         ...    
-  flow:
+  template:
     from:
       uri: kamelet:source
       steps:

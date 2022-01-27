@@ -75,7 +75,7 @@ spec:
   types:
     out:
       mediaType: text/plain
-  flow:
+  template:
     from:
       uri: timer:tick
       parameters:
@@ -98,7 +98,7 @@ kind: Kamelet
 # ...
 spec:
 # ...
-  flow:
+  template:
     from:
       uri: "twitter-search:{{keywords}}" # <1>
       parameters:
@@ -253,7 +253,7 @@ spec:
   types: # <2>
     out:
       mediaType: application/json
-  flow: # <3>
+  template: # <3>
     from:
       uri: "twitter-search:{{keywords}}"
       parameters:
@@ -665,7 +665,7 @@ metadata:
   labels:
     camel.apache.org/kamelet.type: "source"
 spec:
-  flow: # <1>
+  template: # <1>
     from:
       uri: "timer:earthquake"
       parameters:
@@ -752,7 +752,7 @@ spec:
         description: The amount of minutes to look ahead when starting the integration afresh
         type: integer
         default: 120
-  flow:
+  template:
     from:
       uri: "timer:earthquake"
       # ...
@@ -802,7 +802,7 @@ spec:
   dependencies: # <4>
     - camel-quarkus:caffeine
     - camel-quarkus:http
-  flow:
+  template:
     from:
       uri: "timer:earthquake"
       parameters:
@@ -1131,7 +1131,7 @@ spec:
   types: # <2>
     out:
       mediaType: application/json
-  flow: # <3>
+  template: # <3>
     from:
       uri: "kamelet:source"
       steps:
