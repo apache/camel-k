@@ -27,7 +27,7 @@ spec:
   definition:
     title: "Log Sink"
     description: "Consume events from a channel"
-  flow:
+  template:
     from:
       uri: kamelet:source
       steps:

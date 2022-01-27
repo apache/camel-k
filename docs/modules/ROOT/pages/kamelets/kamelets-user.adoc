@@ -73,7 +73,7 @@ spec:
     out:
       mediaType: text/plain
       # schema:
-  flow: # <6>
+  template: # <6>
     from:
       uri: telegram:bots
       parameters:
@@ -587,7 +587,7 @@ For example:
 ----
 spec:
   # ...
-  flow:
+  template:
     from:
       uri: telegram:bots
       parameters:
