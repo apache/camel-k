@@ -46,32 +46,41 @@ func TestRunGlobalKamelet(t *testing.T) {
 		}
 	}
 
-	test := func(operatorNamespace string) {
+	WithGlobalOperatorNamespace(t, func(operatorNamespace string) {
 		Expect(Kamel("install", "-n", operatorNamespace, "--global", "--force").Execute()).To(Succeed())
 
-		Expect(CreateTimerKamelet(operatorNamespace, "my-own-timer-source")()).To(Succeed())
+		t.Run("Global operator + namespaced kamelet test", func(t *testing.T) {
 
-		// NS2: namespace without operator
-		WithNewTestNamespace(t, func(ns2 string) {
-			Expect(Kamel("install", "-n", ns2, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
+			// NS2: namespace without operator
+			WithNewTestNamespace(t, func(ns2 string) {
+				Expect(CreateTimerKamelet(ns2, "my-own-timer-source")()).To(Succeed())
 
-			Expect(Kamel("run", "-n", ns2, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns2, "timer-kamelet-usage"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns2, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
-			Expect(Kamel("delete", "--all", "-n", ns2).Execute()).To(Succeed())
+				Expect(Kamel("install", "-n", ns2, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
+
+				Expect(Kamel("run", "-n", ns2, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
+				Eventually(IntegrationPodPhase(ns2, "timer-kamelet-usage"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationLogs(ns2, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
+				Expect(Kamel("delete", "--all", "-n", ns2).Execute()).To(Succeed())
+			})
+		})
+
+		t.Run("Global operator + global kamelet test", func(t *testing.T) {
+
+			Expect(CreateTimerKamelet(operatorNamespace, "my-own-timer-source")()).To(Succeed())
+
+			// NS3: namespace without operator
+			WithNewTestNamespace(t, func(ns3 string) {
+				Expect(Kamel("install", "-n", ns3, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
+
+				Expect(Kamel("run", "-n", ns3, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
+				Eventually(IntegrationPodPhase(ns3, "timer-kamelet-usage"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationLogs(ns3, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
+				Expect(Kamel("delete", "--all", "-n", ns3).Execute()).To(Succeed())
+				Expect(TestClient().Delete(TestContext, Kamelet("my-own-timer-source", operatorNamespace)())).To(Succeed())
+			})
 		})
 
 		Expect(Kamel("uninstall", "-n", operatorNamespace, "--skip-crd", "--skip-cluster-roles=false", "--skip-cluster-role-bindings=false").Execute()).To(Succeed())
-	}
+	})
 
-	ocp, err := openshift.IsOpenShift(TestClient())
-	assert.Nil(t, err)
-	if ocp {
-		// global operators are always installed in the openshift-operators namespace
-		RegisterTestingT(t)
-		test("openshift-operators")
-	}else {
-		// create new namespace for the global operator
-		WithNewTestNamespace(t, test)
-	}
 }
