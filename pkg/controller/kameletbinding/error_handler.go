@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/bindings"
 	"github.com/pkg/errors"
@@ -57,8 +56,8 @@ func maybeErrorHandler(errHandlConf *v1alpha1.ErrorHandlerSpec, bindingContext b
 	return nil, nil
 }
 
-func parseErrorHandler(rawMessage v1.RawMessage) (v1alpha1.ErrorHandler, error) {
-	var properties map[v1alpha1.ErrorHandlerType]v1.RawMessage
+func parseErrorHandler(rawMessage v1alpha1.RawMessage) (v1alpha1.ErrorHandler, error) {
+	var properties map[v1alpha1.ErrorHandlerType]v1alpha1.RawMessage
 	err := json.Unmarshal(rawMessage, &properties)
 	if err != nil {
 		return nil, err

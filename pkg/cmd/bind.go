@@ -343,7 +343,7 @@ func (o *bindCmdOptions) asEndpointProperties(props map[string]string) (*v1alpha
 		return nil, err
 	}
 	return &v1alpha1.EndpointProperties{
-		RawMessage: v1.RawMessage(data),
+		RawMessage: v1alpha1.RawMessage(data),
 	}, nil
 }
 
