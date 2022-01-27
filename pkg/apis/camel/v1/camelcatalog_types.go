@@ -60,8 +60,9 @@ type CamelArtifact struct {
 // CamelLoader --
 type CamelLoader struct {
 	MavenArtifact `json:",inline" yaml:",inline"`
-	Languages     []string        `json:"languages,omitempty" yaml:"languages,omitempty"`
-	Dependencies  []MavenArtifact `json:"dependencies,omitempty" yaml:"dependencies,omitempty"`
+	Languages     []string          `json:"languages,omitempty" yaml:"languages,omitempty"`
+	Dependencies  []MavenArtifact   `json:"dependencies,omitempty" yaml:"dependencies,omitempty"`
+	Metadata      map[string]string `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 }
 
 // CamelCatalogSpec defines the desired state of CamelCatalog
