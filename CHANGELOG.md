@@ -14,6 +14,8 @@
 
 **Merged pull requests:**
 
+- fix\(e2e\): Patch OLM Subscription to avoid conflicting updates [\#2946](https://github.com/apache/camel-k/pull/2946) ([astefanutti](https://github.com/astefanutti))
+- fix\(e2e\): Do not add snapshot bundle to stable channel [\#2939](https://github.com/apache/camel-k/pull/2939) ([astefanutti](https://github.com/astefanutti))
 - fix: Fix number of found deployments in dump [\#2933](https://github.com/apache/camel-k/pull/2933) ([christophd](https://github.com/christophd))
 - chore: Bump version to 1.9.0-SNAPSHOT [\#2930](https://github.com/apache/camel-k/pull/2930) ([astefanutti](https://github.com/astefanutti))
 - fix: Camel Catalog generation fails with empty Maven effective settings [\#2929](https://github.com/apache/camel-k/pull/2929) ([astefanutti](https://github.com/astefanutti))
@@ -23,6 +25,7 @@
 - fix\(e2e\): Update health tests based on Camel 3.14 new health check responses [\#2911](https://github.com/apache/camel-k/pull/2911) ([astefanutti](https://github.com/astefanutti))
 - camel-website \#701 camel-k RI table setup \(main\) [\#2906](https://github.com/apache/camel-k/pull/2906) ([djencks](https://github.com/djencks))
 - fix\(e2e\): Use X.Y channels for OLM upgrade e2e tests [\#2901](https://github.com/apache/camel-k/pull/2901) ([astefanutti](https://github.com/astefanutti))
+- \[TEST\] - check IntegrationPlatform namespace with global operator [\#2895](https://github.com/apache/camel-k/pull/2895) ([bouskaJ](https://github.com/bouskaJ))
 - Update stale.yaml [\#2894](https://github.com/apache/camel-k/pull/2894) ([squakez](https://github.com/squakez))
 - Fix \#2788: use kamelets 0.7.0 and align with new dir structure [\#2887](https://github.com/apache/camel-k/pull/2887) ([nicolaferraro](https://github.com/nicolaferraro))
 - doc: add more details about installation on IKS/ICR [\#2882](https://github.com/apache/camel-k/pull/2882) ([tadayosi](https://github.com/tadayosi))
