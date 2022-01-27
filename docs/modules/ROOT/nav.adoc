@@ -16,6 +16,7 @@
 *** xref:installation/registry/icr.adoc[IBM Container Registry]
 *** xref:installation/registry/k3s.adoc[K3s]
 ** Advanced
+*** xref:installation/advanced/knative.adoc[Knative Sinks]
 *** xref:installation/advanced/resources.adoc[Resource management]
 *** xref:installation/advanced/multi.adoc[Multiple Operators]
 * Command Line Interface
