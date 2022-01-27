@@ -28,6 +28,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
 	"os"
@@ -1640,6 +1641,18 @@ func WithNewTestNamespace(t *testing.T, doRun func(string)) {
 	defer UserCleanup()
 
 	InvokeUserTestCode(t, ns.GetName(), doRun)
+}
+
+func WithGlobalOperatorNamespace(t *testing.T, test func(string)) {
+	ocp, err := openshift.IsOpenShift(TestClient())
+	assert.Nil(t, err)
+	if ocp {
+		// global operators are always installed in the openshift-operators namespace
+		InvokeUserTestCode(t, "openshift-operators", test)
+	}else {
+		// create new namespace for the global operator
+		WithNewTestNamespace(t, test)
+	}
 }
 
 func WithNewTestNamespaceWithKnativeBroker(t *testing.T, doRun func(string)) {
