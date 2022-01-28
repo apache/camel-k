@@ -21,10 +21,10 @@ import (
 	"context"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/go-logr/logr"
 
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 // OperatorStartupOptionalTools tries to install optional tools at operator startup and warns if something goes wrong.
@@ -62,5 +62,11 @@ func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespac
 				log.V(8).Info("Error while installing global Kamelet viewer role", "error", err)
 			}
 		}
+	}
+
+	// Try to bind the Knative Addressable resolver aggregated ClusterRole to the operator ServiceAccount
+	if err := BindKnativeAddressableResolverClusterRole(ctx, c, namespace); err != nil {
+		log.Info("Cannot bind the Knative Addressable resolver aggregated ClusterRole: skipping.")
+		log.V(8).Info("Error while binding the Knative Addressable resolver aggregated ClusterRole", "error", err)
 	}
 }

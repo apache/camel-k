@@ -35,6 +35,8 @@ import (
 	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
+const serviceAccountName = "camel-k-operator"
+
 // ResourceCustomizer can be used to inject code that changes the objects before they are created.
 type ResourceCustomizer func(object ctrl.Object) ctrl.Object
 
