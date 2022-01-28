@@ -41,45 +41,8 @@ However, a Knative Sink can be any Kubernetes resource that's _addressable_, i.e
 This is what the Camel K operator does to resolve the Sink URLs, so that events can be sent to.
 That requires the ServiceAccount that runs the operator to be granted permission to GET these resources, while it configures the integration runtime.
 
-As the set of resources is arbitrary, and cannot be known _a-priori_, these permissions must be added to a Camel K operator Role, or ClusterRole, that's bound to the `camel-k-operator` ServiceAccount.
+As the set of resources is arbitrary, and cannot be known _a-priori_, these permissions are automatically granted to `camel-k-operator` ServiceAccount, by relying on the Knative Addressable resolver aggregated ClusterRole.
 
-For the above examples, that sink into an `eventing.knative.dev/broker` resource, this can be achieved by creating the following resources:
+For the above examples, that sink into an `eventing.knative.dev/broker` resource, this is already being configured by Knative, that aggregates the required permissions for its own resources by default.
 
-.operator-role-knative-sinks.yaml
-[source,yaml]
-----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  labels:
-    app: camel-k
-  name: camel-k-operator-knative-sinks
-rules:
-- apiGroups:
-  - eventing.knative.dev
-  resources:
-  - brokers
-  verbs:
-  - get
-----
-
-.operator-rolebinding-knative-sinks.yaml
-[source,yaml]
-----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: camel-k-operator-knative-sinks
-  labels:
-    app: "camel-k"
-subjects:
-- kind: ServiceAccount
-  name: camel-k-operator
-  namespace: camel-k
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: camel-k-operator-knative-sinks
-----
-
-These resources apply when the Camel K operator is deployed in _global_ mode, into the `camel-k` namespace, and should be adapted depending on how the operator is actually deployed.
+However, if you integrate custom resources as sinks, the required permissions must be added manually, as documented in the https://knative.dev/docs/eventing/sinks/#using-custom-resources-as-sinks[Knative documentation].
