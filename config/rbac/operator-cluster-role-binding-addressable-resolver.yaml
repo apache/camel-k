@@ -15,29 +15,17 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-#
-# rbac resources applicable for all kubernetes platforms
-#
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-- user-cluster-role.yaml
-- operator-role-events.yaml
-- operator-role-knative.yaml
-- operator-role.yaml
-- operator-role-keda.yaml
-- operator-role-leases.yaml
-- operator-role-podmonitors.yaml
-- operator-role-strimzi.yaml
-- operator-role-binding-events.yaml
-- operator-role-binding-keda.yaml
-- operator-role-binding-knative.yaml
-- operator-role-binding-leases.yaml
-- operator-role-binding-podmonitors.yaml
-- operator-role-binding-strimzi.yaml
-- operator-role-binding.yaml
-- operator-cluster-role-custom-resource-definitions.yaml
-- operator-cluster-role-binding-custom-resource-definitions.yaml
-- operator-cluster-role-addressable-resolver.yaml
-- operator-cluster-role-binding-addressable-resolver.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-bind-addressable-resolver
+  labels:
+    app: "camel-k"
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+  namespace: placeholder
+roleRef:
+  kind: ClusterRole
+  name: camel-k-operator-bind-addressable-resolver
+  apiGroup: rbac.authorization.k8s.io
