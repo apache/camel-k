@@ -11,9 +11,13 @@
 - camel-k-client binary is missing in the latest release assets [\#2892](https://github.com/apache/camel-k/issues/2892)
 - Release 1.8.0 [\#2848](https://github.com/apache/camel-k/issues/2848)
 - Change autogen doc template to adoc [\#2289](https://github.com/apache/camel-k/issues/2289)
+- Kamel dump: make the command smarter [\#2189](https://github.com/apache/camel-k/issues/2189)
 
 **Merged pull requests:**
 
+- fix\(api\): Add missing loader metadata field in CamelCatalog API [\#2953](https://github.com/apache/camel-k/pull/2953) ([astefanutti](https://github.com/astefanutti))
+- Kamel dump: make the command smarter  [\#2952](https://github.com/apache/camel-k/pull/2952) ([oscerd](https://github.com/oscerd))
+- chore\(deps\): remove kamelet-reify [\#2949](https://github.com/apache/camel-k/pull/2949) ([squakez](https://github.com/squakez))
 - fix\(e2e\): Patch OLM Subscription to avoid conflicting updates [\#2946](https://github.com/apache/camel-k/pull/2946) ([astefanutti](https://github.com/astefanutti))
 - fix\(e2e\): Do not add snapshot bundle to stable channel [\#2939](https://github.com/apache/camel-k/pull/2939) ([astefanutti](https://github.com/astefanutti))
 - fix: Fix number of found deployments in dump [\#2933](https://github.com/apache/camel-k/pull/2933) ([christophd](https://github.com/christophd))
@@ -115,6 +119,7 @@
 - feat: Comprehensive Integration error status [\#2682](https://github.com/apache/camel-k/pull/2682) ([astefanutti](https://github.com/astefanutti))
 - fix\(cli\): apply --registry\* flags even on OpenShift for kamel install [\#2681](https://github.com/apache/camel-k/pull/2681) ([tadayosi](https://github.com/tadayosi))
 - \[TEST\] Missing cli tests were added [\#2680](https://github.com/apache/camel-k/pull/2680) ([vsokolov00](https://github.com/vsokolov00))
+- \[TEST\] Global kamelet test - support for openshift [\#2679](https://github.com/apache/camel-k/pull/2679) ([asmigala](https://github.com/asmigala))
 - feat: Add active-deadline-seconds and backoff-limit options to cron trait [\#2678](https://github.com/apache/camel-k/pull/2678) ([astefanutti](https://github.com/astefanutti))
 - feat: Add progress-deadline-seconds option to deployment trait [\#2677](https://github.com/apache/camel-k/pull/2677) ([astefanutti](https://github.com/astefanutti))
 - fix\(cli\): kamel install fails with error: Object 'Kind' is missing in 'null' [\#2676](https://github.com/apache/camel-k/pull/2676) ([tadayosi](https://github.com/tadayosi))
@@ -849,7 +854,6 @@
 - Performance and Architectural Questions On Camel-K [\#1196](https://github.com/apache/camel-k/issues/1196)
 - Transactions with Camel K [\#1128](https://github.com/apache/camel-k/issues/1128)
 - Investigate integration with Keda [\#1107](https://github.com/apache/camel-k/issues/1107)
-- Camel K doesn't support kubernetes services of type loadbalancer [\#1070](https://github.com/apache/camel-k/issues/1070)
 - Camel K Operator don't ignore commented endpoint in the JAVA DSL source [\#1057](https://github.com/apache/camel-k/issues/1057)
 - Kamel cli should send exit code when integration in --dev mode is deleted [\#938](https://github.com/apache/camel-k/issues/938)
 - Kafka example not building on OpenShit v4.? - latest crc version on Mac [\#918](https://github.com/apache/camel-k/issues/918)
