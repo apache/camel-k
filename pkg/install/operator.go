@@ -334,7 +334,7 @@ func installClusterRoleBinding(ctx context.Context, c client.Client, collection 
 
 	bound := false
 	for i, subject := range target.Subjects {
-		if subject.Name == "camel-k-operator" {
+		if subject.Name == serviceAccountName {
 			if subject.Namespace == namespace {
 				bound = true
 
@@ -352,7 +352,7 @@ func installClusterRoleBinding(ctx context.Context, c client.Client, collection 
 		target.Subjects = append(target.Subjects, rbacv1.Subject{
 			Kind:      "ServiceAccount",
 			Namespace: namespace,
-			Name:      "camel-k-operator",
+			Name:      serviceAccountName,
 		})
 	}
 
