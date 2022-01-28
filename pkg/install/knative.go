@@ -25,8 +25,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	rbacv1ac "k8s.io/client-go/applyconfigurations/rbac/v1"
+	"k8s.io/client-go/kubernetes"
 
-	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/knative"
 )
 
@@ -34,13 +34,38 @@ const knativeAddressableResolverClusterRoleName = "addressable-resolver"
 
 // BindKnativeAddressableResolverClusterRole binds the Knative Addressable resolver aggregated ClusterRole
 // to the operator ServiceAccount.
-func BindKnativeAddressableResolverClusterRole(ctx context.Context, c client.Client, namespace string) error {
+func BindKnativeAddressableResolverClusterRole(ctx context.Context, c kubernetes.Interface, namespace string) error {
 	if isKnative, err := knative.IsInstalled(ctx, c); err != nil {
 		return err
 	} else if !isKnative {
 		return nil
 	}
+	if namespace != "" {
+		return applyAddressableResolverRoleBinding(ctx, c, namespace)
+	}
+	return applyAddressableResolverClusterRoleBinding(ctx, c, namespace)
+}
 
+func applyAddressableResolverRoleBinding(ctx context.Context, c kubernetes.Interface, namespace string) error {
+	rb := rbacv1ac.RoleBinding(fmt.Sprintf("%s-addressable-resolver", serviceAccountName), namespace).
+		WithSubjects(
+			rbacv1ac.Subject().
+				WithKind("ServiceAccount").
+				WithNamespace(namespace).
+				WithName(serviceAccountName),
+		).
+		WithRoleRef(rbacv1ac.RoleRef().
+			WithAPIGroup(rbacv1.GroupName).
+			WithKind("ClusterRole").
+			WithName(knativeAddressableResolverClusterRoleName))
+
+	_, err := c.RbacV1().RoleBindings(namespace).
+		Apply(ctx, rb, metav1.ApplyOptions{FieldManager: serviceAccountName, Force: true})
+
+	return err
+}
+
+func applyAddressableResolverClusterRoleBinding(ctx context.Context, c kubernetes.Interface, namespace string) error {
 	crb := rbacv1ac.ClusterRoleBinding(fmt.Sprintf("%s-addressable-resolver", serviceAccountName)).
 		WithSubjects(
 			rbacv1ac.Subject().
