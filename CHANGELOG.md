@@ -10,11 +10,13 @@
 - Stale bot is setting issue `stale` where marked as `never-stale` [\#2893](https://github.com/apache/camel-k/issues/2893)
 - camel-k-client binary is missing in the latest release assets [\#2892](https://github.com/apache/camel-k/issues/2892)
 - Release 1.8.0 [\#2848](https://github.com/apache/camel-k/issues/2848)
+- Expose UDP port using traits and make it accessible outside of the pod [\#2693](https://github.com/apache/camel-k/issues/2693)
 - Change autogen doc template to adoc [\#2289](https://github.com/apache/camel-k/issues/2289)
 - Kamel dump: make the command smarter [\#2189](https://github.com/apache/camel-k/issues/2189)
 
 **Merged pull requests:**
 
+- \[TEST\] Add Global operator + namespaced kamelet test [\#2955](https://github.com/apache/camel-k/pull/2955) ([bouskaJ](https://github.com/bouskaJ))
 - fix\(api\): Add missing loader metadata field in CamelCatalog API [\#2953](https://github.com/apache/camel-k/pull/2953) ([astefanutti](https://github.com/astefanutti))
 - Kamel dump: make the command smarter  [\#2952](https://github.com/apache/camel-k/pull/2952) ([oscerd](https://github.com/oscerd))
 - chore\(deps\): remove kamelet-reify [\#2949](https://github.com/apache/camel-k/pull/2949) ([squakez](https://github.com/squakez))
@@ -29,6 +31,7 @@
 - fix\(e2e\): Update health tests based on Camel 3.14 new health check responses [\#2911](https://github.com/apache/camel-k/pull/2911) ([astefanutti](https://github.com/astefanutti))
 - camel-website \#701 camel-k RI table setup \(main\) [\#2906](https://github.com/apache/camel-k/pull/2906) ([djencks](https://github.com/djencks))
 - fix\(e2e\): Use X.Y channels for OLM upgrade e2e tests [\#2901](https://github.com/apache/camel-k/pull/2901) ([astefanutti](https://github.com/astefanutti))
+- See \#2898 Generate CRD API docs as AsciiDoc [\#2899](https://github.com/apache/camel-k/pull/2899) ([djencks](https://github.com/djencks))
 - \[TEST\] - check IntegrationPlatform namespace with global operator [\#2895](https://github.com/apache/camel-k/pull/2895) ([bouskaJ](https://github.com/bouskaJ))
 - Update stale.yaml [\#2894](https://github.com/apache/camel-k/pull/2894) ([squakez](https://github.com/squakez))
 - Fix \#2788: use kamelets 0.7.0 and align with new dir structure [\#2887](https://github.com/apache/camel-k/pull/2887) ([nicolaferraro](https://github.com/nicolaferraro))
