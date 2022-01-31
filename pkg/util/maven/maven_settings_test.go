@@ -30,6 +30,7 @@ const expectedSettings = `<?xml version="1.0" encoding="UTF-8"?>
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ` +
 	`xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
   <localRepository>/tmp/artifacts/m2</localRepository>
+  <servers></servers>
   <profiles>
     <profile>
       <id>my-profile</id>
@@ -62,6 +63,7 @@ const expectedDefaultSettings = `<?xml version="1.0" encoding="UTF-8"?>
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ` +
 	`xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
   <localRepository></localRepository>
+  <servers></servers>
   <profiles>
     <profile>
       <id>camel-k</id>
@@ -106,6 +108,7 @@ const expectedDefaultSettingsWithExtraRepo = `<?xml version="1.0" encoding="UTF-
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ` +
 	`xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
   <localRepository></localRepository>
+  <servers></servers>
   <profiles>
     <profile>
       <id>camel-k</id>

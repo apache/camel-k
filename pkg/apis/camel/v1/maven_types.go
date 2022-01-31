@@ -83,3 +83,13 @@ type MavenArtifact struct {
 	// Maven Version
 	Version string `json:"version,omitempty" yaml:"version,omitempty" xml:"version,omitempty"`
 }
+
+type Server struct {
+	XMLName       xml.Name   `xml:"server"`
+	ID            string     `xml:"id,omitempty" json:"id,omitempty"`
+	Username      string     `xml:"username,omitempty" json:"username,omitempty"`
+	Password      string     `xml:"password,omitempty" json:"password,omitempty"`
+	Configuration Properties `xml:"configuration,omitempty" json:"configuration,omitempty"`
+}
+
+type Properties map[string]string

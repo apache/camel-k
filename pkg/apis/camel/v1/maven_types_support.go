@@ -19,46 +19,18 @@ package v1
 
 import "encoding/xml"
 
-// Repository --
-type Repository struct {
-	ID        string           `xml:"id" json:"id"`
-	Name      string           `xml:"name,omitempty" json:"name,omitempty"`
-	URL       string           `xml:"url" json:"url"`
-	Snapshots RepositoryPolicy `xml:"snapshots,omitempty" json:"snapshots,omitempty"`
-	Releases  RepositoryPolicy `xml:"releases,omitempty" json:"releases,omitempty"`
-}
-
-// RepositoryPolicy --
-type RepositoryPolicy struct {
-	Enabled        bool   `xml:"enabled" json:"enabled"`
-	UpdatePolicy   string `xml:"updatePolicy,omitempty" json:"updatePolicy,omitempty"`
-	ChecksumPolicy string `xml:"checksumPolicy,omitempty" json:"checksumPolicy,omitempty"`
-}
-
-type Server struct {
-	XMLName       xml.Name   `xml:"server"`
-	ID            string     `xml:"id,omitempty" json:"id,omitempty"`
-	Username      string     `xml:"username,omitempty" json:"username,omitempty"`
-	Password      string     `xml:"password,omitempty" json:"password,omitempty"`
-	Configuration Properties `xml:"configuration,omitempty" json:"configuration,omitempty"`
-}
-
-type Properties map[string]string
-
-
-
 type propertiesEntry struct {
 	XMLName xml.Name
 	Value   string `xml:",chardata"`
 }
 
-func (m v1.Properties) AddAll(properties map[string]string) {
+func (m Properties) AddAll(properties map[string]string) {
 	for k, v := range properties {
 		m[k] = v
 	}
 }
 
-func (m v1.Properties) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+func (m Properties) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	if len(m) == 0 {
 		return nil
 	}
