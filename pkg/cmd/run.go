@@ -297,8 +297,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 			prefix = prefix[0:strings.Index(prefix, "[")]
 		}
 		if !util.StringSliceExists(tp, prefix) {
-			fmt.Printf("Error: %s is not a valid trait property\n", t)
-			return nil
+			return fmt.Errorf("%s is not a valid trait property", t)
 		}
 	}
 
