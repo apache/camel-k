@@ -5,7 +5,7 @@
 |`{{ fieldName . }}` +
 {{ if linkForType .Type -}}
   {{- if isLocalType .Type -}}
-*xref:{{ linkForType .Type}}[{{ asciiDocAttributeEscape (typeDisplayName .Type) }}]*
+*xref:#{{ sanitizeId (anchorIDForType .Type) }}[{{ asciiDocAttributeEscape (typeDisplayName .Type) }}]*
   {{- else -}}
 *{{ linkForType .Type}}[{{ asciiDocAttributeEscape (typeDisplayName .Type) }}]*
   {{- end -}}
