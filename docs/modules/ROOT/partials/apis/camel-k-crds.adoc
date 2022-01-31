@@ -2023,13 +2023,6 @@ string
 
 
 
-|`kit` +
-string
-|
-
-
-Deprecated: use the IntegrationKit field
-
 |`integrationKit` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core[Kubernetes core/v1.ObjectReference]*
 |
