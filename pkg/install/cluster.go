@@ -35,6 +35,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/resources"
+	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -187,6 +188,23 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 		}
 		if !ok || collection != nil {
 			err := installResource(ctx, c, collection, "/rbac/openshift/operator-cluster-role-console-openshift.yaml")
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	isKnative, err := knative.IsInstalled(ctx, c)
+	if err != nil {
+		return err
+	}
+	if isKnative {
+		ok, err := isClusterRoleInstalled(ctx, c, "camel-k-operator-bind-addressable-resolver")
+		if err != nil {
+			return err
+		}
+		if !ok || collection != nil {
+			err := installResource(ctx, c, collection, "/rbac/operator-cluster-role-addressable-resolver.yaml")
 			if err != nil {
 				return err
 			}
