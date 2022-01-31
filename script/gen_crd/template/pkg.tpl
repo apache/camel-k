@@ -1,7 +1,7 @@
 {{ define "packages" -}}
 {{ range .packages -}}
 
-[#{{ packageAnchorID . }}]
+[#{{ sanitizeId (packageAnchorID .) }}]
 == {{ packageDisplayName . }}
 
     {{- with (index .GoPackages 0 ) -}}
