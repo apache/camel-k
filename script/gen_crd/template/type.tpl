@@ -1,12 +1,12 @@
 {{ define "type" }}
 
-[#{{ anchorIDForType . }}]
+[#{{ sanitizeId (anchorIDForType .) }}]
 === {{ .Name.Name }}{{ if eq .Kind "Alias" }}(`{{.Underlying}}` alias){{ end }}
 {{- with (typeReferences .) }}
 
 *Appears on:*
 {{ range . }}
-* <<{{ linkForType . }}, {{ typeDisplayName . }}>>
+* <<#{{ sanitizeId (anchorIDForType .) }}, {{ typeDisplayName . }}>>
 {{- end -}}
 {{- end }}
 
