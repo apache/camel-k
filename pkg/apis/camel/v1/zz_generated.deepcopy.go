@@ -1287,8 +1287,10 @@ func (in *MavenSpec) DeepCopyInto(out *MavenSpec) {
 	in.Settings.DeepCopyInto(&out.Settings)
 	if in.CASecret != nil {
 		in, out := &in.CASecret, &out.CASecret
-		*out = new(corev1.SecretKeySelector)
-		(*in).DeepCopyInto(*out)
+		*out = make([]corev1.SecretKeySelector, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
 	}
 	if in.Extension != nil {
 		in, out := &in.Extension, &out.Extension
