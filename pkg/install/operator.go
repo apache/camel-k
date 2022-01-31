@@ -247,44 +247,51 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		if err := installKnative(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 			return err
 		}
+		if err := installClusterRoleBinding(ctx, c, collection, cfg.Namespace, "camel-k-operator-bind-addressable-resolver", "/rbac/operator-cluster-role-binding-addressable-resolver.yaml"); err != nil {
+			if k8serrors.IsForbidden(err) {
+				fmt.Println("Warning: the operator will not be able to bind Knative addressable-resolver ClusterRole. Try installing the operator as cluster-admin.")
+			} else {
+				return err
+			}
+		}
 	}
 
-	if errevt := installEvents(ctx, c, cfg.Namespace, customizer, collection, force); errevt != nil {
-		if k8serrors.IsAlreadyExists(errevt) {
-			return errevt
+	if err = installEvents(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
+		if k8serrors.IsAlreadyExists(err) {
+			return err
 		}
 		fmt.Println("Warning: the operator will not be able to publish Kubernetes events. Try installing as cluster-admin to allow it to generate events.")
 	}
 
-	if errmtr := installKedaBindings(ctx, c, cfg.Namespace, customizer, collection, force); errmtr != nil {
-		if k8serrors.IsAlreadyExists(errmtr) {
-			return errmtr
+	if err = installKedaBindings(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
+		if k8serrors.IsAlreadyExists(err) {
+			return err
 		}
 		fmt.Println("Warning: the operator will not be able to create KEDA resources. Try installing as cluster-admin.")
 	}
 
-	if errmtr := installPodMonitors(ctx, c, cfg.Namespace, customizer, collection, force); errmtr != nil {
-		if k8serrors.IsAlreadyExists(errmtr) {
-			return errmtr
+	if err = installPodMonitors(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
+		if k8serrors.IsAlreadyExists(err) {
+			return err
 		}
 		fmt.Println("Warning: the operator will not be able to create PodMonitor resources. Try installing as cluster-admin.")
 	}
 
-	if errmtr := installStrimziBindings(ctx, c, cfg.Namespace, customizer, collection, force); errmtr != nil {
-		if k8serrors.IsAlreadyExists(errmtr) {
-			return errmtr
+	if err := installStrimziBindings(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
+		if k8serrors.IsAlreadyExists(err) {
+			return err
 		}
 		fmt.Println("Warning: the operator will not be able to lookup strimzi kafka resources. Try installing as cluster-admin to allow the lookup of strimzi kafka resources.")
 	}
 
-	if errmtr := installLeaseBindings(ctx, c, cfg.Namespace, customizer, collection, force); errmtr != nil {
-		if k8serrors.IsAlreadyExists(errmtr) {
-			return errmtr
+	if err = installLeaseBindings(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
+		if k8serrors.IsAlreadyExists(err) {
+			return err
 		}
 		fmt.Println("Warning: the operator will not be able to create Leases. Try installing as cluster-admin to allow management of Lease resources.")
 	}
 
-	if errmtr := installClusterRoleBinding(ctx, c, collection, cfg.Namespace, "camel-k-operator-custom-resource-definitions", "/rbac/operator-cluster-role-binding-custom-resource-definitions.yaml"); errmtr != nil {
+	if err = installClusterRoleBinding(ctx, c, collection, cfg.Namespace, "camel-k-operator-custom-resource-definitions", "/rbac/operator-cluster-role-binding-custom-resource-definitions.yaml"); err != nil {
 		fmt.Println("Warning: the operator will not be able to get CustomResourceDefinitions resources and the service-binding trait will fail if used. Try installing the operator as cluster-admin.")
 	}
 
@@ -309,7 +316,6 @@ func installClusterRoleBinding(ctx context.Context, c client.Client, collection 
 	existing, err := c.RbacV1().ClusterRoleBindings().Get(ctx, name, metav1.GetOptions{})
 	switch {
 	case k8serrors.IsNotFound(err):
-
 		content, err := resources.ResourceAsString(path)
 		if err != nil {
 			return err
@@ -324,8 +330,10 @@ func installClusterRoleBinding(ctx context.Context, c client.Client, collection 
 		if err != nil {
 			return err
 		}
-		// nolint: forcetypeassert
-		target = obj.(*rbacv1.ClusterRoleBinding)
+		var ok bool
+		if target, ok = obj.(*rbacv1.ClusterRoleBinding); !ok {
+			return fmt.Errorf("file %v does not contain a ClusterRoleBinding resource", path)
+		}
 	case err != nil:
 		return err
 	default:
