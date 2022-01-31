@@ -93,22 +93,22 @@ func GenerateCatalog(
 		return nil, err
 	}
 
-	var caCert []byte
+	var caCerts [][]byte
 	if mvn.CASecret != nil {
-		caCert, err = kubernetes.GetSecretRefData(ctx, client, namespace, mvn.CASecret)
+		caCerts, err = kubernetes.GetSecretsRefData(ctx, client, namespace, mvn.CASecret)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return GenerateCatalogCommon(ctx, globalSettings, []byte(userSettings), caCert, mvn, runtime, providerDependencies)
+	return GenerateCatalogCommon(ctx, globalSettings, []byte(userSettings), caCerts, mvn, runtime, providerDependencies)
 }
 
 func GenerateCatalogCommon(
 	ctx context.Context,
 	globalSettings []byte,
 	userSettings []byte,
-	caCert []byte,
+	caCert [][]byte,
 	mvn v1.MavenSpec,
 	runtime v1.RuntimeSpec,
 	providerDependencies []maven.Dependency) (*RuntimeCatalog, error) {

@@ -80,6 +80,7 @@
 ** xref:traits:prometheus.adoc[Prometheus]
 ** xref:traits:pull-secret.adoc[Pull Secret]
 ** xref:traits:quarkus.adoc[Quarkus]
+** xref:traits:registry.adoc[Registry]
 ** xref:traits:route.adoc[Route]
 ** xref:traits:service-binding.adoc[Service Binding]
 ** xref:traits:service.adoc[Service]

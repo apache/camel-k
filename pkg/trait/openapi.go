@@ -274,13 +274,13 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 	mc.GlobalSettings = data
 
 	if e.Platform.Status.Build.Maven.CASecret != nil {
-		certData, err := kubernetes.GetSecretRefData(e.Ctx, e.Client, e.Platform.Namespace, e.Platform.Status.Build.Maven.CASecret)
+		certsData, err := kubernetes.GetSecretsRefData(e.Ctx, e.Client, e.Platform.Namespace, e.Platform.Status.Build.Maven.CASecret)
 		if err != nil {
 			return err
 		}
 		trustStoreName := "trust.jks"
 		trustStorePass := jvm.NewKeystorePassword()
-		err = jvm.GenerateKeystore(e.Ctx, tmpDir, trustStoreName, trustStorePass, certData)
+		err = jvm.GenerateKeystore(e.Ctx, tmpDir, trustStoreName, trustStorePass, certsData)
 		if err != nil {
 			return err
 		}

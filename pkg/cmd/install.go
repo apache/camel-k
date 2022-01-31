@@ -432,7 +432,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			if err != nil {
 				return err
 			}
-			platform.Spec.Build.Maven.CASecret = secret
+			platform.Spec.Build.Maven.CASecret = append(platform.Spec.Build.Maven.CASecret, *secret)
 		}
 
 		if o.ClusterType != "" {

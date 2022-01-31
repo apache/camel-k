@@ -37,16 +37,18 @@ var (
 	loggerError = func(s string) { logger.Error(nil, s) }
 )
 
-func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePass string, data []byte) error {
-	args := strings.Fields(fmt.Sprintf("-importcert -noprompt -alias maven -storepass %s -keystore %s", keystorePass, keystoreName))
-	cmd := exec.CommandContext(ctx, "keytool", args...)
-	cmd.Dir = keystoreDir
-	cmd.Stdin = bytes.NewReader(data)
-	// keytool logs info messages to stderr, as stdout is used to output results,
-	// otherwise it logs error messages to stdout.
-	err := util.RunAndLog(ctx, cmd, loggerError, loggerInfo)
-	if err != nil {
-		return err
+func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePass string, data [][]byte) error {
+	for i, data := range data {
+		args := strings.Fields(fmt.Sprintf("-importcert -noprompt -alias maven-%d -storepass %s -keystore %s", i, keystorePass, keystoreName))
+		cmd := exec.CommandContext(ctx, "keytool", args...)
+		cmd.Dir = keystoreDir
+		cmd.Stdin = bytes.NewReader(data)
+		// keytool logs info messages to stderr, as stdout is used to output results,
+		// otherwise it logs error messages to stdout.
+		err := util.RunAndLog(ctx, cmd, loggerError, loggerInfo)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Try to locate root CA certificates truststore, in order to import them
