@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -46,7 +47,8 @@ const (
 
 	// camel-k-edit
 	// camel-k-operator-custom-resource-definitions
-	ExpKubeClusterRoles = 2
+	// camel-k-operator-bind-addressable-resolver
+	ExpKubeClusterRoles = 3
 
 	// camel-k-operator-openshift
 	ExpOSPromoteRoles = 1
@@ -75,8 +77,6 @@ func ExecMake(t *testing.T, command *exec.Cmd) {
 }
 
 func Uninstall() {
-	//
 	// Removes all items including CRDs and ClusterRoles
-	//
 	Kamel("uninstall", "--olm=false", "--all").Execute()
 }
