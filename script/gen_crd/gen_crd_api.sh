@@ -24,13 +24,14 @@ echo "Generating CRD API documentation..."
 # to run a local copy use something like
 #go run /Users/david/projects/camel/gen-crd-api-reference-docs/main.go \
 #you will probably need to comment out use of blackfriday.
-go run github.com/djencks/gen-crd-api-reference-docs@7400a10b36d7cfa7563ea48ce0df15a9d4c2de87 \
+go run github.com/djencks/gen-crd-api-reference-docs@e63530f10b55be5f2d82e223d83f86c13e5158e5 \
     -config $location/gen-crd-api-config.json \
     -template-dir $location/template \
     -api-dir "github.com/apache/camel-k/pkg/apis/camel/v1" \
     -out-file $crd_file_camel
 
-go run github.com/djencks/gen-crd-api-reference-docs@7400a10b36d7cfa7563ea48ce0df15a9d4c2de87 \
+#go run /Users/david/projects/camel/gen-crd-api-reference-docs/main.go \
+go run github.com/djencks/gen-crd-api-reference-docs@e63530f10b55be5f2d82e223d83f86c13e5158e5 \
     -config $location/gen-kamelets-crd-api-config.json \
     -template-dir $location/template \
     -api-dir "github.com/apache/camel-k/pkg/apis/camel/v1alpha1" \
