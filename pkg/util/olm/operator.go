@@ -263,7 +263,7 @@ func maybeSetResourcesRequirements(sub *operatorsv1alpha1.Subscription, reqArray
 
 func maybeSetEnvVars(sub *operatorsv1alpha1.Subscription, envVars []string) error {
 	if envVars != nil {
-		vars, _, err := env.ParseEnv(envVars, nil)
+		vars, _, _, err := env.ParseEnv(envVars, nil)
 		if err != nil {
 			return err
 		}
