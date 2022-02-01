@@ -77,7 +77,10 @@ func (c *Clientset) Tracker() testing.ObjectTracker {
 	return c.tracker
 }
 
-var _ clientset.Interface = &Clientset{}
+var (
+	_ clientset.Interface = &Clientset{}
+	_ testing.FakeClient  = &Clientset{}
+)
 
 // CamelV1 retrieves the CamelV1Client
 func (c *Clientset) CamelV1() camelv1.CamelV1Interface {
