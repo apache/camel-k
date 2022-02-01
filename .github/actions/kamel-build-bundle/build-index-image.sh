@@ -155,18 +155,20 @@ fi
 
 #
 # Construct an index image containing the newly built bundle image
-#   Bug:
-#     https://github.com/operator-framework/operator-registry/issues/870
-#   Workaround:
-#     image catalog layers contain root owned files so fails with `permission denied` error.
-#     Running with sudo fixes this error (alternative is to switch to podman)
-#
-sudo opm index add \
-  -c docker --skip-tls \
-  --bundles ${BUNDLE_IMAGE} \
-  --from-index quay.io/operatorhubio/catalog:latest \
-  --tag ${LOCAL_IIB}
-
+mkdir catalog
+opm render quay.io/operatorhubio/catalog:latest -o yaml > catalog/bundles.yaml
+sudo opm render --skip-tls ${BUNDLE_IMAGE} > catalog/camel-k.yaml
+cat << EOF >> catalog/camel-k.yaml
+---
+schema: olm.channel
+package: camel-k
+name: stable-$(make get-version | grep -Po "\d.\d")
+entries:
+  - name: camel-k.v$(make get-version | grep -Po "\d.\d.\d")
+EOF
+opm validate catalog
+opm alpha generate dockerfile catalog
+docker build . -f catalog.Dockerfile -t ${LOCAL_IIB}
 docker push ${LOCAL_IIB}
 BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX="${REGISTRY_PULL_HOST}/${IMAGE_NAMESPACE}/camel-k-iib:${IMAGE_VERSION}"
 echo "Setting build-bundle-image-bundle-index to ${BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX}"
