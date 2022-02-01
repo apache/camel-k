@@ -6,20 +6,26 @@
 
 **Closed issues:**
 
+- Configure Maven: Artifact Repository is not recognized [\#2966](https://github.com/apache/camel-k/issues/2966)
+- camel-k-operator forbidden to get kafkachannels.messaging.knative.dev since 1.8.x [\#2950](https://github.com/apache/camel-k/issues/2950)
 - Enabling prometheus causes KameletBindings to be stuck in status "Creating" [\#2896](https://github.com/apache/camel-k/issues/2896)
 - Stale bot is setting issue `stale` where marked as `never-stale` [\#2893](https://github.com/apache/camel-k/issues/2893)
 - camel-k-client binary is missing in the latest release assets [\#2892](https://github.com/apache/camel-k/issues/2892)
 - Release 1.8.0 [\#2848](https://github.com/apache/camel-k/issues/2848)
-- Expose UDP port using traits and make it accessible outside of the pod [\#2693](https://github.com/apache/camel-k/issues/2693)
 - Kamelet with MQTT Broker Mosquitto [\#2690](https://github.com/apache/camel-k/issues/2690)
+- Json marshalling is needed for Rest route and uncommented code seems to be executed [\#2341](https://github.com/apache/camel-k/issues/2341)
 - Change autogen doc template to adoc [\#2289](https://github.com/apache/camel-k/issues/2289)
 - Kamel dump: make the command smarter [\#2189](https://github.com/apache/camel-k/issues/2189)
 
 **Merged pull requests:**
 
+- fix\(cli\): Kamel CLI zero-code exists when trait properties validation fails [\#2964](https://github.com/apache/camel-k/pull/2964) ([astefanutti](https://github.com/astefanutti))
+- Generate crd API docs as AsciiDoc \(main\) \(Update\) [\#2963](https://github.com/apache/camel-k/pull/2963) ([djencks](https://github.com/djencks))
+- feat\(knative\): Rely on addressable-resolver ClusterRole to transfer RBAC for Knative Sinks [\#2958](https://github.com/apache/camel-k/pull/2958) ([astefanutti](https://github.com/astefanutti))
 - \[TEST\] Add Global operator + namespaced kamelet test [\#2955](https://github.com/apache/camel-k/pull/2955) ([bouskaJ](https://github.com/bouskaJ))
 - fix\(api\): Add missing loader metadata field in CamelCatalog API [\#2953](https://github.com/apache/camel-k/pull/2953) ([astefanutti](https://github.com/astefanutti))
 - Kamel dump: make the command smarter  [\#2952](https://github.com/apache/camel-k/pull/2952) ([oscerd](https://github.com/oscerd))
+- WIP separate v1 and v1alpha1 api packages as much as possible [\#2951](https://github.com/apache/camel-k/pull/2951) ([djencks](https://github.com/djencks))
 - chore\(deps\): remove kamelet-reify [\#2949](https://github.com/apache/camel-k/pull/2949) ([squakez](https://github.com/squakez))
 - fix\(e2e\): Patch OLM Subscription to avoid conflicting updates [\#2946](https://github.com/apache/camel-k/pull/2946) ([astefanutti](https://github.com/astefanutti))
 - fix\(e2e\): Do not add snapshot bundle to stable channel [\#2939](https://github.com/apache/camel-k/pull/2939) ([astefanutti](https://github.com/astefanutti))
@@ -104,6 +110,7 @@
 - camel k main latest to next [\#2716](https://github.com/apache/camel-k/pull/2716) ([djencks](https://github.com/djencks))
 - \[TEST\] Add cross-channel upgrade test feature [\#2715](https://github.com/apache/camel-k/pull/2715) ([bouskaJ](https://github.com/bouskaJ))
 - chore\(ci\): update to golangci-lint 1.42.x and use golangci/golangci-lint-action [\#2714](https://github.com/apache/camel-k/pull/2714) ([tadayosi](https://github.com/tadayosi))
+- E2E development allowing injection of secrets denoting testing on custom clusters [\#2711](https://github.com/apache/camel-k/pull/2711) ([phantomjinx](https://github.com/phantomjinx))
 - fix refs to camel-quarkus docs to point to latest released version [\#2708](https://github.com/apache/camel-k/pull/2708) ([djencks](https://github.com/djencks))
 - fix\(ci\): proper action/staleV3 configuration [\#2707](https://github.com/apache/camel-k/pull/2707) ([squakez](https://github.com/squakez))
 - chore\(dev\): add .editorconfig [\#2705](https://github.com/apache/camel-k/pull/2705) ([tadayosi](https://github.com/tadayosi))
