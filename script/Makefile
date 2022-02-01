@@ -27,7 +27,7 @@ OPERATOR_SDK_VERSION := v1.14.0
 KUSTOMIZE_VERSION := v4.1.2
 BASE_IMAGE := adoptopenjdk/openjdk11:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
-IMAGE_NAME := docker.io/apache/camel-k
+IMAGE_NAME := docker.io/apache/camel-2k
 
 #
 # Situations when user wants to override
@@ -425,7 +425,7 @@ ifeq (, $(shell which operator-sdk))
 			-o operator-sdk ; \
 	else \
 		curl \
-			-L https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_linux_amd64 \
+			-L https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_linux_arm64 \
 			-o operator-sdk ; \
 	fi ;\
 	chmod +x operator-sdk ;\
