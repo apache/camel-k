@@ -28,7 +28,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
 	"os"
@@ -38,12 +37,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/apache/camel-k/pkg/platform"
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
 
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
@@ -53,10 +52,13 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/pointer"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1"
@@ -72,6 +74,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/cmd"
 	"github.com/apache/camel-k/pkg/install"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
@@ -1649,7 +1652,7 @@ func WithGlobalOperatorNamespace(t *testing.T, test func(string)) {
 	if ocp {
 		// global operators are always installed in the openshift-operators namespace
 		InvokeUserTestCode(t, "openshift-operators", test)
-	}else {
+	} else {
 		// create new namespace for the global operator
 		WithNewTestNamespace(t, test)
 	}
@@ -1769,17 +1772,20 @@ func DeleteTestNamespace(t *testing.T, ns ctrl.Object) {
 }
 
 func NewTestNamespace(injectKnativeBroker bool) ctrl.Object {
-	var err error
-	var oc bool
-	var obj ctrl.Object
-
 	brokerLabel := "eventing.knative.dev/injection"
 	name := "test-" + uuid.New().String()
+	c := TestClient()
 
-	if oc, err = openshift.IsOpenShift(TestClient()); err != nil {
+	if oc, err := openshift.IsOpenShift(TestClient()); err != nil {
 		panic(err)
 	} else if oc {
-		obj = &projectv1.ProjectRequest{
+		rest, err := apiutil.RESTClientForGVK(
+			schema.GroupVersionKind{Group: projectv1.GroupName, Version: projectv1.GroupVersion.Version}, false,
+			c.GetConfig(), serializer.NewCodecFactory(c.GetScheme()))
+		if err != nil {
+			panic(err)
+		}
+		request := &projectv1.ProjectRequest{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: projectv1.GroupVersion.String(),
 				Kind:       "ProjectRequest",
@@ -1788,8 +1794,39 @@ func NewTestNamespace(injectKnativeBroker bool) ctrl.Object {
 				Name: name,
 			},
 		}
+		project := &projectv1.Project{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: projectv1.GroupVersion.String(),
+				Kind:       "Project",
+			},
+		}
+		err = rest.Post().
+			Resource("projectrequests").
+			Body(request).
+			Do(TestContext).
+			Into(project)
+		if err != nil {
+			panic(err)
+		}
+		// workaround https://github.com/openshift/origin/issues/3819
+		if injectKnativeBroker {
+			// use Kubernetes API - https://access.redhat.com/solutions/2677921
+			if namespace, err := TestClient().CoreV1().Namespaces().Get(TestContext, name, metav1.GetOptions{}); err != nil {
+				panic(err)
+			} else {
+				if _, ok := namespace.GetLabels()[brokerLabel]; !ok {
+					namespace.SetLabels(map[string]string{
+						brokerLabel: "enabled",
+					})
+					if err = TestClient().Update(TestContext, namespace); err != nil {
+						panic("Unable to label project with knative-eventing-injection. This operation needs update permission on the project.")
+					}
+				}
+			}
+		}
+		return project
 	} else {
-		obj = &corev1.Namespace{
+		namespace := &corev1.Namespace{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: "v1",
 				Kind:       "Namespace",
@@ -1798,36 +1835,16 @@ func NewTestNamespace(injectKnativeBroker bool) ctrl.Object {
 				Name: name,
 			},
 		}
-	}
-
-	if injectKnativeBroker {
-		mo := obj.(metav1.Object)
-		mo.SetLabels(map[string]string{
-			brokerLabel: "enabled",
-		})
-	}
-
-	if err = TestClient().Create(TestContext, obj); err != nil {
-		panic(err)
-	}
-	// workaround https://github.com/openshift/origin/issues/3819
-	if injectKnativeBroker && oc {
-		// use Kubernetes API - https://access.redhat.com/solutions/2677921
-		var namespace *corev1.Namespace
-		if namespace, err = TestClient().CoreV1().Namespaces().Get(TestContext, name, metav1.GetOptions{}); err != nil {
-			panic(err)
-		} else {
-			if _, ok := namespace.GetLabels()[brokerLabel]; !ok {
-				namespace.SetLabels(map[string]string{
-					brokerLabel: "enabled",
-				})
-				if err = TestClient().Update(TestContext, namespace); err != nil {
-					panic("Unable to label project with knative-eventing-injection. This operation needs update permission on the project.")
-				}
-			}
+		if injectKnativeBroker {
+			namespace.SetLabels(map[string]string{
+				brokerLabel: "enabled",
+			})
 		}
+		if err := TestClient().Create(TestContext, namespace); err != nil {
+			panic(err)
+		}
+		return namespace
 	}
-	return obj
 }
 
 func GetOutputString(command *cobra.Command) string {
