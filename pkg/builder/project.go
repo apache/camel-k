@@ -114,7 +114,6 @@ func generateProjectSettings(ctx *builderContext) error {
 	return nil
 }
 
-//Visible for testing
 func injectServersIntoMavenSettings(settings string, servers []v1.Server) string {
 	if servers == nil || len(servers) < 1 {
 		return settings
@@ -145,7 +144,7 @@ func encodeXMLNoHeader(content interface{}) ([]byte, error) {
 	return w.Bytes(), nil
 }
 
-// Return Index of </server> Tag in val. Creates Tag if necessary
+// Return Index of </server> Tag in val. Creates Tag if necessary.
 func getServerTagIndex(val string) (string, int) {
 	serversTag := "\n  <servers></servers>\n"
 	val = strings.Replace(val, "<servers/>", serversTag, 1)
@@ -153,29 +152,27 @@ func getServerTagIndex(val string) (string, int) {
 	i := strings.Index(val, endServerTag)
 	if i > 0 {
 		return val, i
-	} else {
-		// create necessary tags
-		tags := []string{"</proxies>", "<proxies/>", "</offline>", "<offline/>", "</usePluginRegistry>", "<usePluginRegistry/>", "</interactiveMode>", "<interactiveMode/>", "</localRepository>", "<localRepository/>"}
-		i = -1
-		for _, tag := range tags {
-			i = strings.Index(val, tag)
-			if i > 0 {
-				i += len(tag)
-				break
-			}
-		}
-		if i < 0 {
-			regexp := regexp.MustCompile(`<settings.*>`)
-			loc := regexp.FindStringIndex(val)
-			if loc == nil {
-				return val, i
-			} else {
-				i = loc[1]
-			}
-		}
-		val = val[:i] + serversTag + val[i:]
-		return val, strings.Index(val, endServerTag)
 	}
+	// create necessary tags
+	tags := []string{"</proxies>", "<proxies/>", "</offline>", "<offline/>", "</usePluginRegistry>", "<usePluginRegistry/>", "</interactiveMode>", "<interactiveMode/>", "</localRepository>", "<localRepository/>"}
+	i = -1
+	for _, tag := range tags {
+		i = strings.Index(val, tag)
+		if i > 0 {
+			i += len(tag)
+			break
+		}
+	}
+	if i < 0 {
+		regexp := regexp.MustCompile(`<settings.*>`)
+		loc := regexp.FindStringIndex(val)
+		if loc == nil {
+			return val, i
+		}
+		i = loc[1]
+	}
+	val = val[:i] + serversTag + val[i:]
+	return val, strings.Index(val, endServerTag)
 }
 
 func injectDependencies(ctx *builderContext) error {

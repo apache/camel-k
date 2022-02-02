@@ -134,8 +134,8 @@ func GetSecretRefData(ctx context.Context, client ctrl.Reader, namespace string,
 // GetSecretsRefData returns the value of the secrets in the supplied namespace.
 func GetSecretsRefData(ctx context.Context, client ctrl.Reader, namespace string, selector []corev1.SecretKeySelector) ([][]byte, error) {
 	certsData := make([][]byte, len(selector))
-	for i, secret := range selector {
-		certData, err := GetSecretRefData(ctx, client, namespace, &secret)
+	for i := range selector {
+		certData, err := GetSecretRefData(ctx, client, namespace, &selector[i])
 		if err != nil {
 			return nil, err
 		}

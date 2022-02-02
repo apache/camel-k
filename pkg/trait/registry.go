@@ -36,9 +36,9 @@ import (
 )
 
 // The Registry trait sets up Maven to use the Image registry
-// as a Maven repository
+// as a Maven repository.
 //
-// +camel-k:trait=registry
+// +camel-k:trait=registry.
 type registryTrait struct {
 	BaseTrait `property:",squash"`
 }
@@ -49,7 +49,7 @@ func newRegistryTrait() Trait {
 	}
 }
 
-// InfluencesKit overrides base class method
+// InfluencesKit overrides base class method.
 func (t *registryTrait) InfluencesKit() bool {
 	return true
 }
@@ -178,7 +178,7 @@ func extractMavenServerCredentialsFromSecret(registrySecret string, e *Environme
 	}
 	config, ok := dockerAuth.Auths[registryAddress]
 	if !ok {
-		return v1.Server{}, fmt.Errorf("cannot resolve regsitry address %s in secret %s", registryAddress, registrySecret)
+		return v1.Server{}, fmt.Errorf("cannot resolve registry address %s in secret %s", registryAddress, registrySecret)
 	}
 	username := config.Username
 	password := config.Password

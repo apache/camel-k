@@ -54,14 +54,14 @@ type Execution struct {
 // Settings models a Maven settings.
 type Settings struct {
 	XMLName           xml.Name
-	XMLNs             string    `xml:"xmlns,attr"`
-	XMLNsXsi          string    `xml:"xmlns:xsi,attr"`
-	XsiSchemaLocation string    `xml:"xsi:schemaLocation,attr"`
-	LocalRepository   string    `xml:"localRepository"`
+	XMLNs             string      `xml:"xmlns,attr"`
+	XMLNsXsi          string      `xml:"xmlns:xsi,attr"`
+	XsiSchemaLocation string      `xml:"xsi:schemaLocation,attr"`
+	LocalRepository   string      `xml:"localRepository"`
 	Servers           []v1.Server `xml:"servers>server,omitempty"`
-	Profiles          []Profile `xml:"profiles>profile,omitempty"`
-	Proxies           []Proxy   `xml:"proxies>proxy,omitempty"`
-	Mirrors           []Mirror  `xml:"mirrors>mirror,omitempty"`
+	Profiles          []Profile   `xml:"profiles>profile,omitempty"`
+	Proxies           []Proxy     `xml:"proxies>proxy,omitempty"`
+	Mirrors           []Mirror    `xml:"mirrors>mirror,omitempty"`
 }
 
 // Project models a Maven project.

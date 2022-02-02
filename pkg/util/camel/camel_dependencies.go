@@ -110,7 +110,7 @@ func addDependencies(project *maven.Project, dependencies []string, catalog *Run
 			gavString := strings.TrimPrefix(mapping[0], "docker-mvn:")
 			gav, err := maven.ParseGAV(gavString)
 			if err != nil {
-				return nil
+				return err
 			}
 			plugin := getOrCreateBuildPlugin(project, "com.googlecode.maven-download-plugin", "download-maven-plugin", "1.6.7")
 			exec := maven.Execution{

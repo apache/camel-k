@@ -20,7 +20,11 @@ package cmd
 import (
 	"archive/zip"
 	"context"
+
+	// this is needed to generate an SHA1 sum for Jars
+	// #nosec G501
 	"crypto/md5"
+	// #nosec G505
 	"crypto/sha1"
 	"encoding/hex"
 	"encoding/json"
@@ -579,11 +583,11 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		// TODO: accept URLs
 		if strings.HasPrefix(item, "file://") {
 			if platform == nil {
-				// let's also enable the registry trait if not explicitely disabled
+				// let's also enable the registry trait if not explicitly disabled
 				if !contains(o.Traits, "registry.enabled=false") {
 					o.Traits = append(o.Traits, "registry.enabled=true")
 				}
-				platform, err = getPlatform(c, o.Context, integration.Namespace)
+				platform, err = getPlatform(o.Context, c, integration.Namespace)
 				if err != nil {
 					return nil, err
 				}
@@ -777,7 +781,7 @@ func resolvePodTemplate(ctx context.Context, templateSrc string, spec *v1.Integr
 	return err
 }
 
-func getPlatform(c client.Client, context context.Context, ns string) (*v1.IntegrationPlatform, error) {
+func getPlatform(context context.Context, c client.Client, ns string) (*v1.IntegrationPlatform, error) {
 	list := v1.NewIntegrationPlatformList()
 	if err := c.List(context, &list, ctrl.InNamespace(ns)); err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("could not retrieve integration platform from namespace %s", ns))
@@ -794,8 +798,7 @@ func uploadFileOrDirectory(platform *v1.IntegrationPlatform, item string, integr
 	path := strings.TrimPrefix(item, "file://")
 	localPath := path
 	targetPath := ""
-	i := strings.Index(path, ":")
-	if i > 0 {
+	if i := strings.Index(path, ":"); i > 0 {
 		targetPath = path[i+1:]
 		localPath = path[:i]
 	}
@@ -818,10 +821,11 @@ func uploadFileOrDirectory(platform *v1.IntegrationPlatform, item string, integr
 			return err
 		}
 		// When uploading, there are three cases: POM files, JAR files and the rest which will be mounted on the filesystem
-		if isPom(path) {
+		switch {
+		case isPom(path):
 			gav := extractGavFromPom(path, gav)
 			return uploadAsMavenArtifact(gav, path, platform, integration.Namespace, options)
-		} else if isJar(path) {
+		case isJar(path):
 			// Try to upload pom in JAR and extract it's GAV
 			gav = uploadPomFromJar(gav, path, platform, integration.Namespace, options)
 			// add JAR to dependency list
@@ -830,7 +834,7 @@ func uploadFileOrDirectory(platform *v1.IntegrationPlatform, item string, integr
 			integration.Spec.AddDependency(dependency)
 			// Upload JAR
 			return uploadAsMavenArtifact(gav, path, platform, integration.Namespace, options)
-		} else {
+		default:
 			mountPath, err := getMountPath(targetPath, dirName, path)
 			if err != nil {
 				return err
@@ -857,6 +861,7 @@ func getMountPath(targetPath string, dirName string, path string) (string, error
 	return filepath.Join(targetPath, localRelativePath), nil
 }
 
+// nolint:errcheck
 func uploadPomFromJar(gav maven.Dependency, path string, platform *v1.IntegrationPlatform, ns string, options spectrum.Options) maven.Dependency {
 	util.WithTempDir("camel-k", func(tmpDir string) error {
 		pomPath := filepath.Join(tmpDir, "pom.xml")
@@ -873,7 +878,7 @@ func uploadPomFromJar(gav maven.Dependency, path string, platform *v1.Integratio
 		for _, f := range jar.File {
 			if regPom.MatchString(f.Name) {
 				foundPom = true
-				pomExtracted = extractFromZip(pomPath, f, path)
+				pomExtracted = extractFromZip(pomPath, f)
 			} else if regPomProperties.MatchString(f.Name) {
 				foundProperties = true
 				if dep, ok := extractGav(f, path); ok {
@@ -895,7 +900,7 @@ func uploadPomFromJar(gav maven.Dependency, path string, platform *v1.Integratio
 	return gav
 }
 
-func extractFromZip(dst string, src *zip.File, tarPath string) bool {
+func extractFromZip(dst string, src *zip.File) bool {
 	file, err := os.Create(dst)
 	if err != nil {
 		return false
@@ -906,11 +911,10 @@ func extractFromZip(dst string, src *zip.File, tarPath string) bool {
 		return false
 	}
 	defer rc.Close()
+	// no DoS on client side
+	// #nosec G110
 	_, err = io.Copy(file, rc)
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 func extractGav(src *zip.File, localPath string) (maven.Dependency, bool) {
@@ -930,12 +934,12 @@ func extractGav(src *zip.File, localPath string) (maven.Dependency, bool) {
 		return maven.Dependency{}, false
 	}
 
-	groupId, ok := prop.Get("groupId")
+	groupID, ok := prop.Get("groupId")
 	if !ok {
 		fmt.Printf("Couldn't find groupId property while reading pom.properties from [%s], switching to default \n", localPath)
 		return maven.Dependency{}, false
 	}
-	artifactId, ok := prop.Get("artifactId")
+	artifactID, ok := prop.Get("artifactId")
 	if !ok {
 		fmt.Printf("Couldn't find artifactId property while reading pom.properties from [%s], switching to default \n", localPath)
 		return maven.Dependency{}, false
@@ -946,26 +950,27 @@ func extractGav(src *zip.File, localPath string) (maven.Dependency, bool) {
 		return maven.Dependency{}, false
 	}
 	return maven.Dependency{
-		GroupID:    groupId,
-		ArtifactID: artifactId,
+		GroupID:    groupID,
+		ArtifactID: artifactID,
 		Type:       "jar",
 		Version:    version,
 	}, true
 }
 
 func uploadAsMavenArtifact(dependency maven.Dependency, path string, platform *v1.IntegrationPlatform, ns string, options spectrum.Options) error {
-	artifactHttpPath := getArtifactHttpPath(dependency, platform, ns)
-	options.Target = fmt.Sprintf("%s/%s:%s", platform.Spec.Build.Registry.Address, artifactHttpPath, dependency.Version)
+	artifactHTTPPath := getArtifactHTTPPath(dependency, platform, ns)
+	options.Target = fmt.Sprintf("%s/%s:%s", platform.Spec.Build.Registry.Address, artifactHTTPPath, dependency.Version)
 	_, err := spectrum.Build(options, fmt.Sprintf("%s:.", path))
 	if err != nil {
 		return err
 	}
 	fmt.Printf("Uploaded: %s to %s \n", path, options.Target)
-	return uploadChecksumFiles(path, options, platform, artifactHttpPath, dependency)
+	return uploadChecksumFiles(path, options, platform, artifactHTTPPath, dependency)
 }
 
-// Currently swallows errors because our Project model is incomplete
-// Most of the time it is irrelevant for our use case (GAV)
+// Currently swallows errors because our Project model is incomplete.
+// Most of the time it is irrelevant for our use case (GAV).
+// nolint:errcheck
 func extractGavFromPom(path string, gav maven.Dependency) maven.Dependency {
 	var project maven.Project
 	file, err := os.Open(path)
@@ -991,16 +996,18 @@ func extractGavFromPom(path string, gav maven.Dependency) maven.Dependency {
 	return gav
 }
 
-func uploadChecksumFiles(path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHttpPath string, dependency maven.Dependency) error {
+func uploadChecksumFiles(path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHTTPPath string, dependency maven.Dependency) error {
 	return util.WithTempDir("camel-k", func(tmpDir string) error {
-		if err := uploadChecksumFile(md5.New(), tmpDir, "_md5", path, options, platform, artifactHttpPath, dependency); err != nil {
+		// #nosec G401
+		if err := uploadChecksumFile(md5.New(), tmpDir, "_md5", path, options, platform, artifactHTTPPath, dependency); err != nil {
 			return err
 		}
-		return uploadChecksumFile(sha1.New(), tmpDir, "_sha1", path, options, platform, artifactHttpPath, dependency)
+		// #nosec G401
+		return uploadChecksumFile(sha1.New(), tmpDir, "_sha1", path, options, platform, artifactHTTPPath, dependency)
 	})
 }
 
-func uploadChecksumFile(hash hash.Hash, tmpDir string, ext string, path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHttpPath string, dependency maven.Dependency) error {
+func uploadChecksumFile(hash hash.Hash, tmpDir string, ext string, path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHTTPPath string, dependency maven.Dependency) error {
 	file, err := os.Open(path)
 	if err != nil {
 		return err
@@ -1017,7 +1024,7 @@ func uploadChecksumFile(hash hash.Hash, tmpDir string, ext string, path string, 
 	if err = writeChecksumToFile(filepath, hash); err != nil {
 		return err
 	}
-	options.Target = fmt.Sprintf("%s/%s%s:%s", platform.Spec.Build.Registry.Address, artifactHttpPath, ext, dependency.Version)
+	options.Target = fmt.Sprintf("%s/%s%s:%s", platform.Spec.Build.Registry.Address, artifactHTTPPath, ext, dependency.Version)
 	_, err = spectrum.Build(options, fmt.Sprintf("%s:.", filepath))
 	return err
 }
@@ -1048,18 +1055,18 @@ func getSpectrumOptions(platform *v1.IntegrationPlatform, cmd *cobra.Command) sp
 	return options
 }
 
-func getArtifactHttpPath(dependency maven.Dependency, platform *v1.IntegrationPlatform, ns string) string {
-	artifactHttpPath := fmt.Sprintf("maven_%s_%s_%s_%s-%s_%s", dependency.GroupID, dependency.ArtifactID, dependency.Version, dependency.ArtifactID, dependency.Version, dependency.Type)
+func getArtifactHTTPPath(dependency maven.Dependency, platform *v1.IntegrationPlatform, ns string) string {
+	artifactHTTPPath := fmt.Sprintf("maven_%s_%s_%s_%s-%s_%s", dependency.GroupID, dependency.ArtifactID, dependency.Version, dependency.ArtifactID, dependency.Version, dependency.Type)
 	// Image repository names must be lower cased
-	artifactHttpPath = strings.ToLower(artifactHttpPath)
+	artifactHTTPPath = strings.ToLower(artifactHTTPPath)
 	// Some vendors don't allow '/' or '.' in repository name so let's replace them with '_'
-	artifactHttpPath = strings.ReplaceAll(artifactHttpPath, "/", "_")
-	artifactHttpPath = strings.ReplaceAll(artifactHttpPath, ".", "_")
+	artifactHTTPPath = strings.ReplaceAll(artifactHTTPPath, "/", "_")
+	artifactHTTPPath = strings.ReplaceAll(artifactHTTPPath, ".", "_")
 	if platform.Spec.Cluster == v1.IntegrationPlatformClusterOpenShift {
 		// image must be uploaded in the namespace
-		artifactHttpPath = fmt.Sprintf("%s/%s", ns, artifactHttpPath)
+		artifactHTTPPath = fmt.Sprintf("%s/%s", ns, artifactHTTPPath)
 	}
-	return artifactHttpPath
+	return artifactHTTPPath
 }
 
 func createDefaultGav(path string, dirName string, integrationName string) (maven.Dependency, error) {
@@ -1071,13 +1078,13 @@ func createDefaultGav(path string, dirName string, integrationName string) (mave
 		return maven.Dependency{}, err
 	}
 
-	defaultArtifactId := integrationName + "-" + strings.ReplaceAll(fileRelPath, string(os.PathSeparator), ".")
-	defaultGroupId := "org.apache.camel.k.external"
+	defaultArtifactID := integrationName + "-" + strings.ReplaceAll(fileRelPath, string(os.PathSeparator), ".")
+	defaultGroupID := "org.apache.camel.k.external"
 	defaultVersion := defaults.Version
 
 	return maven.Dependency{
-		GroupID:    defaultGroupId,
-		ArtifactID: defaultArtifactId,
+		GroupID:    defaultGroupID,
+		ArtifactID: defaultArtifactID,
 		Type:       ext,
 		Version:    defaultVersion,
 	}, nil
