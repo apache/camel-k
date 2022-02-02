@@ -32,7 +32,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/signal"
-	"path"
 	"path/filepath"
 	"reflect"
 	"regexp"

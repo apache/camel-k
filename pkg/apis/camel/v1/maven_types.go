@@ -18,6 +18,8 @@ limitations under the License.
 package v1
 
 import (
+	"encoding/xml"
+
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -40,7 +42,7 @@ type MavenSpec struct {
 	// The Maven build extensions.
 	// See https://maven.apache.org/guides/mini/guide-using-extensions.html.
 	Extension []MavenArtifact `json:"extension,omitempty"`
-	Servers      []Server         `json:"servers,omitempty"`
+	Servers   []Server        `json:"servers,omitempty"`
 	// The CLI options that are appended to the list of arguments for Maven commands,
 	// e.g., `-V,--no-transfer-progress,-Dstyle.color=never`.
 	// See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.

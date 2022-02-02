@@ -289,8 +289,8 @@ func TestMavenSettingsFromSecret(t *testing.T) {
 }
 
 func TestInjectEmptyServersIntoDefaultMavenSettings(t *testing.T) {
-
-	settings := maven.NewDefaultSettings([]v1.Repository{}, []maven.Mirror{})
+	settings, err := maven.NewSettings(maven.DefaultRepositories)
+	assert.Nil(t, err)
 
 	content, err := util.EncodeXML(settings)
 	assert.Nil(t, err)
@@ -302,8 +302,8 @@ func TestInjectEmptyServersIntoDefaultMavenSettings(t *testing.T) {
 }
 
 func TestInjectServersIntoDefaultMavenSettings(t *testing.T) {
-
-	settings := maven.NewDefaultSettings([]v1.Repository{}, []maven.Mirror{})
+	settings, err := maven.NewSettings(maven.DefaultRepositories)
+	assert.Nil(t, err)
 
 	servers := []v1.Server{
 		{

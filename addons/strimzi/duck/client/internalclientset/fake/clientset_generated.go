@@ -75,7 +75,10 @@ func (c *Clientset) Tracker() testing.ObjectTracker {
 	return c.tracker
 }
 
-var _ clientset.Interface = &Clientset{}
+var (
+	_ clientset.Interface = &Clientset{}
+	_ testing.FakeClient  = &Clientset{}
+)
 
 // KafkaV1beta2 retrieves the KafkaV1beta2Client
 func (c *Clientset) KafkaV1beta2() kafkav1beta2.KafkaV1beta2Interface {
