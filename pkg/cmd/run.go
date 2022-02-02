@@ -580,8 +580,10 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		// TODO: accept URLs
 		if strings.HasPrefix(item, "file://") {
 			if platform == nil {
-				// let's also enable the registry trait
-				o.Traits = append(o.Traits, "registry.enabled=true")
+				// let's also enable the registry trait if not explicitely disabled
+				if !contains(o.Traits, "registry.enabled=false") {
+					o.Traits = append(o.Traits, "registry.enabled=true")
+				}
 				platform, err = getPlatform(c, o.Context, integration.Namespace)
 				if err != nil {
 					return nil, err
@@ -1108,4 +1110,14 @@ func getDirName(path string) (string, error) {
 		parentDir = filepath.Dir(parentDir)
 	}
 	return parentDir, nil
+}
+
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+
+	return false
 }
