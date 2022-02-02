@@ -114,7 +114,7 @@ func addRegistryAndExtensionToMaven(registryAddress string, build *v1.BuilderTas
 	ext := v1.MavenArtifact{
 		GroupID:    "com.github.johnpoth",
 		ArtifactID: "wagon-docker-registry",
-		Version:    "0.2.0-SNAPSHOT",
+		Version:    "0.2.0",
 	}
 	policy := v1.RepositoryPolicy{
 		Enabled:        true,
