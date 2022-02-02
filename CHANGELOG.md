@@ -19,6 +19,7 @@
 
 **Merged pull requests:**
 
+- chore: Upgrade sub-modules to Kubernetes API v0.22.5 [\#2968](https://github.com/apache/camel-k/pull/2968) ([astefanutti](https://github.com/astefanutti))
 - fix\(cli\): Kamel CLI zero-code exists when trait properties validation fails [\#2964](https://github.com/apache/camel-k/pull/2964) ([astefanutti](https://github.com/astefanutti))
 - Generate crd API docs as AsciiDoc \(main\) \(Update\) [\#2963](https://github.com/apache/camel-k/pull/2963) ([djencks](https://github.com/djencks))
 - feat\(knative\): Rely on addressable-resolver ClusterRole to transfer RBAC for Knative Sinks [\#2958](https://github.com/apache/camel-k/pull/2958) ([astefanutti](https://github.com/astefanutti))
@@ -28,6 +29,7 @@
 - WIP separate v1 and v1alpha1 api packages as much as possible [\#2951](https://github.com/apache/camel-k/pull/2951) ([djencks](https://github.com/djencks))
 - chore\(deps\): remove kamelet-reify [\#2949](https://github.com/apache/camel-k/pull/2949) ([squakez](https://github.com/squakez))
 - fix\(e2e\): Patch OLM Subscription to avoid conflicting updates [\#2946](https://github.com/apache/camel-k/pull/2946) ([astefanutti](https://github.com/astefanutti))
+- chore: Upgrade Kubernetes API to version 1.22.5 [\#2945](https://github.com/apache/camel-k/pull/2945) ([astefanutti](https://github.com/astefanutti))
 - fix\(e2e\): Do not add snapshot bundle to stable channel [\#2939](https://github.com/apache/camel-k/pull/2939) ([astefanutti](https://github.com/astefanutti))
 - fix: Fix number of found deployments in dump [\#2933](https://github.com/apache/camel-k/pull/2933) ([christophd](https://github.com/christophd))
 - chore: Bump version to 1.9.0-SNAPSHOT [\#2930](https://github.com/apache/camel-k/pull/2930) ([astefanutti](https://github.com/astefanutti))
