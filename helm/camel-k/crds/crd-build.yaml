@@ -151,7 +151,7 @@ spec:
                             application build phase
                           properties:
                             caSecret:
-                              description: The Secret name and key, containing the
+                              description: The Secrets name and key, containing the
                                 CA certificate(s) used to connect to remote Maven
                                 repositories. It can contain X.509 certificates, and
                                 PKCS#7 formatted certificate chains. A JKS formatted
@@ -279,6 +279,21 @@ spec:
                                 required:
                                 - id
                                 - url
+                                type: object
+                              type: array
+                            servers:
+                              items:
+                                properties:
+                                  configuration:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                  id:
+                                    type: string
+                                  password:
+                                    type: string
+                                  username:
+                                    type: string
                                 type: object
                               type: array
                             settings:

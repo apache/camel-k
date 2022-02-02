@@ -85,7 +85,7 @@ type MavenArtifact struct {
 }
 
 type Server struct {
-	XMLName       xml.Name   `xml:"server"`
+	XMLName       xml.Name   `xml:"server" json:"-"`
 	ID            string     `xml:"id,omitempty" json:"id,omitempty"`
 	Username      string     `xml:"username,omitempty" json:"username,omitempty"`
 	Password      string     `xml:"password,omitempty" json:"password,omitempty"`

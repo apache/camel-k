@@ -34,10 +34,17 @@ import (
 
 	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 func TestImageRegistryIsAMavenRepository(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
+		ocp, err := openshift.IsOpenShift(TestClient())
+		assert.Nil(t, err)
+		if ocp {
+			t.Skip("Avoid running on OpenShift until CA and secret are injected client side")
+			return
+		}
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		// Create integration that should decrypt foobar and log it
@@ -65,7 +72,13 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 
 func TestLocalFilesAreMountedInContainerInDefaultPath(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		// Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		ocp, err := openshift.IsOpenShift(TestClient())
+		assert.Nil(t, err)
+		if ocp {
+			t.Skip("Avoid running on OpenShift until CA and secret are injected client side")
+			return
+		}
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 		name := "laughing-route-default-path"
 
 		Expect(Kamel("run", "files/LaughingRoute.java",
@@ -86,6 +99,12 @@ func TestLocalFilesAreMountedInContainerInDefaultPath(t *testing.T) {
 
 func TestLocalFilesAreMountedInContainerInCustomPath(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
+		ocp, err := openshift.IsOpenShift(TestClient())
+		assert.Nil(t, err)
+		if ocp {
+			t.Skip("Avoid running on OpenShift until CA and secret are injected client side")
+			return
+		}
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 		name := "laughing-route-custom-path"
 		customPath := "this/is/a/custom/path/"
@@ -108,6 +127,12 @@ func TestLocalFilesAreMountedInContainerInCustomPath(t *testing.T) {
 
 func TestLocalDirectoryIsMountedInContainer(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
+		ocp, err := openshift.IsOpenShift(TestClient())
+		assert.Nil(t, err)
+		if ocp {
+			t.Skip("Avoid running on OpenShift until CA and secret are injected client side")
+			return
+		}
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 		name := "laughing-route-directory"
 
@@ -130,6 +155,12 @@ func TestLocalDirectoryIsMountedInContainer(t *testing.T) {
 
 func TestExtractPomFromJar(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
+		ocp, err := openshift.IsOpenShift(TestClient())
+		assert.Nil(t, err)
+		if ocp {
+			t.Skip("Avoid running on OpenShift until CA and secret are injected client side")
+			return
+		}
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
 		// Create integration that should decrypt foobar and log it

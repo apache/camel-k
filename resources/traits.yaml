@@ -1018,6 +1018,15 @@ traits:
       one once ready.The order influences the resolution of the current kit for the
       integration.The kit corresponding to the first package type will be assigned
       to theintegration in case no existing kit that matches the integration exists.
+- name: registry
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The Registry trait sets up Maven to use the Image registry as a Maven
+    repository
+  properties: []
 - name: route
   platform: false
   profiles:
