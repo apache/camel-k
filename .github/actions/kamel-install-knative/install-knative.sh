@@ -30,9 +30,9 @@ sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.6/yq_linux_amd6
 
 set +e
 
-export SERVING_VERSION=knative-v1.1.0
-export EVENTING_VERSION=knative-v1.1.0
-export KOURIER_VERSION=knative-v1.1.0
+export SERVING_VERSION=knative-v1.2.0
+export EVENTING_VERSION=knative-v1.2.0
+export KOURIER_VERSION=knative-v1.2.0
 
 apply() {
   local file="${1:-}"
