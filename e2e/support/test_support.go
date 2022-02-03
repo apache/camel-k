@@ -1576,12 +1576,12 @@ func BindKameletToWithErrorHandler(ns string, name string, from corev1.ObjectRef
 	}
 }
 
-func asTemplate(source map[string]interface{}) *v1.Template {
+func asTemplate(source map[string]interface{}) *v1alpha1.Template {
 	bytes, err := json.Marshal(source)
 	if err != nil {
 		panic(err)
 	}
-	return &v1.Template{
+	return &v1alpha1.Template{
 		RawMessage: bytes,
 	}
 }
