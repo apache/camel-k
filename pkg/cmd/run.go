@@ -591,12 +591,12 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 				if err != nil {
 					return nil, err
 				}
-				if platform.Spec.Build.Registry.CA == "" {
+				if platform.Spec.Build.Registry.CA != "" {
 					fmt.Printf("We've noticed the image registry is configured with a custom certificate [%s] \n", platform.Spec.Build.Registry.CA)
 					fmt.Println("Please make sure Node.js is configured to use it or the operation will fail.")
 					fmt.Println("More information can be found here https://nodejs.org/api/cli.html#cli_node_extra_ca_certs_file")
 				}
-				if platform.Spec.Build.Registry.Secret == "" {
+				if platform.Spec.Build.Registry.Secret != "" {
 					fmt.Printf("We've noticed the image registry is configured with a Secret [%s] \n", platform.Spec.Build.Registry.Secret)
 					fmt.Println("Please configure Docker authentication correctly or the operation will fail (by default it's $HOME/.docker/config.json).")
 					fmt.Println("More information can be found here https://docs.docker.com/engine/reference/commandline/login/")

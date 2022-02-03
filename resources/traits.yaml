@@ -1025,7 +1025,7 @@ traits:
   - Knative
   - OpenShift
   description: The Registry trait sets up Maven to use the Image registry as a Maven
-    repository
+    repository.
   properties: []
 - name: route
   platform: false
