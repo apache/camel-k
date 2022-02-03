@@ -76,3 +76,11 @@ func TestSkipRegistryInstallation(t *testing.T) {
 		}, TestTimeoutMedium).Should(Equal(v1.RegistrySpec{}))
 	})
 }
+
+func TestInstallSkipDefaultKameletsInstallation(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns, "--skip-default-kamelets-setup").Execute()).To(Succeed())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+		Expect(KameletList(ns)()).Should(BeEmpty())
+	})
+}

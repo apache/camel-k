@@ -82,6 +82,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().Bool("skip-operator-setup", false, "Do not install the operator in the namespace (in case there's a global one)")
 	cmd.Flags().Bool("skip-cluster-setup", false, "Skip the cluster-setup phase")
 	cmd.Flags().Bool("skip-registry-setup", false, "Skip the registry-setup phase (may negatively impact building of integrations)")
+	cmd.Flags().Bool("skip-default-kamelets-setup", false, "Skip installation of the default Kamelets from catalog")
 	cmd.Flags().Bool("example", false, "Install example integration")
 	cmd.Flags().Bool("global", false, "Configure the operator to watch all namespaces. No integration platform is created. You can run integrations in a namespace by installing an integration platform: 'kamel install --skip-operator-setup -n my-namespace'")
 	cmd.Flags().Bool("force", false, "Force replacement of configuration resources when already present.")
@@ -156,41 +157,42 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 
 type installCmdOptions struct {
 	*RootCmdOptions
-	Wait                    bool     `mapstructure:"wait"`
-	ClusterSetupOnly        bool     `mapstructure:"cluster-setup"`
-	SkipOperatorSetup       bool     `mapstructure:"skip-operator-setup"`
-	SkipClusterSetup        bool     `mapstructure:"skip-cluster-setup"`
-	SkipRegistrySetup       bool     `mapstructure:"skip-registry-setup"`
-	ExampleSetup            bool     `mapstructure:"example"`
-	Global                  bool     `mapstructure:"global"`
-	KanikoBuildCache        bool     `mapstructure:"kaniko-build-cache"`
-	Save                    bool     `mapstructure:"save" kamel:"omitsave"`
-	Force                   bool     `mapstructure:"force"`
-	Olm                     bool     `mapstructure:"olm"`
-	ClusterType             string   `mapstructure:"cluster-type"`
-	OutputFormat            string   `mapstructure:"output"`
-	RuntimeVersion          string   `mapstructure:"runtime-version"`
-	BaseImage               string   `mapstructure:"base-image"`
-	OperatorImage           string   `mapstructure:"operator-image"`
-	OperatorImagePullPolicy string   `mapstructure:"operator-image-pull-policy"`
-	BuildStrategy           string   `mapstructure:"build-strategy"`
-	BuildPublishStrategy    string   `mapstructure:"build-publish-strategy"`
-	BuildTimeout            string   `mapstructure:"build-timeout"`
-	MavenExtensions         []string `mapstructure:"maven-extensions"`
-	MavenLocalRepository    string   `mapstructure:"maven-local-repository"`
-	MavenProperties         []string `mapstructure:"maven-properties"`
-	MavenRepositories       []string `mapstructure:"maven-repositories"`
-	MavenSettings           string   `mapstructure:"maven-settings"`
-	MavenCASecret           string   `mapstructure:"maven-ca-secret"`
-	MavenCLIOptions         []string `mapstructure:"maven-cli-options"`
-	HealthPort              int32    `mapstructure:"health-port"`
-	Monitoring              bool     `mapstructure:"monitoring"`
-	MonitoringPort          int32    `mapstructure:"monitoring-port"`
-	TraitProfile            string   `mapstructure:"trait-profile"`
-	Tolerations             []string `mapstructure:"tolerations"`
-	NodeSelectors           []string `mapstructure:"node-selectors"`
-	ResourcesRequirements   []string `mapstructure:"operator-resources"`
-	EnvVars                 []string `mapstructure:"operator-env-vars"`
+	Wait                     bool     `mapstructure:"wait"`
+	ClusterSetupOnly         bool     `mapstructure:"cluster-setup"`
+	SkipOperatorSetup        bool     `mapstructure:"skip-operator-setup"`
+	SkipClusterSetup         bool     `mapstructure:"skip-cluster-setup"`
+	SkipRegistrySetup        bool     `mapstructure:"skip-registry-setup"`
+	SkipDefaultKameletsSetup bool     `mapstructure:"skip-default-kamelets-setup"`
+	ExampleSetup             bool     `mapstructure:"example"`
+	Global                   bool     `mapstructure:"global"`
+	KanikoBuildCache         bool     `mapstructure:"kaniko-build-cache"`
+	Save                     bool     `mapstructure:"save" kamel:"omitsave"`
+	Force                    bool     `mapstructure:"force"`
+	Olm                      bool     `mapstructure:"olm"`
+	ClusterType              string   `mapstructure:"cluster-type"`
+	OutputFormat             string   `mapstructure:"output"`
+	RuntimeVersion           string   `mapstructure:"runtime-version"`
+	BaseImage                string   `mapstructure:"base-image"`
+	OperatorImage            string   `mapstructure:"operator-image"`
+	OperatorImagePullPolicy  string   `mapstructure:"operator-image-pull-policy"`
+	BuildStrategy            string   `mapstructure:"build-strategy"`
+	BuildPublishStrategy     string   `mapstructure:"build-publish-strategy"`
+	BuildTimeout             string   `mapstructure:"build-timeout"`
+	MavenExtensions          []string `mapstructure:"maven-extensions"`
+	MavenLocalRepository     string   `mapstructure:"maven-local-repository"`
+	MavenProperties          []string `mapstructure:"maven-properties"`
+	MavenRepositories        []string `mapstructure:"maven-repositories"`
+	MavenSettings            string   `mapstructure:"maven-settings"`
+	MavenCASecret            string   `mapstructure:"maven-ca-secret"`
+	MavenCLIOptions          []string `mapstructure:"maven-cli-options"`
+	HealthPort               int32    `mapstructure:"health-port"`
+	Monitoring               bool     `mapstructure:"monitoring"`
+	MonitoringPort           int32    `mapstructure:"monitoring-port"`
+	TraitProfile             string   `mapstructure:"trait-profile"`
+	Tolerations              []string `mapstructure:"tolerations"`
+	NodeSelectors            []string `mapstructure:"node-selectors"`
+	ResourcesRequirements    []string `mapstructure:"operator-resources"`
+	EnvVars                  []string `mapstructure:"operator-env-vars"`
 
 	registry         v1.RegistrySpec
 	registryAuth     registry.Auth
@@ -208,6 +210,11 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 	// Let's use a client provider during cluster installation, to eliminate the problem of CRD object caching
 	clientProvider := client.Provider{Get: o.NewCmdClient}
+
+	// --skip-default-kamelets-setup is a syntax sugar for '--operator-env-vars KAMEL_INSTALL_DEFAULT_KAMELETS=false'
+	if o.SkipDefaultKameletsSetup {
+		o.EnvVars = append(o.EnvVars, "KAMEL_INSTALL_DEFAULT_KAMELETS=false")
+	}
 
 	installViaOLM := false
 	if o.Olm {

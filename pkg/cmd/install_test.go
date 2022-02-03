@@ -63,6 +63,7 @@ func TestInstallNoFlag(t *testing.T) {
 	assert.Equal(t, false, installCmdOptions.ClusterSetupOnly)
 	assert.Equal(t, false, installCmdOptions.SkipOperatorSetup)
 	assert.Equal(t, false, installCmdOptions.SkipClusterSetup)
+	assert.Equal(t, false, installCmdOptions.SkipDefaultKameletsSetup)
 	assert.Equal(t, false, installCmdOptions.ExampleSetup)
 	assert.Equal(t, false, installCmdOptions.Global)
 	assert.Equal(t, false, installCmdOptions.KanikoBuildCache)
@@ -315,6 +316,13 @@ func TestInstallSkipRegistrySetupFlag(t *testing.T) {
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--skip-registry-setup")
 	assert.Nil(t, err)
 	assert.Equal(t, true, installCmdOptions.SkipRegistrySetup)
+}
+
+func TestInstallSkipDefaultKameletsSetupFlag(t *testing.T) {
+	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--skip-default-kamelets-setup")
+	assert.Nil(t, err)
+	assert.Equal(t, true, installCmdOptions.SkipDefaultKameletsSetup)
 }
 
 func TestInstallTraitProfileFlag(t *testing.T) {
