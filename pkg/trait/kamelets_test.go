@@ -571,11 +571,11 @@ func createKameletsTestEnvironment(flow string, objects ...runtime.Object) (*kam
 	return trait, environment
 }
 
-func templateOrFail(template map[string]interface{}) *v1.Template {
+func templateOrFail(template map[string]interface{}) *v1alpha1.Template {
 	data, err := json.Marshal(template)
 	if err != nil {
 		panic(err)
 	}
-	t := v1.Template{RawMessage: data}
+	t := v1alpha1.Template{RawMessage: data}
 	return &t
 }
