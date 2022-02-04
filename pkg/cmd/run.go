@@ -632,7 +632,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		integration.Spec.AddConfiguration("secret", item)
 	}
 	for _, item := range o.Volumes {
-		o.Traits = append(o.Traits, fmt.Sprintf("container.volumes=%s", item))
+		o.Traits = append(o.Traits, fmt.Sprintf("mount.volumes=%s", item))
 	}
 	for _, item := range o.EnvVars {
 		o.Traits = append(o.Traits, fmt.Sprintf("environment.vars=%s", item))
