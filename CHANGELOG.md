@@ -19,7 +19,10 @@
 
 **Merged pull requests:**
 
+- chore: Upgrade Knative to version 1.2.0 [\#2979](https://github.com/apache/camel-k/pull/2979) ([astefanutti](https://github.com/astefanutti))
+- \[TEST\] Fix route test on Knative enabled clusters [\#2974](https://github.com/apache/camel-k/pull/2974) ([bouskaJ](https://github.com/bouskaJ))
 - fix\(e2e\): Decode OpenShift ProjectRequest into a Project struct [\#2971](https://github.com/apache/camel-k/pull/2971) ([astefanutti](https://github.com/astefanutti))
+- chore: Upgrade controller-runtime to v0.10.3 [\#2970](https://github.com/apache/camel-k/pull/2970) ([astefanutti](https://github.com/astefanutti))
 - chore: Upgrade sub-modules to Kubernetes API v0.22.5 [\#2968](https://github.com/apache/camel-k/pull/2968) ([astefanutti](https://github.com/astefanutti))
 - fix\(cli\): Kamel CLI zero-code exists when trait properties validation fails [\#2964](https://github.com/apache/camel-k/pull/2964) ([astefanutti](https://github.com/astefanutti))
 - Generate crd API docs as AsciiDoc \(main\) \(Update\) [\#2963](https://github.com/apache/camel-k/pull/2963) ([djencks](https://github.com/djencks))
