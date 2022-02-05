@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Kamel install failure [\#2987](https://github.com/apache/camel-k/issues/2987)
 - Configure Maven: Artifact Repository is not recognized [\#2966](https://github.com/apache/camel-k/issues/2966)
 - camel-k-operator forbidden to get kafkachannels.messaging.knative.dev since 1.8.x [\#2950](https://github.com/apache/camel-k/issues/2950)
 - Enabling prometheus causes KameletBindings to be stuck in status "Creating" [\#2896](https://github.com/apache/camel-k/issues/2896)
@@ -13,14 +14,20 @@
 - camel-k-client binary is missing in the latest release assets [\#2892](https://github.com/apache/camel-k/issues/2892)
 - Release 1.8.0 [\#2848](https://github.com/apache/camel-k/issues/2848)
 - Kamelet with MQTT Broker Mosquitto [\#2690](https://github.com/apache/camel-k/issues/2690)
+- Unable to access MongoDB [\#2684](https://github.com/apache/camel-k/issues/2684)
+- KAMEL\_INSTALL\_DEFAULT\_KAMELETS behavior [\#2560](https://github.com/apache/camel-k/issues/2560)
+- Documentation for `kamel local run`? [\#2490](https://github.com/apache/camel-k/issues/2490)
 - Json marshalling is needed for Rest route and uncommented code seems to be executed [\#2341](https://github.com/apache/camel-k/issues/2341)
 - Change autogen doc template to adoc [\#2289](https://github.com/apache/camel-k/issues/2289)
 - Kamel dump: make the command smarter [\#2189](https://github.com/apache/camel-k/issues/2189)
 
 **Merged pull requests:**
 
+- fix\(yaml\): also consider toD while parsing YAML DSL steps [\#2989](https://github.com/apache/camel-k/pull/2989) ([toonalbers](https://github.com/toonalbers))
+- fix\(cli\): kamel run -v should configure the mount trait [\#2986](https://github.com/apache/camel-k/pull/2986) ([astefanutti](https://github.com/astefanutti))
 - chore: Upgrade Knative to version 1.2.0 [\#2979](https://github.com/apache/camel-k/pull/2979) ([astefanutti](https://github.com/astefanutti))
 - \[TEST\] Fix route test on Knative enabled clusters [\#2974](https://github.com/apache/camel-k/pull/2974) ([bouskaJ](https://github.com/bouskaJ))
+- feat\(cli\): add flag --skip-default-kamelets-setup to kamel install [\#2973](https://github.com/apache/camel-k/pull/2973) ([tadayosi](https://github.com/tadayosi))
 - fix\(e2e\): Decode OpenShift ProjectRequest into a Project struct [\#2971](https://github.com/apache/camel-k/pull/2971) ([astefanutti](https://github.com/astefanutti))
 - chore: Upgrade controller-runtime to v0.10.3 [\#2970](https://github.com/apache/camel-k/pull/2970) ([astefanutti](https://github.com/astefanutti))
 - chore: Upgrade sub-modules to Kubernetes API v0.22.5 [\#2968](https://github.com/apache/camel-k/pull/2968) ([astefanutti](https://github.com/astefanutti))
