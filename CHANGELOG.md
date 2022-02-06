@@ -17,7 +17,9 @@
 - Unable to access MongoDB [\#2684](https://github.com/apache/camel-k/issues/2684)
 - KAMEL\_INSTALL\_DEFAULT\_KAMELETS behavior [\#2560](https://github.com/apache/camel-k/issues/2560)
 - Documentation for `kamel local run`? [\#2490](https://github.com/apache/camel-k/issues/2490)
+- Log warnings with kamelets [\#2395](https://github.com/apache/camel-k/issues/2395)
 - Json marshalling is needed for Rest route and uncommented code seems to be executed [\#2341](https://github.com/apache/camel-k/issues/2341)
+- build: use golangci/golangci-lint-action [\#2334](https://github.com/apache/camel-k/issues/2334)
 - Change autogen doc template to adoc [\#2289](https://github.com/apache/camel-k/issues/2289)
 - Kamel dump: make the command smarter [\#2189](https://github.com/apache/camel-k/issues/2189)
 
