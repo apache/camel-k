@@ -74,7 +74,7 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 				"--name", name,
 				"-p", "location=.?filename=laugh.txt",
 				"-d", "file://files/laugh.txt",
-				"-n", "camel-k",
+				"-n", ns,
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))

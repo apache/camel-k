@@ -115,10 +115,10 @@ export CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE=${SAVE_FAILED_TEST_NS}
 set -e
 exit_code=0
 make test-integration || exit_code=1
+make test-registry-maven-wagon || exit_code=1
 make test-service-binding || exit_code=1
 make test-quarkus-native || exit_code=1
 make test-kustomize || exit_code=1
-make test-registry-maven-wagon || exit_code=1
 set +e
 
 echo "Tests completed with exit code: ${exit_code}"
