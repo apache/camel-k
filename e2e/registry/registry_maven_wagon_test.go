@@ -45,7 +45,7 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 			t.Skip("Avoid running on OpenShift until CA and secret are injected client side")
 			return
 		}
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("install", "--wait", "-n", ns).Execute()).To(Succeed())
 
 		t.Run("image registry is a maven repository", func(t *testing.T) {
 			// Create integration that should decrypt an encrypted message to "foobar" and log it
