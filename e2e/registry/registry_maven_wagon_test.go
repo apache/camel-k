@@ -47,136 +47,89 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 		}
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
-		// Create integration that should decrypt foobar and log it
-		name := "foobar-decryption"
-		jar, err := filepath.Abs("files/sample-decryption-1.0.jar")
-		assert.Nil(t, err)
-		pom, err := filepath.Abs("files/sample-decryption-1.0.pom")
-		assert.Nil(t, err)
+		t.Run("image registry is a maven repository", func(t *testing.T) {
+			// Create integration that should decrypt an encrypted message to "foobar" and log it
+			name := "foobar-decryption"
+			jar, err := filepath.Abs("files/sample-decryption-1.0.jar")
+			assert.Nil(t, err)
+			pom, err := filepath.Abs("files/sample-decryption-1.0.pom")
+			assert.Nil(t, err)
 
-		Expect(Kamel("run", "files/FoobarDecryption.java",
-			"--name", name,
-			"-d", fmt.Sprintf("file://%s", jar),
-			"-d", fmt.Sprintf("file://%s", pom),
-			"-n", ns,
-		).Execute()).To(Succeed())
+			Expect(Kamel("run", "files/FoobarDecryption.java",
+				"--name", name,
+				"-d", fmt.Sprintf("file://%s", jar),
+				"-d", fmt.Sprintf("file://%s", pom),
+				"-n", ns,
+			).Execute()).To(Succeed())
 
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("foobar"))
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("foobar"))
+		})
 
-		// Clean up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
+		t.Run("local files are mounted in the integration container at the default path", func(t *testing.T) {
+			name := "laughing-route-default-path"
 
-func TestLocalFilesAreMountedInContainerInDefaultPath(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		ocp, err := openshift.IsOpenShift(TestClient())
-		assert.Nil(t, err)
-		if ocp {
-			t.Skip("Avoid running on OpenShift until CA and secret are injected client side")
-			return
-		}
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
-		name := "laughing-route-default-path"
+			Expect(Kamel("run", "files/LaughingRoute.java",
+				"--name", name,
+				"-p", "location=.?filename=laugh.txt",
+				"-d", "file://files/laugh.txt",
+				"-n", "camel-k",
+			).Execute()).To(Succeed())
 
-		Expect(Kamel("run", "files/LaughingRoute.java",
-			"--name", name,
-			"-p", "location=.?filename=laugh.txt",
-			"-d", "file://files/laugh.txt",
-			"-n", "camel-k",
-		).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("haha"))
+		})
 
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("haha"))
+		t.Run("local files are mounted in the integration container at a custom path", func(t *testing.T) {
+			name := "laughing-route-custom-path"
+			customPath := "this/is/a/custom/path/"
 
-		// Clean up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
+			Expect(Kamel("run", "files/LaughingRoute.java",
+				"--name", name,
+				"-p", fmt.Sprintf("location=%s", customPath),
+				"-d", fmt.Sprintf("file://files/laugh.txt:%slaugh.txt", customPath),
+				"-n", ns,
+			).Execute()).To(Succeed())
 
-func TestLocalFilesAreMountedInContainerInCustomPath(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		ocp, err := openshift.IsOpenShift(TestClient())
-		assert.Nil(t, err)
-		if ocp {
-			t.Skip("Avoid running on OpenShift until CA and secret are injected client side")
-			return
-		}
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
-		name := "laughing-route-custom-path"
-		customPath := "this/is/a/custom/path/"
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("haha"))
+		})
 
-		Expect(Kamel("run", "files/LaughingRoute.java",
-			"--name", name,
-			"-p", fmt.Sprintf("location=%s", customPath),
-			"-d", fmt.Sprintf("file://files/laugh.txt:%slaugh.txt", customPath),
-			"-n", ns,
-		).Execute()).To(Succeed())
+		t.Run("local directory is mounted in the integration container", func(t *testing.T) {
+			name := "laughing-route-directory"
 
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("haha"))
+			Expect(Kamel("run", "files/LaughingRoute.java",
+				"--name", name,
+				"-p", "location=files/",
+				"-d", fmt.Sprintf("file://files/laughs/:files/"),
+				"-n", ns,
+			).Execute()).To(Succeed())
 
-		// Clean up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("haha"))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("hehe"))
+		})
 
-func TestLocalDirectoryIsMountedInContainer(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		ocp, err := openshift.IsOpenShift(TestClient())
-		assert.Nil(t, err)
-		if ocp {
-			t.Skip("Avoid running on OpenShift until CA and secret are injected client side")
-			return
-		}
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
-		name := "laughing-route-directory"
+		t.Run("pom file is extracted from JAR", func(t *testing.T) {
+			// Create integration that should decrypt foobar and log it
+			name := "foobar-decryption-pom-extraction"
+			jar, err := filepath.Abs("files/sample-decryption-1.0.jar")
+			assert.Nil(t, err)
 
-		Expect(Kamel("run", "files/LaughingRoute.java",
-			"--name", name,
-			"-p", "location=files/",
-			"-d", fmt.Sprintf("file://files/laughs/:files/"),
-			"-n", ns,
-		).Execute()).To(Succeed())
+			Expect(Kamel("run", "files/FoobarDecryption.java",
+				"--name", name,
+				"-d", fmt.Sprintf("file://%s", jar),
+				"-n", ns,
+			).Execute()).To(Succeed())
 
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("haha"))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("hehe"))
-
-		// Clean up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
-
-func TestExtractPomFromJar(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		ocp, err := openshift.IsOpenShift(TestClient())
-		assert.Nil(t, err)
-		if ocp {
-			t.Skip("Avoid running on OpenShift until CA and secret are injected client side")
-			return
-		}
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
-
-		// Create integration that should decrypt foobar and log it
-		name := "foobar-decryption-pom-extraction"
-		jar, err := filepath.Abs("files/sample-decryption-1.0.jar")
-		assert.Nil(t, err)
-
-		Expect(Kamel("run", "files/FoobarDecryption.java",
-			"--name", name,
-			"-d", fmt.Sprintf("file://%s", jar),
-			"-n", ns,
-		).Execute()).To(Succeed())
-
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("foobar"))
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("foobar"))
+		})
 
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
