@@ -29,8 +29,11 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/olm"
 	"math/big"
 	rand2 "math/rand"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -38,6 +41,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 
+	configv1 "github.com/openshift/api/config/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -141,13 +145,39 @@ func TestMavenProxy(t *testing.T) {
 		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
 
 		// Install Camel K with the HTTP proxy
-		Expect(Kamel("install", "-n", ns,
-			"--operator-env-vars", fmt.Sprintf("HTTP_PROXY=http://%s", hostname),
-			// TODO: enable TLS for the HTTPS proxy when Maven supports it
-			// "--operator-env-vars", fmt.Sprintf("HTTPS_PROXY=https://%s", hostname),
-			// "--maven-ca-secret", secret.Name+"/"+corev1.TLSCertKey,
-			"--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","),
-		).Execute()).To(Succeed())
+		olm, olmErr := olm.IsAPIAvailable(TestContext, TestClient(), ns)
+		installed, inErr := kubernetes.IsAPIResourceInstalled(TestClient(), configv1.GroupVersion.String(), reflect.TypeOf(configv1.Proxy{}).Name())
+		permission, pErr := kubernetes.CheckPermission(TestContext, TestClient(), configv1.GroupName, reflect.TypeOf(configv1.Proxy{}).Name(), "", "cluster", "edit")
+		olmInstall := pErr == nil && olmErr == nil && inErr == nil && olm && installed && permission
+		var defaultProxy configv1.Proxy
+		if olmInstall  {
+			// use OLM autoconfiguration
+			defaultProxy = configv1.Proxy{}
+			key := ctrl.ObjectKey{
+				Name:      "cluster",
+			}
+			Expect(TestClient().Get(TestContext, key, &defaultProxy)).To(Succeed())
+
+			newProxy := defaultProxy.DeepCopy()
+			newProxy.Spec.HTTPProxy = fmt.Sprintf("http://%s", hostname)
+			newProxy.Spec.NoProxy = strings.Join(noProxy, ",")
+			Expect(TestClient().Update(TestContext, newProxy))
+
+			// ENV values should be injected by the OLM
+			Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+
+			t.Log("OLM install")
+
+
+		} else {
+			Expect(Kamel("install", "-n", ns,
+				"--operator-env-vars", fmt.Sprintf("HTTP_PROXY=http://%s", hostname),
+				// TODO: enable TLS for the HTTPS proxy when Maven supports it
+				// "--operator-env-vars", fmt.Sprintf("HTTPS_PROXY=https://%s", hostname),
+				// "--maven-ca-secret", secret.Name+"/"+corev1.TLSCertKey,
+				"--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","),
+			).Execute()).To(Succeed())
+		}
 
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
@@ -182,6 +212,10 @@ func TestMavenProxy(t *testing.T) {
 		Expect(TestClient().Delete(TestContext, service)).To(Succeed())
 		Expect(TestClient().Delete(TestContext, secret)).To(Succeed())
 		Expect(TestClient().Delete(TestContext, config)).To(Succeed())
+
+		if olmInstall {
+			TestClient().Update(TestContext, &defaultProxy)
+		}
 	})
 }
 
