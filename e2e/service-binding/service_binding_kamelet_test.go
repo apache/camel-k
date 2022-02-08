@@ -58,15 +58,15 @@ func TestKameletServiceBindingTrait(t *testing.T) {
 		serviceRef := fmt.Sprintf("%s:%s/%s", service.TypeMeta.Kind, ns, service.ObjectMeta.Name)
 		Expect(TestClient().Create(TestContext, service)).To(Succeed())
 
-		Expect(CreateTimerKamelet(ns, "timer-source")()).To(Succeed())
+		Expect(CreateTimerKamelet(ns, "my-timer-source")()).To(Succeed())
 
-		Expect(Kamel("bind", "timer-source", "log:info",
+		Expect(Kamel("bind", "my-timer-source", "log:info",
 			"-p", "source.message=Hello+world",
 			"--connect", serviceRef, "-n", ns).
 			Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "timer-source-to-log"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationPodPhase(ns, "my-timer-source-to-log"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
-		Eventually(IntegrationLogs(ns, "timer-source-to-log")).Should(ContainSubstring("Body: Hello+world"))
+		Eventually(IntegrationLogs(ns, "my-timer-source-to-log")).Should(ContainSubstring("Body: Hello+world"))
 
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
