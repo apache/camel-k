@@ -29,6 +29,9 @@ BASE_IMAGE := adoptopenjdk/openjdk11:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
 IMAGE_NAME := docker.io/apache/camel-k
 
+OPM_VERSION := v1.21.0 # <- Not yet released
+OPM_PKG := github.com/operator-framework/operator-registry
+
 #
 # Situations when user wants to override
 # the image name and version
@@ -392,6 +395,8 @@ else
 CONTROLLER_GEN=$(shell command -v controller-gen 2> /dev/null)
 endif
 
+.PHONY: kubectl kustomize operator-sdk opm
+
 kubectl:
 ifeq (, $(shell command -v kubectl 2> /dev/null))
 	$(error "No kubectl found in PATH. Please install and re-run")
@@ -436,6 +441,24 @@ else
 	echo " If this is less than $(OPERATOR_SDK_VERSION) then please consider moving it aside and allowing the approved version to be downloaded."; \
 	}
 OPERATOR_SDK=$(shell command -v operator-sdk 2> /dev/null)
+endif
+
+opm:
+ifeq (, $(shell which opm))
+	@{ \
+	set -e ;\
+	OPM_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$OPM_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get \
+		-ldflags '-w -extldflags "-static"' -tags "json1" \
+		-ldflags "-X '$(OPM_PKG)/cmd/opm/version.opmVersion=$(OPM_VERSION)'" \
+		$(OPM_PKG)/cmd/opm@$(OPM_VERSION) ;\
+		rm -rf $$OPM_GEN_TMP_DIR ;\
+	}
+OPM=$(GOBIN)/opm
+else
+OPM=$(shell which opm)
 endif
 
 .PHONY: generate-crd $(BUNDLE_CAMEL_APIS) bundle bundle-build

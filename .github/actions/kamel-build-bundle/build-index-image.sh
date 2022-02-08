@@ -116,7 +116,7 @@ if [ "${PULL_REGISTRY}" != "${PUSH_REGISTRY}" ]; then
   #
 
   PULL_HOST=$(echo ${PULL_REGISTRY} | sed -e 's/\(.*\):.*/\1/')
-  PULL_PORT=$(echo ${PULL_REGISTRY} | sed -e 's/.*:\([0-9]\+\).*/\1/')
+  PULL_PORT=$(echo ${PULL_REGISTRY} | sed -ne 's/.*:\([0-9]\+\).*/\1/p')
   if [ -z "${PULL_PORT}" ]; then
     # Use standard http port
     PULL_PORT=80
@@ -128,7 +128,10 @@ if [ "${PULL_REGISTRY}" != "${PUSH_REGISTRY}" ]; then
   # Update both ipv4 and ipv6 addresses if they exist
   # 127.0.0.1 localhost
   # ::1     localhost ip6-localhost ip6-loopback
-  sudo sed -i "s/\(localhost.*\)/\1 ${PULL_HOST}/g" /etc/hosts
+  #
+  # Only add PULL_HOST if not already added (avoids repeated appended)
+  #
+  sudo sed -i "/${PULL_HOST}/!s/localhost /&${PULL_HOST} /" /etc/hosts
 
   #
   # Bring up the registry:2 instance if not already started
@@ -144,21 +147,35 @@ if [ "${PULL_REGISTRY}" != "${PUSH_REGISTRY}" ]; then
   #
   # Tag the bundle image
   #
+  echo "Tagging bundle image ..."
   docker tag \
     ${PUSH_REGISTRY}/${IMAGE_NAMESPACE}/camel-k-bundle:${IMAGE_VERSION} \
     ${BUNDLE_IMAGE}
 
   # Push the bundle image to the registry
   #
+  echo "Pushing bundle image ..."
   docker push ${BUNDLE_IMAGE}
 fi
 
 #
 # Construct an index image containing the newly built bundle image
-mkdir catalog
-opm render quay.io/operatorhubio/catalog:latest -o yaml > catalog/bundles.yaml
-sudo opm render --skip-tls ${BUNDLE_IMAGE} > catalog/camel-k.yaml
-cat << EOF >> catalog/camel-k.yaml
+#
+echo "Constructing index image ..."
+
+#
+# Removes catalog directory if already exists.
+# Stops opm from aborting due to existing directory.
+#
+CATALOG_DIR=catalog
+if [ -d ${CATALOG_DIR} ]; then
+  rm -rf ${CATALOG_DIR}
+fi
+
+mkdir ${CATALOG_DIR}
+opm render quay.io/operatorhubio/catalog:latest -o yaml > ${CATALOG_DIR}/bundles.yaml
+sudo opm render --use-http -o yaml ${BUNDLE_IMAGE} > ${CATALOG_DIR}/camel-k.yaml
+cat << EOF >> ${CATALOG_DIR}/camel-k.yaml
 ---
 schema: olm.channel
 package: camel-k
@@ -166,8 +183,12 @@ name: stable-$(make get-version | grep -Po "\d.\d")
 entries:
   - name: camel-k.v$(make get-version | grep -Po "\d.\d.\d")
 EOF
-opm validate catalog
-opm alpha generate dockerfile catalog
+opm validate ${CATALOG_DIR}
+opm generate dockerfile ${CATALOG_DIR}
+if [ ! -f catalog.Dockerfile ]; then
+  echo "Error: Failed to create catalog dockerfile"
+  exit 1
+fi
 docker build . -f catalog.Dockerfile -t ${LOCAL_IIB}
 docker push ${LOCAL_IIB}
 BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX="${REGISTRY_PULL_HOST}/${IMAGE_NAMESPACE}/camel-k-iib:${IMAGE_VERSION}"
