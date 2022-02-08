@@ -38,7 +38,7 @@ func (action *initializeAction) Name() string {
 }
 
 func (action *initializeAction) CanHandle(kamelet *v1alpha1.Kamelet) bool {
-	return kamelet.Status.Phase == v1alpha1.KameletPhaseNone || kamelet.Status.Phase == v1alpha1.KameletPhaseError
+	return kamelet.Status.Phase == v1alpha1.KameletPhaseNone
 }
 
 func (action *initializeAction) Handle(ctx context.Context, kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
