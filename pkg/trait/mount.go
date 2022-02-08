@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -182,13 +183,23 @@ func (t *mountTrait) attachResource(e *Environment, conf *utilResource.Config) {
 
 func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount, conf *utilResource.Config) {
 	refName := kubernetes.SanitizeLabel(conf.Name())
-	vol := getVolume(refName, string(conf.StorageType()), conf.Name(), conf.Key(), conf.Key())
-	mntPath := getMountPoint(conf.Name(), conf.DestinationPath(), string(conf.StorageType()), string(conf.ContentType()))
+	dstDir := ""
+	dstFile := ""
+	if conf.DestinationPath() != "" {
+		if conf.Key() != "" {
+			dstDir = filepath.Dir(conf.DestinationPath())
+			dstFile = filepath.Base(conf.DestinationPath())
+		} else {
+			dstDir = conf.DestinationPath()
+			dstFile = conf.Key()
+		}
+	}
+	vol := getVolume(refName, string(conf.StorageType()), conf.Name(), conf.Key(), dstFile)
+	mntPath := getMountPoint(conf.Name(), dstDir, string(conf.StorageType()), string(conf.ContentType()))
 	readOnly := true
 	if conf.StorageType() == utilResource.StorageTypePVC {
 		readOnly = false
 	}
-	// No need to specify a subpath, as we mount the entire configmap/secret
 	mnt := getMount(refName, mntPath, "", readOnly)
 
 	*vols = append(*vols, *vol)

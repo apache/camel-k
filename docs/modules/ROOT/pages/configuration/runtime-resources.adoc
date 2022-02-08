@@ -130,17 +130,17 @@ In our `Integration` we plan to use only one of the resources of the `Secret`:
 [source,groovy]
 .resource-configmap-key-location-route.groovy
 ----
-from('file:/tmp/app/data/?fileName=my-configmap-key-2&noop=true&idempotent=false')
+from('file:/tmp/app/data/?fileName=test.txt&noop=true&idempotent=false')
     .log('resource file content is: ${body} consumed from ${header.CamelFileName}')
 ----
 
 Let's use the _key_ filtering. Also notice that we're combining with the _@path_ syntax to declare where to mount the file:
 
 ----
-kamel run --resource configmap:my-cm-multi/my-configmap-key-2@/tmp/app/data resource-configmap-key-location-route.groovy --dev
+kamel run --resource configmap:my-cm-multi/my-configmap-key-2@/tmp/app/data/test.txt resource-configmap-key-location-route.groovy --dev
 ----
 
-You may check in the `Integration` `Pod` that only the _my-configmap-key-2_ file has been mounted under _/tmp/app/data_ directory.
+You may check in the `Integration` `Pod` that only the _test.txt_ file has been mounted under _/tmp/app/data_ directory containing the information you had in _my-configmap-key-2_.
 
 [[runtime-resources-config]]
 == Runtime config
