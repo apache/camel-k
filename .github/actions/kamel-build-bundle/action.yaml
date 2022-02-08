@@ -58,12 +58,11 @@ runs:
       name: Install opm if required
       shell: bash
       run: |
-        if ! command -v opm &> /dev/null
-        then
-          curl -L https://github.com/operator-framework/operator-registry/releases/download/v1.19.5/linux-amd64-opm -o opm
-          chmod +x opm
-          sudo mv opm /usr/local/bin/
-        fi
+        make opm
+
+        # Append to PATH if not already
+        echo "${{ env.GOPATH }}/bin" >> $GITHUB_PATH
+        which opm || { echo 'opm not found' ; exit 1; }
 
     - id: build-index-image
       name: Create New Index Image
