@@ -110,7 +110,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Resource configmap with filtered key and destination", func(t *testing.T) {
 			// We'll use the configmap contaning 2 values filtering only 1 key
 
-			Expect(Kamel("run", "-n", ns, "./files/resource-configmap-key-location-route.groovy", "--resource", "configmap:my-cm-multi/my-configmap-key-2@/tmp/app").Execute()).To(Succeed())
+			Expect(Kamel("run", "-n", ns, "./files/resource-configmap-key-location-route.groovy", "--resource", "configmap:my-cm-multi/my-configmap-key-2@/tmp/app/test.txt").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "resource-configmap-key-location-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "resource-configmap-key-location-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "resource-configmap-key-location-route"), TestTimeoutShort).ShouldNot(ContainSubstring(cmDataMulti["my-configmap-key"]))
