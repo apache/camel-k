@@ -24,8 +24,8 @@ runs:
       name: Get YAKS
       shell: bash
       run: |
-        export YAKS_VERSION=0.4.0
-        curl --fail -L https://github.com/citrusframework/yaks/releases/download/v${YAKS_VERSION}/yaks-${YAKS_VERSION}-linux-64bit.tar.gz -o yaks.tar.gz
+        export YAKS_VERSION=0.9.0-202202081029
+        curl --fail -L https://github.com/citrusframework/yaks/releases/download/${YAKS_VERSION}/yaks-${YAKS_VERSION}-linux-64bit.tar.gz -o yaks.tar.gz
         tar -zxf yaks.tar.gz
         sudo mv yaks /usr/local/bin/
 
