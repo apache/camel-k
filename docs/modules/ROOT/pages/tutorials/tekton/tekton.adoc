@@ -28,7 +28,7 @@ spec:
         description: The integration file to run
   steps:
     - name: run-integration
-      image: apache/camel-k:1.9.0-SNAPSHOT //<1>
+      image: docker.io/apache/camel-k:1.9.0-SNAPSHOT //<1>
       workingDir: /workspace/repository
       command:
         - kamel
@@ -127,7 +127,7 @@ metadata:
 spec:
   steps:
     - name: install
-      image: apache/camel-k:1.9.0-SNAPSHOT
+      image: docker.io/apache/camel-k:1.9.0-SNAPSHOT
       command:
         - kamel
       args:
