@@ -26,7 +26,7 @@ spec:
     - name: revision
       value: tekton
     - name: url
-      value: https://github.com/nicolaferraro/camel-k
+      value: https://github.com/apache/camel-k
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: Task
@@ -35,7 +35,7 @@ metadata:
 spec:
   steps:
     - name: install
-      image: apache/camel-k:1.0.0-M2
+      image: apache/camel-k:1.9.0-SNAPSHOT
       command:
         - kamel
       args:
@@ -56,7 +56,7 @@ spec:
         description: The integration file to run
   steps:
     - name: run-integration
-      image: apache/camel-k:1.0.0-M2
+      image: apache/camel-k:1.9.0-SNAPSHOT
       workingDir: /workspace/repository
       command:
         - kamel
