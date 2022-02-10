@@ -90,7 +90,7 @@ func TestRunRoutes(t *testing.T) {
 		}
 		assert.Nil(t, err)
 
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("install", "-n", ns, "--trait-profile=openshift").Execute()).To(Succeed())
 
 		// create a test secret of type tls with certificates
 		// this secret is used to setupt the route TLS object across diferent tests

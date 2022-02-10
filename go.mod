@@ -8,18 +8,18 @@ require (
 	github.com/apache/camel-k/pkg/client/camel v0.0.0
 	github.com/apache/camel-k/pkg/kamelet/repository v0.0.0
 	github.com/container-tools/spectrum v0.3.7
-	github.com/evanphx/json-patch v4.11.0+incompatible
+	github.com/evanphx/json-patch v4.12.0+incompatible
 	github.com/fatih/camelcase v1.0.0
 	github.com/fatih/structs v1.1.0
 	github.com/gertd/go-pluralize v0.1.1
-	github.com/go-logr/logr v0.4.0
+	github.com/go-logr/logr v1.2.2
 	github.com/golangplus/testing v1.0.0
 	github.com/google/go-github/v32 v32.1.0
 	github.com/google/uuid v1.3.0
 	github.com/jpillora/backoff v1.0.0
 	github.com/magiconair/properties v1.8.5
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/mitchellh/mapstructure v1.4.1
+	github.com/mitchellh/mapstructure v1.4.3
 	github.com/onsi/gomega v1.16.0
 	github.com/openshift/api v3.9.1-0.20190927182313-d4a64ec2cbd8+incompatible
 	github.com/operator-framework/api v0.3.8
@@ -37,7 +37,7 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/pflag v1.0.5
-	github.com/spf13/viper v1.8.1
+	github.com/spf13/viper v1.10.1
 	github.com/stoewer/go-strcase v1.2.0
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/automaxprocs v1.4.0
@@ -53,16 +53,20 @@ require (
 	k8s.io/cli-runtime v0.22.5
 	k8s.io/client-go v0.22.5
 	k8s.io/gengo v0.0.0-20211129171323-c02415ce4185
-	k8s.io/klog/v2 v2.9.0
+	k8s.io/klog/v2 v2.40.1
 	k8s.io/kubectl v0.22.5
-	k8s.io/utils v0.0.0-20210819203725-bdf08cb9a70a
-	knative.dev/eventing v0.28.0
-	knative.dev/pkg v0.0.0-20211206113427-18589ac7627e
-	knative.dev/serving v0.28.0
-	sigs.k8s.io/controller-runtime v0.9.7
+	k8s.io/utils v0.0.0-20211208161948-7d6a63dca704
+	knative.dev/eventing v0.29.0
+	knative.dev/pkg v0.0.0-20220118160532-77555ea48cd4
+	knative.dev/serving v0.29.0
+	sigs.k8s.io/controller-runtime v0.10.3
 )
 
-replace github.com/docker/docker => github.com/moby/moby v0.7.3-0.20190826074503-38ab9da00309 // Required by Helm
+replace (
+	github.com/docker/docker => github.com/moby/moby v0.7.3-0.20190826074503-38ab9da00309 // Required by Helm
+	github.com/go-logr/logr => github.com/go-logr/logr v0.4.0
+	k8s.io/klog/v2 => k8s.io/klog/v2 v2.9.0
+)
 
 // Using a fork that removes the HTTPS ping before using HTTP for insecure registries (for Spectrum)
 replace github.com/google/go-containerregistry => github.com/container-tools/go-containerregistry v0.7.1-0.20211124090132-40ccc94a466b

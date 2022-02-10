@@ -217,22 +217,21 @@ func parse(item string, contentType ContentType) (*Config, error) {
 // to reflect the conversion applied transparently.
 func ConvertFileToConfigmap(ctx context.Context, c client.Client, config *Config, namespace string, integrationName string,
 	content string, rawContent []byte) (*corev1.ConfigMap, error) {
+	filename := filepath.Base(config.Name())
 	if config.DestinationPath() == "" {
-		config.resourceKey = filepath.Base(config.Name())
+		config.resourceKey = filename
 		// As we are changing the resource to a configmap type
-		// we need to declare the mount path not to use the
-		// default behavior of a configmap (which include a subdirectory with the configmap name)
+		// we must declare the destination path
 		if config.ContentType() == ContentTypeData {
-			config.destinationPath = camel.ResourcesDefaultMountPath
+			config.destinationPath = camel.ResourcesDefaultMountPath + "/" + filename
 		} else {
-			config.destinationPath = camel.ConfigResourcesMountPath
+			config.destinationPath = camel.ConfigResourcesMountPath + "/" + filename
 		}
 	} else {
 		config.resourceKey = filepath.Base(config.DestinationPath())
-		config.destinationPath = filepath.Dir(config.DestinationPath())
 	}
-	genCmName := fmt.Sprintf("cm-%s", hashFrom([]byte(integrationName), []byte(content), rawContent))
-	cm := kubernetes.NewConfigMap(namespace, genCmName, filepath.Base(config.Name()), config.Key(), content, rawContent)
+	genCmName := fmt.Sprintf("cm-%s", hashFrom([]byte(filename), []byte(integrationName), []byte(content), rawContent))
+	cm := kubernetes.NewConfigMap(namespace, genCmName, filename, config.Key(), content, rawContent)
 	err := c.Create(ctx, cm)
 	if err != nil {
 		if k8serrors.IsAlreadyExists(err) {

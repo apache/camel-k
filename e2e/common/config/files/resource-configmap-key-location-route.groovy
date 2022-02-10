@@ -16,5 +16,5 @@
  * limitations under the License.
  */
 
-from('file:/tmp/app/?noop=true&idempotent=false')
+from('file:/tmp/app/?fileName=test.txt&noop=true&idempotent=false')
     .log('resource file content is: ${body}')

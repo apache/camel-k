@@ -43,9 +43,9 @@ type IntegrationSpec struct {
 	PodTemplate    *PodSpecTemplate        `json:"template,omitempty"`
 	// Deprecated:
 	// Use camel trait (camel.properties) to manage properties
-	// Use container trait (container.configs) to manage configs
-	// Use container trait (container.resources) to manage resources
-	// Use container trait (container.volumes) to manage volumes
+	// Use container trait (mount.configs) to manage configs
+	// Use container trait (mount.resources) to manage resources
+	// Use container trait (mount.volumes) to manage volumes
 	Configuration      []ConfigurationSpec `json:"configuration,omitempty"`
 	Repositories       []string            `json:"repositories,omitempty"`
 	ServiceAccountName string              `json:"serviceAccountName,omitempty"`
