@@ -27,16 +27,25 @@ import (
 
 // IntegrationPlatformSpec defines the desired state of IntegrationPlatform
 type IntegrationPlatformSpec struct {
-	Cluster       IntegrationPlatformCluster       `json:"cluster,omitempty"`
-	Profile       TraitProfile                     `json:"profile,omitempty"`
-	Build         IntegrationPlatformBuildSpec     `json:"build,omitempty"`
-	Resources     IntegrationPlatformResourcesSpec `json:"resources,omitempty"`
-	Traits        map[string]TraitSpec             `json:"traits,omitempty"`
-	Configuration []ConfigurationSpec              `json:"configuration,omitempty"`
-	Kamelet       IntegrationPlatformKameletSpec   `json:"kamelet,omitempty"`
+	// what kind of cluster you're running (ie, plain Kubernetes or Openshift)
+	Cluster IntegrationPlatformCluster `json:"cluster,omitempty"`
+	// the profile you wish to use. It will apply certain traits which are required by the specific profile chosen.
+	// It usually relates the Cluster with the optional definition of special profiles (ie, Knative)
+	Profile TraitProfile `json:"profile,omitempty"`
+	// specify how to build the Integration/IntegrationKits
+	Build IntegrationPlatformBuildSpec `json:"build,omitempty"`
+	// Deprecated: not used
+	Resources IntegrationPlatformResourcesSpec `json:"resources,omitempty"`
+	// list of traits to be executed for all the Integration/IntegrationKits built from this IntegrationPlatform
+	Traits map[string]TraitSpec `json:"traits,omitempty"`
+	// list of configuration properties to be attached to all the Integration/IntegrationKits built from this IntegrationPlatform
+	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
+	// configuration to be executed to all Kamelets controlled by this IntegrationPlatform
+	Kamelet IntegrationPlatformKameletSpec `json:"kamelet,omitempty"`
 }
 
-// IntegrationPlatformResourcesSpec contains platform related resources
+// IntegrationPlatformResourcesSpec contains platform related resources.
+// Deprecated: not used
 type IntegrationPlatformResourcesSpec struct {
 }
 
@@ -44,10 +53,14 @@ type IntegrationPlatformResourcesSpec struct {
 type IntegrationPlatformStatus struct {
 	IntegrationPlatformSpec `json:",inline"`
 
-	Phase      IntegrationPlatformPhase       `json:"phase,omitempty"`
+	// defines in what phase the IntegrationPlatform is found
+	Phase IntegrationPlatformPhase `json:"phase,omitempty"`
+	// which are the conditions met (particularly useful when in ERROR phase)
 	Conditions []IntegrationPlatformCondition `json:"conditions,omitempty"`
-	Version    string                         `json:"version,omitempty"`
-	Info       map[string]string              `json:"info,omitempty"`
+	// the Camel K operator version controlling this IntegrationPlatform
+	Version string `json:"version,omitempty"`
+	// generic information related to the build of Camel K operator software
+	Info map[string]string `json:"info,omitempty"`
 }
 
 // +genclient
@@ -57,7 +70,10 @@ type IntegrationPlatformStatus struct {
 // +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration platform phase"
 
-// IntegrationPlatform is the Schema for the integrationplatforms API
+// IntegrationPlatform is the resource used to drive the Camel K operator behavior.
+// It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
+// When the Camel K operator is installed in `global` mode,
+// you will need to specify an `IntegrationPlatform` in each namespace where you want the Camel K operator to be executed
 type IntegrationPlatform struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -105,45 +121,65 @@ const (
 // AllTraitProfiles contains all allowed profiles
 var AllTraitProfiles = []TraitProfile{TraitProfileKubernetes, TraitProfileKnative, TraitProfileOpenShift}
 
-// IntegrationPlatformBuildSpec contains platform related build information
+// IntegrationPlatformBuildSpec contains platform related build information.
+// This configuration can be used to tune the behavior of the Integration/IntegrationKit image builds.
+// You can define the build strategy, the image registry to use and the Maven configuration to adopt.
 type IntegrationPlatformBuildSpec struct {
-	BuildStrategy         BuildStrategy                           `json:"buildStrategy,omitempty"`
-	PublishStrategy       IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
-	RuntimeVersion        string                                  `json:"runtimeVersion,omitempty"`
-	RuntimeProvider       RuntimeProvider                         `json:"runtimeProvider,omitempty"`
-	BaseImage             string                                  `json:"baseImage,omitempty"`
-	Registry              RegistrySpec                            `json:"registry,omitempty"`
-	Timeout               *metav1.Duration                        `json:"timeout,omitempty"`
-	PersistentVolumeClaim string                                  `json:"persistentVolumeClaim,omitempty"`
-	Maven                 MavenSpec                               `json:"maven,omitempty"`
-	KanikoBuildCache      *bool                                   `json:"kanikoBuildCache,omitempty"`
+	// the strategy to adopt for building an Integration base image
+	BuildStrategy BuildStrategy `json:"buildStrategy,omitempty"`
+	// the strategy to adopt for publishing an Integration base image
+	PublishStrategy IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
+	// the Camel K Runtime dependency version
+	RuntimeVersion string `json:"runtimeVersion,omitempty"`
+	// the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
+	RuntimeProvider RuntimeProvider `json:"runtimeProvider,omitempty"`
+	// a base image that can be used as base layer for all images.
+	// It can be useful if you want to provide some custom base image with further utility softwares
+	BaseImage string `json:"baseImage,omitempty"`
+	// the image registry used to push/pull Integration images
+	Registry RegistrySpec `json:"registry,omitempty"`
+	// how much time to wait before time out the build process
+	Timeout *metav1.Duration `json:"timeout,omitempty"`
+	// Maven configuration used to build the Camel/Camel-Quarkus applications
+	Maven MavenSpec `json:"maven,omitempty"`
+	// enables Kaniko publish strategy cache
+	KanikoBuildCache *bool `json:"kanikoBuildCache,omitempty"`
+	// the Persistent Volume Claim used by Kaniko publish strategy, if cache is enabled
+	PersistentVolumeClaim string `json:"persistentVolumeClaim,omitempty"`
 }
 
-// IntegrationPlatformKameletSpec --
+// IntegrationPlatformKameletSpec define the behavior for all the Kamelets controller by the IntegrationPlatform
 type IntegrationPlatformKameletSpec struct {
+	// remote repository used to retrieve Kamelet catalog
 	Repositories []IntegrationPlatformKameletRepositorySpec `json:"repositories,omitempty"`
 }
 
-// IntegrationPlatformKameletRepositorySpec --
+// IntegrationPlatformKameletRepositorySpec defines the location of the Kamelet catalog to use
 type IntegrationPlatformKameletRepositorySpec struct {
+	// the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
 	URI string `json:"uri,omitempty"`
 }
 
-// IntegrationPlatformBuildPublishStrategy enumerates all implemented publish strategies
+// IntegrationPlatformBuildPublishStrategy defines the strategy used to package and publish an Integration base image
 type IntegrationPlatformBuildPublishStrategy string
 
 const (
-	// IntegrationPlatformBuildPublishStrategyBuildah --
+	// IntegrationPlatformBuildPublishStrategyBuildah uses Buildah project (https://buildah.io/)
+	// in order to push the incremental images to the image repository. It can be used with `pod` BuildStrategy.
 	IntegrationPlatformBuildPublishStrategyBuildah IntegrationPlatformBuildPublishStrategy = "Buildah"
-	// IntegrationPlatformBuildPublishStrategyKaniko --
+	// IntegrationPlatformBuildPublishStrategyKaniko uses Kaniko project (https://github.com/GoogleContainerTools/kaniko)
+	// in order to push the incremental images to the image repository. It can be used with `pod` BuildStrategy.
 	IntegrationPlatformBuildPublishStrategyKaniko IntegrationPlatformBuildPublishStrategy = "Kaniko"
-	// IntegrationPlatformBuildPublishStrategyS2I --
+	// IntegrationPlatformBuildPublishStrategyS2I uses the Source to Images (S2I) feature
+	// (https://docs.openshift.com/container-platform/4.9/openshift_images/create-images.html#images-create-s2i_create-images)
+	// provided by an Openshift cluster in order to create and push the images to the registry. It is the default choice on Openshift cluster
 	IntegrationPlatformBuildPublishStrategyS2I IntegrationPlatformBuildPublishStrategy = "S2I"
-	// IntegrationPlatformBuildPublishStrategySpectrum --
+	// IntegrationPlatformBuildPublishStrategySpectrum uses Spectrum project (https://github.com/container-tools/spectrum)
+	// in order to push the incremental images to the image repository. It is the default choice on vanilla Kubernetes cluster
 	IntegrationPlatformBuildPublishStrategySpectrum IntegrationPlatformBuildPublishStrategy = "Spectrum"
 )
 
-// IntegrationPlatformBuildPublishStrategies --
+// IntegrationPlatformBuildPublishStrategies the list of all available publish strategies
 var IntegrationPlatformBuildPublishStrategies = []IntegrationPlatformBuildPublishStrategy{
 	IntegrationPlatformBuildPublishStrategyBuildah,
 	IntegrationPlatformBuildPublishStrategyKaniko,
@@ -151,27 +187,27 @@ var IntegrationPlatformBuildPublishStrategies = []IntegrationPlatformBuildPublis
 	IntegrationPlatformBuildPublishStrategySpectrum,
 }
 
-// IntegrationPlatformPhase --
+// IntegrationPlatformPhase is the phase of an IntegrationPlatform
 type IntegrationPlatformPhase string
 
-// IntegrationPlatformConditionType --
+// IntegrationPlatformConditionType defines the type of condition
 type IntegrationPlatformConditionType string
 
 const (
-	// IntegrationPlatformKind --
+	// IntegrationPlatformKind is the Kind name of the IntegrationPlatform CR
 	IntegrationPlatformKind string = "IntegrationPlatform"
 
-	// IntegrationPlatformPhaseNone --
+	// IntegrationPlatformPhaseNone when the IntegrationPlatform does not exist
 	IntegrationPlatformPhaseNone IntegrationPlatformPhase = ""
-	// IntegrationPlatformPhaseCreating --
+	// IntegrationPlatformPhaseCreating when the IntegrationPlatform is under creation process
 	IntegrationPlatformPhaseCreating IntegrationPlatformPhase = "Creating"
-	// IntegrationPlatformPhaseWarming --
+	// IntegrationPlatformPhaseWarming when the IntegrationPlatform is warming (ie, creating Kaniko cache)
 	IntegrationPlatformPhaseWarming IntegrationPlatformPhase = "Warming"
-	// IntegrationPlatformPhaseReady --
+	// IntegrationPlatformPhaseReady when the IntegrationPlatform is ready
 	IntegrationPlatformPhaseReady IntegrationPlatformPhase = "Ready"
-	// IntegrationPlatformPhaseError --
+	// IntegrationPlatformPhaseError when the IntegrationPlatform had some error (see Conditions)
 	IntegrationPlatformPhaseError IntegrationPlatformPhase = "Error"
-	// IntegrationPlatformPhaseDuplicate --
+	// IntegrationPlatformPhaseDuplicate when the IntegrationPlatform is duplicated
 	IntegrationPlatformPhaseDuplicate IntegrationPlatformPhase = "Duplicate"
 )
 

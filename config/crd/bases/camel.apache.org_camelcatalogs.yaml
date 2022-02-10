@@ -50,7 +50,9 @@ spec:
     name: v1
     schema:
       openAPIV3Schema:
-        description: CamelCatalog is the Schema for the camelcatalogs API
+        description: CamelCatalog represents the languages, components, data formats
+          and capabilities enabled on a given runtime provider. The catalog may be
+          statically generated.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -65,31 +67,41 @@ spec:
           metadata:
             type: object
           spec:
-            description: CamelCatalogSpec defines the desired state of CamelCatalog
+            description: the desired state of the catalog
             properties:
               artifacts:
                 additionalProperties:
-                  description: CamelArtifact --
+                  description: CamelArtifact represent the configuration for a feature
+                    offered by Camel
                   properties:
                     artifactId:
+                      description: Maven Artifact
                       type: string
                     dataformats:
+                      description: accepted data formats
                       items:
                         type: string
                       type: array
                     dependencies:
+                      description: required dependencies
                       items:
                         description: CamelArtifactDependency represent a maven's dependency
                         properties:
                           artifactId:
+                            description: Maven Artifact
                             type: string
                           exclusions:
+                            description: provide a list of artifacts to exclude for
+                              this dependency
                             items:
-                              description: CamelArtifactExclusion --
+                              description: CamelArtifactExclusion represents an exclusion
+                                clause
                               properties:
                                 artifactId:
+                                  description: Maven Artifact
                                   type: string
                                 groupId:
+                                  description: Maven Group
                                   type: string
                               required:
                               - artifactId
@@ -97,8 +109,10 @@ spec:
                               type: object
                             type: array
                           groupId:
+                            description: Maven Group
                             type: string
                           version:
+                            description: Maven Version
                             type: string
                         required:
                         - artifactId
@@ -106,12 +120,17 @@ spec:
                         type: object
                       type: array
                     exclusions:
+                      description: provide a list of artifacts to exclude for this
+                        dependency
                       items:
-                        description: CamelArtifactExclusion --
+                        description: CamelArtifactExclusion represents an exclusion
+                          clause
                         properties:
                           artifactId:
+                            description: Maven Artifact
                             type: string
                           groupId:
+                            description: Maven Group
                             type: string
                         required:
                         - artifactId
@@ -119,37 +138,51 @@ spec:
                         type: object
                       type: array
                     groupId:
+                      description: Maven Group
                       type: string
                     javaTypes:
+                      description: the Java types used by the artifact feature (ie,
+                        component, data format, ...)
                       items:
                         type: string
                       type: array
                     languages:
+                      description: accepted languages
                       items:
                         type: string
                       type: array
                     schemes:
+                      description: accepted URI schemes
                       items:
-                        description: CamelScheme --
+                        description: CamelScheme represents the scheme used to identify
+                          a component in a URI (ie, timer in a timer:xyz endpoint
+                          URI)
                         properties:
                           consumer:
-                            description: CamelSchemeScope contains scoped information
-                              about a scheme
+                            description: required scope for consumer
                             properties:
                               dependencies:
+                                description: list of dependencies needed for this
+                                  scope
                                 items:
                                   description: CamelArtifactDependency represent a
                                     maven's dependency
                                   properties:
                                     artifactId:
+                                      description: Maven Artifact
                                       type: string
                                     exclusions:
+                                      description: provide a list of artifacts to
+                                        exclude for this dependency
                                       items:
-                                        description: CamelArtifactExclusion --
+                                        description: CamelArtifactExclusion represents
+                                          an exclusion clause
                                         properties:
                                           artifactId:
+                                            description: Maven Artifact
                                             type: string
                                           groupId:
+                                            description: Maven Group
                                             type: string
                                         required:
                                         - artifactId
@@ -157,8 +190,10 @@ spec:
                                         type: object
                                       type: array
                                     groupId:
+                                      description: Maven Group
                                       type: string
                                     version:
+                                      description: Maven Version
                                       type: string
                                   required:
                                   - artifactId
@@ -167,29 +202,39 @@ spec:
                                 type: array
                             type: object
                           http:
+                            description: is a HTTP based scheme
                             type: boolean
                           id:
+                            description: the ID (ie, timer in a timer:xyz URI)
                             type: string
                           passive:
+                            description: is a passive scheme
                             type: boolean
                           producer:
-                            description: CamelSchemeScope contains scoped information
-                              about a scheme
+                            description: required scope for producers
                             properties:
                               dependencies:
+                                description: list of dependencies needed for this
+                                  scope
                                 items:
                                   description: CamelArtifactDependency represent a
                                     maven's dependency
                                   properties:
                                     artifactId:
+                                      description: Maven Artifact
                                       type: string
                                     exclusions:
+                                      description: provide a list of artifacts to
+                                        exclude for this dependency
                                       items:
-                                        description: CamelArtifactExclusion --
+                                        description: CamelArtifactExclusion represents
+                                          an exclusion clause
                                         properties:
                                           artifactId:
+                                            description: Maven Artifact
                                             type: string
                                           groupId:
+                                            description: Maven Group
                                             type: string
                                         required:
                                         - artifactId
@@ -197,8 +242,10 @@ spec:
                                         type: object
                                       type: array
                                     groupId:
+                                      description: Maven Group
                                       type: string
                                     version:
+                                      description: Maven Version
                                       type: string
                                   required:
                                   - artifactId
@@ -213,27 +260,37 @@ spec:
                         type: object
                       type: array
                     version:
+                      description: Maven Version
                       type: string
                   required:
                   - artifactId
                   - groupId
                   type: object
+                description: artifacts required by this catalog
                 type: object
               loaders:
                 additionalProperties:
-                  description: CamelLoader --
+                  description: CamelLoader represents the configuration required to
+                    load a DSL
                   properties:
                     artifactId:
+                      description: Maven Artifact
                       type: string
                     dependencies:
+                      description: a list of additional dependencies required beside
+                        the base one
                       items:
-                        description: MavenArtifact defines a Maven artifact
+                        description: MavenArtifact defines a GAV (Group:Artifact:Version)
+                          Maven artifact
                         properties:
                           artifactId:
+                            description: Maven Artifact
                             type: string
                           groupId:
+                            description: Maven Group
                             type: string
                           version:
+                            description: Maven Version
                             type: string
                         required:
                         - artifactId
@@ -241,40 +298,52 @@ spec:
                         type: object
                       type: array
                     groupId:
+                      description: Maven Group
                       type: string
                     languages:
+                      description: a list of DSLs supported
                       items:
                         type: string
                       type: array
                     metadata:
                       additionalProperties:
                         type: string
+                      description: 'Deprecated: never used a set of general metadata
+                        for various purposes'
                       type: object
                     version:
+                      description: Maven Version
                       type: string
                   required:
                   - artifactId
                   - groupId
                   type: object
+                description: loaders required by this catalog
                 type: object
               runtime:
-                description: RuntimeSpec --
+                description: the runtime targeted for the catalog
                 properties:
                   applicationClass:
+                    description: application entry point (main) to be executed
                     type: string
                   capabilities:
                     additionalProperties:
-                      description: Capability --
+                      description: Capability is a particular feature which requires
+                        a well known set of dependencies
                       properties:
                         dependencies:
                           items:
-                            description: MavenArtifact defines a Maven artifact
+                            description: MavenArtifact defines a GAV (Group:Artifact:Version)
+                              Maven artifact
                             properties:
                               artifactId:
+                                description: Maven Artifact
                                 type: string
                               groupId:
+                                description: Maven Group
                                 type: string
                               version:
+                                description: Maven Version
                                 type: string
                             required:
                             - artifactId
@@ -284,20 +353,27 @@ spec:
                         metadata:
                           additionalProperties:
                             type: string
+                          description: 'Deprecated: not in use'
                           type: object
                       required:
                       - dependencies
                       type: object
+                    description: features offered by this runtime
                     type: object
                   dependencies:
+                    description: list of dependencies needed to run the application
                     items:
-                      description: MavenArtifact defines a Maven artifact
+                      description: MavenArtifact defines a GAV (Group:Artifact:Version)
+                        Maven artifact
                       properties:
                         artifactId:
+                          description: Maven Artifact
                           type: string
                         groupId:
+                          description: Maven Group
                           type: string
                         version:
+                          description: Maven Version
                           type: string
                       required:
                       - artifactId
@@ -307,11 +383,13 @@ spec:
                   metadata:
                     additionalProperties:
                       type: string
+                    description: set of metadata
                     type: object
                   provider:
-                    description: RuntimeProvider --
+                    description: Camel main application provider, ie, Camel Quarkus
                     type: string
                   version:
+                    description: Camel K Runtime version
                     type: string
                 required:
                 - applicationClass
@@ -325,7 +403,7 @@ spec:
             - runtime
             type: object
           status:
-            description: CamelCatalogStatus defines the observed state of CamelCatalog
+            description: the actual state of the catalog
             type: object
         type: object
     served: true
