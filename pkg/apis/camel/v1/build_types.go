@@ -25,7 +25,7 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 // Important: Run "make generate-deepcopy" to regenerate code after modifying this file
 
-// BuildSpec defines the Build to be executed
+// BuildSpec defines the Build operation to be executed
 type BuildSpec struct {
 	// The sequence of Build tasks to be performed as part of the Build execution.
 	Tasks []Task `json:"tasks,omitempty"`
@@ -39,93 +39,130 @@ type BuildSpec struct {
 	Timeout metav1.Duration `json:"timeout,omitempty"`
 }
 
-// Task --
+// Task represents the abstract task. Only one of the task should be configured to represent the specific task chosen.
 type Task struct {
-	Builder  *BuilderTask  `json:"builder,omitempty"`
-	Buildah  *BuildahTask  `json:"buildah,omitempty"`
-	Kaniko   *KanikoTask   `json:"kaniko,omitempty"`
+	// a BuilderTask (base task)
+	Builder *BuilderTask `json:"builder,omitempty"`
+	// a BuildahTask, for Buildah strategy
+	Buildah *BuildahTask `json:"buildah,omitempty"`
+	// a KanikoTask, for Kaniko strategy
+	Kaniko *KanikoTask `json:"kaniko,omitempty"`
+	// a SpectrumTask, for Spectrum strategy
 	Spectrum *SpectrumTask `json:"spectrum,omitempty"`
-	S2i      *S2iTask      `json:"s2i,omitempty"`
+	// a S2iTask, for S2I strategy
+	S2i *S2iTask `json:"s2i,omitempty"`
 }
 
-// BaseTask --
+// BaseTask is a base for the struct hierarchy
 type BaseTask struct {
+	// name of the task
 	Name string `json:"name,omitempty"`
 }
 
-// BuilderTask --
+// BuilderTask is the generic task in charge of building the application image
 type BuilderTask struct {
-	BaseTask     `json:",inline"`
-	BaseImage    string         `json:"baseImage,omitempty"`
-	Runtime      RuntimeSpec    `json:"runtime,omitempty"`
-	Sources      []SourceSpec   `json:"sources,omitempty"`
-	Resources    []ResourceSpec `json:"resources,omitempty"`
-	Dependencies []string       `json:"dependencies,omitempty"`
-	Steps        []string       `json:"steps,omitempty"`
-	Maven        MavenBuildSpec `json:"maven,omitempty"`
-	BuildDir     string         `json:"buildDir,omitempty"`
+	BaseTask `json:",inline"`
+	// the base image layer
+	BaseImage string `json:"baseImage,omitempty"`
+	// the configuration required for the runtime application
+	Runtime RuntimeSpec `json:"runtime,omitempty"`
+	// the source code for the Route(s)
+	// Deprecated: no longer in use
+	Sources []SourceSpec `json:"sources,omitempty"`
+	// Deprecated: no longer in use
+	Resources []ResourceSpec `json:"resources,omitempty"`
+	// the list of dependencies to use for this build
+	Dependencies []string `json:"dependencies,omitempty"`
+	// the list of steps to execute (see pkg/builder/)
+	Steps []string `json:"steps,omitempty"`
+	// the configuration required by Maven for the application build phase
+	Maven MavenBuildSpec `json:"maven,omitempty"`
+	// workspace directory to use
+	BuildDir string `json:"buildDir,omitempty"`
 }
 
-// MavenBuildSpec --
+// MavenBuildSpec defines the Maven configuration plus additional repositories to use
 type MavenBuildSpec struct {
+	// base Maven specification
 	MavenSpec `json:",inline"`
-	// The Maven repositories.
+	// additional repositories
 	Repositories []Repository `json:"repositories,omitempty"`
 }
 
-// PublishTask --
+// PublishTask image publish configuration
 type PublishTask struct {
-	ContextDir string       `json:"contextDir,omitempty"`
-	BaseImage  string       `json:"baseImage,omitempty"`
-	Image      string       `json:"image,omitempty"`
-	Registry   RegistrySpec `json:"registry,omitempty"`
+	// can be useful to share info with other tasks
+	ContextDir string `json:"contextDir,omitempty"`
+	// base image layer
+	BaseImage string `json:"baseImage,omitempty"`
+	// final image name
+	Image string `json:"image,omitempty"`
+	// where to publish the final image
+	Registry RegistrySpec `json:"registry,omitempty"`
 }
 
-// BuildahTask --
+// BuildahTask is used to configure Buildah
 type BuildahTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
-	Verbose     *bool `json:"verbose,omitempty"`
+	// log more information
+	Verbose *bool `json:"verbose,omitempty"`
 }
 
-// KanikoTask --
+// KanikoTask is used to configure Kaniko
 type KanikoTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
-	Verbose     *bool           `json:"verbose,omitempty"`
-	Cache       KanikoTaskCache `json:"cache,omitempty"`
+	// log more information
+	Verbose *bool `json:"verbose,omitempty"`
+	// use a cache
+	Cache KanikoTaskCache `json:"cache,omitempty"`
 }
 
-// KanikoTaskCache --
+// KanikoTaskCache is used to configure Kaniko cache
 type KanikoTaskCache struct {
-	Enabled               *bool  `json:"enabled,omitempty"`
+	// true if a cache is enabled
+	Enabled *bool `json:"enabled,omitempty"`
+	// the PVC used to store the cache
 	PersistentVolumeClaim string `json:"persistentVolumeClaim,omitempty"`
 }
 
-// SpectrumTask --
+// SpectrumTask is used to configure Spectrum
 type SpectrumTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
 }
 
-// S2iTask --
+// S2iTask is used to configure S2I
 type S2iTask struct {
-	BaseTask   `json:",inline"`
+	BaseTask `json:",inline"`
+	// can be useful to share info with other tasks
 	ContextDir string `json:"contextDir,omitempty"`
-	Tag        string `json:"tag,omitempty"`
+	// used by the ImageStream
+	Tag string `json:"tag,omitempty"`
 }
 
 // BuildStatus defines the observed state of Build
 type BuildStatus struct {
-	Phase      BuildPhase       `json:"phase,omitempty"`
-	Image      string           `json:"image,omitempty"`
-	Digest     string           `json:"digest,omitempty"`
-	BaseImage  string           `json:"baseImage,omitempty"`
-	Artifacts  []Artifact       `json:"artifacts,omitempty"`
-	Error      string           `json:"error,omitempty"`
-	Failure    *Failure         `json:"failure,omitempty"`
-	StartedAt  *metav1.Time     `json:"startedAt,omitempty"`
+	// describes the phase
+	Phase BuildPhase `json:"phase,omitempty"`
+	// the image name built
+	Image string `json:"image,omitempty"`
+	// the digest from image
+	Digest string `json:"digest,omitempty"`
+	// the base image used for this build
+	BaseImage string `json:"baseImage,omitempty"`
+	// a list of artifacts contained in the build
+	Artifacts []Artifact `json:"artifacts,omitempty"`
+	// the error description (if any)
+	Error string `json:"error,omitempty"`
+	// the reason of the failure (if any)
+	Failure *Failure `json:"failure,omitempty"`
+	// the time when it started
+	StartedAt *metav1.Time `json:"startedAt,omitempty"`
+	// a list of conditions occurred during the build
 	Conditions []BuildCondition `json:"conditions,omitempty"`
+	// how long it took for the build
 	// Change to Duration / ISO 8601 when CRD uses OpenAPI spec v3
 	// https://github.com/OAI/OpenAPI-Specification/issues/845
 	Duration string `json:"duration,omitempty"`

@@ -48,23 +48,37 @@ type MavenSpec struct {
 
 // Repository defines a Maven repository
 type Repository struct {
-	ID        string           `xml:"id" json:"id"`
-	Name      string           `xml:"name,omitempty" json:"name,omitempty"`
-	URL       string           `xml:"url" json:"url"`
+	// identifies the repository
+	ID string `xml:"id" json:"id"`
+	// name of the repository
+	Name string `xml:"name,omitempty" json:"name,omitempty"`
+	// location of the repository
+	URL string `xml:"url" json:"url"`
+	// can use snapshot
 	Snapshots RepositoryPolicy `xml:"snapshots,omitempty" json:"snapshots,omitempty"`
-	Releases  RepositoryPolicy `xml:"releases,omitempty" json:"releases,omitempty"`
+	// can use stable releases
+	Releases RepositoryPolicy `xml:"releases,omitempty" json:"releases,omitempty"`
 }
 
 // RepositoryPolicy defines the policy associated to a Maven repository
 type RepositoryPolicy struct {
-	Enabled        bool   `xml:"enabled" json:"enabled"`
-	UpdatePolicy   string `xml:"updatePolicy,omitempty" json:"updatePolicy,omitempty"`
+	// is the policy activated or not
+	Enabled bool `xml:"enabled" json:"enabled"`
+	// This element specifies how often updates should attempt to occur.
+	// Maven will compare the local POM's timestamp (stored in a repository's maven-metadata file) to the remote.
+	// The choices are: `always`, `daily` (default), `interval:X` (where X is an integer in minutes) or `never`
+	UpdatePolicy string `xml:"updatePolicy,omitempty" json:"updatePolicy,omitempty"`
+	// When Maven deploys files to the repository, it also deploys corresponding checksum files.
+	// Your options are to `ignore`, `fail`, or `warn` on missing or incorrect checksums.
 	ChecksumPolicy string `xml:"checksumPolicy,omitempty" json:"checksumPolicy,omitempty"`
 }
 
-// MavenArtifact defines a Maven artifact
+// MavenArtifact defines a GAV (Group:Artifact:Version) Maven artifact
 type MavenArtifact struct {
-	GroupID    string `json:"groupId" yaml:"groupId" xml:"groupId"`
+	// Maven Group
+	GroupID string `json:"groupId" yaml:"groupId" xml:"groupId"`
+	// Maven Artifact
 	ArtifactID string `json:"artifactId" yaml:"artifactId" xml:"artifactId"`
-	Version    string `json:"version,omitempty" yaml:"version,omitempty" xml:"version,omitempty"`
+	// Maven Version
+	Version string `json:"version,omitempty" yaml:"version,omitempty" xml:"version,omitempty"`
 }

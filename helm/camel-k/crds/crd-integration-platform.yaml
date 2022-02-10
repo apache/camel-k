@@ -46,8 +46,11 @@ spec:
     name: v1
     schema:
       openAPIV3Schema:
-        description: IntegrationPlatform is the Schema for the integrationplatforms
-          API
+        description: IntegrationPlatform is the resource used to drive the Camel K
+          operator behavior. It defines the behavior of all Custom Resources (`IntegrationKit`,
+          `Integration`, `Kamelet`) in the given namespace. When the Camel K operator
+          is installed in `global` mode, you will need to specify an `IntegrationPlatform`
+          in each namespace where you want the Camel K operator to be executed
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -65,21 +68,26 @@ spec:
             description: IntegrationPlatformSpec defines the desired state of IntegrationPlatform
             properties:
               build:
-                description: IntegrationPlatformBuildSpec contains platform related
-                  build information
+                description: specify how to build the Integration/IntegrationKits
                 properties:
                   baseImage:
+                    description: a base image that can be used as base layer for all
+                      images. It can be useful if you want to provide some custom
+                      base image with further utility softwares
                     type: string
                   buildStrategy:
-                    description: BuildStrategy specifies how the Build should be executed
+                    description: the strategy to adopt for building an Integration
+                      base image
                     enum:
                     - routine
                     - pod
                     type: string
                   kanikoBuildCache:
+                    description: enables Kaniko publish strategy cache
                     type: boolean
                   maven:
-                    description: MavenSpec --
+                    description: Maven configuration used to build the Camel/Camel-Quarkus
+                      applications
                     properties:
                       caSecret:
                         description: The Secret name and key, containing the CA certificate(s)
@@ -115,13 +123,17 @@ spec:
                       extension:
                         description: The Maven build extensions. See https://maven.apache.org/guides/mini/guide-using-extensions.html.
                         items:
-                          description: MavenArtifact defines a Maven artifact
+                          description: MavenArtifact defines a GAV (Group:Artifact:Version)
+                            Maven artifact
                           properties:
                             artifactId:
+                              description: Maven Artifact
                               type: string
                             groupId:
+                              description: Maven Group
                               type: string
                             version:
+                              description: Maven Version
                               type: string
                           required:
                           - artifactId
@@ -180,51 +192,73 @@ spec:
                         type: object
                     type: object
                   persistentVolumeClaim:
+                    description: the Persistent Volume Claim used by Kaniko publish
+                      strategy, if cache is enabled
                     type: string
                   publishStrategy:
-                    description: IntegrationPlatformBuildPublishStrategy enumerates
-                      all implemented publish strategies
+                    description: the strategy to adopt for publishing an Integration
+                      base image
                     type: string
                   registry:
-                    description: RegistrySpec provides the configuration for the container
-                      registry
+                    description: the image registry used to push/pull Integration
+                      images
                     properties:
                       address:
+                        description: the URI to access
                         type: string
                       ca:
+                        description: the configmap which stores the Certificate Authority
                         type: string
                       insecure:
+                        description: if the container registry is insecure (ie, http
+                          only)
                         type: boolean
                       organization:
+                        description: the registry organization
                         type: string
                       secret:
+                        description: the secret where credentials are stored
                         type: string
                     type: object
                   runtimeProvider:
-                    description: RuntimeProvider --
+                    description: the runtime used. Likely Camel Quarkus (we used to
+                      have main runtime which has been discontinued since version
+                      1.5)
                     type: string
                   runtimeVersion:
+                    description: the Camel K Runtime dependency version
                     type: string
                   timeout:
+                    description: how much time to wait before time out the build process
                     type: string
                 type: object
               cluster:
-                description: IntegrationPlatformCluster is the kind of orchestration
-                  cluster the platform is installed into
+                description: what kind of cluster you're running (ie, plain Kubernetes
+                  or Openshift)
                 type: string
               configuration:
+                description: list of configuration properties to be attached to all
+                  the Integration/IntegrationKits built from this IntegrationPlatform
                 items:
-                  description: ConfigurationSpec --
+                  description: ConfigurationSpec represents a generic configuration
+                    specification
                   properties:
                     resourceKey:
+                      description: 'Deprecated: no longer used'
                       type: string
                     resourceMountPoint:
+                      description: 'Deprecated: no longer used'
                       type: string
                     resourceType:
+                      description: 'Deprecated: no longer used'
                       type: string
                     type:
+                      description: 'represents the type of configuration, ie: property,
+                        configmap, secret, ...'
                       type: string
                     value:
+                      description: the value to assign to the configuration (syntax
+                        may vary depending on the `Type`)
                       type: string
                   required:
                   - type
@@ -232,57 +266,69 @@ spec:
                   type: object
                 type: array
               kamelet:
-                description: IntegrationPlatformKameletSpec --
+                description: configuration to be executed to all Kamelets controlled
+                  by this IntegrationPlatform
                 properties:
                   repositories:
+                    description: remote repository used to retrieve Kamelet catalog
                     items:
-                      description: IntegrationPlatformKameletRepositorySpec --
+                      description: IntegrationPlatformKameletRepositorySpec defines
+                        the location of the Kamelet catalog to use
                       properties:
                         uri:
+                          description: the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
                           type: string
                       type: object
                     type: array
                 type: object
               profile:
-                description: TraitProfile represents lists of traits that are enabled
-                  for the specific installation/integration
+                description: the profile you wish to use. It will apply certain traits
+                  which are required by the specific profile chosen. It usually relates
+                  the Cluster with the optional definition of special profiles (ie,
+                  Knative)
                 type: string
               resources:
-                description: IntegrationPlatformResourcesSpec contains platform related
-                  resources
+                description: 'Deprecated: not used'
                 type: object
               traits:
                 additionalProperties:
                   description: A TraitSpec contains the configuration of a trait
                   properties:
                     configuration:
-                      description: TraitConfiguration --
+                      description: TraitConfiguration parameters configuration
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
                   required:
                   - configuration
                   type: object
+                description: list of traits to be executed for all the Integration/IntegrationKits
+                  built from this IntegrationPlatform
                 type: object
             type: object
           status:
             description: IntegrationPlatformStatus defines the observed state of IntegrationPlatform
             properties:
               build:
-                description: IntegrationPlatformBuildSpec contains platform related
-                  build information
+                description: specify how to build the Integration/IntegrationKits
                 properties:
                   baseImage:
+                    description: a base image that can be used as base layer for all
+                      images. It can be useful if you want to provide some custom
+                      base image with further utility softwares
                     type: string
                   buildStrategy:
-                    description: BuildStrategy specifies how the Build should be executed
+                    description: the strategy to adopt for building an Integration
+                      base image
                     enum:
                     - routine
                     - pod
                     type: string
                   kanikoBuildCache:
+                    description: enables Kaniko publish strategy cache
                     type: boolean
                   maven:
-                    description: MavenSpec --
+                    description: Maven configuration used to build the Camel/Camel-Quarkus
+                      applications
                     properties:
                       caSecret:
                         description: The Secret name and key, containing the CA certificate(s)
@@ -318,13 +364,17 @@ spec:
                       extension:
                         description: The Maven build extensions. See https://maven.apache.org/guides/mini/guide-using-extensions.html.
                         items:
-                          description: MavenArtifact defines a Maven artifact
+                          description: MavenArtifact defines a GAV (Group:Artifact:Version)
+                            Maven artifact
                           properties:
                             artifactId:
+                              description: Maven Artifact
                               type: string
                             groupId:
+                              description: Maven Group
                               type: string
                             version:
+                              description: Maven Version
                               type: string
                           required:
                           - artifactId
@@ -383,39 +433,53 @@ spec:
                         type: object
                     type: object
                   persistentVolumeClaim:
+                    description: the Persistent Volume Claim used by Kaniko publish
+                      strategy, if cache is enabled
                     type: string
                   publishStrategy:
-                    description: IntegrationPlatformBuildPublishStrategy enumerates
-                      all implemented publish strategies
+                    description: the strategy to adopt for publishing an Integration
+                      base image
                     type: string
                   registry:
-                    description: RegistrySpec provides the configuration for the container
-                      registry
+                    description: the image registry used to push/pull Integration
+                      images
                     properties:
                       address:
+                        description: the URI to access
                         type: string
                       ca:
+                        description: the configmap which stores the Certificate Authority
                         type: string
                       insecure:
+                        description: if the container registry is insecure (ie, http
+                          only)
                         type: boolean
                       organization:
+                        description: the registry organization
                         type: string
                       secret:
+                        description: the secret where credentials are stored
                         type: string
                     type: object
                   runtimeProvider:
-                    description: RuntimeProvider --
+                    description: the runtime used. Likely Camel Quarkus (we used to
+                      have main runtime which has been discontinued since version
+                      1.5)
                     type: string
                   runtimeVersion:
+                    description: the Camel K Runtime dependency version
                     type: string
                   timeout:
+                    description: how much time to wait before time out the build process
                     type: string
                 type: object
               cluster:
-                description: IntegrationPlatformCluster is the kind of orchestration
-                  cluster the platform is installed into
+                description: what kind of cluster you're running (ie, plain Kubernetes
+                  or Openshift)
                 type: string
               conditions:
+                description: which are the conditions met (particularly useful when
+                  in ERROR phase)
                 items:
                   description: IntegrationPlatformCondition describes the state of
                     a resource at a certain point.
@@ -448,18 +512,28 @@ spec:
                   type: object
                 type: array
               configuration:
+                description: list of configuration properties to be attached to all
+                  the Integration/IntegrationKits built from this IntegrationPlatform
                 items:
-                  description: ConfigurationSpec --
+                  description: ConfigurationSpec represents a generic configuration
+                    specification
                   properties:
                     resourceKey:
+                      description: 'Deprecated: no longer used'
                       type: string
                     resourceMountPoint:
+                      description: 'Deprecated: no longer used'
                       type: string
                     resourceType:
+                      description: 'Deprecated: no longer used'
                       type: string
                     type:
+                      description: 'represents the type of configuration, ie: property,
+                        configmap, secret, ...'
                       type: string
                     value:
+                      description: the value to assign to the configuration (syntax
+                        may vary depending on the `Type`)
                       type: string
                   required:
                   - type
@@ -469,43 +543,53 @@ spec:
               info:
                 additionalProperties:
                   type: string
+                description: generic information related to the build of Camel K operator
+                  software
                 type: object
               kamelet:
-                description: IntegrationPlatformKameletSpec --
+                description: configuration to be executed to all Kamelets controlled
+                  by this IntegrationPlatform
                 properties:
                   repositories:
+                    description: remote repository used to retrieve Kamelet catalog
                     items:
-                      description: IntegrationPlatformKameletRepositorySpec --
+                      description: IntegrationPlatformKameletRepositorySpec defines
+                        the location of the Kamelet catalog to use
                       properties:
                         uri:
+                          description: the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
                           type: string
                       type: object
                     type: array
                 type: object
               phase:
-                description: IntegrationPlatformPhase --
+                description: defines in what phase the IntegrationPlatform is found
                 type: string
               profile:
-                description: TraitProfile represents lists of traits that are enabled
-                  for the specific installation/integration
+                description: the profile you wish to use. It will apply certain traits
+                  which are required by the specific profile chosen. It usually relates
+                  the Cluster with the optional definition of special profiles (ie,
+                  Knative)
                 type: string
               resources:
-                description: IntegrationPlatformResourcesSpec contains platform related
-                  resources
+                description: 'Deprecated: not used'
                 type: object
               traits:
                 additionalProperties:
                   description: A TraitSpec contains the configuration of a trait
                   properties:
                     configuration:
-                      description: TraitConfiguration --
+                      description: TraitConfiguration parameters configuration
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
                   required:
                   - configuration
                   type: object
+                description: list of traits to be executed for all the Integration/IntegrationKits
+                  built from this IntegrationPlatform
                 type: object
               version:
+                description: the Camel K operator version controlling this IntegrationPlatform
                 type: string
             type: object
         type: object

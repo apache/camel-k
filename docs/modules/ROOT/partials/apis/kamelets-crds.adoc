@@ -1042,19 +1042,19 @@ KameletSpec defines the desired state of Kamelet
 
 
 
+|`template` +
+*xref:#_camel_apache_org_v1alpha1_Template[Template]*
+|
+
+
+
+
 |`flow` +
 *xref:apis/camel-k.adoc#_camel_apache_org_v1_Flow[github.com/apache/camel-k/pkg/apis/camel/v1.Flow]*
 |
 
 
 Deprecated: use template
-
-|`template` +
-*xref:apis/camel-k.adoc#_camel_apache_org_v1_Template[github.com/apache/camel-k/pkg/apis/camel/v1.Template]*
-|
-
-
-
 
 |`authorization` +
 *xref:#_camel_apache_org_v1alpha1_AuthorizationSpec[AuthorizationSpec]*

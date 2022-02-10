@@ -77,17 +77,25 @@ spec:
                   Use container trait (mount.resources) to manage resources Use container
                   trait (mount.volumes) to manage volumes'
                 items:
-                  description: ConfigurationSpec --
+                  description: ConfigurationSpec represents a generic configuration
+                    specification
                   properties:
                     resourceKey:
+                      description: 'Deprecated: no longer used'
                       type: string
                     resourceMountPoint:
+                      description: 'Deprecated: no longer used'
                       type: string
                     resourceType:
+                      description: 'Deprecated: no longer used'
                       type: string
                     type:
+                      description: 'represents the type of configuration, ie: property,
+                        configmap, secret, ...'
                       type: string
                     value:
+                      description: the value to assign to the configuration (syntax
+                        may vary depending on the `Type`)
                       type: string
                   required:
                   - type
@@ -180,29 +188,41 @@ spec:
                   to manage resources Use openapi trait (openapi.configmaps) to manage
                   OpenAPIs specifications'
                 items:
-                  description: ResourceSpec --
+                  description: 'ResourceSpec represent an attached resource which
+                    will be materialized as a file on the running `Pod` TODO: we should
+                    deprecate in future releases in favour of mount, openapi or camel
+                    traits'
                   properties:
                     compression:
+                      description: if the content is compressed (base64 encrypted)
                       type: boolean
                     content:
+                      description: the source code (plain text)
                       type: string
                     contentKey:
+                      description: the confimap key holding the source content
                       type: string
                     contentRef:
+                      description: the confimap reference holding the source content
                       type: string
                     contentType:
+                      description: the content type (tipically text or binary)
                       type: string
                     mountPath:
+                      description: the mount path on destination `Pod`
                       type: string
                     name:
+                      description: the name of the specification
                       type: string
                     path:
+                      description: the path where the file is stored
                       type: string
                     rawContent:
+                      description: the source code (binary)
                       format: byte
                       type: string
                     type:
-                      description: ResourceType --
+                      description: the kind of data to expect
                       type: string
                   type: object
                 type: array
@@ -210,17 +230,23 @@ spec:
                 type: string
               sources:
                 items:
-                  description: SourceSpec --
+                  description: SourceSpec defines the configuration for one or more
+                    routes to be executed in a certain Camel DSL language
                   properties:
                     compression:
+                      description: if the content is compressed (base64 encrypted)
                       type: boolean
                     content:
+                      description: the source code (plain text)
                       type: string
                     contentKey:
+                      description: the confimap key holding the source content
                       type: string
                     contentRef:
+                      description: the confimap reference holding the source content
                       type: string
                     contentType:
+                      description: the content type (tipically text or binary)
                       type: string
                     interceptors:
                       description: Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
@@ -229,15 +255,18 @@ spec:
                         type: string
                       type: array
                     language:
-                      description: Language --
+                      description: specify which is the language (Camel DSL) used
+                        to interpret this source code
                       type: string
                     loader:
                       description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
                         that will interpret this source at runtime
                       type: string
                     name:
+                      description: the name of the specification
                       type: string
                     path:
+                      description: the path where the file is stored
                       type: string
                     property-names:
                       description: List of property names defined in the source (e.g.
@@ -246,6 +275,7 @@ spec:
                         type: string
                       type: array
                     rawContent:
+                      description: the source code (binary)
                       format: byte
                       type: string
                     type:
@@ -5659,7 +5689,7 @@ spec:
                   description: A TraitSpec contains the configuration of a trait
                   properties:
                     configuration:
-                      description: TraitConfiguration --
+                      description: TraitConfiguration parameters configuration
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
                   required:
@@ -5713,17 +5743,25 @@ spec:
                 type: array
               configuration:
                 items:
-                  description: ConfigurationSpec --
+                  description: ConfigurationSpec represents a generic configuration
+                    specification
                   properties:
                     resourceKey:
+                      description: 'Deprecated: no longer used'
                       type: string
                     resourceMountPoint:
+                      description: 'Deprecated: no longer used'
                       type: string
                     resourceType:
+                      description: 'Deprecated: no longer used'
                       type: string
                     type:
+                      description: 'represents the type of configuration, ie: property,
+                        configmap, secret, ...'
                       type: string
                     value:
+                      description: the value to assign to the configuration (syntax
+                        may vary depending on the `Type`)
                       type: string
                   required:
                   - type
@@ -5738,45 +5776,63 @@ spec:
                 type: string
               generatedResources:
                 items:
-                  description: ResourceSpec --
+                  description: 'ResourceSpec represent an attached resource which
+                    will be materialized as a file on the running `Pod` TODO: we should
+                    deprecate in future releases in favour of mount, openapi or camel
+                    traits'
                   properties:
                     compression:
+                      description: if the content is compressed (base64 encrypted)
                       type: boolean
                     content:
+                      description: the source code (plain text)
                       type: string
                     contentKey:
+                      description: the confimap key holding the source content
                       type: string
                     contentRef:
+                      description: the confimap reference holding the source content
                       type: string
                     contentType:
+                      description: the content type (tipically text or binary)
                       type: string
                     mountPath:
+                      description: the mount path on destination `Pod`
                       type: string
                     name:
+                      description: the name of the specification
                       type: string
                     path:
+                      description: the path where the file is stored
                       type: string
                     rawContent:
+                      description: the source code (binary)
                       format: byte
                       type: string
                     type:
-                      description: ResourceType --
+                      description: the kind of data to expect
                       type: string
                   type: object
                 type: array
               generatedSources:
                 items:
-                  description: SourceSpec --
+                  description: SourceSpec defines the configuration for one or more
+                    routes to be executed in a certain Camel DSL language
                   properties:
                     compression:
+                      description: if the content is compressed (base64 encrypted)
                       type: boolean
                     content:
+                      description: the source code (plain text)
                       type: string
                     contentKey:
+                      description: the confimap key holding the source content
                       type: string
                     contentRef:
+                      description: the confimap reference holding the source content
                       type: string
                     contentType:
+                      description: the content type (tipically text or binary)
                       type: string
                     interceptors:
                       description: Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
@@ -5785,15 +5841,18 @@ spec:
                         type: string
                       type: array
                     language:
-                      description: Language --
+                      description: specify which is the language (Camel DSL) used
+                        to interpret this source code
                       type: string
                     loader:
                       description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
                         that will interpret this source at runtime
                       type: string
                     name:
+                      description: the name of the specification
                       type: string
                     path:
+                      description: the path where the file is stored
                       type: string
                     property-names:
                       description: List of property names defined in the source (e.g.
@@ -5802,6 +5861,7 @@ spec:
                         type: string
                       type: array
                     rawContent:
+                      description: the source code (binary)
                       format: byte
                       type: string
                     type:
@@ -5889,7 +5949,7 @@ spec:
                 format: int32
                 type: integer
               runtimeProvider:
-                description: RuntimeProvider --
+                description: RuntimeProvider is the provider chosen for the runtime
                 type: string
               runtimeVersion:
                 type: string

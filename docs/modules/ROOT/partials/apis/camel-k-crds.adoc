@@ -50,7 +50,7 @@ Refer to the Kubernetes API documentation for the fields of the `metadata` field
 [#_camel_apache_org_v1_CamelCatalog]
 === CamelCatalog
 
-CamelCatalog is the Schema for the camelcatalogs API
+CamelCatalog represents the languages, components, data formats and capabilities enabled on a given runtime provider. The catalog may be statically generated.
 
 [cols="2,2a",options="header"]
 |===
@@ -77,14 +77,14 @@ Refer to the Kubernetes API documentation for the fields of the `metadata` field
 |
 
 
-
+the actual state of the catalog
 
 |`spec` +
 *xref:#_camel_apache_org_v1_CamelCatalogSpec[CamelCatalogSpec]*
 |
 
 
-
+the desired state of the catalog
 
 
 |===
@@ -134,7 +134,10 @@ Refer to the Kubernetes API documentation for the fields of the `metadata` field
 [#_camel_apache_org_v1_IntegrationKit]
 === IntegrationKit
 
-IntegrationKit is the Schema for the integrationkits API
+IntegrationKit defines a container image and additional configuration needed to run an `Integration`.
+An `IntegrationKit` is a generic image generally built from the requirements of an `Integration`, but agnostic to it,
+in order to be reused by any other `Integration` which has the same required set of capabilities. An `IntegrationKit`
+may be used for other kits as a base container layer, when the `incremental` build option is enabled.
 
 [cols="2,2a",options="header"]
 |===
@@ -161,14 +164,14 @@ Refer to the Kubernetes API documentation for the fields of the `metadata` field
 |
 
 
-
+the desired configuration
 
 |`status` +
 *xref:#_camel_apache_org_v1_IntegrationKitStatus[IntegrationKitStatus]*
 |
 
 
-
+the actual status
 
 
 |===
@@ -176,7 +179,10 @@ Refer to the Kubernetes API documentation for the fields of the `metadata` field
 [#_camel_apache_org_v1_IntegrationPlatform]
 === IntegrationPlatform
 
-IntegrationPlatform is the Schema for the integrationplatforms API
+IntegrationPlatform is the resource used to drive the Camel K operator behavior.
+It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
+When the Camel K operator is installed in `global` mode,
+you will need to specify an `IntegrationPlatform` in each namespace where you want the Camel K operator to be executed
 
 [cols="2,2a",options="header"]
 |===
@@ -225,7 +231,7 @@ Refer to the Kubernetes API documentation for the fields of the `metadata` field
 * <<#_camel_apache_org_v1_BuildStatus, BuildStatus>>
 * <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
 
-Artifact --
+Artifact represents a materialized artifact (a jar dependency or in general a file used by the build)
 
 [cols="2,2a",options="header"]
 |===
@@ -237,28 +243,28 @@ string
 |
 
 
-
+the identification (GAV for maven dependencies or file name for other file types)
 
 |`location` +
 string
 |
 
 
-
+where it is located in the builder `Pod`
 
 |`target` +
 string
 |
 
 
-
+the expected location in the runtime
 
 |`checksum` +
 string
 |
 
 
-
+a checksum (SHA1) of the content
 
 
 |===
@@ -274,7 +280,7 @@ string
 * <<#_camel_apache_org_v1_S2iTask, S2iTask>>
 * <<#_camel_apache_org_v1_SpectrumTask, SpectrumTask>>
 
-BaseTask --
+BaseTask is a base for the struct hierarchy
 
 [cols="2,2a",options="header"]
 |===
@@ -286,7 +292,7 @@ string
 |
 
 
-
+name of the task
 
 
 |===
@@ -377,7 +383,7 @@ BuildPhase --
 
 * <<#_camel_apache_org_v1_Build, Build>>
 
-BuildSpec defines the Build to be executed
+BuildSpec defines the Build operation to be executed
 
 [cols="2,2a",options="header"]
 |===
@@ -430,69 +436,70 @@ BuildStatus defines the observed state of Build
 |
 
 
-
+describes the phase
 
 |`image` +
 string
 |
 
 
-
+the image name built
 
 |`digest` +
 string
 |
 
 
-
+the digest from image
 
 |`baseImage` +
 string
 |
 
 
-
+the base image used for this build
 
 |`artifacts` +
 *xref:#_camel_apache_org_v1_Artifact[[\]Artifact]*
 |
 
 
-
+a list of artifacts contained in the build
 
 |`error` +
 string
 |
 
 
-
+the error description (if any)
 
 |`failure` +
 *xref:#_camel_apache_org_v1_Failure[Failure]*
 |
 
 
-
+the reason of the failure (if any)
 
 |`startedAt` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
-
+the time when it started
 
 |`conditions` +
 *xref:#_camel_apache_org_v1_BuildCondition[[\]BuildCondition]*
 |
 
 
-
+a list of conditions occurred during the build
 
 |`duration` +
 string
 |
 
 
+how long it took for the build
 Change to Duration / ISO 8601 when CRD uses OpenAPI spec v3
 https://github.com/OAI/OpenAPI-Specification/issues/845
 
@@ -507,7 +514,8 @@ https://github.com/OAI/OpenAPI-Specification/issues/845
 * <<#_camel_apache_org_v1_BuildSpec, BuildSpec>>
 * <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
 
-BuildStrategy specifies how the Build should be executed
+BuildStrategy specifies how the Build should be executed.
+It will trigger a Maven process that will take care of producing the expected Camel/Camel-Quarkus runtime.
 
 
 [#_camel_apache_org_v1_BuildahTask]
@@ -517,7 +525,7 @@ BuildStrategy specifies how the Build should be executed
 
 * <<#_camel_apache_org_v1_Task, Task>>
 
-BuildahTask --
+BuildahTask is used to configure Buildah
 
 [cols="2,2a",options="header"]
 |===
@@ -543,7 +551,7 @@ bool
 |
 
 
-
+log more information
 
 
 |===
@@ -555,7 +563,7 @@ bool
 
 * <<#_camel_apache_org_v1_Task, Task>>
 
-BuilderTask --
+BuilderTask is the generic task in charge of building the application image
 
 [cols="2,2a",options="header"]
 |===
@@ -574,56 +582,57 @@ string
 |
 
 
-
+the base image layer
 
 |`runtime` +
 *xref:#_camel_apache_org_v1_RuntimeSpec[RuntimeSpec]*
 |
 
 
-
+the configuration required for the runtime application
 
 |`sources` +
 *xref:#_camel_apache_org_v1_SourceSpec[[\]SourceSpec]*
 |
 
 
-
+the source code for the Route(s)
+Deprecated: no longer in use
 
 |`resources` +
 *xref:#_camel_apache_org_v1_ResourceSpec[[\]ResourceSpec]*
 |
 
 
-
+Deprecated: no longer in use
 
 |`dependencies` +
 []string
 |
 
 
-
+the list of dependencies to use for this build
 
 |`steps` +
 []string
 |
 
 
-
+the list of steps to execute (see pkg/builder/)
 
 |`maven` +
 *xref:#_camel_apache_org_v1_MavenBuildSpec[MavenBuildSpec]*
 |
 
 
-
+the configuration required by Maven for the application build phase
 
 |`buildDir` +
 string
 |
 
 
-
+workspace directory to use
 
 
 |===
@@ -635,7 +644,7 @@ string
 
 * <<#_camel_apache_org_v1_CamelCatalogSpec, CamelCatalogSpec>>
 
-CamelArtifact --
+CamelArtifact represent the configuration for a feature offered by Camel
 
 [cols="2,2a",options="header"]
 |===
@@ -647,42 +656,42 @@ CamelArtifact --
 |(Members of `CamelArtifactDependency` are embedded into this type.)
 
 
-
+Base Camel Artifact dependency
 
 |`schemes` +
 *xref:#_camel_apache_org_v1_CamelScheme[[\]CamelScheme]*
 |
 
 
-
+accepted URI schemes
 
 |`languages` +
 []string
 |
 
 
-
+accepted languages
 
 |`dataformats` +
 []string
 |
 
 
-
+accepted data formats
 
 |`dependencies` +
 *xref:#_camel_apache_org_v1_CamelArtifactDependency[[\]CamelArtifactDependency]*
 |
 
 
-
+required dependencies
 
 |`javaTypes` +
 []string
 |
 
 
-
+the Java types used by the artifact feature (ie, component, data format, ...)
 
 
 |===
@@ -707,14 +716,14 @@ CamelArtifactDependency represent a maven's dependency
 |(Members of `MavenArtifact` are embedded into this type.)
 
 
-
+the maven dependency
 
 |`exclusions` +
 *xref:#_camel_apache_org_v1_CamelArtifactExclusion[[\]CamelArtifactExclusion]*
 |
 
 
-
+provide a list of artifacts to exclude for this dependency
 
 
 |===
@@ -726,7 +735,7 @@ CamelArtifactDependency represent a maven's dependency
 
 * <<#_camel_apache_org_v1_CamelArtifactDependency, CamelArtifactDependency>>
 
-CamelArtifactExclusion --
+CamelArtifactExclusion represents an exclusion clause
 
 [cols="2,2a",options="header"]
 |===
@@ -738,14 +747,14 @@ string
 |
 
 
-
+Maven Group
 
 |`artifactId` +
 string
 |
 
 
-
+Maven Artifact
 
 
 |===
@@ -757,7 +766,7 @@ string
 
 * <<#_camel_apache_org_v1_CamelCatalog, CamelCatalog>>
 
-CamelCatalogSpec defines the desired state of CamelCatalog
+CamelCatalogSpec specify what features a Camel runtime provides
 
 [cols="2,2a",options="header"]
 |===
@@ -769,21 +778,21 @@ CamelCatalogSpec defines the desired state of CamelCatalog
 |
 
 
-
+the runtime targeted for the catalog
 
 |`artifacts` +
 *xref:#_camel_apache_org_v1_CamelArtifact[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.CamelArtifact]*
 |
 
 
-
+artifacts required by this catalog
 
 |`loaders` +
 *xref:#_camel_apache_org_v1_CamelLoader[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.CamelLoader]*
 |
 
 
-
+loaders required by this catalog
 
 
 |===
@@ -795,7 +804,7 @@ CamelCatalogSpec defines the desired state of CamelCatalog
 
 * <<#_camel_apache_org_v1_CamelCatalog, CamelCatalog>>
 
-CamelCatalogStatus defines the observed state of CamelCatalog
+CamelCatalogStatus defines the observed state of CamelCatalog. As the catalog is a static resource, we expect it to be empty.
 
 
 [#_camel_apache_org_v1_CamelLoader]
@@ -805,7 +814,7 @@ CamelCatalogStatus defines the observed state of CamelCatalog
 
 * <<#_camel_apache_org_v1_CamelCatalogSpec, CamelCatalogSpec>>
 
-CamelLoader --
+CamelLoader represents the configuration required to load a DSL
 
 [cols="2,2a",options="header"]
 |===
@@ -817,28 +826,29 @@ CamelLoader --
 |(Members of `MavenArtifact` are embedded into this type.)
 
 
-
+the base Maven artifact required
 
 |`languages` +
 []string
 |
 
 
-
+a list of DSLs supported
 
 |`dependencies` +
 *xref:#_camel_apache_org_v1_MavenArtifact[[\]MavenArtifact]*
 |
 
 
-
+a list of additional dependencies required beside the base one
 
 |`metadata` +
 map[string]string
 |
 
 
-
+Deprecated: never used
+a set of general metadata for various purposes
 
 
 |===
@@ -850,7 +860,7 @@ map[string]string
 
 * <<#_camel_apache_org_v1_CamelArtifact, CamelArtifact>>
 
-CamelScheme --
+CamelScheme represents the scheme used to identify a component in a URI (ie, timer in a timer:xyz endpoint URI)
 
 [cols="2,2a",options="header"]
 |===
@@ -862,35 +872,35 @@ string
 |
 
 
-
+the ID (ie, timer in a timer:xyz URI)
 
 |`passive` +
 bool
 |
 
 
-
+is a passive scheme
 
 |`http` +
 bool
 |
 
 
-
+is a HTTP based scheme
 
 |`consumer` +
 *xref:#_camel_apache_org_v1_CamelSchemeScope[CamelSchemeScope]*
 |
 
 
-
+required scope for consumer
 
 |`producer` +
 *xref:#_camel_apache_org_v1_CamelSchemeScope[CamelSchemeScope]*
 |
 
 
-
+required scope for producers
 
 
 |===
@@ -914,7 +924,7 @@ CamelSchemeScope contains scoped information about a scheme
 |
 
 
-
+list of dependencies needed for this scope
 
 
 |===
@@ -926,7 +936,7 @@ CamelSchemeScope contains scoped information about a scheme
 
 * <<#_camel_apache_org_v1_RuntimeSpec, RuntimeSpec>>
 
-Capability --
+Capability is a particular feature which requires a well known set of dependencies
 
 [cols="2,2a",options="header"]
 |===
@@ -945,7 +955,7 @@ map[string]string
 |
 
 
-
+Deprecated: not in use
 
 
 |===
@@ -966,7 +976,7 @@ Configurable --
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
 * <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
 
-ConfigurationSpec --
+ConfigurationSpec represents a generic configuration specification
 
 [cols="2,2a",options="header"]
 |===
@@ -978,35 +988,35 @@ string
 |
 
 
-
+represents the type of configuration, ie: property, configmap, secret, ...
 
 |`value` +
 string
 |
 
 
-
+the value to assign to the configuration (syntax may vary depending on the `Type`)
 
 |`resourceType` +
 string
 |
 
 
-
+Deprecated: no longer used
 
 |`resourceMountPoint` +
 string
 |
 
 
-
+Deprecated: no longer used
 
 |`resourceKey` +
 string
 |
 
 
-
+Deprecated: no longer used
 
 
 |===
@@ -1019,7 +1029,7 @@ string
 * <<#_camel_apache_org_v1_ResourceSpec, ResourceSpec>>
 * <<#_camel_apache_org_v1_SourceSpec, SourceSpec>>
 
-DataSpec --
+DataSpec represents the way the source is materialized in the running `Pod`
 
 [cols="2,2a",options="header"]
 |===
@@ -1031,56 +1041,56 @@ string
 |
 
 
-
+the name of the specification
 
 |`path` +
 string
 |
 
 
-
+the path where the file is stored
 
 |`content` +
 string
 |
 
 
-
+the source code (plain text)
 
 |`rawContent` +
 []byte
 |
 
 
-
+the source code (binary)
 
 |`contentRef` +
 string
 |
 
 
-
+the confimap reference holding the source content
 
 |`contentKey` +
 string
 |
 
 
-
+the confimap key holding the source content
 
 |`contentType` +
 string
 |
 
 
-
+the content type (tipically text or binary)
 
 |`compression` +
 bool
 |
 
 
-
+if the content is compressed (base64 encrypted)
 
 
 |===
@@ -1093,7 +1103,7 @@ bool
 * <<#_camel_apache_org_v1_BuildStatus, BuildStatus>>
 * <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
 
-Failure --
+Failure represent a message specifying the reason and the time of an event failure
 
 [cols="2,2a",options="header"]
 |===
@@ -1105,21 +1115,21 @@ string
 |
 
 
-
+a short text specifying the reason
 
 |`time` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
-
+the time when the failure has happened
 
 |`recovery` +
 *xref:#_camel_apache_org_v1_FailureRecovery[FailureRecovery]*
 |
 
 
-
+the recovery attempted for this failure
 
 
 |===
@@ -1131,7 +1141,7 @@ string
 
 * <<#_camel_apache_org_v1_Failure, Failure>>
 
-FailureRecovery --
+FailureRecovery defines the attempts to recover a failure
 
 [cols="2,2a",options="header"]
 |===
@@ -1143,21 +1153,21 @@ int
 |
 
 
-
+attempt number
 
 |`attemptMax` +
 int
 |
 
 
-
+maximum number of attempts
 
 |`attemptTime` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 *(Optional)*
 
-
+time of the attempt execution
 
 
 |===
@@ -1348,7 +1358,7 @@ IntegrationKitPhase --
 
 * <<#_camel_apache_org_v1_IntegrationKit, IntegrationKit>>
 
-IntegrationKitSpec defines the desired state of IntegrationKit
+IntegrationKitSpec defines a container image and additional configurations required to kick off an `Integration` which certain features
 
 [cols="2,2a",options="header"]
 |===
@@ -1360,42 +1370,43 @@ string
 |
 
 
-
+the container image as identify in the container registry
 
 |`dependencies` +
 []string
 |
 
 
-
+a list of Camel dependecies used by this kit
 
 |`profile` +
 *xref:#_camel_apache_org_v1_TraitProfile[TraitProfile]*
 |
 
 
-
+the profile which is expected by this kit
 
 |`traits` +
 *xref:#_camel_apache_org_v1_TraitSpec[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec]*
 |
 
 
-
+traits that the kit will execute
 
 |`configuration` +
 *xref:#_camel_apache_org_v1_ConfigurationSpec[[\]ConfigurationSpec]*
 |
 
 
-
+configuration used by the kit
+TODO: we should deprecate in future releases in favour of mount, openapi or camel traits
 
 |`repositories` +
 []string
 |
 
 
-
+Maven repositories that can be used by the kit
 
 
 |===
@@ -1419,77 +1430,77 @@ IntegrationKitStatus defines the observed state of IntegrationKit
 |
 
 
-
+phase of the kit
 
 |`baseImage` +
 string
 |
 
 
-
+base image used by the kit
 
 |`image` +
 string
 |
 
 
-
+actual image name of the kit
 
 |`digest` +
 string
 |
 
 
-
+actual image digest of the kit
 
 |`artifacts` +
 *xref:#_camel_apache_org_v1_Artifact[[\]Artifact]*
 |
 
 
-
+list of artifacts used by the kit
 
 |`failure` +
 *xref:#_camel_apache_org_v1_Failure[Failure]*
 |
 
 
-
+failure reason (if any)
 
 |`runtimeVersion` +
 string
 |
 
 
-
+the runtime version for which this kit was configured
 
 |`runtimeProvider` +
 *xref:#_camel_apache_org_v1_RuntimeProvider[RuntimeProvider]*
 |
 
 
-
+the runtime provider for which this kit was configured
 
 |`platform` +
 string
 |
 
 
-
-
-|`conditions` +
-*xref:#_camel_apache_org_v1_IntegrationKitCondition[[\]IntegrationKitCondition]*
-|
-
-
-
+the platform for which this kit was configured
 
 |`version` +
 string
 |
 
 
+the Camel K operator version for which this kit was configured
 
+|`conditions` +
+*xref:#_camel_apache_org_v1_IntegrationKitCondition[[\]IntegrationKitCondition]*
+|
+
+
+a list of conditions which happened for the events related the kit
 
 
 |===
@@ -1511,7 +1522,7 @@ IntegrationPhase --
 
 * <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
 
-IntegrationPlatformBuildPublishStrategy enumerates all implemented publish strategies
+IntegrationPlatformBuildPublishStrategy defines the strategy used to package and publish an Integration base image
 
 
 [#_camel_apache_org_v1_IntegrationPlatformBuildSpec]
@@ -1521,7 +1532,9 @@ IntegrationPlatformBuildPublishStrategy enumerates all implemented publish strat
 
 * <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
 
-IntegrationPlatformBuildSpec contains platform related build information
+IntegrationPlatformBuildSpec contains platform related build information.
+This configuration can be used to tune the behavior of the Integration/IntegrationKit image builds.
+You can define the build strategy, the image registry to use and the Maven configuration to adopt.
 
 [cols="2,2a",options="header"]
 |===
@@ -1533,70 +1546,71 @@ IntegrationPlatformBuildSpec contains platform related build information
 |
 
 
-
+the strategy to adopt for building an Integration base image
 
 |`publishStrategy` +
 *xref:#_camel_apache_org_v1_IntegrationPlatformBuildPublishStrategy[IntegrationPlatformBuildPublishStrategy]*
 |
 
 
-
+the strategy to adopt for publishing an Integration base image
 
 |`runtimeVersion` +
 string
 |
 
 
-
+the Camel K Runtime dependency version
 
 |`runtimeProvider` +
 *xref:#_camel_apache_org_v1_RuntimeProvider[RuntimeProvider]*
 |
 
 
-
+the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
 
 |`baseImage` +
 string
 |
 
 
-
+a base image that can be used as base layer for all images.
+It can be useful if you want to provide some custom base image with further utility softwares
 
 |`registry` +
 *xref:#_camel_apache_org_v1_RegistrySpec[RegistrySpec]*
 |
 
 
-
+the image registry used to push/pull Integration images
 
 |`timeout` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta[Kubernetes meta/v1.Duration]*
 |
 
 
-
-
-|`persistentVolumeClaim` +
-string
-|
-
-
-
+how much time to wait before time out the build process
 
 |`maven` +
 *xref:#_camel_apache_org_v1_MavenSpec[MavenSpec]*
 |
 
 
-
+Maven configuration used to build the Camel/Camel-Quarkus applications
 
 |`kanikoBuildCache` +
 bool
 |
 
 
+enables Kaniko publish strategy cache
 
+|`persistentVolumeClaim` +
+string
+|
+
+
+the Persistent Volume Claim used by Kaniko publish strategy, if cache is enabled
 
 
 |===
@@ -1677,7 +1691,7 @@ A human-readable message indicating details about the transition.
 
 * <<#_camel_apache_org_v1_IntegrationPlatformCondition, IntegrationPlatformCondition>>
 
-IntegrationPlatformConditionType --
+IntegrationPlatformConditionType defines the type of condition
 
 
 [#_camel_apache_org_v1_IntegrationPlatformKameletRepositorySpec]
@@ -1687,7 +1701,7 @@ IntegrationPlatformConditionType --
 
 * <<#_camel_apache_org_v1_IntegrationPlatformKameletSpec, IntegrationPlatformKameletSpec>>
 
-IntegrationPlatformKameletRepositorySpec --
+IntegrationPlatformKameletRepositorySpec defines the location of the Kamelet catalog to use
 
 [cols="2,2a",options="header"]
 |===
@@ -1699,7 +1713,7 @@ string
 |
 
 
-
+the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
 
 
 |===
@@ -1711,7 +1725,7 @@ string
 
 * <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
 
-IntegrationPlatformKameletSpec --
+IntegrationPlatformKameletSpec define the behavior for all the Kamelets controller by the IntegrationPlatform
 
 [cols="2,2a",options="header"]
 |===
@@ -1723,7 +1737,7 @@ IntegrationPlatformKameletSpec --
 |
 
 
-
+remote repository used to retrieve Kamelet catalog
 
 
 |===
@@ -1735,7 +1749,7 @@ IntegrationPlatformKameletSpec --
 
 * <<#_camel_apache_org_v1_IntegrationPlatformStatus, IntegrationPlatformStatus>>
 
-IntegrationPlatformPhase --
+IntegrationPlatformPhase is the phase of an IntegrationPlatform
 
 
 [#_camel_apache_org_v1_IntegrationPlatformResourcesSpec]
@@ -1745,7 +1759,8 @@ IntegrationPlatformPhase --
 
 * <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
 
-IntegrationPlatformResourcesSpec contains platform related resources
+IntegrationPlatformResourcesSpec contains platform related resources.
+Deprecated: not used
 
 
 [#_camel_apache_org_v1_IntegrationPlatformSpec]
@@ -1768,49 +1783,50 @@ IntegrationPlatformSpec defines the desired state of IntegrationPlatform
 |
 
 
-
+what kind of cluster you're running (ie, plain Kubernetes or Openshift)
 
 |`profile` +
 *xref:#_camel_apache_org_v1_TraitProfile[TraitProfile]*
 |
 
 
-
+the profile you wish to use. It will apply certain traits which are required by the specific profile chosen.
+It usually relates the Cluster with the optional definition of special profiles (ie, Knative)
 
 |`build` +
 *xref:#_camel_apache_org_v1_IntegrationPlatformBuildSpec[IntegrationPlatformBuildSpec]*
 |
 
 
-
+specify how to build the Integration/IntegrationKits
 
 |`resources` +
 *xref:#_camel_apache_org_v1_IntegrationPlatformResourcesSpec[IntegrationPlatformResourcesSpec]*
 |
 
 
-
+Deprecated: not used
 
 |`traits` +
 *xref:#_camel_apache_org_v1_TraitSpec[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec]*
 |
 
 
-
+list of traits to be executed for all the Integration/IntegrationKits built from this IntegrationPlatform
 
 |`configuration` +
 *xref:#_camel_apache_org_v1_ConfigurationSpec[[\]ConfigurationSpec]*
 |
 
 
-
+list of configuration properties to be attached to all the Integration/IntegrationKits built from this IntegrationPlatform
 
 |`kamelet` +
 *xref:#_camel_apache_org_v1_IntegrationPlatformKameletSpec[IntegrationPlatformKameletSpec]*
 |
 
 
-
+configuration to be executed to all Kamelets controlled by this IntegrationPlatform
 
 
 |===
@@ -1841,28 +1857,28 @@ IntegrationPlatformStatus defines the observed state of IntegrationPlatform
 |
 
 
-
+defines in what phase the IntegrationPlatform is found
 
 |`conditions` +
 *xref:#_camel_apache_org_v1_IntegrationPlatformCondition[[\]IntegrationPlatformCondition]*
 |
 
 
-
+which are the conditions met (particularly useful when in ERROR phase)
 
 |`version` +
 string
 |
 
 
-
+the Camel K operator version controlling this IntegrationPlatform
 
 |`info` +
 map[string]string
 |
 
 
-
+generic information related to the build of Camel K operator software
 
 
 |===
@@ -1953,9 +1969,9 @@ Use openapi trait (openapi.configmaps) to manage OpenAPIs specifications
 
 Deprecated:
 Use camel trait (camel.properties) to manage properties
-Use container trait (container.configs) to manage configs
-Use container trait (container.resources) to manage resources
-Use container trait (container.volumes) to manage volumes
+Use container trait (mount.configs) to manage configs
+Use container trait (mount.resources) to manage resources
+Use container trait (mount.volumes) to manage volumes
 
 |`repositories` +
 []string
@@ -2124,7 +2140,7 @@ The timestamp representing the last time when this integration was initialized.
 
 * <<#_camel_apache_org_v1_Task, Task>>
 
-KanikoTask --
+KanikoTask is used to configure Kaniko
 
 [cols="2,2a",options="header"]
 |===
@@ -2150,14 +2166,14 @@ bool
 |
 
 
-
+log more information
 
 |`cache` +
 *xref:#_camel_apache_org_v1_KanikoTaskCache[KanikoTaskCache]*
 |
 
 
-
+use a cache
 
 
 |===
@@ -2169,7 +2185,7 @@ bool
 
 * <<#_camel_apache_org_v1_KanikoTask, KanikoTask>>
 
-KanikoTaskCache --
+KanikoTaskCache is used to configure Kaniko cache
 
 [cols="2,2a",options="header"]
 |===
@@ -2181,14 +2197,14 @@ bool
 |
 
 
-
+true if a cache is enabled
 
 |`persistentVolumeClaim` +
 string
 |
 
 
-
+the PVC used to store the cache
 
 
 |===
@@ -2200,7 +2216,7 @@ string
 
 * <<#_camel_apache_org_v1_SourceSpec, SourceSpec>>
 
-Language --
+Language represents a supported language (Camel DSL)
 
 
 [#_camel_apache_org_v1_MavenArtifact]
@@ -2214,7 +2230,7 @@ Language --
 * <<#_camel_apache_org_v1_MavenSpec, MavenSpec>>
 * <<#_camel_apache_org_v1_RuntimeSpec, RuntimeSpec>>
 
-MavenArtifact defines a Maven artifact
+MavenArtifact defines a GAV (Group:Artifact:Version) Maven artifact
 
 [cols="2,2a",options="header"]
 |===
@@ -2226,21 +2242,21 @@ string
 |
 
 
-
+Maven Group
 
 |`artifactId` +
 string
 |
 
 
-
+Maven Artifact
 
 |`version` +
 string
 |
 
 
-
+Maven Version
 
 
 |===
@@ -2252,7 +2268,7 @@ string
 
 * <<#_camel_apache_org_v1_BuilderTask, BuilderTask>>
 
-MavenBuildSpec --
+MavenBuildSpec defines the Maven configuration plus additional repositories to use
 
 [cols="2,2a",options="header"]
 |===
@@ -2264,14 +2280,14 @@ MavenBuildSpec --
 |(Members of `MavenSpec` are embedded into this type.)
 
 
-
+base Maven specification
 
 |`repositories` +
 *xref:#_camel_apache_org_v1_Repository[[\]Repository]*
 |
 
 
-The Maven repositories.
+additional repositories
 
 
 |===
@@ -2465,7 +2481,7 @@ map[string]string
 * <<#_camel_apache_org_v1_KanikoTask, KanikoTask>>
 * <<#_camel_apache_org_v1_SpectrumTask, SpectrumTask>>
 
-PublishTask --
+PublishTask image publish configuration
 
 [cols="2,2a",options="header"]
 |===
@@ -2477,28 +2493,28 @@ string
 |
 
 
-
+can be useful to share info with other tasks
 
 |`baseImage` +
 string
 |
 
 
-
+base image layer
 
 |`image` +
 string
 |
 
 
-
+final image name
 
 |`registry` +
 *xref:#_camel_apache_org_v1_RegistrySpec[RegistrySpec]*
 |
 
 
-
+where to publish the final image
 
 
 |===
@@ -2536,35 +2552,35 @@ bool
 |
 
 
-
+if the container registry is insecure (ie, http only)
 
 |`address` +
 string
 |
 
 
-
+the URI to access
 
 |`secret` +
 string
 |
 
 
-
+the secret where credentials are stored
 
 |`ca` +
 string
 |
 
 
-
+the configmap which stores the Certificate Authority
 
 |`organization` +
 string
 |
 
 
-
+the registry organization
 
 
 |===
@@ -2588,35 +2604,35 @@ string
 |
 
 
-
+identifies the repository
 
 |`name` +
 string
 |
 
 
-
+name of the repository
 
 |`url` +
 string
 |
 
 
-
+location of the repository
 
 |`snapshots` +
 *xref:#_camel_apache_org_v1_RepositoryPolicy[RepositoryPolicy]*
 |
 
 
-
+can use snapshot
 
 |`releases` +
 *xref:#_camel_apache_org_v1_RepositoryPolicy[RepositoryPolicy]*
 |
 
 
-
+can use stable releases
 
 
 |===
@@ -2640,21 +2656,24 @@ bool
 |
 
 
-
+is the policy activated or not
 
 |`updatePolicy` +
 string
 |
 
 
-
+This element specifies how often updates should attempt to occur.
+Maven will compare the local POM's timestamp (stored in a repository's maven-metadata file) to the remote.
+The choices are: `always`, `daily` (default), `interval:X` (where X is an integer in minutes) or `never`
 
 |`checksumPolicy` +
 string
 |
 
 
-
+When Maven deploys files to the repository, it also deploys corresponding checksum files.
+Your options are to `ignore`, `fail`, or `warn` on missing or incorrect checksums.
 
 
 |===
@@ -2674,7 +2693,8 @@ ResourceCondition is a common type for all conditions
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
 * <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
 
-ResourceSpec --
+ResourceSpec represent an attached resource which will be materialized as a file on the running `Pod`
+TODO: we should deprecate in future releases in favour of mount, openapi or camel traits
 
 [cols="2,2a",options="header"]
 |===
@@ -2686,21 +2706,21 @@ ResourceSpec --
 |(Members of `DataSpec` are embedded into this type.)
 
 
-
+the content of the resource
 
 |`type` +
 *xref:#_camel_apache_org_v1_ResourceType[ResourceType]*
 |
 
 
-
+the kind of data to expect
 
 |`mountPath` +
 string
 |
 
 
-
+the mount path on destination `Pod`
 
 
 |===
@@ -2712,7 +2732,7 @@ string
 
 * <<#_camel_apache_org_v1_ResourceSpec, ResourceSpec>>
 
-ResourceType --
+ResourceType defines a kind of resource
 
 
 [#_camel_apache_org_v1_RuntimeProvider]
@@ -2725,7 +2745,7 @@ ResourceType --
 * <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
 * <<#_camel_apache_org_v1_RuntimeSpec, RuntimeSpec>>
 
-RuntimeProvider --
+RuntimeProvider is the provider chosen for the runtime
 
 
 [#_camel_apache_org_v1_RuntimeSpec]
@@ -2736,7 +2756,7 @@ RuntimeProvider --
 * <<#_camel_apache_org_v1_BuilderTask, BuilderTask>>
 * <<#_camel_apache_org_v1_CamelCatalogSpec, CamelCatalogSpec>>
 
-RuntimeSpec --
+RuntimeSpec represents the configuration for the Java runtime in charge to execute the Camel application
 
 [cols="2,2a",options="header"]
 |===
@@ -2748,42 +2768,42 @@ string
 |
 
 
-
+Camel K Runtime version
 
 |`provider` +
 *xref:#_camel_apache_org_v1_RuntimeProvider[RuntimeProvider]*
 |
 
 
-
+Camel main application provider, ie, Camel Quarkus
 
 |`applicationClass` +
 string
 |
 
 
-
+application entry point (main) to be executed
 
 |`dependencies` +
 *xref:#_camel_apache_org_v1_MavenArtifact[[\]MavenArtifact]*
 |
 
 
-
+list of dependencies needed to run the application
 
 |`metadata` +
 map[string]string
 |
 
 
-
+set of metadata
 
 |`capabilities` +
 *xref:#_camel_apache_org_v1_Capability[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.Capability]*
 |
 
 
-
+features offered by this runtime
 
 
 |===
@@ -2795,7 +2815,7 @@ map[string]string
 
 * <<#_camel_apache_org_v1_Task, Task>>
 
-S2iTask --
+S2iTask is used to configure S2I
 
 [cols="2,2a",options="header"]
 |===
@@ -2814,14 +2834,14 @@ string
 |
 
 
-
+can be useful to share info with other tasks
 
 |`tag` +
 string
 |
 
 
-
+used by the ImageStream
 
 
 |===
@@ -2835,7 +2855,7 @@ string
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
 * <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
 
-SourceSpec --
+SourceSpec defines the configuration for one or more routes to be executed in a certain Camel DSL language
 
 [cols="2,2a",options="header"]
 |===
@@ -2847,14 +2867,14 @@ SourceSpec --
 |(Members of `DataSpec` are embedded into this type.)
 
 
-
+contains configuration related to the source code
 
 |`language` +
 *xref:#_camel_apache_org_v1_Language[Language]*
 |
 
 
-
+specify which is the language (Camel DSL) used to interpret this source code
 
 |`loader` +
 string
@@ -2896,7 +2916,7 @@ List of property names defined in the source (e.g. if type is "template")
 
 * <<#_camel_apache_org_v1_SourceSpec, SourceSpec>>
 
-
+SourceType represents an available source type
 
 
 [#_camel_apache_org_v1_SpectrumTask]
@@ -2906,7 +2926,7 @@ List of property names defined in the source (e.g. if type is "template")
 
 * <<#_camel_apache_org_v1_Task, Task>>
 
-SpectrumTask --
+SpectrumTask is used to configure Spectrum
 
 [cols="2,2a",options="header"]
 |===
@@ -2937,7 +2957,7 @@ SpectrumTask --
 
 * <<#_camel_apache_org_v1_BuildSpec, BuildSpec>>
 
-Task --
+Task represents the abstract task. Only one of the task should be configured to represent the specific task chosen.
 
 [cols="2,2a",options="header"]
 |===
@@ -2949,35 +2969,35 @@ Task --
 |
 
 
-
+a BuilderTask (base task)
 
 |`buildah` +
 *xref:#_camel_apache_org_v1_BuildahTask[BuildahTask]*
 |
 
 
-
+a BuildahTask, for Buildah strategy
 
 |`kaniko` +
 *xref:#_camel_apache_org_v1_KanikoTask[KanikoTask]*
 |
 
 
-
+a KanikoTask, for Kaniko strategy
 
 |`spectrum` +
 *xref:#_camel_apache_org_v1_SpectrumTask[SpectrumTask]*
 |
 
 
-
+a SpectrumTask, for Spectrum strategy
 
 |`s2i` +
 *xref:#_camel_apache_org_v1_S2iTask[S2iTask]*
 |
 
 
-
+a S2iTask, for S2I strategy
 
 
 |===
@@ -2989,7 +3009,7 @@ Task --
 
 * <<#_camel_apache_org_v1_TraitSpec, TraitSpec>>
 
-
+TraitConfiguration represents the expected configuration for a given trait parameter
 
 [cols="2,2a",options="header"]
 |===
@@ -3001,7 +3021,7 @@ Task --
 |(Members of `RawMessage` are embedded into this type.)
 
 
-
+generic raw message, tipically a map containing the keys (trait parameters) and the values (either single text or array)
 
 
 |===
@@ -3040,7 +3060,7 @@ A TraitSpec contains the configuration of a trait
 |
 
 
-TraitConfiguration --
+TraitConfiguration parameters configuration
 
 
 |===

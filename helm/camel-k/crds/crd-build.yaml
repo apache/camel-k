@@ -77,7 +77,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: BuildSpec defines the Build to be executed
+            description: BuildSpec defines the Build operation to be executed
             properties:
               strategy:
                 description: The strategy that should be used to perform the Build.
@@ -89,50 +89,66 @@ spec:
                 description: The sequence of Build tasks to be performed as part of
                   the Build execution.
                 items:
-                  description: Task --
+                  description: Task represents the abstract task. Only one of the
+                    task should be configured to represent the specific task chosen.
                   properties:
                     buildah:
-                      description: BuildahTask --
+                      description: a BuildahTask, for Buildah strategy
                       properties:
                         baseImage:
+                          description: base image layer
                           type: string
                         contextDir:
+                          description: can be useful to share info with other tasks
                           type: string
                         image:
+                          description: final image name
                           type: string
                         name:
+                          description: name of the task
                           type: string
                         registry:
-                          description: RegistrySpec provides the configuration for
-                            the container registry
+                          description: where to publish the final image
                           properties:
                             address:
+                              description: the URI to access
                               type: string
                             ca:
+                              description: the configmap which stores the Certificate
+                                Authority
                               type: string
                             insecure:
+                              description: if the container registry is insecure (ie,
+                                http only)
                               type: boolean
                             organization:
+                              description: the registry organization
                               type: string
                             secret:
+                              description: the secret where credentials are stored
                               type: string
                           type: object
                         verbose:
+                          description: log more information
                           type: boolean
                       type: object
                     builder:
-                      description: BuilderTask --
+                      description: a BuilderTask (base task)
                       properties:
                         baseImage:
+                          description: the base image layer
                           type: string
                         buildDir:
+                          description: workspace directory to use
                           type: string
                         dependencies:
+                          description: the list of dependencies to use for this build
                           items:
                             type: string
                           type: array
                         maven:
-                          description: MavenBuildSpec --
+                          description: the configuration required by Maven for the
+                            application build phase
                           properties:
                             caSecret:
                               description: The Secret name and key, containing the
@@ -171,13 +187,17 @@ spec:
                             extension:
                               description: The Maven build extensions. See https://maven.apache.org/guides/mini/guide-using-extensions.html.
                               items:
-                                description: MavenArtifact defines a Maven artifact
+                                description: MavenArtifact defines a GAV (Group:Artifact:Version)
+                                  Maven artifact
                                 properties:
                                   artifactId:
+                                    description: Maven Artifact
                                     type: string
                                   groupId:
+                                    description: Maven Group
                                     type: string
                                   version:
+                                    description: Maven Version
                                     type: string
                                 required:
                                 - artifactId
@@ -193,41 +213,68 @@ spec:
                               description: The Maven properties.
                               type: object
                             repositories:
-                              description: The Maven repositories.
+                              description: additional repositories
                               items:
                                 description: Repository defines a Maven repository
                                 properties:
                                   id:
+                                    description: identifies the repository
                                     type: string
                                   name:
+                                    description: name of the repository
                                     type: string
                                   releases:
-                                    description: RepositoryPolicy defines the policy
-                                      associated to a Maven repository
+                                    description: can use stable releases
                                     properties:
                                       checksumPolicy:
+                                        description: When Maven deploys files to the
+                                          repository, it also deploys corresponding
+                                          checksum files. Your options are to `ignore`,
+                                          `fail`, or `warn` on missing or incorrect
+                                          checksums.
                                         type: string
                                       enabled:
+                                        description: is the policy activated or not
                                         type: boolean
                                       updatePolicy:
+                                        description: 'This element specifies how often
+                                          updates should attempt to occur. Maven will
+                                          compare the local POM''s timestamp (stored
+                                          in a repository''s maven-metadata file)
+                                          to the remote. The choices are: `always`,
+                                          `daily` (default), `interval:X` (where X
+                                          is an integer in minutes) or `never`'
                                         type: string
                                     required:
                                     - enabled
                                     type: object
                                   snapshots:
-                                    description: RepositoryPolicy defines the policy
-                                      associated to a Maven repository
+                                    description: can use snapshot
                                     properties:
                                       checksumPolicy:
+                                        description: When Maven deploys files to the
+                                          repository, it also deploys corresponding
+                                          checksum files. Your options are to `ignore`,
+                                          `fail`, or `warn` on missing or incorrect
+                                          checksums.
                                         type: string
                                       enabled:
+                                        description: is the policy activated or not
                                         type: boolean
                                       updatePolicy:
+                                        description: 'This element specifies how often
+                                          updates should attempt to occur. Maven will
+                                          compare the local POM''s timestamp (stored
+                                          in a repository''s maven-metadata file)
+                                          to the remote. The choices are: `always`,
+                                          `daily` (default), `interval:X` (where X
+                                          is an integer in minutes) or `never`'
                                         type: string
                                     required:
                                     - enabled
                                     type: object
                                   url:
+                                    description: location of the repository
                                     type: string
                                 required:
                                 - id
@@ -280,53 +327,76 @@ spec:
                               type: object
                           type: object
                         name:
+                          description: name of the task
                           type: string
                         resources:
+                          description: 'Deprecated: no longer in use'
                           items:
-                            description: ResourceSpec --
+                            description: 'ResourceSpec represent an attached resource
+                              which will be materialized as a file on the running
+                              `Pod` TODO: we should deprecate in future releases in
+                              favour of mount, openapi or camel traits'
                             properties:
                               compression:
+                                description: if the content is compressed (base64
+                                  encrypted)
                                 type: boolean
                               content:
+                                description: the source code (plain text)
                                 type: string
                               contentKey:
+                                description: the confimap key holding the source content
                                 type: string
                               contentRef:
+                                description: the confimap reference holding the source
+                                  content
                                 type: string
                               contentType:
+                                description: the content type (tipically text or binary)
                                 type: string
                               mountPath:
+                                description: the mount path on destination `Pod`
                                 type: string
                               name:
+                                description: the name of the specification
                                 type: string
                               path:
+                                description: the path where the file is stored
                                 type: string
                               rawContent:
+                                description: the source code (binary)
                                 format: byte
                                 type: string
                               type:
-                                description: ResourceType --
+                                description: the kind of data to expect
                                 type: string
                             type: object
                           type: array
                         runtime:
-                          description: RuntimeSpec --
+                          description: the configuration required for the runtime
+                            application
                           properties:
                             applicationClass:
+                              description: application entry point (main) to be executed
                               type: string
                             capabilities:
                               additionalProperties:
-                                description: Capability --
+                                description: Capability is a particular feature which
+                                  requires a well known set of dependencies
                                 properties:
                                   dependencies:
                                     items:
-                                      description: MavenArtifact defines a Maven artifact
+                                      description: MavenArtifact defines a GAV (Group:Artifact:Version)
+                                        Maven artifact
                                       properties:
                                         artifactId:
+                                          description: Maven Artifact
                                           type: string
                                         groupId:
+                                          description: Maven Group
                                           type: string
                                         version:
+                                          description: Maven Version
                                           type: string
                                       required:
                                       - artifactId
@@ -336,20 +406,28 @@ spec:
                                   metadata:
                                     additionalProperties:
                                       type: string
+                                    description: 'Deprecated: not in use'
                                     type: object
                                 required:
                                 - dependencies
                                 type: object
+                              description: features offered by this runtime
                               type: object
                             dependencies:
+                              description: list of dependencies needed to run the
+                                application
                               items:
-                                description: MavenArtifact defines a Maven artifact
+                                description: MavenArtifact defines a GAV (Group:Artifact:Version)
+                                  Maven artifact
                                 properties:
                                   artifactId:
+                                    description: Maven Artifact
                                     type: string
                                   groupId:
+                                    description: Maven Group
                                     type: string
                                   version:
+                                    description: Maven Version
                                     type: string
                                 required:
                                 - artifactId
@@ -359,11 +437,14 @@ spec:
                             metadata:
                               additionalProperties:
                                 type: string
+                              description: set of metadata
                               type: object
                             provider:
-                              description: RuntimeProvider --
+                              description: Camel main application provider, ie, Camel
+                                Quarkus
                               type: string
                             version:
+                              description: Camel K Runtime version
                               type: string
                           required:
                           - applicationClass
@@ -372,18 +453,29 @@ spec:
                           - version
                           type: object
                         sources:
+                          description: 'the source code for the Route(s) Deprecated:
+                            no longer in use'
                           items:
-                            description: SourceSpec --
+                            description: SourceSpec defines the configuration for
+                              one or more routes to be executed in a certain Camel
+                              DSL language
                             properties:
                               compression:
+                                description: if the content is compressed (base64
+                                  encrypted)
                                 type: boolean
                               content:
+                                description: the source code (plain text)
                                 type: string
                               contentKey:
+                                description: the confimap key holding the source content
                                 type: string
                               contentRef:
+                                description: the confimap reference holding the source
+                                  content
                                 type: string
                               contentType:
+                                description: the content type (tipically text or binary)
                                 type: string
                               interceptors:
                                 description: Interceptors are optional identifiers
@@ -393,15 +485,18 @@ spec:
                                   type: string
                                 type: array
                               language:
-                                description: Language --
+                                description: specify which is the language (Camel
+                                  DSL) used to interpret this source code
                                 type: string
                               loader:
                                 description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
                                   that will interpret this source at runtime
                                 type: string
                               name:
+                                description: the name of the specification
                                 type: string
                               path:
+                                description: the path where the file is stored
                                 type: string
                               property-names:
                                 description: List of property names defined in the
@@ -410,6 +505,7 @@ spec:
                                   type: string
                                 type: array
                               rawContent:
+                                description: the source code (binary)
                                 format: byte
                                 type: string
                               type:
@@ -419,81 +515,108 @@ spec:
                             type: object
                           type: array
                         steps:
+                          description: the list of steps to execute (see pkg/builder/)
                           items:
                             type: string
                           type: array
                       type: object
                     kaniko:
-                      description: KanikoTask --
+                      description: a KanikoTask, for Kaniko strategy
                       properties:
                         baseImage:
+                          description: base image layer
                           type: string
                         cache:
-                          description: KanikoTaskCache --
+                          description: use a cache
                           properties:
                             enabled:
+                              description: true if a cache is enabled
                               type: boolean
                             persistentVolumeClaim:
+                              description: the PVC used to store the cache
                               type: string
                           type: object
                         contextDir:
+                          description: can be useful to share info with other tasks
                           type: string
                         image:
+                          description: final image name
                           type: string
                         name:
+                          description: name of the task
                           type: string
                         registry:
-                          description: RegistrySpec provides the configuration for
-                            the container registry
+                          description: where to publish the final image
                           properties:
                             address:
+                              description: the URI to access
                               type: string
                             ca:
+                              description: the configmap which stores the Certificate
+                                Authority
                               type: string
                             insecure:
+                              description: if the container registry is insecure (ie,
+                                http only)
                               type: boolean
                             organization:
+                              description: the registry organization
                               type: string
                             secret:
+                              description: the secret where credentials are stored
                               type: string
                           type: object
                         verbose:
+                          description: log more information
                           type: boolean
                       type: object
                     s2i:
-                      description: S2iTask --
+                      description: a S2iTask, for S2I strategy
                       properties:
                         contextDir:
+                          description: can be useful to share info with other tasks
                           type: string
                         name:
+                          description: name of the task
                           type: string
                         tag:
+                          description: used by the ImageStream
                           type: string
                       type: object
                     spectrum:
-                      description: SpectrumTask --
+                      description: a SpectrumTask, for Spectrum strategy
                       properties:
                         baseImage:
+                          description: base image layer
                           type: string
                         contextDir:
+                          description: can be useful to share info with other tasks
                           type: string
                         image:
+                          description: final image name
                           type: string
                         name:
+                          description: name of the task
                           type: string
                         registry:
-                          description: RegistrySpec provides the configuration for
-                            the container registry
+                          description: where to publish the final image
                           properties:
                             address:
+                              description: the URI to access
                               type: string
                             ca:
+                              description: the configmap which stores the Certificate
+                                Authority
                               type: string
                             insecure:
+                              description: if the container registry is insecure (ie,
+                                http only)
                               type: boolean
                             organization:
+                              description: the registry organization
                               type: string
                             secret:
+                              description: the secret where credentials are stored
                               type: string
                           type: object
                       type: object
@@ -511,24 +634,33 @@ spec:
             description: BuildStatus defines the observed state of Build
             properties:
               artifacts:
+                description: a list of artifacts contained in the build
                 items:
-                  description: Artifact --
+                  description: Artifact represents a materialized artifact (a jar
+                    dependency or in general a file used by the build)
                   properties:
                     checksum:
+                      description: a checksum (SHA1) of the content
                       type: string
                     id:
+                      description: the identification (GAV for maven dependencies
+                        or file name for other file types)
                       type: string
                     location:
+                      description: where it is located in the builder `Pod`
                       type: string
                     target:
+                      description: the expected location in the runtime
                       type: string
                   required:
                   - id
                   type: object
                 type: array
               baseImage:
+                description: the base image used for this build
                 type: string
               conditions:
+                description: a list of conditions occurred during the build
                 items:
                   description: BuildCondition describes the state of a resource at
                     a certain point.
@@ -561,26 +693,32 @@ spec:
                   type: object
                 type: array
               digest:
+                description: the digest from image
                 type: string
               duration:
-                description: Change to Duration / ISO 8601 when CRD uses OpenAPI spec
-                  v3 https://github.com/OAI/OpenAPI-Specification/issues/845
+                description: how long it took for the build Change to Duration / ISO
+                  8601 when CRD uses OpenAPI spec v3 https://github.com/OAI/OpenAPI-Specification/issues/845
                 type: string
               error:
+                description: the error description (if any)
                 type: string
               failure:
-                description: Failure --
+                description: the reason of the failure (if any)
                 properties:
                   reason:
+                    description: a short text specifying the reason
                     type: string
                   recovery:
-                    description: FailureRecovery --
+                    description: the recovery attempted for this failure
                     properties:
                       attempt:
+                        description: attempt number
                         type: integer
                       attemptMax:
+                        description: maximum number of attempts
                         type: integer
                       attemptTime:
+                        description: time of the attempt execution
                         format: date-time
                         type: string
                     required:
@@ -588,6 +726,7 @@ spec:
                     - attemptMax
                     type: object
                   time:
+                    description: the time when the failure has happened
                     format: date-time
                     type: string
                 required:
@@ -596,11 +735,13 @@ spec:
                 - time
                 type: object
               image:
+                description: the image name built
                 type: string
               phase:
-                description: BuildPhase --
+                description: describes the phase
                 type: string
               startedAt:
+                description: the time when it started
                 format: date-time
                 type: string
             type: object

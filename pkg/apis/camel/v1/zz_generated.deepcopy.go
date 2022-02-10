@@ -203,20 +203,6 @@ func (in *BuilderTask) DeepCopyInto(out *BuilderTask) {
 	*out = *in
 	out.BaseTask = in.BaseTask
 	in.Runtime.DeepCopyInto(&out.Runtime)
-	if in.Sources != nil {
-		in, out := &in.Sources, &out.Sources
-		*out = make([]SourceSpec, len(*in))
-		for i := range *in {
-			(*in)[i].DeepCopyInto(&(*out)[i])
-		}
-	}
-	if in.Resources != nil {
-		in, out := &in.Resources, &out.Resources
-		*out = make([]ResourceSpec, len(*in))
-		for i := range *in {
-			(*in)[i].DeepCopyInto(&(*out)[i])
-		}
-	}
 	if in.Dependencies != nil {
 		in, out := &in.Dependencies, &out.Dependencies
 		*out = make([]string, len(*in))

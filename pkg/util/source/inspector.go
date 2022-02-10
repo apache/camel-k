@@ -82,7 +82,7 @@ var (
 		},
 		restConfigurationRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			deps := make([]string, 0)
-			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities["rest"]; ok {
+			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities[v1.CapabilityRest]; ok {
 				for _, d := range c.Dependencies {
 					deps = append(deps, d.GetDependencyID())
 				}
@@ -91,7 +91,7 @@ var (
 		},
 		restRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			deps := make([]string, 0)
-			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities["rest"]; ok {
+			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities[v1.CapabilityRest]; ok {
 				for _, d := range c.Dependencies {
 					deps = append(deps, d.GetDependencyID())
 				}
@@ -100,7 +100,7 @@ var (
 		},
 		restClosureRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			deps := make([]string, 0)
-			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities["rest"]; ok {
+			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities[v1.CapabilityRest]; ok {
 				for _, d := range c.Dependencies {
 					deps = append(deps, d.GetDependencyID())
 				}
