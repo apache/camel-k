@@ -18,6 +18,8 @@ limitations under the License.
 package digest
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -43,4 +45,19 @@ func TestDigestUsesAnnotations(t *testing.T) {
 	digest3, err := ComputeForIntegration(&it)
 	assert.NoError(t, err)
 	assert.NotEqual(t, digest1, digest3)
+}
+
+func TestDigestSHA1FromTempFile(t *testing.T) {
+	var tmpFile *os.File
+	var err error
+	if tmpFile, err = ioutil.TempFile("", "camel-k-"); err != nil {
+		t.Error(err)
+	}
+
+	assert.Nil(t, tmpFile.Close())
+	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte("hello test!"), 0o400))
+
+	sha1, err := ComputeSHA1(tmpFile.Name())
+	assert.NoError(t, err)
+	assert.Equal(t, "OXPdxTeLf5rqnsqvTi0CgmWoN/0=", sha1)
 }
