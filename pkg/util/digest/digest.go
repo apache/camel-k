@@ -268,10 +268,8 @@ func ComputeSHA1(elem ...string) (string, error) {
 		return nil
 	})
 
-	var sum string
-
 	if err != nil {
-		sum = base64.StdEncoding.EncodeToString(h.Sum(nil))
+		return "", err
 	}
-	return sum, err
+	return base64.StdEncoding.EncodeToString(h.Sum(nil)), nil
 }
