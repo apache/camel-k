@@ -28,6 +28,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	consoleV1 "github.com/openshift/api/console/v1"
+	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
 	"os"
@@ -42,8 +44,6 @@ import (
 	"github.com/onsi/gomega/format"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"github.com/stretchr/testify/assert"
-
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/batch/v1beta1"
 	coordination "k8s.io/api/coordination/v1"
@@ -1220,6 +1220,18 @@ func CRDs() func() []metav1.APIResource {
 		}
 
 		return present
+	}
+}
+
+func ConsoleCLIDownload(name string) func() *consoleV1.ConsoleCLIDownload {
+	return func() *consoleV1.ConsoleCLIDownload {
+		cliDownload := consoleV1.ConsoleCLIDownload{}
+		if err := TestClient().Get(TestContext, ctrl.ObjectKey{Name: name}, &cliDownload); err != nil && !k8serrors.IsNotFound(err) {
+			panic(err)
+		} else if err != nil && k8serrors.IsNotFound(err) {
+			return nil
+		}
+		return &cliDownload
 	}
 }
 
