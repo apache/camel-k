@@ -120,12 +120,6 @@ func jvmDockerfile(ctx *builderContext) error {
 }
 
 func incrementalImageContext(ctx *builderContext) error {
-	if ctx.Build.BaseImage != "" {
-		// If the build requires a specific image, don't try to determine the
-		// base image using artifact so just use the standard packages
-		return standardImageContext(ctx)
-	}
-
 	images, err := listPublishedImages(ctx)
 	if err != nil {
 		return err
