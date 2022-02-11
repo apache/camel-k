@@ -23,7 +23,17 @@ limitations under the License.
 package common
 
 import (
+	"bytes"
+	"github.com/apache/camel-k/pkg/install"
+	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/openshift"
+	console "github.com/openshift/api/console/v1"
+	"github.com/stretchr/testify/assert"
+	"reflect"
+	"strings"
 	"testing"
+	"text/template"
 
 	. "github.com/onsi/gomega"
 
@@ -74,6 +84,59 @@ func TestSkipRegistryInstallation(t *testing.T) {
 		Eventually(func() v1.RegistrySpec {
 			return Platform(ns)().Spec.Build.Registry
 		}, TestTimeoutMedium).Should(Equal(v1.RegistrySpec{}))
+	})
+}
+
+type templateArgs struct {
+	Version  string
+	Platform string
+}
+
+func TestConsoleCliDownload(t *testing.T) {
+	ocp, err := openshift.IsOpenShift(TestClient())
+	assert.Nil(t, err)
+
+	ok, err := kubernetes.IsAPIResourceInstalled(TestClient(), "console.openshift.io/v1", reflect.TypeOf(console.ConsoleCLIDownload{}).Name())
+	assert.Nil(t, err)
+
+	if !ocp || !ok {
+		t.Skip("This test requires ConsoleCliDownload object which is available on OpenShift 4 only.")
+		return
+	}
+
+	name := GetEnvOrDefault("CAMEL_K_CONSOLE_CLI_DOWNLOAD_NAME", install.KamelCLIDownloadName)
+	downloadUrlTemplate := GetEnvOrDefault("CAMEL_K_CONSOLE_CLI_DOWNLOAD_URL_TEMPLATE", "https://github.com/apache/camel-k/releases/download/v{{ .Version}}/camel-k-client-{{ .Version}}-{{ .Platform}}-64bit.tar.gz")
+
+	args := templateArgs{Version: defaults.Version}
+	templt, err := template.New("downloadLink").Parse(downloadUrlTemplate)
+	assert.Nil(t, err)
+
+	WithNewTestNamespace(t, func(ns string) {
+		// make sure there is no preinstalled CliDownload resource
+		cliDownload := ConsoleCLIDownload(name)()
+		if cliDownload != nil {
+			Expect(TestClient().Delete(TestContext, cliDownload)).To(Succeed())
+		}
+
+		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		Eventually(ConsoleCLIDownload(name), TestTimeoutMedium).Should(Not(BeNil()))
+
+		cliDownload = ConsoleCLIDownload(name)()
+		links := cliDownload.Spec.Links
+
+		for _, link := range links {
+			var buf bytes.Buffer
+			if strings.Contains(link.Text, "for Linux") {
+				args.Platform = "linux"
+			} else if strings.Contains(link.Text, "for Mac") {
+				args.Platform = "mac"
+			} else if strings.Contains(link.Text, "for Windows") {
+				args.Platform = "windows"
+			}
+
+			templt.Execute(&buf, args)
+			Expect(link.Href).To(MatchRegexp(buf.String()))
+		}
 	})
 }
 

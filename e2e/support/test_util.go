@@ -25,6 +25,7 @@ package support
 import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
+	"os"
 
 	"github.com/onsi/gomega/types"
 )
@@ -35,4 +36,13 @@ func EqualP(expected interface{}) types.GomegaMatcher {
 
 func MatchFieldsP(options Options, fields Fields) types.GomegaMatcher {
 	return PointTo(MatchFields(options, fields))
+}
+
+func GetEnvOrDefault(key string, deflt string) string {
+	env, exists := os.LookupEnv(key)
+	if exists {
+		return env
+	} else {
+		return deflt
+	}
 }
