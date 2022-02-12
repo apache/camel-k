@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- kamel client for macOS from release 1.8.0 is really 1.0.0-M4 [\#3006](https://github.com/apache/camel-k/issues/3006)
+- SEDA multiple threads not working [\#3001](https://github.com/apache/camel-k/issues/3001)
 - Errored status Kamelet cannot be reconciled to Ready status [\#2988](https://github.com/apache/camel-k/issues/2988)
 - Kamel install failure [\#2987](https://github.com/apache/camel-k/issues/2987)
 - Configure Maven: Artifact Repository is not recognized [\#2966](https://github.com/apache/camel-k/issues/2966)
