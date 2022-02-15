@@ -69,7 +69,7 @@ The command removes all the Kubernetes resources installed.
 ## Configuration
 
 The following table lists the most commonly configured parameters of the
-Camel-K chart and their default values. The chart allows configuration of an `IntegrationPlatform` resource, which among others includes build properties and traits configuration. A full list of parameters can be found [in the operator specification][1].
+Camel K chart and their default values. The chart allows configuration of an `IntegrationPlatform` resource, which among others includes build properties and traits configuration. A full list of parameters can be found [in the operator specification][1].
 
 |           Parameter                    |             Description                                                   |            Default             |
 |----------------------------------------|---------------------------------------------------------------------------|--------------------------------|

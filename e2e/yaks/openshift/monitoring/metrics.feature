@@ -4,8 +4,8 @@ Feature: Camel K can serve metrics to Prometheus
     Given URL: https://thanos-querier.openshift-monitoring:9091
 
   Scenario: Integration gets the message from the timer
-    Given Camel-K integration metrics is running
-    Then Camel-K integration metrics should print Successfully processed
+    Given Camel K integration metrics is running
+    Then Camel K integration metrics should print Successfully processed
     Then sleep 120000 ms
 
   Scenario: Thanos is able to serve custom microprofile annotation metrics

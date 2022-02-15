@@ -15,7 +15,7 @@
 ** xref:architecture/runtime.adoc[Runtime]
 ** xref:architecture/traits.adoc[Traits]
 * API
-** xref:apis/camel-k.adoc[Camel-K API]
+** xref:apis/camel-k.adoc[Camel K API]
 ** xref:apis/kamelets.adoc[Kamelets API]
 * xref:uninstalling.adoc[Uninstalling]
 * xref:contributing/developers.adoc[Contributing]
