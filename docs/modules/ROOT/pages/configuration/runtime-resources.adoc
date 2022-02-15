@@ -1,7 +1,7 @@
 [[runtime-resources]]
 = Runtime resources
 
-When you develop an integration with `Camel-K` there are many ways you can provide a *resource* to the runtime `Integration`. The most familiar way is to handle local file, but since we are dealing with `Kubernetes` you may need also to use `Configmap` or `Secret`. The `kamel run` command is provided with a `--resource` flag that help you setting any resource your `Integration` may need.
+When you develop an integration with `Camel K` there are many ways you can provide a *resource* to the runtime `Integration`. The most familiar way is to handle local file, but since we are dealing with `Kubernetes` you may need also to use `Configmap` or `Secret`. The `kamel run` command is provided with a `--resource` flag that help you setting any resource your `Integration` may need.
 
 The *runtime resources* are expected to be any resource type (text or binary content). These resources are materialized as files in the `Ìntegration` `Pod`. The destination path can be either a default location or any path specified by the user. Only default resource directory is available within the `Ìntegration` classpath.
 
@@ -58,7 +58,7 @@ You can see that we're expecting to use a _my-configmap-key_ file stored in the 
 kamel run --resource configmap:my-cm resource-configmap-route.groovy --dev
 ----
 
-As soon as the `Integration` starts, the `Camel-K` operator will take care to mount a volume with the `Configmap`'s content.
+As soon as the `Integration` starts, the `Camel K` operator will take care to mount a volume with the `Configmap`'s content.
 
 NOTE: you can provide a `Configmap` which is not yet available on the cluster. The `Integration` won't start until the resource will be made available.
 
@@ -88,7 +88,7 @@ You can see that we're expecting to use a _my-secret-key_ file stored in the def
 kamel run --resource secret:my-sec resource-secret-route.groovy --dev
 ----
 
-As soon as the `Integration` starts, the `Camel-K` operator will take care to mount a volume with the `Secret`'s content.
+As soon as the `Integration` starts, the `Camel K` operator will take care to mount a volume with the `Secret`'s content.
 
 NOTE: you can provide a `Secret` which is not yet available on the cluster. The `Integration` won't start until the resource will be made available.
 

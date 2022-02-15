@@ -265,9 +265,9 @@ Wait for them to be available on https://hub.helm.sh/.
 
 === Homebrew
 
-The https://brew.sh/[HomeBrew] formula for _kamel_ must be synced to download and build the latest version of https://github.com/apache/camel-k[Camel-K], so it can be easily installed on _macOs_ and _Linux_ platforms.
+The https://brew.sh/[HomeBrew] formula for _kamel_ must be synced to download and build the latest version of https://github.com/apache/camel-k[Camel K], so it can be easily installed on _macOs_ and _Linux_ platforms.
 
-To do so, the content of https://github.com/Homebrew/homebrew-core/blob/master/Formula/kamel.rb[homebrew-core/Formula/kamel.rb] _(the package definition)_ should be updated to point the latest release of https://github.com/apache/camel-k[Camel-K].
+To do so, the content of https://github.com/Homebrew/homebrew-core/blob/master/Formula/kamel.rb[homebrew-core/Formula/kamel.rb] _(the package definition)_ should be updated to point the latest release of https://github.com/apache/camel-k[Camel K].
 
 More importantly the _tag_ and _revision_ section configuration should change for a new release e.g
 ```

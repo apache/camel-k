@@ -1292,7 +1292,7 @@ Feature: Kamelet earthquake-source works
   Background:
     Given Disable auto removal of Kamelet resources
     Given Disable auto removal of Kubernetes resources
-    Given Camel-K resource polling configuration
+    Given Camel K resource polling configuration
       | maxAttempts          | 60   |
       | delayBetweenAttempts | 3000 |
 
@@ -1301,7 +1301,7 @@ Feature: Kamelet earthquake-source works
     And bind Kamelet earthquake-source to uri http://test-service.${YAKS_NAMESPACE}.svc.cluster.local/test
     When create KameletBinding earthquake-source-uri
     Then KameletBinding earthquake-source-uri should be available
-    And Camel-K integration earthquake-source-uri should be running
+    And Camel K integration earthquake-source-uri should be running
 
   Scenario: Verify binding
     Given HTTP server "test-service"
@@ -1384,7 +1384,7 @@ Feature: Kamelet telegram-sink works
   Background:
     Given Disable auto removal of Kamelet resources
     Given Disable auto removal of Kubernetes resources
-    Given Camel-K resource polling configuration
+    Given Camel K resource polling configuration
       | maxAttempts          | 60   |
       | delayBetweenAttempts | 3000 |
 
@@ -1393,7 +1393,7 @@ Feature: Kamelet telegram-sink works
     Given load variables telegram-credentials.properties
     And load KameletBinding webhook-to-telegram.yaml
     Then KameletBinding webhook-to-telegram should be available
-    And Camel-K integration webhook-to-telegram should be running
+    And Camel K integration webhook-to-telegram should be running
 
 
   Scenario: Send a message to the Telegram Chat

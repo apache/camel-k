@@ -1,11 +1,11 @@
-Feature: Alerts from Camel-K are propagated to Openshift Prometheus
+Feature: Alerts from Camel K are propagated to Openshift Prometheus
 
   Background: Prepare Thanos-ruler URL
     Given URL: https://thanos-ruler.openshift-user-workload-monitoring:9091
 
   Scenario: Integration gets the message from the timer
-    Given Camel-K integration metrics is running
-    Then Camel-K integration metrics should print Successfully processed
+    Given Camel K integration metrics is running
+    Then Camel K integration metrics should print Successfully processed
     Then sleep 120000 ms
 
   Scenario: Thanos-ruler is able to serve alerts based on metrics from Operator

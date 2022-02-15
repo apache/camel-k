@@ -191,7 +191,7 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 			return err
 		}
 
-		// The Camel-K jar file needs to be at a specific location i.e.:
+		// The Camel K jar file needs to be at a specific location i.e.:
 		// <current_working_folder>/app/camel-k-integration-X.X.X{-SNAPSHOT}.jar
 		localAppDirectory, err := getCustomAppDir()
 		if err != nil {

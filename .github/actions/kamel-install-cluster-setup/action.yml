@@ -27,7 +27,7 @@ runs:
   using: "composite"
   steps:
     - id: execute-kamel
-      name: Install Camel-K Cluster Resources
+      name: Install Camel K Cluster Resources
       shell: bash
       run: |
         ./.github/actions/kamel-install-cluster-setup/install-cluster-setup.sh \
