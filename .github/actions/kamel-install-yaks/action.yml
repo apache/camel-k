@@ -17,6 +17,17 @@
 
 name: kamel-install-yaks
 description: 'Install YAKS artifacts'
+
+inputs:
+  version:
+    description: "The YAKS version"
+    default: 0.8.0
+    required: false
+  image-name:
+    description: "The YAKS operator image name"
+    default: "docker.io/citrusframework/yaks"
+    required: false
+
 runs:
   using: "composite"
   steps:
@@ -24,12 +35,17 @@ runs:
       name: Get YAKS
       shell: bash
       run: |
-        export YAKS_VERSION=0.9.0-202202081449
-        curl --fail -L https://github.com/citrusframework/yaks/releases/download/${YAKS_VERSION}/yaks-${YAKS_VERSION}-linux-64bit.tar.gz -o yaks.tar.gz
+        if [ "${{ inputs.image-name }}" == "docker.io/yaks/yaks" ]; then
+            export DOWNLOAD_VERSION=${{ inputs.version }}
+        else
+            export DOWNLOAD_VERSION=v${{ inputs.version }}
+        fi
+
+        curl --fail -L https://github.com/citrusframework/yaks/releases/download/${DOWNLOAD_VERSION}/yaks-${{ inputs.version }}-linux-64bit.tar.gz -o yaks.tar.gz
         tar -zxf yaks.tar.gz
         sudo mv yaks /usr/local/bin/
 
     - name: Install YAKS
       shell: bash
       run: |
-        yaks install --cluster-setup
+        yaks install --operator-image ${{ inputs.image-name }}:${{ inputs.version }}

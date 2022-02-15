@@ -42,9 +42,6 @@ runs:
       cluster-config-data: ${{ inputs.cluster-config-data }}
       cluster-kube-config-data: ${{ inputs.cluster-kube-config-data }}
 
-  - name: Install YAKS
-    uses: ./.github/actions/kamel-install-yaks
-
   - name: Install Knative
     uses: ./.github/actions/kamel-install-knative
 
@@ -76,6 +73,12 @@ runs:
       image-name: ${{ steps.build-kamel.outputs.build-binary-local-image-name }}
       image-registry-insecure: ${{steps.config-cluster.outputs.cluster-image-registry-insecure }}
       image-version: ${{ steps.build-kamel.outputs.build-binary-local-image-version }}
+
+  - name: Install YAKS
+    uses: ./.github/actions/kamel-install-yaks
+    with:
+      image-name: "docker.io/yaks/yaks"
+      version: 0.9.0-202202081449
 
   - id: report-problematic
     name: List Tests Marked As Problematic
