@@ -154,7 +154,7 @@ do
   sleep 1
 done
 
-echo "Camel-K operator up and running"
+echo "Camel K operator up and running"
 
 camel_operator=$(kubectl get pods -n ${NAMESPACE} | grep camel-k | awk '{print $1}')
 camel_op_version=$(kubectl logs ${camel_operator} -n ${NAMESPACE} | sed -n 's/.*"Camel K Operator Version: \(.*\)"}/\1/p')

@@ -1,7 +1,7 @@
 [[runtime-config]]
 = Runtime configuration
 
-When you develop an integration with `Camel-K` there are many ways you can provide a *configuration* resource to the runtime `Integration`. The most familiar way is to handle local file, but since we are dealing with `Kubernetes` you may need also to use `Configmap` or `Secret`. The `kamel run` command is provided with a `--config` flag that help you setting any configuration resource your `Integration` need.
+When you develop an integration with `Camel K` there are many ways you can provide a *configuration* resource to the runtime `Integration`. The most familiar way is to handle local file, but since we are dealing with `Kubernetes` you may need also to use `Configmap` or `Secret`. The `kamel run` command is provided with a `--config` flag that help you setting any configuration resource your `Integration` need.
 
 The *runtime configuration* are expected to be `ÙTF-8` resources as they are processed by runtime `Camel Context` and tried to be parsed as property files. These resources are materialized as files in a well known path in the `Ìntegration` `Pod`. They are also made available on the classpath in order to ease their usage directly from the `Route`. If you need to provide a non `UTF-8` (ie, a binary resource) you may look for `--resource` flag instead.
 
@@ -63,7 +63,7 @@ You can see that we're expecting to use a _my-configmap-key_ file stored somewhe
 kamel run --config configmap:my-cm config-configmap-route.groovy --dev
 ----
 
-As soon as the `Integration` starts, the `Camel-K` operator will take care to mount a volume with the `Configmap`'s content.
+As soon as the `Integration` starts, the `Camel K` operator will take care to mount a volume with the `Configmap`'s content.
 
 NOTE: you can provide a `Configmap` which is not yet available on the cluster. The `Integration` won't start until the resource will be made available.
 
@@ -95,7 +95,7 @@ You can see that we're expecting to use a _my-secret-key_ file stored somewhere 
 kamel run --config secret:my-sec config-secret-route.groovy --dev
 ----
 
-As soon as the `Integration` starts, the `Camel-K` operator will take care to mount a volume with the `Secret`'s content.
+As soon as the `Integration` starts, the `Camel K` operator will take care to mount a volume with the `Secret`'s content.
 
 NOTE: you can provide a `Secret` which is not yet available on the cluster. The `Integration` won't start until the resource will be made available.
 

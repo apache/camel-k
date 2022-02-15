@@ -46,11 +46,11 @@ Continue reading the documentation to xref:installation/installation.adoc[instal
 == Compatibility Matrix
 
 [caption=]
-.Compatibility between Camel-K and dependencies
+.Compatibility between Camel K and dependencies
 [width="100%",cols="4,2,2,2,2,2,2,1,3",options="header"]
 |===
-|Camel-K Version
-|Camel-K-Runtime version
+|Camel K Version
+|Camel K Runtime version
 |Camel Version
 |Camel-Quarkus Version
 |Quarkus Version

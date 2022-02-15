@@ -38,7 +38,6 @@ import (
 	"github.com/operator-framework/api/pkg/lib/version"
 	olm "github.com/operator-framework/api/pkg/operators/v1alpha1"
 
-	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
@@ -79,7 +78,7 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 
 		Expect(Kamel(args...).Execute()).To(Succeed())
 
-		// Find the only one Camel-K CSV
+		// Find the only one Camel K CSV
 		noAdditionalConditions := func(csv olm.ClusterServiceVersion) bool {
 			return true
 		}
@@ -92,7 +91,7 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 		var newCSVVersion version.OperatorVersion
 
 		// IntegrationPlatform should match at least on the version prefix
-		// CSV patch version can be increased with the OperatorHub respin of the same Camel-K release
+		// CSV patch version can be increased with the OperatorHub respin of the same Camel K release
 		var prevIPVersionPrefix string
 		var newIPVersionPrefix string
 
@@ -120,7 +119,7 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 			Expect(createOrUpdateCatalogSource(ns, catalogSourceName, newIIB)).To(Succeed())
 
 			if crossChannelUpgrade {
-				t.Log("Patching Camel-K OLM subscription channel.")
+				t.Log("Patching Camel K OLM subscription channel.")
 				subscription, err := getSubscription(ns)
 				Expect(err).To(BeNil())
 				Expect(subscription).NotTo(BeNil())
