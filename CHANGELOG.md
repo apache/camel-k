@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Build artifact checksum not working [\#3007](https://github.com/apache/camel-k/issues/3007)
 - kamel client for macOS from release 1.8.0 is really 1.0.0-M4 [\#3006](https://github.com/apache/camel-k/issues/3006)
 - SEDA multiple threads not working [\#3001](https://github.com/apache/camel-k/issues/3001)
 - Errored status Kamelet cannot be reconciled to Ready status [\#2988](https://github.com/apache/camel-k/issues/2988)
@@ -30,6 +31,7 @@
 
 **Merged pull requests:**
 
+- fix\(build\): incremental build [\#3008](https://github.com/apache/camel-k/pull/3008) ([squakez](https://github.com/squakez))
 - fix\(cmd/run\): allow multiple resources [\#2997](https://github.com/apache/camel-k/pull/2997) ([squakez](https://github.com/squakez))
 - fix\(kamelet\): reconcile when errored [\#2993](https://github.com/apache/camel-k/pull/2993) ([squakez](https://github.com/squakez))
 - fix\(yaml\): also consider toD while parsing YAML DSL steps [\#2989](https://github.com/apache/camel-k/pull/2989) ([toonalbers](https://github.com/toonalbers))
