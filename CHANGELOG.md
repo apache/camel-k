@@ -6,14 +6,18 @@
 
 **Closed issues:**
 
+- kamel client for macOS from release 1.8.0 is really 1.0.0-M4 [\#3006](https://github.com/apache/camel-k/issues/3006)
+- SEDA multiple threads not working [\#3001](https://github.com/apache/camel-k/issues/3001)
 - Errored status Kamelet cannot be reconciled to Ready status [\#2988](https://github.com/apache/camel-k/issues/2988)
 - Kamel install failure [\#2987](https://github.com/apache/camel-k/issues/2987)
 - Configure Maven: Artifact Repository is not recognized [\#2966](https://github.com/apache/camel-k/issues/2966)
 - camel-k-operator forbidden to get kafkachannels.messaging.knative.dev since 1.8.x [\#2950](https://github.com/apache/camel-k/issues/2950)
+- \[regression\] Cannot provide 2 resources with 1.8.0 [\#2943](https://github.com/apache/camel-k/issues/2943)
 - Enabling prometheus causes KameletBindings to be stuck in status "Creating" [\#2896](https://github.com/apache/camel-k/issues/2896)
 - Stale bot is setting issue `stale` where marked as `never-stale` [\#2893](https://github.com/apache/camel-k/issues/2893)
 - camel-k-client binary is missing in the latest release assets [\#2892](https://github.com/apache/camel-k/issues/2892)
 - Release 1.8.0 [\#2848](https://github.com/apache/camel-k/issues/2848)
+- Error: unknown flag: --trait on local build [\#2776](https://github.com/apache/camel-k/issues/2776)
 - Kamelet with MQTT Broker Mosquitto [\#2690](https://github.com/apache/camel-k/issues/2690)
 - Unable to access MongoDB [\#2684](https://github.com/apache/camel-k/issues/2684)
 - KAMEL\_INSTALL\_DEFAULT\_KAMELETS behavior [\#2560](https://github.com/apache/camel-k/issues/2560)
@@ -26,6 +30,7 @@
 
 **Merged pull requests:**
 
+- fix\(cmd/run\): allow multiple resources [\#2997](https://github.com/apache/camel-k/pull/2997) ([squakez](https://github.com/squakez))
 - fix\(kamelet\): reconcile when errored [\#2993](https://github.com/apache/camel-k/pull/2993) ([squakez](https://github.com/squakez))
 - fix\(yaml\): also consider toD while parsing YAML DSL steps [\#2989](https://github.com/apache/camel-k/pull/2989) ([toonalbers](https://github.com/toonalbers))
 - fix\(cli\): kamel run -v should configure the mount trait [\#2986](https://github.com/apache/camel-k/pull/2986) ([astefanutti](https://github.com/astefanutti))
@@ -916,7 +921,6 @@
 - Building with buildah not working [\#2685](https://github.com/apache/camel-k/issues/2685)
 - Flaky TestKameletBindingScale test? [\#2660](https://github.com/apache/camel-k/issues/2660)
 - CloudEvent header mapping is confusing [\#2501](https://github.com/apache/camel-k/issues/2501)
-- `Kamel local` chokes on traits [\#2499](https://github.com/apache/camel-k/issues/2499)
 - Revisit saga example [\#2472](https://github.com/apache/camel-k/issues/2472)
 - kamel run command creates 2 pods [\#2469](https://github.com/apache/camel-k/issues/2469)
 - Trying to use bean method call \#class:com.mongodb.client.MongoClients\#create\("mongodb://foo"\) throws ClassNotFoundException [\#2444](https://github.com/apache/camel-k/issues/2444)

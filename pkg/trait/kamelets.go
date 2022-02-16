@@ -254,7 +254,6 @@ func (t *kameletsTrait) configureApplicationProperties(e *Environment) error {
 func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1alpha1.Kamelet) error {
 	sources := make([]v1.SourceSpec, 0)
 
-	// nolint: staticcheck
 	if kamelet.Spec.Template != nil || kamelet.Spec.Flow != nil {
 		template := kamelet.Spec.Template
 		if template == nil {
