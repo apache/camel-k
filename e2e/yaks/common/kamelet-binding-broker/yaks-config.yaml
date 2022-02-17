@@ -25,7 +25,7 @@ pre:
     oc label namespace $YAKS_NAMESPACE eventing.knative.dev/injection=enabled
     oc label namespace $YAKS_NAMESPACE knative-eventing-injection=enabled
 
-    kamel install -n $YAKS_NAMESPACE
+    kamel install -n $YAKS_NAMESPACE --operator-env-vars KAMEL_INSTALL_DEFAULT_KAMELETS=false
 
     kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
     kubectl apply -f logger-sink.kamelet.yaml -n $YAKS_NAMESPACE
