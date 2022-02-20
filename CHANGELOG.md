@@ -14,6 +14,7 @@
 - Configure Maven: Artifact Repository is not recognized [\#2966](https://github.com/apache/camel-k/issues/2966)
 - camel-k-operator forbidden to get kafkachannels.messaging.knative.dev since 1.8.x [\#2950](https://github.com/apache/camel-k/issues/2950)
 - \[regression\] Cannot provide 2 resources with 1.8.0 [\#2943](https://github.com/apache/camel-k/issues/2943)
+- \[Docs/Website\] Generate API documentation as AsciiDoc rather than html [\#2898](https://github.com/apache/camel-k/issues/2898)
 - Enabling prometheus causes KameletBindings to be stuck in status "Creating" [\#2896](https://github.com/apache/camel-k/issues/2896)
 - Stale bot is setting issue `stale` where marked as `never-stale` [\#2893](https://github.com/apache/camel-k/issues/2893)
 - camel-k-client binary is missing in the latest release assets [\#2892](https://github.com/apache/camel-k/issues/2892)
