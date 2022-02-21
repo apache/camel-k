@@ -69,7 +69,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: IntegrationSpec defines the desired state of Integration
+            description: the desired Integration specification
             properties:
               configuration:
                 description: 'Deprecated: Use camel trait (camel.properties) to manage
@@ -103,10 +103,14 @@ spec:
                   type: object
                 type: array
               dependencies:
+                description: the list of Camel or Maven dependencies required by the
+                  Integration
                 items:
                   type: string
                 type: array
               flows:
+                description: a source in YAML DSL language which contain the routes
+                  to run
                 items:
                   description: Flow is an unstructured object representing a Camel
                     Flow in YAML/JSON DSL
@@ -114,30 +118,8 @@ spec:
                   x-kubernetes-preserve-unknown-fields: true
                 type: array
               integrationKit:
-                description: 'ObjectReference contains enough information to let you
-                  inspect or modify the referred object. --- New uses of this type
-                  are discouraged because of difficulty describing its usage when
-                  embedded in APIs.  1. Ignored fields.  It includes many fields which
-                  are not generally honored.  For instance, ResourceVersion and FieldPath
-                  are both very rarely valid in actual usage.  2. Invalid usage help.  It
-                  is impossible to add specific help for individual usage.  In most
-                  embedded usages, there are particular     restrictions like, "must
-                  refer only to types A and B" or "UID not honored" or "name must
-                  be restricted".     Those cannot be well described when embedded.  3.
-                  Inconsistent validation.  Because the usages are different, the
-                  validation rules are different by usage, which makes it hard for
-                  users to predict what will happen.  4. The fields are both imprecise
-                  and overly precise.  Kind is not a precise mapping to a URL. This
-                  can produce ambiguity     during interpretation and require a REST
-                  mapping.  In most cases, the dependency is on the group,resource
-                  tuple     and the version of the actual struct is irrelevant.  5.
-                  We cannot easily change it.  Because this type is embedded in many
-                  locations, updates to this type     will affect numerous schemas.  Don''t
-                  make new APIs embed an underspecified API type they do not control.
-                  Instead of using this type, create a locally provided and used type
-                  that is well-focused on your reference. For example, ServiceReferences
-                  for admission registration: https://github.com/kubernetes/api/blob/release-1.17/admissionregistration/v1/types.go#L533
-                  .'
+                description: the reference of the `IntegrationKit` which is used for
+                  this Integration
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -173,13 +155,14 @@ spec:
                     type: string
                 type: object
               profile:
-                description: TraitProfile represents lists of traits that are enabled
-                  for the specific installation/integration
+                description: the profile needed to run this Integration
                 type: string
               replicas:
+                description: the number of `Pods` needed for the running Integration
                 format: int32
                 type: integer
               repositories:
+                description: additional Maven repositories to be used
                 items:
                   type: string
                 type: array
@@ -227,8 +210,10 @@ spec:
                   type: object
                 type: array
               serviceAccountName:
+                description: custom SA to use for the Integration
                 type: string
               sources:
+                description: the sources which contain the Camel routes to run
                 items:
                   description: SourceSpec defines the configuration for one or more
                     routes to be executed in a certain Camel DSL language
@@ -285,13 +270,17 @@ spec:
                   type: object
                 type: array
               template:
+                description: Pod template customization
                 properties:
                   spec:
+                    description: the specification
                     properties:
                       activeDeadlineSeconds:
+                        description: ActiveDeadlineSeconds
                         format: int64
                         type: integer
                       containers:
+                        description: Containers
                         items:
                           description: A single application container that you want
                             to run within a pod.
@@ -1516,9 +1505,10 @@ spec:
                           type: object
                         type: array
                       dnsPolicy:
-                        description: DNSPolicy defines how a pod's DNS will be configured.
+                        description: DNSPolicy
                         type: string
                       ephemeralContainers:
+                        description: EphemeralContainers
                         items:
                           description: An EphemeralContainer is a container that may
                             be added temporarily to an existing pod for user-initiated
@@ -2736,6 +2726,7 @@ spec:
                           type: object
                         type: array
                       initContainers:
+                        description: InitContainers
                         items:
                           description: A single application container that you want
                             to run within a pod.
@@ -3962,17 +3953,17 @@ spec:
                       nodeSelector:
                         additionalProperties:
                           type: string
+                        description: NodeSelector
                         type: object
                       restartPolicy:
-                        description: RestartPolicy describes how the container should
-                          be restarted. Only one of the following restart policies
-                          may be specified. If none of the following policies is specified,
-                          the default one is RestartPolicyAlways.
+                        description: RestartPolicy
                         type: string
                       terminationGracePeriodSeconds:
+                        description: TerminationGracePeriodSeconds
                         format: int64
                         type: integer
                       topologySpreadConstraints:
+                        description: TopologySpreadConstraints
                         items:
                           description: TopologySpreadConstraint specifies how to spread
                             matching pods among the given topology.
@@ -4079,6 +4070,7 @@ spec:
                           type: object
                         type: array
                       volumes:
+                        description: Volumes
                         items:
                           description: Volume represents a named volume in a pod that
                             may be accessed by any container in the pod.
@@ -5695,16 +5687,19 @@ spec:
                   required:
                   - configuration
                   type: object
+                description: the traits needed to run this Integration
                 type: object
             type: object
           status:
-            description: IntegrationStatus defines the observed state of Integration
+            description: the status of the Integration
             properties:
               capabilities:
+                description: features offered by the Integration
                 items:
                   type: string
                 type: array
               conditions:
+                description: a list of events happened for the Integration
                 items:
                   description: IntegrationCondition describes the state of a resource
                     at a certain point.
@@ -5742,6 +5737,7 @@ spec:
                   type: object
                 type: array
               configuration:
+                description: 'Deprecated: a list of configuration specification'
                 items:
                   description: ConfigurationSpec represents a generic configuration
                     specification
@@ -5769,12 +5765,15 @@ spec:
                   type: object
                 type: array
               dependencies:
+                description: a list of dependencies needed by the application
                 items:
                   type: string
                 type: array
               digest:
+                description: the digest calculated for this Integration
                 type: string
               generatedResources:
+                description: 'Deprecated: a list of resources generated for this Integration'
                 items:
                   description: 'ResourceSpec represent an attached resource which
                     will be materialized as a file on the running `Pod` TODO: we should
@@ -5815,6 +5814,7 @@ spec:
                   type: object
                 type: array
               generatedSources:
+                description: a list of sources generated for this Integration
                 items:
                   description: SourceSpec defines the configuration for one or more
                     routes to be executed in a certain Camel DSL language
@@ -5871,32 +5871,11 @@ spec:
                   type: object
                 type: array
               image:
+                description: the container image used
                 type: string
               integrationKit:
-                description: 'ObjectReference contains enough information to let you
-                  inspect or modify the referred object. --- New uses of this type
-                  are discouraged because of difficulty describing its usage when
-                  embedded in APIs.  1. Ignored fields.  It includes many fields which
-                  are not generally honored.  For instance, ResourceVersion and FieldPath
-                  are both very rarely valid in actual usage.  2. Invalid usage help.  It
-                  is impossible to add specific help for individual usage.  In most
-                  embedded usages, there are particular     restrictions like, "must
-                  refer only to types A and B" or "UID not honored" or "name must
-                  be restricted".     Those cannot be well described when embedded.  3.
-                  Inconsistent validation.  Because the usages are different, the
-                  validation rules are different by usage, which makes it hard for
-                  users to predict what will happen.  4. The fields are both imprecise
-                  and overly precise.  Kind is not a precise mapping to a URL. This
-                  can produce ambiguity     during interpretation and require a REST
-                  mapping.  In most cases, the dependency is on the group,resource
-                  tuple     and the version of the actual struct is irrelevant.  5.
-                  We cannot easily change it.  Because this type is embedded in many
-                  locations, updates to this type     will affect numerous schemas.  Don''t
-                  make new APIs embed an underspecified API type they do not control.
-                  Instead of using this type, create a locally provided and used type
-                  that is well-focused on your reference. For example, ServiceReferences
-                  for admission registration: https://github.com/kubernetes/api/blob/release-1.17/admissionregistration/v1/types.go#L533
-                  .'
+                description: the reference of the `IntegrationKit` which is used for
+                  this Integration
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -5932,30 +5911,34 @@ spec:
                     type: string
                 type: object
               lastInitTimestamp:
-                description: The timestamp representing the last time when this integration
+                description: the timestamp representing the last time when this integration
                   was initialized.
                 format: date-time
                 type: string
               phase:
-                description: IntegrationPhase --
+                description: the actual phase
                 type: string
               platform:
+                description: The IntegrationPlatform watching this Integration
                 type: string
               profile:
-                description: TraitProfile represents lists of traits that are enabled
-                  for the specific installation/integration
+                description: the profile needed to run this Integration
                 type: string
               replicas:
+                description: the number of replicas
                 format: int32
                 type: integer
               runtimeProvider:
-                description: RuntimeProvider is the provider chosen for the runtime
+                description: the runtime provider targeted for this Integration
                 type: string
               runtimeVersion:
+                description: the runtime version targeted for this Integration
                 type: string
               selector:
+                description: label selector
                 type: string
               version:
+                description: the operator version
                 type: string
             type: object
         type: object

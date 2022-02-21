@@ -35,14 +35,14 @@ Refer to the Kubernetes API documentation for the fields of the `metadata` field
 |
 
 
-
+the desired specification
 
 |`status` +
 *xref:#_camel_apache_org_v1alpha1_KameletStatus[KameletStatus]*
 |
 
 
-
+the actual status of the resource
 
 
 |===
@@ -77,14 +77,14 @@ Refer to the Kubernetes API documentation for the fields of the `metadata` field
 |
 
 
-
+the specification of a KameletBinding
 
 |`status` +
 *xref:#_camel_apache_org_v1alpha1_KameletBindingStatus[KameletBindingStatus]*
 |
 
 
-
+the status of a KameletBinding
 
 
 |===
@@ -99,6 +99,7 @@ Refer to the Kubernetes API documentation for the fields of the `metadata` field
 * <<#_camel_apache_org_v1alpha1_KameletSpec, KameletSpec>>
 
 AuthorizationSpec is TODO (oauth information)
+Deprecated: unused
 
 
 [#_camel_apache_org_v1alpha1_BeanProperties]
@@ -129,7 +130,7 @@ BeanProperties represent an unstructured object properties to be set on a bean
 * <<#_camel_apache_org_v1alpha1_ErrorHandlerSink, ErrorHandlerSink>>
 * <<#_camel_apache_org_v1alpha1_KameletBindingSpec, KameletBindingSpec>>
 
-Endpoint represents a source/sink external entity
+Endpoint represents a source/sink external entity (could be any Kubernetes resource or Camel URI)
 
 [cols="2,2a",options="header"]
 |===
@@ -148,7 +149,7 @@ string
 |
 
 
-URI can alternatively be used to specify the (Camel) endpoint explicitly
+URI can be used to specify the (Camel) endpoint explicitly
 
 |`properties` +
 *xref:#_camel_apache_org_v1alpha1_EndpointProperties[EndpointProperties]*
@@ -194,7 +195,7 @@ EndpointProperties is a key/value struct represented as JSON raw to allow numeri
 [#_camel_apache_org_v1alpha1_EndpointType]
 === EndpointType(`string` alias)
 
-
+EndpointType represents the type (ie, source or sink)
 
 
 [#_camel_apache_org_v1alpha1_ErrorHandler]
@@ -329,13 +330,13 @@ ErrorHandlerSpec represents an unstructured object for an error handler
 [#_camel_apache_org_v1alpha1_ErrorHandlerType]
 === ErrorHandlerType(`string` alias)
 
-ErrorHandlerType --
+ErrorHandlerType a type of error handler (ie, sink)
 
 
 [#_camel_apache_org_v1alpha1_EventSlot]
 === EventSlot(`string` alias)
 
-
+EventSlot represent a kind of data (ie, input, output, ...)
 
 
 [#_camel_apache_org_v1alpha1_EventTypeSpec]
@@ -346,7 +347,7 @@ ErrorHandlerType --
 * <<#_camel_apache_org_v1alpha1_Endpoint, Endpoint>>
 * <<#_camel_apache_org_v1alpha1_KameletSpec, KameletSpec>>
 
-
+EventTypeSpec represents a specification for an event type
 
 [cols="2,2a",options="header"]
 |===
@@ -358,14 +359,14 @@ string
 |
 
 
-
+media type as expected for HTTP media types (ie, application/json)
 
 |`schema` +
 *xref:#_camel_apache_org_v1alpha1_JSONSchemaProps[JSONSchemaProps]*
 |
 
 
-
+the expected schema for the event
 
 
 |===
@@ -787,7 +788,7 @@ A human readable message indicating details about the transition.
 
 * <<#_camel_apache_org_v1alpha1_KameletBindingCondition, KameletBindingCondition>>
 
-
+KameletBindingConditionType --
 
 
 [#_camel_apache_org_v1alpha1_KameletBindingPhase]
@@ -797,7 +798,7 @@ A human readable message indicating details about the transition.
 
 * <<#_camel_apache_org_v1alpha1_KameletBindingStatus, KameletBindingStatus>>
 
-
+KameletBindingPhase --
 
 
 [#_camel_apache_org_v1alpha1_KameletBindingSpec]
@@ -807,7 +808,7 @@ A human readable message indicating details about the transition.
 
 * <<#_camel_apache_org_v1alpha1_KameletBinding, KameletBinding>>
 
-KameletBindingSpec --
+KameletBindingSpec defines the binding between a source and a sink. It can include custom parameters and additional intermediate steps and error handling.
 
 [cols="2,2a",options="header"]
 |===
@@ -866,7 +867,7 @@ Replicas is the number of desired replicas for the binding
 
 * <<#_camel_apache_org_v1alpha1_KameletBinding, KameletBinding>>
 
-KameletBindingStatus --
+KameletBindingStatus specify the status of a binding
 
 [cols="2,2a",options="header"]
 |===
@@ -970,7 +971,7 @@ A human-readable message indicating details about the transition.
 
 * <<#_camel_apache_org_v1alpha1_KameletCondition, KameletCondition>>
 
-
+KameletConditionType --
 
 
 [#_camel_apache_org_v1alpha1_KameletPhase]
@@ -980,7 +981,7 @@ A human-readable message indicating details about the transition.
 
 * <<#_camel_apache_org_v1alpha1_KameletStatus, KameletStatus>>
 
-
+KameletPhase --
 
 
 [#_camel_apache_org_v1alpha1_KameletProperty]
@@ -990,7 +991,7 @@ A human-readable message indicating details about the transition.
 
 * <<#_camel_apache_org_v1alpha1_KameletStatus, KameletStatus>>
 
-
+KameletProperty specify the behavior of a property in a Kamelet
 
 [cols="2,2a",options="header"]
 |===
@@ -1002,14 +1003,14 @@ string
 |
 
 
-
+the name of the property
 
 |`default` +
 string
 |
 
 
-
+the default value of the property (if any)
 
 
 |===
@@ -1021,7 +1022,7 @@ string
 
 * <<#_camel_apache_org_v1alpha1_Kamelet, Kamelet>>
 
-KameletSpec defines the desired state of Kamelet
+KameletSpec specifies the configuration required to execute a Kamelet
 
 [cols="2,2a",options="header"]
 |===
@@ -1033,49 +1034,50 @@ KameletSpec defines the desired state of Kamelet
 |
 
 
-
+defines the formal configuration of the Kamelet
 
 |`sources` +
 *xref:apis/camel-k.adoc#_camel_apache_org_v1_SourceSpec[[\]github.com/apache/camel-k/pkg/apis/camel/v1.SourceSpec]*
 |
 
 
-
+sources in any Camel DSL supported
 
 |`template` +
 *xref:#_camel_apache_org_v1alpha1_Template[Template]*
 |
 
 
-
+the main source in YAML DSL
 
 |`flow` +
 *xref:apis/camel-k.adoc#_camel_apache_org_v1_Flow[github.com/apache/camel-k/pkg/apis/camel/v1.Flow]*
 |
 
 
-Deprecated: use template
+Deprecated: use Template instead
+the main source in YAML DSL
 
 |`authorization` +
 *xref:#_camel_apache_org_v1alpha1_AuthorizationSpec[AuthorizationSpec]*
 |
 
 
-
+Deprecated: unused
 
 |`types` +
 *xref:#_camel_apache_org_v1alpha1_EventTypeSpec[map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot\]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventTypeSpec]*
 |
 
 
-
+data specification types for the events consumed/produced by the Kamelet
 
 |`dependencies` +
 []string
 |
 
 
-
+Camel dependencies needed by the Kamelet
 
 
 |===
@@ -1099,21 +1101,21 @@ KameletStatus defines the observed state of Kamelet
 |
 
 
-
+Phase --
 
 |`conditions` +
 *xref:#_camel_apache_org_v1alpha1_KameletCondition[[\]KameletCondition]*
 |
 
 
-
+Conditions --
 
 |`properties` +
 *xref:#_camel_apache_org_v1alpha1_KameletProperty[[\]KameletProperty]*
 |
 
 
-
+Properties --
 
 
 |===
@@ -1154,7 +1156,7 @@ Template is an unstructured object representing a Kamelet template in YAML/JSON 
 |(Members of `RawMessage` are embedded into this type.)
 
 
-
+an unstructured raw message
 
 
 |===

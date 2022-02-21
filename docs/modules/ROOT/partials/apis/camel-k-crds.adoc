@@ -119,14 +119,14 @@ Refer to the Kubernetes API documentation for the fields of the `metadata` field
 |
 
 
-
+the desired Integration specification
 
 |`status` +
 *xref:#_camel_apache_org_v1_IntegrationStatus[IntegrationStatus]*
 |
 
 
-
+the status of the Integration
 
 
 |===
@@ -596,8 +596,8 @@ the configuration required for the runtime application
 |
 
 
-the source code for the Route(s)
 Deprecated: no longer in use
+the source code for the Route(s)
 
 |`resources` +
 *xref:#_camel_apache_org_v1_ResourceSpec[[\]ResourceSpec]*
@@ -1890,7 +1890,8 @@ generic information related to the build of Camel K operator software
 
 * <<#_camel_apache_org_v1_Integration, Integration>>
 
-IntegrationSpec defines the desired state of Integration
+IntegrationSpec specifies the configuration of an Integration.
+The Integration will be watched by the operator which will be in charge to run the related application, according to the configuration specified.
 
 [cols="2,2a",options="header"]
 |===
@@ -1902,21 +1903,21 @@ int32
 |
 
 
-
+the number of `Pods` needed for the running Integration
 
 |`sources` +
 *xref:#_camel_apache_org_v1_SourceSpec[[\]SourceSpec]*
 |
 
 
-
+the sources which contain the Camel routes to run
 
 |`flows` +
 *xref:#_camel_apache_org_v1_Flow[[\]Flow]*
 |
 
 
-
+a source in YAML DSL language which contain the routes to run
 
 |`resources` +
 *xref:#_camel_apache_org_v1_ResourceSpec[[\]ResourceSpec]*
@@ -1932,35 +1933,35 @@ Use openapi trait (openapi.configmaps) to manage OpenAPIs specifications
 |
 
 
-
+the reference of the `IntegrationKit` which is used for this Integration
 
 |`dependencies` +
 []string
 |
 
 
-
+the list of Camel or Maven dependencies required by the Integration
 
 |`profile` +
 *xref:#_camel_apache_org_v1_TraitProfile[TraitProfile]*
 |
 
 
-
+the profile needed to run this Integration
 
 |`traits` +
 *xref:#_camel_apache_org_v1_TraitSpec[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.TraitSpec]*
 |
 
 
-
+the traits needed to run this Integration
 
 |`template` +
 *xref:#_camel_apache_org_v1_PodSpecTemplate[PodSpecTemplate]*
 |
 
 
-
+Pod template customization
 
 |`configuration` +
 *xref:#_camel_apache_org_v1_ConfigurationSpec[[\]ConfigurationSpec]*
@@ -1978,14 +1979,14 @@ Use container trait (mount.volumes) to manage volumes
 |
 
 
-
+additional Maven repositories to be used
 
 |`serviceAccountName` +
 string
 |
 
 
-
+custom SA to use for the Integration
 
 
 |===
@@ -2009,126 +2010,128 @@ IntegrationStatus defines the observed state of Integration
 |
 
 
-
+the actual phase
 
 |`digest` +
 string
 |
 
 
-
+the digest calculated for this Integration
 
 |`image` +
 string
 |
 
 
-
+the container image used
 
 |`dependencies` +
 []string
 |
 
 
-
+a list of dependencies needed by the application
 
 |`profile` +
 *xref:#_camel_apache_org_v1_TraitProfile[TraitProfile]*
 |
 
 
-
+the profile needed to run this Integration
 
 |`integrationKit` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core[Kubernetes core/v1.ObjectReference]*
 |
 
 
-
+the reference of the `IntegrationKit` which is used for this Integration
 
 |`platform` +
 string
 |
 
 
-
+The IntegrationPlatform watching this Integration
 
 |`generatedSources` +
 *xref:#_camel_apache_org_v1_SourceSpec[[\]SourceSpec]*
 |
 
 
-
+a list of sources generated for this Integration
 
 |`generatedResources` +
 *xref:#_camel_apache_org_v1_ResourceSpec[[\]ResourceSpec]*
 |
 
 
-
+Deprecated:
+a list of resources generated for this Integration
 
 |`runtimeVersion` +
 string
 |
 
 
-
+the runtime version targeted for this Integration
 
 |`runtimeProvider` +
 *xref:#_camel_apache_org_v1_RuntimeProvider[RuntimeProvider]*
 |
 
 
-
+the runtime provider targeted for this Integration
 
 |`configuration` +
 *xref:#_camel_apache_org_v1_ConfigurationSpec[[\]ConfigurationSpec]*
 |
 
 
-
+Deprecated:
+a list of configuration specification
 
 |`conditions` +
 *xref:#_camel_apache_org_v1_IntegrationCondition[[\]IntegrationCondition]*
 |
 
 
-
+a list of events happened for the Integration
 
 |`version` +
 string
 |
 
 
-
+the operator version
 
 |`replicas` +
 int32
 |
 
 
-
+the number of replicas
 
 |`selector` +
 string
 |
 
 
-
+label selector
 
 |`capabilities` +
 []string
 |
 
 
-
+features offered by the Integration
 
 |`lastInitTimestamp` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
-The timestamp representing the last time when this integration was initialized.
+the timestamp representing the last time when this integration was initialized.
 
 
 |===
@@ -2368,7 +2371,7 @@ See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.
 
 * <<#_camel_apache_org_v1_PodSpecTemplate, PodSpecTemplate>>
 
-
+PodSpec defines a group of Kubernetes resources
 
 [cols="2,2a",options="header"]
 |===
@@ -2380,70 +2383,70 @@ See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.
 |
 
 
-
+Volumes
 
 |`initContainers` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core[[\]Kubernetes core/v1.Container]*
 |
 
 
-
+InitContainers
 
 |`containers` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core[[\]Kubernetes core/v1.Container]*
 |
 
 
-
+Containers
 
 |`ephemeralContainers` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#ephemeralcontainer-v1-core[[\]Kubernetes core/v1.EphemeralContainer]*
 |
 
 
-
+EphemeralContainers
 
 |`restartPolicy` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#restartpolicy-v1-core[Kubernetes core/v1.RestartPolicy]*
 |
 
 
-
+RestartPolicy
 
 |`terminationGracePeriodSeconds` +
 int64
 |
 
 
-
+TerminationGracePeriodSeconds
 
 |`activeDeadlineSeconds` +
 int64
 |
 
 
-
+ActiveDeadlineSeconds
 
 |`dnsPolicy` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#dnspolicy-v1-core[Kubernetes core/v1.DNSPolicy]*
 |
 
 
-
+DNSPolicy
 
 |`nodeSelector` +
 map[string]string
 |
 
 
-
+NodeSelector
 
 |`topologySpreadConstraints` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#topologyspreadconstraint-v1-core[[\]Kubernetes core/v1.TopologySpreadConstraint]*
 |
 
 
-
+TopologySpreadConstraints
 
 
 |===
@@ -2455,7 +2458,7 @@ map[string]string
 
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
 
-
+PodSpecTemplate represent a template used to deploy an Integration `Pod`
 
 [cols="2,2a",options="header"]
 |===
@@ -2467,7 +2470,7 @@ map[string]string
 |
 
 
-
+the specification
 
 
 |===

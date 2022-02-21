@@ -25,65 +25,114 @@ import (
 )
 
 const (
-	AnnotationIcon       = "camel.apache.org/kamelet.icon"
-	KameletBundledLabel  = "camel.apache.org/kamelet.bundled"
+	// AnnotationIcon label used by icons
+	AnnotationIcon = "camel.apache.org/kamelet.icon"
+	// KameletBundledLabel label used by bundling
+	KameletBundledLabel = "camel.apache.org/kamelet.bundled"
+	// KameletReadOnlyLabel label used to identify readonly Kamelets
 	KameletReadOnlyLabel = "camel.apache.org/kamelet.readonly"
-	KameletTypeLabel     = "camel.apache.org/kamelet.type"
-	KameletGroupLabel    = "camel.apache.org/kamelet.group"
+	// KameletTypeLabel label used to identify Kamelet type
+	KameletTypeLabel = "camel.apache.org/kamelet.type"
+	// KameletGroupLabel label used to group Kamelets
+	KameletGroupLabel = "camel.apache.org/kamelet.group"
 
-	KameletTypeSink   = "sink"
+	// KameletTypeSink type Sink
+	KameletTypeSink = "sink"
+	// KameletTypeSource type Source
 	KameletTypeSource = "source"
+	// KameletTypeAction type Action
 	KameletTypeAction = "action"
 )
 
 var (
+	// reservedKameletNames used to mark reserved names
 	reservedKameletNames = map[string]bool{"source": true, "sink": true}
-	KameletIDProperty    = "id"
+	// KameletIDProperty used to identify
+	KameletIDProperty = "id"
 )
 
-// KameletSpec defines the desired state of Kamelet
+// +genclient
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:path=kamelets,scope=Namespaced,shortName=kl,categories=kamel;camel
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The Kamelet phase"
+
+// Kamelet is the Schema for the kamelets API
+type Kamelet struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	// the desired specification
+	Spec KameletSpec `json:"spec,omitempty"`
+	// the actual status of the resource
+	Status KameletStatus `json:"status,omitempty"`
+}
+
+// KameletSpec specifies the configuration required to execute a Kamelet
 type KameletSpec struct {
-	Definition *JSONSchemaProps     `json:"definition,omitempty"`
-	Sources    []camelv1.SourceSpec `json:"sources,omitempty"`
-	Template   *Template            `json:"template,omitempty"`
-	// Deprecated: use template
-	Flow          *camelv1.Flow               `json:"flow,omitempty"`
-	Authorization *AuthorizationSpec          `json:"authorization,omitempty"`
-	Types         map[EventSlot]EventTypeSpec `json:"types,omitempty"`
-	Dependencies  []string                    `json:"dependencies,omitempty"`
+	// defines the formal configuration of the Kamelet
+	Definition *JSONSchemaProps `json:"definition,omitempty"`
+	// sources in any Camel DSL supported
+	Sources []camelv1.SourceSpec `json:"sources,omitempty"`
+	// the main source in YAML DSL
+	Template *Template `json:"template,omitempty"`
+	// Deprecated: use Template instead
+	// the main source in YAML DSL
+	Flow *camelv1.Flow `json:"flow,omitempty"`
+	// Deprecated: unused
+	Authorization *AuthorizationSpec `json:"authorization,omitempty"`
+	// data specification types for the events consumed/produced by the Kamelet
+	Types map[EventSlot]EventTypeSpec `json:"types,omitempty"`
+	// Camel dependencies needed by the Kamelet
+	Dependencies []string `json:"dependencies,omitempty"`
 }
 
 // Template is an unstructured object representing a Kamelet template in YAML/JSON DSL
 type Template struct {
+	// an unstructured raw message
 	RawMessage `json:",inline"`
 }
 
-type EventTypeSpec struct {
-	MediaType string           `json:"mediaType,omitempty"`
-	Schema    *JSONSchemaProps `json:"schema,omitempty"`
-}
-
+// EventSlot represent a kind of data (ie, input, output, ...)
 type EventSlot string
 
 const (
-	EventSlotIn    EventSlot = "in"
-	EventSlotOut   EventSlot = "out"
+	// EventSlotIn is used for the input events
+	EventSlotIn EventSlot = "in"
+	// EventSlotOut is used for the output events
+	EventSlotOut EventSlot = "out"
+	// EventSlotError is used for the error events
 	EventSlotError EventSlot = "error"
 )
 
+// EventTypeSpec represents a specification for an event type
+type EventTypeSpec struct {
+	// media type as expected for HTTP media types (ie, application/json)
+	MediaType string `json:"mediaType,omitempty"`
+	// the expected schema for the event
+	Schema *JSONSchemaProps `json:"schema,omitempty"`
+}
+
 // AuthorizationSpec is TODO (oauth information)
+// Deprecated: unused
 type AuthorizationSpec struct {
 }
 
 // KameletStatus defines the observed state of Kamelet
 type KameletStatus struct {
-	Phase      KameletPhase       `json:"phase,omitempty"`
+	// Phase --
+	Phase KameletPhase `json:"phase,omitempty"`
+	// Conditions --
 	Conditions []KameletCondition `json:"conditions,omitempty"`
-	Properties []KameletProperty  `json:"properties,omitempty"`
+	// Properties --
+	Properties []KameletProperty `json:"properties,omitempty"`
 }
 
+// KameletProperty specify the behavior of a property in a Kamelet
 type KameletProperty struct {
-	Name    string `json:"name,omitempty"`
+	// the name of the property
+	Name string `json:"name,omitempty"`
+	// the default value of the property (if any)
 	Default string `json:"default,omitempty"`
 }
 
@@ -103,6 +152,7 @@ type KameletCondition struct {
 	Message string `json:"message,omitempty"`
 }
 
+// KameletConditionType --
 type KameletConditionType string
 
 const (
@@ -119,6 +169,7 @@ const (
 	KameletConditionReasonInvalidTemplate string = "InvalidTemplate"
 )
 
+// KameletPhase --
 type KameletPhase string
 
 const (
@@ -132,21 +183,6 @@ const (
 	// KameletPhaseError --
 	KameletPhaseError KameletPhase = "Error"
 )
-
-// +genclient
-// +kubebuilder:object:root=true
-// +kubebuilder:resource:path=kamelets,scope=Namespaced,shortName=kl,categories=kamel;camel
-// +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The Kamelet phase"
-
-// Kamelet is the Schema for the kamelets API
-type Kamelet struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   KameletSpec   `json:"spec,omitempty"`
-	Status KameletStatus `json:"status,omitempty"`
-}
 
 // +kubebuilder:object:root=true
 

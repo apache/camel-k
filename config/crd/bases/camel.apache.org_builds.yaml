@@ -453,8 +453,8 @@ spec:
                           - version
                           type: object
                         sources:
-                          description: 'the source code for the Route(s) Deprecated:
-                            no longer in use'
+                          description: 'Deprecated: no longer in use the source code
+                            for the Route(s)'
                           items:
                             description: SourceSpec defines the configuration for
                               one or more routes to be executed in a certain Camel

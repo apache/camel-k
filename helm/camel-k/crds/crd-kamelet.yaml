@@ -61,14 +61,13 @@ spec:
           metadata:
             type: object
           spec:
-            description: KameletSpec defines the desired state of Kamelet
+            description: the desired specification
             properties:
               authorization:
-                description: AuthorizationSpec is TODO (oauth information)
+                description: 'Deprecated: unused'
                 type: object
               definition:
-                description: JSONSchemaProps is a JSON-Schema following Specification
-                  Draft 4 (http://json-schema.org/).
+                description: defines the formal configuration of the Kamelet
                 properties:
                   $schema:
                     description: JSONSchemaURL represents a schema url.
@@ -210,14 +209,17 @@ spec:
                     type: string
                 type: object
               dependencies:
+                description: Camel dependencies needed by the Kamelet
                 items:
                   type: string
                 type: array
               flow:
-                description: 'Deprecated: use template'
+                description: 'Deprecated: use Template instead the main source in
+                  YAML DSL'
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
               sources:
+                description: sources in any Camel DSL supported
                 items:
                   description: SourceSpec defines the configuration for one or more
                     routes to be executed in a certain Camel DSL language
@@ -274,18 +276,20 @@ spec:
                   type: object
                 type: array
               template:
-                description: Template is an unstructured object representing a Kamelet
-                  template in YAML/JSON DSL
+                description: the main source in YAML DSL
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
               types:
                 additionalProperties:
+                  description: EventTypeSpec represents a specification for an event
+                    type
                   properties:
                     mediaType:
+                      description: media type as expected for HTTP media types (ie,
+                        application/json)
                       type: string
                     schema:
-                      description: JSONSchemaProps is a JSON-Schema following Specification
-                        Draft 4 (http://json-schema.org/).
+                      description: the expected schema for the event
                       properties:
                         $schema:
                           description: JSONSchemaURL represents a schema url.
@@ -432,12 +436,15 @@ spec:
                           type: string
                       type: object
                   type: object
+                description: data specification types for the events consumed/produced
+                  by the Kamelet
                 type: object
             type: object
           status:
-            description: KameletStatus defines the observed state of Kamelet
+            description: the actual status of the resource
             properties:
               conditions:
+                description: Conditions --
                 items:
                   description: KameletCondition describes the state of a resource
                     at a certain point.
@@ -470,13 +477,19 @@ spec:
                   type: object
                 type: array
               phase:
+                description: Phase --
                 type: string
               properties:
+                description: Properties --
                 items:
+                  description: KameletProperty specify the behavior of a property
+                    in a Kamelet
                   properties:
                     default:
+                      description: the default value of the property (if any)
                       type: string
                     name:
+                      description: the name of the property
                       type: string
                   type: object
                 type: array
