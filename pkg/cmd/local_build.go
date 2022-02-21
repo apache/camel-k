@@ -90,11 +90,6 @@ func (command *localBuildCmdOptions) validate(args []string) error {
 		if err != nil {
 			return err
 		}
-
-		// Cannot have both integration files and the base image construction enabled.
-		if command.BaseImage {
-			return errors.New("integration files have been provided and the base image construction is enabled")
-		}
 	}
 
 	// Validate additional dependencies specified by the user.
@@ -109,19 +104,24 @@ func (command *localBuildCmdOptions) validate(args []string) error {
 		return err
 	}
 
-	// ContainerRegistry should only be specified when building the base image.
-	if !command.BaseImage && command.ContainerRegistry != "" {
+	if command.BaseImage {
+		// Cannot have both integration files and the base image construction enabled.
+		if len(args) > 0 {
+			return errors.New("integration files have been provided and the base image construction is enabled")
+		}
+
+		// Docker registry must be set.
+		if command.ContainerRegistry == "" {
+			return errors.New("base image cannot be built because container registry has not been provided")
+		}
+
+		// If an integration directory is provided then no base image containerization can be enabled.
+		if command.IntegrationDirectory != "" {
+			return errors.New("base image construction does not use integration files")
+		}
+	} else if command.ContainerRegistry != "" {
+		// ContainerRegistry should only be specified when building the base image.
 		return errors.New("cannot specify container registry unless a base integration image is being built")
-	}
-
-	// Docker registry must be set.
-	if command.BaseImage && command.ContainerRegistry == "" {
-		return errors.New("base image cannot be built because container registry has not been provided")
-	}
-
-	// If an integration directory is provided then no base image containerization can be enabled.
-	if command.BaseImage && command.IntegrationDirectory != "" {
-		return errors.New("base image construction does not use integration files")
 	}
 
 	// The integration directory must be set when only outputting dependencies.

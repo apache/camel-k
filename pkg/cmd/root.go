@@ -65,10 +65,6 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 		return cmd, err
 	}
 
-	if err := addLocalSubCommands(cmd, &options); err != nil {
-		return cmd, err
-	}
-
 	err = kamelPostAddCommandInit(cmd)
 
 	return cmd, err
