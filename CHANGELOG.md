@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- logging.level.org.apache.camel=DEBUG does not affect integration logs. [\#3024](https://github.com/apache/camel-k/issues/3024)
 - Build artifact checksum not working [\#3007](https://github.com/apache/camel-k/issues/3007)
 - kamel client for macOS from release 1.8.0 is really 1.0.0-M4 [\#3006](https://github.com/apache/camel-k/issues/3006)
 - SEDA multiple threads not working [\#3001](https://github.com/apache/camel-k/issues/3001)
