@@ -66,8 +66,8 @@ type BuilderTask struct {
 	BaseImage string `json:"baseImage,omitempty"`
 	// the configuration required for the runtime application
 	Runtime RuntimeSpec `json:"runtime,omitempty"`
-	// the source code for the Route(s)
 	// Deprecated: no longer in use
+	// the source code for the Route(s)
 	Sources []SourceSpec `json:"sources,omitempty"`
 	// Deprecated: no longer in use
 	Resources []ResourceSpec `json:"resources,omitempty"`

@@ -92,6 +92,7 @@ func collectConfigurations(configurationType string, configurable ...v1.Configur
 			continue
 		}
 
+		// nolint: staticcheck
 		for _, entry := range entries {
 			if entry.Type == configurationType {
 				item := make(map[string]string)

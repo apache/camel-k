@@ -24,7 +24,28 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// KameletBindingSpec --
+// +genclient
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:path=kameletbindings,scope=Namespaced,shortName=klb,categories=kamel;camel
+// +kubebuilder:subresource:status
+// +genclient:method=GetScale,verb=get,subresource=scale,result=k8s.io/api/autoscaling/v1.Scale
+// +genclient:method=UpdateScale,verb=update,subresource=scale,input=k8s.io/api/autoscaling/v1.Scale,result=k8s.io/api/autoscaling/v1.Scale
+// +kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.selector
+// +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The Kamelet Binding phase"
+// +kubebuilder:printcolumn:name="Replicas",type=integer,JSONPath=`.status.replicas`,description="The number of pods"
+
+// KameletBinding is the Schema for the kamelets binding API
+type KameletBinding struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	// the specification of a KameletBinding
+	Spec KameletBindingSpec `json:"spec,omitempty"`
+	// the status of a KameletBinding
+	Status KameletBindingStatus `json:"status,omitempty"`
+}
+
+// KameletBindingSpec defines the binding between a source and a sink. It can include custom parameters and additional intermediate steps and error handling.
 type KameletBindingSpec struct {
 	// Integration is an optional integration used to specify custom parameters
 	Integration *v1.IntegrationSpec `json:"integration,omitempty"`
@@ -40,11 +61,11 @@ type KameletBindingSpec struct {
 	Replicas *int32 `json:"replicas,omitempty"`
 }
 
-// Endpoint represents a source/sink external entity
+// Endpoint represents a source/sink external entity (could be any Kubernetes resource or Camel URI)
 type Endpoint struct {
 	// Ref can be used to declare a Kubernetes resource as source/sink endpoint
 	Ref *corev1.ObjectReference `json:"ref,omitempty"`
-	// URI can alternatively be used to specify the (Camel) endpoint explicitly
+	// URI can be used to specify the (Camel) endpoint explicitly
 	URI *string `json:"uri,omitempty"`
 	// Properties are a key value representation of endpoint properties
 	Properties *EndpointProperties `json:"properties,omitempty"`
@@ -52,12 +73,17 @@ type Endpoint struct {
 	Types map[EventSlot]EventTypeSpec `json:"types,omitempty"`
 }
 
+// EndpointType represents the type (ie, source or sink)
 type EndpointType string
 
 const (
-	EndpointTypeSource       EndpointType = "source"
-	EndpointTypeAction       EndpointType = "action"
-	EndpointTypeSink         EndpointType = "sink"
+	// EndpointTypeSource source endpoint
+	EndpointTypeSource EndpointType = "source"
+	// EndpointTypeAction action endpoint
+	EndpointTypeAction EndpointType = "action"
+	// EndpointTypeSink sink endpoint
+	EndpointTypeSink EndpointType = "sink"
+	// EndpointTypeErrorHandler error handler endpoint
 	EndpointTypeErrorHandler EndpointType = "errorHandler"
 )
 
@@ -66,7 +92,7 @@ type EndpointProperties struct {
 	RawMessage `json:",inline"`
 }
 
-// KameletBindingStatus --
+// KameletBindingStatus specify the status of a binding
 type KameletBindingStatus struct {
 	// Phase --
 	Phase KameletBindingPhase `json:"phase,omitempty"`
@@ -94,6 +120,7 @@ type KameletBindingCondition struct {
 	Message string `json:"message,omitempty"`
 }
 
+// KameletBindingConditionType --
 type KameletBindingConditionType string
 
 const (
@@ -101,10 +128,11 @@ const (
 	KameletBindingConditionReady KameletBindingConditionType = "Ready"
 )
 
+// KameletBindingPhase --
 type KameletBindingPhase string
 
 const (
-	// KameletKind --
+	// KameletBindingKind --
 	KameletBindingKind string = "KameletBinding"
 
 	// KameletBindingPhaseNone --
@@ -116,25 +144,6 @@ const (
 	// KameletBindingPhaseReady --
 	KameletBindingPhaseReady KameletBindingPhase = "Ready"
 )
-
-// +genclient
-// +kubebuilder:object:root=true
-// +kubebuilder:resource:path=kameletbindings,scope=Namespaced,shortName=klb,categories=kamel;camel
-// +kubebuilder:subresource:status
-// +genclient:method=GetScale,verb=get,subresource=scale,result=k8s.io/api/autoscaling/v1.Scale
-// +genclient:method=UpdateScale,verb=update,subresource=scale,input=k8s.io/api/autoscaling/v1.Scale,result=k8s.io/api/autoscaling/v1.Scale
-// +kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.selector
-// +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The Kamelet Binding phase"
-// +kubebuilder:printcolumn:name="Replicas",type=integer,JSONPath=`.status.replicas`,description="The number of pods"
-
-// KameletBinding is the Schema for the kamelets binding API
-type KameletBinding struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   KameletBindingSpec   `json:"spec,omitempty"`
-	Status KameletBindingStatus `json:"status,omitempty"`
-}
 
 // +kubebuilder:object:root=true
 

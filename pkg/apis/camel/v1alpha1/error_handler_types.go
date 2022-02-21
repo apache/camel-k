@@ -17,18 +17,14 @@ limitations under the License.
 
 package v1alpha1
 
-import (
-	"encoding/json"
+const (
+	// ErrorHandlerRefName the reference name to use when looking for an error handler
+	ErrorHandlerRefName = "camel.k.errorHandler.ref"
+	// ErrorHandlerRefDefaultName the default name of the error handler
+	ErrorHandlerRefDefaultName = "defaultErrorHandler"
+	// ErrorHandlerAppPropertiesPrefix the prefix used for the error handler bean
+	ErrorHandlerAppPropertiesPrefix = "camel.beans.defaultErrorHandler"
 )
-
-// ErrorHandlerRefName --
-const ErrorHandlerRefName = "camel.k.errorHandler.ref"
-
-// ErrorHandlerRefDefaultName --
-const ErrorHandlerRefDefaultName = "defaultErrorHandler"
-
-// ErrorHandlerAppPropertiesPrefix --
-const ErrorHandlerAppPropertiesPrefix = "camel.beans.defaultErrorHandler"
 
 // ErrorHandlerSpec represents an unstructured object for an error handler
 type ErrorHandlerSpec struct {
@@ -45,122 +41,18 @@ type BeanProperties struct {
 	RawMessage `json:",omitempty"`
 }
 
-// +kubebuilder:object:generate=false
-
-// ErrorHandler is a generic interface that represent any type of error handler specification
-type ErrorHandler interface {
-	Type() ErrorHandlerType
-	Endpoint() *Endpoint
-	Configuration() (map[string]interface{}, error)
-}
-
-type baseErrorHandler struct {
-}
-
-// Type --
-func (e baseErrorHandler) Type() ErrorHandlerType {
-	return errorHandlerTypeBase
-}
-
-// Endpoint --
-func (e baseErrorHandler) Endpoint() *Endpoint {
-	return nil
-}
-
-// Configuration --
-func (e baseErrorHandler) Configuration() (map[string]interface{}, error) {
-	return nil, nil
-}
-
-// ErrorHandlerNone --
-type ErrorHandlerNone struct {
-	baseErrorHandler
-}
-
-// Type --
-func (e ErrorHandlerNone) Type() ErrorHandlerType {
-	return ErrorHandlerTypeNone
-}
-
-// Configuration --
-func (e ErrorHandlerNone) Configuration() (map[string]interface{}, error) {
-	return map[string]interface{}{
-		ErrorHandlerAppPropertiesPrefix: "#class:org.apache.camel.builder.NoErrorHandlerBuilder",
-		ErrorHandlerRefName:             ErrorHandlerRefDefaultName,
-	}, nil
-}
-
-// ErrorHandlerLog represent a default (log) error handler type
-type ErrorHandlerLog struct {
-	ErrorHandlerNone
-	Parameters *ErrorHandlerParameters `json:"parameters,omitempty"`
-}
-
-// Type --
-func (e ErrorHandlerLog) Type() ErrorHandlerType {
-	return ErrorHandlerTypeLog
-}
-
-// Configuration --
-func (e ErrorHandlerLog) Configuration() (map[string]interface{}, error) {
-	properties, err := e.ErrorHandlerNone.Configuration()
-	if err != nil {
-		return nil, err
-	}
-	properties[ErrorHandlerAppPropertiesPrefix] = "#class:org.apache.camel.builder.DefaultErrorHandlerBuilder"
-
-	if e.Parameters != nil {
-		var parameters map[string]interface{}
-		err := json.Unmarshal(e.Parameters.RawMessage, &parameters)
-		if err != nil {
-			return nil, err
-		}
-		for key, value := range parameters {
-			properties[ErrorHandlerAppPropertiesPrefix+"."+key] = value
-		}
-	}
-
-	return properties, nil
-}
-
-// ErrorHandlerSink represents a sink error handler type which behave like a dead letter channel
-type ErrorHandlerSink struct {
-	ErrorHandlerLog
-	DLCEndpoint *Endpoint `json:"endpoint,omitempty"`
-}
-
-// Type --
-func (e ErrorHandlerSink) Type() ErrorHandlerType {
-	return ErrorHandlerTypeSink
-}
-
-// Endpoint --
-func (e ErrorHandlerSink) Endpoint() *Endpoint {
-	return e.DLCEndpoint
-}
-
-// Configuration --
-func (e ErrorHandlerSink) Configuration() (map[string]interface{}, error) {
-	properties, err := e.ErrorHandlerLog.Configuration()
-	if err != nil {
-		return nil, err
-	}
-	properties[ErrorHandlerAppPropertiesPrefix] = "#class:org.apache.camel.builder.DeadLetterChannelBuilder"
-
-	return properties, err
-}
-
-// ErrorHandlerType --
+// ErrorHandlerType a type of error handler (ie, sink)
 type ErrorHandlerType string
 
 const (
 	errorHandlerTypeBase ErrorHandlerType = ""
-	// ErrorHandlerTypeNone --
+	// ErrorHandlerTypeNone used to ignore any error event
 	ErrorHandlerTypeNone ErrorHandlerType = "none"
-	// ErrorHandlerTypeLog --
+	// ErrorHandlerTypeLog used to log the event producing the error
 	ErrorHandlerTypeLog ErrorHandlerType = "log"
-	// ErrorHandlerTypeSink --
+	// ErrorHandlerTypeSink used to send the event to a further sink (for future processing). This was previously known as dead-letter-channel.
 	ErrorHandlerTypeSink ErrorHandlerType = "sink"
-	// ErrorHandlerTypeDeadLetterChannel Deprecated in favour of ErrorHandlerTypeSink
+	// ErrorHandlerTypeDeadLetterChannel used to send the event to a dead letter channel
+	// Deprecated in favour of ErrorHandlerTypeSink
 	ErrorHandlerTypeDeadLetterChannel ErrorHandlerType = "dead-letter-channel"
 )
