@@ -1,0 +1,2965 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: camel.apache.org/v1
+kind: CamelCatalog
+metadata:
+  name: camel-catalog-1.12.0
+  labels:
+    app: camel-k
+    camel.apache.org/catalog.loader.version: 3.14.1
+    camel.apache.org/catalog.version: 3.14.1
+    camel.apache.org/runtime.version: 1.12.0
+spec:
+  runtime:
+    version: 1.12.0
+    provider: quarkus
+    applicationClass: io.quarkus.bootstrap.runner.QuarkusEntryPoint
+    metadata:
+      camel-quarkus.version: 2.7.0
+      camel.version: 3.14.1
+      quarkus.version: 2.7.0.Final
+    dependencies:
+    - groupId: org.apache.camel.k
+      artifactId: camel-k-runtime
+    capabilities:
+      circuit-breaker:
+        dependencies:
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-microprofile-fault-tolerance
+      cron:
+        dependencies:
+        - groupId: org.apache.camel.k
+          artifactId: camel-k-cron
+      health:
+        dependencies:
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-microprofile-health
+      master:
+        dependencies:
+        - groupId: org.apache.camel.k
+          artifactId: camel-k-master
+      platform-http:
+        dependencies:
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-platform-http
+      rest:
+        dependencies:
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-platform-http
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-rest
+      tracing:
+        dependencies:
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-opentracing
+  artifacts:
+    camel-k-cron:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-cron
+    camel-k-knative:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-knative
+      schemes:
+      - id: knative
+        http: true
+        passive: false
+        producer:
+          dependencies:
+          - groupId: org.apache.camel.k
+            artifactId: camel-k-knative-producer
+        consumer:
+          dependencies:
+          - groupId: org.apache.camel.k
+            artifactId: camel-k-knative-consumer
+    camel-k-master:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-master
+    camel-quarkus-activemq:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-activemq
+      schemes:
+      - id: activemq
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.activemq.ActiveMQComponent
+    camel-quarkus-ahc:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-ahc
+      schemes:
+      - id: ahc
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ahc.AhcComponent
+    camel-quarkus-ahc-ws:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-ahc-ws
+      schemes:
+      - id: ahc-ws
+        http: true
+        passive: false
+      - id: ahc-wss
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ahc.ws.WsComponent
+    camel-quarkus-amqp:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-amqp
+      schemes:
+      - id: amqp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.amqp.AMQPComponent
+    camel-quarkus-arangodb:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-arangodb
+      schemes:
+      - id: arangodb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.arangodb.ArangoDbComponent
+    camel-quarkus-as2:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-as2
+      schemes:
+      - id: as2
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.as2.AS2Component
+    camel-quarkus-asn1:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-asn1
+      dataformats:
+      - asn1
+      javaTypes:
+      - org.apache.camel.dataformat.asn1.ASN1DataFormat
+    camel-quarkus-asterisk:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-asterisk
+      schemes:
+      - id: asterisk
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.asterisk.AsteriskComponent
+    camel-quarkus-atlasmap:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-atlasmap
+      schemes:
+      - id: atlasmap
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.atlasmap.AtlasMapComponent
+    camel-quarkus-atmos:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-atmos
+      schemes:
+      - id: atmos
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.atmos.AtmosComponent
+    camel-quarkus-atom:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-atom
+      schemes:
+      - id: atom
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.atom.AtomComponent
+    camel-quarkus-atomix:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-atomix
+      schemes:
+      - id: atomix-map
+        http: false
+        passive: false
+      - id: atomix-messaging
+        http: false
+        passive: false
+      - id: atomix-multimap
+        http: false
+        passive: false
+      - id: atomix-queue
+        http: false
+        passive: false
+      - id: atomix-set
+        http: false
+        passive: false
+      - id: atomix-value
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.atomix.client.map.AtomixMapComponent
+      - org.apache.camel.component.atomix.client.messaging.AtomixMessagingComponent
+      - org.apache.camel.component.atomix.client.multimap.AtomixMultiMapComponent
+      - org.apache.camel.component.atomix.client.queue.AtomixQueueComponent
+      - org.apache.camel.component.atomix.client.set.AtomixSetComponent
+      - org.apache.camel.component.atomix.client.value.AtomixValueComponent
+    camel-quarkus-avro:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-avro
+      dataformats:
+      - avro
+      javaTypes:
+      - org.apache.camel.dataformat.avro.AvroDataFormat
+    camel-quarkus-avro-rpc:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-avro-rpc
+      schemes:
+      - id: avro
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.avro.AvroComponent
+    camel-quarkus-aws-secrets-manager:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-secrets-manager
+      schemes:
+      - id: aws-secrets-manager
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws.secretsmanager.SecretsManagerComponent
+    camel-quarkus-aws2-athena:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-athena
+      schemes:
+      - id: aws2-athena
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.athena.Athena2Component
+    camel-quarkus-aws2-cw:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-cw
+      schemes:
+      - id: aws2-cw
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.cw.Cw2Component
+    camel-quarkus-aws2-ddb:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-ddb
+      schemes:
+      - id: aws2-ddb
+        http: false
+        passive: false
+      - id: aws2-ddbstream
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.ddb.Ddb2Component
+      - org.apache.camel.component.aws2.ddbstream.Ddb2StreamComponent
+    camel-quarkus-aws2-ec2:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-ec2
+      schemes:
+      - id: aws2-ec2
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.ec2.AWS2EC2Component
+    camel-quarkus-aws2-ecs:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-ecs
+      schemes:
+      - id: aws2-ecs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.ecs.ECS2Component
+    camel-quarkus-aws2-eks:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-eks
+      schemes:
+      - id: aws2-eks
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.eks.EKS2Component
+    camel-quarkus-aws2-eventbridge:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-eventbridge
+      schemes:
+      - id: aws2-eventbridge
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.eventbridge.EventbridgeComponent
+    camel-quarkus-aws2-iam:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-iam
+      schemes:
+      - id: aws2-iam
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.iam.IAM2Component
+    camel-quarkus-aws2-kinesis:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-kinesis
+      schemes:
+      - id: aws2-kinesis
+        http: false
+        passive: false
+      - id: aws2-kinesis-firehose
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.firehose.KinesisFirehose2Component
+      - org.apache.camel.component.aws2.kinesis.Kinesis2Component
+    camel-quarkus-aws2-kms:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-kms
+      schemes:
+      - id: aws2-kms
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.kms.KMS2Component
+    camel-quarkus-aws2-lambda:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-lambda
+      schemes:
+      - id: aws2-lambda
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.lambda.Lambda2Component
+    camel-quarkus-aws2-mq:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-mq
+      schemes:
+      - id: aws2-mq
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.mq.MQ2Component
+    camel-quarkus-aws2-msk:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-msk
+      schemes:
+      - id: aws2-msk
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.msk.MSK2Component
+    camel-quarkus-aws2-s3:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-s3
+      schemes:
+      - id: aws2-s3
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.s3.AWS2S3Component
+    camel-quarkus-aws2-ses:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-ses
+      schemes:
+      - id: aws2-ses
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.ses.Ses2Component
+    camel-quarkus-aws2-sns:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-sns
+      schemes:
+      - id: aws2-sns
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.sns.Sns2Component
+    camel-quarkus-aws2-sqs:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-sqs
+      schemes:
+      - id: aws2-sqs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.sqs.Sqs2Component
+    camel-quarkus-aws2-sts:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-sts
+      schemes:
+      - id: aws2-sts
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.sts.STS2Component
+    camel-quarkus-aws2-translate:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws2-translate
+      schemes:
+      - id: aws2-translate
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.translate.Translate2Component
+    camel-quarkus-azure-cosmosdb:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-azure-cosmosdb
+      schemes:
+      - id: azure-cosmosdb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.azure.cosmosdb.CosmosDbComponent
+    camel-quarkus-azure-eventhubs:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-azure-eventhubs
+      schemes:
+      - id: azure-eventhubs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.azure.eventhubs.EventHubsComponent
+    camel-quarkus-azure-storage-blob:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-azure-storage-blob
+      schemes:
+      - id: azure-storage-blob
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.azure.storage.blob.BlobComponent
+    camel-quarkus-azure-storage-datalake:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-azure-storage-datalake
+      schemes:
+      - id: azure-storage-datalake
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.azure.storage.datalake.DataLakeComponent
+    camel-quarkus-azure-storage-queue:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-azure-storage-queue
+      schemes:
+      - id: azure-storage-queue
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.azure.storage.queue.QueueComponent
+    camel-quarkus-barcode:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-barcode
+      dataformats:
+      - barcode
+      javaTypes:
+      - org.apache.camel.dataformat.barcode.BarcodeDataFormat
+    camel-quarkus-base64:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-base64
+      dataformats:
+      - base64
+      javaTypes:
+      - org.apache.camel.dataformat.base64.Base64DataFormat
+    camel-quarkus-bean:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-bean
+      schemes:
+      - id: bean
+        http: false
+        passive: true
+      - id: class
+        http: false
+        passive: true
+      languages:
+      - bean
+      javaTypes:
+      - org.apache.camel.component.bean.BeanComponent
+      - org.apache.camel.component.beanclass.ClassComponent
+      - org.apache.camel.language.bean.BeanLanguage
+    camel-quarkus-bean-validator:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-bean-validator
+      schemes:
+      - id: bean-validator
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.bean.validator.BeanValidatorComponent
+    camel-quarkus-beanio:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-beanio
+      dataformats:
+      - beanio
+      javaTypes:
+      - org.apache.camel.dataformat.beanio.BeanIODataFormat
+    camel-quarkus-beanstalk:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-beanstalk
+      schemes:
+      - id: beanstalk
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.beanstalk.BeanstalkComponent
+    camel-quarkus-bindy:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-bindy
+      dataformats:
+      - bindy-csv
+      - bindy-fixed
+      - bindy-kvp
+      javaTypes:
+      - org.apache.camel.dataformat.bindy.csv.BindyCsvDataFormat
+      - org.apache.camel.dataformat.bindy.fixed.BindyFixedLengthDataFormat
+      - org.apache.camel.dataformat.bindy.kvp.BindyKeyValuePairDataFormat
+    camel-quarkus-bonita:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-bonita
+      schemes:
+      - id: bonita
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.bonita.BonitaComponent
+    camel-quarkus-box:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-box
+      schemes:
+      - id: box
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.box.BoxComponent
+    camel-quarkus-braintree:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-braintree
+      schemes:
+      - id: braintree
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.braintree.BraintreeComponent
+    camel-quarkus-browse:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-browse
+      schemes:
+      - id: browse
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.browse.BrowseComponent
+    camel-quarkus-caffeine:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-caffeine
+      schemes:
+      - id: caffeine-cache
+        http: false
+        passive: false
+      - id: caffeine-loadcache
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.caffeine.cache.CaffeineCacheComponent
+      - org.apache.camel.component.caffeine.load.CaffeineLoadCacheComponent
+    camel-quarkus-cassandraql:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-cassandraql
+      schemes:
+      - id: cql
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.cassandra.CassandraComponent
+    camel-quarkus-cbor:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-cbor
+      dataformats:
+      - cbor
+      javaTypes:
+      - org.apache.camel.component.cbor.CBORDataFormat
+    camel-quarkus-chatscript:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-chatscript
+      schemes:
+      - id: chatscript
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.chatscript.ChatScriptComponent
+    camel-quarkus-chunk:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-chunk
+      schemes:
+      - id: chunk
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.chunk.ChunkComponent
+    camel-quarkus-cm-sms:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-cm-sms
+      schemes:
+      - id: cm-sms
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.cm.CMComponent
+    camel-quarkus-cmis:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-cmis
+      schemes:
+      - id: cmis
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.cmis.CMISComponent
+    camel-quarkus-coap:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-coap
+      schemes:
+      - id: coap
+        http: false
+        passive: false
+      - id: coap+tcp
+        http: false
+        passive: false
+      - id: coaps
+        http: false
+        passive: false
+      - id: coaps+tcp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.coap.CoAPComponent
+    camel-quarkus-cometd:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-cometd
+      schemes:
+      - id: cometd
+        http: false
+        passive: false
+      - id: cometds
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.cometd.CometdComponent
+    camel-quarkus-consul:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-consul
+      schemes:
+      - id: consul
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.consul.ConsulComponent
+    camel-quarkus-controlbus:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-controlbus
+      schemes:
+      - id: controlbus
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.controlbus.ControlBusComponent
+    camel-quarkus-corda:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-corda
+      schemes:
+      - id: corda
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.corda.CordaComponent
+    camel-quarkus-core:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-core
+      languages:
+      - constant
+      - exchangeProperty
+      - file
+      - header
+      - ref
+      - simple
+      - tokenize
+      javaTypes:
+      - org.apache.camel.language.constant.ConstantLanguage
+      - org.apache.camel.language.header.HeaderLanguage
+      - org.apache.camel.language.property.ExchangePropertyLanguage
+      - org.apache.camel.language.ref.RefLanguage
+      - org.apache.camel.language.simple.FileLanguage
+      - org.apache.camel.language.simple.SimpleLanguage
+      - org.apache.camel.language.tokenizer.TokenizeLanguage
+    camel-quarkus-couchbase:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-couchbase
+      schemes:
+      - id: couchbase
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.couchbase.CouchbaseComponent
+    camel-quarkus-couchdb:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-couchdb
+      schemes:
+      - id: couchdb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.couchdb.CouchDbComponent
+    camel-quarkus-cron:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-cron
+      schemes:
+      - id: cron
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.cron.CronComponent
+    camel-quarkus-crypto:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-crypto
+      schemes:
+      - id: crypto
+        http: false
+        passive: false
+      dataformats:
+      - crypto
+      - pgp
+      javaTypes:
+      - org.apache.camel.component.crypto.DigitalSignatureComponent
+      - org.apache.camel.converter.crypto.CryptoDataFormat
+      - org.apache.camel.converter.crypto.PGPDataFormat
+    camel-quarkus-csimple:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-csimple
+      languages:
+      - csimple
+      javaTypes:
+      - org.apache.camel.language.csimple.CSimpleLanguage
+    camel-quarkus-csv:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-csv
+      dataformats:
+      - csv
+      javaTypes:
+      - org.apache.camel.dataformat.csv.CsvDataFormat
+    camel-quarkus-dataformat:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-dataformat
+      schemes:
+      - id: dataformat
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.dataformat.DataFormatComponent
+    camel-quarkus-debezium-mongodb:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-debezium-mongodb
+      schemes:
+      - id: debezium-mongodb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.debezium.DebeziumMongodbComponent
+    camel-quarkus-debezium-mysql:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-debezium-mysql
+      schemes:
+      - id: debezium-mysql
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.debezium.DebeziumMySqlComponent
+    camel-quarkus-debezium-postgres:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-debezium-postgres
+      schemes:
+      - id: debezium-postgres
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.debezium.DebeziumPostgresComponent
+    camel-quarkus-debezium-sqlserver:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-debezium-sqlserver
+      schemes:
+      - id: debezium-sqlserver
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.debezium.DebeziumSqlserverComponent
+    camel-quarkus-digitalocean:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-digitalocean
+      schemes:
+      - id: digitalocean
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.digitalocean.DigitalOceanComponent
+    camel-quarkus-direct:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-direct
+      schemes:
+      - id: direct
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.direct.DirectComponent
+    camel-quarkus-disruptor:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-disruptor
+      schemes:
+      - id: disruptor
+        http: false
+        passive: false
+      - id: disruptor-vm
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.disruptor.DisruptorComponent
+      - org.apache.camel.component.disruptor.vm.DisruptorVmComponent
+    camel-quarkus-djl:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-djl
+      schemes:
+      - id: djl
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.djl.DJLComponent
+    camel-quarkus-dns:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-dns
+      schemes:
+      - id: dns
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.dns.DnsComponent
+    camel-quarkus-dozer:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-dozer
+      schemes:
+      - id: dozer
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.dozer.DozerComponent
+    camel-quarkus-drill:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-drill
+      schemes:
+      - id: drill
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.drill.DrillComponent
+    camel-quarkus-dropbox:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-dropbox
+      schemes:
+      - id: dropbox
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.dropbox.DropboxComponent
+    camel-quarkus-ehcache:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-ehcache
+      schemes:
+      - id: ehcache
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ehcache.EhcacheComponent
+    camel-quarkus-elasticsearch-rest:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-elasticsearch-rest
+      schemes:
+      - id: elasticsearch-rest
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.elasticsearch.ElasticsearchComponent
+    camel-quarkus-elsql:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-elsql
+      schemes:
+      - id: elsql
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.elsql.ElsqlComponent
+    camel-quarkus-etcd:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-etcd
+      schemes:
+      - id: etcd-keys
+        http: false
+        passive: false
+      - id: etcd-stats
+        http: false
+        passive: false
+      - id: etcd-watch
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.etcd.EtcdKeysComponent
+      - org.apache.camel.component.etcd.EtcdStatsComponent
+      - org.apache.camel.component.etcd.EtcdWatchComponent
+    camel-quarkus-exec:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-exec
+      schemes:
+      - id: exec
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.exec.ExecComponent
+    camel-quarkus-facebook:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-facebook
+      schemes:
+      - id: facebook
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.facebook.FacebookComponent
+    camel-quarkus-fastjson:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-fastjson
+      dataformats:
+      - json-fastjson
+      javaTypes:
+      - org.apache.camel.component.fastjson.FastjsonDataFormat
+    camel-quarkus-fhir:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-fhir
+      schemes:
+      - id: fhir
+        http: false
+        passive: false
+      dataformats:
+      - fhirJson
+      - fhirXml
+      javaTypes:
+      - org.apache.camel.component.fhir.FhirComponent
+      - org.apache.camel.component.fhir.FhirJsonDataFormat
+      - org.apache.camel.component.fhir.FhirXmlDataFormat
+    camel-quarkus-file:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-file
+      schemes:
+      - id: file
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.file.FileComponent
+    camel-quarkus-file-watch:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-file-watch
+      schemes:
+      - id: file-watch
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.file.watch.FileWatchComponent
+    camel-quarkus-flatpack:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-flatpack
+      schemes:
+      - id: flatpack
+        http: false
+        passive: false
+      dataformats:
+      - flatpack
+      javaTypes:
+      - org.apache.camel.component.flatpack.FlatpackComponent
+      - org.apache.camel.dataformat.flatpack.FlatpackDataFormat
+    camel-quarkus-flink:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-flink
+      schemes:
+      - id: flink
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.flink.FlinkComponent
+    camel-quarkus-fop:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-fop
+      schemes:
+      - id: fop
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.fop.FopComponent
+    camel-quarkus-freemarker:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-freemarker
+      schemes:
+      - id: freemarker
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.freemarker.FreemarkerComponent
+    camel-quarkus-ftp:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-ftp
+      schemes:
+      - id: ftp
+        http: false
+        passive: false
+      - id: ftps
+        http: false
+        passive: false
+      - id: sftp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.file.remote.FtpComponent
+      - org.apache.camel.component.file.remote.FtpsComponent
+      - org.apache.camel.component.file.remote.SftpComponent
+    camel-quarkus-ganglia:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-ganglia
+      schemes:
+      - id: ganglia
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ganglia.GangliaComponent
+    camel-quarkus-geocoder:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-geocoder
+      schemes:
+      - id: geocoder
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.geocoder.GeoCoderComponent
+    camel-quarkus-git:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-git
+      schemes:
+      - id: git
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.git.GitComponent
+    camel-quarkus-github:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-github
+      schemes:
+      - id: github
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.github.GitHubComponent
+    camel-quarkus-google-bigquery:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-google-bigquery
+      schemes:
+      - id: google-bigquery
+        http: false
+        passive: false
+      - id: google-bigquery-sql
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.google.bigquery.GoogleBigQueryComponent
+      - org.apache.camel.component.google.bigquery.sql.GoogleBigQuerySQLComponent
+    camel-quarkus-google-calendar:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-google-calendar
+      schemes:
+      - id: google-calendar
+        http: false
+        passive: false
+      - id: google-calendar-stream
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.google.calendar.GoogleCalendarComponent
+      - org.apache.camel.component.google.calendar.stream.GoogleCalendarStreamComponent
+    camel-quarkus-google-drive:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-google-drive
+      schemes:
+      - id: google-drive
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.google.drive.GoogleDriveComponent
+    camel-quarkus-google-functions:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-google-functions
+      schemes:
+      - id: google-functions
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.google.functions.GoogleCloudFunctionsComponent
+    camel-quarkus-google-mail:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-google-mail
+      schemes:
+      - id: google-mail
+        http: false
+        passive: false
+      - id: google-mail-stream
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.google.mail.GoogleMailComponent
+      - org.apache.camel.component.google.mail.stream.GoogleMailStreamComponent
+    camel-quarkus-google-pubsub:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-google-pubsub
+      schemes:
+      - id: google-pubsub
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.google.pubsub.GooglePubsubComponent
+    camel-quarkus-google-sheets:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-google-sheets
+      schemes:
+      - id: google-sheets
+        http: false
+        passive: false
+      - id: google-sheets-stream
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.google.sheets.GoogleSheetsComponent
+      - org.apache.camel.component.google.sheets.stream.GoogleSheetsStreamComponent
+    camel-quarkus-google-storage:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-google-storage
+      schemes:
+      - id: google-storage
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.google.storage.GoogleCloudStorageComponent
+    camel-quarkus-graphql:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-graphql
+      schemes:
+      - id: graphql
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.graphql.GraphqlComponent
+    camel-quarkus-grok:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-grok
+      dataformats:
+      - grok
+      javaTypes:
+      - org.apache.camel.component.grok.GrokDataFormat
+    camel-quarkus-groovy:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-groovy
+      languages:
+      - groovy
+      javaTypes:
+      - org.apache.camel.language.groovy.GroovyLanguage
+    camel-quarkus-grpc:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-grpc
+      schemes:
+      - id: grpc
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.grpc.GrpcComponent
+    camel-quarkus-gson:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-gson
+      dataformats:
+      - json-gson
+      javaTypes:
+      - org.apache.camel.component.gson.GsonDataFormat
+    camel-quarkus-guava-eventbus:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-guava-eventbus
+      schemes:
+      - id: guava-eventbus
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.guava.eventbus.GuavaEventBusComponent
+    camel-quarkus-hazelcast:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-hazelcast
+      schemes:
+      - id: hazelcast-atomicvalue
+        http: false
+        passive: false
+      - id: hazelcast-instance
+        http: false
+        passive: false
+      - id: hazelcast-list
+        http: false
+        passive: false
+      - id: hazelcast-map
+        http: false
+        passive: false
+      - id: hazelcast-multimap
+        http: false
+        passive: false
+      - id: hazelcast-queue
+        http: false
+        passive: false
+      - id: hazelcast-replicatedmap
+        http: false
+        passive: false
+      - id: hazelcast-ringbuffer
+        http: false
+        passive: false
+      - id: hazelcast-seda
+        http: false
+        passive: false
+      - id: hazelcast-set
+        http: false
+        passive: false
+      - id: hazelcast-topic
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.hazelcast.atomicnumber.HazelcastAtomicnumberComponent
+      - org.apache.camel.component.hazelcast.instance.HazelcastInstanceComponent
+      - org.apache.camel.component.hazelcast.list.HazelcastListComponent
+      - org.apache.camel.component.hazelcast.map.HazelcastMapComponent
+      - org.apache.camel.component.hazelcast.multimap.HazelcastMultimapComponent
+      - org.apache.camel.component.hazelcast.queue.HazelcastQueueComponent
+      - org.apache.camel.component.hazelcast.replicatedmap.HazelcastReplicatedmapComponent
+      - org.apache.camel.component.hazelcast.ringbuffer.HazelcastRingbufferComponent
+      - org.apache.camel.component.hazelcast.seda.HazelcastSedaComponent
+      - org.apache.camel.component.hazelcast.set.HazelcastSetComponent
+      - org.apache.camel.component.hazelcast.topic.HazelcastTopicComponent
+    camel-quarkus-hbase:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-hbase
+      schemes:
+      - id: hbase
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.hbase.HBaseComponent
+    camel-quarkus-hdfs:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-hdfs
+      schemes:
+      - id: hdfs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.hdfs.HdfsComponent
+    camel-quarkus-hl7:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-hl7
+      languages:
+      - hl7terser
+      dataformats:
+      - hl7
+      javaTypes:
+      - org.apache.camel.component.hl7.HL7DataFormat
+      - org.apache.camel.component.hl7.Hl7TerserLanguage
+    camel-quarkus-http:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-http
+      schemes:
+      - id: http
+        http: false
+        passive: false
+      - id: https
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.http.HttpComponent
+    camel-quarkus-huaweicloud-smn:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-huaweicloud-smn
+      schemes:
+      - id: hwcloud-smn
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.huaweicloud.smn.SimpleNotificationComponent
+    camel-quarkus-ical:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-ical
+      dataformats:
+      - ical
+      javaTypes:
+      - org.apache.camel.component.ical.ICalDataFormat
+    camel-quarkus-iec60870:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-iec60870
+      schemes:
+      - id: iec60870-client
+        http: false
+        passive: false
+      - id: iec60870-server
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.iec60870.client.ClientComponent
+      - org.apache.camel.component.iec60870.server.ServerComponent
+    camel-quarkus-ignite:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-ignite
+      schemes:
+      - id: ignite-cache
+        http: false
+        passive: false
+      - id: ignite-compute
+        http: false
+        passive: false
+      - id: ignite-events
+        http: false
+        passive: false
+      - id: ignite-idgen
+        http: false
+        passive: false
+      - id: ignite-messaging
+        http: false
+        passive: false
+      - id: ignite-queue
+        http: false
+        passive: false
+      - id: ignite-set
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ignite.cache.IgniteCacheComponent
+      - org.apache.camel.component.ignite.compute.IgniteComputeComponent
+      - org.apache.camel.component.ignite.events.IgniteEventsComponent
+      - org.apache.camel.component.ignite.idgen.IgniteIdGenComponent
+      - org.apache.camel.component.ignite.messaging.IgniteMessagingComponent
+      - org.apache.camel.component.ignite.queue.IgniteQueueComponent
+      - org.apache.camel.component.ignite.set.IgniteSetComponent
+    camel-quarkus-infinispan:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-infinispan
+      schemes:
+      - id: infinispan
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.infinispan.remote.InfinispanRemoteComponent
+    camel-quarkus-influxdb:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-influxdb
+      schemes:
+      - id: influxdb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.influxdb.InfluxDbComponent
+    camel-quarkus-iota:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-iota
+      schemes:
+      - id: iota
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.iota.IOTAComponent
+    camel-quarkus-ipfs:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-ipfs
+      schemes:
+      - id: ipfs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ipfs.IPFSComponent
+    camel-quarkus-irc:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-irc
+      schemes:
+      - id: irc
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.irc.IrcComponent
+    camel-quarkus-jackson:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jackson
+      dataformats:
+      - json-jackson
+      javaTypes:
+      - org.apache.camel.component.jackson.JacksonDataFormat
+    camel-quarkus-jackson-avro:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jackson-avro
+      dataformats:
+      - avro-jackson
+      javaTypes:
+      - org.apache.camel.component.jackson.avro.JacksonAvroDataFormat
+    camel-quarkus-jackson-protobuf:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jackson-protobuf
+      dataformats:
+      - protobuf-jackson
+      javaTypes:
+      - org.apache.camel.component.jackson.protobuf.JacksonProtobufDataFormat
+    camel-quarkus-jacksonxml:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jacksonxml
+      dataformats:
+      - jacksonxml
+      javaTypes:
+      - org.apache.camel.component.jacksonxml.JacksonXMLDataFormat
+    camel-quarkus-jaxb:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jaxb
+      dataformats:
+      - jaxb
+      javaTypes:
+      - org.apache.camel.converter.jaxb.JaxbDataFormat
+    camel-quarkus-jbpm:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jbpm
+      schemes:
+      - id: jbpm
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jbpm.JBPMComponent
+    camel-quarkus-jcache:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jcache
+      schemes:
+      - id: jcache
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jcache.JCacheComponent
+    camel-quarkus-jclouds:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jclouds
+      schemes:
+      - id: jclouds
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jclouds.JcloudsComponent
+    camel-quarkus-jcr:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jcr
+      schemes:
+      - id: jcr
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jcr.JcrComponent
+    camel-quarkus-jdbc:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jdbc
+      schemes:
+      - id: jdbc
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jdbc.JdbcComponent
+    camel-quarkus-jgroups:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jgroups
+      schemes:
+      - id: jgroups
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jgroups.JGroupsComponent
+    camel-quarkus-jgroups-raft:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jgroups-raft
+      schemes:
+      - id: jgroups-raft
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jgroups.raft.JGroupsRaftComponent
+    camel-quarkus-jing:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jing
+      schemes:
+      - id: jing
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.validator.jing.JingComponent
+    camel-quarkus-jira:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jira
+      schemes:
+      - id: jira
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jira.JiraComponent
+    camel-quarkus-jms:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jms
+      schemes:
+      - id: jms
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jms.JmsComponent
+    camel-quarkus-johnzon:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-johnzon
+      dataformats:
+      - json-johnzon
+      javaTypes:
+      - org.apache.camel.component.johnzon.JohnzonDataFormat
+    camel-quarkus-jolt:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jolt
+      schemes:
+      - id: jolt
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jolt.JoltComponent
+    camel-quarkus-jooq:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jooq
+      schemes:
+      - id: jooq
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jooq.JooqComponent
+    camel-quarkus-joor:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-joor
+      languages:
+      - joor
+      javaTypes:
+      - org.apache.camel.language.joor.JoorLanguage
+    camel-quarkus-jpa:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jpa
+      schemes:
+      - id: jpa
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jpa.JpaComponent
+    camel-quarkus-jsch:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jsch
+      schemes:
+      - id: scp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.scp.ScpComponent
+    camel-quarkus-jslt:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jslt
+      schemes:
+      - id: jslt
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jslt.JsltComponent
+    camel-quarkus-json-patch:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-json-patch
+      schemes:
+      - id: json-patch
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jsonpatch.JsonPatchComponent
+    camel-quarkus-json-validator:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-json-validator
+      schemes:
+      - id: json-validator
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jsonvalidator.JsonValidatorComponent
+    camel-quarkus-jsonapi:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jsonapi
+      dataformats:
+      - jsonApi
+      javaTypes:
+      - org.apache.camel.component.jsonapi.JsonApiDataFormat
+    camel-quarkus-jsonata:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jsonata
+      schemes:
+      - id: jsonata
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jsonata.JsonataComponent
+    camel-quarkus-jsonb:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jsonb
+      dataformats:
+      - json-jsonb
+      javaTypes:
+      - org.apache.camel.component.jsonb.JsonbDataFormat
+    camel-quarkus-jsonpath:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jsonpath
+      languages:
+      - jsonpath
+      javaTypes:
+      - org.apache.camel.jsonpath.JsonPathLanguage
+    camel-quarkus-jt400:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jt400
+      schemes:
+      - id: jt400
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.jt400.Jt400Component
+    camel-quarkus-kafka:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-kafka
+      schemes:
+      - id: kafka
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.kafka.KafkaComponent
+    camel-quarkus-kamelet:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-kamelet
+      schemes:
+      - id: kamelet
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.kamelet.KameletComponent
+    camel-quarkus-kamelet-reify:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-kamelet-reify
+      schemes:
+      - id: kamelet-reify
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.kameletreify.KameletReifyComponent
+    camel-quarkus-kubernetes:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-kubernetes
+      schemes:
+      - id: kubernetes-config-maps
+        http: false
+        passive: false
+      - id: kubernetes-custom-resources
+        http: false
+        passive: false
+      - id: kubernetes-deployments
+        http: false
+        passive: false
+      - id: kubernetes-hpa
+        http: false
+        passive: false
+      - id: kubernetes-job
+        http: false
+        passive: false
+      - id: kubernetes-namespaces
+        http: false
+        passive: false
+      - id: kubernetes-nodes
+        http: false
+        passive: false
+      - id: kubernetes-persistent-volumes
+        http: false
+        passive: false
+      - id: kubernetes-persistent-volumes-claims
+        http: false
+        passive: false
+      - id: kubernetes-pods
+        http: false
+        passive: false
+      - id: kubernetes-replication-controllers
+        http: false
+        passive: false
+      - id: kubernetes-resources-quota
+        http: false
+        passive: false
+      - id: kubernetes-secrets
+        http: false
+        passive: false
+      - id: kubernetes-service-accounts
+        http: false
+        passive: false
+      - id: kubernetes-services
+        http: false
+        passive: false
+      - id: openshift-build-configs
+        http: false
+        passive: false
+      - id: openshift-builds
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.kubernetes.config_maps.KubernetesConfigMapsComponent
+      - org.apache.camel.component.kubernetes.customresources.KubernetesCustomResourcesComponent
+      - org.apache.camel.component.kubernetes.deployments.KubernetesDeploymentsComponent
+      - org.apache.camel.component.kubernetes.hpa.KubernetesHPAComponent
+      - org.apache.camel.component.kubernetes.job.KubernetesJobComponent
+      - org.apache.camel.component.kubernetes.namespaces.KubernetesNamespacesComponent
+      - org.apache.camel.component.kubernetes.nodes.KubernetesNodesComponent
+      - org.apache.camel.component.kubernetes.persistent_volumes.KubernetesPersistentVolumesComponent
+      - org.apache.camel.component.kubernetes.persistent_volumes_claims.KubernetesPersistentVolumesClaimsComponent
+      - org.apache.camel.component.kubernetes.pods.KubernetesPodsComponent
+      - org.apache.camel.component.kubernetes.replication_controllers.KubernetesReplicationControllersComponent
+      - org.apache.camel.component.kubernetes.resources_quota.KubernetesResourcesQuotaComponent
+      - org.apache.camel.component.kubernetes.secrets.KubernetesSecretsComponent
+      - org.apache.camel.component.kubernetes.service_accounts.KubernetesServiceAccountsComponent
+      - org.apache.camel.component.kubernetes.services.KubernetesServicesComponent
+      - org.apache.camel.component.openshift.build_configs.OpenshiftBuildConfigsComponent
+      - org.apache.camel.component.openshift.builds.OpenshiftBuildsComponent
+    camel-quarkus-kudu:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-kudu
+      schemes:
+      - id: kudu
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.kudu.KuduComponent
+    camel-quarkus-language:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-language
+      schemes:
+      - id: language
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.language.LanguageComponent
+    camel-quarkus-ldap:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-ldap
+      schemes:
+      - id: ldap
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ldap.LdapComponent
+    camel-quarkus-ldif:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-ldif
+      schemes:
+      - id: ldif
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ldif.LdifComponent
+    camel-quarkus-log:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-log
+      schemes:
+      - id: log
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.log.LogComponent
+    camel-quarkus-lucene:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-lucene
+      schemes:
+      - id: lucene
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.lucene.LuceneComponent
+    camel-quarkus-lumberjack:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-lumberjack
+      schemes:
+      - id: lumberjack
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.lumberjack.LumberjackComponent
+    camel-quarkus-lzf:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-lzf
+      dataformats:
+      - lzf
+      javaTypes:
+      - org.apache.camel.dataformat.lzf.LZFDataFormat
+    camel-quarkus-mail:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mail
+      schemes:
+      - id: imap
+        http: false
+        passive: false
+      - id: imaps
+        http: false
+        passive: false
+      - id: pop3
+        http: false
+        passive: false
+      - id: pop3s
+        http: false
+        passive: false
+      - id: smtp
+        http: false
+        passive: false
+      - id: smtps
+        http: false
+        passive: false
+      dataformats:
+      - mime-multipart
+      javaTypes:
+      - org.apache.camel.component.mail.MailComponent
+      - org.apache.camel.dataformat.mime.multipart.MimeMultipartDataFormat
+    camel-quarkus-master:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-master
+      schemes:
+      - id: master
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.master.MasterComponent
+    camel-quarkus-micrometer:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-micrometer
+      schemes:
+      - id: micrometer
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.micrometer.MicrometerComponent
+    camel-quarkus-microprofile-metrics:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-microprofile-metrics
+      schemes:
+      - id: microprofile-metrics
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.microprofile.metrics.MicroProfileMetricsComponent
+    camel-quarkus-milo:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-milo
+      schemes:
+      - id: milo-client
+        http: false
+        passive: false
+      - id: milo-server
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.milo.client.MiloClientComponent
+      - org.apache.camel.component.milo.server.MiloServerComponent
+    camel-quarkus-minio:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-minio
+      schemes:
+      - id: minio
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.minio.MinioComponent
+    camel-quarkus-mllp:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mllp
+      schemes:
+      - id: mllp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.mllp.MllpComponent
+    camel-quarkus-mock:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mock
+      schemes:
+      - id: mock
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.mock.MockComponent
+    camel-quarkus-mongodb:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mongodb
+      schemes:
+      - id: mongodb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.mongodb.MongoDbComponent
+    camel-quarkus-mongodb-gridfs:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mongodb-gridfs
+      schemes:
+      - id: mongodb-gridfs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.mongodb.gridfs.GridFsComponent
+    camel-quarkus-msv:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-msv
+      schemes:
+      - id: msv
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.validator.msv.MsvComponent
+    camel-quarkus-mustache:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mustache
+      schemes:
+      - id: mustache
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.mustache.MustacheComponent
+    camel-quarkus-mvel:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mvel
+      schemes:
+      - id: mvel
+        http: false
+        passive: false
+      languages:
+      - mvel
+      javaTypes:
+      - org.apache.camel.component.mvel.MvelComponent
+      - org.apache.camel.language.mvel.MvelLanguage
+    camel-quarkus-mybatis:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mybatis
+      schemes:
+      - id: mybatis
+        http: false
+        passive: false
+      - id: mybatis-bean
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.mybatis.MyBatisBeanComponent
+      - org.apache.camel.component.mybatis.MyBatisComponent
+    camel-quarkus-nagios:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-nagios
+      schemes:
+      - id: nagios
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.nagios.NagiosComponent
+    camel-quarkus-nats:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-nats
+      schemes:
+      - id: nats
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.nats.NatsComponent
+    camel-quarkus-netty:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-netty
+      schemes:
+      - id: netty
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.netty.NettyComponent
+    camel-quarkus-netty-http:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-netty-http
+      schemes:
+      - id: netty-http
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.netty.http.NettyHttpComponent
+    camel-quarkus-nitrite:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-nitrite
+      schemes:
+      - id: nitrite
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.nitrite.NitriteComponent
+    camel-quarkus-nsq:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-nsq
+      schemes:
+      - id: nsq
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.nsq.NsqComponent
+    camel-quarkus-oaipmh:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-oaipmh
+      schemes:
+      - id: oaipmh
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.oaipmh.component.OAIPMHComponent
+    camel-quarkus-ognl:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-ognl
+      languages:
+      - ognl
+      javaTypes:
+      - org.apache.camel.language.ognl.OgnlLanguage
+    camel-quarkus-olingo4:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-olingo4
+      schemes:
+      - id: olingo4
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.olingo4.Olingo4Component
+    camel-quarkus-openstack:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-openstack
+      schemes:
+      - id: openstack-cinder
+        http: false
+        passive: false
+      - id: openstack-glance
+        http: false
+        passive: false
+      - id: openstack-keystone
+        http: false
+        passive: false
+      - id: openstack-neutron
+        http: false
+        passive: false
+      - id: openstack-nova
+        http: false
+        passive: false
+      - id: openstack-swift
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.openstack.cinder.CinderComponent
+      - org.apache.camel.component.openstack.glance.GlanceComponent
+      - org.apache.camel.component.openstack.keystone.KeystoneComponent
+      - org.apache.camel.component.openstack.neutron.NeutronComponent
+      - org.apache.camel.component.openstack.nova.NovaComponent
+      - org.apache.camel.component.openstack.swift.SwiftComponent
+    camel-quarkus-optaplanner:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-optaplanner
+      schemes:
+      - id: optaplanner
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.optaplanner.OptaPlannerComponent
+    camel-quarkus-paho:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-paho
+      schemes:
+      - id: paho
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.paho.PahoComponent
+    camel-quarkus-paho-mqtt5:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-paho-mqtt5
+      schemes:
+      - id: paho-mqtt5
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.paho.mqtt5.PahoMqtt5Component
+    camel-quarkus-pdf:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-pdf
+      schemes:
+      - id: pdf
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.pdf.PdfComponent
+    camel-quarkus-pg-replication-slot:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-pg-replication-slot
+      schemes:
+      - id: pg-replication-slot
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.pg.replication.slot.PgReplicationSlotComponent
+    camel-quarkus-pgevent:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-pgevent
+      schemes:
+      - id: pgevent
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.pgevent.PgEventComponent
+    camel-quarkus-platform-http:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-platform-http
+      schemes:
+      - id: platform-http
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.platform.http.PlatformHttpComponent
+    camel-quarkus-printer:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-printer
+      schemes:
+      - id: lpr
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.printer.PrinterComponent
+    camel-quarkus-protobuf:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-protobuf
+      dataformats:
+      - protobuf
+      javaTypes:
+      - org.apache.camel.dataformat.protobuf.ProtobufDataFormat
+    camel-quarkus-pubnub:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-pubnub
+      schemes:
+      - id: pubnub
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.pubnub.PubNubComponent
+    camel-quarkus-pulsar:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-pulsar
+      schemes:
+      - id: pulsar
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.pulsar.PulsarComponent
+    camel-quarkus-quartz:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-quartz
+      schemes:
+      - id: quartz
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.quartz.QuartzComponent
+    camel-quarkus-quickfix:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-quickfix
+      schemes:
+      - id: quickfix
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.quickfixj.QuickfixjComponent
+    camel-quarkus-qute:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-qute
+      schemes:
+      - id: qute
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.qute.QuteComponent
+    camel-quarkus-rabbitmq:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-rabbitmq
+      schemes:
+      - id: rabbitmq
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.rabbitmq.RabbitMQComponent
+    camel-quarkus-reactive-streams:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-reactive-streams
+      schemes:
+      - id: reactive-streams
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.reactive.streams.ReactiveStreamsComponent
+    camel-quarkus-ref:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-ref
+      schemes:
+      - id: ref
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.ref.RefComponent
+    camel-quarkus-rest:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-rest
+      schemes:
+      - id: rest
+        http: true
+        passive: false
+      - id: rest-api
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.rest.RestApiComponent
+      - org.apache.camel.component.rest.RestComponent
+    camel-quarkus-rest-openapi:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-rest-openapi
+      schemes:
+      - id: rest-openapi
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.rest.openapi.RestOpenApiComponent
+    camel-quarkus-robotframework:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-robotframework
+      schemes:
+      - id: robotframework
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.robotframework.RobotFrameworkComponent
+    camel-quarkus-rss:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-rss
+      schemes:
+      - id: rss
+        http: false
+        passive: false
+      dataformats:
+      - rss
+      javaTypes:
+      - org.apache.camel.component.rss.RssComponent
+      - org.apache.camel.dataformat.rss.RssDataFormat
+    camel-quarkus-saga:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-saga
+      schemes:
+      - id: saga
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.saga.SagaComponent
+    camel-quarkus-salesforce:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-salesforce
+      schemes:
+      - id: salesforce
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.salesforce.SalesforceComponent
+    camel-quarkus-sap-netweaver:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-sap-netweaver
+      schemes:
+      - id: sap-netweaver
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sap.netweaver.NetWeaverComponent
+    camel-quarkus-saxon:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-saxon
+      schemes:
+      - id: xquery
+        http: false
+        passive: false
+      languages:
+      - xquery
+      javaTypes:
+      - org.apache.camel.component.xquery.XQueryComponent
+      - org.apache.camel.language.xquery.XQueryLanguage
+    camel-quarkus-scheduler:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-scheduler
+      schemes:
+      - id: scheduler
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.scheduler.SchedulerComponent
+    camel-quarkus-schematron:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-schematron
+      schemes:
+      - id: schematron
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.schematron.SchematronComponent
+    camel-quarkus-seda:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-seda
+      schemes:
+      - id: seda
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.seda.SedaComponent
+    camel-quarkus-servicenow:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-servicenow
+      schemes:
+      - id: servicenow
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.servicenow.ServiceNowComponent
+    camel-quarkus-servlet:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-servlet
+      schemes:
+      - id: servlet
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.servlet.ServletComponent
+    camel-quarkus-sip:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-sip
+      schemes:
+      - id: sip
+        http: false
+        passive: false
+      - id: sips
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sip.SipComponent
+    camel-quarkus-sjms:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-sjms
+      schemes:
+      - id: sjms
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sjms.SjmsComponent
+    camel-quarkus-sjms2:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-sjms2
+      schemes:
+      - id: sjms2
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sjms2.Sjms2Component
+    camel-quarkus-slack:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-slack
+      schemes:
+      - id: slack
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.slack.SlackComponent
+    camel-quarkus-smpp:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-smpp
+      schemes:
+      - id: smpp
+        http: false
+        passive: false
+      - id: smpps
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.smpp.SmppComponent
+    camel-quarkus-snakeyaml:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-snakeyaml
+      dataformats:
+      - yaml-snakeyaml
+      javaTypes:
+      - org.apache.camel.component.snakeyaml.SnakeYAMLDataFormat
+    camel-quarkus-snmp:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-snmp
+      schemes:
+      - id: snmp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.snmp.SnmpComponent
+    camel-quarkus-soap:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-soap
+      dataformats:
+      - soapjaxb
+      javaTypes:
+      - org.apache.camel.dataformat.soap.SoapJaxbDataFormat
+    camel-quarkus-solr:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-solr
+      schemes:
+      - id: solr
+        http: false
+        passive: false
+      - id: solrCloud
+        http: false
+        passive: false
+      - id: solrs
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.solr.SolrComponent
+    camel-quarkus-soroush:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-soroush
+      schemes:
+      - id: soroush
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.soroushbot.component.SoroushBotComponent
+    camel-quarkus-spark:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-spark
+      schemes:
+      - id: spark
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.spark.SparkComponent
+    camel-quarkus-splunk:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-splunk
+      schemes:
+      - id: splunk
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.splunk.SplunkComponent
+    camel-quarkus-splunk-hec:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-splunk-hec
+      schemes:
+      - id: splunk-hec
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.splunkhec.SplunkHECComponent
+    camel-quarkus-spring-rabbitmq:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-spring-rabbitmq
+      schemes:
+      - id: spring-rabbitmq
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.springrabbit.SpringRabbitMQComponent
+    camel-quarkus-sql:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-sql
+      schemes:
+      - id: sql
+        http: false
+        passive: false
+      - id: sql-stored
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.sql.SqlComponent
+      - org.apache.camel.component.sql.stored.SqlStoredComponent
+    camel-quarkus-ssh:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-ssh
+      schemes:
+      - id: ssh
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.ssh.SshComponent
+    camel-quarkus-stax:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-stax
+      schemes:
+      - id: stax
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.stax.StAXComponent
+    camel-quarkus-stitch:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-stitch
+      schemes:
+      - id: stitch
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.stitch.StitchComponent
+    camel-quarkus-stomp:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-stomp
+      schemes:
+      - id: stomp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.stomp.StompComponent
+    camel-quarkus-stream:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-stream
+      schemes:
+      - id: stream
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.stream.StreamComponent
+    camel-quarkus-stringtemplate:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-stringtemplate
+      schemes:
+      - id: string-template
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.stringtemplate.StringTemplateComponent
+    camel-quarkus-stub:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-stub
+      schemes:
+      - id: stub
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.stub.StubComponent
+    camel-quarkus-syslog:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-syslog
+      dataformats:
+      - syslog
+      javaTypes:
+      - org.apache.camel.component.syslog.SyslogDataFormat
+    camel-quarkus-tagsoup:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-tagsoup
+      dataformats:
+      - tidyMarkup
+      javaTypes:
+      - org.apache.camel.dataformat.tagsoup.TidyMarkupDataFormat
+    camel-quarkus-tarfile:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-tarfile
+      dataformats:
+      - tarfile
+      javaTypes:
+      - org.apache.camel.dataformat.tarfile.TarFileDataFormat
+    camel-quarkus-telegram:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-telegram
+      schemes:
+      - id: telegram
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.telegram.TelegramComponent
+    camel-quarkus-thrift:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-thrift
+      schemes:
+      - id: thrift
+        http: false
+        passive: false
+      dataformats:
+      - thrift
+      javaTypes:
+      - org.apache.camel.component.thrift.ThriftComponent
+      - org.apache.camel.dataformat.thrift.ThriftDataFormat
+    camel-quarkus-tika:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-tika
+      schemes:
+      - id: tika
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.tika.TikaComponent
+    camel-quarkus-timer:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-timer
+      schemes:
+      - id: timer
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.timer.TimerComponent
+    camel-quarkus-twilio:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-twilio
+      schemes:
+      - id: twilio
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.twilio.TwilioComponent
+    camel-quarkus-twitter:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-twitter
+      schemes:
+      - id: twitter-directmessage
+        http: false
+        passive: false
+      - id: twitter-search
+        http: false
+        passive: false
+      - id: twitter-timeline
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.twitter.directmessage.TwitterDirectMessageComponent
+      - org.apache.camel.component.twitter.search.TwitterSearchComponent
+      - org.apache.camel.component.twitter.timeline.TwitterTimelineComponent
+    camel-quarkus-univocity-parsers:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-univocity-parsers
+      dataformats:
+      - univocity-csv
+      - univocity-fixed
+      - univocity-tsv
+      javaTypes:
+      - org.apache.camel.dataformat.univocity.UniVocityCsvDataFormat
+      - org.apache.camel.dataformat.univocity.UniVocityFixedWidthDataFormat
+      - org.apache.camel.dataformat.univocity.UniVocityTsvDataFormat
+    camel-quarkus-validator:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-validator
+      schemes:
+      - id: validator
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.validator.ValidatorComponent
+    camel-quarkus-velocity:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-velocity
+      schemes:
+      - id: velocity
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.velocity.VelocityComponent
+    camel-quarkus-vertx:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-vertx
+      schemes:
+      - id: vertx
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.vertx.VertxComponent
+    camel-quarkus-vertx-http:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-vertx-http
+      schemes:
+      - id: vertx-http
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.vertx.http.VertxHttpComponent
+    camel-quarkus-vertx-websocket:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-vertx-websocket
+      schemes:
+      - id: vertx-websocket
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.vertx.websocket.VertxWebsocketComponent
+    camel-quarkus-vm:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-vm
+      schemes:
+      - id: vm
+        http: false
+        passive: true
+      javaTypes:
+      - org.apache.camel.component.vm.VmComponent
+    camel-quarkus-weather:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-weather
+      schemes:
+      - id: weather
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.weather.WeatherComponent
+    camel-quarkus-web3j:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-web3j
+      schemes:
+      - id: web3j
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.web3j.Web3jComponent
+    camel-quarkus-weka:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-weka
+      schemes:
+      - id: weka
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.weka.WekaComponent
+    camel-quarkus-wordpress:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-wordpress
+      schemes:
+      - id: wordpress
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.wordpress.WordpressComponent
+    camel-quarkus-workday:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-workday
+      schemes:
+      - id: workday
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.workday.WorkdayComponent
+    camel-quarkus-xchange:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-xchange
+      schemes:
+      - id: xchange
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.xchange.XChangeComponent
+    camel-quarkus-xj:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-xj
+      schemes:
+      - id: xj
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.xj.XJComponent
+    camel-quarkus-xml-jaxp:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-xml-jaxp
+      languages:
+      - xtokenize
+      javaTypes:
+      - org.apache.camel.language.xtokenizer.XMLTokenizeLanguage
+    camel-quarkus-xmlsecurity:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-xmlsecurity
+      schemes:
+      - id: xmlsecurity-sign
+        http: false
+        passive: false
+      - id: xmlsecurity-verify
+        http: false
+        passive: false
+      dataformats:
+      - secureXML
+      javaTypes:
+      - org.apache.camel.component.xmlsecurity.XmlSignerComponent
+      - org.apache.camel.component.xmlsecurity.XmlVerifierComponent
+      - org.apache.camel.dataformat.xmlsecurity.XMLSecurityDataFormat
+    camel-quarkus-xmpp:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-xmpp
+      schemes:
+      - id: xmpp
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.xmpp.XmppComponent
+    camel-quarkus-xpath:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-xpath
+      languages:
+      - xpath
+      javaTypes:
+      - org.apache.camel.language.xpath.XPathLanguage
+    camel-quarkus-xslt:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-xslt
+      schemes:
+      - id: xslt
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.xslt.XsltComponent
+    camel-quarkus-xslt-saxon:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-xslt-saxon
+      schemes:
+      - id: xslt-saxon
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.xslt.saxon.XsltSaxonComponent
+    camel-quarkus-xstream:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-xstream
+      dataformats:
+      - json-xstream
+      - xstream
+      javaTypes:
+      - org.apache.camel.dataformat.xstream.JsonDataFormat
+      - org.apache.camel.dataformat.xstream.XStreamDataFormat
+    camel-quarkus-yammer:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-yammer
+      schemes:
+      - id: yammer
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.yammer.YammerComponent
+    camel-quarkus-zendesk:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-zendesk
+      schemes:
+      - id: zendesk
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.zendesk.ZendeskComponent
+    camel-quarkus-zip-deflater:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-zip-deflater
+      dataformats:
+      - gzipdeflater
+      - zipdeflater
+      javaTypes:
+      - org.apache.camel.dataformat.deflater.GzipDeflaterDataFormat
+      - org.apache.camel.dataformat.deflater.ZipDeflaterDataFormat
+    camel-quarkus-zipfile:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-zipfile
+      dataformats:
+      - zipfile
+      javaTypes:
+      - org.apache.camel.dataformat.zipfile.ZipFileDataFormat
+    camel-quarkus-zookeeper:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-zookeeper
+      schemes:
+      - id: zookeeper
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.zookeeper.ZooKeeperComponent
+    camel-quarkus-zookeeper-master:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-zookeeper-master
+      schemes:
+      - id: zookeeper-master
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.zookeepermaster.MasterComponent
+    jolokia-jvm:
+      groupId: org.jolokia
+      artifactId: jolokia-jvm
+      exclusions:
+      - groupId: com.googlecode.json-simple
+        artifactId: json-simple
+      - groupId: org.jolokia
+        artifactId: jolokia-core
+  loaders:
+    groovy:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-groovy-dsl
+      languages:
+      - groovy
+      metadata:
+        native: "false"
+    java:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-java-joor-dsl
+      languages:
+      - java
+      metadata:
+        native: "false"
+    js:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-js-dsl
+      languages:
+      - js
+      metadata:
+        native: "true"
+    jsh:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-loader-jsh
+      languages:
+      - jsh
+      metadata:
+        native: "false"
+    kts:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-kotlin-dsl
+      languages:
+      - kts
+      metadata:
+        native: "false"
+    xml:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-xml-io-dsl
+      languages:
+      - xml
+      metadata:
+        native: "true"
+    yaml:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-yaml-dsl
+      languages:
+      - yaml
+      metadata:
+        native: "true"
