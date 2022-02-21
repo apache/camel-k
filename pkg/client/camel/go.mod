@@ -3,7 +3,7 @@ module github.com/apache/camel-k/pkg/client/camel
 go 1.15
 
 require (
-	github.com/apache/camel-k/pkg/apis/camel v1.8.0
+	github.com/apache/camel-k/pkg/apis/camel v1.8.1
 	k8s.io/api v0.20.2
 	k8s.io/apimachinery v0.20.2
 	k8s.io/client-go v0.20.2
