@@ -25,6 +25,7 @@
 * xref:running/running.adoc[Run an Integration]
 ** xref:running/dev-mode.adoc[Developer mode]
 ** xref:running/run-from-github.adoc[Run from GitHub]
+** xref:running/local.adoc[Run Locally]
 ** xref:tutorials/tutorials.adoc[Examples]
 * xref:configuration/configuration.adoc[Configuration]
 ** xref:configuration/build-time-properties.adoc[Build time properties]
