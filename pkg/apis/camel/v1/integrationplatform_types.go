@@ -142,10 +142,14 @@ type IntegrationPlatformBuildSpec struct {
 	Timeout *metav1.Duration `json:"timeout,omitempty"`
 	// Maven configuration used to build the Camel/Camel-Quarkus applications
 	Maven MavenSpec `json:"maven,omitempty"`
+	// Deprecated: Use PublishStrategyOptions instead
 	// enables Kaniko publish strategy cache
 	KanikoBuildCache *bool `json:"kanikoBuildCache,omitempty"`
-	// the Persistent Volume Claim used by Kaniko publish strategy, if cache is enabled
+	// Deprecated: Use PublishStrategyOptions instead
+	//the Persistent Volume Claim used by Kaniko publish strategy, if cache is enabled
 	PersistentVolumeClaim string `json:"persistentVolumeClaim,omitempty"`
+	//
+	PublishStrategyOptions map[string]string `json:"PublishStrategyOptions,omitempty"`
 }
 
 // IntegrationPlatformKameletSpec define the behavior for all the Kamelets controller by the IntegrationPlatform

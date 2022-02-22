@@ -34,6 +34,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/kamelet/repository"
@@ -153,6 +154,9 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 }
 
 func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
+	if p.Status.Build.PublishStrategyOptions == nil {
+		p.Status.Build.PublishStrategyOptions = map[string]string{}
+	}
 	if p.Status.Build.RuntimeVersion == "" {
 		p.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	}
@@ -169,8 +173,8 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 			"-Dstyle.color=never",
 		}
 	}
-	if p.Status.Build.PersistentVolumeClaim == "" {
-		p.Status.Build.PersistentVolumeClaim = p.Name
+	if _, ok := p.Status.Build.PublishStrategyOptions[builder.KanikoPVCName]; !ok {
+		p.Status.Build.PublishStrategyOptions[builder.KanikoPVCName] = p.Name
 	}
 
 	if p.Status.Build.GetTimeout().Duration != 0 {
@@ -189,15 +193,15 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 			Duration: 5 * time.Minute,
 		}
 	}
-
-	if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && p.Status.Build.KanikoBuildCache == nil {
+	_, cacheEnabled := p.Status.Build.PublishStrategyOptions["KanikoBuildCache"]
+	if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && !cacheEnabled {
 		// Default to disabling Kaniko cache warmer
 		// Using the cache warmer pod seems unreliable with the current Kaniko version
 		// and requires relying on a persistent volume.
-		defaultKanikoBuildCache := false
-		p.Status.Build.KanikoBuildCache = &defaultKanikoBuildCache
+		defaultKanikoBuildCache := "false"
+		p.Status.Build.PublishStrategyOptions[builder.KanikoBuildCacheEnabled] = defaultKanikoBuildCache
 		if verbose {
-			log.Log.Infof("Kaniko cache set to %t", *p.Status.Build.KanikoBuildCache)
+			log.Log.Infof("Kaniko cache set to %s", defaultKanikoBuildCache)
 		}
 	}
 

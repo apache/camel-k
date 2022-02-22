@@ -18,6 +18,7 @@ limitations under the License.
 package v1
 
 import (
+	"strconv"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -178,13 +179,17 @@ func (in *IntegrationPlatformStatus) RemoveCondition(condType IntegrationPlatfor
 	in.Conditions = newConditions
 }
 
-// IsKanikoCacheEnabled tells if the KanikoCache is enabled on the integration platform build spec
-func (b IntegrationPlatformBuildSpec) IsKanikoCacheEnabled() bool {
-	if b.KanikoBuildCache == nil {
-		// Cache is disabled by default
-		return false
+// IsOptionEnabled tells if provided option key is present in PublishStrategyOptions and enabled
+func (b IntegrationPlatformBuildSpec) IsOptionEnabled(option string) bool {
+	//Key defined in builder/kaniko.go
+	if enabled, ok := b.PublishStrategyOptions[option]; ok {
+		res, err := strconv.ParseBool(enabled)
+		if err != nil {
+			return false
+		}
+		return res
 	}
-	return *b.KanikoBuildCache
+	return false
 }
 
 // GetTimeout returns the specified duration or a default one

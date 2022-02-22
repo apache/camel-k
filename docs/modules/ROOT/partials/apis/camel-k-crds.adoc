@@ -1603,6 +1603,7 @@ bool
 |
 
 
+Deprecated: Use PublishStrategyOptions instead
 enables Kaniko publish strategy cache
 
 |`persistentVolumeClaim` +
@@ -1610,7 +1611,15 @@ string
 |
 
 
+Deprecated: Use PublishStrategyOptions instead
 the Persistent Volume Claim used by Kaniko publish strategy, if cache is enabled
+
+|`PublishStrategyOptions` +
+map[string]string
+|
+
+
+
 
 
 |===

@@ -19,3 +19,5 @@ package builder
 
 // KanikoCacheDir is the cache directory for Kaniko builds (mounted into the Kaniko pod).
 const KanikoCacheDir = "/kaniko/cache"
+const KanikoPVCName = "KanikoPersistentVolumeClaim"
+const KanikoBuildCacheEnabled = "KanikoBuildCacheEnabled"

@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -39,6 +40,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/util"
@@ -443,7 +445,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 		kanikoBuildCacheFlag := cobraCmd.Flags().Lookup("kaniko-build-cache")
 		if kanikoBuildCacheFlag.Changed {
-			platform.Spec.Build.KanikoBuildCache = &o.KanikoBuildCache
+			platform.Spec.Build.PublishStrategyOptions[builder.KanikoBuildCacheEnabled] = strconv.FormatBool(o.KanikoBuildCache)
 		}
 
 		// Always create a platform in the namespace where the operator is located

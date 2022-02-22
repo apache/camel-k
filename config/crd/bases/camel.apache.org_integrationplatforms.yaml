@@ -70,6 +70,10 @@ spec:
               build:
                 description: specify how to build the Integration/IntegrationKits
                 properties:
+                  PublishStrategyOptions:
+                    additionalProperties:
+                      type: string
+                    type: object
                   baseImage:
                     description: a base image that can be used as base layer for all
                       images. It can be useful if you want to provide some custom
@@ -83,7 +87,8 @@ spec:
                     - pod
                     type: string
                   kanikoBuildCache:
-                    description: enables Kaniko publish strategy cache
+                    description: 'Deprecated: Use PublishStrategyOptions instead enables
+                      Kaniko publish strategy cache'
                     type: boolean
                   maven:
                     description: Maven configuration used to build the Camel/Camel-Quarkus
@@ -192,8 +197,9 @@ spec:
                         type: object
                     type: object
                   persistentVolumeClaim:
-                    description: the Persistent Volume Claim used by Kaniko publish
-                      strategy, if cache is enabled
+                    description: 'Deprecated: Use PublishStrategyOptions instead the
+                      Persistent Volume Claim used by Kaniko publish strategy, if
+                      cache is enabled'
                     type: string
                   publishStrategy:
                     description: the strategy to adopt for publishing an Integration
@@ -311,6 +317,10 @@ spec:
               build:
                 description: specify how to build the Integration/IntegrationKits
                 properties:
+                  PublishStrategyOptions:
+                    additionalProperties:
+                      type: string
+                    type: object
                   baseImage:
                     description: a base image that can be used as base layer for all
                       images. It can be useful if you want to provide some custom
@@ -324,7 +334,8 @@ spec:
                     - pod
                     type: string
                   kanikoBuildCache:
-                    description: enables Kaniko publish strategy cache
+                    description: 'Deprecated: Use PublishStrategyOptions instead enables
+                      Kaniko publish strategy cache'
                     type: boolean
                   maven:
                     description: Maven configuration used to build the Camel/Camel-Quarkus
@@ -433,8 +444,9 @@ spec:
                         type: object
                     type: object
                   persistentVolumeClaim:
-                    description: the Persistent Volume Claim used by Kaniko publish
-                      strategy, if cache is enabled
+                    description: 'Deprecated: Use PublishStrategyOptions instead the
+                      Persistent Volume Claim used by Kaniko publish strategy, if
+                      cache is enabled'
                     type: string
                   publishStrategy:
                     description: the strategy to adopt for publishing an Integration
