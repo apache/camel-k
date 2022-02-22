@@ -1,0 +1,172 @@
+[[running-locally]]
+= Running Locally
+
+While Camel K is a framework for running integrations on a cloud, it also allows you to run your integration locally during development.
+
+NOTE: Not all features are available for the local running. See <<running-locally-limitations>>.
+
+== Available Commands
+
+Available subcommands for `kamel local` are:
+
+.Available Commands
+[cols="1m,2,2m"]
+|===
+|Name |Description |Example
+
+|build
+|Build integration images locally
+|kamel local build
+
+|inspect
+|Generate dependencies list given integration files
+|kamel local inspect
+
+|run
+|Run integration locally
+|kamel local run
+
+|===
+
+To run an integration locally:
+
+[source,console]
+----
+$ kamel local run hello.groovy
+----
+
+To inspect which dependencies are resolved in the integration you are developing:
+
+[source,console]
+----
+$ kamel local inspect hello.groovy
+----
+
+For more information on what options each subcommand accepts, run it with the `--help` option:
+
+[source,console]
+----
+$ kamel local <subcommand> --help
+----
+
+== Local Build
+
+The `local build` subcommand can build integration images locally for development purposes. It provides three main use cases:
+
+1. <<running-locally-build-integration,Build an integration image locally>>
+2. <<running-locally-build-base-image,Build only a base image locally>>
+3. <<running-locally-create-directory,Create a directory structure for an integration>>
+
+[CAUTION]
+====
+It is not intended to be a feature for packaging integrations for later deployment on a Kubernetes cluster. It is purely for development and running on Docker.
+
+To package an integration, use `kamel kit create` to create an `IntegrationKit` on a cluster as a way to package your self-contained resources. Then you can move those kits and reuse them on another cluster.
+====
+
+[[running-locally-build-integration]]
+=== Building an integration
+
+To build an integration image locally, you at lease need to specify an image name with the `--image` option in addition to the integration files you want to build.
+
+[source,console]
+----
+$ kamel local build --image=docker.io/myrepo/hello hello.groovy
+----
+
+[[running-locally-build-base-image]]
+=== Building a base image
+
+You can also build only a base image (`integration-base-image`) locally that all integration images are based on. It requires two options, `--base-image` and `--container-registry`, and no arguments.
+
+[source,console]
+----
+$ kamel local build --base-image --container-registry=docker.io/myrepo
+----
+
+It will create a `docker.io/myrepo/integration-base-image:latest` image locally.
+
+[[running-locally-create-directory]]
+=== Creating a directory structure
+
+You can create a directory structure with the integration files: property files, routes, and dependencies.
+
+[source,console]
+----
+$ kamel local build --integration-directory <dir-name> file1.yaml file2.java file3.groovy
+----
+
+The directory will be created in the parent directory of where the command was invoked and will contain the following directory structure:
+----
+<dir-name>/
+├── dependencies/
+├── properties/
+└── routes/
+----
+
+The `properties`, `routes`, and `dependencies` subdirectories will contain the respective integration files.
+
+For convenience you can output just the dependencies with `--dependencies-only` as follows:
+[source,console]
+----
+$ kamel local build --integration-directory <dir-name> --dependencies-only file1.yaml file2.java file3.groovy
+----
+
+The created integration directory can later be run with the `local run` subcommand. See <<running-locally-run-directory>>.
+
+== Local Run
+
+You can run integrations locally with the `local run` subcommand.
+
+[source,console]
+----
+$ kamel local run hello.groovy
+----
+
+[[running-locally-run-image]]
+=== Running with an image
+
+You can also run an integration from an image which has been already built with the `local build` subcommand:
+
+[source,console]
+----
+$ kamel local run --image=docker.io/myrepo/hello
+----
+
+You can also build and run an image all at once with the `--containerize` option:
+
+[source,console]
+----
+$ kamel local run --containerize --image=docker.io/myrepo/hello hello.groovy
+----
+
+[[running-locally-run-directory]]
+=== Running with an integration directory
+
+The `local run` subcommand can take as input an integration directory constructed by `local build`.
+
+NOTE: Only full integration directories can be processed; i.e. directories created with `--dependencies-only` are not supported.
+
+`local run` can use an integration directory as input and run the integration locally:
+[source,console]
+----
+$ kamel local run --integration-directory <dir-name>
+----
+
+`local run` can use an integration directory and run the integration within a container:
+[source,console]
+----
+$ kamel local run --integration-directory <dir-name> --containerize --network=host --image <image-name>
+----
+
+For now, if route files contain modeline options which depend on lazily evaluated environment variables (for example, `\[[env:ENV_VAR]]`) then the command above will need to specify the environment variable explicitly like so:
+[source,console]
+----
+$ kamel local run --integration-directory <dir-name> --env ENV_VAR
+$ kamel local run --integration-directory <dir-name> --containerize --network=host --image <image-name> --env ENV_VAR
+----
+
+[[running-locally-limitations]]
+== Limitations
+
+* Since there is no platform to leverage, traits are not usable for `kamel local` commands. Right now, if you specify any traits in the xref:cli/modeline.adoc[modeline] an integration will not run locally throwing an error.
