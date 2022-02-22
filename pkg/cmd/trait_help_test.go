@@ -1,3 +1,4 @@
+//go:build common
 // +build common
 
 /*

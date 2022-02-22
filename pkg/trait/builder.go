@@ -111,8 +111,19 @@ func (t *builderTrait) Apply(e *Environment) error {
 			},
 			Verbose: t.Verbose,
 		}})
-
+	// nolint: staticcheck
 	case v1.IntegrationPlatformBuildPublishStrategyKaniko:
+		var persistentVolumeClaim string
+		var found, cacheEnabled bool
+		if persistentVolumeClaim, found = e.Platform.Status.Build.PublishStrategyOptions[builder.KanikoPVCName]; !found {
+			persistentVolumeClaim = e.Platform.Status.Build.PersistentVolumeClaim
+		}
+
+		cacheEnabled = e.Platform.Status.Build.IsOptionEnabled(builder.KanikoBuildCacheEnabled)
+		if _, found = e.Platform.Status.Build.PublishStrategyOptions[builder.KanikoBuildCacheEnabled]; !found {
+			cacheEnabled = *e.Platform.Status.Build.KanikoBuildCache
+		}
+
 		e.BuildTasks = append(e.BuildTasks, v1.Task{Kaniko: &v1.KanikoTask{
 			BaseTask: v1.BaseTask{
 				Name: "kaniko",
@@ -122,8 +133,8 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Registry: e.Platform.Status.Build.Registry,
 			},
 			Cache: v1.KanikoTaskCache{
-				Enabled:               e.Platform.Status.Build.KanikoBuildCache,
-				PersistentVolumeClaim: e.Platform.Status.Build.PersistentVolumeClaim,
+				Enabled:               &cacheEnabled,
+				PersistentVolumeClaim: persistentVolumeClaim,
 			},
 			Verbose: t.Verbose,
 		}})
