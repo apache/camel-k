@@ -4,8 +4,16 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v1.8.1...HEAD)
 
+**Closed issues:**
+
+- Helm multiple namespace install Camel-K [\#2985](https://github.com/apache/camel-k/issues/2985)
+- Documentation for `kamel local run` [\#2490](https://github.com/apache/camel-k/issues/2490)
+
 **Merged pull requests:**
 
+- doc\(cli\): add documentation for kamel local subcommands [\#3030](https://github.com/apache/camel-k/pull/3030) ([tadayosi](https://github.com/tadayosi))
+- chore\(cmd\): refactor kamel local commands [\#3025](https://github.com/apache/camel-k/pull/3025) ([tadayosi](https://github.com/tadayosi))
+- Adds OLM channels to bundle metadata [\#3020](https://github.com/apache/camel-k/pull/3020) ([phantomjinx](https://github.com/phantomjinx))
 - chore\(ci\): revert nolint [\#3015](https://github.com/apache/camel-k/pull/3015) ([squakez](https://github.com/squakez))
 - fix\(build\): incremental build [\#3008](https://github.com/apache/camel-k/pull/3008) ([squakez](https://github.com/squakez))
 - Update tekton documentation [\#3000](https://github.com/apache/camel-k/pull/3000) ([livespotty](https://github.com/livespotty))
@@ -904,7 +912,6 @@
 - CLI log could use some kind of feedback when waiting for pod to spin up [\#1283](https://github.com/apache/camel-k/issues/1283)
 - Kaniko in builder pod failed to push image to docker registry [\#1282](https://github.com/apache/camel-k/issues/1282)
 - Add a trait\(?\) to enable default REST DSL endpoint [\#1239](https://github.com/apache/camel-k/issues/1239)
-- Multi-architecture support [\#1238](https://github.com/apache/camel-k/issues/1238)
 - Camel-K Doesn't Create a Service or Ingress for an Integration [\#1232](https://github.com/apache/camel-k/issues/1232)
 - Performance and Architectural Questions On Camel-K [\#1196](https://github.com/apache/camel-k/issues/1196)
 - Transactions with Camel K [\#1128](https://github.com/apache/camel-k/issues/1128)
