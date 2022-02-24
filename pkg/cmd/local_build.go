@@ -67,6 +67,10 @@ func newCmdLocalBuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localBui
 	cmd.Flags().StringArrayP("dependency", "d", nil, "Add an additional dependency")
 	cmd.Flags().StringArray("maven-repository", nil, "Use a maven repository")
 
+	// hidden flags for compatibility with kamel run
+	cmd.Flags().StringArrayP("trait", "t", nil, "")
+	cmd.Flags().MarkHidden("trait")
+
 	return &cmd, &options
 }
 
@@ -81,6 +85,7 @@ type localBuildCmdOptions struct {
 	Properties             []string `mapstructure:"properties"`
 	PropertyFiles          []string `mapstructure:"property-files"`
 	MavenRepositories      []string `mapstructure:"maven-repositories"`
+	Traits                 []string `mapstructure:"traits"`
 }
 
 func (command *localBuildCmdOptions) validate(args []string) error {
@@ -128,6 +133,8 @@ func (command *localBuildCmdOptions) validate(args []string) error {
 	if command.DependenciesOnly && command.IntegrationDirectory == "" {
 		return errors.New("to output dependencies the integration directory flag must be set")
 	}
+
+	warnTraitUsages(command.Traits)
 
 	return nil
 }

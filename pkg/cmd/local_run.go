@@ -67,6 +67,10 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 	cmd.Flags().StringArrayP("dependency", "d", nil, additionalDependencyUsageMessage)
 	cmd.Flags().StringArray("maven-repository", nil, "Use a maven repository")
 
+	// hidden flags for compatibility with kamel run
+	cmd.Flags().StringArrayP("trait", "t", nil, "")
+	cmd.Flags().MarkHidden("trait")
+
 	return &cmd, &options
 }
 
@@ -81,6 +85,7 @@ type localRunCmdOptions struct {
 	Properties             []string `mapstructure:"properties"`
 	AdditionalDependencies []string `mapstructure:"dependencies"`
 	MavenRepositories      []string `mapstructure:"maven-repositories"`
+	Traits                 []string `mapstructure:"traits"`
 }
 
 func (command *localRunCmdOptions) validate(args []string) error {
@@ -109,6 +114,8 @@ func (command *localRunCmdOptions) validate(args []string) error {
 	if command.Containerize && command.Image == "" {
 		return errors.New("containerization is active but no image name has been provided")
 	}
+
+	warnTraitUsages(command.Traits)
 
 	return nil
 }
