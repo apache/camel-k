@@ -18,6 +18,8 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
@@ -37,4 +39,10 @@ func newCmdLocal(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.AddCommand(cmdOnly(newCmdLocalRun(rootCmdOptions)))
 
 	return &cmd
+}
+
+func warnTraitUsages(traits []string) {
+	if len(traits) > 0 {
+		fmt.Printf("Warning: traits are specified but don't take effect for local run: %v\n", traits)
+	}
 }
