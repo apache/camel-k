@@ -94,3 +94,16 @@ func TestLocalRunAdditionalDependenciesFlag(t *testing.T) {
 		t.Fatalf("Additional dependencies expected to be: \n %v\nGot:\n %v\n", "[mvn:camel-component-1, mvn:camel-component-2]", localRunCmdOptions.AdditionalDependencies)
 	}
 }
+
+func TestLocalRunAcceptsTraits(t *testing.T) {
+	options, rootCmd := kamelTestPreAddCommandInit()
+
+	addTestLocalRunCmd(options, rootCmd)
+
+	kamelTestPostAddCommandInit(t, rootCmd)
+
+	_, err := test.ExecuteCommand(rootCmd, "run", "route.java", "-t", "jolokia.enabled=true", "--trait", "prometheus.enabled=true")
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+}
