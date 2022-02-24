@@ -6,8 +6,12 @@
 
 **Closed issues:**
 
+- IntegrationKit creation based on YAML file fails [\#3033](https://github.com/apache/camel-k/issues/3033)
+- Expose Camel-related metrics \(Prometheus\) [\#3027](https://github.com/apache/camel-k/issues/3027)
 - Helm multiple namespace install Camel-K [\#2985](https://github.com/apache/camel-k/issues/2985)
+- \[E2E\] Test error handler appears to be flaky [\#2744](https://github.com/apache/camel-k/issues/2744)
 - Documentation for `kamel local run` [\#2490](https://github.com/apache/camel-k/issues/2490)
+- Support for POJO, bring it back!  [\#1821](https://github.com/apache/camel-k/issues/1821)
 
 **Merged pull requests:**
 
