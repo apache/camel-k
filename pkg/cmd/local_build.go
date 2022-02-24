@@ -37,7 +37,7 @@ func newCmdLocalBuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localBui
 		Long:    `Build integration images locally for containerized integrations.`,
 		PreRunE: decode(&options),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := options.validate(args); err != nil {
+			if err := options.validate(cmd, args); err != nil {
 				return err
 			}
 			if err := options.init(args); err != nil {
@@ -69,7 +69,9 @@ func newCmdLocalBuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localBui
 
 	// hidden flags for compatibility with kamel run
 	cmd.Flags().StringArrayP("trait", "t", nil, "")
-	cmd.Flags().MarkHidden("trait")
+	if err := cmd.Flags().MarkHidden("trait"); err != nil {
+		fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
+	}
 
 	return &cmd, &options
 }
@@ -88,7 +90,7 @@ type localBuildCmdOptions struct {
 	Traits                 []string `mapstructure:"traits"`
 }
 
-func (command *localBuildCmdOptions) validate(args []string) error {
+func (command *localBuildCmdOptions) validate(cmd *cobra.Command, args []string) error {
 	// Validate integration files.
 	if len(args) > 0 {
 		err := validateIntegrationFiles(args)
@@ -134,7 +136,7 @@ func (command *localBuildCmdOptions) validate(args []string) error {
 		return errors.New("to output dependencies the integration directory flag must be set")
 	}
 
-	warnTraitUsages(command.Traits)
+	warnTraitUsages(cmd, command.Traits)
 
 	return nil
 }

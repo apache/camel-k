@@ -37,7 +37,7 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 		Long:    `Run integration locally using the input integration files.`,
 		PreRunE: decode(&options),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := options.validate(args); err != nil {
+			if err := options.validate(cmd, args); err != nil {
 				return err
 			}
 			if err := options.init(); err != nil {
@@ -69,7 +69,9 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 
 	// hidden flags for compatibility with kamel run
 	cmd.Flags().StringArrayP("trait", "t", nil, "")
-	cmd.Flags().MarkHidden("trait")
+	if err := cmd.Flags().MarkHidden("trait"); err != nil {
+		fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
+	}
 
 	return &cmd, &options
 }
@@ -88,7 +90,7 @@ type localRunCmdOptions struct {
 	Traits                 []string `mapstructure:"traits"`
 }
 
-func (command *localRunCmdOptions) validate(args []string) error {
+func (command *localRunCmdOptions) validate(cmd *cobra.Command, args []string) error {
 	// Validate integration files when no image is provided and we are
 	// not running an already locally-built integration.
 	if command.Image == "" && command.IntegrationDirectory == "" {
@@ -115,7 +117,7 @@ func (command *localRunCmdOptions) validate(args []string) error {
 		return errors.New("containerization is active but no image name has been provided")
 	}
 
-	warnTraitUsages(command.Traits)
+	warnTraitUsages(cmd, command.Traits)
 
 	return nil
 }
