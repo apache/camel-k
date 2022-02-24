@@ -169,4 +169,4 @@ $ kamel local run --integration-directory <dir-name> --containerize --network=ho
 [[running-locally-limitations]]
 == Limitations
 
-* Since there is no platform to leverage, traits are not usable for `kamel local` commands. Right now, if you specify any traits in the xref:cli/modeline.adoc[modeline] an integration will not run locally throwing an error.
+* Since there is no platform to leverage, traits are not usable for `kamel local` commands. If you specify any traits in the xref:cli/modeline.adoc[modeline], they are simply ignored; The commands show a warning and run an integration locally without traits.
