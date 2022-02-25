@@ -376,10 +376,11 @@ get-staging-repo:
 	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
 
 .PHONY: build build-kamel build-resources dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-keda generate-strimzi
+.PHONY: controller-gen kubectl kustomize operator-sdk
 
 # find or download controller-gen if necessary
 controller-gen:
-ifeq (, $(shell which controller-gen))
+ifeq (, $(shell command -v controller-gen 2> /dev/null))
 	@{ \
 	set -e ;\
 	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
@@ -390,18 +391,16 @@ ifeq (, $(shell which controller-gen))
 	}
 CONTROLLER_GEN=$(GOBIN)/controller-gen
 else
-CONTROLLER_GEN=$(shell which controller-gen)
+CONTROLLER_GEN=$(shell command -v controller-gen 2> /dev/null)
 endif
 
-.PHONY: kubectl kustomize operator-sdk
-
 kubectl:
-ifeq (, $(shell which kubectl))
-$(error "No kubectl found in PATH. Please install and re-run")
+ifeq (, $(shell command -v kubectl 2> /dev/null))
+	$(error "No kubectl found in PATH. Please install and re-run")
 endif
 
 kustomize:
-ifeq (, $(shell which kustomize))
+ifeq (, $(shell command -v kustomize 2> /dev/null))
 	@{ \
 	set -e ;\
 	KUSTOMIZE_GEN_TMP_DIR=$$(mktemp -d) ;\
@@ -412,11 +411,11 @@ ifeq (, $(shell which kustomize))
 	}
 KUSTOMIZE=$(GOBIN)/kustomize
 else
-KUSTOMIZE=$(shell which kustomize)
+KUSTOMIZE=$(shell command -v kustomize 2> /dev/null)
 endif
 
 operator-sdk:
-ifeq (, $(shell which operator-sdk))
+ifeq (, $(shell command -v operator-sdk 2> /dev/null))
 	@{ \
 	set -e ;\
 	if [ "$(shell uname -s 2>/dev/null || echo Unknown)" == "Darwin" ] ; then \
@@ -438,7 +437,7 @@ else
   operator-sdk version | sed -n 's/.*"v\([^"]*\)".*/\1/p'; \
 	echo " If this is less than $(OPERATOR_SDK_VERSION) then please consider moving it aside and allowing the approved version to be downloaded."; \
 	}
-OPERATOR_SDK=$(shell which operator-sdk)
+OPERATOR_SDK=$(shell command -v operator-sdk 2> /dev/null)
 endif
 
 .PHONY: generate-crd $(BUNDLE_CAMEL_APIS) bundle bundle-build
