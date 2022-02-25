@@ -10,11 +10,13 @@
 - Expose Camel-related metrics \(Prometheus\) [\#3027](https://github.com/apache/camel-k/issues/3027)
 - Helm multiple namespace install Camel-K [\#2985](https://github.com/apache/camel-k/issues/2985)
 - \[E2E\] Test error handler appears to be flaky [\#2744](https://github.com/apache/camel-k/issues/2744)
+- `Kamel local` chokes on traits [\#2499](https://github.com/apache/camel-k/issues/2499)
 - Documentation for `kamel local run` [\#2490](https://github.com/apache/camel-k/issues/2490)
 - Support for POJO, bring it back!  [\#1821](https://github.com/apache/camel-k/issues/1821)
 
 **Merged pull requests:**
 
+- fix\(cli\): kamel local subcommands accept traits but simply ignore them [\#3034](https://github.com/apache/camel-k/pull/3034) ([tadayosi](https://github.com/tadayosi))
 - doc\(cli\): add documentation for kamel local subcommands [\#3030](https://github.com/apache/camel-k/pull/3030) ([tadayosi](https://github.com/tadayosi))
 - chore\(cmd\): refactor kamel local commands [\#3025](https://github.com/apache/camel-k/pull/3025) ([tadayosi](https://github.com/tadayosi))
 - Adds OLM channels to bundle metadata [\#3020](https://github.com/apache/camel-k/pull/3020) ([phantomjinx](https://github.com/phantomjinx))
@@ -23,6 +25,7 @@
 - Update tekton documentation [\#3000](https://github.com/apache/camel-k/pull/3000) ([livespotty](https://github.com/livespotty))
 - fix\(cmd/run\): allow multiple resources [\#2997](https://github.com/apache/camel-k/pull/2997) ([squakez](https://github.com/squakez))
 - fix\(kamelet\): reconcile when errored [\#2993](https://github.com/apache/camel-k/pull/2993) ([squakez](https://github.com/squakez))
+- Enhance Http proxy test about the OLM [\#2992](https://github.com/apache/camel-k/pull/2992) ([bouskaJ](https://github.com/bouskaJ))
 - fix\(yaml\): also consider toD while parsing YAML DSL steps [\#2989](https://github.com/apache/camel-k/pull/2989) ([toonalbers](https://github.com/toonalbers))
 - fix\(cli\): kamel run -v should configure the mount trait [\#2986](https://github.com/apache/camel-k/pull/2986) ([astefanutti](https://github.com/astefanutti))
 - chore: Upgrade Knative to version 1.2.0 [\#2979](https://github.com/apache/camel-k/pull/2979) ([astefanutti](https://github.com/astefanutti))
@@ -30,6 +33,7 @@
 - feat\(cli\): add flag --skip-default-kamelets-setup to kamel install [\#2973](https://github.com/apache/camel-k/pull/2973) ([tadayosi](https://github.com/tadayosi))
 - fix\(e2e\): Decode OpenShift ProjectRequest into a Project struct [\#2971](https://github.com/apache/camel-k/pull/2971) ([astefanutti](https://github.com/astefanutti))
 - chore: Upgrade controller-runtime to v0.10.3 [\#2970](https://github.com/apache/camel-k/pull/2970) ([astefanutti](https://github.com/astefanutti))
+- \[TEST\] Add CliDownloadTest [\#2969](https://github.com/apache/camel-k/pull/2969) ([bouskaJ](https://github.com/bouskaJ))
 - chore: Upgrade sub-modules to Kubernetes API v0.22.5 [\#2968](https://github.com/apache/camel-k/pull/2968) ([astefanutti](https://github.com/astefanutti))
 - fix\(cli\): Kamel CLI zero-code exists when trait properties validation fails [\#2964](https://github.com/apache/camel-k/pull/2964) ([astefanutti](https://github.com/astefanutti))
 - Generate crd API docs as AsciiDoc \(main\) \(Update\) [\#2963](https://github.com/apache/camel-k/pull/2963) ([djencks](https://github.com/djencks))
