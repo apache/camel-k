@@ -172,9 +172,13 @@ if [ -d ${CATALOG_DIR} ]; then
   rm -rf ${CATALOG_DIR}
 fi
 
+if [ -f ${CATALOG_DIR}.Dockerfile ]; then
+  rm -f ${CATALOG_DIR}.Dockerfile
+fi
+
 mkdir ${CATALOG_DIR}
 opm render quay.io/operatorhubio/catalog:latest -o yaml > ${CATALOG_DIR}/bundles.yaml
-sudo opm render --use-http -o yaml ${BUNDLE_IMAGE} > ${CATALOG_DIR}/camel-k.yaml
+opm render --use-http -o yaml ${BUNDLE_IMAGE} > ${CATALOG_DIR}/camel-k.yaml
 cat << EOF >> ${CATALOG_DIR}/camel-k.yaml
 ---
 schema: olm.channel

@@ -25,12 +25,10 @@ INSTALL_DEFAULT_KAMELETS := true
 CONTROLLER_GEN_VERSION := v0.4.1
 OPERATOR_SDK_VERSION := v1.14.0
 KUSTOMIZE_VERSION := v4.1.2
+OPM_VERSION := v1.21.0
 BASE_IMAGE := adoptopenjdk/openjdk11:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
 IMAGE_NAME := docker.io/apache/camel-k
-
-OPM_VERSION := v1.21.0 # <- Not yet released
-OPM_PKG := github.com/operator-framework/operator-registry
 
 #
 # Situations when user wants to override
@@ -444,21 +442,11 @@ OPERATOR_SDK=$(shell command -v operator-sdk 2> /dev/null)
 endif
 
 opm:
-ifeq (, $(shell which opm))
-	@{ \
-	set -e ;\
-	OPM_GEN_TMP_DIR=$$(mktemp -d) ;\
-	cd $$OPM_GEN_TMP_DIR ;\
-	go mod init tmp ;\
-	go get \
-		-ldflags '-w -extldflags "-static"' -tags "json1" \
-		-ldflags "-X '$(OPM_PKG)/cmd/opm/version.opmVersion=$(OPM_VERSION)'" \
-		$(OPM_PKG)/cmd/opm@$(OPM_VERSION) ;\
-		rm -rf $$OPM_GEN_TMP_DIR ;\
-	}
+ifeq (, $(shell command -v opm 2> /dev/null))
+	@OPM_VERSION=$(OPM_VERSION) ./script/build_install_opm.sh
 OPM=$(GOBIN)/opm
 else
-OPM=$(shell which opm)
+OPM=$(shell command -v opm 2> /dev/null)
 endif
 
 .PHONY: generate-crd $(BUNDLE_CAMEL_APIS) bundle bundle-build
