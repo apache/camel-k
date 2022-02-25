@@ -116,19 +116,6 @@ runs:
         esac
 
       #
-      # Install opm if required
-      #
-    - id: install-opm
-      name: Install opm if required
-      shell: bash
-      run: |
-        if [ "${{ inputs.opm }}" == "true" ]; then
-          curl -L https://github.com/operator-framework/operator-registry/releases/download/v1.19.5/linux-amd64-opm -o opm
-          chmod +x opm
-          sudo mv opm /usr/local/bin/
-        fi
-
-      #
       # Install OLM if required
       #
     - id: install-olm

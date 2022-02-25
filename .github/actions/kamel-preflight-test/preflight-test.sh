@@ -19,7 +19,7 @@
 
 ####
 #
-# Execute the kubernetes tests
+# Execute a preflight test for checking the operator is at the correct version
 #
 ####
 
