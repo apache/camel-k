@@ -26,7 +26,7 @@ NOTE: Minishift is no longer supported since Camel K 1.5.0. You can use xref:ins
 == Procedure
 
 To start using Camel K you need the **"kamel"** CLI tool, that can be used to both configure the cluster and run integrations.
-Look into the https://github.com/apache/camel-k/releases[release page] for the latest version of the *camel-k-client* tool for your specific platform.
+Look into the https://downloads.apache.org/camel/camel-k/[release page] for the latest version of the *camel-k-client* tool for your specific platform.
 
 Download and uncompress the archive. It contains a small binary file named `kamel` that you should put into your system path.
 For example, if you're using Linux, you can put `kamel` in `/usr/bin`.
