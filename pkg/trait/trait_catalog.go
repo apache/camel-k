@@ -108,8 +108,6 @@ func (c *Catalog) apply(environment *Environment) error {
 		}
 
 		if enabled {
-			c.L.Infof("Apply trait: %s", trait.ID())
-
 			err = trait.Apply(environment)
 			if err != nil {
 				return err
@@ -126,6 +124,12 @@ func (c *Catalog) apply(environment *Environment) error {
 			}
 		}
 	}
+
+	traitIds := make([]string, 0)
+	for _, trait := range environment.ExecutedTraits {
+		traitIds = append(traitIds, string(trait.ID()))
+	}
+	c.L.Debugf("Applied traits: %s", strings.Join(traitIds, ","))
 
 	if !applicable && environment.Platform == nil {
 		return errors.New("no trait can be executed because of no integration platform found")

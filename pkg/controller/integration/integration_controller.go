@@ -97,7 +97,7 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 						next != nil && next.Status == corev1.ConditionTrue && next.FirstTruthyTime != nil && !next.FirstTruthyTime.IsZero() &&
 						it.Status.InitializationTimestamp != nil {
 						duration := next.FirstTruthyTime.Time.Sub(it.Status.InitializationTimestamp.Time)
-						Log.WithValues("request-namespace", it.Namespace, "request-name", it.Name).
+						Log.WithValues("request-namespace", it.Namespace, "request-name", it.Name, "ready-after", duration.Seconds()).
 							ForIntegration(it).Infof("First readiness after %s", duration)
 						timeToFirstReadiness.Observe(duration.Seconds())
 					}
