@@ -8,7 +8,7 @@ Feature: Camel K can load specific secrets for Kamelets
       | delayBetweenAttempts | 3000 |
 
   Scenario: KameletBinding can load specific settings for Kamelet
-    Given create Kubernetes service stub-service-2 with target port 8081
+    Given create Kubernetes service stub-service-2 with target port 8080
     And bind Kamelet timer-source to uri http://stub-service-2.${YAKS_NAMESPACE}.svc.cluster.local/specific
     And KameletBinding source properties
       | id  | specific |
