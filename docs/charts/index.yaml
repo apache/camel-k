@@ -28,7 +28,7 @@ entries:
     version: 0.9.1
   - apiVersion: v2
     appVersion: 1.8.0
-    created: "2022-02-28T12:21:15.435042332+01:00"
+    created: "2022-01-24T10:24:12.66608721+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: d087b2949da17ff24557bd57699751d3f9738a7be7c89d5172114136808424e1
@@ -405,7 +405,7 @@ entries:
     version: 0.1.1
   - apiVersion: v2
     appVersion: 1.0.0-RC2
-    created: "2022-02-28T12:21:15.398718897+01:00"
+    created: "2021-04-20T18:13:56.796846712+02:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 3bc8c53c4d781c4b4e4aac254d291339b348c2d8b4cf24b579ceb4330a48edd5
@@ -428,4 +428,4 @@ entries:
     urls:
     - https://apache.github.io/camel-k/charts/camel-k-0.1.0.tgz
     version: 0.1.0
-generated: "2021-04-20T18:13:56.796846712+02:00"
+generated: "2022-01-24T10:24:12.637333798+01:00"
