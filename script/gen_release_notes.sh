@@ -58,4 +58,11 @@ if [ $? -ne 0 ]; then
 fi
 set -e
 
+set +e
+if [ -z "${GITHUB_TOKEN}" ]; then
+  echo "No \"GITHUB_TOKEN\" environment variable exported. Please set the GITHUB_TOKEN environment variable"
+  exit 1
+fi
+set -e
+
 release-notes --start-sha $start_sha --end-sha $end_sha --branch $branch --repo camel-k --org apache --output $location/../release-notes.md --required-author ""
