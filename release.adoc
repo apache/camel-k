@@ -149,12 +149,15 @@ kamel install --operator-image=camelk/camel-k:$CAMEL_K_VERSION --maven-repositor
 Release notes can be generated with:
 
 ```
-# previous version released on same branch, e.g. 1.5.0
+# previous version released on same branch, e.g. 1.8.0
 export PREV=a.b.c
-# current version to be released, e.g. 1.6.0
+# current version to be released, e.g. 1.8.1
 export CUR=x.y.z
 # Branch where both tags are present
 export BRANCH=main
+# Personal access Token for accessing Github API
+export GITHUB_TOKEN=token
+# Run the release-notes command
 ./script/gen_release_notes.sh $PREV $CUR $BRANCH
 ```
 
