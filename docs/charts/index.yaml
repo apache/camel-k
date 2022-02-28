@@ -3,7 +3,7 @@ entries:
   camel-k:
   - apiVersion: v2
     appVersion: 1.8.0
-    created: "2022-01-24T10:24:12.66608721+01:00"
+    created: "2022-02-28T12:21:15.435042332+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: d087b2949da17ff24557bd57699751d3f9738a7be7c89d5172114136808424e1
@@ -110,7 +110,7 @@ entries:
       superpowers
     digest: a3f32e2e2d73361b9d4cda028c9c549ba5dfd5cbf1f0224a1badcff295292818
     home: https://camel.apache.org/camel-k/latest/
-    icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
+    icon: https://github.com/apache/camel/raw/master/docs/img/logo64-d.png
     keywords:
     - serverless
     - integration
@@ -135,7 +135,7 @@ entries:
       superpowers
     digest: a011dd36bbfb07a23ca18baabec945274d2ac1164e08414147ecf683cccf8a21
     home: https://camel.apache.org/camel-k/latest/
-    icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
+    icon: https://github.com/apache/camel/raw/master/docs/img/logo64-d.png
     keywords:
     - serverless
     - integration
@@ -160,7 +160,7 @@ entries:
       superpowers
     digest: 30d999fb1a24c741829cd3ad1c1ba3c8ac4d0571a9ad1258c327c426913312d7
     home: https://camel.apache.org/camel-k/latest/
-    icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
+    icon: https://github.com/apache/camel/raw/master/docs/img/logo64-d.png
     keywords:
     - serverless
     - integration
@@ -185,7 +185,7 @@ entries:
       superpowers
     digest: 222b6b51ac7c836e1a7cfe44228de3666cb2b4c559c64bee35afaef9cbfe2449
     home: https://camel.apache.org/camel-k/latest/
-    icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
+    icon: https://github.com/apache/camel/raw/master/docs/img/logo64-d.png
     keywords:
     - serverless
     - integration
@@ -210,7 +210,7 @@ entries:
       superpowers
     digest: 393f4e4b32119824442ee2abdfc34a34bc49ec0fc6e957057e955cb5dd63aece
     home: https://camel.apache.org/camel-k/latest/
-    icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
+    icon: https://github.com/apache/camel/raw/master/docs/img/logo64-d.png
     keywords:
     - serverless
     - integration
@@ -235,7 +235,7 @@ entries:
       superpowers
     digest: c47863e13644340b857acf5c688004927e0ad126a9c39e8c90fa6d84e2c445b9
     home: https://camel.apache.org/camel-k/latest/
-    icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
+    icon: https://github.com/apache/camel/raw/master/docs/img/logo64-d.png
     keywords:
     - serverless
     - integration
@@ -260,7 +260,7 @@ entries:
       superpowers
     digest: 46771bd1c0e52097f07e9c17e657690872716ed845b196cd0c981c97b984b573
     home: https://camel.apache.org/camel-k/latest/
-    icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
+    icon: https://github.com/apache/camel/raw/master/docs/img/logo64-d.png
     keywords:
     - serverless
     - integration
@@ -285,7 +285,7 @@ entries:
       superpowers
     digest: d7453b9b6281355caad37896c6760be64735f69009bc312a54cbc17e8a1f6697
     home: https://camel.apache.org/camel-k/latest/
-    icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
+    icon: https://github.com/apache/camel/raw/master/docs/img/logo64-d.png
     keywords:
     - serverless
     - integration
@@ -310,7 +310,7 @@ entries:
       superpowers
     digest: 610a2b024d539451ee278b72179f34c242a67b7949e2a4eae7b0fa2d8d3630e3
     home: https://camel.apache.org/camel-k/latest/
-    icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
+    icon: https://github.com/apache/camel/raw/master/docs/img/logo64-d.png
     keywords:
     - serverless
     - integration
@@ -335,7 +335,7 @@ entries:
       superpowers
     digest: 3d5397e111004a8735849dcebd55c9827e687aa3ab28b5c28de8fe69595e1b8f
     home: https://camel.apache.org/camel-k/latest/
-    icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
+    icon: https://github.com/apache/camel/raw/master/docs/img/logo64-d.png
     keywords:
     - serverless
     - integration
@@ -360,7 +360,7 @@ entries:
       superpowers
     digest: 43fa5d9563ce76d25695e4132c5870279541b26be2ac8023537b587483853260
     home: https://camel.apache.org/camel-k/latest/
-    icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
+    icon: https://github.com/apache/camel/raw/master/docs/img/logo64-d.png
     keywords:
     - serverless
     - integration
@@ -380,12 +380,12 @@ entries:
     version: 0.1.1
   - apiVersion: v2
     appVersion: 1.0.0-RC2
-    created: "2021-04-20T18:13:56.796846712+02:00"
+    created: "2022-02-28T12:21:15.398718897+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 3bc8c53c4d781c4b4e4aac254d291339b348c2d8b4cf24b579ceb4330a48edd5
     home: https://camel.apache.org/camel-k/latest/
-    icon: https://raw.githubusercontent.com/apache/camel/main/docs/img/logo-d.svg
+    icon: https://raw.githubusercontent.com/apache/camel/master/docs/img/logo-d.svg
     keywords:
     - serverless
     - integration
@@ -403,4 +403,4 @@ entries:
     urls:
     - https://apache.github.io/camel-k/charts/camel-k-0.1.0.tgz
     version: 0.1.0
-generated: "2022-01-24T10:24:12.637333798+01:00"
+generated: "2021-04-20T18:13:56.796846712+02:00"
