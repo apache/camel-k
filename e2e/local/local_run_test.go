@@ -25,8 +25,8 @@ import (
 	"io"
 	"testing"
 
-	"github.com/golangplus/testing/assert"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 
 	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/e2e/support/util"
@@ -57,7 +57,7 @@ func TestLocalRun(t *testing.T) {
 	Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
 }
 
-func TestLocalContainerRun(t *testing.T) {
+func TestLocalRunContainerize(t *testing.T) {
 	RegisterTestingT(t)
 
 	ctx, cancel := context.WithCancel(TestContext)
@@ -77,6 +77,47 @@ func TestLocalContainerRun(t *testing.T) {
 		err := kamelRun.Execute()
 		assert.NoError(t, err)
 		cancel()
+	}()
+
+	Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
+}
+
+func TestLocalRunIntegrationDirectory(t *testing.T) {
+	RegisterTestingT(t)
+
+	ctx1, cancel1 := context.WithCancel(TestContext)
+	defer cancel1()
+
+	file := util.MakeTempCopy(t, "files/yaml.yaml")
+	dir := util.MakeTempDir(t)
+
+	kamelBuild := KamelWithContext(ctx1, "local", "build", file, "--integration-directory", dir)
+
+	go func() {
+		err := kamelBuild.Execute()
+		assert.NoError(t, err)
+		cancel1()
+	}()
+
+	Eventually(dir+"/dependencies", TestTimeoutShort).Should(BeADirectory())
+	Eventually(dir+"/properties", TestTimeoutShort).Should(BeADirectory())
+	Eventually(dir+"/routes/yaml.yaml", TestTimeoutShort).Should(BeAnExistingFile())
+
+	ctx2, cancel2 := context.WithCancel(TestContext)
+	defer cancel2()
+	piper, pipew := io.Pipe()
+	defer pipew.Close()
+	defer piper.Close()
+
+	kamelRun := KamelWithContext(ctx2, "local", "run", "--integration-directory", dir)
+	kamelRun.SetOut(pipew)
+
+	logScanner := util.NewLogScanner(ctx2, piper, "Magicstring!")
+
+	go func() {
+		err := kamelRun.Execute()
+		assert.NoError(t, err)
+		cancel2()
 	}()
 
 	Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
