@@ -211,7 +211,7 @@ test-builder: build
 
 test-local: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/local -tags=integration $(TEST_LOCAL_RUN)
+	go test -timeout 10m -v ./e2e/local -tags=integration $(TEST_LOCAL_RUN)
 
 test-kamel-cli: build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
