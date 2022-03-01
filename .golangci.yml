@@ -47,6 +47,7 @@ linters:
     - nestif
     - nilnil
     - nlreturn
+    - nolintlint
     - paralleltest
     - tagliatelle
     - tenv
