@@ -23,36 +23,36 @@ linters-settings:
 linters:
   enable-all: true
   disable:
+    - cyclop
     - dupl
+    - exhaustive
+    - exhaustivestruct
     - forbidigo
     - funlen
-    - gomoddirectives
-    - godox
-    - gomnd
+    - gci
+    - gochecknoglobals
     - gochecknoinits
     - gocognit
-    - lll
-    - nestif
-    - cyclop
-    - exhaustivestruct
-    - gochecknoglobals
-    - testpackage
-    - goerr113
-    - varnamelen
-    - tagliatelle
-    - paralleltest
-    - wrapcheck
-    - ireturn
-    - gofumpt
-    - gci
-    - wsl
     - goconst
-    - tenv
-    - whitespace
     - gocyclo
-    - nlreturn
-    - nilnil
-    - exhaustive
-    - nakedret
+    - godox
+    - goerr113
+    - gofumpt
+    - gomnd
+    - gomoddirectives
+    - ireturn
+    - lll
     - maligned
+    - nakedret
+    - nestif
+    - nilnil
+    - nlreturn
+    - paralleltest
+    - tagliatelle
+    - tenv
+    - testpackage
+    - varnamelen
+    - whitespace
+    - wrapcheck
+    - wsl
 
