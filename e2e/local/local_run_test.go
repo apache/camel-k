@@ -120,5 +120,8 @@ func TestLocalRunIntegrationDirectory(t *testing.T) {
 		cancel2()
 	}()
 
+	Eventually(dir+"/../quarkus", TestTimeoutShort).Should(BeADirectory())
+	Eventually(dir+"/../app", TestTimeoutShort).Should(BeADirectory())
+	Eventually(dir+"/../lib", TestTimeoutShort).Should(BeADirectory())
 	Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
 }

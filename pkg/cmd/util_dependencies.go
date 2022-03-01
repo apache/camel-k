@@ -497,54 +497,33 @@ func getCustomRoutesDir(integrationDirectory string) string {
 	return path.Join(integrationDirectory, "routes")
 }
 
-func getCustomQuarkusDir() (string, error) {
-	currentDir, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-	return path.Join(currentDir, "quarkus"), nil
+func getCustomQuarkusDir(integrationDirectory string) string {
+	parentDir := path.Dir(strings.TrimSuffix(integrationDirectory, "/"))
+	return path.Join(parentDir, "quarkus")
 }
 
-func getCustomLibDir() (string, error) {
-	currentDir, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-	return path.Join(currentDir, "lib/main"), nil
+func getCustomLibDir(integrationDirectory string) string {
+	parentDir := path.Dir(strings.TrimSuffix(integrationDirectory, "/"))
+	return path.Join(parentDir, "lib/main")
 }
 
-func getCustomAppDir() (string, error) {
-	currentDir, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-	return path.Join(currentDir, "app"), nil
+func getCustomAppDir(integrationDirectory string) string {
+	parentDir := path.Dir(strings.TrimSuffix(integrationDirectory, "/"))
+	return path.Join(parentDir, "app")
 }
 
-func deleteLocalIntegrationDirs() error {
-	directory, err := getCustomQuarkusDir()
-	if err != nil {
-		return err
+func deleteLocalIntegrationDirs(integrationDirectory string) error {
+	dirs := []string{
+		getCustomQuarkusDir(integrationDirectory),
+		getCustomLibDir(integrationDirectory),
+		getCustomAppDir(integrationDirectory),
 	}
 
-	err = os.RemoveAll(directory)
-	if err != nil {
-		return err
-	}
-
-	err = os.RemoveAll("lib")
-	if err != nil {
-		return err
-	}
-
-	directory, err = getCustomAppDir()
-	if err != nil {
-		return err
-	}
-
-	err = os.RemoveAll(directory)
-	if err != nil {
-		return err
+	for _, dir := range dirs {
+		err := os.RemoveAll(dir)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
