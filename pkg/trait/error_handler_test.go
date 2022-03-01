@@ -89,5 +89,5 @@ func TestErrorHandlerApplyDependency(t *testing.T) {
 	assert.True(t, enabled)
 	err = trait.Apply(e)
 	assert.Nil(t, err)
-	assert.Equal(t, "camel:log", e.Integration.Spec.Dependencies[0])
+	assert.Equal(t, "camel:log", e.Integration.Status.Dependencies[0])
 }
