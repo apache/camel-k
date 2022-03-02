@@ -6,12 +6,14 @@
 
 **Closed issues:**
 
+- Container Trait for Resource Allocation on Openshift [\#3052](https://github.com/apache/camel-k/issues/3052)
 - IntegrationKit creation based on YAML file fails [\#3033](https://github.com/apache/camel-k/issues/3033)
 - Expose Camel-related metrics \(Prometheus\) [\#3027](https://github.com/apache/camel-k/issues/3027)
 - Helm multiple namespace install Camel-K [\#2985](https://github.com/apache/camel-k/issues/2985)
 - Release 1.8.1 [\#2983](https://github.com/apache/camel-k/issues/2983)
 - Makefile Release staging: Pass the remote repository name as argument with origin as default  [\#2891](https://github.com/apache/camel-k/issues/2891)
 - Release note script: Check if the GITHUB\_TOKEN var has been set before running the command [\#2890](https://github.com/apache/camel-k/issues/2890)
+- Remove deprecated code [\#2751](https://github.com/apache/camel-k/issues/2751)
 - \[E2E\] Test error handler appears to be flaky [\#2744](https://github.com/apache/camel-k/issues/2744)
 - `Kamel local` chokes on traits [\#2499](https://github.com/apache/camel-k/issues/2499)
 - Documentation for `kamel local run` [\#2490](https://github.com/apache/camel-k/issues/2490)
