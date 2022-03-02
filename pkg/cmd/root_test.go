@@ -49,6 +49,7 @@ func kamelTestPreAddCommandInit() (*RootCmdOptions, *cobra.Command) {
 }
 
 func TestLoadFromEnvVar(t *testing.T) {
+	defer teardown(t)
 	// shows how to include a "," character inside an env value see VAR1 value
 	if err := os.Setenv("KAMEL_RUN_ENVS", "\"VAR1=value,\"\"othervalue\"\"\",VAR2=value2"); err != nil {
 		t.Fatalf("Unexpected error: %v", err)
@@ -89,6 +90,7 @@ func TestLoadFromFile(t *testing.T) {
 }
 
 func TestPrecedenceEnvVarOverFile(t *testing.T) {
+	defer teardown(t)
 	if err := os.Setenv("KAMEL_RUN_ENVS", "VAR1=envVar"); err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -112,6 +114,7 @@ func TestPrecedenceEnvVarOverFile(t *testing.T) {
 }
 
 func TestPrecedenceCommandLineOverEverythingElse(t *testing.T) {
+	defer teardown(t)
 	if err := os.Setenv("KAMEL_RUN_ENVS", "VAR1=envVar"); err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -141,4 +144,13 @@ func readViperConfigFromBytes(t *testing.T, propertiesFile []byte) {
 	if unexpectedErr != nil {
 		t.Fatalf("Unexpected error: %v", unexpectedErr)
 	}
+}
+
+// We must ALWAYS clean the environment variables and viper library properties to avoid mess up with the rest of the tests.
+func teardown(t *testing.T) {
+	t.Helper()
+	if err := os.Setenv("KAMEL_RUN_ENVS", ""); err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	readViperConfigFromBytes(t, make([]byte, 0))
 }
