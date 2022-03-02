@@ -22,7 +22,7 @@ metadata:
     capabilities: Full Lifecycle
     categories: Integration & Delivery
     certified: "false"
-    containerImage: docker.io/apache/camel-k:1.8.1
+    containerImage: docker.io/apache/camel-k:1.8.2
     createdAt: 2021-12-20T16:11:27Z
     description: Apache Camel K is a lightweight integration platform, born on Kubernetes,
       with serverless superpowers.
@@ -31,7 +31,7 @@ metadata:
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
     repository: https://github.com/apache/camel-k
     support: Camel
-  name: camel-k.v1.8.1
+  name: camel-k.v1.8.2
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -156,4 +156,4 @@ spec:
   selector:
     matchLabels:
       name: camel-k-operator
-  version: 1.8.1-snapshot
+  version: 1.8.2-snapshot
