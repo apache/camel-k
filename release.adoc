@@ -241,10 +241,13 @@ The milestone field in the release doc is the Github id for the milestone (e.g. 
 
 === Operator Hub
 
-The https://github.com/operator-framework/community-operators[OperatorHub] downstream channel should be synced to publish the latest version
+The https://github.com/k8s-operatorhub/community-operators/[OperatorHub] downstream channel should be synced to publish the latest version
 of Camel K, so that it can be easily installed on platforms that support Operator Hub.
 
-You can create the bundle using the `make bundle` command, then upload the CRD and CSV to the "community-operators" repository (2 PRs, one for OpenShift and one for all other platforms).
+The https://github.com/redhat-openshift-ecosystem/community-operators-prod/[Embedded OperatorHub in OpenShift and OKD] downstream channel should be synced to publish the latest version
+of Camel K, so that it can be easily installed on Openshift and OKD.
+
+You can create the bundle using the `make bundle` command, then upload the CRD and CSV to the "community-operators" repository and "community-operators-prod" (2 PRs, one for OpenShift and one for all other platforms).
 
 === Helm
 
