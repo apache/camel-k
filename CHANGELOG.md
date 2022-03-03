@@ -17,6 +17,8 @@
 - \[E2E\] Test error handler appears to be flaky [\#2744](https://github.com/apache/camel-k/issues/2744)
 - `Kamel local` chokes on traits [\#2499](https://github.com/apache/camel-k/issues/2499)
 - Documentation for `kamel local run` [\#2490](https://github.com/apache/camel-k/issues/2490)
+- Support for HashiCorp Vault [\#2107](https://github.com/apache/camel-k/issues/2107)
+- Provide automated tests for "kamel local run --integration-directory \<dir-name\>" command [\#2075](https://github.com/apache/camel-k/issues/2075)
 - Support for POJO, bring it back!  [\#1821](https://github.com/apache/camel-k/issues/1821)
 
 ## [v1.8.1](https://github.com/apache/camel-k/tree/v1.8.1) (2022-02-21)
