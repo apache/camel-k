@@ -31,8 +31,8 @@ import (
 	"sync"
 	"sync/atomic"
 
+	gerrors "github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
-
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -103,7 +103,9 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 						hasServerSideApply.Store(false)
 						err = nil
 					} else {
-						tryServerSideApply = sync.Once{}
+						// Unexpected error occurred
+						err = gerrors.Wrap(err, "Unexpected error occurred whilst validating kamelet")
+						log.Error(err, "Error occurred whilst loading kamelets")
 					}
 				} else {
 					hasServerSideApply.Store(true)
