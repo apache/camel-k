@@ -84,6 +84,10 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integr
 		}
 	}
 
+	//
+	// kit can still be nil if integration kit is yet
+	// to finish building and be assigned to the integration
+	//
 	env := Environment{
 		Ctx:                   ctx,
 		Platform:              pl,

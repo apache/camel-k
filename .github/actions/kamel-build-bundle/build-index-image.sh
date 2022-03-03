@@ -131,7 +131,7 @@ if [ "${PULL_REGISTRY}" != "${PUSH_REGISTRY}" ]; then
   #
   # Only add PULL_HOST if not already added (avoids repeated appended)
   #
-  sudo sed -i "/${PULL_HOST}/!s/localhost /&${PULL_HOST} /" /etc/hosts
+  sudo sed -i "/${PULL_HOST}/!s/localhost/& ${PULL_HOST} /" /etc/hosts
 
   #
   # Bring up the registry:2 instance if not already started
@@ -186,6 +186,7 @@ package: camel-k
 name: stable-$(make get-version | grep -Po "\d.\d")
 entries:
   - name: camel-k.v$(make get-version | grep -Po "\d.\d.\d")
+    replaces: $(make get-last-released-img-name).v$(make get-last-released-version | grep -Po "\d.\d.\d")
 EOF
 opm validate ${CATALOG_DIR}
 opm generate dockerfile ${CATALOG_DIR}

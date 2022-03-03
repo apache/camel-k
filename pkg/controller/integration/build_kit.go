@@ -59,7 +59,12 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 		return integration, nil
 	}
 
+	//
+	// IntegrationKit may be nil if its being upgraded
+	//
 	if integration.Status.IntegrationKit != nil {
+
+		// IntegrationKit fully defined so find it
 		kit, err := kubernetes.GetIntegrationKit(ctx, action.client, integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
 		if err != nil {
 			return nil, errors.Wrapf(err, "unable to find integration kit %s/%s, %s", integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
@@ -73,7 +78,10 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 				// We need to re-generate a kit, or search for a new one that
 				// matches the integration, so let's remove the association
 				// with the kit.
-				integration.SetIntegrationKit(&v1.IntegrationKit{})
+				//
+				// All tests & conditionals check for a nil assignment
+				//
+				integration.SetIntegrationKit(nil)
 				return integration, nil
 			}
 		}

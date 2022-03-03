@@ -267,6 +267,11 @@ func (in *Integration) SetIntegrationPlatform(platform *IntegrationPlatform) {
 }
 
 func (in *Integration) SetIntegrationKit(kit *IntegrationKit) {
+	if kit == nil {
+		in.Status.IntegrationKit = nil
+		return
+	}
+
 	cs := corev1.ConditionTrue
 	message := kit.Name
 	if kit.Status.Phase != IntegrationKitPhaseReady {
