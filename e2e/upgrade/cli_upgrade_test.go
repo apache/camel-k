@@ -75,7 +75,6 @@ func TestOperatorUpgrade(t *testing.T) {
 		Expect(os.Setenv("KAMEL_BIN", "")).To(Succeed())
 
 		// Upgrade the operator by installing the current version
-		Expect(Kamel("install", "--olm=false", "--cluster-setup", "--force").Execute()).To(Succeed())
 		Expect(Kamel("install", "-n", ns, "--olm=false", "--force", "--operator-image", image).Execute()).To(Succeed())
 
 		// Check the operator image is the current built one
