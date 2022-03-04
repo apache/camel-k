@@ -28,8 +28,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	consoleV1 "github.com/openshift/api/console/v1"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
 	"os"
@@ -38,6 +36,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	consoleV1 "github.com/openshift/api/console/v1"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
@@ -226,7 +227,8 @@ func KamelWithContext(ctx context.Context, args ...string) *cobra.Command {
 			},
 		}
 	} else {
-		c, err = cmd.NewKamelCommand(ctx)
+		// Use modeline CLI as it's closer to the real usage
+		c, args, err = cmd.NewKamelWithModelineCommand(ctx, append([]string{"kamel"}, args...))
 	}
 	if err != nil {
 		panic(err)

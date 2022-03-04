@@ -28,3 +28,8 @@ func TestStringContainsPrefix(t *testing.T) {
 	assert.True(t, StringContainsPrefix(args, "--operator-image="))
 	assert.False(t, StringContainsPrefix(args, "--olm"))
 }
+
+func TestRandomString(t *testing.T) {
+	assert.Equal(t, 10, len(RandomString(10)))
+	assert.NotEqual(t, RandomString(10), RandomString(10))
+}
