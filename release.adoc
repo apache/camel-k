@@ -247,7 +247,21 @@ of Camel K, so that it can be easily installed on platforms that support Operato
 The https://github.com/redhat-openshift-ecosystem/community-operators-prod/[Embedded OperatorHub in OpenShift and OKD] downstream channel should be synced to publish the latest version
 of Camel K, so that it can be easily installed on Openshift and OKD.
 
-You can create the bundle using the `make bundle` command, then upload the CRD and CSV to the "community-operators" repository and "community-operators-prod" (2 PRs, one for OpenShift and one for all other platforms).
+You can create the bundle using the `make bundle` command.
+
+Once `make bundle` has been executed, you can run:
+
+```
+./script/prepare-operators.sh <version_just_released>
+```
+
+You'll get two different folders in the bundle folder
+- k8s-operators
+- openshift-ecosystem
+
+In both the directories you'll have a folder with the version number specified in the command line.
+
+The content of these folders is exactly what you need as base to create a PR for https://github.com/k8s-operatorhub/community-operators/[OperatorHub] and https://github.com/redhat-openshift-ecosystem/community-operators-prod/[Embedded OperatorHub in OpenShift and OKD].
 
 === Helm
 
