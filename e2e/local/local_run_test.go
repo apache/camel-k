@@ -23,13 +23,15 @@ package local
 import (
 	"context"
 	"io"
+	"strings"
 	"testing"
 
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
 
 	. "github.com/apache/camel-k/e2e/support"
-	"github.com/apache/camel-k/e2e/support/util"
+	testutil "github.com/apache/camel-k/e2e/support/util"
+	"github.com/apache/camel-k/pkg/util"
 )
 
 func TestLocalRun(t *testing.T) {
@@ -41,12 +43,12 @@ func TestLocalRun(t *testing.T) {
 	defer pipew.Close()
 	defer piper.Close()
 
-	file := util.MakeTempCopy(t, "files/yaml.yaml")
+	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
 
 	kamelRun := KamelWithContext(ctx, "local", "run", file)
 	kamelRun.SetOut(pipew)
 
-	logScanner := util.NewLogScanner(ctx, piper, "Magicstring!")
+	logScanner := testutil.NewLogScanner(ctx, piper, "Magicstring!")
 
 	go func() {
 		err := kamelRun.Execute()
@@ -66,13 +68,15 @@ func TestLocalRunContainerize(t *testing.T) {
 	defer pipew.Close()
 	defer piper.Close()
 
-	file := util.MakeTempCopy(t, "files/yaml.yaml")
+	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
+	image := "test/test-" + strings.ToLower(util.RandomString(10))
 
-	kamelRun := KamelWithContext(ctx, "local", "run", file, "--image", "test/test", "--containerize")
+	kamelRun := KamelWithContext(ctx, "local", "run", file, "--image", image, "--containerize")
 	kamelRun.SetOut(pipew)
 
-	logScanner := util.NewLogScanner(ctx, piper, "Magicstring!")
+	logScanner := testutil.NewLogScanner(ctx, piper, "Magicstring!")
 
+	defer StopDockerContainers()
 	go func() {
 		err := kamelRun.Execute()
 		assert.NoError(t, err)
@@ -80,6 +84,7 @@ func TestLocalRunContainerize(t *testing.T) {
 	}()
 
 	Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
+	Eventually(DockerImages, TestTimeoutShort).Should(ContainSubstring(image))
 }
 
 func TestLocalRunIntegrationDirectory(t *testing.T) {
@@ -88,8 +93,8 @@ func TestLocalRunIntegrationDirectory(t *testing.T) {
 	ctx1, cancel1 := context.WithCancel(TestContext)
 	defer cancel1()
 
-	file := util.MakeTempCopy(t, "files/yaml.yaml")
-	dir := util.MakeTempDir(t)
+	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
+	dir := testutil.MakeTempDir(t)
 
 	kamelBuild := KamelWithContext(ctx1, "local", "build", file, "--integration-directory", dir)
 
@@ -112,7 +117,7 @@ func TestLocalRunIntegrationDirectory(t *testing.T) {
 	kamelRun := KamelWithContext(ctx2, "local", "run", "--integration-directory", dir)
 	kamelRun.SetOut(pipew)
 
-	logScanner := util.NewLogScanner(ctx2, piper, "Magicstring!")
+	logScanner := testutil.NewLogScanner(ctx2, piper, "Magicstring!")
 
 	go func() {
 		err := kamelRun.Execute()

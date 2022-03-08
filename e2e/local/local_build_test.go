@@ -24,7 +24,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os/exec"
 	"strings"
 	"testing"
 
@@ -39,15 +38,6 @@ import (
 // Camel version used to validate the test results
 // TODO: read version for the Camel catalog
 var camelVersion = "3.14.1"
-
-func getDockerImages() []byte {
-	cmd := exec.CommandContext(TestContext, "docker", "images")
-	out, err := cmd.Output()
-	if err != nil {
-		panic(err)
-	}
-	return out
-}
 
 func TestLocalBuild(t *testing.T) {
 	RegisterTestingT(t)
@@ -75,7 +65,7 @@ func TestLocalBuild(t *testing.T) {
 
 	Eventually(logScanner.IsFound(msgTagged), TestTimeoutMedium).Should(BeTrue())
 	Eventually(logScanner.IsFound(image), TestTimeoutMedium).Should(BeTrue())
-	Eventually(getDockerImages, TestTimeoutShort).Should(ContainSubstring(image))
+	Eventually(DockerImages, TestTimeoutShort).Should(ContainSubstring(image))
 }
 
 func TestLocalBuildWithTrait(t *testing.T) {
@@ -106,7 +96,7 @@ func TestLocalBuildWithTrait(t *testing.T) {
 	Eventually(logScanner.IsFound(msgWarning), TestTimeoutMedium).Should(BeTrue())
 	Eventually(logScanner.IsFound(msgTagged), TestTimeoutMedium).Should(BeTrue())
 	Eventually(logScanner.IsFound(image), TestTimeoutMedium).Should(BeTrue())
-	Eventually(getDockerImages, TestTimeoutMedium).Should(ContainSubstring(image))
+	Eventually(DockerImages, TestTimeoutMedium).Should(ContainSubstring(image))
 }
 
 func dependency(dir string, jar string, params ...interface{}) string {
