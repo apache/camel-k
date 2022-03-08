@@ -22,6 +22,11 @@ import (
 	"encoding/json"
 	"sort"
 
+	"github.com/pkg/errors"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
@@ -31,9 +36,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/property"
-	"github.com/pkg/errors"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var (
@@ -45,7 +47,8 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 	controller := true
 	blockOwnerDeletion := true
 	annotations := util.CopyMap(kameletbinding.Annotations)
-	delete(annotations, v1alpha1.AnnotationIcon) // avoid propagating the icon to the integration as it's heavyweight and not needed
+	// avoid propagating the icon to the integration as it's heavyweight and not needed
+	delete(annotations, v1alpha1.AnnotationIcon)
 
 	it := v1.Integration{
 		ObjectMeta: metav1.ObjectMeta{
