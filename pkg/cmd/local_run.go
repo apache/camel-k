@@ -19,6 +19,9 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -43,6 +46,19 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 			if err := options.init(); err != nil {
 				return err
 			}
+
+			// make sure cleanup is done when process is stopped externally
+			cs := make(chan os.Signal, 1)
+			signal.Notify(cs, os.Interrupt, syscall.SIGTERM)
+			go func() {
+				<-cs
+				if err := options.deinit(); err != nil {
+					fmt.Println(err)
+					os.Exit(1)
+				}
+				os.Exit(0)
+			}()
+
 			if err := options.run(cmd, args); err != nil {
 				fmt.Println(err.Error())
 			}

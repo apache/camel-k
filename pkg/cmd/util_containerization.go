@@ -95,7 +95,7 @@ func createAndBuildBaseImage(ctx context.Context) error {
 	cmd := exec.CommandContext(ctx, "docker", args...)
 
 	// Output executed command.
-	fmt.Printf("Executing: " + strings.Join(cmd.Args, " ") + "\n")
+	fmt.Printf("Executing: %s\n", strings.Join(cmd.Args, " "))
 
 	// Run the command.
 	if err := cmd.Run(); err != nil {
@@ -192,7 +192,7 @@ func createAndBuildIntegrationImage(ctx context.Context, containerRegistry strin
 	cmd.Stdout = stdout
 
 	// Output executed command.
-	fmt.Printf("Executing: " + strings.Join(cmd.Args, " ") + "\n")
+	fmt.Printf("Executing: %s\n", strings.Join(cmd.Args, " "))
 
 	// Run the command.
 	if err := cmd.Run(); err != nil {
@@ -225,7 +225,7 @@ func runIntegrationImage(ctx context.Context, image string, stdout, stderr io.Wr
 	cmd.Stdout = stdout
 
 	// Output executed command.
-	fmt.Printf("Executing: " + strings.Join(cmd.Args, " ") + "\n")
+	fmt.Printf("Executing: %s\n", strings.Join(cmd.Args, " "))
 
 	// Run the command.
 	if err := cmd.Run(); err != nil {
