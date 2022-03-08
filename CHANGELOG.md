@@ -6,7 +6,11 @@
 
 **Closed issues:**
 
+- Post release steps: Operators manifests [\#3085](https://github.com/apache/camel-k/issues/3085)
 - Migrate the OLM metadata CSVs to bundle format [\#3018](https://github.com/apache/camel-k/issues/3018)
+- How to package integration to deploy it into a private k8s cluster without internet connection [\#2737](https://github.com/apache/camel-k/issues/2737)
+- Allow trait customization through kamel bind [\#2596](https://github.com/apache/camel-k/issues/2596)
+- Provide automated tests for "kamel local build" command [\#2074](https://github.com/apache/camel-k/issues/2074)
 
 ## [v1.8.2](https://github.com/apache/camel-k/tree/v1.8.2) (2022-03-03)
 
