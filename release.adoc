@@ -258,7 +258,7 @@ First update the chart version in the `Chart.yaml` file under the `/helm` sectio
 From the main branch:
 
 ```
-./script/set-version.sh <released-version>
+./script/set_version.sh <released-version>
 make release-helm
 ```
 
