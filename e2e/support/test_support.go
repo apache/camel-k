@@ -753,7 +753,35 @@ func KameletBindingStatusReplicas(ns string, name string) func() *int32 {
 	}
 }
 
-func KameletBindingCondition(ns string, name string, conditionType v1alpha1.KameletBindingConditionType) func() corev1.ConditionStatus {
+func KameletBindingCondition(ns string, name string, conditionType v1alpha1.KameletBindingConditionType) func() *v1alpha1.KameletBindingCondition {
+	return func() *v1alpha1.KameletBindingCondition {
+		kb := KameletBinding(ns, name)()
+		if kb == nil {
+			return nil
+		}
+		c := kb.Status.GetCondition(conditionType)
+		if c == nil {
+			return nil
+		}
+		return c
+	}
+}
+
+func KameletBindingConditionReason(c *v1alpha1.KameletBindingCondition) string {
+	if c == nil {
+		return ""
+	}
+	return c.Reason
+}
+
+func KameletBindingConditionMessage(c *v1alpha1.KameletBindingCondition) string {
+	if c == nil {
+		return ""
+	}
+	return c.Message
+}
+
+func KameletBindingConditionStatus(ns string, name string, conditionType v1alpha1.KameletBindingConditionType) func() corev1.ConditionStatus {
 	return func() corev1.ConditionStatus {
 		klb := KameletBinding(ns, name)()
 		if klb == nil {
@@ -1549,13 +1577,14 @@ func CreateTimerKamelet(ns string, name string) func() error {
 	return CreateKamelet(ns, name, flow, props, nil)
 }
 
-func BindKameletTo(ns string, name string, from corev1.ObjectReference, to corev1.ObjectReference, sourceProperties map[string]string, sinkProperties map[string]string) func() error {
-	return BindKameletToWithErrorHandler(ns, name, from, to, sourceProperties, sinkProperties, nil)
+func BindKameletTo(ns string, name string, annotations map[string]string, from corev1.ObjectReference, to corev1.ObjectReference, sourceProperties map[string]string, sinkProperties map[string]string) func() error {
+	return BindKameletToWithErrorHandler(ns, name, annotations, from, to, sourceProperties, sinkProperties, nil)
 }
 
-func BindKameletToWithErrorHandler(ns string, name string, from corev1.ObjectReference, to corev1.ObjectReference, sourceProperties map[string]string, sinkProperties map[string]string, errorHandler map[string]interface{}) func() error {
+func BindKameletToWithErrorHandler(ns string, name string, annotations map[string]string, from corev1.ObjectReference, to corev1.ObjectReference, sourceProperties map[string]string, sinkProperties map[string]string, errorHandler map[string]interface{}) func() error {
 	return func() error {
 		kb := v1alpha1.NewKameletBinding(ns, name)
+		kb.Annotations = annotations
 		kb.Spec = v1alpha1.KameletBindingSpec{
 			Source: v1alpha1.Endpoint{
 				Ref:        &from,
