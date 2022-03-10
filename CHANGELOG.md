@@ -6,8 +6,10 @@
 
 **Closed issues:**
 
+- integration readiness condition is not reported to kamelet binding [\#3091](https://github.com/apache/camel-k/issues/3091)
 - Post release steps: Operators manifests [\#3085](https://github.com/apache/camel-k/issues/3085)
 - Release 1.8.2 [\#3057](https://github.com/apache/camel-k/issues/3057)
+- Why do we println errors in `kamel local` instead of returning them? [\#3029](https://github.com/apache/camel-k/issues/3029)
 - Migrate the OLM metadata CSVs to bundle format [\#3018](https://github.com/apache/camel-k/issues/3018)
 - How to package integration to deploy it into a private k8s cluster without internet connection [\#2737](https://github.com/apache/camel-k/issues/2737)
 - Allow trait customization through kamel bind [\#2596](https://github.com/apache/camel-k/issues/2596)
