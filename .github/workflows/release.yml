@@ -50,27 +50,26 @@ jobs:
         TEST_DOCKER_HUB_PASSWORD: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
       run: |
         TAG=${GITHUB_REF##*/}
-        VERSION=${TAG:1}
-        echo "Using VERSION=$VERSION"
-        echo "::set-env name=VERSION::$VERSION"
+        echo "Using VERSION=$TAG"
+        echo "VERSION=$TAG" >> $GITHUB_ENV
 
         IMAGE_NAME=docker.io/${TEST_DOCKER_HUB_USERNAME:-testcamelk}/camel-k
         echo "Using IMAGE_NAME=$IMAGE_NAME"
-        echo "::set-env name=IMAGE_NAME::$IMAGE_NAME"
+        echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
 
         MAVEN_REPOSITORY=$(make get-staging-repo)
         echo "Using MAVEN_REPOSITORY=$MAVEN_REPOSITORY"
-        echo "::set-env name=MAVEN_REPOSITORY::$MAVEN_REPOSITORY"
+        echo "MAVEN_REPOSITORY=$MAVEN_REPOSITORY" >> $GITHUB_ENV
 
         docker login -u $TEST_DOCKER_HUB_USERNAME -p $TEST_DOCKER_HUB_PASSWORD
-
+        
     - name: Codegen
       run: |
-        make VERSION=$VERSION IMAGE_NAME=$IMAGE_NAME codegen set-version build-resources
+        make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} codegen set-version build-resources
 
     - name: Build
       run: |
-        make VERSION=$VERSION IMAGE_NAME=$IMAGE_NAME release-nightly
+        make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} release-nightly
 
     - name: Check
       run: ls -l
