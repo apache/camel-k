@@ -183,14 +183,12 @@ func (t *mountTrait) attachResource(e *Environment, conf *utilResource.Config) {
 
 func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount, conf *utilResource.Config) {
 	refName := kubernetes.SanitizeLabel(conf.Name())
-	dstDir := ""
+	dstDir := conf.DestinationPath()
 	dstFile := ""
 	if conf.DestinationPath() != "" {
 		if conf.Key() != "" {
-			dstDir = filepath.Dir(conf.DestinationPath())
 			dstFile = filepath.Base(conf.DestinationPath())
 		} else {
-			dstDir = conf.DestinationPath()
 			dstFile = conf.Key()
 		}
 	}
@@ -200,7 +198,7 @@ func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeM
 	if conf.StorageType() == utilResource.StorageTypePVC {
 		readOnly = false
 	}
-	mnt := getMount(refName, mntPath, "", readOnly)
+	mnt := getMount(refName, mntPath, dstFile, readOnly)
 
 	*vols = append(*vols, *vol)
 	*mnts = append(*mnts, *mnt)
