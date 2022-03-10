@@ -50,8 +50,9 @@ jobs:
         TEST_DOCKER_HUB_PASSWORD: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
       run: |
         TAG=${GITHUB_REF##*/}
-        echo "Using VERSION=$TAG"
-        echo "VERSION=$TAG" >> $GITHUB_ENV
+        VERSION=${TAG:1}
+        echo "Using VERSION=$VERSION"
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
 
         IMAGE_NAME=docker.io/${TEST_DOCKER_HUB_USERNAME:-testcamelk}/camel-k
         echo "Using IMAGE_NAME=$IMAGE_NAME"
