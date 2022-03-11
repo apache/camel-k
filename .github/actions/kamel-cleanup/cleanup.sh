@@ -48,9 +48,46 @@ while getopts ":c:i:x:" opt; do
 done
 shift $((OPTIND-1))
 
+#
+# Reset the proxy to default if using an OLM
+# which would require a catalogsource
+#
+if [ -n "${BUILD_CATALOG_SOURCE}" ]; then
+  set +e
+
+#
+# Remove values altogther
+#
+  PATCH=$(mktemp /tmp/proxy-patch.XXXXXXXX)
+  cat >${PATCH} <<EOF
+[
+  {
+    "op": "replace",
+    "path": "/spec",
+    "value": {}
+  },
+  {
+    "op": "replace",
+    "path": "/status",
+    "value": {}
+  }
+]
+EOF
+
+  kubectl patch --type='json' Proxy cluster --patch-file "${PATCH}"
+
+  if [ $? != 0 ]; then
+    echo "Error: Failed to reset the Proxy"
+    exit 1
+  fi
+
+  rm -f "${PATCH}"
+
+  set -e
+fi
 
 if [ "${SAVE_NAMESPACES}" == "true" ]; then
-  echo "Skipping cleanup since SAVE_NAMESPACES has been set to true"
+  echo "Skipping remaining cleanup since SAVE_NAMESPACES has been set to true"
   exit 0
 fi
 

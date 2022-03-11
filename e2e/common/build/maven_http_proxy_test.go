@@ -29,14 +29,15 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/olm"
 	"math/big"
 	rand2 "math/rand"
 	"reflect"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/olm"
 
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
@@ -45,6 +46,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -163,6 +165,16 @@ func TestMavenProxy(t *testing.T) {
 			newProxy.Spec.NoProxy = strings.Join(noProxy, ",")
 			Expect(TestClient().Update(TestContext, newProxy))
 
+			defer func() {
+				//
+				// Patching the proxy back to default
+				// Note. A merge patch or client update making spec and status empty
+				//       does not work on some platforms, eg. OCP4
+				//
+				patch := []byte(`[{"op": "replace","path": "/spec","value": {}},{"op": "replace","path": "/status","value": {}}]`)
+				TestClient().Patch(TestContext, &defaultProxy, ctrl.RawPatch(types.JSONPatchType, patch))
+			}()
+
 			// ENV values should be injected by the OLM
 			Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
@@ -209,10 +221,6 @@ func TestMavenProxy(t *testing.T) {
 		Expect(TestClient().Delete(TestContext, service)).To(Succeed())
 		Expect(TestClient().Delete(TestContext, secret)).To(Succeed())
 		Expect(TestClient().Delete(TestContext, config)).To(Succeed())
-
-		if olmInstall {
-			TestClient().Update(TestContext, &defaultProxy)
-		}
 	})
 }
 
