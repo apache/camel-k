@@ -125,11 +125,15 @@ func (action *monitorAction) Handle(ctx context.Context, kameletbinding *v1alpha
 
 func setKameletBindingReadyCondition(kb *v1alpha1.KameletBinding, it *v1.Integration) {
 	if condition := it.Status.GetCondition(v1.IntegrationConditionReady); condition != nil {
+		message := condition.Message
+		if message == "" {
+			message = fmt.Sprintf("Integration %q readiness condition is %q", it.GetName(), condition.Status)
+		}
 		kb.Status.SetCondition(
 			v1alpha1.KameletBindingConditionReady,
 			condition.Status,
 			condition.Reason,
-			fmt.Sprintf("Integration %q readiness condition is %q", it.GetName(), condition.Status),
+			message,
 		)
 	} else {
 		kb.Status.SetCondition(
