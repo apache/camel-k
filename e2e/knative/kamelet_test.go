@@ -69,8 +69,10 @@ func TestKameletChange(t *testing.T) {
 		Eventually(KameletBindingConditionStatus(ns, name, v1alpha1.KameletBindingConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
 		Eventually(KameletBindingCondition(ns, name, v1alpha1.KameletBindingConditionReady), TestTimeoutMedium).Should(And(
 			WithTransform(KameletBindingConditionReason, Equal(v1.IntegrationConditionDeploymentProgressingReason)),
-			WithTransform(KameletBindingConditionMessage, Equal(fmt.Sprintf("Integration %q readiness condition is %q", name, corev1.ConditionFalse))),
-		))
+			WithTransform(KameletBindingConditionMessage, Or(
+				Equal("0/1 updated replicas"),
+				Equal("0/1 ready replicas"),
+			))))
 
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, "timer-binding", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -79,7 +81,7 @@ func TestKameletChange(t *testing.T) {
 		Eventually(KameletBindingConditionStatus(ns, name, v1alpha1.KameletBindingConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(KameletBindingCondition(ns, name, v1alpha1.KameletBindingConditionReady), TestTimeoutMedium).Should(And(
 			WithTransform(KameletBindingConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),
-			WithTransform(KameletBindingConditionMessage, Equal(fmt.Sprintf("Integration %q readiness condition is %q", name, corev1.ConditionTrue))),
+			WithTransform(KameletBindingConditionMessage, Equal(fmt.Sprintf("1/1 ready replicas"))),
 		))
 
 		// Update the KameletBinding
@@ -88,8 +90,10 @@ func TestKameletChange(t *testing.T) {
 		Eventually(KameletBindingConditionStatus(ns, name, v1alpha1.KameletBindingConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
 		Eventually(KameletBindingCondition(ns, name, v1alpha1.KameletBindingConditionReady), TestTimeoutMedium).Should(And(
 			WithTransform(KameletBindingConditionReason, Equal(v1.IntegrationConditionDeploymentProgressingReason)),
-			WithTransform(KameletBindingConditionMessage, Equal(fmt.Sprintf("Integration %q readiness condition is %q", name, corev1.ConditionFalse))),
-		))
+			WithTransform(KameletBindingConditionMessage, Or(
+				Equal("0/1 updated replicas"),
+				Equal("0/1 ready replicas"),
+			))))
 
 		Eventually(IntegrationPodPhase(ns, "timer-binding"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, "timer-binding", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -99,7 +103,7 @@ func TestKameletChange(t *testing.T) {
 		Eventually(KameletBindingCondition(ns, name, v1alpha1.KameletBindingConditionReady), TestTimeoutMedium).
 			Should(And(
 				WithTransform(KameletBindingConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),
-				WithTransform(KameletBindingConditionMessage, Equal(fmt.Sprintf("Integration %q readiness condition is %q", name, corev1.ConditionTrue))),
+				WithTransform(KameletBindingConditionMessage, Equal("1/1 ready replicas")),
 			))
 
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
