@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Kaniko settings refactoring [\#3005](https://github.com/apache/camel-k/issues/3005)
 - Add daily operator image builds [\#393](https://github.com/apache/camel-k/issues/393)
 
 ## [1.9.0-nightly.202203101127](https://github.com/apache/camel-k/tree/1.9.0-nightly.202203101127) (2022-03-10)
