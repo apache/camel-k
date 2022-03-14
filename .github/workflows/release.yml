@@ -18,9 +18,8 @@
 name: release
 
 on:
-  push:
-    tags:
-      - '*nightly*'
+  schedule:
+  - cron: "50 23 * * *"
 
 jobs:
   release:
@@ -43,16 +42,17 @@ jobs:
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
-
+    - name: Get nightly version
+      shell: bash
+      run: |
+        V=$(make get-version | sed s/-SNAPSHOT/-nightly/)
+        echo "VERSION=$V" >> $GITHUB_ENV
     - name: Global Env
       env:
         TEST_DOCKER_HUB_USERNAME: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
         TEST_DOCKER_HUB_PASSWORD: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
       run: |
-        TAG=${GITHUB_REF##*/}
-        VERSION=${TAG:1}
-        echo "Using VERSION=$VERSION"
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Using VERSION=${{ env.VERSION }}"
 
         IMAGE_NAME=docker.io/${TEST_DOCKER_HUB_USERNAME:-testcamelk}/camel-k
         echo "Using IMAGE_NAME=$IMAGE_NAME"
@@ -84,7 +84,7 @@ jobs:
         tag_name: ${{ env.VERSION }}
         release_name: Release ${{ env.VERSION }}
         body: |
-          Apache Camel K nightly build for testing (unstable).
+          Apache Camel K ${{ env.VERSION }} build for testing (unstable).
 
           To test it, download the client for your OS and run:
 
