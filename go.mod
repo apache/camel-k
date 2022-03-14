@@ -11,12 +11,12 @@ require (
 	github.com/evanphx/json-patch v4.12.0+incompatible
 	github.com/fatih/camelcase v1.0.0
 	github.com/fatih/structs v1.1.0
-	github.com/gertd/go-pluralize v0.1.1
+	github.com/gertd/go-pluralize v0.2.0
 	github.com/go-logr/logr v1.2.2
 	github.com/google/go-github/v32 v32.1.0
 	github.com/google/uuid v1.3.0
 	github.com/jpillora/backoff v1.0.0
-	github.com/magiconair/properties v1.8.5
+	github.com/magiconair/properties v1.8.6
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.4.3
 	github.com/onsi/gomega v1.16.0
@@ -41,7 +41,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/automaxprocs v1.4.0
 	go.uber.org/multierr v1.6.0
-	go.uber.org/zap v1.19.1
+	go.uber.org/zap v1.21.0
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gopkg.in/inf.v0 v0.9.1
