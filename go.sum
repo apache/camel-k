@@ -479,8 +479,8 @@ github.com/fsnotify/fsnotify v1.5.1/go.mod h1:T3375wBYaZdLLcVNkcVbzGHY7f1l/uK5T5
 github.com/fullsailor/pkcs7 v0.0.0-20190404230743-d7302db945fa/go.mod h1:KnogPXtdwXqoenmZCw6S+25EAm2MkxbG0deNDu4cbSA=
 github.com/fvbommel/sortorder v1.0.1/go.mod h1:uk88iVf1ovNn1iLfgUVU2F9o5eO30ui720w+kxuqRs0=
 github.com/garyburd/redigo v0.0.0-20150301180006-535138d7bcd7/go.mod h1:NR3MbYisc3/PwhQ00EMzDiPmrwpPxAn5GI05/YaO1SY=
-github.com/gertd/go-pluralize v0.1.1 h1:fQhql/WRRwr4TVp+TCw12s2esCacvEVBdkTUUwNqF/Q=
-github.com/gertd/go-pluralize v0.1.1/go.mod h1:t5DfHcumb6m0RqyVJDrDLEzL2AGeaiqUXIcDNwLaeAs=
+github.com/gertd/go-pluralize v0.2.0 h1:VzWNnxkUo3wkW2Nmp+3ieHSTQQ0LBHeSVxlKsQPQ+UY=
+github.com/gertd/go-pluralize v0.2.0/go.mod h1:4ouO1Ndf/r7sZMorwp4Sbfw80lUni+sd+o3qJR8L9To=
 github.com/getkin/kin-openapi v0.76.0/go.mod h1:660oXbgy5JFMKreazJaQTw7o+X00qeSyhcnluiMv+Xg=
 github.com/getsentry/raven-go v0.2.0/go.mod h1:KungGk8q33+aIAZUIVWZDr2OfAEBsO49PX4NzFV5kcQ=
 github.com/ghodss/yaml v0.0.0-20150909031657-73d445a93680/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
