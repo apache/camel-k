@@ -7,13 +7,12 @@ require (
 	github.com/apache/camel-k/pkg/apis/camel v0.0.0
 	github.com/apache/camel-k/pkg/client/camel v0.0.0
 	github.com/apache/camel-k/pkg/kamelet/repository v0.0.0
-	github.com/container-tools/spectrum v0.3.7
+	github.com/container-tools/spectrum v0.3.8
 	github.com/evanphx/json-patch v4.12.0+incompatible
 	github.com/fatih/camelcase v1.0.0
 	github.com/fatih/structs v1.1.0
 	github.com/gertd/go-pluralize v0.1.1
 	github.com/go-logr/logr v1.2.2
-	github.com/golangplus/testing v1.0.0
 	github.com/google/go-github/v32 v32.1.0
 	github.com/google/uuid v1.3.0
 	github.com/jpillora/backoff v1.0.0
@@ -25,7 +24,7 @@ require (
 	github.com/operator-framework/api v0.3.8
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.42.1
-	github.com/prometheus/client_golang v1.11.0
+	github.com/prometheus/client_golang v1.12.1
 	github.com/prometheus/client_model v0.2.0
 	github.com/prometheus/common v0.32.1
 	github.com/radovskyb/watcher v1.0.7
