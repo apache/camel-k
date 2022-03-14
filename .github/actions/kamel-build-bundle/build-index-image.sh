@@ -25,7 +25,7 @@
 
 set -e
 
-while getopts ":b:i:l:n:s:v:" opt; do
+while getopts ":b:i:l:n:s:v:x:y:z:" opt; do
   case "${opt}" in
     b)
       BUNDLE_IMAGE=${OPTARG}
@@ -44,6 +44,15 @@ while getopts ":b:i:l:n:s:v:" opt; do
       ;;
     v)
       IMAGE_VERSION=${OPTARG}
+      ;;
+    x)
+      CSV_NAME=${OPTARG}
+      ;;
+    y)
+      IMAGE_LAST_NAME=${OPTARG}
+      ;;
+    z)
+      IMAGE_LAST_VERSION=${OPTARG}
       ;;
     :)
       echo "ERROR: Option -$OPTARG requires an argument"
@@ -67,8 +76,18 @@ if [ -z "${IMAGE_NAME}" ]; then
   exit 1
 fi
 
+if [ -z "${IMAGE_LAST_NAME}" ]; then
+  echo "Error: local-image-last-name not defined"
+  exit 1
+fi
+
 if [ -z "${IMAGE_VERSION}" ]; then
   echo "Error: local-image-version not defined"
+  exit 1
+fi
+
+if [ -z "${IMAGE_LAST_VERSION}" ]; then
+  echo "Error: local-image-last-version not defined"
   exit 1
 fi
 
@@ -84,6 +103,11 @@ fi
 
 if [ -z "${REGISTRY_PULL_HOST}" ]; then
   echo "Error: image-registry-pull-host not defined"
+  exit 1
+fi
+
+if [ -z "${CSV_NAME}" ]; then
+  echo "Error: csv-name not defined"
   exit 1
 fi
 
@@ -179,6 +203,10 @@ fi
 mkdir ${CATALOG_DIR}
 opm render quay.io/operatorhubio/catalog:latest -o yaml > ${CATALOG_DIR}/bundles.yaml
 opm render --use-http -o yaml ${BUNDLE_IMAGE} > ${CATALOG_DIR}/camel-k.yaml
+
+#
+# Add the dedicated stable-dev branch (needed for upgrade tests)
+#
 cat << EOF >> ${CATALOG_DIR}/camel-k.yaml
 ---
 schema: olm.channel
@@ -188,6 +216,36 @@ entries:
   - name: camel-k.v$(make get-version | grep -Po "\d.\d.\d")
     replaces: $(make get-last-released-img-name).v$(make get-last-released-version | grep -Po "\d.\d.\d")
 EOF
+
+#
+# Update the existing stable channel (needed for preflight and tests on OCP)
+#
+sedtemp=$(mktemp sed-template-XXX.sed)
+cat << EOF > ${sedtemp}
+/- name: ${IMAGE_LAST_NAME}.v${IMAGE_LAST_VERSION}/ {
+  p;
+  n;
+  /  replaces:/ {
+    p;
+    n;
+    /name: stable$/ {
+      i- name: ${CSV_NAME}
+      i\ \ replaces: ${IMAGE_LAST_NAME}.v${IMAGE_LAST_VERSION}
+      p;
+      d;
+    }
+  }
+}
+p;
+EOF
+
+sed -i -n -f ${sedtemp} ${CATALOG_DIR}/bundles.yaml
+
+rm -f ${sedtemp}
+
+#
+# Validate the modified catalog
+#
 opm validate ${CATALOG_DIR}
 opm generate dockerfile ${CATALOG_DIR}
 if [ ! -f catalog.Dockerfile ]; then

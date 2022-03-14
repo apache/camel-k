@@ -53,6 +53,7 @@ CHANNELS ?= $(OPERATOR_VERSION),candidate,stable,latest
 DEFAULT_CHANNEL ?= $(OPERATOR_VERSION)
 PACKAGE := camel-k
 CSV_VERSION := $(CUSTOM_VERSION:-SNAPSHOT=)
+CSV_NAME := $(PACKAGE).v$(CSV_VERSION)
 CSV_DISPLAY_NAME := Camel K Operator
 CSV_SUPPORT := Camel
 CSV_REPLACES := $(LAST_RELEASED_IMAGE_NAME).v$(LAST_RELEASED_VERSION)
@@ -336,6 +337,9 @@ get-last-released-img-name:
 get-last-released-version:
 	@echo $(LAST_RELEASED_VERSION)
 
+get-csv-name:
+	@echo $(CSV_NAME)
+
 set-version:
 	./script/set_version.sh $(CUSTOM_VERSION) $(CUSTOM_IMAGE)
 
@@ -491,7 +495,7 @@ pre-bundle:
 	@sed -i 's/projectName: .*/projectName: $(PACKAGE)/' PROJECT
 	@sed -i 's~^    containerImage: .*~    containerImage: $(CUSTOM_IMAGE):$(CUSTOM_VERSION)~' $(CSV_PATH)
 	@sed -i 's/^    support: .*/    support: $(CSV_SUPPORT)/' $(CSV_PATH)
-	@sed -i 's/^  name: .*.\(v.*\)/  name: $(PACKAGE).v$(CSV_VERSION)/' $(CSV_PATH)
+	@sed -i 's/^  name: .*.\(v.*\)/  name: $(CSV_NAME)/' $(CSV_PATH)
 	@sed -i 's/^  displayName: .*/  displayName: $(CSV_DISPLAY_NAME)/' $(CSV_PATH)
 	@sed -i 's/^  replaces: .*/  replaces: $(CSV_REPLACES)/' $(CSV_PATH)
 	@sed -i 's/^  version: .*/  version: $(CSV_VERSION)/' $(CSV_PATH)

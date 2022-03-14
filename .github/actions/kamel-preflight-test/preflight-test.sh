@@ -110,6 +110,15 @@ export CUSTOM_VERSION=${IMAGE_VERSION}
 #
 has_olm="false"
 if [ -n "${BUILD_CATALOG_SOURCE}" ]; then
+  #
+  # Check catalog source is actually available
+  #
+  STATE=$(kubectl get catalogsource ${BUILD_CATALOG_SOURCE} -n ${IMAGE_NAMESPACE} -o=jsonpath='{.status.connectionState.lastObservedState}')
+  if [ "${STATE}" != "READY" ]; then
+    echo "Error: catalog source status is not ready."
+    exit 1
+  fi
+
   export KAMEL_INSTALL_OLM_SOURCE_NAMESPACE=${IMAGE_NAMESPACE}
   export KAMEL_INSTALL_OLM_SOURCE=${BUILD_CATALOG_SOURCE}
   has_olm="true"
@@ -166,7 +175,7 @@ src_commit=$(git rev-parse HEAD)
 # Test whether the versions are the same
 #
 if [ "${camel_op_version}" != "${IMAGE_VERSION}" ]; then
-  echo "Preflight Test: Failure - Installed operator version (${camel_op_version} does not match expected version (${IMAGE_VERSION})"
+  echo "Preflight Test: Failure - Installed operator version ${camel_op_version} does not match expected version (${IMAGE_VERSION})"
   exit 1
 fi
 

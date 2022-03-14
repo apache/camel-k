@@ -74,7 +74,10 @@ runs:
           -l "${{ inputs.image-registry-pull-host }}" \
           -n "${{ inputs.local-image-name }}" \
           -s "${{ inputs.image-registry-push-host }}" \
-          -v "${{ inputs.local-image-version }}"
+          -v "${{ inputs.local-image-version }}" \
+          -x "$(make get-csv-name)" \
+          -y "$(make get-last-released-img-name)" \
+          -z "$(make get-last-released-version)"
 
     - id: build-image-catalog
       name: Create a new catalog to host the index image
