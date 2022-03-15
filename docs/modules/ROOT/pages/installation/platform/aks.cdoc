@@ -1,0 +1,34 @@
+Apache Camel K is a lightweight integration platform, born on Kubernetes,
+with serverless superpowers.
+
+# Camel K deployment in AKS 
+
+## Prerequisites
+
+- AKS cluster with cluster role binding to deploy operator
+- Container Image Registry installed and configured for pull (using nexus)
+- Base image to build camel integration push to Image Registry (jdk-jre image present in nexus)
+
+
+Installation using Kamel CLI
+
+
+kamel install --registry <docker registry address> --registry-insecure true --organization chubbio --registry-auth-username <organization name> --registry-secret <docker registry secrets> --base-image <base image to buuld camel integration>   -n <namespace>
+
+## Installing using helm Chart
+
+This chart deploys the Camel K operator and all resources needed to natively run
+Apache Camel integrations on any Kubernetes cluster.
+
+
+```console
+
+helm repo add camel-k https://apache.github.io/camel-k/charts
+
+```
+
+```console
+
+helm install --generate-name --set platform.build.registry.address=<docker registry address> --set platform.build.registry.insecure=true --set platform.build.registry.organization=<organization name> --set platform.build.baseImage=<base image to buuld camel integration> --set platform.build.registry.secret=<docker registry secrets> -–namespace <name of the namespace> 
+
+```
