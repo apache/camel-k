@@ -15,28 +15,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
-
 location=$(dirname $0)
-cd $location/..
+rootdir=$location/../
 
-version=$1
-repo=$2
-
-[ -d "./tmpschema" ] && rm -r ./tmpschema
-mkdir  tmpschema
-
-./mvnw dependency:copy \
-  -f build/maven/pom-catalog.xml \
-  -Dartifact=org.apache.camel.k:camel-k-loader-yaml-impl:$version:json:json-schema \
-  -DoutputDirectory=../../tmpschema \
-  -Dmdep.stripVersion \
-  -Druntime.version=$1 \
-  -Dstaging.repo=$repo
-
-schema=./tmpschema/camel-k-loader-yaml-impl-json-schema.json
-
-go run ./cmd/util/json-schema-gen ./config/crd/bases/camel.apache.org_kamelets.yaml $schema .spec.flow false ./docs/modules/ROOT/assets/attachments/schema/kamelet-schema.json
-go run ./cmd/util/json-schema-gen ./config/crd/bases/camel.apache.org_integrations.yaml $schema .spec.flows true ./docs/modules/ROOT/assets/attachments/schema/integration-schema.json
-
-rm -r ./tmpschema
+if [ "$#" -ge 1 ]; then
+  runtimeVersion="$1"
+  shift 1
+  # the catalog was already provided by Camel K runtime. No need to depends on maven to rebuild it
+  wget -q https://repo1.maven.org/maven2/org/apache/camel/k/camel-k-catalog/$runtimeVersion/camel-k-catalog-$runtimeVersion-catalog.yaml -O ${rootdir}/resources/camel-catalog-$runtimeVersion.yaml
+  # TODO if we need to use also staging, then we must parse the maven-metadata from the staging repository 
+  # (ie https://repository.apache.org/content/repositories/snapshots/org/apache/camel/k/camel-k-catalog/1.13.0-SNAPSHOT/maven-metadata.xml)
+  # and get the latest snapshot produced as done in the stable version above
+else
+  echo "usage: $0 <runtime.version> [staging.repo]"
+  exit 1
+fi
