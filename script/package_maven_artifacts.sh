@@ -29,7 +29,7 @@ staging_repo=$3
 cd ${location}/..
 
 if [ "$strategy" = "copy" ]; then
-    ./mvnw \
+    mvn \
         -V \
         --no-transfer-progress \
         -f build/maven/pom-runtime.xml \
@@ -39,7 +39,7 @@ if [ "$strategy" = "copy" ]; then
         -Dalpn.jdk8.version="8.1.13.v20181017" \
         dependency:copy-dependencies
 elif [ "$strategy" = "download" ]; then
-    ./mvnw \
+    mvn \
         -V \
         --no-transfer-progress \
         -f build/maven/pom-runtime.xml \

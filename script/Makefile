@@ -162,7 +162,7 @@ codegen:
 
 	gofmt -w pkg/util/defaults/defaults.go
 
-generate: generate-deepcopy generate-crd generate-client generate-doc generate-json-schema generate-keda generate-strimzi
+generate: generate-deepcopy generate-crd generate-client generate-doc generate-keda generate-strimzi
 
 generate-client:
 	./script/gen_client.sh
@@ -175,10 +175,6 @@ generate-doc:
 
 generate-deepcopy: controller-gen
 	cd pkg/apis/camel && $(CONTROLLER_GEN) paths="./..." object
-
-generate-json-schema:
-	# Skip since the YAML DSL schema has been moved to apache/camel
-	#./script/gen_json_schema.sh $(RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
 
 generate-keda:
 	cd addons/keda/duck && $(CONTROLLER_GEN) paths="./..." object
@@ -243,7 +239,7 @@ else
 endif
 
 build-resources:
-	./script/build_catalog.sh $(RUNTIME_VERSION) -Dcatalog.file=camel-catalog-$(RUNTIME_VERSION).yaml -Dcatalog.runtime=quarkus -Dstaging.repo="$(STAGING_RUNTIME_REPO)"
+	./script/get_catalog.sh $(RUNTIME_VERSION) -Dstaging.repo="$(STAGING_RUNTIME_REPO)"
 	go generate ./pkg/...
 
 bundle-kamelets:
@@ -295,6 +291,7 @@ check-licenses:
 check-platform:
 	./script/check_platform.sh
 
+# The below are dependencies needed for maven structured logs. We must bundle into the final container image.
 maven-overlay:
 	mkdir -p build/_maven_overlay
 	./script/maven_overlay.sh build/_maven_overlay
