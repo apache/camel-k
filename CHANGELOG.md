@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.9.0-nightly...HEAD)
+
+**Closed issues:**
+
+- Be able to configure PodMonitor via prometheus trait [\#2812](https://github.com/apache/camel-k/issues/2812)
+- SEDA low performance issue [\#2808](https://github.com/apache/camel-k/issues/2808)
+
 ## [1.9.0-nightly](https://github.com/apache/camel-k/tree/1.9.0-nightly) (2022-03-14)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/1.9.0-nightly.202203101127...1.9.0-nightly)
