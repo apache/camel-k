@@ -23,6 +23,7 @@ package local
 import (
 	"context"
 	"io"
+	"os"
 	"strings"
 	"testing"
 
@@ -89,6 +90,10 @@ func TestLocalRunContainerize(t *testing.T) {
 
 func TestLocalRunIntegrationDirectory(t *testing.T) {
 	RegisterTestingT(t)
+
+	if os.Getenv("CI") == "true" {
+		t.Skip("TODO: Temporarily disabled as this test is flaky and hangs the test process")
+	}
 
 	ctx1, cancel1 := context.WithCancel(TestContext)
 	defer cancel1()
