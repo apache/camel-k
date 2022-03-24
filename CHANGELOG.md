@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Jsonata does not evaluate correctly [\#3129](https://github.com/apache/camel-k/issues/3129)
 - Be able to configure PodMonitor via prometheus trait [\#2812](https://github.com/apache/camel-k/issues/2812)
 - SEDA low performance issue [\#2808](https://github.com/apache/camel-k/issues/2808)
 
