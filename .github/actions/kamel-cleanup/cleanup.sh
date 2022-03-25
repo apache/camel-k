@@ -53,37 +53,7 @@ shift $((OPTIND-1))
 # which would require a catalogsource
 #
 if [ -n "${BUILD_CATALOG_SOURCE}" ]; then
-  set +e
-
-#
-# Remove values altogther
-#
-  PATCH=$(mktemp /tmp/proxy-patch.XXXXXXXX)
-  cat >${PATCH} <<EOF
-[
-  {
-    "op": "replace",
-    "path": "/spec",
-    "value": {}
-  },
-  {
-    "op": "replace",
-    "path": "/status",
-    "value": {}
-  }
-]
-EOF
-
-  kubectl patch --type='json' Proxy cluster --patch-file "${PATCH}"
-
-  if [ $? != 0 ]; then
-    echo "Error: Failed to reset the Proxy"
-    exit 1
-  fi
-
-  rm -f "${PATCH}"
-
-  set -e
+  ./.github/actions/kamel-cleanup/reset-proxy.sh
 fi
 
 if [ "${SAVE_NAMESPACES}" == "true" ]; then
