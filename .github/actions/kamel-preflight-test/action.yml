@@ -42,6 +42,14 @@ runs:
   using: "composite"
 
   steps:
+  - id: proxy-reset
+    name: Ensure Proxy has been reset
+    shell: bash
+    run: |
+      if [ -n "${{ inputs.build-catalog-source }}" ]; then
+        ./.github/actions/kamel-cleanup/reset-proxy.sh
+      fi
+
   - id: preflight-test
     name: Execute Preflight Test
     shell: bash
