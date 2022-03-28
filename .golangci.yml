@@ -55,4 +55,7 @@ linters:
     - whitespace
     - wrapcheck
     - wsl
+    - interfacer
+    - scopelint
+    - golint
 
