@@ -40,6 +40,8 @@ linters:
     - gofumpt
     - gomnd
     - gomoddirectives
+    - golint
+    - interfacer
     - ireturn
     - lll
     - maligned
@@ -50,12 +52,13 @@ linters:
     - paralleltest
     - tagliatelle
     - tenv
+    - scopelint
     - testpackage
     - varnamelen
     - whitespace
     - wrapcheck
     - wsl
     - interfacer
-    - scopelint
-    - golint
+    
+   
 
