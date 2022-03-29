@@ -13,7 +13,7 @@ with serverless superpowers.
 Installation using Kamel CLI
 
 
-kamel install --registry <docker registry address> --registry-insecure true --organization chubbio --registry-auth-username <organization name> --registry-secret <docker registry secrets> --base-image <base image to buuld camel integration>   -n <namespace>
+kamel install --registry <docker registry address> --registry-insecure true --organization <organization name> --registry-secret <docker registry secrets> --base-image <base image to build camel integration>   -n <namespace>
 
 ## Installing using helm Chart
 
@@ -29,6 +29,6 @@ helm repo add camel-k https://apache.github.io/camel-k/charts
 
 ```console
 
-helm install --generate-name --set platform.build.registry.address=<docker registry address> --set platform.build.registry.insecure=true --set platform.build.registry.organization=<organization name> --set platform.build.baseImage=<base image to buuld camel integration> --set platform.build.registry.secret=<docker registry secrets> -–namespace <name of the namespace> 
+helm install --generate-name --set platform.build.registry.address=<docker registry address> --set platform.build.registry.insecure=true --set platform.build.registry.organization=<organization name> --set platform.build.baseImage=<base image to build camel integration> --set platform.build.registry.secret=<docker registry secrets> -–namespace <name of the namespace> 
 
 ```
