@@ -22,6 +22,10 @@ metadata:
   labels:
     app: "camel-k"
     camel.apache.org/component: operator
+    name: camel-k-operator
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/name: camel-k
+    app.kubernetes.io/version: "1.8.2"
 spec:
   replicas: 1
   strategy:
@@ -35,6 +39,9 @@ spec:
         name: camel-k-operator
         camel.apache.org/component: operator
         app: "camel-k"
+        app.kubernetes.io/component: operator
+        app.kubernetes.io/name: camel-k
+        app.kubernetes.io/version: "1.8.2"
     spec:
       serviceAccountName: camel-k-operator
       containers:
