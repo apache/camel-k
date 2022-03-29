@@ -20,6 +20,7 @@ package util
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"os/exec"
 
 	"golang.org/x/sync/errgroup"
@@ -28,6 +29,8 @@ import (
 // RunAndLog starts the provided command, scans its standard and error outputs line by line,
 // to feed the provided handlers, and waits until the scans complete and the command returns.
 func RunAndLog(ctx context.Context, cmd *exec.Cmd, stdOutF func(string), stdErrF func(string)) (err error) {
+	stdOutF(fmt.Sprintf("Executed command: %s", cmd.String()))
+
 	stdOut, err := cmd.StdoutPipe()
 	if err != nil {
 		return
@@ -38,6 +41,14 @@ func RunAndLog(ctx context.Context, cmd *exec.Cmd, stdOutF func(string), stdErrF
 	}
 	err = cmd.Start()
 	if err != nil {
+		scanOut := bufio.NewScanner(stdOut)
+		for scanOut.Scan() {
+			stdOutF(scanOut.Text())
+		}
+		scanErr := bufio.NewScanner(stdErr)
+		for scanErr.Scan() {
+			stdOutF(scanErr.Text())
+		}
 		return
 	}
 	g, _ := errgroup.WithContext(ctx)
