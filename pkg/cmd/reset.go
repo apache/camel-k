@@ -54,44 +54,44 @@ type resetCmdOptions struct {
 	SkipKameletBindings bool `mapstructure:"skip-kamelet-bindings"`
 }
 
-func (o *resetCmdOptions) reset(_ *cobra.Command, _ []string) {
+func (o *resetCmdOptions) reset(cmd *cobra.Command, _ []string) {
 	c, err := o.GetCmdClient()
 	if err != nil {
-		fmt.Print(err)
+		fmt.Fprint(cmd.ErrOrStderr(), err)
 		return
 	}
 
 	var n int
 	if !o.SkipKameletBindings {
 		if n, err = o.deleteAllKameletBindings(c); err != nil {
-			fmt.Print(err)
+			fmt.Fprint(cmd.ErrOrStderr(), err)
 			return
 		}
-		fmt.Printf("%d kamelet bindings deleted from namespace %s\n", n, o.Namespace)
+		fmt.Fprintf(cmd.OutOrStdout(), "%d kamelet bindings deleted from namespace %s\n", n, o.Namespace)
 	}
 
 	if !o.SkipIntegrations {
 		if n, err = o.deleteAllIntegrations(c); err != nil {
-			fmt.Print(err)
+			fmt.Fprint(cmd.ErrOrStderr(), err)
 			return
 		}
-		fmt.Printf("%d integrations deleted from namespace %s\n", n, o.Namespace)
+		fmt.Fprintf(cmd.OutOrStdout(), "%d integrations deleted from namespace %s\n", n, o.Namespace)
 	}
 
 	if !o.SkipKits {
 		if n, err = o.deleteAllIntegrationKits(c); err != nil {
-			fmt.Print(err)
+			fmt.Fprint(cmd.ErrOrStderr(), err)
 			return
 		}
-		fmt.Printf("%d integration kits deleted from namespace %s\n", n, o.Namespace)
+		fmt.Fprintf(cmd.OutOrStdout(), "%d integration kits deleted from namespace %s\n", n, o.Namespace)
 	}
 
 	if err = o.resetIntegrationPlatform(c); err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(cmd.ErrOrStderr(), err)
 		return
 	}
 
-	fmt.Println("Camel K platform has been reset successfully!")
+	fmt.Fprintln(cmd.OutOrStdout(), "Camel K platform has been reset successfully!")
 }
 
 func (o *resetCmdOptions) deleteAllIntegrations(c client.Client) (int, error) {

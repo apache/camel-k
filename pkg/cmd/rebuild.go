@@ -48,7 +48,7 @@ type rebuildCmdOptions struct {
 	*RootCmdOptions
 }
 
-func (o *rebuildCmdOptions) rebuild(_ *cobra.Command, args []string) error {
+func (o *rebuildCmdOptions) rebuild(cmd *cobra.Command, args []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		return err
@@ -69,7 +69,7 @@ func (o *rebuildCmdOptions) rebuild(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Printf("%d integrations have been rebuilt\n", len(integrations))
+	fmt.Fprintf(cmd.OutOrStdout(),"%d integrations have been rebuilt\n", len(integrations))
 	return nil
 }
 

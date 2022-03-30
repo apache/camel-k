@@ -108,7 +108,7 @@ func RunLocalIntegrationRunCommand(ctx context.Context, properties []string, dep
 	}
 
 	// Output command we are about to run.
-	fmt.Printf("Executing: %s\n", strings.Join(cmd.Args, " "))
+	fmt.Fprintf(cmd.Stdout, "Executing: %s\n", strings.Join(cmd.Args, " "))
 
 	// Run integration locally.
 	err = cmd.Run()

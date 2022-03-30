@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -70,7 +71,7 @@ type OperatorMonitoringConfiguration struct {
 }
 
 // OperatorOrCollect installs the operator resources or adds them to the collector if present.
-func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection, force bool) error {
+func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection, force bool) error {
 	isOpenShift, err := isOpenShift(c, cfg.ClusterType)
 	if err != nil {
 		return err
@@ -98,7 +99,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 				if d.Labels["camel.apache.org/component"] == "operator" {
 					tolerations, err := kubernetes.NewTolerations(cfg.Tolerations)
 					if err != nil {
-						fmt.Println("Warning: could not parse the configured tolerations!")
+						fmt.Fprintln(cmd.ErrOrStderr(), "Warning: could not parse the configured tolerations!")
 					}
 					d.Spec.Template.Spec.Tolerations = tolerations
 				}
@@ -110,7 +111,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 				if d.Labels["camel.apache.org/component"] == "operator" {
 					resourceReq, err := kubernetes.NewResourceRequirements(cfg.ResourcesRequirements)
 					if err != nil {
-						fmt.Println("Warning: could not parse the configured resources requests!")
+						fmt.Fprintln(cmd.ErrOrStderr(), "Warning: could not parse the configured resources requests!")
 					}
 					for i := 0; i < len(d.Spec.Template.Spec.Containers); i++ {
 						d.Spec.Template.Spec.Containers[i].Resources = resourceReq
@@ -124,7 +125,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 				if d.Labels["camel.apache.org/component"] == "operator" {
 					envVars, _, _, err := env.ParseEnv(cfg.EnvVars, nil)
 					if err != nil {
-						fmt.Println("Warning: could not parse environment variables!")
+						fmt.Fprintln(cmd.ErrOrStderr(), "Warning: could not parse environment variables!")
 					}
 					for i := 0; i < len(d.Spec.Template.Spec.Containers); i++ {
 						d.Spec.Template.Spec.Containers[i].Env = append(d.Spec.Template.Spec.Containers[i].Env, envVars...)
@@ -138,7 +139,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 				if d.Labels["camel.apache.org/component"] == "operator" {
 					nodeSelector, err := kubernetes.NewNodeSelectors(cfg.NodeSelectors)
 					if err != nil {
-						fmt.Println("Warning: could not parse the configured node selectors!")
+						fmt.Fprintln(cmd.ErrOrStderr(), "Warning: could not parse the configured node selectors!")
 					}
 					d.Spec.Template.Spec.NodeSelector = nodeSelector
 				}
@@ -226,7 +227,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		}
 		if err := installClusterRoleBinding(ctx, c, collection, cfg.Namespace, "camel-k-operator-console-openshift", "/rbac/openshift/operator-cluster-role-console-binding-openshift.yaml"); err != nil {
 			if k8serrors.IsForbidden(err) {
-				fmt.Println("Warning: the operator will not be able to manage ConsoleCLIDownload resources. Try installing the operator as cluster-admin.")
+				fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the operator will not be able to manage ConsoleCLIDownload resources. Try installing the operator as cluster-admin.")
 			} else {
 				return err
 			}
@@ -249,7 +250,7 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		}
 		if err := installClusterRoleBinding(ctx, c, collection, cfg.Namespace, "camel-k-operator-bind-addressable-resolver", "/rbac/operator-cluster-role-binding-addressable-resolver.yaml"); err != nil {
 			if k8serrors.IsForbidden(err) {
-				fmt.Println("Warning: the operator will not be able to bind Knative addressable-resolver ClusterRole. Try installing the operator as cluster-admin.")
+				fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the operator will not be able to bind Knative addressable-resolver ClusterRole. Try installing the operator as cluster-admin.")
 			} else {
 				return err
 			}
@@ -260,48 +261,48 @@ func OperatorOrCollect(ctx context.Context, c client.Client, cfg OperatorConfigu
 		if k8serrors.IsAlreadyExists(err) {
 			return err
 		}
-		fmt.Println("Warning: the operator will not be able to publish Kubernetes events. Try installing as cluster-admin to allow it to generate events.")
+		fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the operator will not be able to publish Kubernetes events. Try installing as cluster-admin to allow it to generate events.")
 	}
 
 	if err = installKedaBindings(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 		if k8serrors.IsAlreadyExists(err) {
 			return err
 		}
-		fmt.Println("Warning: the operator will not be able to create KEDA resources. Try installing as cluster-admin.")
+		fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the operator will not be able to create KEDA resources. Try installing as cluster-admin.")
 	}
 
 	if err = installPodMonitors(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 		if k8serrors.IsAlreadyExists(err) {
 			return err
 		}
-		fmt.Println("Warning: the operator will not be able to create PodMonitor resources. Try installing as cluster-admin.")
+		fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the operator will not be able to create PodMonitor resources. Try installing as cluster-admin.")
 	}
 
 	if err := installStrimziBindings(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 		if k8serrors.IsAlreadyExists(err) {
 			return err
 		}
-		fmt.Println("Warning: the operator will not be able to lookup strimzi kafka resources. Try installing as cluster-admin to allow the lookup of strimzi kafka resources.")
+		fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the operator will not be able to lookup strimzi kafka resources. Try installing as cluster-admin to allow the lookup of strimzi kafka resources.")
 	}
 
 	if err = installLeaseBindings(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 		if k8serrors.IsAlreadyExists(err) {
 			return err
 		}
-		fmt.Println("Warning: the operator will not be able to create Leases. Try installing as cluster-admin to allow management of Lease resources.")
+		fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the operator will not be able to create Leases. Try installing as cluster-admin to allow management of Lease resources.")
 	}
 
 	if err = installClusterRoleBinding(ctx, c, collection, cfg.Namespace, "camel-k-operator-custom-resource-definitions", "/rbac/operator-cluster-role-binding-custom-resource-definitions.yaml"); err != nil {
-		fmt.Println("Warning: the operator will not be able to get CustomResourceDefinitions resources and the service-binding trait will fail if used. Try installing the operator as cluster-admin.")
+		fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the operator will not be able to get CustomResourceDefinitions resources and the service-binding trait will fail if used. Try installing the operator as cluster-admin.")
 	}
 
 	if cfg.Monitoring.Enabled {
 		if err := installMonitoringResources(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 			switch {
 			case k8serrors.IsForbidden(err):
-				fmt.Println("Warning: the creation of monitoring resources is not allowed. Try installing as cluster-admin to allow the creation of monitoring resources.")
+				fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the creation of monitoring resources is not allowed. Try installing as cluster-admin to allow the creation of monitoring resources.")
 			case meta.IsNoMatchError(errors.Cause(err)):
-				fmt.Println("Warning: the creation of the monitoring resources failed: ", err)
+				fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the creation of the monitoring resources failed: ", err)
 			default:
 				return err
 			}

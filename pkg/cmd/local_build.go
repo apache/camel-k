@@ -44,7 +44,7 @@ func newCmdLocalBuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localBui
 				return err
 			}
 			if err := options.run(cmd, args); err != nil {
-				fmt.Println(err.Error())
+				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
 			}
 			if err := options.deinit(); err != nil {
 				return err

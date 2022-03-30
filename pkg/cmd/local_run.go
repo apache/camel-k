@@ -53,14 +53,14 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 			go func() {
 				<-cs
 				if err := options.deinit(); err != nil {
-					fmt.Println(err)
+					fmt.Fprintln(cmd.ErrOrStderr(), err)
 					os.Exit(1)
 				}
 				os.Exit(0)
 			}()
 
 			if err := options.run(cmd, args); err != nil {
-				fmt.Println(err.Error())
+				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
 			}
 			if err := options.deinit(); err != nil {
 				return err

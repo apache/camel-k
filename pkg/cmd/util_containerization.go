@@ -83,7 +83,7 @@ func setDockerEnvVars(envVars []string) {
 	}
 }
 
-func createAndBuildBaseImage(ctx context.Context) error {
+func createAndBuildBaseImage(ctx context.Context, stdout, stderr io.Writer) error {
 	// Create the base image Docker file.
 	err := docker.CreateBaseImageDockerFile()
 	if err != nil {
@@ -94,8 +94,12 @@ func createAndBuildBaseImage(ctx context.Context) error {
 	args := docker.BuildBaseImageArgs()
 	cmd := exec.CommandContext(ctx, "docker", args...)
 
+	// Set stdout and stderr.
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+
 	// Output executed command.
-	fmt.Printf("Executing: %s\n", strings.Join(cmd.Args, " "))
+	fmt.Fprintf(cmd.Stdout, "Executing: %s\n", strings.Join(cmd.Args, " "))
 
 	// Run the command.
 	if err := cmd.Run(); err != nil {
@@ -126,7 +130,7 @@ func createAndBuildIntegrationImage(ctx context.Context, containerRegistry strin
 	}
 
 	// Create the Dockerfile and build the base image.
-	err := createAndBuildBaseImage(ctx)
+	err := createAndBuildBaseImage(ctx, stdout, stderr)
 	if err != nil {
 		return err
 	}
@@ -192,7 +196,7 @@ func createAndBuildIntegrationImage(ctx context.Context, containerRegistry strin
 	cmd.Stdout = stdout
 
 	// Output executed command.
-	fmt.Printf("Executing: %s\n", strings.Join(cmd.Args, " "))
+	fmt.Fprintf(cmd.Stdout, "Executing: %s\n", strings.Join(cmd.Args, " "))
 
 	// Run the command.
 	if err := cmd.Run(); err != nil {
@@ -225,7 +229,7 @@ func runIntegrationImage(ctx context.Context, image string, stdout, stderr io.Wr
 	cmd.Stdout = stdout
 
 	// Output executed command.
-	fmt.Printf("Executing: %s\n", strings.Join(cmd.Args, " "))
+	fmt.Fprintf(cmd.Stdout, "Executing: %s\n", strings.Join(cmd.Args, " "))
 
 	// Run the command.
 	if err := cmd.Run(); err != nil {

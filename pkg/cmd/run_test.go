@@ -528,7 +528,7 @@ func TestRunTextCompressedResource(t *testing.T) {
 }
 
 func TestResolvePodTemplate(t *testing.T) {
-	// runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
+	_, rootCmd, _ := initializeRunCmdOptions(t)
 	templateText := `
 containers:
   - name: integration
@@ -544,7 +544,7 @@ volumes:
 `
 
 	integrationSpec := v1.IntegrationSpec{}
-	err := resolvePodTemplate(context.TODO(), templateText, &integrationSpec)
+	err := resolvePodTemplate(context.TODO(), rootCmd, templateText, &integrationSpec)
 	assert.Nil(t, err)
 	assert.NotNil(t, integrationSpec.PodTemplate)
 	assert.Equal(t, 1, len(integrationSpec.PodTemplate.Spec.Containers))
@@ -552,10 +552,11 @@ volumes:
 }
 
 func TestResolveJsonPodTemplate(t *testing.T) {
+	_, rootCmd, _ := initializeRunCmdOptions(t)
 	integrationSpec := v1.IntegrationSpec{}
 	minifiedYamlTemplate := `{"containers": [{"name": "second"}, {"name": "integration", "env": [{"name": "CAMEL_K_DIGEST", "value": "new_value"}]}]}`
 
-	err := resolvePodTemplate(context.TODO(), minifiedYamlTemplate, &integrationSpec)
+	err := resolvePodTemplate(context.TODO(), rootCmd, minifiedYamlTemplate, &integrationSpec)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, integrationSpec.PodTemplate)

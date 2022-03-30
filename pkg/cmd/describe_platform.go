@@ -46,7 +46,7 @@ func newDescribePlatformCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *de
 				return err
 			}
 			if err := options.run(cmd, args); err != nil {
-				fmt.Println(err.Error())
+				fmt.Fprintln(cmd.OutOrStderr(), err.Error())
 			}
 
 			return nil
@@ -81,9 +81,9 @@ func (command *describePlatformCommandOptions) run(cmd *cobra.Command, args []st
 
 	if err := c.Get(command.Context, platformKey, &platform); err == nil {
 		if desc, err := command.describeIntegrationPlatform(cmd, platform); err == nil {
-			fmt.Print(desc)
+			fmt.Fprint(cmd.OutOrStdout(), desc)
 		} else {
-			fmt.Println(err)
+			fmt.Fprintln(cmd.ErrOrStderr(), err)
 		}
 	} else {
 		fmt.Fprintf(cmd.OutOrStdout(), "IntegrationPlatform '%s' does not exist.\n", args[0])

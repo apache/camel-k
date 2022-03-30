@@ -40,12 +40,12 @@ func newKitDeleteCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitDelete
 		Short:   "Delete an Integration Kit",
 		Long:    `Delete an Integration Kit.`,
 		PreRunE: decode(&options),
-		RunE: func(_ *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
 				return err
 			}
-			if err := options.run(args); err != nil {
-				fmt.Println(err.Error())
+			if err := options.run(cmd, args); err != nil {
+				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
 			}
 
 			return nil
@@ -73,7 +73,7 @@ func (command *kitDeleteCommandOptions) validate(args []string) error {
 	return nil
 }
 
-func (command *kitDeleteCommandOptions) run(args []string) error {
+func (command *kitDeleteCommandOptions) run(cmd *cobra.Command, args []string) error {
 	names := args
 
 	c, err := command.GetCmdClient()
@@ -97,7 +97,7 @@ func (command *kitDeleteCommandOptions) run(args []string) error {
 	}
 
 	for _, name := range names {
-		if err := command.delete(name); err != nil {
+		if err := command.delete(cmd, name); err != nil {
 			return err
 		}
 	}
@@ -105,7 +105,7 @@ func (command *kitDeleteCommandOptions) run(args []string) error {
 	return nil
 }
 
-func (command *kitDeleteCommandOptions) delete(name string) error {
+func (command *kitDeleteCommandOptions) delete(cmd *cobra.Command, name string) error {
 	kit := v1.NewIntegrationKit(command.Namespace, name)
 	c, err := command.GetCmdClient()
 	if err != nil {
@@ -144,7 +144,7 @@ func (command *kitDeleteCommandOptions) delete(name string) error {
 		return fmt.Errorf("no integration kit found with name \"%s\"", kit.Name)
 	}
 
-	fmt.Printf("integration kit \"%s\" has been deleted\n", kit.Name)
+	fmt.Fprintf(cmd.OutOrStdout(), "integration kit \"%s\" has been deleted\n", kit.Name)
 
 	return err
 }

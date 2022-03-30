@@ -302,7 +302,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				ResourcesRequirements: o.ResourcesRequirements,
 				EnvVars:               o.EnvVars,
 			}
-			err = install.OperatorOrCollect(o.Context, c, cfg, collection, o.Force)
+			err = install.OperatorOrCollect(o.Context, cobraCmd, c, cfg, collection, o.Force)
 			if err != nil {
 				return err
 			}
@@ -474,15 +474,15 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				strategy = "via OLM subscription"
 			}
 			if o.Global {
-				fmt.Println("Camel K installed in namespace", namespace, strategy, "(global mode)")
+				fmt.Fprintln(cobraCmd.OutOrStdout(), "Camel K installed in namespace", namespace, strategy, "(global mode)")
 			} else {
-				fmt.Println("Camel K installed in namespace", namespace, strategy)
+				fmt.Fprintln(cobraCmd.OutOrStdout(), "Camel K installed in namespace", namespace, strategy)
 			}
 		}
 	}
 
 	if collection != nil {
-		return o.printOutput(collection)
+		return o.printOutput(cobraCmd, collection)
 	}
 
 	return nil
@@ -503,7 +503,7 @@ func (o *installCmdOptions) postRun(cmd *cobra.Command, _ []string) error {
 	return nil
 }
 
-func (o *installCmdOptions) printOutput(collection *kubernetes.Collection) error {
+func (o *installCmdOptions) printOutput(cmd *cobra.Command, collection *kubernetes.Collection) error {
 	lst := collection.AsKubernetesList()
 	switch o.OutputFormat {
 	case "yaml":
@@ -511,13 +511,13 @@ func (o *installCmdOptions) printOutput(collection *kubernetes.Collection) error
 		if err != nil {
 			return err
 		}
-		fmt.Print(string(data))
+		fmt.Fprint(cmd.OutOrStdout(), string(data))
 	case "json":
 		data, err := kubernetes.ToJSON(lst)
 		if err != nil {
 			return err
 		}
-		fmt.Print(string(data))
+		fmt.Fprint(cmd.OutOrStdout(), (data))
 	default:
 		return errors.New("unknown output format: " + o.OutputFormat)
 	}

@@ -71,7 +71,7 @@ func NewKamelWithModelineCommand(ctx context.Context, osArgs []string) (*cobra.C
 	originalFlags := osArgs[1:]
 	rootCmd, flags, err := createKamelWithModelineCommand(ctx, originalFlags)
 	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
+		fmt.Fprintf(rootCmd.ErrOrStderr(), "Error: %s\n", err.Error())
 		return rootCmd, flags, err
 	}
 	if len(originalFlags) != len(flags) {
@@ -127,7 +127,7 @@ func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.
 	files = append(files, fg.Args()...)
 	files = append(files, additionalSources...)
 
-	opts, err := extractModelineOptions(ctx, files)
+	opts, err := extractModelineOptions(ctx, files, rootCmd)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "cannot read sources")
 	}
@@ -191,10 +191,10 @@ func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.
 	return rootCmd, args, nil
 }
 
-func extractModelineOptions(ctx context.Context, sources []string) ([]modeline.Option, error) {
+func extractModelineOptions(ctx context.Context, sources []string, cmd *cobra.Command) ([]modeline.Option, error) {
 	opts := make([]modeline.Option, 0)
 
-	resolvedSources, err := ResolveSources(ctx, sources, false)
+	resolvedSources, err := ResolveSources(ctx, sources, false, cmd)
 	if err != nil {
 		return opts, errors.Wrap(err, "cannot read sources")
 	}

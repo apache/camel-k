@@ -43,8 +43,8 @@ func newKameletDeleteCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kamel
 			if err := options.validate(args); err != nil {
 				return err
 			}
-			if err := options.run(args); err != nil {
-				fmt.Println(err.Error())
+			if err := options.run(cmd, args); err != nil {
+				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
 			}
 
 			return nil
@@ -72,7 +72,7 @@ func (command *kameletDeleteCommandOptions) validate(args []string) error {
 	return nil
 }
 
-func (command *kameletDeleteCommandOptions) run(args []string) error {
+func (command *kameletDeleteCommandOptions) run(cmd *cobra.Command, args []string) error {
 	names := args
 
 	c, err := command.GetCmdClient()
@@ -95,7 +95,7 @@ func (command *kameletDeleteCommandOptions) run(args []string) error {
 	}
 
 	for _, name := range names {
-		if err := command.delete(name); err != nil {
+		if err := command.delete(cmd, name); err != nil {
 			return err
 		}
 	}
@@ -103,7 +103,7 @@ func (command *kameletDeleteCommandOptions) run(args []string) error {
 	return nil
 }
 
-func (command *kameletDeleteCommandOptions) delete(name string) error {
+func (command *kameletDeleteCommandOptions) delete(cmd *cobra.Command, name string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
@@ -139,6 +139,6 @@ func (command *kameletDeleteCommandOptions) delete(name string) error {
 		}
 		return fmt.Errorf("error deleting kamelet \"%s\": %w", name, err)
 	}
-	fmt.Printf("kamelet \"%s\" has been deleted\n", name)
+	fmt.Fprintf(cmd.OutOrStdout(), "kamelet \"%s\" has been deleted\n", name)
 	return nil
 }

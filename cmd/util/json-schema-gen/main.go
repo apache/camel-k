@@ -35,7 +35,7 @@ import (
 
 func main() {
 	if len(os.Args) != 6 {
-		fmt.Println(`Use "json-schema-gen <crd> <schema> <path> <isArray> <destination>`)
+		fmt.Fprintln(os.Stderr, `Use "json-schema-gen <crd> <schema> <path> <isArray> <destination>`)
 		os.Exit(1)
 	}
 	crd := os.Args[1]

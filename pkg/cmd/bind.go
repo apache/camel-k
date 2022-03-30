@@ -219,9 +219,9 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if !existed {
-		fmt.Printf("kamelet binding \"%s\" created\n", name)
+		fmt.Fprintf(cmd.OutOrStdout(), "kamelet binding \"%s\" created\n", name)
 	} else {
-		fmt.Printf("kamelet binding \"%s\" updated\n", name)
+		fmt.Fprintf(cmd.OutOrStdout(), "kamelet binding \"%s\" updated\n", name)
 	}
 	return nil
 }

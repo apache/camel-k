@@ -47,7 +47,7 @@ func newDescribeIntegrationCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, 
 				return err
 			}
 			if err := options.run(cmd, args); err != nil {
-				fmt.Println(err.Error())
+				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
 			}
 
 			return nil
@@ -85,9 +85,9 @@ func (command *describeIntegrationCommandOptions) run(cmd *cobra.Command, args [
 
 	if err := c.Get(command.Context, key, &ctx); err == nil {
 		if desc, err := command.describeIntegration(cmd, ctx); err == nil {
-			fmt.Print(desc)
+			fmt.Fprint(cmd.OutOrStdout(), desc)
 		} else {
-			fmt.Println(err)
+			fmt.Fprintln(cmd.ErrOrStderr(), err)
 		}
 	} else {
 		fmt.Fprintf(cmd.OutOrStdout(), "Integration '%s' does not exist.\n", args[0])

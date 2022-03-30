@@ -98,7 +98,7 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 		// and checking if its different from the new message
 		//
 		if newLogMsg != currLogMsg {
-			fmt.Println(newLogMsg)
+			fmt.Fprintln(cmd.OutOrStdout(), newLogMsg)
 			currLogMsg = newLogMsg
 		}
 
@@ -128,8 +128,8 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 			//
 			// Found the running integration so step over to scraping its pod log
 			//
-			fmt.Printf("Integration '%s' is now running. Showing log ...\n", integrationID)
-			if err := k8slog.Print(o.Context, c, &integration, cmd.OutOrStdout()); err != nil {
+			fmt.Fprintf(cmd.OutOrStdout(), "Integration '%s' is now running. Showing log ...\n", integrationID)
+			if err := k8slog.Print(o.Context, cmd, c, &integration, cmd.OutOrStdout()); err != nil {
 				return false, err
 			}
 

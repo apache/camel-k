@@ -47,7 +47,7 @@ func newDescribeKameletCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *des
 				return err
 			}
 			if err := options.run(cmd, args); err != nil {
-				fmt.Println(err.Error())
+				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
 			}
 
 			return nil
@@ -82,12 +82,12 @@ func (command *describeKameletCommandOptions) run(cmd *cobra.Command, args []str
 
 	if err := c.Get(command.Context, kameletKey, &kamelet); err == nil {
 		if desc, err := command.describeKamelet(cmd, kamelet); err == nil {
-			fmt.Print(desc)
+			fmt.Fprint(cmd.OutOrStdout(), desc)
 		} else {
-			fmt.Println(err)
+			fmt.Fprintln(cmd.ErrOrStderr(), err)
 		}
 	} else {
-		fmt.Printf("Kamelet '%s' does not exist.\n", args[0])
+		fmt.Fprintf(cmd.OutOrStdout(), "Kamelet '%s' does not exist.\n", args[0])
 	}
 
 	return nil
