@@ -27,6 +27,7 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/spf13/cobra"
 
 	"golang.org/x/oauth2"
 
@@ -60,7 +61,7 @@ func (s *Source) setContent(content []byte) error {
 }
 
 // ResolveSources ---.
-func ResolveSources(ctx context.Context, locations []string, compress bool) ([]Source, error) {
+func ResolveSources(ctx context.Context, locations []string, compress bool, cmd *cobra.Command) ([]Source, error) {
 	sources := make([]Source, 0, len(locations))
 
 	for _, location := range locations {
@@ -90,7 +91,7 @@ func ResolveSources(ctx context.Context, locations []string, compress bool) ([]S
 					ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 					tc = oauth2.NewClient(ctx, ts)
 
-					fmt.Println("GITHUB_TOKEN env var detected, using it for GitHub APIs authentication")
+					fmt.Fprintln(cmd.OutOrStdout(),"GITHUB_TOKEN env var detected, using it for GitHub APIs authentication")
 				}
 
 				gc := github.NewClient(tc)

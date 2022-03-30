@@ -46,7 +46,7 @@ func newDescribeKitCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *describ
 				return err
 			}
 			if err := options.run(cmd, args); err != nil {
-				fmt.Println(err.Error())
+				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
 			}
 
 			return nil
@@ -81,12 +81,12 @@ func (command *describeKitCommandOptions) run(cmd *cobra.Command, args []string)
 
 	if err := c.Get(command.Context, kitKey, kit); err == nil {
 		if desc, err := command.describeIntegrationKit(cmd, kit); err == nil {
-			fmt.Print(desc)
+			fmt.Fprint(cmd.OutOrStdout(), desc)
 		} else {
-			fmt.Println(err)
+			fmt.Fprintln(cmd.ErrOrStderr(), err)
 		}
 	} else {
-		fmt.Printf("IntegrationKit '%s' does not exist.\n", args[0])
+		fmt.Fprintf(cmd.OutOrStdout(), "IntegrationKit '%s' does not exist.\n", args[0])
 	}
 
 	return nil

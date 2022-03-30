@@ -27,7 +27,7 @@ import (
 
 func main() {
 	if len(os.Args) != 3 {
-		fmt.Println(`Use "license-check <file> <license>`)
+		fmt.Fprintln(os.Stderr, `Use "license-check <file> <license>`)
 		os.Exit(1)
 	}
 

@@ -43,7 +43,7 @@ func newKitGetCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitGetComman
 				return err
 			}
 			if err := options.run(cmd); err != nil {
-				fmt.Println(err.Error())
+				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
 			}
 
 			return nil

@@ -77,11 +77,12 @@ func TestVersionClientVerbose(t *testing.T) {
 }
 
 func TestCompatibleVersions(t *testing.T) {
-	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.0"))
-	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.1"))
-	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.0-SNAPSHOT"))
-	assert.Equal(t, false, compatibleVersions("1.3.0", "1.2.0"))
-	assert.Equal(t, false, compatibleVersions("1.3.0", "2.3.0"))
-	assert.Equal(t, false, compatibleVersions("1.3.0", "dsadsa"))
-	assert.Equal(t, false, compatibleVersions("dsadsa", "1.3.4"))
+	_, rootCmd, _ := initializeVersionCmdOptions(t)
+	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.0", rootCmd))
+	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.1", rootCmd))
+	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.0-SNAPSHOT", rootCmd))
+	assert.Equal(t, false, compatibleVersions("1.3.0", "1.2.0", rootCmd))
+	assert.Equal(t, false, compatibleVersions("1.3.0", "2.3.0", rootCmd))
+	assert.Equal(t, false, compatibleVersions("1.3.0", "dsadsa", rootCmd))
+	assert.Equal(t, false, compatibleVersions("dsadsa", "1.3.4", rootCmd))
 }

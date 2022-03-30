@@ -100,15 +100,15 @@ func (o *debugCmdOptions) run(cmd *cobra.Command, args []string) error {
 			// Context canceled
 			return
 		}
-		fmt.Printf("Disabling debug mode on integration %q\n", name)
+		fmt.Fprintf(cmd.OutOrStdout(), "Disabling debug mode on integration %q\n", name)
 		it, err := c.Integrations(o.Namespace).Get(o.Context, name, metav1.GetOptions{})
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
 			os.Exit(1)
 		}
 		_, err = o.toggleDebug(c, it, false)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
 			os.Exit(1)
 		}
 		os.Exit(0)
@@ -122,9 +122,9 @@ func (o *debugCmdOptions) run(cmd *cobra.Command, args []string) error {
 	selector := fmt.Sprintf("camel.apache.org/debug=true,camel.apache.org/integration=%s", name)
 
 	go func() {
-		err = k8slog.PrintUsingSelector(o.Context, cmdClient, o.Namespace, "integration", selector, cmd.OutOrStdout())
+		err = k8slog.PrintUsingSelector(o.Context, cmd, cmdClient, o.Namespace, "integration", selector, cmd.OutOrStdout())
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
 		}
 	}()
 

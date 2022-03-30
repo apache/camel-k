@@ -216,7 +216,7 @@ func newCmdCompletionBash(root *cobra.Command) *cobra.Command {
 		Run: func(_ *cobra.Command, _ []string) {
 			err := root.GenBashCompletion(root.OutOrStdout())
 			if err != nil {
-				fmt.Print(err.Error())
+				fmt.Fprint(root.ErrOrStderr(), err.Error())
 			}
 		},
 		Annotations: map[string]string{

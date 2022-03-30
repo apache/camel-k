@@ -27,6 +27,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
+	"github.com/spf13/cobra"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
@@ -230,37 +231,37 @@ func createCamelCatalog(ctx context.Context) (*camel.RuntimeCatalog, error) {
 	return catalog, nil
 }
 
-func outputDependencies(dependencies []string, format string) error {
+func outputDependencies(dependencies []string, format string, cmd *cobra.Command) error {
 	if format != "" {
-		err := printDependencies(format, dependencies)
+		err := printDependencies(format, dependencies, cmd)
 		if err != nil {
 			return err
 		}
 	} else {
 		// Print output in text form
-		fmt.Println("dependencies:")
+		fmt.Fprintln(cmd.OutOrStdout(), "dependencies:")
 		for _, dep := range dependencies {
-			fmt.Printf("%v\n", dep)
+			fmt.Fprintf(cmd.OutOrStdout(), "%v\n", dep)
 		}
 	}
 
 	return nil
 }
 
-func printDependencies(format string, dependencies []string) error {
+func printDependencies(format string, dependencies []string, cmd *cobra.Command) error {
 	switch format {
 	case "yaml":
 		data, err := util.DependenciesToYAML(dependencies)
 		if err != nil {
 			return err
 		}
-		fmt.Print(string(data))
+		fmt.Fprint(cmd.OutOrStdout(), string(data))
 	case "json":
 		data, err := util.DependenciesToJSON(dependencies)
 		if err != nil {
 			return err
 		}
-		fmt.Print(string(data))
+		fmt.Fprint(cmd.OutOrStdout(),string(data))
 	default:
 		return errors.New("unknown output format: " + format)
 	}

@@ -82,7 +82,7 @@ func (command *kitCreateCommandOptions) validateArgs(_ *cobra.Command, args []st
 	return nil
 }
 
-func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) error {
+func (command *kitCreateCommandOptions) run(cmd *cobra.Command, args []string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
@@ -94,7 +94,7 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 		kv := strings.SplitN(t, "=", 2)
 
 		if !util.StringSliceExists(tp, kv[0]) {
-			fmt.Printf("Error: %s is not a valid trait property\n", t)
+			fmt.Fprintf(cmd.OutOrStdout(), "Error: %s is not a valid trait property\n", t)
 			return nil
 		}
 	}
@@ -109,7 +109,7 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 		// not a platform one which is supposed to be "read only"
 
 		if kit.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypePlatform {
-			fmt.Printf("integration kit \"%s\" is not editable\n", kit.Name)
+			fmt.Fprintf(cmd.OutOrStdout(), "integration kit \"%s\" is not editable\n", kit.Name)
 			return nil
 		}
 	}
@@ -175,7 +175,7 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 		existing := v1.NewIntegrationKit(kit.Namespace, kit.Name)
 		err = c.Get(command.Context, key, existing)
 		if err != nil {
-			fmt.Print(err.Error())
+			fmt.Fprint(cmd.ErrOrStderr(), err.Error())
 			return nil
 		}
 		kit.ResourceVersion = existing.ResourceVersion
@@ -183,14 +183,14 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 	}
 
 	if err != nil {
-		fmt.Print(err.Error())
+		fmt.Fprint(cmd.ErrOrStderr(), err.Error())
 		return nil
 	}
 
 	if !existed {
-		fmt.Printf("integration kit \"%s\" created\n", kit.Name)
+		fmt.Fprintf(cmd.OutOrStdout(), "integration kit \"%s\" created\n", kit.Name)
 	} else {
-		fmt.Printf("integration kit \"%s\" updated\n", kit.Name)
+		fmt.Fprintf(cmd.OutOrStdout(), "integration kit \"%s\" updated\n", kit.Name)
 	}
 
 	return nil

@@ -198,12 +198,12 @@ func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
 	return o.validate()
 }
 
-func (o *runCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
+func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 	if len(args) < 1 {
 		return errors.New("run expects at least 1 argument, received 0")
 	}
 
-	if _, err := ResolveSources(context.Background(), args, false); err != nil {
+	if _, err := ResolveSources(context.Background(), args, false, cmd); err != nil {
 		return errors.Wrap(err, "One of the provided sources is not reachable")
 	}
 
@@ -287,10 +287,10 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 				// Context canceled
 				return
 			}
-			fmt.Printf("Run integration terminating\n")
+			fmt.Fprintf(cmd.OutOrStdout(), "Run integration terminating\n")
 			err := DeleteIntegration(o.Context, c, integration.Name, integration.Namespace)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Fprintln(cmd.ErrOrStderr(), err)
 				os.Exit(1)
 			}
 			os.Exit(0)
@@ -334,7 +334,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 	if o.Logs || o.Dev {
-		err = k8slog.Print(o.Context, c, integration, cmd.OutOrStdout())
+		err = k8slog.Print(o.Context, cmd, c, integration, cmd.OutOrStdout())
 		if err != nil {
 			return err
 		}
@@ -419,7 +419,7 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 						newCmd.SetOut(cmd.OutOrStdout())
 						newCmd.SetErr(cmd.ErrOrStderr())
 						if err != nil {
-							fmt.Println("Unable to sync integration: ", err.Error())
+							fmt.Fprintln(newCmd.ErrOrStderr(), "Unable to sync integration: ", err.Error())
 
 							continue
 						}
@@ -436,7 +436,7 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 						// run the new one
 						err = newCmd.Execute()
 						if err != nil {
-							fmt.Println("Unable to sync integration: ", err.Error())
+							fmt.Fprintln(newCmd.ErrOrStderr(), "Unable to sync integration: ", err.Error())
 						}
 					}
 				}
@@ -520,7 +520,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	srcs = append(srcs, sources...)
 	srcs = append(srcs, o.Sources...)
 
-	resolvedSources, err := ResolveSources(context.Background(), srcs, o.Compression)
+	resolvedSources, err := ResolveSources(context.Background(), srcs, o.Compression, cmd)
 	if err != nil {
 		return nil, err
 	}
@@ -543,20 +543,20 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		}
 	}
 
-	err = resolvePodTemplate(context.Background(), o.PodTemplate, &integration.Spec)
+	err = resolvePodTemplate(context.Background(), cmd, o.PodTemplate, &integration.Spec)
 	if err != nil {
 		return nil, err
 	}
 
-	err = o.parseAndConvertToTrait(c, integration, o.Resources, resource.ParseResource, func(c *resource.Config) string { return c.String() }, "mount.resources")
+	err = o.parseAndConvertToTrait(cmd, c, integration, o.Resources, resource.ParseResource, func(c *resource.Config) string { return c.String() }, "mount.resources")
 	if err != nil {
 		return nil, err
 	}
-	err = o.parseAndConvertToTrait(c, integration, o.Configs, resource.ParseConfig, func(c *resource.Config) string { return c.String() }, "mount.configs")
+	err = o.parseAndConvertToTrait(cmd, c, integration, o.Configs, resource.ParseConfig, func(c *resource.Config) string { return c.String() }, "mount.configs")
 	if err != nil {
 		return nil, err
 	}
-	err = o.parseAndConvertToTrait(c, integration, o.OpenAPIs, resource.ParseConfig, func(c *resource.Config) string { return c.Name() }, "openapi.configmaps")
+	err = o.parseAndConvertToTrait(cmd, c, integration, o.OpenAPIs, resource.ParseConfig, func(c *resource.Config) string { return c.Name() }, "openapi.configmaps")
 	if err != nil {
 		return nil, err
 	}
@@ -615,10 +615,10 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 
 	if existing == nil {
 		err = c.Create(o.Context, integration)
-		fmt.Printf("Integration \"%s\" created\n", name)
+		fmt.Fprintf(cmd.OutOrStdout(), "Integration \"%s\" created\n", name)
 	} else {
 		err = c.Patch(o.Context, integration, ctrl.MergeFromWithOptions(existing, ctrl.MergeFromWithOptimisticLock{}))
-		fmt.Printf("Integration \"%s\" updated\n", name)
+		fmt.Fprintf(cmd.OutOrStdout(), "Integration \"%s\" updated\n", name)
 	}
 
 	if err != nil {
@@ -636,7 +636,7 @@ func showIntegrationOutput(cmd *cobra.Command, integration *v1.Integration, outp
 	return printer.PrintObj(integration, cmd.OutOrStdout())
 }
 
-func (o *runCmdOptions) parseAndConvertToTrait(
+func (o *runCmdOptions) parseAndConvertToTrait(cmd *cobra.Command,
 	c client.Client, integration *v1.Integration, params []string,
 	parse func(string) (*resource.Config, error),
 	convert func(*resource.Config) string,
@@ -647,7 +647,7 @@ func (o *runCmdOptions) parseAndConvertToTrait(
 			return err
 		}
 		// We try to autogenerate a configmap
-		_, err = parseConfigAndGenCm(o.Context, c, config, integration, o.Compression)
+		_, err = parseConfigAndGenCm(o.Context, cmd, c, config, integration, o.Compression)
 		if err != nil {
 			return err
 		}
@@ -705,7 +705,7 @@ func loadPropertyFile(fileName string) (*properties.Properties, error) {
 	return p, nil
 }
 
-func resolvePodTemplate(ctx context.Context, templateSrc string, spec *v1.IntegrationSpec) (err error) {
+func resolvePodTemplate(ctx context.Context, cmd *cobra.Command, templateSrc string, spec *v1.IntegrationSpec) (err error) {
 	// check if template is set
 	if templateSrc == "" {
 		return nil
@@ -714,7 +714,7 @@ func resolvePodTemplate(ctx context.Context, templateSrc string, spec *v1.Integr
 
 	// check if value is a path to the file
 	if _, err := os.Stat(templateSrc); err == nil {
-		rsc, err := ResolveSources(ctx, []string{templateSrc}, false)
+		rsc, err := ResolveSources(ctx, []string{templateSrc}, false, cmd)
 		if err == nil && len(rsc) > 0 {
 			templateSrc = rsc[0].Content
 		}

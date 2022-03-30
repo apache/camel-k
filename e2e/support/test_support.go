@@ -1728,9 +1728,9 @@ func UserCleanup() {
 		command.Stderr = os.Stderr
 		command.Stdout = os.Stdout
 		if err := command.Run(); err != nil {
-			fmt.Printf("An error occurred during user cleanup command execution: %v\n", err)
+			fmt.Fprintf(command.Stderr, "An error occurred during user cleanup command execution: %v\n", err)
 		} else {
-			fmt.Printf("User cleanup command completed successfully\n")
+			fmt.Fprintf(command.Stdout, "User cleanup command completed successfully\n")
 		}
 	}
 }
