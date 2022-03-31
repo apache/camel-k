@@ -26,14 +26,17 @@ location=$(dirname $0)
 version=$1
 image_name=${2:-docker.io\/apache\/camel-k}
 sanitized_image_name=${image_name//\//\\\/}
+k8s_version_label="app.kubernetes.io\/version"
 
 for f in $(find $location/../config/manager -type f -name "*.yaml");
 do
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     sed -i -r "s/image: .*/image: ${sanitized_image_name}:${version}/" $f
+    sed -i -r "s/${k8s_version_label}: .*/${k8s_version_label}: \""${version}"\"/" $f
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     # Mac OSX
     sed -i '' -E "s/image: .*/image: ${sanitized_image_name}:${version}/" $f
+    sed -i '' -E "s/${k8s_version_label}: .*/${k8s_version_label}: \""${version}"\"/" $f
   fi
 done
 
