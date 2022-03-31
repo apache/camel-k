@@ -68,10 +68,6 @@ KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
 # Optional branch for the default Kamelet catalog (change this to a tag before release)
 KAMELET_CATALOG_REPO_BRANCH := v0.7.1
 
-# When packaging artifacts into the docker image, you can "copy" them from local maven
-# or "download" them from Apache Snapshots and Maven Central
-PACKAGE_ARTIFACTS_STRATEGY := copy
-
 # OLM (Operator Lifecycle Manager and Operator Hub): uncomment to override operator settings at build time
 #GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultOperatorName=camel-k-operator
 #GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultPackage=camel-k
@@ -239,7 +235,7 @@ else
 endif
 
 build-resources:
-	./script/get_catalog.sh $(RUNTIME_VERSION) -Dstaging.repo="$(STAGING_RUNTIME_REPO)"
+	./script/get_catalog.sh $(RUNTIME_VERSION)
 	go generate ./pkg/...
 
 bundle-kamelets:
@@ -353,7 +349,8 @@ package-examples:
 	./script/package_examples.sh $(CUSTOM_VERSION)
 
 package-artifacts:
-	./script/package_maven_artifacts.sh $(RUNTIME_VERSION) $(PACKAGE_ARTIFACTS_STRATEGY) $(STAGING_RUNTIME_REPO)
+	# useful for development purpose only in order to include any local development runtime dependency
+	./script/package_maven_artifacts.sh $(RUNTIME_VERSION) $(CAMEL_K_RUNTIME_DIR)
 
 release: clean codegen set-module-version set-version build-resources check-licenses build images images-push cross-compile package-examples git-tag
 

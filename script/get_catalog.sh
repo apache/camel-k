@@ -18,15 +18,10 @@
 location=$(dirname $0)
 rootdir=$location/../
 
-if [ "$#" -ge 1 ]; then
-  runtimeVersion="$1"
-  shift 1
-  # the catalog was already provided by Camel K runtime. No need to depends on maven to rebuild it
-  wget -q https://repo1.maven.org/maven2/org/apache/camel/k/camel-k-catalog/$runtimeVersion/camel-k-catalog-$runtimeVersion-catalog.yaml -O ${rootdir}/resources/camel-catalog-$runtimeVersion.yaml
-  # TODO if we need to use also staging, then we must parse the maven-metadata from the staging repository 
-  # (ie https://repository.apache.org/content/repositories/snapshots/org/apache/camel/k/camel-k-catalog/1.13.0-SNAPSHOT/maven-metadata.xml)
-  # and get the latest snapshot produced as done in the stable version above
-else
-  echo "usage: $0 <runtime.version> [staging.repo]"
+if [ "$#" -lt 1 ]; then
+  echo "usage: $0 <Camel K runtime version>"
   exit 1
 fi
+
+mvn dependency:copy -Dartifact="org.apache.camel.k:camel-k-catalog:$1:yaml:catalog" -DoutputDirectory=${rootdir}/resources/
+

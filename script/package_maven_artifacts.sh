@@ -17,39 +17,46 @@
 
 location=$(dirname $0)
 
-if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
-    echo "usage: $0 version strategy [staging.repo]"
+if [ "$#" -lt 1 ]; then
+    echo "usage: $0 <Camel K runtime version> [<local Camel K runtime project directory>]"
     exit 1
 fi
 
-version=$1
-strategy=$2
-staging_repo=$3
+camel_k_destination="$PWD/build/_maven_output"
+camel_k_runtime_version=$1
 
-cd ${location}/..
+if [ -z "$2" ]; then
+    is_snapshot=$(echo "$1" | grep "SNAPSHOT")
+    if [ "$is_snapshot" = "$1" ]; then
+        echo "You're trying to package SNAPSHOT artifacts. You probably wants them from your local environment, try calling:"
+        echo "$0 <Camel K runtime version> <local Camel K runtime project directory>"
+        exit 3
+    fi
 
-if [ "$strategy" = "copy" ]; then
-    mvn \
-        -V \
-        --no-transfer-progress \
-        -f build/maven/pom-runtime.xml \
-        -DoutputDirectory=$PWD/build/_maven_output \
-        -Druntime.version=$version \
-        -Dstaging.repo=$staging_repo \
-        -Dalpn.jdk8.version="8.1.13.v20181017" \
-        dependency:copy-dependencies
-elif [ "$strategy" = "download" ]; then
-    mvn \
-        -V \
-        --no-transfer-progress \
-        -f build/maven/pom-runtime.xml \
-        -Dmaven.repo.local=$PWD/build/_maven_output \
-        -Druntime.version=$version \
-        -Dstaging.repo=$staging_repo \
-        -Dalpn.jdk8.version="8.1.13.v20181017" \
-        install
+    # Take the dependencies officially released
+    wget https://repo1.maven.org/maven2/org/apache/camel/k/apache-camel-k-runtime/$1/apache-camel-k-runtime-$1-source-release.zip -O $PWD/build/apache-camel-k-runtime-$1-source-release.zip
+    unzip -o $PWD/build/apache-camel-k-runtime-$1-source-release.zip -d $PWD/build
+    mvn -f $PWD/build/apache-camel-k-runtime-$1/pom.xml \
+        dependency:copy-dependencies \
+        -DincludeScope=runtime \
+        -Dmdep.copyPom=true \
+        -DoutputDirectory=$camel_k_destination \
+        -Dmdep.useRepositoryLayout=true
+    rm -rf $PWD/build/apache-camel-k-runtime*
 else
-    echo "unknown strategy: $strategy"
-    exit 1
-fi
+    # Take the dependencies from a local development environment
+    camel_k_runtime_source=$2
+    camel_k_runtime_source_version=$(mvn -f $camel_k_runtime_source/pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
 
+    if [ "$camel_k_runtime_version" != "$camel_k_runtime_source_version" ]; then
+        echo "Misaligned version. You're building Camel K project using $camel_k_runtime_version but trying to bundle dependencies from local Camel K runtime $camel_k_runtime_source_version"
+        exit 2
+    fi
+
+    mvn -f $camel_k_runtime_source/pom.xml \
+    dependency:copy-dependencies \
+        -DincludeScope=runtime \
+        -Dmdep.copyPom=true \
+        -DoutputDirectory=$camel_k_destination \
+        -Dmdep.useRepositoryLayout=true
+fi
