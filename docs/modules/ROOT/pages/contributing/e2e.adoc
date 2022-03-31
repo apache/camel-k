@@ -44,11 +44,11 @@ make images
 
 The script will take care to build the operator docker image and push to the underlying docker daemon registry. At this stage, the cluster will be able to pickup this latest image when it executes the tests.
 
-You can also execute the following script, if by any chance you have some change applied to the `camel-k-runtime`:
+You can also execute the following script, if by any chance you have some change applied to the `camel-k-runtime`. You can optionally point to your local Camel K runtime project directory if you need to install any SNAPSHOT dependency:
 
 [source]
 ----
-make images-dev
+make images-dev [CAMEL_K_RUNTIME_DIR=/path/to/camel-k-runtime-project]
 ----
 
 [[using-nexus]]
