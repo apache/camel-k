@@ -287,7 +287,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 				// Context canceled
 				return
 			}
-			fmt.Fprintf(cmd.OutOrStdout(), "Run integration terminating\n")
+			fmt.Fprintln(cmd.OutOrStdout(), "Run integration terminating")
 			err := DeleteIntegration(o.Context, c, integration.Name, integration.Namespace)
 			if err != nil {
 				fmt.Fprintln(cmd.ErrOrStderr(), err)
@@ -615,10 +615,10 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 
 	if existing == nil {
 		err = c.Create(o.Context, integration)
-		fmt.Fprintf(cmd.OutOrStdout(), "Integration \"%s\" created\n", name)
+		fmt.Fprintln(cmd.OutOrStdout(), `Integration "`+name+`" created`)
 	} else {
 		err = c.Patch(o.Context, integration, ctrl.MergeFromWithOptions(existing, ctrl.MergeFromWithOptimisticLock{}))
-		fmt.Fprintf(cmd.OutOrStdout(), "Integration \"%s\" updated\n", name)
+		fmt.Fprintln(cmd.OutOrStdout(), `Integration "`+name+`" updated`)
 	}
 
 	if err != nil {

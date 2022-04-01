@@ -71,7 +71,7 @@ func NewKamelWithModelineCommand(ctx context.Context, osArgs []string) (*cobra.C
 	originalFlags := osArgs[1:]
 	rootCmd, flags, err := createKamelWithModelineCommand(ctx, originalFlags)
 	if err != nil {
-		fmt.Fprintf(rootCmd.ErrOrStderr(), "Error: %s\n", err.Error())
+		fmt.Fprintln(rootCmd.ErrOrStderr(), "Error:", err.Error())
 		return rootCmd, flags, err
 	}
 	if len(originalFlags) != len(flags) {

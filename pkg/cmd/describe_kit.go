@@ -86,7 +86,7 @@ func (command *describeKitCommandOptions) run(cmd *cobra.Command, args []string)
 			fmt.Fprintln(cmd.ErrOrStderr(), err)
 		}
 	} else {
-		fmt.Fprintf(cmd.OutOrStdout(), "IntegrationKit '%s' does not exist.\n", args[0])
+		fmt.Fprintln(cmd.OutOrStdout(), "IntegrationKit '"+args[0]+"' does not exist")
 	}
 
 	return nil

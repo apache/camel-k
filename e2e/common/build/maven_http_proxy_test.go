@@ -150,11 +150,11 @@ func TestMavenProxy(t *testing.T) {
 		permission, pErr := kubernetes.CheckPermission(TestContext, TestClient(), configv1.GroupName, reflect.TypeOf(configv1.Proxy{}).Name(), "", "cluster", "edit")
 		olmInstall := pErr == nil && olmErr == nil && inErr == nil && olm && installed && permission
 		var defaultProxy configv1.Proxy
-		if olmInstall  {
+		if olmInstall {
 			// use OLM autoconfiguration
 			defaultProxy = configv1.Proxy{}
 			key := ctrl.ObjectKey{
-				Name:      "cluster",
+				Name: "cluster",
 			}
 			Expect(TestClient().Get(TestContext, key, &defaultProxy)).To(Succeed())
 
@@ -165,7 +165,6 @@ func TestMavenProxy(t *testing.T) {
 
 			// ENV values should be injected by the OLM
 			Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
-
 
 		} else {
 			Expect(Kamel("install", "-n", ns,
