@@ -91,7 +91,7 @@ func (command *deleteCmdOptions) run(cmd *cobra.Command, args []string) error {
 					return err
 				}
 			} else {
-				err := deleteIntegration(cmd, command.Context, c, integration)
+				err := deleteIntegration(command.Context, cmd, c, integration)
 				if err != nil {
 					return err
 				}
@@ -112,7 +112,7 @@ func (command *deleteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 		for _, integration := range integrationList.Items {
 			integration := integration // pin
-			err := deleteIntegration(cmd, command.Context, c, &integration)
+			err := deleteIntegration(command.Context, cmd, c, &integration)
 			if err != nil {
 				return err
 			}
@@ -139,14 +139,14 @@ func getIntegration(ctx context.Context, c client.Client, name string, namespace
 	return &answer, nil
 }
 
-func deleteIntegration(cmd *cobra.Command, ctx context.Context, c client.Client, integration *v1.Integration) error {
+func deleteIntegration(ctx context.Context, cmd *cobra.Command, c client.Client, integration *v1.Integration) error {
 	deleted, binding, err := deleteKameletBindingIfExists(ctx, c, integration)
 	if err != nil {
 		return err
 	}
 	if deleted {
 		// Deleting KameletBinding will automatically clean up the integration
-		fmt.Fprintln(cmd.OutOrStdout(),"KameletBinding " + binding + " deleted")
+		fmt.Fprintln(cmd.OutOrStdout(), "KameletBinding "+binding+" deleted")
 		return nil
 	}
 	return c.Delete(ctx, integration)

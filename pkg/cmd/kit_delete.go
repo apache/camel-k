@@ -144,7 +144,7 @@ func (command *kitDeleteCommandOptions) delete(cmd *cobra.Command, name string) 
 		return fmt.Errorf("no integration kit found with name \"%s\"", kit.Name)
 	}
 
-	fmt.Fprintf(cmd.OutOrStdout(), "integration kit \"%s\" has been deleted\n", kit.Name)
+	fmt.Fprintln(cmd.OutOrStdout(), `integration kit "`+kit.Name+`" has been deleted`)
 
 	return err
 }

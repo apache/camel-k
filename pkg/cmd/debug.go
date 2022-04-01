@@ -100,7 +100,7 @@ func (o *debugCmdOptions) run(cmd *cobra.Command, args []string) error {
 			// Context canceled
 			return
 		}
-		fmt.Fprintf(cmd.OutOrStdout(), "Disabling debug mode on integration %q\n", name)
+		fmt.Fprintln(cmd.OutOrStdout(), `Disabling debug mode on integration "`+name+`"`)
 		it, err := c.Integrations(o.Namespace).Get(o.Context, name, metav1.GetOptions{})
 		if err != nil {
 			fmt.Fprintln(cmd.ErrOrStderr(), err.Error())

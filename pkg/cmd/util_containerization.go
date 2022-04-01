@@ -99,7 +99,7 @@ func createAndBuildBaseImage(ctx context.Context, stdout, stderr io.Writer) erro
 	cmd.Stderr = stderr
 
 	// Output executed command.
-	fmt.Fprintf(cmd.Stdout, "Executing: %s\n", strings.Join(cmd.Args, " "))
+	fmt.Fprintln(cmd.Stdout, "Executing:", strings.Join(cmd.Args, " "))
 
 	// Run the command.
 	if err := cmd.Run(); err != nil {
@@ -196,7 +196,7 @@ func createAndBuildIntegrationImage(ctx context.Context, containerRegistry strin
 	cmd.Stdout = stdout
 
 	// Output executed command.
-	fmt.Fprintf(cmd.Stdout, "Executing: %s\n", strings.Join(cmd.Args, " "))
+	fmt.Fprintln(cmd.Stdout, "Executing:", strings.Join(cmd.Args, " "))
 
 	// Run the command.
 	if err := cmd.Run(); err != nil {
@@ -229,7 +229,7 @@ func runIntegrationImage(ctx context.Context, image string, stdout, stderr io.Wr
 	cmd.Stdout = stdout
 
 	// Output executed command.
-	fmt.Fprintf(cmd.Stdout, "Executing: %s\n", strings.Join(cmd.Args, " "))
+	fmt.Fprintln(cmd.Stdout, "Executing:", strings.Join(cmd.Args, " "))
 
 	// Run the command.
 	if err := cmd.Run(); err != nil {

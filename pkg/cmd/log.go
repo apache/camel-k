@@ -128,7 +128,7 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 			//
 			// Found the running integration so step over to scraping its pod log
 			//
-			fmt.Fprintf(cmd.OutOrStdout(), "Integration '%s' is now running. Showing log ...\n", integrationID)
+			fmt.Fprintln(cmd.OutOrStdout(), "Integration '"+integrationID+"' is now running. Showing log ...")
 			if err := k8slog.Print(o.Context, cmd, c, &integration, cmd.OutOrStdout()); err != nil {
 				return false, err
 			}

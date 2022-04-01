@@ -139,6 +139,6 @@ func (command *kameletDeleteCommandOptions) delete(cmd *cobra.Command, name stri
 		}
 		return fmt.Errorf("error deleting kamelet \"%s\": %w", name, err)
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "kamelet \"%s\" has been deleted\n", name)
+	fmt.Fprintln(cmd.OutOrStdout(), `kamelet "`+name+`" has been deleted`)
 	return nil
 }

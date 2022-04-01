@@ -69,7 +69,7 @@ func (o *rebuildCmdOptions) rebuild(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Fprintf(cmd.OutOrStdout(),"%d integrations have been rebuilt\n", len(integrations))
+	fmt.Fprintln(cmd.OutOrStdout(), len(integrations), "integrations have been rebuilt")
 	return nil
 }
 

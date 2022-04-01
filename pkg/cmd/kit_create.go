@@ -94,7 +94,7 @@ func (command *kitCreateCommandOptions) run(cmd *cobra.Command, args []string) e
 		kv := strings.SplitN(t, "=", 2)
 
 		if !util.StringSliceExists(tp, kv[0]) {
-			fmt.Fprintf(cmd.OutOrStdout(), "Error: %s is not a valid trait property\n", t)
+			fmt.Fprintln(cmd.OutOrStdout(), "Error:", t, "is not a valid trait property")
 			return nil
 		}
 	}
@@ -109,7 +109,7 @@ func (command *kitCreateCommandOptions) run(cmd *cobra.Command, args []string) e
 		// not a platform one which is supposed to be "read only"
 
 		if kit.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypePlatform {
-			fmt.Fprintf(cmd.OutOrStdout(), "integration kit \"%s\" is not editable\n", kit.Name)
+			fmt.Fprintln(cmd.OutOrStdout(), `integration kit "`+kit.Name+`" is not editable`)
 			return nil
 		}
 	}
@@ -188,9 +188,9 @@ func (command *kitCreateCommandOptions) run(cmd *cobra.Command, args []string) e
 	}
 
 	if !existed {
-		fmt.Fprintf(cmd.OutOrStdout(), "integration kit \"%s\" created\n", kit.Name)
+		fmt.Fprintln(cmd.OutOrStdout(), `integration kit "`+kit.Name+`" created`)
 	} else {
-		fmt.Fprintf(cmd.OutOrStdout(), "integration kit \"%s\" updated\n", kit.Name)
+		fmt.Fprintln(cmd.OutOrStdout(), `integration kit "`+kit.Name+`" updated`)
 	}
 
 	return nil

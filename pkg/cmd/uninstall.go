@@ -143,7 +143,7 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 		fmt.Fprintf(cmd.OutOrStdout(), "Camel K Integration Platform removed from namespace %s\n", o.Namespace)
 	}
 
-	if err = o.uninstallNamespaceResources(cmd, o.Context, c); err != nil {
+	if err = o.uninstallNamespaceResources(o.Context, cmd, c); err != nil {
 		return err
 	}
 
@@ -155,11 +155,11 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 			fmt.Fprintf(cmd.OutOrStdout(), "Camel K Operator removed from namespace %s\n", o.Namespace)
 		}
 
-		if err = o.uninstallNamespaceRoles(cmd, o.Context, c); err != nil {
+		if err = o.uninstallNamespaceRoles(o.Context, cmd, c); err != nil {
 			return err
 		}
 
-		if err = o.uninstallClusterWideResources(cmd, o.Context, c, o.Namespace); err != nil {
+		if err = o.uninstallClusterWideResources(o.Context, cmd, c, o.Namespace); err != nil {
 			return err
 		}
 
@@ -186,7 +186,7 @@ func (o *uninstallCmdOptions) uninstallOperator(ctx context.Context, c client.Cl
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallClusterWideResources(cmd *cobra.Command, ctx context.Context, c client.Client, namespace string) error {
+func (o *uninstallCmdOptions) uninstallClusterWideResources(ctx context.Context, cmd *cobra.Command, c client.Client, namespace string) error {
 	if !o.SkipCrd || o.UninstallAll {
 		if err := o.uninstallCrd(ctx, c); err != nil {
 			if k8serrors.IsForbidden(err) {
@@ -194,7 +194,7 @@ func (o *uninstallCmdOptions) uninstallClusterWideResources(cmd *cobra.Command, 
 			}
 			return err
 		}
-		fmt.Fprintf(cmd.OutOrStdout(), "Camel K Custom Resource Definitions removed from cluster\n")
+		fmt.Fprintln(cmd.OutOrStdout(), "Camel K Custom Resource Definitions removed from cluster")
 	}
 
 	if err := o.removeSubjectFromClusterRoleBindings(ctx, c, namespace); err != nil {
@@ -213,7 +213,7 @@ func (o *uninstallCmdOptions) uninstallClusterWideResources(cmd *cobra.Command, 
 			}
 			return err
 		}
-		fmt.Fprintf(cmd.OutOrStdout(), "Camel K Cluster Role Bindings removed from cluster\n")
+		fmt.Fprintln(cmd.OutOrStdout(), "Camel K Cluster Role Bindings removed from cluster")
 	}
 
 	if !o.SkipClusterRoles || o.UninstallAll {
@@ -223,57 +223,57 @@ func (o *uninstallCmdOptions) uninstallClusterWideResources(cmd *cobra.Command, 
 			}
 			return err
 		}
-		fmt.Fprintf(cmd.OutOrStdout(), "Camel K Cluster Roles removed from cluster\n")
+		fmt.Fprintln(cmd.OutOrStdout(), "Camel K Cluster Roles removed from cluster")
 	}
 
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallNamespaceRoles(cmd *cobra.Command, ctx context.Context, c client.Client) error {
+func (o *uninstallCmdOptions) uninstallNamespaceRoles(ctx context.Context, cmd *cobra.Command, c client.Client) error {
 	if !o.SkipRoleBindings {
 		if err := o.uninstallRoleBindings(ctx, c); err != nil {
 			return err
 		}
-		fmt.Fprintf(cmd.OutOrStdout(), "Camel K Role Bindings removed from namespace %s\n", o.Namespace)
+		fmt.Fprintln(cmd.OutOrStdout(), "Camel K Role Bindings removed from namespace", o.Namespace)
 	}
 
 	if !o.SkipRoles {
 		if err := o.uninstallRoles(ctx, c); err != nil {
 			return err
 		}
-		fmt.Fprintf(cmd.OutOrStdout(), "Camel K Roles removed from namespace %s\n", o.Namespace)
+		fmt.Fprintln(cmd.OutOrStdout(), "Camel K Roles removed from namespace", o.Namespace)
 	}
 
 	if !o.SkipServiceAccounts {
 		if err := o.uninstallServiceAccounts(ctx, c); err != nil {
 			return err
 		}
-		fmt.Fprintf(cmd.OutOrStdout(), "Camel K Service Accounts removed from namespace %s\n", o.Namespace)
+		fmt.Fprintln(cmd.OutOrStdout(), "Camel K Service Accounts removed from namespace", o.Namespace)
 	}
 
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallNamespaceResources(cmd *cobra.Command, ctx context.Context, c client.Client) error {
+func (o *uninstallCmdOptions) uninstallNamespaceResources(ctx context.Context, cmd *cobra.Command, c client.Client) error {
 	if !o.SkipConfigMaps {
 		if err := o.uninstallConfigMaps(ctx, c); err != nil {
 			return err
 		}
-		fmt.Fprintf(cmd.OutOrStdout(), "Camel K Config Maps removed from namespace %s\n", o.Namespace)
+		fmt.Fprintln(cmd.OutOrStdout(), "Camel K Config Maps removed from namespace", o.Namespace)
 	}
 
 	if !o.SkipRegistrySecret {
 		if err := o.uninstallRegistrySecret(ctx, c); err != nil {
 			return err
 		}
-		fmt.Fprintf(cmd.OutOrStdout(), "Camel K Registry Secret removed from namespace %s\n", o.Namespace)
+		fmt.Fprintln(cmd.OutOrStdout(), "Camel K Registry Secret removed from namespace", o.Namespace)
 	}
 
 	if !o.SkipKamelets {
 		if err := o.uninstallKamelets(ctx, c); err != nil {
 			return err
 		}
-		fmt.Fprintf(cmd.OutOrStdout(), "Camel K platform Kamelets removed from namespace %s\n", o.Namespace)
+		fmt.Fprintln(cmd.OutOrStdout(), "Camel K platform Kamelets removed from namespace", o.Namespace)
 	}
 
 	return nil

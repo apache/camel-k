@@ -91,7 +91,7 @@ func ResolveSources(ctx context.Context, locations []string, compress bool, cmd 
 					ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 					tc = oauth2.NewClient(ctx, ts)
 
-					fmt.Fprintln(cmd.OutOrStdout(),"GITHUB_TOKEN env var detected, using it for GitHub APIs authentication")
+					fmt.Fprintln(cmd.OutOrStdout(), "GITHUB_TOKEN env var detected, using it for GitHub APIs authentication")
 				}
 
 				gc := github.NewClient(tc)

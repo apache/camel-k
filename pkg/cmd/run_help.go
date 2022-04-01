@@ -49,16 +49,14 @@ func parseConfigAndGenCm(ctx context.Context, cmd *cobra.Command, c client.Clien
 	case resource.StorageTypeConfigmap:
 		cm := kubernetes.LookupConfigmap(ctx, c, integration.Namespace, config.Name())
 		if cm == nil {
-			fmt.Fprintf(cmd.ErrOrStderr(), "Warn: %s Configmap not found in %s namespace, make sure to provide it before the Integration can run\n",
-				config.Name(), integration.Namespace)
+			fmt.Fprintln(cmd.ErrOrStderr(), "Warn:", config.Name(), "Configmap not found in", integration.Namespace, "namespace, make sure to provide it before the Integration can run")
 		} else if config.ContentType() != resource.ContentTypeData && cm.BinaryData != nil {
 			return nil, fmt.Errorf("you cannot provide a binary config, use a text file instead")
 		}
 	case resource.StorageTypeSecret:
 		secret := kubernetes.LookupSecret(ctx, c, integration.Namespace, config.Name())
 		if secret == nil {
-			fmt.Fprintf(cmd.ErrOrStderr(), "Warn: %s Secret not found in %s namespace, make sure to provide it before the Integration can run\n",
-				config.Name(), integration.Namespace)
+			fmt.Fprintln(cmd.ErrOrStderr(), "Warn:", config.Name(), "Secret not found in", integration.Namespace, "namespace, make sure to provide it before the Integration can run")
 		}
 	case resource.StorageTypeFile:
 		// Don't allow a binary non compressed resource

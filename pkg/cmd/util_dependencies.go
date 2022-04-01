@@ -241,7 +241,7 @@ func outputDependencies(dependencies []string, format string, cmd *cobra.Command
 		// Print output in text form
 		fmt.Fprintln(cmd.OutOrStdout(), "dependencies:")
 		for _, dep := range dependencies {
-			fmt.Fprintf(cmd.OutOrStdout(), "%v\n", dep)
+			fmt.Fprintln(cmd.OutOrStdout(), dep)
 		}
 	}
 
@@ -261,7 +261,7 @@ func printDependencies(format string, dependencies []string, cmd *cobra.Command)
 		if err != nil {
 			return err
 		}
-		fmt.Fprint(cmd.OutOrStdout(),string(data))
+		fmt.Fprint(cmd.OutOrStdout(), string(data))
 	default:
 		return errors.New("unknown output format: " + format)
 	}

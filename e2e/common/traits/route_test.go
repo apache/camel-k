@@ -49,11 +49,11 @@ import (
 )
 
 const (
-	secretName            = "test-certificate"
-	integrationName       = "platform-http-server"
+	secretName      = "test-certificate"
+	integrationName = "platform-http-server"
 )
 
-var waitBeforeHttpRequest = TestTimeoutShort/2
+var waitBeforeHttpRequest = TestTimeoutShort / 2
 
 type keyCertificatePair struct {
 	Key         []byte

@@ -87,7 +87,7 @@ func (command *describeKameletCommandOptions) run(cmd *cobra.Command, args []str
 			fmt.Fprintln(cmd.ErrOrStderr(), err)
 		}
 	} else {
-		fmt.Fprintf(cmd.OutOrStdout(), "Kamelet '%s' does not exist.\n", args[0])
+		fmt.Fprintln(cmd.OutOrStdout(), "Kamelet '"+args[0]+"' does not exist.")
 	}
 
 	return nil
