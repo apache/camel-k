@@ -84,7 +84,8 @@ jobs:
         tag_name: ${{ env.VERSION }}
         release_name: Release ${{ env.VERSION }}
         body: |
-          Apache Camel K ${{ env.VERSION }} build for testing (unstable).
+          Apache Camel K ${{ env.VERSION }} build for testing (unstable). This nightly release is using 
+          an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`
 
           To test it, download the client for your OS and run:
 
@@ -94,6 +95,7 @@ jobs:
 
         draft: false
         prerelease: true
+        allowUpdates: true
     - name: Upload Client Linux
       uses: actions/upload-release-asset@v1
       env:
