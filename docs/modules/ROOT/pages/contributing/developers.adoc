@@ -24,6 +24,9 @@ In order to build the project, you need to comply with the following requirement
 
 * **Go version 1.16+**: needed to compile and test the project. Refer to the https://golang.org/[Go website] for the installation.
 * **GNU Make**: used to define composite build actions. This should be already installed or available as a package if you have a good OS (https://www.gnu.org/software/make/).
+* **MinGW**: needed to compile the project on Windows. Refer to the https://www.mingw-w64.org/[MinGW website] for the installation.
+* **Windows Subsystem for Linux (WSL)**: for running Linux binary executables natively on Windows. Refer to https://docs.microsoft.com/en-us/windows/wsl/install[WSL Website] for installation. Alternatively, you can use https://www.cygwin.com/[Cygwin] or https://www.educative.io/edpresso/how-to-install-git-bash-in-windows[Git Bash].
+
 
 The Camel K Java runtime (camel-k-runtime) requires:
 
@@ -76,6 +79,14 @@ make
 This executes a full build of the Go code. If you need to build the components separately you can execute:
 
 * `make build-kamel`: to build the `kamel` client tool only.
+
+Currently the build is not entirely supported on Windows. If you're building on a Windows system, here's a temporary workaround:
+
+    1. Copy the `script/Makefile` to the root of the project. 
+    2. Run `make -f script/Makefile`. 
+    3. If the above command fails, run `make build-kamel`.
+    4. Rename the `kamel` binary in the root to `kamel.exe`.
+
 
 After a successful build, if you're connected to a Docker daemon, you can build the operator Docker image by running:
 
