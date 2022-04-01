@@ -980,7 +980,6 @@
 - Multiple of the examples fail on Minikube [\#2537](https://github.com/apache/camel-k/issues/2537)
 - Camel-K - uninstall and namespace deletion w/ k8s let all Camel-K Integrations in this namespace alive [\#2533](https://github.com/apache/camel-k/issues/2533)
 - insecure=true does not work with base image [\#2531](https://github.com/apache/camel-k/issues/2531)
-- Reduce time for first Integration start [\#2520](https://github.com/apache/camel-k/issues/2520)
 - Install Error [\#2498](https://github.com/apache/camel-k/issues/2498)
 - Make sure Camel K runs on Microshift [\#2473](https://github.com/apache/camel-k/issues/2473)
 - If the pod is in CrashLoopBackOff, the phase is reported as Running [\#2445](https://github.com/apache/camel-k/issues/2445)
