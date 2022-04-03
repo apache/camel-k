@@ -76,7 +76,7 @@ func printVersion() {
 }
 
 // Run starts the Camel K operator.
-func Run(healthPort, monitoringPort int32, leaderElection bool) {
+func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID string) {
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	flag.Parse()
@@ -158,7 +158,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool) {
 		EventBroadcaster:              broadcaster,
 		LeaderElection:                leaderElection,
 		LeaderElectionNamespace:       operatorNamespace,
-		LeaderElectionID:              platform.OperatorLockName,
+		LeaderElectionID:              leaderElectionID,
 		LeaderElectionResourceLock:    resourcelock.LeasesResourceLock,
 		LeaderElectionReleaseOnCancel: true,
 		HealthProbeBindAddress:        ":" + strconv.Itoa(int(healthPort)),

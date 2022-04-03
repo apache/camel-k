@@ -21,6 +21,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/apache/camel-k/pkg/cmd/operator"
+	"github.com/apache/camel-k/pkg/platform"
 )
 
 const operatorCommand = "operator"
@@ -40,16 +41,18 @@ func newCmdOperator() (*cobra.Command, *operatorCmdOptions) {
 	cmd.Flags().Int32("health-port", 8081, "The port of the health endpoint")
 	cmd.Flags().Int32("monitoring-port", 8080, "The port of the metrics endpoint")
 	cmd.Flags().Bool("leader-election", true, "Use leader election")
+	cmd.Flags().String("leader-election-id", platform.OperatorLockName, "Use the given ID as the leader election Lease name")
 
 	return &cmd, &options
 }
 
 type operatorCmdOptions struct {
-	HealthPort     int32 `mapstructure:"health-port"`
-	MonitoringPort int32 `mapstructure:"monitoring-port"`
-	LeaderElection bool  `mapstructure:"leader-election"`
+	HealthPort       int32  `mapstructure:"health-port"`
+	MonitoringPort   int32  `mapstructure:"monitoring-port"`
+	LeaderElection   bool   `mapstructure:"leader-election"`
+	LeaderElectionID string `mapstructure:"leader-election-id"`
 }
 
 func (o *operatorCmdOptions) run(_ *cobra.Command, _ []string) {
-	operator.Run(o.HealthPort, o.MonitoringPort, o.LeaderElection)
+	operator.Run(o.HealthPort, o.MonitoringPort, o.LeaderElection, o.LeaderElectionID)
 }
