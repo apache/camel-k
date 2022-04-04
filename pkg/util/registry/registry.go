@@ -38,12 +38,14 @@ type Auth struct {
 	Registry string
 }
 
-type dockerConfigList struct {
-	Auths map[string]dockerConfig `json:"auths,omitempty"`
+type DockerConfigList struct {
+	Auths map[string]DockerConfig `json:"auths,omitempty"`
 }
 
-type dockerConfig struct {
-	Auth string `json:"auth,omitempty"`
+type DockerConfig struct {
+	Auth     string `json:"auth,omitempty"`
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
 // IsSet returns if information has been set on the object.
@@ -72,11 +74,11 @@ func (a Auth) GenerateDockerConfig() ([]byte, error) {
 	return json.Marshal(content)
 }
 
-func (a Auth) generateDockerConfigObject() dockerConfigList {
-	return dockerConfigList{
-		map[string]dockerConfig{
+func (a Auth) generateDockerConfigObject() DockerConfigList {
+	return DockerConfigList{
+		map[string]DockerConfig{
 			a.getActualServer(): {
-				a.encodedCredentials(),
+				Auth: a.encodedCredentials(),
 			},
 		},
 	}

@@ -91,7 +91,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	}
 
 	if p.Status.Build.BuildStrategy == v1.BuildStrategyPod {
-		if err := createBuilderServiceAccount(ctx, c, p); err != nil {
+		if err := CreateBuilderServiceAccount(ctx, c, p); err != nil {
 			return errors.Wrap(err, "cannot ensure service account is present")
 		}
 	}
@@ -110,6 +110,21 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	}
 
 	return nil
+}
+
+func CreateBuilderServiceAccount(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) error {
+	sa := corev1.ServiceAccount{}
+	key := ctrl.ObjectKey{
+		Name:      BuilderServiceAccount,
+		Namespace: p.Namespace,
+	}
+
+	err := client.Get(ctx, key, &sa)
+	if err != nil && k8serrors.IsNotFound(err) {
+		return install.BuilderServiceAccountRoles(ctx, client, p.Namespace, p.Status.Cluster)
+	}
+
+	return err
 }
 
 func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) error {
@@ -251,21 +266,6 @@ func createServiceCaBundleConfigMap(ctx context.Context, client client.Client, p
 	}
 
 	return cm, nil
-}
-
-func createBuilderServiceAccount(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) error {
-	sa := corev1.ServiceAccount{}
-	key := ctrl.ObjectKey{
-		Name:      BuilderServiceAccount,
-		Namespace: p.Namespace,
-	}
-
-	err := client.Get(ctx, key, &sa)
-	if err != nil && k8serrors.IsNotFound(err) {
-		return install.BuilderServiceAccountRoles(ctx, client, p.Namespace, p.Status.Cluster)
-	}
-
-	return err
 }
 
 func createBuilderRegistryRoleBinding(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) error {

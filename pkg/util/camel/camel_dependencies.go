@@ -19,6 +19,8 @@ package camel
 
 import (
 	"fmt"
+	"path"
+	"path/filepath"
 	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -102,6 +104,31 @@ func addDependencies(project *maven.Project, dependencies []string, catalog *Run
 			gav := strings.TrimPrefix(d, "mvn:")
 
 			project.AddEncodedDependencyGAV(gav)
+		case strings.HasPrefix(d, "docker-mvn:"):
+			mapping := strings.Split(d, "@")
+			outputFileRelativePath := mapping[1]
+			gavString := strings.TrimPrefix(mapping[0], "docker-mvn:")
+			gav, err := maven.ParseGAV(gavString)
+			if err != nil {
+				return err
+			}
+			plugin := getOrCreateBuildPlugin(project, "com.googlecode.maven-download-plugin", "download-maven-plugin", "1.6.7")
+			exec := maven.Execution{
+				ID:    fmt.Sprint(len(plugin.Executions)),
+				Phase: "package",
+				Goals: []string{
+					"artifact",
+				},
+				Configuration: map[string]string{
+					"outputDirectory": path.Join("../context", filepath.Dir(outputFileRelativePath)),
+					"outputFileName":  filepath.Base(outputFileRelativePath),
+					"groupId":         gav.GroupID,
+					"artifactId":      gav.ArtifactID,
+					"version":         gav.Version,
+					"type":            gav.Type,
+				},
+			}
+			plugin.Executions = append(plugin.Executions, exec)
 		default:
 			if dep := jitpack.ToDependency(d); dep != nil {
 				project.AddDependency(*dep)
@@ -133,6 +160,22 @@ func addDependencies(project *maven.Project, dependencies []string, catalog *Run
 		}
 	}
 	return nil
+}
+
+func getOrCreateBuildPlugin(project *maven.Project, groupID string, artifactID string, version string) *maven.Plugin {
+	for i, plugin := range project.Build.Plugins {
+		if plugin.GroupID == groupID && plugin.ArtifactID == artifactID && plugin.Version == version {
+			return &project.Build.Plugins[i]
+		}
+	}
+	plugin := maven.Plugin{
+		GroupID:    groupID,
+		ArtifactID: artifactID,
+		Version:    version,
+		Executions: []maven.Execution{},
+	}
+	project.Build.Plugins = append(project.Build.Plugins, plugin)
+	return &project.Build.Plugins[len(project.Build.Plugins)-1]
 }
 
 func addDependenciesFromCatalog(project *maven.Project, catalog *RuntimeCatalog) {

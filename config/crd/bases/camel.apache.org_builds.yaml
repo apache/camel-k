@@ -151,7 +151,7 @@ spec:
                             application build phase
                           properties:
                             caSecret:
-                              description: The Secret name and key, containing the
+                              description: The Secrets name and key, containing the
                                 CA certificate(s) used to connect to remote Maven
                                 repositories. It can contain X.509 certificates, and
                                 PKCS#7 formatted certificate chains. A JKS formatted
@@ -160,23 +160,28 @@ spec:
                                 certificate(s) by the Maven commands. Note that the
                                 root CA certificates are also imported into the created
                                 keystore.
-                              properties:
-                                key:
-                                  description: The key of the secret to select from.  Must
-                                    be a valid secret key.
-                                  type: string
-                                name:
-                                  description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                    TODO: Add other useful fields. apiVersion, kind,
-                                    uid?'
-                                  type: string
-                                optional:
-                                  description: Specify whether the Secret or its key
-                                    must be defined
-                                  type: boolean
-                              required:
-                              - key
-                              type: object
+                              items:
+                                description: SecretKeySelector selects a key of a
+                                  Secret.
+                                properties:
+                                  key:
+                                    description: The key of the secret to select from.  Must
+                                      be a valid secret key.
+                                    type: string
+                                  name:
+                                    description: 'Name of the referent. More info:
+                                      https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                      TODO: Add other useful fields. apiVersion, kind,
+                                      uid?'
+                                    type: string
+                                  optional:
+                                    description: Specify whether the Secret or its
+                                      key must be defined
+                                    type: boolean
+                                required:
+                                - key
+                                type: object
+                              type: array
                             cliOptions:
                               description: The CLI options that are appended to the
                                 list of arguments for Maven commands, e.g., `-V,--no-transfer-progress,-Dstyle.color=never`.
@@ -279,6 +284,21 @@ spec:
                                 required:
                                 - id
                                 - url
+                                type: object
+                              type: array
+                            servers:
+                              items:
+                                properties:
+                                  configuration:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                  id:
+                                    type: string
+                                  password:
+                                    type: string
+                                  username:
+                                    type: string
                                 type: object
                               type: array
                             settings:

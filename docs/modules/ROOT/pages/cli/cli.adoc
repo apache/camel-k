@@ -94,3 +94,13 @@ $ kamel <command> --help
 
 Some command options in the CLI can be also specified as modeline in the source file, take a look at the xref:cli/modeline.adoc[Modeline] section
 for more information.
+
+[[image-registry]]
+== Image Registry
+
+The CLI can be used to xref:configuration/dependencies.adoc#local-dependencies[upload] content to the Image Registry.
+To do so, the registry options need to be correctly set during xref:installation/registry/registry.adoc#configuring-registry[installation].
+If the Image Registry uses a custom certificate authority then it needs to be trusted by the CLI see
+link:https://go.dev/src/crypto/x509/root_unix.go[SSL_CERT_FILE].
+If the Image registry uses authentication then it should be configured correctly in `$HOME/.docker/config.json`;
+see link:https://docs.docker.com/engine/reference/commandline/login/[Docker Credentials store]].
