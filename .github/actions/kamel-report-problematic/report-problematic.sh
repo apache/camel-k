@@ -61,7 +61,8 @@ do
   func=""
   while IFS= read -r line
   do
-    if [[ "${line}" =~ ^" * " ]]; then
+    if [[ "${line}" =~ ^[\ ]+\*[\ ] ]]; then
+      # Ignore comments
       continue
     elif [[ "${line}" =~ ^func* ]]; then
       func=$(echo "${line}" | sed -n "s/func \([a-zA-Z0-9]\+\).*/\1/p")
