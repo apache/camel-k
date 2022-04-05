@@ -15,15 +15,23 @@
  * limitations under the License.
  */
 
-//kamel run --trait service.enabled=true
+//
+// To run this integrations use:
+//
+//     kamel run service.java --trait service.enabled=true\
+//     --trait service.node-port=true
+//
+import org.apache.camel.Exchange;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.example.MyClass;
+public class RestDSL extends org.apache.camel.builder.RouteBuilder {
+    @Override
+    public void configure() throws Exception {
+        rest()
+            .get("/hello")
+            .to("direct:hello");
 
-public class Classpath extends RouteBuilder {
-  @Override
-  public void configure() throws Exception {
-	  from("timer:tick")
-        .log(MyClass.sayHello());
-  }
+        from("direct:hello")
+            .setHeader(Exchange.CONTENT_TYPE, constant("text/plain"))
+            .transform().simple("Hello World");
+    }
 }
