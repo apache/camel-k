@@ -95,6 +95,31 @@ spec:
                       applications
                     properties:
                       caSecret:
+                        description: 'Deprecated: use CASecrets The Secret name and
+                          key, containing the CA certificate(s) used to connect to
+                          remote Maven repositories. It can contain X.509 certificates,
+                          and PKCS#7 formatted certificate chains. A JKS formatted
+                          keystore is automatically created to store the CA certificate(s),
+                          and configured to be used as a trusted certificate(s) by
+                          the Maven commands. Note that the root CA certificates are
+                          also imported into the created keystore.'
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                              TODO: Add other useful fields. apiVersion, kind, uid?'
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                      caSecrets:
                         description: The Secrets name and key, containing the CA certificate(s)
                           used to connect to remote Maven repositories. It can contain
                           X.509 certificates, and PKCS#7 formatted certificate chains.
@@ -156,21 +181,6 @@ spec:
                           type: string
                         description: The Maven properties.
                         type: object
-                      servers:
-                        items:
-                          properties:
-                            configuration:
-                              additionalProperties:
-                                type: string
-                              type: object
-                            id:
-                              type: string
-                            password:
-                              type: string
-                            username:
-                              type: string
-                          type: object
-                        type: array
                       settings:
                         description: A reference to the ConfigMap or Secret key that
                           contains the Maven settings.
@@ -360,6 +370,31 @@ spec:
                       applications
                     properties:
                       caSecret:
+                        description: 'Deprecated: use CASecrets The Secret name and
+                          key, containing the CA certificate(s) used to connect to
+                          remote Maven repositories. It can contain X.509 certificates,
+                          and PKCS#7 formatted certificate chains. A JKS formatted
+                          keystore is automatically created to store the CA certificate(s),
+                          and configured to be used as a trusted certificate(s) by
+                          the Maven commands. Note that the root CA certificates are
+                          also imported into the created keystore.'
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                              TODO: Add other useful fields. apiVersion, kind, uid?'
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                      caSecrets:
                         description: The Secrets name and key, containing the CA certificate(s)
                           used to connect to remote Maven repositories. It can contain
                           X.509 certificates, and PKCS#7 formatted certificate chains.
@@ -421,21 +456,6 @@ spec:
                           type: string
                         description: The Maven properties.
                         type: object
-                      servers:
-                        items:
-                          properties:
-                            configuration:
-                              additionalProperties:
-                                type: string
-                              type: object
-                            id:
-                              type: string
-                            password:
-                              type: string
-                            username:
-                              type: string
-                          type: object
-                        type: array
                       settings:
                         description: A reference to the ConfigMap or Secret key that
                           contains the Maven settings.

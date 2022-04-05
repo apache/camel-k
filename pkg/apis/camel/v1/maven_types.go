@@ -32,17 +32,24 @@ type MavenSpec struct {
 	// A reference to the ConfigMap or Secret key that contains
 	// the Maven settings.
 	Settings ValueSource `json:"settings,omitempty"`
+	// Deprecated: use CASecrets
+	// The Secret name and key, containing the CA certificate(s) used to connect
+	// to remote Maven repositories.
+	// It can contain X.509 certificates, and PKCS#7 formatted certificate chains.
+	// A JKS formatted keystore is automatically created to store the CA certificate(s),
+	// and configured to be used as a trusted certificate(s) by the Maven commands.
+	// Note that the root CA certificates are also imported into the created keystore.
+	CASecret *corev1.SecretKeySelector `json:"caSecret,omitempty"`
 	// The Secrets name and key, containing the CA certificate(s) used to connect
 	// to remote Maven repositories.
 	// It can contain X.509 certificates, and PKCS#7 formatted certificate chains.
 	// A JKS formatted keystore is automatically created to store the CA certificate(s),
 	// and configured to be used as a trusted certificate(s) by the Maven commands.
 	// Note that the root CA certificates are also imported into the created keystore.
-	CASecret []corev1.SecretKeySelector `json:"caSecret,omitempty"`
+	CASecrets []corev1.SecretKeySelector `json:"caSecrets,omitempty"`
 	// The Maven build extensions.
 	// See https://maven.apache.org/guides/mini/guide-using-extensions.html.
 	Extension []MavenArtifact `json:"extension,omitempty"`
-	Servers   []Server        `json:"servers,omitempty"`
 	// The CLI options that are appended to the list of arguments for Maven commands,
 	// e.g., `-V,--no-transfer-progress,-Dstyle.color=never`.
 	// See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.

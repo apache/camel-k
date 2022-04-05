@@ -24,6 +24,8 @@ import (
 	"regexp"
 	"strings"
 
+	corev1 "k8s.io/api/core/v1"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/jvm"
@@ -76,11 +78,12 @@ func cleanUpBuildDir(ctx *builderContext) error {
 }
 
 func generateJavaKeystore(ctx *builderContext) error {
-	if ctx.Build.Maven.CASecret == nil {
+	// nolint: staticcheck
+	secrets := mergeSecrets(ctx.Build.Maven.CASecrets, ctx.Build.Maven.CASecret)
+	if secrets == nil {
 		return nil
 	}
-
-	certsData, err := kubernetes.GetSecretsRefData(ctx.C, ctx.Client, ctx.Namespace, ctx.Build.Maven.CASecret)
+	certsData, err := kubernetes.GetSecretsRefData(ctx.C, ctx.Client, ctx.Namespace, secrets)
 	if err != nil {
 		return err
 	}
@@ -89,6 +92,16 @@ func generateJavaKeystore(ctx *builderContext) error {
 	ctx.Maven.TrustStorePass = jvm.NewKeystorePassword()
 
 	return jvm.GenerateKeystore(ctx.C, ctx.Path, ctx.Maven.TrustStoreName, ctx.Maven.TrustStorePass, certsData)
+}
+
+func mergeSecrets(secrets []corev1.SecretKeySelector, secret *corev1.SecretKeySelector) []corev1.SecretKeySelector {
+	if secrets == nil && secret == nil {
+		return nil
+	}
+	if secret == nil {
+		return secrets
+	}
+	return append(secrets, *secret)
 }
 
 func generateProjectSettings(ctx *builderContext) error {

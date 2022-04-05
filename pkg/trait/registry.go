@@ -251,13 +251,13 @@ func addImageRegistryCaToMavenBuild(registryCa string, build *v1.BuilderTask) er
 		return err
 	}
 	contains := false
-	for _, ca := range build.Maven.CASecret {
+	for _, ca := range build.Maven.CASecrets {
 		if ca.Name == secret.Name && ca.Key == secret.Key {
 			contains = true
 		}
 	}
 	if !contains {
-		build.Maven.CASecret = append(build.Maven.CASecret, *secret)
+		build.Maven.CASecrets = append(build.Maven.CASecrets, *secret)
 	}
 	return nil
 }

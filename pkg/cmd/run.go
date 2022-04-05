@@ -59,6 +59,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
+	platformutil "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/defaults"
@@ -587,13 +588,13 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 				if !contains(o.Traits, "registry.enabled=false") {
 					o.Traits = append(o.Traits, "registry.enabled=true")
 				}
-				platform, err = getPlatform(o.Context, c, integration.Namespace)
+				platform, err = platformutil.GetOrFindForResource(o.Context, c, integration, true)
 				if err != nil {
 					return nil, err
 				}
 				if platform.Spec.Build.Registry.CA != "" {
 					fmt.Printf("We've noticed the image registry is configured with a custom certificate [%s] \n", platform.Spec.Build.Registry.CA)
-					fmt.Println("Please make sure Node.js is configured to use it or the operation will fail.")
+					fmt.Println("Please make sure Kamel CLI is configured to use it or the operation will fail.")
 					fmt.Println("More information can be found here https://nodejs.org/api/cli.html#cli_node_extra_ca_certs_file")
 				}
 				if platform.Spec.Build.Registry.Secret != "" {
@@ -781,19 +782,6 @@ func resolvePodTemplate(ctx context.Context, cmd *cobra.Command, templateSrc str
 	return err
 }
 
-func getPlatform(context context.Context, c client.Client, ns string) (*v1.IntegrationPlatform, error) {
-	list := v1.NewIntegrationPlatformList()
-	if err := c.List(context, &list, ctrl.InNamespace(ns)); err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("could not retrieve integration platform from namespace %s", ns))
-	}
-	if len(list.Items) > 1 {
-		return nil, fmt.Errorf("expected 1 integration platform in the namespace, found: %d", len(list.Items))
-	} else if len(list.Items) == 0 {
-		return nil, errors.New("no integration platforms found in the namespace: run \"kamel install\" to install the platform")
-	}
-	return &list.Items[0], nil
-}
-
 func uploadFileOrDirectory(platform *v1.IntegrationPlatform, item string, integrationName string, cmd *cobra.Command, integration *v1.Integration) error {
 	path := strings.TrimPrefix(item, "file://")
 	localPath := path
@@ -839,7 +827,7 @@ func uploadFileOrDirectory(platform *v1.IntegrationPlatform, item string, integr
 			if err != nil {
 				return err
 			}
-			dependency := fmt.Sprintf("docker-mvn:%s:%s:%s:%s@%s", gav.GroupID, gav.ArtifactID, gav.Type, gav.Version, mountPath)
+			dependency := fmt.Sprintf("registry-mvn:%s:%s:%s:%s@%s", gav.GroupID, gav.ArtifactID, gav.Type, gav.Version, mountPath)
 			fmt.Printf("Added %s to the Integration's dependency list \n", dependency)
 			integration.Spec.AddDependency(dependency)
 			return uploadAsMavenArtifact(gav, path, platform, integration.Namespace, options)
