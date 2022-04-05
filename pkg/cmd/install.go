@@ -36,6 +36,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/kubectl/pkg/cmd/set/env"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -330,7 +331,11 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			fmt.Fprintln(cobraCmd.OutOrStdout(), "Camel K operator registry setup skipped")
 		}
 
-		platform, err := install.PlatformOrCollect(o.Context, c, o.ClusterType, namespace, o.SkipRegistrySetup, o.registry, collection)
+		operatorID, err := getOperatorID(o.EnvVars)
+		if err != nil {
+			return err
+		}
+		platform, err := install.PlatformOrCollect(o.Context, c, o.ClusterType, namespace, o.SkipRegistrySetup, o.registry, collection, operatorID)
 		if err != nil {
 			return err
 		}
@@ -486,6 +491,20 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 	}
 
 	return nil
+}
+
+func getOperatorID(vars []string) (string, error) {
+	envs, _, _, err := env.ParseEnv(vars, nil)
+	if err != nil {
+		return "", err
+	}
+	for _, e := range envs {
+		if e.Name == "KAMEL_OPERATOR_ID" {
+			return e.Value, nil
+		}
+	}
+
+	return "", nil
 }
 
 func (o *installCmdOptions) postRun(cmd *cobra.Command, _ []string) error {

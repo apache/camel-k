@@ -510,7 +510,7 @@ func installLeaseBindings(ctx context.Context, c client.Client, namespace string
 
 // PlatformOrCollect --
 // nolint: lll
-func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string, namespace string, skipRegistrySetup bool, registry v1.RegistrySpec, collection *kubernetes.Collection) (*v1.IntegrationPlatform, error) {
+func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string, namespace string, skipRegistrySetup bool, registry v1.RegistrySpec, collection *kubernetes.Collection, operatorID string) (*v1.IntegrationPlatform, error) {
 	isOpenShift, err := isOpenShift(c, clusterType)
 	if err != nil {
 		return nil, err
@@ -529,6 +529,14 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 	pl, ok := platformObject.(*v1.IntegrationPlatform)
 	if !ok {
 		return nil, fmt.Errorf("type assertion failed: %v", platformObject)
+	}
+
+	if operatorID != "" {
+		// We must tell the operator to reconcile this IntegrationPlatform
+		if pl.Annotations == nil {
+			pl.Annotations = make(map[string]string)
+		}
+		pl.Annotations[v1.OperatorIDAnnotation] = operatorID
 	}
 
 	if !skipRegistrySetup {
