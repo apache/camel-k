@@ -24,27 +24,27 @@ package common
 
 import (
 	"bytes"
-	"github.com/apache/camel-k/pkg/install"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/openshift"
-	console "github.com/openshift/api/console/v1"
-	"github.com/stretchr/testify/assert"
 	"reflect"
 	"strings"
 	"testing"
 	"text/template"
 
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 
 	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/install"
+	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 func TestBasicInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+		Eventually(Platform(ns)).ShouldNot(BeNil())
 	})
 }
 
@@ -145,5 +145,16 @@ func TestInstallSkipDefaultKameletsInstallation(t *testing.T) {
 		Expect(Kamel("install", "-n", ns, "--skip-default-kamelets-setup").Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		Expect(KameletList(ns)()).Should(BeEmpty())
+	})
+}
+
+func TestSelectiveUpgradeInstallation(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(Kamel("install", "-n", ns, "--global", "--operator-env-vars", "KAMEL_OPERATOR_ID=foo").Execute()).To(Succeed())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+		Eventually(Platform(ns)).ShouldNot(BeNil())
+		Eventually(func() v1.IntegrationPlatformPhase {
+			return Platform(ns)().Status.Phase
+		}, TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 	})
 }
