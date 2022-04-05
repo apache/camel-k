@@ -36,7 +36,7 @@ if [ -z "$2" ]; then
     # Take the dependencies officially released
     wget https://repo1.maven.org/maven2/org/apache/camel/k/apache-camel-k-runtime/$1/apache-camel-k-runtime-$1-source-release.zip -O $PWD/build/apache-camel-k-runtime-$1-source-release.zip
     unzip -o $PWD/build/apache-camel-k-runtime-$1-source-release.zip -d $PWD/build
-    mvn -f $PWD/build/apache-camel-k-runtime-$1/pom.xml \
+    mvn -q -f $PWD/build/apache-camel-k-runtime-$1/pom.xml \
         dependency:copy-dependencies \
         -DincludeScope=runtime \
         -Dmdep.copyPom=true \
@@ -53,7 +53,7 @@ else
         exit 2
     fi
 
-    mvn -f $camel_k_runtime_source/pom.xml \
+    mvn -q -f $camel_k_runtime_source/pom.xml \
     dependency:copy-dependencies \
         -DincludeScope=runtime \
         -Dmdep.copyPom=true \
