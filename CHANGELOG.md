@@ -7,13 +7,15 @@
 **Closed issues:**
 
 - Use Kubernetes recommended labels  [\#3137](https://github.com/apache/camel-k/issues/3137)
-- Nightly release fail to create an existing tag [\#3130](https://github.com/apache/camel-k/issues/3130)
 - Jsonata does not evaluate correctly [\#3129](https://github.com/apache/camel-k/issues/3129)
 - Best practice to manage multiple routes in Camel-K [\#2824](https://github.com/apache/camel-k/issues/2824)
 - way to add a trusted root cert? \(non-maven\) [\#2820](https://github.com/apache/camel-k/issues/2820)
+- Remove usage of deprecated "flow" in Kamelet CRD in the documentation examples [\#2816](https://github.com/apache/camel-k/issues/2816)
 - Be able to configure PodMonitor via prometheus trait [\#2812](https://github.com/apache/camel-k/issues/2812)
 - SEDA low performance issue [\#2808](https://github.com/apache/camel-k/issues/2808)
+- Get rid of `fmt.Print...()` methods [\#2773](https://github.com/apache/camel-k/issues/2773)
 - Remove maven wrapper and any leftover pom.xml [\#2659](https://github.com/apache/camel-k/issues/2659)
+- Let dependencies be defined using file URLs [\#1227](https://github.com/apache/camel-k/issues/1227)
 - Document how to use Camel K without the "kamel" tool [\#52](https://github.com/apache/camel-k/issues/52)
 - Add roadmap information [\#35](https://github.com/apache/camel-k/issues/35)
 
@@ -948,6 +950,7 @@
 **Closed issues:**
 
 - Update Antora usage [\#2852](https://github.com/apache/camel-k/issues/2852)
+- Support local dependencies when running an integration [\#2834](https://github.com/apache/camel-k/issues/2834)
 - Log4j Security Issue [\#2830](https://github.com/apache/camel-k/issues/2830)
 - Outdated `ca-cert` path for Jolokia trait [\#2827](https://github.com/apache/camel-k/issues/2827)
 - Kafka component propagating headers is supported? [\#2825](https://github.com/apache/camel-k/issues/2825)
