@@ -1,4 +1,3 @@
-//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -176,6 +175,7 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 
 			// Check the previous kit is not garbage collected
 			Eventually(Kits(ns, KitWithVersion(prevCSVVersion.String()))).Should(HaveLen(1))
+			Eventually(Kits(ns, kitWithVersion(fmt.Sprintf("%d.%d.%d", prevCSVVersion.Version.Major, prevCSVVersion.Version.Minor, prevCSVVersion.Version.Patch)))).Should(HaveLen(1))
 			// Check a new kit is created with the current version
 			Eventually(Kits(ns, KitWithVersion(defaults.Version))).Should(HaveLen(1))
 			// Check the new kit is ready
