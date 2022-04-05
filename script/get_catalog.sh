@@ -23,5 +23,6 @@ if [ "$#" -lt 1 ]; then
   exit 1
 fi
 
-mvn dependency:copy -Dartifact="org.apache.camel.k:camel-k-catalog:$1:yaml:catalog" -DoutputDirectory=${rootdir}/resources/
+mvn -q dependency:copy -Dartifact="org.apache.camel.k:camel-k-catalog:$1:yaml:catalog" -DoutputDirectory=${rootdir}/resources/
+mv ${rootdir}/resources/camel-k-catalog-$1-catalog.yaml ${rootdir}/resources/camel-catalog-$1.yaml
 
