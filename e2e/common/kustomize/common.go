@@ -48,7 +48,8 @@ const (
 	// camel-k-edit
 	// camel-k-operator-custom-resource-definitions
 	// camel-k-operator-bind-addressable-resolver
-	ExpKubeClusterRoles = 3
+	// camel-k-operator-local-registry
+	ExpKubeClusterRoles = 4
 
 	// camel-k-operator-openshift
 	ExpOSPromoteRoles = 1

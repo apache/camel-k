@@ -41,6 +41,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/openshift"
+	image "github.com/apache/camel-k/pkg/util/registry"
 )
 
 // BuilderServiceAccount --.
@@ -96,7 +97,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		}
 	}
 
-	err = configureRegistry(ctx, c, p)
+	err = configureRegistry(ctx, c, p, verbose)
 	if err != nil {
 		return err
 	}
@@ -127,7 +128,7 @@ func CreateBuilderServiceAccount(ctx context.Context, client client.Client, p *v
 	return err
 }
 
-func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) error {
+func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPlatform, verbose bool) error {
 	if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift &&
 		p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I &&
 		p.Status.Build.Registry.Address == "" {
@@ -164,7 +165,15 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 			}
 		}
 	}
-
+	if p.Status.Build.Registry.Address == "" {
+		// try KEP-1755
+		address, err := image.GetRegistryAddress(ctx, c)
+		if err != nil && verbose {
+			log.Error(err, "Cannot find a registry where to push images via KEP-1755")
+		} else if err == nil && address != nil {
+			p.Status.Build.Registry.Address = *address
+		}
+	}
 	return nil
 }
 
