@@ -58,7 +58,3 @@ linters:
     - whitespace
     - wrapcheck
     - wsl
-    
-    
-   
-
