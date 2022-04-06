@@ -15,6 +15,7 @@
 - SEDA low performance issue [\#2808](https://github.com/apache/camel-k/issues/2808)
 - Get rid of `fmt.Print...()` methods [\#2773](https://github.com/apache/camel-k/issues/2773)
 - Remove maven wrapper and any leftover pom.xml [\#2659](https://github.com/apache/camel-k/issues/2659)
+- Use local registry config from cluster [\#1802](https://github.com/apache/camel-k/issues/1802)
 - Let dependencies be defined using file URLs [\#1227](https://github.com/apache/camel-k/issues/1227)
 - Document how to use Camel K without the "kamel" tool [\#52](https://github.com/apache/camel-k/issues/52)
 - Add roadmap information [\#35](https://github.com/apache/camel-k/issues/35)
