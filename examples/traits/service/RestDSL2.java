@@ -17,9 +17,7 @@
 
 //
 // To run this integrations use:
-//
-//     kamel run service.java --trait service.enabled=true\
-//     --trait service.node-port=true
+//     kamel run RestDSL2.java --trait service.enabled=true
 //
 import org.apache.camel.Exchange;
 
