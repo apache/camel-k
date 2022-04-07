@@ -61,7 +61,7 @@ kamel run -d file://path/to/data.csv:path/in/container/data.csv Integration.java
 
 Specifying a directory with also work recursively.
 
-Note that this feature relies on the Image Registry being setup xref:cli/cli.adoc#configuring-registry[correctly].
+Note that this feature relies on the Image Registry being setup xref:cli/cli.adoc[correctly].
 
 [[dependencies-kind-jitpack]]
 === Jitpack dependencies
