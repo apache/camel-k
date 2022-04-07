@@ -41,6 +41,7 @@ As soon as you will learn the basic stuff, you will like to try the new advanced
 |---|---|---|
 | Kamelets | How to use [`Kamelet`s](https://camel.apache.org/camel-k/latest/kamelets/kamelets.html) | [see examples](./kamelets/)|
 | Master | Master support example | [see examples](./master/)|
+| OLM | OPERATOR Lifecycle manager installation example | [see examples](./olm/)|
 | Polyglot | Polyglot integration examples | [see examples](./polyglot/)|
 | Pulsar | Pulsar usage | [see examples](./pulsar/)|
 | Saga | Saga pattern example | [see examples](./saga/)|
