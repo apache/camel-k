@@ -87,6 +87,8 @@ type MavenBuildSpec struct {
 	MavenSpec `json:",inline"`
 	// additional repositories
 	Repositories []Repository `json:"repositories,omitempty"`
+	// Servers (auth)
+	Servers []Server `json:"servers,omitempty"`
 }
 
 // PublishTask image publish configuration

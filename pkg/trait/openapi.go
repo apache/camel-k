@@ -272,9 +272,11 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 		return err
 	}
 	mc.GlobalSettings = data
+	// nolint: staticcheck
+	secrets := mergeSecrets(e.Platform.Status.Build.Maven.CASecrets, e.Platform.Status.Build.Maven.CASecret)
 
-	if e.Platform.Status.Build.Maven.CASecret != nil {
-		certsData, err := kubernetes.GetSecretsRefData(e.Ctx, e.Client, e.Platform.Namespace, e.Platform.Status.Build.Maven.CASecret)
+	if secrets != nil {
+		certsData, err := kubernetes.GetSecretsRefData(e.Ctx, e.Client, e.Platform.Namespace, secrets)
 		if err != nil {
 			return err
 		}
@@ -346,6 +348,16 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 
 	e.Resources.Add(&cm)
 	return nil
+}
+
+func mergeSecrets(secrets []corev1.SecretKeySelector, secret *corev1.SecretKeySelector) []corev1.SecretKeySelector {
+	if secrets == nil && secret == nil {
+		return nil
+	}
+	if secret == nil {
+		return secrets
+	}
+	return append(secrets, *secret)
 }
 
 func (t *openAPITrait) generateMavenProject(e *Environment) (maven.Project, error) {

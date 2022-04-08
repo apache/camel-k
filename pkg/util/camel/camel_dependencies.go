@@ -104,10 +104,10 @@ func addDependencies(project *maven.Project, dependencies []string, catalog *Run
 			gav := strings.TrimPrefix(d, "mvn:")
 
 			project.AddEncodedDependencyGAV(gav)
-		case strings.HasPrefix(d, "docker-mvn:"):
+		case strings.HasPrefix(d, "registry-mvn:"):
 			mapping := strings.Split(d, "@")
 			outputFileRelativePath := mapping[1]
-			gavString := strings.TrimPrefix(mapping[0], "docker-mvn:")
+			gavString := strings.TrimPrefix(mapping[0], "registry-mvn:")
 			gav, err := maven.ParseGAV(gavString)
 			if err != nil {
 				return err
