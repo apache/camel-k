@@ -114,4 +114,4 @@ export CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE=${SAVE_FAILED_TEST_NS}
 export KAMEL_INSTALL_OPERATOR_ENV_VARS=KAMEL_INSTALL_DEFAULT_KAMELETS=false
 
 # Then run integration tests
-make test-knative
+DO_TEST_PREBUILD=false make test-knative

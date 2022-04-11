@@ -112,4 +112,4 @@ export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
 export CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE=${SAVE_FAILED_TEST_NS}
 
 # Then run integration tests
-make test-builder
+DO_TEST_PREBUILD=false make test-builder
