@@ -21,7 +21,7 @@
 //
 import org.apache.camel.Exchange;
 
-public class RestDSL extends org.apache.camel.builder.RouteBuilder {
+public class RestDSL2 extends org.apache.camel.builder.RouteBuilder {
     @Override
     public void configure() throws Exception {
         rest()
