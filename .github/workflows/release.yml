@@ -19,7 +19,7 @@ name: release
 
 on:
   schedule:
-  - cron: "50 23 * * *"
+  - cron: "25 15 * * *"
 
 jobs:
   release:
@@ -77,12 +77,9 @@ jobs:
 
     - name: Create Release
       id: create_release
-      uses: actions/create-release@latest
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ env.VERSION }}
-        release_name: Release ${{ env.VERSION }}
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "./camel-k-client*.tar.gz"
         body: |
           Apache Camel K ${{ env.VERSION }} build for testing (unstable). This nightly release is using 
           an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`
@@ -92,43 +89,9 @@ jobs:
           ```
           kamel install --olm=false --maven-repository=${{ env.MAVEN_REPOSITORY }}
           ```
-
+        token: ${{ secrets.GITHUB_TOKEN }}
         draft: false
         prerelease: true
         allowUpdates: true
-    - name: Upload Client Linux
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./camel-k-client-${{ env.VERSION }}-linux-64bit.tar.gz
-        asset_name: camel-k-client-${{ env.VERSION }}-linux-64bit.tar.gz
-        asset_content_type: application/tar+gzip
-    - name: Upload Client Mac
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./camel-k-client-${{ env.VERSION }}-mac-64bit.tar.gz
-        asset_name: camel-k-client-${{ env.VERSION }}-mac-64bit.tar.gz
-        asset_content_type: application/tar+gzip
-    - name: Upload Client Windows
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./camel-k-client-${{ env.VERSION }}-windows-64bit.tar.gz
-        asset_name: camel-k-client-${{ env.VERSION }}-windows-64bit.tar.gz
-        asset_content_type: application/tar+gzip
-    - name: Upload Examples
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./camel-k-examples-${{ env.VERSION }}.tar.gz
-        asset_name: camel-k-examples-${{ env.VERSION }}.tar.gz
-        asset_content_type: application/tar+gzip
+        replaceArtifacts: true
+
