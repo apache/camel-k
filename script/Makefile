@@ -70,6 +70,13 @@ KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
 # Optional branch for the default Kamelet catalog (change this to a tag before release)
 KAMELET_CATALOG_REPO_BRANCH := v0.8.0
 
+# When performing integration tests, it is not necessary to always execute build, especially
+# in e2e tests when lots of tests are being executed sequentially & the build has already taken place.
+# In this case, if DO_TEST_PREBUILD is set to false then TEST_PREBUILD will be set to blank
+# and those rules with a dependency on the build rule will no longer call it (see do-build)
+DO_TEST_PREBUILD ?= true
+TEST_PREBUILD = build
+
 # OLM (Operator Lifecycle Manager and Operator Hub): uncomment to override operator settings at build time
 #GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultOperatorName=camel-k-operator
 #GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultPackage=camel-k
@@ -183,51 +190,62 @@ generate-strimzi:
 
 build: build-resources build-kamel build-compile-integration-tests build-submodules
 
-test: build
+do-build:
+ifeq ($(DO_TEST_PREBUILD),true)
+TEST_PREBUILD = build
+else
+TEST_PREBUILD =
+endif
+
+test: do-build
 	go test ./...
 
-test-integration: build
+#
+# Note
+# This should execute all tests and not exit if one of the suites fail
+#
+test-integration: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/common -tags=integration $(TEST_INTEGRATION_COMMON_RUN) && \
-	go test -timeout 60m -v ./e2e/common/build -tags=integration $(TEST_INTEGRATION_COMMON_BUILD_RUN) && \
-	go test -timeout 60m -v ./e2e/common/cli -tags=integration $(TEST_INTEGRATION_COMMON_CLI_RUN) && \
-	go test -timeout 60m -v ./e2e/common/config -tags=integration $(TEST_INTEGRATION_COMMON_CONFIG_RUN) && \
-	go test -timeout 60m -v ./e2e/common/languages -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) && \
+	go test -timeout 60m -v ./e2e/common -tags=integration $(TEST_INTEGRATION_COMMON_RUN); \
+	go test -timeout 60m -v ./e2e/common/build -tags=integration $(TEST_INTEGRATION_COMMON_BUILD_RUN); \
+	go test -timeout 60m -v ./e2e/common/cli -tags=integration $(TEST_INTEGRATION_COMMON_CLI_RUN); \
+	go test -timeout 60m -v ./e2e/common/config -tags=integration $(TEST_INTEGRATION_COMMON_CONFIG_RUN); \
+	go test -timeout 60m -v ./e2e/common/languages -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN); \
 	go test -timeout 60m -v ./e2e/common/traits -tags=integration $(TEST_INTEGRATION_COMMON_TRAITS_RUN)
 
-test-knative: build
+test-knative: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 60m -v ./e2e/knative -tags=integration $(TEST_KNATIVE_RUN)
 
-test-builder: build
+test-builder: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 60m -v ./e2e/builder -tags=integration $(TEST_BUILDER_RUN)
 
-test-local: build
+test-local: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 30m -v ./e2e/local -tags=integration $(TEST_LOCAL_RUN)
 
-test-kamel-cli: build
+test-kamel-cli: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 60m -v ./e2e/common/cli -tags=integration $(TEST_KAMEL_CLI)
 
-test-kustomize: build
+test-kustomize: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 60m -v ./e2e/common/kustomize -tags=integration $(TEST_KUSTOMIZE_RUN)
 
-test-quarkus-native: build
+test-quarkus-native: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 60m -v ./e2e/native -tags=integration $(TEST_QUARKUS_RUN)
 
-test-service-binding: build
+test-service-binding: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 60m -v ./e2e/service-binding -tags=integration $(TEST_SERVICE_RUN)
 
-test-upgrade: build
+test-upgrade: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 60m -v ./e2e/upgrade -tags=integration $(TEST_UPGRADE_RUN)
 
-test-registry-maven-wagon: build
+test-registry-maven-wagon: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 60m -v ./e2e/registry -tags=integration $(TEST_REGISTRY_MAVEN_WAGON_RUN)
 
@@ -378,7 +396,7 @@ install-minikube:
 get-staging-repo:
 	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
 
-.PHONY: build build-kamel build-resources dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-keda generate-strimzi
+.PHONY: do-build build build-kamel build-resources dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-keda generate-strimzi
 .PHONY: controller-gen kubectl kustomize operator-sdk
 
 # find or download controller-gen if necessary

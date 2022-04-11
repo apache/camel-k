@@ -121,4 +121,4 @@ export KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
 export CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE=${SAVE_FAILED_TEST_NS}
 
 # Then run integration tests
-make test-upgrade
+DO_TEST_PREBUILD=false make test-upgrade
