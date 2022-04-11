@@ -19,7 +19,7 @@ name: release
 
 on:
   schedule:
-  - cron: "25 15 * * *"
+  - cron: "59 23 * * *"
 
 jobs:
   release:
@@ -77,9 +77,9 @@ jobs:
 
     - name: Create Release
       id: create_release
-      - uses: ncipollo/release-action@v1
-        with:
-          artifacts: "./camel-k-client*.tar.gz"
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "./camel-k-client*.tar.gz"
         body: |
           Apache Camel K ${{ env.VERSION }} build for testing (unstable). This nightly release is using 
           an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`
