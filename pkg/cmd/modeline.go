@@ -76,12 +76,12 @@ func NewKamelWithModelineCommand(ctx context.Context, osArgs []string) (*cobra.C
 	}
 	if len(originalFlags) != len(flags) {
 		// Give a feedback about the actual command that is run
-		fmt.Fprintln(rootCmd.OutOrStdout(), "Modeline options have been loaded from source files")
-		fmt.Fprint(rootCmd.OutOrStdout(), "Full command: kamel ")
+		fmt.Fprintln(rootCmd.ErrOrStderr(), "Modeline options have been loaded from source files")
+		fmt.Fprint(rootCmd.ErrOrStderr(), "Full command: kamel ")
 		for _, a := range flags {
-			fmt.Fprintf(rootCmd.OutOrStdout(), "%s ", a)
+			fmt.Fprintf(rootCmd.ErrOrStderr(), "%s ", a)
 		}
-		fmt.Fprintln(rootCmd.OutOrStdout())
+		fmt.Fprintln(rootCmd.ErrOrStderr())
 	}
 	return rootCmd, flags, nil
 }
