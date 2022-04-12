@@ -129,6 +129,11 @@ func (c *RuntimeCatalog) GetJavaTypeDependency(camelType string) (string, bool) 
 	return javaType, ok
 }
 
+// GetCamelVersion returns the Camel version the runtime is based on.
+func (c *RuntimeCatalog) GetCamelVersion() string {
+	return c.Runtime.Metadata["camel.version"]
+}
+
 // VisitArtifacts --.
 func (c *RuntimeCatalog) VisitArtifacts(visitor func(string, v1.CamelArtifact) bool) {
 	for id, artifact := range c.Artifacts {

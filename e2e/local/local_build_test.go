@@ -33,11 +33,23 @@ import (
 	. "github.com/apache/camel-k/e2e/support"
 	testutil "github.com/apache/camel-k/e2e/support/util"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/camel"
 )
 
 // Camel version used to validate the test results
-// TODO: read version for the Camel catalog
-var camelVersion = "3.14.1"
+var camelVersion = getCamelVersion()
+
+func getCamelVersion() string {
+	catalog, err := camel.DefaultCatalog()
+	if err != nil {
+		panic(err)
+	}
+	version := catalog.GetCamelVersion()
+	if version == "" {
+		panic("unable to resolve the Camel version from catalog")
+	}
+	return version
+}
 
 func TestLocalBuild(t *testing.T) {
 	RegisterTestingT(t)
@@ -97,11 +109,6 @@ func TestLocalBuildWithTrait(t *testing.T) {
 	Eventually(logScanner.IsFound(msgTagged), TestTimeoutMedium).Should(BeTrue())
 	Eventually(logScanner.IsFound(image), TestTimeoutMedium).Should(BeTrue())
 	Eventually(DockerImages, TestTimeoutMedium).Should(ContainSubstring(image))
-}
-
-func dependency(dir string, jar string, params ...interface{}) string {
-	params = append([]interface{}{dir}, params...)
-	return fmt.Sprintf("%s/dependencies/"+jar, params...)
 }
 
 func TestLocalBuildIntegrationDirectory(t *testing.T) {
@@ -229,4 +236,9 @@ func TestLocalBuildModelineDependencies(t *testing.T) {
 	// github dependency
 	Eventually(dependency(dir, "com.github.squakez.samplejp-v1.0.jar"), TestTimeoutMedium).Should(BeAnExistingFile())
 	Eventually(dir+"/routes/dependency.groovy", TestTimeoutShort).Should(BeAnExistingFile())
+}
+
+func dependency(dir string, jar string, params ...interface{}) string {
+	params = append([]interface{}{dir}, params...)
+	return fmt.Sprintf("%s/dependencies/"+jar, params...)
 }
