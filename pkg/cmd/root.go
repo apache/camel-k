@@ -46,6 +46,7 @@ type RootCmdOptions struct {
 	_client       client.Client      `mapstructure:"-"`
 	KubeConfig    string             `mapstructure:"kube-config"`
 	Namespace     string             `mapstructure:"namespace"`
+	Verbose       bool               `mapstructure:"verbose" yaml:",omitempty"`
 }
 
 // NewKamelCommand --.
@@ -82,6 +83,7 @@ func kamelPreAddCommandInit(options *RootCmdOptions) *cobra.Command {
 
 	cmd.PersistentFlags().StringVar(&options.KubeConfig, "kube-config", os.Getenv("KUBECONFIG"), "Path to the kube config file to use for CLI requests")
 	cmd.PersistentFlags().StringVarP(&options.Namespace, "namespace", "n", "", "Namespace to use for all operations")
+	cmd.PersistentFlags().BoolVarP(&options.Verbose, "verbose", "V", false, "Verbose logging")
 
 	return &cmd
 }
@@ -236,4 +238,21 @@ func (command *RootCmdOptions) GetCamelCmdClient() (*v1.CamelV1Client, error) {
 // NewCmdClient returns a new client that can be used from command line tools.
 func (command *RootCmdOptions) NewCmdClient() (client.Client, error) {
 	return client.NewOutOfClusterClient(command.KubeConfig)
+}
+
+func (command *RootCmdOptions) PrintVerboseOut(cmd *cobra.Command, a ...interface{}) {
+	if command.Verbose {
+		fmt.Fprintln(cmd.OutOrStdout(), a...)
+	}
+}
+
+func (command *RootCmdOptions) PrintfVerboseOutf(cmd *cobra.Command, format string, a ...interface{}) {
+	if command.Verbose {
+		fmt.Fprintf(cmd.OutOrStdout(), format, a...)
+	}
+}
+func (command *RootCmdOptions) PrintfVerboseErrf(cmd *cobra.Command, format string, a ...interface{}) {
+	if command.Verbose {
+		fmt.Fprintf(cmd.ErrOrStderr(), format, a...)
+	}
 }
