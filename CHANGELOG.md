@@ -6,12 +6,15 @@
 
 **Closed issues:**
 
+- Prometheus trait usage example [\#3144](https://github.com/apache/camel-k/issues/3144)
 - Use Kubernetes recommended labels  [\#3137](https://github.com/apache/camel-k/issues/3137)
+- Nightly release fail to create an existing tag [\#3130](https://github.com/apache/camel-k/issues/3130)
 - Jsonata does not evaluate correctly [\#3129](https://github.com/apache/camel-k/issues/3129)
 - Best practice to manage multiple routes in Camel-K [\#2824](https://github.com/apache/camel-k/issues/2824)
 - way to add a trusted root cert? \(non-maven\) [\#2820](https://github.com/apache/camel-k/issues/2820)
 - Remove usage of deprecated "flow" in Kamelet CRD in the documentation examples [\#2816](https://github.com/apache/camel-k/issues/2816)
 - Be able to configure PodMonitor via prometheus trait [\#2812](https://github.com/apache/camel-k/issues/2812)
+- camel-k doesn't create a service [\#2810](https://github.com/apache/camel-k/issues/2810)
 - SEDA low performance issue [\#2808](https://github.com/apache/camel-k/issues/2808)
 - Get rid of `fmt.Print...()` methods [\#2773](https://github.com/apache/camel-k/issues/2773)
 - Remove maven wrapper and any leftover pom.xml [\#2659](https://github.com/apache/camel-k/issues/2659)
