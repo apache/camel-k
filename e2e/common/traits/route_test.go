@@ -50,7 +50,7 @@ import (
 const(
 	secretName = "test-certificate"
 	integrationName = "platform-http-server"
-	waitBeforeHttpRequest = 7 * time.Second
+	waitBeforeHttpRequest = 15 * time.Second
 )
 
 type keyCertificatePair struct {
