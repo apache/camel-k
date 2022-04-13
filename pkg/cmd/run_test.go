@@ -76,9 +76,6 @@ func addTestRunCmd(options RootCmdOptions, rootCmd *cobra.Command) *runCmdOption
 func addTestRunCmdWithOutput(options RootCmdOptions, rootCmd *cobra.Command) *runCmdOptions {
 	// add a testing version of run Command with output
 	runCmd, runOptions := newCmdRun(&options)
-	runCmd.PersistentPreRunE = func(c *cobra.Command, args []string) error {
-		return nil
-	}
 	runCmd.Args = test.ArbitraryArgs
 	rootCmd.AddCommand(runCmd)
 	return runOptions
@@ -604,9 +601,9 @@ func TestOutputYaml(t *testing.T) {
 	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
 	fileName := filepath.Base(tmpFile.Name())
 
-	buildCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
+	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
 	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml")
-	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
+	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 
 	assert.Nil(t, err)
 	assert.Equal(t, fmt.Sprintf(`apiVersion: camel.apache.org/v1
@@ -635,9 +632,9 @@ func TestTrait(t *testing.T) {
 	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
 	fileName := filepath.Base(tmpFile.Name())
 
-	buildCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
+	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
 	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "-t", "mount.configs=configmap:my-cm", "--connect", "my-service-binding")
-	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
+	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 
 	assert.Nil(t, err)
 	assert.Equal(t, fmt.Sprintf(`apiVersion: camel.apache.org/v1
@@ -674,9 +671,9 @@ func TestMissingTrait(t *testing.T) {
 	assert.Nil(t, tmpFile.Close())
 	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
 
-	buildCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
+	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
 	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "-t", "bogus.fail=i-must-fail")
-	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
+	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 	assert.Equal(t, "Error: bogus.fail=i-must-fail is not a valid trait property\n", output)
 	assert.NotNil(t, err)
 }

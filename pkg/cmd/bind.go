@@ -43,20 +43,13 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     "bind [source] [sink] ...",
-		Short:   "Bind Kubernetes resources, such as Kamelets, in an integration flow.",
-		Long:    "Bind Kubernetes resources, such as Kamelets, in an integration flow. Endpoints are expected in the format \"[[apigroup/]version:]kind:[namespace/]name\" or plain Camel URIs.",
-		PreRunE: decode(&options),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := options.validate(cmd, args); err != nil {
-				return err
-			}
-			if err := options.run(cmd, args); err != nil {
-				fmt.Fprintln(cmd.OutOrStdout(), err.Error())
-			}
-
-			return nil
-		},
+		Use:               "bind [source] [sink] ...",
+		Short:             "Bind Kubernetes resources, such as Kamelets, in an integration flow.",
+		Long:              "Bind Kubernetes resources, such as Kamelets, in an integration flow. Endpoints are expected in the format \"[[apigroup/]version:]kind:[namespace/]name\" or plain Camel URIs.",
+		PersistentPreRunE: decode(&options),
+		PreRunE:           options.preRunE,
+		RunE:              options.runE,
+		Annotations:       make(map[string]string),
 	}
 
 	cmd.Flags().StringArrayP("connect", "c", nil, "A ServiceBinding or Provisioned Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
@@ -88,6 +81,25 @@ type bindCmdOptions struct {
 	SkipChecks   bool     `mapstructure:"skip-checks" yaml:",omitempty"`
 	Steps        []string `mapstructure:"steps" yaml:",omitempty"`
 	Traits       []string `mapstructure:"traits" yaml:",omitempty"`
+}
+
+func (o *bindCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
+	if o.OutputFormat != "" {
+		// let the command to work in offline mode
+		cmd.Annotations[offlineCommandLabel] = "true"
+	}
+	return o.RootCmdOptions.preRun(cmd, args)
+}
+
+func (o *bindCmdOptions) runE(cmd *cobra.Command, args []string) error {
+	if err := o.validate(cmd, args); err != nil {
+		return err
+	}
+	if err := o.run(cmd, args); err != nil {
+		fmt.Fprintln(cmd.OutOrStdout(), err.Error())
+	}
+
+	return nil
 }
 
 func (o *bindCmdOptions) validate(cmd *cobra.Command, args []string) error {
