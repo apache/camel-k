@@ -66,7 +66,7 @@ STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgap
 # Define here the repo containing the default Kamelet catalog (if any)
 KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
 # Optional branch for the default Kamelet catalog (change this to a tag before release)
-KAMELET_CATALOG_REPO_BRANCH := v0.7.1
+KAMELET_CATALOG_REPO_BRANCH := v0.8.0
 
 # OLM (Operator Lifecycle Manager and Operator Hub): uncomment to override operator settings at build time
 #GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultOperatorName=camel-k-operator
