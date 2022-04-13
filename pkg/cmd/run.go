@@ -81,13 +81,15 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	}
 
 	cmd := cobra.Command{
-		Use:      "run [file to run]",
-		Short:    "Run a integration on Kubernetes",
-		Long:     `Deploys and execute a integration pod on Kubernetes.`,
-		Args:     options.validateArgs,
-		PreRunE:  options.decode,
-		RunE:     options.run,
-		PostRunE: options.postRun,
+		Use:               "run [file to run]",
+		Short:             "Run a integration on Kubernetes",
+		Long:              `Deploys and execute a integration pod on Kubernetes.`,
+		Args:              options.validateArgs,
+		PersistentPreRunE: options.decode,
+		PreRunE:           options.preRunE,
+		RunE:              options.run,
+		PostRunE:          options.postRun,
+		Annotations:       make(map[string]string),
 	}
 
 	cmd.Flags().String("name", "", "The integration name")
@@ -152,6 +154,14 @@ type runCmdOptions struct {
 	Labels          []string `mapstructure:"labels" yaml:",omitempty"`
 	Annotations     []string `mapstructure:"annotations" yaml:",omitempty"`
 	Sources         []string `mapstructure:"sources" yaml:",omitempty"`
+}
+
+func (o *runCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
+	if o.OutputFormat != "" {
+		// let the command to work in offline mode
+		cmd.Annotations[offlineCommandLabel] = "true"
+	}
+	return o.RootCmdOptions.preRun(cmd, args)
 }
 
 func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
@@ -492,14 +502,16 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	}
 
 	existing := &v1.Integration{}
-	err := c.Get(o.Context, ctrl.ObjectKeyFromObject(integration), existing)
-	switch {
-	case err == nil:
-		integration = existing.DeepCopy()
-	case k8serrors.IsNotFound(err):
-		existing = nil
-	default:
-		return nil, err
+	if !isOfflineCommand(cmd) {
+		err := c.Get(o.Context, ctrl.ObjectKeyFromObject(integration), existing)
+		switch {
+		case err == nil:
+			integration = existing.DeepCopy()
+		case k8serrors.IsNotFound(err):
+			existing = nil
+		default:
+			return nil, err
+		}
 	}
 
 	var integrationKit *corev1.ObjectReference

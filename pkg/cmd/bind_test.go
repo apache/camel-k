@@ -41,9 +41,6 @@ func initializeBindCmdOptions(t *testing.T) (*bindCmdOptions, *cobra.Command, Ro
 func addTestBindCmd(options RootCmdOptions, rootCmd *cobra.Command) *bindCmdOptions {
 	// add a testing version of bind Command
 	bindCmd, bindOptions := newCmdBind(&options)
-	bindCmd.PersistentPreRunE = func(c *cobra.Command, args []string) error {
-		return nil
-	}
 	bindCmd.Args = test.ArbitraryArgs
 	rootCmd.AddCommand(bindCmd)
 	return bindOptions
