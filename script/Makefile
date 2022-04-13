@@ -61,7 +61,7 @@ CSV_PATH := config/manifests/bases/$(CSV_FILENAME)
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
-STAGING_RUNTIME_REPO :=
+STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1425
 
 # Define here the repo containing the default Kamelet catalog (if any)
 KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
