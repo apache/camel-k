@@ -6,10 +6,14 @@
 
 **Closed issues:**
 
+- Cosmetic log error [\#3192](https://github.com/apache/camel-k/issues/3192)
+- Tracing trait usage example [\#3148](https://github.com/apache/camel-k/issues/3148)
 - Prometheus trait usage example [\#3144](https://github.com/apache/camel-k/issues/3144)
 - Use Kubernetes recommended labels  [\#3137](https://github.com/apache/camel-k/issues/3137)
 - Nightly release fail to create an existing tag [\#3130](https://github.com/apache/camel-k/issues/3130)
 - Jsonata does not evaluate correctly [\#3129](https://github.com/apache/camel-k/issues/3129)
+- wrong XSD url generated with XML initialiser [\#3093](https://github.com/apache/camel-k/issues/3093)
+- Openshift integration tests failure [\#3055](https://github.com/apache/camel-k/issues/3055)
 - Best practice to manage multiple routes in Camel-K [\#2824](https://github.com/apache/camel-k/issues/2824)
 - way to add a trusted root cert? \(non-maven\) [\#2820](https://github.com/apache/camel-k/issues/2820)
 - Remove usage of deprecated "flow" in Kamelet CRD in the documentation examples [\#2816](https://github.com/apache/camel-k/issues/2816)
@@ -19,8 +23,12 @@
 - Get rid of `fmt.Print...()` methods [\#2773](https://github.com/apache/camel-k/issues/2773)
 - Remove maven wrapper and any leftover pom.xml [\#2659](https://github.com/apache/camel-k/issues/2659)
 - Use local registry config from cluster [\#1802](https://github.com/apache/camel-k/issues/1802)
+- Istio sidecar injection is enabled for builder pod [\#1706](https://github.com/apache/camel-k/issues/1706)
+- Integration controller issue [\#1691](https://github.com/apache/camel-k/issues/1691)
 - Create ConsoleYAMLSample for Integration and IntegrationPlatform CRDs on OpenShift [\#1480](https://github.com/apache/camel-k/issues/1480)
+- Kamel run fails to pull in camel-k-builder after installing with helm [\#1476](https://github.com/apache/camel-k/issues/1476)
 - Let dependencies be defined using file URLs [\#1227](https://github.com/apache/camel-k/issues/1227)
+- Deployment not found while replacing CamelSource [\#1028](https://github.com/apache/camel-k/issues/1028)
 - Document how to use Camel K without the "kamel" tool [\#52](https://github.com/apache/camel-k/issues/52)
 - Add roadmap information [\#35](https://github.com/apache/camel-k/issues/35)
 
