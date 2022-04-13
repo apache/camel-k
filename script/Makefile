@@ -239,7 +239,7 @@ else
 endif
 
 build-resources:
-	./script/get_catalog.sh $(RUNTIME_VERSION)
+	./script/get_catalog.sh $(RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
 	go generate ./pkg/...
 
 bundle-kamelets:

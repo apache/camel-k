@@ -19,10 +19,17 @@ location=$(dirname $0)
 rootdir=$location/../
 
 if [ "$#" -lt 1 ]; then
-  echo "usage: $0 <Camel K runtime version>"
+  echo "usage: $0 <Camel K runtime version> [<staging repository>]"
   exit 1
 fi
 
-mvn -q dependency:copy -Dartifact="org.apache.camel.k:camel-k-catalog:$1:yaml:catalog" -DoutputDirectory=${rootdir}/resources/
-mv ${rootdir}/resources/camel-k-catalog-$1-catalog.yaml ${rootdir}/resources/camel-catalog-$1.yaml
+if [ -z $2 ]; then
+  mvn -q dependency:copy -Dartifact="org.apache.camel.k:camel-k-catalog:$1:yaml:catalog" -DoutputDirectory=${rootdir}/resources/
+  mv ${rootdir}/resources/camel-k-catalog-$1-catalog.yaml ${rootdir}/resources/camel-catalog-$1.yaml
+else
+  # TODO: fix this workaround to use the above mvn statement with the staging repository as well
+  echo "INFO: extracting a catalog from staging repository $2"
+  wget -q $2/org/apache/camel/k/camel-k-catalog/$1/camel-k-catalog-$1-catalog.yaml -O ${rootdir}/resources/camel-catalog-$1.yaml
+fi
+
 
