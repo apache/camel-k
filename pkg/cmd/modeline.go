@@ -89,12 +89,12 @@ func NewKamelWithModelineCommand(ctx context.Context, osArgs []string) (*cobra.C
 func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.Command, []string, error) {
 	rootCmd, err := NewKamelCommand(ctx)
 	if err != nil {
-		return nil, nil, err
+		return rootCmd, nil, err
 	}
 
 	target, flags, err := rootCmd.Find(args)
 	if err != nil {
-		return nil, nil, err
+		return rootCmd, nil, err
 	}
 
 	isLocalBuild := target.Name() == buildCmdName && target.Parent().Name() == localCmdName
@@ -108,7 +108,7 @@ func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.
 	if errors.Is(err, pflag.ErrHelp) {
 		return rootCmd, args, nil
 	} else if err != nil {
-		return nil, nil, err
+		return rootCmd, nil, err
 	}
 
 	fg := target.Flags()
@@ -119,7 +119,7 @@ func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.
 	if target.Name() == runCmdName && target.Parent().Name() != localCmdName {
 		additionalSources, err = fg.GetStringArray(runCmdSourcesArgs)
 		if err != nil {
-			return nil, nil, err
+			return rootCmd, nil, err
 		}
 	}
 
@@ -129,7 +129,7 @@ func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.
 
 	opts, err := extractModelineOptions(ctx, files, rootCmd)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "cannot read sources")
+		return rootCmd, nil, errors.Wrap(err, "cannot read sources")
 	}
 
 	// Extract list of property/trait names already specified by the user.
@@ -184,7 +184,7 @@ func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.
 	// Recreating the command as it's dirty
 	rootCmd, err = NewKamelCommand(ctx)
 	if err != nil {
-		return nil, nil, err
+		return rootCmd, nil, err
 	}
 	rootCmd.SetArgs(args)
 
