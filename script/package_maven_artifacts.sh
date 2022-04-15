@@ -33,8 +33,12 @@ if [ -z "$2" ]; then
         exit 3
     fi
 
+    repo_url=https://repo1.maven.org/maven2
+    if [ ! -z "$STAGING_RUNTIME_REPO" ]; then
+        repo_url=$STAGING_RUNTIME_REPO
+    fi
     # Take the dependencies officially released
-    wget https://repo1.maven.org/maven2/org/apache/camel/k/apache-camel-k-runtime/$1/apache-camel-k-runtime-$1-source-release.zip -O $PWD/build/apache-camel-k-runtime-$1-source-release.zip
+    wget ${repo_url}/org/apache/camel/k/apache-camel-k-runtime/$1/apache-camel-k-runtime-$1-source-release.zip -O $PWD/build/apache-camel-k-runtime-$1-source-release.zip
     unzip -o $PWD/build/apache-camel-k-runtime-$1-source-release.zip -d $PWD/build
     mvn -q -f $PWD/build/apache-camel-k-runtime-$1/pom.xml \
         dependency:copy-dependencies \

@@ -29,7 +29,7 @@ import (
 type catalog2deps func(*camel.RuntimeCatalog) []string
 
 const (
-	defaultJSONDataFormat = "json-jackson"
+	defaultJSONDataFormat = "jackson"
 )
 
 var (

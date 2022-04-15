@@ -354,6 +354,7 @@ package-examples:
 
 package-artifacts:
 	# useful for development purpose only in order to include any local development runtime dependency
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	./script/package_maven_artifacts.sh $(RUNTIME_VERSION) $(CAMEL_K_RUNTIME_DIR)
 
 release: clean codegen set-module-version set-version build-resources check-licenses build images images-push cross-compile package-examples git-tag
