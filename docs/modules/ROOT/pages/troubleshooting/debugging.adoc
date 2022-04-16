@@ -44,7 +44,7 @@ As you can see in the logs, the CLI has configured the integration in debug mode
 
 The JVM is suspended and waits for a debugger to attach by default: this behavior can be turned off using the `--suspend=false` option.
 
-Last thing to do is, with your IDE opened on the **integration file (if using Java, Groovy or Kotlin), the Apache Camel project, or the Camel K Runtime project**, to start a remote debugger on `localhost:5005`.
+Last thing to do is, to start a remote debugger on `localhost:5005` with the **integration file (if using Java, Groovy or Kotlin), the Apache Camel project, or the Camel K Runtime project** opened on your IDE.
 
 The following picture shows the configuration of a remote debugger in IntelliJ IDEA:
 
@@ -59,6 +59,6 @@ When the debugging session is done, hitting kbd:[Ctrl+c] on the terminal where t
 
 As we've seen in the previous section, all `Integration` created in Camel K are finally bundled as a Java application, hence, the possibility to debug via JVM debugger. Any `Kamelet` you will be using directly in your `Route` definition or in a `KameletBinding` is automatically converted in a `yaml` route and injected in the Camel Context to be executed. That means that you cannot directly debug a `Kamelet` as you would do with a Java or any other JVM language `Route`.
 
-However, you can troubleshoot individually each `Kamelet` definition by focusing on the specification xref:kamelets/kamelets-user.adoc#_flow[`Flow`]. As an example, you can create a simple xref:languages:yaml.adoc[`yaml`] test `Route` substituting the `kamelet:source` or `kamelet:sink` with any mock endpoint that can help you debugging the single `Kamelet` flow. Even using a `timer` and a `log` component may be enough for a basic check.
+However, you can troubleshoot individually each `Kamelet` definition by focusing on the specification xref:kamelets/kamelets-user.adoc#_flow[`Flow`]. As an example, you can create a simple xref:languages:yaml.adoc[`yaml`] test `Route` substituting the `kamelet:source` or `kamelet:sink` with any mock endpoint that can help you in debugging the single `Kamelet` flow. Even using a `timer` and a `log` component may be enough for a basic check.
 
-NOTE: the same idea applies for a `KameletBinding` which translates to an `Integration` type under the hood. If you need to debug a `KameletBinding` just apply the same troubleshooting technique you would apply on an `Integration`.
+NOTE: the same idea applies for a `KameletBinding` which translates to an `Integration` type under the hood. If you need to debug a `KameletBinding` just apply the same troubleshooting technique you that would apply on an `Integration`.
