@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- \[SOLVED\]Cant specify fastjson when marshal [\#3212](https://github.com/apache/camel-k/issues/3212)
+- Camel K CLI panics when unknown command is passed [\#3203](https://github.com/apache/camel-k/issues/3203)
 - Cosmetic log error [\#3192](https://github.com/apache/camel-k/issues/3192)
 - Make CLI --output argument more clean [\#3177](https://github.com/apache/camel-k/issues/3177)
 - Error when running camel-k in global mode with label selection [\#3161](https://github.com/apache/camel-k/issues/3161)
