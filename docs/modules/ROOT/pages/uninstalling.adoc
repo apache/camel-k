@@ -8,7 +8,7 @@ If you really need to, it is possible to completely uninstall Camel K from OpenS
 kamel uninstall
 ----
 
-This will uninstall from the cluster namespace all Camel K resources along with the operator.
+This will uninstall all Camel K resources along with the operator from the cluster namespace.
 
 NOTE:  By _default_ the resources possibly shared between clusters such as https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources[CustomResourceDefinitions (CRD)], https://kubernetes.io/docs/reference/access-authn-authz/rbac[ClusterRole] and https://docs.openshift.com/container-platform/4.1/applications/operators/olm-understanding-olm.html[Operator Lifecycle Manager(OLM)] will be  **excluded**. To force the inclusion of all resources you can use the **--all** flag. If the **--olm=false** option was specified during installation, which is the case when installing Camel K from sources on CRC, then it also must be used with the uninstall command.
 
