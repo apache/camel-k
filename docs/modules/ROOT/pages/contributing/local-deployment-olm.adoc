@@ -8,7 +8,7 @@ The following steps assume that
 
 To perform OLM (Operator Lifecycle Manager) based deployment of camel-k, built from source locally on an Openshift cluster, you can follow the steps below.
 
-Login to the cluster using the standard "oc" tool, create new project, do other basic setup. Reference commands below
+Login to the cluster using the standard "oc" tool, create new project, complete the basic setup process. Reference commands below
 
 ```
 oc login -u <user> -p <password>

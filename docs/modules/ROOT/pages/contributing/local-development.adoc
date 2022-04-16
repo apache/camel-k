@@ -1,14 +1,14 @@
 [[development-environment]]
 = Local development environment
 
-If you plan to contribute to Camel K, you will end up needing to run and troubleshoot your operator code locally. Here a guideline that will help you configure your local operator running.
+If you plan on contributing to Camel K, you will end up needing to run and troubleshoot your operator code locally. Here is a guideline that will help you configure your local operator running.
 
 [[local-operator]]
 == Running operator locally
 
 As soon as you build your operator locally you will ask yourself how to test it. The idea is that you execute it locally and instruct it to **watch** a namespace on a Kubernetes cluster (it may be remote or any local environment). Let's use a namespace called ``operator-test``.
 
-* We start by setting the environment variable ``WATCH_NAMESPACE`` with the namespace you'd like your operator to watch.
+* You can start with setting the environment variable ``WATCH_NAMESPACE`` with the namespace you'd like your operator to watch.
 ----
 export WATCH_NAMESPACE=operator-test
 ----
@@ -18,7 +18,7 @@ export WATCH_NAMESPACE=operator-test
 ./kamel install --skip-operator-setup -n operator-test --registry my-registry:5000
 ----
 
-* Finally, assuming you've builded your application correctly we can run the operator:
+* Finally, assuming you've built your application correctly we can run the operator:
 -----
 ./kamel operator
 -----
@@ -28,12 +28,12 @@ export WATCH_NAMESPACE=operator-test
 ./kamel run xyz.abc -n operator-test
 -----
 
-IMPORTANT: make sure no other Camel K Operators are watching that namespace, neither you have a global Camel K Operator installed on your cluster.
+IMPORTANT: make sure no other Camel K Operators are watching this namespace, neither you have a global Camel K Operator installed on your cluster.
 
 [[local-minikube]]
 == Local operator and local cluster
 
-If you want to run a local operator togheter with ``Minikube`` you will need an additional step in order to let the local operator being able to push images in the local registry. We need to expose the local registry as described in https://minikube.sigs.k8s.io/docs/handbook/registry/#docker-on-windows[this procedure]:
+If you want to run a local operator togheter with ``Minikube`` you will need an additional step in order to let the local operator push images in the local registry. We need to expose the local registry as described in https://minikube.sigs.k8s.io/docs/handbook/registry/#docker-on-windows[this procedure]:
 
 * Enable the addon registry (this should be already in place):
 ----
