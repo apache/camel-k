@@ -81,8 +81,8 @@ type KameletSpec struct {
 	Flow *camelv1.Flow `json:"flow,omitempty"`
 	// Deprecated: unused
 	Authorization *AuthorizationSpec `json:"authorization,omitempty"`
-	// data specification types for the events consumed/produced by the Kamelet
-	Types map[EventSlot]EventTypeSpec `json:"types,omitempty"`
+	// Data specification types for the events consumed/produced by the Kamelet
+	Types Types `json:"types,omitempty"`
 	// Camel dependencies needed by the Kamelet
 	Dependencies []string `json:"dependencies,omitempty"`
 }
@@ -93,17 +93,20 @@ type Template struct {
 	RawMessage `json:",inline"`
 }
 
-// EventSlot represent a kind of data (ie, input, output, ...)
-type EventSlot string
+// Data specification types for the events consumed/produced by the Kamelet
+type Types struct {
+	// input event
+	In EventSlot `json:"in,omitempty"`
+	// output event
+	Out EventSlot `json:"out,omitempty"`
+	// error event
+	Error EventSlot `json:"error,omitempty"`
+}
 
-const (
-	// EventSlotIn is used for the input events
-	EventSlotIn EventSlot = "in"
-	// EventSlotOut is used for the output events
-	EventSlotOut EventSlot = "out"
-	// EventSlotError is used for the error events
-	EventSlotError EventSlot = "error"
-)
+// EventSlot represent a kind of data (ie, input, output, ...)
+type EventSlot struct {
+	EventTypeSpec `json:",inline"` 
+}
 
 // EventTypeSpec represents a specification for an event type
 type EventTypeSpec struct {
