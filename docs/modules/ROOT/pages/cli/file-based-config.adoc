@@ -2,4 +2,23 @@
 
 File-based configuration is used to set command flags. Flag values do not need to be entered on a regular basis. The file is read on Kamel startup and the flags are set accordingly.
 
-To configure this flag, create a file named kamel-config.yaml on the same directory as your integration. The file must contain a yaml structure as shown in ./kamel-config.yaml.
+The file's default name is `kamel-config.yaml` . Which should be placed in either of this directory structure:
+
+ - `~/.kamel/`
+ - `./.kamel/`
+ - `.`
+
+it can be overriden by setting an env value `KAMEL_CONFIG_NAME` to file path.
+
+
+To configure this flag, create a file named kamel-config.yaml on the same directory as your integration. The file must contain a yaml structure as shown below:
+
+.Kamel-config.yaml
+
+```yaml
+kamel:
+    install:
+        namespace: kamel
+        healthPort: 8081
+        monitoringPort: 8082
+```

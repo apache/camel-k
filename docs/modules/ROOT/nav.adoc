@@ -21,6 +21,7 @@
 *** xref:installation/advanced/multi.adoc[Multiple Operators]
 * Command Line Interface
 ** xref:cli/cli.adoc[Kamel CLI]
+** xref:cli/file-based-config.adoc[File-based Config]
 ** xref:cli/modeline.adoc[Modeline]
 * xref:running/running.adoc[Run an Integration]
 ** xref:running/dev-mode.adoc[Developer mode]
