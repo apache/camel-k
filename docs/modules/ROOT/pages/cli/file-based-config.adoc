@@ -8,7 +8,7 @@ The file's default name is `kamel-config.yaml` . Which should be placed in eithe
  - `./.kamel/`
  - `.`
 
-it can be overriden by setting an env value `KAMEL_CONFIG_NAME` to file path.
+it can be overridden by setting an env value `KAMEL_CONFIG_NAME` to file path.
 
 
 To configure this flag, create a file named kamel-config.yaml on the same directory as your integration. The file must contain a yaml structure as shown below:
