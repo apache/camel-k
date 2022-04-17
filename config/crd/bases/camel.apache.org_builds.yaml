@@ -785,6 +785,11 @@ spec:
               image:
                 description: the image name built
                 type: string
+              observedGeneration:
+                description: ObservedGeneration is the most recent generation observed
+                  for this Build.
+                format: int64
+                type: integer
               phase:
                 description: describes the phase
                 type: string

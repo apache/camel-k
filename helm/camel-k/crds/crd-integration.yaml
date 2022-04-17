@@ -5915,6 +5915,11 @@ spec:
                   was initialized.
                 format: date-time
                 type: string
+              observedGeneration:
+                description: ObservedGeneration is the most recent generation observed
+                  for this Integration.
+                format: int64
+                type: integer
               phase:
                 description: the actual phase
                 type: string

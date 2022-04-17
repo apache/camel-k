@@ -67,6 +67,8 @@ type IntegrationKitSpec struct {
 
 // IntegrationKitStatus defines the observed state of IntegrationKit
 type IntegrationKitStatus struct {
+	// ObservedGeneration is the most recent generation observed for this IntegrationKit.
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 	// phase of the kit
 	Phase IntegrationKitPhase `json:"phase,omitempty"`
 	// base image used by the kit

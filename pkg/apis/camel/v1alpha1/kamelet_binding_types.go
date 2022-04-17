@@ -94,6 +94,8 @@ type EndpointProperties struct {
 
 // KameletBindingStatus specify the status of a binding
 type KameletBindingStatus struct {
+	// ObservedGeneration is the most recent generation observed for this KameletBinding.
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 	// Phase --
 	Phase KameletBindingPhase `json:"phase,omitempty"`
 	// Conditions --

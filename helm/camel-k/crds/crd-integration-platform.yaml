@@ -630,6 +630,11 @@ spec:
                       type: object
                     type: array
                 type: object
+              observedGeneration:
+                description: ObservedGeneration is the most recent generation observed
+                  for this IntegrationPlatform.
+                format: int64
+                type: integer
               phase:
                 description: defines in what phase the IntegrationPlatform is found
                 type: string
