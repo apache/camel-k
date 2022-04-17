@@ -146,6 +146,8 @@ type S2iTask struct {
 
 // BuildStatus defines the observed state of Build
 type BuildStatus struct {
+	// ObservedGeneration is the most recent generation observed for this Build.
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 	// describes the phase
 	Phase BuildPhase `json:"phase,omitempty"`
 	// the image name built

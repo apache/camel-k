@@ -120,6 +120,8 @@ type AuthorizationSpec struct {
 
 // KameletStatus defines the observed state of Kamelet
 type KameletStatus struct {
+	// ObservedGeneration is the most recent generation observed for this Kamelet.
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 	// Phase --
 	Phase KameletPhase `json:"phase,omitempty"`
 	// Conditions --

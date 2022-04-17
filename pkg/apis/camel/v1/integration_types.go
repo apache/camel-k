@@ -85,6 +85,8 @@ type IntegrationSpec struct {
 
 // IntegrationStatus defines the observed state of Integration
 type IntegrationStatus struct {
+	// ObservedGeneration is the most recent generation observed for this Integration.
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 	// the actual phase
 	Phase IntegrationPhase `json:"phase,omitempty"`
 	// the digest calculated for this Integration

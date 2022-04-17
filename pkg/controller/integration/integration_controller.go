@@ -345,6 +345,7 @@ func (r *reconcileIntegration) update(ctx context.Context, base *v1.Integration,
 	}
 
 	target.Status.Digest = d
+	target.Status.ObservedGeneration = base.Generation
 
 	err = r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base))
 

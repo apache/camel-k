@@ -219,6 +219,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 }
 
 func (r *reconcileBuild) update(ctx context.Context, base *v1.Build, target *v1.Build) (reconcile.Result, error) {
+	target.Status.ObservedGeneration = base.Generation
 	err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base))
 
 	return reconcile.Result{}, err

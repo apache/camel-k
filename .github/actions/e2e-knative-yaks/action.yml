@@ -78,7 +78,7 @@ runs:
     uses: ./.github/actions/kamel-install-yaks
     with:
       image-name: "docker.io/yaks/yaks"
-      version: 0.9.0-202202081449
+      version: 0.11.0-202204210858
 
   - id: report-problematic
     name: List Tests Marked As Problematic

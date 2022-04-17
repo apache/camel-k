@@ -6666,6 +6666,11 @@ spec:
                   - type
                   type: object
                 type: array
+              observedGeneration:
+                description: ObservedGeneration is the most recent generation observed
+                  for this KameletBinding.
+                format: int64
+                type: integer
               phase:
                 description: Phase --
                 type: string

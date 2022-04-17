@@ -309,6 +309,8 @@ func (r *reconcileIntegrationKit) update(ctx context.Context, base *v1.Integrati
 
 	target.Status.Digest = dgst
 
+	target.Status.ObservedGeneration = base.Generation
+
 	err = r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base))
 
 	return reconcile.Result{}, err
