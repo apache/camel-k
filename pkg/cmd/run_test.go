@@ -132,6 +132,16 @@ func TestRunDevFlag(t *testing.T) {
 	assert.Equal(t, true, runCmdOptions.Dev)
 }
 
+func TestRunDevModeOutputFlag(t *testing.T) {
+	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--dev", "-o", "yaml", integrationSource)
+	assert.Equal(t, true, runCmdOptions.Dev)
+	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
+	assert.NotNil(t, err)
+	assert.Equal(t, "option '-o' is not compatible with '--dev'",
+		err.Error())
+}
+
 func TestRunEnvFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun,
