@@ -244,7 +244,7 @@ func (o *runCmdOptions) validate() error {
 	}
 
 	if o.OutputFormat != "" && o.Dev {
-		return errors.New("option '-o' is not compatible with '--dev'")
+		return fmt.Errorf("cannot use --dev with -o/--output option")
 	}
 
 	for _, label := range o.Labels {
