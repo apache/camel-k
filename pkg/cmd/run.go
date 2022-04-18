@@ -243,6 +243,10 @@ func (o *runCmdOptions) validate() error {
 		return err
 	}
 
+	if o.OutputFormat != "" && o.Dev {
+		return errors.New("option '-o' is not compatible with '--dev'")
+	}
+
 	for _, label := range o.Labels {
 		parts := strings.Split(label, "=")
 		if len(parts) != 2 {
