@@ -146,20 +146,20 @@ func (command *kitCreateCommandOptions) run(cmd *cobra.Command, args []string) e
 		}
 	}
 
-if err := command.parseAndConvertToTrait(command.Properties, "camel.properties"); err != nil {
-	return err
-}
+	if err := command.parseAndConvertToTrait(command.Properties, "camel.properties"); err != nil {
+		return err
+	}
 
-if err := command.parseAndConvertToTrait(command.Configmaps, "mount.config"); err != nil {
-	return err
-}
+	if err := command.parseAndConvertToTrait(command.Configmaps, "mount.config"); err != nil {
+		return err
+	}
 
-if err := command.parseAndConvertToTrait(command.Secrets, "mount.config"); err != nil {
-	return err
-}
-if err := command.configureTraits(kit, command.Traits, catalog); err != nil {
-return err
-}
+	if err := command.parseAndConvertToTrait(command.Secrets, "mount.config"); err != nil {
+		return err
+	}
+	if err := command.configureTraits(kit, command.Traits, catalog); err != nil {
+		return err
+	}
 	existed := false
 	err = c.Create(command.Context, kit)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
@@ -198,10 +198,10 @@ func (*kitCreateCommandOptions) configureTraits(kit *v1.IntegrationKit, options 
 
 	return nil
 }
-func (command *kitCreateCommandOptions) parseAndConvertToTrait(params []string, traitParam string, ) error {
+func (command *kitCreateCommandOptions) parseAndConvertToTrait(params []string, traitParam string) error {
 	for _, param := range params {
 		command.Traits = append(command.Traits, convertToTrait(param, traitParam))
 	}
-	
+
 	return nil
 }
