@@ -138,7 +138,7 @@ func TestRunDevModeOutputFlag(t *testing.T) {
 	assert.Equal(t, true, runCmdOptions.Dev)
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 	assert.NotNil(t, err)
-	assert.Equal(t, "option '-o' is not compatible with '--dev'",
+	assert.Equal(t, "cannot use --dev with -o/--output option",
 		err.Error())
 }
 
