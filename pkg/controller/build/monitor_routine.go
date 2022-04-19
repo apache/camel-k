@@ -34,6 +34,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/event"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/patch"
 )
 
@@ -174,8 +175,10 @@ tasks:
 
 	duration := metav1.Now().Sub(build.Status.StartedAt.Time)
 	status.Duration = duration.String()
+
+	buildCreator := kubernetes.GetCamelCreator(build)
 	// Account for the Build metrics
-	observeBuildResult(build, status.Phase, duration)
+	observeBuildResult(build, status.Phase, buildCreator, duration)
 
 	_ = action.updateBuildStatus(ctx, build, status)
 }

@@ -35,6 +35,7 @@ import (
 	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 const timeoutAnnotation = "camel.apache.org/timeout"
@@ -121,8 +122,9 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		duration := finishedAt.Sub(build.Status.StartedAt.Time)
 		build.Status.Duration = duration.String()
 
+		buildCreator := kubernetes.GetCamelCreator(build)
 		// Account for the Build metrics
-		observeBuildResult(build, build.Status.Phase, duration)
+		observeBuildResult(build, build.Status.Phase, buildCreator, duration)
 
 		for _, task := range build.Spec.Tasks {
 			if t := task.Buildah; t != nil {
@@ -166,8 +168,9 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		duration := finishedAt.Sub(build.Status.StartedAt.Time)
 		build.Status.Duration = duration.String()
 
+		buildCreator := kubernetes.GetCamelCreator(build)
 		// Account for the Build metrics
-		observeBuildResult(build, build.Status.Phase, duration)
+		observeBuildResult(build, build.Status.Phase, buildCreator, duration)
 	}
 
 	return build, nil
