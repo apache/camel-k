@@ -29,7 +29,16 @@ if [ -z $2 ]; then
 else
   # TODO: fix this workaround to use the above mvn statement with the staging repository as well
   echo "INFO: extracting a catalog from staging repository $2"
-  wget -q $2/org/apache/camel/k/camel-k-catalog/$1/camel-k-catalog-$1-catalog.yaml -O ${rootdir}/resources/camel-catalog-$1.yaml
+  wget -q $2/org/apache/camel/k/camel-k-catalog/$1/camel-k-catalog-$1-catalog.yaml -O ${rootdir}/resources/camel-catalog.yaml
+
+  if [ -s ${rootdir}/resources/camel-catalog.yaml ]; then
+    # the extracted catalog file is not empty
+    mv ${rootdir}/resources/camel-catalog.yaml ${rootdir}/resources/camel-catalog-$1.yaml
+  else
+    # the extracted catalog file is empty - some error in staging repository
+    echo "WARNING: could not extract catalog from staging repository $2"
+    rm ${rootdir}/resources/camel-catalog.yaml
+  fi
 fi
 
 
