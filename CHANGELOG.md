@@ -11,6 +11,7 @@
 - Cosmetic log error [\#3192](https://github.com/apache/camel-k/issues/3192)
 - Make CLI --output argument more clean [\#3177](https://github.com/apache/camel-k/issues/3177)
 - Error when running camel-k in global mode with label selection [\#3161](https://github.com/apache/camel-k/issues/3161)
+- Improve the logging of quarkus build failures [\#3149](https://github.com/apache/camel-k/issues/3149)
 - Tracing trait usage example [\#3148](https://github.com/apache/camel-k/issues/3148)
 - Prometheus trait usage example [\#3144](https://github.com/apache/camel-k/issues/3144)
 - Use Kubernetes recommended labels  [\#3137](https://github.com/apache/camel-k/issues/3137)
