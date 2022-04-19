@@ -48,6 +48,8 @@ MONITORING ?= false
 MONITORING_PORT ?= 8080
 # Health Port: integer
 HEALTH_PORT ?= 8081
+# Operator Logging Level: string [info, debug, 0, 1]
+LOGGING_LEVEL ?= info
 
 CONFIG := ../config
 MANAGER := $(CONFIG)/manager
@@ -67,6 +69,7 @@ ROLE_TO_CROLE_PATCH := $(RBAC)/patch-role-to-clusterrole
 ROLEBIN_TO_CROLEBIN_PATCH := $(RBAC)/patch-rolebinding-to-clusterrolebinding
 # Operator patches
 PORTS_PATCH := patch-ports
+LOG_LEVEL_PATCH := patch-log-level
 IMAGE_PULL_POLICY_PATCH := patch-image-pull-policy-always
 WATCH_NAMESPACE_PATCH := patch-watch-namespace-global
 # Platform patches
@@ -229,7 +232,7 @@ else
 		sed 's/$(PLACEHOLDER)/$(NAMESPACE)/'
 endif
 
-.PHONY: operator .operator-port-patch .operator-can-monitor
+.PHONY: operator .operator-port-patch .operator-can-monitor .operator-log-level-patch
 
 #
 # Customizes the port patch
@@ -239,6 +242,12 @@ endif
 	@sed -i '/path:.*\/containerPort/,/- op/{s/value: .*/value: $(MONITORING_PORT)/}' $(MANAGER)/$(PORTS_PATCH).$(YAML)
 	@sed -i 's/--health-port=.*/--health-port=$(HEALTH_PORT)/' $(MANAGER)/$(PORTS_PATCH).$(YAML)
 	@sed -i '/path:.*\/httpGet\/port/,/- op/{s/value: .*/value: $(HEALTH_PORT)/}' $(MANAGER)/$(PORTS_PATCH).$(YAML)
+
+#
+# Customizes the log level patch
+#
+.operator-log-level-patch:
+	@sed -i 's/    value:.*/    value: "$(LOGGING_LEVEL)"/' $(MANAGER)/$(LOG_LEVEL_PATCH).$(YAML)
 
 .operator-can-monitor: kubectl
 	@output=$$(kubectl get crd prometheusrules.monitoring.coreos.com 2>&1) || (echo "****" && echo "**** ERROR: Montoring not available as Prometheus CRDs not installed in cluster ****" && echo "****"; exit 1)
@@ -258,9 +267,10 @@ endif
 #   MONITORING:         Adds the prometheus monitoring resources
 #   MONITORING_PORT:    Set a custom monitoring port
 #   HEALTH_PORT:        Set a custom health port
+#   LOGGING_LEVEL:      Set the level of logging [info|debug]
 #   DRY_RUN:            Prints the resources to be applied instead of applying them
 #
-operator: check-admin have-platform kustomize kubectl .operator-port-patch
+operator: check-admin have-platform kustomize kubectl .operator-port-patch .operator-log-level-patch
 ifeq ($(MONITORING), true)
 	@$(MAKE) -s .operator-can-monitor
 	@$(call add-remove-operator-monitoring,$@,add)
@@ -288,6 +298,14 @@ ifneq ($(MONITORING_PORT), 8080)
 	@$(call add-remove-kind-patch,$(MANAGER),add,$(PORTS_PATCH).$(YAML),Deployment)
 else ifneq ($(HEALTH_PORT), 8081)
 	@$(call add-remove-kind-patch,$(MANAGER),add,$(PORTS_PATCH).$(YAML),Deployment)
+endif
+# Set the Log level of the operator
+ifneq ($(LOGGING_LEVEL), info)
+	@$(call add-remove-kind-patch,$(MANAGER),add,$(LOG_LEVEL_PATCH).$(YAML),Deployment)
+else ifneq ($(LOGGING_LEVEL), 0)
+		@$(call add-remove-kind-patch,$(MANAGER),add,$(LOG_LEVEL_PATCH).$(YAML),Deployment)
+else
+	@$(call add-remove-kind-patch,$(MANAGER),remove,$(LOG_LEVEL_PATCH).$(YAML),Deployment)
 endif
 ifeq ($(DRY_RUN), false)
 	@$(KUSTOMIZE) build $(KOPTIONS) $@ | kubectl apply -f -
