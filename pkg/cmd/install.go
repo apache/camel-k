@@ -142,6 +142,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().StringArray("node-selector", nil, "Add a NodeSelector to the operator Pod")
 	cmd.Flags().StringArray("operator-resources", nil, "Define the resources requests and limits assigned to the operator Pod as <requestType.requestResource=value> (i.e., limits.memory=256Mi)")
 	cmd.Flags().StringArray("operator-env-vars", nil, "Add an environment variable to set in the operator Pod(s), as <name=value>")
+	cmd.Flags().StringP("log-level", "z", "info", "The level of operator logging (default - info): info or 0, debug or 1")
 
 	// save
 	cmd.Flags().Bool("save", false, "Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
@@ -195,6 +196,7 @@ type installCmdOptions struct {
 	Tolerations              []string `mapstructure:"tolerations"`
 	NodeSelectors            []string `mapstructure:"node-selectors"`
 	ResourcesRequirements    []string `mapstructure:"operator-resources"`
+	LogLevel                 string   `mapstructure:"log-level"`
 	EnvVars                  []string `mapstructure:"operator-env-vars"`
 
 	registry         v1.RegistrySpec
@@ -217,6 +219,11 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 	// --skip-default-kamelets-setup is a syntax sugar for '--operator-env-vars KAMEL_INSTALL_DEFAULT_KAMELETS=false'
 	if o.SkipDefaultKameletsSetup {
 		o.EnvVars = append(o.EnvVars, "KAMEL_INSTALL_DEFAULT_KAMELETS=false")
+	}
+
+	// Set the log-level
+	if len(o.LogLevel) > 0 {
+		o.EnvVars = append(o.EnvVars, fmt.Sprintf("LOG_LEVEL=%s", strings.TrimSpace(o.LogLevel)))
 	}
 
 	installViaOLM := false

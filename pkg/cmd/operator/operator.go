@@ -25,6 +25,7 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
 
 	"go.uber.org/automaxprocs/maxprocs"
@@ -39,8 +40,9 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"k8s.io/client-go/tools/record"
-	"k8s.io/klog/v2"
+	klog "k8s.io/klog/v2"
 
+	"go.uber.org/zap/zapcore"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -61,9 +63,11 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	camelLog "github.com/apache/camel-k/pkg/util/log"
 )
 
 var log = logf.Log.WithName("cmd")
+var camLog = camelLog.Log.WithName("log")
 
 func printVersion() {
 	log.Info(fmt.Sprintf("Go Version: %s", runtime.Version()))
@@ -73,6 +77,17 @@ func printVersion() {
 	log.Info(fmt.Sprintf("Camel K Operator Version: %v", defaults.Version))
 	log.Info(fmt.Sprintf("Camel K Default Runtime Version: %v", defaults.DefaultRuntimeVersion))
 	log.Info(fmt.Sprintf("Camel K Git Commit: %v", defaults.GitCommit))
+
+	// Will only appear if DEBUG level has been enabled using the env var LOG_LEVEL
+	camLog.Debug("*** DEBUG level messages will be logged ***")
+}
+
+type loglvl struct {
+	Level zapcore.Level
+}
+
+func (l loglvl) Enabled(lvl zapcore.Level) bool {
+	return l.Level.Enabled(lvl)
 }
 
 // Run starts the Camel K operator.
@@ -85,8 +100,33 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	// implementing the logr.Logger interface. This logger will
 	// be propagated through the whole operator, generating
 	// uniform and structured logs.
+
+	// The constants specified here are zap specific
+	var logLevel zapcore.Level
+	logLevelVal, ok := os.LookupEnv("LOG_LEVEL")
+	if ok {
+		switch strings.ToLower(logLevelVal) {
+		case "error":
+			logLevel = zapcore.ErrorLevel
+		case "info":
+			logLevel = zapcore.InfoLevel
+		case "debug":
+			logLevel = zapcore.DebugLevel
+		default:
+			customLevel, err := strconv.Atoi(strings.ToLower(logLevelVal))
+			exitOnError(err, "Invalid log-level")
+			// Need to multiply by -1 to turn logr expected level into zap level
+			logLevel = zapcore.Level(int8(customLevel) * -1)
+		}
+	}
+
+	logLevelEnabler := loglvl{
+		Level: logLevel,
+	}
+
 	logf.SetLogger(zap.New(func(o *zap.Options) {
 		o.Development = false
+		o.Level = logLevelEnabler
 	}))
 
 	klog.SetLogger(log)

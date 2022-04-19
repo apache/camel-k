@@ -141,6 +141,8 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 
 				for i := range list.Items {
 					integration := &list.Items[i]
+					log.Debug("Integration Controller: Assessing integration", "integration", integration.Name, "namespace", integration.Namespace)
+
 					if match, err := integrationMatches(integration, kit); err != nil {
 						log.Errorf(err, "Error matching integration %q with kit %q", integration.Name, kit.Name)
 
