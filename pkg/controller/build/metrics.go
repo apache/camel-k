@@ -26,6 +26,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 const (
@@ -88,12 +89,23 @@ func init() {
 	metrics.Registry.MustRegister(buildDuration, buildRecovery, queueDuration)
 }
 
-func observeBuildQueueDuration(build *v1.Build) {
+func observeBuildQueueDuration(build *v1.Build, creator *corev1.ObjectReference) {
+	duration := time.Since(getBuildQueuingTime(build))
+
+	requestName := build.Name
+	requestNamespace := build.Namespace
+	if creator != nil {
+		requestName = creator.Name
+		requestNamespace = creator.Namespace
+	}
+
+	Log.WithValues("request-namespace", requestNamespace, "request-name", requestName, "build-queue-duration", duration.Seconds()).
+		ForBuild(build).Infof("Build queue duration %s", duration)
 	queueDuration.WithLabelValues(build.Labels[v1.IntegrationKitLayoutLabel]).
-		Observe(time.Since(getBuildQueuingTime(build)).Seconds())
+		Observe(duration.Seconds())
 }
 
-func observeBuildResult(build *v1.Build, phase v1.BuildPhase, duration time.Duration) {
+func observeBuildResult(build *v1.Build, phase v1.BuildPhase, creator *corev1.ObjectReference, duration time.Duration) {
 	attempt, attemptMax := getBuildAttemptFor(build)
 
 	if phase == v1.BuildPhaseFailed && attempt >= attemptMax {
@@ -105,6 +117,15 @@ func observeBuildResult(build *v1.Build, phase v1.BuildPhase, duration time.Dura
 	resultLabel := phase.String()
 	typeLabel := build.Labels[v1.IntegrationKitLayoutLabel]
 
+	requestName := build.Name
+	requestNamespace := build.Namespace
+	if creator != nil {
+		requestName = creator.Name
+		requestNamespace = creator.Namespace
+	}
+
+	Log.WithValues("request-namespace", requestNamespace, "request-name", requestName, "build-attempt", float64(attempt), "build-result", resultLabel, "build-duration", duration.Seconds()).
+		ForBuild(build).Infof("Build duration %s", duration)
 	buildRecovery.WithLabelValues(resultLabel, typeLabel).Observe(float64(attempt))
 	buildDuration.WithLabelValues(resultLabel, typeLabel).Observe(duration.Seconds())
 }

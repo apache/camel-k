@@ -29,6 +29,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/event"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 func newScheduleAction(reader ctrl.Reader) Action {
@@ -116,8 +117,9 @@ func (action *scheduleAction) toPendingPhase(ctx context.Context, build *v1.Buil
 		return err
 	}
 
+	buildCreator := kubernetes.GetCamelCreator(build)
 	// Report the duration the Build has been waiting in the build queue
-	observeBuildQueueDuration(build)
+	observeBuildQueueDuration(build, buildCreator)
 
 	return nil
 }
