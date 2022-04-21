@@ -73,7 +73,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 				dataFormatID := defaultJSONDataFormat
 				if jsContent, jsContentOk := js.(map[interface{}]interface{}); jsContentOk {
 					if lib, libOk := jsContent["library"]; libOk {
-						dataFormatID = strings.ToLower(fmt.Sprintf("json-%s", lib))
+						dataFormatID = strings.ToLower(fmt.Sprintf("%s", lib))
 					}
 				}
 				if dfDep := i.catalog.GetArtifactByDataFormat(dataFormatID); dfDep != nil {
