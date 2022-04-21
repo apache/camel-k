@@ -295,7 +295,7 @@ const YAMLJSONGsonMarshal = `
     steps:
     - marshal:
         json:
-          library: Gson
+          library: gson
 `
 
 const YAMLJSONUnknownMarshal = `
