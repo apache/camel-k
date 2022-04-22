@@ -44,7 +44,8 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 	}
 	cmd := cobra.Command{
 		Use:     "bind [source] [sink] ...",
-		Short:   "Bind Kubernetes resources, such as Kamelets, in an integration flow. Endpoints are expected in the format \"[[apigroup/]version:]kind:[namespace/]name\" or plain Camel URIs.",
+		Short:   "Bind Kubernetes resources, such as Kamelets, in an integration flow.",
+		Long:    "Bind Kubernetes resources, such as Kamelets, in an integration flow. Endpoints are expected in the format \"[[apigroup/]version:]kind:[namespace/]name\" or plain Camel URIs.",
 		PreRunE: decode(&options),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(cmd, args); err != nil {
