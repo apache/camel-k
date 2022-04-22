@@ -26,6 +26,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/term"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
@@ -82,6 +83,11 @@ func kamelPreAddCommandInit(options *RootCmdOptions) *cobra.Command {
 
 	cmd.PersistentFlags().StringVar(&options.KubeConfig, "kube-config", os.Getenv("KUBECONFIG"), "Path to the kube config file to use for CLI requests")
 	cmd.PersistentFlags().StringVarP(&options.Namespace, "namespace", "n", "", "Namespace to use for all operations")
+
+	cobra.AddTemplateFunc("wrappedFlagUsages", wrappedFlagUsages)
+	usageTmpl := cmd.UsageTemplate()
+	usageTmpl = strings.Replace(usageTmpl, ".LocalFlags.FlagUsages", " wrappedFlagUsages .", 1)
+	cmd.SetUsageTemplate(usageTmpl)
 
 	return &cmd
 }
@@ -236,4 +242,12 @@ func (command *RootCmdOptions) GetCamelCmdClient() (*v1.CamelV1Client, error) {
 // NewCmdClient returns a new client that can be used from command line tools.
 func (command *RootCmdOptions) NewCmdClient() (client.Client, error) {
 	return client.NewOutOfClusterClient(command.KubeConfig)
+}
+
+func wrappedFlagUsages(cmd *cobra.Command) string {
+	width := 80
+	if w, _, err := term.GetSize(0); err == nil {
+		width = w
+	}
+	return cmd.Flags().FlagUsagesWrapped(width - 1)
 }
