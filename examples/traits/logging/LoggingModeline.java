@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-//
-//  kamel run ./logging.java --trait logging.enabled=true \
-//  --trait logging.json=true --trait logging.level=info
+// camel-k: traits=logging.enabled=true trait=logging.json=true trait=logging.level=info
+
 import org.apache.camel.Exchange;
 
-public class RestDSL extends org.apache.camel.builder.RouteBuilder {
+public class LoggingModeline extends org.apache.camel.builder.RouteBuilder {
     @Override
     public void configure() throws Exception {
         rest()
