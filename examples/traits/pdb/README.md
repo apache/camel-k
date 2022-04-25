@@ -18,4 +18,3 @@ In this pod disruption budget, we have set the max unavailable pod to 1. Wheneve
 
         $Kamel run pdbModeline.java
 
-If you don't know what modeline is, see [Link](https://camel.apache.org/camel-k/1.8.x/cli/modeline.html)
