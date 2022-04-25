@@ -30,14 +30,19 @@ manual log setting example using  `logging trait`:
      
      $kamel run ./logging.java --trait logging.enabled=true --trait logging.json=true --trait logging.level=info
 
+**Output**
+
 The output of this result would give this:
-- Logging would be enabled, but there would be no colors for easy skimming.
+
+```
+[2] {"timestamp":"2022-04-24T22:50:06.303Z","sequence":183,"loggerClassName":"org.slf4j.impl.Slf4jLogger","loggerName":"org.apache.camel.impl.engine.AbstractCamelContext","level":"INFO","message":"Apache Camel 3.14.1 (camel-1) started in 352ms (build:0ms init:293ms start:59ms)","threadName":"main","threadId":1,"mdc":{},"ndc":"","hostName":"rest-dsl-56668cc6dc-9zz7r","processName":"io.quarkus.bootstrap.runner.QuarkusEntryPoint","processId":1}
+[2] {"timestamp":"2022-04-24T22:50:06.835Z","sequence":184,"loggerClassName":"org.jboss.logging.Logger","loggerName":"io.quarkus","level":"INFO","message":"camel-k-integration 1.8.2 on JVM (powered by Quarkus 2.7.0.Final) started in 14.348s. Listening on: http://0.0.0.0:8080","threadName":"main","threadId":1,"mdc":{},"ndc":"","hostName":"rest-dsl-56668cc6dc-9zz7r","processName":"io.quarkus.bootstrap.runner.QuarkusEntryPoint","processId":1}
+[2] {"timestamp":"2022-04-24T22:50:06.842Z","sequence":185,"loggerClassName":"org.jboss.logging.Logger","loggerName":"io.quarkus","level":"INFO","message":"Profile prod activated. ","threadName":"main","threadId":1,"mdc":{},"ndc":"","hostName":"rest-dsl-56668cc6dc-9zz7r","processName":"io.quarkus.bootstrap.runner.QuarkusEntryPoint","processId":1}
+[2] {"timestamp":"2022-04-24T22:50:06.842Z","sequence":186,"loggerClassName":"org.jboss.logging.Logger","loggerName":"io.quarkus","level":"INFO","message":"Installed features: [camel-attachments, camel-bean, camel-core, camel-direct, camel-java-joor-dsl, camel-k-core, camel-k-runtime, camel-platform-http, camel-rest, cdi, smallrye-context-propagation, vertx]","threadName":"main","threadId":1,"mdc":{},"ndc":"","hostName":"rest-dsl-56668cc6dc-9zz7r","processName":"io.quarkus.bootstrap.runner.QuarkusEntryPoint","processId":1}
+
+```
+- Logging would be enabled, and it's output would be in josn. But, there would be no colors for easy skimming.
 - You would need to use your own jq to pretty print and parse the json output. 
-
-**Image example**
-![json](interface/json.png)
-
-
 ## using modeline 
 An example of using a `modeline` to set the `logging traits` : 
 
