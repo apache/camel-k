@@ -3,7 +3,7 @@
 This is an example of a Pod Distruption Budget for an integration pod running on the cluster. 
 You can set a  `minumum available` or a `maximum unavailable` pods, it all depends on your eviction policy.
 
- **Note:** You can only use one trait command. Either a `minimum available` or a `maximum unavailable`
+ **Note:** This trait is best used on a multi-node cluster. Also, you can only use one trait command. Either a `minimum available` or a `maximum unavailable`
 
 Example: 
 

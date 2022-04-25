@@ -21,7 +21,7 @@
 
 import org.apache.camel.Exchange;
 
-public class pdbModeline extends org.apache.camel.builder.RouteBuilder {
+public class PdbModeline extends org.apache.camel.builder.RouteBuilder {
     @Override
     public void configure() throws Exception {
         rest()
