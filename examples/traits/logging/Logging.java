@@ -16,7 +16,7 @@
  */
 
 //
-//  kamel run ./logging.java --trait logging.enabled=true \
+//  kamel run ./Logging.java --trait logging.enabled=true \
 //  --trait logging.json=true --trait logging.level=info
 import org.apache.camel.Exchange;
 
