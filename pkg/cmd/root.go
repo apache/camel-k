@@ -85,9 +85,7 @@ func kamelPreAddCommandInit(options *RootCmdOptions) *cobra.Command {
 	cmd.PersistentFlags().StringVarP(&options.Namespace, "namespace", "n", "", "Namespace to use for all operations")
 
 	cobra.AddTemplateFunc("wrappedFlagUsages", wrappedFlagUsages)
-	usageTmpl := cmd.UsageTemplate()
-	usageTmpl = strings.Replace(usageTmpl, ".LocalFlags.FlagUsages", " wrappedFlagUsages .", 1)
-	cmd.SetUsageTemplate(usageTmpl)
+	cmd.SetUsageTemplate(usageTemplate)
 
 	return &cmd
 }
@@ -251,3 +249,28 @@ func wrappedFlagUsages(cmd *cobra.Command) string {
 	}
 	return cmd.Flags().FlagUsagesWrapped(width - 1)
 }
+
+var usageTemplate = `Usage:{{if .Runnable}}
+  {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
+  {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
+
+Aliases:
+  {{.NameAndAliases}}{{end}}{{if .HasExample}}
+
+Examples:
+{{.Example}}{{end}}{{if .HasAvailableSubCommands}}
+
+Available Commands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+
+Flags:
+{{ wrappedFlagUsages . | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+
+Global Flags:
+{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasHelpSubCommands}}
+
+Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
+  {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
+
+Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
+`
