@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- Jitpack example deployment fails [\#3207](https://github.com/apache/camel-k/issues/3207)
+- `Kamel kit create` to use mount/camel traits [\#2915](https://github.com/apache/camel-k/issues/2915)
 - Camel K CLI asks for an OpenAPI v2 when also v3 is supported [\#2238](https://github.com/apache/camel-k/issues/2238)
 - Traits to configure the container image and location fo the sources [\#2232](https://github.com/apache/camel-k/issues/2232)
 - Lower priority of modeline options [\#1843](https://github.com/apache/camel-k/issues/1843)
@@ -75,7 +77,6 @@
 **Closed issues:**
 
 - Nightly tag failure [\#3107](https://github.com/apache/camel-k/issues/3107)
-- \[regression\] Cannot provide 2 resources with 1.8.0 and 1.8.1 [\#3077](https://github.com/apache/camel-k/issues/3077)
 - Kaniko settings refactoring [\#3005](https://github.com/apache/camel-k/issues/3005)
 - Add daily operator image builds [\#393](https://github.com/apache/camel-k/issues/393)
 
