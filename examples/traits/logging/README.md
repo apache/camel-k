@@ -4,15 +4,15 @@ This type of trait tells us what is going on in a running integration pod. It do
 
 Logs are enabled by default on an integration. Just run this example:
 
-     $kamel run logging.java
+     $ kamel run logging.java
 
-     $kamel logs logging
+     $ kamel logs logging
 
 Or you can instead get the pod name and print its logs using kubectl: 
 
-     $kubectl get pods
+     $ kubectl get pods
 
-     $kubecttl logs <pod name>
+     $ kubecttl logs <pod name>
 
 You can configure the log output with the `logging traits` flag:
       
@@ -28,7 +28,7 @@ for more traits options see this [Link.](https://camel.apache.org/camel-k/next/t
 
 manual log setting example using  `logging trait`:
      
-     $kamel run ./logging.java --trait logging.enabled=true --trait logging.json=true --trait logging.level=info
+     $ kamel run ./logging.java --trait logging.enabled=true --trait logging.json=true --trait logging.level=info
 
 **Output**
 
@@ -43,8 +43,8 @@ The output of this result would give this:
 ```
 - Logging would be enabled, and it's output would be in josn. But, there would be no colors for easy skimming.
 - You would need to use your own jq to pretty print and parse the json output. 
-## using modeline 
+## Using modeline 
 An example of using a `modeline` to set the `logging traits` : 
 
-     $kamel run ./loggingModeline.java 
+     $ kamel run ./loggingModeline.java 
 
