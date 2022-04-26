@@ -25,6 +25,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/builder"
 	mvn "github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/property"
@@ -32,7 +33,7 @@ import (
 
 type builderTrait struct {
 	BaseTrait
-	v1.BuilderTrait `property:",squash"`
+	traitv1.BuilderTrait `property:",squash"`
 }
 
 func newBuilderTrait() Trait {

@@ -27,6 +27,7 @@ import (
 	base64 "encoding/base64"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/registry"
@@ -38,7 +39,7 @@ import (
 
 type registryTrait struct {
 	BaseTrait
-	v1.RegistryTrait
+	traitv1.RegistryTrait
 }
 
 func newRegistryTrait() Trait {

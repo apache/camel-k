@@ -29,6 +29,7 @@ import (
 
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	knativeapis "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/test"
 
@@ -184,7 +185,7 @@ func TestBindings(t *testing.T) {
 			},
 			uri: "knative:endpoint/sink?ce.override.ce-type=mytype",
 			traits: camelv1.Traits{
-				Knative: &camelv1.KnativeTrait{
+				Knative: &traitv1.KnativeTrait{
 					SinkBinding:   pointer.Bool(false),
 					Configuration: asKnativeConfig("https://myurl/hey"),
 				},

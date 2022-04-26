@@ -31,13 +31,13 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/patch"
 )
 
 type deployerTrait struct {
 	BaseTrait
-	v1.DeployerTrait `property:",squash"`
+	traitv1.DeployerTrait `property:",squash"`
 }
 
 var _ ControllerStrategySelector = &deployerTrait{}

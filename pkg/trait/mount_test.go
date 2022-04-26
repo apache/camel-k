@@ -28,6 +28,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/gzip"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -154,7 +155,7 @@ func getNominalEnv(t *testing.T, traitCatalog *Catalog) *Environment {
 					},
 				},
 				Traits: v1.Traits{
-					Mount: &v1.MountTrait{
+					Mount: &traitv1.MountTrait{
 						Configs:   []string{"configmap:my-cm"},
 						Resources: []string{"secret:my-secret"},
 						Volumes:   []string{"my-pvc:/over/the/rainbow"},

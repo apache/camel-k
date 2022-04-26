@@ -30,6 +30,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -320,7 +321,7 @@ func TestCronDepsFallback(t *testing.T) {
 				},
 				Resources: []v1.ResourceSpec{},
 				Traits: v1.Traits{
-					Cron: &v1.CronTrait{
+					Cron: &traitv1.CronTrait{
 						Fallback: pointer.Bool(true),
 					},
 				},
@@ -395,7 +396,7 @@ func TestCronWithActiveDeadline(t *testing.T) {
 				},
 				Resources: []v1.ResourceSpec{},
 				Traits: v1.Traits{
-					Cron: &v1.CronTrait{
+					Cron: &traitv1.CronTrait{
 						ActiveDeadlineSeconds: pointer.Int64(120),
 					},
 				},
@@ -468,7 +469,7 @@ func TestCronWithBackoffLimit(t *testing.T) {
 				},
 				Resources: []v1.ResourceSpec{},
 				Traits: v1.Traits{
-					Cron: &v1.CronTrait{
+					Cron: &traitv1.CronTrait{
 						BackoffLimit: pointer.Int32(5),
 					},
 				},

@@ -30,6 +30,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/property"
@@ -37,7 +38,7 @@ import (
 
 type camelTrait struct {
 	BaseTrait
-	v1.CamelTrait `property:",squash"`
+	traitv1.CamelTrait `property:",squash"`
 }
 
 func newCamelTrait() Trait {

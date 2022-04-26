@@ -38,6 +38,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/digest"
@@ -49,7 +50,7 @@ import (
 
 type openAPITrait struct {
 	BaseTrait
-	v1.OpenAPITrait `property:",squash"`
+	traitv1.OpenAPITrait `property:",squash"`
 }
 
 func newOpenAPITrait() Trait {

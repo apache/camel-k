@@ -25,11 +25,12 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 )
 
 type ownerTrait struct {
 	BaseTrait
-	v1.OwnerTrait `property:",squash"`
+	traitv1.OwnerTrait `property:",squash"`
 }
 
 func newOwnerTrait() Trait {

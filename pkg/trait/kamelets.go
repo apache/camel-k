@@ -29,6 +29,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	kameletutils "github.com/apache/camel-k/pkg/kamelet"
 	"github.com/apache/camel-k/pkg/kamelet/repository"
@@ -41,7 +42,7 @@ import (
 
 type kameletsTrait struct {
 	BaseTrait
-	v1.KameletsTrait `property:",squash"`
+	traitv1.KameletsTrait `property:",squash"`
 }
 
 type configurationKey struct {

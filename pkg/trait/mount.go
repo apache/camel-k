@@ -31,13 +31,14 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	utilResource "github.com/apache/camel-k/pkg/util/resource"
 )
 
 type mountTrait struct {
 	BaseTrait
-	v1.MountTrait `property:",squash"`
+	traitv1.MountTrait `property:",squash"`
 }
 
 func newMountTrait() Trait {

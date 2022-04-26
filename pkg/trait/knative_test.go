@@ -35,6 +35,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/envvar"
@@ -64,8 +65,8 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 				Sources:   []v1.SourceSpec{},
 				Resources: []v1.ResourceSpec{},
 				Traits: v1.Traits{
-					Knative: &v1.KnativeTrait{
-						Trait: v1.Trait{
+					Knative: &traitv1.KnativeTrait{
+						Trait: traitv1.Trait{
 							Enabled: pointer.Bool(true),
 						},
 						Auto:            pointer.Bool(false),
@@ -192,8 +193,8 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 				},
 				Resources: []v1.ResourceSpec{},
 				Traits: v1.Traits{
-					Knative: &v1.KnativeTrait{
-						Trait: v1.Trait{
+					Knative: &traitv1.KnativeTrait{
+						Trait: traitv1.Trait{
 							Enabled: pointer.Bool(true),
 						},
 					},
@@ -379,8 +380,8 @@ func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 				},
 				Resources: []v1.ResourceSpec{},
 				Traits: v1.Traits{
-					Knative: &v1.KnativeTrait{
-						Trait: v1.Trait{
+					Knative: &traitv1.KnativeTrait{
+						Trait: traitv1.Trait{
 							Enabled: pointer.Bool(true),
 						},
 					},

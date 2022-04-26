@@ -28,6 +28,7 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/label"
@@ -48,7 +49,7 @@ const (
 
 type knativeServiceTrait struct {
 	BaseTrait
-	v1.KnativeServiceTrait `property:",squash"`
+	traitv1.KnativeServiceTrait `property:",squash"`
 }
 
 var _ ControllerStrategySelector = &knativeServiceTrait{}

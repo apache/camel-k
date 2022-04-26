@@ -32,13 +32,14 @@ import (
 	"github.com/redhat-developer/service-binding-operator/pkg/reconcile/pipeline/handler/naming"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/reference"
 )
 
 type serviceBindingTrait struct {
 	BaseTrait
-	v1.ServiceBindingTrait `property:",squash"`
+	traitv1.ServiceBindingTrait `property:",squash"`
 }
 
 func newServiceBindingTrait() Trait {

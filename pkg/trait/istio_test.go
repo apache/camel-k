@@ -30,6 +30,7 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
@@ -66,8 +67,8 @@ func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service, ena
 	env.Platform.ResyncStatusFullConfig()
 
 	if enabled {
-		env.Integration.Spec.Traits.Istio = &v1.IstioTrait{
-			Trait: v1.Trait{
+		env.Integration.Spec.Traits.Istio = &traitv1.IstioTrait{
+			Trait: traitv1.Trait{
 				Enabled: pointer.Bool(true),
 			},
 		}

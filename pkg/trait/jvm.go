@@ -37,6 +37,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -45,13 +46,13 @@ import (
 
 type jvmTrait struct {
 	BaseTrait
-	v1.JVMTrait `property:",squash"`
+	traitv1.JVMTrait `property:",squash"`
 }
 
 func newJvmTrait() Trait {
 	return &jvmTrait{
 		BaseTrait: NewBaseTrait("jvm", 2000),
-		JVMTrait: v1.JVMTrait{
+		JVMTrait: traitv1.JVMTrait{
 			DebugAddress: "*:5005",
 			PrintCommand: pointer.Bool(true),
 		},

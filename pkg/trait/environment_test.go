@@ -28,6 +28,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
@@ -82,7 +83,7 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 
 	env := mockEnvironment(c)
 	env.Integration.Spec.Traits = v1.Traits{
-		Environment: &v1.EnvironmentTrait{
+		Environment: &traitv1.EnvironmentTrait{
 			ContainerMeta: pointer.Bool(true),
 		},
 	}
@@ -121,7 +122,7 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 
 	env := mockEnvironment(c)
 	env.Integration.Spec.Traits = v1.Traits{
-		Environment: &v1.EnvironmentTrait{
+		Environment: &traitv1.EnvironmentTrait{
 			ContainerMeta: pointer.Bool(false),
 		},
 	}
@@ -161,7 +162,7 @@ func TestCustomEnvVars(t *testing.T) {
 
 	env := mockEnvironment(c)
 	env.Integration.Spec.Traits = v1.Traits{
-		Environment: &v1.EnvironmentTrait{
+		Environment: &traitv1.EnvironmentTrait{
 			Vars: []string{"key1=val1", "key2 = val2"},
 		},
 	}

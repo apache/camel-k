@@ -28,6 +28,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
@@ -55,7 +56,7 @@ func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint b
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileOpenShift,
 				Traits: v1.Traits{
-					Logging: &v1.LoggingTrait{
+					Logging: &traitv1.LoggingTrait{
 						Color:           pointer.Bool(color),
 						Format:          logFormat,
 						JSON:            pointer.Bool(json),

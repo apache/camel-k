@@ -30,11 +30,12 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 )
 
 type podTrait struct {
 	BaseTrait
-	v1.PodTrait `property:",squash"`
+	traitv1.PodTrait `property:",squash"`
 }
 
 func newPodTrait() Trait {

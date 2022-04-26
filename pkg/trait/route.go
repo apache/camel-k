@@ -30,13 +30,14 @@ import (
 	routev1 "github.com/openshift/api/route/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 type routeTrait struct {
 	BaseTrait
-	v1.RouteTrait `property:",squash"`
-	service       *corev1.Service
+	traitv1.RouteTrait `property:",squash"`
+	service            *corev1.Service
 }
 
 func newRouteTrait() Trait {

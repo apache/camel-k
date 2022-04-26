@@ -38,6 +38,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/envvar"
@@ -47,7 +48,7 @@ import (
 
 type knativeTrait struct {
 	BaseTrait
-	v1.KnativeTrait `property:",squash"`
+	traitv1.KnativeTrait `property:",squash"`
 }
 
 const (

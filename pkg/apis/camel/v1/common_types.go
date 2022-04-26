@@ -20,6 +20,8 @@ package v1
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 )
 
 const (
@@ -104,71 +106,71 @@ type FailureRecovery struct {
 // Traits represents the collection of trait configurations
 type Traits struct {
 	// The configuration of Affinity trait
-	Affinity *AffinityTrait `property:"affinity" json:"affinity,omitempty"`
+	Affinity *trait.AffinityTrait `property:"affinity" json:"affinity,omitempty"`
 	// The configuration of Builder trait
-	Builder *BuilderTrait `property:"builder" json:"builder,omitempty"`
+	Builder *trait.BuilderTrait `property:"builder" json:"builder,omitempty"`
 	// The configuration of Camel trait
-	Camel *CamelTrait `property:"camel" json:"camel,omitempty"`
+	Camel *trait.CamelTrait `property:"camel" json:"camel,omitempty"`
 	// The configuration of Container trait
-	Container *ContainerTrait `property:"container" json:"container,omitempty"`
+	Container *trait.ContainerTrait `property:"container" json:"container,omitempty"`
 	// The configuration of Cron trait
-	Cron *CronTrait `property:"cron" json:"cron,omitempty"`
+	Cron *trait.CronTrait `property:"cron" json:"cron,omitempty"`
 	// The configuration of Dependencies trait
-	Dependencies *DependenciesTrait `property:"dependencies" json:"dependencies,omitempty"`
+	Dependencies *trait.DependenciesTrait `property:"dependencies" json:"dependencies,omitempty"`
 	// The configuration of Deployer trait
-	Deployer *DeployerTrait `property:"deployer" json:"deployer,omitempty"`
+	Deployer *trait.DeployerTrait `property:"deployer" json:"deployer,omitempty"`
 	// The configuration of Deployment trait
-	Deployment *DeploymentTrait `property:"deployment" json:"deployment,omitempty"`
+	Deployment *trait.DeploymentTrait `property:"deployment" json:"deployment,omitempty"`
 	// The configuration of Environment trait
-	Environment *EnvironmentTrait `property:"environment" json:"environment,omitempty"`
+	Environment *trait.EnvironmentTrait `property:"environment" json:"environment,omitempty"`
 	// The configuration of Error Handler trait
-	ErrorHandler *ErrorHandlerTrait `property:"error-handler" json:"error-handler,omitempty"`
+	ErrorHandler *trait.ErrorHandlerTrait `property:"error-handler" json:"error-handler,omitempty"`
 	// The configuration of GC trait
-	GC *GCTrait `property:"gc" json:"gc,omitempty"`
+	GC *trait.GCTrait `property:"gc" json:"gc,omitempty"`
 	// The configuration of Health trait
-	Health *HealthTrait `property:"health" json:"health,omitempty"`
+	Health *trait.HealthTrait `property:"health" json:"health,omitempty"`
 	// The configuration of Ingress trait
-	Ingress *IngressTrait `property:"ingress" json:"ingress,omitempty"`
+	Ingress *trait.IngressTrait `property:"ingress" json:"ingress,omitempty"`
 	// The configuration of Istio trait
-	Istio *IstioTrait `property:"istio" json:"istio,omitempty"`
+	Istio *trait.IstioTrait `property:"istio" json:"istio,omitempty"`
 	// The configuration of Jolokia trait
-	Jolokia *JolokiaTrait `property:"jolokia" json:"jolokia,omitempty"`
+	Jolokia *trait.JolokiaTrait `property:"jolokia" json:"jolokia,omitempty"`
 	// The configuration of JVM trait
-	JVM *JVMTrait `property:"jvm" json:"jvm,omitempty"`
+	JVM *trait.JVMTrait `property:"jvm" json:"jvm,omitempty"`
 	// The configuration of Knative trait
-	Knative *KnativeTrait `property:"knative" json:"knative,omitempty"`
+	Knative *trait.KnativeTrait `property:"knative" json:"knative,omitempty"`
 	// The configuration of Knative Service trait
-	KnativeService *KnativeServiceTrait `property:"knative-service" json:"knative-service,omitempty"`
+	KnativeService *trait.KnativeServiceTrait `property:"knative-service" json:"knative-service,omitempty"`
 	// The configuration of Logging trait
-	Logging *LoggingTrait `property:"logging" json:"logging,omitempty"`
+	Logging *trait.LoggingTrait `property:"logging" json:"logging,omitempty"`
 	// The configuration of Mount trait
-	Mount *MountTrait `property:"mount" json:"mount,omitempty"`
+	Mount *trait.MountTrait `property:"mount" json:"mount,omitempty"`
 	// The configuration of OpenAPI trait
-	OpenAPI *OpenAPITrait `property:"openapi" json:"openapi,omitempty"`
+	OpenAPI *trait.OpenAPITrait `property:"openapi" json:"openapi,omitempty"`
 	// The configuration of Owner trait
-	Owner *OwnerTrait `property:"owner" json:"owner,omitempty"`
+	Owner *trait.OwnerTrait `property:"owner" json:"owner,omitempty"`
 	// The configuration of PDB trait
-	PDB *PDBTrait `property:"pdb" json:"pdb,omitempty"`
+	PDB *trait.PDBTrait `property:"pdb" json:"pdb,omitempty"`
 	// The configuration of Platform trait
-	Platform *PlatformTrait `property:"platform" json:"platform,omitempty"`
+	Platform *trait.PlatformTrait `property:"platform" json:"platform,omitempty"`
 	// The configuration of Pod trait
-	Pod *PodTrait `property:"pod" json:"pod,omitempty"`
+	Pod *trait.PodTrait `property:"pod" json:"pod,omitempty"`
 	// The configuration of Prometheus trait
-	Prometheus *PrometheusTrait `property:"prometheus" json:"prometheus,omitempty"`
+	Prometheus *trait.PrometheusTrait `property:"prometheus" json:"prometheus,omitempty"`
 	// The configuration of Pull Secret trait
-	PullSecret *PullSecretTrait `property:"pull-secret" json:"pull-secret,omitempty"`
+	PullSecret *trait.PullSecretTrait `property:"pull-secret" json:"pull-secret,omitempty"`
 	// The configuration of Quarkus trait
-	Quarkus *QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
+	Quarkus *trait.QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
 	// The configuration of Registry trait
-	Registry *RegistryTrait `property:"registry" json:"registry,omitempty"`
+	Registry *trait.RegistryTrait `property:"registry" json:"registry,omitempty"`
 	// The configuration of Route trait
-	Route *RouteTrait `property:"route" json:"route,omitempty"`
+	Route *trait.RouteTrait `property:"route" json:"route,omitempty"`
 	// The configuration of Service trait
-	Service *ServiceTrait `property:"service" json:"service,omitempty"`
+	Service *trait.ServiceTrait `property:"service" json:"service,omitempty"`
 	// The configuration of Service Binding trait
-	ServiceBinding *ServiceBindingTrait `property:"service-binding" json:"service-binding,omitempty"`
+	ServiceBinding *trait.ServiceBindingTrait `property:"service-binding" json:"service-binding,omitempty"`
 	// The configuration of Toleration trait
-	Toleration *TolerationTrait `property:"toleration" json:"toleration,omitempty"`
+	Toleration *trait.TolerationTrait `property:"toleration" json:"toleration,omitempty"`
 }
 
 // +kubebuilder:validation:Type=object
