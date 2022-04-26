@@ -19,9 +19,7 @@
 
 name: camel-k
 title: Camel K
-version: next
-prerelease: true
-display-version: Next (Pre-release)
+version: 1.9.x
 nav:
 - modules/ROOT/nav.adoc
 - modules/languages/nav-languages.adoc
