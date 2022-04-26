@@ -32,16 +32,16 @@ asciidoc:
   attributes:
     requires: "'util=camel-website-util,ck=xref:js/ck.js'"
     prerelease: true
-    camel-kamelets-version: 0.7.1 # Makefile KAMELET_CATALOG_REPO_BRANCH
-    camel-kamelets-docs-version: 0.7.x # Makefile KAMELET_CATALOG_REPO_BRANCH
-    camel-k-runtime-version: 1.12.0 # Makefile RUNTIME_VERSION
+    camel-kamelets-version: 0.8.0 # Makefile KAMELET_CATALOG_REPO_BRANCH
+    camel-kamelets-docs-version: 0.8.x # Makefile KAMELET_CATALOG_REPO_BRANCH
+    camel-k-runtime-version: 1.13.0 # Makefile RUNTIME_VERSION
     camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # Makefile BUNDLE_CAMEL_APIS
     # from camel-k-runtime parent pom:
-    camel-version: 3.14.1
-    camel-docs-version: 3.14.x
-    camel-quarkus-version: 2.7.0
-    camel-quarkus-docs-version: 2.7.x
-    quarkus-version: 2.7.0.Final
-    graalvm-version: 21.3.0
-    graalvm-docs-version: 21.3
+    camel-version: 3.16.0
+    camel-docs-version: 3.16.x
+    camel-quarkus-version: 2.8.0
+    camel-quarkus-docs-version: 2.8.x
+    quarkus-version: 2.8.0.Final
+    graalvm-version: 22.0.0
+    graalvm-docs-version: 22.0
 
