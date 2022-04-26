@@ -25,6 +25,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	knativeapis "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/uri"
 )
@@ -83,7 +84,7 @@ func (k KnativeURIBindingProvider) Translate(ctx BindingContext, endpointCtx End
 	return &Binding{
 		URI: serviceURI,
 		Traits: v1.Traits{
-			Knative: &v1.KnativeTrait{
+			Knative: &traitv1.KnativeTrait{
 				Configuration: config,
 				SinkBinding:   pointer.Bool(false),
 			},

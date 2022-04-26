@@ -26,13 +26,14 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util"
 )
 
 type errorHandlerTrait struct {
 	BaseTrait
-	v1.ErrorHandlerTrait `property:",squash"`
+	traitv1.ErrorHandlerTrait `property:",squash"`
 }
 
 func newErrorHandlerTrait() Trait {

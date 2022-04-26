@@ -44,6 +44,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util"
 )
 
@@ -59,7 +60,7 @@ var (
 
 type gcTrait struct {
 	BaseTrait
-	v1.GCTrait `property:",squash"`
+	traitv1.GCTrait `property:",squash"`
 }
 
 func newGCTrait() Trait {
@@ -74,7 +75,7 @@ func (t *gcTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	if t.DiscoveryCache == nil {
-		s := v1.MemoryDiscoveryCache
+		s := traitv1.MemoryDiscoveryCache
 		t.DiscoveryCache = &s
 	}
 
@@ -244,7 +245,7 @@ func (t *gcTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind
 
 func (t *gcTrait) discoveryClient() (discovery.DiscoveryInterface, error) {
 	switch *t.DiscoveryCache {
-	case v1.DiskDiscoveryCache:
+	case traitv1.DiskDiscoveryCache:
 		if diskCachedDiscovery != nil {
 			return diskCachedDiscovery, nil
 		}
@@ -255,14 +256,14 @@ func (t *gcTrait) discoveryClient() (discovery.DiscoveryInterface, error) {
 		diskCachedDiscovery, err = disk.NewCachedDiscoveryClientForConfig(config, diskCacheDir, httpCacheDir, 10*time.Minute)
 		return diskCachedDiscovery, err
 
-	case v1.MemoryDiscoveryCache:
+	case traitv1.MemoryDiscoveryCache:
 		if memoryCachedDiscovery != nil {
 			return memoryCachedDiscovery, nil
 		}
 		memoryCachedDiscovery = memory.NewMemCacheClient(t.Client.Discovery())
 		return memoryCachedDiscovery, nil
 
-	case v1.DisabledDiscoveryCache, "":
+	case traitv1.DisabledDiscoveryCache, "":
 		return t.Client.Discovery(), nil
 
 	default:

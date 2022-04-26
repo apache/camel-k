@@ -26,6 +26,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
@@ -53,7 +54,7 @@ func TestProbesDependencies(t *testing.T) {
 	integration := &v1.Integration{
 		Spec: v1.IntegrationSpec{
 			Traits: v1.Traits{
-				Container: &v1.ContainerTrait{
+				Container: &traitv1.ContainerTrait{
 					DeprecatedProbesEnabled: pointer.Bool(true),
 				},
 			},
@@ -73,7 +74,7 @@ func TestProbesOnDeployment(t *testing.T) {
 	integration := &v1.Integration{
 		Spec: v1.IntegrationSpec{
 			Traits: v1.Traits{
-				Container: &v1.ContainerTrait{
+				Container: &traitv1.ContainerTrait{
 					DeprecatedProbesEnabled:   pointer.Bool(true),
 					Expose:                    pointer.Bool(true),
 					DeprecatedLivenessTimeout: 1234,
@@ -105,7 +106,7 @@ func TestProbesOnDeploymentWithCustomScheme(t *testing.T) {
 	integration := &v1.Integration{
 		Spec: v1.IntegrationSpec{
 			Traits: v1.Traits{
-				Container: &v1.ContainerTrait{
+				Container: &traitv1.ContainerTrait{
 					DeprecatedProbesEnabled:   pointer.Bool(true),
 					Expose:                    pointer.Bool(true),
 					DeprecatedLivenessTimeout: 1234,
@@ -140,12 +141,12 @@ func TestProbesOnKnativeService(t *testing.T) {
 		Spec: v1.IntegrationSpec{
 			Profile: v1.TraitProfileKnative,
 			Traits: v1.Traits{
-				KnativeService: &v1.KnativeServiceTrait{
-					Trait: v1.Trait{
+				KnativeService: &traitv1.KnativeServiceTrait{
+					Trait: traitv1.Trait{
 						Enabled: pointer.Bool(true),
 					},
 				},
-				Container: &v1.ContainerTrait{
+				Container: &traitv1.ContainerTrait{
 					DeprecatedProbesEnabled:   pointer.Bool(true),
 					Expose:                    pointer.Bool(true),
 					DeprecatedLivenessTimeout: 1234,

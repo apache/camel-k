@@ -23,13 +23,13 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/pointer"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 type tolerationTrait struct {
 	BaseTrait
-	v1.TolerationTrait `property:",squash"`
+	traitv1.TolerationTrait `property:",squash"`
 }
 
 func newTolerationTrait() Trait {

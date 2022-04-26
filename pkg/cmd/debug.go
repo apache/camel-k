@@ -24,6 +24,7 @@ import (
 	"syscall"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
@@ -133,7 +134,7 @@ func (o *debugCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 func (o *debugCmdOptions) toggleDebug(c camelv1.IntegrationsGetter, it *v1.Integration, active bool) (*v1.Integration, error) {
 	if it.Spec.Traits.JVM == nil {
-		it.Spec.Traits.JVM = &v1.JVMTrait{}
+		it.Spec.Traits.JVM = &traitv1.JVMTrait{}
 	}
 	jvmTrait := it.Spec.Traits.JVM
 

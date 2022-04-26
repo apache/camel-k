@@ -26,6 +26,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 )
 
 func TestOwner(t *testing.T) {
@@ -44,7 +45,7 @@ func SetUpOwnerEnvironment(t *testing.T) *Environment {
 
 	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "camel:core")
 	env.Integration.Spec.Traits = v1.Traits{
-		Owner: &v1.OwnerTrait{
+		Owner: &traitv1.OwnerTrait{
 			TargetLabels:      []string{"com.mycompany/mylabel1"},
 			TargetAnnotations: []string{"com.mycompany/myannotation2"},
 		},

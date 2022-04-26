@@ -26,18 +26,19 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util"
 )
 
 type jolokiaTrait struct {
 	BaseTrait
-	v1.JolokiaTrait `property:",squash"`
+	traitv1.JolokiaTrait `property:",squash"`
 }
 
 func newJolokiaTrait() Trait {
 	return &jolokiaTrait{
 		BaseTrait: NewBaseTrait("jolokia", 1800),
-		JolokiaTrait: v1.JolokiaTrait{
+		JolokiaTrait: traitv1.JolokiaTrait{
 			Port: 8778,
 		},
 	}

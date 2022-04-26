@@ -22,13 +22,14 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 type platformTrait struct {
 	BaseTrait
-	v1.PlatformTrait `property:",squash"`
+	traitv1.PlatformTrait `property:",squash"`
 }
 
 func newPlatformTrait() Trait {

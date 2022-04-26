@@ -26,6 +26,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 )
 
 func TestTraitConfigurationFromAnnotations(t *testing.T) {
@@ -40,7 +41,7 @@ func TestTraitConfigurationFromAnnotations(t *testing.T) {
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
-					Cron: &v1.CronTrait{
+					Cron: &traitv1.CronTrait{
 						Fallback:          pointer.Bool(true),
 						ConcurrencyPolicy: "mypolicy",
 					},
@@ -83,7 +84,7 @@ func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
 			},
 			Spec: v1.IntegrationPlatformSpec{
 				Traits: v1.Traits{
-					Cron: &v1.CronTrait{
+					Cron: &traitv1.CronTrait{
 						Components:        "cmp1",
 						Schedule:          "schedule1",
 						ConcurrencyPolicy: "policy1",
@@ -101,7 +102,7 @@ func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
 			},
 			Spec: v1.IntegrationKitSpec{
 				Traits: v1.IntegrationKitTraits{
-					Builder: &v1.BuilderTrait{
+					Builder: &traitv1.BuilderTrait{
 						Verbose: pointer.Bool(false),
 					},
 				},
@@ -117,7 +118,7 @@ func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
-					Cron: &v1.CronTrait{
+					Cron: &traitv1.CronTrait{
 						ConcurrencyPolicy: "policy3",
 					},
 				},

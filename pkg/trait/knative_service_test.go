@@ -29,6 +29,7 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/gzip"
@@ -89,8 +90,8 @@ func TestKnativeService(t *testing.T) {
 					{Type: "property", Value: "my-property=my-property-value"},
 				},
 				Traits: v1.Traits{
-					KnativeService: &v1.KnativeServiceTrait{
-						Trait: v1.Trait{
+					KnativeService: &traitv1.KnativeServiceTrait{
+						Trait: traitv1.Trait{
 							Enabled: pointer.Bool(true),
 						},
 					},
@@ -205,16 +206,16 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKnative,
 				Traits: v1.Traits{
-					Deployer: &v1.DeployerTrait{
+					Deployer: &traitv1.DeployerTrait{
 						Kind: "knative-service",
 					},
-					KnativeService: &v1.KnativeServiceTrait{
-						Trait: v1.Trait{
+					KnativeService: &traitv1.KnativeServiceTrait{
+						Trait: traitv1.Trait{
 							Enabled: pointer.Bool(true),
 						},
 						Auto: pointer.Bool(false),
 					},
-					Container: &v1.ContainerTrait{
+					Container: &traitv1.ContainerTrait{
 						Name: "my-container-name",
 					},
 				},
@@ -365,7 +366,7 @@ func TestKnativeServiceWithRollout(t *testing.T) {
 					},
 				},
 				Traits: v1.Traits{
-					KnativeService: &v1.KnativeServiceTrait{
+					KnativeService: &traitv1.KnativeServiceTrait{
 						RolloutDuration: "60s",
 					},
 				},

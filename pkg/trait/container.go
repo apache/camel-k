@@ -31,6 +31,7 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
@@ -48,13 +49,13 @@ const (
 
 type containerTrait struct {
 	BaseTrait
-	v1.ContainerTrait `property:",squash"`
+	traitv1.ContainerTrait `property:",squash"`
 }
 
 func newContainerTrait() Trait {
 	return &containerTrait{
 		BaseTrait: NewBaseTrait(containerTraitID, 1600),
-		ContainerTrait: v1.ContainerTrait{
+		ContainerTrait: traitv1.ContainerTrait{
 			Port:                      defaultContainerPort,
 			ServicePort:               defaultServicePort,
 			ServicePortName:           defaultContainerPortName,

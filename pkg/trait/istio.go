@@ -20,16 +20,17 @@ package trait
 import (
 	"strconv"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/utils/pointer"
 
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 )
 
 type istioTrait struct {
 	BaseTrait
-	v1.IstioTrait `property:",squash"`
+	traitv1.IstioTrait `property:",squash"`
 }
 
 const (
@@ -40,7 +41,7 @@ const (
 func newIstioTrait() Trait {
 	return &istioTrait{
 		BaseTrait: NewBaseTrait("istio", 2300),
-		IstioTrait: v1.IstioTrait{
+		IstioTrait: traitv1.IstioTrait{
 			Allow: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
 		},
 	}

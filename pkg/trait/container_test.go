@@ -31,6 +31,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
@@ -111,7 +112,7 @@ func TestContainerWithCustomName(t *testing.T) {
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
-					Container: &v1.ContainerTrait{
+					Container: &traitv1.ContainerTrait{
 						Name: "my-container-name",
 					},
 				},
@@ -177,7 +178,7 @@ func TestContainerWithCustomImage(t *testing.T) {
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
-					Container: &v1.ContainerTrait{
+					Container: &traitv1.ContainerTrait{
 						Image: "foo/bar:1.0.0",
 					},
 				},
@@ -248,7 +249,7 @@ func TestContainerWithCustomImageAndIntegrationKit(t *testing.T) {
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
-					Container: &v1.ContainerTrait{
+					Container: &traitv1.ContainerTrait{
 						Image: "foo/bar:1.0.0",
 					},
 				},
@@ -294,7 +295,7 @@ func TestContainerWithImagePullPolicy(t *testing.T) {
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
-					Container: &v1.ContainerTrait{
+					Container: &traitv1.ContainerTrait{
 						ImagePullPolicy: "Always",
 					},
 				},

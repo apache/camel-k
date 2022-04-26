@@ -29,7 +29,7 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/openshift"
@@ -37,7 +37,7 @@ import (
 
 type pullSecretTrait struct {
 	BaseTrait
-	v1.PullSecretTrait `property:",squash"`
+	traitv1.PullSecretTrait `property:",squash"`
 }
 
 func newPullSecretTrait() Trait {

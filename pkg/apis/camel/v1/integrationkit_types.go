@@ -20,6 +20,8 @@ package v1
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 )
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
@@ -67,8 +69,12 @@ type IntegrationKitSpec struct {
 
 // IntegrationKitTraits defines traits assigned to an `IntegrationKit`
 type IntegrationKitTraits struct {
-	Builder *BuilderTrait `property:"builder" json:"builder,omitempty"`
-	Quarkus *QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
+	// The builder trait is internally used to determine the best strategy to build and configure IntegrationKits.
+	Builder *trait.BuilderTrait `property:"builder" json:"builder,omitempty"`
+	// The Quarkus trait configures the Quarkus runtime.
+	// It's enabled by default.
+	// NOTE: Compiling to a native executable, i.e. when using `package-type=native`, is only supported for kamelets, as well as YAML and XML integrations. It also requires at least 4GiB of memory, so the Pod running the native build, that is either the operator Pod, or the build Pod (depending on the build strategy configured for the platform), must have enough memory available.
+	Quarkus *trait.QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
 }
 
 // IntegrationKitStatus defines the observed state of IntegrationKit

@@ -29,6 +29,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -38,7 +39,7 @@ import (
 
 type cronTrait struct {
 	BaseTrait
-	v1.CronTrait `property:",squash"`
+	traitv1.CronTrait `property:",squash"`
 }
 
 var _ ControllerStrategySelector = &cronTrait{}

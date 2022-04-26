@@ -22,7 +22,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/trait"
 )
 
@@ -33,7 +33,7 @@ import (
 //
 // +camel-k:trait=3scale.
 type Trait struct {
-	v1.Trait `property:",squash" json:",inline"`
+	traitv1.Trait `property:",squash" json:",inline"`
 	// Enables automatic configuration of the trait.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The scheme to use to contact the service (default `http`)
