@@ -31,3 +31,7 @@ resources:
 
 patchesStrategicMerge:
 - patch-delete-user-cluster-role.yaml
+images:
+- name: docker.io/apache/camel-k
+  newName: docker.io/apache/camel-k
+  newTag: 1.9.0
