@@ -27,18 +27,19 @@ import (
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util"
 )
 
 type prometheusTrait struct {
 	BaseTrait
-	v1.PrometheusTrait `property:",squash"`
+	traitv1.PrometheusTrait `property:",squash"`
 }
 
 func newPrometheusTrait() Trait {
 	return &prometheusTrait{
 		BaseTrait: NewBaseTrait("prometheus", 1900),
-		PrometheusTrait: v1.PrometheusTrait{
+		PrometheusTrait: traitv1.PrometheusTrait{
 			PodMonitor: pointer.Bool(true),
 		},
 	}

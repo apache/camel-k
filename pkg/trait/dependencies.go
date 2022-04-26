@@ -23,6 +23,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -30,7 +31,7 @@ import (
 
 type dependenciesTrait struct {
 	BaseTrait
-	v1.DependenciesTrait `property:",squash"`
+	traitv1.DependenciesTrait `property:",squash"`
 }
 
 func newDependenciesTrait() Trait {

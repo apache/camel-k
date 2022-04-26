@@ -26,12 +26,13 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/label"
 )
 
 type deploymentTrait struct {
 	BaseTrait
-	v1.DeploymentTrait `property:",squash"`
+	traitv1.DeploymentTrait `property:",squash"`
 }
 
 var _ ControllerStrategySelector = &deploymentTrait{}

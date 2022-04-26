@@ -22,6 +22,7 @@ import (
 
 	"github.com/apache/camel-k/addons/tracing/discovery"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
 )
@@ -35,7 +36,7 @@ import (
 //
 // +camel-k:trait=tracing.
 type Trait struct {
-	v1.Trait `property:",squash" json:",inline"`
+	traitv1.Trait `property:",squash" json:",inline"`
 	// Enables automatic configuration of the trait, including automatic discovery of the tracing endpoint.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The name of the service that publishes tracing data (defaults to the integration name)

@@ -27,6 +27,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/test"
 )
@@ -153,8 +154,8 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 					"camel-irc",
 				},
 				Traits: v1.IntegrationKitTraits{
-					Builder: &v1.BuilderTrait{
-						Trait: v1.Trait{
+					Builder: &traitv1.BuilderTrait{
+						Trait: traitv1.Trait{
 							Enabled: pointer.Bool(false),
 						},
 					},
@@ -184,8 +185,8 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 					"camel-irc",
 				},
 				Traits: v1.IntegrationKitTraits{
-					Builder: &v1.BuilderTrait{
-						Trait: v1.Trait{
+					Builder: &traitv1.BuilderTrait{
+						Trait: traitv1.Trait{
 							Enabled: pointer.Bool(true),
 						},
 						Properties: []string{
@@ -217,8 +218,8 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 		},
 		Spec: v1.IntegrationSpec{
 			Traits: v1.Traits{
-				Builder: &v1.BuilderTrait{
-					Trait: v1.Trait{
+				Builder: &traitv1.BuilderTrait{
+					Trait: traitv1.Trait{
 						Enabled: pointer.Bool(true),
 					},
 					Properties: []string{
@@ -253,8 +254,8 @@ func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
 		},
 		Spec: v1.IntegrationSpec{
 			Traits: v1.Traits{
-				Builder: &v1.BuilderTrait{
-					Trait: v1.Trait{
+				Builder: &traitv1.BuilderTrait{
+					Trait: traitv1.Trait{
 						Enabled: pointer.Bool(true),
 					},
 				},
@@ -293,8 +294,8 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 		},
 		Spec: v1.IntegrationSpec{
 			Traits: v1.Traits{
-				Builder: &v1.BuilderTrait{
-					Trait: v1.Trait{
+				Builder: &traitv1.BuilderTrait{
+					Trait: traitv1.Trait{
 						Enabled: pointer.Bool(true),
 					},
 					Properties: []string{
@@ -316,8 +317,8 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 		},
 		Spec: v1.IntegrationKitSpec{
 			Traits: v1.IntegrationKitTraits{
-				Builder: &v1.BuilderTrait{
-					Trait: v1.Trait{
+				Builder: &traitv1.BuilderTrait{
+					Trait: traitv1.Trait{
 						Enabled: pointer.Bool(true),
 					},
 					Properties: []string{

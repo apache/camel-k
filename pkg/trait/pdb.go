@@ -26,11 +26,12 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 )
 
 type pdbTrait struct {
 	BaseTrait
-	v1.PDBTrait `property:",squash"`
+	traitv1.PDBTrait `property:",squash"`
 }
 
 func newPdbTrait() Trait {

@@ -27,6 +27,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -36,14 +37,14 @@ const (
 	quarkusTraitID = "quarkus"
 )
 
-var kitPriority = map[v1.QuarkusPackageType]string{
-	v1.FastJarPackageType: "1000",
-	v1.NativePackageType:  "2000",
+var kitPriority = map[traitv1.QuarkusPackageType]string{
+	traitv1.FastJarPackageType: "1000",
+	traitv1.NativePackageType:  "2000",
 }
 
 type quarkusTrait struct {
 	BaseTrait
-	v1.QuarkusTrait `property:",squash"`
+	traitv1.QuarkusTrait `property:",squash"`
 }
 
 func newQuarkusTrait() Trait {
@@ -74,13 +75,13 @@ func (t *quarkusTrait) Matches(trait Trait) bool {
 		return false
 	}
 
-	if len(t.PackageTypes) == 0 && len(qt.PackageTypes) != 0 && !containsPackageType(qt.PackageTypes, v1.FastJarPackageType) {
+	if len(t.PackageTypes) == 0 && len(qt.PackageTypes) != 0 && !containsPackageType(qt.PackageTypes, traitv1.FastJarPackageType) {
 		return false
 	}
 
 types:
 	for _, pt := range t.PackageTypes {
-		if pt == v1.FastJarPackageType && len(qt.PackageTypes) == 0 {
+		if pt == traitv1.FastJarPackageType && len(qt.PackageTypes) == 0 {
 			continue
 		}
 		if containsPackageType(qt.PackageTypes, pt) {
@@ -105,7 +106,7 @@ func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
 
 func (t *quarkusTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) {
-		if containsPackageType(t.PackageTypes, v1.NativePackageType) {
+		if containsPackageType(t.PackageTypes, traitv1.NativePackageType) {
 			// Native compilation is only supported for a subset of languages,
 			// so let's check for compatibility, and fail-fast the Integration,
 			// to save compute resources and user time.
@@ -128,7 +129,7 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 
 		switch len(t.PackageTypes) {
 		case 0:
-			kit := t.newIntegrationKit(e, v1.FastJarPackageType)
+			kit := t.newIntegrationKit(e, traitv1.FastJarPackageType)
 			e.IntegrationKits = append(e.IntegrationKits, *kit)
 
 		case 1:
@@ -139,9 +140,9 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 			for _, packageType := range t.PackageTypes {
 				kit := t.newIntegrationKit(e, packageType)
 				if kit.Spec.Traits.Quarkus == nil {
-					kit.Spec.Traits.Quarkus = &v1.QuarkusTrait{}
+					kit.Spec.Traits.Quarkus = &traitv1.QuarkusTrait{}
 				}
-				kit.Spec.Traits.Quarkus.PackageTypes = []v1.QuarkusPackageType{packageType}
+				kit.Spec.Traits.Quarkus.PackageTypes = []traitv1.QuarkusPackageType{packageType}
 				e.IntegrationKits = append(e.IntegrationKits, *kit)
 			}
 		}
@@ -174,14 +175,14 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 		}
 
 		if native {
-			build.Maven.Properties["quarkus.package.type"] = string(v1.NativePackageType)
+			build.Maven.Properties["quarkus.package.type"] = string(traitv1.NativePackageType)
 			steps = append(steps, builder.Image.NativeImageContext)
 			// Spectrum does not rely on Dockerfile to assemble the image
 			if e.Platform.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategySpectrum {
 				steps = append(steps, builder.Image.ExecutableDockerfile)
 			}
 		} else {
-			build.Maven.Properties["quarkus.package.type"] = string(v1.FastJarPackageType)
+			build.Maven.Properties["quarkus.package.type"] = string(traitv1.FastJarPackageType)
 			steps = append(steps, builder.Quarkus.ComputeQuarkusDependencies, builder.Image.IncrementalImageContext)
 			// Spectrum does not rely on Dockerfile to assemble the image
 			if e.Platform.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategySpectrum {
@@ -211,7 +212,7 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType v1.QuarkusPackageType) *v1.IntegrationKit {
+func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType traitv1.QuarkusPackageType) *v1.IntegrationKit {
 	integration := e.Integration
 	kit := v1.NewIntegrationKit(integration.GetIntegrationKitNamespace(e.Platform), fmt.Sprintf("kit-%s", xid.New()))
 
@@ -255,7 +256,7 @@ func (t *quarkusTrait) isNativeKit(e *Environment) (bool, error) {
 	case 0:
 		return false, nil
 	case 1:
-		return types[0] == v1.NativePackageType, nil
+		return types[0] == traitv1.NativePackageType, nil
 	default:
 		return false, fmt.Errorf("kit %q has more than one package type", e.IntegrationKit.Name)
 	}
@@ -275,7 +276,7 @@ func getBuilderTask(tasks []v1.Task) *v1.BuilderTask {
 	return nil
 }
 
-func containsPackageType(types []v1.QuarkusPackageType, t v1.QuarkusPackageType) bool {
+func containsPackageType(types []traitv1.QuarkusPackageType, t traitv1.QuarkusPackageType) bool {
 	for _, ti := range types {
 		if t == ti {
 			return true

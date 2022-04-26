@@ -27,17 +27,18 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 )
 
 type ingressTrait struct {
 	BaseTrait
-	v1.IngressTrait `property:",squash"`
+	traitv1.IngressTrait `property:",squash"`
 }
 
 func newIngressTrait() Trait {
 	return &ingressTrait{
 		BaseTrait: NewBaseTrait("ingress", 2400),
-		IngressTrait: v1.IngressTrait{
+		IngressTrait: traitv1.IngressTrait{
 			Host: "",
 		},
 	}

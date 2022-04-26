@@ -26,10 +26,13 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/test"
+
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"k8s.io/utils/pointer"
 )
 
 const (
@@ -368,11 +371,11 @@ func TestConfigureTraits(t *testing.T) {
 	traitsMap, err := trait.ToMap(traits)
 	assert.Nil(t, err)
 	assert.Len(t, traitsMap, 5)
-	assertTraitConfiguration(t, traits.Affinity, &v1.AffinityTrait{PodAffinity: pointer.Bool(false)})
-	assertTraitConfiguration(t, traits.Container, &v1.ContainerTrait{DeprecatedProbesEnabled: pointer.Bool(false)})
-	assertTraitConfiguration(t, traits.Environment, &v1.EnvironmentTrait{ContainerMeta: pointer.Bool(false)})
-	assertTraitConfiguration(t, traits.JVM, &v1.JVMTrait{PrintCommand: pointer.Bool(false)})
-	assertTraitConfiguration(t, traits.Prometheus, &v1.PrometheusTrait{PodMonitor: pointer.Bool(false)})
+	assertTraitConfiguration(t, traits.Affinity, &traitv1.AffinityTrait{PodAffinity: pointer.Bool(false)})
+	assertTraitConfiguration(t, traits.Container, &traitv1.ContainerTrait{DeprecatedProbesEnabled: pointer.Bool(false)})
+	assertTraitConfiguration(t, traits.Environment, &traitv1.EnvironmentTrait{ContainerMeta: pointer.Bool(false)})
+	assertTraitConfiguration(t, traits.JVM, &traitv1.JVMTrait{PrintCommand: pointer.Bool(false)})
+	assertTraitConfiguration(t, traits.Prometheus, &traitv1.PrometheusTrait{PodMonitor: pointer.Bool(false)})
 }
 
 func assertTraitConfiguration(t *testing.T, trait interface{}, expected interface{}) {

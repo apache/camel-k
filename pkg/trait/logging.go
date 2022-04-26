@@ -20,7 +20,7 @@ package trait
 import (
 	"k8s.io/utils/pointer"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
@@ -35,13 +35,13 @@ const (
 
 type loggingTrait struct {
 	BaseTrait
-	v1.LoggingTrait `property:",squash"`
+	traitv1.LoggingTrait `property:",squash"`
 }
 
 func newLoggingTraitTrait() Trait {
 	return &loggingTrait{
 		BaseTrait: NewBaseTrait("logging", 800),
-		LoggingTrait: v1.LoggingTrait{
+		LoggingTrait: traitv1.LoggingTrait{
 			Level: defaultLogLevel,
 		},
 	}

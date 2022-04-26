@@ -22,7 +22,7 @@ import (
 
 	"k8s.io/utils/pointer"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/envvar"
@@ -31,7 +31,7 @@ import (
 
 type environmentTrait struct {
 	BaseTrait
-	v1.EnvironmentTrait `property:",squash"`
+	traitv1.EnvironmentTrait `property:",squash"`
 }
 
 const (
@@ -54,7 +54,7 @@ const (
 func newEnvironmentTrait() Trait {
 	return &environmentTrait{
 		BaseTrait: NewBaseTrait("environment", 800),
-		EnvironmentTrait: v1.EnvironmentTrait{
+		EnvironmentTrait: traitv1.EnvironmentTrait{
 			ContainerMeta: pointer.Bool(true),
 		},
 	}

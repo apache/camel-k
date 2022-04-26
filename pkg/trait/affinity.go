@@ -28,17 +28,18 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 )
 
 type affinityTrait struct {
 	BaseTrait
-	v1.AffinityTrait `property:",squash"`
+	traitv1.AffinityTrait `property:",squash"`
 }
 
 func newAffinityTrait() Trait {
 	return &affinityTrait{
 		BaseTrait: NewBaseTrait("affinity", 1500),
-		AffinityTrait: v1.AffinityTrait{
+		AffinityTrait: traitv1.AffinityTrait{
 			PodAffinity:     pointer.Bool(false),
 			PodAntiAffinity: pointer.Bool(false),
 		},

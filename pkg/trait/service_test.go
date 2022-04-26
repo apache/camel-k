@@ -28,6 +28,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/gzip"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -71,8 +72,8 @@ func TestServiceWithDefaults(t *testing.T) {
 					},
 				},
 				Traits: v1.Traits{
-					Service: &v1.ServiceTrait{
-						Trait: v1.Trait{
+					Service: &traitv1.ServiceTrait{
+						Trait: traitv1.Trait{
 							Enabled: pointer.Bool(true),
 						},
 						Auto: pointer.Bool(false),
@@ -164,13 +165,13 @@ func TestService(t *testing.T) {
 					},
 				},
 				Traits: v1.Traits{
-					Service: &v1.ServiceTrait{
-						Trait: v1.Trait{
+					Service: &traitv1.ServiceTrait{
+						Trait: traitv1.Trait{
 							Enabled: pointer.Bool(true),
 						},
 					},
-					Container: &v1.ContainerTrait{
-						Trait: v1.Trait{
+					Container: &traitv1.ContainerTrait{
+						Trait: traitv1.Trait{
 							Enabled: pointer.Bool(true),
 						},
 						Auto:            pointer.Bool(false),
@@ -252,13 +253,13 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
-					Service: &v1.ServiceTrait{
-						Trait: v1.Trait{
+					Service: &traitv1.ServiceTrait{
+						Trait: traitv1.Trait{
 							Enabled: pointer.Bool(true),
 						},
 						Auto: pointer.Bool(false),
 					},
-					Container: &v1.ContainerTrait{
+					Container: &traitv1.ContainerTrait{
 						Name: "my-container-name",
 					},
 				},
@@ -338,8 +339,8 @@ func TestServiceWithNodePort(t *testing.T) {
 					},
 				},
 				Traits: v1.Traits{
-					Service: &v1.ServiceTrait{
-						Trait: v1.Trait{
+					Service: &traitv1.ServiceTrait{
+						Trait: traitv1.Trait{
 							Enabled: pointer.Bool(true),
 						},
 						Auto:     pointer.Bool(false),

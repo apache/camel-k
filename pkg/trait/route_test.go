@@ -30,6 +30,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
@@ -219,8 +220,8 @@ func TestRoute_Disabled(t *testing.T) {
 	name := xid.New().String()
 	environment := createTestRouteEnvironment(t, name)
 	environment.Integration.Spec.Traits = v1.Traits{
-		Route: &v1.RouteTrait{
-			Trait: v1.Trait{
+		Route: &traitv1.RouteTrait{
+			Trait: traitv1.Trait{
 				Enabled: pointer.Bool(false),
 			},
 		},
@@ -260,7 +261,7 @@ func TestRoute_Host(t *testing.T) {
 	traitsCatalog := environment.Catalog
 
 	environment.Integration.Spec.Traits = v1.Traits{
-		Route: &v1.RouteTrait{
+		Route: &traitv1.RouteTrait{
 			Host: host,
 		},
 	}
@@ -286,7 +287,7 @@ func TestRoute_TLS_From_Secret_reencrypt(t *testing.T) {
 	traitsCatalog := environment.Catalog
 
 	environment.Integration.Spec.Traits = v1.Traits{
-		Route: &v1.RouteTrait{
+		Route: &traitv1.RouteTrait{
 			TLSTermination:                    string(routev1.TLSTerminationReencrypt),
 			Host:                              host,
 			TLSKeySecret:                      tlsKeySecretName,
@@ -321,7 +322,7 @@ func TestRoute_TLS_wrong_secret(t *testing.T) {
 	traitsCatalog := environment.Catalog
 
 	environment.Integration.Spec.Traits = v1.Traits{
-		Route: &v1.RouteTrait{
+		Route: &traitv1.RouteTrait{
 			TLSTermination:                    string(routev1.TLSTerminationReencrypt),
 			Host:                              host,
 			TLSKeySecret:                      "foo",
@@ -350,7 +351,7 @@ func TestRoute_TLS_secret_wrong_key(t *testing.T) {
 	traitsCatalog := environment.Catalog
 
 	environment.Integration.Spec.Traits = v1.Traits{
-		Route: &v1.RouteTrait{
+		Route: &traitv1.RouteTrait{
 			TLSTermination:         string(routev1.TLSTerminationReencrypt),
 			Host:                   host,
 			TLSKeySecret:           tlsKeySecretName,
@@ -378,7 +379,7 @@ func TestRoute_TLS_secret_missing_key(t *testing.T) {
 	traitsCatalog := environment.Catalog
 
 	environment.Integration.Spec.Traits = v1.Traits{
-		Route: &v1.RouteTrait{
+		Route: &traitv1.RouteTrait{
 			TLSTermination:         string(routev1.TLSTerminationReencrypt),
 			Host:                   host,
 			TLSKeySecret:           tlsKeySecretName,
@@ -406,7 +407,7 @@ func TestRoute_TLS_reencrypt(t *testing.T) {
 	traitsCatalog := environment.Catalog
 
 	environment.Integration.Spec.Traits = v1.Traits{
-		Route: &v1.RouteTrait{
+		Route: &traitv1.RouteTrait{
 			TLSTermination:              string(routev1.TLSTerminationReencrypt),
 			Host:                        host,
 			TLSKey:                      key,
@@ -441,7 +442,7 @@ func TestRoute_TLS_edge(t *testing.T) {
 	traitsCatalog := environment.Catalog
 
 	environment.Integration.Spec.Traits = v1.Traits{
-		Route: &v1.RouteTrait{
+		Route: &traitv1.RouteTrait{
 			TLSTermination:   string(routev1.TLSTerminationEdge),
 			Host:             host,
 			TLSKey:           key,
@@ -475,7 +476,7 @@ func TestRoute_TLS_passthrough(t *testing.T) {
 	traitsCatalog := environment.Catalog
 
 	environment.Integration.Spec.Traits = v1.Traits{
-		Route: &v1.RouteTrait{
+		Route: &traitv1.RouteTrait{
 			TLSTermination:                   string(routev1.TLSTerminationPassthrough),
 			Host:                             host,
 			TLSInsecureEdgeTerminationPolicy: string(routev1.InsecureEdgeTerminationPolicyAllow),
@@ -505,7 +506,7 @@ func TestRoute_WithCustomServicePort(t *testing.T) {
 	name := xid.New().String()
 	environment := createTestRouteEnvironment(t, name)
 	environment.Integration.Spec.Traits = v1.Traits{
-		Container: &v1.ContainerTrait{
+		Container: &traitv1.ContainerTrait{
 			ServicePortName: "my-port",
 		},
 	}

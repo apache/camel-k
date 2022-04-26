@@ -26,6 +26,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util"
 )
 
@@ -36,13 +37,13 @@ const (
 
 type healthTrait struct {
 	BaseTrait
-	v1.HealthTrait `property:",squash"`
+	traitv1.HealthTrait `property:",squash"`
 }
 
 func newHealthTrait() Trait {
 	return &healthTrait{
 		BaseTrait: NewBaseTrait("health", 1700),
-		HealthTrait: v1.HealthTrait{
+		HealthTrait: traitv1.HealthTrait{
 			LivenessScheme:  string(corev1.URISchemeHTTP),
 			ReadinessScheme: string(corev1.URISchemeHTTP),
 		},
