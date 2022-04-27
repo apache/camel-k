@@ -8,6 +8,7 @@
 
 - Jitpack example deployment fails [\#3207](https://github.com/apache/camel-k/issues/3207)
 - `Kamel kit create` to use mount/camel traits [\#2915](https://github.com/apache/camel-k/issues/2915)
+- Make knative broker name configurable [\#2864](https://github.com/apache/camel-k/issues/2864)
 - Camel K CLI asks for an OpenAPI v2 when also v3 is supported [\#2238](https://github.com/apache/camel-k/issues/2238)
 - Traits to configure the container image and location fo the sources [\#2232](https://github.com/apache/camel-k/issues/2232)
 - Lower priority of modeline options [\#1843](https://github.com/apache/camel-k/issues/1843)
