@@ -113,11 +113,28 @@ if [ -n "${BUILD_CATALOG_SOURCE}" ]; then
   #
   # Check catalog source is actually available
   #
-  STATE=$(kubectl get catalogsource ${BUILD_CATALOG_SOURCE} -n ${IMAGE_NAMESPACE} -o=jsonpath='{.status.connectionState.lastObservedState}')
-  if [ "${STATE}" != "READY" ]; then
-    echo "Error: catalog source status is not ready."
-    exit 1
-  fi
+  timeout=5
+  catalog_ready=0
+  until [ ${catalog_ready} -eq 1 ] || [ ${timeout} -eq 0 ]
+  do
+    echo "Info: Awaiting catalog source to become ready"
+    let timeout=${timeout}-1
+
+    STATE=$(kubectl get catalogsource ${BUILD_CATALOG_SOURCE} -n ${IMAGE_NAMESPACE} -o=jsonpath='{.status.connectionState.lastObservedState}')
+    if [ "${STATE}" == "READY" ]; then
+      let catalog_ready=1
+      echo "Info: Catalog source is ready"
+      continue
+    else
+      echo "Warning: catalog source status is not ready."
+      if [ ${timeout} -eq 0 ]; then
+        echo "Error: timedout while awaiting catalog source to start"
+        exit 1
+      fi
+    fi
+
+    sleep 1m
+  done
 
   export KAMEL_INSTALL_OLM_SOURCE_NAMESPACE=${IMAGE_NAMESPACE}
   export KAMEL_INSTALL_OLM_SOURCE=${BUILD_CATALOG_SOURCE}
