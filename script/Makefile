@@ -100,7 +100,7 @@ else
 $(warning Could not retrieve a valid Git Commit)
 endif
 
-GOFLAGS = -ldflags "$(GOLDFLAGS)" -trimpath
+GOFLAGS = -ldflags "-s -w $(GOLDFLAGS)" -trimpath
 
 define LICENSE_HEADER
 Licensed to the Apache Software Foundation (ASF) under one or more
