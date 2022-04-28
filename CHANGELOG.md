@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Operators: `make prepare-operators` should use the same folder structure of the Kubernetes output for the Openshift ecosystem [\#3237](https://github.com/apache/camel-k/issues/3237)
 - Jitpack example deployment fails [\#3207](https://github.com/apache/camel-k/issues/3207)
 - `Kamel kit create` to use mount/camel traits [\#2915](https://github.com/apache/camel-k/issues/2915)
 - Make knative broker name configurable [\#2864](https://github.com/apache/camel-k/issues/2864)
