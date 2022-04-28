@@ -176,6 +176,7 @@ func Install(ctx context.Context, client client.Client, namespace string, global
 			Channel:                options.Channel,
 			StartingCSV:            options.StartingCSV,
 			InstallPlanApproval:    operatorsv1alpha1.ApprovalAutomatic,
+			Config:                 &operatorsv1alpha1.SubscriptionConfig{},
 		},
 	}
 	// Additional configuration
@@ -234,6 +235,15 @@ func maybeSetTolerations(sub *operatorsv1alpha1.Subscription, tolArray []string)
 		tolerations, err := kubernetes.NewTolerations(tolArray)
 		if err != nil {
 			return err
+		}
+		if sub == nil {
+			panic("sub is nil")
+		}
+		if sub.Spec == nil {
+			panic("sub.Spec is nil")
+		}
+		if sub.Spec.Config == nil {
+			panic("sub.Spec.Config is nil")
 		}
 		sub.Spec.Config.Tolerations = tolerations
 	}
