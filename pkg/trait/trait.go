@@ -35,11 +35,12 @@ import (
 
 func Apply(ctx context.Context, c client.Client, integration *v1.Integration, kit *v1.IntegrationKit) (*Environment, error) {
 	var ilog log.Logger
-	if integration != nil {
+	switch {
+	case integration != nil:
 		ilog = log.ForIntegration(integration)
-	} else if kit != nil {
+	case kit != nil:
 		ilog = log.ForIntegrationKit(kit)
-	} else {
+	default:
 		ilog = log.WithValues("Function", "trait.Apply")
 	}
 
@@ -66,11 +67,12 @@ func Apply(ctx context.Context, c client.Client, integration *v1.Integration, ki
 		}
 	}
 
-	if integration != nil {
+	switch {
+	case integration != nil:
 		ilog.Debug("Applied traits to Integration", "integration", integration.Name, "namespace", integration.Namespace)
-	} else if kit != nil {
+	case kit != nil:
 		ilog.Debug("Applied traits to Integration kit", "integration kit", kit.Name, "namespace", kit.Namespace)
-	} else {
+	default:
 		ilog.Debug("Applied traits")
 	}
 	return environment, nil
