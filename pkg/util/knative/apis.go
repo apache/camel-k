@@ -206,29 +206,29 @@ func GetServiceType(ref v1.ObjectReference) (*knativev1.CamelServiceType, error)
 	return nil, nil
 }
 
-// nolint: gocritic
 func fillMissingReferenceDataWith(serviceTypes []GroupVersionKindResource, ref v1.ObjectReference) []v1.ObjectReference {
 	list := make([]v1.ObjectReference, 0)
-	if ref.APIVersion == "" && ref.Kind == "" {
+	switch {
+	case ref.APIVersion == "" && ref.Kind == "":
 		for _, st := range serviceTypes {
 			refCopy := ref.DeepCopy()
 			refCopy.APIVersion = st.GroupVersion().String()
 			refCopy.Kind = st.Kind
 			list = append(list, *refCopy)
 		}
-	} else if ref.APIVersion == "" {
+	case ref.APIVersion == "":
 		for _, gv := range getGroupVersions(serviceTypes, ref.Kind) {
 			refCopy := ref.DeepCopy()
 			refCopy.APIVersion = gv
 			list = append(list, *refCopy)
 		}
-	} else if ref.Kind == "" {
+	case ref.Kind == "":
 		for _, k := range getKinds(serviceTypes, ref.APIVersion) {
 			refCopy := ref.DeepCopy()
 			refCopy.Kind = k
 			list = append(list, *refCopy)
 		}
-	} else {
+	default:
 		list = append(list, ref)
 	}
 	return list
