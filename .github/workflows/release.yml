@@ -19,7 +19,7 @@ name: release
 
 on:
   schedule:
-  - cron: "59 23 * * *"
+  - cron: "45 23 * * *"
 
 jobs:
   release:
@@ -93,5 +93,5 @@ jobs:
         draft: false
         prerelease: true
         allowUpdates: true
-        replaceArtifacts: true
+        replacesArtifacts: true
 
