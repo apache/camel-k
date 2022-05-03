@@ -597,17 +597,17 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 					return nil, err
 				}
 				if platform.Spec.Build.Registry.CA != "" {
-					fmt.Printf("We've noticed the image registry is configured with a custom certificate [%s] \n", platform.Spec.Build.Registry.CA)
-					fmt.Println("Please make sure Kamel CLI is configured to use it or the operation will fail.")
-					fmt.Println("More information can be found here https://nodejs.org/api/cli.html#cli_node_extra_ca_certs_file")
+					o.PrintfVerboseOutf(cmd, "We've noticed the image registry is configured with a custom certificate [%s] \n", platform.Spec.Build.Registry.CA)
+					o.PrintVerboseOut(cmd, "Please make sure Kamel CLI is configured to use it or the operation will fail.")
+					o.PrintVerboseOut(cmd, "More information can be found here https://nodejs.org/api/cli.html#cli_node_extra_ca_certs_file")
 				}
 				if platform.Spec.Build.Registry.Secret != "" {
-					fmt.Printf("We've noticed the image registry is configured with a Secret [%s] \n", platform.Spec.Build.Registry.Secret)
-					fmt.Println("Please configure Docker authentication correctly or the operation will fail (by default it's $HOME/.docker/config.json).")
-					fmt.Println("More information can be found here https://docs.docker.com/engine/reference/commandline/login/")
+					o.PrintfVerboseOutf(cmd, "We've noticed the image registry is configured with a Secret [%s] \n", platform.Spec.Build.Registry.Secret)
+					o.PrintVerboseOut(cmd, "Please configure Docker authentication correctly or the operation will fail (by default it's $HOME/.docker/config.json).")
+					o.PrintVerboseOut(cmd, "More information can be found here https://docs.docker.com/engine/reference/commandline/login/")
 				}
 			}
-			if err := uploadFileOrDirectory(platform, item, name, cmd, integration); err != nil {
+			if err := o.uploadFileOrDirectory(platform, item, name, cmd, integration); err != nil {
 				return nil, errors.Wrap(err, fmt.Sprintf("Error trying to upload %s to the Image Registry.", item))
 			}
 		} else {
@@ -786,7 +786,7 @@ func resolvePodTemplate(ctx context.Context, cmd *cobra.Command, templateSrc str
 	return err
 }
 
-func uploadFileOrDirectory(platform *v1.IntegrationPlatform, item string, integrationName string, cmd *cobra.Command, integration *v1.Integration) error {
+func (o *runCmdOptions) uploadFileOrDirectory(platform *v1.IntegrationPlatform, item string, integrationName string, cmd *cobra.Command, integration *v1.Integration) error {
 	path := strings.TrimPrefix(item, "file://")
 	localPath := path
 	targetPath := ""
@@ -794,7 +794,7 @@ func uploadFileOrDirectory(platform *v1.IntegrationPlatform, item string, integr
 		targetPath = path[i+1:]
 		localPath = path[:i]
 	}
-	options := getSpectrumOptions(platform, cmd)
+	options := o.getSpectrumOptions(platform, cmd)
 	dirName, err := getDirName(localPath)
 	if err != nil {
 		return err
@@ -816,25 +816,25 @@ func uploadFileOrDirectory(platform *v1.IntegrationPlatform, item string, integr
 		switch {
 		case isPom(path):
 			gav := extractGavFromPom(path, gav)
-			return uploadAsMavenArtifact(gav, path, platform, integration.Namespace, options)
+			return o.uploadAsMavenArtifact(gav, path, platform, integration.Namespace, options, cmd)
 		case isJar(path):
 			// Try to upload pom in JAR and extract it's GAV
-			gav = uploadPomFromJar(gav, path, platform, integration.Namespace, options)
+			gav = o.uploadPomFromJar(gav, path, platform, integration.Namespace, options, cmd)
 			// add JAR to dependency list
 			dependency := fmt.Sprintf("mvn:%s:%s:%s:%s", gav.GroupID, gav.ArtifactID, gav.Type, gav.Version)
-			fmt.Printf("Added %s to the Integration's dependency list \n", dependency)
+			o.PrintfVerboseOutf(cmd, "Added %s to the Integration's dependency list \n", dependency)
 			integration.Spec.AddDependency(dependency)
 			// Upload JAR
-			return uploadAsMavenArtifact(gav, path, platform, integration.Namespace, options)
+			return o.uploadAsMavenArtifact(gav, path, platform, integration.Namespace, options, cmd)
 		default:
 			mountPath, err := getMountPath(targetPath, dirName, path)
 			if err != nil {
 				return err
 			}
 			dependency := fmt.Sprintf("registry-mvn:%s:%s:%s:%s@%s", gav.GroupID, gav.ArtifactID, gav.Type, gav.Version, mountPath)
-			fmt.Printf("Added %s to the Integration's dependency list \n", dependency)
+			o.PrintfVerboseOutf(cmd, "Added %s to the Integration's dependency list \n", dependency)
 			integration.Spec.AddDependency(dependency)
-			return uploadAsMavenArtifact(gav, path, platform, integration.Namespace, options)
+			return o.uploadAsMavenArtifact(gav, path, platform, integration.Namespace, options, cmd)
 		}
 	})
 }
@@ -854,7 +854,7 @@ func getMountPath(targetPath string, dirName string, path string) (string, error
 }
 
 // nolint:errcheck
-func uploadPomFromJar(gav maven.Dependency, path string, platform *v1.IntegrationPlatform, ns string, options spectrum.Options) maven.Dependency {
+func (o *runCmdOptions) uploadPomFromJar(gav maven.Dependency, path string, platform *v1.IntegrationPlatform, ns string, options spectrum.Options, cmd *cobra.Command) maven.Dependency {
 	util.WithTempDir("camel-k", func(tmpDir string) error {
 		pomPath := filepath.Join(tmpDir, "pom.xml")
 		jar, err := zip.OpenReader(path)
@@ -873,7 +873,7 @@ func uploadPomFromJar(gav maven.Dependency, path string, platform *v1.Integratio
 				pomExtracted = extractFromZip(pomPath, f)
 			} else if regPomProperties.MatchString(f.Name) {
 				foundProperties = true
-				if dep, ok := extractGav(f, path); ok {
+				if dep, ok := o.extractGav(f, path, cmd); ok {
 					gav = dep
 				}
 			}
@@ -884,7 +884,7 @@ func uploadPomFromJar(gav maven.Dependency, path string, platform *v1.Integratio
 		if pomExtracted {
 			gav.Type = "pom"
 			// Swallow error as this is not a mandatory step
-			uploadAsMavenArtifact(gav, pomPath, platform, ns, options)
+			o.uploadAsMavenArtifact(gav, pomPath, platform, ns, options, cmd)
 		}
 		return nil
 	})
@@ -909,7 +909,7 @@ func extractFromZip(dst string, src *zip.File) bool {
 	return err == nil
 }
 
-func extractGav(src *zip.File, localPath string) (maven.Dependency, bool) {
+func (o *runCmdOptions) extractGav(src *zip.File, localPath string, cmd *cobra.Command) (maven.Dependency, bool) {
 	rc, err := src.Open()
 	if err != nil {
 		return maven.Dependency{}, false
@@ -917,28 +917,28 @@ func extractGav(src *zip.File, localPath string) (maven.Dependency, bool) {
 	defer rc.Close()
 	data, err := ioutil.ReadAll(rc)
 	if err != nil {
-		fmt.Printf("Error while reading pom.properties from [%s], switching to default: \n %s err \n", localPath, err)
+		o.PrintfVerboseErrf(cmd, "Error while reading pom.properties from [%s], switching to default: \n %s err \n", localPath, err)
 		return maven.Dependency{}, false
 	}
 	prop, err := properties.Load(data, properties.UTF8)
 	if err != nil {
-		fmt.Printf("Error while reading pom.properties from [%s], switching to default: \n %s err \n", localPath, err)
+		o.PrintfVerboseErrf(cmd, "Error while reading pom.properties from [%s], switching to default: \n %s err \n", localPath, err)
 		return maven.Dependency{}, false
 	}
 
 	groupID, ok := prop.Get("groupId")
 	if !ok {
-		fmt.Printf("Couldn't find groupId property while reading pom.properties from [%s], switching to default \n", localPath)
+		o.PrintfVerboseErrf(cmd, "Couldn't find groupId property while reading pom.properties from [%s], switching to default \n", localPath)
 		return maven.Dependency{}, false
 	}
 	artifactID, ok := prop.Get("artifactId")
 	if !ok {
-		fmt.Printf("Couldn't find artifactId property while reading pom.properties from [%s], switching to default \n", localPath)
+		o.PrintfVerboseErrf(cmd, "Couldn't find artifactId property while reading pom.properties from [%s], switching to default \n", localPath)
 		return maven.Dependency{}, false
 	}
 	version, ok := prop.Get("version")
 	if !ok {
-		fmt.Printf("Couldn't find version property while reading pom.properties from [%s], switching to default \n", localPath)
+		o.PrintfVerboseErrf(cmd, "Couldn't find version property while reading pom.properties from [%s], switching to default \n", localPath)
 		return maven.Dependency{}, false
 	}
 	return maven.Dependency{
@@ -949,14 +949,14 @@ func extractGav(src *zip.File, localPath string) (maven.Dependency, bool) {
 	}, true
 }
 
-func uploadAsMavenArtifact(dependency maven.Dependency, path string, platform *v1.IntegrationPlatform, ns string, options spectrum.Options) error {
+func (o *runCmdOptions) uploadAsMavenArtifact(dependency maven.Dependency, path string, platform *v1.IntegrationPlatform, ns string, options spectrum.Options, cmd *cobra.Command) error {
 	artifactHTTPPath := getArtifactHTTPPath(dependency, platform, ns)
 	options.Target = fmt.Sprintf("%s/%s:%s", platform.Spec.Build.Registry.Address, artifactHTTPPath, dependency.Version)
 	_, err := spectrum.Build(options, fmt.Sprintf("%s:.", path))
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Uploaded: %s to %s \n", path, options.Target)
+	o.PrintfVerboseOutf(cmd, "Uploaded: %s to %s \n", path, options.Target)
 	return uploadChecksumFiles(path, options, platform, artifactHTTPPath, dependency)
 }
 
@@ -1032,15 +1032,19 @@ func writeChecksumToFile(filepath string, hash hash.Hash) error {
 	return err
 }
 
-func getSpectrumOptions(platform *v1.IntegrationPlatform, cmd *cobra.Command) spectrum.Options {
+func (o *runCmdOptions) getSpectrumOptions(platform *v1.IntegrationPlatform, cmd *cobra.Command) spectrum.Options {
 	insecure := platform.Spec.Build.Registry.Insecure
+	var stdout io.Writer
+	if o.Verbose {
+		stdout = cmd.OutOrStdout()
+	}
 	options := spectrum.Options{
 		PullInsecure:  true,
 		PushInsecure:  insecure,
 		PullConfigDir: "",
 		PushConfigDir: "",
 		Base:          "",
-		Stdout:        cmd.OutOrStdout(),
+		Stdout:        stdout,
 		Stderr:        cmd.OutOrStderr(),
 		Recursive:     false,
 	}
