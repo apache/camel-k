@@ -120,7 +120,7 @@ limitations under the License.
 endef
 
 export LICENSE_HEADER
-default: test
+default: build
 
 # Generates the version file
 codegen:
@@ -188,7 +188,7 @@ generate-strimzi:
 	cd addons/strimzi/duck && $(CONTROLLER_GEN) paths="./..." object
 	./script/gen_client_strimzi.sh
 
-build: build-resources build-kamel build-compile-integration-tests build-submodules
+build: test build-resources build-kamel build-compile-integration-tests build-submodules
 
 do-build:
 ifeq ($(DO_TEST_PREBUILD),true)
