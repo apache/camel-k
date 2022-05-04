@@ -6,10 +6,12 @@
 
 **Closed issues:**
 
+- Provide example for IBM MQ Server [\#3247](https://github.com/apache/camel-k/issues/3247)
 - Operators: `make prepare-operators` should use the same folder structure of the Kubernetes output for the Openshift ecosystem [\#3237](https://github.com/apache/camel-k/issues/3237)
 - Jitpack example deployment fails [\#3207](https://github.com/apache/camel-k/issues/3207)
 - Mount trait usage example [\#3140](https://github.com/apache/camel-k/issues/3140)
 - `Kamel kit create` to use mount/camel traits [\#2915](https://github.com/apache/camel-k/issues/2915)
+- Update readiness condition based on new Camel health check format [\#2886](https://github.com/apache/camel-k/issues/2886)
 - Make knative broker name configurable [\#2864](https://github.com/apache/camel-k/issues/2864)
 - \[CLI\] Format long subcommand descriptions [\#2318](https://github.com/apache/camel-k/issues/2318)
 - Camel K CLI asks for an OpenAPI v2 when also v3 is supported [\#2238](https://github.com/apache/camel-k/issues/2238)
