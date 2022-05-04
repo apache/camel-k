@@ -4,7 +4,7 @@
 The Prometheus trait configures a Prometheus-compatible endpoint. It also creates a `PodMonitor` resource,
 so that the endpoint can be scraped automatically, when using the Prometheus operator.
 
-The metrics are exposed using MicroProfile Metrics.
+The metrics are exposed using Micrometer.
 
 WARNING: The creation of the `PodMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]
 custom resource definition to be installed.

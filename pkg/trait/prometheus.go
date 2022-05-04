@@ -32,7 +32,7 @@ import (
 // The Prometheus trait configures a Prometheus-compatible endpoint. It also creates a `PodMonitor` resource,
 // so that the endpoint can be scraped automatically, when using the Prometheus operator.
 //
-// The metrics are exposed using MicroProfile Metrics.
+// The metrics are exposed using Micrometer.
 //
 // WARNING: The creation of the `PodMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]
 // custom resource definition to be installed.
@@ -66,8 +66,8 @@ func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
 
 func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		// Add the Camel Quarkus MP Metrics extension
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-microprofile-metrics")
+		// Add the Camel Quarkus Micrometer extension
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-micrometer")
 		return nil
 	}
 
