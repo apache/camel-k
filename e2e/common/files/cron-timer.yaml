@@ -21,14 +21,14 @@
       uri: "timer:tick"
       parameters:
         period: "60000"
-    steps:
-      - set-header:
-          name: "m"
-          constant: "string!"
-      - set-body:
-          simple: "Magic${header.m}"
-      - to: 
-          uri: "log:info"
-          parameters:
-            show-all: "false"
+      steps:
+        - set-header:
+            name: "m"
+            constant: "string!"
+        - set-body:
+            simple: "Magic${header.m}"
+        - to: 
+            uri: "log:info"
+            parameters:
+              show-all: "false"
             
