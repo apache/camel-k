@@ -21,13 +21,13 @@
       uri: "quartz:trigger"
       parameters:
         cron: "0/1 * * * * ?"
-    steps:
-      - set-header:
-          name: "m"
-          constant: "string!"
-      - set-body:
-          simple: "Magic${header.m}"
-      - to: 
-          uri: "log:info"
-          parameters:
-            show-all: "false"
+      steps:
+        - set-header:
+            name: "m"
+            constant: "string!"
+        - set-body:
+            simple: "Magic${header.m}"
+        - to: 
+            uri: "log:info"
+            parameters:
+              show-all: "false"

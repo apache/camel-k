@@ -51,5 +51,13 @@ func TestKamelCLIBind(t *testing.T) {
 		t.Run("unsuccessful binding, no property", func(t *testing.T) {
 			Expect(Kamel("bind", "timer-source", "log:info", "-n", ns).Execute()).NotTo(Succeed())
 		})
+
+		t.Run("bind uris", func(t *testing.T) {
+			Expect(Kamel("bind", "timer:foo", "log:bar", "-n", ns).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "timer-to-log"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationLogs(ns, "timer-to-log")).Should(ContainSubstring("Body is null"))
+
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
 	})
 }
