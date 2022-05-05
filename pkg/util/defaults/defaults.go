@@ -26,7 +26,7 @@ const (
 	Version = "1.10.0-SNAPSHOT"
 
 	// DefaultRuntimeVersion --
-	DefaultRuntimeVersion = "1.13.0"
+	DefaultRuntimeVersion = "1.14.0-SNAPSHOT"
 
 	// BuildahVersion --
 	BuildahVersion = "1.23.3"
@@ -47,5 +47,5 @@ const (
 	installDefaultKamelets = true
 )
 
-// GitCommit must be provided during application build
+//GitCommit must be provided during application build
 var GitCommit string
