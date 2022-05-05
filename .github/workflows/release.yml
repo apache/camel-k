@@ -19,7 +19,7 @@ name: release
 
 on:
   schedule:
-  - cron: "45 23 * * *"
+  - cron: "10 23 * * *"
 
 jobs:
   release:
@@ -94,4 +94,7 @@ jobs:
         prerelease: true
         allowUpdates: true
         replacesArtifacts: true
+        tag: ${{ env.VERSION }}
+        commit: main
+        
 
