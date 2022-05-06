@@ -16,10 +16,9 @@
 # ---------------------------------------------------------------------------
 
 - rest:
-    verb:
-      - method: get
-        uri: "/customers/{name}"
-        to: "direct:start"
+    get:
+      - to: "direct:start"
+        path: "/customers/{name}"
 
 - from:
     uri: "direct:start"
