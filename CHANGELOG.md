@@ -10,6 +10,7 @@
 - Nightly builds in test docker repo [\#3106](https://github.com/apache/camel-k/issues/3106)
 - Add log-level setting on Camel K operator [\#3053](https://github.com/apache/camel-k/issues/3053)
 - kamel local run/build practices for creating a YAML output [\#3021](https://github.com/apache/camel-k/issues/3021)
+- Intermittent problem with integration remaining at phase "Building Kit" [\#2905](https://github.com/apache/camel-k/issues/2905)
 
 ## [1.9.1-nightly](https://github.com/apache/camel-k/tree/1.9.1-nightly) (2022-05-05)
 
