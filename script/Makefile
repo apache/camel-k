@@ -68,7 +68,7 @@ STAGING_RUNTIME_REPO :=
 # Define here the repo containing the default Kamelet catalog (if any)
 KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
 # Optional branch for the default Kamelet catalog (change this to a tag before release)
-KAMELET_CATALOG_REPO_BRANCH := v0.8.0
+KAMELET_CATALOG_REPO_BRANCH := v0.8.1
 
 # When performing integration tests, it is not necessary to always execute build, especially
 # in e2e tests when lots of tests are being executed sequentially & the build has already taken place.
