@@ -4,15 +4,15 @@ This type of trait tells us what is going on in a running integration pod. It do
 
 Logs are enabled by default on an integration. Just run this example:
 
-     $ kamel run logging.java
+     $ kamel run Logging.java
 
-     $ kamel logs logging
+     $ kamel logs Logging
 
 Or you can instead get the pod name and print its logs using kubectl: 
 
      $ kubectl get pods
 
-     $ kubecttl logs <pod name>
+     $ kubectl logs <pod name>
 
 You can configure the log output with the `logging traits` flag:
       
@@ -28,11 +28,12 @@ for more traits options see this [Link.](https://camel.apache.org/camel-k/next/t
 
 manual log setting example using  `logging trait`:
      
-     $ kamel run ./logging.java --trait logging.enabled=true --trait logging.json=true --trait logging.level=info
+     $ kamel run ./Logging.java --trait logging.enabled=true --trait logging.json=true \
+     --trait logging.level=info
 
 **Output**
 
-The output of this result would give this:
+The output of this result would be:
 
 ```
 [2] {"timestamp":"2022-04-24T22:50:06.303Z","sequence":183,"loggerClassName":"org.slf4j.impl.Slf4jLogger","loggerName":"org.apache.camel.impl.engine.AbstractCamelContext","level":"INFO","message":"Apache Camel 3.14.1 (camel-1) started in 352ms (build:0ms init:293ms start:59ms)","threadName":"main","threadId":1,"mdc":{},"ndc":"","hostName":"rest-dsl-56668cc6dc-9zz7r","processName":"io.quarkus.bootstrap.runner.QuarkusEntryPoint","processId":1}
@@ -46,5 +47,5 @@ The output of this result would give this:
 ## Using modeline 
 An example of using a `modeline` to set the `logging traits` : 
 
-     $ kamel run ./loggingModeline.java 
+     $ kamel run ./LoggingModeline.java 
 
