@@ -124,6 +124,14 @@ func generateProjectSettings(ctx *builderContext) error {
 	}
 	ctx.Maven.GlobalSettings = data
 
+	settingsSecurity, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, &ctx.Build.Maven.SettingsSecurity)
+	if err != nil {
+		return err
+	}
+	if settingsSecurity != "" {
+		ctx.Maven.SettingsSecurity = []byte(settingsSecurity)
+	}
+
 	return nil
 }
 

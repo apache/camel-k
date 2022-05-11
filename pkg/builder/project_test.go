@@ -239,6 +239,77 @@ func TestMavenSettingsFromConfigMap(t *testing.T) {
 	assert.Equal(t, []byte("setting-data"), ctx.Maven.UserSettings)
 }
 
+func TestMavenSettingsWithSettingsSecurityFromConfigMap(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	c, err := test.NewFakeClient(
+		&corev1.ConfigMap{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "v1",
+				Kind:       "ConfigMap",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "maven-settings",
+			},
+			Data: map[string]string{
+				"settings.xml": "setting-data",
+			},
+		},
+		&corev1.ConfigMap{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "v1",
+				Kind:       "ConfigMap",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "maven-settings-security",
+			},
+			Data: map[string]string{
+				"settings-security.xml": "setting-security-data",
+			},
+		},
+	)
+
+	assert.Nil(t, err)
+
+	ctx := builderContext{
+		Catalog:   catalog,
+		Client:    c,
+		Namespace: "ns",
+		Build: v1.BuilderTask{
+			Runtime: catalog.Runtime,
+			Maven: v1.MavenBuildSpec{
+				MavenSpec: v1.MavenSpec{
+					Settings: v1.ValueSource{
+						ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: "maven-settings",
+							},
+							Key: "settings.xml",
+						},
+					},
+					SettingsSecurity: v1.ValueSource{
+						ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: "maven-settings-security",
+							},
+							Key: "settings-security.xml",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	err = Project.GenerateProjectSettings.execute(&ctx)
+	assert.Nil(t, err)
+
+	assert.Equal(t, []byte("setting-data"), ctx.Maven.UserSettings)
+	assert.Equal(t, []byte("setting-security-data"), ctx.Maven.SettingsSecurity)
+}
+
 func TestMavenSettingsFromSecret(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
@@ -286,6 +357,77 @@ func TestMavenSettingsFromSecret(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Equal(t, []byte("setting-data"), ctx.Maven.UserSettings)
+}
+
+func TestMavenSettingsWithSettingsSecurityFromSecret(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	c, err := test.NewFakeClient(
+		&corev1.Secret{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "v1",
+				Kind:       "Secret",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "maven-settings",
+			},
+			Data: map[string][]byte{
+				"settings.xml": []byte("setting-data"),
+			},
+		},
+		&corev1.Secret{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "v1",
+				Kind:       "Secret",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "maven-settings-security",
+			},
+			Data: map[string][]byte{
+				"settings-security.xml": []byte("setting-security-data"),
+			},
+		},
+	)
+
+	assert.Nil(t, err)
+
+	ctx := builderContext{
+		Catalog:   catalog,
+		Client:    c,
+		Namespace: "ns",
+		Build: v1.BuilderTask{
+			Runtime: catalog.Runtime,
+			Maven: v1.MavenBuildSpec{
+				MavenSpec: v1.MavenSpec{
+					Settings: v1.ValueSource{
+						SecretKeyRef: &corev1.SecretKeySelector{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: "maven-settings",
+							},
+							Key: "settings.xml",
+						},
+					},
+					SettingsSecurity: v1.ValueSource{
+						SecretKeyRef: &corev1.SecretKeySelector{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: "maven-settings-security",
+							},
+							Key: "settings-security.xml",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	err = Project.GenerateProjectSettings.execute(&ctx)
+	assert.Nil(t, err)
+
+	assert.Equal(t, []byte("setting-data"), ctx.Maven.UserSettings)
+	assert.Equal(t, []byte("setting-security-data"), ctx.Maven.SettingsSecurity)
 }
 
 func TestInjectEmptyServersIntoDefaultMavenSettings(t *testing.T) {
