@@ -1144,7 +1144,7 @@ traits:
     description: To automatically detect from the code if a Service needs to be created.
   - name: node-port
     type: bool
-    description: Enable Service to be exposed as NodePort
+    description: Enable Service to be exposed as NodePort (default `false`).
 - name: 3scale
   platform: false
   profiles:
