@@ -125,6 +125,8 @@ func TestServiceWithDefaults(t *testing.T) {
 	assert.Len(t, d.Spec.Template.Spec.Containers[0].Ports, 1)
 	assert.Equal(t, int32(8080), d.Spec.Template.Spec.Containers[0].Ports[0].ContainerPort)
 	assert.Equal(t, "http", d.Spec.Template.Spec.Containers[0].Ports[0].Name)
+
+	assert.Empty(t, s.Spec.Type) // empty means ClusterIP
 }
 
 func TestService(t *testing.T) {
@@ -329,9 +331,9 @@ func TestServiceWithNodePort(t *testing.T) {
 				},
 				Traits: map[string]v1.TraitSpec{
 					"service": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled":   true,
-						"auto":      false,
-						"node-port": true,
+						"enabled":  true,
+						"auto":     false,
+						"nodePort": true,
 					}),
 				},
 			},
