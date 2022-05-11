@@ -29,7 +29,38 @@ spec:
           name: maven-settings
 ----
 
-The IntegrationPlatform resource can be edited directly, to reference the ConfigMap or the Secret that contains the Maven settings, e.g.:
+[[maven-settings-security]]
+=== Maven Settings Security
+
+If your project also requires a Maven Settings Security in a `settings-security.xml` file (as described in https://maven.apache.org/guides/mini/guide-encryption.html[the official Maven Password Encryption guide]), you can create a ConfigMap or Secret for that file
+
+[source,console]
+----
+$ kubectl create configmap maven-settings-security --from-file=settings-security.xml
+----
+
+and reference it in the IntegrationPlatform resource:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: IntegrationPlatform
+metadata:
+  name: camel-k
+spec:
+  build:
+    maven:
+      settings:
+        configMapKeyRef:
+          key: settings.xml
+          name: maven-settings
+      settingsSecurity:
+        configMapKeyRef:
+          key: settings-security.xml
+          name: maven-settings-security
+----
+
+The IntegrationPlatform resource can be edited directly, to reference the ConfigMap(s) or the Secret(s) that contains the Maven settings and settings security, e.g.:
 
 [source,console]
 ----

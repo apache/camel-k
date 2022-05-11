@@ -153,6 +153,7 @@ func buildQuarkusRunner(ctx *builderContext) error {
 	mc := maven.NewContext(path.Join(ctx.Path, "maven"))
 	mc.GlobalSettings = ctx.Maven.GlobalSettings
 	mc.UserSettings = ctx.Maven.UserSettings
+	mc.SettingsSecurity = ctx.Maven.SettingsSecurity
 	mc.LocalRepository = ctx.Build.Maven.LocalRepository
 	mc.AdditionalArguments = ctx.Build.Maven.CLIOptions
 
@@ -200,6 +201,7 @@ func computeQuarkusDependencies(ctx *builderContext) error {
 	mc := maven.NewContext(path.Join(ctx.Path, "maven"))
 	mc.GlobalSettings = ctx.Maven.GlobalSettings
 	mc.UserSettings = ctx.Maven.UserSettings
+	mc.SettingsSecurity = ctx.Maven.SettingsSecurity
 	mc.LocalRepository = ctx.Build.Maven.LocalRepository
 	mc.AdditionalArguments = ctx.Build.Maven.CLIOptions
 

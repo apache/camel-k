@@ -147,6 +147,7 @@ type Context struct {
 	ExtraMavenOpts      []string
 	GlobalSettings      []byte
 	UserSettings        []byte
+	SettingsSecurity    []byte
 	AdditionalArguments []string
 	AdditionalEntries   map[string]interface{}
 	LocalRepository     string
@@ -189,6 +190,12 @@ func generateProjectStructure(context Context, project Project) error {
 
 	if context.UserSettings != nil {
 		if err := util.WriteFileWithContent(path.Join(context.Path, "user-settings.xml"), context.UserSettings); err != nil {
+			return err
+		}
+	}
+
+	if context.SettingsSecurity != nil {
+		if err := util.WriteFileWithContent(path.Join(context.Path, "settings-security.xml"), context.SettingsSecurity); err != nil {
 			return err
 		}
 	}

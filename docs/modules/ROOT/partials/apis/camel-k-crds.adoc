@@ -2348,6 +2348,14 @@ The Maven properties.
 A reference to the ConfigMap or Secret key that contains
 the Maven settings.
 
+|`settingsSecurity` +
+*xref:#_camel_apache_org_v1_ValueSource[ValueSource]*
+|
+
+
+A reference to the ConfigMap or Secret key that contains
+the security of the Maven settings.
+
 |`caSecret` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#secretkeyselector-v1-core[Kubernetes core/v1.SecretKeySelector]*
 |

@@ -32,6 +32,9 @@ type MavenSpec struct {
 	// A reference to the ConfigMap or Secret key that contains
 	// the Maven settings.
 	Settings ValueSource `json:"settings,omitempty"`
+	// A reference to the ConfigMap or Secret key that contains
+	// the security of the Maven settings.
+	SettingsSecurity ValueSource `json:"settingsSecurity,omitempty"`
 	// Deprecated: use CASecrets
 	// The Secret name and key, containing the CA certificate(s) used to connect
 	// to remote Maven repositories.

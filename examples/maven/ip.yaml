@@ -1,0 +1,15 @@
+apiVersion: camel.apache.org/v1
+kind: IntegrationPlatform
+metadata:
+  name: camel-k
+spec:
+  build:
+    maven:
+      settings:
+        configMapKeyRef:
+          key: settings.xml
+          name: maven-settings
+      settingsSecurity:
+        configMapKeyRef:
+          key: settings-security.xml
+          name: maven-settings-security
