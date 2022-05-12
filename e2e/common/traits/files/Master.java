@@ -18,11 +18,11 @@
 import org.apache.camel.builder.RouteBuilder;
 
 public class Master extends RouteBuilder {
-  @Override
-  public void configure() throws Exception {
-	  from("master:lock:timer:tick")
-	  .setHeader("m").constant("string!")
-	  .setBody().simple("Magic${header.m}")
-      .log("${body}");
-  }
+    @Override
+    public void configure() throws Exception {
+        from("master:lock:timer:tick")
+            .setHeader("m").constant("string!")
+            .setBody().simple("Magic${header.m}")
+            .log("${body}");
+    }
 }
