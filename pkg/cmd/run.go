@@ -789,12 +789,7 @@ func resolvePodTemplate(ctx context.Context, cmd *cobra.Command, templateSrc str
 
 func uploadFileOrDirectory(platform *v1.IntegrationPlatform, item string, integrationName string, cmd *cobra.Command, integration *v1.Integration) error {
 	path := strings.TrimPrefix(item, "file://")
-	localPath := path
-	targetPath := ""
-	if i := strings.Index(path, ":"); i > 0 {
-		targetPath = path[i+1:]
-		localPath = path[:i]
-	}
+	localPath, targetPath := getPaths(path, runtimeos.GOOS, filepath.IsAbs(path))
 	options := getSpectrumOptions(platform, cmd)
 	dirName, err := getDirName(localPath)
 	if err != nil {
@@ -838,6 +833,23 @@ func uploadFileOrDirectory(platform *v1.IntegrationPlatform, item string, integr
 			return uploadAsMavenArtifact(gav, path, platform, integration.Namespace, options)
 		}
 	})
+}
+
+func getPaths(path string, os string, isAbs bool) (localPath string, targetPath string) {
+	localPath = path
+	targetPath = ""
+	parts := strings.Split(path, ":")
+	if len(parts) > 1 {
+		if os != "windows" || !isAbs {
+			localPath = parts[0]
+			targetPath = parts[1]
+		} else if isAbs && len(parts) == 3 {
+			// special case on Windows for absolute paths e.g C:\foo\bar\test.csv:remote/path
+			localPath = fmt.Sprintf("%s:%s", parts[0], parts[1])
+			targetPath = parts[2]
+		}
+	}
+	return localPath, targetPath
 }
 
 func getMountPath(targetPath string, dirName string, path string) (string, error) {
