@@ -20,6 +20,7 @@ package build
 import (
 	"context"
 	"fmt"
+	"github.com/containerd/containerd/platforms"
 	"os"
 	"path"
 	"strconv"
@@ -30,7 +31,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -38,6 +38,7 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	_ "github.com/containerd/containerd/platforms"
 )
 
 const (
@@ -243,6 +244,8 @@ func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, ta
 		"buildah",
 		"bud",
 		"--storage-driver=vfs",
+		"--arch",
+		platforms.DefaultSpec().Architecture,
 		"-f",
 		"Dockerfile",
 		"-t",
