@@ -52,6 +52,8 @@ type mountTrait struct {
 	Resources []string `property:"resources" json:"resources,omitempty"`
 	// A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]
 	Volumes []string `property:"volumes" json:"volumes,omitempty"`
+	// A list of Persistent Volume Claims to be created and mounted. Syntax: [pvcname:storageClassName:requestedQuantity:/container/path]
+	PVCs []string `property:"pvcs" json:"pvcs,omitempty"`
 }
 
 func newMountTrait() Trait {
@@ -161,6 +163,14 @@ func (t *mountTrait) configureVolumesAndMounts(e *Environment, vols *[]corev1.Vo
 			t.mountResource(vols, mnts, vol)
 		} else {
 			return parseErr
+		}
+	}
+	for _, p := range t.PVCs {
+		if pvc, vol, createAndParseErr := utilResource.CreateAndParseVolume(p); createAndParseErr == nil {
+			e.Resources.Add(pvc)
+			t.mountResource(vols, mnts, vol)
+		} else {
+			return createAndParseErr
 		}
 	}
 

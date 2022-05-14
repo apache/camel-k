@@ -30,6 +30,8 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Config represents a config option.
@@ -168,6 +170,38 @@ func ParseVolume(item string) (*Config, error) {
 		resourceName:    configParts[0],
 		destinationPath: configParts[1],
 	}, nil
+}
+
+// CreateAndParseVolume will create and parse a volume then return the created volume and a Config.
+func CreateAndParseVolume(item string) (*corev1.PersistentVolumeClaim, *Config, error) {
+	pvcParts := strings.Split(item, ":")
+
+	if len(pvcParts) != 4 {
+		return nil, nil, fmt.Errorf("could not create and mount pvc as %s", item)
+	}
+
+	return &corev1.PersistentVolumeClaim{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "PersistentVolumeClaim",
+				APIVersion: "v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: pvcParts[0],
+			},
+			Spec: corev1.PersistentVolumeClaimSpec{
+				StorageClassName: &pvcParts[1],
+				AccessModes:      []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
+				Resources: corev1.ResourceRequirements{
+					Requests: corev1.ResourceList{
+						"storage": resource.MustParse(pvcParts[2]),
+					},
+				},
+			},
+		}, &Config{
+			storageType:     StorageTypePVC,
+			resourceName:    pvcParts[0],
+			destinationPath: pvcParts[3],
+		}, nil
 }
 
 // ParseConfig will parse a config and return a Config.
