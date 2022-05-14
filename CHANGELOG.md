@@ -6,7 +6,10 @@
 
 **Closed issues:**
 
+- Path-problem with local dependency \(jar\) on windows [\#3257](https://github.com/apache/camel-k/issues/3257)
 - Enable Service to be exposed as NodePort should be disabled by default [\#3253](https://github.com/apache/camel-k/issues/3253)
+- Default `make` fallback to `test` [\#3242](https://github.com/apache/camel-k/issues/3242)
+- kamel init - Use camelCase for yaml created sample files [\#3206](https://github.com/apache/camel-k/issues/3206)
 
 ## [v1.9.1](https://github.com/apache/camel-k/tree/v1.9.1) (2022-05-09)
 
