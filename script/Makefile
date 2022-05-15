@@ -88,11 +88,11 @@ TEST_PREBUILD = build
 #GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultGlobalNamespace=openshift-operators
 
 # Define target platform for docker build
-ifeq ($(shell uname -r), x86_x64)
+ifeq ($(shell uname -m), x86_x64)
 IMAGE_TARGET_PLATFORM = linux/amd64
 endif
 
-ifeq ($(shell uname -r), aarch64)
+ifeq ($(shell uname -m), aarch64)
 IMAGE_TARGET_PLATFORM = linux/arm64
 endif
 
