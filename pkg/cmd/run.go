@@ -1093,11 +1093,11 @@ func getArtifactHTTPPath(dependency maven.Dependency, platform *v1.IntegrationPl
 	// Some vendors don't allow '/' or '.' in repository name so let's replace them with '_'
 	artifactHTTPPath = strings.ReplaceAll(artifactHTTPPath, "/", "_")
 	artifactHTTPPath = strings.ReplaceAll(artifactHTTPPath, ".", "_")
-	if platform.Spec.Cluster == v1.IntegrationPlatformClusterOpenShift {
-		// image must be uploaded in the namespace
-		artifactHTTPPath = fmt.Sprintf("%s/%s", ns, artifactHTTPPath)
+	organization := platform.Spec.Build.Registry.Organization
+	if organization == "" {
+		organization = ns
 	}
-	return artifactHTTPPath
+	return fmt.Sprintf("%s/%s", organization, artifactHTTPPath)
 }
 
 func createDefaultGav(path string, dirName string, integrationName string) (maven.Dependency, error) {
