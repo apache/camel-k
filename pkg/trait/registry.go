@@ -103,14 +103,16 @@ func (t *registryTrait) Apply(e *Environment) error {
 		}
 		build.Maven.Servers = append(build.Maven.Servers, server)
 	}
-	addRegistryAndExtensionToMaven(registryAddress, build, e.Platform.Status.Cluster, e.Platform.Namespace)
+	addRegistryAndExtensionToMaven(registryAddress, build, e.Platform)
 	return nil
 }
 
-func addRegistryAndExtensionToMaven(registryAddress string, build *v1.BuilderTask, clusterType v1.IntegrationPlatformCluster, ns string) {
-	if clusterType == v1.IntegrationPlatformClusterOpenShift {
-		registryAddress = fmt.Sprintf("%s/%s", registryAddress, ns)
+func addRegistryAndExtensionToMaven(registryAddress string, build *v1.BuilderTask, platform *v1.IntegrationPlatform) {
+	organization := platform.Spec.Build.Registry.Organization
+	if organization == "" {
+		organization = platform.Namespace
 	}
+	registryAddress = fmt.Sprintf("%s/%s", registryAddress, organization)
 	ext := v1.MavenArtifact{
 		GroupID:    "com.github.johnpoth",
 		ArtifactID: "wagon-docker-registry",
