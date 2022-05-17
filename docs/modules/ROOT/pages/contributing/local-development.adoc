@@ -66,3 +66,19 @@ Camel K integrations are based on https://github.com/apache/camel-k-runtime[Came
 ----
 
 With the above instructions, the operator will pick up and use the snapshot version you have released locally.
+
+==== Using a Docker registry
+
+Alternatively, if no local registry is available, you can use a docker registry. First, create a secret with your registry username and password:
+
+```
+kubectl -n default create secret docker-registry external-registry-secret --docker-username my-user --docker-password "password"
+```
+
+And then you can run the installation of Camel K operator:
+
+```
+./kamel install --skip-operator-setup -n operator-test --force --runtime-version 1.7.0-SNAPSHOT --registry docker.io --organization my-org-or-username --registry-secret external-registry-secret 
+```
+
+Make sure to replace the `my-org-or-username` with your actual username or organization used to host the images.
