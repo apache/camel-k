@@ -633,7 +633,7 @@ func TestFilterBuildPropertyFiles(t *testing.T) {
 }
 
 func TestResolveYamlPodTemplateWithSupplementalGroups(t *testing.T) {
-	//_, rootCmd, _ := initializeRunCmdOptions(t)
+	// _, rootCmd, _ := initializeRunCmdOptions(t)
 	templateText := `
 securityContext:
   supplementalGroups:
@@ -651,7 +651,7 @@ securityContext:
 }
 
 func TestResolveJsonPodTemplateWithSupplementalGroups(t *testing.T) {
-	//_, rootCmd, _ := initializeRunCmdOptions(t)
+	// _, rootCmd, _ := initializeRunCmdOptions(t)
 	minifiedYamlTemplate := `{"securityContext":{"supplementalGroups":[666]}}`
 
 	integrationSpec := v1.IntegrationSpec{}

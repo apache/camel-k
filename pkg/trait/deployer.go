@@ -41,6 +41,9 @@ type deployerTrait struct {
 	BaseTrait `property:",squash"`
 	// Allows to explicitly select the desired deployment kind between `deployment`, `cron-job` or `knative-service` when creating the resources for running the integration.
 	Kind string `property:"kind" json:"kind,omitempty"`
+	// Use server-side apply to update the owned resources (default `true`).
+	// Note that it automatically falls back to client-side patching, if SSA is not available, e.g., on old Kubernetes clusters.
+	UseSSA *bool `property:"use-ssa" json:"useSSA,omitempty"`
 }
 
 var _ ControllerStrategySelector = &deployerTrait{}
@@ -68,7 +71,7 @@ func (t *deployerTrait) Apply(e *Environment) error {
 			// check its list of accepted MIME types.
 			// As a simpler solution, we fall back to client-side apply at the first
 			// 415 error, and assume server-side apply is not available globally.
-			if hasServerSideApply {
+			if hasServerSideApply && IsNilOrTrue(t.UseSSA) {
 				err := t.serverSideApply(env, resource)
 				switch {
 				case err == nil:
