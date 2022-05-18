@@ -31,7 +31,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
-
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -205,9 +204,9 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 				return requests
 			})).
 		// Watch for the owned Deployments
-		Owns(&appsv1.Deployment{}).
+		Owns(&appsv1.Deployment{}, builder.WithPredicates(StatusChangedPredicate{})).
 		// Watch for the owned CronJobs
-		Owns(&batchv1beta1.CronJob{}).
+		Owns(&batchv1beta1.CronJob{}, builder.WithPredicates(StatusChangedPredicate{})).
 		// Watch for the Integration Pods
 		Watches(&source.Kind{Type: &corev1.Pod{}},
 			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
@@ -236,7 +235,7 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 		if ok, err = kubernetes.CheckPermission(ctx, c, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); err != nil {
 			return err
 		} else if ok {
-			b.Owns(&servingv1.Service{})
+			b.Owns(&servingv1.Service{}, builder.WithPredicates(StatusChangedPredicate{}))
 		}
 	}
 
