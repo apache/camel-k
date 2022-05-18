@@ -64,7 +64,7 @@ func (t *registryTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *registryTrait) Apply(e *Environment) error {
-	registryAddress := e.Platform.Spec.Build.Registry.Address
+	registryAddress := e.Platform.Status.Build.Registry.Address
 	if registryAddress == "" && e.Platform.Status.Cluster == v1.IntegrationPlatformClusterOpenShift {
 		registryAddress = "image-registry.openshift-image-registry.svc:5000"
 	}
@@ -72,8 +72,8 @@ func (t *registryTrait) Apply(e *Environment) error {
 		return errors.New("could not figure out Image Registry URL, please set it manually")
 	}
 	build := getBuilderTask(e.BuildTasks)
-	registryCa := e.Platform.Spec.Build.Registry.CA
-	registrySecret := e.Platform.Spec.Build.Registry.Secret
+	registryCa := e.Platform.Status.Build.Registry.CA
+	registrySecret := e.Platform.Status.Build.Registry.Secret
 	if e.Platform.Status.Cluster == v1.IntegrationPlatformClusterOpenShift {
 		if registryCa == "" {
 			ca, err := getOpenShiftImageRegistryCA(e)
@@ -108,7 +108,7 @@ func (t *registryTrait) Apply(e *Environment) error {
 }
 
 func addRegistryAndExtensionToMaven(registryAddress string, build *v1.BuilderTask, platform *v1.IntegrationPlatform) {
-	organization := platform.Spec.Build.Registry.Organization
+	organization := platform.Status.Build.Registry.Organization
 	if organization == "" {
 		organization = platform.Namespace
 	}
