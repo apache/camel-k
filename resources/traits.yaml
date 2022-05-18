@@ -281,6 +281,11 @@ traits:
     description: Allows to explicitly select the desired deployment kind between `deployment`,
       `cron-job` or `knative-service` when creating the resources for running the
       integration.
+  - name: use-ssa
+    type: bool
+    description: Use server-side apply to update the owned resources (default `true`).Note
+      that it automatically falls back to client-side patching, if SSA is not available,
+      e.g., on old Kubernetes clusters.
 - name: deployment
   platform: true
   profiles:
