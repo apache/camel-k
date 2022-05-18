@@ -25,7 +25,7 @@ metadata:
     name: camel-k-operator
     app.kubernetes.io/component: operator
     app.kubernetes.io/name: camel-k
-    app.kubernetes.io/version: "1.9.2-SNAPSHOT"
+    app.kubernetes.io/version: "1.10.0-SNAPSHOT"
 spec:
   replicas: 1
   strategy:
@@ -41,12 +41,12 @@ spec:
         app: "camel-k"
         app.kubernetes.io/component: operator
         app.kubernetes.io/name: camel-k
-        app.kubernetes.io/version: "1.9.2-SNAPSHOT"
+        app.kubernetes.io/version: "1.10.0-SNAPSHOT"
     spec:
       serviceAccountName: camel-k-operator
       containers:
         - name: camel-k-operator
-          image: docker.io/apache/camel-k:1.9.2-SNAPSHOT
+          image: docker.io/apache/camel-k:1.10.0-SNAPSHOT
           imagePullPolicy: IfNotPresent
           command:
             - kamel
