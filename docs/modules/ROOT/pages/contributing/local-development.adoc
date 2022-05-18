@@ -67,18 +67,4 @@ Camel K integrations are based on https://github.com/apache/camel-k-runtime[Came
 
 The `$version` variable must be replaced with the version you are building. For example, `1.3.1-SNAPSHOT`. With these instructions, the operator will pick up and use the snapshot version you have released locally.
 
-==== Using a Docker registry
-
-Alternatively, if no local registry is available, you can use a docker registry. First, create a secret with your registry username and password:
-
-```
-kubectl -n default create secret docker-registry external-registry-secret --docker-username $my-user --docker-password "$password"
-```
-
-And then you can run the installation of Camel K operator:
-
-```
-./kamel install --skip-operator-setup -n operator-test --force --runtime-version $version --registry docker.io --organization $my-org-or-username --registry-secret external-registry-secret 
-```
-
-Make sure to replace the `$my-org-or-username` with your actual username or organization used to host the images and the `$version` with the appropiate version number.
+Alternatively, if no local registry is available, you can use another type of registry as explained in xref:installation/registry/registry.adoc[the Registry section].
