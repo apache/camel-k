@@ -89,7 +89,7 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 			Expect(Kamel("run", "files/LaughingRoute.java",
 				"--name", name,
 				"-p", fmt.Sprintf("location=%s", customPath),
-				"-d", fmt.Sprintf("file://files/laugh.txt:%slaugh.txt", customPath),
+				"-d", fmt.Sprintf("file://files/laugh.txt?targetPath=%slaugh.txt", customPath),
 				"-n", ns,
 			).Execute()).To(Succeed())
 
@@ -104,7 +104,7 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 			Expect(Kamel("run", "files/LaughingRoute.java",
 				"--name", name,
 				"-p", "location=files/",
-				"-d", fmt.Sprintf("file://files/laughs/:files/"),
+				"-d", fmt.Sprintf("file://files/laughs/?targetPath=files/"),
 				"-n", ns,
 			).Execute()).To(Succeed())
 
