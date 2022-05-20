@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.10.0-nightly...HEAD)
+
+**Closed issues:**
+
+- Cannot find RestProducerFactory in Registry or as a Component to use" [\#3290](https://github.com/apache/camel-k/issues/3290)
+
 ## [1.10.0-nightly](https://github.com/apache/camel-k/tree/1.10.0-nightly) (2022-05-18)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.9.2...1.10.0-nightly)
