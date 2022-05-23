@@ -31,11 +31,11 @@ type: application
 
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
-version: 0.10.1
+version: 0.10.2
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application.
-appVersion: 1.9.3-SNAPSHOT
+appVersion: 1.9.2
 
 icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
 home: https://camel.apache.org/camel-k/latest/
