@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"github.com/containerd/containerd/platforms"
 	"sort"
 
 	corev1 "k8s.io/api/core/v1"
@@ -101,13 +102,20 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}})
 
 	case v1.IntegrationPlatformBuildPublishStrategyBuildah:
+		var architecture string
+		var found bool
+		if architecture, found = e.Platform.Status.Build.PublishStrategyOptions[builder.Architecture]; !found {
+			architecture = platforms.DefaultSpec().OS + "/" + platforms.DefaultSpec().Architecture + "/" + platforms.DefaultSpec().Variant
+		}
+
 		e.BuildTasks = append(e.BuildTasks, v1.Task{Buildah: &v1.BuildahTask{
 			BaseTask: v1.BaseTask{
 				Name: "buildah",
 			},
 			PublishTask: v1.PublishTask{
-				Image:    getImageName(e),
-				Registry: e.Platform.Status.Build.Registry,
+				Architecture: architecture,
+				Image:        getImageName(e),
+				Registry:     e.Platform.Status.Build.Registry,
 			},
 			Verbose: t.Verbose,
 		}})
@@ -151,6 +159,7 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 	for _, repo := range e.IntegrationKit.Spec.Repositories {
 		maven.Repositories = append(maven.Repositories, mvn.NewRepository(repo))
 	}
+
 	task := &v1.BuilderTask{
 		BaseTask: v1.BaseTask{
 			Name: "builder",

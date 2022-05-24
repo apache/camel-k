@@ -20,7 +20,6 @@ package build
 import (
 	"context"
 	"fmt"
-	"github.com/containerd/containerd/platforms"
 	"os"
 	"path"
 	"strconv"
@@ -245,7 +244,7 @@ func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, ta
 		"bud",
 		"--storage-driver=vfs",
 		"--platform",
-		platforms.DefaultSpec().OS + "/" + platforms.DefaultSpec().Architecture + "/" + platforms.DefaultSpec().Variant,
+		task.Architecture,
 		"--pull-always",
 		"-f",
 		"Dockerfile",
