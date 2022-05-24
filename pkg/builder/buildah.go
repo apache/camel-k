@@ -17,4 +17,4 @@ limitations under the License.
 
 package builder
 
-const Architecture = "Architecture"
+const BuildahArchitecturePlatform = "BuildahArchitecturePlatform"
