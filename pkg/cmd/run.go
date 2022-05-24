@@ -94,7 +94,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 
 	cmd.Flags().String("name", "", "The integration name")
 	cmd.Flags().StringArrayP("connect", "c", nil, "A Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
-	cmd.Flags().StringArrayP("dependency", "d", nil, "A dependency that should be included, e.g., \"-d camel-mail\" for a Camel component, \"-d mvn:org.my:app:1.0\" for a Maven dependency or \"file://localPath[?targetPath=<path>&registry=<registry URL>&skipChecksums=<true>]\" for local files (experimental)")
+	cmd.Flags().StringArrayP("dependency", "d", nil, "A dependency that should be included, e.g., \"-d camel-mail\" for a Camel component, \"-d mvn:org.my:app:1.0\" for a Maven dependency or \"file://localPath[?targetPath=<path>&registry=<registry URL>&skipChecksums=<true>&skipPOM=<true>]\" for local files (experimental)")
 	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or properties file (syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
@@ -817,6 +817,10 @@ func (o *runCmdOptions) skipChecksums() bool {
 	return o.RegistryOptions.Get("skipChecksums") == "true"
 }
 
+func (o *runCmdOptions) skipPom() bool {
+	return o.RegistryOptions.Get("skipPOM") == "true"
+}
+
 func (o *runCmdOptions) getTargetPath() string {
 	return o.RegistryOptions.Get("targetPath")
 }
@@ -913,9 +917,13 @@ func (o *runCmdOptions) uploadPomFromJar(gav maven.Dependency, path string, plat
 			}
 		}
 		if pomExtracted {
-			gav.Type = "pom"
-			// Swallow error as this is not a mandatory step
-			o.uploadAsMavenArtifact(gav, pomPath, platform, ns, options, cmd)
+			if o.skipPom() {
+				o.PrintfVerboseOutf(cmd, "Skipping uploading extracted POM from %s \n", path)
+			} else {
+				gav.Type = "pom"
+				// Swallow error as this is not a mandatory step
+				o.uploadAsMavenArtifact(gav, pomPath, platform, ns, options, cmd)
+			}
 		}
 		return nil
 	})
