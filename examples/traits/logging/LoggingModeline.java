@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// camel-k: traits=logging.enabled=true trait=logging.json=true trait=logging.level=info
+// camel-k: trait=logging.enabled=true trait=logging.json=true trait=logging.level=info
 
 import org.apache.camel.Exchange;
 
