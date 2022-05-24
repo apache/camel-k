@@ -22,7 +22,7 @@ metadata:
     capabilities: Full Lifecycle
     categories: Integration & Delivery
     certified: "false"
-    containerImage: docker.io/apache/camel-k:1.9.2
+    containerImage: docker.io/apache/camel-k:1.9.3-SNAPSHOT
     createdAt: 2022-04-26T08:32:16Z
     description: Apache Camel K is a lightweight integration platform, born on Kubernetes,
       with serverless superpowers.
