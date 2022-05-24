@@ -104,7 +104,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 	case v1.IntegrationPlatformBuildPublishStrategyBuildah:
 		var architecture string
 		var found bool
-		if architecture, found = e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahArchitecturePlatform]; !found {
+		if architecture, found = e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahPlatform]; !found {
 			architecture = platforms.DefaultSpec().OS + "/" + platforms.DefaultSpec().Architecture + "/" + platforms.DefaultSpec().Variant
 		}
 
