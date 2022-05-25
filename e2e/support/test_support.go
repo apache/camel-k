@@ -558,6 +558,16 @@ func Service(ns string, name string) func() *corev1.Service {
 	}
 }
 
+func ServiceType(ns string, name string) func() corev1.ServiceType {
+	return func() corev1.ServiceType {
+		svc := Service(ns, name)()
+		if svc == nil {
+			return ""
+		}
+		return svc.Spec.Type
+	}
+}
+
 func Route(ns string, name string) func() *routev1.Route {
 	return func() *routev1.Route {
 		route := routev1.Route{}
