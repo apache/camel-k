@@ -52,9 +52,8 @@ func TestServiceTrait(t *testing.T) {
 				"-t", "service.enabled=true",
 				"-t", "service.node-port=true").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "platform-http-server"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			service := Service(ns, "platform-http-server")
-			Eventually(service, TestTimeoutShort).ShouldNot(BeNil())
-			Expect(service().Spec.Type).Should(Equal(corev1.ServiceTypeNodePort))
+			Eventually(Service(ns, "platform-http-server"), TestTimeoutShort).ShouldNot(BeNil())
+			Eventually(ServiceType(ns, "platform-http-server"), TestTimeoutShort).Should(Equal(corev1.ServiceTypeNodePort))
 
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
