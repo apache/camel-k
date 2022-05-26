@@ -95,8 +95,6 @@ type MavenBuildSpec struct {
 type PublishTask struct {
 	// can be useful to share info with other tasks
 	ContextDir string `json:"contextDir,omitempty"`
-	// Architecture of image
-	Architecture string `json:"baseImage,omitempty"`
 	// base image layer
 	BaseImage string `json:"baseImage,omitempty"`
 	// final image name
@@ -109,6 +107,8 @@ type PublishTask struct {
 type BuildahTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
+	// The platform of build image
+	Platform string `json:"baseImage,omitempty"`
 	// log more information
 	Verbose *bool `json:"verbose,omitempty"`
 }

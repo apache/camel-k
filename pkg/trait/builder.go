@@ -102,20 +102,20 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}})
 
 	case v1.IntegrationPlatformBuildPublishStrategyBuildah:
-		var architecture string
+		var platform string
 		var found bool
-		if architecture, found = e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahPlatform]; !found {
-			architecture = platforms.DefaultSpec().OS + "/" + platforms.DefaultSpec().Architecture + "/" + platforms.DefaultSpec().Variant
+		if platform, found = e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahPlatform]; !found {
+			platform = platforms.DefaultSpec().OS + "/" + platforms.DefaultSpec().Architecture + "/" + platforms.DefaultSpec().Variant
 		}
 
 		e.BuildTasks = append(e.BuildTasks, v1.Task{Buildah: &v1.BuildahTask{
+			Platform: platform,
 			BaseTask: v1.BaseTask{
 				Name: "buildah",
 			},
 			PublishTask: v1.PublishTask{
-				Architecture: architecture,
-				Image:        getImageName(e),
-				Registry:     e.Platform.Status.Build.Registry,
+				Image:    getImageName(e),
+				Registry: e.Platform.Status.Build.Registry,
 			},
 			Verbose: t.Verbose,
 		}})

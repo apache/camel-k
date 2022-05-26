@@ -244,7 +244,7 @@ func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, ta
 		"bud",
 		"--storage-driver=vfs",
 		"--platform",
-		task.Architecture,
+		task.Platform,
 		"--pull-always",
 		"-f",
 		"Dockerfile",
