@@ -334,11 +334,31 @@ ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
 else
 	cp kamel build/_output/bin
 endif
+	docker build -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
+
+images-arch: bundle-kamelets test maven-overlay
+	mkdir -p build/_maven_output
+	mkdir -p build/_output/bin
+ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
+	GOOS=linux go build $(GOFLAGS) -o build/_output/bin/kamel ./cmd/kamel/*.go
+else
+	cp kamel build/_output/bin
+endif
 	docker buildx rm --all-inactive --force
 	docker buildx create --append --name builder
 	docker buildx build --platform=$(IMAGE_TARGET_PLATFORM) -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
 images-dev: bundle-kamelets test package-artifacts maven-overlay
+	mkdir -p build/_maven_output
+	mkdir -p build/_output/bin
+ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
+	GOOS=linux go build $(GOFLAGS) -o build/_output/bin/kamel ./cmd/kamel/*.go
+else
+	cp kamel build/_output/bin
+endif
+	docker build -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
+
+images-arch-dev: bundle-kamelets test package-artifacts maven-overlay
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
 ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
@@ -553,6 +573,10 @@ endif
 
 # Build the bundle image.
 bundle-build: bundle
+	cd bundle && docker build -f Dockerfile -t $(BUNDLE_IMAGE_NAME) .
+
+# Build the bundle image.
+bundle-build-arch: bundle
 	docker buildx rm --all-inactive --force
 	docker buildx create --append --name builder
 	cd bundle && docker buildx build --platform=$(IMAGE_TARGET_PLATFORM) -f Dockerfile -t $(BUNDLE_IMAGE_NAME) .
