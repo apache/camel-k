@@ -19,7 +19,6 @@ package integration
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -339,15 +338,11 @@ func (action *monitorAction) probeReadiness(ctx context.Context, environment *tr
 				runtimeNotReadyMessages = append(runtimeNotReadyMessages, fmt.Sprintf("readiness probe failed for Pod %s/%s: %s", pod.Namespace, pod.Name, err.Error()))
 				continue
 			}
-			health := HealthCheck{}
-			err = json.Unmarshal(body, &health)
+			health, err := NewHealthCheck(body)
 			if err != nil {
 				return err
 			}
 			for _, check := range health.Checks {
-				if check.Name != "camel-readiness-checks" {
-					continue
-				}
 				if check.Status == HealthCheckStateUp {
 					continue
 				}
