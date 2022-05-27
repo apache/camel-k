@@ -350,7 +350,7 @@ else
 endif
 	docker buildx rm --all-inactive --force
 	docker buildx create --append --name builder
-	docker buildx build --platform=$(IMAGE_TARGET_PLATFORM) -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
+	docker buildx build --platform=$(IMAGE_TARGET_PLATFORM) -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
 
 images-dev: bundle-kamelets test package-artifacts maven-overlay
 	mkdir -p build/_maven_output
@@ -372,7 +372,7 @@ else
 endif
 	docker buildx rm --all-inactive --force
 	docker buildx create --append --name builder
-	docker buildx build --platform=$(IMAGE_TARGET_PLATFORM) -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
+	docker buildx build --platform=$(IMAGE_TARGET_PLATFORM) -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
 
 images-push:
 	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
@@ -586,4 +586,4 @@ bundle-build: bundle
 bundle-build-arch: bundle
 	docker buildx rm --all-inactive --force
 	docker buildx create --append --name builder
-	cd bundle && docker buildx build --platform=$(IMAGE_TARGET_PLATFORM) -f Dockerfile -t $(BUNDLE_IMAGE_NAME) .
+	cd bundle && docker buildx build --platform=$(IMAGE_TARGET_PLATFORM) -f Dockerfile.arch -t $(BUNDLE_IMAGE_NAME) .
