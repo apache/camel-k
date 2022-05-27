@@ -19,7 +19,6 @@ package trait
 
 import (
 	"fmt"
-	"github.com/containerd/containerd/platforms"
 	"sort"
 
 	corev1 "k8s.io/api/core/v1"
@@ -28,6 +27,7 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 	mvn "github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/property"
+	"github.com/containerd/containerd/platforms"
 )
 
 // The builder trait is internally used to determine the best strategy to
