@@ -37,7 +37,6 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	_ "github.com/containerd/containerd/platforms"
 )
 
 const (
