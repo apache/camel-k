@@ -39,6 +39,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	runtimeos "runtime"
 	"strings"
 	"syscall"
 
@@ -608,13 +609,15 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 				if err != nil {
 					return nil, err
 				}
-				if platform.Spec.Build.Registry.CA != "" {
-					o.PrintfVerboseOutf(cmd, "We've noticed the image registry is configured with a custom certificate [%s] \n", platform.Spec.Build.Registry.CA)
+				ca := platform.Status.Build.Registry.CA
+				if ca != "" {
+					o.PrintfVerboseOutf(cmd, "We've noticed the image registry is configured with a custom certificate [%s] \n", ca)
 					o.PrintVerboseOut(cmd, "Please make sure Kamel CLI is configured to use it or the operation will fail.")
 					o.PrintVerboseOut(cmd, "More information can be found here https://nodejs.org/api/cli.html#cli_node_extra_ca_certs_file")
 				}
-				if platform.Spec.Build.Registry.Secret != "" {
-					o.PrintfVerboseOutf(cmd, "We've noticed the image registry is configured with a Secret [%s] \n", platform.Spec.Build.Registry.Secret)
+				secret := platform.Status.Build.Registry.Secret
+				if secret != "" {
+					o.PrintfVerboseOutf(cmd, "We've noticed the image registry is configured with a Secret [%s] \n", secret)
 					o.PrintVerboseOut(cmd, "Please configure Docker authentication correctly or the operation will fail (by default it's $HOME/.docker/config.json).")
 					o.PrintVerboseOut(cmd, "More information can be found here https://docs.docker.com/engine/reference/commandline/login/")
 				}
@@ -800,12 +803,7 @@ func resolvePodTemplate(ctx context.Context, cmd *cobra.Command, templateSrc str
 
 func (o *runCmdOptions) uploadFileOrDirectory(platform *v1.IntegrationPlatform, item string, integrationName string, cmd *cobra.Command, integration *v1.Integration) error {
 	path := strings.TrimPrefix(item, "file://")
-	localPath := path
-	targetPath := ""
-	if i := strings.Index(path, ":"); i > 0 {
-		targetPath = path[i+1:]
-		localPath = path[:i]
-	}
+	localPath, targetPath := getPaths(path, runtimeos.GOOS, filepath.IsAbs(path))
 	options := o.getSpectrumOptions(platform, cmd)
 	dirName, err := getDirName(localPath)
 	if err != nil {
@@ -849,6 +847,23 @@ func (o *runCmdOptions) uploadFileOrDirectory(platform *v1.IntegrationPlatform, 
 			return o.uploadAsMavenArtifact(gav, path, platform, integration.Namespace, options, cmd)
 		}
 	})
+}
+
+func getPaths(path string, os string, isAbs bool) (localPath string, targetPath string) {
+	localPath = path
+	targetPath = ""
+	parts := strings.Split(path, ":")
+	if len(parts) > 1 {
+		if os != "windows" || !isAbs {
+			localPath = parts[0]
+			targetPath = parts[1]
+		} else if isAbs && len(parts) == 3 {
+			// special case on Windows for absolute paths e.g C:\foo\bar\test.csv:remote/path
+			localPath = fmt.Sprintf("%s:%s", parts[0], parts[1])
+			targetPath = parts[2]
+		}
+	}
+	return localPath, targetPath
 }
 
 func getMountPath(targetPath string, dirName string, path string) (string, error) {
@@ -963,13 +978,39 @@ func (o *runCmdOptions) extractGav(src *zip.File, localPath string, cmd *cobra.C
 
 func (o *runCmdOptions) uploadAsMavenArtifact(dependency maven.Dependency, path string, platform *v1.IntegrationPlatform, ns string, options spectrum.Options, cmd *cobra.Command) error {
 	artifactHTTPPath := getArtifactHTTPPath(dependency, platform, ns)
-	options.Target = fmt.Sprintf("%s/%s:%s", platform.Spec.Build.Registry.Address, artifactHTTPPath, dependency.Version)
+	options.Target = fmt.Sprintf("%s/%s:%s", platform.Status.Build.Registry.Address, artifactHTTPPath, dependency.Version)
+	if runtimeos.GOOS == "windows" {
+		// workaround for https://github.com/container-tools/spectrum/issues/8
+		// work with relative paths instead
+		rel, err := getRelativeToWorkingDirectory(path)
+		if err != nil {
+			return err
+		}
+		path = rel
+	}
 	_, err := spectrum.Build(options, fmt.Sprintf("%s:.", path))
 	if err != nil {
 		return err
 	}
 	o.PrintfVerboseOutf(cmd, "Uploaded: %s to %s \n", path, options.Target)
 	return uploadChecksumFiles(path, options, platform, artifactHTTPPath, dependency)
+}
+
+// Deprecated: workaround for https://github.com/container-tools/spectrum/issues/8
+func getRelativeToWorkingDirectory(path string) (string, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return "", err
+	}
+	path, err = filepath.Rel(wd, abs)
+	if err != nil {
+		return "", err
+	}
+	return path, nil
 }
 
 // Currently swallows errors because our Project model is incomplete.
@@ -1024,11 +1065,20 @@ func uploadChecksumFile(hash hash.Hash, tmpDir string, ext string, path string, 
 
 	filename := "maven_" + filepath.Base(path) + ext
 	filepath := filepath.Join(tmpDir, filename)
+	if runtimeos.GOOS == "windows" {
+		// workaround for https://github.com/container-tools/spectrum/issues/8
+		// work with relative paths instead
+		rel, err := getRelativeToWorkingDirectory(path)
+		if err != nil {
+			return err
+		}
+		filepath = rel
+	}
 
 	if err = writeChecksumToFile(filepath, hash); err != nil {
 		return err
 	}
-	options.Target = fmt.Sprintf("%s/%s%s:%s", platform.Spec.Build.Registry.Address, artifactHTTPPath, ext, dependency.Version)
+	options.Target = fmt.Sprintf("%s/%s%s:%s", platform.Status.Build.Registry.Address, artifactHTTPPath, ext, dependency.Version)
 	_, err = spectrum.Build(options, fmt.Sprintf("%s:.", filepath))
 	return err
 }
@@ -1045,7 +1095,7 @@ func writeChecksumToFile(filepath string, hash hash.Hash) error {
 }
 
 func (o *runCmdOptions) getSpectrumOptions(platform *v1.IntegrationPlatform, cmd *cobra.Command) spectrum.Options {
-	insecure := platform.Spec.Build.Registry.Insecure
+	insecure := platform.Status.Build.Registry.Insecure
 	var stdout io.Writer
 	if o.Verbose {
 		stdout = cmd.OutOrStdout()
@@ -1070,11 +1120,11 @@ func getArtifactHTTPPath(dependency maven.Dependency, platform *v1.IntegrationPl
 	// Some vendors don't allow '/' or '.' in repository name so let's replace them with '_'
 	artifactHTTPPath = strings.ReplaceAll(artifactHTTPPath, "/", "_")
 	artifactHTTPPath = strings.ReplaceAll(artifactHTTPPath, ".", "_")
-	if platform.Spec.Cluster == v1.IntegrationPlatformClusterOpenShift {
-		// image must be uploaded in the namespace
-		artifactHTTPPath = fmt.Sprintf("%s/%s", ns, artifactHTTPPath)
+	organization := platform.Status.Build.Registry.Organization
+	if organization == "" {
+		organization = ns
 	}
-	return artifactHTTPPath
+	return fmt.Sprintf("%s/%s", organization, artifactHTTPPath)
 }
 
 func createDefaultGav(path string, dirName string, integrationName string) (maven.Dependency, error) {

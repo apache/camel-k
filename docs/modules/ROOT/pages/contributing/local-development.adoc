@@ -62,7 +62,9 @@ A similar procedure may work if you use other local environments. The idea is to
 
 Camel K integrations are based on https://github.com/apache/camel-k-runtime[Camel K runtime], generally paired with the operator release. If you need to specify a different runtime, or you have a local Camel K runtime that you want to test, then you will need to specify it in the `Integration Platform`:
 ----
-./kamel install --skip-operator-setup -n operator-test --registry localhost:5000 --force --runtime-version 1.7.0-SNAPSHOT
+./kamel install --skip-operator-setup -n operator-test --registry localhost:5000 --force --runtime-version $version
 ----
 
-With the above instructions, the operator will pick up and use the snapshot version you have released locally.
+The `$version` variable must be replaced with the version you are building. For example, `1.3.1-SNAPSHOT`. With these instructions, the operator will pick up and use the snapshot version you have released locally.
+
+Alternatively, if no local registry is available, you can use another type of registry as explained in xref:installation/registry/registry.adoc[the Registry section].

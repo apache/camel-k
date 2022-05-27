@@ -15,14 +15,20 @@
  * limitations under the License.
  */
 
-import org.apache.camel.builder.RouteBuilder;
+//
+//  kamel run ./Logging.java --trait logging.enabled=true \
+//  --trait logging.json=true --trait logging.level=info
+import org.apache.camel.Exchange;
 
-public class Java extends RouteBuilder {
+public class Logging extends org.apache.camel.builder.RouteBuilder {
     @Override
     public void configure() throws Exception {
-        from("timer:tick")
-            .setHeader("m").constant("string!")
-            .setBody().simple("Magic${header.m}")
-            .log("${body}");
+        rest()
+            .get("/hello")
+            .to("direct:hello");
+
+        from("direct:hello")
+            .setHeader(Exchange.CONTENT_TYPE, constant("text/plain"))
+            .transform().simple("Hello World");
     }
 }

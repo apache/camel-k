@@ -14,10 +14,10 @@
 # limitations under the License.
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION ?= 1.9.1-SNAPSHOT
+VERSION ?= 1.10.0-SNAPSHOT
 OPERATOR_VERSION := $(subst -SNAPSHOT,,$(VERSION))
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
-LAST_RELEASED_VERSION := 1.9.0
+LAST_RELEASED_VERSION := 1.9.1
 RUNTIME_VERSION := 1.13.0
 BUILDAH_VERSION := 1.23.3
 KANIKO_VERSION := 0.17.1
@@ -55,11 +55,15 @@ DEFAULT_CHANNEL ?= $(OPERATOR_VERSION)
 PACKAGE := camel-k
 CSV_VERSION := $(CUSTOM_VERSION:-SNAPSHOT=)
 CSV_NAME := $(PACKAGE).v$(CSV_VERSION)
+# Final CSV name that replaces the name required by the operator-sdk
+# Has to be replaced after the bundle has been generated
+CSV_PRODUCTION_NAME := $(PACKAGE)-operator.v$(CSV_VERSION)
 CSV_DISPLAY_NAME := Camel K Operator
 CSV_SUPPORT := Camel
 CSV_REPLACES := $(LAST_RELEASED_IMAGE_NAME).v$(LAST_RELEASED_VERSION)
 CSV_FILENAME := $(PACKAGE).clusterserviceversion.yaml
 CSV_PATH := config/manifests/bases/$(CSV_FILENAME)
+CSV_GENERATED_PATH := bundle/manifests/$(CSV_FILENAME)
 
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
@@ -130,7 +134,7 @@ limitations under the License.
 endef
 
 export LICENSE_HEADER
-default: test
+default: build
 
 # Generates the version file
 codegen:
@@ -198,7 +202,7 @@ generate-strimzi:
 	cd addons/strimzi/duck && $(CONTROLLER_GEN) paths="./..." object
 	./script/gen_client_strimzi.sh
 
-build: build-resources build-kamel build-compile-integration-tests build-submodules
+build: test build-resources build-kamel build-compile-integration-tests build-submodules
 
 do-build:
 ifeq ($(DO_TEST_PREBUILD),true)
@@ -390,7 +394,7 @@ get-last-released-version:
 	@echo $(LAST_RELEASED_VERSION)
 
 get-csv-name:
-	@echo $(CSV_NAME)
+	@echo $(CSV_PRODUCTION_NAME)
 
 set-version:
 	./script/set_version.sh $(CUSTOM_VERSION) $(CUSTOM_IMAGE)
@@ -505,7 +509,7 @@ else
 OPM=$(shell command -v opm 2> /dev/null)
 endif
 
-.PHONY: generate-crd $(BUNDLE_CAMEL_APIS) bundle bundle-build
+.PHONY: generate-crd $(BUNDLE_CAMEL_APIS) pre-bundle bundle bundle-build
 
 # - Have to copy pkg/apis since it is a module in its own right
 # - The dependency of v1alpha1 api on v1 results in duplication
@@ -569,6 +573,9 @@ else
 endif
 	@# Adds the licence headers to the csv file
 	./script/add_license.sh bundle/manifests ./script/headers/yaml.txt
+# Rename the CSV name to conform with the existing released operator versions
+# This cannot happen in pre-bundle as the operator-sdk generation expects a CSV name the same as PACKAGE
+	@sed -i "s/^  name: $(CSV_NAME)/  name: $(CSV_PRODUCTION_NAME)/" $(CSV_GENERATED_PATH)
 	$(OPERATOR_SDK) bundle validate ./bundle
 
 # Build the bundle image.

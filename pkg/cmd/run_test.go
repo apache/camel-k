@@ -677,3 +677,69 @@ func TestMissingTrait(t *testing.T) {
 	assert.Equal(t, "Error: bogus.fail=i-must-fail is not a valid trait property\n", output)
 	assert.NotNil(t, err)
 }
+
+func TestGetsPaths(t *testing.T) {
+	tests := []struct {
+		path       string
+		localPath  string
+		remotePath string
+		os         string
+		isAbs      bool
+	}{
+		{
+			path:       "C:\\USER\\HOME\\:remote/path",
+			localPath:  "C:\\USER\\HOME\\",
+			remotePath: "remote/path",
+			os:         "windows",
+			isAbs:      true,
+		},
+		{
+			path:       "src\\main\\resources:remote/path",
+			localPath:  "src\\main\\resources",
+			remotePath: "remote/path",
+			os:         "windows",
+		},
+		{
+			path:       "C:\\USER\\HOME\\",
+			localPath:  "C:\\USER\\HOME\\",
+			remotePath: "",
+			os:         "windows",
+			isAbs:      true,
+		},
+		{
+			path:       "src\\main\\resources",
+			localPath:  "src\\main\\resources",
+			remotePath: "",
+			os:         "windows",
+		},
+		{
+			path:       "/home/user/name/dir:/remote/path",
+			localPath:  "/home/user/name/dir",
+			remotePath: "/remote/path",
+			os:         "linux",
+			isAbs:      true,
+		}, {
+			path:       "/home/user/name/dir",
+			localPath:  "/home/user/name/dir",
+			remotePath: "",
+			os:         "linux",
+			isAbs:      true,
+		}, {
+			path:       "src/main/resources:remote/path",
+			localPath:  "src/main/resources",
+			remotePath: "remote/path",
+			os:         "linux",
+		}, {
+			path:       "src/main/resources",
+			localPath:  "src/main/resources",
+			remotePath: "",
+			os:         "linux",
+		},
+	}
+	for _, test := range tests {
+		localPath, targetPath := getPaths(test.path, test.os, test.isAbs)
+		assert.Equal(t, test.localPath, localPath)
+		assert.Equal(t, test.remotePath, targetPath)
+
+	}
+}
