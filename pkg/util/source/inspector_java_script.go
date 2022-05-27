@@ -42,6 +42,8 @@ func (i JavaScriptInspector) Extract(source v1.SourceSpec, meta *Metadata) error
 		doubleQuotedToD,
 		singleQuotedToF,
 		doubleQuotedToF,
+		singleQuotedWireTap,
+		doubleQuotedWireTap,
 	)
 
 	meta.FromURIs = append(meta.FromURIs, from...)
