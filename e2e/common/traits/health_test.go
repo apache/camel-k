@@ -99,7 +99,7 @@ func TestHealthTrait(t *testing.T) {
 			//
 			Eventually(IntegrationCondition(ns, "java", v1.IntegrationConditionReady), TestTimeoutMedium).Should(And(
 				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
-				WithTransform(IntegrationConditionMessage, HavePrefix(fmt.Sprintf("[Pod %s runtime is not ready: map[consumer:route1:DOWN context:UP", pod.Name))),
+				WithTransform(IntegrationConditionMessage, HavePrefix(fmt.Sprintf("[Pod %s runtime is not ready: map[route.context.name:camel-1 route.id:route1 route.status:Stopped]", pod.Name))),
 			))
 			// Check the Integration is still in running phase
 			Eventually(IntegrationPhase(ns, "java"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
