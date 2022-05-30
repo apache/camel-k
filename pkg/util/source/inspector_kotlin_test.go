@@ -37,6 +37,11 @@ from("direct:start")
     .to("kamelet:foo/bar?baz=test")
 `
 
+const KotlinWireTapEip = `
+from("direct:start")
+    .wireTap("kamelet:foo/bar?baz=test")
+`
+
 func TestKotlinKamelet(t *testing.T) {
 	tc := []struct {
 		source   string
@@ -48,6 +53,10 @@ func TestKotlinKamelet(t *testing.T) {
 		},
 		{
 			source:   KotlinKameletEndpoint,
+			kamelets: []string{"foo/bar"},
+		},
+		{
+			source:   KotlinWireTapEip,
 			kamelets: []string{"foo/bar"},
 		},
 	}
