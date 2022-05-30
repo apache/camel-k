@@ -56,10 +56,6 @@ func TestJavaScriptKamelet(t *testing.T) {
 			kamelets: []string{"foo/bar"},
 		},
 		{
-			source:   JavaScriptKameletEndpoint,
-			kamelets: []string{"foo/bar"},
-		},
-		{
 			source:   JavaScriptWireTapEipSingleQuote,
 			kamelets: []string{"foo/bar"},
 		},
