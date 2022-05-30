@@ -83,6 +83,16 @@ const YAMLInDepthChannel = `
                 uri: knative:endpoint/service
 `
 
+const YAMLWiretapEIP = `
+- from:
+    uri: knative:channel/mychannel
+    parameters:
+      period: "1000"
+    steps:
+      - wireTap:
+          uri: knative:channel/mychannel
+`
+
 func TestYAMLDependencies(t *testing.T) {
 	tests := []struct {
 		name                string
@@ -120,6 +130,14 @@ func TestYAMLDependencies(t *testing.T) {
 		{
 			name:   "in-depth",
 			source: YAMLInDepthChannel,
+			dependencies: []string{
+				`mvn:org.apache.camel.k:camel-k-knative-producer`,
+				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
+			},
+		},
+		{
+			name:   "wireTap",
+			source: YAMLWiretapEIP,
 			dependencies: []string{
 				`mvn:org.apache.camel.k:camel-k-knative-producer`,
 				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
