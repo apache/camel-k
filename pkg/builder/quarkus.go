@@ -115,13 +115,6 @@ func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion str
 	// DependencyManagement
 	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies,
 		maven.Dependency{
-			GroupID:    "org.apache.camel.quarkus",
-			ArtifactID: "camel-quarkus-bom",
-			Version:    camelQuarkusVersion,
-			Type:       "pom",
-			Scope:      "import",
-		},
-		maven.Dependency{
 			GroupID:    "org.apache.camel.k",
 			ArtifactID: "camel-k-runtime-bom",
 			Version:    runtimeVersion,
