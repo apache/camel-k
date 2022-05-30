@@ -161,7 +161,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 		switch key {
 		case "from":
 			meta.FromURIs = append(meta.FromURIs, maybeURI)
-		case "to", "to-d", "toD":
+		case "to", "to-d", "toD", "wireTap":
 			meta.ToURIs = append(meta.ToURIs, maybeURI)
 		}
 	}
