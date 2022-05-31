@@ -240,33 +240,25 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task *v1.BuildahTask, pod *corev1.Pod) error {
 	bud := []string{}
 
+	bud = []string{
+		"buildah",
+		"bud",
+		"--storage-driver=vfs",
+	}
+
 	if task.Platform != "" {
-		bud = []string{
-			"buildah",
-			"bud",
-			"--storage-driver=vfs",
-			"--platform",
+		bud = append(bud, []string{
 			task.Platform,
 			"--pull-always",
-			"-f",
-			"Dockerfile",
-			"-t",
-			task.Image,
-			".",
-		}
-	} else {
-		bud = []string{
-			"buildah",
-			"bud",
-			"--storage-driver=vfs",
-			"--pull-always",
-			"-f",
-			"Dockerfile",
-			"-t",
-			task.Image,
-			".",
-		}
+		}...)
 	}
+
+	bud = append(bud, []string{"-f",
+		"Dockerfile",
+		"-t",
+		task.Image,
+		".",
+	}...)
 
 	push := []string{
 		"buildah",
