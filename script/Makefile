@@ -524,6 +524,8 @@ pre-bundle:
 	@sed -i '/  version: ${CSV_VERSION}/a \ \ replaces: $(CSV_REPLACES)' $(CSV_PATH)
 
 bundle: set-version generate-crd $(BUNDLE_CAMEL_APIS) kustomize operator-sdk pre-bundle
+	@# Display BUNDLE_METADATA_OPTS for debugging
+	$(info BUNDLE_METADATA_OPTS=$(BUNDLE_METADATA_OPTS))
 	@# Sets the operator image to the preferred image:tag
 	@cd config/manifests && $(KUSTOMIZE) edit set image $(IMAGE_NAME)=$(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 	@# Build kustomize manifests
