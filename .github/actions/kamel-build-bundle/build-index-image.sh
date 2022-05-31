@@ -211,10 +211,10 @@ cat << EOF >> ${CATALOG_DIR}/camel-k.yaml
 ---
 schema: olm.channel
 package: camel-k
-name: stable-dev-$(make get-version | grep -Po "\d.\d+")
+name: stable-dev-$(make get-version | grep -Po "\d+\.\d+")
 entries:
-  - name: camel-k.v$(make get-version | grep -Po "\d.\d+.\d+")
-    replaces: $(make get-last-released-img-name).v$(make get-last-released-version | grep -Po "\d.\d+.\d+")
+  - name: camel-k.v$(make get-version | grep -Po "\d+\.\d+\.\d+")
+    replaces: $(make get-last-released-img-name).v$(make get-last-released-version | grep -Po "\d+\.\d+\.\d+")
 EOF
 
 #
