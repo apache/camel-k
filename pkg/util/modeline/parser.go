@@ -24,14 +24,13 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/mattn/go-shellwords"
 )
 
 var (
 	commonModelineRegexp = regexp.MustCompile(`^\s*//\s*camel-k\s*:\s*([^\s]+.*)$`)
 	yamlModelineRegexp   = regexp.MustCompile(`^\s*#+\s*camel-k\s*:\s*([^\s]+.*)$`)
 	xmlModelineRegexp    = regexp.MustCompile(`^.*<!--\s*camel-k\s*:\s*([^\s]+[^>]*)-->.*$`)
-
-	delimiter = regexp.MustCompile(`\s+`)
 )
 
 func Parse(name, content string) (res []Option, err error) {
@@ -53,7 +52,7 @@ func getModelineOptions(line string, lang v1.Language) (res []Option) {
 	}
 	strs := reg.FindStringSubmatch(line)
 	if len(strs) == 2 {
-		tokens := delimiter.Split(strs[1], -1)
+		tokens, _ := shellwords.Parse(strs[1])
 		for _, token := range tokens {
 			if len(strings.Trim(token, "\t\n\f\r ")) == 0 {
 				continue
