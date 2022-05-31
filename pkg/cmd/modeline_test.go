@@ -507,3 +507,24 @@ func TestModelineInspectMultipleDeps(t *testing.T) {
 
 	assert.NoError(t, err)
 }
+
+func TestModelineQuotedPodTemplate(t *testing.T) {
+	err := util.WithTempDir("camel-k-test-", func(dir string) error {
+
+		file := `
+		// camel-k: pod-template='{ "containers": [], "security": { "podSecurityContext": { "supplementalGroups": [ 553 ] }, "volumes": [] } }'
+	`
+		fileName := path.Join(dir, "simple.groovy")
+		err := ioutil.WriteFile(fileName, []byte(file), 0777)
+		assert.NoError(t, err)
+
+		cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
+		assert.NoError(t, err)
+		assert.NotNil(t, cmd)
+		assert.Equal(t, []string{"run", fileName, "--pod-template={ \"containers\": [], \"security\": { \"podSecurityContext\": { \"supplementalGroups\": [ 553 ] }, \"volumes\": [] } }"}, flags)
+
+		return nil
+	})
+
+	assert.NoError(t, err)
+}
