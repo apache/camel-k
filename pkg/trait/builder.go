@@ -27,7 +27,6 @@ import (
 	"github.com/apache/camel-k/pkg/builder"
 	mvn "github.com/apache/camel-k/pkg/util/maven"
 	"github.com/apache/camel-k/pkg/util/property"
-	"github.com/containerd/containerd/platforms"
 )
 
 // The builder trait is internally used to determine the best strategy to
@@ -104,9 +103,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 	case v1.IntegrationPlatformBuildPublishStrategyBuildah:
 		var platform string
 		var found bool
-		if platform, found = e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahPlatform]; found {
-			platform = platforms.DefaultSpec().OS + "/" + platforms.DefaultSpec().Architecture + "/" + platforms.DefaultSpec().Variant
-		} else {
+		if platform, found = e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahPlatform]; !found {
 			platform = ""
 		}
 
