@@ -106,9 +106,9 @@ popd
 export LOCAL_IMAGE_BUNDLE=${REGISTRY_PUSH_HOST}/${IMAGE_NAMESPACE}/camel-k-bundle:${IMAGE_VERSION}
 export CUSTOM_IMAGE=${IMAGE_NAME}
 
-export PREV_XY_CHANNEL="stable-$(make get-last-released-version | grep -Po '\d.\d+')"
+export PREV_XY_CHANNEL="stable-$(make get-last-released-version | grep -Po '\d+\.\d+')"
 echo "PREV_XY_CHANNEL=${PREV_XY_CHANNEL}" >> $GITHUB_ENV
-export NEW_XY_CHANNEL=stable-dev-$(make get-version | grep -Po "\d.\d+")
+export NEW_XY_CHANNEL=stable-dev-$(make get-version | grep -Po "\d+\.\d+")
 echo "NEW_XY_CHANNEL=${NEW_XY_CHANNEL}" >> $GITHUB_ENV
 
 make bundle-build \
