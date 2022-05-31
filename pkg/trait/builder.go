@@ -104,8 +104,10 @@ func (t *builderTrait) Apply(e *Environment) error {
 	case v1.IntegrationPlatformBuildPublishStrategyBuildah:
 		var platform string
 		var found bool
-		if platform, found = e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahPlatform]; !found {
+		if platform, found = e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahPlatform]; found {
 			platform = platforms.DefaultSpec().OS + "/" + platforms.DefaultSpec().Architecture + "/" + platforms.DefaultSpec().Variant
+		} else {
+			platform = ""
 		}
 
 		e.BuildTasks = append(e.BuildTasks, v1.Task{Buildah: &v1.BuildahTask{

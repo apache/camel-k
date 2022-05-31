@@ -29,7 +29,6 @@ OPM_VERSION := v1.21.0
 BASE_IMAGE := docker.io/adoptopenjdk/openjdk11:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
 IMAGE_NAME := docker.io/apache/camel-k
-IMAGE_TARGET_PLATFORM := linux/amd64
 
 #
 # Situations when user wants to override
@@ -90,15 +89,6 @@ TEST_PREBUILD = build
 #GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultSourceNamespace=openshift-marketplace
 #GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultStartingCSV=
 #GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultGlobalNamespace=openshift-operators
-
-# Define target platform for docker build
-ifeq ($(shell uname -m), x86_x64)
-IMAGE_TARGET_PLATFORM = linux/amd64
-endif
-
-ifeq ($(shell uname -m), aarch64)
-IMAGE_TARGET_PLATFORM = linux/arm64
-endif
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -341,6 +331,16 @@ endif
 	docker build -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
 images-arch: bundle-kamelets test maven-overlay
+IMAGE_TARGET_PLATFORM := linux/amd64
+# Define target platform for docker build
+ifeq ($(shell uname -m), x86_x64)
+	IMAGE_TARGET_PLATFORM = linux/amd64
+endif
+
+ifeq ($(shell uname -m), aarch64)
+	IMAGE_TARGET_PLATFORM = linux/arm64
+endif
+
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
 ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
@@ -363,6 +363,16 @@ endif
 	docker build -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
 images-arch-dev: bundle-kamelets test package-artifacts maven-overlay
+IMAGE_TARGET_PLATFORM := linux/amd64
+# Define target platform for docker build
+ifeq ($(shell uname -m), x86_x64)
+	IMAGE_TARGET_PLATFORM = linux/amd64
+endif
+
+ifeq ($(shell uname -m), aarch64)
+	IMAGE_TARGET_PLATFORM = linux/arm64
+endif
+
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
 ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
@@ -581,9 +591,3 @@ endif
 # Build the bundle image.
 bundle-build: bundle
 	cd bundle && docker build -f Dockerfile -t $(BUNDLE_IMAGE_NAME) .
-
-# Build the bundle image.
-bundle-build-arch: bundle
-	docker buildx rm --all-inactive --force
-	docker buildx create --append --name builder
-	cd bundle && docker buildx build --platform=$(IMAGE_TARGET_PLATFORM) -f Dockerfile.arch -t $(BUNDLE_IMAGE_NAME) .

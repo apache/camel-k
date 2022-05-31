@@ -108,7 +108,7 @@ type BuildahTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
 	// The platform of build image
-	Platform string `json:"baseImage,omitempty"`
+	Platform string `json:"platform,omitempty"`
 	// log more information
 	Verbose *bool `json:"verbose,omitempty"`
 }
