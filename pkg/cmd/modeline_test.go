@@ -512,7 +512,7 @@ func TestModelineQuotedPodTemplate(t *testing.T) {
 	err := util.WithTempDir("camel-k-test-", func(dir string) error {
 
 		file := `
-		// camel-k: pod-template='{ "containers": [], "security": { "podSecurityContext": { "supplementalGroups": [ 553 ] }, "volumes": [] } }'
+		// camel-k: pod-template='{ "containers": [], "securityContext": { "supplementalGroups": [ 553 ] }, "volumes": [] } }'
 	`
 		fileName := path.Join(dir, "simple.groovy")
 		err := ioutil.WriteFile(fileName, []byte(file), 0o400)
@@ -521,7 +521,7 @@ func TestModelineQuotedPodTemplate(t *testing.T) {
 		cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
 		assert.NoError(t, err)
 		assert.NotNil(t, cmd)
-		assert.Equal(t, []string{"run", fileName, "--pod-template={ \"containers\": [], \"security\": { \"podSecurityContext\": { \"supplementalGroups\": [ 553 ] }, \"volumes\": [] } }"}, flags)
+		assert.Equal(t, []string{"run", fileName, "--pod-template={ \"containers\": [], \"securityContext\": { \"supplementalGroups\": [ 553 ] }, \"volumes\": [] } }"}, flags)
 
 		return nil
 	})
