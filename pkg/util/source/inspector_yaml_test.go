@@ -83,7 +83,7 @@ const YAMLInDepthChannel = `
                 uri: knative:endpoint/service
 `
 
-const YAMLWiretapEIP = `
+const YAMLWireTapKnativeEIP = `
 - from:
     uri: knative:channel/mychannel
     parameters:
@@ -91,6 +91,16 @@ const YAMLWiretapEIP = `
     steps:
       - wireTap:
           uri: knative:channel/mychannel
+`
+
+const YAMLWireTapJmsEIP = `
+- from:
+    uri: knative:channel/mychannel
+    parameters:
+      period: "1000"
+    steps:
+      - wireTap:
+          uri: jms:queue:foo
 `
 
 func TestYAMLDependencies(t *testing.T) {
@@ -136,11 +146,19 @@ func TestYAMLDependencies(t *testing.T) {
 			},
 		},
 		{
-			name:   "wireTap",
-			source: YAMLWiretapEIP,
+			name:   "wire-tap-knative",
+			source: YAMLWireTapKnativeEIP,
 			dependencies: []string{
 				`mvn:org.apache.camel.k:camel-k-knative-producer`,
 				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
+			},
+		},
+		{
+			name:   "wire-tap-jms",
+			source: YAMLWireTapJmsEIP,
+			dependencies: []string{
+				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
+				`camel:jms`,
 			},
 		},
 	}
