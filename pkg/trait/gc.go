@@ -27,9 +27,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/pkg/errors"
 	"golang.org/x/time/rate"
 
-	"github.com/apache/camel-k/pkg/util"
 	authorization "k8s.io/api/authorization/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -43,6 +43,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
 )
 
 var (
@@ -127,13 +128,13 @@ func (t *garbageCollectorTrait) Apply(e *Environment) error {
 func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) error {
 	deletableGVKs, err := t.getDeletableTypes(e)
 	if err != nil {
-		return fmt.Errorf("cannot discover GVK types: %v", err)
+		return errors.Wrap(err, "cannot discover GVK types")
 	}
 
 	integration, _ := labels.NewRequirement(v1.IntegrationLabel, selection.Equals, []string{e.Integration.Name})
 	generation, err := labels.NewRequirement("camel.apache.org/generation", selection.LessThan, []string{strconv.FormatInt(e.Integration.GetGeneration(), 10)})
 	if err != nil {
-		return fmt.Errorf("cannot determine generation requirement: %v", err)
+		return errors.Wrap(err, "cannot determine generation requirement")
 	}
 	selector := labels.NewSelector().
 		Add(*integration).
@@ -142,8 +143,8 @@ func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) error {
 	return t.deleteEachOf(e.Ctx, deletableGVKs, e, selector)
 }
 
-func (t *garbageCollectorTrait) deleteEachOf(ctx context.Context, GVKs map[schema.GroupVersionKind]struct{}, e *Environment, selector labels.Selector) error {
-	for GVK := range GVKs {
+func (t *garbageCollectorTrait) deleteEachOf(ctx context.Context, deletableGVKs map[schema.GroupVersionKind]struct{}, e *Environment, selector labels.Selector) error {
+	for GVK := range deletableGVKs {
 		resources := unstructured.UnstructuredList{
 			Object: map[string]interface{}{
 				"apiVersion": GVK.GroupVersion().String(),
@@ -156,7 +157,7 @@ func (t *garbageCollectorTrait) deleteEachOf(ctx context.Context, GVKs map[schem
 		}
 		if err := t.Client.List(ctx, &resources, options...); err != nil {
 			if !k8serrors.IsNotFound(err) {
-				return fmt.Errorf("cannot list child resources: %v", err)
+				return errors.Wrap(err, "cannot list child resources")
 			}
 			continue
 		}
