@@ -248,6 +248,7 @@ func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, ta
 
 	if task.Platform != "" {
 		bud = append(bud, []string{
+			"--platform",
 			task.Platform,
 		}...)
 	}
