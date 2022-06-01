@@ -28,7 +28,7 @@ KUSTOMIZE_VERSION := v4.1.2
 OPM_VERSION := v1.21.0
 BASE_IMAGE := docker.io/adoptopenjdk/openjdk11:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
-IMAGE_NAME := docker.io/apache/camel-k
+IMAGE_NAME := docker.io/camel-k
 
 #
 # Situations when user wants to override
@@ -331,16 +331,6 @@ endif
 	docker build -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
 images-arch: bundle-kamelets test maven-overlay
-IMAGE_TARGET_PLATFORM := linux/amd64
-# Define target platform for docker build
-ifeq ($(shell uname -m), x86_x64)
-	IMAGE_TARGET_PLATFORM = linux/amd64
-endif
-
-ifeq ($(shell uname -m), aarch64)
-	IMAGE_TARGET_PLATFORM = linux/arm64
-endif
-
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
 ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
@@ -350,7 +340,12 @@ else
 endif
 	docker buildx rm --all-inactive --force
 	docker buildx create --append --name builder
-	docker buildx build --platform=$(IMAGE_TARGET_PLATFORM) -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
+ifeq ($(shell uname -m), x86_x64)
+    	docker buildx build --platform=linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
+endif
+ifeq ($(shell uname -m), aarch64)
+	docker buildx build --platform=linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
+endif
 
 images-dev: bundle-kamelets test package-artifacts maven-overlay
 	mkdir -p build/_maven_output
@@ -363,16 +358,6 @@ endif
 	docker build -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
 images-arch-dev: bundle-kamelets test package-artifacts maven-overlay
-IMAGE_TARGET_PLATFORM := linux/amd64
-# Define target platform for docker build
-ifeq ($(shell uname -m), x86_x64)
-	IMAGE_TARGET_PLATFORM = linux/amd64
-endif
-
-ifeq ($(shell uname -m), aarch64)
-	IMAGE_TARGET_PLATFORM = linux/arm64
-endif
-
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
 ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
@@ -382,7 +367,12 @@ else
 endif
 	docker buildx rm --all-inactive --force
 	docker buildx create --append --name builder
-	docker buildx build --platform=$(IMAGE_TARGET_PLATFORM) -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
+ifeq ($(shell uname -m), x86_x64)
+	docker buildx build --platform=linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
+endif
+ifeq ($(shell uname -m), aarch64)
+	docker buildx build --platform=linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
+endif
 
 images-push:
 	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
