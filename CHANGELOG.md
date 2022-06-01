@@ -6,13 +6,18 @@
 
 **Closed issues:**
 
+- E2E repeated failure [\#3315](https://github.com/apache/camel-k/issues/3315)
 - Helm Chart for camel-k 1.9.2 is invalid [\#3300](https://github.com/apache/camel-k/issues/3300)
-- Simple KameletBinding created with Errors [\#3299](https://github.com/apache/camel-k/issues/3299)
+- Kamel run default service nodePort is invalid [\#3296](https://github.com/apache/camel-k/issues/3296)
 - Cannot find RestProducerFactory in Registry or as a Component to use" [\#3290](https://github.com/apache/camel-k/issues/3290)
 - Never stale a bug issue [\#3283](https://github.com/apache/camel-k/issues/3283)
+- Release 1.9.2 [\#3275](https://github.com/apache/camel-k/issues/3275)
 - Add e2e test for kamel run --dev in a warmed-up environment [\#3211](https://github.com/apache/camel-k/issues/3211)
+- Access channel in different namespace [\#3009](https://github.com/apache/camel-k/issues/3009)
+- Operator creates too many repositories [\#3003](https://github.com/apache/camel-k/issues/3003)
 - Release: scripting Renaming files for operator works [\#2984](https://github.com/apache/camel-k/issues/2984)
 - Autoscaling not working [\#2982](https://github.com/apache/camel-k/issues/2982)
+- Update readiness condition based on new Camel health check format [\#2886](https://github.com/apache/camel-k/issues/2886)
 - Using REST as consumer and producer appends PATH to producer URL [\#2867](https://github.com/apache/camel-k/issues/2867)
 - Refactoring dump function [\#2172](https://github.com/apache/camel-k/issues/2172)
 

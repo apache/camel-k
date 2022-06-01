@@ -19,6 +19,7 @@ package integration
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -37,14 +38,24 @@ const (
 )
 
 type HealthCheck struct {
-	Status HealthCheckState      `json:"state,omitempty"`
+	Status HealthCheckState      `json:"status,omitempty"`
 	Checks []HealthCheckResponse `json:"checks,omitempty"`
 }
 
 type HealthCheckResponse struct {
 	Name   string                 `json:"name,omitempty"`
-	Status HealthCheckState       `json:"state,omitempty"`
+	Status HealthCheckState       `json:"status,omitempty"`
 	Data   map[string]interface{} `json:"data,omitempty"`
+}
+
+func NewHealthCheck(body []byte) (*HealthCheck, error) {
+	health := HealthCheck{}
+	err := json.Unmarshal(body, &health)
+	if err != nil {
+		return nil, err
+	}
+
+	return &health, nil
 }
 
 func proxyGetHTTPProbe(ctx context.Context, c kubernetes.Interface, p *corev1.Probe, pod *corev1.Pod, container *corev1.Container) ([]byte, error) {
