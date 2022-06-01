@@ -515,7 +515,7 @@ func TestModelineQuotedPodTemplate(t *testing.T) {
 		// camel-k: pod-template='{ "containers": [], "security": { "podSecurityContext": { "supplementalGroups": [ 553 ] }, "volumes": [] } }'
 	`
 		fileName := path.Join(dir, "simple.groovy")
-		err := ioutil.WriteFile(fileName, []byte(file), 0777)
+		err := ioutil.WriteFile(fileName, []byte(file), 0o400)
 		assert.NoError(t, err)
 
 		cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
