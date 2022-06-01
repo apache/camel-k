@@ -65,6 +65,21 @@ Camel K integrations are based on https://github.com/apache/camel-k-runtime[Came
 ./kamel install --skip-operator-setup -n operator-test --registry localhost:5000 --force --runtime-version $version
 ----
 
-The `$version` variable must be replaced with the version you are building. For example, `1.3.1-SNAPSHOT`. With these instructions, the operator will pick up and use the snapshot version you have released locally.
+The `$version` variable must be replaced with the version you are building. For example, `1.3.1-SNAPSHOT`. With these instructions, the operator will pick up and use the snapshot version you have released locally. In order to use the local maven repository, you will also need to edit your IntegrationPlatform as follow:
+----
+$ k edit ip -n operator-test
+
+...
+  spec:
+    build:
+      maven:
+        cliOptions:
+        - -V
+        localRepository: /home/user/.m2/repository
+        settings: {}
+...
+----
+pointing the `localRepository` where your local maven is storing the artifacts (it will look for the camel-k-runtime dependencies there).
+
 
 Alternatively, if no local registry is available, you can use another type of registry as explained in xref:installation/registry/registry.adoc[the Registry section].
