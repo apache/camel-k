@@ -17,7 +17,7 @@ VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION ?= 1.10.0-SNAPSHOT
 OPERATOR_VERSION := $(subst -SNAPSHOT,,$(VERSION))
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
-LAST_RELEASED_VERSION := 1.9.1
+LAST_RELEASED_VERSION := 1.9.2
 RUNTIME_VERSION := 1.13.0
 BUILDAH_VERSION := 1.23.3
 KANIKO_VERSION := 0.17.1
@@ -558,6 +558,8 @@ pre-bundle:
 	@sed -i '/  version: ${CSV_VERSION}/a \ \ replaces: $(CSV_REPLACES)' $(CSV_PATH)
 
 bundle: set-version generate-crd $(BUNDLE_CAMEL_APIS) kustomize operator-sdk pre-bundle
+	@# Display BUNDLE_METADATA_OPTS for debugging
+	$(info BUNDLE_METADATA_OPTS=$(BUNDLE_METADATA_OPTS))
 	@# Sets the operator image to the preferred image:tag
 	@cd config/manifests && $(KUSTOMIZE) edit set image $(IMAGE_NAME)=$(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 	@# Build kustomize manifests
