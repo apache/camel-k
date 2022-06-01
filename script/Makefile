@@ -28,7 +28,7 @@ KUSTOMIZE_VERSION := v4.1.2
 OPM_VERSION := v1.21.0
 BASE_IMAGE := docker.io/adoptopenjdk/openjdk11:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
-IMAGE_NAME := docker.io/camel-k
+IMAGE_NAME := docker.io/apache/camel-k
 
 #
 # Situations when user wants to override
