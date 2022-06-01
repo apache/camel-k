@@ -249,11 +249,12 @@ func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, ta
 	if task.Platform != "" {
 		bud = append(bud, []string{
 			task.Platform,
-			"--pull-always",
 		}...)
 	}
 
-	bud = append(bud, []string{"-f",
+	bud = append(bud, []string{
+		"--pull-always",
+		"-f",
 		"Dockerfile",
 		"-t",
 		task.Image,
