@@ -27,6 +27,8 @@ import (
 	"sync"
 	"time"
 
+	"golang.org/x/time/rate"
+
 	"github.com/apache/camel-k/pkg/util"
 	authorization "k8s.io/api/authorization/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -44,10 +46,13 @@ import (
 )
 
 var (
-	toFileName                  = regexp.MustCompile(`[^(\w/\.)]`)
-	diskCachedDiscoveryClient   discovery.CachedDiscoveryInterface
-	memoryCachedDiscoveryClient discovery.CachedDiscoveryInterface
-	discoveryClientLock         sync.Mutex
+	toFileName = regexp.MustCompile(`[^(\w/\.)]`)
+
+	lock                  sync.Mutex
+	rateLimiter           = rate.NewLimiter(rate.Every(time.Minute), 1)
+	collectableGVKs       = make(map[schema.GroupVersionKind]struct{})
+	memoryCachedDiscovery discovery.CachedDiscoveryInterface
+	diskCachedDiscovery   discovery.CachedDiscoveryInterface
 )
 
 type discoveryCacheType string
@@ -187,6 +192,15 @@ func (t *garbageCollectorTrait) canBeDeleted(e *Environment, u unstructured.Unst
 }
 
 func (t *garbageCollectorTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind]struct{}, error) {
+	lock.Lock()
+	defer lock.Unlock()
+
+	// Rate limit to avoid Discovery and SelfSubjectRulesReview requests at every reconciliation.
+	if !rateLimiter.Allow() {
+		// Return the cached set of garbage collectable GVKs.
+		return collectableGVKs, nil
+	}
+
 	// We rely on the discovery API to retrieve all the resources GVK,
 	// that results in an unbounded set that can impact garbage collection latency when scaling up.
 	discoveryClient, err := t.discoveryClient()
@@ -196,7 +210,7 @@ func (t *garbageCollectorTrait) getDeletableTypes(e *Environment) (map[schema.Gr
 	resources, err := discoveryClient.ServerPreferredNamespacedResources()
 	// Swallow group discovery errors, e.g., Knative serving exposes
 	// an aggregated API for custom.metrics.k8s.io that requires special
-	// authentication scheme while discovering preferred resources
+	// authentication scheme while discovering preferred resources.
 	if err != nil && !discovery.IsGroupDiscoveryFailedError(err) {
 		return nil, err
 	}
@@ -237,32 +251,30 @@ func (t *garbageCollectorTrait) getDeletableTypes(e *Environment) (map[schema.Gr
 			}
 		}
 	}
+	collectableGVKs = GVKs
 
-	return GVKs, nil
+	return collectableGVKs, nil
 }
 
 func (t *garbageCollectorTrait) discoveryClient() (discovery.DiscoveryInterface, error) {
-	discoveryClientLock.Lock()
-	defer discoveryClientLock.Unlock()
-
 	switch *t.DiscoveryCache {
 	case diskDiscoveryCache:
-		if diskCachedDiscoveryClient != nil {
-			return diskCachedDiscoveryClient, nil
+		if diskCachedDiscovery != nil {
+			return diskCachedDiscovery, nil
 		}
 		config := t.Client.GetConfig()
 		httpCacheDir := filepath.Join(mustHomeDir(), ".kube", "http-cache")
 		diskCacheDir := filepath.Join(mustHomeDir(), ".kube", "cache", "discovery", toHostDir(config.Host))
 		var err error
-		diskCachedDiscoveryClient, err = disk.NewCachedDiscoveryClientForConfig(config, diskCacheDir, httpCacheDir, 10*time.Minute)
-		return diskCachedDiscoveryClient, err
+		diskCachedDiscovery, err = disk.NewCachedDiscoveryClientForConfig(config, diskCacheDir, httpCacheDir, 10*time.Minute)
+		return diskCachedDiscovery, err
 
 	case memoryDiscoveryCache:
-		if memoryCachedDiscoveryClient != nil {
-			return memoryCachedDiscoveryClient, nil
+		if memoryCachedDiscovery != nil {
+			return memoryCachedDiscovery, nil
 		}
-		memoryCachedDiscoveryClient = memory.NewMemCacheClient(t.Client.Discovery())
-		return memoryCachedDiscoveryClient, nil
+		memoryCachedDiscovery = memory.NewMemCacheClient(t.Client.Discovery())
+		return memoryCachedDiscovery, nil
 
 	case disabledDiscoveryCache, "":
 		return t.Client.Discovery(), nil
