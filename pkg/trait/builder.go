@@ -105,6 +105,9 @@ func (t *builderTrait) Apply(e *Environment) error {
 		var found bool
 		if platform, found = e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahPlatform]; !found {
 			platform = ""
+			t.L.Infof("Attribute platform for buildah not found, default from host will be used!")
+		} else {
+			t.L.Infof("User defined %s platform, will be used from buildah!", platform)
 		}
 
 		e.BuildTasks = append(e.BuildTasks, v1.Task{Buildah: &v1.BuildahTask{
