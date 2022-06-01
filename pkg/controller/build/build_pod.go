@@ -238,7 +238,7 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 }
 
 func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task *v1.BuildahTask, pod *corev1.Pod) error {
-	bud := []string{}
+	var bud []string
 
 	bud = []string{
 		"buildah",

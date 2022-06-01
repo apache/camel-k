@@ -35,7 +35,7 @@ const (
 	KanikoVersion = "0.17.1"
 
 	// baseImage --
-	baseImage = "adoptopenjdk/openjdk11:slim"
+	baseImage = "docker.io/adoptopenjdk/openjdk11:slim"
 
 	// LocalRepository --
 	LocalRepository = "/tmp/artifacts/m2"
