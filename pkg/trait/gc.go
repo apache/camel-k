@@ -93,34 +93,30 @@ func (t *garbageCollectorTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *garbageCollectorTrait) Apply(e *Environment) error {
-	switch e.Integration.Status.Phase {
-
-	case v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning, v1.IntegrationPhaseError:
+	if e.IntegrationInRunningPhases() && e.Integration.GetGeneration() > 1 {
 		// Register a post action that deletes the existing resources that are labelled
-		// with the previous integration generations.
-		// TODO: this should be refined so that it's run when all the replicas for the newer generation
-		// are ready.
+		// with the previous integration generation(s).
+		// We make the assumption generation is a monotonically increasing strictly positive integer,
+		// in which case we can skip garbage collection on the first generation.
+		// TODO: this should be refined so that it's run when all the replicas for the newer generation are ready.
 		e.PostActions = append(e.PostActions, func(env *Environment) error {
 			return t.garbageCollectResources(env)
 		})
-
-		fallthrough
-
-	default:
-		// Register a post processor that adds the required labels to the new resources
-		e.PostProcessors = append(e.PostProcessors, func(env *Environment) error {
-			generation := strconv.FormatInt(env.Integration.GetGeneration(), 10)
-			env.Resources.VisitMetaObject(func(resource metav1.Object) {
-				labels := resource.GetLabels()
-				// Label the resource with the current integration generation
-				labels["camel.apache.org/generation"] = generation
-				// Make sure the integration label is set
-				labels[v1.IntegrationLabel] = env.Integration.Name
-				resource.SetLabels(labels)
-			})
-			return nil
-		})
 	}
+
+	// Register a post processor that adds the required labels to the new resources
+	e.PostProcessors = append(e.PostProcessors, func(env *Environment) error {
+		generation := strconv.FormatInt(env.Integration.GetGeneration(), 10)
+		env.Resources.VisitMetaObject(func(resource metav1.Object) {
+			labels := resource.GetLabels()
+			// Label the resource with the current integration generation
+			labels["camel.apache.org/generation"] = generation
+			// Make sure the integration label is set
+			labels[v1.IntegrationLabel] = env.Integration.Name
+			resource.SetLabels(labels)
+		})
+		return nil
+	})
 
 	return nil
 }
@@ -222,12 +218,12 @@ func (t *garbageCollectorTrait) getDeletableTypes(e *Environment) (map[schema.Gr
 
 	// Retrieve the permissions granted to the operator service account.
 	// We assume the operator has only to garbage collect the resources it has created.
-	srr := &authorization.SelfSubjectRulesReview{
+	ssrr := &authorization.SelfSubjectRulesReview{
 		Spec: authorization.SelfSubjectRulesReviewSpec{
 			Namespace: e.Integration.Namespace,
 		},
 	}
-	res, err := e.Client.AuthorizationV1().SelfSubjectRulesReviews().Create(e.Ctx, srr, metav1.CreateOptions{})
+	ssrr, err = e.Client.AuthorizationV1().SelfSubjectRulesReviews().Create(e.Ctx, ssrr, metav1.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +232,7 @@ func (t *garbageCollectorTrait) getDeletableTypes(e *Environment) (map[schema.Gr
 	for _, APIResourceList := range APIResourceLists {
 		for _, resource := range APIResourceList.APIResources {
 		rule:
-			for _, rule := range res.Status.ResourceRules {
+			for _, rule := range ssrr.Status.ResourceRules {
 				if !util.StringSliceContainsAnyOf(rule.Verbs, "delete", "*") {
 					continue
 				}
