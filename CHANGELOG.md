@@ -11,6 +11,7 @@
 - Kamel run default service nodePort is invalid [\#3296](https://github.com/apache/camel-k/issues/3296)
 - Cannot find RestProducerFactory in Registry or as a Component to use" [\#3290](https://github.com/apache/camel-k/issues/3290)
 - Never stale a bug issue [\#3283](https://github.com/apache/camel-k/issues/3283)
+- Moving main to 1.10.0-SNAPSHOT [\#3280](https://github.com/apache/camel-k/issues/3280)
 - Release 1.9.2 [\#3275](https://github.com/apache/camel-k/issues/3275)
 - Add e2e test for kamel run --dev in a warmed-up environment [\#3211](https://github.com/apache/camel-k/issues/3211)
 - Access channel in different namespace [\#3009](https://github.com/apache/camel-k/issues/3009)
