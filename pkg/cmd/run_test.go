@@ -27,6 +27,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/test"
 
@@ -55,7 +56,10 @@ func initializeRunCmdOptions(t *testing.T) (*runCmdOptions, *cobra.Command, Root
 func initializeRunCmdOptionsWithOutput(t *testing.T) (*runCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
 
-	options, rootCmd := kamelTestPreAddCommandInit()
+	defaultIntegrationPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
+	fakeClient, _ := test.NewFakeClient(&defaultIntegrationPlatform)
+
+	options, rootCmd := kamelTestPreAddCommandInitWithClient(fakeClient)
 	runCmdOptions := addTestRunCmdWithOutput(*options, rootCmd)
 	kamelTestPostAddCommandInit(t, rootCmd)
 
