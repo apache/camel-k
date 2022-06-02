@@ -20,12 +20,14 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
+	platformutil "github.com/apache/camel-k/pkg/platform"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -289,6 +291,11 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			fmt.Fprintln(cobraCmd.OutOrStdout(), "Camel K cluster setup completed successfully")
 		}
 	} else {
+		operatorID, err := getOperatorID(o.EnvVars)
+		if err != nil {
+			return err
+		}
+
 		c, err := o.GetCmdClient()
 		if err != nil {
 			return err
@@ -296,7 +303,18 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 		namespace := o.Namespace
 
+		platformName := platformutil.DefaultPlatformName
+		if operatorID != "" {
+			platformName = operatorID
+		}
+
 		if !o.SkipOperatorSetup && !installViaOLM {
+			if ok, err := isInstallAllowed(o.Context, c, platformName, o.Force, cobraCmd.OutOrStdout()); err != nil {
+				return err
+			} else if !ok {
+				return errors.New(fmt.Sprintf("installation not allowed because operator with id '%s' already exists, use the --force option to skip this check", platformName))
+			}
+
 			cfg := install.OperatorConfiguration{
 				CustomImage:           o.OperatorImage,
 				CustomImagePullPolicy: o.OperatorImagePullPolicy,
@@ -343,11 +361,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			fmt.Fprintln(cobraCmd.OutOrStdout(), "Camel K operator registry setup skipped")
 		}
 
-		operatorID, err := getOperatorID(o.EnvVars)
-		if err != nil {
-			return err
-		}
-		platform, err := install.NewPlatform(o.Context, c, o.ClusterType, o.SkipRegistrySetup, o.registry, operatorID)
+		platform, err := install.NewPlatform(o.Context, c, o.ClusterType, o.SkipRegistrySetup, o.registry, platformName)
 		if err != nil {
 			return err
 		}
@@ -503,6 +517,19 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 	}
 
 	return nil
+}
+
+func isInstallAllowed(ctx context.Context, c client.Client, operatorID string, force bool, out io.Writer) (bool, error) {
+	// find existing platform with given name in any namespace
+	pl, err := platformutil.LookupForPlatformName(ctx, c, operatorID)
+
+	if pl != nil && force {
+		fmt.Fprintln(out, fmt.Sprintf("Overwriting existing operator with id '%s'", operatorID))
+		return true, nil
+	}
+
+	// only allow installation when platform with given name is not found
+	return pl == nil, err
 }
 
 func getOperatorID(vars []string) (string, error) {

@@ -31,6 +31,27 @@ const (
 	DefaultPlatformName = "camel-k"
 )
 
+// LookupForPlatformName finds integration platform with given operator id as name in any namespace
+func LookupForPlatformName(ctx context.Context, c k8sclient.Reader, name string) (*v1.IntegrationPlatform, error) {
+	platformList := v1.NewIntegrationPlatformList()
+
+	// get all integration platform instances on the cluster
+	err := c.List(ctx, &platformList)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if platform with same name as given operator id already exists
+	for _, pl := range platformList.Items {
+		if pl.Name == name {
+			// platform already exists installation not allowed
+			return &pl, nil
+		}
+	}
+
+	return nil, nil
+}
+
 func GetForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object) (*v1.IntegrationPlatform, error) {
 	return GetOrFindForResource(ctx, c, o, true)
 }
