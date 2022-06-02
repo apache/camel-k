@@ -44,8 +44,19 @@ func TestConfigureDisabledGarbageCollectorTraitDoesNotSucceed(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestApplyGarbageCollectorTraitDoesSucceed(t *testing.T) {
+func TestApplyGarbageCollectorTraitFirstGenerationDoesSucceed(t *testing.T) {
 	gcTrait, environment := createNominalGarbageCollectorTest()
+
+	err := gcTrait.Apply(environment)
+
+	assert.Nil(t, err)
+	assert.Len(t, environment.PostProcessors, 1)
+	assert.Len(t, environment.PostActions, 0)
+}
+
+func TestApplyGarbageCollectorTraitNextGenerationDoesSucceed(t *testing.T) {
+	gcTrait, environment := createNominalGarbageCollectorTest()
+	environment.Integration.Generation = 2
 
 	err := gcTrait.Apply(environment)
 
@@ -73,7 +84,8 @@ func createNominalGarbageCollectorTest() (*garbageCollectorTrait, *Environment) 
 		Catalog: NewCatalog(nil),
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "integration-name",
+				Name:       "integration-name",
+				Generation: 1,
 			},
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseRunning,
