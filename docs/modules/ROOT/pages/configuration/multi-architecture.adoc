@@ -3,7 +3,7 @@
 
 To use kamel inside other architecture like arm64 you must build it and use Buildah as builder strategy.
 
-NOTE: For now only arm64 is supported
+NOTE: For now only arm64 is supported as other architectures
 
 [[multi-architecture-build]]
 == Build and Publish Kamel
