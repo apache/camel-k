@@ -23,6 +23,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -37,15 +38,19 @@ func kamelTestPostAddCommandInit(t *testing.T, rootCmd *cobra.Command) {
 	}
 }
 
-func kamelTestPreAddCommandInit() (*RootCmdOptions, *cobra.Command) {
-	fakeClient, _ := test.NewFakeClient()
+func kamelTestPreAddCommandInitWithClient(client client.Client) (*RootCmdOptions, *cobra.Command) {
 	options := RootCmdOptions{
 		Context: context.Background(),
-		_client: fakeClient,
+		_client: client,
 	}
 	rootCmd := kamelPreAddCommandInit(&options)
 	rootCmd.Run = test.EmptyRun
 	return &options, rootCmd
+}
+
+func kamelTestPreAddCommandInit() (*RootCmdOptions, *cobra.Command) {
+	fakeClient, _ := test.NewFakeClient()
+	return kamelTestPreAddCommandInitWithClient(fakeClient)
 }
 
 func TestLoadFromEnvVar(t *testing.T) {

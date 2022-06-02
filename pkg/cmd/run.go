@@ -118,6 +118,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArray("label", nil, "Add a label to the integration. E.g. \"--label my.company=hello\"")
 	cmd.Flags().StringArray("source", nil, "Add source file to your integration, this is added to the list of files listed as arguments of the command")
 	cmd.Flags().String("pod-template", "", "The path of the YAML file containing a PodSpec template to be used for the Integration pods")
+	cmd.Flags().Bool("force", false, "Force creation of integration regardless of potential misconfiguration.")
 
 	cmd.Flags().Bool("save", false, "Save the run parameters into the default kamel configuration file (kamel-config.yaml)")
 
@@ -157,11 +158,12 @@ type runCmdOptions struct {
 	Annotations     []string `mapstructure:"annotations" yaml:",omitempty"`
 	Sources         []string `mapstructure:"sources" yaml:",omitempty"`
 	RegistryOptions url.Values
+	Force           bool `mapstructure:"force" yaml:",omitempty"`
 }
 
 func (o *runCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
 	if o.OutputFormat != "" {
-		// let the command to work in offline mode
+		// let the command work in offline mode
 		cmd.Annotations[offlineCommandLabel] = "true"
 	}
 	return o.RootCmdOptions.preRun(cmd, args)
@@ -548,6 +550,22 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 
 	if integration.Annotations == nil {
 		integration.Annotations = make(map[string]string)
+	}
+
+	if o.OperatorId != "" {
+		if pl, err := platformutil.LookupForPlatformName(o.Context, c, o.OperatorId); err != nil {
+			if k8serrors.IsForbidden(err) {
+				o.PrintfVerboseOutf(cmd, "Unable to verify existence of operator id [%s] due to lack of user privileges\n", o.OperatorId)
+			} else {
+				return nil, err
+			}
+		} else if pl == nil {
+			if o.Force {
+				o.PrintfVerboseOutf(cmd, "Unable to find operator with given id [%s] - integration may not be reconciled and get stuck in waiting state\n", o.OperatorId)
+			} else {
+				return nil, errors.New(fmt.Sprintf("unable to find integration platform for given operator id '%s', use --force option or make sure to use a proper operator id", o.OperatorId))
+			}
+		}
 	}
 
 	// --operator-id={id} is a syntax sugar for '--annotation camel.apache.org/operator.id={id}'
