@@ -3910,6 +3910,19 @@ map[string]string
 <td>
 </td>
 </tr>
+<tr>
+<td>
+<code>securityContext</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core">
+[]Kubernetes core/v1.PodSecurityContext
+</a>
+</em>
+</td>
+<td>
+PodSecurityContext
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="camel.apache.org/v1.PodSpecTemplate">PodSpecTemplate
