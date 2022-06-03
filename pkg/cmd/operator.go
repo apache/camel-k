@@ -18,10 +18,12 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
+	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/spf13/cobra"
 
 	"github.com/apache/camel-k/pkg/cmd/operator"
-	"github.com/apache/camel-k/pkg/platform"
 )
 
 const operatorCommand = "operator"
@@ -41,7 +43,7 @@ func newCmdOperator() (*cobra.Command, *operatorCmdOptions) {
 	cmd.Flags().Int32("health-port", 8081, "The port of the health endpoint")
 	cmd.Flags().Int32("monitoring-port", 8080, "The port of the metrics endpoint")
 	cmd.Flags().Bool("leader-election", true, "Use leader election")
-	cmd.Flags().String("leader-election-id", platform.OperatorLockName, "Use the given ID as the leader election Lease name")
+	cmd.Flags().String("leader-election-id", "", "Use the given ID as the leader election Lease name")
 
 	return &cmd, &options
 }
@@ -54,5 +56,15 @@ type operatorCmdOptions struct {
 }
 
 func (o *operatorCmdOptions) run(_ *cobra.Command, _ []string) {
-	operator.Run(o.HealthPort, o.MonitoringPort, o.LeaderElection, o.LeaderElectionID)
+
+	leaderElectionId := o.LeaderElectionID
+	if leaderElectionId == "" {
+		if defaults.OperatorID() != "" {
+			leaderElectionId = fmt.Sprintf("%s-lock", defaults.OperatorID())
+		} else {
+			leaderElectionId = platform.OperatorLockName
+		}
+	}
+
+	operator.Run(o.HealthPort, o.MonitoringPort, o.LeaderElection, leaderElectionId)
 }
