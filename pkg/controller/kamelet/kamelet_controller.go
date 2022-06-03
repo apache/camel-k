@@ -143,7 +143,7 @@ func (r *reconcileKamelet) Reconcile(ctx context.Context, request reconcile.Requ
 	}
 
 	// Only process resources assigned to the operator
-	if !platform.IsOperatorHandler(&instance) {
+	if !platform.IsOperatorHandlerConsideringLock(ctx, r.client, request.Namespace, &instance) {
 		rlog.Info("Ignoring request because resource is not assigned to current operator")
 		return reconcile.Result{}, nil
 	}

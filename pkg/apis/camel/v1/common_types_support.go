@@ -21,6 +21,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func (in *Artifact) String() string {
@@ -65,6 +67,19 @@ func (m *RawMessage) UnmarshalJSON(data []byte) error {
 	}
 	*m = append((*m)[0:0], data...)
 	return nil
+}
+
+// GetOperatorIDAnnotation to safely get the operator id annotation value
+func GetOperatorIDAnnotation(obj metav1.Object) string {
+	if obj == nil || obj.GetAnnotations() == nil {
+		return ""
+	}
+
+	if operatorId, ok := obj.GetAnnotations()[OperatorIDAnnotation]; ok {
+		return operatorId
+	}
+
+	return ""
 }
 
 var _ json.Marshaler = (*RawMessage)(nil)

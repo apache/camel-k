@@ -288,7 +288,7 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 	}
 
 	// Only process resources assigned to the operator
-	if !platform.IsOperatorHandler(&instance) {
+	if !platform.IsOperatorHandlerConsideringLock(ctx, r.client, request.Namespace, &instance) {
 		rlog.Info("Ignoring request because resource is not assigned to current operator")
 		return reconcile.Result{}, nil
 	}
@@ -317,9 +317,9 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 			}
 
 			if newTarget != nil {
-				if res, err := r.update(ctx, &instance, newTarget); err != nil {
+				if err := r.update(ctx, &instance, newTarget); err != nil {
 					camelevent.NotifyIntegrationError(ctx, r.client, r.recorder, &instance, newTarget, err)
-					return res, err
+					return reconcile.Result{}, err
 				}
 
 				if newTarget.Status.Phase != instance.Status.Phase {
@@ -341,16 +341,14 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 	return reconcile.Result{}, nil
 }
 
-func (r *reconcileIntegration) update(ctx context.Context, base *v1.Integration, target *v1.Integration) (reconcile.Result, error) {
+func (r *reconcileIntegration) update(ctx context.Context, base *v1.Integration, target *v1.Integration) error {
 	d, err := digest.ComputeForIntegration(target)
 	if err != nil {
-		return reconcile.Result{}, err
+		return err
 	}
 
 	target.Status.Digest = d
 	target.Status.ObservedGeneration = base.Generation
 
-	err = r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base))
-
-	return reconcile.Result{}, err
+	return r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base))
 }
