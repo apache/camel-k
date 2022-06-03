@@ -29,6 +29,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
 	"go.uber.org/automaxprocs/maxprocs"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -36,6 +37,7 @@ import (
 	coordination "k8s.io/api/coordination/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
@@ -237,9 +239,39 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	installCtx, installCancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer installCancel()
 	install.OperatorStartupOptionalTools(installCtx, c, watchNamespace, operatorNamespace, log)
+	exitOnError(findOrCreateIntegrationPlatform(installCtx, c, operatorNamespace), "failed to create integration platform")
 
 	log.Info("Starting the manager")
 	exitOnError(mgr.Start(signals.SetupSignalHandler()), "manager exited non-zero")
+}
+
+// findOrCreateIntegrationPlatform create default integration platform in operator namespace if not already exists
+func findOrCreateIntegrationPlatform(ctx context.Context, c client.Client, operatorNamespace string) error {
+	platformName := defaults.OperatorID()
+	if platformName == "" {
+		platformName = platform.DefaultPlatformName
+	}
+
+	if pl, err := kubernetes.GetIntegrationPlatform(ctx, c, platformName, operatorNamespace); pl == nil || k8serrors.IsNotFound(err) {
+		defaultPlatform := v1.NewIntegrationPlatform(operatorNamespace, platformName)
+		if defaultPlatform.Labels == nil {
+			defaultPlatform.Labels = make(map[string]string)
+		}
+		defaultPlatform.Labels["camel.apache.org/platform.generated"] = "true"
+
+		if _, err := c.CamelV1().IntegrationPlatforms(operatorNamespace).Create(ctx, &defaultPlatform, metav1.CreateOptions{}); err != nil {
+			return err
+		}
+
+		// Make sure that IntegrationPlatform installed in operator namespace can be seen by others
+		if err := install.IntegrationPlatformViewerRole(ctx, c, operatorNamespace); err != nil && !k8serrors.IsAlreadyExists(err) {
+			return errors.Wrap(err, "Error while installing global IntegrationPlatform viewer role")
+		}
+	} else {
+		return err
+	}
+
+	return nil
 }
 
 // getWatchNamespace returns the Namespace the operator should be watching for changes.
