@@ -19,6 +19,7 @@ package platform
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strings"
 
@@ -80,8 +81,15 @@ func IsNamespaceLocked(ctx context.Context, c ctrl.Reader, namespace string) (bo
 		return false, nil
 	}
 
+	var operatorLockName string
+	if defaults.OperatorID() != "" {
+		operatorLockName = fmt.Sprintf("%s-lock", defaults.OperatorID())
+	} else {
+		operatorLockName = OperatorLockName
+	}
+
 	lease := coordination.Lease{}
-	if err := c.Get(ctx, ctrl.ObjectKey{Namespace: namespace, Name: OperatorLockName}, &lease); err != nil && k8serrors.IsNotFound(err) {
+	if err := c.Get(ctx, ctrl.ObjectKey{Namespace: namespace, Name: operatorLockName}, &lease); err != nil && k8serrors.IsNotFound(err) {
 		return false, nil
 	} else if err != nil {
 		return true, err
