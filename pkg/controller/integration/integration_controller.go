@@ -253,7 +253,7 @@ type reconcileIntegration struct {
 	recorder record.EventRecorder
 }
 
-// Reconcile reads that state of the cluster for a Integration object and makes changes based on the state read
+// Reconcile reads that state of the cluster for an Integration object and makes changes based on the state read
 // and what is in the Integration.Spec
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or

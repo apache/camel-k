@@ -87,6 +87,18 @@ func TestChangeEnvVariables(t *testing.T) {
 	assert.Equal(t, containsEnvVariables(templateSpec, "integration", "CAMEL_K_DIGEST"), "new_value")
 }
 
+func TestSupplementalGroup(t *testing.T) {
+	templateString := "{containers: [], securityContext: {supplementalGroups: [666]}}}"
+
+	templateSpec := testPodTemplateSpec(t, templateString)
+
+	// Check if securityContext was added
+	assert.NotNil(t, templateSpec.Spec)
+	assert.NotNil(t, templateSpec.Spec.SecurityContext)
+	assert.NotNil(t, templateSpec.Spec.SecurityContext.SupplementalGroups)
+	assert.Contains(t, templateSpec.Spec.SecurityContext.SupplementalGroups, int64(666))
+}
+
 // nolint: unparam
 func createPodTest(podSpecTemplate string) (*podTrait, *Environment, *appsv1.Deployment) {
 	trait, _ := newPodTrait().(*podTrait)
@@ -137,6 +149,9 @@ func createPodTest(podSpecTemplate string) (*podTrait, *Environment, *appsv1.Dep
 								},
 							},
 						},
+					},
+					SecurityContext: &corev1.PodSecurityContext{
+						SupplementalGroups: []int64{666},
 					},
 				},
 			},
