@@ -143,7 +143,7 @@ func ListPrimaryPlatforms(ctx context.Context, c k8sclient.Reader, namespace str
 
 	filtered := v1.NewIntegrationPlatformList()
 	for _, pl := range lst.Items {
-		if val, present := pl.Annotations[v1.SecondaryPlatformAnnotation]; !present || val != "true" {
+		if !IsSecondary(&pl) {
 			filtered.Items = append(filtered.Items, pl)
 		}
 	}

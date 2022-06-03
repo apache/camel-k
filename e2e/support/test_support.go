@@ -1304,7 +1304,7 @@ func AssignPlatformToOperator(ns, operator string) error {
 	return TestClient().Update(TestContext, pl)
 }
 
-func ConfigureSecondayPlatfromWith(ns string, customizer func(pl *v1.IntegrationPlatform)) error {
+func ConfigureSecondaryPlatformWith(ns string, customizer func(pl *v1.IntegrationPlatform)) error {
 	pl := Platform(ns)()
 	if pl == nil {
 		return errors.New("cannot find primary platform")
