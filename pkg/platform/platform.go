@@ -65,6 +65,10 @@ func GetOrFindLocalForResource(ctx context.Context, c k8sclient.Reader, o k8scli
 	return getOrFindForResource(ctx, c, o, active, true)
 }
 
+func GetOrFindLocal(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatform, error) {
+	return findLocal(ctx, c, namespace, true)
+}
+
 func getOrFindForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object, active bool, local bool) (*v1.IntegrationPlatform, error) {
 	if selectedPlatform, ok := o.GetAnnotations()[v1.PlatformSelectorAnnotation]; ok {
 		return get(ctx, c, o.GetNamespace(), selectedPlatform)
