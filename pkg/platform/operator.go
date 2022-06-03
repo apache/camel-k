@@ -81,27 +81,41 @@ func IsNamespaceLocked(ctx context.Context, c ctrl.Reader, namespace string) (bo
 		return false, nil
 	}
 
-	var operatorLockName string
-	if defaults.OperatorID() != "" {
-		operatorLockName = fmt.Sprintf("%s-lock", defaults.OperatorID())
-	} else {
-		operatorLockName = OperatorLockName
-	}
-
-	lease := coordination.Lease{}
-	if err := c.Get(ctx, ctrl.ObjectKey{Namespace: namespace, Name: operatorLockName}, &lease); err != nil && k8serrors.IsNotFound(err) {
-		return false, nil
-	} else if err != nil {
+	platforms, err := ListPrimaryPlatforms(ctx, c, namespace)
+	if err != nil {
 		return true, err
 	}
-	return true, nil
+
+	for _, platform := range platforms.Items {
+		lease := coordination.Lease{}
+
+		var operatorLockName string
+		if platform.Name != "" {
+			operatorLockName = fmt.Sprintf("%s-lock", platform.Name)
+		} else {
+			operatorLockName = OperatorLockName
+		}
+
+		if err := c.Get(ctx, ctrl.ObjectKey{Namespace: namespace, Name: operatorLockName}, &lease); err == nil || !k8serrors.IsNotFound(err) {
+			return true, err
+		}
+	}
+
+	return false, nil
 }
 
 // IsOperatorAllowedOnNamespace returns true if the current operator is allowed to react on changes in the given namespace.
 func IsOperatorAllowedOnNamespace(ctx context.Context, c ctrl.Reader, namespace string) (bool, error) {
+	// allow all local operators
 	if !IsCurrentOperatorGlobal() {
 		return true, nil
 	}
+
+	// allow global operators that use a proper operator id
+	if defaults.OperatorID() != "" {
+		return true, nil
+	}
+
 	operatorNamespace := GetOperatorNamespace()
 	if operatorNamespace == namespace {
 		// Global operator is allowed on its own namespace
@@ -114,13 +128,64 @@ func IsOperatorAllowedOnNamespace(ctx context.Context, c ctrl.Reader, namespace 
 	return !alreadyOwned, nil
 }
 
+// IsOperatorHandler checks on resource operator id annotation and this operator instance id.
+// Operators matching the annotation operator id are allowed to reconcile.
+// For legacy resources that are missing a proper operator id annotation the default global operator or the local
+// operator in this namespace are candidates for reconciliation.
 func IsOperatorHandler(object ctrl.Object) bool {
 	if object == nil {
 		return true
 	}
-	resourceID := object.GetAnnotations()[camelv1.OperatorIDAnnotation]
+	resourceID := camelv1.GetOperatorIDAnnotation(object)
 	operatorID := defaults.OperatorID()
-	return resourceID == operatorID
+
+	// allow operator with matching id to handle the resource
+	if resourceID == operatorID {
+		return true
+	}
+
+	// check if we are dealing with resource that is missing a proper operator id annotation
+	if resourceID == "" {
+		// allow default global operator to handle legacy resources (missing proper operator id annotations)
+		if operatorID == DefaultPlatformName {
+			return true
+		}
+
+		// allow local operators to handle legacy resources (missing proper operator id annotations)
+		if !IsCurrentOperatorGlobal() {
+			return true
+		}
+	}
+
+	return false
+}
+
+// IsOperatorHandlerConsideringLock uses normal IsOperatorHandler checks and adds additional check for legacy resources
+// that are missing a proper operator id annotation. In general two kind of operators race for reconcile these legacy resources.
+// The local operator for this namespace and the default global operator instance. Based on the existence of a namespace
+// lock the current local operator has precedence. When no lock exists the default global operator should reconcile.
+func IsOperatorHandlerConsideringLock(ctx context.Context, c ctrl.Reader, namespace string, object ctrl.Object) bool {
+	isHandler := IsOperatorHandler(object)
+	if !isHandler {
+		return false
+	}
+
+	resourceID := camelv1.GetOperatorIDAnnotation(object)
+	// add additional check on resources missing an operator id
+	if resourceID == "" {
+		operatorNamespace := GetOperatorNamespace()
+		if operatorNamespace == namespace {
+			// Global operator is allowed on its own namespace
+			return true
+		}
+
+		if locked, err := IsNamespaceLocked(ctx, c, namespace); err != nil || locked {
+			// namespace is locked so local operators do have precedence
+			return !IsCurrentOperatorGlobal()
+		}
+	}
+
+	return true
 }
 
 // FilteringFuncs do preliminary checks to determine if certain events should be handled by the controller
@@ -165,7 +230,7 @@ func (f FilteringFuncs) Update(e event.UpdateEvent) bool {
 		return false
 	}
 	if e.ObjectOld != nil && e.ObjectNew != nil &&
-		e.ObjectOld.GetAnnotations()[camelv1.OperatorIDAnnotation] != e.ObjectNew.GetAnnotations()[camelv1.OperatorIDAnnotation] {
+		camelv1.GetOperatorIDAnnotation(e.ObjectOld) != camelv1.GetOperatorIDAnnotation(e.ObjectNew) {
 		// Always force reconciliation when the object becomes managed by the current operator
 		return true
 	}

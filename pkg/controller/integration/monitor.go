@@ -69,6 +69,11 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		return nil, fmt.Errorf("no kit set on integration %s", integration.Name)
 	}
 
+	kit, err := kubernetes.GetIntegrationKit(ctx, action.client, integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
+	if err != nil {
+		return nil, fmt.Errorf("unable to find integration kit %s/%s: %w", integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
+	}
+
 	// Check if the Integration requires a rebuild
 	hash, err := digest.ComputeForIntegration(integration)
 	if err != nil {
@@ -76,17 +81,18 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	}
 
 	if hash != integration.Status.Digest {
-		action.L.Info("Integration needs a rebuild")
+		action.L.Info("Monitor: Integration needs a rebuild")
+
+		if v1.GetOperatorIDAnnotation(integration) != "" &&
+			(v1.GetOperatorIDAnnotation(integration) != v1.GetOperatorIDAnnotation(kit)) {
+			// Operator to reconcile the integration has changed. Reset integration kit so new operator can handle the kit reference
+			integration.SetIntegrationKit(nil)
+		}
 
 		integration.Initialize()
 		integration.Status.Digest = hash
 
 		return integration, nil
-	}
-
-	kit, err := kubernetes.GetIntegrationKit(ctx, action.client, integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
-	if err != nil {
-		return nil, fmt.Errorf("unable to find integration kit %s/%s: %w", integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
 	}
 
 	// Check if an IntegrationKit with higher priority is ready
