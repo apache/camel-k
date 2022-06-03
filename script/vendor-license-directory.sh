@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -15,40 +15,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-location=$(dirname $0)
+# Creates a licenses directory and copies vendor licenses into it.
 
-set -e
-
-repo=$1
-branch=$2
-
-cd $location/../
-target=./build/_kamelets
-
-# Always recreate the dir
-rm -rf $target
-mkdir $target
-
-if [ "$repo" = "" ]; then
-	echo "no kamelet catalog defined: skipping"
-	exit 0
+if [ -d licenses ]
+then
+    rm -rf licenses
 fi
 
-if [ "$branch" = "" ]; then
-  branch="main"
-fi
-
-echo "Cloning repository $repo on branch $branch to bundle kamelets..."
-
-
-rm -rf ./tmp_kamelet_catalog
-git clone -b $branch --single-branch --depth 1 $repo ./tmp_kamelet_catalog
-
-cp ./tmp_kamelet_catalog/kamelets/*.kamelet.yaml $target
-
-rm -rf ./tmp_kamelet_catalog
-
-#
-# Check that all the kamelets have licences
-#
-./script/add_license.sh $target ./script/headers/yaml.txt
+mkdir licenses
+for lic in `find . \( -name "LICENSE*" -o -name "NOTICE*" \) | sed 's|^./||'`
+do
+    dir=licenses/`dirname $lic`
+    mkdir -p $dir
+    cp $lic $dir
+done
