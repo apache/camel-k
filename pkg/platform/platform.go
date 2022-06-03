@@ -21,6 +21,7 @@ import (
 	"context"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -68,9 +69,19 @@ func getOrFindForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.O
 	if selectedPlatform, ok := o.GetAnnotations()[v1.PlatformSelectorAnnotation]; ok {
 		return get(ctx, c, o.GetNamespace(), selectedPlatform)
 	}
+
+	platformName := defaults.OperatorID()
 	if it, ok := o.(*v1.Integration); ok {
-		return getOrFind(ctx, c, it.Namespace, it.Status.Platform, active, local)
+		if it.Status.Platform != "" {
+			platformName = it.Status.Platform
+		}
+
+		return getOrFind(ctx, c, it.Namespace, platformName, active, local)
 	} else if ik, ok := o.(*v1.IntegrationKit); ok {
+		if ik.Status.Platform != "" {
+			platformName = ik.Status.Platform
+		}
+
 		return getOrFind(ctx, c, ik.Namespace, ik.Status.Platform, active, local)
 	}
 	return find(ctx, c, o.GetNamespace(), active, local)

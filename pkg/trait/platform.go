@@ -18,12 +18,16 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
+
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
@@ -96,6 +100,10 @@ func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlat
 		if pointer.BoolDeref(t.CreateDefault, false) {
 			platformName := e.Integration.Status.Platform
 			if platformName == "" {
+				platformName = defaults.OperatorID()
+			}
+
+			if platformName == "" {
 				platformName = platform.DefaultPlatformName
 			}
 			namespace := e.Integration.Namespace
@@ -119,6 +127,12 @@ func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlat
 			}
 			pl = &defaultPlatform
 			e.Resources.Add(pl)
+
+			// Make sure that IntegrationPlatform installed in operator namespace can be seen by others
+			if err := install.IntegrationPlatformViewerRole(e.Ctx, t.Client, namespace); err != nil && !k8serrors.IsAlreadyExists(err) {
+				t.L.Info(fmt.Sprintf("Cannot install global IntegrationPlatform viewer role in namespace '%s': skipping.", namespace))
+			}
+
 			return pl, nil
 		}
 	}

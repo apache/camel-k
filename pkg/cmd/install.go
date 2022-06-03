@@ -485,6 +485,10 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			return err
 		}
 
+		if err := install.IntegrationPlatformViewerRole(o.Context, c, namespace); err != nil && !k8serrors.IsAlreadyExists(err) {
+			return errors.Wrap(err, "Error while installing global IntegrationPlatform viewer role")
+		}
+
 		if o.ExampleSetup {
 			err = install.ExampleOrCollect(o.Context, c, namespace, collection, o.Force)
 			if err != nil {
