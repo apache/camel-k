@@ -546,6 +546,13 @@ BuildahTask is used to configure Buildah
 
 
 
+|`platform` +
+string
+|
+
+
+The platform of build image
+
 |`verbose` +
 bool
 |
@@ -2301,6 +2308,13 @@ base Maven specification
 
 additional repositories
 
+|`servers` +
+*xref:#_camel_apache_org_v1_Server[[\]Server]*
+|
+
+
+Servers (auth)
+
 
 |===
 
@@ -2346,7 +2360,20 @@ the Maven settings.
 |
 
 
+Deprecated: use CASecrets
 The Secret name and key, containing the CA certificate(s) used to connect
+to remote Maven repositories.
+It can contain X.509 certificates, and PKCS#7 formatted certificate chains.
+A JKS formatted keystore is automatically created to store the CA certificate(s),
+and configured to be used as a trusted certificate(s) by the Maven commands.
+Note that the root CA certificates are also imported into the created keystore.
+
+|`caSecrets` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#secretkeyselector-v1-core[[\]Kubernetes core/v1.SecretKeySelector]*
+|
+
+
+The Secrets name and key, containing the CA certificate(s) used to connect
 to remote Maven repositories.
 It can contain X.509 certificates, and PKCS#7 formatted certificate chains.
 A JKS formatted keystore is automatically created to store the CA certificate(s),
@@ -2483,6 +2510,16 @@ the specification
 
 
 |===
+
+[#_camel_apache_org_v1_Properties]
+=== Properties(`map[string]string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Server, Server>>
+
+
+
 
 [#_camel_apache_org_v1_PublishTask]
 === PublishTask
@@ -2854,6 +2891,58 @@ string
 
 
 used by the ImageStream
+
+
+|===
+
+[#_camel_apache_org_v1_Server]
+=== Server
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_MavenBuildSpec, MavenBuildSpec>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`-` +
+encoding/xml.Name
+|
+
+
+
+
+|`id` +
+string
+|
+
+
+
+
+|`username` +
+string
+|
+
+
+
+
+|`password` +
+string
+|
+
+
+
+
+|`configuration` +
+*xref:#_camel_apache_org_v1_Properties[Properties]*
+|
+
+
+
 
 
 |===
