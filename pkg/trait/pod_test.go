@@ -22,7 +22,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"gopkg.in/yaml.v2"
+	"k8s.io/apimachinery/pkg/util/yaml"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -149,9 +149,6 @@ func createPodTest(podSpecTemplate string) (*podTrait, *Environment, *appsv1.Dep
 								},
 							},
 						},
-					},
-					SecurityContext: &corev1.PodSecurityContext{
-						SupplementalGroups: []int64{666},
 					},
 				},
 			},
