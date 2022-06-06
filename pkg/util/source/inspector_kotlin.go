@@ -37,6 +37,7 @@ func (i KotlinInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 		doubleQuotedTo,
 		doubleQuotedToD,
 		doubleQuotedToF,
+		doubleQuotedWireTap,
 	)
 
 	meta.FromURIs = append(meta.FromURIs, from...)

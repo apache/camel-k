@@ -62,7 +62,7 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 						meta.FromURIs = append(meta.FromURIs, a.Value)
 					}
 				}
-			case "to", "toD", "toF":
+			case "to", "toD", "toF", "wireTap":
 				for _, a := range se.Attr {
 					if a.Name.Local == "uri" {
 						meta.ToURIs = append(meta.ToURIs, a.Value)

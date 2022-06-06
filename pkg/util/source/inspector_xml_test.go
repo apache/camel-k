@@ -46,6 +46,15 @@ const XMLKameletEndpoint = `
 </camelContext>
 `
 
+const XMLWireTapEndpoint = `
+<camelContext xmlns="http://camel.apache.org/schema/spring">
+  <route>
+    <from uri="direct:start"/>
+    <wireTap uri="kamelet:foo/bar?baz=test"/>
+  </route>
+</camelContext>
+`
+
 func TestXMLKamelet(t *testing.T) {
 	tc := []struct {
 		source   string
@@ -57,6 +66,10 @@ func TestXMLKamelet(t *testing.T) {
 		},
 		{
 			source:   XMLKameletEndpoint,
+			kamelets: []string{"foo/bar"},
+		},
+		{
+			source:   XMLWireTapEndpoint,
 			kamelets: []string{"foo/bar"},
 		},
 	}
