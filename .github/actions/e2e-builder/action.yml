@@ -45,6 +45,20 @@ runs:
       cluster-config-data: ${{ inputs.cluster-config-data }}
       cluster-kube-config-data: ${{ inputs.cluster-kube-config-data }}
 
+  #
+  # Try and ensure the cluster is in a vanilla state before
+  # starting in on an installation
+  #
+  - id: pre-clean-cluster
+    name: Pre Clean Cluster
+    uses: ./.github/actions/kamel-cleanup
+    if: ${{ always() }}
+    with:
+      catalog-source-name: ${{ steps.config-cluster.outputs.cluster-catalog-source-name }}
+      catalog-source-namespace: ${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}
+      image-namespace: ${{ steps.config-cluster.outputs.cluster-image-namespace }}
+      global-operator-namespace: ${{ steps.config-cluster.outputs.cluster-global-operator-namespace }}
+
   - id: build-kamel
     name: Build Kamel
     uses: ./.github/actions/kamel-build
@@ -54,7 +68,8 @@ runs:
       image-namespace: ${{ steps.config-cluster.outputs.cluster-image-namespace }}
       # Builds the bundle if an OLM is available - depends on cluster being tested
       build-bundle: ${{ steps.config-cluster.outputs.cluster-has-olm }}
-      # Can be empty and so catalog source will not be created
+      # Both can be empty and so catalog source will not be created
+      catalog-source-name: ${{ steps.config-cluster.outputs.cluster-catalog-source-name }}
       catalog-source-namespace: ${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}
 
   - id: install-kamel-cluster-setup
@@ -67,7 +82,22 @@ runs:
     name: Preflight Check Test
     uses: ./.github/actions/kamel-preflight-test
     with:
-      build-catalog-source: ${{ steps.build-kamel.outputs.build-bundle-catalog-source-name }}
+      catalog-source-name: ${{ steps.config-cluster.outputs.cluster-catalog-source-name }}
+      catalog-source-namespace: ${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}
+      image-namespace: ${{ steps.config-cluster.outputs.cluster-image-namespace }}
+      image-registry-host: ${{ steps.config-cluster.outputs.cluster-image-registry-pull-host }}
+      image-name: ${{ steps.build-kamel.outputs.build-binary-local-image-name }}
+      image-registry-insecure: ${{steps.config-cluster.outputs.cluster-image-registry-insecure }}
+      image-version: ${{ steps.build-kamel.outputs.build-binary-local-image-version }}
+
+  - id: install-global-operator
+    name: "Install Global Operator"
+    if: ${{ steps.config-cluster.outputs.cluster-global-operator-namespace }}
+    uses: ./.github/actions/kamel-install-global-operator
+    with:
+      global-operator-namespace: ${{ steps.config-cluster.outputs.cluster-global-operator-namespace }}
+      catalog-source-name: ${{ steps.config-cluster.outputs.cluster-catalog-source-name }}
+      catalog-source-namespace: ${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}
       image-namespace: ${{ steps.config-cluster.outputs.cluster-image-namespace }}
       image-registry-host: ${{ steps.config-cluster.outputs.cluster-image-registry-pull-host }}
       image-name: ${{ steps.build-kamel.outputs.build-binary-local-image-name }}
@@ -78,7 +108,7 @@ runs:
     name: List Tests Marked As Problematic
     uses: ./.github/actions/kamel-report-problematic
     with:
-      test-suite: builder
+      test-suite: global/builder
 
   - id: run-it
     name: Run IT
@@ -87,7 +117,9 @@ runs:
       KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY: ${{ inputs.publisher }}
     run: |
       ./.github/actions/e2e-builder/exec-tests.sh \
-        -c "${{ steps.build-kamel.outputs.build-bundle-catalog-source-name }}" \
+        -b "${{ steps.config-cluster.outputs.cluster-catalog-source-name }}" \
+        -c "${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}" \
+        -g "${{ steps.config-cluster.outputs.cluster-global-operator-namespace }}" \
         -i "${{ steps.config-cluster.outputs.cluster-image-namespace }}" \
         -l "${{ steps.config-cluster.outputs.cluster-image-registry-pull-host }}" \
         -n "${{ steps.build-kamel.outputs.build-binary-local-image-name }}" \
@@ -99,5 +131,7 @@ runs:
     uses: ./.github/actions/kamel-cleanup
     if: ${{ always() }}
     with:
-      build-bundle-catalog-source: ${{ steps.build-kamel.outputs.build-bundle-catalog-source-name }}
+      catalog-source-name: ${{ steps.config-cluster.outputs.cluster-catalog-source-name }}
+      catalog-source-namespace: ${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}
       image-namespace: ${{ steps.config-cluster.outputs.cluster-image-namespace }}
+      global-operator-namespace: ${{ steps.config-cluster.outputs.cluster-global-operator-namespace }}

@@ -35,6 +35,9 @@ inputs:
   local-image-version:
     description: "Reference of the camel-k image version"
     required: true
+  catalog-source-name:
+    description: 'Name of the catalog source for the bundle (if required)'
+    required: false
   catalog-source-namespace:
     description: 'Namespace in which to install the catalog source for the bundle (if required)'
     required: false
@@ -84,6 +87,7 @@ runs:
       shell: bash
       run: |
         ./.github/actions/kamel-build-bundle/build-image-catalog.sh \
+          -b "${{ inputs.catalog-source-name }}" \
           -c "${{ inputs.catalog-source-namespace }}" \
           -i "${{ inputs.image-namespace }}" \
           -x "${{ steps.build-index-image.outputs.build-bundle-image-bundle-index }}"
@@ -95,6 +99,3 @@ outputs:
   build-bundle-image-bundle-index:
     description: "Full name of the bundle index image"
     value: ${{ steps.build-index-image.outputs.build-bundle-image-bundle-index }}
-  build-bundle-catalog-source-name:
-    description: "Name of the catalog source for the build bundle image"
-    value: ${{ steps.build-image-catalog.outputs.build-bundle-catalog-source-name }}

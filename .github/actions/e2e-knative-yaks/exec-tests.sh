@@ -25,10 +25,13 @@
 
 set -e
 
-while getopts ":c:i:l:n:s:v:x:" opt; do
+while getopts ":b:c:i:l:n:s:v:x:" opt; do
   case "${opt}" in
+    b)
+      BUILD_CATALOG_SOURCE_NAME=${OPTARG}
+      ;;
     c)
-      BUILD_CATALOG_SOURCE=${OPTARG}
+      BUILD_CATALOG_SOURCE_NAMESPACE=${OPTARG}
       ;;
     i)
       IMAGE_NAMESPACE=${OPTARG}
@@ -92,9 +95,10 @@ export CUSTOM_VERSION=${IMAGE_VERSION}
 #
 # If bundle has been built and installed then use it
 #
-if [ -n "${BUILD_CATALOG_SOURCE}" ]; then
-  export KAMEL_INSTALL_OLM_SOURCE_NAMESPACE=${IMAGE_NAMESPACE}
-  export KAMEL_INSTALL_OLM_SOURCE=${BUILD_CATALOG_SOURCE}
+if [ -n "${BUILD_CATALOG_SOURCE_NAMESPACE}" ]; then
+  export KAMEL_INSTALL_OLM_SOURCE=${BUILD_CATALOG_SOURCE_NAME}
+  export KAMEL_INSTALL_OLM_SOURCE_NAMESPACE=${BUILD_CATALOG_SOURCE_NAMESPACE}
+  export KAMEL_INSTALL_OLM_CHANNEL="${NEW_XY_CHANNEL}"
 fi
 
 export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)

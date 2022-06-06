@@ -25,8 +25,11 @@
 
 set -e
 
-while getopts ":c:i:x:" opt; do
+while getopts ":b:c:i:x:" opt; do
   case "${opt}" in
+    b)
+      CATALOG_SOURCE_NAME=${OPTARG}
+      ;;
     c)
       CATALOG_SOURCE_NAMESPACE=${OPTARG}
       ;;
@@ -53,6 +56,11 @@ if [ -z "${CATALOG_SOURCE_NAMESPACE}" ]; then
   exit 0
 fi
 
+if [ -z "${CATALOG_SOURCE_NAME}" ]; then
+  echo "No catalog source name defined ... skipping catalog source creation"
+  exit 0
+fi
+
 if [ -z "${IMAGE_NAMESPACE}" ]; then
   echo "Error: image-namespace not defined"
   exit 1
@@ -69,16 +77,12 @@ if [ $? != 0 ]; then
   exit 1
 fi
 
-export BUILD_CATALOG_SOURCE="camel-k-test-source"
-echo "Setting build-bundle-catalog-source-name to ${BUILD_CATALOG_SOURCE}"
-echo "::set-output name=build-bundle-catalog-source-name::${BUILD_CATALOG_SOURCE}"
-
 cat <<EOF | kubectl apply -f -
 apiVersion: operators.coreos.com/v1alpha1
 kind: CatalogSource
 metadata:
-  name: ${BUILD_CATALOG_SOURCE}
-  namespace: ${IMAGE_NAMESPACE}
+  name: ${CATALOG_SOURCE_NAME}
+  namespace: ${CATALOG_SOURCE_NAMESPACE}
 spec:
   displayName: OLM upgrade test Catalog
   image: ${BUNDLE_IMAGE_INDEX}

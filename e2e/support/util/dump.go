@@ -23,7 +23,10 @@ package util
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
+	"os"
+	"strings"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -186,6 +189,47 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 				return err
 			}
 			t.Logf("---\n%s\n---\n", string(data))
+		}
+	}
+
+	//
+	// Get logs for global operator if it is being used
+	//
+	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
+	if globalTest {
+		opns := os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
+		if opns == "" {
+			err := errors.New("No operator namespace defined in CAMEL_K_GLOBAL_OPERATOR_NS")
+			t.Logf("ERROR cannot find global operator namespace: %v\n", err)
+		}
+
+		lst, err := c.CoreV1().Pods(opns).List(ctx, metav1.ListOptions{})
+		if err != nil {
+			return err
+		}
+
+		t.Logf("\nFound %d pods:\n", len(lst.Items))
+		for _, pod := range lst.Items {
+			if !strings.Contains(pod.Name, "camel-k") {
+				// ignore other global operators
+				t.Logf("Ignoring pod %s", pod.Name)
+				continue
+			}
+
+			t.Logf("name=%s\n", pod.Name)
+			dumpConditions("  ", pod.Status.Conditions, t)
+			t.Logf("  logs:\n")
+			var allContainers []corev1.Container
+			allContainers = append(allContainers, pod.Spec.InitContainers...)
+			allContainers = append(allContainers, pod.Spec.Containers...)
+			for _, container := range allContainers {
+				pad := "    "
+				t.Logf("%s%s\n", pad, container.Name)
+				err := dumpLogs(ctx, c, fmt.Sprintf("%s> ", pad), pod.Namespace, pod.Name, container.Name, t)
+				if err != nil {
+					t.Logf("%sERROR while reading the logs: %v\n", pad, err)
+				}
+			}
 		}
 	}
 

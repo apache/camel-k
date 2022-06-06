@@ -19,22 +19,51 @@ name: kamel-cleanup
 description: 'Cleans up the target cluster, removing any e2e test resources'
 
 inputs:
-  build-bundle-catalog-source:
+  catalog-source-name:
     description: "Name of the catalog source for the build bundle image"
+    required: true
+  catalog-source-namespace:
+    description: "Namespace of the catalog source for the build bundle image"
     required: true
   image-namespace:
     description: "Installed location of the images if resident on the cluster (only applies to clusters with partnered registries)"
     required: false
+  global-operator-namespace:
+    description: "The namespace to uninstall the global operator from"
+    required: true
 
 runs:
   using: "composite"
   steps:
+    - id: uninstall-global-operator
+      name: Execute Operator Uninstall
+      shell: bash
+      run: |
+        ./.github/actions/kamel-cleanup/uninstall-global-operator.sh \
+          -c "${{ inputs.catalog-source-namespace }}" \
+          -g "${{ inputs.global-operator-namespace }}"
+
+    - id: remove-orphan-resources
+      name: Remove Orphaned Resources
+      shell: bash
+      if: ${{ always() }}
+      run: |
+        ./.github/actions/kamel-cleanup/clean-orphan-resources.sh
+
+    - id: remove-leftover-operatorgroups
+      name: Remove Leftover OperatorGroups
+      shell: bash
+      if: ${{ always() }}
+      run: |
+        ./.github/actions/kamel-cleanup/clean-operator-groups.sh
+
     - id: remove-installed-kamel
       name: Remove Installed Kamel
       shell: bash
       if: ${{ always() }}
       run: |
         ./.github/actions/kamel-cleanup/cleanup.sh \
-          -c "${{ inputs.build-bundle-catalog-source }}" \
+          -b "${{ inputs.catalog-source-name }}" \
+          -c "${{ inputs.catalog-source-namespace }}" \
           -i "${{ inputs.image-namespace }}" \
           -x "${{ env.CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE }}"

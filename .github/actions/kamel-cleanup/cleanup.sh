@@ -25,10 +25,13 @@
 
 set -e
 
-while getopts ":c:i:x:" opt; do
+while getopts ":b:c:i:x:" opt; do
   case "${opt}" in
+    b)
+      BUILD_CATALOG_SOURCE_NAME=${OPTARG}
+      ;;
     c)
-      BUILD_CATALOG_SOURCE=${OPTARG}
+      BUILD_CATALOG_SOURCE_NAMESPACE=${OPTARG}
       ;;
     i)
       IMAGE_NAMESPACE=${OPTARG}
@@ -52,27 +55,9 @@ shift $((OPTIND-1))
 # Reset the proxy to default if using an OLM
 # which would require a catalogsource
 #
-if [ -n "${BUILD_CATALOG_SOURCE}" ]; then
+if [ -n "${BUILD_CATALOG_SOURCE_NAMESPACE}" ]; then
   ./.github/actions/kamel-cleanup/reset-proxy.sh
 fi
-
-if [ "${SAVE_NAMESPACES}" == "true" ]; then
-  echo "Skipping remaining cleanup since SAVE_NAMESPACES has been set to true"
-  exit 0
-fi
-
-#
-# Remove installed kamel
-#
-set +e
-if command -v kamel &> /dev/null
-then
-  kamel uninstall --olm=false --all
-fi
-
-# Ensure the CRDs are removed
-kubectl get crds | grep camel | awk '{print $1}' | xargs kubectl delete crd &> /dev/null
-set -e
 
 if [ -n "${IMAGE_NAMESPACE}" ]; then
   echo -n "Removing compiled image streams ... "
@@ -92,20 +77,35 @@ fi
 #
 # Remove Catalog Source
 #
-if [ -n "${BUILD_CATALOG_SOURCE}" ]; then
+if [ -n "${BUILD_CATALOG_SOURCE_NAMESPACE}" ]; then
   set +e
   echo -n "Removing testing catalogsource ... "
-  kubectl get catalogsource --all-namespaces | \
-    grep ${BUILD_CATALOG_SOURCE} | awk {'print $1'} | \
-    xargs kubectl delete CatalogSource &> /dev/null
+  kubectl delete catalogsource ${BUILD_CATALOG_SOURCE_NAME} -n ${BUILD_CATALOG_SOURCE_NAMESPACE}
   if [ $? == 0 ]; then
     echo "Done"
   else
-    echo
+    echo "Warning: Catalog Source ${BUILD_CATALOG_SOURCE_NAME} not found in ${BUILD_CATALOG_SOURCE_NAMESPACE}"
   fi
 
   set -e
 fi
+
+if [ "${SAVE_NAMESPACES}" == "true" ]; then
+  echo "Skipping remaining cleanup since SAVE_NAMESPACES has been set to true"
+  exit 0
+fi
+
+#
+# Remove installed kamel
+#
+set +e
+if command -v kamel &> /dev/null
+then
+  kamel uninstall --olm=false --all --skip-crd=false
+fi
+
+# Ensure the CRDs are removed
+kubectl get crds | grep camel | awk '{print $1}' | xargs kubectl delete crd &> /dev/null
 
 #
 # Remove KNative resources

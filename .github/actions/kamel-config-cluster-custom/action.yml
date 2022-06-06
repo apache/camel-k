@@ -108,6 +108,9 @@ outputs:
   cluster-image-registry-insecure:
     description: "Whether the pull registry is insecure"
     value: ${{ steps.connect-cluster.outputs.cluster-image-registry-insecure }}
+  cluster-catalog-source-name:
+    description: "The name of the OLM catalog source to install"
+    value: ${{ steps.connect-cluster.outputs.cluster-catalog-source-name }}
   cluster-catalog-source-namespace:
     description: "The namespace in which to install the OLM catalog source"
     value: ${{ steps.connect-cluster.outputs.cluster-catalog-source-namespace }}
@@ -123,3 +126,6 @@ outputs:
   cluster-has-olm:
     description: "Does the cluster have OLM"
     value: ${{ steps.connect-cluster.outputs.cluster-has-olm }}
+  cluster-global-operator-namespace:
+    description: "Namespace to install a global operator"
+    value: ${{ steps.connect-cluster.outputs.cluster-global-operator-namespace}}

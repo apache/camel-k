@@ -210,53 +210,73 @@ test: do-build
 	cd pkg/kamelet/repository && go test ./...
 
 #
+# Integration tests are located either as global or namespace
+# global:    tests can be executed using a pre-installed global operator
+#            with only the platform installed is a namespace
+#
+# namespace: tests must be executed using a namespace installed operator
+#            usually due to the test requiring specific parameters on the
+#            operator configuration
+#
+
+
+###############################
+#
+# GLOBAL INSTALL TESTS
+#
+###############################
+
+#
 # Note
 # This should execute all tests and not exit if one of the suites fail
 #
 test-integration: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/common -tags=integration $(TEST_INTEGRATION_COMMON_RUN); \
-	go test -timeout 60m -v ./e2e/common/build -tags=integration $(TEST_INTEGRATION_COMMON_BUILD_RUN); \
-	go test -timeout 60m -v ./e2e/common/cli -tags=integration $(TEST_INTEGRATION_COMMON_CLI_RUN); \
-	go test -timeout 60m -v ./e2e/common/config -tags=integration $(TEST_INTEGRATION_COMMON_CONFIG_RUN); \
-	go test -timeout 60m -v ./e2e/common/languages -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN); \
-	go test -timeout 60m -v ./e2e/common/traits -tags=integration $(TEST_INTEGRATION_COMMON_TRAITS_RUN)
+	go test -timeout 60m -v ./e2e/global/common -tags=integration $(TEST_INTEGRATION_COMMON_RUN); \
+	go test -timeout 60m -v ./e2e/global/common/build -tags=integration $(TEST_INTEGRATION_COMMON_BUILD_RUN); \
+	go test -timeout 60m -v ./e2e/global/common/config -tags=integration $(TEST_INTEGRATION_COMMON_CONFIG_RUN); \
+	go test -timeout 60m -v ./e2e/global/common/languages -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN); \
+	go test -timeout 60m -v ./e2e/global/common/traits -tags=integration $(TEST_INTEGRATION_COMMON_TRAITS_RUN)
 
 test-knative: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/knative -tags=integration $(TEST_KNATIVE_RUN)
+	go test -timeout 60m -v ./e2e/global/knative -tags=integration $(TEST_KNATIVE_RUN)
 
 test-builder: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/builder -tags=integration $(TEST_BUILDER_RUN)
+	go test -timeout 60m -v ./e2e/global/builder -tags=integration $(TEST_BUILDER_RUN)
+
+test-service-binding: do-build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	go test -timeout 60m -v ./e2e/global/service-binding -tags=integration $(TEST_SERVICE_RUN)
 
 test-local: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 30m -v ./e2e/local -tags=integration $(TEST_LOCAL_RUN)
 
-test-kamel-cli: do-build
+test-registry-maven-wagon: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/common/cli -tags=integration $(TEST_KAMEL_CLI)
+	go test -timeout 60m -v ./e2e/global/registry -tags=integration $(TEST_REGISTRY_MAVEN_WAGON_RUN)
 
-test-kustomize: do-build
+###############################
+#
+# NAMESPACED INSTALL TESTS
+#
+###############################
+
+test-install: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/common/kustomize -tags=integration $(TEST_KUSTOMIZE_RUN)
+	go test -timeout 60m -v ./e2e/namespace/install/ -tags=integration $(TEST_INSTALL_RUN) \
+	go test -timeout 60m -v ./e2e/namespace/install/cli -tags=integration $(TEST_INSTALL_CLI_RUN); \
+	go test -timeout 60m -v ./e2e/namespace/install/kustomize -tags=integration $(TEST_INSTALL_KUSTOMIZE_RUN)
 
 test-quarkus-native: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/native -tags=integration $(TEST_QUARKUS_RUN)
-
-test-service-binding: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/service-binding -tags=integration $(TEST_SERVICE_RUN)
+	go test -timeout 60m -v ./e2e/namespace/native -tags=integration $(TEST_QUARKUS_RUN)
 
 test-upgrade: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/upgrade -tags=integration $(TEST_UPGRADE_RUN)
-
-test-registry-maven-wagon: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/registry -tags=integration $(TEST_REGISTRY_MAVEN_WAGON_RUN)
+	go test -timeout 60m -v ./e2e/namespace/upgrade -tags=integration $(TEST_UPGRADE_RUN)
 
 build-kamel:
 # Ensure the binary is statically linked when building on Linux due to ABI changes in newer glibc 2.32, otherwise
@@ -284,9 +304,9 @@ build-submodules:
 	./script/build_submodules.sh
 
 build-compile-integration-tests:
-	go test -c -tags="integration" ./e2e/common
-	go test -c -tags="integration" ./e2e/knative
-	go test -c -tags="integration" ./e2e/builder
+	go test -run nope -tags="integration" ./e2e/global/... > /dev/null
+	go test -run nope -tags="integration" ./e2e/local/... > /dev/null
+	go test -run nope -tags="integration" ./e2e/namespace/... > /dev/null
 
 clean:
 	# disable gomodules when executing go clean:
