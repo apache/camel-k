@@ -48,6 +48,11 @@ from("direct:start")
     .to('kamelet:foo/bar?baz=test')
 `
 
+const GroovyWireTapEipSingleQuote = `
+from("direct:start")
+    .wireTap('kamelet:foo/bar?baz=test')
+`
+
 func TestGroovyKamelet(t *testing.T) {
 	tc := []struct {
 		source   string
@@ -67,6 +72,10 @@ func TestGroovyKamelet(t *testing.T) {
 		},
 		{
 			source:   GroovyKameletEndpointSingleQuote,
+			kamelets: []string{"foo/bar"},
+		},
+		{
+			source:   GroovyWireTapEipSingleQuote,
 			kamelets: []string{"foo/bar"},
 		},
 	}
