@@ -54,7 +54,7 @@ has_property() {
 }
 
 get_property() {
-  VAR=$(echo "${CLUSTER_CONFIG_DATA}" | grep ${1})
+  VAR=$(echo "${CLUSTER_CONFIG_DATA}" | grep "${1}=")
   echo ${VAR#*=}
 }
 
@@ -86,7 +86,9 @@ fi
 echo "::set-output name=cluster-image-registry-push-host::$(get_property image-registry-push-host)"
 echo "::set-output name=cluster-image-registry-pull-host::$(get_property image-registry-pull-host)"
 echo "::set-output name=cluster-image-registry-insecure::$(get_property image-registry-insecure)"
+echo "::set-output name=cluster-catalog-source-name::$(get_property catalog-source-name)"
 echo "::set-output name=cluster-catalog-source-namespace::$(get_property catalog-source-namespace)"
+echo "::set-output name=cluster-global-operator-namespace::$(get_property global-operator-namespace)"
 
 #
 # Export the image namespace if defined in the cluster config

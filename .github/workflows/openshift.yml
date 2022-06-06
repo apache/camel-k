@@ -89,8 +89,20 @@ jobs:
       with:
         kube-admin-user-ctx: ${{ steps.config-cluster.outputs.cluster-kube-admin-user-ctx }}
 
-    - name: Run IT
+    - name: Run IT 1
       run: |
         # Then run integration tests
         make test-integration
         make test-builder
+        make test-quarkus-native
+
+    - id: change-context
+      name: Change the Kamel Cluster Context to Admin
+      run: |
+        ./.github/actions/kamel-config-cluster/change-context.sh
+          -a "${{ steps.config-cluster.outputs.cluster-kube-admin-user-ctx }}"
+
+    - name: Run IT 2
+      run: |
+        # Then run integration tests
+        make test-install

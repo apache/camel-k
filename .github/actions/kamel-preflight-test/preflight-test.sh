@@ -23,12 +23,21 @@
 #
 ####
 
+
+delns() {
+  echo "Deleting namespace ${1}"
+  kubectl delete ns ${1} &> /dev/null
+}
+
 set -e
 
-while getopts ":c:i:l:n:s:v:" opt; do
+while getopts ":b:c:i:l:n:s:v:" opt; do
   case "${opt}" in
+    b)
+      BUILD_CATALOG_SOURCE_NAME=${OPTARG}
+      ;;
     c)
-      BUILD_CATALOG_SOURCE=${OPTARG}
+      BUILD_CATALOG_SOURCE_NAMESPACE=${OPTARG}
       ;;
     i)
       IMAGE_NAMESPACE=${OPTARG}
@@ -99,8 +108,6 @@ if [ $? != 0 ]; then
   exit 1
 fi
 
-#trap "kubectl delete ns ${NAMESPACE} &> /dev/null" EXIT
-
 # Cluster environment
 export CUSTOM_IMAGE=${IMAGE_NAME}
 export CUSTOM_VERSION=${IMAGE_VERSION}
@@ -109,7 +116,7 @@ export CUSTOM_VERSION=${IMAGE_VERSION}
 # If bundle has been built and installed then use it
 #
 has_olm="false"
-if [ -n "${BUILD_CATALOG_SOURCE}" ]; then
+if [ -n "${BUILD_CATALOG_SOURCE_NAMESPACE}" ]; then
   #
   # Check catalog source is actually available
   #
@@ -118,26 +125,36 @@ if [ -n "${BUILD_CATALOG_SOURCE}" ]; then
   until [ ${catalog_ready} -eq 1 ] || [ ${timeout} -eq 0 ]
   do
     echo "Info: Awaiting catalog source to become ready"
-    let timeout=${timeout}-1
 
-    STATE=$(kubectl get catalogsource ${BUILD_CATALOG_SOURCE} -n ${IMAGE_NAMESPACE} -o=jsonpath='{.status.connectionState.lastObservedState}')
+    STATE=$(kubectl get catalogsource ${BUILD_CATALOG_SOURCE_NAME} \
+      -n ${BUILD_CATALOG_SOURCE_NAMESPACE} \
+      -o=jsonpath='{.status.connectionState.lastObservedState}')
     if [ "${STATE}" == "READY" ]; then
       let catalog_ready=1
       echo "Info: Catalog source is ready"
       continue
     else
       echo "Warning: catalog source status is not ready."
-      if [ ${timeout} -eq 0 ]; then
-        echo "Error: timedout while awaiting catalog source to start"
+      if [ "${timeout}" -eq 1 ]; then
+        echo "Error: timed out while awaiting catalog source to start"
+        delns "${NAMESPACE}"
         exit 1
       fi
     fi
 
     sleep 1m
+    let timeout=${timeout}-1
   done
 
-  export KAMEL_INSTALL_OLM_SOURCE_NAMESPACE=${IMAGE_NAMESPACE}
-  export KAMEL_INSTALL_OLM_SOURCE=${BUILD_CATALOG_SOURCE}
+  if [ -z "${NEW_XY_CHANNEL}" ]; then
+    echo "Error: OLM Channel cannot be determined"
+    delns "${NAMESPACE}"
+    exit 1
+  fi
+
+  export KAMEL_INSTALL_OLM_SOURCE=${BUILD_CATALOG_SOURCE_NAME}
+  export KAMEL_INSTALL_OLM_SOURCE_NAMESPACE=${BUILD_CATALOG_SOURCE_NAMESPACE}
+  export KAMEL_INSTALL_OLM_CHANNEL="${NEW_XY_CHANNEL}"
   has_olm="true"
 fi
 
@@ -157,6 +174,7 @@ export KAMEL_INSTALL_OPERATOR_IMAGE_PULL_POLICY="Always"
 kamel install -n ${NAMESPACE} --olm=${has_olm}
 if [ $? != 0 ]; then
   echo "Error: kamel install returned an error."
+  delns "${NAMESPACE}"
   exit 1
 fi
 
@@ -174,6 +192,13 @@ do
   ((i++))
   if [ "${i}" -gt "${timeout}" ]; then
     echo "kamel operator not successfully installed, aborting due to ${timeout}s timeout"
+    resources="pods csvs deployments subs"
+    for resource in ${resources}
+    do
+      echo "Dumping resourse: ${resource}"
+      kubectl get ${resource} -n "${NAMESPACE}" -o yaml
+    done
+    delns "${NAMESPACE}"
     exit 1
   fi
 
@@ -188,11 +213,30 @@ camel_op_commit=$(kubectl logs ${camel_operator} -n ${NAMESPACE} | sed -n 's/.*"
 
 src_commit=$(git rev-parse HEAD)
 
+if [ -z "${camel_operator}" ]; then
+  echo "Preflight Test: Failure - No camel operator can be located in ${NAMESPACE}"
+  delns "${NAMESPACE}"
+  exit 1
+fi
+
+if [ -z "${camel_op_version}" ]; then
+  echo "Preflight Test: Failure - No camel operator version can be located for ${NAMESPACE} / ${camel_operator}"
+  delns "${NAMESPACE}"
+  exit 1
+fi
+
+if [ -z "${camel_op_commit}" ]; then
+  echo "Preflight Test: Failure - No camel operator commit can be located for ${NAMESPACE} / ${camel_operator}"
+  delns "${NAMESPACE}"
+  exit 1
+fi
+
 #
 # Test whether the versions are the same
 #
 if [ "${camel_op_version}" != "${IMAGE_VERSION}" ]; then
   echo "Preflight Test: Failure - Installed operator version ${camel_op_version} does not match expected version (${IMAGE_VERSION})"
+  delns "${NAMESPACE}"
   exit 1
 fi
 
@@ -201,7 +245,22 @@ fi
 #
 if [ "${camel_op_commit}" != "${src_commit}" ]; then
   echo "Preflight Test: Failure - Installed operator commit id (${camel_op_commit}) does not match expected commit id (${src_commit})"
+  delns "${NAMESPACE}"
   exit 1
 fi
 
+#
+# Tidy-up and remove the operator from preflight
+#
+kamel uninstall -n ${NAMESPACE}
+if [ $? != 0 ]; then
+  echo "Error: kamel uninstall failed while removing preflight install"
+  delns "${NAMESPACE}"
+  exit 1
+fi
+
+sleep 3
+
 echo "Preflight Test: Success"
+
+delns "${NAMESPACE}"

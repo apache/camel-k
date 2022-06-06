@@ -116,6 +116,17 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
+	if !o.SkipIntegrationPlatform {
+		if err = o.uninstallIntegrationPlatform(o.Context, c); err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.OutOrStdout(), "Camel K Integration Platform removed from namespace %s\n", o.Namespace)
+	}
+
+	if err = o.uninstallNamespaceResources(o.Context, cmd, c); err != nil {
+		return err
+	}
+
 	uninstallViaOLM := false
 	if o.OlmEnabled {
 		var err error
@@ -134,17 +145,6 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 			}
 			fmt.Fprintf(cmd.OutOrStdout(), "Camel K OLM service removed %s\n", where)
 		}
-	}
-
-	if !o.SkipIntegrationPlatform {
-		if err = o.uninstallIntegrationPlatform(o.Context, c); err != nil {
-			return err
-		}
-		fmt.Fprintf(cmd.OutOrStdout(), "Camel K Integration Platform removed from namespace %s\n", o.Namespace)
-	}
-
-	if err = o.uninstallNamespaceResources(o.Context, cmd, c); err != nil {
-		return err
 	}
 
 	if !uninstallViaOLM {

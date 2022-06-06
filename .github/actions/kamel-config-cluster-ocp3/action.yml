@@ -203,6 +203,7 @@ runs:
         echo "::set-output name=cluster-image-registry-insecure::$(echo true)"
         echo "::set-output name=cluster-has-olm::$(echo false)"
         echo "::set-output name=cluster-image-namespace::$(echo apache)"
+        echo "::set-output name=cluster-global-operator-namespace::$(echo openshift-operators)"
         /* cluster-catalog-source-namespace intentionally blank due to using straight docker */
 
 outputs:
@@ -227,3 +228,6 @@ outputs:
   cluster-has-olm:
     description: "Does the cluster have OLM"
     value: ${{ steps.extract-config.outputs.cluster-has-olm }}
+  cluster-global-operator-namespace:
+    description: "Namespace to install a global operator"
+    value: ${{ steps.extract-config.outputs.cluster-global-operator-namespace}}

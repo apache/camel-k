@@ -19,8 +19,11 @@ name: kamel-preflight-test
 description: 'Does a preflight-test to check the operator can be installed correctly'
 
 inputs:
-  build-catalog-source:
+  catalog-source-name:
     description: "The name of the bundle catalog (only installed in the cluster if OLM is used)"
+    required: false
+  catalog-source-namespace:
+    description: "The namespace of the bundle catalog (only installed in the cluster if OLM is used)"
     required: false
   image-namespace:
     description: 'Namespace in which the image is stored'
@@ -46,7 +49,7 @@ runs:
     name: Ensure Proxy has been reset
     shell: bash
     run: |
-      if [ -n "${{ inputs.build-catalog-source }}" ]; then
+      if [ -n "${{ inputs.catalog-source-name }}" ]; then
         ./.github/actions/kamel-cleanup/reset-proxy.sh
       fi
 
@@ -55,7 +58,8 @@ runs:
     shell: bash
     run: |
       ./.github/actions/kamel-preflight-test/preflight-test.sh \
-        -c "${{ inputs.build-catalog-source }}" \
+        -b "${{ inputs.catalog-source-name }}" \
+        -c "${{ inputs.catalog-source-namespace }}" \
         -i "${{ inputs.image-namespace }}" \
         -l "${{ inputs.image-registry-host }}" \
         -n "${{ inputs.image-name }}" \

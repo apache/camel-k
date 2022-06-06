@@ -43,6 +43,20 @@ runs:
       cluster-kube-config-data: ${{ inputs.cluster-kube-config-data }}
       require-olm: true
 
+  #
+  # Try and ensure the cluster is in a vanilla state before
+  # starting in on an installation
+  #
+  - id: pre-clean-cluster
+    name: Pre Clean Cluster
+    uses: ./.github/actions/kamel-cleanup
+    if: ${{ always() }}
+    with:
+      catalog-source-name: ${{ steps.config-cluster.outputs.cluster-catalog-source-name }}
+      catalog-source-namespace: ${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}
+      image-namespace: ${{ steps.config-cluster.outputs.cluster-image-namespace }}
+      global-operator-namespace: ${{ steps.config-cluster.outputs.cluster-global-operator-namespace }}
+
   - id: released-kamel-cli
     name: Get Released Kamel CLI
     shell: bash
@@ -78,14 +92,15 @@ runs:
       # Builds the bundle if an OLM is available.
       # Since configure-cluster requires OLM then this should be true
       build-bundle: ${{ steps.config-cluster.outputs.cluster-has-olm }}
-      # Can be empty and so catalog source will not be created
+      # Both can be empty and so catalog source will not be created
+      catalog-source-name: ${{ steps.config-cluster.outputs.cluster-catalog-source-name }}
       catalog-source-namespace: ${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}
 
   - id: report-problematic
     name: List Tests Marked As Problematic
     uses: ./.github/actions/kamel-report-problematic
     with:
-      test-suite: upgrade
+      test-suite: namespace/upgrade
 
   - name: Run IT
     shell: bash
@@ -104,5 +119,7 @@ runs:
     uses: ./.github/actions/kamel-cleanup
     if: ${{ always() }}
     with:
-      build-bundle-catalog-source: ${{ steps.build-kamel.outputs.build-bundle-catalog-source-name }}
+      catalog-source-name: ${{ steps.config-cluster.outputs.cluster-catalog-source-name }}
+      catalog-source-namespace: ${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}
       image-namespace: ${{ steps.config-cluster.outputs.cluster-image-namespace }}
+      global-operator-namespace: ${{ steps.config-cluster.outputs.cluster-global-operator-namespace }}

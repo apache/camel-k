@@ -25,13 +25,19 @@
 
 set -e
 
-while getopts ":a:c:n:o:p:q:s:u:" opt; do
+while getopts ":a:b:c:g:n:o:p:q:s:u:" opt; do
   case "${opt}" in
     a)
       ADMIN_USER_CTX=${OPTARG}
       ;;
+    b)
+      CATALOG_SOURCE_NAME=${OPTARG}
+      ;;
     c)
       CATALOG_SOURCE_NAMESPACE=${OPTARG}
+      ;;
+    g)
+      GLOBAL_OPERATOR_NAMESPACE=${OPTARG}
       ;;
     n)
       IMAGE_NAMESPACE=${OPTARG}
@@ -72,10 +78,16 @@ echo "::set-output name=cluster-kube-user-ctx::${USER_CTX}"
 # Set the image namespace
 echo "::set-output name=cluster-image-namespace::${IMAGE_NAMESPACE}"
 
-# Set the catalog source namespace
+# Set the catalog source
+echo "::set-output name=cluster-catalog-source-name::${CATALOG_SOURCE_NAME}"
 echo "::set-output name=cluster-catalog-source-namespace::${CATALOG_SOURCE_NAMESPACE}"
 
 #
 # Export the flag for olm capability
 #
 echo "::set-output name=cluster-has-olm::${HAS_OLM}"
+
+#
+# Export the flag for testing using global operator
+#
+echo "::set-output name=cluster-global-operator-namespace::${GLOBAL_OPERATOR_NAMESPACE}"

@@ -82,6 +82,7 @@ runs:
         case ${{ env.CLUSTER_TYPE }} in
         kind)
           # Does not require cluster-catalog-source-namespace
+          # Does not require global operator name or namespace ... yet
           ./.github/actions/kamel-config-cluster/output-config.sh \
             -a "${{ steps.execute-kind.outputs.cluster-kube-admin-user-ctx }}" \
             -n "${{ steps.execute-kind.outputs.cluster-image-namespace }}" \
@@ -94,7 +95,9 @@ runs:
         custom)
           ./.github/actions/kamel-config-cluster/output-config.sh \
             -a "${{ steps.execute-custom.outputs.cluster-kube-admin-user-ctx }}" \
+            -b "${{ steps.execute-custom.outputs.cluster-catalog-source-name }}" \
             -c "${{ steps.execute-custom.outputs.cluster-catalog-source-namespace }}" \
+            -g "${{ steps.execute-custom.outputs.cluster-global-operator-namespace }}" \
             -n "${{ steps.execute-custom.outputs.cluster-image-namespace }}" \
             -o "${{ steps.execute-custom.outputs.cluster-has-olm }}" \
             -p "${{ steps.execute-custom.outputs.cluster-image-registry-push-host }}" \
@@ -103,9 +106,10 @@ runs:
             -u "${{ steps.execute-custom.outputs.cluster-kube-user-ctx }}"
             ;;
         ocp3)
-          # Does not require cluster-catalog-source-namespace
+          # Does not require cluster-catalog-source-name or namespace
           ./.github/actions/kamel-config-cluster/output-config.sh \
             -a "${{ steps.execute-ocp3.outputs.cluster-kube-admin-user-ctx }}" \
+            -g "${{ steps.execute-ocp3.outputs.cluster-global-operator-namespace }}" \
             -n "${{ steps.execute-ocp3.outputs.cluster-image-namespace }}" \
             -o "${{ steps.execute-ocp3.outputs.cluster-has-olm }}" \
             -p "${{ steps.execute-ocp3.outputs.cluster-image-registry-push-host }}" \
@@ -168,6 +172,7 @@ runs:
         kubectl config use-context "${ctx}"
 
         echo "::set-output name=cluster-has-olm::$(echo true)"
+
         echo "Complete"
 
 outputs:
@@ -180,6 +185,9 @@ outputs:
   cluster-image-registry-insecure:
     description: "Whether the pull registry is insecure"
     value: ${{ steps.cluster-config.outputs.cluster-image-registry-insecure }}
+  cluster-catalog-source-name:
+    description: "The name of the OLM catalog source to install"
+    value: ${{ steps.cluster-config.outputs.cluster-catalog-source-name }}
   cluster-catalog-source-namespace:
     description: "The namespace in which to install the OLM catalog source"
     value: ${{ steps.cluster-config.outputs.cluster-catalog-source-namespace }}
@@ -192,6 +200,9 @@ outputs:
   cluster-kube-user-ctx:
     description: "The context of the kube user"
     value: ${{ steps.cluster-config.outputs.cluster-kube-user-ctx }}
+  cluster-global-operator-namespace:
+    description: "Namespace to install a global operator"
+    value: ${{ steps.cluster-config.outputs.cluster-global-operator-namespace }}
   cluster-has-olm:
     description: "Does the cluster have OLM"
     value: ${{ steps.install-olm.outputs.cluster-has-olm }}
