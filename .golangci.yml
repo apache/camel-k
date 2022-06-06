@@ -38,9 +38,9 @@ linters:
     - godox
     - goerr113
     - gofumpt
+    - golint
     - gomnd
     - gomoddirectives
-    - golint
     - interfacer
     - ireturn
     - lll
@@ -50,9 +50,9 @@ linters:
     - nilnil
     - nlreturn
     - paralleltest
+    - scopelint
     - tagliatelle
     - tenv
-    - scopelint
     - testpackage
     - varnamelen
     - whitespace
