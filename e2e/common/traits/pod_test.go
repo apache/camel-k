@@ -34,27 +34,72 @@ import (
 )
 
 func TestPodTrait(t *testing.T) {
+
+	tc := []struct {
+		name         string
+		templateName string
+		assertions   func(t *testing.T, ns string, name string)
+	}{
+		{
+			name:         "pod trait with env vars and volume mounts",
+			templateName: "files/template.yaml",
+			// nolint: thelper
+			assertions: func(t *testing.T, ns string, name string) {
+				// check that integrations is working and reading data created by sidecar container
+				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Content from the sidecar container"))
+				// check that env var is injected
+				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("hello from the template"))
+				pod := IntegrationPod(ns, name)()
+
+				// check if ENV variable is applied
+				envValue := getEnvVar("TEST_VARIABLE", pod.Spec)
+				Expect(envValue).To(Equal("hello from the template"))
+			},
+		},
+		{
+			name:         "pod trait with supplemental groups",
+			templateName: "files/template-with-supplemental-groups.yaml",
+			// nolint: thelper
+			assertions: func(t *testing.T, ns string, name string) {
+				Eventually(IntegrationPodHas(ns, name, func(pod *corev1.Pod) bool {
+					if pod.Spec.SecurityContext == nil {
+						return false
+					}
+					for _, sg := range pod.Spec.SecurityContext.SupplementalGroups {
+						if sg == 666 {
+							return true
+						}
+					}
+					return false
+				}), TestTimeoutShort).Should(BeTrue())
+			},
+		},
+	}
+
 	WithNewTestNamespace(t, func(ns string) {
-		name := "pod-template-test"
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
-		Expect(Kamel("run", "-n", ns, "files/PodTest.groovy",
-			"--name", name,
-			"--pod-template", "files/template.yaml",
-		).Execute()).To(Succeed())
 
-		// check integration is deployed
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		name := "pod-template-test"
 
-		// check that integrations is working and reading data created by sidecar container
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Content from the sidecar container"))
-		// check that env var is injected
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("hello from the template"))
-		pod := IntegrationPod(ns, name)()
+		for i := range tc {
+			test := tc[i]
 
-		// check if ENV variable is applied
-		envValue := getEnvVar("TEST_VARIABLE", pod.Spec)
-		Expect(envValue).To(Equal("hello from the template"))
+			t.Run(test.name, func(t *testing.T) {
+				Expect(Kamel("run", "-n", ns, "files/PodTest.groovy",
+					"--name", name,
+					"--pod-template", test.templateName,
+				).Execute()).To(Succeed())
+
+				// check integration is deployed
+				Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+
+				test.assertions(t, ns, name)
+
+				// Clean up
+				Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+			})
+		}
 	})
 }
 

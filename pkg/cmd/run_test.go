@@ -680,3 +680,36 @@ func TestMissingTrait(t *testing.T) {
 	assert.Equal(t, "Error: bogus.fail=i-must-fail is not a valid trait property\n", output)
 	assert.NotNil(t, err)
 }
+
+func TestResolveYamlPodTemplateWithSupplementalGroups(t *testing.T) {
+	_, rootCmd, _ := initializeRunCmdOptions(t)
+	templateText := `
+securityContext:
+  supplementalGroups:
+    - 666
+`
+	integrationSpec := v1.IntegrationSpec{}
+	err := resolvePodTemplate(context.TODO(), rootCmd, templateText, &integrationSpec)
+	assert.Nil(t, err)
+	assert.NotNil(t, integrationSpec.PodTemplate)
+	assert.NotNil(t, integrationSpec.PodTemplate.Spec)
+	assert.NotNil(t, integrationSpec.PodTemplate.Spec.SecurityContext)
+	assert.NotNil(t, integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups)
+	assert.Equal(t, 1, len(integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups))
+	assert.Contains(t, integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups, int64(666))
+}
+
+func TestResolveJsonPodTemplateWithSupplementalGroups(t *testing.T) {
+	_, rootCmd, _ := initializeRunCmdOptions(t)
+	minifiedYamlTemplate := `{"securityContext":{"supplementalGroups":[666]}}`
+
+	integrationSpec := v1.IntegrationSpec{}
+	err := resolvePodTemplate(context.TODO(), rootCmd, minifiedYamlTemplate, &integrationSpec)
+	assert.Nil(t, err)
+	assert.NotNil(t, integrationSpec.PodTemplate)
+	assert.NotNil(t, integrationSpec.PodTemplate.Spec)
+	assert.NotNil(t, integrationSpec.PodTemplate.Spec.SecurityContext)
+	assert.NotNil(t, integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups)
+	assert.Equal(t, 1, len(integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups))
+	assert.Contains(t, integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups, int64(666))
+}
