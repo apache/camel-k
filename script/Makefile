@@ -43,7 +43,7 @@ CUSTOM_VERSION ?= $(VERSION)
 METADATA_IMAGE_NAME := $(CUSTOM_IMAGE)-metadata
 BUNDLE_IMAGE_NAME ?= $(CUSTOM_IMAGE)-bundle
 RELEASE_GIT_REMOTE := origin
-GIT_COMMIT := $(shell git rev-list -1 HEAD)
+GIT_COMMIT := $(shell if [ -d .git ]; then git rev-list -1 HEAD; else echo "$(CUSTOM_VERSION)"; fi)
 LINT_GOGC := 10
 LINT_DEADLINE := 10m
 
