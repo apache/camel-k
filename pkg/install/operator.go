@@ -508,9 +508,9 @@ func installLeaseBindings(ctx context.Context, c client.Client, namespace string
 	)
 }
 
-// PlatformOrCollect --
+// NewPlatform --
 // nolint: lll
-func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string, namespace string, skipRegistrySetup bool, registry v1.RegistrySpec, collection *kubernetes.Collection, operatorID string) (*v1.IntegrationPlatform, error) {
+func NewPlatform(ctx context.Context, c client.Client, clusterType string, skipRegistrySetup bool, registry v1.RegistrySpec, operatorID string) (*v1.IntegrationPlatform, error) {
 	isOpenShift, err := isOpenShift(c, clusterType)
 	if err != nil {
 		return nil, err
@@ -536,7 +536,8 @@ func PlatformOrCollect(ctx context.Context, c client.Client, clusterType string,
 		if pl.Annotations == nil {
 			pl.Annotations = make(map[string]string)
 		}
-		pl.Annotations[v1.OperatorIDAnnotation] = operatorID
+		pl.SetOperatorID(operatorID)
+		pl.Name = operatorID
 	}
 
 	if !skipRegistrySetup {

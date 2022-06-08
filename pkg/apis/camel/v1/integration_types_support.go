@@ -255,6 +255,15 @@ func (in *SourceSpec) InferLanguage() Language {
 	return ""
 }
 
+// SetOperatorID sets the given operator id as an annotation
+func (in *Integration) SetOperatorID(operatorID string) {
+	if in.Annotations == nil {
+		in.Annotations = make(map[string]string)
+	}
+
+	in.Annotations[OperatorIDAnnotation] = operatorID
+}
+
 func (in *Integration) SetIntegrationPlatform(platform *IntegrationPlatform) {
 	cs := corev1.ConditionTrue
 

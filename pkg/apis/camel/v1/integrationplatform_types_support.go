@@ -68,6 +68,15 @@ func (in *IntegrationPlatformSpec) Configurations() []ConfigurationSpec {
 	return in.Configuration
 }
 
+// SetOperatorID sets the given operator id as an annotation
+func (in *IntegrationPlatform) SetOperatorID(operatorID string) {
+	if in.Annotations == nil {
+		in.Annotations = make(map[string]string)
+	}
+
+	in.Annotations[OperatorIDAnnotation] = operatorID
+}
+
 // Configurations --
 func (in *IntegrationPlatform) Configurations() []ConfigurationSpec {
 	if in == nil {
