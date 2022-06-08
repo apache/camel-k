@@ -106,6 +106,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().Bool("sync", false, "Synchronize the local source file with the cluster, republishing at each change")
 	cmd.Flags().Bool("dev", false, "Enable Dev mode (equivalent to \"-w --logs --sync\")")
 	cmd.Flags().Bool("use-flows", true, "Write yaml sources as Flow objects in the integration custom resource")
+	cmd.Flags().String("operator-id", "camel-k", "Operator id selected to manage this integration.")
 	cmd.Flags().String("profile", "", "Trait profile used for deployment")
 	cmd.Flags().StringArrayP("trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
@@ -138,6 +139,7 @@ type runCmdOptions struct {
 	IntegrationKit  string   `mapstructure:"kit" yaml:",omitempty"`
 	IntegrationName string   `mapstructure:"name" yaml:",omitempty"`
 	Profile         string   `mapstructure:"profile" yaml:",omitempty"`
+	OperatorId      string   `mapstructure:"operator-id" yaml:",omitempty"`
 	OutputFormat    string   `mapstructure:"output" yaml:",omitempty"`
 	PodTemplate     string   `mapstructure:"pod-template" yaml:",omitempty"`
 	Connects        []string `mapstructure:"connects" yaml:",omitempty"`
@@ -240,6 +242,10 @@ func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 }
 
 func (o *runCmdOptions) validate() error {
+	if o.OperatorId == "" {
+		return fmt.Errorf("cannot use empty operator id")
+	}
+
 	for _, volume := range o.Volumes {
 		volumeConfig := strings.Split(volume, ":")
 		if len(volumeConfig) != 2 || len(strings.TrimSpace(volumeConfig[0])) == 0 || len(strings.TrimSpace(volumeConfig[1])) == 0 {
@@ -540,12 +546,16 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		}
 	}
 
+	if integration.Annotations == nil {
+		integration.Annotations = make(map[string]string)
+	}
+
+	// --operator-id={id} is a syntax sugar for '--annotation camel.apache.org/operator.id={id}'
+	integration.SetOperatorID(strings.TrimSpace(o.OperatorId))
+
 	for _, annotation := range o.Annotations {
 		parts := strings.SplitN(annotation, "=", 2)
 		if len(parts) == 2 {
-			if integration.Annotations == nil {
-				integration.Annotations = make(map[string]string)
-			}
 			integration.Annotations[parts[0]] = parts[1]
 		}
 	}

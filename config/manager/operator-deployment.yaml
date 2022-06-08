@@ -61,6 +61,8 @@ spec:
                   fieldPath: metadata.namespace
             - name: OPERATOR_NAME
               value: "camel-k"
+            - name: OPERATOR_ID
+              value: "camel-k"
             - name: POD_NAME
               valueFrom:
                 fieldRef:

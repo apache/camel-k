@@ -545,7 +545,7 @@ func AssignIntegrationToOperator(ns, name, operator string) error {
 	if it.Annotations == nil {
 		it.Annotations = make(map[string]string)
 	}
-	it.Annotations[v1.OperatorIDAnnotation] = operator
+	it.SetOperatorID(operator)
 	return TestClient().Update(TestContext, it)
 }
 
@@ -1300,7 +1300,7 @@ func AssignPlatformToOperator(ns, operator string) error {
 	if pl.Annotations == nil {
 		pl.Annotations = make(map[string]string)
 	}
-	pl.Annotations[v1.OperatorIDAnnotation] = operator
+	pl.SetOperatorID(operator)
 	return TestClient().Update(TestContext, pl)
 }
 

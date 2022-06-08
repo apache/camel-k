@@ -566,6 +566,8 @@ func TestOutputYaml(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf(`apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
   creationTimestamp: null
   name: %s
 spec:
@@ -598,6 +600,8 @@ func TestTrait(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf(`apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
   creationTimestamp: null
   name: %s
 spec:

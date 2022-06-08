@@ -101,6 +101,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a camel property")
 	cmd.Flags().String("runtime-version", "", "Set the camel-k runtime version")
 	cmd.Flags().String("base-image", "", "Set the base Image used to run integrations")
+	cmd.Flags().String("operator-id", "camel-k", "Set the operator id that is used to select the resources this operator should manage")
 	cmd.Flags().String("operator-image", "", "Set the operator Image used for the operator deployment")
 	cmd.Flags().String("operator-image-pull-policy", "", "Set the operator ImagePullPolicy used for the operator deployment")
 	cmd.Flags().String("build-strategy", "", "Set the build strategy")
@@ -177,6 +178,7 @@ type installCmdOptions struct {
 	OutputFormat             string   `mapstructure:"output"`
 	RuntimeVersion           string   `mapstructure:"runtime-version"`
 	BaseImage                string   `mapstructure:"base-image"`
+	OperatorId               string   `mapstructure:"operator-id"`
 	OperatorImage            string   `mapstructure:"operator-image"`
 	OperatorImagePullPolicy  string   `mapstructure:"operator-image-pull-policy"`
 	BuildStrategy            string   `mapstructure:"build-strategy"`
@@ -215,6 +217,9 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 	// Let's use a client provider during cluster installation, to eliminate the problem of CRD object caching
 	clientProvider := client.Provider{Get: o.NewCmdClient}
+
+	// --operator-id={id} is a syntax sugar for '--operator-env-vars KAMEL_OPERATOR_ID={id}'
+	o.EnvVars = append(o.EnvVars, fmt.Sprintf("KAMEL_OPERATOR_ID=%s", strings.TrimSpace(o.OperatorId)))
 
 	// --skip-default-kamelets-setup is a syntax sugar for '--operator-env-vars KAMEL_INSTALL_DEFAULT_KAMELETS=false'
 	if o.SkipDefaultKameletsSetup {
@@ -342,7 +347,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		if err != nil {
 			return err
 		}
-		platform, err := install.PlatformOrCollect(o.Context, c, o.ClusterType, namespace, o.SkipRegistrySetup, o.registry, collection, operatorID)
+		platform, err := install.NewPlatform(o.Context, c, o.ClusterType, o.SkipRegistrySetup, o.registry, operatorID)
 		if err != nil {
 			return err
 		}
@@ -599,6 +604,10 @@ func (o *installCmdOptions) decode(cmd *cobra.Command, _ []string) error {
 
 func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 	var result error
+
+	if o.OperatorId == "" {
+		result = multierr.Append(result, fmt.Errorf("cannot use empty operator id"))
+	}
 
 	if len(o.MavenRepositories) > 0 && o.MavenSettings != "" {
 		err := fmt.Errorf("incompatible options combinations: you cannot set both mavenRepository and mavenSettings")
