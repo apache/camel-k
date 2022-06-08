@@ -523,9 +523,11 @@ pre-bundle:
 	@sed -i 's/^    support: .*/    support: $(CSV_SUPPORT)/' $(CSV_PATH)
 	@sed -i 's/^  name: .*.\(v.*\)/  name: $(CSV_NAME)/' $(CSV_PATH)
 	@sed -i 's/^  displayName: .*/  displayName: $(CSV_DISPLAY_NAME)/' $(CSV_PATH)
-	@sed -i 's/^  replaces: .*/  replaces: $(CSV_REPLACES)/' $(CSV_PATH)
 	@sed -i 's/^  version: .*/  version: $(CSV_VERSION)/' $(CSV_PATH)
-	@sed -i '/  version: ${CSV_VERSION}/a \ \ replaces: $(CSV_REPLACES)' $(CSV_PATH)
+	@if grep -q replaces config/manifests/bases/camel-k.clusterserviceversion.yaml; \
+		then sed -i 's/^  replaces: .*/  replaces: $(CSV_REPLACES)/' $(CSV_PATH); \
+		else sed -i '/  version: ${CSV_VERSION}/a \ \ replaces: $(CSV_REPLACES)' $(CSV_PATH); \
+	fi
 
 bundle: set-version generate-crd $(BUNDLE_CAMEL_APIS) kustomize operator-sdk pre-bundle
 	@# Display BUNDLE_METADATA_OPTS for debugging
