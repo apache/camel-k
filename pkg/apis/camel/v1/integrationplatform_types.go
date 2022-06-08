@@ -52,7 +52,8 @@ type IntegrationPlatformResourcesSpec struct {
 // IntegrationPlatformStatus defines the observed state of IntegrationPlatform
 type IntegrationPlatformStatus struct {
 	IntegrationPlatformSpec `json:",inline"`
-
+	// ObservedGeneration is the most recent generation observed for this IntegrationPlatform.
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 	// defines in what phase the IntegrationPlatform is found
 	Phase IntegrationPlatformPhase `json:"phase,omitempty"`
 	// which are the conditions met (particularly useful when in ERROR phase)

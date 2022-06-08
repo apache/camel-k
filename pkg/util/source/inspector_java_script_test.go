@@ -37,6 +37,11 @@ from("direct:start")
     .to("kamelet:foo/bar?baz=test")
 `
 
+const JavaScriptWireTapEipSingleQuote = `
+from("direct:start")
+    .wireTap('kamelet:foo/bar?baz=test')
+`
+
 func TestJavaScriptKamelet(t *testing.T) {
 	tc := []struct {
 		source   string
@@ -48,6 +53,10 @@ func TestJavaScriptKamelet(t *testing.T) {
 		},
 		{
 			source:   JavaScriptKameletEndpoint,
+			kamelets: []string{"foo/bar"},
+		},
+		{
+			source:   JavaScriptWireTapEipSingleQuote,
 			kamelets: []string{"foo/bar"},
 		},
 	}

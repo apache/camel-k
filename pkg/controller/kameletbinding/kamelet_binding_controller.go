@@ -192,6 +192,8 @@ func (r *ReconcileKameletBinding) Reconcile(ctx context.Context, request reconci
 			}
 
 			if target != nil {
+				target.Status.ObservedGeneration = instance.Generation
+
 				if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(&instance)); err != nil {
 					camelevent.NotifyKameletBindingError(ctx, r.client, r.recorder, &instance, target, err)
 					return reconcile.Result{}, err

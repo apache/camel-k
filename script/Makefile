@@ -194,6 +194,8 @@ generate-strimzi:
 
 build: test build-resources build-kamel build-compile-integration-tests build-submodules
 
+ci-build: clean codegen set-module-version set-version check-licenses dir-licenses build-kamel cross-compile
+
 do-build:
 ifeq ($(DO_TEST_PREBUILD),true)
 TEST_PREBUILD = build
@@ -308,6 +310,8 @@ lint:
 lint-fix:
 	GOGC=$(LINT_GOGC) golangci-lint run --out-format tab --deadline $(LINT_DEADLINE) --fix
 
+dir-licenses:
+	./script/vendor-license-directory.sh
 
 check-licenses:
 	./script/check_licenses.sh

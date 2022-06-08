@@ -50,7 +50,7 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 		t.Run("image registry is a maven repository", func(t *testing.T) {
 			// Create integration that should decrypt an encrypted message to "foobar" and log it
 			name := "foobar-decryption"
-			jar, err := filepath.Abs("files/sample-decryption-1.0.jar")
+			jar, err := filepath.Abs("files/sample-decryption-1.0.jar?skipPOM=true")
 			assert.Nil(t, err)
 			pom, err := filepath.Abs("files/sample-decryption-1.0.pom")
 			assert.Nil(t, err)
@@ -89,7 +89,7 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 			Expect(Kamel("run", "files/LaughingRoute.java",
 				"--name", name,
 				"-p", fmt.Sprintf("location=%s", customPath),
-				"-d", fmt.Sprintf("file://files/laugh.txt:%slaugh.txt", customPath),
+				"-d", fmt.Sprintf("file://files/laugh.txt?targetPath=%slaugh.txt", customPath),
 				"-n", ns,
 			).Execute()).To(Succeed())
 
@@ -104,7 +104,7 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 			Expect(Kamel("run", "files/LaughingRoute.java",
 				"--name", name,
 				"-p", "location=files/",
-				"-d", fmt.Sprintf("file://files/laughs/:files/"),
+				"-d", fmt.Sprintf("file://files/laughs/?targetPath=files/"),
 				"-n", ns,
 			).Execute()).To(Succeed())
 

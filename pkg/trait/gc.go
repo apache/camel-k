@@ -19,6 +19,7 @@ package trait
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -26,6 +27,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/pkg/errors"
+	"golang.org/x/time/rate"
+
+	authorization "k8s.io/api/authorization/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -35,17 +40,20 @@ import (
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/discovery/cached/disk"
 	"k8s.io/client-go/discovery/cached/memory"
-
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
 )
 
 var (
-	toFileName                  = regexp.MustCompile(`[^(\w/\.)]`)
-	diskCachedDiscoveryClient   discovery.CachedDiscoveryInterface
-	memoryCachedDiscoveryClient discovery.CachedDiscoveryInterface
-	discoveryClientLock         sync.Mutex
+	toFileName = regexp.MustCompile(`[^(\w/\.)]`)
+
+	lock                  sync.Mutex
+	rateLimiter           = rate.NewLimiter(rate.Every(time.Minute), 1)
+	collectableGVKs       = make(map[schema.GroupVersionKind]struct{})
+	memoryCachedDiscovery discovery.CachedDiscoveryInterface
+	diskCachedDiscovery   discovery.CachedDiscoveryInterface
 )
 
 type discoveryCacheType string
@@ -81,83 +89,72 @@ func (t *garbageCollectorTrait) Configure(e *Environment) (bool, error) {
 		t.DiscoveryCache = &s
 	}
 
-	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(),
-		nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), nil
 }
 
 func (t *garbageCollectorTrait) Apply(e *Environment) error {
-	switch e.Integration.Status.Phase {
-
-	case v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning, v1.IntegrationPhaseError:
+	if e.IntegrationInRunningPhases() && e.Integration.GetGeneration() > 1 {
 		// Register a post action that deletes the existing resources that are labelled
-		// with the previous integration generations.
-		// TODO: this should be refined so that it's run when all the replicas for the newer generation
-		// are ready. This is to be added when the integration scale status is refined with ready replicas
+		// with the previous integration generation(s).
+		// We make the assumption generation is a monotonically increasing strictly positive integer,
+		// in which case we can skip garbage collection on the first generation.
+		// TODO: this should be refined so that it's run when all the replicas for the newer generation are ready.
 		e.PostActions = append(e.PostActions, func(env *Environment) error {
-			// The collection and deletion are performed asynchronously to avoid blocking
-			// the reconciliation loop.
-			go t.garbageCollectResources(env)
-			return nil
-		})
-
-		fallthrough
-
-	default:
-		// Register a post processor that adds the required labels to the new resources
-		e.PostProcessors = append(e.PostProcessors, func(env *Environment) error {
-			generation := strconv.FormatInt(env.Integration.GetGeneration(), 10)
-			env.Resources.VisitMetaObject(func(resource metav1.Object) {
-				labels := resource.GetLabels()
-				// Label the resource with the current integration generation
-				labels["camel.apache.org/generation"] = generation
-				// Make sure the integration label is set
-				labels[v1.IntegrationLabel] = env.Integration.Name
-				resource.SetLabels(labels)
-			})
-			return nil
+			return t.garbageCollectResources(env)
 		})
 	}
+
+	// Register a post processor that adds the required labels to the new resources
+	e.PostProcessors = append(e.PostProcessors, func(env *Environment) error {
+		generation := strconv.FormatInt(env.Integration.GetGeneration(), 10)
+		env.Resources.VisitMetaObject(func(resource metav1.Object) {
+			labels := resource.GetLabels()
+			// Label the resource with the current integration generation
+			labels["camel.apache.org/generation"] = generation
+			// Make sure the integration label is set
+			labels[v1.IntegrationLabel] = env.Integration.Name
+			resource.SetLabels(labels)
+		})
+		return nil
+	})
 
 	return nil
 }
 
-func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) {
+func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) error {
+	deletableGVKs, err := t.getDeletableTypes(e)
+	if err != nil {
+		return errors.Wrap(err, "cannot discover GVK types")
+	}
+
 	integration, _ := labels.NewRequirement(v1.IntegrationLabel, selection.Equals, []string{e.Integration.Name})
 	generation, err := labels.NewRequirement("camel.apache.org/generation", selection.LessThan, []string{strconv.FormatInt(e.Integration.GetGeneration(), 10)})
 	if err != nil {
-		t.L.ForIntegration(e.Integration).Errorf(err, "cannot determine generation requirement")
-		return
+		return errors.Wrap(err, "cannot determine generation requirement")
 	}
 	selector := labels.NewSelector().
 		Add(*integration).
 		Add(*generation)
 
-	deletableGVKs, err := t.getDeletableTypes(e)
-	if err != nil {
-		t.L.ForIntegration(e.Integration).Errorf(err, "cannot discover GVK types")
-		return
-	}
-
-	t.deleteEachOf(deletableGVKs, e, selector)
+	return t.deleteEachOf(e.Ctx, deletableGVKs, e, selector)
 }
 
-func (t *garbageCollectorTrait) deleteEachOf(gvks map[schema.GroupVersionKind]struct{}, e *Environment, selector labels.Selector) {
-	for gvk := range gvks {
+func (t *garbageCollectorTrait) deleteEachOf(ctx context.Context, deletableGVKs map[schema.GroupVersionKind]struct{}, e *Environment, selector labels.Selector) error {
+	for GVK := range deletableGVKs {
 		resources := unstructured.UnstructuredList{
 			Object: map[string]interface{}{
-				"apiVersion": gvk.GroupVersion().String(),
-				"kind":       gvk.Kind,
+				"apiVersion": GVK.GroupVersion().String(),
+				"kind":       GVK.Kind,
 			},
 		}
 		options := []ctrl.ListOption{
 			ctrl.InNamespace(e.Integration.Namespace),
 			ctrl.MatchingLabelsSelector{Selector: selector},
 		}
-		if err := t.Client.List(context.TODO(), &resources, options...); err != nil {
-			if !k8serrors.IsNotFound(err) && !k8serrors.IsForbidden(err) {
-				t.L.ForIntegration(e.Integration).Errorf(err, "cannot list child resources: %v", gvk)
+		if err := t.Client.List(ctx, &resources, options...); err != nil {
+			if !k8serrors.IsNotFound(err) {
+				return errors.Wrap(err, "cannot list child resources")
 			}
-
 			continue
 		}
 
@@ -166,7 +163,7 @@ func (t *garbageCollectorTrait) deleteEachOf(gvks map[schema.GroupVersionKind]st
 			if !t.canBeDeleted(e, r) {
 				continue
 			}
-			err := t.Client.Delete(context.TODO(), &r, ctrl.PropagationPolicy(metav1.DeletePropagationBackground))
+			err := t.Client.Delete(ctx, &r, ctrl.PropagationPolicy(metav1.DeletePropagationBackground))
 			if err != nil {
 				// The resource may have already been deleted
 				if !k8serrors.IsNotFound(err) {
@@ -177,6 +174,8 @@ func (t *garbageCollectorTrait) deleteEachOf(gvks map[schema.GroupVersionKind]st
 			}
 		}
 	}
+
+	return nil
 }
 
 func (t *garbageCollectorTrait) canBeDeleted(e *Environment, u unstructured.Unstructured) bool {
@@ -190,64 +189,94 @@ func (t *garbageCollectorTrait) canBeDeleted(e *Environment, u unstructured.Unst
 }
 
 func (t *garbageCollectorTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind]struct{}, error) {
+	lock.Lock()
+	defer lock.Unlock()
+
+	// Rate limit to avoid Discovery and SelfSubjectRulesReview requests at every reconciliation.
+	if !rateLimiter.Allow() {
+		// Return the cached set of garbage collectable GVKs.
+		return collectableGVKs, nil
+	}
+
 	// We rely on the discovery API to retrieve all the resources GVK,
 	// that results in an unbounded set that can impact garbage collection latency when scaling up.
-	discoveryClient, err := t.discoveryClient(e)
+	discoveryClient, err := t.discoveryClient()
 	if err != nil {
 		return nil, err
 	}
 	resources, err := discoveryClient.ServerPreferredNamespacedResources()
 	// Swallow group discovery errors, e.g., Knative serving exposes
 	// an aggregated API for custom.metrics.k8s.io that requires special
-	// authentication scheme while discovering preferred resources
+	// authentication scheme while discovering preferred resources.
 	if err != nil && !discovery.IsGroupDiscoveryFailedError(err) {
 		return nil, err
 	}
 
 	// We only take types that support the "delete" verb,
 	// to prevents from performing queries that we know are going to return "MethodNotAllowed".
-	return groupVersionKinds(discovery.FilteredBy(discovery.SupportsAllVerbs{Verbs: []string{"delete"}}, resources)),
-		nil
-}
+	APIResourceLists := discovery.FilteredBy(discovery.SupportsAllVerbs{Verbs: []string{"delete"}}, resources)
 
-func groupVersionKinds(rls []*metav1.APIResourceList) map[schema.GroupVersionKind]struct{} {
-	GVKs := map[schema.GroupVersionKind]struct{}{}
-	for _, rl := range rls {
-		for _, r := range rl.APIResources {
-			GVKs[schema.FromAPIVersionAndKind(rl.GroupVersion, r.Kind)] = struct{}{}
+	// Retrieve the permissions granted to the operator service account.
+	// We assume the operator has only to garbage collect the resources it has created.
+	ssrr := &authorization.SelfSubjectRulesReview{
+		Spec: authorization.SelfSubjectRulesReviewSpec{
+			Namespace: e.Integration.Namespace,
+		},
+	}
+	ssrr, err = e.Client.AuthorizationV1().SelfSubjectRulesReviews().Create(e.Ctx, ssrr, metav1.CreateOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	GVKs := make(map[schema.GroupVersionKind]struct{})
+	for _, APIResourceList := range APIResourceLists {
+		for _, resource := range APIResourceList.APIResources {
+		rule:
+			for _, rule := range ssrr.Status.ResourceRules {
+				if !util.StringSliceContainsAnyOf(rule.Verbs, "delete", "*") {
+					continue
+				}
+				for _, group := range rule.APIGroups {
+					for _, name := range rule.Resources {
+						if (resource.Group == group || group == "*") && (resource.Name == name || name == "*") {
+							GVK := schema.FromAPIVersionAndKind(APIResourceList.GroupVersion, resource.Kind)
+							GVKs[GVK] = struct{}{}
+							break rule
+						}
+					}
+				}
+			}
 		}
 	}
-	return GVKs
+	collectableGVKs = GVKs
+
+	return collectableGVKs, nil
 }
 
-func (t *garbageCollectorTrait) discoveryClient(e *Environment) (discovery.DiscoveryInterface, error) {
-	discoveryClientLock.Lock()
-	defer discoveryClientLock.Unlock()
-
+func (t *garbageCollectorTrait) discoveryClient() (discovery.DiscoveryInterface, error) {
 	switch *t.DiscoveryCache {
 	case diskDiscoveryCache:
-		if diskCachedDiscoveryClient != nil {
-			return diskCachedDiscoveryClient, nil
+		if diskCachedDiscovery != nil {
+			return diskCachedDiscovery, nil
 		}
 		config := t.Client.GetConfig()
 		httpCacheDir := filepath.Join(mustHomeDir(), ".kube", "http-cache")
 		diskCacheDir := filepath.Join(mustHomeDir(), ".kube", "cache", "discovery", toHostDir(config.Host))
 		var err error
-		diskCachedDiscoveryClient, err = disk.NewCachedDiscoveryClientForConfig(config, diskCacheDir, httpCacheDir, 10*time.Minute)
-		return diskCachedDiscoveryClient, err
+		diskCachedDiscovery, err = disk.NewCachedDiscoveryClientForConfig(config, diskCacheDir, httpCacheDir, 10*time.Minute)
+		return diskCachedDiscovery, err
 
 	case memoryDiscoveryCache:
-		if memoryCachedDiscoveryClient != nil {
-			return memoryCachedDiscoveryClient, nil
+		if memoryCachedDiscovery != nil {
+			return memoryCachedDiscovery, nil
 		}
-		memoryCachedDiscoveryClient = memory.NewMemCacheClient(t.Client.Discovery())
-		return memoryCachedDiscoveryClient, nil
+		memoryCachedDiscovery = memory.NewMemCacheClient(t.Client.Discovery())
+		return memoryCachedDiscovery, nil
 
 	case disabledDiscoveryCache, "":
 		return t.Client.Discovery(), nil
 
 	default:
-		t.L.ForIntegration(e.Integration).Infof("unsupported discovery cache type: %s", *t.DiscoveryCache)
-		return t.Client.Discovery(), nil
+		return nil, fmt.Errorf("unsupported discovery cache type: %s", *t.DiscoveryCache)
 	}
 }

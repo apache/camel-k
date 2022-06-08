@@ -18,7 +18,7 @@
 location=$(dirname $0)
 rootdir=$location/../
 
-blacklist=("zz_generated" "zz_desc_generated" "./docs/" "./.idea" "./build/" "./resources/traits.yaml")
+denylist=("zz_generated" "zz_desc_generated" "vendor" "./.mvn/wrapper" "./docs/" "./.idea" "./build/" "./deploy/traits.yaml" "./pom.xml")
 
 cd $rootdir
 go build ./cmd/util/license-check/
@@ -31,7 +31,7 @@ check_licenses() {
     failed=0
     find . -type f -name "$files" -print0 | while IFS= read -r -d '' file; do
         check=true
-        for b in ${blacklist[*]}; do
+        for b in ${denylist[*]}; do
         	if [[ "$file" == *"$b"* ]]; then
         	  #echo "skip $file"
         	  check=false

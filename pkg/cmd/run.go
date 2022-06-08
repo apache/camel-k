@@ -34,6 +34,7 @@ import (
 	"io"
 	"io/fs"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -95,7 +96,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 
 	cmd.Flags().String("name", "", "The integration name")
 	cmd.Flags().StringArrayP("connect", "c", nil, "A Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
-	cmd.Flags().StringArrayP("dependency", "d", nil, "A dependency that should be included, e.g., \"-d camel-mail\" for a Camel component, \"-d mvn:org.my:app:1.0\" for a Maven dependency or \"file://localPath[:targetPath]\" for local files (experimental)")
+	cmd.Flags().StringArrayP("dependency", "d", nil, "A dependency that should be included, e.g., \"-d camel-mail\" for a Camel component, \"-d mvn:org.my:app:1.0\" for a Maven dependency or \"file://localPath[?targetPath=<path>&registry=<registry URL>&skipChecksums=<true>&skipPOM=<true>]\" for local files (experimental)")
 	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or properties file (syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
@@ -155,6 +156,7 @@ type runCmdOptions struct {
 	Labels          []string `mapstructure:"labels" yaml:",omitempty"`
 	Annotations     []string `mapstructure:"annotations" yaml:",omitempty"`
 	Sources         []string `mapstructure:"sources" yaml:",omitempty"`
+	RegistryOptions url.Values
 }
 
 func (o *runCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
@@ -801,9 +803,44 @@ func resolvePodTemplate(ctx context.Context, cmd *cobra.Command, templateSrc str
 	return err
 }
 
+func parseFileURI(uri string) *url.URL {
+	file := new(url.URL)
+	file.Scheme = "file"
+	path := strings.TrimPrefix(uri, "file://")
+	i := strings.IndexByte(path, '?')
+	if i > 0 {
+		file.Path = path[:i]
+		file.RawQuery = path[i+1:]
+	} else {
+		file.Path = path
+	}
+	return file
+}
+
+func (o *runCmdOptions) getRegistry(platform *v1.IntegrationPlatform) string {
+	registry := o.RegistryOptions.Get("registry")
+	if registry != "" {
+		return registry
+	}
+	return platform.Status.Build.Registry.Address
+}
+
+func (o *runCmdOptions) skipChecksums() bool {
+	return o.RegistryOptions.Get("skipChecksums") == "true"
+}
+
+func (o *runCmdOptions) skipPom() bool {
+	return o.RegistryOptions.Get("skipPOM") == "true"
+}
+
+func (o *runCmdOptions) getTargetPath() string {
+	return o.RegistryOptions.Get("targetPath")
+}
+
 func (o *runCmdOptions) uploadFileOrDirectory(platform *v1.IntegrationPlatform, item string, integrationName string, cmd *cobra.Command, integration *v1.Integration) error {
-	path := strings.TrimPrefix(item, "file://")
-	localPath, targetPath := getPaths(path, runtimeos.GOOS, filepath.IsAbs(path))
+	uri := parseFileURI(item)
+	o.RegistryOptions = uri.Query()
+	localPath, targetPath := uri.Path, o.getTargetPath()
 	options := o.getSpectrumOptions(platform, cmd)
 	dirName, err := getDirName(localPath)
 	if err != nil {
@@ -849,23 +886,6 @@ func (o *runCmdOptions) uploadFileOrDirectory(platform *v1.IntegrationPlatform, 
 	})
 }
 
-func getPaths(path string, os string, isAbs bool) (localPath string, targetPath string) {
-	localPath = path
-	targetPath = ""
-	parts := strings.Split(path, ":")
-	if len(parts) > 1 {
-		if os != "windows" || !isAbs {
-			localPath = parts[0]
-			targetPath = parts[1]
-		} else if isAbs && len(parts) == 3 {
-			// special case on Windows for absolute paths e.g C:\foo\bar\test.csv:remote/path
-			localPath = fmt.Sprintf("%s:%s", parts[0], parts[1])
-			targetPath = parts[2]
-		}
-	}
-	return localPath, targetPath
-}
-
 func getMountPath(targetPath string, dirName string, path string) (string, error) {
 	// if the target path is a file then use that as the exact mount path
 	if filepath.Ext(targetPath) != "" {
@@ -909,9 +929,13 @@ func (o *runCmdOptions) uploadPomFromJar(gav maven.Dependency, path string, plat
 			}
 		}
 		if pomExtracted {
-			gav.Type = "pom"
-			// Swallow error as this is not a mandatory step
-			o.uploadAsMavenArtifact(gav, pomPath, platform, ns, options, cmd)
+			if o.skipPom() {
+				o.PrintfVerboseOutf(cmd, "Skipping uploading extracted POM from %s \n", path)
+			} else {
+				gav.Type = "pom"
+				// Swallow error as this is not a mandatory step
+				o.uploadAsMavenArtifact(gav, pomPath, platform, ns, options, cmd)
+			}
 		}
 		return nil
 	})
@@ -978,7 +1002,7 @@ func (o *runCmdOptions) extractGav(src *zip.File, localPath string, cmd *cobra.C
 
 func (o *runCmdOptions) uploadAsMavenArtifact(dependency maven.Dependency, path string, platform *v1.IntegrationPlatform, ns string, options spectrum.Options, cmd *cobra.Command) error {
 	artifactHTTPPath := getArtifactHTTPPath(dependency, platform, ns)
-	options.Target = fmt.Sprintf("%s/%s:%s", platform.Status.Build.Registry.Address, artifactHTTPPath, dependency.Version)
+	options.Target = fmt.Sprintf("%s/%s:%s", o.getRegistry(platform), artifactHTTPPath, dependency.Version)
 	if runtimeos.GOOS == "windows" {
 		// workaround for https://github.com/container-tools/spectrum/issues/8
 		// work with relative paths instead
@@ -993,7 +1017,11 @@ func (o *runCmdOptions) uploadAsMavenArtifact(dependency maven.Dependency, path 
 		return err
 	}
 	o.PrintfVerboseOutf(cmd, "Uploaded: %s to %s \n", path, options.Target)
-	return uploadChecksumFiles(path, options, platform, artifactHTTPPath, dependency)
+	if o.skipChecksums() {
+		o.PrintfVerboseOutf(cmd, "Skipping generating and uploading checksum files for %s \n", path)
+		return nil
+	}
+	return o.uploadChecksumFiles(path, options, platform, artifactHTTPPath, dependency)
 }
 
 // Deprecated: workaround for https://github.com/container-tools/spectrum/issues/8
@@ -1041,18 +1069,18 @@ func extractGavFromPom(path string, gav maven.Dependency) maven.Dependency {
 	return gav
 }
 
-func uploadChecksumFiles(path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHTTPPath string, dependency maven.Dependency) error {
+func (o *runCmdOptions) uploadChecksumFiles(path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHTTPPath string, dependency maven.Dependency) error {
 	return util.WithTempDir("camel-k", func(tmpDir string) error {
 		// #nosec G401
-		if err := uploadChecksumFile(md5.New(), tmpDir, "_md5", path, options, platform, artifactHTTPPath, dependency); err != nil {
+		if err := o.uploadChecksumFile(md5.New(), tmpDir, "_md5", path, options, platform, artifactHTTPPath, dependency); err != nil {
 			return err
 		}
 		// #nosec G401
-		return uploadChecksumFile(sha1.New(), tmpDir, "_sha1", path, options, platform, artifactHTTPPath, dependency)
+		return o.uploadChecksumFile(sha1.New(), tmpDir, "_sha1", path, options, platform, artifactHTTPPath, dependency)
 	})
 }
 
-func uploadChecksumFile(hash hash.Hash, tmpDir string, ext string, path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHTTPPath string, dependency maven.Dependency) error {
+func (o *runCmdOptions) uploadChecksumFile(hash hash.Hash, tmpDir string, ext string, path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHTTPPath string, dependency maven.Dependency) error {
 	file, err := os.Open(path)
 	if err != nil {
 		return err
@@ -1078,7 +1106,7 @@ func uploadChecksumFile(hash hash.Hash, tmpDir string, ext string, path string, 
 	if err = writeChecksumToFile(filepath, hash); err != nil {
 		return err
 	}
-	options.Target = fmt.Sprintf("%s/%s%s:%s", platform.Status.Build.Registry.Address, artifactHTTPPath, ext, dependency.Version)
+	options.Target = fmt.Sprintf("%s/%s%s:%s", o.getRegistry(platform), artifactHTTPPath, ext, dependency.Version)
 	_, err = spectrum.Build(options, fmt.Sprintf("%s:.", filepath))
 	return err
 }

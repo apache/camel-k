@@ -85,6 +85,8 @@ type IntegrationSpec struct {
 
 // IntegrationStatus defines the observed state of Integration
 type IntegrationStatus struct {
+	// ObservedGeneration is the most recent generation observed for this Integration.
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 	// the actual phase
 	Phase IntegrationPhase `json:"phase,omitempty"`
 	// the digest calculated for this Integration
@@ -295,4 +297,6 @@ type PodSpec struct {
 	NodeSelector map[string]string `json:"nodeSelector,omitempty" protobuf:"bytes,7,rep,name=nodeSelector"`
 	// TopologySpreadConstraints
 	TopologySpreadConstraints []corev1.TopologySpreadConstraint `json:"topologySpreadConstraints,omitempty" patchStrategy:"merge" patchMergeKey:"topologyKey" protobuf:"bytes,33,opt,name=topologySpreadConstraints"`
+	// PodSecurityContext
+	SecurityContext corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,34,opt,name=securityContext"`
 }

@@ -236,6 +236,11 @@ spec:
               image:
                 description: actual image name of the kit
                 type: string
+              observedGeneration:
+                description: ObservedGeneration is the most recent generation observed
+                  for this IntegrationKit.
+                format: int64
+                type: integer
               phase:
                 description: phase of the kit
                 type: string
