@@ -26,6 +26,8 @@ import (
 	"os/exec"
 	"path"
 	"regexp"
+	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -72,6 +74,14 @@ func (c *Command) Do(ctx context.Context) error {
 		return err
 	} else if settingsExists {
 		args = append(args, "--settings", settingsPath)
+	}
+
+	if !util.StringContainsPrefix(c.context.AdditionalArguments, "-Dmaven.artifact.threads") {
+		args = append(args, "-Dmaven.artifact.threads="+strconv.Itoa(runtime.GOMAXPROCS(0)))
+	}
+
+	if !util.StringSliceExists(c.context.AdditionalArguments, "-T") {
+		args = append(args, "-T", strconv.Itoa(runtime.GOMAXPROCS(0)))
 	}
 
 	cmd := exec.CommandContext(ctx, mvnCmd, args...)
