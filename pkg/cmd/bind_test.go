@@ -20,6 +20,8 @@ package cmd
 import (
 	"testing"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
@@ -31,7 +33,10 @@ const cmdBind = "bind"
 func initializeBindCmdOptions(t *testing.T) (*bindCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
 
-	options, rootCmd := kamelTestPreAddCommandInit()
+	defaultIntegrationPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
+	fakeClient, _ := test.NewFakeClient(&defaultIntegrationPlatform)
+
+	options, rootCmd := kamelTestPreAddCommandInitWithClient(fakeClient)
 	bindCmdOptions := addTestBindCmd(*options, rootCmd)
 	kamelTestPostAddCommandInit(t, rootCmd)
 
@@ -52,7 +57,7 @@ func TestBindOutputJSON(t *testing.T) {
 	assert.Equal(t, "json", buildCmdOptions.OutputFormat)
 
 	assert.Nil(t, err)
-	assert.Equal(t, `{"kind":"KameletBinding","apiVersion":"camel.apache.org/v1alpha1","metadata":{"name":"my-to-my","creationTimestamp":null},"spec":{"source":{"uri":"my:src"},"sink":{"uri":"my:dst"}},"status":{}}`, output)
+	assert.Equal(t, `{"kind":"KameletBinding","apiVersion":"camel.apache.org/v1alpha1","metadata":{"name":"my-to-my","creationTimestamp":null,"annotations":{"camel.apache.org/operator.id":"camel-k"}},"spec":{"source":{"uri":"my:src"},"sink":{"uri":"my:dst"}},"status":{}}`, output)
 }
 
 func TestBindOutputYAML(t *testing.T) {
@@ -64,6 +69,8 @@ func TestBindOutputYAML(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1alpha1
 kind: KameletBinding
 metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
   creationTimestamp: null
   name: my-to-my
 spec:
@@ -93,6 +100,8 @@ func TestBindErrorHandlerDLCKamelet(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1alpha1
 kind: KameletBinding
 metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
   creationTimestamp: null
   name: my-to-my
 spec:
@@ -123,6 +132,8 @@ func TestBindErrorHandlerNone(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1alpha1
 kind: KameletBinding
 metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
   creationTimestamp: null
   name: my-to-my
 spec:
@@ -146,6 +157,8 @@ func TestBindErrorHandlerLog(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1alpha1
 kind: KameletBinding
 metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
   creationTimestamp: null
   name: my-to-my
 spec:
@@ -168,6 +181,8 @@ func TestBindTraits(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1alpha1
 kind: KameletBinding
 metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
   creationTimestamp: null
   name: my-to-my
 spec:

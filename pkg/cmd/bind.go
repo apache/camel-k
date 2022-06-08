@@ -25,6 +25,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	platformutil "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/reference"
@@ -60,6 +61,9 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 	cmd.Flags().Bool("skip-checks", false, "Do not verify the binding for compliance with Kamelets and other Kubernetes resources")
 	cmd.Flags().StringArray("step", nil, `Add binding steps as Kubernetes resources. Endpoints are expected in the format "[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
 	cmd.Flags().StringArrayP("trait", "t", nil, `Add a trait to the corresponding Integration.`)
+	cmd.Flags().String("operator-id", "camel-k", "Operator id selected to manage this Kamelet binding.")
+	cmd.Flags().StringArray("annotation", nil, "Add an annotation to the Kamelet binding. E.g. \"--annotation my.company=hello\"")
+	cmd.Flags().Bool("force", false, "Force creation of Kamelet binding regardless of potential misconfiguration.")
 
 	return &cmd, &options
 }
@@ -81,6 +85,9 @@ type bindCmdOptions struct {
 	SkipChecks   bool     `mapstructure:"skip-checks" yaml:",omitempty"`
 	Steps        []string `mapstructure:"steps" yaml:",omitempty"`
 	Traits       []string `mapstructure:"traits" yaml:",omitempty"`
+	OperatorId   string   `mapstructure:"operator-id" yaml:",omitempty"`
+	Annotations  []string `mapstructure:"annotations" yaml:",omitempty"`
+	Force        bool     `mapstructure:"force" yaml:",omitempty"`
 }
 
 func (o *bindCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
@@ -107,6 +114,17 @@ func (o *bindCmdOptions) validate(cmd *cobra.Command, args []string) error {
 		return errors.New("too many arguments: expected source and sink")
 	} else if len(args) < 2 {
 		return errors.New("source or sink arguments are missing")
+	}
+
+	if o.OperatorId == "" {
+		return fmt.Errorf("cannot use empty operator id")
+	}
+
+	for _, annotation := range o.Annotations {
+		parts := strings.SplitN(annotation, "=", 2)
+		if len(parts) != 2 {
+			return fmt.Errorf(`invalid annotation specification %s. Expected "<annotationkey>=<annotationvalue>"`, annotation)
+		}
 	}
 
 	for _, p := range o.Properties {
@@ -212,6 +230,36 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 		catalog := trait.NewCatalog(client)
 		if err := configureTraits(o.Traits, &binding.Spec.Integration.Traits, catalog); err != nil {
 			return err
+		}
+	}
+
+	if binding.Annotations == nil {
+		binding.Annotations = make(map[string]string)
+	}
+
+	if o.OperatorId != "" {
+		if pl, err := platformutil.LookupForPlatformName(o.Context, client, o.OperatorId); err != nil {
+			if k8serrors.IsForbidden(err) {
+				o.PrintfVerboseOutf(cmd, "Unable to verify existence of operator id [%s] due to lack of user privileges\n", o.OperatorId)
+			} else {
+				return err
+			}
+		} else if pl == nil {
+			if o.Force {
+				o.PrintfVerboseOutf(cmd, "Unable to find operator with given id [%s] - Kamelet binding may not be reconciled and get stuck in waiting state\n", o.OperatorId)
+			} else {
+				return errors.New(fmt.Sprintf("unable to find integration platform for given operator id '%s', use --force option or make sure to use a proper operator id", o.OperatorId))
+			}
+		}
+	}
+
+	// --operator-id={id} is a syntax sugar for '--annotation camel.apache.org/operator.id={id}'
+	binding.SetOperatorID(strings.TrimSpace(o.OperatorId))
+
+	for _, annotation := range o.Annotations {
+		parts := strings.SplitN(annotation, "=", 2)
+		if len(parts) == 2 {
+			binding.Annotations[parts[0]] = parts[1]
 		}
 	}
 
