@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - E2E repeated failure [\#3315](https://github.com/apache/camel-k/issues/3315)
+- Integrations, IntegrationKits, IntegrationPlatforms are not owned by Namespaces [\#3311](https://github.com/apache/camel-k/issues/3311)
 - Helm Chart for camel-k 1.9.2 is invalid [\#3300](https://github.com/apache/camel-k/issues/3300)
 - Kamel run default service nodePort is invalid [\#3296](https://github.com/apache/camel-k/issues/3296)
 - Cannot find RestProducerFactory in Registry or as a Component to use" [\#3290](https://github.com/apache/camel-k/issues/3290)
@@ -14,6 +15,7 @@
 - Moving main to 1.10.0-SNAPSHOT [\#3280](https://github.com/apache/camel-k/issues/3280)
 - Release 1.9.2 [\#3275](https://github.com/apache/camel-k/issues/3275)
 - Add e2e test for kamel run --dev in a warmed-up environment [\#3211](https://github.com/apache/camel-k/issues/3211)
+- OLM scorecard tests missing [\#3022](https://github.com/apache/camel-k/issues/3022)
 - Access channel in different namespace [\#3009](https://github.com/apache/camel-k/issues/3009)
 - Operator creates too many repositories [\#3003](https://github.com/apache/camel-k/issues/3003)
 - Release: scripting Renaming files for operator works [\#2984](https://github.com/apache/camel-k/issues/2984)
@@ -116,7 +118,6 @@
 - Jitpack example deployment fails [\#3207](https://github.com/apache/camel-k/issues/3207)
 - Mount trait usage example [\#3140](https://github.com/apache/camel-k/issues/3140)
 - `Kamel kit create` to use mount/camel traits [\#2915](https://github.com/apache/camel-k/issues/2915)
-- Make knative broker name configurable [\#2864](https://github.com/apache/camel-k/issues/2864)
 - \[CLI\] Format long subcommand descriptions [\#2318](https://github.com/apache/camel-k/issues/2318)
 - Camel K CLI asks for an OpenAPI v2 when also v3 is supported [\#2238](https://github.com/apache/camel-k/issues/2238)
 - Traits to configure the container image and location fo the sources [\#2232](https://github.com/apache/camel-k/issues/2232)
