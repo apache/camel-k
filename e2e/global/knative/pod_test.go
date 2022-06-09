@@ -35,12 +35,13 @@ import (
 
 func TestPodTraitWithKnative(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
-		Expect(Kamel("run", "-n", ns, "files/podtest-knative2.groovy",
+		operatorID := "camel-k-trait-pod-knative"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/podtest-knative2.groovy",
 			"--pod-template", "files/template-knative.yaml").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "podtest-knative2"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, "podtest-knative2", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Expect(Kamel("run", "-n", ns, "files/podtest-knative1.groovy").Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/podtest-knative1.groovy").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "podtest-knative1"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, "podtest-knative1", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 

@@ -37,7 +37,8 @@ import (
 
 func TestServiceBindingTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-trait-service-binding"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		// Create our mock service config
 		host := "hostname"
@@ -65,10 +66,9 @@ func TestServiceBindingTrait(t *testing.T) {
 
 		// Create integration and bind it to our service
 		name := "service-binding"
-		Expect(Kamel("run", "ServiceBinding.java",
+		Expect(KamelRunWithID(operatorID, ns, "ServiceBinding.java",
 			"--name", name,
 			"--connect", serviceRef,
-			"-n", ns,
 		).Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))

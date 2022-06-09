@@ -21,7 +21,6 @@ import (
 	"context"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -74,19 +73,10 @@ func getOrFindForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.O
 		return get(ctx, c, o.GetNamespace(), selectedPlatform)
 	}
 
-	platformName := defaults.OperatorID()
 	if it, ok := o.(*v1.Integration); ok {
-		if it.Status.Platform != "" {
-			platformName = it.Status.Platform
-		}
-
-		return getOrFind(ctx, c, it.Namespace, platformName, active, local)
+		return getOrFind(ctx, c, it.Namespace, it.Status.Platform, active, local)
 	} else if ik, ok := o.(*v1.IntegrationKit); ok {
-		if ik.Status.Platform != "" {
-			platformName = ik.Status.Platform
-		}
-
-		return getOrFind(ctx, c, ik.Namespace, platformName, active, local)
+		return getOrFind(ctx, c, ik.Namespace, ik.Status.Platform, active, local)
 	}
 	return find(ctx, c, o.GetNamespace(), active, local)
 }
@@ -110,7 +100,7 @@ func getOrFindAny(ctx context.Context, c k8sclient.Reader, namespace string, nam
 // getOrFindLocal returns the named platform or any other platform in the local namespace.
 func getOrFindLocal(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool) (*v1.IntegrationPlatform, error) {
 	if name != "" {
-		return kubernetes.GetIntegrationPlatform(ctx, c, name, namespace)
+		return get(ctx, c, name, namespace)
 	}
 
 	return findLocal(ctx, c, namespace, active)

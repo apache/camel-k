@@ -36,8 +36,9 @@ import (
 func TestStructuredLogs(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		name := "java"
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
-		Expect(Kamel("run", "-n", ns, "files/Java.java",
+		operatorID := "camel-k-logging"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"-t", "logging.format=json").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))

@@ -34,10 +34,11 @@ import (
 
 func TestServiceTraitNodePort(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-trait-service"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("NodePort service", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/PlatformHttpServer.java",
+			Expect(KamelRunWithID(operatorID, ns, "files/PlatformHttpServer.java",
 				"-t", "service.enabled=true",
 				"-t", "service.node-port=true").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -59,7 +60,7 @@ func TestServiceTraitDefault(t *testing.T) {
 
 		t.Run("Default service (ClusterIP)", func(t *testing.T) {
 			// Service trait is enabled by default
-			Expect(Kamel("run", "-n", ns, "files/PlatformHttpServer.java").Execute()).To(Succeed())
+			Expect(KamelRun(ns, "files/PlatformHttpServer.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
 			//

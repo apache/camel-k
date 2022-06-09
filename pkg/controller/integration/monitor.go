@@ -27,7 +27,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/equality"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
@@ -297,7 +296,7 @@ func filterPodsByReadyStatus(runningPods []corev1.Pod, podSpec corev1.PodSpec) (
 	for _, pod := range runningPods {
 		// We compare the Integration PodSpec to that of the Pod in order to make
 		// sure we account for up-to-date version.
-		if !equality.Semantic.DeepDerivative(podSpec, pod.Spec) {
+		if !comparePodSpec(podSpec, pod.Spec) {
 			continue
 		}
 		ready := kubernetes.GetPodCondition(pod, corev1.PodReady)
@@ -317,6 +316,48 @@ func filterPodsByReadyStatus(runningPods []corev1.Pod, podSpec corev1.PodSpec) (
 	}
 
 	return readyPods, unreadyPods
+}
+
+// comparePodSpec compares given pod spec according to integration specific information (e.g. digest, container image).
+func comparePodSpec(runningPodSpec corev1.PodSpec, referencePod corev1.PodSpec) bool {
+	runningPodContainer := findIntegrationContainer(runningPodSpec)
+	referencePodContainer := findIntegrationContainer(referencePod)
+
+	if runningPodContainer == nil || referencePodContainer == nil {
+		return false
+	}
+
+	// integration digest must be the same
+	if getIntegrationDigest(runningPodContainer.Env) != getIntegrationDigest(referencePodContainer.Env) {
+		return false
+	}
+
+	// integration container image must be the same (same integration kit)
+	if runningPodContainer.Image != referencePodContainer.Image {
+		return false
+	}
+
+	return true
+}
+
+func getIntegrationDigest(envs []corev1.EnvVar) string {
+	for _, env := range envs {
+		if env.Name == digest.IntegrationDigestEnvVar {
+			return env.Value
+		}
+	}
+
+	return ""
+}
+
+func findIntegrationContainer(spec corev1.PodSpec) *corev1.Container {
+	for _, c := range spec.Containers {
+		if c.Name == "integration" {
+			return &c
+		}
+	}
+
+	return nil
 }
 
 // probeReadiness calls the readiness probes of the non-ready Pods directly to retrieve insights from the Camel runtime.

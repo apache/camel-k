@@ -40,7 +40,8 @@ func TestRunWithDockerHubRegistry(t *testing.T) {
 		t.Skip("no docker hub credentials: skipping")
 	} else {
 		WithNewTestNamespace(t, func(ns string) {
-			Expect(KamelInstall(ns,
+			operatorID := "camel-k-docker-hub"
+			Expect(KamelInstallWithID(operatorID, ns,
 				"--registry", "docker.io",
 				"--organization", user,
 				"--registry-auth-username", user,
@@ -48,7 +49,7 @@ func TestRunWithDockerHubRegistry(t *testing.T) {
 				"--cluster-type", "kubernetes").
 				Execute()).To(Succeed())
 
-			Expect(Kamel("run", "-n", ns, "files/groovy.groovy").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "files/groovy.groovy").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "groovy"), TestTimeoutLong).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationLogs(ns, "groovy"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Eventually(IntegrationPodImage(ns, "groovy"), TestTimeoutShort).Should(HavePrefix("docker.io"))

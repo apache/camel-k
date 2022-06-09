@@ -41,8 +41,9 @@ import (
 func TestIntegrationScale(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		name := "java"
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
-		Expect(Kamel("run", "-n", ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+		operatorID := "camel-k-integration-scale"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -119,7 +120,7 @@ func TestIntegrationScale(t *testing.T) {
 			// Save resources by deleting the integration
 			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
 
-			Expect(Kamel("run", "-n", ns, "files/Java.java", "--name", "pre-built", "-t", fmt.Sprintf("container.image=%s", image)).Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", "pre-built", "-t", fmt.Sprintf("container.image=%s", image)).Execute()).To(Succeed())
 			Eventually(IntegrationPhase(ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
 			Eventually(IntegrationPodPhase(ns, "pre-built"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Expect(ScaleIntegration(ns, "pre-built", 0)).To(Succeed())

@@ -198,9 +198,9 @@ export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
 export KAMEL_INSTALL_OPERATOR_IMAGE_PULL_POLICY="Always"
 
 #
-# Install the operator
+# Install the operator to local namespace
 #
-kamel install -n ${NAMESPACE} --olm=${has_olm}
+kamel install -n ${NAMESPACE} --olm=${has_olm} --global=false --operator-id=camel-k-preflight
 if [ $? != 0 ]; then
   echo "Error: kamel install returned an error."
   delns "${NAMESPACE}"
@@ -281,6 +281,15 @@ kamel uninstall -n ${NAMESPACE}
 if [ $? != 0 ]; then
   echo "Error: kamel uninstall failed while removing preflight install"
   delns "${NAMESPACE}"
+  exit 1
+fi
+
+#
+# Remove the operator from local namespace
+#
+kamel uninstall -n ${NAMESPACE}
+if [ $? != 0 ]; then
+  echo "Error: kamel uninstall returned an error."
   exit 1
 fi
 

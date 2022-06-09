@@ -176,10 +176,11 @@ func TestMavenProxy(t *testing.T) {
 			}()
 
 			// ENV values should be injected by the OLM
-			Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
-
+			operatorID := "camel-k-maven-proxy"
+			Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		} else {
-			Expect(Kamel("install", "-n", ns,
+			operatorID := "camel-k-maven-proxy"
+			Expect(KamelInstallWithID(operatorID, ns,
 				"--operator-env-vars", fmt.Sprintf("HTTP_PROXY=http://%s", hostname),
 				// TODO: enable TLS for the HTTPS proxy when Maven supports it
 				// "--operator-env-vars", fmt.Sprintf("HTTPS_PROXY=https://%s", hostname),
@@ -192,7 +193,7 @@ func TestMavenProxy(t *testing.T) {
 
 		// Run the Integration
 		name := "java"
-		Expect(Kamel("run", "-n", ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+		Expect(KamelRun(ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))

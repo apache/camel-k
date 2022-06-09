@@ -40,7 +40,8 @@ var (
 
 func TestNativeIntegrations(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns,
+		operatorID := "camel-k-quarkus-native"
+		Expect(KamelInstallWithID(operatorID, ns,
 			"--build-timeout", "15m0s",
 			"--operator-resources", "limits.memory=4Gi",
 		).Execute()).To(Succeed())
@@ -48,7 +49,7 @@ func TestNativeIntegrations(t *testing.T) {
 
 		t.Run("unsupported integration source language", func(t *testing.T) {
 			name := "unsupported-java"
-			Expect(Kamel("run", "-n", ns, "Java.java", "--name", name,
+			Expect(KamelRunWithID(operatorID, ns, "Java.java", "--name", name,
 				"-t", "quarkus.package-type=native",
 			).Execute()).To(Succeed())
 
@@ -58,7 +59,7 @@ func TestNativeIntegrations(t *testing.T) {
 
 		t.Run("automatic rollout deployment from fast-jar to native kit", func(t *testing.T) {
 			name := "jvm-to-native"
-			Expect(Kamel("run", "-n", ns, "yaml.yaml", "--name", name,
+			Expect(KamelRunWithID(operatorID, ns, "yaml.yaml", "--name", name,
 				"-t", "quarkus.package-type=fast-jar",
 				"-t", "quarkus.package-type=native",
 			).Execute()).To(Succeed())

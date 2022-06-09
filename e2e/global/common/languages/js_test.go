@@ -35,10 +35,11 @@ import (
 
 func TestRunSimpleJavaScriptExamples(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-examples-js"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("run js", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/js.js").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "files/js.js").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "js"), TestTimeoutLong).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "js", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "js"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))

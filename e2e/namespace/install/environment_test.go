@@ -63,14 +63,15 @@ func TestEnvironmentTrait(t *testing.T) {
 		}
 
 		// Install Camel K with the HTTP proxy environment variable
-		Expect(Kamel("install", "-n", ns,
+		operatorID := "camel-k-trait-environment"
+		Expect(KamelInstallWithID(operatorID, ns,
 			"--operator-env-vars", fmt.Sprintf("HTTP_PROXY=%s", httpProxy),
 			"--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","),
 		).Execute()).To(Succeed())
 
 		t.Run("Run integration with default environment", func(t *testing.T) {
 			name := "java-default"
-			Expect(Kamel("run", "-n", ns, "--name", name, "files/Java.java").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "--name", name, "files/Java.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -96,7 +97,7 @@ func TestEnvironmentTrait(t *testing.T) {
 
 		t.Run("Run integration with custom environment", func(t *testing.T) {
 			name := "java-custom-proxy"
-			Expect(Kamel("run", "-n", ns, "files/Java.java",
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"--name", name,
 				"-t", "environment.vars=HTTP_PROXY=http://custom.proxy",
 			).Execute()).To(Succeed())
@@ -125,7 +126,7 @@ func TestEnvironmentTrait(t *testing.T) {
 
 		t.Run("Run integration without default HTTP proxy environment", func(t *testing.T) {
 			name := "java-no-proxy"
-			Expect(Kamel("run", "-n", ns, "files/Java.java",
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"--name", name,
 				"-t", "environment.http-proxy=false",
 			).Execute()).To(Succeed())

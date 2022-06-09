@@ -30,6 +30,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -85,7 +86,7 @@ func TestChangeEnvVariables(t *testing.T) {
 	assert.Equal(t, 3, len(getContainer(templateSpec.Spec.Containers, "second").Env))
 
 	// Check if env var was changed
-	assert.Equal(t, containsEnvVariables(templateSpec, "integration", "CAMEL_K_DIGEST"), "new_value")
+	assert.Equal(t, containsEnvVariables(templateSpec, "integration", digest.IntegrationDigestEnvVar), "new_value")
 }
 
 func TestSupplementalGroup(t *testing.T) {
@@ -128,7 +129,7 @@ func createPodTest(podSpecTemplate string) (*podTrait, *Environment, *appsv1.Dep
 							Name: "integration",
 							Env: []corev1.EnvVar{
 								{
-									Name:  "CAMEL_K_DIGEST",
+									Name:  digest.IntegrationDigestEnvVar,
 									Value: "vO3wwJHC7-uGEiFFVac0jq6rZT5EZNw56Ae5gKKFZZsk",
 								},
 								{

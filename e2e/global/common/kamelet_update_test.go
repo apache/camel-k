@@ -39,7 +39,8 @@ func TestBundleKameletUpdate(t *testing.T) {
 		Expect(createBundleKamelet(ns, "http-sink")()).To(Succeed()) // Going to be replaced
 		Expect(createUserKamelet(ns, "user-sink")()).To(Succeed())   // Left intact by the operator
 
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-kamelet-update"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		Eventually(Kamelet("http-sink", ns)).
 			Should(WithTransform(KameletLabels, HaveKeyWithValue(customLabel, "true")))

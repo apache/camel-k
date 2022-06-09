@@ -39,11 +39,12 @@ func TestPullSecretTrait(t *testing.T) {
 		ocp, err := openshift.IsOpenShift(TestClient())
 		Expect(err).To(BeNil())
 
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-trait-pull-secret"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("Image pull secret is set on pod", func(t *testing.T) {
 			name := "java1"
-			Expect(Kamel("run", "-n", ns, "files/Java.java", "--name", name,
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
 				"-t", "pull-secret.enabled=true",
 				"-t", "pull-secret.secret-name=dummy-secret").Execute()).To(Succeed())
 			// pod may not run because the pull secret is dummy
@@ -56,7 +57,7 @@ func TestPullSecretTrait(t *testing.T) {
 
 		t.Run("Explicitly disable image pull secret", func(t *testing.T) {
 			name := "java2"
-			Expect(Kamel("run", "-n", ns, "files/Java.java", "--name", name,
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
 				"-t", "pull-secret.enabled=false").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -75,7 +76,7 @@ func TestPullSecretTrait(t *testing.T) {
 			// OpenShift always has an internal registry so image pull secret is set by default
 			t.Run("Image pull secret is automatically set by default", func(t *testing.T) {
 				name := "java3"
-				Expect(Kamel("run", "-n", ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+				Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))

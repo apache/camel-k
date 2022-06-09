@@ -24,6 +24,7 @@ package common
 
 import (
 	"bytes"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -44,7 +45,8 @@ import (
 
 func TestBasicInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		Eventually(Platform(ns)).ShouldNot(BeNil())
 	})
@@ -52,14 +54,16 @@ func TestBasicInstallation(t *testing.T) {
 
 func TestAlternativeImageInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--olm=false", "--operator-image", "x/y:latest").Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns, "--olm=false", "--operator-image", "x/y:latest").Execute()).To(Succeed())
 		Eventually(OperatorImage(ns)).Should(Equal("x/y:latest"))
 	})
 }
 
 func TestKitMainInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Expect(Kamel("kit", "create", "timer", "-d", "camel:timer", "-n", ns).Execute()).To(Succeed())
 		Eventually(Build(ns, "timer"), TestTimeoutMedium).ShouldNot(BeNil())
 	})
@@ -67,7 +71,8 @@ func TestKitMainInstallation(t *testing.T) {
 
 func TestMavenRepositoryInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--maven-repository", "https://my.repo.org/public/").Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns, "--maven-repository", "https://my.repo.org/public/").Execute()).To(Succeed())
 		Eventually(Configmap(ns, "camel-k-maven-settings")).Should(Not(BeNil()))
 		Eventually(func() string {
 			return Configmap(ns, "camel-k-maven-settings")().Data["settings.xml"]
@@ -81,7 +86,8 @@ func TestMavenRepositoryInstallation(t *testing.T) {
  */
 func TestSkipRegistryInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--skip-registry-setup").Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns, "--skip-registry-setup").Execute()).To(Succeed())
 		Eventually(Platform(ns)).ShouldNot(BeNil())
 		Eventually(func() v1.RegistrySpec {
 			return Platform(ns)().Spec.Build.Registry
@@ -120,7 +126,8 @@ func TestConsoleCliDownload(t *testing.T) {
 			Expect(TestClient().Delete(TestContext, cliDownload)).To(Succeed())
 		}
 
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Eventually(ConsoleCLIDownload(name), TestTimeoutMedium).Should(Not(BeNil()))
 
 		cliDownload = ConsoleCLIDownload(name)()
@@ -144,7 +151,8 @@ func TestConsoleCliDownload(t *testing.T) {
 
 func TestInstallSkipDefaultKameletsInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "--skip-default-kamelets-setup").Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns, "--skip-default-kamelets-setup").Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		Expect(KameletList(ns)()).Should(BeEmpty())
 	})
@@ -152,7 +160,8 @@ func TestInstallSkipDefaultKameletsInstallation(t *testing.T) {
 
 func TestInstallDebugLogging(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns, "-z", "debug").Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns, "-z", "debug").Execute()).To(Succeed())
 
 		podFunc := OperatorPod(ns)
 		Eventually(podFunc).ShouldNot(BeNil())

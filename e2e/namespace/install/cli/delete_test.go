@@ -34,10 +34,11 @@ import (
 
 func TestKamelCLIDelete(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		operatorID := "camel-k-cli-delete"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("delete running integration", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "../files/yaml.yaml").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "../files/yaml.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Expect(Kamel("delete", "yaml", "-n", ns).Execute()).To(Succeed())
 			Eventually(Integration(ns, "yaml")).Should(BeNil())
@@ -45,14 +46,14 @@ func TestKamelCLIDelete(t *testing.T) {
 		})
 
 		t.Run("delete building integration", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "../files/yaml.yaml").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "../files/yaml.yaml").Execute()).To(Succeed())
 			Expect(Kamel("delete", "yaml", "-n", ns).Execute()).To(Succeed())
 			Eventually(Integration(ns, "yaml")).Should(BeNil())
 			Eventually(IntegrationPod(ns, "yaml")).Should(BeNil())
 		})
 
 		t.Run("delete integration from csv", func(t *testing.T) {
-			Expect(Kamel("run", "github:apache/camel-k/e2e/common/files/yaml.yaml", "-n", ns).Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "github:apache/camel-k/e2e/common/files/yaml.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Expect(Kamel("delete", "yaml", "-n", ns).Execute()).To(Succeed())
 			Eventually(Integration(ns, "yaml")).Should(BeNil())
@@ -60,8 +61,8 @@ func TestKamelCLIDelete(t *testing.T) {
 		})
 
 		t.Run("delete several integrations", func(t *testing.T) {
-			Expect(Kamel("run", "../files/yaml.yaml", "-n", ns).Execute()).To(Succeed())
-			Expect(Kamel("run", "../files/Java.java", "-n", ns).Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "../files/yaml.yaml").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "../files/Java.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Expect(Kamel("delete", "yaml", "-n", ns).Execute()).To(Succeed())
@@ -73,8 +74,8 @@ func TestKamelCLIDelete(t *testing.T) {
 		})
 
 		t.Run("delete all integrations", func(t *testing.T) {
-			Expect(Kamel("run", "../files/yaml.yaml", "-n", ns).Execute()).To(Succeed())
-			Expect(Kamel("run", "../files/Java.java", "-n", ns).Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "../files/yaml.yaml").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "../files/Java.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())

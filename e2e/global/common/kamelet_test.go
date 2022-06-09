@@ -33,14 +33,15 @@ import (
 
 func TestKameletClasspathLoading(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-kamelet"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		kameletName := "timer-source"
 		removeKamelet(kameletName, ns)
 
 		Eventually(Kamelet(kameletName, ns)).Should(BeNil())
 
-		Expect(Kamel("run", "files/TimerKameletIntegration.java", "-n", ns, "-t", "kamelets.enabled=false",
+		Expect(KamelRunWithID(operatorID, ns, "files/TimerKameletIntegration.java", "-t", "kamelets.enabled=false",
 			"--resource", "file:files/timer-source.kamelet.yaml@/kamelets/timer-source.kamelet.yaml",
 			"-p camel.component.kamelet.location=file:/kamelets",
 			"-d", "camel:yaml-dsl",

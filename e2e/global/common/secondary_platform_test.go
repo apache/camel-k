@@ -36,7 +36,8 @@ import (
 
 func TestSecondaryPlatform(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-platform-secondary"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Expect(ConfigureSecondaryPlatformWith(ns, func(p *v1.IntegrationPlatform) {
 			p.Name = "secondary"
 			p.Spec.Traits.Container = &traitv1.ContainerTrait{
@@ -48,7 +49,7 @@ func TestSecondaryPlatform(t *testing.T) {
 			}
 		})).To(Succeed())
 
-		Expect(Kamel("run", "-n", ns, "--name", "limited", "--annotation", "camel.apache.org/platform.id=secondary", "files/yaml.yaml").Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "--name", "limited", "--annotation", "camel.apache.org/platform.id=secondary", "files/yaml.yaml").Execute()).To(Succeed())
 
 		Eventually(IntegrationPod(ns, "limited"), TestTimeoutMedium).Should(Not(BeNil()))
 		Eventually(IntegrationPodHas(ns, "limited", func(pod *corev1.Pod) bool {
@@ -60,7 +61,7 @@ func TestSecondaryPlatform(t *testing.T) {
 		}), TestTimeoutShort).Should(BeTrue())
 		Expect(Kamel("delete", "limited", "-n", ns).Execute()).To(Succeed())
 
-		Expect(Kamel("run", "-n", ns, "--name", "normal", "files/yaml.yaml").Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "--name", "normal", "files/yaml.yaml").Execute()).To(Succeed())
 		Eventually(IntegrationPod(ns, "normal"), TestTimeoutShort).Should(Not(BeNil()))
 		Eventually(IntegrationPodHas(ns, "normal", func(pod *corev1.Pod) bool {
 			if len(pod.Spec.Containers) != 1 {

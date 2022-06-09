@@ -77,7 +77,8 @@ func TestPodTrait(t *testing.T) {
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-trait-pod-template"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		name := "pod-template-test"
 
@@ -85,7 +86,7 @@ func TestPodTrait(t *testing.T) {
 			test := tc[i]
 
 			t.Run(test.name, func(t *testing.T) {
-				Expect(Kamel("run", "-n", ns, "files/PodTest.groovy",
+				Expect(KamelRunWithID(operatorID, ns, "files/PodTest.groovy",
 					"--name", name,
 					"--pod-template", test.templateName,
 				).Execute()).To(Succeed())

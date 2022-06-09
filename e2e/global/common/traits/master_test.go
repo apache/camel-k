@@ -48,17 +48,18 @@ func TestMasterTrait(t *testing.T) {
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-trait-master"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("master works", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/Master.java").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "files/Master.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "master"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, "master"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("only one integration with master runs", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/Master.java",
+			Expect(KamelRunWithID(operatorID, ns, "files/Master.java",
 				"--name", "first",
 				"--label", "leader-group=same",
 				"-t", "master.label-key=leader-group",
@@ -67,7 +68,7 @@ func TestMasterTrait(t *testing.T) {
 			Eventually(IntegrationPodPhase(ns, "first"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, "first"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			// Start a second integration with the same lock (it should not start the route)
-			Expect(Kamel("run", "-n", ns, "files/Master.java",
+			Expect(KamelRunWithID(operatorID, ns, "files/Master.java",
 				"--name", "second",
 				"--label", "leader-group=same",
 				"-t", "master.label-key=leader-group",

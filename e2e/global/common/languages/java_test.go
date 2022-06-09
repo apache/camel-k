@@ -35,10 +35,11 @@ import (
 
 func TestRunSimpleJavaExamples(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-examples-java"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("run java", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/Java.java").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -46,7 +47,7 @@ func TestRunSimpleJavaExamples(t *testing.T) {
 		})
 
 		t.Run("run java with properties", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/Prop.java", "--property", "file:files/prop.properties").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "files/Prop.java", "--property", "file:files/prop.properties").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "prop"), TestTimeoutLong).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "prop", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "prop"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))

@@ -273,7 +273,7 @@ func (o *uninstallCmdOptions) uninstallNamespaceResources(ctx context.Context, c
 		if err := o.uninstallKamelets(ctx, c); err != nil {
 			return err
 		}
-		fmt.Fprintln(cmd.OutOrStdout(), "Camel K platform Kamelets removed from namespace", o.Namespace)
+		fmt.Fprintln(cmd.OutOrStdout(), "Camel K Platform Kamelets removed from namespace", o.Namespace)
 	}
 
 	return nil
@@ -474,7 +474,7 @@ func (o *uninstallCmdOptions) uninstallKamelets(ctx context.Context, c client.Cl
 	}
 
 	for i := range kameletList.Items {
-		// remove only platform Kamelets (use-defined Kamelets should be skipped)
+		// remove only platform Kamelets (user-defined Kamelets should be skipped)
 		if kameletList.Items[i].Labels[v1alpha1.KameletBundledLabel] == "true" {
 			err := c.Delete(ctx, &kameletList.Items[i])
 			if err != nil {

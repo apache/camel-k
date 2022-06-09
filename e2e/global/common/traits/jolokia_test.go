@@ -36,10 +36,11 @@ import (
 
 func TestJolokiaTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-trait-jolokia"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("Run Java with Jolokia", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/Java.java",
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"-t", "jolokia.enabled=true",
 				"-t", "jolokia.use-ssl-client-authentication=false",
 				"-t", "jolokia.protocol=http",

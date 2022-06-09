@@ -35,10 +35,11 @@ import (
 
 func TestKamelCLILog(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		operatorID := "camel-k-cli-log"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("check integration log", func(t *testing.T) {
-			Expect(Kamel("run", "../files/yaml.yaml", "-n", ns).Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "../files/yaml.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			// first line of the integration logs
 			logs := strings.Split(IntegrationLogs(ns, "yaml")(), "\n")[0]

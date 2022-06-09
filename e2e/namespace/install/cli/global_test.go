@@ -56,10 +56,12 @@ func TestRunGlobalInstall(t *testing.T) {
 		Eventually(OperatorPodPhase(operatorNamespace), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		t.Run("Global test on namespace with platform", func(t *testing.T) {
 			WithNewTestNamespace(t, func(ns2 string) {
-				// Creating platform
-				Expect(Kamel("install", "-n", ns2, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
+				// Creating namespace local platform
+				Expect(KamelInstall(ns2, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
+				Eventually(Platform(ns2)).ShouldNot(BeNil())
 
-				Expect(Kamel("run", "-n", ns2, "files/Java.java").Execute()).To(Succeed())
+				// Run with global operator id
+				Expect(KamelRun(ns2, "files/Java.java").Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(ns2, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns2, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 				Expect(IntegrationConditionMessage(IntegrationCondition(ns2, "java", v1.IntegrationConditionPlatformAvailable)())).To(MatchRegexp(ns2 + "\\/.*"))
@@ -68,19 +70,20 @@ func TestRunGlobalInstall(t *testing.T) {
 				Expect(Kits(ns2)()).Should(WithTransform(integrationKitsToNamesTransform(), ContainElement(kit)))
 				Expect(Kits(operatorNamespace)()).Should(WithTransform(integrationKitsToNamesTransform(), Not(ContainElement(kit))))
 
-				Expect(Lease(ns2, platform.OperatorLockName)()).To(BeNil(), "No locking Leases expected")
+				Expect(Lease(ns2, platform.DefaultPlatformName)()).To(BeNil(), "No locking Leases expected")
 			})
 		})
 
 		t.Run("Global test on namespace with its own operator", func(t *testing.T) {
 			WithNewTestNamespace(t, func(ns3 string) {
+				operatorID := "camel-k-local-ns3"
 				if NoOlmOperatorImage != "" {
-					Expect(Kamel("install", "-n", ns3, "--olm=false", "--operator-image", NoOlmOperatorImage).Execute()).To(Succeed())
+					Expect(KamelInstallWithID(operatorID, ns3, "--olm=false", "--operator-image", NoOlmOperatorImage).Execute()).To(Succeed())
 				} else {
-					Expect(Kamel("install", "-n", ns3, "--olm=false").Execute()).To(Succeed())
+					Expect(KamelInstallWithID(operatorID, ns3, "--olm=false").Execute()).To(Succeed())
 				}
 				Eventually(OperatorPodPhase(ns3), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-				Expect(Kamel("run", "-n", ns3, "files/Java.java").Execute()).To(Succeed())
+				Expect(KamelRunWithID(operatorID, ns3, "files/Java.java").Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(ns3, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns3, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 				Expect(IntegrationConditionMessage(IntegrationCondition(ns3, "java", v1.IntegrationConditionPlatformAvailable)())).To(MatchRegexp(ns3 + "\\/.*"))
@@ -88,7 +91,8 @@ func TestRunGlobalInstall(t *testing.T) {
 				Expect(Kits(ns3)()).Should(WithTransform(integrationKitsToNamesTransform(), ContainElement(kit)))
 				Expect(Kamel("delete", "--all", "-n", ns3).Execute()).To(Succeed())
 
-				Expect(Lease(ns3, platform.OperatorLockName)()).ShouldNot(BeNil(),
+				Expect(Lease(ns3, platform.OperatorLockName)()).To(BeNil(), "No locking Leases expected")
+				Expect(Lease(ns3, platform.GetOperatorLockName(operatorID))()).ShouldNot(BeNil(),
 					"Controller Runtime is expected to use Leases for leader election: if this changes we should update our locking logic",
 				)
 			})
@@ -96,7 +100,7 @@ func TestRunGlobalInstall(t *testing.T) {
 
 		t.Run("Global test on namespace without platform", func(t *testing.T) {
 			WithNewTestNamespace(t, func(ns4 string) {
-				Expect(Kamel("run", "-n", ns4, "files/Java.java").Execute()).To(Succeed())
+				Expect(KamelRun(ns4, "files/Java.java").Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(ns4, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns4, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 				Expect(IntegrationConditionMessage(IntegrationCondition(ns4, "java", v1.IntegrationConditionPlatformAvailable)())).To(MatchRegexp(operatorNamespace + "\\/.*"))
@@ -111,7 +115,7 @@ func TestRunGlobalInstall(t *testing.T) {
 
 		t.Run("Global test on namespace without platform with external kit", func(t *testing.T) {
 			WithNewTestNamespace(t, func(ns5 string) {
-				Expect(Kamel("run", "-n", ns5, "files/Java.java").Execute()).To(Succeed())
+				Expect(KamelRun(ns5, "files/Java.java").Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(ns5, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns5, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 				Expect(IntegrationConditionMessage(IntegrationCondition(ns5, "java", v1.IntegrationConditionPlatformAvailable)())).To(MatchRegexp(operatorNamespace + "\\/.*"))
@@ -136,7 +140,7 @@ func TestRunGlobalInstall(t *testing.T) {
 				}
 				Expect(TestClient().Create(TestContext, &externalKit)).Should(BeNil())
 
-				Expect(Kamel("run", "-n", ns5, "files/Java.java", "--name", "ext", "--kit", "external").Execute()).To(Succeed())
+				Expect(KamelRun(ns5, "files/Java.java", "--name", "ext", "--kit", "external").Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(ns5, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns5, "ext"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 				Expect(IntegrationKit(ns5, "ext")()).Should(Equal("external"))

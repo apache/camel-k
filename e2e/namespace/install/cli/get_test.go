@@ -35,10 +35,11 @@ import (
 
 func TestKamelCLIGet(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		operatorID := "camel-k-cli-get"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("get integration", func(t *testing.T) {
-			Expect(Kamel("run", "../files/yaml.yaml", "-n", ns).Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "../files/yaml.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			// regex is used for the compatibility of tests between OC and vanilla K8
 			// kamel get may have different output depending og the platform
@@ -50,8 +51,8 @@ func TestKamelCLIGet(t *testing.T) {
 		})
 
 		t.Run("get several integrations", func(t *testing.T) {
-			Expect(Kamel("run", "../files/yaml.yaml", "-n", ns).Execute()).To(Succeed())
-			Expect(Kamel("run", "../files/Java.java", "-n", ns).Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "../files/yaml.yaml").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "../files/Java.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 

@@ -36,12 +36,13 @@ import (
 
 func TestBadRouteIntegration(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-bad-route"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("run bad java route", func(t *testing.T) {
 			RegisterTestingT(t)
 			name := "bad-route"
-			Expect(Kamel("run", "-n", ns, "files/BadRoute.java", "--name", name).Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "files/BadRoute.java", "--name", name).Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
