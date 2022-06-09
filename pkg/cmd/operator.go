@@ -57,14 +57,14 @@ type operatorCmdOptions struct {
 
 func (o *operatorCmdOptions) run(_ *cobra.Command, _ []string) {
 
-	leaderElectionId := o.LeaderElectionID
-	if leaderElectionId == "" {
+	leaderElectionID := o.LeaderElectionID
+	if leaderElectionID == "" {
 		if defaults.OperatorID() != "" {
-			leaderElectionId = fmt.Sprintf("%s-lock", defaults.OperatorID())
+			leaderElectionID = fmt.Sprintf("%s-lock", defaults.OperatorID())
 		} else {
-			leaderElectionId = platform.OperatorLockName
+			leaderElectionID = platform.OperatorLockName
 		}
 	}
 
-	operator.Run(o.HealthPort, o.MonitoringPort, o.LeaderElection, leaderElectionId)
+	operator.Run(o.HealthPort, o.MonitoringPort, o.LeaderElection, leaderElectionID)
 }

@@ -133,10 +133,10 @@ func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[s
 	platform, err := platformutil.GetOrFindLocal(ctx, c, namespace)
 	if err != nil && k8serrors.IsNotFound(err) {
 		// find default operator platform in any namespace
-		if defaultPlatform, _ := platformutil.LookupForPlatformName(ctx, c, platformutil.DefaultPlatformName); defaultPlatform == nil {
-			return nil, err
-		} else {
+		if defaultPlatform, _ := platformutil.LookupForPlatformName(ctx, c, platformutil.DefaultPlatformName); defaultPlatform != nil {
 			platform = defaultPlatform
+		} else {
+			return nil, err
 		}
 	} else if err != nil {
 		return nil, err

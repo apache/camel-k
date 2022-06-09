@@ -85,7 +85,7 @@ type bindCmdOptions struct {
 	SkipChecks   bool     `mapstructure:"skip-checks" yaml:",omitempty"`
 	Steps        []string `mapstructure:"steps" yaml:",omitempty"`
 	Traits       []string `mapstructure:"traits" yaml:",omitempty"`
-	OperatorId   string   `mapstructure:"operator-id" yaml:",omitempty"`
+	OperatorID   string   `mapstructure:"operator-id" yaml:",omitempty"`
 	Annotations  []string `mapstructure:"annotations" yaml:",omitempty"`
 	Force        bool     `mapstructure:"force" yaml:",omitempty"`
 }
@@ -116,7 +116,7 @@ func (o *bindCmdOptions) validate(cmd *cobra.Command, args []string) error {
 		return errors.New("source or sink arguments are missing")
 	}
 
-	if o.OperatorId == "" {
+	if o.OperatorID == "" {
 		return fmt.Errorf("cannot use empty operator id")
 	}
 
@@ -237,24 +237,24 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 		binding.Annotations = make(map[string]string)
 	}
 
-	if o.OperatorId != "" {
-		if pl, err := platformutil.LookupForPlatformName(o.Context, client, o.OperatorId); err != nil {
+	if o.OperatorID != "" {
+		if pl, err := platformutil.LookupForPlatformName(o.Context, client, o.OperatorID); err != nil {
 			if k8serrors.IsForbidden(err) {
-				o.PrintfVerboseOutf(cmd, "Unable to verify existence of operator id [%s] due to lack of user privileges\n", o.OperatorId)
+				o.PrintfVerboseOutf(cmd, "Unable to verify existence of operator id [%s] due to lack of user privileges\n", o.OperatorID)
 			} else {
 				return err
 			}
 		} else if pl == nil {
 			if o.Force {
-				o.PrintfVerboseOutf(cmd, "Unable to find operator with given id [%s] - Kamelet binding may not be reconciled and get stuck in waiting state\n", o.OperatorId)
+				o.PrintfVerboseOutf(cmd, "Unable to find operator with given id [%s] - Kamelet binding may not be reconciled and get stuck in waiting state\n", o.OperatorID)
 			} else {
-				return errors.New(fmt.Sprintf("unable to find integration platform for given operator id '%s', use --force option or make sure to use a proper operator id", o.OperatorId))
+				return fmt.Errorf("unable to find integration platform for given operator id '%s', use --force option or make sure to use a proper operator id", o.OperatorID)
 			}
 		}
 	}
 
 	// --operator-id={id} is a syntax sugar for '--annotation camel.apache.org/operator.id={id}'
-	binding.SetOperatorID(strings.TrimSpace(o.OperatorId))
+	binding.SetOperatorID(strings.TrimSpace(o.OperatorID))
 
 	for _, annotation := range o.Annotations {
 		parts := strings.SplitN(annotation, "=", 2)

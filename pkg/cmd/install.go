@@ -180,7 +180,7 @@ type installCmdOptions struct {
 	OutputFormat             string   `mapstructure:"output"`
 	RuntimeVersion           string   `mapstructure:"runtime-version"`
 	BaseImage                string   `mapstructure:"base-image"`
-	OperatorId               string   `mapstructure:"operator-id"`
+	OperatorID               string   `mapstructure:"operator-id"`
 	OperatorImage            string   `mapstructure:"operator-image"`
 	OperatorImagePullPolicy  string   `mapstructure:"operator-image-pull-policy"`
 	BuildStrategy            string   `mapstructure:"build-strategy"`
@@ -221,7 +221,7 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 	clientProvider := client.Provider{Get: o.NewCmdClient}
 
 	// --operator-id={id} is a syntax sugar for '--operator-env-vars KAMEL_OPERATOR_ID={id}'
-	o.EnvVars = append(o.EnvVars, fmt.Sprintf("KAMEL_OPERATOR_ID=%s", strings.TrimSpace(o.OperatorId)))
+	o.EnvVars = append(o.EnvVars, fmt.Sprintf("KAMEL_OPERATOR_ID=%s", strings.TrimSpace(o.OperatorID)))
 
 	// --skip-default-kamelets-setup is a syntax sugar for '--operator-env-vars KAMEL_INSTALL_DEFAULT_KAMELETS=false'
 	if o.SkipDefaultKameletsSetup {
@@ -303,16 +303,18 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 		namespace := o.Namespace
 
-		platformName := platformutil.DefaultPlatformName
+		var platformName string
 		if operatorID != "" {
 			platformName = operatorID
+		} else {
+			platformName = platformutil.DefaultPlatformName
 		}
 
 		if !o.SkipOperatorSetup && !installViaOLM {
 			if ok, err := isInstallAllowed(o.Context, c, platformName, o.Force, cobraCmd.OutOrStdout()); err != nil {
 				return err
 			} else if !ok {
-				return errors.New(fmt.Sprintf("installation not allowed because operator with id '%s' already exists, use the --force option to skip this check", platformName))
+				return fmt.Errorf("installation not allowed because operator with id '%s' already exists, use the --force option to skip this check", platformName)
 			}
 
 			cfg := install.OperatorConfiguration{
@@ -528,7 +530,7 @@ func isInstallAllowed(ctx context.Context, c client.Client, operatorID string, f
 	pl, err := platformutil.LookupForPlatformName(ctx, c, operatorID)
 
 	if pl != nil && force {
-		fmt.Fprintln(out, fmt.Sprintf("Overwriting existing operator with id '%s'", operatorID))
+		fmt.Fprintf(out, "Overwriting existing operator with id '%s'\n", operatorID)
 		return true, nil
 	}
 
@@ -636,7 +638,7 @@ func (o *installCmdOptions) decode(cmd *cobra.Command, _ []string) error {
 func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 	var result error
 
-	if o.OperatorId == "" {
+	if o.OperatorID == "" {
 		result = multierr.Append(result, fmt.Errorf("cannot use empty operator id"))
 	}
 

@@ -245,10 +245,12 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	exitOnError(mgr.Start(signals.SetupSignalHandler()), "manager exited non-zero")
 }
 
-// findOrCreateIntegrationPlatform create default integration platform in operator namespace if not already exists
+// findOrCreateIntegrationPlatform create default integration platform in operator namespace if not already exists.
 func findOrCreateIntegrationPlatform(ctx context.Context, c client.Client, operatorNamespace string) error {
-	platformName := defaults.OperatorID()
-	if platformName == "" {
+	var platformName string
+	if defaults.OperatorID() != "" {
+		platformName = defaults.OperatorID()
+	} else {
 		platformName = platform.DefaultPlatformName
 	}
 
