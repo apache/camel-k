@@ -114,10 +114,6 @@ var assets = func() http.FileSystem {
 			name:    "bases",
 			modTime: time.Time{},
 		},
-		"/crd/bases/cache": &vfsgen۰DirInfo{
-			name:    "cache",
-			modTime: time.Time{},
-		},
 		"/crd/bases/camel.apache.org_builds.yaml": &vfsgen۰CompressedFileInfo{
 			name:             "camel.apache.org_builds.yaml",
 			modTime:          time.Time{},
@@ -631,7 +627,6 @@ var assets = func() http.FileSystem {
 		fs["/crd/bases"].(os.FileInfo),
 	}
 	fs["/crd/bases"].(*vfsgen۰DirInfo).entries = []os.FileInfo{
-		fs["/crd/bases/cache"].(os.FileInfo),
 		fs["/crd/bases/camel.apache.org_builds.yaml"].(os.FileInfo),
 		fs["/crd/bases/camel.apache.org_camelcatalogs.yaml"].(os.FileInfo),
 		fs["/crd/bases/camel.apache.org_integrationkits.yaml"].(os.FileInfo),
