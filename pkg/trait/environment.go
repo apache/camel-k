@@ -37,7 +37,7 @@ type environmentTrait struct {
 const (
 	envVarNamespace            = "NAMESPACE"
 	envVarPodName              = "POD_NAME"
-	envVarOperatorId           = "CAMEL_K_OPERATOR_ID"
+	envVarOperatorID           = "CAMEL_K_OPERATOR_ID"
 	envVarCamelKVersion        = "CAMEL_K_VERSION"
 	envVarCamelKIntegration    = "CAMEL_K_INTEGRATION"
 	envVarCamelKRuntimeVersion = "CAMEL_K_RUNTIME_VERSION"
@@ -71,7 +71,7 @@ func (t *environmentTrait) Configure(e *Environment) (bool, error) {
 
 func (t *environmentTrait) Apply(e *Environment) error {
 	envvar.SetVal(&e.EnvVars, envVarCamelKVersion, defaults.Version)
-	envvar.SetVal(&e.EnvVars, envVarOperatorId, defaults.OperatorID())
+	envvar.SetVal(&e.EnvVars, envVarOperatorID, defaults.OperatorID())
 	if e.Integration != nil {
 		envvar.SetVal(&e.EnvVars, envVarCamelKIntegration, e.Integration.Name)
 	}

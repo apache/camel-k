@@ -32,7 +32,7 @@ const (
 	DefaultPlatformName = "camel-k"
 )
 
-// LookupForPlatformName finds integration platform with given operator id as name in any namespace
+// LookupForPlatformName finds integration platform with given operator id as name in any namespace.
 func LookupForPlatformName(ctx context.Context, c k8sclient.Reader, name string) (*v1.IntegrationPlatform, error) {
 	platformList := v1.NewIntegrationPlatformList()
 
@@ -86,7 +86,7 @@ func getOrFindForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.O
 			platformName = ik.Status.Platform
 		}
 
-		return getOrFind(ctx, c, ik.Namespace, ik.Status.Platform, active, local)
+		return getOrFind(ctx, c, ik.Namespace, platformName, active, local)
 	}
 	return find(ctx, c, o.GetNamespace(), active, local)
 }
@@ -178,7 +178,8 @@ func ListPrimaryPlatforms(ctx context.Context, c k8sclient.Reader, namespace str
 	}
 
 	filtered := v1.NewIntegrationPlatformList()
-	for _, pl := range lst.Items {
+	for i := range lst.Items {
+		pl := lst.Items[i]
 		if !IsSecondary(&pl) {
 			filtered.Items = append(filtered.Items, pl)
 		}

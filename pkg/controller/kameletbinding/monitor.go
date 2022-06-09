@@ -73,7 +73,7 @@ func (action *monitorAction) Handle(ctx context.Context, kameletbinding *v1alpha
 		return nil, errors.Wrapf(err, "could not load integration for KameletBinding %q", kameletbinding.Name)
 	}
 
-	operatorIdChanged := v1.GetOperatorIDAnnotation(kameletbinding) != "" &&
+	operatorIDChanged := v1.GetOperatorIDAnnotation(kameletbinding) != "" &&
 		(v1.GetOperatorIDAnnotation(kameletbinding) != v1.GetOperatorIDAnnotation(&it))
 
 	// Check if the integration needs to be changed
@@ -82,7 +82,7 @@ func (action *monitorAction) Handle(ctx context.Context, kameletbinding *v1alpha
 		return nil, err
 	}
 
-	if !equality.Semantic.DeepDerivative(expected.Spec, it.Spec) || operatorIdChanged {
+	if !equality.Semantic.DeepDerivative(expected.Spec, it.Spec) || operatorIDChanged {
 		action.L.Info("Monitor: KameletBinding needs a rebuild")
 
 		// KameletBinding has changed and needs rebuild
