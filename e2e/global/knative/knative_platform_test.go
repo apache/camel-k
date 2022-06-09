@@ -45,13 +45,14 @@ func TestKnativePlatform(t *testing.T) {
 			t.FailNow()
 		}
 
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-knative"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 		Eventually(PlatformProfile(ns), TestTimeoutShort).Should(Equal(v1.TraitProfile("")))
 		cluster := Platform(ns)().Status.Cluster
 
 		t.Run("run yaml on cluster profile", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/yaml.yaml", "--profile", string(cluster)).Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--profile", string(cluster)).Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Eventually(IntegrationProfile(ns, "yaml"), TestTimeoutShort).Should(Equal(v1.TraitProfile(string(cluster))))
@@ -77,7 +78,7 @@ func TestKnativePlatform(t *testing.T) {
 		})
 
 		t.Run("run yaml on automatic profile", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationProfile(ns, "yaml"), TestTimeoutShort).Should(Equal(v1.TraitProfileKnative))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())

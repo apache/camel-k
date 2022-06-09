@@ -48,10 +48,11 @@ func TestHealthTrait(t *testing.T) {
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-trait-health"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("Readiness condition with stopped route", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/Java.java",
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"-t", "health.enabled=true",
 				// Enable Jolokia for the test to stop the Camel route
 				"-t", "jolokia.enabled=true",

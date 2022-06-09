@@ -35,10 +35,11 @@ import (
 
 func TestRunSimpleXmlExamples(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-examples-xml"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("run xml", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/xml.xml").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "files/xml.xml").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "xml"), TestTimeoutLong).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "xml", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "xml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))

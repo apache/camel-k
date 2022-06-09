@@ -75,6 +75,11 @@ func GetOperatorPodName() string {
 	return ""
 }
 
+// GetOperatorLockName returns the name of the lock lease that is electing a leader on the particular namepsace.
+func GetOperatorLockName(operatorID string) string {
+	return fmt.Sprintf("%s-lock", operatorID)
+}
+
 // IsNamespaceLocked tells if the namespace contains a lock indicating that an operator owns it.
 func IsNamespaceLocked(ctx context.Context, c ctrl.Reader, namespace string) (bool, error) {
 	if namespace == "" {
@@ -91,7 +96,7 @@ func IsNamespaceLocked(ctx context.Context, c ctrl.Reader, namespace string) (bo
 
 		var operatorLockName string
 		if platform.Name != "" {
-			operatorLockName = fmt.Sprintf("%s-lock", platform.Name)
+			operatorLockName = GetOperatorLockName(platform.Name)
 		} else {
 			operatorLockName = OperatorLockName
 		}

@@ -35,10 +35,11 @@ import (
 
 func TestRunSimpleKotlinExamples(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-examples-kotlin"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("run kotlin", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/kotlin.kts").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "files/kotlin.kts").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "kotlin"), TestTimeoutLong).Should(Equal(v1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "kotlin", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "kotlin"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))

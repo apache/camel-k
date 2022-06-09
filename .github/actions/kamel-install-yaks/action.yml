@@ -21,7 +21,7 @@ description: 'Install YAKS artifacts'
 inputs:
   version:
     description: "The YAKS version"
-    default: 0.8.0
+    default: 0.10.0
     required: false
   image-name:
     description: "The YAKS operator image name"
@@ -49,3 +49,6 @@ runs:
       shell: bash
       run: |
         yaks install --operator-image ${{ inputs.image-name }}:${{ inputs.version }}
+
+        kubectl wait --for=condition=available --timeout=180s deployment/yaks-operator
+        kubectl wait --for condition=Ready --timeout=180s pod -l app=yaks

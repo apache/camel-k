@@ -52,23 +52,25 @@ func TestOperatorIDFiltering(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		WithNewTestNamespace(t, func(nsop1 string) {
 			WithNewTestNamespace(t, func(nsop2 string) {
-				Expect(Kamel("install", "-n", nsop1, "--operator-env-vars", "KAMEL_OPERATOR_ID=operator-1", "--global", "--force").Execute()).To(Succeed())
+				operator1 := "operator-1"
+				Expect(KamelInstallWithID(operator1, nsop1, "--global", "--force").Execute()).To(Succeed())
 				Eventually(PlatformPhase(nsop1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-				Expect(Kamel("install", "-n", nsop2, "--operator-env-vars", "KAMEL_OPERATOR_ID=operator-2", "--global", "--force").Execute()).To(Succeed())
+				operator2 := "operator-2"
+				Expect(KamelInstallWithID(operator2, nsop2, "--global", "--force").Execute()).To(Succeed())
 				Eventually(PlatformPhase(nsop2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 				t.Run("Operators ignore non-scoped integrations", func(t *testing.T) {
 					RegisterTestingT(t)
 
-					Expect(Kamel("run", "-n", ns, "files/yaml.yaml", "--name", "untouched").Execute()).To(Succeed())
+					Expect(KamelRun(ns, "files/yaml.yaml", "--name", "untouched").Execute()).To(Succeed())
 					Consistently(IntegrationPhase(ns, "untouched"), 10*time.Second).Should(BeEmpty())
 				})
 
 				t.Run("Operators run scoped integrations", func(t *testing.T) {
 					RegisterTestingT(t)
 
-					Expect(Kamel("run", "-n", ns, "files/yaml.yaml", "--name", "moving").Execute()).To(Succeed())
+					Expect(KamelRun(ns, "files/yaml.yaml", "--name", "moving").Execute()).To(Succeed())
 					Expect(AssignIntegrationToOperator(ns, "moving", "operator-1")).To(Succeed())
 					Eventually(IntegrationPhase(ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
 					Eventually(IntegrationPodPhase(ns, "moving"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -105,7 +107,7 @@ func TestOperatorIDFiltering(t *testing.T) {
 					// Save resources by deleting "moving" integration
 					Expect(Kamel("delete", "moving", "-n", ns).Execute()).To(Succeed())
 
-					Expect(Kamel("run", "-n", ns, "files/yaml.yaml", "--name", "pre-built", "-t", fmt.Sprintf("container.image=%s", image)).Execute()).To(Succeed())
+					Expect(KamelRun(ns, "files/yaml.yaml", "--name", "pre-built", "-t", fmt.Sprintf("container.image=%s", image)).Execute()).To(Succeed())
 					Consistently(IntegrationPhase(ns, "pre-built"), 10*time.Second).Should(BeEmpty())
 					Expect(AssignIntegrationToOperator(ns, "pre-built", "operator-2")).To(Succeed())
 					Eventually(IntegrationPhase(ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
@@ -117,7 +119,7 @@ func TestOperatorIDFiltering(t *testing.T) {
 				t.Run("Operators can run scoped kamelet bindings", func(t *testing.T) {
 					RegisterTestingT(t)
 
-					Expect(Kamel("bind", "-n", ns, "timer-source?message=Hello", "log-sink", "--name", "klb").Execute()).To(Succeed())
+					Expect(KamelBind(ns, "timer-source?message=Hello", "log-sink", "--name", "klb").Execute()).To(Succeed())
 					Consistently(Integration(ns, "klb"), 10*time.Second).Should(BeNil())
 
 					Expect(AssignKameletBindingToOperator(ns, "klb", "operator-1")).To(Succeed())

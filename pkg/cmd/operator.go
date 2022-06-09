@@ -18,7 +18,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/spf13/cobra"
@@ -60,7 +59,7 @@ func (o *operatorCmdOptions) run(_ *cobra.Command, _ []string) {
 	leaderElectionID := o.LeaderElectionID
 	if leaderElectionID == "" {
 		if defaults.OperatorID() != "" {
-			leaderElectionID = fmt.Sprintf("%s-lock", defaults.OperatorID())
+			leaderElectionID = platform.GetOperatorLockName(defaults.OperatorID())
 		} else {
 			leaderElectionID = platform.OperatorLockName
 		}

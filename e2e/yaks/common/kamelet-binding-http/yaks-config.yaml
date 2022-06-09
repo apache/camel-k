@@ -21,10 +21,14 @@ config:
 pre:
 - name: installation
   run: |
-    kamel install -n $YAKS_NAMESPACE --operator-env-vars KAMEL_INSTALL_DEFAULT_KAMELETS=false
+    kamel install -n $YAKS_NAMESPACE --force --operator-env-vars KAMEL_INSTALL_DEFAULT_KAMELETS=false
 
     kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
 
     kamel run display.groovy -w -n $YAKS_NAMESPACE
     cat timer-source-binding-display.yaml | sed  's/{namespace}/'"${YAKS_NAMESPACE}"'/' | kubectl apply -n $YAKS_NAMESPACE -f -
     kubectl wait kameletbinding timer-source-binding-display --for=condition=Ready --timeout=15m -n $YAKS_NAMESPACE
+post:
+  - name: print dump
+    if: env:CI=true && failure()
+    run: yaks dump --includes app=camel-k

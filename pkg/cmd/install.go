@@ -312,7 +312,11 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 		if !o.SkipOperatorSetup && !installViaOLM {
 			if ok, err := isInstallAllowed(o.Context, c, platformName, o.Force, cobraCmd.OutOrStdout()); err != nil {
-				return err
+				if k8serrors.IsForbidden(err) {
+					o.PrintfVerboseOutf(cobraCmd, "Unable to verify existence of operator id [%s] due to lack of user privileges\n", platformName)
+				} else {
+					return err
+				}
 			} else if !ok {
 				return fmt.Errorf("installation not allowed because operator with id '%s' already exists, use the --force option to skip this check", platformName)
 			}

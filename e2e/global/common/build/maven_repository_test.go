@@ -35,10 +35,11 @@ import (
 
 func TestRunExtraRepository(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-extra-repository"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		name := "java"
-		Expect(Kamel("run", "-n", ns, "files/Java.java",
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--maven-repository", "https://maven.repository.redhat.com/ga@id=redhat",
 			"--dependency", "mvn:jakarta.annotation:jakarta.annotation-api:1.3.5.redhat-00002",
 			"--name", name,

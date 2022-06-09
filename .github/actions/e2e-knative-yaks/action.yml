@@ -94,7 +94,7 @@ runs:
     uses: ./.github/actions/kamel-install-yaks
     with:
       image-name: "docker.io/yaks/yaks"
-      version: 0.11.0-202204210858
+      version: 0.11.0-202206130041
 
   - id: report-problematic
     name: List Tests Marked As Problematic
@@ -115,6 +115,13 @@ runs:
         -s "${{steps.config-cluster.outputs.cluster-image-registry-insecure }}" \
         -v "${{ steps.build-kamel.outputs.build-binary-local-image-version }}" \
         -x "${{ env.CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE }}"
+
+  - id: it-report
+    name: YAKS Report
+    if: ${{ failure() }}
+    shell: bash
+    run: |
+      yaks report
 
   - name: Cleanup
     uses: ./.github/actions/kamel-cleanup

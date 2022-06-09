@@ -47,7 +47,7 @@ func TestRunGlobalKamelet(t *testing.T) {
 	}
 
 	WithGlobalOperatorNamespace(t, func(operatorNamespace string) {
-		Expect(Kamel("install", "-n", operatorNamespace, "--global", "--force").Execute()).To(Succeed())
+		Expect(KamelInstall(operatorNamespace, "--global", "--force").Execute()).To(Succeed())
 
 		t.Run("Global operator + namespaced kamelet test", func(t *testing.T) {
 
@@ -55,9 +55,10 @@ func TestRunGlobalKamelet(t *testing.T) {
 			WithNewTestNamespace(t, func(ns2 string) {
 				Expect(CreateTimerKamelet(ns2, "my-own-timer-source")()).To(Succeed())
 
-				Expect(Kamel("install", "-n", ns2, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
+				operatorID := "camel-k-local-ns2"
+				Expect(KamelInstallWithID(operatorID, ns2, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
 
-				Expect(Kamel("run", "-n", ns2, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
+				Expect(KamelRunWithID(operatorID, ns2, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(ns2, "timer-kamelet-usage"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns2, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
 				Expect(Kamel("delete", "--all", "-n", ns2).Execute()).To(Succeed())
@@ -70,9 +71,10 @@ func TestRunGlobalKamelet(t *testing.T) {
 
 			// NS3: namespace without operator
 			WithNewTestNamespace(t, func(ns3 string) {
-				Expect(Kamel("install", "-n", ns3, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
+				operatorID := "camel-k-local-ns3"
+				Expect(KamelInstallWithID(operatorID, ns3, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
 
-				Expect(Kamel("run", "-n", ns3, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
+				Expect(KamelRunWithID(operatorID, ns3, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(ns3, "timer-kamelet-usage"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns3, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
 				Expect(Kamel("delete", "--all", "-n", ns3).Execute()).To(Succeed())

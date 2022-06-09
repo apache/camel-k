@@ -23,6 +23,7 @@ limitations under the License.
 package builder
 
 import (
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -80,7 +81,8 @@ func doKitFullBuild(t *testing.T, name string, memoryLimit string, buildTimeout 
 			args = append(args, "--operator-resources", "limits.memory="+memoryLimit)
 		}
 
-		Expect(KamelInstall(ns, args...).Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns, args...).Execute()).To(Succeed())
 
 		buildKitArgs := []string{"kit", "create", name, "-n", ns}
 		for _, dependency := range options.dependencies {

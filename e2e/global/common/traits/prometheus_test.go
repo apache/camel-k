@@ -49,9 +49,10 @@ func TestPrometheusTrait(t *testing.T) {
 		// Do not create PodMonitor for the time being as CI test runs on OCP 3.11
 		createPodMonitor := false
 
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-trait-prometheus"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
-		Expect(Kamel("run", "-n", ns, "files/Java.java",
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"-t", "prometheus.enabled=true",
 			"-t", fmt.Sprintf("prometheus.pod-monitor=%v", createPodMonitor)).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))

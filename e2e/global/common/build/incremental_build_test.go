@@ -36,10 +36,11 @@ import (
 
 func TestRunIncrementalBuild(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-incremental-build"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		name := "java"
-		Expect(Kamel("run", "-n", ns, "files/Java.java",
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 		).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -50,7 +51,7 @@ func TestRunIncrementalBuild(t *testing.T) {
 		// Another integration that should be built on top of the previous IntegrationKit
 		// just add a new random dependency
 		name2 := "java2"
-		Expect(Kamel("run", "-n", ns, "files/Java.java",
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name2,
 			"-d", "camel-zipfile",
 		).Execute()).To(Succeed())

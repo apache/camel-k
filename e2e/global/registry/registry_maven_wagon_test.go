@@ -45,7 +45,8 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 			t.Skip("Avoid running on OpenShift until CA and secret are injected client side")
 			return
 		}
-		Expect(KamelInstall(ns, "--wait").Execute()).To(Succeed())
+		operatorID := "camel-k-maven-registry"
+		Expect(KamelInstallWithID(operatorID, ns, "--wait").Execute()).To(Succeed())
 
 		t.Run("image registry is a maven repository", func(t *testing.T) {
 			// Create integration that should decrypt an encrypted message to "foobar" and log it
@@ -55,11 +56,10 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 			pom, err := filepath.Abs("files/sample-decryption-1.0.pom")
 			assert.Nil(t, err)
 
-			Expect(Kamel("run", "files/FoobarDecryption.java",
+			Expect(KamelRunWithID(operatorID, ns, "files/FoobarDecryption.java",
 				"--name", name,
 				"-d", fmt.Sprintf("file://%s", jar),
 				"-d", fmt.Sprintf("file://%s", pom),
-				"-n", ns,
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -70,11 +70,10 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 		t.Run("local files are mounted in the integration container at the default path", func(t *testing.T) {
 			name := "laughing-route-default-path"
 
-			Expect(Kamel("run", "files/LaughingRoute.java",
+			Expect(KamelRunWithID(operatorID, ns, "files/LaughingRoute.java",
 				"--name", name,
 				"-p", "location=.?filename=laugh.txt",
 				"-d", "file://files/laugh.txt",
-				"-n", ns,
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -86,11 +85,10 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 			name := "laughing-route-custom-path"
 			customPath := "this/is/a/custom/path/"
 
-			Expect(Kamel("run", "files/LaughingRoute.java",
+			Expect(KamelRunWithID(operatorID, ns, "files/LaughingRoute.java",
 				"--name", name,
 				"-p", fmt.Sprintf("location=%s", customPath),
 				"-d", fmt.Sprintf("file://files/laugh.txt?targetPath=%slaugh.txt", customPath),
-				"-n", ns,
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -101,11 +99,10 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 		t.Run("local directory is mounted in the integration container", func(t *testing.T) {
 			name := "laughing-route-directory"
 
-			Expect(Kamel("run", "files/LaughingRoute.java",
+			Expect(KamelRunWithID(operatorID, ns, "files/LaughingRoute.java",
 				"--name", name,
 				"-p", "location=files/",
 				"-d", fmt.Sprintf("file://files/laughs/?targetPath=files/"),
-				"-n", ns,
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -120,10 +117,9 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 			jar, err := filepath.Abs("files/sample-decryption-1.0.jar")
 			assert.Nil(t, err)
 
-			Expect(Kamel("run", "files/FoobarDecryption.java",
+			Expect(KamelRunWithID(operatorID, ns, "files/FoobarDecryption.java",
 				"--name", name,
 				"-d", fmt.Sprintf("file://%s", jar),
-				"-n", ns,
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))

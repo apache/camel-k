@@ -35,10 +35,11 @@ import (
 
 func TestIstioTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-trait-istio"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("Run Java with Istio", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "files/Java.java",
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"-t", "istio.enabled=true").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))

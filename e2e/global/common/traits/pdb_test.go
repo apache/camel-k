@@ -55,8 +55,9 @@ func TestPodDisruptionBudgetTrait(t *testing.T) {
 
 	WithNewTestNamespace(t, func(ns string) {
 		name := "java"
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
-		Expect(Kamel("run", "-n", ns, "files/Java.java",
+		operatorID := "camel-k-trait-pod-disruption"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "pdb.enabled=true",
 			"-t", "pdb.min-available=2",

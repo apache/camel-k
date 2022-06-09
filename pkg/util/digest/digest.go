@@ -38,6 +38,10 @@ import (
 	"github.com/apache/camel-k/pkg/util/dsl"
 )
 
+const (
+	IntegrationDigestEnvVar = "CAMEL_K_DIGEST"
+)
+
 // ComputeForIntegration a digest of the fields that are relevant for the deployment
 // Produces a digest that can be used as docker image tag.
 func ComputeForIntegration(integration *v1.Integration) (string, error) {

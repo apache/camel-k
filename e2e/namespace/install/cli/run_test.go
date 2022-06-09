@@ -23,6 +23,7 @@ limitations under the License.
 package common
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -37,10 +38,11 @@ import (
 
 func TestRunExamplesFromGitHub(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("run java from GitHub", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "github:apache/camel-k/e2e/common/files/Java.java").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "github:apache/camel-k/e2e/common/files/Java.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -48,7 +50,7 @@ func TestRunExamplesFromGitHub(t *testing.T) {
 		})
 
 		t.Run("run java from GitHub (RAW)", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "https://raw.githubusercontent.com/apache/camel-k/main/e2e/common/files/Java.java").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "https://raw.githubusercontent.com/apache/camel-k/main/e2e/common/files/Java.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -57,7 +59,7 @@ func TestRunExamplesFromGitHub(t *testing.T) {
 
 		t.Run("run from GitHub Gist (ID)", func(t *testing.T) {
 			name := "github-gist-id"
-			Expect(Kamel("run", "-n", ns, "--name", name, "gist:e2c3f9a5fd0d9e79b21b04809786f17a").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "--name", name, "gist:e2c3f9a5fd0d9e79b21b04809786f17a").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -67,7 +69,7 @@ func TestRunExamplesFromGitHub(t *testing.T) {
 
 		t.Run("run from GitHub Gist (URL)", func(t *testing.T) {
 			name := "github-gist-url"
-			Expect(Kamel("run", "-n", ns, "--name", name, "https://gist.github.com/lburgazzoli/e2c3f9a5fd0d9e79b21b04809786f17a").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "--name", name, "https://gist.github.com/lburgazzoli/e2c3f9a5fd0d9e79b21b04809786f17a").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -82,16 +84,17 @@ func TestRunExamplesFromGitHub(t *testing.T) {
 
 func TestRunAndUpdate(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		name := "run"
-		Expect(Kamel("run", "-n", ns, "files/run.yaml", "--name", name).Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/run.yaml", "--name", name).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magic default"))
 
 		// Re-run the Integration with an updated configuration
-		Expect(Kamel("run", "-n", ns, "files/run.yaml", "--name", name, "-p", "property=value").Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/run.yaml", "--name", name, "-p", "property=value").Execute()).To(Succeed())
 
 		// Check the Deployment has progressed successfully
 		Eventually(DeploymentCondition(ns, name, appsv1.DeploymentProgressing), TestTimeoutShort).Should(MatchFields(IgnoreExtras, Fields{

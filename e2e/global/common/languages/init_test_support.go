@@ -42,7 +42,7 @@ func RunInitGeneratedExample(lang camelv1.Language, ns string, t *testing.T) {
 	fileName := fmt.Sprintf("%s.%s", itName, string(lang)) // e.g. initjava.java
 	file := path.Join(dir, fileName)
 	Expect(Kamel("init", file).Execute()).To(Succeed())
-	Expect(Kamel("run", "-n", ns, file).Execute()).To(Succeed())
+	Expect(KamelRun(ns, file).Execute()).To(Succeed())
 	Eventually(IntegrationPodPhase(ns, itName), TestTimeoutLong).Should(Equal(v1.PodRunning))
 	Eventually(IntegrationLogs(ns, itName), TestTimeoutShort).Should(ContainSubstring(languageInitExpectedString(lang)))
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())

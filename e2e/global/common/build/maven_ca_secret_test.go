@@ -420,7 +420,8 @@ ProxyPreserveHost On
 		})).To(Succeed())
 
 		// Install Camel K with the Maven Central Nexus proxy and the corresponding Maven CA secret
-		Expect(KamelInstall(ns,
+		operatorID := "camel-k-maven-ca-secret"
+		Expect(KamelInstallWithID(operatorID, ns,
 			"--maven-repository", fmt.Sprintf(`https://%s/repository/maven-public/@id=central-internal@mirrorOf=central`, hostname),
 			"--maven-repository", fmt.Sprintf(`https://%s/repository/%s/%s`, hostname, stagingRepository.ID, strings.Join(getRepositoryAttributes(stagingRepository), "")),
 			"--maven-ca-secret", secret.Name+"/"+corev1.TLSCertKey,
@@ -432,7 +433,7 @@ ProxyPreserveHost On
 
 		// Run the Integration
 		name := "java"
-		Expect(Kamel("run", "-n", ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))

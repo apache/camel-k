@@ -48,11 +48,10 @@ func TestOpenAPI(t *testing.T) {
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-trait-openapi"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
-		Expect(Kamel(
-			"run",
-			"-n", ns,
+		Expect(KamelRunWithID(operatorID, ns,
 			"--name", "petstore",
 			"--open-api", "file:files/openapi/petstore-api.yaml",
 			"files/openapi/petstore.groovy",
@@ -87,7 +86,8 @@ func TestOpenAPIConfigmap(t *testing.T) {
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-trait-openapi-configmap"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		openapiContent, err := ioutil.ReadFile("./files/openapi/petstore-api.yaml")
 		assert.Nil(t, err)
@@ -95,9 +95,7 @@ func TestOpenAPIConfigmap(t *testing.T) {
 		cmDataProps["petstore-api.yaml"] = string(openapiContent)
 		NewPlainTextConfigmap(ns, "my-openapi", cmDataProps)
 
-		Expect(Kamel(
-			"run",
-			"-n", ns,
+		Expect(KamelRunWithID(operatorID, ns,
 			"--name", "petstore",
 			"--open-api", "configmap:my-openapi",
 			"files/openapi/petstore.groovy",

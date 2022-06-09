@@ -21,7 +21,7 @@ config:
 pre:
 - name: installation
   run: |
-    kamel install -n $YAKS_NAMESPACE --operator-env-vars KAMEL_INSTALL_DEFAULT_KAMELETS=false
+    kamel install -n $YAKS_NAMESPACE --force --operator-env-vars KAMEL_INSTALL_DEFAULT_KAMELETS=false
 
     kubectl apply -f messages-channel.yaml -n $YAKS_NAMESPACE
 
@@ -33,3 +33,7 @@ pre:
 
     kubectl wait kameletbinding timer-source-binding --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
     kubectl wait kameletbinding logger-sink-binding --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
+post:
+  - name: print dump
+    if: env:CI=true && failure()
+    run: yaks dump --includes app=camel-k

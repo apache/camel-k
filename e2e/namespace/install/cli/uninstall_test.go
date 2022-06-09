@@ -23,6 +23,7 @@ limitations under the License.
 package common
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -33,7 +34,8 @@ import (
 func TestBasicUninstall(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		// a successful new installation
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 
 		// should be completely removed on uninstall
@@ -50,7 +52,8 @@ func TestBasicUninstall(t *testing.T) {
 func TestUninstallSkipOperator(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		// a successful new installation
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		// on uninstall it should remove everything except operator
 		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-operator").Execute()).To(Succeed())
@@ -61,7 +64,8 @@ func TestUninstallSkipOperator(t *testing.T) {
 func TestUninstallSkipRole(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		// a successful new installation
-		Expect(Kamel("install", "-n", ns, "--olm=false").Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns, "--olm=false").Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		// on uninstall it should remove everything except roles
 		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-roles").Execute()).To(Succeed())
@@ -72,7 +76,8 @@ func TestUninstallSkipRole(t *testing.T) {
 func TestUninstallSkipRoleBinding(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		// a successful new installation
-		Expect(Kamel("install", "-n", ns, "--olm=false").Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns, "--olm=false").Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		// on uninstall it should remove everything except role-bindings
 		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-role-bindings").Execute()).To(Succeed())
@@ -83,7 +88,8 @@ func TestUninstallSkipRoleBinding(t *testing.T) {
 func TestUninstallSkipServiceAccounts(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		// a successful new installation
-		Expect(Kamel("install", "-n", ns, "--olm=false").Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns, "--olm=false").Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		// on uninstall it should remove everything except cluster-roles
 		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-service-accounts").Execute()).To(Succeed())
@@ -94,7 +100,8 @@ func TestUninstallSkipServiceAccounts(t *testing.T) {
 func TestUninstallSkipIntegrationPlatform(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		// a successful new installation
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		// on uninstall it should remove everything except cluster-roles
 		// NOTE: skip CRDs is also required in addition to skip integration platform
@@ -106,7 +113,8 @@ func TestUninstallSkipIntegrationPlatform(t *testing.T) {
 func TestUninstallSkipKamelets(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		// a successful new installation
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		Eventually(KameletList(ns)).ShouldNot(BeEmpty())
 		// on uninstall it should remove everything except kamelets

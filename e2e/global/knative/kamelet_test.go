@@ -40,11 +40,12 @@ import (
 // Test that a KameletBinding can be changed and the changes are propagated to the Integration
 func TestKameletChange(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-kamelet-change"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Expect(CreateTimerKamelet(ns, "timer-source")()).To(Succeed())
 		Expect(CreateKnativeChannel(ns, "messages")()).To(Succeed())
 
-		Expect(Kamel("run", "-n", ns, "files/display.groovy", "-w").Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/display.groovy", "-w").Execute()).To(Succeed())
 
 		from := corev1.ObjectReference{
 			Kind:       "Kamelet",

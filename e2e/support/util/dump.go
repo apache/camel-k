@@ -141,6 +141,14 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	t.Logf("\nFound %d pods:\n", len(lst.Items))
 	for _, pod := range lst.Items {
 		t.Logf("name=%s\n", pod.Name)
+
+		ref := pod
+		data, err := kubernetes.ToYAMLNoManagedFields(&ref)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(data))
+
 		dumpConditions("  ", pod.Status.Conditions, t)
 		t.Logf("  logs:\n")
 		var allContainers []corev1.Container

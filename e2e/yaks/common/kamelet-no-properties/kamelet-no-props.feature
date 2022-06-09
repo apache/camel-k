@@ -19,7 +19,6 @@ from:
 """
     Then Kamelet no-props-source should be available
 
-
   Scenario: Bind Kamelet to service
     Given create Kubernetes service greeting-service with target port 8080
     And bind Kamelet no-props-source to uri log:info

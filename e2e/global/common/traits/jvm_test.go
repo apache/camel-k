@@ -37,7 +37,8 @@ import (
 
 func TestJVMTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-trait-jvm"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		// Store a configmap holding a jar
 		var cmData = make(map[string][]byte)
@@ -49,7 +50,7 @@ func TestJVMTrait(t *testing.T) {
 		assert.Nil(t, err)
 
 		t.Run("JVM trait classpath", func(t *testing.T) {
-			Expect(Kamel("run", "-n", ns, "./files/jvm/Classpath.java",
+			Expect(KamelRunWithID(operatorID, ns, "./files/jvm/Classpath.java",
 				"--resource", "configmap:my-deps",
 				"-t", "jvm.classpath=/etc/camel/resources/my-deps/sample-1.0.jar",
 			).Execute()).To(Succeed())

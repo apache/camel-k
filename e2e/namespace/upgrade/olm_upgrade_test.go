@@ -107,10 +107,10 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 		Eventually(PlatformVersion(ns)).Should(ContainSubstring(prevIPVersionPrefix))
 
 		name := "yaml"
-		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
+		Expect(KamelRun(ns, "files/yaml.yaml").Execute()).To(Succeed())
 		// Check the Integration runs correctly
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
 
 		// Check the Integration version matches that of the current operator
 		Expect(IntegrationVersion(ns, name)()).To(ContainSubstring(prevIPVersionPrefix))
@@ -193,13 +193,13 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 
 			// Check the Integration runs correctly
 			Eventually(IntegrationPodPhase(ns, name)).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
 
 			// Clean up
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 			Expect(Kamel("uninstall", "-n", ns).Execute()).To(Succeed())
 			// Clean up cluster-wide resources that are not removed by OLM
-			Expect(Kamel("uninstall", "--all", "--olm=false").Execute()).To(Succeed())
+			Expect(Kamel("uninstall", "--all", "-n", ns, "--olm=false").Execute()).To(Succeed())
 		})
 	})
 }

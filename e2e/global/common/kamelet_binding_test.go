@@ -35,7 +35,8 @@ import (
 
 func TestErrorHandler(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-kamelet-errorhandler"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		Expect(CreateErrorProducerKamelet(ns, "my-own-error-producer-source")()).To(Succeed())
 		Expect(CreateLogKamelet(ns, "my-own-log-sink")()).To(Succeed())

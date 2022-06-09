@@ -49,11 +49,12 @@ func TestTolerationTrait(t *testing.T) {
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-trait-toleration"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("Run Java with node toleration operation exists", func(t *testing.T) {
 			name := "java1"
-			Expect(Kamel("run", "-n", ns, "files/Java.java",
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"--name", name,
 				"-t", "toleration.enabled=true",
 				"-t", "toleration.taints=camel.apache.org/master:NoExecute:300",
@@ -75,7 +76,7 @@ func TestTolerationTrait(t *testing.T) {
 
 		t.Run("Run Java with node toleration operation equals", func(t *testing.T) {
 			name := "java2"
-			Expect(Kamel("run", "-n", ns, "files/Java.java",
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"--name", name,
 				"-t", "toleration.enabled=true",
 				"-t", "toleration.taints=camel.apache.org/master=test:NoExecute:300",
@@ -101,7 +102,7 @@ func TestTolerationTrait(t *testing.T) {
 			}
 
 			name := "java3"
-			Expect(Kamel("run", "-n", ns, "files/Java.java",
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"--name", name,
 				// Use the affinity trait to force the scheduling of the Integration pod onto a master node
 				"-t", "affinity.enabled=true",

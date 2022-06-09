@@ -21,8 +21,12 @@ config:
 pre:
 - name: installation
   run: |
-    kamel install -w -n $YAKS_NAMESPACE
+    kamel install -w -n $YAKS_NAMESPACE --force
 
     kubectl wait kamelets.camel.apache.org/timer-source --for=condition=Ready --timeout=120s -n $YAKS_NAMESPACE
 
     kamel run logger.groovy -w -n $YAKS_NAMESPACE
+post:
+  - name: print dump
+    if: env:CI=true && failure()
+    run: yaks dump --includes app=camel-k

@@ -35,10 +35,9 @@ import (
 
 func TestOpenAPIService(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns, "--trait-profile", string(v1.TraitProfileKnative)).Execute()).To(Succeed())
-		Expect(Kamel(
-			"run",
-			"-n", ns,
+		operatorID := "camel-k-openapi-service"
+		Expect(KamelInstallWithID(operatorID, ns, "--trait-profile", string(v1.TraitProfileKnative)).Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns,
 			"--name", "petstore",
 			"--open-api", "file:files/petstore-api.yaml",
 			"files/petstore.groovy",
@@ -60,10 +59,9 @@ func TestOpenAPIService(t *testing.T) {
 
 func TestOpenAPIDeployment(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns, "--trait-profile", string(v1.TraitProfileKubernetes)).Execute()).To(Succeed())
-		Expect(Kamel(
-			"run",
-			"-n", ns,
+		operatorID := "camel-k-openapi-deployment"
+		Expect(KamelInstallWithID(operatorID, ns, "--trait-profile", string(v1.TraitProfileKubernetes)).Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns,
 			"--name", "petstore",
 			"--open-api", "file:files/petstore-api.yaml",
 			"files/petstore.groovy",

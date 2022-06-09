@@ -33,12 +33,13 @@ import (
 
 func TestKamelReset(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-cli-reset"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("Reset the whole platform", func(t *testing.T) {
 
 			name := "yaml1"
-			Expect(Kamel("run", "-n", ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
@@ -49,13 +50,11 @@ func TestKamelReset(t *testing.T) {
 
 			Expect(Integration(ns, name)()).To(BeNil())
 			Expect(Kits(ns)()).To(HaveLen(0))
-
 		})
 
 		t.Run("Reset skip-integrations", func(t *testing.T) {
-
 			name := "yaml2"
-			Expect(Kamel("run", "-n", ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
@@ -66,13 +65,11 @@ func TestKamelReset(t *testing.T) {
 
 			Expect(Integration(ns, name)()).To(Not(BeNil()))
 			Expect(Kits(ns)()).To(HaveLen(0))
-
 		})
 
 		t.Run("Reset skip-kits", func(t *testing.T) {
-
 			name := "yaml3"
-			Expect(Kamel("run", "-n", ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
@@ -84,7 +81,6 @@ func TestKamelReset(t *testing.T) {
 
 			Expect(Integration(ns, name)()).To(BeNil())
 			Expect(Kit(ns, kitName)()).To(Not(BeNil()))
-
 		})
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())

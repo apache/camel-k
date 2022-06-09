@@ -21,7 +21,7 @@ config:
 pre:
 - name: installation
   run: |
-    kamel install -n $YAKS_NAMESPACE
+    kamel install -n $YAKS_NAMESPACE --force
 
     kubectl apply -n $YAKS_NAMESPACE -f messages-channel.yaml
 
@@ -29,3 +29,7 @@ pre:
     kamel run source.yaml -w -n $YAKS_NAMESPACE -t knative.sink-binding=true
 
     kubectl wait integration --all --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
+post:
+  - name: print dump
+    if: env:CI=true && failure()
+    run: yaks dump --includes app=camel-k

@@ -46,12 +46,13 @@ func TestPlatformlessRun(t *testing.T) {
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-platform-missing"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		// Delete the platform from the namespace before running the integration
 		Eventually(DeletePlatform(ns)).Should(BeTrue())
 
-		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 

@@ -35,11 +35,12 @@ import (
 
 func TestErrorHandlerTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
+		operatorID := "camel-k-trait-errorhandler"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("Run errored integration with error handler", func(t *testing.T) {
 			name := "error-handler"
-			Expect(Kamel("run", "-n", ns, "files/ErroredRoute.java",
+			Expect(KamelRunWithID(operatorID, ns, "files/ErroredRoute.java",
 				"--name", name,
 				"-t", "error-handler.enabled=true",
 				"-t", "error-handler.ref=defaultErrorHandler",
