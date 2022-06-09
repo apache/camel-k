@@ -157,7 +157,12 @@ func (c *Collection) RemoveDeployment(filter func(*appsv1.Deployment) bool) *app
 	if res == nil {
 		return nil
 	}
-	return res.(*appsv1.Deployment)
+	deploy, ok := res.(*appsv1.Deployment)
+	if !ok {
+		return nil
+	}
+
+	return deploy
 }
 
 // VisitConfigMap executes the visitor function on all ConfigMap resources.
@@ -191,7 +196,12 @@ func (c *Collection) RemoveConfigMap(filter func(*corev1.ConfigMap) bool) *corev
 	if res == nil {
 		return nil
 	}
-	return res.(*corev1.ConfigMap)
+	cm, ok := res.(*corev1.ConfigMap)
+	if !ok {
+		return nil
+	}
+
+	return cm
 }
 
 // VisitService executes the visitor function on all Service resources.
