@@ -39,6 +39,13 @@
 - Import release notes from Camel K Runtime on release [\#1623](https://github.com/apache/camel-k/issues/1623)
 - No way to configure Ingress Trait with annotations [\#1535](https://github.com/apache/camel-k/issues/1535)
 - kamel run directory \(self contained\) [\#1523](https://github.com/apache/camel-k/issues/1523)
+- Modeline and file-based options on http/github endpoints [\#1522](https://github.com/apache/camel-k/issues/1522)
+- OLM: enable support for OperatorGroup [\#1471](https://github.com/apache/camel-k/issues/1471)
+- create trait to configure the http layer [\#1406](https://github.com/apache/camel-k/issues/1406)
+- MicroK8s' built-in registry declared for the Camel K installation, but not used - integration installations fail [\#1376](https://github.com/apache/camel-k/issues/1376)
+- Detect components from xxx.properties [\#1363](https://github.com/apache/camel-k/issues/1363)
+- Add a compatibility matrix in documentation related to knative vs camel-k version [\#1336](https://github.com/apache/camel-k/issues/1336)
+- watch of \*v1.ConfigMap ended with: too old resource version [\#1296](https://github.com/apache/camel-k/issues/1296)
 
 ## [1.10.0-nightly](https://github.com/apache/camel-k/tree/1.10.0-nightly) (2022-05-18)
 
