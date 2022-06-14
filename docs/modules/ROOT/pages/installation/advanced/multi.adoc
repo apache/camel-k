@@ -1,19 +1,22 @@
 [[advanced-installation-multiple-operators]]
 = Multiple Operators and Selective Upgrades
 
-It's possible to setup multiple Camel K operators in a cluster to watch the same namespaces. It's not
+It is possible to set up multiple Camel K operators on a cluster to watch resources on namespaces. It's not
 possible to configure Camel K this way using OLM (Operator Hub), since OLM prevents two operators from watching the same namespaces,
 but it's technically possible to achieve this setup manually.
 
-A typical example is when you install two global operators in different namespaces (e.g. `kamel install --global --olm=false -n camel-ns-1` and `kamel install --global --olm=false -n camel-ns-2`).
-In this  situation, both operators will watch the same resources in the cluster, so that if a user creates an integration in any namespace,
-both operators will contend the integration and the reconciliation will most probably result in an error (actual behavior is undefined).
+A typical example is when you need to install multiple global operators in different namespaces in order to have multiple tenants on the cluster working with Camel K.
+In this multi operator situation Camel K needs to avoid that the same resources on the cluster are managed by more than one operator at the same time.
+Operators must not contend the integration and the reconciliation because this will most probably result in an error (actual behavior is undefined).
 
-To avoid contention, it's possible to specify for each operator an ID and then assign any custom resource (CR) to a specific operator using an annotation.
-The assigned operator will be responsible for the reconciliation of the annotated CR.
+To avoid contention, Camel K uses an operator id for each operator. The operator id must be unique on the cluster and any custom resource (CR) is assigned to a specific operator using an annotation.
+The assigned operator will be responsible for the reconciliation of the annotated CR and explicitly manages the resource no matter where it lives.
 
 In detail, the Camel K operator supports the environment variable `KAMEL_OPERATOR_ID`. The value is an identifier that can be equal to any string (e.g. `KAMEL_OPERATOR_ID=operator-1`).
-Once the operator is assigned an ID, it will *only reconcile* Camel custom resources that are assigned to that ID (unannotated resources will be ignored as well).
+Once the operator is assigned with an identifier, it will *only reconcile* Camel K custom resources that are assigned to that ID (unannotated resources will be ignored as well).
+
+By default, the Camel K operator is using the id `camel-k`. When installing many operators the instances must use a different operator id.
+(e.g. `kamel install --global --olm=false -n camel-ns-1 --operator-id=operator-2`).
 
 To assign a resource to a specific operator, the user can annotate it with `camel.apache.org/operator.id`. For example:
 
@@ -23,9 +26,13 @@ kind: Integration
 apiVersion: camel.apache.org/v1
 metadata:
   annotations:
-    camel.apache.org/operator.id: operator-1
+    camel.apache.org/operator.id: operator-2
 # ...
 ----
+
+By default, Camel K custom resources use the default operator id `camel-k` as a value in this annotation.
+And more precisely the default operator with id `camel-k` and only this specific operator is allowed to also reconcile resources that are missing the
+operator id annotation.
 
 The annotation can be put on any resource belonging to the "camel.apache.org" group.
 
@@ -34,7 +41,13 @@ an Integration may create an IntegrationKit, which in turn creates a Build resou
 all resources created in the process, so they'll be all reconciled by the same operator.
 
 By using the `camel.apache.org/operator.id` annotation, it's possible to move integrations between two or more operators running different
-versions of the Camel K platform, i.e. *selectively upgrading or downgrading* them.
+versions of the Camel K platform, i.e. *selectively upgrading or downgrading* them. Just change the annotation on that particula resource to point to a new
+operator id:
+
+[source,shell script]
+----
+kubectl annotate integration timer-to-log camel.apache.org/operator.id=operator-2 --overwrite
+----
 
 [[advanced-installation-multiple-platforms]]
 == Configuring Multiple Integration Platforms
