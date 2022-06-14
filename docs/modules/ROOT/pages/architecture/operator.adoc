@@ -21,7 +21,7 @@ The Camel K Operator defines a number of new Kubernetes API through the https://
 
 All the api conform to the Kubernetes https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md[api conventions].
 
-To manage the interaction with them, a simple control loop was not enough and we ended up with a sort of “Hierarchical Operator Pattern” where the reconcile phase may trigger other controllers and supervises them.
+To manage the interaction with them, a simple control loop was not enough. So we ended up with a sort of “Hierarchical Operator Pattern” where the reconcile phase may trigger other controllers and supervises them.
 
 image::architecture/camel-k-operator-control-loop.png[control-loop]
 
@@ -31,7 +31,7 @@ With the exception of the `CamelCatalog`, each CR has a dedicated state machine 
 
 image::architecture/camel-k-state-machine-basic.png[State Machine]
 
-Each state of the CR is handled by a dedicated handler, named `Action`, defined as follow:
+Each state of the CR is handled by a dedicated handler, named `Action`, defined as follows:
 
 [source,go]
 ----
@@ -47,3 +47,20 @@ type Action interface {
 ====
 Since the go language does not yet support generics, there is an `Action` definition per CR, The full list of definitions can be found in the https://github.com/apache/camel-k/tree/main/pkg/controller[controller package]
 ====
+
+== Operator resource mapping
+
+By default the Camel K operator (global mode) will manage all Camel K resources on the cluster doing the reconciliation loops for the resources in order to apply the mentioned state machine.
+
+For clusters with multiple Camel K tenants this approach is not going to work as user groups may want to separate the workloads with respective
+authentication and authorization schemes. For multi tenancy the Camel K operator uses an operator id that can be applied to resources in the form of
+an annotation. The annotation selects the operator that should handle the resource.
+
+This approach allows multiple Camel K installations and operators on the same cluster with each operator handling an explicit set of Camel K resources identified
+by the operator id.
+
+By default the Camel K operator has the id `camel-k` and users with only one single installation on the cluster will not even notice the existence of this identifier. When an administrator wants to add more Camel K operator installations to the cluster the
+operator id needs to be unique and resources should be annotated with the respective annotation `camel.apache.org/operator.id={operator-id}`. With this approach we make sure that only one single operator installation manages
+a resource at a time.
+
+Read more about this topic in xref:installation/advanced/multi.adoc[Multiple Operators and Selective Upgrades]
