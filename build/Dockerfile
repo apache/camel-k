@@ -33,7 +33,7 @@ RUN mkdir -p ${MAVEN_HOME} \
 ADD build/_maven_output /tmp/artifacts/m2
 ADD build/_kamelets /kamelets
 COPY build/_maven_overlay/ /usr/share/maven/lib/
-ADD build/logback.xml /usr/share/maven/conf/
+ADD build/_maven_overlay/logback.xml /usr/share/maven/conf/
 
 ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=/usr/share/maven/conf/logback.xml"
 

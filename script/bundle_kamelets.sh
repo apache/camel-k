@@ -16,13 +16,14 @@
 # limitations under the License.
 
 location=$(dirname $0)
+rootdir=$location/../
 
 set -e
 
 repo=$1
 branch=$2
 
-cd $location/../
+cd $rootdir
 target=./build/_kamelets
 
 # Always recreate the dir
