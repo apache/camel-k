@@ -274,8 +274,8 @@ github.com/cockroachdb/errors v1.2.4/go.mod h1:rQD95gz6FARkaKkQXUksEje/d9a6wBJoC
 github.com/cockroachdb/logtags v0.0.0-20190617123548-eb05cc24525f/go.mod h1:i/u985jwjWRlyHXQbwatDASoW0RMlZ/3i9yJHE2xLkI=
 github.com/container-tools/go-containerregistry v0.7.1-0.20211124090132-40ccc94a466b h1:PnXGj/WjUnNI7O3AAjXIYs+8QXVRzgoxurEgVgsItrU=
 github.com/container-tools/go-containerregistry v0.7.1-0.20211124090132-40ccc94a466b/go.mod h1:6cMIl1RfryEiPzBE67OgtZdEiLWz4myqCQIiBMy3CsM=
-github.com/container-tools/spectrum v0.3.8 h1:k3XaKB4Y/ArwcZGltVL768uU/gSUmWO6z/ZN4EoW3DI=
-github.com/container-tools/spectrum v0.3.8/go.mod h1:nxoXaVMRNF1dS3Gp3dwE2CRYrt+nUM1p/1joIEheYJE=
+github.com/container-tools/spectrum v0.3.9 h1:AslAkt0c6HKWIZUHlweiU1gbe7CVvOiKMl6iqE4rPS0=
+github.com/container-tools/spectrum v0.3.9/go.mod h1:nxoXaVMRNF1dS3Gp3dwE2CRYrt+nUM1p/1joIEheYJE=
 github.com/containerd/aufs v0.0.0-20200908144142-dab0cbea06f4/go.mod h1:nukgQABAEopAHvB6j7cnP5zJ+/3aVcE7hCYqvIwAHyE=
 github.com/containerd/aufs v0.0.0-20201003224125-76a6863f2989/go.mod h1:AkGGQs9NM2vtYHaUen+NljV0/baGCAPELGm2q9ZXpWU=
 github.com/containerd/aufs v0.0.0-20210316121734-20793ff83c97/go.mod h1:kL5kd6KM5TzQjR79jljyi4olc1Vrx6XBlcyj3gNv2PU=
