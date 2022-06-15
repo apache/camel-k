@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -49,7 +50,7 @@ func assembleClasspathArgValue(properties []string, dependencies []string, route
 	classpathContents = append(classpathContents, properties...)
 	classpathContents = append(classpathContents, routes...)
 	classpathContents = append(classpathContents, dependencies...)
-	return strings.Join(classpathContents, ":")
+	return strings.Join(classpathContents, string(os.PathListSeparator))
 }
 
 func assembleIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string, propertiesDir string, stdout, stderr io.Writer, local bool) (*exec.Cmd, error) {
