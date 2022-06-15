@@ -18,36 +18,43 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/test"
-	"github.com/spf13/cobra"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/stretchr/testify/assert"
 )
 
-const cmdPromote = "promote"
+func TestEditContainerTrait(t *testing.T) {
+	var containerTrait v1.TraitSpec
+	m := make(map[string]interface{})
+	m["configuration"] = map[string]interface{}{
+		"name":  "myName",
+		"image": "myImage",
+	}
+	data, _ := json.Marshal(m)
+	_ = json.Unmarshal(data, &containerTrait)
 
-// nolint: unparam
-func initializePromoteCmdOptions(t *testing.T) (*promoteCmdOptions, *cobra.Command, RootCmdOptions) {
-	t.Helper()
+	editedContainerTrait, err := editContainerImage(containerTrait, "editedImage")
+	assert.Nil(t, err)
 
-	options, rootCmd := kamelTestPreAddCommandInit()
-	promoteCmdOptions := addTestPromoteCmd(*options, rootCmd)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	mappedTrait := make(map[string]map[string]interface{})
+	newData, _ := json.Marshal(editedContainerTrait)
+	_ = json.Unmarshal(newData, &mappedTrait)
 
-	return promoteCmdOptions, rootCmd, *options
+	assert.Equal(t, "myName", mappedTrait["configuration"]["name"])
+	assert.Equal(t, "editedImage", mappedTrait["configuration"]["image"])
 }
 
-// nolint: unparam
-func addTestPromoteCmd(options RootCmdOptions, rootCmd *cobra.Command) *promoteCmdOptions {
-	// add a testing version of operator Command
-	operatorCmd, promoteOptions := newCmdPromote(&options)
-	operatorCmd.RunE = func(c *cobra.Command, args []string) error {
-		return nil
-	}
-	operatorCmd.PostRunE = func(c *cobra.Command, args []string) error {
-		return nil
-	}
-	operatorCmd.Args = test.ArbitraryArgs
-	rootCmd.AddCommand(operatorCmd)
-	return promoteOptions
+func TestEditMissingContainerTrait(t *testing.T) {
+	var containerTrait v1.TraitSpec
+
+	editedContainerTrait, err := editContainerImage(containerTrait, "editedImage")
+	assert.Nil(t, err)
+
+	mappedTrait := make(map[string]map[string]interface{})
+	newData, _ := json.Marshal(editedContainerTrait)
+	_ = json.Unmarshal(newData, &mappedTrait)
+
+	assert.Equal(t, "editedImage", mappedTrait["configuration"]["image"])
 }
