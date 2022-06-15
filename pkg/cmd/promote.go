@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -44,16 +43,14 @@ func newCmdPromote(rootCmdOptions *RootCmdOptions) (*cobra.Command, *promoteCmdO
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     "promote integration -to [namespace] ...",
+		Use:     "promote integration --to [namespace] ...",
 		Short:   "Promote an Integration from an environment to another",
 		Long:    "Promote an Integration from an environment to another, for example from a Development environment to a Production environment",
-		Aliases: []string{"cp", "mv"},
-		Args:    options.validate,
 		PreRunE: decode(&options),
 		RunE:    options.run,
 	}
 
-	cmd.Flags().StringP("to", "", "", "The namespace where to promote the Integration")
+	cmd.Flags().String("to", "", "The namespace where to promote the Integration")
 
 	return &cmd, &options
 }
@@ -65,13 +62,19 @@ type promoteCmdOptions struct {
 
 func (o *promoteCmdOptions) validate(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
-		return errors.New("promote expects an integration name argument")
+		return errors.New("promote expects an Integration name argument")
 	}
-
+	if o.To == "" {
+		return errors.New("promote expects a destination namespace as --to argument")
+	}
 	return nil
 }
 
 func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
+	if err := o.validate(cmd, args); err != nil {
+		return err
+	}
+
 	it := args[0]
 	c, err := o.GetCmdClient()
 	if err != nil {
@@ -87,26 +90,41 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not retrieve info for Camel K operator source")
 	}
 
-	checkOpsCompatibility(cmd, opSource, opDest)
-
+	err = checkOpsCompatibility(cmd, opSource, opDest)
+	if err != nil {
+		return err
+	}
 	sourceIntegration, err := o.getIntegration(c, it)
-	o.validateDestResources(c, sourceIntegration)
-	//destIntegration := o.editIntegration(sourceIntegration)
+	if err != nil {
+		return err
+	}
+	if sourceIntegration.Status.Phase != v1.IntegrationPhaseRunning {
+		return fmt.Errorf("could not promote an integration in %s status", sourceIntegration.Status.Phase)
+	}
+	err = o.validateDestResources(c, sourceIntegration)
+	if err != nil {
+		return err
+	}
+	destIntegration, err := o.editIntegration(sourceIntegration)
+	if err != nil {
+		return err
+	}
 
-	//return c.Create(o.Context, destIntegration)
-	return nil
+	return c.Create(o.Context, destIntegration)
 }
 
-func checkOpsCompatibility(cmd *cobra.Command, source, dest map[string]string) {
+func checkOpsCompatibility(cmd *cobra.Command, source, dest map[string]string) error {
 	if !compatibleVersions(source["Version"], dest["Version"], cmd) {
-		panic(fmt.Sprintf("source (%s) and destination (%s) Camel K operator versions are not compatible", source["version"], dest["version"]))
+		return fmt.Errorf("source (%s) and destination (%s) Camel K operator versions are not compatible", source["Version"], dest["Version"])
 	}
 	if !compatibleVersions(source["Runtime Version"], dest["Runtime Version"], cmd) {
-		panic(fmt.Sprintf("source (%s) and destination (%s) Camel K runtime versions are not compatible", source["runtime version"], dest["runtime version"]))
+		return fmt.Errorf("source (%s) and destination (%s) Camel K runtime versions are not compatible", source["Runtime Version"], dest["Runtime Version"])
 	}
 	if source["Registry Address"] != source["Registry Address"] {
-		panic(fmt.Sprintf("source (%s) and destination (%s) Camel K container images registries are not the same", source["registry address"], dest["registry address"]))
+		return fmt.Errorf("source (%s) and destination (%s) Camel K container images registries are not the same", source["Registry Address"], dest["Registry Address"])
 	}
+
+	return nil
 }
 
 func (o *promoteCmdOptions) getIntegration(c client.Client, name string) (*v1.Integration, error) {
@@ -122,7 +140,7 @@ func (o *promoteCmdOptions) getIntegration(c client.Client, name string) (*v1.In
 	return &it, nil
 }
 
-func (o *promoteCmdOptions) validateDestResources(c client.Client, it *v1.Integration) {
+func (o *promoteCmdOptions) validateDestResources(c client.Client, it *v1.Integration) error {
 	var traits map[string][]string
 	var configmaps []string
 	var secrets []string
@@ -162,34 +180,37 @@ func (o *promoteCmdOptions) validateDestResources(c client.Client, it *v1.Integr
 	kamelets = o.listKamelets(c, it)
 
 	anyError := false
+	var errorTrace string
 	for _, name := range configmaps {
 		if !existsCm(o.Context, c, name, o.To) {
 			anyError = true
-			fmt.Printf("Configmap %s is missing from %s namespace\n", name, o.To)
+			errorTrace += fmt.Sprintf("Configmap %s is missing from %s namespace\n", name, o.To)
 		}
 	}
 	for _, name := range secrets {
 		if !existsSecret(o.Context, c, name, o.To) {
 			anyError = true
-			fmt.Printf("Secret %s is missing from %s namespace\n", name, o.To)
+			errorTrace += fmt.Sprintf("Secret %s is missing from %s namespace\n", name, o.To)
 		}
 	}
 	for _, name := range pvcs {
 		if !existsPv(o.Context, c, name, o.To) {
 			anyError = true
-			fmt.Printf("PersistentVolume %s is missing from %s namespace\n", name, o.To)
+			errorTrace += fmt.Sprintf("PersistentVolume %s is missing from %s namespace\n", name, o.To)
 		}
 	}
 	for _, name := range kamelets {
 		if !existsKamelet(o.Context, c, name, o.To) {
 			anyError = true
-			fmt.Printf("Kamelet %s is missing from %s namespace\n", name, o.To)
+			errorTrace += fmt.Sprintf("Kamelet %s is missing from %s namespace\n", name, o.To)
 		}
 	}
 
 	if anyError {
-		os.Exit(1)
+		return fmt.Errorf(errorTrace)
 	}
+
+	return nil
 }
 
 func (o *promoteCmdOptions) listKamelets(c client.Client, it *v1.Integration) []string {
@@ -211,7 +232,15 @@ func (o *promoteCmdOptions) listKamelets(c client.Client, it *v1.Integration) []
 		}
 	}
 
-	return kamelets
+	// We must remove any default source/sink
+	var filtered []string
+	for _, k := range kamelets {
+		if k != "source" && k != "sink" {
+			filtered = append(filtered, k)
+		}
+	}
+
+	return filtered
 }
 
 func existsCm(ctx context.Context, c client.Client, name string, namespace string) bool {
@@ -266,23 +295,39 @@ func existsKamelet(ctx context.Context, c client.Client, name string, namespace 
 	return true
 }
 
-func (o *promoteCmdOptions) editIntegration(it *v1.Integration) *v1.Integration {
+func (o *promoteCmdOptions) editIntegration(it *v1.Integration) (*v1.Integration, error) {
 	dst := v1.NewIntegration(o.To, it.Name)
 	contImage := it.Status.Image
 	dst.Spec = *it.Spec.DeepCopy()
-	dst.Spec.Traits = map[string]v1.TraitSpec{
-		"container": traitSpecFromMap(map[string]interface{}{
-			"image": contImage,
-		}),
+	if dst.Spec.Traits == nil {
+		dst.Spec.Traits = map[string]v1.TraitSpec{}
 	}
-
-	return &dst
+	editedContTrait, err := editContainerImage(dst.Spec.Traits["container"], contImage)
+	dst.Spec.Traits["container"] = editedContTrait
+	return &dst, err
 }
 
-// TODO refactor properly
-func traitSpecFromMap(spec map[string]interface{}) v1.TraitSpec {
-	var trait v1.TraitSpec
-	data, _ := json.Marshal(spec)
-	_ = json.Unmarshal(data, &trait.Configuration)
-	return trait
+func editContainerImage(contTrait v1.TraitSpec, image string) (v1.TraitSpec, error) {
+	var editedTrait v1.TraitSpec
+	m := make(map[string]map[string]interface{})
+	data, err := json.Marshal(contTrait)
+	if err != nil {
+		return editedTrait, err
+	}
+	err = json.Unmarshal(data, &m)
+	if err != nil {
+		return editedTrait, err
+	}
+	// We must initialize, if it was not initialized so far
+	if m["configuration"] == nil {
+		m["configuration"] = make(map[string]interface{})
+	}
+	m["configuration"]["image"] = image
+	newData, err := json.Marshal(m)
+	if err != nil {
+		return editedTrait, err
+	}
+	err = json.Unmarshal(newData, &editedTrait)
+
+	return editedTrait, err
 }
