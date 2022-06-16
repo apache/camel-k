@@ -27,11 +27,10 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/metadata"
-	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/kamelets"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/source"
+	"github.com/apache/camel-k/pkg/util/resource"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -120,7 +119,7 @@ func checkOpsCompatibility(cmd *cobra.Command, source, dest map[string]string) e
 	if !compatibleVersions(source["Runtime Version"], dest["Runtime Version"], cmd) {
 		return fmt.Errorf("source (%s) and destination (%s) Camel K runtime versions are not compatible", source["Runtime Version"], dest["Runtime Version"])
 	}
-	if source["Registry Address"] != source["Registry Address"] {
+	if source["Registry Address"] != dest["Registry Address"] {
 		return fmt.Errorf("source (%s) and destination (%s) Camel K container images registries are not the same", source["Registry Address"], dest["Registry Address"])
 	}
 
@@ -148,27 +147,52 @@ func (o *promoteCmdOptions) validateDestResources(c client.Client, it *v1.Integr
 	var kamelets []string
 	// Mount trait
 	mounts := it.Spec.Traits["mount"]
-	json.Unmarshal(mounts.Configuration.RawMessage, &traits)
+	if err := json.Unmarshal(mounts.Configuration.RawMessage, &traits); err != nil {
+		return err
+	}
 	for t, v := range traits {
-		if t == "configs" || t == "resources" {
+		switch t {
+		case "configs":
 			for _, c := range v {
-				//TODO proper parse resources, now it does not account for complex parsing
-				if strings.HasPrefix(c, "configmap:") {
-					configmaps = append(configmaps, strings.Split(c, ":")[1])
-				}
-				if strings.HasPrefix(c, "secret:") {
-					secrets = append(secrets, strings.Split(c, ":")[1])
+				if conf, parseErr := resource.ParseConfig(c); parseErr == nil {
+					if conf.StorageType() == resource.StorageTypeConfigmap {
+						configmaps = append(configmaps, conf.Name())
+					} else if conf.StorageType() == resource.StorageTypeSecret {
+						secrets = append(secrets, conf.Name())
+					}
+				} else {
+					return parseErr
 				}
 			}
-		} else if t == "volumes" {
+		case "resources":
 			for _, c := range v {
-				pvcs = append(pvcs, strings.Split(c, ":")[0])
+				if conf, parseErr := resource.ParseResource(c); parseErr == nil {
+					if conf.StorageType() == resource.StorageTypeConfigmap {
+						configmaps = append(configmaps, conf.Name())
+					} else if conf.StorageType() == resource.StorageTypeSecret {
+						secrets = append(secrets, conf.Name())
+					}
+				} else {
+					return parseErr
+				}
+			}
+		case "volumes":
+			for _, c := range v {
+				if conf, parseErr := resource.ParseVolume(c); parseErr == nil {
+					if conf.StorageType() == resource.StorageTypePVC {
+						pvcs = append(pvcs, conf.Name())
+					}
+				} else {
+					return parseErr
+				}
 			}
 		}
 	}
 	// Openapi trait
 	openapis := it.Spec.Traits["openapi"]
-	json.Unmarshal(openapis.Configuration.RawMessage, &traits)
+	if err := json.Unmarshal(openapis.Configuration.RawMessage, &traits); err != nil {
+		return err
+	}
 	for k, v := range traits {
 		for _, c := range v {
 			if k == "configmaps" {
@@ -177,7 +201,17 @@ func (o *promoteCmdOptions) validateDestResources(c client.Client, it *v1.Integr
 		}
 	}
 	// Kamelet trait
-	kamelets = o.listKamelets(c, it)
+	kameletTrait := it.Spec.Traits["kamelets"]
+	var kameletListTrait map[string]string
+	if err := json.Unmarshal(kameletTrait.Configuration.RawMessage, &kameletListTrait); err != nil {
+		return err
+	}
+	kamelets = strings.Split(kameletListTrait["list"], ",")
+	sourceKamelets, err := o.listKamelets(c, it)
+	if err != nil {
+		return err
+	}
+	kamelets = append(kamelets, sourceKamelets...)
 
 	anyError := false
 	var errorTrace string
@@ -213,23 +247,14 @@ func (o *promoteCmdOptions) validateDestResources(c client.Client, it *v1.Integr
 	return nil
 }
 
-func (o *promoteCmdOptions) listKamelets(c client.Client, it *v1.Integration) []string {
-	// TODO collect any kamelets which may be coming into the kamelet trait as well
-	var kamelets []string
-
-	sources, _ := kubernetes.ResolveIntegrationSources(o.Context, c, it, &kubernetes.Collection{})
-	catalog, _ := camel.DefaultCatalog()
-	metadata.Each(catalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
-		util.StringSliceUniqueConcat(&kamelets, meta.Kamelets)
-		return true
-	})
-
-	// Check if a Kamelet is configured as default error handler URI
-	defaultErrorHandlerURI := it.Spec.GetConfigurationProperty(v1alpha1.ErrorHandlerAppPropertiesPrefix + ".deadLetterUri")
-	if defaultErrorHandlerURI != "" {
-		if strings.HasPrefix(defaultErrorHandlerURI, "kamelet:") {
-			kamelets = append(kamelets, source.ExtractKamelet(defaultErrorHandlerURI))
-		}
+func (o *promoteCmdOptions) listKamelets(c client.Client, it *v1.Integration) ([]string, error) {
+	catalog, err := camel.DefaultCatalog()
+	if err != nil {
+		return nil, err
+	}
+	kamelets, err := kamelets.ExtractKameletFromSources(o.Context, c, catalog, &kubernetes.Collection{}, it)
+	if err != nil {
+		return nil, err
 	}
 
 	// We must remove any default source/sink
@@ -240,7 +265,7 @@ func (o *promoteCmdOptions) listKamelets(c client.Client, it *v1.Integration) []
 		}
 	}
 
-	return filtered
+	return filtered, nil
 }
 
 func existsCm(ctx context.Context, c client.Client, name string, namespace string) bool {
