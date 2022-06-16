@@ -104,7 +104,7 @@ func WithPrefix(pathPrefix string) ([]string, error) {
 
 	var res []string
 	for i := range paths {
-		path := filepath.FromSlash(paths[i])
+		path := filepath.ToSlash(paths[i])
 		if result, _ := filepath.Match(pathPrefix+"*", path); result {
 			res = append(res, path)
 		}
@@ -150,5 +150,5 @@ func Resources(dirName string) ([]string, error) {
 }
 
 func openAsset(path string) (http.File, error) {
-	return assets.Open(filepath.FromSlash(path))
+	return assets.Open(filepath.ToSlash(path))
 }
