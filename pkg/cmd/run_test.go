@@ -631,3 +631,36 @@ func TestFilterBuildPropertyFiles(t *testing.T) {
 	assert.Equal(t, len(outputValues), 1)
 	assert.Equal(t, outputValues[0], "/tmp/test")
 }
+
+func TestResolveYamlPodTemplateWithSupplementalGroups(t *testing.T) {
+	//_, rootCmd, _ := initializeRunCmdOptions(t)
+	templateText := `
+securityContext:
+  supplementalGroups:
+    - 666
+`
+	integrationSpec := v1.IntegrationSpec{}
+	err := resolvePodTemplate(context.TODO(), templateText, &integrationSpec)
+	assert.Nil(t, err)
+	assert.NotNil(t, integrationSpec.PodTemplate)
+	assert.NotNil(t, integrationSpec.PodTemplate.Spec)
+	assert.NotNil(t, integrationSpec.PodTemplate.Spec.SecurityContext)
+	assert.NotNil(t, integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups)
+	assert.Equal(t, 1, len(integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups))
+	assert.Contains(t, integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups, int64(666))
+}
+
+func TestResolveJsonPodTemplateWithSupplementalGroups(t *testing.T) {
+	//_, rootCmd, _ := initializeRunCmdOptions(t)
+	minifiedYamlTemplate := `{"securityContext":{"supplementalGroups":[666]}}`
+
+	integrationSpec := v1.IntegrationSpec{}
+	err := resolvePodTemplate(context.TODO(), minifiedYamlTemplate, &integrationSpec)
+	assert.Nil(t, err)
+	assert.NotNil(t, integrationSpec.PodTemplate)
+	assert.NotNil(t, integrationSpec.PodTemplate.Spec)
+	assert.NotNil(t, integrationSpec.PodTemplate.Spec.SecurityContext)
+	assert.NotNil(t, integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups)
+	assert.Equal(t, 1, len(integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups))
+	assert.Contains(t, integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups, int64(666))
+}

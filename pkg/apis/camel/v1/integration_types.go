@@ -262,4 +262,6 @@ type PodSpec struct {
 	NodeSelector map[string]string `json:"nodeSelector,omitempty" protobuf:"bytes,7,rep,name=nodeSelector"`
 
 	TopologySpreadConstraints []corev1.TopologySpreadConstraint `json:"topologySpreadConstraints,omitempty" patchStrategy:"merge" patchMergeKey:"topologyKey" protobuf:"bytes,33,opt,name=topologySpreadConstraints"`
+	// PodSecurityContext
+	SecurityContext corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,34,opt,name=securityContext"`
 }
