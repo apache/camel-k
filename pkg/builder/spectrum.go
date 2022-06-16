@@ -25,6 +25,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"go.uber.org/multierr"
@@ -124,6 +125,10 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 		Stdout:        newStdW,
 		Stderr:        newStdW,
 		Recursive:     true,
+	}
+
+	if jobs := runtime.GOMAXPROCS(0); jobs > 1 {
+		options.Jobs = jobs
 	}
 
 	go readSpectrumLogs(newStdR)
