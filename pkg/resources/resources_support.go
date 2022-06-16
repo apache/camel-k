@@ -20,9 +20,9 @@ package resources
 import (
 	"bytes"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"text/template"
 
@@ -47,7 +47,7 @@ func Resource(name string) ([]byte, error) {
 		name = "/" + name
 	}
 
-	file, err := assets.Open(fixPath(name))
+	file, err := openAsset(name)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot access resource file %s", name)
 	}
@@ -86,7 +86,7 @@ func TemplateResource(name string, params interface{}) (string, error) {
 
 // DirExists tells if a directory exists and can be listed for files.
 func DirExists(dirName string) bool {
-	if _, err := assets.Open(fixPath(dirName)); err != nil {
+	if _, err := openAsset(dirName); err != nil {
 		return false
 	}
 	return true
@@ -104,7 +104,7 @@ func WithPrefix(pathPrefix string) ([]string, error) {
 
 	var res []string
 	for i := range paths {
-		path := fixPath(paths[i])
+		path := filepath.FromSlash(paths[i])
 		if result, _ := filepath.Match(pathPrefix+"*", path); result {
 			res = append(res, path)
 		}
@@ -115,7 +115,7 @@ func WithPrefix(pathPrefix string) ([]string, error) {
 
 // Resources lists all file names in the given path (starts with '/').
 func Resources(dirName string) ([]string, error) {
-	dir, err := assets.Open(fixPath(dirName))
+	dir, err := openAsset(dirName)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
@@ -149,10 +149,6 @@ func Resources(dirName string) ([]string, error) {
 	return res, dir.Close()
 }
 
-func fixPath(path string) string {
-	if runtime.GOOS == "windows" {
-		path = strings.ReplaceAll(path, "\\", "/")
-	}
-
-	return path
+func openAsset(path string) (http.File, error) {
+	return assets.Open(filepath.FromSlash(path))
 }

@@ -21,8 +21,8 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
@@ -50,13 +50,7 @@ func assembleClasspathArgValue(properties []string, dependencies []string, route
 	classpathContents = append(classpathContents, properties...)
 	classpathContents = append(classpathContents, routes...)
 	classpathContents = append(classpathContents, dependencies...)
-
-	pathSeparator := ":"
-	if runtime.GOOS == "windows" {
-		pathSeparator = ";"
-	}
-
-	return strings.Join(classpathContents, pathSeparator)
+	return strings.Join(classpathContents, string(os.PathListSeparator))
 }
 
 func assembleIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string, propertiesDir string, stdout, stderr io.Writer, local bool) (*exec.Cmd, error) {
