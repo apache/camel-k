@@ -1114,8 +1114,8 @@ github.com/radovskyb/watcher v1.0.7 h1:AYePLih6dpmS32vlHfhCeli8127LzkIgwJGcwwe8t
 github.com/radovskyb/watcher v1.0.7/go.mod h1:78okwvY5wPdzcb1UYnip1pvrZNIVEIh/Cm+ZuvsUYIg=
 github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
 github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
-github.com/redhat-developer/service-binding-operator v1.0.1 h1:YHqfpox6effDWwy2Mhyj5Nzrd1o4DLgS/hZSZsL2LUk=
-github.com/redhat-developer/service-binding-operator v1.0.1/go.mod h1:CR6QrBvM9WSXnRoUFedg9ZKn+G+95TaLJ5CvNZU0kYY=
+github.com/redhat-developer/service-binding-operator v1.1.0 h1:L1zAbpmt4Z8NVCzNIeXtufvSguPHTKXlPUjiyTtBRIc=
+github.com/redhat-developer/service-binding-operator v1.1.0/go.mod h1:te3jViU9tglVasxf0W4nNCBx2L08FYCx2472U/IX860=
 github.com/rickb777/date v1.13.0 h1:+8AmwLuY1d/rldzdqvqTEg7107bZ8clW37x4nsdG3Hs=
 github.com/rickb777/date v1.13.0/go.mod h1:GZf3LoGnxPWjX+/1TXOuzHefZFDovTyNLHDMd3qH70k=
 github.com/rickb777/plural v1.2.1 h1:UitRAgR70+yHFt26Tmj/F9dU9aV6UfjGXSbO1DcC9/U=
