@@ -43,7 +43,7 @@ CUSTOM_VERSION ?= $(VERSION)
 METADATA_IMAGE_NAME := $(CUSTOM_IMAGE)-metadata
 BUNDLE_IMAGE_NAME ?= $(CUSTOM_IMAGE)-bundle
 RELEASE_GIT_REMOTE := origin
-GIT_COMMIT := $(shell git rev-list -1 HEAD)
+GIT_COMMIT := $(shell if [ -d .git ]; then git rev-list -1 HEAD; else echo "$(CUSTOM_VERSION)"; fi)
 LINT_GOGC := 10
 LINT_DEADLINE := 10m
 
@@ -305,10 +305,10 @@ dep:
 	go mod tidy
 
 lint:
-	GOGC=$(LINT_GOGC) golangci-lint run --out-format tab --deadline $(LINT_DEADLINE)
+	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format tab --deadline $(LINT_DEADLINE) --verbose
 
 lint-fix:
-	GOGC=$(LINT_GOGC) golangci-lint run --out-format tab --deadline $(LINT_DEADLINE) --fix
+	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format tab --deadline $(LINT_DEADLINE) --fix
 
 dir-licenses:
 	./script/vendor-license-directory.sh
@@ -557,9 +557,11 @@ pre-bundle:
 	@sed -i 's/^    support: .*/    support: $(CSV_SUPPORT)/' $(CSV_PATH)
 	@sed -i 's/^  name: .*.\(v.*\)/  name: $(CSV_NAME)/' $(CSV_PATH)
 	@sed -i 's/^  displayName: .*/  displayName: $(CSV_DISPLAY_NAME)/' $(CSV_PATH)
-	@sed -i 's/^  replaces: .*/  replaces: $(CSV_REPLACES)/' $(CSV_PATH)
 	@sed -i 's/^  version: .*/  version: $(CSV_VERSION)/' $(CSV_PATH)
-	@sed -i '/  version: ${CSV_VERSION}/a \ \ replaces: $(CSV_REPLACES)' $(CSV_PATH)
+	@if grep -q replaces config/manifests/bases/camel-k.clusterserviceversion.yaml; \
+		then sed -i 's/^  replaces: .*/  replaces: $(CSV_REPLACES)/' $(CSV_PATH); \
+		else sed -i '/  version: ${CSV_VERSION}/a \ \ replaces: $(CSV_REPLACES)' $(CSV_PATH); \
+	fi
 
 bundle: set-version generate-crd $(BUNDLE_CAMEL_APIS) kustomize operator-sdk pre-bundle
 	@# Display BUNDLE_METADATA_OPTS for debugging
