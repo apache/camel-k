@@ -20,9 +20,10 @@ package cmd
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -33,6 +34,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/resource"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -43,8 +45,8 @@ func newCmdPromote(rootCmdOptions *RootCmdOptions) (*cobra.Command, *promoteCmdO
 	}
 	cmd := cobra.Command{
 		Use:     "promote integration --to [namespace] ...",
-		Short:   "Promote an Integration from an environment to another",
-		Long:    "Promote an Integration from an environment to another, for example from a Development environment to a Production environment",
+		Short:   "Promote an Integration/KameletBinding from an environment to another",
+		Long:    "Promote an Integration/KameletBinding from an environment to another, for example from a Development environment to a Production environment",
 		PreRunE: decode(&options),
 		RunE:    options.run,
 	}
@@ -61,7 +63,7 @@ type promoteCmdOptions struct {
 
 func (o *promoteCmdOptions) validate(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
-		return errors.New("promote expects an Integration name argument")
+		return errors.New("promote expects an Integration/KameletBinding name argument")
 	}
 	if o.To == "" {
 		return errors.New("promote expects a destination namespace as --to argument")
@@ -74,39 +76,61 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	it := args[0]
+	name := args[0]
 	c, err := o.GetCmdClient()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "could not retrieve cluster client")
 	}
 
 	opSource, err := operatorInfo(o.Context, c, o.Namespace)
 	if err != nil {
-		return fmt.Errorf("could not retrieve info for Camel K operator source")
+		return errors.Wrap(err, "could not retrieve info for Camel K operator source")
 	}
 	opDest, err := operatorInfo(o.Context, c, o.To)
 	if err != nil {
-		return fmt.Errorf("could not retrieve info for Camel K operator source")
+		return errors.Wrap(err, "could not retrieve info for Camel K operator destination")
 	}
 
 	err = checkOpsCompatibility(cmd, opSource, opDest)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "could not verify operators compatibility")
 	}
-	sourceIntegration, err := o.getIntegration(c, it)
+	promoteKameletBinding := false
+	var sourceIntegration *v1.Integration
+	// We first look if a KameletBinding with the name exists
+	sourceKameletBinding, err := o.getKameletBinding(c, name)
+	if err != nil && !k8serrors.IsNotFound(err) {
+		return errors.Wrap(err, "problems looking for KameletBinding "+name)
+	}
+	if sourceKameletBinding != nil {
+		promoteKameletBinding = true
+	}
+	sourceIntegration, err = o.getIntegration(c, name)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "could not get Integration "+name)
 	}
 	if sourceIntegration.Status.Phase != v1.IntegrationPhaseRunning {
-		return fmt.Errorf("could not promote an integration in %s status", sourceIntegration.Status.Phase)
+		return fmt.Errorf("could not promote an Integration in %s status", sourceIntegration.Status.Phase)
 	}
 	err = o.validateDestResources(c, sourceIntegration)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "could not validate destination resources")
 	}
+	if promoteKameletBinding {
+		// KameletBinding promotion
+		destKameletBinding, err := o.editKameletBinding(sourceKameletBinding, sourceIntegration)
+		if err != nil {
+			return errors.Wrap(err, "could not edit KameletBinding "+name)
+		}
+
+		return c.Create(o.Context, destKameletBinding)
+	}
+	// Plain Integration promotion
 	destIntegration, err := o.editIntegration(sourceIntegration)
 	if err != nil {
-		return err
+		if err != nil {
+			return errors.Wrap(err, "could not edit Integration "+name)
+		}
 	}
 
 	return c.Create(o.Context, destIntegration)
@@ -126,6 +150,19 @@ func checkOpsCompatibility(cmd *cobra.Command, source, dest map[string]string) e
 	return nil
 }
 
+func (o *promoteCmdOptions) getKameletBinding(c client.Client, name string) (*v1alpha1.KameletBinding, error) {
+	it := v1alpha1.NewKameletBinding(o.Namespace, name)
+	key := k8sclient.ObjectKey{
+		Name:      name,
+		Namespace: o.Namespace,
+	}
+	if err := c.Get(o.Context, key, &it); err != nil {
+		return nil, err
+	}
+
+	return &it, nil
+}
+
 func (o *promoteCmdOptions) getIntegration(c client.Client, name string) (*v1.Integration, error) {
 	it := v1.NewIntegration(o.Namespace, name)
 	key := k8sclient.ObjectKey{
@@ -133,7 +170,7 @@ func (o *promoteCmdOptions) getIntegration(c client.Client, name string) (*v1.In
 		Namespace: o.Namespace,
 	}
 	if err := c.Get(o.Context, key, &it); err != nil {
-		return nil, fmt.Errorf("could not find integration %s in namespace %s", it.Name, o.Namespace)
+		return nil, err
 	}
 
 	return &it, nil
@@ -145,6 +182,9 @@ func (o *promoteCmdOptions) validateDestResources(c client.Client, it *v1.Integr
 	var secrets []string
 	var pvcs []string
 	var kamelets []string
+	if it.Spec.Traits == nil {
+		return nil
+	}
 	// Mount trait
 	mounts := it.Spec.Traits["mount"]
 	if err := json.Unmarshal(mounts.Configuration.RawMessage, &traits); err != nil {
@@ -329,6 +369,34 @@ func (o *promoteCmdOptions) editIntegration(it *v1.Integration) (*v1.Integration
 	}
 	editedContTrait, err := editContainerImage(dst.Spec.Traits["container"], contImage)
 	dst.Spec.Traits["container"] = editedContTrait
+	return &dst, err
+}
+
+func (o *promoteCmdOptions) editKameletBinding(kb *v1alpha1.KameletBinding, it *v1.Integration) (*v1alpha1.KameletBinding, error) {
+	dst := v1alpha1.NewKameletBinding(o.To, kb.Name)
+	dst.Spec = *kb.Spec.DeepCopy()
+	contImage := it.Status.Image
+	if dst.Spec.Integration == nil {
+		dst.Spec.Integration = &v1.IntegrationSpec{}
+	}
+	if dst.Spec.Integration.Traits == nil {
+		dst.Spec.Integration.Traits = map[string]v1.TraitSpec{}
+	}
+	editedContTrait, err := editContainerImage(dst.Spec.Integration.Traits["container"], contImage)
+	dst.Spec.Integration.Traits["container"] = editedContTrait
+	if dst.Spec.Source.Ref != nil {
+		dst.Spec.Source.Ref.Namespace = o.To
+	}
+	if dst.Spec.Sink.Ref != nil {
+		dst.Spec.Sink.Ref.Namespace = o.To
+	}
+	if dst.Spec.Steps != nil {
+		for _, step := range dst.Spec.Steps {
+			if step.Ref != nil {
+				step.Ref.Namespace = o.To
+			}
+		}
+	}
 	return &dst, err
 }
 
