@@ -46,7 +46,7 @@ func TestKamelCLIPromote(t *testing.T) {
 		secData["my-secret-key"] = "very top secret development"
 		NewPlainTextSecret(nsDev, "my-sec", secData)
 
-		t.Run("plain integration", func(t *testing.T) {
+		t.Run("plain integration dev", func(t *testing.T) {
 			Expect(Kamel("run", "-n", nsDev, "./files/promote-route.groovy",
 				"--config", "configmap:my-cm",
 				"--config", "secret:my-sec",
@@ -57,11 +57,18 @@ func TestKamelCLIPromote(t *testing.T) {
 			Eventually(IntegrationLogs(nsDev, "promote-route"), TestTimeoutShort).Should(ContainSubstring("very top secret development"))
 		})
 
-		t.Run("kamelet integration", func(t *testing.T) {
+		t.Run("kamelet integration dev", func(t *testing.T) {
 			Expect(CreateTimerKamelet(nsDev, "my-own-timer-source")()).To(Succeed())
 			Expect(Kamel("run", "-n", nsDev, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(nsDev, "timer-kamelet-usage"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(nsDev, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
+		})
+
+		t.Run("kamelet binding dev", func(t *testing.T) {
+			Expect(CreateTimerKamelet(nsDev, "kb-timer-source")()).To(Succeed())
+			Expect(Kamel("bind", "kb-timer-source", "log:info", "-p", "message=my-kamelet-binding-rocks", "-n", nsDev).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(nsDev, "kb-timer-source-to-log"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationLogs(nsDev, "kb-timer-source-to-log"), TestTimeoutShort).Should(ContainSubstring("my-kamelet-binding-rocks"))
 		})
 
 		// Prod environment namespace
@@ -85,7 +92,7 @@ func TestKamelCLIPromote(t *testing.T) {
 			secData["my-secret-key"] = "very top secret production"
 			NewPlainTextSecret(nsProd, "my-sec", secData)
 
-			t.Run("Production integration", func(t *testing.T) {
+			t.Run("plain integration promotion", func(t *testing.T) {
 				Expect(Kamel("promote", "-n", nsDev, "promote-route", "--to", nsProd).Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(nsProd, "promote-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationConditionStatus(nsProd, "promote-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -99,13 +106,26 @@ func TestKamelCLIPromote(t *testing.T) {
 				Expect(Kamel("promote", "-n", nsDev, "timer-kamelet-usage", "--to", nsProd).Execute()).NotTo(Succeed())
 			})
 
-			t.Run("kamelet integration", func(t *testing.T) {
+			t.Run("kamelet integration promotion", func(t *testing.T) {
 				Expect(CreateTimerKamelet(nsProd, "my-own-timer-source")()).To(Succeed())
 				Expect(Kamel("promote", "-n", nsDev, "timer-kamelet-usage", "--to", nsProd).Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(nsProd, "timer-kamelet-usage"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(nsProd, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
 				// They must use the same image
 				Expect(IntegrationPodImage(nsProd, "timer-kamelet-usage")()).Should(Equal(IntegrationPodImage(nsDev, "timer-kamelet-usage")()))
+			})
+
+			t.Run("no kamelet for kameletbinding in destination", func(t *testing.T) {
+				Expect(Kamel("promote", "-n", nsDev, "kb-timer-source", "--to", nsProd).Execute()).NotTo(Succeed())
+			})
+
+			t.Run("kamelet binding promotion", func(t *testing.T) {
+				Expect(CreateTimerKamelet(nsProd, "kb-timer-source")()).To(Succeed())
+				Expect(Kamel("promote", "-n", nsDev, "kb-timer-source-to-log", "--to", nsProd).Execute()).To(Succeed())
+				Eventually(IntegrationPodPhase(nsProd, "kb-timer-source-to-log"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationLogs(nsProd, "kb-timer-source-to-log"), TestTimeoutShort).Should(ContainSubstring("my-kamelet-binding-rocks"))
+				// They must use the same image
+				Expect(IntegrationPodImage(nsProd, "kb-timer-source-to-log")()).Should(Equal(IntegrationPodImage(nsDev, "kb-timer-source-to-log")()))
 			})
 		})
 	})
