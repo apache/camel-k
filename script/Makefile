@@ -518,6 +518,18 @@ BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL) $(BUNDLE_PA
 #
 pre-bundle:
 # bundle name must match that which appears in PROJECT file
+ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Darwin)
+	@sed -i '' 's/projectName: .*/projectName: $(PACKAGE)/' PROJECT
+	@sed -i '' 's~^    containerImage: .*~    containerImage: $(CUSTOM_IMAGE):$(CUSTOM_VERSION)~' $(CSV_PATH)
+	@sed -i '' 's/^    support: .*/    support: $(CSV_SUPPORT)/' $(CSV_PATH)
+	@sed -i '' 's/^  name: .*.\(v.*\)/  name: $(CSV_NAME)/' $(CSV_PATH)
+	@sed -i '' 's/^  displayName: .*/  displayName: $(CSV_DISPLAY_NAME)/' $(CSV_PATH)
+	@sed -i '' 's/^  version: .*/  version: $(CSV_VERSION)/' $(CSV_PATH)
+	@if grep -q replaces config/manifests/bases/camel-k.clusterserviceversion.yaml; \
+		then sed -i '' 's/^  replaces: .*/  replaces: $(CSV_REPLACES)/' $(CSV_PATH); \
+		else sed -i '' '/  version: ${CSV_VERSION}/a \ \ replaces: $(CSV_REPLACES)' $(CSV_PATH); \
+	fi
+else
 	@sed -i 's/projectName: .*/projectName: $(PACKAGE)/' PROJECT
 	@sed -i 's~^    containerImage: .*~    containerImage: $(CUSTOM_IMAGE):$(CUSTOM_VERSION)~' $(CSV_PATH)
 	@sed -i 's/^    support: .*/    support: $(CSV_SUPPORT)/' $(CSV_PATH)
@@ -528,6 +540,7 @@ pre-bundle:
 		then sed -i 's/^  replaces: .*/  replaces: $(CSV_REPLACES)/' $(CSV_PATH); \
 		else sed -i '/  version: ${CSV_VERSION}/a \ \ replaces: $(CSV_REPLACES)' $(CSV_PATH); \
 	fi
+endif
 
 bundle: set-version generate-crd $(BUNDLE_CAMEL_APIS) kustomize operator-sdk pre-bundle
 	@# Display BUNDLE_METADATA_OPTS for debugging
@@ -540,16 +553,17 @@ bundle: set-version generate-crd $(BUNDLE_CAMEL_APIS) kustomize operator-sdk pre
 			-q --overwrite --version $(OPERATOR_VERSION) \
 			--kustomize-dir config/manifests $(BUNDLE_METADATA_OPTS)
 	@# Move the dockerfile into the bundle directory
+	@# Rename the CSV name to conform with the existing released operator versions
+	@# This cannot happen in pre-bundle as the operator-sdk generation expects a CSV name the same as PACKAGE
 ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Darwin)
 	@mv bundle.Dockerfile bundle/Dockerfile && sed -i '' 's/bundle\///g' bundle/Dockerfile
+	@sed -i '' "s/^  name: $(CSV_NAME)/  name: $(CSV_PRODUCTION_NAME)/" $(CSV_GENERATED_PATH)
 else
 	@mv bundle.Dockerfile bundle/Dockerfile && sed -i 's/bundle\///g' bundle/Dockerfile
+	@sed -i "s/^  name: $(CSV_NAME)/  name: $(CSV_PRODUCTION_NAME)/" $(CSV_GENERATED_PATH)
 endif
 	@# Adds the licence headers to the csv file
 	./script/add_license.sh bundle/manifests ./script/headers/yaml.txt
-# Rename the CSV name to conform with the existing released operator versions
-# This cannot happen in pre-bundle as the operator-sdk generation expects a CSV name the same as PACKAGE
-	@sed -i "s/^  name: $(CSV_NAME)/  name: $(CSV_PRODUCTION_NAME)/" $(CSV_GENERATED_PATH)
 	$(OPERATOR_SDK) bundle validate ./bundle
 
 # Build the bundle image.

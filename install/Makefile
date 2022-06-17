@@ -238,10 +238,17 @@ endif
 # Customizes the port patch
 #
 .operator-port-patch:
+ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Darwin)
+	@sed -i '' 's/--monitoring-port=.*/--monitoring-port=$(MONITORING_PORT)/' $(MANAGER)/$(PORTS_PATCH).$(YAML)
+	@sed -i '' '/path:.*\/containerPort/,/- op/{s/value: .*/value: $(MONITORING_PORT)/}' $(MANAGER)/$(PORTS_PATCH).$(YAML)
+	@sed -i '' 's/--health-port=.*/--health-port=$(HEALTH_PORT)/' $(MANAGER)/$(PORTS_PATCH).$(YAML)
+	@sed -i '' '/path:.*\/httpGet\/port/,/- op/{s/value: .*/value: $(HEALTH_PORT)/}' $(MANAGER)/$(PORTS_PATCH).$(YAML)
+else
 	@sed -i 's/--monitoring-port=.*/--monitoring-port=$(MONITORING_PORT)/' $(MANAGER)/$(PORTS_PATCH).$(YAML)
 	@sed -i '/path:.*\/containerPort/,/- op/{s/value: .*/value: $(MONITORING_PORT)/}' $(MANAGER)/$(PORTS_PATCH).$(YAML)
 	@sed -i 's/--health-port=.*/--health-port=$(HEALTH_PORT)/' $(MANAGER)/$(PORTS_PATCH).$(YAML)
 	@sed -i '/path:.*\/httpGet\/port/,/- op/{s/value: .*/value: $(HEALTH_PORT)/}' $(MANAGER)/$(PORTS_PATCH).$(YAML)
+endif
 
 #
 # Customizes the log level patch
@@ -319,13 +326,21 @@ endif
 # Customizes the samples patches for kubernetes
 #
 .platform-kubernetes-patch:
+ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Darwin)
+	@sed -i '' 's/.*profile:.*/  profile: Kubernetes/' $(SAMPLES)/$(INT_PLATFORM_PATCH).$(YAML)
+else
 	@sed -i 's/.*profile:.*/  profile: Kubernetes/' $(SAMPLES)/$(INT_PLATFORM_PATCH).$(YAML)
+endif
 
 #
 # Customizes the samples patches for openshift
 #
 .platform-openshift-patch:
+ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Darwin)
+	@sed -i '' 's/.*profile:.*/  profile: Openshift/' $(SAMPLES)/$(INT_PLATFORM_PATCH).$(YAML)
+else
 	@sed -i 's/.*profile:.*/  profile: Openshift/' $(SAMPLES)/$(INT_PLATFORM_PATCH).$(YAML)
+endif
 
 #
 # Install the integration platform

@@ -58,5 +58,11 @@ cp ./tests/scorecard/config.yaml openshift-ecosystem/$1/tests/scorecard/config.y
 
 # Starting sed to replace operator
 
-sed -i 's/camel-k.v/camel-k-operator.v/g' k8s-operatorhub/$1/manifests/camel-k.v$1.clusterserviceversion.yaml
-sed -i 's/camel-k.v/camel-k-operator.v/g' openshift-ecosystem/$1/manifests/camel-k.v$1.clusterserviceversion.yaml
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  sed -i 's/camel-k.v/camel-k-operator.v/g' k8s-operatorhub/$1/manifests/camel-k.v$1.clusterserviceversion.yaml
+  sed -i 's/camel-k.v/camel-k-operator.v/g' openshift-ecosystem/$1/manifests/camel-k.v$1.clusterserviceversion.yaml
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  # Mac OSX
+  sed -i '' 's/camel-k.v/camel-k-operator.v/g' k8s-operatorhub/$1/manifests/camel-k.v$1.clusterserviceversion.yaml
+  sed -i '' 's/camel-k.v/camel-k-operator.v/g' openshift-ecosystem/$1/manifests/camel-k.v$1.clusterserviceversion.yaml
+fi

@@ -155,7 +155,12 @@ if [ "${PULL_REGISTRY}" != "${PUSH_REGISTRY}" ]; then
   #
   # Only add PULL_HOST if not already added (avoids repeated appended)
   #
-  sudo sed -i "/${PULL_HOST}/!s/localhost/& ${PULL_HOST} /" /etc/hosts
+  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    sudo sed -i "/${PULL_HOST}/!s/localhost/& ${PULL_HOST} /" /etc/hosts
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    # Mac OSX
+    sudo sed -i '' "/${PULL_HOST}/!s/localhost/& ${PULL_HOST} /" /etc/hosts
+  fi
 
   #
   # Bring up the registry:2 instance if not already started
@@ -239,7 +244,12 @@ cat << EOF > ${sedtemp}
 p;
 EOF
 
-sed -i -n -f ${sedtemp} ${CATALOG_DIR}/bundles.yaml
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  sed -i -n -f ${sedtemp} ${CATALOG_DIR}/bundles.yaml
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  # Mac OSX
+  sed -i -n -f '' ${sedtemp} ${CATALOG_DIR}/bundles.yaml
+fi
 
 rm -f ${sedtemp}
 
