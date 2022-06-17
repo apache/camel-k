@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- kamel local run support --build-property ? [\#3356](https://github.com/apache/camel-k/issues/3356)
 - Kamel install error [\#3348](https://github.com/apache/camel-k/issues/3348)
 - E2E repeated failure [\#3315](https://github.com/apache/camel-k/issues/3315)
 - Integrations, IntegrationKits, IntegrationPlatforms are not owned by Namespaces [\#3311](https://github.com/apache/camel-k/issues/3311)
