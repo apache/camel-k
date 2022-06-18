@@ -84,8 +84,12 @@ func (g *traitDocGen) Filter(context *generator.Context, t *types.Type) bool {
 }
 
 func (g *traitDocGen) GenerateType(context *generator.Context, t *types.Type, out io.Writer) error {
-	docDir := g.arguments.CustomArgs.(*CustomArgs).DocDir
-	traitPath := g.arguments.CustomArgs.(*CustomArgs).TraitPath
+	customArgs, ok := g.arguments.CustomArgs.(*CustomArgs)
+	if !ok {
+		return fmt.Errorf("type assertion failed: %v", g.arguments.CustomArgs)
+	}
+	docDir := customArgs.DocDir
+	traitPath := customArgs.TraitPath
 	traitID := getTraitID(t)
 	traitFile := traitID + ".adoc"
 	filename := path.Join(docDir, traitPath, traitFile)
@@ -108,8 +112,12 @@ func (g *traitDocGen) Finalize(c *generator.Context, w io.Writer) error {
 }
 
 func (g *traitDocGen) FinalizeNav(*generator.Context) error {
-	docDir := g.arguments.CustomArgs.(*CustomArgs).DocDir
-	navPath := g.arguments.CustomArgs.(*CustomArgs).NavPath
+	customArgs, ok := g.arguments.CustomArgs.(*CustomArgs)
+	if !ok {
+		return fmt.Errorf("type assertion failed: %v", g.arguments.CustomArgs)
+	}
+	docDir := customArgs.DocDir
+	navPath := customArgs.NavPath
 	filename := path.Join(docDir, navPath)
 
 	return util.WithFileContent(filename, func(file *os.File, data []byte) error {
