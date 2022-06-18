@@ -874,6 +874,13 @@ KameletBindingStatus specify the status of a binding
 |Field
 |Description
 
+|`observedGeneration` +
+int64
+|
+
+
+ObservedGeneration is the most recent generation observed for this KameletBinding.
+
 |`phase` +
 *xref:#_camel_apache_org_v1alpha1_KameletBindingPhase[KameletBindingPhase]*
 |
@@ -1095,6 +1102,13 @@ KameletStatus defines the observed state of Kamelet
 |===
 |Field
 |Description
+
+|`observedGeneration` +
+int64
+|
+
+
+ObservedGeneration is the most recent generation observed for this Kamelet.
 
 |`phase` +
 *xref:#_camel_apache_org_v1alpha1_KameletPhase[KameletPhase]*

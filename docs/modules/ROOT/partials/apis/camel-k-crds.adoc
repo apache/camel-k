@@ -431,6 +431,13 @@ BuildStatus defines the observed state of Build
 |Field
 |Description
 
+|`observedGeneration` +
+int64
+|
+
+
+ObservedGeneration is the most recent generation observed for this Build.
+
 |`phase` +
 *xref:#_camel_apache_org_v1_BuildPhase[BuildPhase]*
 |
@@ -1432,6 +1439,13 @@ IntegrationKitStatus defines the observed state of IntegrationKit
 |Field
 |Description
 
+|`observedGeneration` +
+int64
+|
+
+
+ObservedGeneration is the most recent generation observed for this IntegrationKit.
+
 |`phase` +
 *xref:#_camel_apache_org_v1_IntegrationKitPhase[IntegrationKitPhase]*
 |
@@ -1868,6 +1882,13 @@ IntegrationPlatformStatus defines the observed state of IntegrationPlatform
 
 
 
+|`observedGeneration` +
+int64
+|
+
+
+ObservedGeneration is the most recent generation observed for this IntegrationPlatform.
+
 |`phase` +
 *xref:#_camel_apache_org_v1_IntegrationPlatformPhase[IntegrationPlatformPhase]*
 |
@@ -2020,6 +2041,13 @@ IntegrationStatus defines the observed state of Integration
 |===
 |Field
 |Description
+
+|`observedGeneration` +
+int64
+|
+
+
+ObservedGeneration is the most recent generation observed for this Integration.
 
 |`phase` +
 *xref:#_camel_apache_org_v1_IntegrationPhase[IntegrationPhase]*
@@ -2484,9 +2512,8 @@ NodeSelector
 
 TopologySpreadConstraints
 
-
 |`securityContext` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core[[\]Kubernetes core/v1.PodSecurityContext]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core[Kubernetes core/v1.PodSecurityContext]*
 |
 
 
