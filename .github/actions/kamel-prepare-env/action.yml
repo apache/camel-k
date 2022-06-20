@@ -21,7 +21,21 @@ description: 'Initialise the test environment with tools. (Will only run once pe
 runs:
   using: "composite"
   steps:
-  
+    - name: Set Env Vars
+      shell: bash
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          SUDO=sudo
+        fi
+
+        echo "SUDO=${SUDO}" >> $GITHUB_ENV
+    #
+    # This is a docker action so its pre-builds the image prior to
+    # running it. The building occurs prior to all steps regardless
+    # of where its located to run. Therefore, it must be run prior to
+    # clean-up since that step removes all docker image in order to
+    # claim back as much space as possible.
+    #
     - name: Cleanup
       shell: bash
       if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
@@ -32,20 +46,18 @@ runs:
 
         if [ "$RUNNER_OS" == "Linux" ]; then
           echo "Cleaning up resources:"
-          sudo swapoff -a
-          sudo rm -f /swapfile
-          sudo apt clean
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf "/usr/local/share/boost"
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          df -kh
-          docker rmi $(docker image ls -aq) || true # Don't fail if image is not present
-          df -kh
-        else
-          echo "OS $RUNNER_OS is not yet supported"
-          exit 1
+          ${{ env.SUDO }} swapoff -a
+          ${{ env.SUDO }} rm -f /swapfile
+          ${{ env.SUDO }} apt clean
+          ${{ env.SUDO }} rm -rf /usr/share/dotnet
+          ${{ env.SUDO }} rm -rf /opt/ghc
+          ${{ env.SUDO }} rm -rf "/usr/local/share/boost"
+          ${{ env.SUDO }} rm -rf "$AGENT_TOOLSDIRECTORY"
         fi
+
+        df -kh
+        docker rmi $(docker image ls -aq) || true # Don't fail if image is not present
+        df -kh
 
         echo "Final status:"
         df -h
@@ -67,7 +79,9 @@ runs:
       if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       run: |
         # reinstall kustomize to be always on the same version
-        sudo rm $(which kustomize)
+        if [ $(which kustomize) == "0" ]; then
+          ${{ env.SUDO }} rm $(which kustomize)
+        fi
         make kustomize
 
         # Add kustomize to PATH

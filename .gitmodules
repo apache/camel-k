@@ -4,4 +4,3 @@
 [submodule ".github/actions/changelog"]
 	path = .github/actions/changelog
 	url = https://github.com/CharMixer/auto-changelog-action
-	

@@ -41,7 +41,6 @@ runs:
     name: Configure Platform
     uses: ./.github/actions/kamel-config-cluster
     with:
-      cluster-type: ${{ env.TEST_CLUSTER }}
       cluster-config-data: ${{ inputs.cluster-config-data }}
       cluster-kube-config-data: ${{ inputs.cluster-kube-config-data }}
 

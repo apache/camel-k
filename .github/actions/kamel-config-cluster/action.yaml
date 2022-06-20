@@ -20,11 +20,10 @@ description: 'Delegates to respective cluster action depending on type of reques
 
 inputs:
   cluster-type:
-    description: 'The type of cluster required: [kind, ocp3, custom]'
-    required: true
-    default: 'kind'
+    description: 'The type of cluster required: [kind, ocp3, custom] - optional (see Override Cluster Type step)'
+    required: false
   cluster-config-data:
-    description: 'Variables for the cluster configuration - required for custom cluster type only'
+    description: 'Variables for the cluster configuration - required for custom cluster type only optional (see Override Cluster Type step)'
     required: false
   cluster-kube-config-data:
     description: 'Base16 encoded kube config - required for custom cluster type only'
@@ -43,11 +42,17 @@ runs:
           #
           # Have custom cluster-config-data so override cluster-type
           #
+          echo "Have cluster-config-data so setting cluster-type to custom"
           echo "CLUSTER_TYPE=custom" >> $GITHUB_ENV
-        else
-          echo "Info: No cluster configuration supplied."
+        elif [ -n "${{ inputs.cluster-type }}" ]; then
+          echo "Cluster-type specified so setting accordingly"
           echo "CLUSTER_TYPE=${{ inputs.cluster-type }}" >> $GITHUB_ENV
+        else
+          echo "Info: No cluster configuration supplied. Default to kind."
+          echo "CLUSTER_TYPE=kind" >> $GITHUB_ENV
         fi
+
+        echo "CLUSTER_TYPE -> ${{ env.CLUSTER_TYPE }}"
 
     - id: execute-kind
       name: Maybe Execute Kind Cluster
