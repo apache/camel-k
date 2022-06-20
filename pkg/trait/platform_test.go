@@ -24,8 +24,11 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
+
 	"github.com/stretchr/testify/assert"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 )
 
 func TestPlatformTraitChangeStatus(t *testing.T) {
@@ -56,7 +59,7 @@ func TestPlatformTraitChangeStatus(t *testing.T) {
 			}
 
 			trait, _ := newPlatformTrait().(*platformTrait)
-			trait.CreateDefault = BoolP(false)
+			trait.CreateDefault = pointer.Bool(false)
 
 			var err error
 			trait.Client, err = test.NewFakeClient()
@@ -90,7 +93,7 @@ func TestPlatformTraitCreatesDefaultPlatform(t *testing.T) {
 	}
 
 	trait, _ := newPlatformTrait().(*platformTrait)
-	trait.CreateDefault = BoolP(true)
+	trait.CreateDefault = pointer.Bool(true)
 
 	var err error
 	trait.Client, err = test.NewFakeClient()
@@ -145,7 +148,7 @@ func TestPlatformTraitExisting(t *testing.T) {
 			}
 
 			trait, _ := newPlatformTrait().(*platformTrait)
-			trait.CreateDefault = BoolP(true)
+			trait.CreateDefault = pointer.Bool(true)
 
 			var err error
 			existingPlatform := v1.NewIntegrationPlatform("ns1", "existing")

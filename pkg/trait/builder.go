@@ -22,6 +22,7 @@ import (
 	"sort"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
@@ -58,7 +59,7 @@ func (t *builderTrait) InfluencesKit() bool {
 }
 
 func (t *builderTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 

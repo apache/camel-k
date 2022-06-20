@@ -22,6 +22,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 
@@ -52,12 +53,12 @@ type prometheusTrait struct {
 func newPrometheusTrait() Trait {
 	return &prometheusTrait{
 		BaseTrait:  NewBaseTrait("prometheus", 1900),
-		PodMonitor: BoolP(true),
+		PodMonitor: pointer.Bool(true),
 	}
 }
 
 func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
-	if IsNilOrFalse(t.Enabled) {
+	if !pointer.BoolDeref(t.Enabled, false) {
 		return false, nil
 	}
 
@@ -102,7 +103,7 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	condition.Message = fmt.Sprintf("%s(%d)", container.Name, containerPort.ContainerPort)
 
 	// Add the PodMonitor resource
-	if IsTrue(t.PodMonitor) {
+	if pointer.BoolDeref(t.PodMonitor, false) {
 		portName := containerPort.Name
 		// Knative defaults to naming the userland container port "user-port".
 		// Let's rely on that default, granted it is not officially part of the Knative

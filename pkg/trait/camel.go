@@ -26,6 +26,7 @@ import (
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -52,7 +53,7 @@ func newCamelTrait() Trait {
 }
 
 func (t *camelTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, errors.New("trait camel cannot be disabled")
 	}
 

@@ -25,6 +25,7 @@ import (
 	"github.com/rs/xid"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
@@ -92,7 +93,7 @@ func (t *quarkusTrait) Matches(trait Trait) bool {
 		return false
 	}
 
-	if IsNilOrTrue(t.Enabled) && IsFalse(qt.Enabled) {
+	if pointer.BoolDeref(t.Enabled, true) && !pointer.BoolDeref(qt.Enabled, true) {
 		return false
 	}
 
@@ -115,7 +116,7 @@ types:
 }
 
 func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 

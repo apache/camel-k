@@ -26,6 +26,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/api/policy/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -98,7 +99,7 @@ func findPdb(resources *kubernetes.Collection) *v1beta1.PodDisruptionBudget {
 // nolint: unparam
 func createPdbTest() (*pdbTrait, *Environment, *appsv1.Deployment) {
 	trait, _ := newPdbTrait().(*pdbTrait)
-	trait.Enabled = BoolP(true)
+	trait.Enabled = pointer.Bool(true)
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{

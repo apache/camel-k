@@ -27,6 +27,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -102,7 +103,7 @@ func TestSupplementalGroup(t *testing.T) {
 // nolint: unparam
 func createPodTest(podSpecTemplate string) (*podTrait, *Environment, *appsv1.Deployment) {
 	trait, _ := newPodTrait().(*podTrait)
-	trait.Enabled = BoolP(true)
+	trait.Enabled = pointer.Bool(true)
 
 	var podSpec v1.PodSpec
 	if podSpecTemplate != "" {

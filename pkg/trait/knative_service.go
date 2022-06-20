@@ -23,6 +23,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -101,7 +102,7 @@ func (t *knativeServiceTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 }
 
 func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if !pointer.BoolDeref(t.Enabled, true) {
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
@@ -149,7 +150,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if IsNilOrTrue(t.Auto) {
+	if pointer.BoolDeref(t.Auto, true) {
 		// Check the right value for minScale, as not all services are allowed to scale down to 0
 		if t.MinScale == nil {
 			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)

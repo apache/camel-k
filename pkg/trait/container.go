@@ -26,6 +26,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/utils/pointer"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -134,14 +135,14 @@ func newContainerTrait() Trait {
 		ServicePort:               defaultServicePort,
 		ServicePortName:           defaultContainerPortName,
 		Name:                      defaultContainerName,
-		DeprecatedProbesEnabled:   BoolP(false),
+		DeprecatedProbesEnabled:   pointer.Bool(false),
 		DeprecatedLivenessScheme:  string(corev1.URISchemeHTTP),
 		DeprecatedReadinessScheme: string(corev1.URISchemeHTTP),
 	}
 }
 
 func (t *containerTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 
@@ -149,7 +150,7 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if IsNilOrTrue(t.Auto) {
+	if pointer.BoolDeref(t.Auto, true) {
 		if t.Expose == nil {
 			e := e.Resources.GetServiceForIntegration(e.Integration) != nil
 			t.Expose = &e
@@ -251,7 +252,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	}
 
 	t.configureResources(e, &container)
-	if IsTrue(t.Expose) {
+	if pointer.BoolDeref(t.Expose, false) {
 		t.configureService(e, &container)
 	}
 	t.configureCapabilities(e)

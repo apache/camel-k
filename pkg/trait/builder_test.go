@@ -25,6 +25,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -165,7 +166,7 @@ func TestMavenPropertyBuilderTrait(t *testing.T) {
 
 func createNominalBuilderTraitTest() *builderTrait {
 	builderTrait, _ := newBuilderTrait().(*builderTrait)
-	builderTrait.Enabled = BoolP(true)
+	builderTrait.Enabled = pointer.Bool(true)
 
 	return builderTrait
 }

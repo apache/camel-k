@@ -23,6 +23,7 @@ import (
 	"k8s.io/api/policy/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
@@ -49,7 +50,7 @@ func newPdbTrait() Trait {
 }
 
 func (t *pdbTrait) Configure(e *Environment) (bool, error) {
-	if IsNilOrFalse(t.Enabled) {
+	if !pointer.BoolDeref(t.Enabled, false) {
 		return false, nil
 	}
 

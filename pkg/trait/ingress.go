@@ -24,6 +24,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networking "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
@@ -55,7 +56,7 @@ func (t *ingressTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 }
 
 func (t *ingressTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if !pointer.BoolDeref(t.Enabled, true) {
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionExposureAvailable,
 			corev1.ConditionFalse,
@@ -69,7 +70,7 @@ func (t *ingressTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if IsNilOrTrue(t.Auto) {
+	if pointer.BoolDeref(t.Auto, true) {
 		hasService := e.Resources.GetUserServiceForIntegration(e.Integration) != nil
 		hasHost := t.Host != ""
 		enabled := hasService && hasHost

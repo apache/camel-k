@@ -23,6 +23,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -42,7 +43,7 @@ func TestConfigureEnabledCamelTraitSucceeds(t *testing.T) {
 
 func TestConfigureDisabledCamelTraitFails(t *testing.T) {
 	trait, environment := createNominalCamelTest()
-	trait.Enabled = BoolP(false)
+	trait.Enabled = pointer.Bool(false)
 
 	configured, err := trait.Configure(environment)
 	assert.NotNil(t, err)
@@ -74,7 +75,7 @@ func createNominalCamelTest() (*camelTrait, *Environment) {
 	client, _ := test.NewFakeClient()
 
 	trait, _ := newCamelTrait().(*camelTrait)
-	trait.Enabled = BoolP(true)
+	trait.Enabled = pointer.Bool(true)
 
 	environment := &Environment{
 		CamelCatalog: &camel.RuntimeCatalog{

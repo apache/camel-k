@@ -32,6 +32,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -65,12 +66,12 @@ func newJvmTrait() Trait {
 	return &jvmTrait{
 		BaseTrait:    NewBaseTrait("jvm", 2000),
 		DebugAddress: "*:5005",
-		PrintCommand: BoolP(true),
+		PrintCommand: pointer.Bool(true),
 	}
 }
 
 func (t *jvmTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 
@@ -80,7 +81,7 @@ func (t *jvmTrait) Configure(e *Environment) (bool, error) {
 
 	if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {
 		// The JVM trait must be disabled in case the current IntegrationKit corresponds to a native build
-		if quarkus, ok := trait.(*quarkusTrait); ok && IsNilOrTrue(quarkus.Enabled) && quarkus.isNativeIntegration(e) {
+		if quarkus, ok := trait.(*quarkusTrait); ok && pointer.BoolDeref(quarkus.Enabled, true) && quarkus.isNativeIntegration(e) {
 			return false, nil
 		}
 	}
@@ -145,9 +146,9 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	args := container.Args
 
 	// Remote debugging
-	if IsTrue(t.Debug) {
+	if pointer.BoolDeref(t.Debug, false) {
 		suspend := "n"
-		if IsTrue(t.DebugSuspend) {
+		if pointer.BoolDeref(t.DebugSuspend, false) {
 			suspend = "y"
 		}
 		args = append(args,
@@ -250,7 +251,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 
 	args = append(args, e.CamelCatalog.Runtime.ApplicationClass)
 
-	if IsNilOrTrue(t.PrintCommand) {
+	if pointer.BoolDeref(t.PrintCommand, true) {
 		args = append([]string{"exec", "java"}, args...)
 		container.Command = []string{"/bin/sh", "-c"}
 		cmd := strings.Join(args, " ")

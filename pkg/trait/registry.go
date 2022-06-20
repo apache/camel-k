@@ -26,13 +26,14 @@ import (
 
 	base64 "encoding/base64"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/registry"
-	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/pointer"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // The Registry trait sets up Maven to use the Image registry
@@ -56,7 +57,7 @@ func (t *registryTrait) InfluencesKit() bool {
 
 func (t *registryTrait) Configure(e *Environment) (bool, error) {
 	// disabled by default
-	if IsNilOrFalse(t.Enabled) {
+	if !pointer.BoolDeref(t.Enabled, false) {
 		return false, nil
 	}
 

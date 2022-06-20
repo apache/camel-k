@@ -24,6 +24,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -207,7 +208,7 @@ func TestSetDefaultBoolJolokiaOptionShouldSucceed(t *testing.T) {
 func TestSetDefaultBoolJolokiaOptionShouldNotOverrideExistingValue(t *testing.T) {
 	trait, _ := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
-	option := BoolP(false)
+	option := pointer.Bool(false)
 
 	trait.setDefaultJolokiaOption(options, &option, "key", true)
 
@@ -250,7 +251,7 @@ func TestAddBoolPointerOptionToJolokiaOptions(t *testing.T) {
 	trait, _ := newJolokiaTrait().(*jolokiaTrait)
 	options := map[string]string{}
 
-	trait.addToJolokiaOptions(options, "key", BoolP(false))
+	trait.addToJolokiaOptions(options, "key", pointer.Bool(false))
 
 	assert.Len(t, options, 1)
 	assert.Equal(t, "false", options["key"])
@@ -267,7 +268,7 @@ func TestAddWrongTypeOptionToJolokiaOptionsDoesNothing(t *testing.T) {
 
 func createNominalJolokiaTest() (*jolokiaTrait, *Environment) {
 	trait, _ := newJolokiaTrait().(*jolokiaTrait)
-	trait.Enabled = BoolP(true)
+	trait.Enabled = pointer.Bool(true)
 
 	environment := &Environment{
 		Catalog: NewCatalog(nil),
