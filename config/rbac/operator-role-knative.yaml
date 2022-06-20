@@ -26,6 +26,7 @@ rules:
   - serving.knative.dev
   resources:
   - services
+  - routes
   verbs:
   - create
   - delete
@@ -38,6 +39,7 @@ rules:
   - eventing.knative.dev
   resources:
   - triggers
+  - brokers
   verbs:
   - create
   - delete
@@ -49,6 +51,8 @@ rules:
   - messaging.knative.dev
   resources:
   - subscriptions
+  - channels
+  - inmemorychannels
   verbs:
   - create
   - delete
