@@ -31,13 +31,11 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	kameletutils "github.com/apache/camel-k/pkg/kamelet"
 	"github.com/apache/camel-k/pkg/kamelet/repository"
-	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/dsl"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/source"
+	"github.com/apache/camel-k/pkg/util/kamelets"
 )
 
 // The kamelets trait is a platform trait used to inject Kamelets into the integration runtime.
@@ -91,23 +89,9 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	if IsNilOrTrue(t.Auto) {
-		var kamelets []string
-		if t.List == "" {
-			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
-			if err != nil {
-				return false, err
-			}
-			metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
-				util.StringSliceUniqueConcat(&kamelets, meta.Kamelets)
-				return true
-			})
-		}
-		// Check if a Kamelet is configured as default error handler URI
-		defaultErrorHandlerURI := e.Integration.Spec.GetConfigurationProperty(v1alpha1.ErrorHandlerAppPropertiesPrefix + ".deadLetterUri")
-		if defaultErrorHandlerURI != "" {
-			if strings.HasPrefix(defaultErrorHandlerURI, "kamelet:") {
-				kamelets = append(kamelets, source.ExtractKamelet(defaultErrorHandlerURI))
-			}
+		kamelets, err := kamelets.ExtractKameletFromSources(e.Ctx, e.Client, e.CamelCatalog, e.Resources, e.Integration)
+		if err != nil {
+			return false, err
 		}
 
 		if len(kamelets) > 0 {
