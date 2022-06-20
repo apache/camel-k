@@ -19,6 +19,7 @@ package trait
 
 import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
@@ -49,7 +50,7 @@ func newPlatformTrait() Trait {
 }
 
 func (t *platformTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 
@@ -57,7 +58,7 @@ func (t *platformTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if IsNilOrFalse(t.Auto) {
+	if !pointer.BoolDeref(t.Auto, false) {
 		if e.Platform == nil {
 			if t.CreateDefault == nil {
 				// Calculate if the platform should be automatically created when missing.
@@ -103,13 +104,13 @@ func (t *platformTrait) Apply(e *Environment) error {
 func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlatform, error) {
 	pl, err := platform.GetOrFindForResource(e.Ctx, t.Client, e.Integration, false)
 	if err != nil && k8serrors.IsNotFound(err) {
-		if IsTrue(t.CreateDefault) {
+		if pointer.BoolDeref(t.CreateDefault, false) {
 			platformName := e.Integration.Status.Platform
 			if platformName == "" {
 				platformName = platform.DefaultPlatformName
 			}
 			namespace := e.Integration.Namespace
-			if IsTrue(t.Global) {
+			if pointer.BoolDeref(t.Global, false) {
 				operatorNamespace := platform.GetOperatorNamespace()
 				if operatorNamespace != "" {
 					namespace = operatorNamespace

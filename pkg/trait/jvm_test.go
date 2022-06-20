@@ -29,6 +29,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -67,7 +68,7 @@ func TestConfigureJvmTraitInWrongIntegrationKitPhaseDoesNotSucceed(t *testing.T)
 
 func TestConfigureJvmDisabledTraitDoesNotSucceed(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	trait.Enabled = BoolP(false)
+	trait.Enabled = pointer.Bool(false)
 
 	configured, err := trait.Configure(environment)
 	assert.Nil(t, err)
@@ -146,8 +147,8 @@ func TestApplyJvmTraitWithKNativeResource(t *testing.T) {
 
 func TestApplyJvmTraitWithDebugEnabled(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	trait.Debug = BoolP(true)
-	trait.DebugSuspend = BoolP(true)
+	trait.Debug = pointer.Bool(true)
+	trait.DebugSuspend = pointer.Bool(true)
 
 	d := appsv1.Deployment{
 		Spec: appsv1.DeploymentSpec{
@@ -255,8 +256,8 @@ func createNominalJvmTest(kitType string) (*jvmTrait, *Environment) {
 	client, _ := test.NewFakeClient()
 
 	trait, _ := newJvmTrait().(*jvmTrait)
-	trait.Enabled = BoolP(true)
-	trait.PrintCommand = BoolP(false)
+	trait.Enabled = pointer.Bool(true)
+	trait.PrintCommand = pointer.Bool(false)
 	trait.Client = client
 
 	environment := &Environment{

@@ -20,6 +20,8 @@ package trait
 import (
 	"github.com/scylladb/go-set/strset"
 
+	"k8s.io/utils/pointer"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
@@ -41,7 +43,7 @@ func newDependenciesTrait() Trait {
 }
 
 func (t *dependenciesTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 

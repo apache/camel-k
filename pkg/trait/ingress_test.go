@@ -26,6 +26,7 @@ import (
 	networking "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -42,7 +43,7 @@ func TestConfigureIngressTraitDoesSucceed(t *testing.T) {
 
 func TestConfigureDisabledIngressTraitDoesNotSucceed(t *testing.T) {
 	ingressTrait, environment := createNominalIngressTest()
-	ingressTrait.Enabled = BoolP(false)
+	ingressTrait.Enabled = pointer.Bool(false)
 
 	configured, err := ingressTrait.Configure(environment)
 
@@ -66,7 +67,7 @@ func TestConfigureIngressTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 
 func TestConfigureAutoIngressTraitWithoutUserServiceDoesNotSucceed(t *testing.T) {
 	ingressTrait, environment := createNominalIngressTest()
-	ingressTrait.Auto = BoolP(true)
+	ingressTrait.Auto = pointer.Bool(true)
 	environment.Resources = kubernetes.NewCollection()
 
 	configured, err := ingressTrait.Configure(environment)
@@ -154,8 +155,8 @@ func TestApplyIngressTraitDoesSucceed(t *testing.T) {
 
 func createNominalIngressTest() (*ingressTrait, *Environment) {
 	trait, _ := newIngressTrait().(*ingressTrait)
-	trait.Enabled = BoolP(true)
-	trait.Auto = BoolP(false)
+	trait.Enabled = pointer.Bool(true)
+	trait.Auto = pointer.Bool(false)
 	trait.Host = "hostname"
 
 	environment := &Environment{

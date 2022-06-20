@@ -20,6 +20,8 @@ package trait
 import (
 	"os"
 
+	"k8s.io/utils/pointer"
+
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/envvar"
@@ -62,12 +64,12 @@ const (
 func newEnvironmentTrait() Trait {
 	return &environmentTrait{
 		BaseTrait:     NewBaseTrait("environment", 800),
-		ContainerMeta: BoolP(true),
+		ContainerMeta: pointer.Bool(true),
 	}
 }
 
 func (t *environmentTrait) Configure(e *Environment) (bool, error) {
-	if IsNilOrTrue(t.Enabled) {
+	if pointer.BoolDeref(t.Enabled, true) {
 		return e.IntegrationInRunningPhases(), nil
 	}
 
@@ -83,12 +85,12 @@ func (t *environmentTrait) Apply(e *Environment) error {
 	envvar.SetVal(&e.EnvVars, envVarMountPathConfigMaps, camel.ConfigConfigmapsMountPath)
 	envvar.SetVal(&e.EnvVars, envVarMountPathSecrets, camel.ConfigSecretsMountPath)
 
-	if IsNilOrTrue(t.ContainerMeta) {
+	if pointer.BoolDeref(t.ContainerMeta, true) {
 		envvar.SetValFrom(&e.EnvVars, envVarNamespace, "metadata.namespace")
 		envvar.SetValFrom(&e.EnvVars, envVarPodName, "metadata.name")
 	}
 
-	if IsNilOrTrue(t.HTTPProxy) {
+	if pointer.BoolDeref(t.HTTPProxy, true) {
 		if HTTPProxy, ok := os.LookupEnv("HTTP_PROXY"); ok {
 			envvar.SetVal(&e.EnvVars, "HTTP_PROXY", HTTPProxy)
 		}

@@ -27,6 +27,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/pointer"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -57,7 +58,7 @@ func newDeployerTrait() Trait {
 }
 
 func (t *deployerTrait) Configure(e *Environment) (bool, error) {
-	return e.Integration != nil && IsNilOrTrue(t.Enabled), nil
+	return e.Integration != nil && pointer.BoolDeref(t.Enabled, true), nil
 }
 
 func (t *deployerTrait) Apply(e *Environment) error {
@@ -71,7 +72,7 @@ func (t *deployerTrait) Apply(e *Environment) error {
 			// check its list of accepted MIME types.
 			// As a simpler solution, we fall back to client-side apply at the first
 			// 415 error, and assume server-side apply is not available globally.
-			if hasServerSideApply && IsNilOrTrue(t.UseSSA) {
+			if hasServerSideApply && pointer.BoolDeref(t.UseSSA, true) {
 				err := t.serverSideApply(env, resource)
 				switch {
 				case err == nil:
@@ -162,7 +163,7 @@ func isIncompatibleServerError(err error) bool {
 }
 
 func (t *deployerTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
-	if IsFalse(t.Enabled) {
+	if !pointer.BoolDeref(t.Enabled, true) {
 		return nil, nil
 	}
 	if t.Kind != "" {

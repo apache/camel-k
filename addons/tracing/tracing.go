@@ -18,6 +18,8 @@ limitations under the License.
 package tracing
 
 import (
+	"k8s.io/utils/pointer"
+
 	"github.com/apache/camel-k/addons/tracing/discovery"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
@@ -76,11 +78,11 @@ func NewTracingTrait() trait.Trait {
 }
 
 func (t *tracingTrait) Configure(e *trait.Environment) (bool, error) {
-	if trait.IsNilOrFalse(t.Enabled) {
+	if !pointer.BoolDeref(t.Enabled, false) {
 		return false, nil
 	}
 
-	if trait.IsNilOrTrue(t.Auto) {
+	if pointer.BoolDeref(t.Auto, true) {
 		if t.Endpoint == "" {
 			for _, locator := range discovery.TracingLocators {
 				endpoint, err := locator.FindEndpoint(e.Ctx, t.Client, t.L, e)

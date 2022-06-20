@@ -24,10 +24,12 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/stretchr/testify/assert"
@@ -61,7 +63,7 @@ func TestPullSecretAuto(t *testing.T) {
 	e, _ := getEnvironmentAndDeployment(t)
 
 	trait, _ := newPullSecretTrait().(*pullSecretTrait)
-	trait.Auto = BoolP(false)
+	trait.Auto = pointer.Bool(false)
 	enabled, err := trait.Configure(e)
 	assert.Nil(t, err)
 	assert.False(t, enabled)
@@ -71,8 +73,8 @@ func TestPullSecretImagePullerDelegation(t *testing.T) {
 	e, _ := getEnvironmentAndDeployment(t)
 
 	trait, _ := newPullSecretTrait().(*pullSecretTrait)
-	trait.Auto = BoolP(false)
-	trait.ImagePullerDelegation = BoolP(true)
+	trait.Auto = pointer.Bool(false)
+	trait.ImagePullerDelegation = pointer.Bool(true)
 	enabled, err := trait.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, enabled)

@@ -18,11 +18,10 @@ limitations under the License.
 package trait
 
 import (
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/reference"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/utils/pointer"
 
 	sb "github.com/redhat-developer/service-binding-operator/apis/binding/v1alpha1"
 	"github.com/redhat-developer/service-binding-operator/pkg/client/kubernetes"
@@ -33,6 +32,8 @@ import (
 	"github.com/redhat-developer/service-binding-operator/pkg/reconcile/pipeline/handler/naming"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/reference"
 )
 
 // The Service Binding trait allows users to connect to Services in Kubernetes:
@@ -52,7 +53,7 @@ func newServiceBindingTrait() Trait {
 }
 
 func (t *serviceBindingTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 

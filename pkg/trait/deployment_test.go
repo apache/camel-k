@@ -25,6 +25,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -33,7 +34,7 @@ import (
 
 func TestConfigureDisabledDeploymentTraitDoesNotSucceed(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
-	deploymentTrait.Enabled = BoolP(false)
+	deploymentTrait.Enabled = pointer.Bool(false)
 
 	configured, err := deploymentTrait.Configure(environment)
 
@@ -148,7 +149,7 @@ func TestApplyDeploymentTraitWithProgressDeadline(t *testing.T) {
 
 func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 	trait, _ := newDeploymentTrait().(*deploymentTrait)
-	trait.Enabled = BoolP(true)
+	trait.Enabled = pointer.Bool(true)
 	trait.Client, _ = test.NewFakeClient(&appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "integration-name",

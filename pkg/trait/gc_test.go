@@ -24,6 +24,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 )
 
 func TestConfigureGarbageCollectorTraitDoesSucceed(t *testing.T) {
@@ -36,7 +37,7 @@ func TestConfigureGarbageCollectorTraitDoesSucceed(t *testing.T) {
 
 func TestConfigureDisabledGarbageCollectorTraitDoesNotSucceed(t *testing.T) {
 	gcTrait, environment := createNominalGarbageCollectorTest()
-	gcTrait.Enabled = BoolP(false)
+	gcTrait.Enabled = pointer.Bool(false)
 
 	configured, err := gcTrait.Configure(environment)
 
@@ -78,7 +79,7 @@ func TestApplyGarbageCollectorTraitDuringInitializationPhaseSkipPostActions(t *t
 
 func createNominalGarbageCollectorTest() (*garbageCollectorTrait, *Environment) {
 	trait, _ := newGarbageCollectorTrait().(*garbageCollectorTrait)
-	trait.Enabled = BoolP(true)
+	trait.Enabled = pointer.Bool(true)
 
 	environment := &Environment{
 		Catalog: NewCatalog(nil),

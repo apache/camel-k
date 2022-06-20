@@ -18,6 +18,8 @@ limitations under the License.
 package trait
 
 import (
+	"k8s.io/utils/pointer"
+
 	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
@@ -56,7 +58,7 @@ func newLoggingTraitTrait() Trait {
 }
 
 func (l loggingTrait) Configure(environment *Environment) (bool, error) {
-	if IsFalse(l.Enabled) {
+	if !pointer.BoolDeref(l.Enabled, true) {
 		return false, nil
 	}
 
@@ -70,16 +72,16 @@ func (l loggingTrait) Apply(environment *Environment) error {
 		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleFormat, l.Format)
 	}
 
-	if IsTrue(l.JSON) {
+	if pointer.BoolDeref(l.JSON, false) {
 		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJSON, True)
-		if IsTrue(l.JSONPrettyPrint) {
+		if pointer.BoolDeref(l.JSONPrettyPrint, false) {
 			envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJSONPrettyPrint, True)
 		}
 	} else {
 		// If the trait is false OR unset, we default to false.
 		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJSON, False)
 
-		if IsNilOrTrue(l.Color) {
+		if pointer.BoolDeref(l.Color, true) {
 			envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleColor, True)
 		}
 	}

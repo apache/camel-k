@@ -22,6 +22,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"k8s.io/utils/pointer"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -47,7 +49,7 @@ func TestConfigureQuarkusTraitBuildSubmitted(t *testing.T) {
 
 func TestConfigureDisabledQuarkusTraitShouldFail(t *testing.T) {
 	quarkusTrait, environment := createNominalQuarkusTest()
-	quarkusTrait.Enabled = BoolP(false)
+	quarkusTrait.Enabled = pointer.Bool(false)
 
 	configured, err := quarkusTrait.Configure(environment)
 
@@ -71,7 +73,7 @@ func TestApplyQuarkusTraitDefaultKitLayout(t *testing.T) {
 
 func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
 	trait, _ := newQuarkusTrait().(*quarkusTrait)
-	trait.Enabled = BoolP(true)
+	trait.Enabled = pointer.Bool(true)
 
 	environment := &Environment{
 		CamelCatalog: &camel.RuntimeCatalog{},

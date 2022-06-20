@@ -25,6 +25,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/utils/pointer"
 
 	routev1 "github.com/openshift/api/route/v1"
 
@@ -108,7 +109,7 @@ func (t *routeTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 }
 
 func (t *routeTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if !pointer.BoolDeref(t.Enabled, true) {
 		if e.Integration != nil {
 			e.Integration.Status.SetCondition(
 				v1.IntegrationConditionExposureAvailable,

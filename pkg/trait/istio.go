@@ -21,6 +21,7 @@ import (
 	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/utils/pointer"
 
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
@@ -50,7 +51,7 @@ func newIstioTrait() Trait {
 }
 
 func (t *istioTrait) Configure(e *Environment) (bool, error) {
-	if IsTrue(t.Enabled) {
+	if pointer.BoolDeref(t.Enabled, false) {
 		return e.IntegrationInRunningPhases(), nil
 	}
 
