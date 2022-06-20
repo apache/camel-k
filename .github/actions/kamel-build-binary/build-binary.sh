@@ -95,8 +95,9 @@ else
   make ${RULES}
 fi
 
-echo "Moving kamel binary to /usr/local/bin"
-sudo mv ./kamel /usr/local/bin
+echo "Moving kamel binary to be visible on PATH"
+
+${SUDO} mv ./kamel /usr/bin
 echo "Kamel version installed: $(kamel version)"
 
 #

@@ -29,26 +29,26 @@ runs:
         export OPENSHIFT_COMMIT=0cbc58b
         export MAVEN_OPTS=-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 
-        sudo rm -f /etc/resolv.conf
-        sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
-        sudo sh -c 'echo "DNS=8.8.8.8 4.4.4.4" >> /etc/systemd/resolved.conf'
-        sudo service systemd-resolved restart
+        {{ env.SUDO }} rm -f /etc/resolv.conf
+        {{ env.SUDO }} ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+        {{ env.SUDO }} sh -c 'echo "DNS=8.8.8.8 4.4.4.4" >> /etc/systemd/resolved.conf'
+        {{ env.SUDO }} service systemd-resolved restart
 
         # set docker0 to promiscuous mode
-        sudo ip link set docker0 promisc on
+        {{ env.SUDO }} ip link set docker0 promisc on
 
         # Download and install the oc binary
-        sudo mount --make-shared /
+        {{ env.SUDO }} mount --make-shared /
 
-        sudo service docker stop
-        sudo echo '{"insecure-registries": ["172.30.0.0/16"]}' | sudo tee /etc/docker/daemon.json > /dev/null
-        sudo service docker start
+        {{ env.SUDO }} service docker stop
+        {{ env.SUDO }} echo '{"insecure-registries": ["172.30.0.0/16"]}' | {{ env.SUDO }} tee /etc/docker/daemon.json > /dev/null
+        {{ env.SUDO }} service docker start
 
         DOWNLOAD_URL=https://github.com/openshift/origin/releases/download/$OPENSHIFT_VERSION/openshift-origin-client-tools-$OPENSHIFT_VERSION-$OPENSHIFT_COMMIT-linux-64bit.tar.gz
         wget -O client.tar.gz ${DOWNLOAD_URL}
         tar xvzOf client.tar.gz > oc.bin
-        sudo mv oc.bin /usr/local/bin/oc
-        sudo chmod 755 /usr/local/bin/oc
+        {{ env.SUDO }} mv oc.bin /usr/bin/oc
+        {{ env.SUDO }} chmod 755 /usr/bin/oc
 
     - id: start-openshift
       name: Start OpenShift Cluster
@@ -59,8 +59,8 @@ runs:
         IP_ADDR="$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)"
 
         # Setup cluster dir
-        sudo mkdir -p /home/runner/lib/oc
-        sudo chmod 777 /home/runner/lib/oc
+        {{ env.SUDO }} mkdir -p /home/runner/lib/oc
+        {{ env.SUDO }} chmod 777 /home/runner/lib/oc
         cd /home/runner/lib/oc
 
         # Start OpenShift

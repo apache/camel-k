@@ -155,7 +155,7 @@ if [ "${PULL_REGISTRY}" != "${PUSH_REGISTRY}" ]; then
   #
   # Only add PULL_HOST if not already added (avoids repeated appended)
   #
-  sudo sed -i "/${PULL_HOST}/!s/localhost/& ${PULL_HOST} /" /etc/hosts
+  ${SUDO} sed -i "/${PULL_HOST}/!s/localhost/& ${PULL_HOST} /" /etc/hosts
 
   #
   # Bring up the registry:2 instance if not already started

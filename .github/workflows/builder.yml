@@ -17,9 +17,6 @@
 
 name: builder
 
-env:
-  TEST_CLUSTER: kind
-
 on:
   pull_request:
     branches:

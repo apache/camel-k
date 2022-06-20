@@ -43,7 +43,7 @@ runs:
 
         curl --fail -L https://github.com/citrusframework/yaks/releases/download/${DOWNLOAD_VERSION}/yaks-${{ inputs.version }}-linux-64bit.tar.gz -o yaks.tar.gz
         tar -zxf yaks.tar.gz
-        sudo mv yaks /usr/local/bin/
+        ${{ env.SUDO }} mv yaks /usr/bin/
 
     - name: Install YAKS
       shell: bash

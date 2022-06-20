@@ -26,7 +26,7 @@
 set -e
 
 # Prerequisites
-sudo wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
+${SUDO} wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 -O /usr/bin/yq && ${SUDO} chmod +x /usr/bin/yq
 
 set +e
 
