@@ -30,7 +30,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -239,16 +238,29 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 }
 
 func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task *v1.BuildahTask, pod *corev1.Pod) error {
-	bud := []string{
+	var bud []string
+
+	bud = []string{
 		"buildah",
 		"bud",
 		"--storage-driver=vfs",
+	}
+
+	if task.Platform != "" {
+		bud = append(bud, []string{
+			"--platform",
+			task.Platform,
+		}...)
+	}
+
+	bud = append(bud, []string{
+		"--pull-always",
 		"-f",
 		"Dockerfile",
 		"-t",
 		task.Image,
 		".",
-	}
+	}...)
 
 	push := []string{
 		"buildah",

@@ -19,14 +19,14 @@ OPERATOR_VERSION := $(subst -SNAPSHOT,,$(VERSION))
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION := 1.9.2
 RUNTIME_VERSION := 1.13.0
-BUILDAH_VERSION := 1.14.0
+BUILDAH_VERSION := 1.23.3
 KANIKO_VERSION := 0.17.1
 INSTALL_DEFAULT_KAMELETS := true
 CONTROLLER_GEN_VERSION := v0.6.1
 OPERATOR_SDK_VERSION := v1.14.0
 KUSTOMIZE_VERSION := v4.1.2
 OPM_VERSION := v1.21.0
-BASE_IMAGE := adoptopenjdk/openjdk11:slim
+BASE_IMAGE := docker.io/adoptopenjdk/openjdk11:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
 IMAGE_NAME := docker.io/apache/camel-k
 
@@ -334,6 +334,23 @@ else
 endif
 	docker build -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
+images-arch: bundle-kamelets test maven-overlay
+	mkdir -p build/_maven_output
+	mkdir -p build/_output/bin
+ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
+	GOOS=linux go build $(GOFLAGS) -o build/_output/bin/kamel ./cmd/kamel/*.go
+else
+	cp kamel build/_output/bin
+endif
+	docker buildx rm --all-inactive --force
+	docker buildx create --append --name builder
+ifeq ($(shell uname -m), x86_x64)
+    	docker buildx build --platform=linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
+endif
+ifeq ($(shell uname -m), aarch64)
+	docker buildx build --platform=linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
+endif
+
 images-dev: bundle-kamelets test package-artifacts maven-overlay
 	mkdir -p build/_maven_output
 	mkdir -p build/_output/bin
@@ -343,6 +360,23 @@ else
 	cp kamel build/_output/bin
 endif
 	docker build -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
+
+images-arch-dev: bundle-kamelets test package-artifacts maven-overlay
+	mkdir -p build/_maven_output
+	mkdir -p build/_output/bin
+ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
+	GOOS=linux go build $(GOFLAGS) -o build/_output/bin/kamel ./cmd/kamel/*.go
+else
+	cp kamel build/_output/bin
+endif
+	docker buildx rm --all-inactive --force
+	docker buildx create --append --name builder
+ifeq ($(shell uname -m), x86_x64)
+	docker buildx build --platform=linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
+endif
+ifeq ($(shell uname -m), aarch64)
+	docker buildx build --platform=linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
+endif
 
 images-push:
 	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)

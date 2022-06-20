@@ -1,0 +1,81 @@
+[[multi-architecture-props]]
+= Multi Architecture
+
+To use kamel inside other architecture like arm64 you must build it and use Buildah as builder strategy.
+
+NOTE: For now only arm64 is supported as other architectures
+
+[[multi-architecture-build]]
+== Build and Publish Kamel
+
+As first step it's necessary to build kamel project `https://github.com/apache/camel-k` manually and push image to own docker repository.
+
+I suggest to create a free docker image repository with `docker-hub` or `ghcr`.
+
+[source,shell]
+.script/Makefile
+----
+make build images-arch images-push
+----
+
+NOTE: The base image of kamel operator is graalvm because multi architecture quarkus-mandrel image not published yet
+
+[[multi-architecture-install]]
+== Install Kamel
+
+Proceed with installation of kamel inside kubernetes cluster with the below command
+
+[source,shell]
+----
+./kamel install --build-publish-strategy=Buildah --registry YOUR_REGISTRY --registry-auth-username YOUR_USERNAME --registry-auth-password YOUR_PASSWORD
+----
+
+[[multi-architecture-use]]
+== Use kamel
+
+Build and run an integration
+
+[source,groovy]
+.hello.groovy
+----
+from('timer:tick?period=3000')
+  .setBody().constant('Hello world from Camel K')
+  .to('log:info')
+----
+
+Send the groovy file to kamel operator to build, publish and run it
+[source,shell]
+----
+kamel run hello.groovy
+----
+
+[[multi-architecture-configure-optional]]
+== Optional Buildah Configuration
+
+If you want change the default architecture of buildah build strategy, you must edit integration platform manually.
+
+[source,shell]
+----
+kubectl edit ip
+----
+
+This command will open the editor with the yaml of `IntegrationPlatform`, to change the architecture you can fill inside `spec.build.PublishStrategyOptions` as below
+[source,yaml]
+----
+spec:
+  build:
+    PublishStrategyOptions:
+      BuildahPlatform: linux/arm/v8
+----
+
+After few seconds the yaml will be updated and that field is imported inside status
+
+[source,yaml]
+----
+status:
+  build:
+    PublishStrategyOptions:
+      BuildahPlatform: linux/arm/v8
+----
+
+NOTE: It's important to know buidah supports only amd64 and arm64

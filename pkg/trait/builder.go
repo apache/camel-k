@@ -101,7 +101,17 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}})
 
 	case v1.IntegrationPlatformBuildPublishStrategyBuildah:
+		var platform string
+		var found bool
+		if platform, found = e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahPlatform]; !found {
+			platform = ""
+			t.L.Infof("Attribute platform for buildah not found, default from host will be used!")
+		} else {
+			t.L.Infof("User defined %s platform, will be used from buildah!", platform)
+		}
+
 		e.BuildTasks = append(e.BuildTasks, v1.Task{Buildah: &v1.BuildahTask{
+			Platform: platform,
 			BaseTask: v1.BaseTask{
 				Name: "buildah",
 			},
@@ -151,6 +161,7 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 	for _, repo := range e.IntegrationKit.Spec.Repositories {
 		maven.Repositories = append(maven.Repositories, mvn.NewRepository(repo))
 	}
+
 	task := &v1.BuilderTask{
 		BaseTask: v1.BaseTask{
 			Name: "builder",

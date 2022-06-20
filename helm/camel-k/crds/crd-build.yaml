@@ -107,6 +107,9 @@ spec:
                         name:
                           description: name of the task
                           type: string
+                        platform:
+                          description: The platform of build image
+                          type: string
                         registry:
                           description: where to publish the final image
                           properties:
