@@ -25,6 +25,7 @@
 - Modify e2e tests so that if failed the tests is repeated in a new namespace [\#2965](https://github.com/apache/camel-k/issues/2965)
 - Update readiness condition based on new Camel health check format [\#2886](https://github.com/apache/camel-k/issues/2886)
 - Using REST as consumer and producer appends PATH to producer URL [\#2867](https://github.com/apache/camel-k/issues/2867)
+- Adding mavens settings-security.xml to the spec.build.maven is not possible [\#2747](https://github.com/apache/camel-k/issues/2747)
 - Kamel 1.5.1 CLI generates broken zsh completions [\#2622](https://github.com/apache/camel-k/issues/2622)
 - ImagePullBackOff when node failed [\#2485](https://github.com/apache/camel-k/issues/2485)
 - Debug seems not to work on knative pods [\#2474](https://github.com/apache/camel-k/issues/2474)
