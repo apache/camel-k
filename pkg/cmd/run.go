@@ -307,8 +307,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	catalog := trait.NewCatalog(c)
-	integration, err := o.createOrUpdateIntegration(cmd, c, args, catalog)
+	integration, err := o.createOrUpdateIntegration(cmd, c, args)
 	if err != nil {
 		return err
 	}
@@ -333,7 +332,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if o.Sync || o.Dev {
-		err = o.syncIntegration(cmd, c, args, catalog)
+		err = o.syncIntegration(cmd, c, args)
 		if err != nil {
 			return err
 		}
@@ -423,7 +422,7 @@ func (o *runCmdOptions) waitForIntegrationReady(cmd *cobra.Command, c client.Cli
 	return watch.HandleIntegrationStateChanges(o.Context, c, integration, handler)
 }
 
-func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sources []string, catalog trait.Finder) error {
+func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sources []string) error {
 	// Let's watch all relevant files when in dev mode
 	var files []string
 	files = append(files, sources...)
@@ -461,7 +460,7 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 						newCmd.Args = o.validateArgs
 						newCmd.PreRunE = o.decode
 						newCmd.RunE = func(cmd *cobra.Command, args []string) error {
-							_, err := o.createOrUpdateIntegration(cmd, c, sources, catalog)
+							_, err := o.createOrUpdateIntegration(cmd, c, sources)
 							return err
 						}
 						newCmd.PostRunE = nil
@@ -485,7 +484,7 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 }
 
 // nolint: gocyclo
-func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.Client, sources []string, catalog trait.Finder) (*v1.Integration, error) {
+func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.Client, sources []string) (*v1.Integration, error) {
 	namespace := o.Namespace
 	name := o.GetIntegrationName(sources)
 

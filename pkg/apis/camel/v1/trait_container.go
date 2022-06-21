@@ -28,6 +28,7 @@ import corev1 "k8s.io/api/core/v1"
 type ContainerTrait struct {
 	Trait `property:",squash" json:",inline"`
 
+	// To automatically enable the trait
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 
 	// The minimum amount of CPU required.

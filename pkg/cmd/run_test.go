@@ -382,33 +382,6 @@ func assertTraitConfiguration(t *testing.T, trait interface{}, expected interfac
 	assert.Equal(t, expected, trait)
 }
 
-type customTrait struct {
-	trait.BaseTrait `property:",squash"`
-	// SimpleMap
-	SimpleMap  map[string]string            `property:"simple-map" json:"simpleMap,omitempty"`
-	DoubleMap  map[string]map[string]string `property:"double-map" json:"doubleMap,omitempty"`
-	SliceOfMap []map[string]string          `property:"slice-of-map" json:"sliceOfMap,omitempty"`
-}
-
-func (c customTrait) Configure(environment *trait.Environment) (bool, error) {
-	panic("implement me")
-}
-func (c customTrait) Apply(environment *trait.Environment) error {
-	panic("implement me")
-}
-
-var _ trait.Trait = &customTrait{}
-
-type customTraitFinder struct {
-}
-
-func (finder customTraitFinder) GetTrait(id string) trait.Trait {
-	if id == "custom" {
-		return &customTrait{}
-	}
-	return nil
-}
-
 func TestRunUseFlowsFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--use-flows=false", integrationSource)

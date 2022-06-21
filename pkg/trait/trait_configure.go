@@ -66,8 +66,9 @@ func (c *Catalog) configureTraits(traits interface{}) error {
 	}
 
 	for id, trait := range traitsMap {
+		t := trait // Avoid G601: Implicit memory aliasing in for loop
 		if catTrait := c.GetTrait(id); catTrait != nil {
-			if err := decodeTraitSpec(&trait, catTrait); err != nil {
+			if err := decodeTraitSpec(&t, catTrait); err != nil {
 				return err
 			}
 		}

@@ -244,7 +244,7 @@ func ToMap(traits interface{}) (map[string]map[string]interface{}, error) {
 	return traitsMap, nil
 }
 
-// ToTrait unmarshals a map configuration to a target trait
+// ToTrait unmarshals a map configuration to a target trait.
 func ToTrait(trait map[string]interface{}, target interface{}) error {
 	data, err := json.Marshal(trait)
 	if err != nil {

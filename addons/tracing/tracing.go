@@ -34,8 +34,8 @@ import (
 // The Tracing trait is disabled by default.
 //
 // +camel-k:trait=tracing.
-type tracingTrait struct {
-	trait.BaseTrait `property:",squash"`
+type Trait struct {
+	v1.Trait `property:",squash" json:",inline"`
 	// Enables automatic configuration of the trait, including automatic discovery of the tracing endpoint.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The name of the service that publishes tracing data (defaults to the integration name)
@@ -46,6 +46,11 @@ type tracingTrait struct {
 	SamplerType *string `property:"sampler-type" json:"samplerType,omitempty"`
 	// The sampler specific param (default "1")
 	SamplerParam *string `property:"sampler-param" json:"samplerParam,omitempty"`
+}
+
+type tracingTrait struct {
+	trait.BaseTrait
+	Trait `property:",squash"`
 }
 
 const (
