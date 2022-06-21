@@ -30,33 +30,18 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// Allows constraining which nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node,
-// or with inter-pod affinity and anti-affinity, based on labels on pods that are already running on the nodes.
-//
-// It's disabled by default.
-//
-// +camel-k:trait=affinity.
 type affinityTrait struct {
-	BaseTrait `property:",squash"`
-	// Always co-locates multiple replicas of the integration in the same node (default *false*).
-	PodAffinity *bool `property:"pod-affinity" json:"podAffinity,omitempty"`
-	// Never co-locates multiple replicas of the integration in the same node (default *false*).
-	PodAntiAffinity *bool `property:"pod-anti-affinity" json:"podAntiAffinity,omitempty"`
-	// Defines a set of nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node.
-	NodeAffinityLabels []string `property:"node-affinity-labels" json:"nodeAffinityLabels,omitempty"`
-	// Defines a set of pods (namely those matching the label selector, relative to the given namespace) that the
-	// integration pod(s) should be co-located with.
-	PodAffinityLabels []string `property:"pod-affinity-labels" json:"podAffinityLabels,omitempty"`
-	// Defines a set of pods (namely those matching the label selector, relative to the given namespace) that the
-	// integration pod(s) should not be co-located with.
-	PodAntiAffinityLabels []string `property:"pod-anti-affinity-labels" json:"podAntiAffinityLabels,omitempty"`
+	BaseTrait
+	v1.AffinityTrait `property:",squash"`
 }
 
 func newAffinityTrait() Trait {
 	return &affinityTrait{
-		BaseTrait:       NewBaseTrait("affinity", 1500),
-		PodAffinity:     pointer.Bool(false),
-		PodAntiAffinity: pointer.Bool(false),
+		BaseTrait: NewBaseTrait("affinity", 1500),
+		AffinityTrait: v1.AffinityTrait{
+			PodAffinity:     pointer.Bool(false),
+			PodAntiAffinity: pointer.Bool(false),
+		},
 	}
 }
 

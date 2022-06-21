@@ -39,15 +39,9 @@ import (
 	"github.com/apache/camel-k/pkg/util/kamelets"
 )
 
-// The kamelets trait is a platform trait used to inject Kamelets into the integration runtime.
-//
-// +camel-k:trait=kamelets.
 type kameletsTrait struct {
-	BaseTrait `property:",squash"`
-	// Automatically inject all referenced Kamelets and their default configuration (enabled by default)
-	Auto *bool `property:"auto"`
-	// Comma separated list of Kamelet names to load into the current integration
-	List string `property:"list"`
+	BaseTrait
+	v1.KameletsTrait `property:",squash"`
 }
 
 type configurationKey struct {

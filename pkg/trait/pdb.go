@@ -28,19 +28,9 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// The PDB trait allows to configure the PodDisruptionBudget resource for the Integration pods.
-//
-// +camel-k:trait=pdb.
 type pdbTrait struct {
-	BaseTrait `property:",squash"`
-	// The number of pods for the Integration that must still be available after an eviction.
-	// It can be either an absolute number or a percentage.
-	// Only one of `min-available` and `max-unavailable` can be specified.
-	MinAvailable string `property:"min-available" json:"minAvailable,omitempty"`
-	// The number of pods for the Integration that can be unavailable after an eviction.
-	// It can be either an absolute number or a percentage (default `1` if `min-available` is also not set).
-	// Only one of `max-unavailable` and `min-available` can be specified.
-	MaxUnavailable string `property:"max-unavailable" json:"maxUnavailable,omitempty"`
+	BaseTrait
+	v1.PDBTrait `property:",squash"`
 }
 
 func newPdbTrait() Trait {

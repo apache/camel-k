@@ -94,7 +94,7 @@ func createNominalCamelTest() (*camelTrait, *Environment) {
 				Namespace: "namespace",
 			},
 			Spec: v1.IntegrationSpec{
-				Traits: make(map[string]v1.TraitSpec),
+				Traits: v1.Traits{},
 			},
 			Status: v1.IntegrationStatus{
 				RuntimeVersion: "0.0.1",

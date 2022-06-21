@@ -360,21 +360,26 @@ func TestConfigureTraits(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	client, err := runCmdOptions.GetCmdClient()
-	if err != nil {
-		t.Error(err)
-	}
-	catalog := trait.NewCatalog(client)
 
-	traits, err := configureTraits(runCmdOptions.Traits, catalog)
+	traits := v1.Traits{}
+	err = configureTraits(runCmdOptions.Traits, &traits)
 
 	assert.Nil(t, err)
-	assert.Len(t, traits, 5)
-	assertTraitConfiguration(t, traits, "affinity", `{"podAffinity":false}`)
-	assertTraitConfiguration(t, traits, "container", `{"probesEnabled":false}`)
-	assertTraitConfiguration(t, traits, "environment", `{"containerMeta":false}`)
-	assertTraitConfiguration(t, traits, "jvm", `{"printCommand":false}`)
-	assertTraitConfiguration(t, traits, "prometheus", `{"podMonitor":false}`)
+	traitsMap, err := trait.ToMap(traits)
+	assert.Nil(t, err)
+	assert.Len(t, traitsMap, 5)
+	assertTraitConfiguration(t, traits.Affinity, &v1.AffinityTrait{PodAffinity: pointer.Bool(false)})
+	assertTraitConfiguration(t, traits.Container, &v1.ContainerTrait{DeprecatedProbesEnabled: pointer.Bool(false)})
+	assertTraitConfiguration(t, traits.Environment, &v1.EnvironmentTrait{ContainerMeta: pointer.Bool(false)})
+	assertTraitConfiguration(t, traits.JVM, &v1.JVMTrait{PrintCommand: pointer.Bool(false)})
+	assertTraitConfiguration(t, traits.Prometheus, &v1.PrometheusTrait{PodMonitor: pointer.Bool(false)})
+}
+
+func assertTraitConfiguration(t *testing.T, trait interface{}, expected interface{}) {
+	t.Helper()
+
+	assert.NotNil(t, trait)
+	assert.Equal(t, expected, trait)
 }
 
 type customTrait struct {
@@ -402,35 +407,6 @@ func (finder customTraitFinder) GetTrait(id string) trait.Trait {
 		return &customTrait{}
 	}
 	return nil
-}
-
-func TestTraitsNestedConfig(t *testing.T) {
-	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, "run",
-		"--trait", "custom.simple-map.a=b",
-		"--trait", "custom.simple-map.y=z",
-		"--trait", "custom.double-map.m.n=q",
-		"--trait", "custom.double-map.m.o=w",
-		"--trait", "custom.slice-of-map[0].f=g",
-		"--trait", "custom.slice-of-map[3].f=h",
-		"--trait", "custom.slice-of-map[2].f=i",
-		"example.js")
-	// We will have an error because those traits are not existing
-	// however we want to test how those properties are mapped in the configuration
-	assert.NotNil(t, err)
-	catalog := &customTraitFinder{}
-	traits, err := configureTraits(runCmdOptions.Traits, catalog)
-
-	assert.Nil(t, err)
-	assert.Len(t, traits, 1)
-	assertTraitConfiguration(t, traits, "custom", `{"simpleMap":{"a":"b","y":"z"},"doubleMap":{"m":{"n":"q","o":"w"}},"sliceOfMap":[{"f":"g"},null,{"f":"i"},{"f":"h"}]}`)
-}
-
-func assertTraitConfiguration(t *testing.T, traits map[string]v1.TraitSpec, trait string, expected string) {
-	t.Helper()
-
-	assert.Contains(t, traits, trait)
-	assert.Equal(t, expected, string(traits[trait].Configuration.RawMessage))
 }
 
 func TestRunUseFlowsFlag(t *testing.T) {
@@ -617,6 +593,7 @@ spec:
       extends RouteBuilder {\n  @Override\n  public void configure() throws Exception
       {\n\t  from(\"timer:tick\")\n        .log(\"Hello Camel K!\");\n  }\n}\n"
     name: %s
+  traits: {}
 status: {}
 `, fileName, fileName), output)
 }
@@ -650,13 +627,11 @@ spec:
     name: %s
   traits:
     mount:
-      configuration:
-        configs:
-        - configmap:my-cm
+      configs:
+      - configmap:my-cm
     service-binding:
-      configuration:
-        services:
-        - my-service-binding
+      services:
+      - my-service-binding
 status: {}
 `, fileName, fileName), output)
 }

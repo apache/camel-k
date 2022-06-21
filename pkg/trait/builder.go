@@ -30,16 +30,9 @@ import (
 	"github.com/apache/camel-k/pkg/util/property"
 )
 
-// The builder trait is internally used to determine the best strategy to
-// build and configure IntegrationKits.
-//
-// +camel-k:trait=builder.
 type builderTrait struct {
-	BaseTrait `property:",squash"`
-	// Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-	Verbose *bool `property:"verbose" json:"verbose,omitempty"`
-	// A list of properties to be provided to the build task
-	Properties []string `property:"properties" json:"properties,omitempty"`
+	BaseTrait
+	v1.BuilderTrait `property:",squash"`
 }
 
 func newBuilderTrait() Trait {

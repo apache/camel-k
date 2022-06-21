@@ -26,21 +26,9 @@ import (
 	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
-// The platform trait is a base trait that is used to assign an integration platform to an integration.
-//
-// In case the platform is missing, the trait is allowed to create a default platform.
-// This feature is especially useful in contexts where there's no need to provide a custom configuration for the platform
-// (e.g. on OpenShift the default settings work, since there's an embedded container image registry).
-//
-// +camel-k:trait=platform.
 type platformTrait struct {
-	BaseTrait `property:",squash"`
-	// To create a default (empty) platform when the platform is missing.
-	CreateDefault *bool `property:"create-default" json:"createDefault,omitempty"`
-	// Indicates if the platform should be created globally in the case of global operator (default true).
-	Global *bool `property:"global" json:"global,omitempty"`
-	// To automatically detect from the environment if a default platform can be created (it will be created on OpenShift only).
-	Auto *bool `property:"auto" json:"auto,omitempty"`
+	BaseTrait
+	v1.PlatformTrait `property:",squash"`
 }
 
 func newPlatformTrait() Trait {

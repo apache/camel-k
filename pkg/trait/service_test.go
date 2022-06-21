@@ -25,12 +25,12 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/gzip"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
 )
 
 const (
@@ -70,11 +70,13 @@ func TestServiceWithDefaults(t *testing.T) {
 						Language: v1.LanguageJavaScript,
 					},
 				},
-				Traits: map[string]v1.TraitSpec{
-					"service": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": true,
-						"auto":    false,
-					}),
+				Traits: v1.Traits{
+					Service: &v1.ServiceTrait{
+						Trait: v1.Trait{
+							Enabled: pointer.Bool(true),
+						},
+						Auto: pointer.Bool(false),
+					},
 				},
 			},
 		},
@@ -161,19 +163,23 @@ func TestService(t *testing.T) {
 						Language: v1.LanguageJavaScript,
 					},
 				},
-				Traits: map[string]v1.TraitSpec{
-					"service": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": true,
-					}),
-					"container": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled":         true,
-						"auto":            false,
-						"expose":          true,
-						"port":            8081,
-						"portName":        "http-8081",
-						"servicePort":     81,
-						"servicePortName": "http-81",
-					}),
+				Traits: v1.Traits{
+					Service: &v1.ServiceTrait{
+						Trait: v1.Trait{
+							Enabled: pointer.Bool(true),
+						},
+					},
+					Container: &v1.ContainerTrait{
+						Trait: v1.Trait{
+							Enabled: pointer.Bool(true),
+						},
+						Auto:            pointer.Bool(false),
+						Expose:          pointer.Bool(true),
+						Port:            8081,
+						PortName:        "http-8081",
+						ServicePort:     81,
+						ServicePortName: "http-81",
+					},
 				},
 			},
 		},
@@ -245,14 +251,16 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 			},
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
-				Traits: map[string]v1.TraitSpec{
-					"service": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": true,
-						"auto":    false,
-					}),
-					"container": test.TraitSpecFromMap(t, map[string]interface{}{
-						"name": "my-container-name",
-					}),
+				Traits: v1.Traits{
+					Service: &v1.ServiceTrait{
+						Trait: v1.Trait{
+							Enabled: pointer.Bool(true),
+						},
+						Auto: pointer.Bool(false),
+					},
+					Container: &v1.ContainerTrait{
+						Name: "my-container-name",
+					},
 				},
 			},
 		},
@@ -289,10 +297,10 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 
 	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
 
-	trait := test.TraitSpecToMap(t, environment.Integration.Spec.Traits["container"])
+	trait := environment.Integration.Spec.Traits.Container
 	assert.Equal(
 		t,
-		trait["name"],
+		trait.Name,
 		d.Spec.Template.Spec.Containers[0].Name,
 	)
 }
@@ -329,12 +337,14 @@ func TestServiceWithNodePort(t *testing.T) {
 						Language: v1.LanguageJavaScript,
 					},
 				},
-				Traits: map[string]v1.TraitSpec{
-					"service": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled":  true,
-						"auto":     false,
-						"nodePort": true,
-					}),
+				Traits: v1.Traits{
+					Service: &v1.ServiceTrait{
+						Trait: v1.Trait{
+							Enabled: pointer.Bool(true),
+						},
+						Auto:     pointer.Bool(false),
+						NodePort: pointer.Bool(true),
+					},
 				},
 			},
 		},

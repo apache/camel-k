@@ -292,7 +292,7 @@ func IntegrationLogs(ns, name string) func() string {
 		}
 
 		options := corev1.PodLogOptions{
-			TailLines: pointer.Int64Ptr(100),
+			TailLines: pointer.Int64(100),
 		}
 
 		if len(pod.Spec.Containers) > 1 {

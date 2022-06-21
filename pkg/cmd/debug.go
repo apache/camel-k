@@ -18,7 +18,6 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"os/signal"
@@ -32,6 +31,7 @@ import (
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 )
 
 func newCmdDebug(rootCmdOptions *RootCmdOptions) (*cobra.Command, *debugCmdOptions) {
@@ -133,30 +133,18 @@ func (o *debugCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 // nolint: unparam
 func (o *debugCmdOptions) toggleDebug(c camelv1.IntegrationsGetter, it *v1.Integration, active bool) (*v1.Integration, error) {
-	if it.Spec.Traits == nil {
-		it.Spec.Traits = make(map[string]v1.TraitSpec)
+	if it.Spec.Traits.JVM == nil {
+		it.Spec.Traits.JVM = &v1.JVMTrait{}
 	}
-	traitSpec := it.Spec.Traits["jvm"]
-	jvmConfig := make(map[string]interface{})
-	if len(traitSpec.Configuration.RawMessage) > 0 {
-		if err := json.Unmarshal(traitSpec.Configuration.RawMessage, &jvmConfig); err != nil {
-			return it, err
-		}
-	}
-	if active {
-		jvmConfig["debug"] = true
-		jvmConfig["debugSuspend"] = o.Suspend
-	} else {
-		delete(jvmConfig, "debug")
-		delete(jvmConfig, "debugSuspend")
-	}
+	jvmTrait := it.Spec.Traits.JVM
 
-	jvmConfigBytes, err := json.Marshal(jvmConfig)
-	if err != nil {
-		return it, err
+	if active {
+		jvmTrait.Debug = pointer.Bool(true)
+		jvmTrait.DebugSuspend = pointer.Bool(o.Suspend)
+	} else {
+		jvmTrait.Debug = nil
+		jvmTrait.DebugSuspend = nil
 	}
-	traitSpec.Configuration.RawMessage = jvmConfigBytes
-	it.Spec.Traits["jvm"] = traitSpec
 
 	return c.Integrations(it.Namespace).Update(o.Context, it, metav1.UpdateOptions{})
 }

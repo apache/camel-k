@@ -19,6 +19,7 @@ package trait
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -26,6 +27,7 @@ import (
 	"strings"
 
 	user "github.com/mitchellh/go-homedir"
+	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -220,4 +222,38 @@ func AddSourceDependencies(source v1.SourceSpec, catalog *camel.RuntimeCatalog) 
 	}
 
 	return dependencies
+}
+
+// ToMap accepts either v1.Traits or v1.IntegrationKitTraits and converts it to a map.
+func ToMap(traits interface{}) (map[string]map[string]interface{}, error) {
+	_, ok1 := traits.(v1.Traits)
+	_, ok2 := traits.(v1.IntegrationKitTraits)
+	if !ok1 && !ok2 {
+		return nil, errors.New("traits must be either v1.Traits or v1.IntegrationKitTraits")
+	}
+
+	data, err := json.Marshal(traits)
+	if err != nil {
+		return nil, err
+	}
+	traitsMap := make(map[string]map[string]interface{})
+	if err = json.Unmarshal(data, &traitsMap); err != nil {
+		return nil, err
+	}
+
+	return traitsMap, nil
+}
+
+// ToTrait unmarshals a map configuration to a target trait
+func ToTrait(trait map[string]interface{}, target interface{}) error {
+	data, err := json.Marshal(trait)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(data, &target)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

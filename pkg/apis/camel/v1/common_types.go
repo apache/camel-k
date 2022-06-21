@@ -101,16 +101,74 @@ type FailureRecovery struct {
 	AttemptTime metav1.Time `json:"attemptTime"`
 }
 
-// A TraitSpec contains the configuration of a trait
-type TraitSpec struct {
-	// TraitConfiguration parameters configuration
-	Configuration TraitConfiguration `json:"configuration"`
-}
-
-// TraitConfiguration represents the expected configuration for a given trait parameter
-type TraitConfiguration struct {
-	// generic raw message, tipically a map containing the keys (trait parameters) and the values (either single text or array)
-	RawMessage `json:",inline"`
+// Traits represents the collection of trait configurations
+type Traits struct {
+	// The configuration of Affinity trait
+	Affinity *AffinityTrait `property:"affinity" json:"affinity,omitempty"`
+	// The configuration of Builder trait
+	Builder *BuilderTrait `property:"builder" json:"builder,omitempty"`
+	// The configuration of Camel trait
+	Camel *CamelTrait `property:"camel" json:"camel,omitempty"`
+	// The configuration of Container trait
+	Container *ContainerTrait `property:"container" json:"container,omitempty"`
+	// The configuration of Cron trait
+	Cron *CronTrait `property:"cron" json:"cron,omitempty"`
+	// DependenciesTrait is the configuration of Dependencies trait
+	Dependencies *DependenciesTrait `property:"dependencies" json:"dependencies,omitempty"`
+	// The configuration of Deployer trait
+	Deployer *DeployerTrait `property:"deployer" json:"deployer,omitempty"`
+	// The configuration of Deployment trait
+	Deployment *DeploymentTrait `property:"deployment" json:"deployment,omitempty"`
+	// The configuration of Environment trait
+	Environment *EnvironmentTrait `property:"environment" json:"environment,omitempty"`
+	// The configuration of Error Handler trait
+	ErrorHandler *ErrorHandlerTrait `property:"error-handler" json:"error-handler,omitempty"`
+	// The configuration of GC trait
+	GC *GCTrait `property:"gc" json:"gc,omitempty"`
+	// The configuration of Health trait
+	Health *HealthTrait `property:"health" json:"health,omitempty"`
+	// The configuration of Ingress trait
+	Ingress *IngressTrait `property:"ingress" json:"ingress,omitempty"`
+	// The configuration of Istio trait
+	Istio *IstioTrait `property:"istio" json:"istio,omitempty"`
+	// The configuration of Jolokia trait
+	Jolokia *JolokiaTrait `property:"jolokia" json:"jolokia,omitempty"`
+	// The configuration of JVM trait
+	JVM *JVMTrait `property:"jvm" json:"jvm,omitempty"`
+	// The configuration of Knative trait
+	Knative *KnativeTrait `property:"knative" json:"knative,omitempty"`
+	// The configuration of Knative Service trait
+	KnativeService *KnativeServiceTrait `property:"knative-service" json:"knative-service,omitempty"`
+	// The configuration of Logging trait
+	Logging *LoggingTrait `property:"logging" json:"logging,omitempty"`
+	// The configuration of Mount trait
+	Mount *MountTrait `property:"mount" json:"mount,omitempty"`
+	// The configuration of OpenAPI trait
+	OpenAPI *OpenAPITrait `property:"openapi" json:"openapi,omitempty"`
+	// The configuration of Owner trait
+	Owner *OwnerTrait `property:"owner" json:"owner,omitempty"`
+	// The configuration of PDB trait
+	PDB *PDBTrait `property:"pdb" json:"pdb,omitempty"`
+	// The configuration of Platform trait
+	Platform *PlatformTrait `property:"platform" json:"platform,omitempty"`
+	// The configuration of Pod trait
+	Pod *PodTrait `property:"pod" json:"pod,omitempty"`
+	// The configuration of Prometheus trait
+	Prometheus *PrometheusTrait `property:"prometheus" json:"prometheus,omitempty"`
+	// The configuration of Pull Secret trait
+	PullSecret *PullSecretTrait `property:"pull-secret" json:"pull-secret,omitempty"`
+	// The configuration of Quarkus trait
+	Quarkus *QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
+	// The configuration of Registry trait
+	Registry *RegistryTrait `property:"registry" json:"registry,omitempty"`
+	// The configuration of Route trait
+	Route *RouteTrait `property:"route" json:"route,omitempty"`
+	// The configuration of Service trait
+	Service *ServiceTrait `property:"service" json:"service,omitempty"`
+	// The configuration of Service Binding trait
+	ServiceBinding *ServiceBindingTrait `property:"service-binding" json:"service-binding,omitempty"`
+	// The configuration of Toleration trait
+	Toleration *TolerationTrait `property:"toleration" json:"toleration,omitempty"`
 }
 
 // +kubebuilder:validation:Type=object

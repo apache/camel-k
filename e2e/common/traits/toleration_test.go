@@ -69,7 +69,7 @@ func TestTolerationTrait(t *testing.T) {
 				Key:               "camel.apache.org/master",
 				Operator:          corev1.TolerationOpExists,
 				Effect:            corev1.TaintEffectNoExecute,
-				TolerationSeconds: pointer.Int64Ptr(300),
+				TolerationSeconds: pointer.Int64(300),
 			}))
 		})
 
@@ -91,7 +91,7 @@ func TestTolerationTrait(t *testing.T) {
 				Key:      "camel.apache.org/master",
 				Operator: corev1.TolerationOpEqual,
 				Value:    "test", Effect: corev1.TaintEffectNoExecute,
-				TolerationSeconds: pointer.Int64Ptr(300),
+				TolerationSeconds: pointer.Int64(300),
 			}))
 		})
 

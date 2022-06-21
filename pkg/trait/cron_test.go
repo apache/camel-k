@@ -27,12 +27,12 @@ import (
 	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestCronFromURI(t *testing.T) {
@@ -249,7 +249,7 @@ func TestCronDeps(t *testing.T) {
 					},
 				},
 				Resources: []v1.ResourceSpec{},
-				Traits:    map[string]v1.TraitSpec{},
+				Traits:    v1.Traits{},
 			},
 		},
 		IntegrationKit: &v1.IntegrationKit{
@@ -319,10 +319,10 @@ func TestCronDepsFallback(t *testing.T) {
 					},
 				},
 				Resources: []v1.ResourceSpec{},
-				Traits: map[string]v1.TraitSpec{
-					"cron": test.TraitSpecFromMap(t, map[string]interface{}{
-						"fallback": true,
-					}),
+				Traits: v1.Traits{
+					Cron: &v1.CronTrait{
+						Fallback: pointer.Bool(true),
+					},
 				},
 			},
 		},
@@ -394,10 +394,10 @@ func TestCronWithActiveDeadline(t *testing.T) {
 					},
 				},
 				Resources: []v1.ResourceSpec{},
-				Traits: map[string]v1.TraitSpec{
-					"cron": test.TraitSpecFromMap(t, map[string]interface{}{
-						"activeDeadlineSeconds": 120,
-					}),
+				Traits: v1.Traits{
+					Cron: &v1.CronTrait{
+						ActiveDeadlineSeconds: pointer.Int64(120),
+					},
 				},
 			},
 		},
@@ -467,10 +467,10 @@ func TestCronWithBackoffLimit(t *testing.T) {
 					},
 				},
 				Resources: []v1.ResourceSpec{},
-				Traits: map[string]v1.TraitSpec{
-					"cron": test.TraitSpecFromMap(t, map[string]interface{}{
-						"backoffLimit": 5,
-					}),
+				Traits: v1.Traits{
+					Cron: &v1.CronTrait{
+						BackoffLimit: pointer.Int32(5),
+					},
 				},
 			},
 		},

@@ -38,7 +38,7 @@ func TestMountVolumesEmpty(t *testing.T) {
 	traitCatalog := NewCatalog(nil)
 
 	environment := getNominalEnv(t, traitCatalog)
-	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{}
+	environment.Integration.Spec.Traits = v1.Traits{} // empty traits
 	environment.Platform.ResyncStatusFullConfig()
 
 	err := traitCatalog.apply(environment)
@@ -153,12 +153,12 @@ func getNominalEnv(t *testing.T, traitCatalog *Catalog) *Environment {
 						Language: v1.LanguageJavaScript,
 					},
 				},
-				Traits: map[string]v1.TraitSpec{
-					"mount": test.TraitSpecFromMap(t, map[string]interface{}{
-						"configs":   []string{"configmap:my-cm"},
-						"resources": []string{"secret:my-secret"},
-						"volumes":   []string{"my-pvc:/over/the/rainbow"},
-					}),
+				Traits: v1.Traits{
+					Mount: &v1.MountTrait{
+						Configs:   []string{"configmap:my-cm"},
+						Resources: []string{"secret:my-secret"},
+						Volumes:   []string{"my-pvc:/over/the/rainbow"},
+					},
 				},
 			},
 		},

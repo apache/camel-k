@@ -32,16 +32,9 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// The pod trait allows the customization of the Integration pods.
-// It applies the `PodSpecTemplate` struct contained in the Integration `.spec.podTemplate` field,
-// into the Integration deployment Pods template, using strategic merge patch.
-//
-// This can be used to customize the container where Camel routes execute,
-// by using the `integration` container name.
-//
-// +camel-k:trait=pod.
 type podTrait struct {
-	BaseTrait `property:",squash"`
+	BaseTrait
+	v1.PodTrait `property:",squash"`
 }
 
 func newPodTrait() Trait {

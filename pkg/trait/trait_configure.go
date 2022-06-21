@@ -32,30 +32,24 @@ import (
 
 func (c *Catalog) configure(env *Environment) error {
 	if env.Platform != nil {
-		if env.Platform.Status.Traits != nil {
-			if err := c.configureTraits(env.Platform.Status.Traits); err != nil {
-				return err
-			}
+		if err := c.configureTraits(env.Platform.Status.Traits); err != nil {
+			return err
 		}
 		if err := c.configureTraitsFromAnnotations(env.Platform.Annotations); err != nil {
 			return err
 		}
 	}
 	if env.IntegrationKit != nil {
-		if env.IntegrationKit.Spec.Traits != nil {
-			if err := c.configureTraits(env.IntegrationKit.Spec.Traits); err != nil {
-				return err
-			}
+		if err := c.configureTraits(env.IntegrationKit.Spec.Traits); err != nil {
+			return err
 		}
 		if err := c.configureTraitsFromAnnotations(env.IntegrationKit.Annotations); err != nil {
 			return err
 		}
 	}
 	if env.Integration != nil {
-		if env.Integration.Spec.Traits != nil {
-			if err := c.configureTraits(env.Integration.Spec.Traits); err != nil {
-				return err
-			}
+		if err := c.configureTraits(env.Integration.Spec.Traits); err != nil {
+			return err
 		}
 		if err := c.configureTraitsFromAnnotations(env.Integration.Annotations); err != nil {
 			return err
@@ -65,11 +59,14 @@ func (c *Catalog) configure(env *Environment) error {
 	return nil
 }
 
-func (c *Catalog) configureTraits(traits map[string]v1.TraitSpec) error {
-	for id, traitSpec := range traits {
-		catTrait := c.GetTrait(id)
-		if catTrait != nil {
-			trait := traitSpec
+func (c *Catalog) configureTraits(traits interface{}) error {
+	traitsMap, err := ToMap(traits)
+	if err != nil {
+		return err
+	}
+
+	for id, trait := range traitsMap {
+		if catTrait := c.GetTrait(id); catTrait != nil {
 			if err := decodeTraitSpec(&trait, catTrait); err != nil {
 				return err
 			}
@@ -79,8 +76,8 @@ func (c *Catalog) configureTraits(traits map[string]v1.TraitSpec) error {
 	return nil
 }
 
-func decodeTraitSpec(in *v1.TraitSpec, target interface{}) error {
-	data, err := json.Marshal(&in.Configuration)
+func decodeTraitSpec(in interface{}, target interface{}) error {
+	data, err := json.Marshal(&in)
 	if err != nil {
 		return err
 	}
