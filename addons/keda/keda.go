@@ -72,8 +72,8 @@ const (
 // The KEDA trait is disabled by default.
 //
 // +camel-k:trait=keda.
-type kedaTrait struct {
-	trait.BaseTrait `property:",squash"`
+type Trait struct {
+	camelv1.Trait `property:",squash" json:",inline"`
 	// Enables automatic configuration of the trait. Allows the trait to infer KEDA triggers from the Kamelets.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// Set the spec->replicas field on the top level controller to an explicit value if missing, to allow KEDA to recognize it as a scalable resource.
@@ -93,6 +93,11 @@ type kedaTrait struct {
 	// An optional `authentication-secret` can be declared per trigger and the operator will link each entry of
 	// the secret to a KEDA authentication parameter.
 	Triggers []kedaTrigger `property:"triggers" json:"triggers,omitempty"`
+}
+
+type kedaTrait struct {
+	trait.BaseTrait
+	Trait `property:",squash"`
 }
 
 type kedaTrigger struct {

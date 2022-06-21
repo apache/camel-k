@@ -113,7 +113,7 @@ type Traits struct {
 	Container *ContainerTrait `property:"container" json:"container,omitempty"`
 	// The configuration of Cron trait
 	Cron *CronTrait `property:"cron" json:"cron,omitempty"`
-	// DependenciesTrait is the configuration of Dependencies trait
+	// The configuration of Dependencies trait
 	Dependencies *DependenciesTrait `property:"dependencies" json:"dependencies,omitempty"`
 	// The configuration of Deployer trait
 	Deployer *DeployerTrait `property:"deployer" json:"deployer,omitempty"`

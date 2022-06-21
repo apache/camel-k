@@ -64,7 +64,7 @@ func TestStrimziDirect(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, binding)
 	assert.Equal(t, "kafka:mytopic?brokers=my-cluster-kafka-bootstrap%3A9092", binding.URI)
-	assert.Nil(t, binding.Traits)
+	assert.Equal(t, camelv1.Traits{}, binding.Traits)
 }
 
 func TestStrimziLookup(t *testing.T) {
@@ -124,7 +124,7 @@ func TestStrimziLookup(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, binding)
 	assert.Equal(t, "kafka:mytopicy?brokers=my-clusterx-kafka-bootstrap%3A9092", binding.URI)
-	assert.Nil(t, binding.Traits)
+	assert.Equal(t, camelv1.Traits{}, binding.Traits)
 }
 
 func asEndpointProperties(props map[string]string) *v1alpha1.EndpointProperties {
