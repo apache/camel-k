@@ -131,7 +131,6 @@ func (o *debugCmdOptions) run(cmd *cobra.Command, args []string) error {
 	return kubernetes.PortForward(o.Context, cmdClient, o.Namespace, selector, o.Port, o.RemotePort, cmd.OutOrStdout(), cmd.ErrOrStderr())
 }
 
-// nolint: unparam
 func (o *debugCmdOptions) toggleDebug(c camelv1.IntegrationsGetter, it *v1.Integration, active bool) (*v1.Integration, error) {
 	if it.Spec.Traits.JVM == nil {
 		it.Spec.Traits.JVM = &v1.JVMTrait{}
