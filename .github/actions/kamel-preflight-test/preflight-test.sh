@@ -120,7 +120,7 @@ if [ -n "${BUILD_CATALOG_SOURCE_NAMESPACE}" ]; then
   #
   # Check catalog source is actually available
   #
-  timeout=5
+  timeout=10
   catalog_ready=0
   until [ ${catalog_ready} -eq 1 ] || [ ${timeout} -eq 0 ]
   do
@@ -136,6 +136,8 @@ if [ -n "${BUILD_CATALOG_SOURCE_NAMESPACE}" ]; then
     else
       echo "Warning: catalog source status is not ready."
       if [ "${timeout}" -eq 1 ]; then
+        kubectl get catalogsource ${BUILD_CATALOG_SOURCE_NAME} \
+          -n ${BUILD_CATALOG_SOURCE_NAMESPACE} -o yaml
         echo "Error: timed out while awaiting catalog source to start"
         delns "${NAMESPACE}"
         exit 1
