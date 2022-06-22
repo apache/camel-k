@@ -144,7 +144,7 @@ func TestNewRepository(t *testing.T) {
 
 func TestNewRepositoryWithCamelKamelets(t *testing.T) {
 	ctx := context.Background()
-	fakeClient := fake.NewSimpleClientset(createTestContext("github:apache/camel-kamelets")...)
+	fakeClient := fake.NewSimpleClientset(createTestContext("github:apache/camel-kamelets/kamelets")...)
 	repo, err := New(ctx, fakeClient, "test")
 	assert.NoError(t, err)
 	list, err := repo.List(ctx)
@@ -165,7 +165,7 @@ func TestNewRepositoryWithDefault(t *testing.T) {
 	assert.NoError(t, err)
 	list, err := repo.List(ctx)
 	assert.NoError(t, err)
-	assert.True(t, len(list) > 2)
+	assert.Len(t, list, 2)
 	k1, err := repo.Get(ctx, "kamelet1")
 	assert.NoError(t, err)
 	assert.Equal(t, "kamelet1", k1.Name)
@@ -174,8 +174,8 @@ func TestNewRepositoryWithDefault(t *testing.T) {
 	assert.Equal(t, "kamelet2", k2.Name)
 }
 
-func createTestContext(uris ...string) (res []runtime.Object) {
-	res = []runtime.Object{
+func createTestContext(uris ...string) []runtime.Object {
+	res := []runtime.Object{
 		&v1alpha1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "test",
