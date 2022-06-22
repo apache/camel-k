@@ -21,4 +21,16 @@ package trait
 type Trait struct {
 	// Can be used to enable or disable a trait. All traits share this common property.
 	Enabled *bool `property:"enabled" json:"enabled,omitempty"`
+
+	// Legacy trait configuration parameters.
+	// Deprecated: for backward compatibility.
+	Configuration *Configuration `json:"configuration,omitempty"`
 }
+
+// Deprecated: for backward compatibility.
+type Configuration struct {
+	RawMessage `json:",inline"`
+}
+
+// Deprecated: for backward compatibility.
+type RawMessage []byte

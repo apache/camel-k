@@ -26,6 +26,7 @@ import (
 	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -118,20 +119,12 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 	if promoteKameletBinding {
 		// KameletBinding promotion
-		destKameletBinding, err := o.editKameletBinding(sourceKameletBinding, sourceIntegration)
-		if err != nil {
-			return errors.Wrap(err, "could not edit KameletBinding "+name)
-		}
+		destKameletBinding := o.editKameletBinding(sourceKameletBinding, sourceIntegration)
 
 		return c.Create(o.Context, destKameletBinding)
 	}
 	// Plain Integration promotion
-	destIntegration, err := o.editIntegration(sourceIntegration)
-	if err != nil {
-		if err != nil {
-			return errors.Wrap(err, "could not edit Integration "+name)
-		}
-	}
+	destIntegration := o.editIntegration(sourceIntegration)
 
 	return c.Create(o.Context, destIntegration)
 }
@@ -182,11 +175,8 @@ func (o *promoteCmdOptions) validateDestResources(c client.Client, it *v1.Integr
 	var secrets []string
 	var pvcs []string
 	var kamelets []string
-	if it.Spec.Traits == nil {
-		return nil
-	}
 	// Mount trait
-	mounts := it.Spec.Traits["mount"]
+	mounts := it.Spec.Traits.Mount
 	if err := json.Unmarshal(mounts.Configuration.RawMessage, &traits); err != nil {
 		return err
 	}
@@ -229,7 +219,7 @@ func (o *promoteCmdOptions) validateDestResources(c client.Client, it *v1.Integr
 		}
 	}
 	// Openapi trait
-	openapis := it.Spec.Traits["openapi"]
+	openapis := it.Spec.Traits.OpenAPI
 	if err := json.Unmarshal(openapis.Configuration.RawMessage, &traits); err != nil {
 		return err
 	}
@@ -241,7 +231,7 @@ func (o *promoteCmdOptions) validateDestResources(c client.Client, it *v1.Integr
 		}
 	}
 	// Kamelet trait
-	kameletTrait := it.Spec.Traits["kamelets"]
+	kameletTrait := it.Spec.Traits.Kamelets
 	var kameletListTrait map[string]string
 	if err := json.Unmarshal(kameletTrait.Configuration.RawMessage, &kameletListTrait); err != nil {
 		return err
@@ -360,30 +350,28 @@ func existsKamelet(ctx context.Context, c client.Client, name string, namespace 
 	return true
 }
 
-func (o *promoteCmdOptions) editIntegration(it *v1.Integration) (*v1.Integration, error) {
+func (o *promoteCmdOptions) editIntegration(it *v1.Integration) *v1.Integration {
 	dst := v1.NewIntegration(o.To, it.Name)
 	contImage := it.Status.Image
 	dst.Spec = *it.Spec.DeepCopy()
-	if dst.Spec.Traits == nil {
-		dst.Spec.Traits = map[string]v1.TraitSpec{}
+	if dst.Spec.Traits.Container == nil {
+		dst.Spec.Traits.Container = &traitv1.ContainerTrait{}
 	}
-	editedContTrait, err := editContainerImage(dst.Spec.Traits["container"], contImage)
-	dst.Spec.Traits["container"] = editedContTrait
-	return &dst, err
+	dst.Spec.Traits.Container.Image = contImage
+	return &dst
 }
 
-func (o *promoteCmdOptions) editKameletBinding(kb *v1alpha1.KameletBinding, it *v1.Integration) (*v1alpha1.KameletBinding, error) {
+func (o *promoteCmdOptions) editKameletBinding(kb *v1alpha1.KameletBinding, it *v1.Integration) *v1alpha1.KameletBinding {
 	dst := v1alpha1.NewKameletBinding(o.To, kb.Name)
 	dst.Spec = *kb.Spec.DeepCopy()
 	contImage := it.Status.Image
 	if dst.Spec.Integration == nil {
 		dst.Spec.Integration = &v1.IntegrationSpec{}
 	}
-	if dst.Spec.Integration.Traits == nil {
-		dst.Spec.Integration.Traits = map[string]v1.TraitSpec{}
+	if dst.Spec.Integration.Traits.Container == nil {
+		dst.Spec.Integration.Traits.Container = &traitv1.ContainerTrait{}
 	}
-	editedContTrait, err := editContainerImage(dst.Spec.Integration.Traits["container"], contImage)
-	dst.Spec.Integration.Traits["container"] = editedContTrait
+	dst.Spec.Integration.Traits.Container.Image = contImage
 	if dst.Spec.Source.Ref != nil {
 		dst.Spec.Source.Ref.Namespace = o.To
 	}
@@ -397,30 +385,5 @@ func (o *promoteCmdOptions) editKameletBinding(kb *v1alpha1.KameletBinding, it *
 			}
 		}
 	}
-	return &dst, err
-}
-
-func editContainerImage(contTrait v1.TraitSpec, image string) (v1.TraitSpec, error) {
-	var editedTrait v1.TraitSpec
-	m := make(map[string]map[string]interface{})
-	data, err := json.Marshal(contTrait)
-	if err != nil {
-		return editedTrait, err
-	}
-	err = json.Unmarshal(data, &m)
-	if err != nil {
-		return editedTrait, err
-	}
-	// We must initialize, if it was not initialized so far
-	if m["configuration"] == nil {
-		m["configuration"] = make(map[string]interface{})
-	}
-	m["configuration"]["image"] = image
-	newData, err := json.Marshal(m)
-	if err != nil {
-		return editedTrait, err
-	}
-	err = json.Unmarshal(newData, &editedTrait)
-
-	return editedTrait, err
+	return &dst
 }

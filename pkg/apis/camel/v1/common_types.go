@@ -137,6 +137,8 @@ type Traits struct {
 	Jolokia *trait.JolokiaTrait `property:"jolokia" json:"jolokia,omitempty"`
 	// The configuration of JVM trait
 	JVM *trait.JVMTrait `property:"jvm" json:"jvm,omitempty"`
+	// The configuration of Kamelets trait
+	Kamelets *trait.KameletsTrait `property:"kamelets" json:"kamelets,omitempty"`
 	// The configuration of Knative trait
 	Knative *trait.KnativeTrait `property:"knative" json:"knative,omitempty"`
 	// The configuration of Knative Service trait
@@ -171,6 +173,31 @@ type Traits struct {
 	ServiceBinding *trait.ServiceBindingTrait `property:"service-binding" json:"service-binding,omitempty"`
 	// The configuration of Toleration trait
 	Toleration *trait.TolerationTrait `property:"toleration" json:"toleration,omitempty"`
+
+	// Deprecated: for backward compatibility.
+	Keda *TraitSpec `property:"keda" json:"keda,omitempty"`
+	// Deprecated: for backward compatibility.
+	Master *TraitSpec `property:"master" json:"master,omitempty"`
+	// Deprecated: for backward compatibility.
+	Strimzi *TraitSpec `property:"strimzi" json:"strimzi,omitempty"`
+	// Deprecated: for backward compatibility.
+	ThreeScale *TraitSpec `property:"3scale" json:"3scale,omitempty"`
+	// Deprecated: for backward compatibility.
+	Tracing *TraitSpec `property:"tracing" json:"tracing,omitempty"`
+}
+
+// A TraitSpec contains the configuration of a trait
+// Deprecated: superceded by each Trait type, left for backward compatibility.
+type TraitSpec struct {
+	// TraitConfiguration parameters configuration
+	Configuration TraitConfiguration `json:"configuration"`
+}
+
+// TraitConfiguration represents the expected configuration for a given trait parameter
+// Deprecated: superceded by each Trait type, left for backward compatibility.
+type TraitConfiguration struct {
+	// generic raw message, typically a map containing the keys (trait parameters) and the values (either single text or array)
+	RawMessage `json:",inline"`
 }
 
 // +kubebuilder:validation:Type=object
