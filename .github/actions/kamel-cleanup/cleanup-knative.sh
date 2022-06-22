@@ -63,7 +63,12 @@ echo -n "Removing testing knative cluster roles ... "
 cleanup_resources clusterroles 'knative\|imc'
 
 # CRDS
-echo -n "Removing testing knative CRDs ... "
-cleanup_resources crds 'knative.dev'
-
+CRDS=$(kubectl --ignore-not-found=true get crds | grep knative | awk '{print $1}')
+if [ -n "${CRDS}" ]; then
+  for crd in ${CRDS}
+  do
+    echo -n "Removing ${crd} CRD ... "
+    cleanup_resources crds "${crd}"
+  done
+fi
 set -e

@@ -90,11 +90,6 @@ if [ -n "${BUILD_CATALOG_SOURCE_NAMESPACE}" ]; then
   set -e
 fi
 
-if [ "${SAVE_NAMESPACES}" == "true" ]; then
-  echo "Skipping remaining cleanup since SAVE_NAMESPACES has been set to true"
-  exit 0
-fi
-
 #
 # Remove installed kamel
 #
