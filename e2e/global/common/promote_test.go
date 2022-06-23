@@ -67,7 +67,7 @@ func TestKamelCLIPromote(t *testing.T) {
 
 		t.Run("kamelet binding dev", func(t *testing.T) {
 			Expect(CreateTimerKamelet(nsDev, "kb-timer-source")()).To(Succeed())
-			Expect(Kamel("bind", "kb-timer-source", "log:info", "-p", "message=my-kamelet-binding-rocks", "-n", nsDev).Execute()).To(Succeed())
+			Expect(Kamel("bind", "kb-timer-source", "log:info", "-p", "source.message=my-kamelet-binding-rocks", "-n", nsDev).Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(nsDev, "kb-timer-source-to-log"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(nsDev, "kb-timer-source-to-log"), TestTimeoutShort).Should(ContainSubstring("my-kamelet-binding-rocks"))
 		})
