@@ -49,6 +49,8 @@ rules:
   - messaging.knative.dev
   resources:
   - subscriptions
+  - channels
+  - inmemorychannels
   verbs:
   - create
   - delete
