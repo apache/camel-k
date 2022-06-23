@@ -23,7 +23,6 @@ limitations under the License.
 package common
 
 import (
-	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -35,18 +34,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-/*
- * TODO
- * Test has issues on OCP4.
- * Line 66 always has a value of 1 not 2.
- *
- * Adding CAMEL_K_TEST_SKIP_PROBLEMATIC env var for the moment.
- */
 func TestBadRouteIntegration(t *testing.T) {
-	if os.Getenv("CAMEL_K_TEST_SKIP_PROBLEMATIC") == "true" {
-		t.Skip("WARNING: Test marked as problematic ... skipping")
-	}
-
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(KamelInstall(ns).Execute()).To(Succeed())
 
