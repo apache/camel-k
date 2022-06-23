@@ -24,7 +24,6 @@ package common
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -39,17 +38,7 @@ import (
 	"github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
 )
 
-/*
-* TODO
-* The scaling spec keeps referring to "1" rather than "2" for all the tests
-*
-* Adding CAMEL_K_TEST_SKIP_PROBLEMATIC env var for the moment.
- */
 func TestIntegrationScale(t *testing.T) {
-	if os.Getenv("CAMEL_K_TEST_SKIP_PROBLEMATIC") == "true" {
-		t.Skip("WARNING: Test marked as problematic ... skipping")
-	}
-
 	WithNewTestNamespace(t, func(ns string) {
 		name := "java"
 		Expect(KamelInstall(ns).Execute()).To(Succeed())
