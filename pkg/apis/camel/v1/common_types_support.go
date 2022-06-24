@@ -69,7 +69,7 @@ func (m *RawMessage) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// GetOperatorIDAnnotation to safely get the operator id annotation value
+// GetOperatorIDAnnotation to safely get the operator id annotation value.
 func GetOperatorIDAnnotation(obj metav1.Object) string {
 	if obj == nil || obj.GetAnnotations() == nil {
 		return ""
@@ -80,6 +80,15 @@ func GetOperatorIDAnnotation(obj metav1.Object) string {
 	}
 
 	return ""
+}
+
+// SetAnnotation safely sets the annotation on the given runtime object.
+func SetAnnotation(obj *metav1.ObjectMeta, name string, value string) {
+	if obj.Annotations == nil {
+		obj.Annotations = make(map[string]string)
+	}
+
+	obj.Annotations[name] = value
 }
 
 var _ json.Marshaler = (*RawMessage)(nil)

@@ -598,9 +598,7 @@ func AssignIntegrationToOperator(ns, name, operator string) error {
 	if it == nil {
 		return fmt.Errorf("cannot assign integration %q to operator: integration not found", name)
 	}
-	if it.Annotations == nil {
-		it.Annotations = make(map[string]string)
-	}
+
 	it.SetOperatorID(operator)
 	return TestClient().Update(TestContext, it)
 }
@@ -991,10 +989,8 @@ func AssignKameletBindingToOperator(ns, name, operator string) error {
 	if klb == nil {
 		return fmt.Errorf("cannot assign kamelet binding %q to operator: kamelet binding not found", name)
 	}
-	if klb.Annotations == nil {
-		klb.Annotations = make(map[string]string)
-	}
-	klb.Annotations[v1.OperatorIDAnnotation] = operator
+
+	klb.SetOperatorID(operator)
 	return TestClient().Update(TestContext, klb)
 }
 
@@ -1363,9 +1359,7 @@ func AssignPlatformToOperator(ns, operator string) error {
 	if pl == nil {
 		return errors.New("cannot assign platform to operator: no platform found")
 	}
-	if pl.Annotations == nil {
-		pl.Annotations = make(map[string]string)
-	}
+
 	pl.SetOperatorID(operator)
 	return TestClient().Update(TestContext, pl)
 }
@@ -1375,10 +1369,8 @@ func ConfigureSecondaryPlatformWith(ns string, customizer func(pl *v1.Integratio
 	if pl == nil {
 		return errors.New("cannot find primary platform")
 	}
-	if pl.Annotations == nil {
-		pl.Annotations = make(map[string]string)
-	}
-	pl.Annotations[v1.SecondaryPlatformAnnotation] = "true"
+
+	v1.SetAnnotation(&pl.ObjectMeta, v1.SecondaryPlatformAnnotation, "true")
 	pl.ObjectMeta.ResourceVersion = ""
 	pl.Name = ""
 	pl.Status = v1.IntegrationPlatformStatus{}

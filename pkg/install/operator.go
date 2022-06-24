@@ -533,9 +533,6 @@ func NewPlatform(ctx context.Context, c client.Client, clusterType string, skipR
 
 	if operatorID != "" {
 		// We must tell the operator to reconcile this IntegrationPlatform
-		if pl.Annotations == nil {
-			pl.Annotations = make(map[string]string)
-		}
 		pl.SetOperatorID(operatorID)
 		pl.Name = operatorID
 	}

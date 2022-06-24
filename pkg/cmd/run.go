@@ -553,17 +553,11 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	}
 
 	if o.OperatorID != "" {
-		if pl, err := platformutil.LookupForPlatformName(o.Context, c, o.OperatorID); err != nil {
-			if k8serrors.IsForbidden(err) {
-				o.PrintfVerboseOutf(cmd, "Unable to verify existence of operator id [%s] due to lack of user privileges\n", o.OperatorID)
+		if err := verifyOperatorID(o.Context, c, o.OperatorID, cmd.OutOrStdout()); err != nil {
+			if o.Force {
+				o.PrintfVerboseErrf(cmd, "%s, use --force option or make sure to use a proper operator id", err.Error())
 			} else {
 				return nil, err
-			}
-		} else if pl == nil {
-			if o.Force {
-				o.PrintfVerboseOutf(cmd, "Unable to find operator with given id [%s] - integration may not be reconciled and get stuck in waiting state\n", o.OperatorID)
-			} else {
-				return nil, fmt.Errorf("unable to find integration platform for given operator id '%s', use --force option or make sure to use a proper operator id", o.OperatorID)
 			}
 		}
 	}

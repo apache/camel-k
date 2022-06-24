@@ -33,6 +33,7 @@ import (
 
 	routev1 "github.com/openshift/api/route/v1"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 )
 
@@ -84,14 +85,11 @@ func mapRequiredRouteData(from runtime.Object, to runtime.Object) {
 func mapRequiredKnativeServiceV1Beta1Data(from runtime.Object, to runtime.Object) {
 	if fromC, ok := from.(*serving.Service); ok {
 		if toC, ok := to.(*serving.Service); ok {
-			if toC.ObjectMeta.Annotations == nil {
-				toC.ObjectMeta.Annotations = make(map[string]string)
-			}
 			if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/creator"]; present {
-				toC.ObjectMeta.Annotations["serving.knative.dev/creator"] = v
+				v1.SetAnnotation(&toC.ObjectMeta, "serving.knative.dev/creator", v)
 			}
 			if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/lastModifier"]; present {
-				toC.ObjectMeta.Annotations["serving.knative.dev/lastModifier"] = v
+				v1.SetAnnotation(&toC.ObjectMeta, "serving.knative.dev/lastModifier", v)
 			}
 		}
 	}
@@ -100,14 +98,11 @@ func mapRequiredKnativeServiceV1Beta1Data(from runtime.Object, to runtime.Object
 func mapRequiredKnativeServiceV1Data(from runtime.Object, to runtime.Object) {
 	if fromC, ok := from.(*serving.Service); ok {
 		if toC, ok := to.(*serving.Service); ok {
-			if toC.ObjectMeta.Annotations == nil {
-				toC.ObjectMeta.Annotations = make(map[string]string)
-			}
 			if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/creator"]; present {
-				toC.ObjectMeta.Annotations["serving.knative.dev/creator"] = v
+				v1.SetAnnotation(&toC.ObjectMeta, "serving.knative.dev/creator", v)
 			}
 			if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/lastModifier"]; present {
-				toC.ObjectMeta.Annotations["serving.knative.dev/lastModifier"] = v
+				v1.SetAnnotation(&toC.ObjectMeta, "serving.knative.dev/lastModifier", v)
 			}
 		}
 	}

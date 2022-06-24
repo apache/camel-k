@@ -25,7 +25,6 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	platformutil "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/reference"
@@ -238,17 +237,11 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if o.OperatorID != "" {
-		if pl, err := platformutil.LookupForPlatformName(o.Context, client, o.OperatorID); err != nil {
-			if k8serrors.IsForbidden(err) {
-				o.PrintfVerboseOutf(cmd, "Unable to verify existence of operator id [%s] due to lack of user privileges\n", o.OperatorID)
+		if err := verifyOperatorID(o.Context, client, o.OperatorID, cmd.OutOrStdout()); err != nil {
+			if o.Force {
+				o.PrintfVerboseErrf(cmd, "%s, use --force option or make sure to use a proper operator id", err.Error())
 			} else {
 				return err
-			}
-		} else if pl == nil {
-			if o.Force {
-				o.PrintfVerboseOutf(cmd, "Unable to find operator with given id [%s] - Kamelet binding may not be reconciled and get stuck in waiting state\n", o.OperatorID)
-			} else {
-				return fmt.Errorf("unable to find integration platform for given operator id '%s', use --force option or make sure to use a proper operator id", o.OperatorID)
 			}
 		}
 	}

@@ -68,11 +68,7 @@ func (c KameletBindingCondition) GetMessage() string {
 
 // SetOperatorID sets the given operator id as an annotation
 func (in *KameletBinding) SetOperatorID(operatorID string) {
-	if in.Annotations == nil {
-		in.Annotations = make(map[string]string)
-	}
-
-	in.Annotations[v1.OperatorIDAnnotation] = operatorID
+	v1.SetAnnotation(&in.ObjectMeta, v1.OperatorIDAnnotation, operatorID)
 }
 
 // GetCondition returns the condition with the provided type.
