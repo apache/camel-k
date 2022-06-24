@@ -120,9 +120,6 @@ func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlat
 			defaultPlatform.Labels["camel.apache.org/platform.generated"] = True
 			// Cascade the operator id in charge to reconcile the Integration
 			if v1.GetOperatorIDAnnotation(e.Integration) != "" {
-				if defaultPlatform.Annotations == nil {
-					defaultPlatform.Annotations = make(map[string]string)
-				}
 				defaultPlatform.SetOperatorID(v1.GetOperatorIDAnnotation(e.Integration))
 			}
 			pl = &defaultPlatform

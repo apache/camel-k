@@ -194,11 +194,8 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType traitv1.Qua
 		kubernetes.CamelCreatorLabelVersion:   integration.ResourceVersion,
 	}
 
-	if kit.Annotations == nil {
-		kit.Annotations = make(map[string]string)
-	}
 	if v, ok := integration.Annotations[v1.PlatformSelectorAnnotation]; ok {
-		kit.Annotations[v1.PlatformSelectorAnnotation] = v
+		v1.SetAnnotation(&kit.ObjectMeta, v1.PlatformSelectorAnnotation, v)
 	}
 	operatorID := defaults.OperatorID()
 	if operatorID != "" {

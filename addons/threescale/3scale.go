@@ -22,6 +22,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/trait"
 )
@@ -126,19 +127,16 @@ func (t *threeScaleTrait) addLabelsAndAnnotations(obj *metav1.ObjectMeta) {
 	}
 	obj.Labels[ThreeScaleDiscoveryLabel] = ThreeScaleDiscoveryLabelEnabled
 
-	if obj.Annotations == nil {
-		obj.Annotations = make(map[string]string)
-	}
 	if t.Scheme != "" {
-		obj.Annotations[ThreeScaleSchemeAnnotation] = t.Scheme
+		v1.SetAnnotation(obj, ThreeScaleSchemeAnnotation, t.Scheme)
 	}
 	if t.Path != "" {
-		obj.Annotations[ThreeScalePathAnnotation] = t.Path
+		v1.SetAnnotation(obj, ThreeScalePathAnnotation, t.Path)
 	}
 	if t.Port != 0 {
-		obj.Annotations[ThreeScalePortAnnotation] = strconv.Itoa(t.Port)
+		v1.SetAnnotation(obj, ThreeScalePortAnnotation, strconv.Itoa(t.Port))
 	}
 	if t.DescriptionPath != nil && *t.DescriptionPath != "" {
-		obj.Annotations[ThreeScaleDescriptionPathAnnotation] = *t.DescriptionPath
+		v1.SetAnnotation(obj, ThreeScaleDescriptionPathAnnotation, *t.DescriptionPath)
 	}
 }

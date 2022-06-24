@@ -129,11 +129,8 @@ func (t *containerTrait) configureImageIntegrationKit(e *Environment) error {
 			kubernetes.CamelCreatorLabelVersion:   e.Integration.ResourceVersion,
 		}
 
-		if kit.Annotations == nil {
-			kit.Annotations = make(map[string]string)
-		}
 		if v, ok := e.Integration.Annotations[v1.PlatformSelectorAnnotation]; ok {
-			kit.Annotations[v1.PlatformSelectorAnnotation] = v
+			v1.SetAnnotation(&kit.ObjectMeta, v1.PlatformSelectorAnnotation, v)
 		}
 		operatorID := defaults.OperatorID()
 		if operatorID != "" {

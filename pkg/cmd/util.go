@@ -22,23 +22,25 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"reflect"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/gzip"
-	"github.com/pkg/errors"
-
 	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
+	platformutil "github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/gzip"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
 	p "github.com/gertd/go-pluralize"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -282,4 +284,19 @@ func hasSupportedScheme(uri string) bool {
 	}
 
 	return false
+}
+
+func verifyOperatorID(ctx context.Context, client client.Client, operatorID string, out io.Writer) error {
+	if pl, err := platformutil.LookupForPlatformName(ctx, client, operatorID); err != nil {
+		if k8serrors.IsForbidden(err) {
+			_, printErr := fmt.Fprintf(out, "Unable to verify existence of operator id [%s] due to lack of user privileges\n", operatorID)
+			return printErr
+		}
+
+		return err
+	} else if pl == nil {
+		return fmt.Errorf("unable to find operator with given id [%s] - resource may not be reconciled and get stuck in waiting state", operatorID)
+	}
+
+	return nil
 }
