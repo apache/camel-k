@@ -23,13 +23,41 @@
 #
 ####
 
+set -e
+
+NAMESPACE="preflight"
 
 delns() {
   echo "Deleting namespace ${1}"
   kubectl delete ns ${1} &> /dev/null
 }
 
-set -e
+waitForOperator() {
+  #
+  # Wait for the operator to be running
+  #
+  local timeout=180
+  local i=1
+  local command="kubectl get pods -n ${NAMESPACE} 2> /dev/null | grep camel-k | grep Running &> /dev/null"
+
+  until eval "${command}"
+  do
+    ((i++))
+    if [ "${i}" -gt "${timeout}" ]; then
+      echo "kamel operator not successfully installed, aborting due to ${timeout}s timeout"
+      resources="pods csvs deployments subs"
+      for resource in ${resources}
+      do
+        echo "Dumping resourse: ${resource}"
+        kubectl get ${resource} -n "${NAMESPACE}" -o yaml
+      done
+      delns "${NAMESPACE}"
+      exit 1
+    fi
+
+    sleep 1
+  done
+}
 
 while getopts ":b:c:i:l:n:s:v:" opt; do
   case "${opt}" in
@@ -94,7 +122,6 @@ fi
 #
 # Create the preflight test namespace
 #
-NAMESPACE="preflight"
 set +e
 if kubectl get ns ${NAMESPACE} &> /dev/null
 then
@@ -182,34 +209,30 @@ fi
 
 sleep 3
 
-#
-# Wait for the operator to be running
-#
-timeout=180
-i=1
-command="kubectl get pods -n ${NAMESPACE} 2> /dev/null | grep camel-k | grep Running &> /dev/null"
+echo "Waiting for operator to start ..."
+waitForOperator
 
-until eval "${command}"
+sleep 5
+
+#
+# Confirm the operator has not restarted
+#
+echo "Checking operator has not restarted ..."
+waitForOperator
+
+echo "Finding the operator pod identifier"
+for i in {1..5}
 do
-  ((i++))
-  if [ "${i}" -gt "${timeout}" ]; then
-    echo "kamel operator not successfully installed, aborting due to ${timeout}s timeout"
-    resources="pods csvs deployments subs"
-    for resource in ${resources}
-    do
-      echo "Dumping resourse: ${resource}"
-      kubectl get ${resource} -n "${NAMESPACE}" -o yaml
-    done
-    delns "${NAMESPACE}"
-    exit 1
+  camel_operator=$(kubectl get pods -n ${NAMESPACE} | grep camel-k | grep Running | awk '{print $1}')
+  if [ -n "${camel_operator}" ]; then
+    break
   fi
 
-  sleep 1
+  echo "Preflight Test: camel operator no longer running ... waiting on restart"
+  waitForOperator
 done
 
-echo "Camel K operator up and running"
-
-camel_operator=$(kubectl get pods -n ${NAMESPACE} | grep camel-k | awk '{print $1}')
+echo "Camel K operator ${camel_operator} up and running"
 camel_op_version=$(kubectl logs ${camel_operator} -n ${NAMESPACE} | sed -n 's/.*"Camel K Operator Version: \(.*\)"}/\1/p')
 camel_op_commit=$(kubectl logs ${camel_operator} -n ${NAMESPACE} | sed -n 's/.*"Camel K Git Commit: \(.*\)"}/\1/p')
 
