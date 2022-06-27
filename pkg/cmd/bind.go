@@ -85,7 +85,7 @@ type bindCmdOptions struct {
 
 func (o *bindCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
 	if o.OutputFormat != "" {
-		// let the command to work in offline mode
+		// let the command work in offline mode
 		cmd.Annotations[offlineCommandLabel] = "true"
 	}
 	return o.RootCmdOptions.preRun(cmd, args)

@@ -21,18 +21,17 @@ import (
 	"context"
 	"strings"
 
-	"github.com/go-logr/logr"
-
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	logutil "github.com/apache/camel-k/pkg/util/log"
 )
 
 // OperatorStartupOptionalTools tries to install optional tools at operator startup and warns if something goes wrong.
-func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespace string, operatorNamespace string, log logr.Logger) {
+func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespace string, operatorNamespace string, log logutil.Logger) {
 	// Try to register the OpenShift CLI Download link if possible
 	if err := OpenShiftConsoleDownloadLink(ctx, c); err != nil {
 		log.Info("Cannot install OpenShift CLI download link: skipping.")
-		log.V(8).Info("Error while installing OpenShift CLI download link", "error", err)
+		log.Debug("Error while installing OpenShift CLI download link", "error", err)
 	}
 
 	// Try to install Kamelet Catalog automatically
@@ -49,7 +48,7 @@ func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespac
 		if defaults.InstallDefaultKamelets() {
 			if err := KameletCatalog(ctx, c, kameletNamespace); err != nil {
 				log.Info("Cannot install bundled Kamelet Catalog: skipping.")
-				log.V(8).Info("Error while installing bundled Kamelet Catalog", "error", err)
+				log.Debug("Error while installing bundled Kamelet Catalog", "error", err)
 			}
 		} else {
 			log.Info("Kamelet Catalog installation is disabled")
@@ -59,14 +58,14 @@ func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespac
 			// Make sure that Kamelets installed in operator namespace can be used by others
 			if err := KameletViewerRole(ctx, c, kameletNamespace); err != nil {
 				log.Info("Cannot install global Kamelet viewer role: skipping.")
-				log.V(8).Info("Error while installing global Kamelet viewer role", "error", err)
+				log.Debug("Error while installing global Kamelet viewer role", "error", err)
 			}
 		}
 	}
 
 	// Try to bind the Knative Addressable resolver aggregated ClusterRole to the operator ServiceAccount
 	if err := BindKnativeAddressableResolverClusterRole(ctx, c, namespace, operatorNamespace); err != nil {
-		log.Info("Cannot bind the Knative Addressable resolver aggregated ClusterRole: skipping.")
-		log.V(8).Info("Error while binding the Knative Addressable resolver aggregated ClusterRole", "error", err)
+		log.Info("Cannot bind the Knative addressable resolver aggregated ClusterRole: skipping.")
+		log.Debug("Error while binding the Knative Addressable resolver aggregated ClusterRole", "error", err)
 	}
 }

@@ -149,6 +149,11 @@ func (l Logger) ForKameletBinding(target *v1alpha1.KameletBinding) Logger {
 	)
 }
 
+// AsLogger --.
+func (l Logger) AsLogger() logr.Logger {
+	return l.delegate
+}
+
 // ***********************************
 //
 // Helpers
