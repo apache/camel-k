@@ -32,26 +32,26 @@ import (
 
 const knativeAddressableResolverClusterRoleName = "addressable-resolver"
 
-// BindKnativeAddressableResolverClusterRole binds the Knative Addressable resolver aggregated ClusterRole
+// BindKnativeAddressableResolverClusterRole binds the Knative addressable resolver aggregated ClusterRole
 // to the operator ServiceAccount.
-func BindKnativeAddressableResolverClusterRole(ctx context.Context, c kubernetes.Interface, namespace string) error {
+func BindKnativeAddressableResolverClusterRole(ctx context.Context, c kubernetes.Interface, namespace string, operatorNamespace string) error {
 	if isKnative, err := knative.IsInstalled(ctx, c); err != nil {
 		return err
 	} else if !isKnative {
 		return nil
 	}
 	if namespace != "" {
-		return applyAddressableResolverRoleBinding(ctx, c, namespace)
+		return applyAddressableResolverRoleBinding(ctx, c, namespace, operatorNamespace)
 	}
-	return applyAddressableResolverClusterRoleBinding(ctx, c, namespace)
+	return applyAddressableResolverClusterRoleBinding(ctx, c, operatorNamespace)
 }
 
-func applyAddressableResolverRoleBinding(ctx context.Context, c kubernetes.Interface, namespace string) error {
+func applyAddressableResolverRoleBinding(ctx context.Context, c kubernetes.Interface, namespace string, operatorNamespace string) error {
 	rb := rbacv1ac.RoleBinding(fmt.Sprintf("%s-addressable-resolver", serviceAccountName), namespace).
 		WithSubjects(
 			rbacv1ac.Subject().
 				WithKind("ServiceAccount").
-				WithNamespace(namespace).
+				WithNamespace(operatorNamespace).
 				WithName(serviceAccountName),
 		).
 		WithRoleRef(rbacv1ac.RoleRef().
@@ -65,12 +65,12 @@ func applyAddressableResolverRoleBinding(ctx context.Context, c kubernetes.Inter
 	return err
 }
 
-func applyAddressableResolverClusterRoleBinding(ctx context.Context, c kubernetes.Interface, namespace string) error {
+func applyAddressableResolverClusterRoleBinding(ctx context.Context, c kubernetes.Interface, operatorNamespace string) error {
 	crb := rbacv1ac.ClusterRoleBinding(fmt.Sprintf("%s-addressable-resolver", serviceAccountName)).
 		WithSubjects(
 			rbacv1ac.Subject().
 				WithKind("ServiceAccount").
-				WithNamespace(namespace).
+				WithNamespace(operatorNamespace).
 				WithName(serviceAccountName),
 		).
 		WithRoleRef(rbacv1ac.RoleRef().
