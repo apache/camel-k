@@ -30,34 +30,17 @@ k8s_version_label="app.kubernetes.io\/version"
 
 for f in $(find $location/../config/manager -type f -name "*.yaml");
 do
-  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    sed -i -r "s/image: .*/image: ${sanitized_image_name}:${version}/" $f
-    sed -i -r "s/${k8s_version_label}: .*/${k8s_version_label}: \""${version}"\"/" $f
-  elif [[ "$OSTYPE" == "darwin"* ]]; then
-    # Mac OSX
-    sed -i '' -E "s/image: .*/image: ${sanitized_image_name}:${version}/" $f
-    sed -i '' -E "s/${k8s_version_label}: .*/${k8s_version_label}: \""${version}"\"/" $f
-  fi
+  sed -i -r "s/image: .*/image: ${sanitized_image_name}:${version}/" $f
+  sed -i -r "s/${k8s_version_label}: .*/${k8s_version_label}: \""${version}"\"/" $f
 done
 
 for f in $(find $location/../config/manifests/bases -type f -name "*.yaml");
 do
-  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    sed -i -r "s/containerImage: .*/containerImage: ${sanitized_image_name}:${version}/" $f
-  elif [[ "$OSTYPE" == "darwin"* ]]; then
-    # Mac OSX
-    sed -i '' -E "s/containerImage: .*/containerImage: ${sanitized_image_name}:${version}/" $f
-  fi
+  sed -i -r "s/containerImage: .*/containerImage: ${sanitized_image_name}:${version}/" $f
 done
 
 # Update helm chart
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  sed -i -r "s/image: .*/image: ${sanitized_image_name}:${version}/" $location/../helm/camel-k/values.yaml
-  sed -i -r "s/appVersion:\s([0-9]+[a-zA-Z0-9\-\.].*).*/appVersion: ${version}/" $location/../helm/camel-k/Chart.yaml
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-  # Mac OSX
-  sed -i '' -E "s/docker.io\/apache\/camel-k:([0-9]+[a-zA-Z0-9\-\.].*).*/${sanitized_image_name}:${version}/" $location/../helm/camel-k/values.yaml
-  sed -i '' -E "s/appVersion:\s([0-9]+[a-zA-Z0-9\-\.].*).*/appVersion: ${version}/" $location/../helm/camel-k/Chart.yaml
-fi
+sed -i -r "s/image: .*/image: ${sanitized_image_name}:${version}/" $location/../helm/camel-k/values.yaml
+sed -i -r "s/appVersion:\s([0-9]+[a-zA-Z0-9\-\.].*).*/appVersion: ${version}/" $location/../helm/camel-k/Chart.yaml
 
 echo "Camel K version set to: $version and image name to: $image_name"

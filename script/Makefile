@@ -577,11 +577,7 @@ bundle: set-version generate-crd $(BUNDLE_CAMEL_APIS) kustomize operator-sdk pre
 			-q --overwrite --version $(OPERATOR_VERSION) \
 			--kustomize-dir config/manifests $(BUNDLE_METADATA_OPTS)
 	@# Move the dockerfile into the bundle directory
-ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Darwin)
-	@mv bundle.Dockerfile bundle/Dockerfile && sed -i '' 's/bundle\///g' bundle/Dockerfile
-else
 	@mv bundle.Dockerfile bundle/Dockerfile && sed -i 's/bundle\///g' bundle/Dockerfile
-endif
 	@# Adds the licence headers to the csv file
 	./script/add_license.sh bundle/manifests ./script/headers/yaml.txt
 # Rename the CSV name to conform with the existing released operator versions
