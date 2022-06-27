@@ -41,15 +41,16 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"k8s.io/client-go/tools/record"
-	klog "k8s.io/klog/v2"
+	"k8s.io/klog/v2"
 
+	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	zapctrl "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
@@ -64,11 +65,10 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	camelLog "github.com/apache/camel-k/pkg/util/log"
+	logutil "github.com/apache/camel-k/pkg/util/log"
 )
 
-var log = logf.Log.WithName("cmd")
-var camLog = camelLog.Log.WithName("log")
+var log = logutil.Log.WithName("cmd")
 
 func printVersion() {
 	log.Info(fmt.Sprintf("Go Version: %s", runtime.Version()))
@@ -80,15 +80,7 @@ func printVersion() {
 	log.Info(fmt.Sprintf("Camel K Git Commit: %v", defaults.GitCommit))
 
 	// Will only appear if DEBUG level has been enabled using the env var LOG_LEVEL
-	camLog.Debug("*** DEBUG level messages will be logged ***")
-}
-
-type loglvl struct {
-	Level zapcore.Level
-}
-
-func (l loglvl) Enabled(lvl zapcore.Level) bool {
-	return l.Level.Enabled(lvl)
+	log.Debug("*** DEBUG level messages will be logged ***")
 }
 
 // Run starts the Camel K operator.
@@ -119,18 +111,18 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 			// Need to multiply by -1 to turn logr expected level into zap level
 			logLevel = zapcore.Level(int8(customLevel) * -1)
 		}
+	} else {
+		logLevel = zapcore.InfoLevel
 	}
 
-	logLevelEnabler := loglvl{
-		Level: logLevel,
-	}
-
-	logf.SetLogger(zap.New(func(o *zap.Options) {
+	// Use and set atomic level that all following log events are compared with
+	// in order to evaluate if a given log level on the event is enabled.
+	logf.SetLogger(zapctrl.New(func(o *zapctrl.Options) {
 		o.Development = false
-		o.Level = logLevelEnabler
+		o.Level = zap.NewAtomicLevelAt(logLevel)
 	}))
 
-	klog.SetLogger(log)
+	klog.SetLogger(log.AsLogger())
 
 	_, err := maxprocs.Set(maxprocs.Logger(func(f string, a ...interface{}) { log.Info(fmt.Sprintf(f, a)) }))
 	exitOnError(err, "failed to set GOMAXPROCS from cgroups")
