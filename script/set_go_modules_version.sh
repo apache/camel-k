@@ -30,19 +30,9 @@ api_rule="s/github.com\/apache\/camel-k\/pkg\/apis\/camel [A-Za-z0-9\.\-]+.*$/gi
 client_rule="s/github.com\/apache\/camel-k\/pkg\/client\/camel [A-Za-z0-9\.\-]+.*$/github.com\/apache\/camel-k\/pkg\/client\/camel $target_tag/"
 kr_rule="s/github.com\/apache\/camel-k\/pkg\/kamelet\/repository [A-Za-z0-9\.\-]+.*$/github.com\/apache\/camel-k\/pkg\/kamelet\/repository $target_tag/"
 
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  sed -i -r "$api_rule"    $location/../go.mod
-  sed -i -r "$client_rule" $location/../go.mod
-  sed -i -r "$kr_rule"     $location/../go.mod
-  sed -i -r "$api_rule"    $location/../pkg/client/camel/go.mod
-  sed -i -r "$api_rule"    $location/../pkg/kamelet/repository/go.mod
-  sed -i -r "$client_rule" $location/../pkg/kamelet/repository/go.mod
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-  # Mac OSX
-  sed -i '' -E "$api_rule"    $location/../go.mod
-  sed -i '' -E "$client_rule" $location/../go.mod
-  sed -i '' -E "$kr_rule"     $location/../go.mod
-  sed -i '' -E "$api_rule"    $location/../pkg/client/camel/go.mod
-  sed -i '' -E "$api_rule"    $location/../pkg/kamelet/repository/go.mod
-  sed -i '' -E "$client_rule" $location/../pkg/kamelet/repository/go.mod
-fi
+sed -i -r "$api_rule"    $location/../go.mod
+sed -i -r "$client_rule" $location/../go.mod
+sed -i -r "$kr_rule"     $location/../go.mod
+sed -i -r "$api_rule"    $location/../pkg/client/camel/go.mod
+sed -i -r "$api_rule"    $location/../pkg/kamelet/repository/go.mod
+sed -i -r "$client_rule" $location/../pkg/kamelet/repository/go.mod
