@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
@@ -169,4 +170,29 @@ func TestTraitSplitConfiguration(t *testing.T) {
 	c := NewCatalog(nil)
 	assert.NoError(t, c.configure(&env))
 	assert.Equal(t, []string{"opt1", "opt2"}, c.GetTrait("owner").(*ownerTrait).TargetLabels)
+}
+
+func TestTraitDecode(t *testing.T) {
+	trait := traitToMap(t, traitv1.ContainerTrait{
+		Trait: traitv1.Trait{
+			Enabled: pointer.Bool(false),
+			Configuration: configurationFromMap(t, map[string]interface{}{
+				"name": "test-container",
+				"port": 8081,
+			}),
+		},
+		Port: 7071,
+		Auto: pointer.Bool(false),
+	})
+
+	target, ok := newContainerTrait().(*containerTrait)
+	require.True(t, ok)
+	err := decodeTrait(trait, target, true)
+	require.NoError(t, err)
+
+	assert.Equal(t, false, pointer.BoolDeref(target.Enabled, true))
+	assert.Equal(t, "test-container", target.Name)
+	// legacy configuration should not override a value in new API field
+	assert.Equal(t, 7071, target.Port)
+	assert.Equal(t, false, pointer.BoolDeref(target.Auto, true))
 }

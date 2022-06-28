@@ -27,6 +27,7 @@ import (
 	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -123,20 +124,12 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 	if promoteKameletBinding {
 		// KameletBinding promotion
-		destKameletBinding, err := o.editKameletBinding(sourceKameletBinding, sourceIntegration)
-		if err != nil {
-			return errors.Wrap(err, "could not edit KameletBinding "+name)
-		}
+		destKameletBinding := o.editKameletBinding(sourceKameletBinding, sourceIntegration)
 
 		return c.Create(o.Context, destKameletBinding)
 	}
 	// Plain Integration promotion
-	destIntegration, err := o.editIntegration(sourceIntegration)
-	if err != nil {
-		if err != nil {
-			return errors.Wrap(err, "could not edit Integration "+name)
-		}
-	}
+	destIntegration := o.editIntegration(sourceIntegration)
 
 	// Ensure the destination namespace has access to the source namespace images
 	err = addSystemPullerRoleBinding(o.Context, c, sourceIntegration.Namespace, destIntegration.Namespace)
@@ -194,82 +187,76 @@ func (o *promoteCmdOptions) validateDestResources(c client.Client, it *v1.Integr
 	var pvcs []string
 	var kamelets []string
 
-	if it.Spec.Traits != nil {
-		// Mount trait
-		mounts := it.Spec.Traits["mount"]
-		if err := json.Unmarshal(mounts.Configuration.RawMessage, &traits); err != nil {
+	// Mount trait
+	mounts := it.Spec.Traits.Mount
+	if err := json.Unmarshal(mounts.Configuration.RawMessage, &traits); err != nil {
+		return err
+	}
+	for t, v := range traits {
+		switch t {
+		case "configs":
+			for _, cn := range v {
+				if conf, parseErr := resource.ParseConfig(cn); parseErr == nil {
+					if conf.StorageType() == resource.StorageTypeConfigmap {
+						configmaps = append(configmaps, conf.Name())
+					} else if conf.StorageType() == resource.StorageTypeSecret {
+						secrets = append(secrets, conf.Name())
+					}
+				} else {
+					return parseErr
+				}
+			}
+		case "resources":
+			for _, cn := range v {
+				if conf, parseErr := resource.ParseResource(cn); parseErr == nil {
+					if conf.StorageType() == resource.StorageTypeConfigmap {
+						configmaps = append(configmaps, conf.Name())
+					} else if conf.StorageType() == resource.StorageTypeSecret {
+						secrets = append(secrets, conf.Name())
+					}
+				} else {
+					return parseErr
+				}
+			}
+		case "volumes":
+			for _, cn := range v {
+				if conf, parseErr := resource.ParseVolume(cn); parseErr == nil {
+					if conf.StorageType() == resource.StorageTypePVC {
+						pvcs = append(pvcs, conf.Name())
+					}
+				} else {
+					return parseErr
+				}
+			}
+		}
+	}
+
+	// Openapi trait
+	openapis := it.Spec.Traits.OpenAPI
+	traits = map[string][]string{}
+	if len(openapis.Configuration.RawMessage) > 0 {
+		if err := json.Unmarshal(openapis.Configuration.RawMessage, &traits); err != nil {
 			return err
 		}
-		for t, v := range traits {
-			switch t {
-			case "configs":
-				for _, cn := range v {
-					if conf, parseErr := resource.ParseConfig(cn); parseErr == nil {
-						if conf.StorageType() == resource.StorageTypeConfigmap {
-							configmaps = append(configmaps, conf.Name())
-						} else if conf.StorageType() == resource.StorageTypeSecret {
-							secrets = append(secrets, conf.Name())
-						}
-					} else {
-						return parseErr
-					}
-				}
-			case "resources":
-				for _, cn := range v {
-					if conf, parseErr := resource.ParseResource(cn); parseErr == nil {
-						if conf.StorageType() == resource.StorageTypeConfigmap {
-							configmaps = append(configmaps, conf.Name())
-						} else if conf.StorageType() == resource.StorageTypeSecret {
-							secrets = append(secrets, conf.Name())
-						}
-					} else {
-						return parseErr
-					}
-				}
-			case "volumes":
-				for _, cn := range v {
-					if conf, parseErr := resource.ParseVolume(cn); parseErr == nil {
-						if conf.StorageType() == resource.StorageTypePVC {
-							pvcs = append(pvcs, conf.Name())
-						}
-					} else {
-						return parseErr
-					}
-				}
+	}
+	for k, v := range traits {
+		for _, cn := range v {
+			if k == "configmaps" {
+				configmaps = append(configmaps, cn)
 			}
 		}
+	}
 
-		// Openapi trait
-		openapis := it.Spec.Traits["openapi"]
-
-		traits = map[string][]string{}
-		if len(openapis.Configuration.RawMessage) > 0 {
-			if err := json.Unmarshal(openapis.Configuration.RawMessage, &traits); err != nil {
-				return err
-			}
+	// Kamelet trait
+	kameletTrait := it.Spec.Traits.Kamelets
+	var kameletListTrait map[string]string
+	if len(kameletTrait.Configuration.RawMessage) > 0 {
+		if err := json.Unmarshal(kameletTrait.Configuration.RawMessage, &kameletListTrait); err != nil {
+			return err
 		}
 
-		for k, v := range traits {
-			for _, cn := range v {
-				if k == "configmaps" {
-					configmaps = append(configmaps, cn)
-				}
-			}
-		}
-
-		// Kamelet trait
-		kameletTrait := it.Spec.Traits["kamelets"]
-		var kameletListTrait map[string]string
-
-		if len(kameletTrait.Configuration.RawMessage) > 0 {
-			if err := json.Unmarshal(kameletTrait.Configuration.RawMessage, &kameletListTrait); err != nil {
-				return err
-			}
-
-			kamelets = strings.Split(kameletListTrait["list"], ",")
-		}
-	} // end of it.Spec.Traits != nil
-
+		kamelets = strings.Split(kameletListTrait["list"], ",")
+	}
 	sourceKamelets, err := o.listKamelets(c, it)
 	if err != nil {
 		return err
@@ -391,30 +378,28 @@ func existsKamelet(ctx context.Context, c client.Client, name string, namespace 
 	return true
 }
 
-func (o *promoteCmdOptions) editIntegration(it *v1.Integration) (*v1.Integration, error) {
+func (o *promoteCmdOptions) editIntegration(it *v1.Integration) *v1.Integration {
 	dst := v1.NewIntegration(o.To, it.Name)
 	contImage := it.Status.Image
 	dst.Spec = *it.Spec.DeepCopy()
-	if dst.Spec.Traits == nil {
-		dst.Spec.Traits = map[string]v1.TraitSpec{}
+	if dst.Spec.Traits.Container == nil {
+		dst.Spec.Traits.Container = &traitv1.ContainerTrait{}
 	}
-	editedContTrait, err := editContainerImage(dst.Spec.Traits["container"], contImage)
-	dst.Spec.Traits["container"] = editedContTrait
-	return &dst, err
+	dst.Spec.Traits.Container.Image = contImage
+	return &dst
 }
 
-func (o *promoteCmdOptions) editKameletBinding(kb *v1alpha1.KameletBinding, it *v1.Integration) (*v1alpha1.KameletBinding, error) {
+func (o *promoteCmdOptions) editKameletBinding(kb *v1alpha1.KameletBinding, it *v1.Integration) *v1alpha1.KameletBinding {
 	dst := v1alpha1.NewKameletBinding(o.To, kb.Name)
 	dst.Spec = *kb.Spec.DeepCopy()
 	contImage := it.Status.Image
 	if dst.Spec.Integration == nil {
 		dst.Spec.Integration = &v1.IntegrationSpec{}
 	}
-	if dst.Spec.Integration.Traits == nil {
-		dst.Spec.Integration.Traits = map[string]v1.TraitSpec{}
+	if dst.Spec.Integration.Traits.Container == nil {
+		dst.Spec.Integration.Traits.Container = &traitv1.ContainerTrait{}
 	}
-	editedContTrait, err := editContainerImage(dst.Spec.Integration.Traits["container"], contImage)
-	dst.Spec.Integration.Traits["container"] = editedContTrait
+	dst.Spec.Integration.Traits.Container.Image = contImage
 	if dst.Spec.Source.Ref != nil {
 		dst.Spec.Source.Ref.Namespace = o.To
 	}
@@ -428,32 +413,7 @@ func (o *promoteCmdOptions) editKameletBinding(kb *v1alpha1.KameletBinding, it *
 			}
 		}
 	}
-	return &dst, err
-}
-
-func editContainerImage(contTrait v1.TraitSpec, image string) (v1.TraitSpec, error) {
-	var editedTrait v1.TraitSpec
-	m := make(map[string]map[string]interface{})
-	data, err := json.Marshal(contTrait)
-	if err != nil {
-		return editedTrait, err
-	}
-	err = json.Unmarshal(data, &m)
-	if err != nil {
-		return editedTrait, err
-	}
-	// We must initialize, if it was not initialized so far
-	if m["configuration"] == nil {
-		m["configuration"] = make(map[string]interface{})
-	}
-	m["configuration"]["image"] = image
-	newData, err := json.Marshal(m)
-	if err != nil {
-		return editedTrait, err
-	}
-	err = json.Unmarshal(newData, &editedTrait)
-
-	return editedTrait, err
+	return &dst
 }
 
 //

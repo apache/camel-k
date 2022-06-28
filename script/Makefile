@@ -326,6 +326,9 @@ clean:
 
 dep:
 	go mod tidy
+	cd pkg/apis/camel && go mod tidy
+	cd pkg/client/camel && go mod tidy
+	cd pkg/kamelet/repository && go mod tidy
 
 lint:
 	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format tab --deadline $(LINT_DEADLINE) --verbose

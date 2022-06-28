@@ -30,6 +30,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
+// configure reads trait configurations from environment and applies them to catalog.
 func (c *Catalog) configure(env *Environment) error {
 	if env.Platform != nil {
 		if err := c.configureTraits(env.Platform.Status.Traits); err != nil {
@@ -68,7 +69,7 @@ func (c *Catalog) configureTraits(traits interface{}) error {
 	for id, trait := range traitsMap {
 		t := trait // Avoid G601: Implicit memory aliasing in for loop
 		if catTrait := c.GetTrait(id); catTrait != nil {
-			if err := decodeTraitSpec(&t, catTrait); err != nil {
+			if err := decodeTrait(t, catTrait, true); err != nil {
 				return err
 			}
 		}
@@ -77,13 +78,22 @@ func (c *Catalog) configureTraits(traits interface{}) error {
 	return nil
 }
 
-func decodeTraitSpec(in interface{}, target interface{}) error {
+func decodeTrait(in map[string]interface{}, target Trait, root bool) error {
+	// decode legacy configuration first if it exists
+	if root && in["configuration"] != nil {
+		if config, ok := in["configuration"].(map[string]interface{}); ok {
+			if err := decodeTrait(config, target, false); err != nil {
+				return err
+			}
+		}
+	}
+
 	data, err := json.Marshal(&in)
 	if err != nil {
 		return err
 	}
 
-	return json.Unmarshal(data, &target)
+	return json.Unmarshal(data, target)
 }
 
 func (c *Catalog) configureTraitsFromAnnotations(annotations map[string]string) error {
