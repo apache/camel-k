@@ -17,20 +17,27 @@ limitations under the License.
 
 package trait
 
-// Base type for all traits.
-type Trait struct {
-	// Can be used to enable or disable a trait. All traits share this common property.
-	Enabled *bool `property:"enabled" json:"enabled,omitempty"`
+import (
+	"encoding/json"
+	"errors"
+)
 
-	// Legacy trait configuration parameters.
-	// Deprecated: for backward compatibility.
-	Configuration *Configuration `json:"configuration,omitempty"`
+// MarshalJSON returns m as the JSON encoding of m.
+func (m RawMessage) MarshalJSON() ([]byte, error) {
+	if m == nil {
+		return []byte("null"), nil
+	}
+	return m, nil
 }
 
-// Deprecated: for backward compatibility.
-type Configuration struct {
-	RawMessage `json:",inline"`
+// UnmarshalJSON sets *m to a copy of data.
+func (m *RawMessage) UnmarshalJSON(data []byte) error {
+	if m == nil {
+		return errors.New("json.RawMessage: UnmarshalJSON on nil pointer")
+	}
+	*m = append((*m)[0:0], data...)
+	return nil
 }
 
-// Deprecated: for backward compatibility.
-type RawMessage []byte
+var _ json.Marshaler = (*RawMessage)(nil)
+var _ json.Unmarshaler = (*RawMessage)(nil)

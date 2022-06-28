@@ -31,6 +31,7 @@ import (
 
 	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 )
 
 func TestSecondaryPlatform(t *testing.T) {
@@ -38,13 +39,12 @@ func TestSecondaryPlatform(t *testing.T) {
 		Expect(KamelInstall(ns).Execute()).To(Succeed())
 		Expect(ConfigureSecondayPlatfromWith(ns, func(p *v1.IntegrationPlatform) {
 			p.Name = "secondary"
-			if p.Spec.Traits == nil {
-				p.Spec.Traits = make(map[string]v1.TraitSpec)
-			}
-			p.Spec.Traits["container"] = v1.TraitSpec{
-				Configuration: AsTraitConfiguration(map[string]string{
-					"limitCPU": "0.1",
-				}),
+			p.Spec.Traits.Container = &traitv1.ContainerTrait{
+				Trait: traitv1.Trait{
+					Configuration: AsTraitConfiguration(map[string]string{
+						"limitCPU": "0.1",
+					}),
+				},
 			}
 		})).To(Succeed())
 

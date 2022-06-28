@@ -18,6 +18,9 @@ limitations under the License.
 package trait
 
 import (
+	"encoding/json"
+	"testing"
+
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -26,7 +29,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+
+	"github.com/stretchr/testify/require"
 )
 
 func createNominalDeploymentTraitTest() (*Environment, *appsv1.Deployment) {
@@ -114,4 +120,30 @@ func createNominalCronJobTraitTest() (*Environment, *batchv1.CronJob) {
 	}
 
 	return environment, cronJob
+}
+
+// nolint: staticcheck
+func configurationFromMap(t *testing.T, configMap map[string]interface{}) *traitv1.Configuration {
+	t.Helper()
+
+	data, err := json.Marshal(configMap)
+	require.NoError(t, err)
+
+	return &traitv1.Configuration{
+		RawMessage: data,
+	}
+}
+
+func traitToMap(t *testing.T, trait interface{}) map[string]interface{} {
+	t.Helper()
+
+	traitMap := make(map[string]interface{})
+
+	data, err := json.Marshal(trait)
+	require.NoError(t, err)
+
+	err = json.Unmarshal(data, &traitMap)
+	require.NoError(t, err)
+
+	return traitMap
 }

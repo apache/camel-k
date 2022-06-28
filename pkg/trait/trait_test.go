@@ -136,24 +136,6 @@ func TestKubernetesTraitsWithWeb(t *testing.T) {
 	}))
 }
 
-func TestTraitDecode(t *testing.T) {
-	trait := traitv1.ContainerTrait{
-		Trait: traitv1.Trait{
-			Enabled: pointer.Bool(false),
-		},
-		Port: 7071,
-		Auto: pointer.Bool(true),
-	}
-
-	ctr, _ := newContainerTrait().(*containerTrait)
-	err := decodeTraitSpec(&trait, ctr)
-
-	assert.Nil(t, err)
-	assert.Equal(t, 7071, ctr.Port)
-	assert.NotNil(t, ctr.Enabled)
-	assert.Equal(t, false, *ctr.Enabled)
-}
-
 func TestTraitHierarchyDecode(t *testing.T) {
 	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "")
 

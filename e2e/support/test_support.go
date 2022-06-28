@@ -71,6 +71,7 @@ import (
 
 	"github.com/apache/camel-k/e2e/support/util"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/cmd"
@@ -1764,12 +1765,13 @@ func asEndpointProperties(props map[string]string) *v1alpha1.EndpointProperties 
 	}
 }
 
-func AsTraitConfiguration(props map[string]string) v1.TraitConfiguration {
+// nolint: staticcheck
+func AsTraitConfiguration(props map[string]string) *traitv1.Configuration {
 	bytes, err := json.Marshal(props)
 	if err != nil {
 		failTest(err)
 	}
-	return v1.TraitConfiguration{
+	return &traitv1.Configuration{
 		RawMessage: bytes,
 	}
 }
