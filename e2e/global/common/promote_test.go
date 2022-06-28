@@ -75,6 +75,7 @@ func TestKamelCLIPromote(t *testing.T) {
 		// Prod environment namespace
 		WithNewTestNamespace(t, func(nsProd string) {
 			Expect(KamelInstall(nsProd).Execute()).To(Succeed())
+			Eventually(PlatformPhase(nsProd), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 			t.Run("no configmap in destination", func(t *testing.T) {
 				Expect(Kamel("promote", "-n", nsDev, "promote-route", "--to", nsProd).Execute()).NotTo(Succeed())
