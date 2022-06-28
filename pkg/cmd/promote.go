@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -34,9 +35,15 @@ import (
 	"github.com/apache/camel-k/pkg/util/resource"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	rbacv1ac "k8s.io/client-go/applyconfigurations/rbac/v1"
 )
+
+var namedConfRegExp = regexp.MustCompile("([a-z0-9-.]+)/.*")
 
 // newCmdPromote --.
 func newCmdPromote(rootCmdOptions *RootCmdOptions) (*cobra.Command, *promoteCmdOptions) {
@@ -133,6 +140,12 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	// Ensure the destination namespace has access to the source namespace images
+	err = addSystemPullerRoleBinding(o.Context, c, sourceIntegration.Namespace, destIntegration.Namespace)
+	if err != nil {
+		return err
+	}
+
 	return c.Create(o.Context, destIntegration)
 }
 
@@ -182,71 +195,83 @@ func (o *promoteCmdOptions) validateDestResources(c client.Client, it *v1.Integr
 	var secrets []string
 	var pvcs []string
 	var kamelets []string
-	if it.Spec.Traits == nil {
-		return nil
-	}
-	// Mount trait
-	mounts := it.Spec.Traits["mount"]
-	if err := json.Unmarshal(mounts.Configuration.RawMessage, &traits); err != nil {
-		return err
-	}
-	for t, v := range traits {
-		switch t {
-		case "configs":
-			for _, c := range v {
-				if conf, parseErr := resource.ParseConfig(c); parseErr == nil {
-					if conf.StorageType() == resource.StorageTypeConfigmap {
-						configmaps = append(configmaps, conf.Name())
-					} else if conf.StorageType() == resource.StorageTypeSecret {
-						secrets = append(secrets, conf.Name())
+
+	if it.Spec.Traits != nil {
+		// Mount trait
+		mounts := it.Spec.Traits["mount"]
+		if err := json.Unmarshal(mounts.Configuration.RawMessage, &traits); err != nil {
+			return err
+		}
+		for t, v := range traits {
+			switch t {
+			case "configs":
+				for _, cn := range v {
+					if conf, parseErr := resource.ParseConfig(cn); parseErr == nil {
+						if conf.StorageType() == resource.StorageTypeConfigmap {
+							configmaps = append(configmaps, conf.Name())
+						} else if conf.StorageType() == resource.StorageTypeSecret {
+							secrets = append(secrets, conf.Name())
+						}
+					} else {
+						return parseErr
 					}
-				} else {
-					return parseErr
 				}
-			}
-		case "resources":
-			for _, c := range v {
-				if conf, parseErr := resource.ParseResource(c); parseErr == nil {
-					if conf.StorageType() == resource.StorageTypeConfigmap {
-						configmaps = append(configmaps, conf.Name())
-					} else if conf.StorageType() == resource.StorageTypeSecret {
-						secrets = append(secrets, conf.Name())
+			case "resources":
+				for _, cn := range v {
+					if conf, parseErr := resource.ParseResource(cn); parseErr == nil {
+						if conf.StorageType() == resource.StorageTypeConfigmap {
+							configmaps = append(configmaps, conf.Name())
+						} else if conf.StorageType() == resource.StorageTypeSecret {
+							secrets = append(secrets, conf.Name())
+						}
+					} else {
+						return parseErr
 					}
-				} else {
-					return parseErr
 				}
-			}
-		case "volumes":
-			for _, c := range v {
-				if conf, parseErr := resource.ParseVolume(c); parseErr == nil {
-					if conf.StorageType() == resource.StorageTypePVC {
-						pvcs = append(pvcs, conf.Name())
+			case "volumes":
+				for _, cn := range v {
+					if conf, parseErr := resource.ParseVolume(cn); parseErr == nil {
+						if conf.StorageType() == resource.StorageTypePVC {
+							pvcs = append(pvcs, conf.Name())
+						}
+					} else {
+						return parseErr
 					}
-				} else {
-					return parseErr
 				}
 			}
 		}
-	}
-	// Openapi trait
-	openapis := it.Spec.Traits["openapi"]
-	if err := json.Unmarshal(openapis.Configuration.RawMessage, &traits); err != nil {
-		return err
-	}
-	for k, v := range traits {
-		for _, c := range v {
-			if k == "configmaps" {
-				configmaps = append(configmaps, c)
+
+		// Openapi trait
+		openapis := it.Spec.Traits["openapi"]
+
+		traits = map[string][]string{}
+		if len(openapis.Configuration.RawMessage) > 0 {
+			if err := json.Unmarshal(openapis.Configuration.RawMessage, &traits); err != nil {
+				return err
 			}
 		}
-	}
-	// Kamelet trait
-	kameletTrait := it.Spec.Traits["kamelets"]
-	var kameletListTrait map[string]string
-	if err := json.Unmarshal(kameletTrait.Configuration.RawMessage, &kameletListTrait); err != nil {
-		return err
-	}
-	kamelets = strings.Split(kameletListTrait["list"], ",")
+
+		for k, v := range traits {
+			for _, cn := range v {
+				if k == "configmaps" {
+					configmaps = append(configmaps, cn)
+				}
+			}
+		}
+
+		// Kamelet trait
+		kameletTrait := it.Spec.Traits["kamelets"]
+		var kameletListTrait map[string]string
+
+		if len(kameletTrait.Configuration.RawMessage) > 0 {
+			if err := json.Unmarshal(kameletTrait.Configuration.RawMessage, &kameletListTrait); err != nil {
+				return err
+			}
+
+			kamelets = strings.Split(kameletListTrait["list"], ",")
+		}
+	} // end of it.Spec.Traits != nil
+
 	sourceKamelets, err := o.listKamelets(c, it)
 	if err != nil {
 		return err
@@ -297,10 +322,18 @@ func (o *promoteCmdOptions) listKamelets(c client.Client, it *v1.Integration) ([
 		return nil, err
 	}
 
-	// We must remove any default source/sink
 	var filtered []string
 	for _, k := range kamelets {
-		if k != "source" && k != "sink" {
+		// We must remove any default source/sink
+		if k == "source" || k == "sink" {
+			continue
+		}
+
+		// We must drop any named configurations
+		match := namedConfRegExp.FindStringSubmatch(k)
+		if len(match) > 0 {
+			filtered = append(filtered, match[1])
+		} else {
 			filtered = append(filtered, k)
 		}
 	}
@@ -423,4 +456,28 @@ func editContainerImage(contTrait v1.TraitSpec, image string) (v1.TraitSpec, err
 	err = json.Unmarshal(newData, &editedTrait)
 
 	return editedTrait, err
+}
+
+//
+// RoleBinding is required to allow access to images in one namespace
+// by another namespace. Without this on rbac-enabled clusters, the
+// image cannot be pulled.
+//
+func addSystemPullerRoleBinding(ctx context.Context, c client.Client, sourceNS string, destNS string) error {
+	rb := rbacv1ac.RoleBinding(fmt.Sprintf("%s-image-puller", destNS), sourceNS).
+		WithSubjects(
+			rbacv1ac.Subject().
+				WithKind("ServiceAccount").
+				WithNamespace(destNS).
+				WithName("default"),
+		).
+		WithRoleRef(rbacv1ac.RoleRef().
+			WithAPIGroup(rbacv1.GroupName).
+			WithKind("ClusterRole").
+			WithName("system:image-puller"))
+
+	_, err := c.RbacV1().RoleBindings(sourceNS).
+		Apply(ctx, rb, metav1.ApplyOptions{FieldManager: "default", Force: true})
+
+	return err
 }
