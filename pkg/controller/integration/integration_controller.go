@@ -24,7 +24,7 @@ import (
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
-	batchv1beta1 "k8s.io/api/batch/v1beta1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -204,7 +204,7 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 		// Watch for the owned Deployments
 		Owns(&appsv1.Deployment{}, builder.WithPredicates(StatusChangedPredicate{})).
 		// Watch for the owned CronJobs
-		Owns(&batchv1beta1.CronJob{}, builder.WithPredicates(StatusChangedPredicate{})).
+		Owns(&batchv1.CronJob{}, builder.WithPredicates(StatusChangedPredicate{})).
 		// Watch for the Integration Pods
 		Watches(&source.Kind{Type: &corev1.Pod{}},
 			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {

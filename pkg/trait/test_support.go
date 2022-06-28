@@ -21,7 +21,7 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/batch/v1beta1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -93,12 +93,12 @@ func createNominalKnativeServiceTraitTest() (*Environment, *serving.Service) {
 	return environment, knativeService
 }
 
-func createNominalCronJobTraitTest() (*Environment, *v1beta1.CronJob) {
-	cronJob := &v1beta1.CronJob{
+func createNominalCronJobTraitTest() (*Environment, *batchv1.CronJob) {
+	cronJob := &batchv1.CronJob{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "integration-name",
 		},
-		Spec: v1beta1.CronJobSpec{},
+		Spec: batchv1.CronJobSpec{},
 	}
 
 	environment := &Environment{

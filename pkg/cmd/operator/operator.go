@@ -31,7 +31,6 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
-	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	coordination "k8s.io/api/coordination/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -166,11 +165,11 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		NewCache: cache.BuilderWithOptions(
 			cache.Options{
 				SelectorsByObject: cache.SelectorsByObject{
-					&corev1.Pod{}:           {Label: selector},
-					&appsv1.Deployment{}:    {Label: selector},
-					&batchv1beta1.CronJob{}: {Label: selector},
-					&batchv1.Job{}:          {Label: selector},
-					&servingv1.Service{}:    {Label: selector},
+					&corev1.Pod{}:        {Label: selector},
+					&appsv1.Deployment{}: {Label: selector},
+					&batchv1.CronJob{}:   {Label: selector},
+					&batchv1.Job{}:       {Label: selector},
+					&servingv1.Service{}: {Label: selector},
 				},
 			},
 		),

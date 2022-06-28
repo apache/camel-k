@@ -21,7 +21,7 @@ import (
 	"fmt"
 
 	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/batch/v1beta1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
@@ -70,7 +70,7 @@ func (t *podTrait) Apply(e *Environment) error {
 	}
 	switch strategy {
 	case ControllerStrategyCronJob:
-		e.Resources.VisitCronJob(func(c *v1beta1.CronJob) {
+		e.Resources.VisitCronJob(func(c *batchv1.CronJob) {
 			if c.Name == e.Integration.Name {
 				if patchedPodSpec, err = t.applyChangesTo(&c.Spec.JobTemplate.Spec.Template.Spec, changes); err == nil {
 					c.Spec.JobTemplate.Spec.Template.Spec = *patchedPodSpec

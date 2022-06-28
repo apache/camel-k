@@ -46,7 +46,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/batch/v1beta1"
+	batchv1 "k8s.io/api/batch/v1"
 	coordination "k8s.io/api/coordination/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -599,12 +599,12 @@ func RouteStatus(ns string, name string) func() string {
 	}
 }
 
-func IntegrationCronJob(ns string, name string) func() *v1beta1.CronJob {
-	return func() *v1beta1.CronJob {
-		lst := v1beta1.CronJobList{
+func IntegrationCronJob(ns string, name string) func() *batchv1.CronJob {
+	return func() *batchv1.CronJob {
+		lst := batchv1.CronJobList{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "CronJob",
-				APIVersion: v1beta1.SchemeGroupVersion.String(),
+				APIVersion: batchv1.SchemeGroupVersion.String(),
 			},
 		}
 		err := TestClient().List(TestContext, &lst,
