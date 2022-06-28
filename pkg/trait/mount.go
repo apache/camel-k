@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/batch/v1beta1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
@@ -118,7 +118,7 @@ func (t *mountTrait) Apply(e *Environment) error {
 	}
 
 	// CronJob
-	if err := e.Resources.VisitCronJobE(func(cron *v1beta1.CronJob) error {
+	if err := e.Resources.VisitCronJobE(func(cron *batchv1.CronJob) error {
 		volumes = &cron.Spec.JobTemplate.Spec.Template.Spec.Volumes
 		visited = true
 		return nil

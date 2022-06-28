@@ -27,7 +27,6 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
-	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -175,7 +174,7 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 	case isConditionTrue(integration, v1.IntegrationConditionKnativeServiceAvailable):
 		controller = &servingv1.Service{}
 	case isConditionTrue(integration, v1.IntegrationConditionCronJobAvailable):
-		controller = &batchv1beta1.CronJob{}
+		controller = &batchv1.CronJob{}
 	default:
 		return fmt.Errorf("unsupported controller for integration %s", integration.Name)
 	}
@@ -207,7 +206,7 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 		}
 		podSpec = c.Spec.Template.Spec.PodSpec
 
-	case *batchv1beta1.CronJob:
+	case *batchv1.CronJob:
 		// Check latest job result
 		if lastScheduleTime := c.Status.LastScheduleTime; lastScheduleTime != nil && len(c.Status.Active) == 0 {
 			jobs := batchv1.JobList{}
@@ -341,7 +340,7 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 		}
 		setReadyCondition(integration, corev1.ConditionFalse, ready.GetReason(), ready.GetMessage())
 
-	case *batchv1beta1.CronJob:
+	case *batchv1.CronJob:
 		switch {
 		case c.Status.LastScheduleTime == nil:
 			setReadyCondition(integration, corev1.ConditionTrue, v1.IntegrationConditionCronJobCreatedReason, "cronjob created")
