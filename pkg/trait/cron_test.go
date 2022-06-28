@@ -24,7 +24,7 @@ import (
 	passert "github.com/magiconair/properties/assert"
 	"github.com/stretchr/testify/assert"
 
-	batchv1beta1 "k8s.io/api/batch/v1beta1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -428,7 +428,7 @@ func TestCronWithActiveDeadline(t *testing.T) {
 	assert.Nil(t, ct.Fallback)
 	assert.Contains(t, environment.Interceptors, "cron")
 
-	cronJob := environment.Resources.GetCronJob(func(job *batchv1beta1.CronJob) bool { return true })
+	cronJob := environment.Resources.GetCronJob(func(job *batchv1.CronJob) bool { return true })
 	assert.NotNil(t, cronJob)
 
 	assert.NotNil(t, cronJob.Spec.JobTemplate.Spec.ActiveDeadlineSeconds)
@@ -501,7 +501,7 @@ func TestCronWithBackoffLimit(t *testing.T) {
 	assert.Nil(t, ct.Fallback)
 	assert.Contains(t, environment.Interceptors, "cron")
 
-	cronJob := environment.Resources.GetCronJob(func(job *batchv1beta1.CronJob) bool { return true })
+	cronJob := environment.Resources.GetCronJob(func(job *batchv1.CronJob) bool { return true })
 	assert.NotNil(t, cronJob)
 
 	assert.NotNil(t, cronJob.Spec.JobTemplate.Spec.ActiveDeadlineSeconds)
