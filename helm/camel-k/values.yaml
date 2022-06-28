@@ -24,6 +24,8 @@ fullnameOverride: ""
 
 operator:
   image: docker.io/apache/camel-k:1.10.0-SNAPSHOT
+  resources: {}
+  securityContext: {}
 
 platform:
   build:
