@@ -24,7 +24,6 @@ import (
 	"strings"
 
 	batchv1 "k8s.io/api/batch/v1"
-	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -172,7 +171,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 		}
 
 		if t.ConcurrencyPolicy == "" {
-			t.ConcurrencyPolicy = string(batchv1beta1.ForbidConcurrent)
+			t.ConcurrencyPolicy = string(batchv1.ForbidConcurrent)
 		}
 
 		if (t.Schedule == "" && t.Components == "") && t.Fallback == nil {
@@ -264,7 +263,7 @@ func (t *cronTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *cronTrait) getCronJobFor(e *Environment) *batchv1beta1.CronJob {
+func (t *cronTrait) getCronJobFor(e *Environment) *batchv1.CronJob {
 	annotations := make(map[string]string)
 	if e.Integration.Annotations != nil {
 		for k, v := range filterTransferableAnnotations(e.Integration.Annotations) {
@@ -282,10 +281,10 @@ func (t *cronTrait) getCronJobFor(e *Environment) *batchv1beta1.CronJob {
 		backoffLimit = *t.BackoffLimit
 	}
 
-	cronjob := batchv1beta1.CronJob{
+	cronjob := batchv1.CronJob{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "CronJob",
-			APIVersion: batchv1beta1.SchemeGroupVersion.String(),
+			APIVersion: batchv1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      e.Integration.Name,
@@ -295,11 +294,11 @@ func (t *cronTrait) getCronJobFor(e *Environment) *batchv1beta1.CronJob {
 			},
 			Annotations: e.Integration.Annotations,
 		},
-		Spec: batchv1beta1.CronJobSpec{
+		Spec: batchv1.CronJobSpec{
 			Schedule:                t.Schedule,
-			ConcurrencyPolicy:       batchv1beta1.ConcurrencyPolicy(t.ConcurrencyPolicy),
+			ConcurrencyPolicy:       batchv1.ConcurrencyPolicy(t.ConcurrencyPolicy),
 			StartingDeadlineSeconds: t.StartingDeadlineSeconds,
-			JobTemplate: batchv1beta1.JobTemplateSpec{
+			JobTemplate: batchv1.JobTemplateSpec{
 				Spec: batchv1.JobSpec{
 					ActiveDeadlineSeconds: &activeDeadline,
 					BackoffLimit:          &backoffLimit,

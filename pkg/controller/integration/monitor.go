@@ -25,7 +25,7 @@ import (
 	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
-	batchv1beta1 "k8s.io/api/batch/v1beta1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -185,9 +185,9 @@ func (action *monitorAction) newController(ctx context.Context, env *trait.Envir
 			integration: integration,
 		}
 	case isConditionTrue(integration, v1.IntegrationConditionCronJobAvailable):
-		obj = getUpdatedController(env, &batchv1beta1.CronJob{})
+		obj = getUpdatedController(env, &batchv1.CronJob{})
 		controller = &cronJobController{
-			obj:         obj.(*batchv1beta1.CronJob),
+			obj:         obj.(*batchv1.CronJob),
 			integration: integration,
 			client:      action.client,
 			context:     ctx,
