@@ -22,7 +22,7 @@ import (
 	"path"
 
 	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/batch/v1beta1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -298,7 +298,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	}
 
 	// CronJob
-	if err := e.Resources.VisitCronJobE(func(cron *v1beta1.CronJob) error {
+	if err := e.Resources.VisitCronJobE(func(cron *batchv1.CronJob) error {
 		for _, envVar := range e.EnvVars {
 			envvar.SetVar(&container.Env, envVar)
 		}

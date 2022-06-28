@@ -22,7 +22,6 @@ import (
 	"fmt"
 
 	batchv1 "k8s.io/api/batch/v1"
-	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -33,7 +32,7 @@ import (
 )
 
 type cronJobController struct {
-	obj              *batchv1beta1.CronJob
+	obj              *batchv1.CronJob
 	integration      *v1.Integration
 	client           client.Client
 	context          context.Context
