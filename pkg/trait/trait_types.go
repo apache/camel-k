@@ -27,7 +27,7 @@ import (
 	"github.com/pkg/errors"
 
 	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/batch/v1beta1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -326,7 +326,7 @@ func (e *Environment) GetIntegrationPodSpec() *corev1.PodSpec {
 	}
 
 	// Cronjob
-	cronJob := e.Resources.GetCronJob(func(c *v1beta1.CronJob) bool {
+	cronJob := e.Resources.GetCronJob(func(c *batchv1.CronJob) bool {
 		return c.Name == e.Integration.Name
 	})
 	if cronJob != nil {
