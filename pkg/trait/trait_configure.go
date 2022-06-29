@@ -100,6 +100,13 @@ func decodeTrait(in map[string]interface{}, target Trait, root bool) error {
 	// decode legacy configuration first if it exists
 	if root && in["configuration"] != nil {
 		if config, ok := in["configuration"].(map[string]interface{}); ok {
+			// for traits that had the same property name "configuration",
+			// it needs to be renamed to "config" to avoid naming conflicts
+			// (e.g. Knative trait).
+			if config["configuration"] != nil {
+				config["config"] = config["configuration"]
+			}
+
 			if err := decodeTrait(config, target, false); err != nil {
 				return err
 			}
