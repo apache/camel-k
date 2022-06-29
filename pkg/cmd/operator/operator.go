@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"reflect"
 	"runtime"
 	"strconv"
 	"time"
@@ -34,6 +35,7 @@ import (
 	coordination "k8s.io/api/coordination/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
@@ -152,6 +154,22 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	exitOnError(err, "cannot create Integration label selector")
 	selector := labels.NewSelector().Add(*hasIntegrationLabel)
 
+	selectors := cache.SelectorsByObject{
+		&corev1.Pod{}:        {Label: selector},
+		&appsv1.Deployment{}: {Label: selector},
+		&batchv1.Job{}:       {Label: selector},
+		&servingv1.Service{}: {Label: selector},
+	}
+
+	if ok, err := kubernetes.IsAPIResourceInstalled(c, batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
+		selectors[&batchv1.CronJob{}] = struct {
+			Label labels.Selector
+			Field fields.Selector
+		}{
+			Label: selector,
+		}
+	}
+
 	mgr, err := manager.New(c.GetConfig(), manager.Options{
 		Namespace:                     watchNamespace,
 		EventBroadcaster:              broadcaster,
@@ -164,13 +182,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		MetricsBindAddress:            ":" + strconv.Itoa(int(monitoringPort)),
 		NewCache: cache.BuilderWithOptions(
 			cache.Options{
-				SelectorsByObject: cache.SelectorsByObject{
-					&corev1.Pod{}:        {Label: selector},
-					&appsv1.Deployment{}: {Label: selector},
-					&batchv1.CronJob{}:   {Label: selector},
-					&batchv1.Job{}:       {Label: selector},
-					&servingv1.Service{}: {Label: selector},
-				},
+				SelectorsByObject: selectors,
 			},
 		),
 	})
