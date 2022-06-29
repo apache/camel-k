@@ -203,8 +203,6 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 			})).
 		// Watch for the owned Deployments
 		Owns(&appsv1.Deployment{}, builder.WithPredicates(StatusChangedPredicate{})).
-		// Watch for the owned CronJobs
-		Owns(&batchv1.CronJob{}, builder.WithPredicates(StatusChangedPredicate{})).
 		// Watch for the Integration Pods
 		Watches(&source.Kind{Type: &corev1.Pod{}},
 			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
@@ -222,6 +220,11 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 					},
 				}
 			}))
+
+	if ok, err := kubernetes.IsAPIResourceInstalled(c, batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
+		// Watch for the owned CronJobs
+		b.Owns(&batchv1.CronJob{}, builder.WithPredicates(StatusChangedPredicate{}))
+	}
 
 	// Watch for the owned Knative Services conditionally
 	if ok, err := kubernetes.IsAPIResourceInstalled(c, servingv1.SchemeGroupVersion.String(), reflect.TypeOf(servingv1.Service{}).Name()); err != nil {
