@@ -23,17 +23,29 @@ limitations under the License.
 package common
 
 import (
+	"reflect"
 	"testing"
 
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 func TestRunCronExample(t *testing.T) {
+	ok, err := kubernetes.IsAPIResourceInstalled(TestClient(), batchv1.SchemeGroupVersion.Group, reflect.TypeOf(batchv1.CronJob{}).Name())
+	assert.Nil(t, err)
+
+	if !ok {
+		t.Skip("This test requires CronJob batch/v1 API installed.")
+		return
+	}
+
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
 
