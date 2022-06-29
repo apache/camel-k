@@ -116,7 +116,7 @@ func TestKamelCLIPromote(t *testing.T) {
 			})
 
 			t.Run("no kamelet for kameletbinding in destination", func(t *testing.T) {
-				Expect(Kamel("promote", "-n", nsDev, "kb-timer-source", "--to", nsProd).Execute()).NotTo(Succeed())
+				Expect(Kamel("promote", "-n", nsDev, "kb-timer-source-to-log", "--to", nsProd).Execute()).NotTo(Succeed())
 			})
 
 			t.Run("kamelet binding promotion", func(t *testing.T) {
