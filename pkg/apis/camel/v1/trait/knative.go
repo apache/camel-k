@@ -29,7 +29,7 @@ package trait
 type KnativeTrait struct {
 	Trait `property:",squash" json:",inline"`
 	// Can be used to inject a Knative complete configuration in JSON format.
-	Configuration string `property:"configuration" json:"configuration,omitempty"`
+	Configuration string `property:"configuration" json:"config,omitempty"`
 	// List of channels used as source of integration routes.
 	// Can contain simple channel names or full Camel URIs.
 	ChannelSources []string `property:"channel-sources" json:"channelSources,omitempty"`

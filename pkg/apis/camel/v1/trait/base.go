@@ -32,5 +32,8 @@ type Configuration struct {
 	RawMessage `json:",inline"`
 }
 
+// +kubebuilder:validation:Type=object
+// +kubebuilder:validation:Format=""
+// +kubebuilder:pruning:PreserveUnknownFields
 // Deprecated: for backward compatibility.
 type RawMessage []byte

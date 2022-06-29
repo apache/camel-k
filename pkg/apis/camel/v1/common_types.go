@@ -209,13 +209,12 @@ type TraitConfiguration struct {
 	RawMessage `json:",inline"`
 }
 
-// +kubebuilder:validation:Type=object
-// +kubebuilder:validation:Format=""
-// +kubebuilder:pruning:PreserveUnknownFields
-
 // RawMessage is a raw encoded JSON value.
 // It implements Marshaler and Unmarshaler and can
 // be used to delay JSON decoding or precompute a JSON encoding.
+// +kubebuilder:validation:Type=object
+// +kubebuilder:validation:Format=""
+// +kubebuilder:pruning:PreserveUnknownFields
 type RawMessage []byte
 
 // +kubebuilder:object:generate=false
