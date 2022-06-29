@@ -38,7 +38,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/openshift"
-	console "github.com/openshift/api/console/v1"
+	consolev1 "github.com/openshift/api/console/v1"
 )
 
 func TestBasicInstallation(t *testing.T) {
@@ -97,11 +97,11 @@ func TestConsoleCliDownload(t *testing.T) {
 	ocp, err := openshift.IsOpenShift(TestClient())
 	assert.Nil(t, err)
 
-	ok, err := kubernetes.IsAPIResourceInstalled(TestClient(), "console.openshift.io/v1", reflect.TypeOf(console.ConsoleCLIDownload{}).Name())
+	ok, err := kubernetes.IsAPIResourceInstalled(TestClient(), "console.openshift.io/v1", reflect.TypeOf(consolev1.ConsoleCLIDownload{}).Name())
 	assert.Nil(t, err)
 
 	if !ocp || !ok {
-		t.Skip("This test requires ConsoleCliDownload object which is available on OpenShift 4 only.")
+		t.Skip("This test requires ConsoleCliDownload object which is available on OpenShift 4+ only.")
 		return
 	}
 
