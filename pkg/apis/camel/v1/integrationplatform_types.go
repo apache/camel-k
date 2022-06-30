@@ -37,7 +37,7 @@ type IntegrationPlatformSpec struct {
 	// Deprecated: not used
 	Resources IntegrationPlatformResourcesSpec `json:"resources,omitempty"`
 	// list of traits to be executed for all the Integration/IntegrationKits built from this IntegrationPlatform
-	Traits map[string]TraitSpec `json:"traits,omitempty"`
+	Traits Traits `json:"traits,omitempty"`
 	// list of configuration properties to be attached to all the Integration/IntegrationKits built from this IntegrationPlatform
 	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
 	// configuration to be executed to all Kamelets controlled by this IntegrationPlatform

@@ -48,21 +48,27 @@ type IntegrationKit struct {
 	Status IntegrationKitStatus `json:"status,omitempty"`
 }
 
-// IntegrationKitSpec defines a container image and additional configurations required to kick off an `Integration` which certain features
+// IntegrationKitSpec defines a container image and additional configurations required to kick off an `Integration` with certain features
 type IntegrationKitSpec struct {
-	// the container image as identify in the container registry
+	// the container image as identified in the container registry
 	Image string `json:"image,omitempty"`
 	// a list of Camel dependecies used by this kit
 	Dependencies []string `json:"dependencies,omitempty"`
 	// the profile which is expected by this kit
 	Profile TraitProfile `json:"profile,omitempty"`
 	// traits that the kit will execute
-	Traits map[string]TraitSpec `json:"traits,omitempty"`
+	Traits IntegrationKitTraits `json:"traits,omitempty"`
 	// configuration used by the kit
 	// TODO: we should deprecate in future releases in favour of mount, openapi or camel traits
 	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
 	// Maven repositories that can be used by the kit
 	Repositories []string `json:"repositories,omitempty"`
+}
+
+// IntegrationKitTraits defines traits assigned to an `IntegrationKit`
+type IntegrationKitTraits struct {
+	Builder *BuilderTrait `property:"builder" json:"builder,omitempty"`
+	Quarkus *QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
 }
 
 // IntegrationKitStatus defines the observed state of IntegrationKit

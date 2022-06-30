@@ -18,13 +18,10 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"reflect"
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/mitchellh/mapstructure"
@@ -46,32 +43,32 @@ func validateTraits(catalog *trait.Catalog, traits []string) error {
 	return nil
 }
 
-func configureTraits(options []string, catalog trait.Finder) (map[string]v1.TraitSpec, error) {
-	traits := make(map[string]map[string]interface{})
+func configureTraits(options []string, traits interface{}) error {
+	config := make(map[string]map[string]interface{})
 
 	for _, option := range options {
 		parts := traitConfigRegexp.FindStringSubmatch(option)
 		if len(parts) < 4 {
-			return nil, errors.New("unrecognized config format (expected \"<trait>.<prop>=<value>\"): " + option)
+			return errors.New("unrecognized config format (expected \"<trait>.<prop>=<value>\"): " + option)
 		}
 		id := parts[1]
 		fullProp := parts[2][1:]
 		value := parts[3]
-		if _, ok := traits[id]; !ok {
-			traits[id] = make(map[string]interface{})
+		if _, ok := config[id]; !ok {
+			config[id] = make(map[string]interface{})
 		}
 
 		propParts := util.ConfigTreePropertySplit(fullProp)
-		var current = traits[id]
+		var current = config[id]
 		if len(propParts) > 1 {
 			c, err := util.NavigateConfigTree(current, propParts[0:len(propParts)-1])
 			if err != nil {
-				return nil, err
+				return err
 			}
 			if cc, ok := c.(map[string]interface{}); ok {
 				current = cc
 			} else {
-				return nil, errors.New("trait configuration cannot end with a slice")
+				return errors.New("trait configuration cannot end with a slice")
 			}
 		}
 
@@ -91,41 +88,13 @@ func configureTraits(options []string, catalog trait.Finder) (map[string]v1.Trai
 		}
 	}
 
-	specs := make(map[string]v1.TraitSpec)
-	for id, config := range traits {
-		t := catalog.GetTrait(id)
-		if t != nil {
-			// let's take a clone to prevent default values set at runtime from being serialized
-			zero := reflect.New(reflect.TypeOf(t)).Interface()
-			err := configureTrait(config, zero)
-			if err != nil {
-				return nil, err
-			}
-			data, err := json.Marshal(zero)
-			if err != nil {
-				return nil, err
-			}
-			var spec v1.TraitSpec
-			err = json.Unmarshal(data, &spec.Configuration)
-			if err != nil {
-				return nil, err
-			}
-			specs[id] = spec
-		}
-	}
-
-	return specs, nil
-}
-
-func configureTrait(config map[string]interface{}, trait interface{}) error {
 	md := mapstructure.Metadata{}
-
 	decoder, err := mapstructure.NewDecoder(
 		&mapstructure.DecoderConfig{
 			Metadata:         &md,
 			WeaklyTypedInput: true,
 			TagName:          "property",
-			Result:           &trait,
+			Result:           &traits,
 		},
 	)
 	if err != nil {

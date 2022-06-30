@@ -32,7 +32,8 @@ import (
 const flowsInternalSourceName = "camel-k-embedded-flow.yaml"
 
 type initTrait struct {
-	BaseTrait `property:",squash"`
+	BaseTrait
+	v1.Trait
 }
 
 func NewInitTrait() Trait {

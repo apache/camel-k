@@ -30,7 +30,7 @@ func init() {
 	AddToTraits(newDeploymentTrait)
 	AddToTraits(newEnvironmentTrait)
 	AddToTraits(newErrorHandlerTrait)
-	AddToTraits(newGarbageCollectorTrait)
+	AddToTraits(newGCTrait)
 	AddToTraits(newHealthTrait)
 	AddToTraits(NewInitTrait)
 	AddToTraits(newIngressTrait)

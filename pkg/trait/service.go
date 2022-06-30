@@ -27,18 +27,9 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-// The Service trait exposes the integration with a Service resource so that it can be accessed by other applications
-// (or integrations) in the same namespace.
-//
-// It's enabled by default if the integration depends on a Camel component that can expose a HTTP endpoint.
-//
-// +camel-k:trait=service.
 type serviceTrait struct {
-	BaseTrait `property:",squash"`
-	// To automatically detect from the code if a Service needs to be created.
-	Auto *bool `property:"auto" json:"auto,omitempty"`
-	// Enable Service to be exposed as NodePort (default `false`).
-	NodePort *bool `property:"node-port" json:"nodePort,omitempty"`
+	BaseTrait
+	v1.ServiceTrait `property:",squash"`
 }
 
 const serviceTraitID = "service"

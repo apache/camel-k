@@ -28,12 +28,9 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-// The Dependencies trait is internally used to automatically add runtime dependencies based on the
-// integration that the user wants to run.
-//
-// +camel-k:trait=dependencies.
 type dependenciesTrait struct {
-	BaseTrait `property:",squash"`
+	BaseTrait
+	v1.DependenciesTrait `property:",squash"`
 }
 
 func newDependenciesTrait() Trait {

@@ -29,15 +29,9 @@ import (
 	"github.com/apache/camel-k/pkg/util/label"
 )
 
-// The Deployment trait is responsible for generating the Kubernetes deployment that will make sure
-// the integration will run in the cluster.
-//
-// +camel-k:trait=deployment.
 type deploymentTrait struct {
-	BaseTrait `property:",squash"`
-	// The maximum time in seconds for the deployment to make progress before it
-	// is considered to be failed. It defaults to 60s.
-	ProgressDeadlineSeconds *int32 `property:"progress-deadline-seconds" json:"progressDeadlineSeconds,omitempty"`
+	BaseTrait
+	v1.DeploymentTrait `property:",squash"`
 }
 
 var _ ControllerStrategySelector = &deploymentTrait{}

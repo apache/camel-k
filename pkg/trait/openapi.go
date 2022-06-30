@@ -47,13 +47,9 @@ import (
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
-// The OpenAPI DSL trait is internally used to allow creating integrations from a OpenAPI specs.
-//
-// +camel-k:trait=openapi.
 type openAPITrait struct {
-	BaseTrait `property:",squash"`
-	// The configmaps holding the spec of the OpenAPI
-	Configmaps []string `property:"configmaps" json:"configmaps,omitempty"`
+	BaseTrait
+	v1.OpenAPITrait `property:",squash"`
 }
 
 func newOpenAPITrait() Trait {

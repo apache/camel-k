@@ -15,41 +15,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package test
+package v1
 
-import (
-	"encoding/json"
-	"testing"
-
-	"github.com/stretchr/testify/assert"
-
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-)
-
-func TraitSpecFromMap(t *testing.T, spec map[string]interface{}) v1.TraitSpec {
-	t.Helper()
-
-	var trait v1.TraitSpec
-
-	data, err := json.Marshal(spec)
-	assert.Nil(t, err)
-
-	err = json.Unmarshal(data, &trait.Configuration)
-	assert.Nil(t, err)
-
-	return trait
-}
-
-func TraitSpecToMap(t *testing.T, spec v1.TraitSpec) map[string]string {
-	t.Helper()
-
-	trait := make(map[string]string)
-
-	data, err := json.Marshal(spec.Configuration)
-	assert.Nil(t, err)
-
-	err = json.Unmarshal(data, &trait)
-	assert.Nil(t, err)
-
-	return trait
+// The Dependencies trait is internally used to automatically add runtime dependencies based on the
+// integration that the user wants to run.
+//
+// +camel-k:trait=dependencies.
+type DependenciesTrait struct {
+	Trait `property:",squash" json:",inline"`
 }

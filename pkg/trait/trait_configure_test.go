@@ -23,9 +23,9 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestTraitConfigurationFromAnnotations(t *testing.T) {
@@ -39,11 +39,11 @@ func TestTraitConfigurationFromAnnotations(t *testing.T) {
 			},
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
-				Traits: map[string]v1.TraitSpec{
-					"cron": test.TraitSpecFromMap(t, map[string]interface{}{
-						"fallback":          true,
-						"concurrencyPolicy": "mypolicy",
-					}),
+				Traits: v1.Traits{
+					Cron: &v1.CronTrait{
+						Fallback:          pointer.Bool(true),
+						ConcurrencyPolicy: "mypolicy",
+					},
 				},
 			},
 		},
@@ -82,42 +82,44 @@ func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
 				},
 			},
 			Spec: v1.IntegrationPlatformSpec{
-				Traits: map[string]v1.TraitSpec{
-					"cron": test.TraitSpecFromMap(t, map[string]interface{}{
-						"components": "cmp1",
-						"schedule":   "schedule1",
-					}),
+				Traits: v1.Traits{
+					Cron: &v1.CronTrait{
+						Components:        "cmp1",
+						Schedule:          "schedule1",
+						ConcurrencyPolicy: "policy1",
+					},
 				},
 			},
 		},
 		IntegrationKit: &v1.IntegrationKit{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
-					"trait.camel.apache.org/cron.components":         "cmp4",
+					"trait.camel.apache.org/cron.components":         "cmp3",
 					"trait.camel.apache.org/cron.concurrency-policy": "policy2",
+					"trait.camel.apache.org/builder.verbose":         "true",
 				},
 			},
 			Spec: v1.IntegrationKitSpec{
-				Traits: map[string]v1.TraitSpec{
-					"cron": test.TraitSpecFromMap(t, map[string]interface{}{
-						"components":        "cmp3",
-						"concurrencyPolicy": "policy1",
-					}),
+				Traits: v1.IntegrationKitTraits{
+					Builder: &v1.BuilderTrait{
+						Verbose: pointer.Bool(false),
+					},
 				},
 			},
 		},
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
+					"trait.camel.apache.org/cron.components":         "cmp4",
 					"trait.camel.apache.org/cron.concurrency-policy": "policy4",
 				},
 			},
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
-				Traits: map[string]v1.TraitSpec{
-					"cron": test.TraitSpecFromMap(t, map[string]interface{}{
-						"concurrencyPolicy": "policy3",
-					}),
+				Traits: v1.Traits{
+					Cron: &v1.CronTrait{
+						ConcurrencyPolicy: "policy3",
+					},
 				},
 			},
 		},
@@ -127,6 +129,7 @@ func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
 	assert.Equal(t, "schedule2", c.GetTrait("cron").(*cronTrait).Schedule)
 	assert.Equal(t, "cmp4", c.GetTrait("cron").(*cronTrait).Components)
 	assert.Equal(t, "policy4", c.GetTrait("cron").(*cronTrait).ConcurrencyPolicy)
+	assert.Equal(t, pointer.Bool(true), c.GetTrait("builder").(*builderTrait).Verbose)
 }
 
 func TestTraitListConfigurationFromAnnotations(t *testing.T) {

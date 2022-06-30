@@ -158,7 +158,6 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	catalog := trait.NewCatalog(client)
 
 	source, err := o.decode(args[0], sourceKey)
 	if err != nil {
@@ -210,11 +209,9 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 		if binding.Spec.Integration == nil {
 			binding.Spec.Integration = &v1.IntegrationSpec{}
 		}
-		traits, err := configureTraits(o.Traits, catalog)
-		if err != nil {
+		if err := configureTraits(o.Traits, &binding.Spec.Integration.Traits); err != nil {
 			return err
 		}
-		binding.Spec.Integration.Traits = traits
 	}
 
 	if o.OutputFormat != "" {

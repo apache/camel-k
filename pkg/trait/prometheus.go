@@ -30,30 +30,17 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 )
 
-// The Prometheus trait configures a Prometheus-compatible endpoint. It also creates a `PodMonitor` resource,
-// so that the endpoint can be scraped automatically, when using the Prometheus operator.
-//
-// The metrics are exposed using MicroProfile Metrics.
-//
-// WARNING: The creation of the `PodMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]
-// custom resource definition to be installed.
-// You can set `pod-monitor` to `false` for the Prometheus trait to work without the Prometheus Operator.
-//
-// The Prometheus trait is disabled by default.
-//
-// +camel-k:trait=prometheus.
 type prometheusTrait struct {
-	BaseTrait `property:",squash"`
-	// Whether a `PodMonitor` resource is created (default `true`).
-	PodMonitor *bool `property:"pod-monitor" json:"podMonitor,omitempty"`
-	// The `PodMonitor` resource labels, applicable when `pod-monitor` is `true`.
-	PodMonitorLabels []string `property:"pod-monitor-labels" json:"podMonitorLabels,omitempty"`
+	BaseTrait
+	v1.PrometheusTrait `property:",squash"`
 }
 
 func newPrometheusTrait() Trait {
 	return &prometheusTrait{
-		BaseTrait:  NewBaseTrait("prometheus", 1900),
-		PodMonitor: pointer.Bool(true),
+		BaseTrait: NewBaseTrait("prometheus", 1900),
+		PrometheusTrait: v1.PrometheusTrait{
+			PodMonitor: pointer.Bool(true),
+		},
 	}
 }
 

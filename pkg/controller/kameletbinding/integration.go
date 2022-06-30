@@ -213,12 +213,7 @@ func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding
 		if b == nil {
 			continue
 		}
-		if integration.Spec.Traits == nil {
-			integration.Spec.Traits = make(map[string]v1.TraitSpec)
-		}
-		for k, v := range b.Traits {
-			integration.Spec.Traits[k] = v
-		}
+		integration.Spec.Traits = b.Traits
 		for k, v := range b.ApplicationProperties {
 			entry, err := property.EncodePropertyFileEntry(k, v)
 			if err != nil {
