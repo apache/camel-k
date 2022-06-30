@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -29,6 +30,13 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/mitchellh/mapstructure"
 )
+
+type optionMap map[string]map[string]interface{}
+
+// The list of known addons is used for handling backward compatibility.
+var knownAddons = []string{"keda", "master", "strimzi", "3scale", "tracing"}
+
+var traitConfigRegexp = regexp.MustCompile(`^([a-z0-9-]+)((?:\.[a-z0-9-]+)(?:\[[0-9]+\]|\.[A-Za-z0-9-_]+)*)=(.*)$`)
 
 func validateTraits(catalog *trait.Catalog, traits []string) error {
 	tp := catalog.ComputeTraitsProperties()
@@ -52,6 +60,20 @@ func configureTraits(options []string, traits interface{}, catalog trait.Finder)
 		return err
 	}
 
+	//
+	// Known addons need to be put aside here, as otherwise the deprecated addon fields on
+	// Traits might be accidentally populated. The deprecated addon fields are preserved
+	// for backward compatibility and should be populated only when the operator reads
+	// existing CRs from the API server.
+	//
+	addons := make(optionMap)
+	for _, id := range knownAddons {
+		if config[id] != nil {
+			addons[id] = config[id]
+			delete(config, id)
+		}
+	}
+
 	md := mapstructure.Metadata{}
 	decoder, err := mapstructure.NewDecoder(
 		&mapstructure.DecoderConfig{
@@ -69,21 +91,20 @@ func configureTraits(options []string, traits interface{}, catalog trait.Finder)
 		return err
 	}
 
-	if len(md.Unused) == 0 {
-		// No addons found
-		return nil
-	}
-
-	addons := make(map[string]map[string]interface{})
-	for _, id := range md.Unused {
+	// in case there are unknown addons
+	for _, prop := range md.Unused {
+		id := strings.Split(prop, ".")[0]
 		addons[id] = config[id]
 	}
 
+	if len(addons) == 0 {
+		return nil
+	}
 	return configureAddons(addons, traits, catalog)
 }
 
-func optionsToMap(options []string) (map[string]map[string]interface{}, error) {
-	optionMap := make(map[string]map[string]interface{})
+func optionsToMap(options []string) (optionMap, error) {
+	optionMap := make(optionMap)
 
 	for _, option := range options {
 		parts := traitConfigRegexp.FindStringSubmatch(option)
@@ -130,7 +151,7 @@ func optionsToMap(options []string) (map[string]map[string]interface{}, error) {
 	return optionMap, nil
 }
 
-func configureAddons(config map[string]map[string]interface{}, traits interface{}, catalog trait.Finder) error {
+func configureAddons(config optionMap, traits interface{}, catalog trait.Finder) error {
 	// Addon traits require raw message mapping
 	addons := make(map[string]v1.AddonTrait)
 	for id, props := range config {
