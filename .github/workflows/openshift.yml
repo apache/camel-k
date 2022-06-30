@@ -99,7 +99,7 @@ jobs:
     - id: change-context
       name: Change the Kamel Cluster Context to Admin
       run: |
-        ./.github/actions/kamel-config-cluster/change-context.sh
+        ./.github/actions/kamel-config-cluster/change-context.sh \
           -a "${{ steps.config-cluster.outputs.cluster-kube-admin-user-ctx }}"
 
     - name: Run IT 2

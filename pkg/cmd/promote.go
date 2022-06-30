@@ -39,8 +39,6 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
-
-	rbacv1ac "k8s.io/client-go/applyconfigurations/rbac/v1"
 )
 
 var namedConfRegExp = regexp.MustCompile("([a-z0-9-.]+)/.*")
@@ -464,20 +462,29 @@ func editContainerImage(contTrait v1.TraitSpec, image string) (v1.TraitSpec, err
 // image cannot be pulled.
 //
 func addSystemPullerRoleBinding(ctx context.Context, c client.Client, sourceNS string, destNS string) error {
-	rb := rbacv1ac.RoleBinding(fmt.Sprintf("%s-image-puller", destNS), sourceNS).
-		WithSubjects(
-			rbacv1ac.Subject().
-				WithKind("ServiceAccount").
-				WithNamespace(destNS).
-				WithName("default"),
-		).
-		WithRoleRef(rbacv1ac.RoleRef().
-			WithAPIGroup(rbacv1.GroupName).
-			WithKind("ClusterRole").
-			WithName("system:image-puller"))
-
-	_, err := c.RbacV1().RoleBindings(sourceNS).
-		Apply(ctx, rb, metav1.ApplyOptions{FieldManager: "default", Force: true})
+	rb := &rbacv1.RoleBinding{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "RoleBinding",
+			APIVersion: "rbac.authorization.k8s.io/v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      fmt.Sprintf("%s-image-puller", destNS),
+			Namespace: sourceNS,
+		},
+		Subjects: []rbacv1.Subject{
+			{
+				Kind:      "ServiceAccount",
+				Name:      "default",
+				Namespace: destNS,
+			},
+		},
+		RoleRef: rbacv1.RoleRef{
+			Kind: "ClusterRole",
+			Name: "system:image-puller",
+		},
+	}
+	applier := c.ServerOrClientSideApplier()
+	err := applier.Apply(ctx, rb)
 
 	return err
 }
