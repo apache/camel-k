@@ -24,6 +24,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -87,10 +88,12 @@ func TestKnativeService(t *testing.T) {
 					{Type: "secret", Value: "my-secret"},
 					{Type: "property", Value: "my-property=my-property-value"},
 				},
-				Traits: map[string]v1.TraitSpec{
-					"knative-service": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": true,
-					}),
+				Traits: v1.Traits{
+					KnativeService: &v1.KnativeServiceTrait{
+						Trait: v1.Trait{
+							Enabled: pointer.Bool(true),
+						},
+					},
 				},
 			},
 		},
@@ -201,17 +204,19 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKnative,
-				Traits: map[string]v1.TraitSpec{
-					"deployer": test.TraitSpecFromMap(t, map[string]interface{}{
-						"kind": "knative-service",
-					}),
-					"knative-service": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": true,
-						"auto":    false,
-					}),
-					"container": test.TraitSpecFromMap(t, map[string]interface{}{
-						"name": "my-container-name",
-					}),
+				Traits: v1.Traits{
+					Deployer: &v1.DeployerTrait{
+						Kind: "knative-service",
+					},
+					KnativeService: &v1.KnativeServiceTrait{
+						Trait: v1.Trait{
+							Enabled: pointer.Bool(true),
+						},
+						Auto: pointer.Bool(false),
+					},
+					Container: &v1.ContainerTrait{
+						Name: "my-container-name",
+					},
 				},
 			},
 		},
@@ -248,10 +253,10 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 
 	assert.NotNil(t, s)
 
-	trait := test.TraitSpecToMap(t, environment.Integration.Spec.Traits["container"])
+	trait := environment.Integration.Spec.Traits.Container
 	assert.Equal(
 		t,
-		trait["name"],
+		trait.Name,
 		s.Spec.ConfigurationSpec.Template.Spec.Containers[0].Name,
 	)
 }
@@ -359,10 +364,10 @@ func TestKnativeServiceWithRollout(t *testing.T) {
 						Language: v1.LanguageXML,
 					},
 				},
-				Traits: map[string]v1.TraitSpec{
-					"knative-service": test.TraitSpecFromMap(t, map[string]interface{}{
-						"rolloutDuration": "60s",
-					}),
+				Traits: v1.Traits{
+					KnativeService: &v1.KnativeServiceTrait{
+						RolloutDuration: "60s",
+					},
 				},
 			},
 		},

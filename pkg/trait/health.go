@@ -34,50 +34,18 @@ const (
 	defaultReadinessProbePath = "/q/health/ready"
 )
 
-// The health trait is responsible for configuring the health probes on the integration container.
-//
-// It's disabled by default.
-//
-// +camel-k:trait=health.
 type healthTrait struct {
-	BaseTrait `property:",squash"`
-
-	// Configures the liveness probe for the integration container (default `false`).
-	LivenessProbeEnabled *bool `property:"liveness-probe-enabled" json:"livenessProbeEnabled,omitempty"`
-	// Scheme to use when connecting to the liveness probe (default `HTTP`).
-	LivenessScheme string `property:"liveness-scheme" json:"livenessScheme,omitempty"`
-	// Number of seconds after the container has started before the liveness probe is initiated.
-	LivenessInitialDelay int32 `property:"liveness-initial-delay" json:"livenessInitialDelay,omitempty"`
-	// Number of seconds after which the liveness probe times out.
-	LivenessTimeout int32 `property:"liveness-timeout" json:"livenessTimeout,omitempty"`
-	// How often to perform the liveness probe.
-	LivenessPeriod int32 `property:"liveness-period" json:"livenessPeriod,omitempty"`
-	// Minimum consecutive successes for the liveness probe to be considered successful after having failed.
-	LivenessSuccessThreshold int32 `property:"liveness-success-threshold" json:"livenessSuccessThreshold,omitempty"`
-	// Minimum consecutive failures for the liveness probe to be considered failed after having succeeded.
-	LivenessFailureThreshold int32 `property:"liveness-failure-threshold" json:"livenessFailureThreshold,omitempty"`
-
-	// Configures the readiness probe for the integration container (default `true`).
-	ReadinessProbeEnabled *bool `property:"readiness-probe-enabled" json:"readinessProbeEnabled,omitempty"`
-	// Scheme to use when connecting to the readiness probe (default `HTTP`).
-	ReadinessScheme string `property:"readiness-scheme" json:"readinessScheme,omitempty"`
-	// Number of seconds after the container has started before the readiness probe is initiated.
-	ReadinessInitialDelay int32 `property:"readiness-initial-delay" json:"readinessInitialDelay,omitempty"`
-	// Number of seconds after which the readiness probe times out.
-	ReadinessTimeout int32 `property:"readiness-timeout" json:"readinessTimeout,omitempty"`
-	// How often to perform the readiness probe.
-	ReadinessPeriod int32 `property:"readiness-period" json:"readinessPeriod,omitempty"`
-	// Minimum consecutive successes for the readiness probe to be considered successful after having failed.
-	ReadinessSuccessThreshold int32 `property:"readiness-success-threshold" json:"readinessSuccessThreshold,omitempty"`
-	// Minimum consecutive failures for the readiness probe to be considered failed after having succeeded.
-	ReadinessFailureThreshold int32 `property:"readiness-failure-threshold" json:"readinessFailureThreshold,omitempty"`
+	BaseTrait
+	v1.HealthTrait `property:",squash"`
 }
 
 func newHealthTrait() Trait {
 	return &healthTrait{
-		BaseTrait:       NewBaseTrait("health", 1700),
-		LivenessScheme:  string(corev1.URISchemeHTTP),
-		ReadinessScheme: string(corev1.URISchemeHTTP),
+		BaseTrait: NewBaseTrait("health", 1700),
+		HealthTrait: v1.HealthTrait{
+			LivenessScheme:  string(corev1.URISchemeHTTP),
+			ReadinessScheme: string(corev1.URISchemeHTTP),
+		},
 	}
 }
 

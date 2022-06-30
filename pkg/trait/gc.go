@@ -57,43 +57,31 @@ var (
 	diskCachedDiscovery   discovery.CachedDiscoveryInterface
 )
 
-type discoveryCacheType string
-
-const (
-	disabledDiscoveryCache discoveryCacheType = "disabled"
-	diskDiscoveryCache     discoveryCacheType = "disk"
-	memoryDiscoveryCache   discoveryCacheType = "memory"
-)
-
-// The GC Trait garbage-collects all resources that are no longer necessary upon integration updates.
-//
-// +camel-k:trait=gc.
-type garbageCollectorTrait struct {
-	BaseTrait `property:",squash"`
-	// Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`)
-	DiscoveryCache *discoveryCacheType `property:"discovery-cache" json:"discoveryCache,omitempty"`
+type gcTrait struct {
+	BaseTrait
+	v1.GCTrait `property:",squash"`
 }
 
-func newGarbageCollectorTrait() Trait {
-	return &garbageCollectorTrait{
+func newGCTrait() Trait {
+	return &gcTrait{
 		BaseTrait: NewBaseTrait("gc", 1200),
 	}
 }
 
-func (t *garbageCollectorTrait) Configure(e *Environment) (bool, error) {
+func (t *gcTrait) Configure(e *Environment) (bool, error) {
 	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 
 	if t.DiscoveryCache == nil {
-		s := memoryDiscoveryCache
+		s := v1.MemoryDiscoveryCache
 		t.DiscoveryCache = &s
 	}
 
 	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), nil
 }
 
-func (t *garbageCollectorTrait) Apply(e *Environment) error {
+func (t *gcTrait) Apply(e *Environment) error {
 	if e.IntegrationInRunningPhases() && e.Integration.GetGeneration() > 1 {
 		// Register a post action that deletes the existing resources that are labelled
 		// with the previous integration generation(s).
@@ -122,7 +110,7 @@ func (t *garbageCollectorTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) error {
+func (t *gcTrait) garbageCollectResources(e *Environment) error {
 	deletableGVKs, err := t.getDeletableTypes(e)
 	if err != nil {
 		return errors.Wrap(err, "cannot discover GVK types")
@@ -140,7 +128,7 @@ func (t *garbageCollectorTrait) garbageCollectResources(e *Environment) error {
 	return t.deleteEachOf(e.Ctx, deletableGVKs, e, selector)
 }
 
-func (t *garbageCollectorTrait) deleteEachOf(ctx context.Context, deletableGVKs map[schema.GroupVersionKind]struct{}, e *Environment, selector labels.Selector) error {
+func (t *gcTrait) deleteEachOf(ctx context.Context, deletableGVKs map[schema.GroupVersionKind]struct{}, e *Environment, selector labels.Selector) error {
 	for GVK := range deletableGVKs {
 		resources := unstructured.UnstructuredList{
 			Object: map[string]interface{}{
@@ -179,7 +167,7 @@ func (t *garbageCollectorTrait) deleteEachOf(ctx context.Context, deletableGVKs 
 	return nil
 }
 
-func (t *garbageCollectorTrait) canBeDeleted(e *Environment, u unstructured.Unstructured) bool {
+func (t *gcTrait) canBeDeleted(e *Environment, u unstructured.Unstructured) bool {
 	// Only delete direct children of the integration, otherwise we can affect the behavior of external controllers (i.e. Knative)
 	for _, o := range u.GetOwnerReferences() {
 		if o.Kind == v1.IntegrationKind && strings.HasPrefix(o.APIVersion, v1.SchemeGroupVersion.Group) && o.Name == e.Integration.Name {
@@ -189,7 +177,7 @@ func (t *garbageCollectorTrait) canBeDeleted(e *Environment, u unstructured.Unst
 	return false
 }
 
-func (t *garbageCollectorTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind]struct{}, error) {
+func (t *gcTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind]struct{}, error) {
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -254,9 +242,9 @@ func (t *garbageCollectorTrait) getDeletableTypes(e *Environment) (map[schema.Gr
 	return collectableGVKs, nil
 }
 
-func (t *garbageCollectorTrait) discoveryClient() (discovery.DiscoveryInterface, error) {
+func (t *gcTrait) discoveryClient() (discovery.DiscoveryInterface, error) {
 	switch *t.DiscoveryCache {
-	case diskDiscoveryCache:
+	case v1.DiskDiscoveryCache:
 		if diskCachedDiscovery != nil {
 			return diskCachedDiscovery, nil
 		}
@@ -267,14 +255,14 @@ func (t *garbageCollectorTrait) discoveryClient() (discovery.DiscoveryInterface,
 		diskCachedDiscovery, err = disk.NewCachedDiscoveryClientForConfig(config, diskCacheDir, httpCacheDir, 10*time.Minute)
 		return diskCachedDiscovery, err
 
-	case memoryDiscoveryCache:
+	case v1.MemoryDiscoveryCache:
 		if memoryCachedDiscovery != nil {
 			return memoryCachedDiscovery, nil
 		}
 		memoryCachedDiscovery = memory.NewMemCacheClient(t.Client.Discovery())
 		return memoryCachedDiscovery, nil
 
-	case disabledDiscoveryCache, "":
+	case v1.DisabledDiscoveryCache, "":
 		return t.Client.Discovery(), nil
 
 	default:

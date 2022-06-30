@@ -27,16 +27,9 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// The Owner trait ensures that all created resources belong to the integration being created
-// and transfers annotations and labels on the integration onto these owned resources.
-//
-// +camel-k:trait=owner.
 type ownerTrait struct {
-	BaseTrait `property:",squash"`
-	// The set of annotations to be transferred
-	TargetAnnotations []string `property:"target-annotations" json:"targetAnnotations,omitempty"`
-	// The set of labels to be transferred
-	TargetLabels []string `property:"target-labels" json:"targetLabels,omitempty"`
+	BaseTrait
+	v1.OwnerTrait `property:",squash"`
 }
 
 func newOwnerTrait() Trait {

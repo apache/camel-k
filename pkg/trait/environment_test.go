@@ -25,11 +25,11 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestDefaultEnvironment(t *testing.T) {
@@ -81,10 +81,10 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 	assert.Nil(t, err)
 
 	env := mockEnvironment(c)
-	env.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		"environment": test.TraitSpecFromMap(t, map[string]interface{}{
-			"containerMeta": true,
-		}),
+	env.Integration.Spec.Traits = v1.Traits{
+		Environment: &v1.EnvironmentTrait{
+			ContainerMeta: pointer.Bool(true),
+		},
 	}
 	env.Platform.ResyncStatusFullConfig()
 
@@ -120,10 +120,10 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 	assert.Nil(t, err)
 
 	env := mockEnvironment(c)
-	env.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		"environment": test.TraitSpecFromMap(t, map[string]interface{}{
-			"containerMeta": false,
-		}),
+	env.Integration.Spec.Traits = v1.Traits{
+		Environment: &v1.EnvironmentTrait{
+			ContainerMeta: pointer.Bool(false),
+		},
 	}
 
 	env.Platform.ResyncStatusFullConfig()
@@ -160,10 +160,10 @@ func TestCustomEnvVars(t *testing.T) {
 	assert.Nil(t, err)
 
 	env := mockEnvironment(c)
-	env.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		"environment": test.TraitSpecFromMap(t, map[string]interface{}{
-			"vars": []string{"key1=val1", "key2 = val2"},
-		}),
+	env.Integration.Spec.Traits = v1.Traits{
+		Environment: &v1.EnvironmentTrait{
+			Vars: []string{"key1=val1", "key2 = val2"},
+		},
 	}
 	env.Platform.ResyncStatusFullConfig()
 

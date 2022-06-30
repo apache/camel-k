@@ -18,9 +18,10 @@ limitations under the License.
 package bindings
 
 import (
-	"encoding/json"
 	"net/url"
 	"strings"
+
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	knativeapis "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
@@ -53,7 +54,6 @@ func (k KnativeURIBindingProvider) Translate(ctx BindingContext, endpointCtx End
 		return nil, nil
 	}
 
-	knativeConfig := make(map[string]interface{})
 	originalURI, err := url.Parse(*e.URI)
 	if err != nil {
 		return nil, err
@@ -71,12 +71,6 @@ func (k KnativeURIBindingProvider) Translate(ctx BindingContext, endpointCtx End
 	if err != nil {
 		return nil, err
 	}
-	knativeConfig["configuration"] = config
-	knativeConfig["sinkBinding"] = false
-	knativeConfigJSON, err := json.Marshal(knativeConfig)
-	if err != nil {
-		return nil, err
-	}
 
 	// Rewrite URI to match the service definition
 	serviceURI := "knative:endpoint/sink"
@@ -88,11 +82,10 @@ func (k KnativeURIBindingProvider) Translate(ctx BindingContext, endpointCtx End
 
 	return &Binding{
 		URI: serviceURI,
-		Traits: map[string]v1.TraitSpec{
-			"knative": {
-				Configuration: v1.TraitConfiguration{
-					RawMessage: knativeConfigJSON,
-				},
+		Traits: v1.Traits{
+			Knative: &v1.KnativeTrait{
+				Configuration: config,
+				SinkBinding:   pointer.Bool(false),
 			},
 		},
 	}, nil

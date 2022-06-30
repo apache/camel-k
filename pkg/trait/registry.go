@@ -36,12 +36,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// The Registry trait sets up Maven to use the Image registry
-// as a Maven repository.
-//
-// +camel-k:trait=registry.
 type registryTrait struct {
-	BaseTrait `property:",squash"`
+	BaseTrait
+	v1.RegistryTrait
 }
 
 func newRegistryTrait() Trait {

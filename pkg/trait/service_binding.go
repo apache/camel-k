@@ -36,14 +36,9 @@ import (
 	"github.com/apache/camel-k/pkg/util/reference"
 )
 
-// The Service Binding trait allows users to connect to Services in Kubernetes:
-// https://github.com/k8s-service-bindings/spec#service-binding
-// As the specification is still evolving this is subject to change
-// +camel-k:trait=service-binding.
 type serviceBindingTrait struct {
-	BaseTrait `property:",squash"`
-	// List of Services in the form [[apigroup/]version:]kind:[namespace/]name
-	Services []string `property:"services" json:"services,omitempty"`
+	BaseTrait
+	v1.ServiceBindingTrait `property:",squash"`
 }
 
 func newServiceBindingTrait() Trait {

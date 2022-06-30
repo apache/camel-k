@@ -20,6 +20,7 @@ package trait
 import (
 	"k8s.io/utils/pointer"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
@@ -32,28 +33,17 @@ const (
 	defaultLogLevel                        = "INFO"
 )
 
-// The Logging trait is used to configure Integration runtime logging options (such as color and format).
-// The logging backend is provided by Quarkus, whose configuration is documented at https://quarkus.io/guides/logging.
-//
-// +camel-k:trait=logging.
 type loggingTrait struct {
-	BaseTrait `property:",squash"`
-	// Colorize the log output
-	Color *bool `property:"color" json:"color,omitempty"`
-	// Logs message format
-	Format string `property:"format" json:"format,omitempty"`
-	// Adjust the logging level (defaults to INFO)
-	Level string `property:"level" json:"level,omitempty"`
-	// Output the logs in JSON
-	JSON *bool `property:"json" json:"json,omitempty"`
-	// Enable "pretty printing" of the JSON logs
-	JSONPrettyPrint *bool `property:"json-pretty-print" json:"jsonPrettyPrint,omitempty"`
+	BaseTrait
+	v1.LoggingTrait `property:",squash"`
 }
 
 func newLoggingTraitTrait() Trait {
 	return &loggingTrait{
 		BaseTrait: NewBaseTrait("logging", 800),
-		Level:     defaultLogLevel,
+		LoggingTrait: v1.LoggingTrait{
+			Level: defaultLogLevel,
+		},
 	}
 }
 

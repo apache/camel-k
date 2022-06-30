@@ -27,6 +27,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -217,10 +218,12 @@ func TestRoute_Default(t *testing.T) {
 func TestRoute_Disabled(t *testing.T) {
 	name := xid.New().String()
 	environment := createTestRouteEnvironment(t, name)
-	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		"route": test.TraitSpecFromMap(t, map[string]interface{}{
-			"enabled": false,
-		}),
+	environment.Integration.Spec.Traits = v1.Traits{
+		Route: &v1.RouteTrait{
+			Trait: v1.Trait{
+				Enabled: pointer.Bool(false),
+			},
+		},
 	}
 
 	traitsCatalog := environment.Catalog
@@ -256,10 +259,10 @@ func TestRoute_Host(t *testing.T) {
 	environment := createTestRouteEnvironment(t, name)
 	traitsCatalog := environment.Catalog
 
-	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		"route": test.TraitSpecFromMap(t, map[string]interface{}{
-			"host": host,
-		}),
+	environment.Integration.Spec.Traits = v1.Traits{
+		Route: &v1.RouteTrait{
+			Host: host,
+		},
 	}
 
 	err := traitsCatalog.apply(environment)
@@ -282,15 +285,15 @@ func TestRoute_TLS_From_Secret_reencrypt(t *testing.T) {
 	environment := createTestRouteEnvironment(t, name)
 	traitsCatalog := environment.Catalog
 
-	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		"route": test.TraitSpecFromMap(t, map[string]interface{}{
-			"tlsTermination":                    string(routev1.TLSTerminationReencrypt),
-			"host":                              host,
-			"tlsKeySecret":                      tlsKeySecretName,
-			"tlsCertificateSecret":              tlsMultipleSecretsName + "/" + tlsMultipleSecretsCert1Key,
-			"tlsCACertificateSecret":            tlsMultipleSecretsName + "/" + tlsMultipleSecretsCert2Key,
-			"tlsDestinationCACertificateSecret": tlsMultipleSecretsName + "/" + tlsMultipleSecretsCert3Key,
-		}),
+	environment.Integration.Spec.Traits = v1.Traits{
+		Route: &v1.RouteTrait{
+			TLSTermination:                    string(routev1.TLSTerminationReencrypt),
+			Host:                              host,
+			TLSKeySecret:                      tlsKeySecretName,
+			TLSCertificateSecret:              tlsMultipleSecretsName + "/" + tlsMultipleSecretsCert1Key,
+			TLSCACertificateSecret:            tlsMultipleSecretsName + "/" + tlsMultipleSecretsCert2Key,
+			TLSDestinationCACertificateSecret: tlsMultipleSecretsName + "/" + tlsMultipleSecretsCert3Key,
+		},
 	}
 	err := traitsCatalog.apply(environment)
 
@@ -317,15 +320,15 @@ func TestRoute_TLS_wrong_secret(t *testing.T) {
 	environment := createTestRouteEnvironment(t, name)
 	traitsCatalog := environment.Catalog
 
-	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		"route": test.TraitSpecFromMap(t, map[string]interface{}{
-			"tlsTermination":                    string(routev1.TLSTerminationReencrypt),
-			"host":                              host,
-			"tlsKeySecret":                      "foo",
-			"tlsCertificateSecret":              "bar",
-			"tlsCACertificateSecret":            "test",
-			"tlsDestinationCACertificateSecret": "404",
-		}),
+	environment.Integration.Spec.Traits = v1.Traits{
+		Route: &v1.RouteTrait{
+			TLSTermination:                    string(routev1.TLSTerminationReencrypt),
+			Host:                              host,
+			TLSKeySecret:                      "foo",
+			TLSCertificateSecret:              "bar",
+			TLSCACertificateSecret:            "test",
+			TLSDestinationCACertificateSecret: "404",
+		},
 	}
 	err := traitsCatalog.apply(environment)
 
@@ -346,14 +349,14 @@ func TestRoute_TLS_secret_wrong_key(t *testing.T) {
 	environment := createTestRouteEnvironment(t, name)
 	traitsCatalog := environment.Catalog
 
-	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		"route": test.TraitSpecFromMap(t, map[string]interface{}{
-			"tlsTermination":         string(routev1.TLSTerminationReencrypt),
-			"host":                   host,
-			"tlsKeySecret":           tlsKeySecretName,
-			"tlsCertificateSecret":   tlsMultipleSecretsName + "/" + tlsMultipleSecretsCert1Key,
-			"tlsCACertificateSecret": tlsMultipleSecretsName + "/foo",
-		}),
+	environment.Integration.Spec.Traits = v1.Traits{
+		Route: &v1.RouteTrait{
+			TLSTermination:         string(routev1.TLSTerminationReencrypt),
+			Host:                   host,
+			TLSKeySecret:           tlsKeySecretName,
+			TLSCertificateSecret:   tlsMultipleSecretsName + "/" + tlsMultipleSecretsCert1Key,
+			TLSCACertificateSecret: tlsMultipleSecretsName + "/foo",
+		},
 	}
 	err := traitsCatalog.apply(environment)
 
@@ -374,14 +377,14 @@ func TestRoute_TLS_secret_missing_key(t *testing.T) {
 	environment := createTestRouteEnvironment(t, name)
 	traitsCatalog := environment.Catalog
 
-	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		"route": test.TraitSpecFromMap(t, map[string]interface{}{
-			"tlsTermination":         string(routev1.TLSTerminationReencrypt),
-			"host":                   host,
-			"tlsKeySecret":           tlsKeySecretName,
-			"tlsCertificateSecret":   tlsMultipleSecretsName + "/" + tlsMultipleSecretsCert1Key,
-			"tlsCACertificateSecret": tlsMultipleSecretsName,
-		}),
+	environment.Integration.Spec.Traits = v1.Traits{
+		Route: &v1.RouteTrait{
+			TLSTermination:         string(routev1.TLSTerminationReencrypt),
+			Host:                   host,
+			TLSKeySecret:           tlsKeySecretName,
+			TLSCertificateSecret:   tlsMultipleSecretsName + "/" + tlsMultipleSecretsCert1Key,
+			TLSCACertificateSecret: tlsMultipleSecretsName,
+		},
 	}
 	err := traitsCatalog.apply(environment)
 
@@ -402,15 +405,15 @@ func TestRoute_TLS_reencrypt(t *testing.T) {
 	environment := createTestRouteEnvironment(t, name)
 	traitsCatalog := environment.Catalog
 
-	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		"route": test.TraitSpecFromMap(t, map[string]interface{}{
-			"tlsTermination":              string(routev1.TLSTerminationReencrypt),
-			"host":                        host,
-			"tlsKey":                      key,
-			"tlsCertificate":              cert,
-			"tlsCACertificate":            caCert,
-			"tlsDestinationCACertificate": destinationCaCert,
-		}),
+	environment.Integration.Spec.Traits = v1.Traits{
+		Route: &v1.RouteTrait{
+			TLSTermination:              string(routev1.TLSTerminationReencrypt),
+			Host:                        host,
+			TLSKey:                      key,
+			TLSCertificate:              cert,
+			TLSCACertificate:            caCert,
+			TLSDestinationCACertificate: destinationCaCert,
+		},
 	}
 	err := traitsCatalog.apply(environment)
 
@@ -437,14 +440,14 @@ func TestRoute_TLS_edge(t *testing.T) {
 	environment := createTestRouteEnvironment(t, name)
 	traitsCatalog := environment.Catalog
 
-	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		"route": test.TraitSpecFromMap(t, map[string]interface{}{
-			"tlsTermination":   string(routev1.TLSTerminationEdge),
-			"host":             host,
-			"tlsKey":           key,
-			"tlsCertificate":   cert,
-			"tlsCACertificate": caCert,
-		}),
+	environment.Integration.Spec.Traits = v1.Traits{
+		Route: &v1.RouteTrait{
+			TLSTermination:   string(routev1.TLSTerminationEdge),
+			Host:             host,
+			TLSKey:           key,
+			TLSCertificate:   cert,
+			TLSCACertificate: caCert,
+		},
 	}
 	err := traitsCatalog.apply(environment)
 
@@ -471,12 +474,12 @@ func TestRoute_TLS_passthrough(t *testing.T) {
 	environment := createTestRouteEnvironment(t, name)
 	traitsCatalog := environment.Catalog
 
-	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		"route": test.TraitSpecFromMap(t, map[string]interface{}{
-			"tlsTermination":                   string(routev1.TLSTerminationPassthrough),
-			"host":                             host,
-			"tlsInsecureEdgeTerminationPolicy": routev1.InsecureEdgeTerminationPolicyAllow,
-		}),
+	environment.Integration.Spec.Traits = v1.Traits{
+		Route: &v1.RouteTrait{
+			TLSTermination:                   string(routev1.TLSTerminationPassthrough),
+			Host:                             host,
+			TLSInsecureEdgeTerminationPolicy: string(routev1.InsecureEdgeTerminationPolicyAllow),
+		},
 	}
 	err := traitsCatalog.apply(environment)
 
@@ -501,10 +504,10 @@ func TestRoute_TLS_passthrough(t *testing.T) {
 func TestRoute_WithCustomServicePort(t *testing.T) {
 	name := xid.New().String()
 	environment := createTestRouteEnvironment(t, name)
-	environment.Integration.Spec.Traits = map[string]v1.TraitSpec{
-		containerTraitID: test.TraitSpecFromMap(t, map[string]interface{}{
-			"servicePortName": "my-port",
-		}),
+	environment.Integration.Spec.Traits = v1.Traits{
+		Container: &v1.ContainerTrait{
+			ServicePortName: "my-port",
+		},
 	}
 
 	traitsCatalog := environment.Catalog
@@ -522,10 +525,10 @@ func TestRoute_WithCustomServicePort(t *testing.T) {
 	assert.NotNil(t, route)
 	assert.NotNil(t, route.Spec.Port)
 
-	trait := test.TraitSpecToMap(t, environment.Integration.Spec.Traits[containerTraitID])
+	trait := environment.Integration.Spec.Traits.Container
 	assert.Equal(
 		t,
-		trait["servicePortName"],
+		trait.ServicePortName,
 		route.Spec.Port.TargetPort.StrVal,
 	)
 }

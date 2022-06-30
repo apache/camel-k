@@ -23,27 +23,13 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/pointer"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-// This trait sets Tolerations over Integration pods. Tolerations allow (but do not require) the pods to schedule onto nodes with matching taints.
-// See https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ for more details.
-//
-// The toleration should be expressed in a similar manner that of taints, i.e., `Key[=Value]:Effect[:Seconds]`, where values in square brackets are optional.
-//
-// For examples:
-//
-// - `node-role.kubernetes.io/master:NoSchedule`
-// - `node.kubernetes.io/network-unavailable:NoExecute:3000`
-// - `disktype=ssd:PreferNoSchedule`
-//
-// It's disabled by default.
-//
-// +camel-k:trait=toleration.
 type tolerationTrait struct {
-	BaseTrait `property:",squash"`
-	// The list of taints to tolerate, in the form `Key[=Value]:Effect[:Seconds]`
-	Taints []string `property:"taints" json:"taints,omitempty"`
+	BaseTrait
+	v1.TolerationTrait `property:",squash"`
 }
 
 func newTolerationTrait() Trait {

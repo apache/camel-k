@@ -30,13 +30,9 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 )
 
-// The error-handler is a platform trait used to inject Error Handler source into the integration runtime.
-//
-// +camel-k:trait=error-handler.
 type errorHandlerTrait struct {
-	BaseTrait `property:",squash"`
-	// The error handler ref name provided or found in application properties
-	ErrorHandlerRef string `property:"ref" json:"ref,omitempty"`
+	BaseTrait
+	v1.ErrorHandlerTrait `property:",squash"`
 }
 
 func newErrorHandlerTrait() Trait {

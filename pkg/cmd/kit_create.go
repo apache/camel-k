@@ -157,7 +157,7 @@ func (command *kitCreateCommandOptions) run(cmd *cobra.Command, args []string) e
 	if err := command.parseAndConvertToTrait(command.Secrets, "mount.config"); err != nil {
 		return err
 	}
-	if err := command.configureTraits(kit, command.Traits, catalog); err != nil {
+	if err := configureTraits(command.Traits, &kit.Spec.Traits); err != nil {
 		return err
 	}
 	existed := false
@@ -188,16 +188,6 @@ func (command *kitCreateCommandOptions) run(cmd *cobra.Command, args []string) e
 	return nil
 }
 
-func (*kitCreateCommandOptions) configureTraits(kit *v1.IntegrationKit, options []string, catalog trait.Finder) error {
-	traits, err := configureTraits(options, catalog)
-	if err != nil {
-		return err
-	}
-
-	kit.Spec.Traits = traits
-
-	return nil
-}
 func (command *kitCreateCommandOptions) parseAndConvertToTrait(params []string, traitParam string) error {
 	for _, param := range params {
 		command.Traits = append(command.Traits, convertToTrait(param, traitParam))

@@ -174,13 +174,11 @@ spec:
   integration:
     traits:
       mount:
-        configuration:
-          configs:
-          - configmap:my-cm
+        configs:
+        - configmap:my-cm
       service-binding:
-        configuration:
-          services:
-          - my-service-binding
+        services:
+        - my-service-binding
   sink:
     uri: my:dst
   source:

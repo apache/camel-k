@@ -19,7 +19,6 @@ package integration
 
 import (
 	"context"
-	"encoding/json"
 	"reflect"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -87,26 +86,10 @@ func integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bo
 	ilog := log.ForIntegration(integration)
 
 	ilog.Debug("Matching integration", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
-	if kit.Status.Phase == v1.IntegrationKitPhaseError {
-		ilog.Debug("Integration kit has a phase of Error", "integration-kit", kit.Name, "namespace", integration.Namespace)
+	if !statusMatches(integration, kit, &ilog) {
 		return false, nil
 	}
-	if kit.Status.Version != integration.Status.Version {
-		ilog.Debug("Integration and integration-kit versions do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
-		return false, nil
-	}
-	if kit.Status.RuntimeProvider != integration.Status.RuntimeProvider {
-		ilog.Debug("Integration and integration-kit runtime providers do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
-		return false, nil
-	}
-	if kit.Status.RuntimeVersion != integration.Status.RuntimeVersion {
-		ilog.Debug("Integration and integration-kit runtime versions do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
-		return false, nil
-	}
-	if len(integration.Status.Dependencies) != len(kit.Spec.Dependencies) {
-		ilog.Debug("Integration and integration-kit have different number of dependencies", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
-		return false, nil
-	}
+
 	// When a platform kit is created it inherits the traits from the integrations and as
 	// some traits may influence the build thus the artifacts present on the container image,
 	// we need to take traits into account when looking up for compatible kits.
@@ -130,6 +113,30 @@ func integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bo
 	return true, nil
 }
 
+func statusMatches(integration *v1.Integration, kit *v1.IntegrationKit, ilog *log.Logger) bool {
+	if kit.Status.Phase == v1.IntegrationKitPhaseError {
+		ilog.Debug("Integration kit has a phase of Error", "integration-kit", kit.Name, "namespace", integration.Namespace)
+		return false
+	}
+	if kit.Status.Version != integration.Status.Version {
+		ilog.Debug("Integration and integration-kit versions do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
+		return false
+	}
+	if kit.Status.RuntimeProvider != integration.Status.RuntimeProvider {
+		ilog.Debug("Integration and integration-kit runtime providers do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
+		return false
+	}
+	if kit.Status.RuntimeVersion != integration.Status.RuntimeVersion {
+		ilog.Debug("Integration and integration-kit runtime versions do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
+		return false
+	}
+	if len(integration.Status.Dependencies) != len(kit.Spec.Dependencies) {
+		ilog.Debug("Integration and integration-kit have different number of dependencies", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
+	}
+
+	return true
+}
+
 // kitMatches returns whether the two v1.IntegrationKit match.
 func kitMatches(kit1 *v1.IntegrationKit, kit2 *v1.IntegrationKit) (bool, error) {
 	version := kit1.Status.Version
@@ -149,132 +156,66 @@ func kitMatches(kit1 *v1.IntegrationKit, kit2 *v1.IntegrationKit) (bool, error) 
 	if !util.StringSliceContains(kit1.Spec.Dependencies, kit2.Spec.Dependencies) {
 		return false, nil
 	}
+
 	return true, nil
 }
 
-func hasMatchingTraits(traits1 map[string]v1.TraitSpec, traits2 map[string]v1.TraitSpec) (bool, error) {
+func hasMatchingTraits(traits interface{}, kitTraits interface{}) (bool, error) {
+	traitsMap, err := trait.ToMap(traits)
+	if err != nil {
+		return false, err
+	}
+	kitTraitsMap, err := trait.ToMap(kitTraits)
+	if err != nil {
+		return false, err
+	}
 	catalog := trait.NewCatalog(nil)
+
 	for _, t := range catalog.AllTraits() {
-		if t != nil && !t.InfluencesKit() {
+		if t == nil || !t.InfluencesKit() {
 			// We don't store the trait configuration if the trait cannot influence the kit behavior
 			continue
 		}
 		id := string(t.ID())
-		t1, ok1 := traits1[id]
-		t2, ok2 := traits2[id]
+		it, ok1 := traitsMap[id]
+		kt, ok2 := kitTraitsMap[id]
 
 		if !ok1 && !ok2 {
 			continue
 		}
+		if !ok1 || !ok2 {
+			return false, nil
+		}
 		if ct, ok := t.(trait.ComparableTrait); ok {
-			if comparable, err := hasComparableTrait(ct, &t1, &t2); err != nil {
+			// if it's match trait use its matches method to determine the match
+			if match, err := matchesComparableTrait(ct, it, kt); !match || err != nil {
 				return false, err
-			} else if comparable {
-				continue
 			}
-		} else if ok1 && ok2 {
-			if match, err := hasMatchingTrait(&t1, &t2); err != nil {
-				return false, err
-			} else if match {
-				continue
+		} else {
+			if !matchesTrait(it, kt) {
+				return false, nil
 			}
 		}
-		return false, nil
 	}
 
 	return true, nil
 }
 
-func hasComparableTrait(t trait.ComparableTrait, ts1 *v1.TraitSpec, ts2 *v1.TraitSpec) (bool, error) {
-	t1 := reflect.New(reflect.TypeOf(t).Elem()).Interface()
-	if ts1.Configuration.RawMessage != nil {
-		data, err := json.Marshal(ts1.Configuration)
-		if err != nil {
-			return false, err
-		}
-		err = json.Unmarshal(data, &t1)
-		if err != nil {
-			return false, err
-		}
+func matchesComparableTrait(ct trait.ComparableTrait, it map[string]interface{}, kt map[string]interface{}) (bool, error) {
+	t1 := reflect.New(reflect.TypeOf(ct).Elem()).Interface()
+	if err := trait.ToTrait(it, &t1); err != nil {
+		return false, err
 	}
 
-	t2 := reflect.New(reflect.TypeOf(t).Elem()).Interface()
-	if ts2.Configuration.RawMessage != nil {
-		data, err := json.Marshal(ts2.Configuration)
-		if err != nil {
-			return false, err
-		}
-		err = json.Unmarshal(data, &t2)
-		if err != nil {
-			return false, err
-		}
+	t2 := reflect.New(reflect.TypeOf(ct).Elem()).Interface()
+	if err := trait.ToTrait(kt, &t2); err != nil {
+		return false, err
 	}
 
 	return t2.(trait.ComparableTrait).Matches(t1.(trait.Trait)), nil
 }
 
-func hasMatchingTrait(ts1 *v1.TraitSpec, ts2 *v1.TraitSpec) (bool, error) {
-	data, err := json.Marshal(ts1.Configuration)
-	if err != nil {
-		return false, err
-	}
-	t1 := make(map[string]interface{})
-	err = json.Unmarshal(data, &t1)
-	if err != nil {
-		return false, err
-	}
-	data, err = json.Marshal(ts2.Configuration)
-	if err != nil {
-		return false, err
-	}
-	t2 := make(map[string]interface{})
-	err = json.Unmarshal(data, &t2)
-	if err != nil {
-		return false, err
-	}
-	for ck, cv := range t2 {
-		iv, ok := t1[ck]
-		if !ok {
-			// skip it because trait configured on kit has a value that is not defined
-			// in integration trait
-			return false, nil
-		}
-		if !equal(iv, cv) {
-			// skip it because trait configured on kit has a value that differs from
-			// the one configured on integration
-			return false, nil
-		}
-	}
-	return true, nil
-}
-
-// We need to try to perform a slice equality in order to prevent a runtime panic.
-func equal(a, b interface{}) bool {
-	aSlice, aOk := a.([]interface{})
-	bSlice, bOk := b.([]interface{})
-
-	if aOk && bOk {
-		// Both are slices
-		return sliceEqual(aSlice, bSlice)
-	}
-
-	if aOk || bOk {
-		// One of the 2 is a slice
-		return false
-	}
-
-	// None is a slice
-	return a == b
-}
-
-func sliceEqual(a, b []interface{}) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i, v := range a {
-		if v != b[i] {
-			return false
-		}
-	}
-	return true
+func matchesTrait(it map[string]interface{}, kt map[string]interface{}) bool {
+	// perform exact match on the two trait maps
+	return reflect.DeepEqual(it, kt)
 }

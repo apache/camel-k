@@ -43,30 +43,18 @@ import (
 	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
-// The JVM trait is used to configure the JVM that runs the integration.
-//
-// +camel-k:trait=jvm.
 type jvmTrait struct {
-	BaseTrait `property:",squash"`
-	// Activates remote debugging, so that a debugger can be attached to the JVM, e.g., using port-forwarding
-	Debug *bool `property:"debug" json:"debug,omitempty"`
-	// Suspends the target JVM immediately before the main class is loaded
-	DebugSuspend *bool `property:"debug-suspend" json:"debugSuspend,omitempty"`
-	// Prints the command used the start the JVM in the container logs (default `true`)
-	PrintCommand *bool `property:"print-command" json:"printCommand,omitempty"`
-	// Transport address at which to listen for the newly launched JVM (default `*:5005`)
-	DebugAddress string `property:"debug-address" json:"debugAddress,omitempty"`
-	// A list of JVM options
-	Options []string `property:"options" json:"options,omitempty"`
-	// Additional JVM classpath (use `Linux` classpath separator)
-	Classpath string `property:"classpath" json:"classpath,omitempty"`
+	BaseTrait
+	v1.JVMTrait `property:",squash"`
 }
 
 func newJvmTrait() Trait {
 	return &jvmTrait{
-		BaseTrait:    NewBaseTrait("jvm", 2000),
-		DebugAddress: "*:5005",
-		PrintCommand: pointer.Bool(true),
+		BaseTrait: NewBaseTrait("jvm", 2000),
+		JVMTrait: v1.JVMTrait{
+			DebugAddress: "*:5005",
+			PrintCommand: pointer.Bool(true),
+		},
 	}
 }
 

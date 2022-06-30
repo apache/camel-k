@@ -24,6 +24,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/log"
@@ -151,10 +152,12 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 					"camel-core",
 					"camel-irc",
 				},
-				Traits: map[string]v1.TraitSpec{
-					"builder": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": "false",
-					}),
+				Traits: v1.IntegrationKitTraits{
+					Builder: &v1.BuilderTrait{
+						Trait: v1.Trait{
+							Enabled: pointer.Bool(false),
+						},
+					},
 				},
 			},
 			Status: v1.IntegrationKitStatus{
@@ -180,13 +183,15 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 					"camel-core",
 					"camel-irc",
 				},
-				Traits: map[string]v1.TraitSpec{
-					"builder": test.TraitSpecFromMap(t, map[string]interface{}{
-						"enabled": "true",
-						"properties": []string{
+				Traits: v1.IntegrationKitTraits{
+					Builder: &v1.BuilderTrait{
+						Trait: v1.Trait{
+							Enabled: pointer.Bool(true),
+						},
+						Properties: []string{
 							"build-key1=build-value1",
 						},
-					}),
+					},
 				},
 			},
 			Status: v1.IntegrationKitStatus{
@@ -211,13 +216,15 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 			Name:      "my-integration",
 		},
 		Spec: v1.IntegrationSpec{
-			Traits: map[string]v1.TraitSpec{
-				"builder": test.TraitSpecFromMap(t, map[string]interface{}{
-					"enabled": "true",
-					"properties": []string{
+			Traits: v1.Traits{
+				Builder: &v1.BuilderTrait{
+					Trait: v1.Trait{
+						Enabled: pointer.Bool(true),
+					},
+					Properties: []string{
 						"build-key1=build-value1",
 					},
-				}),
+				},
 			},
 		},
 		Status: v1.IntegrationStatus{
@@ -245,10 +252,12 @@ func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
 			Name:      "my-integration",
 		},
 		Spec: v1.IntegrationSpec{
-			Traits: map[string]v1.TraitSpec{
-				"builder": test.TraitSpecFromMap(t, map[string]interface{}{
-					"enabled": "true",
-				}),
+			Traits: v1.Traits{
+				Builder: &v1.BuilderTrait{
+					Trait: v1.Trait{
+						Enabled: pointer.Bool(true),
+					},
+				},
 			},
 		},
 	}
@@ -261,9 +270,6 @@ func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "ns",
 			Name:      "my-kit",
-		},
-		Spec: v1.IntegrationKitSpec{
-			Traits: map[string]v1.TraitSpec{},
 		},
 	}
 
@@ -286,13 +292,15 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 			Name:      "my-integration",
 		},
 		Spec: v1.IntegrationSpec{
-			Traits: map[string]v1.TraitSpec{
-				"builder": test.TraitSpecFromMap(t, map[string]interface{}{
-					"enabled": "true",
-					"properties": []string{
+			Traits: v1.Traits{
+				Builder: &v1.BuilderTrait{
+					Trait: v1.Trait{
+						Enabled: pointer.Bool(true),
+					},
+					Properties: []string{
 						"build-key1=build-value1",
 					},
-				}),
+				},
 			},
 		},
 	}
@@ -307,13 +315,15 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 			Name:      "my-kit",
 		},
 		Spec: v1.IntegrationKitSpec{
-			Traits: map[string]v1.TraitSpec{
-				"builder": test.TraitSpecFromMap(t, map[string]interface{}{
-					"enabled": "true",
-					"properties": []string{
+			Traits: v1.IntegrationKitTraits{
+				Builder: &v1.BuilderTrait{
+					Trait: v1.Trait{
+						Enabled: pointer.Bool(true),
+					},
+					Properties: []string{
 						"build-key1=build-value1",
 					},
-				}),
+				},
 			},
 		},
 	}

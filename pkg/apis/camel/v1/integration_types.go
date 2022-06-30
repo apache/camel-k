@@ -68,7 +68,7 @@ type IntegrationSpec struct {
 	// the profile needed to run this Integration
 	Profile TraitProfile `json:"profile,omitempty"`
 	// the traits needed to run this Integration
-	Traits map[string]TraitSpec `json:"traits,omitempty"`
+	Traits Traits `json:"traits,omitempty"`
 	// Pod template customization
 	PodTemplate *PodSpecTemplate `json:"template,omitempty"`
 	// Deprecated:

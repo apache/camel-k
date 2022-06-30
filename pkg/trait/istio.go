@@ -20,22 +20,16 @@ package trait
 import (
 	"strconv"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/utils/pointer"
 
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
-// The Istio trait allows configuring properties related to the Istio service mesh,
-// such as sidecar injection and outbound IP ranges.
-//
-// +camel-k:trait=istio.
 type istioTrait struct {
-	BaseTrait `property:",squash"`
-	// Configures a (comma-separated) list of CIDR subnets that should not be intercepted by the Istio proxy (`10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` by default).
-	Allow string `property:"allow" json:"allow,omitempty"`
-	// Forces the value for labels `sidecar.istio.io/inject`. By default the label is set to `true` on deployment and not set on Knative Service.
-	Inject *bool `property:"inject" json:"inject,omitempty"`
+	BaseTrait
+	v1.IstioTrait `property:",squash"`
 }
 
 const (
@@ -46,7 +40,9 @@ const (
 func newIstioTrait() Trait {
 	return &istioTrait{
 		BaseTrait: NewBaseTrait("istio", 2300),
-		Allow:     "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
+		IstioTrait: v1.IstioTrait{
+			Allow: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
+		},
 	}
 }
 

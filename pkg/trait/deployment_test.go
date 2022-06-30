@@ -187,7 +187,7 @@ func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 			},
 			Spec: v1.IntegrationSpec{
 				Replicas: &replicas,
-				Traits:   make(map[string]v1.TraitSpec),
+				Traits:   v1.Traits{},
 			},
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,
