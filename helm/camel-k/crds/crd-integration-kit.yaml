@@ -111,7 +111,7 @@ spec:
                   type: string
                 type: array
               image:
-                description: the container image as identify in the container registry
+                description: the container image as identified in the container registry
                 type: string
               profile:
                 description: the profile which is expected by this kit
@@ -122,17 +122,73 @@ spec:
                   type: string
                 type: array
               traits:
-                additionalProperties:
-                  description: A TraitSpec contains the configuration of a trait
-                  properties:
-                    configuration:
-                      description: TraitConfiguration parameters configuration
+                description: traits that the kit will execute
+                properties:
+                  addons:
+                    additionalProperties:
+                      description: AddonTrait represents the configuration of an addon
+                        trait
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
-                  required:
-                  - configuration
-                  type: object
-                description: traits that the kit will execute
+                    description: The collection of addon trait configurations
+                    type: object
+                  builder:
+                    description: The builder trait is internally used to determine
+                      the best strategy to build and configure IntegrationKits.
+                    properties:
+                      configuration:
+                        description: 'Legacy trait configuration parameters. Deprecated:
+                          for backward compatibility.'
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      properties:
+                        description: A list of properties to be provided to the build
+                          task
+                        items:
+                          type: string
+                        type: array
+                      verbose:
+                        description: Enable verbose logging on build components that
+                          support it (e.g. Kaniko build pod).
+                        type: boolean
+                    type: object
+                  quarkus:
+                    description: 'The Quarkus trait configures the Quarkus runtime.
+                      It''s enabled by default. NOTE: Compiling to a native executable,
+                      i.e. when using `package-type=native`, is only supported for
+                      kamelets, as well as YAML and XML integrations. It also requires
+                      at least 4GiB of memory, so the Pod running the native build,
+                      that is either the operator Pod, or the build Pod (depending
+                      on the build strategy configured for the platform), must have
+                      enough memory available.'
+                    properties:
+                      configuration:
+                        description: 'Legacy trait configuration parameters. Deprecated:
+                          for backward compatibility.'
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      packageTypes:
+                        description: The Quarkus package types, either `fast-jar`
+                          or `native` (default `fast-jar`). In case both `fast-jar`
+                          and `native` are specified, two `IntegrationKit` resources
+                          are created, with the `native` kit having precedence over
+                          the `fast-jar` one once ready. The order influences the
+                          resolution of the current kit for the integration. The kit
+                          corresponding to the first package type will be assigned
+                          to the integration in case no existing kit that matches
+                          the integration exists.
+                        items:
+                          type: string
+                        type: array
+                    type: object
                 type: object
             type: object
           status:

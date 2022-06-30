@@ -31,7 +31,7 @@ The following configuration options are available:
 
 | container.auto
 | bool
-| 
+| To automatically enable the trait
 
 | container.request-cpu
 | string
