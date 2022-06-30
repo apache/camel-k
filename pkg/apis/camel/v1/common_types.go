@@ -174,6 +174,9 @@ type Traits struct {
 	// The configuration of Toleration trait
 	Toleration *trait.TolerationTrait `property:"toleration" json:"toleration,omitempty"`
 
+	// The extension point with addon traits
+	Addons map[string]AddonTrait `json:"addons,omitempty"`
+
 	// Deprecated: for backward compatibility.
 	Keda *TraitSpec `property:"keda" json:"keda,omitempty"`
 	// Deprecated: for backward compatibility.
@@ -184,6 +187,12 @@ type Traits struct {
 	ThreeScale *TraitSpec `property:"3scale" json:"3scale,omitempty"`
 	// Deprecated: for backward compatibility.
 	Tracing *TraitSpec `property:"tracing" json:"tracing,omitempty"`
+}
+
+// AddonTrait represents the configuration of an addon trait
+type AddonTrait struct {
+	// Generic raw message, typically a map containing the keys (trait parameters) and the values (either single text or array)
+	RawMessage `json:",inline"`
 }
 
 // A TraitSpec contains the configuration of a trait

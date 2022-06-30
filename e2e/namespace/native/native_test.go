@@ -69,7 +69,7 @@ func TestNativeIntegrations(t *testing.T) {
 
 			// Check the fast-jar Kit is ready
 			Eventually(Kits(ns, withFastJarLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
-				TestTimeoutMedium).Should(HaveLen(1))
+				TestTimeoutVeryLong).Should(HaveLen(1))
 
 			fastJarKit := Kits(ns, withFastJarLayout, KitWithPhase(v1.IntegrationKitPhaseReady))()[0]
 			// Check the Integration uses the fast-jar Kit

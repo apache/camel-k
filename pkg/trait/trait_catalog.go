@@ -88,7 +88,7 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 }
 
 func (c *Catalog) apply(environment *Environment) error {
-	if err := c.configure(environment); err != nil {
+	if err := c.Configure(environment); err != nil {
 		return err
 	}
 	traits := c.traitsFor(environment)

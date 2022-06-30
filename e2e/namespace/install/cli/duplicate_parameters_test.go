@@ -46,6 +46,6 @@ func TestDuplicateParameters(t *testing.T) {
 	// the command is executed inside GetOutputString function
 	commOutput := GetOutputString(comm)
 
-	outParams := `"traits":{"affinity":{"configuration":{"enabled":true}},"camel":{"configuration":{"properties":["prop1 = true","prop2 = true","foo = bar"]}},"pull-secret":{"configuration":{"enabled":true}},"tracing":{"configuration":{"enabled":true}}}`
+	outParams := `"traits":{"affinity":{"enabled":true},"camel":{"properties":["prop1 = true","prop2 = true","foo = bar"]},"pull-secret":{"enabled":true},"addons":{"tracing":{"enabled":true}}}`
 	Expect(commOutput).To(ContainSubstring(outParams))
 }
