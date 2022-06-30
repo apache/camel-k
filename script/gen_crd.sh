@@ -21,15 +21,17 @@ location=$(dirname "$0")
 apidir=$location/../pkg/apis/camel
 
 cd "$apidir"
-$CONTROLLER_GEN crd paths=./... output:crd:artifacts:config=../../../config/crd/bases output:crd:dir=../../../config/crd/bases crd:crdVersions=v1
+$CONTROLLER_GEN crd \
+  paths=./... \
+  output:crd:artifacts:config=../../../config/crd/bases \
+  output:crd:dir=../../../config/crd/bases \
+  crd:crdVersions=v1
 
 # cleanup working directory in $apidir
 rm -rf ./config
 
 # to root
 cd ../../../
-
-version=$(make -s get-version | tr '[:upper:]' '[:lower:]')
 
 deploy_crd_file() {
   source=$1
@@ -40,7 +42,7 @@ deploy_crd_file() {
   # Post-process source
   cat ./script/headers/yaml.txt > "$source"
   echo "" >> "$source"
-  cat "${source}.orig" | sed -n '/^---/,/^status/p;/^status/q' \
+  sed -n '/^---/,/^status/p;/^status/q' "${source}.orig" \
     | sed '1d;$d' \
     | sed '/creationTimestamp:/a\  labels:\n    app: camel-k' >> "$source"
 
