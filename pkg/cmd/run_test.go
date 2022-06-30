@@ -363,9 +363,14 @@ func TestConfigureTraits(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	client, err := runCmdOptions.GetCmdClient()
+	if err != nil {
+		t.Error(err)
+	}
+	catalog := trait.NewCatalog(client)
 
 	traits := v1.Traits{}
-	err = configureTraits(runCmdOptions.Traits, &traits)
+	err = configureTraits(runCmdOptions.Traits, &traits, catalog)
 
 	assert.Nil(t, err)
 	traitsMap, err := trait.ToMap(traits)

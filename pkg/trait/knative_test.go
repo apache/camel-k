@@ -106,7 +106,7 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 
 	tc := NewCatalog(c)
 
-	err = tc.configure(&environment)
+	err = tc.Configure(&environment)
 	assert.Nil(t, err)
 
 	tr, _ := tc.GetTrait("knative").(*knativeTrait)
@@ -227,7 +227,7 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 
 	tc := NewCatalog(c)
 
-	err = tc.configure(&environment)
+	err = tc.Configure(&environment)
 	assert.Nil(t, err)
 
 	tr, _ := tc.GetTrait("knative").(*knativeTrait)
@@ -295,7 +295,7 @@ func TestKnativePlatformHttpConfig(t *testing.T) {
 
 			tc := NewCatalog(c)
 
-			err = tc.configure(&environment)
+			err = tc.Configure(&environment)
 			assert.Nil(t, err)
 
 			err = tc.apply(&environment)
@@ -342,7 +342,7 @@ func TestKnativePlatformHttpDependencies(t *testing.T) {
 
 			tc := NewCatalog(c)
 
-			err = tc.configure(&environment)
+			err = tc.Configure(&environment)
 			assert.Nil(t, err)
 
 			err = tc.apply(&environment)

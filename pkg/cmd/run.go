@@ -668,7 +668,8 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		o.Traits = append(o.Traits, fmt.Sprintf("service-binding.services=%s", item))
 	}
 	if len(o.Traits) > 0 {
-		if err := configureTraits(o.Traits, &integration.Spec.Traits); err != nil {
+		catalog := trait.NewCatalog(c)
+		if err := configureTraits(o.Traits, &integration.Spec.Traits, catalog); err != nil {
 			return nil, err
 		}
 	}

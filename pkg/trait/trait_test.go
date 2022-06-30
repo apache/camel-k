@@ -158,7 +158,7 @@ func TestTraitHierarchyDecode(t *testing.T) {
 	}
 
 	c := NewTraitTestCatalog()
-	err := c.configure(env)
+	err := c.Configure(env)
 
 	assert.Nil(t, err)
 

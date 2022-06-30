@@ -157,7 +157,7 @@ func (command *kitCreateCommandOptions) run(cmd *cobra.Command, args []string) e
 	if err := command.parseAndConvertToTrait(command.Secrets, "mount.config"); err != nil {
 		return err
 	}
-	if err := configureTraits(command.Traits, &kit.Spec.Traits); err != nil {
+	if err := configureTraits(command.Traits, &kit.Spec.Traits, catalog); err != nil {
 		return err
 	}
 	existed := false

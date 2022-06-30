@@ -30,6 +30,42 @@ import (
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 )
 
+func TestTraitConfiguration(t *testing.T) {
+	env := Environment{
+		Integration: &v1.Integration{
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKubernetes,
+				Traits: v1.Traits{
+					Logging: &traitv1.LoggingTrait{
+						JSON:            pointer.Bool(true),
+						JSONPrettyPrint: pointer.Bool(false),
+						Level:           "DEBUG",
+					},
+					Service: &traitv1.ServiceTrait{
+						Trait: traitv1.Trait{
+							Enabled: pointer.Bool(true),
+						},
+						Auto:     pointer.Bool(true),
+						NodePort: pointer.Bool(false),
+					},
+				},
+			},
+		},
+	}
+	c := NewCatalog(nil)
+	assert.NoError(t, c.Configure(&env))
+	logging, ok := c.GetTrait("logging").(*loggingTrait)
+	require.True(t, ok)
+	assert.True(t, *logging.JSON)
+	assert.False(t, *logging.JSONPrettyPrint)
+	assert.Equal(t, "DEBUG", logging.Level)
+	service, ok := c.GetTrait("service").(*serviceTrait)
+	require.True(t, ok)
+	assert.True(t, *service.Enabled)
+	assert.True(t, *service.Auto)
+	assert.False(t, *service.NodePort)
+}
+
 func TestTraitConfigurationFromAnnotations(t *testing.T) {
 	env := Environment{
 		Integration: &v1.Integration{
@@ -51,7 +87,7 @@ func TestTraitConfigurationFromAnnotations(t *testing.T) {
 		},
 	}
 	c := NewCatalog(nil)
-	assert.NoError(t, c.configure(&env))
+	assert.NoError(t, c.Configure(&env))
 	assert.True(t, *c.GetTrait("cron").(*cronTrait).Fallback)
 	assert.Equal(t, "annotated-policy", c.GetTrait("cron").(*cronTrait).ConcurrencyPolicy)
 	assert.True(t, *c.GetTrait("environment").(*environmentTrait).ContainerMeta)
@@ -71,7 +107,7 @@ func TestFailOnWrongTraitAnnotations(t *testing.T) {
 		},
 	}
 	c := NewCatalog(nil)
-	assert.Error(t, c.configure(&env))
+	assert.Error(t, c.Configure(&env))
 }
 
 func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
@@ -127,7 +163,7 @@ func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
 		},
 	}
 	c := NewCatalog(nil)
-	assert.NoError(t, c.configure(&env))
+	assert.NoError(t, c.Configure(&env))
 	assert.Equal(t, "schedule2", c.GetTrait("cron").(*cronTrait).Schedule)
 	assert.Equal(t, "cmp4", c.GetTrait("cron").(*cronTrait).Components)
 	assert.Equal(t, "policy4", c.GetTrait("cron").(*cronTrait).ConcurrencyPolicy)
@@ -149,7 +185,7 @@ func TestTraitListConfigurationFromAnnotations(t *testing.T) {
 		},
 	}
 	c := NewCatalog(nil)
-	assert.NoError(t, c.configure(&env))
+	assert.NoError(t, c.Configure(&env))
 	assert.Equal(t, []string{"opt1", "opt2"}, c.GetTrait("jolokia").(*jolokiaTrait).Options)
 	assert.Equal(t, []string{"Binding:xxx"}, c.GetTrait("service-binding").(*serviceBindingTrait).Services)
 }
@@ -168,7 +204,7 @@ func TestTraitSplitConfiguration(t *testing.T) {
 		},
 	}
 	c := NewCatalog(nil)
-	assert.NoError(t, c.configure(&env))
+	assert.NoError(t, c.Configure(&env))
 	assert.Equal(t, []string{"opt1", "opt2"}, c.GetTrait("owner").(*ownerTrait).TargetLabels)
 }
 

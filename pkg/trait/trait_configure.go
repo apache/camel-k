@@ -23,15 +23,15 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
 )
 
-// configure reads trait configurations from environment and applies them to catalog.
-func (c *Catalog) configure(env *Environment) error {
+// Configure reads trait configurations from environment and applies them to catalog.
+func (c *Catalog) Configure(env *Environment) error {
 	if env.Platform != nil {
 		if err := c.configureTraits(env.Platform.Status.Traits); err != nil {
 			return err
@@ -67,11 +67,29 @@ func (c *Catalog) configureTraits(traits interface{}) error {
 	}
 
 	for id, trait := range traitsMap {
-		t := trait // Avoid G601: Implicit memory aliasing in for loop
-		if catTrait := c.GetTrait(id); catTrait != nil {
-			if err := decodeTrait(t, catTrait, true); err != nil {
+		if id == "addons" {
+			continue
+		}
+		if err := c.configureTrait(id, trait); err != nil {
+			return err
+		}
+	}
+	// Addons
+	for id, trait := range traitsMap["addons"] {
+		if addons, ok := trait.(map[string]interface{}); ok {
+			if err := c.configureTrait(id, addons); err != nil {
 				return err
 			}
+		}
+	}
+
+	return nil
+}
+
+func (c *Catalog) configureTrait(id string, trait map[string]interface{}) error {
+	if catTrait := c.GetTrait(id); catTrait != nil {
+		if err := decodeTrait(trait, catTrait, true); err != nil {
+			return err
 		}
 	}
 

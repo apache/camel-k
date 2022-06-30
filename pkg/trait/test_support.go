@@ -32,6 +32,7 @@ import (
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -146,4 +147,17 @@ func traitToMap(t *testing.T, trait interface{}) map[string]interface{} {
 	require.NoError(t, err)
 
 	return traitMap
+}
+
+func ToAddonTrait(t *testing.T, config map[string]interface{}) v1.AddonTrait {
+	t.Helper()
+
+	data, err := json.Marshal(config)
+	assert.NoError(t, err)
+
+	var addon v1.AddonTrait
+	err = json.Unmarshal(data, &addon)
+	assert.NoError(t, err)
+
+	return addon
 }

@@ -224,12 +224,22 @@ func AddSourceDependencies(source v1.SourceSpec, catalog *camel.RuntimeCatalog) 
 	return dependencies
 }
 
-// ToMap accepts either v1.Traits or v1.IntegrationKitTraits and converts it to a map.
-func ToMap(traits interface{}) (map[string]map[string]interface{}, error) {
+// AssertTraitsType asserts that traits is either v1.Traits or v1.IntegrationKitTraits.
+// This function is provided because Go doesn't have Either nor union types.
+func AssertTraitsType(traits interface{}) error {
 	_, ok1 := traits.(v1.Traits)
 	_, ok2 := traits.(v1.IntegrationKitTraits)
 	if !ok1 && !ok2 {
-		return nil, errors.New("traits must be either v1.Traits or v1.IntegrationKitTraits")
+		return errors.New("traits must be either v1.Traits or v1.IntegrationKitTraits")
+	}
+
+	return nil
+}
+
+// ToMap accepts either v1.Traits or v1.IntegrationKitTraits and converts it to a map.
+func ToMap(traits interface{}) (map[string]map[string]interface{}, error) {
+	if err := AssertTraitsType(traits); err != nil {
+		return nil, err
 	}
 
 	data, err := json.Marshal(traits)

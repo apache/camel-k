@@ -177,8 +177,8 @@ func hasMatchingTraits(traits interface{}, kitTraits interface{}) (bool, error) 
 			continue
 		}
 		id := string(t.ID())
-		it, ok1 := traitsMap[id]
-		kt, ok2 := kitTraitsMap[id]
+		it, ok1 := findTrait(traitsMap, id)
+		kt, ok2 := findTrait(kitTraitsMap, id)
 
 		if !ok1 && !ok2 {
 			continue
@@ -199,6 +199,22 @@ func hasMatchingTraits(traits interface{}, kitTraits interface{}) (bool, error) 
 	}
 
 	return true, nil
+}
+
+func findTrait(traitsMap map[string]map[string]interface{}, id string) (map[string]interface{}, bool) {
+	if trait, ok := traitsMap[id]; ok {
+		return trait, true
+	}
+
+	if addons, ok := traitsMap["addons"]; ok {
+		if addon, ok := addons[id]; ok {
+			if trait, ok := addon.(map[string]interface{}); ok {
+				return trait, true
+			}
+		}
+	}
+
+	return nil, false
 }
 
 func matchesComparableTrait(ct trait.ComparableTrait, it map[string]interface{}, kt map[string]interface{}) (bool, error) {
