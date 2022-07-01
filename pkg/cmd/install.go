@@ -103,7 +103,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a camel property")
 	cmd.Flags().String("runtime-version", "", "Set the camel-k runtime version")
 	cmd.Flags().String("base-image", "", "Set the base Image used to run integrations")
-	cmd.Flags().String("operator-id", "camel-k", "Set the operator id that is used to select the resources this operator should manage")
+	cmd.Flags().StringP("operator-id", "x", "camel-k", "Set the operator id that is used to select the resources this operator should manage")
 	cmd.Flags().String("operator-image", "", "Set the operator Image used for the operator deployment")
 	cmd.Flags().String("operator-image-pull-policy", "", "Set the operator ImagePullPolicy used for the operator deployment")
 	cmd.Flags().String("build-strategy", "", "Set the build strategy")
