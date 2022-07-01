@@ -833,6 +833,11 @@ func (in *IntegrationKitTraits) DeepCopyInto(out *IntegrationKitTraits) {
 		*out = new(trait.QuarkusTrait)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Registry != nil {
+		in, out := &in.Registry, &out.Registry
+		*out = new(trait.RegistryTrait)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Addons != nil {
 		in, out := &in.Addons, &out.Addons
 		*out = make(map[string]AddonTrait, len(*in))
