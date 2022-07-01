@@ -189,6 +189,20 @@ spec:
                           type: string
                         type: array
                     type: object
+                  registry:
+                    description: The Registry trait sets up Maven to use the Image
+                      registry as a Maven repository.
+                    properties:
+                      configuration:
+                        description: 'Legacy trait configuration parameters. Deprecated:
+                          for backward compatibility.'
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                    type: object
                 type: object
             type: object
           status:

@@ -39,7 +39,7 @@ import (
 
 type registryTrait struct {
 	BaseTrait
-	traitv1.RegistryTrait
+	traitv1.RegistryTrait `property:",squash"`
 }
 
 func newRegistryTrait() Trait {

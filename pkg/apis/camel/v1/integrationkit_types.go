@@ -75,6 +75,8 @@ type IntegrationKitTraits struct {
 	// It's enabled by default.
 	// NOTE: Compiling to a native executable, i.e. when using `package-type=native`, is only supported for kamelets, as well as YAML and XML integrations. It also requires at least 4GiB of memory, so the Pod running the native build, that is either the operator Pod, or the build Pod (depending on the build strategy configured for the platform), must have enough memory available.
 	Quarkus *trait.QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
+	// The Registry trait sets up Maven to use the Image registry as a Maven repository.
+	Registry *trait.RegistryTrait `property:"registry" json:"registry,omitempty"`
 
 	// The collection of addon trait configurations
 	Addons map[string]AddonTrait `json:"addons,omitempty"`

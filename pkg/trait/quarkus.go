@@ -243,8 +243,9 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType traitv1.Qua
 		Dependencies: e.Integration.Status.Dependencies,
 		Repositories: e.Integration.Spec.Repositories,
 		Traits: v1.IntegrationKitTraits{
-			Builder: e.Integration.Spec.Traits.Builder,
-			Quarkus: e.Integration.Spec.Traits.Quarkus,
+			Builder:  e.Integration.Spec.Traits.Builder,
+			Quarkus:  e.Integration.Spec.Traits.Quarkus,
+			Registry: e.Integration.Spec.Traits.Registry,
 		},
 	}
 
