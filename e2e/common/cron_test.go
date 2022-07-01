@@ -38,7 +38,7 @@ import (
 )
 
 func TestRunCronExample(t *testing.T) {
-	ok, err := kubernetes.IsAPIResourceInstalled(TestClient(), batchv1.SchemeGroupVersion.Group, reflect.TypeOf(batchv1.CronJob{}).Name())
+	ok, err := kubernetes.IsAPIResourceInstalled(TestClient(), batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name())
 	assert.Nil(t, err)
 
 	if !ok {
