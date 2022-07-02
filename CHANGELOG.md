@@ -6,7 +6,10 @@
 
 **Closed issues:**
 
+- Migrate from batch/v1beta1 to batch/v1 [\#3393](https://github.com/apache/camel-k/issues/3393)
+- RBAC missing permissions for channels and inmemorychannels in messaging.knative.dev [\#3390](https://github.com/apache/camel-k/issues/3390)
 - kamel local run support --build-property ? [\#3356](https://github.com/apache/camel-k/issues/3356)
+- CamelK 1.9.2 when installed via OLM "system:serviceaccount:openshift-operators:camel-k-operator" cannot get resource "channels" in API group "messaging.knative.dev" [\#3328](https://github.com/apache/camel-k/issues/3328)
 - E2E repeated failure [\#3315](https://github.com/apache/camel-k/issues/3315)
 - Integrations, IntegrationKits, IntegrationPlatforms are not owned by Namespaces [\#3311](https://github.com/apache/camel-k/issues/3311)
 - Helm Chart for camel-k 1.9.2 is invalid [\#3300](https://github.com/apache/camel-k/issues/3300)
@@ -35,6 +38,7 @@
 - ImagePullBackOff when node failed [\#2485](https://github.com/apache/camel-k/issues/2485)
 - Debug seems not to work on knative pods [\#2474](https://github.com/apache/camel-k/issues/2474)
 - Groovy script JSON paring runs into java.util.ServiceConfigurationError: org.apache.groovy.json.FastStringServiceFactory: org.apache.groovy.json.DefaultFastStringServiceFactory not a subtype [\#2418](https://github.com/apache/camel-k/issues/2418)
+- Migrate CronJob to `batch/v1` [\#2408](https://github.com/apache/camel-k/issues/2408)
 - Provide option to have symbolic link for kamel local build --integration-directory \<folder\> [\#2179](https://github.com/apache/camel-k/issues/2179)
 - Refactoring dump function [\#2172](https://github.com/apache/camel-k/issues/2172)
 - In troubleshooting documentation section, provide information on which logs to look at [\#2031](https://github.com/apache/camel-k/issues/2031)
