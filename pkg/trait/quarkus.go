@@ -79,13 +79,12 @@ func (t *quarkusTrait) Matches(trait Trait) bool {
 		return false
 	}
 
-types:
 	for _, pt := range t.PackageTypes {
 		if pt == traitv1.FastJarPackageType && len(qt.PackageTypes) == 0 {
 			continue
 		}
 		if containsPackageType(qt.PackageTypes, pt) {
-			continue types
+			continue
 		}
 		return false
 	}
@@ -106,110 +105,77 @@ func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
 
 func (t *quarkusTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) {
-		if containsPackageType(t.PackageTypes, traitv1.NativePackageType) {
-			// Native compilation is only supported for a subset of languages,
-			// so let's check for compatibility, and fail-fast the Integration,
-			// to save compute resources and user time.
-			for _, source := range e.Integration.Sources() {
-				if language := source.InferLanguage(); language != v1.LanguageKamelet &&
-					language != v1.LanguageYaml &&
-					language != v1.LanguageXML {
-					t.L.ForIntegration(e.Integration).Infof("Integration %s contains a %s source that cannot be compiled to native executable", e.Integration.Namespace+"/"+e.Integration.Name, language)
-					e.Integration.Status.Phase = v1.IntegrationPhaseError
-					e.Integration.Status.SetCondition(
-						v1.IntegrationConditionKitAvailable,
-						corev1.ConditionFalse,
-						v1.IntegrationConditionUnsupportedLanguageReason,
-						fmt.Sprintf("native compilation for language %q is not supported", language))
-					// Let the calling controller handle the Integration update
-					return nil
-				}
-			}
-		}
-
-		switch len(t.PackageTypes) {
-		case 0:
-			kit := t.newIntegrationKit(e, traitv1.FastJarPackageType)
-			e.IntegrationKits = append(e.IntegrationKits, *kit)
-
-		case 1:
-			kit := t.newIntegrationKit(e, t.PackageTypes[0])
-			e.IntegrationKits = append(e.IntegrationKits, *kit)
-
-		default:
-			for _, packageType := range t.PackageTypes {
-				kit := t.newIntegrationKit(e, packageType)
-				if kit.Spec.Traits.Quarkus == nil {
-					kit.Spec.Traits.Quarkus = &traitv1.QuarkusTrait{}
-				}
-				kit.Spec.Traits.Quarkus.PackageTypes = []traitv1.QuarkusPackageType{packageType}
-				e.IntegrationKits = append(e.IntegrationKits, *kit)
-			}
-		}
+		t.applyWhileBuildingKit(e)
 
 		return nil
 	}
 
 	switch e.IntegrationKit.Status.Phase {
-
 	case v1.IntegrationKitPhaseBuildSubmitted:
-		build := getBuilderTask(e.BuildTasks)
-		if build == nil {
-			return fmt.Errorf("unable to find builder task: %s", e.Integration.Name)
-		}
-
-		if build.Maven.Properties == nil {
-			build.Maven.Properties = make(map[string]string)
-		}
-
-		steps, err := builder.StepsFrom(build.Steps...)
-		if err != nil {
+		if err := t.applyWhenBuildSubmitted(e); err != nil {
 			return err
 		}
-
-		steps = append(steps, builder.Quarkus.CommonSteps...)
-
-		native, err := t.isNativeKit(e)
-		if err != nil {
-			return err
-		}
-
-		if native {
-			build.Maven.Properties["quarkus.package.type"] = string(traitv1.NativePackageType)
-			steps = append(steps, builder.Image.NativeImageContext)
-			// Spectrum does not rely on Dockerfile to assemble the image
-			if e.Platform.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategySpectrum {
-				steps = append(steps, builder.Image.ExecutableDockerfile)
-			}
-		} else {
-			build.Maven.Properties["quarkus.package.type"] = string(traitv1.FastJarPackageType)
-			steps = append(steps, builder.Quarkus.ComputeQuarkusDependencies, builder.Image.IncrementalImageContext)
-			// Spectrum does not rely on Dockerfile to assemble the image
-			if e.Platform.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategySpectrum {
-				steps = append(steps, builder.Image.JvmDockerfile)
-			}
-		}
-
-		// Sort steps by phase
-		sort.SliceStable(steps, func(i, j int) bool {
-			return steps[i].Phase() < steps[j].Phase()
-		})
-
-		build.Steps = builder.StepIDsFor(steps...)
 
 	case v1.IntegrationKitPhaseReady:
-		if e.IntegrationInRunningPhases() && t.isNativeIntegration(e) {
-			container := e.GetIntegrationContainer()
-			if container == nil {
-				return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
-			}
-
-			container.Command = []string{"./camel-k-integration-" + defaults.Version + "-runner"}
-			container.WorkingDir = builder.DeploymentDir
+		if err := t.applyWhenKitReady(e); err != nil {
+			return err
 		}
 	}
 
 	return nil
+}
+
+func (t *quarkusTrait) applyWhileBuildingKit(e *Environment) {
+	if containsPackageType(t.PackageTypes, traitv1.NativePackageType) {
+		// Native compilation is only supported for a subset of languages,
+		// so let's check for compatibility, and fail-fast the Integration,
+		// to save compute resources and user time.
+		if !t.validateNativeSupport(e) {
+			// Let the calling controller handle the Integration update
+			return
+		}
+	}
+
+	switch len(t.PackageTypes) {
+	case 0:
+		kit := t.newIntegrationKit(e, traitv1.FastJarPackageType)
+		e.IntegrationKits = append(e.IntegrationKits, *kit)
+
+	case 1:
+		kit := t.newIntegrationKit(e, t.PackageTypes[0])
+		e.IntegrationKits = append(e.IntegrationKits, *kit)
+
+	default:
+		for _, pt := range t.PackageTypes {
+			packageType := pt
+			kit := t.newIntegrationKit(e, packageType)
+			if kit.Spec.Traits.Quarkus == nil {
+				kit.Spec.Traits.Quarkus = &traitv1.QuarkusTrait{}
+			}
+			kit.Spec.Traits.Quarkus.PackageTypes = []traitv1.QuarkusPackageType{packageType}
+			e.IntegrationKits = append(e.IntegrationKits, *kit)
+		}
+	}
+}
+
+func (t *quarkusTrait) validateNativeSupport(e *Environment) bool {
+	for _, source := range e.Integration.Sources() {
+		if language := source.InferLanguage(); language != v1.LanguageKamelet &&
+			language != v1.LanguageYaml &&
+			language != v1.LanguageXML {
+			t.L.ForIntegration(e.Integration).Infof("Integration %s/%s contains a %s source that cannot be compiled to native executable", e.Integration.Namespace, e.Integration.Name, language)
+			e.Integration.Status.Phase = v1.IntegrationPhaseError
+			e.Integration.Status.SetCondition(
+				v1.IntegrationConditionKitAvailable,
+				corev1.ConditionFalse,
+				v1.IntegrationConditionUnsupportedLanguageReason,
+				fmt.Sprintf("native compilation for language %q is not supported", language))
+
+			return false
+		}
+	}
+
+	return true
 }
 
 func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType traitv1.QuarkusPackageType) *v1.IntegrationKit {
@@ -242,14 +208,79 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType traitv1.Qua
 	kit.Spec = v1.IntegrationKitSpec{
 		Dependencies: e.Integration.Status.Dependencies,
 		Repositories: e.Integration.Spec.Repositories,
-		Traits: v1.IntegrationKitTraits{
-			Builder:  e.Integration.Spec.Traits.Builder,
-			Quarkus:  e.Integration.Spec.Traits.Quarkus,
-			Registry: e.Integration.Spec.Traits.Registry,
-		},
+		Traits:       propagateKitTraits(e),
 	}
 
 	return kit
+}
+
+func propagateKitTraits(e *Environment) v1.IntegrationKitTraits {
+	traits := e.Integration.Spec.Traits
+	kitTraits := v1.IntegrationKitTraits{
+		Builder:  traits.Builder.DeepCopy(),
+		Quarkus:  traits.Quarkus.DeepCopy(),
+		Registry: traits.Registry.DeepCopy(),
+	}
+
+	// propagate addons that influence kits too
+	if len(traits.Addons) > 0 {
+		kitTraits.Addons = make(map[string]v1.AddonTrait)
+		for id, addon := range traits.Addons {
+			if t := e.Catalog.GetTrait(id); t != nil && t.InfluencesKit() {
+				kitTraits.Addons[id] = *addon.DeepCopy()
+			}
+		}
+	}
+
+	return kitTraits
+}
+
+func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
+	build := getBuilderTask(e.BuildTasks)
+	if build == nil {
+		return fmt.Errorf("unable to find builder task: %s", e.Integration.Name)
+	}
+
+	if build.Maven.Properties == nil {
+		build.Maven.Properties = make(map[string]string)
+	}
+
+	steps, err := builder.StepsFrom(build.Steps...)
+	if err != nil {
+		return err
+	}
+
+	steps = append(steps, builder.Quarkus.CommonSteps...)
+
+	native, err := t.isNativeKit(e)
+	if err != nil {
+		return err
+	}
+
+	if native {
+		build.Maven.Properties["quarkus.package.type"] = string(traitv1.NativePackageType)
+		steps = append(steps, builder.Image.NativeImageContext)
+		// Spectrum does not rely on Dockerfile to assemble the image
+		if e.Platform.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategySpectrum {
+			steps = append(steps, builder.Image.ExecutableDockerfile)
+		}
+	} else {
+		build.Maven.Properties["quarkus.package.type"] = string(traitv1.FastJarPackageType)
+		steps = append(steps, builder.Quarkus.ComputeQuarkusDependencies, builder.Image.IncrementalImageContext)
+		// Spectrum does not rely on Dockerfile to assemble the image
+		if e.Platform.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategySpectrum {
+			steps = append(steps, builder.Image.JvmDockerfile)
+		}
+	}
+
+	// Sort steps by phase
+	sort.SliceStable(steps, func(i, j int) bool {
+		return steps[i].Phase() < steps[j].Phase()
+	})
+
+	build.Steps = builder.StepIDsFor(steps...)
+
+	return nil
 }
 
 func (t *quarkusTrait) isNativeKit(e *Environment) (bool, error) {
@@ -263,18 +294,23 @@ func (t *quarkusTrait) isNativeKit(e *Environment) (bool, error) {
 	}
 }
 
+func (t *quarkusTrait) applyWhenKitReady(e *Environment) error {
+	if e.IntegrationInRunningPhases() && t.isNativeIntegration(e) {
+		container := e.GetIntegrationContainer()
+		if container == nil {
+			return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
+		}
+
+		container.Command = []string{"./camel-k-integration-" + defaults.Version + "-runner"}
+		container.WorkingDir = builder.DeploymentDir
+	}
+
+	return nil
+}
+
 func (t *quarkusTrait) isNativeIntegration(e *Environment) bool {
 	// The current IntegrationKit determines the Integration runtime type
 	return e.IntegrationKit.Labels[v1.IntegrationKitLayoutLabel] == v1.IntegrationKitLayoutNative
-}
-
-func getBuilderTask(tasks []v1.Task) *v1.BuilderTask {
-	for i, task := range tasks {
-		if task.Builder != nil {
-			return tasks[i].Builder
-		}
-	}
-	return nil
 }
 
 func containsPackageType(types []traitv1.QuarkusPackageType, t traitv1.QuarkusPackageType) bool {

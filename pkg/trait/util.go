@@ -267,3 +267,12 @@ func ToTrait(trait map[string]interface{}, target interface{}) error {
 
 	return nil
 }
+
+func getBuilderTask(tasks []v1.Task) *v1.BuilderTask {
+	for i, task := range tasks {
+		if task.Builder != nil {
+			return tasks[i].Builder
+		}
+	}
+	return nil
+}

@@ -39,9 +39,12 @@ type QuarkusTrait struct {
 	PackageTypes []QuarkusPackageType `property:"package-type" json:"packageTypes,omitempty"`
 }
 
+// Quarkus package type.
 type QuarkusPackageType string
 
 const (
+	// Quarkus package type representing "fast jar" packaging.
 	FastJarPackageType QuarkusPackageType = "fast-jar"
-	NativePackageType  QuarkusPackageType = "native"
+	// Quarkus package type representing "native" packaging.
+	NativePackageType QuarkusPackageType = "native"
 )
