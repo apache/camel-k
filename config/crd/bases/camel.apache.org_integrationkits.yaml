@@ -186,6 +186,7 @@ spec:
                           to the integration in case no existing kit that matches
                           the integration exists.
                         items:
+                          description: Quarkus package type.
                           type: string
                         type: array
                     type: object
