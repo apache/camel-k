@@ -32,6 +32,10 @@ import (
 )
 
 func TestBasicSetup(t *testing.T) {
+	if os.Getenv("CAMEL_K_CLUSTER_OCP3") == "true" {
+		t.Skip("INFO: Skipping test as not supported on OCP3")
+	}
+
 	os.Setenv("MAKE_DIR", "../../../../install")
 
 	// Ensure no CRDs are already installed
@@ -61,6 +65,10 @@ func TestBasicSetup(t *testing.T) {
 }
 
 func TestGlobalSetup(t *testing.T) {
+	if os.Getenv("CAMEL_K_CLUSTER_OCP3") == "true" {
+		t.Skip("INFO: Skipping test as not supported on OCP3")
+	}
+
 	os.Setenv("MAKE_DIR", "../../../../install")
 
 	// Ensure no CRDs are already installed

@@ -155,6 +155,16 @@ endif
 check-admin: kubectl
 	@output=$$(kubectl get crd 2>&1) || (echo "****" && echo "**** ERROR: Cannot continue as user is not a Cluster-Admin ****" && echo "****"; exit 1)
 
+crd-api-support: kubectl
+ifndef CRD_SUPPORT
+CRD_SUPPORT=$(shell script/check_crd_api_support.sh)
+endif
+
+check-crd-api-support: crd-api-support
+ifneq ($(CRD_SUPPORT),OK)
+	$(error *** CRD API FAILURE: $(CRD_SUPPORT) ****)
+endif
+
 #
 # Setup the cluster installation by installing crds and cluster roles.
 #
@@ -168,7 +178,7 @@ check-admin: kubectl
 #   PLATFORM:  Override the discovered platform, if required
 #   DRY_RUN:     true - Prints the resources to be applied instead of applying them
 #
-setup-cluster: check-admin have-platform kustomize kubectl
+setup-cluster: check-admin check-crd-api-support have-platform kustomize kubectl
 # Set the namespace in the setup-cluster kustomization yaml
 	@$(call set-kustomize-namespace,$@)
 ifeq ($(PLATFORM), openshift)
@@ -270,7 +280,7 @@ endif
 #   LOGGING_LEVEL:      Set the level of logging [info|debug]
 #   DRY_RUN:            Prints the resources to be applied instead of applying them
 #
-operator: check-admin have-platform kustomize kubectl .operator-port-patch .operator-log-level-patch
+operator: check-admin have-platform check-crd-api-support kustomize kubectl .operator-port-patch .operator-log-level-patch
 ifeq ($(MONITORING), true)
 	@$(MAKE) -s .operator-can-monitor
 	@$(call add-remove-operator-monitoring,$@,add)

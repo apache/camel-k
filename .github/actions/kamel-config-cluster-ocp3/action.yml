@@ -199,7 +199,7 @@ runs:
       if: ${{ env.CLUSTER_OCP3_CONFIGURED != 'true' }}
       run: |
         echo "::set-output name=cluster-image-registry-pull-host::"
-        echo "::set-output name=cluster-image-registry-pull-host::"
+        echo "::set-output name=cluster-image-registry-push-host::"
         echo "::set-output name=cluster-image-registry-insecure::$(echo true)"
         echo "::set-output name=cluster-has-olm::$(echo false)"
         echo "::set-output name=cluster-image-namespace::$(echo apache)"
