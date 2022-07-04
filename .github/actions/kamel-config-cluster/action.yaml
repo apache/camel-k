@@ -158,10 +158,10 @@ runs:
         if [ $? != 0 ]; then
           set -e
           echo "OLM not detected on cluster so downloading and installing"
-          kubectl apply -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.17.0/crds.yaml
+          kubectl create -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.21.2/crds.yaml
           # wait for a while to be sure CRDs are installed
           sleep 1
-          kubectl apply -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.17.0/olm.yaml
+          kubectl create -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.21.2/olm.yaml
         fi
         set -e
 
