@@ -50,7 +50,7 @@ on:
       skip-problematic:
         description: 'Whether tests marked as problematic should be skipped - false by default (sets CAMEL_K_TEST_SKIP_PROBLEMATIC)'
         required: false
-        default: false
+        default: "false"
       test-filters:
         description: |
           Filter the tests in this test suite by assigning the test pattern to TEST_UPGRADE_RUN,

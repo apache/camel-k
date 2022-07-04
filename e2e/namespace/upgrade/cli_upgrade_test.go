@@ -64,7 +64,7 @@ func TestOperatorUpgrade(t *testing.T) {
 
 		// Run the Integration
 		name := "yaml"
-		Expect(KamelRun(ns, "files/yaml.yaml").Execute()).To(Succeed())
+		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
 
