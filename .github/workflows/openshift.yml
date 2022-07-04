@@ -44,6 +44,21 @@ on:
       - 'NOTICE'
   workflow_dispatch:
     inputs:
+      pre-built-kamel-image:
+        description: 'Kamel image url for skipping building of kamel stages. Used for debugging'
+        required: false
+      skip-problematic:
+        description: 'Whether tests marked as problematic should be skipped - false by default (sets CAMEL_K_TEST_SKIP_PROBLEMATIC)'
+        required: false
+        default: false
+      test-filters:
+        description: |
+          List of comma-separated key/value pairs to filter the tests in this test suite:
+            TEST_INTEGRATION_COMMON_RUN,        TEST_INTEGRATION_COMMON_BUILD_RUN, TEST_INTEGRATION_COMMON_CONFIG_RUN,
+            TEST_INTEGRATION_COMMON_LANG_RUN,   TEST_INTEGRATION_COMMON_TRAITS_RUN
+            TEST_SERVICE_RUN,                   TEST_REGISTRY_MAVEN_WAGON_RUN
+          eg. TEST_INTEGRATION_COMMON_RUN=TestBasic will only run tests prefixed with 'TestBasic'
+        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -92,9 +107,10 @@ jobs:
     - name: Run IT 1
       run: |
         # Then run integration tests
+        export CAMEL_K_CLUSTER_OCP3=true
+
         make test-integration
         make test-builder
-        make test-quarkus-native
 
     - id: change-context
       name: Change the Kamel Cluster Context to Admin
@@ -105,4 +121,7 @@ jobs:
     - name: Run IT 2
       run: |
         # Then run integration tests
+        export CAMEL_K_CLUSTER_OCP3=true
+
+        make test-quarkus-native
         make test-install

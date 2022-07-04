@@ -73,8 +73,28 @@ func ExecMake(t *testing.T, command *exec.Cmd) {
 	session.Wait()
 	Eventually(session).Should(gexec.Exit(0))
 	assert.Nil(t, err)
-	assert.NotContains(t, cmdErr.String(), "Error")
-	assert.NotContains(t, cmdErr.String(), "ERROR")
+	assert.NotContains(t, strings.ToUpper(cmdErr.String()), "ERROR")
+}
+
+//
+// Expect a make error with an exit code of 1
+//
+func ExecMakeError(t *testing.T, command *exec.Cmd) {
+	var cmdOut strings.Builder
+	var cmdErr strings.Builder
+
+	defer func() {
+		if t.Failed() {
+			t.Logf("Output from make command:\n%s\n", cmdOut.String())
+			t.Logf("Error from make command:\n%s\n", cmdErr.String())
+		}
+	}()
+
+	session, err := gexec.Start(command, &cmdOut, &cmdErr)
+	session.Wait()
+	Eventually(session).ShouldNot(gexec.Exit(0))
+	assert.Nil(t, err)
+	assert.Contains(t, strings.ToUpper(cmdErr.String()), "ERROR")
 }
 
 // Clean up the cluster ready for the next set of tests
