@@ -107,7 +107,7 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 		Eventually(PlatformVersion(ns)).Should(ContainSubstring(prevIPVersionPrefix))
 
 		name := "yaml"
-		Expect(KamelRun(ns, "files/yaml.yaml").Execute()).To(Succeed())
+		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
 		// Check the Integration runs correctly
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
