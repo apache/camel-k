@@ -15,7 +15,7 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: generate
+name: verify-generate
 
 on:
   pull_request:
@@ -48,7 +48,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  generate:
+  verify-generate:
     strategy:
       matrix:
         # TODO: test an all the supported OS
