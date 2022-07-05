@@ -61,13 +61,15 @@ func (c *Catalog) Configure(env *Environment) error {
 }
 
 func (c *Catalog) configureTraits(traits interface{}) error {
-	traitsMap, err := ToMap(traits)
+	traitMap, err := ToTraitMap(traits)
 	if err != nil {
 		return err
 	}
 
-	for id, trait := range traitsMap {
+	for id, trait := range traitMap {
 		if id == "addons" {
+			// Handle addons later so that the configurations on the new API
+			// take precedence over the legacy addon configurations
 			continue
 		}
 		if err := c.configureTrait(id, trait); err != nil {
@@ -75,7 +77,7 @@ func (c *Catalog) configureTraits(traits interface{}) error {
 		}
 	}
 	// Addons
-	for id, trait := range traitsMap["addons"] {
+	for id, trait := range traitMap["addons"] {
 		if addons, ok := trait.(map[string]interface{}); ok {
 			if err := c.configureTrait(id, addons); err != nil {
 				return err
@@ -88,7 +90,7 @@ func (c *Catalog) configureTraits(traits interface{}) error {
 
 func (c *Catalog) configureTrait(id string, trait map[string]interface{}) error {
 	if catTrait := c.GetTrait(id); catTrait != nil {
-		if err := decodeTrait(trait, catTrait, true); err != nil {
+		if err := decodeTrait(trait, catTrait); err != nil {
 			return err
 		}
 	}
@@ -96,21 +98,10 @@ func (c *Catalog) configureTrait(id string, trait map[string]interface{}) error 
 	return nil
 }
 
-func decodeTrait(in map[string]interface{}, target Trait, root bool) error {
-	// decode legacy configuration first if it exists
-	if root && in["configuration"] != nil {
-		if config, ok := in["configuration"].(map[string]interface{}); ok {
-			// for traits that had the same property name "configuration",
-			// it needs to be renamed to "config" to avoid naming conflicts
-			// (e.g. Knative trait).
-			if config["configuration"] != nil {
-				config["config"] = config["configuration"]
-			}
-
-			if err := decodeTrait(config, target, false); err != nil {
-				return err
-			}
-		}
+func decodeTrait(in map[string]interface{}, target Trait) error {
+	// Migrate legacy configuration properties before applying to catalog
+	if err := MigrateLegacyConfiguration(in); err != nil {
+		return err
 	}
 
 	data, err := json.Marshal(&in)

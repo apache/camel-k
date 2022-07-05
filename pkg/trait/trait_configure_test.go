@@ -223,7 +223,7 @@ func TestTraitDecode(t *testing.T) {
 
 	target, ok := newContainerTrait().(*containerTrait)
 	require.True(t, ok)
-	err := decodeTrait(trait, target, true)
+	err := decodeTrait(trait, target)
 	require.NoError(t, err)
 
 	assert.Equal(t, false, pointer.BoolDeref(target.Enabled, true))

@@ -51,15 +51,15 @@ func describeObjectMeta(w *indentedwriter.Writer, om metav1.ObjectMeta) {
 }
 
 func describeTraits(w *indentedwriter.Writer, traits interface{}) error {
-	traitsMap, err := trait.ToMap(traits)
+	traitMap, err := trait.ToTraitMap(traits)
 	if err != nil {
 		return err
 	}
 
-	if len(traitsMap) > 0 {
+	if len(traitMap) > 0 {
 		w.Writef(0, "Traits:\n")
 
-		for id, trait := range traitsMap {
+		for id, trait := range traitMap {
 			w.Writef(1, "%s:\n", strings.Title(id))
 			// TODO: print the whole TraitSpec as Yaml
 			for k, v := range trait {

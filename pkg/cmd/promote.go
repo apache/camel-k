@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
@@ -30,6 +29,7 @@ import (
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kamelets"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -181,81 +181,83 @@ func (o *promoteCmdOptions) getIntegration(c client.Client, name string) (*v1.In
 }
 
 func (o *promoteCmdOptions) validateDestResources(c client.Client, it *v1.Integration) error {
-	var traits map[string][]string
 	var configmaps []string
 	var secrets []string
 	var pvcs []string
 	var kamelets []string
 
 	// Mount trait
-	mounts := it.Spec.Traits.Mount
-	if err := json.Unmarshal(mounts.Configuration.RawMessage, &traits); err != nil {
+	mount, err := toPropertyMap(it.Spec.Traits.Mount)
+	if err != nil {
 		return err
 	}
-	for t, v := range traits {
+	for t, v := range mount {
 		switch t {
 		case "configs":
-			for _, cn := range v {
-				if conf, parseErr := resource.ParseConfig(cn); parseErr == nil {
-					if conf.StorageType() == resource.StorageTypeConfigmap {
-						configmaps = append(configmaps, conf.Name())
-					} else if conf.StorageType() == resource.StorageTypeSecret {
-						secrets = append(secrets, conf.Name())
+			if list, ok := v.([]string); ok {
+				for _, cn := range list {
+					if conf, parseErr := resource.ParseConfig(cn); parseErr == nil {
+						if conf.StorageType() == resource.StorageTypeConfigmap {
+							configmaps = append(configmaps, conf.Name())
+						} else if conf.StorageType() == resource.StorageTypeSecret {
+							secrets = append(secrets, conf.Name())
+						}
+					} else {
+						return parseErr
 					}
-				} else {
-					return parseErr
 				}
 			}
 		case "resources":
-			for _, cn := range v {
-				if conf, parseErr := resource.ParseResource(cn); parseErr == nil {
-					if conf.StorageType() == resource.StorageTypeConfigmap {
-						configmaps = append(configmaps, conf.Name())
-					} else if conf.StorageType() == resource.StorageTypeSecret {
-						secrets = append(secrets, conf.Name())
+			if list, ok := v.([]string); ok {
+				for _, cn := range list {
+					if conf, parseErr := resource.ParseResource(cn); parseErr == nil {
+						if conf.StorageType() == resource.StorageTypeConfigmap {
+							configmaps = append(configmaps, conf.Name())
+						} else if conf.StorageType() == resource.StorageTypeSecret {
+							secrets = append(secrets, conf.Name())
+						}
+					} else {
+						return parseErr
 					}
-				} else {
-					return parseErr
 				}
 			}
 		case "volumes":
-			for _, cn := range v {
-				if conf, parseErr := resource.ParseVolume(cn); parseErr == nil {
-					if conf.StorageType() == resource.StorageTypePVC {
-						pvcs = append(pvcs, conf.Name())
+			if list, ok := v.([]string); ok {
+				for _, cn := range list {
+					if conf, parseErr := resource.ParseVolume(cn); parseErr == nil {
+						if conf.StorageType() == resource.StorageTypePVC {
+							pvcs = append(pvcs, conf.Name())
+						}
+					} else {
+						return parseErr
 					}
-				} else {
-					return parseErr
 				}
 			}
 		}
 	}
 
-	// Openapi trait
-	openapis := it.Spec.Traits.OpenAPI
-	traits = map[string][]string{}
-	if len(openapis.Configuration.RawMessage) > 0 {
-		if err := json.Unmarshal(openapis.Configuration.RawMessage, &traits); err != nil {
-			return err
-		}
+	// OpenAPI trait
+	openapi, err := toPropertyMap(it.Spec.Traits.OpenAPI)
+	if err != nil {
+		return err
 	}
-	for k, v := range traits {
-		for _, cn := range v {
-			if k == "configmaps" {
-				configmaps = append(configmaps, cn)
-			}
+	for k, v := range openapi {
+		if k != "configmaps" {
+			continue
+		}
+		if list, ok := v.([]string); ok {
+			configmaps = append(configmaps, list...)
+			break
 		}
 	}
 
-	// Kamelet trait
-	kameletTrait := it.Spec.Traits.Kamelets
-	var kameletListTrait map[string]string
-	if len(kameletTrait.Configuration.RawMessage) > 0 {
-		if err := json.Unmarshal(kameletTrait.Configuration.RawMessage, &kameletListTrait); err != nil {
-			return err
-		}
-
-		kamelets = strings.Split(kameletListTrait["list"], ",")
+	// Kamelets trait
+	kamelet, err := toPropertyMap(it.Spec.Traits.Kamelets)
+	if err != nil {
+		return err
+	}
+	if list, ok := kamelet["list"].(string); ok {
+		kamelets = strings.Split(list, ",")
 	}
 	sourceKamelets, err := o.listKamelets(c, it)
 	if err != nil {
@@ -295,6 +297,19 @@ func (o *promoteCmdOptions) validateDestResources(c client.Client, it *v1.Integr
 	}
 
 	return nil
+}
+
+func toPropertyMap(src interface{}) (map[string]interface{}, error) {
+	propMap, err := trait.ToPropertyMap(src)
+	if err != nil {
+		return nil, err
+	}
+	// Migrate legacy configuration properties before promoting
+	if err := trait.MigrateLegacyConfiguration(propMap); err != nil {
+		return nil, err
+	}
+
+	return propMap, nil
 }
 
 func (o *promoteCmdOptions) listKamelets(c client.Client, it *v1.Integration) ([]string, error) {
