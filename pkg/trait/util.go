@@ -236,8 +236,8 @@ func AssertTraitsType(traits interface{}) error {
 	return nil
 }
 
-// ToMap accepts either v1.Traits or v1.IntegrationKitTraits and converts it to a map.
-func ToMap(traits interface{}) (map[string]map[string]interface{}, error) {
+// ToTraitMap accepts either v1.Traits or v1.IntegrationKitTraits and converts it to a map of traits.
+func ToTraitMap(traits interface{}) (map[string]map[string]interface{}, error) {
 	if err := AssertTraitsType(traits); err != nil {
 		return nil, err
 	}
@@ -246,12 +246,56 @@ func ToMap(traits interface{}) (map[string]map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	traitsMap := make(map[string]map[string]interface{})
-	if err = json.Unmarshal(data, &traitsMap); err != nil {
+	traitMap := make(map[string]map[string]interface{})
+	if err = json.Unmarshal(data, &traitMap); err != nil {
 		return nil, err
 	}
 
-	return traitsMap, nil
+	return traitMap, nil
+}
+
+// ToPropertyMap accepts a trait and converts it to a map of trait properties.
+func ToPropertyMap(trait interface{}) (map[string]interface{}, error) {
+	data, err := json.Marshal(trait)
+	if err != nil {
+		return nil, err
+	}
+	propMap := make(map[string]interface{})
+	if err = json.Unmarshal(data, &propMap); err != nil {
+		return nil, err
+	}
+
+	return propMap, nil
+}
+
+// MigrateLegacyConfiguration moves up the legacy configuration in a trait to the new top-level properties.
+// Values of the new properties always take precedence over the ones from the legacy configuration
+// with the same property names.
+func MigrateLegacyConfiguration(trait map[string]interface{}) error {
+	if trait["configuration"] == nil {
+		return nil
+	}
+
+	if config, ok := trait["configuration"].(map[string]interface{}); ok {
+		// For traits that had the same property name "configuration",
+		// the property needs to be renamed to "config" to avoid naming conflicts
+		// (e.g. Knative trait).
+		if config["configuration"] != nil {
+			config["config"] = config["configuration"]
+			delete(config, "configuration")
+		}
+
+		for k, v := range config {
+			if trait[k] == nil {
+				trait[k] = v
+			}
+		}
+		delete(trait, "configuration")
+	} else {
+		return errors.Errorf(`unexpected type for "configuration" field: %v`, reflect.TypeOf(trait["configuration"]))
+	}
+
+	return nil
 }
 
 // ToTrait unmarshals a map configuration to a target trait.

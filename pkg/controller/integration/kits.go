@@ -161,11 +161,11 @@ func kitMatches(kit1 *v1.IntegrationKit, kit2 *v1.IntegrationKit) (bool, error) 
 }
 
 func hasMatchingTraits(traits interface{}, kitTraits interface{}) (bool, error) {
-	traitsMap, err := trait.ToMap(traits)
+	traitMap, err := trait.ToTraitMap(traits)
 	if err != nil {
 		return false, err
 	}
-	kitTraitsMap, err := trait.ToMap(kitTraits)
+	kitTraitMap, err := trait.ToTraitMap(kitTraits)
 	if err != nil {
 		return false, err
 	}
@@ -177,8 +177,8 @@ func hasMatchingTraits(traits interface{}, kitTraits interface{}) (bool, error) 
 			continue
 		}
 		id := string(t.ID())
-		it, ok1 := findTrait(traitsMap, id)
-		kt, ok2 := findTrait(kitTraitsMap, id)
+		it, ok1 := findTrait(traitMap, id)
+		kt, ok2 := findTrait(kitTraitMap, id)
 
 		if !ok1 && !ok2 {
 			continue

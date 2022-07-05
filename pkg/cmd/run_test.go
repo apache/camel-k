@@ -373,9 +373,9 @@ func TestConfigureTraits(t *testing.T) {
 	err = configureTraits(runCmdOptions.Traits, &traits, catalog)
 
 	assert.Nil(t, err)
-	traitsMap, err := trait.ToMap(traits)
+	traitMap, err := trait.ToTraitMap(traits)
 	assert.Nil(t, err)
-	assert.Len(t, traitsMap, 5)
+	assert.Len(t, traitMap, 5)
 	assertTraitConfiguration(t, traits.Affinity, &traitv1.AffinityTrait{PodAffinity: pointer.Bool(false)})
 	assertTraitConfiguration(t, traits.Container, &traitv1.ContainerTrait{DeprecatedProbesEnabled: pointer.Bool(false)})
 	assertTraitConfiguration(t, traits.Environment, &traitv1.EnvironmentTrait{ContainerMeta: pointer.Bool(false)})
