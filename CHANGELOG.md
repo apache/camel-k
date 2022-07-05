@@ -20,6 +20,7 @@
 - Release 1.9.2 [\#3275](https://github.com/apache/camel-k/issues/3275)
 - `make generate-doc` doesn't update CRD API doc when using Go 1.16.x [\#3236](https://github.com/apache/camel-k/issues/3236)
 - Add e2e test for kamel run --dev in a warmed-up environment [\#3211](https://github.com/apache/camel-k/issues/3211)
+- Logging trait usage example [\#3143](https://github.com/apache/camel-k/issues/3143)
 - Support operator hub bundle format in `make bundle` [\#3128](https://github.com/apache/camel-k/issues/3128)
 - hello yaml example output [\#3124](https://github.com/apache/camel-k/issues/3124)
 - cyrus-sasl-lib \(CVE-2022-24407\), CVE-2022-23806 and multiple go related vulnerabilities in Docker Image 1.7.0, 1.8.1, 1.8.2 [\#3113](https://github.com/apache/camel-k/issues/3113)
