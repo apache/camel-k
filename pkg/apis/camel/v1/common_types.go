@@ -37,7 +37,7 @@ const (
 
 // BuildStrategy specifies how the Build should be executed.
 // It will trigger a Maven process that will take care of producing the expected Camel/Camel-Quarkus runtime.
-// +kubebuilder:validation:Enum=routine;pod
+// +kubebuilder:validation:Enum=routine;pod;mvnd
 type BuildStrategy string
 
 const (
@@ -48,12 +48,17 @@ const (
 	// BuildStrategyPod performs the build in a `Pod` (will schedule a new builder ephemeral `Pod` which will take care of the build action).
 	// This strategy has the limitation that every build will have to download all the dependencies required by the Maven build.
 	BuildStrategyPod BuildStrategy = "pod"
+	//"BuildStrategyMvnd performs the build using Apache Maven Daemon, that's started in the operator Pod."
+	// It will trigger a Maven daemon process that will take care of producing the expected Camel/Camel-Quarkus runtime.
+	// The Maven daemon will be run in a container.
+	BuildStrategyMvnd BuildStrategy = "mvnd"
 )
 
 // BuildStrategies is a list of strategies allowed for the build
 var BuildStrategies = []BuildStrategy{
 	BuildStrategyRoutine,
 	BuildStrategyPod,
+	BuildStrategyMvnd,
 }
 
 // ConfigurationSpec represents a generic configuration specification

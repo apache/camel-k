@@ -72,6 +72,17 @@ func TestKitTimerToLogFullNativeBuild(t *testing.T) {
 	})
 }
 
+<<<<<<< HEAD
+=======
+func TestKitMavenDaemonFullBuild(t *testing.T) {
+	doKitFullBuild(t, "mvnd", "300Mi", "5m0s", TestTimeoutLong, kitOptions{
+		dependencies: []string{
+			"camel:timer", "camel:log",
+		},
+	})
+}
+
+>>>>>>> 6c715963 (add new strategy conditional check in build test)
 func doKitFullBuild(t *testing.T, name string, memoryLimit string, buildTimeout string, testTimeout time.Duration, options kitOptions) {
 	t.Helper()
 
@@ -84,6 +95,10 @@ func doKitFullBuild(t *testing.T, name string, memoryLimit string, buildTimeout 
 		// TODO: configure build Pod resources if applicable
 		if strategy == "Spectrum" || ocp {
 			args = append(args, "--operator-resources", "limits.memory="+memoryLimit)
+		}
+
+		if strategy == "mvnd" {
+			args = append(args, "--buildStrategy", "mvnd")
 		}
 
 		operatorID := fmt.Sprintf("camel-k-%s", ns)

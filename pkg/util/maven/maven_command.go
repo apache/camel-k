@@ -32,6 +32,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/log"
 )
@@ -48,14 +49,19 @@ func (c *Command) Do(ctx context.Context) error {
 		return err
 	}
 
-	mvnCmd := "mvnd"
+	var mvnCmd string
+	switch c.context.Strategy {
+	default:
+		mvnCmd = "mvn"
+	case "mvnd":
+		mvnCmd = "mvnd"
+	}
 	if c, ok := os.LookupEnv("MAVEN_CMD"); ok {
 		mvnCmd = c
 	}
 
 	args := make([]string, 0)
 	args = append(args, c.context.AdditionalArguments...)
-	// the below changes are merged from pr-355
 	args = append(args, "--no-transfer-progress", "-Dstyle.color=never")
 	args = append(args, "-Dmvnd.daemonStorage=/.mvnd")
 
@@ -156,6 +162,7 @@ type Context struct {
 	AdditionalArguments []string
 	AdditionalEntries   map[string]interface{}
 	LocalRepository     string
+	Strategy            v1.BuildStrategy
 }
 
 func (c *Context) AddEntry(id string, entry interface{}) {

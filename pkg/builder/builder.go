@@ -63,6 +63,7 @@ func (t *builderTask) Do(ctx context.Context) v1.BuildStatus {
 		Namespace: t.build.Namespace,
 		Build:     *t.task,
 		BaseImage: t.task.BaseImage,
+		Strategy:  t.build.Spec.Strategy,
 	}
 
 	// Add sources

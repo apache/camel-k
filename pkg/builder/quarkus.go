@@ -152,6 +152,7 @@ func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion str
 
 func buildQuarkusRunner(ctx *builderContext) error {
 	mc := maven.NewContext(path.Join(ctx.Path, "maven"))
+	mc.Strategy = ctx.Strategy
 	mc.GlobalSettings = ctx.Maven.GlobalSettings
 	mc.UserSettings = ctx.Maven.UserSettings
 	mc.SettingsSecurity = ctx.Maven.SettingsSecurity
@@ -200,6 +201,7 @@ func BuildQuarkusRunnerCommon(ctx context.Context, mc maven.Context, project mav
 
 func computeQuarkusDependencies(ctx *builderContext) error {
 	mc := maven.NewContext(path.Join(ctx.Path, "maven"))
+	mc.Strategy = ctx.Strategy
 	mc.GlobalSettings = ctx.Maven.GlobalSettings
 	mc.UserSettings = ctx.Maven.UserSettings
 	mc.SettingsSecurity = ctx.Maven.SettingsSecurity

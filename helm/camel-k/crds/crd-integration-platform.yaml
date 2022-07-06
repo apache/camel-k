@@ -85,6 +85,7 @@ spec:
                     enum:
                     - routine
                     - pod
+                    - mvnd
                     type: string
                   kanikoBuildCache:
                     description: 'Deprecated: Use PublishStrategyOptions instead enables
@@ -1671,6 +1672,7 @@ spec:
                     enum:
                     - routine
                     - pod
+                    - mvnd
                     type: string
                   kanikoBuildCache:
                     description: 'Deprecated: Use PublishStrategyOptions instead enables

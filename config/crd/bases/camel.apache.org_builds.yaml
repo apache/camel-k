@@ -84,6 +84,7 @@ spec:
                 enum:
                 - routine
                 - pod
+                - mvnd
                 type: string
               tasks:
                 description: The sequence of Build tasks to be performed as part of

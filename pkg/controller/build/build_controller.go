@@ -155,7 +155,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 			newErrorRecoveryAction(),
 			newErrorAction(),
 		}
-	case v1.BuildStrategyRoutine:
+	case v1.BuildStrategyRoutine, v1.BuildStrategyMvnd:
 		actions = []Action{
 			newInitializeRoutineAction(),
 			newScheduleAction(r.reader),
