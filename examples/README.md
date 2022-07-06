@@ -9,8 +9,6 @@ In this section you will find the most basic examples. Useful to start learning 
 | Type  |  Description | Link  |
 |---|---|---|
 | Languages | Simple integrations developed in various supported languages | [see examples](./languages/)|
-| Basic | Simple integrations with basic configuration | [see examples](./basic/)|
-| Cron | How to create a `cront` integration | [see examples](./cron/)|
 | User Config | Explore how to include a `property`, `secret`, `configmap` or file `resource` in your integration | [see examples](./user-config/)|
 | User Dependencies | Explore how to include a local dependency in your integration with Jitpack | [see examples](./jitpack/)|
 | Processor | Show how to include `Processor`s logic | [see examples](./processor/)|
@@ -25,10 +23,6 @@ In this section you can find a few examples of certain [`Camel` components](http
 
 | Type  |  Description | Link  |
 |---|---|---|
-| AMQP | Component usage | [see examples](./amqp/)|
-| Caffeine | Component usage | [see examples](./caffeine/)|
-| Databases | Component usage | [see examples](./databases/)|
-| DNS | Component usage | [see examples](./dns/)|
 | HTTP/HTTPS | Component usage | [see examples](./http/)|
 | Kafka | Component usage | [see examples](./kafka/)|
 | Knative | Component usage | [see examples](./knative/)|
