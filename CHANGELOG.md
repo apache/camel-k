@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Camel K integration Prometheus Trait label autocreation with Integration Platform not working [\#3415](https://github.com/apache/camel-k/issues/3415)
 - Migrate from batch/v1beta1 to batch/v1 [\#3393](https://github.com/apache/camel-k/issues/3393)
 - RBAC missing permissions for channels and inmemorychannels in messaging.knative.dev [\#3390](https://github.com/apache/camel-k/issues/3390)
 - kamel local run support --build-property ? [\#3356](https://github.com/apache/camel-k/issues/3356)
