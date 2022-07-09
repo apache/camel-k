@@ -51,6 +51,7 @@
 - Populate Knative event registry when using KameletBinding [\#1689](https://github.com/apache/camel-k/issues/1689)
 - List of supported versions combinations for running Camel-K with Knative [\#1665](https://github.com/apache/camel-k/issues/1665)
 - Import release notes from Camel K Runtime on release [\#1623](https://github.com/apache/camel-k/issues/1623)
+- Traits configuration schema [\#1614](https://github.com/apache/camel-k/issues/1614)
 - Drop OpenShift 3 support [\#1550](https://github.com/apache/camel-k/issues/1550)
 - No way to configure Ingress Trait with annotations [\#1535](https://github.com/apache/camel-k/issues/1535)
 - kamel run directory \(self contained\) [\#1523](https://github.com/apache/camel-k/issues/1523)
