@@ -53,7 +53,7 @@ func TestKamelCLIDelete(t *testing.T) {
 		})
 
 		t.Run("delete integration from csv", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "github:apache/camel-k/e2e/common/files/yaml.yaml").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "github:apache/camel-k/e2e/namespace/install/cli/files/yaml.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Expect(Kamel("delete", "yaml", "-n", ns).Execute()).To(Succeed())
 			Eventually(Integration(ns, "yaml")).Should(BeNil())
