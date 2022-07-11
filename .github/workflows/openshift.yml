@@ -75,7 +75,6 @@ jobs:
       with:
         persist-credentials: false
         submodules: recursive
-
     - id: prepare-env
       name: Prepare Test Environment
       uses: ./.github/actions/kamel-prepare-env

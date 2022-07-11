@@ -75,7 +75,7 @@ runs:
       uses: actions/setup-go@v2 # Version 2 adds GOBIN to PATH
       if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       with:
-        go-version: 1.16.x
+        go-version: 1.17.x
 
     - name: (Re-)install kustomize
       shell: bash
