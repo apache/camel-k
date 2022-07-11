@@ -71,7 +71,6 @@ jobs:
       with:
         persist-credentials: false
         submodules: recursive
-
     - name: Convert input parameters to env vars
       shell: bash
       run: |
