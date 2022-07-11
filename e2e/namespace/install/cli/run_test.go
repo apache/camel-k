@@ -42,7 +42,7 @@ func TestRunExamplesFromGitHub(t *testing.T) {
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("run java from GitHub", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "github:apache/camel-k/e2e/common/files/Java.java").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "github:apache/camel-k/e2e/namespace/install/files/Java.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -50,7 +50,7 @@ func TestRunExamplesFromGitHub(t *testing.T) {
 		})
 
 		t.Run("run java from GitHub (RAW)", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "https://raw.githubusercontent.com/apache/camel-k/main/e2e/common/files/Java.java").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "https://raw.githubusercontent.com/apache/camel-k/main/e2e/namespace/install/files/Java.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
