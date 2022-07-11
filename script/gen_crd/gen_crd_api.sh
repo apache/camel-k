@@ -20,18 +20,22 @@ rootdir=$location/../..
 crd_file_camel=$rootdir/docs/modules/ROOT/partials/apis/camel-k-crds.adoc
 crd_file_kamelets=$rootdir/docs/modules/ROOT/partials/apis/kamelets-crds.adoc
 
+# Until the pull req below is merged upstream, we need to use a self-hosted
+# version of gen-crd-api-reference-docs:
+#   https://github.com/ahmetb/gen-crd-api-reference-docs/pull/45
+
 echo "Generating CRD API documentation..."
 # to run a local copy use something like
 #go run /Users/david/projects/camel/gen-crd-api-reference-docs/main.go \
 #you will probably need to comment out use of blackfriday.
-go run github.com/djencks/gen-crd-api-reference-docs@e63530f10b55be5f2d82e223d83f86c13e5158e5 \
+go run github.com/tadayosi/gen-crd-api-reference-docs@v0.4.0-camel-k-1 \
     -config $location/gen-crd-api-config.json \
     -template-dir $location/template \
     -api-dir "github.com/apache/camel-k/pkg/apis/camel/v1" \
     -out-file $crd_file_camel
 
 #go run /Users/david/projects/camel/gen-crd-api-reference-docs/main.go \
-go run github.com/djencks/gen-crd-api-reference-docs@e63530f10b55be5f2d82e223d83f86c13e5158e5 \
+go run github.com/tadayosi/gen-crd-api-reference-docs@v0.4.0-camel-k-1 \
     -config $location/gen-kamelets-crd-api-config.json \
     -template-dir $location/template \
     -api-dir "github.com/apache/camel-k/pkg/apis/camel/v1alpha1" \
