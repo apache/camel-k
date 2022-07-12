@@ -1,4 +1,33 @@
 traits:
+- name: 3scale
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The 3scale trait can be used to automatically create annotations that
+    allow 3scale to discover the generated service and make it available for API management.
+    The 3scale trait is disabled by default.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: auto
+    type: bool
+    description: Enables automatic configuration of the trait.
+  - name: scheme
+    type: string
+    description: The scheme to use to contact the service (default `http`)
+  - name: path
+    type: string
+    description: The path where the API is published (default `/`)
+  - name: port
+    type: int
+    description: The port where the service is exposed (default `80`)
+  - name: description-path
+    type: string
+    description: The path where the Open-API specification is published (default `/openapi.json`)
 - name: affinity
   platform: false
   profiles:
@@ -467,39 +496,6 @@ traits:
     type: bool
     description: Forces the value for labels `sidecar.istio.io/inject`. By default
       the label is set to `true` on deployment and not set on Knative Service.
-- name: jvm
-  platform: true
-  profiles:
-  - Kubernetes
-  - Knative
-  - OpenShift
-  description: The JVM trait is used to configure the JVM that runs the integration.
-  properties:
-  - name: enabled
-    type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
-  - name: debug
-    type: bool
-    description: Activates remote debugging, so that a debugger can be attached to
-      the JVM, e.g., using port-forwarding
-  - name: debug-suspend
-    type: bool
-    description: Suspends the target JVM immediately before the main class is loaded
-  - name: print-command
-    type: bool
-    description: Prints the command used the start the JVM in the container logs (default
-      `true`)
-  - name: debug-address
-    type: string
-    description: Transport address at which to listen for the newly launched JVM (default
-      `*:5005`)
-  - name: options
-    type: '[]string'
-    description: A list of JVM options
-  - name: classpath
-    type: string
-    description: Additional JVM classpath (use `Linux` classpath separator)
 - name: jolokia
   platform: false
   profiles:
@@ -560,6 +556,39 @@ traits:
     type: '[]string'
     description: A list of additional Jolokia options as definedin https://jolokia.org/reference/html/agents.html#agent-jvm-config[JVM
       agent configuration options]
+- name: jvm
+  platform: true
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: The JVM trait is used to configure the JVM that runs the integration.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: debug
+    type: bool
+    description: Activates remote debugging, so that a debugger can be attached to
+      the JVM, e.g., using port-forwarding
+  - name: debug-suspend
+    type: bool
+    description: Suspends the target JVM immediately before the main class is loaded
+  - name: print-command
+    type: bool
+    description: Prints the command used the start the JVM in the container logs (default
+      `true`)
+  - name: debug-address
+    type: string
+    description: Transport address at which to listen for the newly launched JVM (default
+      `*:5005`)
+  - name: options
+    type: '[]string'
+    description: A list of JVM options
+  - name: classpath
+    type: string
+    description: Additional JVM classpath (use `Linux` classpath separator)
 - name: kamelets
   platform: true
   profiles:
@@ -580,57 +609,57 @@ traits:
   - name: list
     type: string
     description: Comma separated list of Kamelet names to load into the current integration
-- name: knative-service
+- name: keda
   platform: false
   profiles:
+  - Kubernetes
   - Knative
-  description: The Knative Service trait allows configuring options when running the
-    Integration as a Knative service, instead of a standard Kubernetes Deployment.
-    Running an Integration as a Knative Service enables auto-scaling (and scaling-to-zero),
-    but those features are only relevant when the Camel route(s) use(s) an HTTP endpoint
-    consumer.
+  - OpenShift
+  description: The KEDA trait can be used for automatic integration with KEDA autoscalers.
+    The trait can be either manually configured using the `triggers` option or automatically
+    configured via markers in the Kamelets. For information on how to use KEDA enabled
+    Kamelets with the KEDA trait, refer to xref:ROOT:kamelets/kamelets-user.adoc#kamelet-keda-user[the
+    KEDA section in the Kamelets user guide]. If you want to create Kamelets that
+    contain KEDA metadata, refer to xref:ROOT:kamelets/kamelets-dev.adoc#kamelet-keda-dev[the
+    KEDA section in the Kamelets development guide]. The KEDA trait is disabled by
+    default.
   properties:
   - name: enabled
     type: bool
     description: Can be used to enable or disable a trait. All traits share this common
       property.
-  - name: autoscaling-class
-    type: string
-    description: Configures the Knative autoscaling class property (e.g. to set `hpa.autoscaling.knative.dev`
-      or `kpa.autoscaling.knative.dev` autoscaling).Refer to the Knative documentation
-      for more information.
-  - name: autoscaling-metric
-    type: string
-    description: Configures the Knative autoscaling metric property (e.g. to set `concurrency`
-      based or `cpu` based autoscaling).Refer to the Knative documentation for more
-      information.
-  - name: autoscaling-target
-    type: int
-    description: Sets the allowed concurrency level or CPU percentage (depending on
-      the autoscaling metric) for each Pod.Refer to the Knative documentation for
-      more information.
-  - name: min-scale
-    type: int
-    description: The minimum number of Pods that should be running at any time for
-      the integration. It's **zero** by default, meaning thatthe integration is scaled
-      down to zero when not used for a configured amount of time.Refer to the Knative
-      documentation for more information.
-  - name: max-scale
-    type: int
-    description: An upper bound for the number of Pods that can be running in parallel
-      for the integration.Knative has its own cap value that depends on the installation.Refer
-      to the Knative documentation for more information.
-  - name: rollout-duration
-    type: string
-    description: Enables to gradually shift traffic to the latest Revision and sets
-      the rollout duration.It's disabled by default and must be expressed as a Golang
-      `time.Duration` string representation,rounded to a second precision.
   - name: auto
     type: bool
-    description: Automatically deploy the integration as Knative service when all
-      conditions hold:* Integration is using the Knative profile* All routes are either
-      starting from a HTTP based consumer or a passive consumer (e.g. `direct` is
-      a passive consumer)
+    description: Enables automatic configuration of the trait. Allows the trait to
+      infer KEDA triggers from the Kamelets.
+  - name: hack-controller-replicas
+    type: bool
+    description: Set the spec->replicas field on the top level controller to an explicit
+      value if missing, to allow KEDA to recognize it as a scalable resource.
+  - name: polling-interval
+    type: int32
+    description: Interval (seconds) to check each trigger on.
+  - name: cooldown-period
+    type: int32
+    description: The wait period between the last active trigger reported and scaling
+      the resource back to 0.
+  - name: idle-replica-count
+    type: int32
+    description: Enabling this property allows KEDA to scale the resource down to
+      the specified number of replicas.
+  - name: min-replica-count
+    type: int32
+    description: Minimum number of replicas.
+  - name: max-replica-count
+    type: int32
+    description: Maximum number of replicas.
+  - name: triggers
+    type: '[]github.com/apache/camel-k/addons/keda.kedaTrigger'
+    description: Definition of triggers according to the KEDA format. Each trigger
+      must contain `type` field correspondingto the name of a KEDA autoscaler and
+      a key/value map named `metadata` containing specific trigger options.An optional
+      `authentication-secret` can be declared per trigger and the operator will link
+      each entry ofthe secret to a KEDA authentication parameter.
 - name: knative
   platform: false
   profiles:
@@ -686,6 +715,57 @@ traits:
   - name: auto
     type: bool
     description: Enable automatic discovery of all trait properties.
+- name: knative-service
+  platform: false
+  profiles:
+  - Knative
+  description: The Knative Service trait allows configuring options when running the
+    Integration as a Knative service, instead of a standard Kubernetes Deployment.
+    Running an Integration as a Knative Service enables auto-scaling (and scaling-to-zero),
+    but those features are only relevant when the Camel route(s) use(s) an HTTP endpoint
+    consumer.
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: autoscaling-class
+    type: string
+    description: Configures the Knative autoscaling class property (e.g. to set `hpa.autoscaling.knative.dev`
+      or `kpa.autoscaling.knative.dev` autoscaling).Refer to the Knative documentation
+      for more information.
+  - name: autoscaling-metric
+    type: string
+    description: Configures the Knative autoscaling metric property (e.g. to set `concurrency`
+      based or `cpu` based autoscaling).Refer to the Knative documentation for more
+      information.
+  - name: autoscaling-target
+    type: int
+    description: Sets the allowed concurrency level or CPU percentage (depending on
+      the autoscaling metric) for each Pod.Refer to the Knative documentation for
+      more information.
+  - name: min-scale
+    type: int
+    description: The minimum number of Pods that should be running at any time for
+      the integration. It's **zero** by default, meaning thatthe integration is scaled
+      down to zero when not used for a configured amount of time.Refer to the Knative
+      documentation for more information.
+  - name: max-scale
+    type: int
+    description: An upper bound for the number of Pods that can be running in parallel
+      for the integration.Knative has its own cap value that depends on the installation.Refer
+      to the Knative documentation for more information.
+  - name: rollout-duration
+    type: string
+    description: Enables to gradually shift traffic to the latest Revision and sets
+      the rollout duration.It's disabled by default and must be expressed as a Golang
+      `time.Duration` string representation,rounded to a second precision.
+  - name: auto
+    type: bool
+    description: Automatically deploy the integration as Knative service when all
+      conditions hold:* Integration is using the Knative profile* All routes are either
+      starting from a HTTP based consumer or a passive consumer (e.g. `direct` is
+      a passive consumer)
 - name: logging
   platform: false
   profiles:
@@ -715,6 +795,50 @@ traits:
   - name: json-pretty-print
     type: bool
     description: Enable "pretty printing" of the JSON logs
+- name: master
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: 'The Master trait allows to configure the integration to automatically
+    leverage Kubernetes resources for doing leader election and starting *master*
+    routes only on certain instances. It''s activated automatically when using the
+    master endpoint in a route, e.g. `from("master:lockname:telegram:bots")...`. NOTE:
+    this trait adds special permissions to the integration service account in order
+    to read/write configmaps and read pods. It''s recommended to use a different service
+    account than "default" when running the integration.'
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: auto
+    type: bool
+    description: Enables automatic configuration of the trait.
+  - name: include-delegate-dependencies
+    type: bool
+    description: When this flag is active, the operator analyzes the source code to
+      add dependencies required by delegate endpoints.E.g. when using `master:lockname:timer`,
+      then `camel:timer` is automatically added to the set of dependencies.It's enabled
+      by default.
+  - name: resource-name
+    type: string
+    description: Name of the configmap that will be used to store the lock. Defaults
+      to "<integration-name>-lock".Name of the configmap/lease resource that will
+      be used to store the lock. Defaults to "<integration-name>-lock".
+  - name: resource-type
+    type: string
+    description: Type of Kubernetes resource to use for locking ("ConfigMap" or "Lease").
+      Defaults to "Lease".
+  - name: label-key
+    type: string
+    description: Label that will be used to identify all pods contending the lock.
+      Defaults to "camel.apache.org/integration".
+  - name: label-value
+    type: string
+    description: Label value that will be used to identify all pods contending the
+      lock. Defaults to the integration name.
 - name: mount
   platform: true
   profiles:
@@ -1018,23 +1142,6 @@ traits:
     description: To configure how to deal with insecure traffic, e.g. `Allow`, `Disable`
       or `Redirect` traffic.Refer to the OpenShift route documentation for additional
       information.
-- name: service-binding
-  platform: false
-  profiles:
-  - Kubernetes
-  - Knative
-  - OpenShift
-  description: 'The Service Binding trait allows users to connect to Services in Kubernetes:
-    https://github.com/k8s-service-bindings/spec#service-binding As the specification
-    is still evolving this is subject to change.'
-  properties:
-  - name: enabled
-    type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
-  - name: services
-    type: '[]string'
-    description: List of Services in the form [[apigroup/]version:]kind:[namespace/]name
 - name: service
   platform: false
   profiles:
@@ -1055,6 +1162,23 @@ traits:
   - name: node-port
     type: bool
     description: Enable Service to be exposed as NodePort (default `false`).
+- name: service-binding
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: 'The Service Binding trait allows users to connect to Services in Kubernetes:
+    https://github.com/k8s-service-bindings/spec#service-binding As the specification
+    is still evolving this is subject to change.'
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: services
+    type: '[]string'
+    description: List of Services in the form [[apigroup/]version:]kind:[namespace/]name
 - name: toleration
   platform: false
   profiles:
@@ -1109,127 +1233,3 @@ traits:
   - name: sampler-param
     type: string
     description: The sampler specific param (default "1")
-- name: keda
-  platform: false
-  profiles:
-  - Kubernetes
-  - Knative
-  - OpenShift
-  description: The KEDA trait can be used for automatic integration with KEDA autoscalers.
-    The trait can be either manually configured using the `triggers` option or automatically
-    configured via markers in the Kamelets. For information on how to use KEDA enabled
-    Kamelets with the KEDA trait, refer to xref:ROOT:kamelets/kamelets-user.adoc#kamelet-keda-user[the
-    KEDA section in the Kamelets user guide]. If you want to create Kamelets that
-    contain KEDA metadata, refer to xref:ROOT:kamelets/kamelets-dev.adoc#kamelet-keda-dev[the
-    KEDA section in the Kamelets development guide]. The KEDA trait is disabled by
-    default.
-  properties:
-  - name: enabled
-    type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
-  - name: auto
-    type: bool
-    description: Enables automatic configuration of the trait. Allows the trait to
-      infer KEDA triggers from the Kamelets.
-  - name: hack-controller-replicas
-    type: bool
-    description: Set the spec->replicas field on the top level controller to an explicit
-      value if missing, to allow KEDA to recognize it as a scalable resource.
-  - name: polling-interval
-    type: int32
-    description: Interval (seconds) to check each trigger on.
-  - name: cooldown-period
-    type: int32
-    description: The wait period between the last active trigger reported and scaling
-      the resource back to 0.
-  - name: idle-replica-count
-    type: int32
-    description: Enabling this property allows KEDA to scale the resource down to
-      the specified number of replicas.
-  - name: min-replica-count
-    type: int32
-    description: Minimum number of replicas.
-  - name: max-replica-count
-    type: int32
-    description: Maximum number of replicas.
-  - name: triggers
-    type: '[]github.com/apache/camel-k/addons/keda.kedaTrigger'
-    description: Definition of triggers according to the KEDA format. Each trigger
-      must contain `type` field correspondingto the name of a KEDA autoscaler and
-      a key/value map named `metadata` containing specific trigger options.An optional
-      `authentication-secret` can be declared per trigger and the operator will link
-      each entry ofthe secret to a KEDA authentication parameter.
-- name: 3scale
-  platform: false
-  profiles:
-  - Kubernetes
-  - Knative
-  - OpenShift
-  description: The 3scale trait can be used to automatically create annotations that
-    allow 3scale to discover the generated service and make it available for API management.
-    The 3scale trait is disabled by default.
-  properties:
-  - name: enabled
-    type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
-  - name: auto
-    type: bool
-    description: Enables automatic configuration of the trait.
-  - name: scheme
-    type: string
-    description: The scheme to use to contact the service (default `http`)
-  - name: path
-    type: string
-    description: The path where the API is published (default `/`)
-  - name: port
-    type: int
-    description: The port where the service is exposed (default `80`)
-  - name: description-path
-    type: string
-    description: The path where the Open-API specification is published (default `/openapi.json`)
-- name: master
-  platform: false
-  profiles:
-  - Kubernetes
-  - Knative
-  - OpenShift
-  description: 'The Master trait allows to configure the integration to automatically
-    leverage Kubernetes resources for doing leader election and starting *master*
-    routes only on certain instances. It''s activated automatically when using the
-    master endpoint in a route, e.g. `from("master:lockname:telegram:bots")...`. NOTE:
-    this trait adds special permissions to the integration service account in order
-    to read/write configmaps and read pods. It''s recommended to use a different service
-    account than "default" when running the integration.'
-  properties:
-  - name: enabled
-    type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
-  - name: auto
-    type: bool
-    description: Enables automatic configuration of the trait.
-  - name: include-delegate-dependencies
-    type: bool
-    description: When this flag is active, the operator analyzes the source code to
-      add dependencies required by delegate endpoints.E.g. when using `master:lockname:timer`,
-      then `camel:timer` is automatically added to the set of dependencies.It's enabled
-      by default.
-  - name: resource-name
-    type: string
-    description: Name of the configmap that will be used to store the lock. Defaults
-      to "<integration-name>-lock".Name of the configmap/lease resource that will
-      be used to store the lock. Defaults to "<integration-name>-lock".
-  - name: resource-type
-    type: string
-    description: Type of Kubernetes resource to use for locking ("ConfigMap" or "Lease").
-      Defaults to "Lease".
-  - name: label-key
-    type: string
-    description: Label that will be used to identify all pods contending the lock.
-      Defaults to "camel.apache.org/integration".
-  - name: label-value
-    type: string
-    description: Label value that will be used to identify all pods contending the
-      lock. Defaults to the integration name.
