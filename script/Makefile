@@ -23,6 +23,7 @@ BUILDAH_VERSION := 1.23.3
 KANIKO_VERSION := 0.17.1
 INSTALL_DEFAULT_KAMELETS := true
 CONTROLLER_GEN_VERSION := v0.6.1
+CODEGEN_VERSION := v0.22.5
 OPERATOR_SDK_VERSION := v1.14.0
 KUSTOMIZE_VERSION := v4.1.2
 OPM_VERSION := v1.21.0
@@ -171,26 +172,26 @@ codegen:
 
 	gofmt -w pkg/util/defaults/defaults.go
 
-generate: generate-deepcopy generate-crd generate-client generate-doc generate-keda generate-strimzi
-
-generate-client:
+generate: codegen-tools-install
+	# We better force the developer to generate all the resources everytime as
+	# it happens we tend to forget some code generation in the past
 	./script/gen_client.sh
-
-generate-crd: controller-gen
-	CONTROLLER_GEN=$(CONTROLLER_GEN) ./script/gen_crd.sh
-
-generate-doc:
+	./script/gen_crd.sh
 	./script/gen_doc.sh
-
-generate-deepcopy: controller-gen
-	cd pkg/apis/camel && $(CONTROLLER_GEN) paths="./..." object
-
-generate-keda:
-	cd addons/keda/duck && $(CONTROLLER_GEN) paths="./..." object
-
-generate-strimzi:
-	cd addons/strimzi/duck && $(CONTROLLER_GEN) paths="./..." object
+	cd pkg/apis/camel && $(shell go env GOPATH)/bin/controller-gen paths="./..." object
+	cd addons/keda/duck && $(shell go env GOPATH)/bin/controller-gen paths="./..." object
+	cd addons/strimzi/duck && $(shell go env GOPATH)/bin/controller-gen paths="./..." object
 	./script/gen_client_strimzi.sh
+
+codegen-tools-install:
+	# We must force the installation to make sure we are using the correct version
+	# Note: as there is no --version in the tools, we cannot rely on cached local versions
+	echo "Installing k8s.io/code-generator tools with version $(CODEGEN_VERSION)"
+	go install k8s.io/code-generator/cmd/client-gen@$(CODEGEN_VERSION)
+	go install k8s.io/code-generator/cmd/lister-gen@$(CODEGEN_VERSION)
+	go install k8s.io/code-generator/cmd/informer-gen@$(CODEGEN_VERSION)
+	echo "sigs.k8s.io/controller-tools/cmd/controller-gen with version $(CONTROLLER_GEN_VERSION)"
+	go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION)
 
 build: test build-resources build-kamel build-compile-integration-tests build-submodules
 
@@ -466,23 +467,6 @@ get-staging-repo:
 
 .PHONY: do-build build build-kamel build-resources dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-keda generate-strimzi
 .PHONY: controller-gen kubectl kustomize operator-sdk
-
-# find or download controller-gen if necessary
-controller-gen:
-ifeq (, $(shell command -v controller-gen 2> /dev/null))
-	@{ \
-	set -e ;\
-	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
-	cd $$CONTROLLER_GEN_TMP_DIR ;\
-	go mod init tmp ;\
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION) ;\
-	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
-	}
-CONTROLLER_GEN=$(GOBIN)/controller-gen
-else
-CONTROLLER_GEN=$(shell command -v controller-gen 2> /dev/null)
-endif
-
 .PHONY: kubectl kustomize operator-sdk opm
 
 kubectl:
