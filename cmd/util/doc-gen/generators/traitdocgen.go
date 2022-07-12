@@ -63,6 +63,9 @@ type traitDocGen struct {
 	generatedTraitFiles []string
 }
 
+// traitDocGen implements Generator interface.
+var _ generator.Generator = &traitDocGen{}
+
 func NewTraitDocGen(arguments *args.GeneratorArgs) generator.Generator {
 	return &traitDocGen{
 		DefaultGen: generator.DefaultGen{},
@@ -256,7 +259,7 @@ func escapeASCIIDoc(text string) string {
 	return strings.ReplaceAll(text, "|", "\\|")
 }
 
-func split(doc []string, startMarker, endMarker string) (pre []string, post []string) {
+func split(doc []string, startMarker, endMarker string) ([]string, []string) {
 	if len(doc) == 0 {
 		return nil, nil
 	}
@@ -274,7 +277,8 @@ func split(doc []string, startMarker, endMarker string) (pre []string, post []st
 			break
 		}
 	}
-	pre = doc[0:idx]
+	pre := doc[0:idx]
+	post := []string{}
 	if idy < len(doc) {
 		post = doc[idy+1:]
 	}
@@ -307,7 +311,8 @@ func isPlatformTrait(traitID string) bool {
 	return t.IsPlatformTrait()
 }
 
-func determineProfiles(traitID string) (profiles []string) {
+func determineProfiles(traitID string) []string {
+	var profiles []string
 	catalog := trait.NewCatalog(nil)
 	for _, p := range v1.AllTraitProfiles {
 		traits := catalog.TraitsForProfile(p)

@@ -23,6 +23,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"sort"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
@@ -32,6 +33,8 @@ import (
 	"k8s.io/gengo/generator"
 	"k8s.io/gengo/types"
 )
+
+const traitFile = "traits.yaml"
 
 // traitMetaDataGen produces YAML documentation about trait descriptions.
 type traitMetaDataGen struct {
@@ -57,6 +60,9 @@ type traitPropertyMetaData struct {
 	TypeName    string `yaml:"type"`
 	Description string `yaml:"description"`
 }
+
+// traitMetaDataGen implements Generator interface.
+var _ generator.Generator = &traitMetaDataGen{}
 
 // NewtraitMetaDataGen --.
 func NewtraitMetaDataGen(arguments *args.GeneratorArgs) generator.Generator {
@@ -89,10 +95,18 @@ func (g *traitMetaDataGen) GenerateType(context *generator.Context, t *types.Typ
 	return nil
 }
 
-func (g *traitMetaDataGen) Finalize(c *generator.Context, w io.Writer) (err error) {
-	deployDir := g.arguments.CustomArgs.(*CustomArgs).ResourceDir
-	traitFile := "traits.yaml"
+func (g *traitMetaDataGen) Finalize(c *generator.Context, w io.Writer) error {
+	customArgs, ok := g.arguments.CustomArgs.(*CustomArgs)
+	if !ok {
+		return fmt.Errorf("type assertion failed: %v", g.arguments.CustomArgs)
+	}
+	deployDir := customArgs.ResourceDir
 	filename := path.Join(deployDir, traitFile)
+
+	// reorder the traits metadata so that it always gets the identical result
+	sort.Slice(g.Root.Traits, func(i, j int) bool {
+		return g.Root.Traits[i].Name < g.Root.Traits[j].Name
+	})
 
 	return util.WithFile(filename, os.O_RDWR|os.O_CREATE, 0o777, func(file *os.File) error {
 		if err := file.Truncate(0); err != nil {

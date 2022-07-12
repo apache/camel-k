@@ -49,7 +49,8 @@ func DefaultNameSystem() string {
 }
 
 // Packages --.
-func Packages(context *generator.Context, arguments *args.GeneratorArgs) (packages generator.Packages) {
+func Packages(context *generator.Context, arguments *args.GeneratorArgs) generator.Packages {
+	var packages generator.Packages
 	for _, i := range context.Inputs {
 		pkg := context.Universe[i]
 		if pkg == nil {
@@ -59,9 +60,8 @@ func Packages(context *generator.Context, arguments *args.GeneratorArgs) (packag
 		packages = append(packages, &generator.DefaultPackage{
 			PackageName: strings.Split(filepath.Base(pkg.Path), ".")[0],
 			PackagePath: pkg.Path,
-			GeneratorFunc: func(c *generator.Context) (generators []generator.Generator) {
-				generators = append(generators, NewTraitDocGen(arguments), NewtraitMetaDataGen(arguments))
-				return generators
+			GeneratorFunc: func(c *generator.Context) []generator.Generator {
+				return []generator.Generator{NewTraitDocGen(arguments), NewtraitMetaDataGen(arguments)}
 			},
 		})
 	}
