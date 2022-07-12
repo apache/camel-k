@@ -27,7 +27,7 @@ echo "Generating Go client code for Strimzi addon..."
 
 cd $rootdir
 
-go run k8s.io/code-generator/cmd/client-gen \
+$(go env GOPATH)/bin/client-gen \
   -h script/headers/default.txt \
   --input duck/v1beta2 \
   --input-base=github.com/apache/camel-k/addons/strimzi \

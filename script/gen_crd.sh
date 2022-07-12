@@ -21,7 +21,7 @@ location=$(dirname "$0")
 apidir=$location/../pkg/apis/camel
 
 cd "$apidir"
-$CONTROLLER_GEN crd \
+$(go env GOPATH)/bin/controller-gen crd \
   paths=./... \
   output:crd:artifacts:config=../../../config/crd/bases \
   output:crd:dir=../../../config/crd/bases \
