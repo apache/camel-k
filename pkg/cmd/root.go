@@ -59,7 +59,6 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 		ContextCancel: childCancel,
 	}
 
-	var err error
 	cmd := kamelPreAddCommandInit(&options)
 	addKamelSubcommands(cmd, &options)
 
@@ -67,7 +66,7 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 		return cmd, err
 	}
 
-	err = kamelPostAddCommandInit(cmd)
+	err := kamelPostAddCommandInit(cmd)
 
 	return cmd, err
 }
@@ -148,7 +147,7 @@ func addKamelSubcommands(cmd *cobra.Command, options *RootCmdOptions) {
 	cmd.AddCommand(cmdOnly(newCmdInit(options)))
 	cmd.AddCommand(cmdOnly(newCmdDebug(options)))
 	cmd.AddCommand(cmdOnly(newCmdDump(options)))
-	cmd.AddCommand(newCmdLocal(options))
+	cmd.AddCommand(cmdOnly(newCmdLocal(options)))
 	cmd.AddCommand(cmdOnly(newCmdBind(options)))
 	cmd.AddCommand(cmdOnly(newCmdPromote(options)))
 	cmd.AddCommand(newCmdKamelet(options))

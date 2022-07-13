@@ -29,9 +29,9 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 )
 
-func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCmdOptions) {
+func newCmdLocalRun(localCmdOptions *LocalCmdOptions) (*cobra.Command, *localRunCmdOptions) {
 	options := localRunCmdOptions{
-		RootCmdOptions: rootCmdOptions,
+		LocalCmdOptions: localCmdOptions,
 	}
 
 	cmd := cobra.Command{
@@ -40,7 +40,7 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 		Long:    `Run integration locally using the input integration files.`,
 		PreRunE: decode(&options),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := options.validate(cmd, args); err != nil {
+			if err := options.validate(args); err != nil {
 				return err
 			}
 			if err := options.init(); err != nil {
@@ -80,51 +80,39 @@ func newCmdLocalRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localRunCm
 	cmd.Flags().StringArrayP("env", "e", nil, "Flag to specify an environment variable [--env VARIABLE=value].")
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a Camel property to the integration.")
-	cmd.Flags().StringArrayP("dependency", "d", nil, additionalDependencyUsageMessage)
 	cmd.Flags().StringArray("maven-repository", nil, "Use a maven repository")
-
-	// hidden flags for compatibility with kamel run
-	cmd.Flags().StringArrayP("trait", "t", nil, "")
-	if err := cmd.Flags().MarkHidden("trait"); err != nil {
-		fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
-	}
 
 	return &cmd, &options
 }
 
 type localRunCmdOptions struct {
-	*RootCmdOptions
-	Containerize           bool     `mapstructure:"containerize"`
-	Image                  string   `mapstructure:"image"`
-	Network                string   `mapstructure:"network"`
-	IntegrationDirectory   string   `mapstructure:"integration-directory"`
-	EnvironmentVariables   []string `mapstructure:"envs"`
-	PropertyFiles          []string `mapstructure:"property-files"`
-	Properties             []string `mapstructure:"properties"`
-	AdditionalDependencies []string `mapstructure:"dependencies"`
-	MavenRepositories      []string `mapstructure:"maven-repositories"`
-	Traits                 []string `mapstructure:"traits"`
+	*LocalCmdOptions
+	Containerize         bool     `mapstructure:"containerize"`
+	Image                string   `mapstructure:"image"`
+	Network              string   `mapstructure:"network"`
+	IntegrationDirectory string   `mapstructure:"integration-directory"`
+	EnvironmentVariables []string `mapstructure:"envs"`
+	PropertyFiles        []string `mapstructure:"property-files"`
+	Properties           []string `mapstructure:"properties"`
+	MavenRepositories    []string `mapstructure:"maven-repositories"`
 }
 
-func (command *localRunCmdOptions) validate(cmd *cobra.Command, args []string) error {
+func (command *localRunCmdOptions) validate(args []string) error {
 	// Validate integration files when no image is provided and we are
 	// not running an already locally-built integration.
 	if command.Image == "" && command.IntegrationDirectory == "" {
-		err := validateIntegrationFiles(args)
-		if err != nil {
+		if err := validateIntegrationFiles(args); err != nil {
 			return err
 		}
 	}
 
 	// Validate additional dependencies specified by the user.
-	err := validateAdditionalDependencies(command.AdditionalDependencies)
-	if err != nil {
+	if err := validateDependencies(command.Dependencies); err != nil {
 		return err
 	}
 
 	// Validate properties file.
-	err = validatePropertyFiles(command.PropertyFiles)
-	if err != nil {
+	if err := validatePropertyFiles(command.PropertyFiles); err != nil {
 		return err
 	}
 
@@ -133,20 +121,16 @@ func (command *localRunCmdOptions) validate(cmd *cobra.Command, args []string) e
 		return errors.New("containerization is active but no image name has been provided")
 	}
 
-	warnTraitUsages(cmd, command.Traits)
-
 	return nil
 }
 
 func (command *localRunCmdOptions) init() error {
 	if command.Containerize {
-		err := createDockerBaseWorkingDirectory()
-		if err != nil {
+		if err := createDockerBaseWorkingDirectory(); err != nil {
 			return err
 		}
 
-		err = createDockerWorkingDirectory()
-		if err != nil {
+		if err := createDockerWorkingDirectory(); err != nil {
 			return err
 		}
 	}
@@ -162,8 +146,7 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 	// If local run is provided with an image name, it will just run the image locally and exit.
 	if command.Image != "" && !command.Containerize {
 		// Run image locally.
-		err := runIntegrationImage(command.Context, command.Image, cmd.OutOrStdout(), cmd.ErrOrStderr())
-		if err != nil {
+		if err := runIntegrationImage(command.Context, command.Image, cmd.OutOrStdout(), cmd.ErrOrStderr()); err != nil {
 			return err
 		}
 
@@ -209,7 +192,7 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 			return err
 		}
 	} else {
-		computedDependencies, err := getDependencies(command.Context, args, command.AdditionalDependencies, command.MavenRepositories, true)
+		computedDependencies, err := GetDependencies(command.Context, args, command.Dependencies, command.MavenRepositories, true)
 		if err != nil {
 			return err
 		}

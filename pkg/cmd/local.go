@@ -20,25 +20,57 @@ package cmd
 import (
 	"fmt"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/spf13/cobra"
 )
 
 // newCmdLocal -- Add local kamel subcommand with several other subcommands of its own.
-func newCmdLocal(rootCmdOptions *RootCmdOptions) *cobra.Command {
+func newCmdLocal(rootCmdOptions *RootCmdOptions) (*cobra.Command, *LocalCmdOptions) {
+	options := LocalCmdOptions{
+		RootCmdOptions: rootCmdOptions,
+	}
+
 	cmd := cobra.Command{
-		Use:   "local [sub-command]",
-		Short: "Perform integration actions locally.",
-		Long:  `Perform integration actions locally given a set of input integration files.`,
+		Use:               "local [sub-command]",
+		Short:             "Perform integration actions locally.",
+		Long:              `Perform integration actions locally given a set of input integration files.`,
+		PersistentPreRunE: options.persistentPreRun,
 		Annotations: map[string]string{
 			offlineCommandLabel: "true",
 		},
 	}
 
-	cmd.AddCommand(cmdOnly(newCmdLocalBuild(rootCmdOptions)))
-	cmd.AddCommand(cmdOnly(newCmdLocalInspect(rootCmdOptions)))
-	cmd.AddCommand(cmdOnly(newCmdLocalRun(rootCmdOptions)))
+	cmd.PersistentFlags().StringArrayVarP(&options.Dependencies, "dependency", "d", nil, usageDependency)
 
-	return &cmd
+	// hidden flags for compatibility with kamel run
+	cmd.PersistentFlags().StringArrayVarP(&options.Traits, "trait", "t", nil, "")
+	if err := cmd.PersistentFlags().MarkHidden("trait"); err != nil {
+		fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
+	}
+
+	cmd.AddCommand(cmdOnly(newCmdLocalBuild(&options)))
+	cmd.AddCommand(cmdOnly(newCmdLocalInspect(&options)))
+	cmd.AddCommand(cmdOnly(newCmdLocalRun(&options)))
+
+	return &cmd, &options
+}
+
+type LocalCmdOptions struct {
+	*RootCmdOptions
+	Dependencies []string `mapstructure:"dependencies"`
+	Traits       []string `mapstructure:"traits"`
+}
+
+func (o *LocalCmdOptions) persistentPreRun(cmd *cobra.Command, args []string) error {
+	// pre-process dependencies
+	for i, dependency := range o.Dependencies {
+		o.Dependencies[i] = v1.NormalizeDependency(dependency)
+	}
+
+	// validate traits
+	warnTraitUsages(cmd, o.Traits)
+
+	return nil
 }
 
 func warnTraitUsages(cmd *cobra.Command, traits []string) {

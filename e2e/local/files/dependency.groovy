@@ -1,4 +1,4 @@
-// camel-k: language=groovy dependency=camel:twitter dependency=mvn:com.google.guava:guava:31.1-jre dependency=github:squakez/samplejp:v1.0
+// camel-k: language=groovy dependency=camel-twitter dependency=mvn:com.google.guava:guava:31.1-jre dependency=github:squakez/samplejp:v1.0
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more

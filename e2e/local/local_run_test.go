@@ -60,6 +60,31 @@ func TestLocalRun(t *testing.T) {
 	Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
 }
 
+func TestLocalRunWithDependencies(t *testing.T) {
+	RegisterTestingT(t)
+
+	ctx, cancel := context.WithCancel(TestContext)
+	defer cancel()
+	piper, pipew := io.Pipe()
+	defer pipew.Close()
+	defer piper.Close()
+
+	file := testutil.MakeTempCopy(t, "files/dependency.groovy")
+
+	kamelRun := KamelWithContext(ctx, "local", "run", file, "-d", "camel-amqp")
+	kamelRun.SetOut(pipew)
+
+	logScanner := testutil.NewLogScanner(ctx, piper, "Magicstring!")
+
+	go func() {
+		err := kamelRun.Execute()
+		assert.NoError(t, err)
+		cancel()
+	}()
+
+	Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
+}
+
 func TestLocalRunContainerize(t *testing.T) {
 	RegisterTestingT(t)
 

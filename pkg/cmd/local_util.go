@@ -38,13 +38,14 @@ import (
 	"github.com/apache/camel-k/pkg/util/maven"
 )
 
-var acceptedDependencyTypes = []string{"bom", "camel", "camel-k", "camel-quarkus", "mvn", "github"}
+var acceptedDependencyTypes = []string{
+	"bom", "camel", "camel-k", "camel-quarkus", "mvn",
+	// jitpack
+	"github", "gitlab", "bitbucket", "gitee", "azure",
+}
 
-var additionalDependencyUsageMessage = `Additional top-level dependencies are specified with the format:
-<type>:<dependency-name>
-where <type> is one of {` + strings.Join(acceptedDependencyTypes, "|") + `}.`
-
-func getDependencies(ctx context.Context, args []string, additionalDependencies []string, repositories []string, allDependencies bool) ([]string, error) {
+// GetDependencies resolves and gets the list of dependencies from catalog and sources.
+func GetDependencies(ctx context.Context, args []string, additionalDependencies []string, repositories []string, allDependencies bool) ([]string, error) {
 	// Fetch existing catalog or create new one if one does not already exist
 	catalog, err := createCamelCatalog(ctx)
 	if err != nil {
@@ -109,8 +110,7 @@ func getTransitiveDependencies(ctx context.Context, catalog *camel.RuntimeCatalo
 		catalog.CamelCatalogSpec.Runtime.Metadata["quarkus.version"],
 	)
 
-	err := camel.ManageIntegrationDependencies(&project, dependencies, catalog)
-	if err != nil {
+	if err := camel.ManageIntegrationDependencies(&project, dependencies, catalog); err != nil {
 		return nil, err
 	}
 
@@ -132,8 +132,7 @@ func getTransitiveDependencies(ctx context.Context, catalog *camel.RuntimeCatalo
 	// Make maven command less verbose
 	mc.AdditionalArguments = append(mc.AdditionalArguments, "-q")
 
-	err = builder.BuildQuarkusRunnerCommon(ctx, mc, project)
-	if err != nil {
+	if err := builder.BuildQuarkusRunnerCommon(ctx, mc, project); err != nil {
 		return nil, err
 	}
 
@@ -293,29 +292,17 @@ func validateFiles(args []string) error {
 	return nil
 }
 
-func validateAdditionalDependencies(additionalDependencies []string) error {
-	// Validate list of additional dependencies i.e. make sure that each dependency has a valid type
-	for _, additionalDependency := range additionalDependencies {
-		isValid := validateDependency(additionalDependency)
-		if !isValid {
-			return errors.New("Unexpected type for user-provided dependency: " + additionalDependency + ". " + additionalDependencyUsageMessage)
+// validateDependencies validates list of additional dependencies i.e. makes sure
+// that each dependency has a valid type.
+func validateDependencies(dependencies []string) error {
+	for _, dependency := range dependencies {
+		depType := strings.Split(dependency, ":")[0]
+		if !util.StringSliceExists(acceptedDependencyTypes, depType) {
+			return fmt.Errorf("dependency is not valid: %s", dependency)
 		}
 	}
 
 	return nil
-}
-
-func validateDependency(additionalDependency string) bool {
-	dependencyComponents := strings.Split(additionalDependency, ":")
-
-	TypeIsValid := false
-	for _, dependencyType := range acceptedDependencyTypes {
-		if dependencyType == dependencyComponents[0] {
-			TypeIsValid = true
-		}
-	}
-
-	return TypeIsValid
 }
 
 func validateIntegrationFiles(args []string) error {

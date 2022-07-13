@@ -75,6 +75,8 @@ import (
 	"github.com/apache/camel-k/pkg/util/watch"
 )
 
+const usageDependency = `A dependency that should be included, e.g., "-d camel-mail" for a Camel component, "-d mvn:org.my:app:1.0" for a Maven dependency or "file://localPath[?targetPath=<path>&registry=<registry_URL>&skipChecksums=<true>&skipPOM=<true>]" for local files (experimental)`
+
 func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) {
 	options := runCmdOptions{
 		RootCmdOptions: rootCmdOptions,
@@ -94,7 +96,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 
 	cmd.Flags().String("name", "", "The integration name")
 	cmd.Flags().StringArrayP("connect", "c", nil, "A Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
-	cmd.Flags().StringArrayP("dependency", "d", nil, "A dependency that should be included, e.g., \"-d camel-mail\" for a Camel component, \"-d mvn:org.my:app:1.0\" for a Maven dependency or \"file://localPath[?targetPath=<path>&registry=<registry URL>&skipChecksums=<true>&skipPOM=<true>]\" for local files (experimental)")
+	cmd.Flags().StringArrayP("dependency", "d", nil, usageDependency)
 	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or properties file (syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
