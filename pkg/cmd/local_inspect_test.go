@@ -22,28 +22,52 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func addTestLocalInspectCmd(rootCmdOptions *RootCmdOptions, rootCmd *cobra.Command) *localInspectCmdOptions {
+	localCmd, localCmdOptions := newCmdLocal(rootCmdOptions)
+	// remove predefined sub commands
+	localCmd.RemoveCommand(localCmd.Commands()...)
 	// add a testing version of inspect Command
-	localInspectCmd, localInspectCmdOptions := newCmdLocalInspect(rootCmdOptions)
+	localInspectCmd, localInspectCmdOptions := newCmdLocalInspect(localCmdOptions)
 	localInspectCmd.RunE = func(c *cobra.Command, args []string) error {
 		return nil
 	}
 	localInspectCmd.Args = test.ArbitraryArgs
-	rootCmd.AddCommand(localInspectCmd)
+	localCmd.AddCommand(localInspectCmd)
+	rootCmd.AddCommand(localCmd)
 	return localInspectCmdOptions
 }
 
 func TestLocalInspectAcceptsTraits(t *testing.T) {
-	options, rootCmd := kamelTestPreAddCommandInit()
-
-	addTestLocalInspectCmd(options, rootCmd)
-
+	rootOptions, rootCmd := kamelTestPreAddCommandInit()
+	addTestLocalInspectCmd(rootOptions, rootCmd)
 	kamelTestPostAddCommandInit(t, rootCmd)
 
-	_, err := test.ExecuteCommand(rootCmd, "inspect", "route.java", "-t", "jolokia.enabled=true", "--trait", "prometheus.enabled=true")
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	_, err := test.ExecuteCommand(rootCmd, "local", "inspect", "route.java",
+		"-t", "jolokia.enabled=true",
+		"--trait", "prometheus.enabled=true")
+
+	require.NoError(t, err)
+}
+
+func TestLocalInspectWithDependencies(t *testing.T) {
+	rootOptions, rootCmd := kamelTestPreAddCommandInit()
+	options := addTestLocalInspectCmd(rootOptions, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd)
+
+	_, err := test.ExecuteCommand(rootCmd, "local", "inspect", "route.java",
+		"-d", "camel-amqp",
+		"-d", "camel:bean",
+		"-d", "camel-quarkus-controlbus",
+		"-d", "camel-quarkus:directvm",
+		"--dependency", "mvn:test:component:1.0.0")
+
+	require.NoError(t, err)
+	assert.Len(t, options.Dependencies, 5)
+	assert.ElementsMatch(t, options.Dependencies, []string{
+		"camel:amqp", "camel:bean", "camel:controlbus", "camel:directvm", "mvn:test:component:1.0.0",
+	})
 }

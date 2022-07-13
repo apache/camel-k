@@ -22,31 +22,35 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func addTestLocalRunCmd(rootCmdOptions *RootCmdOptions, rootCmd *cobra.Command) *localRunCmdOptions {
+	localCmd, localCmdOptions := newCmdLocal(rootCmdOptions)
+	// remove predefined sub commands
+	localCmd.RemoveCommand(localCmd.Commands()...)
 	// add a testing version of run Command
-	localRunCmd, localRunCmdOptions := newCmdLocalRun(rootCmdOptions)
+	localRunCmd, localRunCmdOptions := newCmdLocalRun(localCmdOptions)
 	localRunCmd.RunE = func(c *cobra.Command, args []string) error {
 		return nil
 	}
 	localRunCmd.Args = test.ArbitraryArgs
-	rootCmd.AddCommand(localRunCmd)
+	localCmd.AddCommand(localRunCmd)
+	rootCmd.AddCommand(localCmd)
 	return localRunCmdOptions
 }
 
 func TestLocalRunPropertyFileFlag(t *testing.T) {
 	options, rootCmd := kamelTestPreAddCommandInit()
-
 	localRunCmdOptions := addTestLocalRunCmd(options, rootCmd)
-
 	kamelTestPostAddCommandInit(t, rootCmd)
 
-	_, err := test.ExecuteCommand(rootCmd, "run", "route.java", "--property-file", "file1.properties", "--property-file", "file2.properties")
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	_, err := test.ExecuteCommand(rootCmd, "local", "run", "route.java",
+		"--property-file", "file1.properties",
+		"--property-file", "file2.properties")
 
+	require.NoError(t, err)
 	if len(localRunCmdOptions.PropertyFiles) != 2 {
 		t.Fatalf("Property files expected to contain: \n %v elements\nGot:\n %v elements\n", 2, len(localRunCmdOptions.PropertyFiles))
 	}
@@ -57,16 +61,14 @@ func TestLocalRunPropertyFileFlag(t *testing.T) {
 
 func TestLocalRunPropertiesFlag(t *testing.T) {
 	options, rootCmd := kamelTestPreAddCommandInit()
-
 	localRunCmdOptions := addTestLocalRunCmd(options, rootCmd)
-
 	kamelTestPostAddCommandInit(t, rootCmd)
 
-	_, err := test.ExecuteCommand(rootCmd, "run", "route.java", "-p", "prop1=value1", "-p", "prop2=value2")
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	_, err := test.ExecuteCommand(rootCmd, "local", "run", "route.java",
+		"-p", "prop1=value1",
+		"-p", "prop2=value2")
 
+	require.NoError(t, err)
 	if len(localRunCmdOptions.Properties) != 2 {
 		t.Fatalf("Additional dependencies expected to contain: \n %v elements\nGot:\n %v elements\n", 2, len(localRunCmdOptions.Properties))
 	}
@@ -77,33 +79,31 @@ func TestLocalRunPropertiesFlag(t *testing.T) {
 
 func TestLocalRunAdditionalDependenciesFlag(t *testing.T) {
 	options, rootCmd := kamelTestPreAddCommandInit()
-
 	localRunCmdOptions := addTestLocalRunCmd(options, rootCmd)
-
 	kamelTestPostAddCommandInit(t, rootCmd)
 
-	_, err := test.ExecuteCommand(rootCmd, "run", "route.java", "-d", "mvn:camel-component-1", "-d", "mvn:camel-component-2")
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	_, err := test.ExecuteCommand(rootCmd, "local", "run", "route.java",
+		"-d", "camel-amqp",
+		"-d", "camel:bean",
+		"-d", "camel-quarkus-controlbus",
+		"-d", "camel-quarkus:directvm",
+		"--dependency", "mvn:test:component:1.0.0")
 
-	if len(localRunCmdOptions.AdditionalDependencies) != 2 {
-		t.Fatalf("Additional dependencies expected to contain: \n %v elements\nGot:\n %v elements\n", 2, len(localRunCmdOptions.AdditionalDependencies))
-	}
-	if localRunCmdOptions.AdditionalDependencies[0] != "mvn:camel-component-1" || localRunCmdOptions.AdditionalDependencies[1] != "mvn:camel-component-2" {
-		t.Fatalf("Additional dependencies expected to be: \n %v\nGot:\n %v\n", "[mvn:camel-component-1, mvn:camel-component-2]", localRunCmdOptions.AdditionalDependencies)
-	}
+	require.NoError(t, err)
+	assert.Len(t, localRunCmdOptions.Dependencies, 5)
+	assert.ElementsMatch(t, localRunCmdOptions.Dependencies, []string{
+		"camel:amqp", "camel:bean", "camel:controlbus", "camel:directvm", "mvn:test:component:1.0.0",
+	})
 }
 
 func TestLocalRunAcceptsTraits(t *testing.T) {
 	options, rootCmd := kamelTestPreAddCommandInit()
-
 	addTestLocalRunCmd(options, rootCmd)
-
 	kamelTestPostAddCommandInit(t, rootCmd)
 
-	_, err := test.ExecuteCommand(rootCmd, "run", "route.java", "-t", "jolokia.enabled=true", "--trait", "prometheus.enabled=true")
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	_, err := test.ExecuteCommand(rootCmd, "local", "run", "route.java",
+		"-t", "jolokia.enabled=true",
+		"--trait", "prometheus.enabled=true")
+
+	require.NoError(t, err)
 }

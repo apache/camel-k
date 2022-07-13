@@ -30,14 +30,9 @@ import (
 )
 
 // ManageIntegrationDependencies --.
-func ManageIntegrationDependencies(
-	project *maven.Project,
-	dependencies []string,
-	catalog *RuntimeCatalog) error {
-
+func ManageIntegrationDependencies(project *maven.Project, dependencies []string, catalog *RuntimeCatalog) error {
 	// Add dependencies from build
-	err := addDependencies(project, dependencies, catalog)
-	if err != nil {
+	if err := addDependencies(project, dependencies, catalog); err != nil {
 		return err
 	}
 	// Add dependencies from catalog

@@ -195,7 +195,7 @@ func TestLocalBuildDependenciesOnly(t *testing.T) {
 	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
 	dir := testutil.MakeTempDir(t)
 
-	kamelBuild := KamelWithContext(ctx, "local", "build", file, "--integration-directory", dir, "--dependencies-only")
+	kamelBuild := KamelWithContext(ctx, "local", "build", file, "--integration-directory", dir, "--dependencies-only", "-d", "camel-amqp")
 
 	go func() {
 		err := kamelBuild.Execute()
@@ -206,6 +206,7 @@ func TestLocalBuildDependenciesOnly(t *testing.T) {
 	Eventually(dir+"/dependencies", TestTimeoutShort).Should(BeADirectory())
 	Eventually(dependency(dir, "org.apache.camel.camel-timer-%s.jar", camelVersion), TestTimeoutShort).Should(BeAnExistingFile())
 	Eventually(dependency(dir, "org.apache.camel.camel-log-%s.jar", camelVersion), TestTimeoutShort).Should(BeAnExistingFile())
+	Eventually(dependency(dir, "org.apache.camel.camel-amqp-%s.jar", camelVersion), TestTimeoutShort).Should(BeAnExistingFile())
 	Expect(dir + "/properties").ShouldNot(BeADirectory())
 	Expect(dir + "/routes/yaml.yaml").ShouldNot(BeAnExistingFile())
 }
@@ -219,7 +220,7 @@ func TestLocalBuildModelineDependencies(t *testing.T) {
 	file := testutil.MakeTempCopy(t, "files/dependency.groovy")
 	dir := testutil.MakeTempDir(t)
 
-	kamelBuild := KamelWithContext(ctx, "local", "build", file, "--integration-directory", dir)
+	kamelBuild := KamelWithContext(ctx, "local", "build", file, "--integration-directory", dir, "-d", "camel-amqp")
 
 	go func() {
 		err := kamelBuild.Execute()
@@ -229,6 +230,7 @@ func TestLocalBuildModelineDependencies(t *testing.T) {
 	Eventually(dir+"/dependencies", TestTimeoutShort).Should(BeADirectory())
 	Eventually(dependency(dir, "org.apache.camel.camel-timer-%s.jar", camelVersion), TestTimeoutShort).Should(BeAnExistingFile())
 	Eventually(dependency(dir, "org.apache.camel.camel-log-%s.jar", camelVersion), TestTimeoutShort).Should(BeAnExistingFile())
+	Eventually(dependency(dir, "org.apache.camel.camel-amqp-%s.jar", camelVersion), TestTimeoutShort).Should(BeAnExistingFile())
 	// camel dependency
 	Eventually(dependency(dir, "org.apache.camel.camel-twitter-%s.jar", camelVersion), TestTimeoutMedium).Should(BeAnExistingFile())
 	// mvn dependency

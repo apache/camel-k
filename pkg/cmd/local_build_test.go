@@ -22,28 +22,52 @@ import (
 
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func addTestLocalBuildCmd(rootCmdOptions *RootCmdOptions, rootCmd *cobra.Command) *localBuildCmdOptions {
+	localCmd, localCmdOptions := newCmdLocal(rootCmdOptions)
+	// remove predefined sub commands
+	localCmd.RemoveCommand(localCmd.Commands()...)
 	// add a testing version of build Command
-	localBuildCmd, localBuildCmdOptions := newCmdLocalBuild(rootCmdOptions)
+	localBuildCmd, localBuildCmdOptions := newCmdLocalBuild(localCmdOptions)
 	localBuildCmd.RunE = func(c *cobra.Command, args []string) error {
 		return nil
 	}
 	localBuildCmd.Args = test.ArbitraryArgs
-	rootCmd.AddCommand(localBuildCmd)
+	localCmd.AddCommand(localBuildCmd)
+	rootCmd.AddCommand(localCmd)
 	return localBuildCmdOptions
 }
 
 func TestLocalBuildAcceptsTraits(t *testing.T) {
 	options, rootCmd := kamelTestPreAddCommandInit()
-
 	addTestLocalBuildCmd(options, rootCmd)
-
 	kamelTestPostAddCommandInit(t, rootCmd)
 
-	_, err := test.ExecuteCommand(rootCmd, "build", "route.java", "-t", "jolokia.enabled=true", "--trait", "prometheus.enabled=true")
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	_, err := test.ExecuteCommand(rootCmd, "local", "build", "route.java",
+		"-t", "jolokia.enabled=true",
+		"--trait", "prometheus.enabled=true")
+
+	require.NoError(t, err)
+}
+
+func TestLocalBuildWithDependencies(t *testing.T) {
+	options, rootCmd := kamelTestPreAddCommandInit()
+	localBuildCmdOptions := addTestLocalBuildCmd(options, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd)
+
+	_, err := test.ExecuteCommand(rootCmd, "local", "build", "route.java",
+		"-d", "camel-amqp",
+		"-d", "camel:bean",
+		"-d", "camel-quarkus-controlbus",
+		"-d", "camel-quarkus:directvm",
+		"--dependency", "mvn:test:component:1.0.0")
+
+	require.NoError(t, err)
+	assert.Len(t, localBuildCmdOptions.Dependencies, 5)
+	assert.ElementsMatch(t, localBuildCmdOptions.Dependencies, []string{
+		"camel:amqp", "camel:bean", "camel:controlbus", "camel:directvm", "mvn:test:component:1.0.0",
+	})
 }

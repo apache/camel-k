@@ -26,9 +26,9 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 )
 
-func newCmdLocalBuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localBuildCmdOptions) {
+func newCmdLocalBuild(localCmdOptions *LocalCmdOptions) (*cobra.Command, *localBuildCmdOptions) {
 	options := localBuildCmdOptions{
-		RootCmdOptions: rootCmdOptions,
+		LocalCmdOptions: localCmdOptions,
 	}
 
 	cmd := cobra.Command{
@@ -37,7 +37,7 @@ func newCmdLocalBuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localBui
 		Long:    `Build integration images locally for containerized integrations.`,
 		PreRunE: decode(&options),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := options.validate(cmd, args); err != nil {
+			if err := options.validate(args); err != nil {
 				return err
 			}
 			if err := options.init(args); err != nil {
@@ -64,50 +64,38 @@ func newCmdLocalBuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *localBui
 	cmd.Flags().String("integration-directory", "", "Directory to hold local integration files.")
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a Camel property to the integration.")
-	cmd.Flags().StringArrayP("dependency", "d", nil, "Add an additional dependency")
 	cmd.Flags().StringArray("maven-repository", nil, "Use a maven repository")
-
-	// hidden flags for compatibility with kamel run
-	cmd.Flags().StringArrayP("trait", "t", nil, "")
-	if err := cmd.Flags().MarkHidden("trait"); err != nil {
-		fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
-	}
 
 	return &cmd, &options
 }
 
 type localBuildCmdOptions struct {
-	*RootCmdOptions
-	BaseImage              bool     `mapstructure:"base-image"`
-	DependenciesOnly       bool     `mapstructure:"dependencies-only"`
-	ContainerRegistry      string   `mapstructure:"container-registry"`
-	Image                  string   `mapstructure:"image"`
-	IntegrationDirectory   string   `mapstructure:"integration-directory"`
-	AdditionalDependencies []string `mapstructure:"dependencies"`
-	Properties             []string `mapstructure:"properties"`
-	PropertyFiles          []string `mapstructure:"property-files"`
-	MavenRepositories      []string `mapstructure:"maven-repositories"`
-	Traits                 []string `mapstructure:"traits"`
+	*LocalCmdOptions
+	BaseImage            bool     `mapstructure:"base-image"`
+	DependenciesOnly     bool     `mapstructure:"dependencies-only"`
+	ContainerRegistry    string   `mapstructure:"container-registry"`
+	Image                string   `mapstructure:"image"`
+	IntegrationDirectory string   `mapstructure:"integration-directory"`
+	Properties           []string `mapstructure:"properties"`
+	PropertyFiles        []string `mapstructure:"property-files"`
+	MavenRepositories    []string `mapstructure:"maven-repositories"`
 }
 
-func (command *localBuildCmdOptions) validate(cmd *cobra.Command, args []string) error {
+func (command *localBuildCmdOptions) validate(args []string) error {
 	// Validate integration files.
 	if len(args) > 0 {
-		err := validateIntegrationFiles(args)
-		if err != nil {
+		if err := validateIntegrationFiles(args); err != nil {
 			return err
 		}
 	}
 
 	// Validate additional dependencies specified by the user.
-	err := validateAdditionalDependencies(command.AdditionalDependencies)
-	if err != nil {
+	if err := validateDependencies(command.Dependencies); err != nil {
 		return err
 	}
 
 	// Validate properties file.
-	err = validateFiles(command.PropertyFiles)
-	if err != nil {
+	if err := validateFiles(command.PropertyFiles); err != nil {
 		return err
 	}
 
@@ -135,8 +123,6 @@ func (command *localBuildCmdOptions) validate(cmd *cobra.Command, args []string)
 	if command.DependenciesOnly && command.IntegrationDirectory == "" {
 		return errors.New("to output dependencies the integration directory flag must be set")
 	}
-
-	warnTraitUsages(cmd, command.Traits)
 
 	return nil
 }
@@ -176,7 +162,7 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 	var dependenciesList, propertyFilesList []string
 	routeFiles := args
 	if !command.BaseImage {
-		dependencies, err := getDependencies(command.Context, args, command.AdditionalDependencies, command.MavenRepositories, true)
+		dependencies, err := GetDependencies(command.Context, args, command.Dependencies, command.MavenRepositories, true)
 		if err != nil {
 			return err
 		}

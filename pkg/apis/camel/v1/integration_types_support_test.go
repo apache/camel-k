@@ -74,6 +74,13 @@ func TestAddDependency(t *testing.T) {
 	assert.Equal(t, integration.Dependencies, []string{"file:dep"})
 }
 
+func TestNormalizeDependency(t *testing.T) {
+	assert.Equal(t, "camel:file", NormalizeDependency("camel-file"))
+	assert.Equal(t, "camel:file", NormalizeDependency("camel:file"))
+	assert.Equal(t, "camel:file", NormalizeDependency("camel-quarkus-file"))
+	assert.Equal(t, "camel:file", NormalizeDependency("camel-quarkus:file"))
+}
+
 func TestGetConfigurationProperty(t *testing.T) {
 	integration := IntegrationSpec{}
 	integration.AddConfiguration("property", "key1=value1")
