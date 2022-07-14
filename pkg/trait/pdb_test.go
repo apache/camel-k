@@ -89,8 +89,8 @@ func pdbCreatedCheck(t *testing.T, pdbTrait *pdbTrait, environment *Environment)
 
 func findPdb(resources *kubernetes.Collection) *v1beta1.PodDisruptionBudget {
 	for _, a := range resources.Items() {
-		if _, ok := a.(*v1beta1.PodDisruptionBudget); ok {
-			return a.(*v1beta1.PodDisruptionBudget)
+		if pdb, ok := a.(*v1beta1.PodDisruptionBudget); ok {
+			return pdb
 		}
 	}
 	return nil

@@ -121,8 +121,10 @@ func (t *prometheusTrait) getContainerPort(e *Environment, controller Controller
 	var port int
 
 	if t := e.Catalog.GetTrait(containerTraitID); t != nil {
-		name = t.(*containerTrait).PortName
-		port = t.(*containerTrait).Port
+		if ct, ok := t.(*containerTrait); ok {
+			name = ct.PortName
+			port = ct.Port
+		}
 	}
 
 	// Let's rely on Knative default HTTP negotiation

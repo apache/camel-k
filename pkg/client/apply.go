@@ -66,7 +66,8 @@ func (a *ServerOrClientSideApplier) Apply(ctx context.Context, object ctrl.Objec
 		a.tryServerSideApply = sync.Once{}
 		return err
 	}
-	if v := a.hasServerSideApply.Load(); v.(bool) {
+	v := a.hasServerSideApply.Load()
+	if vb, ok := v.(bool); ok && vb {
 		if !once {
 			return a.serverSideApply(ctx, object)
 		}

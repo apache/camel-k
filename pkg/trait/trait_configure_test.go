@@ -88,9 +88,11 @@ func TestTraitConfigurationFromAnnotations(t *testing.T) {
 	}
 	c := NewCatalog(nil)
 	assert.NoError(t, c.Configure(&env))
-	assert.True(t, *c.GetTrait("cron").(*cronTrait).Fallback)
-	assert.Equal(t, "annotated-policy", c.GetTrait("cron").(*cronTrait).ConcurrencyPolicy)
-	assert.True(t, *c.GetTrait("environment").(*environmentTrait).ContainerMeta)
+	ct, _ := c.GetTrait("cron").(*cronTrait)
+	assert.True(t, *ct.Fallback)
+	assert.Equal(t, "annotated-policy", ct.ConcurrencyPolicy)
+	et, _ := c.GetTrait("environment").(*environmentTrait)
+	assert.True(t, *et.ContainerMeta)
 }
 
 func TestFailOnWrongTraitAnnotations(t *testing.T) {
@@ -164,10 +166,12 @@ func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
 	}
 	c := NewCatalog(nil)
 	assert.NoError(t, c.Configure(&env))
-	assert.Equal(t, "schedule2", c.GetTrait("cron").(*cronTrait).Schedule)
-	assert.Equal(t, "cmp4", c.GetTrait("cron").(*cronTrait).Components)
-	assert.Equal(t, "policy4", c.GetTrait("cron").(*cronTrait).ConcurrencyPolicy)
-	assert.Equal(t, pointer.Bool(true), c.GetTrait("builder").(*builderTrait).Verbose)
+	ct, _ := c.GetTrait("cron").(*cronTrait)
+	assert.Equal(t, "schedule2", ct.Schedule)
+	assert.Equal(t, "cmp4", ct.Components)
+	assert.Equal(t, "policy4", ct.ConcurrencyPolicy)
+	bt, _ := c.GetTrait("builder").(*builderTrait)
+	assert.True(t, *bt.Verbose)
 }
 
 func TestTraitListConfigurationFromAnnotations(t *testing.T) {
@@ -186,8 +190,10 @@ func TestTraitListConfigurationFromAnnotations(t *testing.T) {
 	}
 	c := NewCatalog(nil)
 	assert.NoError(t, c.Configure(&env))
-	assert.Equal(t, []string{"opt1", "opt2"}, c.GetTrait("jolokia").(*jolokiaTrait).Options)
-	assert.Equal(t, []string{"Binding:xxx"}, c.GetTrait("service-binding").(*serviceBindingTrait).Services)
+	jt, _ := c.GetTrait("jolokia").(*jolokiaTrait)
+	assert.Equal(t, []string{"opt1", "opt2"}, jt.Options)
+	sbt, _ := c.GetTrait("service-binding").(*serviceBindingTrait)
+	assert.Equal(t, []string{"Binding:xxx"}, sbt.Services)
 }
 
 func TestTraitSplitConfiguration(t *testing.T) {
@@ -205,7 +211,8 @@ func TestTraitSplitConfiguration(t *testing.T) {
 	}
 	c := NewCatalog(nil)
 	assert.NoError(t, c.Configure(&env))
-	assert.Equal(t, []string{"opt1", "opt2"}, c.GetTrait("owner").(*ownerTrait).TargetLabels)
+	ot, _ := c.GetTrait("owner").(*ownerTrait)
+	assert.Equal(t, []string{"opt1", "opt2"}, ot.TargetLabels)
 }
 
 func TestTraitDecode(t *testing.T) {

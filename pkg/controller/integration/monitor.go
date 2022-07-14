@@ -179,20 +179,32 @@ func (action *monitorAction) newController(ctx context.Context, env *trait.Envir
 	switch {
 	case isConditionTrue(integration, v1.IntegrationConditionDeploymentAvailable):
 		obj = getUpdatedController(env, &appsv1.Deployment{})
+		deploy, ok := obj.(*appsv1.Deployment)
+		if !ok {
+			return nil, fmt.Errorf("type assertion failed: %v", obj)
+		}
 		controller = &deploymentController{
-			obj:         obj.(*appsv1.Deployment),
+			obj:         deploy,
 			integration: integration,
 		}
 	case isConditionTrue(integration, v1.IntegrationConditionKnativeServiceAvailable):
 		obj = getUpdatedController(env, &servingv1.Service{})
+		svc, ok := obj.(*servingv1.Service)
+		if !ok {
+			return nil, fmt.Errorf("type assertion failed: %v", obj)
+		}
 		controller = &knativeServiceController{
-			obj:         obj.(*servingv1.Service),
+			obj:         svc,
 			integration: integration,
 		}
 	case isConditionTrue(integration, v1.IntegrationConditionCronJobAvailable):
 		obj = getUpdatedController(env, &batchv1.CronJob{})
+		cj, ok := obj.(*batchv1.CronJob)
+		if !ok {
+			return nil, fmt.Errorf("type assertion failed: %v", obj)
+		}
 		controller = &cronJobController{
-			obj:         obj.(*batchv1.CronJob),
+			obj:         cj,
 			integration: integration,
 			client:      action.client,
 		}

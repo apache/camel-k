@@ -27,6 +27,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 )
 
 func TestThreeScaleDisabled(t *testing.T) {
@@ -46,8 +47,8 @@ func TestThreeScaleDisabled(t *testing.T) {
 func TestThreeScaleInjection(t *testing.T) {
 	svc, e := createEnvironment(t)
 	threeScale := NewThreeScaleTrait()
-	enabled := true
-	threeScale.(*threeScaleTrait).Enabled = &enabled
+	tst, _ := threeScale.(*threeScaleTrait)
+	tst.Enabled = pointer.Bool(true)
 	ok, err := threeScale.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, ok)
@@ -65,10 +66,9 @@ func TestThreeScaleInjection(t *testing.T) {
 func TestThreeScaleInjectionNoAPIPath(t *testing.T) {
 	svc, e := createEnvironment(t)
 	threeScale := NewThreeScaleTrait()
-	enabled := true
-	threeScale.(*threeScaleTrait).Enabled = &enabled
-	noPath := ""
-	threeScale.(*threeScaleTrait).DescriptionPath = &noPath
+	tst, _ := threeScale.(*threeScaleTrait)
+	tst.Enabled = pointer.Bool(true)
+	tst.DescriptionPath = pointer.String("")
 	ok, err := threeScale.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, ok)

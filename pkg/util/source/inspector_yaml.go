@@ -86,7 +86,9 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 		case string:
 			AddKamelet(meta, "kamelet:"+t)
 		case map[interface{}]interface{}:
-			AddKamelet(meta, "kamelet:"+t["name"].(string))
+			if name, ok := t["name"].(string); ok {
+				AddKamelet(meta, "kamelet:"+name)
+			}
 		}
 	}
 

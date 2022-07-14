@@ -225,7 +225,8 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	exitOnError(
 		mgr.GetFieldIndexer().IndexField(context.Background(), &corev1.Pod{}, "status.phase",
 			func(obj ctrl.Object) []string {
-				return []string{string(obj.(*corev1.Pod).Status.Phase)}
+				pod, _ := obj.(*corev1.Pod)
+				return []string{string(pod.Status.Phase)}
 			}),
 		"unable to set up field indexer for status.phase: %v",
 	)

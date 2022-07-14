@@ -666,9 +666,11 @@ func (e *Environment) collectConfigurations(configurationType string) []map[stri
 
 func (e *Environment) GetIntegrationContainerName() string {
 	containerName := defaultContainerName
-	dt := e.Catalog.GetTrait(containerTraitID)
-	if dt != nil {
-		containerName = dt.(*containerTrait).Name
+
+	if dt := e.Catalog.GetTrait(containerTraitID); dt != nil {
+		if ct, ok := dt.(*containerTrait); ok {
+			containerName = ct.Name
+		}
 	}
 	return containerName
 }
@@ -685,9 +687,10 @@ func (e *Environment) getIntegrationContainerPort() *corev1.ContainerPort {
 	}
 
 	portName := ""
-	t := e.Catalog.GetTrait(containerTraitID)
-	if t != nil {
-		portName = t.(*containerTrait).PortName
+	if t := e.Catalog.GetTrait(containerTraitID); t != nil {
+		if ct, ok := t.(*containerTrait); ok {
+			portName = ct.PortName
+		}
 	}
 	if portName == "" {
 		portName = defaultContainerPortName
