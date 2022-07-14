@@ -66,8 +66,7 @@ func (o *initCmdOptions) validate(_ *cobra.Command, args []string) error {
 		return fmt.Errorf("init expects exactly 1 argument, received %d", len(args))
 	}
 
-	fileName := args[0]
-	if o.extractLanguage(fileName) == nil {
+	if fileName := args[0]; o.extractLanguage(fileName) == nil {
 		return fmt.Errorf("unsupported file type: %s", fileName)
 	}
 

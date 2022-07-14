@@ -127,6 +127,7 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
+	// nolint: ifshort
 	uninstallViaOLM := false
 	if o.OlmEnabled {
 		var err error
