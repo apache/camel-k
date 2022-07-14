@@ -52,7 +52,7 @@ func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
 	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), nil
 }
 
-func (t *jolokiaTrait) Apply(e *Environment) (err error) {
+func (t *jolokiaTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		// Add the Camel management and Jolokia agent dependencies
 		// Also add the Camel JAXB dependency, that's required by Hawtio

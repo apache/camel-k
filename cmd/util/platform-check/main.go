@@ -53,7 +53,7 @@ func exitOnError(err error) {
 	}
 }
 
-func RestConfig() (c *rest.Config) {
+func RestConfig() *rest.Config {
 	restConfig, err := config.GetConfig()
 	exitOnError(err)
 

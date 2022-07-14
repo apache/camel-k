@@ -792,7 +792,7 @@ func loadPropertyFile(fileName string) (*properties.Properties, error) {
 	return p, nil
 }
 
-func resolvePodTemplate(ctx context.Context, cmd *cobra.Command, templateSrc string, spec *v1.IntegrationSpec) (err error) {
+func resolvePodTemplate(ctx context.Context, cmd *cobra.Command, templateSrc string, spec *v1.IntegrationSpec) error {
 	// check if template is set
 	if templateSrc == "" {
 		return nil

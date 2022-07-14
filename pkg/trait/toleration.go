@@ -50,7 +50,7 @@ func (t *tolerationTrait) Configure(e *Environment) (bool, error) {
 	return e.IntegrationInRunningPhases(), nil
 }
 
-func (t *tolerationTrait) Apply(e *Environment) (err error) {
+func (t *tolerationTrait) Apply(e *Environment) error {
 	tolerations, err := kubernetes.NewTolerations(t.Taints)
 	if err != nil {
 		return err

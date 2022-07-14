@@ -293,7 +293,8 @@ func (e *Environment) DetermineControllerStrategy() (ControllerStrategy, error) 
 	return defaultStrategy, nil
 }
 
-func (e *Environment) getControllerStrategyChoosers() (res []ControllerStrategySelector) {
+func (e *Environment) getControllerStrategyChoosers() []ControllerStrategySelector {
+	var res []ControllerStrategySelector
 	for _, t := range e.ConfiguredTraits {
 		if cc, ok := t.(ControllerStrategySelector); ok {
 			res = append(res, cc)

@@ -294,12 +294,13 @@ func notifyIfConditionUpdated(recorder record.EventRecorder, newResource runtime
 	}
 }
 
-func getCommonChangedConditions(oldConditions, newConditions []v1.ResourceCondition) (res []v1.ResourceCondition) {
+func getCommonChangedConditions(oldConditions, newConditions []v1.ResourceCondition) []v1.ResourceCondition {
 	oldState := make(map[string]v1.ResourceCondition)
 	for _, c := range oldConditions {
 		oldState[c.GetType()] = c
 	}
 
+	var res []v1.ResourceCondition
 	for _, newCond := range newConditions {
 		oldCond := oldState[newCond.GetType()]
 		if oldCond == nil || oldCond.GetStatus() != newCond.GetStatus() || oldCond.GetMessage() != newCond.GetMessage() {
@@ -309,7 +310,7 @@ func getCommonChangedConditions(oldConditions, newConditions []v1.ResourceCondit
 	return res
 }
 
-func getCreatorObject(ctx context.Context, c client.Client, obj runtime.Object) (ref *corev1.ObjectReference, creator runtime.Object) {
+func getCreatorObject(ctx context.Context, c client.Client, obj runtime.Object) (*corev1.ObjectReference, runtime.Object) {
 	if ref := kubernetes.GetCamelCreator(obj); ref != nil {
 		if ref.Kind == "Integration" {
 			it := v1.NewIntegration(ref.Namespace, ref.Name)

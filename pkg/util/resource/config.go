@@ -120,9 +120,9 @@ func newConfig(storageType StorageType, contentType ContentType, value string) *
 	}
 }
 
-func parseResourceValue(storageType StorageType, value string) (resource string, maybeKey string, maybeDestinationPath string) {
+func parseResourceValue(storageType StorageType, value string) (string, string, string) {
 	if storageType == StorageTypeFile {
-		resource, maybeDestinationPath = ParseFileValue(value)
+		resource, maybeDestinationPath := ParseFileValue(value)
 		return resource, "", maybeDestinationPath
 	}
 
@@ -131,7 +131,7 @@ func parseResourceValue(storageType StorageType, value string) (resource string,
 
 // ParseFileValue will parse a file resource/config option to return the local path and the
 // destination path expected.
-func ParseFileValue(value string) (localPath string, maybeDestinationPath string) {
+func ParseFileValue(value string) (string, string) {
 	split := strings.SplitN(value, "@", 2)
 	if len(split) == 2 {
 		return split[0], split[1]
@@ -140,7 +140,7 @@ func ParseFileValue(value string) (localPath string, maybeDestinationPath string
 	return value, ""
 }
 
-func parseCMOrSecretValue(value string) (resource string, maybeKey string, maybeDestinationPath string) {
+func parseCMOrSecretValue(value string) (string, string, string) {
 	if !validResourceRegexp.MatchString(value) {
 		return value, "", ""
 	}

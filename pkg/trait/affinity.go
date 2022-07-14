@@ -58,7 +58,7 @@ func (t *affinityTrait) Configure(e *Environment) (bool, error) {
 	return e.IntegrationInRunningPhases(), nil
 }
 
-func (t *affinityTrait) Apply(e *Environment) (err error) {
+func (t *affinityTrait) Apply(e *Environment) error {
 	podSpec := e.GetIntegrationPodSpec()
 
 	if podSpec == nil {

@@ -64,7 +64,7 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 	})...)
 	replicasCount := make(map[string]int32)
 	fakescaleclient := fakescale.FakeScaleClient{}
-	fakescaleclient.AddReactor("update", "*", func(rawAction testing.Action) (handled bool, ret runtime.Object, err error) {
+	fakescaleclient.AddReactor("update", "*", func(rawAction testing.Action) (bool, runtime.Object, error) {
 		action := rawAction.(testing.UpdateAction)       // nolint: forcetypeassert
 		obj := action.GetObject().(*autoscalingv1.Scale) // nolint: forcetypeassert
 		replicas := obj.Spec.Replicas
@@ -80,7 +80,7 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 			},
 		}, nil
 	})
-	fakescaleclient.AddReactor("get", "*", func(rawAction testing.Action) (handled bool, ret runtime.Object, err error) {
+	fakescaleclient.AddReactor("get", "*", func(rawAction testing.Action) (bool, runtime.Object, error) {
 		action := rawAction.(testing.GetAction) // nolint: forcetypeassert
 		key := fmt.Sprintf("%s:%s:%s/%s", action.GetResource().Group, action.GetResource().Resource, action.GetNamespace(), action.GetName())
 		obj := &autoscalingv1.Scale{
@@ -103,7 +103,8 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 	}, nil
 }
 
-func filterObjects(scheme *runtime.Scheme, input []runtime.Object, filter func(gvk schema.GroupVersionKind) bool) (res []runtime.Object) {
+func filterObjects(scheme *runtime.Scheme, input []runtime.Object, filter func(gvk schema.GroupVersionKind) bool) []runtime.Object {
+	var res []runtime.Object
 	for _, obj := range input {
 		kinds, _, _ := scheme.ObjectKinds(obj)
 		for _, k := range kinds {

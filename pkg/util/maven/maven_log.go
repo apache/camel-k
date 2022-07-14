@@ -59,9 +59,10 @@ func mavenLogHandler(s string) {
 	}
 }
 
-func parseLog(line string) (l mavenLog, err error) {
-	err = json.Unmarshal([]byte(line), &l)
-	return
+func parseLog(line string) (mavenLog, error) {
+	var l mavenLog
+	err := json.Unmarshal([]byte(line), &l)
+	return l, err
 }
 
 func normalizeLog(mavenLog mavenLog) {

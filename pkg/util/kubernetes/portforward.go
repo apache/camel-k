@@ -118,7 +118,7 @@ func PortForward(ctx context.Context, c client.Client, ns, labelSelector string,
 	}
 }
 
-func portFowardPod(ctx context.Context, config *restclient.Config, ns, pod string, localPort, remotePort uint, stdOut, stdErr io.Writer) (host string, err error) {
+func portFowardPod(ctx context.Context, config *restclient.Config, ns, pod string, localPort, remotePort uint, stdOut, stdErr io.Writer) (string, error) {
 	c, err := corev1client.NewForConfig(config)
 	if err != nil {
 		return "", err
