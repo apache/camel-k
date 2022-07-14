@@ -173,8 +173,8 @@ codegen:
 	gofmt -w pkg/util/defaults/defaults.go
 
 generate: codegen-tools-install
-	# We better force the developer to generate all the resources everytime as
-	# it happens we tend to forget some code generation in the past
+	@# We better force the developer to generate all the resources everytime as
+	@# it happens we tend to forget some code generation in the past
 	./script/gen_client.sh
 	./script/gen_crd.sh
 	./script/gen_doc.sh
@@ -184,13 +184,13 @@ generate: codegen-tools-install
 	./script/gen_client_strimzi.sh
 
 codegen-tools-install:
-	# We must force the installation to make sure we are using the correct version
-	# Note: as there is no --version in the tools, we cannot rely on cached local versions
-	echo "Installing k8s.io/code-generator tools with version $(CODEGEN_VERSION)"
+	@# We must force the installation to make sure we are using the correct version
+	@# Note: as there is no --version in the tools, we cannot rely on cached local versions
+	@echo "Installing k8s.io/code-generator tools with version $(CODEGEN_VERSION)"
 	go install k8s.io/code-generator/cmd/client-gen@$(CODEGEN_VERSION)
 	go install k8s.io/code-generator/cmd/lister-gen@$(CODEGEN_VERSION)
 	go install k8s.io/code-generator/cmd/informer-gen@$(CODEGEN_VERSION)
-	echo "sigs.k8s.io/controller-tools/cmd/controller-gen with version $(CONTROLLER_GEN_VERSION)"
+	@echo "sigs.k8s.io/controller-tools/cmd/controller-gen with version $(CONTROLLER_GEN_VERSION)"
 	go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION)
 
 build: test build-resources build-kamel build-compile-integration-tests build-submodules
