@@ -173,7 +173,7 @@ type controller interface {
 	updateReadyCondition(readyPods []corev1.Pod) bool
 }
 
-func (action *monitorAction) newController(ctx context.Context, env *trait.Environment, integration *v1.Integration) (controller, error) {
+func (action *monitorAction) newController(env *trait.Environment, integration *v1.Integration) (controller, error) {
 	var controller controller
 	var obj ctrl.Object
 	switch {
@@ -227,7 +227,7 @@ func getUpdatedController(env *trait.Environment, obj ctrl.Object) ctrl.Object {
 }
 
 func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context.Context, environment *trait.Environment, integration *v1.Integration, pendingPods []corev1.Pod, runningPods []corev1.Pod) error {
-	controller, err := action.newController(ctx, environment, integration)
+	controller, err := action.newController(environment, integration)
 	if err != nil {
 		return err
 	}
