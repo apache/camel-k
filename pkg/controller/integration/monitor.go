@@ -168,7 +168,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 }
 
 type controller interface {
-	checkReadyCondition() (bool, error)
+	checkReadyCondition(ctx context.Context) (bool, error)
 	getPodSpec() corev1.PodSpec
 	updateReadyCondition(readyPods []corev1.Pod) bool
 }
@@ -195,7 +195,6 @@ func (action *monitorAction) newController(ctx context.Context, env *trait.Envir
 			obj:         obj.(*batchv1.CronJob),
 			integration: integration,
 			client:      action.client,
-			context:     ctx,
 		}
 	default:
 		return nil, fmt.Errorf("unsupported controller for integration %s", integration.Name)
@@ -221,7 +220,7 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context
 		return err
 	}
 
-	if done, err := controller.checkReadyCondition(); done || err != nil {
+	if done, err := controller.checkReadyCondition(ctx); done || err != nil {
 		return err
 	}
 	if done := checkPodStatuses(integration, pendingPods, runningPods); done {

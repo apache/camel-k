@@ -55,6 +55,7 @@ type BindingProvider interface {
 	Order() int
 }
 
+// nolint: containedctx
 type BindingContext struct {
 	Ctx       context.Context
 	Client    client.Client
