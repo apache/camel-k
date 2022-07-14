@@ -60,7 +60,7 @@ This approach allows multiple Camel K installations and operators on the same cl
 by the operator id.
 
 By default, the Camel K operator has the id `camel-k` and users with only one single installation on the cluster will not even notice the existence of this identifier. When an administrator wants to add more Camel K operator installations to the cluster the
-operator id needs to be unique and resources should be annotated with the respective annotation `camel.apache.org/operator.id={operator-id}`. With this approach we make sure that only one single operator installation manages
+operator id needs to be unique and resources should be annotated with the respective annotation `camel.apache.org/operator.id=<operator-id>`. With this approach we make sure that only one single operator installation manages
 a resource at a time.
 
 Read more about this topic in xref:installation/advanced/multi.adoc[Multiple Operators and Selective Upgrades]

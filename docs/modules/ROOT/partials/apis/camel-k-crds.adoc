@@ -1566,14 +1566,14 @@ IntegrationKitTraits defines traits assigned to an `IntegrationKit`
 |Description
 
 |`builder` +
-*xref:#_camel_apache_org_v1_BuilderTrait[BuilderTrait]*
+*xref:#_camel_apache_org_v1_trait_BuilderTrait[BuilderTrait]*
 |
 
 
 The builder trait is internally used to determine the best strategy to build and configure IntegrationKits.
 
 |`quarkus` +
-*xref:#_camel_apache_org_v1_QuarkusTrait[QuarkusTrait]*
+*xref:#_camel_apache_org_v1_trait_QuarkusTrait[QuarkusTrait]*
 |
 
 
@@ -1582,7 +1582,7 @@ It's enabled by default.
 NOTE: Compiling to a native executable, i.e. when using `package-type=native`, is only supported for kamelets, as well as YAML and XML integrations. It also requires at least 4GiB of memory, so the Pod running the native build, that is either the operator Pod, or the build Pod (depending on the build strategy configured for the platform), must have enough memory available.
 
 |`registry` +
-*xref:#_camel_apache_org_v1_RegistryTrait[RegistryTrait]*
+*xref:#_camel_apache_org_v1_trait_RegistryTrait[RegistryTrait]*
 |
 
 
@@ -3298,238 +3298,238 @@ Traits represents the collection of trait configurations
 |Description
 
 |`affinity` +
-*xref:#_camel_apache_org_v1_AffinityTrait[AffinityTrait]*
+*xref:#_camel_apache_org_v1_trait_AffinityTrait[AffinityTrait]*
 |
 
 
 The configuration of Affinity trait
 
 |`builder` +
-*xref:#_camel_apache_org_v1_BuilderTrait[BuilderTrait]*
+*xref:#_camel_apache_org_v1_trait_BuilderTrait[BuilderTrait]*
 |
 
 
 The configuration of Builder trait
 
 |`camel` +
-*xref:#_camel_apache_org_v1_CamelTrait[CamelTrait]*
+*xref:#_camel_apache_org_v1_trait_CamelTrait[CamelTrait]*
 |
 
 
 The configuration of Camel trait
 
 |`container` +
-*xref:#_camel_apache_org_v1_ContainerTrait[ContainerTrait]*
+*xref:#_camel_apache_org_v1_trait_ContainerTrait[ContainerTrait]*
 |
 
 
 The configuration of Container trait
 
 |`cron` +
-*xref:#_camel_apache_org_v1_CronTrait[CronTrait]*
+*xref:#_camel_apache_org_v1_trait_CronTrait[CronTrait]*
 |
 
 
 The configuration of Cron trait
 
 |`dependencies` +
-*xref:#_camel_apache_org_v1_DependenciesTrait[DependenciesTrait]*
+*xref:#_camel_apache_org_v1_trait_DependenciesTrait[DependenciesTrait]*
 |
 
 
 The configuration of Dependencies trait
 
 |`deployer` +
-*xref:#_camel_apache_org_v1_DeployerTrait[DeployerTrait]*
+*xref:#_camel_apache_org_v1_trait_DeployerTrait[DeployerTrait]*
 |
 
 
 The configuration of Deployer trait
 
 |`deployment` +
-*xref:#_camel_apache_org_v1_DeploymentTrait[DeploymentTrait]*
+*xref:#_camel_apache_org_v1_trait_DeploymentTrait[DeploymentTrait]*
 |
 
 
 The configuration of Deployment trait
 
 |`environment` +
-*xref:#_camel_apache_org_v1_EnvironmentTrait[EnvironmentTrait]*
+*xref:#_camel_apache_org_v1_trait_EnvironmentTrait[EnvironmentTrait]*
 |
 
 
 The configuration of Environment trait
 
 |`error-handler` +
-*xref:#_camel_apache_org_v1_ErrorHandlerTrait[ErrorHandlerTrait]*
+*xref:#_camel_apache_org_v1_trait_ErrorHandlerTrait[ErrorHandlerTrait]*
 |
 
 
 The configuration of Error Handler trait
 
 |`gc` +
-*xref:#_camel_apache_org_v1_GCTrait[GCTrait]*
+*xref:#_camel_apache_org_v1_trait_GCTrait[GCTrait]*
 |
 
 
 The configuration of GC trait
 
 |`health` +
-*xref:#_camel_apache_org_v1_HealthTrait[HealthTrait]*
+*xref:#_camel_apache_org_v1_trait_HealthTrait[HealthTrait]*
 |
 
 
 The configuration of Health trait
 
 |`ingress` +
-*xref:#_camel_apache_org_v1_IngressTrait[IngressTrait]*
+*xref:#_camel_apache_org_v1_trait_IngressTrait[IngressTrait]*
 |
 
 
 The configuration of Ingress trait
 
 |`istio` +
-*xref:#_camel_apache_org_v1_IstioTrait[IstioTrait]*
+*xref:#_camel_apache_org_v1_trait_IstioTrait[IstioTrait]*
 |
 
 
 The configuration of Istio trait
 
 |`jolokia` +
-*xref:#_camel_apache_org_v1_JolokiaTrait[JolokiaTrait]*
+*xref:#_camel_apache_org_v1_trait_JolokiaTrait[JolokiaTrait]*
 |
 
 
 The configuration of Jolokia trait
 
 |`jvm` +
-*xref:#_camel_apache_org_v1_JVMTrait[JVMTrait]*
+*xref:#_camel_apache_org_v1_trait_JVMTrait[JVMTrait]*
 |
 
 
 The configuration of JVM trait
 
 |`kamelets` +
-*xref:#_camel_apache_org_v1_KameletsTrait[KameletsTrait]*
+*xref:#_camel_apache_org_v1_trait_KameletsTrait[KameletsTrait]*
 |
 
 
 The configuration of Kamelets trait
 
 |`knative` +
-*xref:#_camel_apache_org_v1_KnativeTrait[KnativeTrait]*
+*xref:#_camel_apache_org_v1_trait_KnativeTrait[KnativeTrait]*
 |
 
 
 The configuration of Knative trait
 
 |`knative-service` +
-*xref:#_camel_apache_org_v1_KnativeServiceTrait[KnativeServiceTrait]*
+*xref:#_camel_apache_org_v1_trait_KnativeServiceTrait[KnativeServiceTrait]*
 |
 
 
 The configuration of Knative Service trait
 
 |`logging` +
-*xref:#_camel_apache_org_v1_LoggingTrait[LoggingTrait]*
+*xref:#_camel_apache_org_v1_trait_LoggingTrait[LoggingTrait]*
 |
 
 
 The configuration of Logging trait
 
 |`mount` +
-*xref:#_camel_apache_org_v1_MountTrait[MountTrait]*
+*xref:#_camel_apache_org_v1_trait_MountTrait[MountTrait]*
 |
 
 
 The configuration of Mount trait
 
 |`openapi` +
-*xref:#_camel_apache_org_v1_OpenAPITrait[OpenAPITrait]*
+*xref:#_camel_apache_org_v1_trait_OpenAPITrait[OpenAPITrait]*
 |
 
 
 The configuration of OpenAPI trait
 
 |`owner` +
-*xref:#_camel_apache_org_v1_OwnerTrait[OwnerTrait]*
+*xref:#_camel_apache_org_v1_trait_OwnerTrait[OwnerTrait]*
 |
 
 
 The configuration of Owner trait
 
 |`pdb` +
-*xref:#_camel_apache_org_v1_PDBTrait[PDBTrait]*
+*xref:#_camel_apache_org_v1_trait_PDBTrait[PDBTrait]*
 |
 
 
 The configuration of PDB trait
 
 |`platform` +
-*xref:#_camel_apache_org_v1_PlatformTrait[PlatformTrait]*
+*xref:#_camel_apache_org_v1_trait_PlatformTrait[PlatformTrait]*
 |
 
 
 The configuration of Platform trait
 
 |`pod` +
-*xref:#_camel_apache_org_v1_PodTrait[PodTrait]*
+*xref:#_camel_apache_org_v1_trait_PodTrait[PodTrait]*
 |
 
 
 The configuration of Pod trait
 
 |`prometheus` +
-*xref:#_camel_apache_org_v1_PrometheusTrait[PrometheusTrait]*
+*xref:#_camel_apache_org_v1_trait_PrometheusTrait[PrometheusTrait]*
 |
 
 
 The configuration of Prometheus trait
 
 |`pull-secret` +
-*xref:#_camel_apache_org_v1_PullSecretTrait[PullSecretTrait]*
+*xref:#_camel_apache_org_v1_trait_PullSecretTrait[PullSecretTrait]*
 |
 
 
 The configuration of Pull Secret trait
 
 |`quarkus` +
-*xref:#_camel_apache_org_v1_QuarkusTrait[QuarkusTrait]*
+*xref:#_camel_apache_org_v1_trait_QuarkusTrait[QuarkusTrait]*
 |
 
 
 The configuration of Quarkus trait
 
 |`registry` +
-*xref:#_camel_apache_org_v1_RegistryTrait[RegistryTrait]*
+*xref:#_camel_apache_org_v1_trait_RegistryTrait[RegistryTrait]*
 |
 
 
 The configuration of Registry trait
 
 |`route` +
-*xref:#_camel_apache_org_v1_RouteTrait[RouteTrait]*
+*xref:#_camel_apache_org_v1_trait_RouteTrait[RouteTrait]*
 |
 
 
 The configuration of Route trait
 
 |`service` +
-*xref:#_camel_apache_org_v1_ServiceTrait[ServiceTrait]*
+*xref:#_camel_apache_org_v1_trait_ServiceTrait[ServiceTrait]*
 |
 
 
 The configuration of Service trait
 
 |`service-binding` +
-*xref:#_camel_apache_org_v1_ServiceBindingTrait[ServiceBindingTrait]*
+*xref:#_camel_apache_org_v1_trait_ServiceBindingTrait[ServiceBindingTrait]*
 |
 
 
 The configuration of Service Binding trait
 
 |`toleration` +
-*xref:#_camel_apache_org_v1_TolerationTrait[TolerationTrait]*
+*xref:#_camel_apache_org_v1_trait_TolerationTrait[TolerationTrait]*
 |
 
 
@@ -3611,7 +3611,7 @@ Selects a key of a secret.
 
 |===
 
-[#_camel_apache_org_v1_AffinityTrait]
+[#_camel_apache_org_v1_trait_AffinityTrait]
 === AffinityTrait
 
 *Appears on:*
@@ -3630,7 +3630,7 @@ It's disabled by default.
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -3676,7 +3676,7 @@ integration pod(s) should not be co-located with.
 
 |===
 
-[#_camel_apache_org_v1_BuilderTrait]
+[#_camel_apache_org_v1_trait_BuilderTrait]
 === BuilderTrait
 
 *Appears on:*
@@ -3694,7 +3694,7 @@ build and configure IntegrationKits.
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -3717,7 +3717,7 @@ A list of properties to be provided to the build task
 
 |===
 
-[#_camel_apache_org_v1_CamelTrait]
+[#_camel_apache_org_v1_trait_CamelTrait]
 === CamelTrait
 
 *Appears on:*
@@ -3733,7 +3733,7 @@ The Camel trait can be used to configure versions of Apache Camel K runtime and 
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -3756,12 +3756,12 @@ A list of properties to be provided to the Integration runtime
 
 |===
 
-[#_camel_apache_org_v1_Configuration]
+[#_camel_apache_org_v1_trait_Configuration]
 === Configuration
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_Trait, Trait>>
+* <<#_camel_apache_org_v1_trait_Trait, Trait>>
 
 Deprecated: for backward compatibility.
 
@@ -3771,7 +3771,7 @@ Deprecated: for backward compatibility.
 |Description
 
 |`RawMessage` +
-*xref:#_camel_apache_org_v1_RawMessage[RawMessage]*
+*xref:#_camel_apache_org_v1_trait_RawMessage[RawMessage]*
 |(Members of `RawMessage` are embedded into this type.)
 
 
@@ -3780,7 +3780,7 @@ Deprecated: for backward compatibility.
 
 |===
 
-[#_camel_apache_org_v1_ContainerTrait]
+[#_camel_apache_org_v1_trait_ContainerTrait]
 === ContainerTrait
 
 *Appears on:*
@@ -3799,7 +3799,7 @@ nolint: tagliatelle
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -4007,7 +4007,7 @@ Deprecated: replaced by the health trait.
 
 |===
 
-[#_camel_apache_org_v1_CronTrait]
+[#_camel_apache_org_v1_trait_CronTrait]
 === CronTrait
 
 *Appears on:*
@@ -4035,7 +4035,7 @@ The rules for using a Kubernetes CronJob are the following:
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -4118,7 +4118,7 @@ It defaults to 2.
 
 |===
 
-[#_camel_apache_org_v1_DependenciesTrait]
+[#_camel_apache_org_v1_trait_DependenciesTrait]
 === DependenciesTrait
 
 *Appears on:*
@@ -4135,7 +4135,7 @@ integration that the user wants to run.
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -4144,7 +4144,7 @@ integration that the user wants to run.
 
 |===
 
-[#_camel_apache_org_v1_DeployerTrait]
+[#_camel_apache_org_v1_trait_DeployerTrait]
 === DeployerTrait
 
 *Appears on:*
@@ -4161,7 +4161,7 @@ to explicitly select the underlying controller that will manage the integration 
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -4185,7 +4185,7 @@ Note that it automatically falls back to client-side patching, if SSA is not ava
 
 |===
 
-[#_camel_apache_org_v1_DeploymentTrait]
+[#_camel_apache_org_v1_trait_DeploymentTrait]
 === DeploymentTrait
 
 *Appears on:*
@@ -4202,7 +4202,7 @@ the integration will run in the cluster.
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -4219,17 +4219,17 @@ is considered to be failed. It defaults to 60s.
 
 |===
 
-[#_camel_apache_org_v1_DiscoveryCacheType]
+[#_camel_apache_org_v1_trait_DiscoveryCacheType]
 === DiscoveryCacheType(`string` alias)
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_GCTrait, GCTrait>>
+* <<#_camel_apache_org_v1_trait_GCTrait, GCTrait>>
 
 
 
 
-[#_camel_apache_org_v1_EnvironmentTrait]
+[#_camel_apache_org_v1_trait_EnvironmentTrait]
 === EnvironmentTrait
 
 *Appears on:*
@@ -4246,7 +4246,7 @@ such as `NAMESPACE`, `POD_NAME` and others.
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -4278,7 +4278,7 @@ These take precedence over the previously defined environment variables.
 
 |===
 
-[#_camel_apache_org_v1_ErrorHandlerTrait]
+[#_camel_apache_org_v1_trait_ErrorHandlerTrait]
 === ErrorHandlerTrait
 
 *Appears on:*
@@ -4294,7 +4294,7 @@ The error-handler is a platform trait used to inject Error Handler source into t
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -4310,7 +4310,7 @@ The error handler ref name provided or found in application properties
 
 |===
 
-[#_camel_apache_org_v1_GCTrait]
+[#_camel_apache_org_v1_trait_GCTrait]
 === GCTrait
 
 *Appears on:*
@@ -4326,14 +4326,14 @@ The GC Trait garbage-collects all resources that are no longer necessary upon in
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
 
 
 |`discoveryCache` +
-*xref:#_camel_apache_org_v1_DiscoveryCacheType[DiscoveryCacheType]*
+*xref:#_camel_apache_org_v1_trait_DiscoveryCacheType[DiscoveryCacheType]*
 |
 
 
@@ -4342,7 +4342,7 @@ Discovery client cache to be used, either `disabled`, `disk` or `memory` (defaul
 
 |===
 
-[#_camel_apache_org_v1_HealthTrait]
+[#_camel_apache_org_v1_trait_HealthTrait]
 === HealthTrait
 
 *Appears on:*
@@ -4360,7 +4360,7 @@ It's disabled by default.
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -4467,7 +4467,7 @@ Minimum consecutive failures for the readiness probe to be considered failed aft
 
 |===
 
-[#_camel_apache_org_v1_IngressTrait]
+[#_camel_apache_org_v1_trait_IngressTrait]
 === IngressTrait
 
 *Appears on:*
@@ -4486,7 +4486,7 @@ It's enabled by default whenever a Service is added to the integration (through 
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -4509,7 +4509,7 @@ To automatically add an ingress whenever the integration uses a HTTP endpoint co
 
 |===
 
-[#_camel_apache_org_v1_IstioTrait]
+[#_camel_apache_org_v1_trait_IstioTrait]
 === IstioTrait
 
 *Appears on:*
@@ -4526,7 +4526,7 @@ such as sidecar injection and outbound IP ranges.
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -4549,7 +4549,7 @@ Forces the value for labels `sidecar.istio.io/inject`. By default the label is s
 
 |===
 
-[#_camel_apache_org_v1_JVMTrait]
+[#_camel_apache_org_v1_trait_JVMTrait]
 === JVMTrait
 
 *Appears on:*
@@ -4565,7 +4565,7 @@ The JVM trait is used to configure the JVM that runs the integration.
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -4616,7 +4616,7 @@ Additional JVM classpath (use `Linux` classpath separator)
 
 |===
 
-[#_camel_apache_org_v1_JolokiaTrait]
+[#_camel_apache_org_v1_trait_JolokiaTrait]
 === JolokiaTrait
 
 *Appears on:*
@@ -4635,7 +4635,7 @@ nolint: tagliatelle
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -4729,7 +4729,7 @@ in https://jolokia.org/reference/html/agents.html#agent-jvm-config[JVM agent con
 
 |===
 
-[#_camel_apache_org_v1_KameletsTrait]
+[#_camel_apache_org_v1_trait_KameletsTrait]
 === KameletsTrait
 
 *Appears on:*
@@ -4745,7 +4745,7 @@ The kamelets trait is a platform trait used to inject Kamelets into the integrat
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -4768,7 +4768,7 @@ Comma separated list of Kamelet names to load into the current integration
 
 |===
 
-[#_camel_apache_org_v1_KnativeServiceTrait]
+[#_camel_apache_org_v1_trait_KnativeServiceTrait]
 === KnativeServiceTrait
 
 *Appears on:*
@@ -4788,7 +4788,7 @@ are only relevant when the Camel route(s) use(s) an HTTP endpoint consumer.
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -4863,7 +4863,7 @@ Automatically deploy the integration as Knative service when all conditions hold
 
 |===
 
-[#_camel_apache_org_v1_KnativeTrait]
+[#_camel_apache_org_v1_trait_KnativeTrait]
 === KnativeTrait
 
 *Appears on:*
@@ -4885,7 +4885,7 @@ The trait is enabled by default when the Knative profile is active.
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -4973,7 +4973,7 @@ Enable automatic discovery of all trait properties.
 
 |===
 
-[#_camel_apache_org_v1_LoggingTrait]
+[#_camel_apache_org_v1_trait_LoggingTrait]
 === LoggingTrait
 
 *Appears on:*
@@ -4990,7 +4990,7 @@ The logging backend is provided by Quarkus, whose configuration is documented at
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -5034,7 +5034,7 @@ Enable "pretty printing" of the JSON logs
 
 |===
 
-[#_camel_apache_org_v1_MountTrait]
+[#_camel_apache_org_v1_trait_MountTrait]
 === MountTrait
 
 *Appears on:*
@@ -5051,7 +5051,7 @@ nolint: tagliatelle
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -5087,7 +5087,7 @@ A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/pa
 
 |===
 
-[#_camel_apache_org_v1_OpenAPITrait]
+[#_camel_apache_org_v1_trait_OpenAPITrait]
 === OpenAPITrait
 
 *Appears on:*
@@ -5103,7 +5103,7 @@ The OpenAPI DSL trait is internally used to allow creating integrations from a O
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -5119,7 +5119,7 @@ The configmaps holding the spec of the OpenAPI
 
 |===
 
-[#_camel_apache_org_v1_OwnerTrait]
+[#_camel_apache_org_v1_trait_OwnerTrait]
 === OwnerTrait
 
 *Appears on:*
@@ -5136,7 +5136,7 @@ and transfers annotations and labels on the integration onto these owned resourc
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -5159,7 +5159,7 @@ The set of labels to be transferred
 
 |===
 
-[#_camel_apache_org_v1_PDBTrait]
+[#_camel_apache_org_v1_trait_PDBTrait]
 === PDBTrait
 
 *Appears on:*
@@ -5175,7 +5175,7 @@ The PDB trait allows to configure the PodDisruptionBudget resource for the Integ
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -5202,7 +5202,7 @@ Only one of `max-unavailable` and `min-available` can be specified.
 
 |===
 
-[#_camel_apache_org_v1_PlatformTrait]
+[#_camel_apache_org_v1_trait_PlatformTrait]
 === PlatformTrait
 
 *Appears on:*
@@ -5222,7 +5222,7 @@ This feature is especially useful in contexts where there's no need to provide a
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -5252,7 +5252,7 @@ To automatically detect from the environment if a default platform can be create
 
 |===
 
-[#_camel_apache_org_v1_PodTrait]
+[#_camel_apache_org_v1_trait_PodTrait]
 === PodTrait
 
 *Appears on:*
@@ -5273,7 +5273,7 @@ by using the `integration` container name.
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -5282,7 +5282,7 @@ by using the `integration` container name.
 
 |===
 
-[#_camel_apache_org_v1_PrometheusTrait]
+[#_camel_apache_org_v1_trait_PrometheusTrait]
 === PrometheusTrait
 
 *Appears on:*
@@ -5307,7 +5307,7 @@ The Prometheus trait is disabled by default.
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -5330,7 +5330,7 @@ The `PodMonitor` resource labels, applicable when `pod-monitor` is `true`.
 
 |===
 
-[#_camel_apache_org_v1_PullSecretTrait]
+[#_camel_apache_org_v1_trait_PullSecretTrait]
 === PullSecretTrait
 
 *Appears on:*
@@ -5355,7 +5355,7 @@ If your registry does not need authentication for pulling images, you can disabl
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -5385,17 +5385,17 @@ Automatically configures the platform registry secret on the pod if it is of typ
 
 |===
 
-[#_camel_apache_org_v1_QuarkusPackageType]
+[#_camel_apache_org_v1_trait_QuarkusPackageType]
 === QuarkusPackageType(`string` alias)
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_QuarkusTrait, QuarkusTrait>>
+* <<#_camel_apache_org_v1_trait_QuarkusTrait, QuarkusTrait>>
 
 Quarkus package type.
 
 
-[#_camel_apache_org_v1_QuarkusTrait]
+[#_camel_apache_org_v1_trait_QuarkusTrait]
 === QuarkusTrait
 
 *Appears on:*
@@ -5420,14 +5420,14 @@ must have enough memory available.
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
 
 
 |`packageTypes` +
-*xref:#_camel_apache_org_v1_QuarkusPackageType[[\]QuarkusPackageType]*
+*xref:#_camel_apache_org_v1_trait_QuarkusPackageType[[\]QuarkusPackageType]*
 |
 
 
@@ -5441,17 +5441,17 @@ integration in case no existing kit that matches the integration exists.
 
 |===
 
-[#_camel_apache_org_v1_RawMessage]
+[#_camel_apache_org_v1_trait_RawMessage]
 === RawMessage(`[]byte` alias)
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_Configuration, Configuration>>
+* <<#_camel_apache_org_v1_trait_Configuration, Configuration>>
 
 Deprecated: for backward compatibility.
 
 
-[#_camel_apache_org_v1_RegistryTrait]
+[#_camel_apache_org_v1_trait_RegistryTrait]
 === RegistryTrait
 
 *Appears on:*
@@ -5469,7 +5469,7 @@ as a Maven repository.
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -5478,7 +5478,7 @@ as a Maven repository.
 
 |===
 
-[#_camel_apache_org_v1_RouteTrait]
+[#_camel_apache_org_v1_trait_RouteTrait]
 === RouteTrait
 
 *Appears on:*
@@ -5503,7 +5503,7 @@ nolint: tagliatelle
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -5613,7 +5613,7 @@ Refer to the OpenShift route documentation for additional information.
 
 |===
 
-[#_camel_apache_org_v1_ServiceBindingTrait]
+[#_camel_apache_org_v1_trait_ServiceBindingTrait]
 === ServiceBindingTrait
 
 *Appears on:*
@@ -5631,7 +5631,7 @@ As the specification is still evolving this is subject to change.
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -5647,7 +5647,7 @@ List of Services in the form [[apigroup/]version:]kind:[namespace/]name
 
 |===
 
-[#_camel_apache_org_v1_ServiceTrait]
+[#_camel_apache_org_v1_trait_ServiceTrait]
 === ServiceTrait
 
 *Appears on:*
@@ -5666,7 +5666,7 @@ It's enabled by default if the integration depends on a Camel component that can
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -5689,7 +5689,7 @@ Enable Service to be exposed as NodePort (default `false`).
 
 |===
 
-[#_camel_apache_org_v1_TolerationTrait]
+[#_camel_apache_org_v1_trait_TolerationTrait]
 === TolerationTrait
 
 *Appears on:*
@@ -5716,7 +5716,7 @@ It's disabled by default.
 |Description
 
 |`Trait` +
-*xref:#_camel_apache_org_v1_Trait[Trait]*
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
 |(Members of `Trait` are embedded into this type.)
 
 
@@ -5732,45 +5732,45 @@ The list of taints to tolerate, in the form `Key[=Value]:Effect[:Seconds]`
 
 |===
 
-[#_camel_apache_org_v1_Trait]
+[#_camel_apache_org_v1_trait_Trait]
 === Trait
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_AffinityTrait, AffinityTrait>>
-* <<#_camel_apache_org_v1_BuilderTrait, BuilderTrait>>
-* <<#_camel_apache_org_v1_CamelTrait, CamelTrait>>
-* <<#_camel_apache_org_v1_ContainerTrait, ContainerTrait>>
-* <<#_camel_apache_org_v1_CronTrait, CronTrait>>
-* <<#_camel_apache_org_v1_DependenciesTrait, DependenciesTrait>>
-* <<#_camel_apache_org_v1_DeployerTrait, DeployerTrait>>
-* <<#_camel_apache_org_v1_DeploymentTrait, DeploymentTrait>>
-* <<#_camel_apache_org_v1_EnvironmentTrait, EnvironmentTrait>>
-* <<#_camel_apache_org_v1_ErrorHandlerTrait, ErrorHandlerTrait>>
-* <<#_camel_apache_org_v1_GCTrait, GCTrait>>
-* <<#_camel_apache_org_v1_HealthTrait, HealthTrait>>
-* <<#_camel_apache_org_v1_IngressTrait, IngressTrait>>
-* <<#_camel_apache_org_v1_IstioTrait, IstioTrait>>
-* <<#_camel_apache_org_v1_JVMTrait, JVMTrait>>
-* <<#_camel_apache_org_v1_JolokiaTrait, JolokiaTrait>>
-* <<#_camel_apache_org_v1_KameletsTrait, KameletsTrait>>
-* <<#_camel_apache_org_v1_KnativeServiceTrait, KnativeServiceTrait>>
-* <<#_camel_apache_org_v1_KnativeTrait, KnativeTrait>>
-* <<#_camel_apache_org_v1_LoggingTrait, LoggingTrait>>
-* <<#_camel_apache_org_v1_MountTrait, MountTrait>>
-* <<#_camel_apache_org_v1_OpenAPITrait, OpenAPITrait>>
-* <<#_camel_apache_org_v1_OwnerTrait, OwnerTrait>>
-* <<#_camel_apache_org_v1_PDBTrait, PDBTrait>>
-* <<#_camel_apache_org_v1_PlatformTrait, PlatformTrait>>
-* <<#_camel_apache_org_v1_PodTrait, PodTrait>>
-* <<#_camel_apache_org_v1_PrometheusTrait, PrometheusTrait>>
-* <<#_camel_apache_org_v1_PullSecretTrait, PullSecretTrait>>
-* <<#_camel_apache_org_v1_QuarkusTrait, QuarkusTrait>>
-* <<#_camel_apache_org_v1_RegistryTrait, RegistryTrait>>
-* <<#_camel_apache_org_v1_RouteTrait, RouteTrait>>
-* <<#_camel_apache_org_v1_ServiceBindingTrait, ServiceBindingTrait>>
-* <<#_camel_apache_org_v1_ServiceTrait, ServiceTrait>>
-* <<#_camel_apache_org_v1_TolerationTrait, TolerationTrait>>
+* <<#_camel_apache_org_v1_trait_AffinityTrait, AffinityTrait>>
+* <<#_camel_apache_org_v1_trait_BuilderTrait, BuilderTrait>>
+* <<#_camel_apache_org_v1_trait_CamelTrait, CamelTrait>>
+* <<#_camel_apache_org_v1_trait_ContainerTrait, ContainerTrait>>
+* <<#_camel_apache_org_v1_trait_CronTrait, CronTrait>>
+* <<#_camel_apache_org_v1_trait_DependenciesTrait, DependenciesTrait>>
+* <<#_camel_apache_org_v1_trait_DeployerTrait, DeployerTrait>>
+* <<#_camel_apache_org_v1_trait_DeploymentTrait, DeploymentTrait>>
+* <<#_camel_apache_org_v1_trait_EnvironmentTrait, EnvironmentTrait>>
+* <<#_camel_apache_org_v1_trait_ErrorHandlerTrait, ErrorHandlerTrait>>
+* <<#_camel_apache_org_v1_trait_GCTrait, GCTrait>>
+* <<#_camel_apache_org_v1_trait_HealthTrait, HealthTrait>>
+* <<#_camel_apache_org_v1_trait_IngressTrait, IngressTrait>>
+* <<#_camel_apache_org_v1_trait_IstioTrait, IstioTrait>>
+* <<#_camel_apache_org_v1_trait_JVMTrait, JVMTrait>>
+* <<#_camel_apache_org_v1_trait_JolokiaTrait, JolokiaTrait>>
+* <<#_camel_apache_org_v1_trait_KameletsTrait, KameletsTrait>>
+* <<#_camel_apache_org_v1_trait_KnativeServiceTrait, KnativeServiceTrait>>
+* <<#_camel_apache_org_v1_trait_KnativeTrait, KnativeTrait>>
+* <<#_camel_apache_org_v1_trait_LoggingTrait, LoggingTrait>>
+* <<#_camel_apache_org_v1_trait_MountTrait, MountTrait>>
+* <<#_camel_apache_org_v1_trait_OpenAPITrait, OpenAPITrait>>
+* <<#_camel_apache_org_v1_trait_OwnerTrait, OwnerTrait>>
+* <<#_camel_apache_org_v1_trait_PDBTrait, PDBTrait>>
+* <<#_camel_apache_org_v1_trait_PlatformTrait, PlatformTrait>>
+* <<#_camel_apache_org_v1_trait_PodTrait, PodTrait>>
+* <<#_camel_apache_org_v1_trait_PrometheusTrait, PrometheusTrait>>
+* <<#_camel_apache_org_v1_trait_PullSecretTrait, PullSecretTrait>>
+* <<#_camel_apache_org_v1_trait_QuarkusTrait, QuarkusTrait>>
+* <<#_camel_apache_org_v1_trait_RegistryTrait, RegistryTrait>>
+* <<#_camel_apache_org_v1_trait_RouteTrait, RouteTrait>>
+* <<#_camel_apache_org_v1_trait_ServiceBindingTrait, ServiceBindingTrait>>
+* <<#_camel_apache_org_v1_trait_ServiceTrait, ServiceTrait>>
+* <<#_camel_apache_org_v1_trait_TolerationTrait, TolerationTrait>>
 
 Base type for all traits.
 
@@ -5787,7 +5787,7 @@ bool
 Can be used to enable or disable a trait. All traits share this common property.
 
 |`configuration` +
-*xref:#_camel_apache_org_v1_Configuration[Configuration]*
+*xref:#_camel_apache_org_v1_trait_Configuration[Configuration]*
 |
 
 
