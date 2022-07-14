@@ -19,6 +19,7 @@ package integration
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -228,7 +229,16 @@ func matchesComparableTrait(ct trait.ComparableTrait, it map[string]interface{},
 		return false, err
 	}
 
-	return t2.(trait.ComparableTrait).Matches(t1.(trait.Trait)), nil
+	ct2, ok := t2.(trait.ComparableTrait)
+	if !ok {
+		return false, fmt.Errorf("type assertion failed: %v", t2)
+	}
+	tt1, ok := t1.(trait.Trait)
+	if !ok {
+		return false, fmt.Errorf("type assertion failed: %v", t1)
+	}
+
+	return ct2.Matches(tt1), nil
 }
 
 func matchesTrait(it map[string]interface{}, kt map[string]interface{}) bool {

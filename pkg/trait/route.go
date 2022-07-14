@@ -88,9 +88,10 @@ func (t *routeTrait) Configure(e *Environment) (bool, error) {
 
 func (t *routeTrait) Apply(e *Environment) error {
 	servicePortName := defaultContainerPortName
-	dt := e.Catalog.GetTrait(containerTraitID)
-	if dt != nil {
-		servicePortName = dt.(*containerTrait).ServicePortName
+	if dt := e.Catalog.GetTrait(containerTraitID); dt != nil {
+		if ct, ok := dt.(*containerTrait); ok {
+			servicePortName = ct.ServicePortName
+		}
 	}
 
 	tlsConfig, err := t.getTLSConfig(e)

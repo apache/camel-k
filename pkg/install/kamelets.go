@@ -114,7 +114,8 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 			if err != nil {
 				return err
 			}
-			if v := hasServerSideApply.Load(); v.(bool) {
+			v := hasServerSideApply.Load()
+			if vb, ok := v.(bool); ok && vb {
 				if !once {
 					return serverSideApply(gCtx, c, kamelet)
 				}
