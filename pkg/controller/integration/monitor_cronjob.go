@@ -35,17 +35,16 @@ type cronJobController struct {
 	obj              *batchv1.CronJob
 	integration      *v1.Integration
 	client           client.Client
-	context          context.Context
 	lastCompletedJob *batchv1.Job
 }
 
 var _ controller = &cronJobController{}
 
-func (c *cronJobController) checkReadyCondition() (bool, error) {
+func (c *cronJobController) checkReadyCondition(ctx context.Context) (bool, error) {
 	// Check latest job result
 	if lastScheduleTime := c.obj.Status.LastScheduleTime; lastScheduleTime != nil && len(c.obj.Status.Active) == 0 {
 		jobs := batchv1.JobList{}
-		if err := c.client.List(c.context, &jobs,
+		if err := c.client.List(ctx, &jobs,
 			ctrl.InNamespace(c.integration.Namespace),
 			ctrl.MatchingLabels{v1.IntegrationLabel: c.integration.Name},
 		); err != nil {

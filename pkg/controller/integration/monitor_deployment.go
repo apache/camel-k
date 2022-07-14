@@ -18,6 +18,7 @@ limitations under the License.
 package integration
 
 import (
+	"context"
 	"fmt"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -34,7 +35,7 @@ type deploymentController struct {
 
 var _ controller = &deploymentController{}
 
-func (c *deploymentController) checkReadyCondition() (bool, error) {
+func (c *deploymentController) checkReadyCondition(ctx context.Context) (bool, error) {
 	// Check the Deployment progression
 	if progressing := kubernetes.GetDeploymentCondition(*c.obj, appsv1.DeploymentProgressing); progressing != nil && progressing.Status == corev1.ConditionFalse && progressing.Reason == "ProgressDeadlineExceeded" {
 		c.integration.Status.Phase = v1.IntegrationPhaseError

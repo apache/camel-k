@@ -18,6 +18,8 @@ limitations under the License.
 package integration
 
 import (
+	"context"
+
 	corev1 "k8s.io/api/core/v1"
 
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
@@ -33,7 +35,7 @@ type knativeServiceController struct {
 
 var _ controller = &knativeServiceController{}
 
-func (c *knativeServiceController) checkReadyCondition() (bool, error) {
+func (c *knativeServiceController) checkReadyCondition(ctx context.Context) (bool, error) {
 	// Check the KnativeService conditions
 	if ready := kubernetes.GetKnativeServiceCondition(*c.obj, servingv1.ServiceConditionReady); ready.IsFalse() && ready.GetReason() == "RevisionFailed" {
 		c.integration.Status.Phase = v1.IntegrationPhaseError
