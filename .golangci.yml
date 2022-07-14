@@ -27,6 +27,7 @@ linters:
     - dupl
     - exhaustive
     - exhaustivestruct
+    - exhaustruct
     - forbidigo
     - funlen
     - gci

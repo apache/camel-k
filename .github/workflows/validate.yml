@@ -46,6 +46,6 @@ jobs:
         env:
           GOGC: 20
         with:
-          version: v1.43.0
+          version: v1.46.2
           skip-go-installation: true
           args: --verbose --deadline 15m --config .golangci.yml
