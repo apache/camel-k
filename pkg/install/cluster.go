@@ -39,6 +39,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
+// nolint: maintidx // TODO: refactor the code
 func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider client.Provider, collection *kubernetes.Collection, clusterType string, force bool) error {
 	// Get a client to install the CRD
 	c, err := clientProvider.Get()
