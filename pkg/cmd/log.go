@@ -92,7 +92,7 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 	currLogMsg := ""
 	newLogMsg := ""
 
-	err = wait.PollImmediate(pollInterval, pollTimeout, func() (done bool, err error) {
+	err = wait.PollImmediate(pollInterval, pollTimeout, func() (bool, error) {
 		//
 		// Reduce repetition of messages by tracking the last message
 		// and checking if its different from the new message

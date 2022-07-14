@@ -98,22 +98,24 @@ func (t *podTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *podTrait) applyChangesTo(podSpec *corev1.PodSpec, changes v1.PodSpec) (patchedPodSpec *corev1.PodSpec, err error) {
+func (t *podTrait) applyChangesTo(podSpec *corev1.PodSpec, changes v1.PodSpec) (*corev1.PodSpec, error) {
 	patch, err := json.Marshal(changes)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	sourceJSON, err := json.Marshal(podSpec)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	patched, err := strategicpatch.StrategicMergePatch(sourceJSON, patch, corev1.PodSpec{})
 	if err != nil {
-		return
+		return nil, err
 	}
 
+	var patchedPodSpec *corev1.PodSpec
 	err = json.Unmarshal(patched, &patchedPodSpec)
-	return
+
+	return patchedPodSpec, err
 }

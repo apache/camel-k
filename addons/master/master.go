@@ -228,7 +228,8 @@ func (t *masterTrait) canUseLeases(e *trait.Environment) (bool, error) {
 	return kubernetes.CheckPermission(e.Ctx, t.Client, "coordination.k8s.io", "leases", e.Integration.Namespace, "", "create")
 }
 
-func findAdditionalDependencies(e *trait.Environment, meta metadata.IntegrationMetadata) (dependencies []string) {
+func findAdditionalDependencies(e *trait.Environment, meta metadata.IntegrationMetadata) []string {
+	var dependencies []string
 	for _, endpoint := range meta.FromURIs {
 		if uri.GetComponent(endpoint) == masterComponent {
 			parts := strings.Split(endpoint, ":")

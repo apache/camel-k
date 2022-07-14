@@ -241,20 +241,20 @@ func EncodeXML(content interface{}) ([]byte, error) {
 	return w.Bytes(), nil
 }
 
-func CopyFile(src, dst string) (nBytes int64, err error) {
+func CopyFile(src, dst string) (int64, error) {
 	stat, err := os.Stat(src)
 	if err != nil {
-		return
+		return 0, err
 	}
 
 	if !stat.Mode().IsRegular() {
 		err = fmt.Errorf("%s is not a regular file", src)
-		return
+		return 0, err
 	}
 
 	source, err := Open(src)
 	if err != nil {
-		return
+		return 0, err
 	}
 
 	defer func() {
@@ -265,23 +265,22 @@ func CopyFile(src, dst string) (nBytes int64, err error) {
 	// in the container may not be the same as the one owning the files
 	//
 	// #nosec G301
-	err = os.MkdirAll(path.Dir(dst), 0o755)
-	if err != nil {
-		return
+	if err = os.MkdirAll(path.Dir(dst), 0o755); err != nil {
+		return 0, err
 	}
 
 	destination, err := OpenFile(dst, os.O_RDWR|os.O_CREATE|os.O_TRUNC, stat.Mode())
 	if err != nil {
-		return
+		return 0, err
 	}
 
 	defer func() {
 		err = Close(err, destination)
 	}()
 
-	nBytes, err = io.Copy(destination, source)
+	nBytes, err := io.Copy(destination, source)
 
-	return
+	return nBytes, err
 }
 
 func WriteFileWithBytesMarshallerContent(basePath string, filePath string, content BytesMarshaller) error {
@@ -342,22 +341,22 @@ func DirectoryExists(directory string) (bool, error) {
 	return info.IsDir(), nil
 }
 
-func DirectoryEmpty(directory string) (ok bool, err error) {
+func DirectoryEmpty(directory string) (bool, error) {
 	f, err := Open(directory)
 	if err != nil {
-		return
+		return false, err
 	}
 
 	defer func() {
 		err = Close(err, f)
 	}()
 
-	_, err = f.Readdirnames(1)
-	if errors.Is(err, io.EOF) {
+	ok := false
+	if _, err = f.Readdirnames(1); errors.Is(err, io.EOF) {
 		ok = true
 	}
 
-	return
+	return ok, err
 }
 
 func CreateDirectory(directory string) error {

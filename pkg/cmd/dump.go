@@ -60,10 +60,10 @@ type dumpCmdOptions struct {
 	Compressed bool `mapstructure:"compressed" yaml:",omitempty"`
 }
 
-func (o *dumpCmdOptions) dump(cmd *cobra.Command, args []string) (err error) {
+func (o *dumpCmdOptions) dump(cmd *cobra.Command, args []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
-		return
+		return err
 	}
 
 	if len(args) == 1 {

@@ -355,7 +355,8 @@ func (t *cronTrait) getSourcesFromURIs(e *Environment) ([]string, error) {
 	return meta.FromURIs, nil
 }
 
-func getCronForURIs(camelURIs []string) (globalCron *cronInfo) {
+func getCronForURIs(camelURIs []string) *cronInfo {
+	var globalCron *cronInfo
 	for _, camelURI := range camelURIs {
 		cr := getCronForURI(camelURI)
 		if cr == nil {
