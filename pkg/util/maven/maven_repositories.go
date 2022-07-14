@@ -37,8 +37,9 @@ func (o defaultRepositories) apply(settings *Settings) error {
 }
 
 func defaultMavenRepositories() []v1.Repository {
-	var repositories []v1.Repository
-	for _, repository := range strings.Split(DefaultMavenRepositories, ",") {
+	defaultRepositories := strings.Split(DefaultMavenRepositories, ",")
+	repositories := make([]v1.Repository, 0, len(defaultRepositories))
+	for _, repository := range defaultRepositories {
 		repositories = append(repositories, NewRepository(repository))
 	}
 	return repositories
