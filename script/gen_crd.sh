@@ -44,7 +44,8 @@ deploy_crd_file() {
   echo "" >> "$source"
   sed -n '/^---/,/^status/p;/^status/q' "${source}.orig" \
     | sed '1d;$d' \
-    | sed '/creationTimestamp:/a\  labels:\n    app: camel-k' >> "$source"
+    | sed '/creationTimestamp:/a\  
+    labels:\n    app: camel-k' >> "$source"
 
   for dest in "${@:2}"; do
     cp "$source" "$dest"
