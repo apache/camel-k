@@ -66,7 +66,7 @@ func TestServiceBindingTrait(t *testing.T) {
 
 		// Create integration and bind it to our service
 		name := "service-binding"
-		Expect(KamelRunWithID(operatorID, ns, "ServiceBinding.java",
+		Expect(KamelRunWithID(operatorID, ns, "files/ServiceBinding.java",
 			"--name", name,
 			"--connect", serviceRef,
 		).Execute()).To(Succeed())
