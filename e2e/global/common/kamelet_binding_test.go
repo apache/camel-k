@@ -38,8 +38,8 @@ func TestErrorHandler(t *testing.T) {
 		operatorID := "camel-k-kamelet-errorhandler"
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
-		Expect(CreateErrorProducerKamelet(ns, "my-own-error-producer-source")()).To(Succeed())
-		Expect(CreateLogKamelet(ns, "my-own-log-sink")()).To(Succeed())
+		Expect(createErrorProducerKamelet(ns, "my-own-error-producer-source")()).To(Succeed())
+		Expect(createLogKamelet(ns, "my-own-log-sink")()).To(Succeed())
 		from := corev1.ObjectReference{
 			Kind:       "Kamelet",
 			Name:       "my-own-error-producer-source",
@@ -92,7 +92,7 @@ func TestErrorHandler(t *testing.T) {
 	})
 }
 
-func CreateLogKamelet(ns string, name string) func() error {
+func createLogKamelet(ns string, name string) func() error {
 	flow := map[string]interface{}{
 		"from": map[string]interface{}{
 			"uri": "kamelet:source",
@@ -109,10 +109,11 @@ func CreateLogKamelet(ns string, name string) func() error {
 			Type: "string",
 		},
 	}
+
 	return CreateKamelet(ns, name, flow, props, nil)
 }
 
-func CreateErrorProducerKamelet(ns string, name string) func() error {
+func createErrorProducerKamelet(ns string, name string) func() error {
 	props := map[string]v1alpha1.JSONSchemaProp{
 		"message": {
 			Type: "string",
