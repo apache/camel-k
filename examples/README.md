@@ -22,7 +22,6 @@ In this section you can find a few examples of certain [`Camel` components](http
 
 | Type  |  Description | Link  |
 |---|---|---|
-| HTTP/HTTPS | Component usage | [see examples](./http/)|
 | Kafka | Component usage | [see examples](./kafka/)|
 | Knative | Component usage | [see examples](./knative/)|
 
