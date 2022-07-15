@@ -96,17 +96,6 @@ func TestKnative(t *testing.T) {
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
-		t.Run("Broker", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "files/knativeevt1.groovy").Execute()).To(Succeed())
-			Expect(KamelRunWithID(operatorID, ns, "files/knativeevt2.groovy").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "knativeevt1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationPodPhase(ns, "knativeevt2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationLogs(ns, "knativeevt2"), TestTimeoutMedium).Should(ContainSubstring("Received 1: Hello 1"))
-			Eventually(IntegrationLogs(ns, "knativeevt2"), TestTimeoutMedium).Should(ContainSubstring("Received 2: Hello 2"))
-			Eventually(IntegrationLogs(ns, "knativeevt2")).ShouldNot(ContainSubstring("Received 1: Hello 2"))
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-		})
-
 		t.Run("Flow", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns, "files/flow.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "flow"), TestTimeoutLong).Should(Equal(v1.PodRunning))
@@ -118,5 +107,20 @@ func TestKnative(t *testing.T) {
 
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
+	})
+}
+
+func TestRunBroker(t *testing.T) {
+	WithNewTestNamespaceWithKnativeBroker(t, func(ns string) {
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns, "--trait-profile", "knative").Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/knativeevt1.groovy").Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/knativeevt2.groovy").Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, "knativeevt1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		Eventually(IntegrationPodPhase(ns, "knativeevt2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		Eventually(IntegrationLogs(ns, "knativeevt2"), TestTimeoutMedium).Should(ContainSubstring("Received 1: Hello 1"))
+		Eventually(IntegrationLogs(ns, "knativeevt2"), TestTimeoutMedium).Should(ContainSubstring("Received 2: Hello 2"))
+		Eventually(IntegrationLogs(ns, "knativeevt2")).ShouldNot(ContainSubstring("Received 1: Hello 2"))
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
