@@ -32,7 +32,7 @@ import (
 	. "github.com/apache/camel-k/e2e/support"
 )
 
-func TestServiceTraitNodePort(t *testing.T) {
+func TestServiceTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-trait-service"
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
@@ -51,16 +51,10 @@ func TestServiceTraitNodePort(t *testing.T) {
 
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
-	})
-}
-
-func TestServiceTraitDefault(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		Expect(KamelInstall(ns).Execute()).To(Succeed())
 
 		t.Run("Default service (ClusterIP)", func(t *testing.T) {
 			// Service trait is enabled by default
-			Expect(KamelRun(ns, "files/PlatformHttpServer.java").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "files/PlatformHttpServer.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
 			//
