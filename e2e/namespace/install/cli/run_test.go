@@ -36,7 +36,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-func TestRun(t *testing.T) {
+func TestKamelCLIRun(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
