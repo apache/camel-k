@@ -15,7 +15,6 @@
 
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION ?= 1.10.0-SNAPSHOT
-OPERATOR_VERSION := $(subst -SNAPSHOT,,$(VERSION))
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION := 1.9.2
 RUNTIME_VERSION := 1.13.0
@@ -40,6 +39,7 @@ IMAGE_NAME := docker.io/apache/camel-k
 #
 CUSTOM_IMAGE ?= $(IMAGE_NAME)
 CUSTOM_VERSION ?= $(VERSION)
+OPERATOR_VERSION := $(subst -SNAPSHOT,,$(CUSTOM_VERSION))
 
 METADATA_IMAGE_NAME := $(CUSTOM_IMAGE)-metadata
 BUNDLE_IMAGE_NAME ?= $(CUSTOM_IMAGE)-bundle
@@ -50,20 +50,27 @@ LINT_DEADLINE := 10m
 
 
 # olm bundle vars
-CHANNELS ?= $(OPERATOR_VERSION),candidate,stable,latest
-DEFAULT_CHANNEL ?= $(OPERATOR_VERSION)
+MANAGER := config/manager
+MANIFESTS := config/manifests
+CHANNELS ?= $(shell v=$(OPERATOR_VERSION) && echo "stable-$${v%\.[0-9]}"),candidate,latest
+DEFAULT_CHANNEL ?= $(shell v=$(OPERATOR_VERSION) && echo "stable-$${v%\.[0-9]}")
 PACKAGE := camel-k
-CSV_VERSION := $(CUSTOM_VERSION:-SNAPSHOT=)
+CSV_VERSION := $(OPERATOR_VERSION)
 CSV_NAME := $(PACKAGE).v$(CSV_VERSION)
 # Final CSV name that replaces the name required by the operator-sdk
 # Has to be replaced after the bundle has been generated
-CSV_PRODUCTION_NAME := $(PACKAGE)-operator.v$(CSV_VERSION)
+CSV_PRODUCTION_NAME := $(LAST_RELEASED_IMAGE_NAME).v$(CSV_VERSION)
 CSV_DISPLAY_NAME := Camel K Operator
 CSV_SUPPORT := Camel
 CSV_REPLACES := $(LAST_RELEASED_IMAGE_NAME).v$(LAST_RELEASED_VERSION)
 CSV_FILENAME := $(PACKAGE).clusterserviceversion.yaml
-CSV_PATH := config/manifests/bases/$(CSV_FILENAME)
-CSV_GENERATED_PATH := bundle/manifests/$(CSV_FILENAME)
+CSV_PATH := $(MANIFESTS)/bases/$(CSV_FILENAME)
+CSV_PRODUCTION_PATH := bundle/manifests/$(CSV_FILENAME)
+
+# Test Bundle Index
+BUNDLE_INDEX := quay.io/operatorhubio/catalog:latest
+INDEX_DIR := index
+OPM := opm
 
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
@@ -329,6 +336,7 @@ clean:
 	rm -rf camel-k-client-*.tar.gz
 	rm -rf camel-k-examples-*.tar.gz
 	rm -rf bundle
+	rm -rf $(INDEX_DIR) $(INDEX_DIR).Dockerfile
 
 dep:
 	@echo "Cleaning dependencies..."
@@ -336,6 +344,18 @@ dep:
 	cd pkg/apis/camel && go mod tidy
 	cd pkg/client/camel && go mod tidy
 	cd pkg/kamelet/repository && go mod tidy
+
+detect-os:
+ifeq '$(findstring ;,$(PATH))' ';'
+OS := Windows
+OS_LOWER := windows
+else
+OS := $(shell echo $$(uname 2>/dev/null) || echo Unknown)
+OS := $(patsubst CYGWIN%,Cygwin,$(OS))
+OS := $(patsubst MSYS%,MSYS,$(OS))
+OS := $(patsubst MINGW%,MSYS,$(OS))
+OS_LOWER := $(shell echo $(OS) | tr '[:upper:]' '[:lower:]')
+endif
 
 lint:
 	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format tab --deadline $(LINT_DEADLINE) --verbose
@@ -415,6 +435,9 @@ get-last-released-version:
 get-csv-name:
 	@echo $(CSV_PRODUCTION_NAME)
 
+get-bundle-image:
+	@echo $(BUNDLE_IMAGE_NAME)
+
 set-version:
 	./script/set_version.sh $(CUSTOM_VERSION) $(CUSTOM_IMAGE)
 
@@ -453,7 +476,7 @@ install-minikube:
 get-staging-repo:
 	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
 
-.PHONY: do-build build build-kamel build-resources dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-keda generate-strimzi
+.PHONY: do-build build build-kamel build-resources dep detect-os codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-keda generate-strimzi
 .PHONY: controller-gen kubectl kustomize operator-sdk
 .PHONY: kubectl kustomize operator-sdk opm
 
@@ -477,19 +500,13 @@ else
 KUSTOMIZE=$(shell command -v kustomize 2> /dev/null)
 endif
 
-operator-sdk:
+operator-sdk: detect-os
 ifeq (, $(shell command -v operator-sdk 2> /dev/null))
 	@{ \
 	set -e ;\
-	if [ "$(shell uname -s 2>/dev/null || echo Unknown)" == "Darwin" ] ; then \
-		curl \
-			-L https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_darwin_amd64 \
-			-o operator-sdk ; \
-	else \
-		curl \
-			-L https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_linux_amd64 \
-			-o operator-sdk ; \
-	fi ;\
+	curl \
+		-L https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$(OS_LOWER)_amd64 \
+		-o operator-sdk ; \
 	chmod +x operator-sdk ;\
 	mv operator-sdk $(GOBIN)/ ;\
 	}
@@ -577,9 +594,23 @@ bundle: set-version generate-crd $(BUNDLE_CAMEL_APIS) kustomize operator-sdk pre
 	./script/add_license.sh bundle/manifests ./script/headers/yaml.txt
 # Rename the CSV name to conform with the existing released operator versions
 # This cannot happen in pre-bundle as the operator-sdk generation expects a CSV name the same as PACKAGE
-	@sed -i "s/^  name: $(CSV_NAME)/  name: $(CSV_PRODUCTION_NAME)/" $(CSV_GENERATED_PATH)
+	@sed -i "s/^  name: $(CSV_NAME)/  name: $(CSV_PRODUCTION_NAME)/" $(CSV_PRODUCTION_PATH)
 	$(OPERATOR_SDK) bundle validate ./bundle
 
 # Build the bundle image.
 bundle-build: bundle
-	cd bundle && docker build -f Dockerfile -t $(BUNDLE_IMAGE_NAME) .
+	cd bundle && docker build -f Dockerfile -t $(BUNDLE_IMAGE_NAME):$(CUSTOM_VERSION) .
+
+.PHONY: bundle-push bundle-index
+
+bundle-push: bundle-build
+	docker push $(BUNDLE_IMAGE_NAME):$(CUSTOM_VERSION)
+
+#
+# Builds a test catalog index for installing the operator via an OLM
+#
+bundle-index: opm
+	BUNDLE_INDEX=$(BUNDLE_INDEX) INDEX_DIR=$(INDEX_DIR) PACKAGE=$(PACKAGE) \
+	OPM=$(OPM) BUNDLE_IMAGE=$(BUNDLE_IMAGE_NAME):$(CUSTOM_VERSION) CSV_NAME=$(CSV_PRODUCTION_NAME) \
+	CSV_SKIPS=$(CSV_SKIP_RANGE) CSV_REPLACES=$(CSV_REPLACES) CHANNEL="$(DEFAULT_CHANNEL)-dev" \
+	./script/build_bundle_index.sh
