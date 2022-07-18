@@ -172,8 +172,11 @@ if [ "${PULL_REGISTRY}" != "${PUSH_REGISTRY}" ]; then
   # Tag the bundle image
   #
   echo "Tagging bundle image ..."
+  IMAGE_BASE_NAME=$(basename ${IMAGE_NAME})
+  export CUSTOM_IMAGE=${PUSH_REGISTRY}/${IMAGE_NAMESPACE}/${IMAGE_BASE_NAME}
+  export CUSTOM_VERSION=${IMAGE_VERSION}
   docker tag \
-    ${PUSH_REGISTRY}/${IMAGE_NAMESPACE}/camel-k-bundle:${IMAGE_VERSION} \
+    $(make get-bundle-image):${CUSTOM_VERSION} \
     ${BUNDLE_IMAGE}
 
   # Push the bundle image to the registry
