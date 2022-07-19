@@ -100,7 +100,7 @@ func newKnativeTrait() Trait {
 
 // IsAllowedInProfile overrides default.
 func (t *knativeTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
-	return profile == v1.TraitProfileKnative
+	return profile.Equal(v1.TraitProfileKnative)
 }
 
 func (t *knativeTrait) Configure(e *Environment) (bool, error) {
