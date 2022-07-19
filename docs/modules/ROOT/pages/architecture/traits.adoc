@@ -19,10 +19,10 @@ Traits are typically used to tune several aspects of an `Integration`. However, 
 Another important concept related to the trait lifecycle is the **trait profile**. At this time, Camel K is supporting the following profiles:
 
 * Kubernetes
-* Openshift
+* OpenShift
 * Knative
 
-A profile is useful to identify on which kind of cluster a trait has to run: vanilla `Kubernetes`, `Openshift` or OpenShift/Kubernetes clusters powered by `Knative`. The default is to allow a trait on any profile; each trait can specify a different behavior (ie, running a trait only for a profile as it happens with `Knative`).
+A profile is useful to identify on which kind of cluster a trait has to run: vanilla `Kubernetes`, `OpenShift` or OpenShift/Kubernetes clusters powered by `Knative`. The default is to allow a trait on any profile; each trait can specify a different behavior (ie, running a trait only for a profile as it happens with `Knative`).
 
 [[traits-configuration]]
 === Trait configuration

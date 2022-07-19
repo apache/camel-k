@@ -70,17 +70,17 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 			}
 		}
 		if t.ImagePullerDelegation == nil {
-			var isOpenshift bool
+			var isOpenShift bool
 			if t.Client != nil {
 				var err error
-				isOpenshift, err = openshift.IsOpenShift(t.Client)
+				isOpenShift, err = openshift.IsOpenShift(t.Client)
 				if err != nil {
 					return false, err
 				}
 			}
 			isOperatorGlobal := platform.IsCurrentOperatorGlobal()
 			isKitExternal := e.Integration.GetIntegrationKitNamespace(e.Platform) != e.Integration.Namespace
-			needsDelegation := isOpenshift && isOperatorGlobal && isKitExternal
+			needsDelegation := isOpenShift && isOperatorGlobal && isKitExternal
 			t.ImagePullerDelegation = &needsDelegation
 		}
 	}

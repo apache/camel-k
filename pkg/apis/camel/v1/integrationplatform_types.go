@@ -27,7 +27,7 @@ import (
 
 // IntegrationPlatformSpec defines the desired state of IntegrationPlatform
 type IntegrationPlatformSpec struct {
-	// what kind of cluster you're running (ie, plain Kubernetes or Openshift)
+	// what kind of cluster you're running (ie, plain Kubernetes or OpenShift)
 	Cluster IntegrationPlatformCluster `json:"cluster,omitempty"`
 	// the profile you wish to use. It will apply certain traits which are required by the specific profile chosen.
 	// It usually relates the Cluster with the optional definition of special profiles (ie, Knative)
@@ -177,7 +177,7 @@ const (
 	IntegrationPlatformBuildPublishStrategyKaniko IntegrationPlatformBuildPublishStrategy = "Kaniko"
 	// IntegrationPlatformBuildPublishStrategyS2I uses the Source to Images (S2I) feature
 	// (https://docs.openshift.com/container-platform/4.9/openshift_images/create-images.html#images-create-s2i_create-images)
-	// provided by an Openshift cluster in order to create and push the images to the registry. It is the default choice on Openshift cluster
+	// provided by an OpenShift cluster in order to create and push the images to the registry. It is the default choice on OpenShift cluster
 	IntegrationPlatformBuildPublishStrategyS2I IntegrationPlatformBuildPublishStrategy = "S2I"
 	// IntegrationPlatformBuildPublishStrategySpectrum uses Spectrum project (https://github.com/container-tools/spectrum)
 	// in order to push the incremental images to the image repository. It is the default choice on vanilla Kubernetes cluster
