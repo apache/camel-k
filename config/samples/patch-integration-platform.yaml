@@ -24,7 +24,7 @@ spec:
   # The profile to be implemented by default
   # ie. OpenShift, Kubernetes, Knative
   #
-  profile: Openshift
+  profile: OpenShift
   #
   #
   # Options propagated to integrations

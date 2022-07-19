@@ -6,7 +6,7 @@ The following steps assume that
 - you've already built the camel-k image using `make images` and made it available in the cluster as an imagestream
 - you've already built the bundle image using `make bundle` and have pushed it to some registry
 
-To perform OLM (Operator Lifecycle Manager) based deployment of camel-k, built from source locally on an Openshift cluster, you can follow the steps below.
+To perform OLM (Operator Lifecycle Manager) based deployment of camel-k, built from source locally on an OpenShift cluster, you can follow the steps below.
 
 Login to the cluster using the standard "oc" tool, create new project, complete the basic setup process. Reference commands below
 

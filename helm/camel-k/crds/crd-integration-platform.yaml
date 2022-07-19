@@ -310,7 +310,7 @@ spec:
                 type: object
               cluster:
                 description: what kind of cluster you're running (ie, plain Kubernetes
-                  or Openshift)
+                  or OpenShift)
                 type: string
               configuration:
                 description: list of configuration properties to be attached to all
@@ -1868,7 +1868,7 @@ spec:
                 type: object
               cluster:
                 description: what kind of cluster you're running (ie, plain Kubernetes
-                  or Openshift)
+                  or OpenShift)
                 type: string
               conditions:
                 description: which are the conditions met (particularly useful when
