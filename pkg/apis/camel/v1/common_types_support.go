@@ -21,19 +21,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 )
 
 func (in *Artifact) String() string {
 	return in.ID
-}
-
-func (in *MavenArtifact) GetDependencyID() string {
-	switch {
-	case in.Version == "":
-		return "mvn:" + in.GroupID + ":" + in.ArtifactID
-	default:
-		return "mvn:" + in.GroupID + ":" + in.ArtifactID + ":" + in.Version
-	}
 }
 
 func (in *ConfigurationSpec) String() string {
@@ -48,6 +40,21 @@ func (in *RuntimeSpec) CapabilityDependencies(capability string) []MavenArtifact
 	}
 
 	return deps
+}
+
+// TraitProfileByName returns the trait profile corresponding to the given name (case insensitive).
+func TraitProfileByName(name string) TraitProfile {
+	for _, p := range AllTraitProfiles {
+		if strings.EqualFold(name, string(p)) {
+			return p
+		}
+	}
+	return ""
+}
+
+// Equal checks if the profile is equal to the given profile (case insensitive).
+func (p TraitProfile) Equal(other TraitProfile) bool {
+	return strings.EqualFold(string(p), string(other))
 }
 
 // MarshalJSON returns m as the JSON encoding of m.
