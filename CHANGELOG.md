@@ -36,6 +36,7 @@
 - simplify platforms handling/configuration [\#3164](https://github.com/apache/camel-k/issues/3164)
 - Service Binding trait usage example [\#3147](https://github.com/apache/camel-k/issues/3147)
 - Route trait usage example [\#3146](https://github.com/apache/camel-k/issues/3146)
+- PDB trait usage example [\#3145](https://github.com/apache/camel-k/issues/3145)
 - Logging trait usage example [\#3143](https://github.com/apache/camel-k/issues/3143)
 - Support operator hub bundle format in `make bundle` [\#3128](https://github.com/apache/camel-k/issues/3128)
 - hello yaml example output [\#3124](https://github.com/apache/camel-k/issues/3124)
