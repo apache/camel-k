@@ -245,7 +245,7 @@ The https://github.com/k8s-operatorhub/community-operators/[OperatorHub] downstr
 of Camel K, so that it can be easily installed on platforms that support Operator Hub.
 
 The https://github.com/redhat-openshift-ecosystem/community-operators-prod/[Embedded OperatorHub in OpenShift and OKD] downstream channel should be synced to publish the latest version
-of Camel K, so that it can be easily installed on Openshift and OKD.
+of Camel K, so that it can be easily installed on OpenShift and OKD.
 
 You can create the bundle using the `make bundle` command.
 
