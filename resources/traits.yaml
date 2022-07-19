@@ -1038,7 +1038,7 @@ traits:
   - OpenShift
   description: 'The Route trait can be used to configure the creation of OpenShift
     routes for the integration. The certificate and key contents may be sourced either
-    from the local filesystem or in a Openshift `secret` object. The user may use
+    from the local filesystem or in a OpenShift `secret` object. The user may use
     the parameters ending in `-secret` (example: `tls-certificate-secret`) to reference
     a certificate stored in a `secret`. Parameters ending in `-secret` have higher
     priorities and in case the same route parameter is set, for example: `tls-key-secret`
