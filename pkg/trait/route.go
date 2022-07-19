@@ -48,7 +48,7 @@ func newRouteTrait() Trait {
 
 // IsAllowedInProfile overrides default.
 func (t *routeTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
-	return profile == v1.TraitProfileOpenShift
+	return profile.Equal(v1.TraitProfileOpenShift)
 }
 
 func (t *routeTrait) Configure(e *Environment) (bool, error) {

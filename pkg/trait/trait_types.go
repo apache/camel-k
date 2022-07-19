@@ -76,7 +76,7 @@ type Trait interface {
 	// RequiresIntegrationPlatform indicates that the trait cannot work without an integration platform set
 	RequiresIntegrationPlatform() bool
 
-	// IsAllowedInProfile tels if the trait supports the given profile
+	// IsAllowedInProfile tells if the trait supports the given profile
 	IsAllowedInProfile(v1.TraitProfile) bool
 
 	// Order is the order in which the trait should be executed in the normal flow

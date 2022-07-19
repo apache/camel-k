@@ -103,6 +103,23 @@ type FailureRecovery struct {
 	AttemptTime metav1.Time `json:"attemptTime"`
 }
 
+// TraitProfile represents lists of traits that are enabled for the specific installation/integration
+type TraitProfile string
+
+const (
+	// TraitProfileOpenShift is used by default on OpenShift clusters
+	TraitProfileOpenShift TraitProfile = "OpenShift"
+	// TraitProfileKubernetes is used by default on Kubernetes clusters
+	TraitProfileKubernetes TraitProfile = "Kubernetes"
+	// TraitProfileKnative is used by default on OpenShift/Kubernetes clusters powered by Knative
+	TraitProfileKnative TraitProfile = "Knative"
+	// DefaultTraitProfile is the trait profile used as default when no other profile is set
+	DefaultTraitProfile = TraitProfileKubernetes
+)
+
+// AllTraitProfiles contains all allowed profiles
+var AllTraitProfiles = []TraitProfile{TraitProfileKubernetes, TraitProfileKnative, TraitProfileOpenShift}
+
 // Traits represents the collection of trait configurations
 type Traits struct {
 	// The configuration of Affinity trait
