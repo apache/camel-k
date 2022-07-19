@@ -1,4 +1,4 @@
-Feature: Alerts from Camel-K are propagated to Openshift Prometheus
+Feature: Alerts from Camel K are propagated to OpenShift Prometheus
 
   Background: Prepare Thanos-ruler URL
     Given URL: https://thanos-ruler.openshift-user-workload-monitoring:9091

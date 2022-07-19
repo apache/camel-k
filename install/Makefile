@@ -303,7 +303,7 @@ endif
 # Customizes the samples patches for openshift
 #
 .platform-openshift-patch:
-	@sed -i 's/.*profile:.*/  profile: Openshift/' $(SAMPLES)/$(INT_PLATFORM_PATCH).$(YAML)
+	@sed -i 's/.*profile:.*/  profile: OpenShift/' $(SAMPLES)/$(INT_PLATFORM_PATCH).$(YAML)
 
 #
 # Install the integration platform

@@ -1953,9 +1953,9 @@ Deprecated: use the IntegrationKit field
 
 Deprecated:
 Use camel trait (camel.properties) to manage properties
-Use container trait (container.configs) to manage configs
-Use container trait (container.resources) to manage resources
-Use container trait (container.volumes) to manage volumes
+Use container trait (mount.configs) to manage configs
+Use container trait (mount.resources) to manage resources
+Use container trait (mount.volumes) to manage volumes
 
 |`repositories` +
 []string
@@ -2443,9 +2443,8 @@ map[string]string
 
 
 
-
 |`securityContext` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core[[\]Kubernetes core/v1.PodSecurityContext]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core[Kubernetes core/v1.PodSecurityContext]*
 |
 
 
