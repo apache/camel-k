@@ -19,6 +19,15 @@ package v1
 
 import "encoding/xml"
 
+func (in *MavenArtifact) GetDependencyID() string {
+	switch {
+	case in.Version == "":
+		return "mvn:" + in.GroupID + ":" + in.ArtifactID
+	default:
+		return "mvn:" + in.GroupID + ":" + in.ArtifactID + ":" + in.Version
+	}
+}
+
 type propertiesEntry struct {
 	XMLName xml.Name
 	Value   string `xml:",chardata"`

@@ -96,7 +96,7 @@ type IntegrationPlatformList struct {
 type IntegrationPlatformCluster string
 
 const (
-	// IntegrationPlatformClusterOpenShift is used when targeting a OpenShift cluster
+	// IntegrationPlatformClusterOpenShift is used when targeting an OpenShift cluster
 	IntegrationPlatformClusterOpenShift IntegrationPlatformCluster = "OpenShift"
 	// IntegrationPlatformClusterKubernetes is used when targeting a Kubernetes cluster
 	IntegrationPlatformClusterKubernetes IntegrationPlatformCluster = "Kubernetes"
@@ -104,23 +104,6 @@ const (
 
 // AllIntegrationPlatformClusters --
 var AllIntegrationPlatformClusters = []IntegrationPlatformCluster{IntegrationPlatformClusterOpenShift, IntegrationPlatformClusterKubernetes}
-
-// TraitProfile represents lists of traits that are enabled for the specific installation/integration
-type TraitProfile string
-
-const (
-	// TraitProfileOpenShift is used by default on OpenShift clusters
-	TraitProfileOpenShift TraitProfile = "OpenShift"
-	// TraitProfileKubernetes is used by default on Kubernetes clusters
-	TraitProfileKubernetes TraitProfile = "Kubernetes"
-	// TraitProfileKnative is used by default on OpenShift/Kubernetes clusters powered by Knative
-	TraitProfileKnative TraitProfile = "Knative"
-	// DefaultTraitProfile is the trait profile used as default when no other profile is set
-	DefaultTraitProfile = TraitProfileKubernetes
-)
-
-// AllTraitProfiles contains all allowed profiles
-var AllTraitProfiles = []TraitProfile{TraitProfileKubernetes, TraitProfileKnative, TraitProfileOpenShift}
 
 // IntegrationPlatformBuildSpec contains platform related build information.
 // This configuration can be used to tune the behavior of the Integration/IntegrationKit image builds.

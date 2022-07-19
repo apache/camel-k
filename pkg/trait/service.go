@@ -43,8 +43,8 @@ func newServiceTrait() Trait {
 
 // IsAllowedInProfile overrides default.
 func (t *serviceTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
-	return profile == v1.TraitProfileKubernetes ||
-		profile == v1.TraitProfileOpenShift
+	return profile.Equal(v1.TraitProfileKubernetes) ||
+		profile.Equal(v1.TraitProfileOpenShift)
 }
 
 func (t *serviceTrait) Configure(e *Environment) (bool, error) {

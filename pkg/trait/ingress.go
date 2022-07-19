@@ -46,7 +46,7 @@ func newIngressTrait() Trait {
 
 // IsAllowedInProfile overrides default.
 func (t *ingressTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
-	return profile == v1.TraitProfileKubernetes
+	return profile.Equal(v1.TraitProfileKubernetes)
 }
 
 func (t *ingressTrait) Configure(e *Environment) (bool, error) {
