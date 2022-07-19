@@ -18,8 +18,6 @@ limitations under the License.
 package v1
 
 import (
-	"strings"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -46,16 +44,6 @@ func NewIntegrationPlatform(namespace string, name string) IntegrationPlatform {
 			Name:      name,
 		},
 	}
-}
-
-// TraitProfileByName returns the trait profile corresponding to the given name (case insensitive)
-func TraitProfileByName(name string) TraitProfile {
-	for _, p := range AllTraitProfiles {
-		if strings.EqualFold(name, string(p)) {
-			return p
-		}
-	}
-	return ""
 }
 
 // Configurations --
