@@ -6,7 +6,9 @@
 
 **Closed issues:**
 
+- `camel-k-operator` pod in `CrashLoopBackOff` [\#3456](https://github.com/apache/camel-k/issues/3456)
 - `make generate-doc` outputs non-deterministic `resources/traits.yaml` [\#3431](https://github.com/apache/camel-k/issues/3431)
+- Any ideas on disabling property expansion in kamel run? [\#3422](https://github.com/apache/camel-k/issues/3422)
 - Camel K integration Prometheus Trait label autocreation with Integration Platform not working [\#3415](https://github.com/apache/camel-k/issues/3415)
 - kamel run --output yaml does not include resources [\#3396](https://github.com/apache/camel-k/issues/3396)
 - Migrate from batch/v1beta1 to batch/v1 [\#3393](https://github.com/apache/camel-k/issues/3393)
