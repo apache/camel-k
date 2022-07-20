@@ -58,7 +58,7 @@ type IntegrationSpec struct {
 	// a source in YAML DSL language which contain the routes to run
 	Flows []Flow `json:"flows,omitempty"`
 	// Deprecated:
-	// Use container trait (container.resources) to manage resources
+	// Use mount trait (mount.resources) to manage resources
 	// Use openapi trait (openapi.configmaps) to manage OpenAPIs specifications
 	Resources []ResourceSpec `json:"resources,omitempty"`
 	// the reference of the `IntegrationKit` which is used for this Integration
@@ -73,9 +73,9 @@ type IntegrationSpec struct {
 	PodTemplate *PodSpecTemplate `json:"template,omitempty"`
 	// Deprecated:
 	// Use camel trait (camel.properties) to manage properties
-	// Use container trait (mount.configs) to manage configs
-	// Use container trait (mount.resources) to manage resources
-	// Use container trait (mount.volumes) to manage volumes
+	// Use mount trait (mount.configs) to manage configs
+	// Use mount trait (mount.resources) to manage resources
+	// Use mount trait (mount.volumes) to manage volumes
 	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
 	// additional Maven repositories to be used
 	Repositories []string `json:"repositories,omitempty"`
