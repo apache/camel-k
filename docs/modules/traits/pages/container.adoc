@@ -83,7 +83,7 @@ The following configuration options are available:
 
 | container.probes-enabled
 | bool
-| DeprecatedProbesEnabled enable/disable probes on the container (default `false`)
+| DeprecatedProbesEnabled enable/disable probes on the container (default `false`).
 Deprecated: replaced by the health trait.
 
 | container.liveness-scheme
