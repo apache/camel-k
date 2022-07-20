@@ -45,7 +45,9 @@ func (action *createAction) CanHandle(platform *v1.IntegrationPlatform) bool {
 	return platform.Status.Phase == v1.IntegrationPlatformPhaseCreating
 }
 
-func (action *createAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
+func (action *createAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (
+	*v1.IntegrationPlatform, error,
+) {
 	paths, err := resources.WithPrefix("/camel-catalog-")
 	if err != nil {
 		return nil, err

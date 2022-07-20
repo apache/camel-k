@@ -123,7 +123,8 @@ func HandleIntegrationEvents(ctx context.Context, c client.Client, integration *
 
 // HandlePlatformStateChanges watches a platform resource and invoke the given handler when its status changes.
 // This function blocks until the handler function returns true or either the events channel or the context is closed.
-func HandlePlatformStateChanges(ctx context.Context, c client.Client, platform *v1.IntegrationPlatform, handler func(platform *v1.IntegrationPlatform) bool) error {
+func HandlePlatformStateChanges(ctx context.Context, c client.Client, platform *v1.IntegrationPlatform,
+	handler func(platform *v1.IntegrationPlatform) bool) error {
 	watcher, err := c.CamelV1().IntegrationPlatforms(platform.Namespace).
 		Watch(ctx, metav1.ListOptions{
 			FieldSelector: "metadata.name=" + platform.Name,

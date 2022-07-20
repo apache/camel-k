@@ -52,10 +52,15 @@ func TestLocalRunPropertyFileFlag(t *testing.T) {
 
 	require.NoError(t, err)
 	if len(localRunCmdOptions.PropertyFiles) != 2 {
-		t.Fatalf("Property files expected to contain: \n %v elements\nGot:\n %v elements\n", 2, len(localRunCmdOptions.PropertyFiles))
+		t.Fatalf(
+			"Property files expected to contain: \n %v elements\nGot:\n %v elements\n",
+			2, len(localRunCmdOptions.PropertyFiles))
 	}
-	if localRunCmdOptions.PropertyFiles[0] != "file1.properties" || localRunCmdOptions.PropertyFiles[1] != "file2.properties" {
-		t.Fatalf("Property files expected to be: \n %v\nGot:\n %v\n", "[file1.properties, file2.properties]", localRunCmdOptions.PropertyFiles)
+	if localRunCmdOptions.PropertyFiles[0] != "file1.properties" ||
+		localRunCmdOptions.PropertyFiles[1] != "file2.properties" {
+		t.Fatalf(
+			"Property files expected to be: \n %v\nGot:\n %v\n", "[file1.properties, file2.properties]",
+			localRunCmdOptions.PropertyFiles)
 	}
 }
 
@@ -70,10 +75,14 @@ func TestLocalRunPropertiesFlag(t *testing.T) {
 
 	require.NoError(t, err)
 	if len(localRunCmdOptions.Properties) != 2 {
-		t.Fatalf("Additional dependencies expected to contain: \n %v elements\nGot:\n %v elements\n", 2, len(localRunCmdOptions.Properties))
+		t.Fatalf(
+			"Additional dependencies expected to contain: \n %v elements\nGot:\n %v elements\n",
+			2, len(localRunCmdOptions.Properties))
 	}
 	if localRunCmdOptions.Properties[0] != "prop1=value1" || localRunCmdOptions.Properties[1] != "prop2=value2" {
-		t.Fatalf("Additional dependencies expected to be: \n %v\nGot:\n %v\n", "[prop1=value1, prop2=value2]", localRunCmdOptions.Properties)
+		t.Fatalf(
+			"Additional dependencies expected to be: \n %v\nGot:\n %v\n", "[prop1=value1, prop2=value2]",
+			localRunCmdOptions.Properties)
 	}
 }
 

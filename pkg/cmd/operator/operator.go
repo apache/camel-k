@@ -151,7 +151,8 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	broadcaster := record.NewBroadcaster()
 	defer broadcaster.Shutdown()
 
-	if ok, err := kubernetes.CheckPermission(context.TODO(), c, corev1.GroupName, "events", watchNamespace, "", "create"); err != nil || !ok {
+	if ok, err := kubernetes.CheckPermission(context.TODO(), c,
+		corev1.GroupName, "events", watchNamespace, "", "create"); err != nil || !ok {
 		// Do not sink Events to the server as they'll be rejected
 		broadcaster = event.NewSinkLessBroadcaster(broadcaster)
 		exitOnError(err, "cannot check permissions for creating Events")
@@ -174,7 +175,8 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	platform.OperatorImage, err = getOperatorImage(context.TODO(), c)
 	exitOnError(err, "cannot get operator container image")
 
-	if ok, err := kubernetes.CheckPermission(context.TODO(), c, coordination.GroupName, "leases", operatorNamespace, "", "create"); err != nil || !ok {
+	if ok, err := kubernetes.CheckPermission(context.TODO(), c,
+		coordination.GroupName, "leases", operatorNamespace, "", "create"); err != nil || !ok {
 		leaderElection = false
 		exitOnError(err, "cannot check permissions for creating Leases")
 		log.Info("The operator is not granted permissions to create Leases")
@@ -195,7 +197,8 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		&servingv1.Service{}: {Label: selector},
 	}
 
-	if ok, err := kubernetes.IsAPIResourceInstalled(c, batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
+	if ok, err := kubernetes.IsAPIResourceInstalled(c,
+		batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
 		selectors[&batchv1.CronJob{}] = struct {
 			Label labels.Selector
 			Field fields.Selector
@@ -255,19 +258,22 @@ func findOrCreateIntegrationPlatform(ctx context.Context, c client.Client, opera
 		platformName = platform.DefaultPlatformName
 	}
 
-	if pl, err := kubernetes.GetIntegrationPlatform(ctx, c, platformName, operatorNamespace); pl == nil || k8serrors.IsNotFound(err) {
+	if pl, err := kubernetes.GetIntegrationPlatform(ctx, c, platformName, operatorNamespace); pl == nil ||
+		k8serrors.IsNotFound(err) {
 		defaultPlatform := v1.NewIntegrationPlatform(operatorNamespace, platformName)
 		if defaultPlatform.Labels == nil {
 			defaultPlatform.Labels = make(map[string]string)
 		}
 		defaultPlatform.Labels["camel.apache.org/platform.generated"] = "true"
 
-		if _, err := c.CamelV1().IntegrationPlatforms(operatorNamespace).Create(ctx, &defaultPlatform, metav1.CreateOptions{}); err != nil {
+		if _, err := c.CamelV1().IntegrationPlatforms(operatorNamespace).Create(
+			ctx, &defaultPlatform, metav1.CreateOptions{}); err != nil {
 			return err
 		}
 
 		// Make sure that IntegrationPlatform installed in operator namespace can be seen by others
-		if err := install.IntegrationPlatformViewerRole(ctx, c, operatorNamespace); err != nil && !k8serrors.IsAlreadyExists(err) {
+		if err := install.IntegrationPlatformViewerRole(ctx, c, operatorNamespace); err != nil &&
+			!k8serrors.IsAlreadyExists(err) {
 			return errors.Wrap(err, "Error while installing global IntegrationPlatform viewer role")
 		}
 	} else {
@@ -286,7 +292,8 @@ func getWatchNamespace() (string, error) {
 	return ns, nil
 }
 
-// getOperatorImage returns the image currently used by the running operator if present (when running out of cluster, it may be absent).
+// getOperatorImage returns the image currently used by the running operator if present
+// (when running out of cluster, it may be absent).
 func getOperatorImage(ctx context.Context, c ctrl.Reader) (string, error) {
 	ns := platform.GetOperatorNamespace()
 	name := platform.GetOperatorPodName()

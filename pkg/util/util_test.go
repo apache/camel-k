@@ -24,7 +24,8 @@ import (
 )
 
 func TestStringContainsPrefix(t *testing.T) {
-	args := []string{"install", "--operator-image=xxx/yyy:zzz", "--registry", "image-registry.openshift-image-registry.svc:5000"}
+	args := []string{"install",
+		"--operator-image=xxx/yyy:zzz", "--registry", "image-registry.openshift-image-registry.svc:5000"}
 	assert.True(t, StringContainsPrefix(args, "--operator-image="))
 	assert.False(t, StringContainsPrefix(args, "--olm"))
 }

@@ -72,7 +72,8 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 			}
 			if err := options.install(cmd, args); err != nil {
 				if k8serrors.IsAlreadyExists(err) {
-					return errors.Wrap(err, "Camel K seems already installed (use the --force option to overwrite existing resources)")
+					return errors.Wrap(err,
+						"Camel K seems already installed (use the --force option to overwrite existing resources)")
 				}
 				return err
 			}
@@ -84,28 +85,36 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().BoolP("wait", "w", false, "Wait for the platform to be running")
 	cmd.Flags().Bool("cluster-setup", false, "Execute cluster-wide operations only (may require admin rights)")
 	cmd.Flags().String("cluster-type", "", "Set explicitly the cluster type to Kubernetes or OpenShift")
-	cmd.Flags().Bool("skip-operator-setup", false, "Do not install the operator in the namespace (in case there's a global one)")
+	cmd.Flags().Bool("skip-operator-setup", false,
+		"Do not install the operator in the namespace (in case there's a global one)")
 	cmd.Flags().Bool("skip-cluster-setup", false, "Skip the cluster-setup phase")
-	cmd.Flags().Bool("skip-registry-setup", false, "Skip the registry-setup phase (may negatively impact building of integrations)")
+	cmd.Flags().Bool("skip-registry-setup", false,
+		"Skip the registry-setup phase (may negatively impact building of integrations)")
 	cmd.Flags().Bool("skip-default-kamelets-setup", false, "Skip installation of the default Kamelets from catalog")
 	cmd.Flags().Bool("example", false, "Install example integration")
-	cmd.Flags().Bool("global", false, "Configure the operator to watch all namespaces. No integration platform is created. You can run integrations in a namespace by installing an integration platform: 'kamel install --skip-operator-setup -n my-namespace'")
+	cmd.Flags().Bool("global", false,
+		"Configure the operator to watch all namespaces. No integration platform is created. "+
+			"You can run integrations in a namespace by installing an integration platform: "+
+			"'kamel install --skip-operator-setup -n my-namespace'")
 	cmd.Flags().Bool("force", false, "Force replacement of configuration resources when already present.")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().String("organization", "", "A organization on the Docker registry that can be used to publish images")
 	cmd.Flags().String("registry", "", "A Docker registry that can be used to publish images")
 	cmd.Flags().String("registry-secret", "", "A secret used to push/pull images to the Docker registry")
 	cmd.Flags().Bool("registry-insecure", false, "Configure to configure registry access in insecure mode or not")
-	cmd.Flags().String("registry-auth-file", "", "A docker registry configuration file containing authorization tokens for pushing and pulling images")
+	cmd.Flags().String("registry-auth-file", "",
+		"A docker registry configuration file containing authorization tokens for pushing and pulling images")
 	cmd.Flags().String("registry-auth-server", "", "The docker registry authentication server")
 	cmd.Flags().String("registry-auth-username", "", "The docker registry authentication username")
 	cmd.Flags().String("registry-auth-password", "", "The docker registry authentication password")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a camel property")
 	cmd.Flags().String("runtime-version", "", "Set the camel-k runtime version")
 	cmd.Flags().String("base-image", "", "Set the base Image used to run integrations")
-	cmd.Flags().StringP("operator-id", "x", "camel-k", "Set the operator id that is used to select the resources this operator should manage")
+	cmd.Flags().StringP("operator-id", "x", "camel-k",
+		"Set the operator id that is used to select the resources this operator should manage")
 	cmd.Flags().String("operator-image", "", "Set the operator Image used for the operator deployment")
-	cmd.Flags().String("operator-image-pull-policy", "", "Set the operator ImagePullPolicy used for the operator deployment")
+	cmd.Flags().String("operator-image-pull-policy", "",
+		"Set the operator ImagePullPolicy used for the operator deployment")
 	cmd.Flags().String("build-strategy", "", "Set the build strategy")
 	cmd.Flags().String("build-publish-strategy", "", "Set the build publish strategy")
 	cmd.Flags().String("build-timeout", "", "Set how long the build process can last")
@@ -117,21 +126,27 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("olm-operator-name", "", "Name of the Camel K operator in the OLM source or marketplace")
 	cmd.Flags().String("olm-package", "", "Name of the Camel K package in the OLM source or marketplace")
 	cmd.Flags().String("olm-channel", "", "Name of the Camel K channel in the OLM source or marketplace")
-	cmd.Flags().String("olm-source", "", "Name of the OLM source providing the Camel K package (defaults to the standard Operator Hub source)")
+	cmd.Flags().String("olm-source", "",
+		"Name of the OLM source providing the Camel K package (defaults to the standard Operator Hub source)")
 	cmd.Flags().String("olm-source-namespace", "", "Namespace where the OLM source is available")
-	cmd.Flags().String("olm-starting-csv", "", "Allow to install a specific version from the operator source instead of latest available "+
-		"from the channel")
-	cmd.Flags().String("olm-global-namespace", "", "A namespace containing an OperatorGroup that defines global scope for the "+
-		"operator (used in combination with the --global flag)")
+	cmd.Flags().String("olm-starting-csv", "",
+		"Allow to install a specific version from the operator source instead of latest available "+
+			"from the channel")
+	cmd.Flags().String("olm-global-namespace", "",
+		"A namespace containing an OperatorGroup that defines global scope for the "+
+			"operator (used in combination with the --global flag)")
 
 	// Maven
 	cmd.Flags().String("maven-local-repository", "", "Path of the local Maven repository")
 	cmd.Flags().StringArray("maven-property", nil, "Add a Maven property")
 	cmd.Flags().StringArray("maven-extension", nil, "Add a Maven build extension")
-	cmd.Flags().String("maven-settings", "", "Configure the source of the Maven settings (configmap|secret:name[/key])")
+	cmd.Flags().String("maven-settings", "",
+		"Configure the source of the Maven settings (configmap|secret:name[/key])")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a Maven repository")
-	cmd.Flags().String("maven-ca-secret", "", "Configure the secret key containing the Maven CA certificates (secret/key)")
-	cmd.Flags().StringArray("maven-cli-option", nil, "Add a default Maven CLI option to the list of arguments for Maven commands")
+	cmd.Flags().String("maven-ca-secret", "",
+		"Configure the secret key containing the Maven CA certificates (secret/key)")
+	cmd.Flags().StringArray("maven-cli-option", nil,
+		"Add a default Maven CLI option to the list of arguments for Maven commands")
 
 	// health
 	cmd.Flags().Int("health-port", 8081, "The port of the health endpoint")
@@ -143,12 +158,17 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	// Operator settings
 	cmd.Flags().StringArray("toleration", nil, "Add a Toleration to the operator Pod")
 	cmd.Flags().StringArray("node-selector", nil, "Add a NodeSelector to the operator Pod")
-	cmd.Flags().StringArray("operator-resources", nil, "Define the resources requests and limits assigned to the operator Pod as <requestType.requestResource=value> (i.e., limits.memory=256Mi)")
-	cmd.Flags().StringArray("operator-env-vars", nil, "Add an environment variable to set in the operator Pod(s), as <name=value>")
-	cmd.Flags().StringP("log-level", "z", "info", "The level of operator logging (default - info): info or 0, debug or 1")
+	cmd.Flags().StringArray("operator-resources", nil,
+		"Define the resources requests and limits assigned to the operator Pod as "+
+			"<requestType.requestResource=value> (i.e., limits.memory=256Mi)")
+	cmd.Flags().StringArray("operator-env-vars", nil,
+		"Add an environment variable to set in the operator Pod(s), as <name=value>")
+	cmd.Flags().StringP("log-level", "z", "info",
+		"The level of operator logging (default - info): info or 0, debug or 1")
 
 	// save
-	cmd.Flags().Bool("save", false, "Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
+	cmd.Flags().Bool("save", false,
+		"Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
 
 	// completion support
 	configureBashAnnotationForFlag(
@@ -245,12 +265,16 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			return errors.Wrap(err, "error while checking OLM availability. Run with '--olm=false' to skip this check")
 		}
 		if olmAvailable {
-			if installViaOLM, err = olm.HasPermissionToInstall(o.Context, olmClient, o.Namespace, o.Global, o.olmOptions); err != nil {
-				return errors.Wrap(err, "error while checking permissions to install operator via OLM. Run with '--olm=false' to skip this check")
+			if installViaOLM, err = olm.HasPermissionToInstall(o.Context, olmClient,
+				o.Namespace, o.Global, o.olmOptions); err != nil {
+				return errors.Wrap(err,
+					"error while checking permissions to install operator via OLM. Run with '--olm=false' to skip this check")
 			}
 			if !installViaOLM {
-				fmt.Fprintln(cobraCmd.OutOrStdout(), "OLM is available but current user has not enough permissions to create the operator. "+
-					"You can either ask your administrator to provide permissions (preferred) or run the install command with the `--olm=false` flag.")
+				fmt.Fprintln(cobraCmd.OutOrStdout(),
+					"OLM is available but current user has not enough permissions to create the operator. "+
+						"You can either ask your administrator to provide permissions (preferred) "+
+						"or run the install command with the `--olm=false` flag.")
 				os.Exit(1)
 			}
 		} else {
@@ -277,9 +301,12 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 	if !o.SkipClusterSetup && !installViaOLM {
 		err := install.SetupClusterWideResourcesOrCollect(o.Context, clientProvider, collection, o.ClusterType, o.Force)
 		if err != nil && k8serrors.IsForbidden(err) {
-			fmt.Fprintln(cobraCmd.OutOrStdout(), "Current user is not authorized to create cluster-wide objects like custom resource definitions or cluster roles: ", err)
+			fmt.Fprintln(cobraCmd.OutOrStdout(),
+				"Current user is not authorized to create cluster-wide objects like custom resource definitions or cluster roles:",
+				err)
 
-			meg := `please login as cluster-admin and execute "kamel install --cluster-setup" to install cluster-wide resources (one-time operation)`
+			meg := `please login as cluster-admin and execute "kamel install --cluster-setup" ` +
+				`to install cluster-wide resources (one-time operation)`
 			return errors.New(meg)
 		} else if err != nil {
 			return err
@@ -313,12 +340,16 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		if !o.SkipOperatorSetup && !installViaOLM {
 			if ok, err := isInstallAllowed(o.Context, c, platformName, o.Force, cobraCmd.OutOrStdout()); err != nil {
 				if k8serrors.IsForbidden(err) {
-					o.PrintfVerboseOutf(cobraCmd, "Unable to verify existence of operator id [%s] due to lack of user privileges\n", platformName)
+					o.PrintfVerboseOutf(cobraCmd,
+						"Unable to verify existence of operator id [%s] due to lack of user privileges\n",
+						platformName)
 				} else {
 					return err
 				}
 			} else if !ok {
-				return fmt.Errorf("installation not allowed because operator with id '%s' already exists, use the --force option to skip this check", platformName)
+				return fmt.Errorf(
+					"installation not allowed because operator with id '%s' already exists, use the --force option to skip this check",
+					platformName)
 			}
 
 			cfg := install.OperatorConfiguration{
@@ -353,12 +384,14 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			if o.registryAuth.IsSet() {
 				regData := o.registryAuth
 				regData.Registry = o.registry.Address
-				generatedSecretName, err = install.RegistrySecretOrCollect(o.Context, c, namespace, regData, collection, o.Force)
+				generatedSecretName, err = install.RegistrySecretOrCollect(o.Context, c, namespace,
+					regData, collection, o.Force)
 				if err != nil {
 					return err
 				}
 			} else if o.RegistryAuthFile != "" {
-				generatedSecretName, err = install.RegistrySecretFromFileOrCollect(o.Context, c, namespace, o.RegistryAuthFile, collection, o.Force)
+				generatedSecretName, err = install.RegistrySecretFromFileOrCollect(o.Context, c, namespace,
+					o.RegistryAuthFile, collection, o.Force)
 				if err != nil {
 					return err
 				}
@@ -391,7 +424,9 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			for _, extension := range o.MavenExtensions {
 				gav := strings.Split(extension, ":")
 				if len(gav) != 2 && len(gav) != 3 {
-					meg := fmt.Sprintf("Maven build extension GAV must match <groupId>:<artifactId>:<version>, found: %s", extension)
+					meg := fmt.Sprintf(
+						"Maven build extension GAV must match <groupId>:<artifactId>:<version>, found: %s",
+						extension)
 					return errors.New(meg)
 				}
 				ext := v1.MavenArtifact{
@@ -482,7 +517,8 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 
 		kanikoBuildCacheFlag := cobraCmd.Flags().Lookup("kaniko-build-cache")
 		if kanikoBuildCacheFlag.Changed {
-			platform.Spec.Build.PublishStrategyOptions[builder.KanikoBuildCacheEnabled] = strconv.FormatBool(o.KanikoBuildCache)
+			platform.Spec.Build.PublishStrategyOptions[builder.KanikoBuildCacheEnabled] =
+				strconv.FormatBool(o.KanikoBuildCache)
 		}
 
 		// Always create a platform in the namespace where the operator is located
@@ -491,7 +527,8 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			return err
 		}
 
-		if err := install.IntegrationPlatformViewerRole(o.Context, c, namespace); err != nil && !k8serrors.IsAlreadyExists(err) {
+		if err := install.IntegrationPlatformViewerRole(o.Context, c, namespace); err != nil &&
+			!k8serrors.IsAlreadyExists(err) {
 			return errors.Wrap(err, "Error while installing global IntegrationPlatform viewer role")
 		}
 
@@ -515,7 +552,8 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				strategy = "via OLM subscription"
 			}
 			if o.Global {
-				fmt.Fprintln(cobraCmd.OutOrStdout(), "Camel K installed in namespace", namespace, strategy, "(global mode)")
+				fmt.Fprintln(cobraCmd.OutOrStdout(), "Camel K installed in namespace", namespace, strategy,
+					"(global mode)")
 			} else {
 				fmt.Fprintln(cobraCmd.OutOrStdout(), "Camel K installed in namespace", namespace, strategy)
 			}
@@ -529,7 +567,8 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 	return nil
 }
 
-func isInstallAllowed(ctx context.Context, c client.Client, operatorID string, force bool, out io.Writer) (bool, error) {
+func isInstallAllowed(ctx context.Context, c client.Client, operatorID string, force bool,
+	out io.Writer) (bool, error) {
 	// find existing platform with given name in any namespace
 	pl, err := platformutil.LookupForPlatformName(ctx, c, operatorID)
 
@@ -660,12 +699,14 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 	}
 
 	if o.registry.Secret != "" && (o.registryAuth.IsSet() || o.RegistryAuthFile != "") {
-		err := fmt.Errorf("incompatible options combinations: you cannot set both registry-secret and registry-auth-[*] settings")
+		err := fmt.Errorf(
+			"incompatible options combinations: you cannot set both registry-secret and registry-auth-[*] settings")
 		result = multierr.Append(result, err)
 	}
 
 	if o.registryAuth.IsSet() && o.RegistryAuthFile != "" {
-		err := fmt.Errorf("incompatible options combinations: you cannot set registry-auth-file with other registry-auth-[*] settings")
+		err := fmt.Errorf(
+			"incompatible options combinations: you cannot set registry-auth-file with other registry-auth-[*] settings")
 		result = multierr.Append(result, err)
 	}
 
@@ -674,7 +715,8 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 		if err != nil {
 			result = multierr.Append(result, err)
 		} else if nfo.IsDir() {
-			result = multierr.Append(result, errors.Wrapf(err, "registry file cannot be a directory: %s", o.RegistryAuthFile))
+			result = multierr.Append(result,
+				errors.Wrapf(err, "registry file cannot be a directory: %s", o.RegistryAuthFile))
 		}
 	}
 
@@ -691,7 +733,9 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 			for _, s := range v1.BuildStrategies {
 				strategies = append(strategies, string(s))
 			}
-			return fmt.Errorf("unknown build strategy: %s. One of [%s] is expected", o.BuildStrategy, strings.Join(strategies, ", "))
+			return fmt.Errorf(
+				"unknown build strategy: %s. One of [%s] is expected",
+				o.BuildStrategy, strings.Join(strategies, ", "))
 		}
 	}
 
@@ -708,7 +752,9 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 			for _, s := range v1.IntegrationPlatformBuildPublishStrategies {
 				strategies = append(strategies, string(s))
 			}
-			return fmt.Errorf("unknown build publish strategy: %s. One of [%s] is expected", o.BuildPublishStrategy, strings.Join(strategies, ", "))
+			return fmt.Errorf(
+				"unknown build publish strategy: %s. One of [%s] is expected",
+				o.BuildPublishStrategy, strings.Join(strategies, ", "))
 		}
 	}
 
@@ -755,7 +801,8 @@ func decodeMavenSettings(mavenSettings string) (v1.ValueSource, error) {
 		}
 	}
 
-	return v1.ValueSource{}, fmt.Errorf("illegal maven setting definition, syntax: configmap|secret:resource-name[/settings path]")
+	return v1.ValueSource{}, fmt.Errorf(
+		"illegal maven setting definition, syntax: configmap|secret:resource-name[/settings path]")
 }
 
 func decodeSecretKeySelector(secretKey string) (*corev1.SecretKeySelector, error) {
@@ -775,7 +822,8 @@ func decodeSecretKeySelector(secretKey string) (*corev1.SecretKeySelector, error
 	}, nil
 }
 
-func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Client, namespace, name string, settings maven.Settings) error {
+func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Client,
+	namespace, name string, settings maven.Settings) error {
 	cm, err := settingsConfigMap(namespace, name, settings)
 	if err != nil {
 		return err

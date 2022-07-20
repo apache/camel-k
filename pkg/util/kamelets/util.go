@@ -32,7 +32,8 @@ import (
 )
 
 // ExtractKameletFromSources provide a list of Kamelets referred into the Integration sources.
-func ExtractKameletFromSources(context context.Context, c client.Client, catalog *camel.RuntimeCatalog, resources *kubernetes.Collection, it *v1.Integration) ([]string, error) {
+func ExtractKameletFromSources(context context.Context, c client.Client, catalog *camel.RuntimeCatalog,
+	resources *kubernetes.Collection, it *v1.Integration) ([]string, error) {
 	var kamelets []string
 
 	sources, err := kubernetes.ResolveIntegrationSources(context, c, it, resources)

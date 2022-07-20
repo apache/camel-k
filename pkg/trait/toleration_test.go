@@ -61,16 +61,20 @@ func TestApplyPodTolerationLabelsDefault(t *testing.T) {
 	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration=my-value:NoExecute")
 
 	environment, deployment := createNominalDeploymentTraitTest()
-	testApplyPodTolerationLabelsDefault(t, tolerationTrait, environment, &deployment.Spec.Template.Spec.Tolerations)
+	testApplyPodTolerationLabelsDefault(t, tolerationTrait, environment,
+		&deployment.Spec.Template.Spec.Tolerations)
 
 	environment, knativeService := createNominalKnativeServiceTraitTest()
-	testApplyPodTolerationLabelsDefault(t, tolerationTrait, environment, &knativeService.Spec.Template.Spec.Tolerations)
+	testApplyPodTolerationLabelsDefault(t, tolerationTrait, environment,
+		&knativeService.Spec.Template.Spec.Tolerations)
 
 	environment, cronJob := createNominalCronJobTraitTest()
-	testApplyPodTolerationLabelsDefault(t, tolerationTrait, environment, &cronJob.Spec.JobTemplate.Spec.Template.Spec.Tolerations)
+	testApplyPodTolerationLabelsDefault(t, tolerationTrait, environment,
+		&cronJob.Spec.JobTemplate.Spec.Template.Spec.Tolerations)
 }
 
-func testApplyPodTolerationLabelsDefault(t *testing.T, trait *tolerationTrait, environment *Environment, tolerations *[]corev1.Toleration) {
+func testApplyPodTolerationLabelsDefault(t *testing.T, trait *tolerationTrait, environment *Environment,
+	tolerations *[]corev1.Toleration) {
 	t.Helper()
 
 	err := trait.Apply(environment)
@@ -89,16 +93,20 @@ func TestApplyPodTolerationLabelsTolerationSeconds(t *testing.T) {
 	tolerationTrait.Taints = append(tolerationTrait.Taints, "my-toleration:NoExecute:300")
 
 	environment, deployment := createNominalDeploymentTraitTest()
-	testApplyPodTolerationLabelsTolerationSeconds(t, tolerationTrait, environment, &deployment.Spec.Template.Spec.Tolerations)
+	testApplyPodTolerationLabelsTolerationSeconds(t, tolerationTrait, environment,
+		&deployment.Spec.Template.Spec.Tolerations)
 
 	environment, knativeService := createNominalKnativeServiceTraitTest()
-	testApplyPodTolerationLabelsTolerationSeconds(t, tolerationTrait, environment, &knativeService.Spec.Template.Spec.Tolerations)
+	testApplyPodTolerationLabelsTolerationSeconds(t, tolerationTrait, environment,
+		&knativeService.Spec.Template.Spec.Tolerations)
 
 	environment, cronJob := createNominalCronJobTraitTest()
-	testApplyPodTolerationLabelsTolerationSeconds(t, tolerationTrait, environment, &cronJob.Spec.JobTemplate.Spec.Template.Spec.Tolerations)
+	testApplyPodTolerationLabelsTolerationSeconds(t, tolerationTrait, environment,
+		&cronJob.Spec.JobTemplate.Spec.Template.Spec.Tolerations)
 }
 
-func testApplyPodTolerationLabelsTolerationSeconds(t *testing.T, trait *tolerationTrait, environment *Environment, tolerations *[]corev1.Toleration) {
+func testApplyPodTolerationLabelsTolerationSeconds(t *testing.T, trait *tolerationTrait, environment *Environment,
+	tolerations *[]corev1.Toleration) {
 	t.Helper()
 
 	err := trait.Apply(environment)

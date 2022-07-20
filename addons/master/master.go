@@ -36,9 +36,11 @@ import (
 // The Master trait allows to configure the integration to automatically leverage Kubernetes resources for doing
 // leader election and starting *master* routes only on certain instances.
 //
-// It's activated automatically when using the master endpoint in a route, e.g. `from("master:lockname:telegram:bots")...`.
+// It's activated automatically when using the master endpoint in a route,
+// e.g. `from("master:lockname:telegram:bots")...`.
 //
-// NOTE: this trait adds special permissions to the integration service account in order to read/write configmaps and read pods.
+// NOTE: this trait adds special permissions to the integration service account in order to read/write configmaps
+// and read pods.
 // It's recommended to use a different service account than "default" when running the integration.
 //
 // +camel-k:trait=master.
@@ -46,9 +48,11 @@ type Trait struct {
 	traitv1.Trait `property:",squash" json:",inline"`
 	// Enables automatic configuration of the trait.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
-	// When this flag is active, the operator analyzes the source code to add dependencies required by delegate endpoints.
+	// When this flag is active, the operator analyzes the source code to add dependencies required
+	// by delegate endpoints.
 	// E.g. when using `master:lockname:timer`, then `camel:timer` is automatically added to the set of dependencies.
 	// It's enabled by default.
+	// nolint: lll
 	IncludeDelegateDependencies *bool `property:"include-delegate-dependencies" json:"includeDelegateDependencies,omitempty"`
 	// Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
 	// Name of the configmap/lease resource that will be used to store the lock. Defaults to "<integration-name>-lock".
@@ -198,13 +202,19 @@ func (t *masterTrait) Apply(e *trait.Environment) error {
 		if t.ResourceName != nil {
 			resourceName := t.ResourceName
 			e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-				v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.kubernetesResourceName=%s", *resourceName)},
+				v1.ConfigurationSpec{
+					Type:  "property",
+					Value: fmt.Sprintf("customizer.master.kubernetesResourceName=%s", *resourceName),
+				},
 			)
 		}
 
 		if t.ResourceType != nil {
 			e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-				v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.leaseResourceType=%s", *t.ResourceType)},
+				v1.ConfigurationSpec{
+					Type:  "property",
+					Value: fmt.Sprintf("customizer.master.leaseResourceType=%s", *t.ResourceType),
+				},
 			)
 		}
 
@@ -225,7 +235,8 @@ func (t *masterTrait) Apply(e *trait.Environment) error {
 }
 
 func (t *masterTrait) canUseLeases(e *trait.Environment) (bool, error) {
-	return kubernetes.CheckPermission(e.Ctx, t.Client, "coordination.k8s.io", "leases", e.Integration.Namespace, "", "create")
+	return kubernetes.CheckPermission(e.Ctx, t.Client, "coordination.k8s.io", "leases",
+		e.Integration.Namespace, "", "create")
 }
 
 func findAdditionalDependencies(e *trait.Environment, meta metadata.IntegrationMetadata) []string {

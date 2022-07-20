@@ -32,7 +32,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// NewInitializeAction returns a action that initializes the kamelet binding configuration when not provided by the user.
+// NewInitializeAction returns a action that initializes the kamelet binding configuration
+// when not provided by the user.
 func NewInitializeAction() Action {
 	return &initializeAction{}
 }
@@ -49,7 +50,9 @@ func (action *initializeAction) CanHandle(kameletbinding *v1alpha1.KameletBindin
 	return kameletbinding.Status.Phase == v1alpha1.KameletBindingPhaseNone
 }
 
-func (action *initializeAction) Handle(ctx context.Context, kameletbinding *v1alpha1.KameletBinding) (*v1alpha1.KameletBinding, error) {
+func (action *initializeAction) Handle(ctx context.Context, kameletbinding *v1alpha1.KameletBinding) (
+	*v1alpha1.KameletBinding, error,
+) {
 	it, err := CreateIntegrationFor(ctx, action.client, kameletbinding)
 	if err != nil {
 		return nil, err
@@ -100,9 +103,11 @@ func (action *initializeAction) propagateIcon(ctx context.Context, binding *v1al
 
 func (action *initializeAction) findIcon(ctx context.Context, binding *v1alpha1.KameletBinding) (string, error) {
 	var kameletRef *corev1.ObjectReference
-	if binding.Spec.Source.Ref != nil && binding.Spec.Source.Ref.Kind == "Kamelet" && strings.HasPrefix(binding.Spec.Source.Ref.APIVersion, "camel.apache.org/") {
+	if binding.Spec.Source.Ref != nil && binding.Spec.Source.Ref.Kind == "Kamelet" &&
+		strings.HasPrefix(binding.Spec.Source.Ref.APIVersion, "camel.apache.org/") {
 		kameletRef = binding.Spec.Source.Ref
-	} else if binding.Spec.Sink.Ref != nil && binding.Spec.Sink.Ref.Kind == "Kamelet" && strings.HasPrefix(binding.Spec.Sink.Ref.APIVersion, "camel.apache.org/") {
+	} else if binding.Spec.Sink.Ref != nil && binding.Spec.Sink.Ref.Kind == "Kamelet" &&
+		strings.HasPrefix(binding.Spec.Sink.Ref.APIVersion, "camel.apache.org/") {
 		kameletRef = binding.Spec.Sink.Ref
 	}
 

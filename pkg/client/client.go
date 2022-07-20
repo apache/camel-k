@@ -251,7 +251,8 @@ func GetCurrentNamespace(kubeconfig string) (string, error) {
 		return "", errors.New("kubernetes config file is empty")
 	}
 
-	decoded, _, err := clientcmdlatest.Codec.Decode(data, &schema.GroupVersionKind{Version: clientcmdlatest.Version, Kind: "Config"}, conf)
+	decoded, _, err := clientcmdlatest.Codec.Decode(data,
+		&schema.GroupVersionKind{Version: clientcmdlatest.Version, Kind: "Config"}, conf)
 	if err != nil {
 		return "", err
 	}

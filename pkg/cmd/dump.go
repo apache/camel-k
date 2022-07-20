@@ -186,11 +186,14 @@ func dumpNamespace(ctx context.Context, c client.Client, ns string, out io.Write
 
 func dumpConditions(prefix string, conditions []v1.PodCondition, out io.Writer) {
 	for _, cond := range conditions {
-		fmt.Fprintf(out, "%scondition type=%s, status=%s, reason=%s, message=%q\n", prefix, cond.Type, cond.Status, cond.Reason, cond.Message)
+		fmt.Fprintf(out,
+			"%scondition type=%s, status=%s, reason=%s, message=%q\n",
+			prefix, cond.Type, cond.Status, cond.Reason, cond.Message)
 	}
 }
 
-func dumpLogs(ctx context.Context, c client.Client, prefix string, ns string, name string, container string, out io.Writer, logLines int) error {
+func dumpLogs(ctx context.Context, c client.Client, prefix string, ns string, name string, container string,
+	out io.Writer, logLines int) error {
 	lines := int64(logLines)
 	stream, err := c.CoreV1().Pods(ns).GetLogs(name, &v1.PodLogOptions{
 		Container: container,

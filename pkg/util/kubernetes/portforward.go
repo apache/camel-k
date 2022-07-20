@@ -35,7 +35,8 @@ import (
 	"k8s.io/client-go/transport/spdy"
 )
 
-func PortForward(ctx context.Context, c client.Client, ns, labelSelector string, localPort, remotePort uint, stdOut, stdErr io.Writer) error {
+func PortForward(ctx context.Context, c client.Client, ns, labelSelector string, localPort, remotePort uint,
+	stdOut, stdErr io.Writer) error {
 	list, err := c.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{
 		LabelSelector: labelSelector,
 	})
@@ -51,7 +52,8 @@ func PortForward(ctx context.Context, c client.Client, ns, labelSelector string,
 		if forwardPod == nil && podReady(pod) {
 			forwardPod = pod
 			forwardCtx, forwardCtxCancel = context.WithCancel(ctx)
-			if _, err := portFowardPod(forwardCtx, c.GetConfig(), ns, forwardPod.Name, localPort, remotePort, stdOut, stdErr); err != nil {
+			if _, err := portFowardPod(forwardCtx, c.GetConfig(), ns, forwardPod.Name, localPort, remotePort,
+				stdOut, stdErr); err != nil {
 				return err
 			}
 		}
@@ -118,7 +120,8 @@ func PortForward(ctx context.Context, c client.Client, ns, labelSelector string,
 	}
 }
 
-func portFowardPod(ctx context.Context, config *restclient.Config, ns, pod string, localPort, remotePort uint, stdOut, stdErr io.Writer) (string, error) {
+func portFowardPod(ctx context.Context, config *restclient.Config, ns, pod string, localPort, remotePort uint,
+	stdOut, stdErr io.Writer) (string, error) {
 	c, err := corev1client.NewForConfig(config)
 	if err != nil {
 		return "", err
@@ -139,7 +142,8 @@ func portFowardPod(ctx context.Context, config *restclient.Config, ns, pod strin
 	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: transport}, "POST", url)
 	stopChan := make(chan struct{})
 	readyChan := make(chan struct{})
-	forwarder, err := portforward.New(dialer, []string{fmt.Sprintf("%d:%d", localPort, remotePort)}, stopChan, readyChan, stdOut, stdErr)
+	forwarder, err := portforward.New(dialer, []string{fmt.Sprintf("%d:%d", localPort, remotePort)},
+		stopChan, readyChan, stdOut, stdErr)
 	if err != nil {
 		return "", err
 	}

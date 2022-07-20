@@ -56,7 +56,8 @@ func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
 func (t *prometheusTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		// Add the Camel Quarkus MP Metrics extension
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-microprofile-metrics")
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies,
+			"mvn:org.apache.camel.quarkus:camel-quarkus-microprofile-metrics")
 		return nil
 	}
 

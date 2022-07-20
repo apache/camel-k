@@ -189,7 +189,8 @@ func findTraitDescription(id trait.ID, traitDescriptions []*traitDescription) *t
 	return nil
 }
 
-func computeTraitProperties(fields []*structs.Field, properties *[]traitPropertyDescription, targetTrait *traitDescription) {
+func computeTraitProperties(fields []*structs.Field, properties *[]traitPropertyDescription,
+	targetTrait *traitDescription) {
 	for _, f := range fields {
 		if f.IsEmbedded() && f.IsExported() && f.Kind() == reflect.Struct {
 			computeTraitProperties(f.Fields(), properties, targetTrait)

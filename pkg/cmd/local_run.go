@@ -76,7 +76,8 @@ func newCmdLocalRun(localCmdOptions *LocalCmdOptions) (*cobra.Command, *localRun
 	cmd.Flags().Bool("containerize", false, "Run integration in a local container.")
 	cmd.Flags().String("image", "", "Full path to integration image including registry.")
 	cmd.Flags().String("network", "", "Custom network name to be used by the underlying Docker command.")
-	cmd.Flags().String("integration-directory", "", "Directory which holds the locally built integration and is the result of a local build action.")
+	cmd.Flags().String("integration-directory", "",
+		"Directory which holds the locally built integration and is the result of a local build action.")
 	cmd.Flags().StringArrayP("env", "e", nil, "Flag to specify an environment variable [--env VARIABLE=value].")
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a Camel property to the integration.")
@@ -192,7 +193,8 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 			return err
 		}
 	} else {
-		computedDependencies, err := GetDependencies(command.Context, args, command.Dependencies, command.MavenRepositories, true)
+		computedDependencies, err := GetDependencies(command.Context,
+			args, command.Dependencies, command.MavenRepositories, true)
 		if err != nil {
 			return err
 		}
@@ -227,7 +229,9 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 	// If this is a containerized local run, create, build and run the container image.
 	if command.Containerize {
 		// Create and build integration image.
-		err := createAndBuildIntegrationImage(command.Context, "", false, command.Image, propertyFiles, dependencies, routes, hasIntegrationDir, cmd.OutOrStdout(), cmd.ErrOrStderr())
+		err := createAndBuildIntegrationImage(command.Context,
+			"", false, command.Image, propertyFiles, dependencies, routes, hasIntegrationDir,
+			cmd.OutOrStdout(), cmd.ErrOrStderr())
 		if err != nil {
 			return err
 		}
@@ -244,7 +248,9 @@ func (command *localRunCmdOptions) run(cmd *cobra.Command, args []string) error 
 		}
 
 		// Run integration locally.
-		err := RunLocalIntegrationRunCommand(command.Context, propertyFiles, dependencies, routes, propertiesDir, cmd.OutOrStdout(), cmd.ErrOrStderr())
+		err := RunLocalIntegrationRunCommand(command.Context,
+			propertyFiles, dependencies, routes, propertiesDir,
+			cmd.OutOrStdout(), cmd.ErrOrStderr())
 		if err != nil {
 			return err
 		}

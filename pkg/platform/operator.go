@@ -45,7 +45,8 @@ var OperatorImage string
 
 // IsCurrentOperatorGlobal returns true if the operator is configured to watch all namespaces.
 func IsCurrentOperatorGlobal() bool {
-	if watchNamespace, envSet := os.LookupEnv(OperatorWatchNamespaceEnvVariable); !envSet || strings.TrimSpace(watchNamespace) == "" {
+	if watchNamespace, envSet := os.LookupEnv(OperatorWatchNamespaceEnvVariable); !envSet ||
+		strings.TrimSpace(watchNamespace) == "" {
 		return true
 	}
 	return false
@@ -101,7 +102,8 @@ func IsNamespaceLocked(ctx context.Context, c ctrl.Reader, namespace string) (bo
 			operatorLockName = OperatorLockName
 		}
 
-		if err := c.Get(ctx, ctrl.ObjectKey{Namespace: namespace, Name: operatorLockName}, &lease); err == nil || !k8serrors.IsNotFound(err) {
+		if err := c.Get(ctx, ctrl.ObjectKey{Namespace: namespace, Name: operatorLockName}, &lease); err == nil ||
+			!k8serrors.IsNotFound(err) {
 			return true, err
 		}
 	}
@@ -109,7 +111,8 @@ func IsNamespaceLocked(ctx context.Context, c ctrl.Reader, namespace string) (bo
 	return false, nil
 }
 
-// IsOperatorAllowedOnNamespace returns true if the current operator is allowed to react on changes in the given namespace.
+// IsOperatorAllowedOnNamespace returns true if the current operator is allowed to react on changes
+// in the given namespace.
 func IsOperatorAllowedOnNamespace(ctx context.Context, c ctrl.Reader, namespace string) (bool, error) {
 	// allow all local operators
 	if !IsCurrentOperatorGlobal() {
@@ -166,9 +169,11 @@ func IsOperatorHandler(object ctrl.Object) bool {
 }
 
 // IsOperatorHandlerConsideringLock uses normal IsOperatorHandler checks and adds additional check for legacy resources
-// that are missing a proper operator id annotation. In general two kind of operators race for reconcile these legacy resources.
-// The local operator for this namespace and the default global operator instance. Based on the existence of a namespace
-// lock the current local operator has precedence. When no lock exists the default global operator should reconcile.
+// that are missing a proper operator id annotation.
+// In general two kind of operators race for reconcile these legacy resources. The local operator for this namespace
+// and the default global operator instance.
+// Based on the existence of a namespace lock the current local operator has precedence.
+// When no lock exists the default global operator should reconcile.
 func IsOperatorHandlerConsideringLock(ctx context.Context, c ctrl.Reader, namespace string, object ctrl.Object) bool {
 	isHandler := IsOperatorHandler(object)
 	if !isHandler {

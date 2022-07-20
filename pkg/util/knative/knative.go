@@ -43,7 +43,7 @@ import (
 	util "github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-func CreateSubscription(channelReference corev1.ObjectReference, serviceName string, path string) *messaging.Subscription {
+func CreateSubscription(channelReference corev1.ObjectReference, serviceName, path string) *messaging.Subscription {
 	return &messaging.Subscription{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: messaging.SchemeGroupVersion.String(),
@@ -73,7 +73,8 @@ func CreateSubscription(channelReference corev1.ObjectReference, serviceName str
 	}
 }
 
-func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, eventType string, path string) *eventing.Trigger {
+func CreateTrigger(brokerReference corev1.ObjectReference,
+	serviceName string, eventType string, path string) *eventing.Trigger {
 	nameSuffix := ""
 	var attributes map[string]string
 	if eventType != "" {
@@ -161,7 +162,9 @@ func GetAddressableReference(ctx context.Context, c client.Client,
 }
 
 // GetSinkURL returns the sink as *url.URL.
-func GetSinkURL(ctx context.Context, c client.Client, sink *corev1.ObjectReference, namespace string) (*url.URL, error) {
+func GetSinkURL(ctx context.Context, c client.Client, sink *corev1.ObjectReference, namespace string) (
+	*url.URL, error,
+) {
 	res, err := getSinkURI(ctx, c, sink, namespace)
 	if err != nil {
 		return nil, err
@@ -186,7 +189,8 @@ func getSinkURI(ctx context.Context, c client.Client, sink *corev1.ObjectReferen
 
 	objIdentifier := fmt.Sprintf("\"%s/%s\" (%s)", u.GetNamespace(), u.GetName(), u.GroupVersionKind())
 	// Special case v1/Service to allow it be addressable
-	if u.GroupVersionKind().Kind == "Service" && u.GroupVersionKind().Group == "" && u.GroupVersionKind().Version == "v1" {
+	if u.GroupVersionKind().Kind == "Service" && u.GroupVersionKind().Group == "" &&
+		u.GroupVersionKind().Version == "v1" {
 		return fmt.Sprintf("http://%s.%s.svc/", u.GetName(), u.GetNamespace()), nil
 	}
 

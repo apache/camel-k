@@ -47,7 +47,8 @@ type SelectorScraper struct {
 }
 
 // NewSelectorScraper creates a new SelectorScraper.
-func NewSelectorScraper(client kubernetes.Interface, namespace string, defaultContainerName string, labelSelector string) *SelectorScraper {
+func NewSelectorScraper(client kubernetes.Interface, namespace string, defaultContainerName string,
+	labelSelector string) *SelectorScraper {
 	return &SelectorScraper{
 		client:               client,
 		namespace:            namespace,

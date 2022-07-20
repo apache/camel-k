@@ -276,7 +276,8 @@ func TestContainerWithCustomImageAndIntegrationKit(t *testing.T) {
 
 	err = traitCatalog.apply(&environment)
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "unsupported configuration: a container image has been set in conjunction with an IntegrationKit")
+	assert.Contains(t, err.Error(),
+		"unsupported configuration: a container image has been set in conjunction with an IntegrationKit")
 }
 
 func TestContainerWithImagePullPolicy(t *testing.T) {

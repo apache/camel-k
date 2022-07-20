@@ -39,7 +39,8 @@ func (s BindingProvider) ID() string {
 	return "strimzi"
 }
 
-func (s BindingProvider) Translate(ctx bindings.BindingContext, _ bindings.EndpointContext, endpoint v1alpha1.Endpoint) (*bindings.Binding, error) {
+func (s BindingProvider) Translate(ctx bindings.BindingContext, _ bindings.EndpointContext,
+	endpoint v1alpha1.Endpoint) (*bindings.Binding, error) {
 	if endpoint.Ref == nil {
 		// React only on refs
 		return nil, nil
@@ -73,14 +74,17 @@ func (s BindingProvider) Translate(ctx bindings.BindingContext, _ bindings.Endpo
 		}
 
 		// look them up
-		topic, err := s.Client.KafkaV1beta2().KafkaTopics(ctx.Namespace).Get(ctx.Ctx, endpoint.Ref.Name, v1.GetOptions{})
+		topic, err := s.Client.KafkaV1beta2().KafkaTopics(ctx.Namespace).
+			Get(ctx.Ctx, endpoint.Ref.Name, v1.GetOptions{})
 		if err != nil {
 			return nil, err
 		}
 
 		clusterName := topic.Labels[v1beta2.StrimziKafkaClusterLabel]
 		if clusterName == "" {
-			return nil, fmt.Errorf("no %q label defined on topic %s", v1beta2.StrimziKafkaClusterLabel, endpoint.Ref.Name)
+			return nil, fmt.Errorf(
+				"no %q label defined on topic %s",
+				v1beta2.StrimziKafkaClusterLabel, endpoint.Ref.Name)
 		}
 
 		bootstrapServers, err := s.getBootstrapServers(ctx, clusterName)
@@ -108,7 +112,9 @@ func (s BindingProvider) getBootstrapServers(ctx bindings.BindingContext, cluste
 	for _, l := range cluster.Status.Listeners {
 		if l.Type == v1beta2.StrimziListenerTypePlain {
 			if l.BootstrapServers == "" {
-				return "", fmt.Errorf("cluster %q has no bootstrap servers in %q listener", clusterName, v1beta2.StrimziListenerTypePlain)
+				return "", fmt.Errorf(
+					"cluster %q has no bootstrap servers in %q listener",
+					clusterName, v1beta2.StrimziListenerTypePlain)
 			}
 
 			return l.BootstrapServers, nil

@@ -115,7 +115,8 @@ func (t *kameletsTrait) Apply(e *Environment) error {
 }
 
 func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1alpha1.Kamelet, error) {
-	repo, err := repository.NewForPlatform(e.Ctx, e.Client, e.Platform, e.Integration.Namespace, platform.GetOperatorNamespace())
+	repo, err := repository.NewForPlatform(e.Ctx, e.Client, e.Platform, e.Integration.Namespace,
+		platform.GetOperatorNamespace())
 	if err != nil {
 		return nil, err
 	}
@@ -257,7 +258,8 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1alpha1.Kam
 			},
 			Language: v1.LanguageYaml,
 		}
-		flowSource, err = integrationSourceFromKameletSource(e, kamelet, flowSource, fmt.Sprintf("%s-kamelet-%s-template", e.Integration.Name, kamelet.Name))
+		flowSource, err = integrationSourceFromKameletSource(e, kamelet, flowSource,
+			fmt.Sprintf("%s-kamelet-%s-template", e.Integration.Name, kamelet.Name))
 		if err != nil {
 			return err
 		}
@@ -265,7 +267,8 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1alpha1.Kam
 	}
 
 	for idx, s := range kamelet.Spec.Sources {
-		intSource, err := integrationSourceFromKameletSource(e, kamelet, s, fmt.Sprintf("%s-kamelet-%s-%03d", e.Integration.Name, kamelet.Name, idx))
+		intSource, err := integrationSourceFromKameletSource(e, kamelet, s,
+			fmt.Sprintf("%s-kamelet-%s-%03d", e.Integration.Name, kamelet.Name, idx))
 		if err != nil {
 			return err
 		}
@@ -294,7 +297,9 @@ func (t *kameletsTrait) addConfigurationSecrets(e *Environment) error {
 			LabelSelector: fmt.Sprintf("%s=%s", kameletLabel, k.kamelet),
 		}
 		if k.configurationID != "" {
-			options.LabelSelector = fmt.Sprintf("%s=%s,%s=%s", kameletLabel, k.kamelet, kameletConfigurationLabel, k.configurationID)
+			options.LabelSelector = fmt.Sprintf(
+				"%s=%s,%s=%s",
+				kameletLabel, k.kamelet, kameletConfigurationLabel, k.configurationID)
 		}
 		secrets, err := t.Client.CoreV1().Secrets(e.Integration.Namespace).List(e.Ctx, options)
 		if err != nil {
@@ -360,7 +365,8 @@ func (t *kameletsTrait) getConfigurationKeys() []configurationKey {
 	return answer
 }
 
-func integrationSourceFromKameletSource(e *Environment, kamelet *v1alpha1.Kamelet, source v1.SourceSpec, name string) (v1.SourceSpec, error) {
+func integrationSourceFromKameletSource(e *Environment, kamelet *v1alpha1.Kamelet, source v1.SourceSpec,
+	name string) (v1.SourceSpec, error) {
 	if source.Type == v1.SourceTypeTemplate {
 		// Kamelets must be named "<kamelet-name>.extension"
 		language := source.InferLanguage()

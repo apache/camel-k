@@ -68,9 +68,12 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		return nil, fmt.Errorf("no kit set on integration %s", integration.Name)
 	}
 
-	kit, err := kubernetes.GetIntegrationKit(ctx, action.client, integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
+	kit, err := kubernetes.GetIntegrationKit(ctx, action.client,
+		integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
 	if err != nil {
-		return nil, fmt.Errorf("unable to find integration kit %s/%s: %w", integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
+		return nil, fmt.Errorf(
+			"unable to find integration kit %s/%s: %w",
+			integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
 	}
 
 	// Check if the Integration requires a rebuild
@@ -84,7 +87,8 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 
 		if v1.GetOperatorIDAnnotation(integration) != "" &&
 			(v1.GetOperatorIDAnnotation(integration) != v1.GetOperatorIDAnnotation(kit)) {
-			// Operator to reconcile the integration has changed. Reset integration kit so new operator can handle the kit reference
+			// Operator to reconcile the integration has changed.
+			// Reset integration kit so new operator can handle the kit reference.
 			integration.SetIntegrationKit(nil)
 		}
 
@@ -99,7 +103,8 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	if !ok {
 		priority = "0"
 	}
-	withHigherPriority, err := labels.NewRequirement(v1.IntegrationKitPriorityLabel, selection.GreaterThan, []string{priority})
+	withHigherPriority, err := labels.NewRequirement(v1.IntegrationKitPriorityLabel, selection.GreaterThan,
+		[]string{priority})
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +164,8 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	if integration.Status.Phase == v1.IntegrationPhaseDeploying {
 		integration.Status.Phase = v1.IntegrationPhaseRunning
 	}
-	err = action.updateIntegrationPhaseAndReadyCondition(ctx, environment, integration, pendingPods.Items, runningPods.Items)
+	err = action.updateIntegrationPhaseAndReadyCondition(ctx, environment, integration,
+		pendingPods.Items, runningPods.Items)
 	if err != nil {
 		return nil, err
 	}
@@ -226,7 +232,9 @@ func getUpdatedController(env *trait.Environment, obj ctrl.Object) ctrl.Object {
 	})
 }
 
-func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context.Context, environment *trait.Environment, integration *v1.Integration, pendingPods []corev1.Pod, runningPods []corev1.Pod) error {
+func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(ctx context.Context,
+	environment *trait.Environment, integration *v1.Integration,
+	pendingPods []corev1.Pod, runningPods []corev1.Pod) error {
 	controller, err := action.newController(environment, integration)
 	if err != nil {
 		return err
@@ -255,7 +263,8 @@ func checkPodStatuses(integration *v1.Integration, pendingPods []corev1.Pod, run
 	// Check Pods statuses
 	for _, pod := range pendingPods {
 		// Check the scheduled condition
-		if scheduled := kubernetes.GetPodCondition(pod, corev1.PodScheduled); scheduled != nil && scheduled.Status == corev1.ConditionFalse && scheduled.Reason == "Unschedulable" {
+		if scheduled := kubernetes.GetPodCondition(pod, corev1.PodScheduled); scheduled != nil &&
+			scheduled.Status == corev1.ConditionFalse && scheduled.Reason == "Unschedulable" {
 			integration.Status.Phase = v1.IntegrationPhaseError
 			setReadyConditionError(integration, scheduled.Message)
 			return true
@@ -372,7 +381,8 @@ func findIntegrationContainer(spec corev1.PodSpec) *corev1.Container {
 }
 
 // probeReadiness calls the readiness probes of the non-ready Pods directly to retrieve insights from the Camel runtime.
-func (action *monitorAction) probeReadiness(ctx context.Context, environment *trait.Environment, integration *v1.Integration, unreadyPods []corev1.Pod) error {
+func (action *monitorAction) probeReadiness(ctx context.Context, environment *trait.Environment,
+	integration *v1.Integration, unreadyPods []corev1.Pod) error {
 	var runtimeNotReadyMessages []string
 	for i := range unreadyPods {
 		pod := &unreadyPods[i]
@@ -389,11 +399,13 @@ func (action *monitorAction) probeReadiness(ctx context.Context, environment *tr
 				continue
 			}
 			if errors.Is(err, context.DeadlineExceeded) {
-				runtimeNotReadyMessages = append(runtimeNotReadyMessages, fmt.Sprintf("readiness probe timed out for Pod %s/%s", pod.Namespace, pod.Name))
+				runtimeNotReadyMessages = append(runtimeNotReadyMessages,
+					fmt.Sprintf("readiness probe timed out for Pod %s/%s", pod.Namespace, pod.Name))
 				continue
 			}
 			if !k8serrors.IsServiceUnavailable(err) {
-				runtimeNotReadyMessages = append(runtimeNotReadyMessages, fmt.Sprintf("readiness probe failed for Pod %s/%s: %s", pod.Namespace, pod.Name, err.Error()))
+				runtimeNotReadyMessages = append(runtimeNotReadyMessages,
+					fmt.Sprintf("readiness probe failed for Pod %s/%s: %s", pod.Namespace, pod.Name, err.Error()))
 				continue
 			}
 			health, err := NewHealthCheck(body)
@@ -407,7 +419,8 @@ func (action *monitorAction) probeReadiness(ctx context.Context, environment *tr
 				if _, ok := check.Data[runtimeHealthCheckErrorMessage]; ok {
 					integration.Status.Phase = v1.IntegrationPhaseError
 				}
-				runtimeNotReadyMessages = append(runtimeNotReadyMessages, fmt.Sprintf("Pod %s runtime is not ready: %s", pod.Name, check.Data))
+				runtimeNotReadyMessages = append(runtimeNotReadyMessages,
+					fmt.Sprintf("Pod %s runtime is not ready: %s", pod.Name, check.Data))
 			}
 		}
 	}

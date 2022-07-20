@@ -30,7 +30,8 @@ import (
 
 // AdditionalLabels are labels=values, they MUST be set as key=value separated by comma ,
 // example: myKey1=myValue1,myKey2=myValue2
-// Also it supports replacing a value for the integration name at runtime, just use the value as "token_integration_name"
+// Also it supports replacing a value for the integration name at runtime, just use the value as
+// "token_integration_name"
 // example: myKey1=myValue1,myKey2=token_integration_name
 var AdditionalLabels = ""
 

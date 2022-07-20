@@ -30,11 +30,16 @@ func main() {
 
 	// Custom args.
 	customArgs := &generators.CustomArgs{}
-	pflag.CommandLine.StringVar(&customArgs.DocDir, "doc-dir", "./docs", "Root of the document directory.")
-	pflag.CommandLine.StringVar(&customArgs.ResourceDir, "resource-dir", "./resources", "Root of the resource directory.")
-	pflag.CommandLine.StringVar(&customArgs.TraitPath, "traits-path", "modules/traits/pages", "Path to the traits directory.")
-	pflag.CommandLine.StringVar(&customArgs.NavPath, "nav-path", "modules/ROOT/nav.adoc", "Path to the navigation file.")
-	pflag.CommandLine.StringVar(&customArgs.ListPath, "list-path", "modules/traits/pages/traits.adoc", "Path to the trait list file.")
+	pflag.CommandLine.StringVar(&customArgs.DocDir, "doc-dir",
+		"./docs", "Root of the document directory.")
+	pflag.CommandLine.StringVar(&customArgs.ResourceDir, "resource-dir",
+		"./resources", "Root of the resource directory.")
+	pflag.CommandLine.StringVar(&customArgs.TraitPath, "traits-path",
+		"modules/traits/pages", "Path to the traits directory.")
+	pflag.CommandLine.StringVar(&customArgs.NavPath, "nav-path",
+		"modules/ROOT/nav.adoc", "Path to the navigation file.")
+	pflag.CommandLine.StringVar(&customArgs.ListPath, "list-path",
+		"modules/traits/pages/traits.adoc", "Path to the trait list file.")
 	arguments.CustomArgs = customArgs
 
 	if err := arguments.Execute(

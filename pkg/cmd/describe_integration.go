@@ -96,7 +96,8 @@ func (command *describeIntegrationCommandOptions) run(cmd *cobra.Command, args [
 	return nil
 }
 
-func (command *describeIntegrationCommandOptions) describeIntegration(cmd *cobra.Command, i v1.Integration) (string, error) {
+func (command *describeIntegrationCommandOptions) describeIntegration(cmd *cobra.Command,
+	i v1.Integration) (string, error) {
 	return indentedwriter.IndentedString(func(out io.Writer) error {
 		w := indentedwriter.NewWriter(cmd.OutOrStdout())
 

@@ -49,7 +49,9 @@ func (action *warmAction) CanHandle(platform *v1.IntegrationPlatform) bool {
 	return platform.Status.Phase == v1.IntegrationPlatformPhaseWarming
 }
 
-func (action *warmAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
+func (action *warmAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (
+	*v1.IntegrationPlatform, error,
+) {
 	// Check Kaniko warmer pod status
 	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{

@@ -52,7 +52,9 @@ func (action *monitorAction) CanHandle(kameletbinding *v1alpha1.KameletBinding) 
 		kameletbinding.Status.Phase == v1alpha1.KameletBindingPhaseReady
 }
 
-func (action *monitorAction) Handle(ctx context.Context, kameletbinding *v1alpha1.KameletBinding) (*v1alpha1.KameletBinding, error) {
+func (action *monitorAction) Handle(ctx context.Context, kameletbinding *v1alpha1.KameletBinding) (
+	*v1alpha1.KameletBinding, error,
+) {
 	key := client.ObjectKey{
 		Namespace: kameletbinding.Namespace,
 		Name:      kameletbinding.Name,

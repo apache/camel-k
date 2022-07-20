@@ -92,7 +92,8 @@ func (command *describePlatformCommandOptions) run(cmd *cobra.Command, args []st
 	return nil
 }
 
-func (command *describePlatformCommandOptions) describeIntegrationPlatform(cmd *cobra.Command, platform v1.IntegrationPlatform) (string, error) {
+func (command *describePlatformCommandOptions) describeIntegrationPlatform(cmd *cobra.Command,
+	platform v1.IntegrationPlatform) (string, error) {
 	return indentedwriter.IndentedString(func(out io.Writer) error {
 		w := indentedwriter.NewWriter(cmd.OutOrStdout())
 		describeObjectMeta(w, platform.ObjectMeta)

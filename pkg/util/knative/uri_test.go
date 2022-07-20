@@ -82,7 +82,8 @@ func TestChannelUri(t *testing.T) {
 		Kind:       "Broker",
 	}, ref)
 
-	ref, err = ExtractObjectReference("knative://event/chuck?&brokerApxxiVersion=eventing.knative.dev/v1beta1&brokxerName=broker2")
+	ref, err = ExtractObjectReference(
+		"knative://event/chuck?&brokerApxxiVersion=eventing.knative.dev/v1beta1&brokxerName=broker2")
 	assert.Nil(t, err)
 	assert.Equal(t, v1.ObjectReference{
 		Name: "default",

@@ -164,7 +164,8 @@ func (c *Catalog) configureFromOptions(traits map[string]map[string]interface{})
 func configureTrait(id string, config map[string]interface{}, trait interface{}) error {
 	md := mapstructure.Metadata{}
 
-	var valueConverter mapstructure.DecodeHookFuncKind = func(sourceKind reflect.Kind, targetKind reflect.Kind, data interface{}) (interface{}, error) {
+	var valueConverter mapstructure.DecodeHookFuncKind = func(
+		sourceKind reflect.Kind, targetKind reflect.Kind, data interface{}) (interface{}, error) {
 		// Allow JSON encoded arrays to set slices
 		if sourceKind == reflect.String && targetKind == reflect.Slice {
 			if v, ok := data.(string); ok && strings.HasPrefix(v, "[") && strings.HasSuffix(v, "]") {

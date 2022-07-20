@@ -70,7 +70,9 @@ func TestLoadFromEnvVar(t *testing.T) {
 		t.Fatalf("Properties expected to contain: \n %v elements\nGot:\n %v elemtns\n", 2, len(runCmdOptions.EnvVars))
 	}
 	if runCmdOptions.EnvVars[0] != "VAR1=value,\"othervalue\"" || runCmdOptions.EnvVars[1] != "VAR2=value2" {
-		t.Fatalf("EnvVars expected to be: \n %v\nGot:\n %v\n", "[VAR1=value,\"othervalue\" VAR=value2]", runCmdOptions.EnvVars)
+		t.Fatalf(
+			"EnvVars expected to be: \n %v\nGot:\n %v\n", "[VAR1=value,\"othervalue\" VAR=value2]",
+			runCmdOptions.EnvVars)
 	}
 }
 
@@ -90,7 +92,9 @@ func TestLoadFromFile(t *testing.T) {
 		t.Fatalf("Properties expected to contain: \n %v elements\nGot:\n %v elemtns\n", 2, len(runCmdOptions.EnvVars))
 	}
 	if runCmdOptions.EnvVars[0] != "VAR1=value,\"othervalue\"" || runCmdOptions.EnvVars[1] != "VAR2=value2" {
-		t.Fatalf("EnvVars expected to be: \n %v\nGot:\n %v\n", "[VAR1=value,\"othervalue\" VAR=value2]", runCmdOptions.EnvVars)
+		t.Fatalf(
+			"EnvVars expected to be: \n %v\nGot:\n %v\n", "[VAR1=value,\"othervalue\" VAR=value2]",
+			runCmdOptions.EnvVars)
 	}
 }
 
@@ -151,7 +155,8 @@ func readViperConfigFromBytes(t *testing.T, propertiesFile []byte) {
 	}
 }
 
-// We must ALWAYS clean the environment variables and viper library properties to avoid mess up with the rest of the tests.
+// We must ALWAYS clean the environment variables and viper library properties
+// to avoid mess up with the rest of the tests.
 func teardown(t *testing.T) {
 	t.Helper()
 	if err := os.Setenv("KAMEL_RUN_ENVS", ""); err != nil {

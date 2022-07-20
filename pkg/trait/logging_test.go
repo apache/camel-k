@@ -33,7 +33,8 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint bool, logLevel string, logFormat string) *Environment {
+func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint bool, logLevel string,
+	logFormat string) *Environment {
 	t.Helper()
 
 	c, err := camel.DefaultCatalog()

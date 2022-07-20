@@ -27,7 +27,8 @@ import (
 )
 
 // OperatorStartupOptionalTools tries to install optional tools at operator startup and warns if something goes wrong.
-func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespace string, operatorNamespace string, log logutil.Logger) {
+func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespace string, operatorNamespace string,
+	log logutil.Logger) {
 	// Try to register the OpenShift CLI Download link if possible
 	if err := OpenShiftConsoleDownloadLink(ctx, c); err != nil {
 		log.Info("Cannot install OpenShift CLI download link: skipping.")

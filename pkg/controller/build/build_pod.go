@@ -237,7 +237,8 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 	addContainerToPod(build, container, pod)
 }
 
-func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task *v1.BuildahTask, pod *corev1.Pod) error {
+func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task *v1.BuildahTask,
+	pod *corev1.Pod) error {
 	var bud []string
 
 	bud = []string{
@@ -342,7 +343,8 @@ func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, ta
 	return nil
 }
 
-func addKanikoTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task *v1.KanikoTask, pod *corev1.Pod) error {
+func addKanikoTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task *v1.KanikoTask,
+	pod *corev1.Pod) error {
 	cache := false
 	if task.Cache.Enabled != nil && *task.Cache.Enabled {
 		cache = true
@@ -475,7 +477,8 @@ func hasBuilderVolume(pod *corev1.Pod) bool {
 	return false
 }
 
-func getRegistryConfigMap(ctx context.Context, c ctrl.Reader, ns, name string, registryConfigMaps []registryConfigMap) (registryConfigMap, error) {
+func getRegistryConfigMap(ctx context.Context, c ctrl.Reader, ns, name string,
+	registryConfigMaps []registryConfigMap) (registryConfigMap, error) {
 	config := corev1.ConfigMap{}
 	err := c.Get(ctx, ctrl.ObjectKey{Namespace: ns, Name: name}, &config)
 	if err != nil {
@@ -489,7 +492,8 @@ func getRegistryConfigMap(ctx context.Context, c ctrl.Reader, ns, name string, r
 	return registryConfigMap{}, errors.New("unsupported registry config map")
 }
 
-func addRegistryConfigMap(name string, config registryConfigMap, volumes *[]corev1.Volume, volumeMounts *[]corev1.VolumeMount) {
+func addRegistryConfigMap(name string, config registryConfigMap, volumes *[]corev1.Volume,
+	volumeMounts *[]corev1.VolumeMount) {
 	*volumes = append(*volumes, corev1.Volume{
 		Name: "registry-config",
 		VolumeSource: corev1.VolumeSource{
@@ -514,7 +518,8 @@ func addRegistryConfigMap(name string, config registryConfigMap, volumes *[]core
 	})
 }
 
-func getRegistrySecret(ctx context.Context, c ctrl.Reader, ns, name string, registrySecrets []registrySecret) (registrySecret, error) {
+func getRegistrySecret(ctx context.Context, c ctrl.Reader, ns, name string,
+	registrySecrets []registrySecret) (registrySecret, error) {
 	secret := corev1.Secret{}
 	err := c.Get(ctx, ctrl.ObjectKey{Namespace: ns, Name: name}, &secret)
 	if err != nil {
@@ -528,7 +533,8 @@ func getRegistrySecret(ctx context.Context, c ctrl.Reader, ns, name string, regi
 	return registrySecret{}, errors.New("unsupported secret type for registry authentication")
 }
 
-func addRegistrySecret(name string, secret registrySecret, volumes *[]corev1.Volume, volumeMounts *[]corev1.VolumeMount, env *[]corev1.EnvVar) {
+func addRegistrySecret(name string, secret registrySecret, volumes *[]corev1.Volume,
+	volumeMounts *[]corev1.VolumeMount, env *[]corev1.EnvVar) {
 	*volumes = append(*volumes, corev1.Volume{
 		Name: "registry-secret",
 		VolumeSource: corev1.VolumeSource{

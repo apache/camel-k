@@ -215,7 +215,8 @@ func (t *knativeTrait) Apply(e *Environment) error {
 
 func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEnvironment) error {
 	// Sources
-	err := t.ifServiceMissingDo(e, env, t.ChannelSources, knativeapi.CamelServiceTypeChannel, knativeapi.CamelEndpointKindSource,
+	err := t.ifServiceMissingDo(e, env, t.ChannelSources, knativeapi.CamelServiceTypeChannel,
+		knativeapi.CamelEndpointKindSource,
 		func(ref *corev1.ObjectReference, serviceURI string, urlProvider func() (*url.URL, error)) error {
 			loc, err := urlProvider()
 			if err != nil {
@@ -251,7 +252,8 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 
 	if !pointer.BoolDeref(t.SinkBinding, false) {
 		// Sinks
-		err = t.ifServiceMissingDo(e, env, t.ChannelSinks, knativeapi.CamelServiceTypeChannel, knativeapi.CamelEndpointKindSink,
+		err = t.ifServiceMissingDo(e, env, t.ChannelSinks, knativeapi.CamelServiceTypeChannel,
+			knativeapi.CamelEndpointKindSink,
 			func(ref *corev1.ObjectReference, serviceURI string, urlProvider func() (*url.URL, error)) error {
 				loc, err := urlProvider()
 				if err != nil {
@@ -310,7 +312,8 @@ func (t *knativeTrait) configureEndpoints(e *Environment, env *knativeapi.CamelE
 
 	// Sinks
 	if !pointer.BoolDeref(t.SinkBinding, false) {
-		err := t.ifServiceMissingDo(e, env, t.EndpointSinks, knativeapi.CamelServiceTypeEndpoint, knativeapi.CamelEndpointKindSink,
+		err := t.ifServiceMissingDo(e, env, t.EndpointSinks, knativeapi.CamelServiceTypeEndpoint,
+			knativeapi.CamelEndpointKindSink,
 			func(ref *corev1.ObjectReference, serviceURI string, urlProvider func() (*url.URL, error)) error {
 				loc, err := urlProvider()
 				if err != nil {
@@ -334,7 +337,8 @@ func (t *knativeTrait) configureEndpoints(e *Environment, env *knativeapi.CamelE
 
 func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvironment) error {
 	// Sources
-	err := t.withServiceDo(false, e, env, t.EventSources, knativeapi.CamelServiceTypeEvent, knativeapi.CamelEndpointKindSource,
+	err := t.withServiceDo(false, e, env, t.EventSources,
+		knativeapi.CamelServiceTypeEvent, knativeapi.CamelEndpointKindSource,
 		func(ref *corev1.ObjectReference, serviceURI string, _ func() (*url.URL, error)) error {
 			// Iterate over all, without skipping duplicates
 			eventType := knativeutil.ExtractEventType(serviceURI)
@@ -345,7 +349,8 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 			servicePath := fmt.Sprintf("/events/%s", eventType)
 			t.createTrigger(e, ref, eventType, servicePath)
 
-			if !env.ContainsService(serviceName, knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEvent, ref.APIVersion, ref.Kind) {
+			if !env.ContainsService(serviceName, knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEvent,
+				ref.APIVersion, ref.Kind) {
 				svc := knativeapi.CamelServiceDefinition{
 					Name:        serviceName,
 					ServiceType: knativeapi.CamelServiceTypeEvent,
@@ -368,7 +373,8 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 
 	// Sinks
 	if !pointer.BoolDeref(t.SinkBinding, false) {
-		err = t.ifServiceMissingDo(e, env, t.EventSinks, knativeapi.CamelServiceTypeEvent, knativeapi.CamelEndpointKindSink,
+		err = t.ifServiceMissingDo(e, env, t.EventSinks, knativeapi.CamelServiceTypeEvent,
+			knativeapi.CamelEndpointKindSink,
 			func(ref *corev1.ObjectReference, serviceURI string, urlProvider func() (*url.URL, error)) error {
 				loc, err := urlProvider()
 				if err != nil {
@@ -429,7 +435,8 @@ func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.Came
 		return fmt.Errorf("sinkbinding can only be used with a single sink: found %d sinks", len(services))
 	}
 
-	err := t.withServiceDo(false, e, env, services, serviceType, knativeapi.CamelEndpointKindSink, func(ref *corev1.ObjectReference, serviceURI string, _ func() (*url.URL, error)) error {
+	err := t.withServiceDo(false, e, env, services, serviceType, knativeapi.CamelEndpointKindSink, func(
+		ref *corev1.ObjectReference, serviceURI string, _ func() (*url.URL, error)) error {
 		e.ApplicationProperties["camel.k.customizer.sinkbinding.enabled"] = "true"
 		e.ApplicationProperties["camel.k.customizer.sinkbinding.name"] = ref.Name
 		e.ApplicationProperties["camel.k.customizer.sinkbinding.type"] = string(serviceType)
@@ -478,8 +485,8 @@ func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.Came
 					// This is necessary for Knative environments, that are configured
 					// with SINK_BINDING_SELECTION_MODE=inclusion.
 					// See:
-					// - https://knative.dev/v0.20-docs/eventing/sources/sinkbinding/
-					// - https://github.com/knative/operator/blob/c60e62bb86ff318c44d1520927d2182659cfdeb5/docs/configuration.md#specsinkbindingselectionmode
+					// https://knative.dev/v0.20-docs/eventing/sources/sinkbinding/
+					// https://github.com/knative/operator/blob/c60e62bb86ff318c44d1520927d2182659cfdeb5/docs/configuration.md#specsinkbindingselectionmode
 					controller.GetLabels()["bindings.knative.dev/include"] = "true"
 				}
 				return nil
@@ -539,7 +546,8 @@ func (t *knativeTrait) withServiceDo(
 		if len(possibleRefs) == 1 {
 			actualRef = &possibleRefs[0]
 		} else {
-			actualRef, err = knativeutil.GetAddressableReference(e.Ctx, t.Client, possibleRefs, e.Integration.Namespace, ref.Name)
+			actualRef, err = knativeutil.GetAddressableReference(e.Ctx, t.Client, possibleRefs,
+				e.Integration.Namespace, ref.Name)
 			if err != nil && k8serrors.IsNotFound(err) {
 				return errors.Errorf("cannot find %s", serviceType.ResourceDescription(ref.Name))
 			} else if err != nil {
@@ -550,7 +558,9 @@ func (t *knativeTrait) withServiceDo(
 		urlProvider := func() (*url.URL, error) {
 			targetURL, err := knativeutil.GetSinkURL(e.Ctx, t.Client, actualRef, e.Integration.Namespace)
 			if err != nil {
-				return nil, errors.Wrapf(err, "cannot determine address of %s", serviceType.ResourceDescription(ref.Name))
+				return nil, errors.Wrapf(err,
+					"cannot determine address of %s",
+					serviceType.ResourceDescription(ref.Name))
 			}
 			t.L.Infof("Found URL for %s: %s", serviceType.ResourceDescription(ref.Name), targetURL.String())
 			return targetURL, nil
@@ -558,7 +568,9 @@ func (t *knativeTrait) withServiceDo(
 
 		err = gen(actualRef, serviceURI, urlProvider)
 		if err != nil {
-			return errors.Wrapf(err, "unexpected error while executing handler for %s", serviceType.ResourceDescription(ref.Name))
+			return errors.Wrapf(err,
+				"unexpected error while executing handler for %s",
+				serviceType.ResourceDescription(ref.Name))
 		}
 	}
 	return nil

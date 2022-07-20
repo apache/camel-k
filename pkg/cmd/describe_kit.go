@@ -92,7 +92,8 @@ func (command *describeKitCommandOptions) run(cmd *cobra.Command, args []string)
 	return nil
 }
 
-func (command *describeKitCommandOptions) describeIntegrationKit(cmd *cobra.Command, kit *v1.IntegrationKit) (string, error) {
+func (command *describeKitCommandOptions) describeIntegrationKit(cmd *cobra.Command,
+	kit *v1.IntegrationKit) (string, error) {
 	return indentedwriter.IndentedString(func(out io.Writer) error {
 		w := indentedwriter.NewWriter(cmd.OutOrStdout())
 

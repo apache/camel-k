@@ -46,6 +46,7 @@ To configure your bash shell to load completions for each session add to your ba
 . <(kamel completion bash)
 `
 
+// nolint: lll
 var bashCompletionFunction = `
 __kamel_dependency_type() {
     case ${cur} in

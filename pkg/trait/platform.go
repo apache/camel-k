@@ -83,7 +83,8 @@ func (t *platformTrait) Apply(e *Environment) error {
 
 	if initial.Status.Phase != e.Integration.Status.Phase {
 		if err != nil {
-			e.Integration.Status.SetErrorCondition(v1.IntegrationConditionPlatformAvailable, v1.IntegrationConditionPlatformAvailableReason, err)
+			e.Integration.Status.SetErrorCondition(v1.IntegrationConditionPlatformAvailable,
+				v1.IntegrationConditionPlatformAvailableReason, err)
 		}
 
 		if pl != nil {
@@ -126,8 +127,11 @@ func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlat
 			e.Resources.Add(pl)
 
 			// Make sure that IntegrationPlatform installed in operator namespace can be seen by others
-			if err := install.IntegrationPlatformViewerRole(e.Ctx, t.Client, namespace); err != nil && !k8serrors.IsAlreadyExists(err) {
-				t.L.Info(fmt.Sprintf("Cannot install global IntegrationPlatform viewer role in namespace '%s': skipping.", namespace))
+			if err := install.IntegrationPlatformViewerRole(e.Ctx, t.Client, namespace); err != nil &&
+				!k8serrors.IsAlreadyExists(err) {
+				t.L.Info(fmt.Sprintf(
+					"Cannot install global IntegrationPlatform viewer role in namespace '%s': skipping.",
+					namespace))
 			}
 
 			return pl, nil

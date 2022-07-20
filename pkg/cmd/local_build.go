@@ -58,8 +58,10 @@ func newCmdLocalBuild(localCmdOptions *LocalCmdOptions) (*cobra.Command, *localB
 	}
 
 	cmd.Flags().Bool("base-image", false, "Build base image used as a starting point for any integration.")
-	cmd.Flags().Bool("dependencies-only", false, "Only output the integration dependencies. The integration-directory flag must be set.")
-	cmd.Flags().String("container-registry", "", "Registry that holds intermediate images. This flag should only be used in conjunction with the base-image flag.")
+	cmd.Flags().Bool("dependencies-only", false,
+		"Only output the integration dependencies. The integration-directory flag must be set.")
+	cmd.Flags().String("container-registry", "",
+		"Registry that holds intermediate images. This flag should only be used in conjunction with the base-image flag.")
 	cmd.Flags().String("image", "", "Full path to integration image including registry.")
 	cmd.Flags().String("integration-directory", "", "Directory to hold local integration files.")
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")

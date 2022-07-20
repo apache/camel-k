@@ -75,7 +75,10 @@ import (
 	"github.com/apache/camel-k/pkg/util/watch"
 )
 
-const usageDependency = `A dependency that should be included, e.g., "-d camel-mail" for a Camel component, "-d mvn:org.my:app:1.0" for a Maven dependency or "file://localPath[?targetPath=<path>&registry=<registry_URL>&skipChecksums=<true>&skipPOM=<true>]" for local files (experimental)`
+const usageDependency = `A dependency that should be included, e.g., "-d camel-mail" for a Camel component, ` +
+	`"-d mvn:org.my:app:1.0" for a Maven dependency or ` +
+	`"file://localPath[?targetPath=<path>&registry=<registry_URL>&skipChecksums=<true>&skipPOM=<true>]" ` +
+	`for local files (experimental)`
 
 func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) {
 	options := runCmdOptions{
@@ -95,14 +98,26 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	}
 
 	cmd.Flags().String("name", "", "The integration name")
-	cmd.Flags().StringArrayP("connect", "c", nil, "A Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
+	cmd.Flags().StringArrayP("connect", "c", nil,
+		"A Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
 	cmd.Flags().StringArrayP("dependency", "d", nil, usageDependency)
 	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
-	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or properties file (syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
-	cmd.Flags().StringArray("build-property", nil, "Add a build time property or properties file (syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
-	cmd.Flags().StringArray("config", nil, "Add a runtime configuration from a Configmap, a Secret or a file (syntax: [configmap|secret|file]:name[/key], where name represents the local file path or the configmap/secret name and key optionally represents the configmap/secret key to be filtered)")
-	cmd.Flags().StringArray("resource", nil, "Add a runtime resource from a Configmap, a Secret or a file (syntax: [configmap|secret|file]:name[/key][@path], where name represents the local file path or the configmap/secret name, key optionally represents the configmap/secret key to be filtered and path represents the destination path)")
+	cmd.Flags().StringArrayP("property", "p", nil,
+		"Add a runtime property or properties file (syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
+	cmd.Flags().StringArray("build-property", nil,
+		"Add a build time property or properties file (syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
+	cmd.Flags().StringArray("config", nil,
+		"Add a runtime configuration from a Configmap, "+
+			"a Secret or a file (syntax: [configmap|secret|file]:name[/key], "+
+			"where name represents the local file path or the configmap/secret name "+
+			"and key optionally represents the configmap/secret key to be filtered)")
+	cmd.Flags().StringArray("resource", nil,
+		"Add a runtime resource from a Configmap, "+
+			"a Secret or a file (syntax: [configmap|secret|file]:name[/key][@path], "+
+			"where name represents the local file path or the configmap/secret name, "+
+			"key optionally represents the configmap/secret key to be filtered and "+
+			"path represents the destination path)")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
 	cmd.Flags().Bool("logs", false, "Print integration logs")
 	cmd.Flags().Bool("sync", false, "Synchronize the local source file with the cluster, republishing at each change")
@@ -114,15 +129,21 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().Bool("compression", false, "Enable storage of sources and resources as a compressed binary blobs")
 	cmd.Flags().StringArray("open-api", nil, "Add an OpenAPI spec (syntax: [configmap|file]:name)")
-	cmd.Flags().StringArrayP("volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
-	cmd.Flags().StringArrayP("env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
-	cmd.Flags().StringArray("annotation", nil, "Add an annotation to the integration. E.g. \"--annotation my.company=hello\"")
+	cmd.Flags().StringArrayP("volume", "v", nil,
+		"Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
+	cmd.Flags().StringArrayP("env", "e", nil,
+		"Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
+	cmd.Flags().StringArray("annotation", nil,
+		"Add an annotation to the integration. E.g. \"--annotation my.company=hello\"")
 	cmd.Flags().StringArray("label", nil, "Add a label to the integration. E.g. \"--label my.company=hello\"")
-	cmd.Flags().StringArray("source", nil, "Add source file to your integration, this is added to the list of files listed as arguments of the command")
-	cmd.Flags().String("pod-template", "", "The path of the YAML file containing a PodSpec template to be used for the Integration pods")
+	cmd.Flags().StringArray("source", nil,
+		"Add source file to your integration, this is added to the list of files listed as arguments of the command")
+	cmd.Flags().String("pod-template", "",
+		"The path of the YAML file containing a PodSpec template to be used for the Integration pods")
 	cmd.Flags().Bool("force", false, "Force creation of integration regardless of potential misconfiguration.")
 
-	cmd.Flags().Bool("save", false, "Save the run parameters into the default kamel configuration file (kamel-config.yaml)")
+	cmd.Flags().Bool("save", false,
+		"Save the run parameters into the default kamel configuration file (kamel-config.yaml)")
 
 	// completion support
 	configureKnownCompletions(&cmd)
@@ -252,7 +273,8 @@ func (o *runCmdOptions) validate() error {
 
 	for _, volume := range o.Volumes {
 		volumeConfig := strings.Split(volume, ":")
-		if len(volumeConfig) != 2 || len(strings.TrimSpace(volumeConfig[0])) == 0 || len(strings.TrimSpace(volumeConfig[1])) == 0 {
+		if len(volumeConfig) != 2 || len(strings.TrimSpace(volumeConfig[0])) == 0 ||
+			len(strings.TrimSpace(volumeConfig[1])) == 0 {
 			return fmt.Errorf("volume '%s' is invalid, it should be in the format: pvcname:/container/path", volume)
 		}
 	}
@@ -278,7 +300,9 @@ func (o *runCmdOptions) validate() error {
 	for _, annotation := range o.Annotations {
 		parts := strings.SplitN(annotation, "=", 2)
 		if len(parts) != 2 {
-			return fmt.Errorf(`invalid annotation specification %s. Expected "<annotationkey>=<annotationvalue>"`, annotation)
+			return fmt.Errorf(
+				`invalid annotation specification %s. Expected "<annotationkey>=<annotationvalue>"`,
+				annotation)
 		}
 	}
 
@@ -411,14 +435,18 @@ func (o *runCmdOptions) postRun(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *runCmdOptions) waitForIntegrationReady(cmd *cobra.Command, c client.Client, integration *v1.Integration) (*v1.IntegrationPhase, error) {
+func (o *runCmdOptions) waitForIntegrationReady(cmd *cobra.Command, c client.Client, integration *v1.Integration) (
+	*v1.IntegrationPhase, error,
+) {
 	handler := func(i *v1.Integration) bool {
 		//
 		// TODO when we add health checks, we should Wait until they are passed
 		//
 		if i.Status.Phase != "" {
 			// TODO remove this log when we make sure that events are always created
-			fmt.Fprintf(cmd.OutOrStdout(), "Progress: integration %q in phase %s\n", integration.Name, string(i.Status.Phase))
+			fmt.Fprintf(cmd.OutOrStdout(),
+				"Progress: integration %q in phase %s\n",
+				integration.Name, string(i.Status.Phase))
 		}
 		if i.Status.Phase == v1.IntegrationPhaseRunning || i.Status.Phase == v1.IntegrationPhaseError {
 			return false
@@ -492,7 +520,9 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 }
 
 // nolint: gocyclo,maintidx // TODO: refactor the code
-func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.Client, sources []string) (*v1.Integration, error) {
+func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.Client, sources []string) (
+	*v1.Integration, error,
+) {
 	namespace := o.Namespace
 	name := o.GetIntegrationName(sources)
 
@@ -557,7 +587,9 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	if o.OperatorID != "" {
 		if err := verifyOperatorID(o.Context, c, o.OperatorID, cmd.OutOrStdout()); err != nil {
 			if o.Force {
-				o.PrintfVerboseErrf(cmd, "%s, use --force option or make sure to use a proper operator id", err.Error())
+				o.PrintfVerboseErrf(cmd,
+					"%s, use --force option or make sure to use a proper operator id",
+					err.Error())
 			} else {
 				return nil, err
 			}
@@ -584,7 +616,8 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	}
 
 	for _, source := range resolvedSources {
-		if o.UseFlows && !o.Compression && (strings.HasSuffix(source.Name, ".yaml") || strings.HasSuffix(source.Name, ".yml")) {
+		if o.UseFlows && !o.Compression && (strings.HasSuffix(source.Name, ".yaml") ||
+			strings.HasSuffix(source.Name, ".yml")) {
 			flows, err := dsl.FromYamlDSLString(source.Content)
 			if err != nil {
 				return nil, err
@@ -606,15 +639,18 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		return nil, err
 	}
 
-	err = o.parseAndConvertToTrait(cmd, c, integration, o.Resources, resource.ParseResource, func(c *resource.Config) string { return c.String() }, "mount.resources")
+	err = o.parseAndConvertToTrait(cmd, c, integration, o.Resources, resource.ParseResource,
+		func(c *resource.Config) string { return c.String() }, "mount.resources")
 	if err != nil {
 		return nil, err
 	}
-	err = o.parseAndConvertToTrait(cmd, c, integration, o.Configs, resource.ParseConfig, func(c *resource.Config) string { return c.String() }, "mount.configs")
+	err = o.parseAndConvertToTrait(cmd, c, integration, o.Configs, resource.ParseConfig,
+		func(c *resource.Config) string { return c.String() }, "mount.configs")
 	if err != nil {
 		return nil, err
 	}
-	err = o.parseAndConvertToTrait(cmd, c, integration, o.OpenAPIs, resource.ParseConfig, func(c *resource.Config) string { return c.Name() }, "openapi.configmaps")
+	err = o.parseAndConvertToTrait(cmd, c, integration, o.OpenAPIs, resource.ParseConfig,
+		func(c *resource.Config) string { return c.Name() }, "openapi.configmaps")
 	if err != nil {
 		return nil, err
 	}
@@ -634,15 +670,22 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 				}
 				ca := platform.Status.Build.Registry.CA
 				if ca != "" {
-					o.PrintfVerboseOutf(cmd, "We've noticed the image registry is configured with a custom certificate [%s] \n", ca)
-					o.PrintVerboseOut(cmd, "Please make sure Kamel CLI is configured to use it or the operation will fail.")
-					o.PrintVerboseOut(cmd, "More information can be found here https://nodejs.org/api/cli.html#cli_node_extra_ca_certs_file")
+					o.PrintfVerboseOutf(cmd,
+						"We've noticed the image registry is configured with a custom certificate [%s] \n", ca)
+					o.PrintVerboseOut(cmd,
+						"Please make sure Kamel CLI is configured to use it or the operation will fail.")
+					o.PrintVerboseOut(cmd,
+						"More information can be found here https://nodejs.org/api/cli.html#cli_node_extra_ca_certs_file")
 				}
 				secret := platform.Status.Build.Registry.Secret
 				if secret != "" {
-					o.PrintfVerboseOutf(cmd, "We've noticed the image registry is configured with a Secret [%s] \n", secret)
-					o.PrintVerboseOut(cmd, "Please configure Docker authentication correctly or the operation will fail (by default it's $HOME/.docker/config.json).")
-					o.PrintVerboseOut(cmd, "More information can be found here https://docs.docker.com/engine/reference/commandline/login/")
+					o.PrintfVerboseOutf(cmd,
+						"We've noticed the image registry is configured with a Secret [%s] \n", secret)
+					o.PrintVerboseOut(cmd,
+						"Please configure Docker authentication correctly or the operation will fail "+
+							"(by default it's $HOME/.docker/config.json).")
+					o.PrintVerboseOut(cmd,
+						"More information can be found here https://docs.docker.com/engine/reference/commandline/login/")
 				}
 			}
 			if err := o.uploadFileOrDirectory(platform, item, name, cmd, integration); err != nil {
@@ -715,7 +758,8 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	return integration, nil
 }
 
-func showIntegrationOutput(cmd *cobra.Command, integration *v1.Integration, outputFormat string, scheme runtime.ObjectTyper) error {
+func showIntegrationOutput(cmd *cobra.Command, integration *v1.Integration, outputFormat string,
+	scheme runtime.ObjectTyper) error {
 	printer := printers.NewTypeSetter(scheme)
 	printer.Delegate = &kubernetes.CLIPrinter{
 		Format: outputFormat,
@@ -857,7 +901,8 @@ func (o *runCmdOptions) getTargetPath() string {
 	return o.RegistryOptions.Get("targetPath")
 }
 
-func (o *runCmdOptions) uploadFileOrDirectory(platform *v1.IntegrationPlatform, item string, integrationName string, cmd *cobra.Command, integration *v1.Integration) error {
+func (o *runCmdOptions) uploadFileOrDirectory(platform *v1.IntegrationPlatform, item string, integrationName string,
+	cmd *cobra.Command, integration *v1.Integration) error {
 	uri := parseFileURI(item)
 	o.RegistryOptions = uri.Query()
 	localPath, targetPath := uri.Path, o.getTargetPath()
@@ -879,7 +924,8 @@ func (o *runCmdOptions) uploadFileOrDirectory(platform *v1.IntegrationPlatform, 
 		if err != nil {
 			return err
 		}
-		// When uploading, there are three cases: POM files, JAR files and the rest which will be mounted on the filesystem
+		// When uploading, there are three cases: POM files, JAR files and the rest which will be mounted
+		// on the filesystem
 		switch {
 		case isPom(path):
 			gav := extractGavFromPom(path, gav)
@@ -898,7 +944,9 @@ func (o *runCmdOptions) uploadFileOrDirectory(platform *v1.IntegrationPlatform, 
 			if err != nil {
 				return err
 			}
-			dependency := fmt.Sprintf("registry-mvn:%s:%s:%s:%s@%s", gav.GroupID, gav.ArtifactID, gav.Type, gav.Version, mountPath)
+			dependency := fmt.Sprintf(
+				"registry-mvn:%s:%s:%s:%s@%s",
+				gav.GroupID, gav.ArtifactID, gav.Type, gav.Version, mountPath)
 			o.PrintfVerboseOutf(cmd, "Added %s to the Integration's dependency list \n", dependency)
 			integration.Spec.AddDependency(dependency)
 			return o.uploadAsMavenArtifact(gav, path, platform, integration.Namespace, options, cmd)
@@ -920,9 +968,9 @@ func getMountPath(targetPath string, dirName string, path string) (string, error
 	return filepath.Join(targetPath, localRelativePath), nil
 }
 
-// nolint:errcheck
-func (o *runCmdOptions) uploadPomFromJar(gav maven.Dependency, path string, platform *v1.IntegrationPlatform, ns string, options spectrum.Options, cmd *cobra.Command) maven.Dependency {
-	util.WithTempDir("camel-k", func(tmpDir string) error {
+func (o *runCmdOptions) uploadPomFromJar(gav maven.Dependency, path string, platform *v1.IntegrationPlatform,
+	ns string, options spectrum.Options, cmd *cobra.Command) maven.Dependency {
+	_ = util.WithTempDir("camel-k", func(tmpDir string) error {
 		pomPath := filepath.Join(tmpDir, "pom.xml")
 		jar, err := zip.OpenReader(path)
 		if err != nil {
@@ -954,7 +1002,7 @@ func (o *runCmdOptions) uploadPomFromJar(gav maven.Dependency, path string, plat
 			} else {
 				gav.Type = "pom"
 				// Swallow error as this is not a mandatory step
-				o.uploadAsMavenArtifact(gav, pomPath, platform, ns, options, cmd)
+				_ = o.uploadAsMavenArtifact(gav, pomPath, platform, ns, options, cmd)
 			}
 		}
 		return nil
@@ -988,28 +1036,38 @@ func (o *runCmdOptions) extractGav(src *zip.File, localPath string, cmd *cobra.C
 	defer rc.Close()
 	data, err := ioutil.ReadAll(rc)
 	if err != nil {
-		o.PrintfVerboseErrf(cmd, "Error while reading pom.properties from [%s], switching to default: \n %s err \n", localPath, err)
+		o.PrintfVerboseErrf(cmd,
+			"Error while reading pom.properties from [%s], switching to default: \n %s err \n",
+			localPath, err)
 		return maven.Dependency{}, false
 	}
 	prop, err := properties.Load(data, properties.UTF8)
 	if err != nil {
-		o.PrintfVerboseErrf(cmd, "Error while reading pom.properties from [%s], switching to default: \n %s err \n", localPath, err)
+		o.PrintfVerboseErrf(cmd,
+			"Error while reading pom.properties from [%s], switching to default: \n %s err \n",
+			localPath, err)
 		return maven.Dependency{}, false
 	}
 
 	groupID, ok := prop.Get("groupId")
 	if !ok {
-		o.PrintfVerboseErrf(cmd, "Couldn't find groupId property while reading pom.properties from [%s], switching to default \n", localPath)
+		o.PrintfVerboseErrf(cmd,
+			"Couldn't find groupId property while reading pom.properties from [%s], switching to default \n",
+			localPath)
 		return maven.Dependency{}, false
 	}
 	artifactID, ok := prop.Get("artifactId")
 	if !ok {
-		o.PrintfVerboseErrf(cmd, "Couldn't find artifactId property while reading pom.properties from [%s], switching to default \n", localPath)
+		o.PrintfVerboseErrf(cmd,
+			"Couldn't find artifactId property while reading pom.properties from [%s], switching to default \n",
+			localPath)
 		return maven.Dependency{}, false
 	}
 	version, ok := prop.Get("version")
 	if !ok {
-		o.PrintfVerboseErrf(cmd, "Couldn't find version property while reading pom.properties from [%s], switching to default \n", localPath)
+		o.PrintfVerboseErrf(cmd,
+			"Couldn't find version property while reading pom.properties from [%s], switching to default \n",
+			localPath)
 		return maven.Dependency{}, false
 	}
 	return maven.Dependency{
@@ -1020,7 +1078,8 @@ func (o *runCmdOptions) extractGav(src *zip.File, localPath string, cmd *cobra.C
 	}, true
 }
 
-func (o *runCmdOptions) uploadAsMavenArtifact(dependency maven.Dependency, path string, platform *v1.IntegrationPlatform, ns string, options spectrum.Options, cmd *cobra.Command) error {
+func (o *runCmdOptions) uploadAsMavenArtifact(dependency maven.Dependency, path string,
+	platform *v1.IntegrationPlatform, ns string, options spectrum.Options, cmd *cobra.Command) error {
 	artifactHTTPPath := getArtifactHTTPPath(dependency, platform, ns)
 	options.Target = fmt.Sprintf("%s/%s:%s", o.getRegistry(platform), artifactHTTPPath, dependency.Version)
 	if runtimeos.GOOS == "windows" {
@@ -1089,18 +1148,23 @@ func extractGavFromPom(path string, gav maven.Dependency) maven.Dependency {
 	return gav
 }
 
-func (o *runCmdOptions) uploadChecksumFiles(path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHTTPPath string, dependency maven.Dependency) error {
+func (o *runCmdOptions) uploadChecksumFiles(path string, options spectrum.Options, platform *v1.IntegrationPlatform,
+	artifactHTTPPath string, dependency maven.Dependency) error {
 	return util.WithTempDir("camel-k", func(tmpDir string) error {
 		// #nosec G401
-		if err := o.uploadChecksumFile(md5.New(), tmpDir, "_md5", path, options, platform, artifactHTTPPath, dependency); err != nil {
+		if err := o.uploadChecksumFile(md5.New(), tmpDir, "_md5", path, options,
+			platform, artifactHTTPPath, dependency); err != nil {
 			return err
 		}
 		// #nosec G401
-		return o.uploadChecksumFile(sha1.New(), tmpDir, "_sha1", path, options, platform, artifactHTTPPath, dependency)
+		return o.uploadChecksumFile(sha1.New(), tmpDir, "_sha1", path, options,
+			platform, artifactHTTPPath, dependency)
 	})
 }
 
-func (o *runCmdOptions) uploadChecksumFile(hash hash.Hash, tmpDir string, ext string, path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHTTPPath string, dependency maven.Dependency) error {
+func (o *runCmdOptions) uploadChecksumFile(hash hash.Hash, tmpDir string, ext string, path string,
+	options spectrum.Options, platform *v1.IntegrationPlatform, artifactHTTPPath string,
+	dependency maven.Dependency) error {
 	file, err := os.Open(path)
 	if err != nil {
 		return err
@@ -1162,7 +1226,10 @@ func (o *runCmdOptions) getSpectrumOptions(platform *v1.IntegrationPlatform, cmd
 }
 
 func getArtifactHTTPPath(dependency maven.Dependency, platform *v1.IntegrationPlatform, ns string) string {
-	artifactHTTPPath := fmt.Sprintf("maven_%s_%s_%s_%s-%s_%s", dependency.GroupID, dependency.ArtifactID, dependency.Version, dependency.ArtifactID, dependency.Version, dependency.Type)
+	artifactHTTPPath := fmt.Sprintf(
+		"maven_%s_%s_%s_%s-%s_%s",
+		dependency.GroupID, dependency.ArtifactID, dependency.Version,
+		dependency.ArtifactID, dependency.Version, dependency.Type)
 	// Image repository names must be lower cased
 	artifactHTTPPath = strings.ToLower(artifactHTTPPath)
 	// Some vendors don't allow '/' or '.' in repository name so let's replace them with '_'

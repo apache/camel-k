@@ -52,7 +52,9 @@ func newFastDiscoveryRESTMapper(config *rest.Config) meta.RESTMapper {
 	})
 }
 
-func newFastDiscoveryRESTMapperWithFilter(config *rest.Config, filter func(*metav1.APIGroup) bool) (meta.RESTMapper, error) {
+func newFastDiscoveryRESTMapperWithFilter(config *rest.Config, filter func(*metav1.APIGroup) bool) (
+	meta.RESTMapper, error,
+) {
 	dc := discovery.NewDiscoveryClientForConfigOrDie(config)
 	groups, err := dc.ServerGroups()
 	if err != nil {

@@ -32,7 +32,9 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 )
 
-func GetIntegrationPlatform(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationPlatform, error) {
+func GetIntegrationPlatform(context context.Context, client ctrl.Reader, name string, namespace string) (
+	*v1.IntegrationPlatform, error,
+) {
 	platform := v1.NewIntegrationPlatform(namespace, name)
 	if err := client.Get(context, ctrl.ObjectKeyFromObject(&platform), &platform); err != nil {
 		return nil, err
@@ -41,7 +43,9 @@ func GetIntegrationPlatform(context context.Context, client ctrl.Reader, name st
 	return &platform, nil
 }
 
-func GetIntegrationKit(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationKit, error) {
+func GetIntegrationKit(context context.Context, client ctrl.Reader, name string, namespace string) (
+	*v1.IntegrationKit, error,
+) {
 	kit := v1.NewIntegrationKit(namespace, name)
 	if err := client.Get(context, ctrl.ObjectKeyFromObject(kit), kit); err != nil {
 		return nil, err
@@ -59,8 +63,10 @@ func GetBuild(context context.Context, client client.Client, name string, namesp
 	return build, nil
 }
 
-// GetUnstructured provides a generic unstructured K8S object. Useful in order to retrieve a non cached version of an object.
-func GetUnstructured(context context.Context, client ctrl.Reader, gvk schema.GroupVersionKind, name string, namespace string) (*unstructured.Unstructured, error) {
+// GetUnstructured provides a generic unstructured K8S object. Useful in order to retrieve
+// a non cached version of an object.
+func GetUnstructured(context context.Context, client ctrl.Reader, gvk schema.GroupVersionKind, name string,
+	namespace string) (*unstructured.Unstructured, error) {
 	object := &unstructured.Unstructured{}
 	object.SetNamespace(namespace)
 	object.SetName(name)
@@ -70,7 +76,9 @@ func GetUnstructured(context context.Context, client ctrl.Reader, gvk schema.Gro
 	return object, err
 }
 
-func GetConfigMap(context context.Context, client ctrl.Reader, name string, namespace string) (*corev1.ConfigMap, error) {
+func GetConfigMap(context context.Context, client ctrl.Reader, name string, namespace string) (
+	*corev1.ConfigMap, error,
+) {
 	configMap := &corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
@@ -109,7 +117,8 @@ func GetSecret(context context.Context, client ctrl.Reader, name string, namespa
 }
 
 // GetSecretRefValue returns the value of a secret in the supplied namespace.
-func GetSecretRefValue(ctx context.Context, client ctrl.Reader, namespace string, selector *corev1.SecretKeySelector) (string, error) {
+func GetSecretRefValue(ctx context.Context, client ctrl.Reader, namespace string,
+	selector *corev1.SecretKeySelector) (string, error) {
 	data, err := GetSecretRefData(ctx, client, namespace, selector)
 	if err != nil {
 		return "", err
@@ -118,7 +127,8 @@ func GetSecretRefValue(ctx context.Context, client ctrl.Reader, namespace string
 }
 
 // GetSecretRefData returns the value of a secret in the supplied namespace.
-func GetSecretRefData(ctx context.Context, client ctrl.Reader, namespace string, selector *corev1.SecretKeySelector) ([]byte, error) {
+func GetSecretRefData(ctx context.Context, client ctrl.Reader, namespace string,
+	selector *corev1.SecretKeySelector) ([]byte, error) {
 	secret, err := GetSecret(ctx, client, selector.Name, namespace)
 	if err != nil {
 		return nil, err
@@ -132,7 +142,8 @@ func GetSecretRefData(ctx context.Context, client ctrl.Reader, namespace string,
 }
 
 // GetSecretsRefData returns the value of the secrets in the supplied namespace.
-func GetSecretsRefData(ctx context.Context, client ctrl.Reader, namespace string, selector []corev1.SecretKeySelector) ([][]byte, error) {
+func GetSecretsRefData(ctx context.Context, client ctrl.Reader, namespace string,
+	selector []corev1.SecretKeySelector) ([][]byte, error) {
 	certsData := make([][]byte, len(selector))
 	for i := range selector {
 		certData, err := GetSecretRefData(ctx, client, namespace, &selector[i])
@@ -145,7 +156,8 @@ func GetSecretsRefData(ctx context.Context, client ctrl.Reader, namespace string
 }
 
 // GetConfigMapRefValue returns the value of a configmap in the supplied namespace.
-func GetConfigMapRefValue(ctx context.Context, client ctrl.Reader, namespace string, selector *corev1.ConfigMapKeySelector) (string, error) {
+func GetConfigMapRefValue(ctx context.Context, client ctrl.Reader, namespace string,
+	selector *corev1.ConfigMapKeySelector) (string, error) {
 	cm, err := GetConfigMap(ctx, client, selector.Name, namespace)
 	if err != nil {
 		return "", err
@@ -158,7 +170,8 @@ func GetConfigMapRefValue(ctx context.Context, client ctrl.Reader, namespace str
 	return "", fmt.Errorf("key %s not found in config map %s", selector.Key, selector.Name)
 }
 
-func ResolveValueSource(ctx context.Context, client ctrl.Reader, namespace string, valueSource *v1.ValueSource) (string, error) {
+func ResolveValueSource(ctx context.Context, client ctrl.Reader, namespace string,
+	valueSource *v1.ValueSource) (string, error) {
 	if valueSource.ConfigMapKeyRef != nil && valueSource.SecretKeyRef != nil {
 		return "", fmt.Errorf("value source has bot config map and secret configured")
 	}

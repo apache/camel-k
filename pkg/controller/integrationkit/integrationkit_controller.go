@@ -44,8 +44,8 @@ import (
 	"github.com/apache/camel-k/pkg/util/monitoring"
 )
 
-// Add creates a new IntegrationKit Controller and adds it to the Manager. The Manager will set fields on the Controller
-// and Start it when the Manager is Started.
+// Add creates a new IntegrationKit Controller and adds it to the Manager. The Manager will set fields
+// on the Controller and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
 	c, err := client.FromManager(mgr)
 	if err != nil {
@@ -192,7 +192,9 @@ type reconcileIntegrationKit struct {
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
+func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconcile.Request) (
+	reconcile.Result, error,
+) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
 	rlog.Info("Reconciling IntegrationKit")
 
@@ -227,7 +229,8 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegrationKit(target)
 
-	if target.Status.Phase == v1.IntegrationKitPhaseNone || target.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
+	if target.Status.Phase == v1.IntegrationKitPhaseNone ||
+		target.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
 		if target.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypeExternal {
 			target.Status.Phase = v1.IntegrationKitPhaseInitialization
 			return r.update(ctx, &instance, target)
@@ -243,7 +246,8 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 
 		if instance.Status.Phase != target.Status.Phase {
 			if err != nil {
-				target.Status.SetErrorCondition(v1.IntegrationKitConditionPlatformAvailable, v1.IntegrationKitConditionPlatformAvailableReason, err)
+				target.Status.SetErrorCondition(v1.IntegrationKitConditionPlatformAvailable,
+					v1.IntegrationKitConditionPlatformAvailableReason, err)
 			}
 
 			if pl != nil {
@@ -301,7 +305,9 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 	return reconcile.Result{}, nil
 }
 
-func (r *reconcileIntegrationKit) update(ctx context.Context, base *v1.IntegrationKit, target *v1.IntegrationKit) (reconcile.Result, error) {
+func (r *reconcileIntegrationKit) update(ctx context.Context, base *v1.IntegrationKit, target *v1.IntegrationKit) (
+	reconcile.Result, error,
+) {
 	dgst, err := digest.ComputeForIntegrationKit(target)
 	if err != nil {
 		return reconcile.Result{}, err

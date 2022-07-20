@@ -106,7 +106,9 @@ func (o *resetCmdOptions) deleteAllIntegrations(c client.Client) (int, error) {
 			continue
 		}
 		if err := c.Delete(o.Context, &it); err != nil {
-			return 0, errors.Wrap(err, fmt.Sprintf("could not delete integration %s from namespace %s", it.Name, it.Namespace))
+			return 0, errors.Wrap(err, fmt.Sprintf(
+				"could not delete integration %s from namespace %s",
+				it.Name, it.Namespace))
 		}
 	}
 	return len(list.Items), nil
@@ -115,12 +117,14 @@ func (o *resetCmdOptions) deleteAllIntegrations(c client.Client) (int, error) {
 func (o *resetCmdOptions) deleteAllIntegrationKits(c client.Client) (int, error) {
 	list := v1.NewIntegrationKitList()
 	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
-		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieve integration Kits from namespace %s", o.Namespace))
+		return 0, errors.Wrap(err,
+			fmt.Sprintf("could not retrieve integration Kits from namespace %s", o.Namespace))
 	}
 	for _, i := range list.Items {
 		kit := i
 		if err := c.Delete(o.Context, &kit); err != nil {
-			return 0, errors.Wrap(err, fmt.Sprintf("could not delete integration kit %s from namespace %s", kit.Name, kit.Namespace))
+			return 0, errors.Wrap(err,
+				fmt.Sprintf("could not delete integration kit %s from namespace %s", kit.Name, kit.Namespace))
 		}
 	}
 	return len(list.Items), nil
@@ -129,12 +133,14 @@ func (o *resetCmdOptions) deleteAllIntegrationKits(c client.Client) (int, error)
 func (o *resetCmdOptions) deleteAllKameletBindings(c client.Client) (int, error) {
 	list := v1alpha1.NewKameletBindingList()
 	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
-		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieve kamelet bindings from namespace %s", o.Namespace))
+		return 0, errors.Wrap(err,
+			fmt.Sprintf("could not retrieve kamelet bindings from namespace %s", o.Namespace))
 	}
 	for _, i := range list.Items {
 		klb := i
 		if err := c.Delete(o.Context, &klb); err != nil {
-			return 0, errors.Wrap(err, fmt.Sprintf("could not delete kamelet binding %s from namespace %s", klb.Name, klb.Namespace))
+			return 0, errors.Wrap(err,
+				fmt.Sprintf("could not delete kamelet binding %s from namespace %s", klb.Name, klb.Namespace))
 		}
 	}
 	return len(list.Items), nil
@@ -148,7 +154,8 @@ func (o *resetCmdOptions) resetIntegrationPlatform(c client.Client) error {
 	if len(list.Items) > 1 {
 		return fmt.Errorf("expected 1 integration platform in the namespace, found: %d", len(list.Items))
 	} else if len(list.Items) == 0 {
-		return errors.New("no integration platforms found in the namespace: run \"kamel install\" to install the platform")
+		return errors.New(
+			"no integration platforms found in the namespace: run \"kamel install\" to install the platform")
 	}
 	platform := list.Items[0]
 	// Let's reset the status

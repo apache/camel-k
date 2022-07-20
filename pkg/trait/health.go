@@ -60,7 +60,8 @@ func (t *healthTrait) Configure(e *Environment) (bool, error) {
 		// This can be removed once the deprecated properties related to health probes are actually
 		// removed from the container trait.
 		if trait := e.Catalog.GetTrait(containerTraitID); trait != nil {
-			if container, ok := trait.(*containerTrait); ok && pointer.BoolDeref(container.Enabled, true) && pointer.BoolDeref(container.DeprecatedProbesEnabled, false) {
+			if container, ok := trait.(*containerTrait); ok && pointer.BoolDeref(container.Enabled, true) &&
+				pointer.BoolDeref(container.DeprecatedProbesEnabled, false) {
 				config, err := json.Marshal(container)
 				if err != nil {
 					return false, err
@@ -102,7 +103,8 @@ func (t *healthTrait) Apply(e *Environment) error {
 	// Use the default named HTTP container port if it exists.
 	// For Knative, the Serving webhook is responsible for setting the user-land port,
 	// and associating the probes with the corresponding port.
-	if containerPort := e.getIntegrationContainerPort(); containerPort != nil && containerPort.Name == defaultContainerPortName {
+	if containerPort := e.getIntegrationContainerPort(); containerPort != nil &&
+		containerPort.Name == defaultContainerPortName {
 		p := intstr.FromString(defaultContainerPortName)
 		port = &p
 	} else if e.GetTrait(knativeServiceTraitID) == nil {

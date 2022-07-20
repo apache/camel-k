@@ -349,7 +349,9 @@ func TestHackReplicas(t *testing.T) {
 	assert.NoError(t, keda.Apply(env))
 	scalesClient, err := env.Client.ScalesClient()
 	assert.NoError(t, err)
-	sc, err := scalesClient.Scales("test").Get(env.Ctx, camelv1.SchemeGroupVersion.WithResource("integrations").GroupResource(), "my-it", metav1.GetOptions{})
+	sc, err := scalesClient.Scales("test").Get(
+		env.Ctx, camelv1.SchemeGroupVersion.WithResource("integrations").GroupResource(),
+		"my-it", metav1.GetOptions{})
 	assert.NoError(t, err)
 	assert.Equal(t, int32(1), sc.Spec.Replicas)
 }
@@ -396,7 +398,9 @@ func TestHackKLBReplicas(t *testing.T) {
 	assert.NoError(t, keda.Apply(env))
 	scalesClient, err := env.Client.ScalesClient()
 	assert.NoError(t, err)
-	sc, err := scalesClient.Scales("test").Get(env.Ctx, camelv1alpha1.SchemeGroupVersion.WithResource("kameletbindings").GroupResource(), "my-klb", metav1.GetOptions{})
+	sc, err := scalesClient.Scales("test").Get(
+		env.Ctx, camelv1alpha1.SchemeGroupVersion.WithResource("kameletbindings").GroupResource(),
+		"my-klb", metav1.GetOptions{})
 	assert.NoError(t, err)
 	assert.Equal(t, int32(1), sc.Spec.Replicas)
 }

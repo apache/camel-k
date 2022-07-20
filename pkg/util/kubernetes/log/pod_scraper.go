@@ -112,7 +112,8 @@ func (s *PodScraper) doScrape(ctx context.Context, out *bufio.Writer, clientClos
 	s.handleAndRestart(ctx, err, 5*time.Second, out, clientCloser)
 }
 
-func (s *PodScraper) handleAndRestart(ctx context.Context, err error, wait time.Duration, out *bufio.Writer, clientCloser func() error) {
+func (s *PodScraper) handleAndRestart(ctx context.Context, err error, wait time.Duration, out *bufio.Writer,
+	clientCloser func() error) {
 	if err != nil {
 		s.L.Error(err, "error caught during log scraping")
 	}
@@ -141,7 +142,8 @@ func (s *PodScraper) handleAndRestart(ctx context.Context, err error, wait time.
 
 // waitForPodRunning waits for a given pod to reach the running state.
 // It may return the internal container to watch if present.
-func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, podName string, defaultContainerName string) (string, error) {
+func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, podName string,
+	defaultContainerName string) (string, error) {
 	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Pod",

@@ -58,7 +58,8 @@ func ComputeForIntegration(integration *v1.Integration) (string, error) {
 
 	// Integration Kit is relevant
 	if integration.Spec.IntegrationKit != nil {
-		if _, err := hash.Write([]byte(fmt.Sprintf("%s/%s", integration.Spec.IntegrationKit.Namespace, integration.Spec.IntegrationKit.Name))); err != nil {
+		if _, err := hash.Write([]byte(fmt.Sprintf("%s/%s",
+			integration.Spec.IntegrationKit.Namespace, integration.Spec.IntegrationKit.Name))); err != nil {
 			return "", err
 		}
 	}

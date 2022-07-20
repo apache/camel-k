@@ -35,9 +35,8 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
-const kamelCommandLongDescription = `Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless
-superpowers.
-`
+const kamelCommandLongDescription = "Apache Camel K is a lightweight integration platform, " +
+	"born on Kubernetes, with serverless\nsuperpowers.\n\n"
 
 // RootCmdOptions --.
 // nolint: containedctx
@@ -82,7 +81,8 @@ func kamelPreAddCommandInit(options *RootCmdOptions) *cobra.Command {
 		SilenceUsage:           true,
 	}
 
-	cmd.PersistentFlags().StringVar(&options.KubeConfig, "kube-config", os.Getenv("KUBECONFIG"), "Path to the kube config file to use for CLI requests")
+	cmd.PersistentFlags().StringVar(&options.KubeConfig, "kube-config", os.Getenv("KUBECONFIG"),
+		"Path to the kube config file to use for CLI requests")
 	cmd.PersistentFlags().StringVarP(&options.Namespace, "namespace", "n", "", "Namespace to use for all operations")
 	cmd.PersistentFlags().BoolVarP(&options.Verbose, "verbose", "V", false, "Verbose logging")
 
@@ -215,7 +215,10 @@ func checkAndShowCompatibilityWarning(ctx context.Context, cmd *cobra.Command, c
 		}
 	} else {
 		if operatorVersion != "" && !compatibleVersions(operatorVersion, defaults.Version, cmd) {
-			fmt.Fprintf(cmd.ErrOrStderr(), "You're using Camel K %s client with a %s cluster operator, it's recommended to use the same version to improve compatibility.\n\n", defaults.Version, operatorVersion)
+			fmt.Fprintf(cmd.ErrOrStderr(),
+				"You're using Camel K %s client with a %s cluster operator, "+
+					"it's recommended to use the same version to improve compatibility.\n\n",
+				defaults.Version, operatorVersion)
 		}
 	}
 }

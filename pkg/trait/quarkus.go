@@ -75,7 +75,8 @@ func (t *quarkusTrait) Matches(trait Trait) bool {
 		return false
 	}
 
-	if len(t.PackageTypes) == 0 && len(qt.PackageTypes) != 0 && !containsPackageType(qt.PackageTypes, traitv1.FastJarPackageType) {
+	if len(t.PackageTypes) == 0 && len(qt.PackageTypes) != 0 &&
+		!containsPackageType(qt.PackageTypes, traitv1.FastJarPackageType) {
 		return false
 	}
 
@@ -163,7 +164,9 @@ func (t *quarkusTrait) validateNativeSupport(e *Environment) bool {
 		if language := source.InferLanguage(); language != v1.LanguageKamelet &&
 			language != v1.LanguageYaml &&
 			language != v1.LanguageXML {
-			t.L.ForIntegration(e.Integration).Infof("Integration %s/%s contains a %s source that cannot be compiled to native executable", e.Integration.Namespace, e.Integration.Name, language)
+			t.L.ForIntegration(e.Integration).Infof(
+				"Integration %s/%s contains a %s source that cannot be compiled to native executable",
+				e.Integration.Namespace, e.Integration.Name, language)
 			e.Integration.Status.Phase = v1.IntegrationPhaseError
 			e.Integration.Status.SetCondition(
 				v1.IntegrationConditionKitAvailable,

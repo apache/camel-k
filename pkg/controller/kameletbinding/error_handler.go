@@ -26,7 +26,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-func maybeErrorHandler(errHandlConf *v1alpha1.ErrorHandlerSpec, bindingContext bindings.BindingContext) (*bindings.Binding, error) {
+func maybeErrorHandler(errHandlConf *v1alpha1.ErrorHandlerSpec, bindingContext bindings.BindingContext) (
+	*bindings.Binding, error,
+) {
 	var errorHandlerBinding *bindings.Binding
 	if errHandlConf != nil {
 		errorHandlerSpec, err := parseErrorHandler(errHandlConf.RawMessage)
@@ -35,7 +37,8 @@ func maybeErrorHandler(errHandlConf *v1alpha1.ErrorHandlerSpec, bindingContext b
 		}
 		// We need to get the translated URI from any referenced resource (ie, kamelets)
 		if errorHandlerSpec.Type() == v1alpha1.ErrorHandlerTypeSink {
-			errorHandlerBinding, err = bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1alpha1.EndpointTypeErrorHandler}, *errorHandlerSpec.Endpoint())
+			errorHandlerBinding, err = bindings.Translate(bindingContext,
+				bindings.EndpointContext{Type: v1alpha1.EndpointTypeErrorHandler}, *errorHandlerSpec.Endpoint())
 			if err != nil {
 				return nil, errors.Wrap(err, "could not determine error handler URI")
 			}
@@ -106,7 +109,9 @@ func setErrorHandlerConfiguration(errorHandlerBinding *bindings.Binding, errorHa
 		errorHandlerBinding.ApplicationProperties[key] = fmt.Sprintf("%v", value)
 	}
 	if errorHandler.Type() == v1alpha1.ErrorHandlerTypeSink && errorHandlerBinding.URI != "" {
-		errorHandlerBinding.ApplicationProperties[fmt.Sprintf("%s.deadLetterUri", v1alpha1.ErrorHandlerAppPropertiesPrefix)] = fmt.Sprintf("%v", errorHandlerBinding.URI)
+		key := fmt.Sprintf("%s.deadLetterUri", v1alpha1.ErrorHandlerAppPropertiesPrefix)
+		value := fmt.Sprintf("%v", errorHandlerBinding.URI)
+		errorHandlerBinding.ApplicationProperties[key] = value
 	}
 	return nil
 }

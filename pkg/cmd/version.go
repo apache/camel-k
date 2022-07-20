@@ -112,9 +112,11 @@ func (o *versionCmdOptions) displayOperatorVersion(cmd *cobra.Command, c client.
 		fmt.Fprintf(cmd.OutOrStdout(), "Unable to retrieve operator version: %s\n", err)
 	} else {
 		if operatorInfo[infoVersion] == "" {
-			fmt.Fprintf(cmd.OutOrStdout(), "Unable to retrieve operator version: The IntegrationPlatform resource hasn't been reconciled yet!")
+			fmt.Fprintf(cmd.OutOrStdout(),
+				"Unable to retrieve operator version: The IntegrationPlatform resource hasn't been reconciled yet!")
 		} else {
-			fmt.Fprintf(cmd.OutOrStdout(), "Camel K Operator %s\n", operatorInfo[infoVersion])
+			fmt.Fprintf(cmd.OutOrStdout(),
+				"Camel K Operator %s\n", operatorInfo[infoVersion])
 
 			if o.Verbose {
 				for k, v := range operatorInfo {
@@ -133,7 +135,8 @@ func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[s
 	platform, err := platformutil.GetOrFindLocal(ctx, c, namespace)
 	if err != nil && k8serrors.IsNotFound(err) {
 		// find default operator platform in any namespace
-		if defaultPlatform, _ := platformutil.LookupForPlatformName(ctx, c, platformutil.DefaultPlatformName); defaultPlatform != nil {
+		if defaultPlatform, _ :=
+			platformutil.LookupForPlatformName(ctx, c, platformutil.DefaultPlatformName); defaultPlatform != nil {
 			platform = defaultPlatform
 		} else {
 			return nil, err

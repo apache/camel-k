@@ -171,7 +171,11 @@ func writeDescription(t *types.Type, traitID string, content *[]string) {
 	profiles := strings.Join(determineProfiles(traitID), ", ")
 	res = append(res, "", fmt.Sprintf("This trait is available in the following profiles: **%s**.", profiles))
 	if isPlatformTrait(traitID) {
-		res = append(res, "", fmt.Sprintf("WARNING: The %s trait is a *platform trait*: disabling it may compromise the platform functionality.", traitID))
+		res = append(res,
+			"",
+			fmt.Sprintf(
+				"WARNING: The %s trait is a *platform trait*: disabling it may compromise the platform functionality.",
+				traitID))
 	}
 	res = append(res, "", adocDescriptionMarkerEnd)
 	res = append(res, post...)
@@ -186,7 +190,9 @@ func writeFields(t *types.Type, traitID string, content *[]string) {
 	res = append(res, "[source,console]")
 	res = append(res, "----")
 	if len(t.Members) > 1 {
-		res = append(res, fmt.Sprintf("$ kamel run --trait %s.[key]=[value] --trait %s.[key2]=[value2] integration.groovy", traitID, traitID))
+		res = append(res, fmt.Sprintf(
+			"$ kamel run --trait %s.[key]=[value] --trait %s.[key2]=[value2] integration.groovy",
+			traitID, traitID))
 	} else {
 		res = append(res, fmt.Sprintf("$ kamel run --trait %s.[key]=[value] integration.groovy", traitID))
 	}

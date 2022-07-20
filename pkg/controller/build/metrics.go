@@ -99,7 +99,8 @@ func observeBuildQueueDuration(build *v1.Build, creator *corev1.ObjectReference)
 		requestNamespace = creator.Namespace
 	}
 
-	Log.WithValues("request-namespace", requestNamespace, "request-name", requestName, "build-queue-duration", duration.Seconds()).
+	Log.WithValues("request-namespace", requestNamespace, "request-name", requestName,
+		"build-queue-duration", duration.Seconds()).
 		ForBuild(build).Infof("Build queue duration %s", duration)
 	queueDuration.WithLabelValues(build.Labels[v1.IntegrationKitLayoutLabel]).
 		Observe(duration.Seconds())
@@ -124,7 +125,8 @@ func observeBuildResult(build *v1.Build, phase v1.BuildPhase, creator *corev1.Ob
 		requestNamespace = creator.Namespace
 	}
 
-	Log.WithValues("request-namespace", requestNamespace, "request-name", requestName, "build-attempt", float64(attempt), "build-result", resultLabel, "build-duration", duration.Seconds()).
+	Log.WithValues("request-namespace", requestNamespace, "request-name", requestName,
+		"build-attempt", float64(attempt), "build-result", resultLabel, "build-duration", duration.Seconds()).
 		ForBuild(build).Infof("Build duration %s", duration)
 	buildRecovery.WithLabelValues(resultLabel, typeLabel).Observe(float64(attempt))
 	buildDuration.WithLabelValues(resultLabel, typeLabel).Observe(duration.Seconds())

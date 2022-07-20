@@ -139,7 +139,9 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 			// This phase can take a while so check progress using
 			// the associated Integration Kit's progress
 			//
-			newLogMsg = fmt.Sprintf("The building kit for integration '%s' is being initialised. This may take some time ...", integrationID)
+			newLogMsg = fmt.Sprintf(
+				"The building kit for integration '%s' is being initialised. This may take some time ...",
+				integrationID)
 			if integration.Status.IntegrationKit == nil {
 				//
 				// Not created yet so wait quietly
@@ -181,7 +183,9 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 			//
 			// Found the building kit so output its phase
 			//
-			newLogMsg = fmt.Sprintf("The building kit for integration '%s' is at: %s", integrationID, integrationKit.Status.Phase)
+			newLogMsg = fmt.Sprintf(
+				"The building kit for integration '%s' is at: %s",
+				integrationID, integrationKit.Status.Phase)
 		default:
 			//
 			// Integration is still building, deploying or even in error

@@ -91,7 +91,8 @@ func (t *jolokiaTrait) Apply(e *Environment) error {
 	// Configure HTTPS by default for OpenShift
 	if e.DetermineProfile() == v1.TraitProfileOpenShift {
 		t.setDefaultJolokiaOption(options, &t.Protocol, "protocol", "https")
-		t.setDefaultJolokiaOption(options, &t.CaCert, "caCert", "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt")
+		t.setDefaultJolokiaOption(options, &t.CaCert, "caCert",
+			"/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt")
 		t.setDefaultJolokiaOption(options, &t.ExtendedClientCheck, "extendedClientCheck", true)
 		t.setDefaultJolokiaOption(options, &t.UseSslClientAuthentication, "useSslClientAuthentication", true)
 		t.setDefaultJolokiaOption(options, &t.ClientPrincipal, "clientPrincipal", []string{
@@ -122,7 +123,8 @@ func (t *jolokiaTrait) Apply(e *Environment) error {
 		optionValues[i] = k + "=" + options[k]
 	}
 
-	container.Args = append(container.Args, "-javaagent:dependencies/lib/main/org.jolokia.jolokia-jvm-1.7.1.jar="+strings.Join(optionValues, ","))
+	container.Args = append(container.Args,
+		"-javaagent:dependencies/lib/main/org.jolokia.jolokia-jvm-1.7.1.jar="+strings.Join(optionValues, ","))
 
 	containerPort := corev1.ContainerPort{
 		Name:          "jolokia",
@@ -142,7 +144,8 @@ func (t *jolokiaTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *jolokiaTrait) setDefaultJolokiaOption(options map[string]string, option interface{}, key string, value interface{}) {
+func (t *jolokiaTrait) setDefaultJolokiaOption(options map[string]string, option interface{},
+	key string, value interface{}) {
 	// Do not override existing option
 	if _, ok := options[key]; ok {
 		return

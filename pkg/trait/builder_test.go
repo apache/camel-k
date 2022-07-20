@@ -89,7 +89,9 @@ func TestS2IBuilderTrait(t *testing.T) {
 }
 
 func TestKanikoBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko)
+	env := createBuilderTestEnv(
+		v1.IntegrationPlatformClusterKubernetes,
+		v1.IntegrationPlatformBuildPublishStrategyKaniko)
 	err := NewBuilderTestCatalog().apply(env)
 
 	assert.Nil(t, err)
@@ -101,7 +103,8 @@ func TestKanikoBuilderTrait(t *testing.T) {
 	assert.NotNil(t, env.BuildTasks[1].Kaniko)
 }
 
-func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.IntegrationPlatformBuildPublishStrategy) *Environment {
+func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster,
+	strategy v1.IntegrationPlatformBuildPublishStrategy) *Environment {
 	c, err := camel.DefaultCatalog()
 	if err != nil {
 		panic(err)

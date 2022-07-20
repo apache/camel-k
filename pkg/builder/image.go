@@ -217,7 +217,9 @@ func listPublishedImages(context *builderContext) ([]v1.IntegrationKitStatus, er
 	return images, nil
 }
 
-func findBestImage(images []v1.IntegrationKitStatus, artifacts []v1.Artifact) (v1.IntegrationKitStatus, map[string]bool) {
+func findBestImage(images []v1.IntegrationKitStatus, artifacts []v1.Artifact) (
+	v1.IntegrationKitStatus, map[string]bool,
+) {
 	var bestImage v1.IntegrationKitStatus
 
 	if len(images) == 0 {
@@ -255,7 +257,8 @@ func findBestImage(images []v1.IntegrationKitStatus, artifacts []v1.Artifact) (v
 			continue
 		}
 
-		if numCommonLibs > len(bestImageCommonLibs) || (numCommonLibs == len(bestImageCommonLibs) && surplus < bestImageSurplusLibs) {
+		if numCommonLibs > len(bestImageCommonLibs) ||
+			(numCommonLibs == len(bestImageCommonLibs) && surplus < bestImageSurplusLibs) {
 			bestImage = image
 			bestImageCommonLibs = common
 			bestImageSurplusLibs = surplus

@@ -93,7 +93,8 @@ func (command *describeKameletCommandOptions) run(cmd *cobra.Command, args []str
 	return nil
 }
 
-func (command *describeKameletCommandOptions) describeKamelet(cmd *cobra.Command, kamelet v1alpha1.Kamelet) (string, error) {
+func (command *describeKameletCommandOptions) describeKamelet(cmd *cobra.Command,
+	kamelet v1alpha1.Kamelet) (string, error) {
 	return indentedwriter.IndentedString(func(out io.Writer) error {
 		w := indentedwriter.NewWriter(cmd.OutOrStdout())
 

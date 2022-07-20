@@ -102,7 +102,9 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		return err
 	}
 
-	if verbose && p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I && p.Status.Build.Registry.Address == "" {
+	if verbose &&
+		p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I &&
+		p.Status.Build.Registry.Address == "" {
 		log.Log.Info("No registry specified for publishing images")
 	}
 
@@ -205,7 +207,9 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 		d := p.Status.Build.GetTimeout().Duration.Truncate(time.Second)
 
 		if verbose && p.Status.Build.GetTimeout().Duration != d {
-			log.Log.Infof("Build timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.Build.GetTimeout().Duration, d)
+			log.Log.Infof(
+				"Build timeout minimum unit is sec (configured: %s, truncated: %s)",
+				p.Status.Build.GetTimeout().Duration, d)
 		}
 
 		p.Status.Build.Timeout = &metav1.Duration{
@@ -258,7 +262,9 @@ func setStatusAdditionalInfo(platform *v1.IntegrationPlatform) {
 	platform.Status.Info["gitCommit"] = defaults.GitCommit
 }
 
-func createServiceCaBundleConfigMap(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) (*corev1.ConfigMap, error) {
+func createServiceCaBundleConfigMap(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) (
+	*corev1.ConfigMap, error,
+) {
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      BuilderServiceAccount + "-ca",
@@ -300,7 +306,8 @@ func createBuilderRegistryRoleBinding(ctx context.Context, client client.Client,
 	if err != nil {
 		if k8serrors.IsForbidden(err) {
 			log.Log.Infof("Cannot grant permission to push images to the registry. "+
-				"Run 'oc policy add-role-to-user system:image-builder system:serviceaccount:%s:%s' as a system admin.", p.Namespace, BuilderServiceAccount)
+				"Run 'oc policy add-role-to-user system:image-builder system:serviceaccount:%s:%s' as a system admin.",
+				p.Namespace, BuilderServiceAccount)
 		} else if !k8serrors.IsAlreadyExists(err) {
 			return err
 		}

@@ -33,7 +33,8 @@ func TestErrorHandlerConfigureFromIntegrationProperty(t *testing.T) {
 		Catalog:     NewEnvironmentTestCatalog(),
 		Integration: &v1.Integration{},
 	}
-	e.Integration.Spec.AddConfiguration("property", fmt.Sprintf("%v = %s", v1alpha1.ErrorHandlerRefName, "defaultErrorHandler"))
+	e.Integration.Spec.AddConfiguration("property",
+		fmt.Sprintf("%v = %s", v1alpha1.ErrorHandlerRefName, "defaultErrorHandler"))
 
 	trait := newErrorHandlerTrait()
 	enabled, err := trait.Configure(e)
@@ -56,7 +57,8 @@ func TestErrorHandlerApplySource(t *testing.T) {
 		Catalog:     NewEnvironmentTestCatalog(),
 		Integration: &v1.Integration{},
 	}
-	e.Integration.Spec.AddConfiguration("property", fmt.Sprintf("%v = %s", v1alpha1.ErrorHandlerRefName, "defaultErrorHandler"))
+	e.Integration.Spec.AddConfiguration("property",
+		fmt.Sprintf("%v = %s", v1alpha1.ErrorHandlerRefName, "defaultErrorHandler"))
 	e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 
 	trait := newErrorHandlerTrait()
@@ -78,9 +80,12 @@ func TestErrorHandlerApplyDependency(t *testing.T) {
 		CamelCatalog: c,
 		Integration:  &v1.Integration{},
 	}
-	e.Integration.Spec.AddConfiguration("property", "camel.beans.defaultErrorHandler = #class:org.apache.camel.builder.DeadLetterChannelBuilder")
-	e.Integration.Spec.AddConfiguration("property", "camel.beans.defaultErrorHandler.deadLetterUri = log:info")
-	e.Integration.Spec.AddConfiguration("property", fmt.Sprintf("%v = %s", v1alpha1.ErrorHandlerRefName, "defaultErrorHandler"))
+	e.Integration.Spec.AddConfiguration("property",
+		"camel.beans.defaultErrorHandler = #class:org.apache.camel.builder.DeadLetterChannelBuilder")
+	e.Integration.Spec.AddConfiguration("property",
+		"camel.beans.defaultErrorHandler.deadLetterUri = log:info")
+	e.Integration.Spec.AddConfiguration("property",
+		fmt.Sprintf("%v = %s", v1alpha1.ErrorHandlerRefName, "defaultErrorHandler"))
 	e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 
 	trait := newErrorHandlerTrait()

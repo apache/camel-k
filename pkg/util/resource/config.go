@@ -204,8 +204,8 @@ func parse(item string, contentType ContentType) (*Config, error) {
 // ConvertFileToConfigmap convert a local file resource type in a configmap type
 // taking care to create the Configmap on the cluster. The method will change the value of config parameter
 // to reflect the conversion applied transparently.
-func ConvertFileToConfigmap(ctx context.Context, c client.Client, config *Config, namespace string, integrationName string,
-	content string, rawContent []byte) (*corev1.ConfigMap, error) {
+func ConvertFileToConfigmap(ctx context.Context, c client.Client, config *Config, namespace string,
+	integrationName string, content string, rawContent []byte) (*corev1.ConfigMap, error) {
 	filename := filepath.Base(config.Name())
 	if config.DestinationPath() == "" {
 		config.resourceKey = filename

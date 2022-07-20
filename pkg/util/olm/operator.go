@@ -60,7 +60,8 @@ var DefaultSourceNamespace = "openshift-marketplace"
 // DefaultStartingCSV contains the specific version to install.
 var DefaultStartingCSV = ""
 
-// DefaultGlobalNamespace indicates a namespace containing an OperatorGroup that enables the operator to watch all namespaces.
+// DefaultGlobalNamespace indicates a namespace containing an OperatorGroup that enables the operator
+// to watch all namespaces.
 // It will be used in global installation mode.
 var DefaultGlobalNamespace = "openshift-operators"
 
@@ -76,7 +77,8 @@ type Options struct {
 }
 
 // IsOperatorInstalled tells if a OLM CSV or a Subscription is already installed in the namespace.
-func IsOperatorInstalled(ctx context.Context, client client.Client, namespace string, global bool, options Options) (bool, error) {
+func IsOperatorInstalled(ctx context.Context, client client.Client, namespace string, global bool,
+	options Options) (bool, error) {
 	options, err := fillDefaults(options, client)
 	if err != nil {
 		return false, err
@@ -97,9 +99,12 @@ func IsOperatorInstalled(ctx context.Context, client client.Client, namespace st
 	return false, nil
 }
 
-// HasPermissionToInstall checks if the current user/serviceaccount has the right permissions to install camel k via OLM.
-func HasPermissionToInstall(ctx context.Context, client client.Client, namespace string, global bool, options Options) (bool, error) {
-	if ok, err := kubernetes.CheckPermission(ctx, client, operatorsv1alpha1.GroupName, "clusterserviceversions", namespace, options.Package, "list"); err != nil {
+// HasPermissionToInstall checks if the current user/serviceaccount has the right permissions
+// to install camel k via OLM.
+func HasPermissionToInstall(ctx context.Context, client client.Client, namespace string, global bool,
+	options Options) (bool, error) {
+	if ok, err := kubernetes.CheckPermission(ctx, client, operatorsv1alpha1.GroupName, "clusterserviceversions",
+		namespace, options.Package, "list"); err != nil {
 		return false, err
 	} else if !ok {
 		return false, nil
@@ -110,7 +115,8 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 		targetNamespace = options.GlobalNamespace
 	}
 
-	if ok, err := kubernetes.CheckPermission(ctx, client, operatorsv1alpha1.GroupName, "subscriptions", targetNamespace, options.Package, "create"); err != nil {
+	if ok, err := kubernetes.CheckPermission(ctx, client, operatorsv1alpha1.GroupName, "subscriptions",
+		targetNamespace, options.Package, "create"); err != nil {
 		return false, err
 	} else if !ok {
 		return false, nil
@@ -123,7 +129,8 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 	}
 
 	if !global {
-		if ok, err := kubernetes.CheckPermission(ctx, client, operators.GroupName, "operatorgroups", namespace, options.Package, "list"); err != nil {
+		if ok, err := kubernetes.CheckPermission(ctx, client, operators.GroupName, "operatorgroups",
+			namespace, options.Package, "list"); err != nil {
 			return false, err
 		} else if !ok {
 			return false, nil
@@ -134,7 +141,8 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 			return false, err
 		}
 		if group == nil {
-			if ok, err := kubernetes.CheckPermission(ctx, client, operators.GroupName, "operatorgroups", namespace, options.Package, "create"); err != nil {
+			if ok, err := kubernetes.CheckPermission(ctx, client, operators.GroupName, "operatorgroups",
+				namespace, options.Package, "create"); err != nil {
 				return false, err
 			} else if !ok {
 				return false, nil
@@ -146,8 +154,9 @@ func HasPermissionToInstall(ctx context.Context, client client.Client, namespace
 }
 
 // Install creates a subscription for the OLM package.
-func Install(ctx context.Context, client client.Client, namespace string, global bool, options Options, collection *kubernetes.Collection,
-	tolerations []string, nodeSelectors []string, resourcesRequirements []string, envVars []string) (bool, error) {
+func Install(ctx context.Context, client client.Client, namespace string, global bool, options Options,
+	collection *kubernetes.Collection, tolerations []string, nodeSelectors []string, resourcesRequirements []string,
+	envVars []string) (bool, error) {
 	options, err := fillDefaults(options, client)
 	if err != nil {
 		return false, err
@@ -311,7 +320,9 @@ func Uninstall(ctx context.Context, client client.Client, namespace string, glob
 	return nil
 }
 
-func findSubscription(ctx context.Context, client client.Client, namespace string, global bool, options Options) (*operatorsv1alpha1.Subscription, error) {
+func findSubscription(ctx context.Context, client client.Client, namespace string, global bool, options Options) (
+	*operatorsv1alpha1.Subscription, error,
+) {
 	subNamespace := namespace
 	if global {
 		// In case of global installation, global subscription must be removed
@@ -330,7 +341,9 @@ func findSubscription(ctx context.Context, client client.Client, namespace strin
 	return nil, nil
 }
 
-func findCSV(ctx context.Context, client client.Client, namespace string, options Options) (*operatorsv1alpha1.ClusterServiceVersion, error) {
+func findCSV(ctx context.Context, client client.Client, namespace string, options Options) (
+	*operatorsv1alpha1.ClusterServiceVersion, error,
+) {
 	csvList := operatorsv1alpha1.ClusterServiceVersionList{}
 	if err := client.List(ctx, &csvList, runtime.InNamespace(namespace)); err != nil {
 		return nil, err
@@ -344,7 +357,9 @@ func findCSV(ctx context.Context, client client.Client, namespace string, option
 	return nil, nil
 }
 
-func findOperatorGroup(ctx context.Context, client client.Client, namespace string) (*operatorsv1.OperatorGroup, error) {
+func findOperatorGroup(ctx context.Context, client client.Client, namespace string) (
+	*operatorsv1.OperatorGroup, error,
+) {
 	opGroupList := operatorsv1.OperatorGroupList{}
 	if err := client.List(ctx, &opGroupList, runtime.InNamespace(namespace)); err != nil {
 		return nil, err

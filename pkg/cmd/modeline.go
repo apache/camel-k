@@ -57,7 +57,8 @@ var (
 		"property-file": true,
 	}
 
-	// file format options are those options that admit multiple values, not only files (ie, key=value|configmap|secret|file syntax).
+	// file format options are those options that admit multiple values, not only files
+	// (ie, key=value|configmap|secret|file syntax).
 	fileFormatOptions = map[string]bool{
 		"resource":       true,
 		"config":         true,

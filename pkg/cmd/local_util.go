@@ -45,7 +45,8 @@ var acceptedDependencyTypes = []string{
 }
 
 // GetDependencies resolves and gets the list of dependencies from catalog and sources.
-func GetDependencies(ctx context.Context, args []string, additionalDependencies []string, repositories []string, allDependencies bool) ([]string, error) {
+func GetDependencies(ctx context.Context, args []string, additionalDependencies []string, repositories []string,
+	allDependencies bool) ([]string, error) {
 	// Fetch existing catalog or create new one if one does not already exist
 	catalog, err := createCamelCatalog(ctx)
 	if err != nil {
@@ -103,7 +104,8 @@ func getTopLevelDependencies(ctx context.Context, catalog *camel.RuntimeCatalog,
 	return dependencies.List(), nil
 }
 
-func getTransitiveDependencies(ctx context.Context, catalog *camel.RuntimeCatalog, dependencies []string, repositories []string) ([]string, error) {
+func getTransitiveDependencies(ctx context.Context, catalog *camel.RuntimeCatalog, dependencies []string,
+	repositories []string) ([]string, error) {
 	project := builder.GenerateQuarkusProjectCommon(
 		catalog.CamelCatalogSpec.Runtime.Metadata["camel-quarkus.version"],
 		defaults.DefaultRuntimeVersion,
@@ -343,7 +345,9 @@ func validatePropertyFile(fileName string) error {
 	return nil
 }
 
-func updateIntegrationProperties(properties []string, propertyFiles []string, hasIntegrationDir bool) ([]string, error) {
+func updateIntegrationProperties(properties []string, propertyFiles []string, hasIntegrationDir bool) (
+	[]string, error,
+) {
 	// Create properties directory under Maven working directory.
 	// This ensures that property files of different integrations do not clash.
 	err := util.CreateLocalPropertiesDirectory()

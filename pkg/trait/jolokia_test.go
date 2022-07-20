@@ -77,6 +77,7 @@ func TestApplyJolokiaTraitForOpenShiftProfileShouldSucceed(t *testing.T) {
 	container := environment.Resources.GetContainerByName(defaultContainerName)
 	assert.NotNil(t, container)
 
+	// nolint: lll
 	assert.Equal(t, container.Args, []string{
 		"-javaagent:dependencies/lib/main/org.jolokia.jolokia-jvm-1.7.1.jar=caCert=/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt," +
 			"clientPrincipal.1=cn=system:master-proxy,clientPrincipal.2=cn=hawtio-online.hawtio.svc," +

@@ -64,7 +64,9 @@ func (action *buildAction) Handle(ctx context.Context, kit *v1.IntegrationKit) (
 	return nil, nil
 }
 
-func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.IntegrationKit) (*v1.IntegrationKit, error) {
+func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.IntegrationKit) (
+	*v1.IntegrationKit, error,
+) {
 	build, err := kubernetes.GetBuild(ctx, action.client, kit.Name, kit.Namespace)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return nil, err
@@ -97,7 +99,8 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 		}
 
 		timeout := env.Platform.Status.Build.GetTimeout()
-		if layout := labels[v1.IntegrationKitLayoutLabel]; env.Platform.Spec.Build.Timeout == nil && layout == v1.IntegrationKitLayoutNative {
+		if layout := labels[v1.IntegrationKitLayoutLabel]; env.Platform.Spec.Build.Timeout == nil &&
+			layout == v1.IntegrationKitLayoutNative {
 			// Increase the timeout to a sensible default
 			timeout = metav1.Duration{
 				Duration: 10 * time.Minute,

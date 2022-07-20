@@ -67,7 +67,8 @@ func TestProbesDependencies(t *testing.T) {
 	err := env.Catalog.apply(&env)
 	assert.Nil(t, err)
 
-	assert.Contains(t, env.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-microprofile-health")
+	assert.Contains(t, env.Integration.Status.Dependencies,
+		"mvn:org.apache.camel.quarkus:camel-quarkus-microprofile-health")
 }
 
 func TestProbesOnDeployment(t *testing.T) {

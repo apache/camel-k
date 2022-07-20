@@ -42,7 +42,9 @@ func (action *monitorAction) CanHandle(platform *v1.IntegrationPlatform) bool {
 	return platform.Status.Phase == v1.IntegrationPlatformPhaseReady
 }
 
-func (action *monitorAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
+func (action *monitorAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (
+	*v1.IntegrationPlatform, error,
+) {
 	// Just track the version of the operator in the platform resource
 	if platform.Status.Version != defaults.Version {
 		platform.Status.Version = defaults.Version

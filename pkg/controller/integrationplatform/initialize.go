@@ -49,7 +49,9 @@ func (action *initializeAction) CanHandle(platform *v1.IntegrationPlatform) bool
 	return platform.Status.Phase == "" || platform.Status.Phase == v1.IntegrationPlatformPhaseDuplicate
 }
 
-func (action *initializeAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
+func (action *initializeAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (
+	*v1.IntegrationPlatform, error,
+) {
 	duplicate, err := action.isPrimaryDuplicate(ctx, platform)
 	if err != nil {
 		return nil, err
@@ -101,7 +103,9 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1.Integra
 	return platform, nil
 }
 
-func (action *initializeAction) isPrimaryDuplicate(ctx context.Context, thisPlatform *v1.IntegrationPlatform) (bool, error) {
+func (action *initializeAction) isPrimaryDuplicate(ctx context.Context, thisPlatform *v1.IntegrationPlatform) (
+	bool, error,
+) {
 	if platformutil.IsSecondary(thisPlatform) {
 		// Always reconcile secondary platforms
 		return false, nil

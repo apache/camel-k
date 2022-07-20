@@ -56,11 +56,15 @@ func GetForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object)
 	return GetOrFindForResource(ctx, c, o, true)
 }
 
-func GetOrFindForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object, active bool) (*v1.IntegrationPlatform, error) {
+func GetOrFindForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object, active bool) (
+	*v1.IntegrationPlatform, error,
+) {
 	return getOrFindForResource(ctx, c, o, active, false)
 }
 
-func GetOrFindLocalForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object, active bool) (*v1.IntegrationPlatform, error) {
+func GetOrFindLocalForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object, active bool) (
+	*v1.IntegrationPlatform, error,
+) {
 	return getOrFindForResource(ctx, c, o, active, true)
 }
 
@@ -68,7 +72,9 @@ func GetOrFindLocal(ctx context.Context, c k8sclient.Reader, namespace string) (
 	return findLocal(ctx, c, namespace, true)
 }
 
-func getOrFindForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object, active bool, local bool) (*v1.IntegrationPlatform, error) {
+func getOrFindForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object, active bool, local bool) (
+	*v1.IntegrationPlatform, error,
+) {
 	if selectedPlatform, ok := o.GetAnnotations()[v1.PlatformSelectorAnnotation]; ok {
 		return get(ctx, c, o.GetNamespace(), selectedPlatform)
 	}
@@ -81,7 +87,9 @@ func getOrFindForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.O
 	return find(ctx, c, o.GetNamespace(), active, local)
 }
 
-func getOrFind(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool, local bool) (*v1.IntegrationPlatform, error) {
+func getOrFind(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool, local bool) (
+	*v1.IntegrationPlatform, error,
+) {
 	if local {
 		return getOrFindLocal(ctx, c, namespace, name, active)
 	}
@@ -89,7 +97,9 @@ func getOrFind(ctx context.Context, c k8sclient.Reader, namespace string, name s
 }
 
 // getOrFindAny returns the named platform or any other platform in the local namespace or the global one.
-func getOrFindAny(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool) (*v1.IntegrationPlatform, error) {
+func getOrFindAny(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool) (
+	*v1.IntegrationPlatform, error,
+) {
 	if name != "" {
 		return get(ctx, c, namespace, name)
 	}
@@ -98,7 +108,9 @@ func getOrFindAny(ctx context.Context, c k8sclient.Reader, namespace string, nam
 }
 
 // getOrFindLocal returns the named platform or any other platform in the local namespace.
-func getOrFindLocal(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool) (*v1.IntegrationPlatform, error) {
+func getOrFindLocal(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool) (
+	*v1.IntegrationPlatform, error,
+) {
 	if name != "" {
 		return get(ctx, c, name, namespace)
 	}
@@ -118,7 +130,9 @@ func get(ctx context.Context, c k8sclient.Reader, namespace string, name string)
 	return p, err
 }
 
-func find(ctx context.Context, c k8sclient.Reader, namespace string, active bool, local bool) (*v1.IntegrationPlatform, error) {
+func find(ctx context.Context, c k8sclient.Reader, namespace string, active bool, local bool) (
+	*v1.IntegrationPlatform, error,
+) {
 	if local {
 		return findLocal(ctx, c, namespace, active)
 	}
@@ -138,7 +152,9 @@ func findAny(ctx context.Context, c k8sclient.Reader, namespace string, active b
 }
 
 // findLocal returns the currently installed platform or any platform existing in local namespace.
-func findLocal(ctx context.Context, c k8sclient.Reader, namespace string, active bool) (*v1.IntegrationPlatform, error) {
+func findLocal(ctx context.Context, c k8sclient.Reader, namespace string, active bool) (
+	*v1.IntegrationPlatform, error,
+) {
 	lst, err := ListPrimaryPlatforms(ctx, c, namespace)
 	if err != nil {
 		return nil, err
@@ -161,7 +177,9 @@ func findLocal(ctx context.Context, c k8sclient.Reader, namespace string, active
 }
 
 // ListPrimaryPlatforms returns all non-secondary platforms installed in a given namespace (only one will be active).
-func ListPrimaryPlatforms(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatformList, error) {
+func ListPrimaryPlatforms(ctx context.Context, c k8sclient.Reader, namespace string) (
+	*v1.IntegrationPlatformList, error,
+) {
 	lst, err := ListAllPlatforms(ctx, c, namespace)
 	if err != nil {
 		return nil, err

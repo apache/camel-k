@@ -234,7 +234,10 @@ const YAMLRestDSLWithRoute = `
 `
 
 func TestYAMLRestDSL(t *testing.T) {
-	for name, content := range map[string]string{"YAMLRestDSL": YAMLRestDSL, "YAMLRestDSLWithRoute": YAMLRestDSLWithRoute} {
+	for name, content := range map[string]string{
+		"YAMLRestDSL":          YAMLRestDSL,
+		"YAMLRestDSLWithRoute": YAMLRestDSLWithRoute,
+	} {
 		sourceContent := content
 		t.Run(name, func(t *testing.T) {
 			code := v1.SourceSpec{
@@ -286,7 +289,10 @@ const YAMLFromDSLWithRoute = `
 `
 
 func TestYAMLRouteAndFromEquivalence(t *testing.T) {
-	for name, content := range map[string]string{"YAMLFromDSL": YAMLFromDSL, "YAMLFromDSLWithRoute": YAMLFromDSLWithRoute} {
+	for name, content := range map[string]string{
+		"YAMLFromDSL":          YAMLFromDSL,
+		"YAMLFromDSLWithRoute": YAMLFromDSLWithRoute,
+	} {
 		sourceContent := content
 		t.Run(name, func(t *testing.T) {
 			code := v1.SourceSpec{

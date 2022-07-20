@@ -16,10 +16,13 @@
 # ---------------------------------------------------------------------------
 
 linters-settings:
-  lll:
-    line-length: 170
   goconst:
     ignore-tests: true
+issues:
+  exclude-rules:
+    - linters:
+        - lll
+      source: "^[\\s]*// http[s]?://"
 linters:
   enable-all: true
   disable:
@@ -44,7 +47,6 @@ linters:
     - gomoddirectives
     - interfacer
     - ireturn
-    - lll
     - maligned
     - nakedret
     - nestif

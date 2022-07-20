@@ -100,8 +100,8 @@ const (
 	// TraitOrderControllerSelection can be used if you intend to provide an alternative controller for the integration
 	// (e.g. Deployment, CronJob, ...).
 	TraitOrderControllerSelection = 950
-	// TraitOrderPostProcessResources is executed after all other traits are executed (except for important core traits such as
-	// the "owner" trait), so it can be used to post-process generated resources before their actual creation.
+	// TraitOrderPostProcessResources is executed after all other traits are executed (except for important core traits
+	// such as the "owner" trait), so it can be used to post-process generated resources before their actual creation.
 	TraitOrderPostProcessResources = 2450
 )
 
@@ -157,7 +157,8 @@ func (trait *BaseTrait) Order() int {
 	return trait.ExecutionOrder
 }
 
-// ControllerStrategySelector is the interface for traits that can determine the kind of controller that will run the integration.
+// ControllerStrategySelector is the interface for traits that can determine the kind of controller that will run
+// the integration.
 type ControllerStrategySelector interface {
 	// SelectControllerStrategy tells if the trait with current configuration can select a specific controller to use
 	SelectControllerStrategy(*Environment) (*ControllerStrategy, error)
@@ -341,10 +342,12 @@ func (e *Environment) DetermineCatalogNamespace() string {
 	if e.Platform != nil && e.Platform.Namespace != "" {
 		return e.Platform.Namespace
 	}
-	if e.Integration != nil && e.Integration.Status.IntegrationKit != nil && e.Integration.Status.IntegrationKit.Namespace != "" {
+	if e.Integration != nil &&
+		e.Integration.Status.IntegrationKit != nil && e.Integration.Status.IntegrationKit.Namespace != "" {
 		return e.Integration.Status.IntegrationKit.Namespace
 	}
-	if e.Integration != nil && e.Integration.Spec.IntegrationKit != nil && e.Integration.Spec.IntegrationKit.Namespace != "" {
+	if e.Integration != nil &&
+		e.Integration.Spec.IntegrationKit != nil && e.Integration.Spec.IntegrationKit.Namespace != "" {
 		return e.Integration.Spec.IntegrationKit.Namespace
 	}
 	if e.IntegrationKit != nil && e.IntegrationKit.Namespace != "" {
@@ -510,8 +513,10 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	//
 	for _, configmaps := range e.collectConfigurations("configmap") {
 		refName := kubernetes.SanitizeLabel(configmaps["value"])
-		mountPath := getMountPoint(configmaps["value"], configmaps["resourceMountPoint"], "configmap", configmaps["resourceType"])
-		vol := getVolume(refName, "configmap", configmaps["value"], configmaps["resourceKey"], configmaps["resourceKey"])
+		mountPath := getMountPoint(configmaps["value"], configmaps["resourceMountPoint"], "configmap",
+			configmaps["resourceType"])
+		vol := getVolume(refName, "configmap", configmaps["value"], configmaps["resourceKey"],
+			configmaps["resourceKey"])
 		mnt := getMount(refName, mountPath, "", true)
 
 		*vols = append(*vols, *vol)

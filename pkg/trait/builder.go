@@ -65,7 +65,8 @@ func (t *builderTrait) Apply(e *Environment) error {
 	if err != nil {
 		e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseError
 		e.IntegrationKit.Status.SetCondition("IntegrationKitPropertiesFormatValid", corev1.ConditionFalse,
-			"IntegrationKitPropertiesFormatValid", fmt.Sprintf("One or more properties where not formatted as expected: %s", err.Error()))
+			"IntegrationKitPropertiesFormatValid",
+			fmt.Sprintf("One or more properties where not formatted as expected: %s", err.Error()))
 		if err := e.Client.Status().Update(e.Ctx, e.IntegrationKit); err != nil {
 			return err
 		}
@@ -200,5 +201,6 @@ func getImageName(e *Environment) string {
 	if organization == "" {
 		organization = e.Platform.Namespace
 	}
-	return e.Platform.Status.Build.Registry.Address + "/" + organization + "/camel-k-" + e.IntegrationKit.Name + ":" + e.IntegrationKit.ResourceVersion
+	return e.Platform.Status.Build.Registry.Address + "/" + organization + "/camel-k-" + e.IntegrationKit.Name +
+		":" + e.IntegrationKit.ResourceVersion
 }

@@ -58,7 +58,8 @@ func NewHealthCheck(body []byte) (*HealthCheck, error) {
 	return &health, nil
 }
 
-func proxyGetHTTPProbe(ctx context.Context, c kubernetes.Interface, p *corev1.Probe, pod *corev1.Pod, container *corev1.Container) ([]byte, error) {
+func proxyGetHTTPProbe(ctx context.Context, c kubernetes.Interface, p *corev1.Probe, pod *corev1.Pod,
+	container *corev1.Container) ([]byte, error) {
 	if p.HTTPGet == nil {
 		return nil, fmt.Errorf("missing probe handler for %s/%s", pod.Namespace, pod.Name)
 	}

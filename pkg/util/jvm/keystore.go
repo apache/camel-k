@@ -39,7 +39,9 @@ var (
 
 func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePass string, data [][]byte) error {
 	for i, data := range data {
-		args := strings.Fields(fmt.Sprintf("-importcert -noprompt -alias maven-%d -storepass %s -keystore %s", i, keystorePass, keystoreName))
+		args := strings.Fields(fmt.Sprintf(
+			"-importcert -noprompt -alias maven-%d -storepass %s -keystore %s",
+			i, keystorePass, keystoreName))
 		cmd := exec.CommandContext(ctx, "keytool", args...)
 		cmd.Dir = keystoreDir
 		cmd.Stdin = bytes.NewReader(data)
@@ -57,7 +59,9 @@ func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePa
 	javaHome, ok := os.LookupEnv("JAVA_HOME")
 	if ok {
 		caCertsPath := path.Join(javaHome, "lib/security/cacerts")
-		args := strings.Fields(fmt.Sprintf("-importkeystore -noprompt -srckeystore %s -srcstorepass %s -destkeystore %s -deststorepass %s", caCertsPath, "changeit", keystoreName, keystorePass))
+		args := strings.Fields(fmt.Sprintf(
+			"-importkeystore -noprompt -srckeystore %s -srcstorepass %s -destkeystore %s -deststorepass %s",
+			caCertsPath, "changeit", keystoreName, keystorePass))
 		cmd := exec.CommandContext(ctx, "keytool", args...)
 		cmd.Dir = keystoreDir
 		// keytool logs info messages to stderr, as stdout is used to output results,

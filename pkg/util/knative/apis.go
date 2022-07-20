@@ -160,9 +160,10 @@ func init() {
 	KnownEndpointKinds = append(KnownEndpointKinds, KnownBrokerKinds...)
 }
 
-// FillMissingReferenceData returns all possible combinations of ObjectReference that can be obtained by filling the missing fields
-// with known data.
-func FillMissingReferenceData(serviceType knativev1.CamelServiceType, ref v1.ObjectReference) []v1.ObjectReference {
+// FillMissingReferenceData returns all possible combinations of ObjectReference that can be obtained by filling
+// the missing fields with known data.
+func FillMissingReferenceData(serviceType knativev1.CamelServiceType,
+	ref v1.ObjectReference) []v1.ObjectReference {
 	var refs []v1.ObjectReference
 	switch serviceType {
 	case knativev1.CamelServiceTypeChannel:
@@ -206,7 +207,8 @@ func GetServiceType(ref v1.ObjectReference) (*knativev1.CamelServiceType, error)
 	return nil, nil
 }
 
-func fillMissingReferenceDataWith(serviceTypes []GroupVersionKindResource, ref v1.ObjectReference) []v1.ObjectReference {
+func fillMissingReferenceDataWith(serviceTypes []GroupVersionKindResource,
+	ref v1.ObjectReference) []v1.ObjectReference {
 	list := make([]v1.ObjectReference, 0)
 	switch {
 	case ref.APIVersion == "" && ref.Kind == "":

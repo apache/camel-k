@@ -30,12 +30,15 @@ import (
 )
 
 // Print prints integrations logs to the stdout.
-func Print(ctx context.Context, cmd *cobra.Command, client kubernetes.Interface, integration *v1.Integration, out io.Writer) error {
-	return PrintUsingSelector(ctx, cmd, client, integration.Namespace, integration.Name, v1.IntegrationLabel+"="+integration.Name, out)
+func Print(ctx context.Context, cmd *cobra.Command, client kubernetes.Interface, integration *v1.Integration,
+	out io.Writer) error {
+	return PrintUsingSelector(ctx, cmd, client, integration.Namespace, integration.Name,
+		v1.IntegrationLabel+"="+integration.Name, out)
 }
 
 // PrintUsingSelector prints pod logs using a selector.
-func PrintUsingSelector(ctx context.Context, cmd *cobra.Command, client kubernetes.Interface, namespace, defaultContainerName, selector string, out io.Writer) error {
+func PrintUsingSelector(ctx context.Context, cmd *cobra.Command, client kubernetes.Interface,
+	namespace, defaultContainerName, selector string, out io.Writer) error {
 	scraper := NewSelectorScraper(client, namespace, defaultContainerName, selector)
 	reader := scraper.Start(ctx)
 

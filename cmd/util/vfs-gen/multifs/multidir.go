@@ -136,10 +136,13 @@ func (d *dirInfo) Read([]byte) (int, error) {
 func (d *dirInfo) Close() error               { return nil }
 func (d *dirInfo) Stat() (os.FileInfo, error) { return d, nil }
 
-func (d *dirInfo) Name() string       { return d.name }
-func (d *dirInfo) Size() int64        { return 0 }
-func (d *dirInfo) Mode() os.FileMode  { return 0o755 | os.ModeDir }
-func (d *dirInfo) ModTime() time.Time { return time.Time{} } // Actual mod time is not computed because it's expensive and rarely needed.
+func (d *dirInfo) Name() string { return d.name }
+func (d *dirInfo) Size() int64  { return 0 }
+func (d *dirInfo) Mode() os.FileMode {
+	// Actual mod time is not computed because it's expensive and rarely needed.
+	return 0o755 | os.ModeDir
+}
+func (d *dirInfo) ModTime() time.Time { return time.Time{} }
 func (d *dirInfo) IsDir() bool        { return true }
 func (d *dirInfo) Sys() interface{}   { return nil }
 

@@ -40,6 +40,7 @@ const (
 )
 
 // The following variables may be overridden at build time.
+// nolint: lll
 var (
 	// KamelCLIDownloadName --.
 	KamelCLIDownloadName = "kamel-cli"
@@ -59,7 +60,8 @@ var (
 func OpenShiftConsoleDownloadLink(ctx context.Context, c client.Client) error {
 	// Check the ConsoleCLIDownload CRD is present, which should be starting OpenShift version 4.2.
 	// That check is also enough to exclude Kubernetes clusters.
-	ok, err := kubernetes.IsAPIResourceInstalled(c, "console.openshift.io/v1", reflect.TypeOf(console.ConsoleCLIDownload{}).Name())
+	ok, err := kubernetes.IsAPIResourceInstalled(c, "console.openshift.io/v1",
+		reflect.TypeOf(console.ConsoleCLIDownload{}).Name())
 	if err != nil {
 		return err
 	} else if !ok {
@@ -67,7 +69,8 @@ func OpenShiftConsoleDownloadLink(ctx context.Context, c client.Client) error {
 	}
 
 	// Check for permission to create the ConsoleCLIDownload resource
-	ok, err = kubernetes.CheckPermission(ctx, c, console.GroupName, "consoleclidownloads", "", KamelCLIDownloadName, "create")
+	ok, err = kubernetes.CheckPermission(ctx, c,
+		console.GroupName, "consoleclidownloads", "", KamelCLIDownloadName, "create")
 	if err != nil {
 		return err
 	}

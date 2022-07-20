@@ -151,7 +151,8 @@ func (t *routeTrait) Apply(e *Environment) error {
 }
 
 func (t *routeTrait) getTLSConfig(e *Environment) (*routev1.TLSConfig, error) {
-	// a certificate is a multiline text, but to set it as value in a single line in CLI, the user must escape the new line character as \\n
+	// a certificate is a multiline text, but to set it as value in a single line in CLI,
+	// the user must escape the new line character as \\n
 	// but in the TLS configuration, the certificates should be a multiline string
 	// then we need to replace the incoming escaped new lines \\n for a real new line \n
 	key := strings.ReplaceAll(t.TLSKey, "\\n", "\n")
@@ -210,7 +211,9 @@ func (t *routeTrait) readContentIfExists(e *Environment, secretName string) (str
 
 	secret := kubernetes.LookupSecret(e.Ctx, t.Client, t.service.Namespace, secretName)
 	if secret == nil {
-		return "", fmt.Errorf("%s secret not found in %s namespace, make sure to provide it before the Integration can run", secretName, t.service.Namespace)
+		return "", fmt.Errorf(
+			"%s secret not found in %s namespace, make sure to provide it before the Integration can run",
+			secretName, t.service.Namespace)
 	}
 	if len(secret.Data) > 1 && len(key) == 0 {
 		return "", fmt.Errorf("secret %s contains multiple data keys, but no key was provided", secretName)

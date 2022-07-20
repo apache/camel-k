@@ -152,7 +152,9 @@ func deleteIntegration(ctx context.Context, cmd *cobra.Command, c client.Client,
 	return c.Delete(ctx, integration)
 }
 
-func deleteKameletBindingIfExists(ctx context.Context, c client.Client, integration *v1.Integration) (bool, string, error) {
+func deleteKameletBindingIfExists(ctx context.Context, c client.Client, integration *v1.Integration) (
+	bool, string, error,
+) {
 	kind, name := findCreator(integration)
 	if kind != v1alpha1.KameletBindingKind || name == "" {
 		return false, "", nil

@@ -110,7 +110,8 @@ func createAndBuildBaseImage(ctx context.Context, stdout, stderr io.Writer) erro
 }
 
 func createAndBuildIntegrationImage(ctx context.Context, containerRegistry string, justBaseImage bool, image string,
-	propertyFiles []string, dependencies []string, routes []string, startsFromLocalFolder bool, stdout, stderr io.Writer) error {
+	propertyFiles []string, dependencies []string, routes []string, startsFromLocalFolder bool,
+	stdout, stderr io.Writer) error {
 	// This ensures the Dockerfile for the base image will not end up in an undesired location.
 	if docker.BaseWorkingDirectory == "" {
 		return errors.New("base directory that holds the base image Dockerfile has not been set correctly")

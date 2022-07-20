@@ -168,8 +168,10 @@ func TestDependenciesQuarkus(t *testing.T) {
 			    from("http:test").to("log:end");
 			    from("https:test").to("log:end");
 			    from("twitter-timeline:test").to("mock:end");
-			    from("direct:start").circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(1500).end()
-			    .to("direct:other").onFallback().setBody(constant("Fallback response")).end();
+			    from("direct:start")
+				    .circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(1500).end()
+			        .to("direct:other")
+					.onFallback().setBody(constant("Fallback response")).end();
 		    `,
 		},
 		Language: v1.LanguageJavaSource,

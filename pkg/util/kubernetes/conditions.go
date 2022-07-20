@@ -36,7 +36,8 @@ func GetPodCondition(pod corev1.Pod, conditionType corev1.PodConditionType) *cor
 	return nil
 }
 
-func GetDeploymentCondition(deployment appsv1.Deployment, conditionType appsv1.DeploymentConditionType) *appsv1.DeploymentCondition {
+func GetDeploymentCondition(deployment appsv1.Deployment,
+	conditionType appsv1.DeploymentConditionType) *appsv1.DeploymentCondition {
 	for i := range deployment.Status.Conditions {
 		condition := deployment.Status.Conditions[i]
 		if condition.Type == conditionType {

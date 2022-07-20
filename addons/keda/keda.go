@@ -57,7 +57,8 @@ const (
 	kameletAnnotationType = "camel.apache.org/keda.type"
 	// kameletAnnotationMetadataPrefix is used to define virtual metadata fields computed from Kamelet properties.
 	kameletAnnotationMetadataPrefix = "camel.apache.org/keda.metadata."
-	// kameletAnnotationAuthenticationPrefix is used to define virtual authentication fields computed from Kamelet properties.
+	// kameletAnnotationAuthenticationPrefix is used to define virtual authentication fields computed
+	// from Kamelet properties.
 	kameletAnnotationAuthenticationPrefix = "camel.apache.org/keda.authentication."
 )
 
@@ -77,7 +78,8 @@ type Trait struct {
 	traitv1.Trait `property:",squash" json:",inline"`
 	// Enables automatic configuration of the trait. Allows the trait to infer KEDA triggers from the Kamelets.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
-	// Set the spec->replicas field on the top level controller to an explicit value if missing, to allow KEDA to recognize it as a scalable resource.
+	// Set the spec->replicas field on the top level controller to an explicit value if missing,
+	// to allow KEDA to recognize it as a scalable resource.
 	HackControllerReplicas *bool `property:"hack-controller-replicas" json:"hackControllerReplicas,omitempty"`
 	// Interval (seconds) to check each trigger on.
 	PollingInterval *int32 `property:"polling-interval" json:"pollingInterval,omitempty"`
@@ -225,7 +227,9 @@ func (t *kedaTrait) addScalingResources(e *trait.Environment) error {
 				Name:      trigger.AuthenticationSecret,
 			}
 			if err := e.Client.Get(e.Ctx, key, &s); err != nil {
-				return errors.Wrapf(err, "could not load secret named %q in namespace %q", trigger.AuthenticationSecret, e.Integration.Namespace)
+				return errors.Wrapf(err,
+					"could not load secret named %q in namespace %q",
+					trigger.AuthenticationSecret, e.Integration.Namespace)
 			}
 			// Fill a TriggerAuthentication from the secret
 			triggerAuth := kedav1alpha1.TriggerAuthentication{
@@ -280,13 +284,17 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 	}
 	if ctrlRef.Kind == camelv1alpha1.KameletBindingKind {
 		scale.ObjectMeta.Name = ctrlRef.Name
-		_, err = scalesClient.Scales(e.Integration.Namespace).Update(e.Ctx, camelv1alpha1.SchemeGroupVersion.WithResource("kameletbindings").GroupResource(), &scale, metav1.UpdateOptions{})
+		_, err = scalesClient.Scales(e.Integration.Namespace).Update(e.Ctx,
+			camelv1alpha1.SchemeGroupVersion.WithResource("kameletbindings").GroupResource(),
+			&scale, metav1.UpdateOptions{})
 		if err != nil {
 			return err
 		}
 	} else if e.Integration.Spec.Replicas == nil {
 		scale.ObjectMeta.Name = e.Integration.Name
-		_, err = scalesClient.Scales(e.Integration.Namespace).Update(e.Ctx, camelv1.SchemeGroupVersion.WithResource("integrations").GroupResource(), &scale, metav1.UpdateOptions{})
+		_, err = scalesClient.Scales(e.Integration.Namespace).Update(e.Ctx,
+			camelv1.SchemeGroupVersion.WithResource("integrations").GroupResource(),
+			&scale, metav1.UpdateOptions{})
 		if err != nil {
 			return err
 		}
@@ -296,7 +304,8 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 
 func (t *kedaTrait) getTopControllerReference(e *trait.Environment) *v1.ObjectReference {
 	for _, o := range e.Integration.OwnerReferences {
-		if o.Kind == camelv1alpha1.KameletBindingKind && strings.HasPrefix(o.APIVersion, camelv1alpha1.SchemeGroupVersion.Group) {
+		if o.Kind == camelv1alpha1.KameletBindingKind &&
+			strings.HasPrefix(o.APIVersion, camelv1alpha1.SchemeGroupVersion.Group) {
 			return &v1.ObjectReference{
 				APIVersion: o.APIVersion,
 				Kind:       o.Kind,
@@ -337,7 +346,8 @@ func (t *kedaTrait) populateTriggersFromKamelets(e *trait.Environment) error {
 		return nil
 	}
 
-	repo, err := repository.NewForPlatform(e.Ctx, e.Client, e.Platform, e.Integration.Namespace, platform.GetOperatorNamespace())
+	repo, err := repository.NewForPlatform(e.Ctx, e.Client,
+		e.Platform, e.Integration.Namespace, platform.GetOperatorNamespace())
 	if err != nil {
 		return err
 	}
@@ -357,7 +367,8 @@ func (t *kedaTrait) populateTriggersFromKamelets(e *trait.Environment) error {
 	return nil
 }
 
-func (t *kedaTrait) populateTriggersFromKamelet(e *trait.Environment, repo repository.KameletRepository, kameletName string, uris []string) error {
+func (t *kedaTrait) populateTriggersFromKamelet(e *trait.Environment, repo repository.KameletRepository,
+	kameletName string, uris []string) error {
 	kamelet, err := repo.Get(e.Ctx, kameletName)
 	if err != nil {
 		return err
@@ -382,7 +393,8 @@ func (t *kedaTrait) populateTriggersFromKamelet(e *trait.Environment, repo repos
 				requiredKEDAParam[metadataName] = true
 			}
 		}
-		if authenticationName := t.getXDescriptorValue(def.XDescriptors, kameletURNAuthenticationPrefix); authenticationName != "" {
+		if authenticationName := t.getXDescriptorValue(def.XDescriptors,
+			kameletURNAuthenticationPrefix); authenticationName != "" {
 			kedaParamToProperty[authenticationName] = k
 			if req := t.isXDescriptorPresent(def.XDescriptors, kameletURNRequiredTag); req {
 				requiredKEDAParam[authenticationName] = true
@@ -391,14 +403,17 @@ func (t *kedaTrait) populateTriggersFromKamelet(e *trait.Environment, repo repos
 		}
 	}
 	for _, kameletURI := range uris {
-		if err := t.populateTriggersFromKameletURI(e, kamelet, triggerType, kedaParamToProperty, requiredKEDAParam, kedaAuthenticationParam, kameletURI); err != nil {
+		if err := t.populateTriggersFromKameletURI(e, kamelet, triggerType, kedaParamToProperty, requiredKEDAParam,
+			kedaAuthenticationParam, kameletURI); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (t *kedaTrait) populateTriggersFromKameletURI(e *trait.Environment, kamelet *camelv1alpha1.Kamelet, triggerType string, kedaParamToProperty map[string]string, requiredKEDAParam map[string]bool, authenticationParams map[string]bool, kameletURI string) error {
+func (t *kedaTrait) populateTriggersFromKameletURI(e *trait.Environment, kamelet *camelv1alpha1.Kamelet,
+	triggerType string, kedaParamToProperty map[string]string, requiredKEDAParam map[string]bool,
+	authenticationParams map[string]bool, kameletURI string) error {
 	metaValues := make(map[string]string, len(kedaParamToProperty))
 	for metaParam, prop := range kedaParamToProperty {
 		v, err := t.getKameletPropertyValue(e, kamelet, kameletURI, prop)
@@ -447,7 +462,8 @@ func (t *kedaTrait) populateTriggersFromKameletURI(e *trait.Environment, kamelet
 	return nil
 }
 
-func (t *kedaTrait) evaluateTemplateParameters(e *trait.Environment, kamelet *camelv1alpha1.Kamelet, kameletURI string) (map[string]string, map[string]bool, error) {
+func (t *kedaTrait) evaluateTemplateParameters(e *trait.Environment, kamelet *camelv1alpha1.Kamelet,
+	kameletURI string) (map[string]string, map[string]bool, error) {
 	paramTemplates := make(map[string]string)
 	authenticationParam := make(map[string]bool)
 	for annotation, expr := range kamelet.Annotations {
@@ -489,7 +505,8 @@ func (t *kedaTrait) evaluateTemplateParameters(e *trait.Environment, kamelet *ca
 	return paramValues, authenticationParam, nil
 }
 
-func (t *kedaTrait) getKameletPropertyValue(e *trait.Environment, kamelet *camelv1alpha1.Kamelet, kameletURI, prop string) (string, error) {
+func (t *kedaTrait) getKameletPropertyValue(e *trait.Environment, kamelet *camelv1alpha1.Kamelet,
+	kameletURI, prop string) (string, error) {
 	// From top priority to lowest
 	if v := uri.GetQueryParameter(kameletURI, prop); v != "" {
 		return v, nil

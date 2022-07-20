@@ -33,7 +33,9 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func Apply(ctx context.Context, c client.Client, integration *v1.Integration, kit *v1.IntegrationKit) (*Environment, error) {
+func Apply(ctx context.Context, c client.Client, integration *v1.Integration, kit *v1.IntegrationKit) (
+	*Environment, error,
+) {
 	var ilog log.Logger
 	switch {
 	case integration != nil:
@@ -79,7 +81,9 @@ func Apply(ctx context.Context, c client.Client, integration *v1.Integration, ki
 }
 
 // newEnvironment creates a Environment from the given data.
-func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integration, kit *v1.IntegrationKit) (*Environment, error) {
+func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integration, kit *v1.IntegrationKit) (
+	*Environment, error,
+) {
 	if integration == nil && ctx == nil {
 		return nil, errors.New("neither integration nor kit are set")
 	}

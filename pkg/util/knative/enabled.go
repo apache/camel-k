@@ -36,7 +36,9 @@ import (
 func IsEnabledInNamespace(ctx context.Context, c client.Client, namespace string) bool {
 	dyn, err := dynamic.NewForConfig(c.GetConfig())
 	if err != nil {
-		log.Infof("could not create dynamic client to check knative installation in namespace %s, got error: %v", namespace, err)
+		log.Infof(
+			"could not create dynamic client to check knative installation in namespace %s, got error: %v",
+			namespace, err)
 		return false
 	}
 	for _, kgv := range RequiredKinds {

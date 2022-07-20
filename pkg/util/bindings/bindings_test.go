@@ -255,7 +255,8 @@ func asKnativeConfig(endpointURL string) string {
 	if err != nil {
 		panic(err)
 	}
-	def, err := knativeapis.BuildCamelServiceDefinition("sink", knativeapis.CamelEndpointKindSink, knativeapis.CamelServiceTypeEndpoint, *serviceURL, "", "")
+	def, err := knativeapis.BuildCamelServiceDefinition("sink", knativeapis.CamelEndpointKindSink,
+		knativeapis.CamelServiceTypeEndpoint, *serviceURL, "", "")
 	if err != nil {
 		panic(err)
 	}

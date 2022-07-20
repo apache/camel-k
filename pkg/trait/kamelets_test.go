@@ -62,7 +62,8 @@ func TestConfigurationWithKamelets(t *testing.T) {
 	enabled, err := trait.Configure(environment)
 	assert.NoError(t, err)
 	assert.True(t, enabled)
-	assert.Equal(t, []string{"c0", "c1", "c2", "complex-.-.-1a", "complex-.-.-1b", "complex-.-.-1c"}, trait.getKameletKeys())
+	assert.Equal(t, []string{"c0", "c1", "c2", "complex-.-.-1a", "complex-.-.-1b", "complex-.-.-1c"},
+		trait.getKameletKeys())
 	assert.Equal(t, []configurationKey{
 		newConfigurationKey("c0", ""),
 		newConfigurationKey("c1", ""),
@@ -155,9 +156,13 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
 
 	err = trait.Apply(environment)
 	assert.NoError(t, err)
-	cmFlow := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "it-kamelet-timer-template" })
+	cmFlow := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool {
+		return c.Name == "it-kamelet-timer-template"
+	})
 	assert.NotNil(t, cmFlow)
-	cmRes := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "it-kamelet-timer-000" })
+	cmRes := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool {
+		return c.Name == "it-kamelet-timer-000"
+	})
 	assert.NotNil(t, cmRes)
 
 	assert.Len(t, environment.Integration.Status.GeneratedSources, 2)
@@ -283,11 +288,17 @@ func TestMultipleKamelets(t *testing.T) {
 	err = trait.Apply(environment)
 	assert.NoError(t, err)
 
-	cmFlow := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "it-kamelet-timer-template" })
+	cmFlow := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool {
+		return c.Name == "it-kamelet-timer-template"
+	})
 	assert.NotNil(t, cmFlow)
-	cmRes := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "it-kamelet-timer-000" })
+	cmRes := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool {
+		return c.Name == "it-kamelet-timer-000"
+	})
 	assert.NotNil(t, cmRes)
-	cmFlow2 := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "it-kamelet-logger-template" })
+	cmFlow2 := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool {
+		return c.Name == "it-kamelet-logger-template"
+	})
 	assert.NotNil(t, cmFlow2)
 
 	assert.Len(t, environment.Integration.Status.GeneratedSources, 3)
@@ -310,7 +321,8 @@ func TestMultipleKamelets(t *testing.T) {
 	assert.Equal(t, "it-kamelet-timer-000", supportSource.ContentRef)
 	assert.Equal(t, "content", supportSource.ContentKey)
 
-	assert.Equal(t, []string{"camel:log", "camel:tbd", "camel:timer", "camel:xxx"}, environment.Integration.Status.Dependencies)
+	assert.Equal(t, []string{"camel:log", "camel:tbd", "camel:timer", "camel:xxx"},
+		environment.Integration.Status.Dependencies)
 }
 
 func TestKameletConfigLookup(t *testing.T) {
@@ -371,9 +383,12 @@ func TestKameletConfigLookup(t *testing.T) {
 	err = trait.Apply(environment)
 	assert.NoError(t, err)
 	assert.Len(t, environment.Integration.Status.Configuration, 2)
-	assert.Contains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret"})
-	assert.NotContains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret2"})
-	assert.Contains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret3"})
+	assert.Contains(t, environment.Integration.Status.Configuration,
+		v1.ConfigurationSpec{Type: "secret", Value: "my-secret"})
+	assert.NotContains(t, environment.Integration.Status.Configuration,
+		v1.ConfigurationSpec{Type: "secret", Value: "my-secret2"})
+	assert.Contains(t, environment.Integration.Status.Configuration,
+		v1.ConfigurationSpec{Type: "secret", Value: "my-secret3"})
 }
 
 func TestKameletNamedConfigLookup(t *testing.T) {
@@ -438,9 +453,12 @@ func TestKameletNamedConfigLookup(t *testing.T) {
 	err = trait.Apply(environment)
 	assert.NoError(t, err)
 	assert.Len(t, environment.Integration.Status.Configuration, 2)
-	assert.Contains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret"})
-	assert.Contains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret2"})
-	assert.NotContains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret3"})
+	assert.Contains(t, environment.Integration.Status.Configuration,
+		v1.ConfigurationSpec{Type: "secret", Value: "my-secret"})
+	assert.Contains(t, environment.Integration.Status.Configuration,
+		v1.ConfigurationSpec{Type: "secret", Value: "my-secret2"})
+	assert.NotContains(t, environment.Integration.Status.Configuration,
+		v1.ConfigurationSpec{Type: "secret", Value: "my-secret3"})
 }
 
 func TestKameletConditionFalse(t *testing.T) {

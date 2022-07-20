@@ -37,7 +37,8 @@ const (
 	jaegerPortName = "http-c-binary-trft"
 )
 
-func (loc *JaegerTracingLocator) FindEndpoint(ctx context.Context, c client.Client, l log.Logger, e *trait.Environment) (string, error) {
+func (loc *JaegerTracingLocator) FindEndpoint(ctx context.Context, c client.Client, l log.Logger,
+	e *trait.Environment) (string, error) {
 	opts := metav1.ListOptions{
 		LabelSelector: "app.kubernetes.io/part-of=jaeger,app.kubernetes.io/component=service-collector",
 	}
@@ -53,7 +54,8 @@ func (loc *JaegerTracingLocator) FindEndpoint(ctx context.Context, c client.Clie
 
 		for _, port := range svc.Spec.Ports {
 			if port.Name == jaegerPortName && port.Port > 0 {
-				candidates = append(candidates, fmt.Sprintf("http://%s.%s.svc.cluster.local:%d/api/traces", svc.Name, svc.Namespace, port.Port))
+				candidates = append(candidates,
+					fmt.Sprintf("http://%s.%s.svc.cluster.local:%d/api/traces", svc.Name, svc.Namespace, port.Port))
 			}
 		}
 	}

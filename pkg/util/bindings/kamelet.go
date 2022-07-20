@@ -32,7 +32,8 @@ func (k KameletBindingProvider) ID() string {
 	return "kamelet"
 }
 
-func (k KameletBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
+func (k KameletBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext,
+	e v1alpha1.Endpoint) (*Binding, error) {
 	if e.Ref == nil {
 		// works only on refs
 		return nil, nil

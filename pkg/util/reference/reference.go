@@ -38,8 +38,9 @@ const (
 
 var (
 	simpleNameRegexp = regexp.MustCompile(`^(?:(?P<namespace>[a-z0-9-.]+)/)?(?P<name>[a-z0-9-.]+)(?:$|[?].*$)`)
-	fullNameRegexp   = regexp.MustCompile(`^(?:(?P<apiVersion>(?:[a-z0-9-.]+/)?(?:[a-z0-9-.]+)):)?(?P<kind>[A-Za-z0-9-.]+):(?:(?P<namespace>[a-z0-9-.]+)/)?(?P<name>[a-z0-9-.]+)(?:$|[?].*$)`)
-	queryRegexp      = regexp.MustCompile(`^[^?]*[?](?P<query>.*)$`)
+	// nolint: lll
+	fullNameRegexp = regexp.MustCompile(`^(?:(?P<apiVersion>(?:[a-z0-9-.]+/)?(?:[a-z0-9-.]+)):)?(?P<kind>[A-Za-z0-9-.]+):(?:(?P<namespace>[a-z0-9-.]+)/)?(?P<name>[a-z0-9-.]+)(?:$|[?].*$)`)
+	queryRegexp    = regexp.MustCompile(`^[^?]*[?](?P<query>.*)$`)
 
 	templates = map[string]corev1.ObjectReference{
 		"kamelet": {
@@ -156,9 +157,13 @@ func (c *Converter) simpleDecodeString(str string) (corev1.ObjectReference, erro
 		return ref, nil
 	}
 	if c.defaultPrefix != "" {
-		return corev1.ObjectReference{}, fmt.Errorf(`name %q does not match either "[[apigroup/]version:]kind:[namespace/]name" or "[namespace/]name"`, str)
+		return corev1.ObjectReference{}, fmt.Errorf(
+			`name %q does not match either "[[apigroup/]version:]kind:[namespace/]name" or "[namespace/]name"`,
+			str)
 	}
-	return corev1.ObjectReference{}, fmt.Errorf(`name %q does not match format "[[apigroup/]version:]kind:[namespace/]name"`, str)
+	return corev1.ObjectReference{}, fmt.Errorf(
+		`name %q does not match format "[[apigroup/]version:]kind:[namespace/]name"`,
+		str)
 }
 
 func (c *Converter) ToString(ref corev1.ObjectReference) (string, error) {

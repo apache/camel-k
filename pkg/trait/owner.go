@@ -111,7 +111,8 @@ func (t *ownerTrait) IsPlatformTrait() bool {
 	return true
 }
 
-func (t *ownerTrait) propagateLabelAndAnnotations(res metav1.Object, targetLabels map[string]string, targetAnnotations map[string]string) {
+func (t *ownerTrait) propagateLabelAndAnnotations(res metav1.Object, targetLabels map[string]string,
+	targetAnnotations map[string]string) {
 	// Transfer annotations
 	annotations := res.GetAnnotations()
 	if annotations == nil {

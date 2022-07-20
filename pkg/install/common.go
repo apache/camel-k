@@ -62,7 +62,8 @@ var RemoveIngressRoleCustomizer = func(object ctrl.Object) ctrl.Object {
 }
 
 // Resources installs named resources from the project resource directory.
-func Resources(ctx context.Context, c client.Client, namespace string, force bool, customizer ResourceCustomizer, names ...string) error {
+func Resources(ctx context.Context, c client.Client, namespace string, force bool, customizer ResourceCustomizer,
+	names ...string) error {
 	return ResourcesOrCollect(ctx, c, namespace, nil, force, customizer, names...)
 }
 
@@ -77,7 +78,8 @@ func ResourcesOrCollect(ctx context.Context, c client.Client, namespace string, 
 }
 
 // Resource installs a single named resource from the project resource directory.
-func Resource(ctx context.Context, c client.Client, namespace string, force bool, customizer ResourceCustomizer, name string) error {
+func Resource(ctx context.Context, c client.Client, namespace string, force bool, customizer ResourceCustomizer,
+	name string) error {
 	return ResourceOrCollect(ctx, c, namespace, nil, force, customizer, name)
 }
 
@@ -97,7 +99,8 @@ func ResourceOrCollect(ctx context.Context, c client.Client, namespace string, c
 	return ObjectOrCollect(ctx, c, namespace, collection, force, customizer(obj))
 }
 
-func ObjectOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection, force bool, obj ctrl.Object) error {
+func ObjectOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection,
+	force bool, obj ctrl.Object) error {
 	if collection != nil {
 		// Adding to the collection before setting the namespace
 		collection.Add(obj)

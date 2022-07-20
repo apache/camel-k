@@ -87,7 +87,8 @@ func (command *localInspectCmdOptions) init() error {
 }
 
 func (command *localInspectCmdOptions) run(cmd *cobra.Command, args []string) error {
-	dependencies, err := GetDependencies(command.Context, args, command.Dependencies, command.MavenRepositories, command.AllDependencies)
+	dependencies, err := GetDependencies(command.Context,
+		args, command.Dependencies, command.MavenRepositories, command.AllDependencies)
 	if err != nil {
 		return err
 	}

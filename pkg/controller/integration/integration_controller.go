@@ -75,6 +75,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	)
 }
 
+// nolint: maintidx // TODO: refactor the code
 func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 	b := builder.ControllerManagedBy(mgr).
 		Named("integration-controller").
@@ -92,11 +93,14 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 					}
 					// Observe the time to first readiness metric
 					previous := old.Status.GetCondition(v1.IntegrationConditionReady)
-					if next := it.Status.GetCondition(v1.IntegrationConditionReady); (previous == nil || previous.Status != corev1.ConditionTrue && (previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero())) &&
-						next != nil && next.Status == corev1.ConditionTrue && next.FirstTruthyTime != nil && !next.FirstTruthyTime.IsZero() &&
-						it.Status.InitializationTimestamp != nil {
+					if next := it.Status.GetCondition(v1.IntegrationConditionReady); (previous == nil ||
+						previous.Status != corev1.ConditionTrue && (previous.FirstTruthyTime == nil ||
+							previous.FirstTruthyTime.IsZero())) &&
+						next != nil && next.Status == corev1.ConditionTrue && next.FirstTruthyTime != nil &&
+						!next.FirstTruthyTime.IsZero() && it.Status.InitializationTimestamp != nil {
 						duration := next.FirstTruthyTime.Time.Sub(it.Status.InitializationTimestamp.Time)
-						Log.WithValues("request-namespace", it.Namespace, "request-name", it.Name, "ready-after", duration.Seconds()).
+						Log.WithValues("request-namespace", it.Namespace, "request-name", it.Name,
+							"ready-after", duration.Seconds()).
 							ForIntegration(it).Infof("First readiness after %s", duration)
 						timeToFirstReadiness.Observe(duration.Seconds())
 					}
@@ -140,7 +144,8 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 
 				for i := range list.Items {
 					integration := &list.Items[i]
-					log.Debug("Integration Controller: Assessing integration", "integration", integration.Name, "namespace", integration.Namespace)
+					log.Debug("Integration Controller: Assessing integration",
+						"integration", integration.Name, "namespace", integration.Namespace)
 
 					if match, err := integrationMatches(integration, kit); err != nil {
 						log.Errorf(err, "Error matching integration %q with kit %q", integration.Name, kit.Name)
@@ -223,19 +228,22 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 				}
 			}))
 
-	if ok, err := kubernetes.IsAPIResourceInstalled(c, batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
+	if ok, err := kubernetes.IsAPIResourceInstalled(c, batchv1.SchemeGroupVersion.String(),
+		reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
 		// Watch for the owned CronJobs
 		b.Owns(&batchv1.CronJob{}, builder.WithPredicates(StatusChangedPredicate{}))
 	}
 
 	// Watch for the owned Knative Services conditionally
-	if ok, err := kubernetes.IsAPIResourceInstalled(c, servingv1.SchemeGroupVersion.String(), reflect.TypeOf(servingv1.Service{}).Name()); err != nil {
+	if ok, err := kubernetes.IsAPIResourceInstalled(c, servingv1.SchemeGroupVersion.String(),
+		reflect.TypeOf(servingv1.Service{}).Name()); err != nil {
 		return err
 	} else if ok {
 		// Check for permission to watch the ConsoleCLIDownload resource
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		defer cancel()
-		if ok, err = kubernetes.CheckPermission(ctx, c, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); err != nil {
+		if ok, err = kubernetes.CheckPermission(ctx, c, serving.GroupName, "services",
+			platform.GetOperatorWatchNamespace(), "", "watch"); err != nil {
 			return err
 		} else if ok {
 			b.Owns(&servingv1.Service{}, builder.WithPredicates(StatusChangedPredicate{}))

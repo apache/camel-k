@@ -78,7 +78,8 @@ func loadCamelQuarkusCatalog(ctx *builderContext) error {
 }
 
 func generateQuarkusProject(ctx *builderContext) error {
-	p := GenerateQuarkusProjectCommon(ctx.Build.Runtime.Metadata["camel-quarkus.version"], ctx.Build.Runtime.Version, ctx.Build.Runtime.Metadata["quarkus.version"])
+	p := GenerateQuarkusProjectCommon(ctx.Build.Runtime.Metadata["camel-quarkus.version"],
+		ctx.Build.Runtime.Version, ctx.Build.Runtime.Metadata["quarkus.version"])
 
 	// Add all the properties from the build configuration
 	p.Properties.AddAll(ctx.Build.Maven.Properties)
@@ -94,7 +95,8 @@ func generateQuarkusProject(ctx *builderContext) error {
 	return nil
 }
 
-func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion string, quarkusVersion string) maven.Project {
+func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion string,
+	quarkusVersion string) maven.Project {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", defaults.Version)
 	p.DependencyManagement = &maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)}
 	p.Dependencies = make([]maven.Dependency, 0)

@@ -48,7 +48,8 @@ func GetRegistryAddress(ctx context.Context, c client.Client) (*string, error) {
 	return nil, nil
 }
 
-// Copied from https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry
+// Copied from
+// https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry
 // LocalRegistryHostingV1 describes a local registry that developer tools can
 // connect to. A local registry allows clients to load images into the local
 // cluster by pushing to this registry.

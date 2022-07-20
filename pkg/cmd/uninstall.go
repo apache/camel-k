@@ -57,10 +57,13 @@ func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstall
 	cmd.Flags().Bool("skip-roles", false, "Do not uninstall the Camel K Roles in the current namespace")
 	cmd.Flags().Bool("skip-cluster-role-bindings", true, "Do not uninstall the Camel K Cluster Role Bindings")
 	cmd.Flags().Bool("skip-cluster-roles", true, "Do not uninstall the Camel K Cluster Roles")
-	cmd.Flags().Bool("skip-integration-platform", false, "Do not uninstall the Camel K Integration Platform in the current namespace")
-	cmd.Flags().Bool("skip-service-accounts", false, "Do not uninstall the Camel K Service Accounts in the current namespace")
+	cmd.Flags().Bool("skip-integration-platform", false,
+		"Do not uninstall the Camel K Integration Platform in the current namespace")
+	cmd.Flags().Bool("skip-service-accounts", false,
+		"Do not uninstall the Camel K Service Accounts in the current namespace")
 	cmd.Flags().Bool("skip-config-maps", false, "Do not uninstall the Camel K Config Maps in the current namespace")
-	cmd.Flags().Bool("skip-registry-secret", false, "Do not uninstall the Camel K Registry Secret in the current namespace")
+	cmd.Flags().Bool("skip-registry-secret", false,
+		"Do not uninstall the Camel K Registry Secret in the current namespace")
 	cmd.Flags().Bool("skip-kamelets", false, "Do not uninstall the Kamelets in the current namespace")
 	cmd.Flags().Bool("global", false, "Indicates that a global installation is going to be uninstalled (affects OLM)")
 	cmd.Flags().Bool("olm", true, "Try to uninstall via OLM (Operator Lifecycle Manager) if available")
@@ -187,7 +190,8 @@ func (o *uninstallCmdOptions) uninstallOperator(ctx context.Context, c client.Cl
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallClusterWideResources(ctx context.Context, cmd *cobra.Command, c client.Client, namespace string) error {
+func (o *uninstallCmdOptions) uninstallClusterWideResources(ctx context.Context, cmd *cobra.Command,
+	c client.Client, namespace string) error {
 	if !o.SkipCrd || o.UninstallAll {
 		if err := o.uninstallCrd(ctx, c); err != nil {
 			if k8serrors.IsForbidden(err) {
@@ -201,7 +205,8 @@ func (o *uninstallCmdOptions) uninstallClusterWideResources(ctx context.Context,
 	if err := o.removeSubjectFromClusterRoleBindings(ctx, c, namespace); err != nil {
 		if k8serrors.IsForbidden(err) {
 			// Let's print a warning message and continue
-			fmt.Fprintln(cmd.ErrOrStderr(), "Current user is not authorized to remove the operator ServiceAccount from the cluster role bindings")
+			fmt.Fprintln(cmd.ErrOrStderr(),
+				"Current user is not authorized to remove the operator ServiceAccount from the cluster role bindings")
 		} else if err != nil {
 			return err
 		}
@@ -230,7 +235,8 @@ func (o *uninstallCmdOptions) uninstallClusterWideResources(ctx context.Context,
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallNamespaceRoles(ctx context.Context, cmd *cobra.Command, c client.Client) error {
+func (o *uninstallCmdOptions) uninstallNamespaceRoles(ctx context.Context, cmd *cobra.Command,
+	c client.Client) error {
 	if !o.SkipRoleBindings {
 		if err := o.uninstallRoleBindings(ctx, c); err != nil {
 			return err
@@ -255,7 +261,8 @@ func (o *uninstallCmdOptions) uninstallNamespaceRoles(ctx context.Context, cmd *
 	return nil
 }
 
-func (o *uninstallCmdOptions) uninstallNamespaceResources(ctx context.Context, cmd *cobra.Command, c client.Client) error {
+func (o *uninstallCmdOptions) uninstallNamespaceResources(ctx context.Context, cmd *cobra.Command,
+	c client.Client) error {
 	if !o.SkipConfigMaps {
 		if err := o.uninstallConfigMaps(ctx, c); err != nil {
 			return err
@@ -355,7 +362,8 @@ func (o *uninstallCmdOptions) uninstallClusterRoles(ctx context.Context, c clien
 	return nil
 }
 
-func (o *uninstallCmdOptions) removeSubjectFromClusterRoleBindings(ctx context.Context, c client.Client, namespace string) error {
+func (o *uninstallCmdOptions) removeSubjectFromClusterRoleBindings(ctx context.Context, c client.Client,
+	namespace string) error {
 	api := c.RbacV1()
 
 	clusterRoleBindings, err := api.ClusterRoleBindings().List(ctx, defaultListOptions)
@@ -367,8 +375,10 @@ func (o *uninstallCmdOptions) removeSubjectFromClusterRoleBindings(ctx context.C
 	for crbIndex, clusterRoleBinding := range clusterRoleBindings.Items {
 		for i, subject := range clusterRoleBinding.Subjects {
 			if subject.Name == "camel-k-operator" && subject.Namespace == namespace {
-				clusterRoleBinding.Subjects = append(clusterRoleBinding.Subjects[:i], clusterRoleBinding.Subjects[i+1:]...)
-				_, err = api.ClusterRoleBindings().Update(ctx, &clusterRoleBindings.Items[crbIndex], metav1.UpdateOptions{})
+				clusterRoleBinding.Subjects =
+					append(clusterRoleBinding.Subjects[:i], clusterRoleBinding.Subjects[i+1:]...)
+				_, err = api.ClusterRoleBindings().
+					Update(ctx, &clusterRoleBindings.Items[crbIndex], metav1.UpdateOptions{})
 				if err != nil {
 					return err
 				}
@@ -423,7 +433,8 @@ func (o *uninstallCmdOptions) uninstallIntegrationPlatform(ctx context.Context, 
 	}
 
 	for _, integrationPlatform := range integrationPlatforms.Items {
-		err := c.CamelV1().IntegrationPlatforms(o.Namespace).Delete(ctx, integrationPlatform.GetName(), metav1.DeleteOptions{})
+		err := c.CamelV1().IntegrationPlatforms(o.Namespace).
+			Delete(ctx, integrationPlatform.GetName(), metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}
@@ -488,7 +499,9 @@ func (o *uninstallCmdOptions) uninstallKamelets(ctx context.Context, c client.Cl
 }
 
 func createActionNotAuthorizedError(cmd *cobra.Command) error {
-	fmt.Fprintln(cmd.ErrOrStderr(), "Current user is not authorized to remove cluster-wide objects like custom resource definitions or cluster roles")
+	fmt.Fprintln(cmd.ErrOrStderr(),
+		"Current user is not authorized to remove cluster-wide objects like custom resource definitions or cluster roles")
+	// nolint: lll
 	msg := `login as cluster-admin and execute "kamel uninstall" or use flags "--skip-crd --skip-cluster-roles --skip-cluster-role-bindings"`
 	return errors.New(msg)
 }

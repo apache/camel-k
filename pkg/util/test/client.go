@@ -56,19 +56,23 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 
 	c := fake.NewClientBuilder().WithScheme(scheme).WithRuntimeObjects(initObjs...).Build()
 
-	camelClientset := fakecamelclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
-		return strings.Contains(gvk.Group, "camel")
-	})...)
+	camelClientset := fakecamelclientset.NewSimpleClientset(
+		filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
+			return strings.Contains(gvk.Group, "camel")
+		})...,
+	)
 	clientset := fakeclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
 		return !strings.Contains(gvk.Group, "camel") && !strings.Contains(gvk.Group, "knative")
 	})...)
 	replicasCount := make(map[string]int32)
 	fakescaleclient := fakescale.FakeScaleClient{}
 	fakescaleclient.AddReactor("update", "*", func(rawAction testing.Action) (bool, runtime.Object, error) {
-		action := rawAction.(testing.UpdateAction)       // nolint: forcetypeassert
-		obj := action.GetObject().(*autoscalingv1.Scale) // nolint: forcetypeassert
+		action, _ := rawAction.(testing.UpdateAction)
+		obj, _ := action.GetObject().(*autoscalingv1.Scale)
 		replicas := obj.Spec.Replicas
-		key := fmt.Sprintf("%s:%s:%s/%s", action.GetResource().Group, action.GetResource().Resource, action.GetNamespace(), obj.GetName())
+		key := fmt.Sprintf(
+			"%s:%s:%s/%s",
+			action.GetResource().Group, action.GetResource().Resource, action.GetNamespace(), obj.GetName())
 		replicasCount[key] = replicas
 		return true, &autoscalingv1.Scale{
 			ObjectMeta: metav1.ObjectMeta{
@@ -82,7 +86,9 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 	})
 	fakescaleclient.AddReactor("get", "*", func(rawAction testing.Action) (bool, runtime.Object, error) {
 		action := rawAction.(testing.GetAction) // nolint: forcetypeassert
-		key := fmt.Sprintf("%s:%s:%s/%s", action.GetResource().Group, action.GetResource().Resource, action.GetNamespace(), action.GetName())
+		key := fmt.Sprintf(
+			"%s:%s:%s/%s",
+			action.GetResource().Group, action.GetResource().Resource, action.GetNamespace(), action.GetName())
 		obj := &autoscalingv1.Scale{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      action.GetName(),
@@ -103,7 +109,8 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 	}, nil
 }
 
-func filterObjects(scheme *runtime.Scheme, input []runtime.Object, filter func(gvk schema.GroupVersionKind) bool) []runtime.Object {
+func filterObjects(scheme *runtime.Scheme, input []runtime.Object,
+	filter func(gvk schema.GroupVersionKind) bool) []runtime.Object {
 	var res []runtime.Object
 	for _, obj := range input {
 		kinds, _, _ := scheme.ObjectKinds(obj)
@@ -147,7 +154,8 @@ func (c *FakeClient) GetCurrentNamespace(kubeConfig string) (string, error) {
 }
 
 // Patch mimicks patch for server-side apply and simply creates the obj.
-func (c *FakeClient) Patch(ctx context.Context, obj controller.Object, patch controller.Patch, opts ...controller.PatchOption) error {
+func (c *FakeClient) Patch(ctx context.Context, obj controller.Object, patch controller.Patch,
+	opts ...controller.PatchOption) error {
 	return c.Create(ctx, obj)
 }
 

@@ -41,9 +41,10 @@ func newCmdDebug(rootCmdOptions *RootCmdOptions) (*cobra.Command, *debugCmdOptio
 	}
 
 	cmd := cobra.Command{
-		Use:     "debug [integration name]",
-		Short:   "Debug an integration running on Kubernetes",
-		Long:    `Set an integration running on the Kubernetes cluster in debug mode and forward ports in order to connect a remote debugger running on the local host.`,
+		Use:   "debug [integration name]",
+		Short: "Debug an integration running on Kubernetes",
+		Long: "Set an integration running on the Kubernetes cluster in debug mode and forward ports " +
+			"in order to connect a remote debugger running on the local host.",
 		Args:    options.validateArgs,
 		PreRunE: decode(&options),
 		RunE:    options.run,
@@ -129,10 +130,13 @@ func (o *debugCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}()
 
-	return kubernetes.PortForward(o.Context, cmdClient, o.Namespace, selector, o.Port, o.RemotePort, cmd.OutOrStdout(), cmd.ErrOrStderr())
+	return kubernetes.PortForward(o.Context, cmdClient, o.Namespace, selector, o.Port, o.RemotePort,
+		cmd.OutOrStdout(), cmd.ErrOrStderr())
 }
 
-func (o *debugCmdOptions) toggleDebug(c camelv1.IntegrationsGetter, it *v1.Integration, active bool) (*v1.Integration, error) {
+func (o *debugCmdOptions) toggleDebug(c camelv1.IntegrationsGetter, it *v1.Integration, active bool) (
+	*v1.Integration, error,
+) {
 	if it.Spec.Traits.JVM == nil {
 		it.Spec.Traits.JVM = &traitv1.JVMTrait{}
 	}

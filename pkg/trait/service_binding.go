@@ -91,7 +91,8 @@ func (t *serviceBindingTrait) getContext(e *Environment) (pipeline.Context, erro
 	if err != nil {
 		return nil, err
 	}
-	ctxProvider := context.Provider(dyn, e.Client.AuthorizationV1().SubjectAccessReviews(), kubernetes.ResourceLookup(e.Client.RESTMapper()))
+	ctxProvider := context.Provider(dyn, e.Client.AuthorizationV1().SubjectAccessReviews(),
+		kubernetes.ResourceLookup(e.Client.RESTMapper()))
 	ctx, err := ctxProvider.Get(serviceBinding)
 	if err != nil {
 		return nil, err

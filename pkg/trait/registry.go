@@ -155,7 +155,9 @@ func getOpenShiftRegistrySecret(e *Environment) (string, error) {
 	return "", nil
 }
 
-func extractMavenServerCredentialsFromSecret(registrySecret string, e *Environment, registryAddress string) (v1.Server, error) {
+func extractMavenServerCredentialsFromSecret(registrySecret string, e *Environment, registryAddress string) (
+	v1.Server, error,
+) {
 	secret, err := kubernetes.GetSecret(e.Ctx, e.Client, registrySecret, e.Platform.Namespace)
 	if err != nil {
 		return v1.Server{}, err

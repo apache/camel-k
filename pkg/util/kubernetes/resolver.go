@@ -29,7 +29,9 @@ import (
 )
 
 // ResolveSources --.
-func ResolveSources(elements []v1.SourceSpec, mapLookup func(string) (*corev1.ConfigMap, error)) ([]v1.SourceSpec, error) {
+func ResolveSources(elements []v1.SourceSpec, mapLookup func(string) (*corev1.ConfigMap, error)) (
+	[]v1.SourceSpec, error,
+) {
 	for i := 0; i < len(elements); i++ {
 		r := &elements[i]
 
@@ -42,7 +44,9 @@ func ResolveSources(elements []v1.SourceSpec, mapLookup func(string) (*corev1.Co
 }
 
 // ResolveResource --.
-func ResolveResource(elements []v1.ResourceSpec, mapLookup func(string) (*corev1.ConfigMap, error)) ([]v1.ResourceSpec, error) {
+func ResolveResource(elements []v1.ResourceSpec, mapLookup func(string) (*corev1.ConfigMap, error)) (
+	[]v1.ResourceSpec, error,
+) {
 	for i := 0; i < len(elements); i++ {
 		r := &elements[i]
 

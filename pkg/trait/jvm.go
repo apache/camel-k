@@ -70,7 +70,8 @@ func (t *jvmTrait) Configure(e *Environment) (bool, error) {
 
 	if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {
 		// The JVM trait must be disabled in case the current IntegrationKit corresponds to a native build
-		if quarkus, ok := trait.(*quarkusTrait); ok && pointer.BoolDeref(quarkus.Enabled, true) && quarkus.isNativeIntegration(e) {
+		if quarkus, ok := trait.(*quarkusTrait); ok &&
+			pointer.BoolDeref(quarkus.Enabled, true) && quarkus.isNativeIntegration(e) {
 			return false, nil
 		}
 	}
@@ -94,7 +95,9 @@ func (t *jvmTrait) Apply(e *Environment) error {
 
 	if kit == nil {
 		if e.Integration.Status.IntegrationKit != nil {
-			return fmt.Errorf("unable to find integration kit %s/%s", e.Integration.GetIntegrationKitNamespace(e.Platform), e.Integration.Status.IntegrationKit.Name)
+			return fmt.Errorf(
+				"unable to find integration kit %s/%s",
+				e.Integration.GetIntegrationKitNamespace(e.Platform), e.Integration.Status.IntegrationKit.Name)
 		}
 		return fmt.Errorf("unable to find integration kit for integration %s", e.Integration.Name)
 	}
@@ -157,7 +160,8 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	hasHeapSizeOption := false
 	// Add JVM options
 	if len(t.Options) > 0 {
-		hasHeapSizeOption = util.StringSliceContainsAnyOf(t.Options, "-Xmx", "-XX:MaxHeapSize", "-XX:MinRAMPercentage", "-XX:MaxRAMPercentage")
+		hasHeapSizeOption = util.StringSliceContainsAnyOf(t.Options,
+			"-Xmx", "-XX:MaxHeapSize", "-XX:MinRAMPercentage", "-XX:MaxRAMPercentage")
 
 		args = append(args, t.Options...)
 	}

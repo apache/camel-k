@@ -183,19 +183,22 @@ func generateProjectStructure(context Context, project Project) error {
 	}
 
 	if context.GlobalSettings != nil {
-		if err := util.WriteFileWithContent(path.Join(context.Path, "settings.xml"), context.GlobalSettings); err != nil {
+		if err := util.WriteFileWithContent(path.Join(context.Path, "settings.xml"),
+			context.GlobalSettings); err != nil {
 			return err
 		}
 	}
 
 	if context.UserSettings != nil {
-		if err := util.WriteFileWithContent(path.Join(context.Path, "user-settings.xml"), context.UserSettings); err != nil {
+		if err := util.WriteFileWithContent(path.Join(context.Path, "user-settings.xml"),
+			context.UserSettings); err != nil {
 			return err
 		}
 	}
 
 	if context.SettingsSecurity != nil {
-		if err := util.WriteFileWithContent(path.Join(context.Path, "settings-security.xml"), context.SettingsSecurity); err != nil {
+		if err := util.WriteFileWithContent(path.Join(context.Path, "settings-security.xml"),
+			context.SettingsSecurity); err != nil {
 			return err
 		}
 	}
@@ -241,7 +244,8 @@ func ParseGAV(gav string) (Dependency, error) {
 	res := rex.FindStringSubmatch(gav)
 
 	if res == nil || len(res) < 9 {
-		return Dependency{}, errors.New("GAV must match <groupId>:<artifactId>[:<packagingType>[:<classifier>]]:(<version>|'?')")
+		return Dependency{}, errors.New(
+			"GAV must match <groupId>:<artifactId>[:<packagingType>[:<classifier>]]:(<version>|'?')")
 	}
 
 	dep.GroupID = res[1]

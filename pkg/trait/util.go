@@ -166,7 +166,8 @@ func keyValuePairArrayAsStringMap(pairs []string) (map[string]string, error) {
 	return m, nil
 }
 
-// filterTransferableAnnotations returns a map containing annotations that are meaningful for being transferred to child resources.
+// filterTransferableAnnotations returns a map containing annotations that are meaningful for being transferred
+// to child resources.
 func filterTransferableAnnotations(annotations map[string]string) map[string]string {
 	res := make(map[string]string)
 	for k, v := range annotations {

@@ -72,16 +72,20 @@ func TestApplyEmptyAffinityLabelsDoesSucceed(t *testing.T) {
 	affinityTrait := createNominalAffinityTest()
 
 	environment, deployment := createNominalDeploymentTraitTest()
-	testApplyEmptyAffinityLabelsDoesSucceed(t, affinityTrait, environment, deployment.Spec.Template.Spec.Affinity)
+	testApplyEmptyAffinityLabelsDoesSucceed(t, affinityTrait, environment,
+		deployment.Spec.Template.Spec.Affinity)
 
 	environment, knativeService := createNominalKnativeServiceTraitTest()
-	testApplyEmptyAffinityLabelsDoesSucceed(t, affinityTrait, environment, knativeService.Spec.Template.Spec.Affinity)
+	testApplyEmptyAffinityLabelsDoesSucceed(t, affinityTrait, environment,
+		knativeService.Spec.Template.Spec.Affinity)
 
 	environment, cronJob := createNominalCronJobTraitTest()
-	testApplyEmptyAffinityLabelsDoesSucceed(t, affinityTrait, environment, cronJob.Spec.JobTemplate.Spec.Template.Spec.Affinity)
+	testApplyEmptyAffinityLabelsDoesSucceed(t, affinityTrait, environment,
+		cronJob.Spec.JobTemplate.Spec.Template.Spec.Affinity)
 }
 
-func testApplyEmptyAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, environment *Environment, affinity *corev1.Affinity) {
+func testApplyEmptyAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, environment *Environment,
+	affinity *corev1.Affinity) {
 	t.Helper()
 
 	err := trait.Apply(environment)
@@ -95,16 +99,20 @@ func TestApplyNodeAffinityLabelsDoesSucceed(t *testing.T) {
 	affinityTrait.NodeAffinityLabels = []string{"criteria = value"}
 
 	environment, deployment := createNominalDeploymentTraitTest()
-	testApplyNodeAffinityLabelsDoesSucceed(t, affinityTrait, environment, &deployment.Spec.Template.Spec)
+	testApplyNodeAffinityLabelsDoesSucceed(t, affinityTrait, environment,
+		&deployment.Spec.Template.Spec)
 
 	environment, knativeService := createNominalKnativeServiceTraitTest()
-	testApplyNodeAffinityLabelsDoesSucceed(t, affinityTrait, environment, &knativeService.Spec.Template.Spec.PodSpec)
+	testApplyNodeAffinityLabelsDoesSucceed(t, affinityTrait, environment,
+		&knativeService.Spec.Template.Spec.PodSpec)
 
 	environment, cronJob := createNominalCronJobTraitTest()
-	testApplyNodeAffinityLabelsDoesSucceed(t, affinityTrait, environment, &cronJob.Spec.JobTemplate.Spec.Template.Spec)
+	testApplyNodeAffinityLabelsDoesSucceed(t, affinityTrait, environment,
+		&cronJob.Spec.JobTemplate.Spec.Template.Spec)
 }
 
-func testApplyNodeAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, environment *Environment, podSpec *corev1.PodSpec) {
+func testApplyNodeAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, environment *Environment,
+	podSpec *corev1.PodSpec) {
 	t.Helper()
 
 	err := trait.Apply(environment)
@@ -112,8 +120,10 @@ func testApplyNodeAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, 
 	assert.Nil(t, err)
 	assert.NotNil(t, podSpec.Affinity.NodeAffinity)
 	nodeAffinity := podSpec.Affinity.NodeAffinity
-	assert.NotNil(t, nodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[0].MatchExpressions[0])
-	nodeSelectorRequirement := nodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[0].MatchExpressions[0]
+	assert.NotNil(t,
+		nodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[0].MatchExpressions[0])
+	nodeSelectorRequirement :=
+		nodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[0].MatchExpressions[0]
 	assert.Equal(t, "criteria", nodeSelectorRequirement.Key)
 	assert.Equal(t, corev1.NodeSelectorOpIn, nodeSelectorRequirement.Operator)
 	assert.ElementsMatch(t, [1]string{"value"}, nodeSelectorRequirement.Values)
@@ -125,16 +135,20 @@ func TestApplyPodAntiAffinityLabelsDoesSucceed(t *testing.T) {
 	affinityTrait.PodAntiAffinityLabels = []string{"criteria != value"}
 
 	environment, deployment := createNominalDeploymentTraitTest()
-	testApplyPodAntiAffinityLabelsDoesSucceed(t, affinityTrait, environment, &deployment.Spec.Template.Spec)
+	testApplyPodAntiAffinityLabelsDoesSucceed(t, affinityTrait, environment,
+		&deployment.Spec.Template.Spec)
 
 	environment, knativeService := createNominalKnativeServiceTraitTest()
-	testApplyPodAntiAffinityLabelsDoesSucceed(t, affinityTrait, environment, &knativeService.Spec.Template.Spec.PodSpec)
+	testApplyPodAntiAffinityLabelsDoesSucceed(t, affinityTrait, environment,
+		&knativeService.Spec.Template.Spec.PodSpec)
 
 	environment, cronJob := createNominalCronJobTraitTest()
-	testApplyPodAntiAffinityLabelsDoesSucceed(t, affinityTrait, environment, &cronJob.Spec.JobTemplate.Spec.Template.Spec)
+	testApplyPodAntiAffinityLabelsDoesSucceed(t, affinityTrait, environment,
+		&cronJob.Spec.JobTemplate.Spec.Template.Spec)
 }
 
-func testApplyPodAntiAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, environment *Environment, podSpec *corev1.PodSpec) {
+func testApplyPodAntiAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, environment *Environment,
+	podSpec *corev1.PodSpec) {
 	t.Helper()
 
 	err := trait.Apply(environment)
@@ -142,13 +156,17 @@ func testApplyPodAntiAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrai
 	assert.Nil(t, err)
 	assert.NotNil(t, podSpec.Affinity.PodAntiAffinity)
 	podAntiAffinity := podSpec.Affinity.PodAntiAffinity
-	assert.NotNil(t, podAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[0])
-	userRequirement := podAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[0]
+	assert.NotNil(t,
+		podAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[0])
+	userRequirement :=
+		podAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[0]
 	assert.Equal(t, "criteria", userRequirement.Key)
 	assert.Equal(t, metav1.LabelSelectorOpNotIn, userRequirement.Operator)
 	assert.ElementsMatch(t, [1]string{"value"}, userRequirement.Values)
-	assert.NotNil(t, podAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[1])
-	integrationRequirement := podAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[1]
+	assert.NotNil(t,
+		podAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[1])
+	integrationRequirement :=
+		podAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[1]
 	assert.Equal(t, v1.IntegrationLabel, integrationRequirement.Key)
 	assert.Equal(t, metav1.LabelSelectorOpIn, integrationRequirement.Operator)
 	assert.ElementsMatch(t, [1]string{"integration-name"}, integrationRequirement.Values)
@@ -160,16 +178,20 @@ func TestApplyPodAffinityLabelsDoesSucceed(t *testing.T) {
 	affinityTrait.PodAffinityLabels = []string{"!criteria"}
 
 	environment, deployment := createNominalDeploymentTraitTest()
-	testApplyPodAffinityLabelsDoesSucceed(t, affinityTrait, environment, &deployment.Spec.Template.Spec)
+	testApplyPodAffinityLabelsDoesSucceed(t, affinityTrait, environment,
+		&deployment.Spec.Template.Spec)
 
 	environment, knativeService := createNominalKnativeServiceTraitTest()
-	testApplyPodAffinityLabelsDoesSucceed(t, affinityTrait, environment, &knativeService.Spec.Template.Spec.PodSpec)
+	testApplyPodAffinityLabelsDoesSucceed(t, affinityTrait, environment,
+		&knativeService.Spec.Template.Spec.PodSpec)
 
 	environment, cronJob := createNominalCronJobTraitTest()
-	testApplyPodAffinityLabelsDoesSucceed(t, affinityTrait, environment, &cronJob.Spec.JobTemplate.Spec.Template.Spec)
+	testApplyPodAffinityLabelsDoesSucceed(t, affinityTrait, environment,
+		&cronJob.Spec.JobTemplate.Spec.Template.Spec)
 }
 
-func testApplyPodAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, environment *Environment, podSpec *corev1.PodSpec) {
+func testApplyPodAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, environment *Environment,
+	podSpec *corev1.PodSpec) {
 	t.Helper()
 
 	err := trait.Apply(environment)
@@ -177,12 +199,16 @@ func testApplyPodAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, e
 	assert.Nil(t, err)
 	assert.NotNil(t, podSpec.Affinity.PodAffinity)
 	podAffinity := podSpec.Affinity.PodAffinity
-	assert.NotNil(t, podAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[0])
-	userRequirement := podAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[0]
+	assert.NotNil(t,
+		podAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[0])
+	userRequirement :=
+		podAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[0]
 	assert.Equal(t, "criteria", userRequirement.Key)
 	assert.Equal(t, metav1.LabelSelectorOpDoesNotExist, userRequirement.Operator)
-	assert.NotNil(t, podAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[1])
-	integrationRequirement := podAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[1]
+	assert.NotNil(t,
+		podAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[1])
+	integrationRequirement :=
+		podAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[1]
 	assert.Equal(t, v1.IntegrationLabel, integrationRequirement.Key)
 	assert.Equal(t, metav1.LabelSelectorOpIn, integrationRequirement.Operator)
 	assert.ElementsMatch(t, [1]string{"integration-name"}, integrationRequirement.Values)

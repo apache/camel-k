@@ -44,19 +44,22 @@ func hashFrom(contents ...[]byte) string {
 	return fmt.Sprintf("%x", hash.Sum(nil))
 }
 
-func parseConfigAndGenCm(ctx context.Context, cmd *cobra.Command, c client.Client, config *resource.Config, integration *v1.Integration, enableCompression bool) (*corev1.ConfigMap, error) {
+func parseConfigAndGenCm(ctx context.Context, cmd *cobra.Command, c client.Client, config *resource.Config,
+	integration *v1.Integration, enableCompression bool) (*corev1.ConfigMap, error) {
 	switch config.StorageType() {
 	case resource.StorageTypeConfigmap:
 		cm := kubernetes.LookupConfigmap(ctx, c, integration.Namespace, config.Name())
 		if cm == nil {
-			fmt.Fprintln(cmd.ErrOrStderr(), "Warn:", config.Name(), "Configmap not found in", integration.Namespace, "namespace, make sure to provide it before the Integration can run")
+			fmt.Fprintln(cmd.ErrOrStderr(), "Warn:", config.Name(), "Configmap not found in", integration.Namespace,
+				"namespace, make sure to provide it before the Integration can run")
 		} else if config.ContentType() != resource.ContentTypeData && cm.BinaryData != nil {
 			return nil, fmt.Errorf("you cannot provide a binary config, use a text file instead")
 		}
 	case resource.StorageTypeSecret:
 		secret := kubernetes.LookupSecret(ctx, c, integration.Namespace, config.Name())
 		if secret == nil {
-			fmt.Fprintln(cmd.ErrOrStderr(), "Warn:", config.Name(), "Secret not found in", integration.Namespace, "namespace, make sure to provide it before the Integration can run")
+			fmt.Fprintln(cmd.ErrOrStderr(), "Warn:", config.Name(), "Secret not found in", integration.Namespace,
+				"namespace, make sure to provide it before the Integration can run")
 		}
 	case resource.StorageTypeFile:
 		// Don't allow a binary non compressed resource
@@ -65,18 +68,21 @@ func parseConfigAndGenCm(ctx context.Context, cmd *cobra.Command, c client.Clien
 			return nil, err
 		}
 		if config.ContentType() != resource.ContentTypeData && !enableCompression && isBinary(contentType) {
-			return nil, fmt.Errorf("you cannot provide a binary config, use a text file or check --resource flag instead")
+			return nil, fmt.Errorf(
+				"you cannot provide a binary config, use a text file or check --resource flag instead")
 		}
 		resourceType := v1.ResourceTypeData
 		if config.ContentType() == resource.ContentTypeText {
 			resourceType = v1.ResourceTypeConfig
 		}
-		resourceSpec, err := binaryOrTextResource(path.Base(config.Name()), rawData, contentType, enableCompression, resourceType, config.DestinationPath())
+		resourceSpec, err := binaryOrTextResource(path.Base(config.Name()), rawData, contentType, enableCompression,
+			resourceType, config.DestinationPath())
 		if err != nil {
 			return nil, err
 		}
 
-		return resource.ConvertFileToConfigmap(ctx, c, config, integration.Namespace, integration.Name, resourceSpec.Content, resourceSpec.RawContent)
+		return resource.ConvertFileToConfigmap(ctx, c, config, integration.Namespace, integration.Name,
+			resourceSpec.Content, resourceSpec.RawContent)
 	default:
 		// Should never reach this
 		return nil, fmt.Errorf("invalid option type %s", config.StorageType())
@@ -85,7 +91,8 @@ func parseConfigAndGenCm(ctx context.Context, cmd *cobra.Command, c client.Clien
 	return nil, nil
 }
 
-func binaryOrTextResource(fileName string, data []byte, contentType string, base64Compression bool, resourceType v1.ResourceType, destinationPath string) (v1.ResourceSpec, error) {
+func binaryOrTextResource(fileName string, data []byte, contentType string, base64Compression bool,
+	resourceType v1.ResourceType, destinationPath string) (v1.ResourceSpec, error) {
 	resourceSpec := v1.ResourceSpec{
 		DataSpec: v1.DataSpec{
 			Name:        fileName,

@@ -28,7 +28,8 @@ import (
 )
 
 var (
-	validTaintRegexp                = regexp.MustCompile(`^([\w\/_\-\.]+)(=)?([\w_\-\.]+)?:(NoSchedule|NoExecute|PreferNoSchedule):?(\d*)?$`)
+	validTaintRegexp = regexp.MustCompile(
+		`^([\w\/_\-\.]+)(=)?([\w_\-\.]+)?:(NoSchedule|NoExecute|PreferNoSchedule):?(\d*)?$`)
 	validNodeSelectorRegexp         = regexp.MustCompile(`^([\w\/_\-\.]+)=([\w_\-\.]+)$`)
 	validResourceRequirementsRegexp = regexp.MustCompile(`^(requests|limits)\.(memory|cpu)=([\w\.]+)$`)
 )

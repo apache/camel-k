@@ -183,7 +183,8 @@ tasks:
 	_ = action.updateBuildStatus(ctx, build, status)
 }
 
-func (action *monitorRoutineAction) updateBuildStatus(ctx context.Context, build *v1.Build, status v1.BuildStatus) error {
+func (action *monitorRoutineAction) updateBuildStatus(ctx context.Context, build *v1.Build,
+	status v1.BuildStatus) error {
 	target := build.DeepCopy()
 	target.Status = status
 	// Copy the failure field from the build to persist recovery state

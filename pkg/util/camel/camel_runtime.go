@@ -27,7 +27,9 @@ import (
 )
 
 // LoadCatalog --.
-func LoadCatalog(ctx context.Context, client client.Client, namespace string, runtime v1.RuntimeSpec) (*RuntimeCatalog, error) {
+func LoadCatalog(ctx context.Context, client client.Client, namespace string, runtime v1.RuntimeSpec) (
+	*RuntimeCatalog, error,
+) {
 	options := []k8sclient.ListOption{
 		k8sclient.InNamespace(namespace),
 	}

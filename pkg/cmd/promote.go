@@ -50,9 +50,10 @@ func newCmdPromote(rootCmdOptions *RootCmdOptions) (*cobra.Command, *promoteCmdO
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     "promote integration --to [namespace] ...",
-		Short:   "Promote an Integration/KameletBinding from an environment to another",
-		Long:    "Promote an Integration/KameletBinding from an environment to another, for example from a Development environment to a Production environment",
+		Use:   "promote integration --to [namespace] ...",
+		Short: "Promote an Integration/KameletBinding from an environment to another",
+		Long: "Promote an Integration/KameletBinding from an environment to another, " +
+			"for example from a Development environment to a Production environment",
 		PreRunE: decode(&options),
 		RunE:    options.run,
 	}
@@ -142,13 +143,19 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 func checkOpsCompatibility(cmd *cobra.Command, source, dest map[string]string) error {
 	if !compatibleVersions(source["Version"], dest["Version"], cmd) {
-		return fmt.Errorf("source (%s) and destination (%s) Camel K operator versions are not compatible", source["Version"], dest["Version"])
+		return fmt.Errorf(
+			"source (%s) and destination (%s) Camel K operator versions are not compatible",
+			source["Version"], dest["Version"])
 	}
 	if !compatibleVersions(source["Runtime Version"], dest["Runtime Version"], cmd) {
-		return fmt.Errorf("source (%s) and destination (%s) Camel K runtime versions are not compatible", source["Runtime Version"], dest["Runtime Version"])
+		return fmt.Errorf(
+			"source (%s) and destination (%s) Camel K runtime versions are not compatible",
+			source["Runtime Version"], dest["Runtime Version"])
 	}
 	if source["Registry Address"] != dest["Registry Address"] {
-		return fmt.Errorf("source (%s) and destination (%s) Camel K container images registries are not the same", source["Registry Address"], dest["Registry Address"])
+		return fmt.Errorf(
+			"source (%s) and destination (%s) Camel K container images registries are not the same",
+			source["Registry Address"], dest["Registry Address"])
 	}
 
 	return nil
@@ -404,7 +411,8 @@ func (o *promoteCmdOptions) editIntegration(it *v1.Integration) *v1.Integration 
 	return &dst
 }
 
-func (o *promoteCmdOptions) editKameletBinding(kb *v1alpha1.KameletBinding, it *v1.Integration) *v1alpha1.KameletBinding {
+func (o *promoteCmdOptions) editKameletBinding(kb *v1alpha1.KameletBinding,
+	it *v1.Integration) *v1alpha1.KameletBinding {
 	dst := v1alpha1.NewKameletBinding(o.To, kb.Name)
 	dst.Spec = *kb.Spec.DeepCopy()
 	contImage := it.Status.Image

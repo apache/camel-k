@@ -53,7 +53,8 @@ func assembleClasspathArgValue(properties []string, dependencies []string, route
 	return strings.Join(classpathContents, string(os.PathListSeparator))
 }
 
-func assembleIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string, propertiesDir string, stdout, stderr io.Writer, local bool) (*exec.Cmd, error) {
+func assembleIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string,
+	propertiesDir string, stdout, stderr io.Writer, local bool) (*exec.Cmd, error) {
 	// Create classpath value.
 	classpathValue := assembleClasspathArgValue(properties, dependencies, routes)
 
@@ -102,7 +103,8 @@ func assembleIntegrationRunCommand(ctx context.Context, properties []string, dep
 }
 
 // RunLocalIntegrationRunCommand --.
-func RunLocalIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string, propertiesDir string, stdout, stderr io.Writer) error {
+func RunLocalIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string,
+	propertiesDir string, stdout, stderr io.Writer) error {
 	cmd, err := assembleIntegrationRunCommand(ctx, properties, dependencies, routes, propertiesDir, stdout, stderr, true)
 	if err != nil {
 		return err
@@ -121,7 +123,8 @@ func RunLocalIntegrationRunCommand(ctx context.Context, properties []string, dep
 }
 
 // GetContainerIntegrationRunCommand --.
-func GetContainerIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string, stdout, stderr io.Writer) (*exec.Cmd, error) {
+func GetContainerIntegrationRunCommand(ctx context.Context, properties []string, dependencies []string, routes []string,
+	stdout, stderr io.Writer) (*exec.Cmd, error) {
 	// This is the integration command which will be run inside the container. Therefore all paths need to
 	// be valid container paths.
 
@@ -130,5 +133,6 @@ func GetContainerIntegrationRunCommand(ctx context.Context, properties []string,
 	containerDependencies := docker.ContainerizeDependencyPaths(dependencies, docker.GetContainerDependenciesDir())
 	containerRoutes := docker.ContainerizeFilePaths(routes, docker.GetContainerRoutesDir())
 
-	return assembleIntegrationRunCommand(ctx, containerProperties, containerDependencies, containerRoutes, docker.GetContainerPropertiesDir(), stdout, stderr, false)
+	return assembleIntegrationRunCommand(ctx, containerProperties, containerDependencies, containerRoutes,
+		docker.GetContainerPropertiesDir(), stdout, stderr, false)
 }

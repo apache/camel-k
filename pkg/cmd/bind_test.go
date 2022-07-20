@@ -57,7 +57,10 @@ func TestBindOutputJSON(t *testing.T) {
 	assert.Equal(t, "json", buildCmdOptions.OutputFormat)
 
 	assert.Nil(t, err)
-	assert.Equal(t, `{"kind":"KameletBinding","apiVersion":"camel.apache.org/v1alpha1","metadata":{"name":"my-to-my","creationTimestamp":null,"annotations":{"camel.apache.org/operator.id":"camel-k"}},"spec":{"source":{"uri":"my:src"},"sink":{"uri":"my:dst"}},"status":{}}`, output)
+	// nolint: lll
+	assert.Equal(t,
+		`{"kind":"KameletBinding","apiVersion":"camel.apache.org/v1alpha1","metadata":{"name":"my-to-my","creationTimestamp":null,"annotations":{"camel.apache.org/operator.id":"camel-k"}},"spec":{"source":{"uri":"my:src"},"sink":{"uri":"my:dst"}},"status":{}}`,
+		output)
 }
 
 func TestBindOutputYAML(t *testing.T) {
@@ -174,7 +177,8 @@ status: {}
 
 func TestBindTraits(t *testing.T) {
 	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
-	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml", "-t", "mount.configs=configmap:my-cm", "-c", "my-service-binding")
+	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst",
+		"-o", "yaml", "-t", "mount.configs=configmap:my-cm", "-c", "my-service-binding")
 	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
 
 	assert.Nil(t, err)

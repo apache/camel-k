@@ -37,7 +37,8 @@ func (k KnativeURIBindingProvider) ID() string {
 	return "knative-uri"
 }
 
-func (k KnativeURIBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
+func (k KnativeURIBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext,
+	e v1alpha1.Endpoint) (*Binding, error) {
 	if e.URI == nil {
 		// works only on uris
 		return nil, nil

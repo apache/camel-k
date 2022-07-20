@@ -43,25 +43,36 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:               "bind [source] [sink] ...",
-		Short:             "Bind Kubernetes resources, such as Kamelets, in an integration flow.",
-		Long:              "Bind Kubernetes resources, such as Kamelets, in an integration flow. Endpoints are expected in the format \"[[apigroup/]version:]kind:[namespace/]name\" or plain Camel URIs.",
+		Use:   "bind [source] [sink] ...",
+		Short: "Bind Kubernetes resources, such as Kamelets, in an integration flow.",
+		Long: "Bind Kubernetes resources, such as Kamelets, in an integration flow. " +
+			"Endpoints are expected in the format \"[[apigroup/]version:]kind:[namespace/]name\" or plain Camel URIs.",
 		PersistentPreRunE: decode(&options),
 		PreRunE:           options.preRunE,
 		RunE:              options.runE,
 		Annotations:       make(map[string]string),
 	}
 
-	cmd.Flags().StringArrayP("connect", "c", nil, "A ServiceBinding or Provisioned Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
-	cmd.Flags().String("error-handler", "", `Add error handler (none|log|sink:<endpoint>). Sink endpoints are expected in the format "[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
+	cmd.Flags().StringArrayP("connect", "c", nil,
+		"A ServiceBinding or Provisioned Service that the integration should bind to, "+
+			"specified as [[apigroup/]version:]kind:[namespace/]name")
+	cmd.Flags().String("error-handler", "",
+		`Add error handler (none|log|sink:<endpoint>). Sink endpoints are expected in the format `+
+			`"[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
 	cmd.Flags().String("name", "", "Name for the binding")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
-	cmd.Flags().StringArrayP("property", "p", nil, `Add a binding property in the form of "source.<key>=<value>", "sink.<key>=<value>", "error-handler.<key>=<value>" or "step-<n>.<key>=<value>"`)
-	cmd.Flags().Bool("skip-checks", false, "Do not verify the binding for compliance with Kamelets and other Kubernetes resources")
-	cmd.Flags().StringArray("step", nil, `Add binding steps as Kubernetes resources. Endpoints are expected in the format "[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
+	cmd.Flags().StringArrayP("property", "p", nil,
+		`Add a binding property in the form of `+
+			`"source.<key>=<value>", "sink.<key>=<value>", "error-handler.<key>=<value>" or "step-<n>.<key>=<value>"`)
+	cmd.Flags().Bool("skip-checks", false,
+		"Do not verify the binding for compliance with Kamelets and other Kubernetes resources")
+	cmd.Flags().StringArray("step", nil,
+		`Add binding steps as Kubernetes resources. Endpoints are expected in the format `+
+			`"[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
 	cmd.Flags().StringArrayP("trait", "t", nil, `Add a trait to the corresponding Integration.`)
 	cmd.Flags().StringP("operator-id", "x", "camel-k", "Operator id selected to manage this Kamelet binding.")
-	cmd.Flags().StringArray("annotation", nil, "Add an annotation to the Kamelet binding. E.g. \"--annotation my.company=hello\"")
+	cmd.Flags().StringArray("annotation", nil,
+		"Add an annotation to the Kamelet binding. E.g. \"--annotation my.company=hello\"")
 	cmd.Flags().Bool("force", false, "Force creation of Kamelet binding regardless of potential misconfiguration.")
 
 	return &cmd, &options
@@ -278,7 +289,8 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func showOutput(cmd *cobra.Command, binding *v1alpha1.KameletBinding, outputFormat string, scheme runtime.ObjectTyper) error {
+func showOutput(cmd *cobra.Command, binding *v1alpha1.KameletBinding, outputFormat string,
+	scheme runtime.ObjectTyper) error {
 	printer := printers.NewTypeSetter(scheme)
 	printer.Delegate = &kubernetes.CLIPrinter{
 		Format: outputFormat,
@@ -422,18 +434,24 @@ func (o *bindCmdOptions) getProperties(refType string) map[string]string {
 func (o *bindCmdOptions) parseProperty(prop string) (string, string, string, error) {
 	parts := strings.SplitN(prop, "=", 2)
 	if len(parts) != 2 {
-		return "", "", "", fmt.Errorf(`property %q does not follow format "[source|sink|error-handler|step-<n>].<key>=<value>"`, prop)
+		return "", "", "", fmt.Errorf(
+			`property %q does not follow format "[source|sink|error-handler|step-<n>].<key>=<value>"`,
+			prop)
 	}
 	keyParts := strings.SplitN(parts[0], ".", 2)
 	if len(keyParts) != 2 {
-		return "", "", "", fmt.Errorf(`property key %q does not follow format "[source|sink|error-handler|step-<n>].<key>"`, parts[0])
+		return "", "", "", fmt.Errorf(
+			`property key %q does not follow format "[source|sink|error-handler|step-<n>].<key>"`,
+			parts[0])
 	}
 	isSource := keyParts[0] == sourceKey
 	isSink := keyParts[0] == sinkKey
 	isErrorHandler := keyParts[0] == errorHandlerKey
 	isStep := strings.HasPrefix(keyParts[0], stepKeyPrefix)
 	if !isSource && !isSink && !isStep && !isErrorHandler {
-		return "", "", "", fmt.Errorf(`property key %q does not start with "source.", "sink.", "error-handler." or "step-<n>."`, parts[0])
+		return "", "", "", fmt.Errorf(
+			`property key %q does not start with "source.", "sink.", "error-handler." or "step-<n>."`,
+			parts[0])
 	}
 	return keyParts[0], keyParts[1], parts[1], nil
 }

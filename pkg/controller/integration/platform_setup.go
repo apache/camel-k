@@ -66,7 +66,8 @@ func (action *platformSetupAction) Handle(ctx context.Context, integration *v1.I
 }
 
 // DetermineBestProfile tries to detect the best trait profile for the integration.
-func determineBestProfile(ctx context.Context, c client.Client, integration *v1.Integration, p *v1.IntegrationPlatform) v1.TraitProfile {
+func determineBestProfile(ctx context.Context, c client.Client, integration *v1.Integration,
+	p *v1.IntegrationPlatform) v1.TraitProfile {
 	if integration.Spec.Profile != "" {
 		return integration.Spec.Profile
 	}

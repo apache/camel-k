@@ -75,10 +75,13 @@ func TestModelineRunChain(t *testing.T) {
 		err := ioutil.WriteFile(fileName, []byte(file), 0o400)
 		assert.NoError(t, err)
 
-		cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", "-d", "mvn:org.my:lib2:1.0", fileName})
+		cmd, flags, err := NewKamelWithModelineCommand(context.TODO(),
+			[]string{"kamel", "run", "-d", "mvn:org.my:lib2:1.0", fileName})
 		assert.NoError(t, err)
 		assert.NotNil(t, cmd)
-		assert.Equal(t, []string{"run", "-d", "mvn:org.my:lib2:1.0", fileName, "--dependency=mvn:org.my:lib:2.0"}, flags)
+		assert.Equal(t,
+			[]string{"run", "-d", "mvn:org.my:lib2:1.0", fileName, "--dependency=mvn:org.my:lib:2.0"},
+			flags)
 
 		return nil
 	})
@@ -105,7 +108,12 @@ func TestModelineRunMultipleFiles(t *testing.T) {
 		cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName, fileName2})
 		assert.NoError(t, err)
 		assert.NotNil(t, cmd)
-		assert.Equal(t, []string{"run", fileName, fileName2, "--dependency=mvn:org.my:lib1:3.0", "--dependency=mvn:org.my:lib2:3.0"}, flags)
+		assert.Equal(t,
+			[]string{
+				"run", fileName, fileName2,
+				"--dependency=mvn:org.my:lib1:3.0", "--dependency=mvn:org.my:lib2:3.0",
+			},
+			flags)
 
 		return nil
 	})
@@ -152,10 +160,13 @@ func TestModelineRunDuplicatedProperties(t *testing.T) {
 		err = ioutil.WriteFile(fileName, []byte(file), 0o400)
 		assert.NoError(t, err)
 
-		cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName, "-p", "prop1=true", "--property", "prop2=true"})
+		cmd, flags, err := NewKamelWithModelineCommand(context.TODO(),
+			[]string{"kamel", "run", fileName, "-p", "prop1=true", "--property", "prop2=true"})
 		assert.NoError(t, err)
 		assert.NotNil(t, cmd)
-		assert.Equal(t, []string{"run", fileName, "-p", "prop1=true", "--property", "prop2=true", "--property=foo=bar"}, flags)
+		assert.Equal(t,
+			[]string{"run", fileName, "-p", "prop1=true", "--property", "prop2=true", "--property=foo=bar"},
+			flags)
 
 		return nil
 	})
@@ -296,10 +307,13 @@ func TestModelineRunDuplicateTraits(t *testing.T) {
 		err = ioutil.WriteFile(fileName, []byte(file), 0o400)
 		assert.NoError(t, err)
 
-		cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName, "-t", "trait1=true", "--trait", "trait2=true"})
+		cmd, flags, err := NewKamelWithModelineCommand(context.TODO(),
+			[]string{"kamel", "run", fileName, "-t", "trait1=true", "--trait", "trait2=true"})
 		assert.NoError(t, err)
 		assert.NotNil(t, cmd)
-		assert.Equal(t, []string{"run", fileName, "-t", "trait1=true", "--trait", "trait2=true", "--trait=foo=bar"}, flags)
+		assert.Equal(t,
+			[]string{"run", fileName, "-t", "trait1=true", "--trait", "trait2=true", "--trait=foo=bar"},
+			flags)
 
 		return nil
 	})
@@ -492,7 +506,7 @@ func TestModelineInspectMultipleDeps(t *testing.T) {
 		file := `
 		// camel-k: dependency=mvn:org.my:lib:1.0
 		// camel-k: dependency=camel-k:camel-dep
-	`
+		`
 		fileName := path.Join(dir, "simple.groovy")
 		err := ioutil.WriteFile(fileName, []byte(file), 0o400)
 		assert.NoError(t, err)
@@ -500,7 +514,9 @@ func TestModelineInspectMultipleDeps(t *testing.T) {
 		cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "local", "inspect", fileName})
 		assert.NoError(t, err)
 		assert.NotNil(t, cmd)
-		assert.Equal(t, []string{"local", "inspect", fileName, "--dependency=mvn:org.my:lib:1.0", "--dependency=camel-k:camel-dep"}, flags)
+		assert.Equal(t,
+			[]string{"local", "inspect", fileName, "--dependency=mvn:org.my:lib:1.0", "--dependency=camel-k:camel-dep"},
+			flags)
 
 		return nil
 	})
@@ -509,11 +525,12 @@ func TestModelineInspectMultipleDeps(t *testing.T) {
 }
 
 func TestModelineQuotedPodTemplate(t *testing.T) {
+	// nolint: lll
 	err := util.WithTempDir("camel-k-test-", func(dir string) error {
 
 		file := `
 		// camel-k: pod-template='{ "containers": [], "securityContext": { "supplementalGroups": [ 553 ] }, "volumes": [] } }'
-	`
+		`
 		fileName := path.Join(dir, "simple.groovy")
 		err := ioutil.WriteFile(fileName, []byte(file), 0o400)
 		assert.NoError(t, err)
@@ -521,7 +538,12 @@ func TestModelineQuotedPodTemplate(t *testing.T) {
 		cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
 		assert.NoError(t, err)
 		assert.NotNil(t, cmd)
-		assert.Equal(t, []string{"run", fileName, "--pod-template={ \"containers\": [], \"securityContext\": { \"supplementalGroups\": [ 553 ] }, \"volumes\": [] } }"}, flags)
+		assert.Equal(t,
+			[]string{
+				"run", fileName,
+				"--pod-template={ \"containers\": [], \"securityContext\": { \"supplementalGroups\": [ 553 ] }, \"volumes\": [] } }",
+			},
+			flags)
 
 		return nil
 	})

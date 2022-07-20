@@ -203,8 +203,10 @@ func loadKamelet(path string, namespace string) (ctrl.Object, error) {
 
 // KameletViewerRole installs the role that allows any user ro access kamelets in the global namespace.
 func KameletViewerRole(ctx context.Context, c client.Client, namespace string) error {
-	if err := Resource(ctx, c, namespace, true, IdentityResourceCustomizer, "/viewer/user-global-kamelet-viewer-role.yaml"); err != nil {
+	if err := Resource(ctx, c, namespace, true, IdentityResourceCustomizer,
+		"/viewer/user-global-kamelet-viewer-role.yaml"); err != nil {
 		return err
 	}
-	return Resource(ctx, c, namespace, true, IdentityResourceCustomizer, "/viewer/user-global-kamelet-viewer-role-binding.yaml")
+	return Resource(ctx, c, namespace, true, IdentityResourceCustomizer,
+		"/viewer/user-global-kamelet-viewer-role-binding.yaml")
 }

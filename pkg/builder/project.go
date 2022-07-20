@@ -124,7 +124,8 @@ func generateProjectSettings(ctx *builderContext) error {
 	}
 	ctx.Maven.GlobalSettings = data
 
-	settingsSecurity, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, &ctx.Build.Maven.SettingsSecurity)
+	settingsSecurity, err := kubernetes.ResolveValueSource(
+		ctx.C, ctx.Client, ctx.Namespace, &ctx.Build.Maven.SettingsSecurity)
 	if err != nil {
 		return err
 	}
@@ -175,7 +176,10 @@ func getServerTagIndex(val string) (string, int) {
 		return val, i
 	}
 	// create necessary tags
-	tags := []string{"</proxies>", "<proxies/>", "</offline>", "<offline/>", "</usePluginRegistry>", "<usePluginRegistry/>", "</interactiveMode>", "<interactiveMode/>", "</localRepository>", "<localRepository/>"}
+	tags := []string{
+		"</proxies>", "<proxies/>", "</offline>", "<offline/>", "</usePluginRegistry>", "<usePluginRegistry/>",
+		"</interactiveMode>", "<interactiveMode/>", "</localRepository>", "<localRepository/>",
+	}
 	i = -1
 	for _, tag := range tags {
 		i = strings.Index(val, tag)

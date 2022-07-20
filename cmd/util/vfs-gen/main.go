@@ -47,8 +47,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	flag.StringVar(&rootDir, "root", base.GoModDirectory, "The absolute path from were the directories can be found (camel-k module directory by default)")
-	flag.StringVar(&destDir, "dest", wd, "The destination directory of the generated file (working directory by default)")
+	flag.StringVar(&rootDir, "root", base.GoModDirectory,
+		"The absolute path from were the directories can be found (camel-k module directory by default)")
+	flag.StringVar(&destDir, "dest", wd,
+		"The destination directory of the generated file (working directory by default)")
 	flag.Parse()
 
 	if len(flag.Args()) < 1 {
@@ -179,7 +181,9 @@ func BigFilesFilter(size int) func(path string, fi os.FileInfo) bool {
 		}
 
 		if fi.Size() > int64(size) {
-			log.Printf("Warning: File %s is skipped due to being %d bytes (greater than maximum %d bytes)", path, fi.Size(), size)
+			log.Printf(
+				"Warning: File %s is skipped due to being %d bytes (greater than maximum %d bytes)",
+				path, fi.Size(), size)
 			return true
 		}
 

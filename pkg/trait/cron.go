@@ -188,10 +188,13 @@ func (t *cronTrait) Apply(e *Environment) error {
 		if pointer.BoolDeref(t.Fallback, false) {
 			fallbackArtifact := e.CamelCatalog.GetArtifactByScheme(genericCronComponentFallbackScheme)
 			if fallbackArtifact == nil {
-				return fmt.Errorf("no fallback artifact for scheme %q has been found in camel catalog", genericCronComponentFallbackScheme)
+				return fmt.Errorf(
+					"no fallback artifact for scheme %q has been found in camel catalog",
+					genericCronComponentFallbackScheme)
 			}
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, fallbackArtifact.GetDependencyID())
-			util.StringSliceUniqueConcat(&e.Integration.Status.Dependencies, fallbackArtifact.GetConsumerDependencyIDs(genericCronComponentFallbackScheme))
+			util.StringSliceUniqueConcat(&e.Integration.Status.Dependencies,
+				fallbackArtifact.GetConsumerDependencyIDs(genericCronComponentFallbackScheme))
 		}
 	}
 

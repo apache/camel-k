@@ -36,7 +36,8 @@ func (k KnativeRefBindingProvider) ID() string {
 	return "knative-ref"
 }
 
-func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
+func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext,
+	e v1alpha1.Endpoint) (*Binding, error) {
 	if e.Ref == nil {
 		// works only on refs
 		return nil, nil
@@ -68,7 +69,8 @@ func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointCtx End
 
 	var serviceURI string
 	if *serviceType == knativeapis.CamelServiceTypeEvent {
-		// TODO enable this when the runtime will support changing the broker name (https://github.com/apache/camel-k-runtime/issues/535)
+		// TODO enable this when the runtime will support changing the broker name
+		// https://github.com/apache/camel-k-runtime/issues/535
 		/*
 			if props["name"] == "" {
 				props["name"] = e.Ref.Name

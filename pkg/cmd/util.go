@@ -289,13 +289,17 @@ func hasSupportedScheme(uri string) bool {
 func verifyOperatorID(ctx context.Context, client client.Client, operatorID string, out io.Writer) error {
 	if pl, err := platformutil.LookupForPlatformName(ctx, client, operatorID); err != nil {
 		if k8serrors.IsForbidden(err) {
-			_, printErr := fmt.Fprintf(out, "Unable to verify existence of operator id [%s] due to lack of user privileges\n", operatorID)
+			_, printErr := fmt.Fprintf(out,
+				"Unable to verify existence of operator id [%s] due to lack of user privileges\n",
+				operatorID)
 			return printErr
 		}
 
 		return err
 	} else if pl == nil {
-		return fmt.Errorf("unable to find operator with given id [%s] - resource may not be reconciled and get stuck in waiting state", operatorID)
+		return fmt.Errorf(
+			"unable to find operator with given id [%s] - resource may not be reconciled and get stuck in waiting state",
+			operatorID)
 	}
 
 	return nil

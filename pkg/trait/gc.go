@@ -118,7 +118,8 @@ func (t *gcTrait) garbageCollectResources(e *Environment) error {
 	}
 
 	integration, _ := labels.NewRequirement(v1.IntegrationLabel, selection.Equals, []string{e.Integration.Name})
-	generation, err := labels.NewRequirement("camel.apache.org/generation", selection.LessThan, []string{strconv.FormatInt(e.Integration.GetGeneration(), 10)})
+	generation, err := labels.NewRequirement("camel.apache.org/generation", selection.LessThan,
+		[]string{strconv.FormatInt(e.Integration.GetGeneration(), 10)})
 	if err != nil {
 		return errors.Wrap(err, "cannot determine generation requirement")
 	}
@@ -129,7 +130,8 @@ func (t *gcTrait) garbageCollectResources(e *Environment) error {
 	return t.deleteEachOf(e.Ctx, deletableGVKs, e, selector)
 }
 
-func (t *gcTrait) deleteEachOf(ctx context.Context, deletableGVKs map[schema.GroupVersionKind]struct{}, e *Environment, selector labels.Selector) error {
+func (t *gcTrait) deleteEachOf(ctx context.Context, deletableGVKs map[schema.GroupVersionKind]struct{}, e *Environment,
+	selector labels.Selector) error {
 	for GVK := range deletableGVKs {
 		resources := unstructured.UnstructuredList{
 			Object: map[string]interface{}{
@@ -157,7 +159,9 @@ func (t *gcTrait) deleteEachOf(ctx context.Context, deletableGVKs map[schema.Gro
 			if err != nil {
 				// The resource may have already been deleted
 				if !k8serrors.IsNotFound(err) {
-					t.L.ForIntegration(e.Integration).Errorf(err, "cannot delete child resource: %s/%s", resource.GetKind(), resource.GetName())
+					t.L.ForIntegration(e.Integration).Errorf(err,
+						"cannot delete child resource: %s/%s",
+						resource.GetKind(), resource.GetName())
 				}
 			} else {
 				t.L.ForIntegration(e.Integration).Debugf("child resource deleted: %s/%s", resource.GetKind(), resource.GetName())
@@ -169,9 +173,11 @@ func (t *gcTrait) deleteEachOf(ctx context.Context, deletableGVKs map[schema.Gro
 }
 
 func (t *gcTrait) canBeDeleted(e *Environment, u unstructured.Unstructured) bool {
-	// Only delete direct children of the integration, otherwise we can affect the behavior of external controllers (i.e. Knative)
+	// Only delete direct children of the integration, otherwise we can affect the behavior of external controllers
+	// (i.e. Knative)
 	for _, o := range u.GetOwnerReferences() {
-		if o.Kind == v1.IntegrationKind && strings.HasPrefix(o.APIVersion, v1.SchemeGroupVersion.Group) && o.Name == e.Integration.Name {
+		if o.Kind == v1.IntegrationKind && strings.HasPrefix(o.APIVersion, v1.SchemeGroupVersion.Group) &&
+			o.Name == e.Integration.Name {
 			return true
 		}
 	}
