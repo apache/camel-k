@@ -558,7 +558,7 @@ spec:
                         type: string
                       probesEnabled:
                         description: 'DeprecatedProbesEnabled enable/disable probes
-                          on the container (default `false`) Deprecated: replaced
+                          on the container (default `false`). Deprecated: replaced
                           by the health trait.'
                         type: boolean
                       readinessFailureThreshold:
@@ -2164,7 +2164,7 @@ spec:
                         type: string
                       probesEnabled:
                         description: 'DeprecatedProbesEnabled enable/disable probes
-                          on the container (default `false`) Deprecated: replaced
+                          on the container (default `false`). Deprecated: replaced
                           by the health trait.'
                         type: boolean
                       readinessFailureThreshold:

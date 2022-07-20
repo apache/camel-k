@@ -58,12 +58,12 @@ traits:
   - name: pod-affinity-labels
     type: '[]string'
     description: Defines a set of pods (namely those matching the label selector,
-      relative to the given namespace) that theintegration pod(s) should be co-located
+      relative to the given namespace) that the integration pod(s) should be co-located
       with.
   - name: pod-anti-affinity-labels
     type: '[]string'
     description: Defines a set of pods (namely those matching the label selector,
-      relative to the given namespace) that theintegration pod(s) should not be co-located
+      relative to the given namespace) that the integration pod(s) should not be co-located
       with.
 - name: builder
   platform: true
@@ -164,59 +164,59 @@ traits:
   - name: probes-enabled
     type: bool
     description: 'DeprecatedProbesEnabled enable/disable probes on the container (default
-      `false`)Deprecated: replaced by the health trait.'
+      `false`). Deprecated: replaced by the health trait.'
   - name: liveness-scheme
     type: string
     description: 'Scheme to use when connecting. Defaults to HTTP. Applies to the
-      liveness probe.Deprecated: replaced by the health trait.'
+      liveness probe. Deprecated: replaced by the health trait.'
   - name: liveness-initial-delay
     type: int32
     description: 'Number of seconds after the container has started before liveness
-      probes are initiated.Deprecated: replaced by the health trait.'
+      probes are initiated. Deprecated: replaced by the health trait.'
   - name: liveness-timeout
     type: int32
     description: 'Number of seconds after which the probe times out. Applies to the
-      liveness probe.Deprecated: replaced by the health trait.'
+      liveness probe. Deprecated: replaced by the health trait.'
   - name: liveness-period
     type: int32
-    description: 'How often to perform the probe. Applies to the liveness probe.Deprecated:
+    description: 'How often to perform the probe. Applies to the liveness probe. Deprecated:
       replaced by the health trait.'
   - name: liveness-success-threshold
     type: int32
     description: 'Minimum consecutive successes for the probe to be considered successful
-      after having failed.Applies to the liveness probe.Deprecated: replaced by the
-      health trait.'
+      after having failed. Applies to the liveness probe. Deprecated: replaced by
+      the health trait.'
   - name: liveness-failure-threshold
     type: int32
     description: 'Minimum consecutive failures for the probe to be considered failed
-      after having succeeded.Applies to the liveness probe.Deprecated: replaced by
-      the health trait.'
+      after having succeeded. Applies to the liveness probe. Deprecated: replaced
+      by the health trait.'
   - name: readiness-scheme
     type: string
     description: 'Scheme to use when connecting. Defaults to HTTP. Applies to the
-      readiness probe.Deprecated: replaced by the health trait.'
+      readiness probe. Deprecated: replaced by the health trait.'
   - name: readiness-initial-delay
     type: int32
     description: 'Number of seconds after the container has started before readiness
-      probes are initiated.Deprecated: replaced by the health trait.'
+      probes are initiated. Deprecated: replaced by the health trait.'
   - name: readiness-timeout
     type: int32
     description: 'Number of seconds after which the probe times out. Applies to the
-      readiness probe.Deprecated: replaced by the health trait.'
+      readiness probe. Deprecated: replaced by the health trait.'
   - name: readiness-period
     type: int32
-    description: 'How often to perform the probe. Applies to the readiness probe.Deprecated:
-      replaced by the health trait.'
+    description: 'How often to perform the probe. Applies to the readiness probe.
+      Deprecated: replaced by the health trait.'
   - name: readiness-success-threshold
     type: int32
     description: 'Minimum consecutive successes for the probe to be considered successful
-      after having failed.Applies to the readiness probe.Deprecated: replaced by the
-      health trait.'
+      after having failed. Applies to the readiness probe. Deprecated: replaced by
+      the health trait.'
   - name: readiness-failure-threshold
     type: int32
     description: 'Minimum consecutive failures for the probe to be considered failed
-      after having succeeded.Applies to the readiness probe.Deprecated: replaced by
-      the health trait.'
+      after having succeeded. Applies to the readiness probe. Deprecated: replaced
+      by the health trait.'
 - name: cron
   platform: false
   profiles:
@@ -243,44 +243,45 @@ traits:
   - name: schedule
     type: string
     description: The CronJob schedule for the whole integration. If multiple routes
-      are declared, they must have the same schedule for thismechanism to work correctly.
+      are declared, they must have the same schedule for this mechanism to work correctly.
   - name: components
     type: string
     description: 'A comma separated list of the Camel components that need to be customized
-      in order for them to work when the schedule is triggered externally by Kubernetes.A
-      specific customizer is activated for each specified component. E.g. for the
-      `timer` component, the `cron-timer` customizer isactivated (it''s present in
-      the `org.apache.camel.k:camel-k-cron` library).Supported components are currently:
+      in order for them to work when the schedule is triggered externally by Kubernetes.
+      A specific customizer is activated for each specified component. E.g. for the
+      `timer` component, the `cron-timer` customizer is activated (it''s present in
+      the `org.apache.camel.k:camel-k-cron` library).  Supported components are currently:
       `cron`, `timer` and `quartz`.'
   - name: fallback
     type: bool
     description: Use the default Camel implementation of the `cron` endpoint (`quartz`)
-      instead of trying to materialize the integrationas Kubernetes CronJob.
+      instead of trying to materialize the integration as Kubernetes CronJob.
   - name: concurrency-policy
     type: string
-    description: 'Specifies how to treat concurrent executions of a Job.Valid values
-      are:- "Allow": allows CronJobs to run concurrently;- "Forbid" (default): forbids
-      concurrent runs, skipping next run if previous run hasn''t finished yet;- "Replace":
+    description: 'Specifies how to treat concurrent executions of a Job. Valid values
+      are: - "Allow": allows CronJobs to run concurrently; - "Forbid" (default): forbids
+      concurrent runs, skipping next run if previous run hasn''t finished yet; - "Replace":
       cancels currently running job and replaces it with a new one'
   - name: auto
     type: bool
-    description: Automatically deploy the integration as CronJob when all routes areeither
-      starting from a periodic consumer (only `cron`, `timer` and `quartz` are supported)
-      or a passive consumer (e.g. `direct` is a passive consumer).It's required that
-      all periodic consumers have the same period and it can be expressed as cron
-      schedule (e.g. `1m` can be expressed as `0/1 * * * *`,while `35m` or `50s` cannot).
+    description: Automatically deploy the integration as CronJob when all routes are
+      either starting from a periodic consumer (only `cron`, `timer` and `quartz`
+      are supported) or a passive consumer (e.g. `direct` is a passive consumer).  It's
+      required that all periodic consumers have the same period and it can be expressed
+      as cron schedule (e.g. `1m` can be expressed as `0/1 * * * *`, while `35m` or
+      `50s` cannot).
   - name: starting-deadline-seconds
     type: int64
-    description: Optional deadline in seconds for starting the job if it misses scheduledtime
-      for any reason.  Missed jobs executions will be counted as failed ones.
+    description: Optional deadline in seconds for starting the job if it misses scheduled
+      time for any reason.  Missed jobs executions will be counted as failed ones.
   - name: active-deadline-seconds
     type: int64
     description: Specifies the duration in seconds, relative to the start time, that
-      the jobmay be continuously active before it is considered to be failed.It defaults
-      to 60s.
+      the job may be continuously active before it is considered to be failed. It
+      defaults to 60s.
   - name: backoff-limit
     type: int32
-    description: Specifies the number of retries before marking the job failed.It
+    description: Specifies the number of retries before marking the job failed. It
       defaults to 2.
 - name: dependencies
   platform: true
@@ -312,9 +313,9 @@ traits:
       integration.
   - name: use-ssa
     type: bool
-    description: Use server-side apply to update the owned resources (default `true`).Note
-      that it automatically falls back to client-side patching, if SSA is not available,
-      e.g., on old Kubernetes clusters.
+    description: Use server-side apply to update the owned resources (default `true`).
+      Note that it automatically falls back to client-side patching, if SSA is not
+      available, e.g., on old Kubernetes clusters.
 - name: deployment
   platform: true
   profiles:
@@ -331,7 +332,7 @@ traits:
   - name: progress-deadline-seconds
     type: int32
     description: The maximum time in seconds for the deployment to make progress before
-      itis considered to be failed. It defaults to 60s.
+      it is considered to be failed. It defaults to 60s.
 - name: environment
   platform: true
   profiles:
@@ -355,9 +356,9 @@ traits:
       variables (default `true`)
   - name: vars
     type: '[]string'
-    description: A list of environment variables to be added to the integration container.The
-      syntax is KEY=VALUE, e.g., `MY_VAR="my value"`.These take precedence over the
-      previously defined environment variables.
+    description: A list of environment variables to be added to the integration container.
+      The syntax is KEY=VALUE, e.g., `MY_VAR="my value"`. These take precedence over
+      the previously defined environment variables.
 - name: error-handler
   platform: true
   profiles:
@@ -512,14 +513,14 @@ traits:
   - name: ca-cert
     type: string
     description: The PEM encoded CA certification file path, used to verify client
-      certificates,applicable when `protocol` is `https` and `use-ssl-client-authentication`
-      is `true`(default `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt`
+      certificates, applicable when `protocol` is `https` and `use-ssl-client-authentication`
+      is `true` (default `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt`
       for OpenShift).
   - name: client-principal
     type: '[]string'
     description: The principal(s) which must be given in a client certificate to allow
-      access to the Jolokia endpoint,applicable when `protocol` is `https` and `use-ssl-client-authentication`
-      is `true`(default `clientPrincipal=cn=system:master-proxy`, `cn=hawtio-online.hawtio.svc`
+      access to the Jolokia endpoint, applicable when `protocol` is `https` and `use-ssl-client-authentication`
+      is `true` (default `clientPrincipal=cn=system:master-proxy`, `cn=hawtio-online.hawtio.svc`
       and `cn=fuse-console.fuse.svc` for OpenShift).
   - name: discovery-enabled
     type: bool
@@ -527,12 +528,12 @@ traits:
   - name: extended-client-check
     type: bool
     description: Mandate the client certificate contains a client flag in the extended
-      key usage section,applicable when `protocol` is `https` and `use-ssl-client-authentication`
-      is `true`(default `true` for OpenShift).
+      key usage section, applicable when `protocol` is `https` and `use-ssl-client-authentication`
+      is `true` (default `true` for OpenShift).
   - name: host
     type: string
     description: The Host address to which the Jolokia agent should bind to. If `"\*"`
-      or `"0.0.0.0"` is given,the servers binds to every network interface (default
+      or `"0.0.0.0"` is given, the servers binds to every network interface (default
       `"*"`).
   - name: password
     type: string
@@ -554,7 +555,7 @@ traits:
       `true` for OpenShift).
   - name: options
     type: '[]string'
-    description: A list of additional Jolokia options as definedin https://jolokia.org/reference/html/agents.html#agent-jvm-config[JVM
+    description: A list of additional Jolokia options as defined in https://jolokia.org/reference/html/agents.html#agent-jvm-config[JVM
       agent configuration options]
 - name: jvm
   platform: true
@@ -656,10 +657,10 @@ traits:
   - name: triggers
     type: '[]github.com/apache/camel-k/addons/keda.kedaTrigger'
     description: Definition of triggers according to the KEDA format. Each trigger
-      must contain `type` field correspondingto the name of a KEDA autoscaler and
-      a key/value map named `metadata` containing specific trigger options.An optional
+      must contain `type` field corresponding to the name of a KEDA autoscaler and
+      a key/value map named `metadata` containing specific trigger options. An optional
       `authentication-secret` can be declared per trigger and the operator will link
-      each entry ofthe secret to a KEDA authentication parameter.
+      each entry of the secret to a KEDA authentication parameter.
 - name: knative
   platform: false
   profiles:
@@ -679,39 +680,39 @@ traits:
     description: Can be used to inject a Knative complete configuration in JSON format.
   - name: channel-sources
     type: '[]string'
-    description: List of channels used as source of integration routes.Can contain
+    description: List of channels used as source of integration routes. Can contain
       simple channel names or full Camel URIs.
   - name: channel-sinks
     type: '[]string'
-    description: List of channels used as destination of integration routes.Can contain
+    description: List of channels used as destination of integration routes. Can contain
       simple channel names or full Camel URIs.
   - name: endpoint-sources
     type: '[]string'
     description: List of channels used as source of integration routes.
   - name: endpoint-sinks
     type: '[]string'
-    description: List of endpoints used as destination of integration routes.Can contain
-      simple endpoint names or full Camel URIs.
+    description: List of endpoints used as destination of integration routes. Can
+      contain simple endpoint names or full Camel URIs.
   - name: event-sources
     type: '[]string'
-    description: List of event types that the integration will be subscribed to.Can
+    description: List of event types that the integration will be subscribed to. Can
       contain simple event types or full Camel URIs (to use a specific broker different
       from "default").
   - name: event-sinks
     type: '[]string'
-    description: List of event types that the integration will produce.Can contain
+    description: List of event types that the integration will produce. Can contain
       simple event types or full Camel URIs (to use a specific broker).
   - name: filter-source-channels
     type: bool
     description: Enables filtering on events based on the header "ce-knativehistory".
-      Since this header has been removed in newer versions ofKnative, filtering is
+      Since this header has been removed in newer versions of Knative, filtering is
       disabled by default.
   - name: sink-binding
     type: bool
     description: Allows binding the integration to a sink via a Knative SinkBinding
-      resource.This can be used when the integration targets a single sink.It's enabled
-      by default when the integration targets a single sink(except when the integration
-      is owned by a Knative source).
+      resource. This can be used when the integration targets a single sink. It's
+      enabled by default when the integration targets a single sink (except when the
+      integration is owned by a Knative source).
   - name: auto
     type: bool
     description: Enable automatic discovery of all trait properties.
@@ -732,40 +733,40 @@ traits:
   - name: autoscaling-class
     type: string
     description: Configures the Knative autoscaling class property (e.g. to set `hpa.autoscaling.knative.dev`
-      or `kpa.autoscaling.knative.dev` autoscaling).Refer to the Knative documentation
+      or `kpa.autoscaling.knative.dev` autoscaling).  Refer to the Knative documentation
       for more information.
   - name: autoscaling-metric
     type: string
     description: Configures the Knative autoscaling metric property (e.g. to set `concurrency`
-      based or `cpu` based autoscaling).Refer to the Knative documentation for more
+      based or `cpu` based autoscaling).  Refer to the Knative documentation for more
       information.
   - name: autoscaling-target
     type: int
     description: Sets the allowed concurrency level or CPU percentage (depending on
-      the autoscaling metric) for each Pod.Refer to the Knative documentation for
+      the autoscaling metric) for each Pod.  Refer to the Knative documentation for
       more information.
   - name: min-scale
     type: int
     description: The minimum number of Pods that should be running at any time for
-      the integration. It's **zero** by default, meaning thatthe integration is scaled
-      down to zero when not used for a configured amount of time.Refer to the Knative
+      the integration. It's **zero** by default, meaning that the integration is scaled
+      down to zero when not used for a configured amount of time.  Refer to the Knative
       documentation for more information.
   - name: max-scale
     type: int
     description: An upper bound for the number of Pods that can be running in parallel
-      for the integration.Knative has its own cap value that depends on the installation.Refer
+      for the integration. Knative has its own cap value that depends on the installation.  Refer
       to the Knative documentation for more information.
   - name: rollout-duration
     type: string
     description: Enables to gradually shift traffic to the latest Revision and sets
-      the rollout duration.It's disabled by default and must be expressed as a Golang
-      `time.Duration` string representation,rounded to a second precision.
+      the rollout duration. It's disabled by default and must be expressed as a Golang
+      `time.Duration` string representation, rounded to a second precision.
   - name: auto
     type: bool
-    description: Automatically deploy the integration as Knative service when all
-      conditions hold:* Integration is using the Knative profile* All routes are either
-      starting from a HTTP based consumer or a passive consumer (e.g. `direct` is
-      a passive consumer)
+    description: 'Automatically deploy the integration as Knative service when all
+      conditions hold:  * Integration is using the Knative profile * All routes are
+      either starting from a HTTP based consumer or a passive consumer (e.g. `direct`
+      is a passive consumer)'
 - name: logging
   platform: false
   profiles:
@@ -819,13 +820,13 @@ traits:
   - name: include-delegate-dependencies
     type: bool
     description: When this flag is active, the operator analyzes the source code to
-      add dependencies required by delegate endpoints.E.g. when using `master:lockname:timer`,
-      then `camel:timer` is automatically added to the set of dependencies.It's enabled
+      add dependencies required by delegate endpoints. E.g. when using `master:lockname:timer`,
+      then `camel:timer` is automatically added to the set of dependencies. It's enabled
       by default.
   - name: resource-name
     type: string
     description: Name of the configmap that will be used to store the lock. Defaults
-      to "<integration-name>-lock".Name of the configmap/lease resource that will
+      to "<integration-name>-lock". Name of the configmap/lease resource that will
       be used to store the lock. Defaults to "<integration-name>-lock".
   - name: resource-type
     type: string
@@ -854,20 +855,20 @@ traits:
       property.
   - name: configs
     type: '[]string'
-    description: 'A list of configuration pointing to configmap/secret.The configuration
+    description: 'A list of configuration pointing to configmap/secret. The configuration
       are expected to be UTF-8 resources as they are processed by runtime Camel Context
-      and tried to be parsed as property files.They are also made available on the
-      classpath in order to ease their usage directly from the Route.Syntax: [configmap|secret]:name[/key],
+      and tried to be parsed as property files. They are also made available on the
+      classpath in order to ease their usage directly from the Route. Syntax: [configmap|secret]:name[/key],
       where name represents the resource name and key optionally represents the resource
       key to be filtered'
   - name: resources
     type: '[]string'
-    description: 'A list of resources (text or binary content) pointing to configmap/secret.The
-      resources are expected to be any resource type (text or binary content).The
-      destination path can be either a default location or any path specified by the
-      user.Syntax: [configmap|secret]:name[/key][@path], where name represents the
-      resource name, key optionally represents the resource key to be filtered and
-      path represents the destination path'
+    description: 'A list of resources (text or binary content) pointing to configmap/secret.
+      The resources are expected to be any resource type (text or binary content).
+      The destination path can be either a default location or any path specified
+      by the user. Syntax: [configmap|secret]:name[/key][@path], where name represents
+      the resource name, key optionally represents the resource key to be filtered
+      and path represents the destination path'
   - name: volumes
     type: '[]string'
     description: 'A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]'
@@ -923,13 +924,13 @@ traits:
   - name: min-available
     type: string
     description: The number of pods for the Integration that must still be available
-      after an eviction.It can be either an absolute number or a percentage.Only one
-      of `min-available` and `max-unavailable` can be specified.
+      after an eviction. It can be either an absolute number or a percentage. Only
+      one of `min-available` and `max-unavailable` can be specified.
   - name: max-unavailable
     type: string
     description: The number of pods for the Integration that can be unavailable after
-      an eviction.It can be either an absolute number or a percentage (default `1`
-      if `min-available` is also not set).Only one of `max-unavailable` and `min-available`
+      an eviction. It can be either an absolute number or a percentage (default `1`
+      if `min-available` is also not set). Only one of `max-unavailable` and `min-available`
       can be specified.
 - name: platform
   platform: true
@@ -1047,11 +1048,11 @@ traits:
   - name: package-type
     type: '[]github.com/apache/camel-k/pkg/apis/camel/v1/trait.QuarkusPackageType'
     description: The Quarkus package types, either `fast-jar` or `native` (default
-      `fast-jar`).In case both `fast-jar` and `native` are specified, two `IntegrationKit`
-      resources are created,with the `native` kit having precedence over the `fast-jar`
-      one once ready.The order influences the resolution of the current kit for the
-      integration.The kit corresponding to the first package type will be assigned
-      to theintegration in case no existing kit that matches the integration exists.
+      `fast-jar`). In case both `fast-jar` and `native` are specified, two `IntegrationKit`
+      resources are created, with the `native` kit having precedence over the `fast-jar`
+      one once ready. The order influences the resolution of the current kit for the
+      integration. The kit corresponding to the first package type will be assigned
+      to the integration in case no existing kit that matches the integration exists.
 - name: registry
   platform: false
   profiles:
@@ -1086,61 +1087,61 @@ traits:
     description: To configure the host exposed by the route.
   - name: tls-termination
     type: string
-    description: The TLS termination type, like `edge`, `passthrough` or `reencrypt`.Refer
+    description: The TLS termination type, like `edge`, `passthrough` or `reencrypt`.  Refer
       to the OpenShift route documentation for additional information.
   - name: tls-certificate
     type: string
-    description: The TLS certificate contents.Refer to the OpenShift route documentation
+    description: The TLS certificate contents.  Refer to the OpenShift route documentation
       for additional information.
   - name: tls-certificate-secret
     type: string
     description: The secret name and key reference to the TLS certificate. The format
       is "secret-name[/key-name]", the value represents the secret name, if there
       is only one key in the secret it will be read, otherwise you can set a key name
-      separated with a "/".Refer to the OpenShift route documentation for additional
+      separated with a "/".  Refer to the OpenShift route documentation for additional
       information.
   - name: tls-key
     type: string
-    description: The TLS certificate key contents.Refer to the OpenShift route documentation
+    description: The TLS certificate key contents.  Refer to the OpenShift route documentation
       for additional information.
   - name: tls-key-secret
     type: string
     description: The secret name and key reference to the TLS certificate key. The
       format is "secret-name[/key-name]", the value represents the secret name, if
       there is only one key in the secret it will be read, otherwise you can set a
-      key name separated with a "/".Refer to the OpenShift route documentation for
+      key name separated with a "/".  Refer to the OpenShift route documentation for
       additional information.
   - name: tls-ca-certificate
     type: string
-    description: The TLS CA certificate contents.Refer to the OpenShift route documentation
+    description: The TLS CA certificate contents.  Refer to the OpenShift route documentation
       for additional information.
   - name: tls-ca-certificate-secret
     type: string
     description: The secret name and key reference to the TLS CA certificate. The
       format is "secret-name[/key-name]", the value represents the secret name, if
       there is only one key in the secret it will be read, otherwise you can set a
-      key name separated with a "/".Refer to the OpenShift route documentation for
+      key name separated with a "/".  Refer to the OpenShift route documentation for
       additional information.
   - name: tls-destination-ca-certificate
     type: string
     description: The destination CA certificate provides the contents of the ca certificate
-      of the final destination.  When using reencrypttermination this file should
+      of the final destination.  When using reencrypt termination this file should
       be provided in order to have routers use it for health checks on the secure
-      connection.If this field is not specified, the router may provide its own destination
-      CA and perform hostname validation usingthe short service name (service.namespace.svc),
-      which allows infrastructure generated certificates to automaticallyverify.Refer
+      connection. If this field is not specified, the router may provide its own destination
+      CA and perform hostname validation using the short service name (service.namespace.svc),
+      which allows infrastructure generated certificates to automatically verify.  Refer
       to the OpenShift route documentation for additional information.
   - name: tls-destination-ca-certificate-secret
     type: string
     description: The secret name and key reference to the destination CA certificate.
       The format is "secret-name[/key-name]", the value represents the secret name,
       if there is only one key in the secret it will be read, otherwise you can set
-      a key name separated with a "/".Refer to the OpenShift route documentation for
-      additional information.
+      a key name separated with a "/".  Refer to the OpenShift route documentation
+      for additional information.
   - name: tls-insecure-edge-termination-policy
     type: string
     description: To configure how to deal with insecure traffic, e.g. `Allow`, `Disable`
-      or `Redirect` traffic.Refer to the OpenShift route documentation for additional
+      or `Redirect` traffic.  Refer to the OpenShift route documentation for additional
       information.
 - name: service
   platform: false

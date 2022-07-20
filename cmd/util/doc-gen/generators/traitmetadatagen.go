@@ -175,7 +175,7 @@ func (g *traitMetaDataGen) buildMembers(t *types.Type, content *[]string, td *tr
 				pd.TypeName = strings.TrimPrefix(m.Type.Name.Name, "*")
 
 				res = append(res, filterOutTagsAndComments(m.CommentLines)...)
-				pd.Description = strings.Join(res, "")
+				pd.Description = strings.Join(res, " ")
 				td.Properties = append(td.Properties, pd)
 			}
 		}

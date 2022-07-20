@@ -57,7 +57,7 @@ type ContainerTrait struct {
 	// The pull policy: Always|Never|IfNotPresent
 	ImagePullPolicy corev1.PullPolicy `property:"image-pull-policy" json:"imagePullPolicy,omitempty"`
 
-	// DeprecatedProbesEnabled enable/disable probes on the container (default `false`)
+	// DeprecatedProbesEnabled enable/disable probes on the container (default `false`).
 	// Deprecated: replaced by the health trait.
 	DeprecatedProbesEnabled *bool `property:"probes-enabled" json:"probesEnabled,omitempty"`
 	// Scheme to use when connecting. Defaults to HTTP. Applies to the liveness probe.
