@@ -50,6 +50,7 @@ linters:
     - nestif
     - nilnil
     - nlreturn
+    - nosnakecase
     - paralleltest
     - scopelint
     - tagliatelle
