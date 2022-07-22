@@ -48,11 +48,11 @@ func newIstioTrait() Trait {
 }
 
 func (t *istioTrait) Configure(e *Environment) (bool, error) {
-	if pointer.BoolDeref(t.Enabled, false) {
-		return e.IntegrationInRunningPhases(), nil
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+		return false, nil
 	}
 
-	return false, nil
+	return e.IntegrationInRunningPhases(), nil
 }
 
 func (t *istioTrait) Apply(e *Environment) error {

@@ -66,13 +66,15 @@ func (t *knativeServiceTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 }
 
 func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
-		e.Integration.Status.SetCondition(
-			v1.IntegrationConditionKnativeServiceAvailable,
-			corev1.ConditionFalse,
-			v1.IntegrationConditionKnativeServiceNotAvailableReason,
-			"explicitly disabled",
-		)
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
+		if e.Integration != nil {
+			e.Integration.Status.SetCondition(
+				v1.IntegrationConditionKnativeServiceAvailable,
+				corev1.ConditionFalse,
+				v1.IntegrationConditionKnativeServiceNotAvailableReason,
+				"explicitly disabled",
+			)
+		}
 
 		return false, nil
 	}

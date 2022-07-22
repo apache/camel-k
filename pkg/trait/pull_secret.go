@@ -47,7 +47,7 @@ func newPullSecretTrait() Trait {
 }
 
 func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 

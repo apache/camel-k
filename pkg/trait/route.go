@@ -52,7 +52,7 @@ func (t *routeTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 }
 
 func (t *routeTrait) Configure(e *Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
 		if e.Integration != nil {
 			e.Integration.Status.SetCondition(
 				v1.IntegrationConditionExposureAvailable,

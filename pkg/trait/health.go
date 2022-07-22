@@ -51,7 +51,8 @@ func newHealthTrait() Trait {
 }
 
 func (t *healthTrait) Configure(e *Environment) (bool, error) {
-	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
+	if e.Integration == nil ||
+		!e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil
 	}
 

@@ -42,6 +42,7 @@ import (
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -116,7 +117,7 @@ func NewKedaTrait() trait.Trait {
 }
 
 func (t *kedaTrait) Configure(e *trait.Environment) (bool, error) {
-	if t.Enabled == nil || !*t.Enabled {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
 		return false, nil
 	}
 

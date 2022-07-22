@@ -75,13 +75,15 @@ func newCronTrait() Trait {
 }
 
 func (t *cronTrait) Configure(e *Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
-		e.Integration.Status.SetCondition(
-			v1.IntegrationConditionCronJobAvailable,
-			corev1.ConditionFalse,
-			v1.IntegrationConditionCronJobNotAvailableReason,
-			"explicitly disabled",
-		)
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
+		if e.Integration != nil {
+			e.Integration.Status.SetCondition(
+				v1.IntegrationConditionCronJobAvailable,
+				corev1.ConditionFalse,
+				v1.IntegrationConditionCronJobNotAvailableReason,
+				"explicitly disabled",
+			)
+		}
 
 		return false, nil
 	}

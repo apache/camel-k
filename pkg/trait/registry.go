@@ -55,7 +55,7 @@ func (t *registryTrait) InfluencesKit() bool {
 
 func (t *registryTrait) Configure(e *Environment) (bool, error) {
 	// disabled by default
-	if !pointer.BoolDeref(t.Enabled, false) {
+	if e.IntegrationKit == nil || !pointer.BoolDeref(t.Enabled, false) {
 		return false, nil
 	}
 
