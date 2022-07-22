@@ -58,9 +58,9 @@ require (
 	k8s.io/klog/v2 v2.40.1
 	k8s.io/kubectl v0.22.5
 	k8s.io/utils v0.0.0-20211208161948-7d6a63dca704
-	knative.dev/eventing v0.29.0
-	knative.dev/pkg v0.0.0-20220118160532-77555ea48cd4
-	knative.dev/serving v0.29.0
+	knative.dev/eventing v0.30.3
+	knative.dev/pkg v0.0.0-20220301181942-2fdd5f232e77
+	knative.dev/serving v0.30.0
 	sigs.k8s.io/controller-runtime v0.10.3
 )
 
@@ -88,7 +88,7 @@ require (
 	github.com/containerd/stargz-snapshotter/estargz v0.10.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/cli v20.10.12+incompatible // indirect
-	github.com/docker/distribution v2.7.1+incompatible // indirect
+	github.com/docker/distribution v2.8.0+incompatible // indirect
 	github.com/docker/docker v20.10.12+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.6.4 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
@@ -103,7 +103,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/btree v1.0.1 // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
-	github.com/google/go-containerregistry v0.8.1-0.20220120151853-ac864e57b117 // indirect
+	github.com/google/go-containerregistry v0.8.1-0.20220219142810-1571d7fdc46e // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/googleapis/gnostic v0.5.5 // indirect
@@ -157,7 +157,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/component-base v0.22.5 // indirect
 	k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65 // indirect
-	knative.dev/networking v0.0.0-20220120043934-ec785540a732 // indirect
+	knative.dev/networking v0.0.0-20220302134042-e8b2eb995165 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )

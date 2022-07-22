@@ -26,13 +26,13 @@
 set -e
 
 # Prerequisites
-sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.6/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
+sudo wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
 
 set +e
 
-export SERVING_VERSION=knative-v1.2.0
-export EVENTING_VERSION=knative-v1.2.0
-export KOURIER_VERSION=knative-v1.2.0
+export SERVING_VERSION=knative-v1.3.0
+export EVENTING_VERSION=knative-v1.3.3
+export KOURIER_VERSION=knative-v1.3.0
 
 apply() {
   local file="${1:-}"
@@ -55,7 +55,7 @@ apply() {
 
 SERVING_CRDS="https://github.com/knative/serving/releases/download/${SERVING_VERSION}/serving-crds.yaml"
 SERVING_CORE="https://github.com/knative/serving/releases/download/${SERVING_VERSION}/serving-core.yaml"
-KOURIER="https://github.com/knative-sandbox/net-kourier/releases/download/${KOURIER_VERSION}/kourier.yaml"
+KOURIER="https://github.com/knative/net-kourier/releases/download/${KOURIER_VERSION}/kourier.yaml"
 EVENTING_CRDS="https://github.com/knative/eventing/releases/download/${EVENTING_VERSION}/eventing-crds.yaml"
 EVENTING_CORE="https://github.com/knative/eventing/releases/download/${EVENTING_VERSION}/eventing-core.yaml"
 IN_MEMORY_CHANNEL="https://github.com/knative/eventing/releases/download/${EVENTING_VERSION}/in-memory-channel.yaml"
