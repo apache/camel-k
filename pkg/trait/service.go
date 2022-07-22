@@ -48,13 +48,15 @@ func (t *serviceTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 }
 
 func (t *serviceTrait) Configure(e *Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
-		e.Integration.Status.SetCondition(
-			v1.IntegrationConditionServiceAvailable,
-			corev1.ConditionFalse,
-			v1.IntegrationConditionServiceNotAvailableReason,
-			"explicitly disabled",
-		)
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
+		if e.Integration != nil {
+			e.Integration.Status.SetCondition(
+				v1.IntegrationConditionServiceAvailable,
+				corev1.ConditionFalse,
+				v1.IntegrationConditionServiceNotAvailableReason,
+				"explicitly disabled",
+			)
+		}
 
 		return false, nil
 	}

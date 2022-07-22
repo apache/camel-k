@@ -46,7 +46,7 @@ func newPrometheusTrait() Trait {
 }
 
 func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, false) {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
 		return false, nil
 	}
 

@@ -47,32 +47,32 @@ func newLoggingTraitTrait() Trait {
 	}
 }
 
-func (l loggingTrait) Configure(environment *Environment) (bool, error) {
-	if !pointer.BoolDeref(l.Enabled, true) {
+func (l loggingTrait) Configure(e *Environment) (bool, error) {
+	if e.Integration == nil || !pointer.BoolDeref(l.Enabled, true) {
 		return false, nil
 	}
 
-	return environment.IntegrationInRunningPhases(), nil
+	return e.IntegrationInRunningPhases(), nil
 }
 
-func (l loggingTrait) Apply(environment *Environment) error {
-	envvar.SetVal(&environment.EnvVars, envVarQuarkusLogLevel, l.Level)
+func (l loggingTrait) Apply(e *Environment) error {
+	envvar.SetVal(&e.EnvVars, envVarQuarkusLogLevel, l.Level)
 
 	if l.Format != "" {
-		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleFormat, l.Format)
+		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleFormat, l.Format)
 	}
 
 	if pointer.BoolDeref(l.JSON, false) {
-		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJSON, True)
+		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSON, True)
 		if pointer.BoolDeref(l.JSONPrettyPrint, false) {
-			envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJSONPrettyPrint, True)
+			envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSONPrettyPrint, True)
 		}
 	} else {
 		// If the trait is false OR unset, we default to false.
-		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJSON, False)
+		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSON, False)
 
 		if pointer.BoolDeref(l.Color, true) {
-			envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleColor, True)
+			envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleColor, True)
 		}
 	}
 

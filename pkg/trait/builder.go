@@ -53,7 +53,7 @@ func (t *builderTrait) InfluencesKit() bool {
 }
 
 func (t *builderTrait) Configure(e *Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if e.IntegrationKit == nil || !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 

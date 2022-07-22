@@ -84,7 +84,7 @@ func NewTracingTrait() trait.Trait {
 }
 
 func (t *tracingTrait) Configure(e *trait.Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, false) {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
 		return false, nil
 	}
 

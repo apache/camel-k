@@ -47,7 +47,7 @@ func newAffinityTrait() Trait {
 }
 
 func (t *affinityTrait) Configure(e *Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, false) {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
 		return false, nil
 	}
 

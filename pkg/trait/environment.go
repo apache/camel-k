@@ -62,11 +62,11 @@ func newEnvironmentTrait() Trait {
 }
 
 func (t *environmentTrait) Configure(e *Environment) (bool, error) {
-	if pointer.BoolDeref(t.Enabled, true) {
-		return e.IntegrationInRunningPhases(), nil
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
+		return false, nil
 	}
 
-	return false, nil
+	return e.IntegrationInRunningPhases(), nil
 }
 
 func (t *environmentTrait) Apply(e *Environment) error {

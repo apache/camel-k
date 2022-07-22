@@ -45,11 +45,11 @@ func newPodTrait() Trait {
 }
 
 func (t *podTrait) Configure(e *Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 
-	if e.Integration != nil && e.Integration.Spec.PodTemplate == nil {
+	if e.Integration.Spec.PodTemplate == nil {
 		return false, nil
 	}
 

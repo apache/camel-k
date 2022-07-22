@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -84,7 +85,7 @@ var (
 )
 
 func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
-	if t.Enabled != nil && !*t.Enabled {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 
@@ -92,7 +93,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 		return false, nil
 	}
 
-	if t.Auto == nil || *t.Auto {
+	if pointer.BoolDeref(t.Auto, true) {
 		// Check if the master component has been used
 		sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
 		if err != nil {
@@ -110,7 +111,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 			}
 		}
 
-		if t.Enabled == nil || !*t.Enabled {
+		if !pointer.BoolDeref(t.Enabled, false) {
 			return false, nil
 		}
 
@@ -145,7 +146,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 		}
 	}
 
-	return t.Enabled != nil && *t.Enabled, nil
+	return pointer.BoolDeref(t.Enabled, true), nil
 }
 
 func (t *masterTrait) Apply(e *trait.Environment) error {

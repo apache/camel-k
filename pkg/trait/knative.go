@@ -69,7 +69,7 @@ func (t *knativeTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 }
 
 func (t *knativeTrait) Configure(e *Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 

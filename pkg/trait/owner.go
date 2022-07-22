@@ -40,11 +40,7 @@ func newOwnerTrait() Trait {
 }
 
 func (t *ownerTrait) Configure(e *Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
-		return false, nil
-	}
-
-	if e.Integration == nil {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 

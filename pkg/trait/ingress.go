@@ -50,13 +50,16 @@ func (t *ingressTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 }
 
 func (t *ingressTrait) Configure(e *Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
-		e.Integration.Status.SetCondition(
-			v1.IntegrationConditionExposureAvailable,
-			corev1.ConditionFalse,
-			v1.IntegrationConditionIngressNotAvailableReason,
-			"explicitly disabled",
-		)
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
+		if e.Integration != nil {
+			e.Integration.Status.SetCondition(
+				v1.IntegrationConditionExposureAvailable,
+				corev1.ConditionFalse,
+				v1.IntegrationConditionIngressNotAvailableReason,
+				"explicitly disabled",
+			)
+		}
+
 		return false, nil
 	}
 

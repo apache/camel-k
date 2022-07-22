@@ -49,7 +49,7 @@ func (t *errorHandlerTrait) IsPlatformTrait() bool {
 }
 
 func (t *errorHandlerTrait) Configure(e *Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 
