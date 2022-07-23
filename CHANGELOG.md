@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - `camel-k-operator` pod in `CrashLoopBackOff` [\#3456](https://github.com/apache/camel-k/issues/3456)
+- Option `--maven-repository` on kamel run command has no effect [\#3447](https://github.com/apache/camel-k/issues/3447)
 - `make generate-doc` outputs non-deterministic `resources/traits.yaml` [\#3431](https://github.com/apache/camel-k/issues/3431)
 - Any ideas on disabling property expansion in kamel run? [\#3422](https://github.com/apache/camel-k/issues/3422)
 - Camel K integration Prometheus Trait label autocreation with Integration Platform not working [\#3415](https://github.com/apache/camel-k/issues/3415)
@@ -36,6 +37,7 @@
 - Release 1.9.0 - Failure to install via OLM [\#3246](https://github.com/apache/camel-k/issues/3246)
 - `make generate-doc` doesn't update CRD API doc when using Go 1.16.x [\#3236](https://github.com/apache/camel-k/issues/3236)
 - Add e2e test for kamel run --dev in a warmed-up environment [\#3211](https://github.com/apache/camel-k/issues/3211)
+- Nil pointer dereference tracing trait [\#3205](https://github.com/apache/camel-k/issues/3205)
 - E2E errors in `1.8.x` [\#3191](https://github.com/apache/camel-k/issues/3191)
 - Improve the reliability of e2e tests by installing operator globally as a pre-requisite. [\#3183](https://github.com/apache/camel-k/issues/3183)
 - Add `.status.observedGeneration` to Camel K CRDs [\#3182](https://github.com/apache/camel-k/issues/3182)
