@@ -29,16 +29,35 @@ import (
 	user "github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
-
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/property"
 )
+
+type Unstructured map[string]map[string]interface{}
+
+func (u Unstructured) Get(id string) (map[string]interface{}, bool) {
+	if t, ok := u[id]; ok {
+		return t, true
+	}
+
+	if addons, ok := u["addons"]; ok {
+		if addon, ok := addons[id]; ok {
+			if t, ok := addon.(map[string]interface{}); ok {
+				return t, true
+			}
+		}
+	}
+
+	return nil, false
+}
 
 var exactVersionRegexp = regexp.MustCompile(`^(\d+)\.(\d+)\.([\w-.]+)$`)
 
@@ -237,7 +256,7 @@ func AssertTraitsType(traits interface{}) error {
 }
 
 // ToTraitMap accepts either v1.Traits or v1.IntegrationKitTraits and converts it to a map of traits.
-func ToTraitMap(traits interface{}) (map[string]map[string]interface{}, error) {
+func ToTraitMap(traits interface{}) (Unstructured, error) {
 	if err := AssertTraitsType(traits); err != nil {
 		return nil, err
 	}
@@ -246,7 +265,7 @@ func ToTraitMap(traits interface{}) (map[string]map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	traitMap := make(map[string]map[string]interface{})
+	traitMap := make(Unstructured)
 	if err = json.Unmarshal(data, &traitMap); err != nil {
 		return nil, err
 	}
@@ -319,4 +338,198 @@ func getBuilderTask(tasks []v1.Task) *v1.BuilderTask {
 		}
 	}
 	return nil
+}
+
+// Equals return if traits are the same.
+func Equals(i1 Unstructured, i2 Unstructured) bool {
+	return reflect.DeepEqual(i1, i2)
+}
+
+// IntegrationsHaveSameTraits return if traits are the same.
+func IntegrationsHaveSameTraits(i1 *v1.Integration, i2 *v1.Integration) (bool, error) {
+	c1, err := NewUnstructuredTraitsForIntegration(i1)
+	if err != nil {
+		return false, err
+	}
+	c2, err := NewUnstructuredTraitsForIntegration(i2)
+	if err != nil {
+		return false, err
+	}
+
+	return Equals(c1, c2), nil
+}
+
+// IntegrationKitsHaveSameTraits return if traits are the same.
+func IntegrationKitsHaveSameTraits(i1 *v1.IntegrationKit, i2 *v1.IntegrationKit) (bool, error) {
+	c1, err := NewUnstructuredTraitsForIntegrationKit(i1)
+	if err != nil {
+		return false, err
+	}
+	c2, err := NewUnstructuredTraitsForIntegrationKit(i2)
+	if err != nil {
+		return false, err
+	}
+
+	return Equals(c1, c2), nil
+}
+
+// KameletBindingsHaveSameTraits return if traits are the same.
+func KameletBindingsHaveSameTraits(i1 *v1alpha1.KameletBinding, i2 *v1alpha1.KameletBinding) (bool, error) {
+	c1, err := NewUnstructuredTraitsForKameletBinding(i1)
+	if err != nil {
+		return false, err
+	}
+	c2, err := NewUnstructuredTraitsForKameletBinding(i2)
+	if err != nil {
+		return false, err
+	}
+
+	return Equals(c1, c2), nil
+}
+
+// IntegrationAndBindingSameTraits return if traits are the same.
+func IntegrationAndBindingSameTraits(i1 *v1.Integration, i2 *v1alpha1.KameletBinding) (bool, error) {
+	c1, err := NewUnstructuredTraitsForIntegration(i1)
+	if err != nil {
+		return false, err
+	}
+	c2, err := NewUnstructuredTraitsForKameletBinding(i2)
+	if err != nil {
+		return false, err
+	}
+
+	return Equals(c1, c2), nil
+}
+
+// IntegrationAndKitHaveSameTraits return if traits are the same.
+func IntegrationAndKitHaveSameTraits(i1 *v1.Integration, i2 *v1.IntegrationKit) (bool, error) {
+	c1, err := NewUnstructuredTraitsForIntegration(i1)
+	if err != nil {
+		return false, err
+	}
+	c2, err := NewUnstructuredTraitsForIntegrationKit(i2)
+	if err != nil {
+		return false, err
+	}
+
+	return Equals(c1, c2), nil
+}
+
+func NewUnstructuredTraitsForIntegration(i *v1.Integration) (Unstructured, error) {
+	m1, err := ToTraitMap(i.Spec.Traits)
+	if err != nil {
+		return nil, err
+	}
+
+	m2, err := FromAnnotations(&i.ObjectMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range m2 {
+		m1[k] = v
+	}
+
+	return m1, nil
+}
+
+func NewUnstructuredTraitsForIntegrationKit(i *v1.IntegrationKit) (Unstructured, error) {
+	m1, err := ToTraitMap(i.Spec.Traits)
+	if err != nil {
+		return nil, err
+	}
+
+	m2, err := FromAnnotations(&i.ObjectMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range m2 {
+		m1[k] = v
+	}
+
+	return m1, nil
+}
+
+func NewUnstructuredTraitsForIntegrationPlatform(i *v1.IntegrationPlatform) (Unstructured, error) {
+	m1, err := ToTraitMap(i.Spec.Traits)
+	if err != nil {
+		return nil, err
+	}
+
+	m2, err := FromAnnotations(&i.ObjectMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range m2 {
+		m1[k] = v
+	}
+
+	return m1, nil
+}
+
+func NewUnstructuredTraitsForKameletBinding(i *v1alpha1.KameletBinding) (Unstructured, error) {
+	if i.Spec.Integration != nil {
+		m1, err := ToTraitMap(i.Spec.Integration.Traits)
+		if err != nil {
+			return nil, err
+		}
+
+		m2, err := FromAnnotations(&i.ObjectMeta)
+		if err != nil {
+			return nil, err
+		}
+
+		for k, v := range m2 {
+			m1[k] = v
+		}
+
+		return m1, nil
+	}
+
+	m1, err := FromAnnotations(&i.ObjectMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	return m1, nil
+}
+
+func FromAnnotations(meta *metav1.ObjectMeta) (Unstructured, error) {
+	options := make(Unstructured)
+
+	for k, v := range meta.Annotations {
+		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
+			configKey := strings.TrimPrefix(k, v1.TraitAnnotationPrefix)
+			if strings.Contains(configKey, ".") {
+				parts := strings.SplitN(configKey, ".", 2)
+				id := parts[0]
+				prop := parts[1]
+				if _, ok := options[id]; !ok {
+					options[id] = make(map[string]interface{})
+				}
+
+				propParts := util.ConfigTreePropertySplit(prop)
+				var current = options[id]
+				if len(propParts) > 1 {
+					c, err := util.NavigateConfigTree(current, propParts[0:len(propParts)-1])
+					if err != nil {
+						return options, err
+					}
+					if cc, ok := c.(map[string]interface{}); ok {
+						current = cc
+					} else {
+						return options, errors.New(`invalid array specification: to set an array value use the ["v1", "v2"] format`)
+					}
+				}
+				current[prop] = v
+
+			} else {
+				return options, fmt.Errorf("wrong format for trait annotation %q: missing trait ID", k)
+			}
+		}
+	}
+
+	return options, nil
 }
