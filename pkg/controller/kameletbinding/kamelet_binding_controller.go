@@ -37,6 +37,8 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/trait"
+
 	camelevent "github.com/apache/camel-k/pkg/event"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/monitoring"
@@ -87,6 +89,19 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 				if !ok {
 					return false
 				}
+
+				// If traits have changed, the reconciliation loop must kick in as
+				// traits may have impact
+				sameTraits, err := trait.KameletBindingsHaveSameTraits(oldKameletBinding, newKameletBinding)
+				if err != nil {
+					Log.ForKameletBinding(newKameletBinding).Error(
+						err,
+						"unable to determine if old and new resource have the same traits")
+				}
+				if !sameTraits {
+					return true
+				}
+
 				// Ignore updates to the kameletBinding status in which case metadata.Generation
 				// does not change, or except when the kameletBinding phase changes as it's used
 				// to transition from one phase to another
