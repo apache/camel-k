@@ -40,12 +40,17 @@ func TestDuplicateParameters(t *testing.T) {
 
 	// run kamel to output the traits/configuration structure in json format to check the processed values
 	// the tracing.enabled is false inside JavaDuplicateParams.java, so we can check the output of this trait as true.
-	cmdParams := []string{"kamel", "run", "files/JavaDuplicateParams.java", "-o", "json", "-t", "tracing.enabled=true", "--trait", "pull-secret.enabled=true", "--property", "prop1=true", "-p", "prop2=true"}
+	cmdParams := []string{"kamel", "run", "files/JavaDuplicateParams.java",
+		"-o", "json",
+		"-t", "tracing.enabled=true", "--trait", "pull-secret.enabled=true",
+		"--property", "prop1=true", "-p", "prop2=true",
+		"--force"}
 	comm, _, _ := cmd.NewKamelWithModelineCommand(ctx, cmdParams)
 
 	// the command is executed inside GetOutputString function
 	commOutput := GetOutputString(comm)
 
-	outParams := `"traits":{"affinity":{"enabled":true},"camel":{"properties":["prop1 = true","prop2 = true","foo = bar"]},"pull-secret":{"enabled":true},"addons":{"tracing":{"enabled":true}}}`
+	outParams :=
+		`"traits":{"affinity":{"enabled":true},"camel":{"properties":["prop1 = true","prop2 = true","foo = bar"]},"pull-secret":{"enabled":true},"addons":{"tracing":{"enabled":true}}}`
 	Expect(commOutput).To(ContainSubstring(outParams))
 }

@@ -135,7 +135,7 @@ func TestRunDevMode(t *testing.T) {
 			defer pipew.Close()
 			defer piper.Close()
 
-			file := util.MakeTempCopy(t, "../config/files/resource-file-location-route.groovy")
+			file := util.MakeTempCopy(t, "files/resource-file-location-route.groovy")
 
 			kamelRun := KamelRunWithContext(ctx, operatorID, ns, file, "--dev", "--resource", fmt.Sprintf("file:%s@/tmp/file.txt", tmpFile.Name()))
 			kamelRun.SetOut(pipew)

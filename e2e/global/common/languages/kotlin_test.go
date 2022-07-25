@@ -47,7 +47,7 @@ func TestRunSimpleKotlinExamples(t *testing.T) {
 		})
 
 		t.Run("init run Kotlin", func(t *testing.T) {
-			RunInitGeneratedExample(camelv1.LanguageKotlin, ns, t)
+			RunInitGeneratedExample(t, operatorID, ns, camelv1.LanguageKotlin)
 		})
 	})
 }

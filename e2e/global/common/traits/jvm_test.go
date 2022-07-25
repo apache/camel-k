@@ -46,7 +46,7 @@ func TestJVMTrait(t *testing.T) {
 		source, err := ioutil.ReadFile("./files/jvm/sample-1.0.jar")
 		assert.Nil(t, err)
 		cmData["sample-1.0.jar"] = source
-		err = NewBinaryConfigmap(ns, "my-deps", cmData)
+		err = CreateBinaryConfigmap(ns, "my-deps", cmData)
 		assert.Nil(t, err)
 
 		t.Run("JVM trait classpath", func(t *testing.T) {

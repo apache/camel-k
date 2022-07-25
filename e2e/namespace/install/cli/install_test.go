@@ -73,9 +73,10 @@ func TestMavenRepositoryInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
 		Expect(KamelInstallWithID(operatorID, ns, "--maven-repository", "https://my.repo.org/public/").Execute()).To(Succeed())
-		Eventually(Configmap(ns, "camel-k-maven-settings")).Should(Not(BeNil()))
+		configmapName := fmt.Sprintf("%s-maven-settings", operatorID)
+		Eventually(Configmap(ns, configmapName)).Should(Not(BeNil()))
 		Eventually(func() string {
-			return Configmap(ns, "camel-k-maven-settings")().Data["settings.xml"]
+			return Configmap(ns, configmapName)().Data["settings.xml"]
 		}).Should(ContainSubstring("https://my.repo.org/public/"))
 	})
 }

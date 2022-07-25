@@ -50,6 +50,10 @@ func TestOperatorIDFiltering(t *testing.T) {
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
+
+		// Create only IntegrationPlatform so that `kamel run` with default operator ID succeeds
+		Expect(KamelInstall(ns, "--skip-operator-setup").Execute()).To(Succeed())
+
 		WithNewTestNamespace(t, func(nsop1 string) {
 			WithNewTestNamespace(t, func(nsop2 string) {
 				operator1 := "operator-1"

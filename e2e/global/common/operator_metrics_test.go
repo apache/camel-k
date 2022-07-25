@@ -203,7 +203,7 @@ func TestMetrics(t *testing.T) {
 				"LoggerName":       Equal("camel-k.controller.integrationplatform"),
 				"Message":          Equal("Reconciling IntegrationPlatform"),
 				"RequestNamespace": Equal(ns),
-				"RequestName":      Equal("camel-k"),
+				"RequestName":      Equal(operatorID),
 			}))
 			Expect(err).To(BeNil())
 

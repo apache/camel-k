@@ -93,7 +93,7 @@ func TestOpenAPIConfigmap(t *testing.T) {
 		assert.Nil(t, err)
 		var cmDataProps = make(map[string]string)
 		cmDataProps["petstore-api.yaml"] = string(openapiContent)
-		NewPlainTextConfigmap(ns, "my-openapi", cmDataProps)
+		CreatePlainTextConfigmap(ns, "my-openapi", cmDataProps)
 
 		Expect(KamelRunWithID(operatorID, ns,
 			"--name", "petstore",

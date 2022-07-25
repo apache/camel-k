@@ -47,7 +47,7 @@ func TestRunSimpleJavaScriptExamples(t *testing.T) {
 		})
 
 		t.Run("init run JavaScript", func(t *testing.T) {
-			RunInitGeneratedExample(camelv1.LanguageJavaScript, ns, t)
+			RunInitGeneratedExample(t, operatorID, ns, camelv1.LanguageJavaScript)
 		})
 	})
 }

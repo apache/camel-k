@@ -55,7 +55,7 @@ func TestRunSimpleJavaExamples(t *testing.T) {
 		})
 
 		t.Run("init run java", func(t *testing.T) {
-			RunInitGeneratedExample(camelv1.LanguageJavaSource, ns, t)
+			RunInitGeneratedExample(t, operatorID, ns, camelv1.LanguageJavaSource)
 		})
 	})
 }

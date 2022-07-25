@@ -47,7 +47,7 @@ func TestRunSimpleYamlExamples(t *testing.T) {
 		})
 
 		t.Run("init run yaml", func(t *testing.T) {
-			RunInitGeneratedExample(camelv1.LanguageYaml, ns, t)
+			RunInitGeneratedExample(t, operatorID, ns, camelv1.LanguageYaml)
 		})
 	})
 }
