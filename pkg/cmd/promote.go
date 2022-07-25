@@ -20,6 +20,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -194,43 +195,61 @@ func (o *promoteCmdOptions) validateDestResources(c client.Client, it *v1.Integr
 	for t, v := range mount {
 		switch t {
 		case "configs":
-			if list, ok := v.([]string); ok {
-				for _, cn := range list {
-					if conf, parseErr := resource.ParseConfig(cn); parseErr == nil {
-						if conf.StorageType() == resource.StorageTypeConfigmap {
-							configmaps = append(configmaps, conf.Name())
-						} else if conf.StorageType() == resource.StorageTypeSecret {
-							secrets = append(secrets, conf.Name())
-						}
-					} else {
-						return parseErr
+			list, ok := v.([]interface{})
+			if !ok {
+				return fmt.Errorf("invalid %s type: %s, value: %s", t, reflect.TypeOf(v), v)
+			}
+			for _, cn := range list {
+				s, ok := cn.(string)
+				if !ok {
+					return fmt.Errorf("invalid %s type: %s, value: %s", t, reflect.TypeOf(cn), cn)
+				}
+				if conf, parseErr := resource.ParseConfig(s); parseErr == nil {
+					if conf.StorageType() == resource.StorageTypeConfigmap {
+						configmaps = append(configmaps, conf.Name())
+					} else if conf.StorageType() == resource.StorageTypeSecret {
+						secrets = append(secrets, conf.Name())
 					}
+				} else {
+					return parseErr
 				}
 			}
 		case "resources":
-			if list, ok := v.([]string); ok {
-				for _, cn := range list {
-					if conf, parseErr := resource.ParseResource(cn); parseErr == nil {
-						if conf.StorageType() == resource.StorageTypeConfigmap {
-							configmaps = append(configmaps, conf.Name())
-						} else if conf.StorageType() == resource.StorageTypeSecret {
-							secrets = append(secrets, conf.Name())
-						}
-					} else {
-						return parseErr
+			list, ok := v.([]interface{})
+			if !ok {
+				return fmt.Errorf("invalid %s type: %s, value: %s", t, reflect.TypeOf(v), v)
+			}
+			for _, cn := range list {
+				s, ok := cn.(string)
+				if !ok {
+					return fmt.Errorf("invalid %s type: %s, value: %s", t, reflect.TypeOf(cn), cn)
+				}
+				if conf, parseErr := resource.ParseResource(s); parseErr == nil {
+					if conf.StorageType() == resource.StorageTypeConfigmap {
+						configmaps = append(configmaps, conf.Name())
+					} else if conf.StorageType() == resource.StorageTypeSecret {
+						secrets = append(secrets, conf.Name())
 					}
+				} else {
+					return parseErr
 				}
 			}
 		case "volumes":
-			if list, ok := v.([]string); ok {
-				for _, cn := range list {
-					if conf, parseErr := resource.ParseVolume(cn); parseErr == nil {
-						if conf.StorageType() == resource.StorageTypePVC {
-							pvcs = append(pvcs, conf.Name())
-						}
-					} else {
-						return parseErr
+			list, ok := v.([]interface{})
+			if !ok {
+				return fmt.Errorf("invalid %s type: %s, value: %s", t, reflect.TypeOf(v), v)
+			}
+			for _, cn := range list {
+				s, ok := cn.(string)
+				if !ok {
+					return fmt.Errorf("invalid %s type: %s, value: %s", t, reflect.TypeOf(cn), cn)
+				}
+				if conf, parseErr := resource.ParseVolume(s); parseErr == nil {
+					if conf.StorageType() == resource.StorageTypePVC {
+						pvcs = append(pvcs, conf.Name())
 					}
+				} else {
+					return parseErr
 				}
 			}
 		}
@@ -270,25 +289,25 @@ func (o *promoteCmdOptions) validateDestResources(c client.Client, it *v1.Integr
 	for _, name := range configmaps {
 		if !existsCm(o.Context, c, name, o.To) {
 			anyError = true
-			errorTrace += fmt.Sprintf("Configmap %s is missing from %s namespace\n", name, o.To)
+			errorTrace += fmt.Sprintf("\n\tConfigmap %s is missing from %s namespace", name, o.To)
 		}
 	}
 	for _, name := range secrets {
 		if !existsSecret(o.Context, c, name, o.To) {
 			anyError = true
-			errorTrace += fmt.Sprintf("Secret %s is missing from %s namespace\n", name, o.To)
+			errorTrace += fmt.Sprintf("\n\tSecret %s is missing from %s namespace", name, o.To)
 		}
 	}
 	for _, name := range pvcs {
 		if !existsPv(o.Context, c, name, o.To) {
 			anyError = true
-			errorTrace += fmt.Sprintf("PersistentVolume %s is missing from %s namespace\n", name, o.To)
+			errorTrace += fmt.Sprintf("\n\tPersistentVolume %s is missing from %s namespace", name, o.To)
 		}
 	}
 	for _, name := range kamelets {
 		if !existsKamelet(o.Context, c, name, o.To) {
 			anyError = true
-			errorTrace += fmt.Sprintf("Kamelet %s is missing from %s namespace\n", name, o.To)
+			errorTrace += fmt.Sprintf("\n\tKamelet %s is missing from %s namespace", name, o.To)
 		}
 	}
 
