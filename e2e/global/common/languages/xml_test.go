@@ -47,7 +47,7 @@ func TestRunSimpleXmlExamples(t *testing.T) {
 		})
 
 		t.Run("init run xml", func(t *testing.T) {
-			RunInitGeneratedExample(camelv1.LanguageXML, ns, t)
+			RunInitGeneratedExample(t, operatorID, ns, camelv1.LanguageXML)
 		})
 	})
 }

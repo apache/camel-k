@@ -47,7 +47,8 @@ func TestRunGlobalKamelet(t *testing.T) {
 	}
 
 	WithGlobalOperatorNamespace(t, func(operatorNamespace string) {
-		Expect(KamelInstall(operatorNamespace, "--global", "--force").Execute()).To(Succeed())
+		operatorID := "camel-k-global-kamelet"
+		Expect(KamelInstallWithID(operatorID, operatorNamespace, "--global", "--force").Execute()).To(Succeed())
 
 		t.Run("Global operator + namespaced kamelet test", func(t *testing.T) {
 
@@ -55,7 +56,6 @@ func TestRunGlobalKamelet(t *testing.T) {
 			WithNewTestNamespace(t, func(ns2 string) {
 				Expect(CreateTimerKamelet(ns2, "my-own-timer-source")()).To(Succeed())
 
-				operatorID := "camel-k-local-ns2"
 				Expect(KamelInstallWithID(operatorID, ns2, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
 
 				Expect(KamelRunWithID(operatorID, ns2, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
@@ -71,7 +71,6 @@ func TestRunGlobalKamelet(t *testing.T) {
 
 			// NS3: namespace without operator
 			WithNewTestNamespace(t, func(ns3 string) {
-				operatorID := "camel-k-local-ns3"
 				Expect(KamelInstallWithID(operatorID, ns3, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
 
 				Expect(KamelRunWithID(operatorID, ns3, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())

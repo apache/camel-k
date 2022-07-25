@@ -54,6 +54,7 @@ func TestRunGlobalInstall(t *testing.T) {
 	WithGlobalOperatorNamespace(t, func(operatorNamespace string) {
 		Expect(KamelInstall(operatorNamespace, "--global", "--force").Execute()).To(Succeed())
 		Eventually(OperatorPodPhase(operatorNamespace), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+
 		t.Run("Global test on namespace with platform", func(t *testing.T) {
 			WithNewTestNamespace(t, func(ns2 string) {
 				// Creating namespace local platform

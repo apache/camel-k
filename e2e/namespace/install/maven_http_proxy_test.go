@@ -147,6 +147,7 @@ func TestMavenProxy(t *testing.T) {
 		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
 
 		// Install Camel K with the HTTP proxy
+		operatorID := "camel-k-maven-proxy"
 		olm, olmErr := olm.IsAPIAvailable(TestContext, TestClient(), ns)
 		installed, inErr := kubernetes.IsAPIResourceInstalled(TestClient(), configv1.GroupVersion.String(), reflect.TypeOf(configv1.Proxy{}).Name())
 		permission, pErr := kubernetes.CheckPermission(TestContext, TestClient(), configv1.GroupName, reflect.TypeOf(configv1.Proxy{}).Name(), "", "cluster", "edit")
@@ -176,10 +177,8 @@ func TestMavenProxy(t *testing.T) {
 			}()
 
 			// ENV values should be injected by the OLM
-			operatorID := "camel-k-maven-proxy"
 			Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		} else {
-			operatorID := "camel-k-maven-proxy"
 			Expect(KamelInstallWithID(operatorID, ns,
 				"--operator-env-vars", fmt.Sprintf("HTTP_PROXY=http://%s", hostname),
 				// TODO: enable TLS for the HTTPS proxy when Maven supports it
@@ -193,7 +192,7 @@ func TestMavenProxy(t *testing.T) {
 
 		// Run the Integration
 		name := "java"
-		Expect(KamelRun(ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))

@@ -47,7 +47,7 @@ func TestRunSimpleGroovyExamples(t *testing.T) {
 		})
 
 		t.Run("init run groovy", func(t *testing.T) {
-			RunInitGeneratedExample(camelv1.LanguageGroovy, ns, t)
+			RunInitGeneratedExample(t, operatorID, ns, camelv1.LanguageGroovy)
 		})
 	})
 }

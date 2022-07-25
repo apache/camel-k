@@ -73,13 +73,13 @@ func TestRunConfigExamples(t *testing.T) {
 		// Store a configmap on the cluster
 		var cmData = make(map[string]string)
 		cmData["my-configmap-key"] = "my-configmap-content"
-		NewPlainTextConfigmap(ns, "my-cm", cmData)
+		CreatePlainTextConfigmap(ns, "my-cm", cmData)
 
 		// Store a configmap with multiple values
 		var cmDataMulti = make(map[string]string)
 		cmDataMulti["my-configmap-key"] = "should-not-see-it"
 		cmDataMulti["my-configmap-key-2"] = "my-configmap-content-2"
-		NewPlainTextConfigmap(ns, "my-cm-multi", cmDataMulti)
+		CreatePlainTextConfigmap(ns, "my-cm-multi", cmDataMulti)
 
 		t.Run("Config configmap", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns, "./files/config-configmap-route.groovy", "--config", "configmap:my-cm").Execute()).To(Succeed())
@@ -123,7 +123,7 @@ func TestRunConfigExamples(t *testing.T) {
 		// Store a configmap as property file
 		var cmDataProps = make(map[string]string)
 		cmDataProps["my.properties"] = "my.key.1=hello\nmy.key.2=world"
-		NewPlainTextConfigmap(ns, "my-cm-properties", cmDataProps)
+		CreatePlainTextConfigmap(ns, "my-cm-properties", cmDataProps)
 
 		t.Run("Config configmap as property file", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns, "./files/config-configmap-properties-route.groovy", "--config", "configmap:my-cm-properties").Execute()).To(Succeed())
@@ -138,7 +138,7 @@ func TestRunConfigExamples(t *testing.T) {
 		// Store a secret on the cluster
 		var secData = make(map[string]string)
 		secData["my-secret-key"] = "very top secret"
-		NewPlainTextSecret(ns, "my-sec", secData)
+		CreatePlainTextSecret(ns, "my-sec", secData)
 
 		t.Run("Config secret", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns, "./files/config-secret-route.groovy", "--config", "secret:my-sec").Execute()).To(Succeed())

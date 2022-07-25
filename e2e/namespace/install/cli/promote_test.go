@@ -36,19 +36,20 @@ import (
 func TestKamelCLIPromote(t *testing.T) {
 	// Dev environment namespace
 	WithNewTestNamespace(t, func(nsDev string) {
-		Expect(KamelInstall(nsDev).Execute()).To(Succeed())
+		operatorDevID := "camel-k-cli-promote-dev"
+		Expect(KamelInstallWithID(operatorDevID, nsDev).Execute()).To(Succeed())
 
 		// Dev content configmap
 		var cmData = make(map[string]string)
 		cmData["my-configmap-key"] = "I am development configmap!"
-		NewPlainTextConfigmap(nsDev, "my-cm", cmData)
+		CreatePlainTextConfigmap(nsDev, "my-cm", cmData)
 		// Dev secret
 		var secData = make(map[string]string)
 		secData["my-secret-key"] = "very top secret development"
-		NewPlainTextSecret(nsDev, "my-sec", secData)
+		CreatePlainTextSecret(nsDev, "my-sec", secData)
 
 		t.Run("plain integration dev", func(t *testing.T) {
-			Expect(KamelRun(nsDev, "./files/promote-route.groovy",
+			Expect(KamelRunWithID(operatorDevID, nsDev, "./files/promote-route.groovy",
 				"--config", "configmap:my-cm",
 				"--config", "secret:my-sec",
 			).Execute()).To(Succeed())
@@ -60,30 +61,32 @@ func TestKamelCLIPromote(t *testing.T) {
 
 		t.Run("kamelet integration dev", func(t *testing.T) {
 			Expect(CreateTimerKamelet(nsDev, "my-own-timer-source")()).To(Succeed())
-			Expect(KamelRun(nsDev, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorDevID, nsDev, "./files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(nsDev, "timer-kamelet-usage"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(nsDev, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
 		})
 
 		t.Run("kamelet binding dev", func(t *testing.T) {
 			Expect(CreateTimerKamelet(nsDev, "kb-timer-source")()).To(Succeed())
-			Expect(KamelBind(nsDev, "kb-timer-source", "log:info", "-p", "source.message=my-kamelet-binding-rocks").Execute()).To(Succeed())
+			Expect(KamelBindWithID(operatorDevID, nsDev, "kb-timer-source", "log:info", "-p", "source.message=my-kamelet-binding-rocks").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(nsDev, "kb-timer-source-to-log"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(nsDev, "kb-timer-source-to-log"), TestTimeoutShort).Should(ContainSubstring("my-kamelet-binding-rocks"))
 		})
 
 		// Prod environment namespace
 		WithNewTestNamespace(t, func(nsProd string) {
-			Expect(KamelInstall(nsProd).Execute()).To(Succeed())
+			operatorProdID := "camel-k-cli-promote-prod"
+			Expect(KamelInstallWithID(operatorProdID, nsProd).Execute()).To(Succeed())
 			Eventually(PlatformPhase(nsProd), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 			t.Run("no configmap in destination", func(t *testing.T) {
 				Expect(Kamel("promote", "-n", nsDev, "promote-route", "--to", nsProd).Execute()).NotTo(Succeed())
 			})
+
 			// Prod content configmap
 			var cmData = make(map[string]string)
 			cmData["my-configmap-key"] = "I am production!"
-			NewPlainTextConfigmap(nsProd, "my-cm", cmData)
+			CreatePlainTextConfigmap(nsProd, "my-cm", cmData)
 
 			t.Run("no secret in destination", func(t *testing.T) {
 				Expect(Kamel("promote", "-n", nsDev, "promote-route", "--to", nsProd).Execute()).NotTo(Succeed())
@@ -92,7 +95,7 @@ func TestKamelCLIPromote(t *testing.T) {
 			// Prod secret
 			var secData = make(map[string]string)
 			secData["my-secret-key"] = "very top secret production"
-			NewPlainTextSecret(nsProd, "my-sec", secData)
+			CreatePlainTextSecret(nsProd, "my-sec", secData)
 
 			t.Run("plain integration promotion", func(t *testing.T) {
 				Expect(Kamel("promote", "-n", nsDev, "promote-route", "--to", nsProd).Execute()).To(Succeed())

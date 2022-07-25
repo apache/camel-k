@@ -70,7 +70,7 @@ func TestKamelCliDescribe(t *testing.T) {
 		})
 
 		t.Run("Test kamel describe integration platform", func(t *testing.T) {
-			platform := GetOutputString(Kamel("describe", "platform", "camel-k", "-n", ns))
+			platform := GetOutputString(Kamel("describe", "platform", operatorID, "-n", ns))
 			r, _ := regexp.Compile("(?sm).*Name:\\s+camel-k.*")
 			Expect(platform).To(MatchRegexp(r.String()))
 
