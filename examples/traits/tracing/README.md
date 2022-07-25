@@ -31,13 +31,13 @@ Quarkus OpenTracing extension in Camel automatically creates a Camel OpenTracing
 
 See `quarkus.properties` for details.
 
-    kamel run InventoryService.java --name inventory -d mvn:org.apache.camel.quarkus:camel-quarkus-opentracing  -d camel-jackson --property-file quarkus.properties -t quarkus.enabled=true
+    kamel run InventoryService.java --name inventory -d mvn:org.apache.camel.quarkus:camel-quarkus-opentracing  -d camel:jackson --property-file quarkus.properties -t quarkus.enabled=true
 
 Let's inject the Opentracing Tracer to the camel OrderService.java application. Let's start the inventory service. 
 
 See `customizers/OpentracingCustomizer.java` for more details. 
 
-    kamel run --name order OrderService.java customizers/OpentracingCustomizer.java -d camel-opentracing -d mvn:io.jaegertracing:jaeger-client:1.2.0 -d camel-jackson -d camel-undertow -d camel-swagger-java --property-file application.properties
+    kamel run --name order OrderService.java customizers/OpentracingCustomizer.java -d camel:opentracing -d mvn:io.jaegertracing:jaeger-client:1.2.0 -d camel:jackson -d camel:undertow -d camel:swagger-java --property-file application.properties
 
 ## View the Jaeger UI 
 

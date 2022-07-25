@@ -25,7 +25,7 @@ from('file:/etc/camel/resources/?fileName=resources-data.zip&noop=true&idempoten
 We have this file available locally, so we can use the `--resource` _file_ flag command to copy this file in the `Integration`:
 
 ----
-kamel run --resource file:resources-data.zip resource-file-binary-route.groovy -d camel-zipfile --dev
+kamel run --resource file:resources-data.zip resource-file-binary-route.groovy -d camel:zipfile --dev
 ----
 
 NOTE: when you're providing a resource file, we try to recognize if it's a binary file and process it accordingly creating a binary representation that will be decoded transparently in the `Integration`.

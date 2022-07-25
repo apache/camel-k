@@ -53,7 +53,7 @@ func TestRunIncrementalBuild(t *testing.T) {
 		name2 := "java2"
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name2,
-			"-d", "camel-zipfile",
+			"-d", "camel:zipfile",
 		).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name2), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name2, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))

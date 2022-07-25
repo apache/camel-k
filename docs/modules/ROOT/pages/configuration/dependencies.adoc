@@ -23,10 +23,10 @@ NOTE: Camel K won't be able to automatically the dependencies when your routes s
 You can explicitly add dependency using the `-d` flag of the `kamel run` command. This is useful when you need to use dependencies that are not included in the Camel catalog or when the URI of your routes cannot be automatically discovered (see Dynamic URIs). For example:
 
 ```
-kamel run -d mvn:com.google.guava:guava:26.0-jre -d camel-mina2 Integration.java
+kamel run -d mvn:com.google.guava:guava:26.0-jre -d camel:http Integration.java
 ```
 
-With that command you will add a dependency of Guava and the Camel Mina component. This feature can also be disabled if needed (although we discourage you from doing it) by disabling the _dependencies_ trait (`-t dependencies.enabled=false`).
+With that command you will add a dependency of Guava and the Camel HTTP component. This feature can also be disabled if needed (although we discourage you from doing it) by disabling the _dependencies_ trait (`-t dependencies.enabled=false`).
 
 [[dependencies-kind]]
 == Kind of dependencies
@@ -35,9 +35,9 @@ The `-d` flag of the `kamel run` command is flexible and support multiple kind o
 
 *Camel dependencies* can be added directly using the `-d` flag like this:
 ```
-kamel run -d camel-mina2 Integration.java
+kamel run -d camel:http Integration.java
 ```
-In this case, the dependency will be added with the correct version.
+In this case, the dependency will be added with the correct version. Note that the standard notation for specifying a Camel dependency is `camel:xxx`, while `kamel` also accepts `camel-xxx` for usability.
 
 *External dependencies* can be added using the `-d` flag, the `mvn` prefix, and the maven coordinates:
 ```

@@ -15,14 +15,14 @@ kubectl apply -f lra-coordinator.yaml
 
 * Start the three demo services
 ```
-kamel run -d camel-lra Payment.java
-kamel run -d camel-lra Flight.java
-kamel run -d camel-lra Train.java
+kamel run -d camel:lra Payment.java
+kamel run -d camel:lra Flight.java
+kamel run -d camel:lra Train.java
 ```
 
 * Start the saga application
 ```
-kamel run -d camel-lra Saga.java
+kamel run -d camel:lra Saga.java
 ```
 
 Then you can use ```kamel logs saga``` to check the output of the transactions.

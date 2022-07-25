@@ -19,7 +19,7 @@
 //
 // To run this integration use:
 //
-//     kamel run --name pulsar-groovy --dev -d camel-pulsar examples/pulsar.groovy
+//     kamel run --name pulsar-groovy --dev -d camel:pulsar examples/pulsar.groovy
 //
 //  Notes: 
 //  camel-pulsar may be unecessary as camel-k can detect automatically dependencies from component calls for example from("pulsar://localhost:6650/tenant/namespace/topic")

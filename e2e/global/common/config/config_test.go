@@ -188,7 +188,7 @@ func TestRunConfigExamples(t *testing.T) {
 		})
 
 		t.Run("Binary (zip) resource file", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "./files/resource-file-binary-route.groovy", "--resource", "file:./files/resources-data.zip", "-d", "camel-zipfile").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "./files/resource-file-binary-route.groovy", "--resource", "file:./files/resources-data.zip", "-d", "camel:zipfile").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "resource-file-binary-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "resource-file-binary-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "resource-file-binary-route"), TestTimeoutShort).Should(ContainSubstring("the file body"))

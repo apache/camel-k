@@ -18,7 +18,7 @@
 
 //
 // To run this integrations use:
-// kamel run --resource file:resources-data.zip resource-file-binary-route.groovy -d camel-zipfile --dev
+// kamel run --resource file:resources-data.zip resource-file-binary-route.groovy -d camel:zipfile --dev
 //
 
 from('file:/etc/camel/resources/?fileName=resources-data.zip&noop=true&idempotent=false')
