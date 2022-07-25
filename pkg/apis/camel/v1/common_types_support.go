@@ -24,6 +24,8 @@ import (
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/imdario/mergo"
 )
 
 func (in *Artifact) String() string {
@@ -57,6 +59,44 @@ func TraitProfileByName(name string) TraitProfile {
 // Equal checks if the profile is equal to the given profile (case insensitive).
 func (p TraitProfile) Equal(other TraitProfile) bool {
 	return strings.EqualFold(string(p), string(other))
+}
+
+// Merge merges the given Traits into the receiver.
+func (t *Traits) Merge(other Traits) error {
+	// marshal both
+	data1, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+	data2, err := json.Marshal(other)
+	if err != nil {
+		return err
+	}
+
+	// merge them
+	map1 := make(map[string]interface{})
+	if err := json.Unmarshal(data1, &map1); err != nil {
+		return err
+	}
+	map2 := make(map[string]interface{})
+	if err := json.Unmarshal(data2, &map2); err != nil {
+		return err
+	}
+	// values from merged trait take precedence over the original ones
+	if err := mergo.Merge(&map1, map2, mergo.WithOverride); err != nil {
+		return err
+	}
+
+	// unmarshal it
+	data, err := json.Marshal(map1)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(data, &t); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // MarshalJSON returns m as the JSON encoding of m.

@@ -213,7 +213,9 @@ func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding
 		if b == nil {
 			continue
 		}
-		integration.Spec.Traits = b.Traits
+		if err := integration.Spec.Traits.Merge(b.Traits); err != nil {
+			return err
+		}
 		for k, v := range b.ApplicationProperties {
 			entry, err := property.EncodePropertyFileEntry(k, v)
 			if err != nil {
