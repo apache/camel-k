@@ -3,9 +3,11 @@ module github.com/apache/camel-k/pkg/apis/camel
 go 1.17
 
 require (
+	github.com/imdario/mergo v0.3.13
 	github.com/stretchr/testify v1.7.0
 	k8s.io/api v0.22.5
 	k8s.io/apimachinery v0.22.5
+	k8s.io/utils v0.0.0-20220713171938-56c0de1e6f5e
 )
 
 require (
@@ -22,7 +24,7 @@ require (
 	golang.org/x/text v0.3.6 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.0 // indirect
 	k8s.io/klog/v2 v2.9.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
 )
