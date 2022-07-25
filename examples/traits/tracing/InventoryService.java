@@ -18,7 +18,7 @@
 
 /* 
 
-kamel run InventoryService.java --name inventory -d camel-opentracing -d mvn:io.jaegertracing:jaeger-client:1.2.0 -d rest-api -d camel-jackson --property-file application.properties
+kamel run InventoryService.java --name inventory -d camel:opentracing -d mvn:io.jaegertracing:jaeger-client:1.2.0 -d rest-api -d camel:jackson --property-file application.properties
 
 */
 

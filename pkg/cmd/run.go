@@ -75,7 +75,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/watch"
 )
 
-const usageDependency = `A dependency that should be included, e.g., "-d camel-mail" for a Camel component, "-d mvn:org.my:app:1.0" for a Maven dependency or "file://localPath[?targetPath=<path>&registry=<registry_URL>&skipChecksums=<true>&skipPOM=<true>]" for local files (experimental)`
+const usageDependency = `A dependency that should be included, e.g., "-d camel:mail" for a Camel component, "-d mvn:org.my:app:1.0" for a Maven dependency or "file://localPath[?targetPath=<path>&registry=<registry_URL>&skipChecksums=<true>&skipPOM=<true>]" for local files (experimental)`
 
 func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) {
 	options := runCmdOptions{

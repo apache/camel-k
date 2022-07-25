@@ -18,7 +18,7 @@
 
 /*
 
-kamel run --name=order-service-api -d camel-swagger-java -d camel-jackson -d camel-undertow  OrderService.java --dev
+kamel run --name=order-service-api -d camel:swagger-java -d camel:jackson -d camel:undertow  OrderService.java --dev
 
 */
 
