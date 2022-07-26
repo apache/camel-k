@@ -50,10 +50,6 @@ func TestOperatorIDFiltering(t *testing.T) {
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
-
-		// Create only IntegrationPlatform so that `kamel run` with default operator ID succeeds
-		Expect(KamelInstall(ns, "--skip-operator-setup").Execute()).To(Succeed())
-
 		WithNewTestNamespace(t, func(nsop1 string) {
 			WithNewTestNamespace(t, func(nsop2 string) {
 				operator1 := "operator-1"
@@ -67,15 +63,15 @@ func TestOperatorIDFiltering(t *testing.T) {
 				t.Run("Operators ignore non-scoped integrations", func(t *testing.T) {
 					RegisterTestingT(t)
 
-					Expect(KamelRun(ns, "files/yaml.yaml", "--name", "untouched").Execute()).To(Succeed())
+					Expect(KamelRun(ns, "files/yaml.yaml", "--name", "untouched", "--force").Execute()).To(Succeed())
 					Consistently(IntegrationPhase(ns, "untouched"), 10*time.Second).Should(BeEmpty())
 				})
 
 				t.Run("Operators run scoped integrations", func(t *testing.T) {
 					RegisterTestingT(t)
 
-					Expect(KamelRun(ns, "files/yaml.yaml", "--name", "moving").Execute()).To(Succeed())
-					Expect(AssignIntegrationToOperator(ns, "moving", "operator-1")).To(Succeed())
+					Expect(KamelRun(ns, "files/yaml.yaml", "--name", "moving", "--force").Execute()).To(Succeed())
+					Expect(AssignIntegrationToOperator(ns, "moving", operator1)).To(Succeed())
 					Eventually(IntegrationPhase(ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
 					Eventually(IntegrationPodPhase(ns, "moving"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 					Eventually(IntegrationLogs(ns, "moving"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -84,7 +80,7 @@ func TestOperatorIDFiltering(t *testing.T) {
 				t.Run("Operators can handoff scoped integrations", func(t *testing.T) {
 					RegisterTestingT(t)
 
-					Expect(AssignIntegrationToOperator(ns, "moving", "operator-2")).To(Succeed())
+					Expect(AssignIntegrationToOperator(ns, "moving", operator2)).To(Succeed())
 					Eventually(IntegrationPhase(ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
 					Expect(Kamel("rebuild", "-n", ns, "moving").Execute()).To(Succeed())
 					Eventually(IntegrationPhase(ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
@@ -111,9 +107,10 @@ func TestOperatorIDFiltering(t *testing.T) {
 					// Save resources by deleting "moving" integration
 					Expect(Kamel("delete", "moving", "-n", ns).Execute()).To(Succeed())
 
-					Expect(KamelRun(ns, "files/yaml.yaml", "--name", "pre-built", "-t", fmt.Sprintf("container.image=%s", image)).Execute()).To(Succeed())
+					Expect(KamelRun(ns, "files/yaml.yaml", "--name", "pre-built", "--force",
+						"-t", fmt.Sprintf("container.image=%s", image)).Execute()).To(Succeed())
 					Consistently(IntegrationPhase(ns, "pre-built"), 10*time.Second).Should(BeEmpty())
-					Expect(AssignIntegrationToOperator(ns, "pre-built", "operator-2")).To(Succeed())
+					Expect(AssignIntegrationToOperator(ns, "pre-built", operator2)).To(Succeed())
 					Eventually(IntegrationPhase(ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
 					Eventually(IntegrationPodPhase(ns, "pre-built"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 					Eventually(IntegrationLogs(ns, "pre-built"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -123,10 +120,11 @@ func TestOperatorIDFiltering(t *testing.T) {
 				t.Run("Operators can run scoped kamelet bindings", func(t *testing.T) {
 					RegisterTestingT(t)
 
-					Expect(KamelBind(ns, "timer-source?message=Hello", "log-sink", "--name", "klb").Execute()).To(Succeed())
+					Expect(KamelBind(ns, "timer-source?message=Hello", "log-sink",
+						"--name", "klb", "--force").Execute()).To(Succeed())
 					Consistently(Integration(ns, "klb"), 10*time.Second).Should(BeNil())
 
-					Expect(AssignKameletBindingToOperator(ns, "klb", "operator-1")).To(Succeed())
+					Expect(AssignKameletBindingToOperator(ns, "klb", operator1)).To(Succeed())
 					Eventually(Integration(ns, "klb"), TestTimeoutShort).ShouldNot(BeNil())
 					Eventually(IntegrationPhase(ns, "klb"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
 					Eventually(IntegrationPodPhase(ns, "klb"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
