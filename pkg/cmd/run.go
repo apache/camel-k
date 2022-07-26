@@ -920,9 +920,8 @@ func getMountPath(targetPath string, dirName string, path string) (string, error
 	return filepath.Join(targetPath, localRelativePath), nil
 }
 
-// nolint:errcheck
 func (o *runCmdOptions) uploadPomFromJar(gav maven.Dependency, path string, platform *v1.IntegrationPlatform, ns string, options spectrum.Options, cmd *cobra.Command) maven.Dependency {
-	util.WithTempDir("camel-k", func(tmpDir string) error {
+	_ = util.WithTempDir("camel-k", func(tmpDir string) error {
 		pomPath := filepath.Join(tmpDir, "pom.xml")
 		jar, err := zip.OpenReader(path)
 		if err != nil {
@@ -954,7 +953,7 @@ func (o *runCmdOptions) uploadPomFromJar(gav maven.Dependency, path string, plat
 			} else {
 				gav.Type = "pom"
 				// Swallow error as this is not a mandatory step
-				o.uploadAsMavenArtifact(gav, pomPath, platform, ns, options, cmd)
+				_ = o.uploadAsMavenArtifact(gav, pomPath, platform, ns, options, cmd)
 			}
 		}
 		return nil
