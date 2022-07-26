@@ -57,6 +57,11 @@ func TestKitKnativeFullBuild(t *testing.T) {
 }
 
 func TestKitTimerToLogFullNativeBuild(t *testing.T) {
+	if os.Getenv("CAMEL_K_CLUSTER_OCP3") == "true" {
+		t.Skip("INFO: Skipping test as known to never pass on OCP3")
+		return
+	}
+
 	doKitFullBuild(t, "timer-to-log", "4Gi", "15m0s", TestTimeoutVeryLong, kitOptions{
 		dependencies: []string{
 			"camel:timer", "camel:log",
