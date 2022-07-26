@@ -27,7 +27,6 @@ import (
 
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gstruct"
-
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
@@ -56,6 +55,31 @@ func TestBadRouteIntegration(t *testing.T) {
 				Should(gstruct.PointTo(BeNumerically("==", 2)))
 			// Check the Integration stays in error phase
 			Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
+		})
+
+		// Clean up
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
+}
+
+func TestMissingDependencyIntegration(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		operatorID := "camel-k-missing-dependencies"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+
+		t.Run("run missing dependency java route", func(t *testing.T) {
+			RegisterTestingT(t)
+			name := "java-route"
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name, "-d", "mvn:com.example:nonexistent:1.0").Execute()).To(Succeed())
+			// Integration in error
+			Eventually(IntegrationPhase(ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
+			kitName := IntegrationKit(ns, name)()
+			// Kit in error
+			Eventually(KitPhase(ns, kitName), TestTimeoutShort).Should(Equal(v1.IntegrationKitPhaseError))
+			//Build in error with 5 attempts
+			build := Build(ns, kitName)()
+			Eventually(build.Status.Phase, TestTimeoutShort).Should(Equal(v1.BuildPhaseError))
+			Eventually(build.Status.Failure.Recovery.Attempt, TestTimeoutShort).Should(Equal(5))
 		})
 
 		// Clean up
