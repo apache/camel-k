@@ -23,6 +23,7 @@ limitations under the License.
 package native
 
 import (
+	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -39,6 +40,11 @@ var (
 )
 
 func TestNativeIntegrations(t *testing.T) {
+	if os.Getenv("CAMEL_K_CLUSTER_OCP3") == "true" {
+		t.Skip("INFO: Skipping test as known to never pass on OCP3")
+		return
+	}
+
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-quarkus-native"
 		Expect(KamelInstallWithID(operatorID, ns,
