@@ -30,6 +30,7 @@ import (
 	"os"
 	"testing"
 	"time"
+	"path/filepath"
 
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
@@ -123,7 +124,7 @@ func TestRunDevMode(t *testing.T) {
 
 			file := util.MakeTempCopy(t, "../config/files/resource-file-location-route.groovy")
 
-			kamelRun := KamelWithContext(ctx, "run", "-n", ns, file, "--dev", "--resource", fmt.Sprintf("file:%s@/tmp/file.txt", tmpFile.Name()))
+			kamelRun := KamelWithContext(ctx, "run", "-n", ns, file, "--dev", "--resource", fmt.Sprintf("file:%s@/tmp/file.txt", filepath.ToSlash(tmpFile.Name())))
 			kamelRun.SetOut(pipew)
 
 			logScanner := util.NewLogScanner(ctx, piper, `integration "resource-file-location-route" in phase Running`,
@@ -131,7 +132,7 @@ func TestRunDevMode(t *testing.T) {
 
 			args := os.Args
 			defer func() { os.Args = args }()
-			os.Args = []string{"kamel", "run", "-n", ns, file, "--dev", "--resource", fmt.Sprintf("file:%s@/tmp/file.txt", tmpFile.Name())}
+			os.Args = []string{"kamel", "run", "-n", ns, file, "--dev", "--resource", fmt.Sprintf("file:%s@/tmp/file.txt", filepath.ToSlash(tmpFile.Name()))}
 			go kamelRun.Execute()
 
 			Eventually(logScanner.IsFound(`integration "resource-file-location-route" in phase Running`), TestTimeoutMedium).Should(BeTrue())
