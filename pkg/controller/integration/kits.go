@@ -73,7 +73,7 @@ func lookupKitsForIntegration(ctx context.Context, c ctrl.Reader, integration *v
 		match, err := integrationMatches(integration, kit)
 		if err != nil {
 			return nil, err
-		} else if !match {
+		} else if !match || kit.Status.Phase == v1.IntegrationKitPhaseError {
 			continue
 		}
 		kits = append(kits, *kit)
@@ -115,10 +115,6 @@ func integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bo
 }
 
 func statusMatches(integration *v1.Integration, kit *v1.IntegrationKit, ilog *log.Logger) bool {
-	if kit.Status.Phase == v1.IntegrationKitPhaseError {
-		ilog.Debug("Integration kit has a phase of Error", "integration-kit", kit.Name, "namespace", integration.Namespace)
-		return false
-	}
 	if kit.Status.Version != integration.Status.Version {
 		ilog.Debug("Integration and integration-kit versions do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
 		return false
