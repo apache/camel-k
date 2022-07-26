@@ -30,6 +30,7 @@ import (
 	"os"
 	"testing"
 	"time"
+	"path/filepath"
 
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
@@ -137,7 +138,7 @@ func TestRunDevMode(t *testing.T) {
 
 			file := util.MakeTempCopy(t, "files/resource-file-location-route.groovy")
 
-			kamelRun := KamelRunWithContext(ctx, operatorID, ns, file, "--dev", "--resource", fmt.Sprintf("file:%s@/tmp/file.txt", tmpFile.Name()))
+			kamelRun := KamelRunWithContext(ctx, operatorID, ns, file, "--dev", "--resource", fmt.Sprintf("file:%s@/tmp/file.txt", filepath.ToSlash(tmpFile.Name())))
 			kamelRun.SetOut(pipew)
 
 			logScanner := util.NewLogScanner(ctx, piper, `integration "resource-file-location-route" in phase Running`,
@@ -150,7 +151,7 @@ func TestRunDevMode(t *testing.T) {
 			if globalTest {
 				os.Args = []string{"kamel", "run", "-n", ns, file, "--dev", "--resource", fmt.Sprintf("file:%s@/tmp/file.txt", tmpFile.Name())}
 			} else {
-				os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", operatorID, file, "--dev", "--resource", fmt.Sprintf("file:%s@/tmp/file.txt", tmpFile.Name())}
+				os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", operatorID, file, "--dev", "--resource", fmt.Sprintf("file:%s@/tmp/file.txt", filepath.ToSlash(tmpFile.Name()))}
 			}
 
 			go kamelRun.Execute()
