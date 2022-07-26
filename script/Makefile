@@ -205,6 +205,7 @@ TEST_PREBUILD =
 endif
 
 test: do-build
+	@echo "####### Running unit test..."
 	go test ./...
 	cd pkg/apis/camel && go test ./...
 	cd pkg/client/camel && go test ./...
@@ -280,8 +281,9 @@ test-upgrade: do-build
 	go test -timeout 60m -v ./e2e/namespace/upgrade -tags=integration $(TEST_UPGRADE_RUN)
 
 build-kamel:
-# Ensure the binary is statically linked when building on Linux due to ABI changes in newer glibc 2.32, otherwise
-# it would not run on older versions. See https://github.com/apache/camel-k/pull/2141#issuecomment-800990117
+	@echo "####### Building kamel CLI..."
+	@# Ensure the binary is statically linked when building on Linux due to ABI changes in newer glibc 2.32, otherwise
+	@# it would not run on older versions. See https://github.com/apache/camel-k/pull/2141#issuecomment-800990117
 ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
 	CGO_ENABLED=0 go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
 else
@@ -293,6 +295,7 @@ build-resources:
 	go generate ./pkg/...
 
 bundle-kamelets:
+	@echo "Preparing Kamelets bundle resource..."
 ifneq (,$(findstring release,$(MAKECMDGOALS)))
 ifneq (,$(findstring $(KAMELET_CATALOG_REPO_BRANCH), main))
 	@echo "You cannot set KAMELET_CATALOG_REPO_BRANCH=$(KAMELET_CATALOG_REPO_BRANCH) when doing a release"
@@ -326,6 +329,7 @@ clean:
 	rm -rf bundle
 
 dep:
+	@echo "Cleaning dependencies..."
 	go mod tidy
 	cd pkg/apis/camel && go mod tidy
 	cd pkg/client/camel && go mod tidy
@@ -348,27 +352,21 @@ check-platform:
 
 # The below are dependencies needed for maven structured logs. We must bundle into the final container image.
 maven-overlay:
+	@echo "####### Preparing maven dependencies bundle..."
 	mkdir -p build/_maven_overlay
 	./script/maven_overlay.sh build/_maven_overlay
 
-images: bundle-kamelets test maven-overlay
-	mkdir -p build/_maven_output
+kamel-overlay:
+	@echo "####### Copying kamel CLI to output build directory..."
 	mkdir -p build/_output/bin
-ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
-	GOOS=linux go build $(GOFLAGS) -o build/_output/bin/kamel ./cmd/kamel/*.go
-else
 	cp kamel build/_output/bin
-endif
+
+images: build kamel-overlay maven-overlay bundle-kamelets
+	@echo "####### Building Camel K operator container image..."
 	docker build -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
-images-arch: bundle-kamelets test maven-overlay
-	mkdir -p build/_maven_output
-	mkdir -p build/_output/bin
-ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
-	GOOS=linux go build $(GOFLAGS) -o build/_output/bin/kamel ./cmd/kamel/*.go
-else
-	cp kamel build/_output/bin
-endif
+images-arch: build kamel-overlay maven-overlay bundle-kamelets
+	@echo "####### Building Camel K operator container image for multi architectures..."
 	docker buildx rm --all-inactive --force
 	docker buildx create --append --name builder
 ifeq ($(shell uname -m), x86_x64)
@@ -378,24 +376,12 @@ ifeq ($(shell uname -m), aarch64)
 	docker buildx build --platform=linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
 endif
 
-images-dev: bundle-kamelets test package-artifacts maven-overlay
-	mkdir -p build/_maven_output
-	mkdir -p build/_output/bin
-ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
-	GOOS=linux go build $(GOFLAGS) -o build/_output/bin/kamel ./cmd/kamel/*.go
-else
-	cp kamel build/_output/bin
-endif
+images-dev: build kamel-overlay maven-overlay bundle-kamelets package-artifacts
+	@echo "####### Building Camel K operator container development image..."
 	docker build -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
-images-arch-dev: bundle-kamelets test package-artifacts maven-overlay
-	mkdir -p build/_maven_output
-	mkdir -p build/_output/bin
-ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
-	GOOS=linux go build $(GOFLAGS) -o build/_output/bin/kamel ./cmd/kamel/*.go
-else
-	cp kamel build/_output/bin
-endif
+images-arch-dev:  build kamel-overlay maven-overlay bundle-kamelets package-artifacts
+	@echo "####### Building Camel K operator container development image for multi architectures..."
 	docker buildx rm --all-inactive --force
 	docker buildx create --append --name builder
 ifeq ($(shell uname -m), x86_x64)
