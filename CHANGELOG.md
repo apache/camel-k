@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Kamel install error on Kind [\#3483](https://github.com/apache/camel-k/issues/3483)
 - `camel-k-operator` pod in `CrashLoopBackOff` [\#3456](https://github.com/apache/camel-k/issues/3456)
 - Option `--maven-repository` on kamel run command has no effect [\#3447](https://github.com/apache/camel-k/issues/3447)
 - `make generate-doc` outputs non-deterministic `resources/traits.yaml` [\#3431](https://github.com/apache/camel-k/issues/3431)
@@ -28,6 +29,7 @@
 - Kamel run default service nodePort is invalid [\#3296](https://github.com/apache/camel-k/issues/3296)
 - Integration upgraded automatically after operator upgrade [\#3294](https://github.com/apache/camel-k/issues/3294)
 - `kamel rebuild` does not seem to work [\#3293](https://github.com/apache/camel-k/issues/3293)
+- Dependency doc is wrong about how to add camel components [\#3291](https://github.com/apache/camel-k/issues/3291)
 - Cannot find RestProducerFactory in Registry or as a Component to use" [\#3290](https://github.com/apache/camel-k/issues/3290)
 - Never stale a bug issue [\#3283](https://github.com/apache/camel-k/issues/3283)
 - Moving main to 1.10.0-SNAPSHOT [\#3280](https://github.com/apache/camel-k/issues/3280)
