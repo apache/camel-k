@@ -33,62 +33,91 @@ import (
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
-func TestErrorHandler(t *testing.T) {
+func TestKameletBinding(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		operatorID := "camel-k-kamelet-errorhandler"
+		operatorID := "camel-k-kameletbinding"
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
-		Expect(createErrorProducerKamelet(ns, "my-own-error-producer-source")()).To(Succeed())
-		Expect(createLogKamelet(ns, "my-own-log-sink")()).To(Succeed())
-		from := corev1.ObjectReference{
-			Kind:       "Kamelet",
-			Name:       "my-own-error-producer-source",
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-		}
-
-		to := corev1.ObjectReference{
-			Kind:       "Kamelet",
-			Name:       "my-own-log-sink",
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-		}
-
-		errorHandler := map[string]interface{}{
-			"sink": map[string]interface{}{
-				"endpoint": map[string]interface{}{
-					"ref": map[string]string{
-						"kind":       "Kamelet",
-						"apiVersion": v1alpha1.SchemeGroupVersion.String(),
-						"name":       "my-own-log-sink",
-					},
-					"properties": map[string]string{
-						"loggerName": "kameletErrorHandler",
-					},
-				}}}
-
-		t.Run("throw error test", func(t *testing.T) {
+		// Error Handler testing
+		t.Run("test error handler", func(t *testing.T) {
 			RegisterTestingT(t)
+			Expect(createErrorProducerKamelet(ns, "my-own-error-producer-source")()).To(Succeed())
+			Expect(createLogKamelet(ns, "my-own-log-sink")()).To(Succeed())
+			from := corev1.ObjectReference{
+				Kind:       "Kamelet",
+				Name:       "my-own-error-producer-source",
+				APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			}
 
-			Expect(BindKameletToWithErrorHandler(ns, "throw-error-binding", map[string]string{}, from, to, map[string]string{"message": "throw Error"}, map[string]string{"loggerName": "integrationLogger"}, errorHandler)()).To(Succeed())
+			to := corev1.ObjectReference{
+				Kind:       "Kamelet",
+				Name:       "my-own-log-sink",
+				APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			}
 
-			Eventually(IntegrationPodPhase(ns, "throw-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).Should(ContainSubstring("kameletErrorHandler"))
-			Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("integrationLogger"))
+			errorHandler := map[string]interface{}{
+				"sink": map[string]interface{}{
+					"endpoint": map[string]interface{}{
+						"ref": map[string]string{
+							"kind":       "Kamelet",
+							"apiVersion": v1alpha1.SchemeGroupVersion.String(),
+							"name":       "my-own-log-sink",
+						},
+						"properties": map[string]string{
+							"loggerName": "kameletErrorHandler",
+						},
+					}}}
 
+			t.Run("throw error test", func(t *testing.T) {
+				RegisterTestingT(t)
+
+				Expect(BindKameletToWithErrorHandler(ns, "throw-error-binding", map[string]string{}, from, to, map[string]string{"message": "throw Error"}, map[string]string{"loggerName": "integrationLogger"}, errorHandler)()).To(Succeed())
+
+				Eventually(IntegrationPodPhase(ns, "throw-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).Should(ContainSubstring("kameletErrorHandler"))
+				Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("integrationLogger"))
+
+			})
+
+			t.Run("don't throw error test", func(t *testing.T) {
+				RegisterTestingT(t)
+
+				Expect(BindKameletToWithErrorHandler(ns, "no-error-binding", map[string]string{}, from, to, map[string]string{"message": "true"}, map[string]string{"loggerName": "integrationLogger"}, errorHandler)()).To(Succeed())
+
+				Eventually(IntegrationPodPhase(ns, "no-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationLogs(ns, "no-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("kameletErrorHandler"))
+				Eventually(IntegrationLogs(ns, "no-error-binding"), TestTimeoutShort).Should(ContainSubstring("integrationLogger"))
+
+			})
+
+			// Cleanup
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
-		t.Run("don't throw error test", func(t *testing.T) {
+		// Kamelet binding with traits testing
+		t.Run("test kamelet binding with trait", func(t *testing.T) {
 			RegisterTestingT(t)
+			Expect(createTimerKamelet(ns, "my-own-timer-source")()).To(Succeed())
+			// Log sink kamelet exists from previous test
 
-			Expect(BindKameletToWithErrorHandler(ns, "no-error-binding", map[string]string{}, from, to, map[string]string{"message": "true"}, map[string]string{"loggerName": "integrationLogger"}, errorHandler)()).To(Succeed())
+			from := corev1.ObjectReference{
+				Kind:       "Kamelet",
+				Name:       "my-own-timer-source",
+				APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			}
 
-			Eventually(IntegrationPodPhase(ns, "no-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, "no-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("kameletErrorHandler"))
-			Eventually(IntegrationLogs(ns, "no-error-binding"), TestTimeoutShort).Should(ContainSubstring("integrationLogger"))
+			to := corev1.ObjectReference{
+				Kind:       "Kamelet",
+				Name:       "my-own-log-sink",
+				APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			}
 
+			Expect(BindKameletTo(ns, "kb-with-traits", map[string]string{"trait.camel.apache.org/camel.properties": "[\"camel.prop1=a\",\"camel.prop2=b\"]"}, from, to, map[string]string{"message": "hello from test"}, map[string]string{"loggerName": "integrationLogger"})()).To(Succeed())
+
+			Eventually(IntegrationPodPhase(ns, "kb-with-traits"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationLogs(ns, "kb-with-traits"), TestTimeoutShort).Should(ContainSubstring("hello from test"))
+			Eventually(IntegrationLogs(ns, "kb-with-traits"), TestTimeoutShort).Should(ContainSubstring("integrationLogger"))
 		})
-
-		// Cleanup
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})
 }
 
@@ -132,6 +161,32 @@ func createErrorProducerKamelet(ns string, name string) func() error {
 				{
 					"set-body": map[string]interface{}{
 						"simple": "${mandatoryBodyAs(Boolean)}",
+					},
+				},
+				{
+					"to": "kamelet:sink",
+				},
+			},
+		},
+	}
+
+	return CreateKamelet(ns, name, flow, props, nil)
+}
+
+func createTimerKamelet(ns string, name string) func() error {
+	props := map[string]v1alpha1.JSONSchemaProp{
+		"message": {
+			Type: "string",
+		},
+	}
+
+	flow := map[string]interface{}{
+		"from": map[string]interface{}{
+			"uri": "timer:tick",
+			"steps": []map[string]interface{}{
+				{
+					"set-body": map[string]interface{}{
+						"constant": "{{message}}",
 					},
 				},
 				{
