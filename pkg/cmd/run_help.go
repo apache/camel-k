@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"context"
-	"crypto/sha1"
 	"fmt"
 	"path"
 	"strings"
@@ -32,16 +31,6 @@ import (
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 )
-
-func hashFrom(contents ...[]byte) string {
-	// SHA1 because we need to limit the length to less than 64 chars
-	hash := sha1.New()
-	for _, c := range contents {
-		hash.Write(c)
-	}
-
-	return fmt.Sprintf("%x", hash.Sum(nil))
-}
 
 func parseConfigAndGenCm(ctx context.Context, cmd *cobra.Command, c client.Client, config *resource.Config, integration *v1.Integration, enableCompression bool) (*corev1.ConfigMap, error) {
 	switch config.StorageType() {
