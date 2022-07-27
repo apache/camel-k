@@ -15,9 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+location=$(dirname $0)
+rootdir=$location/../
+cmdutil="./cmd/util"
+check_binary="./platform-check"
+
 check_platform() {
 	set +e
-  echo $(./platform-check)
+  echo $(${check_binary})
 	set -e
 }
 
@@ -40,23 +45,27 @@ is_binary_available() {
   echo "ERROR: No '${client}' binary found in path."
 }
 
-location=$(dirname $0)
-rootdir=$location/../
-
 cd $rootdir
-if [ -d "./cmd/util/platform-check" ]; then
+if [ -d "${cmdutil}/platform-check" ]; then
 
-	hasgo=$(is_binary_available "go")
-	if [ "${hasgo}" == "OK" ]; then
-		go build ./cmd/util/platform-check/
-		if [ $? == 0 ]; then
-			go_result=$(check_platform)
-		else
-			go_result="ERROR: failed to build platform-check binary"
-		fi
-
+	if [ -f "${check_binary}" ]; then
+		#
+		# Avoid compiling again if binary already exists
+		#
+		go_result=$(check_platform)
 	else
-		go_result="ERROR: cannot build platform-check"
+		hasgo=$(is_binary_available "go")
+		if [ "${hasgo}" == "OK" ]; then
+			go build ${cmdutil}/platform-check/
+			if [ $? == 0 ]; then
+				go_result=$(check_platform)
+			else
+				go_result="ERROR: failed to build platform-check binary"
+			fi
+
+		else
+			go_result="ERROR: cannot build platform-check"
+		fi
 	fi
 
 else

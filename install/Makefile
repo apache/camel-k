@@ -51,7 +51,7 @@ HEALTH_PORT ?= 8081
 # Operator Logging Level: string [info, debug, 0, 1]
 LOGGING_LEVEL ?= info
 
-CONFIG := ../config
+CONFIG := config
 MANAGER := $(CONFIG)/manager
 SAMPLES := $(CONFIG)/samples
 RBAC := $(CONFIG)/rbac
