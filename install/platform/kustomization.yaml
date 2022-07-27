@@ -15,10 +15,16 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 #
 # * patch-integration-platform.yaml
 # customizes the integration platform custom resource
 # Edit the patch manually to add required configuration
 #
 resources:
-- ../../config/samples/bases/camel_v1_integrationplatform.yaml
+- ../config/samples/bases/camel_v1_integrationplatform.yaml
+
+patchesStrategicMerge:
+- ../config/samples/patch-integration-platform.yaml

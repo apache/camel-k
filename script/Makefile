@@ -499,6 +499,11 @@ release-nightly: clean codegen set-module-version set-version build-resources bu
 release-helm:
 	./script/release_helm.sh
 
+release-kustomize:
+	RELEASE_VERSION=$(CUSTOM_VERSION) \
+	RELEASE_NAME=$(PACKAGE) \
+	./script/release_kustomize.sh
+
 install-crc:
 	./script/install_crc.sh $(CUSTOM_VERSION)
 install-minikube:

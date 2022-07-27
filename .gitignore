@@ -166,4 +166,4 @@ config/**/*.gen.tmpl
 config/**/*.gen.yaml
 config/**/*.gen.json
 
-release/*-installer*
+*-installer*
