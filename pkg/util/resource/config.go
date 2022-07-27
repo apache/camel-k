@@ -19,7 +19,7 @@ package resource
 
 import (
 	"context"
-	"crypto/sha1" //nolint
+	"crypto/sha1"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -235,7 +235,6 @@ func ConvertFileToConfigmap(ctx context.Context, c client.Client, config *Config
 	return cm, nil
 }
 
-//nolint
 func hashFrom(contents ...[]byte) string {
 	// SHA1 because we need to limit the length to less than 64 chars
 	hash := sha1.New()

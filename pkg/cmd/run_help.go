@@ -19,7 +19,7 @@ package cmd
 
 import (
 	"context"
-	"crypto/sha1" //nolint
+	"crypto/sha1"
 	"fmt"
 	"path"
 	"strings"
@@ -33,7 +33,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-//nolint
 func hashFrom(contents ...[]byte) string {
 	// SHA1 because we need to limit the length to less than 64 chars
 	hash := sha1.New()
