@@ -42,10 +42,9 @@ jobs:
         with:
           go-version: 1.17.x
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3
         env:
           GOGC: 20
         with:
-          version: v1.47.1
-          skip-go-installation: true
+          version: v1.47.2
           args: --verbose --deadline 15m --config .golangci.yml
