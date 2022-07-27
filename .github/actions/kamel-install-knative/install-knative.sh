@@ -79,6 +79,8 @@ fi
 # Kourier
 apply "${KOURIER}"
 
+sleep 5
+
 kubectl patch configmap/config-network \
   --namespace knative-serving \
   --type merge \
