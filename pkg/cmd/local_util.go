@@ -357,8 +357,9 @@ func updateIntegrationProperties(properties []string, propertyFiles []string, ha
 
 	// Relocate properties files to this integration's property directory.
 	relocatedPropertyFiles := []string{}
+	dir := getLocalPropertiesDir()
 	for _, propertyFile := range propertyFiles {
-		relocatedPropertyFile := path.Join(getLocalPropertiesDir(), path.Base(propertyFile))
+		relocatedPropertyFile := path.Join(dir, path.Base(propertyFile))
 		if _, err := util.CopyFile(propertyFile, relocatedPropertyFile); err != nil {
 			return nil, err
 		}
@@ -368,7 +369,7 @@ func updateIntegrationProperties(properties []string, propertyFiles []string, ha
 	if !hasIntegrationDir {
 		// Output list of properties to property file if any CLI properties were given.
 		if len(properties) > 0 {
-			propertyFilePath := path.Join(getLocalPropertiesDir(), "CLI.properties")
+			propertyFilePath := path.Join(dir, "CLI.properties")
 			if err := ioutil.WriteFile(propertyFilePath, []byte(strings.Join(properties, "\n")), 0o600); err != nil {
 				return nil, err
 			}
@@ -382,22 +383,21 @@ func updateIntegrationProperties(properties []string, propertyFiles []string, ha
 func updateIntegrationDependencies(dependencies []string) error {
 	// Create dependencies directory under Maven working directory.
 	// This ensures that dependencies will be removed after they are not needed.
-	err := createLocalDependenciesDirectory()
-	if err != nil {
+	if err := createLocalDependenciesDirectory(); err != nil {
 		return err
 	}
 
 	// Relocate dependencies files to this integration's dependencies directory
+	dir := getLocalDependenciesDir()
 	for _, dependency := range dependencies {
 		var targetPath string
 		basePath := util.SubstringFrom(dependency, util.QuarkusDependenciesBaseDirectory)
 		if basePath != "" {
-			targetPath = path.Join(getLocalDependenciesDir(), basePath)
+			targetPath = path.Join(dir, basePath)
 		} else {
-			targetPath = path.Join(getLocalDependenciesDir(), path.Base(dependency))
+			targetPath = path.Join(dir, path.Base(dependency))
 		}
-		_, err = util.CopyFile(dependency, targetPath)
-		if err != nil {
+		if _, err := util.CopyFile(dependency, targetPath); err != nil {
 			return err
 		}
 	}
@@ -406,14 +406,13 @@ func updateIntegrationDependencies(dependencies []string) error {
 }
 
 func updateIntegrationRoutes(routes []string) error {
-	err := createLocalRoutesDirectory()
-	if err != nil {
+	if err := createLocalRoutesDirectory(); err != nil {
 		return err
 	}
 
+	dir := getLocalRoutesDir()
 	for _, route := range routes {
-		_, err = util.CopyFile(route, path.Join(getLocalRoutesDir(), path.Base(route)))
-		if err != nil {
+		if _, err := util.CopyFile(route, path.Join(dir, path.Base(route))); err != nil {
 			return err
 		}
 	}
@@ -422,8 +421,7 @@ func updateIntegrationRoutes(routes []string) error {
 }
 
 func updateQuarkusDirectory() error {
-	err := createLocalQuarkusDirectory()
-	if err != nil {
+	if err := createLocalQuarkusDirectory(); err != nil {
 		return err
 	}
 
@@ -434,8 +432,7 @@ func updateQuarkusDirectory() error {
 }
 
 func updateAppDirectory() error {
-	err := createLocalAppDirectory()
-	if err != nil {
+	if err := createLocalAppDirectory(); err != nil {
 		return err
 	}
 
@@ -446,8 +443,7 @@ func updateAppDirectory() error {
 }
 
 func updateLibDirectory() error {
-	err := createLocalLibDirectory()
-	if err != nil {
+	if err := createLocalLibDirectory(); err != nil {
 		return err
 	}
 
@@ -467,8 +463,7 @@ func copyIntegrationFilesToDirectory(files []string, directory string) ([]string
 	relocatedFilesList := []string{}
 	for _, filePath := range files {
 		newFilePath := path.Join(directory, path.Base(filePath))
-		_, err := util.CopyFile(filePath, newFilePath)
-		if err != nil {
+		if _, err := util.CopyFile(filePath, newFilePath); err != nil {
 			return relocatedFilesList, err
 		}
 		relocatedFilesList = append(relocatedFilesList, newFilePath)
@@ -492,8 +487,7 @@ func copyQuarkusAppFiles(localDependenciesDirectory string, localQuarkusDir stri
 		if strings.HasSuffix(file, ".dat") || strings.HasSuffix(file, "-bytecode.jar") {
 			source := path.Join(localDependenciesDirectory, file)
 			destination := path.Join(localQuarkusDir, file)
-			_, err = util.CopyFile(source, destination)
-			if err != nil {
+			if _, err = util.CopyFile(source, destination); err != nil {
 				return err
 			}
 		}
@@ -516,8 +510,7 @@ func copyLibFiles(localDependenciesDirectory string, localLibDirectory string) e
 	for _, dependencyJar := range fileNames {
 		source := path.Join(localDependenciesDirectory, dependencyJar)
 		destination := path.Join(localLibDirectory, dependencyJar)
-		_, err = util.CopyFile(source, destination)
-		if err != nil {
+		if _, err = util.CopyFile(source, destination); err != nil {
 			return err
 		}
 	}
@@ -540,8 +533,7 @@ func copyAppFile(localDependenciesDirectory string, localAppDirectory string) er
 		if strings.HasPrefix(dependencyJar, "camel-k-integration-") {
 			source := path.Join(localDependenciesDirectory, dependencyJar)
 			destination := path.Join(localAppDirectory, dependencyJar)
-			_, err = util.CopyFile(source, destination)
-			if err != nil {
+			if _, err = util.CopyFile(source, destination); err != nil {
 				return err
 			}
 		}

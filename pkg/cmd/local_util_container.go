@@ -84,11 +84,20 @@ func setDockerEnvVars(envVars []string) {
 }
 
 func createAndBuildBaseImage(ctx context.Context, stdout, stderr io.Writer) error {
+	// This ensures the Dockerfile for the base image will not end up in an undesired location.
+	if docker.BaseWorkingDirectory == "" {
+		return errors.New("base directory that holds the base image Dockerfile has not been set correctly")
+	}
+
 	// Create the base image Docker file.
 	if err := docker.CreateBaseImageDockerFile(); err != nil {
 		return err
 	}
 
+	return buildBaseImage(ctx, stdout, stderr)
+}
+
+func buildBaseImage(ctx context.Context, stdout, stderr io.Writer) error {
 	// Get the Docker command arguments for building the base image and create the command.
 	args := docker.BuildBaseImageArgs()
 	cmd := exec.CommandContext(ctx, "docker", args...)
@@ -108,15 +117,8 @@ func createAndBuildBaseImage(ctx context.Context, stdout, stderr io.Writer) erro
 	return nil
 }
 
-func createAndBuildIntegrationImage(ctx context.Context, containerRegistry string, justBaseImage bool, image string,
-	propertyFiles []string, dependencies []string, routes []string, startsFromLocalFolder bool, stdout, stderr io.Writer) error {
-	// This ensures the Dockerfile for the base image will not end up in an undesired location.
-	if docker.BaseWorkingDirectory == "" {
-		return errors.New("base directory that holds the base image Dockerfile has not been set correctly")
-	}
-
+func setupDockerRegistry(containerRegistry string, image string, justBaseImage bool) error {
 	docker.RegistryName = containerRegistry
-
 	// If we build a normal image, i.e. not the base image, we need to parse
 	// the location where images will be pushed.
 	if !justBaseImage {
@@ -124,8 +126,17 @@ func createAndBuildIntegrationImage(ctx context.Context, containerRegistry strin
 		if err != nil {
 			return err
 		}
-
 		docker.RegistryName = registryName
+	}
+
+	return nil
+}
+
+func createAndBuildIntegrationImage(ctx context.Context, containerRegistry string, justBaseImage bool, image string,
+	propertyFiles []string, dependencies []string, routes []string, startsFromLocalFolder bool,
+	stdout, stderr io.Writer) error {
+	if err := setupDockerRegistry(containerRegistry, image, justBaseImage); err != nil {
+		return err
 	}
 
 	// Create the Dockerfile and build the base image.
@@ -179,6 +190,11 @@ func createAndBuildIntegrationImage(ctx context.Context, containerRegistry strin
 		return err
 	}
 
+	return buildIntegrationImage(ctx, image, startsFromLocalFolder, stdout, stderr)
+}
+
+func buildIntegrationImage(ctx context.Context, image string, startsFromLocalFolder bool,
+	stdout, stderr io.Writer) error {
 	// Get the Docker command arguments for building the base image and create the command.
 	args := docker.BuildIntegrationImageArgs(image, MavenWorkingDirectory)
 	cmd := exec.CommandContext(ctx, "docker", args...)

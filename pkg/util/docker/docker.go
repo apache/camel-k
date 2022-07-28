@@ -39,8 +39,7 @@ func CreateBaseImageDockerFile() error {
 
 	// Write <BaseWorkingDirectory>/Dockerfile
 	baseDockerFilePath := path.Join(BaseWorkingDirectory, "Dockerfile")
-	err := util.WriteToFile(baseDockerFilePath, strings.Join(dockerFile, "\n"))
-	if err != nil {
+	if err := util.WriteToFile(baseDockerFilePath, strings.Join(dockerFile, "\n")); err != nil {
 		return err
 	}
 
