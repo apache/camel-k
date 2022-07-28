@@ -70,29 +70,29 @@ type localInspectCmdOptions struct {
 	MavenRepositories []string `mapstructure:"maven-repositories"`
 }
 
-func (command *localInspectCmdOptions) validate(args []string) error {
+func (o *localInspectCmdOptions) validate(args []string) error {
 	if err := validateIntegrationFiles(args); err != nil {
 		return err
 	}
 
-	if err := validateDependencies(command.Dependencies); err != nil {
+	if err := validateDependencies(o.Dependencies); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (command *localInspectCmdOptions) init() error {
+func (o *localInspectCmdOptions) init() error {
 	return createMavenWorkingDirectory()
 }
 
-func (command *localInspectCmdOptions) run(cmd *cobra.Command, args []string) error {
-	dependencies, err := GetDependencies(command.Context, args, command.Dependencies, command.MavenRepositories, command.AllDependencies)
+func (o *localInspectCmdOptions) run(cmd *cobra.Command, args []string) error {
+	dependencies, err := GetDependencies(o.Context, args, o.Dependencies, o.MavenRepositories, o.AllDependencies)
 	if err != nil {
 		return err
 	}
 
-	err = outputDependencies(dependencies, command.OutputFormat, cmd)
+	err = outputDependencies(dependencies, o.OutputFormat, cmd)
 	if err != nil {
 		return err
 	}
@@ -100,6 +100,6 @@ func (command *localInspectCmdOptions) run(cmd *cobra.Command, args []string) er
 	return nil
 }
 
-func (command *localInspectCmdOptions) deinit() error {
+func (o *localInspectCmdOptions) deinit() error {
 	return deleteMavenWorkingDirectory()
 }

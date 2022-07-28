@@ -81,7 +81,7 @@ type localBuildCmdOptions struct {
 	MavenRepositories    []string `mapstructure:"maven-repositories"`
 }
 
-func (command *localBuildCmdOptions) validate(args []string) error {
+func (o *localBuildCmdOptions) validate(args []string) error {
 	// Validate integration files.
 	if len(args) > 0 {
 		if err := validateIntegrationFiles(args); err != nil {
@@ -90,51 +90,51 @@ func (command *localBuildCmdOptions) validate(args []string) error {
 	}
 
 	// Validate additional dependencies specified by the user.
-	if err := validateDependencies(command.Dependencies); err != nil {
+	if err := validateDependencies(o.Dependencies); err != nil {
 		return err
 	}
 
 	// Validate properties file.
-	if err := validateFiles(command.PropertyFiles); err != nil {
+	if err := validateFiles(o.PropertyFiles); err != nil {
 		return err
 	}
 
-	if command.BaseImage {
+	if o.BaseImage {
 		// Cannot have both integration files and the base image construction enabled.
 		if len(args) > 0 {
 			return errors.New("integration files have been provided and the base image construction is enabled")
 		}
 
 		// Docker registry must be set.
-		if command.ContainerRegistry == "" {
+		if o.ContainerRegistry == "" {
 			return errors.New("base image cannot be built because container registry has not been provided")
 		}
 
 		// If an integration directory is provided then no base image containerization can be enabled.
-		if command.IntegrationDirectory != "" {
+		if o.IntegrationDirectory != "" {
 			return errors.New("base image construction does not use integration files")
 		}
-	} else if command.ContainerRegistry != "" {
+	} else if o.ContainerRegistry != "" {
 		// ContainerRegistry should only be specified when building the base image.
 		return errors.New("cannot specify container registry unless a base integration image is being built")
 	}
 
 	// The integration directory must be set when only outputting dependencies.
-	if command.DependenciesOnly && command.IntegrationDirectory == "" {
+	if o.DependenciesOnly && o.IntegrationDirectory == "" {
 		return errors.New("to output dependencies the integration directory flag must be set")
 	}
 
 	return nil
 }
 
-func (command *localBuildCmdOptions) init(args []string) error {
+func (o *localBuildCmdOptions) init(args []string) error {
 	// Create integration directory if one is provided.
-	err := util.CreateDirectory(command.IntegrationDirectory)
+	err := util.CreateDirectory(o.IntegrationDirectory)
 	if err != nil {
 		return err
 	}
 
-	if command.BaseImage || command.Image != "" {
+	if o.BaseImage || o.Image != "" {
 		// If base image construction is enabled create a directory for it.
 		err := createDockerBaseWorkingDirectory()
 		if err != nil {
@@ -142,7 +142,7 @@ func (command *localBuildCmdOptions) init(args []string) error {
 		}
 
 		// If integration image construction is enabled, an integration image will be built.
-		if command.Image != "" {
+		if o.Image != "" {
 			err := createDockerWorkingDirectory()
 			if err != nil {
 				return err
@@ -158,19 +158,19 @@ func (command *localBuildCmdOptions) init(args []string) error {
 	return nil
 }
 
-func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
+func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 	var dependenciesList, propertyFilesList []string
 	routeFiles := args
-	if !command.BaseImage {
-		dependencies, err := GetDependencies(command.Context, args, command.Dependencies, command.MavenRepositories, true)
+	if !o.BaseImage {
+		dependencies, err := GetDependencies(o.Context, args, o.Dependencies, o.MavenRepositories, true)
 		if err != nil {
 			return err
 		}
 
 		var propertyFiles []string
-		if !command.DependenciesOnly {
+		if !o.DependenciesOnly {
 			// Manage integration properties which may come from files or CLI
-			propertyFiles, err = updateIntegrationProperties(command.Properties, command.PropertyFiles, false)
+			propertyFiles, err = updateIntegrationProperties(o.Properties, o.PropertyFiles, false)
 			if err != nil {
 				return err
 			}
@@ -178,10 +178,10 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 
 		dependenciesList = dependencies
 		propertyFilesList = propertyFiles
-		hasIntegrationDir := command.IntegrationDirectory != ""
+		hasIntegrationDir := o.IntegrationDirectory != ""
 		if hasIntegrationDir {
 			// Create dependencies subdirectory.
-			localDependenciesDirectory := getCustomDependenciesDir(command.IntegrationDirectory)
+			localDependenciesDirectory := getCustomDependenciesDir(o.IntegrationDirectory)
 
 			// Copy dependencies in persistent IntegrationDirectory/dependencies
 			dependenciesList, err = util.CopyIntegrationFilesToDirectory(dependencies, localDependenciesDirectory)
@@ -190,12 +190,12 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 			}
 
 			// Once dependencies have been copied to local folder, we can exit.
-			if command.DependenciesOnly {
+			if o.DependenciesOnly {
 				return nil
 			}
 
 			// Create dependencies subdirectory.
-			localPropertiesDirectory := getCustomPropertiesDir(command.IntegrationDirectory)
+			localPropertiesDirectory := getCustomPropertiesDir(o.IntegrationDirectory)
 
 			// Copy dependencies in persistent IntegrationDirectory/dependencies
 			propertyFilesList, err = util.CopyIntegrationFilesToDirectory(propertyFiles, localPropertiesDirectory)
@@ -204,7 +204,7 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 			}
 
 			// Save routes.
-			localRoutesDirectory := getCustomRoutesDir(command.IntegrationDirectory)
+			localRoutesDirectory := getCustomRoutesDir(o.IntegrationDirectory)
 
 			// Copy routes in persistent IntegrationDirectory/dependencies
 			routeFiles, err = util.CopyIntegrationFilesToDirectory(args, localRoutesDirectory)
@@ -220,13 +220,13 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 
 	// The only case in which we should not execute the integration image creation is when we want to
 	// just output the files that comprise the integration locally.
-	if command.IntegrationDirectory != "" && command.Image == "" {
+	if o.IntegrationDirectory != "" && o.Image == "" {
 		return nil
 	}
 
 	// Create and build integration image.
-	err := createAndBuildIntegrationImage(command.Context, command.ContainerRegistry, command.BaseImage,
-		command.Image, propertyFilesList, dependenciesList, routeFiles, false, cmd.OutOrStdout(), cmd.ErrOrStderr())
+	err := createAndBuildIntegrationImage(o.Context, o.ContainerRegistry, o.BaseImage,
+		o.Image, propertyFilesList, dependenciesList, routeFiles, false, cmd.OutOrStdout(), cmd.ErrOrStderr())
 	if err != nil {
 		return err
 	}
@@ -234,7 +234,7 @@ func (command *localBuildCmdOptions) run(cmd *cobra.Command, args []string) erro
 	return nil
 }
 
-func (command *localBuildCmdOptions) deinit() error {
+func (o *localBuildCmdOptions) deinit() error {
 	// If base image construction is enabled delete the directory for it.
 	err := deleteDockerBaseWorkingDirectory()
 	if err != nil {
@@ -242,7 +242,7 @@ func (command *localBuildCmdOptions) deinit() error {
 	}
 
 	// If integration files are provided delete the maven project folder.
-	if !command.BaseImage {
+	if !o.BaseImage {
 		err = deleteDockerWorkingDirectory()
 		if err != nil {
 			return err
