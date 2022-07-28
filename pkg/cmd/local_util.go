@@ -280,6 +280,7 @@ func validateFile(file string) error {
 	return nil
 }
 
+// validateFiles ensures existence of given files.
 func validateFiles(args []string) error {
 	// Ensure source files exist
 	for _, arg := range args {
