@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Trait owner.target-annotations is not propagated to K8S Services [\#3494](https://github.com/apache/camel-k/issues/3494)
 - Kamel install error on Kind [\#3483](https://github.com/apache/camel-k/issues/3483)
 - Integration cannot be run from github with different branch [\#3475](https://github.com/apache/camel-k/issues/3475)
 - `make images` is not building the binary [\#3474](https://github.com/apache/camel-k/issues/3474)
@@ -28,6 +29,7 @@
 - `make bundle` adds duplicate `replaces` to Camel K CSV [\#3321](https://github.com/apache/camel-k/issues/3321)
 - E2E repeated failure [\#3315](https://github.com/apache/camel-k/issues/3315)
 - Integrations, IntegrationKits, IntegrationPlatforms are not owned by Namespaces [\#3311](https://github.com/apache/camel-k/issues/3311)
+- kamel local build:failure while building project: exit status 1 [\#3307](https://github.com/apache/camel-k/issues/3307)
 - Helm Chart for camel-k 1.9.2 is invalid [\#3300](https://github.com/apache/camel-k/issues/3300)
 - Our preference on defining multiple e2e tests [\#3298](https://github.com/apache/camel-k/issues/3298)
 - Kamel run default service nodePort is invalid [\#3296](https://github.com/apache/camel-k/issues/3296)
@@ -52,6 +54,7 @@
 - Route trait usage example [\#3146](https://github.com/apache/camel-k/issues/3146)
 - PDB trait usage example [\#3145](https://github.com/apache/camel-k/issues/3145)
 - Logging trait usage example [\#3143](https://github.com/apache/camel-k/issues/3143)
+- Camel K operator scaling documentation [\#3133](https://github.com/apache/camel-k/issues/3133)
 - Support operator hub bundle format in `make bundle` [\#3128](https://github.com/apache/camel-k/issues/3128)
 - hello yaml example output [\#3124](https://github.com/apache/camel-k/issues/3124)
 - E2E failing in release-1.8.x [\#3120](https://github.com/apache/camel-k/issues/3120)
