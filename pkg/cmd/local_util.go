@@ -44,8 +44,8 @@ var acceptedDependencyTypes = []string{
 	"github", "gitlab", "bitbucket", "gitee", "azure",
 }
 
-// GetDependencies resolves and gets the list of dependencies from catalog and sources.
-func GetDependencies(ctx context.Context, args []string, additionalDependencies []string, repositories []string, allDependencies bool) ([]string, error) {
+// getDependencies resolves and gets the list of dependencies from catalog and sources.
+func getDependencies(ctx context.Context, args []string, additionalDependencies []string, repositories []string, allDependencies bool) ([]string, error) {
 	// Fetch existing catalog or create new one if one does not already exist
 	catalog, err := createCamelCatalog(ctx)
 	if err != nil {
@@ -114,7 +114,7 @@ func getTransitiveDependencies(ctx context.Context, catalog *camel.RuntimeCatalo
 		return nil, err
 	}
 
-	mc := maven.NewContext(util.MavenWorkingDirectory)
+	mc := maven.NewContext(MavenWorkingDirectory)
 	mc.LocalRepository = ""
 
 	if len(repositories) > 0 {
@@ -150,27 +150,31 @@ func getTransitiveDependencies(ctx context.Context, catalog *camel.RuntimeCatalo
 	return transitiveDependencies, nil
 }
 
-func getRegularFilesInDir(directory string) ([]string, error) {
+func getRegularFilesInDir(directory string, dirnameInPath bool) ([]string, error) {
 	var dirFiles []string
 	files, err := ioutil.ReadDir(directory)
+	if err != nil {
+		return nil, err
+	}
+
 	for _, file := range files {
 		fileName := file.Name()
 
 		// Do not include hidden files or sub-directories.
 		if !file.IsDir() && !strings.HasPrefix(fileName, ".") {
-			dirFiles = append(dirFiles, path.Join(directory, fileName))
+			if dirnameInPath {
+				dirFiles = append(dirFiles, path.Join(directory, fileName))
+			} else {
+				dirFiles = append(dirFiles, fileName)
+			}
 		}
-	}
-
-	if err != nil {
-		return nil, err
 	}
 
 	return dirFiles, nil
 }
 
 func getLocalBuildDependencies(integrationDirectory string) ([]string, error) {
-	locallyBuiltDependencies, err := getRegularFilesInDir(getCustomDependenciesDir(integrationDirectory))
+	locallyBuiltDependencies, err := getRegularFilesInDir(getCustomDependenciesDir(integrationDirectory), true)
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +182,7 @@ func getLocalBuildDependencies(integrationDirectory string) ([]string, error) {
 }
 
 func getLocalBuildProperties(integrationDirectory string) ([]string, error) {
-	locallyBuiltProperties, err := getRegularFilesInDir(getCustomPropertiesDir(integrationDirectory))
+	locallyBuiltProperties, err := getRegularFilesInDir(getCustomPropertiesDir(integrationDirectory), true)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +190,7 @@ func getLocalBuildProperties(integrationDirectory string) ([]string, error) {
 }
 
 func getLocalBuildRoutes(integrationDirectory string) ([]string, error) {
-	locallyBuiltRoutes, err := getRegularFilesInDir(getCustomRoutesDir(integrationDirectory))
+	locallyBuiltRoutes, err := getRegularFilesInDir(getCustomRoutesDir(integrationDirectory), true)
 	if err != nil {
 		return nil, err
 	}
@@ -347,17 +351,15 @@ func validatePropertyFile(fileName string) error {
 func updateIntegrationProperties(properties []string, propertyFiles []string, hasIntegrationDir bool) ([]string, error) {
 	// Create properties directory under Maven working directory.
 	// This ensures that property files of different integrations do not clash.
-	err := util.CreateLocalPropertiesDirectory()
-	if err != nil {
+	if err := createLocalPropertiesDirectory(); err != nil {
 		return nil, err
 	}
 
 	// Relocate properties files to this integration's property directory.
 	relocatedPropertyFiles := []string{}
 	for _, propertyFile := range propertyFiles {
-		relocatedPropertyFile := path.Join(util.GetLocalPropertiesDir(), path.Base(propertyFile))
-		_, err = util.CopyFile(propertyFile, relocatedPropertyFile)
-		if err != nil {
+		relocatedPropertyFile := path.Join(getLocalPropertiesDir(), path.Base(propertyFile))
+		if _, err := util.CopyFile(propertyFile, relocatedPropertyFile); err != nil {
 			return nil, err
 		}
 		relocatedPropertyFiles = append(relocatedPropertyFiles, relocatedPropertyFile)
@@ -366,9 +368,8 @@ func updateIntegrationProperties(properties []string, propertyFiles []string, ha
 	if !hasIntegrationDir {
 		// Output list of properties to property file if any CLI properties were given.
 		if len(properties) > 0 {
-			propertyFilePath := path.Join(util.GetLocalPropertiesDir(), "CLI.properties")
-			err = ioutil.WriteFile(propertyFilePath, []byte(strings.Join(properties, "\n")), 0o600)
-			if err != nil {
+			propertyFilePath := path.Join(getLocalPropertiesDir(), "CLI.properties")
+			if err := ioutil.WriteFile(propertyFilePath, []byte(strings.Join(properties, "\n")), 0o600); err != nil {
 				return nil, err
 			}
 			relocatedPropertyFiles = append(relocatedPropertyFiles, propertyFilePath)
@@ -381,7 +382,7 @@ func updateIntegrationProperties(properties []string, propertyFiles []string, ha
 func updateIntegrationDependencies(dependencies []string) error {
 	// Create dependencies directory under Maven working directory.
 	// This ensures that dependencies will be removed after they are not needed.
-	err := util.CreateLocalDependenciesDirectory()
+	err := createLocalDependenciesDirectory()
 	if err != nil {
 		return err
 	}
@@ -391,9 +392,9 @@ func updateIntegrationDependencies(dependencies []string) error {
 		var targetPath string
 		basePath := util.SubstringFrom(dependency, util.QuarkusDependenciesBaseDirectory)
 		if basePath != "" {
-			targetPath = path.Join(util.GetLocalDependenciesDir(), basePath)
+			targetPath = path.Join(getLocalDependenciesDir(), basePath)
 		} else {
-			targetPath = path.Join(util.GetLocalDependenciesDir(), path.Base(dependency))
+			targetPath = path.Join(getLocalDependenciesDir(), path.Base(dependency))
 		}
 		_, err = util.CopyFile(dependency, targetPath)
 		if err != nil {
@@ -405,13 +406,13 @@ func updateIntegrationDependencies(dependencies []string) error {
 }
 
 func updateIntegrationRoutes(routes []string) error {
-	err := util.CreateLocalRoutesDirectory()
+	err := createLocalRoutesDirectory()
 	if err != nil {
 		return err
 	}
 
 	for _, route := range routes {
-		_, err = util.CopyFile(route, path.Join(util.GetLocalRoutesDir(), path.Base(route)))
+		_, err = util.CopyFile(route, path.Join(getLocalRoutesDir(), path.Base(route)))
 		if err != nil {
 			return err
 		}
@@ -421,104 +422,42 @@ func updateIntegrationRoutes(routes []string) error {
 }
 
 func updateQuarkusDirectory() error {
-	err := util.CreateLocalQuarkusDirectory()
+	err := createLocalQuarkusDirectory()
 	if err != nil {
 		return err
 	}
 
 	// ignore error if custom dir doesn't exist
-	_ = CopyQuarkusAppFiles(util.CustomQuarkusDirectoryName, util.GetLocalQuarkusDir())
+	_ = copyQuarkusAppFiles(util.CustomQuarkusDirectoryName, getLocalQuarkusDir())
 
 	return nil
 }
 
 func updateAppDirectory() error {
-	err := util.CreateLocalAppDirectory()
+	err := createLocalAppDirectory()
 	if err != nil {
 		return err
 	}
 
 	// ignore error if custom dir doesn't exist
-	_ = CopyAppFile(util.CustomAppDirectoryName, util.GetLocalAppDir())
+	_ = copyAppFile(util.CustomAppDirectoryName, getLocalAppDir())
 
 	return nil
 }
 
 func updateLibDirectory() error {
-	err := util.CreateLocalLibDirectory()
+	err := createLocalLibDirectory()
 	if err != nil {
 		return err
 	}
 
 	// ignore error if custom dir doesn't exist
-	_ = CopyLibFiles(util.CustomLibDirectoryName, util.GetLocalLibDir())
+	_ = copyLibFiles(util.CustomLibDirectoryName, getLocalLibDir())
 
 	return nil
 }
 
-func createMavenWorkingDirectory() error {
-	// Create local Maven context
-	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "maven-")
-	if err != nil {
-		return err
-	}
-
-	// Set the Maven directory to the default value
-	util.MavenWorkingDirectory = temporaryDirectory
-
-	return nil
-}
-
-func deleteMavenWorkingDirectory() error {
-	// Remove directory used for computing the dependencies
-	return os.RemoveAll(util.MavenWorkingDirectory)
-}
-
-func getCustomDependenciesDir(integrationDirectory string) string {
-	return path.Join(integrationDirectory, "dependencies")
-}
-
-func getCustomPropertiesDir(integrationDirectory string) string {
-	return path.Join(integrationDirectory, "properties")
-}
-
-func getCustomRoutesDir(integrationDirectory string) string {
-	return path.Join(integrationDirectory, "routes")
-}
-
-func getCustomQuarkusDir(integrationDirectory string) string {
-	parentDir := path.Dir(strings.TrimSuffix(integrationDirectory, "/"))
-	return path.Join(parentDir, "quarkus")
-}
-
-func getCustomLibDir(integrationDirectory string) string {
-	parentDir := path.Dir(strings.TrimSuffix(integrationDirectory, "/"))
-	return path.Join(parentDir, "lib/main")
-}
-
-func getCustomAppDir(integrationDirectory string) string {
-	parentDir := path.Dir(strings.TrimSuffix(integrationDirectory, "/"))
-	return path.Join(parentDir, "app")
-}
-
-func deleteLocalIntegrationDirs(integrationDirectory string) error {
-	dirs := []string{
-		getCustomQuarkusDir(integrationDirectory),
-		getCustomLibDir(integrationDirectory),
-		getCustomAppDir(integrationDirectory),
-	}
-
-	for _, dir := range dirs {
-		err := os.RemoveAll(dir)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func CopyIntegrationFilesToDirectory(files []string, directory string) ([]string, error) {
+func copyIntegrationFilesToDirectory(files []string, directory string) ([]string, error) {
 	// Create directory if one does not already exist
 	if err := util.CreateDirectory(directory); err != nil {
 		return nil, err
@@ -538,15 +477,14 @@ func CopyIntegrationFilesToDirectory(files []string, directory string) ([]string
 	return relocatedFilesList, nil
 }
 
-func CopyQuarkusAppFiles(localDependenciesDirectory string, localQuarkusDir string) error {
+func copyQuarkusAppFiles(localDependenciesDirectory string, localQuarkusDir string) error {
 	// Create directory if one does not already exist
-	err := util.CreateDirectory(localQuarkusDir)
-	if err != nil {
+	if err := util.CreateDirectory(localQuarkusDir); err != nil {
 		return err
 	}
 
 	// Transfer all files with a .dat extension and all files with a *-bytecode.jar suffix.
-	files, err := getRegularFileNamesInDir(localDependenciesDirectory)
+	files, err := getRegularFilesInDir(localDependenciesDirectory, false)
 	if err != nil {
 		return err
 	}
@@ -564,14 +502,13 @@ func CopyQuarkusAppFiles(localDependenciesDirectory string, localQuarkusDir stri
 	return nil
 }
 
-func CopyLibFiles(localDependenciesDirectory string, localLibDirectory string) error {
+func copyLibFiles(localDependenciesDirectory string, localLibDirectory string) error {
 	// Create directory if one does not already exist
-	err := util.CreateDirectory(localLibDirectory)
-	if err != nil {
+	if err := util.CreateDirectory(localLibDirectory); err != nil {
 		return err
 	}
 
-	fileNames, err := getRegularFileNamesInDir(localDependenciesDirectory)
+	fileNames, err := getRegularFilesInDir(localDependenciesDirectory, false)
 	if err != nil {
 		return err
 	}
@@ -588,14 +525,13 @@ func CopyLibFiles(localDependenciesDirectory string, localLibDirectory string) e
 	return nil
 }
 
-func CopyAppFile(localDependenciesDirectory string, localAppDirectory string) error {
+func copyAppFile(localDependenciesDirectory string, localAppDirectory string) error {
 	// Create directory if one does not already exist
-	err := util.CreateDirectory(localAppDirectory)
-	if err != nil {
+	if err := util.CreateDirectory(localAppDirectory); err != nil {
 		return err
 	}
 
-	fileNames, err := getRegularFileNamesInDir(localDependenciesDirectory)
+	fileNames, err := getRegularFilesInDir(localDependenciesDirectory, false)
 	if err != nil {
 		return err
 	}
@@ -612,23 +548,4 @@ func CopyAppFile(localDependenciesDirectory string, localAppDirectory string) er
 	}
 
 	return nil
-}
-
-func getRegularFileNamesInDir(directory string) ([]string, error) {
-	var dirFiles []string
-	files, err := ioutil.ReadDir(directory)
-	for _, file := range files {
-		fileName := file.Name()
-
-		// Do not include hidden files or sub-directories.
-		if !file.IsDir() && !strings.HasPrefix(fileName, ".") {
-			dirFiles = append(dirFiles, fileName)
-		}
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	return dirFiles, nil
 }

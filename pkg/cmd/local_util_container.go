@@ -35,8 +35,8 @@ import (
 
 // Local Docker file system management functions.
 
+// createDockerBaseWorkingDirectory creates local docker base directory.
 func createDockerBaseWorkingDirectory() error {
-	// Create local docker base directory.
 	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "docker-base-")
 	if err != nil {
 		return err
@@ -48,13 +48,13 @@ func createDockerBaseWorkingDirectory() error {
 	return nil
 }
 
+// deleteDockerBaseWorkingDirectory removes directory used for computing the base dependencies.
 func deleteDockerBaseWorkingDirectory() error {
-	// Remove directory used for computing the dependencies.
 	return os.RemoveAll(docker.BaseWorkingDirectory)
 }
 
+// createDockerWorkingDirectory creates local docker directory.
 func createDockerWorkingDirectory() error {
-	// Create local docker base directory.
 	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "docker-")
 	if err != nil {
 		return err
@@ -66,8 +66,8 @@ func createDockerWorkingDirectory() error {
 	return nil
 }
 
+// deleteDockerWorkingDirectory removes directory used for computing the integration dependencies.
 func deleteDockerWorkingDirectory() error {
-	// Remove directory used for computing the dependencies.
 	return os.RemoveAll(docker.IntegrationWorkingDirectory)
 }
 
@@ -180,7 +180,7 @@ func createAndBuildIntegrationImage(ctx context.Context, containerRegistry strin
 	}
 
 	// Get the Docker command arguments for building the base image and create the command.
-	args := docker.BuildIntegrationImageArgs(image)
+	args := docker.BuildIntegrationImageArgs(image, MavenWorkingDirectory)
 	cmd := exec.CommandContext(ctx, "docker", args...)
 
 	// Set stdout and stderr.

@@ -92,31 +92,27 @@ func CreateIntegrationImageDockerFile(integrationRunCmd *exec.Cmd, startsFromLoc
 	return nil
 }
 
-// BuildBaseImageArgs --.
+// BuildBaseImageArgs constructs the docker command:
+//
+// docker build -f <BaseWorkingDirectory>/Dockerfile -t <dockerRegistry>/<BaseImageName> <BaseWorkingDirectory>.
+//
 func BuildBaseImageArgs() []string {
-	// Construct the docker command:
-	//
-	// docker build -f <BaseWorkingDirectory>/Dockerfile -t <dockerRegistry>/<BaseImageName> <BaseWorkingDirectory>
-	//
-	// Add register
 	return BuildImageArgs(BaseWorkingDirectory, GetBaseImagePath(), BaseWorkingDirectory)
 }
 
-// BuildIntegrationImageArgs --.
-func BuildIntegrationImageArgs(imagePath string) []string {
-	// Construct the docker command:
-	//
-	// docker build -f <BaseWorkingDirectory>/Dockerfile -t <imagePath> <MavenWorkingDirectory>
-	//
-	return BuildImageArgs(IntegrationWorkingDirectory, imagePath, util.MavenWorkingDirectory)
+// BuildIntegrationImageArgs constructs the docker command:
+//
+// docker build -f <BaseWorkingDirectory>/Dockerfile -t <imagePath> <mavenWorkingDirectory>.
+//
+func BuildIntegrationImageArgs(imagePath string, mavenWorkingDirectory string) []string {
+	return BuildImageArgs(IntegrationWorkingDirectory, imagePath, mavenWorkingDirectory)
 }
 
-// RunIntegrationImageArgs --.
+// RunIntegrationImageArgs constructs the docker command:
+//
+// docker run --network=<network-name> --env LAZY_ENV_VAR=value <dockerRegistry>/<ImageName>.
+//
 func RunIntegrationImageArgs(imagePath string) ([]string, error) {
-	// Construct the docker command:
-	//
-	// docker run --network=<network-name> --env LAZY_ENV_VAR=value <dockerRegistry>/<ImageName>
-	//
 	return RunImageArgs(imagePath, latestTag)
 }
 
