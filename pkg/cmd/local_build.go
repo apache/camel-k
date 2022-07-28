@@ -160,7 +160,7 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 	var dependenciesList, propertyFilesList []string
 	routeFiles := args
 	if !o.BaseImage {
-		dependencies, err := GetDependencies(o.Context, args, o.Dependencies, o.MavenRepositories, true)
+		dependencies, err := getDependencies(o.Context, args, o.Dependencies, o.MavenRepositories, true)
 		if err != nil {
 			return err
 		}
@@ -176,12 +176,13 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 		dependenciesList = dependencies
 		propertyFilesList = propertyFiles
+
 		if o.IntegrationDirectory != "" {
 			// Create dependencies subdirectory.
 			localDependenciesDirectory := getCustomDependenciesDir(o.IntegrationDirectory)
 
 			// Copy dependencies in persistent IntegrationDirectory/dependencies
-			dependenciesList, err = CopyIntegrationFilesToDirectory(dependencies, localDependenciesDirectory)
+			dependenciesList, err = copyIntegrationFilesToDirectory(dependencies, localDependenciesDirectory)
 			if err != nil {
 				return err
 			}
@@ -195,7 +196,7 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 			localPropertiesDirectory := getCustomPropertiesDir(o.IntegrationDirectory)
 
 			// Copy dependencies in persistent IntegrationDirectory/dependencies
-			propertyFilesList, err = CopyIntegrationFilesToDirectory(propertyFiles, localPropertiesDirectory)
+			propertyFilesList, err = copyIntegrationFilesToDirectory(propertyFiles, localPropertiesDirectory)
 			if err != nil {
 				return err
 			}
@@ -204,7 +205,7 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 			localRoutesDirectory := getCustomRoutesDir(o.IntegrationDirectory)
 
 			// Copy routes in persistent IntegrationDirectory/dependencies
-			routeFiles, err = CopyIntegrationFilesToDirectory(args, localRoutesDirectory)
+			routeFiles, err = copyIntegrationFilesToDirectory(args, localRoutesDirectory)
 			if err != nil {
 				return err
 			}

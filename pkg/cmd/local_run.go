@@ -25,8 +25,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-
-	"github.com/apache/camel-k/pkg/util"
 )
 
 func newCmdLocalRun(localCmdOptions *LocalCmdOptions) (*cobra.Command, *localRunCmdOptions) {
@@ -171,7 +169,7 @@ func (o *localRunCmdOptions) run(cmd *cobra.Command, args []string) error {
 		// <integration_directory>/../quarkus/quarkus-application.dat
 		// <integration_directory>/../quarkus/generated-bytecode.jar
 		localQuarkusDir := getCustomQuarkusDir(o.IntegrationDirectory)
-		err = CopyQuarkusAppFiles(localDependenciesDirectory, localQuarkusDir)
+		err = copyQuarkusAppFiles(localDependenciesDirectory, localQuarkusDir)
 		if err != nil {
 			return err
 		}
@@ -179,7 +177,7 @@ func (o *localRunCmdOptions) run(cmd *cobra.Command, args []string) error {
 		// The dependency jar files need to be at a specific location i.e.:
 		// <integration_directory>/../lib/main/*.jar
 		localLibDirectory := getCustomLibDir(o.IntegrationDirectory)
-		err = CopyLibFiles(localDependenciesDirectory, localLibDirectory)
+		err = copyLibFiles(localDependenciesDirectory, localLibDirectory)
 		if err != nil {
 			return err
 		}
@@ -187,12 +185,12 @@ func (o *localRunCmdOptions) run(cmd *cobra.Command, args []string) error {
 		// The Camel K jar file needs to be at a specific location i.e.:
 		// <integration_directory>/../app/camel-k-integration-X.X.X{-SNAPSHOT}.jar
 		localAppDirectory := getCustomAppDir(o.IntegrationDirectory)
-		err = CopyAppFile(localDependenciesDirectory, localAppDirectory)
+		err = copyAppFile(localDependenciesDirectory, localAppDirectory)
 		if err != nil {
 			return err
 		}
 	} else {
-		computedDependencies, err := GetDependencies(o.Context, args, o.Dependencies, o.MavenRepositories, true)
+		computedDependencies, err := getDependencies(o.Context, args, o.Dependencies, o.MavenRepositories, true)
 		if err != nil {
 			return err
 		}
@@ -238,7 +236,7 @@ func (o *localRunCmdOptions) run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	} else {
-		propertiesDir := util.GetLocalPropertiesDir()
+		propertiesDir := getLocalPropertiesDir()
 		if hasIntegrationDir {
 			propertiesDir = getCustomPropertiesDir(o.IntegrationDirectory)
 		}
