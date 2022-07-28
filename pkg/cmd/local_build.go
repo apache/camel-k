@@ -159,6 +159,7 @@ func (o *localBuildCmdOptions) init(args []string) error {
 func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 	var dependenciesList, propertyFilesList []string
 	routeFiles := args
+
 	if !o.BaseImage {
 		dependencies, err := getDependencies(o.Context, args, o.Dependencies, o.MavenRepositories, true)
 		if err != nil {
@@ -177,56 +178,44 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 		dependenciesList = dependencies
 		propertyFilesList = propertyFiles
 
+		// Integration directory can only be used when building an integration image or when we just
+		// build the integration without also building the image. A local build of the integration is
+		// represented by all the files that define the integration: dependencies, properties, and routes.
 		if o.IntegrationDirectory != "" {
-			// Create dependencies subdirectory.
-			localDependenciesDirectory := getCustomDependenciesDir(o.IntegrationDirectory)
-
-			// Copy dependencies in persistent IntegrationDirectory/dependencies
-			dependenciesList, err = copyIntegrationFilesToDirectory(dependencies, localDependenciesDirectory)
+			localDependenciesDir := getCustomDependenciesDir(o.IntegrationDirectory)
+			dependenciesList, err = copyIntegrationFilesToDirectory(dependencies, localDependenciesDir)
 			if err != nil {
 				return err
 			}
 
-			// Once dependencies have been copied to local folder, we can exit.
 			if o.DependenciesOnly {
+				// Once dependencies have been copied to local folder, we can exit.
 				return nil
 			}
 
-			// Create dependencies subdirectory.
-			localPropertiesDirectory := getCustomPropertiesDir(o.IntegrationDirectory)
-
-			// Copy dependencies in persistent IntegrationDirectory/dependencies
-			propertyFilesList, err = copyIntegrationFilesToDirectory(propertyFiles, localPropertiesDirectory)
+			localPropertiesDir := getCustomPropertiesDir(o.IntegrationDirectory)
+			propertyFilesList, err = copyIntegrationFilesToDirectory(propertyFiles, localPropertiesDir)
 			if err != nil {
 				return err
 			}
 
-			// Save routes.
-			localRoutesDirectory := getCustomRoutesDir(o.IntegrationDirectory)
-
-			// Copy routes in persistent IntegrationDirectory/dependencies
-			routeFiles, err = copyIntegrationFilesToDirectory(args, localRoutesDirectory)
+			localRoutesDir := getCustomRoutesDir(o.IntegrationDirectory)
+			routeFiles, err = copyIntegrationFilesToDirectory(args, localRoutesDir)
 			if err != nil {
 				return err
+			}
+
+			// The only case in which we should not execute the integration image creation is when we want to
+			// just output the files that comprise the integration locally.
+			if o.Image == "" {
+				return nil
 			}
 		}
 	}
 
-	// Integration directory can only be used when building an integration image or when we just
-	// build the integration without also building the image. A local build of the integration is
-	// represented by all the files that define the integration: dependencies, properties and routes.
-
-	// The only case in which we should not execute the integration image creation is when we want to
-	// just output the files that comprise the integration locally.
-	if o.IntegrationDirectory != "" && o.Image == "" {
-		return nil
-	}
-
-	// Create and build integration image.
-	err := createAndBuildIntegrationImage(o.Context, o.ContainerRegistry, o.BaseImage,
-		o.Image, propertyFilesList, dependenciesList, routeFiles, false,
-		cmd.OutOrStdout(), cmd.ErrOrStderr())
-	if err != nil {
+	if err := createAndBuildIntegrationImage(o.Context, o.ContainerRegistry, o.BaseImage, o.Image,
+		propertyFilesList, dependenciesList, routeFiles, false,
+		cmd.OutOrStdout(), cmd.ErrOrStderr()); err != nil {
 		return err
 	}
 

@@ -40,7 +40,7 @@ var IntegrationWorkingDirectory = ""
 var NetworkName = "host"
 
 // Internal variables.
-var (
+const (
 	dockerEndpointSeparator = "/"
 	containerFileSeparator  = "/"
 	latestTag               = "latest"
@@ -174,7 +174,7 @@ func GetFullDockerImage(dockerImageName string, tag string) string {
 	return strings.Join(fullImagePath, dockerEndpointSeparator)
 }
 
-// GetBaseImagePath --.
+// GetBaseImagePath returns Docker base image path.
 func GetBaseImagePath() string {
 	return RegistryName + dockerEndpointSeparator + BaseImageName
 }

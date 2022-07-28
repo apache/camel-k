@@ -224,9 +224,9 @@ func (o *localRunCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	// If this is a containerized local run, create, build and run the container image.
 	if o.Containerize {
-		// Create and build integration image.
-		err := createAndBuildIntegrationImage(o.Context, "", false, o.Image, propertyFiles, dependencies, routes, hasIntegrationDir, cmd.OutOrStdout(), cmd.ErrOrStderr())
-		if err != nil {
+		if err := createAndBuildIntegrationImage(o.Context, "", false, o.Image,
+			propertyFiles, dependencies, routes, hasIntegrationDir,
+			cmd.OutOrStdout(), cmd.ErrOrStderr()); err != nil {
 			return err
 		}
 
