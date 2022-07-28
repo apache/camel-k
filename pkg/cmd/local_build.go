@@ -129,29 +129,27 @@ func (o *localBuildCmdOptions) validate(args []string) error {
 
 func (o *localBuildCmdOptions) init(args []string) error {
 	// Create integration directory if one is provided.
-	err := util.CreateDirectory(o.IntegrationDirectory)
-	if err != nil {
-		return err
+	if o.IntegrationDirectory != "" {
+		if err := util.CreateDirectory(o.IntegrationDirectory); err != nil {
+			return err
+		}
 	}
 
 	if o.BaseImage || o.Image != "" {
 		// If base image construction is enabled create a directory for it.
-		err := createDockerBaseWorkingDirectory()
-		if err != nil {
+		if err := createDockerBaseWorkingDirectory(); err != nil {
 			return err
 		}
 
 		// If integration image construction is enabled, an integration image will be built.
 		if o.Image != "" {
-			err := createDockerWorkingDirectory()
-			if err != nil {
+			if err := createDockerWorkingDirectory(); err != nil {
 				return err
 			}
 		}
 	}
 
-	err = createMavenWorkingDirectory()
-	if err != nil {
+	if err := createMavenWorkingDirectory(); err != nil {
 		return err
 	}
 
@@ -178,13 +176,12 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 		dependenciesList = dependencies
 		propertyFilesList = propertyFiles
-		hasIntegrationDir := o.IntegrationDirectory != ""
-		if hasIntegrationDir {
+		if o.IntegrationDirectory != "" {
 			// Create dependencies subdirectory.
 			localDependenciesDirectory := getCustomDependenciesDir(o.IntegrationDirectory)
 
 			// Copy dependencies in persistent IntegrationDirectory/dependencies
-			dependenciesList, err = util.CopyIntegrationFilesToDirectory(dependencies, localDependenciesDirectory)
+			dependenciesList, err = CopyIntegrationFilesToDirectory(dependencies, localDependenciesDirectory)
 			if err != nil {
 				return err
 			}
@@ -198,7 +195,7 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 			localPropertiesDirectory := getCustomPropertiesDir(o.IntegrationDirectory)
 
 			// Copy dependencies in persistent IntegrationDirectory/dependencies
-			propertyFilesList, err = util.CopyIntegrationFilesToDirectory(propertyFiles, localPropertiesDirectory)
+			propertyFilesList, err = CopyIntegrationFilesToDirectory(propertyFiles, localPropertiesDirectory)
 			if err != nil {
 				return err
 			}
@@ -207,7 +204,7 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 			localRoutesDirectory := getCustomRoutesDir(o.IntegrationDirectory)
 
 			// Copy routes in persistent IntegrationDirectory/dependencies
-			routeFiles, err = util.CopyIntegrationFilesToDirectory(args, localRoutesDirectory)
+			routeFiles, err = CopyIntegrationFilesToDirectory(args, localRoutesDirectory)
 			if err != nil {
 				return err
 			}
@@ -226,7 +223,8 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	// Create and build integration image.
 	err := createAndBuildIntegrationImage(o.Context, o.ContainerRegistry, o.BaseImage,
-		o.Image, propertyFilesList, dependenciesList, routeFiles, false, cmd.OutOrStdout(), cmd.ErrOrStderr())
+		o.Image, propertyFilesList, dependenciesList, routeFiles, false,
+		cmd.OutOrStdout(), cmd.ErrOrStderr())
 	if err != nil {
 		return err
 	}
@@ -236,19 +234,16 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 func (o *localBuildCmdOptions) deinit() error {
 	// If base image construction is enabled delete the directory for it.
-	err := deleteDockerBaseWorkingDirectory()
-	if err != nil {
+	if err := deleteDockerBaseWorkingDirectory(); err != nil {
 		return err
 	}
 
 	// If integration files are provided delete the maven project folder.
 	if !o.BaseImage {
-		err = deleteDockerWorkingDirectory()
-		if err != nil {
+		if err := deleteDockerWorkingDirectory(); err != nil {
 			return err
 		}
-		err = deleteMavenWorkingDirectory()
-		if err != nil {
+		if err := deleteMavenWorkingDirectory(); err != nil {
 			return err
 		}
 	}

@@ -368,20 +368,21 @@ func DirectoryEmpty(directory string) (bool, error) {
 	return ok, err
 }
 
+// CreateDirectory creates a directory if it does not exist.
 func CreateDirectory(directory string) error {
-	if directory != "" {
-		// If directory does not exist, create it
-		directoryExists, err := DirectoryExists(directory)
-		if err != nil {
-			return err
-		}
+	if directory == "" {
+		return errors.New("directory name must not be empty")
+	}
 
-		if !directoryExists {
-			// #nosec G301
-			err := os.MkdirAll(directory, 0o755)
-			if err != nil {
-				return err
-			}
+	directoryExists, err := DirectoryExists(directory)
+	if err != nil {
+		return err
+	}
+
+	if !directoryExists {
+		// #nosec G301
+		if err := os.MkdirAll(directory, 0o755); err != nil {
+			return err
 		}
 	}
 
@@ -680,122 +681,6 @@ func EvaluateCLIAndLazyEnvVars() ([]string, error) {
 	}
 
 	return evaluatedEnvVars, nil
-}
-
-func CopyIntegrationFilesToDirectory(files []string, directory string) ([]string, error) {
-	// Create directory if one does not already exist
-	err := CreateDirectory(directory)
-	if err != nil {
-		return nil, err
-	}
-
-	// Copy files to new location. Also create the list with relocated files.
-	relocatedFilesList := []string{}
-	for _, filePath := range files {
-		newFilePath := path.Join(directory, path.Base(filePath))
-		_, err := CopyFile(filePath, newFilePath)
-		if err != nil {
-			return relocatedFilesList, err
-		}
-		relocatedFilesList = append(relocatedFilesList, newFilePath)
-	}
-
-	return relocatedFilesList, nil
-}
-
-func CopyQuarkusAppFiles(localDependenciesDirectory string, localQuarkusDir string) error {
-	// Create directory if one does not already exist
-	err := CreateDirectory(localQuarkusDir)
-	if err != nil {
-		return err
-	}
-
-	// Transfer all files with a .dat extension and all files with a *-bytecode.jar suffix.
-	files, err := getRegularFileNamesInDir(localDependenciesDirectory)
-	if err != nil {
-		return err
-	}
-	for _, file := range files {
-		if strings.HasSuffix(file, ".dat") || strings.HasSuffix(file, "-bytecode.jar") {
-			source := path.Join(localDependenciesDirectory, file)
-			destination := path.Join(localQuarkusDir, file)
-			_, err = CopyFile(source, destination)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-func getRegularFileNamesInDir(directory string) ([]string, error) {
-	var dirFiles []string
-	files, err := ioutil.ReadDir(directory)
-	for _, file := range files {
-		fileName := file.Name()
-
-		// Do not include hidden files or sub-directories.
-		if !file.IsDir() && !strings.HasPrefix(fileName, ".") {
-			dirFiles = append(dirFiles, fileName)
-		}
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	return dirFiles, nil
-}
-
-func CopyLibFiles(localDependenciesDirectory string, localLibDirectory string) error {
-	// Create directory if one does not already exist
-	err := CreateDirectory(localLibDirectory)
-	if err != nil {
-		return err
-	}
-
-	fileNames, err := getRegularFileNamesInDir(localDependenciesDirectory)
-	if err != nil {
-		return err
-	}
-
-	for _, dependencyJar := range fileNames {
-		source := path.Join(localDependenciesDirectory, dependencyJar)
-		destination := path.Join(localLibDirectory, dependencyJar)
-		_, err = CopyFile(source, destination)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func CopyAppFile(localDependenciesDirectory string, localAppDirectory string) error {
-	// Create directory if one does not already exist
-	err := CreateDirectory(localAppDirectory)
-	if err != nil {
-		return err
-	}
-
-	fileNames, err := getRegularFileNamesInDir(localDependenciesDirectory)
-	if err != nil {
-		return err
-	}
-
-	for _, dependencyJar := range fileNames {
-		if strings.HasPrefix(dependencyJar, "camel-k-integration-") {
-			source := path.Join(localDependenciesDirectory, dependencyJar)
-			destination := path.Join(localAppDirectory, dependencyJar)
-			_, err = CopyFile(source, destination)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
 }
 
 // Open a safe wrapper of os.Open.
