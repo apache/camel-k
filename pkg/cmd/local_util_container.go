@@ -85,8 +85,7 @@ func setDockerEnvVars(envVars []string) {
 
 func createAndBuildBaseImage(ctx context.Context, stdout, stderr io.Writer) error {
 	// Create the base image Docker file.
-	err := docker.CreateBaseImageDockerFile()
-	if err != nil {
+	if err := docker.CreateBaseImageDockerFile(); err != nil {
 		return err
 	}
 
@@ -130,8 +129,7 @@ func createAndBuildIntegrationImage(ctx context.Context, containerRegistry strin
 	}
 
 	// Create the Dockerfile and build the base image.
-	err := createAndBuildBaseImage(ctx, stdout, stderr)
-	if err != nil {
+	if err := createAndBuildBaseImage(ctx, stdout, stderr); err != nil {
 		return err
 	}
 
@@ -145,32 +143,27 @@ func createAndBuildIntegrationImage(ctx context.Context, containerRegistry strin
 
 	// Create integration image if integration files were provided.
 	// Copy dependencies to a dependencies folder under a local directory.
-	err = updateIntegrationDependencies(dependencies)
-	if err != nil {
+	if err := updateIntegrationDependencies(dependencies); err != nil {
 		return err
 	}
 
 	// Copy routes to a routes folder under a local directory.
-	err = updateIntegrationRoutes(routes)
-	if err != nil {
+	if err := updateIntegrationRoutes(routes); err != nil {
 		return err
 	}
 
 	// Copy quarkus files in maven subdirectory
-	err = updateQuarkusDirectory()
-	if err != nil {
+	if err := updateQuarkusDirectory(); err != nil {
 		return err
 	}
 
 	// Copy app files in maven subdirectory
-	err = updateAppDirectory()
-	if err != nil {
+	if err := updateAppDirectory(); err != nil {
 		return err
 	}
 
 	// Copy lib files in maven subdirectory
-	err = updateLibDirectory()
-	if err != nil {
+	if err := updateLibDirectory(); err != nil {
 		return err
 	}
 
@@ -182,8 +175,7 @@ func createAndBuildIntegrationImage(ctx context.Context, containerRegistry strin
 	}
 
 	// Create the integration image Docker file.
-	err = docker.CreateIntegrationImageDockerFile(containerCmd, startsFromLocalFolder)
-	if err != nil {
+	if err := docker.CreateIntegrationImageDockerFile(containerCmd, startsFromLocalFolder); err != nil {
 		return err
 	}
 

@@ -75,6 +75,7 @@ func (o *LocalCmdOptions) persistentPreRun(cmd *cobra.Command, args []string) er
 
 func warnTraitUsages(cmd *cobra.Command, traits []string) {
 	if len(traits) > 0 {
-		fmt.Fprintf(cmd.OutOrStdout(), "Warning: traits are specified but don't take effect for local run: %v\n", traits)
+		fmt.Fprintf(cmd.OutOrStdout(),
+			"Warning: traits are specified but don't take effect for local run: %v\n", traits)
 	}
 }

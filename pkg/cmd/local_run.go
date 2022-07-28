@@ -171,7 +171,7 @@ func (o *localRunCmdOptions) run(cmd *cobra.Command, args []string) error {
 		// <integration_directory>/../quarkus/quarkus-application.dat
 		// <integration_directory>/../quarkus/generated-bytecode.jar
 		localQuarkusDir := getCustomQuarkusDir(o.IntegrationDirectory)
-		err = util.CopyQuarkusAppFiles(localDependenciesDirectory, localQuarkusDir)
+		err = CopyQuarkusAppFiles(localDependenciesDirectory, localQuarkusDir)
 		if err != nil {
 			return err
 		}
@@ -179,7 +179,7 @@ func (o *localRunCmdOptions) run(cmd *cobra.Command, args []string) error {
 		// The dependency jar files need to be at a specific location i.e.:
 		// <integration_directory>/../lib/main/*.jar
 		localLibDirectory := getCustomLibDir(o.IntegrationDirectory)
-		err = util.CopyLibFiles(localDependenciesDirectory, localLibDirectory)
+		err = CopyLibFiles(localDependenciesDirectory, localLibDirectory)
 		if err != nil {
 			return err
 		}
@@ -187,7 +187,7 @@ func (o *localRunCmdOptions) run(cmd *cobra.Command, args []string) error {
 		// The Camel K jar file needs to be at a specific location i.e.:
 		// <integration_directory>/../app/camel-k-integration-X.X.X{-SNAPSHOT}.jar
 		localAppDirectory := getCustomAppDir(o.IntegrationDirectory)
-		err = util.CopyAppFile(localDependenciesDirectory, localAppDirectory)
+		err = CopyAppFile(localDependenciesDirectory, localAppDirectory)
 		if err != nil {
 			return err
 		}
