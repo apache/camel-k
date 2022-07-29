@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package local
 
 import (
 	"context"
@@ -32,6 +32,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/cmd/source"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -45,8 +46,8 @@ var acceptedDependencyTypes = []string{
 	"github", "gitlab", "bitbucket", "gitee", "azure",
 }
 
-// getDependencies resolves and gets the list of dependencies from catalog and sources.
-func getDependencies(ctx context.Context, args []string, additionalDependencies []string, repositories []string, allDependencies bool) ([]string, error) {
+// GetDependencies resolves and gets the list of dependencies from catalog and sources.
+func GetDependencies(ctx context.Context, args []string, additionalDependencies []string, repositories []string, allDependencies bool) ([]string, error) {
 	// Fetch existing catalog or create new one if one does not already exist
 	catalog, err := createCamelCatalog(ctx)
 	if err != nil {
@@ -84,15 +85,15 @@ func getTopLevelDependencies(ctx context.Context, catalog *camel.RuntimeCatalog,
 	dependencies := strset.New()
 
 	// Invoke the dependency inspector code for each source file
-	for _, source := range args {
-		data, _, _, err := loadTextContent(ctx, source, false)
+	for _, src := range args {
+		data, _, _, err := source.LoadTextContent(ctx, src, false)
 		if err != nil {
 			return []string{}, err
 		}
 
 		sourceSpec := v1.SourceSpec{
 			DataSpec: v1.DataSpec{
-				Name:        path.Base(source),
+				Name:        path.Base(src),
 				Content:     data,
 				Compression: false,
 			},
@@ -175,24 +176,24 @@ func getRegularFilesInDir(directory string, dirnameInPath bool) ([]string, error
 	return dirFiles, nil
 }
 
-func getLocalBuildDependencies(integrationDirectory string) ([]string, error) {
-	locallyBuiltDependencies, err := getRegularFilesInDir(getCustomDependenciesDir(integrationDirectory), true)
+func GetBuildDependencies(integrationDirectory string) ([]string, error) {
+	locallyBuiltDependencies, err := getRegularFilesInDir(GetCustomDependenciesDir(integrationDirectory), true)
 	if err != nil {
 		return nil, err
 	}
 	return locallyBuiltDependencies, nil
 }
 
-func getLocalBuildProperties(integrationDirectory string) ([]string, error) {
-	locallyBuiltProperties, err := getRegularFilesInDir(getCustomPropertiesDir(integrationDirectory), true)
+func GetBuildProperties(integrationDirectory string) ([]string, error) {
+	locallyBuiltProperties, err := getRegularFilesInDir(GetCustomPropertiesDir(integrationDirectory), true)
 	if err != nil {
 		return nil, err
 	}
 	return locallyBuiltProperties, nil
 }
 
-func getLocalBuildRoutes(integrationDirectory string) ([]string, error) {
-	locallyBuiltRoutes, err := getRegularFilesInDir(getCustomRoutesDir(integrationDirectory), true)
+func GetBuildRoutes(integrationDirectory string) ([]string, error) {
+	locallyBuiltRoutes, err := getRegularFilesInDir(GetCustomRoutesDir(integrationDirectory), true)
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +237,7 @@ func createCamelCatalog(ctx context.Context) (*camel.RuntimeCatalog, error) {
 	return catalog, nil
 }
 
-func outputDependencies(dependencies []string, format string, cmd *cobra.Command) error {
+func OutputDependencies(dependencies []string, format string, cmd *cobra.Command) error {
 	if format != "" {
 		if err := printDependencies(format, dependencies, cmd); err != nil {
 			return err
@@ -300,8 +301,8 @@ func validateFile(file string) error {
 	return nil
 }
 
-// validateFiles ensures existence of given files.
-func validateFiles(args []string) error {
+// ValidateFiles ensures existence of given files.
+func ValidateFiles(args []string) error {
 	// Ensure source files exist
 	for _, arg := range args {
 		err := validateFile(arg)
@@ -313,9 +314,9 @@ func validateFiles(args []string) error {
 	return nil
 }
 
-// validateDependencies validates list of additional dependencies i.e. makes sure
+// ValidateDependencies validates list of additional dependencies i.e. makes sure
 // that each dependency has a valid type.
-func validateDependencies(dependencies []string) error {
+func ValidateDependencies(dependencies []string) error {
 	for _, dependency := range dependencies {
 		depType := strings.Split(dependency, ":")[0]
 		if !util.StringSliceExists(acceptedDependencyTypes, depType) {
@@ -326,7 +327,7 @@ func validateDependencies(dependencies []string) error {
 	return nil
 }
 
-func validatePropertyFiles(propertyFiles []string) error {
+func ValidatePropertyFiles(propertyFiles []string) error {
 	for _, fileName := range propertyFiles {
 		if err := validatePropertyFile(fileName); err != nil {
 			return err
@@ -350,16 +351,16 @@ func validatePropertyFile(fileName string) error {
 	return nil
 }
 
-func updateIntegrationProperties(properties []string, propertyFiles []string, hasIntegrationDir bool) ([]string, error) {
+func UpdateIntegrationProperties(properties []string, propertyFiles []string, hasIntegrationDir bool) ([]string, error) {
 	// Create properties directory under Maven working directory.
 	// This ensures that property files of different integrations do not clash.
-	if err := createLocalPropertiesDirectory(); err != nil {
+	if err := CreateLocalPropertiesDirectory(); err != nil {
 		return nil, err
 	}
 
 	// Relocate properties files to this integration's property directory.
 	relocatedPropertyFiles := []string{}
-	dir := getLocalPropertiesDir()
+	dir := GetLocalPropertiesDir()
 	for _, propertyFile := range propertyFiles {
 		relocatedPropertyFile := path.Join(dir, path.Base(propertyFile))
 		if _, err := util.CopyFile(propertyFile, relocatedPropertyFile); err != nil {
@@ -428,7 +429,7 @@ func updateQuarkusDirectory() error {
 	}
 
 	// ignore error if custom dir doesn't exist
-	_ = copyQuarkusAppFiles(util.CustomQuarkusDirectoryName, getLocalQuarkusDir())
+	_ = CopyQuarkusAppFiles(util.CustomQuarkusDirectoryName, getLocalQuarkusDir())
 
 	return nil
 }
@@ -439,7 +440,7 @@ func updateAppDirectory() error {
 	}
 
 	// ignore error if custom dir doesn't exist
-	_ = copyAppFile(util.CustomAppDirectoryName, getLocalAppDir())
+	_ = CopyAppFile(util.CustomAppDirectoryName, getLocalAppDir())
 
 	return nil
 }
@@ -450,12 +451,12 @@ func updateLibDirectory() error {
 	}
 
 	// ignore error if custom dir doesn't exist
-	_ = copyLibFiles(util.CustomLibDirectoryName, getLocalLibDir())
+	_ = CopyLibFiles(util.CustomLibDirectoryName, getLocalLibDir())
 
 	return nil
 }
 
-func copyIntegrationFilesToDirectory(files []string, directory string) ([]string, error) {
+func CopyIntegrationFilesToDirectory(files []string, directory string) ([]string, error) {
 	// Create directory if one does not already exist
 	if err := util.CreateDirectory(directory); err != nil {
 		return nil, err
@@ -474,7 +475,7 @@ func copyIntegrationFilesToDirectory(files []string, directory string) ([]string
 	return relocatedFilesList, nil
 }
 
-func copyQuarkusAppFiles(dependenciesDir string, quarkusDir string) error {
+func CopyQuarkusAppFiles(dependenciesDir string, quarkusDir string) error {
 	// Create directory if one does not already exist
 	if err := util.CreateDirectory(quarkusDir); err != nil {
 		return err
@@ -498,7 +499,7 @@ func copyQuarkusAppFiles(dependenciesDir string, quarkusDir string) error {
 	return nil
 }
 
-func copyLibFiles(dependenciesDir string, libDir string) error {
+func CopyLibFiles(dependenciesDir string, libDir string) error {
 	// Create directory if one does not already exist
 	if err := util.CreateDirectory(libDir); err != nil {
 		return err
@@ -520,7 +521,7 @@ func copyLibFiles(dependenciesDir string, libDir string) error {
 	return nil
 }
 
-func copyAppFile(dependenciesDir string, appDir string) error {
+func CopyAppFile(dependenciesDir string, appDir string) error {
 	// Create directory if one does not already exist
 	if err := util.CreateDirectory(appDir); err != nil {
 		return err

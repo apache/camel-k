@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package source
 
 import (
 	"context"
@@ -45,9 +45,34 @@ type Source struct {
 	Local    bool
 }
 
+// newSource creates a source using the content provider function.
+func newSource(location string, compress bool, loadContent func() ([]byte, error)) (Source, error) {
+	// strip query part from location if any
+	locPath := util.SubstringBefore(location, "?")
+	if locPath == "" {
+		locPath = location
+	}
+	src := Source{
+		Name:     path.Base(locPath),
+		Origin:   location,
+		Location: location,
+		Compress: compress,
+	}
+
+	content, err := loadContent()
+	if err != nil {
+		return Source{}, err
+	}
+	if err := src.setContent(content); err != nil {
+		return Source{}, err
+	}
+
+	return src, nil
+}
+
 func (s *Source) setContent(content []byte) error {
 	if s.Compress {
-		result, err := compressToString(content)
+		result, err := CompressToString(content)
 		if err != nil {
 			return err
 		}
@@ -60,18 +85,18 @@ func (s *Source) setContent(content []byte) error {
 	return nil
 }
 
-// ResolveSources resolves sources from a variety of locations including local and remote.
-func ResolveSources(ctx context.Context, locations []string, compress bool, cmd *cobra.Command) ([]Source, error) {
+// Resolve resolves sources from a variety of locations including local and remote.
+func Resolve(ctx context.Context, locations []string, compress bool, cmd *cobra.Command) ([]Source, error) {
 	sources := make([]Source, 0, len(locations))
 
 	for _, location := range locations {
-		ok, err := isLocalAndFileExists(location)
+		ok, err := IsLocalAndFileExists(location)
 		if err != nil {
 			return sources, err
 		}
 
 		if ok {
-			answer, err := resolveLocalSource(location, compress)
+			answer, err := resolveLocal(location, compress)
 			if err != nil {
 				return sources, err
 			}
@@ -85,13 +110,13 @@ func ResolveSources(ctx context.Context, locations []string, compress bool, cmd 
 
 			switch {
 			case u.Scheme == gistScheme || strings.HasPrefix(location, "https://gist.github.com/"):
-				answer, err := resolveGistSource(ctx, location, compress, cmd, u)
+				answer, err := resolveGist(ctx, location, compress, cmd, u)
 				if err != nil {
 					return sources, err
 				}
 				sources = append(sources, answer...)
 			case u.Scheme == githubScheme:
-				answer, err := resolveSource(location, compress, func() ([]byte, error) {
+				answer, err := newSource(location, compress, func() ([]byte, error) {
 					return loadContentGitHub(ctx, u)
 				})
 				if err != nil {
@@ -99,7 +124,7 @@ func ResolveSources(ctx context.Context, locations []string, compress bool, cmd 
 				}
 				sources = append(sources, answer)
 			case u.Scheme == httpScheme || u.Scheme == httpsScheme:
-				answer, err := resolveSource(location, compress, func() ([]byte, error) {
+				answer, err := newSource(location, compress, func() ([]byte, error) {
 					return loadContentHTTP(ctx, u)
 				})
 				if err != nil {
@@ -115,8 +140,8 @@ func ResolveSources(ctx context.Context, locations []string, compress bool, cmd 
 	return sources, nil
 }
 
-// resolveGistSource resolves sources from a Gist.
-func resolveGistSource(ctx context.Context, location string, compress bool, cmd *cobra.Command, u *url.URL) ([]Source, error) {
+// resolveGist resolves sources from a Gist.
+func resolveGist(ctx context.Context, location string, compress bool, cmd *cobra.Command, u *url.URL) ([]Source, error) {
 	var hc *http.Client
 
 	if token, ok := os.LookupEnv("GITHUB_TOKEN"); ok {
@@ -170,46 +195,21 @@ func resolveGistSource(ctx context.Context, location string, compress bool, cmd 
 	return sources, nil
 }
 
-// resolveLocalSource resolves a source from the local file system.
-func resolveLocalSource(location string, compress bool) (Source, error) {
+// resolveLocal resolves a source from the local file system.
+func resolveLocal(location string, compress bool) (Source, error) {
 	if _, err := os.Stat(location); err != nil && os.IsNotExist(err) {
 		return Source{}, errors.Wrapf(err, "file %s does not exist", location)
 	} else if err != nil {
 		return Source{}, errors.Wrapf(err, "error while accessing file %s", location)
 	}
 
-	answer, err := resolveSource(location, compress, func() ([]byte, error) {
+	answer, err := newSource(location, compress, func() ([]byte, error) {
 		return util.ReadFile(location)
 	})
 	if err != nil {
 		return Source{}, err
 	}
 	answer.Local = true
-
-	return answer, nil
-}
-
-// resolveSource resolves a source using the content provider function.
-func resolveSource(location string, compress bool, loadContent func() ([]byte, error)) (Source, error) {
-	// strip query part from location if any
-	locPath := util.SubstringBefore(location, "?")
-	if locPath == "" {
-		locPath = location
-	}
-	answer := Source{
-		Name:     path.Base(locPath),
-		Origin:   location,
-		Location: location,
-		Compress: compress,
-	}
-
-	content, err := loadContent()
-	if err != nil {
-		return Source{}, err
-	}
-	if err := answer.setContent(content); err != nil {
-		return Source{}, err
-	}
 
 	return answer, nil
 }

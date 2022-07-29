@@ -23,6 +23,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
+	"github.com/apache/camel-k/pkg/cmd/local"
 	"github.com/apache/camel-k/pkg/util"
 )
 
@@ -139,17 +140,17 @@ func (o *localBuildCmdOptions) validateIntegrationMode(args []string) error {
 	}
 
 	// Validate integration files.
-	if err := validateFiles(args); err != nil {
+	if err := local.ValidateFiles(args); err != nil {
 		return err
 	}
 
 	// Validate additional dependencies specified by the user.
-	if err := validateDependencies(o.Dependencies); err != nil {
+	if err := local.ValidateDependencies(o.Dependencies); err != nil {
 		return err
 	}
 
 	// Validate properties file.
-	if err := validateFiles(o.PropertyFiles); err != nil {
+	if err := local.ValidateFiles(o.PropertyFiles); err != nil {
 		return err
 	}
 
@@ -166,19 +167,19 @@ func (o *localBuildCmdOptions) init(args []string) error {
 
 	if o.BaseImage || o.Image != "" {
 		// If base image construction is enabled create a directory for it.
-		if err := createDockerBaseWorkingDirectory(); err != nil {
+		if err := local.CreateDockerBaseWorkingDirectory(); err != nil {
 			return err
 		}
 
 		// If integration image construction is enabled, an integration image will be built.
 		if o.Image != "" {
-			if err := createDockerWorkingDirectory(); err != nil {
+			if err := local.CreateDockerWorkingDirectory(); err != nil {
 				return err
 			}
 		}
 	}
 
-	return createMavenWorkingDirectory()
+	return local.CreateMavenWorkingDirectory()
 }
 
 func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
@@ -186,7 +187,7 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 	routeFiles := args
 
 	if !o.BaseImage {
-		dependencies, err := getDependencies(o.Context, args, o.Dependencies, o.MavenRepositories, true)
+		dependencies, err := local.GetDependencies(o.Context, args, o.Dependencies, o.MavenRepositories, true)
 		if err != nil {
 			return err
 		}
@@ -194,7 +195,7 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 		var propertyFiles []string
 		if !o.DependenciesOnly {
 			// Manage integration properties which may come from files or CLI
-			propertyFiles, err = updateIntegrationProperties(o.Properties, o.PropertyFiles, false)
+			propertyFiles, err = local.UpdateIntegrationProperties(o.Properties, o.PropertyFiles, false)
 			if err != nil {
 				return err
 			}
@@ -207,8 +208,8 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 		// build the integration without also building the image. A local build of the integration is
 		// represented by all the files that define the integration: dependencies, properties, and routes.
 		if o.IntegrationDirectory != "" {
-			localDependenciesDir := getCustomDependenciesDir(o.IntegrationDirectory)
-			dependenciesList, err = copyIntegrationFilesToDirectory(dependencies, localDependenciesDir)
+			localDependenciesDir := local.GetCustomDependenciesDir(o.IntegrationDirectory)
+			dependenciesList, err = local.CopyIntegrationFilesToDirectory(dependencies, localDependenciesDir)
 			if err != nil {
 				return err
 			}
@@ -218,14 +219,14 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 				return nil
 			}
 
-			localPropertiesDir := getCustomPropertiesDir(o.IntegrationDirectory)
-			propertyFilesList, err = copyIntegrationFilesToDirectory(propertyFiles, localPropertiesDir)
+			localPropertiesDir := local.GetCustomPropertiesDir(o.IntegrationDirectory)
+			propertyFilesList, err = local.CopyIntegrationFilesToDirectory(propertyFiles, localPropertiesDir)
 			if err != nil {
 				return err
 			}
 
-			localRoutesDir := getCustomRoutesDir(o.IntegrationDirectory)
-			routeFiles, err = copyIntegrationFilesToDirectory(args, localRoutesDir)
+			localRoutesDir := local.GetCustomRoutesDir(o.IntegrationDirectory)
+			routeFiles, err = local.CopyIntegrationFilesToDirectory(args, localRoutesDir)
 			if err != nil {
 				return err
 			}
@@ -240,7 +241,7 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if err := createAndBuildIntegrationImage(o.Context, o.ContainerRegistry, o.BaseImage, o.Image,
+	if err := local.CreateAndBuildIntegrationImage(o.Context, o.ContainerRegistry, o.BaseImage, o.Image,
 		propertyFilesList, dependenciesList, routeFiles, false,
 		cmd.OutOrStdout(), cmd.ErrOrStderr()); err != nil {
 		return err
@@ -251,16 +252,16 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 func (o *localBuildCmdOptions) deinit() error {
 	// If base image construction is enabled delete the directory for it.
-	if err := deleteDockerBaseWorkingDirectory(); err != nil {
+	if err := local.DeleteDockerBaseWorkingDirectory(); err != nil {
 		return err
 	}
 
 	// If integration files are provided delete the maven project folder.
 	if !o.BaseImage {
-		if err := deleteDockerWorkingDirectory(); err != nil {
+		if err := local.DeleteDockerWorkingDirectory(); err != nil {
 			return err
 		}
-		if err := deleteMavenWorkingDirectory(); err != nil {
+		if err := local.DeleteMavenWorkingDirectory(); err != nil {
 			return err
 		}
 	}
