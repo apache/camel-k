@@ -179,7 +179,7 @@ func (o *localRunCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	// Run integration locally.
-	return RunLocalIntegrationRunCommand(o.Context, propertyFiles, dependencies, routes, o.getPropertiesDir(),
+	return runLocalIntegration(o.Context, propertyFiles, dependencies, routes, o.getPropertiesDir(),
 		cmd.OutOrStdout(), cmd.ErrOrStderr())
 }
 
