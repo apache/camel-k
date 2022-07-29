@@ -23,7 +23,6 @@ package local
 import (
 	"context"
 	"io"
-	"os"
 	"strings"
 	"testing"
 
@@ -48,6 +47,7 @@ func TestLocalRun(t *testing.T) {
 
 	kamelRun := KamelWithContext(ctx, "local", "run", file)
 	kamelRun.SetOut(pipew)
+	kamelRun.SetErr(pipew)
 
 	logScanner := testutil.NewLogScanner(ctx, piper, "Magicstring!")
 
@@ -73,6 +73,7 @@ func TestLocalRunWithDependencies(t *testing.T) {
 
 	kamelRun := KamelWithContext(ctx, "local", "run", file, "-d", "camel-amqp")
 	kamelRun.SetOut(pipew)
+	kamelRun.SetErr(pipew)
 
 	logScanner := testutil.NewLogScanner(ctx, piper, "Magicstring!")
 
@@ -99,6 +100,7 @@ func TestLocalRunContainerize(t *testing.T) {
 
 	kamelRun := KamelWithContext(ctx, "local", "run", file, "--image", image, "--containerize")
 	kamelRun.SetOut(pipew)
+	kamelRun.SetErr(pipew)
 
 	logScanner := testutil.NewLogScanner(ctx, piper, "Magicstring!")
 
@@ -115,10 +117,6 @@ func TestLocalRunContainerize(t *testing.T) {
 
 func TestLocalRunIntegrationDirectory(t *testing.T) {
 	RegisterTestingT(t)
-
-	if os.Getenv("CI") == "true" {
-		t.Skip("TODO: Temporarily disabled as this test is flaky and hangs the test process")
-	}
 
 	ctx1, cancel1 := context.WithCancel(TestContext)
 	defer cancel1()
@@ -146,6 +144,7 @@ func TestLocalRunIntegrationDirectory(t *testing.T) {
 
 	kamelRun := KamelWithContext(ctx2, "local", "run", "--integration-directory", dir)
 	kamelRun.SetOut(pipew)
+	kamelRun.SetErr(pipew)
 
 	logScanner := testutil.NewLogScanner(ctx2, piper, "Magicstring!")
 
