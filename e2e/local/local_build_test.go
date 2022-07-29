@@ -65,6 +65,7 @@ func TestLocalBuild(t *testing.T) {
 
 	kamelBuild := KamelWithContext(ctx, "local", "build", file, "--image", image)
 	kamelBuild.SetOut(pipew)
+	kamelBuild.SetErr(pipew)
 
 	msgTagged := "Successfully tagged"
 	logScanner := testutil.NewLogScanner(ctx, piper, msgTagged, image)
@@ -94,6 +95,7 @@ func TestLocalBuildWithTrait(t *testing.T) {
 
 	kamelBuild := KamelWithContext(ctx, "local", "build", file, "--image", image)
 	kamelBuild.SetOut(pipew)
+	kamelBuild.SetErr(pipew)
 
 	msgWarning := "Warning: traits are specified but don't take effect for local run: [jolokia.enabled=true]"
 	msgTagged := "Successfully tagged"
