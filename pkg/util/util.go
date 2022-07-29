@@ -423,21 +423,6 @@ func CopyMap(source map[string]string) map[string]string {
 	return dest
 }
 
-func DependenciesToJSON(list []string) ([]byte, error) {
-	jsondata := map[string]interface{}{}
-	jsondata["dependencies"] = list
-	return json.Marshal(jsondata)
-}
-
-func DependenciesToYAML(list []string) ([]byte, error) {
-	data, err := DependenciesToJSON(list)
-	if err != nil {
-		return nil, err
-	}
-
-	return JSONToYAML(data)
-}
-
 func JSONToYAML(src []byte) ([]byte, error) {
 	mapdata, err := JSONToMap(src)
 	if err != nil {

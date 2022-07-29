@@ -190,11 +190,10 @@ func createAndBuildIntegrationImage(ctx context.Context, containerRegistry strin
 		return err
 	}
 
-	return buildIntegrationImage(ctx, image, startsFromLocalFolder, stdout, stderr)
+	return buildIntegrationImage(ctx, image, stdout, stderr)
 }
 
-func buildIntegrationImage(ctx context.Context, image string, startsFromLocalFolder bool,
-	stdout, stderr io.Writer) error {
+func buildIntegrationImage(ctx context.Context, image string, stdout, stderr io.Writer) error {
 	// Get the Docker command arguments for building the base image and create the command.
 	args := docker.BuildIntegrationImageArgs(image, MavenWorkingDirectory)
 	cmd := exec.CommandContext(ctx, "docker", args...)

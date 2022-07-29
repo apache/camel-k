@@ -74,7 +74,8 @@ func newCmdLocalRun(localCmdOptions *LocalCmdOptions) (*cobra.Command, *localRun
 	cmd.Flags().Bool("containerize", false, "Run integration in a local container.")
 	cmd.Flags().String("image", "", "Full path to integration image including registry.")
 	cmd.Flags().String("network", "", "Custom network name to be used by the underlying Docker command.")
-	cmd.Flags().String("integration-directory", "", "Directory which holds the locally built integration and is the result of a local build action.")
+	cmd.Flags().String("integration-directory", "",
+		"Directory which holds the locally built integration and is the result of a local build action.")
 	cmd.Flags().StringArrayP("env", "e", nil, "Flag to specify an environment variable [--env VARIABLE=value].")
 	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a Camel property to the integration.")
@@ -99,7 +100,12 @@ func (o *localRunCmdOptions) validate(args []string) error {
 	// Validate integration files when no image is provided and we are
 	// not running an already locally-built integration.
 	if o.Image == "" && o.IntegrationDirectory == "" {
-		if err := validateIntegrationFiles(args); err != nil {
+		if len(args) == 0 {
+			return errors.New("no integration files have been provided")
+		}
+
+		// Validate integration files.
+		if err := validateFiles(args); err != nil {
 			return err
 		}
 	}
@@ -144,129 +150,132 @@ func (o *localRunCmdOptions) run(cmd *cobra.Command, args []string) error {
 	// If local run is provided with an image name, it will just run the image locally and exit.
 	if o.Image != "" && !o.Containerize {
 		// Run image locally.
-		if err := runIntegrationImage(o.Context, o.Image, cmd.OutOrStdout(), cmd.ErrOrStderr()); err != nil {
-			return err
-		}
-
-		return nil
+		return runIntegrationImage(o.Context, o.Image, cmd.OutOrStdout(), cmd.ErrOrStderr())
 	}
 
-	hasIntegrationDir := o.IntegrationDirectory != ""
-
-	var dependencies []string
-	if hasIntegrationDir {
-		// Fetch local dependencies
-		localBuildDependencies, err := getLocalBuildDependencies(o.IntegrationDirectory)
-		if err != nil {
-			return err
-		}
-		dependencies = localBuildDependencies
-
-		// Local dependencies directory
-		localDependenciesDirectory := getCustomDependenciesDir(o.IntegrationDirectory)
-
-		// The quarkus application files need to be at a specific location i.e.:
-		// <integration_directory>/../quarkus/quarkus-application.dat
-		// <integration_directory>/../quarkus/generated-bytecode.jar
-		localQuarkusDir := getCustomQuarkusDir(o.IntegrationDirectory)
-		err = copyQuarkusAppFiles(localDependenciesDirectory, localQuarkusDir)
-		if err != nil {
-			return err
-		}
-
-		// The dependency jar files need to be at a specific location i.e.:
-		// <integration_directory>/../lib/main/*.jar
-		localLibDirectory := getCustomLibDir(o.IntegrationDirectory)
-		err = copyLibFiles(localDependenciesDirectory, localLibDirectory)
-		if err != nil {
-			return err
-		}
-
-		// The Camel K jar file needs to be at a specific location i.e.:
-		// <integration_directory>/../app/camel-k-integration-X.X.X{-SNAPSHOT}.jar
-		localAppDirectory := getCustomAppDir(o.IntegrationDirectory)
-		err = copyAppFile(localDependenciesDirectory, localAppDirectory)
-		if err != nil {
-			return err
-		}
-	} else {
-		computedDependencies, err := getDependencies(o.Context, args, o.Dependencies, o.MavenRepositories, true)
-		if err != nil {
-			return err
-		}
-		dependencies = computedDependencies
-	}
-
-	// Manage integration properties which may come from files or CLI.
-	propertyFiles := o.PropertyFiles
-	if hasIntegrationDir {
-		localBuildPropertyFiles, err := getLocalBuildProperties(o.IntegrationDirectory)
-		if err != nil {
-			return err
-		}
-		propertyFiles = localBuildPropertyFiles
-	}
-
-	updatedPropertyFiles, err := updateIntegrationProperties(o.Properties, propertyFiles, hasIntegrationDir)
+	dependencies, err := o.processDependencies(args)
 	if err != nil {
 		return err
 	}
-	propertyFiles = updatedPropertyFiles
-
-	routes := args
-	if hasIntegrationDir {
-		localBuildRoutes, err := getLocalBuildRoutes(o.IntegrationDirectory)
-		if err != nil {
-			return err
-		}
-		routes = localBuildRoutes
+	propertyFiles, err := o.processPropertyFiles()
+	if err != nil {
+		return err
+	}
+	routes, err := o.processRoutes(args)
+	if err != nil {
+		return err
 	}
 
-	// If this is a containerized local run, create, build and run the container image.
 	if o.Containerize {
+		// If this is a containerized local run, create, build and run the container image.
 		if err := createAndBuildIntegrationImage(o.Context, "", false, o.Image,
-			propertyFiles, dependencies, routes, hasIntegrationDir,
+			propertyFiles, dependencies, routes, o.IntegrationDirectory != "",
 			cmd.OutOrStdout(), cmd.ErrOrStderr()); err != nil {
 			return err
 		}
 
 		// Run integration image.
-		err = runIntegrationImage(o.Context, o.Image, cmd.OutOrStdout(), cmd.ErrOrStderr())
-		if err != nil {
-			return err
-		}
-	} else {
-		propertiesDir := getLocalPropertiesDir()
-		if hasIntegrationDir {
-			propertiesDir = getCustomPropertiesDir(o.IntegrationDirectory)
-		}
+		return runIntegrationImage(o.Context, o.Image, cmd.OutOrStdout(), cmd.ErrOrStderr())
+	}
 
-		// Run integration locally.
-		err := RunLocalIntegrationRunCommand(o.Context, propertyFiles, dependencies, routes, propertiesDir, cmd.OutOrStdout(), cmd.ErrOrStderr())
-		if err != nil {
-			return err
-		}
+	// Run integration locally.
+	return RunLocalIntegrationRunCommand(o.Context, propertyFiles, dependencies, routes, o.getPropertiesDir(),
+		cmd.OutOrStdout(), cmd.ErrOrStderr())
+}
+
+func (o *localRunCmdOptions) processDependencies(args []string) ([]string, error) {
+	if o.IntegrationDirectory == "" {
+		return getDependencies(o.Context, args, o.Dependencies, o.MavenRepositories, true)
+	}
+
+	// Set up on the integration directory
+
+	// Fetch local dependencies
+	dependencies, err := getLocalBuildDependencies(o.IntegrationDirectory)
+	if err != nil {
+		return nil, err
+	}
+	if err := o.setupDependenciesForQuarkusRun(); err != nil {
+		return dependencies, err
+	}
+
+	return dependencies, nil
+}
+
+// setupDependenciesForQuarkusRun sets up resources under the integration directory for running Quarkus app.
+func (o *localRunCmdOptions) setupDependenciesForQuarkusRun() error {
+	// Local dependencies directory
+	localDependenciesDir := getCustomDependenciesDir(o.IntegrationDirectory)
+
+	// The quarkus application files need to be at a specific location i.e.:
+	// <integration_directory>/../quarkus/quarkus-application.dat
+	// <integration_directory>/../quarkus/generated-bytecode.jar
+	localQuarkusDir := getCustomQuarkusDir(o.IntegrationDirectory)
+	if err := copyQuarkusAppFiles(localDependenciesDir, localQuarkusDir); err != nil {
+		return err
+	}
+
+	// The dependency jar files need to be at a specific location i.e.:
+	// <integration_directory>/../lib/main/*.jar
+	localLibDir := getCustomLibDir(o.IntegrationDirectory)
+	if err := copyLibFiles(localDependenciesDir, localLibDir); err != nil {
+		return err
+	}
+
+	// The Camel K jar file needs to be at a specific location i.e.:
+	// <integration_directory>/../app/camel-k-integration-X.X.X{-SNAPSHOT}.jar
+	localAppDir := getCustomAppDir(o.IntegrationDirectory)
+	if err := copyAppFile(localDependenciesDir, localAppDir); err != nil {
+		return err
 	}
 
 	return nil
 }
 
+// processPropertyFiles processes integration properties which may come from files or CLI.
+func (o *localRunCmdOptions) processPropertyFiles() ([]string, error) {
+	propertyFiles := o.PropertyFiles
+	hasIntegrationDir := o.IntegrationDirectory != ""
+	if hasIntegrationDir {
+		localPropertyFiles, err := getLocalBuildProperties(o.IntegrationDirectory)
+		if err != nil {
+			return nil, err
+		}
+		propertyFiles = localPropertyFiles
+	}
+
+	return updateIntegrationProperties(o.Properties, propertyFiles, hasIntegrationDir)
+}
+
+func (o *localRunCmdOptions) processRoutes(args []string) ([]string, error) {
+	if o.IntegrationDirectory == "" {
+		return args, nil
+	}
+
+	return getLocalBuildRoutes(o.IntegrationDirectory)
+}
+
+func (o *localRunCmdOptions) getPropertiesDir() string {
+	if o.IntegrationDirectory == "" {
+		return getLocalPropertiesDir()
+	}
+
+	return getCustomPropertiesDir(o.IntegrationDirectory)
+}
+
 func (o *localRunCmdOptions) deinit() error {
 	if o.Containerize {
-		err := deleteDockerBaseWorkingDirectory()
-		if err != nil {
+		if err := deleteDockerBaseWorkingDirectory(); err != nil {
 			return err
 		}
 
-		err = deleteDockerWorkingDirectory()
-		if err != nil {
+		if err := deleteDockerWorkingDirectory(); err != nil {
 			return err
 		}
 	}
 
 	if o.IntegrationDirectory != "" {
-		err := deleteLocalIntegrationDirs(o.IntegrationDirectory)
-		if err != nil {
+		if err := deleteLocalIntegrationDirs(o.IntegrationDirectory); err != nil {
 			return err
 		}
 	}

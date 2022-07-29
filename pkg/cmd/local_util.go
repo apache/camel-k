@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -236,8 +237,7 @@ func createCamelCatalog(ctx context.Context) (*camel.RuntimeCatalog, error) {
 
 func outputDependencies(dependencies []string, format string, cmd *cobra.Command) error {
 	if format != "" {
-		err := printDependencies(format, dependencies, cmd)
-		if err != nil {
+		if err := printDependencies(format, dependencies, cmd); err != nil {
 			return err
 		}
 	} else {
@@ -254,21 +254,36 @@ func outputDependencies(dependencies []string, format string, cmd *cobra.Command
 func printDependencies(format string, dependencies []string, cmd *cobra.Command) error {
 	switch format {
 	case "yaml":
-		data, err := util.DependenciesToYAML(dependencies)
+		data, err := dependenciesToYAML(dependencies)
 		if err != nil {
 			return err
 		}
 		fmt.Fprint(cmd.OutOrStdout(), string(data))
 	case "json":
-		data, err := util.DependenciesToJSON(dependencies)
+		data, err := dependenciesToJSON(dependencies)
 		if err != nil {
 			return err
 		}
 		fmt.Fprint(cmd.OutOrStdout(), string(data))
 	default:
-		return errors.New("unknown output format: " + format)
+		return errors.Errorf("unknown output format: %s", format)
 	}
 	return nil
+}
+
+func dependenciesToJSON(list []string) ([]byte, error) {
+	jsondata := map[string]interface{}{}
+	jsondata["dependencies"] = list
+	return json.Marshal(jsondata)
+}
+
+func dependenciesToYAML(list []string) ([]byte, error) {
+	data, err := dependenciesToJSON(list)
+	if err != nil {
+		return nil, err
+	}
+
+	return util.JSONToYAML(data)
 }
 
 func validateFile(file string) error {
@@ -305,20 +320,6 @@ func validateDependencies(dependencies []string) error {
 		if !util.StringSliceExists(acceptedDependencyTypes, depType) {
 			return fmt.Errorf("dependency is not valid: %s", dependency)
 		}
-	}
-
-	return nil
-}
-
-func validateIntegrationFiles(args []string) error {
-	// If no source files have been provided there is nothing to inspect.
-	if len(args) == 0 {
-		return errors.New("no integration files have been provided")
-	}
-
-	// Validate integration files.
-	if err := validateFiles(args); err != nil {
-		return err
 	}
 
 	return nil
@@ -472,21 +473,21 @@ func copyIntegrationFilesToDirectory(files []string, directory string) ([]string
 	return relocatedFilesList, nil
 }
 
-func copyQuarkusAppFiles(localDependenciesDirectory string, localQuarkusDir string) error {
+func copyQuarkusAppFiles(dependenciesDir string, quarkusDir string) error {
 	// Create directory if one does not already exist
-	if err := util.CreateDirectory(localQuarkusDir); err != nil {
+	if err := util.CreateDirectory(quarkusDir); err != nil {
 		return err
 	}
 
 	// Transfer all files with a .dat extension and all files with a *-bytecode.jar suffix.
-	files, err := getRegularFilesInDir(localDependenciesDirectory, false)
+	files, err := getRegularFilesInDir(dependenciesDir, false)
 	if err != nil {
 		return err
 	}
 	for _, file := range files {
 		if strings.HasSuffix(file, ".dat") || strings.HasSuffix(file, "-bytecode.jar") {
-			source := path.Join(localDependenciesDirectory, file)
-			destination := path.Join(localQuarkusDir, file)
+			source := path.Join(dependenciesDir, file)
+			destination := path.Join(quarkusDir, file)
 			if _, err = util.CopyFile(source, destination); err != nil {
 				return err
 			}
@@ -496,20 +497,20 @@ func copyQuarkusAppFiles(localDependenciesDirectory string, localQuarkusDir stri
 	return nil
 }
 
-func copyLibFiles(localDependenciesDirectory string, localLibDirectory string) error {
+func copyLibFiles(dependenciesDir string, libDir string) error {
 	// Create directory if one does not already exist
-	if err := util.CreateDirectory(localLibDirectory); err != nil {
+	if err := util.CreateDirectory(libDir); err != nil {
 		return err
 	}
 
-	fileNames, err := getRegularFilesInDir(localDependenciesDirectory, false)
+	fileNames, err := getRegularFilesInDir(dependenciesDir, false)
 	if err != nil {
 		return err
 	}
 
 	for _, dependencyJar := range fileNames {
-		source := path.Join(localDependenciesDirectory, dependencyJar)
-		destination := path.Join(localLibDirectory, dependencyJar)
+		source := path.Join(dependenciesDir, dependencyJar)
+		destination := path.Join(libDir, dependencyJar)
 		if _, err = util.CopyFile(source, destination); err != nil {
 			return err
 		}
@@ -518,21 +519,21 @@ func copyLibFiles(localDependenciesDirectory string, localLibDirectory string) e
 	return nil
 }
 
-func copyAppFile(localDependenciesDirectory string, localAppDirectory string) error {
+func copyAppFile(dependenciesDir string, appDir string) error {
 	// Create directory if one does not already exist
-	if err := util.CreateDirectory(localAppDirectory); err != nil {
+	if err := util.CreateDirectory(appDir); err != nil {
 		return err
 	}
 
-	fileNames, err := getRegularFilesInDir(localDependenciesDirectory, false)
+	fileNames, err := getRegularFilesInDir(dependenciesDir, false)
 	if err != nil {
 		return err
 	}
 
 	for _, dependencyJar := range fileNames {
 		if strings.HasPrefix(dependencyJar, "camel-k-integration-") {
-			source := path.Join(localDependenciesDirectory, dependencyJar)
-			destination := path.Join(localAppDirectory, dependencyJar)
+			source := path.Join(dependenciesDir, dependencyJar)
+			destination := path.Join(appDir, dependencyJar)
 			if _, err = util.CopyFile(source, destination); err != nil {
 				return err
 			}
