@@ -28,7 +28,7 @@ KUSTOMIZE_VERSION := v4.1.2
 OPM_VERSION := v1.21.0
 BASE_IMAGE := docker.io/adoptopenjdk/openjdk11:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
-IMAGE_NAME := docker.io/apache/camel-k
+IMAGE_NAME ?= docker.io/apache/camel-k
 
 #
 # Situations when user wants to override
@@ -298,6 +298,9 @@ ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
 else
 	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
 endif
+ifeq ($(shell uname -m), arm64)
+	GOOS=linux GOARCH=arm64 go build $(GOFLAGS) -o kamel.linux.arm ./cmd/kamel/*.go
+endif
 
 build-resources:
 	./script/get_catalog.sh $(RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
@@ -398,7 +401,7 @@ ifeq ($(shell uname -m), aarch64)
 	docker buildx build --platform=linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
 endif
 ifeq ($(shell uname -m), arm64)
-	docker buildx build --platform=linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
+	docker buildx build --platform=linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
 endif
 
 images-dev: build kamel-overlay maven-overlay bundle-kamelets package-artifacts
@@ -416,7 +419,8 @@ ifeq ($(shell uname -m), aarch64)
 	docker buildx build --platform=linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
 endif
 ifeq ($(shell uname -m), arm64)
-	docker buildx build --platform=linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
+	mv kamel.linux.arm build/_output/bin/kamel
+	docker buildx build --platform=linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
 endif
 
 images-push:
