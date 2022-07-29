@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -71,7 +72,12 @@ type localInspectCmdOptions struct {
 }
 
 func (o *localInspectCmdOptions) validate(args []string) error {
-	if err := validateIntegrationFiles(args); err != nil {
+	// If no source files have been provided there is nothing to inspect.
+	if len(args) == 0 {
+		return errors.New("no integration files have been provided")
+	}
+
+	if err := validateFiles(args); err != nil {
 		return err
 	}
 
@@ -92,8 +98,7 @@ func (o *localInspectCmdOptions) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	err = outputDependencies(dependencies, o.OutputFormat, cmd)
-	if err != nil {
+	if err = outputDependencies(dependencies, o.OutputFormat, cmd); err != nil {
 		return err
 	}
 
