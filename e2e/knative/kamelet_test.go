@@ -41,7 +41,7 @@ import (
 func TestKameletChange(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
-		Expect(CreateTimerKamelet(ns, "timer-source")()).To(Succeed())
+
 		Expect(CreateKnativeChannel(ns, "messages")()).To(Succeed())
 
 		Expect(Kamel("run", "-n", ns, "files/display.groovy", "-w").Execute()).To(Succeed())
