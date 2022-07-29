@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package local
 
 import (
 	"io/ioutil"
@@ -30,8 +30,8 @@ import (
 // By default, a temporary folder will be used.
 var MavenWorkingDirectory = ""
 
-// createMavenWorkingDirectory creates local Maven working directory.
-func createMavenWorkingDirectory() error {
+// CreateMavenWorkingDirectory creates local Maven working directory.
+func CreateMavenWorkingDirectory() error {
 	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "maven-")
 	if err != nil {
 		return err
@@ -43,8 +43,8 @@ func createMavenWorkingDirectory() error {
 	return nil
 }
 
-// deleteMavenWorkingDirectory removes local Maven working directory.
-func deleteMavenWorkingDirectory() error {
+// DeleteMavenWorkingDirectory removes local Maven working directory.
+func DeleteMavenWorkingDirectory() error {
 	return os.RemoveAll(MavenWorkingDirectory)
 }
 
@@ -73,24 +73,24 @@ func createLocalDependenciesDirectory() error {
 	return nil
 }
 
-// getLocalPropertiesDir returns <mavenWorkingDirectory>/properties.
-func getLocalPropertiesDir() string {
+// GetLocalPropertiesDir returns <mavenWorkingDirectory>/properties.
+func GetLocalPropertiesDir() string {
 	return path.Join(MavenWorkingDirectory, util.DefaultPropertiesDirectoryName)
 }
 
-func createLocalPropertiesDirectory() error {
+func CreateLocalPropertiesDirectory() error {
 	// Do not create a directory unless the maven directory contains a valid value.
 	if MavenWorkingDirectory == "" {
 		return nil
 	}
 
-	directoryExists, err := util.DirectoryExists(getLocalPropertiesDir())
+	directoryExists, err := util.DirectoryExists(GetLocalPropertiesDir())
 	if err != nil {
 		return err
 	}
 
 	if !directoryExists {
-		err := os.MkdirAll(getLocalPropertiesDir(), 0o700)
+		err := os.MkdirAll(GetLocalPropertiesDir(), 0o700)
 		if err != nil {
 			return err
 		}
@@ -199,38 +199,38 @@ func createLocalLibDirectory() error {
 	return nil
 }
 
-func getCustomDependenciesDir(dir string) string {
+func GetCustomDependenciesDir(dir string) string {
 	return path.Join(dir, util.DefaultDependenciesDirectoryName)
 }
 
-func getCustomPropertiesDir(dir string) string {
+func GetCustomPropertiesDir(dir string) string {
 	return path.Join(dir, util.DefaultPropertiesDirectoryName)
 }
 
-func getCustomRoutesDir(dir string) string {
+func GetCustomRoutesDir(dir string) string {
 	return path.Join(dir, util.DefaultRoutesDirectoryName)
 }
 
-func getCustomQuarkusDir(dir string) string {
+func GetCustomQuarkusDir(dir string) string {
 	parentDir := path.Dir(strings.TrimSuffix(dir, "/"))
 	return path.Join(parentDir, util.CustomQuarkusDirectoryName)
 }
 
-func getCustomLibDir(dir string) string {
+func GetCustomLibDir(dir string) string {
 	parentDir := path.Dir(strings.TrimSuffix(dir, "/"))
 	return path.Join(parentDir, util.CustomLibDirectoryName)
 }
 
-func getCustomAppDir(dir string) string {
+func GetCustomAppDir(dir string) string {
 	parentDir := path.Dir(strings.TrimSuffix(dir, "/"))
 	return path.Join(parentDir, "app")
 }
 
-func deleteLocalIntegrationDirs(dir string) error {
+func DeleteLocalIntegrationDirs(dir string) error {
 	dirs := []string{
-		getCustomQuarkusDir(dir),
-		getCustomLibDir(dir),
-		getCustomAppDir(dir),
+		GetCustomQuarkusDir(dir),
+		GetCustomLibDir(dir),
+		GetCustomAppDir(dir),
 	}
 
 	for _, dir := range dirs {

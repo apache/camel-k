@@ -27,6 +27,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/pkg/cmd/source"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/test"
@@ -463,7 +464,7 @@ func TestRunBinaryResource(t *testing.T) {
 
 func TestRunBinaryCompressedResource(t *testing.T) {
 	data := []byte{1, 2, 3, 4}
-	base64Compressed, _ := compressToString(data)
+	base64Compressed, _ := source.CompressToString(data)
 	binaryResourceSpec, err := binaryOrTextResource("file.ext", data, "application/octet-stream", true, v1.ResourceTypeData, "")
 	assert.Nil(t, err)
 	assert.Equal(t, base64Compressed, binaryResourceSpec.Content)
@@ -485,7 +486,7 @@ func TestRunTextResource(t *testing.T) {
 
 func TestRunTextCompressedResource(t *testing.T) {
 	data := []byte("hello horld")
-	base64Compressed, _ := compressToString(data)
+	base64Compressed, _ := source.CompressToString(data)
 	textResourceSpec, err := binaryOrTextResource("file.ext", []byte("hello horld"), "text/plain", true, v1.ResourceTypeData, "")
 	assert.Nil(t, err)
 	assert.Equal(t, base64Compressed, textResourceSpec.Content)

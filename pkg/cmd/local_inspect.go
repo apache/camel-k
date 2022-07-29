@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/apache/camel-k/pkg/cmd/local"
 	"github.com/spf13/cobra"
 )
 
@@ -75,11 +76,11 @@ func (o *localInspectCmdOptions) validate(args []string) error {
 		return errors.New("no integration files have been provided")
 	}
 
-	if err := validateFiles(args); err != nil {
+	if err := local.ValidateFiles(args); err != nil {
 		return err
 	}
 
-	if err := validateDependencies(o.Dependencies); err != nil {
+	if err := local.ValidateDependencies(o.Dependencies); err != nil {
 		return err
 	}
 
@@ -87,16 +88,16 @@ func (o *localInspectCmdOptions) validate(args []string) error {
 }
 
 func (o *localInspectCmdOptions) init() error {
-	return createMavenWorkingDirectory()
+	return local.CreateMavenWorkingDirectory()
 }
 
 func (o *localInspectCmdOptions) run(cmd *cobra.Command, args []string) error {
-	dependencies, err := getDependencies(o.Context, args, o.Dependencies, o.MavenRepositories, o.AllDependencies)
+	dependencies, err := local.GetDependencies(o.Context, args, o.Dependencies, o.MavenRepositories, o.AllDependencies)
 	if err != nil {
 		return err
 	}
 
-	if err = outputDependencies(dependencies, o.OutputFormat, cmd); err != nil {
+	if err = local.OutputDependencies(dependencies, o.OutputFormat, cmd); err != nil {
 		return err
 	}
 
@@ -104,5 +105,5 @@ func (o *localInspectCmdOptions) run(cmd *cobra.Command, args []string) error {
 }
 
 func (o *localInspectCmdOptions) deinit() error {
-	return deleteMavenWorkingDirectory()
+	return local.DeleteMavenWorkingDirectory()
 }

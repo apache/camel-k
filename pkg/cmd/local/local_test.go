@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package local
 
 import (
 	"io/ioutil"
@@ -37,7 +37,7 @@ func TestValidatePropertyFiles_ShouldSucceed(t *testing.T) {
 	assert.Nil(t, ioutil.WriteFile(tmpFile1.Name(), []byte("key=value"), 0o400))
 
 	inputValues := []string{tmpFile1.Name()}
-	err = validatePropertyFiles(inputValues)
+	err = ValidatePropertyFiles(inputValues)
 
 	assert.Nil(t, err)
 }
@@ -53,7 +53,7 @@ func TestValidatePropertyFiles_ShouldFailNotAPropertiesFile(t *testing.T) {
 	assert.Nil(t, ioutil.WriteFile(tmpFile1.Name(), []byte("key=value"), 0o400))
 
 	inputValues := []string{tmpFile1.Name()}
-	err = validatePropertyFiles(inputValues)
+	err = ValidatePropertyFiles(inputValues)
 
 	assert.NotNil(t, err)
 	assert.True(t, strings.HasPrefix(err.Error(), "supported property files must have a .properties extension"))
@@ -61,7 +61,7 @@ func TestValidatePropertyFiles_ShouldFailNotAPropertiesFile(t *testing.T) {
 
 func TestValidatePropertyFiles_ShouldFailNotFound(t *testing.T) {
 	inputValues := []string{"/tmp/not-found.properties"}
-	err := validatePropertyFiles(inputValues)
+	err := ValidatePropertyFiles(inputValues)
 
 	assert.NotNil(t, err)
 	assert.True(t, strings.HasPrefix(err.Error(), "unable to access property file"))

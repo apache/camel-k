@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package local
 
 import (
 	"context"
@@ -35,8 +35,8 @@ import (
 
 // Local Docker file system management functions.
 
-// createDockerBaseWorkingDirectory creates local docker base directory.
-func createDockerBaseWorkingDirectory() error {
+// CreateDockerBaseWorkingDirectory creates local docker base directory.
+func CreateDockerBaseWorkingDirectory() error {
 	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "docker-base-")
 	if err != nil {
 		return err
@@ -48,13 +48,13 @@ func createDockerBaseWorkingDirectory() error {
 	return nil
 }
 
-// deleteDockerBaseWorkingDirectory removes directory used for computing the base dependencies.
-func deleteDockerBaseWorkingDirectory() error {
+// DeleteDockerBaseWorkingDirectory removes directory used for computing the base dependencies.
+func DeleteDockerBaseWorkingDirectory() error {
 	return os.RemoveAll(docker.BaseWorkingDirectory)
 }
 
-// createDockerWorkingDirectory creates local docker directory.
-func createDockerWorkingDirectory() error {
+// CreateDockerWorkingDirectory creates local docker directory.
+func CreateDockerWorkingDirectory() error {
 	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "docker-")
 	if err != nil {
 		return err
@@ -66,18 +66,18 @@ func createDockerWorkingDirectory() error {
 	return nil
 }
 
-// deleteDockerWorkingDirectory removes directory used for computing the integration dependencies.
-func deleteDockerWorkingDirectory() error {
+// DeleteDockerWorkingDirectory removes directory used for computing the integration dependencies.
+func DeleteDockerWorkingDirectory() error {
 	return os.RemoveAll(docker.IntegrationWorkingDirectory)
 }
 
-func setDockerNetworkName(networkName string) {
+func SetDockerNetworkName(networkName string) {
 	if networkName != "" {
 		docker.NetworkName = networkName
 	}
 }
 
-func setDockerEnvVars(envVars []string) {
+func SetDockerEnvVars(envVars []string) {
 	if len(envVars) > 0 {
 		util.CLIEnvVars = envVars
 	}
@@ -132,7 +132,7 @@ func setupDockerRegistry(containerRegistry string, image string, justBaseImage b
 	return nil
 }
 
-func createAndBuildIntegrationImage(ctx context.Context, containerRegistry string, justBaseImage bool, image string,
+func CreateAndBuildIntegrationImage(ctx context.Context, containerRegistry string, justBaseImage bool, image string,
 	propertyFiles []string, dependencies []string, routes []string, startsFromLocalFolder bool,
 	stdout, stderr io.Writer) error {
 	if err := setupDockerRegistry(containerRegistry, image, justBaseImage); err != nil {
@@ -213,7 +213,7 @@ func buildIntegrationImage(ctx context.Context, image string, stdout, stderr io.
 	return nil
 }
 
-func runIntegrationImage(ctx context.Context, image string, stdout, stderr io.Writer) error {
+func RunIntegrationImage(ctx context.Context, image string, stdout, stderr io.Writer) error {
 	// Stop the child process before exiting
 	dockerCtx, cancel := context.WithCancel(ctx)
 	cs := make(chan os.Signal, 1)
@@ -259,7 +259,7 @@ func getContainerIntegrationRunCommand(ctx context.Context, properties []string,
 		docker.GetContainerPropertiesDir(), stdout, stderr, false)
 }
 
-func runLocalIntegration(ctx context.Context, properties []string, dependencies []string, routes []string,
+func RunLocalIntegration(ctx context.Context, properties []string, dependencies []string, routes []string,
 	propertiesDir string, stdout, stderr io.Writer) error {
 	cmd, err := assembleIntegrationRunCommand(ctx, properties, dependencies, routes,
 		propertiesDir, stdout, stderr, true)

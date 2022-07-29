@@ -18,7 +18,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package source
 
 import (
 	"testing"
@@ -27,8 +27,8 @@ import (
 )
 
 func TestCorrectFileValuesButNotFound(t *testing.T) {
-	value1, err1 := isLocalAndFileExists("c:\\test")
-	value2, err2 := isLocalAndFileExists("path/to/file")
+	value1, err1 := IsLocalAndFileExists("c:\\test")
+	value2, err2 := IsLocalAndFileExists("path/to/file")
 
 	// they are all not found, but it must not panic
 	assert.Nil(t, err1)
@@ -38,17 +38,17 @@ func TestCorrectFileValuesButNotFound(t *testing.T) {
 }
 
 func TestPermissionDenied(t *testing.T) {
-	value, err := isLocalAndFileExists("/root/test")
+	value, err := IsLocalAndFileExists("/root/test")
 	// must not panic because a permission error
 	assert.NotNil(t, err)
 	assert.False(t, value)
 }
 
 func TestSupportedScheme(t *testing.T) {
-	gistValue, err1 := isLocalAndFileExists("gist:some/gist/resource")
-	githubValue, err2 := isLocalAndFileExists("github:some/github/resource")
-	httpValue, err3 := isLocalAndFileExists("http://some/http/resource")
-	httpsValue, err4 := isLocalAndFileExists("https://some/https/resource")
+	gistValue, err1 := IsLocalAndFileExists("gist:some/gist/resource")
+	githubValue, err2 := IsLocalAndFileExists("github:some/github/resource")
+	httpValue, err3 := IsLocalAndFileExists("http://some/http/resource")
+	httpsValue, err4 := IsLocalAndFileExists("https://some/https/resource")
 
 	assert.Nil(t, err1)
 	assert.False(t, gistValue)
@@ -61,7 +61,7 @@ func TestSupportedScheme(t *testing.T) {
 }
 
 func TestUnSupportedScheme(t *testing.T) {
-	value, err := isLocalAndFileExists("bad_scheme:some/bad/resource")
+	value, err := IsLocalAndFileExists("bad_scheme:some/bad/resource")
 	// must not report an error
 	assert.Nil(t, err)
 	assert.False(t, value)
