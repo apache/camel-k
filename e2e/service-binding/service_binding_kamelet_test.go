@@ -58,8 +58,6 @@ func TestKameletServiceBindingTrait(t *testing.T) {
 		serviceRef := fmt.Sprintf("%s:%s/%s", service.TypeMeta.Kind, ns, service.ObjectMeta.Name)
 		Expect(TestClient().Create(TestContext, service)).To(Succeed())
 
-		Expect(CreateTimerKamelet(ns, "timer-source")()).To(Succeed())
-
 		Expect(Kamel("bind", "timer-source", "log:info",
 			"-p", "source.message=Hello+world",
 			"--connect", serviceRef, "-n", ns).
