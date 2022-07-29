@@ -23,6 +23,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -72,14 +73,12 @@ func newCmdLocalRun(localCmdOptions *LocalCmdOptions) (*cobra.Command, *localRun
 	}
 
 	cmd.Flags().Bool("containerize", false, "Run integration in a local container.")
-	cmd.Flags().String("image", "", "Full path to integration image including registry.")
+	cmd.Flags().String("image", "", usageImage)
 	cmd.Flags().String("network", "", "Custom network name to be used by the underlying Docker command.")
-	cmd.Flags().String("integration-directory", "",
-		"Directory which holds the locally built integration and is the result of a local build action.")
+	cmd.Flags().String("integration-directory", "", usageIntegrationDirectory)
 	cmd.Flags().StringArrayP("env", "e", nil, "Flag to specify an environment variable [--env VARIABLE=value].")
-	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
-	cmd.Flags().StringArrayP("property", "p", nil, "Add a Camel property to the integration.")
-	cmd.Flags().StringArray("maven-repository", nil, "Use a maven repository")
+	cmd.Flags().StringArray("property-file", nil, usagePropertyFile)
+	cmd.Flags().StringArrayP("property", "p", nil, usageProperty)
 
 	return &cmd, &options
 }
@@ -93,21 +92,21 @@ type localRunCmdOptions struct {
 	EnvironmentVariables []string `mapstructure:"envs"`
 	PropertyFiles        []string `mapstructure:"property-files"`
 	Properties           []string `mapstructure:"properties"`
-	MavenRepositories    []string `mapstructure:"maven-repositories"`
 }
 
 func (o *localRunCmdOptions) validate(args []string) error {
-	// Validate integration files when no image is provided and we are
-	// not running an already locally-built integration.
-	if o.Image == "" && o.IntegrationDirectory == "" {
-		if len(args) == 0 {
-			return errors.New("no integration files have been provided")
-		}
+	if len(args) == 0 && o.IntegrationDirectory == "" && o.Image == "" {
+		return errors.New("either integration files, --image, or --integration-directory must be provided")
+	}
 
-		// Validate integration files.
-		if err := validateFiles(args); err != nil {
-			return err
-		}
+	// If containerize is set then docker image name must be set.
+	if o.Containerize && o.Image == "" {
+		return errors.New("--containerize requires --image")
+	}
+
+	// Validate integration files.
+	if err := validateFiles(args); err != nil {
+		return err
 	}
 
 	// Validate additional dependencies specified by the user.
@@ -120,9 +119,12 @@ func (o *localRunCmdOptions) validate(args []string) error {
 		return err
 	}
 
-	// If containerize is set then docker image name must be set.
-	if o.Containerize && o.Image == "" {
-		return errors.New("containerization is active but no image name has been provided")
+	if o.IntegrationDirectory != "" {
+		if ok, err := util.DirectoryExists(o.IntegrationDirectory); err != nil {
+			return err
+		} else if !ok {
+			return errors.Errorf("integration directory %q does not exist", o.IntegrationDirectory)
+		}
 	}
 
 	return nil
@@ -133,14 +135,11 @@ func (o *localRunCmdOptions) init() error {
 		if err := createDockerBaseWorkingDirectory(); err != nil {
 			return err
 		}
-
 		if err := createDockerWorkingDirectory(); err != nil {
 			return err
 		}
 	}
-
 	setDockerNetworkName(o.Network)
-
 	setDockerEnvVars(o.EnvironmentVariables)
 
 	return createMavenWorkingDirectory()
@@ -167,14 +166,13 @@ func (o *localRunCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if o.Containerize {
-		// If this is a containerized local run, create, build and run the container image.
+		// Create, build, and run the container image.
 		if err := createAndBuildIntegrationImage(o.Context, "", false, o.Image,
 			propertyFiles, dependencies, routes, o.IntegrationDirectory != "",
 			cmd.OutOrStdout(), cmd.ErrOrStderr()); err != nil {
 			return err
 		}
 
-		// Run integration image.
 		return runIntegrationImage(o.Context, o.Image, cmd.OutOrStdout(), cmd.ErrOrStderr())
 	}
 

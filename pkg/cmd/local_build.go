@@ -37,7 +37,7 @@ func newCmdLocalBuild(localCmdOptions *LocalCmdOptions) (*cobra.Command, *localB
 		Long:    `Build integration images locally for containerized integrations.`,
 		PreRunE: decode(&options),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := options.validate(args); err != nil {
+			if err := options.validate(cmd, args); err != nil {
 				return err
 			}
 			if err := options.init(args); err != nil {
@@ -57,16 +57,15 @@ func newCmdLocalBuild(localCmdOptions *LocalCmdOptions) (*cobra.Command, *localB
 		},
 	}
 
-	cmd.Flags().Bool("base-image", false, "Build base image used as a starting point for any integration.")
+	cmd.Flags().Bool("base-image", false, "Build base image used as a starting point for any integration")
 	cmd.Flags().Bool("dependencies-only", false,
 		"Only output the integration dependencies. The integration-directory flag must be set.")
 	cmd.Flags().String("container-registry", "",
 		"Registry that holds intermediate images. This flag should only be used in conjunction with the base-image flag.")
-	cmd.Flags().String("image", "", "Full path to integration image including registry.")
-	cmd.Flags().String("integration-directory", "", "Directory to hold local integration files.")
-	cmd.Flags().StringArray("property-file", nil, "Add a property file to the integration.")
-	cmd.Flags().StringArrayP("property", "p", nil, "Add a Camel property to the integration.")
-	cmd.Flags().StringArray("maven-repository", nil, "Use a maven repository")
+	cmd.Flags().String("image", "", usageImage)
+	cmd.Flags().String("integration-directory", "", usageIntegrationDirectory)
+	cmd.Flags().StringArray("property-file", nil, usagePropertyFile)
+	cmd.Flags().StringArrayP("property", "p", nil, usageProperty)
 
 	return &cmd, &options
 }
@@ -80,15 +79,68 @@ type localBuildCmdOptions struct {
 	IntegrationDirectory string   `mapstructure:"integration-directory"`
 	Properties           []string `mapstructure:"properties"`
 	PropertyFiles        []string `mapstructure:"property-files"`
-	MavenRepositories    []string `mapstructure:"maven-repositories"`
 }
 
-func (o *localBuildCmdOptions) validate(args []string) error {
-	// Validate integration files.
+func (o *localBuildCmdOptions) validate(cmd *cobra.Command, args []string) error {
+	if o.BaseImage {
+		return o.validateBaseImageMode(cmd, args)
+	}
+
+	return o.validateIntegrationMode(args)
+}
+
+func (o *localBuildCmdOptions) validateBaseImageMode(cmd *cobra.Command, args []string) error {
+	// Cannot have both integration files and the base image construction enabled.
 	if len(args) > 0 {
-		if err := validateFiles(args); err != nil {
-			return err
+		return errors.New("cannot use --base-image with integration files")
+	}
+
+	// Docker registry must be set.
+	if o.ContainerRegistry == "" {
+		return errors.New("--base-image requires --container-registry")
+	}
+
+	// If an integration directory is provided then no base image containerization can be enabled.
+	if o.IntegrationDirectory != "" {
+		return errors.New("cannot use --integration-directory with --base-image")
+	}
+
+	if o.DependenciesOnly {
+		return errors.New("cannot use --dependencies-only with --base-image")
+	}
+
+	if len(o.Dependencies) > 0 || len(o.PropertyFiles) > 0 || len(o.Properties) > 0 {
+		fmt.Fprintln(cmd.OutOrStdout(),
+			"Warning: --dependency, --property, and --property-file are ignored in --base-image mode")
+	}
+
+	return nil
+}
+
+func (o *localBuildCmdOptions) validateIntegrationMode(args []string) error {
+	if len(args) == 0 {
+		if o.IntegrationDirectory == "" {
+			return errors.New("either integration files, --integration-directory, or --base-image must be provided")
 		}
+	} else {
+		if o.IntegrationDirectory == "" && o.Image == "" {
+			return errors.New("either --integration-directory or --image must be provided with integration files")
+		}
+	}
+
+	if o.ContainerRegistry != "" {
+		// ContainerRegistry should only be specified when building the base image.
+		return errors.New("--container-registry must be used with --base-image")
+	}
+
+	// The integration directory must be set when only outputting dependencies.
+	if o.DependenciesOnly && o.IntegrationDirectory == "" {
+		return errors.New("--dependencies-only requires --integration-directory")
+	}
+
+	// Validate integration files.
+	if err := validateFiles(args); err != nil {
+		return err
 	}
 
 	// Validate additional dependencies specified by the user.
@@ -99,31 +151,6 @@ func (o *localBuildCmdOptions) validate(args []string) error {
 	// Validate properties file.
 	if err := validateFiles(o.PropertyFiles); err != nil {
 		return err
-	}
-
-	if o.BaseImage {
-		// Cannot have both integration files and the base image construction enabled.
-		if len(args) > 0 {
-			return errors.New("integration files have been provided and the base image construction is enabled")
-		}
-
-		// Docker registry must be set.
-		if o.ContainerRegistry == "" {
-			return errors.New("base image cannot be built because container registry has not been provided")
-		}
-
-		// If an integration directory is provided then no base image containerization can be enabled.
-		if o.IntegrationDirectory != "" {
-			return errors.New("base image construction does not use integration files")
-		}
-	} else if o.ContainerRegistry != "" {
-		// ContainerRegistry should only be specified when building the base image.
-		return errors.New("cannot specify container registry unless a base integration image is being built")
-	}
-
-	// The integration directory must be set when only outputting dependencies.
-	if o.DependenciesOnly && o.IntegrationDirectory == "" {
-		return errors.New("to output dependencies the integration directory flag must be set")
 	}
 
 	return nil
@@ -206,6 +233,8 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 			// The only case in which we should not execute the integration image creation is when we want to
 			// just output the files that comprise the integration locally.
 			if o.Image == "" {
+				fmt.Fprintf(cmd.OutOrStdout(),
+					"Integration directory generated: %s\n", o.IntegrationDirectory)
 				return nil
 			}
 		}

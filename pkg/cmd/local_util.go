@@ -50,13 +50,13 @@ func getDependencies(ctx context.Context, args []string, additionalDependencies 
 	// Fetch existing catalog or create new one if one does not already exist
 	catalog, err := createCamelCatalog(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to create Camel catalog")
 	}
 
 	// Get top-level dependencies
 	dependencies, err := getTopLevelDependencies(ctx, catalog, args)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get top-level dependencies")
 	}
 
 	// Add additional user-provided dependencies
@@ -72,9 +72,10 @@ func getDependencies(ctx context.Context, args []string, additionalDependencies 
 
 		dependencies, err = getTransitiveDependencies(ctx, catalog, dependencies, repositories)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "failed to compute transitive dependencies")
 		}
 	}
+
 	return dependencies, nil
 }
 
