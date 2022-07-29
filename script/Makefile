@@ -397,6 +397,9 @@ endif
 ifeq ($(shell uname -m), aarch64)
 	docker buildx build --platform=linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
 endif
+ifeq ($(shell uname -m), arm64)
+	docker buildx build --platform=linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
+endif
 
 images-dev: build kamel-overlay maven-overlay bundle-kamelets package-artifacts
 	@echo "####### Building Camel K operator container development image..."
@@ -410,6 +413,9 @@ ifeq ($(shell uname -m), x86_x64)
 	docker buildx build --platform=linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
 endif
 ifeq ($(shell uname -m), aarch64)
+	docker buildx build --platform=linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
+endif
+ifeq ($(shell uname -m), arm64)
 	docker buildx build --platform=linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
 endif
 
