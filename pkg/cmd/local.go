@@ -24,6 +24,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Usage descritions of common flags that are shared across some of the subcommands.
+const (
+	usageImage                = `Full path to integration image including registry, e.g. "docker.io/user/app"`
+	usageIntegrationDirectory = "Directory to hold local integration files"
+	usagePropertyFile         = "Add a property file to the integration"
+	usageProperty             = "Add a Camel property to the integration"
+)
+
 // newCmdLocal -- Add local kamel subcommand with several other subcommands of its own.
 func newCmdLocal(rootCmdOptions *RootCmdOptions) (*cobra.Command, *LocalCmdOptions) {
 	options := LocalCmdOptions{
@@ -41,6 +49,8 @@ func newCmdLocal(rootCmdOptions *RootCmdOptions) (*cobra.Command, *LocalCmdOptio
 	}
 
 	cmd.PersistentFlags().StringArrayVarP(&options.Dependencies, "dependency", "d", nil, usageDependency)
+	cmd.PersistentFlags().StringArrayVar(&options.MavenRepositories, "maven-repository", nil,
+		"Use a maven repository")
 
 	// hidden flags for compatibility with kamel run
 	cmd.PersistentFlags().StringArrayVarP(&options.Traits, "trait", "t", nil, "")
@@ -57,8 +67,9 @@ func newCmdLocal(rootCmdOptions *RootCmdOptions) (*cobra.Command, *LocalCmdOptio
 
 type LocalCmdOptions struct {
 	*RootCmdOptions
-	Dependencies []string `mapstructure:"dependencies"`
-	Traits       []string `mapstructure:"traits"`
+	Dependencies      []string `mapstructure:"dependencies"`
+	MavenRepositories []string `mapstructure:"maven-repositories"`
+	Traits            []string `mapstructure:"traits"`
 }
 
 func (o *LocalCmdOptions) persistentPreRun(cmd *cobra.Command, args []string) error {
