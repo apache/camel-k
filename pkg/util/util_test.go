@@ -32,5 +32,15 @@ func TestStringContainsPrefix(t *testing.T) {
 func TestRandomString(t *testing.T) {
 	assert.Equal(t, 10, len(RandomString(10)))
 	assert.NotEqual(t, RandomString(10), RandomString(10))
+}
 
+func TestSubstringFrom(t *testing.T) {
+	assert.Equal(t, "/bbb/ccc", SubstringFrom("aaa/bbb/ccc", "/"))
+	assert.Empty(t, SubstringFrom("aaa/bbb/ccc", "?"))
+}
+
+func TestSubstringBefore(t *testing.T) {
+	assert.Equal(t, "aaa/bbb", SubstringBefore("aaa/bbb/ccc", "/"))
+	assert.Equal(t, "aaa/bbb", SubstringBefore("aaa/bbb?ccc=ddd", "?"))
+	assert.Empty(t, SubstringBefore("aaa/bbb/ccc", "?"))
 }

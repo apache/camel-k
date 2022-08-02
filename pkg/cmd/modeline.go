@@ -196,7 +196,7 @@ func extractModelineOptions(ctx context.Context, sources []string, cmd *cobra.Co
 
 	resolvedSources, err := ResolveSources(ctx, sources, false, cmd)
 	if err != nil {
-		return opts, errors.Wrap(err, "cannot read sources")
+		return opts, errors.Wrap(err, "failed to resolve sources")
 	}
 
 	for _, resolvedSource := range resolvedSources {
@@ -217,7 +217,7 @@ func extractModelineOptions(ctx context.Context, sources []string, cmd *cobra.Co
 }
 
 func extractModelineOptionsFromSource(resolvedSource Source) ([]modeline.Option, error) {
-	ops, err := modeline.Parse(resolvedSource.Location, resolvedSource.Content)
+	ops, err := modeline.Parse(resolvedSource.Name, resolvedSource.Content)
 	if err != nil {
 		return ops, errors.Wrapf(err, "cannot process file %s", resolvedSource.Location)
 	}
