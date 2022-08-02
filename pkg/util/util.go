@@ -199,6 +199,15 @@ func SubstringFrom(s string, substr string) string {
 	return ""
 }
 
+func SubstringBefore(s string, substr string) string {
+	index := strings.LastIndex(s, substr)
+	if index != -1 {
+		return s[:index]
+	}
+
+	return ""
+}
+
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 const (

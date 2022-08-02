@@ -191,8 +191,13 @@ func resolveLocalSource(location string, compress bool) (Source, error) {
 
 // resolveSource resolves a source using the content provider function.
 func resolveSource(location string, compress bool, loadContent func() ([]byte, error)) (Source, error) {
+	// strip query part from location if any
+	locPath := util.SubstringBefore(location, "?")
+	if locPath == "" {
+		locPath = location
+	}
 	answer := Source{
-		Name:     path.Base(location),
+		Name:     path.Base(locPath),
 		Origin:   location,
 		Location: location,
 		Compress: compress,
