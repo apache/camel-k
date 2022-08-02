@@ -133,8 +133,13 @@ func ResolveSources(ctx context.Context, locations []string, compress bool) ([]S
 					sources = append(sources, answer)
 				}
 			case u.Scheme == githubScheme:
+				// strip query part from location if any
+				locPath := util.SubstringBefore(location, "?")
+				if locPath == "" {
+					locPath = location
+				}
 				answer := Source{
-					Name:     path.Base(location),
+					Name:     path.Base(locPath),
 					Origin:   location,
 					Location: location,
 					Compress: compress,
