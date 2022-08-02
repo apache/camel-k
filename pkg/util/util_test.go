@@ -28,3 +28,14 @@ func TestStringContainsPrefix(t *testing.T) {
 	assert.True(t, StringContainsPrefix(args, "--operator-image="))
 	assert.False(t, StringContainsPrefix(args, "--olm"))
 }
+
+func TestSubstringFrom(t *testing.T) {
+	assert.Equal(t, "/bbb/ccc", SubstringFrom("aaa/bbb/ccc", "/"))
+	assert.Empty(t, SubstringFrom("aaa/bbb/ccc", "?"))
+}
+
+func TestSubstringBefore(t *testing.T) {
+	assert.Equal(t, "aaa/bbb", SubstringBefore("aaa/bbb/ccc", "/"))
+	assert.Equal(t, "aaa/bbb", SubstringBefore("aaa/bbb?ccc=ddd", "?"))
+	assert.Empty(t, SubstringBefore("aaa/bbb/ccc", "?"))
+}
