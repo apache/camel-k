@@ -127,11 +127,11 @@ func integrationKitEnqueueRequestsFromMapFunc(c client.Client, kit *v1.Integrati
 
 	for i := range list.Items {
 		integration := &list.Items[i]
-		log.Debug("Integration Controller: Assessing integration", "integration", integration.Name, "namespace", integration.Namespace)
+		Log.Debug("Integration Controller: Assessing integration", "integration", integration.Name, "namespace", integration.Namespace)
 
 		match, err := sameOrMatch(kit, integration)
 		if err != nil {
-			log.Errorf(err, "Error matching integration %q with kit %q", integration.Name, kit.Name)
+			Log.ForIntegration(integration).Errorf(err, "Error matching integration %q with kit %q", integration.Name, kit.Name)
 			continue
 		}
 		if !match {

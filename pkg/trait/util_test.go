@@ -58,7 +58,7 @@ func TestToTraitMap(t *testing.T) {
 			}),
 		},
 	}
-	expected := Unstructured{
+	expected := Options{
 		"container": {
 			"enabled":         true,
 			"auto":            false,

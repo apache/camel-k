@@ -189,7 +189,7 @@ func kitMatches(kit1 *v1.IntegrationKit, kit2 *v1.IntegrationKit) (bool, error) 
 	return true, nil
 }
 
-func hasMatchingTraits(traitMap trait.Unstructured, kitTraitMap trait.Unstructured) (bool, error) {
+func hasMatchingTraits(traitMap trait.Options, kitTraitMap trait.Options) (bool, error) {
 	catalog := trait.NewCatalog(nil)
 
 	for _, t := range catalog.AllTraits() {
