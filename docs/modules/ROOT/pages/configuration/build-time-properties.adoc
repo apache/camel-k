@@ -18,7 +18,7 @@ from('timer:build-property')
 In order to give a value to the `quarkus.application.name` property you can pass it using the command line with the `--build-property` flag:
 
 ----
-kamel run --build-property=quarkus.application.name=my-super-application build-property-route.groovy --dev
+kamel run --build-property=quarkus.application.name=my-super-application build-property-route.groovy
 ----
 
 You can provide more than one single `build-property` at once by just adding the flag repeatedly (ie, `--build-property=prop1=val1 --build-property=prop2=val2 ...`)
@@ -26,7 +26,7 @@ You can provide more than one single `build-property` at once by just adding the
 [[build-time-props-file]]
 == Property File
 
-Repeating the property flag when you have many *build time configuration* may be cumbersome. Usually you deal with property files instead. You will be able to use the _file_ syntax available for `--build-property` flag. Here, as an example you have a property files with 2 `Quarkus` properties:
+Repeating the `--build-property` flag when you have many *build time configuration* may be cumbersome. Usually you deal with property files instead. You will be able to use the _file_ syntax available for `--build-property` flag. Here, as an example you have a property file with 2 `Quarkus` properties:
 
 [source,properties]
 .quarkus.properties
@@ -45,7 +45,7 @@ from('timer:build-property')
 The `quarkus.banner.enabled` is configured to show the banner during the `Integration` startup. Let's use `--build-property` flag in conjunction with file:
 
 ----
-kamel run --build-property=file:quarkus.properties build-property-file-route.groovy --dev
+kamel run --build-property=file:quarkus.properties build-property-route.groovy
 ----
 
 The property file is parsed and its properties configured on the `Integration`. As soon as the application starts, you will see the log with the expected configuration.
