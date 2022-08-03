@@ -67,7 +67,7 @@ To package an integration, use `kamel kit create` to create an `IntegrationKit` 
 [[running-locally-build-integration]]
 === Building an integration
 
-To build an integration image locally, you at lease need to specify an image name with the `--image` option in addition to the integration files you want to build.
+To build an integration image locally, you at least need to specify an image name with the `--image` option in addition to the integration files you want to build.
 
 [source,console]
 ----
