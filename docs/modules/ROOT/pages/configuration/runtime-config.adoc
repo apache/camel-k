@@ -3,14 +3,14 @@
 
 When you develop an integration with `Camel K` there are many ways you can provide a *configuration* resource to the runtime `Integration`. The most familiar way is to handle local file, but since we are dealing with `Kubernetes` you may need also to use `Configmap` or `Secret`. The `kamel run` command is provided with a `--config` flag that help you setting any configuration resource your `Integration` need.
 
-The *runtime configuration* are expected to be `ÙTF-8` resources as they are processed by runtime `Camel Context` and tried to be parsed as property files. These resources are materialized as files in a well known path in the `Ìntegration` `Pod`. They are also made available on the classpath in order to ease their usage directly from the `Route`. If you need to provide a non `UTF-8` (ie, a binary resource) you may look for `--resource` flag instead.
+The *runtime configuration* files are expected to be encoded in `UTF-8` as they are processed by runtime `Camel Context` and parsed as property files. These resources are materialized as files in a well known path in the `Integration` `Pod`. They are also made available on the classpath in order to ease their usage directly from the `Route`. If you need to provide a non `UTF-8` (ie, a binary resource) you may look for `--resource` flag instead.
 
 NOTE: the scope of `--config` global option had different meaning prior Camel K version 1.5. The old global `--config` has been replaced with `--kube-config` since Camel K version 1.5.
 
 [[runtime-config-file]]
 == Runtime file configuration
 
-The most classic way to provide a configuration is probably to have a file where you have certain text data stored. In this case you can use the `--config file:/path/to/file` flag that will copy that file and made available at classpath level.
+The most classic way to provide a configuration is probably to have a file where you have certain text data stored. In this case you can use the `--config file:/path/to/file` flag that will copy that file and make it available at classpath level.
 
 [source,txt]
 .resources-data.txt
@@ -30,7 +30,7 @@ from('timer:config-file')
 We are referring to the file expected to be copied somewhere in the classpath, with the same name as the source file. In order to use it, we'll execute the following `--config` _file_ flag command:
 
 ----
-kamel run --config file:resources-data.txt config-file-route.groovy --dev
+kamel run --config file:resources-data.txt config-file-route.groovy
 ----
 
 You can provide more than one single `config` at once by just adding the flag repeatedly (ie, `--config file:file1.txt ---config file:file2.txt ...`).
@@ -38,7 +38,7 @@ You can provide more than one single `config` at once by just adding the flag re
 [[runtime-config-configmap]]
 == Runtime configmap configuration
 
-In a `Kubernetes` world we're dealing with `Configmap` that are containing configuration previously stored in the platform. When you need to materialize a `Configmap` into a file configuration available at your `Integration`, you can use the `--config` _configmap_ syntax.
+In a `Kubernetes` world we're dealing with `Configmap` containing configuration previously stored in the platform. When you need to materialize a `Configmap` into a file configuration available at your `Integration`, you can use the `--config` _configmap_ syntax.
 
 As an example, let's create a `Configmap` named _my-cm_ containing certain information. You can alternatively use any `Configmap` you've already stored in your cluster:
 
@@ -60,17 +60,17 @@ from('timer:configmap')
 You can see that we're expecting to use a _my-configmap-key_ file stored somewhere in the classpath. In order to materialize the `Configmap` will be as easy as running the `--config` _configmap_ syntax:
 
 ----
-kamel run --config configmap:my-cm config-configmap-route.groovy --dev
+kamel run --config configmap:my-cm config-configmap-route.groovy
 ----
 
-As soon as the `Integration` starts, the `Camel K` operator will take care to mount a volume with the `Configmap`'s content.
+As soon as the `Integration` starts, the `Camel K` operator will take care to mount a volume with the `Configmap` 's content.
 
 NOTE: you can provide a `Configmap` which is not yet available on the cluster. The `Integration` won't start until the resource will be made available.
 
 [[runtime-config-secret]]
 == Runtime secret configuration
 
-We can apply the very same concept seen in the previous section for the Kubernetes `Secret`s.
+We can apply the very same concept seen in the previous section for the Kubernetes `Secret` 's.
 
 As an example, let's create a `Secret` named _my-sec_ containing certain information. You can alternatively use any `Secret` you've already stored in your cluster:
 
@@ -92,10 +92,10 @@ from('timer:secret')
 You can see that we're expecting to use a _my-secret-key_ file stored somewhere in the classpath. In order to materialize the `Secret` will be as easy as running the `--config` _secret_ syntax:
 
 ----
-kamel run --config secret:my-sec config-secret-route.groovy --dev
+kamel run --config secret:my-sec config-secret-route.groovy
 ----
 
-As soon as the `Integration` starts, the `Camel K` operator will take care to mount a volume with the `Secret`'s content.
+As soon as the `Integration` starts, the `Camel K` operator will take care to mount a volume with the `Secret` 's content.
 
 NOTE: you can provide a `Secret` which is not yet available on the cluster. The `Integration` won't start until the resource will be made available.
 
@@ -114,7 +114,7 @@ my.key.2=world
 kubectl create secret generic my-secret-properties --from-file=my.properties
 ----
 
-In our `Integration` we can simply refer the properties defined in the `Secret` as we'd do with any other property:
+In our `Integration` we can simply refer the properties defined in the `Secret` as we would do with any other property:
 
 [source,groovy]
 .config-secret-property-route.groovy
@@ -124,10 +124,10 @@ from('timer:secret')
     .log('{{my.key.1}} {{my.key.2}}')
 ----
 
-We have to just provide the `--config` we are willing to use:
+We just have to provide the `--config` we are willing to use:
 
 ----
-kamel run --config secret:my-secret-properties config-secret-property-route.groovy --dev
+kamel run --config secret:my-secret-properties config-secret-property-route.groovy
 ----
 
 [[runtime-config-keys]]
@@ -155,7 +155,7 @@ from('timer:secret')
 Let's use the _key_ filtering:
 
 ----
-kamel run --config secret:my-sec-multi/my-secret-key-2 config-secret-key-route.groovy --dev
+kamel run --config secret:my-sec-multi/my-secret-key-2 config-secret-key-route.groovy
 ----
 
 You may check in the `Integration` `Pod` that only the _my-secret-key-2_ file has been mounted.
