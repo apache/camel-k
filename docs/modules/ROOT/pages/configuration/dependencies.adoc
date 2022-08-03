@@ -15,12 +15,12 @@ This dependency resolution mechanism is transparent to the user, that will just 
 
 Automatic resolution is also a nice feature in xref:running/dev-mode.adoc[dev mode], because you are allowed to add all components you need *without exiting the dev loop*.
 
-NOTE: Camel K won't be able to automatically the dependencies when your routes specify dynamic URIs.
+NOTE: Camel K won't be able to resolve automatically the dependencies when your routes specify dynamic URIs.
 
 [[dependencies-explicit]]
 == Add explicit dependencies
 
-You can explicitly add dependency using the `-d` flag of the `kamel run` command. This is useful when you need to use dependencies that are not included in the Camel catalog or when the URI of your routes cannot be automatically discovered (see Dynamic URIs). For example:
+You can explicitly add dependency using the `-d` flag (short name of the flag `--dependency`) of the `kamel run` command. This is useful when you need to use dependencies that are not included in the Camel catalog or when the URI of your routes cannot be automatically discovered (see Dynamic URIs). For example:
 
 ```
 kamel run -d mvn:com.google.guava:guava:26.0-jre -d camel:http Integration.java
@@ -51,7 +51,7 @@ Note that if your dependencies belong to a private repository, this repository n
 kamel run -d file://path/to/integration-dep.jar Integration.java
 ```
 
-The contents `integration-dep.jar` will then be accessible in your integration for you to use.
+The content of `integration-dep.jar` will then be accessible in your integration for you to use.
 
 You can also specify data files to be mounted in the running container:
 
@@ -84,12 +84,12 @@ gitee:user/repo/version
 azure:user/repo/version
 ```
 
-The `version` can be omitted when you are willing to use the `main` branch. Otherwise it will represent the branch or tag used in the project repo. You can have a look at the https://github.com/apache/camel-k/tree/main/examples/jitpack[Camel K Jitpack example] to have a complete experience about how to include a dependency with this mechanism.
+The `version` can be omitted when you are willing to use the `main` branch. Otherwise it will represent the branch or tag used in the project repo. 
 
 [[dependencies-dynamic]]
 == Dynamic URIs
 
-Unfortunately, Camel K won't be able to always discover all your dependencies. When you are creating an URI dynamically, then you will also need to instruct Camel K on which is the expected component to load (via `-d` parameter). An example is illustrated in the following code snippet:
+Unfortunately, Camel K won't be able to always discover all your dependencies. When you are creating an URI dynamically, then you will also need to instruct Camel K which component to load (via `-d` parameter). An example is illustrated in the following code snippet:
 
 [source,java]
 .DynamicURI.java
