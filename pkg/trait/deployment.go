@@ -20,10 +20,12 @@ package trait
 import (
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/utils/pointer"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
@@ -163,6 +165,36 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 				},
 			},
 		},
+	}
+
+	switch t.Strategy {
+	case appsv1.RecreateDeploymentStrategyType:
+		deployment.Spec.Strategy = appsv1.DeploymentStrategy{
+			Type: t.Strategy,
+		}
+	case appsv1.RollingUpdateDeploymentStrategyType:
+		deployment.Spec.Strategy = appsv1.DeploymentStrategy{
+			Type: t.Strategy,
+		}
+
+		if t.RollingUpdateMaxSurge != nil || t.RollingUpdateMaxUnavailable != nil {
+			var maxSurge *intstr.IntOrString
+			var maxUnavailable *intstr.IntOrString
+
+			if t.RollingUpdateMaxSurge != nil {
+				v := intstr.FromInt(*t.RollingUpdateMaxSurge)
+				maxSurge = &v
+			}
+			if t.RollingUpdateMaxUnavailable != nil {
+				v := intstr.FromInt(*t.RollingUpdateMaxUnavailable)
+				maxUnavailable = &v
+			}
+
+			deployment.Spec.Strategy.RollingUpdate = &appsv1.RollingUpdateDeployment{
+				MaxSurge:       maxSurge,
+				MaxUnavailable: maxUnavailable,
+			}
+		}
 	}
 
 	// Reconcile the deployment replicas
