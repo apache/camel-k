@@ -17,7 +17,7 @@ from('timer:props?period=1000')
 In order to give a value to the `my.message` property you can pass it using the command line:
 
 ```
-kamel run --property my.message="Hello World" examples/props.js
+kamel run --property my.message="Hello World" props.groovy
 ```
 
 For more details and advanced use cases, see the xref:configuration/runtime-properties.adoc[runtime properties] section.
