@@ -31,6 +31,7 @@ type DeploymentTrait struct {
 	// is considered to be failed. It defaults to 60s.
 	ProgressDeadlineSeconds *int32 `property:"progress-deadline-seconds" json:"progressDeadlineSeconds,omitempty"`
 	// The deployment strategy to use to replace existing pods with new ones.
+	// +kubebuilder:validation:Enum=Recreate;RollingUpdate
 	Strategy appsv1.DeploymentStrategyType `property:"strategy" json:"strategy,omitempty"`
 	// The maximum number of pods that can be unavailable during the update.
 	// Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).

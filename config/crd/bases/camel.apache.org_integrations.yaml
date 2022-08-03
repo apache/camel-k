@@ -6211,6 +6211,28 @@ spec:
                           defaults to 60s.
                         format: int32
                         type: integer
+                      rollingUpdateMaxSurge:
+                        description: 'The maximum number of pods that can be scheduled
+                          above the desired number of pods. Value can be an absolute
+                          number (ex: 5) or a percentage of desired pods (ex: 10%).
+                          This can not be 0 if MaxUnavailable is 0. Absolute number
+                          is calculated from percentage by rounding up. Defaults to
+                          25%.'
+                        type: integer
+                      rollingUpdateMaxUnavailable:
+                        description: 'The maximum number of pods that can be unavailable
+                          during the update. Value can be an absolute number (ex:
+                          5) or a percentage of desired pods (ex: 10%). Absolute number
+                          is calculated from percentage by rounding down. This can
+                          not be 0 if MaxSurge is 0. Defaults to 25%.'
+                        type: integer
+                      strategy:
+                        description: The deployment strategy to use to replace existing
+                          pods with new ones.
+                        enum:
+                        - Recreate
+                        - RollingUpdate
+                        type: string
                     type: object
                   environment:
                     description: The configuration of Environment trait
