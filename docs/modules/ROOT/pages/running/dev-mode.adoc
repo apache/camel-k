@@ -10,7 +10,7 @@ Dev mode is just a helper to let you be quicker during development.
 To enable dev mode, just add the `--dev` flag when running the integration:
 
 ```
-kamel run examples/Sample.java --dev
+kamel run examples/languages/Sample.java --dev
 ```
 
 The `--dev` flag deploys immediately the integration and shows the integration logs in the console. You can then change the code and see
@@ -21,7 +21,7 @@ The console follows automatically all redeploys of the integration.
 Here's an example of the output:
 
 ```
-$ kamel run examples/Sample.java --dev
+$ kamel run examples/languages/Sample.java --dev
 integration "sample" created
 integration "sample" in phase Initialization
 integration "sample" in phase Building Kit
