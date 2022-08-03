@@ -147,6 +147,94 @@ func TestApplyDeploymentTraitWithProgressDeadline(t *testing.T) {
 	assert.Equal(t, int32(120), *deployment.Spec.ProgressDeadlineSeconds)
 }
 
+func TestApplyDeploymentTraitWitRecresteStrategy(t *testing.T) {
+	deploymentTrait, environment := createNominalDeploymentTest()
+	maxSurge := 10
+
+	deploymentTrait.Strategy = appsv1.RecreateDeploymentStrategyType
+	deploymentTrait.RollingUpdateMaxSurge = &maxSurge
+
+	environment.Integration.Status.Phase = v1.IntegrationPhaseRunning
+
+	err := deploymentTrait.Apply(environment)
+
+	assert.Nil(t, err)
+
+	deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool { return true })
+	assert.NotNil(t, deployment)
+	assert.Equal(t, "integration-name", deployment.Name)
+	assert.Equal(t, appsv1.RecreateDeploymentStrategyType, deployment.Spec.Strategy.Type)
+	assert.Nil(t, deployment.Spec.Strategy.RollingUpdate)
+}
+
+func TestApplyDeploymentTraitWitRollingUpdateStrategy(t *testing.T) {
+
+	t.Run("with defaults", func(t *testing.T) {
+		deploymentTrait, environment := createNominalDeploymentTest()
+
+		deploymentTrait.Strategy = appsv1.RollingUpdateDeploymentStrategyType
+		environment.Integration.Status.Phase = v1.IntegrationPhaseRunning
+
+		err := deploymentTrait.Apply(environment)
+
+		assert.Nil(t, err)
+
+		deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool { return true })
+		assert.NotNil(t, deployment)
+		assert.Equal(t, "integration-name", deployment.Name)
+		assert.Equal(t, appsv1.RollingUpdateDeploymentStrategyType, deployment.Spec.Strategy.Type)
+		assert.Nil(t, deployment.Spec.Strategy.RollingUpdate)
+	})
+
+	t.Run("with surge", func(t *testing.T) {
+		deploymentTrait, environment := createNominalDeploymentTest()
+
+		maxSurge := 10
+
+		deploymentTrait.Strategy = appsv1.RollingUpdateDeploymentStrategyType
+		deploymentTrait.RollingUpdateMaxSurge = &maxSurge
+
+		environment.Integration.Status.Phase = v1.IntegrationPhaseRunning
+
+		err := deploymentTrait.Apply(environment)
+
+		assert.Nil(t, err)
+
+		deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool { return true })
+		assert.NotNil(t, deployment)
+		assert.Equal(t, "integration-name", deployment.Name)
+		assert.Equal(t, appsv1.RollingUpdateDeploymentStrategyType, deployment.Spec.Strategy.Type)
+		assert.NotNil(t, deployment.Spec.Strategy.RollingUpdate)
+		assert.Nil(t, deployment.Spec.Strategy.RollingUpdate.MaxUnavailable)
+		assert.Equal(t, maxSurge, deployment.Spec.Strategy.RollingUpdate.MaxSurge.IntValue())
+	})
+
+	t.Run("with surge and unavailable", func(t *testing.T) {
+		deploymentTrait, environment := createNominalDeploymentTest()
+
+		maxSurge := 10
+		maxUnavailable := 11
+
+		deploymentTrait.Strategy = appsv1.RollingUpdateDeploymentStrategyType
+		deploymentTrait.RollingUpdateMaxSurge = &maxSurge
+		deploymentTrait.RollingUpdateMaxUnavailable = &maxUnavailable
+
+		environment.Integration.Status.Phase = v1.IntegrationPhaseRunning
+
+		err := deploymentTrait.Apply(environment)
+
+		assert.Nil(t, err)
+
+		deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool { return true })
+		assert.NotNil(t, deployment)
+		assert.Equal(t, "integration-name", deployment.Name)
+		assert.Equal(t, appsv1.RollingUpdateDeploymentStrategyType, deployment.Spec.Strategy.Type)
+		assert.NotNil(t, deployment.Spec.Strategy.RollingUpdate)
+		assert.Equal(t, maxUnavailable, deployment.Spec.Strategy.RollingUpdate.MaxUnavailable.IntValue())
+		assert.Equal(t, maxSurge, deployment.Spec.Strategy.RollingUpdate.MaxSurge.IntValue())
+	})
+}
+
 func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 	trait, _ := newDeploymentTrait().(*deploymentTrait)
 	trait.Enabled = pointer.Bool(true)
