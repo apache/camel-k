@@ -4,6 +4,7 @@
 
 # Binary files
 /kamel
+/kamel.*
 /license-check
 /**/platform-check
 
