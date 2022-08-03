@@ -18,7 +18,7 @@ from('timer:property')
 The simplest way to replace that variable with a real value is to use the `--property` flag (also shortcut by `-p`):
 
 ----
-kamel run -p my.message=test-property property-route.groovy --dev
+kamel run -p my.message=test-property property-route.groovy
 ----
 
 At runtime, that variable will be substituted by the value you've provided. You can provide more than one single `property` at once by just adding the flag repeatedly (ie, `--property prop1=val1 --property prop2=val2 ...`)
@@ -36,7 +36,7 @@ from('timer:property?period={{triggerPeriod}}')
 The simplest way to replace that variable with a real value is to use the `--property` flag (also shortcut by `-p`):
 
 ----
-kamel run -p my.message=test-property -p triggerPeriod=3000 property-route.groovy --dev
+kamel run -p my.message=test-property -p triggerPeriod=3000 property-route.groovy
 ----
 
 [[runtime-props-file]]
@@ -52,7 +52,7 @@ my.key.2=world
 ----
 
 [source,groovy]
-.build-property-route.groovy
+.property-route.groovy
 ----
 from('timer:property-file')
     .routeId('property-file')
@@ -62,7 +62,7 @@ from('timer:property-file')
 You'll need to provide a `property` _file_ flag when launching the application:
 
 ----
-// kamel run --property file:my.properties property-file-route.groovy --dev
+kamel run --property file:my.properties property-route.groovy
 ----
 
 The property file is parsed and its properties configured on the `Integration`. As soon as the application starts, you will see the log with the expected configuration.
