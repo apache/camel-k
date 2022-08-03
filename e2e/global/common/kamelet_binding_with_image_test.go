@@ -79,13 +79,11 @@ func TestBindingWithImage(t *testing.T) {
 				To(Succeed())
 			Eventually(IntegrationGeneration(ns, bindingID)).
 				Should(gstruct.PointTo(BeNumerically("==", 1)))
-			Eventually(IntegrationAnnotations(ns, bindingID)).
-				Should(HaveKeyWithValue("test", "1"))
-			Eventually(IntegrationAnnotations(ns, bindingID)).
-				Should(HaveKeyWithValue("trait.camel.apache.org/container.image", expectedImage))
+			Eventually(Integration(ns, bindingID)).Should(WithTransform(Annotations, And(
+				HaveKeyWithValue("test", "1"))),
+				HaveKeyWithValue("trait.camel.apache.org/container.image", expectedImage))
 			Eventually(IntegrationStatusImage(ns, bindingID)).
 				Should(Equal(expectedImage))
-
 			Eventually(IntegrationPodPhase(ns, bindingID), TestTimeoutLong).
 				Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationPodImage(ns, bindingID)).
@@ -101,13 +99,11 @@ func TestBindingWithImage(t *testing.T) {
 				To(Succeed())
 			Eventually(IntegrationGeneration(ns, bindingID)).
 				Should(gstruct.PointTo(BeNumerically("==", 1)))
-			Eventually(IntegrationAnnotations(ns, bindingID)).
-				Should(HaveKeyWithValue("test", "2"))
-			Eventually(IntegrationAnnotations(ns, bindingID)).
-				Should(HaveKeyWithValue("trait.camel.apache.org/container.image", expectedImage))
+			Eventually(Integration(ns, bindingID)).Should(WithTransform(Annotations, And(
+				HaveKeyWithValue("test", "2"))),
+				HaveKeyWithValue("trait.camel.apache.org/container.image", expectedImage))
 			Eventually(IntegrationStatusImage(ns, bindingID)).
 				Should(Equal(expectedImage))
-
 			Eventually(IntegrationPodPhase(ns, bindingID), TestTimeoutLong).
 				Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationPodImage(ns, bindingID)).

@@ -92,10 +92,10 @@ func (action *monitorAction) Handle(ctx context.Context, kameletbinding *v1alpha
 
 	if !semanticEquality || operatorIDChanged || !sameTraits {
 		action.L.Info(
-			"Monitor: KameletBinding needs a rebuild",
+			"KameletBinding needs a rebuild",
 			"semantic-equality", !semanticEquality,
 			"operatorid-changed", operatorIDChanged,
-			"traites-changed", !sameTraits)
+			"traits-changed", !sameTraits)
 
 		// KameletBinding has changed and needs rebuild
 		target := kameletbinding.DeepCopy()

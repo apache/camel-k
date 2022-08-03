@@ -555,7 +555,7 @@ func IntegrationGeneration(ns string, name string) func() *int64 {
 	}
 }
 
-func IntegrationStatusObserverGeneration(ns string, name string) func() *int64 {
+func IntegrationObservedGeneration(ns string, name string) func() *int64 {
 	return func() *int64 {
 		it := Integration(ns, name)()
 		if it == nil {
@@ -641,6 +641,10 @@ func AssignIntegrationToOperator(ns, name, operator string) error {
 
 	it.SetOperatorID(operator)
 	return TestClient().Update(TestContext, it)
+}
+
+func Annotations(object metav1.Object) map[string]string {
+	return object.GetAnnotations()
 }
 
 func Lease(ns string, name string) func() *coordination.Lease {

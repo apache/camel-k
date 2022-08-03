@@ -41,9 +41,9 @@ import (
 	"github.com/apache/camel-k/pkg/util/property"
 )
 
-type Unstructured map[string]map[string]interface{}
+type Options map[string]map[string]interface{}
 
-func (u Unstructured) Get(id string) (map[string]interface{}, bool) {
+func (u Options) Get(id string) (map[string]interface{}, bool) {
 	if t, ok := u[id]; ok {
 		return t, true
 	}
@@ -256,7 +256,7 @@ func AssertTraitsType(traits interface{}) error {
 }
 
 // ToTraitMap accepts either v1.Traits or v1.IntegrationKitTraits and converts it to a map of traits.
-func ToTraitMap(traits interface{}) (Unstructured, error) {
+func ToTraitMap(traits interface{}) (Options, error) {
 	if err := AssertTraitsType(traits); err != nil {
 		return nil, err
 	}
@@ -265,7 +265,7 @@ func ToTraitMap(traits interface{}) (Unstructured, error) {
 	if err != nil {
 		return nil, err
 	}
-	traitMap := make(Unstructured)
+	traitMap := make(Options)
 	if err = json.Unmarshal(data, &traitMap); err != nil {
 		return nil, err
 	}
@@ -341,7 +341,7 @@ func getBuilderTask(tasks []v1.Task) *v1.BuilderTask {
 }
 
 // Equals return if traits are the same.
-func Equals(i1 Unstructured, i2 Unstructured) bool {
+func Equals(i1 Options, i2 Options) bool {
 	return reflect.DeepEqual(i1, i2)
 }
 
@@ -415,7 +415,7 @@ func IntegrationAndKitHaveSameTraits(i1 *v1.Integration, i2 *v1.IntegrationKit) 
 	return Equals(c1, c2), nil
 }
 
-func NewUnstructuredTraitsForIntegration(i *v1.Integration) (Unstructured, error) {
+func NewUnstructuredTraitsForIntegration(i *v1.Integration) (Options, error) {
 	m1, err := ToTraitMap(i.Spec.Traits)
 	if err != nil {
 		return nil, err
@@ -433,7 +433,7 @@ func NewUnstructuredTraitsForIntegration(i *v1.Integration) (Unstructured, error
 	return m1, nil
 }
 
-func NewUnstructuredTraitsForIntegrationKit(i *v1.IntegrationKit) (Unstructured, error) {
+func NewUnstructuredTraitsForIntegrationKit(i *v1.IntegrationKit) (Options, error) {
 	m1, err := ToTraitMap(i.Spec.Traits)
 	if err != nil {
 		return nil, err
@@ -451,7 +451,7 @@ func NewUnstructuredTraitsForIntegrationKit(i *v1.IntegrationKit) (Unstructured,
 	return m1, nil
 }
 
-func NewUnstructuredTraitsForIntegrationPlatform(i *v1.IntegrationPlatform) (Unstructured, error) {
+func NewUnstructuredTraitsForIntegrationPlatform(i *v1.IntegrationPlatform) (Options, error) {
 	m1, err := ToTraitMap(i.Spec.Traits)
 	if err != nil {
 		return nil, err
@@ -469,7 +469,7 @@ func NewUnstructuredTraitsForIntegrationPlatform(i *v1.IntegrationPlatform) (Uns
 	return m1, nil
 }
 
-func NewUnstructuredTraitsForKameletBinding(i *v1alpha1.KameletBinding) (Unstructured, error) {
+func NewUnstructuredTraitsForKameletBinding(i *v1alpha1.KameletBinding) (Options, error) {
 	if i.Spec.Integration != nil {
 		m1, err := ToTraitMap(i.Spec.Integration.Traits)
 		if err != nil {
@@ -496,8 +496,8 @@ func NewUnstructuredTraitsForKameletBinding(i *v1alpha1.KameletBinding) (Unstruc
 	return m1, nil
 }
 
-func FromAnnotations(meta *metav1.ObjectMeta) (Unstructured, error) {
-	options := make(Unstructured)
+func FromAnnotations(meta *metav1.ObjectMeta) (Options, error) {
+	options := make(Options)
 
 	for k, v := range meta.Annotations {
 		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
