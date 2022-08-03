@@ -388,10 +388,12 @@ kamel-overlay:
 
 images: build kamel-overlay maven-overlay bundle-kamelets
 	@echo "####### Building Camel K operator container image..."
+	mkdir -p build/_maven_output
 	docker build -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
 images-arch: build kamel-overlay maven-overlay bundle-kamelets
 	@echo "####### Building Camel K operator container image for multi architectures..."
+	mkdir -p build/_maven_output
 	docker buildx rm --all-inactive --force
 	docker buildx create --append --name builder
 ifeq ($(shell uname -m), x86_x64)
