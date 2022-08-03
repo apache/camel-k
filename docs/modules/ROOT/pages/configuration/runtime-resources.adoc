@@ -3,7 +3,7 @@
 
 When you develop an integration with `Camel K` there are many ways you can provide a *resource* to the runtime `Integration`. The most familiar way is to handle local file, but since we are dealing with `Kubernetes` you may need also to use `Configmap` or `Secret`. The `kamel run` command is provided with a `--resource` flag that help you setting any resource your `Integration` may need.
 
-The *runtime resources* are expected to be any resource type (text or binary content). These resources are materialized as files in the `Ìntegration` `Pod`. The destination path can be either a default location or any path specified by the user. Only default resource directory is available within the `Ìntegration` classpath.
+The *runtime resources* are expected to be any resource type (text or binary content). These resources are materialized as files in the `Integration` `Pod`. The destination path can be either a default location or any path specified by the user. Only default resource directory is available within the `Integration` classpath.
 
 NOTE: you'll find `--resource` is very similar to the `--config` run flag. The main difference is that a `resource` can have a binary content and it won't be parsed by the Camel Context.
 
@@ -25,7 +25,7 @@ from('file:/etc/camel/resources/?fileName=resources-data.zip&noop=true&idempoten
 We have this file available locally, so we can use the `--resource` _file_ flag command to copy this file in the `Integration`:
 
 ----
-kamel run --resource file:resources-data.zip resource-file-binary-route.groovy -d camel:zipfile --dev
+kamel run --resource file:resources-data.zip resource-file-binary-route.groovy -d camel:zipfile
 ----
 
 NOTE: when you're providing a resource file, we try to recognize if it's a binary file and process it accordingly creating a binary representation that will be decoded transparently in the `Integration`.
@@ -55,17 +55,17 @@ from('file:/etc/camel/resources/my-cm/?fileName=my-configmap-key&noop=true&idemp
 You can see that we're expecting to use a _my-configmap-key_ file stored in the default resource location (_/etc/camel/resources/_). In order to materialize the `Configmap` will be as easy as running the `--resource` _configmap_ syntax:
 
 ----
-kamel run --resource configmap:my-cm resource-configmap-route.groovy --dev
+kamel run --resource configmap:my-cm resource-configmap-route.groovy
 ----
 
-As soon as the `Integration` starts, the `Camel K` operator will take care to mount a volume with the `Configmap`'s content.
+As soon as the `Integration` starts, the `Camel K` operator will take care to mount a volume with the `Configmap` 's content.
 
 NOTE: you can provide a `Configmap` which is not yet available on the cluster. The `Integration` won't start until the resource will be made available.
 
 [[runtime-resource-secret]]
 == Runtime secret resource
 
-We can apply the very same concept seen in the previous section for the Kubernetes `Secret`s.
+We can apply the very same concept seen in the previous section for the Kubernetes `Secret` 's.
 
 As an example, let's create a `Secret` named _my-sec_ containing certain information. You can alternatively use any `Secret` you've already stored in your cluster:
 
@@ -85,10 +85,10 @@ from('file:/etc/camel/resources/my-sec/?fileName=my-secret-key&noop=true&idempot
 You can see that we're expecting to use a _my-secret-key_ file stored in the default resource location (_/etc/camel/resources/_). In order to materialize the `Secret` will be as easy as running the `--resource` _secret_ syntax:
 
 ----
-kamel run --resource secret:my-sec resource-secret-route.groovy --dev
+kamel run --resource secret:my-sec resource-secret-route.groovy
 ----
 
-As soon as the `Integration` starts, the `Camel K` operator will take care to mount a volume with the `Secret`'s content.
+As soon as the `Integration` starts, the `Camel K` operator will take care to mount a volume with the `Secret` 's content.
 
 NOTE: you can provide a `Secret` which is not yet available on the cluster. The `Integration` won't start until the resource will be made available.
 
@@ -109,10 +109,10 @@ from('file:/tmp/?fileName=input.txt&noop=true&idempotent=false')
 When running the `Integration`, you can specify where to mount the resource content (either a `File`, `Configmap` or `Secret`) with the _@path_ syntax:
 
 ----
-kamel run --resource file:resources-data.txt@/tmp/input.txt resource-file-location-route.groovy --dev
+kamel run --resource file:resources-data.txt@/tmp/input.txt resource-file-location-route.groovy
 ----
 
-You may check in the `Integration` `Pod` and verify the file was mounted in the _tmp/input.txt_ destination.
+You may check in the `Integration` `Pod` and verify that the file was mounted in the _tmp/input.txt_ destination.
 
 [[runtime-resource-keys]]
 == Configmap/Secret key filtering
@@ -137,7 +137,7 @@ from('file:/tmp/app/data/?fileName=test.txt&noop=true&idempotent=false')
 Let's use the _key_ filtering. Also notice that we're combining with the _@path_ syntax to declare where to mount the file:
 
 ----
-kamel run --resource configmap:my-cm-multi/my-configmap-key-2@/tmp/app/data/test.txt resource-configmap-key-location-route.groovy --dev
+kamel run --resource configmap:my-cm-multi/my-configmap-key-2@/tmp/app/data/test.txt resource-configmap-key-location-route.groovy
 ----
 
 You may check in the `Integration` `Pod` that only the _test.txt_ file has been mounted under _/tmp/app/data_ directory containing the information you had in _my-configmap-key-2_.
