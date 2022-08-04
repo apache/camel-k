@@ -68,6 +68,12 @@ spec:
           ports:
             - containerPort: 8080
               name: metrics
-          resources: {{ .Values.operator.resources }}
-          securityContext: {{ .Values.operator.securityContext }}
+          {{- with .Values.operator.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.operator.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
       serviceAccountName: camel-k-operator
