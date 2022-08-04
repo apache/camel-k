@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Passing namespace info for CXF Endpoint in Camel-K YAML DSL [\#3503](https://github.com/apache/camel-k/issues/3503)
 - Trait owner.target-annotations is not propagated to K8S Services [\#3494](https://github.com/apache/camel-k/issues/3494)
 - Kamel install error on Kind [\#3483](https://github.com/apache/camel-k/issues/3483)
 - Integration cannot be run from github with different branch [\#3475](https://github.com/apache/camel-k/issues/3475)
