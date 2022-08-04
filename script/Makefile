@@ -520,6 +520,7 @@ ifeq (, $(shell command -v operator-sdk 2> /dev/null))
 		-L https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$(OS_LOWER)_amd64 \
 		-o operator-sdk ; \
 	chmod +x operator-sdk ;\
+	mkdir -p $(GOBIN) ;\
 	mv operator-sdk $(GOBIN)/ ;\
 	}
 OPERATOR_SDK=$(GOBIN)/operator-sdk
