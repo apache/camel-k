@@ -40,7 +40,7 @@ type Action interface {
 	Handle(ctx context.Context, cr *v1.CR) (*v1.CR, error) // <2>
 }
 ----
-<1> Determine if the action can handle the CR as an example by looking at the phase of the CR which is store as part of the status sub resource.
+<1> Determine if the action can handle the CR as an example by looking at the phase of the CR which is stored as part of the status sub resource.
 <2> Implement the action and return a non `nil` instance to signal to the controller that the CR needs to be updated with the new one, instead, if the method returns a `nil` instance, then nothing will happen and unless the CR changes outside the control of the operator, the same action will be invoked on the next iteration. This is useful when a CR needs to delegate some work to a different controller so the CR won't be moved to the next stage till the sub operation has completed. 
 
 [NOTE]
