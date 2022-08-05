@@ -114,11 +114,11 @@ func integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bo
 	// A kit can be used only if it contains a subset of the traits and related configurations
 	// declared on integration.
 
-	itc, err := trait.NewUnstructuredTraitsForIntegration(integration)
+	itc, err := trait.NewTraitsOptionsForIntegration(integration)
 	if err != nil {
 		return false, err
 	}
-	ikc, err := trait.NewUnstructuredTraitsForIntegrationKit(kit)
+	ikc, err := trait.NewTraitsOptionsForIntegrationKit(kit)
 	if err != nil {
 		return false, err
 	}
@@ -170,11 +170,11 @@ func kitMatches(kit1 *v1.IntegrationKit, kit2 *v1.IntegrationKit) (bool, error) 
 		return false, nil
 	}
 
-	c1, err := trait.NewUnstructuredTraitsForIntegrationKit(kit1)
+	c1, err := trait.NewTraitsOptionsForIntegrationKit(kit1)
 	if err != nil {
 		return false, err
 	}
-	c2, err := trait.NewUnstructuredTraitsForIntegrationKit(kit2)
+	c2, err := trait.NewTraitsOptionsForIntegrationKit(kit2)
 	if err != nil {
 		return false, err
 	}
