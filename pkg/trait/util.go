@@ -347,11 +347,11 @@ func Equals(i1 Options, i2 Options) bool {
 
 // IntegrationsHaveSameTraits return if traits are the same.
 func IntegrationsHaveSameTraits(i1 *v1.Integration, i2 *v1.Integration) (bool, error) {
-	c1, err := NewUnstructuredTraitsForIntegration(i1)
+	c1, err := NewTraitsOptionsForIntegration(i1)
 	if err != nil {
 		return false, err
 	}
-	c2, err := NewUnstructuredTraitsForIntegration(i2)
+	c2, err := NewTraitsOptionsForIntegration(i2)
 	if err != nil {
 		return false, err
 	}
@@ -361,11 +361,11 @@ func IntegrationsHaveSameTraits(i1 *v1.Integration, i2 *v1.Integration) (bool, e
 
 // IntegrationKitsHaveSameTraits return if traits are the same.
 func IntegrationKitsHaveSameTraits(i1 *v1.IntegrationKit, i2 *v1.IntegrationKit) (bool, error) {
-	c1, err := NewUnstructuredTraitsForIntegrationKit(i1)
+	c1, err := NewTraitsOptionsForIntegrationKit(i1)
 	if err != nil {
 		return false, err
 	}
-	c2, err := NewUnstructuredTraitsForIntegrationKit(i2)
+	c2, err := NewTraitsOptionsForIntegrationKit(i2)
 	if err != nil {
 		return false, err
 	}
@@ -375,11 +375,11 @@ func IntegrationKitsHaveSameTraits(i1 *v1.IntegrationKit, i2 *v1.IntegrationKit)
 
 // KameletBindingsHaveSameTraits return if traits are the same.
 func KameletBindingsHaveSameTraits(i1 *v1alpha1.KameletBinding, i2 *v1alpha1.KameletBinding) (bool, error) {
-	c1, err := NewUnstructuredTraitsForKameletBinding(i1)
+	c1, err := NewTraitsOptionsForKameletBinding(i1)
 	if err != nil {
 		return false, err
 	}
-	c2, err := NewUnstructuredTraitsForKameletBinding(i2)
+	c2, err := NewTraitsOptionsForKameletBinding(i2)
 	if err != nil {
 		return false, err
 	}
@@ -388,34 +388,43 @@ func KameletBindingsHaveSameTraits(i1 *v1alpha1.KameletBinding, i2 *v1alpha1.Kam
 }
 
 // IntegrationAndBindingSameTraits return if traits are the same.
+// The comparison is done for the subset of traits defines on the binding as during the trait processing,
+// some traits may be added to the Integration i.e. knative configuration in case of sink binding.
 func IntegrationAndBindingSameTraits(i1 *v1.Integration, i2 *v1alpha1.KameletBinding) (bool, error) {
-	c1, err := NewUnstructuredTraitsForIntegration(i1)
+	itOpts, err := NewTraitsOptionsForIntegration(i1)
 	if err != nil {
 		return false, err
 	}
-	c2, err := NewUnstructuredTraitsForKameletBinding(i2)
+	klbOpts, err := NewTraitsOptionsForKameletBinding(i2)
 	if err != nil {
 		return false, err
 	}
 
-	return Equals(c1, c2), nil
+	toCompare := make(Options)
+	for k := range klbOpts {
+		if v, ok := itOpts[k]; ok {
+			toCompare[k] = v
+		}
+	}
+
+	return Equals(klbOpts, toCompare), nil
 }
 
 // IntegrationAndKitHaveSameTraits return if traits are the same.
 func IntegrationAndKitHaveSameTraits(i1 *v1.Integration, i2 *v1.IntegrationKit) (bool, error) {
-	c1, err := NewUnstructuredTraitsForIntegration(i1)
+	itOpts, err := NewTraitsOptionsForIntegration(i1)
 	if err != nil {
 		return false, err
 	}
-	c2, err := NewUnstructuredTraitsForIntegrationKit(i2)
+	ikOpts, err := NewTraitsOptionsForIntegrationKit(i2)
 	if err != nil {
 		return false, err
 	}
 
-	return Equals(c1, c2), nil
+	return Equals(ikOpts, itOpts), nil
 }
 
-func NewUnstructuredTraitsForIntegration(i *v1.Integration) (Options, error) {
+func NewTraitsOptionsForIntegration(i *v1.Integration) (Options, error) {
 	m1, err := ToTraitMap(i.Spec.Traits)
 	if err != nil {
 		return nil, err
@@ -433,7 +442,7 @@ func NewUnstructuredTraitsForIntegration(i *v1.Integration) (Options, error) {
 	return m1, nil
 }
 
-func NewUnstructuredTraitsForIntegrationKit(i *v1.IntegrationKit) (Options, error) {
+func NewTraitsOptionsForIntegrationKit(i *v1.IntegrationKit) (Options, error) {
 	m1, err := ToTraitMap(i.Spec.Traits)
 	if err != nil {
 		return nil, err
@@ -451,7 +460,7 @@ func NewUnstructuredTraitsForIntegrationKit(i *v1.IntegrationKit) (Options, erro
 	return m1, nil
 }
 
-func NewUnstructuredTraitsForIntegrationPlatform(i *v1.IntegrationPlatform) (Options, error) {
+func NewTraitsOptionsForIntegrationPlatform(i *v1.IntegrationPlatform) (Options, error) {
 	m1, err := ToTraitMap(i.Spec.Traits)
 	if err != nil {
 		return nil, err
@@ -469,7 +478,7 @@ func NewUnstructuredTraitsForIntegrationPlatform(i *v1.IntegrationPlatform) (Opt
 	return m1, nil
 }
 
-func NewUnstructuredTraitsForKameletBinding(i *v1alpha1.KameletBinding) (Options, error) {
+func NewTraitsOptionsForKameletBinding(i *v1alpha1.KameletBinding) (Options, error) {
 	if i.Spec.Integration != nil {
 		m1, err := ToTraitMap(i.Spec.Integration.Traits)
 		if err != nil {
