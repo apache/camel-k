@@ -78,6 +78,7 @@
 - Debug seems not to work on knative pods [\#2474](https://github.com/apache/camel-k/issues/2474)
 - Groovy script JSON paring runs into java.util.ServiceConfigurationError: org.apache.groovy.json.FastStringServiceFactory: org.apache.groovy.json.DefaultFastStringServiceFactory not a subtype [\#2418](https://github.com/apache/camel-k/issues/2418)
 - Migrate CronJob to `batch/v1` [\#2408](https://github.com/apache/camel-k/issues/2408)
+- re-deployment strategies [\#2256](https://github.com/apache/camel-k/issues/2256)
 - `kamel local build` doesn't support same dependency notation [\#2213](https://github.com/apache/camel-k/issues/2213)
 - Provide option to have symbolic link for kamel local build --integration-directory \<folder\> [\#2179](https://github.com/apache/camel-k/issues/2179)
 - Global vs local operator  [\#2177](https://github.com/apache/camel-k/issues/2177)
