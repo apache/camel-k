@@ -56,6 +56,7 @@
 - Route trait usage example [\#3146](https://github.com/apache/camel-k/issues/3146)
 - PDB trait usage example [\#3145](https://github.com/apache/camel-k/issues/3145)
 - Logging trait usage example [\#3143](https://github.com/apache/camel-k/issues/3143)
+- Knative trait usage example [\#3142](https://github.com/apache/camel-k/issues/3142)
 - Camel K operator scaling documentation [\#3133](https://github.com/apache/camel-k/issues/3133)
 - Support operator hub bundle format in `make bundle` [\#3128](https://github.com/apache/camel-k/issues/3128)
 - hello yaml example output [\#3124](https://github.com/apache/camel-k/issues/3124)
