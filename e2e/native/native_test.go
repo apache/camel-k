@@ -23,6 +23,7 @@ limitations under the License.
 package native
 
 import (
+	"strings"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -79,6 +80,7 @@ func TestNativeIntegrations(t *testing.T) {
 
 			// Check the Integration is ready
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationPod(ns, name), TestTimeoutShort).Should(WithTransform(getContainerCommand(), ContainSubstring("java")))
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -95,6 +97,7 @@ func TestNativeIntegrations(t *testing.T) {
 
 			// Check the Integration is still ready
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationPod(ns, name), TestTimeoutShort).Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-.+-runner.*")))
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -103,4 +106,12 @@ func TestNativeIntegrations(t *testing.T) {
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
+}
+
+func getContainerCommand() func(pod *corev1.Pod) string {
+	return func(pod *corev1.Pod) string {
+		cmd := strings.Join(pod.Spec.Containers[0].Command, " ")
+		cmd = cmd + strings.Join(pod.Spec.Containers[0].Args, " ")
+		return cmd
+	}
 }
