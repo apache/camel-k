@@ -1,3 +1,5 @@
+--- # ---------------------------------------------------------------------------
+
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -13,88 +15,39 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# ---------------------------------------------------------------------------
-
 name: release
 
 on:
   schedule:
-  - cron: "10 23 * * *"
+    - cron: "10 23 * * *"
 
 jobs:
-  release:
-    runs-on: ubuntu-20.04
-    steps:
-    - name: Set up JDK 11
-      uses: AdoptOpenJDK/install-jdk@v1
-      with:
-        version: "11"
-    - name: Install Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.17.x
-    - name: Checkout code
-      uses: actions/checkout@v2
-    - name: Cache modules
-      uses: actions/cache@v1
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-    - name: Get nightly version
-      shell: bash
-      run: |
-        V=$(make get-version | sed s/-SNAPSHOT/-nightly/)
-        echo "VERSION=$V" >> $GITHUB_ENV
-    - name: Global Env
-      env:
-        TEST_DOCKER_HUB_USERNAME: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
-        TEST_DOCKER_HUB_PASSWORD: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
-      run: |
-        echo "Using VERSION=${{ env.VERSION }}"
+  main:
+    uses: ./.github/workflows/release-workflow.yaml
+    with:
+      ref: "main"
+      goVersion: "1.17.x"
+      javaVersion: "11"
+    secrets:
+      registryUsername: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+      registryPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
 
-        IMAGE_NAME=docker.io/${TEST_DOCKER_HUB_USERNAME:-testcamelk}/camel-k
-        echo "Using IMAGE_NAME=$IMAGE_NAME"
-        echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+  v1_8_x:
+    uses: ./.github/workflows/release-workflow.yaml
+    with:
+      ref: "release-1.8.x"
+      goVersion: "1.17.x"
+      javaVersion: "11"
+    secrets:
+      registryUsername: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+      registryPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
 
-        MAVEN_REPOSITORY=$(make get-staging-repo)
-        echo "Using MAVEN_REPOSITORY=$MAVEN_REPOSITORY"
-        echo "MAVEN_REPOSITORY=$MAVEN_REPOSITORY" >> $GITHUB_ENV
-
-        docker login -u $TEST_DOCKER_HUB_USERNAME -p $TEST_DOCKER_HUB_PASSWORD
-        
-    - name: Codegen
-      run: |
-        make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} codegen set-version build-resources
-
-    - name: Build
-      run: |
-        make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} release-nightly
-
-    - name: Check
-      run: ls -l
-
-    - name: Create Release
-      id: create_release
-      uses: ncipollo/release-action@58ae73b360456532aafd58ee170c045abbeaee37
-      with:
-        artifacts: "./camel-k-client*.tar.gz"
-        body: |
-          Apache Camel K ${{ env.VERSION }} build for testing (unstable). This nightly release is using 
-          an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`
-
-          To test it, download the client for your OS and run:
-
-          ```
-          kamel install --olm=false --maven-repository=${{ env.MAVEN_REPOSITORY }}
-          ```
-        token: ${{ secrets.GITHUB_TOKEN }}
-        draft: false
-        prerelease: true
-        allowUpdates: true
-        replacesArtifacts: true
-        tag: ${{ env.VERSION }}
-        commit: main
-        
-
+  v1_9_x:
+    uses: ./.github/workflows/release-workflow.yaml
+    with:
+      ref: "release-1.9.x"
+      goVersion: "1.17.x"
+      javaVersion: "11"
+    secrets:
+      registryUsername: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+      registryPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
