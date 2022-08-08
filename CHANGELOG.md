@@ -63,6 +63,7 @@
 - java.lang.ClassNotFoundException: io.quarkus.bootstrap.runner.QuarkusEntryPoint after k8s node update [\#3122](https://github.com/apache/camel-k/issues/3122)
 - E2E failing in release-1.8.x [\#3120](https://github.com/apache/camel-k/issues/3120)
 - cyrus-sasl-lib \(CVE-2022-24407\), CVE-2022-23806 and multiple go related vulnerabilities in Docker Image 1.7.0, 1.8.1, 1.8.2 [\#3113](https://github.com/apache/camel-k/issues/3113)
+- More user-friendly error messages for `kamel local` subcommands [\#3028](https://github.com/apache/camel-k/issues/3028)
 - OLM scorecard tests missing [\#3022](https://github.com/apache/camel-k/issues/3022)
 - Access channel in different namespace [\#3009](https://github.com/apache/camel-k/issues/3009)
 - Operator creates too many repositories [\#3003](https://github.com/apache/camel-k/issues/3003)
