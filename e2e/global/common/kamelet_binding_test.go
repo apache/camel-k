@@ -97,7 +97,7 @@ func TestKameletBinding(t *testing.T) {
 		// Kamelet binding with traits testing
 		t.Run("test kamelet binding with trait", func(t *testing.T) {
 			RegisterTestingT(t)
-			Expect(createTimerKamelet(ns, "my-own-timer-source")()).To(Succeed())
+			Expect(CreateTimerKamelet(ns, "my-own-timer-source")()).To(Succeed())
 			// Log sink kamelet exists from previous test
 
 			from := corev1.ObjectReference{
@@ -161,32 +161,6 @@ func createErrorProducerKamelet(ns string, name string) func() error {
 				{
 					"set-body": map[string]interface{}{
 						"simple": "${mandatoryBodyAs(Boolean)}",
-					},
-				},
-				{
-					"to": "kamelet:sink",
-				},
-			},
-		},
-	}
-
-	return CreateKamelet(ns, name, flow, props, nil)
-}
-
-func createTimerKamelet(ns string, name string) func() error {
-	props := map[string]v1alpha1.JSONSchemaProp{
-		"message": {
-			Type: "string",
-		},
-	}
-
-	flow := map[string]interface{}{
-		"from": map[string]interface{}{
-			"uri": "timer:tick",
-			"steps": []map[string]interface{}{
-				{
-					"set-body": map[string]interface{}{
-						"constant": "{{message}}",
 					},
 				},
 				{
