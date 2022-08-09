@@ -33,6 +33,7 @@ resources:
 - operator-role-binding-events.yaml
 - operator-role-binding-keda.yaml
 - operator-role-binding-knative.yaml
+- operator-role-binding-knative-eventing-webhook.yaml
 - operator-role-binding-leases.yaml
 - operator-role-binding-local-registry.yaml
 - operator-role-binding-podmonitors.yaml

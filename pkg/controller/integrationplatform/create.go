@@ -66,6 +66,14 @@ func (action *createAction) Handle(ctx context.Context, platform *v1.Integration
 		}
 	}
 
+	// set the label to namespace to allow automatic sinkbinding injection in resources
+	enabled, err := platformutil.EnableKnativeBindInNamespace(ctx, action.client, platform.Namespace)
+	if err != nil {
+		action.L.Errorf(err, "Error setting label 'bindings.knative.dev/include=true' in namespace: %s", platform.Namespace)
+	} else if enabled {
+		action.L.Infof("Label 'bindings.knative.dev/include=true' set to namespace=%s", platform.Namespace)
+	}
+
 	platform.Status.Phase = v1.IntegrationPlatformPhaseReady
 
 	return platform, nil

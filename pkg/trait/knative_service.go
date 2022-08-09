@@ -234,6 +234,14 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 			Namespace: e.Integration.Namespace,
 			Labels: map[string]string{
 				v1.IntegrationLabel: e.Integration.Name,
+				// Make sure the Eventing webhook will select the source resource,
+				// in order to inject the sink information.
+				// This is necessary for Knative environments, that are configured
+				// with SINK_BINDING_SELECTION_MODE=inclusion.
+				// See:
+				// - https://knative.dev/v1.3-docs/eventing/custom-event-source/sinkbinding/create-a-sinkbinding/#optional-choose-sinkbinding-namespace-selection-behavior
+				// - https://github.com/knative/operator/blob/release-1.2/docs/configuration.md#specsinkbindingselectionmode
+				"bindings.knative.dev/include": "true",
 			},
 			Annotations: serviceAnnotations,
 		},

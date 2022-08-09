@@ -35,6 +35,7 @@ import (
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/olm"
 )
 
@@ -302,15 +303,29 @@ func (o *uninstallCmdOptions) uninstallCrd(ctx context.Context, c client.Client)
 }
 
 func (o *uninstallCmdOptions) uninstallRoles(ctx context.Context, c client.Client) error {
+	err := o.uninstallRolesFromNamespace(ctx, c, o.Namespace)
+	if err != nil {
+		return err
+	}
+	if isKnative, _ := knative.IsInstalled(ctx, c); isKnative {
+		err = o.uninstallRolesFromNamespace(ctx, c, "knative-eventing")
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (o *uninstallCmdOptions) uninstallRolesFromNamespace(ctx context.Context, c client.Client, namespace string) error {
 	api := c.RbacV1()
 
-	roleBindings, err := api.Roles(o.Namespace).List(ctx, defaultListOptions)
+	roles, err := api.Roles(namespace).List(ctx, defaultListOptions)
 	if err != nil {
 		return err
 	}
 
-	for _, roleBinding := range roleBindings.Items {
-		err := api.Roles(o.Namespace).Delete(ctx, roleBinding.Name, metav1.DeleteOptions{})
+	for _, role := range roles.Items {
+		err := api.Roles(namespace).Delete(ctx, role.Name, metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}
@@ -319,16 +334,31 @@ func (o *uninstallCmdOptions) uninstallRoles(ctx context.Context, c client.Clien
 	return nil
 }
 
+
 func (o *uninstallCmdOptions) uninstallRoleBindings(ctx context.Context, c client.Client) error {
+	err := o.uninstallRoleBindingsFromNamespace(ctx, c, o.Namespace)
+	if err != nil {
+		return err
+	}
+	if isKnative, _ := knative.IsInstalled(ctx, c); isKnative {
+		err = o.uninstallRoleBindingsFromNamespace(ctx, c, "knative-eventing")
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (o *uninstallCmdOptions) uninstallRoleBindingsFromNamespace(ctx context.Context, c client.Client, namespace string) error {
 	api := c.RbacV1()
 
-	roleBindings, err := api.RoleBindings(o.Namespace).List(ctx, defaultListOptions)
+	roleBindings, err := api.RoleBindings(namespace).List(ctx, defaultListOptions)
 	if err != nil {
 		return err
 	}
 
 	for _, roleBinding := range roleBindings.Items {
-		err := api.RoleBindings(o.Namespace).Delete(ctx, roleBinding.Name, metav1.DeleteOptions{})
+		err := api.RoleBindings(namespace).Delete(ctx, roleBinding.Name, metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}

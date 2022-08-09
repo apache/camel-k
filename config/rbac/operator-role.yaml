@@ -71,6 +71,7 @@ rules:
   - configmaps
   - secrets
   - serviceaccounts
+  - namespaces
   verbs:
   - create
   - delete

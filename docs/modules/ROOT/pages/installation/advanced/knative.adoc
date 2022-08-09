@@ -46,3 +46,25 @@ As the set of resources is arbitrary, and cannot be known _a-priori_, these perm
 For the above examples, that sink into an `eventing.knative.dev/broker` resource, this is already being configured by Knative, that aggregates the required permissions for its own resources by default.
 
 However, if you integrate custom resources as sinks, the required permissions must be added manually, as documented in the https://knative.dev/docs/eventing/sinks/#using-custom-resources-as-sinks[Knative documentation].
+
+[[knative-sinks-injection]]
+== Automatic Injection of K_SINK URL
+
+When using a Camel route with a Knative producer, it may be possible that the the Knative trait will automatically create a SinkBinding to wire the consumer and the Knative producer, given the following example:
+
+[source,java]
+----
+public class AddToChannel extends RouteBuilder {
+    public void configure() throws Exception {
+        rest("/")
+            .put("/input")
+            .to("knative:channel/messages");
+    }
+}
+---
+
+In a Knative enabled environment, there is a `eventing-webhook` pod (in `knative-eventing` namespace), which will set a `K_SINK` environment variable in the Knative source, see https://knative.dev/docs/eventing/custom-event-source/sinkbinding/create-a-sinkbinding/[Knative documentation].
+
+For this injection to work in Camel K Integration, there must be a `bindings.knative.dev/include: true` label in the namespace where the `IntegrationPlatform` is running.
+If a plain Knative is installed directly from Knative upstream, the https://knative.dev/docs/eventing/custom-event-source/sinkbinding/create-a-sinkbinding/#optional-choose-sinkbinding-namespace-selection-behavior[default configuration of eventing-webhook] is to inspect and inject the K_SINK URL in any kubernetes objects in any namespace.
+If Openshift Serverless is used, https://docs.openshift.com/container-platform/4.10/serverless/develop/serverless-custom-event-sources.html#serverless-sinkbinding-reference-include-label_serverless-custom-event-sources[the default configuration is to selectively allow the kubernetes objects in the namespace to be inspected by the eventing-webhook], by setting the `bindings.knative.dev/include: true` label in the namespace. Camel K already takes care of this label when the `IntegrationPlatform` is installed in the namespace.

@@ -19,14 +19,20 @@ package platform
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/envvar"
+	"github.com/apache/camel-k/pkg/util/knative"
 	coordination "k8s.io/api/coordination/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
@@ -131,6 +137,62 @@ func IsOperatorAllowedOnNamespace(ctx context.Context, c ctrl.Reader, namespace 
 		return false, err
 	}
 	return !alreadyOwned, nil
+}
+
+// EnableKnativeBindInNamespace sets the "bindings.knative.dev/include=true" label to the namespace if ALL of the conditions are met:
+// * Knative is installed and enabled in the IntegrationPlatform namespace
+// * There aren't any of these labels bindings.knative.dev/include bindings.knative.dev/exclude in the IntegrationPlatform namespace
+// * The environment variable SINK_BINDING_SELECTION_MODE should be set to inclusion in deploy/eventing-webhook of knative-eventing namespace
+// Returns true if the label was set in the namespace
+// see https://knative.dev/v1.3-docs/eventing/custom-event-source/sinkbinding/create-a-sinkbinding/
+func EnableKnativeBindInNamespace(ctx context.Context, client client.Client, namespace string) (bool, error) {
+	ns, err := client.CoreV1().Namespaces().Get(ctx, namespace, metav1.GetOptions{})
+	if err != nil {
+		return false, err
+	}
+	// if Knative is not enabled in this namespace, doesn't proceed
+	isKnative := knative.IsEnabledInNamespace(ctx, client, namespace)
+	if !isKnative {
+		return false, nil
+	}
+
+	// if there are sinkbinding labels in the namespace, camel-k-operator respects it and doesn't proceed
+	sinkbindingLabelsExists := ns.Labels["bindings.knative.dev/include"] != "" || ns.Labels["bindings.knative.dev/exclude"] != ""
+	if sinkbindingLabelsExists {
+		return false, nil
+	}
+
+	eventingWebhook, err := client.AppsV1().Deployments("knative-eventing").Get(ctx, "eventing-webhook", metav1.GetOptions{})
+	if err != nil {
+		return false, err
+	}
+	inclusionMode := false
+	for _, c := range eventingWebhook.Spec.Template.Spec.Containers {
+		if c.Name == "eventing-webhook" {
+			if sinkBindingSelectionMode := envvar.Get(c.Env, "SINK_BINDING_SELECTION_MODE"); sinkBindingSelectionMode != nil {
+				inclusionMode = sinkBindingSelectionMode.Value == "inclusion"
+			}
+			break
+		}
+	}
+	// only proceeds if the sinkbinding mode is inclusion
+	if !inclusionMode {
+		return false, err
+	}
+	var jsonLabelPatch = map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"labels": map[string]string{"bindings.knative.dev/include": "true"},
+		},
+	}
+	patch, err := json.Marshal(jsonLabelPatch)
+	if err != nil {
+		return false, err
+	}
+	_, err = client.CoreV1().Namespaces().Patch(ctx, namespace, types.MergePatchType, patch, metav1.PatchOptions{})
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // IsOperatorHandler checks on resource operator id annotation and this operator instance id.
