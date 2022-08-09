@@ -44,7 +44,6 @@ func main() {
 	wd, err := os.Getwd()
 	if err != nil {
 		log.Fatalln(err)
-		os.Exit(1)
 	}
 
 	flag.StringVar(&rootDir, "root", base.GoModDirectory, "The absolute path from were the directories can be found (camel-k module directory by default)")
@@ -59,7 +58,6 @@ func main() {
 	err = checkDir(rootDir)
 	if err != nil {
 		log.Fatalln(err)
-		os.Exit(1)
 	}
 
 	dirNames := flag.Args()
@@ -68,7 +66,6 @@ func main() {
 		err := checkDir(absDir)
 		if err != nil {
 			log.Fatalln(err)
-			os.Exit(1)
 		}
 	}
 
@@ -82,7 +79,6 @@ func main() {
 	mfs, err := multifs.New(rootDir, dirNames, exclusions)
 	if err != nil {
 		log.Fatalln(err)
-		os.Exit(1)
 	}
 
 	var fs http.FileSystem = modTimeFS{
