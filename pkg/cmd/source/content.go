@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package source
 
 import (
 	"context"
@@ -27,6 +27,7 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/gzip"
 )
 
 const (
@@ -36,11 +37,11 @@ const (
 	Kilobyte = 1 << 10
 )
 
-func loadRawContent(ctx context.Context, source string) ([]byte, string, error) {
+func LoadRawContent(ctx context.Context, source string) ([]byte, string, error) {
 	var content []byte
 	var err error
 
-	ok, err := isLocalAndFileExists(source)
+	ok, err := IsLocalAndFileExists(source)
 	if err != nil {
 		return nil, "", err
 	}
@@ -74,20 +75,29 @@ func loadRawContent(ctx context.Context, source string) ([]byte, string, error) 
 	return content, contentType, nil
 }
 
-func isBinary(contentType string) bool {
+func IsBinary(contentType string) bool {
 	// According the http.DetectContentType method
 	// also json and other "text" application mime types would be reported as text
 	return !strings.HasPrefix(contentType, "text")
 }
 
-func loadTextContent(ctx context.Context, source string, base64Compression bool) (string, string, bool, error) {
-	content, contentType, err := loadRawContent(ctx, source)
+func CompressToString(content []byte) (string, error) {
+	bytes, err := gzip.CompressBase64(content)
+	if err != nil {
+		return "", err
+	}
+
+	return string(bytes), nil
+}
+
+func LoadTextContent(ctx context.Context, source string, base64Compression bool) (string, string, bool, error) {
+	content, contentType, err := LoadRawContent(ctx, source)
 	if err != nil {
 		return "", "", false, err
 	}
 
 	if base64Compression {
-		base64Compressed, err := compressToString(content)
+		base64Compressed, err := CompressToString(content)
 		return base64Compressed, contentType, true, err
 	}
 

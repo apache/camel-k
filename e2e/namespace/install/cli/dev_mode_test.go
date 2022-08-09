@@ -28,9 +28,9 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
-	"path/filepath"
 
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"

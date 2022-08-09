@@ -26,9 +26,9 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
@@ -82,6 +82,18 @@ func lookupKitsForIntegration(ctx context.Context, c ctrl.Reader, integration *v
 	return kits, nil
 }
 
+// sameOrMatch returns whether the v1.IntegrationKit is the one used by the v1.Integration or if it meets the
+// requirements of the v1.Integration.
+func sameOrMatch(kit *v1.IntegrationKit, integration *v1.Integration) (bool, error) {
+	if integration.Status.IntegrationKit != nil {
+		if integration.Status.IntegrationKit.Namespace == kit.Namespace && integration.Status.IntegrationKit.Name == kit.Name {
+			return true, nil
+		}
+	}
+
+	return integrationMatches(integration, kit)
+}
+
 // integrationMatches returns whether the v1.IntegrationKit meets the requirements of the v1.Integration.
 func integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bool, error) {
 	ilog := log.ForIntegration(integration)
@@ -101,7 +113,17 @@ func integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bo
 	//
 	// A kit can be used only if it contains a subset of the traits and related configurations
 	// declared on integration.
-	if match, err := hasMatchingTraits(integration.Spec.Traits, kit.Spec.Traits); !match || err != nil {
+
+	itc, err := trait.NewTraitsOptionsForIntegration(integration)
+	if err != nil {
+		return false, err
+	}
+	ikc, err := trait.NewTraitsOptionsForIntegrationKit(kit)
+	if err != nil {
+		return false, err
+	}
+
+	if match, err := hasMatchingTraits(itc, ikc); !match || err != nil {
 		ilog.Debug("Integration and integration-kit traits do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
 		return false, err
 	}
@@ -147,7 +169,17 @@ func kitMatches(kit1 *v1.IntegrationKit, kit2 *v1.IntegrationKit) (bool, error) 
 	if len(kit1.Spec.Dependencies) != len(kit2.Spec.Dependencies) {
 		return false, nil
 	}
-	if match, err := hasMatchingTraits(kit1.Spec.Traits, kit2.Spec.Traits); !match || err != nil {
+
+	c1, err := trait.NewTraitsOptionsForIntegrationKit(kit1)
+	if err != nil {
+		return false, err
+	}
+	c2, err := trait.NewTraitsOptionsForIntegrationKit(kit2)
+	if err != nil {
+		return false, err
+	}
+
+	if match, err := hasMatchingTraits(c1, c2); !match || err != nil {
 		return false, err
 	}
 	if !util.StringSliceContains(kit1.Spec.Dependencies, kit2.Spec.Dependencies) {
@@ -157,15 +189,7 @@ func kitMatches(kit1 *v1.IntegrationKit, kit2 *v1.IntegrationKit) (bool, error) 
 	return true, nil
 }
 
-func hasMatchingTraits(traits interface{}, kitTraits interface{}) (bool, error) {
-	traitMap, err := trait.ToTraitMap(traits)
-	if err != nil {
-		return false, err
-	}
-	kitTraitMap, err := trait.ToTraitMap(kitTraits)
-	if err != nil {
-		return false, err
-	}
+func hasMatchingTraits(traitMap trait.Options, kitTraitMap trait.Options) (bool, error) {
 	catalog := trait.NewCatalog(nil)
 
 	for _, t := range catalog.AllTraits() {
@@ -173,9 +197,10 @@ func hasMatchingTraits(traits interface{}, kitTraits interface{}) (bool, error) 
 			// We don't store the trait configuration if the trait cannot influence the kit behavior
 			continue
 		}
+
 		id := string(t.ID())
-		it, ok1 := findTrait(traitMap, id)
-		kt, ok2 := findTrait(kitTraitMap, id)
+		it, ok1 := traitMap.Get(id)
+		kt, ok2 := kitTraitMap.Get(id)
 
 		if !ok1 && !ok2 {
 			continue
@@ -196,22 +221,6 @@ func hasMatchingTraits(traits interface{}, kitTraits interface{}) (bool, error) 
 	}
 
 	return true, nil
-}
-
-func findTrait(traitsMap map[string]map[string]interface{}, id string) (map[string]interface{}, bool) {
-	if trait, ok := traitsMap[id]; ok {
-		return trait, true
-	}
-
-	if addons, ok := traitsMap["addons"]; ok {
-		if addon, ok := addons[id]; ok {
-			if trait, ok := addon.(map[string]interface{}); ok {
-				return trait, true
-			}
-		}
-	}
-
-	return nil, false
 }
 
 func matchesComparableTrait(ct trait.ComparableTrait, it map[string]interface{}, kt map[string]interface{}) (bool, error) {

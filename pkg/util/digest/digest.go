@@ -202,6 +202,10 @@ func ComputeForIntegrationKit(kit *v1.IntegrationKit) (string, error) {
 		return "", err
 	}
 
+	if _, err := hash.Write([]byte(kit.Spec.Image)); err != nil {
+		return "", err
+	}
+
 	for _, item := range kit.Spec.Dependencies {
 		if _, err := hash.Write([]byte(item)); err != nil {
 			return "", err

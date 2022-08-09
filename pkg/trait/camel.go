@@ -79,10 +79,6 @@ func (t *camelTrait) Apply(e *Environment) error {
 	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) && e.IntegrationInRunningPhases() {
 		// Get all resources
 		maps := t.computeConfigMaps(e)
-		if t.Properties != nil {
-			// Only user.properties
-			maps = append(maps, t.computeUserProperties(e)...)
-		}
 		e.Resources.AddAll(maps)
 	}
 
@@ -177,6 +173,14 @@ func (t *camelTrait) computeConfigMaps(e *Environment) []ctrl.Object {
 	for _, prop := range e.collectConfigurationPairs("property") {
 		// properties in resource configuration are expected to be pre-encoded using properties format
 		userProperties += fmt.Sprintf("%s=%s\n", prop.Name, prop.Value)
+	}
+
+	if t.Properties != nil {
+		// Merge with properties set in the trait
+		for _, prop := range t.Properties {
+			k, v := property.SplitPropertyFileEntry(prop)
+			userProperties += fmt.Sprintf("%s=%s\n", k, v)
+		}
 	}
 
 	if userProperties != "" {
@@ -279,44 +283,6 @@ func (t *camelTrait) computeConfigMaps(e *Environment) []ctrl.Object {
 		}
 
 		maps = append(maps, &cm)
-	}
-
-	return maps
-}
-
-func (t *camelTrait) computeUserProperties(e *Environment) []ctrl.Object {
-	maps := make([]ctrl.Object, 0)
-
-	// combine properties of integration with kit, integration
-	// properties have the priority
-	userProperties := ""
-
-	for _, prop := range t.Properties {
-		k, v := property.SplitPropertyFileEntry(prop)
-		userProperties += fmt.Sprintf("%s=%s\n", k, v)
-	}
-
-	if userProperties != "" {
-		maps = append(
-			maps,
-			&corev1.ConfigMap{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "ConfigMap",
-					APIVersion: "v1",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      e.Integration.Name + "-user-properties",
-					Namespace: e.Integration.Namespace,
-					Labels: map[string]string{
-						v1.IntegrationLabel:                e.Integration.Name,
-						"camel.apache.org/properties.type": "user",
-					},
-				},
-				Data: map[string]string{
-					"application.properties": userProperties,
-				},
-			},
-		)
 	}
 
 	return maps

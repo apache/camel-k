@@ -18,10 +18,9 @@ limitations under the License.
 package kubernetes
 
 import (
+	"github.com/apache/camel-k/pkg/util"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
-
-	"github.com/apache/camel-k/pkg/util"
 )
 
 // ToJSON marshal to json format.

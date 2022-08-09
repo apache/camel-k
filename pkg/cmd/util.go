@@ -24,17 +24,14 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 	"reflect"
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	platformutil "github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util/gzip"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -46,12 +43,6 @@ import (
 
 const (
 	offlineCommandLabel = "camel.apache.org/cmd.offline"
-
-	// Supported source schemes.
-	gistScheme   = "gist"
-	githubScheme = "github"
-	httpScheme   = "http"
-	httpsScheme  = "https"
 )
 
 // DeleteIntegration --.
@@ -248,42 +239,6 @@ func fieldByMapstructureTagName(target reflect.Value, tagName string) (reflect.S
 	}
 
 	return reflect.StructField{}, false
-}
-
-func compressToString(content []byte) (string, error) {
-	bytes, err := gzip.CompressBase64(content)
-	if err != nil {
-		return "", err
-	}
-
-	return string(bytes), nil
-}
-
-func isLocalAndFileExists(uri string) (bool, error) {
-	if hasSupportedScheme(uri) {
-		// it's not a local file as it matches one of the supporting schemes
-		return false, nil
-	}
-	info, err := os.Stat(uri)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false, nil
-		}
-		// If it is a different error (ie, permission denied) we should report it back
-		return false, errors.Wrap(err, fmt.Sprintf("file system error while looking for %s", uri))
-	}
-	return !info.IsDir(), nil
-}
-
-func hasSupportedScheme(uri string) bool {
-	if strings.HasPrefix(strings.ToLower(uri), gistScheme+":") ||
-		strings.HasPrefix(strings.ToLower(uri), githubScheme+":") ||
-		strings.HasPrefix(strings.ToLower(uri), httpScheme+":") ||
-		strings.HasPrefix(strings.ToLower(uri), httpsScheme+":") {
-		return true
-	}
-
-	return false
 }
 
 func verifyOperatorID(ctx context.Context, client client.Client, operatorID string, out io.Writer) error {

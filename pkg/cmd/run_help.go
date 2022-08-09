@@ -25,6 +25,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/cmd/source"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/resource"
 	"github.com/magiconair/properties"
@@ -48,11 +49,11 @@ func parseConfigAndGenCm(ctx context.Context, cmd *cobra.Command, c client.Clien
 		}
 	case resource.StorageTypeFile:
 		// Don't allow a binary non compressed resource
-		rawData, contentType, err := loadRawContent(ctx, config.Name())
+		rawData, contentType, err := source.LoadRawContent(ctx, config.Name())
 		if err != nil {
 			return nil, err
 		}
-		if config.ContentType() != resource.ContentTypeData && !enableCompression && isBinary(contentType) {
+		if config.ContentType() != resource.ContentTypeData && !enableCompression && source.IsBinary(contentType) {
 			return nil, fmt.Errorf("you cannot provide a binary config, use a text file or check --resource flag instead")
 		}
 		resourceType := v1.ResourceTypeData
@@ -85,13 +86,13 @@ func binaryOrTextResource(fileName string, data []byte, contentType string, base
 		Type: resourceType,
 	}
 
-	if !base64Compression && isBinary(contentType) {
+	if !base64Compression && source.IsBinary(contentType) {
 		resourceSpec.RawContent = data
 		return resourceSpec, nil
 	}
 	// either is a text resource or base64 compression is enabled
 	if base64Compression {
-		content, err := compressToString(data)
+		content, err := source.CompressToString(data)
 		if err != nil {
 			return resourceSpec, err
 		}

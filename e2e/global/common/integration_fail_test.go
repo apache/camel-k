@@ -55,17 +55,10 @@ func TestBadRouteIntegration(t *testing.T) {
 				Should(gstruct.PointTo(BeNumerically("==", 2)))
 			// Check the Integration stays in error phase
 			Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
+
+			// Clean up
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
-
-		// Clean up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
-
-func TestMissingDependencyIntegration(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		operatorID := "camel-k-missing-dependencies"
-		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("run missing dependency java route", func(t *testing.T) {
 			RegisterTestingT(t)
@@ -80,9 +73,9 @@ func TestMissingDependencyIntegration(t *testing.T) {
 			build := Build(ns, kitName)()
 			Eventually(build.Status.Phase, TestTimeoutShort).Should(Equal(v1.BuildPhaseError))
 			Eventually(build.Status.Failure.Recovery.Attempt, TestTimeoutShort).Should(Equal(5))
-		})
 
-		// Clean up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+			// Clean up
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
 	})
 }

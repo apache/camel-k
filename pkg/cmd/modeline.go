@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/cmd/source"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/modeline"
 	"github.com/pkg/errors"
@@ -194,7 +195,7 @@ func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.
 func extractModelineOptions(ctx context.Context, sources []string, cmd *cobra.Command) ([]modeline.Option, error) {
 	opts := make([]modeline.Option, 0)
 
-	resolvedSources, err := ResolveSources(ctx, sources, false, cmd)
+	resolvedSources, err := source.Resolve(ctx, sources, false, cmd)
 	if err != nil {
 		return opts, errors.Wrap(err, "failed to resolve sources")
 	}
@@ -216,7 +217,7 @@ func extractModelineOptions(ctx context.Context, sources []string, cmd *cobra.Co
 	return opts, nil
 }
 
-func extractModelineOptionsFromSource(resolvedSource Source) ([]modeline.Option, error) {
+func extractModelineOptionsFromSource(resolvedSource source.Source) ([]modeline.Option, error) {
 	ops, err := modeline.Parse(resolvedSource.Name, resolvedSource.Content)
 	if err != nil {
 		return ops, errors.Wrapf(err, "cannot process file %s", resolvedSource.Location)

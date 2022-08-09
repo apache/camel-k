@@ -472,6 +472,7 @@ Let's try sorting out these issues in the route (we publish here the final versi
 // camel-k: language=java
 
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.ClaimCheckOperation;
 import org.apache.camel.Exchange;
 
 public class Earthquake extends RouteBuilder {

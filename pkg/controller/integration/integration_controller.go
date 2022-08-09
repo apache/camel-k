@@ -23,6 +23,8 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/apache/camel-k/pkg/trait"
+
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -75,6 +77,115 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	)
 }
 
+func integrationUpdateFunc(old *v1.Integration, it *v1.Integration) bool {
+	// Observe the time to first readiness metric
+	previous := old.Status.GetCondition(v1.IntegrationConditionReady)
+	if next := it.Status.GetCondition(v1.IntegrationConditionReady); (previous == nil || previous.Status != corev1.ConditionTrue && (previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero())) &&
+		next != nil && next.Status == corev1.ConditionTrue && next.FirstTruthyTime != nil && !next.FirstTruthyTime.IsZero() &&
+		it.Status.InitializationTimestamp != nil {
+		duration := next.FirstTruthyTime.Time.Sub(it.Status.InitializationTimestamp.Time)
+		Log.WithValues("request-namespace", it.Namespace, "request-name", it.Name, "ready-after", duration.Seconds()).
+			ForIntegration(it).Infof("First readiness after %s", duration)
+		timeToFirstReadiness.Observe(duration.Seconds())
+	}
+
+	// If traits have changed, the reconciliation loop must kick in as
+	// traits may have impact
+	sameTraits, err := trait.IntegrationsHaveSameTraits(old, it)
+	if err != nil {
+		Log.ForIntegration(it).Error(
+			err,
+			"unable to determine if old and new resource have the same traits")
+	}
+	if !sameTraits {
+		return true
+	}
+
+	// Ignore updates to the integration status in which case metadata.Generation does not change,
+	// or except when the integration phase changes as it's used to transition from one phase
+	// to another.
+	return old.Generation != it.Generation ||
+		old.Status.Phase != it.Status.Phase
+}
+
+func integrationKitEnqueueRequestsFromMapFunc(c client.Client, kit *v1.IntegrationKit) []reconcile.Request {
+	var requests []reconcile.Request
+	if kit.Status.Phase != v1.IntegrationKitPhaseReady && kit.Status.Phase != v1.IntegrationKitPhaseError {
+		return requests
+	}
+
+	list := &v1.IntegrationList{}
+	// Do global search in case of global operator (it may be using a global platform)
+	var opts []ctrl.ListOption
+	if !platform.IsCurrentOperatorGlobal() {
+		opts = append(opts, ctrl.InNamespace(kit.Namespace))
+	}
+	if err := c.List(context.Background(), list, opts...); err != nil {
+		log.Error(err, "Failed to retrieve integration list")
+		return requests
+	}
+
+	for i := range list.Items {
+		integration := &list.Items[i]
+		Log.Debug("Integration Controller: Assessing integration", "integration", integration.Name, "namespace", integration.Namespace)
+
+		match, err := sameOrMatch(kit, integration)
+		if err != nil {
+			Log.ForIntegration(integration).Errorf(err, "Error matching integration %q with kit %q", integration.Name, kit.Name)
+			continue
+		}
+		if !match {
+			continue
+		}
+
+		if integration.Status.Phase == v1.IntegrationPhaseBuildingKit ||
+			integration.Status.Phase == v1.IntegrationPhaseRunning {
+			log.Infof("Kit %s ready, notify integration: %s", kit.Name, integration.Name)
+			requests = append(requests, reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Namespace: integration.Namespace,
+					Name:      integration.Name,
+				},
+			})
+		}
+	}
+
+	return requests
+}
+
+func integrationPlatformEnqueueRequestsFromMapFunc(c client.Client, p *v1.IntegrationPlatform) []reconcile.Request {
+	var requests []reconcile.Request
+
+	if p.Status.Phase == v1.IntegrationPlatformPhaseReady {
+		list := &v1.IntegrationList{}
+
+		// Do global search in case of global operator (it may be using a global platform)
+		var opts []ctrl.ListOption
+		if !platform.IsCurrentOperatorGlobal() {
+			opts = append(opts, ctrl.InNamespace(p.Namespace))
+		}
+
+		if err := c.List(context.Background(), list, opts...); err != nil {
+			log.Error(err, "Failed to list integrations")
+			return requests
+		}
+
+		for _, integration := range list.Items {
+			if integration.Status.Phase == v1.IntegrationPhaseWaitingForPlatform {
+				log.Infof("Platform %s ready, wake-up integration: %s", p.Name, integration.Name)
+				requests = append(requests, reconcile.Request{
+					NamespacedName: types.NamespacedName{
+						Namespace: integration.Namespace,
+						Name:      integration.Name,
+					},
+				})
+			}
+		}
+	}
+
+	return requests
+}
+
 func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 	b := builder.ControllerManagedBy(mgr).
 		Named("integration-controller").
@@ -90,21 +201,8 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 					if !ok {
 						return false
 					}
-					// Observe the time to first readiness metric
-					previous := old.Status.GetCondition(v1.IntegrationConditionReady)
-					if next := it.Status.GetCondition(v1.IntegrationConditionReady); (previous == nil || previous.Status != corev1.ConditionTrue && (previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero())) &&
-						next != nil && next.Status == corev1.ConditionTrue && next.FirstTruthyTime != nil && !next.FirstTruthyTime.IsZero() &&
-						it.Status.InitializationTimestamp != nil {
-						duration := next.FirstTruthyTime.Time.Sub(it.Status.InitializationTimestamp.Time)
-						Log.WithValues("request-namespace", it.Namespace, "request-name", it.Name, "ready-after", duration.Seconds()).
-							ForIntegration(it).Infof("First readiness after %s", duration)
-						timeToFirstReadiness.Observe(duration.Seconds())
-					}
-					// Ignore updates to the integration status in which case metadata.Generation does not change,
-					// or except when the integration phase changes as it's used to transition from one phase
-					// to another.
-					return old.Generation != it.Generation ||
-						old.Status.Phase != it.Status.Phase
+
+					return integrationUpdateFunc(old, it)
 				},
 				DeleteFunc: func(e event.DeleteEvent) bool {
 					// Evaluates to false if the object has been confirmed deleted
@@ -116,92 +214,25 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 		// or running phase.
 		Watches(&source.Kind{Type: &v1.IntegrationKit{}},
 			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
-				var requests []reconcile.Request
 				kit, ok := a.(*v1.IntegrationKit)
 				if !ok {
 					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve integration list")
-					return requests
+					return []reconcile.Request{}
 				}
 
-				if kit.Status.Phase != v1.IntegrationKitPhaseReady && kit.Status.Phase != v1.IntegrationKitPhaseError {
-					return requests
-				}
-
-				list := &v1.IntegrationList{}
-				// Do global search in case of global operator (it may be using a global platform)
-				var opts []ctrl.ListOption
-				if !platform.IsCurrentOperatorGlobal() {
-					opts = append(opts, ctrl.InNamespace(kit.Namespace))
-				}
-				if err := c.List(context.Background(), list, opts...); err != nil {
-					log.Error(err, "Failed to retrieve integration list")
-					return requests
-				}
-
-				for i := range list.Items {
-					integration := &list.Items[i]
-					log.Debug("Integration Controller: Assessing integration", "integration", integration.Name, "namespace", integration.Namespace)
-
-					if match, err := integrationMatches(integration, kit); err != nil {
-						log.Errorf(err, "Error matching integration %q with kit %q", integration.Name, kit.Name)
-
-						continue
-					} else if !match {
-						continue
-					}
-					if integration.Status.Phase == v1.IntegrationPhaseBuildingKit ||
-						integration.Status.Phase == v1.IntegrationPhaseRunning {
-						log.Infof("Kit %s ready, notify integration: %s", kit.Name, integration.Name)
-						requests = append(requests, reconcile.Request{
-							NamespacedName: types.NamespacedName{
-								Namespace: integration.Namespace,
-								Name:      integration.Name,
-							},
-						})
-					}
-				}
-
-				return requests
+				return integrationKitEnqueueRequestsFromMapFunc(c, kit)
 			})).
 		// Watch for IntegrationPlatform phase transitioning to ready and enqueue
 		// requests for any integrations that are in phase waiting for platform
 		Watches(&source.Kind{Type: &v1.IntegrationPlatform{}},
 			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
-				var requests []reconcile.Request
 				p, ok := a.(*v1.IntegrationPlatform)
 				if !ok {
 					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to list integrations")
-					return requests
+					return []reconcile.Request{}
 				}
 
-				if p.Status.Phase == v1.IntegrationPlatformPhaseReady {
-					list := &v1.IntegrationList{}
-
-					// Do global search in case of global operator (it may be using a global platform)
-					var opts []ctrl.ListOption
-					if !platform.IsCurrentOperatorGlobal() {
-						opts = append(opts, ctrl.InNamespace(p.Namespace))
-					}
-
-					if err := c.List(context.Background(), list, opts...); err != nil {
-						log.Error(err, "Failed to list integrations")
-						return requests
-					}
-
-					for _, integration := range list.Items {
-						if integration.Status.Phase == v1.IntegrationPhaseWaitingForPlatform {
-							log.Infof("Platform %s ready, wake-up integration: %s", p.Name, integration.Name)
-							requests = append(requests, reconcile.Request{
-								NamespacedName: types.NamespacedName{
-									Namespace: integration.Namespace,
-									Name:      integration.Name,
-								},
-							})
-						}
-					}
-				}
-
-				return requests
+				return integrationPlatformEnqueueRequestsFromMapFunc(c, p)
 			})).
 		// Watch for the owned Deployments
 		Owns(&appsv1.Deployment{}, builder.WithPredicates(StatusChangedPredicate{})).

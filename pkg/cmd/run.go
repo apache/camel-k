@@ -61,6 +61,8 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/cmd/local"
+	"github.com/apache/camel-k/pkg/cmd/source"
 	platformutil "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
@@ -238,7 +240,7 @@ func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 		return errors.New("run expects at least 1 argument, received 0")
 	}
 
-	if _, err := ResolveSources(context.Background(), args, false, cmd); err != nil {
+	if _, err := source.Resolve(context.Background(), args, false, cmd); err != nil {
 		return errors.Wrap(err, "One of the provided sources is not reachable")
 	}
 
@@ -259,7 +261,7 @@ func (o *runCmdOptions) validate() error {
 
 	propertyFiles := filterBuildPropertyFiles(o.Properties)
 	propertyFiles = append(propertyFiles, filterBuildPropertyFiles(o.BuildProperties)...)
-	err := validatePropertyFiles(propertyFiles)
+	err := local.ValidatePropertyFiles(propertyFiles)
 	if err != nil {
 		return err
 	}
@@ -441,7 +443,7 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 	files = append(files, filterFileLocation(o.OpenAPIs)...)
 
 	for _, s := range files {
-		ok, err := isLocalAndFileExists(s)
+		ok, err := source.IsLocalAndFileExists(s)
 		if err != nil {
 			return err
 		}
@@ -578,7 +580,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	srcs = append(srcs, sources...)
 	srcs = append(srcs, o.Sources...)
 
-	resolvedSources, err := ResolveSources(context.Background(), srcs, o.Compression, cmd)
+	resolvedSources, err := source.Resolve(context.Background(), srcs, o.Compression, cmd)
 	if err != nil {
 		return nil, err
 	}
@@ -801,7 +803,7 @@ func resolvePodTemplate(ctx context.Context, cmd *cobra.Command, templateSrc str
 
 	// check if value is a path to the file
 	if _, err := os.Stat(templateSrc); err == nil {
-		rsc, err := ResolveSources(ctx, []string{templateSrc}, false, cmd)
+		rsc, err := source.Resolve(ctx, []string{templateSrc}, false, cmd)
 		if err == nil && len(rsc) > 0 {
 			templateSrc = rsc[0].Content
 		}

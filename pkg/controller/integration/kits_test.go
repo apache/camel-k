@@ -21,15 +21,17 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
+
+	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/test"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
@@ -277,7 +279,7 @@ func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
 	a := buildKitAction{}
 	a.InjectLogger(log.Log)
 
-	ok, err := hasMatchingTraits(integration.Spec.Traits, kit.Spec.Traits)
+	ok, err := trait.IntegrationAndKitHaveSameTraits(integration, kit)
 	assert.Nil(t, err)
 	assert.False(t, ok)
 }
@@ -332,7 +334,7 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 	a := buildKitAction{}
 	a.InjectLogger(log.Log)
 
-	ok, err := hasMatchingTraits(integration.Spec.Traits, kit.Spec.Traits)
+	ok, err := trait.IntegrationAndKitHaveSameTraits(integration, kit)
 	assert.Nil(t, err)
 	assert.True(t, ok)
 }

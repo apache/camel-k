@@ -545,6 +545,26 @@ func IntegrationSpecReplicas(ns string, name string) func() *int32 {
 	}
 }
 
+func IntegrationGeneration(ns string, name string) func() *int64 {
+	return func() *int64 {
+		it := Integration(ns, name)()
+		if it == nil {
+			return nil
+		}
+		return &it.Generation
+	}
+}
+
+func IntegrationObservedGeneration(ns string, name string) func() *int64 {
+	return func() *int64 {
+		it := Integration(ns, name)()
+		if it == nil {
+			return nil
+		}
+		return &it.Status.ObservedGeneration
+	}
+}
+
 func IntegrationStatusReplicas(ns string, name string) func() *int32 {
 	return func() *int32 {
 		it := Integration(ns, name)()
@@ -552,6 +572,26 @@ func IntegrationStatusReplicas(ns string, name string) func() *int32 {
 			return nil
 		}
 		return it.Status.Replicas
+	}
+}
+
+func IntegrationStatusImage(ns string, name string) func() string {
+	return func() string {
+		it := Integration(ns, name)()
+		if it == nil {
+			return ""
+		}
+		return it.Status.Image
+	}
+}
+
+func IntegrationAnnotations(ns string, name string) func() map[string]string {
+	return func() map[string]string {
+		it := Integration(ns, name)()
+		if it == nil {
+			return map[string]string{}
+		}
+		return it.Annotations
 	}
 }
 
@@ -601,6 +641,10 @@ func AssignIntegrationToOperator(ns, name, operator string) error {
 
 	it.SetOperatorID(operator)
 	return TestClient().Update(TestContext, it)
+}
+
+func Annotations(object metav1.Object) map[string]string {
+	return object.GetAnnotations()
 }
 
 func Lease(ns string, name string) func() *coordination.Lease {
