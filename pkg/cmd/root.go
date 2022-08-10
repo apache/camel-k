@@ -40,7 +40,6 @@ superpowers.
 `
 
 // RootCmdOptions --.
-// nolint: containedctx
 type RootCmdOptions struct {
 	RootContext   context.Context    `mapstructure:"-"`
 	Context       context.Context    `mapstructure:"-"`

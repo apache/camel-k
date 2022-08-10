@@ -72,7 +72,6 @@ type resource struct {
 	Content []byte
 }
 
-// nolint: containedctx
 type builderContext struct {
 	client.Client
 	C                 context.Context

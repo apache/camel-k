@@ -166,7 +166,6 @@ type ControllerStrategySelector interface {
 }
 
 // An Environment provides the context for the execution of the traits.
-// nolint: containedctx
 type Environment struct {
 	CamelCatalog   *camel.RuntimeCatalog
 	RuntimeVersion string

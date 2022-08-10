@@ -493,7 +493,7 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 	return nil
 }
 
-// nolint: gocyclo,maintidx // TODO: refactor the code
+// nolint: gocyclo // TODO: refactor the code
 func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.Client, sources []string) (*v1.Integration, error) {
 	namespace := o.Namespace
 	name := o.GetIntegrationName(sources)
