@@ -24,7 +24,9 @@ package common
 
 import (
 	"fmt"
+	"k8s.io/apimachinery/pkg/types"
 	"os"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"testing"
 	"time"
 
@@ -120,13 +122,14 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 
 			if crossChannelUpgrade {
 				t.Log("Updating Camel-K subscription OLM update channel.")
-				s := ckSubscription(ns)()
-				r, err := ctrlutil.CreateOrUpdate(TestContext, TestClient(), s, func() error {
-					s.Spec.Channel = newUpdateChannel
-					return nil
-				})
-				Expect(err).To(BeNil())
-				Expect(r).To(Equal(ctrlutil.OperationResultUpdated))
+				subscription := ckSubscription(ns)()
+				Expect(subscription).NotTo(BeNil())
+
+				// Patch the Subscription to avoid conflicts with concurrent updates performed by OLM
+				patch := fmt.Sprintf("{\"spec\":{\"channel\":%q}}", newUpdateChannel)
+				Expect(TestClient().Patch(TestContext, subscription, ctrl.RawPatch(types.MergePatchType, []byte(patch)))).To(Succeed())
+				// Assert the response back from the API server
+				Expect(subscription.Spec.Channel).To(Equal(newUpdateChannel))
 			}
 			// Check the previous CSV is being replaced
 			Eventually(clusterServiceVersionPhase(func(csv olm.ClusterServiceVersion) bool {
