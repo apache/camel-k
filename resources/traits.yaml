@@ -761,6 +761,11 @@ traits:
     description: Enables to gradually shift traffic to the latest Revision and sets
       the rollout duration. It's disabled by default and must be expressed as a Golang
       `time.Duration` string representation, rounded to a second precision.
+  - name: visibility
+    type: string
+    description: Setting `cluster-local`, Knative service becomes a private service.
+      Specifically, this option applies the `networking.knative.dev/visibility` label
+      to Knative service.  Refer to the Knative documentation for more information.
   - name: auto
     type: bool
     description: 'Automatically deploy the integration as Knative service when all

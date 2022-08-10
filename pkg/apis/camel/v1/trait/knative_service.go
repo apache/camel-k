@@ -52,6 +52,11 @@ type KnativeServiceTrait struct {
 	// It's disabled by default and must be expressed as a Golang `time.Duration` string representation,
 	// rounded to a second precision.
 	RolloutDuration string `property:"rollout-duration" json:"rolloutDuration,omitempty"`
+	// Setting `cluster-local`, Knative service becomes a private service.
+	// Specifically, this option applies the `networking.knative.dev/visibility` label to Knative service.
+	//
+	// Refer to the Knative documentation for more information.
+	Visibility string `property:"visibility" json:"visibility,omitempty"`
 	// Automatically deploy the integration as Knative service when all conditions hold:
 	//
 	// * Integration is using the Knative profile

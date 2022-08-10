@@ -331,12 +331,42 @@ func TestKnativeServiceWithResr(t *testing.T) {
 }
 
 func TestKnativeServiceWithRollout(t *testing.T) {
+	environment := createKnativeServiceTestEnvironment(t, &traitv1.KnativeServiceTrait{RolloutDuration: "60s"})
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("knative-service"))
+
+	ksvc := environment.Resources.GetKnativeService(func(service *serving.Service) bool {
+		return service.Name == KnativeServiceTestName
+	})
+	assert.NotNil(t, ksvc)
+
+	assert.Equal(t, ksvc.Annotations[knativeServingRolloutDurationAnnotation], "60s")
+}
+
+func TestKnativeServiceWithVisibility(t *testing.T) {
+	environment := createKnativeServiceTestEnvironment(t, &traitv1.KnativeServiceTrait{
+		Visibility: "cluster-local",
+	})
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("knative-service"))
+
+	ksvc := environment.Resources.GetKnativeService(func(service *serving.Service) bool {
+		return service.Name == KnativeServiceTestName
+	})
+	assert.NotNil(t, ksvc)
+
+	assert.Equal(t, ksvc.Labels[knativeServingVisibilityLabel], "cluster-local")
+}
+
+func createKnativeServiceTestEnvironment(t *testing.T, trait *traitv1.KnativeServiceTrait) *Environment {
+	t.Helper()
+
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	traitCatalog := NewCatalog(nil)
 
-	environment := Environment{
+	environment := &Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
 		Integration: &v1.Integration{
@@ -366,9 +396,7 @@ func TestKnativeServiceWithRollout(t *testing.T) {
 					},
 				},
 				Traits: v1.Traits{
-					KnativeService: &traitv1.KnativeServiceTrait{
-						RolloutDuration: "60s",
-					},
+					KnativeService: trait,
 				},
 			},
 		},
@@ -386,18 +414,12 @@ func TestKnativeServiceWithRollout(t *testing.T) {
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
+
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(&environment)
+	err = traitCatalog.apply(environment)
 
 	assert.Nil(t, err)
-	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait("knative-service"))
 
-	ksvc := environment.Resources.GetKnativeService(func(service *serving.Service) bool {
-		return service.Name == KnativeServiceTestName
-	})
-	assert.NotNil(t, ksvc)
-
-	assert.Equal(t, ksvc.Annotations[knativeServingRolloutDurationAnnotation], "60s")
+	return environment
 }
