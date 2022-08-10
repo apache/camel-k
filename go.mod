@@ -29,7 +29,7 @@ require (
 	github.com/prometheus/client_model v0.2.0
 	github.com/prometheus/common v0.35.0
 	github.com/radovskyb/watcher v1.0.7
-	github.com/redhat-developer/service-binding-operator v1.1.0
+	github.com/redhat-developer/service-binding-operator v1.1.1
 	github.com/rs/xid v1.4.0
 	github.com/scylladb/go-set v1.0.2
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
