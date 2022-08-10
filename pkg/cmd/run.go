@@ -348,7 +348,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 	if o.Logs || o.Dev || o.Wait {
-		// nolint: errcheck
+		//nolint: errcheck
 		go watch.HandleIntegrationEvents(o.Context, c, integration, func(event *corev1.Event) bool {
 			fmt.Fprintln(cmd.OutOrStdout(), event.Message)
 			return true
@@ -493,7 +493,7 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 	return nil
 }
 
-// nolint: gocyclo,maintidx // TODO: refactor the code
+//nolint: gocyclo,maintidx // TODO: refactor the code
 func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.Client, sources []string) (*v1.Integration, error) {
 	namespace := o.Namespace
 	name := o.GetIntegrationName(sources)
@@ -1064,7 +1064,7 @@ func getRelativeToWorkingDirectory(path string) (string, error) {
 
 // Currently swallows errors because our Project model is incomplete.
 // Most of the time it is irrelevant for our use case (GAV).
-// nolint:errcheck
+//nolint:errcheck
 func extractGavFromPom(path string, gav maven.Dependency) maven.Dependency {
 	var project maven.Project
 	file, err := os.Open(path)

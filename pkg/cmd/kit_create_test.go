@@ -27,7 +27,7 @@ import (
 
 const subCmdKit = "create"
 
-// nolint: unparam
+//nolint: unparam
 func initializeKitCreateCmdOptions(t *testing.T) (*kitCreateCommandOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
 

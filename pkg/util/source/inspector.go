@@ -292,7 +292,7 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 }
 
 // discoverDependencies inspects endpoints and extract kamelets
-// nolint: unparam
+//nolint: unparam
 func (i *baseInspector) discoverKamelets(source v1.SourceSpec, meta *Metadata) {
 	for _, uri := range meta.FromURIs {
 		AddKamelet(meta, uri)

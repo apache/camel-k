@@ -78,7 +78,7 @@ func cleanUpBuildDir(ctx *builderContext) error {
 }
 
 func generateJavaKeystore(ctx *builderContext) error {
-	// nolint: staticcheck
+	//nolint: staticcheck
 	secrets := mergeSecrets(ctx.Build.Maven.CASecrets, ctx.Build.Maven.CASecret)
 	if secrets == nil {
 		return nil

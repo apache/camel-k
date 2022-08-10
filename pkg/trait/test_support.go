@@ -123,7 +123,7 @@ func createNominalCronJobTraitTest() (*Environment, *batchv1.CronJob) {
 	return environment, cronJob
 }
 
-// nolint: staticcheck
+//nolint: staticcheck
 func configurationFromMap(t *testing.T, configMap map[string]interface{}) *traitv1.Configuration {
 	t.Helper()
 

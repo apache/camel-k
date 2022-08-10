@@ -29,7 +29,7 @@ import (
 
 const cmdInstall = "install"
 
-// nolint: unparam
+//nolint: unparam
 func initializeInstallCmdOptions(t *testing.T) (*installCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
 

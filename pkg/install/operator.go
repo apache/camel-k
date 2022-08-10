@@ -72,7 +72,7 @@ type OperatorMonitoringConfiguration struct {
 }
 
 // OperatorOrCollect installs the operator resources or adds them to the collector if present.
-// nolint: maintidx // TODO: refactor the code
+//nolint: maintidx // TODO: refactor the code
 func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection, force bool) error {
 	isOpenShift, err := isOpenShift(c, cfg.ClusterType)
 	if err != nil {
@@ -336,7 +336,7 @@ func installNamespacedRoleBinding(ctx context.Context, c client.Client, collecti
 	if err != nil {
 		return err
 	}
-	// nolint: forcetypeassert
+	//nolint: forcetypeassert
 	target := obj.(*rbacv1.RoleBinding)
 
 	bound := false
@@ -521,7 +521,7 @@ func installLeaseBindings(ctx context.Context, c client.Client, namespace string
 }
 
 // NewPlatform --
-// nolint: lll
+//nolint: lll
 func NewPlatform(ctx context.Context, c client.Client, clusterType string, skipRegistrySetup bool, registry v1.RegistrySpec, operatorID string) (*v1.IntegrationPlatform, error) {
 	isOpenShift, err := isOpenShift(c, clusterType)
 	if err != nil {

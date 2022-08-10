@@ -31,10 +31,9 @@ import (
 	"github.com/pkg/errors"
 )
 
+// ResourceAsString returns the named resource content as string.
 //
 //go:generate go run ../../cmd/util/vfs-gen resources config
-//
-// ResourceAsString returns the named resource content as string.
 func ResourceAsString(name string) (string, error) {
 	data, err := Resource(name)
 	return string(data), err

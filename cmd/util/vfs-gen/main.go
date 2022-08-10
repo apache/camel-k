@@ -169,9 +169,7 @@ func NamedFilesFilter(names ...string) func(path string, fi os.FileInfo) bool {
 	}
 }
 
-//
 // If file is bigger than maximum size (in bytes) then exclude.
-//
 func BigFilesFilter(size int) func(path string, fi os.FileInfo) bool {
 	return func(path string, fi os.FileInfo) bool {
 		if fi.IsDir() {

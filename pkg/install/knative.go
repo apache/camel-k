@@ -59,7 +59,7 @@ func applyAddressableResolverRoleBinding(ctx context.Context, c kubernetes.Inter
 			WithKind("ClusterRole").
 			WithName(knativeAddressableResolverClusterRoleName))
 
-	rb.WithLabels(map[string]string{"app":"camel-k"})
+	rb.WithLabels(map[string]string{"app": "camel-k"})
 	_, err := c.RbacV1().RoleBindings(namespace).
 		Apply(ctx, rb, metav1.ApplyOptions{FieldManager: serviceAccountName, Force: true})
 
@@ -79,7 +79,7 @@ func applyAddressableResolverClusterRoleBinding(ctx context.Context, c kubernete
 			WithKind("ClusterRole").
 			WithName(knativeAddressableResolverClusterRoleName))
 
-	crb.WithLabels(map[string]string{"app":"camel-k"})
+	crb.WithLabels(map[string]string{"app": "camel-k"})
 	_, err := c.RbacV1().ClusterRoleBindings().
 		Apply(ctx, crb, metav1.ApplyOptions{FieldManager: serviceAccountName, Force: true})
 

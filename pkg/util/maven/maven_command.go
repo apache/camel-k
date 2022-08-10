@@ -232,8 +232,7 @@ func generateProjectStructure(context Context, project Project) error {
 //
 // The artifact id is in the form of:
 //
-//     <groupId>:<artifactId>[:<packagingType>[:<classifier>]]:(<version>|'?')
-//
+//	<groupId>:<artifactId>[:<packagingType>[:<classifier>]]:(<version>|'?')
 func ParseGAV(gav string) (Dependency, error) {
 	// <groupId>:<artifactId>[:<packagingType>[:<classifier>]]:(<version>|'?')
 	dep := Dependency{}

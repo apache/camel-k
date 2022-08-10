@@ -167,7 +167,7 @@ func NewDependency(groupID string, artifactID string, version string) Dependency
 // The repository can be customized by appending @param to the repository
 // URL, e.g.:
 //
-//     http://my-nexus:8081/repository/publicc@id=my-repo@snapshots
+//	http://my-nexus:8081/repository/publicc@id=my-repo@snapshots
 //
 // That enables snapshots and sets the repository id to `my-repo`.
 func NewRepository(repo string) v1.Repository {

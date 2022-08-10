@@ -66,7 +66,7 @@ func (t *builderTask) Do(ctx context.Context) v1.BuildStatus {
 	}
 
 	// Add sources
-	// nolint: staticcheck
+	//nolint: staticcheck
 	for _, data := range t.task.Sources {
 		c.Resources = append(c.Resources, resource{
 			Content: []byte(data.Content),
@@ -75,7 +75,7 @@ func (t *builderTask) Do(ctx context.Context) v1.BuildStatus {
 	}
 
 	// Add resources
-	// nolint: staticcheck
+	//nolint: staticcheck
 	for _, data := range t.task.Resources {
 		t := path.Join("resources", data.Name)
 

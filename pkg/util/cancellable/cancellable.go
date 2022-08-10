@@ -41,7 +41,7 @@ func NewContextWithParent(parent context.Context) Context {
 	}
 }
 
-// nolint: containedctx
+//nolint: containedctx
 type cancellableContext struct {
 	context.Context
 	cancel func()

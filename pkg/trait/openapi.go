@@ -270,7 +270,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 		return err
 	}
 	mc.GlobalSettings = data
-	// nolint: staticcheck
+	//nolint: staticcheck
 	secrets := mergeSecrets(e.Platform.Status.Build.Maven.CASecrets, e.Platform.Status.Build.Maven.CASecret)
 
 	if secrets != nil {

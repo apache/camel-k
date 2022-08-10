@@ -101,7 +101,7 @@ func TestSupplementalGroup(t *testing.T) {
 	assert.Contains(t, templateSpec.Spec.SecurityContext.SupplementalGroups, int64(666))
 }
 
-// nolint: unparam
+//nolint: unparam
 func createPodTest(podSpecTemplate string) (*podTrait, *Environment, *appsv1.Deployment) {
 	trait, _ := newPodTrait().(*podTrait)
 	trait.Enabled = pointer.Bool(true)

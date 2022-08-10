@@ -450,11 +450,9 @@ func (o *promoteCmdOptions) editKameletBinding(kb *v1alpha1.KameletBinding, it *
 	return &dst
 }
 
-//
 // RoleBinding is required to allow access to images in one namespace
 // by another namespace. Without this on rbac-enabled clusters, the
 // image cannot be pulled.
-//
 func addSystemPullerRoleBinding(ctx context.Context, c client.Client, sourceNS string, destNS string) error {
 	rb := &rbacv1.RoleBinding{
 		TypeMeta: metav1.TypeMeta{

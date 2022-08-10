@@ -40,7 +40,7 @@ func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platf
 	// See:
 	// - https://kubernetes.io/docs/concepts/storage/persistent-volumes/#node-affinity
 	// - https://kubernetes.io/docs/concepts/storage/volumes/#local
-	// nolint: staticcheck
+	//nolint: staticcheck
 	pvcName := platform.Status.Build.PersistentVolumeClaim
 	if persistentVolumeClaim, found := platform.Status.Build.PublishStrategyOptions[builder.KanikoPVCName]; found {
 		pvcName = persistentVolumeClaim

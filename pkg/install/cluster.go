@@ -39,7 +39,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-// nolint: maintidx // TODO: refactor the code
+//nolint: maintidx // TODO: refactor the code
 func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider client.Provider, collection *kubernetes.Collection, clusterType string, force bool) error {
 	// Get a client to install the CRD
 	c, err := clientProvider.Get()
@@ -180,7 +180,7 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 
 	ok, err = isClusterRoleInstalled(ctx, c, "camel-k-operator-local-registry")
 	if err == nil && !ok {
-		// nolint: errcheck
+		//nolint: errcheck
 		installResource(ctx, c, collection, "/rbac/operator-cluster-role-local-registry.yaml")
 	}
 

@@ -55,7 +55,7 @@ func generate(crdFilename, dslFilename, path string, isArray bool, destination s
 		return err
 	}
 	if !isArray && dslSchema["type"] == "array" {
-		// nolint: forcetypeassert
+		//nolint: forcetypeassert
 		dslSchema = dslSchema["items"].(map[string]interface{})
 	}
 

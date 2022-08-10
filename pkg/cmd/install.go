@@ -210,7 +210,7 @@ type installCmdOptions struct {
 	olmOptions olm.Options
 }
 
-// nolint: gocyclo,maintidx // TODO: refactor the code
+//nolint: gocyclo,maintidx // TODO: refactor the code
 func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 	var collection *kubernetes.Collection
 	if o.OutputFormat != "" {
@@ -592,7 +592,7 @@ func (o *installCmdOptions) printOutput(cmd *cobra.Command, collection *kubernet
 	return nil
 }
 
-// nolint:errcheck
+//nolint:errcheck
 func (o *installCmdOptions) waitForPlatformReady(cmd *cobra.Command, platform *v1.IntegrationPlatform) error {
 	c, err := o.GetCmdClient()
 	if err != nil {

@@ -29,7 +29,7 @@ import (
 
 const cmdVersion = "version"
 
-// nolint: unparam
+//nolint: unparam
 func initializeVersionCmdOptions(t *testing.T) (*versionCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
 

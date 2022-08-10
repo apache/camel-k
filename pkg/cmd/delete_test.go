@@ -27,7 +27,7 @@ import (
 
 const cmdDelete = "delete"
 
-// nolint: unparam
+//nolint: unparam
 func initializeDeleteCmdOptions(t *testing.T) (*deleteCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
 

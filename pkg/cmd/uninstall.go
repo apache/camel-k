@@ -128,7 +128,7 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	// nolint: ifshort
+	//nolint: ifshort
 	uninstallViaOLM := false
 	if o.OlmEnabled {
 		var err error
@@ -333,7 +333,6 @@ func (o *uninstallCmdOptions) uninstallRolesFromNamespace(ctx context.Context, c
 
 	return nil
 }
-
 
 func (o *uninstallCmdOptions) uninstallRoleBindings(ctx context.Context, c client.Client) error {
 	err := o.uninstallRoleBindingsFromNamespace(ctx, c, o.Namespace)

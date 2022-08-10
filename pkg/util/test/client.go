@@ -65,8 +65,8 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 	replicasCount := make(map[string]int32)
 	fakescaleclient := fakescale.FakeScaleClient{}
 	fakescaleclient.AddReactor("update", "*", func(rawAction testing.Action) (bool, runtime.Object, error) {
-		action := rawAction.(testing.UpdateAction)       // nolint: forcetypeassert
-		obj := action.GetObject().(*autoscalingv1.Scale) // nolint: forcetypeassert
+		action := rawAction.(testing.UpdateAction)       //nolint: forcetypeassert
+		obj := action.GetObject().(*autoscalingv1.Scale) //nolint: forcetypeassert
 		replicas := obj.Spec.Replicas
 		key := fmt.Sprintf("%s:%s:%s/%s", action.GetResource().Group, action.GetResource().Resource, action.GetNamespace(), obj.GetName())
 		replicasCount[key] = replicas
@@ -81,7 +81,7 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 		}, nil
 	})
 	fakescaleclient.AddReactor("get", "*", func(rawAction testing.Action) (bool, runtime.Object, error) {
-		action := rawAction.(testing.GetAction) // nolint: forcetypeassert
+		action := rawAction.(testing.GetAction) //nolint: forcetypeassert
 		key := fmt.Sprintf("%s:%s:%s/%s", action.GetResource().Group, action.GetResource().Resource, action.GetNamespace(), action.GetName())
 		obj := &autoscalingv1.Scale{
 			ObjectMeta: metav1.ObjectMeta{

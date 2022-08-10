@@ -96,7 +96,7 @@ func findPdb(resources *kubernetes.Collection) *v1beta1.PodDisruptionBudget {
 	return nil
 }
 
-// nolint: unparam
+//nolint: unparam
 func createPdbTest() (*pdbTrait, *Environment, *appsv1.Deployment) {
 	trait, _ := newPdbTrait().(*pdbTrait)
 	trait.Enabled = pointer.Bool(true)
