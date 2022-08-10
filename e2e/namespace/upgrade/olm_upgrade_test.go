@@ -153,6 +153,7 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 			Expect(prevCSVVersion.Version.String()).NotTo(Equal(newCSVVersion.Version.String()))
 
 			Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(OperatorImage(ns), TestTimeoutShort).Should(Equal(defaults.OperatorImage()))
 
 			// Check the IntegrationPlatform has been reconciled
 			Eventually(PlatformVersion(ns)).Should(ContainSubstring(newIPVersionPrefix))
