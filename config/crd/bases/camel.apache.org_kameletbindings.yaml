@@ -6975,6 +6975,13 @@ spec:
                               `time.Duration` string representation, rounded to a
                               second precision.
                             type: string
+                          visibility:
+                            description: "Setting `cluster-local`, Knative service
+                              becomes a private service. Specifically, this option
+                              applies the `networking.knative.dev/visibility` label
+                              to Knative service. \n Refer to the Knative documentation
+                              for more information."
+                            type: string
                         type: object
                       logging:
                         description: The configuration of Logging trait

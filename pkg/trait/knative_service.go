@@ -45,6 +45,8 @@ const (
 	knativeServingMaxScaleAnnotation = "autoscaling.knative.dev/maxScale"
 	// Rollout annotation.
 	knativeServingRolloutDurationAnnotation = "serving.knative.dev/rolloutDuration"
+	// visibility label.
+	knativeServingVisibilityLabel = "networking.knative.dev/visibility"
 )
 
 type knativeServiceTrait struct {
@@ -224,17 +226,22 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 		revisionAnnotations[knativeServingMaxScaleAnnotation] = strconv.Itoa(*t.MaxScale)
 	}
 
+	serviceLabels := map[string]string{
+		v1.IntegrationLabel: e.Integration.Name,
+	}
+	if t.Visibility != "" {
+		serviceLabels[knativeServingVisibilityLabel] = t.Visibility
+	}
+
 	svc := serving.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",
 			APIVersion: serving.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      e.Integration.Name,
-			Namespace: e.Integration.Namespace,
-			Labels: map[string]string{
-				v1.IntegrationLabel: e.Integration.Name,
-			},
+			Name:        e.Integration.Name,
+			Namespace:   e.Integration.Namespace,
+			Labels:      serviceLabels,
 			Annotations: serviceAnnotations,
 		},
 		Spec: serving.ServiceSpec{

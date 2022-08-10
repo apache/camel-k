@@ -4880,6 +4880,16 @@ Enables to gradually shift traffic to the latest Revision and sets the rollout d
 It's disabled by default and must be expressed as a Golang `time.Duration` string representation,
 rounded to a second precision.
 
+|`visibility` +
+string
+|
+
+
+Setting `cluster-local`, Knative service becomes a private service.
+Specifically, this option applies the `networking.knative.dev/visibility` label to Knative service.
+
+Refer to the Knative documentation for more information.
+
 |`auto` +
 bool
 |
