@@ -75,11 +75,10 @@ var log = logutil.Log.WithName("cmd")
 func printVersion() {
 	log.Info(fmt.Sprintf("Go Version: %s", runtime.Version()))
 	log.Info(fmt.Sprintf("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH))
-	log.Info(fmt.Sprintf("Buildah Version: %v", defaults.BuildahVersion))
-	log.Info(fmt.Sprintf("Kaniko Version: %v", defaults.KanikoVersion))
 	log.Info(fmt.Sprintf("Camel K Operator Version: %v", defaults.Version))
 	log.Info(fmt.Sprintf("Camel K Default Runtime Version: %v", defaults.DefaultRuntimeVersion))
 	log.Info(fmt.Sprintf("Camel K Git Commit: %v", defaults.GitCommit))
+	log.Info(fmt.Sprintf("Camel K Operator ID: %v", defaults.OperatorID()))
 
 	// Will only appear if DEBUG level has been enabled using the env var LOG_LEVEL
 	log.Debug("*** DEBUG level messages will be logged ***")
