@@ -22,6 +22,7 @@
 - Camel K integration Prometheus Trait label autocreation with Integration Platform not working [\#3415](https://github.com/apache/camel-k/issues/3415)
 - Example readme page 404 links [\#3413](https://github.com/apache/camel-k/issues/3413)
 - Failing integration does not report error condition [\#3412](https://github.com/apache/camel-k/issues/3412)
+- Set log-level on Camel K operator not working [\#3399](https://github.com/apache/camel-k/issues/3399)
 - kamel run --output yaml does not include resources [\#3396](https://github.com/apache/camel-k/issues/3396)
 - Migrate from batch/v1beta1 to batch/v1 [\#3393](https://github.com/apache/camel-k/issues/3393)
 - RBAC missing permissions for channels and inmemorychannels in messaging.knative.dev [\#3390](https://github.com/apache/camel-k/issues/3390)
