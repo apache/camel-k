@@ -23,7 +23,7 @@ on:
 
 jobs:
   main:
-    uses: ./.github/workflows/release-workflow.yaml
+    uses: ./.github/workflows/release-workflow.yml
     with:
       ref: "main"
       goVersion: "1.17.x"
@@ -33,7 +33,7 @@ jobs:
       registryPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
 
   v1_8_x:
-    uses: ./.github/workflows/release-workflow.yaml
+    uses: ./.github/workflows/release-workflow.yml
     with:
       ref: "release-1.8.x"
       goVersion: "1.17.x"
@@ -43,7 +43,7 @@ jobs:
       registryPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
 
   v1_9_x:
-    uses: ./.github/workflows/release-workflow.yaml
+    uses: ./.github/workflows/release-workflow.yml
     with:
       ref: "release-1.9.x"
       goVersion: "1.17.x"
