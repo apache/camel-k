@@ -114,3 +114,42 @@ func TestCollectConfigurationPairs(t *testing.T) {
 		{Name: "p4", Value: "integration"},
 	})
 }
+
+func TestVolumeWithKeyAndPath(t *testing.T) {
+	v := getVolume("SomeVolName", "secret", "SomeSecretName", "SomeKey", "SomePath")
+	assert.NotNil(t, v)
+	assert.Equal(t, "SomeVolName", v.Name)
+	s := v.VolumeSource.Secret
+	assert.NotNil(t, s)
+	assert.Equal(t, "SomeSecretName", s.SecretName)
+	items := s.Items
+	assert.NotNil(t, items)
+	assert.Equal(t, 1, len(items))
+	assert.Equal(t, "SomeKey", items[0].Key)
+	assert.Equal(t, "SomePath", items[0].Path)
+}
+
+func TestVolumeWithPathOnly(t *testing.T) {
+	v := getVolume("SomeVolName", "secret", "SomeSecretName", "", "SomePath")
+	assert.NotNil(t, v)
+	assert.Equal(t, "SomeVolName", v.Name)
+	s := v.VolumeSource.Secret
+	assert.NotNil(t, s)
+	assert.Equal(t, "SomeSecretName", s.SecretName)
+	items := s.Items
+	assert.Nil(t, items)
+}
+
+func TestVolumeWithKeyOnly(t *testing.T) {
+	v := getVolume("SomeVolName", "secret", "SomeSecretName", "SomeKey", "")
+	assert.NotNil(t, v)
+	assert.Equal(t, "SomeVolName", v.Name)
+	s := v.VolumeSource.Secret
+	assert.NotNil(t, s)
+	assert.Equal(t, "SomeSecretName", s.SecretName)
+	items := s.Items
+	assert.NotNil(t, items)
+	assert.Equal(t, 1, len(items))
+	assert.Equal(t, "SomeKey", items[0].Key)
+	assert.Equal(t, "SomeKey", items[0].Path)
+}
