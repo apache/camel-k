@@ -15,6 +15,7 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
+{{- if eq .Values.operator.global "false" }}
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -29,3 +30,4 @@ roleRef:
   kind: Role
   name: camel-k-operator
   apiGroup: rbac.authorization.k8s.io
+{{- end }}

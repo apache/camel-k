@@ -1,0 +1,179 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+{{- if eq .Values.operator.global "true" }}
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: camel-k-operator
+  apiGroup: rbac.authorization.k8s.io
+
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-custom-resource-definitions
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: camel-k-operator-custom-resource-definitions
+  apiGroup: rbac.authorization.k8s.io
+
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-events
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: camel-k-operator-events
+  apiGroup: rbac.authorization.k8s.io
+
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-keda
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: camel-k-operator-keda
+  apiGroup: rbac.authorization.k8s.io
+
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-leases
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: camel-k-operator-leases
+  apiGroup: rbac.authorization.k8s.io
+
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-podmonitors
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: camel-k-operator-podmonitors
+  apiGroup: rbac.authorization.k8s.io
+
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-strimzi
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: camel-k-operator-strimzi
+  apiGroup: rbac.authorization.k8s.io
+
+
+{{- if eq .Values.platform.cluster "OpenShift" }}
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-console-openshift
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: camel-k-operator-console-openshift
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-openshift
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: camel-k-operator-openshift
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
+
+{{- end }}

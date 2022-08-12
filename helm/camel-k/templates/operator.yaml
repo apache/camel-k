@@ -43,9 +43,13 @@ spec:
             - operator
           env:
             - name: WATCH_NAMESPACE
+              {{- if eq .Values.operator.global "false" }}
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+              {{- else }}
+              value: ""
+              {{- end }}
             - name: OPERATOR_NAME
               value: camel-k
             - name: POD_NAME
