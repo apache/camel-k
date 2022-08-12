@@ -608,7 +608,9 @@ func convertToKeyToPath(k, v string) []corev1.KeyToPath {
 	if k == "" {
 		return nil
 	}
-
+	if v == "" {
+		v = k
+	}
 	kp := []corev1.KeyToPath{
 		{
 			Key:  k,
