@@ -15,8 +15,57 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-{{- if eq .Values.operator.global "false" }}
-kind: Role
+{{- if eq .Values.operator.global "true" }}
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-edit
+  labels:
+    app: "camel-k"
+    # Add these permissions to the "admin" and "edit" default roles.
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - builds
+  - camelcatalogs
+  - integrationkits
+  - integrationplatforms
+  - integrations
+  - kameletbindings
+  - kamelets
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - builds/status
+  - camelcatalogs/status
+  - integrationkits/status
+  - integrationplatforms/status
+  - integrations/scale
+  - integrations/status
+  - kameletbindings/scale
+  - kameletbindings/status
+  - kamelets/status
+  verbs:
+  - get
+  - patch
+  - update
+
+
+---
+kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: camel-k-operator
@@ -167,6 +216,34 @@ rules:
   - patch
   - update
   - watch
+
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-custom-resource-definitions
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - get
+
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-events
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
 - apiGroups:
   - ""
   resources:
@@ -177,8 +254,19 @@ rules:
   - get
   - list
   - watch
+
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-keda
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
 - apiGroups:
-  - keda.sh
+  - "keda.sh"
   resources:
   - scaledobjects
   - triggerauthentications
@@ -191,53 +279,19 @@ rules:
   - patch
   - update
   - watch
+
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-leases
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
 - apiGroups:
-  - serving.knative.dev
-  resources:
-  - services
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - eventing.knative.dev
-  resources:
-  - triggers
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-- apiGroups:
-  - messaging.knative.dev
-  resources:
-  - subscriptions
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-- apiGroups:
-  - sources.knative.dev
-  resources:
-  - sinkbindings
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-- apiGroups:
-  - coordination.k8s.io
+  - "coordination.k8s.io"
   resources:
   - leases
   verbs:
@@ -249,6 +303,99 @@ rules:
   - patch
   - update
   - watch
+
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-local-registry
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["local-registry-hosting"]
+    verbs: ["get"]
+
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-podmonitors
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - podmonitors
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-strimzi
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - "kafka.strimzi.io"
+  resources:
+  - kafkatopics
+  - kafkas
+  verbs:
+  - get
+  - list
+  - watch
+
+
+{{- if eq .Values.platform.cluster "OpenShift" }}
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-console-openshift
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - console.openshift.io
+  resources:
+  - consoleclidownloads
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-openshift
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
 - apiGroups:
   - camel.apache.org
   resources:
@@ -261,7 +408,7 @@ rules:
   - update
 - apiGroups:
   - ""
-  - build.openshift.io
+  - "build.openshift.io"
   resources:
   - buildconfigs
   - buildconfigs/webhooks
@@ -277,7 +424,7 @@ rules:
   - watch
 - apiGroups:
   - ""
-  - image.openshift.io
+  - "image.openshift.io"
   resources:
   - imagestreamimages
   - imagestreammappings
@@ -304,7 +451,7 @@ rules:
   - create
 - apiGroups:
   - ""
-  - route.openshift.io
+  - "route.openshift.io"
   resources:
   - routes
   verbs:
@@ -323,38 +470,6 @@ rules:
   - routes/custom-host
   verbs:
   - create
-- apiGroups:
-  - monitoring.coreos.com
-  resources:
-  - podmonitors
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - kafka.strimzi.io
-  resources:
-  - kafkatopics
-  - kafkas
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - "apiextensions.k8s.io"
-  resources:
-  - customresourcedefinitions
-  verbs:
-  - get
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - clusterroles
-  verbs:
-  - bind
+{{- end }}
+
 {{- end }}
