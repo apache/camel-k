@@ -100,7 +100,7 @@ func getOrFindAny(ctx context.Context, c k8sclient.Reader, namespace string, nam
 // getOrFindLocal returns the named platform or any other platform in the local namespace.
 func getOrFindLocal(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool) (*v1.IntegrationPlatform, error) {
 	if name != "" {
-		return get(ctx, c, name, namespace)
+		return get(ctx, c, namespace, name)
 	}
 
 	return findLocal(ctx, c, namespace, active)
