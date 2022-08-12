@@ -13,6 +13,7 @@
 - camel-k ignores changes to traits configured using annotations [\#3479](https://github.com/apache/camel-k/issues/3479)
 - Integration cannot be run from github with different branch [\#3475](https://github.com/apache/camel-k/issues/3475)
 - `make images` is not building the binary [\#3474](https://github.com/apache/camel-k/issues/3474)
+- `kamel operator` does not work locally [\#3472](https://github.com/apache/camel-k/issues/3472)
 - `install-it` workflow is failing silently [\#3465](https://github.com/apache/camel-k/issues/3465)
 - Declaring multiple traits in KameletBinding fails badly [\#3458](https://github.com/apache/camel-k/issues/3458)
 - `camel-k-operator` pod in `CrashLoopBackOff` [\#3456](https://github.com/apache/camel-k/issues/3456)
