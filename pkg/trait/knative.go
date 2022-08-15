@@ -472,15 +472,6 @@ func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.Came
 					// before the reference source, so that the SinkBinding webhook has
 					// all the information to perform injection.
 					e.Resources.AddFirst(knativeutil.CreateSinkBinding(source, target))
-
-					// Make sure the Eventing webhook will select the source resource,
-					// in order to inject the sink information.
-					// This is necessary for Knative environments, that are configured
-					// with SINK_BINDING_SELECTION_MODE=inclusion.
-					// See:
-					// - https://knative.dev/v0.20-docs/eventing/sources/sinkbinding/
-					// - https://github.com/knative/operator/blob/c60e62bb86ff318c44d1520927d2182659cfdeb5/docs/configuration.md#specsinkbindingselectionmode
-					controller.GetLabels()["bindings.knative.dev/include"] = "true"
 				}
 				return nil
 			})
