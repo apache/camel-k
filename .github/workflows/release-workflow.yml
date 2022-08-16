@@ -40,7 +40,7 @@ jobs:
       - name: Set up JDK ${{ inputs.javaVersion }}
         uses: actions/setup-java@v2
         with:
-          version: ${{ inputs.javaVersion }}
+          java-version: ${{ inputs.javaVersion }}
           distribution: "temurin"
       - name: Install Go ${{ inputs.goVersion }}
         uses: actions/setup-go@v2
