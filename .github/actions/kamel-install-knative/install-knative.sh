@@ -60,7 +60,6 @@ EVENTING_CRDS="https://github.com/knative/eventing/releases/download/${EVENTING_
 EVENTING_CORE="https://github.com/knative/eventing/releases/download/${EVENTING_VERSION}/eventing-core.yaml"
 IN_MEMORY_CHANNEL="https://github.com/knative/eventing/releases/download/${EVENTING_VERSION}/in-memory-channel.yaml"
 CHANNEL_BROKER="https://github.com/knative/eventing/releases/download/${EVENTING_VERSION}/mt-channel-broker.yaml"
-SUGAR_CONTROLLER="https://github.com/knative/eventing/releases/download/${EVENTING_VERSION}/eventing-sugar-controller.yaml"
 
 # Serving
 apply "${SERVING_CRDS}"
@@ -121,9 +120,6 @@ else
   echo "Error: Failed to correctly download ${SERVING_CORE}"
   exit 1
 fi
-
-# Eventing sugar controller for injection
-apply ${SUGAR_CONTROLLER}
 
 # Wait for installation completed
 echo "Waiting for all pods to be ready in kourier-system"
