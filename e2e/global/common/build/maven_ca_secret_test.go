@@ -251,7 +251,7 @@ ProxyPreserveHost On
 								ReadinessProbe: &corev1.Probe{
 									InitialDelaySeconds: 30,
 									FailureThreshold:    3,
-									Handler: corev1.Handler{
+									ProbeHandler: corev1.ProbeHandler{
 										HTTPGet: &corev1.HTTPGetAction{
 											Port: intstr.FromString("nexus"),
 											Path: "/repository/maven-public/",

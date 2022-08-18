@@ -123,7 +123,7 @@ func (t *healthTrait) Apply(e *Environment) error {
 
 func (t *healthTrait) newLivenessProbe(port *intstr.IntOrString, path string) *corev1.Probe {
 	p := corev1.Probe{
-		Handler: corev1.Handler{
+		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
 				Path:   path,
 				Scheme: corev1.URIScheme(t.LivenessScheme),
@@ -137,7 +137,7 @@ func (t *healthTrait) newLivenessProbe(port *intstr.IntOrString, path string) *c
 	}
 
 	if port != nil {
-		p.Handler.HTTPGet.Port = *port
+		p.ProbeHandler.HTTPGet.Port = *port
 	}
 
 	return &p
@@ -145,7 +145,7 @@ func (t *healthTrait) newLivenessProbe(port *intstr.IntOrString, path string) *c
 
 func (t *healthTrait) newReadinessProbe(port *intstr.IntOrString, path string) *corev1.Probe {
 	p := corev1.Probe{
-		Handler: corev1.Handler{
+		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
 				Path:   path,
 				Scheme: corev1.URIScheme(t.ReadinessScheme),
@@ -159,7 +159,7 @@ func (t *healthTrait) newReadinessProbe(port *intstr.IntOrString, path string) *
 	}
 
 	if port != nil {
-		p.Handler.HTTPGet.Port = *port
+		p.ProbeHandler.HTTPGet.Port = *port
 	}
 
 	return &p
