@@ -187,16 +187,21 @@ func loadKamelet(path string, namespace string) (ctrl.Object, error) {
 
 	kamelet.SetNamespace(namespace)
 
-	if kamelet.GetAnnotations() == nil {
-		kamelet.SetAnnotations(make(map[string]string))
+	annotations := kamelet.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
 	}
-	kamelet.GetAnnotations()[kamelVersionAnnotation] = defaults.Version
+	annotations[kamelVersionAnnotation] = defaults.Version
+	kamelet.SetAnnotations(annotations)
 
-	if kamelet.GetLabels() == nil {
-		kamelet.SetLabels(make(map[string]string))
+	labels := kamelet.GetLabels()
+	if labels == nil {
+		labels = make(map[string]string)
 	}
-	kamelet.GetLabels()[v1alpha1.KameletBundledLabel] = "true"
-	kamelet.GetLabels()[v1alpha1.KameletReadOnlyLabel] = "true"
+	labels[v1alpha1.KameletBundledLabel] = "true"
+	labels[v1alpha1.KameletReadOnlyLabel] = "true"
+
+	kamelet.SetLabels(labels)
 
 	return kamelet, nil
 }
