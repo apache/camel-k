@@ -119,7 +119,7 @@ func (c *FakeIntegrations) UpdateStatus(ctx context.Context, integration *camelv
 // Delete takes name of the integration and deletes it. Returns an error if one occurs.
 func (c *FakeIntegrations) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(integrationsResource, c.ns, name), &camelv1.Integration{})
+		Invokes(testing.NewDeleteActionWithOptions(integrationsResource, c.ns, name, opts), &camelv1.Integration{})
 
 	return err
 }

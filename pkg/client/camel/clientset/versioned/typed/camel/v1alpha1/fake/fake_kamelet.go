@@ -118,7 +118,7 @@ func (c *FakeKamelets) UpdateStatus(ctx context.Context, kamelet *v1alpha1.Kamel
 // Delete takes name of the kamelet and deletes it. Returns an error if one occurs.
 func (c *FakeKamelets) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(kameletsResource, c.ns, name), &v1alpha1.Kamelet{})
+		Invokes(testing.NewDeleteActionWithOptions(kameletsResource, c.ns, name, opts), &v1alpha1.Kamelet{})
 
 	return err
 }
