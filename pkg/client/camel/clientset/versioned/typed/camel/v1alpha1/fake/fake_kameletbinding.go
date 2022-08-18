@@ -119,7 +119,7 @@ func (c *FakeKameletBindings) UpdateStatus(ctx context.Context, kameletBinding *
 // Delete takes name of the kameletBinding and deletes it. Returns an error if one occurs.
 func (c *FakeKameletBindings) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(kameletbindingsResource, c.ns, name), &v1alpha1.KameletBinding{})
+		Invokes(testing.NewDeleteActionWithOptions(kameletbindingsResource, c.ns, name, opts), &v1alpha1.KameletBinding{})
 
 	return err
 }

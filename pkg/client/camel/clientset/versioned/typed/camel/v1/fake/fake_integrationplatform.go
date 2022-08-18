@@ -118,7 +118,7 @@ func (c *FakeIntegrationPlatforms) UpdateStatus(ctx context.Context, integration
 // Delete takes name of the integrationPlatform and deletes it. Returns an error if one occurs.
 func (c *FakeIntegrationPlatforms) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(integrationplatformsResource, c.ns, name), &camelv1.IntegrationPlatform{})
+		Invokes(testing.NewDeleteActionWithOptions(integrationplatformsResource, c.ns, name, opts), &camelv1.IntegrationPlatform{})
 
 	return err
 }

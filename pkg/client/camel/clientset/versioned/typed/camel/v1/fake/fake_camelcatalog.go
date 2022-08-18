@@ -118,7 +118,7 @@ func (c *FakeCamelCatalogs) UpdateStatus(ctx context.Context, camelCatalog *came
 // Delete takes name of the camelCatalog and deletes it. Returns an error if one occurs.
 func (c *FakeCamelCatalogs) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(camelcatalogsResource, c.ns, name), &camelv1.CamelCatalog{})
+		Invokes(testing.NewDeleteActionWithOptions(camelcatalogsResource, c.ns, name, opts), &camelv1.CamelCatalog{})
 
 	return err
 }
