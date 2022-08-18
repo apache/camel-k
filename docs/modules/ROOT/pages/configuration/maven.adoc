@@ -233,6 +233,46 @@ $ kubectl edit ip camel-k
 Maven extensions are typically used to enable https://maven.apache.org/wagon/wagon-providers/[Wagon Providers], used for the transport of artifacts between repository. 
 
 [[use-case]]
+== Maven Daemon
+
+In this section, we will describe how to use the https://github.com/apache/maven-mvnd[Maven Daemon] (mvnd) as a build strategy additional to the existing pod/routine strategy to build and deploy integrations faster using techniques known from Gradle and Takari.
+
+mvnd starts a daemon process, which helps avoid restarting the built JVM every time, caches the compiled JIT code, and stores the class holders of the maven plugin, speeding up the build.
+
+The mvnd daemon is started by the Maven plugin, and is configured in the `spec.build.maven.daemon` field of the IntegrationPlatform resource.
+
+To build integrations faster using the mvnd daemon, 
+
+- Check the IntegrationPlatform resource,
+
+```sh
+  $ kubectl get ip camel-k -o yaml
+```
+and configure the mvnd daemon in the `spec.build.maven.daemon` field. If the spec.build is configured to mvnd strategy, the maven daemon is automatically started when the integration is built.
+
+
+- If the spec.build is not configured to use mvnd as a build strategy, then configure the spec.build.maven.daemon field to use the mvnd daemon. 
+
+Edit th IntegrationPlatform resource, and set the strategy to `mvnd` in the `spec.build.strategy` field, eg:
+
+```sh
+$ kubectl edit ip camel-k
+```
+
+```yaml
+spec:
+  build:
+    buildeStrategy: mvnd
+```
+such that the resource yaml is updated to: 
+
+```yaml
+status:
+  build:
+    buildStrategy: mvnd
+```
+
+[[use-case]]
 == S3 Bucket as a Maven Repository
 
 In this section, we will show how to configure Camel K to fetch artifacts from a https://aws.amazon.com/s3/[S3] bucket that's set up as a Maven repository.
