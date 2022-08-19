@@ -34,18 +34,41 @@ func newCmdRebuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *rebuildCmdO
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     "rebuild [integration]",
+		Use:     "rebuild [integration1] [integration2] ...",
 		Short:   "Clear the state of integrations to rebuild them",
 		Long:    `Clear the state of one or more integrations causing a rebuild.`,
 		PreRunE: decode(&options),
-		RunE:    options.rebuild,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := options.validate(args); err != nil {
+				return err
+			}
+			if err := options.rebuild(cmd, args); err != nil {
+				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
+			}
+
+			return nil
+		},
 	}
+
+	cmd.Flags().Bool("all", false, "Rebuild all integrations")
 
 	return &cmd, &options
 }
 
 type rebuildCmdOptions struct {
 	*RootCmdOptions
+	RebuildAll bool `mapstructure:"all"`
+}
+
+func (o *rebuildCmdOptions) validate(args []string) error {
+	if o.RebuildAll && len(args) > 0 {
+		return errors.New("invalid combination: both all flag and named integrations are set")
+	}
+	if !o.RebuildAll && len(args) == 0 {
+		return errors.New("invalid combination: neither all flag nor named integrations are set")
+	}
+
+	return nil
 }
 
 func (o *rebuildCmdOptions) rebuild(cmd *cobra.Command, args []string) error {
@@ -55,11 +78,11 @@ func (o *rebuildCmdOptions) rebuild(cmd *cobra.Command, args []string) error {
 	}
 
 	var integrations []v1.Integration
-	if len(args) == 0 {
+	if o.RebuildAll {
 		if integrations, err = o.listAllIntegrations(c); err != nil {
 			return err
 		}
-	} else {
+	} else if len(args) > 0 {
 		if integrations, err = o.getIntegrations(c, args); err != nil {
 			return err
 		}
