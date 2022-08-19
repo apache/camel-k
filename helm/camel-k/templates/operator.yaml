@@ -81,3 +81,7 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
       serviceAccountName: camel-k-operator
+      {{- with .Values.operator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{-end }}

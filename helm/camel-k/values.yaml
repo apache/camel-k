@@ -27,6 +27,7 @@ operator:
   global: "false"
   resources: {}
   securityContext: {}
+  tolerations: []
 
 platform:
   build:

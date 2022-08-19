@@ -82,6 +82,7 @@ Camel K chart and their default values. The chart allows configuration of an `In
 | `operator.global`                      | Indicates if the operator should watch all namespaces                     | `false`                        |
 | `operator.resources`                   | The resource requests and limits to use for the operator                  |                                |
 | `operator.securityContext`             | The (container-related) securityContext to use for the operator           |                                |
+| `operator.tolerations`                 | The list of tolerations to use for the operator                           |                                |
 
 ## Contributing
 
