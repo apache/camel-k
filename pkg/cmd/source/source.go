@@ -85,6 +85,10 @@ func (s *Source) setContent(content []byte) error {
 	return nil
 }
 
+func (s Source) IsYaml() bool {
+	return strings.HasSuffix(s.Name, ".yaml") || strings.HasSuffix(s.Name, ".yml")
+}
+
 // Resolve resolves sources from a variety of locations including local and remote.
 func Resolve(ctx context.Context, locations []string, compress bool, cmd *cobra.Command) ([]Source, error) {
 	sources := make([]Source, 0, len(locations))
