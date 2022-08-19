@@ -194,7 +194,7 @@ endif
 ifeq ($(DRY_RUN), false)
 	@$(KUSTOMIZE) build $(KOPTIONS) $@ | \
 		sed 's/$(PLACEHOLDER)/$(NAMESPACE)/' | \
-		kubectl apply -f -
+		kubectl apply --server-side -f -
 else
 	@$(KUSTOMIZE) build $(KOPTIONS) $@ | \
 		sed 's/$(PLACEHOLDER)/$(NAMESPACE)/'
@@ -236,7 +236,7 @@ endif
 ifeq ($(DRY_RUN), false)
 	@$(KUSTOMIZE) build $(KOPTIONS) $@ | \
 		sed 's/$(PLACEHOLDER)/$(NAMESPACE)/' | \
-		kubectl apply -f -
+		kubectl apply --server-side -f -
 else
 	@$(KUSTOMIZE) build $(KOPTIONS) $@ | \
 		sed 's/$(PLACEHOLDER)/$(NAMESPACE)/'
