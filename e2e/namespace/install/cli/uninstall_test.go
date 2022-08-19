@@ -44,7 +44,7 @@ func TestBasicUninstall(t *testing.T) {
 		Eventually(RoleBinding(ns)).Should(BeNil())
 		Eventually(Configmap(ns, "camel-k-maven-settings")).Should(BeNil())
 		Eventually(ServiceAccount(ns, "camel-k-operator")).Should(BeNil())
-		Eventually(OperatorPod(ns)).Should(BeNil())
+		Eventually(OperatorPod(ns), TestTimeoutMedium).Should(BeNil())
 		Eventually(KameletList(ns)).Should(BeEmpty())
 	})
 }

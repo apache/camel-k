@@ -186,7 +186,7 @@ func TestRunDevMode(t *testing.T) {
 			Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Expect(Kamel("delete", "yaml", "-n", ns).Execute()).To(Succeed())
 			Eventually(Integration(ns, "yaml")).Should(BeNil())
-			Eventually(IntegrationPod(ns, "yaml")).Should(BeNil())
+			Eventually(IntegrationPod(ns, "yaml"), TestTimeoutMedium).Should(BeNil())
 
 			// Second run (rebuild)
 			ctx, cancel := context.WithCancel(TestContext)
