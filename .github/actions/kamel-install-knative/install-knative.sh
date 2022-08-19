@@ -121,6 +121,18 @@ else
   exit 1
 fi
 
+# Eventing sugar controller configuration
+echo "Patching Knative eventing configuration"
+kubectl patch configmap/config-sugar \
+  -n knative-eventing \
+  --type merge \
+  -p '{"data":{"namespace-selector":"{\"matchExpressions\":[{\"key\":\"eventing.knative.dev/injection\",\"operator\":\"In\",\"values\":[\"enabled\"]}]}"}}'
+
+kubectl patch configmap/config-sugar \
+  -n knative-eventing \
+  --type merge \
+  -p '{"data":{"trigger-selector":"{\"matchExpressions\":[{\"key\":\"eventing.knative.dev/injection\",\"operator\":\"In\",\"values\":[\"enabled\"]}]}"}}'
+
 # Wait for installation completed
 echo "Waiting for all pods to be ready in kourier-system"
 kubectl wait --for=condition=Ready pod --all -n kourier-system --timeout=60s
