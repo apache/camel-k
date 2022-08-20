@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -64,7 +65,7 @@ __kamel_dependency_type() {
 		compopt -o nospace
         ;;
     *)
-        local type_list="camel mvn: file:"
+        local type_list="camel: mvn: file:"
         COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
 	    compopt -o nospace
     esac
@@ -297,9 +298,13 @@ func computeCamelDependencies() string {
 	}
 
 	results := make([]string, 0, len(catalog.Artifacts))
-	for k := range catalog.Artifacts {
-		results = append(results, k)
+	for a := range catalog.Artifacts {
+		// skipping camel-k-* and other artifacts as they may not be useful for cli completion
+		if strings.HasPrefix(a, "camel-quarkus-") {
+			results = append(results, v1.NormalizeDependency(a))
+		}
 	}
+	sort.Strings(results)
 
 	return strings.Join(results, " ")
 }
