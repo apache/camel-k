@@ -67,6 +67,11 @@ func (c *CamelCatalogSpec) GetRuntimeVersion() string {
 	return c.Runtime.Version
 }
 
+// GetCamelVersion returns the Camel version the runtime is based on.
+func (c *CamelCatalogSpec) GetCamelVersion() string {
+	return c.Runtime.Metadata["camel.version"]
+}
+
 // HasCapability checks if the given capability is present in the catalog.
 func (c *CamelCatalogSpec) HasCapability(capability string) bool {
 	_, ok := c.Runtime.Capabilities[capability]
