@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.8.3-nightly...HEAD)
+
+**Closed issues:**
+
+- load camel-cxf in camel-k integration [\#3550](https://github.com/apache/camel-k/issues/3550)
+- In a specific scenario a new integration pod is created every ~0.5 seconds [\#3522](https://github.com/apache/camel-k/issues/3522)
+- `make generate-crd` error [\#3453](https://github.com/apache/camel-k/issues/3453)
+
 ## [1.8.3-nightly](https://github.com/apache/camel-k/tree/1.8.3-nightly) (2022-08-16)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/1.9.3-nightly...1.8.3-nightly)
