@@ -47,113 +47,111 @@ func addDependencies(project *maven.Project, dependencies []string, catalog *Run
 	for _, d := range dependencies {
 		switch {
 		case strings.HasPrefix(d, "bom:"):
-			gav := strings.TrimPrefix(d, "bom:")
-
-			d, err := maven.ParseGAV(gav)
-			if err != nil {
+			if err := addBOM(project, d); err != nil {
 				return err
 			}
-
-			project.DependencyManagement.Dependencies = append(project.DependencyManagement.Dependencies, maven.Dependency{
-				GroupID:    d.GroupID,
-				ArtifactID: d.ArtifactID,
-				Version:    d.Version,
-				Type:       "pom",
-				Scope:      "import",
-			})
 		case strings.HasPrefix(d, "camel:"):
-			if catalog != nil && catalog.Runtime.Provider == v1.RuntimeProviderQuarkus {
-				artifactID := strings.TrimPrefix(d, "camel:")
-
-				if !strings.HasPrefix(artifactID, "camel-") {
-					artifactID = "camel-quarkus-" + artifactID
-				}
-
-				project.AddDependencyGAV("org.apache.camel.quarkus", artifactID, "")
-			} else {
-				artifactID := strings.TrimPrefix(d, "camel:")
-
-				if !strings.HasPrefix(artifactID, "camel-") {
-					artifactID = "camel-" + artifactID
-				}
-
-				project.AddDependencyGAV("org.apache.camel", artifactID, "")
-			}
+			addCamelComponent(project, catalog, d)
 		case strings.HasPrefix(d, "camel-k:"):
-			artifactID := strings.TrimPrefix(d, "camel-k:")
-
-			if !strings.HasPrefix(artifactID, "camel-k-") {
-				artifactID = "camel-k-" + artifactID
-			}
-
-			project.AddDependencyGAV("org.apache.camel.k", artifactID, "")
+			addCamelKComponent(project, d)
 		case strings.HasPrefix(d, "camel-quarkus:"):
-			artifactID := strings.TrimPrefix(d, "camel-quarkus:")
-
-			if !strings.HasPrefix(artifactID, "camel-quarkus-") {
-				artifactID = "camel-quarkus-" + artifactID
-			}
-
-			project.AddDependencyGAV("org.apache.camel.quarkus", artifactID, "")
+			addCamelQuarkusComponent(project, d)
 		case strings.HasPrefix(d, "mvn:"):
-			gav := strings.TrimPrefix(d, "mvn:")
-
-			project.AddEncodedDependencyGAV(gav)
+			addMavenDependency(project, d)
 		case strings.HasPrefix(d, "registry-mvn:"):
-			mapping := strings.Split(d, "@")
-			outputFileRelativePath := mapping[1]
-			gavString := strings.TrimPrefix(mapping[0], "registry-mvn:")
-			gav, err := maven.ParseGAV(gavString)
-			if err != nil {
+			if err := addRegistryMavenDependency(project, d); err != nil {
 				return err
 			}
-			plugin := getOrCreateBuildPlugin(project, "com.googlecode.maven-download-plugin", "download-maven-plugin", "1.6.7")
-			exec := maven.Execution{
-				ID:    fmt.Sprint(len(plugin.Executions)),
-				Phase: "package",
-				Goals: []string{
-					"artifact",
-				},
-				Configuration: map[string]string{
-					"outputDirectory": path.Join("../context", filepath.Dir(outputFileRelativePath)),
-					"outputFileName":  filepath.Base(outputFileRelativePath),
-					"groupId":         gav.GroupID,
-					"artifactId":      gav.ArtifactID,
-					"version":         gav.Version,
-					"type":            gav.Type,
-				},
-			}
-			plugin.Executions = append(plugin.Executions, exec)
 		default:
-			if dep := jitpack.ToDependency(d); dep != nil {
-				project.AddDependency(*dep)
-
-				addRepo := true
-				for _, repo := range project.Repositories {
-					if repo.URL == jitpack.RepoURL {
-						addRepo = false
-						break
-					}
-				}
-				if addRepo {
-					project.Repositories = append(project.Repositories, v1.Repository{
-						ID:  "jitpack.io-" + xid.New().String(),
-						URL: jitpack.RepoURL,
-						Releases: v1.RepositoryPolicy{
-							Enabled:        true,
-							ChecksumPolicy: "fail",
-						},
-						Snapshots: v1.RepositoryPolicy{
-							Enabled:        true,
-							ChecksumPolicy: "fail",
-						},
-					})
-				}
-			} else {
-				return fmt.Errorf("unknown dependency type: %s", d)
+			if err := addJitPack(project, d); err != nil {
+				return err
 			}
 		}
 	}
+
+	return nil
+}
+
+func addBOM(project *maven.Project, dependency string) error {
+	gav := strings.TrimPrefix(dependency, "bom:")
+	d, err := maven.ParseGAV(gav)
+	if err != nil {
+		return err
+	}
+	project.DependencyManagement.Dependencies = append(project.DependencyManagement.Dependencies,
+		maven.Dependency{
+			GroupID:    d.GroupID,
+			ArtifactID: d.ArtifactID,
+			Version:    d.Version,
+			Type:       "pom",
+			Scope:      "import",
+		})
+
+	return nil
+}
+
+func addCamelComponent(project *maven.Project, catalog *RuntimeCatalog, dependency string) {
+	artifactID := strings.TrimPrefix(dependency, "camel:")
+	if catalog != nil && catalog.Runtime.Provider == v1.RuntimeProviderQuarkus {
+		if !strings.HasPrefix(artifactID, "camel-") {
+			artifactID = "camel-quarkus-" + artifactID
+		}
+		project.AddDependencyGAV("org.apache.camel.quarkus", artifactID, "")
+	} else {
+		if !strings.HasPrefix(artifactID, "camel-") {
+			artifactID = "camel-" + artifactID
+		}
+		project.AddDependencyGAV("org.apache.camel", artifactID, "")
+	}
+}
+
+func addCamelKComponent(project *maven.Project, dependency string) {
+	artifactID := strings.TrimPrefix(dependency, "camel-k:")
+	if !strings.HasPrefix(artifactID, "camel-k-") {
+		artifactID = "camel-k-" + artifactID
+	}
+	project.AddDependencyGAV("org.apache.camel.k", artifactID, "")
+}
+
+func addCamelQuarkusComponent(project *maven.Project, dependency string) {
+	artifactID := strings.TrimPrefix(dependency, "camel-quarkus:")
+	if !strings.HasPrefix(artifactID, "camel-quarkus-") {
+		artifactID = "camel-quarkus-" + artifactID
+	}
+	project.AddDependencyGAV("org.apache.camel.quarkus", artifactID, "")
+}
+
+func addMavenDependency(project *maven.Project, dependency string) {
+	gav := strings.TrimPrefix(dependency, "mvn:")
+	project.AddEncodedDependencyGAV(gav)
+}
+
+func addRegistryMavenDependency(project *maven.Project, dependency string) error {
+	mapping := strings.Split(dependency, "@")
+	outputFileRelativePath := mapping[1]
+	gavString := strings.TrimPrefix(mapping[0], "registry-mvn:")
+	gav, err := maven.ParseGAV(gavString)
+	if err != nil {
+		return err
+	}
+	plugin := getOrCreateBuildPlugin(project, "com.googlecode.maven-download-plugin", "download-maven-plugin", "1.6.7")
+	exec := maven.Execution{
+		ID:    fmt.Sprint(len(plugin.Executions)),
+		Phase: "package",
+		Goals: []string{
+			"artifact",
+		},
+		Configuration: map[string]string{
+			"outputDirectory": path.Join("../context", filepath.Dir(outputFileRelativePath)),
+			"outputFileName":  filepath.Base(outputFileRelativePath),
+			"groupId":         gav.GroupID,
+			"artifactId":      gav.ArtifactID,
+			"version":         gav.Version,
+			"type":            gav.Type,
+		},
+	}
+	plugin.Executions = append(plugin.Executions, exec)
+
 	return nil
 }
 
@@ -170,7 +168,41 @@ func getOrCreateBuildPlugin(project *maven.Project, groupID string, artifactID s
 		Executions: []maven.Execution{},
 	}
 	project.Build.Plugins = append(project.Build.Plugins, plugin)
+
 	return &project.Build.Plugins[len(project.Build.Plugins)-1]
+}
+
+func addJitPack(project *maven.Project, dependency string) error {
+	dep := jitpack.ToDependency(dependency)
+	if dep == nil {
+		return fmt.Errorf("unknown dependency type: %s", dependency)
+	}
+
+	project.AddDependency(*dep)
+
+	addRepo := true
+	for _, repo := range project.Repositories {
+		if repo.URL == jitpack.RepoURL {
+			addRepo = false
+			break
+		}
+	}
+	if addRepo {
+		project.Repositories = append(project.Repositories, v1.Repository{
+			ID:  "jitpack.io-" + xid.New().String(),
+			URL: jitpack.RepoURL,
+			Releases: v1.RepositoryPolicy{
+				Enabled:        true,
+				ChecksumPolicy: "fail",
+			},
+			Snapshots: v1.RepositoryPolicy{
+				Enabled:        true,
+				ChecksumPolicy: "fail",
+			},
+		})
+	}
+
+	return nil
 }
 
 func addDependenciesFromCatalog(project *maven.Project, catalog *RuntimeCatalog) {
