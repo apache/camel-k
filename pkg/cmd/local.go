@@ -58,6 +58,9 @@ func newCmdLocal(rootCmdOptions *RootCmdOptions) (*cobra.Command, *LocalCmdOptio
 		fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
 	}
 
+	// completion support
+	configureKnownCompletions(&cmd)
+
 	cmd.AddCommand(cmdOnly(newCmdLocalBuild(&options)))
 	cmd.AddCommand(cmdOnly(newCmdLocalInspect(&options)))
 	cmd.AddCommand(cmdOnly(newCmdLocalRun(&options)))
