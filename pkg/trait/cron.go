@@ -353,7 +353,11 @@ func (t *cronTrait) getSourcesFromURIs(e *Environment) ([]string, error) {
 	if sources, err = kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources); err != nil {
 		return nil, err
 	}
-	meta := metadata.ExtractAll(e.CamelCatalog, sources)
+	meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
+	if err != nil {
+		return nil, err
+	}
+
 	return meta.FromURIs, nil
 }
 

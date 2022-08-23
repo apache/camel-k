@@ -39,10 +39,13 @@ func ExtractKameletFromSources(context context.Context, c client.Client, catalog
 	if err != nil {
 		return nil, err
 	}
-	metadata.Each(catalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
+
+	if err := metadata.Each(catalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 		util.StringSliceUniqueConcat(&kamelets, meta.Kamelets)
 		return true
-	})
+	}); err != nil {
+		return nil, err
+	}
 
 	// Check if a Kamelet is configured as default error handler URI
 	defaultErrorHandlerURI := it.Spec.GetConfigurationProperty(v1alpha1.ErrorHandlerAppPropertiesPrefix + ".deadLetterUri")

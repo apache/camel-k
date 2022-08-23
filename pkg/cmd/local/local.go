@@ -100,7 +100,11 @@ func getTopLevelDependencies(ctx context.Context, catalog *camel.RuntimeCatalog,
 		}
 
 		// Extract list of top-level dependencies
-		dependencies.Merge(trait.AddSourceDependencies(sourceSpec, catalog))
+		srcDeps, err := trait.ExtractSourceDependencies(sourceSpec, catalog)
+		if err != nil {
+			return nil, err
+		}
+		dependencies.Merge(srcDeps)
 	}
 
 	return dependencies.List(), nil
