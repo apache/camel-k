@@ -44,9 +44,10 @@ func TestDependenciesJavaSource(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,
@@ -78,9 +79,10 @@ func TestDependenciesJavaScript(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,
@@ -113,9 +115,10 @@ func TestDependenciesGroovy(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,
@@ -144,9 +147,10 @@ func TestDependencies(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(t,
 		[]string{
@@ -176,10 +180,11 @@ func TestDependenciesQuarkus(t *testing.T) {
 	}
 
 	catalog, err := camel.QuarkusCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.NotNil(t, catalog)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(t,
 		[]string{
@@ -207,9 +212,10 @@ func TestJacksonDependency(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,
@@ -235,9 +241,10 @@ func TestJacksonImplicitDependency(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,
@@ -269,9 +276,10 @@ func TestLanguageDependencies(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 	assert.ElementsMatch(
 		t,
 		[]string{
@@ -303,9 +311,10 @@ func TestLanguageDependenciesTransformExpression(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 	assert.ElementsMatch(
 		t,
 		[]string{
@@ -333,9 +342,10 @@ func TestCircuitBreakerDependency(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(t,
 		[]string{
@@ -363,9 +373,10 @@ func TestRestDependency(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,
@@ -395,9 +406,10 @@ func TestRestWithPathDependency(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t, []string{
@@ -425,9 +437,10 @@ func TestRestConfigurationDependency(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t, []string{
@@ -454,9 +467,10 @@ func TestRestClosureDependencyGroovy(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,
@@ -484,9 +498,10 @@ func TestRestClosureDependencyKotlin(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,
@@ -518,9 +533,10 @@ func TestXMLCircuitBreakerDependency(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,
@@ -557,9 +573,10 @@ func TestXMLRestDependency(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,
@@ -614,9 +631,10 @@ func TestXMLLanguageDependencies(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 	assert.ElementsMatch(
 		t,
 		[]string{
@@ -684,9 +702,10 @@ func TestYAMLRestDependency(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,
@@ -710,9 +729,10 @@ func TestYAMLCircuitBreakerDependency(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,
@@ -733,9 +753,10 @@ func TestYAMLLanguageDependencies(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,

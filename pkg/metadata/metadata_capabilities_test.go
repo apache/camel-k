@@ -36,9 +36,10 @@ func TestPlatformHttpCapabilities(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,

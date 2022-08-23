@@ -26,18 +26,23 @@ import (
 )
 
 // ExtractAll returns metadata information from all listed source codes.
-func ExtractAll(catalog *camel.RuntimeCatalog, sources []v1.SourceSpec) IntegrationMetadata {
+func ExtractAll(catalog *camel.RuntimeCatalog, sources []v1.SourceSpec) (IntegrationMetadata, error) {
 	// neutral metadata
 	meta := src.NewMetadata()
 	meta.PassiveEndpoints = true
 	meta.ExposesHTTPServices = false
 
 	for _, source := range sources {
-		meta = merge(meta, Extract(catalog, source).Metadata)
+		m, err := Extract(catalog, source)
+		if err != nil {
+			return IntegrationMetadata{}, err
+		}
+		meta = merge(meta, m.Metadata)
 	}
+
 	return IntegrationMetadata{
 		Metadata: meta,
-	}
+	}, nil
 }
 
 func merge(m1 src.Metadata, m2 src.Metadata) src.Metadata {
@@ -60,7 +65,7 @@ func merge(m1 src.Metadata, m2 src.Metadata) src.Metadata {
 }
 
 // Extract returns metadata information from the source code.
-func Extract(catalog *camel.RuntimeCatalog, source v1.SourceSpec) IntegrationMetadata {
+func Extract(catalog *camel.RuntimeCatalog, source v1.SourceSpec) (IntegrationMetadata, error) {
 	if source.ContentRef != "" {
 		panic("source must be dereferenced before calling this method")
 	}
@@ -74,21 +79,27 @@ func Extract(catalog *camel.RuntimeCatalog, source v1.SourceSpec) IntegrationMet
 	meta.PassiveEndpoints = true
 	meta.ExposesHTTPServices = false
 
-	// TODO: handle error
-	_ = src.InspectorForLanguage(catalog, language).Extract(source, &meta)
+	if err := src.InspectorForLanguage(catalog, language).Extract(source, &meta); err != nil {
+		return IntegrationMetadata{}, err
+	}
 
 	return IntegrationMetadata{
 		Metadata: meta,
-	}
+	}, nil
 }
 
-// Each --.
-func Each(catalog *camel.RuntimeCatalog, sources []v1.SourceSpec, consumer func(int, IntegrationMetadata) bool) {
+// Each traverses the sources with the provided consumer function.
+func Each(catalog *camel.RuntimeCatalog, sources []v1.SourceSpec, consumer func(int, IntegrationMetadata) bool) error {
 	for i, s := range sources {
-		meta := Extract(catalog, s)
+		meta, err := Extract(catalog, s)
+		if err != nil {
+			return err
+		}
 
 		if !consumer(i, meta) {
 			break
 		}
 	}
+
+	return nil
 }
