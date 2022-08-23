@@ -15,14 +15,6 @@ In this section you will find the most basic examples. Useful to start learning 
 | Modeline | [Camel K modeline support](https://camel.apache.org/camel-k/latest/cli/modeline.html) | [see examples](./modeline/)|
 | Volumes | Produce/Consume files attached to a `PVC` | [see examples](./volumes/)|
 
-## Component usage examples
-
-In this section you can find a few examples of certain [`Camel` components](https://camel.apache.org/components/latest/index.html). This is a limited number of the wide variety of components supported by Apache Camel. You can also find useful examples [in this repository](https://github.com/apache/camel-k-examples).
-
-| Type  |  Description | Link  |
-|---|---|---|
-| Knative | Component usage | [see examples](./knative/)|
-
 ## Advanced usage examples
 
 As soon as you will learn the basic stuff, you will like to try the new advanced feature offered by Camel K. Here a few examples:
