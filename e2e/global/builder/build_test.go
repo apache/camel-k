@@ -73,27 +73,16 @@ func TestKitTimerToLogFullNativeBuild(t *testing.T) {
 }
 
 <<<<<<< HEAD
-<<<<<<< HEAD
 =======
 func TestKitMavenDaemonFullBuild(t *testing.T) {
 	doKitFullBuild(t, "mvnd", "300Mi", "5m0s", TestTimeoutLong, kitOptions{
 		dependencies: []string{
 			"camel:timer", "camel:log",
-=======
-func TestKitMavenDaemonFullBuild(t *testing.T) {
-	
-	doKitFullBuild(t, "mvnd", "300Mi", "5m0s", TestTimeoutLong, kitOptions{
-		dependencies: []string{
-			"camel:mvnd",
->>>>>>> f82d5e4c (E2E test for adding mvnd support in builds)
 		},
 	})
 }
 
-<<<<<<< HEAD
 >>>>>>> 6c715963 (add new strategy conditional check in build test)
-=======
->>>>>>> f82d5e4c (E2E test for adding mvnd support in builds)
 func doKitFullBuild(t *testing.T, name string, memoryLimit string, buildTimeout string, testTimeout time.Duration, options kitOptions) {
 	t.Helper()
 
