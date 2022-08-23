@@ -7,8 +7,10 @@
 **Closed issues:**
 
 - load camel-cxf in camel-k integration [\#3550](https://github.com/apache/camel-k/issues/3550)
+- Cannot deploy an integration using configmap/secret key filtering [\#3543](https://github.com/apache/camel-k/issues/3543)
 - In a specific scenario a new integration pod is created every ~0.5 seconds [\#3522](https://github.com/apache/camel-k/issues/3522)
 - `make generate-crd` error [\#3453](https://github.com/apache/camel-k/issues/3453)
+- Update to Knative v1.5.0 [\#3381](https://github.com/apache/camel-k/issues/3381)
 
 ## [1.8.3-nightly](https://github.com/apache/camel-k/tree/1.8.3-nightly) (2022-08-16)
 
