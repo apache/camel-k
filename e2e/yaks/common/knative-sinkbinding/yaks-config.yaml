@@ -21,8 +21,6 @@ config:
 pre:
 - name: installation
   run: |
-    kamel install -n $YAKS_NAMESPACE --force
-
     kubectl apply -n $YAKS_NAMESPACE -f messages-channel.yaml
 
     kamel run receiver.groovy -w -n $YAKS_NAMESPACE
