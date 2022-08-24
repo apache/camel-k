@@ -52,7 +52,6 @@ func ReplaceResource(ctx context.Context, c client.Client, res ctrl.Object) erro
 		mapRequiredMeta(existing, res)
 		mapRequiredServiceData(existing, res)
 		mapRequiredRouteData(existing, res)
-		mapRequiredKnativeServiceV1Beta1Data(existing, res)
 		mapRequiredKnativeServiceV1Data(existing, res)
 		err = c.Update(ctx, res)
 	}
@@ -78,19 +77,6 @@ func mapRequiredRouteData(from runtime.Object, to runtime.Object) {
 	if fromC, ok := from.(*routev1.Route); ok {
 		if toC, ok := to.(*routev1.Route); ok {
 			toC.Spec.Host = fromC.Spec.Host
-		}
-	}
-}
-
-func mapRequiredKnativeServiceV1Beta1Data(from runtime.Object, to runtime.Object) {
-	if fromC, ok := from.(*serving.Service); ok {
-		if toC, ok := to.(*serving.Service); ok {
-			if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/creator"]; present {
-				v1.SetAnnotation(&toC.ObjectMeta, "serving.knative.dev/creator", v)
-			}
-			if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/lastModifier"]; present {
-				v1.SetAnnotation(&toC.ObjectMeta, "serving.knative.dev/lastModifier", v)
-			}
 		}
 	}
 }
