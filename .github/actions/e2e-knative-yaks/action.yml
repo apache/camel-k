@@ -90,6 +90,19 @@ runs:
       image-registry-insecure: ${{steps.config-cluster.outputs.cluster-image-registry-insecure }}
       image-version: ${{ steps.build-kamel.outputs.build-binary-local-image-version }}
 
+  - id: install-global-operator
+    name: "Install Global Operator"
+    uses: ./.github/actions/kamel-install-global-operator
+    with:
+      global-operator-namespace: default
+      catalog-source-name: ${{ steps.config-cluster.outputs.cluster-catalog-source-name }}
+      catalog-source-namespace: ${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}
+      image-namespace: ${{ steps.config-cluster.outputs.cluster-image-namespace }}
+      image-registry-host: ${{ steps.config-cluster.outputs.cluster-image-registry-pull-host }}
+      image-name: ${{ steps.build-kamel.outputs.build-binary-local-image-name }}
+      image-registry-insecure: ${{steps.config-cluster.outputs.cluster-image-registry-insecure }}
+      image-version: ${{ steps.build-kamel.outputs.build-binary-local-image-version }}
+
   - name: Install YAKS
     uses: ./.github/actions/kamel-install-yaks
     with:
