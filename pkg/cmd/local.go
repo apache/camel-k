@@ -20,7 +20,7 @@ package cmd
 import (
 	"fmt"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/spf13/cobra"
 )
 
@@ -78,7 +78,7 @@ type LocalCmdOptions struct {
 func (o *LocalCmdOptions) persistentPreRun(cmd *cobra.Command, args []string) error {
 	// pre-process dependencies
 	for i, dependency := range o.Dependencies {
-		o.Dependencies[i] = v1.NormalizeDependency(dependency)
+		o.Dependencies[i] = camel.NormalizeDependency(dependency)
 	}
 
 	// validate traits
