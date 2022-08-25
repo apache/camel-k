@@ -45,6 +45,9 @@ Feature: Camel K can correctly filter messages from broker
     And Camel K integration receiver should print From all: event-1
     And Camel K integration receiver should print From all: event-2
     And Camel K integration receiver should print From all: event-all
+    And Camel K resource polling configuration
+      | maxAttempts          | 5    |
+      | delayBetweenAttempts | 1000 |
     And Camel K integration receiver should not print From evt1: event-2
     And Camel K integration receiver should not print From evt1: event-all
     And Camel K integration receiver should not print From evt2: event-1
