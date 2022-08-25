@@ -301,7 +301,7 @@ func computeCamelDependencies() string {
 	for a := range catalog.Artifacts {
 		// skipping camel-k-* and other artifacts as they may not be useful for cli completion
 		if strings.HasPrefix(a, "camel-quarkus-") {
-			results = append(results, v1.NormalizeDependency(a))
+			results = append(results, camel.NormalizeDependency(a))
 		}
 	}
 	sort.Strings(results)

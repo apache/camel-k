@@ -66,6 +66,7 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/dsl"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -797,6 +798,7 @@ func (o *runCmdOptions) convertToTraitParameter(c client.Client, value, traitPar
 
 func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, it *v1.Integration, name string) error {
 	var platform *v1.IntegrationPlatform
+	var catalog *camel.RuntimeCatalog
 	for _, item := range o.Dependencies {
 		if strings.HasPrefix(item, "file://") || strings.HasPrefix(item, "http://") || strings.HasPrefix(item, "https://") {
 			if platform == nil {
@@ -810,7 +812,19 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, i
 				return errors.Wrap(err, fmt.Sprintf("Error trying to upload %s to the Image Registry.", item))
 			}
 		} else {
-			it.Spec.AddDependency(item)
+			if catalog == nil {
+				// The catalog used for lightweight validation of Camel components.
+				// The exact runtime version is not used here since resolving the runtime version may be
+				// a costly operation and most of the use cases should be covered by the default catalog.
+				// And the validation only warns potential misusages of Camel components at the CLI level,
+				// so strictness of catalog version is not necessary here.
+				var err error
+				catalog, err = local.CreateCamelCatalog(o.Context)
+				if err != nil {
+					return err
+				}
+			}
+			addDependency(cmd, it, item, catalog)
 		}
 	}
 

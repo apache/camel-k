@@ -51,13 +51,13 @@ var acceptedDependencyTypes = []string{
 func GetDependencies(ctx context.Context, cmd *cobra.Command, srcs, userDependencies, repositories []string,
 	allDependencies bool) ([]string, error) {
 	// Fetch existing catalog or create new one if one does not already exist
-	catalog, err := createCamelCatalog(ctx)
+	catalog, err := CreateCamelCatalog(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create Camel catalog")
 	}
 
 	// Validate user-provided dependencies against Camel catalog
-	validateCamelDependency(cmd, catalog, userDependencies)
+	camel.ValidateDependencies(catalog, userDependencies, cmd)
 
 	// Get top-level dependencies from sources
 	dependencies, err := getTopLevelDependencies(ctx, catalog, srcs)
@@ -114,22 +114,6 @@ func getTopLevelDependencies(ctx context.Context, catalog *camel.RuntimeCatalog,
 	}
 
 	return dependencies.List(), nil
-}
-
-// validateCamelDependency validates dependencies against Camel catalog.
-// It only shows warning and does not throw error in case the Catalog is just not complete
-// and we don't want to let it stop the process.
-func validateCamelDependency(cmd *cobra.Command, catalog *camel.RuntimeCatalog, dependencies []string) {
-	for _, d := range dependencies {
-		if !strings.HasPrefix(d, "camel:") {
-			continue
-		}
-
-		artifact := strings.TrimPrefix(d, "camel:")
-		if ok := catalog.HasArtifact(artifact); !ok {
-			fmt.Fprintf(cmd.ErrOrStderr(), "Warning: dependency %s not found in Camel catalog\n", d)
-		}
-	}
 }
 
 func getTransitiveDependencies(ctx context.Context, catalog *camel.RuntimeCatalog, dependencies []string, repositories []string) ([]string, error) {
@@ -245,7 +229,7 @@ func generateCatalog(ctx context.Context) (*camel.RuntimeCatalog, error) {
 	return catalog, nil
 }
 
-func createCamelCatalog(ctx context.Context) (*camel.RuntimeCatalog, error) {
+func CreateCamelCatalog(ctx context.Context) (*camel.RuntimeCatalog, error) {
 	// Attempt to reuse existing Camel catalog if one is present
 	catalog, err := camel.DefaultCatalog()
 	if err != nil {
