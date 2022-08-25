@@ -32,7 +32,7 @@ spec:
     metadata:
       camel-quarkus.version: 2.11.0
       camel.version: 3.18.0
-      quarkus.version: 2.11.2.Final
+      quarkus.version: 2.11.3.Final
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime
