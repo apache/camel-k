@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -47,21 +48,25 @@ var acceptedDependencyTypes = []string{
 }
 
 // GetDependencies resolves and gets the list of dependencies from catalog and sources.
-func GetDependencies(ctx context.Context, args []string, additionalDependencies []string, repositories []string, allDependencies bool) ([]string, error) {
+func GetDependencies(ctx context.Context, cmd *cobra.Command, srcs, userDependencies, repositories []string,
+	allDependencies bool) ([]string, error) {
 	// Fetch existing catalog or create new one if one does not already exist
 	catalog, err := createCamelCatalog(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create Camel catalog")
 	}
 
-	// Get top-level dependencies
-	dependencies, err := getTopLevelDependencies(ctx, catalog, args)
+	// Validate user-provided dependencies against Camel catalog
+	validateCamelDependency(cmd, catalog, userDependencies)
+
+	// Get top-level dependencies from sources
+	dependencies, err := getTopLevelDependencies(ctx, catalog, srcs)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get top-level dependencies")
+		return nil, errors.Wrap(err, "failed to resolve dependencies from source")
 	}
 
 	// Add additional user-provided dependencies
-	dependencies = append(dependencies, additionalDependencies...)
+	dependencies = append(dependencies, userDependencies...)
 
 	// Compute transitive dependencies
 	if allDependencies {
@@ -80,12 +85,13 @@ func GetDependencies(ctx context.Context, args []string, additionalDependencies 
 	return dependencies, nil
 }
 
-func getTopLevelDependencies(ctx context.Context, catalog *camel.RuntimeCatalog, args []string) ([]string, error) {
+// getTopLevelDependencies gets top-level dependencies from sources.
+func getTopLevelDependencies(ctx context.Context, catalog *camel.RuntimeCatalog, srcs []string) ([]string, error) {
 	// List of top-level dependencies
 	dependencies := strset.New()
 
 	// Invoke the dependency inspector code for each source file
-	for _, src := range args {
+	for _, src := range srcs {
 		data, _, _, err := source.LoadTextContent(ctx, src, false)
 		if err != nil {
 			return []string{}, err
@@ -110,11 +116,27 @@ func getTopLevelDependencies(ctx context.Context, catalog *camel.RuntimeCatalog,
 	return dependencies.List(), nil
 }
 
+// validateCamelDependency validates dependencies against Camel catalog.
+// It only shows warning and does not throw error in case the Catalog is just not complete
+// and we don't want to let it stop the process.
+func validateCamelDependency(cmd *cobra.Command, catalog *camel.RuntimeCatalog, dependencies []string) {
+	for _, d := range dependencies {
+		if !strings.HasPrefix(d, "camel:") {
+			continue
+		}
+
+		artifact := strings.TrimPrefix(d, "camel:")
+		if ok := catalog.HasArtifact(artifact); !ok {
+			fmt.Fprintf(cmd.ErrOrStderr(), "Warning: dependency %s not found in Camel catalog\n", d)
+		}
+	}
+}
+
 func getTransitiveDependencies(ctx context.Context, catalog *camel.RuntimeCatalog, dependencies []string, repositories []string) ([]string, error) {
 	project := builder.GenerateQuarkusProjectCommon(
-		catalog.CamelCatalogSpec.Runtime.Metadata["camel-quarkus.version"],
+		catalog.GetCamelQuarkusVersion(),
 		defaults.DefaultRuntimeVersion,
-		catalog.CamelCatalogSpec.Runtime.Metadata["quarkus.version"],
+		catalog.GetQuarkusVersion(),
 	)
 
 	if err := camel.ManageIntegrationDependencies(&project, dependencies, catalog); err != nil {
@@ -242,6 +264,7 @@ func createCamelCatalog(ctx context.Context) (*camel.RuntimeCatalog, error) {
 }
 
 func OutputDependencies(dependencies []string, format string, cmd *cobra.Command) error {
+	sort.Strings(dependencies)
 	if format != "" {
 		if err := printDependencies(format, dependencies, cmd); err != nil {
 			return err

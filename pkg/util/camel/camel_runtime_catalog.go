@@ -80,13 +80,18 @@ type RuntimeCatalog struct {
 	javaTypeDependencies map[string]string
 }
 
-// HasArtifact --.
+// HasArtifact checks if the given artifact is present in the catalog.
 func (c *RuntimeCatalog) HasArtifact(artifact string) bool {
-	if !strings.HasPrefix(artifact, "camel-") {
-		artifact = "camel-" + artifact
+	a := artifact
+	if !strings.HasPrefix(a, "camel-") {
+		if c.Runtime.Provider == v1.RuntimeProviderQuarkus {
+			a = "camel-quarkus-" + a
+		} else {
+			a = "camel-" + a
+		}
 	}
 
-	_, ok := c.Artifacts[artifact]
+	_, ok := c.Artifacts[a]
 
 	return ok
 }

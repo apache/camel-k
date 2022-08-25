@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"sync"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -111,6 +112,38 @@ func TestLocalBuildWithTrait(t *testing.T) {
 	Eventually(logScanner.IsFound(msgTagged), TestTimeoutMedium).Should(BeTrue())
 	Eventually(logScanner.IsFound(image), TestTimeoutMedium).Should(BeTrue())
 	Eventually(DockerImages, TestTimeoutMedium).Should(ContainSubstring(image))
+}
+
+func TestLocalBuildWithInvalidDependency(t *testing.T) {
+	RegisterTestingT(t)
+
+	ctx, cancel := context.WithCancel(TestContext)
+	defer cancel()
+	piper, pipew := io.Pipe()
+	defer pipew.Close()
+	defer piper.Close()
+
+	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
+	image := "test/test-" + strings.ToLower(util.RandomString(10))
+
+	kamelBuild := KamelWithContext(ctx, "local", "build", file, "--image", image, "-d", "camel-xxx")
+	kamelBuild.SetOut(pipew)
+	kamelBuild.SetErr(pipew)
+
+	logScanner := testutil.NewLogScanner(ctx, piper, "Warning: dependency camel:xxx not found in Camel catalog")
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		err := kamelBuild.Execute()
+		assert.Error(t, err)
+		cancel()
+	}()
+
+	Eventually(logScanner.IsFound("Warning: dependency camel:xxx not found in Camel catalog"), TestTimeoutShort).
+		Should(BeTrue())
+	wg.Wait()
 }
 
 func TestLocalBuildIntegrationDirectory(t *testing.T) {
