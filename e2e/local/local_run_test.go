@@ -45,7 +45,7 @@ func TestLocalRun(t *testing.T) {
 
 	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
 
-	kamelRun := KamelWithContext(ctx, "local", "run", file)
+	kamelRun := kamelWithContext(ctx, "local", "run", file)
 	kamelRun.SetOut(pipew)
 	kamelRun.SetErr(pipew)
 
@@ -71,7 +71,7 @@ func TestLocalRunWithDependencies(t *testing.T) {
 
 	file := testutil.MakeTempCopy(t, "files/dependency.groovy")
 
-	kamelRun := KamelWithContext(ctx, "local", "run", file, "-d", "camel-amqp")
+	kamelRun := kamelWithContext(ctx, "local", "run", file, "-d", "camel-amqp")
 	kamelRun.SetOut(pipew)
 	kamelRun.SetErr(pipew)
 
@@ -98,7 +98,7 @@ func TestLocalRunContainerize(t *testing.T) {
 	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
 	image := "test/test-" + strings.ToLower(util.RandomString(10))
 
-	kamelRun := KamelWithContext(ctx, "local", "run", file, "--image", image, "--containerize")
+	kamelRun := kamelWithContext(ctx, "local", "run", file, "--image", image, "--containerize")
 	kamelRun.SetOut(pipew)
 	kamelRun.SetErr(pipew)
 
@@ -124,7 +124,7 @@ func TestLocalRunIntegrationDirectory(t *testing.T) {
 	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
 	dir := testutil.MakeTempDir(t)
 
-	kamelBuild := KamelWithContext(ctx1, "local", "build", file, "--integration-directory", dir)
+	kamelBuild := kamelWithContext(ctx1, "local", "build", file, "--integration-directory", dir)
 
 	go func() {
 		err := kamelBuild.Execute()
@@ -142,7 +142,7 @@ func TestLocalRunIntegrationDirectory(t *testing.T) {
 	defer pipew.Close()
 	defer piper.Close()
 
-	kamelRun := KamelWithContext(ctx2, "local", "run", "--integration-directory", dir)
+	kamelRun := kamelWithContext(ctx2, "local", "run", "--integration-directory", dir)
 	kamelRun.SetOut(pipew)
 	kamelRun.SetErr(pipew)
 

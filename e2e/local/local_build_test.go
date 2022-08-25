@@ -63,7 +63,7 @@ func TestLocalBuild(t *testing.T) {
 	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
 	image := "test/test-" + strings.ToLower(util.RandomString(10))
 
-	kamelBuild := KamelWithContext(ctx, "local", "build", file, "--image", image)
+	kamelBuild := kamelWithContext(ctx, "local", "build", file, "--image", image)
 	kamelBuild.SetOut(pipew)
 	kamelBuild.SetErr(pipew)
 
@@ -93,7 +93,7 @@ func TestLocalBuildWithTrait(t *testing.T) {
 	file := testutil.MakeTempCopy(t, "files/trait.groovy")
 	image := "test/test-" + strings.ToLower(util.RandomString(10))
 
-	kamelBuild := KamelWithContext(ctx, "local", "build", file, "--image", image)
+	kamelBuild := kamelWithContext(ctx, "local", "build", file, "--image", image)
 	kamelBuild.SetOut(pipew)
 	kamelBuild.SetErr(pipew)
 
@@ -122,7 +122,7 @@ func TestLocalBuildIntegrationDirectory(t *testing.T) {
 	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
 	dir := testutil.MakeTempDir(t)
 
-	kamelBuild := KamelWithContext(ctx, "local", "build", file, "--integration-directory", dir)
+	kamelBuild := kamelWithContext(ctx, "local", "build", file, "--integration-directory", dir)
 
 	go func() {
 		err := kamelBuild.Execute()
@@ -149,7 +149,7 @@ func TestLocalBuildIntegrationDirectoryWithSpaces(t *testing.T) {
 	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
 	dir := testutil.MakeTempDir(t) + " - Camel rocks!"
 
-	kamelBuild := KamelWithContext(ctx, "local", "build", file, "--integration-directory", dir)
+	kamelBuild := kamelWithContext(ctx, "local", "build", file, "--integration-directory", dir)
 
 	go func() {
 		err := kamelBuild.Execute()
@@ -173,7 +173,7 @@ func TestLocalBuildIntegrationDirectoryWithMultiBytes(t *testing.T) {
 	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
 	dir := testutil.MakeTempDir(t) + "_らくだ" // Camel
 
-	kamelBuild := KamelWithContext(ctx, "local", "build", file, "--integration-directory", dir)
+	kamelBuild := kamelWithContext(ctx, "local", "build", file, "--integration-directory", dir)
 
 	go func() {
 		err := kamelBuild.Execute()
@@ -197,7 +197,7 @@ func TestLocalBuildDependenciesOnly(t *testing.T) {
 	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
 	dir := testutil.MakeTempDir(t)
 
-	kamelBuild := KamelWithContext(ctx, "local", "build", file, "--integration-directory", dir, "--dependencies-only", "-d", "camel-amqp")
+	kamelBuild := kamelWithContext(ctx, "local", "build", file, "--integration-directory", dir, "--dependencies-only", "-d", "camel-amqp")
 
 	go func() {
 		err := kamelBuild.Execute()
@@ -222,7 +222,7 @@ func TestLocalBuildModelineDependencies(t *testing.T) {
 	file := testutil.MakeTempCopy(t, "files/dependency.groovy")
 	dir := testutil.MakeTempDir(t)
 
-	kamelBuild := KamelWithContext(ctx, "local", "build", file, "--integration-directory", dir, "-d", "camel-amqp")
+	kamelBuild := kamelWithContext(ctx, "local", "build", file, "--integration-directory", dir, "-d", "camel-amqp")
 
 	go func() {
 		err := kamelBuild.Execute()
