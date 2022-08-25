@@ -44,14 +44,12 @@ func newCmdLocalBuild(localCmdOptions *LocalCmdOptions) (*cobra.Command, *localB
 			if err := options.init(args); err != nil {
 				return err
 			}
-			if err := options.run(cmd, args); err != nil {
-				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
-			}
-			if err := options.deinit(); err != nil {
-				return err
-			}
-
-			return nil
+			defer func() {
+				if err := options.deinit(); err != nil {
+					fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
+				}
+			}()
+			return options.run(cmd, args)
 		},
 		Annotations: map[string]string{
 			offlineCommandLabel: "true",
@@ -187,7 +185,7 @@ func (o *localBuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 	routeFiles := args
 
 	if !o.BaseImage {
-		dependencies, err := local.GetDependencies(o.Context, args, o.Dependencies, o.MavenRepositories, true)
+		dependencies, err := local.GetDependencies(o.Context, cmd, args, o.Dependencies, o.MavenRepositories, true)
 		if err != nil {
 			return err
 		}

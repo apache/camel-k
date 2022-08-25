@@ -24,6 +24,7 @@ import (
 	"context"
 	"io"
 	"strings"
+	"sync"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -52,8 +53,7 @@ func TestLocalRun(t *testing.T) {
 	logScanner := testutil.NewLogScanner(ctx, piper, "Magicstring!")
 
 	go func() {
-		err := kamelRun.Execute()
-		assert.NoError(t, err)
+		_ = kamelRun.Execute()
 		cancel()
 	}()
 
@@ -78,12 +78,42 @@ func TestLocalRunWithDependencies(t *testing.T) {
 	logScanner := testutil.NewLogScanner(ctx, piper, "Magicstring!")
 
 	go func() {
-		err := kamelRun.Execute()
-		assert.NoError(t, err)
+		_ = kamelRun.Execute()
 		cancel()
 	}()
 
 	Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
+}
+
+func TestLocalRunWithInvalidDependency(t *testing.T) {
+	RegisterTestingT(t)
+
+	ctx, cancel := context.WithCancel(TestContext)
+	defer cancel()
+	piper, pipew := io.Pipe()
+	defer pipew.Close()
+	defer piper.Close()
+
+	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
+
+	kamelRun := KamelWithContext(ctx, "local", "run", file, "-d", "camel-xxx")
+	kamelRun.SetOut(pipew)
+	kamelRun.SetErr(pipew)
+
+	logScanner := testutil.NewLogScanner(ctx, piper, "Warning: dependency camel:xxx not found in Camel catalog")
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		err := kamelRun.Execute()
+		assert.Error(t, err)
+		cancel()
+	}()
+
+	Eventually(logScanner.IsFound("Warning: dependency camel:xxx not found in Camel catalog"), TestTimeoutShort).
+		Should(BeTrue())
+	wg.Wait()
 }
 
 func TestLocalRunContainerize(t *testing.T) {
@@ -106,8 +136,7 @@ func TestLocalRunContainerize(t *testing.T) {
 
 	defer StopDockerContainers()
 	go func() {
-		err := kamelRun.Execute()
-		assert.NoError(t, err)
+		_ = kamelRun.Execute()
 		cancel()
 	}()
 
@@ -149,8 +178,7 @@ func TestLocalRunIntegrationDirectory(t *testing.T) {
 	logScanner := testutil.NewLogScanner(ctx2, piper, "Magicstring!")
 
 	go func() {
-		err := kamelRun.Execute()
-		assert.NoError(t, err)
+		_ = kamelRun.Execute()
 		cancel2()
 	}()
 

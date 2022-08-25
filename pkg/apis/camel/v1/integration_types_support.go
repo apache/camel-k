@@ -124,6 +124,10 @@ func NormalizeDependency(dependency string) string {
 		newDep = "camel:" + strings.TrimPrefix(dependency, "camel-quarkus-")
 	case strings.HasPrefix(newDep, "camel-quarkus:"):
 		newDep = "camel:" + strings.TrimPrefix(dependency, "camel-quarkus:")
+	case strings.HasPrefix(newDep, "camel-k-"):
+		newDep = "camel-k:" + strings.TrimPrefix(dependency, "camel-k-")
+	case strings.HasPrefix(newDep, "camel-k:"):
+		// do nothing
 	case strings.HasPrefix(newDep, "camel-"):
 		newDep = "camel:" + strings.TrimPrefix(dependency, "camel-")
 	}

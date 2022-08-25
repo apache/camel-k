@@ -59,14 +59,12 @@ func newCmdLocalRun(localCmdOptions *LocalCmdOptions) (*cobra.Command, *localRun
 				os.Exit(0)
 			}()
 
-			if err := options.run(cmd, args); err != nil {
-				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
-			}
-			if err := options.deinit(); err != nil {
-				return err
-			}
-
-			return nil
+			defer func() {
+				if err := options.deinit(); err != nil {
+					fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
+				}
+			}()
+			return options.run(cmd, args)
 		},
 		Annotations: map[string]string{
 			offlineCommandLabel: "true",
@@ -153,7 +151,7 @@ func (o *localRunCmdOptions) run(cmd *cobra.Command, args []string) error {
 		return local.RunIntegrationImage(o.Context, o.Image, cmd.OutOrStdout(), cmd.ErrOrStderr())
 	}
 
-	dependencies, err := o.processDependencies(args)
+	dependencies, err := o.processDependencies(cmd, args)
 	if err != nil {
 		return err
 	}
@@ -182,9 +180,9 @@ func (o *localRunCmdOptions) run(cmd *cobra.Command, args []string) error {
 		cmd.OutOrStdout(), cmd.ErrOrStderr())
 }
 
-func (o *localRunCmdOptions) processDependencies(args []string) ([]string, error) {
+func (o *localRunCmdOptions) processDependencies(cmd *cobra.Command, args []string) ([]string, error) {
 	if o.IntegrationDirectory == "" {
-		return local.GetDependencies(o.Context, args, o.Dependencies, o.MavenRepositories, true)
+		return local.GetDependencies(o.Context, cmd, args, o.Dependencies, o.MavenRepositories, true)
 	}
 
 	// Set up on the integration directory
