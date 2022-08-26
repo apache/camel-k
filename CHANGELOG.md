@@ -6,11 +6,14 @@
 
 **Closed issues:**
 
+- Base Image is pulled via http instead of https [\#3577](https://github.com/apache/camel-k/issues/3577)
+- How to run a Camel process as a cron job \(other than a timer\) [\#3575](https://github.com/apache/camel-k/issues/3575)
 - load camel-cxf in camel-k integration [\#3550](https://github.com/apache/camel-k/issues/3550)
 - Cannot deploy an integration using configmap/secret key filtering [\#3543](https://github.com/apache/camel-k/issues/3543)
 - In a specific scenario a new integration pod is created every ~0.5 seconds [\#3522](https://github.com/apache/camel-k/issues/3522)
 - `make generate-crd` error [\#3453](https://github.com/apache/camel-k/issues/3453)
 - Update to Knative v1.5.0 [\#3381](https://github.com/apache/camel-k/issues/3381)
+- kamel local build is writing on stderr with Maven dependency specified as modeline even if it is working [\#3252](https://github.com/apache/camel-k/issues/3252)
 - Unable to access MongoDB from kamelets binding \[DOCS bug\] [\#3228](https://github.com/apache/camel-k/issues/3228)
 
 ## [1.8.3-nightly](https://github.com/apache/camel-k/tree/1.8.3-nightly) (2022-08-16)
