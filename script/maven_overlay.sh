@@ -18,8 +18,22 @@
 location=$(dirname $0)
 rootdir=$(realpath ${location}/../)
 
+while getopts "d:s:" opt; do
+  case "${opt}" in
+    d)
+      local_runtime_dir="${OPTARG}"
+      ;;
+    s)
+      staging_repo="${OPTARG}"
+      ;;
+    *)
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+
 if [ "$#" -lt 2 ]; then
-  echo "usage: $0 <Camel K runtime version> <output directory> [<staging repository>] [<local Camel K runtime project directory>]"
+  echo "usage: $0 [-s <staging repository>] [-d <local Camel K runtime project directory>] <Camel K runtime version> <output directory>"
   exit 1
 fi
 
@@ -30,42 +44,37 @@ fi
 
 runtime_version=$1
 output_dir=$2
-staging_repo=${3:-}
-local_runtime_dir=${4:-}
 
 if [ -n "$staging_repo" ]; then
     if  [[ $staging_repo == http:* ]] || [[ $staging_repo == https:* ]]; then
         options="${options} -s ${rootdir}/settings.xml"
         cat << EOF > ${rootdir}/settings.xml
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
-   <profiles>
-     <profile>
-       <id>camel-k-staging</id>
-       <repositories>
-         <repository>
-           <id>camel-k-staging-releases</id>
-           <name>Camel K Staging</name>
-           <url>${staging_repo}</url>
-           <releases>
-             <enabled>true</enabled>
-             <updatePolicy>never</updatePolicy>
-           </releases>
-           <snapshots>
-             <enabled>false</enabled>
-           </snapshots>
-         </repository>
-       </repositories>
-     </profile>
-   </profiles>
-   <activeProfiles>
-     <activeProfile>camel-k-staging</activeProfile>
-   </activeProfiles>
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <profiles>
+    <profile>
+      <id>camel-k-staging</id>
+      <repositories>
+        <repository>
+          <id>camel-k-staging-releases</id>
+          <name>Camel K Staging</name>
+          <url>${staging_repo}</url>
+          <releases>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
+  <activeProfiles>
+    <activeProfile>camel-k-staging</activeProfile>
+  </activeProfiles>
 </settings>
 EOF
-    else
-        local_runtime_dir="${staging_repo}"
-        staging_repo=""
     fi
 fi
 

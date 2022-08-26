@@ -379,7 +379,7 @@ check-platform:
 maven-overlay:
 	@echo "####### Preparing maven dependencies bundle..."
 	mkdir -p build/_maven_overlay
-	./script/maven_overlay.sh $(RUNTIME_VERSION) build/_maven_overlay $(STAGING_RUNTIME_REPO) $(CAMEL_K_RUNTIME_DIR)
+	./script/maven_overlay.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(RUNTIME_VERSION) build/_maven_overlay
 
 kamel-overlay:
 	@echo "####### Copying kamel CLI to output build directory..."
@@ -469,7 +469,7 @@ package-examples:
 
 package-artifacts:
 	# useful for development purpose only in order to include any local development runtime dependency
-	./script/package_maven_artifacts.sh $(RUNTIME_VERSION) $(CAMEL_K_RUNTIME_DIR)
+	./script/package_maven_artifacts.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(RUNTIME_VERSION)
 
 release: clean codegen set-module-version set-version build-resources check-licenses build images images-push cross-compile package-examples git-tag
 
