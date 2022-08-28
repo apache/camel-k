@@ -132,6 +132,7 @@ func GenerateCatalogCommon(
 		project := generateMavenProject(runtime.Version, providerDependencies)
 
 		mc := maven.NewContext(tmpDir)
+		mc.Strategy = ctx.Strategy
 		mc.LocalRepository = mvn.LocalRepository
 		mc.AdditionalArguments = mvn.CLIOptions
 		mc.AddSystemProperty("catalog.path", tmpDir)

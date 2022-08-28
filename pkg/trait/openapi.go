@@ -221,7 +221,7 @@ func (t *openAPITrait) generateOpenAPIConfigMap(e *Environment, resource v1.Data
 	return t.createNewOpenAPIConfigMap(e, resource, tmpDir, generatedContentName)
 }
 
-func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.DataSpec, tmpDir, generatedContentName string) error {
+func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, ctx *builderContext, resource v1.DataSpec, tmpDir, generatedContentName string) error {
 	tmpDir = path.Join(tmpDir, generatedContentName)
 	err := os.MkdirAll(tmpDir, os.ModePerm)
 	if err != nil {
@@ -250,6 +250,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 	}
 
 	mc := maven.NewContext(tmpDir)
+	mc.Strategy = ctx.Strategy
 	mc.LocalRepository = e.Platform.Status.Build.Maven.LocalRepository
 	mc.AdditionalArguments = e.Platform.Status.Build.Maven.CLIOptions
 	mc.AddArgument("-Dopenapi.spec=" + in)

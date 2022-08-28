@@ -118,6 +118,7 @@ func getTransitiveDependencies(ctx context.Context, catalog *camel.RuntimeCatalo
 	}
 
 	mc := maven.NewContext(MavenWorkingDirectory)
+	mc.Strategy = ctx.Strategy
 	mc.LocalRepository = ""
 
 	if len(repositories) > 0 {
