@@ -41,7 +41,7 @@ import (
 func TestKameletChange(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
-		Expect(CreateTimerKamelet(ns, "timer-source")()).To(Succeed())
+		Expect(CreateTimerKamelet(ns, "my-timer-source")()).To(Succeed())
 		Expect(CreateKnativeChannel(ns, "messages")()).To(Succeed())
 
 		Expect(Kamel("run", "-n", ns, "files/display.groovy", "-w").Execute()).To(Succeed())
@@ -49,7 +49,7 @@ func TestKameletChange(t *testing.T) {
 		from := corev1.ObjectReference{
 			Kind:       "Kamelet",
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Name:       "timer-source",
+			Name:       "my-timer-source",
 		}
 
 		to := corev1.ObjectReference{
