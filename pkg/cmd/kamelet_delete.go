@@ -35,19 +35,14 @@ func newKameletDeleteCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kamel
 	}
 
 	cmd := cobra.Command{
-		Use:     "delete <name>",
-		Short:   "Delete a Kamelet",
-		Long:    `Delete a Kamelet.`,
+		Use:     "delete [Kamelet1] [Kamelet2] ...",
+		Short:   "Delete Kamelets deployed on Kubernetes",
 		PreRunE: decode(&options),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
 				return err
 			}
-			if err := options.run(cmd, args); err != nil {
-				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
-			}
-
-			return nil
+			return options.run(cmd, args)
 		},
 	}
 
@@ -63,10 +58,10 @@ type kameletDeleteCommandOptions struct {
 
 func (command *kameletDeleteCommandOptions) validate(args []string) error {
 	if command.All && len(args) > 0 {
-		return errors.New("invalid combination: both all flag and named kamelets are set")
+		return errors.New("invalid combination: --all flag is set and at least one kamelet name is provided")
 	}
 	if !command.All && len(args) == 0 {
-		return errors.New("invalid combination: neither all flag nor named kamelets are set")
+		return errors.New("invalid combination: provide one or several kamelet names or set --all flag for all kamelets")
 	}
 
 	return nil
