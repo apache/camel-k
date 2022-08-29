@@ -42,11 +42,7 @@ func newCmdRebuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *rebuildCmdO
 			if err := options.validate(args); err != nil {
 				return err
 			}
-			if err := options.rebuild(cmd, args); err != nil {
-				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
-			}
-
-			return nil
+			return options.run(cmd, args)
 		},
 	}
 
@@ -62,16 +58,16 @@ type rebuildCmdOptions struct {
 
 func (o *rebuildCmdOptions) validate(args []string) error {
 	if o.RebuildAll && len(args) > 0 {
-		return errors.New("invalid combination: both all flag and named integrations are set")
+		return errors.New("invalid combination: --all flag is set and at least one integration name is provided")
 	}
 	if !o.RebuildAll && len(args) == 0 {
-		return errors.New("invalid combination: neither all flag nor named integrations are set")
+		return errors.New("invalid combination: provide one or several integration names or set --all flag for all integrations")
 	}
 
 	return nil
 }
 
-func (o *rebuildCmdOptions) rebuild(cmd *cobra.Command, args []string) error {
+func (o *rebuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		return err

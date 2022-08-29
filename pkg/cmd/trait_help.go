@@ -89,10 +89,10 @@ type traitMetaData struct {
 
 func (command *traitHelpCommandOptions) validate(args []string) error {
 	if command.IncludeAll && len(args) > 0 {
-		return errors.New("invalid combination: both all flag and a named trait is set")
+		return errors.New("invalid combination: --all flag is set and a trait name is provided")
 	}
 	if !command.IncludeAll && len(args) == 0 {
-		return errors.New("invalid combination: neither all flag nor a named trait is set")
+		return errors.New("invalid combination: provide a trait name or set --all flag for all traits")
 	}
 	return nil
 }

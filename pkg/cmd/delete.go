@@ -46,11 +46,7 @@ func newCmdDelete(rootCmdOptions *RootCmdOptions) (*cobra.Command, *deleteCmdOpt
 			if err := options.validate(args); err != nil {
 				return err
 			}
-			if err := options.run(cmd, args); err != nil {
-				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
-			}
-
-			return nil
+			return options.run(cmd, args)
 		},
 	}
 
@@ -66,10 +62,10 @@ type deleteCmdOptions struct {
 
 func (command *deleteCmdOptions) validate(args []string) error {
 	if command.DeleteAll && len(args) > 0 {
-		return errors.New("invalid combination: both all flag and named integrations are set")
+		return errors.New("invalid combination: --all flag is set and at least one integration name is provided")
 	}
 	if !command.DeleteAll && len(args) == 0 {
-		return errors.New("invalid combination: neither all flag nor named integrations are set")
+		return errors.New("invalid combination: provide one or several integration names or set --all flag for all integrations")
 	}
 
 	return nil

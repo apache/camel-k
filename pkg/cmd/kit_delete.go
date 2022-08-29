@@ -36,19 +36,14 @@ func newKitDeleteCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitDelete
 	}
 
 	cmd := cobra.Command{
-		Use:     "delete <name>",
-		Short:   "Delete an Integration Kit",
-		Long:    `Delete an Integration Kit.`,
+		Use:     "delete [integration kit1] [integration kit2] ...",
+		Short:   "Delete integration kits deployed on Kubernetes",
 		PreRunE: decode(&options),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
 				return err
 			}
-			if err := options.run(cmd, args); err != nil {
-				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
-			}
-
-			return nil
+			return options.run(cmd, args)
 		},
 	}
 
@@ -64,10 +59,10 @@ type kitDeleteCommandOptions struct {
 
 func (command *kitDeleteCommandOptions) validate(args []string) error {
 	if command.All && len(args) > 0 {
-		return errors.New("invalid combination: both all flag and named Kits are set")
+		return errors.New("invalid combination: --all flag is set and at least one integration kit name is provided")
 	}
 	if !command.All && len(args) == 0 {
-		return errors.New("invalid combination: neither all flag nor named Kits are set")
+		return errors.New("invalid combination: provide one or several integration kit names or set --all flag for all integration kits")
 	}
 
 	return nil
