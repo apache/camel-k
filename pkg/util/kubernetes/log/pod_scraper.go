@@ -48,16 +48,18 @@ type PodScraper struct {
 	defaultContainerName string
 	client               kubernetes.Interface
 	L                    klog.Logger
+	tailLines            *int64
 }
 
 // NewPodScraper creates a new pod scraper.
-func NewPodScraper(c kubernetes.Interface, namespace string, podName string, defaultContainerName string) *PodScraper {
+func NewPodScraper(c kubernetes.Interface, namespace string, podName string, defaultContainerName string, tailLines *int64) *PodScraper {
 	return &PodScraper{
 		namespace:            namespace,
 		podName:              podName,
 		defaultContainerName: defaultContainerName,
 		client:               c,
 		L:                    klog.WithName("scraper").WithName("pod").WithValues("name", podName),
+		tailLines:            tailLines,
 	}
 }
 
@@ -83,6 +85,7 @@ func (s *PodScraper) doScrape(ctx context.Context, out *bufio.Writer, clientClos
 	}
 	logOptions := corev1.PodLogOptions{
 		Follow:    true,
+		TailLines: s.tailLines,
 		Container: containerName,
 	}
 	byteReader, err := s.client.CoreV1().Pods(s.namespace).GetLogs(s.podName, &logOptions).Stream(ctx)

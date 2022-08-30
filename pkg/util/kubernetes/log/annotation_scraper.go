@@ -44,16 +44,18 @@ type SelectorScraper struct {
 	podScrapers          sync.Map
 	counter              uint64
 	L                    klog.Logger
+	tailLines            *int64
 }
 
 // NewSelectorScraper creates a new SelectorScraper.
-func NewSelectorScraper(client kubernetes.Interface, namespace string, defaultContainerName string, labelSelector string) *SelectorScraper {
+func NewSelectorScraper(client kubernetes.Interface, namespace string, defaultContainerName string, labelSelector string, tailLines *int64) *SelectorScraper {
 	return &SelectorScraper{
 		client:               client,
 		namespace:            namespace,
 		defaultContainerName: defaultContainerName,
 		labelSelector:        labelSelector,
 		L:                    klog.WithName("scraper").WithName("label").WithValues("selector", labelSelector),
+		tailLines:            tailLines,
 	}
 }
 
@@ -130,7 +132,7 @@ func (s *SelectorScraper) synchronize(ctx context.Context, out *bufio.Writer) er
 }
 
 func (s *SelectorScraper) addPodScraper(ctx context.Context, podName string, out *bufio.Writer) {
-	podScraper := NewPodScraper(s.client, s.namespace, podName, s.defaultContainerName)
+	podScraper := NewPodScraper(s.client, s.namespace, podName, s.defaultContainerName, s.tailLines)
 	podCtx, podCancel := context.WithCancel(ctx)
 	id := atomic.AddUint64(&s.counter, 1)
 	prefix := "[" + strconv.FormatUint(id, 10) + "] "

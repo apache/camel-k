@@ -378,7 +378,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 	if o.Logs || o.Dev {
-		err = k8slog.Print(o.Context, cmd, c, integration, cmd.OutOrStdout())
+		err = k8slog.Print(o.Context, cmd, c, integration, nil, cmd.OutOrStdout())
 		if err != nil {
 			return err
 		}
