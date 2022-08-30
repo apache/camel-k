@@ -111,6 +111,8 @@ type BuildahTask struct {
 	Platform string `json:"platform,omitempty"`
 	// log more information
 	Verbose *bool `json:"verbose,omitempty"`
+	// docker image to use
+	ExecutorImage string `json:"executorImage,omitempty"`
 }
 
 // KanikoTask is used to configure Kaniko
@@ -121,6 +123,8 @@ type KanikoTask struct {
 	Verbose *bool `json:"verbose,omitempty"`
 	// use a cache
 	Cache KanikoTaskCache `json:"cache,omitempty"`
+	// docker image to use
+	ExecutorImage string `json:"executorImage,omitempty"`
 }
 
 // KanikoTaskCache is used to configure Kaniko cache

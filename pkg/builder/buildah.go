@@ -18,3 +18,5 @@ limitations under the License.
 package builder
 
 const BuildahPlatform = "BuildahPlatform"
+const BuildahImage = "BuildahImage"
+const BuildahDefaultImageName = "quay.io/buildah/stable"

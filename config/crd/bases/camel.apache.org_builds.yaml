@@ -101,6 +101,9 @@ spec:
                         contextDir:
                           description: can be useful to share info with other tasks
                           type: string
+                        executorImage:
+                          description: docker image to use
+                          type: string
                         image:
                           description: final image name
                           type: string
@@ -633,6 +636,9 @@ spec:
                           type: object
                         contextDir:
                           description: can be useful to share info with other tasks
+                          type: string
+                        executorImage:
+                          description: docker image to use
                           type: string
                         image:
                           description: final image name
