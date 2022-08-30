@@ -2067,7 +2067,10 @@ func deleteTestNamespace(t *testing.T, ns ctrl.Object) {
 
 func newTestNamespace(injectKnativeBroker bool) ctrl.Object {
 	brokerLabel := "eventing.knative.dev/injection"
-	name := "test-" + uuid.New().String()
+	name := os.Getenv("CAMEL_K_TEST_NS")
+	if name == "" {
+		name = "test-" + uuid.New().String()
+	}
 	c := TestClient()
 
 	if oc, err := openshift.IsOpenShift(TestClient()); err != nil {
