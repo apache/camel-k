@@ -110,7 +110,14 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("build-publish-strategy", "", "Set the build publish strategy")
 	cmd.Flags().String("build-timeout", "", "Set how long the build process can last")
 	cmd.Flags().String("trait-profile", "", "The profile to use for traits")
+
+	// Kaniko
 	cmd.Flags().Bool("kaniko-build-cache", false, "To enable or disable the Kaniko cache")
+	cmd.Flags().String("kaniko-executor-image", "", "The docker image of the Kaniko executor")
+	cmd.Flags().String("kaniko-warmer-image", "", "The docker image of the Kaniko warmer")
+
+	// Buildah
+	cmd.Flags().String("buildah-image", "", "The docker image to use for Buildah")
 
 	// OLM
 	cmd.Flags().Bool("olm", true, "Try to install everything via OLM (Operator Lifecycle Manager) if available")
@@ -165,6 +172,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 type installCmdOptions struct {
 	*RootCmdOptions
 	Wait                     bool     `mapstructure:"wait"`
+	BuildahImage             string   `mapstructure:"buildah-image"`
 	ClusterSetupOnly         bool     `mapstructure:"cluster-setup"`
 	SkipOperatorSetup        bool     `mapstructure:"skip-operator-setup"`
 	SkipClusterSetup         bool     `mapstructure:"skip-cluster-setup"`
@@ -173,6 +181,8 @@ type installCmdOptions struct {
 	ExampleSetup             bool     `mapstructure:"example"`
 	Global                   bool     `mapstructure:"global"`
 	KanikoBuildCache         bool     `mapstructure:"kaniko-build-cache"`
+	KanikoExecutorImage      string   `mapstructure:"kaniko-executor-image"`
+	KanikoWarmerImage        string   `mapstructure:"kaniko-warmer-image"`
 	Save                     bool     `mapstructure:"save" kamel:"omitsave"`
 	Force                    bool     `mapstructure:"force"`
 	Olm                      bool     `mapstructure:"olm"`
@@ -480,11 +490,20 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 			}
 		}
 
-		kanikoBuildCacheFlag := cobraCmd.Flags().Lookup("kaniko-build-cache")
-		if kanikoBuildCacheFlag.Changed {
-			platform.Spec.Build.PublishStrategyOptions[builder.KanikoBuildCacheEnabled] = strconv.FormatBool(o.KanikoBuildCache)
+		if platform.Spec.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko {
+			kanikoBuildCacheFlag := cobraCmd.Flags().Lookup("kaniko-build-cache")
+			if kanikoBuildCacheFlag.Changed {
+				platform.Spec.Build.AddOption(builder.KanikoBuildCacheEnabled, strconv.FormatBool(o.KanikoBuildCache))
+			}
+			if o.KanikoExecutorImage != "" {
+				platform.Spec.Build.AddOption(builder.KanikoExecutorImage, o.KanikoExecutorImage)
+			}
+			if o.KanikoWarmerImage != "" {
+				platform.Spec.Build.AddOption(builder.KanikoWarmerImage, o.KanikoWarmerImage)
+			}
+		} else if platform.Spec.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyBuildah && o.BuildahImage != "" {
+			platform.Spec.Build.AddOption(builder.BuildahImage, o.BuildahImage)
 		}
-
 		// Always create a platform in the namespace where the operator is located
 		err = install.ObjectOrCollect(o.Context, c, namespace, collection, o.Force, platform)
 		if err != nil {

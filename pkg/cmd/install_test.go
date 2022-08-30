@@ -164,6 +164,27 @@ func TestInstallKanikoBuildCacheFlag(t *testing.T) {
 	assert.Equal(t, true, installCmdOptions.KanikoBuildCache)
 }
 
+func TestInstallKanikoExecutorImage(t *testing.T) {
+	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--kaniko-executor-image", "some-executor-image")
+	assert.Nil(t, err)
+	assert.Equal(t, "some-executor-image", installCmdOptions.KanikoExecutorImage)
+}
+
+func TestInstallKanikoWarmerImage(t *testing.T) {
+	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--kaniko-warmer-image", "some-warmer-image")
+	assert.Nil(t, err)
+	assert.Equal(t, "some-warmer-image", installCmdOptions.KanikoWarmerImage)
+}
+
+func TestInstallBuildahImage(t *testing.T) {
+	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--buildah-image", "some-buildah-image")
+	assert.Nil(t, err)
+	assert.Equal(t, "some-buildah-image", installCmdOptions.BuildahImage)
+}
+
 func TestInstallLocalRepositoryFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--maven-local-repository", "someString")

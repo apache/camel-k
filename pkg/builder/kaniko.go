@@ -21,3 +21,7 @@ package builder
 const KanikoCacheDir = "/kaniko/cache"
 const KanikoPVCName = "KanikoPersistentVolumeClaim"
 const KanikoBuildCacheEnabled = "KanikoBuildCacheEnabled"
+const KanikoExecutorImage = "KanikoExecutorImage"
+const KanikoWarmerImage = "KanikoWarmerImage"
+const KanikoDefaultExecutorImageName = "gcr.io/kaniko-project/executor"
+const KanikoDefaultWarmerImageName = "gcr.io/kaniko-project/warmer"

@@ -592,6 +592,13 @@ bool
 
 log more information
 
+|`executorImage` +
+string
+|
+
+
+docker image to use
+
 
 |===
 
@@ -2293,6 +2300,13 @@ log more information
 
 
 use a cache
+
+|`executorImage` +
+string
+|
+
+
+docker image to use
 
 
 |===

@@ -104,7 +104,11 @@ func (t *builderTrait) Apply(e *Environment) error {
 		} else {
 			t.L.Infof("User defined %s platform, will be used from buildah!", platform)
 		}
-
+		var executorImage string
+		if image, found := e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahImage]; found {
+			executorImage = image
+			t.L.Infof("User defined executor image %s will be used for buildah", image)
+		}
 		e.BuildTasks = append(e.BuildTasks, v1.Task{Buildah: &v1.BuildahTask{
 			Platform: platform,
 			BaseTask: v1.BaseTask{
@@ -114,7 +118,8 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Image:    getImageName(e),
 				Registry: e.Platform.Status.Build.Registry,
 			},
-			Verbose: t.Verbose,
+			Verbose:       t.Verbose,
+			ExecutorImage: executorImage,
 		}})
 	//nolint: staticcheck,nolintlint
 	case v1.IntegrationPlatformBuildPublishStrategyKaniko:
@@ -129,6 +134,12 @@ func (t *builderTrait) Apply(e *Environment) error {
 			cacheEnabled = *e.Platform.Status.Build.KanikoBuildCache
 		}
 
+		var executorImage string
+		if image, found := e.Platform.Status.Build.PublishStrategyOptions[builder.KanikoExecutorImage]; found {
+			executorImage = image
+			t.L.Infof("User defined executor image %s will be used for kaniko", image)
+		}
+
 		e.BuildTasks = append(e.BuildTasks, v1.Task{Kaniko: &v1.KanikoTask{
 			BaseTask: v1.BaseTask{
 				Name: "kaniko",
@@ -141,7 +152,8 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Enabled:               &cacheEnabled,
 				PersistentVolumeClaim: persistentVolumeClaim,
 			},
-			Verbose: t.Verbose,
+			Verbose:       t.Verbose,
+			ExecutorImage: executorImage,
 		}})
 	}
 
