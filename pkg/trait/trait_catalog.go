@@ -97,7 +97,7 @@ func (c *Catalog) apply(environment *Environment) error {
 	applicable := false
 	for _, trait := range traits {
 		if environment.Platform == nil && trait.RequiresIntegrationPlatform() {
-			c.L.Debug("Skipping trait because of missing integration platform: %s", trait.ID())
+			c.L.Debugf("Skipping trait because of missing integration platform: %s", trait.ID())
 
 			continue
 		}
