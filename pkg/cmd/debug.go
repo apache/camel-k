@@ -123,7 +123,7 @@ func (o *debugCmdOptions) run(cmd *cobra.Command, args []string) error {
 	selector := fmt.Sprintf("camel.apache.org/debug=true,camel.apache.org/integration=%s", name)
 
 	go func() {
-		err = k8slog.PrintUsingSelector(o.Context, cmd, cmdClient, o.Namespace, "integration", selector, cmd.OutOrStdout())
+		err = k8slog.PrintUsingSelector(o.Context, cmd, cmdClient, o.Namespace, "integration", selector, nil, cmd.OutOrStdout())
 		if err != nil {
 			fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
 		}
