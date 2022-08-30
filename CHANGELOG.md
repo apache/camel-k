@@ -6,7 +6,6 @@
 
 **Closed issues:**
 
-- OPC UA server not reachable not from client [\#3580](https://github.com/apache/camel-k/issues/3580)
 - Base Image is pulled via http instead of https [\#3577](https://github.com/apache/camel-k/issues/3577)
 - How to run a Camel process as a cron job \(other than a timer\) [\#3575](https://github.com/apache/camel-k/issues/3575)
 - load camel-cxf in camel-k integration [\#3550](https://github.com/apache/camel-k/issues/3550)
