@@ -101,3 +101,18 @@ func TestParseErrorHandlerSinkWithParametersDoesSucceed(t *testing.T) {
 	assert.Equal(t, "value1", parameters["camel.beans.defaultErrorHandler.param1"])
 	assert.Equal(t, "value2", parameters["camel.beans.defaultErrorHandler.param2"])
 }
+
+func TestParseErrorHandlerWithWrongDefinition(t *testing.T) {
+	_, err := parseErrorHandler(
+		[]byte(`{
+			"sink": {
+				"ref": {
+					"kind": "Kamelet",
+					"apiVersion": "camel.apache.org/v1alpha1",
+					"name": "err-sink"
+				}
+			}
+		}`),
+	)
+	assert.NotNil(t, err)
+}

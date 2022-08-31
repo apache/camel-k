@@ -46,11 +46,7 @@ func maybeErrorHandler(errHandlConf *v1alpha1.ErrorHandlerSpec, bindingContext b
 			}
 		}
 
-		err = setErrorHandlerConfiguration(errorHandlerBinding, errorHandlerSpec)
-		if err != nil {
-			return nil, errors.Wrap(err, "could not set integration error handler")
-		}
-
+		_ = setErrorHandlerConfiguration(errorHandlerBinding, errorHandlerSpec)
 		return errorHandlerBinding, nil
 	}
 	return nil, nil
@@ -87,17 +83,31 @@ func parseErrorHandler(rawMessage v1alpha1.RawMessage) (v1alpha1.ErrorHandler, e
 			return nil, err
 		}
 
-		return dst, nil
+		return verifyErrorHandler(dst)
 	}
 
 	return nil, errors.New("You must provide any supported error handler")
 }
 
-func setErrorHandlerConfiguration(errorHandlerBinding *bindings.Binding, errorHandler v1alpha1.ErrorHandler) error {
+func verifyErrorHandler(errorHandler v1alpha1.ErrorHandler) (v1alpha1.ErrorHandler, error) {
 	properties, err := errorHandler.Configuration()
+	if err != nil {
+		return nil, err
+	} else if properties == nil {
+		return nil, errors.New("The properties of the error handler could not be found")
+	}
+	if errorHandler.Type() == v1alpha1.ErrorHandlerTypeSink && errorHandler.Endpoint() == nil {
+		return nil, errors.New("The endpoint of the error handler could not be found")
+	}
+	return errorHandler, nil
+}
+
+func setErrorHandlerConfiguration(errorHandlerBinding *bindings.Binding, errorHandler v1alpha1.ErrorHandler) error {
+	_, err := verifyErrorHandler(errorHandler)
 	if err != nil {
 		return err
 	}
+	properties, _ := errorHandler.Configuration()
 	// initialize map if not yet initialized
 	if errorHandlerBinding.ApplicationProperties == nil {
 		errorHandlerBinding.ApplicationProperties = make(map[string]string)
