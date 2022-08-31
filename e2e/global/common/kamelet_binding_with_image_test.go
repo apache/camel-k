@@ -23,14 +23,14 @@ limitations under the License.
 package common
 
 import (
-	"github.com/onsi/gomega/gstruct"
 	"testing"
 
-	. "github.com/apache/camel-k/e2e/support"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gstruct"
 
 	corev1 "k8s.io/api/core/v1"
 
+	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
@@ -80,8 +80,9 @@ func TestBindingWithImage(t *testing.T) {
 			Eventually(IntegrationGeneration(ns, bindingID)).
 				Should(gstruct.PointTo(BeNumerically("==", 1)))
 			Eventually(Integration(ns, bindingID)).Should(WithTransform(Annotations, And(
-				HaveKeyWithValue("test", "1"))),
-				HaveKeyWithValue("trait.camel.apache.org/container.image", expectedImage))
+				HaveKeyWithValue("test", "1"),
+				HaveKeyWithValue("trait.camel.apache.org/container.image", expectedImage),
+			)))
 			Eventually(IntegrationStatusImage(ns, bindingID)).
 				Should(Equal(expectedImage))
 			Eventually(IntegrationPodPhase(ns, bindingID), TestTimeoutLong).
@@ -100,8 +101,9 @@ func TestBindingWithImage(t *testing.T) {
 			Eventually(IntegrationGeneration(ns, bindingID)).
 				Should(gstruct.PointTo(BeNumerically("==", 1)))
 			Eventually(Integration(ns, bindingID)).Should(WithTransform(Annotations, And(
-				HaveKeyWithValue("test", "2"))),
-				HaveKeyWithValue("trait.camel.apache.org/container.image", expectedImage))
+				HaveKeyWithValue("test", "2"),
+				HaveKeyWithValue("trait.camel.apache.org/container.image", expectedImage),
+			)))
 			Eventually(IntegrationStatusImage(ns, bindingID)).
 				Should(Equal(expectedImage))
 			Eventually(IntegrationPodPhase(ns, bindingID), TestTimeoutLong).
