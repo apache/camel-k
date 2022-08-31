@@ -116,7 +116,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			},
 			Verbose: t.Verbose,
 		}})
-	// nolint: staticcheck
+	//nolint: staticcheck,nolintlint
 	case v1.IntegrationPlatformBuildPublishStrategyKaniko:
 		var persistentVolumeClaim string
 		var found, cacheEnabled bool
