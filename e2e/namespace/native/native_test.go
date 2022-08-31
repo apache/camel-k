@@ -49,8 +49,9 @@ func TestNativeIntegrations(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-quarkus-native"
 		Expect(KamelInstallWithID(operatorID, ns,
-			"--build-timeout", "15m0s",
-			"--operator-resources", "limits.memory=4Gi",
+			"--build-timeout", "30m0s",
+			"--operator-resources", "limits.memory=4.5Gi",
+			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=3g",
 		).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
@@ -61,7 +62,11 @@ func TestNativeIntegrations(t *testing.T) {
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPhase(ns, name)).Should(Equal(v1.IntegrationPhaseError))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionKitAvailable)).Should(Equal(corev1.ConditionFalse))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionKitAvailable)).
+				Should(Equal(corev1.ConditionFalse))
+
+			// Clean up
+			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("automatic rollout deployment from fast-jar to native kit", func(t *testing.T) {
@@ -77,7 +82,7 @@ func TestNativeIntegrations(t *testing.T) {
 
 			// Check the fast-jar Kit is ready
 			Eventually(Kits(ns, withFastJarLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
-				TestTimeoutVeryLong).Should(HaveLen(1))
+				TestTimeoutLong).Should(HaveLen(1))
 
 			fastJarKit := Kits(ns, withFastJarLayout, KitWithPhase(v1.IntegrationKitPhaseReady))()[0]
 			// Check the Integration uses the fast-jar Kit
@@ -87,14 +92,16 @@ func TestNativeIntegrations(t *testing.T) {
 
 			// Check the Integration is ready
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationPod(ns, name), TestTimeoutShort).Should(WithTransform(getContainerCommand(), ContainSubstring("java")))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationPod(ns, name), TestTimeoutShort).
+				Should(WithTransform(getContainerCommand(), ContainSubstring("java")))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
 
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			// Check the native Kit is ready
 			Eventually(Kits(ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
-				TestTimeoutLong).Should(HaveLen(1))
+				TestTimeoutVeryLong).Should(HaveLen(1))
 
 			nativeKit := Kits(ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady))()[0]
 			// Check the Integration uses the native Kit
@@ -104,8 +111,10 @@ func TestNativeIntegrations(t *testing.T) {
 
 			// Check the Integration is still ready
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationPod(ns, name), TestTimeoutShort).Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-.+-runner.*")))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationPod(ns, name), TestTimeoutShort).
+				Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-.+-runner.*")))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
 
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		})
