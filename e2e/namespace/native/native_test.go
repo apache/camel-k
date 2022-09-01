@@ -65,8 +65,24 @@ func TestNativeIntegrations(t *testing.T) {
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionKitAvailable)).
 				Should(Equal(corev1.ConditionFalse))
 
+				// Clean up
+			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("warm up before native build testing", func(t *testing.T) {
+			// The following native build test is under tight time constraints, so here it runs
+			// a warm up testing to make sure necessary jars are already downloaded.
+			name := "warm-up-yaml"
+			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
 			// Clean up
 			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
+			Expect(DeleteKits(ns)).To(Succeed())
 		})
 
 		t.Run("automatic rollout deployment from fast-jar to native kit", func(t *testing.T) {
