@@ -1107,6 +1107,20 @@ func Kits(ns string, options ...interface{}) func() []v1.IntegrationKit {
 	}
 }
 
+func DeleteKits(ns string) error {
+	kits := Kits(ns)()
+	if len(kits) == 0 {
+		return nil
+	}
+	for _, kit := range kits {
+		if err := TestClient().Delete(TestContext, &kit); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func OperatorImage(ns string) func() string {
 	return func() string {
 		pod := OperatorPod(ns)()
@@ -1360,8 +1374,7 @@ func DeletePlatform(ns string) func() bool {
 		if pl == nil {
 			return true
 		}
-		err := TestClient().Delete(TestContext, pl)
-		if err != nil {
+		if err := TestClient().Delete(TestContext, pl); err != nil {
 			log.Error(err, "Got error while deleting the platform")
 		}
 		return false
