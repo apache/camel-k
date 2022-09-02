@@ -41,7 +41,7 @@ type kitOptions struct {
 }
 
 func TestKitTimerToLogFullBuild(t *testing.T) {
-	doKitFullBuild(t, "timer-to-log", "300Mi", "5m0s", TestTimeoutLong, kitOptions{
+	doKitFullBuild(t, "timer-to-log", "500Mi", "8m0s", TestTimeoutLong, kitOptions{
 		dependencies: []string{
 			"camel:timer", "camel:log",
 		},
@@ -49,7 +49,7 @@ func TestKitTimerToLogFullBuild(t *testing.T) {
 }
 
 func TestKitKnativeFullBuild(t *testing.T) {
-	doKitFullBuild(t, "knative", "300Mi", "5m0s", TestTimeoutLong, kitOptions{
+	doKitFullBuild(t, "knative", "500Mi", "8m0s", TestTimeoutLong, kitOptions{
 		dependencies: []string{
 			"camel-k-knative",
 		},
@@ -72,7 +72,8 @@ func TestKitTimerToLogFullNativeBuild(t *testing.T) {
 	})
 }
 
-func doKitFullBuild(t *testing.T, name string, memoryLimit string, buildTimeout string, testTimeout time.Duration, options kitOptions) {
+func doKitFullBuild(t *testing.T, name string, memoryLimit string, buildTimeout string, testTimeout time.Duration,
+	options kitOptions) {
 	t.Helper()
 
 	WithNewTestNamespace(t, func(ns string) {
