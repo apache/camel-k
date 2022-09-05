@@ -16,7 +16,7 @@
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION ?= 1.10.1-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
-LAST_RELEASED_VERSION := 1.10.0
+LAST_RELEASED_VERSION ?= 1.10.0
 RUNTIME_VERSION := 1.14.0
 BUILDAH_VERSION := 1.23.3
 KANIKO_VERSION := 0.17.1
@@ -133,6 +133,13 @@ endef
 
 export LICENSE_HEADER
 default: build
+
+bump-replace:
+	@# Bump version and replace with the variables provided by the user
+	@sed -i 's/^VERSION ?= .*$//VERSION ?= $(VERSION)/' ./script/Makefile
+	@sed -i 's/^LAST_RELEASED_VERSION ?= .*$//LAST_RELEASED_VERSION ?= $(LAST_RELEASED_VERSION)/' ./script/Makefile
+
+bump: bump-replace codegen bundle
 
 # Generates the version file
 codegen:
