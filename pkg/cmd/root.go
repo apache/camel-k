@@ -152,6 +152,7 @@ func addKamelSubcommands(cmd *cobra.Command, options *RootCmdOptions) {
 	cmd.AddCommand(cmdOnly(newCmdBind(options)))
 	cmd.AddCommand(cmdOnly(newCmdPromote(options)))
 	cmd.AddCommand(newCmdKamelet(options))
+	cmd.AddCommand(cmdOnly(newCmdConfig(options)))
 }
 
 func addHelpSubCommands(cmd *cobra.Command, options *RootCmdOptions) error {
@@ -182,9 +183,13 @@ func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 			return errors.Wrap(err, "cannot get command client")
 		}
 		if command.Namespace == "" {
-			current, err := c.GetCurrentNamespace(command.KubeConfig)
-			if err != nil {
-				return errors.Wrap(err, "cannot get current namespace")
+			current := viper.GetString("kamel.config.default-namespace")
+			if current == "" {
+				defaultNS, err := c.GetCurrentNamespace(command.KubeConfig)
+				if err != nil {
+					return errors.Wrap(err, "cannot get current namespace")
+				}
+				current = defaultNS
 			}
 			err = cmd.Flag("namespace").Value.Set(current)
 			if err != nil {

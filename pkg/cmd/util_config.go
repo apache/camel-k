@@ -55,8 +55,17 @@ type Config struct {
 
 // LoadConfiguration loads a kamel configuration file.
 func LoadConfiguration() (*Config, error) {
+	return loadConfiguration(viper.ConfigFileUsed())
+}
+
+// LoadConfiguration loads a kamel configuration file from a specific location.
+func LoadConfigurationFrom(location string) (*Config, error) {
+	return loadConfiguration(location)
+}
+
+func loadConfiguration(location string) (*Config, error) {
 	config := Config{
-		location: viper.ConfigFileUsed(),
+		location: location,
 		content:  make(map[string]interface{}),
 	}
 
