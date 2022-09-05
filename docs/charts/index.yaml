@@ -2,6 +2,33 @@ apiVersion: v1
 entries:
   camel-k:
   - apiVersion: v2
+    appVersion: 1.10.0
+    created: "2022-09-05T08:05:38.933946681+02:00"
+    description: A lightweight integration platform, born on Kubernetes, with serverless
+      superpowers
+    digest: 3d0c2f0d095a8a2c6780b63d68c3dc1da584a9b33ec7229f22733cb62be505d2
+    home: https://camel.apache.org/camel-k/latest/
+    icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
+    keywords:
+    - serverless
+    - integration
+    - patterns
+    maintainers:
+    - email: nferraro@apache.org
+      name: nferraro
+    - email: acosentino@apache.org
+      name: acosentino
+    name: camel-k
+    sources:
+    - https://github.com/apache/camel-k
+    - https://github.com/apache/camel-k-runtime
+    - https://github.com/apache/camel-quarkus
+    - https://github.com/apache/camel
+    type: application
+    urls:
+    - https://apache.github.io/camel-k/charts/camel-k-0.11.0.tgz
+    version: 0.11.0
+- apiVersion: v2
     appVersion: 1.9.2
     created: "2022-05-24T14:23:13.27813937+02:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
@@ -557,4 +584,4 @@ entries:
     urls:
     - https://apache.github.io/camel-k/charts/camel-k-0.1.0.tgz
     version: 0.1.0
-generated: "2022-03-07T07:52:06.816108619+01:00"
+generated: "2022-09-05T08:05:38.890961567+02:00"
