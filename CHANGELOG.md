@@ -8,6 +8,9 @@
 
 - Validate failure in CI [\#3591](https://github.com/apache/camel-k/issues/3591)
 - Add back beginner examples [\#3579](https://github.com/apache/camel-k/issues/3579)
+- 1.10.0 Release [\#3560](https://github.com/apache/camel-k/issues/3560)
+- CPU Spikes on Openshift with unusual operator behaviour [\#3441](https://github.com/apache/camel-k/issues/3441)
+- Release documentation: Review steps and make it a bit more complete for new release manager [\#2931](https://github.com/apache/camel-k/issues/2931)
 
 ## [v1.10.0](https://github.com/apache/camel-k/tree/v1.10.0) (2022-08-31)
 
