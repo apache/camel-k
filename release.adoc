@@ -295,3 +295,15 @@ More importantly the _tag_ and _revision_ section configuration should change fo
 ```
 
 _P.S please note that the bottles are created using the https://docs.brew.sh/Brew-Test-Bot[Brew Test Bot]   https://docs.brew.sh/Bottles[ [1] ]._
+
+=== Bump to next version
+
+Once the release process is complete, we must prepare the configuration for next version. In order to do so, please run the following:
+```
+make bump VERSION=<new-version> LAST_RELEASED_VERSION=<replace-version>
+git commit -m "chore: bump next version to <new-version>"
+git push upstream main
+```
+Where <new-version> represents the new version you want to bump and <replace-version> the version that was previously released.
+
+In case of a major or minor release, please update accordingly the `release` workflow in order to always have the latest 2 release branches and `main` running in a CI fashion. See https://github.com/apache/camel-k/pull/3607/commits/f835c978dcfbcadae99b0f8b2fbcd07f49adb3a1 for reference.
