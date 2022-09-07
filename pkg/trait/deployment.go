@@ -46,16 +46,17 @@ func newDeploymentTrait() Trait {
 }
 
 func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
-		if e.Integration != nil {
-			e.Integration.Status.SetCondition(
-				v1.IntegrationConditionDeploymentAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationConditionDeploymentAvailableReason,
-				"explicitly disabled",
-			)
-		}
+	if !e.IntegrationInRunningPhases() {
+		return false, nil
+	}
 
+	if !pointer.BoolDeref(t.Enabled, true) {
+		e.Integration.Status.SetCondition(
+			v1.IntegrationConditionDeploymentAvailable,
+			corev1.ConditionFalse,
+			v1.IntegrationConditionDeploymentAvailableReason,
+			"explicitly disabled",
+		)
 		return false, nil
 	}
 
