@@ -65,7 +65,7 @@ func (t *openAPITrait) IsPlatformTrait() bool {
 }
 
 func (t *openAPITrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 
