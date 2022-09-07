@@ -902,7 +902,7 @@ spec:
                     properties:
                       auto:
                         description: To automatically add an ingress whenever the
-                          integration uses a HTTP endpoint consumer.
+                          integration uses an HTTP endpoint consumer.
                         type: boolean
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -914,8 +914,7 @@ spec:
                           traits share this common property.
                         type: boolean
                       host:
-                        description: '**Required**. To configure the host exposed
-                          by the ingress.'
+                        description: To configure the host exposed by the ingress.
                         type: string
                     type: object
                   istio:
@@ -2536,7 +2535,7 @@ spec:
                     properties:
                       auto:
                         description: To automatically add an ingress whenever the
-                          integration uses a HTTP endpoint consumer.
+                          integration uses an HTTP endpoint consumer.
                         type: boolean
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -2548,8 +2547,7 @@ spec:
                           traits share this common property.
                         type: boolean
                       host:
-                        description: '**Required**. To configure the host exposed
-                          by the ingress.'
+                        description: To configure the host exposed by the ingress.
                         type: string
                     type: object
                   istio:
