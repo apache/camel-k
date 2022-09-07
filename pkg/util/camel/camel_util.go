@@ -65,10 +65,10 @@ func newSemVerConstraint(versionConstraint string) *semver.Constraints {
 	constraint, err := semver.NewConstraint(versionConstraint)
 	if err != nil || constraint == nil {
 		if err != nil {
-			log.Debug("Unable to parse version constraint: %s, error:\n", versionConstraint, err.Error())
+			log.Debugf("Unable to parse version constraint: %s, error: %s", versionConstraint, err.Error())
 		}
 		if constraint == nil {
-			log.Debug("Unable to parse version constraint: %s\n", versionConstraint)
+			log.Debugf("Unable to parse version constraint: %s", versionConstraint)
 		}
 	}
 
