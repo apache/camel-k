@@ -96,7 +96,7 @@ func (c *Catalog) apply(environment *Environment) error {
 
 	applicable := false
 	for _, trait := range traits {
-		if environment.Platform == nil && trait.RequiresIntegrationPlatform() {
+		if !environment.PlatformInPhase(v1.IntegrationPlatformPhaseReady) && trait.RequiresIntegrationPlatform() {
 			c.L.Debugf("Skipping trait because of missing integration platform: %s", trait.ID())
 
 			continue
@@ -131,8 +131,8 @@ func (c *Catalog) apply(environment *Environment) error {
 	}
 	c.L.Debugf("Applied traits: %s", strings.Join(traitIds, ","))
 
-	if !applicable && environment.Platform == nil {
-		return errors.New("no trait can be executed because of no integration platform found")
+	if !applicable && environment.PlatformInPhase(v1.IntegrationPlatformPhaseReady) {
+		return errors.New("no trait can be executed because of no ready platform found")
 	}
 
 	for _, processor := range environment.PostProcessors {

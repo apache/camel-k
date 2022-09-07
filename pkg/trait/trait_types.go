@@ -251,6 +251,20 @@ func (e *Environment) IntegrationKitInPhase(phases ...v1.IntegrationKitPhase) bo
 	return false
 }
 
+func (e *Environment) PlatformInPhase(phases ...v1.IntegrationPlatformPhase) bool {
+	if e.Platform == nil {
+		return false
+	}
+
+	for _, phase := range phases {
+		if e.Platform.Status.Phase == phase {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (e *Environment) InPhase(c v1.IntegrationKitPhase, i v1.IntegrationPhase) bool {
 	return e.IntegrationKitInPhase(c) && e.IntegrationInPhase(i)
 }
