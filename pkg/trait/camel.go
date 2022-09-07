@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
@@ -52,20 +53,26 @@ func (t *camelTrait) Configure(e *Environment) (bool, error) {
 		return false, errors.New("trait camel cannot be disabled")
 	}
 
+	if t.RuntimeVersion == "" {
+		t.RuntimeVersion = determineRuntimeVersion(e)
+	}
+
 	return true, nil
 }
 
 func (t *camelTrait) Apply(e *Environment) error {
-	rv := t.determineRuntimeVersion(e)
+	if t.RuntimeVersion == "" {
+		return errors.New("unable to determine runtime version")
+	}
 
 	if e.CamelCatalog == nil {
-		err := t.loadOrCreateCatalog(e, rv)
+		err := t.loadOrCreateCatalog(e, t.RuntimeVersion)
 		if err != nil {
 			return err
 		}
 	}
 
-	e.RuntimeVersion = rv
+	e.RuntimeVersion = t.RuntimeVersion
 
 	if e.Integration != nil {
 		e.Integration.Status.RuntimeVersion = e.CamelCatalog.Runtime.Version
@@ -142,19 +149,6 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 	e.CamelCatalog = catalog
 
 	return nil
-}
-
-func (t *camelTrait) determineRuntimeVersion(e *Environment) string {
-	if t.RuntimeVersion != "" {
-		return t.RuntimeVersion
-	}
-	if e.Integration != nil && e.Integration.Status.RuntimeVersion != "" {
-		return e.Integration.Status.RuntimeVersion
-	}
-	if e.IntegrationKit != nil && e.IntegrationKit.Status.RuntimeVersion != "" {
-		return e.IntegrationKit.Status.RuntimeVersion
-	}
-	return e.Platform.Status.Build.RuntimeVersion
 }
 
 // IsPlatformTrait overrides base class method.
@@ -286,4 +280,17 @@ func (t *camelTrait) computeConfigMaps(e *Environment) []ctrl.Object {
 	}
 
 	return maps
+}
+
+func determineRuntimeVersion(e *Environment) string {
+	if e.Integration != nil && e.Integration.Status.RuntimeVersion != "" {
+		return e.Integration.Status.RuntimeVersion
+	}
+	if e.IntegrationKit != nil && e.IntegrationKit.Status.RuntimeVersion != "" {
+		return e.IntegrationKit.Status.RuntimeVersion
+	}
+	if e.Platform != nil && e.Platform.Status.Build.RuntimeVersion != "" {
+		return e.Platform.Status.Build.RuntimeVersion
+	}
+	return ""
 }
