@@ -20,7 +20,7 @@ package trait
 import (
 	"fmt"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -29,6 +29,7 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/openshift"
+	image "github.com/apache/camel-k/pkg/util/registry"
 )
 
 type platformTrait struct {
@@ -59,6 +60,10 @@ func (t *platformTrait) Configure(e *Environment) (bool, error) {
 					return false, err
 				} else if ocp {
 					t.CreateDefault = &ocp
+				} else if addr, err := image.GetRegistryAddress(e.Ctx, t.Client); err != nil {
+					return false, err
+				} else if addr != nil {
+					t.CreateDefault = pointer.Bool(true)
 				}
 			}
 			if t.Global == nil {
@@ -96,7 +101,7 @@ func (t *platformTrait) Apply(e *Environment) error {
 
 func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlatform, error) {
 	pl, err := platform.GetOrFindForResource(e.Ctx, t.Client, e.Integration, false)
-	if err != nil && k8serrors.IsNotFound(err) {
+	if err != nil && apierrors.IsNotFound(err) {
 		if pointer.BoolDeref(t.CreateDefault, false) {
 			platformName := e.Integration.Status.Platform
 			if platformName == "" {
@@ -126,7 +131,7 @@ func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlat
 			e.Resources.Add(pl)
 
 			// Make sure that IntegrationPlatform installed in operator namespace can be seen by others
-			if err := install.IntegrationPlatformViewerRole(e.Ctx, t.Client, namespace); err != nil && !k8serrors.IsAlreadyExists(err) {
+			if err := install.IntegrationPlatformViewerRole(e.Ctx, t.Client, namespace); err != nil && !apierrors.IsAlreadyExists(err) {
 				t.L.Info(fmt.Sprintf("Cannot install global IntegrationPlatform viewer role in namespace '%s': skipping.", namespace))
 			}
 
