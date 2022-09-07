@@ -138,6 +138,9 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 					KanikoBuildCache:       &kanikoCache,
 				},
 			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
