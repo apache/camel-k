@@ -22,7 +22,7 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
-	networking "k8s.io/api/networking/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
 
@@ -50,49 +50,30 @@ func (t *ingressTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 }
 
 func (t *ingressTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
-		if e.Integration != nil {
-			e.Integration.Status.SetCondition(
-				v1.IntegrationConditionExposureAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationConditionIngressNotAvailableReason,
-				"explicitly disabled",
-			)
-		}
-
-		return false, nil
-	}
-
 	if !e.IntegrationInRunningPhases() {
 		return false, nil
 	}
 
-	if pointer.BoolDeref(t.Auto, true) {
-		hasService := e.Resources.GetUserServiceForIntegration(e.Integration) != nil
-		hasHost := t.Host != ""
-		enabled := hasService && hasHost
-
-		if !enabled {
-			e.Integration.Status.SetCondition(
-				v1.IntegrationConditionExposureAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationConditionIngressNotAvailableReason,
-				"no host or service defined",
-			)
-
-			return false, nil
-		}
-	}
-
-	if t.Host == "" {
+	if !pointer.BoolDeref(t.Enabled, true) {
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionExposureAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionIngressNotAvailableReason,
-			"no host defined",
+			"explicitly disabled",
 		)
+		return false, nil
+	}
 
-		return false, errors.New("cannot Apply ingress trait: no host defined")
+	if pointer.BoolDeref(t.Auto, true) {
+		if e.Resources.GetUserServiceForIntegration(e.Integration) == nil {
+			e.Integration.Status.SetCondition(
+				v1.IntegrationConditionExposureAvailable,
+				corev1.ConditionFalse,
+				v1.IntegrationConditionIngressNotAvailableReason,
+				"no service defined",
+			)
+			return false, nil
+		}
 	}
 
 	return true, nil
@@ -104,25 +85,25 @@ func (t *ingressTrait) Apply(e *Environment) error {
 		return errors.New("cannot Apply ingress trait: no target service")
 	}
 
-	ingress := networking.Ingress{
+	ingress := networkingv1.Ingress{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Ingress",
-			APIVersion: networking.SchemeGroupVersion.String(),
+			APIVersion: networkingv1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      service.Name,
 			Namespace: service.Namespace,
 		},
-		Spec: networking.IngressSpec{
-			DefaultBackend: &networking.IngressBackend{
-				Service: &networking.IngressServiceBackend{
+		Spec: networkingv1.IngressSpec{
+			DefaultBackend: &networkingv1.IngressBackend{
+				Service: &networkingv1.IngressServiceBackend{
 					Name: service.Name,
-					Port: networking.ServiceBackendPort{
+					Port: networkingv1.ServiceBackendPort{
 						Name: "http",
 					},
 				},
 			},
-			Rules: []networking.IngressRule{
+			Rules: []networkingv1.IngressRule{
 				{
 					Host: t.Host,
 				},

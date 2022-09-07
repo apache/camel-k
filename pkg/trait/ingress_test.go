@@ -23,7 +23,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	corev1 "k8s.io/api/core/v1"
-	networking "k8s.io/api/networking/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/utils/pointer"
@@ -76,21 +76,7 @@ func TestConfigureAutoIngressTraitWithoutUserServiceDoesNotSucceed(t *testing.T)
 	assert.Nil(t, err)
 	conditions := environment.Integration.Status.Conditions
 	assert.Len(t, conditions, 1)
-	assert.Equal(t, "no host or service defined", conditions[0].Message)
-}
-
-func TestConfigureAutoIngressTraitWithEmptyHostDoesNotSucceed(t *testing.T) {
-	ingressTrait, environment := createNominalIngressTest()
-	ingressTrait.Auto = nil
-	ingressTrait.Host = ""
-
-	configured, err := ingressTrait.Configure(environment)
-
-	assert.False(t, configured)
-	assert.Nil(t, err)
-	conditions := environment.Integration.Status.Conditions
-	assert.Len(t, conditions, 1)
-	assert.Equal(t, "no host or service defined", conditions[0].Message)
+	assert.Equal(t, "no service defined", conditions[0].Message)
 }
 
 func TestConfigureAutoIngressTraitWithUserServiceDoesSucceed(t *testing.T) {
@@ -102,20 +88,6 @@ func TestConfigureAutoIngressTraitWithUserServiceDoesSucceed(t *testing.T) {
 	assert.True(t, configured)
 	assert.Nil(t, err)
 	assert.Len(t, environment.Integration.Status.Conditions, 0)
-}
-
-func TestConfigureIngressTraitWithoutHostDoesNotSucceed(t *testing.T) {
-	ingressTrait, environment := createNominalIngressTest()
-	ingressTrait.Host = ""
-
-	configured, err := ingressTrait.Configure(environment)
-
-	assert.False(t, configured)
-	assert.NotNil(t, err)
-	assert.Equal(t, "cannot Apply ingress trait: no host defined", err.Error())
-	conditions := environment.Integration.Status.Conditions
-	assert.Len(t, conditions, 1)
-	assert.Equal(t, "no host defined", conditions[0].Message)
 }
 
 func TestApplyIngressTraitWithoutUserServiceDoesNotSucceed(t *testing.T) {
@@ -139,7 +111,7 @@ func TestApplyIngressTraitDoesSucceed(t *testing.T) {
 
 	assert.Len(t, environment.Resources.Items(), 2)
 	environment.Resources.Visit(func(resource runtime.Object) {
-		if ingress, ok := resource.(*networking.Ingress); ok {
+		if ingress, ok := resource.(*networkingv1.Ingress); ok {
 			assert.Equal(t, "service-name", ingress.Name)
 			assert.Equal(t, "namespace", ingress.Namespace)
 			assert.Equal(t, "service-name", ingress.Spec.DefaultBackend.Service.Name)
