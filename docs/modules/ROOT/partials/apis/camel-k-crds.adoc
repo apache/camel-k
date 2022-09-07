@@ -4541,14 +4541,14 @@ string
 |
 
 
-**Required**. To configure the host exposed by the ingress.
+To configure the host exposed by the ingress.
 
 |`auto` +
 bool
 |
 
 
-To automatically add an ingress whenever the integration uses a HTTP endpoint consumer.
+To automatically add an ingress whenever the integration uses an HTTP endpoint consumer.
 
 
 |===

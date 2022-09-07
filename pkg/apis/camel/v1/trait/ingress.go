@@ -25,8 +25,8 @@ package trait
 // +camel-k:trait=ingress.
 type IngressTrait struct {
 	Trait `property:",squash" json:",inline"`
-	// **Required**. To configure the host exposed by the ingress.
+	// To configure the host exposed by the ingress.
 	Host string `property:"host" json:"host,omitempty"`
-	// To automatically add an ingress whenever the integration uses a HTTP endpoint consumer.
+	// To automatically add an ingress whenever the integration uses an HTTP endpoint consumer.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 }

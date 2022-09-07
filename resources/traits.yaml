@@ -486,11 +486,11 @@ traits:
       property.
   - name: host
     type: string
-    description: '**Required**. To configure the host exposed by the ingress.'
+    description: To configure the host exposed by the ingress.
   - name: auto
     type: bool
-    description: To automatically add an ingress whenever the integration uses a HTTP
-      endpoint consumer.
+    description: To automatically add an ingress whenever the integration uses an
+      HTTP endpoint consumer.
 - name: istio
   platform: false
   profiles:
