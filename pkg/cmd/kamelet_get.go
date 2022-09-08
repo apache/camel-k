@@ -44,11 +44,8 @@ func newKameletGetCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kameletG
 			if err := options.validate(); err != nil {
 				return err
 			}
-			if err := options.run(cmd); err != nil {
-				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
-			}
 
-			return nil
+			return options.run(cmd)
 		},
 	}
 
