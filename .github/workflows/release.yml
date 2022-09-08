@@ -24,7 +24,7 @@ on:
 jobs:
   main:
     if: github.repository == 'apache/camel-k'
-    uses: ./.github/workflows/release-workflow.yml
+    uses: ./.github/actions/release
     with:
       ref: "main"
       goVersion: "1.17.x"
@@ -35,7 +35,7 @@ jobs:
 
   v1_10_x:
     if: github.repository == 'apache/camel-k'
-    uses: ./.github/workflows/release-workflow.yml
+    uses: ./.github/actions/release
     with:
       ref: "release-1.10.x"
       goVersion: "1.17.x"
@@ -46,7 +46,7 @@ jobs:
 
   v1_9_x:
     if: github.repository == 'apache/camel-k'
-    uses: ./.github/workflows/release-workflow.yml
+    uses: ./.github/actions/release
     with:
       ref: "release-1.9.x"
       goVersion: "1.17.x"
