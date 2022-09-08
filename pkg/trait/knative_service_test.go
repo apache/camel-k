@@ -109,7 +109,11 @@ func TestKnativeService(t *testing.T) {
 				Build: v1.IntegrationPlatformBuildSpec{
 					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
 					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
 				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
@@ -232,7 +236,11 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 				Build: v1.IntegrationPlatformBuildSpec{
 					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
 					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
 				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
@@ -310,7 +318,11 @@ func TestKnativeServiceWithResr(t *testing.T) {
 				Build: v1.IntegrationPlatformBuildSpec{
 					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
 					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
 				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
@@ -408,6 +420,12 @@ func createKnativeServiceTestEnvironment(t *testing.T, trait *traitv1.KnativeSer
 		Platform: &v1.IntegrationPlatform{
 			Spec: v1.IntegrationPlatformSpec{
 				Cluster: v1.IntegrationPlatformClusterKubernetes,
+				Build: v1.IntegrationPlatformBuildSpec{
+					RuntimeVersion: catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),

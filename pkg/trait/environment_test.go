@@ -217,6 +217,12 @@ func mockEnvironment(catalog *camel.RuntimeCatalog) Environment {
 			},
 			Spec: v1.IntegrationPlatformSpec{
 				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					RuntimeVersion: catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),

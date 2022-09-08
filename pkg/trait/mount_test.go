@@ -174,7 +174,11 @@ func getNominalEnv(t *testing.T, traitCatalog *Catalog) *Environment {
 				Build: v1.IntegrationPlatformBuildSpec{
 					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
 					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
 				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),

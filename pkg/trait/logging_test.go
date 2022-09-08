@@ -78,6 +78,14 @@ func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint b
 			Spec: v1.IntegrationPlatformSpec{
 				Cluster: v1.IntegrationPlatformClusterOpenShift,
 			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+				IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
+					Build: v1.IntegrationPlatformBuildSpec{
+						RuntimeVersion: c.Runtime.Version,
+					},
+				},
+			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
