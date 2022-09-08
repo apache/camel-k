@@ -28,7 +28,7 @@ entries:
     urls:
     - https://apache.github.io/camel-k/charts/camel-k-0.11.0.tgz
     version: 0.11.0
-- apiVersion: v2
+  - apiVersion: v2
     appVersion: 1.9.2
     created: "2022-05-24T14:23:13.27813937+02:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
