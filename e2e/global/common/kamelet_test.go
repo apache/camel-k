@@ -41,18 +41,37 @@ func TestKameletClasspathLoading(t *testing.T) {
 
 		Eventually(Kamelet(kameletName, ns)).Should(BeNil())
 
-		Expect(KamelRunWithID(operatorID, ns, "files/TimerKameletIntegration.java", "-t", "kamelets.enabled=false",
-			"--resource", "file:files/timer-source.kamelet.yaml@/kamelets/timer-source.kamelet.yaml",
-			"-p camel.component.kamelet.location=file:/kamelets",
-			"-d", "camel:yaml-dsl",
-			// kamelet dependencies
-			"-d", "camel:timer").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "timer-kamelet-integration"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		// Basic
+		t.Run("test basic case", func(t *testing.T) {
 
-		Eventually(IntegrationLogs(ns, "timer-kamelet-integration")).Should(ContainSubstring("important message"))
+			Expect(KamelRunWithID(operatorID, ns, "files/TimerKameletIntegration.java", "-t", "kamelets.enabled=false",
+				"--resource", "file:files/timer-source.kamelet.yaml@/kamelets/timer-source.kamelet.yaml",
+				"-p camel.component.kamelet.location=file:/kamelets",
+				"-d", "camel:yaml-dsl",
+				// kamelet dependencies
+				"-d", "camel:timer").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "timer-kamelet-integration"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
-		// Cleanup
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			Eventually(IntegrationLogs(ns, "timer-kamelet-integration")).Should(ContainSubstring("important message"))
+
+			// Cleanup
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		})
+
+		// Custom repo
+		t.Run("test custom Kamelet repository", func(t *testing.T) {
+
+			// Add the custom repository
+			Expect(Kamel("kamelet", "add-repo", "github:essobedo/camel-k-test/kamelets", "-n", ns, "-x", operatorID).Execute()).To(Succeed())
+
+			Expect(KamelRunWithID(operatorID, ns, "files/TimerCustomKameletIntegration.java").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "timer-custom-kamelet-integration"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+
+			Eventually(IntegrationLogs(ns, "timer-custom-kamelet-integration")).Should(ContainSubstring("great message"))
+
+			// Cleanup
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+		})
 	})
 }
 
