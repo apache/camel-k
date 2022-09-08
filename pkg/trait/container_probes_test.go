@@ -41,9 +41,18 @@ func newTestProbesEnv(t *testing.T, integration *v1.Integration) Environment {
 	traitCatalog := NewCatalog(nil)
 
 	return Environment{
-		Catalog:               traitCatalog,
-		CamelCatalog:          catalog,
-		Platform:              &v1.IntegrationPlatform{},
+		Catalog:      traitCatalog,
+		CamelCatalog: catalog,
+		Platform: &v1.IntegrationPlatform{
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+				IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
+					Build: v1.IntegrationPlatformBuildSpec{
+						RuntimeVersion: catalog.Runtime.Version,
+					},
+				},
+			},
+		},
 		Integration:           integration,
 		Resources:             kubernetes.NewCollection(),
 		ApplicationProperties: make(map[string]string),

@@ -69,7 +69,11 @@ func TestContainerWithDefaults(t *testing.T) {
 				Build: v1.IntegrationPlatformBuildSpec{
 					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
 					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
 				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
@@ -129,7 +133,11 @@ func TestContainerWithCustomName(t *testing.T) {
 				Build: v1.IntegrationPlatformBuildSpec{
 					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
 					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
 				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
@@ -190,7 +198,11 @@ func TestContainerWithCustomImage(t *testing.T) {
 				Build: v1.IntegrationPlatformBuildSpec{
 					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
 					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
 				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
@@ -265,7 +277,11 @@ func TestContainerWithCustomImageAndIntegrationKit(t *testing.T) {
 				Build: v1.IntegrationPlatformBuildSpec{
 					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
 					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
 				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
@@ -301,7 +317,16 @@ func TestContainerWithImagePullPolicy(t *testing.T) {
 				},
 			},
 		},
-		Platform:  &v1.IntegrationPlatform{},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Build: v1.IntegrationPlatformBuildSpec{
+					RuntimeVersion: catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
 		Resources: kubernetes.NewCollection(),
 	}
 	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
