@@ -65,5 +65,50 @@ func TestServiceTrait(t *testing.T) {
 
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
+
+		t.Run("NodePort service from Type", func(t *testing.T) {
+			Expect(KamelRunWithID(operatorID, ns, "files/PlatformHttpServer.java",
+				"-t", "service.enabled=true",
+				"-t", "service.type=NodePort").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+
+			//
+			// Service names can vary with the ExternalName Service
+			// sometimes being created first and being given the root name
+			//
+			Eventually(ServicesByType(ns, corev1.ServiceTypeNodePort), TestTimeoutLong).ShouldNot(BeEmpty())
+
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("ClusterIP service from Type", func(t *testing.T) {
+			Expect(KamelRunWithID(operatorID, ns, "files/PlatformHttpServer.java",
+				"-t", "service.enabled=true",
+				"-t", "service.type=ClusterIP").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+
+			//
+			// Service names can vary with the ExternalName Service
+			// sometimes being created first and being given the root name
+			//
+			Eventually(ServicesByType(ns, corev1.ServiceTypeClusterIP), TestTimeoutLong).ShouldNot(BeEmpty())
+
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("LoadBalancer service from Type", func(t *testing.T) {
+			Expect(KamelRunWithID(operatorID, ns, "files/PlatformHttpServer.java",
+				"-t", "service.enabled=true",
+				"-t", "service.type=LoadBalancer").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+
+			//
+			// Service names can vary with the ExternalName Service
+			// sometimes being created first and being given the root name
+			//
+			Eventually(ServicesByType(ns, corev1.ServiceTypeLoadBalancer), TestTimeoutLong).ShouldNot(BeEmpty())
+
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
 	})
 }

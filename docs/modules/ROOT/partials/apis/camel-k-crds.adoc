@@ -5739,9 +5739,27 @@ bool
 
 
 Enable Service to be exposed as NodePort (default `false`).
+Deprecated: Use service type instead.
+
+|`type` +
+*xref:#_camel_apache_org_v1_trait_ServiceType[ServiceType]*
+|
+
+
+The type of service to be used, either 'ClusterIP', 'NodePort' or 'LoadBalancer'.
 
 
 |===
+
+[#_camel_apache_org_v1_trait_ServiceType]
+=== ServiceType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_trait_ServiceTrait, ServiceTrait>>
+
+
+
 
 [#_camel_apache_org_v1_trait_TolerationTrait]
 === TolerationTrait

@@ -28,5 +28,25 @@ type ServiceTrait struct {
 	// To automatically detect from the code if a Service needs to be created.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// Enable Service to be exposed as NodePort (default `false`).
+	// Deprecated: Use service type instead.
 	NodePort *bool `property:"node-port" json:"nodePort,omitempty"`
+	// The type of service to be used, either 'ClusterIP', 'NodePort' or 'LoadBalancer'.
+	Type *ServiceType `property:"type" json:"type,omitempty"`
 }
+
+type ServiceType string
+
+const (
+	// ServiceTypeClusterIP means a service will only be accessible inside the
+	// cluster, via the cluster IP.
+	ServiceTypeClusterIP ServiceType = "ClusterIP"
+
+	// ServiceTypeNodePort means a service will be exposed on one port of
+	// every node, in addition to 'ClusterIP' type.
+	ServiceTypeNodePort ServiceType = "NodePort"
+
+	// ServiceTypeLoadBalancer means a service will be exposed via an
+	// external load balancer (if the cloud provider supports it), in addition
+	// to 'NodePort' type.
+	ServiceTypeLoadBalancer ServiceType = "LoadBalancer"
+)
