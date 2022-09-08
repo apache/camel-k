@@ -53,8 +53,6 @@ jobs:
           persist-credentials: false
           submodules: recursive
       
-      # TODO: remove this workaround once 1.11 is released, see #3613
-      - if: ${{ github.ref == 'refs/heads/main' }} || ${{ github.ref == 'refs/heads/release-1.10.x' }}
       # Reuse the testing flows used for PRs
         name: Smoke tests
         uses: ./.github/actions/e2e-common
