@@ -1183,7 +1183,12 @@ traits:
     description: To automatically detect from the code if a Service needs to be created.
   - name: node-port
     type: bool
-    description: Enable Service to be exposed as NodePort (default `false`).
+    description: 'Enable Service to be exposed as NodePort (default `false`). Deprecated:
+      Use service type instead.'
+  - name: type
+    type: github.com/apache/camel-k/pkg/apis/camel/v1/trait.ServiceType
+    description: The type of service to be used, either 'ClusterIP', 'NodePort' or
+      'LoadBalancer'.
 - name: service-binding
   platform: false
   profiles:

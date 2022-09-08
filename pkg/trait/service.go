@@ -18,6 +18,8 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
@@ -90,7 +92,6 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 			return false, nil
 		}
 	}
-
 	return true, nil
 }
 
@@ -100,9 +101,23 @@ func (t *serviceTrait) Apply(e *Environment) error {
 	if svc == nil {
 		svc = getServiceFor(e)
 
-		if pointer.BoolDeref(t.NodePort, false) {
-			svc.Spec.Type = corev1.ServiceTypeNodePort
+		var serviceType corev1.ServiceType
+		if t.Type != nil {
+			switch *t.Type {
+			case traitv1.ServiceTypeClusterIP:
+				serviceType = corev1.ServiceTypeClusterIP
+			case traitv1.ServiceTypeNodePort:
+				serviceType = corev1.ServiceTypeNodePort
+			case traitv1.ServiceTypeLoadBalancer:
+				serviceType = corev1.ServiceTypeLoadBalancer
+			default:
+				return fmt.Errorf("unsupported service type: %s", *t.Type)
+			}
+		} else if pointer.BoolDeref(t.NodePort, false) {
+			t.L.ForIntegration(e.Integration).Infof("Integration %s/%s should no more use the flag node-port as it is deprecated, use type instead", e.Integration.Namespace, e.Integration.Name)
+			serviceType = corev1.ServiceTypeNodePort
 		}
+		svc.Spec.Type = serviceType
 	}
 	e.Resources.Add(svc)
 	return nil

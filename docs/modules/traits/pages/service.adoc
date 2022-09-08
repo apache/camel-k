@@ -35,6 +35,11 @@ The following configuration options are available:
 | service.node-port
 | bool
 | Enable Service to be exposed as NodePort (default `false`).
+Deprecated: Use service type instead.
+
+| service.type
+| github.com/apache/camel-k/pkg/apis/camel/v1/trait.ServiceType
+| The type of service to be used, either 'ClusterIP', 'NodePort' or 'LoadBalancer'.
 
 |===
 

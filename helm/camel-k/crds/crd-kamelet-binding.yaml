@@ -7578,9 +7578,13 @@ spec:
                               All traits share this common property.
                             type: boolean
                           nodePort:
-                            description: Enable Service to be exposed as NodePort
-                              (default `false`).
+                            description: 'Enable Service to be exposed as NodePort
+                              (default `false`). Deprecated: Use service type instead.'
                             type: boolean
+                          type:
+                            description: The type of service to be used, either 'ClusterIP',
+                              'NodePort' or 'LoadBalancer'.
+                            type: string
                         type: object
                       service-binding:
                         description: The configuration of Service Binding trait
