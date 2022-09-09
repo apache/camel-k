@@ -26,10 +26,15 @@ jobs:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: main
+        persist-credentials: false
+        submodules: recursive
     - name: Release main nightly
       uses: ./.github/actions/release-nightly
       with:
-        ref: "main"
         goVersion: "1.17.x"
         javaVersion: "11"
 
@@ -37,10 +42,15 @@ jobs:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: release-1.10.x
+        persist-credentials: false
+        submodules: recursive    
     - name: Release 1.10 nightly
       uses: ./.github/actions/release-nightly
       with:
-        ref: "release-1.10.x"
         goVersion: "1.17.x"
         javaVersion: "11"
 
@@ -48,10 +58,15 @@ jobs:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: release-1.9.x
+        persist-credentials: false
+        submodules: recursive    
     - name: Release 1.9 nightly 
       uses: ./.github/actions/release-nightly
       with:
-        ref: "release-1.9.x"
-        goVersion: "1.17.x"
+        goVersion: "1.16.x"
         javaVersion: "11"
         
