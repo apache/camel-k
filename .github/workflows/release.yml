@@ -25,35 +25,41 @@ jobs:
   main:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
-    uses: ./.github/actions/release
-    with:
-      ref: "main"
-      goVersion: "1.17.x"
-      javaVersion: "11"
-    secrets:
-      registryUsername: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
-      registryPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
+    steps:
+    - name: Release main nightly
+      uses: ./.github/actions/release-nightly
+      with:
+        ref: "main"
+        goVersion: "1.17.x"
+        javaVersion: "11"
+      secrets:
+        registryUsername: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+        registryPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
 
   v1_10_x:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
-    uses: ./.github/actions/release
-    with:
-      ref: "release-1.10.x"
-      goVersion: "1.17.x"
-      javaVersion: "11"
-    secrets:
-      registryUsername: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
-      registryPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
+    steps:
+    - name: Release 1.10 nightly
+      uses: ./.github/actions/release-nightly
+      with:
+        ref: "release-1.10.x"
+        goVersion: "1.17.x"
+        javaVersion: "11"
+      secrets:
+        registryUsername: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+        registryPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
 
   v1_9_x:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
-    uses: ./.github/actions/release
-    with:
-      ref: "release-1.9.x"
-      goVersion: "1.17.x"
-      javaVersion: "11"
-    secrets:
-      registryUsername: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
-      registryPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
+    steps:
+    - name: Release 1.9 nightly 
+      uses: ./.github/actions/release-nightly
+      with:
+        ref: "release-1.9.x"
+        goVersion: "1.17.x"
+        javaVersion: "11"
+      secrets:
+        registryUsername: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+        registryPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
