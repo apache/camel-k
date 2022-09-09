@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"path"
+	"reflect"
 	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -115,37 +116,48 @@ func filterFileLocation(maybeFileLocations []string) []string {
 	return filteredOptions
 }
 
-func mergePropertiesWithPrecedence(items []string) (*properties.Properties, error) {
-	loPrecedenceProps := properties.NewProperties()
-	hiPrecedenceProps := properties.NewProperties()
-	for _, item := range items {
-		prop, err := extractProperties(item)
-		if err != nil {
-			return nil, err
-		}
-		// We consider file props to have a lower priority versus single properties
-		if strings.HasPrefix(item, "file:") {
-			loPrecedenceProps.Merge(prop)
-		} else {
-			hiPrecedenceProps.Merge(prop)
-		}
-	}
-	// Any property contained in both collections will be merged
-	// giving precedence to the ones in hiPrecedenceProps
-	loPrecedenceProps.Merge(hiPrecedenceProps)
-	return loPrecedenceProps, nil
-}
-
-// The function parse the value and if it is a file (file:/path/), it will parse as property file
-// otherwise return a single property built from the item passed as `key=value`.
-func extractProperties(value string) (*properties.Properties, error) {
-	if !strings.HasPrefix(value, "file:") {
-		return keyValueProps(value)
-	}
-	// we already validated the existence of files during validate()
-	return loadPropertyFile(strings.Replace(value, "file:", "", 1))
-}
-
 func keyValueProps(value string) (*properties.Properties, error) {
 	return properties.Load([]byte(value), properties.UTF8)
+}
+
+func loadPropertiesFromSecret(ctx context.Context, c client.Client, ns string, name string) (*properties.Properties, error) {
+	secret := kubernetes.LookupSecret(ctx, c, ns, name)
+	if secret == nil {
+		return nil, fmt.Errorf("%s secret not found in %s namespace, make sure to provide it before the Integration can run", name, ns)
+	}
+	return fromMapToProperties(secret.Data,
+		func(v reflect.Value) string { return string(v.Bytes()) },
+		func(v reflect.Value) (*properties.Properties, error) {
+			return properties.Load(v.Bytes(), properties.UTF8)
+		})
+}
+
+func loadPropertiesFromConfigMap(ctx context.Context, c client.Client, ns string, name string) (*properties.Properties, error) {
+	cm := kubernetes.LookupConfigmap(ctx, c, ns, name)
+	if cm == nil {
+		return nil, fmt.Errorf("%s configmap not found in %s namespace, make sure to provide it before the Integration can run", name, ns)
+	}
+	return fromMapToProperties(cm.Data,
+		func(v reflect.Value) string { return v.String() },
+		func(v reflect.Value) (*properties.Properties, error) { return keyValueProps(v.String()) })
+}
+
+func fromMapToProperties(data interface{}, toString func(reflect.Value) string, loadProperties func(reflect.Value) (*properties.Properties, error)) (*properties.Properties, error) {
+	result := properties.NewProperties()
+	m := reflect.ValueOf(data)
+	for _, k := range m.MapKeys() {
+		key := k.String()
+		value := m.MapIndex(k)
+		if strings.HasSuffix(key, ".properties") {
+			p, err := loadProperties(value)
+			if err == nil {
+				result.Merge(p)
+			} else if _, _, err = result.Set(key, toString(value)); err != nil {
+				return nil, fmt.Errorf("cannot assign %s to %s", value, key)
+			}
+		} else if _, _, err := result.Set(key, toString(value)); err != nil {
+			return nil, fmt.Errorf("cannot assign %s to %s", value, key)
+		}
+	}
+	return result, nil
 }

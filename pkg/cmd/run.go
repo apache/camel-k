@@ -101,8 +101,8 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArrayP("dependency", "d", nil, usageDependency)
 	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
-	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or properties file (syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
-	cmd.Flags().StringArray("build-property", nil, "Add a build time property or properties file (syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
+	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or properties file from a path, a config map or a secret (syntax: [my-key=my-value|file:/path/to/my-conf.properties|[configmap|secret]:name])")
+	cmd.Flags().StringArray("build-property", nil, "Add a build time property or properties file from a path, a config map or a secret (syntax: [my-key=my-value|file:/path/to/my-conf.properties|[configmap|secret]:name]])")
 	cmd.Flags().StringArray("config", nil, "Add a runtime configuration from a Configmap, a Secret or a file (syntax: [configmap|secret|file]:name[/key], where name represents the local file path or the configmap/secret name and key optionally represents the configmap/secret key to be filtered)")
 	cmd.Flags().StringArray("resource", nil, "Add a runtime resource from a Configmap, a Secret or a file (syntax: [configmap|secret|file]:name[/key][@path], where name represents the local file path or the configmap/secret name, key optionally represents the configmap/secret key to be filtered and path represents the destination path)")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
@@ -694,11 +694,11 @@ func (o *runCmdOptions) convertOptionsToTraits(cmd *cobra.Command, c client.Clie
 		return err
 	}
 
-	if err := o.applyProperties(); err != nil {
+	if err := o.applyProperties(c); err != nil {
 		return err
 	}
 
-	if err := o.applyBuildProperties(); err != nil {
+	if err := o.applyBuildProperties(c); err != nil {
 		return err
 	}
 
@@ -738,14 +738,14 @@ func convertToTrait(value, traitParameter string) string {
 	return fmt.Sprintf("%s=%s", traitParameter, value)
 }
 
-func (o *runCmdOptions) applyProperties() error {
-	props, err := mergePropertiesWithPrecedence(o.Properties)
+func (o *runCmdOptions) applyProperties(c client.Client) error {
+	props, err := o.mergePropertiesWithPrecedence(c, o.Properties)
 	if err != nil {
 		return err
 	}
 	for _, key := range props.Keys() {
 		kv := fmt.Sprintf("%s=%s", key, props.GetString(key, ""))
-		propsTraits, err := convertToTraitParameter(kv, "camel.properties")
+		propsTraits, err := o.convertToTraitParameter(c, kv, "camel.properties")
 		if err != nil {
 			return err
 		}
@@ -755,15 +755,15 @@ func (o *runCmdOptions) applyProperties() error {
 	return nil
 }
 
-func (o *runCmdOptions) applyBuildProperties() error {
+func (o *runCmdOptions) applyBuildProperties(c client.Client) error {
 	// convert each build configuration to a builder trait property
-	buildProps, err := mergePropertiesWithPrecedence(o.BuildProperties)
+	buildProps, err := o.mergePropertiesWithPrecedence(c, o.BuildProperties)
 	if err != nil {
 		return err
 	}
 	for _, key := range buildProps.Keys() {
 		kv := fmt.Sprintf("%s=%s", key, buildProps.GetString(key, ""))
-		buildPropsTraits, err := convertToTraitParameter(kv, "builder.properties")
+		buildPropsTraits, err := o.convertToTraitParameter(c, kv, "builder.properties")
 		if err != nil {
 			return err
 		}
@@ -773,9 +773,9 @@ func (o *runCmdOptions) applyBuildProperties() error {
 	return nil
 }
 
-func convertToTraitParameter(value, traitParameter string) ([]string, error) {
+func (o *runCmdOptions) convertToTraitParameter(c client.Client, value, traitParameter string) ([]string, error) {
 	traits := make([]string, 0)
-	props, err := extractProperties(value)
+	props, err := o.extractProperties(c, value)
 	if err != nil {
 		return nil, err
 	}
@@ -850,6 +850,43 @@ func (o *runCmdOptions) GetIntegrationName(sources []string) string {
 		name = kubernetes.SanitizeName(sources[0])
 	}
 	return name
+}
+
+func (o *runCmdOptions) mergePropertiesWithPrecedence(c client.Client, items []string) (*properties.Properties, error) {
+	loPrecedenceProps := properties.NewProperties()
+	hiPrecedenceProps := properties.NewProperties()
+	for _, item := range items {
+		prop, err := o.extractProperties(c, item)
+		if err != nil {
+			return nil, err
+		}
+		// We consider file, secret and config map props to have a lower priority versus single properties
+		if strings.HasPrefix(item, "file:") || strings.HasPrefix(item, "secret:") || strings.HasPrefix(item, "configmap:") {
+			loPrecedenceProps.Merge(prop)
+		} else {
+			hiPrecedenceProps.Merge(prop)
+		}
+	}
+	// Any property contained in both collections will be merged
+	// giving precedence to the ones in hiPrecedenceProps
+	loPrecedenceProps.Merge(hiPrecedenceProps)
+	return loPrecedenceProps, nil
+}
+
+// The function parse the value and if it is a file (file:/path/), it will parse as property file
+// otherwise return a single property built from the item passed as `key=value`.
+func (o *runCmdOptions) extractProperties(c client.Client, value string) (*properties.Properties, error) {
+	switch {
+	case strings.HasPrefix(value, "file:"):
+		// we already validated the existence of files during validate()
+		return loadPropertyFile(strings.Replace(value, "file:", "", 1))
+	case strings.HasPrefix(value, "secret:"):
+		return loadPropertiesFromSecret(o.Context, c, o.Namespace, strings.Replace(value, "secret:", "", 1))
+	case strings.HasPrefix(value, "configmap:"):
+		return loadPropertiesFromConfigMap(o.Context, c, o.Namespace, strings.Replace(value, "configmap:", "", 1))
+	default:
+		return keyValueProps(value)
+	}
 }
 
 func loadPropertyFile(fileName string) (*properties.Properties, error) {
