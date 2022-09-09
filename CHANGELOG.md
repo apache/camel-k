@@ -6,13 +6,11 @@
 
 **Closed issues:**
 
-- Nightly release 1.9.x missing tests [\#3613](https://github.com/apache/camel-k/issues/3613)
 - Parametrize kaniko executor image to point to private registry [\#3350](https://github.com/apache/camel-k/issues/3350)
 - Configure parallel container image layers push based on CPU quota [\#3340](https://github.com/apache/camel-k/issues/3340)
 - Configure Maven builds based on CPU quota [\#3339](https://github.com/apache/camel-k/issues/3339)
 - Flaky E2E tests identified in 1.9.x [\#3234](https://github.com/apache/camel-k/issues/3234)
 - kamel log tail option [\#3004](https://github.com/apache/camel-k/issues/3004)
-- Support Knative Sinks [\#1834](https://github.com/apache/camel-k/issues/1834)
 - Ability to set labels on knative service \(for things like "cluster-local"\) [\#1712](https://github.com/apache/camel-k/issues/1712)
 - Auto-install knative broker by trigger annotation [\#1456](https://github.com/apache/camel-k/issues/1456)
 - kamel CLI - Allow to specify a namespace to use instead of default [\#1184](https://github.com/apache/camel-k/issues/1184)
