@@ -13,116 +13,115 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: release
+name: release-action
+description: 'action used to release nightly'
 
-on:
-  workflow_call:
-    inputs:
-      ref:
-        required: true
-        type: string
-      goVersion:
-        required: true
-        type: string
-      javaVersion:
-        required: true
-        type: string
-    secrets:
-      registryUsername:
-        required: true
-      registryPassword:
-        required: true
+inputs:
+  ref:
+    required: true
+    type: string
+  goVersion:
+    required: true
+    type: string
+  javaVersion:
+    required: true
+    type: string
+secrets:
+  registryUsername:
+    required: true
+  registryPassword:
+    required: true
 
-jobs:
-  release:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Set up JDK ${{ inputs.javaVersion }}
-        uses: actions/setup-java@v2
-        with:
-          java-version: ${{ inputs.javaVersion }}
-          distribution: "temurin"
-      - name: Install Go ${{ inputs.goVersion }}
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ inputs.goVersion }}
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ inputs.ref }}
-          persist-credentials: false
-          submodules: recursive
-      
-      # Reuse the testing flows used for PRs
-        name: Smoke tests
-        uses: ./.github/actions/e2e-common
-        with:
-          cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-          cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
+runs:
+  using: "composite"
+  
+  steps:
+    - name: Set up JDK ${{ inputs.javaVersion }}
+      uses: actions/setup-java@v2
+      with:
+        java-version: ${{ inputs.javaVersion }}
+        distribution: "temurin"
+    - name: Install Go ${{ inputs.goVersion }}
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ inputs.goVersion }}
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ inputs.ref }}
+        persist-credentials: false
+        submodules: recursive
+    
+    # Reuse the testing flows used for PRs
+      name: Smoke tests
+      uses: ./.github/actions/e2e-common
+      with:
+        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
 
-      - name: Cache modules
-        uses: actions/cache@v1
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-      - name: Get nightly version and update date
-        shell: bash
-        run: |
-          V=$(make get-version | sed s/-SNAPSHOT/-nightly/)
-          D=$(date)
-          echo "VERSION=$V" >> $GITHUB_ENV
-          echo "UPD_DATE=$D" >> $GITHUB_ENV
-      - name: Global Env
-        run: |
-          echo "Using VERSION=${{ env.VERSION }}"
+    - name: Cache modules
+      uses: actions/cache@v1
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+    - name: Get nightly version and update date
+      shell: bash
+      run: |
+        V=$(make get-version | sed s/-SNAPSHOT/-nightly/)
+        D=$(date)
+        echo "VERSION=$V" >> $GITHUB_ENV
+        echo "UPD_DATE=$D" >> $GITHUB_ENV
+    - name: Global Env
+      run: |
+        echo "Using VERSION=${{ env.VERSION }}"
 
-          IMAGE_NAME=docker.io/${TEST_DOCKER_HUB_USERNAME:-testcamelk}/camel-k
-          echo "Using IMAGE_NAME=$IMAGE_NAME"
-          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+        IMAGE_NAME=docker.io/${TEST_DOCKER_HUB_USERNAME:-testcamelk}/camel-k
+        echo "Using IMAGE_NAME=$IMAGE_NAME"
+        echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
 
-          MAVEN_REPOSITORY=$(make get-staging-repo)
-          echo "Using MAVEN_REPOSITORY=$MAVEN_REPOSITORY"
-          echo "MAVEN_REPOSITORY=$MAVEN_REPOSITORY" >> $GITHUB_ENV
+        MAVEN_REPOSITORY=$(make get-staging-repo)
+        echo "Using MAVEN_REPOSITORY=$MAVEN_REPOSITORY"
+        echo "MAVEN_REPOSITORY=$MAVEN_REPOSITORY" >> $GITHUB_ENV
 
-      - name: Login to Container Registry
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.registryUsername }}
-          password: ${{ secrets.registryPassword }}
+    - name: Login to Container Registry
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.registryUsername }}
+        password: ${{ secrets.registryPassword }}
 
-      - name: Codegen
-        run: |
-          make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} codegen set-version build-resources
+    - name: Codegen
+      run: |
+        make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} codegen set-version build-resources
 
-      - name: Build
-        run: |
-          make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} release-nightly
+    - name: Build
+      run: |
+        make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} release-nightly
 
-      - name: Check
-        run: ls -l
+    - name: Check
+      run: ls -l
 
-      - name: Create Release
-        id: create_release
-        uses: ncipollo/release-action@58ae73b360456532aafd58ee170c045abbeaee37
-        with:
-          artifacts: "./camel-k-client*.tar.gz"
-          body: |
-            Apache Camel K ${{ env.VERSION }} build for testing (unstable). This nightly release is using 
-            an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`
+    - name: Create Release
+      id: create_release
+      uses: ncipollo/release-action@58ae73b360456532aafd58ee170c045abbeaee37
+      with:
+        artifacts: "./camel-k-client*.tar.gz"
+        body: |
+          Apache Camel K ${{ env.VERSION }} build for testing (unstable). This nightly release is using 
+          an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`
 
-            To test it, download the client for your OS and run:
+          To test it, download the client for your OS and run:
 
-            ```
-            kamel install --olm=false --maven-repository=${{ env.MAVEN_REPOSITORY }}
-            ```
-            
-            NOTE: last updated on ${{ env.UPD_DATE }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          draft: false
-          prerelease: true
-          allowUpdates: true
-          replacesArtifacts: true
-          tag: ${{ env.VERSION }}
-          commit: main
+          ```
+          kamel install --olm=false --maven-repository=${{ env.MAVEN_REPOSITORY }}
+          ```
+          
+          NOTE: last updated on ${{ env.UPD_DATE }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        draft: false
+        prerelease: true
+        allowUpdates: true
+        replacesArtifacts: true
+        tag: ${{ env.VERSION }}
+        commit: main
