@@ -28,6 +28,7 @@ go run ./cmd/util/doc-gen \
   --input-dirs github.com/apache/camel-k/pkg/apis/camel/v1/trait \
   --input-dirs github.com/apache/camel-k/addons/keda \
   --input-dirs github.com/apache/camel-k/addons/master \
+  --input-dirs github.com/apache/camel-k/addons/resume \
   --input-dirs github.com/apache/camel-k/addons/threescale \
   --input-dirs github.com/apache/camel-k/addons/tracing
 echo "Generating traits documentation... done!"

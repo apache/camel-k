@@ -1083,6 +1083,45 @@ traits:
   description: The Registry trait sets up Maven to use the Image registry as a Maven
     repository.
   properties: []
+- name: resume
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: 'The Resume trait can be used to manage and configure resume strategies.
+    This feature is meant to allow quick resume of processing by Camel K instances
+    after they have been restarted. This is an experimental implementation based on
+    the support available on Camel Core: https://camel.apache.org/components/next/eips/resume-strategies.html.
+    The Resume trait is disabled by default. The main different from the implementation
+    on Core is that it''s not necessary to bind the strategies to the registry. This
+    step will be done automatically by Camel K, after resolving the options passed
+    to the trait. A sample execution of this trait, using the Kafka backend (the only
+    one supported at the moment), would require the following trait options: -t resume.enabled=true
+    -t resume.resume-path=camel-file-sets -t resume.resume-server="address-of-your-kafka:9092"'
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: auto
+    type: bool
+    description: Enables automatic configuration of the trait.
+  - name: resume-strategy,omitempty
+    type: string
+    description: The type of the resume strategy to use
+  - name: resume-path,omitempty
+    type: string
+    description: The path used by the resume strategy (this is specific to the resume
+      strategy type)
+  - name: resume-server,omitempty
+    type: string
+    description: The address of the resume server to use (protocol / implementation
+      specific)
+  - name: cache-fill-policy,omitempty
+    type: string
+    description: 'The adapter-specific policy to use when filling the cache (use:
+      minimizing / maximizing). Check the component documentation if unsure'
 - name: route
   platform: false
   profiles:
