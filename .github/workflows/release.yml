@@ -24,6 +24,7 @@ on:
 jobs:
   main:
     if: github.repository == 'apache/camel-k'
+    runs-on: ubuntu-20.04
     uses: ./.github/actions/release
     with:
       ref: "main"
@@ -35,6 +36,7 @@ jobs:
 
   v1_10_x:
     if: github.repository == 'apache/camel-k'
+    runs-on: ubuntu-20.04
     uses: ./.github/actions/release
     with:
       ref: "release-1.10.x"
@@ -46,6 +48,7 @@ jobs:
 
   v1_9_x:
     if: github.repository == 'apache/camel-k'
+    runs-on: ubuntu-20.04
     uses: ./.github/actions/release
     with:
       ref: "release-1.9.x"
