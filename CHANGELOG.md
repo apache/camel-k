@@ -7,15 +7,15 @@
 **Closed issues:**
 
 - Parametrize kaniko executor image to point to private registry [\#3350](https://github.com/apache/camel-k/issues/3350)
+- kamel uninstall --all does not remove Kamelets [\#3342](https://github.com/apache/camel-k/issues/3342)
 - Configure parallel container image layers push based on CPU quota [\#3340](https://github.com/apache/camel-k/issues/3340)
 - Configure Maven builds based on CPU quota [\#3339](https://github.com/apache/camel-k/issues/3339)
 - Flaky E2E tests identified in 1.9.x [\#3234](https://github.com/apache/camel-k/issues/3234)
 - kamel log tail option [\#3004](https://github.com/apache/camel-k/issues/3004)
 - Ability to set labels on knative service \(for things like "cluster-local"\) [\#1712](https://github.com/apache/camel-k/issues/1712)
-- Auto-install knative broker by trigger annotation [\#1456](https://github.com/apache/camel-k/issues/1456)
 - kamel CLI - Allow to specify a namespace to use instead of default [\#1184](https://github.com/apache/camel-k/issues/1184)
 - Create a Github Action for Camel K [\#1163](https://github.com/apache/camel-k/issues/1163)
-- Make integrations addressable \(Knative SinkBinding\) [\#1122](https://github.com/apache/camel-k/issues/1122)
+- Camel K doesn't support kubernetes services of type loadbalancer [\#1070](https://github.com/apache/camel-k/issues/1070)
 
 ## [1.11.0-nightly](https://github.com/apache/camel-k/tree/1.11.0-nightly) (2022-09-06)
 
