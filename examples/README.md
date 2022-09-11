@@ -21,7 +21,6 @@ As soon as you will learn the basic stuff, you will like to try the new advanced
 
 | Type  |  Description | Link  |
 |---|---|---|
-| Master | Master support example | [see examples](./master/)|
 | OLM | OPERATOR Lifecycle manager installation example | [see examples](./olm/)|
 | Polyglot | Polyglot integration examples | [see examples](./polyglot/)|
 | Pulsar | Pulsar usage | [see examples](./pulsar/)|
