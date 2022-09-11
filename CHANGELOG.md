@@ -16,6 +16,9 @@
 - kamel CLI - Allow to specify a namespace to use instead of default [\#1184](https://github.com/apache/camel-k/issues/1184)
 - Create a Github Action for Camel K [\#1163](https://github.com/apache/camel-k/issues/1163)
 - Camel K doesn't support kubernetes services of type loadbalancer [\#1070](https://github.com/apache/camel-k/issues/1070)
+- Camel-K operator should clean up kits and kit builders after integrations are deleted [\#889](https://github.com/apache/camel-k/issues/889)
+- Execute maven operation asynchronously [\#762](https://github.com/apache/camel-k/issues/762)
+- support for multiple type of builders [\#687](https://github.com/apache/camel-k/issues/687)
 
 ## [1.11.0-nightly](https://github.com/apache/camel-k/tree/1.11.0-nightly) (2022-09-06)
 
