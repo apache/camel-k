@@ -17,9 +17,11 @@ limitations under the License.
 
 package source
 
-import "github.com/scylladb/go-set/strset"
+import (
+	"github.com/scylladb/go-set/strset"
+)
 
-// Metadata --.
+// Metadata represents metadata for Integration source.
 type Metadata struct {
 	// All starting URIs of defined routes
 	FromURIs []string
@@ -41,7 +43,7 @@ type Metadata struct {
 	Kamelets []string
 }
 
-// NewMetadata --.
+// NewMetadata creates a new metadata.
 func NewMetadata() Metadata {
 	return Metadata{
 		FromURIs:             make([]string, 0),
@@ -49,4 +51,12 @@ func NewMetadata() Metadata {
 		Dependencies:         strset.New(),
 		RequiredCapabilities: strset.New(),
 	}
+}
+
+func (m *Metadata) AddRequiredCapability(capability string) {
+	m.RequiredCapabilities.Add(capability)
+}
+
+func (m *Metadata) AddDependency(dependency string) {
+	m.Dependencies.Add(dependency)
 }

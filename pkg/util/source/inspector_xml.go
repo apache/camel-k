@@ -52,7 +52,7 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 				for _, a := range se.Attr {
 					if a.Name.Local == "language" {
 						if dependency, ok := i.catalog.GetLanguageDependency(a.Value); ok {
-							i.addDependency(dependency, meta)
+							meta.AddDependency(dependency)
 						}
 					}
 				}
@@ -77,14 +77,18 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 			}
 
 			if dependency, ok := i.catalog.GetLanguageDependency(se.Name.Local); ok {
-				i.addDependency(dependency, meta)
+				meta.AddDependency(dependency)
 			}
 		}
 	}
 
-	i.discoverCapabilities(source, meta)
-	i.discoverDependencies(source, meta)
-	i.discoverKamelets(source, meta)
+	if err := i.discoverCapabilities(source, meta); err != nil {
+		return err
+	}
+	if err := i.discoverDependencies(source, meta); err != nil {
+		return err
+	}
+	i.discoverKamelets(meta)
 
 	meta.ExposesHTTPServices = meta.ExposesHTTPServices || i.containsHTTPURIs(meta.FromURIs)
 	meta.PassiveEndpoints = i.hasOnlyPassiveEndpoints(meta.FromURIs)

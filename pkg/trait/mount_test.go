@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -44,7 +45,7 @@ func TestMountVolumesEmpty(t *testing.T) {
 
 	err := traitCatalog.apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("mount"))
 
@@ -66,7 +67,7 @@ func TestMountVolumesIntegrationPhaseDeploying(t *testing.T) {
 
 	err := traitCatalog.apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("mount"))
 
@@ -114,7 +115,7 @@ func TestMountVolumesIntegrationPhaseInitialization(t *testing.T) {
 
 	err := traitCatalog.apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.Nil(t, environment.GetTrait("mount"))
 
@@ -128,7 +129,7 @@ func getNominalEnv(t *testing.T, traitCatalog *Catalog) *Environment {
 	t.Helper()
 	fakeClient, _ := test.NewFakeClient()
 	catalog, _ := camel.DefaultCatalog()
-	compressedRoute, _ := gzip.CompressBase64([]byte(`from("undertow:test").log("hello")`))
+	compressedRoute, _ := gzip.CompressBase64([]byte(`from("platform-http:test").log("hello")`))
 
 	return &Environment{
 		CamelCatalog: catalog,

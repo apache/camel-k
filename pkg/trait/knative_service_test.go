@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -44,12 +45,12 @@ const (
 
 func TestKnativeService(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	traitCatalog := NewCatalog(nil)
 
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("undertow:test").log("hello")`))
-	assert.NoError(t, err)
+	compressedRoute, err := gzip.CompressBase64([]byte(`from("platform-http:test").log("hello")`))
+	require.NoError(t, err)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -120,7 +121,7 @@ func TestKnativeService(t *testing.T) {
 
 	err = traitCatalog.apply(&environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("knative"))
 	assert.NotNil(t, envvar.Get(environment.EnvVars, "CAMEL_KNATIVE_CONFIGURATION"))
@@ -187,7 +188,7 @@ func TestKnativeService(t *testing.T) {
 
 func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	traitCatalog := NewCatalog(nil)
 
@@ -243,7 +244,7 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 
 	err = traitCatalog.apply(&environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("knative-service"))
 	assert.NotNil(t, environment.GetTrait("container"))
@@ -264,7 +265,7 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 
 func TestKnativeServiceWithResr(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	traitCatalog := NewCatalog(nil)
 
@@ -321,7 +322,7 @@ func TestKnativeServiceWithResr(t *testing.T) {
 
 	err = traitCatalog.apply(&environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("knative"))
 
@@ -362,7 +363,7 @@ func createKnativeServiceTestEnvironment(t *testing.T, trait *traitv1.KnativeSer
 	t.Helper()
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	traitCatalog := NewCatalog(nil)
 
@@ -419,7 +420,7 @@ func createKnativeServiceTestEnvironment(t *testing.T, trait *traitv1.KnativeSer
 
 	err = traitCatalog.apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	return environment
 }

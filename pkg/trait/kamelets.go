@@ -147,7 +147,7 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1alpha1.Ka
 	sort.Strings(missingKamelets)
 
 	if len(missingKamelets) > 0 {
-		message := fmt.Sprintf("kamelets %s found, %s not found in repositories: %s",
+		message := fmt.Sprintf("kamelets [%s] found, [%s] not found in repositories: %s",
 			strings.Join(availableKamelets, ","),
 			strings.Join(missingKamelets, ","),
 			repo.String())
@@ -166,7 +166,7 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1alpha1.Ka
 		v1.IntegrationConditionKameletsAvailable,
 		corev1.ConditionTrue,
 		v1.IntegrationConditionKameletsAvailableReason,
-		fmt.Sprintf("kamelets %s found in repositories: %s", strings.Join(availableKamelets, ","), repo.String()),
+		fmt.Sprintf("kamelets [%s] found in repositories: %s", strings.Join(availableKamelets, ","), repo.String()),
 	)
 
 	return kamelets, nil
