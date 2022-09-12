@@ -164,25 +164,12 @@ func TestInstallKanikoBuildCacheFlag(t *testing.T) {
 	assert.Equal(t, true, installCmdOptions.KanikoBuildCache)
 }
 
-func TestInstallKanikoExecutorImage(t *testing.T) {
+func TestInstallBuildPublishStrategyOptions(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--kaniko-executor-image", "some-executor-image")
+	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--build-publish-strategy-option", "foo1=bar1", "--build-publish-strategy-option", "foo2=bar2")
 	assert.Nil(t, err)
-	assert.Equal(t, "some-executor-image", installCmdOptions.KanikoExecutorImage)
-}
-
-func TestInstallKanikoWarmerImage(t *testing.T) {
-	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--kaniko-warmer-image", "some-warmer-image")
-	assert.Nil(t, err)
-	assert.Equal(t, "some-warmer-image", installCmdOptions.KanikoWarmerImage)
-}
-
-func TestInstallBuildahImage(t *testing.T) {
-	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--buildah-image", "some-buildah-image")
-	assert.Nil(t, err)
-	assert.Equal(t, "some-buildah-image", installCmdOptions.BuildahImage)
+	assert.Equal(t, "foo1=bar1", installCmdOptions.BuildPublishStrategyOptions[0])
+	assert.Equal(t, "foo2=bar2", installCmdOptions.BuildPublishStrategyOptions[1])
 }
 
 func TestInstallLocalRepositoryFlag(t *testing.T) {

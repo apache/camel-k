@@ -20,3 +20,15 @@ package builder
 const BuildahPlatform = "BuildahPlatform"
 const BuildahImage = "BuildahImage"
 const BuildahDefaultImageName = "quay.io/buildah/stable"
+
+var buildahSupportedOptions = map[string]PublishStrategyOption{
+	BuildahPlatform: {
+		Name:        BuildahPlatform,
+		description: "The attribute platform for buildah",
+	},
+	BuildahImage: {
+		Name:         BuildahImage,
+		description:  "The docker image to use for Buildah",
+		defaultValue: BuildahDefaultImageName,
+	},
+}
