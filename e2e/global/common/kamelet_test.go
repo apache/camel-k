@@ -62,7 +62,7 @@ func TestKameletClasspathLoading(t *testing.T) {
 		t.Run("test custom Kamelet repository", func(t *testing.T) {
 
 			// Add the custom repository
-			Expect(Kamel("kamelet", "add-repo", "github:essobedo/camel-k-test/kamelets", "-n", ns, "-x", operatorID).Execute()).To(Succeed())
+			Expect(Kamel("kamelet", "add-repo", "github:apache/camel-k/e2e/global/common/files/kamelets", "-n", ns, "-x", operatorID).Execute()).To(Succeed())
 
 			Expect(KamelRunWithID(operatorID, ns, "files/TimerCustomKameletIntegration.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "timer-custom-kamelet-integration"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
