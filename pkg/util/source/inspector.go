@@ -18,6 +18,7 @@ limitations under the License.
 package source
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -161,12 +162,13 @@ var (
 	}
 )
 
-// Inspector --.
+// Inspector is the common interface for language specific inspector implementations.
 type Inspector interface {
 	Extract(v1.SourceSpec, *Metadata) error
 }
 
-// InspectorForLanguage --.
+// InspectorForLanguage is the factory function to return a new inspector for the given language
+// with the catalog.
 func InspectorForLanguage(catalog *camel.RuntimeCatalog, language v1.Language) Inspector {
 	switch language {
 	case v1.LanguageJavaSource:
@@ -217,13 +219,40 @@ func (i baseInspector) Extract(v1.SourceSpec, *Metadata) error {
 	return nil
 }
 
-// discoverDependencies returns a list of dependencies required by the given source code.
-func (i *baseInspector) discoverCapabilities(source v1.SourceSpec, meta *Metadata) {
+func (i *baseInspector) extract(source v1.SourceSpec, meta *Metadata,
+	from, to, kameletEips []string, hasRest bool) error {
+	meta.FromURIs = append(meta.FromURIs, from...)
+	meta.ToURIs = append(meta.ToURIs, to...)
+
+	for _, k := range kameletEips {
+		AddKamelet(meta, "kamelet:"+k)
+	}
+
+	if err := i.discoverCapabilities(source, meta); err != nil {
+		return err
+	}
+	if err := i.discoverDependencies(source, meta); err != nil {
+		return err
+	}
+	i.discoverKamelets(meta)
+
+	if hasRest {
+		meta.AddRequiredCapability(v1.CapabilityRest)
+	}
+
+	meta.ExposesHTTPServices = hasRest || i.containsHTTPURIs(meta.FromURIs)
+	meta.PassiveEndpoints = i.hasOnlyPassiveEndpoints(meta.FromURIs)
+
+	return nil
+}
+
+// discoverCapabilities returns a list of dependencies required by the given source code.
+func (i *baseInspector) discoverCapabilities(source v1.SourceSpec, meta *Metadata) error {
 	uris := util.StringSliceJoin(meta.FromURIs, meta.ToURIs)
 
 	for _, uri := range uris {
 		if i.getURIPrefix(uri) == "platform-http" {
-			meta.RequiredCapabilities.Add(v1.CapabilityPlatformHTTP)
+			meta.AddRequiredCapability(v1.CapabilityPlatformHTTP)
 		}
 	}
 
@@ -233,34 +262,37 @@ func (i *baseInspector) discoverCapabilities(source v1.SourceSpec, meta *Metadat
 		}
 
 		for _, capability := range capabilities {
-			meta.RequiredCapabilities.Add(capability)
+			meta.AddRequiredCapability(capability)
 		}
 	}
+
+	// validate capabilities
+	var err error
+	meta.RequiredCapabilities.Each(func(capability string) bool {
+		if !i.catalog.HasCapability(capability) {
+			err = fmt.Errorf("capability %s not supported in camel catalog runtime version %s",
+				capability, i.catalog.GetRuntimeVersion())
+			return false
+		}
+		return true
+	})
+
+	return err
 }
 
 // discoverDependencies returns a list of dependencies required by the given source code.
-func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadata) {
+func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadata) error {
 	for _, uri := range meta.FromURIs {
-		candidateComp, scheme := i.catalog.DecodeComponent(uri)
-		if candidateComp != nil {
-			i.addDependency(candidateComp.GetDependencyID(), meta)
-			if scheme != nil {
-				for _, dep := range candidateComp.GetConsumerDependencyIDs(scheme.ID) {
-					i.addDependency(dep, meta)
-				}
-			}
+		// consumer
+		if err := i.addDependencies(uri, meta, true); err != nil {
+			return err
 		}
 	}
 
 	for _, uri := range meta.ToURIs {
-		candidateComp, scheme := i.catalog.DecodeComponent(uri)
-		if candidateComp != nil {
-			i.addDependency(candidateComp.GetDependencyID(), meta)
-			if scheme != nil {
-				for _, dep := range candidateComp.GetProducerDependencyIDs(scheme.ID) {
-					i.addDependency(dep, meta)
-				}
-			}
+		// producer
+		if err := i.addDependencies(uri, meta, false); err != nil {
+			return err
 		}
 	}
 
@@ -270,14 +302,14 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 		}
 
 		for _, dep := range supplier(i.catalog) {
-			i.addDependency(dep, meta)
+			meta.AddDependency(dep)
 		}
 	}
 
 	for _, match := range languageRegexp.FindAllStringSubmatch(source.Content, -1) {
 		if len(match) > 1 {
 			if dependency, ok := i.catalog.GetLanguageDependency(match[1]); ok {
-				i.addDependency(dependency, meta)
+				meta.AddDependency(dependency)
 			}
 		}
 	}
@@ -285,15 +317,16 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 	for _, match := range camelTypeRegexp.FindAllStringSubmatch(source.Content, -1) {
 		if len(match) > 1 {
 			if dependency, ok := i.catalog.GetJavaTypeDependency(match[1]); ok {
-				i.addDependency(dependency, meta)
+				meta.AddDependency(dependency)
 			}
 		}
 	}
+
+	return nil
 }
 
-// discoverDependencies inspects endpoints and extract kamelets
-// nolint: unparam
-func (i *baseInspector) discoverKamelets(source v1.SourceSpec, meta *Metadata) {
+// discoverKamelets inspects endpoints and extract kamelets.
+func (i *baseInspector) discoverKamelets(meta *Metadata) {
 	for _, uri := range meta.FromURIs {
 		AddKamelet(meta, uri)
 	}
@@ -302,8 +335,25 @@ func (i *baseInspector) discoverKamelets(source v1.SourceSpec, meta *Metadata) {
 	}
 }
 
-func (i *baseInspector) addDependency(dependency string, meta *Metadata) {
-	meta.Dependencies.Add(dependency)
+func (i *baseInspector) addDependencies(uri string, meta *Metadata, consumer bool) error {
+	candidateComp, scheme := i.catalog.DecodeComponent(uri)
+	if candidateComp == nil || scheme == nil {
+		return fmt.Errorf("component not found for uri %q in camel catalog runtime version %s",
+			uri, i.catalog.GetRuntimeVersion())
+	}
+
+	meta.AddDependency(candidateComp.GetDependencyID())
+	var deps []string
+	if consumer {
+		deps = candidateComp.GetConsumerDependencyIDs(scheme.ID)
+	} else {
+		deps = candidateComp.GetProducerDependencyIDs(scheme.ID)
+	}
+	for _, dep := range deps {
+		meta.AddDependency(dep)
+	}
+
+	return nil
 }
 
 // hasOnlyPassiveEndpoints returns true if the source has no endpoint that needs to remain always active.

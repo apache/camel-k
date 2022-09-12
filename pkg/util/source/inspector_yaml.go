@@ -48,9 +48,13 @@ func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 		}
 	}
 
-	i.discoverCapabilities(source, meta)
-	i.discoverDependencies(source, meta)
-	i.discoverKamelets(source, meta)
+	if err := i.discoverCapabilities(source, meta); err != nil {
+		return err
+	}
+	if err := i.discoverDependencies(source, meta); err != nil {
+		return err
+	}
+	i.discoverKamelets(meta)
 
 	meta.ExposesHTTPServices = meta.ExposesHTTPServices || i.containsHTTPURIs(meta.FromURIs)
 	meta.PassiveEndpoints = i.hasOnlyPassiveEndpoints(meta.FromURIs)
@@ -77,7 +81,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 					}
 				}
 				if dfDep := i.catalog.GetArtifactByDataFormat(dataFormatID); dfDep != nil {
-					i.addDependency(dfDep.GetDependencyID(), meta)
+					meta.AddDependency(dfDep.GetDependencyID())
 				}
 			}
 		}
@@ -102,7 +106,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 
 			if s, ok := k.(string); ok {
 				if dependency, ok := i.catalog.GetLanguageDependency(s); ok {
-					i.addDependency(dependency, meta)
+					meta.AddDependency(dependency)
 				}
 			}
 
@@ -133,7 +137,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 			case "language":
 				if s, ok := v.(string); ok {
 					if dependency, ok := i.catalog.GetLanguageDependency(s); ok {
-						i.addDependency(dependency, meta)
+						meta.AddDependency(dependency)
 					}
 				} else if m, ok := v.(map[interface{}]interface{}); ok {
 					if err := i.parseStep("language", m, meta); err != nil {
