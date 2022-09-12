@@ -466,8 +466,8 @@ The following annotations and labels are also defined on the resource:
 |name |Description |Type |Example
 
 |label: `camel.apache.org/kamelet.type`
-|Indicates if the Kamelet can be used as source or sink
-|enum: `source`, `sink`
+|Indicates if the Kamelet can be used as source, action or sink.
+|enum: `source`, `action`, `sink`
 |E.g. `source`
 |===
 
