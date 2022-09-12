@@ -108,16 +108,12 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("operator-image-pull-policy", "", "Set the operator ImagePullPolicy used for the operator deployment")
 	cmd.Flags().String("build-strategy", "", "Set the build strategy")
 	cmd.Flags().String("build-publish-strategy", "", "Set the build publish strategy")
+	cmd.Flags().StringArray("build-publish-strategy-option", nil, "Add a build publish strategy option, as <name=value>")
 	cmd.Flags().String("build-timeout", "", "Set how long the build process can last")
 	cmd.Flags().String("trait-profile", "", "The profile to use for traits")
 
 	// Kaniko
-	cmd.Flags().Bool("kaniko-build-cache", false, "To enable or disable the Kaniko cache")
-	cmd.Flags().String("kaniko-executor-image", "", "The docker image of the Kaniko executor")
-	cmd.Flags().String("kaniko-warmer-image", "", "The docker image of the Kaniko warmer")
-
-	// Buildah
-	cmd.Flags().String("buildah-image", "", "The docker image to use for Buildah")
+	cmd.Flags().Bool("kaniko-build-cache", false, "To enable or disable the Kaniko cache. Deprecated use --build-publish-strategy-option KanikoBuildCacheEnabled=true instead")
 
 	// OLM
 	cmd.Flags().Bool("olm", true, "Try to install everything via OLM (Operator Lifecycle Manager) if available")
@@ -171,47 +167,46 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 
 type installCmdOptions struct {
 	*RootCmdOptions
-	Wait                     bool     `mapstructure:"wait"`
-	BuildahImage             string   `mapstructure:"buildah-image"`
-	ClusterSetupOnly         bool     `mapstructure:"cluster-setup"`
-	SkipOperatorSetup        bool     `mapstructure:"skip-operator-setup"`
-	SkipClusterSetup         bool     `mapstructure:"skip-cluster-setup"`
-	SkipRegistrySetup        bool     `mapstructure:"skip-registry-setup"`
-	SkipDefaultKameletsSetup bool     `mapstructure:"skip-default-kamelets-setup"`
-	ExampleSetup             bool     `mapstructure:"example"`
-	Global                   bool     `mapstructure:"global"`
-	KanikoBuildCache         bool     `mapstructure:"kaniko-build-cache"`
-	KanikoExecutorImage      string   `mapstructure:"kaniko-executor-image"`
-	KanikoWarmerImage        string   `mapstructure:"kaniko-warmer-image"`
-	Save                     bool     `mapstructure:"save" kamel:"omitsave"`
-	Force                    bool     `mapstructure:"force"`
-	Olm                      bool     `mapstructure:"olm"`
-	ClusterType              string   `mapstructure:"cluster-type"`
-	OutputFormat             string   `mapstructure:"output"`
-	RuntimeVersion           string   `mapstructure:"runtime-version"`
-	BaseImage                string   `mapstructure:"base-image"`
-	OperatorID               string   `mapstructure:"operator-id"`
-	OperatorImage            string   `mapstructure:"operator-image"`
-	OperatorImagePullPolicy  string   `mapstructure:"operator-image-pull-policy"`
-	BuildStrategy            string   `mapstructure:"build-strategy"`
-	BuildPublishStrategy     string   `mapstructure:"build-publish-strategy"`
-	BuildTimeout             string   `mapstructure:"build-timeout"`
-	MavenExtensions          []string `mapstructure:"maven-extensions"`
-	MavenLocalRepository     string   `mapstructure:"maven-local-repository"`
-	MavenProperties          []string `mapstructure:"maven-properties"`
-	MavenRepositories        []string `mapstructure:"maven-repositories"`
-	MavenSettings            string   `mapstructure:"maven-settings"`
-	MavenCASecret            string   `mapstructure:"maven-ca-secret"`
-	MavenCLIOptions          []string `mapstructure:"maven-cli-options"`
-	HealthPort               int32    `mapstructure:"health-port"`
-	Monitoring               bool     `mapstructure:"monitoring"`
-	MonitoringPort           int32    `mapstructure:"monitoring-port"`
-	TraitProfile             string   `mapstructure:"trait-profile"`
-	Tolerations              []string `mapstructure:"tolerations"`
-	NodeSelectors            []string `mapstructure:"node-selectors"`
-	ResourcesRequirements    []string `mapstructure:"operator-resources"`
-	LogLevel                 string   `mapstructure:"log-level"`
-	EnvVars                  []string `mapstructure:"operator-env-vars"`
+	Wait                     bool `mapstructure:"wait"`
+	ClusterSetupOnly         bool `mapstructure:"cluster-setup"`
+	SkipOperatorSetup        bool `mapstructure:"skip-operator-setup"`
+	SkipClusterSetup         bool `mapstructure:"skip-cluster-setup"`
+	SkipRegistrySetup        bool `mapstructure:"skip-registry-setup"`
+	SkipDefaultKameletsSetup bool `mapstructure:"skip-default-kamelets-setup"`
+	ExampleSetup             bool `mapstructure:"example"`
+	Global                   bool `mapstructure:"global"`
+	// Deprecated: use the BuildPublishStrategyOption "KanikoBuildCacheEnabled" instead
+	KanikoBuildCache            bool     `mapstructure:"kaniko-build-cache"`
+	Save                        bool     `mapstructure:"save" kamel:"omitsave"`
+	Force                       bool     `mapstructure:"force"`
+	Olm                         bool     `mapstructure:"olm"`
+	ClusterType                 string   `mapstructure:"cluster-type"`
+	OutputFormat                string   `mapstructure:"output"`
+	RuntimeVersion              string   `mapstructure:"runtime-version"`
+	BaseImage                   string   `mapstructure:"base-image"`
+	OperatorID                  string   `mapstructure:"operator-id"`
+	OperatorImage               string   `mapstructure:"operator-image"`
+	OperatorImagePullPolicy     string   `mapstructure:"operator-image-pull-policy"`
+	BuildStrategy               string   `mapstructure:"build-strategy"`
+	BuildPublishStrategy        string   `mapstructure:"build-publish-strategy"`
+	BuildPublishStrategyOptions []string `mapstructure:"build-publish-strategy-options"`
+	BuildTimeout                string   `mapstructure:"build-timeout"`
+	MavenExtensions             []string `mapstructure:"maven-extensions"`
+	MavenLocalRepository        string   `mapstructure:"maven-local-repository"`
+	MavenProperties             []string `mapstructure:"maven-properties"`
+	MavenRepositories           []string `mapstructure:"maven-repositories"`
+	MavenSettings               string   `mapstructure:"maven-settings"`
+	MavenCASecret               string   `mapstructure:"maven-ca-secret"`
+	MavenCLIOptions             []string `mapstructure:"maven-cli-options"`
+	HealthPort                  int32    `mapstructure:"health-port"`
+	Monitoring                  bool     `mapstructure:"monitoring"`
+	MonitoringPort              int32    `mapstructure:"monitoring-port"`
+	TraitProfile                string   `mapstructure:"trait-profile"`
+	Tolerations                 []string `mapstructure:"tolerations"`
+	NodeSelectors               []string `mapstructure:"node-selectors"`
+	ResourcesRequirements       []string `mapstructure:"operator-resources"`
+	LogLevel                    string   `mapstructure:"log-level"`
+	EnvVars                     []string `mapstructure:"operator-env-vars"`
 
 	registry         v1.RegistrySpec
 	registryAuth     registry.Auth
@@ -489,20 +484,14 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				}
 			}
 		}
-
-		if platform.Spec.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko {
-			kanikoBuildCacheFlag := cobraCmd.Flags().Lookup("kaniko-build-cache")
-			if kanikoBuildCacheFlag.Changed {
-				platform.Spec.Build.AddOption(builder.KanikoBuildCacheEnabled, strconv.FormatBool(o.KanikoBuildCache))
+		if platform.Spec.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && cobraCmd.Flags().Lookup("kaniko-build-cache").Changed {
+			fmt.Fprintln(cobraCmd.OutOrStdout(), "Warn: the flag --kaniko-build-cache is deprecated, use --build-publish-strategy-option KanikoBuildCacheEnabled=true instead")
+			platform.Spec.Build.AddOption(builder.KanikoBuildCacheEnabled, strconv.FormatBool(o.KanikoBuildCache))
+		}
+		if len(o.BuildPublishStrategyOptions) > 0 {
+			if err = o.addBuildPublishStrategyOptions(&platform.Spec.Build); err != nil {
+				return err
 			}
-			if o.KanikoExecutorImage != "" {
-				platform.Spec.Build.AddOption(builder.KanikoExecutorImage, o.KanikoExecutorImage)
-			}
-			if o.KanikoWarmerImage != "" {
-				platform.Spec.Build.AddOption(builder.KanikoWarmerImage, o.KanikoWarmerImage)
-			}
-		} else if platform.Spec.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyBuildah && o.BuildahImage != "" {
-			platform.Spec.Build.AddOption(builder.BuildahImage, o.BuildahImage)
 		}
 		// Always create a platform in the namespace where the operator is located
 		err = install.ObjectOrCollect(o.Context, c, namespace, collection, o.Force, platform)
@@ -732,6 +721,37 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 	}
 
 	return result
+}
+
+// addBuildPublishStrategyOptions parses and adds all the build publish strategy options to the given IntegrationPlatformBuildSpec.
+func (o *installCmdOptions) addBuildPublishStrategyOptions(build *v1.IntegrationPlatformBuildSpec) error {
+	for _, option := range o.BuildPublishStrategyOptions {
+		kv := strings.Split(option, "=")
+		if len(kv) == 2 {
+			key := kv[0]
+			if builder.IsSupportedPublishStrategyOption(build.PublishStrategy, key) {
+				build.AddOption(key, kv[1])
+			} else {
+				return fmt.Errorf("build publish strategy option '%s' not supported. %s", option, supportedOptionsAsString(build.PublishStrategy))
+			}
+		} else {
+			return fmt.Errorf("build publish strategy option '%s' not in the expected format (name=value)", option)
+		}
+	}
+	return nil
+}
+
+// supportedOptionsAsString provides all the supported options for the given strategy as string.
+func supportedOptionsAsString(strategy v1.IntegrationPlatformBuildPublishStrategy) string {
+	options := builder.GetSupportedPublishStrategyOptions(strategy)
+	if len(options) == 0 {
+		return fmt.Sprintf("no options are supported for the strategy '%s'.", strategy)
+	}
+	var sb strings.Builder
+	for _, supportedOption := range builder.GetSupportedPublishStrategyOptions(strategy) {
+		sb.WriteString(fmt.Sprintf("* %s\n", supportedOption.ToString()))
+	}
+	return fmt.Sprintf("\n\nSupported options for the strategy '%s':\n\n%s", strategy, sb.String())
 }
 
 func decodeMavenSettings(mavenSettings string) (v1.ValueSource, error) {

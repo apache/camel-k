@@ -217,7 +217,7 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 			Duration: 5 * time.Minute,
 		}
 	}
-	_, cacheEnabled := p.Status.Build.PublishStrategyOptions["KanikoBuildCache"]
+	_, cacheEnabled := p.Status.Build.PublishStrategyOptions[builder.KanikoBuildCacheEnabled]
 	if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && !cacheEnabled {
 		// Default to disabling Kaniko cache warmer
 		// Using the cache warmer pod seems unreliable with the current Kaniko version
