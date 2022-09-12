@@ -91,7 +91,10 @@ func (r *resumeTrait) Configure(environment *trait.Environment) (bool, error) {
 			return false, err
 		}
 
-		meta := metadata.ExtractAll(environment.CamelCatalog, sources)
+		meta, err := metadata.ExtractAll(environment.CamelCatalog, sources)
+		if err != nil {
+			return false, err
+		}
 
 		for _, endpoint := range meta.FromURIs {
 			log.Infof("Processing component %s", endpoint)

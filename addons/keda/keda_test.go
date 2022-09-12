@@ -35,17 +35,13 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-)
-
-var (
-	testingTrue  = true
-	testingFalse = false
+	"k8s.io/utils/pointer"
 )
 
 func TestManualConfig(t *testing.T) {
 	keda, _ := NewKedaTrait().(*kedaTrait)
-	keda.Enabled = &testingTrue
-	keda.Auto = &testingFalse
+	keda.Enabled = pointer.Bool(true)
+	keda.Auto = pointer.Bool(false)
 	meta := map[string]string{
 		"prop":      "val",
 		"camelCase": "VAL",
@@ -72,8 +68,8 @@ func TestManualConfig(t *testing.T) {
 
 func TestConfigFromSecret(t *testing.T) {
 	keda, _ := NewKedaTrait().(*kedaTrait)
-	keda.Enabled = &testingTrue
-	keda.Auto = &testingFalse
+	keda.Enabled = pointer.Bool(true)
+	keda.Auto = pointer.Bool(false)
 	meta := map[string]string{
 		"prop":      "val",
 		"camelCase": "VAL",
@@ -119,7 +115,7 @@ func TestConfigFromSecret(t *testing.T) {
 
 func TestKameletAutoDetection(t *testing.T) {
 	keda, _ := NewKedaTrait().(*kedaTrait)
-	keda.Enabled = &testingTrue
+	keda.Enabled = pointer.Bool(true)
 	env := createBasicTestEnvironment(
 		&camelv1alpha1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
@@ -209,7 +205,7 @@ func TestKameletAutoDetection(t *testing.T) {
 
 func TestKameletBindingAutoDetection(t *testing.T) {
 	keda, _ := NewKedaTrait().(*kedaTrait)
-	keda.Enabled = &testingTrue
+	keda.Enabled = pointer.Bool(true)
 	logEndpoint := "log:info"
 	klb := camelv1alpha1.KameletBinding{
 		ObjectMeta: metav1.ObjectMeta{
@@ -322,15 +318,15 @@ func TestKameletBindingAutoDetection(t *testing.T) {
 
 func TestHackReplicas(t *testing.T) {
 	keda, _ := NewKedaTrait().(*kedaTrait)
-	keda.Enabled = &testingTrue
-	keda.Auto = &testingFalse
+	keda.Enabled = pointer.Bool(true)
+	keda.Auto = pointer.Bool(false)
 	keda.Triggers = append(keda.Triggers, kedaTrigger{
 		Type: "custom",
 		Metadata: map[string]string{
 			"a": "b",
 		},
 	})
-	keda.HackControllerReplicas = &testingTrue
+	keda.HackControllerReplicas = pointer.Bool(true)
 	env := createBasicTestEnvironment(
 		&camelv1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
@@ -356,15 +352,15 @@ func TestHackReplicas(t *testing.T) {
 
 func TestHackKLBReplicas(t *testing.T) {
 	keda, _ := NewKedaTrait().(*kedaTrait)
-	keda.Enabled = &testingTrue
-	keda.Auto = &testingFalse
+	keda.Enabled = pointer.Bool(true)
+	keda.Auto = pointer.Bool(false)
 	keda.Triggers = append(keda.Triggers, kedaTrigger{
 		Type: "custom",
 		Metadata: map[string]string{
 			"a": "b",
 		},
 	})
-	keda.HackControllerReplicas = &testingTrue
+	keda.HackControllerReplicas = pointer.Bool(true)
 	env := createBasicTestEnvironment(
 		&camelv1alpha1.KameletBinding{
 			ObjectMeta: metav1.ObjectMeta{
@@ -483,19 +479,14 @@ func createBasicTestEnvironment(resources ...runtime.Object) *trait.Environment 
 		}
 	}
 
+	camelCatalog, _ := camel.DefaultCatalog()
+
 	return &trait.Environment{
-		Catalog:     trait.NewCatalog(nil),
-		Ctx:         context.Background(),
-		Client:      fakeClient,
-		Integration: it,
-		CamelCatalog: &camel.RuntimeCatalog{
-			CamelCatalogSpec: camelv1.CamelCatalogSpec{
-				Runtime: camelv1.RuntimeSpec{
-					Version:  "0.0.1",
-					Provider: camelv1.RuntimeProviderQuarkus,
-				},
-			},
-		},
+		Catalog:               trait.NewCatalog(nil),
+		Ctx:                   context.Background(),
+		Client:                fakeClient,
+		Integration:           it,
+		CamelCatalog:          camelCatalog,
 		Platform:              pl,
 		Resources:             kubernetes.NewCollection(),
 		ApplicationProperties: make(map[string]string),
