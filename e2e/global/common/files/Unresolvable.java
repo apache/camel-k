@@ -17,12 +17,13 @@
 
 import org.apache.camel.builder.RouteBuilder;
 
-public class Java extends RouteBuilder {
+public class Unresolvable extends RouteBuilder {
     @Override
     public void configure() throws Exception {
         from("timer:tick")
             .setHeader("m").constant("string!")
             .setBody().simple("Magic${header.m}")
-            .log("${body}");
+            .log("${body}")
+            .to("non-existent:hello");
     }
 }

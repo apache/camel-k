@@ -41,7 +41,7 @@ func (c *deploymentController) checkReadyCondition(ctx context.Context) (bool, e
 		progressing.Status == corev1.ConditionFalse &&
 		progressing.Reason == "ProgressDeadlineExceeded" {
 		c.integration.Status.Phase = v1.IntegrationPhaseError
-		setReadyConditionError(c.integration, progressing.Message)
+		c.integration.SetReadyConditionError(progressing.Message)
 		return true, nil
 	}
 
@@ -66,14 +66,20 @@ func (c *deploymentController) updateReadyCondition(readyPods []corev1.Pod) bool
 		// reported to be ready is larger than or equal to the specified number
 		// of replicas. This avoids reporting a falsy readiness condition
 		// when the Integration is being down-scaled.
-		setReadyCondition(c.integration, corev1.ConditionTrue, v1.IntegrationConditionDeploymentReadyReason, fmt.Sprintf("%d/%d ready replicas", readyReplicas, replicas))
+		c.integration.SetReadyCondition(corev1.ConditionTrue,
+			v1.IntegrationConditionDeploymentReadyReason,
+			fmt.Sprintf("%d/%d ready replicas", readyReplicas, replicas))
 		return true
 
 	case c.obj.Status.UpdatedReplicas < replicas:
-		setReadyCondition(c.integration, corev1.ConditionFalse, v1.IntegrationConditionDeploymentProgressingReason, fmt.Sprintf("%d/%d updated replicas", c.obj.Status.UpdatedReplicas, replicas))
+		c.integration.SetReadyCondition(corev1.ConditionFalse,
+			v1.IntegrationConditionDeploymentProgressingReason,
+			fmt.Sprintf("%d/%d updated replicas", c.obj.Status.UpdatedReplicas, replicas))
 
 	default:
-		setReadyCondition(c.integration, corev1.ConditionFalse, v1.IntegrationConditionDeploymentProgressingReason, fmt.Sprintf("%d/%d ready replicas", readyReplicas, replicas))
+		c.integration.SetReadyCondition(corev1.ConditionFalse,
+			v1.IntegrationConditionDeploymentProgressingReason,
+			fmt.Sprintf("%d/%d ready replicas", readyReplicas, replicas))
 	}
 
 	return false
