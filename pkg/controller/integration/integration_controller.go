@@ -344,21 +344,17 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 			newTarget, err := a.Handle(ctx, target)
 			if err != nil {
 				camelevent.NotifyIntegrationError(ctx, r.client, r.recorder, &instance, newTarget, err)
+				// Update the integration (mostly just to update its phase) if the new instance is returned
+				if newTarget != nil {
+					_ = r.update(ctx, &instance, newTarget, &targetLog)
+				}
 				return reconcile.Result{}, err
 			}
 
 			if newTarget != nil {
-				if err := r.update(ctx, &instance, newTarget); err != nil {
+				if err := r.update(ctx, &instance, newTarget, &targetLog); err != nil {
 					camelevent.NotifyIntegrationError(ctx, r.client, r.recorder, &instance, newTarget, err)
 					return reconcile.Result{}, err
-				}
-
-				if newTarget.Status.Phase != instance.Status.Phase {
-					targetLog.Info(
-						"state transition",
-						"phase-from", instance.Status.Phase,
-						"phase-to", newTarget.Status.Phase,
-					)
 				}
 			}
 
@@ -372,7 +368,7 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 	return reconcile.Result{}, nil
 }
 
-func (r *reconcileIntegration) update(ctx context.Context, base *v1.Integration, target *v1.Integration) error {
+func (r *reconcileIntegration) update(ctx context.Context, base *v1.Integration, target *v1.Integration, log *log.Logger) error {
 	d, err := digest.ComputeForIntegration(target)
 	if err != nil {
 		return err
@@ -381,5 +377,17 @@ func (r *reconcileIntegration) update(ctx context.Context, base *v1.Integration,
 	target.Status.Digest = d
 	target.Status.ObservedGeneration = base.Generation
 
-	return r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base))
+	if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base)); err != nil {
+		return err
+	}
+
+	if target.Status.Phase != base.Status.Phase {
+		log.Info(
+			"state transition",
+			"phase-from", base.Status.Phase,
+			"phase-to", target.Status.Phase,
+		)
+	}
+
+	return nil
 }

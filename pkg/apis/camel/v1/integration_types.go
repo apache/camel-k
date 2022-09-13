@@ -240,6 +240,8 @@ const (
 	// IntegrationConditionErrorReason --
 	IntegrationConditionErrorReason string = "Error"
 
+	// IntegrationConditionInitializationFailedReason --
+	IntegrationConditionInitializationFailedReason string = "InitializationFailed"
 	// IntegrationConditionUnsupportedLanguageReason --
 	IntegrationConditionUnsupportedLanguageReason string = "UnsupportedLanguage"
 

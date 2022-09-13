@@ -20,9 +20,10 @@ import java.lang.Override;
 import org.apache.camel.builder.RouteBuilder;
 
 public class BadRoute extends RouteBuilder {
-  @Override
-  public void configure() throws Exception {
-    from("mongodb:sample?database=sampledb&collection=mycollection&operation=findfoo").throwException(new RuntimeException("Heyyy")).log("bar");
-  }
+    @Override
+    public void configure() throws Exception {
+        from("mongodb:sample?database=sampledb&collection=mycollection&operation=findfoo")
+            .throwException(new RuntimeException("Heyyy"))
+            .log("bar");
+    }
 }
-
