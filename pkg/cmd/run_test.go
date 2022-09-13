@@ -274,6 +274,69 @@ f=g:h
 i=j\nk
 `
 
+func TestExtractProperties_SingleKeyValue(t *testing.T) {
+	correctValues := []string{"key=val", "key = val", "key= val", " key   =  val"}
+	runCmdOptions, _, _ := initializeRunCmdOptionsWithOutput(t)
+	for _, val := range correctValues {
+		prop, err := runCmdOptions.extractProperties(nil, val)
+		assert.Nil(t, err)
+		value, ok := prop.Get("key")
+		assert.True(t, ok)
+		assert.Equal(t, "val", value)
+	}
+}
+
+func TestExtractProperties_FromFile(t *testing.T) {
+	var tmpFile1 *os.File
+	var err error
+	if tmpFile1, err = ioutil.TempFile("", "camel-k-*.properties"); err != nil {
+		t.Error(err)
+	}
+
+	assert.Nil(t, tmpFile1.Close())
+	assert.Nil(t, ioutil.WriteFile(tmpFile1.Name(), []byte(`
+	key=value
+	#key2=value2
+	my.key=value
+	`), 0o400))
+	runCmdOptions, _, _ := initializeRunCmdOptionsWithOutput(t)
+	props, err := runCmdOptions.extractProperties(nil, "file:"+tmpFile1.Name())
+	assert.Nil(t, err)
+	assert.Equal(t, 2, props.Len())
+	for _, prop := range props.Keys() {
+		value, ok := props.Get(prop)
+		assert.True(t, ok)
+		assert.Equal(t, "value", value)
+	}
+}
+
+func TestExtractPropertiesFromFileAndSingleValue(t *testing.T) {
+	var tmpFile1 *os.File
+	var err error
+	if tmpFile1, err = ioutil.TempFile("", "camel-k-*.properties"); err != nil {
+		t.Error(err)
+	}
+
+	assert.Nil(t, tmpFile1.Close())
+	assert.Nil(t, ioutil.WriteFile(tmpFile1.Name(), []byte(`
+	key=value
+	#key2=value2
+	my.key=value
+	`), 0o400))
+
+	properties := []string{"key=override", "file:" + tmpFile1.Name(), "my.key = override"}
+	runCmdOptions, _, _ := initializeRunCmdOptionsWithOutput(t)
+	props, err := runCmdOptions.mergePropertiesWithPrecedence(nil, properties)
+	assert.Nil(t, err)
+	assert.Equal(t, 2, props.Len())
+	val, ok := props.Get("key")
+	assert.True(t, ok)
+	assert.Equal(t, "override", val)
+	val, ok = props.Get("my.key")
+	assert.True(t, ok)
+	assert.Equal(t, "override", val)
+}
+
 func TestAddPropertyFile(t *testing.T) {
 	var tmpFile *os.File
 	var err error
@@ -284,7 +347,8 @@ func TestAddPropertyFile(t *testing.T) {
 	assert.Nil(t, tmpFile.Close())
 	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestPropertyFileContent), 0o400))
 
-	properties, err := convertToTraitParameter("file:"+tmpFile.Name(), "trait.properties")
+	runCmdOptions, _, _ := initializeRunCmdOptionsWithOutput(t)
+	properties, err := runCmdOptions.convertToTraitParameter(nil, "file:"+tmpFile.Name(), "trait.properties")
 	assert.Nil(t, err)
 	assert.Equal(t, 3, len(properties))
 	assert.Equal(t, `trait.properties=a = b`, properties[0])
@@ -293,7 +357,8 @@ func TestAddPropertyFile(t *testing.T) {
 }
 
 func TestRunProperty(t *testing.T) {
-	properties, err := convertToTraitParameter(`key=value\nnewline`, "trait.properties")
+	runCmdOptions, _, _ := initializeRunCmdOptionsWithOutput(t)
+	properties, err := runCmdOptions.convertToTraitParameter(nil, `key=value\nnewline`, "trait.properties")
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(properties))
 	assert.Equal(t, `trait.properties=key = value\nnewline`, properties[0])

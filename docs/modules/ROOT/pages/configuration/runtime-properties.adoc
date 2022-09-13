@@ -67,10 +67,70 @@ kamel run --property file:my.properties property-route.groovy
 
 The property file is parsed and its properties configured on the `Integration`. As soon as the application starts, you will see the log with the expected configuration.
 
+[[runtime-configmap]]
+== Property from ConfigMap/Secret
+
+In case some runtime properties are stored into a `Configmap` or a `Secret`, you can use the `--property` flag with a value of type respectively _configmap:name-of-configmap_ or _secret:name-of-secret_ to refer to the specific resource to use as runtime properties.
+
+As an example, let's create a `Configmap` named _my-cm-rp_ containing the runtime properties to load. You can alternatively use any `Configmap` you've already stored in your cluster:
+
+----
+kubectl create configmap my-cm-rp --from-literal=name="Will Smith" --from-literal=period="2000"
+----
+
+In our `Integration` we can simply refer to the properties defined in the `ConfigMap` as we'd do with any other property:
+
+[source,groovy]
+.property-configmap-route.groovy
+----
+from('timer:property?period={{period}}')
+    .log('Hello {{name}}!')
+----
+
+Then we launch the `run` command with the `--property` flag whose value matches with the appropriate syntax to refer to `my-cm-rp`:
+
+----
+kamel run --property configmap:my-cm-rp property-configmap-route.groovy
+----
+
+The key-value pairs of the `ConfigMap` are loaded and used as runtime properties of the `Integration`. As soon as the application starts, you will see the log with the expected message.
+
+[[runtime-configmap-as-file]]
+== Property from ConfigMap/Secret as file
+
+When you have a lot of key-value pairs to store into a given `ConfigMap`/`Secret`, you may consider storing some runtime properties as a file into a specific key-value pair for the sake of simplicity. 
+
+The only constraint is to use `.properties` as a suffix of the key to indicate that the value is actually a property file, not a simple value.
+
+As an example, let's use the same `Integration` as the previous section but with a `ConfigMap` that contains all the properties into the same key-value pair.
+
+For this we need a properties file as next:
+
+[source,text]
+.some.properties
+----
+name=John Smith
+period=2000
+----
+
+That we will load into a specific `ConfigMap` using the following command:
+
+----
+kubectl create configmap my-cm-rps --from-file=some.properties
+----
+
+Then we launch the `run` command with the `--property` flag whose value matches with the appropriate syntax to refer to `my-cm-rps`:
+
+----
+kamel run --property configmap:my-cm-rps property-configmap-route.groovy
+----
+
+The value of the key-value of the `ConfigMap` is loaded as a property file and used as runtime properties of the `Integration`. As soon as the application starts, you will see the log with the expected message.
+
 [[runtime-props-file-precedence]]
 == Property collision priority
 
-If you have a property repeated more than once, the general rule is that the last one declared in your `kamel run` statement will be taken in consideration. If the same property is found both in a single option declaration and inside a file, then, the single option will have higher priority and will be used.
+If you have a property repeated more than once, the general rule is that the last one declared in your `kamel run` statement will be taken in consideration. If the same property is found both in a single option declaration and inside a file/configmap/secret, then, the single option will have higher priority and will be used.
 
 [[runtime-build-time-conf]]
 == Build time properties

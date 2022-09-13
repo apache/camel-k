@@ -68,6 +68,54 @@ func TestRunConfigExamples(t *testing.T) {
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
+		t.Run("Property from ConfigMap", func(t *testing.T) {
+			var cmData = make(map[string]string)
+			cmData["my.message"] = "my-configmap-property-value"
+			CreatePlainTextConfigmap(ns, "my-cm-test-property", cmData)
+
+			Expect(KamelRunWithID(operatorID, ns, "./files/property-route.groovy", "-p", "configmap:my-cm-test-property").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "property-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "property-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "property-route"), TestTimeoutShort).Should(ContainSubstring("my-configmap-property-value"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("Property from ConfigMap as property file", func(t *testing.T) {
+			var cmData = make(map[string]string)
+			cmData["my.properties"] = "my.message=my-configmap-property-entry"
+			CreatePlainTextConfigmap(ns, "my-cm-test-properties", cmData)
+
+			Expect(KamelRunWithID(operatorID, ns, "./files/property-route.groovy", "-p", "configmap:my-cm-test-properties").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "property-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "property-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "property-route"), TestTimeoutShort).Should(ContainSubstring("my-configmap-property-entry"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("Property from Secret", func(t *testing.T) {
+			var secData = make(map[string]string)
+			secData["my.message"] = "my-secret-property-value"
+			CreatePlainTextSecret(ns, "my-sec-test-property", secData)
+
+			Expect(KamelRunWithID(operatorID, ns, "./files/property-route.groovy", "-p", "secret:my-sec-test-property").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "property-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "property-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "property-route"), TestTimeoutShort).Should(ContainSubstring("my-secret-property-value"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("Property from Secret as property file", func(t *testing.T) {
+			var secData = make(map[string]string)
+			secData["my.properties"] = "my.message=my-secret-property-entry"
+			CreatePlainTextSecret(ns, "my-sec-test-properties", secData)
+
+			Expect(KamelRunWithID(operatorID, ns, "./files/property-route.groovy", "-p", "secret:my-sec-test-properties").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "property-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "property-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "property-route"), TestTimeoutShort).Should(ContainSubstring("my-secret-property-entry"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
 		// Configmap
 
 		// Store a configmap on the cluster
@@ -274,5 +322,52 @@ func TestRunConfigExamples(t *testing.T) {
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
+		t.Run("Build time property from ConfigMap", func(t *testing.T) {
+			var cmData = make(map[string]string)
+			cmData["quarkus.application.name"] = "my-cool-application"
+			CreatePlainTextConfigmap(ns, "my-cm-test-build-property", cmData)
+
+			Expect(KamelRunWithID(operatorID, ns, "./files/build-property-file-route.groovy", "--build-property", "configmap:my-cm-test-build-property").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "build-property-file-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "build-property-file-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "build-property-file-route"), TestTimeoutShort).Should(ContainSubstring("my-cool-application"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("Build time property from ConfigMap as property file", func(t *testing.T) {
+			var cmData = make(map[string]string)
+			cmData["my.properties"] = "quarkus.application.name=my-super-cool-application"
+			CreatePlainTextConfigmap(ns, "my-cm-test-build-properties", cmData)
+
+			Expect(KamelRunWithID(operatorID, ns, "./files/build-property-file-route.groovy", "--build-property", "configmap:my-cm-test-build-properties").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "build-property-file-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "build-property-file-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "build-property-file-route"), TestTimeoutShort).Should(ContainSubstring("my-super-cool-application"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("Build time property from Secret", func(t *testing.T) {
+			var secData = make(map[string]string)
+			secData["quarkus.application.name"] = "my-great-application"
+			CreatePlainTextSecret(ns, "my-sec-test-build-property", secData)
+
+			Expect(KamelRunWithID(operatorID, ns, "./files/build-property-file-route.groovy", "--build-property", "secret:my-sec-test-build-property").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "build-property-file-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "build-property-file-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "build-property-file-route"), TestTimeoutShort).Should(ContainSubstring("my-great-application"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("Build time property from Secret as property file", func(t *testing.T) {
+			var secData = make(map[string]string)
+			secData["my.properties"] = "quarkus.application.name=my-awsome-application"
+			CreatePlainTextSecret(ns, "my-sec-test-build-properties", secData)
+
+			Expect(KamelRunWithID(operatorID, ns, "./files/build-property-file-route.groovy", "--build-property", "secret:my-sec-test-build-properties").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "build-property-file-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "build-property-file-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "build-property-file-route"), TestTimeoutShort).Should(ContainSubstring("my-awsome-application"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
 	})
 }
