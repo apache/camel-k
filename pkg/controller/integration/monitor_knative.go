@@ -39,7 +39,7 @@ func (c *knativeServiceController) checkReadyCondition(ctx context.Context) (boo
 	// Check the KnativeService conditions
 	if ready := kubernetes.GetKnativeServiceCondition(*c.obj, servingv1.ServiceConditionReady); ready.IsFalse() && ready.GetReason() == "RevisionFailed" {
 		c.integration.Status.Phase = v1.IntegrationPhaseError
-		setReadyConditionError(c.integration, ready.Message)
+		c.integration.SetReadyConditionError(ready.Message)
 		return true, nil
 	}
 
@@ -53,10 +53,12 @@ func (c *knativeServiceController) getPodSpec() corev1.PodSpec {
 func (c *knativeServiceController) updateReadyCondition(readyPods []corev1.Pod) bool {
 	ready := kubernetes.GetKnativeServiceCondition(*c.obj, servingv1.ServiceConditionReady)
 	if ready.IsTrue() {
-		setReadyCondition(c.integration, corev1.ConditionTrue, v1.IntegrationConditionKnativeServiceReadyReason, "")
+		c.integration.SetReadyCondition(corev1.ConditionTrue,
+			v1.IntegrationConditionKnativeServiceReadyReason, "")
 		return true
 	}
-	setReadyCondition(c.integration, corev1.ConditionFalse, ready.GetReason(), ready.GetMessage())
+	c.integration.SetReadyCondition(corev1.ConditionFalse,
+		ready.GetReason(), ready.GetMessage())
 
 	return false
 }

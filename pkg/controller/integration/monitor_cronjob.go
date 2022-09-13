@@ -60,7 +60,9 @@ func (c *cronJobController) checkReadyCondition(ctx context.Context) (bool, erro
 		}
 		if c.lastCompletedJob != nil {
 			if failed := kubernetes.GetJobCondition(*c.lastCompletedJob, batchv1.JobFailed); failed != nil && failed.Status == corev1.ConditionTrue {
-				setReadyCondition(c.integration, corev1.ConditionFalse, v1.IntegrationConditionLastJobFailedReason, fmt.Sprintf("last job %s failed: %s", c.lastCompletedJob.Name, failed.Message))
+				c.integration.SetReadyCondition(corev1.ConditionFalse,
+					v1.IntegrationConditionLastJobFailedReason,
+					fmt.Sprintf("last job %s failed: %s", c.lastCompletedJob.Name, failed.Message))
 				c.integration.Status.Phase = v1.IntegrationPhaseError
 				return true, nil
 			}
@@ -77,25 +79,30 @@ func (c *cronJobController) getPodSpec() corev1.PodSpec {
 func (c *cronJobController) updateReadyCondition(readyPods []corev1.Pod) bool {
 	switch {
 	case c.obj.Status.LastScheduleTime == nil:
-		setReadyCondition(c.integration, corev1.ConditionTrue, v1.IntegrationConditionCronJobCreatedReason, "cronjob created")
+		c.integration.SetReadyCondition(corev1.ConditionTrue,
+			v1.IntegrationConditionCronJobCreatedReason, "cronjob created")
 		return true
 
 	case len(c.obj.Status.Active) > 0:
-		setReadyCondition(c.integration, corev1.ConditionTrue, v1.IntegrationConditionCronJobActiveReason, "cronjob active")
+		c.integration.SetReadyCondition(corev1.ConditionTrue,
+			v1.IntegrationConditionCronJobActiveReason, "cronjob active")
 		return true
 
 	case c.obj.Spec.SuccessfulJobsHistoryLimit != nil && *c.obj.Spec.SuccessfulJobsHistoryLimit == 0 && c.obj.Spec.FailedJobsHistoryLimit != nil && *c.obj.Spec.FailedJobsHistoryLimit == 0:
-		setReadyCondition(c.integration, corev1.ConditionTrue, v1.IntegrationConditionCronJobCreatedReason, "no jobs history available")
+		c.integration.SetReadyCondition(corev1.ConditionTrue,
+			v1.IntegrationConditionCronJobCreatedReason, "no jobs history available")
 		return true
 
 	case c.lastCompletedJob != nil:
 		if complete := kubernetes.GetJobCondition(*c.lastCompletedJob, batchv1.JobComplete); complete != nil && complete.Status == corev1.ConditionTrue {
-			setReadyCondition(c.integration, corev1.ConditionTrue, v1.IntegrationConditionLastJobSucceededReason, fmt.Sprintf("last job %s completed successfully", c.lastCompletedJob.Name))
+			c.integration.SetReadyCondition(corev1.ConditionTrue,
+				v1.IntegrationConditionLastJobSucceededReason,
+				fmt.Sprintf("last job %s completed successfully", c.lastCompletedJob.Name))
 			return true
 		}
 
 	default:
-		setReadyCondition(c.integration, corev1.ConditionUnknown, "", "")
+		c.integration.SetReadyCondition(corev1.ConditionUnknown, "", "")
 	}
 
 	return false
