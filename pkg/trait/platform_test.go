@@ -127,7 +127,7 @@ func TestPlatformTraitExisting(t *testing.T) {
 		{
 			name:          "Move state",
 			platformPhase: v1.IntegrationPlatformPhaseReady,
-			expectedPhase: v1.IntegrationPhaseInitialization,
+			expectedPhase: v1.IntegrationPhaseNone,
 		},
 	}
 
