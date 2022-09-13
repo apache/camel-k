@@ -80,20 +80,31 @@ func (t *platformTrait) Apply(e *Environment) error {
 	initial := e.Integration.DeepCopy()
 
 	pl, err := t.getOrCreatePlatform(e)
-	if err != nil || pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
+	// Do not change to Initialization phase within the trait
+	switch {
+	case err != nil:
 		e.Integration.Status.Phase = v1.IntegrationPhaseWaitingForPlatform
-	} else {
-		e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
-	}
+		if initial.Status.Phase != e.Integration.Status.Phase {
+			e.Integration.Status.SetErrorCondition(
+				v1.IntegrationConditionPlatformAvailable,
+				v1.IntegrationConditionPlatformAvailableReason,
+				err)
 
-	if initial.Status.Phase != e.Integration.Status.Phase {
-		if err != nil {
-			e.Integration.Status.SetErrorCondition(v1.IntegrationConditionPlatformAvailable, v1.IntegrationConditionPlatformAvailableReason, err)
+			if pl != nil {
+				e.Integration.SetIntegrationPlatform(pl)
+			}
 		}
-
-		if pl != nil {
+	case pl == nil:
+		e.Integration.Status.Phase = v1.IntegrationPhaseWaitingForPlatform
+	case pl.Status.Phase != v1.IntegrationPlatformPhaseReady:
+		e.Integration.Status.Phase = v1.IntegrationPhaseWaitingForPlatform
+		if initial.Status.Phase != e.Integration.Status.Phase {
 			e.Integration.SetIntegrationPlatform(pl)
 		}
+	default:
+		// In success case, phase should be reset to none
+		e.Integration.Status.Phase = v1.IntegrationPhaseNone
+		e.Integration.SetIntegrationPlatform(pl)
 	}
 
 	return nil
@@ -101,43 +112,42 @@ func (t *platformTrait) Apply(e *Environment) error {
 
 func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlatform, error) {
 	pl, err := platform.GetOrFindForResource(e.Ctx, t.Client, e.Integration, false)
-	if err != nil && apierrors.IsNotFound(err) {
-		if pointer.BoolDeref(t.CreateDefault, false) {
-			platformName := e.Integration.Status.Platform
-			if platformName == "" {
-				platformName = defaults.OperatorID()
-			}
-
-			if platformName == "" {
-				platformName = platform.DefaultPlatformName
-			}
-			namespace := e.Integration.Namespace
-			if pointer.BoolDeref(t.Global, false) {
-				operatorNamespace := platform.GetOperatorNamespace()
-				if operatorNamespace != "" {
-					namespace = operatorNamespace
-				}
-			}
-			defaultPlatform := v1.NewIntegrationPlatform(namespace, platformName)
-			if defaultPlatform.Labels == nil {
-				defaultPlatform.Labels = make(map[string]string)
-			}
-			defaultPlatform.Labels["camel.apache.org/platform.generated"] = True
-			// Cascade the operator id in charge to reconcile the Integration
-			if v1.GetOperatorIDAnnotation(e.Integration) != "" {
-				defaultPlatform.SetOperatorID(v1.GetOperatorIDAnnotation(e.Integration))
-			}
-			pl = &defaultPlatform
-			e.Resources.Add(pl)
-
-			// Make sure that IntegrationPlatform installed in operator namespace can be seen by others
-			if err := install.IntegrationPlatformViewerRole(e.Ctx, t.Client, namespace); err != nil && !apierrors.IsAlreadyExists(err) {
-				t.L.Info(fmt.Sprintf("Cannot install global IntegrationPlatform viewer role in namespace '%s': skipping.", namespace))
-			}
-
-			return pl, nil
+	if err != nil && apierrors.IsNotFound(err) && pointer.BoolDeref(t.CreateDefault, false) {
+		platformName := e.Integration.Status.Platform
+		if platformName == "" {
+			platformName = defaults.OperatorID()
 		}
+
+		if platformName == "" {
+			platformName = platform.DefaultPlatformName
+		}
+		namespace := e.Integration.Namespace
+		if pointer.BoolDeref(t.Global, false) {
+			operatorNamespace := platform.GetOperatorNamespace()
+			if operatorNamespace != "" {
+				namespace = operatorNamespace
+			}
+		}
+		defaultPlatform := v1.NewIntegrationPlatform(namespace, platformName)
+		if defaultPlatform.Labels == nil {
+			defaultPlatform.Labels = make(map[string]string)
+		}
+		defaultPlatform.Labels["camel.apache.org/platform.generated"] = True
+		// Cascade the operator id in charge to reconcile the Integration
+		if v1.GetOperatorIDAnnotation(e.Integration) != "" {
+			defaultPlatform.SetOperatorID(v1.GetOperatorIDAnnotation(e.Integration))
+		}
+		pl = &defaultPlatform
+		e.Resources.Add(pl)
+
+		// Make sure that IntegrationPlatform installed in operator namespace can be seen by others
+		if err := install.IntegrationPlatformViewerRole(e.Ctx, t.Client, namespace); err != nil && !apierrors.IsAlreadyExists(err) {
+			t.L.Info(fmt.Sprintf("Cannot install global IntegrationPlatform viewer role in namespace '%s': skipping.", namespace))
+		}
+
+		return pl, nil
 	}
+
 	return pl, err
 }
 
