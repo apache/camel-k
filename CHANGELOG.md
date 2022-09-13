@@ -6,18 +6,19 @@
 
 **Closed issues:**
 
+- `make bundle` failure [\#3602](https://github.com/apache/camel-k/issues/3602)
 - Parametrize kaniko executor image to point to private registry [\#3350](https://github.com/apache/camel-k/issues/3350)
 - kamel uninstall --all does not remove Kamelets [\#3342](https://github.com/apache/camel-k/issues/3342)
 - Configure parallel container image layers push based on CPU quota [\#3340](https://github.com/apache/camel-k/issues/3340)
 - Configure Maven builds based on CPU quota [\#3339](https://github.com/apache/camel-k/issues/3339)
 - Flaky E2E tests identified in 1.9.x [\#3234](https://github.com/apache/camel-k/issues/3234)
 - kamel log tail option [\#3004](https://github.com/apache/camel-k/issues/3004)
+- Provide a command to add a repo for custom Kamelet catalog [\#2850](https://github.com/apache/camel-k/issues/2850)
 - Ability to set labels on knative service \(for things like "cluster-local"\) [\#1712](https://github.com/apache/camel-k/issues/1712)
 - kamel CLI - Allow to specify a namespace to use instead of default [\#1184](https://github.com/apache/camel-k/issues/1184)
 - Create a Github Action for Camel K [\#1163](https://github.com/apache/camel-k/issues/1163)
 - Camel K doesn't support kubernetes services of type loadbalancer [\#1070](https://github.com/apache/camel-k/issues/1070)
 - Camel-K operator should clean up kits and kit builders after integrations are deleted [\#889](https://github.com/apache/camel-k/issues/889)
-- Execute maven operation asynchronously [\#762](https://github.com/apache/camel-k/issues/762)
 - support for multiple type of builders [\#687](https://github.com/apache/camel-k/issues/687)
 
 ## [1.11.0-nightly](https://github.com/apache/camel-k/tree/1.11.0-nightly) (2022-09-06)
