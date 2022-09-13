@@ -80,9 +80,8 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 func integrationUpdateFunc(old *v1.Integration, it *v1.Integration) bool {
 	// Observe the time to first readiness metric
 	previous := old.Status.GetCondition(v1.IntegrationConditionReady)
-	if next := it.Status.GetCondition(v1.IntegrationConditionReady); (previous == nil || previous.Status != corev1.ConditionTrue && (previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero())) &&
-		next != nil && next.Status == corev1.ConditionTrue && next.FirstTruthyTime != nil && !next.FirstTruthyTime.IsZero() &&
-		it.Status.InitializationTimestamp != nil {
+	next := it.Status.GetCondition(v1.IntegrationConditionReady)
+	if isIntegrationUpdated(it, previous, next) {
 		duration := next.FirstTruthyTime.Time.Sub(it.Status.InitializationTimestamp.Time)
 		Log.WithValues("request-namespace", it.Namespace, "request-name", it.Name, "ready-after", duration.Seconds()).
 			ForIntegration(it).Infof("First readiness after %s", duration)
@@ -106,6 +105,16 @@ func integrationUpdateFunc(old *v1.Integration, it *v1.Integration) bool {
 	// to another.
 	return old.Generation != it.Generation ||
 		old.Status.Phase != it.Status.Phase
+}
+
+func isIntegrationUpdated(it *v1.Integration, previous, next *v1.IntegrationCondition) bool {
+	if previous == nil || previous.Status != corev1.ConditionTrue && (previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero()) {
+		if next != nil && next.Status == corev1.ConditionTrue && next.FirstTruthyTime != nil && !next.FirstTruthyTime.IsZero() {
+			return it.Status.InitializationTimestamp != nil
+		}
+	}
+
+	return false
 }
 
 func integrationKitEnqueueRequestsFromMapFunc(c client.Client, kit *v1.IntegrationKit) []reconcile.Request {
