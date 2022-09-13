@@ -57,9 +57,26 @@ func (action *monitorAction) Name() string {
 }
 
 func (action *monitorAction) CanHandle(integration *v1.Integration) bool {
+	// When in InitializationFailed condition a kit is not available for the integration
+	// so the monitor action is not able to handle it.
+	if isInInitializationFailed(integration.Status) {
+		return false
+	}
+
 	return integration.Status.Phase == v1.IntegrationPhaseDeploying ||
 		integration.Status.Phase == v1.IntegrationPhaseRunning ||
 		integration.Status.Phase == v1.IntegrationPhaseError
+}
+
+func isInInitializationFailed(status v1.IntegrationStatus) bool {
+	if status.Phase == v1.IntegrationPhaseError {
+		cond := status.GetCondition(v1.IntegrationConditionReady)
+		if cond.Status == corev1.ConditionFalse && cond.Reason == v1.IntegrationConditionInitializationFailedReason {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
@@ -177,7 +194,7 @@ func (action *monitorAction) newController(env *trait.Environment, integration *
 	var controller controller
 	var obj ctrl.Object
 	switch {
-	case isConditionTrue(integration, v1.IntegrationConditionDeploymentAvailable):
+	case integration.IsConditionTrue(v1.IntegrationConditionDeploymentAvailable):
 		obj = getUpdatedController(env, &appsv1.Deployment{})
 		deploy, ok := obj.(*appsv1.Deployment)
 		if !ok {
@@ -187,7 +204,7 @@ func (action *monitorAction) newController(env *trait.Environment, integration *
 			obj:         deploy,
 			integration: integration,
 		}
-	case isConditionTrue(integration, v1.IntegrationConditionKnativeServiceAvailable):
+	case integration.IsConditionTrue(v1.IntegrationConditionKnativeServiceAvailable):
 		obj = getUpdatedController(env, &servingv1.Service{})
 		svc, ok := obj.(*servingv1.Service)
 		if !ok {
@@ -197,7 +214,7 @@ func (action *monitorAction) newController(env *trait.Environment, integration *
 			obj:         svc,
 			integration: integration,
 		}
-	case isConditionTrue(integration, v1.IntegrationConditionCronJobAvailable):
+	case integration.IsConditionTrue(v1.IntegrationConditionCronJobAvailable):
 		obj = getUpdatedController(env, &batchv1.CronJob{})
 		cj, ok := obj.(*batchv1.CronJob)
 		if !ok {
@@ -257,7 +274,7 @@ func checkPodStatuses(integration *v1.Integration, pendingPods []corev1.Pod, run
 		// Check the scheduled condition
 		if scheduled := kubernetes.GetPodCondition(pod, corev1.PodScheduled); scheduled != nil && scheduled.Status == corev1.ConditionFalse && scheduled.Reason == "Unschedulable" {
 			integration.Status.Phase = v1.IntegrationPhaseError
-			setReadyConditionError(integration, scheduled.Message)
+			integration.SetReadyConditionError(scheduled.Message)
 			return true
 		}
 	}
@@ -270,7 +287,7 @@ func checkPodStatuses(integration *v1.Integration, pendingPods []corev1.Pod, run
 			// Check the images are pulled
 			if waiting := container.State.Waiting; waiting != nil && waiting.Reason == "ImagePullBackOff" {
 				integration.Status.Phase = v1.IntegrationPhaseError
-				setReadyConditionError(integration, waiting.Message)
+				integration.SetReadyConditionError(waiting.Message)
 				return true
 			}
 		}
@@ -287,12 +304,12 @@ func checkPodStatuses(integration *v1.Integration, pendingPods []corev1.Pod, run
 			// Check the container state
 			if waiting := container.State.Waiting; waiting != nil && waiting.Reason == "CrashLoopBackOff" {
 				integration.Status.Phase = v1.IntegrationPhaseError
-				setReadyConditionError(integration, waiting.Message)
+				integration.SetReadyConditionError(waiting.Message)
 				return true
 			}
 			if terminated := container.State.Terminated; terminated != nil && terminated.Reason == "Error" {
 				integration.Status.Phase = v1.IntegrationPhaseError
-				setReadyConditionError(integration, terminated.Message)
+				integration.SetReadyConditionError(terminated.Message)
 				return true
 			}
 		}
@@ -416,7 +433,7 @@ func (action *monitorAction) probeReadiness(ctx context.Context, environment *tr
 		if integration.Status.Phase == v1.IntegrationPhaseError {
 			reason = v1.IntegrationConditionErrorReason
 		}
-		setReadyCondition(integration, corev1.ConditionFalse, reason, fmt.Sprintf("%s", runtimeNotReadyMessages))
+		integration.SetReadyCondition(corev1.ConditionFalse, reason, fmt.Sprintf("%s", runtimeNotReadyMessages))
 	}
 
 	return nil
@@ -452,20 +469,4 @@ func getIntegrationContainer(environment *trait.Environment, pod *corev1.Pod) *c
 		}
 	}
 	return nil
-}
-
-func isConditionTrue(integration *v1.Integration, conditionType v1.IntegrationConditionType) bool {
-	cond := integration.Status.GetCondition(conditionType)
-	if cond == nil {
-		return false
-	}
-	return cond.Status == corev1.ConditionTrue
-}
-
-func setReadyConditionError(integration *v1.Integration, err string) {
-	setReadyCondition(integration, corev1.ConditionFalse, v1.IntegrationConditionErrorReason, err)
-}
-
-func setReadyCondition(integration *v1.Integration, status corev1.ConditionStatus, reason string, message string) {
-	integration.Status.SetCondition(v1.IntegrationConditionReady, status, reason, message)
 }

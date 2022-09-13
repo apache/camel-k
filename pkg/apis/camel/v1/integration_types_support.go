@@ -322,6 +322,29 @@ func (in *Integration) GetIntegrationKitNamespace(p *IntegrationPlatform) string
 	return in.Namespace
 }
 
+// IsConditionTrue checks if the condition with the given type is true.
+func (in *Integration) IsConditionTrue(conditionType IntegrationConditionType) bool {
+	if in == nil {
+		return false
+	}
+	cond := in.Status.GetCondition(conditionType)
+	if cond == nil {
+		return false
+	}
+
+	return cond.Status == corev1.ConditionTrue
+}
+
+// SetReadyCondition sets Ready condition with the given status, reason, and message.
+func (in *Integration) SetReadyCondition(status corev1.ConditionStatus, reason, message string) {
+	in.Status.SetCondition(IntegrationConditionReady, status, reason, message)
+}
+
+// SetReadyConditionError sets Ready condition to False with the given error message.
+func (in *Integration) SetReadyConditionError(err string) {
+	in.SetReadyCondition(corev1.ConditionFalse, IntegrationConditionErrorReason, err)
+}
+
 // GetCondition returns the condition with the provided type.
 func (in *IntegrationStatus) GetCondition(condType IntegrationConditionType) *IntegrationCondition {
 	for i := range in.Conditions {
