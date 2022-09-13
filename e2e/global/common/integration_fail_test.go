@@ -96,6 +96,13 @@ func TestBadRouteIntegration(t *testing.T) {
 			// Kit shouldn't be created
 			Consistently(IntegrationKit(ns, name), 10*time.Second).Should(BeEmpty())
 
+			// Fixing the route should reconcile the Integration in Initialization Failed condition to Running
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
 			// Clean up
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
