@@ -54,58 +54,36 @@ func (action *monitorAction) Name() string {
 }
 
 func (action *monitorAction) CanHandle(integration *v1.Integration) bool {
-	// When in InitializationFailed condition a kit is not available for the integration
-	// so the monitor action is not able to handle it.
-	if isInInitializationFailed(integration.Status) {
-		return false
-	}
-
 	return integration.Status.Phase == v1.IntegrationPhaseDeploying ||
 		integration.Status.Phase == v1.IntegrationPhaseRunning ||
 		integration.Status.Phase == v1.IntegrationPhaseError
 }
 
-func isInInitializationFailed(status v1.IntegrationStatus) bool {
-	if status.Phase == v1.IntegrationPhaseError {
-		cond := status.GetCondition(v1.IntegrationConditionReady)
-		if cond.Status == corev1.ConditionFalse && cond.Reason == v1.IntegrationConditionInitializationFailedReason {
-			return true
-		}
+func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
+	// When in InitializationFailed condition a kit is not available for the integration
+	// so handle it differently from the rest
+	if isInInitializationFailed(integration.Status) {
+		// Only check if the Integration requires a rebuild
+		return action.checkDigestAndRebuild(integration, nil)
 	}
 
-	return false
-}
-
-func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	// At that staged the Integration must have a Kit
 	if integration.Status.IntegrationKit == nil {
 		return nil, fmt.Errorf("no kit set on integration %s", integration.Name)
 	}
 
-	kit, err := kubernetes.GetIntegrationKit(ctx, action.client, integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
+	kit, err := kubernetes.GetIntegrationKit(ctx, action.client,
+		integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
 	if err != nil {
-		return nil, fmt.Errorf("unable to find integration kit %s/%s: %w", integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
+		return nil, fmt.Errorf("unable to find integration kit %s/%s: %w",
+			integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
 	}
 
 	// Check if the Integration requires a rebuild
-	hash, err := digest.ComputeForIntegration(integration)
-	if err != nil {
+	if changed, err := action.checkDigestAndRebuild(integration, kit); err != nil {
 		return nil, err
-	}
-
-	if hash != integration.Status.Digest {
-		action.L.Info("Monitor: Integration needs a rebuild")
-
-		if v1.GetOperatorIDAnnotation(integration) != "" &&
-			(v1.GetOperatorIDAnnotation(integration) != v1.GetOperatorIDAnnotation(kit)) {
-			// Operator to reconcile the integration has changed. Reset integration kit so new operator can handle the kit reference
-			integration.SetIntegrationKit(nil)
-		}
-
-		integration.Initialize()
-		integration.Status.Digest = hash
-
-		return integration, nil
+	} else if changed != nil {
+		return changed, nil
 	}
 
 	// Check if an IntegrationKit with higher priority is ready
@@ -181,6 +159,45 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	}
 
 	return integration, nil
+}
+
+func isInInitializationFailed(status v1.IntegrationStatus) bool {
+	if status.Phase != v1.IntegrationPhaseError {
+		return false
+	}
+	if cond := status.GetCondition(v1.IntegrationConditionReady); cond != nil {
+		if cond.Status == corev1.ConditionFalse &&
+			cond.Reason == v1.IntegrationConditionInitializationFailedReason {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (action *monitorAction) checkDigestAndRebuild(integration *v1.Integration, kit *v1.IntegrationKit) (*v1.Integration, error) {
+	hash, err := digest.ComputeForIntegration(integration)
+	if err != nil {
+		return nil, err
+	}
+
+	if hash != integration.Status.Digest {
+		action.L.Info("Monitor: Integration needs a rebuild")
+
+		if kit != nil &&
+			v1.GetOperatorIDAnnotation(integration) != "" &&
+			v1.GetOperatorIDAnnotation(integration) != v1.GetOperatorIDAnnotation(kit) {
+			// Operator to reconcile the integration has changed. Reset integration kit so new operator can handle the kit reference
+			integration.SetIntegrationKit(nil)
+		}
+
+		integration.Initialize()
+		integration.Status.Digest = hash
+
+		return integration, nil
+	}
+
+	return nil, nil
 }
 
 type controller interface {
