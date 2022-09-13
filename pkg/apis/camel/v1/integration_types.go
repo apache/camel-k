@@ -148,10 +148,10 @@ const (
 
 	// IntegrationPhaseNone --
 	IntegrationPhaseNone IntegrationPhase = ""
-	// IntegrationPhaseInitialization --
-	IntegrationPhaseInitialization IntegrationPhase = "Initialization"
 	// IntegrationPhaseWaitingForPlatform --
 	IntegrationPhaseWaitingForPlatform IntegrationPhase = "Waiting For Platform"
+	// IntegrationPhaseInitialization --
+	IntegrationPhaseInitialization IntegrationPhase = "Initialization"
 	// IntegrationPhaseBuildingKit --
 	IntegrationPhaseBuildingKit IntegrationPhase = "Building Kit"
 	// IntegrationPhaseDeploying --
