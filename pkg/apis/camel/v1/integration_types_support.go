@@ -105,33 +105,12 @@ func (in *IntegrationSpec) AddDependency(dependency string) {
 	if in.Dependencies == nil {
 		in.Dependencies = make([]string, 0)
 	}
-	newDep := NormalizeDependency(dependency)
 	for _, d := range in.Dependencies {
-		if d == newDep {
+		if d == dependency {
 			return
 		}
 	}
-	in.Dependencies = append(in.Dependencies, newDep)
-}
-
-// NormalizeDependency converts different forms of camel dependencies
-// -- `camel-xxx`, `camel-quarkus-xxx`, and `camel-quarkus:xxx` --
-// into the unified form `camel:xxx`.
-func NormalizeDependency(dependency string) string {
-	newDep := dependency
-	switch {
-	case strings.HasPrefix(newDep, "camel-quarkus-"):
-		newDep = "camel:" + strings.TrimPrefix(dependency, "camel-quarkus-")
-	case strings.HasPrefix(newDep, "camel-quarkus:"):
-		newDep = "camel:" + strings.TrimPrefix(dependency, "camel-quarkus:")
-	case strings.HasPrefix(newDep, "camel-k-"):
-		newDep = "camel-k:" + strings.TrimPrefix(dependency, "camel-k-")
-	case strings.HasPrefix(newDep, "camel-k:"):
-		// do nothing
-	case strings.HasPrefix(newDep, "camel-"):
-		newDep = "camel:" + strings.TrimPrefix(dependency, "camel-")
-	}
-	return newDep
+	in.Dependencies = append(in.Dependencies, dependency)
 }
 
 // GetConfigurationProperty returns a configuration property

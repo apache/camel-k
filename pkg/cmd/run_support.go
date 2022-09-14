@@ -26,12 +26,19 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/cmd/source"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/resource"
 	"github.com/magiconair/properties"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 )
+
+func addDependency(cmd *cobra.Command, it *v1.Integration, dependency string, catalog *camel.RuntimeCatalog) {
+	normalized := camel.NormalizeDependency(dependency)
+	camel.ValidateDependency(catalog, normalized, cmd)
+	it.Spec.AddDependency(normalized)
+}
 
 func parseConfigAndGenCm(ctx context.Context, cmd *cobra.Command, c client.Client, config *resource.Config, integration *v1.Integration, enableCompression bool) (*corev1.ConfigMap, error) {
 	switch config.StorageType() {

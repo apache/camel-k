@@ -19,6 +19,7 @@ package camel
 
 import (
 	"fmt"
+	"io"
 	"path"
 	"path/filepath"
 	"strings"
@@ -29,7 +30,55 @@ import (
 	"github.com/rs/xid"
 )
 
-// ManageIntegrationDependencies --.
+// NormalizeDependency converts different forms of camel dependencies
+// -- `camel-xxx`, `camel-quarkus-xxx`, and `camel-quarkus:xxx` --
+// into the unified form `camel:xxx`.
+func NormalizeDependency(dependency string) string {
+	newDep := dependency
+	switch {
+	case strings.HasPrefix(newDep, "camel-quarkus-"):
+		newDep = "camel:" + strings.TrimPrefix(dependency, "camel-quarkus-")
+	case strings.HasPrefix(newDep, "camel-quarkus:"):
+		newDep = "camel:" + strings.TrimPrefix(dependency, "camel-quarkus:")
+	case strings.HasPrefix(newDep, "camel-k-"):
+		newDep = "camel-k:" + strings.TrimPrefix(dependency, "camel-k-")
+	case strings.HasPrefix(newDep, "camel-k:"):
+		// do nothing
+	case strings.HasPrefix(newDep, "camel-"):
+		newDep = "camel:" + strings.TrimPrefix(dependency, "camel-")
+	}
+	return newDep
+}
+
+type Output interface {
+	OutOrStdout() io.Writer
+	ErrOrStderr() io.Writer
+}
+
+// ValidateDependencies validates dependencies against Camel catalog.
+// It only shows warning and does not throw error in case the Catalog is just not complete
+// and we don't want to let it stop the process.
+func ValidateDependencies(catalog *RuntimeCatalog, dependencies []string, out Output) {
+	for _, d := range dependencies {
+		ValidateDependency(catalog, d, out)
+	}
+}
+
+// ValidateDependency validates a dependency against Camel catalog.
+// It only shows warning and does not throw error in case the Catalog is just not complete
+// and we don't want to let it stop the process.
+func ValidateDependency(catalog *RuntimeCatalog, dependency string, out Output) {
+	if !strings.HasPrefix(dependency, "camel:") {
+		return
+	}
+
+	artifact := strings.TrimPrefix(dependency, "camel:")
+	if ok := catalog.HasArtifact(artifact); !ok {
+		fmt.Fprintf(out.ErrOrStderr(), "Warning: dependency %s not found in Camel catalog\n", dependency)
+	}
+}
+
+// ManageIntegrationDependencies sets up all the required dependencies for the given Maven project.
 func ManageIntegrationDependencies(project *maven.Project, dependencies []string, catalog *RuntimeCatalog) error {
 	// Add dependencies from build
 	if err := addDependencies(project, dependencies, catalog); err != nil {

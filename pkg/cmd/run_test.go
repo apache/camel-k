@@ -27,7 +27,6 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/cmd/source"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/test"
@@ -450,50 +449,6 @@ func TestRunValidateArgs(t *testing.T) {
 	err = runCmdOptions.validateArgs(rootCmd, args)
 	assert.NotNil(t, err)
 	assert.Equal(t, "One of the provided sources is not reachable: missing file or unsupported scheme in missing_file", err.Error())
-}
-
-func TestRunBinaryResource(t *testing.T) {
-	binaryResourceSpec, err := binaryOrTextResource("file.ext", []byte{1, 2, 3, 4}, "application/octet-stream", false, v1.ResourceTypeData, "")
-	assert.Nil(t, err)
-	assert.Equal(t, "", binaryResourceSpec.Content)
-	assert.NotNil(t, binaryResourceSpec.RawContent)
-	assert.Equal(t, "file.ext", binaryResourceSpec.Name)
-	assert.Equal(t, "application/octet-stream", binaryResourceSpec.ContentType)
-	assert.False(t, binaryResourceSpec.Compression)
-}
-
-func TestRunBinaryCompressedResource(t *testing.T) {
-	data := []byte{1, 2, 3, 4}
-	base64Compressed, _ := source.CompressToString(data)
-	binaryResourceSpec, err := binaryOrTextResource("file.ext", data, "application/octet-stream", true, v1.ResourceTypeData, "")
-	assert.Nil(t, err)
-	assert.Equal(t, base64Compressed, binaryResourceSpec.Content)
-	assert.Nil(t, binaryResourceSpec.RawContent)
-	assert.Equal(t, "file.ext", binaryResourceSpec.Name)
-	assert.Equal(t, "application/octet-stream", binaryResourceSpec.ContentType)
-	assert.True(t, binaryResourceSpec.Compression)
-}
-
-func TestRunTextResource(t *testing.T) {
-	textResourceSpec, err := binaryOrTextResource("file.ext", []byte("hello world"), "text/plain", false, v1.ResourceTypeData, "")
-	assert.Nil(t, err)
-	assert.Equal(t, "hello world", textResourceSpec.Content)
-	assert.Nil(t, textResourceSpec.RawContent)
-	assert.Equal(t, "file.ext", textResourceSpec.Name)
-	assert.Equal(t, "text/plain", textResourceSpec.ContentType)
-	assert.False(t, textResourceSpec.Compression)
-}
-
-func TestRunTextCompressedResource(t *testing.T) {
-	data := []byte("hello horld")
-	base64Compressed, _ := source.CompressToString(data)
-	textResourceSpec, err := binaryOrTextResource("file.ext", []byte("hello horld"), "text/plain", true, v1.ResourceTypeData, "")
-	assert.Nil(t, err)
-	assert.Equal(t, base64Compressed, textResourceSpec.Content)
-	assert.Nil(t, textResourceSpec.RawContent)
-	assert.Equal(t, "file.ext", textResourceSpec.Name)
-	assert.Equal(t, "text/plain", textResourceSpec.ContentType)
-	assert.True(t, textResourceSpec.Compression)
 }
 
 func TestResolvePodTemplate(t *testing.T) {
