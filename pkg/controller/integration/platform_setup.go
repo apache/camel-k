@@ -62,6 +62,13 @@ func (action *platformSetupAction) Handle(ctx context.Context, integration *v1.I
 		integration.Status.Profile = determineBestProfile(ctx, action.client, integration, pl)
 	}
 
+	// Change the integration phase to Initialization after traits have been applied
+	// so that traits targeting Initialization phase don't get applied unintentionally
+	// at the platform setup step.
+	if integration.Status.Phase != v1.IntegrationPhaseWaitingForPlatform {
+		integration.Status.Phase = v1.IntegrationPhaseInitialization
+	}
+
 	return integration, nil
 }
 

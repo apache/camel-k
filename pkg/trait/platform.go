@@ -75,20 +75,31 @@ func (t *platformTrait) Apply(e *Environment) error {
 	initial := e.Integration.DeepCopy()
 
 	pl, err := t.getOrCreatePlatform(e)
-	if err != nil || pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
+	// Do not change to Initialization phase within the trait
+	switch {
+	case err != nil:
 		e.Integration.Status.Phase = v1.IntegrationPhaseWaitingForPlatform
-	} else {
-		e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
-	}
+		if initial.Status.Phase != e.Integration.Status.Phase {
+			e.Integration.Status.SetErrorCondition(
+				v1.IntegrationConditionPlatformAvailable,
+				v1.IntegrationConditionPlatformAvailableReason,
+				err)
 
-	if initial.Status.Phase != e.Integration.Status.Phase {
-		if err != nil {
-			e.Integration.Status.SetErrorCondition(v1.IntegrationConditionPlatformAvailable, v1.IntegrationConditionPlatformAvailableReason, err)
+			if pl != nil {
+				e.Integration.SetIntegrationPlatform(pl)
+			}
 		}
-
-		if pl != nil {
+	case pl == nil:
+		e.Integration.Status.Phase = v1.IntegrationPhaseWaitingForPlatform
+	case pl.Status.Phase != v1.IntegrationPlatformPhaseReady:
+		e.Integration.Status.Phase = v1.IntegrationPhaseWaitingForPlatform
+		if initial.Status.Phase != e.Integration.Status.Phase {
 			e.Integration.SetIntegrationPlatform(pl)
 		}
+	default:
+		// In success case, phase should be reset to none
+		e.Integration.Status.Phase = v1.IntegrationPhaseNone
+		e.Integration.SetIntegrationPlatform(pl)
 	}
 
 	return nil
