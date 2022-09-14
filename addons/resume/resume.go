@@ -31,8 +31,7 @@ import (
 // The Resume trait can be used to manage and configure resume strategies.
 //
 // This feature is meant to allow quick resume of processing by Camel K instances after they have been restarted. This
-// is an experimental implementation based on the support available on Camel Core:
-// https://camel.apache.org/components/next/eips/resume-strategies.html.
+// is an experimental implementation based on the support available on Camel Core resume strategies.
 //
 // The Resume trait is disabled by default.
 //
