@@ -100,7 +100,10 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 			return false, err
 		}
 
-		meta := metadata.ExtractAll(e.CamelCatalog, sources)
+		meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
+		if err != nil {
+			return false, err
+		}
 
 		if t.Enabled == nil {
 			for _, endpoint := range meta.FromURIs {

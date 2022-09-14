@@ -318,7 +318,7 @@ func (t *kedaTrait) populateTriggersFromKamelets(e *trait.Environment) error {
 		return err
 	}
 	kameletURIs := make(map[string][]string)
-	metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
+	if err := metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 		for _, kameletURI := range meta.FromURIs {
 			if kameletStr := source.ExtractKamelet(kameletURI); kameletStr != "" && camelv1alpha1.ValidKameletName(kameletStr) {
 				kamelet := kameletStr
@@ -332,7 +332,9 @@ func (t *kedaTrait) populateTriggersFromKamelets(e *trait.Environment) error {
 			}
 		}
 		return true
-	})
+	}); err != nil {
+		return err
+	}
 
 	if len(kameletURIs) == 0 {
 		return nil

@@ -211,11 +211,15 @@ func toHostDir(host string) string {
 	return toFileName.ReplaceAllString(h, "_")
 }
 
-func AddSourceDependencies(source v1.SourceSpec, catalog *camel.RuntimeCatalog) *strset.Set {
+// ExtractSourceDependencies extracts dependencies from source.
+func ExtractSourceDependencies(source v1.SourceSpec, catalog *camel.RuntimeCatalog) (*strset.Set, error) {
 	dependencies := strset.New()
 
 	// Add auto-detected dependencies
-	meta := metadata.Extract(catalog, source)
+	meta, err := metadata.Extract(catalog, source)
+	if err != nil {
+		return nil, err
+	}
 	dependencies.Merge(meta.Dependencies)
 
 	// Add loader dependencies
@@ -240,7 +244,7 @@ func AddSourceDependencies(source v1.SourceSpec, catalog *camel.RuntimeCatalog) 
 		}
 	}
 
-	return dependencies
+	return dependencies, nil
 }
 
 // AssertTraitsType asserts that traits is either v1.Traits or v1.IntegrationKitTraits.

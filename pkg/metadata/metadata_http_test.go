@@ -40,9 +40,10 @@ func TestHttpJavaSource(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.False(t, meta.PassiveEndpoints)
@@ -64,9 +65,10 @@ func TestHttpOnlyJavaSource(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
@@ -85,9 +87,10 @@ func TestHttpOnlyJavaSourceRest(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
@@ -106,9 +109,10 @@ func TestHttpOnlyJavaSourceRest2(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
@@ -128,9 +132,10 @@ func TestNoHttpGroovySource(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.False(t, meta.ExposesHTTPServices)
 	assert.False(t, meta.PassiveEndpoints)
@@ -150,9 +155,10 @@ func TestHttpOnlyGroovySource(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
@@ -172,9 +178,10 @@ func TestHttpXMLSource(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.False(t, meta.PassiveEndpoints)
@@ -195,9 +202,10 @@ func TestHttpOnlyXMLSource(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	assert.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
@@ -229,9 +237,10 @@ func TestMultilangHTTPOnlySource(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := ExtractAll(catalog, codes)
+	meta, err := ExtractAll(catalog, codes)
+	assert.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
@@ -265,9 +274,10 @@ func TestMultilangHTTPSource(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	meta := ExtractAll(catalog, codes)
+	meta, err := ExtractAll(catalog, codes)
+	assert.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.False(t, meta.PassiveEndpoints)

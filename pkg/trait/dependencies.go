@@ -70,9 +70,16 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 	}
 	for _, s := range sources {
 		// Add source-related dependencies
-		dependencies.Merge(AddSourceDependencies(s, e.CamelCatalog))
+		srcDeps, err := ExtractSourceDependencies(s, e.CamelCatalog)
+		if err != nil {
+			return err
+		}
+		dependencies.Merge(srcDeps)
 
-		meta := metadata.Extract(e.CamelCatalog, s)
+		meta, err := metadata.Extract(e.CamelCatalog, s)
+		if err != nil {
+			return err
+		}
 		meta.RequiredCapabilities.Each(func(item string) bool {
 			util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, item)
 			return true
