@@ -78,6 +78,23 @@ func ValidateDependency(catalog *RuntimeCatalog, dependency string, out Output) 
 	}
 }
 
+// ValidateDependenciesE validates dependencies against Camel catalog and throws error
+// if it doesn't exist in the catalog.
+func ValidateDependenciesE(catalog *RuntimeCatalog, dependencies []string) error {
+	for _, dependency := range dependencies {
+		if !strings.HasPrefix(dependency, "camel:") {
+			continue
+		}
+
+		artifact := strings.TrimPrefix(dependency, "camel:")
+		if ok := catalog.HasArtifact(artifact); !ok {
+			return fmt.Errorf("dependency %s not found in Camel catalog", dependency)
+		}
+	}
+
+	return nil
+}
+
 // ManageIntegrationDependencies sets up all the required dependencies for the given Maven project.
 func ManageIntegrationDependencies(project *maven.Project, dependencies []string, catalog *RuntimeCatalog) error {
 	// Add dependencies from build

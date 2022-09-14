@@ -26,6 +26,7 @@ import (
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -56,6 +57,9 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 	dependencies := strset.New()
 
 	if e.Integration.Spec.Dependencies != nil {
+		if err := camel.ValidateDependenciesE(e.CamelCatalog, e.Integration.Spec.Dependencies); err != nil {
+			return err
+		}
 		dependencies.Add(e.Integration.Spec.Dependencies...)
 	}
 
