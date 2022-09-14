@@ -96,11 +96,17 @@ func TestLocalRunWithInvalidDependency(t *testing.T) {
 
 	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
 
-	kamelRun := KamelWithContext(ctx, "local", "run", file, "-d", "camel-xxx")
+	kamelRun := KamelWithContext(ctx, "local", "run", file,
+		"-d", "camel-xxx",
+		"-d", "mvn:org.apache.camel:camel-http:3.18.0",
+		"-d", "mvn:org.apache.camel.quarkus:camel-quarkus-netty:2.11.0")
 	kamelRun.SetOut(pipew)
 	kamelRun.SetErr(pipew)
 
-	logScanner := testutil.NewLogScanner(ctx, piper, "Warning: dependency camel:xxx not found in Camel catalog")
+	warn1 := "Warning: dependency camel:xxx not found in Camel catalog"
+	warn2 := "Warning: do not use mvn:org.apache.camel:camel-http:3.18.0. Use camel:http instead"
+	warn3 := "Warning: do not use mvn:org.apache.camel.quarkus:camel-quarkus-netty:2.11.0. Use camel:netty instead"
+	logScanner := testutil.NewLogScanner(ctx, piper, warn1, warn2, warn3)
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -111,8 +117,9 @@ func TestLocalRunWithInvalidDependency(t *testing.T) {
 		cancel()
 	}()
 
-	Eventually(logScanner.IsFound("Warning: dependency camel:xxx not found in Camel catalog"), TestTimeoutShort).
-		Should(BeTrue())
+	Eventually(logScanner.IsFound(warn1), TestTimeoutShort).Should(BeTrue())
+	Eventually(logScanner.IsFound(warn2), TestTimeoutShort).Should(BeTrue())
+	Eventually(logScanner.IsFound(warn3), TestTimeoutShort).Should(BeTrue())
 	wg.Wait()
 }
 

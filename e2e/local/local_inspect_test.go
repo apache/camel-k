@@ -76,12 +76,19 @@ func TestLocalInspectWithDependencies(t *testing.T) {
 
 	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
 
-	kamelInspect := KamelWithContext(ctx, "local", "inspect", file, "-d", "camel-amqp", "-d", "camel-xxx")
+	kamelInspect := KamelWithContext(ctx, "local", "inspect", file,
+		"-d", "camel-amqp",
+		"-d", "camel-xxx",
+		"-d", "mvn:org.apache.camel:camel-http:3.18.0",
+		"-d", "mvn:org.apache.camel.quarkus:camel-quarkus-netty:2.11.0")
 	kamelInspect.SetOut(pipew)
 	kamelInspect.SetErr(pipew)
 
+	warn1 := "Warning: dependency camel:xxx not found in Camel catalog"
+	warn2 := "Warning: do not use mvn:org.apache.camel:camel-http:3.18.0. Use camel:http instead"
+	warn3 := "Warning: do not use mvn:org.apache.camel.quarkus:camel-quarkus-netty:2.11.0. Use camel:netty instead"
 	logScanner := testutil.NewLogScanner(ctx, piper,
-		"Warning: dependency camel:xxx not found in Camel catalog",
+		warn1, warn2, warn3,
 		"camel:amqp",
 		"camel:log",
 		"camel:timer",
@@ -93,8 +100,9 @@ func TestLocalInspectWithDependencies(t *testing.T) {
 		cancel()
 	}()
 
-	Eventually(logScanner.IsFound("Warning: dependency camel:xxx not found in Camel catalog"), TestTimeoutShort).
-		Should(BeTrue())
+	Eventually(logScanner.IsFound(warn1), TestTimeoutShort).Should(BeTrue())
+	Eventually(logScanner.IsFound(warn2), TestTimeoutShort).Should(BeTrue())
+	Eventually(logScanner.IsFound(warn3), TestTimeoutShort).Should(BeTrue())
 	Eventually(logScanner.IsFound("camel:amqp"), TestTimeoutShort).Should(BeTrue())
 	Eventually(logScanner.IsFound("camel:log"), TestTimeoutShort).Should(BeTrue())
 	Eventually(logScanner.IsFound("camel:timer"), TestTimeoutShort).Should(BeTrue())
