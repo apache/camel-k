@@ -297,11 +297,16 @@ func computeCamelDependencies() string {
 		catalog = camel.NewRuntimeCatalog(v1.CamelCatalog{}.Spec)
 	}
 
-	results := make([]string, 0, len(catalog.Artifacts))
+	results := make([]string, 0, len(catalog.Artifacts)+len(catalog.Loaders))
 	for a := range catalog.Artifacts {
 		// skipping camel-k-* and other artifacts as they may not be useful for cli completion
 		if strings.HasPrefix(a, "camel-quarkus-") {
 			results = append(results, camel.NormalizeDependency(a))
+		}
+	}
+	for _, l := range catalog.Loaders {
+		if strings.HasPrefix(l.ArtifactID, "camel-quarkus-") {
+			results = append(results, camel.NormalizeDependency(l.ArtifactID))
 		}
 	}
 	sort.Strings(results)
