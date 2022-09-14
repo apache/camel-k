@@ -77,7 +77,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/watch"
 )
 
-const usageDependency = `A dependency that should be included, e.g., "-d camel:mail" for a Camel component, "-d mvn:org.my:app:1.0" for a Maven dependency or "file://localPath[?targetPath=<path>&registry=<registry_URL>&skipChecksums=<true>&skipPOM=<true>]" for local files (experimental)`
+const usageDependency = `A dependency that should be included, e.g., "-d camel:mail" for a Camel component, "-d mvn:org.my:app:1.0" for a Maven dependency, "-d http(s)://my-repo/my-dependency.jar|targetPath=<path>&registry=<registry_URL>&skipChecksums=<true>&skipPOM=<true>" for custom dependencies located on an http server or "file://localPath[?targetPath=<path>&registry=<registry_URL>&skipChecksums=<true>&skipPOM=<true>]" for local files (experimental)`
 
 func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) {
 	options := runCmdOptions{
@@ -798,8 +798,7 @@ func (o *runCmdOptions) convertToTraitParameter(c client.Client, value, traitPar
 func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, it *v1.Integration, name string) error {
 	var platform *v1.IntegrationPlatform
 	for _, item := range o.Dependencies {
-		// TODO: accept URLs
-		if strings.HasPrefix(item, "file://") {
+		if strings.HasPrefix(item, "file://") || strings.HasPrefix(item, "http://") || strings.HasPrefix(item, "https://") {
 			if platform == nil {
 				var err error
 				platform, err = o.getPlatform(cmd, c, it)
@@ -807,7 +806,7 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, i
 					return err
 				}
 			}
-			if err := o.uploadFileOrDirectory(platform, item, name, cmd, it); err != nil {
+			if err := o.uploadDependency(platform, item, name, cmd, it); err != nil {
 				return errors.Wrap(err, fmt.Sprintf("Error trying to upload %s to the Image Registry.", item))
 			}
 		} else {
@@ -966,10 +965,38 @@ func (o *runCmdOptions) getTargetPath() string {
 	return o.RegistryOptions.Get("targetPath")
 }
 
-func (o *runCmdOptions) uploadFileOrDirectory(platform *v1.IntegrationPlatform, item string, integrationName string, cmd *cobra.Command, integration *v1.Integration) error {
-	uri := parseFileURI(item)
-	o.RegistryOptions = uri.Query()
-	localPath, targetPath := uri.Path, o.getTargetPath()
+func (o *runCmdOptions) uploadDependency(platform *v1.IntegrationPlatform, item string, integrationName string, cmd *cobra.Command, integration *v1.Integration) error {
+	var localPath string
+	if strings.HasPrefix(item, "http://") || strings.HasPrefix(item, "https://") {
+		idx := strings.LastIndex(item, "|")
+		var depURL string
+		if idx == -1 {
+			depURL = item
+			o.RegistryOptions = make(url.Values)
+		} else {
+			query := item[idx+1:]
+			options, err := url.ParseQuery(query)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("invalid http dependency options %s", query))
+			}
+			o.RegistryOptions = options
+			depURL = item[:idx]
+		}
+
+		uri, err := url.Parse(depURL)
+		if err != nil {
+			return errors.Wrap(err, fmt.Sprintf("invalid http dependency url %s", depURL))
+		} else if localPath, err = downloadDependency(o.Context, *uri); err != nil {
+			return errors.Wrap(err, fmt.Sprintf("could not download http dependency %s", depURL))
+		}
+		// Remove the temporary file
+		defer os.Remove(localPath)
+	} else {
+		uri := parseFileURI(item)
+		o.RegistryOptions = uri.Query()
+		localPath = uri.Path
+	}
+	targetPath := o.getTargetPath()
 	options := o.getSpectrumOptions(platform, cmd)
 	dirName, err := getDirName(localPath)
 	if err != nil {

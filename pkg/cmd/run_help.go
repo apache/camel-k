@@ -20,7 +20,12 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"os"
 	"path"
+	"path/filepath"
 	"reflect"
 	"strings"
 
@@ -160,4 +165,34 @@ func fromMapToProperties(data interface{}, toString func(reflect.Value) string, 
 		}
 	}
 	return result, nil
+}
+
+// downloadDependency downloads the file located at the given URL into a temporary folder and returns the local path to the generated temporary file.
+func downloadDependency(ctx context.Context, url url.URL) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url.String(), nil)
+	if err != nil {
+		return "", err
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+	base := path.Base(url.Path)
+	if base == "." || base == "/" || filepath.Ext(base) == "" {
+		base = path.Base(url.String())
+		if base == "." || base == "/" {
+			base = "tmp"
+		}
+	}
+	out, err := os.CreateTemp("", fmt.Sprintf("*.%s", base))
+	if err != nil {
+		return "", err
+	}
+	defer out.Close()
+	_, err = io.Copy(out, res.Body)
+	if err != nil {
+		return "", err
+	}
+	return out.Name(), nil
 }
