@@ -71,7 +71,7 @@ func ValidateDependency(catalog *RuntimeCatalog, dependency string, out Output) 
 	switch {
 	case strings.HasPrefix(dependency, "camel:"):
 		artifact := strings.TrimPrefix(dependency, "camel:")
-		if ok := catalog.HasArtifact(artifact); !ok {
+		if ok := catalog.IsValidArtifact(artifact); !ok {
 			fmt.Fprintf(out.ErrOrStderr(), "Warning: dependency %s not found in Camel catalog\n", dependency)
 		}
 	case strings.HasPrefix(dependency, "mvn:org.apache.camel:"):
@@ -95,7 +95,7 @@ func ValidateDependenciesE(catalog *RuntimeCatalog, dependencies []string) error
 		}
 
 		artifact := strings.TrimPrefix(dependency, "camel:")
-		if ok := catalog.HasArtifact(artifact); !ok {
+		if ok := catalog.IsValidArtifact(artifact); !ok {
 			return fmt.Errorf("dependency %s not found in Camel catalog", dependency)
 		}
 	}
