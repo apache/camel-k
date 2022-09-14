@@ -129,5 +129,24 @@ func TestKamelCLIRun(t *testing.T) {
 			// Clean up
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
+		t.Run("Run with http dependency", func(t *testing.T) {
+			Expect(KamelRunWithID(operatorID, ns, "../../../global/common/traits/files/jvm/Classpath.java",
+				"-d", "https://github.com/apache/camel-k/raw/main/e2e/global/common/traits/files/jvm/sample-1.0.jar",
+			).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "classpath"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "classpath", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "classpath"), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+		t.Run("Run with http dependency using options", func(t *testing.T) {
+			Expect(KamelRunWithID(operatorID, ns, "../../../global/common/traits/files/jvm/Classpath.java",
+				"-d", "https://github.com/apache/camel-k/raw/main/e2e/global/common/traits/files/jvm/sample-1.0.jar",
+				"-d", "https://raw.githubusercontent.com/apache/camel-k/main/e2e/namespace/install/cli/files/Java.java|targetPath=/tmp/foo",
+			).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "classpath"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "classpath", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "classpath"), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
 	})
 }
