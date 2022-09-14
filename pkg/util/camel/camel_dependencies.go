@@ -68,14 +68,22 @@ func ValidateDependencies(catalog *RuntimeCatalog, dependencies []string, out Ou
 // It only shows warning and does not throw error in case the Catalog is just not complete
 // and we don't want to let it stop the process.
 func ValidateDependency(catalog *RuntimeCatalog, dependency string, out Output) {
-	if !strings.HasPrefix(dependency, "camel:") {
-		return
+	switch {
+	case strings.HasPrefix(dependency, "camel:"):
+		artifact := strings.TrimPrefix(dependency, "camel:")
+		if ok := catalog.HasArtifact(artifact); !ok {
+			fmt.Fprintf(out.ErrOrStderr(), "Warning: dependency %s not found in Camel catalog\n", dependency)
+		}
+	case strings.HasPrefix(dependency, "mvn:org.apache.camel:"):
+		component := strings.Split(dependency, ":")[2]
+		fmt.Fprintf(out.ErrOrStderr(), "Warning: do not use %s. Use %s instead\n",
+			dependency, NormalizeDependency(component))
+	case strings.HasPrefix(dependency, "mvn:org.apache.camel.quarkus:"):
+		component := strings.Split(dependency, ":")[2]
+		fmt.Fprintf(out.ErrOrStderr(), "Warning: do not use %s. Use %s instead\n",
+			dependency, NormalizeDependency(component))
 	}
 
-	artifact := strings.TrimPrefix(dependency, "camel:")
-	if ok := catalog.HasArtifact(artifact); !ok {
-		fmt.Fprintf(out.ErrOrStderr(), "Warning: dependency %s not found in Camel catalog\n", dependency)
-	}
 }
 
 // ValidateDependenciesE validates dependencies against Camel catalog and throws error
