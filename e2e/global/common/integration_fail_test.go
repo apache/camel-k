@@ -81,11 +81,38 @@ func TestBadRouteIntegration(t *testing.T) {
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
+		t.Run("run invalid dependency java route", func(t *testing.T) {
+			RegisterTestingT(t)
+			name := "invalid-dependency"
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
+				"-d", "camel:non-existent").Execute()).To(Succeed())
+			// Integration in error with Initialization Failed condition
+			Eventually(IntegrationPhase(ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionFalse))
+			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(And(
+				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionInitializationFailedReason)),
+				WithTransform(IntegrationConditionMessage, HavePrefix("error during trait customization")),
+			))
+			// Kit shouldn't be created
+			Consistently(IntegrationKit(ns, name), 10*time.Second).Should(BeEmpty())
+
+			// Fixing the route should reconcile the Integration in Initialization Failed condition to Running
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+			// Clean up
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
 		t.Run("run unresolvable component java route", func(t *testing.T) {
 			RegisterTestingT(t)
 			name := "unresolvable-route"
 			Expect(KamelRunWithID(operatorID, ns, "files/Unresolvable.java", "--name", name).Execute()).To(Succeed())
-			// Integration in error
+			// Integration in error with Initialization Failed condition
 			Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionFalse))
