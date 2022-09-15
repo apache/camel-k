@@ -23,6 +23,17 @@ inputs:
   javaVersion:
     required: true
     type: string
+  # Make sure to treat the below values confidential (ie, not logging)
+  secretE2ECluster:
+    required: true
+  secretE2EKube:
+    required: true
+  secretDockerHubUser:
+    required: true
+  secretDockerHubPassword:
+    required: true    
+  secretGithubToken:
+    required: true
 
 runs:
   using: "composite"
@@ -37,12 +48,11 @@ runs:
       uses: actions/setup-go@v2
       with:
         go-version: ${{ inputs.goVersion }}
-    # Reuse the testing flows used for PRs
-      name: Smoke tests
+    - name: Smoke tests
       uses: ./.github/actions/e2e-common
       with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
+        cluster-config-data: ${{ inputs.secretE2ECluster }}
+        cluster-kube-config-data: ${{ inputs.secretE2EKube }}
     - name: Cache modules
       uses: actions/cache@v1
       with:
@@ -58,6 +68,7 @@ runs:
         echo "VERSION=$V" >> $GITHUB_ENV
         echo "UPD_DATE=$D" >> $GITHUB_ENV
     - name: Global Env
+      shell: bash
       run: |
         echo "Using VERSION=${{ env.VERSION }}"
 
@@ -68,24 +79,22 @@ runs:
         MAVEN_REPOSITORY=$(make get-staging-repo)
         echo "Using MAVEN_REPOSITORY=$MAVEN_REPOSITORY"
         echo "MAVEN_REPOSITORY=$MAVEN_REPOSITORY" >> $GITHUB_ENV
-
     - name: Login to Container Registry
       uses: docker/login-action@v1
       with:
-        username: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
-        password: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
-
+        username: ${{ inputs.secretDockerHubUser }}
+        password: ${{ inputs.secretDockerHubPassword }}
     - name: Codegen
+      shell: bash
       run: |
         make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} codegen set-version build-resources
-
     - name: Build
+      shell: bash
       run: |
         make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} release-nightly
-
     - name: Check
+      shell: bash
       run: ls -l
-
     - name: Create Release
       id: create_release
       uses: ncipollo/release-action@58ae73b360456532aafd58ee170c045abbeaee37
@@ -102,7 +111,7 @@ runs:
           ```
           
           NOTE: last updated on ${{ env.UPD_DATE }}
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ inputs.secretGithubToken }}
         draft: false
         prerelease: true
         allowUpdates: true
