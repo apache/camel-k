@@ -50,7 +50,7 @@ func TestLocalInspect(t *testing.T) {
 	logScanner := testutil.NewLogScanner(ctx, piper,
 		"camel:log",
 		"camel:timer",
-		"mvn:org.apache.camel.quarkus:camel-quarkus-yaml-dsl",
+		//"mvn:org.apache.camel.quarkus:camel-quarkus-yaml-dsl",
 	)
 
 	go func() {
@@ -61,8 +61,7 @@ func TestLocalInspect(t *testing.T) {
 
 	Eventually(logScanner.IsFound("camel:log"), TestTimeoutShort).Should(BeTrue())
 	Eventually(logScanner.IsFound("camel:timer"), TestTimeoutShort).Should(BeTrue())
-	Eventually(logScanner.IsFound("mvn:org.apache.camel.quarkus:camel-quarkus-yaml-dsl"), TestTimeoutShort).
-		Should(BeTrue())
+	//Eventually(logScanner.IsFound("mvn:org.apache.camel.quarkus:camel-quarkus-yaml-dsl"), TestTimeoutShort).Should(BeTrue())
 }
 
 func TestLocalInspectWithDependencies(t *testing.T) {
