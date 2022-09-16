@@ -114,9 +114,13 @@ func TestApplyIngressTraitDoesSucceed(t *testing.T) {
 		if ingress, ok := resource.(*networkingv1.Ingress); ok {
 			assert.Equal(t, "service-name", ingress.Name)
 			assert.Equal(t, "namespace", ingress.Namespace)
-			assert.Equal(t, "service-name", ingress.Spec.DefaultBackend.Service.Name)
 			assert.Len(t, ingress.Spec.Rules, 1)
 			assert.Equal(t, "hostname", ingress.Spec.Rules[0].Host)
+			assert.Len(t, ingress.Spec.Rules[0].HTTP.Paths, 1)
+			assert.Equal(t, "service-name", ingress.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Name)
+			assert.Equal(t, "/", ingress.Spec.Rules[0].HTTP.Paths[0].Path)
+			assert.NotNil(t, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+			assert.Equal(t, networkingv1.PathTypePrefix, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
 		}
 	})
 

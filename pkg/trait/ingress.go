@@ -85,6 +85,8 @@ func (t *ingressTrait) Apply(e *Environment) error {
 		return errors.New("cannot Apply ingress trait: no target service")
 	}
 
+	pathType := networkingv1.PathTypePrefix
+
 	ingress := networkingv1.Ingress{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Ingress",
@@ -95,17 +97,27 @@ func (t *ingressTrait) Apply(e *Environment) error {
 			Namespace: service.Namespace,
 		},
 		Spec: networkingv1.IngressSpec{
-			DefaultBackend: &networkingv1.IngressBackend{
-				Service: &networkingv1.IngressServiceBackend{
-					Name: service.Name,
-					Port: networkingv1.ServiceBackendPort{
-						Name: "http",
-					},
-				},
-			},
 			Rules: []networkingv1.IngressRule{
 				{
 					Host: t.Host,
+					IngressRuleValue: networkingv1.IngressRuleValue{
+						HTTP: &networkingv1.HTTPIngressRuleValue{
+							Paths: []networkingv1.HTTPIngressPath{
+								{
+									Path:     "/",
+									PathType: &pathType,
+									Backend: networkingv1.IngressBackend{
+										Service: &networkingv1.IngressServiceBackend{
+											Name: service.Name,
+											Port: networkingv1.ServiceBackendPort{
+												Name: "http",
+											},
+										},
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
@@ -113,11 +125,7 @@ func (t *ingressTrait) Apply(e *Environment) error {
 
 	e.Resources.Add(&ingress)
 
-	message := fmt.Sprintf("%s(%s) -> %s(%s)",
-		ingress.Name,
-		t.Host,
-		ingress.Spec.DefaultBackend.Service.Name,
-		ingress.Spec.DefaultBackend.Service.Port.Name)
+	message := fmt.Sprintf("%s(%s) -> %s(%s)", ingress.Name, t.Host, service.Name, "http")
 
 	e.Integration.Status.SetCondition(
 		v1.IntegrationConditionExposureAvailable,
