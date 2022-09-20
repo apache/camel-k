@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- camel k 0.11.0 helm - Error: parse error at \(camel-k/templates/operator.yaml:87\): "-en" [\#3654](https://github.com/apache/camel-k/issues/3654)
 - `make bundle` failure [\#3602](https://github.com/apache/camel-k/issues/3602)
 - Raise error when dependency could not be resolved via CamelCatalog [\#3449](https://github.com/apache/camel-k/issues/3449)
 - Parametrize kaniko executor image to point to private registry [\#3350](https://github.com/apache/camel-k/issues/3350)
@@ -13,6 +14,7 @@
 - Configure parallel container image layers push based on CPU quota [\#3340](https://github.com/apache/camel-k/issues/3340)
 - Configure Maven builds based on CPU quota [\#3339](https://github.com/apache/camel-k/issues/3339)
 - Add a `kamel install --publish-strategy-option` [\#3308](https://github.com/apache/camel-k/issues/3308)
+- Simple KameletBinding created with Errors [\#3299](https://github.com/apache/camel-k/issues/3299)
 - Proposal: Clarify the description for the Operator in the OLM catalog [\#3267](https://github.com/apache/camel-k/issues/3267)
 - Flaky E2E tests identified in 1.9.x [\#3234](https://github.com/apache/camel-k/issues/3234)
 - Log a warn message once the component used has not a quarkus extension [\#3127](https://github.com/apache/camel-k/issues/3127)
