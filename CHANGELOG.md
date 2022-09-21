@@ -2,7 +2,17 @@
 
 ## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/1.11.0-nightly...HEAD)
+[Full Changelog](https://github.com/apache/camel-k/compare/1.10.1-nightly...HEAD)
+
+**Closed issues:**
+
+- 1.10.x Smoke test failure TestBindingWithImage [\#3619](https://github.com/apache/camel-k/issues/3619)
+- Nightly release 1.9.x missing tests [\#3613](https://github.com/apache/camel-k/issues/3613)
+- \[regression\] Cannot provide 2 resources with 1.8.0 and 1.8.1 [\#3077](https://github.com/apache/camel-k/issues/3077)
+
+## [1.10.1-nightly](https://github.com/apache/camel-k/tree/1.10.1-nightly) (2022-09-20)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.11.0-nightly...1.10.1-nightly)
 
 **Closed issues:**
 
@@ -29,6 +39,39 @@
 - Camel-K operator should clean up kits and kit builders after integrations are deleted [\#889](https://github.com/apache/camel-k/issues/889)
 - support for multiple type of builders [\#687](https://github.com/apache/camel-k/issues/687)
 - Let dependencies be defined using HTTP URLs [\#240](https://github.com/apache/camel-k/issues/240)
+
+**Merged pull requests:**
+
+- Fix README in examples/openapi [\#3655](https://github.com/apache/camel-k/pull/3655) ([halmakidon](https://github.com/halmakidon))
+- fix: release action to use secrets properly [\#3648](https://github.com/apache/camel-k/pull/3648) ([squakez](https://github.com/squakez))
+- fix: release as an action [\#3646](https://github.com/apache/camel-k/pull/3646) ([squakez](https://github.com/squakez))
+- feat\(cli/run\): Support dependencies defined using HTTP URLs [\#3644](https://github.com/apache/camel-k/pull/3644) ([essobedo](https://github.com/essobedo))
+- Fix Camel website build by removing invalid link [\#3642](https://github.com/apache/camel-k/pull/3642) ([apupier](https://github.com/apupier))
+- feat\(controller/cli\): improve handling of invalid components & dependencies against Camel catalog [\#3640](https://github.com/apache/camel-k/pull/3640) ([tadayosi](https://github.com/tadayosi))
+- fix: release as an action [\#3636](https://github.com/apache/camel-k/pull/3636) ([squakez](https://github.com/squakez))
+- Fixed helm install failing [\#3634](https://github.com/apache/camel-k/pull/3634) ([halmakidon](https://github.com/halmakidon))
+- Update documentation for kamelet type that can also be action [\#3632](https://github.com/apache/camel-k/pull/3632) ([apupier](https://github.com/apupier))
+- feat\(cli\): Allow to set build publish strategy options from install cmd [\#3631](https://github.com/apache/camel-k/pull/3631) ([essobedo](https://github.com/essobedo))
+- test: Use camel-k repo in the test for the add-repo command [\#3630](https://github.com/apache/camel-k/pull/3630) ([essobedo](https://github.com/essobedo))
+- fix: release as an action [\#3629](https://github.com/apache/camel-k/pull/3629) ([squakez](https://github.com/squakez))
+- migrate and improve master example [\#3627](https://github.com/apache/camel-k/pull/3627) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- feat\(cmd/run\): secret/configmap as runtime/build-time properties [\#3626](https://github.com/apache/camel-k/pull/3626) ([essobedo](https://github.com/essobedo))
+- fix: release as an action [\#3625](https://github.com/apache/camel-k/pull/3625) ([squakez](https://github.com/squakez))
+- doc: generate Resume trait doc [\#3624](https://github.com/apache/camel-k/pull/3624) ([tadayosi](https://github.com/tadayosi))
+- feat\(cli\): Add add-repo command to add a repo for custom Kamelet catalog [\#3623](https://github.com/apache/camel-k/pull/3623) ([essobedo](https://github.com/essobedo))
+- chore\(ci\): release as an action [\#3621](https://github.com/apache/camel-k/pull/3621) ([squakez](https://github.com/squakez))
+- feat\(trait\): Provide the service type from the trait configuration [\#3618](https://github.com/apache/camel-k/pull/3618) ([essobedo](https://github.com/essobedo))
+- feat: Ingress trait host is optional [\#3617](https://github.com/apache/camel-k/pull/3617) ([astefanutti](https://github.com/astefanutti))
+- Fix panics when integration is waiting for platform [\#3616](https://github.com/apache/camel-k/pull/3616) ([astefanutti](https://github.com/astefanutti))
+- fix: do not run smoke tests on 1.9 nightly [\#3614](https://github.com/apache/camel-k/pull/3614) ([squakez](https://github.com/squakez))
+- feat: Auto-create platform when registry can be inferred from KEP-1755 [\#3612](https://github.com/apache/camel-k/pull/3612) ([astefanutti](https://github.com/astefanutti))
+- fix: Panic with odd number of key / value arguments [\#3610](https://github.com/apache/camel-k/pull/3610) ([astefanutti](https://github.com/astefanutti))
+- chore\(deps\): bump github.com/spf13/viper from 1.12.0 to 1.13.0 [\#3609](https://github.com/apache/camel-k/pull/3609) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat\(cli\): Add a config command to manage the default settings [\#3599](https://github.com/apache/camel-k/pull/3599) ([essobedo](https://github.com/essobedo))
+- \[TEST\] OLM fresh install test [\#3593](https://github.com/apache/camel-k/pull/3593) ([bouskaJ](https://github.com/bouskaJ))
+- feat\(cli\): Add tail flag to the log command [\#3589](https://github.com/apache/camel-k/pull/3589) ([essobedo](https://github.com/essobedo))
+- feat\(metadata\): raise error when capability/dependency not resolved in CamelCatalog [\#3571](https://github.com/apache/camel-k/pull/3571) ([tadayosi](https://github.com/tadayosi))
+- feat\(cli\): Allow to specify custom Kaniko and Buildah images [\#3558](https://github.com/apache/camel-k/pull/3558) ([essobedo](https://github.com/essobedo))
 
 ## [1.11.0-nightly](https://github.com/apache/camel-k/tree/1.11.0-nightly) (2022-09-06)
 
@@ -93,19 +136,19 @@
 
 ## [pkg/client/camel/v1.10.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.10.0) (2022-08-31)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.10.0...pkg/client/camel/v1.10.0)
-
-## [pkg/kamelet/repository/v1.10.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.10.0) (2022-08-31)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.10.0...pkg/kamelet/repository/v1.10.0)
-
-## [v1.10.0](https://github.com/apache/camel-k/tree/v1.10.0) (2022-08-31)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.10.0...v1.10.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.10.0...pkg/client/camel/v1.10.0)
 
 ## [pkg/apis/camel/v1.10.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.10.0) (2022-08-31)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/1.9.3-nightly...pkg/apis/camel/v1.10.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.10.0...pkg/apis/camel/v1.10.0)
+
+## [v1.10.0](https://github.com/apache/camel-k/tree/v1.10.0) (2022-08-31)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.10.0...v1.10.0)
+
+## [pkg/kamelet/repository/v1.10.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.10.0) (2022-08-31)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.9.3-nightly...pkg/kamelet/repository/v1.10.0)
 
 **Closed issues:**
 
@@ -380,7 +423,7 @@
 
 ## [1.10.0-nightly](https://github.com/apache/camel-k/tree/1.10.0-nightly) (2022-05-18)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.9.2...1.10.0-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.9.2...1.10.0-nightly)
 
 **Closed issues:**
 
@@ -393,25 +436,25 @@
 - Moving to 1.10.0-SNAPSHOT [\#3284](https://github.com/apache/camel-k/pull/3284) ([oscerd](https://github.com/oscerd))
 - chore\(cmd/trait\): refactor cmd & trait packages [\#3279](https://github.com/apache/camel-k/pull/3279) ([tadayosi](https://github.com/tadayosi))
 
-## [pkg/kamelet/repository/v1.9.2](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.9.2) (2022-05-17)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.9.2...pkg/kamelet/repository/v1.9.2)
-
-## [pkg/client/camel/v1.9.2](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.9.2) (2022-05-17)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.9.2...pkg/client/camel/v1.9.2)
-
 ## [v1.9.2](https://github.com/apache/camel-k/tree/v1.9.2) (2022-05-17)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.9.2...v1.9.2)
 
 ## [pkg/apis/camel/v1.9.2](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.9.2) (2022-05-17)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/1.9.2-nightly...pkg/apis/camel/v1.9.2)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.9.2...pkg/apis/camel/v1.9.2)
+
+## [pkg/kamelet/repository/v1.9.2](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.9.2) (2022-05-17)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.9.2...pkg/kamelet/repository/v1.9.2)
+
+## [pkg/client/camel/v1.9.2](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.9.2) (2022-05-17)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.9.2-nightly...pkg/client/camel/v1.9.2)
 
 ## [1.9.2-nightly](https://github.com/apache/camel-k/tree/1.9.2-nightly) (2022-05-17)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.9.1...1.9.2-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.9.1...1.9.2-nightly)
 
 **Closed issues:**
 
@@ -434,13 +477,13 @@
 - chore: Improve extract Camel catalog script [\#3221](https://github.com/apache/camel-k/pull/3221) ([christophd](https://github.com/christophd))
 - CamelCase for yaml created sample files [\#3209](https://github.com/apache/camel-k/pull/3209) ([SarveshLimaye](https://github.com/SarveshLimaye))
 
-## [pkg/apis/camel/v1.9.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.9.1) (2022-05-09)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.9.1...pkg/apis/camel/v1.9.1)
-
 ## [v1.9.1](https://github.com/apache/camel-k/tree/v1.9.1) (2022-05-09)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.9.1...v1.9.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.9.1...v1.9.1)
+
+## [pkg/apis/camel/v1.9.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.9.1) (2022-05-09)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.9.1...pkg/apis/camel/v1.9.1)
 
 ## [pkg/kamelet/repository/v1.9.1](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.9.1) (2022-05-09)
 
@@ -533,19 +576,19 @@
 
 ## [pkg/apis/camel/v1.9.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.9.0) (2022-04-21)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.9.0...pkg/apis/camel/v1.9.0)
-
-## [v1.9.0](https://github.com/apache/camel-k/tree/v1.9.0) (2022-04-21)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.9.0...v1.9.0)
-
-## [pkg/kamelet/repository/v1.9.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.9.0) (2022-04-21)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.9.0...pkg/kamelet/repository/v1.9.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.9.0...pkg/apis/camel/v1.9.0)
 
 ## [pkg/client/camel/v1.9.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.9.0) (2022-04-21)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/1.9.0-nightly...pkg/client/camel/v1.9.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.9.0...pkg/client/camel/v1.9.0)
+
+## [pkg/kamelet/repository/v1.9.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.9.0) (2022-04-21)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.9.0...pkg/kamelet/repository/v1.9.0)
+
+## [v1.9.0](https://github.com/apache/camel-k/tree/v1.9.0) (2022-04-21)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.9.0-nightly...v1.9.0)
 
 **Closed issues:**
 
