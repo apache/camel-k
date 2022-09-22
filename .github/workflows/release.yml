@@ -64,17 +64,17 @@ jobs:
         secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
         secretGithubToken: ${{ secrets.GITHUB_TOKEN }}        
 
-  v1_9_x:
+  v1_8_x_lts:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
       with:
-        ref: release-1.9.x
+        ref: release-1.8.x
         persist-credentials: false
         submodules: recursive    
-    - name: Release 1.9 nightly 
+    - name: Release 1.8 (LTS) nightly 
       uses: ./.github/actions/release-nightly
       with:
         goVersion: "1.16.x"
