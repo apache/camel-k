@@ -1,0 +1,54 @@
+[[promoting-integration]]
+= Promoting across environments
+
+As soon as you have an Integration running in your cluster, you will be challenged to move that Integration to an higher environment. Ie, you can test your Integration in a **development** environment, and, as soon as you're happy with the result, you will need to move it into a **production** environment.
+
+Camel K has an opinionated way to achieve that goal through the usage of `kamel promote` command. With this command you will be able to easily move an Integration from one namespace to another without worrying about any low level detail such as resources needed by the Integration. You only need to make sure that both the source operator and the destination operator are using the same container registry and that the destination namespace provides the required Configmaps, Secrets or Kamelets required by the Integration.
+
+NOTE: in order to use the same container registry, you can use the `--registry` option during installation phase or change the IntegrationPlatform to reflect that accordingly.
+
+== Show me the code!
+
+Let's see a simple Integration that uses a Configmap to expose some message on an HTTP endpoint. We can start creating such an Integration and testing in a namespace called `development`:
+
+```
+kubectl create configmap my-cm --from-literal=greeting="hello, I am development!" -n development
+```
+.PromoteServer.java
+```java
+import org.apache.camel.builder.RouteBuilder;
+
+public class PromoteServer extends RouteBuilder {
+  @Override
+  public void configure() throws Exception {
+    from("platform-http:/hello?httpMethodRestrict=GET").setBody(simple("resource:classpath:greeting"));
+  }
+}
+```
+Let's run it:
+```
+kamel run --dev -n development PromoteServer.java --config configmap:my-cm [-t service.node-port=true]
+```
+Note that you may need to tweak the service trait, depending on the Kubernetes platform and the level of exposure you want to provide. As soon as it is finished, we can test it as well:
+```
+curl http://192.168.49.2:32116/hello
+hello, I am development!
+```
+
+Now let's say we're happy with the testing of our Integration and we're ready to move it to a production environment. We need to have the destination environment (a Kubernetes namespace) ready with an operator (sharing the same operator source container registry) and any configuration, such as the configmap we have used here. For that scope, let's create one on the destination namespace:
+```
+kubectl create configmap my-cm --from-literal=greeting="hello, I am production!" -n production
+```
+Please, note that for security reason, there is a check to make sure that the expected resources such as Configmaps, Secrets and Kamelets are present on the destination. If any is missing, the Integration won't be moved. We can now "promote" our Integration:
+```
+kamel promote promote-server -n development --to production
+kamel logs promote-server -n production
+```
+Let's test the promoted Integration:
+```
+curl http://192.168.49.2:30764/hello
+hello, I am production!
+```
+Something nice is that since the Integration is reusing the very same container image, the execution of the new application will be immediate. Also from a release perspective we are guaranteeing the **immutability** of the Integration as the container used is exactly the same of the one we have tested in development (what we change are just the configurations).
+
+Please notice that the Integration running in test is not altered in any way and will be running until any user will stop it.
