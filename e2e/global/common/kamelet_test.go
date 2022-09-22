@@ -23,6 +23,7 @@ limitations under the License.
 package common
 
 import (
+	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -31,7 +32,15 @@ import (
 	. "github.com/apache/camel-k/e2e/support"
 )
 
+/*
+ * This seems to be problematic in a global context
+ * See https://github.com/apache/camel-k/issues/3667 for details
+ */
 func TestKameletClasspathLoading(t *testing.T) {
+	if os.Getenv("CAMEL_K_TEST_SKIP_PROBLEMATIC") == "true" {
+		t.Skip("WARNING: Test marked as problematic ... skipping")
+	}
+
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-kamelet"
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
