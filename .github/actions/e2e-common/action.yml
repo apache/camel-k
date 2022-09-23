@@ -23,10 +23,6 @@ runs:
 
   steps:
 
-  - id: prepare-env
-    name: Prepare Test Environment
-    uses: ./.github/actions/kamel-prepare-env
-
   - name: Cache modules
     uses: actions/cache@v1
     with:
