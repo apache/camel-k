@@ -24,7 +24,6 @@ package native
 
 import (
 	"os"
-	"strings"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -33,11 +32,6 @@ import (
 
 	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-)
-
-var (
-	withFastJarLayout = KitWithLabels(map[string]string{v1.IntegrationKitLayoutLabel: v1.IntegrationKitLayoutFastJar})
-	withNativeLayout  = KitWithLabels(map[string]string{v1.IntegrationKitLayoutLabel: v1.IntegrationKitLayoutNative})
 )
 
 func TestNativeIntegrations(t *testing.T) {
@@ -128,7 +122,7 @@ func TestNativeIntegrations(t *testing.T) {
 			// Check the Integration is still ready
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationPod(ns, name), TestTimeoutShort).
-				Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-.+-runner.*")))
+				Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
 
@@ -138,12 +132,4 @@ func TestNativeIntegrations(t *testing.T) {
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
-}
-
-func getContainerCommand() func(pod *corev1.Pod) string {
-	return func(pod *corev1.Pod) string {
-		cmd := strings.Join(pod.Spec.Containers[0].Command, " ")
-		cmd = cmd + strings.Join(pod.Spec.Containers[0].Args, " ")
-		return cmd
-	}
 }
