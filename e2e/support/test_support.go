@@ -2161,6 +2161,19 @@ func deleteTestNamespace(t *testing.T, ns ctrl.Object) {
 	}
 }
 
+func testNamespaceExists(ns string) (bool, error) {
+	_, err := TestClient().CoreV1().Namespaces().Get(TestContext, ns, metav1.GetOptions{})
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			return false, nil
+		} else {
+			return false, err
+		}
+	}
+
+	return true, nil
+}
+
 func newTestNamespace(injectKnativeBroker bool) ctrl.Object {
 	brokerLabel := "eventing.knative.dev/injection"
 	name := os.Getenv("CAMEL_K_TEST_NS")
@@ -2168,6 +2181,13 @@ func newTestNamespace(injectKnativeBroker bool) ctrl.Object {
 		name = "test-" + uuid.New().String()
 	}
 	c := TestClient()
+
+	if exists, err := testNamespaceExists(name); err != nil {
+		failTest(err)
+	} else if exists {
+		fmt.Println("Warning: namespace ", name, " already exists so using different namespace name")
+		name = fmt.Sprintf("%s-%d", name, time.Now().Second())
+	}
 
 	if oc, err := openshift.IsOpenShift(TestClient()); err != nil {
 		failTest(err)
