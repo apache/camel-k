@@ -23,7 +23,6 @@ limitations under the License.
 package native
 
 import (
-	"strings"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -32,11 +31,6 @@ import (
 
 	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-)
-
-var (
-	withFastJarLayout = KitWithLabels(map[string]string{v1.IntegrationKitLayoutLabel: v1.IntegrationKitLayoutFastJar})
-	withNativeLayout  = KitWithLabels(map[string]string{v1.IntegrationKitLayoutLabel: v1.IntegrationKitLayoutNative})
 )
 
 func TestNativeIntegrations(t *testing.T) {
@@ -106,12 +100,4 @@ func TestNativeIntegrations(t *testing.T) {
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
-}
-
-func getContainerCommand() func(pod *corev1.Pod) string {
-	return func(pod *corev1.Pod) string {
-		cmd := strings.Join(pod.Spec.Containers[0].Command, " ")
-		cmd = cmd + strings.Join(pod.Spec.Containers[0].Args, " ")
-		return cmd
-	}
 }
