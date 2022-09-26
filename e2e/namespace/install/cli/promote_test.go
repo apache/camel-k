@@ -107,6 +107,21 @@ func TestKamelCLIPromote(t *testing.T) {
 				Expect(IntegrationPodImage(nsProd, "promote-route")()).Should(Equal(IntegrationPodImage(nsDev, "promote-route")()))
 			})
 
+			t.Run("plain integration promotion update", func(t *testing.T) {
+				// Update the configmap
+				var cmData = make(map[string]string)
+				cmData["my-configmap-key"] = "I am production, but I was updated!"
+				UpdatePlainTextConfigmap(nsProd, "my-cm", cmData)
+
+				Expect(Kamel("promote", "-n", nsDev, "promote-route", "--to", nsProd).Execute()).To(Succeed())
+				Eventually(IntegrationPodPhase(nsProd, "promote-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationConditionStatus(nsProd, "promote-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+				Eventually(IntegrationLogs(nsProd, "promote-route"), TestTimeoutShort).Should(ContainSubstring("I am production, but I was updated!"))
+				Eventually(IntegrationLogs(nsProd, "promote-route"), TestTimeoutShort).Should(ContainSubstring("very top secret production"))
+				// They must use the same image
+				Expect(IntegrationPodImage(nsProd, "promote-route")()).Should(Equal(IntegrationPodImage(nsDev, "promote-route")()))
+			})
+
 			t.Run("no kamelet in destination", func(t *testing.T) {
 				Expect(Kamel("promote", "-n", nsDev, "timer-kamelet-usage", "--to", nsProd).Execute()).NotTo(Succeed())
 			})
