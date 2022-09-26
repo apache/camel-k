@@ -211,11 +211,16 @@ build: test build-resources build-kamel build-compile-integration-tests build-su
 
 ci-build: clean codegen set-module-version set-version check-licenses dir-licenses build-kamel cross-compile
 
-do-build:
+do-build: gotestfmt-install
 ifeq ($(DO_TEST_PREBUILD),true)
 TEST_PREBUILD = build
 else
 TEST_PREBUILD =
+endif
+
+gotestfmt-install:
+ifeq (, $(shell command -v gotestfmt 2> /dev/null))
+	go install github.com/haveyoudebuggedit/gotestfmt/v2/cmd/gotestfmt@latest
 endif
 
 test: do-build
@@ -248,32 +253,32 @@ test: do-build
 #
 test-integration: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 60m -v ./e2e/global/common -tags=integration $(TEST_INTEGRATION_COMMON_RUN) || FAILED=1; \
-	go test -timeout 60m -v ./e2e/global/common/build -tags=integration $(TEST_INTEGRATION_COMMON_BUILD_RUN) || FAILED=1; \
-	go test -timeout 60m -v ./e2e/global/common/config -tags=integration $(TEST_INTEGRATION_COMMON_CONFIG_RUN) || FAILED=1; \
-	go test -timeout 60m -v ./e2e/global/common/languages -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) || FAILED=1; \
-	go test -timeout 60m -v ./e2e/global/common/traits -tags=integration $(TEST_INTEGRATION_COMMON_TRAITS_RUN) || FAILED=1; \
+	go test -timeout 60m -v ./e2e/global/common -tags=integration $(TEST_INTEGRATION_COMMON_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 60m -v ./e2e/global/common/build -tags=integration $(TEST_INTEGRATION_COMMON_BUILD_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 60m -v ./e2e/global/common/config -tags=integration $(TEST_INTEGRATION_COMMON_CONFIG_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 60m -v ./e2e/global/common/languages -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 60m -v ./e2e/global/common/traits -tags=integration $(TEST_INTEGRATION_COMMON_TRAITS_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
 	exit $${FAILED}
 
 test-knative: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/global/knative -tags=integration $(TEST_KNATIVE_RUN)
+	go test -timeout 60m -v ./e2e/global/knative -tags=integration $(TEST_KNATIVE_RUN) -json 2>&1 | gotestfmt
 
 test-builder: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/global/builder -tags=integration $(TEST_BUILDER_RUN)
+	go test -timeout 60m -v ./e2e/global/builder -tags=integration $(TEST_BUILDER_RUN) -json 2>&1 | gotestfmt
 
 test-service-binding: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/global/service-binding -tags=integration $(TEST_SERVICE_RUN)
+	go test -timeout 60m -v ./e2e/global/service-binding -tags=integration $(TEST_SERVICE_RUN) -json 2>&1 | gotestfmt
 
 test-local: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 30m -v ./e2e/local -tags=integration $(TEST_LOCAL_RUN)
+	go test -timeout 30m -v ./e2e/local -tags=integration $(TEST_LOCAL_RUN) -json 2>&1 | gotestfmt
 
 test-registry-maven-wagon: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/global/registry -tags=integration $(TEST_REGISTRY_MAVEN_WAGON_RUN)
+	go test -timeout 60m -v ./e2e/global/registry -tags=integration $(TEST_REGISTRY_MAVEN_WAGON_RUN) -json 2>&1 | gotestfmt
 
 ###############################
 #
@@ -283,18 +288,18 @@ test-registry-maven-wagon: do-build
 
 test-install: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 60m -v ./e2e/namespace/install/ -tags=integration $(TEST_INSTALL_RUN) || FAILED=1; \
-	go test -timeout 60m -v ./e2e/namespace/install/cli -tags=integration $(TEST_INSTALL_CLI_RUN) || FAILED=1; \
-	go test -timeout 60m -v ./e2e/namespace/install/kustomize -tags=integration $(TEST_INSTALL_KUSTOMIZE_RUN) || FAILED=1; \
+	go test -timeout 60m -v ./e2e/namespace/install/ -tags=integration $(TEST_INSTALL_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 60m -v ./e2e/namespace/install/cli -tags=integration $(TEST_INSTALL_CLI_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 60m -v ./e2e/namespace/install/kustomize -tags=integration $(TEST_INSTALL_KUSTOMIZE_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
 	exit $${FAILED}
 
 test-quarkus-native: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/namespace/native -tags=integration $(TEST_QUARKUS_RUN)
+	go test -timeout 60m -v ./e2e/namespace/native -tags=integration $(TEST_QUARKUS_RUN) -json 2>&1 | gotestfmt
 
 test-upgrade: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/namespace/upgrade -tags=integration $(TEST_UPGRADE_RUN)
+	go test -timeout 60m -v ./e2e/namespace/upgrade -tags=integration $(TEST_UPGRADE_RUN) -json 2>&1 | gotestfmt
 
 build-kamel:
 	@echo "####### Building kamel CLI..."
