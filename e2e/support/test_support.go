@@ -1204,6 +1204,21 @@ func CreatePlainTextConfigmap(ns string, name string, data map[string]string) er
 	return TestClient().Create(TestContext, &cm)
 }
 
+func UpdatePlainTextConfigmap(ns string, name string, data map[string]string) error {
+	cm := corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+		Data: data,
+	}
+	return TestClient().Update(TestContext, &cm)
+}
+
 func CreateBinaryConfigmap(ns string, name string, data map[string][]byte) error {
 	cm := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
