@@ -11,6 +11,7 @@
 - Nightly release 1.9.x missing tests [\#3613](https://github.com/apache/camel-k/issues/3613)
 - Run E2E test before nightly releases [\#3572](https://github.com/apache/camel-k/issues/3572)
 - `kamel promote` documentation [\#3375](https://github.com/apache/camel-k/issues/3375)
+- Camel route terminates when route takes longer than 5 minutes [\#3335](https://github.com/apache/camel-k/issues/3335)
 - \[regression\] Cannot provide 2 resources with 1.8.0 and 1.8.1 [\#3077](https://github.com/apache/camel-k/issues/3077)
 
 ## [1.10.1-nightly](https://github.com/apache/camel-k/tree/1.10.1-nightly) (2022-09-20)
