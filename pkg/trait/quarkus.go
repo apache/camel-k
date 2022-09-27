@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/rs/xid"
 
@@ -270,6 +271,16 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 	if v, ok := integration.Annotations[v1.PlatformSelectorAnnotation]; ok {
 		kit.Annotations[v1.PlatformSelectorAnnotation] = v
 	}
+
+	if kit.GetAnnotations() == nil {
+		kit.SetAnnotations(make(map[string]string))
+	}
+	for k, v := range integration.Annotations {
+		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
+			kit.GetAnnotations()[k] = v
+		}
+	}
+
 	operatorID := defaults.OperatorID()
 	if operatorID != "" {
 		kit.Annotations[v1.OperatorIDAnnotation] = operatorID
