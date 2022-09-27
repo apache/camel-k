@@ -12,7 +12,7 @@ Operators must not contend the integration and the reconciliation because this w
 To avoid contention, Camel K uses an operator id for each operator. The operator id must be unique on the cluster and any custom resource (CR) is assigned to a specific operator using an annotation.
 The assigned operator will be responsible for the reconciliation of the annotated CR and explicitly manages the resource no matter where it lives.
 
-In detail, the Camel K operator supports the environment variable `KAMEL_OPERATOR_ID`. The value is an identifier that can be equal to any string (e.g. `KAMEL_OPERATOR_ID=operator-1`).
+In detail, the Camel K operator supports the environment variable `OPERATOR_ID`. The value is an identifier that can be equal to any string (e.g. `OPERATOR_ID=operator-1`).
 Once the operator is assigned with an identifier, it will *only reconcile* Camel K custom resources that are assigned to that ID (unannotated resources will be ignored as well).
 
 By default, the Camel K operator is using the id `camel-k`. When installing many operators the instances must use a different operator id.
