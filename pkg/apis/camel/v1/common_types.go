@@ -306,6 +306,8 @@ const (
 	CapabilityMaster = "master"
 	// CapabilityResumeKafka defines the resume capability
 	CapabilityResumeKafka = "resume-kafka"
+	// CapabilityAwsSecretsManager defines the aws secrets manager capability
+	CapabilityAwsSecretsManager = "aws-secrets-manager"
 )
 
 // +kubebuilder:object:generate=false
