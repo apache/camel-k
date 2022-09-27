@@ -20,6 +20,7 @@ package trait
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/rs/xid"
 
@@ -197,6 +198,13 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType traitv1.Qua
 	if v, ok := integration.Annotations[v1.PlatformSelectorAnnotation]; ok {
 		v1.SetAnnotation(&kit.ObjectMeta, v1.PlatformSelectorAnnotation, v)
 	}
+
+	for k, v := range integration.Annotations {
+		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
+			v1.SetAnnotation(&kit.ObjectMeta, k, v)
+		}
+	}
+
 	operatorID := defaults.OperatorID()
 	if operatorID != "" {
 		kit.SetOperatorID(operatorID)
