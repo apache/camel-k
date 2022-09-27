@@ -71,6 +71,24 @@ func TestApplyQuarkusTraitDefaultKitLayout(t *testing.T) {
 	assert.Equal(t, environment.IntegrationKits[0].Labels[v1.IntegrationKitLayoutLabel], v1.IntegrationKitLayoutFastJar)
 }
 
+func TestApplyQuarkusTraitAnnotationKitConfiguration(t *testing.T) {
+	quarkusTrait, environment := createNominalQuarkusTest()
+	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
+
+	v1.SetAnnotation(&environment.Integration.ObjectMeta, v1.TraitAnnotationPrefix+"quarkus.foo", "camel-k")
+
+	configured, err := quarkusTrait.Configure(environment)
+	assert.True(t, configured)
+	assert.Nil(t, err)
+
+	err = quarkusTrait.Apply(environment)
+	assert.Nil(t, err)
+	assert.Len(t, environment.IntegrationKits, 1)
+	assert.Equal(t, v1.IntegrationKitLayoutFastJar, environment.IntegrationKits[0].Labels[v1.IntegrationKitLayoutLabel])
+	assert.Equal(t, "camel-k", environment.IntegrationKits[0].Annotations[v1.TraitAnnotationPrefix+"quarkus.foo"])
+
+}
+
 func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
 	trait, _ := newQuarkusTrait().(*quarkusTrait)
 	trait.Enabled = pointer.Bool(true)
