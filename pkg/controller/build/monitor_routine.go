@@ -77,8 +77,7 @@ func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1.Build)
 		// Start the build asynchronously to avoid blocking the reconciliation loop
 		routines.Store(build.Name, true)
 
-		// nolint: contextcheck
-		go action.runBuild(build)
+		go action.runBuild(ctx, build)
 
 	case v1.BuildPhaseRunning:
 		if _, ok := routines.Load(build.Name); !ok {
@@ -93,10 +92,9 @@ func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1.Build)
 	return nil, nil
 }
 
-func (action *monitorRoutineAction) runBuild(build *v1.Build) {
+func (action *monitorRoutineAction) runBuild(ctx context.Context, build *v1.Build) {
 	defer routines.Delete(build.Name)
 
-	ctx := context.Background()
 	ctxWithTimeout, cancel := context.WithDeadline(ctx, build.Status.StartedAt.Add(build.Spec.Timeout.Duration))
 	defer cancel()
 
