@@ -11,7 +11,7 @@ As soon as you build your operator locally you will ask yourself how to test it.
 * You can start with setting the environment variable ``WATCH_NAMESPACE`` with the namespace you'd like your operator to watch. You also need to specify the name of the operator, as you may have different operators running on the cluster.
 ----
 export WATCH_NAMESPACE=operator-test
-export KAMEL_OPERATOR_ID="camel-k-dev"
+export OPERATOR_ID="camel-k-dev"
 ----
 
 * The next step is to install an ``IntegrationPlatform`` on the cluster namespace. You probably need to tweak the registry parameters in order to be able to authenticate against an image repository (see below paragraph for local repository instructions). It's important to specify the target operator that will take care of this IntegrationPlatform (`-x` or `--operator-id` option).

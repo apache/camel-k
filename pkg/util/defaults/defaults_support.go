@@ -38,7 +38,7 @@ func InstallDefaultKamelets() bool {
 }
 
 func OperatorID() string {
-	return envOrDefault("", "KAMEL_OPERATOR_ID")
+	return envOrDefault("", "KAMEL_OPERATOR_ID", "OPERATOR_ID")
 }
 
 func boolEnvOrDefault(def bool, envs ...string) bool {
