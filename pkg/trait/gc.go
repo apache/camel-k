@@ -19,8 +19,6 @@ package trait
 
 import (
 	"context"
-	"fmt"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -38,9 +36,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/discovery"
-	"k8s.io/client-go/discovery/cached/disk"
-	"k8s.io/client-go/discovery/cached/memory"
 	"k8s.io/utils/pointer"
+
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -51,11 +48,9 @@ import (
 var (
 	toFileName = regexp.MustCompile(`[^(\w/\.)]`)
 
-	lock                  sync.Mutex
-	rateLimiter           = rate.NewLimiter(rate.Every(time.Minute), 1)
-	collectableGVKs       = make(map[schema.GroupVersionKind]struct{})
-	memoryCachedDiscovery discovery.CachedDiscoveryInterface
-	diskCachedDiscovery   discovery.CachedDiscoveryInterface
+	lock            sync.Mutex
+	rateLimiter     = rate.NewLimiter(rate.Every(time.Minute), 1)
+	collectableGVKs = make(map[schema.GroupVersionKind]struct{})
 )
 
 type gcTrait struct {
@@ -72,11 +67,6 @@ func newGCTrait() Trait {
 func (t *gcTrait) Configure(e *Environment) (bool, error) {
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
-	}
-
-	if t.DiscoveryCache == nil {
-		s := traitv1.MemoryDiscoveryCache
-		t.DiscoveryCache = &s
 	}
 
 	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), nil
@@ -190,11 +180,7 @@ func (t *gcTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind
 
 	// We rely on the discovery API to retrieve all the resources GVK,
 	// that results in an unbounded set that can impact garbage collection latency when scaling up.
-	discoveryClient, err := t.discoveryClient()
-	if err != nil {
-		return nil, err
-	}
-	resources, err := discoveryClient.ServerPreferredNamespacedResources()
+	resources, err := t.Client.Discovery().ServerPreferredNamespacedResources()
 	// Swallow group discovery errors, e.g., Knative serving exposes
 	// an aggregated API for custom.metrics.k8s.io that requires special
 	// authentication scheme while discovering preferred resources.
@@ -241,32 +227,4 @@ func (t *gcTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind
 	collectableGVKs = GVKs
 
 	return collectableGVKs, nil
-}
-
-func (t *gcTrait) discoveryClient() (discovery.DiscoveryInterface, error) {
-	switch *t.DiscoveryCache {
-	case traitv1.DiskDiscoveryCache:
-		if diskCachedDiscovery != nil {
-			return diskCachedDiscovery, nil
-		}
-		config := t.Client.GetConfig()
-		httpCacheDir := filepath.Join(mustHomeDir(), ".kube", "http-cache")
-		diskCacheDir := filepath.Join(mustHomeDir(), ".kube", "cache", "discovery", toHostDir(config.Host))
-		var err error
-		diskCachedDiscovery, err = disk.NewCachedDiscoveryClientForConfig(config, diskCacheDir, httpCacheDir, 10*time.Minute)
-		return diskCachedDiscovery, err
-
-	case traitv1.MemoryDiscoveryCache:
-		if memoryCachedDiscovery != nil {
-			return memoryCachedDiscovery, nil
-		}
-		memoryCachedDiscovery = memory.NewMemCacheClient(t.Client.Discovery())
-		return memoryCachedDiscovery, nil
-
-	case traitv1.DisabledDiscoveryCache, "":
-		return t.Client.Discovery(), nil
-
-	default:
-		return nil, fmt.Errorf("unsupported discovery cache type: %s", *t.DiscoveryCache)
-	}
 }

@@ -4381,7 +4381,8 @@ The GC Trait garbage-collects all resources that are no longer necessary upon in
 |
 
 
-Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`)
+Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
+Deprecated: to be removed from trait configuration.
 
 
 |===

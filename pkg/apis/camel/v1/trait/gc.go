@@ -22,7 +22,8 @@ package trait
 // +camel-k:trait=gc.
 type GCTrait struct {
 	Trait `property:",squash" json:",inline"`
-	// Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`)
+	// Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
+	// Deprecated: to be removed from trait configuration.
 	DiscoveryCache *DiscoveryCacheType `property:"discovery-cache" json:"discoveryCache,omitempty"`
 }
 
