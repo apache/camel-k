@@ -31,6 +31,8 @@ import (
 //
 // The AWS Secrets Manager trait is disabled by default.
 //
+// For more information about how to use secrets from AWS Secrets Manager take a look at the components docs: xref:components::aws-secrets-manager-component.adoc[AWS Secrets Manager component]
+//
 // A sample execution of this trait, would require
 // the following trait options:
 // -t aws-secrets-manager.enabled=true -t aws-secrets-manager.access-key="aws-access-key" -t aws-secrets-manager.secret-key="aws-secret-key" -t aws-secrets-manager.region="aws-region"
