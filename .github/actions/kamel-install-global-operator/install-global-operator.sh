@@ -25,7 +25,7 @@
 
 set -e
 
-while getopts ":b:c:g:i:l:n:s:v:" opt; do
+while getopts ":b:c:g:i:l:n:q:s:v:" opt; do
   case "${opt}" in
     b)
       BUILD_CATALOG_SOURCE_NAME=${OPTARG}
@@ -44,6 +44,9 @@ while getopts ":b:c:g:i:l:n:s:v:" opt; do
       ;;
     n)
       IMAGE_NAME=${OPTARG}
+      ;;
+    q)
+      LOG_LEVEL=${OPTARG}
       ;;
     s)
       REGISTRY_INSECURE=${OPTARG}
@@ -155,10 +158,15 @@ export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
 # (see kamel-build-bundle/build-bundle-image.sh)
 export KAMEL_INSTALL_OPERATOR_IMAGE_PULL_POLICY="Always"
 
+logLevelSwitch=""
+if [ -n "${LOG_LEVEL}" ]; then
+  logLevelSwitch="--log-level ${LOG_LEVEL}"
+fi
+
 #
 # Install the operator
 #
-kamel install -n ${GLOBAL_OPERATOR_NAMESPACE} --olm=${has_olm} --force --global
+kamel install -n ${GLOBAL_OPERATOR_NAMESPACE} ${logLevelSwitch} --olm=${has_olm} --force --global
 if [ $? != 0 ]; then
   echo "Error: kamel install returned an error."
   exit 1

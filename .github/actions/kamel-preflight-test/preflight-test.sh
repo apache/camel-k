@@ -29,7 +29,9 @@ NAMESPACE="preflight"
 
 delns() {
   echo "Deleting namespace ${1}"
+  set +e
   kubectl delete ns ${1} &> /dev/null
+  set -e
 }
 
 waitForOperator() {

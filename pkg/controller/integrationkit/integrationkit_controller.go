@@ -191,6 +191,7 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 
 	// Make sure the operator is allowed to act on namespace
 	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
+		log.Debugf("Error occurred when checking whether operator is allowed in namespace %s: %v", request.Namespace, err)
 		return reconcile.Result{}, err
 	} else if !ok {
 		rlog.Info("Ignoring request because namespace is locked")
@@ -221,6 +222,7 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 	targetLog := rlog.ForIntegrationKit(target)
 
 	if target.Status.Phase == v1.IntegrationKitPhaseNone || target.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
+		rlog.Debug("Preparing to shift integration kit phase")
 		if target.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypeExternal {
 			target.Status.Phase = v1.IntegrationKitPhaseInitialization
 			return r.update(ctx, &instance, target)
@@ -236,6 +238,7 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 
 		if instance.Status.Phase != target.Status.Phase {
 			if err != nil {
+				rlog.Debugf("Error occurred while searching for platform. Cannot advance phase until cleared: %v", err)
 				target.Status.SetErrorCondition(v1.IntegrationKitConditionPlatformAvailable, v1.IntegrationKitConditionPlatformAvailableReason, err)
 			}
 

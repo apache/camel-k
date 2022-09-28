@@ -31,6 +31,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	platformutil "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/log"
 )
 
 // VersionVariant may be overridden at build time.
@@ -155,7 +156,9 @@ func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[s
 		}
 	}
 
-	return fromCamelCase(infos), nil
+	ccInfo := fromCamelCase(infos)
+	log.Debugf("Operator Info for namespace %s: %v", namespace, ccInfo)
+	return ccInfo, nil
 }
 
 func fromCamelCase(infos map[string]string) map[string]string {

@@ -40,7 +40,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	consolev1 "github.com/openshift/api/console/v1"
-	corev1 "k8s.io/api/core/v1"
 )
 
 func TestBasicInstallation(t *testing.T) {
@@ -164,13 +163,7 @@ func TestInstallDebugLogging(t *testing.T) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
 		Expect(KamelInstallWithID(operatorID, ns, "-z", "debug").Execute()).To(Succeed())
 
-		podFunc := OperatorPod(ns)
-		Eventually(podFunc).ShouldNot(BeNil())
-
-		pod := podFunc()
-		logs := Logs(pod.Namespace, pod.Name, corev1.PodLogOptions{})
-		Eventually(logs).ShouldNot(BeEmpty())
-		Eventually(logs).Should(ContainSubstring("DEBUG level messages will be logged"))
+		Eventually(OperatorEnvVarValue(ns, "LOG_LEVEL"), TestTimeoutLong).Should(Equal("debug"))
 	})
 }
 

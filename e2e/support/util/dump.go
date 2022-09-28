@@ -138,7 +138,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 		return err
 	}
 
-	t.Logf("\nFound %d pods:\n", len(lst.Items))
+	t.Logf("\nFound %d pods in %q:\n", len(lst.Items), ns)
 	for _, pod := range lst.Items {
 		t.Logf("name=%s\n", pod.Name)
 
@@ -216,7 +216,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 			return err
 		}
 
-		t.Logf("\nFound %d pods:\n", len(lst.Items))
+		t.Logf("\nFound %d pods in global namespace %q:\n", len(lst.Items), opns)
 		for _, pod := range lst.Items {
 			if !strings.Contains(pod.Name, "camel-k") {
 				// ignore other global operators
@@ -252,11 +252,17 @@ func dumpConditions(prefix string, conditions []corev1.PodCondition, t *testing.
 }
 
 func dumpLogs(ctx context.Context, c client.Client, prefix string, ns string, name string, container string, t *testing.T) error {
-	lines := int64(50)
-	stream, err := c.CoreV1().Pods(ns).GetLogs(name, &corev1.PodLogOptions{
+	logOptions := &corev1.PodLogOptions{
 		Container: container,
-		TailLines: &lines,
-	}).Stream(ctx)
+	}
+
+	if os.Getenv("CAMEL_K_LOG_LEVEL") != "debug" {
+		// If not in debug mode then curtail the dumping of log lines
+		lines := int64(50)
+		logOptions.TailLines = &lines
+	}
+
+	stream, err := c.CoreV1().Pods(ns).GetLogs(name, logOptions).Stream(ctx)
 	if err != nil {
 		return err
 	}

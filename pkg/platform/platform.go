@@ -22,6 +22,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/log"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -139,6 +140,8 @@ func findAny(ctx context.Context, c k8sclient.Reader, namespace string, active b
 
 // findLocal returns the currently installed platform or any platform existing in local namespace.
 func findLocal(ctx context.Context, c k8sclient.Reader, namespace string, active bool) (*v1.IntegrationPlatform, error) {
+	log.Debug("Finding available platforms")
+
 	lst, err := ListPrimaryPlatforms(ctx, c, namespace)
 	if err != nil {
 		return nil, err
@@ -147,6 +150,7 @@ func findLocal(ctx context.Context, c k8sclient.Reader, namespace string, active
 	for _, platform := range lst.Items {
 		platform := platform // pin
 		if IsActive(&platform) {
+			log.Debugf("Found active local integration platform %s", platform.Name)
 			return &platform, nil
 		}
 	}
@@ -154,9 +158,11 @@ func findLocal(ctx context.Context, c k8sclient.Reader, namespace string, active
 	if !active && len(lst.Items) > 0 {
 		// does not require the platform to be active, just return one if present
 		res := lst.Items[0]
+		log.Debugf("Found local integration platform %s", res.Name)
 		return &res, nil
 	}
 
+	log.Debugf("Not found a local integration platform")
 	return nil, k8serrors.NewNotFound(v1.Resource("IntegrationPlatform"), DefaultPlatformName)
 }
 

@@ -44,6 +44,9 @@ on:
       - 'NOTICE'
   workflow_dispatch:
     inputs:
+      log-level:
+        description: 'Set the operator log level (info or debug)'
+        required: false
       pre-built-kamel-image:
         description: 'Kamel image url for skipping building of kamel stages. Used for debugging'
         required: false
@@ -77,6 +80,7 @@ jobs:
         ./.github/workflows/manual-exec-process-inputs.sh \
           -i "${{ github.event.inputs.pre-built-kamel-image }}" \
           -p "${{ github.event.inputs.skip-problematic }}" \
+          -q "${{ github.event.inputs.log-level }}" \
           -t "${{ github.event.inputs.test-filters }}"
 
     - name: Execute Upgrade Tests

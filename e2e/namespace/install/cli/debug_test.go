@@ -34,7 +34,7 @@ import (
 
 func TestKamelCLIDebug(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(Kamel("install", "-n", ns).Execute()).To(Succeed())
+		Expect(KamelInstall(ns).Execute()).To(Succeed())
 
 		t.Run("debug local default port check", func(t *testing.T) {
 			Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())

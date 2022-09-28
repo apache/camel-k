@@ -68,9 +68,6 @@ func TestKameletClasspathLoading(t *testing.T) {
 			Eventually(IntegrationPodPhase(ns, "timer-custom-kamelet-integration"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
 			Eventually(IntegrationLogs(ns, "timer-custom-kamelet-integration")).Should(ContainSubstring("great message"))
-
-			// Cleanup
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 	})
 }

@@ -23,6 +23,7 @@ limitations under the License.
 package common
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -47,7 +48,12 @@ func TestStructuredLogs(t *testing.T) {
 		Expect(pod).NotTo(BeNil())
 
 		// pod.Namespace could be different from ns if using global operator
-		logs := StructuredLogs(pod.Namespace, pod.Name, corev1.PodLogOptions{}, false)
+		fmt.Printf("Fetching logs for operator pod %s in namespace %s", pod.Name, pod.Namespace)
+		logOptions := &corev1.PodLogOptions{
+			Container: "camel-k-operator",
+		}
+		logs, err := StructuredLogs(pod.Namespace, pod.Name, logOptions, false)
+		Expect(err).To(BeNil())
 		Expect(logs).NotTo(BeEmpty())
 
 		it := Integration(ns, name)()

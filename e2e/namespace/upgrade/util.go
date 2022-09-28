@@ -23,9 +23,12 @@ limitations under the License.
 package common
 
 import (
+	"fmt"
 	"strings"
+	"time"
 	"unsafe"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -112,6 +115,52 @@ func catalogSourcePhase(ns, name string) func() string {
 		}
 		return ""
 	}
+}
+
+func catalogSourcePod(ns, csName string) func() *corev1.Pod {
+	return func() *corev1.Pod {
+		podList, err := TestClient().CoreV1().Pods(ns).List(TestContext, metav1.ListOptions{})
+		if err != nil && errors.IsNotFound(err) {
+			return nil
+		} else if err != nil {
+			panic(err)
+		}
+
+		if len(podList.Items) == 0 {
+			return nil
+		}
+
+		for _, pod := range podList.Items {
+			if strings.HasPrefix(pod.Name, csName) {
+				return &pod
+			}
+		}
+
+		return nil
+	}
+}
+
+func catalogSourcePodRunning(ns, csName string) error {
+	podFunc := catalogSourcePod(ns, installCatalogSourceName)
+
+	for i := 1; i < 5; i++ {
+		csPod := podFunc()
+		if csPod.Status.Phase == "Running" {
+			return nil // Pod good to go
+		}
+
+		if i == 2 {
+			fmt.Println("Catalog Source Pod still not ready so delete & allow it to be redeployed ...")
+			if err := TestClient().Delete(TestContext, csPod); err != nil {
+				return err
+			}
+		}
+
+		fmt.Println("Catalog Source Pod not ready so waiting for 2 minutes ...")
+		time.Sleep(2 * time.Minute)
+	}
+
+	return fmt.Errorf("Catalog Source Pod failed to reach a 'running' state")
 }
 
 func getSubscription(ns string) (*olm.Subscription, error) {

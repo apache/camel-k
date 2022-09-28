@@ -99,7 +99,7 @@ func TestKnative(t *testing.T) {
 		t.Run("Flow", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns, "files/flow.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "flow"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, "flow", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, "flow", camelv1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(v1.ConditionTrue))
 
 			t.Run("Scale to zero", func(t *testing.T) {
 				Eventually(IntegrationPod(ns, "flow"), TestTimeoutLong).Should(BeNil())

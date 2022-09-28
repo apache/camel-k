@@ -100,7 +100,7 @@ func ExecMakeError(t *testing.T, command *exec.Cmd) {
 // Clean up the cluster ready for the next set of tests
 func Cleanup() {
 	// Remove the locally installed operator
-	Kamel("uninstall", "--olm=false").Execute()
+	UninstallAll()
 
 	// Ensure the CRDs & ClusterRoles are reinstalled if not already
 	Kamel("install", "--olm=false", "--cluster-setup").Execute()

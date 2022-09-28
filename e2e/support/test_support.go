@@ -33,6 +33,7 @@ import (
 	"os"
 	"os/exec"
 	"reflect"
+	"runtime/debug"
 	"strings"
 	"testing"
 	"time"
@@ -249,6 +250,12 @@ func KamelInstallWithContext(ctx context.Context, operatorID string, namespace s
 		installArgs = []string{"install", "-n", namespace, "--operator-id", operatorID}
 	}
 
+	logLevel := os.Getenv("CAMEL_K_LOG_LEVEL")
+	if len(logLevel) > 0 {
+		fmt.Printf("Setting log-level to %s\n", logLevel)
+		installArgs = append(installArgs, "--log-level", logLevel)
+	}
+
 	installArgs = append(installArgs, args...)
 	return KamelWithContext(ctx, installArgs...)
 }
@@ -316,6 +323,12 @@ func verifyGlobalOperator() error {
 func KamelWithContext(ctx context.Context, args ...string) *cobra.Command {
 	var c *cobra.Command
 	var err error
+
+	if os.Getenv("CAMEL_K_LOG_LEVEL") == "debug" {
+		fmt.Printf("Executing kamel with command %+q\n", args)
+		fmt.Println("Printing stack for KamelWithContext")
+		debug.PrintStack()
+	}
 
 	kamelArgs := os.Getenv("KAMEL_ARGS")
 	kamelDefaultArgs := strings.Fields(kamelArgs)
@@ -437,30 +450,34 @@ func Logs(ns, podName string, options corev1.PodLogOptions) func() string {
 	}
 }
 
-func StructuredLogs(ns, podName string, options corev1.PodLogOptions, ignoreParseErrors bool) []util.LogEntry {
-	byteReader, err := TestClient().CoreV1().Pods(ns).GetLogs(podName, &options).Stream(TestContext)
+func StructuredLogs(ns, podName string, options *corev1.PodLogOptions, ignoreParseErrors bool) ([]util.LogEntry, error) {
+
+	stream, err := TestClient().CoreV1().Pods(ns).GetLogs(podName, options).Stream(TestContext)
 	if err != nil {
-		log.Error(err, "Error while reading container logs")
-		return nil
+		msg := "Error while reading container logs"
+		log.Error(err, msg)
+		return nil, fmt.Errorf("%s: %w\n", msg, err)
 	}
 	defer func() {
-		if err := byteReader.Close(); err != nil {
+		if err := stream.Close(); err != nil {
 			log.Error(err, "Error closing the stream")
 		}
 	}()
 
 	entries := make([]util.LogEntry, 0)
-	scanner := bufio.NewScanner(byteReader)
+	scanner := bufio.NewScanner(stream)
 	for scanner.Scan() {
 		entry := util.LogEntry{}
 		t := scanner.Text()
 		err := json.Unmarshal([]byte(t), &entry)
 		if err != nil {
 			if ignoreParseErrors {
+				fmt.Printf("Warning: Ignoring parse error for logging line: '%s'\n", t)
 				continue
 			} else {
-				log.Errorf(err, "Unable to parse structured content: %s", t)
-				return nil
+				msg := fmt.Sprintf("Unable to parse structured content: %s", t)
+				log.Errorf(err, msg)
+				return nil, fmt.Errorf("%s %w\n", msg, err)
 			}
 		}
 
@@ -468,11 +485,18 @@ func StructuredLogs(ns, podName string, options corev1.PodLogOptions, ignorePars
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Error(err, "Error while scanning container logs")
-		return nil
+		msg := "Error while scanning container logs"
+		log.Error(err, msg)
+		return nil, fmt.Errorf("%s %w\n", msg, err)
 	}
 
-	return entries
+	if len(entries) == 0 {
+		msg := "Error fetched zero log entries"
+		log.Error(err, msg)
+		return nil, fmt.Errorf("%s %w\n", msg, err)
+	}
+
+	return entries, nil
 }
 
 func IntegrationPodPhase(ns string, name string) func() corev1.PodPhase {
@@ -1143,6 +1167,23 @@ func OperatorPodPhase(ns string) func() corev1.PodPhase {
 	}
 }
 
+func OperatorEnvVarValue(ns string, key string) func() string {
+	return func() string {
+		pod := OperatorPod(ns)()
+		if pod == nil || len(pod.Spec.Containers) == 0 {
+			return ""
+		}
+		envvars := pod.Spec.Containers[0].Env
+		for _, v := range envvars {
+			if v.Name == key {
+				return v.Value
+			}
+		}
+
+		return ""
+	}
+}
+
 func Configmap(ns string, name string) func() *corev1.ConfigMap {
 	return func() *corev1.ConfigMap {
 		cm := corev1.ConfigMap{
@@ -1247,6 +1288,32 @@ func CreatePlainTextSecret(ns string, name string, data map[string]string) error
 		StringData: data,
 	}
 	return TestClient().Create(TestContext, &sec)
+}
+
+//
+// Finds a secret in the given namespace by name or prefix of name
+//
+func SecretByName(ns string, prefix string) func() *corev1.Secret {
+	return func() *corev1.Secret {
+		secretList, err := TestClient().CoreV1().Secrets(ns).List(TestContext, metav1.ListOptions{})
+		if err != nil && k8serrors.IsNotFound(err) {
+			return nil
+		} else if err != nil {
+			failTest(err)
+		}
+
+		if len(secretList.Items) == 0 {
+			return nil
+		}
+
+		for _, secret := range secretList.Items {
+			if strings.HasPrefix(secret.Name, prefix) {
+				return &secret
+			}
+		}
+
+		return nil
+	}
 }
 
 func KnativeService(ns string, name string) func() *servingv1.Service {
