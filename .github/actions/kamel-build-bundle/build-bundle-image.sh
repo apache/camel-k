@@ -23,7 +23,7 @@
 #
 ####
 
-set -e
+set +e
 
 while getopts ":i:l:n:s:v:" opt; do
   case "${opt}" in
@@ -115,10 +115,18 @@ echo "PREV_XY_CHANNEL=${PREV_XY_CHANNEL}" >> $GITHUB_ENV
 export NEW_XY_CHANNEL=stable-dev-$(make get-version | grep -Po "\d+\.\d+")
 echo "NEW_XY_CHANNEL=${NEW_XY_CHANNEL}" >> $GITHUB_ENV
 
+echo "BUNDLE_IMAGE_NAME=${PUSH_BUNDLE_LOCAL_IMAGE}"
+echo "DEFAULT_CHANNEL=${NEW_XY_CHANNEL}"
+echo "CHANNELS=${NEW_XY_CHANNEL}"
+
 make bundle-push \
   BUNDLE_IMAGE_NAME="${PUSH_BUNDLE_LOCAL_IMAGE}" \
   DEFAULT_CHANNEL="${NEW_XY_CHANNEL}" \
-  CHANNELS="${NEW_XY_CHANNEL}"
+  CHANNELS="${NEW_XY_CHANNEL}" 2>&1
+if [ $? != 0 ]; then
+  echo "Error: Making bundle failed."
+  exit 1
+fi
 
 #
 # Use the PULL host to ensure the correct image:tag

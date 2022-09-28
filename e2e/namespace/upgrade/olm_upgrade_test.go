@@ -30,6 +30,7 @@ import (
 
 	. "github.com/apache/camel-k/e2e/support"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -41,6 +42,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 const catalogSourceName = "test-camel-k-source"
@@ -66,6 +68,17 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(createOrUpdateCatalogSource(ns, catalogSourceName, prevIIB)).To(Succeed())
+		ocp, err := openshift.IsOpenShift(TestClient())
+		assert.Nil(t, err)
+
+		if ocp {
+			// Wait for pull secret to be created in namespace
+			// eg. test-camel-k-source-dockercfg-zlltn
+			secretPrefix := fmt.Sprintf("%s-dockercfg-", catalogSourceName)
+			Eventually(SecretByName(ns, secretPrefix), TestTimeoutLong).Should(Not(BeNil()))
+		}
+
+		Eventually(catalogSourcePodRunning(ns, catalogSourceName), TestTimeoutMedium).Should(BeNil())
 		Eventually(catalogSourcePhase(ns, catalogSourceName), TestTimeoutMedium).Should(Equal("READY"))
 
 		// Set KAMEL_BIN only for this test - don't override the ENV variable for all tests

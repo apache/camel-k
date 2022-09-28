@@ -59,5 +59,6 @@ runs:
         -i "${{ inputs.image-namespace }}" \
         -l "${{ inputs.image-registry-host }}" \
         -n "${{ inputs.image-name }}" \
+        -q "${{ env.CAMEL_K_LOG_LEVEL }}" \
         -s "${{ inputs.image-registry-insecure }}" \
         -v "${{ inputs.image-version }}"

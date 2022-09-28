@@ -30,11 +30,14 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util/log"
 )
 
 func GetIntegrationPlatform(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationPlatform, error) {
 	platform := v1.NewIntegrationPlatform(namespace, name)
+	log.Debugf("Integration Platform [name: %s], [namespace: %s], [objectkey: %s]", name, namespace, ctrl.ObjectKeyFromObject(&platform))
 	if err := client.Get(context, ctrl.ObjectKeyFromObject(&platform), &platform); err != nil {
+		log.Debugf("Integration platform Error: %v", err)
 		return nil, err
 	}
 
@@ -43,7 +46,9 @@ func GetIntegrationPlatform(context context.Context, client ctrl.Reader, name st
 
 func GetIntegrationKit(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationKit, error) {
 	kit := v1.NewIntegrationKit(namespace, name)
+	log.Debugf("Integration Kit [name: %s], [namespace: %s], [objectkey: %s]", name, namespace, ctrl.ObjectKeyFromObject(kit))
 	if err := client.Get(context, ctrl.ObjectKeyFromObject(kit), kit); err != nil {
+		log.Debugf("Integration kit Error: %v", err)
 		return nil, err
 	}
 
@@ -52,7 +57,9 @@ func GetIntegrationKit(context context.Context, client ctrl.Reader, name string,
 
 func GetBuild(context context.Context, client client.Client, name string, namespace string) (*v1.Build, error) {
 	build := v1.NewBuild(namespace, name)
+	log.Debugf("Build [name: %s], [namespace: %s], [objectkey: %s]", name, namespace, ctrl.ObjectKeyFromObject(build))
 	if err := client.Get(context, ctrl.ObjectKeyFromObject(build), build); err != nil {
+		log.Debugf("Integration build Error: %v", err)
 		return nil, err
 	}
 

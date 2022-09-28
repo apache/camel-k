@@ -29,6 +29,7 @@ import (
 
 	. "github.com/apache/camel-k/e2e/support"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -36,6 +37,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
 const installCatalogSourceName = "test-camel-k-source"
@@ -53,7 +55,19 @@ func TestOLMInstallation(t *testing.T) {
 
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(createOrUpdateCatalogSource(ns, installCatalogSourceName, newIIB)).To(Succeed())
-		Eventually(catalogSourcePhase(ns, installCatalogSourceName), TestTimeoutMedium).Should(Equal("READY"))
+
+		ocp, err := openshift.IsOpenShift(TestClient())
+		assert.Nil(t, err)
+
+		if ocp {
+			// Wait for pull secret to be created in namespace
+			// eg. test-camel-k-source-dockercfg-zlltn
+			secretPrefix := fmt.Sprintf("%s-dockercfg-", installCatalogSourceName)
+			Eventually(SecretByName(ns, secretPrefix), TestTimeoutLong).Should(Not(BeNil()))
+		}
+
+		Eventually(catalogSourcePodRunning(ns, installCatalogSourceName), TestTimeoutMedium).Should(BeNil())
+		Eventually(catalogSourcePhase(ns, installCatalogSourceName), TestTimeoutLong).Should(Equal("READY"))
 
 		args := []string{"install", "-n", ns, "--olm=true", "--olm-source", installCatalogSourceName, "--olm-source-namespace", ns}
 

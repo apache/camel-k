@@ -30,6 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
+	"github.com/apache/camel-k/pkg/util/log"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -46,8 +47,11 @@ var OperatorImage string
 // IsCurrentOperatorGlobal returns true if the operator is configured to watch all namespaces.
 func IsCurrentOperatorGlobal() bool {
 	if watchNamespace, envSet := os.LookupEnv(OperatorWatchNamespaceEnvVariable); !envSet || strings.TrimSpace(watchNamespace) == "" {
+		log.Debug("Operator is global to all namespaces")
 		return true
 	}
+
+	log.Debug("Operator is local to namespace")
 	return false
 }
 
@@ -118,6 +122,7 @@ func IsOperatorAllowedOnNamespace(ctx context.Context, c ctrl.Reader, namespace 
 
 	// allow global operators that use a proper operator id
 	if defaults.OperatorID() != "" {
+		log.Debugf("Operator ID: %s", defaults.OperatorID())
 		return true, nil
 	}
 
@@ -128,8 +133,11 @@ func IsOperatorAllowedOnNamespace(ctx context.Context, c ctrl.Reader, namespace 
 	}
 	alreadyOwned, err := IsNamespaceLocked(ctx, c, namespace)
 	if err != nil {
+		log.Debugf("Error occurred while testing whether namespace is locked: %v", err)
 		return false, err
 	}
+
+	log.Debugf("Lock status of namespace %s: %t", namespace, alreadyOwned)
 	return !alreadyOwned, nil
 }
 

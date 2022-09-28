@@ -29,6 +29,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/apache/camel-k/e2e/support"
+	"github.com/apache/camel-k/pkg/util/olm"
 )
 
 func TestBasicUninstall(t *testing.T) {
@@ -40,10 +41,25 @@ func TestBasicUninstall(t *testing.T) {
 
 		// should be completely removed on uninstall
 		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles").Execute()).To(Succeed())
+
+		// Roles only removed in non-olm use-case
+		uninstallViaOLM := false
+		var err error
+		if uninstallViaOLM, err = olm.IsAPIAvailable(TestContext, TestClient(), ns); err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+
+		if !uninstallViaOLM {
 		Eventually(Role(ns)).Should(BeNil())
 		Eventually(RoleBinding(ns)).Should(BeNil())
+			Eventually(ServiceAccount(ns, "camel-k-operator")).Should(BeNil())
+		} else {
+			Eventually(Role(ns)).ShouldNot(BeNil())
+			Eventually(RoleBinding(ns)).ShouldNot(BeNil())
+		}
+
 		Eventually(Configmap(ns, "camel-k-maven-settings")).Should(BeNil())
-		Eventually(ServiceAccount(ns, "camel-k-operator")).Should(BeNil())
 		Eventually(OperatorPod(ns), TestTimeoutMedium).Should(BeNil())
 		Eventually(KameletList(ns)).Should(BeEmpty())
 	})

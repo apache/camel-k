@@ -55,6 +55,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 
 	// update missing fields in the resource
 	if p.Status.Cluster == "" {
+		log.Debugf("Integration Platform [%s]: setting cluster status", p.Namespace)
 		// determine the kind of cluster the platform is installed into
 		isOpenShift, err := openshift.IsOpenShift(c)
 		switch {
@@ -68,6 +69,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	}
 
 	if p.Status.Build.PublishStrategy == "" {
+		log.Debugf("Integration Platform [%s]: setting publishing strategy", p.Namespace)
 		if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift {
 			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyS2I
 		} else {
@@ -76,6 +78,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	}
 
 	if p.Status.Build.BuildStrategy == "" {
+		log.Debugf("Integration Platform [%s]: setting build strategy", p.Namespace)
 		// Use the fastest strategy that they support (routine when possible)
 		if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I ||
 			p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategySpectrum {
@@ -114,6 +117,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 }
 
 func CreateBuilderServiceAccount(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) error {
+	log.Debugf("Integration Platform [%s]: creating build service account", p.Namespace)
 	sa := corev1.ServiceAccount{}
 	key := ctrl.ObjectKey{
 		Name:      BuilderServiceAccount,
@@ -132,6 +136,7 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift &&
 		p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I &&
 		p.Status.Build.Registry.Address == "" {
+		log.Debugf("Integration Platform [%s]: setting registry address", p.Namespace)
 		// Default to using OpenShift internal container images registry when using a strategy other than S2I
 		p.Status.Build.Registry.Address = "image-registry.openshift-image-registry.svc:5000"
 
@@ -140,10 +145,12 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		if err != nil {
 			return err
 		}
+		log.Debugf("Integration Platform [%s]: setting registry certificate authority", p.Namespace)
 		p.Status.Build.Registry.CA = cm.Name
 
 		// Default to using the registry secret that's configured for the builder service account
 		if p.Status.Build.Registry.Secret == "" {
+			log.Debugf("Integration Platform [%s]: setting registry secret", p.Namespace)
 			// Bind the required role to push images to the registry
 			err := createBuilderRegistryRoleBinding(ctx, c, p)
 			if err != nil {
@@ -174,23 +181,30 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 			p.Status.Build.Registry.Address = *address
 		}
 	}
+
+	log.Debugf("Final Registry Address: %s", p.Status.Build.Registry.Address)
 	return nil
 }
 
 func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 	if p.Status.Build.PublishStrategyOptions == nil {
+		log.Debugf("Integration Platform [%s]: setting publish strategy options", p.Namespace)
 		p.Status.Build.PublishStrategyOptions = map[string]string{}
 	}
 	if p.Status.Build.RuntimeVersion == "" {
+		log.Debugf("Integration Platform [%s]: setting runtime version", p.Namespace)
 		p.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	}
 	if p.Status.Build.BaseImage == "" {
+		log.Debugf("Integration Platform [%s]: setting base image", p.Namespace)
 		p.Status.Build.BaseImage = defaults.BaseImage()
 	}
 	if p.Status.Build.Maven.LocalRepository == "" {
+		log.Debugf("Integration Platform [%s]: setting local repository", p.Namespace)
 		p.Status.Build.Maven.LocalRepository = defaults.LocalRepository
 	}
 	if len(p.Status.Build.Maven.CLIOptions) == 0 {
+		log.Debugf("Integration Platform [%s]: setting CLI options", p.Namespace)
 		p.Status.Build.Maven.CLIOptions = []string{
 			"-V",
 			"--no-transfer-progress",
@@ -198,6 +212,7 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 		}
 	}
 	if _, ok := p.Status.Build.PublishStrategyOptions[builder.KanikoPVCName]; !ok {
+		log.Debugf("Integration Platform [%s]: setting publish strategy options", p.Namespace)
 		p.Status.Build.PublishStrategyOptions[builder.KanikoPVCName] = p.Name
 	}
 
@@ -208,6 +223,7 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 			log.Log.Infof("Build timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.Build.GetTimeout().Duration, d)
 		}
 
+		log.Debugf("Integration Platform [%s]: setting build timeout", p.Namespace)
 		p.Status.Build.Timeout = &metav1.Duration{
 			Duration: d,
 		}
@@ -230,6 +246,7 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 	}
 
 	if len(p.Status.Kamelet.Repositories) == 0 {
+		log.Debugf("Integration Platform [%s]: setting kamelet repositories", p.Namespace)
 		p.Status.Kamelet.Repositories = append(p.Status.Kamelet.Repositories, v1.IntegrationPlatformKameletRepositorySpec{
 			URI: repository.DefaultRemoteRepository,
 		})
@@ -248,11 +265,14 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 
 func setStatusAdditionalInfo(platform *v1.IntegrationPlatform) {
 	platform.Status.Info = make(map[string]string)
+
+	log.Debugf("Integration Platform [%s]: setting build publish strategy", platform.Namespace)
 	if platform.Spec.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyBuildah {
 		platform.Status.Info["buildahVersion"] = defaults.BuildahVersion
 	} else if platform.Spec.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko {
 		platform.Status.Info["kanikoVersion"] = defaults.KanikoVersion
 	}
+	log.Debugf("Integration Platform [%s]: setting status info", platform.Namespace)
 	platform.Status.Info["goVersion"] = runtime.Version()
 	platform.Status.Info["goOS"] = runtime.GOOS
 	platform.Status.Info["gitCommit"] = defaults.GitCommit

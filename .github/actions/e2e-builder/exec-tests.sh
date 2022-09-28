@@ -25,7 +25,7 @@
 
 set -e
 
-while getopts ":b:c:g:i:l:n:s:v:x:" opt; do
+while getopts ":b:c:g:i:l:n:q:s:v:x:" opt; do
   case "${opt}" in
     b)
       BUILD_CATALOG_SOURCE_NAME=${OPTARG}
@@ -44,6 +44,9 @@ while getopts ":b:c:g:i:l:n:s:v:x:" opt; do
       ;;
     n)
       IMAGE_NAME=${OPTARG}
+      ;;
+    q)
+      LOG_LEVEL=${OPTARG}
       ;;
     s)
       REGISTRY_INSECURE=${OPTARG}
@@ -114,6 +117,7 @@ export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
 # (see kamel-build-bundle/build-bundle-image.sh)
 export KAMEL_INSTALL_OPERATOR_IMAGE_PULL_POLICY="Always"
 
+export CAMEL_K_LOG_LEVEL="${LOG_LEVEL}"
 export CAMEL_K_TEST_IMAGE_NAME=${CUSTOM_IMAGE}
 export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
 export CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE=${SAVE_FAILED_TEST_NS}

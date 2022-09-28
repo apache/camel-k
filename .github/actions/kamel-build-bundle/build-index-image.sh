@@ -182,7 +182,7 @@ if [ "${PULL_REGISTRY}" != "${PUSH_REGISTRY}" ]; then
   # Push the bundle image to the registry
   #
   echo "Pushing bundle image ..."
-  docker push ${BUNDLE_IMAGE}
+  docker push ${BUNDLE_IMAGE} 2>&1
 fi
 
 #
