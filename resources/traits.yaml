@@ -95,8 +95,8 @@ traits:
     description: The AWS Region to use
   - name: use-default-credentials-provider,omitempty
     type: bool
-    description: 'The adapter-specific policy to use when filling the cache (use:
-      minimizing / maximizing). Check the component documentation if unsure'
+    description: Define if we want to use the Default Credentials Provider chain as
+      authentication method
 - name: builder
   platform: true
   profiles:
