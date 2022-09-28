@@ -190,7 +190,7 @@ func FromManager(manager manager.Manager) (Client, error) {
 	}, nil
 }
 
-// init initialize the k8s client for usage outside the cluster.
+// initialize the k8s client for usage outside the cluster.
 func initialize(kubeconfig string) {
 	if kubeconfig == "" {
 		// skip out-of-cluster initialization if inside the container
