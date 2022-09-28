@@ -108,8 +108,8 @@ while eval "${command}"
 do
   ((i++))
   if [ "${i}" -gt "${timeout}" ]; then
-    echo "kamel operator not successfully uninstalled, aborting due to ${timeout}s timeout"
-    exit 1
+    echo "Warning: kamel operator not successfully uninstalled, aborting due to ${timeout}s timeout"
+    exit 0
   fi
 
   sleep 1
