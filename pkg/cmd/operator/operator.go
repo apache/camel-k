@@ -30,7 +30,10 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+
 	"go.uber.org/automaxprocs/maxprocs"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -45,8 +48,6 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog/v2"
 
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -140,7 +141,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	// from being throttled.
 	cfg.QPS = 20
 	cfg.Burst = 200
-	c, err := client.NewClientWithConfig(false, cfg)
+	bootstrapClient, err := client.NewClientWithConfig(false, cfg)
 	exitOnError(err, "cannot initialize client")
 
 	// We do not rely on the event broadcaster managed by controller runtime,
@@ -150,7 +151,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	broadcaster := record.NewBroadcaster()
 	defer broadcaster.Shutdown()
 
-	if ok, err := kubernetes.CheckPermission(context.TODO(), c, corev1.GroupName, "events", watchNamespace, "", "create"); err != nil || !ok {
+	if ok, err := kubernetes.CheckPermission(context.TODO(), bootstrapClient, corev1.GroupName, "events", watchNamespace, "", "create"); err != nil || !ok {
 		// Do not sink Events to the server as they'll be rejected
 		broadcaster = event.NewSinkLessBroadcaster(broadcaster)
 		exitOnError(err, "cannot check permissions for creating Events")
@@ -170,10 +171,10 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	}
 
 	// Set the operator container image if it runs in-container
-	platform.OperatorImage, err = getOperatorImage(context.TODO(), c)
+	platform.OperatorImage, err = getOperatorImage(context.TODO(), bootstrapClient)
 	exitOnError(err, "cannot get operator container image")
 
-	if ok, err := kubernetes.CheckPermission(context.TODO(), c, coordination.GroupName, "leases", operatorNamespace, "", "create"); err != nil || !ok {
+	if ok, err := kubernetes.CheckPermission(context.TODO(), bootstrapClient, coordination.GroupName, "leases", operatorNamespace, "", "create"); err != nil || !ok {
 		leaderElection = false
 		exitOnError(err, "cannot check permissions for creating Leases")
 		log.Info("The operator is not granted permissions to create Leases")
@@ -194,7 +195,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		&servingv1.Service{}: {Label: selector},
 	}
 
-	if ok, err := kubernetes.IsAPIResourceInstalled(c, batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
+	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
 		selectors[&batchv1.CronJob{}] = struct {
 			Label labels.Selector
 			Field fields.Selector
@@ -203,7 +204,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		}
 	}
 
-	mgr, err := manager.New(c.GetConfig(), manager.Options{
+	mgr, err := manager.New(cfg, manager.Options{
 		Namespace:                     watchNamespace,
 		EventBroadcaster:              broadcaster,
 		LeaderElection:                leaderElection,
@@ -233,13 +234,15 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	log.Info("Configuring manager")
 	exitOnError(mgr.AddHealthzCheck("health-probe", healthz.Ping), "Unable add liveness check")
 	exitOnError(apis.AddToScheme(mgr.GetScheme()), "")
-	exitOnError(controller.AddToManager(mgr), "")
+	ctrlClient, err := client.FromManager(mgr)
+	exitOnError(err, "")
+	exitOnError(controller.AddToManager(mgr, ctrlClient), "")
 
 	log.Info("Installing operator resources")
 	installCtx, installCancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer installCancel()
-	install.OperatorStartupOptionalTools(installCtx, c, watchNamespace, operatorNamespace, log)
-	exitOnError(findOrCreateIntegrationPlatform(installCtx, c, operatorNamespace), "failed to create integration platform")
+	install.OperatorStartupOptionalTools(installCtx, bootstrapClient, watchNamespace, operatorNamespace, log)
+	exitOnError(findOrCreateIntegrationPlatform(installCtx, bootstrapClient, operatorNamespace), "failed to create integration platform")
 
 	log.Info("Starting the manager")
 	exitOnError(mgr.Start(signals.SetupSignalHandler()), "manager exited non-zero")

@@ -23,8 +23,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/apache/camel-k/pkg/trait"
-
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -33,6 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
+
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -48,17 +47,14 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	camelevent "github.com/apache/camel-k/pkg/event"
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/monitoring"
 )
 
-func Add(mgr manager.Manager) error {
-	c, err := client.FromManager(mgr)
-	if err != nil {
-		return err
-	}
+func Add(mgr manager.Manager, c client.Client) error {
 	return add(mgr, c, newReconciler(mgr, c))
 }
 

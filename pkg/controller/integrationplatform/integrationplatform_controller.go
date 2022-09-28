@@ -41,17 +41,12 @@ import (
 	"github.com/apache/camel-k/pkg/util/monitoring"
 )
 
-// Add creates a new IntegrationPlatform Controller and adds it to the Manager. The Manager will set fields on the Controller
-// and Start it when the Manager is Started.
-func Add(mgr manager.Manager) error {
-	c, err := client.FromManager(mgr)
-	if err != nil {
-		return err
-	}
+// Add creates a new IntegrationPlatform Controller and adds it to the Manager. The Manager will set fields
+// on the Controller and Start it when the Manager is Started.
+func Add(mgr manager.Manager, c client.Client) error {
 	return add(mgr, newReconciler(mgr, c))
 }
 
-// newReconciler returns a new reconcile.Reconciler.
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	return monitoring.NewInstrumentedReconciler(
 		&reconcileIntegrationPlatform{
@@ -68,9 +63,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	)
 }
 
-// add adds a new Controller to mgr with r as the reconcile.Reconciler.
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	// Create a new controller
 	c, err := controller.New("integrationplatform-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
