@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package vault
+package aws
 
 import (
 	"strconv"
