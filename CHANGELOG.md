@@ -6,6 +6,9 @@
 
 **Closed issues:**
 
+- Cannot build the project, likely `gotestfmt` [\#3677](https://github.com/apache/camel-k/issues/3677)
+- OLM installtion needs to set KAMEL\_OPERATOR\_ID EnvVar [\#3657](https://github.com/apache/camel-k/issues/3657)
+- Provide documentation for LTS support [\#3647](https://github.com/apache/camel-k/issues/3647)
 - Wrong compatibility matrix [\#3622](https://github.com/apache/camel-k/issues/3622)
 - 1.10.x Smoke test failure TestBindingWithImage [\#3619](https://github.com/apache/camel-k/issues/3619)
 - Nightly release 1.9.x missing tests [\#3613](https://github.com/apache/camel-k/issues/3613)
