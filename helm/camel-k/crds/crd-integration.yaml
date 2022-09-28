@@ -6503,8 +6503,9 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       discoveryCache:
-                        description: Discovery client cache to be used, either `disabled`,
-                          `disk` or `memory` (default `memory`)
+                        description: 'Discovery client cache to be used, either `disabled`,
+                          `disk` or `memory` (default `memory`). Deprecated: to be
+                          removed from trait configuration.'
                         type: string
                       enabled:
                         description: Can be used to enable or disable a trait. All

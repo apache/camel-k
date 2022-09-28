@@ -438,8 +438,8 @@ traits:
       property.
   - name: discovery-cache
     type: github.com/apache/camel-k/pkg/apis/camel/v1/trait.DiscoveryCacheType
-    description: Discovery client cache to be used, either `disabled`, `disk` or `memory`
-      (default `memory`)
+    description: 'Discovery client cache to be used, either `disabled`, `disk` or
+      `memory` (default `memory`). Deprecated: to be removed from trait configuration.'
 - name: health
   platform: false
   profiles:
