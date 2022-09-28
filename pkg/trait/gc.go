@@ -19,7 +19,6 @@ package trait
 
 import (
 	"context"
-	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -46,8 +45,6 @@ import (
 )
 
 var (
-	toFileName = regexp.MustCompile(`[^(\w/\.)]`)
-
 	lock            sync.Mutex
 	rateLimiter     = rate.NewLimiter(rate.Every(time.Minute), 1)
 	collectableGVKs = make(map[schema.GroupVersionKind]struct{})
