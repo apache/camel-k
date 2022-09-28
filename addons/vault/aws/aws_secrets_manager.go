@@ -46,8 +46,7 @@ type Trait struct {
 	SecretKey string `property:"secret-key,omitempty"`
 	// The AWS Region to use
 	Region string `property:"region,omitempty"`
-	// The adapter-specific policy to use when filling the cache (use: minimizing / maximizing). Check
-	// the component documentation if unsure
+	// Define if we want to use the Default Credentials Provider chain as authentication method
 	UseDefaultCredentialsProvider *bool `property:"use-default-credentials-provider,omitempty"`
 }
 
