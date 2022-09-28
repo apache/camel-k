@@ -440,7 +440,8 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 		}
 
 		if len(o.MavenRepositories) > 0 {
-			settings, err := maven.NewSettings(maven.Repositories(o.MavenRepositories...))
+			settings, err := maven.NewSettings(maven.Repositories(o.MavenRepositories...), maven.DefaultRepositories)
+
 			if err != nil {
 				return err
 			}
