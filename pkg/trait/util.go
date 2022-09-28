@@ -26,10 +26,11 @@ import (
 	"sort"
 	"strings"
 
-	user "github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -113,7 +114,7 @@ func collectConfigurations(configurationType string, configurable ...v1.Configur
 			continue
 		}
 
-		//nolint: staticcheck,nolintlint
+		// nolint: staticcheck,nolintlint
 		for _, entry := range entries {
 			if entry.Type == configurationType {
 				item := make(map[string]string)
@@ -196,19 +197,6 @@ func filterTransferableAnnotations(annotations map[string]string) map[string]str
 		res[k] = v
 	}
 	return res
-}
-
-func mustHomeDir() string {
-	dir, err := user.Dir()
-	if err != nil {
-		panic(err)
-	}
-	return dir
-}
-
-func toHostDir(host string) string {
-	h := strings.Replace(strings.Replace(host, "https://", "", 1), "http://", "", 1)
-	return toFileName.ReplaceAllString(h, "_")
 }
 
 // ExtractSourceDependencies extracts dependencies from source.
