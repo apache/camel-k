@@ -36,7 +36,6 @@ import (
 // -t aws-secrets-manager.enabled=true -t aws-secrets-manager.access-key="aws-access-key" -t aws-secrets-manager.secret-key="aws-secret-key" -t aws-secrets-manager.region="aws-region"
 //
 // +camel-k:trait=aws-secrets-manager.
-
 type Trait struct {
 	traitv1.Trait `property:",squash"`
 	// Enables automatic configuration of the trait.
