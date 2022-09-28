@@ -18,10 +18,10 @@
 package addons
 
 import (
-	"github.com/apache/camel-k/addons/vault"
+	"github.com/apache/camel-k/addons/vault/aws"
 	"github.com/apache/camel-k/pkg/trait"
 )
 
 func init() {
-	trait.AddToTraits(vault.NewAwsSecretsManagerTrait)
+	trait.AddToTraits(aws.NewAwsSecretsManagerTrait)
 }
