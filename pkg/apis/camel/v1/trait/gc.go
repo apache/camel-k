@@ -27,6 +27,7 @@ type GCTrait struct {
 	DiscoveryCache *DiscoveryCacheType `property:"discovery-cache" json:"discoveryCache,omitempty"`
 }
 
+// +kubebuilder:validation:Enum=disabled;disk;memory
 type DiscoveryCacheType string
 
 const (

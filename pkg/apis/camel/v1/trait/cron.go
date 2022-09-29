@@ -51,11 +51,12 @@ type CronTrait struct {
 	// - "Allow": allows CronJobs to run concurrently;
 	// - "Forbid" (default): forbids concurrent runs, skipping next run if previous run hasn't finished yet;
 	// - "Replace": cancels currently running job and replaces it with a new one
+	// +kubebuilder:validation:Enum=Allow;Forbid;Replace
 	ConcurrencyPolicy string `property:"concurrency-policy" json:"concurrencyPolicy,omitempty"`
 	// Automatically deploy the integration as CronJob when all routes are
 	// either starting from a periodic consumer (only `cron`, `timer` and `quartz` are supported) or a passive consumer (e.g. `direct` is a passive consumer).
 	//
-	// It's required that all periodic consumers have the same period and it can be expressed as cron schedule (e.g. `1m` can be expressed as `0/1 * * * *`,
+	// It's required that all periodic consumers have the same period, and it can be expressed as cron schedule (e.g. `1m` can be expressed as `0/1 * * * *`,
 	// while `35m` or `50s` cannot).
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// Optional deadline in seconds for starting the job if it misses scheduled
