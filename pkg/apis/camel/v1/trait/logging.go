@@ -28,6 +28,7 @@ type LoggingTrait struct {
 	// Logs message format
 	Format string `property:"format" json:"format,omitempty"`
 	// Adjust the logging level (defaults to INFO)
+	// +kubebuilder:validation:Enum=FATAL;WARN;INFO;DEBUG;TRACE
 	Level string `property:"level" json:"level,omitempty"`
 	// Output the logs in JSON
 	JSON *bool `property:"json" json:"json,omitempty"`

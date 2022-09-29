@@ -501,6 +501,10 @@ spec:
                         type: string
                       imagePullPolicy:
                         description: 'The pull policy: Always|Never|IfNotPresent'
+                        enum:
+                        - Always
+                        - Never
+                        - IfNotPresent
                         type: string
                       limitCPU:
                         description: The maximum amount of CPU required.
@@ -626,7 +630,7 @@ spec:
                           when all routes are either starting from a periodic consumer
                           (only `cron`, `timer` and `quartz` are supported) or a passive
                           consumer (e.g. `direct` is a passive consumer). \n It's
-                          required that all periodic consumers have the same period
+                          required that all periodic consumers have the same period,
                           and it can be expressed as cron schedule (e.g. `1m` can
                           be expressed as `0/1 * * * *`, while `35m` or `50s` cannot)."
                         type: boolean
@@ -652,6 +656,10 @@ spec:
                           runs, skipping next run if previous run hasn''t finished
                           yet; - "Replace": cancels currently running job and replaces
                           it with a new one'
+                        enum:
+                        - Allow
+                        - Forbid
+                        - Replace
                         type: string
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -708,6 +716,10 @@ spec:
                         description: Allows to explicitly select the desired deployment
                           kind between `deployment`, `cron-job` or `knative-service`
                           when creating the resources for running the integration.
+                        enum:
+                        - deployment
+                        - cron-job
+                        - knative-service
                         type: string
                       useSSA:
                         description: Use server-side apply to update the owned resources
@@ -815,6 +827,10 @@ spec:
                         description: 'Discovery client cache to be used, either `disabled`,
                           `disk` or `memory` (default `memory`). Deprecated: to be
                           removed from trait configuration.'
+                        enum:
+                        - disabled
+                        - disk
+                        - memory
                         type: string
                       enabled:
                         description: Can be used to enable or disable a trait. All
@@ -1157,7 +1173,7 @@ spec:
                         description: "Automatically deploy the integration as Knative
                           service when all conditions hold: \n * Integration is using
                           the Knative profile * All routes are either starting from
-                          a HTTP based consumer or a passive consumer (e.g. `direct`
+                          an HTTP based consumer or a passive consumer (e.g. `direct`
                           is a passive consumer)"
                         type: boolean
                       autoscalingMetric:
@@ -1175,6 +1191,9 @@ spec:
                           (e.g. to set `hpa.autoscaling.knative.dev` or `kpa.autoscaling.knative.dev`
                           autoscaling). \n Refer to the Knative documentation for
                           more information."
+                        enum:
+                        - kpa.autoscaling.knative.dev
+                        - hpa.autoscaling.knative.dev
                         type: string
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -1209,6 +1228,8 @@ spec:
                           a private service. Specifically, this option applies the
                           `networking.knative.dev/visibility` label to Knative service.
                           \n Refer to the Knative documentation for more information."
+                        enum:
+                        - cluster-local
                         type: string
                     type: object
                   logging:
@@ -1237,6 +1258,12 @@ spec:
                         type: boolean
                       level:
                         description: Adjust the logging level (defaults to INFO)
+                        enum:
+                        - FATAL
+                        - WARN
+                        - INFO
+                        - DEBUG
+                        - TRACE
                         type: string
                     type: object
                   master:
@@ -1471,6 +1498,9 @@ spec:
                           corresponding to the first package type will be assigned
                           to the integration in case no existing kit that matches
                           the integration exists.
+                        enum:
+                        - fast-jar
+                        - native
                         items:
                           description: Quarkus package type.
                           type: string
@@ -1552,6 +1582,10 @@ spec:
                         description: "To configure how to deal with insecure traffic,
                           e.g. `Allow`, `Disable` or `Redirect` traffic. \n Refer
                           to the OpenShift route documentation for additional information."
+                        enum:
+                        - None
+                        - Allow
+                        - Redirect
                         type: string
                       tlsKey:
                         description: "The TLS certificate key contents. \n Refer to
@@ -1569,6 +1603,10 @@ spec:
                         description: "The TLS termination type, like `edge`, `passthrough`
                           or `reencrypt`. \n Refer to the OpenShift route documentation
                           for additional information."
+                        enum:
+                        - edge
+                        - reencrypt
+                        - passthrough
                         type: string
                     type: object
                   service:
@@ -1594,6 +1632,10 @@ spec:
                       type:
                         description: The type of service to be used, either 'ClusterIP',
                           'NodePort' or 'LoadBalancer'.
+                        enum:
+                        - ClusterIP
+                        - NodePort
+                        - LoadBalancer
                         type: string
                     type: object
                   service-binding:
@@ -2139,6 +2181,10 @@ spec:
                         type: string
                       imagePullPolicy:
                         description: 'The pull policy: Always|Never|IfNotPresent'
+                        enum:
+                        - Always
+                        - Never
+                        - IfNotPresent
                         type: string
                       limitCPU:
                         description: The maximum amount of CPU required.
@@ -2264,7 +2310,7 @@ spec:
                           when all routes are either starting from a periodic consumer
                           (only `cron`, `timer` and `quartz` are supported) or a passive
                           consumer (e.g. `direct` is a passive consumer). \n It's
-                          required that all periodic consumers have the same period
+                          required that all periodic consumers have the same period,
                           and it can be expressed as cron schedule (e.g. `1m` can
                           be expressed as `0/1 * * * *`, while `35m` or `50s` cannot)."
                         type: boolean
@@ -2290,6 +2336,10 @@ spec:
                           runs, skipping next run if previous run hasn''t finished
                           yet; - "Replace": cancels currently running job and replaces
                           it with a new one'
+                        enum:
+                        - Allow
+                        - Forbid
+                        - Replace
                         type: string
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -2346,6 +2396,10 @@ spec:
                         description: Allows to explicitly select the desired deployment
                           kind between `deployment`, `cron-job` or `knative-service`
                           when creating the resources for running the integration.
+                        enum:
+                        - deployment
+                        - cron-job
+                        - knative-service
                         type: string
                       useSSA:
                         description: Use server-side apply to update the owned resources
@@ -2453,6 +2507,10 @@ spec:
                         description: 'Discovery client cache to be used, either `disabled`,
                           `disk` or `memory` (default `memory`). Deprecated: to be
                           removed from trait configuration.'
+                        enum:
+                        - disabled
+                        - disk
+                        - memory
                         type: string
                       enabled:
                         description: Can be used to enable or disable a trait. All
@@ -2795,7 +2853,7 @@ spec:
                         description: "Automatically deploy the integration as Knative
                           service when all conditions hold: \n * Integration is using
                           the Knative profile * All routes are either starting from
-                          a HTTP based consumer or a passive consumer (e.g. `direct`
+                          an HTTP based consumer or a passive consumer (e.g. `direct`
                           is a passive consumer)"
                         type: boolean
                       autoscalingMetric:
@@ -2813,6 +2871,9 @@ spec:
                           (e.g. to set `hpa.autoscaling.knative.dev` or `kpa.autoscaling.knative.dev`
                           autoscaling). \n Refer to the Knative documentation for
                           more information."
+                        enum:
+                        - kpa.autoscaling.knative.dev
+                        - hpa.autoscaling.knative.dev
                         type: string
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -2847,6 +2908,8 @@ spec:
                           a private service. Specifically, this option applies the
                           `networking.knative.dev/visibility` label to Knative service.
                           \n Refer to the Knative documentation for more information."
+                        enum:
+                        - cluster-local
                         type: string
                     type: object
                   logging:
@@ -2875,6 +2938,12 @@ spec:
                         type: boolean
                       level:
                         description: Adjust the logging level (defaults to INFO)
+                        enum:
+                        - FATAL
+                        - WARN
+                        - INFO
+                        - DEBUG
+                        - TRACE
                         type: string
                     type: object
                   master:
@@ -3109,6 +3178,9 @@ spec:
                           corresponding to the first package type will be assigned
                           to the integration in case no existing kit that matches
                           the integration exists.
+                        enum:
+                        - fast-jar
+                        - native
                         items:
                           description: Quarkus package type.
                           type: string
@@ -3190,6 +3262,10 @@ spec:
                         description: "To configure how to deal with insecure traffic,
                           e.g. `Allow`, `Disable` or `Redirect` traffic. \n Refer
                           to the OpenShift route documentation for additional information."
+                        enum:
+                        - None
+                        - Allow
+                        - Redirect
                         type: string
                       tlsKey:
                         description: "The TLS certificate key contents. \n Refer to
@@ -3207,6 +3283,10 @@ spec:
                         description: "The TLS termination type, like `edge`, `passthrough`
                           or `reencrypt`. \n Refer to the OpenShift route documentation
                           for additional information."
+                        enum:
+                        - edge
+                        - reencrypt
+                        - passthrough
                         type: string
                     type: object
                   service:
@@ -3232,6 +3312,10 @@ spec:
                       type:
                         description: The type of service to be used, either 'ClusterIP',
                           'NodePort' or 'LoadBalancer'.
+                        enum:
+                        - ClusterIP
+                        - NodePort
+                        - LoadBalancer
                         type: string
                     type: object
                   service-binding:

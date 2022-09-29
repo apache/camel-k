@@ -36,6 +36,7 @@ type RouteTrait struct {
 	// The TLS termination type, like `edge`, `passthrough` or `reencrypt`.
 	//
 	// Refer to the OpenShift route documentation for additional information.
+	// +kubebuilder:validation:Enum=edge;reencrypt;passthrough
 	TLSTermination string `property:"tls-termination" json:"tlsTermination,omitempty"`
 	// The TLS certificate contents.
 	//
@@ -76,5 +77,6 @@ type RouteTrait struct {
 	// To configure how to deal with insecure traffic, e.g. `Allow`, `Disable` or `Redirect` traffic.
 	//
 	// Refer to the OpenShift route documentation for additional information.
+	// +kubebuilder:validation:Enum=None;Allow;Redirect
 	TLSInsecureEdgeTerminationPolicy string `property:"tls-insecure-edge-termination-policy" json:"tlsInsecureEdgeTerminationPolicy,omitempty"`
 }

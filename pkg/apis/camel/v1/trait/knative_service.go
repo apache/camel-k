@@ -29,6 +29,7 @@ type KnativeServiceTrait struct {
 	// Configures the Knative autoscaling class property (e.g. to set `hpa.autoscaling.knative.dev` or `kpa.autoscaling.knative.dev` autoscaling).
 	//
 	// Refer to the Knative documentation for more information.
+	// +kubebuilder:validation:Enum=kpa.autoscaling.knative.dev;hpa.autoscaling.knative.dev
 	Class string `property:"autoscaling-class" json:"class,omitempty"`
 	// Configures the Knative autoscaling metric property (e.g. to set `concurrency` based or `cpu` based autoscaling).
 	//
@@ -56,10 +57,11 @@ type KnativeServiceTrait struct {
 	// Specifically, this option applies the `networking.knative.dev/visibility` label to Knative service.
 	//
 	// Refer to the Knative documentation for more information.
+	// +kubebuilder:validation:Enum=cluster-local
 	Visibility string `property:"visibility" json:"visibility,omitempty"`
 	// Automatically deploy the integration as Knative service when all conditions hold:
 	//
 	// * Integration is using the Knative profile
-	// * All routes are either starting from a HTTP based consumer or a passive consumer (e.g. `direct` is a passive consumer)
+	// * All routes are either starting from an HTTP based consumer or a passive consumer (e.g. `direct` is a passive consumer)
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 }

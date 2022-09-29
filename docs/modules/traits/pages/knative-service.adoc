@@ -79,7 +79,7 @@ Refer to the Knative documentation for more information.
 | Automatically deploy the integration as Knative service when all conditions hold:
 
 * Integration is using the Knative profile
-* All routes are either starting from a HTTP based consumer or a passive consumer (e.g. `direct` is a passive consumer)
+* All routes are either starting from an HTTP based consumer or a passive consumer (e.g. `direct` is a passive consumer)
 
 |===
 

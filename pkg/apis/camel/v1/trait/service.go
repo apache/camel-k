@@ -31,6 +31,7 @@ type ServiceTrait struct {
 	// Deprecated: Use service type instead.
 	NodePort *bool `property:"node-port" json:"nodePort,omitempty"`
 	// The type of service to be used, either 'ClusterIP', 'NodePort' or 'LoadBalancer'.
+	// +kubebuilder:validation:Enum=ClusterIP;NodePort;LoadBalancer
 	Type *ServiceType `property:"type" json:"type,omitempty"`
 }
 
