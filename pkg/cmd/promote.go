@@ -127,7 +127,7 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		// KameletBinding promotion
 		destKameletBinding := o.editKameletBinding(sourceKameletBinding, sourceIntegration)
 
-		return o.saveKameletBinding(destKameletBinding)
+		return o.replaceResource(destKameletBinding)
 	}
 	// Plain Integration promotion
 	destIntegration := o.editIntegration(sourceIntegration)
@@ -138,7 +138,7 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	return o.saveIntegration(destIntegration)
+	return o.replaceResource(destIntegration)
 }
 
 func checkOpsCompatibility(cmd *cobra.Command, source, dest map[string]string) error {
@@ -423,14 +423,6 @@ func (o *promoteCmdOptions) editIntegration(it *v1.Integration) *v1.Integration 
 	return &dst
 }
 
-func (o *promoteCmdOptions) saveIntegration(it *v1.Integration) error {
-	err := o._client.Create(o.Context, it)
-	if err != nil && !k8serrors.IsAlreadyExists(err) {
-		return o._client.Update(o.Context, it)
-	}
-	return err
-}
-
 func (o *promoteCmdOptions) editKameletBinding(kb *v1alpha1.KameletBinding, it *v1.Integration) *v1alpha1.KameletBinding {
 	dst := v1alpha1.NewKameletBinding(o.To, kb.Name)
 	dst.Spec = *kb.Spec.DeepCopy()
@@ -458,12 +450,8 @@ func (o *promoteCmdOptions) editKameletBinding(kb *v1alpha1.KameletBinding, it *
 	return &dst
 }
 
-func (o *promoteCmdOptions) saveKameletBinding(kb *v1alpha1.KameletBinding) error {
-	err := o._client.Create(o.Context, kb)
-	if err != nil && !k8serrors.IsAlreadyExists(err) {
-		return o._client.Update(o.Context, kb)
-	}
-	return err
+func (o *promoteCmdOptions) replaceResource(res k8sclient.Object) error {
+	return kubernetes.ReplaceResource(o.Context, o._client, res)
 }
 
 //

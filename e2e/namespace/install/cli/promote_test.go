@@ -108,16 +108,21 @@ func TestKamelCLIPromote(t *testing.T) {
 			})
 
 			t.Run("plain integration promotion update", func(t *testing.T) {
-				// Update the configmap
+				// We need to update the Integration CR in order the operator to restart it both in dev and prod envs
+				Expect(KamelRunWithID(operatorDevID, nsDev, "./files/promote-route-edited.groovy", "--name", "promote-route",
+					"--config", "configmap:my-cm").Execute()).To(Succeed())
+				Eventually(IntegrationPodPhase(nsDev, "promote-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationConditionStatus(nsDev, "promote-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+				Eventually(IntegrationLogs(nsDev, "promote-route"), TestTimeoutShort).Should(ContainSubstring("I am development configmap!"))
+				// Update the configmap only in prod
 				var cmData = make(map[string]string)
 				cmData["my-configmap-key"] = "I am production, but I was updated!"
 				UpdatePlainTextConfigmap(nsProd, "my-cm", cmData)
-
+				// Promote the edited Integration
 				Expect(Kamel("promote", "-n", nsDev, "promote-route", "--to", nsProd).Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(nsProd, "promote-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationConditionStatus(nsProd, "promote-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 				Eventually(IntegrationLogs(nsProd, "promote-route"), TestTimeoutShort).Should(ContainSubstring("I am production, but I was updated!"))
-				Eventually(IntegrationLogs(nsProd, "promote-route"), TestTimeoutShort).Should(ContainSubstring("very top secret production"))
 				// They must use the same image
 				Expect(IntegrationPodImage(nsProd, "promote-route")()).Should(Equal(IntegrationPodImage(nsDev, "promote-route")()))
 			})
@@ -146,6 +151,14 @@ func TestKamelCLIPromote(t *testing.T) {
 				Eventually(IntegrationLogs(nsProd, "kb-timer-source-to-log"), TestTimeoutShort).Should(ContainSubstring("my-kamelet-binding-rocks"))
 				// They must use the same image
 				Expect(IntegrationPodImage(nsProd, "kb-timer-source-to-log")()).Should(Equal(IntegrationPodImage(nsDev, "kb-timer-source-to-log")()))
+
+				// Kamelet Binding update
+				Expect(KamelBindWithID(operatorDevID, nsDev, "kb-timer-source", "log:info", "-p", "source.message=my-kamelet-binding-rocks-again").Execute()).To(Succeed())
+				Eventually(IntegrationPodPhase(nsDev, "kb-timer-source-to-log"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationLogs(nsDev, "kb-timer-source-to-log"), TestTimeoutShort).Should(ContainSubstring("my-kamelet-binding-rocks-again"))
+				Expect(Kamel("promote", "-n", nsDev, "kb-timer-source-to-log", "--to", nsProd).Execute()).To(Succeed())
+				Eventually(IntegrationPodPhase(nsProd, "kb-timer-source-to-log"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationLogs(nsProd, "kb-timer-source-to-log"), TestTimeoutShort).Should(ContainSubstring("my-kamelet-binding-rocks-again"))
 			})
 		})
 	})
