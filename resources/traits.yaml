@@ -474,7 +474,6 @@ traits:
     type: bool
     description: Define if we want to use the Default Instance approach for accessing
       the Google Secret Manager service
->>>>>>> 086b55a6 (Added docs about GCP Secret Manager Vault Trait)
 - name: health
   platform: false
   profiles:
