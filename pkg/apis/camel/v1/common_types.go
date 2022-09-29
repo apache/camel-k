@@ -308,6 +308,8 @@ const (
 	CapabilityResumeKafka = "resume-kafka"
 	// CapabilityAwsSecretsManager defines the aws secrets manager capability
 	CapabilityAwsSecretsManager = "aws-secrets-manager"
+	// CapabilityGcpSecretManager defines the gcp secret manager capability
+	CapabilityGcpSecretManager = "gcp-secret-manager"
 )
 
 // +kubebuilder:object:generate=false
