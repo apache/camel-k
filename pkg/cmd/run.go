@@ -40,7 +40,6 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
-	runtimeos "runtime"
 	"strings"
 	"syscall"
 
@@ -1172,15 +1171,6 @@ func (o *runCmdOptions) extractGav(src *zip.File, localPath string, cmd *cobra.C
 func (o *runCmdOptions) uploadAsMavenArtifact(dependency maven.Dependency, path string, platform *v1.IntegrationPlatform, ns string, options spectrum.Options, cmd *cobra.Command) error {
 	artifactHTTPPath := getArtifactHTTPPath(dependency, platform, ns)
 	options.Target = fmt.Sprintf("%s/%s:%s", o.getRegistry(platform), artifactHTTPPath, dependency.Version)
-	if runtimeos.GOOS == "windows" {
-		// workaround for https://github.com/container-tools/spectrum/issues/8
-		// work with relative paths instead
-		rel, err := getRelativeToWorkingDirectory(path)
-		if err != nil {
-			return err
-		}
-		path = rel
-	}
 	_, err := spectrum.Build(options, fmt.Sprintf("%s:.", path))
 	if err != nil {
 		return err
@@ -1191,23 +1181,6 @@ func (o *runCmdOptions) uploadAsMavenArtifact(dependency maven.Dependency, path 
 		return nil
 	}
 	return o.uploadChecksumFiles(path, options, platform, artifactHTTPPath, dependency)
-}
-
-// Deprecated: workaround for https://github.com/container-tools/spectrum/issues/8
-func getRelativeToWorkingDirectory(path string) (string, error) {
-	wd, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-	abs, err := filepath.Abs(path)
-	if err != nil {
-		return "", err
-	}
-	path, err = filepath.Rel(wd, abs)
-	if err != nil {
-		return "", err
-	}
-	return path, nil
 }
 
 // Currently swallows errors because our Project model is incomplete.
