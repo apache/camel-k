@@ -134,6 +134,8 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	watchNamespace, err := getWatchNamespace()
 	exitOnError(err, "failed to get watch namespace")
 
+	ctx := signals.SetupSignalHandler()
+
 	cfg, err := config.GetConfig()
 	exitOnError(err, "cannot get client config")
 	// Increase maximum burst that is used by client-side throttling,
@@ -151,7 +153,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	broadcaster := record.NewBroadcaster()
 	defer broadcaster.Shutdown()
 
-	if ok, err := kubernetes.CheckPermission(context.TODO(), bootstrapClient, corev1.GroupName, "events", watchNamespace, "", "create"); err != nil || !ok {
+	if ok, err := kubernetes.CheckPermission(ctx, bootstrapClient, corev1.GroupName, "events", watchNamespace, "", "create"); err != nil || !ok {
 		// Do not sink Events to the server as they'll be rejected
 		broadcaster = event.NewSinkLessBroadcaster(broadcaster)
 		exitOnError(err, "cannot check permissions for creating Events")
@@ -171,10 +173,10 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	}
 
 	// Set the operator container image if it runs in-container
-	platform.OperatorImage, err = getOperatorImage(context.TODO(), bootstrapClient)
+	platform.OperatorImage, err = getOperatorImage(ctx, bootstrapClient)
 	exitOnError(err, "cannot get operator container image")
 
-	if ok, err := kubernetes.CheckPermission(context.TODO(), bootstrapClient, coordination.GroupName, "leases", operatorNamespace, "", "create"); err != nil || !ok {
+	if ok, err := kubernetes.CheckPermission(ctx, bootstrapClient, coordination.GroupName, "leases", operatorNamespace, "", "create"); err != nil || !ok {
 		leaderElection = false
 		exitOnError(err, "cannot check permissions for creating Leases")
 		log.Info("The operator is not granted permissions to create Leases")
@@ -223,7 +225,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	exitOnError(err, "")
 
 	exitOnError(
-		mgr.GetFieldIndexer().IndexField(context.Background(), &corev1.Pod{}, "status.phase",
+		mgr.GetFieldIndexer().IndexField(ctx, &corev1.Pod{}, "status.phase",
 			func(obj ctrl.Object) []string {
 				pod, _ := obj.(*corev1.Pod)
 				return []string{string(pod.Status.Phase)}
@@ -239,13 +241,13 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	exitOnError(controller.AddToManager(mgr, ctrlClient), "")
 
 	log.Info("Installing operator resources")
-	installCtx, installCancel := context.WithTimeout(context.Background(), 1*time.Minute)
+	installCtx, installCancel := context.WithTimeout(ctx, 1*time.Minute)
 	defer installCancel()
 	install.OperatorStartupOptionalTools(installCtx, bootstrapClient, watchNamespace, operatorNamespace, log)
 	exitOnError(findOrCreateIntegrationPlatform(installCtx, bootstrapClient, operatorNamespace), "failed to create integration platform")
 
 	log.Info("Starting the manager")
-	exitOnError(mgr.Start(signals.SetupSignalHandler()), "manager exited non-zero")
+	exitOnError(mgr.Start(ctx), "manager exited non-zero")
 }
 
 // findOrCreateIntegrationPlatform create default integration platform in operator namespace if not already exists.
