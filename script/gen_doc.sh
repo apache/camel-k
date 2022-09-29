@@ -31,5 +31,6 @@ go run ./cmd/util/doc-gen \
   --input-dirs github.com/apache/camel-k/addons/resume \
   --input-dirs github.com/apache/camel-k/addons/threescale \
   --input-dirs github.com/apache/camel-k/addons/tracing \
-  --input-dirs github.com/apache/camel-k/addons/vault/aws 
+  --input-dirs github.com/apache/camel-k/addons/vault/aws \
+  --input-dirs github.com/apache/camel-k/addons/vault/gcp
 echo "Generating traits documentation... done!"
