@@ -59,7 +59,11 @@ func (action *platformSetupAction) Handle(ctx context.Context, integration *v1.I
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return nil, err
 	} else if pl != nil {
-		integration.Status.Profile = determineBestProfile(ctx, action.client, integration, pl)
+		profile, err := determineBestProfile(action.client, integration, pl)
+		if err != nil {
+			return nil, err
+		}
+		integration.Status.Profile = profile
 	}
 
 	// Change the integration phase to Initialization after traits have been applied
@@ -73,24 +77,26 @@ func (action *platformSetupAction) Handle(ctx context.Context, integration *v1.I
 }
 
 // DetermineBestProfile tries to detect the best trait profile for the integration.
-func determineBestProfile(ctx context.Context, c client.Client, integration *v1.Integration, p *v1.IntegrationPlatform) v1.TraitProfile {
+func determineBestProfile(c client.Client, integration *v1.Integration, p *v1.IntegrationPlatform) (v1.TraitProfile, error) {
 	if integration.Spec.Profile != "" {
-		return integration.Spec.Profile
+		return integration.Spec.Profile, nil
 	}
 	if integration.Status.Profile != "" {
 		// Integration already has a profile
-		return integration.Status.Profile
+		return integration.Status.Profile, nil
 	}
 	if p.Status.Profile != "" {
 		// Use platform profile if set
-		return p.Status.Profile
+		return p.Status.Profile, nil
 	}
 	if p.Spec.Profile != "" {
 		// Use platform spec profile if set
-		return p.Spec.Profile
+		return p.Spec.Profile, nil
 	}
-	if knative.IsEnabledInNamespace(ctx, c, integration.Namespace) {
-		return v1.TraitProfileKnative
+	if ok, err := knative.IsInstalled(c); err != nil {
+		return "", err
+	} else if ok {
+		return v1.TraitProfileKnative, nil
 	}
-	return platform.GetProfile(p)
+	return platform.GetProfile(p), nil
 }

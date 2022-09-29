@@ -35,7 +35,7 @@ const knativeAddressableResolverClusterRoleName = "addressable-resolver"
 // BindKnativeAddressableResolverClusterRole binds the Knative addressable resolver aggregated ClusterRole
 // to the operator ServiceAccount.
 func BindKnativeAddressableResolverClusterRole(ctx context.Context, c kubernetes.Interface, namespace string, operatorNamespace string) error {
-	if isKnative, err := knative.IsInstalled(ctx, c); err != nil {
+	if isKnative, err := knative.IsInstalled(c); err != nil {
 		return err
 	} else if !isKnative {
 		return nil
