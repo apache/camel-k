@@ -44,7 +44,7 @@ The MicroProfile Metrics extension registers and exposes the following metrics o
 
 * https://github.com/eclipse/microprofile-metrics/blob/master/spec/src/main/asciidoc/required-metrics.adoc#required-metrics[JVM and operating system related metrics]
 
-* xref:camel-quarkus::reference/extensions/microprofile-metrics.adoc#_camel_route_metrics[Camel specific metrics]
+* xref:camel-quarkus::reference/extensions/microprofile-metrics.adoc#extensions-microprofile-metrics-usage-camel-route-metrics[Camel specific metrics]
 
 It is possible to extend this set of metrics by using either, or both:
 
