@@ -1262,15 +1262,6 @@ func (o *runCmdOptions) uploadChecksumFile(hash hash.Hash, tmpDir string, ext st
 
 	filename := "maven_" + filepath.Base(path) + ext
 	filepath := filepath.Join(tmpDir, filename)
-	if runtimeos.GOOS == "windows" {
-		// workaround for https://github.com/container-tools/spectrum/issues/8
-		// work with relative paths instead
-		rel, err := getRelativeToWorkingDirectory(path)
-		if err != nil {
-			return err
-		}
-		filepath = rel
-	}
 
 	if err = writeChecksumToFile(filepath, hash); err != nil {
 		return err
