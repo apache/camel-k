@@ -36,7 +36,7 @@ func TestGcpSecretManagerTraitApply(t *testing.T) {
 	secrets, _ := gcp.(*gcpSecretManagerTrait)
 	secrets.Enabled = pointer.Bool(true)
 	secrets.UseDefaultInstance = pointer.Bool(false)
-	secrets.ProjectId = "project-gcp"
+	secrets.ProjectID = "project-gcp"
 	secrets.ServiceAccountKey = "file:////usr/local/serviceaccount.json"
 	ok, err := secrets.Configure(e)
 	assert.Nil(t, err)
@@ -56,7 +56,7 @@ func TestGcpSecretManagerTraitNoDefaultCreds(t *testing.T) {
 	secrets, _ := gcp.(*gcpSecretManagerTrait)
 	secrets.Enabled = pointer.Bool(true)
 	secrets.UseDefaultInstance = pointer.Bool(false)
-	secrets.ProjectId = "project-gcp"
+	secrets.ProjectID = "project-gcp"
 	secrets.ServiceAccountKey = "file:////usr/local/serviceaccount.json"
 	ok, err := secrets.Configure(e)
 	assert.Nil(t, err)
