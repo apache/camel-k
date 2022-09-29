@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - Cannot build the project, likely `gotestfmt` [\#3677](https://github.com/apache/camel-k/issues/3677)
+- Can't run KameletBinding with the native mode [\#3671](https://github.com/apache/camel-k/issues/3671)
 - OLM installtion needs to set KAMEL\_OPERATOR\_ID EnvVar [\#3657](https://github.com/apache/camel-k/issues/3657)
 - Provide documentation for LTS support [\#3647](https://github.com/apache/camel-k/issues/3647)
 - Wrong compatibility matrix [\#3622](https://github.com/apache/camel-k/issues/3622)
