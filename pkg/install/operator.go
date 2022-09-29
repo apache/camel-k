@@ -242,7 +242,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 	}
 
 	// Additionally, install Knative resources (roles and bindings)
-	isKnative, err := knative.IsInstalled(ctx, c)
+	isKnative, err := knative.IsInstalled(c)
 	if err != nil {
 		return err
 	}

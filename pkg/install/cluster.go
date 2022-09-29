@@ -201,7 +201,7 @@ func SetupClusterWideResourcesOrCollect(ctx context.Context, clientProvider clie
 		}
 	}
 
-	isKnative, err := knative.IsInstalled(ctx, c)
+	isKnative, err := knative.IsInstalled(c)
 	if err != nil {
 		return err
 	}
