@@ -35,7 +35,7 @@ import (
 //
 // A sample execution of this trait, would require
 // the following trait options:
-// -t aws-secrets-manager.enabled=true -t aws-secrets-manager.access-key="aws-access-key" -t aws-secrets-manager.secret-key="aws-secret-key" -t aws-secrets-manager.region="aws-region"
+// -t gpc-secret-manager.enabled=true -t gpc-secret-manager.project-id="project-id" -t gpc-secret-manager.service-account-key="file:serviceaccount.json"
 //
 // +camel-k:trait=gcp-secret-manager.
 type Trait struct {
