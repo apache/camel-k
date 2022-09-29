@@ -43,7 +43,7 @@ type Trait struct {
 	// Enables automatic configuration of the trait.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The Project Id from Google Cloud
-	ProjectId string `property:"project-id,omitempty"`
+	ProjectID string `property:"project-id,omitempty"`
 	// The Path to a service account Key File to use secrets from Google Secret Manager
 	ServiceAccountKey string `property:"service-account-key,omitempty"`
 	// Define if we want to use the Default Instance approach for accessing the Google Secret Manager service
@@ -85,7 +85,7 @@ func (t *gcpSecretManagerTrait) Apply(environment *trait.Environment) error {
 	}
 
 	if environment.IntegrationInRunningPhases() {
-		environment.ApplicationProperties["camel.vault.gcp.projectId"] = t.ProjectId
+		environment.ApplicationProperties["camel.vault.gcp.projectId"] = t.ProjectID
 		environment.ApplicationProperties["camel.vault.gcp.serviceAccountKey"] = t.ServiceAccountKey
 		environment.ApplicationProperties["camel.vault.gcp.useDefaultInstance"] = strconv.FormatBool(*t.UseDefaultInstance)
 	}
