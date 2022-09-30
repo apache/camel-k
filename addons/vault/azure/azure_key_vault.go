@@ -35,7 +35,7 @@ import (
 // the following trait options:
 // -t azure-key-vault.enabled=true -t azure-key-vault.tenant-id="tenant-id" -t azure-key-vault.client-id="client-id" -t azure-key-vault.client-secret="client-secret" -t azure-key-vault.vault-name="vault-name"
 //
-// +camel-k:trait=azure-key-vault
+// +camel-k:trait=azure-key-vault.
 type Trait struct {
 	traitv1.Trait `property:",squash"`
 	// Enables automatic configuration of the trait.
