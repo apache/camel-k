@@ -250,10 +250,25 @@ func KamelInstallWithContext(ctx context.Context, operatorID string, namespace s
 		installArgs = []string{"install", "-n", namespace, "--operator-id", operatorID}
 	}
 
-	logLevel := os.Getenv("CAMEL_K_LOG_LEVEL")
+	logLevel := os.Getenv("CAMEL_K_TEST_LOG_LEVEL")
 	if len(logLevel) > 0 {
 		fmt.Printf("Setting log-level to %s\n", logLevel)
 		installArgs = append(installArgs, "--log-level", logLevel)
+	}
+
+	mvnCLIOptions := os.Getenv("CAMEL_K_TEST_MAVEN_CLI_OPTIONS")
+	if len(mvnCLIOptions) > 0 {
+		// Split the string by spaces
+		mvnCLIArr := strings.Split(mvnCLIOptions, " ")
+		for _, mc := range mvnCLIArr {
+			mc = strings.Trim(mc, " ")
+			if len(mc) == 0 {
+				continue
+			}
+
+			fmt.Printf("Adding maven cli option %s\n", mc)
+			installArgs = append(installArgs, "--maven-cli-option", mc)
+		}
 	}
 
 	installArgs = append(installArgs, args...)
@@ -324,7 +339,7 @@ func KamelWithContext(ctx context.Context, args ...string) *cobra.Command {
 	var c *cobra.Command
 	var err error
 
-	if os.Getenv("CAMEL_K_LOG_LEVEL") == "debug" {
+	if os.Getenv("CAMEL_K_TEST_LOG_LEVEL") == "debug" {
 		fmt.Printf("Executing kamel with command %+q\n", args)
 		fmt.Println("Printing stack for KamelWithContext")
 		debug.PrintStack()
@@ -472,7 +487,7 @@ func StructuredLogs(ns, podName string, options *corev1.PodLogOptions, ignorePar
 		err := json.Unmarshal([]byte(t), &entry)
 		if err != nil {
 			if ignoreParseErrors {
-				fmt.Printf("Warning: Ignoring parse error for logging line: '%s'\n", t)
+				fmt.Printf("Warning: Ignoring parse error for logging line: %q\n", t)
 				continue
 			} else {
 				msg := fmt.Sprintf("Unable to parse structured content: %s", t)

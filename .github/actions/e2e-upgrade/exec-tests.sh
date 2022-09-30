@@ -115,7 +115,10 @@ export KAMEL_INSTALL_OPERATOR_IMAGE_PULL_POLICY="Always"
 # Despite building a bundle we don't want it installed immediately so no OLM_INDEX_BUNDLE var
 
 # Configure test options
-export CAMEL_K_LOG_LEVEL="${LOG_LEVEL}"
+export CAMEL_K_TEST_LOG_LEVEL="${LOG_LEVEL}"
+if [ "${LOG_LEVEL}" == "debug" ]; then
+  export CAMEL_K_TEST_MAVEN_CLI_OPTIONS="-X ${CAMEL_K_TEST_MAVEN_CLI_OPTIONS}"
+fi
 export CAMEL_K_PREV_IIB=quay.io/operatorhubio/catalog:latest
 export CAMEL_K_NEW_IIB=${BUNDLE_INDEX_IMAGE}
 export CAMEL_K_PREV_UPGRADE_CHANNEL=${PREV_XY_CHANNEL}

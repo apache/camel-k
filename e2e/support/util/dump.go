@@ -256,7 +256,7 @@ func dumpLogs(ctx context.Context, c client.Client, prefix string, ns string, na
 		Container: container,
 	}
 
-	if os.Getenv("CAMEL_K_LOG_LEVEL") != "debug" {
+	if os.Getenv("CAMEL_K_TEST_LOG_LEVEL") != "debug" {
 		// If not in debug mode then curtail the dumping of log lines
 		lines := int64(50)
 		logOptions.TailLines = &lines
