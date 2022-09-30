@@ -127,7 +127,13 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		// KameletBinding promotion
 		destKameletBinding := o.editKameletBinding(sourceKameletBinding, sourceIntegration)
 
-		return o.replaceResource(destKameletBinding)
+		replaced, err := o.replaceResource(destKameletBinding)
+		if !replaced {
+			fmt.Fprintln(cmd.OutOrStdout(), `Promoted Integration "`+name+`" created`)
+		} else {
+			fmt.Fprintln(cmd.OutOrStdout(), `Promoted Integration "`+name+`" updated`)
+		}
+		return err
 	}
 	// Plain Integration promotion
 	destIntegration := o.editIntegration(sourceIntegration)
@@ -138,7 +144,13 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	return o.replaceResource(destIntegration)
+	replaced, err := o.replaceResource(destIntegration)
+	if !replaced {
+		fmt.Fprintln(cmd.OutOrStdout(), `Promoted Integration "`+name+`" created`)
+	} else {
+		fmt.Fprintln(cmd.OutOrStdout(), `Promoted Integration "`+name+`" updated`)
+	}
+	return err
 }
 
 func checkOpsCompatibility(cmd *cobra.Command, source, dest map[string]string) error {
@@ -450,7 +462,7 @@ func (o *promoteCmdOptions) editKameletBinding(kb *v1alpha1.KameletBinding, it *
 	return &dst
 }
 
-func (o *promoteCmdOptions) replaceResource(res k8sclient.Object) error {
+func (o *promoteCmdOptions) replaceResource(res k8sclient.Object) (bool, error) {
 	return kubernetes.ReplaceResource(o.Context, o._client, res)
 }
 
