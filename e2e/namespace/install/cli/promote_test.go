@@ -34,6 +34,8 @@ import (
 )
 
 func TestKamelCLIPromote(t *testing.T) {
+	one := int64(1)
+	two := int64(2)
 	// Dev environment namespace
 	WithNewTestNamespace(t, func(nsDev string) {
 		operatorDevID := "camel-k-cli-promote-dev"
@@ -53,6 +55,7 @@ func TestKamelCLIPromote(t *testing.T) {
 				"--config", "configmap:my-cm",
 				"--config", "secret:my-sec",
 			).Execute()).To(Succeed())
+			Eventually(IntegrationObservedGeneration(nsDev, "promote-route")).Should(Equal(&one))
 			Eventually(IntegrationPodPhase(nsDev, "promote-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(nsDev, "promote-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(nsDev, "promote-route"), TestTimeoutShort).Should(ContainSubstring("I am development configmap!"))
@@ -99,6 +102,7 @@ func TestKamelCLIPromote(t *testing.T) {
 
 			t.Run("plain integration promotion", func(t *testing.T) {
 				Expect(Kamel("promote", "-n", nsDev, "promote-route", "--to", nsProd).Execute()).To(Succeed())
+				Eventually(IntegrationObservedGeneration(nsProd, "promote-route")).Should(Equal(&one))
 				Eventually(IntegrationPodPhase(nsProd, "promote-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationConditionStatus(nsProd, "promote-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 				Eventually(IntegrationLogs(nsProd, "promote-route"), TestTimeoutShort).Should(ContainSubstring("I am production!"))
@@ -111,6 +115,8 @@ func TestKamelCLIPromote(t *testing.T) {
 				// We need to update the Integration CR in order the operator to restart it both in dev and prod envs
 				Expect(KamelRunWithID(operatorDevID, nsDev, "./files/promote-route-edited.groovy", "--name", "promote-route",
 					"--config", "configmap:my-cm").Execute()).To(Succeed())
+				// The generation has to be incremented
+				Eventually(IntegrationObservedGeneration(nsDev, "promote-route")).Should(Equal(&two))
 				Eventually(IntegrationPodPhase(nsDev, "promote-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationConditionStatus(nsDev, "promote-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 				Eventually(IntegrationLogs(nsDev, "promote-route"), TestTimeoutShort).Should(ContainSubstring("I am development configmap!"))
@@ -120,6 +126,8 @@ func TestKamelCLIPromote(t *testing.T) {
 				UpdatePlainTextConfigmap(nsProd, "my-cm", cmData)
 				// Promote the edited Integration
 				Expect(Kamel("promote", "-n", nsDev, "promote-route", "--to", nsProd).Execute()).To(Succeed())
+				// The generation has to be incremented also in prod
+				Eventually(IntegrationObservedGeneration(nsDev, "promote-route")).Should(Equal(&two))
 				Eventually(IntegrationPodPhase(nsProd, "promote-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationConditionStatus(nsProd, "promote-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 				Eventually(IntegrationLogs(nsProd, "promote-route"), TestTimeoutShort).Should(ContainSubstring("I am production, but I was updated!"))
