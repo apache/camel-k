@@ -99,6 +99,39 @@ traits:
     type: bool
     description: Define if we want to use the Default Credentials Provider chain as
       authentication method
+- name: azure-key-vault
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: 'The Azure Key Vault trait can be used to use secrets from Azure Key
+    Vault service The Azure Key Vault trait is disabled by default. For more information
+    about how to use secrets from Azure Key Vault component take a look at the components
+    docs: xref:components::azure-key-vault-component.adoc[Azure Key Vault component]
+    A sample execution of this trait, would require the following trait options: -t
+    azure-key-vault.enabled=true -t azure-key-vault.tenant-id="tenant-id" -t azure-key-vault.client-id="client-id"
+    -t azure-key-vault.client-secret="client-secret" -t azure-key-vault.vault-name="vault-name"'
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: auto
+    type: bool
+    description: Enables automatic configuration of the trait.
+  - name: tenant-id,omitempty
+    type: string
+    description: The Azure Tenant Id for accessing Key Vault
+  - name: client-id,omitempty
+    type: string
+    description: The Azure Client Id for accessing Key Vault
+  - name: client-secret,omitempty
+    type: string
+    description: The Azure Client Secret for accessing Key Vault
+  - name: vault-name,omitempty
+    type: string
+    description: The Azure Vault Name for accessing Key Vault
 - name: builder
   platform: true
   profiles:
