@@ -1877,7 +1877,8 @@ func BindKameletToWithErrorHandler(ns string, name string, annotations map[strin
 		if errorHandler != nil {
 			kb.Spec.ErrorHandler = asErrorHandlerSpec(errorHandler)
 		}
-		return kubernetes.ReplaceResource(TestContext, TestClient(), &kb)
+		_, err := kubernetes.ReplaceResource(TestContext, TestClient(), &kb)
+		return err
 	}
 }
 
