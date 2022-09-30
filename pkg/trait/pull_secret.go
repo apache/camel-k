@@ -109,7 +109,7 @@ func (t *pullSecretTrait) delegateImagePuller(e *Environment) error {
 	// Applying the RoleBinding directly because it's a resource in the operator namespace
 	// (different from the integration namespace when delegation is enabled).
 	rb := t.newImagePullerRoleBinding(e)
-	if err := kubernetes.ReplaceResource(e.Ctx, e.Client, rb); err != nil {
+	if _, err := kubernetes.ReplaceResource(e.Ctx, e.Client, rb); err != nil {
 		return errors.Wrap(err, "error during the creation of the system:image-puller delegating role binding")
 	}
 	return nil
