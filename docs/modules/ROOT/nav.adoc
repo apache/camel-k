@@ -53,6 +53,7 @@
 ** xref:traits:3scale.adoc[3scale]
 ** xref:traits:affinity.adoc[Affinity]
 ** xref:traits:aws-secrets-manager.adoc[Aws Secrets Manager]
+** xref:traits:azure-key-vault.adoc[Azure Key Vault]
 ** xref:traits:builder.adoc[Builder]
 ** xref:traits:camel.adoc[Camel]
 ** xref:traits:container.adoc[Container]
