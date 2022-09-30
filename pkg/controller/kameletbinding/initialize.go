@@ -55,7 +55,7 @@ func (action *initializeAction) Handle(ctx context.Context, kameletbinding *v1al
 		return nil, err
 	}
 
-	if err := kubernetes.ReplaceResource(ctx, action.client, it); err != nil {
+	if _, err := kubernetes.ReplaceResource(ctx, action.client, it); err != nil {
 		return nil, errors.Wrap(err, "could not create integration for kamelet binding")
 	}
 

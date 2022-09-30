@@ -113,7 +113,7 @@ func ObjectOrCollect(ctx context.Context, c client.Client, namespace string, col
 	}
 
 	if force {
-		if err := kubernetes.ReplaceResource(ctx, c, obj); err != nil {
+		if _, err := kubernetes.ReplaceResource(ctx, c, obj); err != nil {
 			return err
 		}
 		// For some resources, also reset the status

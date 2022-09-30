@@ -38,16 +38,18 @@ import (
 )
 
 // ReplaceResource allows to completely replace a resource on Kubernetes, taking care of immutable fields and resource versions.
-func ReplaceResource(ctx context.Context, c client.Client, res ctrl.Object) error {
+func ReplaceResource(ctx context.Context, c client.Client, res ctrl.Object) (bool, error) {
+	replaced := false
 	err := c.Create(ctx, res)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
+		replaced = true
 		existing, ok := res.DeepCopyObject().(ctrl.Object)
 		if !ok {
-			return fmt.Errorf("type assertion failed: %v", res.DeepCopyObject())
+			return replaced, fmt.Errorf("type assertion failed: %v", res.DeepCopyObject())
 		}
 		err = c.Get(ctx, ctrl.ObjectKeyFromObject(existing), existing)
 		if err != nil {
-			return err
+			return replaced, err
 		}
 		mapRequiredMeta(existing, res)
 		mapRequiredServiceData(existing, res)
@@ -56,9 +58,9 @@ func ReplaceResource(ctx context.Context, c client.Client, res ctrl.Object) erro
 		err = c.Update(ctx, res)
 	}
 	if err != nil {
-		return errors.Wrap(err, "could not create or replace "+findResourceDetails(res))
+		return replaced, errors.Wrap(err, "could not create or replace "+findResourceDetails(res))
 	}
-	return nil
+	return replaced, nil
 }
 
 func mapRequiredMeta(from ctrl.Object, to ctrl.Object) {

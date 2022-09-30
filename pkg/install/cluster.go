@@ -322,7 +322,8 @@ func installCRD(ctx context.Context, c client.Client, kind string, version strin
 		return nil
 	}
 
-	return kubernetes.ReplaceResource(ctx, c, crd)
+	_, err = kubernetes.ReplaceResource(ctx, c, crd)
+	return err
 }
 
 func isClusterRoleInstalled(ctx context.Context, c client.Client, name string) (bool, error) {

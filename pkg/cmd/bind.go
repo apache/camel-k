@@ -260,17 +260,12 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 		return showOutput(cmd, &binding, o.OutputFormat, client.GetScheme())
 	}
 
-	existed := false
-	err = client.Create(o.Context, &binding)
-	if err != nil && k8serrors.IsAlreadyExists(err) {
-		existed = true
-		err = kubernetes.ReplaceResource(o.Context, client, &binding)
-	}
+	replaced, err := kubernetes.ReplaceResource(o.Context, client, &binding)
 	if err != nil {
 		return err
 	}
 
-	if !existed {
+	if !replaced {
 		fmt.Fprintln(cmd.OutOrStdout(), `kamelet binding "`+name+`" created`)
 	} else {
 		fmt.Fprintln(cmd.OutOrStdout(), `kamelet binding "`+name+`" updated`)
