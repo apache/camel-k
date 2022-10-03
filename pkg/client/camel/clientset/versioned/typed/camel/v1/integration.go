@@ -51,6 +51,7 @@ type IntegrationInterface interface {
 	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *v1.Integration, err error)
 	GetScale(ctx context.Context, integrationName string, options metav1.GetOptions) (*autoscalingv1.Scale, error)
 	UpdateScale(ctx context.Context, integrationName string, scale *autoscalingv1.Scale, opts metav1.UpdateOptions) (*autoscalingv1.Scale, error)
+	PatchScale(ctx context.Context, integrationName string, pt types.PatchType, data []byte, opts metav1.PatchOptions) (result *autoscalingv1.Scale, err error)
 
 	IntegrationExpansion
 }
@@ -223,6 +224,21 @@ func (c *integrations) UpdateScale(ctx context.Context, integrationName string, 
 		SubResource("scale").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(scale).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// PatchScale takes the top resource name and the representation of a scale and patches it. Returns the server's representation of the scale, and an error, if there is any.
+func (c *integrations) PatchScale(ctx context.Context, integrationName string, pt types.PatchType, data []byte, opts metav1.PatchOptions) (result *autoscalingv1.Scale, err error) {
+	result = &autoscalingv1.Scale{}
+	err = c.client.Patch(pt).
+		Namespace(c.ns).
+		Resource("integrations").
+		Name(integrationName).
+		SubResource("scale").
+		VersionedParams(&opts, scheme.ParameterCodec).
+		Body(data).
 		Do(ctx).
 		Into(result)
 	return
