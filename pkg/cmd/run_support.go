@@ -28,6 +28,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"time"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
@@ -176,7 +177,10 @@ func fromMapToProperties(data interface{}, toString func(reflect.Value) string, 
 
 // downloadDependency downloads the file located at the given URL into a temporary folder and returns the local path to the generated temporary file.
 func downloadDependency(ctx context.Context, url url.URL) (string, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url.String(), nil)
+	tctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(tctx, http.MethodGet, url.String(), nil)
 	if err != nil {
 		return "", err
 	}
