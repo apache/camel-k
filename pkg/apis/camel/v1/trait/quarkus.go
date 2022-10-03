@@ -36,11 +36,11 @@ type QuarkusTrait struct {
 	// The order influences the resolution of the current kit for the integration.
 	// The kit corresponding to the first package type will be assigned to the
 	// integration in case no existing kit that matches the integration exists.
-	// +kubebuilder:validation:Enum=fast-jar;native
 	PackageTypes []QuarkusPackageType `property:"package-type" json:"packageTypes,omitempty"`
 }
 
 // Quarkus package type.
+// +kubebuilder:validation:Enum=fast-jar;native
 type QuarkusPackageType string
 
 const (
