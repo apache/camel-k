@@ -23,6 +23,7 @@ limitations under the License.
 package common
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -95,9 +96,14 @@ func TestIntegrationScale(t *testing.T) {
 			Expect(integrationScale.Spec.Replicas).To(BeNumerically("==", 2))
 			Expect(integrationScale.Status.Replicas).To(BeNumerically("==", 2))
 
-			// Setter
-			integrationScale.Spec.Replicas = 1
-			integrationScale, err = camel.CamelV1().Integrations(ns).UpdateScale(TestContext, name, integrationScale, metav1.UpdateOptions{})
+			payload := []PatchUInt32Value{{
+				Op:    "replace",
+				Path:  "/spec/replicas",
+				Value: 1,
+			}}
+			payloadBytes, _ := json.Marshal(payload)
+
+			integrationScale, err = camel.CamelV1().Integrations(ns).PatchScale(TestContext, name, types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
 			Expect(err).To(BeNil())
 
 			// Check the readiness condition is still truthy as down-scaling
