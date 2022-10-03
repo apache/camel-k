@@ -185,11 +185,11 @@ spec:
                           corresponding to the first package type will be assigned
                           to the integration in case no existing kit that matches
                           the integration exists.
-                        enum:
-                        - fast-jar
-                        - native
                         items:
                           description: Quarkus package type.
+                          enum:
+                          - fast-jar
+                          - native
                           type: string
                         type: array
                     type: object
