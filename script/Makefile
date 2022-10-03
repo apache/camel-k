@@ -207,7 +207,7 @@ codegen-tools-install:
 	@echo "sigs.k8s.io/controller-tools/cmd/controller-gen with version $(CONTROLLER_GEN_VERSION)"
 	go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION)
 
-build: test build-resources build-kamel build-compile-integration-tests build-submodules
+build: build-resources test build-kamel build-compile-integration-tests build-submodules
 
 ci-build: clean codegen set-module-version set-version check-licenses dir-licenses build-kamel cross-compile
 
