@@ -97,8 +97,8 @@ traits:
     description: The AWS Region to use
   - name: use-default-credentials-provider,omitempty
     type: bool
-    description: Define if we want to use the Default Credentials Provider chain as
-      authentication method
+    description: 'The adapter-specific policy to use when filling the cache (use:
+      minimizing / maximizing). Check the component documentation if unsure'
 - name: azure-key-vault
   platform: false
   profiles:
@@ -132,7 +132,6 @@ traits:
   - name: vault-name,omitempty
     type: string
     description: The Azure Vault Name for accessing Key Vault
->>>>>>> 19075447 (Added Support for Azure Key Vault addon)
 - name: builder
   platform: true
   profiles:
