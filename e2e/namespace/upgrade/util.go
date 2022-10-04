@@ -145,7 +145,7 @@ func catalogSourcePodRunning(ns, csName string) error {
 
 	for i := 1; i < 5; i++ {
 		csPod := podFunc()
-		if csPod.Status.Phase == "Running" {
+		if csPod != nil && csPod.Status.Phase == "Running" {
 			return nil // Pod good to go
 		}
 
