@@ -230,6 +230,13 @@ test: do-build
 	cd pkg/client/camel && go test ./...
 	cd pkg/kamelet/repository && go test ./...
 
+test-fmt: do-build
+	@echo "####### Running unit test..."
+	go test -v ./... -json 2>&1 | gotestfmt
+	cd pkg/apis/camel && go test -v ./... -json 2>&1 | gotestfmt
+	cd pkg/client/camel && go test -v ./... -json 2>&1 | gotestfmt
+	cd pkg/kamelet/repository && go test -v ./... -json 2>&1 | gotestfmt
+
 #
 # Integration tests are located either as global or namespace
 # global:    tests can be executed using a pre-installed global operator
