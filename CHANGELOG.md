@@ -7,6 +7,8 @@
 **Closed issues:**
 
 - Cannot build the project, likely `gotestfmt` [\#3677](https://github.com/apache/camel-k/issues/3677)
+- Add an info after `kamel promote` [\#3676](https://github.com/apache/camel-k/issues/3676)
+- Allow continuous deployment for `kamel promote` [\#3673](https://github.com/apache/camel-k/issues/3673)
 - Can't run KameletBinding with the native mode [\#3671](https://github.com/apache/camel-k/issues/3671)
 - OLM installtion needs to set KAMEL\_OPERATOR\_ID EnvVar [\#3657](https://github.com/apache/camel-k/issues/3657)
 - Provide documentation for LTS support [\#3647](https://github.com/apache/camel-k/issues/3647)
@@ -16,6 +18,7 @@
 - Run E2E test before nightly releases [\#3572](https://github.com/apache/camel-k/issues/3572)
 - `kamel promote` documentation [\#3375](https://github.com/apache/camel-k/issues/3375)
 - Camel route terminates when route takes longer than 5 minutes [\#3335](https://github.com/apache/camel-k/issues/3335)
+- \[E2E\] Split integration test suite for kubernetes and openshift CI workflows [\#3210](https://github.com/apache/camel-k/issues/3210)
 - \[regression\] Cannot provide 2 resources with 1.8.0 and 1.8.1 [\#3077](https://github.com/apache/camel-k/issues/3077)
 
 ## [1.10.1-nightly](https://github.com/apache/camel-k/tree/1.10.1-nightly) (2022-09-20)
