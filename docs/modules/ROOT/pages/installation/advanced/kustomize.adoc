@@ -1,0 +1,100 @@
+[[kustomize]]
+= Installing with Kustomize
+
+https://kustomize.io[Kustomize] provides a declarative approach to the configuration customization of a
+Camel-K installation. Kustomize works either with a standalone executable or as a built-in to ``kubectl``.
+
+== File Location
+
+The https://github.com/apache/camel-k/tree/main/install[install] directory provides the configuration
+files for use with Kustomize. The following sub-directories are named to describe the purpose of their
+respective kustomization:
+
+* *setup-cluster*: install the cluster-level resources, inc. the ClusterResourceDefinitions
+* *setup*: install the roles and permissions required by the camel-k operator into the current namespace
+* *operator*: install the camel-k operator into the current namespace of a cluster
+* *platform*: install an instance of the camel-k integration-platform into the current namespace of a cluster
+* *example*: install an example integration into the current namespace of a cluster
+
+== Using kubectl
+
+The kustomization resources can be applied directly to a cluster using ``kubectl``, eg.
+ `kubectl -k setup-cluster`
+
+Due to its declarative nature, it is expected that the configuration files would be edited to suit the
+custom implementation. For example, when creating an integration-platform:
+
+* ``kustomization.yaml`` references configuration in ``config/samples/patch-integration-platform.yaml``
+* Edit this file according to installation requirements
+* Apply the resources by executing ``kubectl -k platform``
+
+== Using the Makefile
+
+For convenience, a Makefile is included in the install directory, providing a frontend interface for
+the most common installation procedures. By incorporating environment variables, it is able to update
+some of the configuration automatically before applying it to the cluster using ``kubectl``.
+
+The environment variable ``DRY_RUN`` can be used with a value of ``true`` to only display the prepared
+resources, allowing the user to check the prospective installation.
+
+A recent version of ``make`` is a pre-requisite and a familiarity with using
+https://www.gnu.org/software/make/manual/make.html[Makefiles] would be beneficial.
+
+The Makefile rules are described by executing ``make`` or ``make help``, eg.
+
+....
+Usage: make <PARAM1=val1 PARAM2=val2> <target>
+
+Available targets are:
+
+setup-cluster   Setup the cluster installation by installing crds and cluster roles.
+
+                Cluster-admin privileges are required.
+
+                NAMESPACE: Sets the namespace for the resources
+                PLATFORM:  Override the discovered platform, if required
+                DRY_RUN:   If 'true', prints the resources to be applied instead of applying them
+
+
+setup           Setup the installation by installing roles and granting privileges for the installing operator.
+
+                Calls setup-cluster
+                Cluster-admin privileges are required.
+
+                NAMESPACE: Sets the namespace for the resources
+                GLOBAL:    Converts all roles & bindings to cluster-level [true|false]
+                PLATFORM:  Override the discovered platform, if required
+                DRY_RUN:     If 'true', prints the resources to be applied instead of applying them
+
+operator        Install the operator deployment and related resources
+
+                Cluster-admin privileges are required.
+
+                NAMESPACE:          Set the namespace to install the operator into
+                PLATFORM:           Override the discovered platform, if required
+                GLOBAL:             Sets the operator to watch all namespaces for custom resources [true|false]
+                CUSTOM_IMAGE:       Set a custom operator image name
+                CUSTOM_VERSION:     Set a custom operator image version/tag
+                ALWAYS_PULL_IMAGES: Sets whether to always pull the operator image [true|false]
+                MONITORING:         Adds the prometheus monitoring resources
+                MONITORING_PORT:    Set a custom monitoring port
+                HEALTH_PORT:        Set a custom health port
+                LOGGING_LEVEL:      Set the level of logging [info|debug]
+                DRY_RUN:            Prints the resources to be applied instead of applying them
+
+
+platform        Install the integration platform
+
+                Cluster-admin privileges are required.
+
+                NAMESPACE: Set the namespace to install the operator into
+                PLATFORM:  Override the discovered platform, if required
+                DRY_RUN:   Prints the resources to be applied instead of applying them [true,false]
+
+
+example         Installs the example integration
+
+                NAMESPACE: Set the namespace to install the example into
+                PLATFORM:  Override the discovered platform, if required
+                DRY_RUN:   Prints the resources to be applied instead of applying them [true, false]
+....
