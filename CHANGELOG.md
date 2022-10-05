@@ -17,6 +17,7 @@
 - Nightly release 1.9.x missing tests [\#3613](https://github.com/apache/camel-k/issues/3613)
 - Run E2E test before nightly releases [\#3572](https://github.com/apache/camel-k/issues/3572)
 - `kamel promote` documentation [\#3375](https://github.com/apache/camel-k/issues/3375)
+- Kamel install error on Minikube [\#3348](https://github.com/apache/camel-k/issues/3348)
 - Camel route terminates when route takes longer than 5 minutes [\#3335](https://github.com/apache/camel-k/issues/3335)
 - \[E2E\] Split integration test suite for kubernetes and openshift CI workflows [\#3210](https://github.com/apache/camel-k/issues/3210)
 - \[regression\] Cannot provide 2 resources with 1.8.0 and 1.8.1 [\#3077](https://github.com/apache/camel-k/issues/3077)
