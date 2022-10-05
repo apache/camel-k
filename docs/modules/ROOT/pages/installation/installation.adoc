@@ -52,6 +52,12 @@ You're now ready to xref:running/running.adoc[run some integrations].
 Camel K is also available in Helm Hub for installation.
 Follow the instructions on the https://hub.helm.sh/charts/camel-k/camel-k[Camel K] page for more information.
 
+[[kustomize]]
+== Installation via Kustomize
+
+Camel K can be installed using https://kustomize.io[Kustomize], providing an interface for configuring more advanced features.
+Please go to xref:installation/advanced/kustomize.adoc[this page] for more information.
+
 [[advanced]]
 == Advanced configuration
 
