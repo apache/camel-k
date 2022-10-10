@@ -23,6 +23,7 @@ import (
 	"regexp"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	platformutil "github.com/apache/camel-k/pkg/platform"
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -33,7 +34,9 @@ var kameletRepositoryURIRegexp = regexp.MustCompile(`^github:[^/]+/[^/]+((/[^/]+
 
 func newKameletAddRepoCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kameletAddRepoCommandOptions) {
 	options := kameletAddRepoCommandOptions{
-		RootCmdOptions: rootCmdOptions,
+		kameletUpdateRepoCommandOptions: &kameletUpdateRepoCommandOptions{
+			RootCmdOptions: rootCmdOptions,
+		},
 	}
 
 	cmd := cobra.Command{
@@ -49,22 +52,23 @@ func newKameletAddRepoCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kame
 		},
 	}
 
-	cmd.Flags().StringP("operator-id", "x", "camel-k", "Id of the Operator to update.")
+	cmd.Flags().StringP("operator-id", "x", "", "Id of the Operator to update. If not set, the active primary Integration Platform is updated.")
 
 	return &cmd, &options
 }
 
-type kameletAddRepoCommandOptions struct {
+type kameletUpdateRepoCommandOptions struct {
 	*RootCmdOptions
 	OperatorID string `mapstructure:"operator-id" yaml:",omitempty"`
+}
+
+type kameletAddRepoCommandOptions struct {
+	*kameletUpdateRepoCommandOptions
 }
 
 func (o *kameletAddRepoCommandOptions) validate(args []string) error {
 	if len(args) == 0 {
 		return errors.New("at least one Kamelet repository is expected")
-	}
-	if o.OperatorID == "" {
-		return fmt.Errorf("cannot use empty operator id")
 	}
 	return nil
 }
@@ -74,18 +78,16 @@ func (o *kameletAddRepoCommandOptions) run(cmd *cobra.Command, args []string) er
 	if err != nil {
 		return err
 	}
-	key := client.ObjectKey{
-		Namespace: o.Namespace,
-		Name:      o.OperatorID,
+	var platform *v1.IntegrationPlatform
+	if o.OperatorID == "" {
+		platform, err = o.findIntegrationPlatorm(cmd, c)
+	} else {
+		platform, err = o.getIntegrationPlatorm(cmd, c)
 	}
-	platform := v1.IntegrationPlatform{}
-	if err := c.Get(o.Context, key, &platform); err != nil {
-		if k8serrors.IsNotFound(err) {
-			// IntegrationPlatform may be in the operator namespace, but we currently don't have a way to determine it: we just warn
-			fmt.Fprintf(cmd.ErrOrStderr(), "Warning: IntegrationPlatform %q not found in namespace %q\n", key.Name, key.Namespace)
-			return nil
-		}
+	if err != nil {
 		return err
+	} else if platform == nil {
+		return nil
 	}
 	for _, uri := range args {
 		if err := checkURI(uri, platform.Spec.Kamelet.Repositories); err != nil {
@@ -95,7 +97,41 @@ func (o *kameletAddRepoCommandOptions) run(cmd *cobra.Command, args []string) er
 			URI: uri,
 		})
 	}
-	return c.Update(o.Context, &platform)
+	return c.Update(o.Context, platform)
+}
+
+// getIntegrationPlatorm gives the integration plaform matching with the operator id in the provided namespace.
+func (o *kameletUpdateRepoCommandOptions) getIntegrationPlatorm(cmd *cobra.Command, c client.Client) (*v1.IntegrationPlatform, error) {
+	key := client.ObjectKey{
+		Namespace: o.Namespace,
+		Name:      o.OperatorID,
+	}
+	platform := v1.IntegrationPlatform{}
+	if err := c.Get(o.Context, key, &platform); err != nil {
+		if k8serrors.IsNotFound(err) {
+			// IntegrationPlatform may be in the operator namespace, but we currently don't have a way to determine it: we just warn
+			fmt.Fprintf(cmd.ErrOrStderr(), "Warning: IntegrationPlatform %q not found in namespace %q\n", key.Name, key.Namespace)
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &platform, nil
+}
+
+// findIntegrationPlatorm gives the primary integration plaform that could be found in the provided namespace.
+func (o *kameletUpdateRepoCommandOptions) findIntegrationPlatorm(cmd *cobra.Command, c client.Client) (*v1.IntegrationPlatform, error) {
+	platforms, err := platformutil.ListPrimaryPlatforms(o.Context, c, o.Namespace)
+	if err != nil {
+		return nil, err
+	}
+	for _, p := range platforms.Items {
+		p := p // pin
+		if platformutil.IsActive(&p) {
+			return &p, nil
+		}
+	}
+	fmt.Fprintf(cmd.ErrOrStderr(), "Warning: No active primary IntegrationPlatform could be found in namespace %q\n", o.Namespace)
+	return nil, nil
 }
 
 func checkURI(uri string, repositories []v1.IntegrationPlatformKameletRepositorySpec) error {
