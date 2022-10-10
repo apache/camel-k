@@ -850,6 +850,24 @@ func IntegrationCronJob(ns string, name string) func() *batchv1.CronJob {
 	}
 }
 
+func Integrations(ns string) func() *v1.IntegrationList {
+	return func() *v1.IntegrationList {
+		lst := v1.NewIntegrationList()
+		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+			failTest(err)
+		}
+
+		return &lst
+	}
+}
+
+func NumIntegrations(ns string) func() int {
+	return func() int {
+		lst := Integrations(ns)()
+		return len(lst.Items)
+	}
+}
+
 func Integration(ns string, name string) func() *v1.Integration {
 	return func() *v1.Integration {
 		it := v1.NewIntegration(ns, name)
@@ -1165,6 +1183,21 @@ func DeleteKits(ns string) error {
 	}
 
 	return nil
+}
+
+func DeleteIntegrations(ns string) func() (int, error) {
+	return func() (int, error) {
+		integrations := Integrations(ns)()
+		if len(integrations.Items) == 0 {
+			return 0, nil
+		}
+
+		if err := Kamel("delete", "--all", "-n", ns).Execute(); err != nil {
+			return 0, err
+		}
+
+		return NumIntegrations(ns)(), nil
+	}
 }
 
 func OperatorImage(ns string) func() string {
