@@ -23,7 +23,6 @@ limitations under the License.
 package common
 
 import (
-	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -32,26 +31,18 @@ import (
 	. "github.com/apache/camel-k/e2e/support"
 )
 
-/*
- * This seems to be problematic in a global context
- * See https://github.com/apache/camel-k/issues/3667 for details
- */
 func TestKameletClasspathLoading(t *testing.T) {
-	if os.Getenv("CAMEL_K_TEST_SKIP_PROBLEMATIC") == "true" {
-		t.Skip("WARNING: Test marked as problematic ... skipping")
-	}
 
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-kamelet"
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
-		kameletName := "timer-source"
-		removeKamelet(kameletName, ns)
-
-		Eventually(Kamelet(kameletName, ns)).Should(BeNil())
-
 		// Basic
 		t.Run("test basic case", func(t *testing.T) {
+
+			kameletName := "timer-source"
+			removeKamelet(kameletName, ns)
+			Eventually(Kamelet(kameletName, ns)).Should(BeNil())
 
 			Expect(KamelRunWithID(operatorID, ns, "files/TimerKameletIntegration.java", "-t", "kamelets.enabled=false",
 				"--resource", "file:files/timer-source.kamelet.yaml@/kamelets/timer-source.kamelet.yaml",
@@ -62,21 +53,25 @@ func TestKameletClasspathLoading(t *testing.T) {
 			Eventually(IntegrationPodPhase(ns, "timer-kamelet-integration"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
 			Eventually(IntegrationLogs(ns, "timer-kamelet-integration")).Should(ContainSubstring("important message"))
-
-			// Cleanup
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
 
-		// Custom repo
-		t.Run("test custom Kamelet repository", func(t *testing.T) {
+		// Custom repo without operator ID
+		t.Run("test custom Kamelet repository without operator ID", func(t *testing.T) {
+
+			kameletName := "timer-custom-source"
+			removeKamelet(kameletName, ns)
+			Eventually(Kamelet(kameletName, ns)).Should(BeNil())
 
 			// Add the custom repository
-			Expect(Kamel("kamelet", "add-repo", "github:apache/camel-k/e2e/global/common/files/kamelets", "-n", ns, "-x", operatorID).Execute()).To(Succeed())
+			Expect(Kamel("kamelet", "add-repo", "github:apache/camel-k/e2e/global/common/files/kamelets", "-n", ns).Execute()).To(Succeed())
 
 			Expect(KamelRunWithID(operatorID, ns, "files/TimerCustomKameletIntegration.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "timer-custom-kamelet-integration"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
 			Eventually(IntegrationLogs(ns, "timer-custom-kamelet-integration")).Should(ContainSubstring("great message"))
+
+			// Remove the custom repository
+			Expect(Kamel("kamelet", "remove-repo", "github:apache/camel-k/e2e/global/common/files/kamelets", "-n", ns).Execute()).To(Succeed())
 		})
 	})
 }
