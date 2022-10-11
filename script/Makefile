@@ -220,7 +220,7 @@ endif
 
 gotestfmt-install:
 ifeq (, $(shell command -v gotestfmt 2> /dev/null))
-	go install github.com/haveyoudebuggedit/gotestfmt/v2/cmd/gotestfmt@latest
+	go install github.com/gotesttools/gotestfmt/v2/cmd/gotestfmt@latest
 endif
 
 test: do-build
