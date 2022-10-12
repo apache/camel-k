@@ -23,6 +23,7 @@ limitations under the License.
 package common
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -33,8 +34,8 @@ import (
 
 func TestKameletFromCustomRepository(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		operatorID := operatorID(ns)
-		installWithID(ns)
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		kameletName := "timer-custom-source"
 		removeKamelet(kameletName, ns)
