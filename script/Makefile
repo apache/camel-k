@@ -192,20 +192,18 @@ generate: codegen-tools-install
 	./script/gen_client.sh
 	./script/gen_crd.sh
 	./script/gen_doc.sh
-	cd pkg/apis/camel && $(shell go env GOPATH)/bin/controller-gen paths="./..." object
-	cd addons/keda/duck && $(shell go env GOPATH)/bin/controller-gen paths="./..." object
-	cd addons/strimzi/duck && $(shell go env GOPATH)/bin/controller-gen paths="./..." object
+	cd pkg/apis/camel && $(CONTROLLER_GEN) paths="./..." object
+	cd addons/keda/duck && $(CONTROLLER_GEN) paths="./..." object
+	cd addons/strimzi/duck && $(CONTROLLER_GEN) paths="./..." object
 	./script/gen_client_strimzi.sh
 
-codegen-tools-install:
+codegen-tools-install: controller-gen
 	@# We must force the installation to make sure we are using the correct version
 	@# Note: as there is no --version in the tools, we cannot rely on cached local versions
 	@echo "Installing k8s.io/code-generator tools with version $(CODEGEN_VERSION)"
 	go install k8s.io/code-generator/cmd/client-gen@$(CODEGEN_VERSION)
 	go install k8s.io/code-generator/cmd/lister-gen@$(CODEGEN_VERSION)
 	go install k8s.io/code-generator/cmd/informer-gen@$(CODEGEN_VERSION)
-	@echo "sigs.k8s.io/controller-tools/cmd/controller-gen with version $(CONTROLLER_GEN_VERSION)"
-	go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION)
 
 build: build-resources test build-kamel build-compile-integration-tests build-submodules
 
@@ -512,9 +510,24 @@ install-minikube:
 get-staging-repo:
 	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
 
-.PHONY: do-build build build-kamel build-resources dep detect-os codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-keda generate-strimzi
-.PHONY: controller-gen kubectl kustomize operator-sdk
-.PHONY: kubectl kustomize operator-sdk opm
+.PHONY: do-build build build-kamel build-resources dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-keda generate-strimzi
+.PHONY: controller-gen kubectl kustomize operator-sdk opm
+
+# find or download controller-gen if necessary
+controller-gen:
+ifeq (, $(shell command -v controller-gen 2> /dev/null))
+	@{ \
+	set -e ;\
+	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$CONTROLLER_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION) ;\
+	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
+	}
+CONTROLLER_GEN=$(GOBIN)/controller-gen
+else
+CONTROLLER_GEN=$(shell command -v controller-gen 2> /dev/null)
+endif
 
 kubectl:
 ifeq (, $(shell command -v kubectl 2> /dev/null))
@@ -618,12 +631,12 @@ pre-bundle:
 	@sed -i 's/^  name: .*.\(v.*\)/  name: $(CSV_NAME)/' $(CSV_PATH)
 	@sed -i 's/^  displayName: .*/  displayName: $(CSV_DISPLAY_NAME)/' $(CSV_PATH)
 	@sed -i 's/^  version: .*/  version: $(CSV_VERSION)/' $(CSV_PATH)
-	@if grep -q replaces config/manifests/bases/camel-k.clusterserviceversion.yaml; \
+	@if grep -q replaces $(CSV_PATH); \
 		then sed -i 's/^  replaces: .*/  replaces: $(CSV_REPLACES)/' $(CSV_PATH); \
 		else sed -i '/  version: ${CSV_VERSION}/a \ \ replaces: $(CSV_REPLACES)' $(CSV_PATH); \
 	fi
 
-bundle: set-version generate-crd $(BUNDLE_CAMEL_APIS) kustomize operator-sdk pre-bundle
+bundle: set-version generate-crd kustomize operator-sdk pre-bundle $(BUNDLE_CAMEL_APIS)
 	@# Display BUNDLE_METADATA_OPTS for debugging
 	$(info BUNDLE_METADATA_OPTS=$(BUNDLE_METADATA_OPTS))
 	@# Sets the operator image to the preferred image:tag
