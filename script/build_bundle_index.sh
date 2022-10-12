@@ -11,6 +11,7 @@ check_env_var "BUNDLE_INDEX" ${BUNDLE_INDEX}
 check_env_var "INDEX_DIR" ${INDEX_DIR}
 check_env_var "PACKAGE" ${PACKAGE}
 check_env_var "OPM" ${OPM}
+check_env_var "YQ" ${YQ}
 check_env_var "BUNDLE_IMAGE" ${BUNDLE_IMAGE}
 check_env_var "CSV_NAME" ${CSV_NAME}
 check_env_var "CSV_REPLACES" ${CSV_REPLACES}
@@ -80,7 +81,7 @@ fi
 #
 # Extract the camel-k channels
 #
-yq eval ". | select(.package == \"${PACKAGE}\" and .schema == \"olm.channel\")" ${INDEX_BASE_YAML} > ${CHANNELS_YAML}
+${YQ} eval ". | select(.package == \"${PACKAGE}\" and .schema == \"olm.channel\")" ${INDEX_BASE_YAML} > ${CHANNELS_YAML}
 if [ $? != 0 ] || [ ! -f "${CHANNELS_YAML}" ]; then
   echo "ERROR: Failed to extract camel-k entries from bundle catalog"
   exit 1
@@ -89,7 +90,7 @@ fi
 #
 # Filter out the channels in the bundles file
 #
-yq -i eval ". | select(.package != \"${PACKAGE}\" or .schema != \"olm.channel\")" ${INDEX_BASE_YAML}
+${YQ} -i eval ". | select(.package != \"${PACKAGE}\" or .schema != \"olm.channel\")" ${INDEX_BASE_YAML}
 if [ $? != 0 ]; then
   echo "ERROR: Failed to remove camel-k channel entries from bundles catalog"
   exit 1
@@ -100,11 +101,11 @@ fi
 #
 IFS=','
 #Read the split words into an array based on comma delimiter
-read -a CHANNEL_ARR <<< "${CHANNELS}"
+read -r -a CHANNEL_ARR <<< "${CHANNELS}"
 
 for channel in "${CHANNEL_ARR[@]}";
 do
-  channel_props=$(yq eval ". | select(.name == \"${channel}\")" ${CHANNELS_YAML})
+  channel_props=$(${YQ} eval ". | select(.name == \"${channel}\")" ${CHANNELS_YAML})
 
   entry="{ \"name\": \"${CSV_NAME}\""
   if [ -n "${CSV_REPLACES}" ]; then
@@ -123,8 +124,8 @@ do
     object="{ \"entries\": [${entry}], \"name\": \"${channel}\", \"package\": \"${PACKAGE}\", \"schema\": \"olm.channel\" }"
 
     channel_file=$(mktemp ${channel}-channel-XXX.yaml)
-    trap "rm -f ${channel_file}" EXIT
-    yq -n eval "${object}" > ${channel_file}
+    trap 'rm -f ${channel_file}' EXIT
+    ${YQ} -n eval "${object}" > ${channel_file}
 
     echo "---" >> ${CHANNELS_YAML}
     cat ${channel_file} >> ${CHANNELS_YAML}
@@ -133,7 +134,7 @@ do
     # Channel already exists so insert entry
     #
     echo "Inserting channel ${channel} ..."
-    yq -i eval "(. | select(.name == \"${channel}\") | .entries) += ${entry}" ${CHANNELS_YAML}
+    ${YQ} -i eval "(. | select(.name == \"${channel}\") | .entries) += ${entry}" ${CHANNELS_YAML}
   fi
 done
 

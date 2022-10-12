@@ -565,6 +565,14 @@ else
 OPM=$(shell command -v opm 2> /dev/null)
 endif
 
+yq:
+ifeq (, $(shell command -v yq 2> /dev/null))
+	@GO111MODULE=on go install github.com/mikefarah/yq/v3
+YQ=$(GOBIN)/yq
+else
+YQ=$(shell command -v yq 2> /dev/null)
+endif
+
 .PHONY: generate-crd $(BUNDLE_CAMEL_APIS) pre-bundle bundle bundle-build
 
 # - Have to copy pkg/apis since it is a module in its own right
@@ -646,8 +654,8 @@ bundle-push: bundle-build
 #
 # Builds a test catalog index for installing the operator via an OLM
 #
-bundle-index: opm
-	BUNDLE_INDEX=$(BUNDLE_INDEX) INDEX_DIR=$(INDEX_DIR) PACKAGE=$(PACKAGE) \
+bundle-index: opm yq
+	BUNDLE_INDEX=$(BUNDLE_INDEX) INDEX_DIR=$(INDEX_DIR) PACKAGE=$(PACKAGE) YQ=$(YQ) \
 	OPM=$(OPM) BUNDLE_IMAGE=$(BUNDLE_IMAGE_NAME):$(CUSTOM_VERSION) CSV_NAME=$(CSV_PRODUCTION_NAME) \
 	CSV_SKIPS=$(CSV_SKIP_RANGE) CSV_REPLACES=$(CSV_REPLACES) CHANNELS="$(CHANNELS)" \
 	./script/build_bundle_index.sh
