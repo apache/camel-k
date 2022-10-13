@@ -28,6 +28,7 @@ operator:
   resources: {}
   securityContext: {}
   tolerations: []
+  logLevel: "info"
 
 platform:
   build:
