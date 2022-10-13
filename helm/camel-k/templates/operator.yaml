@@ -50,6 +50,8 @@ spec:
               {{- else }}
               value: ""
               {{- end }}
+            - name: LOG_LEVEL
+              value: {{ .Values.operator.logLevel }}
             - name: OPERATOR_NAME
               value: camel-k
             - name: POD_NAME
