@@ -6,7 +6,10 @@
 
 **Closed issues:**
 
+- E2E native flaky tests [\#3726](https://github.com/apache/camel-k/issues/3726)
 - The --add-repo switch fails with a global operator [\#3667](https://github.com/apache/camel-k/issues/3667)
+- Should `make bundle` update kustomization.yaml? [\#3606](https://github.com/apache/camel-k/issues/3606)
+- Release 1.10.1 [\#3605](https://github.com/apache/camel-k/issues/3605)
 
 ## [v1.10.1](https://github.com/apache/camel-k/tree/v1.10.1) (2022-10-10)
 
