@@ -141,7 +141,7 @@ func catalogSourcePod(ns, csName string) func() *corev1.Pod {
 }
 
 func catalogSourcePodRunning(ns, csName string) error {
-	podFunc := catalogSourcePod(ns, installCatalogSourceName)
+	podFunc := catalogSourcePod(ns, csName)
 
 	for i := 1; i < 5; i++ {
 		csPod := podFunc()
