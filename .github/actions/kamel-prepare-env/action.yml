@@ -79,9 +79,12 @@ runs:
       if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       run: |
         # reinstall kustomize to be always on the same version
-        if [ $(which kustomize) == "0" ]; then
+        set +e
+        $(which kustomize &> /dev/null)
+        if [ "$?" == "0" ]; then
           ${{ env.SUDO }} rm $(which kustomize)
         fi
+        set -e
         make kustomize
 
         # Add kustomize to PATH
