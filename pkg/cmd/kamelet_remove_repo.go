@@ -68,9 +68,9 @@ func (o *kameletRemoveRepoCommandOptions) run(cmd *cobra.Command, args []string)
 	}
 	var platform *v1.IntegrationPlatform
 	if o.OperatorID == "" {
-		platform, err = o.findIntegrationPlatorm(cmd, c)
+		platform, err = o.findIntegrationPlatform(cmd, c)
 	} else {
-		platform, err = o.getIntegrationPlatorm(cmd, c)
+		platform, err = o.getIntegrationPlatform(cmd, c)
 	}
 	if err != nil {
 		return err
