@@ -80,9 +80,9 @@ func (o *kameletAddRepoCommandOptions) run(cmd *cobra.Command, args []string) er
 	}
 	var platform *v1.IntegrationPlatform
 	if o.OperatorID == "" {
-		platform, err = o.findIntegrationPlatorm(cmd, c)
+		platform, err = o.findIntegrationPlatform(cmd, c)
 	} else {
-		platform, err = o.getIntegrationPlatorm(cmd, c)
+		platform, err = o.getIntegrationPlatform(cmd, c)
 	}
 	if err != nil {
 		return err
@@ -100,8 +100,8 @@ func (o *kameletAddRepoCommandOptions) run(cmd *cobra.Command, args []string) er
 	return c.Update(o.Context, platform)
 }
 
-// getIntegrationPlatorm gives the integration plaform matching with the operator id in the provided namespace.
-func (o *kameletUpdateRepoCommandOptions) getIntegrationPlatorm(cmd *cobra.Command, c client.Client) (*v1.IntegrationPlatform, error) {
+// getIntegrationPlatform gives the integration platform matching with the operator id in the provided namespace.
+func (o *kameletUpdateRepoCommandOptions) getIntegrationPlatform(cmd *cobra.Command, c client.Client) (*v1.IntegrationPlatform, error) {
 	key := client.ObjectKey{
 		Namespace: o.Namespace,
 		Name:      o.OperatorID,
@@ -118,8 +118,8 @@ func (o *kameletUpdateRepoCommandOptions) getIntegrationPlatorm(cmd *cobra.Comma
 	return &platform, nil
 }
 
-// findIntegrationPlatorm gives the primary integration plaform that could be found in the provided namespace.
-func (o *kameletUpdateRepoCommandOptions) findIntegrationPlatorm(cmd *cobra.Command, c client.Client) (*v1.IntegrationPlatform, error) {
+// findIntegrationPlatform gives the primary integration platform that could be found in the provided namespace.
+func (o *kameletUpdateRepoCommandOptions) findIntegrationPlatform(cmd *cobra.Command, c client.Client) (*v1.IntegrationPlatform, error) {
 	platforms, err := platformutil.ListPrimaryPlatforms(o.Context, c, o.Namespace)
 	if err != nil {
 		return nil, err
