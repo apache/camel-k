@@ -30,12 +30,16 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
+// This test requires operator installation with a custom operator ID, thus needs
+// to be run under e2e/namespace.
 func TestKameletFromCustomRepository(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		kameletName := "timer-custom-source"
 		removeKamelet(kameletName, ns)
@@ -43,15 +47,22 @@ func TestKameletFromCustomRepository(t *testing.T) {
 		Eventually(Kamelet(kameletName, ns)).Should(BeNil())
 
 		// Add the custom repository
-		Expect(Kamel("kamelet", "add-repo", "github:apache/camel-k/e2e/global/common/files/kamelets", "-n", ns, "-x", operatorID).Execute()).To(Succeed())
+		Expect(Kamel("kamelet", "add-repo",
+			"github:apache/camel-k/e2e/global/common/files/kamelets",
+			"-n", ns,
+			"-x", operatorID).Execute()).To(Succeed())
 
 		Expect(KamelRunWithID(operatorID, ns, "files/TimerCustomKameletIntegration.java").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "timer-custom-kamelet-integration"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationPodPhase(ns, "timer-custom-kamelet-integration"), TestTimeoutLong).
+			Should(Equal(corev1.PodRunning))
 
 		Eventually(IntegrationLogs(ns, "timer-custom-kamelet-integration")).Should(ContainSubstring("hello world"))
 
 		// Remove the custom repository
-		Expect(Kamel("kamelet", "remove-repo", "github:apache/camel-k/e2e/global/common/files/kamelets", "-n", ns, "-x", operatorID).Execute()).To(Succeed())
+		Expect(Kamel("kamelet", "remove-repo",
+			"github:apache/camel-k/e2e/global/common/files/kamelets",
+			"-n", ns,
+			"-x", operatorID).Execute()).To(Succeed())
 	})
 }
 
