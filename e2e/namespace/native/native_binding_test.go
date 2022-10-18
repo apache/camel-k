@@ -23,8 +23,9 @@ limitations under the License.
 package native
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"testing"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 
 	. "github.com/onsi/gomega"
 
@@ -38,27 +39,46 @@ func TestNativeBinding(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-native-binding"
 		Expect(KamelInstallWithID(operatorID, ns,
-			"--build-timeout", "15m0s",
-			"--operator-resources", "limits.memory=4Gi",
+			"--build-timeout", "40m0s",
+			"--operator-resources", "limits.memory=4.5Gi",
+			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=3g",
 		).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
+		from := corev1.ObjectReference{
+			Kind:       "Kamelet",
+			Name:       "timer-source",
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+		}
+		to := corev1.ObjectReference{
+			Kind:       "Kamelet",
+			Name:       "log-sink",
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+		}
+		message := "Magicstring!"
+
+		t.Run("warm up before native build testing", func(t *testing.T) {
+			// The following native build test is under tight time constraints, so here it runs
+			// a warm up testing to make sure necessary jars are already downloaded.
+			bindingName := "warm-up-binding"
+			Expect(BindKameletTo(ns, bindingName, map[string]string{},
+				from, to,
+				map[string]string{"message": message}, map[string]string{})()).To(Succeed())
+
+			Eventually(IntegrationPodPhase(ns, bindingName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationLogs(ns, bindingName), TestTimeoutShort).Should(ContainSubstring(message))
+
+			// Clean up
+			Expect(Kamel("delete", bindingName, "-n", ns).Execute()).To(Succeed())
+			Expect(DeleteKits(ns)).To(Succeed())
+		})
+
 		t.Run("kamelet binding with native build", func(t *testing.T) {
-			from := corev1.ObjectReference{
-				Kind:       "Kamelet",
-				Name:       "timer-source",
-				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			}
-
-			to := corev1.ObjectReference{
-				Kind:       "Kamelet",
-				Name:       "log-sink",
-				APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			}
-
 			bindingName := "native-binding"
-			message := "Magicstring!"
-			Expect(BindKameletTo(ns, bindingName, map[string]string{"trait.camel.apache.org/quarkus.package-type": "native"}, from, to, map[string]string{"message": message}, map[string]string{})()).To(Succeed())
+			Expect(BindKameletTo(ns, bindingName,
+				map[string]string{"trait.camel.apache.org/quarkus.package-type": "native"},
+				from, to,
+				map[string]string{"message": message}, map[string]string{})()).To(Succeed())
 
 			Eventually(Kits(ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
 				TestTimeoutVeryLong).Should(HaveLen(1))
@@ -69,7 +89,8 @@ func TestNativeBinding(t *testing.T) {
 			Eventually(IntegrationLogs(ns, bindingName), TestTimeoutShort).Should(ContainSubstring(message))
 
 			Eventually(IntegrationPod(ns, bindingName), TestTimeoutShort).
-				Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
+				Should(WithTransform(getContainerCommand(),
+					MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
 
 			// Clean up
 			Expect(Kamel("delete", bindingName, "-n", ns).Execute()).To(Succeed())
