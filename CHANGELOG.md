@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.10.2-nightly...HEAD)
+
+**Closed issues:**
+
+- Missing container image docker.io/apache/camel-k:1.10.1-SNAPSHOT [\#3720](https://github.com/apache/camel-k/issues/3720)
+
 ## [1.10.2-nightly](https://github.com/apache/camel-k/tree/1.10.2-nightly) (2022-10-14)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v1.10.1...1.10.2-nightly)
