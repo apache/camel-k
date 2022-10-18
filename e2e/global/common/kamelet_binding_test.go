@@ -71,7 +71,10 @@ func TestKameletBinding(t *testing.T) {
 			t.Run("throw error test", func(t *testing.T) {
 				RegisterTestingT(t)
 
-				Expect(BindKameletToWithErrorHandler(ns, "throw-error-binding", map[string]string{}, from, to, map[string]string{"message": "throw Error"}, map[string]string{"loggerName": "integrationLogger"}, errorHandler)()).To(Succeed())
+				Expect(BindKameletToWithErrorHandler(ns, "throw-error-binding", map[string]string{},
+					from, to,
+					map[string]string{"message": "throw Error"}, map[string]string{"loggerName": "integrationLogger"},
+					errorHandler)()).To(Succeed())
 
 				Eventually(IntegrationPodPhase(ns, "throw-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).Should(ContainSubstring("kameletErrorHandler"))
@@ -82,7 +85,10 @@ func TestKameletBinding(t *testing.T) {
 			t.Run("don't throw error test", func(t *testing.T) {
 				RegisterTestingT(t)
 
-				Expect(BindKameletToWithErrorHandler(ns, "no-error-binding", map[string]string{}, from, to, map[string]string{"message": "true"}, map[string]string{"loggerName": "integrationLogger"}, errorHandler)()).To(Succeed())
+				Expect(BindKameletToWithErrorHandler(ns, "no-error-binding", map[string]string{},
+					from, to,
+					map[string]string{"message": "true"}, map[string]string{"loggerName": "integrationLogger"},
+					errorHandler)()).To(Succeed())
 
 				Eventually(IntegrationPodPhase(ns, "no-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns, "no-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("kameletErrorHandler"))
@@ -112,7 +118,11 @@ func TestKameletBinding(t *testing.T) {
 				APIVersion: v1alpha1.SchemeGroupVersion.String(),
 			}
 
-			Expect(BindKameletTo(ns, "kb-with-traits", map[string]string{"trait.camel.apache.org/camel.properties": "[\"camel.prop1=a\",\"camel.prop2=b\"]"}, from, to, map[string]string{"message": "hello from test"}, map[string]string{"loggerName": "integrationLogger"})()).To(Succeed())
+			Expect(BindKameletTo(ns, "kb-with-traits",
+				map[string]string{"trait.camel.apache.org/camel.properties": "[\"camel.prop1=a\",\"camel.prop2=b\"]"},
+				from, to,
+				map[string]string{"message": "hello from test"}, map[string]string{"loggerName": "integrationLogger"})()).
+				To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, "kb-with-traits"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, "kb-with-traits"), TestTimeoutShort).Should(ContainSubstring("hello from test"))
