@@ -95,7 +95,7 @@ var TestTimeoutMedium = 5 * time.Minute
 var TestTimeoutLong = 10 * time.Minute
 
 // TestTimeoutVeryLong should be used only for testing native builds.
-var TestTimeoutVeryLong = 30 * time.Minute
+var TestTimeoutVeryLong = 40 * time.Minute
 
 var NoOlmOperatorImage string
 
@@ -1978,11 +1978,13 @@ func CreateTimerKamelet(ns string, name string) func() error {
 	return CreateKamelet(ns, name, flow, props, nil)
 }
 
-func BindKameletTo(ns string, name string, annotations map[string]string, from corev1.ObjectReference, to corev1.ObjectReference, sourceProperties map[string]string, sinkProperties map[string]string) func() error {
+func BindKameletTo(ns, name string, annotations map[string]string, from, to corev1.ObjectReference,
+	sourceProperties, sinkProperties map[string]string) func() error {
 	return BindKameletToWithErrorHandler(ns, name, annotations, from, to, sourceProperties, sinkProperties, nil)
 }
 
-func BindKameletToWithErrorHandler(ns string, name string, annotations map[string]string, from corev1.ObjectReference, to corev1.ObjectReference, sourceProperties map[string]string, sinkProperties map[string]string, errorHandler map[string]interface{}) func() error {
+func BindKameletToWithErrorHandler(ns, name string, annotations map[string]string, from, to corev1.ObjectReference,
+	sourceProperties, sinkProperties map[string]string, errorHandler map[string]interface{}) func() error {
 	return func() error {
 		kb := v1alpha1.NewKameletBinding(ns, name)
 		kb.Annotations = annotations
