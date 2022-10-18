@@ -92,7 +92,7 @@ func TestNativeIntegrations(t *testing.T) {
 
 			// Check the fast-jar Kit is ready
 			Eventually(Kits(ns, withFastJarLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
-				TestTimeoutVeryLong).Should(HaveLen(1))
+				TestTimeoutLong).Should(HaveLen(1))
 
 			fastJarKit := Kits(ns, withFastJarLayout, KitWithPhase(v1.IntegrationKitPhaseReady))()[0]
 			// Check the Integration uses the fast-jar Kit
@@ -109,7 +109,7 @@ func TestNativeIntegrations(t *testing.T) {
 
 			// Check the native Kit is ready
 			Eventually(Kits(ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
-				TestTimeoutLong).Should(HaveLen(1))
+				TestTimeoutVeryLong).Should(HaveLen(1))
 
 			nativeKit := Kits(ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady))()[0]
 			// Check the Integration uses the native Kit
