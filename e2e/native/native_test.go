@@ -42,8 +42,9 @@ var (
 func TestNativeIntegrations(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		Expect(Kamel("install", "-n", ns,
-			"--build-timeout", "15m0s",
-			"--operator-resources", "limits.memory=4Gi",
+			"--build-timeout", "40m0s",
+			"--operator-resources", "limits.memory=4.5Gi",
+			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=3g",
 		).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
@@ -107,7 +108,7 @@ func TestNativeIntegrations(t *testing.T) {
 
 			// Check the native Kit is ready
 			Eventually(Kits(ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
-				TestTimeoutLong).Should(HaveLen(1))
+				TestTimeoutVeryLong).Should(HaveLen(1))
 
 			nativeKit := Kits(ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady))()[0]
 			// Check the Integration uses the native Kit
