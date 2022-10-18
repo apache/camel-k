@@ -14,7 +14,7 @@
 # limitations under the License.
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION ?= 1.10.2-SNAPSHOT
+VERSION ?= 1.10.2
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 1.10.1
 RUNTIME_VERSION := 1.15.1
