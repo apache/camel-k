@@ -62,8 +62,7 @@ func (t *jolokiaTrait) Apply(e *Environment) error {
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel:jaxb")
 		}
 
-		// TODO: We may want to make the Jolokia version configurable
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.jolokia:jolokia-jvm:jar:1.7.1")
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.jolokia:jolokia-jvm")
 
 		return nil
 	}
@@ -122,7 +121,14 @@ func (t *jolokiaTrait) Apply(e *Environment) error {
 		optionValues[i] = k + "=" + options[k]
 	}
 
-	container.Args = append(container.Args, "-javaagent:dependencies/lib/main/org.jolokia.jolokia-jvm-1.7.1.jar="+strings.Join(optionValues, ","))
+	jolokiaFilepath := ""
+	for _, ar := range e.IntegrationKit.Status.Artifacts {
+		if strings.HasPrefix(ar.ID, "org.jolokia.jolokia-jvm") {
+			jolokiaFilepath = ar.Target
+			break
+		}
+	}
+	container.Args = append(container.Args, "-javaagent:"+jolokiaFilepath+"="+strings.Join(optionValues, ","))
 
 	containerPort := corev1.ContainerPort{
 		Name:          "jolokia",
