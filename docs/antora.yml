@@ -32,7 +32,7 @@ asciidoc:
     prerelease: true
     camel-kamelets-version: 0.9.1 # Makefile KAMELET_CATALOG_REPO_BRANCH
     camel-kamelets-docs-version: 0.9.x # Makefile KAMELET_CATALOG_REPO_BRANCH
-    camel-k-runtime-version: 1.15.0 # Makefile RUNTIME_VERSION
+    camel-k-runtime-version: 1.15.1 # Makefile RUNTIME_VERSION
     camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # Makefile BUNDLE_CAMEL_APIS
     # from camel-k-runtime parent pom:
     camel-version: 3.18.2
