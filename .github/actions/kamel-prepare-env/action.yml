@@ -21,22 +21,7 @@ description: 'Initialise the test environment with tools. (Will only run once pe
 runs:
   using: "composite"
   steps:
-    #
-    # This is a docker action so its pre-builds the image prior to
-    # running it. The building occurs prior to all steps regardless
-    # of where its located to run. Therefore, it must be run prior to
-    # clean-up since that step removes all docker image in order to
-    # claim back as much space as possible.
-    #
-    # Expects env file with following vars:
-    # TEST_CLUSTER
-    #
-    - id: read-env-file
-      uses: ./.github/actions/action-dotenv-to-setenv
-      if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
-      with:
-        env-file: .github/.env
-
+  
     - name: Cleanup
       shell: bash
       if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
