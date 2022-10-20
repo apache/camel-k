@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.10.2...HEAD)
+
+**Closed issues:**
+
+- Native E2E tests failing [\#3715](https://github.com/apache/camel-k/issues/3715)
+
 ## [v1.10.2](https://github.com/apache/camel-k/tree/v1.10.2) (2022-10-18)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.10.2...v1.10.2)
