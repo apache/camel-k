@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Release 1.10.2 [\#3746](https://github.com/apache/camel-k/issues/3746)
 - Native E2E tests failing [\#3715](https://github.com/apache/camel-k/issues/3715)
 
 ## [v1.10.2](https://github.com/apache/camel-k/tree/v1.10.2) (2022-10-18)
