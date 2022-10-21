@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -ex
+set -e
 
 location=$(dirname $0)
 rootdir=$location/../
@@ -38,7 +38,7 @@ rm -f ${rootdir}/resources/camel-catalog-*
 mvn -q dependency:copy -Dartifact="org.apache.camel.k:camel-k-catalog:$runtime_version:yaml:catalog" \
   -DoutputDirectory=${rootdir}/resources/ \
   -s $location/maven-settings.xml \
-  -Papache-snapshots
+  -Papache
 if [ -f "${rootdir}/resources/camel-k-catalog-${runtime_version}-catalog.yaml" ]; then
     mv ${rootdir}/resources/camel-k-catalog-"${runtime_version}"-catalog.yaml ${rootdir}/resources/camel-catalog-"${runtime_version}".yaml
 elif [[ $runtime_version == *"SNAPSHOT" ]]; then
