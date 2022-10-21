@@ -165,7 +165,7 @@ sleep 3
 #
 # Wait for the operator to be running
 #
-timeout=180
+timeout=300
 i=1
 command="kubectl get pods -n ${NAMESPACE} 2> /dev/null | grep camel-k | grep Running &> /dev/null"
 
