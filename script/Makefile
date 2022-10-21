@@ -17,7 +17,7 @@ VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION ?= 1.11.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 1.10.2
-RUNTIME_VERSION := 1.14.0
+RUNTIME_VERSION := 1.16.0-SNAPSHOT
 BUILDAH_VERSION := 1.23.3
 KANIKO_VERSION := 0.17.1
 INSTALL_DEFAULT_KAMELETS := true
@@ -75,7 +75,7 @@ OPM := opm
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
-STAGING_RUNTIME_REPO :=
+STAGING_RUNTIME_REPO := 
 
 # Define here the repo containing the default Kamelet catalog (if any)
 KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
@@ -205,7 +205,7 @@ codegen-tools-install: controller-gen
 	go install k8s.io/code-generator/cmd/lister-gen@$(CODEGEN_VERSION)
 	go install k8s.io/code-generator/cmd/informer-gen@$(CODEGEN_VERSION)
 
-build: build-resources test build-kamel build-compile-integration-tests build-submodules
+build: codegen build-resources test build-kamel build-compile-integration-tests build-submodules
 
 ci-build: clean codegen set-module-version set-version check-licenses dir-licenses build-kamel cross-compile
 
