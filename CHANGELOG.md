@@ -8,6 +8,7 @@
 
 - Release 1.10.2 [\#3746](https://github.com/apache/camel-k/issues/3746)
 - Native E2E tests failing [\#3715](https://github.com/apache/camel-k/issues/3715)
+- Unable to get basic hello.groovy example working on local single node KIND cluster [\#3349](https://github.com/apache/camel-k/issues/3349)
 
 ## [v1.10.2](https://github.com/apache/camel-k/tree/v1.10.2) (2022-10-18)
 
