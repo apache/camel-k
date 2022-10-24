@@ -17,6 +17,9 @@
 # limitations under the License.
 name: release
 
+env:
+  TEST_CLUSTER: kind
+
 on:
   schedule:
     - cron: "10 23 * * *"
