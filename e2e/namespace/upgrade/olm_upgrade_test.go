@@ -84,7 +84,13 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 		// Set KAMEL_BIN only for this test - don't override the ENV variable for all tests
 		Expect(os.Setenv("KAMEL_BIN", kamel)).To(Succeed())
 
-		args := []string{"install", "-n", ns, "--olm=true", "--olm-source", catalogSourceName, "--olm-source-namespace", ns}
+		args := []string{
+			"install",
+			"-n", ns,
+			"--olm=true",
+			"--olm-source", catalogSourceName,
+			"--olm-source-namespace", ns,
+		}
 
 		if prevUpdateChannel != "" {
 			args = append(args, "--olm-channel", prevUpdateChannel)
@@ -96,7 +102,8 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 		noAdditionalConditions := func(csv olm.ClusterServiceVersion) bool {
 			return true
 		}
-		Eventually(clusterServiceVersionPhase(noAdditionalConditions, ns), TestTimeoutMedium).Should(Equal(olm.CSVPhaseSucceeded))
+		Eventually(clusterServiceVersionPhase(noAdditionalConditions, ns), TestTimeoutMedium).
+			Should(Equal(olm.CSVPhaseSucceeded))
 
 		// Refresh the test client to account for the newly installed CRDs
 		SyncClient()
@@ -123,7 +130,8 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
 		// Check the Integration runs correctly
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).
+			Should(Equal(corev1.ConditionTrue))
 
 		// Check the Integration version matches that of the current operator
 		Expect(IntegrationVersion(ns, name)()).To(ContainSubstring(prevIPVersionPrefix))
@@ -140,7 +148,9 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 
 				// Patch the Subscription to avoid conflicts with concurrent updates performed by OLM
 				patch := fmt.Sprintf("{\"spec\":{\"channel\":%q}}", newUpdateChannel)
-				Expect(TestClient().Patch(TestContext, subscription, ctrl.RawPatch(types.MergePatchType, []byte(patch)))).To(Succeed())
+				Expect(
+					TestClient().Patch(TestContext, subscription, ctrl.RawPatch(types.MergePatchType, []byte(patch))),
+				).To(Succeed())
 				// Assert the response back from the API server
 				Expect(subscription.Spec.Channel).To(Equal(newUpdateChannel))
 			}
@@ -177,14 +187,16 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 			Expect(os.Setenv("KAMEL_BIN", "")).To(Succeed())
 
 			// Check the Integration hasn't been upgraded
-			Consistently(IntegrationVersion(ns, name), 5*time.Second, 1*time.Second).Should(ContainSubstring(prevIPVersionPrefix))
+			Consistently(IntegrationVersion(ns, name), 5*time.Second, 1*time.Second).
+				Should(ContainSubstring(prevIPVersionPrefix))
 
 			// Rebuild the Integration
 			Expect(Kamel("rebuild", name, "-n", ns).Execute()).To(Succeed())
 
 			// Check the Integration runs correctly
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
 
 			// Check the Integration version has been upgraded
 			Eventually(IntegrationVersion(ns, name)).Should(ContainSubstring(newIPVersionPrefix))
@@ -207,7 +219,8 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 
 			// Check the Integration runs correctly
 			Eventually(IntegrationPodPhase(ns, name)).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).
+				Should(Equal(corev1.ConditionTrue))
 
 			// Clean up
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
