@@ -404,11 +404,17 @@ kamel-overlay:
 	cp kamel build/_output/bin
 
 images: build kamel-overlay maven-overlay bundle-kamelets
+ifneq (,$(findstring SNAPSHOT,$(RUNTIME_VERSION)))
+	./script/package_maven_artifacts.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(RUNTIME_VERSION)
+endif
 	@echo "####### Building Camel K operator container image..."
 	mkdir -p build/_maven_output
 	docker build -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
 images-arch: build kamel-overlay maven-overlay bundle-kamelets
+ifneq (,$(findstring SNAPSHOT,$(RUNTIME_VERSION)))
+	./script/package_maven_artifacts.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(RUNTIME_VERSION)
+endif
 	@echo "####### Building Camel K operator container image for multi architectures..."
 	mkdir -p build/_maven_output
 	docker buildx rm --all-inactive --force
@@ -420,25 +426,6 @@ ifeq ($(shell uname -m), aarch64)
 	docker buildx build --platform=linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
 endif
 ifeq ($(shell uname -m), arm64)
-	docker buildx build --platform=linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
-endif
-
-images-dev: build kamel-overlay maven-overlay bundle-kamelets package-artifacts
-	@echo "####### Building Camel K operator container development image..."
-	docker build -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
-
-images-arch-dev:  build kamel-overlay maven-overlay bundle-kamelets package-artifacts
-	@echo "####### Building Camel K operator container development image for multi architectures..."
-	docker buildx rm --all-inactive --force
-	docker buildx create --append --name builder
-ifeq ($(shell uname -m), x86_x64)
-	docker buildx build --platform=linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
-endif
-ifeq ($(shell uname -m), aarch64)
-	docker buildx build --platform=linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
-endif
-ifeq ($(shell uname -m), arm64)
-	mv kamel.linux.arm build/_output/bin/kamel
 	docker buildx build --platform=linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
 endif
 
@@ -484,10 +471,6 @@ cross-compile:
 package-examples:
 	./script/package_examples.sh $(CUSTOM_VERSION)
 
-package-artifacts:
-	# useful for development purpose only in order to include any local development runtime dependency
-	./script/package_maven_artifacts.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(RUNTIME_VERSION)
-
 release: clean codegen set-module-version set-version build-resources check-licenses build images images-push cross-compile package-examples git-tag
 
 release-staging: clean codegen set-module-version set-version build-resources check-licenses build images images-push-staging cross-compile package-examples git-tag
@@ -510,7 +493,7 @@ install-minikube:
 get-staging-repo:
 	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
 
-.PHONY: do-build build build-kamel build-resources dep codegen images images-dev images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-keda generate-strimzi
+.PHONY: do-build build build-kamel build-resources dep codegen images images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-keda generate-strimzi
 .PHONY: controller-gen kubectl kustomize operator-sdk opm
 
 # find or download controller-gen if necessary
