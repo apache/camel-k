@@ -45,49 +45,13 @@ fi
 runtime_version=$1
 output_dir=$2
 
-if [ -n "$staging_repo" ]; then
-    if  [[ $staging_repo == http:* ]] || [[ $staging_repo == https:* ]]; then
-        options="${options} -s ${rootdir}/settings.xml"
-        cat << EOF > ${rootdir}/settings.xml
-<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
-  <profiles>
-    <profile>
-      <id>camel-k-staging</id>
-      <repositories>
-        <repository>
-          <id>camel-k-staging-releases</id>
-          <name>Camel K Staging</name>
-          <url>${staging_repo}</url>
-          <releases>
-            <enabled>true</enabled>
-            <updatePolicy>never</updatePolicy>
-          </releases>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-        </repository>
-      </repositories>
-    </profile>
-  </profiles>
-  <activeProfiles>
-    <activeProfile>camel-k-staging</activeProfile>
-  </activeProfiles>
-</settings>
-EOF
-    fi
+if [ ! -z $staging_repo ]; then
+  # Change the settings to include the staging repo if it's not already there
+  echo "INFO: updating the settings staging repository"
+  sed -i "s;<url>https://repository\.apache\.org/content/repositories/orgapachecamel-.*</url>;<url>$staging_repo</url>;" $location/maven-settings.xml
 fi
 
-
-if [ -z "$local_runtime_dir" ]; then
-    mvn -q \
-      $options \
-      dependency:copy \
-      -Dartifact=org.apache.camel.k:camel-k-maven-logging:${runtime_version}:zip \
-      -DoutputDirectory=${rootdir}/${output_dir}
-
-    mv ${rootdir}/${output_dir}/camel-k-maven-logging-${runtime_version}.zip ${rootdir}/${output_dir}/camel-k-maven-logging.zip
-else
+if [ ! -z "$local_runtime_dir" ]; then
     # Take the dependencies from a local development environment
     camel_k_runtime_source_version=$(mvn -f $local_runtime_dir/pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
 
@@ -100,20 +64,17 @@ else
       -am \
       -f $local_runtime_dir/support/camel-k-maven-logging/pom.xml \
       install
-
-    mvn -q \
-      $options \
-      dependency:copy \
-      -Dartifact=org.apache.camel.k:camel-k-maven-logging:$camel_k_runtime_source_version:zip \
-      -DoutputDirectory=${rootdir}/${output_dir}
-
-    mv ${rootdir}/${output_dir}/camel-k-maven-logging-$camel_k_runtime_source_version.zip ${rootdir}/${output_dir}/camel-k-maven-logging.zip
 fi
 
-unzip -q -o ${rootdir}/${output_dir}/camel-k-maven-logging.zip -d ${rootdir}/${output_dir}
+mvn -q \
+  $options \
+  dependency:copy \
+  -Dartifact=org.apache.camel.k:camel-k-maven-logging:${runtime_version}:zip \
+  -D mdep.useBaseVersion=true \
+  -DoutputDirectory=${rootdir}/${output_dir} \
+  -Papache \
+  -s $location/maven-settings.xml
 
-if [ -n "$staging_repo" ]; then
-    rm ${rootdir}/settings.xml
-fi
+unzip -q -o ${rootdir}/${output_dir}/camel-k-maven-logging-${runtime_version}.zip -d ${rootdir}/${output_dir}
+rm -f camel-k-maven-logging-${runtime_version}.zip
 
-rm ${rootdir}/${output_dir}/camel-k-maven-logging.zip

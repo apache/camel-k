@@ -36,16 +36,12 @@ fi
 rm -f ${rootdir}/resources/camel-catalog-*
 
 mvn -q dependency:copy -Dartifact="org.apache.camel.k:camel-k-catalog:$runtime_version:yaml:catalog" \
+  -D mdep.useBaseVersion=true \
   -DoutputDirectory=${rootdir}/resources/ \
   -s $location/maven-settings.xml \
   -Papache
+
 if [ -f "${rootdir}/resources/camel-k-catalog-${runtime_version}-catalog.yaml" ]; then
     mv ${rootdir}/resources/camel-k-catalog-"${runtime_version}"-catalog.yaml ${rootdir}/resources/camel-catalog-"${runtime_version}".yaml
-elif [[ $runtime_version == *"SNAPSHOT" ]]; then
-    # when using SNAPSHOT versions and a snapshot repository the downloaded artifact has a timestamp in place of the SNAPSHOT word
-    # we should replace this timestamp with the SNAPSHOT word
-    only_version=$(echo $runtime_version|sed 's/-SNAPSHOT//g')
-    cat_file=$(ls -lrt ${rootdir}/resources/camel-k-catalog-"${only_version}"*-catalog.yaml|tail -1|sed 's/.*resources\///g')
-    mv ${rootdir}/resources/$cat_file ${rootdir}/resources/camel-catalog-"${runtime_version}".yaml
 fi
 

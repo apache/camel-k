@@ -31,7 +31,7 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 
-make images-dev
+make images
 
 # Tag image
 docker tag apache/camel-k:$1 default-route-openshift-image-registry.apps-crc.testing/$project/camel-k:$1
