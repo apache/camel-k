@@ -83,7 +83,7 @@ else
 
   echo "Build Kamel from source"
 
-  RULES="PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images"
+  RULES="PACKAGE_ARTIFACTS_STRATEGY=download build images"
   if [ -n "${MAKE_RULES}" ]; then
     RULES=" ${MAKE_RULES} "
   fi
