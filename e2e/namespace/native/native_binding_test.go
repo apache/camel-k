@@ -39,7 +39,7 @@ func TestNativeBinding(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-native-binding"
 		Expect(KamelInstallWithID(operatorID, ns,
-			"--build-timeout", "40m0s",
+			"--build-timeout", "60m0s",
 			"--operator-resources", "limits.memory=4.5Gi",
 			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=3g",
 		).Execute()).To(Succeed())
