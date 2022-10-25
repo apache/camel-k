@@ -95,7 +95,7 @@ var TestTimeoutMedium = 5 * time.Minute
 var TestTimeoutLong = 10 * time.Minute
 
 // TestTimeoutVeryLong should be used only for testing native builds.
-var TestTimeoutVeryLong = 40 * time.Minute
+var TestTimeoutVeryLong = 60 * time.Minute
 
 var NoOlmOperatorImage string
 
