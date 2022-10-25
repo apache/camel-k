@@ -295,7 +295,7 @@ test-install: do-build
 
 test-quarkus-native: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 90m -v ./e2e/namespace/native -tags=integration $(TEST_QUARKUS_RUN) -json 2>&1 | gotestfmt
+	go test -timeout 130m -v ./e2e/namespace/native -tags=integration $(TEST_QUARKUS_RUN) -json 2>&1 | gotestfmt
 
 test-upgrade: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
