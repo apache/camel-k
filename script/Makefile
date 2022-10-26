@@ -279,6 +279,7 @@ test-service-binding: do-build
 
 test-local: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	RUNTIME_VERSION="$(RUNTIME_VERSION)" \
 	go test -timeout 30m -v ./e2e/local -tags=integration $(TEST_LOCAL_RUN) -json 2>&1 | gotestfmt
 
 test-registry-maven-wagon: do-build
