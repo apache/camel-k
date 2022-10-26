@@ -4,7 +4,4 @@
 [submodule ".github/actions/changelog"]
 	path = .github/actions/changelog
 	url = https://github.com/CharMixer/auto-changelog-action
-[submodule ".github/actions/action-dotenv-to-setenv"]
-	path = .github/actions/action-dotenv-to-setenv
-        url = https://github.com/c-py/action-dotenv-to-setenv.git
-	branch = tags/v3
+	
