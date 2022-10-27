@@ -31,21 +31,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestOcp3CrdError(t *testing.T) {
-	if os.Getenv("CAMEL_K_CLUSTER_OCP3") != "true" {
-		t.Skip("INFO: Skipping test as only applicable to OCP3")
-	}
-
-	WithNewTestNamespace(t, func(ns string) {
-		ExecMakeError(t, Make("setup-cluster", fmt.Sprintf("NAMESPACE=%s", ns)))
-	})
-}
-
 func TestBasicOperator(t *testing.T) {
-	if os.Getenv("CAMEL_K_CLUSTER_OCP3") == "true" {
-		t.Skip("INFO: Skipping test as not supported on OCP3")
-	}
-
 	os.Setenv("MAKE_DIR", "../../../../install")
 
 	// Ensure no CRDs are already installed
@@ -64,10 +50,6 @@ func TestBasicOperator(t *testing.T) {
 }
 
 func TestAlternativeImageOperator(t *testing.T) {
-	if os.Getenv("CAMEL_K_CLUSTER_OCP3") == "true" {
-		t.Skip("INFO: Skipping test as not supported on OCP3")
-	}
-
 	os.Setenv("MAKE_DIR", "../../../../install")
 
 	// Ensure no CRDs are already installed
@@ -90,10 +72,6 @@ func TestAlternativeImageOperator(t *testing.T) {
 }
 
 func TestGlobalOperator(t *testing.T) {
-	if os.Getenv("CAMEL_K_CLUSTER_OCP3") == "true" {
-		t.Skip("INFO: Skipping test as not supported on OCP3")
-	}
-
 	os.Setenv("MAKE_DIR", "../../../../install")
 
 	// Ensure no CRDs are already installed
