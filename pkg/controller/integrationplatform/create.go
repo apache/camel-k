@@ -20,12 +20,13 @@ package integrationplatform
 import (
 	"context"
 
-	platformutil "github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/resources"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	corev1 "k8s.io/api/core/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/install"
+	platformutil "github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/resources"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 // NewCreateAction returns a action that creates resources needed by the platform.
@@ -67,6 +68,11 @@ func (action *createAction) Handle(ctx context.Context, platform *v1.Integration
 	}
 
 	platform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	platform.Status.SetCondition(
+		v1.IntegrationPlatformConditionReady,
+		corev1.ConditionTrue,
+		v1.IntegrationPlatformConditionCreatedReason,
+		"integration platform created")
 
 	return platform, nil
 }

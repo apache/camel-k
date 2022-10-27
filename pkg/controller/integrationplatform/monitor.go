@@ -21,7 +21,7 @@ import (
 	"context"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	platformutils "github.com/apache/camel-k/pkg/platform"
+	platformutil "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
@@ -50,7 +50,7 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 	}
 
 	// Refresh applied configuration
-	if err := platformutils.ConfigureDefaults(ctx, action.client, platform, false); err != nil {
+	if err := platformutil.ConfigureDefaults(ctx, action.client, platform, false); err != nil {
 		return nil, err
 	}
 

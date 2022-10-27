@@ -197,6 +197,12 @@ const (
 	IntegrationPlatformPhaseError IntegrationPlatformPhase = "Error"
 	// IntegrationPlatformPhaseDuplicate when the IntegrationPlatform is duplicated
 	IntegrationPlatformPhaseDuplicate IntegrationPlatformPhase = "Duplicate"
+
+	// IntegrationPlatformConditionReady is the condition if the IntegrationPlatform is ready.
+	IntegrationPlatformConditionReady = "Ready"
+
+	// IntegrationPlatformConditionCreatedReason represents the reason that the IntegrationPlatform is created.
+	IntegrationPlatformConditionCreatedReason = "IntegrationPlatformCreated"
 )
 
 // IntegrationPlatformCondition describes the state of a resource at a certain point.

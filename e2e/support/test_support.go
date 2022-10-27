@@ -647,11 +647,7 @@ func IntegrationCondition(ns string, name string, conditionType v1.IntegrationCo
 		if it == nil {
 			return nil
 		}
-		c := it.Status.GetCondition(conditionType)
-		if c == nil {
-			return nil
-		}
-		return c
+		return it.Status.GetCondition(conditionType)
 	}
 }
 
@@ -1535,6 +1531,32 @@ func PlatformPhase(ns string) func() v1.IntegrationPlatformPhase {
 			return ""
 		}
 		return p.Status.Phase
+	}
+}
+
+func PlatformCondition(
+	ns string,
+	conditionType v1.IntegrationPlatformConditionType,
+) func() *v1.IntegrationPlatformCondition {
+	return func() *v1.IntegrationPlatformCondition {
+		p := Platform(ns)()
+		if p == nil {
+			return nil
+		}
+		return p.Status.GetCondition(conditionType)
+	}
+}
+
+func PlatformConditionStatus(
+	ns string,
+	conditionType v1.IntegrationPlatformConditionType,
+) func() corev1.ConditionStatus {
+	return func() corev1.ConditionStatus {
+		c := PlatformCondition(ns, conditionType)()
+		if c == nil {
+			return "Unknown"
+		}
+		return c.Status
 	}
 }
 
