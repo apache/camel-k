@@ -109,7 +109,7 @@ func (in *IntegrationPlatformStatus) GetCondition(condType IntegrationPlatformCo
 	return nil
 }
 
-// SetCondition --
+// SetCondition sets the condition with the given status, reason, and message.
 func (in *IntegrationPlatformStatus) SetCondition(condType IntegrationPlatformConditionType, status corev1.ConditionStatus, reason string, message string) {
 	in.SetConditions(IntegrationPlatformCondition{
 		Type:               condType,
@@ -121,7 +121,7 @@ func (in *IntegrationPlatformStatus) SetCondition(condType IntegrationPlatformCo
 	})
 }
 
-// SetErrorCondition --
+// SetErrorCondition sets the condition with the given reason and error message.
 func (in *IntegrationPlatformStatus) SetErrorCondition(condType IntegrationPlatformConditionType, reason string, err error) {
 	in.SetConditions(IntegrationPlatformCondition{
 		Type:               condType,
