@@ -8,6 +8,8 @@
 
 - KameletBinding in Error when prometheus trait is enabled [\#3775](https://github.com/apache/camel-k/issues/3775)
 - E2E - No longer able to run native build tests with Quarkus 2.13.0 \(Camel Catalog 1.15.x\) [\#3773](https://github.com/apache/camel-k/issues/3773)
+- Prometheus monitoring doc doesn't help to get monitoring working [\#3428](https://github.com/apache/camel-k/issues/3428)
+- integration platform: add conditions [\#2555](https://github.com/apache/camel-k/issues/2555)
 
 ## [1.10.3-nightly](https://github.com/apache/camel-k/tree/1.10.3-nightly) (2022-10-25)
 
