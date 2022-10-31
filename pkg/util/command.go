@@ -21,14 +21,18 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"os/exec"
 
+	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
 
 // RunAndLog starts the provided command, scans its standard and error outputs line by line,
 // to feed the provided handlers, and waits until the scans complete and the command returns.
-func RunAndLog(ctx context.Context, cmd *exec.Cmd, stdOutF func(string), stdErrF func(string)) error {
+func RunAndLog(ctx context.Context, cmd *exec.Cmd, stdOutF func(string) string, stdErrF func(string) string) error {
+	scanOutMsg := ""
+	scanErrMsg := ""
 	stdOutF(fmt.Sprintf("Executed command: %s", cmd.String()))
 
 	stdOut, err := cmd.StdoutPipe()
@@ -40,38 +44,51 @@ func RunAndLog(ctx context.Context, cmd *exec.Cmd, stdOutF func(string), stdErrF
 		return err
 	}
 	err = cmd.Start()
+	// if the command is in error, we try to figure it out why also by parsing the log
 	if err != nil {
-		scanOut := bufio.NewScanner(stdOut)
-		for scanOut.Scan() {
-			stdOutF(scanOut.Text())
-		}
-		scanErr := bufio.NewScanner(stdErr)
-		for scanErr.Scan() {
-			stdOutF(scanErr.Text())
-		}
-		return err
+		scanOutMsg = scan(stdOut, stdOutF)
+		scanErrMsg = scan(stdErr, stdErrF)
+
+		return errors.Wrapf(err, formatErr(scanOutMsg, scanErrMsg))
 	}
 	g, _ := errgroup.WithContext(ctx)
 	g.Go(func() error {
-		scanner := bufio.NewScanner(stdOut)
-		for scanner.Scan() {
-			stdOutF(scanner.Text())
-		}
+		scanOutMsg = scan(stdOut, stdOutF)
 		return nil
 	})
 	g.Go(func() error {
-		scanner := bufio.NewScanner(stdErr)
-		for scanner.Scan() {
-			stdErrF(scanner.Text())
-		}
+		scanErrMsg = scan(stdErr, stdErrF)
 		return nil
 	})
 	if err = g.Wait(); err != nil {
-		return err
+		return errors.Wrapf(err, formatErr(scanOutMsg, scanErrMsg))
 	}
 	if err = cmd.Wait(); err != nil {
-		return err
+		return errors.Wrapf(err, formatErr(scanOutMsg, scanErrMsg))
 	}
 
 	return nil
+}
+
+func scan(stdOut io.ReadCloser, stdOutF func(string) string) string {
+	scanError := ""
+	scanner := bufio.NewScanner(stdOut)
+	for scanner.Scan() {
+		errMsg := stdOutF(scanner.Text())
+		if errMsg != "" && scanError == "" {
+			scanError = errMsg
+		}
+	}
+
+	return scanError
+}
+
+func formatErr(stdout, stderr string) string {
+	if stderr == "" {
+		return stdout
+	}
+	if stdout == "" {
+		return stderr
+	}
+	return fmt.Sprintf("stdout: %s, stderr: %s", stdout, stderr)
 }
