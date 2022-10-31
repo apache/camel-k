@@ -457,7 +457,7 @@ func TestConfigureVolumesAndMountsBinaryAndTextResources(t *testing.T) {
 
 func TestOnlySomeTraitsInfluenceBuild(t *testing.T) {
 	c := NewTraitTestCatalog()
-	buildTraits := []string{"builder", "quarkus", "registry"}
+	buildTraits := []string{"builder", "quarkus", "registry", "camel"}
 
 	for _, trait := range c.AllTraits() {
 		if trait.InfluencesKit() {

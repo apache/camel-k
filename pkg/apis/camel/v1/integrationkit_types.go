@@ -77,7 +77,8 @@ type IntegrationKitTraits struct {
 	Quarkus *trait.QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
 	// The Registry trait sets up Maven to use the Image registry as a Maven repository.
 	Registry *trait.RegistryTrait `property:"registry" json:"registry,omitempty"`
-
+	// The Camel trait sets up Camel configuration.
+	Camel *trait.CamelTrait `property:"camel" json:"camel,omitempty"`
 	// The collection of addon trait configurations
 	Addons map[string]AddonTrait `json:"addons,omitempty"`
 }
