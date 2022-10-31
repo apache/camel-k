@@ -838,6 +838,11 @@ func (in *IntegrationKitTraits) DeepCopyInto(out *IntegrationKitTraits) {
 		*out = new(trait.RegistryTrait)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Camel != nil {
+		in, out := &in.Camel, &out.Camel
+		*out = new(trait.CamelTrait)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Addons != nil {
 		in, out := &in.Addons, &out.Addons
 		*out = make(map[string]AddonTrait, len(*in))

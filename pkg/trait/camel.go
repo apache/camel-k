@@ -47,6 +47,11 @@ func newCamelTrait() Trait {
 	}
 }
 
+// InfluencesKit overrides base class method.
+func (t *camelTrait) InfluencesKit() bool {
+	return true
+}
+
 func (t *camelTrait) Configure(e *Environment) (bool, error) {
 	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, errors.New("trait camel cannot be disabled")

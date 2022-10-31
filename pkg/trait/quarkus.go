@@ -223,6 +223,7 @@ func propagateKitTraits(e *Environment) v1.IntegrationKitTraits {
 	traits := e.Integration.Spec.Traits
 	kitTraits := v1.IntegrationKitTraits{
 		Builder:  traits.Builder.DeepCopy(),
+		Camel:    traits.Camel.DeepCopy(),
 		Quarkus:  traits.Quarkus.DeepCopy(),
 		Registry: traits.Registry.DeepCopy(),
 	}
