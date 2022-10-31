@@ -19,6 +19,7 @@ package maven
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/util/log"
 )
@@ -47,7 +48,7 @@ const (
 
 var mavenLogger = log.WithName("maven.build")
 
-func mavenLogHandler(s string) {
+func mavenLogHandler(s string) string {
 	mavenLog, parseError := parseLog(s)
 	if parseError == nil {
 		normalizeLog(mavenLog)
@@ -57,6 +58,13 @@ func mavenLogHandler(s string) {
 		// etc). The build may still have succeeded, though.
 		nonNormalizedLog(s)
 	}
+
+	// Return the error message according to maven log
+	if strings.HasPrefix(s, "[ERROR]") {
+		return s
+	}
+
+	return ""
 }
 
 func parseLog(line string) (mavenLog, error) {
@@ -72,10 +80,15 @@ func normalizeLog(mavenLog mavenLog) {
 	case INFO, WARN:
 		mavenLogger.Info(mavenLog.Msg)
 	case ERROR, FATAL:
-		mavenLogger.Errorf(nil, mavenLog.Msg)
+		mavenLogger.Error(nil, mavenLog.Msg)
 	}
 }
 
 func nonNormalizedLog(rawLog string) {
-	mavenLogger.Info(rawLog)
+	// Distinguish an error message from the rest
+	if strings.HasPrefix(rawLog, "[ERROR]") {
+		mavenLogger.Error(nil, rawLog)
+	} else {
+		mavenLogger.Info(rawLog)
+	}
 }
