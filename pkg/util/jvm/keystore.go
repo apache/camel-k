@@ -33,8 +33,8 @@ import (
 var (
 	logger = log.WithName("keytool")
 
-	loggerInfo  = func(s string) { logger.Info(s) }
-	loggerError = func(s string) { logger.Error(nil, s) }
+	loggerInfo  = func(s string) string { logger.Info(s); return "" }
+	loggerError = func(s string) string { logger.Error(nil, s); return "" }
 )
 
 func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePass string, data [][]byte) error {
