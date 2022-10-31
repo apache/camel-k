@@ -48,6 +48,16 @@ func newCamelTrait() Trait {
 	}
 }
 
+// IsPlatformTrait overrides base class method.
+func (t *camelTrait) IsPlatformTrait() bool {
+	return true
+}
+
+// InfluencesKit overrides base class method.
+func (t *camelTrait) InfluencesKit() bool {
+	return true
+}
+
 func (t *camelTrait) Configure(e *Environment) (bool, error) {
 	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, errors.New("trait camel cannot be disabled")
@@ -149,11 +159,6 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 	e.CamelCatalog = catalog
 
 	return nil
-}
-
-// IsPlatformTrait overrides base class method.
-func (t *camelTrait) IsPlatformTrait() bool {
-	return true
 }
 
 func (t *camelTrait) computeConfigMaps(e *Environment) []ctrl.Object {
