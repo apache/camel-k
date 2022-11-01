@@ -61,7 +61,7 @@ func TestBasicUninstall(t *testing.T) {
 
 		Eventually(Configmap(ns, "camel-k-maven-settings")).Should(BeNil())
 		Eventually(OperatorPod(ns), TestTimeoutMedium).Should(BeNil())
-		Eventually(KameletList(ns)).Should(BeEmpty())
+		Eventually(KameletList(ns), TestTimeoutMedium).Should(BeEmpty())
 	})
 }
 
