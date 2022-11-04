@@ -405,7 +405,6 @@
 - Global vs local operator  [\#2177](https://github.com/apache/camel-k/issues/2177)
 - Refactoring dump function [\#2172](https://github.com/apache/camel-k/issues/2172)
 - In troubleshooting documentation section, provide information on which logs to look at [\#2031](https://github.com/apache/camel-k/issues/2031)
-- Add support for multiple data types and schemas in Kamelets [\#1980](https://github.com/apache/camel-k/issues/1980)
 - Make the Camel K operator more involved in the Knative SinkBinding flow [\#1976](https://github.com/apache/camel-k/issues/1976)
 - Take into account consumer/producer dependencies [\#1808](https://github.com/apache/camel-k/issues/1808)
 - Camel K on GKE doesn't seem to work [\#1770](https://github.com/apache/camel-k/issues/1770)
