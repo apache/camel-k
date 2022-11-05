@@ -12,6 +12,8 @@
 - Runtime trait failure [\#3758](https://github.com/apache/camel-k/issues/3758)
 - Option ```--registry-insecure false``` takes no effect when using local dependencies ```-d file:///path/xxx.jar```  [\#3455](https://github.com/apache/camel-k/issues/3455)
 - Prometheus monitoring doc doesn't help to get monitoring working [\#3428](https://github.com/apache/camel-k/issues/3428)
+- Integration Platform issues when using the Operator  [\#3297](https://github.com/apache/camel-k/issues/3297)
+- Make knative broker name configurable [\#2864](https://github.com/apache/camel-k/issues/2864)
 - integration platform: add conditions [\#2555](https://github.com/apache/camel-k/issues/2555)
 
 ## [1.10.3-nightly](https://github.com/apache/camel-k/tree/1.10.3-nightly) (2022-10-25)
