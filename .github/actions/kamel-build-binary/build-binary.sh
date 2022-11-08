@@ -107,6 +107,6 @@ echo "Kamel version installed: $(kamel version)"
 BUILD_BINARY_LOCAL_IMAGE_NAME="${REGISTRY_PULL_HOST}/${IMAGE_NAMESPACE}/camel-k"
 BUILD_BINARY_LOCAL_IMAGE_VERSION="$(make get-version)"
 echo "Setting build-binary-local-image-name to ${BUILD_BINARY_LOCAL_IMAGE_NAME}"
-echo "::set-output name=build-binary-local-image-name::${BUILD_BINARY_LOCAL_IMAGE_NAME}"
+echo "build-binary-local-image-name=${BUILD_BINARY_LOCAL_IMAGE_NAME}" >> $GITHUB_OUTPUT
 echo "Setting build-binary-local-image-name-version to ${BUILD_BINARY_LOCAL_IMAGE_VERSION}"
-echo "::set-output name=build-binary-local-image-version::${BUILD_BINARY_LOCAL_IMAGE_VERSION}"
+echo "build-binary-local-image-version=${BUILD_BINARY_LOCAL_IMAGE_VERSION}" >> $GITHUB_OUTPUT

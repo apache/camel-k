@@ -259,4 +259,4 @@ docker build . -f catalog.Dockerfile -t ${LOCAL_IIB}
 docker push ${LOCAL_IIB}
 BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX="${REGISTRY_PULL_HOST}/${IMAGE_NAMESPACE}/camel-k-iib:${IMAGE_VERSION}"
 echo "Setting build-bundle-image-bundle-index to ${BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX}"
-echo "::set-output name=build-bundle-image-bundle-index::${BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX}"
+echo "build-bundle-image-bundle-index=${BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX}" >> $GITHUB_OUTPUT

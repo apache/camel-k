@@ -83,25 +83,25 @@ if [ ! $(has_property image-registry-push-host) ]; then
   exit 1
 fi
 
-echo "::set-output name=cluster-image-registry-push-host::$(get_property image-registry-push-host)"
-echo "::set-output name=cluster-image-registry-pull-host::$(get_property image-registry-pull-host)"
-echo "::set-output name=cluster-image-registry-insecure::$(get_property image-registry-insecure)"
-echo "::set-output name=cluster-catalog-source-name::$(get_property catalog-source-name)"
-echo "::set-output name=cluster-catalog-source-namespace::$(get_property catalog-source-namespace)"
-echo "::set-output name=cluster-global-operator-namespace::$(get_property global-operator-namespace)"
+echo "cluster-image-registry-push-host=$(get_property image-registry-push-host)" >> $GITHUB_OUTPUT
+echo "cluster-image-registry-pull-host=$(get_property image-registry-pull-host)" >> $GITHUB_OUTPUT
+echo "cluster-image-registry-insecure=$(get_property image-registry-insecure)" >> $GITHUB_OUTPUT
+echo "cluster-catalog-source-name=$(get_property catalog-source-name)" >> $GITHUB_OUTPUT
+echo "cluster-catalog-source-namespace=$(get_property catalog-source-namespace)" >> $GITHUB_OUTPUT
+echo "cluster-global-operator-namespace=$(get_property global-operator-namespace)" >> $GITHUB_OUTPUT
 
 #
 # Export the image namespace if defined in the cluster config
 #
 if [ $(has_property image-namespace) ]; then
-  echo "::set-output name=cluster-image-namespace::$(get_property image-namespace)"
+  echo "cluster-image-namespace=$(get_property image-namespace)" >> $GITHUB_OUTPUT
 fi
 
 #
 # Export the context used for admin and user
 #
-echo "::set-output name=cluster-kube-admin-user-ctx::$(get_property kube-admin-user-ctx)"
-echo "::set-output name=cluster-kube-user-ctx::$(get_property kube-user-ctx)"
+echo "cluster-kube-admin-user-ctx=$(get_property kube-admin-user-ctx)" >> $GITHUB_OUTPUT
+echo "cluster-kube-user-ctx=$(get_property kube-user-ctx)" >> $GITHUB_OUTPUT
 
 #
 # Keep values private in the log
@@ -114,7 +114,7 @@ echo "::add-mask::$(get_property kube-user-ctx)"
 #
 # Export the flag for olm capability
 #
-echo "::set-output name=cluster-has-olm::$(get_property has-olm)"
+echo "cluster-has-olm=$(get_property has-olm)" >> $GITHUB_OUTPUT
 
 #
 # Login to docker if registry is externally secured

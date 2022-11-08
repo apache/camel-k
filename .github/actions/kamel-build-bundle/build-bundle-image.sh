@@ -134,4 +134,4 @@ fi
 #
 PULL_BUNDLE_LOCAL_IMAGE="${REGISTRY_PULL_HOST}/${IMAGE_NAMESPACE}/${BUNDLE_IMAGE_BASE_NAME}:${IMAGE_VERSION}"
 echo "Setting build-bundle-local-image to ${PULL_BUNDLE_LOCAL_IMAGE}"
-echo "::set-output name=build-bundle-local-image::${PULL_BUNDLE_LOCAL_IMAGE}"
+echo "build-bundle-local-image=${PULL_BUNDLE_LOCAL_IMAGE}" >> $GITHUB_OUTPUT
