@@ -69,25 +69,25 @@ while getopts ":a:b:c:g:n:o:p:q:s:u:" opt; do
 done
 shift $((OPTIND-1))
 
-echo "::set-output name=cluster-image-registry-push-host::${PUSH_HOST}"
-echo "::set-output name=cluster-image-registry-pull-host::${PULL_HOST}"
-echo "::set-output name=cluster-image-registry-insecure::${INSECURE}"
-echo "::set-output name=cluster-kube-admin-user-ctx::${ADMIN_USER_CTX}"
-echo "::set-output name=cluster-kube-user-ctx::${USER_CTX}"
+echo "cluster-image-registry-push-host=${PUSH_HOST}" >> $GITHUB_OUTPUT
+echo "cluster-image-registry-pull-host=${PULL_HOST}" >> $GITHUB_OUTPUT
+echo "cluster-image-registry-insecure=${INSECURE}" >> $GITHUB_OUTPUT
+echo "cluster-kube-admin-user-ctx=${ADMIN_USER_CTX}" >> $GITHUB_OUTPUT
+echo "cluster-kube-user-ctx=${USER_CTX}" >> $GITHUB_OUTPUT
 
 # Set the image namespace
-echo "::set-output name=cluster-image-namespace::${IMAGE_NAMESPACE}"
+echo "cluster-image-namespace=${IMAGE_NAMESPACE}" >> $GITHUB_OUTPUT
 
 # Set the catalog source
-echo "::set-output name=cluster-catalog-source-name::${CATALOG_SOURCE_NAME}"
-echo "::set-output name=cluster-catalog-source-namespace::${CATALOG_SOURCE_NAMESPACE}"
+echo "cluster-catalog-source-name=${CATALOG_SOURCE_NAME}" >> $GITHUB_OUTPUT
+echo "cluster-catalog-source-namespace=${CATALOG_SOURCE_NAMESPACE}" >> $GITHUB_OUTPUT
 
 #
 # Export the flag for olm capability
 #
-echo "::set-output name=cluster-has-olm::${HAS_OLM}"
+echo "cluster-has-olm=${HAS_OLM}" >> $GITHUB_OUTPUT
 
 #
 # Export the flag for testing using global operator
 #
-echo "::set-output name=cluster-global-operator-namespace::${GLOBAL_OPERATOR_NAMESPACE}"
+echo "cluster-global-operator-namespace=${GLOBAL_OPERATOR_NAMESPACE}" >> $GITHUB_OUTPUT

@@ -43,16 +43,17 @@ runs:
           # Have custom cluster-config-data so override cluster-type
           #
           echo "Have cluster-config-data so setting cluster-type to custom"
-          echo "CLUSTER_TYPE=custom" >> $GITHUB_ENV
+          calculated_cluster_type=custom
         elif [ -n "${{ inputs.cluster-type }}" ]; then
           echo "Cluster-type specified so setting accordingly"
-          echo "CLUSTER_TYPE=${{ inputs.cluster-type }}" >> $GITHUB_ENV
+          calculated_cluster_type=${{ inputs.cluster-type }}
         else
           echo "Info: No cluster configuration supplied. Default to kind."
-          echo "CLUSTER_TYPE=kind" >> $GITHUB_ENV
+          calculated_cluster_type=kind
         fi
 
-        echo "CLUSTER_TYPE -> ${{ env.CLUSTER_TYPE }}"
+        echo "CLUSTER_TYPE -> ${calculated_cluster_type}"
+        echo "CLUSTER_TYPE=${calculated_cluster_type}" >> $GITHUB_ENV
 
     - id: execute-kind
       name: Maybe Execute Kind Cluster
@@ -134,14 +135,14 @@ runs:
         if [ "${{ steps.cluster-config.outputs.cluster-has-olm }}" == "true" ]; then
           # OLM already installed by default
           echo "OLM already available in cluster"
-          echo "::set-output name=cluster-has-olm::${{ steps.cluster-config.outputs.cluster-has-olm }}"
+          echo "cluster-has-olm=${{ steps.cluster-config.outputs.cluster-has-olm }}" >> $GITHUB_OUTPUT
           exit 0
         fi
 
         if [ "${{ inputs.require-olm }}" != "true" ]; then
           # OLM not explicitly requested
           echo "OLM not explicity required for testing"
-          echo "::set-output name=cluster-has-olm::$(echo false)"
+          echo "cluster-has-olm=$(echo false)" >> $GITHUB_OUTPUT
           exit 0
         fi
 
@@ -176,7 +177,7 @@ runs:
         echo "Return to original kube context"
         kubectl config use-context "${ctx}"
 
-        echo "::set-output name=cluster-has-olm::$(echo true)"
+        echo "cluster-has-olm=$(echo true)" >> $GITHUB_OUTPUT
 
         echo "Complete"
 

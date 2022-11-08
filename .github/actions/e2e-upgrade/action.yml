@@ -75,7 +75,7 @@ runs:
       mv /tmp/kamel ${RELEASED_KAMEL_BINARY}
       if [ $? == 0 ]; then
         echo "Info: Kamel version installed: $(${RELEASED_KAMEL_BINARY} version)"
-        echo "::set-output name=released-kamel-binary::${RELEASED_KAMEL_BINARY}"
+        echo "released-kamel-binary=${RELEASED_KAMEL_BINARY}" >> $GITHUB_OUTPUT
       else
         echo "Error: Failed to install kamel binary ${KAMEL_VERSION}"
         exit 1

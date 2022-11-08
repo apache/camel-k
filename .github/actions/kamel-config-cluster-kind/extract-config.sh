@@ -26,19 +26,19 @@
 set -e
 
 # Kind has the same interface for both pushing and pulling images in its registry
-echo "::set-output name=cluster-image-registry-push-host::${KIND_REGISTRY}"
-echo "::set-output name=cluster-image-registry-pull-host::${KIND_REGISTRY}"
-echo "::set-output name=cluster-image-registry-insecure::$(echo true)"
+echo "cluster-image-registry-push-host=${KIND_REGISTRY}" >> $GITHUB_OUTPUT
+echo "cluster-image-registry-pull-host=${KIND_REGISTRY}" >> $GITHUB_OUTPUT
+echo "cluster-image-registry-insecure=$(echo true)" >> $GITHUB_OUTPUT
 
 #
 # Export the context used for admin and user
 # Since kind has no rbac switched on then these can be the same
 #
-echo "::set-output name=cluster-kube-admin-user-ctx::$(kubectl config current-context)"
-echo "::set-output name=cluster-kube-user-ctx::$(kubectl config current-context)"
+echo "cluster-kube-admin-user-ctx=$(kubectl config current-context)" >> $GITHUB_OUTPUT
+echo "cluster-kube-user-ctx=$(kubectl config current-context)" >> $GITHUB_OUTPUT
 
 # Set the image namespace
-echo "::set-output name=cluster-image-namespace::$(echo apache)"
+echo "cluster-image-namespace=$(echo apache)" >> $GITHUB_OUTPUT
 
 #
 # cluster-catalog-source-namespace intentionally blank as OLM not routinely installed
@@ -48,4 +48,4 @@ echo "::set-output name=cluster-image-namespace::$(echo apache)"
 #
 # Export the flag for olm capability
 #
-echo "::set-output name=cluster-has-olm::$(echo false)"
+echo "cluster-has-olm=$(echo false)" >> $GITHUB_OUTPUT

@@ -105,7 +105,7 @@ runs:
         oc login -u system:admin
 
         # Export the context used for admin login
-        echo "::set-output name=cluster-kube-admin-user-ctx::$(oc config current-context)"
+        echo "cluster-kube-admin-user-ctx=$(oc config current-context)" >> $GITHUB_OUTPUT
 
         # Aggregate pod eviction permission to the default admin role
         cat <<EOF | oc apply -f -
@@ -192,18 +192,18 @@ runs:
         oc login -u developer
 
         # Export the context used for developer login
-        echo "::set-output name=cluster-kube-user-ctx::$(oc config current-context)"
+        echo "cluster-kube-user-ctx=$(oc config current-context)" >> $GITHUB_OUTPUT
 
     - id: extract-config
       shell: bash
       if: ${{ env.CLUSTER_OCP3_CONFIGURED != 'true' }}
       run: |
-        echo "::set-output name=cluster-image-registry-pull-host::"
-        echo "::set-output name=cluster-image-registry-push-host::"
-        echo "::set-output name=cluster-image-registry-insecure::$(echo true)"
-        echo "::set-output name=cluster-has-olm::$(echo false)"
-        echo "::set-output name=cluster-image-namespace::$(echo apache)"
-        echo "::set-output name=cluster-global-operator-namespace::$(echo openshift-operators)"
+        echo "cluster-image-registry-pull-host=" >> $GITHUB_OUTPUT
+        echo "cluster-image-registry-push-host=" >> $GITHUB_OUTPUT
+        echo "cluster-image-registry-insecure=$(echo true)" >> $GITHUB_OUTPUT
+        echo "cluster-has-olm=$(echo false)" >> $GITHUB_OUTPUT
+        echo "cluster-image-namespace=$(echo apache)" >> $GITHUB_OUTPUT
+        echo "cluster-global-operator-namespace=$(echo openshift-operators)" >> $GITHUB_OUTPUT
         /* cluster-catalog-source-namespace intentionally blank due to using straight docker */
 
 outputs:
