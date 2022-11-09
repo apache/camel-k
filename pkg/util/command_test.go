@@ -45,17 +45,16 @@ var (
 )
 
 func TestRunAndLog(t *testing.T) {
-	cmd := exec.CommandContext(context.Background(), "/usr/bin/date")
+	cmd := exec.CommandContext(context.Background(), "date")
 	err := RunAndLog(context.Background(), cmd, loggerInfo, loggerError)
 
 	assert.Nil(t, err)
 }
 
-// Let's comment this because the Error logging might be different on different Linux distribution
-/*func TestRunAndLogInvalid(t *testing.T) {
-	cmd := exec.CommandContext(context.Background(), "/usr/bin/date", "-dsa")
+func TestRunAndLogInvalid(t *testing.T) {
+	cmd := exec.CommandContext(context.Background(), "date", "-dsa")
 	err := RunAndLog(context.Background(), cmd, loggerInfo, loggerError)
 
 	assert.NotNil(t, err)
-	assert.Equal(t, "/usr/bin/date: invalid date ‘sa’: exit status 1", err.Error())
-}*/
+	assert.ErrorContains(t, err, "exit status 1")
+}

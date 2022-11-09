@@ -27,7 +27,7 @@ import (
 )
 
 func TestRunAndLogErrorMvn(t *testing.T) {
-	cmd := exec.CommandContext(context.Background(), "/usr/bin/mvn", "package")
+	cmd := exec.CommandContext(context.Background(), "mvn", "package")
 	err := util.RunAndLog(context.Background(), cmd, mavenLogHandler, mavenLogHandler)
 
 	assert.NotNil(t, err)
