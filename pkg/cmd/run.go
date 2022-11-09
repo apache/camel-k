@@ -77,7 +77,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/watch"
 )
 
-const usageDependency = `A dependency that should be included, e.g., "-d camel:mail" for a Camel component, "-d mvn:org.my:app:1.0" for a Maven dependency, "-d http(s)://my-repo/my-dependency.jar|targetPath=<path>&registry=<registry_URL>&skipChecksums=<true>&skipPOM=<true>" for custom dependencies located on an http server or "file://localPath[?targetPath=<path>&registry=<registry_URL>&skipChecksums=<true>&skipPOM=<true>]" for local files (experimental)`
+const usageDependency = `A dependency that should be included, e.g., "-d camel:mail" for a Camel component, "-d mvn:org.my:app:1.0" for a Maven dependency, "-d http(s)://my-repo/my-dependency.jar|targetPath=<path>&registry=<registry_URL>&skipChecksums=<true>&skipPOM=<true>&classpath=<true>" for custom dependencies located on an http server or "file://localPath[?targetPath=<path>&registry=<registry_URL>&skipChecksums=<true>&skipPOM=<true>&classpath=<true>]" for local files`
 
 func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) {
 	options := runCmdOptions{
@@ -974,6 +974,10 @@ func (o *runCmdOptions) skipPom() bool {
 	return o.RegistryOptions.Get("skipPOM") == "true"
 }
 
+func (o *runCmdOptions) classpath() bool {
+	return o.RegistryOptions.Get("classpath") == "true"
+}
+
 func (o *runCmdOptions) getTargetPath() string {
 	return o.RegistryOptions.Get("targetPath")
 }
@@ -1048,6 +1052,9 @@ func (o *runCmdOptions) uploadDependency(platform *v1.IntegrationPlatform, item 
 				return err
 			}
 			dependency := fmt.Sprintf("registry-mvn:%s:%s:%s:%s@%s", gav.GroupID, gav.ArtifactID, gav.Type, gav.Version, mountPath)
+			if o.classpath() {
+				dependency = fmt.Sprintf("%s@%s", dependency, "classpath")
+			}
 			o.PrintfVerboseOutf(cmd, "Added %s to the Integration's dependency list \n", dependency)
 			integration.Spec.AddDependency(dependency)
 			return o.uploadAsMavenArtifact(gav, path, platform, integration.Namespace, options, cmd)
