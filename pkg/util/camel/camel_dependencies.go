@@ -208,15 +208,20 @@ func addRegistryMavenDependency(project *maven.Project, dependency string) error
 	if err != nil {
 		return err
 	}
-	plugin := getOrCreateBuildPlugin(project, "com.googlecode.maven-download-plugin", "download-maven-plugin", "1.6.7")
+	plugin := getOrCreateBuildPlugin(project, "com.googlecode.maven-download-plugin", "download-maven-plugin", "1.6.8")
+	outputDirectory := "../context"
+	isClasspath := len(mapping) == 3 && mapping[2] == "classpath"
+	if isClasspath {
+		outputDirectory = "src/main/resources"
+	}
 	exec := maven.Execution{
 		ID:    fmt.Sprint(len(plugin.Executions)),
-		Phase: "package",
+		Phase: "validate",
 		Goals: []string{
 			"artifact",
 		},
 		Configuration: map[string]string{
-			"outputDirectory": path.Join("../context", filepath.Dir(outputFileRelativePath)),
+			"outputDirectory": path.Join(outputDirectory, filepath.Dir(outputFileRelativePath)),
 			"outputFileName":  filepath.Base(outputFileRelativePath),
 			"groupId":         gav.GroupID,
 			"artifactId":      gav.ArtifactID,

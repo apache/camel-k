@@ -126,6 +126,17 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("foobar"))
 		})
+		t.Run("dependency can be used at build time", func(t *testing.T) {
+			// Create integration that should run an Xslt transformation whose template needs to be present at build time
+			name := "xslt"
+			Expect(KamelRunWithID(operatorID, ns, "files/classpath/Xslt.java", "--name", name,
+				"-d", "file://files/classpath/cheese.xsl?targetPath=xslt/cheese.xsl&classpath=true",
+			).Execute()).To(Succeed())
+
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("<cheese><item>A</item></cheese>"))
+		})
 
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
