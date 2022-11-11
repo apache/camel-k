@@ -11,6 +11,7 @@
 - E2E - No longer able to run native build tests with Quarkus 2.13.0 \(Camel Catalog 1.15.x\) [\#3773](https://github.com/apache/camel-k/issues/3773)
 - Runtime trait failure [\#3758](https://github.com/apache/camel-k/issues/3758)
 - Option ```--registry-insecure false``` takes no effect when using local dependencies ```-d file:///path/xxx.jar```  [\#3455](https://github.com/apache/camel-k/issues/3455)
+- Unable to run an integration on Minikube [\#3442](https://github.com/apache/camel-k/issues/3442)
 - Prometheus monitoring doc doesn't help to get monitoring working [\#3428](https://github.com/apache/camel-k/issues/3428)
 - Upgrade can result in integration being rebuilt using the old integrationkit [\#3359](https://github.com/apache/camel-k/issues/3359)
 - Integration Platform issues when using the Operator  [\#3297](https://github.com/apache/camel-k/issues/3297)
