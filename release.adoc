@@ -107,6 +107,17 @@ git commit -m "preparing for next release"
 git push upstream main
 ```
 
+If you are on an active branch and you're going to release on it the command will be
+
+Sync the main branch (with your changes) with upstream.
+
+```
+git add *
+git commit -m "preparing for next release"
+# assuming write permissions
+git push upstream <branch_name>
+```
+
 Now the release on staging can be executed.
 
 Change the version on Makefile to next version of camel-k (usually, just remove '-SNAPSHOT' from the version)
