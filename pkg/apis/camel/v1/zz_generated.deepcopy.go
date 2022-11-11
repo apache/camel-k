@@ -828,6 +828,11 @@ func (in *IntegrationKitTraits) DeepCopyInto(out *IntegrationKitTraits) {
 		*out = new(trait.BuilderTrait)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Camel != nil {
+		in, out := &in.Camel, &out.Camel
+		*out = new(trait.CamelTrait)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Quarkus != nil {
 		in, out := &in.Quarkus, &out.Quarkus
 		*out = new(trait.QuarkusTrait)
@@ -836,11 +841,6 @@ func (in *IntegrationKitTraits) DeepCopyInto(out *IntegrationKitTraits) {
 	if in.Registry != nil {
 		in, out := &in.Registry, &out.Registry
 		*out = new(trait.RegistryTrait)
-		(*in).DeepCopyInto(*out)
-	}
-	if in.Camel != nil {
-		in, out := &in.Camel, &out.Camel
-		*out = new(trait.CamelTrait)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.Addons != nil {

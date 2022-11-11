@@ -1572,6 +1572,13 @@ IntegrationKitTraits defines traits assigned to an `IntegrationKit`
 
 The builder trait is internally used to determine the best strategy to build and configure IntegrationKits.
 
+|`camel` +
+*xref:#_camel_apache_org_v1_trait_CamelTrait[CamelTrait]*
+|
+
+
+The Camel trait sets up Camel configuration.
+
 |`quarkus` +
 *xref:#_camel_apache_org_v1_trait_QuarkusTrait[QuarkusTrait]*
 |
@@ -1587,13 +1594,6 @@ NOTE: Compiling to a native executable, i.e. when using `package-type=native`, i
 
 
 The Registry trait sets up Maven to use the Image registry as a Maven repository.
-
-|`camel` +
-*xref:#_camel_apache_org_v1_trait_CamelTrait[CamelTrait]*
-|
-
-
-The Camel trait sets up Camel configuration.
 
 |`addons` +
 *xref:#_camel_apache_org_v1_AddonTrait[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.AddonTrait]*
