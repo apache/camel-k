@@ -23,12 +23,12 @@ spec:
 [[kameletbindings-error-handler-types]]
 == Error Handler Types
 
-We have different types of error handler: `ǹone`, `log` and `sink`. The `errorHandler` parameter is optional.
+We have different types of error handler: `none`, `log` and `sink`. The `errorHandler` parameter is optional.
 
 [[kameletbindings-error-handler-none]]
 === No error handler
 
-There may be certain cases where you want to just ignore any failure happening on your integration. In this situation just use a `ǹone` error handler.
+There may be certain cases where you want to just ignore any failure happening on your integration. In this situation just use a `none` error handler.
 
 [source,yaml]
 ----
