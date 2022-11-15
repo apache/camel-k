@@ -21,36 +21,36 @@ under the License.
 
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
-    <profiles>
-        <profile>
-            <id>apache</id>
-            <repositories>
-				<repository>
-					<id>apache-snapshots</id>
-					<name>Apache Snapshots Repository</name>
-					<url>https://repository.apache.org/content/repositories/snapshots-group</url>
-					<releases>
-						<enabled>false</enabled>
-						<updatePolicy>never</updatePolicy>
-					</releases>
-					<snapshots>
-						<enabled>true</enabled>
-						<updatePolicy>always</updatePolicy>
-					</snapshots>
-				</repository>
-				<repository>
-					<id>apache-staging</id>
-					<name>Apache Staging Repository</name>
-					<url>https://repository.apache.org/content/repositories/orgapachecamel-1484</url>
-					<releases>
-						<enabled>true</enabled>
-						<updatePolicy>never</updatePolicy>
-					</releases>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</repository>
-	    	</repositories>
-        </profile>
-    </profiles>
+  <profiles>
+    <profile>
+      <id>apache</id>
+      <repositories>
+        <repository>
+          <id>apache-snapshots</id>
+          <name>Apache Snapshots Repository</name>
+          <url>https://repository.apache.org/content/repositories/snapshots-group</url>
+          <releases>
+            <enabled>false</enabled>
+            <updatePolicy>never</updatePolicy>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+            <updatePolicy>always</updatePolicy>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>apache-staging</id>
+          <name>Apache Staging Repository</name>
+          <url>https://repository.apache.org/content/repositories/orgapachecamel-1484</url>
+          <releases>
+            <enabled>true</enabled>
+            <updatePolicy>never</updatePolicy>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
 </settings>
