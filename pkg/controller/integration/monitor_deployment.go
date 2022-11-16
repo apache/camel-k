@@ -37,7 +37,9 @@ var _ controller = &deploymentController{}
 
 func (c *deploymentController) checkReadyCondition(ctx context.Context) (bool, error) {
 	// Check the Deployment progression
-	if progressing := kubernetes.GetDeploymentCondition(*c.obj, appsv1.DeploymentProgressing); progressing != nil && progressing.Status == corev1.ConditionFalse && progressing.Reason == "ProgressDeadlineExceeded" {
+	if progressing := kubernetes.GetDeploymentCondition(*c.obj, appsv1.DeploymentProgressing); progressing != nil &&
+		progressing.Status == corev1.ConditionFalse &&
+		progressing.Reason == "ProgressDeadlineExceeded" {
 		c.integration.Status.Phase = v1.IntegrationPhaseError
 		setReadyConditionError(c.integration, progressing.Message)
 		return true, nil
