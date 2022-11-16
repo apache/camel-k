@@ -39,7 +39,7 @@ func TestNativeBinding(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-native-binding"
 		Expect(KamelInstallWithID(operatorID, ns,
-			"--build-timeout", "60m0s",
+			"--build-timeout", "90m0s",
 			"--operator-resources", "limits.memory=4.5Gi",
 			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=3g",
 		).Execute()).To(Succeed())
@@ -80,8 +80,12 @@ func TestNativeBinding(t *testing.T) {
 				from, to,
 				map[string]string{"message": message}, map[string]string{})()).To(Succeed())
 
+			// ====================================
+			// !!! THE MOST TIME-CONSUMING PART !!!
+			// ====================================
 			Eventually(Kits(ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
 				TestTimeoutVeryLong).Should(HaveLen(1))
+
 			nativeKit := Kits(ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady))()[0]
 			Eventually(IntegrationKit(ns, bindingName), TestTimeoutShort).Should(Equal(nativeKit.Name))
 
