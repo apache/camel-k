@@ -59,7 +59,8 @@ func (c *cronJobController) checkReadyCondition(ctx context.Context) (bool, erro
 			t = c.lastCompletedJob.CreationTimestamp.Time
 		}
 		if c.lastCompletedJob != nil {
-			if failed := kubernetes.GetJobCondition(*c.lastCompletedJob, batchv1.JobFailed); failed != nil && failed.Status == corev1.ConditionTrue {
+			if failed := kubernetes.GetJobCondition(*c.lastCompletedJob, batchv1.JobFailed); failed != nil &&
+				failed.Status == corev1.ConditionTrue {
 				c.integration.SetReadyCondition(corev1.ConditionFalse,
 					v1.IntegrationConditionLastJobFailedReason,
 					fmt.Sprintf("last job %s failed: %s", c.lastCompletedJob.Name, failed.Message))
@@ -88,13 +89,15 @@ func (c *cronJobController) updateReadyCondition(readyPods []corev1.Pod) bool {
 			v1.IntegrationConditionCronJobActiveReason, "cronjob active")
 		return true
 
-	case c.obj.Spec.SuccessfulJobsHistoryLimit != nil && *c.obj.Spec.SuccessfulJobsHistoryLimit == 0 && c.obj.Spec.FailedJobsHistoryLimit != nil && *c.obj.Spec.FailedJobsHistoryLimit == 0:
+	case c.obj.Spec.SuccessfulJobsHistoryLimit != nil && *c.obj.Spec.SuccessfulJobsHistoryLimit == 0 &&
+		c.obj.Spec.FailedJobsHistoryLimit != nil && *c.obj.Spec.FailedJobsHistoryLimit == 0:
 		c.integration.SetReadyCondition(corev1.ConditionTrue,
 			v1.IntegrationConditionCronJobCreatedReason, "no jobs history available")
 		return true
 
 	case c.lastCompletedJob != nil:
-		if complete := kubernetes.GetJobCondition(*c.lastCompletedJob, batchv1.JobComplete); complete != nil && complete.Status == corev1.ConditionTrue {
+		if complete := kubernetes.GetJobCondition(*c.lastCompletedJob, batchv1.JobComplete); complete != nil &&
+			complete.Status == corev1.ConditionTrue {
 			c.integration.SetReadyCondition(corev1.ConditionTrue,
 				v1.IntegrationConditionLastJobSucceededReason,
 				fmt.Sprintf("last job %s completed successfully", c.lastCompletedJob.Name))
