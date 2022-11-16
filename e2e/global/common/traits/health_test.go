@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	. "github.com/onsi/gomega"
 
@@ -52,6 +53,7 @@ func TestHealthTrait(t *testing.T) {
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("Readiness condition with stopped route", func(t *testing.T) {
+			name := "java"
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"-t", "health.enabled=true",
 				// Enable Jolokia for the test to stop the Camel route
@@ -60,12 +62,13 @@ func TestHealthTrait(t *testing.T) {
 				"-t", "jolokia.protocol=http",
 			).Execute()).To(Succeed())
 
-			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationPhase(ns, "java"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
-			Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			pod := IntegrationPod(ns, "java")()
+			pod := IntegrationPod(ns, name)()
 
 			// Stop the Camel route
 			request := map[string]string{
@@ -84,7 +87,8 @@ func TestHealthTrait(t *testing.T) {
 			Expect(response).To(ContainSubstring(`"status":200`))
 
 			// Check the ready condition has turned falsy
-			Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionFalse))
 			// And it contains details about the runtime state
 
 			//
@@ -98,12 +102,42 @@ func TestHealthTrait(t *testing.T) {
 			// status: "False"
 			// type: Ready
 			//
-			Eventually(IntegrationCondition(ns, "java", v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
+			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
 				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
-				WithTransform(IntegrationConditionMessage, HavePrefix(fmt.Sprintf("[Pod %s runtime is not ready: map[check.kind:READINESS route.id:route1 route.status:Stopped]", pod.Name))),
+				WithTransform(IntegrationConditionMessage, HavePrefix(
+					fmt.Sprintf(
+						"[Pod %s runtime is not ready: map[check.kind:READINESS route.id:route1 route.status:Stopped]",
+						pod.Name))),
 			))
 			// Check the Integration is still in running phase
-			Eventually(IntegrationPhase(ns, "java"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+			Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+
+			// Clean-up
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("Readiness condition with never ready route", func(t *testing.T) {
+			name := "never-ready"
+			Expect(KamelRunWithID(operatorID, ns, "files/NeverReady.java",
+				"-t", "health.enabled=true",
+			).Execute()).To(Succeed())
+
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+			Consistently(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), 1*time.Minute).
+				Should(Equal(corev1.ConditionFalse))
+			Eventually(IntegrationPhase(ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
+
+			pod := IntegrationPod(ns, name)()
+
+			// Check that the error message is propagated from health checks even if deployment never becomes ready
+			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
+				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionErrorReason)),
+				WithTransform(IntegrationConditionMessage, HavePrefix(
+					fmt.Sprintf(
+						"[Pod %s runtime is not ready: map[check.kind:READINESS route.id:never-ready route.status:Stopped]",
+						pod.Name))),
+			))
 
 			// Clean-up
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
