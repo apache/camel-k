@@ -37,7 +37,8 @@ var _ controller = &knativeServiceController{}
 
 func (c *knativeServiceController) checkReadyCondition(ctx context.Context) (bool, error) {
 	// Check the KnativeService conditions
-	if ready := kubernetes.GetKnativeServiceCondition(*c.obj, servingv1.ServiceConditionReady); ready.IsFalse() && ready.GetReason() == "RevisionFailed" {
+	if ready := kubernetes.GetKnativeServiceCondition(*c.obj, servingv1.ServiceConditionReady); ready.IsFalse() &&
+		ready.GetReason() == "RevisionFailed" {
 		c.integration.Status.Phase = v1.IntegrationPhaseError
 		setReadyConditionError(c.integration, ready.Message)
 		return true, nil
