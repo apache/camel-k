@@ -76,11 +76,6 @@ type KameletSpec struct {
 	Sources []camelv1.SourceSpec `json:"sources,omitempty"`
 	// the main source in YAML DSL
 	Template *Template `json:"template,omitempty"`
-	// Deprecated: use Template instead
-	// the main source in YAML DSL
-	Flow *camelv1.Flow `json:"flow,omitempty"`
-	// Deprecated: unused
-	Authorization *AuthorizationSpec `json:"authorization,omitempty"`
 	// data specification types for the events consumed/produced by the Kamelet
 	Types map[EventSlot]EventTypeSpec `json:"types,omitempty"`
 	// Camel dependencies needed by the Kamelet
@@ -111,11 +106,6 @@ type EventTypeSpec struct {
 	MediaType string `json:"mediaType,omitempty"`
 	// the expected schema for the event
 	Schema *JSONSchemaProps `json:"schema,omitempty"`
-}
-
-// AuthorizationSpec is TODO (oauth information)
-// Deprecated: unused
-type AuthorizationSpec struct {
 }
 
 // KameletStatus defines the observed state of Kamelet

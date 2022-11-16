@@ -50,7 +50,7 @@ func Initialize(kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
 			fmt.Sprintf("Kamelet property %q is reserved and cannot be part of the schema", v1alpha1.KameletIDProperty),
 		)
 	}
-	if !v1alpha1.ValidKameletTemplate(kamelet) {
+	if !v1alpha1.ValidKamelet(kamelet) {
 		ok = false
 		target.Status.SetCondition(
 			v1alpha1.KameletConditionReady,

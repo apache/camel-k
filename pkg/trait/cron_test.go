@@ -249,8 +249,7 @@ func TestCronDeps(t *testing.T) {
 						Language: v1.LanguageJavaSource,
 					},
 				},
-				Resources: []v1.ResourceSpec{},
-				Traits:    v1.Traits{},
+				Traits: v1.Traits{},
 			},
 		},
 		IntegrationKit: &v1.IntegrationKit{
@@ -323,7 +322,6 @@ func TestCronDepsFallback(t *testing.T) {
 						Language: v1.LanguageJavaSource,
 					},
 				},
-				Resources: []v1.ResourceSpec{},
 				Traits: v1.Traits{
 					Cron: &traitv1.CronTrait{
 						Fallback: pointer.Bool(true),
@@ -402,7 +400,6 @@ func TestCronWithActiveDeadline(t *testing.T) {
 						Language: v1.LanguageJavaSource,
 					},
 				},
-				Resources: []v1.ResourceSpec{},
 				Traits: v1.Traits{
 					Cron: &traitv1.CronTrait{
 						ActiveDeadlineSeconds: pointer.Int64(120),
@@ -484,7 +481,6 @@ func TestCronWithBackoffLimit(t *testing.T) {
 						Language: v1.LanguageJavaSource,
 					},
 				},
-				Resources: []v1.ResourceSpec{},
 				Traits: v1.Traits{
 					Cron: &traitv1.CronTrait{
 						BackoffLimit: pointer.Int32(5),

@@ -63,9 +63,6 @@ spec:
           spec:
             description: the desired specification
             properties:
-              authorization:
-                description: 'Deprecated: unused'
-                type: object
               definition:
                 description: defines the formal configuration of the Kamelet
                 properties:
@@ -213,11 +210,6 @@ spec:
                 items:
                   type: string
                 type: array
-              flow:
-                description: 'Deprecated: use Template instead the main source in
-                  YAML DSL'
-                type: object
-                x-kubernetes-preserve-unknown-fields: true
               sources:
                 description: sources in any Camel DSL supported
                 items:

@@ -73,9 +73,6 @@ func parseErrorHandler(rawMessage v1alpha1.RawMessage) (v1alpha1.ErrorHandler, e
 			dst = new(v1alpha1.ErrorHandlerNone)
 		case v1alpha1.ErrorHandlerTypeLog:
 			dst = new(v1alpha1.ErrorHandlerLog)
-		// Deprecated: left for compatibility for some version
-		case v1alpha1.ErrorHandlerTypeDeadLetterChannel:
-			dst = new(v1alpha1.ErrorHandlerSink)
 		case v1alpha1.ErrorHandlerTypeSink:
 			dst = new(v1alpha1.ErrorHandlerSink)
 		default:

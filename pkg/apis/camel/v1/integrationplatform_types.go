@@ -34,19 +34,17 @@ type IntegrationPlatformSpec struct {
 	Profile TraitProfile `json:"profile,omitempty"`
 	// specify how to build the Integration/IntegrationKits
 	Build IntegrationPlatformBuildSpec `json:"build,omitempty"`
-	// Deprecated: not used
-	Resources IntegrationPlatformResourcesSpec `json:"resources,omitempty"`
 	// list of traits to be executed for all the Integration/IntegrationKits built from this IntegrationPlatform
 	Traits Traits `json:"traits,omitempty"`
+	// Deprecated:
+	// Use camel trait (camel.properties) to manage properties
+	// Use mount trait (mount.configs) to manage configs
+	// Use mount trait (mount.resources) to manage resources
+	// Use mount trait (mount.volumes) to manage volumes
 	// list of configuration properties to be attached to all the Integration/IntegrationKits built from this IntegrationPlatform
 	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
 	// configuration to be executed to all Kamelets controlled by this IntegrationPlatform
 	Kamelet IntegrationPlatformKameletSpec `json:"kamelet,omitempty"`
-}
-
-// IntegrationPlatformResourcesSpec contains platform related resources.
-// Deprecated: not used
-type IntegrationPlatformResourcesSpec struct {
 }
 
 // IntegrationPlatformStatus defines the observed state of IntegrationPlatform
@@ -126,13 +124,7 @@ type IntegrationPlatformBuildSpec struct {
 	Timeout *metav1.Duration `json:"timeout,omitempty"`
 	// Maven configuration used to build the Camel/Camel-Quarkus applications
 	Maven MavenSpec `json:"maven,omitempty"`
-	// Deprecated: Use PublishStrategyOptions instead
-	// enables Kaniko publish strategy cache
-	KanikoBuildCache *bool `json:"kanikoBuildCache,omitempty"`
-	// Deprecated: Use PublishStrategyOptions instead
-	//the Persistent Volume Claim used by Kaniko publish strategy, if cache is enabled
-	PersistentVolumeClaim string `json:"persistentVolumeClaim,omitempty"`
-	//
+	// Generic options that can used by each publish strategy
 	PublishStrategyOptions map[string]string `json:"PublishStrategyOptions,omitempty"`
 }
 

@@ -305,12 +305,6 @@ spec:
                       items:
                         type: string
                       type: array
-                    metadata:
-                      additionalProperties:
-                        type: string
-                      description: 'Deprecated: never used a set of general metadata
-                        for various purposes'
-                      type: object
                     version:
                       description: Maven Version
                       type: string
@@ -350,11 +344,6 @@ spec:
                             - groupId
                             type: object
                           type: array
-                        metadata:
-                          additionalProperties:
-                            type: string
-                          description: 'Deprecated: not in use'
-                          type: object
                       required:
                       - dependencies
                       type: object

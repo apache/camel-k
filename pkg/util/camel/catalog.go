@@ -95,8 +95,7 @@ func GenerateCatalog(
 	}
 
 	var caCerts [][]byte
-	// nolint: staticcheck
-	secrets := mergeSecrets(mvn.CASecrets, mvn.CASecret)
+	secrets := mvn.CASecrets
 	if secrets != nil {
 		caCerts, err = kubernetes.GetSecretsRefData(ctx, client, namespace, secrets)
 		if err != nil {

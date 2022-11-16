@@ -77,21 +77,14 @@ spec:
             description: the desired configuration
             properties:
               configuration:
-                description: 'configuration used by the kit TODO: we should deprecate
-                  in future releases in favour of mount, openapi or camel traits'
+                description: 'Deprecated: Use camel trait (camel.properties) to manage
+                  properties Use mount trait (mount.configs) to manage configs Use
+                  mount trait (mount.resources) to manage resources Use mount trait
+                  (mount.volumes) to manage volumes configuration used by the kit'
                 items:
                   description: ConfigurationSpec represents a generic configuration
                     specification
                   properties:
-                    resourceKey:
-                      description: 'Deprecated: no longer used'
-                      type: string
-                    resourceMountPoint:
-                      description: 'Deprecated: no longer used'
-                      type: string
-                    resourceType:
-                      description: 'Deprecated: no longer used'
-                      type: string
                     type:
                       description: 'represents the type of configuration, ie: property,
                         configmap, secret, ...'

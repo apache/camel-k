@@ -107,7 +107,6 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 		panic(err)
 	}
 
-	kanikoCache := false
 	res := &Environment{
 		Ctx:          context.TODO(),
 		CamelCatalog: c,
@@ -135,7 +134,6 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 					RuntimeVersion:         defaults.DefaultRuntimeVersion,
 					RuntimeProvider:        v1.RuntimeProviderQuarkus,
 					PublishStrategyOptions: map[string]string{},
-					KanikoBuildCache:       &kanikoCache,
 				},
 			},
 			Status: v1.IntegrationPlatformStatus{

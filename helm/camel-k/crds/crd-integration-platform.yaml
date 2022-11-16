@@ -73,6 +73,7 @@ spec:
                   PublishStrategyOptions:
                     additionalProperties:
                       type: string
+                    description: Generic options that can used by each publish strategy
                     type: object
                   baseImage:
                     description: a base image that can be used as base layer for all
@@ -86,39 +87,10 @@ spec:
                     - routine
                     - pod
                     type: string
-                  kanikoBuildCache:
-                    description: 'Deprecated: Use PublishStrategyOptions instead enables
-                      Kaniko publish strategy cache'
-                    type: boolean
                   maven:
                     description: Maven configuration used to build the Camel/Camel-Quarkus
                       applications
                     properties:
-                      caSecret:
-                        description: 'Deprecated: use CASecrets The Secret name and
-                          key, containing the CA certificate(s) used to connect to
-                          remote Maven repositories. It can contain X.509 certificates,
-                          and PKCS#7 formatted certificate chains. A JKS formatted
-                          keystore is automatically created to store the CA certificate(s),
-                          and configured to be used as a trusted certificate(s) by
-                          the Maven commands. Note that the root CA certificates are
-                          also imported into the created keystore.'
-                        properties:
-                          key:
-                            description: The key of the secret to select from.  Must
-                              be a valid secret key.
-                            type: string
-                          name:
-                            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                              TODO: Add other useful fields. apiVersion, kind, uid?'
-                            type: string
-                          optional:
-                            description: Specify whether the Secret or its key must
-                              be defined
-                            type: boolean
-                        required:
-                        - key
-                        type: object
                       caSecrets:
                         description: The Secrets name and key, containing the CA certificate(s)
                           used to connect to remote Maven repositories. It can contain
@@ -266,11 +238,6 @@ spec:
                             type: object
                         type: object
                     type: object
-                  persistentVolumeClaim:
-                    description: 'Deprecated: Use PublishStrategyOptions instead the
-                      Persistent Volume Claim used by Kaniko publish strategy, if
-                      cache is enabled'
-                    type: string
                   publishStrategy:
                     description: the strategy to adopt for publishing an Integration
                       base image
@@ -313,21 +280,16 @@ spec:
                   or OpenShift)
                 type: string
               configuration:
-                description: list of configuration properties to be attached to all
-                  the Integration/IntegrationKits built from this IntegrationPlatform
+                description: 'Deprecated: Use camel trait (camel.properties) to manage
+                  properties Use mount trait (mount.configs) to manage configs Use
+                  mount trait (mount.resources) to manage resources Use mount trait
+                  (mount.volumes) to manage volumes list of configuration properties
+                  to be attached to all the Integration/IntegrationKits built from
+                  this IntegrationPlatform'
                 items:
                   description: ConfigurationSpec represents a generic configuration
                     specification
                   properties:
-                    resourceKey:
-                      description: 'Deprecated: no longer used'
-                      type: string
-                    resourceMountPoint:
-                      description: 'Deprecated: no longer used'
-                      type: string
-                    resourceType:
-                      description: 'Deprecated: no longer used'
-                      type: string
                     type:
                       description: 'represents the type of configuration, ie: property,
                         configmap, secret, ...'
@@ -363,9 +325,6 @@ spec:
                   the Cluster with the optional definition of special profiles (ie,
                   Knative)
                 type: string
-              resources:
-                description: 'Deprecated: not used'
-                type: object
               traits:
                 description: list of traits to be executed for all the Integration/IntegrationKits
                   built from this IntegrationPlatform
@@ -512,41 +471,6 @@ spec:
                       limitMemory:
                         description: The maximum amount of memory required.
                         type: string
-                      livenessFailureThreshold:
-                        description: 'Minimum consecutive failures for the probe to
-                          be considered failed after having succeeded. Applies to
-                          the liveness probe. Deprecated: replaced by the health trait.'
-                        format: int32
-                        type: integer
-                      livenessInitialDelay:
-                        description: 'Number of seconds after the container has started
-                          before liveness probes are initiated. Deprecated: replaced
-                          by the health trait.'
-                        format: int32
-                        type: integer
-                      livenessPeriod:
-                        description: 'How often to perform the probe. Applies to the
-                          liveness probe. Deprecated: replaced by the health trait.'
-                        format: int32
-                        type: integer
-                      livenessScheme:
-                        description: 'Scheme to use when connecting. Defaults to HTTP.
-                          Applies to the liveness probe. Deprecated: replaced by the
-                          health trait.'
-                        type: string
-                      livenessSuccessThreshold:
-                        description: 'Minimum consecutive successes for the probe
-                          to be considered successful after having failed. Applies
-                          to the liveness probe. Deprecated: replaced by the health
-                          trait.'
-                        format: int32
-                        type: integer
-                      livenessTimeout:
-                        description: 'Number of seconds after which the probe times
-                          out. Applies to the liveness probe. Deprecated: replaced
-                          by the health trait.'
-                        format: int32
-                        type: integer
                       name:
                         description: The main container name. It's named `integration`
                           by default.
@@ -560,47 +484,6 @@ spec:
                           exposed by the container. It defaults to `http` only when
                           the `expose` parameter is true.
                         type: string
-                      probesEnabled:
-                        description: 'DeprecatedProbesEnabled enable/disable probes
-                          on the container (default `false`). Deprecated: replaced
-                          by the health trait.'
-                        type: boolean
-                      readinessFailureThreshold:
-                        description: 'Minimum consecutive failures for the probe to
-                          be considered failed after having succeeded. Applies to
-                          the readiness probe. Deprecated: replaced by the health
-                          trait.'
-                        format: int32
-                        type: integer
-                      readinessInitialDelay:
-                        description: 'Number of seconds after the container has started
-                          before readiness probes are initiated. Deprecated: replaced
-                          by the health trait.'
-                        format: int32
-                        type: integer
-                      readinessPeriod:
-                        description: 'How often to perform the probe. Applies to the
-                          readiness probe. Deprecated: replaced by the health trait.'
-                        format: int32
-                        type: integer
-                      readinessScheme:
-                        description: 'Scheme to use when connecting. Defaults to HTTP.
-                          Applies to the readiness probe. Deprecated: replaced by
-                          the health trait.'
-                        type: string
-                      readinessSuccessThreshold:
-                        description: 'Minimum consecutive successes for the probe
-                          to be considered successful after having failed. Applies
-                          to the readiness probe. Deprecated: replaced by the health
-                          trait.'
-                        format: int32
-                        type: integer
-                      readinessTimeout:
-                        description: 'Number of seconds after which the probe times
-                          out. Applies to the readiness probe. Deprecated: replaced
-                          by the health trait.'
-                        format: int32
-                        type: integer
                       requestCPU:
                         description: The minimum amount of CPU required.
                         type: string
@@ -1705,6 +1588,7 @@ spec:
                   PublishStrategyOptions:
                     additionalProperties:
                       type: string
+                    description: Generic options that can used by each publish strategy
                     type: object
                   baseImage:
                     description: a base image that can be used as base layer for all
@@ -1718,39 +1602,10 @@ spec:
                     - routine
                     - pod
                     type: string
-                  kanikoBuildCache:
-                    description: 'Deprecated: Use PublishStrategyOptions instead enables
-                      Kaniko publish strategy cache'
-                    type: boolean
                   maven:
                     description: Maven configuration used to build the Camel/Camel-Quarkus
                       applications
                     properties:
-                      caSecret:
-                        description: 'Deprecated: use CASecrets The Secret name and
-                          key, containing the CA certificate(s) used to connect to
-                          remote Maven repositories. It can contain X.509 certificates,
-                          and PKCS#7 formatted certificate chains. A JKS formatted
-                          keystore is automatically created to store the CA certificate(s),
-                          and configured to be used as a trusted certificate(s) by
-                          the Maven commands. Note that the root CA certificates are
-                          also imported into the created keystore.'
-                        properties:
-                          key:
-                            description: The key of the secret to select from.  Must
-                              be a valid secret key.
-                            type: string
-                          name:
-                            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                              TODO: Add other useful fields. apiVersion, kind, uid?'
-                            type: string
-                          optional:
-                            description: Specify whether the Secret or its key must
-                              be defined
-                            type: boolean
-                        required:
-                        - key
-                        type: object
                       caSecrets:
                         description: The Secrets name and key, containing the CA certificate(s)
                           used to connect to remote Maven repositories. It can contain
@@ -1898,11 +1753,6 @@ spec:
                             type: object
                         type: object
                     type: object
-                  persistentVolumeClaim:
-                    description: 'Deprecated: Use PublishStrategyOptions instead the
-                      Persistent Volume Claim used by Kaniko publish strategy, if
-                      cache is enabled'
-                    type: string
                   publishStrategy:
                     description: the strategy to adopt for publishing an Integration
                       base image
@@ -1979,21 +1829,16 @@ spec:
                   type: object
                 type: array
               configuration:
-                description: list of configuration properties to be attached to all
-                  the Integration/IntegrationKits built from this IntegrationPlatform
+                description: 'Deprecated: Use camel trait (camel.properties) to manage
+                  properties Use mount trait (mount.configs) to manage configs Use
+                  mount trait (mount.resources) to manage resources Use mount trait
+                  (mount.volumes) to manage volumes list of configuration properties
+                  to be attached to all the Integration/IntegrationKits built from
+                  this IntegrationPlatform'
                 items:
                   description: ConfigurationSpec represents a generic configuration
                     specification
                   properties:
-                    resourceKey:
-                      description: 'Deprecated: no longer used'
-                      type: string
-                    resourceMountPoint:
-                      description: 'Deprecated: no longer used'
-                      type: string
-                    resourceType:
-                      description: 'Deprecated: no longer used'
-                      type: string
                     type:
                       description: 'represents the type of configuration, ie: property,
                         configmap, secret, ...'
@@ -2043,9 +1888,6 @@ spec:
                   the Cluster with the optional definition of special profiles (ie,
                   Knative)
                 type: string
-              resources:
-                description: 'Deprecated: not used'
-                type: object
               traits:
                 description: list of traits to be executed for all the Integration/IntegrationKits
                   built from this IntegrationPlatform
@@ -2192,41 +2034,6 @@ spec:
                       limitMemory:
                         description: The maximum amount of memory required.
                         type: string
-                      livenessFailureThreshold:
-                        description: 'Minimum consecutive failures for the probe to
-                          be considered failed after having succeeded. Applies to
-                          the liveness probe. Deprecated: replaced by the health trait.'
-                        format: int32
-                        type: integer
-                      livenessInitialDelay:
-                        description: 'Number of seconds after the container has started
-                          before liveness probes are initiated. Deprecated: replaced
-                          by the health trait.'
-                        format: int32
-                        type: integer
-                      livenessPeriod:
-                        description: 'How often to perform the probe. Applies to the
-                          liveness probe. Deprecated: replaced by the health trait.'
-                        format: int32
-                        type: integer
-                      livenessScheme:
-                        description: 'Scheme to use when connecting. Defaults to HTTP.
-                          Applies to the liveness probe. Deprecated: replaced by the
-                          health trait.'
-                        type: string
-                      livenessSuccessThreshold:
-                        description: 'Minimum consecutive successes for the probe
-                          to be considered successful after having failed. Applies
-                          to the liveness probe. Deprecated: replaced by the health
-                          trait.'
-                        format: int32
-                        type: integer
-                      livenessTimeout:
-                        description: 'Number of seconds after which the probe times
-                          out. Applies to the liveness probe. Deprecated: replaced
-                          by the health trait.'
-                        format: int32
-                        type: integer
                       name:
                         description: The main container name. It's named `integration`
                           by default.
@@ -2240,47 +2047,6 @@ spec:
                           exposed by the container. It defaults to `http` only when
                           the `expose` parameter is true.
                         type: string
-                      probesEnabled:
-                        description: 'DeprecatedProbesEnabled enable/disable probes
-                          on the container (default `false`). Deprecated: replaced
-                          by the health trait.'
-                        type: boolean
-                      readinessFailureThreshold:
-                        description: 'Minimum consecutive failures for the probe to
-                          be considered failed after having succeeded. Applies to
-                          the readiness probe. Deprecated: replaced by the health
-                          trait.'
-                        format: int32
-                        type: integer
-                      readinessInitialDelay:
-                        description: 'Number of seconds after the container has started
-                          before readiness probes are initiated. Deprecated: replaced
-                          by the health trait.'
-                        format: int32
-                        type: integer
-                      readinessPeriod:
-                        description: 'How often to perform the probe. Applies to the
-                          readiness probe. Deprecated: replaced by the health trait.'
-                        format: int32
-                        type: integer
-                      readinessScheme:
-                        description: 'Scheme to use when connecting. Defaults to HTTP.
-                          Applies to the readiness probe. Deprecated: replaced by
-                          the health trait.'
-                        type: string
-                      readinessSuccessThreshold:
-                        description: 'Minimum consecutive successes for the probe
-                          to be considered successful after having failed. Applies
-                          to the readiness probe. Deprecated: replaced by the health
-                          trait.'
-                        format: int32
-                        type: integer
-                      readinessTimeout:
-                        description: 'Number of seconds after which the probe times
-                          out. Applies to the readiness probe. Deprecated: replaced
-                          by the health trait.'
-                        format: int32
-                        type: integer
                       requestCPU:
                         description: The minimum amount of CPU required.
                         type: string

@@ -236,54 +236,6 @@ func (t *camelTrait) computeConfigMaps(e *Environment) []ctrl.Object {
 		maps = append(maps, &cm)
 	}
 
-	for i, r := range e.Integration.Spec.Resources {
-		if r.Type == v1.ResourceTypeOpenAPI {
-			continue
-		}
-		if r.ContentRef != "" {
-			continue
-		}
-
-		cmKey := "content"
-		if r.ContentKey != "" {
-			cmKey = r.ContentKey
-		}
-
-		cm := corev1.ConfigMap{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "ConfigMap",
-				APIVersion: "v1",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      fmt.Sprintf("%s-resource-%03d", e.Integration.Name, i),
-				Namespace: e.Integration.Namespace,
-				Labels: map[string]string{
-					"camel.apache.org/integration": e.Integration.Name,
-				},
-				Annotations: map[string]string{
-					"camel.apache.org/resource.name":        r.Name,
-					"camel.apache.org/resource.compression": strconv.FormatBool(r.Compression),
-				},
-			},
-		}
-
-		if r.ContentType != "" {
-			cm.Annotations["camel.apache.org/resource.content-type"] = r.ContentType
-		}
-
-		if r.RawContent != nil {
-			cm.BinaryData = map[string][]byte{
-				cmKey: r.RawContent,
-			}
-		} else {
-			cm.Data = map[string]string{
-				cmKey: r.Content,
-			}
-		}
-
-		maps = append(maps, &cm)
-	}
-
 	return maps
 }
 

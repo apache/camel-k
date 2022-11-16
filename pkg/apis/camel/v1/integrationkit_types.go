@@ -60,8 +60,12 @@ type IntegrationKitSpec struct {
 	Profile TraitProfile `json:"profile,omitempty"`
 	// traits that the kit will execute
 	Traits IntegrationKitTraits `json:"traits,omitempty"`
+	// Deprecated:
+	// Use camel trait (camel.properties) to manage properties
+	// Use mount trait (mount.configs) to manage configs
+	// Use mount trait (mount.resources) to manage resources
+	// Use mount trait (mount.volumes) to manage volumes
 	// configuration used by the kit
-	// TODO: we should deprecate in future releases in favour of mount, openapi or camel traits
 	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
 	// Maven repositories that can be used by the kit
 	Repositories []string `json:"repositories,omitempty"`

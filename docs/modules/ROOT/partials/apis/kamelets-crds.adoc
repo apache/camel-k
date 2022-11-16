@@ -91,17 +91,6 @@ the status of a KameletBinding
 
 == Internal Types
 
-[#_camel_apache_org_v1alpha1_AuthorizationSpec]
-=== AuthorizationSpec
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1alpha1_KameletSpec, KameletSpec>>
-
-AuthorizationSpec is TODO (oauth information)
-Deprecated: unused
-
-
 [#_camel_apache_org_v1alpha1_BeanProperties]
 === BeanProperties
 
@@ -1056,21 +1045,6 @@ sources in any Camel DSL supported
 
 
 the main source in YAML DSL
-
-|`flow` +
-*xref:apis/camel-k.adoc#_camel_apache_org_v1_Flow[github.com/apache/camel-k/pkg/apis/camel/v1.Flow]*
-|
-
-
-Deprecated: use Template instead
-the main source in YAML DSL
-
-|`authorization` +
-*xref:#_camel_apache_org_v1alpha1_AuthorizationSpec[AuthorizationSpec]*
-|
-
-
-Deprecated: unused
 
 |`types` +
 *xref:#_camel_apache_org_v1alpha1_EventTypeSpec[map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot\]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventTypeSpec]*

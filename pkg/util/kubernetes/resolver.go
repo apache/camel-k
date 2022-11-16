@@ -119,29 +119,3 @@ func ResolveIntegrationSources(
 		return GetConfigMap(context, client, name, integration.Namespace)
 	})
 }
-
-// ResolveIntegrationResources --.
-func ResolveIntegrationResources(
-	context context.Context,
-	client controller.Reader,
-	integration *v1.Integration,
-	resources *Collection) ([]v1.ResourceSpec, error) {
-
-	if integration == nil {
-		return nil, nil
-	}
-
-	return ResolveResource(integration.Spec.Resources, func(name string) (*corev1.ConfigMap, error) {
-		// the config map could be part of the resources created
-		// by traits
-		cm := resources.GetConfigMap(func(m *corev1.ConfigMap) bool {
-			return m.Name == name
-		})
-
-		if cm != nil {
-			return cm, nil
-		}
-
-		return GetConfigMap(context, client, name, integration.Namespace)
-	})
-}
