@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -40,9 +41,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
-
-// The key used for propagating error details from Camel health to MicroProfile Health (See CAMEL-17138).
-const runtimeHealthCheckErrorMessage = "error.message"
 
 func NewMonitorAction() Action {
 	return &monitorAction{}
@@ -417,10 +415,10 @@ func (action *monitorAction) probeReadiness(
 				return err
 			}
 			for _, check := range health.Checks {
-				if check.Status == HealthCheckStateUp {
+				if check.Status == HealthCheckStatusUp {
 					continue
 				}
-				if _, ok := check.Data[runtimeHealthCheckErrorMessage]; ok {
+				if _, ok := check.Data[HealthCheckErrorMessage]; ok {
 					integration.Status.Phase = v1.IntegrationPhaseError
 				}
 				runtimeNotReadyMessages = append(runtimeNotReadyMessages,
@@ -433,7 +431,8 @@ func (action *monitorAction) probeReadiness(
 		if integration.Status.Phase == v1.IntegrationPhaseError {
 			reason = v1.IntegrationConditionErrorReason
 		}
-		setReadyCondition(integration, corev1.ConditionFalse, reason, fmt.Sprintf("%s", runtimeNotReadyMessages))
+		message := fmt.Sprintf("[%s]", strings.Join(runtimeNotReadyMessages, ", "))
+		setReadyCondition(integration, corev1.ConditionFalse, reason, message)
 	}
 
 	return nil
