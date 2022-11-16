@@ -30,28 +30,31 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-type HealthCheckState string
+type HealthCheckStatus string
 
 const (
-	HealthCheckStateDown HealthCheckState = "DOWN"
-	HealthCheckStateUp   HealthCheckState = "UP"
+	HealthCheckStatusDown HealthCheckStatus = "DOWN"
+	HealthCheckStatusUp   HealthCheckStatus = "UP"
+
+	// The key used for propagating error details from Camel health to MicroProfile Health
+	// (See CAMEL-17138).
+	HealthCheckErrorMessage = "error.message"
 )
 
 type HealthCheck struct {
-	Status HealthCheckState      `json:"status,omitempty"`
+	Status HealthCheckStatus     `json:"status,omitempty"`
 	Checks []HealthCheckResponse `json:"checks,omitempty"`
 }
 
 type HealthCheckResponse struct {
 	Name   string                 `json:"name,omitempty"`
-	Status HealthCheckState       `json:"status,omitempty"`
+	Status HealthCheckStatus      `json:"status,omitempty"`
 	Data   map[string]interface{} `json:"data,omitempty"`
 }
 
 func NewHealthCheck(body []byte) (*HealthCheck, error) {
 	health := HealthCheck{}
-	err := json.Unmarshal(body, &health)
-	if err != nil {
+	if err := json.Unmarshal(body, &health); err != nil {
 		return nil, err
 	}
 
