@@ -274,7 +274,12 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(
 		return err
 	}
 
+	readyPods, unreadyPods := filterPodsByReadyStatus(runningPods, controller.getPodSpec())
+
 	if done, err := controller.checkReadyCondition(ctx); done || err != nil {
+		// There may be pods that are not ready but still probable for getting error messages.
+		// Ignore returned error from probing as it's expected when the ctrl obj is not ready.
+		_ = action.probeReadiness(ctx, environment, integration, unreadyPods)
 		return err
 	}
 	if done := checkPodStatuses(integration, pendingPods, runningPods); done {
@@ -282,7 +287,6 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(
 	}
 	integration.Status.Phase = v1.IntegrationPhaseRunning
 
-	readyPods, unreadyPods := filterPodsByReadyStatus(runningPods, controller.getPodSpec())
 	if done := controller.updateReadyCondition(readyPods); done {
 		return nil
 	}
