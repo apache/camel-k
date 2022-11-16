@@ -57,13 +57,10 @@ func newContainerTrait() Trait {
 	return &containerTrait{
 		BaseTrait: NewBaseTrait(containerTraitID, 1600),
 		ContainerTrait: traitv1.ContainerTrait{
-			Port:                      defaultContainerPort,
-			ServicePort:               defaultServicePort,
-			ServicePortName:           defaultContainerPortName,
-			Name:                      defaultContainerName,
-			DeprecatedProbesEnabled:   pointer.Bool(false),
-			DeprecatedLivenessScheme:  string(corev1.URISchemeHTTP),
-			DeprecatedReadinessScheme: string(corev1.URISchemeHTTP),
+			Port:            defaultContainerPort,
+			ServicePort:     defaultServicePort,
+			ServicePortName: defaultContainerPortName,
+			Name:            defaultContainerName,
 		},
 	}
 }

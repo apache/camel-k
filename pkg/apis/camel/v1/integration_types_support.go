@@ -69,25 +69,12 @@ func (in *Integration) Sources() []SourceSpec {
 	return sources
 }
 
-// Resources return a new slice containing all the resources associated to the integration
-func (in *Integration) Resources() []ResourceSpec {
-	resources := make([]ResourceSpec, 0, len(in.Spec.Resources)+len(in.Status.GeneratedResources))
-	resources = append(resources, in.Spec.Resources...)
-	resources = append(resources, in.Status.GeneratedResources...)
-
-	return resources
-}
-
 func (in *IntegrationSpec) AddSource(name string, content string, language Language) {
 	in.Sources = append(in.Sources, NewSourceSpec(name, content, language))
 }
 
 func (in *IntegrationSpec) AddSources(sources ...SourceSpec) {
 	in.Sources = append(in.Sources, sources...)
-}
-
-func (in *IntegrationSpec) AddResources(resources ...ResourceSpec) {
-	in.Resources = append(in.Resources, resources...)
 }
 
 func (in *IntegrationSpec) AddFlows(flows ...Flow) {
@@ -131,25 +118,6 @@ func trimFirstLeadingSpace(val string) string {
 		return val[1:]
 	}
 	return val
-}
-
-func (in *IntegrationStatus) AddOrReplaceGeneratedResources(resources ...ResourceSpec) {
-	newResources := make([]ResourceSpec, 0)
-	for _, resource := range resources {
-		replaced := false
-		for i, r := range in.GeneratedResources {
-			if r.Name == resource.Name {
-				in.GeneratedResources[i] = resource
-				replaced = true
-				break
-			}
-		}
-		if !replaced {
-			newResources = append(newResources, resource)
-		}
-	}
-
-	in.GeneratedResources = append(in.GeneratedResources, newResources...)
 }
 
 func (in *IntegrationStatus) AddOrReplaceGeneratedSources(sources ...SourceSpec) {

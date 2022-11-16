@@ -128,7 +128,4 @@ type CamelLoader struct {
 	Languages []string `json:"languages,omitempty" yaml:"languages,omitempty"`
 	// a list of additional dependencies required beside the base one
 	Dependencies []MavenArtifact `json:"dependencies,omitempty" yaml:"dependencies,omitempty"`
-	// Deprecated: never used
-	// a set of general metadata for various purposes
-	Metadata map[string]string `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 }

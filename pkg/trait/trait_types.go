@@ -468,33 +468,6 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		*mnts = append(*mnts, *mnt)
 	}
 
-	for i, r := range e.Integration.Resources() {
-		if r.Type == v1.ResourceTypeOpenAPI {
-			continue
-		}
-
-		cmName := fmt.Sprintf("%s-resource-%03d", e.Integration.Name, i)
-		refName := fmt.Sprintf("i-resource-%03d", i)
-		resName := strings.TrimPrefix(r.Name, "/")
-		cmKey := "content"
-		resPath := getResourcePath(resName, r.Path, r.Type)
-
-		if r.ContentRef != "" {
-			cmName = r.ContentRef
-		}
-		if r.ContentKey != "" {
-			cmKey = r.ContentKey
-		}
-		if r.MountPath != "" {
-			resPath = r.MountPath
-		}
-		vol := getVolume(refName, "configmap", cmName, cmKey, resName)
-		mnt := getMount(refName, resPath, resName, true)
-
-		*vols = append(*vols, *vol)
-		*mnts = append(*mnts, *mnt)
-	}
-
 	if e.Resources != nil {
 		e.Resources.VisitConfigMap(func(configMap *corev1.ConfigMap) {
 			propertiesType := configMap.Labels["camel.apache.org/properties.type"]

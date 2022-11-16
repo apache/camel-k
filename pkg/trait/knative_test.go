@@ -61,9 +61,8 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile:   v1.TraitProfileKnative,
-				Sources:   []v1.SourceSpec{},
-				Resources: []v1.ResourceSpec{},
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{},
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{
@@ -191,7 +190,6 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 						Language: v1.LanguageJavaSource,
 					},
 				},
-				Resources: []v1.ResourceSpec{},
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{
@@ -378,7 +376,6 @@ func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 				Sources: []v1.SourceSpec{
 					source,
 				},
-				Resources: []v1.ResourceSpec{},
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{

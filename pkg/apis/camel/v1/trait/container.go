@@ -57,48 +57,4 @@ type ContainerTrait struct {
 	// The pull policy: Always|Never|IfNotPresent
 	// +kubebuilder:validation:Enum=Always;Never;IfNotPresent
 	ImagePullPolicy corev1.PullPolicy `property:"image-pull-policy" json:"imagePullPolicy,omitempty"`
-
-	// DeprecatedProbesEnabled enable/disable probes on the container (default `false`).
-	// Deprecated: replaced by the health trait.
-	DeprecatedProbesEnabled *bool `property:"probes-enabled" json:"probesEnabled,omitempty"`
-	// Scheme to use when connecting. Defaults to HTTP. Applies to the liveness probe.
-	// Deprecated: replaced by the health trait.
-	DeprecatedLivenessScheme string `property:"liveness-scheme" json:"livenessScheme,omitempty"`
-	// Number of seconds after the container has started before liveness probes are initiated.
-	// Deprecated: replaced by the health trait.
-	DeprecatedLivenessInitialDelay int32 `property:"liveness-initial-delay" json:"livenessInitialDelay,omitempty"`
-	// Number of seconds after which the probe times out. Applies to the liveness probe.
-	// Deprecated: replaced by the health trait.
-	DeprecatedLivenessTimeout int32 `property:"liveness-timeout" json:"livenessTimeout,omitempty"`
-	// How often to perform the probe. Applies to the liveness probe.
-	// Deprecated: replaced by the health trait.
-	DeprecatedLivenessPeriod int32 `property:"liveness-period" json:"livenessPeriod,omitempty"`
-	// Minimum consecutive successes for the probe to be considered successful after having failed.
-	// Applies to the liveness probe.
-	// Deprecated: replaced by the health trait.
-	DeprecatedLivenessSuccessThreshold int32 `property:"liveness-success-threshold" json:"livenessSuccessThreshold,omitempty"`
-	// Minimum consecutive failures for the probe to be considered failed after having succeeded.
-	// Applies to the liveness probe.
-	// Deprecated: replaced by the health trait.
-	DeprecatedLivenessFailureThreshold int32 `property:"liveness-failure-threshold" json:"livenessFailureThreshold,omitempty"`
-	// Scheme to use when connecting. Defaults to HTTP. Applies to the readiness probe.
-	// Deprecated: replaced by the health trait.
-	DeprecatedReadinessScheme string `property:"readiness-scheme" json:"readinessScheme,omitempty"`
-	// Number of seconds after the container has started before readiness probes are initiated.
-	// Deprecated: replaced by the health trait.
-	DeprecatedReadinessInitialDelay int32 `property:"readiness-initial-delay" json:"readinessInitialDelay,omitempty"`
-	// Number of seconds after which the probe times out. Applies to the readiness probe.
-	// Deprecated: replaced by the health trait.
-	DeprecatedReadinessTimeout int32 `property:"readiness-timeout" json:"readinessTimeout,omitempty"`
-	// How often to perform the probe. Applies to the readiness probe.
-	// Deprecated: replaced by the health trait.
-	DeprecatedReadinessPeriod int32 `property:"readiness-period" json:"readinessPeriod,omitempty"`
-	// Minimum consecutive successes for the probe to be considered successful after having failed.
-	// Applies to the readiness probe.
-	// Deprecated: replaced by the health trait.
-	DeprecatedReadinessSuccessThreshold int32 `property:"readiness-success-threshold" json:"readinessSuccessThreshold,omitempty"`
-	// Minimum consecutive failures for the probe to be considered failed after having succeeded.
-	// Applies to the readiness probe.
-	// Deprecated: replaced by the health trait.
-	DeprecatedReadinessFailureThreshold int32 `property:"readiness-failure-threshold" json:"readinessFailureThreshold,omitempty"`
 }

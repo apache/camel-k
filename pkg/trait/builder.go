@@ -123,16 +123,8 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}})
 	//nolint: staticcheck,nolintlint
 	case v1.IntegrationPlatformBuildPublishStrategyKaniko:
-		var persistentVolumeClaim string
-		var found, cacheEnabled bool
-		if persistentVolumeClaim, found = e.Platform.Status.Build.PublishStrategyOptions[builder.KanikoPVCName]; !found {
-			persistentVolumeClaim = e.Platform.Status.Build.PersistentVolumeClaim
-		}
-
-		cacheEnabled = e.Platform.Status.Build.IsOptionEnabled(builder.KanikoBuildCacheEnabled)
-		if _, found = e.Platform.Status.Build.PublishStrategyOptions[builder.KanikoBuildCacheEnabled]; !found {
-			cacheEnabled = *e.Platform.Status.Build.KanikoBuildCache
-		}
+		persistentVolumeClaim := e.Platform.Status.Build.PublishStrategyOptions[builder.KanikoPVCName]
+		cacheEnabled := e.Platform.Status.Build.IsOptionEnabled(builder.KanikoBuildCacheEnabled)
 
 		var executorImage string
 		if image, found := e.Platform.Status.Build.PublishStrategyOptions[builder.KanikoExecutorImage]; found {

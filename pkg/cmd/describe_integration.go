@@ -135,16 +135,6 @@ func (command *describeIntegrationCommandOptions) describeIntegration(cmd *cobra
 			}
 		}
 
-		if len(i.Spec.Resources) > 0 {
-			w.Writef(0, "Resources:\n")
-			for _, resource := range i.Spec.Resources {
-				w.Writef(1, "Content:\n")
-				w.Writef(2, "%s\n", strings.TrimSpace(resource.Content))
-				w.Writef(1, "Name:\t%s\n", resource.Name)
-				w.Writef(1, "Type:\t%s\n", resource.Type)
-			}
-		}
-
 		if len(i.Sources()) > 0 {
 			w.Writef(0, "Sources:\n")
 			if command.showSourceContent {

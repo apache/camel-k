@@ -63,9 +63,7 @@ func TestProbesDependencies(t *testing.T) {
 	integration := &v1.Integration{
 		Spec: v1.IntegrationSpec{
 			Traits: v1.Traits{
-				Container: &traitv1.ContainerTrait{
-					DeprecatedProbesEnabled: pointer.Bool(true),
-				},
+				Health: &traitv1.HealthTrait{},
 			},
 		},
 	}
@@ -83,10 +81,10 @@ func TestProbesOnDeployment(t *testing.T) {
 	integration := &v1.Integration{
 		Spec: v1.IntegrationSpec{
 			Traits: v1.Traits{
-				Container: &traitv1.ContainerTrait{
-					DeprecatedProbesEnabled:   pointer.Bool(true),
-					Expose:                    pointer.Bool(true),
-					DeprecatedLivenessTimeout: 1234,
+				Health: &traitv1.HealthTrait{
+					LivenessProbeEnabled:  pointer.Bool(true),
+					ReadinessProbeEnabled: pointer.Bool(true),
+					LivenessTimeout:       1234,
 				},
 			},
 		},
@@ -115,12 +113,12 @@ func TestProbesOnDeploymentWithCustomScheme(t *testing.T) {
 	integration := &v1.Integration{
 		Spec: v1.IntegrationSpec{
 			Traits: v1.Traits{
-				Container: &traitv1.ContainerTrait{
-					DeprecatedProbesEnabled:   pointer.Bool(true),
-					Expose:                    pointer.Bool(true),
-					DeprecatedLivenessTimeout: 1234,
-					DeprecatedLivenessScheme:  "HTTPS",
-					DeprecatedReadinessScheme: "HTTPS",
+				Health: &traitv1.HealthTrait{
+					LivenessProbeEnabled:  pointer.Bool(true),
+					ReadinessProbeEnabled: pointer.Bool(true),
+					LivenessScheme:        "HTTPS",
+					ReadinessScheme:       "HTTPS",
+					LivenessTimeout:       1234,
 				},
 			},
 		},
@@ -155,10 +153,10 @@ func TestProbesOnKnativeService(t *testing.T) {
 						Enabled: pointer.Bool(true),
 					},
 				},
-				Container: &traitv1.ContainerTrait{
-					DeprecatedProbesEnabled:   pointer.Bool(true),
-					Expose:                    pointer.Bool(true),
-					DeprecatedLivenessTimeout: 1234,
+				Health: &traitv1.HealthTrait{
+					LivenessProbeEnabled:  pointer.Bool(true),
+					ReadinessProbeEnabled: pointer.Bool(true),
+					LivenessTimeout:       1234,
 				},
 			},
 		},
