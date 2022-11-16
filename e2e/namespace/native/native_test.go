@@ -37,7 +37,7 @@ func TestNativeIntegrations(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-quarkus-native"
 		Expect(KamelInstallWithID(operatorID, ns,
-			"--build-timeout", "60m0s",
+			"--build-timeout", "90m0s",
 			"--operator-resources", "limits.memory=4.5Gi",
 			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=3g",
 		).Execute()).To(Succeed())
@@ -103,6 +103,9 @@ func TestNativeIntegrations(t *testing.T) {
 
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
+			// ====================================
+			// !!! THE MOST TIME-CONSUMING PART !!!
+			// ====================================
 			// Check the native Kit is ready
 			Eventually(Kits(ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
 				TestTimeoutVeryLong).Should(HaveLen(1))
