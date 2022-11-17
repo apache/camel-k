@@ -411,6 +411,7 @@ endif
 	@echo "####### Building Camel K operator container image for multi architectures..."
 	mkdir -p build/_maven_output
 	docker buildx rm --all-inactive --force
+	docker run --rm --privileged tonistiigi/binfmt:latest --install arm64
 	docker buildx create --name builder --use
 	docker buildx build --platform=linux/amd64,linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
