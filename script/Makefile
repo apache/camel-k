@@ -28,8 +28,7 @@ KUSTOMIZE_VERSION := v4.1.2
 OPM_VERSION := v1.24.0
 BASE_IMAGE := docker.io/adoptopenjdk/openjdk11:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
-#IMAGE_NAME ?= docker.io/apache/camel-k
-IMAGE_NAME := localhost:5000/apache/camel-k
+IMAGE_NAME ?= docker.io/apache/camel-k
 
 #
 # Situations when user wants to override
@@ -413,7 +412,7 @@ endif
 	mkdir -p build/_maven_output
 	docker buildx rm --all-inactive --force
 	docker run --rm --privileged tonistiigi/binfmt:latest --install arm64
-	docker buildx create --name builder --use
+	docker buildx create --name builder --use --driver-opt network=host --buildkitd-flags '--allow-insecure-entitlement network.host'
 	docker buildx build --platform=linux/amd64,linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 	# load only the amd64 image platform as docker local storage doesnt support multi-arch images (yet)
 	# https://github.com/docker/buildx/issues/59
