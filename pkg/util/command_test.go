@@ -21,7 +21,6 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -30,17 +29,11 @@ import (
 var (
 	loggerInfo = func(s string) string {
 		fmt.Println("OUT:", s)
-		if strings.Contains(s, "invalid") {
-			return s
-		}
-		return ""
+		return s
 	}
 	loggerError = func(s string) string {
 		fmt.Println("ERR:", s)
-		if strings.Contains(s, "invalid") {
-			return s
-		}
-		return ""
+		return s
 	}
 )
 
@@ -52,9 +45,9 @@ func TestRunAndLog(t *testing.T) {
 }
 
 func TestRunAndLogInvalid(t *testing.T) {
-	cmd := exec.CommandContext(context.Background(), "date", "-dsa")
+	cmd := exec.CommandContext(context.Background(), "go", "help", "dsa")
 	err := RunAndLog(context.Background(), cmd, loggerInfo, loggerError)
 
 	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "exit status 1")
+	assert.Equal(t, "go help dsa: unknown help topic. Run 'go help'.: exit status 2", err.Error())
 }
