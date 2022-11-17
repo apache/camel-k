@@ -408,12 +408,15 @@ images: build kamel-overlay maven-overlay bundle-kamelets
 ifneq (,$(findstring SNAPSHOT,$(RUNTIME_VERSION)))
 	./script/package_maven_artifacts.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(RUNTIME_VERSION)
 endif
-	@echo "####### Building Camel K operator container image for multi architectures..."
+	@echo "####### Building Camel K operator container image (single) for multi architectures..."
 	mkdir -p build/_maven_output
 	docker buildx rm --all-inactive --force
 	docker run --rm --privileged tonistiigi/binfmt:latest --install arm64
 	docker buildx create --name builder --use
-	docker buildx build --load --platform=linux/amd64,linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
+	docker buildx build --platform=linux/amd64,linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
+	# load only the amd64 image platform as docker local storage doesnt support multi-arch images (yet)
+	# https://github.com/docker/buildx/issues/59
+	docker buildx build --load --platform linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) .
 
 images-arch: build kamel-overlay maven-overlay bundle-kamelets
 ifneq (,$(findstring SNAPSHOT,$(RUNTIME_VERSION)))
@@ -434,11 +437,11 @@ ifeq ($(shell uname -m), arm64)
 endif
 
 images-push:
-	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
+	docker buildx build --push --platform linux/arm64,linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) .
 
 images-push-staging:
 	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION) $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)
-	docker push $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)
+	docker buildx build --push --platform linux/arm64,linux/amd64 -t $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION) .
 
 get-image:
 	@echo $(CUSTOM_IMAGE)
