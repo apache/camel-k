@@ -69,7 +69,6 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1.Integra
 	if err = platformutil.ConfigureDefaults(ctx, action.client, platform, true); err != nil {
 		return nil, err
 	}
-	// nolint: staticcheck
 	if platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko {
 		cacheEnabled := platform.Status.Build.IsOptionEnabled(builder.KanikoBuildCacheEnabled)
 		if cacheEnabled {
