@@ -437,11 +437,11 @@ ifeq ($(shell uname -m), arm64)
 endif
 
 images-push:
-	docker buildx build --push --platform linux/arm64,linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) .
+	docker buildx build --push --platform linux/arm64,linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
 images-push-staging:
 	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION) $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)
-	docker buildx build --push --platform linux/arm64,linux/amd64 -t $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION) .
+	docker buildx build --push --platform linux/arm64,linux/amd64 -t $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION) -f build/Dockerfile .
 
 get-image:
 	@echo $(CUSTOM_IMAGE)
