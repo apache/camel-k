@@ -8,6 +8,9 @@
 
 - FTP sink does not create directories when writing [\#3812](https://github.com/apache/camel-k/issues/3812)
 - Release 1.10.3 [\#3796](https://github.com/apache/camel-k/issues/3796)
+- Native checks to run on a nightly basis instead of on each PR [\#3784](https://github.com/apache/camel-k/issues/3784)
+- Ready condition message not always taken from Camel Health Check [\#3761](https://github.com/apache/camel-k/issues/3761)
+- Drop support for Openshift 3 and related E2E test [\#3421](https://github.com/apache/camel-k/issues/3421)
 
 ## [1.10.4-nightly](https://github.com/apache/camel-k/tree/1.10.4-nightly) (2022-11-14)
 

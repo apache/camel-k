@@ -61,24 +61,24 @@ func TestNewHealthCheck(t *testing.T) {
 	`)
 	health, err := NewHealthCheck(body)
 	assert.NoError(t, err)
-	assert.Equal(t, HealthCheckStateDown, health.Status)
+	assert.Equal(t, HealthCheckStatusDown, health.Status)
 	assert.Len(t, health.Checks, 3)
 	assert.Equal(t, "camel-routes", health.Checks[0].Name)
-	assert.Equal(t, HealthCheckStateDown, health.Checks[0].Status)
+	assert.Equal(t, HealthCheckStatusDown, health.Checks[0].Status)
 	assert.True(t, reflect.DeepEqual(health.Checks[0].Data, map[string]interface{}{
 		"route.id":           "route1",
 		"route.context.name": "camel-1",
 		"route.status":       "Stopped",
 	}))
 	assert.Equal(t, "context", health.Checks[1].Name)
-	assert.Equal(t, HealthCheckStateUp, health.Checks[1].Status)
+	assert.Equal(t, HealthCheckStatusUp, health.Checks[1].Status)
 	assert.True(t, reflect.DeepEqual(health.Checks[1].Data, map[string]interface{}{
 		"context.name":    "camel-1",
 		"context.version": "3.16.0",
 		"context.status":  "Started",
 	}))
 	assert.Equal(t, "camel-consumers", health.Checks[2].Name)
-	assert.Equal(t, HealthCheckStateDown, health.Checks[2].Status)
+	assert.Equal(t, HealthCheckStatusDown, health.Checks[2].Status)
 	assert.True(t, reflect.DeepEqual(health.Checks[2].Data, map[string]interface{}{
 		"route.id":           "route1",
 		"route.context.name": "camel-1",
