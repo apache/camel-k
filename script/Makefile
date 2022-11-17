@@ -412,7 +412,7 @@ endif
 	mkdir -p build/_maven_output
 	docker buildx rm --all-inactive --force
 	docker run --rm --privileged tonistiigi/binfmt:latest --install arm64
-	docker buildx create --name builder --use --driver-opt network=host --buildkitd-flags '--allow-insecure-entitlement network.host'
+	docker buildx create --name builder --use --driver-opt network=host --config build/buildkitd.toml
 	docker buildx build --platform=linux/amd64,linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 	# load only the amd64 image platform as docker local storage doesnt support multi-arch images (yet)
 	# https://github.com/docker/buildx/issues/59
