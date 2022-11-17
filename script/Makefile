@@ -413,7 +413,7 @@ endif
 	docker buildx rm --all-inactive --force
 	docker run --rm --privileged tonistiigi/binfmt:latest --install arm64
 	docker buildx create --name builder --use
-	docker buildx build --platform=linux/amd64,linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
+	docker buildx build --load --platform=linux/amd64,linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
 images-arch: build kamel-overlay maven-overlay bundle-kamelets
 ifneq (,$(findstring SNAPSHOT,$(RUNTIME_VERSION)))
