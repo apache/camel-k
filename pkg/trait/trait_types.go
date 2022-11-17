@@ -608,20 +608,6 @@ func convertToKeyToPath(k, v string) []corev1.KeyToPath {
 	return kp
 }
 
-func getResourcePath(resourceName string, maybePath string, resourceType v1.ResourceType) string {
-	// If the path is specified, we'll return it
-	if maybePath != "" {
-		return maybePath
-	}
-	// otherwise return a default path, according to the resource type
-	if resourceType == v1.ResourceTypeData {
-		return path.Join(camel.ResourcesDefaultMountPath, resourceName)
-	}
-
-	// Default, config type
-	return path.Join(camel.ConfigResourcesMountPath, resourceName)
-}
-
 func getMountPoint(resourceName string, mountPoint string, storagetype, resourceType string) string {
 	if mountPoint != "" {
 		return mountPoint

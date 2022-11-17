@@ -192,13 +192,6 @@ func ValidKameletProperties(kamelet *Kamelet) bool {
 	return true
 }
 
-func ValidKamelet(kamelet *Kamelet) bool {
-	if kamelet == nil {
-		return true
-	}
-	return true
-}
-
 // NewKamelet creates a new kamelet
 func NewKamelet(namespace string, name string) Kamelet {
 	return Kamelet{

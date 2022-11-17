@@ -23,7 +23,6 @@ import (
 
 	yaml2 "gopkg.in/yaml.v2"
 
-	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -95,25 +94,14 @@ func GenerateCatalog(
 	}
 
 	var caCerts [][]byte
-	secrets := mvn.CASecrets
-	if secrets != nil {
-		caCerts, err = kubernetes.GetSecretsRefData(ctx, client, namespace, secrets)
+	if mvn.CASecrets != nil {
+		caCerts, err = kubernetes.GetSecretsRefData(ctx, client, namespace, mvn.CASecrets)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	return GenerateCatalogCommon(ctx, globalSettings, []byte(userSettings), caCerts, mvn, runtime, providerDependencies)
-}
-
-func mergeSecrets(secrets []corev1.SecretKeySelector, secret *corev1.SecretKeySelector) []corev1.SecretKeySelector {
-	if secrets == nil && secret == nil {
-		return nil
-	}
-	if secret == nil {
-		return secrets
-	}
-	return append(secrets, *secret)
 }
 
 func GenerateCatalogCommon(

@@ -319,16 +319,6 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 	return nil
 }
 
-func mergeSecrets(secrets []corev1.SecretKeySelector, secret *corev1.SecretKeySelector) []corev1.SecretKeySelector {
-	if secrets == nil && secret == nil {
-		return nil
-	}
-	if secret == nil {
-		return secrets
-	}
-	return append(secrets, *secret)
-}
-
 func (t *openAPITrait) generateMavenProject(e *Environment) (maven.Project, error) {
 	if e.CamelCatalog == nil {
 		return maven.Project{}, errors.New("unknown camel catalog")
