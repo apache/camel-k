@@ -411,7 +411,7 @@ endif
 	@echo "####### Building Camel K operator container image for multi architectures..."
 	mkdir -p build/_maven_output
 	docker buildx rm --all-inactive --force
-	docker buildx create --append --name builder
+	docker buildx create --name builder --use
 	docker buildx build --platform=linux/amd64,linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
 images-arch: build kamel-overlay maven-overlay bundle-kamelets
