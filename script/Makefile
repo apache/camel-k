@@ -416,7 +416,7 @@ endif
 	docker buildx build --platform=linux/amd64,linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 	# load only the amd64 image platform as docker local storage doesnt support multi-arch images (yet)
 	# https://github.com/docker/buildx/issues/59
-	docker buildx build --load --platform linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) .
+	docker buildx build --load --platform linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
 images-arch: build kamel-overlay maven-overlay bundle-kamelets
 ifneq (,$(findstring SNAPSHOT,$(RUNTIME_VERSION)))
