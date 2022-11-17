@@ -258,11 +258,20 @@ test-fmt: do-build
 #
 test-integration: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 90m -v ./e2e/global/common -tags=integration $(TEST_INTEGRATION_COMMON_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
-	go test -timeout 90m -v ./e2e/global/common/build -tags=integration $(TEST_INTEGRATION_COMMON_BUILD_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
-	go test -timeout 90m -v ./e2e/global/common/config -tags=integration $(TEST_INTEGRATION_COMMON_CONFIG_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
-	go test -timeout 90m -v ./e2e/global/common/languages -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
-	go test -timeout 90m -v ./e2e/global/common/traits -tags=integration $(TEST_INTEGRATION_COMMON_TRAITS_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 90m -v ./e2e/global/common -tags=integration,stable $(TEST_INTEGRATION_COMMON_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 90m -v ./e2e/global/common/build -tags=integration,stable $(TEST_INTEGRATION_COMMON_BUILD_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 90m -v ./e2e/global/common/config -tags=integration,stable $(TEST_INTEGRATION_COMMON_CONFIG_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 90m -v ./e2e/global/common/languages -tags=integration,stable $(TEST_INTEGRATION_COMMON_LANG_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 90m -v ./e2e/global/common/traits -tags=integration,stable $(TEST_INTEGRATION_COMMON_TRAITS_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	exit $${FAILED}
+
+test-integration-flaky: do-build
+	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	go test -timeout 90m -v ./e2e/global/common -tags=integration,flaky $(TEST_INTEGRATION_COMMON_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 90m -v ./e2e/global/common/build -tags=integration,flaky $(TEST_INTEGRATION_COMMON_BUILD_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 90m -v ./e2e/global/common/config -tags=integration,flaky $(TEST_INTEGRATION_COMMON_CONFIG_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 90m -v ./e2e/global/common/languages -tags=integration,flaky $(TEST_INTEGRATION_COMMON_LANG_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 90m -v ./e2e/global/common/traits -tags=integration,flaky $(TEST_INTEGRATION_COMMON_TRAITS_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
 	exit $${FAILED}
 
 test-knative: do-build
@@ -294,9 +303,16 @@ test-registry-maven-wagon: do-build
 
 test-install: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 90m -v ./e2e/namespace/install/ -tags=integration $(TEST_INSTALL_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
-	go test -timeout 90m -v ./e2e/namespace/install/cli -tags=integration $(TEST_INSTALL_CLI_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
-	go test -timeout 90m -v ./e2e/namespace/install/kustomize -tags=integration $(TEST_INSTALL_KUSTOMIZE_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 90m -v ./e2e/namespace/install/ -tags=integration,stable $(TEST_INSTALL_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 90m -v ./e2e/namespace/install/cli -tags=integration,stable $(TEST_INSTALL_CLI_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 90m -v ./e2e/namespace/install/kustomize -tags=integration,stable $(TEST_INSTALL_KUSTOMIZE_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	exit $${FAILED}
+
+test-install-flaky: do-build
+	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	go test -timeout 90m -v ./e2e/namespace/install/ -tags=integration,flaky $(TEST_INSTALL_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 90m -v ./e2e/namespace/install/cli -tags=integration,flaky $(TEST_INSTALL_CLI_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 90m -v ./e2e/namespace/install/kustomize -tags=integration,flaky $(TEST_INSTALL_KUSTOMIZE_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
 	exit $${FAILED}
 
 test-quarkus-native: do-build

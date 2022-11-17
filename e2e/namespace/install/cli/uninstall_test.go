@@ -1,5 +1,5 @@
-//go:build integration
-// +build integration
+//go:build integration && stable
+// +build integration,stable
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
 
@@ -51,8 +51,8 @@ func TestBasicUninstall(t *testing.T) {
 		}
 
 		if !uninstallViaOLM {
-		Eventually(Role(ns)).Should(BeNil())
-		Eventually(RoleBinding(ns)).Should(BeNil())
+			Eventually(Role(ns)).Should(BeNil())
+			Eventually(RoleBinding(ns)).Should(BeNil())
 			Eventually(ServiceAccount(ns, "camel-k-operator")).Should(BeNil())
 		} else {
 			Eventually(Role(ns)).ShouldNot(BeNil())

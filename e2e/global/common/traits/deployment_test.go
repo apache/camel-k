@@ -1,5 +1,5 @@
-//go:build integration
-// +build integration
+//go:build integration && stable
+// +build integration,stable
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
 
@@ -23,8 +23,9 @@ limitations under the License.
 package traits
 
 import (
-	appsv1 "k8s.io/api/apps/v1"
 	"testing"
+
+	appsv1 "k8s.io/api/apps/v1"
 
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"

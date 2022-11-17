@@ -1,5 +1,5 @@
-//go:build integration
-// +build integration
+//go:build integration && stable
+// +build integration,stable
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
 
@@ -24,12 +24,13 @@ package common
 
 import (
 	"context"
-	. "github.com/apache/camel-k/e2e/support"
-	. "github.com/onsi/gomega"
-	v1 "k8s.io/api/core/v1"
 	"net"
 	"testing"
 	"time"
+
+	. "github.com/apache/camel-k/e2e/support"
+	. "github.com/onsi/gomega"
+	v1 "k8s.io/api/core/v1"
 )
 
 func TestKamelCLIDebug(t *testing.T) {
