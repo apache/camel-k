@@ -32,6 +32,9 @@ inputs:
   make-rules:
     description: 'Override the default make rules'
     required: false
+  image-platforms:
+    description: 'Comma-separated list of platforms eg linux/amd64,linux/arm64'
+    required: false
 
 runs:
   using: "composite"
@@ -45,6 +48,7 @@ runs:
           -l "${{ inputs.image-registry-pull-host }}" \
           -m "${{ inputs.make-rules }}" \
           -s "${{ inputs.image-registry-push-host }}" \
+          -p "${{ inputs.image-platforms }}" \
           -x "${{ env.DEBUG_USE_EXISTING_IMAGE }}"
 
 outputs:

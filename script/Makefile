@@ -29,6 +29,8 @@ OPM_VERSION := v1.24.0
 BASE_IMAGE := docker.io/adoptopenjdk/openjdk11:slim
 LOCAL_REPOSITORY := /tmp/artifacts/m2
 IMAGE_NAME ?= docker.io/apache/camel-k
+BUILD_PLATFORMS ?= linux/amd64,linux/arm64
+CURRENT_ENV_PLATFORM ?= linux/amd64
 
 #
 # Situations when user wants to override
@@ -411,12 +413,12 @@ endif
 	@echo "####### Building Camel K operator container image (single) for multi architectures..."
 	mkdir -p build/_maven_output
 	docker buildx rm --all-inactive --force
-	docker run --rm --privileged tonistiigi/binfmt:latest --install arm64
+	docker run --rm --privileged tonistiigi/binfmt:latest --install all
 	docker buildx create --name builder --use --driver-opt network=host --config build/buildkitd.toml
-	docker buildx build --platform=linux/amd64,linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
-	# load only the amd64 image platform as docker local storage doesnt support multi-arch images (yet)
+	docker buildx build --platform $(BUILD_PLATFORMS) -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
+	# load only the curreny system platform as docker local storage doesnt support multi-arch images (yet)
 	# https://github.com/docker/buildx/issues/59
-	docker buildx build --load --platform linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
+	docker buildx build --load --platform $(CURRENT_ENV_PLATFORM) -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
 images-arch: build kamel-overlay maven-overlay bundle-kamelets
 ifneq (,$(findstring SNAPSHOT,$(RUNTIME_VERSION)))
@@ -437,11 +439,11 @@ ifeq ($(shell uname -m), arm64)
 endif
 
 images-push:
-	docker buildx build --push --platform linux/arm64,linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
+	docker buildx build --push --platform $(BUILD_PLATFORMS) -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
 
 images-push-staging:
 	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION) $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)
-	docker buildx build --push --platform linux/arm64,linux/amd64 -t $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION) -f build/Dockerfile .
+	docker buildx build --push --platform $(BUILD_PLATFORMS) -t $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION) -f build/Dockerfile .
 
 get-image:
 	@echo $(CUSTOM_IMAGE)

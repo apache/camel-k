@@ -42,6 +42,9 @@ inputs:
   catalog-source-namespace:
     description: 'Namespace in which to install the catalog source for the bundle (if required)'
     required: false
+  image-platforms:
+    description: 'Comma-separated list of platforms eg linux/amd64,linux/arm64'
+    required: false
 
 runs:
   using: "composite"
@@ -54,6 +57,7 @@ runs:
         image-registry-pull-host: ${{ inputs.image-registry-pull-host }}
         image-namespace: ${{ inputs.image-namespace }}
         make-rules: ${{ inputs.make-rules }}
+        image-platforms: ${{ inputs.image-platforms }}
 
     #
     # By default do not build the image bundle
