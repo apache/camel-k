@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- query regarding using camel k [\#3815](https://github.com/apache/camel-k/issues/3815)
 - FTP sink does not create directories when writing [\#3812](https://github.com/apache/camel-k/issues/3812)
 - Release 1.10.3 [\#3796](https://github.com/apache/camel-k/issues/3796)
 - Native checks to run on a nightly basis instead of on each PR [\#3784](https://github.com/apache/camel-k/issues/3784)
