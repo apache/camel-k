@@ -56,7 +56,7 @@ on:
       skip-problematic:
         description: 'Whether tests marked as problematic should be skipped - false by default (sets CAMEL_K_TEST_SKIP_PROBLEMATIC)'
         required: false
-        default: false
+        default: 'false'
       test-filters:
         description: |
           List of comma-separated key/value pairs to filter the tests in this test suite:
@@ -92,3 +92,27 @@ jobs:
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
         cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
+
+  flaky-it:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+        submodules: recursive
+    - name: Convert input parameters to env vars
+      shell: bash
+      run: |
+        ./.github/workflows/manual-exec-process-inputs.sh \
+          -i "${{ github.event.inputs.pre-built-kamel-image }}" \
+          -p "${{ github.event.inputs.skip-problematic }}" \
+          -q "${{ github.event.inputs.log-level }}" \
+          -t "${{ github.event.inputs.test-filters }}"
+
+    - name: Execute Tests
+      uses: ./.github/actions/e2e-install
+      with:
+        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
+        test-flaky: 'true'

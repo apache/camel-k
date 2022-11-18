@@ -25,13 +25,16 @@
 
 set -e
 
-while getopts ":b:c:g:i:l:n:q:s:v:x:" opt; do
+while getopts ":b:c:f:g:i:l:n:q:s:v:x:" opt; do
   case "${opt}" in
     b)
       BUILD_CATALOG_SOURCE_NAME=${OPTARG}
       ;;
     c)
       BUILD_CATALOG_SOURCE_NAMESPACE=${OPTARG}
+      ;;
+    f)
+      TEST_FLAKY=${OPTARG}
       ;;
     g)
       GLOBAL_OPERATOR_NAMESPACE=${OPTARG}
@@ -107,7 +110,8 @@ if [ -n "${BUILD_CATALOG_SOURCE_NAMESPACE}" ]; then
   export KAMEL_INSTALL_OLM_CHANNEL="${NEW_XY_CHANNEL}"
 fi
 
-export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
+KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
+export KAMEL_INSTALL_MAVEN_REPOSITORIES
 export KAMEL_INSTALL_REGISTRY=${REGISTRY_PULL_HOST}
 export KAMEL_INSTALL_REGISTRY_INSECURE=${REGISTRY_INSECURE}
 export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
@@ -134,9 +138,13 @@ fi
 # Then run all integration tests rather than ending on first failure
 set -e
 exit_code=0
-DO_TEST_PREBUILD=false make test-integration || exit_code=1
-DO_TEST_PREBUILD=false make test-registry-maven-wagon || exit_code=1
-DO_TEST_PREBUILD=false make test-service-binding || exit_code=1
+if [ "${TEST_FLAKY}" == "false" ]; then
+  DO_TEST_PREBUILD=false make test-integration || exit_code=1
+  DO_TEST_PREBUILD=false make test-registry-maven-wagon || exit_code=1
+  DO_TEST_PREBUILD=false make test-service-binding || exit_code=1
+else
+  DO_TEST_PREBUILD=false make test-integration-flaky || exit_code=1
+fi
 set +e
 
 echo "Tests completed with exit code: ${exit_code}"

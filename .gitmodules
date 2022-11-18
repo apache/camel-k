@@ -4,4 +4,6 @@
 [submodule ".github/actions/changelog"]
 	path = .github/actions/changelog
 	url = https://github.com/CharMixer/auto-changelog-action
-	
+[submodule ".github/actions/retry"]
+	path = .github/actions/retry
+	url = https://github.com/nick-fields/retry.git

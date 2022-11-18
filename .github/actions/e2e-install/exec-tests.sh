@@ -25,13 +25,16 @@
 
 set -e
 
-while getopts ":b:c:i:l:n:q:s:v:x:" opt; do
+while getopts ":b:c:f:i:l:n:q:s:v:x:" opt; do
   case "${opt}" in
     b)
       BUILD_CATALOG_SOURCE_NAME=${OPTARG}
       ;;
     c)
       BUILD_CATALOG_SOURCE_NAMESPACE=${OPTARG}
+      ;;
+    f)
+      TEST_FLAKY=${OPTARG}
       ;;
     i)
       IMAGE_NAMESPACE=${OPTARG}
@@ -124,4 +127,8 @@ export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
 export CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE=${SAVE_FAILED_TEST_NS}
 
 # Then run integration tests
-DO_TEST_PREBUILD=false make test-install
+if [ "${TEST_FLAKY}" == "false" ]; then
+  DO_TEST_PREBUILD=false make test-install
+else
+  DO_TEST_PREBUILD=false make test-install-flaky
+fi
