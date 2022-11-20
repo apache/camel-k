@@ -85,7 +85,11 @@ if [ -n "${DEBUG_USE_EXISTING_IMAGE}" ] && [ -n "${CUSTOM_IMAGE}" ]; then
 else
 
   echo "Build Kamel from source"
-  export BUILD_PLATFORMS
+
+  if [ -n "${BUILD_PLATFORMS}" ]; then
+    export BUILD_PLATFORMS
+  fi
+  
   RULES="PACKAGE_ARTIFACTS_STRATEGY=download build images"
   if [ -n "${MAKE_RULES}" ]; then
     RULES=" ${MAKE_RULES} "
