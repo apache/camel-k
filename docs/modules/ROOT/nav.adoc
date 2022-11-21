@@ -39,6 +39,7 @@
 ** xref:configuration/runtime-resources.adoc[Runtime resources]
 ** xref:configuration/http-proxy.adoc[HTTP Proxy]
 ** xref:configuration/maven.adoc[Maven]
+** xref:configuration/multi-architecture.adoc[Multi Architecture]
 * Observability
 ** xref:observability/logging.adoc[Logging]
 *** xref:observability/logging/operator.adoc[Operator]
