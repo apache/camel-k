@@ -55,6 +55,10 @@ func (t *healthTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
+	if !pointer.BoolDeref(t.Enabled, false) {
+		return false, nil
+	}
+
 	return true, nil
 }
 

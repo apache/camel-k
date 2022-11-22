@@ -63,7 +63,11 @@ func TestProbesDependencies(t *testing.T) {
 	integration := &v1.Integration{
 		Spec: v1.IntegrationSpec{
 			Traits: v1.Traits{
-				Health: &traitv1.HealthTrait{},
+				Health: &traitv1.HealthTrait{
+					Trait: traitv1.Trait{
+						Enabled: pointer.Bool(true),
+					},
+				},
 			},
 		},
 	}
@@ -82,6 +86,9 @@ func TestProbesOnDeployment(t *testing.T) {
 		Spec: v1.IntegrationSpec{
 			Traits: v1.Traits{
 				Health: &traitv1.HealthTrait{
+					Trait: traitv1.Trait{
+						Enabled: pointer.Bool(true),
+					},
 					LivenessProbeEnabled:  pointer.Bool(true),
 					ReadinessProbeEnabled: pointer.Bool(true),
 					LivenessTimeout:       1234,
@@ -114,6 +121,9 @@ func TestProbesOnDeploymentWithCustomScheme(t *testing.T) {
 		Spec: v1.IntegrationSpec{
 			Traits: v1.Traits{
 				Health: &traitv1.HealthTrait{
+					Trait: traitv1.Trait{
+						Enabled: pointer.Bool(true),
+					},
 					LivenessProbeEnabled:  pointer.Bool(true),
 					ReadinessProbeEnabled: pointer.Bool(true),
 					LivenessScheme:        "HTTPS",
@@ -154,6 +164,9 @@ func TestProbesOnKnativeService(t *testing.T) {
 					},
 				},
 				Health: &traitv1.HealthTrait{
+					Trait: traitv1.Trait{
+						Enabled: pointer.Bool(true),
+					},
 					LivenessProbeEnabled:  pointer.Bool(true),
 					ReadinessProbeEnabled: pointer.Bool(true),
 					LivenessTimeout:       1234,
