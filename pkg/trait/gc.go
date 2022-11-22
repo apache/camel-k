@@ -204,14 +204,23 @@ func (t *gcTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind
 	GVKs := make(map[schema.GroupVersionKind]struct{})
 	for _, APIResourceList := range APIResourceLists {
 		for _, resource := range APIResourceList.APIResources {
+			resourceGroup := resource.Group
+			if resourceGroup == "" {
+				// Empty implies the group of the containing resource list should be used
+				gv, err := schema.ParseGroupVersion(APIResourceList.GroupVersion)
+				if err != nil {
+					return nil, err
+				}
+				resourceGroup = gv.Group
+			}
 		rule:
 			for _, rule := range ssrr.Status.ResourceRules {
 				if !util.StringSliceContainsAnyOf(rule.Verbs, "delete", "*") {
 					continue
 				}
-				for _, group := range rule.APIGroups {
-					for _, name := range rule.Resources {
-						if (resource.Group == group || group == "*") && (resource.Name == name || name == "*") {
+				for _, ruleGroup := range rule.APIGroups {
+					for _, ruleResource := range rule.Resources {
+						if (resourceGroup == ruleGroup || ruleGroup == "*") && (resource.Name == ruleResource || ruleResource == "*") {
 							GVK := schema.FromAPIVersionAndKind(APIResourceList.GroupVersion, resource.Kind)
 							GVKs[GVK] = struct{}{}
 							break rule
