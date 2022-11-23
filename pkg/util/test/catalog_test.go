@@ -34,8 +34,8 @@ func TestRuntimeContainsEmbeddedArtifacts(t *testing.T) {
 
 	artifact := catalog.GetArtifactByScheme("knative")
 	assert.Equal(t, 1, len(artifact.Schemes))
-	assert.Equal(t, "org.apache.camel.k", artifact.GroupID)
-	assert.Equal(t, "camel-k-knative", artifact.ArtifactID)
+	assert.Equal(t, "org.apache.camel.quarkus", artifact.GroupID)
+	assert.Equal(t, "camel-quarkus-knative", artifact.ArtifactID)
 
 	scheme, found := catalog.GetScheme("knative")
 	assert.True(t, found)

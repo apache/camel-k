@@ -41,7 +41,7 @@ func TemplateToYamlDSL(template v1.Template, id string) ([]byte, error) {
 		jsondata["id"] = id
 	}
 	templateWrapper := make(map[string]interface{}, 2)
-	templateWrapper["template"] = jsondata
+	templateWrapper["routeTemplate"] = jsondata
 	listWrapper := make([]interface{}, 0, 1)
 	listWrapper = append(listWrapper, templateWrapper)
 	yamldata, err := yaml2.Marshal(listWrapper)

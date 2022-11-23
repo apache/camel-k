@@ -309,7 +309,7 @@ func TestLanguageDependencies(t *testing.T) {
 			"camel:jsonpath",
 			"camel:groovy",
 			"camel:saxon",
-			"camel:xml-jaxp",
+			"camel:stax",
 		},
 		meta.Dependencies.List())
 }
@@ -662,7 +662,7 @@ func TestXMLLanguageDependencies(t *testing.T) {
 			"camel:mvel",
 			"camel:ognl",
 			"camel:xpath",
-			"camel:xml-jaxp",
+			"camel:stax",
 			"camel:jsonpath",
 			"camel:saxon",
 			"camel:groovy",
@@ -787,7 +787,7 @@ func TestYAMLLanguageDependencies(t *testing.T) {
 			"camel:jsonpath",
 			"camel:groovy",
 			"camel:saxon",
-			"camel:xml-jaxp",
+			"camel:stax",
 		},
 		meta.Dependencies.List())
 }

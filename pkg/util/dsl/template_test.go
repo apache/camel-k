@@ -49,7 +49,7 @@ func TestTemplateReadWrite(t *testing.T) {
 	yamlBytes, err := TemplateToYamlDSL(templateJSON, "myid")
 	assert.NoError(t, err)
 	yaml := string(yamlBytes)
-	expected := `- template:
+	expected := `- routeTemplate:
     beans:
     - name: myBean
       type: com.acme.MyBean

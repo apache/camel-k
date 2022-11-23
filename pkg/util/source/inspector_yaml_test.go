@@ -111,53 +111,48 @@ func TestYAMLDependencies(t *testing.T) {
 		missingDependencies []string
 	}{
 		{
-			name:                "consumer",
-			source:              YAMLRouteConsumer,
-			dependencies:        []string{`mvn:org.apache.camel.k:camel-k-knative-consumer`},
-			missingDependencies: []string{`mvn:org.apache.camel.k:camel-k-knative-producer`},
+			name:         "consumer",
+			source:       YAMLRouteConsumer,
+			dependencies: []string{`camel:knative`},
 		},
 		{
-			name:                "producer",
-			source:              YAMLRouteProducer,
-			dependencies:        []string{`mvn:org.apache.camel.k:camel-k-knative-producer`},
-			missingDependencies: []string{`mvn:org.apache.camel.k:camel-k-knative-consumer`},
+			name:         "producer",
+			source:       YAMLRouteProducer,
+			dependencies: []string{`camel:knative`},
 		},
 		{
 			name:   "transformer",
 			source: YAMLRouteTransformer,
 			dependencies: []string{
-				`mvn:org.apache.camel.k:camel-k-knative-producer`,
-				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
+				`camel:knative`,
 			},
 		},
 		{
 			name:   "invalid",
 			source: YAMLInvalid,
 			dependencies: []string{
-				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
+				`camel:knative`,
 			},
 		},
 		{
 			name:   "in-depth",
 			source: YAMLInDepthChannel,
 			dependencies: []string{
-				`mvn:org.apache.camel.k:camel-k-knative-producer`,
-				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
+				`camel:knative`,
 			},
 		},
 		{
 			name:   "wire-tap-knative",
 			source: YAMLWireTapKnativeEIP,
 			dependencies: []string{
-				`mvn:org.apache.camel.k:camel-k-knative-producer`,
-				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
+				`camel:knative`,
 			},
 		},
 		{
 			name:   "wire-tap-jms",
 			source: YAMLWireTapJmsEIP,
 			dependencies: []string{
-				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
+				`camel:knative`,
 				`camel:jms`,
 			},
 		},

@@ -21,8 +21,8 @@ metadata:
   name: camel-catalog-1.16.0-snapshot
   labels:
     app: camel-k
-    camel.apache.org/catalog.loader.version: 3.18.3
-    camel.apache.org/catalog.version: 3.18.3
+    camel.apache.org/catalog.loader.version: 3.19.0
+    camel.apache.org/catalog.version: 3.19.0
     camel.apache.org/runtime.version: 1.16.0-SNAPSHOT
 spec:
   runtime:
@@ -30,9 +30,9 @@ spec:
     provider: quarkus
     applicationClass: io.quarkus.bootstrap.runner.QuarkusEntryPoint
     metadata:
-      camel-quarkus.version: 2.13.1
-      camel.version: 3.18.3
-      quarkus.version: 2.13.4.Final
+      camel-quarkus.version: 2.14.0
+      camel.version: 3.19.0
+      quarkus.version: 2.14.0.Final
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime
@@ -75,21 +75,6 @@ spec:
     camel-k-cron:
       groupId: org.apache.camel.k
       artifactId: camel-k-cron
-    camel-k-knative:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-knative
-      schemes:
-      - id: knative
-        http: true
-        passive: false
-        producer:
-          dependencies:
-          - groupId: org.apache.camel.k
-            artifactId: camel-k-knative-producer
-        consumer:
-          dependencies:
-          - groupId: org.apache.camel.k
-            artifactId: camel-k-knative-consumer
     camel-k-master:
       groupId: org.apache.camel.k
       artifactId: camel-k-master
@@ -1630,6 +1615,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.kamelet.KameletComponent
+    camel-quarkus-knative:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-knative
+      schemes:
+      - id: knative
+        http: true
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.knative.KnativeComponent
     camel-quarkus-kubernetes:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-kubernetes
@@ -2428,8 +2422,11 @@ spec:
       - id: stax
         http: false
         passive: false
+      languages:
+      - xtokenize
       javaTypes:
       - org.apache.camel.component.stax.StAXComponent
+      - org.apache.camel.language.xtokenizer.XMLTokenizeLanguage
     camel-quarkus-stitch:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-stitch
@@ -2673,13 +2670,6 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.xj.XJComponent
-    camel-quarkus-xml-jaxp:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-xml-jaxp
-      languages:
-      - xtokenize
-      javaTypes:
-      - org.apache.camel.language.xtokenizer.XMLTokenizeLanguage
     camel-quarkus-xmlsecurity:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-xmlsecurity
