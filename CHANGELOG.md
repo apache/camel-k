@@ -6,13 +6,17 @@
 
 **Closed issues:**
 
+- gc trait fails for: cannot list resource \"endpoints\" in API group \"submariner.io\" [\#3833](https://github.com/apache/camel-k/issues/3833)
 - Bundle m2 camel k runtime distribution [\#3826](https://github.com/apache/camel-k/issues/3826)
+- E2E - Builder tests are constantly failing due to "Out of date version of GraalVM detected: native-image 21.3.0.0-Final" [\#3817](https://github.com/apache/camel-k/issues/3817)
 - query regarding using camel k [\#3815](https://github.com/apache/camel-k/issues/3815)
 - FTP sink does not create directories when writing [\#3812](https://github.com/apache/camel-k/issues/3812)
 - Release 1.10.3 [\#3796](https://github.com/apache/camel-k/issues/3796)
 - Native checks to run on a nightly basis instead of on each PR [\#3784](https://github.com/apache/camel-k/issues/3784)
 - Ready condition message not always taken from Camel Health Check [\#3761](https://github.com/apache/camel-k/issues/3761)
 - Drop support for Openshift 3 and related E2E test [\#3421](https://github.com/apache/camel-k/issues/3421)
+- Turn AWS region parameter into an enum? [\#3289](https://github.com/apache/camel-k/issues/3289)
+- Install Camel-K Operator based on Helm Chart with --global option [\#3054](https://github.com/apache/camel-k/issues/3054)
 
 ## [1.10.4-nightly](https://github.com/apache/camel-k/tree/1.10.4-nightly) (2022-11-14)
 
@@ -2500,7 +2504,6 @@
 - one page of documentation to install Camel-K on Minikube is incorrect [\#798](https://github.com/apache/camel-k/issues/798)
 - Kamel run Sample.java --dev hanged with "Waiting for Platform". Error - Non-resolvable import POM [\#677](https://github.com/apache/camel-k/issues/677)
 - Sample does not work after change camel version [\#664](https://github.com/apache/camel-k/issues/664)
-- Cannot load Knative configuration from file or env variable [\#654](https://github.com/apache/camel-k/issues/654)
 - Release 1.0.1 [\#1565](https://github.com/apache/camel-k/issues/1565)
 - Cannot expose knative endpoints in YAML [\#1539](https://github.com/apache/camel-k/issues/1539)
 - kamel install uses the wrong channel in OLM [\#1524](https://github.com/apache/camel-k/issues/1524)
