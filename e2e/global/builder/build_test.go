@@ -51,7 +51,7 @@ func TestKitTimerToLogFullBuild(t *testing.T) {
 func TestKitKnativeFullBuild(t *testing.T) {
 	doKitFullBuild(t, "knative", "500Mi", "8m0s", TestTimeoutLong, kitOptions{
 		dependencies: []string{
-			"camel-k-knative",
+			"camel-quarkus-knative",
 		},
 	})
 }

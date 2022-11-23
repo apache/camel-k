@@ -183,7 +183,8 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 
 func (t *knativeTrait) Apply(e *Environment) error {
 	if pointer.BoolDeref(t.SinkBinding, false) {
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k:camel-k-knative")
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel:knative")
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k:camel-k-knative-impl")
 	}
 
 	if len(t.ChannelSources) > 0 || len(t.EndpointSources) > 0 || len(t.EventSources) > 0 {
