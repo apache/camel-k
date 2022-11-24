@@ -468,33 +468,6 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		*mnts = append(*mnts, *mnt)
 	}
 
-	for i, r := range e.Integration.Resources() {
-		if r.Type == v1.ResourceTypeOpenAPI {
-			continue
-		}
-
-		cmName := fmt.Sprintf("%s-resource-%03d", e.Integration.Name, i)
-		refName := fmt.Sprintf("i-resource-%03d", i)
-		resName := strings.TrimPrefix(r.Name, "/")
-		cmKey := "content"
-		resPath := getResourcePath(resName, r.Path, r.Type)
-
-		if r.ContentRef != "" {
-			cmName = r.ContentRef
-		}
-		if r.ContentKey != "" {
-			cmKey = r.ContentKey
-		}
-		if r.MountPath != "" {
-			resPath = r.MountPath
-		}
-		vol := getVolume(refName, "configmap", cmName, cmKey, resName)
-		mnt := getMount(refName, resPath, resName, true)
-
-		*vols = append(*vols, *vol)
-		*mnts = append(*mnts, *mnt)
-	}
-
 	if e.Resources != nil {
 		e.Resources.VisitConfigMap(func(configMap *corev1.ConfigMap) {
 			propertiesType := configMap.Labels["camel.apache.org/properties.type"]
@@ -633,20 +606,6 @@ func convertToKeyToPath(k, v string) []corev1.KeyToPath {
 	}
 
 	return kp
-}
-
-func getResourcePath(resourceName string, maybePath string, resourceType v1.ResourceType) string {
-	// If the path is specified, we'll return it
-	if maybePath != "" {
-		return maybePath
-	}
-	// otherwise return a default path, according to the resource type
-	if resourceType == v1.ResourceTypeData {
-		return path.Join(camel.ResourcesDefaultMountPath, resourceName)
-	}
-
-	// Default, config type
-	return path.Join(camel.ConfigResourcesMountPath, resourceName)
 }
 
 func getMountPoint(resourceName string, mountPoint string, storagetype, resourceType string) string {

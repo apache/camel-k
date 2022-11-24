@@ -191,51 +191,18 @@ func TestConfigureVolumesAndMountsTextResourcesAndProperties(t *testing.T) {
 				Namespace: "ns",
 			},
 			Spec: v1.IntegrationSpec{
-				Resources: []v1.ResourceSpec{
-					{
-						DataSpec: v1.DataSpec{
-							Name:       "res1.txt",
-							ContentRef: "my-cm1",
-							ContentKey: "my-key1",
-						},
-						Type:      "data",
-						MountPath: "/etc/m1",
-					},
-					{
-						DataSpec: v1.DataSpec{
-							Name:       "res2.txt",
-							ContentRef: "my-cm2",
-						},
-						Type: "data",
-					},
-					{
-						DataSpec: v1.DataSpec{
-							Name:       "res3.txt",
-							ContentKey: "my-key3",
-						},
-						Type: "data",
-					},
-					{
-						DataSpec: v1.DataSpec{
-							Name: "res4.txt",
-						},
-						Type: "data",
-					},
-				},
 				Configuration: []v1.ConfigurationSpec{
 					{
 						Type:  "property",
 						Value: "a=b",
 					},
 					{
-						Type:         "configmap",
-						Value:        "test-configmap",
-						ResourceType: "config",
+						Type:  "configmap",
+						Value: "test-configmap",
 					},
 					{
-						Type:         "secret",
-						Value:        "test-secret",
-						ResourceType: "config",
+						Type:  "secret",
+						Value: "test-secret",
 					},
 					{
 						Type:  "volume",
@@ -255,60 +222,16 @@ func TestConfigureVolumesAndMountsTextResourcesAndProperties(t *testing.T) {
 
 	env.configureVolumesAndMounts(&vols, &mnts)
 
-	assert.Len(t, vols, 7)
-	assert.Len(t, mnts, 7)
+	assert.Len(t, vols, 3)
+	assert.Len(t, mnts, 3)
 
-	v := findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm1" })
-	assert.NotNil(t, v)
-	assert.NotNil(t, v.VolumeSource.ConfigMap)
-	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
-	assert.Equal(t, "my-key1", v.VolumeSource.ConfigMap.Items[0].Key)
-	assert.Equal(t, "res1.txt", v.VolumeSource.ConfigMap.Items[0].Path)
-
-	m := findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "i-resource-000" })
-	assert.NotNil(t, m)
-	assert.Equal(t, "/etc/m1", m.MountPath)
-
-	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm2" })
-	assert.NotNil(t, v)
-	assert.NotNil(t, v.VolumeSource.ConfigMap)
-	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
-	assert.Equal(t, "content", v.VolumeSource.ConfigMap.Items[0].Key)
-	assert.Equal(t, "res2.txt", v.VolumeSource.ConfigMap.Items[0].Path)
-
-	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "i-resource-001" })
-	assert.NotNil(t, m)
-	assert.Equal(t, "/etc/camel/resources/res2.txt", m.MountPath)
-
-	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == TestDeploymentName+"-resource-002" })
-	assert.NotNil(t, v)
-	assert.NotNil(t, v.VolumeSource.ConfigMap)
-	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
-	assert.Equal(t, "my-key3", v.VolumeSource.ConfigMap.Items[0].Key)
-	assert.Equal(t, "res3.txt", v.VolumeSource.ConfigMap.Items[0].Path)
-
-	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "i-resource-002" })
-	assert.NotNil(t, m)
-	assert.Equal(t, "/etc/camel/resources/res3.txt", m.MountPath)
-
-	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == TestDeploymentName+"-resource-003" })
-	assert.NotNil(t, v)
-	assert.NotNil(t, v.VolumeSource.ConfigMap)
-	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
-	assert.Equal(t, "content", v.VolumeSource.ConfigMap.Items[0].Key)
-	assert.Equal(t, "res4.txt", v.VolumeSource.ConfigMap.Items[0].Path)
-
-	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "i-resource-003" })
-	assert.NotNil(t, m)
-	assert.Equal(t, "/etc/camel/resources/res4.txt", m.MountPath)
-
-	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "test-configmap" })
+	v := findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "test-configmap" })
 	assert.NotNil(t, v)
 	assert.NotNil(t, v.VolumeSource.ConfigMap)
 	assert.NotNil(t, v.VolumeSource.ConfigMap.LocalObjectReference)
 	assert.Equal(t, "test-configmap", v.VolumeSource.ConfigMap.LocalObjectReference.Name)
 
-	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "test-configmap" })
+	m := findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "test-configmap" })
 	assert.NotNil(t, m)
 	assert.Equal(t, path.Join(camel.ConfigConfigmapsMountPath, "test-configmap"), m.MountPath)
 
@@ -387,72 +310,6 @@ func TestConfigureVolumesAndMountsSources(t *testing.T) {
 
 	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
 	assert.NotNil(t, m)
-}
-
-func TestConfigureVolumesAndMountsBinaryAndTextResources(t *testing.T) {
-	env := Environment{
-		Resources: kubernetes.NewCollection(),
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      TestDeploymentName,
-				Namespace: "ns",
-			},
-			Spec: v1.IntegrationSpec{
-				Resources: []v1.ResourceSpec{
-					{
-						DataSpec: v1.DataSpec{
-							Name:        "res1.bin",
-							RawContent:  []byte{1, 2, 3, 4},
-							ContentRef:  "my-cm1",
-							ContentKey:  "my-binary",
-							ContentType: "application/octet-stream",
-						},
-						Type: "data",
-					},
-					{
-						DataSpec: v1.DataSpec{
-							Name:        "res2.txt",
-							ContentRef:  "my-cm2",
-							Content:     "hello",
-							ContentKey:  "my-text",
-							ContentType: "text/plain",
-						},
-						Type: "data",
-					},
-				},
-			},
-		},
-	}
-
-	vols := make([]corev1.Volume, 0)
-	mnts := make([]corev1.VolumeMount, 0)
-
-	env.configureVolumesAndMounts(&vols, &mnts)
-
-	assert.Len(t, vols, 2)
-	assert.Len(t, mnts, 2)
-
-	v := findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm1" })
-	assert.NotNil(t, v)
-	assert.NotNil(t, v.VolumeSource.ConfigMap)
-	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
-	assert.Equal(t, "my-binary", v.VolumeSource.ConfigMap.Items[0].Key)
-	assert.Equal(t, "res1.bin", v.VolumeSource.ConfigMap.Items[0].Path)
-
-	m := findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
-	assert.NotNil(t, m)
-	assert.Equal(t, "/etc/camel/resources/res1.bin", m.MountPath)
-
-	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm2" })
-	assert.NotNil(t, v)
-	assert.NotNil(t, v.VolumeSource.ConfigMap)
-	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
-	assert.Equal(t, "my-text", v.VolumeSource.ConfigMap.Items[0].Key)
-	assert.Equal(t, "res2.txt", v.VolumeSource.ConfigMap.Items[0].Path)
-
-	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
-	assert.NotNil(t, m)
-	assert.Equal(t, "/etc/camel/resources/res2.txt", m.MountPath)
 }
 
 func TestOnlySomeTraitsInfluenceBuild(t *testing.T) {

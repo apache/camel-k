@@ -75,16 +75,6 @@ func TestKnativeService(t *testing.T) {
 						Language: v1.LanguageJavaScript,
 					},
 				},
-				Resources: []v1.ResourceSpec{
-					{
-						DataSpec: v1.DataSpec{
-							Name:        "my-resource.txt",
-							Content:     "",
-							Compression: false,
-						},
-						Type: v1.ResourceTypeData,
-					},
-				},
 				Configuration: []v1.ConfigurationSpec{
 					{Type: "configmap", Value: "my-cm"},
 					{Type: "secret", Value: "my-secret"},
@@ -129,7 +119,7 @@ func TestKnativeService(t *testing.T) {
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("knative"))
 	assert.NotNil(t, envvar.Get(environment.EnvVars, "CAMEL_KNATIVE_CONFIGURATION"))
-	assert.Equal(t, 5, environment.Resources.Size())
+	assert.Equal(t, 4, environment.Resources.Size())
 
 	s := environment.Resources.GetKnativeService(func(service *serving.Service) bool {
 		return service.Name == KnativeServiceTestName
@@ -139,8 +129,8 @@ func TestKnativeService(t *testing.T) {
 
 	spec := s.Spec.ConfigurationSpec.Template.Spec
 
-	assert.Len(t, spec.Containers[0].VolumeMounts, 6)
-	assert.Len(t, spec.Volumes, 6)
+	assert.Len(t, spec.Containers[0].VolumeMounts, 5)
+	assert.Len(t, spec.Volumes, 5)
 
 	assert.Condition(t, func() bool {
 		for _, v := range spec.Containers[0].VolumeMounts {
@@ -174,7 +164,6 @@ func TestKnativeService(t *testing.T) {
 
 	assert.Contains(t, names, "test-user-properties")
 	assert.Contains(t, names, "test-source-000")
-	assert.Contains(t, names, "test-resource-000")
 
 	environment.Resources.VisitConfigMap(func(cm *corev1.ConfigMap) {
 		if cm.Name == "test-properties" {

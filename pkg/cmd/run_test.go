@@ -424,7 +424,6 @@ func TestConfigureTraits(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, "run",
 		"--trait", "affinity.pod-affinity=false",
-		"--trait", "container.probes-enabled=false",
 		"--trait", "environment.container-meta=false",
 		"--trait", "jvm.print-command=false",
 		"--trait", "prometheus.pod-monitor=false",
@@ -444,9 +443,8 @@ func TestConfigureTraits(t *testing.T) {
 	assert.Nil(t, err)
 	traitMap, err := trait.ToTraitMap(traits)
 	assert.Nil(t, err)
-	assert.Len(t, traitMap, 5)
+	assert.Len(t, traitMap, 4)
 	assertTraitConfiguration(t, traits.Affinity, &traitv1.AffinityTrait{PodAffinity: pointer.Bool(false)})
-	assertTraitConfiguration(t, traits.Container, &traitv1.ContainerTrait{DeprecatedProbesEnabled: pointer.Bool(false)})
 	assertTraitConfiguration(t, traits.Environment, &traitv1.EnvironmentTrait{ContainerMeta: pointer.Bool(false)})
 	assertTraitConfiguration(t, traits.JVM, &traitv1.JVMTrait{PrintCommand: pointer.Bool(false)})
 	assertTraitConfiguration(t, traits.Prometheus, &traitv1.PrometheusTrait{PodMonitor: pointer.Bool(false)})

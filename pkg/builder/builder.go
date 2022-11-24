@@ -21,7 +21,6 @@ import (
 	"context"
 	"errors"
 	"os"
-	"path"
 	"sort"
 	"strconv"
 	"time"
@@ -63,30 +62,6 @@ func (t *builderTask) Do(ctx context.Context) v1.BuildStatus {
 		Namespace: t.build.Namespace,
 		Build:     *t.task,
 		BaseImage: t.task.BaseImage,
-	}
-
-	// Add sources
-	// nolint: staticcheck
-	for _, data := range t.task.Sources {
-		c.Resources = append(c.Resources, resource{
-			Content: []byte(data.Content),
-			Target:  path.Join("sources", data.Name),
-		})
-	}
-
-	// Add resources
-	// nolint: staticcheck
-	for _, data := range t.task.Resources {
-		t := path.Join("resources", data.Name)
-
-		if data.MountPath != "" {
-			t = path.Join(data.MountPath, data.Name)
-		}
-
-		c.Resources = append(c.Resources, resource{
-			Content: []byte(data.Content),
-			Target:  t,
-		})
 	}
 
 	steps, err := StepsFrom(t.task.Steps...)

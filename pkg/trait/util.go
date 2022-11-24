@@ -114,14 +114,10 @@ func collectConfigurations(configurationType string, configurable ...v1.Configur
 			continue
 		}
 
-		// nolint: staticcheck,nolintlint
 		for _, entry := range entries {
 			if entry.Type == configurationType {
 				item := make(map[string]string)
 				item["value"] = entry.Value
-				item["resourceType"] = entry.ResourceType
-				item["resourceMountPoint"] = entry.ResourceMountPoint
-				item["resourceKey"] = entry.ResourceKey
 				result = append(result, item)
 			}
 		}

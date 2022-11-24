@@ -62,12 +62,6 @@ type ConfigurationSpec struct {
 	Type string `json:"type"`
 	// the value to assign to the configuration (syntax may vary depending on the `Type`)
 	Value string `json:"value"`
-	// Deprecated: no longer used
-	ResourceType string `json:"resourceType,omitempty"`
-	// Deprecated: no longer used
-	ResourceMountPoint string `json:"resourceMountPoint,omitempty"`
-	// Deprecated: no longer used
-	ResourceKey string `json:"resourceKey,omitempty"`
 }
 
 // Artifact represents a materialized artifact (a jar dependency or in general a file used by the build)
@@ -282,8 +276,6 @@ type RuntimeSpec struct {
 // Capability is a particular feature which requires a well known set of dependencies
 type Capability struct {
 	Dependencies []MavenArtifact `json:"dependencies" yaml:"dependencies"`
-	// Deprecated: not in use
-	Metadata map[string]string `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 }
 
 const (

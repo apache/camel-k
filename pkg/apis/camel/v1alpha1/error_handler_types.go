@@ -52,7 +52,4 @@ const (
 	ErrorHandlerTypeLog ErrorHandlerType = "log"
 	// ErrorHandlerTypeSink used to send the event to a further sink (for future processing). This was previously known as dead-letter-channel.
 	ErrorHandlerTypeSink ErrorHandlerType = "sink"
-	// ErrorHandlerTypeDeadLetterChannel used to send the event to a dead letter channel
-	// Deprecated in favour of ErrorHandlerTypeSink
-	ErrorHandlerTypeDeadLetterChannel ErrorHandlerType = "dead-letter-channel"
 )

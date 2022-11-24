@@ -57,10 +57,6 @@ type IntegrationSpec struct {
 	Sources []SourceSpec `json:"sources,omitempty"`
 	// a source in YAML DSL language which contain the routes to run
 	Flows []Flow `json:"flows,omitempty"`
-	// Deprecated:
-	// Use mount trait (mount.resources) to manage resources
-	// Use openapi trait (openapi.configmaps) to manage OpenAPIs specifications
-	Resources []ResourceSpec `json:"resources,omitempty"`
 	// the reference of the `IntegrationKit` which is used for this Integration
 	IntegrationKit *corev1.ObjectReference `json:"integrationKit,omitempty"`
 	// the list of Camel or Maven dependencies required by the Integration
@@ -103,9 +99,6 @@ type IntegrationStatus struct {
 	Platform string `json:"platform,omitempty"`
 	// a list of sources generated for this Integration
 	GeneratedSources []SourceSpec `json:"generatedSources,omitempty"`
-	// Deprecated:
-	// a list of resources generated for this Integration
-	GeneratedResources []ResourceSpec `json:"generatedResources,omitempty"`
 	// the runtime version targeted for this Integration
 	RuntimeVersion string `json:"runtimeVersion,omitempty"`
 	// the runtime provider targeted for this Integration

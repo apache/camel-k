@@ -35,7 +35,7 @@ func TestRestDslTraitApplicability(t *testing.T) {
 		CamelCatalog: catalog,
 	}
 
-	trait := newOpenAPITrait()
+	trait, _ := newOpenAPITrait().(*openAPITrait)
 	enabled, err := trait.Configure(e)
 	assert.Nil(t, err)
 	assert.False(t, enabled)
@@ -49,10 +49,8 @@ func TestRestDslTraitApplicability(t *testing.T) {
 	assert.Nil(t, err)
 	assert.False(t, enabled)
 
-	resource := v1.ResourceSpec{
-		Type: v1.ResourceTypeOpenAPI,
-	}
-	e.Integration.Spec.Resources = append(e.Integration.Spec.Resources, resource)
+	trait.Configmaps = []string{"my-configmap"}
+
 	enabled, err = trait.Configure(e)
 	assert.Nil(t, err)
 	assert.False(t, enabled)

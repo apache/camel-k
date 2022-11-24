@@ -76,13 +76,6 @@ func ComputeForIntegration(integration *v1.Integration) (string, error) {
 		}
 	}
 
-	// Integration resources
-	for _, item := range integration.Spec.Resources {
-		if _, err := hash.Write([]byte(item.Content)); err != nil {
-			return "", err
-		}
-	}
-
 	// Integration flows
 	if len(integration.Spec.Flows) > 0 {
 		flows, err := dsl.ToYamlDSL(integration.Spec.Flows)

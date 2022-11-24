@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"encoding/json"
 	"sort"
 
 	corev1 "k8s.io/api/core/v1"
@@ -57,25 +56,6 @@ func (t *healthTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	if !pointer.BoolDeref(t.Enabled, false) {
-		// Source the configuration from the container trait to maintain backward compatibility.
-		// This can be removed once the deprecated properties related to health probes are actually
-		// removed from the container trait.
-		if trait := e.Catalog.GetTrait(containerTraitID); trait != nil {
-			if container, ok := trait.(*containerTrait); ok && pointer.BoolDeref(container.Enabled, true) && pointer.BoolDeref(container.DeprecatedProbesEnabled, false) {
-				config, err := json.Marshal(container)
-				if err != nil {
-					return false, err
-				}
-				err = json.Unmarshal(config, t)
-				if err != nil {
-					return false, err
-				}
-				t.Enabled = pointer.Bool(true)
-				t.LivenessProbeEnabled = pointer.Bool(true)
-				t.ReadinessProbeEnabled = pointer.Bool(true)
-				return true, err
-			}
-		}
 		return false, nil
 	}
 

@@ -36,7 +36,7 @@ fi
 rm -f ${rootdir}/resources/camel-catalog-*
 
 mvn -q dependency:copy -Dartifact="org.apache.camel.k:camel-k-catalog:$runtime_version:yaml:catalog" \
-  -D mdep.useBaseVersion=true \
+  -Dmdep.useBaseVersion=true \
   -DoutputDirectory=${rootdir}/resources/ \
   -s $location/maven-settings.xml \
   -Papache

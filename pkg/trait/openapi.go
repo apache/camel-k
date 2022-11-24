@@ -74,12 +74,6 @@ func (t *openAPITrait) Configure(e *Environment) (bool, error) {
 		return false, fmt.Errorf("the runtime provider %s does not declare 'rest' capability", e.CamelCatalog.Runtime.Provider)
 	}
 
-	for _, resource := range e.Integration.Spec.Resources {
-		if resource.Type == v1.ResourceTypeOpenAPI {
-			return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil
-		}
-	}
-
 	if t.Configmaps != nil {
 		return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil
 	}
@@ -97,35 +91,13 @@ func (t *openAPITrait) Apply(e *Environment) error {
 	}
 	defer os.RemoveAll(tmpDir)
 
-	generatedFromResources, err := t.generateFromResources(e, tmpDir)
-	if err != nil {
-		return err
-	}
 	generatedFromConfigmaps, err := t.generateFromConfigmaps(e, tmpDir)
 	if err != nil {
 		return err
 	}
-	if len(generatedFromConfigmaps) > 0 {
-		generatedFromResources = append(generatedFromResources, generatedFromConfigmaps...)
-	}
-	e.Integration.Status.GeneratedSources = generatedFromResources
+	e.Integration.Status.GeneratedSources = generatedFromConfigmaps
 
 	return nil
-}
-
-func (t *openAPITrait) generateFromResources(e *Environment, tmpDir string) ([]v1.SourceSpec, error) {
-	dataSpecs := make([]v1.DataSpec, 0, len(e.Integration.Spec.Resources))
-	for _, resource := range e.Integration.Spec.Resources {
-		if resource.Type != v1.ResourceTypeOpenAPI {
-			continue
-		}
-		if resource.Name == "" {
-			return nil, fmt.Errorf("no name defined for the openapi resource: %v", resource)
-		}
-		dataSpecs = append(dataSpecs, resource.DataSpec)
-	}
-
-	return t.generateFromDataSpecs(e, tmpDir, dataSpecs)
 }
 
 func (t *openAPITrait) generateFromConfigmaps(e *Environment, tmpDir string) ([]v1.SourceSpec, error) {
@@ -270,8 +242,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 		return err
 	}
 	mc.GlobalSettings = data
-	//nolint: staticcheck,nolintlint
-	secrets := mergeSecrets(e.Platform.Status.Build.Maven.CASecrets, e.Platform.Status.Build.Maven.CASecret)
+	secrets := e.Platform.Status.Build.Maven.CASecrets
 
 	if secrets != nil {
 		certsData, err := kubernetes.GetSecretsRefData(e.Ctx, e.Client, e.Platform.Namespace, secrets)
@@ -346,16 +317,6 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 
 	e.Resources.Add(&cm)
 	return nil
-}
-
-func mergeSecrets(secrets []corev1.SecretKeySelector, secret *corev1.SecretKeySelector) []corev1.SecretKeySelector {
-	if secrets == nil && secret == nil {
-		return nil
-	}
-	if secret == nil {
-		return secrets
-	}
-	return append(secrets, *secret)
 }
 
 func (t *openAPITrait) generateMavenProject(e *Environment) (maven.Project, error) {

@@ -80,15 +80,6 @@ spec:
                   description: ConfigurationSpec represents a generic configuration
                     specification
                   properties:
-                    resourceKey:
-                      description: 'Deprecated: no longer used'
-                      type: string
-                    resourceMountPoint:
-                      description: 'Deprecated: no longer used'
-                      type: string
-                    resourceType:
-                      description: 'Deprecated: no longer used'
-                      type: string
                     type:
                       description: 'represents the type of configuration, ie: property,
                         configmap, secret, ...'
@@ -165,49 +156,6 @@ spec:
                 description: additional Maven repositories to be used
                 items:
                   type: string
-                type: array
-              resources:
-                description: 'Deprecated: Use mount trait (mount.resources) to manage
-                  resources Use openapi trait (openapi.configmaps) to manage OpenAPIs
-                  specifications'
-                items:
-                  description: 'ResourceSpec represent an attached resource which
-                    will be materialized as a file on the running `Pod` TODO: we should
-                    deprecate in future releases in favour of mount, openapi or camel
-                    traits'
-                  properties:
-                    compression:
-                      description: if the content is compressed (base64 encrypted)
-                      type: boolean
-                    content:
-                      description: the source code (plain text)
-                      type: string
-                    contentKey:
-                      description: the confimap key holding the source content
-                      type: string
-                    contentRef:
-                      description: the confimap reference holding the source content
-                      type: string
-                    contentType:
-                      description: the content type (tipically text or binary)
-                      type: string
-                    mountPath:
-                      description: the mount path on destination `Pod`
-                      type: string
-                    name:
-                      description: the name of the specification
-                      type: string
-                    path:
-                      description: the path where the file is stored
-                      type: string
-                    rawContent:
-                      description: the source code (binary)
-                      format: byte
-                      type: string
-                    type:
-                      description: the kind of data to expect
-                      type: string
-                  type: object
                 type: array
               serviceAccountName:
                 description: custom SA to use for the Integration
@@ -6203,41 +6151,6 @@ spec:
                       limitMemory:
                         description: The maximum amount of memory required.
                         type: string
-                      livenessFailureThreshold:
-                        description: 'Minimum consecutive failures for the probe to
-                          be considered failed after having succeeded. Applies to
-                          the liveness probe. Deprecated: replaced by the health trait.'
-                        format: int32
-                        type: integer
-                      livenessInitialDelay:
-                        description: 'Number of seconds after the container has started
-                          before liveness probes are initiated. Deprecated: replaced
-                          by the health trait.'
-                        format: int32
-                        type: integer
-                      livenessPeriod:
-                        description: 'How often to perform the probe. Applies to the
-                          liveness probe. Deprecated: replaced by the health trait.'
-                        format: int32
-                        type: integer
-                      livenessScheme:
-                        description: 'Scheme to use when connecting. Defaults to HTTP.
-                          Applies to the liveness probe. Deprecated: replaced by the
-                          health trait.'
-                        type: string
-                      livenessSuccessThreshold:
-                        description: 'Minimum consecutive successes for the probe
-                          to be considered successful after having failed. Applies
-                          to the liveness probe. Deprecated: replaced by the health
-                          trait.'
-                        format: int32
-                        type: integer
-                      livenessTimeout:
-                        description: 'Number of seconds after which the probe times
-                          out. Applies to the liveness probe. Deprecated: replaced
-                          by the health trait.'
-                        format: int32
-                        type: integer
                       name:
                         description: The main container name. It's named `integration`
                           by default.
@@ -6251,47 +6164,6 @@ spec:
                           exposed by the container. It defaults to `http` only when
                           the `expose` parameter is true.
                         type: string
-                      probesEnabled:
-                        description: 'DeprecatedProbesEnabled enable/disable probes
-                          on the container (default `false`). Deprecated: replaced
-                          by the health trait.'
-                        type: boolean
-                      readinessFailureThreshold:
-                        description: 'Minimum consecutive failures for the probe to
-                          be considered failed after having succeeded. Applies to
-                          the readiness probe. Deprecated: replaced by the health
-                          trait.'
-                        format: int32
-                        type: integer
-                      readinessInitialDelay:
-                        description: 'Number of seconds after the container has started
-                          before readiness probes are initiated. Deprecated: replaced
-                          by the health trait.'
-                        format: int32
-                        type: integer
-                      readinessPeriod:
-                        description: 'How often to perform the probe. Applies to the
-                          readiness probe. Deprecated: replaced by the health trait.'
-                        format: int32
-                        type: integer
-                      readinessScheme:
-                        description: 'Scheme to use when connecting. Defaults to HTTP.
-                          Applies to the readiness probe. Deprecated: replaced by
-                          the health trait.'
-                        type: string
-                      readinessSuccessThreshold:
-                        description: 'Minimum consecutive successes for the probe
-                          to be considered successful after having failed. Applies
-                          to the readiness probe. Deprecated: replaced by the health
-                          trait.'
-                        format: int32
-                        type: integer
-                      readinessTimeout:
-                        description: 'Number of seconds after which the probe times
-                          out. Applies to the readiness probe. Deprecated: replaced
-                          by the health trait.'
-                        format: int32
-                        type: integer
                       requestCPU:
                         description: The minimum amount of CPU required.
                         type: string
@@ -7439,15 +7311,6 @@ spec:
                   description: ConfigurationSpec represents a generic configuration
                     specification
                   properties:
-                    resourceKey:
-                      description: 'Deprecated: no longer used'
-                      type: string
-                    resourceMountPoint:
-                      description: 'Deprecated: no longer used'
-                      type: string
-                    resourceType:
-                      description: 'Deprecated: no longer used'
-                      type: string
                     type:
                       description: 'represents the type of configuration, ie: property,
                         configmap, secret, ...'
@@ -7469,47 +7332,6 @@ spec:
               digest:
                 description: the digest calculated for this Integration
                 type: string
-              generatedResources:
-                description: 'Deprecated: a list of resources generated for this Integration'
-                items:
-                  description: 'ResourceSpec represent an attached resource which
-                    will be materialized as a file on the running `Pod` TODO: we should
-                    deprecate in future releases in favour of mount, openapi or camel
-                    traits'
-                  properties:
-                    compression:
-                      description: if the content is compressed (base64 encrypted)
-                      type: boolean
-                    content:
-                      description: the source code (plain text)
-                      type: string
-                    contentKey:
-                      description: the confimap key holding the source content
-                      type: string
-                    contentRef:
-                      description: the confimap reference holding the source content
-                      type: string
-                    contentType:
-                      description: the content type (tipically text or binary)
-                      type: string
-                    mountPath:
-                      description: the mount path on destination `Pod`
-                      type: string
-                    name:
-                      description: the name of the specification
-                      type: string
-                    path:
-                      description: the path where the file is stored
-                      type: string
-                    rawContent:
-                      description: the source code (binary)
-                      format: byte
-                      type: string
-                    type:
-                      description: the kind of data to expect
-                      type: string
-                  type: object
-                type: array
               generatedSources:
                 description: a list of sources generated for this Integration
                 items:
