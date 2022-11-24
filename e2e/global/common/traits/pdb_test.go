@@ -31,7 +31,7 @@ import (
 	. "github.com/onsi/gomega/gstruct"
 
 	corev1 "k8s.io/api/core/v1"
-	policy "k8s.io/api/policy/v1beta1"
+	policyv1 "k8s.io/api/policy/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -109,7 +109,7 @@ func TestPodDisruptionBudgetTrait(t *testing.T) {
 		// Eviction attempt
 		pods := IntegrationPods(ns, name)()
 		Expect(pods).To(HaveLen(2))
-		err := TestClient().CoreV1().Pods(ns).Evict(TestContext, &policy.Eviction{
+		err := TestClient().CoreV1().Pods(ns).EvictV1(TestContext, &policyv1.Eviction{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: pods[0].Name,
 			},
@@ -141,7 +141,7 @@ func TestPodDisruptionBudgetTrait(t *testing.T) {
 
 		pods = IntegrationPods(ns, name)()
 		Expect(pods).To(HaveLen(3))
-		Expect(TestClient().CoreV1().Pods(ns).Evict(TestContext, &policy.Eviction{
+		Expect(TestClient().CoreV1().Pods(ns).EvictV1(TestContext, &policyv1.Eviction{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: pods[0].Name,
 			},
@@ -152,11 +152,11 @@ func TestPodDisruptionBudgetTrait(t *testing.T) {
 	})
 }
 
-func podDisruptionBudget(ns string, name string) func() *policy.PodDisruptionBudget {
-	return func() *policy.PodDisruptionBudget {
-		pdb := policy.PodDisruptionBudget{
+func podDisruptionBudget(ns string, name string) func() *policyv1.PodDisruptionBudget {
+	return func() *policyv1.PodDisruptionBudget {
+		pdb := policyv1.PodDisruptionBudget{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: policy.SchemeGroupVersion.String(),
+				APIVersion: policyv1.SchemeGroupVersion.String(),
 				Kind:       "PodDisruptionBudget",
 			},
 			ObjectMeta: metav1.ObjectMeta{
