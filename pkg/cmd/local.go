@@ -42,6 +42,7 @@ func newCmdLocal(rootCmdOptions *RootCmdOptions) (*cobra.Command, *LocalCmdOptio
 		Use:               "local [sub-command]",
 		Short:             "Perform integration actions locally.",
 		Long:              `Perform integration actions locally given a set of input integration files.`,
+		Deprecated:        "consider using Camel JBang instead (https://camel.apache.org/manual/camel-jbang.html)",
 		PersistentPreRunE: options.persistentPreRun,
 		Annotations: map[string]string{
 			offlineCommandLabel: "true",

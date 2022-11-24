@@ -35,10 +35,11 @@ func newCmdLocalRun(localCmdOptions *LocalCmdOptions) (*cobra.Command, *localRun
 	}
 
 	cmd := cobra.Command{
-		Use:     "run [integration files]",
-		Short:   "Run integration locally.",
-		Long:    `Run integration locally using the input integration files.`,
-		PreRunE: decode(&options),
+		Use:        "run [integration files]",
+		Short:      "Run integration locally.",
+		Long:       `Run integration locally using the input integration files.`,
+		Deprecated: "consider using Camel JBang instead (https://camel.apache.org/manual/camel-jbang.html)",
+		PreRunE:    decode(&options),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
 				return err

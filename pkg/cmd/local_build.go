@@ -33,10 +33,11 @@ func newCmdLocalBuild(localCmdOptions *LocalCmdOptions) (*cobra.Command, *localB
 	}
 
 	cmd := cobra.Command{
-		Use:     "build [options]",
-		Short:   "Build integration images locally.",
-		Long:    `Build integration images locally for containerized integrations.`,
-		PreRunE: decode(&options),
+		Use:        "build [options]",
+		Short:      "Build integration images locally.",
+		Long:       `Build integration images locally for containerized integrations.`,
+		Deprecated: "it may be removed in future versions",
+		PreRunE:    decode(&options),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(cmd, args); err != nil {
 				return err
