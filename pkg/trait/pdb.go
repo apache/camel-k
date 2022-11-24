@@ -20,7 +20,7 @@ package trait
 import (
 	"fmt"
 
-	"k8s.io/api/policy/v1beta1"
+	policyv1 "k8s.io/api/policy/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
@@ -80,18 +80,18 @@ func (t *pdbTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *pdbTrait) podDisruptionBudgetFor(integration *v1.Integration) *v1beta1.PodDisruptionBudget {
-	pdb := &v1beta1.PodDisruptionBudget{
+func (t *pdbTrait) podDisruptionBudgetFor(integration *v1.Integration) *policyv1.PodDisruptionBudget {
+	pdb := &policyv1.PodDisruptionBudget{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "PodDisruptionBudget",
-			APIVersion: v1beta1.SchemeGroupVersion.String(),
+			APIVersion: policyv1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      integration.Name,
 			Namespace: integration.Namespace,
 			Labels:    integration.Labels,
 		},
-		Spec: v1beta1.PodDisruptionBudgetSpec{
+		Spec: policyv1.PodDisruptionBudgetSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
 					v1.IntegrationLabel: integration.Name,
