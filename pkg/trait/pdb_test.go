@@ -24,7 +24,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/api/policy/v1beta1"
+	policyv1 "k8s.io/api/policy/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -72,7 +72,7 @@ func TestPdbIsCreatedWithMinAvailable(t *testing.T) {
 	assert.Equal(t, int32(2), pdb.Spec.MinAvailable.IntVal)
 }
 
-func pdbCreatedCheck(t *testing.T, pdbTrait *pdbTrait, environment *Environment) *v1beta1.PodDisruptionBudget {
+func pdbCreatedCheck(t *testing.T, pdbTrait *pdbTrait, environment *Environment) *policyv1.PodDisruptionBudget {
 	t.Helper()
 
 	err := pdbTrait.Apply(environment)
@@ -86,10 +86,10 @@ func pdbCreatedCheck(t *testing.T, pdbTrait *pdbTrait, environment *Environment)
 	return pdb
 }
 
-func findPdb(resources *kubernetes.Collection) *v1beta1.PodDisruptionBudget {
+func findPdb(resources *kubernetes.Collection) *policyv1.PodDisruptionBudget {
 	for _, a := range resources.Items() {
-		if _, ok := a.(*v1beta1.PodDisruptionBudget); ok {
-			return a.(*v1beta1.PodDisruptionBudget)
+		if _, ok := a.(*policyv1.PodDisruptionBudget); ok {
+			return a.(*policyv1.PodDisruptionBudget)
 		}
 	}
 	return nil
