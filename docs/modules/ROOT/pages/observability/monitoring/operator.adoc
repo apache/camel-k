@@ -6,7 +6,7 @@ NOTE: The Camel K monitoring architecture relies on https://prometheus.io[Promet
 [[installation]]
 == Installation
 
-The `kamel install` command provides the `--monitoring` option flag, that can be used to automatically creates the default resources required to monitor the Camel K operator, e.g.:
+The `kamel install` command provides the `--monitoring` option flag, that can be used to automatically create the default resources required to monitor the Camel K operator, e.g.:
 
 [source,console]
 ----
