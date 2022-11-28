@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM quay.io/quarkus/ubi-quarkus-mandrel:22.2.0.0-Final-java11
+FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:22.2.0.0-Final-java11
 
 ARG MAVEN_VERSION="3.8.6"
 ARG MAVEN_HOME="/usr/share/maven"

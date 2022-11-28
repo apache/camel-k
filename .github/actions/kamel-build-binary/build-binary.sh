@@ -25,7 +25,7 @@
 
 set -e
 
-while getopts ":i:l:m:s:x:" opt; do
+while getopts ":i:l:m:s:p:x:" opt; do
   case "${opt}" in
     i)
       IMAGE_NAMESPACE=${OPTARG}
@@ -38,6 +38,9 @@ while getopts ":i:l:m:s:x:" opt; do
       ;;
     s)
       REGISTRY_PUSH_HOST=${OPTARG}
+      ;;
+    p)
+      BUILD_PLATFORMS=${OPTARG}
       ;;
     x)
       DEBUG_USE_EXISTING_IMAGE=${OPTARG}
@@ -83,6 +86,10 @@ else
 
   echo "Build Kamel from source"
 
+  if [ -n "${BUILD_PLATFORMS}" ]; then
+    export BUILD_PLATFORMS
+  fi
+  
   RULES="PACKAGE_ARTIFACTS_STRATEGY=download build images"
   if [ -n "${MAKE_RULES}" ]; then
     RULES=" ${MAKE_RULES} "
