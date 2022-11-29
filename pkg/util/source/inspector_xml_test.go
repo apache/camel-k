@@ -102,7 +102,7 @@ func TestXMLKamelet(t *testing.T) {
 	}
 }
 
-const xmlJsonEip = `
+const xmlJSONEip = `
 <camelContext xmlns="http://camel.apache.org/schema/spring">
   <route>
     <from uri="direct:start"/>
@@ -111,7 +111,7 @@ const xmlJsonEip = `
 </camelContext>
 `
 
-const xmlJsonJacksonEip = `
+const xmlJSONJacksonEip = `
 <camelContext xmlns="http://camel.apache.org/schema/spring">
   <route>
     <from uri="direct:start"/>
@@ -153,11 +153,11 @@ func TestXMLDataFormat(t *testing.T) {
 		deps   []string
 	}{
 		{
-			source: xmlJsonEip,
+			source: xmlJSONEip,
 			deps:   []string{"camel:jackson"},
 		},
 		{
-			source: xmlJsonJacksonEip,
+			source: xmlJSONJacksonEip,
 			deps:   []string{"camel:jackson"},
 		},
 		{
