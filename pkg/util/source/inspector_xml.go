@@ -19,6 +19,7 @@ package source
 
 import (
 	"encoding/xml"
+	"fmt"
 	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -48,6 +49,16 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 				meta.RequiredCapabilities.Add(v1.CapabilityRest)
 			case "circuitBreaker":
 				meta.RequiredCapabilities.Add(v1.CapabilityCircuitBreaker)
+			case "json":
+				dataFormatID := defaultJSONDataFormat
+				for _, a := range se.Attr {
+					if a.Name.Local == "library" {
+						dataFormatID = strings.ToLower(fmt.Sprintf("%s", a.Value))
+					}
+				}
+				if dfDep := i.catalog.GetArtifactByDataFormat(dataFormatID); dfDep != nil {
+					meta.AddDependency(dfDep.GetDependencyID())
+				}
 			case "language":
 				for _, a := range se.Attr {
 					if a.Name.Local == "language" {

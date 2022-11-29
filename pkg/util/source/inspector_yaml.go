@@ -69,9 +69,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 		meta.RequiredCapabilities.Add(v1.CapabilityRest)
 	case "circuitBreaker":
 		meta.RequiredCapabilities.Add(v1.CapabilityCircuitBreaker)
-	case "unmarshal":
-		fallthrough
-	case "marshal":
+	case "marshal", "unmarshal":
 		if cm, ok := content.(map[interface{}]interface{}); ok {
 			if js, jsOk := cm["json"]; jsOk {
 				dataFormatID := defaultJSONDataFormat
