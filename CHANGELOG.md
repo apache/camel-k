@@ -6,12 +6,14 @@
 
 **Closed issues:**
 
+- Remove deprecated Kubernetes API [\#3840](https://github.com/apache/camel-k/issues/3840)
 - gc trait fails for: cannot list resource \"endpoints\" in API group \"submariner.io\" [\#3833](https://github.com/apache/camel-k/issues/3833)
 - Bundle m2 camel k runtime distribution [\#3826](https://github.com/apache/camel-k/issues/3826)
 - E2E - Builder tests are constantly failing due to "Out of date version of GraalVM detected: native-image 21.3.0.0-Final" [\#3817](https://github.com/apache/camel-k/issues/3817)
 - query regarding using camel k [\#3815](https://github.com/apache/camel-k/issues/3815)
 - FTP sink does not create directories when writing [\#3812](https://github.com/apache/camel-k/issues/3812)
 - Release 1.10.3 [\#3796](https://github.com/apache/camel-k/issues/3796)
+- Deprecate overlapping Kamel CLI features in favour of Camel JBang [\#3790](https://github.com/apache/camel-k/issues/3790)
 - Remove code deprecated before 1.8 \(LTS\) [\#3787](https://github.com/apache/camel-k/issues/3787)
 - Native checks to run on a nightly basis instead of on each PR [\#3784](https://github.com/apache/camel-k/issues/3784)
 - Ready condition message not always taken from Camel Health Check [\#3761](https://github.com/apache/camel-k/issues/3761)
