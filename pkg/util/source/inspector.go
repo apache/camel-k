@@ -353,6 +353,30 @@ func (i *baseInspector) addDependencies(uri string, meta *Metadata, consumer boo
 		meta.AddDependency(dep)
 	}
 
+	// some components require additional dependency resolution based on URI
+	if err := i.addDependenciesFromUri(uri, scheme, meta); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (i *baseInspector) addDependenciesFromUri(uri string, scheme *v1.CamelScheme, meta *Metadata) error {
+	switch scheme.ID {
+	case "dataformat":
+		// dataformat:name:(marshal|unmarshal)[?options]
+		parts := strings.Split(uri, ":")
+		if len(parts) < 3 {
+			return fmt.Errorf("invalid dataformat uri: %s", uri)
+		}
+		name := parts[1]
+		df := i.catalog.GetArtifactByDataFormat(name)
+		if df == nil {
+			return fmt.Errorf("dataformat %q not found: %s", name, uri)
+		}
+		meta.AddDependency(df.GetDependencyID())
+	}
+
 	return nil
 }
 
