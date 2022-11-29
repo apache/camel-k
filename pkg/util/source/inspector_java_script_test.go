@@ -21,23 +21,36 @@ import (
 	"fmt"
 	"testing"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-const JavaScriptKameletEip = `
+func newTestJavaScriptInspector(t *testing.T) JavaScriptInspector {
+	t.Helper()
+
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	return JavaScriptInspector{
+		baseInspector: baseInspector{
+			catalog: catalog,
+		},
+	}
+}
+
+const javaScriptKameletEip = `
 from("direct:start")
     .kamelet("foo/bar?baz=test")
 `
 
-const JavaScriptKameletEndpoint = `
+const javaScriptKameletEndpoint = `
 from("direct:start")
     .to("kamelet:foo/bar?baz=test")
 `
 
-const JavaScriptWireTapEipSingleQuote = `
+const javaScriptWireTapEipSingleQuote = `
 from("direct:start")
     .wireTap('kamelet:foo/bar?baz=test')
 `
@@ -48,45 +61,94 @@ func TestJavaScriptKamelet(t *testing.T) {
 		kamelets []string
 	}{
 		{
-			source:   JavaScriptKameletEip,
+			source:   javaScriptKameletEip,
 			kamelets: []string{"foo/bar"},
 		},
 		{
-			source:   JavaScriptKameletEndpoint,
+			source:   javaScriptKameletEndpoint,
 			kamelets: []string{"foo/bar"},
 		},
 		{
-			source:   JavaScriptWireTapEipSingleQuote,
+			source:   javaScriptWireTapEipSingleQuote,
 			kamelets: []string{"foo/bar"},
 		},
 	}
 
+	inspector := newTestJavaScriptInspector(t)
 	for i := range tc {
 		test := tc[i]
 		t.Run(fmt.Sprintf("TestJavaScriptKamelet-%d", i), func(t *testing.T) {
-			code := v1.SourceSpec{
-				DataSpec: v1.DataSpec{
-					Content: test.source,
-				},
-			}
+			assertExtract(t, inspector, test.source, func(meta *Metadata) {
+				assert.True(t, meta.RequiredCapabilities.IsEmpty())
+				for _, k := range test.kamelets {
+					assert.Contains(t, meta.Kamelets, k)
+				}
+			})
+		})
+	}
+}
 
-			catalog, err := camel.DefaultCatalog()
-			assert.Nil(t, err)
+const javaScriptJsonEip = `
+from('direct:start')
+    .unmarshal().json()
+`
 
-			meta := NewMetadata()
-			inspector := JavaScriptInspector{
-				baseInspector: baseInspector{
-					catalog: catalog,
-				},
-			}
+const javaScriptJsonJacksonEip = `
+from('direct:start')
+    .unmarshal().json(JsonLibrary.Jackson)
+`
 
-			err = inspector.Extract(code, &meta)
-			assert.Nil(t, err)
-			assert.True(t, meta.RequiredCapabilities.IsEmpty())
+const javaScriptAvroEndpoint = `
+from('direct:start')
+    .to('dataformat:avro:marshal');
+`
 
-			for _, k := range test.kamelets {
-				assert.Contains(t, meta.Kamelets, k)
-			}
+const javaScriptJacksonEndpoint = `
+from('direct:start')
+    .to('dataformat:jackson:marshal')
+`
+
+const javaScriptProtobufEndpoint = `
+from('direct:start')
+    .to('dataformat:protobuf:marshal')
+`
+
+func TestJavaScriptDataFormat(t *testing.T) {
+	tc := []struct {
+		source string
+		deps   []string
+	}{
+		{
+			source: javaScriptJsonEip,
+			deps:   []string{"camel:jackson"},
+		},
+		{
+			source: javaScriptJsonJacksonEip,
+			deps:   []string{"camel:jackson"},
+		},
+		{
+			source: javaScriptAvroEndpoint,
+			deps:   []string{"camel:dataformat", "camel:avro"},
+		},
+		{
+			source: javaScriptJacksonEndpoint,
+			deps:   []string{"camel:dataformat", "camel:jackson"},
+		},
+		{
+			source: javaScriptProtobufEndpoint,
+			deps:   []string{"camel:dataformat", "camel:protobuf"},
+		},
+	}
+
+	inspector := newTestJavaScriptInspector(t)
+	for i := range tc {
+		test := tc[i]
+		t.Run(fmt.Sprintf("TestJavaScriptDataFormat-%d", i), func(t *testing.T) {
+			assertExtract(t, inspector, test.source, func(meta *Metadata) {
+				for _, d := range test.deps {
+					assert.Contains(t, meta.Dependencies.List(), d)
+				}
+			})
 		})
 	}
 }
