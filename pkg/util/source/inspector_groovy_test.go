@@ -106,12 +106,12 @@ func TestGroovyKamelet(t *testing.T) {
 	}
 }
 
-const groovyJsonEip = `
+const groovyJSONEip = `
 from("direct:start")
     .unmarshal().json()
 `
 
-const groovyJsonJacksonEip = `
+const groovyJSONJacksonEip = `
 from("direct:start")
     .unmarshal().json(JsonLibrary.Jackson)
 `
@@ -137,11 +137,11 @@ func TestGroovyDataFormat(t *testing.T) {
 		deps   []string
 	}{
 		{
-			source: groovyJsonEip,
+			source: groovyJSONEip,
 			deps:   []string{"camel:jackson"},
 		},
 		{
-			source: groovyJsonJacksonEip,
+			source: groovyJSONJacksonEip,
 			deps:   []string{"camel:jackson"},
 		},
 		{

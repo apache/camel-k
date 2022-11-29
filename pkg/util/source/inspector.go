@@ -354,16 +354,15 @@ func (i *baseInspector) addDependencies(uri string, meta *Metadata, consumer boo
 	}
 
 	// some components require additional dependency resolution based on URI
-	if err := i.addDependenciesFromUri(uri, scheme, meta); err != nil {
+	if err := i.addDependenciesFromURI(uri, scheme, meta); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (i *baseInspector) addDependenciesFromUri(uri string, scheme *v1.CamelScheme, meta *Metadata) error {
-	switch scheme.ID {
-	case "dataformat":
+func (i *baseInspector) addDependenciesFromURI(uri string, scheme *v1.CamelScheme, meta *Metadata) error {
+	if scheme.ID == "dataformat" {
 		// dataformat:name:(marshal|unmarshal)[?options]
 		parts := strings.Split(uri, ":")
 		if len(parts) < 3 {
