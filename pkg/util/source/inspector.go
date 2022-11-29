@@ -248,6 +248,8 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 				for _, dep := range candidateComp.GetConsumerDependencyIDs(scheme.ID) {
 					i.addDependency(dep, meta)
 				}
+				// some components require additional dependency resolution based on URI
+				i.addDependenciesFromUri(uri, scheme, meta)
 			}
 		}
 	}
@@ -260,6 +262,8 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 				for _, dep := range candidateComp.GetProducerDependencyIDs(scheme.ID) {
 					i.addDependency(dep, meta)
 				}
+				// some components require additional dependency resolution based on URI
+				i.addDependenciesFromUri(uri, scheme, meta)
 			}
 		}
 	}
@@ -304,6 +308,23 @@ func (i *baseInspector) discoverKamelets(source v1.SourceSpec, meta *Metadata) {
 
 func (i *baseInspector) addDependency(dependency string, meta *Metadata) {
 	meta.Dependencies.Add(dependency)
+}
+
+func (i *baseInspector) addDependenciesFromUri(uri string, scheme *v1.CamelScheme, meta *Metadata) {
+	switch scheme.ID {
+	case "dataformat":
+		// dataformat:name:(marshal|unmarshal)[?options]
+		parts := strings.Split(uri, ":")
+		if len(parts) < 3 {
+			return
+		}
+		name := parts[1]
+		df := i.catalog.GetArtifactByDataFormat(name)
+		if df == nil {
+			return
+		}
+		meta.Dependencies.Add(df.GetDependencyID())
+	}
 }
 
 // hasOnlyPassiveEndpoints returns true if the source has no endpoint that needs to remain always active.
