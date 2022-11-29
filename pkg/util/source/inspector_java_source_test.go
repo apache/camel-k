@@ -88,12 +88,12 @@ func TestJavaSourceKamelet(t *testing.T) {
 	}
 }
 
-const javaSourceJsonEip = `
+const javaSourceJSONEip = `
 from("direct:start")
     .unmarshal().json();
 `
 
-const javaSourceJsonJacksonEip = `
+const javaSourceJSONJacksonEip = `
 from("direct:start")
     .unmarshal().json(JsonLibrary.Jackson);
 `
@@ -119,11 +119,11 @@ func TestJavaSourceDataFormat(t *testing.T) {
 		deps   []string
 	}{
 		{
-			source: javaSourceJsonEip,
+			source: javaSourceJSONEip,
 			deps:   []string{"camel:jackson"},
 		},
 		{
-			source: javaSourceJsonJacksonEip,
+			source: javaSourceJSONJacksonEip,
 			deps:   []string{"camel:jackson"},
 		},
 		{
