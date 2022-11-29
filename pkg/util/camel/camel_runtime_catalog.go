@@ -186,9 +186,8 @@ func (c *RuntimeCatalog) DecodeComponent(uri string) (*v1.CamelArtifact, *v1.Cam
 		return nil, nil
 	}
 	uriStart := uriSplit[0]
-	scheme, ok := c.GetScheme(uriStart)
 	var schemeRef *v1.CamelScheme
-	if ok {
+	if scheme, ok := c.GetScheme(uriStart); ok {
 		schemeRef = &scheme
 	}
 	return c.GetArtifactByScheme(uriStart), schemeRef

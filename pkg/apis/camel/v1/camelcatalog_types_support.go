@@ -101,20 +101,20 @@ func (in *CamelArtifact) GetDependencyID() string {
 	}
 }
 
-func (in *CamelArtifact) GetConsumerDependencyIDs(schemeID string) (deps []string) {
+func (in *CamelArtifact) GetConsumerDependencyIDs(schemeID string) []string {
 	return in.getDependencyIDs(schemeID, consumerScheme)
 }
 
-func (in *CamelArtifact) GetProducerDependencyIDs(schemeID string) (deps []string) {
+func (in *CamelArtifact) GetProducerDependencyIDs(schemeID string) []string {
 	return in.getDependencyIDs(schemeID, producerScheme)
 }
 
-func (in *CamelArtifact) getDependencyIDs(schemeID string, scope func(CamelScheme) CamelSchemeScope) (deps []string) {
+func (in *CamelArtifact) getDependencyIDs(schemeID string, scope func(CamelScheme) CamelSchemeScope) []string {
 	ads := in.getDependencies(schemeID, scope)
 	if ads == nil {
-		return deps
+		return nil
 	}
-	deps = make([]string, 0, len(ads))
+	deps := make([]string, 0, len(ads))
 	for _, ad := range ads {
 		deps = append(deps, ad.GetDependencyID())
 	}
