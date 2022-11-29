@@ -19,7 +19,6 @@ package source
 
 import (
 	"encoding/xml"
-	"fmt"
 	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -53,7 +52,7 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 				dataFormatID := defaultJSONDataFormat
 				for _, a := range se.Attr {
 					if a.Name.Local == "library" {
-						dataFormatID = strings.ToLower(fmt.Sprintf("%s", a.Value))
+						dataFormatID = strings.ToLower(a.Value)
 					}
 				}
 				if dfDep := i.catalog.GetArtifactByDataFormat(dataFormatID); dfDep != nil {

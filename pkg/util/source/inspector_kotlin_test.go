@@ -88,12 +88,12 @@ func TestKotlinKamelet(t *testing.T) {
 	}
 }
 
-const kotlinJsonEip = `
+const kotlinJSONEip = `
 from("direct:start")
     .unmarshal().json()
 `
 
-const kotlinJsonJacksonEip = `
+const kotlinJSONJacksonEip = `
 from("direct:start")
     .unmarshal().json(JsonLibrary.Jackson)
 `
@@ -119,11 +119,11 @@ func TestKotlinDataFormat(t *testing.T) {
 		deps   []string
 	}{
 		{
-			source: kotlinJsonEip,
+			source: kotlinJSONEip,
 			deps:   []string{"camel:jackson"},
 		},
 		{
-			source: kotlinJsonJacksonEip,
+			source: kotlinJSONJacksonEip,
 			deps:   []string{"camel:jackson"},
 		},
 		{

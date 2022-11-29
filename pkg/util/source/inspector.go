@@ -249,7 +249,7 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 					i.addDependency(dep, meta)
 				}
 				// some components require additional dependency resolution based on URI
-				i.addDependenciesFromUri(uri, scheme, meta)
+				i.addDependenciesFromURI(uri, scheme, meta)
 			}
 		}
 	}
@@ -263,7 +263,7 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 					i.addDependency(dep, meta)
 				}
 				// some components require additional dependency resolution based on URI
-				i.addDependenciesFromUri(uri, scheme, meta)
+				i.addDependenciesFromURI(uri, scheme, meta)
 			}
 		}
 	}
@@ -310,9 +310,8 @@ func (i *baseInspector) addDependency(dependency string, meta *Metadata) {
 	meta.Dependencies.Add(dependency)
 }
 
-func (i *baseInspector) addDependenciesFromUri(uri string, scheme *v1.CamelScheme, meta *Metadata) {
-	switch scheme.ID {
-	case "dataformat":
+func (i *baseInspector) addDependenciesFromURI(uri string, scheme *v1.CamelScheme, meta *Metadata) {
+	if scheme.ID == "dataformat" {
 		// dataformat:name:(marshal|unmarshal)[?options]
 		parts := strings.Split(uri, ":")
 		if len(parts) < 3 {
