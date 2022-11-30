@@ -22,6 +22,7 @@
 - Drop support for Openshift 3 and related E2E test [\#3421](https://github.com/apache/camel-k/issues/3421)
 - Turn AWS region parameter into an enum? [\#3289](https://github.com/apache/camel-k/issues/3289)
 - Install Camel-K Operator based on Helm Chart with --global option [\#3054](https://github.com/apache/camel-k/issues/3054)
+- Camel 3.15 - Data formats renamed [\#2880](https://github.com/apache/camel-k/issues/2880)
 
 ## [1.10.4-nightly](https://github.com/apache/camel-k/tree/1.10.4-nightly) (2022-11-14)
 
