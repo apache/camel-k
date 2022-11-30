@@ -26,6 +26,7 @@ import (
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -76,8 +77,7 @@ func (t *camelTrait) Apply(e *Environment) error {
 	}
 
 	if e.CamelCatalog == nil {
-		err := t.loadOrCreateCatalog(e, t.RuntimeVersion)
-		if err != nil {
+		if err := t.loadOrCreateCatalog(e, t.RuntimeVersion); err != nil {
 			return err
 		}
 	}
@@ -125,7 +125,8 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 		if exactVersionRegexp.MatchString(runtimeVersion) {
 			ctx, cancel := context.WithTimeout(e.Ctx, e.Platform.Status.Build.GetTimeout().Duration)
 			defer cancel()
-			catalog, err = camel.GenerateCatalog(ctx, e.Client, ns, e.Platform.Status.Build.Maven, runtime, []maven.Dependency{})
+			catalog, err = camel.GenerateCatalog(ctx, e.Client,
+				ns, e.Platform.Status.Build.Maven, runtime, []maven.Dependency{})
 			if err != nil {
 				return err
 			}
@@ -140,12 +141,22 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 			cx.Labels["camel.apache.org/runtime.provider"] = string(runtime.Provider)
 			cx.Labels["camel.apache.org/catalog.generated"] = True
 
-			err = e.Client.Create(e.Ctx, &cx)
-			if err != nil {
-				return errors.Wrapf(err, "unable to create catalog runtime=%s, provider=%s, name=%s",
-					runtime.Version,
-					runtime.Provider,
-					catalogName)
+			if err := e.Client.Create(e.Ctx, &cx); err != nil {
+				if k8serrors.IsAlreadyExists(err) {
+					// It's still possible that catalog wasn't yet found at the time of loading
+					// but then created in the background before the client tries to create it.
+					// In this case, simply try loading again and reuse the existing catalog.
+					catalog, err = camel.LoadCatalog(e.Ctx, e.Client, ns, runtime)
+					if err != nil {
+						// unexpected error
+						return errors.Wrapf(err, "catalog %q already exists but unable to load", catalogName)
+					}
+				} else {
+					return errors.Wrapf(err, "unable to create catalog runtime=%s, provider=%s, name=%s",
+						runtime.Version,
+						runtime.Provider,
+						catalogName)
+				}
 			}
 		}
 	}
