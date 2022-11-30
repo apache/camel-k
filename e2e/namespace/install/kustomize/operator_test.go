@@ -32,7 +32,7 @@ import (
 )
 
 func TestBasicOperator(t *testing.T) {
-	os.Setenv("MAKE_DIR", "../../../../install")
+	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../../install")
 
 	// Ensure no CRDs are already installed
 	UninstallAll()
@@ -50,7 +50,7 @@ func TestBasicOperator(t *testing.T) {
 }
 
 func TestAlternativeImageOperator(t *testing.T) {
-	os.Setenv("MAKE_DIR", "../../../../install")
+	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../../install")
 
 	// Ensure no CRDs are already installed
 	UninstallAll()
@@ -72,7 +72,7 @@ func TestAlternativeImageOperator(t *testing.T) {
 }
 
 func TestGlobalOperator(t *testing.T) {
-	os.Setenv("MAKE_DIR", "../../../../install")
+	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../../install")
 
 	// Ensure no CRDs are already installed
 	UninstallAll()

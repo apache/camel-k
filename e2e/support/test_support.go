@@ -398,15 +398,16 @@ func Make(rule string, args ...string) *exec.Cmd {
 }
 
 func MakeWithContext(ctx context.Context, rule string, args ...string) *exec.Cmd {
-	makeArgs := os.Getenv("MAKE_ARGS")
+	makeArgs := os.Getenv("CAMEL_K_TEST_MAKE_ARGS")
 	defaultArgs := strings.Fields(makeArgs)
 	args = append(defaultArgs, args...)
 
-	makeDir := os.Getenv("MAKE_DIR")
+	defaultDir := "../../../../install"
+	makeDir := os.Getenv("CAMEL_K_TEST_MAKE_DIR")
 	if makeDir == "" {
-		makeDir = "../../../../install"
-	} else {
-		fmt.Printf("Using alternative make directory on path %s\n", makeDir)
+		makeDir = defaultDir
+	} else if makeDir != defaultDir {
+		fmt.Printf("Using alternative make directory on path: %s\n", makeDir)
 	}
 
 	if fi, e := os.Stat(makeDir); e != nil && os.IsNotExist(e) {
@@ -420,9 +421,9 @@ func MakeWithContext(ctx context.Context, rule string, args ...string) *exec.Cmd
 	return exec.Command("make", args...)
 }
 
-/*
-	Curryied utility functions for testing
-*/
+// =============================================================================
+// Curried utility functions for testing
+// =============================================================================
 
 func IntegrationLogs(ns, name string) func() string {
 	return func() string {
@@ -1728,12 +1729,11 @@ func Role(ns string) func() []rbacv1.Role {
 				APIVersion: rbacv1.SchemeGroupVersion.String(),
 			},
 		}
-		err := TestClient().List(TestContext, &lst,
+		if err := TestClient().List(TestContext, &lst,
 			ctrl.InNamespace(ns),
 			ctrl.MatchingLabels{
 				"app": "camel-k",
-			})
-		if err != nil {
+			}); err != nil {
 			failTest(err)
 		}
 		if len(lst.Items) == 0 {
@@ -1751,12 +1751,11 @@ func RoleBinding(ns string) func() *rbacv1.RoleBinding {
 				APIVersion: metav1.SchemeGroupVersion.String(),
 			},
 		}
-		err := TestClient().List(TestContext, &lst,
+		if err := TestClient().List(TestContext, &lst,
 			ctrl.InNamespace(ns),
 			ctrl.MatchingLabels{
 				"app": "camel-k",
-			})
-		if err != nil {
+			}); err != nil {
 			failTest(err)
 		}
 		if len(lst.Items) == 0 {

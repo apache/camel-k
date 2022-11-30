@@ -32,7 +32,7 @@ import (
 )
 
 func TestBasicSetup(t *testing.T) {
-	os.Setenv("MAKE_DIR", "../../../../install")
+	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../../install")
 
 	// Ensure no CRDs are already installed
 	UninstallAll()
@@ -42,17 +42,17 @@ func TestBasicSetup(t *testing.T) {
 
 	WithNewTestNamespace(t, func(ns string) {
 		ExecMake(t, Make("setup-cluster", fmt.Sprintf("NAMESPACE=%s", ns)))
-		Eventually(CRDs()).Should(HaveLen(ExpCrds))
+		Eventually(CRDs()).Should(HaveLen(ExpectedCRDs))
 
 		ExecMake(t, Make("setup", fmt.Sprintf("NAMESPACE=%s", ns)))
 
-		kroles := ExpKubePromoteRoles
-		osroles := kroles + ExpOSPromoteRoles
-		Eventually(Role(ns)).Should(Or(HaveLen(kroles), HaveLen(osroles)))
+		kpRoles := ExpectedKubePromoteRoles
+		opRoles := kpRoles + ExpectedOSPromoteRoles
+		Eventually(Role(ns)).Should(Or(HaveLen(kpRoles), HaveLen(opRoles)))
 
-		kcroles := ExpKubeClusterRoles
-		oscroles := kcroles + ExpOSClusterRoles
-		Eventually(ClusterRole()).Should(Or(HaveLen(kcroles), HaveLen(oscroles)))
+		kcRoles := ExpectedKubeClusterRoles
+		ocRoles := kcRoles + ExpectedOSClusterRoles
+		Eventually(ClusterRole()).Should(Or(HaveLen(kcRoles), HaveLen(ocRoles)))
 
 		// Tidy up to ensure next test works
 		Expect(Kamel("uninstall", "-n", ns).Execute()).To(Succeed())
@@ -61,7 +61,7 @@ func TestBasicSetup(t *testing.T) {
 }
 
 func TestGlobalSetup(t *testing.T) {
-	os.Setenv("MAKE_DIR", "../../../../install")
+	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../../install")
 
 	// Ensure no CRDs are already installed
 	UninstallAll()
@@ -71,14 +71,14 @@ func TestGlobalSetup(t *testing.T) {
 
 	WithNewTestNamespace(t, func(ns string) {
 		ExecMake(t, Make("setup-cluster", fmt.Sprintf("NAMESPACE=%s", ns)))
-		Eventually(CRDs()).Should(HaveLen(ExpCrds))
+		Eventually(CRDs()).Should(HaveLen(ExpectedCRDs))
 
 		ExecMake(t, Make("setup", "GLOBAL=true", fmt.Sprintf("NAMESPACE=%s", ns)))
 
 		Eventually(Role(ns)).Should(HaveLen(0))
 
-		kcroles := ExpKubeClusterRoles + ExpKubePromoteRoles
-		oscroles := kcroles + ExpOSClusterRoles + ExpOSPromoteRoles
-		Eventually(ClusterRole()).Should(Or(HaveLen(kcroles), HaveLen(oscroles)))
+		kcpRoles := ExpectedKubeClusterRoles + ExpectedKubePromoteRoles
+		ocpRoles := kcpRoles + ExpectedOSClusterRoles + ExpectedOSPromoteRoles
+		Eventually(ClusterRole()).Should(Or(HaveLen(kcpRoles), HaveLen(ocpRoles)))
 	})
 }
