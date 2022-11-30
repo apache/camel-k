@@ -31,13 +31,13 @@ inputs:
   secretDockerHubUser:
     required: true
   secretDockerHubPassword:
-    required: true    
+    required: true
   secretGithubToken:
     required: true
 
 runs:
   using: "composite"
-  
+
   steps:
     - name: Set up JDK ${{ inputs.javaVersion }}
       uses: actions/setup-java@v2
@@ -48,8 +48,13 @@ runs:
       uses: actions/setup-go@v2
       with:
         go-version: ${{ inputs.goVersion }}
-    - name: Smoke tests
+    - name: Common smoke tests
       uses: ./.github/actions/e2e-common
+      with:
+        cluster-config-data: ${{ inputs.secretE2ECluster }}
+        cluster-kube-config-data: ${{ inputs.secretE2EKube }}
+    - name: Native smoke tests
+      uses: ./.github/actions/e2e-install-native
       with:
         cluster-config-data: ${{ inputs.secretE2ECluster }}
         cluster-kube-config-data: ${{ inputs.secretE2EKube }}
@@ -101,7 +106,7 @@ runs:
       with:
         artifacts: "./camel-k-client*.tar.gz"
         body: |
-          Apache Camel K ${{ env.VERSION }} build for testing (unstable). This nightly release is using 
+          Apache Camel K ${{ env.VERSION }} build for testing (unstable). This nightly release is using
           an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`
 
           To test it, download the client for your OS and run:
@@ -109,7 +114,7 @@ runs:
           ```
           kamel install --olm=false --maven-repository=${{ env.MAVEN_REPOSITORY }}
           ```
-          
+
           NOTE: last updated on ${{ env.UPD_DATE }}
         token: ${{ inputs.secretGithubToken }}
         draft: false
