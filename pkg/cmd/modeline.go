@@ -20,7 +20,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -231,7 +230,7 @@ func extractModelineOptionsFromSource(resolvedSource source.Source) ([]modeline.
 			baseDir := filepath.Dir(resolvedSource.Origin)
 			refPath := o.Value
 			if !filepath.IsAbs(refPath) {
-				full := path.Join(baseDir, refPath)
+				full := filepath.Join(baseDir, refPath)
 				o.Value = full
 				ops[i] = o
 			}
@@ -239,7 +238,7 @@ func extractModelineOptionsFromSource(resolvedSource source.Source) ([]modeline.
 			baseDir := filepath.Dir(resolvedSource.Origin)
 			refPath := getRefPathOrProperty(o.Value)
 			if !filepath.IsAbs(refPath) {
-				full := getFullPathOrProperty(o.Value, path.Join(baseDir, refPath))
+				full := getFullPathOrProperty(o.Value, filepath.Join(baseDir, refPath))
 				o.Value = full
 				ops[i] = o
 			}

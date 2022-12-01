@@ -19,7 +19,7 @@ package docker
 
 import (
 	"os/exec"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
@@ -38,7 +38,7 @@ func CreateBaseImageDockerFile() error {
 	dockerFile = append(dockerFile, RUNMavenInstall())
 
 	// Write <BaseWorkingDirectory>/Dockerfile
-	baseDockerFilePath := path.Join(BaseWorkingDirectory, "Dockerfile")
+	baseDockerFilePath := filepath.Join(BaseWorkingDirectory, "Dockerfile")
 	if err := util.WriteToFile(baseDockerFilePath, strings.Join(dockerFile, "\n")); err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func CreateIntegrationImageDockerFile(integrationRunCmd *exec.Cmd, startsFromLoc
 	dockerFile = append(dockerFile, CMDShellWrap(strings.Join(integrationRunCmd.Args, " ")))
 
 	// Write <IntegrationWorkingDirectory>/Dockerfile
-	integrationDockerFilePath := path.Join(IntegrationWorkingDirectory, "Dockerfile")
+	integrationDockerFilePath := filepath.Join(IntegrationWorkingDirectory, "Dockerfile")
 	err := util.WriteToFile(integrationDockerFilePath, strings.Join(dockerFile, "\n"))
 	if err != nil {
 		return err
@@ -139,7 +139,7 @@ func GetContainerRoutesDir() string {
 func ContainerizeFilePaths(currentFilePaths []string, newDir string) []string {
 	newFilePaths := []string{}
 	for _, currentFilePath := range currentFilePaths {
-		newFilePaths = append(newFilePaths, newDir+containerFileSeparator+path.Base(currentFilePath))
+		newFilePaths = append(newFilePaths, newDir+containerFileSeparator+filepath.Base(currentFilePath))
 	}
 
 	return newFilePaths
@@ -153,7 +153,7 @@ func ContainerizeDependencyPaths(dependencyPaths []string, newDir string) []stri
 		if newDependencyPath != "" {
 			newDependencyPaths = append(newDependencyPaths, newDir+newDependencyPath)
 		} else {
-			newDependencyPaths = append(newDependencyPaths, newDir+containerFileSeparator+path.Base(currentDependencyPath))
+			newDependencyPaths = append(newDependencyPaths, newDir+containerFileSeparator+filepath.Base(currentDependencyPath))
 		}
 	}
 	return newDependencyPaths

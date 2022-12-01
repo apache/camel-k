@@ -20,7 +20,7 @@ package trait
 import (
 	"fmt"
 	"net/url"
-	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -102,8 +102,8 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	classpath := strset.New()
 
 	classpath.Add("./resources")
-	classpath.Add(camel.ConfigResourcesMountPath)
-	classpath.Add(camel.ResourcesDefaultMountPath)
+	classpath.Add(filepath.ToSlash(camel.ConfigResourcesMountPath))
+	classpath.Add(filepath.ToSlash(camel.ResourcesDefaultMountPath))
 	if t.Classpath != "" {
 		classpath.Add(strings.Split(t.Classpath, ":")...)
 	}
@@ -116,7 +116,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		// In case of an external created kit, we do not have any information about
 		// the classpath, so we assume the all jars in /deployments/dependencies/ have
 		// to be taken into account.
-		dependencies := path.Join(builder.DeploymentDir, builder.DependenciesDir)
+		dependencies := filepath.Join(builder.DeploymentDir, builder.DependenciesDir)
 		classpath.Add(
 			dependencies+"/*",
 			dependencies+"/app/*",

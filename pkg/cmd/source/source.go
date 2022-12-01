@@ -23,7 +23,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
@@ -53,7 +53,7 @@ func newSource(location string, compress bool, loadContent func() ([]byte, error
 		locPath = location
 	}
 	src := Source{
-		Name:     path.Base(locPath),
+		Name:     filepath.Base(locPath),
 		Origin:   location,
 		Location: location,
 		Compress: compress,

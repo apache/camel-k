@@ -23,7 +23,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -67,7 +66,7 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 		if err != nil {
 			return status.Failed(err)
 		}
-		contextDir = path.Join(pwd, ContextDir)
+		contextDir = filepath.Join(pwd, ContextDir)
 	}
 
 	exists, err := util.DirectoryExists(contextDir)
@@ -132,7 +131,7 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 	}
 
 	go readSpectrumLogs(newStdR)
-	digest, err := spectrum.Build(options, contextDir+":"+path.Join(DeploymentDir))
+	digest, err := spectrum.Build(options, contextDir+":"+filepath.Join(DeploymentDir)) //nolint
 	if err != nil {
 		_ = os.RemoveAll(registryConfigDir)
 		return status.Failed(err)

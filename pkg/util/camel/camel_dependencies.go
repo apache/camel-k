@@ -20,7 +20,6 @@ package camel
 import (
 	"fmt"
 	"io"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -221,7 +220,7 @@ func addRegistryMavenDependency(project *maven.Project, dependency string) error
 			"artifact",
 		},
 		Configuration: map[string]string{
-			"outputDirectory": path.Join(outputDirectory, filepath.Dir(outputFileRelativePath)),
+			"outputDirectory": filepath.Join(outputDirectory, filepath.Dir(outputFileRelativePath)),
 			"outputFileName":  filepath.Base(outputFileRelativePath),
 			"groupId":         gav.GroupID,
 			"artifactId":      gav.ArtifactID,

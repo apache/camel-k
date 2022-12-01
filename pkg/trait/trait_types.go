@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -405,8 +406,8 @@ func (e *Environment) addSourcesProperties() {
 		e.ApplicationProperties = make(map[string]string)
 	}
 	for i, s := range e.Integration.Sources() {
-		srcName := strings.TrimPrefix(s.Name, "/")
-		src := "file:" + path.Join(camel.SourcesMountPath, srcName)
+		srcName := strings.TrimPrefix(filepath.ToSlash(s.Name), "/")
+		src := "file:" + path.Join(filepath.ToSlash(camel.SourcesMountPath), srcName)
 		e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].location", i)] = src
 
 		simpleName := srcName
@@ -460,7 +461,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		}
 		resName := strings.TrimPrefix(s.Name, "/")
 		refName := fmt.Sprintf("i-source-%03d", i)
-		resPath := path.Join(camel.SourcesMountPath, resName)
+		resPath := filepath.Join(camel.SourcesMountPath, resName)
 		vol := getVolume(refName, "configmap", cmName, cmKey, resName)
 		mnt := getMount(refName, resPath, resName, true)
 
@@ -476,9 +477,9 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 			var mountPath string
 			switch propertiesType {
 			case "application":
-				mountPath = path.Join(camel.BasePath, resName)
+				mountPath = filepath.Join(camel.BasePath, resName)
 			case "user":
-				mountPath = path.Join(camel.ConfDPath, resName)
+				mountPath = filepath.Join(camel.ConfDPath, resName)
 			}
 
 			if propertiesType != "" {
@@ -521,7 +522,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	if len(e.ServiceBindingSecret) > 0 {
 		secret := e.ServiceBindingSecret
 		refName := kubernetes.SanitizeLabel(secret)
-		mountPath := path.Join(camel.ServiceBindingsMountPath, strings.ToLower(secret))
+		mountPath := filepath.Join(camel.ServiceBindingsMountPath, strings.ToLower(secret))
 		vol := getVolume(refName, "secret", secret, "", "")
 		mnt := getMount(refName, mountPath, "", true)
 
@@ -613,14 +614,14 @@ func getMountPoint(resourceName string, mountPoint string, storagetype, resource
 		return mountPoint
 	}
 	if resourceType == "data" {
-		return path.Join(camel.ResourcesDefaultMountPath, resourceName)
+		return filepath.Join(camel.ResourcesDefaultMountPath, resourceName)
 	}
 	defaultMountPoint := camel.ConfigConfigmapsMountPath
 	if storagetype == "secret" {
 		defaultMountPoint = camel.ConfigSecretsMountPath
 	}
 
-	return path.Join(defaultMountPoint, resourceName)
+	return filepath.Join(defaultMountPoint, resourceName)
 }
 
 func (e *Environment) collectConfigurationValues(configurationType string) []string {

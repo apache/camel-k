@@ -18,7 +18,7 @@ limitations under the License.
 package camel
 
 import (
-	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -30,13 +30,13 @@ import (
 
 var (
 	BasePath                  = "/etc/camel"
-	ConfDPath                 = path.Join(BasePath, "conf.d")
-	SourcesMountPath          = path.Join(BasePath, "sources")
-	ResourcesDefaultMountPath = path.Join(BasePath, "resources")
-	ConfigResourcesMountPath  = path.Join(ConfDPath, "_resources")
-	ConfigConfigmapsMountPath = path.Join(ConfDPath, "_configmaps")
-	ConfigSecretsMountPath    = path.Join(ConfDPath, "_secrets")
-	ServiceBindingsMountPath  = path.Join(ConfDPath, "_servicebindings")
+	ConfDPath                 = filepath.Join(BasePath, "conf.d")
+	SourcesMountPath          = filepath.Join(BasePath, "sources")
+	ResourcesDefaultMountPath = filepath.Join(BasePath, "resources")
+	ConfigResourcesMountPath  = filepath.Join(ConfDPath, "_resources")
+	ConfigConfigmapsMountPath = filepath.Join(ConfDPath, "_configmaps")
+	ConfigSecretsMountPath    = filepath.Join(ConfDPath, "_secrets")
+	ServiceBindingsMountPath  = filepath.Join(ConfDPath, "_servicebindings")
 )
 
 func findBestMatch(catalogs []v1.CamelCatalog, runtime v1.RuntimeSpec) (*RuntimeCatalog, error) {

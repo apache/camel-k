@@ -21,7 +21,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -230,7 +230,7 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 			"--task-name",
 			taskName,
 		},
-		WorkingDir: path.Join(builderDir, build.Name),
+		WorkingDir: filepath.Join(builderDir, build.Name),
 		Env:        proxyFromEnvironment(),
 	}
 
@@ -336,7 +336,7 @@ func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, ta
 		Command:         []string{"/bin/sh", "-c"},
 		Args:            []string{strings.Join(args, " && ")},
 		Env:             env,
-		WorkingDir:      path.Join(builderDir, build.Name, builder.ContextDir),
+		WorkingDir:      filepath.Join(builderDir, build.Name, builder.ContextDir),
 		VolumeMounts:    volumeMounts,
 	}
 
@@ -355,7 +355,7 @@ func addKanikoTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, tas
 
 	args := []string{
 		"--dockerfile=Dockerfile",
-		"--context=" + path.Join(builderDir, build.Name, builder.ContextDir),
+		"--context=" + filepath.Join(builderDir, build.Name, builder.ContextDir),
 		"--destination=" + task.Image,
 		"--cache=" + strconv.FormatBool(cache),
 		"--cache-dir=" + builder.KanikoCacheDir,
@@ -452,7 +452,7 @@ func addKanikoTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, tas
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Args:            args,
 		Env:             env,
-		WorkingDir:      path.Join(builderDir, build.Name, builder.ContextDir),
+		WorkingDir:      filepath.Join(builderDir, build.Name, builder.ContextDir),
 		VolumeMounts:    volumeMounts,
 	}
 
@@ -469,7 +469,7 @@ func addContainerToPod(build *v1.Build, container corev1.Container, pod *corev1.
 	if hasBuilderVolume(pod) {
 		container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
 			Name:      builderVolume,
-			MountPath: path.Join(builderDir, build.Name),
+			MountPath: filepath.Join(builderDir, build.Name),
 		})
 	}
 
@@ -563,7 +563,7 @@ func addRegistrySecret(name string, secret registrySecret, volumes *[]corev1.Vol
 	if secret.refEnv != "" {
 		*env = append(*env, corev1.EnvVar{
 			Name:  secret.refEnv,
-			Value: path.Join(secret.mountPath, secret.destination),
+			Value: filepath.Join(secret.mountPath, secret.destination),
 		})
 	}
 }

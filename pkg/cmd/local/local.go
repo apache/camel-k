@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -99,7 +99,7 @@ func getTopLevelDependencies(ctx context.Context, catalog *camel.RuntimeCatalog,
 
 		sourceSpec := v1.SourceSpec{
 			DataSpec: v1.DataSpec{
-				Name:        path.Base(src),
+				Name:        filepath.Base(src),
 				Content:     data,
 				Compression: false,
 			},
@@ -176,7 +176,7 @@ func getRegularFilesInDir(directory string, dirnameInPath bool) ([]string, error
 		// Do not include hidden files or sub-directories.
 		if !file.IsDir() && !strings.HasPrefix(fileName, ".") {
 			if dirnameInPath {
-				dirFiles = append(dirFiles, path.Join(directory, fileName))
+				dirFiles = append(dirFiles, filepath.Join(directory, fileName))
 			} else {
 				dirFiles = append(dirFiles, fileName)
 			}
@@ -373,7 +373,7 @@ func UpdateIntegrationProperties(properties []string, propertyFiles []string, ha
 	relocatedPropertyFiles := []string{}
 	dir := GetLocalPropertiesDir()
 	for _, propertyFile := range propertyFiles {
-		relocatedPropertyFile := path.Join(dir, path.Base(propertyFile))
+		relocatedPropertyFile := filepath.Join(dir, filepath.Base(propertyFile))
 		if _, err := util.CopyFile(propertyFile, relocatedPropertyFile); err != nil {
 			return nil, err
 		}
@@ -383,7 +383,7 @@ func UpdateIntegrationProperties(properties []string, propertyFiles []string, ha
 	if !hasIntegrationDir {
 		// Output list of properties to property file if any CLI properties were given.
 		if len(properties) > 0 {
-			propertyFilePath := path.Join(dir, "CLI.properties")
+			propertyFilePath := filepath.Join(dir, "CLI.properties")
 			if err := ioutil.WriteFile(propertyFilePath, []byte(strings.Join(properties, "\n")), 0o600); err != nil {
 				return nil, err
 			}
@@ -407,9 +407,9 @@ func updateIntegrationDependencies(dependencies []string) error {
 		var targetPath string
 		basePath := util.SubstringFrom(dependency, util.QuarkusDependenciesBaseDirectory)
 		if basePath != "" {
-			targetPath = path.Join(dir, basePath)
+			targetPath = filepath.Join(dir, basePath)
 		} else {
-			targetPath = path.Join(dir, path.Base(dependency))
+			targetPath = filepath.Join(dir, filepath.Base(dependency))
 		}
 		if _, err := util.CopyFile(dependency, targetPath); err != nil {
 			return err
@@ -426,7 +426,7 @@ func updateIntegrationRoutes(routes []string) error {
 
 	dir := getLocalRoutesDir()
 	for _, route := range routes {
-		if _, err := util.CopyFile(route, path.Join(dir, path.Base(route))); err != nil {
+		if _, err := util.CopyFile(route, filepath.Join(dir, filepath.Base(route))); err != nil {
 			return err
 		}
 	}
@@ -476,7 +476,7 @@ func CopyIntegrationFilesToDirectory(files []string, directory string) ([]string
 	// Copy files to new location. Also create the list with relocated files.
 	relocatedFilesList := []string{}
 	for _, filePath := range files {
-		newFilePath := path.Join(directory, path.Base(filePath))
+		newFilePath := filepath.Join(directory, filepath.Base(filePath))
 		if _, err := util.CopyFile(filePath, newFilePath); err != nil {
 			return relocatedFilesList, err
 		}
@@ -499,8 +499,8 @@ func CopyQuarkusAppFiles(dependenciesDir string, quarkusDir string) error {
 	}
 	for _, file := range files {
 		if strings.HasSuffix(file, ".dat") || strings.HasSuffix(file, "-bytecode.jar") {
-			source := path.Join(dependenciesDir, file)
-			destination := path.Join(quarkusDir, file)
+			source := filepath.Join(dependenciesDir, file)
+			destination := filepath.Join(quarkusDir, file)
 			if _, err = util.CopyFile(source, destination); err != nil {
 				return err
 			}
@@ -522,8 +522,8 @@ func CopyLibFiles(dependenciesDir string, libDir string) error {
 	}
 
 	for _, dependencyJar := range fileNames {
-		source := path.Join(dependenciesDir, dependencyJar)
-		destination := path.Join(libDir, dependencyJar)
+		source := filepath.Join(dependenciesDir, dependencyJar)
+		destination := filepath.Join(libDir, dependencyJar)
 		if _, err = util.CopyFile(source, destination); err != nil {
 			return err
 		}
@@ -545,8 +545,8 @@ func CopyAppFile(dependenciesDir string, appDir string) error {
 
 	for _, dependencyJar := range fileNames {
 		if strings.HasPrefix(dependencyJar, "camel-k-integration-") {
-			source := path.Join(dependenciesDir, dependencyJar)
-			destination := path.Join(appDir, dependencyJar)
+			source := filepath.Join(dependenciesDir, dependencyJar)
+			destination := filepath.Join(appDir, dependencyJar)
 			if _, err = util.CopyFile(source, destination); err != nil {
 				return err
 			}

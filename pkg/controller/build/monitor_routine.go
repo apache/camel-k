@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 	"sync"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -137,13 +137,13 @@ tasks:
 					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
 					break tasks
 				}
-				t.ContextDir = path.Join(buildDir, builder.ContextDir)
+				t.ContextDir = filepath.Join(buildDir, builder.ContextDir)
 			} else if t := task.S2i; t != nil && t.ContextDir == "" {
 				if buildDir == "" {
 					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
 					break tasks
 				}
-				t.ContextDir = path.Join(buildDir, builder.ContextDir)
+				t.ContextDir = filepath.Join(buildDir, builder.ContextDir)
 			}
 
 			// Execute the task

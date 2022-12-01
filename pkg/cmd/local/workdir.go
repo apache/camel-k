@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
@@ -50,7 +51,7 @@ func DeleteMavenWorkingDirectory() error {
 
 // getLocalDependenciesDir returns <mavenWorkingDirectory>/dependencies.
 func getLocalDependenciesDir() string {
-	return path.Join(MavenWorkingDirectory, util.DefaultDependenciesDirectoryName)
+	return filepath.Join(MavenWorkingDirectory, util.DefaultDependenciesDirectoryName)
 }
 
 func createLocalDependenciesDirectory() error {
@@ -75,7 +76,7 @@ func createLocalDependenciesDirectory() error {
 
 // GetLocalPropertiesDir returns <mavenWorkingDirectory>/properties.
 func GetLocalPropertiesDir() string {
-	return path.Join(MavenWorkingDirectory, util.DefaultPropertiesDirectoryName)
+	return filepath.Join(MavenWorkingDirectory, util.DefaultPropertiesDirectoryName)
 }
 
 func CreateLocalPropertiesDirectory() error {
@@ -101,7 +102,7 @@ func CreateLocalPropertiesDirectory() error {
 
 // getLocalRoutesDir returns <mavenWorkingDirectory>/routes.
 func getLocalRoutesDir() string {
-	return path.Join(MavenWorkingDirectory, util.DefaultRoutesDirectoryName)
+	return filepath.Join(MavenWorkingDirectory, util.DefaultRoutesDirectoryName)
 }
 
 func createLocalRoutesDirectory() error {
@@ -126,7 +127,7 @@ func createLocalRoutesDirectory() error {
 
 // getLocalQuarkusDir returns <mavenWorkingDirectory>/quarkus.
 func getLocalQuarkusDir() string {
-	return path.Join(MavenWorkingDirectory, util.CustomQuarkusDirectoryName)
+	return filepath.Join(MavenWorkingDirectory, util.CustomQuarkusDirectoryName)
 }
 
 func createLocalQuarkusDirectory() error {
@@ -151,7 +152,7 @@ func createLocalQuarkusDirectory() error {
 
 // getLocalAppDir returns <mavenWorkingDirectory>/app.
 func getLocalAppDir() string {
-	return path.Join(MavenWorkingDirectory, util.CustomAppDirectoryName)
+	return filepath.Join(MavenWorkingDirectory, util.CustomAppDirectoryName)
 }
 
 func createLocalAppDirectory() error {
@@ -176,7 +177,7 @@ func createLocalAppDirectory() error {
 
 // getLocalLibDir returns <mavenWorkingDirectory>/lib/main.
 func getLocalLibDir() string {
-	return path.Join(MavenWorkingDirectory, util.CustomLibDirectoryName)
+	return filepath.Join(MavenWorkingDirectory, util.CustomLibDirectoryName)
 }
 
 func createLocalLibDirectory() error {
@@ -200,30 +201,30 @@ func createLocalLibDirectory() error {
 }
 
 func GetCustomDependenciesDir(dir string) string {
-	return path.Join(dir, util.DefaultDependenciesDirectoryName)
+	return filepath.Join(dir, util.DefaultDependenciesDirectoryName)
 }
 
 func GetCustomPropertiesDir(dir string) string {
-	return path.Join(dir, util.DefaultPropertiesDirectoryName)
+	return filepath.Join(dir, util.DefaultPropertiesDirectoryName)
 }
 
 func GetCustomRoutesDir(dir string) string {
-	return path.Join(dir, util.DefaultRoutesDirectoryName)
+	return filepath.Join(dir, util.DefaultRoutesDirectoryName)
 }
 
 func GetCustomQuarkusDir(dir string) string {
 	parentDir := path.Dir(strings.TrimSuffix(dir, "/"))
-	return path.Join(parentDir, util.CustomQuarkusDirectoryName)
+	return filepath.Join(parentDir, util.CustomQuarkusDirectoryName)
 }
 
 func GetCustomLibDir(dir string) string {
 	parentDir := path.Dir(strings.TrimSuffix(dir, "/"))
-	return path.Join(parentDir, util.CustomLibDirectoryName)
+	return filepath.Join(parentDir, util.CustomLibDirectoryName)
 }
 
 func GetCustomAppDir(dir string) string {
 	parentDir := path.Dir(strings.TrimSuffix(dir, "/"))
-	return path.Join(parentDir, "app")
+	return filepath.Join(parentDir, "app")
 }
 
 func DeleteLocalIntegrationDirs(dir string) error {

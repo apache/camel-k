@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
@@ -68,7 +69,7 @@ func nativeImageContext(ctx *builderContext) error {
 		ctx.Artifacts = []v1.Artifact{
 			{
 				ID:       runner,
-				Location: path.Join(ctx.Path, "maven", "target", runner),
+				Location: filepath.Join(ctx.Path, "maven", "target", runner),
 				Target:   runner,
 			},
 		}
@@ -87,7 +88,7 @@ func executableDockerfile(ctx *builderContext) error {
 		USER nonroot
 	`)
 
-	err := ioutil.WriteFile(path.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
+	err := ioutil.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
 	if err != nil {
 		return err
 	}
@@ -111,7 +112,7 @@ func jvmDockerfile(ctx *builderContext) error {
 		USER 1000
 	`)
 
-	err := ioutil.WriteFile(path.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
+	err := ioutil.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
 	if err != nil {
 		return err
 	}
@@ -153,7 +154,7 @@ func imageContext(ctx *builderContext, selector artifactsSelector) error {
 		return err
 	}
 
-	contextDir := path.Join(ctx.Path, ContextDir)
+	contextDir := filepath.Join(ctx.Path, ContextDir)
 
 	err = os.MkdirAll(contextDir, 0o700)
 	if err != nil {
@@ -161,7 +162,7 @@ func imageContext(ctx *builderContext, selector artifactsSelector) error {
 	}
 
 	for _, entry := range ctx.SelectedArtifacts {
-		_, err := util.CopyFile(entry.Location, path.Join(contextDir, entry.Target))
+		_, err := util.CopyFile(entry.Location, filepath.Join(contextDir, entry.Target))
 		if err != nil {
 			return err
 		}
@@ -169,7 +170,7 @@ func imageContext(ctx *builderContext, selector artifactsSelector) error {
 
 	for _, entry := range ctx.Resources {
 		filePath, fileName := path.Split(entry.Target)
-		fullPath := path.Join(contextDir, filePath, fileName)
+		fullPath := filepath.Join(contextDir, filePath, fileName)
 		if err := util.WriteFileWithContent(fullPath, entry.Content); err != nil {
 			return err
 		}

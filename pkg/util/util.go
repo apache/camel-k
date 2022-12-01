@@ -294,7 +294,7 @@ func WriteFileWithBytesMarshallerContent(basePath string, filePath string, conte
 		return err
 	}
 
-	return WriteFileWithContent(path.Join(basePath, filePath), data)
+	return WriteFileWithContent(filepath.Join(basePath, filePath), data)
 }
 
 func FindAllDistinctStringSubmatch(data string, regexps ...*regexp.Regexp) []string {

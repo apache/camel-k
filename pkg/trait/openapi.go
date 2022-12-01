@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -194,7 +193,7 @@ func (t *openAPITrait) generateOpenAPIConfigMap(e *Environment, resource v1.Data
 }
 
 func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.DataSpec, tmpDir, generatedContentName string) error {
-	tmpDir = path.Join(tmpDir, generatedContentName)
+	tmpDir = filepath.Join(tmpDir, generatedContentName)
 	err := os.MkdirAll(tmpDir, os.ModePerm)
 	if err != nil {
 		return err
@@ -208,8 +207,8 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 		}
 	}
 
-	in := path.Join(tmpDir, resource.Name)
-	out := path.Join(tmpDir, "openapi-dsl.xml")
+	in := filepath.Join(tmpDir, resource.Name)
+	out := filepath.Join(tmpDir, "openapi-dsl.xml")
 
 	err = ioutil.WriteFile(in, content, 0o400)
 	if err != nil {

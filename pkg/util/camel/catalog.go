@@ -19,7 +19,7 @@ package camel
 
 import (
 	"context"
-	"path"
+	"path/filepath"
 
 	yaml2 "gopkg.in/yaml.v2"
 
@@ -148,7 +148,7 @@ func GenerateCatalogCommon(
 			return err
 		}
 
-		content, err := util.ReadFile(path.Join(tmpDir, "catalog.yaml"))
+		content, err := util.ReadFile(filepath.Join(tmpDir, "catalog.yaml"))
 		if err != nil {
 			return err
 		}

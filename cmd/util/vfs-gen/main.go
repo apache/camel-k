@@ -110,7 +110,7 @@ func main() {
 	//
 	err = vfsgen.Generate(fs, vfsgen.Options{
 		Filename:    resourceFile,
-		PackageName: path.Base(destDir),
+		PackageName: filepath.Base(destDir),
 	})
 	if err != nil {
 		log.Fatalln(err)

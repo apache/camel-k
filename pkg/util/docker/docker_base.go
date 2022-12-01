@@ -18,7 +18,7 @@ limitations under the License.
 package docker
 
 import (
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
@@ -56,7 +56,7 @@ func BuildImageArgs(dockerFileDir string, imageName string, sourceDir string) []
 	args = append(args, "build")
 
 	// Add path to Dockerfile:
-	dockerFile := path.Join(dockerFileDir, "Dockerfile")
+	dockerFile := filepath.Join(dockerFileDir, "Dockerfile")
 
 	args = append(args, DockerfilePathArg(dockerFile)...)
 
