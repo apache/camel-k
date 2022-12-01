@@ -18,9 +18,13 @@ limitations under the License.
 package util
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestStringContainsPrefix(t *testing.T) {
@@ -43,4 +47,16 @@ func TestSubstringBefore(t *testing.T) {
 	assert.Equal(t, "aaa/bbb", SubstringBefore("aaa/bbb/ccc", "/"))
 	assert.Equal(t, "aaa/bbb", SubstringBefore("aaa/bbb?ccc=ddd", "?"))
 	assert.Empty(t, SubstringBefore("aaa/bbb/ccc", "?"))
+}
+
+func TestCopyDir(t *testing.T) {
+	srcDir := "../../install"
+	tmpDir, err := os.MkdirTemp("", "TestCopyDir-*")
+	defer os.RemoveAll(tmpDir)
+	destDir := filepath.Join(tmpDir, "install")
+
+	require.NoError(t, err)
+	fmt.Println(destDir)
+	err = CopyDir(srcDir, destDir)
+	assert.NoError(t, err)
 }
