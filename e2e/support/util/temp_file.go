@@ -21,48 +21,62 @@ limitations under the License.
 package util
 
 import (
-	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/apache/camel-k/pkg/util"
 )
 
 func MakeTempCopy(t *testing.T, fileName string) string {
-	_, simpleName := path.Split(fileName)
-	var err error
+	t.Helper()
+
+	_, simpleName := filepath.Split(fileName)
 	tmpDir := MakeTempDir(t)
-	tmpFileName := path.Join(tmpDir, simpleName)
-	var content []byte
-	if content, err = ioutil.ReadFile(fileName); err != nil {
-		t.Error(err)
-		t.FailNow()
-	}
-	if err = ioutil.WriteFile(tmpFileName, content, os.FileMode(0777)); err != nil {
+	tmpFileName := filepath.Join(tmpDir, simpleName)
+	if _, err := util.CopyFile(fileName, tmpFileName); err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 	return tmpFileName
 }
 
+func MakeTempCopyDir(t *testing.T, dirName string) string {
+	t.Helper()
+
+	dirName = strings.TrimSuffix(dirName, "/")
+	_, simpleName := filepath.Split(dirName)
+	tmpDir := MakeTempDir(t)
+	tmpDirName := filepath.Join(tmpDir, simpleName)
+	if err := util.CopyDir(dirName, tmpDirName); err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	return tmpDirName
+}
+
 // ReplaceInFile replace strings in a file with new values
 func ReplaceInFile(t *testing.T, fileName string, old, new string) {
-	content, err := ioutil.ReadFile(fileName)
+	t.Helper()
+
+	content, err := os.ReadFile(fileName)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 	res := strings.ReplaceAll(string(content), old, new)
-	if err = ioutil.WriteFile(fileName, []byte(res), os.FileMode(0777)); err != nil {
+	if err = os.WriteFile(fileName, []byte(res), os.FileMode(0777)); err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 }
 
 func MakeTempDir(t *testing.T) string {
-	var tmpDir string
-	var err error
-	if tmpDir, err = ioutil.TempDir("", "camel-k-"); err != nil {
+	t.Helper()
+
+	tmpDir, err := os.MkdirTemp("", "camel-k-")
+	if err != nil {
 		t.Error(err)
 		t.FailNow()
 		return ""

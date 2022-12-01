@@ -59,6 +59,8 @@ const (
 )
 
 func ExecMake(t *testing.T, command *exec.Cmd) {
+	t.Helper()
+
 	var cmdOut strings.Builder
 	var cmdErr strings.Builder
 
@@ -80,6 +82,8 @@ func ExecMake(t *testing.T, command *exec.Cmd) {
 // Expect a make error with an exit code of 1
 //
 func ExecMakeError(t *testing.T, command *exec.Cmd) {
+	t.Helper()
+
 	var cmdOut strings.Builder
 	var cmdErr strings.Builder
 

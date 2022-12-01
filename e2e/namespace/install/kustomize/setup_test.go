@@ -28,11 +28,13 @@ import (
 	"testing"
 
 	. "github.com/apache/camel-k/e2e/support"
+	testutil "github.com/apache/camel-k/e2e/support/util"
 	. "github.com/onsi/gomega"
 )
 
 func TestBasicSetup(t *testing.T) {
-	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../../install")
+	makeDir := testutil.MakeTempCopyDir(t, "../../../../install")
+	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
 	UninstallAll()
@@ -61,7 +63,8 @@ func TestBasicSetup(t *testing.T) {
 }
 
 func TestGlobalSetup(t *testing.T) {
-	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../../install")
+	makeDir := testutil.MakeTempCopyDir(t, "../../../../install")
+	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
 	UninstallAll()

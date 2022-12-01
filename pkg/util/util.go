@@ -23,7 +23,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"io/fs"
 	"math/rand"
 	"os"
 	"path"
@@ -288,6 +288,42 @@ func CopyFile(src, dst string) (int64, error) {
 	return nBytes, err
 }
 
+func CopyDir(src, dst string) error {
+	entries, err := os.ReadDir(src)
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		srcEntry := filepath.Join(src, entry.Name())
+		dstEntry := filepath.Join(dst, entry.Name())
+		realEntry := entry
+		if entry.Type() == os.ModeSymlink {
+			realPath, err := filepath.EvalSymlinks(srcEntry)
+			if err != nil {
+				return err
+			}
+			realInfo, err := os.Stat(realPath)
+			if err != nil {
+				return err
+			}
+			srcEntry = realPath
+			realEntry = fs.FileInfoToDirEntry(realInfo)
+		}
+		if realEntry.IsDir() {
+			if err := CopyDir(srcEntry, dstEntry); err != nil {
+				return err
+			}
+		} else {
+			if _, err := CopyFile(srcEntry, dstEntry); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func WriteFileWithBytesMarshallerContent(basePath string, filePath string, content BytesMarshaller) error {
 	data, err := content.MarshalBytes()
 	if err != nil {
@@ -452,7 +488,7 @@ func MapToYAML(src map[string]interface{}) ([]byte, error) {
 }
 
 func WriteToFile(filePath string, fileContents string) error {
-	err := ioutil.WriteFile(filePath, []byte(fileContents), 0o400)
+	err := os.WriteFile(filePath, []byte(fileContents), 0o400)
 	if err != nil {
 		return errors.Errorf("error writing file: %v", filePath)
 	}
@@ -598,7 +634,7 @@ func WriteFileWithContent(filePath string, content []byte) error {
 
 // WithTempDir a safe wrapper to deal with temporary directories.
 func WithTempDir(pattern string, consumer func(string) error) error {
-	tmpDir, err := ioutil.TempDir("", pattern)
+	tmpDir, err := os.MkdirTemp("", pattern)
 	if err != nil {
 		return err
 	}

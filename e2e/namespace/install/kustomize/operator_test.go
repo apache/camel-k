@@ -28,11 +28,13 @@ import (
 	"testing"
 
 	. "github.com/apache/camel-k/e2e/support"
+	testutil "github.com/apache/camel-k/e2e/support/util"
 	. "github.com/onsi/gomega"
 )
 
 func TestBasicOperator(t *testing.T) {
-	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../../install")
+	makeDir := testutil.MakeTempCopyDir(t, "../../../../install")
+	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
 	UninstallAll()
@@ -50,7 +52,8 @@ func TestBasicOperator(t *testing.T) {
 }
 
 func TestAlternativeImageOperator(t *testing.T) {
-	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../../install")
+	makeDir := testutil.MakeTempCopyDir(t, "../../../../install")
+	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
 	UninstallAll()
@@ -72,7 +75,8 @@ func TestAlternativeImageOperator(t *testing.T) {
 }
 
 func TestGlobalOperator(t *testing.T) {
-	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../../install")
+	makeDir := testutil.MakeTempCopyDir(t, "../../../../install")
+	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
 	UninstallAll()
