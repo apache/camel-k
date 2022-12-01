@@ -19,7 +19,7 @@ package trait
 
 import (
 	"fmt"
-	"path"
+	"path/filepath"
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -162,7 +162,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	}
 
 	envvar.SetVal(&container.Env, digest.IntegrationDigestEnvVar, e.Integration.Status.Digest)
-	envvar.SetVal(&container.Env, "CAMEL_K_CONF", path.Join(camel.BasePath, "application.properties"))
+	envvar.SetVal(&container.Env, "CAMEL_K_CONF", filepath.Join(camel.BasePath, "application.properties"))
 	envvar.SetVal(&container.Env, "CAMEL_K_CONF_D", camel.ConfDPath)
 
 	e.addSourcesProperties()

@@ -20,6 +20,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -85,14 +86,14 @@ func TestConfigFolderFlagToSub(t *testing.T) {
 	_, rootCmd, _ := initializeConfigCmdOptions(t, false)
 	output, err := test.ExecuteCommand(rootCmd, cmdConfig, "--list", "--folder", "sub")
 	assert.Nil(t, err)
-	assert.True(t, strings.Contains(output, fmt.Sprintf(" .kamel/%s", DefaultConfigLocation)), "The output is unexpected: "+output)
+	assert.True(t, strings.Contains(output, filepath.FromSlash(fmt.Sprintf(".kamel/%s", DefaultConfigLocation))), "The output is unexpected: "+output)
 }
 
 func TestConfigFolderFlagToHome(t *testing.T) {
 	_, rootCmd, _ := initializeConfigCmdOptions(t, false)
 	output, err := test.ExecuteCommand(rootCmd, cmdConfig, "--list", "--folder", "home")
 	assert.Nil(t, err)
-	assert.True(t, strings.Contains(output, fmt.Sprintf("/.kamel/%s", DefaultConfigLocation)), "The output is unexpected: "+output)
+	assert.True(t, strings.Contains(output, filepath.FromSlash(fmt.Sprintf(".kamel/%s", DefaultConfigLocation))), "The output is unexpected: "+output)
 }
 
 func TestConfigFolderFlagToEnv(t *testing.T) {
@@ -101,7 +102,7 @@ func TestConfigFolderFlagToEnv(t *testing.T) {
 	_, rootCmd, _ := initializeConfigCmdOptions(t, false)
 	output, err := test.ExecuteCommand(rootCmd, cmdConfig, "--list", "--folder", "env")
 	assert.Nil(t, err)
-	assert.True(t, strings.Contains(output, fmt.Sprintf("/foo/bar/%s", DefaultConfigLocation)), "The output is unexpected: "+output)
+	assert.True(t, strings.Contains(output, filepath.FromSlash(fmt.Sprintf("foo/bar/%s", DefaultConfigLocation))), "The output is unexpected: "+output)
 }
 
 func TestConfigFolderFlagToEnvWithConfigName(t *testing.T) {
@@ -114,7 +115,7 @@ func TestConfigFolderFlagToEnvWithConfigName(t *testing.T) {
 	_, rootCmd, _ := initializeConfigCmdOptions(t, false)
 	output, err := test.ExecuteCommand(rootCmd, cmdConfig, "--list", "--folder", "env")
 	assert.Nil(t, err)
-	assert.True(t, strings.Contains(output, "/foo/bar/config.yaml"), "The output is unexpected: "+output)
+	assert.True(t, strings.Contains(output, filepath.FromSlash("/foo/bar/config.yaml")), "The output is unexpected: "+output)
 }
 
 func TestConfigDefaultNamespace(t *testing.T) {

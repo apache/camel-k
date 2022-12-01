@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -43,6 +44,7 @@ func ResourceAsString(name string) (string, error) {
 // Resource provides an easy way to access to embedded assets.
 func Resource(name string) ([]byte, error) {
 	name = strings.Trim(name, " ")
+	name = filepath.ToSlash(name)
 	if !strings.HasPrefix(name, "/") {
 		name = "/" + name
 	}
@@ -115,6 +117,7 @@ func WithPrefix(pathPrefix string) ([]string, error) {
 
 // Resources lists all file names in the given path (starts with '/').
 func Resources(dirName string) ([]string, error) {
+	dirName = filepath.ToSlash(dirName)
 	dir, err := openAsset(dirName)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -142,7 +145,7 @@ func Resources(dirName string) ([]string, error) {
 	var res []string
 	for _, f := range files {
 		if !f.IsDir() {
-			res = append(res, filepath.Join(dirName, f.Name()))
+			res = append(res, path.Join(dirName, f.Name()))
 		}
 	}
 

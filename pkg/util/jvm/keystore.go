@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
@@ -56,7 +56,7 @@ func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePa
 	// JVM truststore.
 	javaHome, ok := os.LookupEnv("JAVA_HOME")
 	if ok {
-		caCertsPath := path.Join(javaHome, "lib/security/cacerts")
+		caCertsPath := filepath.Join(javaHome, "lib/security/cacerts")
 		args := strings.Fields(fmt.Sprintf("-importkeystore -noprompt -srckeystore %s -srcstorepass %s -destkeystore %s -deststorepass %s", caCertsPath, "changeit", keystoreName, keystorePass))
 		cmd := exec.CommandContext(ctx, "keytool", args...)
 		cmd.Dir = keystoreDir

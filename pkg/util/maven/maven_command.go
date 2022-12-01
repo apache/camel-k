@@ -24,7 +24,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"strconv"
@@ -62,14 +62,14 @@ func (c *Command) Do(ctx context.Context) error {
 		}
 	}
 
-	settingsPath := path.Join(c.context.Path, "settings.xml")
+	settingsPath := filepath.Join(c.context.Path, "settings.xml")
 	if settingsExists, err := util.FileExists(settingsPath); err != nil {
 		return err
 	} else if settingsExists {
 		args = append(args, "--global-settings", settingsPath)
 	}
 
-	settingsPath = path.Join(c.context.Path, "user-settings.xml")
+	settingsPath = filepath.Join(c.context.Path, "user-settings.xml")
 	if settingsExists, err := util.FileExists(settingsPath); err != nil {
 		return err
 	} else if settingsExists {
@@ -183,19 +183,19 @@ func generateProjectStructure(context Context, project Project) error {
 	}
 
 	if context.GlobalSettings != nil {
-		if err := util.WriteFileWithContent(path.Join(context.Path, "settings.xml"), context.GlobalSettings); err != nil {
+		if err := util.WriteFileWithContent(filepath.Join(context.Path, "settings.xml"), context.GlobalSettings); err != nil {
 			return err
 		}
 	}
 
 	if context.UserSettings != nil {
-		if err := util.WriteFileWithContent(path.Join(context.Path, "user-settings.xml"), context.UserSettings); err != nil {
+		if err := util.WriteFileWithContent(filepath.Join(context.Path, "user-settings.xml"), context.UserSettings); err != nil {
 			return err
 		}
 	}
 
 	if context.SettingsSecurity != nil {
-		if err := util.WriteFileWithContent(path.Join(context.Path, "settings-security.xml"), context.SettingsSecurity); err != nil {
+		if err := util.WriteFileWithContent(filepath.Join(context.Path, "settings-security.xml"), context.SettingsSecurity); err != nil {
 			return err
 		}
 	}
@@ -218,7 +218,7 @@ func generateProjectStructure(context Context, project Project) error {
 		if len(bytes) > 0 {
 			Log.Infof("write entry: %s (%d bytes)", k, len(bytes))
 
-			err = util.WriteFileWithContent(path.Join(context.Path, k), bytes)
+			err = util.WriteFileWithContent(filepath.Join(context.Path, k), bytes)
 			if err != nil {
 				return err
 			}

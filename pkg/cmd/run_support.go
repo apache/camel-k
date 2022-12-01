@@ -24,7 +24,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -74,7 +73,7 @@ func parseConfigAndGenCm(ctx context.Context, cmd *cobra.Command, c client.Clien
 		if config.ContentType() == resource.ContentTypeText {
 			resourceType = v1.ResourceTypeConfig
 		}
-		resourceSpec, err := binaryOrTextResource(path.Base(config.Name()), rawData, contentType, enableCompression, resourceType, config.DestinationPath())
+		resourceSpec, err := binaryOrTextResource(filepath.Base(config.Name()), rawData, contentType, enableCompression, resourceType, config.DestinationPath())
 		if err != nil {
 			return nil, err
 		}
@@ -189,9 +188,9 @@ func downloadDependency(ctx context.Context, url url.URL) (string, error) {
 		return "", err
 	}
 	defer res.Body.Close()
-	base := path.Base(url.Path)
+	base := filepath.Base(url.Path)
 	if base == "." || base == "/" || filepath.Ext(base) == "" {
-		base = path.Base(url.String())
+		base = filepath.Base(url.String())
 		if base == "." || base == "/" {
 			base = "tmp"
 		}

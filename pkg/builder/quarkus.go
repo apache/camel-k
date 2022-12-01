@@ -21,7 +21,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -146,7 +145,7 @@ func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion str
 }
 
 func buildQuarkusRunner(ctx *builderContext) error {
-	mc := maven.NewContext(path.Join(ctx.Path, "maven"))
+	mc := maven.NewContext(filepath.Join(ctx.Path, "maven"))
 	mc.GlobalSettings = ctx.Maven.GlobalSettings
 	mc.UserSettings = ctx.Maven.UserSettings
 	mc.SettingsSecurity = ctx.Maven.SettingsSecurity
@@ -155,7 +154,7 @@ func buildQuarkusRunner(ctx *builderContext) error {
 
 	if ctx.Maven.TrustStoreName != "" {
 		mc.ExtraMavenOpts = append(mc.ExtraMavenOpts,
-			"-Djavax.net.ssl.trustStore="+path.Join(ctx.Path, ctx.Maven.TrustStoreName),
+			"-Djavax.net.ssl.trustStore="+filepath.Join(ctx.Path, ctx.Maven.TrustStoreName),
 			"-Djavax.net.ssl.trustStorePassword="+ctx.Maven.TrustStorePass,
 		)
 	}
@@ -169,7 +168,7 @@ func buildQuarkusRunner(ctx *builderContext) error {
 }
 
 func BuildQuarkusRunnerCommon(ctx context.Context, mc maven.Context, project maven.Project) error {
-	resourcesPath := path.Join(mc.Path, "src", "main", "resources")
+	resourcesPath := filepath.Join(mc.Path, "src", "main", "resources")
 	if err := os.MkdirAll(resourcesPath, os.ModePerm); err != nil {
 		return errors.Wrap(err, "failure while creating resource folder")
 	}
@@ -179,7 +178,7 @@ func BuildQuarkusRunnerCommon(ctx context.Context, mc maven.Context, project mav
 	// may fail the build.
 	// In the future there should be a way to provide build information from secrets,
 	// configmap, etc.
-	if _, err := os.Create(path.Join(resourcesPath, "application.properties")); err != nil {
+	if _, err := os.Create(filepath.Join(resourcesPath, "application.properties")); err != nil {
 		return errors.Wrap(err, "failure while creating application.properties")
 	}
 
@@ -194,7 +193,7 @@ func BuildQuarkusRunnerCommon(ctx context.Context, mc maven.Context, project mav
 }
 
 func computeQuarkusDependencies(ctx *builderContext) error {
-	mc := maven.NewContext(path.Join(ctx.Path, "maven"))
+	mc := maven.NewContext(filepath.Join(ctx.Path, "maven"))
 	mc.GlobalSettings = ctx.Maven.GlobalSettings
 	mc.UserSettings = ctx.Maven.UserSettings
 	mc.SettingsSecurity = ctx.Maven.SettingsSecurity
@@ -215,7 +214,7 @@ func ProcessQuarkusTransitiveDependencies(mc maven.Context) ([]v1.Artifact, erro
 	var artifacts []v1.Artifact
 
 	// Quarkus fast-jar format is split into various sub-directories in quarkus-app
-	quarkusAppDir := path.Join(mc.Path, "target", "quarkus-app")
+	quarkusAppDir := filepath.Join(mc.Path, "target", "quarkus-app")
 
 	// Discover application dependencies from the Quarkus fast-jar directory tree
 	err := filepath.Walk(quarkusAppDir, func(filePath string, info os.FileInfo, err error) error {
@@ -234,7 +233,7 @@ func ProcessQuarkusTransitiveDependencies(mc maven.Context) ([]v1.Artifact, erro
 			artifacts = append(artifacts, v1.Artifact{
 				ID:       filepath.Base(fileRelPath),
 				Location: filePath,
-				Target:   path.Join(DependenciesDir, fileRelPath),
+				Target:   filepath.Join(DependenciesDir, fileRelPath),
 				Checksum: "sha1:" + sha1,
 			})
 		}

@@ -19,7 +19,9 @@ package source
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -43,6 +45,12 @@ func IsLocalAndFileExists(uri string) (bool, error) {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
+
+		if _, ok := err.(*fs.PathError); ok && runtime.GOOS == "windows" { // nolint
+			// Windows returns a PathError rather than NotExist is path is invalid
+			return false, nil
+		}
+
 		// If it is a different error (ie, permission denied) we should report it back
 		return false, errors.Wrap(err, fmt.Sprintf("file system error while looking for %s", uri))
 	}

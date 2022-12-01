@@ -27,7 +27,7 @@ import (
 	"fmt"
 	"hash"
 	"io"
-	"path"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -311,7 +311,7 @@ func sortedTraitAnnotationsKeys(it *v1.Integration) []string {
 }
 
 func ComputeSHA1(elem ...string) (string, error) {
-	file := path.Join(elem...)
+	file := filepath.Join(elem...)
 
 	// #nosec G401
 	h := sha1.New()

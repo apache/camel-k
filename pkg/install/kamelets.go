@@ -25,7 +25,6 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -90,7 +89,7 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 		}
 		// We may want to throttle the creation of Go routines if the number of bundled Kamelets increases.
 		g.Go(func() error {
-			kamelet, err := loadKamelet(path.Join(kameletDir, f.Name()), namespace)
+			kamelet, err := loadKamelet(filepath.Join(kameletDir, f.Name()), namespace)
 			if err != nil {
 				return err
 			}

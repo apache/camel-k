@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"path/filepath"
 	"sort"
 	"strings"
 	"testing"
@@ -38,6 +39,11 @@ import (
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
+)
+
+var (
+	crMountPath = filepath.ToSlash(camel.ConfigResourcesMountPath)
+	rdMountPath = filepath.ToSlash(camel.ResourcesDefaultMountPath)
 )
 
 func TestConfigureJvmTraitInRightPhasesDoesSucceed(t *testing.T) {
@@ -103,12 +109,12 @@ func TestApplyJvmTraitWithDeploymentResource(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	cp := strset.New("./resources", camel.ConfigResourcesMountPath, camel.ResourcesDefaultMountPath, "/mount/path").List()
+	cp := strset.New("./resources", crMountPath, rdMountPath, "/mount/path").List()
 	sort.Strings(cp)
 
 	assert.Equal(t, []string{
 		"-cp",
-		fmt.Sprintf("./resources:%s:%s:/mount/path", camel.ConfigResourcesMountPath, camel.ResourcesDefaultMountPath),
+		fmt.Sprintf("./resources:%s:%s:/mount/path", crMountPath, rdMountPath),
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }
@@ -135,12 +141,12 @@ func TestApplyJvmTraitWithKNativeResource(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	cp := strset.New("./resources", camel.ConfigResourcesMountPath, camel.ResourcesDefaultMountPath, "/mount/path").List()
+	cp := strset.New("./resources", crMountPath, rdMountPath, "/mount/path").List()
 	sort.Strings(cp)
 
 	assert.Equal(t, []string{
 		"-cp",
-		fmt.Sprintf("./resources:%s:%s:/mount/path", camel.ConfigResourcesMountPath, camel.ResourcesDefaultMountPath),
+		fmt.Sprintf("./resources:%s:%s:/mount/path", crMountPath, rdMountPath),
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, s.Spec.Template.Spec.Containers[0].Args)
 }
@@ -244,7 +250,7 @@ func TestApplyJvmTraitWithClasspath(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, []string{
 		"-cp",
-		fmt.Sprintf("./resources:%s:%s:/mount/path:%s:%s", camel.ConfigResourcesMountPath, camel.ResourcesDefaultMountPath,
+		fmt.Sprintf("./resources:%s:%s:/mount/path:%s:%s", crMountPath, rdMountPath,
 			"/path/to/another/dep.jar", "/path/to/my-dep.jar"),
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, d.Spec.Template.Spec.Containers[0].Args)

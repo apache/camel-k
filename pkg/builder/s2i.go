@@ -26,7 +26,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -145,7 +144,7 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 	}
 
 	err = util.WithTempDir(t.build.Name+"-s2i-", func(tmpDir string) error {
-		archive := path.Join(tmpDir, "archive.tar.gz")
+		archive := filepath.Join(tmpDir, "archive.tar.gz")
 
 		contextDir := t.task.ContextDir
 		if contextDir == "" {
@@ -157,7 +156,7 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 			if err != nil {
 				return err
 			}
-			contextDir = path.Join(pwd, ContextDir)
+			contextDir = filepath.Join(pwd, ContextDir)
 		}
 
 		archiveFile, err := os.Create(archive)

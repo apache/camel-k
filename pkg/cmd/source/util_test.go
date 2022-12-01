@@ -21,6 +21,9 @@ limitations under the License.
 package source
 
 import (
+	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -37,8 +40,29 @@ func TestCorrectFileValuesButNotFound(t *testing.T) {
 	assert.False(t, value2)
 }
 
+func isWindows() bool {
+	return runtime.GOOS == "windows"
+}
+
 func TestPermissionDenied(t *testing.T) {
-	value, err := IsLocalAndFileExists("/root/test")
+	dir := "/tmp/filedir"
+
+	if isWindows() {
+		t.Skip("Test not reliably producing a result on a windows OS")
+	}
+
+	err := os.Mkdir(dir, 0700)
+	assert.Nil(t, err)
+
+	filename := filepath.Join(dir, "file.txt")
+	f, err := os.Create(filename)
+	assert.Nil(t, err)
+	defer f.Close()
+
+	err = os.Chmod(dir, 0000)
+	assert.Nil(t, err)
+
+	value, err := IsLocalAndFileExists(filename)
 	// must not panic because a permission error
 	assert.NotNil(t, err)
 	assert.False(t, value)
