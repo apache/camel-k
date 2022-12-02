@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- Recent testing failures [\#3861](https://github.com/apache/camel-k/issues/3861)
+- Update dependency versions in the documentation for 1.10.x and Next versions [\#3852](https://github.com/apache/camel-k/issues/3852)
 - Remove deprecated Kubernetes API [\#3840](https://github.com/apache/camel-k/issues/3840)
 - gc trait fails for: cannot list resource \"endpoints\" in API group \"submariner.io\" [\#3833](https://github.com/apache/camel-k/issues/3833)
 - Bundle m2 camel k runtime distribution [\#3826](https://github.com/apache/camel-k/issues/3826)
@@ -19,12 +21,14 @@
 - Remove code deprecated before 1.8 \(LTS\) [\#3787](https://github.com/apache/camel-k/issues/3787)
 - Native checks to run on a nightly basis instead of on each PR [\#3784](https://github.com/apache/camel-k/issues/3784)
 - Ready condition message not always taken from Camel Health Check [\#3761](https://github.com/apache/camel-k/issues/3761)
+- Unable to set env var OPERATOR\_ID in Helm installation [\#3739](https://github.com/apache/camel-k/issues/3739)
 - Camel version mismatch [\#3481](https://github.com/apache/camel-k/issues/3481)
 - Why's there JDK inside the camel-k-kit-\* images? [\#3424](https://github.com/apache/camel-k/issues/3424)
 - Drop support for Openshift 3 and related E2E test [\#3421](https://github.com/apache/camel-k/issues/3421)
 - Turn AWS region parameter into an enum? [\#3289](https://github.com/apache/camel-k/issues/3289)
 - Install Camel-K Operator based on Helm Chart with --global option [\#3054](https://github.com/apache/camel-k/issues/3054)
 - Camel 3.15 - Data formats renamed [\#2880](https://github.com/apache/camel-k/issues/2880)
+- Add official documentation on Kustomize introduced in 1.7 [\#2758](https://github.com/apache/camel-k/issues/2758)
 
 ## [1.10.4-nightly](https://github.com/apache/camel-k/tree/1.10.4-nightly) (2022-11-14)
 
