@@ -103,7 +103,7 @@ func TestIntegrationScale(t *testing.T) {
 			}}
 			payloadBytes, _ := json.Marshal(payload)
 
-			integrationScale, err = camel.CamelV1().Integrations(ns).PatchScale(TestContext, name, types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
+			_, err = camel.CamelV1().Integrations(ns).Patch(TestContext, name, types.JSONPatchType, payloadBytes, metav1.PatchOptions{}, "scale")
 			Expect(err).To(BeNil())
 
 			// Check the readiness condition is still truthy as down-scaling

@@ -164,13 +164,3 @@ func (c *FakeIntegrations) UpdateScale(ctx context.Context, integrationName stri
 	}
 	return obj.(*autoscalingv1.Scale), err
 }
-
-func (c *FakeIntegrations) PatchScale(ctx context.Context, integrationName string, pt types.PatchType, data []byte, opts v1.PatchOptions) (result *autoscalingv1.Scale, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(integrationsResource, c.ns, integrationName, pt, data, "scale"), &autoscalingv1.Scale{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*autoscalingv1.Scale), err
-}
