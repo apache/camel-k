@@ -107,6 +107,21 @@ func TestKnative(t *testing.T) {
 
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
+
+		t.Run("Knative-service disabled", func(t *testing.T) {
+			Expect(KamelRunWithID(operatorID, ns, "files/http_out.groovy", "-t", "knative-service.enabled=false").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "http-out"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+			Eventually(Service(ns, "http-out"), TestTimeoutShort).ShouldNot(BeNil())
+			Consistently(KnativeService(ns, "http-out"), TestTimeoutShort).Should(BeNil())
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("Knative-service priority", func(t *testing.T) {
+			Expect(KamelRunWithID(operatorID, ns, "files/http_out.groovy").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "http-out"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+			Eventually(KnativeService(ns, "http-out"), TestTimeoutShort).ShouldNot(BeNil())
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
 	})
 }
 

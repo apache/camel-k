@@ -408,3 +408,209 @@ func TestServiceWithNodePort(t *testing.T) {
 
 	assert.Equal(t, corev1.ServiceTypeNodePort, s.Spec.Type)
 }
+
+// When service and knative-service are enabled at the integration scope in knative profile
+// knative-service has the priority and the k8s service is not run.
+func TestServiceWithKnativeServiceEnabled(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	traitCatalog := NewCatalog(nil)
+
+	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
+	assert.NoError(t, err)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      ServiceTestName,
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:        "routes.js",
+							Content:     string(compressedRoute),
+							Compression: true,
+						},
+						Language: v1.LanguageJavaScript,
+					},
+				},
+				Traits: v1.Traits{
+					Service: &traitv1.ServiceTrait{
+						Trait: traitv1.Trait{
+							Enabled: pointer.Bool(true),
+						},
+						Auto: pointer.Bool(false),
+					},
+					KnativeService: &traitv1.KnativeServiceTrait{
+						Trait: traitv1.Trait{
+							Enabled: pointer.Bool(true),
+						},
+					},
+				},
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	err = traitCatalog.apply(&environment)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.Nil(t, environment.GetTrait(serviceTraitID))
+	assert.NotNil(t, environment.GetTrait(knativeServiceTraitID))
+}
+
+func TestServicesWithKnativeProfile(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	traitCatalog := NewCatalog(nil)
+
+	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
+	assert.NoError(t, err)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      ServiceTestName,
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:        "routes.js",
+							Content:     string(compressedRoute),
+							Compression: true,
+						},
+						Language: v1.LanguageJavaScript,
+					},
+				},
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	err = traitCatalog.apply(&environment)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.Nil(t, environment.GetTrait(serviceTraitID))
+	assert.NotNil(t, environment.GetTrait(knativeServiceTraitID))
+}
+
+// When the knative-service is disabled at the IntegrationPlatform, the k8s service is enabled.
+func TestServiceWithKnativeServiceDisabledInIntegrationPlatform(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	traitCatalog := NewCatalog(nil)
+
+	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
+	assert.NoError(t, err)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      ServiceTestName,
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:        "routes.js",
+							Content:     string(compressedRoute),
+							Compression: true,
+						},
+						Language: v1.LanguageJavaScript,
+					},
+				},
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+				Traits: v1.Traits{
+					KnativeService: &traitv1.KnativeServiceTrait{
+						Trait: traitv1.Trait{
+							Enabled: pointer.Bool(false),
+						},
+					},
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	err = traitCatalog.apply(&environment)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait(serviceTraitID))
+	assert.Nil(t, environment.GetTrait(knativeServiceTraitID))
+}
