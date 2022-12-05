@@ -43,12 +43,6 @@ func newServiceTrait() Trait {
 	}
 }
 
-// IsAllowedInProfile overrides default.
-func (t *serviceTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
-	return profile.Equal(v1.TraitProfileKubernetes) ||
-		profile.Equal(v1.TraitProfileOpenShift)
-}
-
 func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
 		if e.Integration != nil {
@@ -61,6 +55,15 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 		}
 
 		return false, nil
+	}
+
+	// in case the knative-service and service trait are enabled, the knative-service has priority
+	// then this service is disabled
+	if e.GetTrait(knativeServiceTraitID) != nil {
+		knativeServiceTrait, _ := e.GetTrait(knativeServiceTraitID).(*knativeServiceTrait)
+		if pointer.BoolDeref(knativeServiceTrait.Enabled, true) {
+			return false, nil
+		}
 	}
 
 	if !e.IntegrationInRunningPhases() {
