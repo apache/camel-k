@@ -102,13 +102,6 @@ var NoOlmOperatorImage string
 var TestContext context.Context
 var testClient client.Client
 
-//  patchUint32Value specifies a patch operation for a uint32.
-type PatchUInt32Value struct {
-	Op    string `json:"op"`
-	Path  string `json:"path"`
-	Value uint32 `json:"value"`
-}
-
 var testLocus *testing.T
 
 func setTestLocus(t *testing.T) {
