@@ -16,6 +16,7 @@
 - query regarding using camel k [\#3815](https://github.com/apache/camel-k/issues/3815)
 - TestRunAndLog refactoring [\#3813](https://github.com/apache/camel-k/issues/3813)
 - FTP sink does not create directories when writing [\#3812](https://github.com/apache/camel-k/issues/3812)
+- `make install-minikube` does not work on macOS [\#3800](https://github.com/apache/camel-k/issues/3800)
 - Release 1.10.3 [\#3796](https://github.com/apache/camel-k/issues/3796)
 - Deprecate overlapping Kamel CLI features in favour of Camel JBang [\#3790](https://github.com/apache/camel-k/issues/3790)
 - Remove code deprecated before 1.8 \(LTS\) [\#3787](https://github.com/apache/camel-k/issues/3787)
