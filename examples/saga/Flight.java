@@ -31,7 +31,9 @@ public class Flight extends RouteBuilder {
 
 		rest("/api").post("/flight/buy")
 			.param().type(RestParamType.header).name("id").required(true).endParam()
-			.route()
+			.to("direct:buy");
+
+		from("direct:buy")
 			.saga()
 				.propagation(SagaPropagation.MANDATORY)
 				.option("id", header("id"))

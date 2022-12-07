@@ -22,7 +22,7 @@ kamel run -d camel:lra Train.java
 
 * Start the saga application
 ```
-kamel run -d camel:lra Saga.java
+kamel run -d camel:lra -d camel:direct Saga.java
 ```
 
 Then you can use ```kamel logs saga``` to check the output of the transactions.
