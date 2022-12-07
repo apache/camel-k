@@ -31,7 +31,9 @@ public class Train extends RouteBuilder {
 
 		rest("/api/").post("/train/buy/seat")
                     .param().type(RestParamType.header).name("id").required(true).endParam()
-                    .route()
+                    .to("direct:buySeat");
+
+		from("direct:buySeat")
                     .saga()
                         .propagation(SagaPropagation.SUPPORTS)
                         .option("id", header("id"))
