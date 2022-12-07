@@ -1250,6 +1250,7 @@ traits:
   platform: false
   profiles:
   - Kubernetes
+  - Knative
   - OpenShift
   description: The Service trait exposes the integration with a Service resource so
     that it can be accessed by other applications (or integrations) in the same namespace.
