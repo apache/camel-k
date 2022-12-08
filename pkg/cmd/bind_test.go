@@ -206,8 +206,8 @@ func TestBindSteps(t *testing.T) {
 	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
 	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
 		"--step", "dst:step1", "--step", "src:step2",
-		"-p", "step-0.var1=my-step1-var1", "-p", "step-0.var2=my-step1-var2",
-		"-p", "step-1.var1=my-step2-var1", "-p", "step-1.var2=my-step2-var2")
+		"-p", "step-1.var1=my-step1-var1", "-p", "step-1.var2=my-step1-var2",
+		"-p", "step-2.var1=my-step2-var1", "-p", "step-2.var2=my-step2-var2")
 	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
 
 	assert.Nil(t, err)

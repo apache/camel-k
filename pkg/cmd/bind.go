@@ -56,7 +56,7 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 	cmd.Flags().String("error-handler", "", `Add error handler (none|log|sink:<endpoint>). Sink endpoints are expected in the format "[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
 	cmd.Flags().String("name", "", "Name for the binding")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
-	cmd.Flags().StringArrayP("property", "p", nil, `Add a binding property in the form of "source.<key>=<value>", "sink.<key>=<value>", "error-handler.<key>=<value>" or "step-<n>.<key>=<value>"`)
+	cmd.Flags().StringArrayP("property", "p", nil, `Add a binding property in the form of "source.<key>=<value>", "sink.<key>=<value>", "error-handler.<key>=<value>" or "step-<n>.<key>=<value> where <n> is the step order starting from 1"`)
 	cmd.Flags().Bool("skip-checks", false, "Do not verify the binding for compliance with Kamelets and other Kubernetes resources")
 	cmd.Flags().StringArray("step", nil, `Add binding steps as Kubernetes resources. Endpoints are expected in the format "[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
 	cmd.Flags().StringArrayP("trait", "t", nil, `Add a trait to the corresponding Integration.`)
@@ -210,7 +210,8 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if len(o.Steps) > 0 {
 		binding.Spec.Steps = make([]v1alpha1.Endpoint, 0)
 		for idx, stepDesc := range o.Steps {
-			stepKey := fmt.Sprintf("%s%d", stepKeyPrefix, idx)
+			stepIndex := idx + 1
+			stepKey := fmt.Sprintf("%s%d", stepKeyPrefix, stepIndex)
 			step, err := o.decode(stepDesc, stepKey)
 			if err != nil {
 				return err
