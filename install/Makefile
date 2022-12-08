@@ -178,9 +178,9 @@ endif
 #=== Cluster-admin privileges are required.
 #
 #* PARAMETERS:
-#** NAMESPACE: Sets the namespace for the resources
+#** NAMESPACE: Set the namespace for the resources
 #** PLATFORM:  Override the discovered platform, if required
-#** DRY_RUN:   If 'true', prints the resources to be applied instead of applying them
+#** DRY_RUN:   Print the resources to be applied instead of applying them [true|false]
 #
 #---
 setup-cluster: check-admin check-crd-api-support have-platform kustomize kubectl
@@ -217,10 +217,10 @@ endif
 #=== Cluster-admin privileges are required.
 #
 #* PARAMETERS:
-#** NAMESPACE: Sets the namespace for the resources
-#** GLOBAL:    Converts all roles & bindings to cluster-level [true|false]
+#** NAMESPACE: Set the namespace for the resources
+#** GLOBAL:    Convert all roles & bindings to cluster-level [true|false]
 #** PLATFORM:  Override the discovered platform, if required
-#** DRY_RUN:     If 'true', prints the resources to be applied instead of applying them
+#** DRY_RUN:   Print the resources to be applied instead of applying them [true|false]
 #
 #---
 setup: setup-cluster
@@ -286,15 +286,15 @@ endif
 #* PARAMETERS:
 #** NAMESPACE:          Set the namespace to install the operator into
 #** PLATFORM:           Override the discovered platform, if required
-#** GLOBAL:             Sets the operator to watch all namespaces for custom resources [true|false]
+#** GLOBAL:             Set the operator to watch all namespaces for custom resources [true|false]
 #** CUSTOM_IMAGE:       Set a custom operator image name
 #** CUSTOM_VERSION:     Set a custom operator image version/tag
-#** ALWAYS_PULL_IMAGES: Sets whether to always pull the operator image [true|false]
-#** MONITORING:         Adds the prometheus monitoring resources
+#** ALWAYS_PULL_IMAGES: Set whether to always pull the operator image [true|false]
+#** MONITORING:         Add the prometheus monitoring resources
 #** MONITORING_PORT:    Set a custom monitoring port
 #** HEALTH_PORT:        Set a custom health port
 #** LOGGING_LEVEL:      Set the level of logging [info|debug]
-#** DRY_RUN:            Prints the resources to be applied instead of applying them
+#** DRY_RUN:            Print the resources to be applied instead of applying them [true|false]
 #
 #---
 operator: check-admin have-platform check-crd-api-support kustomize kubectl .operator-port-patch .operator-log-level-patch
@@ -365,7 +365,7 @@ endif
 #* PARAMETERS:
 #** NAMESPACE: Set the namespace to install the operator into
 #** PLATFORM:  Override the discovered platform, if required
-#** DRY_RUN:   Prints the resources to be applied instead of applying them [true,false]
+#** DRY_RUN:   Print the resources to be applied instead of applying them [true|false]
 #
 #---
 platform: have-platform kustomize kubectl
@@ -390,7 +390,7 @@ endif
 #* PARAMETERS:
 #** NAMESPACE: Set the namespace to install the example into
 #** PLATFORM:  Override the discovered platform, if required
-#** DRY_RUN:   Prints the resources to be applied instead of applying them [true, false]
+#** DRY_RUN:   Print the resources to be applied instead of applying them [true|false]
 #
 #---
 example: kubectl
