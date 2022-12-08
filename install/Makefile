@@ -83,8 +83,8 @@ INT_PLATFORM_PATCH := patch-integration-platform
 #
 define set-kustomize-image
 	$(if $(filter $(IMAGE_NAME),$(CUSTOM_IMAGE):$(CUSTOM_VERSION)),,\
-
-		@cd $(1) && $(KUSTOMIZE) edit set image $(IMAGE_NAME)=$(CUSTOM_IMAGE):$(CUSTOM_VERSION))
+		@cd $(1) || exit 1 && \
+			$(KUSTOMIZE) edit set image $(IMAGE_NAME)=$(CUSTOM_IMAGE):$(CUSTOM_VERSION))
 endef
 
 #
@@ -94,7 +94,8 @@ endef
 # Parameter: directory of the kustomization.yaml
 #
 define set-kustomize-namespace
-	@cd $(1) && $(KUSTOMIZE) edit set namespace $(NAMESPACE)
+	@cd $(1) || exit 1 && \
+		$(KUSTOMIZE) edit set namespace $(NAMESPACE)
 endef
 
 #
@@ -108,16 +109,16 @@ endef
 # * kind of resources, eg. Deployment, Role
 #
 define add-remove-kind-patch
-	@(cd $(1) && \
-		$(KUSTOMIZE) edit $(2) patch --path $(3) --kind $(4) &> /dev/null)
+	@cd $(1) || exit 1 && \
+		$(KUSTOMIZE) edit $(2) patch --path $(3) --kind $(4) &> /dev/null
 endef
 
 #
 # Macro for adding / removing the prometheus resources for monitoring
 #
 define add-remove-operator-monitoring
-	@(cd $(1) && \
-		$(KUSTOMIZE) edit $(2) resource ../$(CONFIG)/prometheus &> /dev/null)
+	@cd $(1) || exit 1 && \
+		$(KUSTOMIZE) edit $(2) resource ../$(CONFIG)/prometheus &> /dev/null
 endef
 
 .PHONY: have-platform check_admin setup-cluster .setup-kubernetes .setup-openshift setup
@@ -187,7 +188,9 @@ setup-cluster: check-admin check-crd-api-support have-platform kustomize kubectl
 	@$(call set-kustomize-namespace,$@)
 ifeq ($(PLATFORM), openshift)
 	@for res in $(RBAC_OS)/operator-cluster*; do \
-		(cd $@ && $(KUSTOMIZE) edit add resource ../$$res); \
+		cd $@ || exit 1 && \
+			$(KUSTOMIZE) edit add resource ../$$res && \
+			cd - &> /dev/null; \
 	done
 endif
 #
@@ -233,7 +236,9 @@ else
 endif
 ifeq ($(PLATFORM), openshift)
 	@for res in $(RBAC_OS)/operator-role*; do \
-		(cd $@ && $(KUSTOMIZE) edit add resource ../$$res); \
+		cd $@ || exit 1 && \
+			$(KUSTOMIZE) edit add resource ../$$res && \
+			cd - &> /dev/null; \
 	done
 endif
 #
