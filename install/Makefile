@@ -50,6 +50,8 @@ MONITORING_PORT ?= 8080
 HEALTH_PORT ?= 8081
 # Operator Logging Level: string [info, debug, 0, 1]
 LOGGING_LEVEL ?= info
+# Install default kamelets: [true|false]
+INSTALL_DEFAULT_KAMELETS ?= true
 
 CONFIG := config
 MANAGER := $(CONFIG)/manager
@@ -70,6 +72,7 @@ ROLEBIN_TO_CROLEBIN_PATCH := $(RBAC)/patch-rolebinding-to-clusterrolebinding
 # Operator patches
 PORTS_PATCH := patch-ports
 LOG_LEVEL_PATCH := patch-log-level
+INSTALL_DEFAULT_KAMELETS_PATCH := patch-install-default-kamelets
 IMAGE_PULL_POLICY_PATCH := patch-image-pull-policy-always
 WATCH_NAMESPACE_PATCH := patch-watch-namespace-global
 # Platform patches
@@ -284,17 +287,18 @@ endif
 #=== Cluster-admin privileges are required.
 #
 #* PARAMETERS:
-#** NAMESPACE:          Set the namespace to install the operator into
-#** PLATFORM:           Override the discovered platform, if required
-#** GLOBAL:             Set the operator to watch all namespaces for custom resources [true|false]
-#** CUSTOM_IMAGE:       Set a custom operator image name
-#** CUSTOM_VERSION:     Set a custom operator image version/tag
-#** ALWAYS_PULL_IMAGES: Set whether to always pull the operator image [true|false]
-#** MONITORING:         Add the prometheus monitoring resources
-#** MONITORING_PORT:    Set a custom monitoring port
-#** HEALTH_PORT:        Set a custom health port
-#** LOGGING_LEVEL:      Set the level of logging [info|debug]
-#** DRY_RUN:            Print the resources to be applied instead of applying them [true|false]
+#** NAMESPACE:                Set the namespace to install the operator into
+#** PLATFORM:                 Override the discovered platform, if required
+#** GLOBAL:                   Set the operator to watch all namespaces for custom resources [true|false]
+#** CUSTOM_IMAGE:             Set a custom operator image name
+#** CUSTOM_VERSION:           Set a custom operator image version/tag
+#** ALWAYS_PULL_IMAGES:       Set whether to always pull the operator image [true|false]
+#** MONITORING:               Add the prometheus monitoring resources
+#** MONITORING_PORT:          Set a custom monitoring port
+#** HEALTH_PORT:              Set a custom health port
+#** LOGGING_LEVEL:            Set the level of logging [info|debug]
+#** INSTALL_DEFAULT_KAMELETS: Install the default Kamelets from catalog [true|false]
+#** DRY_RUN:                  Print the resources to be applied instead of applying them [true|false]
 #
 #---
 operator: check-admin have-platform check-crd-api-support kustomize kubectl .operator-port-patch .operator-log-level-patch
@@ -333,6 +337,12 @@ else ifneq ($(LOGGING_LEVEL), 0)
 		@$(call add-remove-kind-patch,$(MANAGER),add,$(LOG_LEVEL_PATCH).$(YAML),Deployment)
 else
 	@$(call add-remove-kind-patch,$(MANAGER),remove,$(LOG_LEVEL_PATCH).$(YAML),Deployment)
+endif
+# Set the INSTALL_DEFAULT_KAMELETS config depending on var
+ifeq ($(INSTALL_DEFAULT_KAMELETS),false)
+	@$(call add-remove-kind-patch,$(MANAGER),add,$(INSTALL_DEFAULT_KAMELETS_PATCH).$(YAML),Deployment)
+else
+	@$(call add-remove-kind-patch,$(MANAGER),remove,$(INSTALL_DEFAULT_KAMELETS_PATCH).$(YAML),Deployment)
 endif
 ifeq ($(DRY_RUN), false)
 	@$(KUSTOMIZE) build $(KOPTIONS) $@ | kubectl apply -f -
