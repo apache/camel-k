@@ -2065,21 +2065,21 @@ func AsTraitConfiguration(props map[string]string) *traitv1.Configuration {
 	Namespace testing functions
 */
 
-func NumPods(ns string) func() int {
-	return func() int {
+func Pods(ns string) func() []corev1.Pod {
+	return func() []corev1.Pod {
 		lst := corev1.PodList{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Pod",
 				APIVersion: v1.SchemeGroupVersion.String(),
 			},
 		}
-		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil && k8serrors.IsUnauthorized(err) {
-			return 0
-		} else if err != nil {
-			log.Error(err, "Error while listing the pods")
-			return 0
+		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+			if !k8serrors.IsUnauthorized(err) {
+				log.Error(err, "Error while listing the pods")
+			}
+			return nil
 		}
-		return len(lst.Items)
+		return lst.Items
 	}
 }
 
@@ -2222,13 +2222,18 @@ func deleteTestNamespace(t *testing.T, ns ctrl.Object) {
 	}
 
 	// Wait for all pods to be deleted
-	pods := NumPods(ns.GetName())()
-	for i := 0; pods > 0 && i < 60; i++ {
+	pods := Pods(ns.GetName())()
+	for i := 0; len(pods) > 0 && i < 60; i++ {
 		time.Sleep(1 * time.Second)
-		pods = NumPods(ns.GetName())()
+		pods = Pods(ns.GetName())()
 	}
-	if pods > 0 {
-		t.Logf("Warning: some pods are still running in namespace %q after deletion (%d)", ns.GetName(), pods)
+	if len(pods) > 0 {
+		names := []string{}
+		for _, pod := range pods {
+			names = append(names, pod.Name)
+		}
+		t.Logf("Warning: some pods are still running in namespace %q after deletion", ns.GetName())
+		t.Logf("Warning: %d running pods: %s", len(pods), names)
 	}
 }
 
