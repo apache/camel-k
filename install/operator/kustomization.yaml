@@ -31,7 +31,7 @@
 #   modifies the WATCH_NAMESPACE env var to wildcard for all namespaces
 #
 # * patch-toleration.yaml
-#   modifies the tolerations configuraion of the deployment
+#   modifies the tolerations configuration of the deployment
 #   Edit the patch manually to add the required keys
 #
 # * patch-nodes-selector.yaml
