@@ -45,7 +45,10 @@ func TestBasicOperator(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		ExecMake(t, Make("setup-cluster", fmt.Sprintf("NAMESPACE=%s", ns)))
 		ExecMake(t, Make("setup", fmt.Sprintf("NAMESPACE=%s", ns)))
-		ExecMake(t, Make("operator", fmt.Sprintf("NAMESPACE=%s", ns)))
+		// Skip default kamelets installation for faster test runs
+		ExecMake(t, Make("operator",
+			fmt.Sprintf("NAMESPACE=%s", ns),
+			"INSTALL_DEFAULT_KAMELETS=false"))
 
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 	})
@@ -66,9 +69,14 @@ func TestAlternativeImageOperator(t *testing.T) {
 		ExecMake(t, Make("setup-cluster", fmt.Sprintf("NAMESPACE=%s", ns)))
 		ExecMake(t, Make("setup", fmt.Sprintf("NAMESPACE=%s", ns)))
 
+		// Skip default kamelets installation for faster test runs
 		newImage := "quay.io/kameltest/kamel-operator"
 		newTag := "1.1.1"
-		ExecMake(t, Make("operator", fmt.Sprintf("CUSTOM_IMAGE=%s", newImage), fmt.Sprintf("CUSTOM_VERSION=%s", newTag), fmt.Sprintf("NAMESPACE=%s", ns)))
+		ExecMake(t, Make("operator",
+			fmt.Sprintf("CUSTOM_IMAGE=%s", newImage),
+			fmt.Sprintf("CUSTOM_VERSION=%s", newTag),
+			fmt.Sprintf("NAMESPACE=%s", ns),
+			"INSTALL_DEFAULT_KAMELETS=false"))
 
 		Eventually(OperatorImage(ns)).Should(Equal(fmt.Sprintf("%s:%s", newImage, newTag)))
 	})
@@ -88,7 +96,11 @@ func TestGlobalOperator(t *testing.T) {
 		ExecMake(t, Make("setup-cluster", fmt.Sprintf("NAMESPACE=%s", ns)))
 		ExecMake(t, Make("setup", fmt.Sprintf("NAMESPACE=%s", ns), "GLOBAL=true"))
 
-		ExecMake(t, Make("operator", fmt.Sprintf("NAMESPACE=%s", ns), "GLOBAL=true"))
+		// Skip default kamelets installation for faster test runs
+		ExecMake(t, Make("operator",
+			fmt.Sprintf("NAMESPACE=%s", ns),
+			"GLOBAL=true",
+			"INSTALL_DEFAULT_KAMELETS=false"))
 
 		podFunc := OperatorPod(ns)
 		Eventually(podFunc).Should(Not(BeNil()))
