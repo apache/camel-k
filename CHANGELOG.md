@@ -8,6 +8,7 @@
 
 - How to run a Camel process as a cron job \(other than a timer\) [\#3576](https://github.com/apache/camel-k/issues/3576)
 - `kamel uninstall` should also delete leases [\#3473](https://github.com/apache/camel-k/issues/3473)
+- failed: could not pull base image image adoptopenjdk/openjdk11:slim: https://auth.docker.io/token dial tcp: i/o timeout [\#3425](https://github.com/apache/camel-k/issues/3425)
 
 ## [v1.11.0](https://github.com/apache/camel-k/tree/v1.11.0) (2022-12-07)
 
