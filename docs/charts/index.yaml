@@ -2,8 +2,35 @@ apiVersion: v1
 entries:
   camel-k:
   - apiVersion: v2
+    appVersion: 1.11.0
+    created: "2022-12-12T10:18:40.829190193+01:00"
+    description: A lightweight integration platform, born on Kubernetes, with serverless
+      superpowers
+    digest: 487e987dbf332d61745d4a8888ed5be116eb1e370d3ebd8cbb095eda470401d1
+    home: https://camel.apache.org/camel-k/latest/
+    icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
+    keywords:
+    - serverless
+    - integration
+    - patterns
+    maintainers:
+    - email: nferraro@apache.org
+      name: nferraro
+    - email: acosentino@apache.org
+      name: acosentino
+    name: camel-k
+    sources:
+    - https://github.com/apache/camel-k
+    - https://github.com/apache/camel-k-runtime
+    - https://github.com/apache/camel-quarkus
+    - https://github.com/apache/camel
+    type: application
+    urls:
+    - https://apache.github.io/camel-k/charts/camel-k-0.12.0.tgz
+    version: 0.12.0
+  - apiVersion: v2
     appVersion: 1.10.3
-    created: "2022-11-14T11:45:22.7614056+01:00"
+    created: "2022-12-12T10:18:40.823016308+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 59ddb87112b9b7ccd3db621f5987afe6f61006b5638a2e83eed14c1ba06dfca6
@@ -30,7 +57,7 @@ entries:
     version: 0.11.3
   - apiVersion: v2
     appVersion: 1.10.2
-    created: "2022-11-14T11:45:22.756210709+01:00"
+    created: "2022-12-12T10:18:40.817683621+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 02daa47b4984d9273a3f68854ad4dbc54b40d344fa1167d17954e2e960f54d7e
@@ -57,7 +84,7 @@ entries:
     version: 0.11.2
   - apiVersion: v2
     appVersion: 1.10.1
-    created: "2022-11-14T11:45:22.750365628+01:00"
+    created: "2022-12-12T10:18:40.812395204+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: f1e8d2405b146b5e7e9a17e2b5f69a456fb7f1e4aa06964f010a88a014ded4e5
@@ -84,7 +111,7 @@ entries:
     version: 0.11.1
   - apiVersion: v2
     appVersion: 1.10.0
-    created: "2022-11-14T11:45:22.745103139+01:00"
+    created: "2022-12-12T10:18:40.8065409+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 14fb0780b934ac871f5dfc473ddb7db1e1a70df257faedf33bd62c99e0eaa980
@@ -111,7 +138,7 @@ entries:
     version: 0.11.0
   - apiVersion: v2
     appVersion: 1.9.2
-    created: "2022-11-14T11:45:22.739570602+01:00"
+    created: "2022-12-12T10:18:40.800120693+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 90ea439bb18596657e6e93b4b07a41a5da499f77d7233d661677a0463b8d5f52
@@ -136,7 +163,7 @@ entries:
     version: 0.10.3
   - apiVersion: v2
     appVersion: 1.9.2
-    created: "2022-11-14T11:45:22.734781104+01:00"
+    created: "2022-12-12T10:18:40.795569886+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: bbf1187380da9a5c9725e8c1a94ea49dd858d4dab7da7ea13345a04aa24911d3
@@ -161,7 +188,7 @@ entries:
     version: 0.10.2
   - apiVersion: v2
     appVersion: 1.9.1
-    created: "2022-11-14T11:45:22.730151395+01:00"
+    created: "2022-12-12T10:18:40.790940757+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 0cba3a300eed89997102d6e82a53b4b898cb20b2d89c0c9b75cff58886ac7ac8
@@ -186,7 +213,7 @@ entries:
     version: 0.10.1
   - apiVersion: v2
     appVersion: 1.9.0
-    created: "2022-11-14T11:45:22.725753499+01:00"
+    created: "2022-12-12T10:18:40.786689585+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 6e6cb47f1bbcaf2e0269ee92b8cf3c5d88255681633a53ef61a925536aa9b073
@@ -211,7 +238,7 @@ entries:
     version: 0.10.0
   - apiVersion: v2
     appVersion: 1.8.2
-    created: "2022-11-14T11:45:22.798416096+01:00"
+    created: "2022-12-12T10:18:40.8649093+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 4ada6d477897adb993d6e08e665cdf6eb94ebf71d2503b5cb0921016837021eb
@@ -236,7 +263,7 @@ entries:
     version: 0.9.2
   - apiVersion: v2
     appVersion: 1.8.1
-    created: "2022-11-14T11:45:22.794711492+01:00"
+    created: "2022-12-12T10:18:40.861050907+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: ec85e315b224177021660106e375de7990b1f4c9594a10d668ade5e998e40bff
@@ -261,7 +288,7 @@ entries:
     version: 0.9.1
   - apiVersion: v2
     appVersion: 1.8.0
-    created: "2022-11-14T11:45:22.790811079+01:00"
+    created: "2022-12-12T10:18:40.857585759+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 9c7ec4fceec32adbf281562a9a61aa612a4ac52df358a9a6f4903896ee7a7684
@@ -286,7 +313,7 @@ entries:
     version: 0.9.0
   - apiVersion: v2
     appVersion: 1.7.0
-    created: "2022-11-14T11:45:22.786873797+01:00"
+    created: "2022-12-12T10:18:40.853758726+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: efccc4fab8d7f8b4e5ad129d9117e8a8d8fb5f65c7c3141eb07a63481eb7a4a7
@@ -311,7 +338,7 @@ entries:
     version: 0.8.0
   - apiVersion: v2
     appVersion: 1.6.1
-    created: "2022-11-14T11:45:22.783110525+01:00"
+    created: "2022-12-12T10:18:40.850063283+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 949d4e2d12f3a7667ec5dcd924788ba38b955b75cdcf2b9c9fd8bda30d491b20
@@ -336,7 +363,7 @@ entries:
     version: 0.7.1
   - apiVersion: v2
     appVersion: 1.5.0
-    created: "2022-11-14T11:45:22.779306938+01:00"
+    created: "2022-12-12T10:18:40.846643089+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 226251d742edff0f1a71d0068de67de348e0be0a8b29a411cad073ceb7d48535
@@ -361,7 +388,7 @@ entries:
     version: 0.7.0
   - apiVersion: v2
     appVersion: 1.4.1
-    created: "2022-11-14T11:45:22.775915722+01:00"
+    created: "2022-12-12T10:18:40.842228411+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: a3f32e2e2d73361b9d4cda028c9c549ba5dfd5cbf1f0224a1badcff295292818
@@ -386,7 +413,7 @@ entries:
     version: 0.6.1
   - apiVersion: v2
     appVersion: 1.4.0
-    created: "2022-11-14T11:45:22.774459257+01:00"
+    created: "2022-12-12T10:18:40.841360279+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: a011dd36bbfb07a23ca18baabec945274d2ac1164e08414147ecf683cccf8a21
@@ -411,7 +438,7 @@ entries:
     version: 0.6.0
   - apiVersion: v2
     appVersion: 1.3.2-SNAPSHOT
-    created: "2022-11-14T11:45:22.773444064+01:00"
+    created: "2022-12-12T10:18:40.840317134+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 30d999fb1a24c741829cd3ad1c1ba3c8ac4d0571a9ad1258c327c426913312d7
@@ -436,7 +463,7 @@ entries:
     version: 0.5.2
   - apiVersion: v2
     appVersion: 1.3.1
-    created: "2022-11-14T11:45:22.771135395+01:00"
+    created: "2022-12-12T10:18:40.837940347+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 222b6b51ac7c836e1a7cfe44228de3666cb2b4c559c64bee35afaef9cbfe2449
@@ -461,7 +488,7 @@ entries:
     version: 0.5.1
   - apiVersion: v2
     appVersion: 1.2.1
-    created: "2022-11-14T11:45:22.769201629+01:00"
+    created: "2022-12-12T10:18:40.835907844+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 393f4e4b32119824442ee2abdfc34a34bc49ec0fc6e957057e955cb5dd63aece
@@ -486,7 +513,7 @@ entries:
     version: 0.4.1
   - apiVersion: v2
     appVersion: 1.2.0
-    created: "2022-11-14T11:45:22.767379384+01:00"
+    created: "2022-12-12T10:18:40.833764044+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: c47863e13644340b857acf5c688004927e0ad126a9c39e8c90fa6d84e2c445b9
@@ -511,7 +538,7 @@ entries:
     version: 0.4.0
   - apiVersion: v2
     appVersion: 1.1.1
-    created: "2022-11-14T11:45:22.765266062+01:00"
+    created: "2022-12-12T10:18:40.832074434+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 46771bd1c0e52097f07e9c17e657690872716ed845b196cd0c981c97b984b573
@@ -536,7 +563,7 @@ entries:
     version: 0.3.2
   - apiVersion: v2
     appVersion: 1.0.1
-    created: "2022-11-14T11:45:22.763647751+01:00"
+    created: "2022-12-12T10:18:40.830558121+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: d7453b9b6281355caad37896c6760be64735f69009bc312a54cbc17e8a1f6697
@@ -561,7 +588,7 @@ entries:
     version: 0.3.1
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2022-11-14T11:45:22.7626204+01:00"
+    created: "2022-12-12T10:18:40.830082228+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 610a2b024d539451ee278b72179f34c242a67b7949e2a4eae7b0fa2d8d3630e3
@@ -586,7 +613,7 @@ entries:
     version: 0.3.0
   - apiVersion: v2
     appVersion: 1.0.0-RC2
-    created: "2022-11-14T11:45:22.762035491+01:00"
+    created: "2022-12-12T10:18:40.829646329+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 3d5397e111004a8735849dcebd55c9827e687aa3ab28b5c28de8fe69595e1b8f
@@ -611,7 +638,7 @@ entries:
     version: 0.2.1
   - apiVersion: v2
     appVersion: 1.0.0-RC2
-    created: "2022-11-14T11:45:22.720621636+01:00"
+    created: "2022-12-12T10:18:40.781147775+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 43fa5d9563ce76d25695e4132c5870279541b26be2ac8023537b587483853260
@@ -636,7 +663,7 @@ entries:
     version: 0.1.1
   - apiVersion: v2
     appVersion: 1.0.0-RC2
-    created: "2022-11-14T11:45:22.719954993+01:00"
+    created: "2022-12-12T10:18:40.780701309+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
     digest: 3bc8c53c4d781c4b4e4aac254d291339b348c2d8b4cf24b579ceb4330a48edd5
@@ -659,4 +686,4 @@ entries:
     urls:
     - https://apache.github.io/camel-k/charts/camel-k-0.1.0.tgz
     version: 0.1.0
-generated: "2022-11-14T11:45:22.71874218+01:00"
+generated: "2022-12-12T10:18:40.780041557+01:00"
