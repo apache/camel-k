@@ -19,7 +19,6 @@ package kameletbinding
 
 import (
 	"context"
-	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -41,6 +40,7 @@ import (
 
 	camelevent "github.com/apache/camel-k/pkg/event"
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/monitoring"
 )
 
@@ -185,7 +185,6 @@ func (r *ReconcileKameletBinding) Reconcile(ctx context.Context, request reconci
 		NewMonitorAction(),
 	}
 
-	var targetPhase v1alpha1.KameletBindingPhase
 	var err error
 
 	target := instance.DeepCopy()
@@ -198,30 +197,20 @@ func (r *ReconcileKameletBinding) Reconcile(ctx context.Context, request reconci
 		if a.CanHandle(target) {
 			targetLog.Infof("Invoking action %s", a.Name())
 
-			phaseFrom := target.Status.Phase
-
 			target, err = a.Handle(ctx, target)
 			if err != nil {
 				camelevent.NotifyKameletBindingError(ctx, r.client, r.recorder, &instance, target, err)
+				// Update the kameletbinding (mostly just to update its phase) if the new instance is returned
+				if target != nil {
+					_ = r.update(ctx, &instance, target, &targetLog)
+				}
 				return reconcile.Result{}, err
 			}
 
 			if target != nil {
-				target.Status.ObservedGeneration = instance.Generation
-
-				if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(&instance)); err != nil {
+				if err := r.update(ctx, &instance, target, &targetLog); err != nil {
 					camelevent.NotifyKameletBindingError(ctx, r.client, r.recorder, &instance, target, err)
 					return reconcile.Result{}, err
-				}
-
-				targetPhase = target.Status.Phase
-
-				if targetPhase != phaseFrom {
-					targetLog.Info(
-						"state transition",
-						"phase-from", phaseFrom,
-						"phase-to", target.Status.Phase,
-					)
 				}
 			}
 
@@ -232,12 +221,24 @@ func (r *ReconcileKameletBinding) Reconcile(ctx context.Context, request reconci
 		}
 	}
 
-	if targetPhase == v1alpha1.KameletBindingPhaseReady {
-		return reconcile.Result{}, nil
+	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileKameletBinding) update(ctx context.Context, base *v1alpha1.KameletBinding, target *v1alpha1.KameletBinding, log *log.Logger) error {
+	target.Status.ObservedGeneration = base.Generation
+
+	if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base)); err != nil {
+		camelevent.NotifyKameletBindingError(ctx, r.client, r.recorder, base, target, err)
+		return err
 	}
 
-	// Requeue
-	return reconcile.Result{
-		RequeueAfter: 5 * time.Second,
-	}, nil
+	if target.Status.Phase != base.Status.Phase {
+		log.Info(
+			"state transition",
+			"phase-from", base.Status.Phase,
+			"phase-to", target.Status.Phase,
+		)
+	}
+
+	return nil
 }
