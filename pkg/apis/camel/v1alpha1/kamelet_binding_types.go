@@ -128,6 +128,8 @@ type KameletBindingConditionType string
 const (
 	// KameletBindingConditionReady --
 	KameletBindingConditionReady KameletBindingConditionType = "Ready"
+	// KameletBindingIntegrationConditionError is used to report the error on the generated Integration
+	KameletBindingIntegrationConditionError KameletBindingConditionType = "IntegrationError"
 )
 
 // KameletBindingPhase --
