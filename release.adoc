@@ -127,18 +127,15 @@ make release-staging
 ```
 
 Binary files will be generated and put in the project root directory, including examples.
-All those files should be put in the corresponding directory of the camel-k dev SVN at https://dist.apache.org/repos/dist/dev/camel/camel-k/<version>.
 
-Sources are not produced directly by the scripts, but since the procedure is creating a tag, the source code in tar.gz format can be downloaded from Github
-at: https://github.com/apache/camel-k/releases
-
-After copying all the files to the dev SVN, a `sign.sh` script in the parent directory can be used to sign all the uploaded artifacts:
+Now run:
 
 ```
-./sign.sh <version> <gpg_pass>
+cd release-utils/scripts/
+./upload-sources.sh <released_version> <released_version>
 ```
 
-Commit all files to the SVN.
+This will upload the sources, client and examples to the dist/dev repository in ASF.
 
 A docker image `camelk/camel-k:<version>` will be pushed to the staging organization (`camelk`, not `apache`).
 
@@ -229,7 +226,7 @@ Apache dist repository on: https://dist.apache.org/repos/dist/release/camel.
 
 The same should be done for camel-kamelets and camel-k-runtime in case of combined vote.
 
-Both the camel-kamelets and camel-k-runtime contains a script to promote the release from dev to release
+Camel-kamelets, camel-k-runtime and camel-k contains a script to promote the release from dev to release
 
 ```
 cd release-utils/scripts/
