@@ -49,7 +49,8 @@ func (action *monitorAction) Name() string {
 
 func (action *monitorAction) CanHandle(kameletbinding *v1alpha1.KameletBinding) bool {
 	return kameletbinding.Status.Phase == v1alpha1.KameletBindingPhaseCreating ||
-		kameletbinding.Status.Phase == v1alpha1.KameletBindingPhaseError ||
+		(kameletbinding.Status.Phase == v1alpha1.KameletBindingPhaseError &&
+			kameletbinding.Status.GetCondition(v1alpha1.KameletBindingIntegrationConditionError) == nil) ||
 		kameletbinding.Status.Phase == v1alpha1.KameletBindingPhaseReady
 }
 
@@ -85,7 +86,10 @@ func (action *monitorAction) Handle(ctx context.Context, kameletbinding *v1alpha
 	// Check if the integration needs to be changed
 	expected, err := CreateIntegrationFor(ctx, action.client, kameletbinding)
 	if err != nil {
-		return nil, err
+		kameletbinding.Status.Phase = v1alpha1.KameletBindingPhaseError
+		kameletbinding.Status.SetErrorCondition(v1alpha1.KameletBindingIntegrationConditionError,
+			"Couldn't create an Integration custom resource", err)
+		return kameletbinding, err
 	}
 
 	semanticEquality := equality.Semantic.DeepDerivative(expected.Spec, it.Spec)

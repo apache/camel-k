@@ -20,6 +20,7 @@ package integration
 import (
 	"context"
 
+	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
@@ -52,7 +53,10 @@ func (action *platformSetupAction) CanHandle(integration *v1.Integration) bool {
 // Handle handles the integrations.
 func (action *platformSetupAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	if _, err := trait.Apply(ctx, action.client, integration, nil); err != nil {
-		return nil, err
+		integration.Status.Phase = v1.IntegrationPhaseError
+		integration.SetReadyCondition(corev1.ConditionFalse,
+			v1.IntegrationConditionInitializationFailedReason, err.Error())
+		return integration, err
 	}
 
 	pl, err := platform.GetForResource(ctx, action.client, integration)
