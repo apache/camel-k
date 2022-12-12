@@ -14,6 +14,12 @@
 # limitations under the License.
 
 #
+# Use bash explicitly in this Makefile to avoid unexpected platform
+# incompatibilities among Linux distros.
+#
+SHELL := /bin/bash
+
+#
 # Allows for resources to be loaded from outside the root location of
 # the kustomize config file. Ensures that resource don't need to be
 # copied around the file system.
