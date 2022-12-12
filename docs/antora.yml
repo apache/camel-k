@@ -19,9 +19,7 @@
 
 name: camel-k
 title: Camel K
-version: next
-prerelease: true
-display-version: Next (Pre-release)
+version: 1.11.x
 nav:
 - modules/ROOT/nav.adoc
 - modules/languages/nav-languages.adoc
@@ -34,14 +32,14 @@ asciidoc:
     prerelease: true
     camel-kamelets-version: 0.10.0 # Makefile KAMELET_CATALOG_REPO_BRANCH
     camel-kamelets-docs-version: 0.9.x # Makefile KAMELET_CATALOG_REPO_BRANCH
-    camel-k-runtime-version: 1.15.0 # Makefile RUNTIME_VERSION
+    camel-k-runtime-version: 1.16.0 # Makefile RUNTIME_VERSION
     camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # Makefile BUNDLE_CAMEL_APIS
     # from camel-k-runtime parent pom:
-    camel-version: 3.18.0
-    camel-docs-version: 3.18.x
-    camel-quarkus-version: 2.11.0
-    camel-quarkus-docs-version: 2.11.x
-    quarkus-version: 2.11.3.Final
+    camel-version: 3.19.0
+    camel-docs-version: 3.19.x
+    camel-quarkus-version: 2.14.0
+    camel-quarkus-docs-version: 2.14.x
+    quarkus-version: 2.14.0.Final
     graalvm-version: 22.1.0
     graalvm-docs-version: 22.1
 
