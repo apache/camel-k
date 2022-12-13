@@ -25,7 +25,6 @@ import (
 	"github.com/spf13/cobra"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 )
@@ -168,13 +167,6 @@ __kamel_kubectl_get_non_platform_integrationkits() {
         COMPREPLY=( $( compgen -W "${kubectl_out}" -- "$cur" ) )
     fi
 }
-
-__kamel_kubectl_get_known_integrationkits() {
-    local type_list="` + strings.Join(platform.GetKitsNames(), " ") + `"
-    COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
-    compopt -o nospace
-}
-
 
 __kamel_kubectl_get_kamelets() {
     local template

@@ -153,15 +153,6 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	// save
 	cmd.Flags().Bool("save", false, "Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
 
-	// completion support
-	configureBashAnnotationForFlag(
-		&cmd,
-		"context",
-		map[string][]string{
-			cobra.BashCompCustom: {"__kamel_kubectl_get_known_integrationcontexts"},
-		},
-	)
-
 	return &cmd, &options
 }
 
