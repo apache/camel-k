@@ -30,7 +30,7 @@ kamel run --resource file:resources-data.zip resource-file-binary-route.groovy -
 
 NOTE: when you're providing a resource file, we try to recognize if it's a binary file and process it accordingly creating a binary representation that will be decoded transparently in the `Integration`.
 
-You can provide more than one single `resource` at once by just adding the flag repeatedly (ie, `--resource file:file1.txt ---resource file:file2.txt ...`).
+You can provide more than one single `resource` at once by just adding the flag repeatedly (ie, `--resource file:file1.txt --resource file:file2.txt ...`).
 
 [[runtime-resource-configmap]]
 == Runtime configmap resource
