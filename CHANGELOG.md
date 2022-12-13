@@ -6,9 +6,16 @@
 
 **Closed issues:**
 
+- Saga example failing with version \> 1.10 [\#3869](https://github.com/apache/camel-k/issues/3869)
+- Release 1.11.0 [\#3837](https://github.com/apache/camel-k/issues/3837)
+- E2E - Isolate native tests into a dedicated workflow and put each test with a separate job in the workflow [\#3777](https://github.com/apache/camel-k/issues/3777)
+- Apache sync not working [\#3734](https://github.com/apache/camel-k/issues/3734)
+- OPC UA server not reachable from client [\#3580](https://github.com/apache/camel-k/issues/3580)
 - How to run a Camel process as a cron job \(other than a timer\) [\#3576](https://github.com/apache/camel-k/issues/3576)
 - `kamel uninstall` should also delete leases [\#3473](https://github.com/apache/camel-k/issues/3473)
 - failed: could not pull base image image adoptopenjdk/openjdk11:slim: https://auth.docker.io/token dial tcp: i/o timeout [\#3425](https://github.com/apache/camel-k/issues/3425)
+- Kamel `bind` step index unclear [\#2586](https://github.com/apache/camel-k/issues/2586)
+- Migrate the PodDisruptionBudget trait to `policy/v1` API [\#2206](https://github.com/apache/camel-k/issues/2206)
 
 ## [v1.11.0](https://github.com/apache/camel-k/tree/v1.11.0) (2022-12-07)
 
