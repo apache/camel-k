@@ -175,6 +175,30 @@ __kamel_kubectl_get_known_integrationkits() {
     compopt -o nospace
 }
 
+
+__kamel_kubectl_get_kamelets() {
+    local template
+    local kubectl_out
+
+    template="{{ range .items  }}{{ .metadata.name }} {{ end }}"
+
+    if kubectl_out=$(kubectl get -o template --template="${template}" kamelets 2>/dev/null); then
+        COMPREPLY=( $( compgen -W "${kubectl_out}" -- "$cur" ) )
+    fi
+}
+
+__kamel_kubectl_get_non_bundled_non_readonly_kamelets() {
+    local template
+    local kubectl_out
+
+    template="{{ range .items  }}{{ .metadata.name }} {{ end }}"
+    label_conditions="camel.apache.org/kamelet.bundled=false,camel.apache.org/kamelet.readonly=false"
+
+    if kubectl_out=$(kubectl get -l ${label_conditions} -o template --template="${template}" kamelets 2>/dev/null); then
+        COMPREPLY=( $( compgen -W "${kubectl_out}" -- "$cur" ) )
+    fi
+}
+
 __custom_func() {
     case ${last_command} in
         kamel_describe_integration)
@@ -185,6 +209,10 @@ __custom_func() {
             __kamel_kubectl_get_integrationkits
             return
             ;;
+        kamel_describe_kamelet)
+            __kamel_kubectl_get_kamelets
+            return
+            ;;
         kamel_delete)
             __kamel_kubectl_get_integrations
             return
@@ -193,8 +221,20 @@ __custom_func() {
             __kamel_kubectl_get_integrations
             return
             ;;
+        kamel_get)
+            __kamel_kubectl_get_integrations
+            return
+            ;;
         kamel_kit_delete)
             __kamel_kubectl_get_non_platform_integrationkits
+            return
+            ;;
+        kamel_kit_get)
+            __kamel_kubectl_get_integrationkits
+            return
+            ;;
+        kamel_kamelet_delete)
+            __kamel_kubectl_get_non_bundled_non_readonly_kamelets
             return
             ;;
         *)
