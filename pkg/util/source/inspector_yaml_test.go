@@ -19,6 +19,7 @@ package source
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -541,6 +542,103 @@ func TestYAMLExplicitParameters(t *testing.T) {
 				for _, k := range test.toURIs {
 					assert.Contains(t, meta.ToURIs, k)
 				}
+			})
+		})
+	}
+}
+
+const yamlFromDSLWithPropertyPlaceholder = `
+- route:
+    id: route1
+    from:
+      uri: "timer:tick"
+      parameters:
+        period: "5000"
+    steps:
+      - set-body:
+          constant: "Hello Yaml !!!"
+      - transform:
+          simple: "${body.toUpperCase()}"
+      - to: "{{url}}"
+`
+
+const yamlFromDSLWithPropertyPlaceholderScheme = `
+- route:
+    id: route2
+    from:
+      uri: "timer:tick"
+      parameters:
+        period: "5000"
+    steps:
+      - set-body:
+          constant: "Hello Yaml !!!"
+      - transform:
+          simple: "${body.toUpperCase()}"
+      - to: "{{scheme}}:{{resource}}"
+`
+
+func TestYAMLRouteWithPropertyPlaceholder(t *testing.T) {
+	tc := []struct {
+		source   string
+		fromURIs []string
+		toURIs   []string
+	}{
+		{
+			source:   yamlFromDSLWithPropertyPlaceholder,
+			fromURIs: []string{"timer:tick?period=5000"},
+			toURIs:   []string{"{{url}}"},
+		},
+		{
+			source:   yamlFromDSLWithPropertyPlaceholderScheme,
+			fromURIs: []string{"timer:tick?period=5000"},
+			toURIs:   []string{"{{scheme}}:{{resource}}"},
+		},
+	}
+
+	inspector := newTestYAMLInspector(t)
+	for i, test := range tc {
+		t.Run(fmt.Sprintf("TestYAMLRouteWithPropertyPlaceholder-%d", i), func(t *testing.T) {
+			assertExtractYAML(t, inspector, test.source, func(meta *Metadata) {
+				assert.Len(t, meta.FromURIs, len(test.fromURIs))
+				for _, k := range test.fromURIs {
+					assert.Contains(t, meta.FromURIs, k)
+				}
+				assert.Len(t, meta.ToURIs, len(test.toURIs))
+				for _, k := range test.toURIs {
+					assert.Contains(t, meta.ToURIs, k)
+				}
+				assert.Equal(t, meta.Dependencies.Size(), 2)
+				assert.True(t, meta.Dependencies.Has("camel:core"))
+				assert.True(t, meta.Dependencies.Has("camel:timer"))
+			})
+		})
+	}
+}
+
+const yamlFromDSLWithUnknownFromScheme = `
+- route:
+    id: route1
+    from:
+      uri: "unknown:foo"
+    steps:
+      - to: "log:info"
+`
+
+const yamlFromDSLWithUnknownToScheme = `
+- route:
+    id: route2
+    from:
+      uri: "timer:tick"
+    steps:
+      - to: "unknown:foo"
+`
+
+func TestYAMLRouteWithUnknownScheme(t *testing.T) {
+	inspector := newTestYAMLInspector(t)
+	for i, source := range []string{yamlFromDSLWithUnknownFromScheme, yamlFromDSLWithUnknownToScheme} {
+		t.Run(fmt.Sprintf("TestYAMLRouteWithUnknownScheme-%d", i), func(t *testing.T) {
+			assertExtractYAMLError(t, inspector, source, func(err error) {
+				assert.True(t, strings.HasPrefix(err.Error(), fmt.Sprintf("component not found for uri %q", "unknown:foo")))
 			})
 		})
 	}

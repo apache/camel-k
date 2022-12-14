@@ -179,7 +179,7 @@ func (c *RuntimeCatalog) VisitSchemes(visitor func(string, v1.CamelScheme) bool)
 	}
 }
 
-// DecodeComponent parses an URI and return a camel artifact and a scheme.
+// DecodeComponent parses the given URI and return a camel artifact and a scheme.
 func (c *RuntimeCatalog) DecodeComponent(uri string) (*v1.CamelArtifact, *v1.CamelScheme) {
 	uriSplit := strings.SplitN(uri, ":", 2)
 	if len(uriSplit) < 2 {
@@ -191,4 +191,20 @@ func (c *RuntimeCatalog) DecodeComponent(uri string) (*v1.CamelArtifact, *v1.Cam
 		schemeRef = &scheme
 	}
 	return c.GetArtifactByScheme(uriStart), schemeRef
+}
+
+// IsResolvable checks given URI for proper Camel format (e.g. resolvable scheme).
+func (c *RuntimeCatalog) IsResolvable(uri string) bool {
+	uriSplit := strings.SplitN(uri, ":", 2)
+
+	if len(uriSplit) == 0 {
+		return false
+	}
+
+	if scheme := uriSplit[0]; strings.HasPrefix(scheme, "{{") && strings.HasSuffix(scheme, "}}") {
+		// scheme is a property placeholder (e.g. {{url}}) which is not resolvable
+		return false
+	}
+
+	return true
 }

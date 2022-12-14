@@ -56,3 +56,20 @@ func assertExtractYAML(t *testing.T, inspector YAMLInspector, source string, ass
 
 	assertFn(&meta)
 }
+
+func assertExtractYAMLError(t *testing.T, inspector YAMLInspector, source string, assertFn func(err error)) {
+	t.Helper()
+
+	srcSpec := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:    "route.yaml",
+			Content: source,
+		},
+		Language: v1.LanguageYaml,
+	}
+	meta := NewMetadata()
+	err := inspector.Extract(srcSpec, &meta)
+	require.Error(t, err)
+
+	assertFn(err)
+}

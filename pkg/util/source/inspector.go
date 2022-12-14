@@ -336,7 +336,14 @@ func (i *baseInspector) discoverKamelets(meta *Metadata) {
 }
 
 func (i *baseInspector) addDependencies(uri string, meta *Metadata, consumer bool) error {
+	if !i.catalog.IsResolvable(uri) {
+		// ignore dependencies for given URI as it is not resolvable in this state
+		// (e.g. using a property placeholder such as {{url} or {{scheme}}:{{resource}})
+		return nil
+	}
+
 	candidateComp, scheme := i.catalog.DecodeComponent(uri)
+
 	if candidateComp == nil || scheme == nil {
 		return fmt.Errorf("component not found for uri %q in camel catalog runtime version %s",
 			uri, i.catalog.GetRuntimeVersion())
