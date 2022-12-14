@@ -509,9 +509,11 @@ func installLeaseBindings(ctx context.Context, c client.Client, namespace string
 	)
 }
 
-// NewPlatform --
-// nolint: lll
-func NewPlatform(ctx context.Context, c client.Client, clusterType string, skipRegistrySetup bool, registry v1.RegistrySpec, operatorID string) (*v1.IntegrationPlatform, error) {
+// NewPlatform creates a new IntegrationPlatform instance.
+func NewPlatform(
+	ctx context.Context, c client.Client,
+	clusterType string, skipRegistrySetup bool, registry v1.RegistrySpec, operatorID string,
+) (*v1.IntegrationPlatform, error) {
 	isOpenShift, err := isOpenShift(c, clusterType)
 	if err != nil {
 		return nil, err
