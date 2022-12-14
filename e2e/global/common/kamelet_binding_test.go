@@ -31,6 +31,7 @@ import (
 
 	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 func TestKameletBinding(t *testing.T) {
@@ -127,6 +128,23 @@ func TestKameletBinding(t *testing.T) {
 			Eventually(IntegrationPodPhase(ns, "kb-with-traits"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, "kb-with-traits"), TestTimeoutShort).Should(ContainSubstring("hello from test"))
 			Eventually(IntegrationLogs(ns, "kb-with-traits"), TestTimeoutShort).Should(ContainSubstring("integrationLogger"))
+		})
+
+		// KameletBinding with wrong spec
+		t.Run("test KameletBinding with wrong spec", func(t *testing.T) {
+			RegisterTestingT(t)
+			name := "bad-klb"
+			kb := v1alpha1.NewKameletBinding(ns, name)
+			kb.Spec = v1alpha1.KameletBindingSpec{}
+			_, err := kubernetes.ReplaceResource(TestContext, TestClient(), &kb)
+			Eventually(err).Should(BeNil())
+			Eventually(KameletBindingPhase(ns, name), TestTimeoutShort).Should(Equal(v1alpha1.KameletBindingPhaseError))
+			Eventually(KameletBindingConditionStatus(ns, name, v1alpha1.KameletBindingConditionReady), TestTimeoutShort).ShouldNot(Equal(corev1.ConditionTrue))
+			Eventually(KameletBindingCondition(ns, name, v1alpha1.KameletBindingIntegrationConditionError), TestTimeoutShort).Should(
+				WithTransform(KameletBindingConditionMessage, And(
+					ContainSubstring("could not determine source URI"),
+					ContainSubstring("no ref or URI specified in endpoint"),
+				)))
 		})
 	})
 }

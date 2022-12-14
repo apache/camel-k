@@ -996,6 +996,16 @@ func KameletBinding(ns string, name string) func() *v1alpha1.KameletBinding {
 	}
 }
 
+func KameletBindingPhase(ns string, name string) func() v1alpha1.KameletBindingPhase {
+	return func() v1alpha1.KameletBindingPhase {
+		klb := KameletBinding(ns, name)()
+		if klb == nil {
+			return ""
+		}
+		return klb.Status.Phase
+	}
+}
+
 func KameletBindingSpecReplicas(ns string, name string) func() *int32 {
 	return func() *int32 {
 		klb := KameletBinding(ns, name)()
