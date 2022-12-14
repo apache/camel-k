@@ -31,6 +31,7 @@ import (
 
 	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
 func TestErroredTrait(t *testing.T) {
@@ -58,6 +59,15 @@ func TestErroredTrait(t *testing.T) {
 				"--name", name,
 				"-t", "kamelets.list=missing",
 			).Execute()).To(Succeed())
+			// KameletBinding
+			Eventually(KameletBindingPhase(ns, name), TestTimeoutShort).Should(Equal(v1alpha1.KameletBindingPhaseError))
+			Eventually(KameletBindingConditionStatus(ns, name, v1alpha1.KameletBindingConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
+			Eventually(KameletBindingCondition(ns, name, v1alpha1.KameletBindingConditionReady), TestTimeoutShort).Should(
+				WithTransform(KameletBindingConditionMessage, And(
+					ContainSubstring("error during trait customization"),
+					ContainSubstring("[missing] not found"),
+				)))
+			// Integration related
 			Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
 			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(And(
