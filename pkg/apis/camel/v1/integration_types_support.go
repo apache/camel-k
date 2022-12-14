@@ -351,6 +351,29 @@ func (in *IntegrationStatus) SetErrorCondition(condType IntegrationConditionType
 	})
 }
 
+// IsConditionTrue checks if the condition with the given type is true.
+func (in *Integration) IsConditionTrue(conditionType IntegrationConditionType) bool {
+	if in == nil {
+		return false
+	}
+	cond := in.Status.GetCondition(conditionType)
+	if cond == nil {
+		return false
+	}
+
+	return cond.Status == corev1.ConditionTrue
+}
+
+// SetReadyCondition sets Ready condition with the given status, reason, and message.
+func (in *Integration) SetReadyCondition(status corev1.ConditionStatus, reason, message string) {
+	in.Status.SetCondition(IntegrationConditionReady, status, reason, message)
+}
+
+// SetReadyConditionError sets Ready condition to False with the given error message.
+func (in *Integration) SetReadyConditionError(err string) {
+	in.SetReadyCondition(corev1.ConditionFalse, IntegrationConditionErrorReason, err)
+}
+
 // SetConditions updates the resource to include the provided conditions.
 //
 // If a condition that we are about to add already exists and has the same status and
