@@ -57,15 +57,15 @@ jobs:
         secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
         secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
 
-  v1_8_x:
+  v1_11_x:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
     steps:
-    - name: release-1.8.x nightly
+    - name: release-1.11.x nightly
       uses: ./.github/actions/release-nightly
       with:
-        branch-ref: "release-1.8.x"
-        goVersion: "1.16.x"
+        branch-ref: "release-1.11.x"
+        goVersion: "1.17.x"
         javaVersion: "11"
         secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
         secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
