@@ -140,6 +140,7 @@ bump-replace:
 	@sed -i 's/^LAST_RELEASED_VERSION ?= .*$//LAST_RELEASED_VERSION ?= $(LAST_RELEASED_VERSION)/' ./script/Makefile
 
 bump: bump-replace codegen bundle
+	./script/bump_actions.sh $(LAST_RELEASED_VERSION)
 
 # Generates the version file
 codegen:
