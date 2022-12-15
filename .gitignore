@@ -168,3 +168,4 @@ config/**/*.gen.yaml
 config/**/*.gen.json
 
 *-installer*
+pkg/resources/resources.go

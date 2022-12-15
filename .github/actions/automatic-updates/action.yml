@@ -1,0 +1,60 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: automatic-updates
+description: 'action used to run automation required by the project'
+
+inputs:
+  branch-ref:
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ inputs.branch-ref }}
+        persist-credentials: false
+        submodules: recursive
+    - name: Generate changelog
+      uses: ./.github/actions/changelog
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        release_branch: ${{ inputs.branch-ref }}
+    - name: Commit files
+      env:
+        CI_USER: "github-actions[bot]"
+        CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+      run: |
+        git config --local user.email "$CI_EMAIL"
+        git config --local user.name "$CI_USER"
+        git add CHANGELOG.md && git commit -m 'chore: changelog automatic update' && echo "changelog=1" >> $GITHUB_ENV || echo "No changes to CHANGELOG"
+    - name: Make generate and commit
+      env:
+        CI_USER: "github-actions[bot]"
+        CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+      run: |
+        make generate
+        git add -A && git commit -m 'chore: make generate automatic update' && echo "make_generate=1" >> $GITHUB_ENV || echo "No changes to Make generate"
+    - name: Push changes
+      if: env.changelog == 1 || env.make_generate == 1
+      env:
+        CI_USER: "github-actions[bot]"
+        CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+        CI_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" HEAD:${{ inputs.branch-ref }}
