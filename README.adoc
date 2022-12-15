@@ -63,7 +63,7 @@ More information is provided in the official documentation https://camel.apache.
 
 Since the inception of the project, our goal was to bring `Apache Camel` to the cloud.
 
-See the https://camel.apache.org/camel-k/next/architecture/architecture.html[software architecture defails].
+See the https://camel.apache.org/camel-k/next/architecture/architecture.html[software architecture details].
 
 == :heart: Contributing
 
