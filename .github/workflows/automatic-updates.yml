@@ -42,11 +42,11 @@ jobs:
       with:
         branch-ref: "release-1.10.x"
 
-  v1_8_x_lts:
+  v1_8_x:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
     steps:
-    - name: Automatic updates on release-1.18.x
+    - name: Automatic updates on release-1.8.x
       uses: ./.github/actions/automatic-updates
       with:
         branch-ref: "release-1.8.x"

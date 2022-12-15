@@ -29,15 +29,10 @@ jobs:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-        ref: main
-        persist-credentials: false
-        submodules: recursive
     - name: Release main nightly
       uses: ./.github/actions/release-nightly
       with:
+        branch-ref: "main"
         goVersion: "1.17.x"
         javaVersion: "11"
         secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
@@ -50,41 +45,31 @@ jobs:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-        ref: release-1.10.x
-        persist-credentials: false
-        submodules: recursive    
     - name: Release 1.10 nightly
       uses: ./.github/actions/release-nightly
       with:
+        branch-ref: "release-1.10.x"
         goVersion: "1.17.x"
         javaVersion: "11"
         secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
         secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
         secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
         secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
-        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}        
+        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
 
-  v1_8_x_lts:
+  v1_8_x:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-        ref: release-1.8.x
-        persist-credentials: false
-        submodules: recursive    
-    - name: Release 1.8 (LTS) nightly 
+    - name: Release 1.8 nightly
       uses: ./.github/actions/release-nightly
       with:
+        branch-ref: "release-1.8.x"
         goVersion: "1.16.x"
         javaVersion: "11"
         secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
         secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
         secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
         secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
-        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}        
-        
+        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
+
