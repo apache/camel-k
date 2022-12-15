@@ -320,6 +320,6 @@ git push upstream main
 ```
 Where <new-version> represents the new version you want to bump and <replace-version> the version that was previously released.
 
-In case of a major or minor release, please update accordingly the `release` workflow in order to always have the previous release branches, `main` and latest LTS running in a CI fashion. See https://github.com/apache/camel-k/pull/3607/commits/f835c978dcfbcadae99b0f8b2fbcd07f49adb3a1 for reference.
+Note: this action should also replace automatically the oldest nightly release Github Action with the newest one just created.
 
 You will also need to update the `docs/antora.yml` configuration in order to provide the proper versions for the upcoming release in `main` branch.
