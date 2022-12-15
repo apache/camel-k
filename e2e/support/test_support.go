@@ -2002,11 +2002,15 @@ func CreateTimerKamelet(ns string, name string) func() error {
 	return CreateKamelet(ns, name, flow, props, nil)
 }
 
+// Deprecated:
+// Use KamelBind func instead
 func BindKameletTo(ns, name string, annotations map[string]string, from, to corev1.ObjectReference,
 	sourceProperties, sinkProperties map[string]string) func() error {
 	return BindKameletToWithErrorHandler(ns, name, annotations, from, to, sourceProperties, sinkProperties, nil)
 }
 
+// Deprecated:
+// Use KamelBind func instead
 func BindKameletToWithErrorHandler(ns, name string, annotations map[string]string, from, to corev1.ObjectReference,
 	sourceProperties, sinkProperties map[string]string, errorHandler map[string]interface{}) func() error {
 	return func() error {
@@ -2030,6 +2034,8 @@ func BindKameletToWithErrorHandler(ns, name string, annotations map[string]strin
 	}
 }
 
+// Deprecated:
+// Use KamelBind func instead
 func asTemplate(source map[string]interface{}) *v1alpha1.Template {
 	bytes, err := json.Marshal(source)
 	if err != nil {
@@ -2040,6 +2046,8 @@ func asTemplate(source map[string]interface{}) *v1alpha1.Template {
 	}
 }
 
+// Deprecated:
+// Use KamelBind func instead
 func asErrorHandlerSpec(source map[string]interface{}) *v1alpha1.ErrorHandlerSpec {
 	bytes, err := json.Marshal(source)
 	if err != nil {
@@ -2050,6 +2058,8 @@ func asErrorHandlerSpec(source map[string]interface{}) *v1alpha1.ErrorHandlerSpe
 	}
 }
 
+// Deprecated:
+// Use KamelBind func instead
 func asEndpointProperties(props map[string]string) *v1alpha1.EndpointProperties {
 	bytes, err := json.Marshal(props)
 	if err != nil {
