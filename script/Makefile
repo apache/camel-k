@@ -479,14 +479,11 @@ cross-compile:
 	# be processed as a single argument by the cross compile script
 	./script/cross_compile.sh $(CUSTOM_VERSION) $(subst ","\",$(GOFLAGS))
 
-package-examples:
-	./script/package_examples.sh $(CUSTOM_VERSION)
+release: clean codegen set-module-version set-version build-resources check-licenses build images images-push cross-compile git-tag
 
-release: clean codegen set-module-version set-version build-resources check-licenses build images images-push cross-compile package-examples git-tag
+release-staging: clean codegen set-module-version set-version build-resources check-licenses build images images-push-staging cross-compile git-tag
 
-release-staging: clean codegen set-module-version set-version build-resources check-licenses build images images-push-staging cross-compile package-examples git-tag
-
-release-nightly: clean codegen set-module-version set-version build-resources build images images-push cross-compile package-examples
+release-nightly: clean codegen set-module-version set-version build-resources build images images-push cross-compile
 
 release-helm:
 	./script/release_helm.sh
@@ -495,11 +492,6 @@ release-kustomize:
 	RELEASE_VERSION=$(CUSTOM_VERSION) \
 	RELEASE_NAME=$(PACKAGE) \
 	./script/release_kustomize.sh
-
-install-crc:
-	./script/install_crc.sh $(CUSTOM_VERSION)
-install-minikube:
-	./script/install_minikube.sh
 
 get-staging-repo:
 	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
