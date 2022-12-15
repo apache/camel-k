@@ -45,7 +45,7 @@ jobs:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
     steps:
-    - name: Release 1.10 nightly
+    - name: release-1.10.x nightly
       uses: ./.github/actions/release-nightly
       with:
         branch-ref: "release-1.10.x"
@@ -61,7 +61,7 @@ jobs:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
     steps:
-    - name: Release 1.8 nightly
+    - name: release-1.8.x nightly
       uses: ./.github/actions/release-nightly
       with:
         branch-ref: "release-1.8.x"
