@@ -158,6 +158,12 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.ValueSourceApplyConfiguration{}
 
 		// Group=camel.apache.org, Version=v1alpha1
+	case v1alpha1.SchemeGroupVersion.WithKind("DataTypeReference"):
+		return &camelv1alpha1.DataTypeReferenceApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("DataTypeSpec"):
+		return &camelv1alpha1.DataTypeSpecApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("DataTypesSpec"):
+		return &camelv1alpha1.DataTypesSpecApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("Endpoint"):
 		return &camelv1alpha1.EndpointApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("EndpointProperties"):
@@ -168,6 +174,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1alpha1.EventTypeSpecApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("ExternalDocumentation"):
 		return &camelv1alpha1.ExternalDocumentationApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("HeaderSpec"):
+		return &camelv1alpha1.HeaderSpecApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("JSON"):
 		return &camelv1alpha1.JSONApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("JSONSchemaProp"):
