@@ -27,11 +27,12 @@ import (
 // KameletSpecApplyConfiguration represents an declarative configuration of the KameletSpec type for use
 // with apply.
 type KameletSpecApplyConfiguration struct {
-	Definition   *JSONSchemaPropsApplyConfiguration                          `json:"definition,omitempty"`
-	Sources      []v1.SourceSpecApplyConfiguration                           `json:"sources,omitempty"`
-	Template     *TemplateApplyConfiguration                                 `json:"template,omitempty"`
-	Types        map[camelv1alpha1.EventSlot]EventTypeSpecApplyConfiguration `json:"types,omitempty"`
-	Dependencies []string                                                    `json:"dependencies,omitempty"`
+	Definition   *JSONSchemaPropsApplyConfiguration                         `json:"definition,omitempty"`
+	Sources      []v1.SourceSpecApplyConfiguration                          `json:"sources,omitempty"`
+	Template     *TemplateApplyConfiguration                                `json:"template,omitempty"`
+	Types        map[camelv1alpha1.TypeSlot]EventTypeSpecApplyConfiguration `json:"types,omitempty"`
+	DataTypes    map[camelv1alpha1.TypeSlot]DataTypesSpecApplyConfiguration `json:"dataTypes,omitempty"`
+	Dependencies []string                                                   `json:"dependencies,omitempty"`
 }
 
 // KameletSpecApplyConfiguration constructs an declarative configuration of the KameletSpec type for use with
@@ -73,12 +74,26 @@ func (b *KameletSpecApplyConfiguration) WithTemplate(value *TemplateApplyConfigu
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, the entries provided by each call will be put on the Types field,
 // overwriting an existing map entries in Types field with the same key.
-func (b *KameletSpecApplyConfiguration) WithTypes(entries map[camelv1alpha1.EventSlot]EventTypeSpecApplyConfiguration) *KameletSpecApplyConfiguration {
+func (b *KameletSpecApplyConfiguration) WithTypes(entries map[camelv1alpha1.TypeSlot]EventTypeSpecApplyConfiguration) *KameletSpecApplyConfiguration {
 	if b.Types == nil && len(entries) > 0 {
-		b.Types = make(map[camelv1alpha1.EventSlot]EventTypeSpecApplyConfiguration, len(entries))
+		b.Types = make(map[camelv1alpha1.TypeSlot]EventTypeSpecApplyConfiguration, len(entries))
 	}
 	for k, v := range entries {
 		b.Types[k] = v
+	}
+	return b
+}
+
+// WithDataTypes puts the entries into the DataTypes field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, the entries provided by each call will be put on the DataTypes field,
+// overwriting an existing map entries in DataTypes field with the same key.
+func (b *KameletSpecApplyConfiguration) WithDataTypes(entries map[camelv1alpha1.TypeSlot]DataTypesSpecApplyConfiguration) *KameletSpecApplyConfiguration {
+	if b.DataTypes == nil && len(entries) > 0 {
+		b.DataTypes = make(map[camelv1alpha1.TypeSlot]DataTypesSpecApplyConfiguration, len(entries))
+	}
+	for k, v := range entries {
+		b.DataTypes[k] = v
 	}
 	return b
 }

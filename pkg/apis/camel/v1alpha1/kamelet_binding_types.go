@@ -71,8 +71,11 @@ type Endpoint struct {
 	URI *string `json:"uri,omitempty"`
 	// Properties are a key value representation of endpoint properties
 	Properties *EndpointProperties `json:"properties,omitempty"`
-	// Types defines the schema of the data produced/consumed by the endpoint
-	Types map[EventSlot]EventTypeSpec `json:"types,omitempty"`
+	// Types defines the data type of the data produced/consumed by the endpoint and references a given data type specification.
+	// Deprecated: In favor of using DataTypes
+	Types map[TypeSlot]EventTypeSpec `json:"types,omitempty"`
+	// DataTypes defines the data type of the data produced/consumed by the endpoint and references a given data type specification.
+	DataTypes map[TypeSlot]DataTypeReference `json:"dataTypes,omitempty"`
 }
 
 // EndpointType represents the type (ie, source or sink)

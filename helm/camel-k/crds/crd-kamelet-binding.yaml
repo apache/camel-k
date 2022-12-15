@@ -7691,6 +7691,21 @@ spec:
                 description: Sink is the destination of the integration defined by
                   this binding
                 properties:
+                  dataTypes:
+                    additionalProperties:
+                      description: DataTypeReference references to the specification
+                        of a data type by its scheme and format name
+                      properties:
+                        format:
+                          description: the data type format name
+                          type: string
+                        scheme:
+                          description: the data type component scheme
+                          type: string
+                      type: object
+                    description: DataTypes defines the data type of the data produced/consumed
+                      by the endpoint and references a given data type specification.
+                    type: object
                   properties:
                     description: Properties are a key value representation of endpoint
                       properties
@@ -7735,8 +7750,8 @@ spec:
                     type: object
                   types:
                     additionalProperties:
-                      description: EventTypeSpec represents a specification for an
-                        event type
+                      description: 'EventTypeSpec represents a specification for an
+                        event type Deprecated: In favor of using DataTypeSpec'
                       properties:
                         mediaType:
                           description: media type as expected for HTTP media types
@@ -7899,8 +7914,9 @@ spec:
                               type: string
                           type: object
                       type: object
-                    description: Types defines the schema of the data produced/consumed
-                      by the endpoint
+                    description: 'Types defines the data type of the data produced/consumed
+                      by the endpoint and references a given data type specification.
+                      Deprecated: In favor of using DataTypes'
                     type: object
                   uri:
                     description: URI can be used to specify the (Camel) endpoint explicitly
@@ -7910,6 +7926,21 @@ spec:
                 description: Source is the starting point of the integration defined
                   by this binding
                 properties:
+                  dataTypes:
+                    additionalProperties:
+                      description: DataTypeReference references to the specification
+                        of a data type by its scheme and format name
+                      properties:
+                        format:
+                          description: the data type format name
+                          type: string
+                        scheme:
+                          description: the data type component scheme
+                          type: string
+                      type: object
+                    description: DataTypes defines the data type of the data produced/consumed
+                      by the endpoint and references a given data type specification.
+                    type: object
                   properties:
                     description: Properties are a key value representation of endpoint
                       properties
@@ -7954,8 +7985,8 @@ spec:
                     type: object
                   types:
                     additionalProperties:
-                      description: EventTypeSpec represents a specification for an
-                        event type
+                      description: 'EventTypeSpec represents a specification for an
+                        event type Deprecated: In favor of using DataTypeSpec'
                       properties:
                         mediaType:
                           description: media type as expected for HTTP media types
@@ -8118,8 +8149,9 @@ spec:
                               type: string
                           type: object
                       type: object
-                    description: Types defines the schema of the data produced/consumed
-                      by the endpoint
+                    description: 'Types defines the data type of the data produced/consumed
+                      by the endpoint and references a given data type specification.
+                      Deprecated: In favor of using DataTypes'
                     type: object
                   uri:
                     description: URI can be used to specify the (Camel) endpoint explicitly
@@ -8132,6 +8164,21 @@ spec:
                   description: Endpoint represents a source/sink external entity (could
                     be any Kubernetes resource or Camel URI)
                   properties:
+                    dataTypes:
+                      additionalProperties:
+                        description: DataTypeReference references to the specification
+                          of a data type by its scheme and format name
+                        properties:
+                          format:
+                            description: the data type format name
+                            type: string
+                          scheme:
+                            description: the data type component scheme
+                            type: string
+                        type: object
+                      description: DataTypes defines the data type of the data produced/consumed
+                        by the endpoint and references a given data type specification.
+                      type: object
                     properties:
                       description: Properties are a key value representation of endpoint
                         properties
@@ -8177,8 +8224,8 @@ spec:
                       type: object
                     types:
                       additionalProperties:
-                        description: EventTypeSpec represents a specification for
-                          an event type
+                        description: 'EventTypeSpec represents a specification for
+                          an event type Deprecated: In favor of using DataTypeSpec'
                         properties:
                           mediaType:
                             description: media type as expected for HTTP media types
@@ -8343,8 +8390,9 @@ spec:
                                 type: string
                             type: object
                         type: object
-                      description: Types defines the schema of the data produced/consumed
-                        by the endpoint
+                      description: 'Types defines the data type of the data produced/consumed
+                        by the endpoint and references a given data type specification.
+                        Deprecated: In favor of using DataTypes'
                       type: object
                     uri:
                       description: URI can be used to specify the (Camel) endpoint

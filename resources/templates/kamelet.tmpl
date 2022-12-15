@@ -20,9 +20,12 @@ spec:
         title: Message
         description: The message to generate
         type: string
-  types:
+  dataTypes:
     out:
-      mediaType: text/plain
+      default: text
+      types:
+        text:
+          mediaType: text/plain
   template:
     from:
       uri: timer:tick

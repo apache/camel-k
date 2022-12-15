@@ -37,12 +37,14 @@ spec:
         title: Message
         description: The message to generate
         type: string
-  types:
+  dataTypes:
     out:
-      mediaType: application/json
-      schema:
-        id: text.camel.apache.org
-        type: string
+      types:
+        json:
+          mediaType: application/json
+          schema:
+            id: text.camel.apache.org
+            type: string
   template:
     from:
       uri: timer:tick

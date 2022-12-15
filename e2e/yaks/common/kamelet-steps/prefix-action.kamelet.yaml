@@ -32,11 +32,15 @@ spec:
         title: Prefix
         description: The prefix to add
         type: string
-  types:
+  dataTypes:
     in:
-      mediaType: text/plain
+      types:
+        text:
+          mediaType: text/plain
     out:
-      mediaType: text/plain
+      types:
+        text:
+          mediaType: text/plain
   template:
     from:
       uri: "kamelet:source"

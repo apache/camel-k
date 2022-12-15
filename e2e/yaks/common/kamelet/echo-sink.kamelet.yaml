@@ -31,11 +31,17 @@ spec:
         description: The prefix to prepend to the incoming event
         type: string
         default: "echo: "
-  types:
+  dataTypes:
     in:
-      mediaType: text/plain
+      default: text
+      types:
+        text:
+          mediaType: text/plain
     out:
-      mediaType: text/plain
+      default: text
+      types:
+        text:
+          mediaType: text/plain
   template:
     from:
       uri: "kamelet:source"
