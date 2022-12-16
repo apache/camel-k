@@ -29,7 +29,7 @@ runs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         release_branch: ${{ inputs.branch-ref }}
-    - name: Commit files
+    - name: Commit changelog
       env:
         CI_USER: "github-actions[bot]"
         CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
@@ -37,15 +37,16 @@ runs:
         git config --local user.email "$CI_EMAIL"
         git config --local user.name "$CI_USER"
         git add CHANGELOG.md && git commit -m 'chore: changelog automatic update' && echo "changelog=1" >> $GITHUB_ENV || echo "No changes to CHANGELOG"
-    - name: Make generate and commit
+    - name: Run refresh actions and commit
       env:
         CI_USER: "github-actions[bot]"
         CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
       run: |
         make generate
-        git add -A && git commit -m 'chore: make generate automatic update' && echo "make_generate=1" >> $GITHUB_ENV || echo "No changes to Make generate"
+        make update-docs
+        git add -A && git commit -m 'chore: nightly resource refresh' && echo "refresh=1" >> $GITHUB_ENV || echo "No changes to make update-docs"
     - name: Push changes
-      if: env.changelog == 1 || env.make_generate == 1
+      if: env.changelog == 1 || env.refresh == 1
       env:
         CI_USER: "github-actions[bot]"
         CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"

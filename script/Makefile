@@ -23,7 +23,7 @@ VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION ?= 1.12.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 1.11.0
-RUNTIME_VERSION := 1.16.0
+RUNTIME_VERSION := 1.17.0-SNAPSHOT
 BUILDAH_VERSION := 1.23.3
 KANIKO_VERSION := 0.17.1
 INSTALL_DEFAULT_KAMELETS ?= true
@@ -139,6 +139,9 @@ endef
 
 export LICENSE_HEADER
 default: build
+
+update-docs: build-resources
+	./script/update_docs.sh
 
 bump-replace:
 	@# Bump version and replace with the variables provided by the user
