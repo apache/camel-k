@@ -16,14 +16,9 @@
 # limitations under the License.
 
 location=$(dirname $0)
+
+echo "Scraping information from Makefile"
 RUNTIME_VERSION=$(grep '^RUNTIME_VERSION := ' Makefile | sed 's/^.* \?= //')
-KAMELETS_VERSION=$(grep '^KAMELET_CATALOG_REPO_BRANCH := ' Makefile | sed 's/^.* \?= //' | sed 's/^.//')
-re="^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)$"
-if ! [[ $KAMELETS_VERSION =~ $re ]]; then
-    echo "❗ argument must match semantic version: $KAMELETS_VERSION"
-    exit 1
-fi
-KAMELETS_DOCS_VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.x"
 
 CATALOG="$location/../resources/camel-catalog-$RUNTIME_VERSION.yaml"
 # This script requires the catalog to be available (via make build-resources for instance)
@@ -31,6 +26,28 @@ if [ ! -f $CATALOG ]; then
     echo "❗ catalog not available. Make sure to download it before calling this script."
     exit 1
 fi
+
+KAMELETS_VERSION=$(grep '^KAMELET_CATALOG_REPO_BRANCH := ' Makefile | sed 's/^.* \?= //' | sed 's/^.//')
+re="^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)$"
+if ! [[ $KAMELETS_VERSION =~ $re ]]; then
+    echo "❗ argument must match semantic version: $KAMELETS_VERSION"
+    exit 1
+fi
+KAMELETS_DOCS_VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.x"
+BUILDAH_VERSION=$(grep '^BUILDAH_VERSION := ' Makefile | sed 's/^.* \?= //')
+KANIKO_VERSION=$(grep '^KANIKO_VERSION := ' Makefile | sed 's/^.* \?= //')
+KUSTOMIZE_VERSION=$(grep '^KUSTOMIZE_VERSION := ' Makefile | sed 's/^.* \?= //' | sed 's/^.//')
+
+echo "Camel K Runtime version: $RUNTIME_VERSION"
+echo "Kamelets version: $KAMELETS_VERSION"
+echo "Buildah version: $BUILDAH_VERSION"
+echo "Kaniko version: $KANIKO_VERSION"
+echo "Kustomize version: $KUSTOMIZE_VERSION"
+
+yq -i ".asciidoc.attributes.buildah-version = \"$BUILDAH_VERSION\"" $location/../docs/antora.yml
+yq -i ".asciidoc.attributes.kaniko-version = \"$KANIKO_VERSION\"" $location/../docs/antora.yml
+yq -i ".asciidoc.attributes.kustomize-version = \"$KUSTOMIZE_VERSION\"" $location/../docs/antora.yml
+
 echo "Scraping information from catalog available at: $CATALOG"
 RUNTIME_VERSION=$(yq '.spec.runtime.version' $CATALOG)
 CAMEL_VERSION=$(yq '.spec.runtime.metadata."camel.version"' $CATALOG)
@@ -53,7 +70,6 @@ echo "Camel K Runtime version: $RUNTIME_VERSION"
 echo "Camel version: $CAMEL_VERSION"
 echo "Camel Quarkus version: $CAMEL_QUARKUS_VERSION"
 echo "Quarkus version: $QUARKUS_VERSION"
-echo "Kamelets version: $KAMELETS_VERSION"
 
 yq -i ".asciidoc.attributes.camel-k-runtime-version = \"$RUNTIME_VERSION\"" $location/../docs/antora.yml
 yq -i ".asciidoc.attributes.camel-version = \"$CAMEL_VERSION\"" $location/../docs/antora.yml
@@ -63,3 +79,22 @@ yq -i ".asciidoc.attributes.camel-quarkus-docs-version = \"$CAMEL_QUARKUS_DOCS_V
 yq -i ".asciidoc.attributes.quarkus-version = \"$QUARKUS_VERSION\"" $location/../docs/antora.yml
 yq -i ".asciidoc.attributes.camel-kamelets-version = \"$KAMELETS_VERSION\"" $location/../docs/antora.yml
 yq -i ".asciidoc.attributes.camel-kamelets-docs-version = \"$KAMELETS_DOCS_VERSION\"" $location/../docs/antora.yml
+
+echo "Scraping information from go.mod"
+KNATIVE_API_VERSION=$(grep '^.*knative.dev/eventing ' $location/../go.mod | sed 's/^.* //' | sed 's/^.//')
+KUBE_API_VERSION=$(grep '^.*k8s.io/api ' $location/../go.mod | sed 's/^.* //' | sed 's/^.//')
+OPERATOR_FWK_API_VERSION=$(grep '^.*github.com/operator-framework/api ' $location/../go.mod | sed 's/^.* //' | sed 's/^.//')
+SERVICE_BINDING_OP_VERSION=$(grep '^.*github.com/redhat-developer/service-binding-operator ' $location/../go.mod | sed 's/^.* //' | sed 's/^.//')
+PROMETHEUS_OP_VERSION=$(grep '^.*github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring ' $location/../go.mod | sed 's/^.* //' | sed 's/^.//')
+
+echo "Kubernetes API version: $KUBE_API_VERSION"
+echo "Operator Framework API version: $OPERATOR_FWK_API_VERSION"
+echo "KNative API version: $KNATIVE_API_VERSION"
+echo "Service Binding Operator version: $SERVICE_BINDING_OP_VERSION"
+echo "Prometheus Operator version: $PROMETHEUS_OP_VERSION"
+
+yq -i ".asciidoc.attributes.kubernetes-api-version = \"$KUBE_API_VERSION\"" $location/../docs/antora.yml
+yq -i ".asciidoc.attributes.operator-fwk-api-version = \"$OPERATOR_FWK_API_VERSION\"" $location/../docs/antora.yml
+yq -i ".asciidoc.attributes.knative-api-version = \"$KNATIVE_API_VERSION\"" $location/../docs/antora.yml
+yq -i ".asciidoc.attributes.service-binding-op-version = \"$SERVICE_BINDING_OP_VERSION\"" $location/../docs/antora.yml
+yq -i ".asciidoc.attributes.prometheus-op-version = \"$PROMETHEUS_OP_VERSION\"" $location/../docs/antora.yml
