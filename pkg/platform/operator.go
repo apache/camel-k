@@ -79,7 +79,7 @@ func GetOperatorPodName() string {
 	return ""
 }
 
-// GetOperatorLockName returns the name of the lock lease that is electing a leader on the particular namepsace.
+// GetOperatorLockName returns the name of the lock lease that is electing a leader on the particular namespace.
 func GetOperatorLockName(operatorID string) string {
 	return fmt.Sprintf("%s-lock", operatorID)
 }
