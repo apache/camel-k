@@ -17,9 +17,6 @@ name: release-nightly
 description: 'action used to release nightly'
 
 inputs:
-  branch-ref:
-    required: true
-    type: string
   goVersion:
     required: true
     type: string
@@ -42,12 +39,6 @@ runs:
   using: "composite"
 
   steps:
-    - name: "Checkout code"
-      uses: actions/checkout@v2
-      with:
-        ref: ${{ inputs.branch-ref }}
-        persist-credentials: false
-        submodules: recursive
     - name: Set up JDK ${{ inputs.javaVersion }}
       uses: actions/setup-java@v2
       with:

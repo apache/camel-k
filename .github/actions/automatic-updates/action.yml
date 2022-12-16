@@ -24,12 +24,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: "Checkout code"
-      uses: actions/checkout@v2
-      with:
-        ref: ${{ inputs.branch-ref }}
-        persist-credentials: false
-        submodules: recursive
     - name: Generate changelog
       uses: ./.github/actions/changelog
       with:
