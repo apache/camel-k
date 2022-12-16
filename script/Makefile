@@ -13,6 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#
+# Use bash explicitly in this Makefile to avoid unexpected platform
+# incompatibilities among Linux distros.
+#
+SHELL := /bin/bash
+
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION ?= 1.12.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
