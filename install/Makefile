@@ -19,6 +19,8 @@
 #
 SHELL := /bin/bash
 
+MAKE := make --no-print-directory
+
 #
 # Allows for resources to be loaded from outside the root location of
 # the kustomize config file. Ensures that resource don't need to be
@@ -58,6 +60,8 @@ HEALTH_PORT ?= 8081
 LOGGING_LEVEL ?= info
 # Install default kamelets: [true|false]
 INSTALL_DEFAULT_KAMELETS ?= true
+# Uninstall all Camel K resources: [true|false]
+UNINSTALL_ALL ?=false
 
 CONFIG := config
 MANAGER := $(CONFIG)/manager
@@ -288,7 +292,7 @@ endif
 #
 #@ operator
 #
-#== Install the operator deployment and related resources
+#== Install the operator deployment and related resources.
 #
 #=== Cluster-admin privileges are required.
 #
@@ -374,7 +378,7 @@ endif
 #
 #@ platform
 #
-#== Install the integration platform
+#== Install the integration platform.
 #
 #=== Cluster-admin privileges are required.
 #
@@ -401,7 +405,7 @@ endif
 #
 #@ example
 #
-#== Installs the example integration
+#== Install the example integration.
 #
 #* PARAMETERS:
 #** NAMESPACE: Set the namespace to install the example into
@@ -416,6 +420,38 @@ ifeq ($(DRY_RUN), false)
 	@$(KUSTOMIZE) build $(KOPTIONS) $@ | kubectl apply -f -
 else
 	@$(KUSTOMIZE) build $(KOPTIONS) $@
+endif
+
+.PHONY: uninstall
+
+#---
+#
+#@ uninstall
+#
+#== Uninstall the resources previously installed by the platform, operator, setup, and setup-cluster targets.
+#
+#=== Cluster-admin privileges are required.
+#
+#* PARAMETERS:
+#** UNINSTALL_ALL: Uninstall all Camel K resources including crds and cluster roles installed by setup-cluster [true|false]
+#** DRY_RUN:       Print the resources to be applied instead of applying them [true|false]
+#
+#---
+uninstall: kubectl
+ifeq ($(DRY_RUN), false)
+	@$(KUSTOMIZE) build $(KOPTIONS) platform | kubectl delete --ignore-not-found=true -f -
+	@$(KUSTOMIZE) build $(KOPTIONS) operator | kubectl delete --ignore-not-found=true -f -
+	@$(KUSTOMIZE) build $(KOPTIONS) setup    | kubectl delete --ignore-not-found=true -f -
+ifeq ($(UNINSTALL_ALL), true)
+	@$(KUSTOMIZE) build $(KOPTIONS) setup-cluster | kubectl delete --ignore-not-found=true -f -
+endif
+else
+	@$(KUSTOMIZE) build $(KOPTIONS) platform | kubectl delete --dry-run=client -f -
+	@$(KUSTOMIZE) build $(KOPTIONS) operator | kubectl delete --dry-run=client -f -
+	@$(KUSTOMIZE) build $(KOPTIONS) setup    | kubectl delete --dry-run=client -f -
+ifeq ($(UNINSTALL_ALL), true)
+	@$(KUSTOMIZE) build $(KOPTIONS) setup-cluster | kubectl delete --dry-run=client -f -
+endif
 endif
 
 .DEFAULT_GOAL := help

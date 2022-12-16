@@ -123,11 +123,9 @@ spec:
     #
     #  insecure: true | false
   kamelet: {}
-  resources: {}
 status:
   build:
     maven:
       settings: {}
     registry: {}
   kamelet: {}
-  resources: {}
