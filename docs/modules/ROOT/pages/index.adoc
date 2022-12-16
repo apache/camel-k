@@ -4,14 +4,13 @@
 --
 This version ({page-component-display-version}) of {page-component-title} depends on:
 
-* https://github.com/apache/camel-k-runtime.git[camel-k-runtime] (undocumented) at version {camel-k-runtime-version}, and therefore:
+* https://github.com/apache/camel-k-runtime.git[camel-k-runtime] at version {camel-k-runtime-version}, and therefore:
 ** xref:{camel-quarkus-docs-version}@camel-quarkus::index.adoc[] at version {camel-quarkus-version}.
 ** xref:{camel-docs-version}@components::index.adoc[Camel] at version {camel-version}
 ** https://quarkus.io[Quarkus] at version {quarkus-version}
-** https://www.graalvm.org[GraalVM] at version TODO:fix-me graalvm-version
 * xref:{camel-kamelets-docs-version}@camel-kamelets::index.adoc[] at version {camel-kamelets-version}
 
-ifdef::lts[This long term service release will be supported until {lts}.]
+ifdef::lts[This is a long term service release.]
 ifndef::lts[]
 ifdef::prerelease[This is the development version of {page-component-title}. It should not be used in production.]
 ifndef::prerelease[This release will not be updated, but rather replaced by a new release.]
@@ -46,7 +45,7 @@ Continue reading the documentation to xref:installation/installation.adoc[instal
 == Compatibility Matrix
 
 [caption=]
-.Compatibility between Camel K and dependencies
+.Compatibility between Camel K, Camel and Quarkus
 [width="100%",cols="4,2,2,2,2,2,1,3",options="header"]
 |===
 |Camel K Version
@@ -61,3 +60,20 @@ Continue reading the documentation to xref:installation/installation.adoc[instal
 
 //cannot use top level index.adoc as the page with the query is always omitted.
 indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|camelKRuntimeVersion|util.camelRef(camelVersion, camelDocsVersion)|util.camelQuarkusRef(camelQuarkusVersion, camelQuarkusDocsVersion)|util.quarkusRef(quarkusVersion)|util.kameletsRef(camelKameletsVersion, camelKameletsDocsVersion)|lts|ck.branch(pageComponentVersion)", requires={requires},transform=util.sortCompatibilityItems]
+
+.Compatibility between Camel K and dependencies
+[width="100%",cols="4,2,2,2,2,2,2,1,3",options="header"]
+|===
+|Camel K Version
+|Kubernetes API
+|Operator Framework API
+|KNative API
+|Service Binding Operator
+|Prometheus Operator
+|Buildah
+|Kaniko
+|Kustomize version
+|===
+
+//cannot use top level index.adoc as the page with the query is always omitted.
+indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|kubernetesApiVersion|operatorFwkApiVersion|knativeApiVersion|serviceBindingOpVersion|prometheusOpVersion|buildahVersion|kanikoVersion|kustomizeVersion", requires={requires},transform=util.sortCompatibilityItems]
