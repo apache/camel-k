@@ -28,6 +28,12 @@ jobs:
     runs-on: ubuntu-20.04
     name: Generate changelog for main branch
     steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v2
+      with:
+        ref: main
+        persist-credentials: false
+        submodules: recursive
     - name: Automatic updates on main
       uses: ./.github/actions/automatic-updates
       with:
@@ -37,6 +43,12 @@ jobs:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
     steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v2
+      with:
+        ref: release-1.10.x
+        persist-credentials: false
+        submodules: recursive
     - name: Automatic updates on release-1.10.x
       uses: ./.github/actions/automatic-updates
       with:
@@ -46,6 +58,12 @@ jobs:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
     steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v2
+      with:
+        ref: release-1.11.x
+        persist-credentials: false
+        submodules: recursive
     - name: Automatic updates on release-1.11.x
       uses: ./.github/actions/automatic-updates
       with:
