@@ -47,18 +47,17 @@ Continue reading the documentation to xref:installation/installation.adoc[instal
 
 [caption=]
 .Compatibility between Camel K and dependencies
-[width="100%",cols="4,2,2,2,2,2,2,1,3",options="header"]
+[width="100%",cols="4,2,2,2,2,2,1,3",options="header"]
 |===
 |Camel K Version
 |Camel K Runtime version
 |Camel Version
 |Camel-Quarkus Version
 |Quarkus Version
-|GraalVM Version
 |Kamelets Version
-|LTS Until
+|LTS
 |Branch
 |===
 
 //cannot use top level index.adoc as the page with the query is always omitted.
-indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|camelKRuntimeVersion|util.camelRef(camelVersion, camelDocsVersion)|util.camelQuarkusRef(camelQuarkusVersion, camelQuarkusDocsVersion)|util.quarkusRef(quarkusVersion)|util.graalvmRef(graalvmVersion, graalvmDocsVersion)|util.kameletsRef(camelKameletsVersion, camelKameletsDocsVersion)|lts|ck.branch(pageComponentVersion)", requires={requires},transform=util.sortCompatibilityItems]
+indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|camelKRuntimeVersion|util.camelRef(camelVersion, camelDocsVersion)|util.camelQuarkusRef(camelQuarkusVersion, camelQuarkusDocsVersion)|util.quarkusRef(quarkusVersion)|util.kameletsRef(camelKameletsVersion, camelKameletsDocsVersion)|lts|ck.branch(pageComponentVersion)", requires={requires},transform=util.sortCompatibilityItems]
