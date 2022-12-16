@@ -144,6 +144,7 @@ bump-replace:
 	@# Bump version and replace with the variables provided by the user
 	@sed -i 's/^VERSION ?= .*$//VERSION ?= $(VERSION)/' ./script/Makefile
 	@sed -i 's/^LAST_RELEASED_VERSION ?= .*$//LAST_RELEASED_VERSION ?= $(LAST_RELEASED_VERSION)/' ./script/Makefile
+	@sed -i 's/^STAGING_RUNTIME_REPO :=.*$//STAGING_RUNTIME_REPO :=/' ./script/Makefile
 
 bump: bump-replace codegen bundle
 	./script/bump_actions.sh $(LAST_RELEASED_VERSION)
