@@ -8,7 +8,7 @@ This version ({page-component-display-version}) of {page-component-title} depend
 ** xref:{camel-quarkus-docs-version}@camel-quarkus::index.adoc[] at version {camel-quarkus-version}.
 ** xref:{camel-docs-version}@components::index.adoc[Camel] at version {camel-version}
 ** https://quarkus.io[Quarkus] at version {quarkus-version}
-** https://www.graalvm.org[GraalVM] at version {graalvm-version}
+** https://www.graalvm.org[GraalVM] at version TODO:fix-me graalvm-version
 * xref:{camel-kamelets-docs-version}@camel-kamelets::index.adoc[] at version {camel-kamelets-version}
 
 ifdef::lts[This long term service release will be supported until {lts}.]
