@@ -73,6 +73,13 @@ spec:
     #
     maven:
     #
+    # CLI options passed to the Maven commands to be executed
+    #
+    # cliOptions:
+    #   - --show-version
+    #   - --batch-mode
+    #
+    #
     # Location of the local Maven repository
     #
     #  localRepository: my.repository.url
