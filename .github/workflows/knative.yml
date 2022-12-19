@@ -19,6 +19,7 @@ name: knative
 
 env:
   TEST_CLUSTER: kind
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 on:
   pull_request:
