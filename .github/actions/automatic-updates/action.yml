@@ -20,6 +20,8 @@ inputs:
   branch-ref:
     required: true
     type: string
+  secretGithubToken:
+    required: true
 
 runs:
   using: "composite"
@@ -27,7 +29,7 @@ runs:
     - name: Generate changelog
       uses: ./.github/actions/changelog
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ inputs.secretGithubToken }}
         release_branch: ${{ inputs.branch-ref }}
     - name: Commit changelog
       env:
@@ -50,6 +52,6 @@ runs:
       env:
         CI_USER: "github-actions[bot]"
         CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
-        CI_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CI_TOKEN: ${{ inputs.secretGithubToken }}
       run: |
         git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" HEAD:${{ inputs.branch-ref }}

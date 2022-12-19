@@ -38,6 +38,7 @@ jobs:
       uses: ./.github/actions/automatic-updates
       with:
         branch-ref: "main"
+        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
 
   v1_10_x:
     if: github.repository == 'apache/camel-k'
@@ -53,6 +54,7 @@ jobs:
       uses: ./.github/actions/automatic-updates
       with:
         branch-ref: "release-1.10.x"
+        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
 
   v1_11_x:
     if: github.repository == 'apache/camel-k'
@@ -68,3 +70,4 @@ jobs:
       uses: ./.github/actions/automatic-updates
       with:
         branch-ref: "release-1.11.x"
+        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
