@@ -17,6 +17,9 @@
 # limitations under the License.
 name: release
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 on:
   schedule:
     - cron: "10 23 * * *"
