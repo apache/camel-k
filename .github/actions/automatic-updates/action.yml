@@ -32,6 +32,7 @@ runs:
         token: ${{ inputs.secretGithubToken }}
         release_branch: ${{ inputs.branch-ref }}
     - name: Commit changelog
+      shell: bash
       env:
         CI_USER: "github-actions[bot]"
         CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
@@ -40,6 +41,7 @@ runs:
         git config --local user.name "$CI_USER"
         git add CHANGELOG.md && git commit -m 'chore: changelog automatic update' && echo "changelog=1" >> $GITHUB_ENV || echo "No changes to CHANGELOG"
     - name: Run refresh actions and commit
+      shell: bash
       env:
         CI_USER: "github-actions[bot]"
         CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
@@ -48,6 +50,7 @@ runs:
         make update-docs
         git add -A && git commit -m 'chore: nightly resource refresh' && echo "refresh=1" >> $GITHUB_ENV || echo "No changes to make update-docs"
     - name: Push changes
+      shell: bash
       if: env.changelog == 1 || env.refresh == 1
       env:
         CI_USER: "github-actions[bot]"
