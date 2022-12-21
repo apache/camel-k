@@ -272,7 +272,7 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(
 		return err
 	}
 
-	readyPods, unreadyPods := filterPodsByReadyStatus(runningPods, controller.getPodSpec())
+	readyPods, unreadyPods := filterPodsByReadyStatus(environment, runningPods, controller.getPodSpec())
 
 	if done, err := controller.checkReadyCondition(ctx); done || err != nil {
 		// There may be pods that are not ready but still probable for getting error messages.
@@ -347,13 +347,15 @@ func checkPodStatuses(integration *v1.Integration, pendingPods []corev1.Pod, run
 	return false
 }
 
-func filterPodsByReadyStatus(runningPods []corev1.Pod, podSpec corev1.PodSpec) ([]corev1.Pod, []corev1.Pod) {
+func filterPodsByReadyStatus(environment *trait.Environment, runningPods []corev1.Pod, podSpec corev1.PodSpec) ([]corev1.Pod, []corev1.Pod) {
 	var readyPods []corev1.Pod
 	var unreadyPods []corev1.Pod
+
+	integrationContainerName := environment.GetIntegrationContainerName()
 	for _, pod := range runningPods {
 		// We compare the Integration PodSpec to that of the Pod in order to make
 		// sure we account for up-to-date version.
-		if !comparePodSpec(podSpec, pod.Spec) {
+		if !comparePodSpec(integrationContainerName, podSpec, pod.Spec) {
 			continue
 		}
 		ready := kubernetes.GetPodCondition(pod, corev1.PodReady)
@@ -376,9 +378,9 @@ func filterPodsByReadyStatus(runningPods []corev1.Pod, podSpec corev1.PodSpec) (
 }
 
 // comparePodSpec compares given pod spec according to integration specific information (e.g. digest, container image).
-func comparePodSpec(runningPodSpec corev1.PodSpec, referencePod corev1.PodSpec) bool {
-	runningPodContainer := findIntegrationContainer(runningPodSpec)
-	referencePodContainer := findIntegrationContainer(referencePod)
+func comparePodSpec(integrationContainerName string, runningPodSpec corev1.PodSpec, referencePod corev1.PodSpec) bool {
+	runningPodContainer := findIntegrationContainer(integrationContainerName, runningPodSpec)
+	referencePodContainer := findIntegrationContainer(integrationContainerName, referencePod)
 
 	if runningPodContainer == nil || referencePodContainer == nil {
 		return false
@@ -407,9 +409,10 @@ func getIntegrationDigest(envs []corev1.EnvVar) string {
 	return ""
 }
 
-func findIntegrationContainer(spec corev1.PodSpec) *corev1.Container {
+// findIntegrationContainer find if present the integration container in the pod spec using the integration specifications.
+func findIntegrationContainer(integrationContainerName string, spec corev1.PodSpec) *corev1.Container {
 	for _, c := range spec.Containers {
-		if c.Name == "integration" {
+		if c.Name == integrationContainerName {
 			return &c
 		}
 	}
