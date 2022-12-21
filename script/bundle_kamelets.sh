@@ -21,7 +21,7 @@ rootdir=$location/../
 set -e
 
 repo=$1
-branch=$2
+tag=$2
 
 cd $rootdir
 target=./build/_kamelets
@@ -35,15 +35,15 @@ if [ "$repo" = "" ]; then
 	exit 0
 fi
 
-if [ "$branch" = "" ]; then
-  branch="main"
+if [ "$tag" = "" ]; then
+	echo "ERROR: no kamelet catalog version defined"
+	exit 1
 fi
 
-echo "Cloning repository $repo on branch $branch to bundle kamelets..."
-
+echo "Cloning repository $repo from tag $tag to bundle kamelets..."
 
 rm -rf ./tmp_kamelet_catalog
-git clone -b $branch --single-branch --depth 1 $repo ./tmp_kamelet_catalog
+git clone -q -c advice.detachedHead=false -b $tag --single-branch --depth 1 $repo ./tmp_kamelet_catalog
 
 cp ./tmp_kamelet_catalog/kamelets/*.kamelet.yaml $target
 
