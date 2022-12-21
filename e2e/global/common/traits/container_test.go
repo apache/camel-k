@@ -79,7 +79,7 @@ func TestContainerTrait(t *testing.T) {
 
 		t.Run("Container name", func(t *testing.T) {
 			name := "java2"
-			containerName := "notintegration"
+			containerName := "my-container-name"
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"-t", "container.name="+containerName,
 				"--name", name,
