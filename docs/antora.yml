@@ -16,24 +16,29 @@
 #
 
 # Another part of this distributed component is in camel-k-runtime docs
-
 name: camel-k
 title: Camel K
 version: 1.10.x
 nav:
-- modules/ROOT/nav.adoc
-- modules/languages/nav-languages.adoc
-- modules/ROOT/nav-end.adoc
-
+  - modules/ROOT/nav.adoc
+  - modules/languages/nav-languages.adoc
+  - modules/ROOT/nav-end.adoc
 # On release, update this to the appropriate released camel version.
 asciidoc:
   attributes:
     requires: "'util=camel-website-util,ck=xref:js/ck.js'"
+<<<<<<< HEAD
     lts: LTS
     prerelease: false
     camel-kamelets-version: 0.9.3 # Makefile KAMELET_CATALOG_REPO_BRANCH
     camel-kamelets-docs-version: 0.9.x # Makefile KAMELET_CATALOG_REPO_BRANCH
     camel-k-runtime-version: 1.15.2 # Makefile RUNTIME_VERSION
+=======
+    prerelease: true
+    camel-kamelets-version: 0.10.0 # Makefile KAMELET_CATALOG_REPO_BRANCH
+    camel-kamelets-docs-version: 0.10.x # Makefile KAMELET_CATALOG_REPO_BRANCH
+    camel-k-runtime-version: 1.16.0 # Makefile RUNTIME_VERSION
+>>>>>>> 80f3e3865 (chore: update docs script)
     camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # Makefile BUNDLE_CAMEL_APIS
     # from camel-k-runtime parent pom:
     camel-version: 3.18.2
@@ -43,4 +48,11 @@ asciidoc:
     quarkus-version: 2.13.0.Final
     graalvm-version: 22.1.0
     graalvm-docs-version: 22.1
-
+    buildah-version: 1.23.3
+    kaniko-version: 0.17.1
+    kustomize-version: 4.1.2
+    kubernetes-api-version: 0.23.8
+    operator-fwk-api-version: 0.13.0
+    knative-api-version: 0.33.0
+    service-binding-op-version: 1.3.1
+    prometheus-op-version: 0.50.0
