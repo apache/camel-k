@@ -27,7 +27,6 @@ nav:
 asciidoc:
   attributes:
     requires: "'util=camel-website-util,ck=xref:js/ck.js'"
-    lts: LTS
     prerelease: false
     camel-kamelets-version: 0.8.1 # Makefile KAMELET_CATALOG_REPO_BRANCH
     camel-kamelets-docs-version: 0.8.x # Makefile KAMELET_CATALOG_REPO_BRANCH
