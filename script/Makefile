@@ -26,7 +26,6 @@ LAST_RELEASED_VERSION ?= 1.11.0
 RUNTIME_VERSION := 1.17.0-SNAPSHOT
 BUILDAH_VERSION := 1.23.3
 KANIKO_VERSION := 0.17.1
-INSTALL_DEFAULT_KAMELETS ?= true
 CONTROLLER_GEN_VERSION := v0.6.1
 CODEGEN_VERSION := v0.23.5
 OPERATOR_SDK_VERSION := v1.16.0
@@ -80,13 +79,12 @@ OPM := opm
 
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
-
 STAGING_RUNTIME_REPO :=
 
-# Define here the repo containing the default Kamelet catalog (if any)
+# Kamelets options
+INSTALL_DEFAULT_KAMELETS ?= true
 KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
-# Optional branch for the default Kamelet catalog (change this to a tag before release)
-KAMELET_CATALOG_REPO_BRANCH := v0.10.0
+KAMELET_CATALOG_REPO_TAG := main
 
 # When performing integration tests, it is not necessary to always execute build, especially
 # in e2e tests when lots of tests are being executed sequentially & the build has already taken place.
@@ -148,6 +146,7 @@ bump-replace:
 	@sed -i 's/^VERSION ?= .*$//VERSION ?= $(VERSION)/' ./script/Makefile
 	@sed -i 's/^LAST_RELEASED_VERSION ?= .*$//LAST_RELEASED_VERSION ?= $(LAST_RELEASED_VERSION)/' ./script/Makefile
 	@sed -i 's/^STAGING_RUNTIME_REPO :=.*$//STAGING_RUNTIME_REPO :=/' ./script/Makefile
+	@sed -i 's/^KAMELET_CATALOG_REPO_TAG :=.*$//KAMELET_CATALOG_REPO_TAG := main/' ./script/Makefile
 
 bump: bump-replace codegen bundle
 	./script/bump_actions.sh $(LAST_RELEASED_VERSION)
@@ -335,12 +334,12 @@ build-resources:
 bundle-kamelets:
 	@echo "Preparing Kamelets bundle resource..."
 ifneq (,$(findstring release,$(MAKECMDGOALS)))
-ifneq (,$(findstring $(KAMELET_CATALOG_REPO_BRANCH), main))
-	@echo "You cannot set KAMELET_CATALOG_REPO_BRANCH=$(KAMELET_CATALOG_REPO_BRANCH) when doing a release"
+ifneq (,$(findstring $(KAMELET_CATALOG_REPO_TAG), main))
+	@echo "You cannot set KAMELET_CATALOG_REPO_TAG=$(KAMELET_CATALOG_REPO_TAG) when doing a release"
 	@exit 1
 endif
 endif
-	./script/bundle_kamelets.sh $(KAMELET_CATALOG_REPO) $(KAMELET_CATALOG_REPO_BRANCH)
+	./script/bundle_kamelets.sh $(KAMELET_CATALOG_REPO) $(KAMELET_CATALOG_REPO_TAG)
 
 build-submodules:
 	./script/build_submodules.sh
