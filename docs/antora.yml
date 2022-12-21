@@ -16,15 +16,13 @@
 #
 
 # Another part of this distributed component is in camel-k-runtime docs
-
 name: camel-k
 title: Camel K
 version: 1.8.x
 nav:
-- modules/ROOT/nav.adoc
-- modules/languages/nav-languages.adoc
-- modules/ROOT/nav-end.adoc
-
+  - modules/ROOT/nav.adoc
+  - modules/languages/nav-languages.adoc
+  - modules/ROOT/nav-end.adoc
 # On release, update this to the appropriate released camel version.
 asciidoc:
   attributes:
@@ -42,4 +40,11 @@ asciidoc:
     quarkus-version: 2.7.0.Final
     graalvm-version: 21.3.0
     graalvm-docs-version: 21.3
-
+    buildah-version: 1.14.0
+    kaniko-version: 0.17.1
+    kustomize-version: 4.1.2
+    kubernetes-api-version: 0.21.4
+    operator-fwk-api-version: 0.3.8
+    knative-api-version: 0.28.0
+    service-binding-op-version: 1.0.0
+    prometheus-op-version: 0.42.1
