@@ -27,13 +27,19 @@ if [ ! -f $CATALOG ]; then
     exit 1
 fi
 
-KAMELETS_VERSION=$(grep '^KAMELET_CATALOG_REPO_BRANCH := ' Makefile | sed 's/^.* \?= //' | sed 's/^.//')
-re="^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)$"
-if ! [[ $KAMELETS_VERSION =~ $re ]]; then
-    echo "❗ argument must match semantic version: $KAMELETS_VERSION"
-    exit 1
+KAMELET_CATALOG_REPO_TAG=$(grep '^KAMELET_CATALOG_REPO_TAG := ' Makefile | sed 's/^.* \?= //')
+KAMELETS_VERSION=$(echo $KAMELET_CATALOG_REPO_TAG | sed 's/^.//')
+if [[ "$KAMELET_CATALOG_REPO_TAG" == "main" ]]; then
+    KAMELETS_VERSION="latest"
+    KAMELETS_DOCS_VERSION="next"
+else
+    re="^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)$"
+    if ! [[ $KAMELETS_VERSION =~ $re ]]; then
+        echo "❗ argument must match semantic version: $KAMELETS_VERSION"
+        exit 1
+    fi
+    KAMELETS_DOCS_VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.x"
 fi
-KAMELETS_DOCS_VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.x"
 BUILDAH_VERSION=$(grep '^BUILDAH_VERSION := ' Makefile | sed 's/^.* \?= //')
 KANIKO_VERSION=$(grep '^KANIKO_VERSION := ' Makefile | sed 's/^.* \?= //')
 KUSTOMIZE_VERSION=$(grep '^KUSTOMIZE_VERSION := ' Makefile | sed 's/^.* \?= //' | sed 's/^.//')

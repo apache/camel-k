@@ -20,7 +20,6 @@ LAST_RELEASED_VERSION ?= 1.10.3
 RUNTIME_VERSION := 1.15.2
 BUILDAH_VERSION := 1.23.3
 KANIKO_VERSION := 0.17.1
-INSTALL_DEFAULT_KAMELETS := true
 CONTROLLER_GEN_VERSION := v0.6.1
 CODEGEN_VERSION := v0.23.5
 OPERATOR_SDK_VERSION := v1.14.0
@@ -77,7 +76,8 @@ STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
 STAGING_RUNTIME_REPO :=
 
-# Define here the repo containing the default Kamelet catalog (if any)
+# Kamelets options
+INSTALL_DEFAULT_KAMELETS ?= true
 KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
 # Optional branch for the default Kamelet catalog (change this to a tag before release)
 KAMELET_CATALOG_REPO_BRANCH := v0.9.3
@@ -141,6 +141,8 @@ bump-replace:
 	@# Bump version and replace with the variables provided by the user
 	@sed -i 's/^VERSION ?= .*$//VERSION ?= $(VERSION)/' ./script/Makefile
 	@sed -i 's/^LAST_RELEASED_VERSION ?= .*$//LAST_RELEASED_VERSION ?= $(LAST_RELEASED_VERSION)/' ./script/Makefile
+	@sed -i 's/^STAGING_RUNTIME_REPO :=.*$//STAGING_RUNTIME_REPO :=/' ./script/Makefile
+	@sed -i 's/^KAMELET_CATALOG_REPO_TAG :=.*$//KAMELET_CATALOG_REPO_TAG := main/' ./script/Makefile
 
 bump: bump-replace codegen bundle
 
@@ -321,12 +323,12 @@ build-resources:
 bundle-kamelets:
 	@echo "Preparing Kamelets bundle resource..."
 ifneq (,$(findstring release,$(MAKECMDGOALS)))
-ifneq (,$(findstring $(KAMELET_CATALOG_REPO_BRANCH), main))
-	@echo "You cannot set KAMELET_CATALOG_REPO_BRANCH=$(KAMELET_CATALOG_REPO_BRANCH) when doing a release"
+ifneq (,$(findstring $(KAMELET_CATALOG_REPO_TAG), main))
+	@echo "You cannot set KAMELET_CATALOG_REPO_TAG=$(KAMELET_CATALOG_REPO_TAG) when doing a release"
 	@exit 1
 endif
 endif
-	./script/bundle_kamelets.sh $(KAMELET_CATALOG_REPO) $(KAMELET_CATALOG_REPO_BRANCH)
+	./script/bundle_kamelets.sh $(KAMELET_CATALOG_REPO) $(KAMELET_CATALOG_REPO_TAG)
 
 build-submodules:
 	./script/build_submodules.sh
