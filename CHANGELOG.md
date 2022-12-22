@@ -9,6 +9,7 @@
 - V 1.11.0 nightly wrong image name [\#3930](https://github.com/apache/camel-k/issues/3930)
 - GraalVM removal from doc [\#3929](https://github.com/apache/camel-k/issues/3929)
 - Use flag/config namespace for existing CLI completion kubectl commands [\#3922](https://github.com/apache/camel-k/issues/3922)
+- Bundle Kamelets from a released version [\#3919](https://github.com/apache/camel-k/issues/3919)
 - Automate the dependencies in doc setting [\#3867](https://github.com/apache/camel-k/issues/3867)
 - Helm - missing parameters [\#3763](https://github.com/apache/camel-k/issues/3763)
 - Kamelet API test rate limit [\#3760](https://github.com/apache/camel-k/issues/3760)
