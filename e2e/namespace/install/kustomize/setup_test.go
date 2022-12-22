@@ -32,7 +32,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestBasicSetup(t *testing.T) {
+func TestSetupBasic(t *testing.T) {
 	makeDir := testutil.MakeTempCopyDir(t, "../../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
@@ -43,10 +43,11 @@ func TestBasicSetup(t *testing.T) {
 	defer Cleanup()
 
 	WithNewTestNamespace(t, func(ns string) {
-		ExecMake(t, Make("setup-cluster", fmt.Sprintf("NAMESPACE=%s", ns)))
+		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
+		ExpectExecSucceed(t, Make("setup-cluster", namespaceArg))
 		Eventually(CRDs()).Should(HaveLen(ExpectedCRDs))
 
-		ExecMake(t, Make("setup", fmt.Sprintf("NAMESPACE=%s", ns)))
+		ExpectExecSucceed(t, Make("setup", namespaceArg))
 
 		kpRoles := ExpectedKubePromoteRoles
 		opRoles := kpRoles + ExpectedOSPromoteRoles
@@ -62,7 +63,7 @@ func TestBasicSetup(t *testing.T) {
 
 }
 
-func TestGlobalSetup(t *testing.T) {
+func TestSetupGlobal(t *testing.T) {
 	makeDir := testutil.MakeTempCopyDir(t, "../../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
@@ -73,10 +74,11 @@ func TestGlobalSetup(t *testing.T) {
 	defer Cleanup()
 
 	WithNewTestNamespace(t, func(ns string) {
-		ExecMake(t, Make("setup-cluster", fmt.Sprintf("NAMESPACE=%s", ns)))
+		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
+		ExpectExecSucceed(t, Make("setup-cluster", namespaceArg))
 		Eventually(CRDs()).Should(HaveLen(ExpectedCRDs))
 
-		ExecMake(t, Make("setup", "GLOBAL=true", fmt.Sprintf("NAMESPACE=%s", ns)))
+		ExpectExecSucceed(t, Make("setup", "GLOBAL=true", namespaceArg))
 
 		Eventually(Role(ns)).Should(HaveLen(0))
 
