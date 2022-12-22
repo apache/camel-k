@@ -318,7 +318,7 @@ ifeq ($(MONITORING), true)
 else
 	@$(call add-remove-operator-monitoring,$@,remove)
 endif
-# Set the namespace in the setup kustomization yaml
+# Set the namespace in the operator kustomization yaml
 	@$(call set-kustomize-namespace,$@)
 # Set the image reference of the kustomization
 	@$(call set-kustomize-image,$@)
@@ -391,7 +391,7 @@ endif
 platform: have-platform kustomize kubectl
 # Cannot be a dependency as PLATFORM could contain 'ERROR: '
 	@$(MAKE) .platform-$(PLATFORM)-patch
-# Set the namespace in the setup kustomization yaml
+# Set the namespace in the platform kustomization yaml
 	@$(call set-kustomize-namespace,$@)
 ifeq ($(DRY_RUN), false)
 	@$(KUSTOMIZE) build $(KOPTIONS) $@ | kubectl apply -f -
@@ -414,7 +414,7 @@ endif
 #
 #---
 example: kubectl
-# Set the namespace in the setup kustomization yaml
+# Set the namespace in the example kustomization yaml
 	@$(call set-kustomize-namespace,$@)
 ifeq ($(DRY_RUN), false)
 	@$(KUSTOMIZE) build $(KOPTIONS) $@ | kubectl apply -f -
@@ -433,11 +433,19 @@ endif
 #=== Cluster-admin privileges are required.
 #
 #* PARAMETERS:
+#** NAMESPACE:     Set the namespace to uninstall the resources from
 #** UNINSTALL_ALL: Uninstall all Camel K resources including crds and cluster roles installed by setup-cluster [true|false]
 #** DRY_RUN:       Print the resources to be applied instead of applying them [true|false]
 #
 #---
 uninstall: kubectl
+# Set the namespace in the all target kustomization yaml
+	@$(call set-kustomize-namespace, platform)
+	@$(call set-kustomize-namespace, operator)
+	@$(call set-kustomize-namespace, setup)
+ifeq ($(UNINSTALL_ALL), true)
+	@$(call set-kustomize-namespace, setup-cluster)
+endif
 ifeq ($(DRY_RUN), false)
 	@$(KUSTOMIZE) build $(KOPTIONS) platform | kubectl delete --ignore-not-found=true -f -
 	@$(KUSTOMIZE) build $(KOPTIONS) operator | kubectl delete --ignore-not-found=true -f -

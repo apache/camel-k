@@ -58,7 +58,7 @@ const (
 	ExpectedOSClusterRoles = 1
 )
 
-func ExecMake(t *testing.T, command *exec.Cmd) {
+func ExpectExecSucceed(t *testing.T, command *exec.Cmd) {
 	t.Helper()
 
 	var cmdOut strings.Builder
@@ -74,14 +74,14 @@ func ExecMake(t *testing.T, command *exec.Cmd) {
 	session, err := gexec.Start(command, &cmdOut, &cmdErr)
 	session.Wait()
 	Eventually(session).Should(gexec.Exit(0))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.NotContains(t, strings.ToUpper(cmdErr.String()), "ERROR")
 }
 
 //
-// Expect a make error with an exit code of 1
+// Expect a command error with an exit code of 1
 //
-func ExecMakeError(t *testing.T, command *exec.Cmd) {
+func ExpectExecError(t *testing.T, command *exec.Cmd) {
 	t.Helper()
 
 	var cmdOut strings.Builder
@@ -97,7 +97,7 @@ func ExecMakeError(t *testing.T, command *exec.Cmd) {
 	session, err := gexec.Start(command, &cmdOut, &cmdErr)
 	session.Wait()
 	Eventually(session).ShouldNot(gexec.Exit(0))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Contains(t, strings.ToUpper(cmdErr.String()), "ERROR")
 }
 
