@@ -27,6 +27,8 @@ import (
 	"os"
 	"testing"
 
+	corev1 "k8s.io/api/core/v1"
+
 	. "github.com/apache/camel-k/e2e/support"
 	testutil "github.com/apache/camel-k/e2e/support/util"
 	. "github.com/onsi/gomega"
@@ -50,6 +52,7 @@ func TestUninstallBasic(t *testing.T) {
 		// Skip default kamelets installation for faster test runs
 		ExpectExecSucceed(t, Make("operator", namespaceArg, "INSTALL_DEFAULT_KAMELETS=false"))
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
 		// Do uninstall
 		ExpectExecSucceed(t, Make("uninstall", namespaceArg))
@@ -90,6 +93,7 @@ func TestUninstallGlobal(t *testing.T) {
 		// Skip default kamelets installation for faster test runs
 		ExpectExecSucceed(t, Make("operator", namespaceArg, "GLOBAL=true", "INSTALL_DEFAULT_KAMELETS=false"))
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
 		// Do uninstall
 		ExpectExecSucceed(t, Make("uninstall", namespaceArg))
