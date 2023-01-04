@@ -32,6 +32,7 @@ spec:
     metadata:
       camel-quarkus.version: 2.14.0
       camel.version: 3.19.0
+      quarkus.native-builder-image: quay.io/quarkus/ubi-quarkus-mandrel:22.2.0.0-Final-java11
       quarkus.version: 2.14.0.Final
     dependencies:
     - groupId: org.apache.camel.k
