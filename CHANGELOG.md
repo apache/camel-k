@@ -6,7 +6,9 @@
 
 **Closed issues:**
 
+- Smoke test error TestKameletBindingScale [\#3959](https://github.com/apache/camel-k/issues/3959)
 - Nightly smoke test failure for Kamelets [\#3957](https://github.com/apache/camel-k/issues/3957)
+- E2E - TestKamelCLIRun constantly failing after secrets.GITHUB\_TOKEN applied [\#3952](https://github.com/apache/camel-k/issues/3952)
 - Important increase of size of apache/camel-k Docker image [\#3925](https://github.com/apache/camel-k/issues/3925)
 
 ## [1.11.1-nightly](https://github.com/apache/camel-k/tree/1.11.1-nightly) (2022-12-23)
