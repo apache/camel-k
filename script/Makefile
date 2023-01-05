@@ -506,14 +506,7 @@ get-staging-repo:
 # find or download controller-gen if necessary
 controller-gen:
 ifeq (, $(shell command -v controller-gen 2> /dev/null))
-	@{ \
-	set -e ;\
-	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
-	cd $$CONTROLLER_GEN_TMP_DIR ;\
-	go mod init tmp ;\
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION) ;\
-	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
-	}
+	go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION)
 CONTROLLER_GEN=$(GOBIN)/controller-gen
 else
 CONTROLLER_GEN=$(shell command -v controller-gen 2> /dev/null)
