@@ -1,6 +1,6 @@
 module github.com/apache/camel-k/pkg/client/camel
 
-go 1.17
+go 1.18
 
 require (
 	github.com/apache/camel-k/pkg/apis/camel v0.0.0
