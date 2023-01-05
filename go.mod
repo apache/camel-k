@@ -61,7 +61,7 @@ require (
 	knative.dev/eventing v0.35.3
 	knative.dev/pkg v0.0.0-20221123011842-b78020c16606
 	knative.dev/serving v0.35.3
-	sigs.k8s.io/controller-runtime v0.11.2
+	sigs.k8s.io/controller-runtime v0.13.1
 )
 
 require (
