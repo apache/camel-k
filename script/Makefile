@@ -546,11 +546,24 @@ else
 OPERATOR_SDK=$(shell command -v operator-sdk 2> /dev/null)
 endif
 
-opm:
+opm: detect-os
 ifeq (, $(shell command -v opm 2> /dev/null))
-	@OPM_VERSION=$(OPM_VERSION) ./script/build_install_opm.sh
+	@{ \
+	set -e ;\
+	curl \
+		-L https://github.com/operator-framework/operator-registry/releases/download/$(OPM_VERSION)/$(OS_LOWER)-amd64-opm \
+		-o opm; \
+	chmod +x opm;\
+	mkdir -p $(GOBIN) ;\
+	mv opm $(GOBIN)/ ;\
+	}
 OPM=$(GOBIN)/opm
 else
+	@{ \
+	echo -n "opm already installed: "; \
+  opm version | sed -n 's/.*"v\([^"]*\)".*/\1/p'; \
+	echo " If this is less than $(OPM_VERSION) then please consider moving it aside and allowing the approved version to be downloaded."; \
+	}
 OPM=$(shell command -v opm 2> /dev/null)
 endif
 
