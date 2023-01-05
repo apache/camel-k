@@ -22,6 +22,9 @@ import (
 	"fmt"
 	"strings"
 
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/Masterminds/semver"
@@ -164,7 +167,7 @@ func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[s
 func fromCamelCase(infos map[string]string) map[string]string {
 	textKeys := make(map[string]string)
 	for k, v := range infos {
-		key := strings.Title(strings.Join(camelcase.Split(k), " "))
+		key := cases.Title(language.English).String(strings.Join(camelcase.Split(k), " "))
 		textKeys[key] = v
 	}
 
