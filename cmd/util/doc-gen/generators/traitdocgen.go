@@ -27,7 +27,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	"k8s.io/gengo/args"
 	"k8s.io/gengo/generator"
@@ -35,6 +36,7 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
+	"github.com/apache/camel-k/pkg/util"
 )
 
 const (
@@ -147,7 +149,7 @@ func traitNameFromFile(file string) string {
 	name = strings.ReplaceAll(name, "trait", "")
 	name = strings.ReplaceAll(name, "-", " ")
 	name = strings.Trim(name, " ")
-	name = strings.Title(name)
+	name = cases.Title(language.English).String(name)
 	return name
 }
 
@@ -159,7 +161,7 @@ func writeTitle(traitID string, content *[]string) {
 			return
 		}
 	}
-	res = append([]string{"= " + strings.Title(strings.ReplaceAll(traitID, "-", " ")) + " Trait"}, res...)
+	res = append([]string{"= " + cases.Title(language.English).String(strings.ReplaceAll(traitID, "-", " ")) + " Trait"}, res...)
 	*content = res
 }
 
