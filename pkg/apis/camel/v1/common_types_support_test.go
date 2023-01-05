@@ -47,7 +47,7 @@ func TestTraitsMerge(t *testing.T) {
 			"master": toAddonTrait(t, map[string]interface{}{
 				"resourceName": "test-lock",
 			}),
-			"tracing": toAddonTrait(t, map[string]interface{}{
+			"telemetry": toAddonTrait(t, map[string]interface{}{
 				"enabled": true,
 			}),
 		},
@@ -66,7 +66,7 @@ func TestTraitsMerge(t *testing.T) {
 			Level: "DEBUG",
 		},
 		Addons: map[string]AddonTrait{
-			"tracing": toAddonTrait(t, map[string]interface{}{
+			"telemetry": toAddonTrait(t, map[string]interface{}{
 				"serviceName": "test-integration",
 			}),
 		},
@@ -103,7 +103,7 @@ func TestTraitsMerge(t *testing.T) {
 			"enabled":     true,
 			"serviceName": "test-integration",
 		}),
-		t1.Addons["tracing"])
+		t1.Addons["telemetry"])
 }
 
 func configurationFromMap(t *testing.T, configMap map[string]interface{}) *trait.Configuration {

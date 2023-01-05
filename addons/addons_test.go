@@ -23,7 +23,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/apache/camel-k/addons/master"
-	"github.com/apache/camel-k/addons/tracing"
+	"github.com/apache/camel-k/addons/telemetry"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
 
@@ -44,7 +44,7 @@ func TestTraitConfiguration(t *testing.T) {
 							"labelKey":     "test-label",
 							"labelValue":   "test-value",
 						}),
-						"tracing": trait.ToAddonTrait(t, map[string]interface{}{
+						"telemetry": trait.ToAddonTrait(t, map[string]interface{}{
 							"enabled": true,
 						}),
 					},
@@ -63,10 +63,10 @@ func TestTraitConfiguration(t *testing.T) {
 	assert.Equal(t, "test-label", *master.LabelKey)
 	assert.Equal(t, "test-value", *master.LabelValue)
 
-	require.NotNil(t, c.GetTrait("tracing"))
-	tracing, ok := c.GetTrait("tracing").(*tracing.TestTracingTrait)
+	require.NotNil(t, c.GetTrait("telemetry"))
+	telemetry, ok := c.GetTrait("telemetry").(*telemetry.TestTelemetryTrait)
 	require.True(t, ok)
-	assert.True(t, *tracing.Enabled)
+	assert.True(t, *telemetry.Enabled)
 }
 
 func TestTraitConfigurationFromAnnotations(t *testing.T) {
@@ -78,7 +78,7 @@ func TestTraitConfigurationFromAnnotations(t *testing.T) {
 					"trait.camel.apache.org/master.resource-name": "test-lock",
 					"trait.camel.apache.org/master.label-key":     "test-label",
 					"trait.camel.apache.org/master.label-value":   "test-value",
-					"trait.camel.apache.org/tracing.enabled":      "true",
+					"trait.camel.apache.org/telemetry.enabled":    "true",
 				},
 			},
 			Spec: v1.IntegrationSpec{
@@ -97,8 +97,8 @@ func TestTraitConfigurationFromAnnotations(t *testing.T) {
 	assert.Equal(t, "test-label", *master.LabelKey)
 	assert.Equal(t, "test-value", *master.LabelValue)
 
-	require.NotNil(t, c.GetTrait("tracing"))
-	tracing, ok := c.GetTrait("tracing").(*tracing.TestTracingTrait)
+	require.NotNil(t, c.GetTrait("telemetry"))
+	telemetry, ok := c.GetTrait("telemetry").(*telemetry.TestTelemetryTrait)
 	require.True(t, ok)
-	assert.True(t, *tracing.Enabled)
+	assert.True(t, *telemetry.Enabled)
 }

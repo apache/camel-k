@@ -1,4 +1,4 @@
-// camel-k: language=java trait=tracing.enabled=false trait=affinity.enabled=true property=prop1=false property=foo=bar
+// camel-k: language=java trait=telemetry.enabled=false trait=affinity.enabled=true property=prop1=false property=foo=bar
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
