@@ -53,7 +53,7 @@ func TestToTraitMap(t *testing.T) {
 			},
 		},
 		Addons: map[string]v1.AddonTrait{
-			"tracing": ToAddonTrait(t, map[string]interface{}{
+			"telemetry": ToAddonTrait(t, map[string]interface{}{
 				"enabled": true,
 			}),
 		},
@@ -76,7 +76,7 @@ func TestToTraitMap(t *testing.T) {
 			"enabled": true,
 		},
 		"addons": {
-			"tracing": map[string]interface{}{
+			"telemetry": map[string]interface{}{
 				"enabled": true,
 			},
 		},

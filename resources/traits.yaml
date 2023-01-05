@@ -1289,6 +1289,44 @@ traits:
   - name: services
     type: '[]string'
     description: List of Services in the form [[apigroup/]version:]kind:[namespace/]name
+- name: telemetry
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: 'The Telemetry trait can be used to automatically publish tracing information
+    to an OTLP compatible collector. The trait is able to automatically discover the
+    telemetry OTLP endpoint available in the namespace (supports **Jaerger** in version
+    1.35+). The Telemetry trait is disabled by default. WARNING: The Telemetry trait
+    can''t be enabled at the same time as the Tracing trait.'
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: auto
+    type: bool
+    description: Enables automatic configuration of the trait, including automatic
+      discovery of the telemetry endpoint.
+  - name: service-name
+    type: string
+    description: The name of the service that publishes telemetry data (defaults to
+      the integration name)
+  - name: endpoint
+    type: string
+    description: The target endpoint of the Telemetry service (automatically discovered
+      by default)
+  - name: sampler
+    type: string
+    description: The sampler of the telemetry used for tracing (default "on")
+  - name: sampler-ratio
+    type: string
+    description: The sampler ratio of the telemetry used for tracing
+  - name: sampler-parent-based
+    type: bool
+    description: The sampler of the telemetry used for tracing is parent based (default
+      "true")
 - name: toleration
   platform: false
   profiles:
@@ -1316,10 +1354,13 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The Tracing trait can be used to automatically publish tracing information
-    to an OpenTracing compatible collector. The trait is able to automatically discover
-    the tracing endpoint available in the namespace (supports **Jaeger**). The Tracing
-    trait is disabled by default.
+  description: 'WARNING: The Tracing trait has been **deprecated** in favor of the
+    xref:traits:telemetry.adoc[Telemetry] trait. The Tracing trait can be used to
+    automatically publish tracing information to an OpenTracing compatible collector.
+    The trait is able to automatically discover the tracing endpoint available in
+    the namespace (supports **Jaeger**). The Tracing trait is disabled by default.
+    WARNING: The Tracing trait can''t be enabled at the same time as the Telemetry
+    trait.'
   properties:
   - name: enabled
     type: bool

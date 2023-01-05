@@ -294,6 +294,8 @@ const (
 	CapabilityCircuitBreaker = "circuit-breaker"
 	// CapabilityTracing defines the tracing (opentracing) capability
 	CapabilityTracing = "tracing"
+	// CapabilityTelemetry defines the telemetry (opentelemetry) capability
+	CapabilityTelemetry = "telemetry"
 	// CapabilityMaster defines the master capability
 	CapabilityMaster = "master"
 	// CapabilityResumeKafka defines the resume capability

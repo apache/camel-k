@@ -27,12 +27,16 @@ import (
 	"github.com/apache/camel-k/pkg/util"
 )
 
-// The Tracing trait can be used to automatically publish tracing information to an
-// OpenTracing compatible collector.
+//
+// WARNING: The Tracing trait has been **deprecated** in favor of the xref:traits:telemetry.adoc[Telemetry] trait.
+//
+// The Tracing trait can be used to automatically publish tracing information to an OpenTracing compatible collector.
 //
 // The trait is able to automatically discover the tracing endpoint available in the namespace (supports **Jaeger**).
 //
 // The Tracing trait is disabled by default.
+//
+// WARNING: The Tracing trait can't be enabled at the same time as the Telemetry trait.
 //
 // +camel-k:trait=tracing.
 type Trait struct {
