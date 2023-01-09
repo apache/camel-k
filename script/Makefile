@@ -212,6 +212,7 @@ codegen-tools-install: controller-gen
 	@# We must force the installation to make sure we are using the correct version
 	@# Note: as there is no --version in the tools, we cannot rely on cached local versions
 	@echo "Installing k8s.io/code-generator tools with version $(CODEGEN_VERSION)"
+	go install k8s.io/code-generator/cmd/applyconfiguration-gen@$(CODEGEN_VERSION)
 	go install k8s.io/code-generator/cmd/client-gen@$(CODEGEN_VERSION)
 	go install k8s.io/code-generator/cmd/lister-gen@$(CODEGEN_VERSION)
 	go install k8s.io/code-generator/cmd/informer-gen@$(CODEGEN_VERSION)
