@@ -71,7 +71,7 @@ func GetOrFindLocal(ctx context.Context, c k8sclient.Reader, namespace string) (
 
 func getOrFindForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object, active bool, local bool) (*v1.IntegrationPlatform, error) {
 	if selectedPlatform, ok := o.GetAnnotations()[v1.PlatformSelectorAnnotation]; ok {
-		return get(ctx, c, o.GetNamespace(), selectedPlatform)
+		return Get(ctx, c, o.GetNamespace(), selectedPlatform)
 	}
 
 	if it, ok := o.(*v1.Integration); ok {
@@ -92,7 +92,7 @@ func getOrFind(ctx context.Context, c k8sclient.Reader, namespace string, name s
 // getOrFindAny returns the named platform or any other platform in the local namespace or the global one.
 func getOrFindAny(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool) (*v1.IntegrationPlatform, error) {
 	if name != "" {
-		return get(ctx, c, namespace, name)
+		return Get(ctx, c, namespace, name)
 	}
 
 	return findAny(ctx, c, namespace, active)
@@ -101,14 +101,14 @@ func getOrFindAny(ctx context.Context, c k8sclient.Reader, namespace string, nam
 // getOrFindLocal returns the named platform or any other platform in the local namespace.
 func getOrFindLocal(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool) (*v1.IntegrationPlatform, error) {
 	if name != "" {
-		return get(ctx, c, namespace, name)
+		return Get(ctx, c, namespace, name)
 	}
 
 	return findLocal(ctx, c, namespace, active)
 }
 
 // get returns the given platform in the given namespace or the global one.
-func get(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1.IntegrationPlatform, error) {
+func Get(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1.IntegrationPlatform, error) {
 	p, err := kubernetes.GetIntegrationPlatform(ctx, c, name, namespace)
 	if err != nil && k8serrors.IsNotFound(err) {
 		operatorNamespace := GetOperatorNamespace()
