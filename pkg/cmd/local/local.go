@@ -118,9 +118,9 @@ func getTopLevelDependencies(ctx context.Context, catalog *camel.RuntimeCatalog,
 
 func getTransitiveDependencies(ctx context.Context, catalog *camel.RuntimeCatalog, dependencies []string, repositories []string) ([]string, error) {
 	project := builder.GenerateQuarkusProjectCommon(
-		catalog.GetCamelQuarkusVersion(),
 		defaults.DefaultRuntimeVersion,
 		catalog.GetQuarkusVersion(),
+		make(map[string]string),
 	)
 
 	if err := camel.ManageIntegrationDependencies(&project, dependencies, catalog); err != nil {

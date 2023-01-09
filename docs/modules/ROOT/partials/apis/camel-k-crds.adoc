@@ -2423,6 +2423,12 @@ See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.
 
 |===
 
+[#_camel_apache_org_v1_PluginProperties]
+=== PluginProperties(`map[string]github.com/apache/camel-k/pkg/apis/camel/v1.StringOrProperties` alias)
+
+
+
+
 [#_camel_apache_org_v1_PodSpec]
 === PodSpec
 
@@ -2547,6 +2553,7 @@ the specification
 *Appears on:*
 
 * <<#_camel_apache_org_v1_Server, Server>>
+* <<#_camel_apache_org_v1_StringOrProperties, StringOrProperties>>
 
 
 
@@ -3068,6 +3075,33 @@ SpectrumTask is used to configure Spectrum
 |`PublishTask` +
 *xref:#_camel_apache_org_v1_PublishTask[PublishTask]*
 |(Members of `PublishTask` are embedded into this type.)
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_StringOrProperties]
+=== StringOrProperties
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`-` +
+string
+|
+
+
+
+
+|`properties` +
+*xref:#_camel_apache_org_v1_Properties[Properties]*
+|
 
 
 

@@ -96,4 +96,10 @@ type Server struct {
 	Configuration Properties `xml:"configuration,omitempty" json:"configuration,omitempty"`
 }
 
+type StringOrProperties struct {
+	Value      string     `xml:",chardata" json:"-"`
+	Properties Properties `xml:"properties,omitempty" json:"properties,omitempty"`
+}
+
 type Properties map[string]string
+type PluginProperties map[string]StringOrProperties

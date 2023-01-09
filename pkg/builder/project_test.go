@@ -452,7 +452,7 @@ func TestInjectServersIntoDefaultMavenSettings(t *testing.T) {
 			ID:       "image-repository",
 			Username: "jpoth",
 			Password: "changeit",
-			Configuration: map[string]string{
+			Configuration: v1.Properties{
 				"allowInsecureRegistries": "false",
 			},
 		},
@@ -478,7 +478,7 @@ func TestInjectServersIntoCustomMavenSettings(t *testing.T) {
 			ID:       "image-repository",
 			Username: "jpoth",
 			Password: "changeit",
-			Configuration: map[string]string{
+			Configuration: v1.Properties{
 				"allowInsecureRegistries": "false",
 			},
 		},
