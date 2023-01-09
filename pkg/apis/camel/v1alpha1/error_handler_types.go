@@ -28,17 +28,17 @@ const (
 
 // ErrorHandlerSpec represents an unstructured object for an error handler
 type ErrorHandlerSpec struct {
-	RawMessage `json:",omitempty"`
+	RawMessage `json:",inline,omitempty"`
 }
 
 // ErrorHandlerParameters represent an unstructured object for error handler parameters
 type ErrorHandlerParameters struct {
-	RawMessage `json:",omitempty"`
+	RawMessage `json:",inline,omitempty"`
 }
 
 // BeanProperties represent an unstructured object properties to be set on a bean
 type BeanProperties struct {
-	RawMessage `json:",omitempty"`
+	RawMessage `json:",inline,omitempty"`
 }
 
 // ErrorHandlerType a type of error handler (ie, sink)
