@@ -78,12 +78,9 @@ func loadCamelQuarkusCatalog(ctx *builderContext) error {
 
 func generateQuarkusProject(ctx *builderContext) error {
 	p := GenerateQuarkusProjectCommon(
-		ctx.Build.Runtime.Metadata["camel-quarkus.version"],
 		ctx.Build.Runtime.Version,
-		ctx.Build.Runtime.Metadata["quarkus.version"])
-
-	// Add all the properties from the build configuration
-	p.Properties.AddAll(ctx.Build.Maven.Properties)
+		ctx.Build.Runtime.Metadata["quarkus.version"],
+		ctx.Build.Maven.Properties)
 
 	// Add Maven build extensions
 	p.Build.Extensions = ctx.Build.Maven.Extension
@@ -96,23 +93,14 @@ func generateQuarkusProject(ctx *builderContext) error {
 	return nil
 }
 
-func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion string, quarkusVersion string) maven.Project {
+func GenerateQuarkusProjectCommon(runtimeVersion string, quarkusVersion string, buildTimeProperties map[string]string) maven.Project {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", defaults.Version)
 	p.DependencyManagement = &maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)}
 	p.Dependencies = make([]maven.Dependency, 0)
 	p.Build = &maven.Build{Plugins: make([]maven.Plugin, 0)}
 
-	// camel-quarkus does route discovery at startup, but we don't want
-	// this to happen as routes are loaded at runtime and looking for
-	// routes at build time may try to load camel-k-runtime routes builder
-	// proxies which in some case may fail.
-	p.Properties["quarkus.camel.routes-discovery.enabled"] = "false"
-
-	// disable quarkus banner
-	p.Properties["quarkus.banner.enabled"] = "false"
-
 	// set fast-jar packaging by default, since it gives some startup time improvements
-	p.Properties["quarkus.package.type"] = "fast-jar"
+	p.Properties.Add("quarkus.package.type", "fast-jar")
 
 	// DependencyManagement
 	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies,
@@ -125,6 +113,34 @@ func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion str
 		},
 	)
 
+	// Add all the properties from the build configuration
+	p.Properties.AddAll(buildTimeProperties)
+
+	// Quarkus build time properties
+	buildProperties := make(map[string]string)
+
+	// disable quarkus banner
+	buildProperties["quarkus.banner.enabled"] = "false"
+
+	// camel-quarkus does route discovery at startup, but we don't want
+	// this to happen as routes are loaded at runtime and looking for
+	// routes at build time may try to load camel-k-runtime routes builder
+	// proxies which in some case may fail.
+	buildProperties["quarkus.camel.routes-discovery.enabled"] = "false"
+
+	// required for Kamelets utils to resolve data type converters at runtime
+	buildProperties["quarkus.camel.service.discovery.include-patterns"] = "META-INF/services/org/apache/camel/datatype/converter/*"
+
+	// copy all user defined quarkus.camel build time properties to the quarkus-maven-plugin build properties
+	for key, value := range buildTimeProperties {
+		if strings.HasPrefix(key, "quarkus.camel.") {
+			buildProperties[key] = value
+		}
+	}
+
+	configuration := v1.PluginProperties{}
+	configuration.AddProperties("properties", buildProperties)
+
 	// Plugins
 	p.Build.Plugins = append(p.Build.Plugins,
 		maven.Plugin{
@@ -133,9 +149,11 @@ func GenerateQuarkusProjectCommon(camelQuarkusVersion string, runtimeVersion str
 			Version:    quarkusVersion,
 			Executions: []maven.Execution{
 				{
+					ID: "build-integration",
 					Goals: []string{
 						"build",
 					},
+					Configuration: configuration,
 				},
 			},
 		},

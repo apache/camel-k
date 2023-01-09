@@ -213,20 +213,22 @@ func addRegistryMavenDependency(project *maven.Project, dependency string) error
 	if isClasspath {
 		outputDirectory = "src/main/resources"
 	}
+
+	properties := v1.PluginProperties{}
+	properties.Add("outputDirectory", filepath.Join(outputDirectory, filepath.Dir(outputFileRelativePath)))
+	properties.Add("outputFileName", filepath.Base(outputFileRelativePath))
+	properties.Add("groupId", gav.GroupID)
+	properties.Add("artifactId", gav.ArtifactID)
+	properties.Add("version", gav.Version)
+	properties.Add("type", gav.Type)
+
 	exec := maven.Execution{
 		ID:    fmt.Sprint(len(plugin.Executions)),
 		Phase: "validate",
 		Goals: []string{
 			"artifact",
 		},
-		Configuration: map[string]string{
-			"outputDirectory": filepath.Join(outputDirectory, filepath.Dir(outputFileRelativePath)),
-			"outputFileName":  filepath.Base(outputFileRelativePath),
-			"groupId":         gav.GroupID,
-			"artifactId":      gav.ArtifactID,
-			"version":         gav.Version,
-			"type":            gav.Type,
-		},
+		Configuration: properties,
 	}
 	plugin.Executions = append(plugin.Executions, exec)
 

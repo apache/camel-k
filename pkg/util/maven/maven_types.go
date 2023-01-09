@@ -45,10 +45,10 @@ type Plugin struct {
 }
 
 type Execution struct {
-	ID            string        `xml:"id,omitempty"`
-	Phase         string        `xml:"phase,omitempty"`
-	Goals         []string      `xml:"goals>goal,omitempty"`
-	Configuration v1.Properties `xml:"configuration,omitempty"`
+	ID            string              `xml:"id,omitempty"`
+	Phase         string              `xml:"phase,omitempty"`
+	Goals         []string            `xml:"goals>goal,omitempty"`
+	Configuration v1.PluginProperties `xml:"configuration,omitempty"`
 }
 
 // Settings models a Maven settings.
