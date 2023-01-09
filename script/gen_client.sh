@@ -25,11 +25,18 @@ cd $location/../pkg/client/camel
 
 echo "Generating Go client code..."
 
+$(go env GOPATH)/bin/applyconfiguration-gen \
+	--input-dirs=github.com/apache/camel-k/pkg/apis/camel/v1,github.com/apache/camel-k/pkg/apis/camel/v1alpha1 \
+	--go-header-file=../../../script/headers/default.txt \
+	--output-base=. \
+	--output-package=github.com/apache/camel-k/pkg/client/camel/applyconfiguration
+
 $(go env GOPATH)/bin/client-gen \
 	--input=camel/v1,camel/v1alpha1 \
 	--go-header-file=../../../script/headers/default.txt \
 	--clientset-name "versioned"  \
 	--input-base=github.com/apache/camel-k/pkg/apis \
+	--apply-configuration-package=github.com/apache/camel-k/pkg/client/camel/applyconfiguration \
 	--output-base=. \
 	--output-package=github.com/apache/camel-k/pkg/client/camel/clientset
 
