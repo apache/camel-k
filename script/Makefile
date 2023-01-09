@@ -501,7 +501,7 @@ release-kustomize:
 get-staging-repo:
 	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
 
-.PHONY: do-build build build-kamel build-resources dep codegen images images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses generate-deepcopy generate-client generate-doc build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets generate-keda generate-strimzi
+.PHONY: do-build build build-kamel build-resources dep codegen images images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets
 .PHONY: controller-gen kubectl kustomize operator-sdk opm
 
 # find or download controller-gen if necessary
@@ -576,7 +576,7 @@ else
 YQ=$(shell command -v yq 2> /dev/null)
 endif
 
-.PHONY: generate-crd $(BUNDLE_CAMEL_APIS) pre-bundle bundle bundle-build
+.PHONY: $(BUNDLE_CAMEL_APIS) pre-bundle bundle bundle-build
 
 # - Have to copy pkg/apis since it is a module in its own right
 # - The dependency of v1alpha1 api on v1 results in duplication
@@ -626,7 +626,7 @@ pre-bundle:
 		else sed -i '/  version: ${CSV_VERSION}/a \ \ replaces: $(CSV_REPLACES)' $(CSV_PATH); \
 	fi
 
-bundle: set-version generate-crd kustomize operator-sdk pre-bundle $(BUNDLE_CAMEL_APIS)
+bundle: set-version kustomize operator-sdk pre-bundle $(BUNDLE_CAMEL_APIS)
 	@# Display BUNDLE_METADATA_OPTS for debugging
 	$(info BUNDLE_METADATA_OPTS=$(BUNDLE_METADATA_OPTS))
 	@# Sets the operator image to the preferred image:tag
