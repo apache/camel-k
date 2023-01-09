@@ -21,9 +21,12 @@ package v1
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 	"time"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/camel/v1"
 	scheme "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/scheme"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -49,6 +52,8 @@ type IntegrationInterface interface {
 	List(ctx context.Context, opts metav1.ListOptions) (*v1.IntegrationList, error)
 	Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error)
 	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *v1.Integration, err error)
+	Apply(ctx context.Context, integration *camelv1.IntegrationApplyConfiguration, opts metav1.ApplyOptions) (result *v1.Integration, err error)
+	ApplyStatus(ctx context.Context, integration *camelv1.IntegrationApplyConfiguration, opts metav1.ApplyOptions) (result *v1.Integration, err error)
 	GetScale(ctx context.Context, integrationName string, options metav1.GetOptions) (*autoscalingv1.Scale, error)
 	UpdateScale(ctx context.Context, integrationName string, scale *autoscalingv1.Scale, opts metav1.UpdateOptions) (*autoscalingv1.Scale, error)
 
@@ -193,6 +198,62 @@ func (c *integrations) Patch(ctx context.Context, name string, pt types.PatchTyp
 		Name(name).
 		SubResource(subresources...).
 		VersionedParams(&opts, scheme.ParameterCodec).
+		Body(data).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied integration.
+func (c *integrations) Apply(ctx context.Context, integration *camelv1.IntegrationApplyConfiguration, opts metav1.ApplyOptions) (result *v1.Integration, err error) {
+	if integration == nil {
+		return nil, fmt.Errorf("integration provided to Apply must not be nil")
+	}
+	patchOpts := opts.ToPatchOptions()
+	data, err := json.Marshal(integration)
+	if err != nil {
+		return nil, err
+	}
+	name := integration.Name
+	if name == nil {
+		return nil, fmt.Errorf("integration.Name must be provided to Apply")
+	}
+	result = &v1.Integration{}
+	err = c.client.Patch(types.ApplyPatchType).
+		Namespace(c.ns).
+		Resource("integrations").
+		Name(*name).
+		VersionedParams(&patchOpts, scheme.ParameterCodec).
+		Body(data).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *integrations) ApplyStatus(ctx context.Context, integration *camelv1.IntegrationApplyConfiguration, opts metav1.ApplyOptions) (result *v1.Integration, err error) {
+	if integration == nil {
+		return nil, fmt.Errorf("integration provided to Apply must not be nil")
+	}
+	patchOpts := opts.ToPatchOptions()
+	data, err := json.Marshal(integration)
+	if err != nil {
+		return nil, err
+	}
+
+	name := integration.Name
+	if name == nil {
+		return nil, fmt.Errorf("integration.Name must be provided to Apply")
+	}
+
+	result = &v1.Integration{}
+	err = c.client.Patch(types.ApplyPatchType).
+		Namespace(c.ns).
+		Resource("integrations").
+		Name(*name).
+		SubResource("status").
+		VersionedParams(&patchOpts, scheme.ParameterCodec).
 		Body(data).
 		Do(ctx).
 		Into(result)

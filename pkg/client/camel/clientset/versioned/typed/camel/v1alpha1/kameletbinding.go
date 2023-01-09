@@ -21,9 +21,12 @@ package v1alpha1
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 	"time"
 
 	v1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	camelv1alpha1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/camel/v1alpha1"
 	scheme "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/scheme"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -49,6 +52,8 @@ type KameletBindingInterface interface {
 	List(ctx context.Context, opts v1.ListOptions) (*v1alpha1.KameletBindingList, error)
 	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
 	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.KameletBinding, err error)
+	Apply(ctx context.Context, kameletBinding *camelv1alpha1.KameletBindingApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.KameletBinding, err error)
+	ApplyStatus(ctx context.Context, kameletBinding *camelv1alpha1.KameletBindingApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.KameletBinding, err error)
 	GetScale(ctx context.Context, kameletBindingName string, options v1.GetOptions) (*autoscalingv1.Scale, error)
 	UpdateScale(ctx context.Context, kameletBindingName string, scale *autoscalingv1.Scale, opts v1.UpdateOptions) (*autoscalingv1.Scale, error)
 
@@ -193,6 +198,62 @@ func (c *kameletBindings) Patch(ctx context.Context, name string, pt types.Patch
 		Name(name).
 		SubResource(subresources...).
 		VersionedParams(&opts, scheme.ParameterCodec).
+		Body(data).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied kameletBinding.
+func (c *kameletBindings) Apply(ctx context.Context, kameletBinding *camelv1alpha1.KameletBindingApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.KameletBinding, err error) {
+	if kameletBinding == nil {
+		return nil, fmt.Errorf("kameletBinding provided to Apply must not be nil")
+	}
+	patchOpts := opts.ToPatchOptions()
+	data, err := json.Marshal(kameletBinding)
+	if err != nil {
+		return nil, err
+	}
+	name := kameletBinding.Name
+	if name == nil {
+		return nil, fmt.Errorf("kameletBinding.Name must be provided to Apply")
+	}
+	result = &v1alpha1.KameletBinding{}
+	err = c.client.Patch(types.ApplyPatchType).
+		Namespace(c.ns).
+		Resource("kameletbindings").
+		Name(*name).
+		VersionedParams(&patchOpts, scheme.ParameterCodec).
+		Body(data).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *kameletBindings) ApplyStatus(ctx context.Context, kameletBinding *camelv1alpha1.KameletBindingApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.KameletBinding, err error) {
+	if kameletBinding == nil {
+		return nil, fmt.Errorf("kameletBinding provided to Apply must not be nil")
+	}
+	patchOpts := opts.ToPatchOptions()
+	data, err := json.Marshal(kameletBinding)
+	if err != nil {
+		return nil, err
+	}
+
+	name := kameletBinding.Name
+	if name == nil {
+		return nil, fmt.Errorf("kameletBinding.Name must be provided to Apply")
+	}
+
+	result = &v1alpha1.KameletBinding{}
+	err = c.client.Patch(types.ApplyPatchType).
+		Namespace(c.ns).
+		Resource("kameletbindings").
+		Name(*name).
+		SubResource("status").
+		VersionedParams(&patchOpts, scheme.ParameterCodec).
 		Body(data).
 		Do(ctx).
 		Into(result)

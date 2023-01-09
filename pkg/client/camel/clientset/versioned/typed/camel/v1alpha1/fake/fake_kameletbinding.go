@@ -21,8 +21,11 @@ package fake
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 
 	v1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	camelv1alpha1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/camel/v1alpha1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -136,6 +139,51 @@ func (c *FakeKameletBindings) DeleteCollection(ctx context.Context, opts v1.Dele
 func (c *FakeKameletBindings) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.KameletBinding, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(kameletbindingsResource, c.ns, name, pt, data, subresources...), &v1alpha1.KameletBinding{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.KameletBinding), err
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied kameletBinding.
+func (c *FakeKameletBindings) Apply(ctx context.Context, kameletBinding *camelv1alpha1.KameletBindingApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.KameletBinding, err error) {
+	if kameletBinding == nil {
+		return nil, fmt.Errorf("kameletBinding provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(kameletBinding)
+	if err != nil {
+		return nil, err
+	}
+	name := kameletBinding.Name
+	if name == nil {
+		return nil, fmt.Errorf("kameletBinding.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(kameletbindingsResource, c.ns, *name, types.ApplyPatchType, data), &v1alpha1.KameletBinding{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.KameletBinding), err
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *FakeKameletBindings) ApplyStatus(ctx context.Context, kameletBinding *camelv1alpha1.KameletBindingApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.KameletBinding, err error) {
+	if kameletBinding == nil {
+		return nil, fmt.Errorf("kameletBinding provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(kameletBinding)
+	if err != nil {
+		return nil, err
+	}
+	name := kameletBinding.Name
+	if name == nil {
+		return nil, fmt.Errorf("kameletBinding.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(kameletbindingsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1alpha1.KameletBinding{})
 
 	if obj == nil {
 		return nil, err
