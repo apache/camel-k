@@ -57,6 +57,13 @@ runs:
       run: |
         ./.github/actions/kamel-cleanup/clean-operator-groups.sh
 
+    - id: remove-telemetry-resources
+      name: Remove Installed Telemetry Resources
+      shell: bash
+      if: ${{ always() }}
+      run: |
+        ./.github/actions/kamel-cleanup/clean-telemetry-resources.sh
+
     - id: remove-installed-kamel
       name: Remove Installed Kamel
       shell: bash

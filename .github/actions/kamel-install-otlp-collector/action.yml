@@ -1,0 +1,117 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: kamel-install-otlp-collector
+description: 'Install opentelemetry OTLP collector'
+
+
+inputs:
+  otlp-collector-image-name:
+    description: "The OTLP collector image name"
+    required: true
+  otlp-collector-image-version:
+    description: "The OTLP collector image version"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - id: install-otlp-collector
+      name: Install opentelemetry OTLP Collector
+      shell: bash
+      run: |
+        # Create namespace otlp
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: otlp
+        EOF
+
+        # Add collector configuration : basic otlp grpc reciever to logging
+        cat <<EOF | kubectl apply -n otlp -f -
+        kind: ConfigMap
+        apiVersion: v1
+        metadata:
+          name: collector-config
+        data:
+          collector.yaml: |
+            receivers:
+              otlp:
+                protocols: 
+                  grpc:
+            processors:
+              batch:
+            exporters:
+              logging:
+                verbosity: detailed
+            service:
+              pipelines:
+                traces:
+                  receivers: [otlp]
+                  processors: [batch]
+                  exporters: [logging]
+        EOF
+
+        # Deployment for opentelemetry collector
+        cat <<EOF | kubectl apply -n otlp -f -
+        kind: Deployment
+        apiVersion: apps/v1
+        metadata:
+          name: opentelemetrycollector
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app.kubernetes.io/name: opentelemetrycollector
+          template:
+            metadata:
+              labels:
+                app.kubernetes.io/name: opentelemetrycollector
+            spec:
+              containers:
+              - name: otelcol
+                args:
+                - --config=/conf/collector.yaml
+                image: ${{ inputs.otlp-collector-image-name }}:${{ inputs.otlp-collector-image-version }}
+                volumeMounts:
+                - mountPath: /conf
+                  name: collector-config
+              volumes:
+              - configMap:
+                  items:
+                  - key: collector.yaml
+                    path: collector.yaml
+                  name: collector-config
+                name: collector-config
+        EOF
+
+        # Add service with grpc access for opentelemetry collector
+        cat <<EOF | kubectl apply -n otlp -f -
+        kind: Service
+        apiVersion: v1
+        metadata:
+          name: opentelemetrycollector
+        spec:
+          ports:
+          - name: grpc-otlp
+            port: 4317
+            protocol: TCP
+            targetPort: 4317
+          selector:
+            app.kubernetes.io/name: opentelemetrycollector
+          type: ClusterIP
+        EOF
