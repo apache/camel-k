@@ -103,7 +103,7 @@ BeanProperties represent an unstructured object properties to be set on a bean
 
 |`RawMessage` +
 *xref:#_camel_apache_org_v1alpha1_RawMessage[RawMessage]*
-|
+|(Members of `RawMessage` are embedded into this type.)
 
 
 
@@ -257,7 +257,7 @@ ErrorHandlerParameters represent an unstructured object for error handler parame
 
 |`RawMessage` +
 *xref:#_camel_apache_org_v1alpha1_RawMessage[RawMessage]*
-|
+|(Members of `RawMessage` are embedded into this type.)
 
 
 
@@ -308,7 +308,7 @@ ErrorHandlerSpec represents an unstructured object for an error handler
 
 |`RawMessage` +
 *xref:#_camel_apache_org_v1alpha1_RawMessage[RawMessage]*
-|
+|(Members of `RawMessage` are embedded into this type.)
 
 
 
