@@ -25,6 +25,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/apache/camel-k/pkg/platform"
 	platformutil "github.com/apache/camel-k/pkg/platform"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -176,30 +177,30 @@ func (o *gcCmdOptions) printInfo(cmd *cobra.Command) {
 	}
 	for _, kits := range o.KitsToSquash {
 		for _, kit := range kits {
-			fmt.Fprint(cmd.OutOrStdout(), kit.Kit.Name, " in namespace: ", kit.Kit.Namespace, ", ")
+			fmt.Fprint(cmd.OutOrStdout(), fmt.Sprintf("%s in namespace: %s, ", kit.Kit.Name, kit.Kit.Namespace))
 		}
-		fmt.Fprintln(cmd.OutOrStdout(), "will all be squashed into Integration Kit: ", kits[0].Kit.Name, " in namespace: ", kits[0].Kit.Namespace)
+		fmt.Fprintln(cmd.OutOrStdout(), fmt.Sprintf("will all be squashed into Integration Kit: %s in namespace: %s", kits[0].Kit.Name, kits[0].Kit.Namespace))
+	}
+	if len(o.KitsToSquash) != 0 {
+		fmt.Fprintln(cmd.OutOrStdout(), "\nThe following Integrations will updated with a new squashed Image and redeployed:")
+		for _, kits := range o.KitsToSquash {
+			kit := kits[0]
+			integrations := o.UsedImages[kit.Kit.Status.Image]
+			for _, integration := range integrations {
+				fmt.Fprintln(cmd.OutOrStdout(), fmt.Sprintf("%s in namespace: %s", integration.Name, integration.Namespace))
+			}
+		}
 	}
 	if len(o.KitsToDelete) != 0 {
 		fmt.Fprintln(cmd.OutOrStdout(), "\nThe following Integration Kits will be deleted:")
 	}
 	for _, kit := range o.KitsToDelete {
-		fmt.Fprintln(cmd.OutOrStdout(), kit.Kit.Name, " in namespace:", kit.Kit.Namespace)
+		fmt.Fprintln(cmd.OutOrStdout(), fmt.Sprintf("%s in namespace: %s", kit.Kit.Name, kit.Kit.Namespace))
 	}
 	if len(o.KitsToDelete) != 0 && o.RemoveImages {
 		fmt.Fprintln(cmd.OutOrStdout(), "\nThe following Images will be deleted from the Image Registry:")
 		for _, kit := range o.KitsToDelete {
 			fmt.Fprintln(cmd.OutOrStdout(), kit.Kit.Status.Image)
-		}
-	}
-	if len(o.KitsToSquash) != 0 {
-		fmt.Fprintln(cmd.OutOrStdout(), "\nThe following Integrations will updated with a new squashed image and redeployed:")
-		for _, kits := range o.KitsToSquash {
-			kit := kits[0]
-			integrations := o.UsedImages[kit.Kit.Status.Image]
-			for _, integration := range integrations {
-				fmt.Fprintln(cmd.OutOrStdout(), integration.Name, " in namespace:", integration.Namespace)
-			}
 		}
 	}
 }
@@ -469,11 +470,16 @@ func (o *gcCmdOptions) getTag(c client.Client, kit *v1.IntegrationKit, cache map
 }
 
 func (o *gcCmdOptions) getPlatformOptions(c client.Client, kit *v1.IntegrationKit, cache map[string][]name.Option) ([]name.Option, error) {
-	options := cache[kit.ObjectMeta.Namespace+"/"+kit.Status.Platform]
+	platformName := kit.Status.Platform
+	if platformName == "" {
+		platformName = platform.DefaultPlatformName
+	}
+	key := fmt.Sprintf("%s/%s", kit.ObjectMeta.Namespace, platformName)
+	options := cache[key]
 	if options != nil {
 		return options, nil
 	}
-	platform, err := platformutil.Get(o.Context, c, kit.ObjectMeta.Namespace, kit.Status.Platform)
+	platform, err := platformutil.Get(o.Context, c, kit.ObjectMeta.Namespace, platformName)
 	if err != nil {
 		return nil, err
 	}
@@ -481,7 +487,7 @@ func (o *gcCmdOptions) getPlatformOptions(c client.Client, kit *v1.IntegrationKi
 	if platform.Status.Build.Registry.Insecure {
 		options = append(options, name.Insecure)
 	}
-	cache[kit.ObjectMeta.Namespace+"/"+kit.Status.Platform] = options
+	cache[key] = options
 	return options, nil
 }
 

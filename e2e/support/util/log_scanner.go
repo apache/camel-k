@@ -30,17 +30,25 @@ import (
 
 // LogScanner can attach to a stream and check if a value is printed
 type LogScanner struct {
-	in     io.Reader
-	ctx    context.Context
-	values map[string]bool
+	in         io.Reader
+	ctx        context.Context
+	values     map[string]bool
+	exactMatch bool
+	done       bool
 }
 
 // NewLogScanner --
 func NewLogScanner(ctx context.Context, in io.Reader, values ...string) *LogScanner {
+	return NewStrictLogScanner(ctx, in, false, values...)
+}
+
+// NewStrictLogScanner --
+func NewStrictLogScanner(ctx context.Context, in io.Reader, strict bool, values ...string) *LogScanner {
 	scanner := LogScanner{
-		ctx:    ctx,
-		in:     in,
-		values: make(map[string]bool),
+		ctx:        ctx,
+		in:         in,
+		values:     make(map[string]bool),
+		exactMatch: strict,
 	}
 	for _, v := range values {
 		scanner.values[v] = false
@@ -57,11 +65,18 @@ func (s *LogScanner) startScan() {
 		}
 		text := scanner.Text()
 		fmt.Println(text)
+		found := false
 		for k := range s.values {
 			if strings.Contains(text, k) {
 				fmt.Printf("LogScanner - Found match for: %s\n", k)
 				s.values[k] = true
+				found = true
+				break
 			}
+		}
+		if text != "" && !found && s.exactMatch {
+			fmt.Printf("LogScanner - Did not find match for: %s\n", text)
+			s.exactMatch = false
 		}
 	}
 }
@@ -76,4 +91,15 @@ func (s *LogScanner) IsFound(value string) func() bool {
 // Contains returns if the string has been found in the logs
 func (s *LogScanner) Contains(value string) bool {
 	return s.values[value]
+}
+
+// ExactMatch returns every scan was a match ignoring empty strings
+func (s *LogScanner) ExactMatch() func() bool {
+	return func() bool {
+		return s.done && s.exactMatch
+	}
+}
+
+func (s *LogScanner) Done() {
+	s.done = true
 }
