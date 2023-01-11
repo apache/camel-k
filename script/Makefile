@@ -289,6 +289,10 @@ test-service-binding: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 90m -v ./e2e/global/service-binding -tags=integration $(TEST_SERVICE_RUN) -json 2>&1 | gotestfmt
 
+test-telemetry: do-build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	go test -timeout 90m -v ./e2e/global/telemetry -tags=integration $(TEST_TELEMETRY_RUN) -json 2>&1 | gotestfmt
+
 test-local: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	RUNTIME_VERSION="$(RUNTIME_VERSION)" \

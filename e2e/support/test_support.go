@@ -445,6 +445,17 @@ func IntegrationLogs(ns, name string) func() string {
 	}
 }
 
+// Retrieve the Logs from the Pod defined by its name in the given namespace ns. The number of lines numLines from the end of the logs to show.
+func TailedLogs(ns, name string, numLines int64) func() string {
+	return func() string {
+		options := corev1.PodLogOptions{
+			TailLines: pointer.Int64(numLines),
+		}
+
+		return Logs(ns, name, options)()
+	}
+}
+
 func Logs(ns, podName string, options corev1.PodLogOptions) func() string {
 	return func() string {
 		byteReader, err := TestClient().CoreV1().Pods(ns).GetLogs(podName, &options).Stream(TestContext)
@@ -1676,6 +1687,29 @@ func OperatorPod(ns string) func() *corev1.Pod {
 			return nil
 		}
 		return &lst.Items[0]
+	}
+}
+
+// Find one Pod filtered by namespace ns and label app.kubernetes.io/name value appName.
+func Pod(ns string, appName string) func() (*corev1.Pod, error) {
+	return func() (*corev1.Pod, error) {
+		lst := corev1.PodList{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Pod",
+				APIVersion: v1.SchemeGroupVersion.String(),
+			},
+		}
+		if err := TestClient().List(TestContext, &lst,
+			ctrl.InNamespace(ns),
+			ctrl.MatchingLabels{
+				"app.kubernetes.io/name": appName,
+			}); err != nil {
+			return nil, err
+		}
+		if len(lst.Items) == 0 {
+			return nil, nil
+		}
+		return &lst.Items[0], nil
 	}
 }
 
