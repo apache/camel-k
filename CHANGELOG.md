@@ -10,6 +10,7 @@
 - Nightly smoke test failure for Kamelets [\#3957](https://github.com/apache/camel-k/issues/3957)
 - E2E - TestKamelCLIRun constantly failing after secrets.GITHUB\_TOKEN applied [\#3952](https://github.com/apache/camel-k/issues/3952)
 - Important increase of size of apache/camel-k Docker image [\#3925](https://github.com/apache/camel-k/issues/3925)
+- `kamel uninstall` doesn't uninstall IntegrationPlatform [\#3916](https://github.com/apache/camel-k/issues/3916)
 - Kamelet http-sink not working [\#3896](https://github.com/apache/camel-k/issues/3896)
 - Add data type converter factory finder discovery in camel-quarkus [\#3844](https://github.com/apache/camel-k/issues/3844)
 - Upgrade to Go 1.18.x [\#3807](https://github.com/apache/camel-k/issues/3807)
