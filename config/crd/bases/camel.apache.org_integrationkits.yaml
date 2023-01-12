@@ -201,6 +201,10 @@ spec:
                         items:
                           type: string
                         type: array
+                      strategy:
+                        description: The strategy to use, either `pod` or `routine`
+                          (default routine)
+                        type: string
                       verbose:
                         description: Enable verbose logging on build components that
                           support it (e.g. Kaniko build pod).

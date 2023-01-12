@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/pkg/errors"
 
@@ -103,6 +104,20 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 				Duration: 10 * time.Minute,
 			}
 		}
+
+		buildStrategy := env.Platform.Status.Build.BuildStrategy
+		if env.BuildStrategy != "" {
+			buildStrategy = env.BuildStrategy
+
+			if buildStrategy == v1.BuildStrategyPod {
+				// We must ensure the expected service account is available or create it
+				err = platform.CreateBuilderServiceAccount(env.Ctx, env.Client, env.Platform)
+				if err != nil {
+					return nil, errors.Wrap(err, "Error while creating Camel K Builder service account")
+				}
+			}
+		}
+
 		build = &v1.Build{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1.SchemeGroupVersion.String(),
@@ -115,7 +130,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 				Annotations: annotations,
 			},
 			Spec: v1.BuildSpec{
-				Strategy: env.Platform.Status.Build.BuildStrategy,
+				Strategy: buildStrategy,
 				Tasks:    env.BuildTasks,
 				Timeout:  timeout,
 			},

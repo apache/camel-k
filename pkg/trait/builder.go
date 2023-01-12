@@ -149,6 +149,17 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}})
 	}
 
+	if t.Strategy != "" {
+		t.L.Infof("User defined build strategy %s", t.Strategy)
+		if t.Strategy == string(v1.BuildStrategyPod) {
+			e.BuildStrategy = v1.BuildStrategyPod
+		} else if t.Strategy == string(v1.BuildStrategyRoutine) {
+			e.BuildStrategy = v1.BuildStrategyRoutine
+		} else {
+			return fmt.Errorf("Must specify either pod or routine build strategy, unknown %s", t.Strategy)
+		}
+	}
+
 	return nil
 }
 
