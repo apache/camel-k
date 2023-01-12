@@ -147,6 +147,13 @@ func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *quarkusTrait) Apply(e *Environment) error {
+	if t.hasKitNativeType(e) {
+		// Force the build to run in a separate Pod
+		t.L.Info("Quarkus Native requires a build pod strategy")
+		e.BuildStrategy = v1.BuildStrategyPod
+		// TODO we may provide a set of sensible resource default values for the Pod spun off
+	}
+
 	if e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) {
 		t.applyWhileBuildingKit(e)
 
@@ -345,6 +352,15 @@ func (t *quarkusTrait) isNativeKit(e *Environment) (bool, error) {
 	default:
 		return false, fmt.Errorf("kit %q has more than one package type", e.IntegrationKit.Name)
 	}
+}
+
+func (t *quarkusTrait) hasKitNativeType(e *Environment) bool {
+	for _, v := range t.PackageTypes {
+		if v == traitv1.NativePackageType {
+			return true
+		}
+	}
+	return false
 }
 
 func (t *quarkusTrait) applyWhenKitReady(e *Environment) error {
