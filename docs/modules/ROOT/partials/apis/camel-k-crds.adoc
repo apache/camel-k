@@ -3772,7 +3772,7 @@ integration pod(s) should not be co-located with.
 * <<#_camel_apache_org_v1_IntegrationKitTraits, IntegrationKitTraits>>
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
-The builder trait is internally used to determine the best strategy to
+BuilderTrait is internally used to determine the best strategy to
 build and configure IntegrationKits.
 
 
@@ -3801,6 +3801,13 @@ Enable verbose logging on build components that support it (e.g. Kaniko build po
 
 
 A list of properties to be provided to the build task
+
+|`strategy` +
+string
+|
+
+
+The strategy to use, either `pod` or `routine` (default routine)
 
 
 |===

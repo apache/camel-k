@@ -195,8 +195,8 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: The builder trait is internally used to determine the best strategy
-    to build and configure IntegrationKits.
+  description: BuilderTrait is internally used to determine the best strategy to build
+    and configure IntegrationKits.
   properties:
   - name: enabled
     type: bool
@@ -209,6 +209,9 @@ traits:
   - name: properties
     type: '[]string'
     description: A list of properties to be provided to the build task
+  - name: strategy
+    type: string
+    description: The strategy to use, either `pod` or `routine` (default routine)
 - name: camel
   platform: true
   profiles:
