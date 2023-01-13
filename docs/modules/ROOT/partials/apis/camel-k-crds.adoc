@@ -1191,6 +1191,83 @@ Flow is an unstructured object representing a Camel Flow in YAML/JSON DSL
 
 |===
 
+[#_camel_apache_org_v1_HealthCheck]
+=== HealthCheck
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`status` +
+*xref:#_camel_apache_org_v1_HealthCheckStatus[HealthCheckStatus]*
+|
+
+
+
+
+|`checks` +
+*xref:#_camel_apache_org_v1_HealthCheckResponse[[\]HealthCheckResponse]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_HealthCheckResponse]
+=== HealthCheckResponse
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_HealthCheck, HealthCheck>>
+* <<#_camel_apache_org_v1_PodCondition, PodCondition>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`name` +
+string
+|
+
+
+
+
+|`status` +
+*xref:#_camel_apache_org_v1_HealthCheckStatus[HealthCheckStatus]*
+|
+
+
+
+
+|`data` +
+*xref:#_camel_apache_org_v1_RawMessage[RawMessage]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_HealthCheckStatus]
+=== HealthCheckStatus(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_HealthCheck, HealthCheck>>
+* <<#_camel_apache_org_v1_HealthCheckResponse, HealthCheckResponse>>
+
+
+
+
 [#_camel_apache_org_v1_IntegrationCondition]
 === IntegrationCondition
 
@@ -1253,6 +1330,13 @@ string
 
 
 A human-readable message indicating details about the transition.
+
+|`pods` +
+*xref:#_camel_apache_org_v1_PodCondition[[\]PodCondition]*
+|
+
+
+Pods collect health and conditions information from the owned PODs
 
 
 |===
@@ -2429,6 +2513,44 @@ See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.
 
 
 
+[#_camel_apache_org_v1_PodCondition]
+=== PodCondition
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationCondition, IntegrationCondition>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`PodCondition` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podcondition-v1-core[Kubernetes core/v1.PodCondition]*
+|(Members of `PodCondition` are embedded into this type.)
+
+
+
+
+|`name` +
+string
+|
+
+
+
+
+|`health` +
+*xref:#_camel_apache_org_v1_HealthCheckResponse[[\]HealthCheckResponse]*
+|
+
+
+
+
+
+|===
+
 [#_camel_apache_org_v1_PodSpec]
 === PodSpec
 
@@ -2612,6 +2734,7 @@ where to publish the final image
 
 * <<#_camel_apache_org_v1_AddonTrait, AddonTrait>>
 * <<#_camel_apache_org_v1_Flow, Flow>>
+* <<#_camel_apache_org_v1_HealthCheckResponse, HealthCheckResponse>>
 * <<#_camel_apache_org_v1_TraitConfiguration, TraitConfiguration>>
 
 RawMessage is a raw encoded JSON value.

@@ -21,9 +21,9 @@ package v1
 
 import (
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/meta/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
-	v1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
 // CamelCatalogApplyConfiguration represents an declarative configuration of the CamelCatalog type for use

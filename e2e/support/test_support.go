@@ -33,6 +33,7 @@ import (
 	"os"
 	"os/exec"
 	"reflect"
+	"regexp"
 	"runtime/debug"
 	"strings"
 	"testing"
@@ -108,11 +109,9 @@ func setTestLocus(t *testing.T) {
 	testLocus = t
 }
 
-//
 // Only panic the test if absolutely necessary and there is
 // no test locus. In most cases, the test should fail gracefully
 // using the test locus to error out and fail now.
-//
 func failTest(err error) {
 	if testLocus != nil {
 		testLocus.Helper()
@@ -671,6 +670,47 @@ func IntegrationConditionMessage(c *v1.IntegrationCondition) string {
 	return c.Message
 }
 
+func HealthCheckResponse(podRegexp string, healthName string) func(*v1.IntegrationCondition) *v1.HealthCheckResponse {
+	re := regexp.MustCompile(podRegexp)
+
+	return func(c *v1.IntegrationCondition) *v1.HealthCheckResponse {
+		if c == nil {
+			return nil
+		}
+
+		for p := range c.Pods {
+			if re.MatchString(c.Pods[p].Name) {
+				continue
+			}
+
+			for h := range c.Pods[p].Health {
+				if c.Pods[p].Health[h].Name == healthName {
+					return &c.Pods[p].Health[h]
+				}
+			}
+
+		}
+
+		return nil
+	}
+}
+
+func HealthCheckData(r *v1.HealthCheckResponse) (map[string]interface{}, error) {
+	if r == nil {
+		return nil, nil
+	}
+	if r.Data == nil {
+		return nil, nil
+	}
+
+	var data map[string]interface{}
+	if err := json.Unmarshal(r.Data, data); err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
 func IntegrationConditionStatus(ns string, name string, conditionType v1.IntegrationConditionType) func() corev1.ConditionStatus {
 	return func() corev1.ConditionStatus {
 		c := IntegrationCondition(ns, name, conditionType)()
@@ -773,9 +813,7 @@ func ServiceType(ns string, name string) func() corev1.ServiceType {
 	}
 }
 
-//
 // Find the service in the given namespace with the given type
-//
 func ServicesByType(ns string, svcType corev1.ServiceType) func() []corev1.Service {
 	return func() []corev1.Service {
 		svcs := []corev1.Service{}
@@ -1354,9 +1392,7 @@ func CreatePlainTextSecret(ns string, name string, data map[string]string) error
 	return TestClient().Create(TestContext, &sec)
 }
 
-//
 // Finds a secret in the given namespace by name or prefix of name
-//
 func SecretByName(ns string, prefix string) func() *corev1.Secret {
 	return func() *corev1.Secret {
 		secretList, err := TestClient().CoreV1().Secrets(ns).List(TestContext, metav1.ListOptions{})
@@ -2089,6 +2125,10 @@ func asErrorHandlerSpec(source map[string]interface{}) *v1alpha1.ErrorHandlerSpe
 // Deprecated:
 // Use KamelBind func instead
 func asEndpointProperties(props map[string]string) *v1alpha1.EndpointProperties {
+	if props == nil {
+		return &v1alpha1.EndpointProperties{}
+	}
+
 	bytes, err := json.Marshal(props)
 	if err != nil {
 		failTest(err)
@@ -2405,4 +2445,25 @@ func GetOutputStringAsync(cmd *cobra.Command) func() string {
 	return func() string {
 		return buffer.String()
 	}
+}
+
+func CreateLogKamelet(ns string, name string) func() error {
+	flow := map[string]interface{}{
+		"from": map[string]interface{}{
+			"uri": "kamelet:source",
+			"steps": []map[string]interface{}{
+				{
+					"to": "log:{{loggerName}}",
+				},
+			},
+		},
+	}
+
+	props := map[string]v1alpha1.JSONSchemaProp{
+		"loggerName": {
+			Type: "string",
+		},
+	}
+
+	return CreateKamelet(ns, name, flow, props, nil)
 }

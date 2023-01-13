@@ -767,6 +767,13 @@ string
 
 A human readable message indicating details about the transition.
 
+|`pods` +
+*xref:apis/camel-k.adoc#_camel_apache_org_v1_PodCondition[[\]github.com/apache/camel-k/pkg/apis/camel/v1.PodCondition]*
+|
+
+
+Pods collect health and conditions information from the owned PODs
+
 
 |===
 

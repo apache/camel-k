@@ -20,19 +20,19 @@ limitations under the License.
 package v1
 
 import (
-	corev1 "k8s.io/api/core/v1"
+	corev1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/core/v1"
 )
 
 // MavenSpecApplyConfiguration represents an declarative configuration of the MavenSpec type for use
 // with apply.
 type MavenSpecApplyConfiguration struct {
-	LocalRepository  *string                           `json:"localRepository,omitempty"`
-	Properties       map[string]string                 `json:"properties,omitempty"`
-	Settings         *ValueSourceApplyConfiguration    `json:"settings,omitempty"`
-	SettingsSecurity *ValueSourceApplyConfiguration    `json:"settingsSecurity,omitempty"`
-	CASecrets        []corev1.SecretKeySelector        `json:"caSecrets,omitempty"`
-	Extension        []MavenArtifactApplyConfiguration `json:"extension,omitempty"`
-	CLIOptions       []string                          `json:"cliOptions,omitempty"`
+	LocalRepository  *string                                      `json:"localRepository,omitempty"`
+	Properties       map[string]string                            `json:"properties,omitempty"`
+	Settings         *ValueSourceApplyConfiguration               `json:"settings,omitempty"`
+	SettingsSecurity *ValueSourceApplyConfiguration               `json:"settingsSecurity,omitempty"`
+	CASecrets        []corev1.SecretKeySelectorApplyConfiguration `json:"caSecrets,omitempty"`
+	Extension        []MavenArtifactApplyConfiguration            `json:"extension,omitempty"`
+	CLIOptions       []string                                     `json:"cliOptions,omitempty"`
 }
 
 // MavenSpecApplyConfiguration constructs an declarative configuration of the MavenSpec type for use with
@@ -82,9 +82,12 @@ func (b *MavenSpecApplyConfiguration) WithSettingsSecurity(value *ValueSourceApp
 // WithCASecrets adds the given value to the CASecrets field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the CASecrets field.
-func (b *MavenSpecApplyConfiguration) WithCASecrets(values ...corev1.SecretKeySelector) *MavenSpecApplyConfiguration {
+func (b *MavenSpecApplyConfiguration) WithCASecrets(values ...*corev1.SecretKeySelectorApplyConfiguration) *MavenSpecApplyConfiguration {
 	for i := range values {
-		b.CASecrets = append(b.CASecrets, values[i])
+		if values[i] == nil {
+			panic("nil value passed to WithCASecrets")
+		}
+		b.CASecrets = append(b.CASecrets, *values[i])
 	}
 	return b
 }

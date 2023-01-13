@@ -262,6 +262,8 @@ type IntegrationCondition struct {
 	Reason string `json:"reason,omitempty"`
 	// A human-readable message indicating details about the transition.
 	Message string `json:"message,omitempty"`
+	// Pods collect health and conditions information from the owned PODs
+	Pods []PodCondition `json:"pods,omitempty"`
 }
 
 // PodSpecTemplate represent a template used to deploy an Integration `Pod`
@@ -294,4 +296,10 @@ type PodSpec struct {
 	TopologySpreadConstraints []corev1.TopologySpreadConstraint `json:"topologySpreadConstraints,omitempty" patchStrategy:"merge" patchMergeKey:"topologyKey" protobuf:"bytes,33,opt,name=topologySpreadConstraints"`
 	// PodSecurityContext
 	SecurityContext corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,34,opt,name=securityContext"`
+}
+
+type PodCondition struct {
+	corev1.PodCondition `json:",inline" yaml:",inline"`
+	Name                string                `json:"name,omitempty" yaml:"name,omitempty"`
+	Health              []HealthCheckResponse `json:"health,omitempty" yaml:"health,omitempty"`
 }

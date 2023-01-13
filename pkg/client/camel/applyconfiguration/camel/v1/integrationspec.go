@@ -21,23 +21,23 @@ package v1
 
 import (
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	corev1 "k8s.io/api/core/v1"
+	corev1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/core/v1"
 )
 
 // IntegrationSpecApplyConfiguration represents an declarative configuration of the IntegrationSpec type for use
 // with apply.
 type IntegrationSpecApplyConfiguration struct {
-	Replicas           *int32                                `json:"replicas,omitempty"`
-	Sources            []SourceSpecApplyConfiguration        `json:"sources,omitempty"`
-	Flows              []FlowApplyConfiguration              `json:"flows,omitempty"`
-	IntegrationKit     *corev1.ObjectReference               `json:"integrationKit,omitempty"`
-	Dependencies       []string                              `json:"dependencies,omitempty"`
-	Profile            *camelv1.TraitProfile                 `json:"profile,omitempty"`
-	Traits             *TraitsApplyConfiguration             `json:"traits,omitempty"`
-	PodTemplate        *PodSpecTemplateApplyConfiguration    `json:"template,omitempty"`
-	Configuration      []ConfigurationSpecApplyConfiguration `json:"configuration,omitempty"`
-	Repositories       []string                              `json:"repositories,omitempty"`
-	ServiceAccountName *string                               `json:"serviceAccountName,omitempty"`
+	Replicas           *int32                                    `json:"replicas,omitempty"`
+	Sources            []SourceSpecApplyConfiguration            `json:"sources,omitempty"`
+	Flows              []FlowApplyConfiguration                  `json:"flows,omitempty"`
+	IntegrationKit     *corev1.ObjectReferenceApplyConfiguration `json:"integrationKit,omitempty"`
+	Dependencies       []string                                  `json:"dependencies,omitempty"`
+	Profile            *camelv1.TraitProfile                     `json:"profile,omitempty"`
+	Traits             *TraitsApplyConfiguration                 `json:"traits,omitempty"`
+	PodTemplate        *PodSpecTemplateApplyConfiguration        `json:"template,omitempty"`
+	Configuration      []ConfigurationSpecApplyConfiguration     `json:"configuration,omitempty"`
+	Repositories       []string                                  `json:"repositories,omitempty"`
+	ServiceAccountName *string                                   `json:"serviceAccountName,omitempty"`
 }
 
 // IntegrationSpecApplyConfiguration constructs an declarative configuration of the IntegrationSpec type for use with
@@ -83,8 +83,8 @@ func (b *IntegrationSpecApplyConfiguration) WithFlows(values ...*FlowApplyConfig
 // WithIntegrationKit sets the IntegrationKit field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the IntegrationKit field is set to the value of the last call.
-func (b *IntegrationSpecApplyConfiguration) WithIntegrationKit(value corev1.ObjectReference) *IntegrationSpecApplyConfiguration {
-	b.IntegrationKit = &value
+func (b *IntegrationSpecApplyConfiguration) WithIntegrationKit(value *corev1.ObjectReferenceApplyConfiguration) *IntegrationSpecApplyConfiguration {
+	b.IntegrationKit = value
 	return b
 }
 

@@ -28,13 +28,14 @@ import (
 // IntegrationConditionApplyConfiguration represents an declarative configuration of the IntegrationCondition type for use
 // with apply.
 type IntegrationConditionApplyConfiguration struct {
-	Type               *v1.IntegrationConditionType `json:"type,omitempty"`
-	Status             *corev1.ConditionStatus      `json:"status,omitempty"`
-	LastUpdateTime     *metav1.Time                 `json:"lastUpdateTime,omitempty"`
-	LastTransitionTime *metav1.Time                 `json:"lastTransitionTime,omitempty"`
-	FirstTruthyTime    *metav1.Time                 `json:"firstTruthyTime,omitempty"`
-	Reason             *string                      `json:"reason,omitempty"`
-	Message            *string                      `json:"message,omitempty"`
+	Type               *v1.IntegrationConditionType     `json:"type,omitempty"`
+	Status             *corev1.ConditionStatus          `json:"status,omitempty"`
+	LastUpdateTime     *metav1.Time                     `json:"lastUpdateTime,omitempty"`
+	LastTransitionTime *metav1.Time                     `json:"lastTransitionTime,omitempty"`
+	FirstTruthyTime    *metav1.Time                     `json:"firstTruthyTime,omitempty"`
+	Reason             *string                          `json:"reason,omitempty"`
+	Message            *string                          `json:"message,omitempty"`
+	Pods               []PodConditionApplyConfiguration `json:"pods,omitempty"`
 }
 
 // IntegrationConditionApplyConfiguration constructs an declarative configuration of the IntegrationCondition type for use with
@@ -96,5 +97,18 @@ func (b *IntegrationConditionApplyConfiguration) WithReason(value string) *Integ
 // If called multiple times, the Message field is set to the value of the last call.
 func (b *IntegrationConditionApplyConfiguration) WithMessage(value string) *IntegrationConditionApplyConfiguration {
 	b.Message = &value
+	return b
+}
+
+// WithPods adds the given value to the Pods field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, values provided by each call will be appended to the Pods field.
+func (b *IntegrationConditionApplyConfiguration) WithPods(values ...*PodConditionApplyConfiguration) *IntegrationConditionApplyConfiguration {
+	for i := range values {
+		if values[i] == nil {
+			panic("nil value passed to WithPods")
+		}
+		b.Pods = append(b.Pods, *values[i])
+	}
 	return b
 }
