@@ -21,13 +21,13 @@ package v1alpha1
 
 import (
 	camelv1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	v1 "k8s.io/api/core/v1"
+	v1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/core/v1"
 )
 
 // EndpointApplyConfiguration represents an declarative configuration of the Endpoint type for use
 // with apply.
 type EndpointApplyConfiguration struct {
-	Ref        *v1.ObjectReference                                         `json:"ref,omitempty"`
+	Ref        *v1.ObjectReferenceApplyConfiguration                       `json:"ref,omitempty"`
 	URI        *string                                                     `json:"uri,omitempty"`
 	Properties *EndpointPropertiesApplyConfiguration                       `json:"properties,omitempty"`
 	Types      map[camelv1alpha1.EventSlot]EventTypeSpecApplyConfiguration `json:"types,omitempty"`
@@ -42,8 +42,8 @@ func Endpoint() *EndpointApplyConfiguration {
 // WithRef sets the Ref field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Ref field is set to the value of the last call.
-func (b *EndpointApplyConfiguration) WithRef(value v1.ObjectReference) *EndpointApplyConfiguration {
-	b.Ref = &value
+func (b *EndpointApplyConfiguration) WithRef(value *v1.ObjectReferenceApplyConfiguration) *EndpointApplyConfiguration {
+	b.Ref = value
 	return b
 }
 

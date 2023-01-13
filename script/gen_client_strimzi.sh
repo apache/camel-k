@@ -20,7 +20,6 @@ set -e
 location=$(dirname $0)
 rootdir=$location/..
 
-unset GOPATH
 GO111MODULE=on
 
 echo "Generating Go client code for Strimzi addon..."

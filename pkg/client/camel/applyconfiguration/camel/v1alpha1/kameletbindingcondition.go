@@ -21,6 +21,7 @@ package v1alpha1
 
 import (
 	v1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	camelv1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/camel/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -28,12 +29,13 @@ import (
 // KameletBindingConditionApplyConfiguration represents an declarative configuration of the KameletBindingCondition type for use
 // with apply.
 type KameletBindingConditionApplyConfiguration struct {
-	Type               *v1alpha1.KameletBindingConditionType `json:"type,omitempty"`
-	Status             *v1.ConditionStatus                   `json:"status,omitempty"`
-	LastUpdateTime     *metav1.Time                          `json:"lastUpdateTime,omitempty"`
-	LastTransitionTime *metav1.Time                          `json:"lastTransitionTime,omitempty"`
-	Reason             *string                               `json:"reason,omitempty"`
-	Message            *string                               `json:"message,omitempty"`
+	Type               *v1alpha1.KameletBindingConditionType    `json:"type,omitempty"`
+	Status             *v1.ConditionStatus                      `json:"status,omitempty"`
+	LastUpdateTime     *metav1.Time                             `json:"lastUpdateTime,omitempty"`
+	LastTransitionTime *metav1.Time                             `json:"lastTransitionTime,omitempty"`
+	Reason             *string                                  `json:"reason,omitempty"`
+	Message            *string                                  `json:"message,omitempty"`
+	Pods               []camelv1.PodConditionApplyConfiguration `json:"pods,omitempty"`
 }
 
 // KameletBindingConditionApplyConfiguration constructs an declarative configuration of the KameletBindingCondition type for use with
@@ -87,5 +89,18 @@ func (b *KameletBindingConditionApplyConfiguration) WithReason(value string) *Ka
 // If called multiple times, the Message field is set to the value of the last call.
 func (b *KameletBindingConditionApplyConfiguration) WithMessage(value string) *KameletBindingConditionApplyConfiguration {
 	b.Message = &value
+	return b
+}
+
+// WithPods adds the given value to the Pods field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, values provided by each call will be appended to the Pods field.
+func (b *KameletBindingConditionApplyConfiguration) WithPods(values ...*camelv1.PodConditionApplyConfiguration) *KameletBindingConditionApplyConfiguration {
+	for i := range values {
+		if values[i] == nil {
+			panic("nil value passed to WithPods")
+		}
+		b.Pods = append(b.Pods, *values[i])
+	}
 	return b
 }

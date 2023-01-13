@@ -17,7 +17,6 @@
 
 location=$(dirname $0)
 
-unset GOPATH
 GO111MODULE=on
 
 # Entering the client module
@@ -26,7 +25,7 @@ cd $location/../pkg/client/camel
 echo "Generating Go client code..."
 
 $(go env GOPATH)/bin/applyconfiguration-gen \
-	--input-dirs=github.com/apache/camel-k/pkg/apis/camel/v1,github.com/apache/camel-k/pkg/apis/camel/v1alpha1 \
+	--input-dirs=github.com/apache/camel-k/pkg/apis/camel/v1,github.com/apache/camel-k/pkg/apis/camel/v1alpha1,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/api/core/v1 \
 	--go-header-file=../../../script/headers/default.txt \
 	--output-base=. \
 	--output-package=github.com/apache/camel-k/pkg/client/camel/applyconfiguration

@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
-	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -277,7 +276,7 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(
 	if done, err := controller.checkReadyCondition(ctx); done || err != nil {
 		// There may be pods that are not ready but still probable for getting error messages.
 		// Ignore returned error from probing as it's expected when the ctrl obj is not ready.
-		_ = action.probeReadiness(ctx, environment, integration, unreadyPods)
+		_ = action.probeReadiness(ctx, environment, integration, unreadyPods, readyPods)
 		return err
 	}
 	if done := checkPodStatuses(integration, pendingPods, runningPods); done {
@@ -288,7 +287,7 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(
 	if done := controller.updateReadyCondition(readyPods); done {
 		return nil
 	}
-	if err := action.probeReadiness(ctx, environment, integration, unreadyPods); err != nil {
+	if err := action.probeReadiness(ctx, environment, integration, unreadyPods, readyPods); err != nil {
 		return err
 	}
 
@@ -423,9 +422,17 @@ func findIntegrationContainer(integrationContainerName string, spec corev1.PodSp
 // probeReadiness calls the readiness probes of the non-ready Pods directly to retrieve insights from the Camel runtime.
 func (action *monitorAction) probeReadiness(
 	ctx context.Context, environment *trait.Environment, integration *v1.Integration,
-	unreadyPods []corev1.Pod,
+	unreadyPods []corev1.Pod, readyPods []corev1.Pod,
 ) error {
-	var runtimeNotReadyMessages []string
+	readyCondition := v1.IntegrationCondition{
+		Type:   v1.IntegrationConditionReady,
+		Status: corev1.ConditionFalse,
+		Pods:   make([]v1.PodCondition, len(unreadyPods)),
+	}
+
+	runtimeReady := true
+	runtimeFailed := false
+
 	for i := range unreadyPods {
 		pod := &unreadyPods[i]
 		if ready := kubernetes.GetPodCondition(*pod, corev1.PodReady); ready.Reason != "ContainersNotReady" {
@@ -435,45 +442,100 @@ func (action *monitorAction) probeReadiness(
 		if container == nil {
 			return fmt.Errorf("integration container not found in Pod %s/%s", pod.Namespace, pod.Name)
 		}
+
+		readyCondition.Pods[i].Name = pod.Name
+
+		for p := range pod.Status.Conditions {
+			if pod.Status.Conditions[p].Type == corev1.PodReady {
+				readyCondition.Pods[i].PodCondition = pod.Status.Conditions[p]
+				break
+			}
+		}
 		if probe := container.ReadinessProbe; probe != nil && probe.HTTPGet != nil {
 			body, err := proxyGetHTTPProbe(ctx, action.client, probe, pod, container)
+
+			// When invoking the HTTP probe, the kubernetes client exposes a very
+			// specific behavior:
+			//
+			// - if there is no error, that means the pod in not ready just because
+			//   the probe has to be called few time as per configuration, so it means
+			//   it's not ready, but the probe is OK, and the pod could become ready
+			//   at some point
+			// - if the error is Service Unavailable (HTTP 503) then it means the pod
+			//   is not ready and the probe is failing, in this case we can use the
+			//   response to scrape for camel info
+			//
+			// Here an example of a failed probe (from curl):
+			//
+			//   Trying 127.0.0.1:8080...
+			//   TCP_NODELAY set
+			//   Connected to localhost (127.0.0.1) port 8080 (#0)
+			//   GET /q/health/ready HTTP/1.1
+			//   Host: localhost:8080
+			//   User-Agent: curl/7.68.0
+			//   Accept: */*
+			//
+			//   Mark bundle as not supporting multiuse
+			//   HTTP/1.1 503 Service Unavailable
+			//   content-type: application/json; charset=UTF-8
+			//   content-length: 871
+			//
+			//   {
+			//     "status": "DOWN",
+			//     "checks": [ {
+			//       "name": "camel-routes",
+			//       "status": "DOWN",
+			//       "data": {
+			//         "route.id": "route1",
+			//         "route.status": "Stopped",
+			//         "check.kind": "READINESS"
+			//       }
+			//     }]
+			//   }
 			if err == nil {
 				continue
 			}
+
 			if errors.Is(err, context.DeadlineExceeded) {
-				runtimeNotReadyMessages = append(runtimeNotReadyMessages,
-					fmt.Sprintf("readiness probe timed out for Pod %s/%s", pod.Namespace, pod.Name))
+				readyCondition.Pods[i].Message = fmt.Sprintf("readiness probe timed out for Pod %s/%s", pod.Namespace, pod.Name)
+				runtimeReady = false
 				continue
 			}
 			if !k8serrors.IsServiceUnavailable(err) {
-				runtimeNotReadyMessages = append(runtimeNotReadyMessages,
-					fmt.Sprintf("readiness probe failed for Pod %s/%s: %s", pod.Namespace, pod.Name, err.Error()))
+				readyCondition.Pods[i].Message = fmt.Sprintf("readiness probe failed for Pod %s/%s: %s", pod.Namespace, pod.Name, err.Error())
+				runtimeReady = false
 				continue
 			}
+
 			health, err := NewHealthCheck(body)
 			if err != nil {
 				return err
 			}
 			for _, check := range health.Checks {
-				if check.Status == HealthCheckStatusUp {
+				if check.Status == v1.HealthCheckStatusUp {
 					continue
 				}
-				if _, ok := check.Data[HealthCheckErrorMessage]; ok {
-					integration.Status.Phase = v1.IntegrationPhaseError
-				}
-				runtimeNotReadyMessages = append(runtimeNotReadyMessages,
-					fmt.Sprintf("Pod %s runtime is not ready: %s", pod.Name, check.Data))
+
+				runtimeReady = false
+				runtimeFailed = true
+
+				readyCondition.Pods[i].Health = append(readyCondition.Pods[i].Health, check)
 			}
 		}
 	}
-	if len(runtimeNotReadyMessages) > 0 {
-		reason := v1.IntegrationConditionRuntimeNotReadyReason
-		if integration.Status.Phase == v1.IntegrationPhaseError {
-			reason = v1.IntegrationConditionErrorReason
-		}
-		message := fmt.Sprintf("[%s]", strings.Join(runtimeNotReadyMessages, ", "))
-		integration.SetReadyCondition(corev1.ConditionFalse, reason, message)
+
+	if runtimeFailed {
+		integration.Status.Phase = v1.IntegrationPhaseError
+		readyCondition.Reason = v1.IntegrationConditionErrorReason
+		readyCondition.Message = fmt.Sprintf("%d/%d pods are not ready", len(unreadyPods), len(unreadyPods)+len(readyPods))
 	}
+	if !runtimeReady {
+		integration.Status.Phase = v1.IntegrationPhaseError
+		readyCondition.Reason = v1.IntegrationConditionRuntimeNotReadyReason
+		readyCondition.Message = fmt.Sprintf("%d/%d pods are not ready", len(unreadyPods), len(unreadyPods)+len(readyPods))
+	}
+
+	integration.Status.SetConditions(readyCondition)
 
 	return nil
 }

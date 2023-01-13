@@ -120,6 +120,8 @@ type KameletBindingCondition struct {
 	Reason string `json:"reason,omitempty"`
 	// A human readable message indicating details about the transition.
 	Message string `json:"message,omitempty"`
+	// Pods collect health and conditions information from the owned PODs
+	Pods []v1.PodCondition `json:"pods,omitempty"`
 }
 
 // KameletBindingConditionType --

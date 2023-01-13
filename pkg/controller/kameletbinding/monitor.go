@@ -129,12 +129,22 @@ func (action *monitorAction) Handle(ctx context.Context, kameletbinding *v1alpha
 
 	default:
 		target.Status.Phase = v1alpha1.KameletBindingPhaseCreating
-		target.Status.SetCondition(
-			v1alpha1.KameletBindingConditionReady,
-			corev1.ConditionFalse,
-			string(target.Status.Phase),
-			fmt.Sprintf("Integration %q is in %q phase", it.GetName(), target.Status.Phase),
-		)
+
+		c := v1alpha1.KameletBindingCondition{
+			Type:    v1alpha1.KameletBindingConditionReady,
+			Status:  corev1.ConditionFalse,
+			Reason:  string(target.Status.Phase),
+			Message: fmt.Sprintf("Integration %q is in %q phase", it.GetName(), target.Status.Phase),
+		}
+
+		if condition := it.Status.GetCondition(v1.IntegrationConditionReady); condition != nil {
+			if condition.Pods != nil {
+				c.Pods = make([]v1.PodCondition, 0, len(condition.Pods))
+				c.Pods = append(c.Pods, condition.Pods...)
+			}
+		}
+
+		target.Status.SetConditions(c)
 	}
 
 	// Mirror status replicas and selector
@@ -150,12 +160,21 @@ func setKameletBindingReadyCondition(kb *v1alpha1.KameletBinding, it *v1.Integra
 		if message == "" {
 			message = fmt.Sprintf("Integration %q readiness condition is %q", it.GetName(), condition.Status)
 		}
-		kb.Status.SetCondition(
-			v1alpha1.KameletBindingConditionReady,
-			condition.Status,
-			condition.Reason,
-			message,
-		)
+
+		c := v1alpha1.KameletBindingCondition{
+			Type:    v1alpha1.KameletBindingConditionReady,
+			Status:  condition.Status,
+			Reason:  condition.Reason,
+			Message: message,
+		}
+
+		if condition.Pods != nil {
+			c.Pods = make([]v1.PodCondition, 0, len(condition.Pods))
+			c.Pods = append(c.Pods, condition.Pods...)
+		}
+
+		kb.Status.SetConditions(c)
+
 	} else {
 		kb.Status.SetCondition(
 			v1alpha1.KameletBindingConditionReady,
