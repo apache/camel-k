@@ -48,7 +48,13 @@ func (c *Command) Do(ctx context.Context) error {
 		return err
 	}
 
-	mvnCmd := "mvn"
+	// Prepare maven wrapper helps when running the builder as Pod as it makes
+	// the builder container, Maven agnostic
+	if err := c.prepareMavenWrapper(ctx); err != nil {
+		return err
+	}
+
+	mvnCmd := "./mvnw"
 	if c, ok := os.LookupEnv("MAVEN_CMD"); ok {
 		mvnCmd = c
 	}
@@ -233,6 +239,13 @@ func generateProjectStructure(context Context, project Project) error {
 	}
 
 	return nil
+}
+
+// We expect a maven wrapper under /usr/share/maven/mvnw
+func (c *Command) prepareMavenWrapper(ctx context.Context) error {
+	cmd := exec.CommandContext(ctx, "cp", "--recursive", "/usr/share/maven/mvnw", ".")
+	cmd.Dir = c.context.Path
+	return util.RunAndLog(ctx, cmd, mavenLogHandler, mavenLogHandler)
 }
 
 // ParseGAV decodes the provided Maven GAV into the corresponding Dependency.
