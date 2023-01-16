@@ -1135,8 +1135,8 @@ github.com/quasilyte/go-ruleguard/rules v0.0.0-20210428214800-545e0d2e0bf7/go.mo
 github.com/quasilyte/regex/syntax v0.0.0-20200407221936-30656e2c4a95/go.mod h1:rlzQ04UMyJXu/aOvhd8qT+hvDrFpiwqp8MRXDY9szc0=
 github.com/radovskyb/watcher v1.0.7 h1:AYePLih6dpmS32vlHfhCeli8127LzkIgwJGcwwe8tUE=
 github.com/radovskyb/watcher v1.0.7/go.mod h1:78okwvY5wPdzcb1UYnip1pvrZNIVEIh/Cm+ZuvsUYIg=
-github.com/redhat-developer/service-binding-operator v1.3.2 h1:anDClx50q6dgrDMD6CfUUliDAr4TE1fB0ggNPSgH1tA=
-github.com/redhat-developer/service-binding-operator v1.3.2/go.mod h1:JGVTZlbPXu31upvnjppC8zS52m+VXnU+/kNfM6A6xyc=
+github.com/redhat-developer/service-binding-operator v1.3.3 h1:85ks9HjJGtMmXGEMqQDK/nUqWIiFpIcrOiWySvKjUnM=
+github.com/redhat-developer/service-binding-operator v1.3.3/go.mod h1:JGVTZlbPXu31upvnjppC8zS52m+VXnU+/kNfM6A6xyc=
 github.com/rickb777/date v1.13.0 h1:+8AmwLuY1d/rldzdqvqTEg7107bZ8clW37x4nsdG3Hs=
 github.com/rickb777/date v1.13.0/go.mod h1:GZf3LoGnxPWjX+/1TXOuzHefZFDovTyNLHDMd3qH70k=
 github.com/rickb777/plural v1.2.1 h1:UitRAgR70+yHFt26Tmj/F9dU9aV6UfjGXSbO1DcC9/U=
