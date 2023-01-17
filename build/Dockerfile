@@ -36,18 +36,25 @@ ADD build/_kamelets /kamelets
 COPY build/_maven_overlay/ /usr/share/maven/lib/
 ADD build/_maven_overlay/logback.xml /usr/share/maven/conf/
 
-ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=/usr/share/maven/conf/logback.xml"
+ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=${MAVEN_HOME}/conf/logback.xml"
 
 # Prepare the maven wrapper required in the build Pod strategy
 COPY build/mvnw/mvnw.tar ${MVNW_DIR}
 RUN tar -xC ${MVNW_DIR} -f ${MVNW_DIR}mvnw.tar \
     && rm -v ${MVNW_DIR}mvnw.tar \
     && sed -i "s;distributionUrl=.*;distributionUrl=${BASE_URL}/apache-maven-${MAVEN_VERSION}-bin.zip;" ${MVNW_DIR}.mvn/wrapper/maven-wrapper.properties
+# Used by mvnw to download maven dist into it
+ENV MAVEN_USER_HOME="${MAVEN_HOME}"
+# Let's install a default mvnw distribution at build time
+RUN ${MVNW_DIR}/mvnw --version | grep "Maven home:" | sed 's/Maven home: //' >> ${MVNW_DIR}default
+# TODO add maven overlay
 
 RUN chgrp -R 0 /tmp/artifacts/m2 \
     && chmod -R g=u /tmp/artifacts/m2 \
     && chgrp -R 0 /kamelets \
-    && chmod -R g=u /kamelets
+    && chmod -R g=u /kamelets \
+    && chgrp -R 0 ${MAVEN_HOME} \
+    && chmod -R g=u ${MAVEN_HOME}
 
 USER 1000
 
