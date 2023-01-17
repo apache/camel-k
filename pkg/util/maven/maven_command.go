@@ -243,7 +243,7 @@ func generateProjectStructure(context Context, project Project) error {
 
 // We expect a maven wrapper under /usr/share/maven/mvnw
 func (c *Command) prepareMavenWrapper(ctx context.Context) error {
-	cmd := exec.CommandContext(ctx, "cp", "--recursive", "/usr/share/maven/mvnw", ".")
+	cmd := exec.CommandContext(ctx, "cp", "--recursive", "/usr/share/maven/mvnw/.", ".")
 	cmd.Dir = c.context.Path
 	return util.RunAndLog(ctx, cmd, mavenLogHandler, mavenLogHandler)
 }
