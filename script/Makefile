@@ -191,7 +191,7 @@ codegen:
 	@echo "  installDefaultKamelets = $(INSTALL_DEFAULT_KAMELETS)" >> $(VERSIONFILE)
 	@echo ")" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
-	@echo "//GitCommit must be provided during application build" >> $(VERSIONFILE)
+	@echo "// GitCommit must be provided during application build" >> $(VERSIONFILE)
 	@echo "var GitCommit string" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 
