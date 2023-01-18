@@ -67,7 +67,7 @@ indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef
 |Camel K Version
 |Kubernetes API
 |Operator Framework API
-|KNative API
+|Knative API
 |Service Binding Operator
 |Prometheus Operator
 |Buildah

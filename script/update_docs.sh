@@ -95,7 +95,7 @@ PROMETHEUS_OP_VERSION=$(grep '^.*github.com/prometheus-operator/prometheus-opera
 
 echo "Kubernetes API version: $KUBE_API_VERSION"
 echo "Operator Framework API version: $OPERATOR_FWK_API_VERSION"
-echo "KNative API version: $KNATIVE_API_VERSION"
+echo "Knative API version: $KNATIVE_API_VERSION"
 echo "Service Binding Operator version: $SERVICE_BINDING_OP_VERSION"
 echo "Prometheus Operator version: $PROMETHEUS_OP_VERSION"
 
