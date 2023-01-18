@@ -762,6 +762,8 @@ spec:
 <2> Definition of the period parameter (used with the `{\{period}}` placeholder in the route)
 <3> Definition of the lookAhead parameter
 
+TIP: In other scenarios, you might want to refer to non-required parameters in the Kamelet's `spec.template` using the `{{?optionalParam}}` syntax; that might be helpful for those cases where the non-required parameter does not define a default value in the Kamelet's `spec.definition.properties`. For more information, you can refer to the Camel property placeholder syntax in the https://camel.apache.org/manual/using-propertyplaceholder.html#_using_optional_property_placeholders[Camel manual].
+
 === Step 7: add metadata and sugar
 
 We should complete the Kamelet with all mandatory (also optional) options that are described in https://github.com/apache/camel-kamelets[the guidelines for contributing Kamelets].
