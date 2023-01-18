@@ -81,8 +81,7 @@ func TestOperatorIDFiltering(t *testing.T) {
 					RegisterTestingT(t)
 
 					Expect(AssignIntegrationToOperator(ns, "moving", operator2)).To(Succeed())
-					Eventually(IntegrationPhase(ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
-					Expect(Kamel("rebuild", "-n", ns, "moving").Execute()).To(Succeed())
+					Eventually(IntegrationPhase(ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseBuildingKit))
 					Eventually(IntegrationPhase(ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
 					Eventually(IntegrationPodPhase(ns, "moving"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 					Eventually(IntegrationLogs(ns, "moving"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
