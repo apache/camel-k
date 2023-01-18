@@ -19,6 +19,7 @@ package maven
 
 import (
 	"context"
+	"os"
 	"os/exec"
 	"testing"
 
@@ -27,7 +28,12 @@ import (
 )
 
 func TestRunAndLogErrorMvn(t *testing.T) {
-	cmd := exec.CommandContext(context.Background(), "mvn", "package")
+	mavenCmd, ok := os.LookupEnv("MAVEN_CMD")
+	if !ok {
+		mavenCmd = "mvn"
+	}
+
+	cmd := exec.CommandContext(context.Background(), mavenCmd, "package", "-B")
 	err := util.RunAndLog(context.Background(), cmd, mavenLogHandler, mavenLogHandler)
 
 	assert.NotNil(t, err)
