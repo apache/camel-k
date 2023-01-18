@@ -20,7 +20,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.3
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/onsi/gomega v1.22.1
+	github.com/onsi/gomega v1.25.0
 	github.com/openshift/api v3.9.1-0.20190927182313-d4a64ec2cbd8+incompatible
 	github.com/operator-framework/api v0.13.0
 	github.com/pkg/errors v0.9.1
