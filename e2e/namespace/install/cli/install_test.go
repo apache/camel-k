@@ -41,7 +41,6 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/openshift"
 	consolev1 "github.com/openshift/api/console/v1"
-	corev1 "k8s.io/api/core/v1"
 )
 
 func TestBasicInstallation(t *testing.T) {
