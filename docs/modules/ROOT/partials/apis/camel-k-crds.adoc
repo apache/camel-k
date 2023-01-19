@@ -429,6 +429,27 @@ The sequence of Build tasks to be performed as part of the Build execution.
 
 The strategy that should be used to perform the Build.
 
+|`runtimeVersion` +
+string
+|
+
+
+The desired runtime version required eventually. Used to drive the build tooling as well.
+
+|`quarkusToolingImage` +
+string
+|
+
+
+The image containing the tools required by Quarkus builds.
+
+|`builderImage` +
+string
+|
+
+
+The target image builder name
+
 |`timeout` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta[Kubernetes meta/v1.Duration]*
 |

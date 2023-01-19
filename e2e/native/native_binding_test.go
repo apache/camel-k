@@ -57,22 +57,6 @@ func TestNativeBinding(t *testing.T) {
 		}
 		message := "Magicstring!"
 
-		t.Run("warm up before native build testing", func(t *testing.T) {
-			// The following native build test is under tight time constraints, so here it runs
-			// a warm up testing to make sure necessary jars are already downloaded.
-			bindingName := "warm-up-binding"
-			Expect(BindKameletTo(ns, bindingName, map[string]string{},
-				from, to,
-				map[string]string{"message": message}, map[string]string{})()).To(Succeed())
-
-			Eventually(IntegrationPodPhase(ns, bindingName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, bindingName), TestTimeoutShort).Should(ContainSubstring(message))
-
-			// Clean up
-			Expect(Kamel("delete", bindingName, "-n", ns).Execute()).To(Succeed())
-			Expect(DeleteKits(ns)).To(Succeed())
-		})
-
 		t.Run("kamelet binding with native build", func(t *testing.T) {
 			bindingName := "native-binding"
 			Expect(BindKameletTo(ns, bindingName,

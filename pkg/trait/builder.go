@@ -217,3 +217,12 @@ func getImageName(e *Environment) string {
 	}
 	return e.Platform.Status.Build.Registry.Address + "/" + organization + "/camel-k-" + e.IntegrationKit.Name + ":" + e.IntegrationKit.ResourceVersion
 }
+
+// TODO move somewhere else
+func GetBuilderImageName(e *Environment) string {
+	organization := e.Platform.Status.Build.Registry.Organization
+	if organization == "" {
+		organization = e.Platform.Namespace
+	}
+	return e.Platform.Status.Build.Registry.Address + "/" + organization + "/camel-k-builder:" + e.CamelCatalog.GetRuntimeVersion()
+}

@@ -130,9 +130,12 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 				Annotations: annotations,
 			},
 			Spec: v1.BuildSpec{
-				Strategy: buildStrategy,
-				Tasks:    env.BuildTasks,
-				Timeout:  timeout,
+				Strategy:            buildStrategy,
+				RuntimeVersion:      env.CamelCatalog.GetRuntimeVersion(),
+				QuarkusToolingImage: env.CamelCatalog.GetQuarkusToolingImage(),
+				BuilderImage:        trait.GetBuilderImageName(env),
+				Tasks:               env.BuildTasks,
+				Timeout:             timeout,
 			},
 		}
 
