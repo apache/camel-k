@@ -1089,6 +1089,13 @@ func KameletBindingCondition(ns string, name string, conditionType v1alpha1.Kame
 	}
 }
 
+func KameletBindingConditionStatusExtract(c *v1alpha1.KameletBindingCondition) corev1.ConditionStatus {
+	if c == nil {
+		return ""
+	}
+	return c.Status
+}
+
 func KameletBindingConditionReason(c *v1alpha1.KameletBindingCondition) string {
 	if c == nil {
 		return ""
