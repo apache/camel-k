@@ -79,6 +79,16 @@ spec:
           spec:
             description: BuildSpec defines the Build operation to be executed
             properties:
+              builderImage:
+                description: The target image builder name
+                type: string
+              quarkusToolingImage:
+                description: The image containing the tools required by Quarkus builds.
+                type: string
+              runtimeVersion:
+                description: The desired runtime version required eventually. Used
+                  to drive the build tooling as well.
+                type: string
               strategy:
                 description: The strategy that should be used to perform the Build.
                 enum:

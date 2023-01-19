@@ -82,6 +82,11 @@ func (c *CamelCatalogSpec) GetQuarkusVersion() string {
 	return c.Runtime.Metadata["quarkus.version"]
 }
 
+// GetQuarkusToolingImage returns the Quarkus tooling image required to build an application based on this catalog.
+func (c *CamelCatalogSpec) GetQuarkusToolingImage() string {
+	return c.Runtime.Metadata["quarkus.native-builder-image"]
+}
+
 // HasCapability checks if the given capability is present in the catalog.
 func (c *CamelCatalogSpec) HasCapability(capability string) bool {
 	_, ok := c.Runtime.Capabilities[capability]

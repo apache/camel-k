@@ -18,10 +18,13 @@ limitations under the License.
 package build
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -35,8 +38,12 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/log"
+
+	spectrum "github.com/container-tools/spectrum/pkg/builder"
 )
 
 const (
@@ -135,6 +142,12 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.P
 
 	pod.Labels = kubernetes.MergeCamelCreatorLabels(build.Labels, pod.Labels)
 
+	err := addInitRuntimeBuilderTaskToPod(build, pod)
+	if err != nil {
+		log.Error(err, "Could not build builder image")
+		return nil, err
+	}
+
 	for _, task := range build.Spec.Tasks {
 		switch {
 		case task.Builder != nil:
@@ -211,14 +224,9 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 		})
 	}
 
-	operatorImage := platform.OperatorImage
-	if operatorImage == "" {
-		operatorImage = defaults.ImageName + ":" + defaults.Version
-	}
-
 	container := corev1.Container{
 		Name:            taskName,
-		Image:           operatorImage,
+		Image:           build.Spec.BuilderImage,
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Command: []string{
 			"kamel",
@@ -235,6 +243,63 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 	}
 
 	addContainerToPod(build, container, pod)
+}
+
+// This func will take care to dynamically build an image that will contain the tools required
+// by Quarkus for Native build, kamel binary and a maven wrapper required for the build.
+func addInitRuntimeBuilderTaskToPod(build *v1.Build, pod *corev1.Pod) error {
+	// TODO: check if the builder image is already available
+	log.Infof("Making up Camel K builder container %s", build.Spec.BuilderImage)
+
+	newStdR, newStdW, pipeErr := os.Pipe()
+	defer util.CloseQuietly(newStdW)
+
+	if pipeErr != nil {
+		// In the unlikely case of an error, use stdout instead of aborting
+		log.Errorf(pipeErr, "Unable to remap I/O. Spectrum messages will be displayed on the stdout")
+		newStdW = os.Stdout
+	}
+
+	// TODO provide proper configuration as in pkg/builder/spectrum.Do()
+
+	options := spectrum.Options{
+		PullInsecure:    true,
+		PushInsecure:    true,
+		PullConfigDir:   "",
+		PushConfigDir:   "",
+		Base:            build.Spec.QuarkusToolingImage,
+		Target:          build.Spec.BuilderImage,
+		Stdout:          newStdW,
+		Stderr:          newStdW,
+		Recursive:       true,
+		ClearEntrypoint: true,
+		RunAs:           "0",
+	}
+
+	if jobs := runtime.GOMAXPROCS(0); jobs > 1 {
+		options.Jobs = jobs
+	}
+
+	go readSpectrumLogs(newStdR)
+	_, err := spectrum.Build(options,
+		"/usr/local/bin/kamel:/usr/local/bin/",
+		"/usr/share/maven/mvnw/:/usr/share/maven/mvnw/",
+		// required to bring in base artifacts (ie, snapshot ones)
+		"/tmp/artifacts/m2/:/tmp/artifacts/m2/") //nolint
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func readSpectrumLogs(newStdOut io.Reader) {
+	scanner := bufio.NewScanner(newStdOut)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		log.Infof(line)
+	}
 }
 
 func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task *v1.BuildahTask, pod *corev1.Pod) error {
