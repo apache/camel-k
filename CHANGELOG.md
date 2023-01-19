@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- unable to set null-like default for non-required Kamelet property [\#3986](https://github.com/apache/camel-k/issues/3986)
 - Smoke test error TestKameletBindingScale [\#3959](https://github.com/apache/camel-k/issues/3959)
 - Nightly smoke test failure for Kamelets [\#3957](https://github.com/apache/camel-k/issues/3957)
 - E2E - TestKamelCLIRun constantly failing after secrets.GITHUB\_TOKEN applied [\#3952](https://github.com/apache/camel-k/issues/3952)
@@ -14,7 +15,9 @@
 - Kamelet http-sink not working [\#3896](https://github.com/apache/camel-k/issues/3896)
 - Add data type converter factory finder discovery in camel-quarkus [\#3844](https://github.com/apache/camel-k/issues/3844)
 - Upgrade to Go 1.18.x [\#3807](https://github.com/apache/camel-k/issues/3807)
+- e2e testing: refactor to remove deprecated functions [\#3751](https://github.com/apache/camel-k/issues/3751)
 - e2e test TestKamelCLIRun \(Run with http dependency\) consistently failing on OCP4 [\#3708](https://github.com/apache/camel-k/issues/3708)
+- Move tracing from opentracing to opentelemetry [\#3519](https://github.com/apache/camel-k/issues/3519)
 
 ## [1.11.1-nightly](https://github.com/apache/camel-k/tree/1.11.1-nightly) (2022-12-23)
 
