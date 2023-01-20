@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Multi tenancy operator flaky test [\#3988](https://github.com/apache/camel-k/issues/3988)
 - unable to set null-like default for non-required Kamelet property [\#3986](https://github.com/apache/camel-k/issues/3986)
 - Smoke test error TestKameletBindingScale [\#3959](https://github.com/apache/camel-k/issues/3959)
 - Nightly smoke test failure for Kamelets [\#3957](https://github.com/apache/camel-k/issues/3957)
