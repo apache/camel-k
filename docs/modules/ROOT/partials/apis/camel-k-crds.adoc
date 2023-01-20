@@ -429,26 +429,12 @@ The sequence of Build tasks to be performed as part of the Build execution.
 
 The strategy that should be used to perform the Build.
 
-|`runtimeVersion` +
+|`toolImage` +
 string
 |
 
 
-The desired runtime version required eventually. Used to drive the build tooling as well.
-
-|`quarkusToolingImage` +
-string
-|
-
-
-The image containing the tools required by Quarkus builds.
-
-|`builderImage` +
-string
-|
-
-
-The target image builder name
+The container image to be used to run the build.
 
 |`timeout` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta[Kubernetes meta/v1.Duration]*
@@ -818,6 +804,85 @@ Maven Artifact
 
 |===
 
+[#_camel_apache_org_v1_CamelCatalogCondition]
+=== CamelCatalogCondition
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelCatalogStatus, CamelCatalogStatus>>
+
+CamelCatalogCondition describes the state of a resource at a certain point.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+*xref:#_camel_apache_org_v1_CamelCatalogConditionType[CamelCatalogConditionType]*
+|
+
+
+Type of CamelCatalog condition.
+
+|`status` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+|
+
+
+Status of the condition, one of True, False, Unknown.
+
+|`lastUpdateTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+The last time this condition was updated.
+
+|`lastTransitionTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+Last time the condition transitioned from one status to another.
+
+|`reason` +
+string
+|
+
+
+The reason for the condition's last transition.
+
+|`message` +
+string
+|
+
+
+A human-readable message indicating details about the transition.
+
+
+|===
+
+[#_camel_apache_org_v1_CamelCatalogConditionType]
+=== CamelCatalogConditionType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelCatalogCondition, CamelCatalogCondition>>
+
+CamelCatalogConditionType --
+
+
+[#_camel_apache_org_v1_CamelCatalogPhase]
+=== CamelCatalogPhase(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelCatalogStatus, CamelCatalogStatus>>
+
+CamelCatalogPhase --
+
+
 [#_camel_apache_org_v1_CamelCatalogSpec]
 === CamelCatalogSpec
 
@@ -865,6 +930,41 @@ loaders required by this catalog
 
 CamelCatalogStatus defines the observed state of CamelCatalog. As the catalog is a static resource, we expect it to be empty.
 
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`observedGeneration` +
+int64
+|
+
+
+ObservedGeneration is the most recent generation observed for this Kamelet.
+
+|`phase` +
+*xref:#_camel_apache_org_v1_CamelCatalogPhase[CamelCatalogPhase]*
+|
+
+
+Phase --
+
+|`conditions` +
+*xref:#_camel_apache_org_v1_CamelCatalogCondition[[\]CamelCatalogCondition]*
+|
+
+
+Conditions --
+
+|`image` +
+string
+|
+
+
+Image --
+
+
+|===
 
 [#_camel_apache_org_v1_CamelLoader]
 === CamelLoader

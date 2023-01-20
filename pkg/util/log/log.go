@@ -149,6 +149,16 @@ func (l Logger) ForKameletBinding(target *v1alpha1.KameletBinding) Logger {
 	)
 }
 
+// ForCatalog --.
+func (l Logger) ForCatalog(target *v1.CamelCatalog) Logger {
+	return l.WithValues(
+		"api-version", target.APIVersion,
+		"kind", target.Kind,
+		"ns", target.Namespace,
+		"name", target.Name,
+	)
+}
+
 // AsLogger --.
 func (l Logger) AsLogger() logr.Logger {
 	return l.delegate

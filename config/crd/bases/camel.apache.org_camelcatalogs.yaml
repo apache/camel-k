@@ -398,6 +398,51 @@ spec:
             type: object
           status:
             description: the actual state of the catalog
+            properties:
+              conditions:
+                description: Conditions --
+                items:
+                  description: CamelCatalogCondition describes the state of a resource
+                    at a certain point.
+                  properties:
+                    lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: The last time this condition was updated.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human-readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type of CamelCatalog condition.
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              image:
+                description: Image --
+                type: string
+              observedGeneration:
+                description: ObservedGeneration is the most recent generation observed
+                  for this Kamelet.
+                format: int64
+                type: integer
+              phase:
+                description: Phase --
+                type: string
             type: object
         type: object
     served: true

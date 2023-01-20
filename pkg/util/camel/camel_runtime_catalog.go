@@ -77,6 +77,7 @@ func NewRuntimeCatalog(spec v1.CamelCatalogSpec) *RuntimeCatalog {
 // RuntimeCatalog represents the data structure for a runtime catalog.
 type RuntimeCatalog struct {
 	v1.CamelCatalogSpec
+	v1.CamelCatalogStatus
 
 	artifactByScheme     map[string]string
 	artifactByDataFormat map[string]string

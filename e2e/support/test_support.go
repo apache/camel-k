@@ -1602,6 +1602,39 @@ func Platform(ns string) func() *v1.IntegrationPlatform {
 	}
 }
 
+func CamelCatalog(ns string) func() *v1.CamelCatalog {
+	return func() *v1.CamelCatalog {
+		lst := v1.NewCamelCatalogList()
+		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+			failTest(err)
+		}
+		if len(lst.Items) == 0 {
+			return nil
+		}
+		return &lst.Items[0]
+	}
+}
+
+func CamelCatalogPhase(ns string) func() v1.CamelCatalogPhase {
+	return func() v1.CamelCatalogPhase {
+		c := CamelCatalog(ns)()
+		if c == nil {
+			return ""
+		}
+		return c.Status.Phase
+	}
+}
+
+func CamelCatalogImage(ns string) func() string {
+	return func() string {
+		c := CamelCatalog(ns)()
+		if c == nil {
+			return ""
+		}
+		return c.Status.Image
+	}
+}
+
 func DeletePlatform(ns string) func() bool {
 	return func() bool {
 		pl := Platform(ns)()

@@ -31,12 +31,8 @@ type BuildSpec struct {
 	Tasks []Task `json:"tasks,omitempty"`
 	// The strategy that should be used to perform the Build.
 	Strategy BuildStrategy `json:"strategy,omitempty"`
-	// The desired runtime version required eventually. Used to drive the build tooling as well.
-	RuntimeVersion string `json:"runtimeVersion,omitempty"`
-	// The image containing the tools required by Quarkus builds.
-	QuarkusToolingImage string `json:"quarkusToolingImage,omitempty"`
-	// The target image builder name
-	BuilderImage string `json:"builderImage,omitempty"`
+	// The container image to be used to run the build.
+	ToolImage string `json:"toolImage,omitempty"`
 	// Timeout defines the Build maximum execution duration.
 	// The Build deadline is set to the Build start time plus the Timeout duration.
 	// If the Build deadline is exceeded, the Build context is canceled,

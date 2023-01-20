@@ -18,6 +18,7 @@ limitations under the License.
 package v1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -66,7 +67,51 @@ type CamelCatalogSpec struct {
 
 // CamelCatalogStatus defines the observed state of CamelCatalog. As the catalog is a static resource, we expect it to be empty.
 type CamelCatalogStatus struct {
+	// ObservedGeneration is the most recent generation observed for this Kamelet.
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
+	// Phase --
+	Phase CamelCatalogPhase `json:"phase,omitempty"`
+	// Conditions --
+	Conditions []CamelCatalogCondition `json:"conditions,omitempty"`
+	// Image --
+	Image string `json:"image,omitempty"`
 }
+
+// CamelCatalogPhase --
+type CamelCatalogPhase string
+
+const (
+	// CamelCatalogPhaseNone --
+	CamelCatalogPhaseNone CamelCatalogPhase = ""
+	// CamelCatalogPhaseReady --
+	CamelCatalogPhaseReady CamelCatalogPhase = "Ready"
+	// CamelCatalogPhaseError --
+	CamelCatalogPhaseError CamelCatalogPhase = "Error"
+)
+
+// CamelCatalogCondition describes the state of a resource at a certain point.
+type CamelCatalogCondition struct {
+	// Type of CamelCatalog condition.
+	Type CamelCatalogConditionType `json:"type"`
+	// Status of the condition, one of True, False, Unknown.
+	Status corev1.ConditionStatus `json:"status"`
+	// The last time this condition was updated.
+	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
+	// Last time the condition transitioned from one status to another.
+	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
+	// The reason for the condition's last transition.
+	Reason string `json:"reason,omitempty"`
+	// A human-readable message indicating details about the transition.
+	Message string `json:"message,omitempty"`
+}
+
+// CamelCatalogConditionType --
+type CamelCatalogConditionType string
+
+const (
+	// CamelCatalogConditionReady --
+	CamelCatalogConditionReady CamelCatalogConditionType = "Ready"
+)
 
 // CamelScheme represents the scheme used to identify a component in a URI (ie, timer in a timer:xyz endpoint URI)
 type CamelScheme struct {
