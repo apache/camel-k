@@ -65,7 +65,7 @@ func TestErroredTrait(t *testing.T) {
 			Eventually(KameletBindingCondition(ns, name, v1alpha1.KameletBindingConditionReady), TestTimeoutShort).Should(
 				WithTransform(KameletBindingConditionMessage, And(
 					ContainSubstring("error during trait customization"),
-					ContainSubstring("[missing] not found"),
+					ContainSubstring("missing not found"),
 				)))
 			// Integration related
 			Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
