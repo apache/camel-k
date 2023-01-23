@@ -31,7 +31,7 @@ CODEGEN_VERSION := v0.25.2
 OPERATOR_SDK_VERSION := v1.16.0
 KUSTOMIZE_VERSION := v4.5.4
 OPM_VERSION := v1.24.0
-BASE_IMAGE := docker.io/adoptopenjdk/openjdk11:slim
+BASE_IMAGE := docker.io/eclipse-temurin:11
 LOCAL_REPOSITORY := /tmp/artifacts/m2
 IMAGE_NAME ?= docker.io/apache/camel-k
 
