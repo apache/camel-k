@@ -88,4 +88,8 @@ jobs:
         secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
         secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
         secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
+    - name: Deploy to ASF Snapshots Repository
+      working-directory: java
+      run: |
+        ./mvnw ${MAVEN_ARGS} clean deploy -DskipTests -DskipITs --settings .github/asf-deploy-settings.xml
 
