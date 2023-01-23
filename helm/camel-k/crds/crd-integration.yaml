@@ -7393,6 +7393,39 @@ spec:
                         from the owned PODs
                       items:
                         properties:
+                          condition:
+                            description: PodCondition contains details for the current
+                              condition of this pod.
+                            properties:
+                              lastProbeTime:
+                                description: Last time we probed the condition.
+                                format: date-time
+                                type: string
+                              lastTransitionTime:
+                                description: Last time the condition transitioned
+                                  from one status to another.
+                                format: date-time
+                                type: string
+                              message:
+                                description: Human-readable message indicating details
+                                  about last transition.
+                                type: string
+                              reason:
+                                description: Unique, one-word, CamelCase reason for
+                                  the condition's last transition.
+                                type: string
+                              status:
+                                description: 'Status is the status of the condition.
+                                  Can be True, False, Unknown. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions'
+                                type: string
+                              type:
+                                description: 'Type is the type of the condition. More
+                                  info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions'
+                                type: string
+                            required:
+                            - status
+                            - type
+                            type: object
                           health:
                             items:
                               properties:
@@ -7409,36 +7442,10 @@ spec:
                                   type: string
                               type: object
                             type: array
-                          lastProbeTime:
-                            description: Last time we probed the condition.
-                            format: date-time
-                            type: string
-                          lastTransitionTime:
-                            description: Last time the condition transitioned from
-                              one status to another.
-                            format: date-time
-                            type: string
-                          message:
-                            description: Human-readable message indicating details
-                              about last transition.
-                            type: string
                           name:
                             type: string
-                          reason:
-                            description: Unique, one-word, CamelCase reason for the
-                              condition's last transition.
-                            type: string
-                          status:
-                            description: 'Status is the status of the condition. Can
-                              be True, False, Unknown. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions'
-                            type: string
-                          type:
-                            description: 'Type is the type of the condition. More
-                              info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions'
-                            type: string
                         required:
-                        - status
-                        - type
+                        - condition
                         type: object
                       type: array
                     reason:

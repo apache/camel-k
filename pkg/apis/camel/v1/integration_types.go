@@ -299,7 +299,7 @@ type PodSpec struct {
 }
 
 type PodCondition struct {
-	corev1.PodCondition `json:",inline" yaml:",inline"`
-	Name                string                `json:"name,omitempty" yaml:"name,omitempty"`
-	Health              []HealthCheckResponse `json:"health,omitempty" yaml:"health,omitempty"`
+	Name      string                `json:"name,omitempty" yaml:"name,omitempty"`
+	Condition corev1.PodCondition   `json:"condition" yaml:"condition"`
+	Health    []HealthCheckResponse `json:"health,omitempty" yaml:"health,omitempty"`
 }

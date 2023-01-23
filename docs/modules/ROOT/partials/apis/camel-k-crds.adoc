@@ -2527,15 +2527,15 @@ See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.
 |Field
 |Description
 
-|`PodCondition` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podcondition-v1-core[Kubernetes core/v1.PodCondition]*
-|(Members of `PodCondition` are embedded into this type.)
-
-
-
-
 |`name` +
 string
+|
+
+
+
+
+|`condition` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podcondition-v1-core[Kubernetes core/v1.PodCondition]*
 |
 
 

@@ -20,7 +20,7 @@ limitations under the License.
 package v1
 
 import (
-	corev1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/core/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // MavenBuildSpecApplyConfiguration represents an declarative configuration of the MavenBuildSpec type for use
@@ -78,12 +78,9 @@ func (b *MavenBuildSpecApplyConfiguration) WithSettingsSecurity(value *ValueSour
 // WithCASecrets adds the given value to the CASecrets field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the CASecrets field.
-func (b *MavenBuildSpecApplyConfiguration) WithCASecrets(values ...*corev1.SecretKeySelectorApplyConfiguration) *MavenBuildSpecApplyConfiguration {
+func (b *MavenBuildSpecApplyConfiguration) WithCASecrets(values ...corev1.SecretKeySelector) *MavenBuildSpecApplyConfiguration {
 	for i := range values {
-		if values[i] == nil {
-			panic("nil value passed to WithCASecrets")
-		}
-		b.CASecrets = append(b.CASecrets, *values[i])
+		b.CASecrets = append(b.CASecrets, values[i])
 	}
 	return b
 }
