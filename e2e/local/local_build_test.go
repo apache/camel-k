@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"sync"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -55,7 +54,7 @@ func getCamelVersion() string {
 func TestLocalBuild(t *testing.T) {
 	RegisterTestingT(t)
 
-	ctx, cancel := context.WithCancel(TestContext)
+	ctx, cancel := context.WithTimeout(TestContext, TestTimeoutMedium)
 	defer cancel()
 	piper, pipew := io.Pipe()
 	defer pipew.Close()
@@ -71,11 +70,7 @@ func TestLocalBuild(t *testing.T) {
 	msgTagged := "Successfully tagged"
 	logScanner := testutil.NewLogScanner(ctx, piper, msgTagged, image)
 
-	go func() {
-		err := kamelBuild.Execute()
-		assert.NoError(t, err)
-		cancel()
-	}()
+	Expect(kamelBuild.Execute()).To(BeNil())
 
 	Eventually(logScanner.IsFound(msgTagged), TestTimeoutMedium).Should(BeTrue())
 	Eventually(logScanner.IsFound(image), TestTimeoutMedium).Should(BeTrue())
@@ -85,7 +80,7 @@ func TestLocalBuild(t *testing.T) {
 func TestLocalBuildWithTrait(t *testing.T) {
 	RegisterTestingT(t)
 
-	ctx, cancel := context.WithCancel(TestContext)
+	ctx, cancel := context.WithTimeout(TestContext, TestTimeoutMedium)
 	defer cancel()
 	piper, pipew := io.Pipe()
 	defer pipew.Close()
@@ -102,11 +97,7 @@ func TestLocalBuildWithTrait(t *testing.T) {
 	msgTagged := "Successfully tagged"
 	logScanner := testutil.NewLogScanner(ctx, piper, msgWarning, msgTagged, image)
 
-	go func() {
-		err := kamelBuild.Execute()
-		assert.NoError(t, err)
-		cancel()
-	}()
+	Expect(kamelBuild.Execute()).To(BeNil())
 
 	Eventually(logScanner.IsFound(msgWarning), TestTimeoutMedium).Should(BeTrue())
 	Eventually(logScanner.IsFound(msgTagged), TestTimeoutMedium).Should(BeTrue())
@@ -117,7 +108,7 @@ func TestLocalBuildWithTrait(t *testing.T) {
 func TestLocalBuildWithInvalidDependency(t *testing.T) {
 	RegisterTestingT(t)
 
-	ctx, cancel := context.WithCancel(TestContext)
+	ctx, cancel := context.WithTimeout(TestContext, TestTimeoutMedium)
 	defer cancel()
 	piper, pipew := io.Pipe()
 	defer pipew.Close()
@@ -138,25 +129,17 @@ func TestLocalBuildWithInvalidDependency(t *testing.T) {
 	warn3 := "Warning: do not use mvn:org.apache.camel.quarkus:camel-quarkus-netty:2.11.0. Use camel:netty instead"
 	logScanner := testutil.NewLogScanner(ctx, piper, warn1, warn2, warn3)
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		err := kamelBuild.Execute()
-		assert.Error(t, err)
-		cancel()
-	}()
+	Expect(kamelBuild.Execute()).To(Not(BeNil()))
 
 	Eventually(logScanner.IsFound(warn1), TestTimeoutShort).Should(BeTrue())
 	Eventually(logScanner.IsFound(warn2), TestTimeoutShort).Should(BeTrue())
 	Eventually(logScanner.IsFound(warn3), TestTimeoutShort).Should(BeTrue())
-	wg.Wait()
 }
 
 func TestLocalBuildIntegrationDirectory(t *testing.T) {
 	RegisterTestingT(t)
 
-	ctx, cancel := context.WithCancel(TestContext)
+	ctx, cancel := context.WithTimeout(TestContext, TestTimeoutMedium)
 	defer cancel()
 
 	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
@@ -164,10 +147,7 @@ func TestLocalBuildIntegrationDirectory(t *testing.T) {
 
 	kamelBuild := kamelWithContext(ctx, "local", "build", file, "--integration-directory", dir)
 
-	go func() {
-		err := kamelBuild.Execute()
-		assert.NoError(t, err)
-	}()
+	Expect(kamelBuild.Execute()).To(BeNil())
 
 	Eventually(dir+"/dependencies", TestTimeoutShort).Should(BeADirectory())
 	Eventually(dependency(dir, "org.apache.camel.camel-timer-%s.jar", camelVersion), TestTimeoutShort).Should(BeAnExistingFile())
@@ -183,7 +163,7 @@ func TestLocalBuildIntegrationDirectory(t *testing.T) {
 func TestLocalBuildIntegrationDirectoryWithSpaces(t *testing.T) {
 	RegisterTestingT(t)
 
-	ctx, cancel := context.WithCancel(TestContext)
+	ctx, cancel := context.WithTimeout(TestContext, TestTimeoutMedium)
 	defer cancel()
 
 	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
@@ -191,12 +171,7 @@ func TestLocalBuildIntegrationDirectoryWithSpaces(t *testing.T) {
 
 	kamelBuild := kamelWithContext(ctx, "local", "build", file, "--integration-directory", dir)
 
-	go func() {
-		err := kamelBuild.Execute()
-		assert.NoError(t, err)
-		cancel()
-	}()
-
+	Expect(kamelBuild.Execute()).To(BeNil())
 	Eventually(dir+"/dependencies", TestTimeoutShort).Should(BeADirectory())
 	Eventually(dependency(dir, "org.apache.camel.camel-timer-%s.jar", camelVersion), TestTimeoutShort).Should(BeAnExistingFile())
 	Eventually(dependency(dir, "org.apache.camel.camel-log-%s.jar", camelVersion), TestTimeoutShort).Should(BeAnExistingFile())
@@ -207,7 +182,7 @@ func TestLocalBuildIntegrationDirectoryWithSpaces(t *testing.T) {
 func TestLocalBuildIntegrationDirectoryWithMultiBytes(t *testing.T) {
 	RegisterTestingT(t)
 
-	ctx, cancel := context.WithCancel(TestContext)
+	ctx, cancel := context.WithTimeout(TestContext, TestTimeoutMedium)
 	defer cancel()
 
 	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
@@ -215,11 +190,7 @@ func TestLocalBuildIntegrationDirectoryWithMultiBytes(t *testing.T) {
 
 	kamelBuild := kamelWithContext(ctx, "local", "build", file, "--integration-directory", dir)
 
-	go func() {
-		err := kamelBuild.Execute()
-		assert.NoError(t, err)
-		cancel()
-	}()
+	Expect(kamelBuild.Execute()).To(BeNil())
 
 	Eventually(dir+"/dependencies", TestTimeoutShort).Should(BeADirectory())
 	Eventually(dependency(dir, "org.apache.camel.camel-timer-%s.jar", camelVersion), TestTimeoutShort).Should(BeAnExistingFile())
@@ -231,7 +202,7 @@ func TestLocalBuildIntegrationDirectoryWithMultiBytes(t *testing.T) {
 func TestLocalBuildDependenciesOnly(t *testing.T) {
 	RegisterTestingT(t)
 
-	ctx, cancel := context.WithCancel(TestContext)
+	ctx, cancel := context.WithTimeout(TestContext, TestTimeoutMedium)
 	defer cancel()
 
 	file := testutil.MakeTempCopy(t, "files/yaml.yaml")
@@ -239,11 +210,7 @@ func TestLocalBuildDependenciesOnly(t *testing.T) {
 
 	kamelBuild := kamelWithContext(ctx, "local", "build", file, "--integration-directory", dir, "--dependencies-only", "-d", "camel-amqp")
 
-	go func() {
-		err := kamelBuild.Execute()
-		assert.NoError(t, err)
-		cancel()
-	}()
+	Expect(kamelBuild.Execute()).To(BeNil())
 
 	Eventually(dir+"/dependencies", TestTimeoutShort).Should(BeADirectory())
 	Eventually(dependency(dir, "org.apache.camel.camel-timer-%s.jar", camelVersion), TestTimeoutShort).Should(BeAnExistingFile())
@@ -256,7 +223,7 @@ func TestLocalBuildDependenciesOnly(t *testing.T) {
 func TestLocalBuildModelineDependencies(t *testing.T) {
 	RegisterTestingT(t)
 
-	ctx, cancel := context.WithCancel(TestContext)
+	ctx, cancel := context.WithTimeout(TestContext, TestTimeoutMedium)
 	defer cancel()
 
 	file := testutil.MakeTempCopy(t, "files/dependency.groovy")
@@ -264,10 +231,7 @@ func TestLocalBuildModelineDependencies(t *testing.T) {
 
 	kamelBuild := kamelWithContext(ctx, "local", "build", file, "--integration-directory", dir, "-d", "camel-amqp")
 
-	go func() {
-		err := kamelBuild.Execute()
-		assert.NoError(t, err)
-	}()
+	Expect(kamelBuild.Execute()).To(BeNil())
 
 	Eventually(dir+"/dependencies", TestTimeoutShort).Should(BeADirectory())
 	Eventually(dependency(dir, "org.apache.camel.camel-timer-%s.jar", camelVersion), TestTimeoutShort).Should(BeAnExistingFile())

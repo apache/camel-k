@@ -25,17 +25,15 @@ import (
 	"io"
 	"testing"
 
-	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
-
 	. "github.com/apache/camel-k/e2e/support"
 	testutil "github.com/apache/camel-k/e2e/support/util"
+	. "github.com/onsi/gomega"
 )
 
 func TestLocalInspect(t *testing.T) {
 	RegisterTestingT(t)
 
-	ctx, cancel := context.WithCancel(TestContext)
+	ctx, cancel := context.WithTimeout(TestContext, TestTimeoutMedium)
 	defer cancel()
 	piper, pipew := io.Pipe()
 	defer pipew.Close()
@@ -53,11 +51,7 @@ func TestLocalInspect(t *testing.T) {
 		//"mvn:org.apache.camel.quarkus:camel-quarkus-yaml-dsl",
 	)
 
-	go func() {
-		err := kamelInspect.Execute()
-		assert.NoError(t, err)
-		cancel()
-	}()
+	Expect(kamelInspect.Execute()).To(BeNil())
 
 	Eventually(logScanner.IsFound("camel:log"), TestTimeoutShort).Should(BeTrue())
 	Eventually(logScanner.IsFound("camel:timer"), TestTimeoutShort).Should(BeTrue())
@@ -67,7 +61,7 @@ func TestLocalInspect(t *testing.T) {
 func TestLocalInspectWithDependencies(t *testing.T) {
 	RegisterTestingT(t)
 
-	ctx, cancel := context.WithCancel(TestContext)
+	ctx, cancel := context.WithTimeout(TestContext, TestTimeoutMedium)
 	defer cancel()
 	piper, pipew := io.Pipe()
 	defer pipew.Close()
@@ -93,11 +87,7 @@ func TestLocalInspectWithDependencies(t *testing.T) {
 		"camel:timer",
 	)
 
-	go func() {
-		err := kamelInspect.Execute()
-		assert.NoError(t, err)
-		cancel()
-	}()
+	Expect(kamelInspect.Execute()).To(BeNil())
 
 	Eventually(logScanner.IsFound(warn1), TestTimeoutShort).Should(BeTrue())
 	Eventually(logScanner.IsFound(warn2), TestTimeoutShort).Should(BeTrue())

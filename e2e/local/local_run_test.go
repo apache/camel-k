@@ -38,7 +38,7 @@ import (
 func TestLocalRun(t *testing.T) {
 	RegisterTestingT(t)
 
-	ctx, cancel := context.WithCancel(TestContext)
+	ctx, cancel := context.WithTimeout(TestContext, TestTimeoutMedium)
 	defer cancel()
 	piper, pipew := io.Pipe()
 	defer pipew.Close()
@@ -52,7 +52,12 @@ func TestLocalRun(t *testing.T) {
 
 	logScanner := testutil.NewLogScanner(ctx, piper, "Magicstring!")
 
+	var wg sync.WaitGroup
+	wg.Add(1)
+
 	go func() {
+		defer wg.Done()
+
 		_ = kamelRun.Execute()
 		cancel()
 	}()
@@ -63,7 +68,7 @@ func TestLocalRun(t *testing.T) {
 func TestLocalRunWithDependencies(t *testing.T) {
 	RegisterTestingT(t)
 
-	ctx, cancel := context.WithCancel(TestContext)
+	ctx, cancel := context.WithTimeout(TestContext, TestTimeoutMedium)
 	defer cancel()
 	piper, pipew := io.Pipe()
 	defer pipew.Close()
@@ -77,7 +82,11 @@ func TestLocalRunWithDependencies(t *testing.T) {
 
 	logScanner := testutil.NewLogScanner(ctx, piper, "Magicstring!")
 
+	var wg sync.WaitGroup
+	wg.Add(1)
+
 	go func() {
+		defer wg.Done()
 		_ = kamelRun.Execute()
 		cancel()
 	}()
@@ -88,7 +97,7 @@ func TestLocalRunWithDependencies(t *testing.T) {
 func TestLocalRunWithInvalidDependency(t *testing.T) {
 	RegisterTestingT(t)
 
-	ctx, cancel := context.WithCancel(TestContext)
+	ctx, cancel := context.WithTimeout(TestContext, TestTimeoutMedium)
 	defer cancel()
 	piper, pipew := io.Pipe()
 	defer pipew.Close()
@@ -110,8 +119,10 @@ func TestLocalRunWithInvalidDependency(t *testing.T) {
 
 	var wg sync.WaitGroup
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
+
 		err := kamelRun.Execute()
 		assert.Error(t, err)
 		cancel()
@@ -126,7 +137,7 @@ func TestLocalRunWithInvalidDependency(t *testing.T) {
 func TestLocalRunContainerize(t *testing.T) {
 	RegisterTestingT(t)
 
-	ctx, cancel := context.WithCancel(TestContext)
+	ctx, cancel := context.WithTimeout(TestContext, TestTimeoutMedium)
 	defer cancel()
 	piper, pipew := io.Pipe()
 	defer pipew.Close()
@@ -141,8 +152,12 @@ func TestLocalRunContainerize(t *testing.T) {
 
 	logScanner := testutil.NewLogScanner(ctx, piper, "Magicstring!")
 
+	var wg sync.WaitGroup
+	wg.Add(1)
+
 	defer StopDockerContainers()
 	go func() {
+		defer wg.Done()
 		_ = kamelRun.Execute()
 		cancel()
 	}()
@@ -162,7 +177,12 @@ func TestLocalRunIntegrationDirectory(t *testing.T) {
 
 	kamelBuild := kamelWithContext(ctx1, "local", "build", file, "--integration-directory", dir)
 
+	var wg sync.WaitGroup
+	wg.Add(1)
+
 	go func() {
+		defer wg.Done()
+
 		err := kamelBuild.Execute()
 		assert.NoError(t, err)
 		cancel1()
@@ -184,7 +204,12 @@ func TestLocalRunIntegrationDirectory(t *testing.T) {
 
 	logScanner := testutil.NewLogScanner(ctx2, piper, "Magicstring!")
 
+	var wg2 sync.WaitGroup
+	wg2.Add(1)
+
 	go func() {
+		defer wg2.Done()
+
 		_ = kamelRun.Execute()
 		cancel2()
 	}()

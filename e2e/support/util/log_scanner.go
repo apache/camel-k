@@ -72,3 +72,8 @@ func (s *LogScanner) IsFound(value string) func() bool {
 		return s.values[value]
 	}
 }
+
+// Contains returns if the string has been found in the logs
+func (s *LogScanner) Contains(value string) bool {
+	return s.values[value]
+}
