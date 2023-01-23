@@ -71,7 +71,14 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 		// Set KAMEL_BIN only for this test - don't override the ENV variable for all tests
 		Expect(os.Setenv("KAMEL_BIN", kamel)).To(Succeed())
 
-		args := []string{"install", "-n", ns, "--olm=true", "--olm-source", catalogSourceName, "--olm-source-namespace", ns}
+		args := []string{
+			"install",
+			"-n", ns,
+			"--olm=true",
+			"--olm-source", catalogSourceName,
+			"--olm-source-namespace", ns,
+			"--base-image", defaults.BaseImage(),
+		}
 
 		if prevUpdateChannel != "" {
 			args = append(args, "--olm-channel", prevUpdateChannel)
