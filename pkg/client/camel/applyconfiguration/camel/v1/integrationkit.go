@@ -20,9 +20,9 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/meta/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
+	v1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
 // IntegrationKitApplyConfiguration represents an declarative configuration of the IntegrationKit type for use

@@ -447,7 +447,7 @@ func (action *monitorAction) probeReadiness(
 
 		for p := range pod.Status.Conditions {
 			if pod.Status.Conditions[p].Type == corev1.PodReady {
-				readyCondition.Pods[i].PodCondition = pod.Status.Conditions[p]
+				readyCondition.Pods[i].Condition = pod.Status.Conditions[p]
 				break
 			}
 		}
@@ -497,12 +497,12 @@ func (action *monitorAction) probeReadiness(
 			}
 
 			if errors.Is(err, context.DeadlineExceeded) {
-				readyCondition.Pods[i].Message = fmt.Sprintf("readiness probe timed out for Pod %s/%s", pod.Namespace, pod.Name)
+				readyCondition.Pods[i].Condition.Message = fmt.Sprintf("readiness probe timed out for Pod %s/%s", pod.Namespace, pod.Name)
 				runtimeReady = false
 				continue
 			}
 			if !k8serrors.IsServiceUnavailable(err) {
-				readyCondition.Pods[i].Message = fmt.Sprintf("readiness probe failed for Pod %s/%s: %s", pod.Namespace, pod.Name, err.Error())
+				readyCondition.Pods[i].Condition.Message = fmt.Sprintf("readiness probe failed for Pod %s/%s: %s", pod.Namespace, pod.Name, err.Error())
 				runtimeReady = false
 				continue
 			}

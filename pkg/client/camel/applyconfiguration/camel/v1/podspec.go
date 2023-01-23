@@ -20,24 +20,23 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/core/v1"
-	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 )
 
 // PodSpecApplyConfiguration represents an declarative configuration of the PodSpec type for use
 // with apply.
 type PodSpecApplyConfiguration struct {
-	Volumes                       []v1.VolumeApplyConfiguration                   `json:"volumes,omitempty"`
-	InitContainers                []v1.ContainerApplyConfiguration                `json:"initContainers,omitempty"`
-	Containers                    []v1.ContainerApplyConfiguration                `json:"containers,omitempty"`
-	EphemeralContainers           []v1.EphemeralContainerApplyConfiguration       `json:"ephemeralContainers,omitempty"`
-	RestartPolicy                 *corev1.RestartPolicy                           `json:"restartPolicy,omitempty"`
-	TerminationGracePeriodSeconds *int64                                          `json:"terminationGracePeriodSeconds,omitempty"`
-	ActiveDeadlineSeconds         *int64                                          `json:"activeDeadlineSeconds,omitempty"`
-	DNSPolicy                     *corev1.DNSPolicy                               `json:"dnsPolicy,omitempty"`
-	NodeSelector                  map[string]string                               `json:"nodeSelector,omitempty"`
-	TopologySpreadConstraints     []v1.TopologySpreadConstraintApplyConfiguration `json:"topologySpreadConstraints,omitempty"`
-	SecurityContext               *v1.PodSecurityContextApplyConfiguration        `json:"securityContext,omitempty"`
+	Volumes                       []v1.Volume                   `json:"volumes,omitempty"`
+	InitContainers                []v1.Container                `json:"initContainers,omitempty"`
+	Containers                    []v1.Container                `json:"containers,omitempty"`
+	EphemeralContainers           []v1.EphemeralContainer       `json:"ephemeralContainers,omitempty"`
+	RestartPolicy                 *v1.RestartPolicy             `json:"restartPolicy,omitempty"`
+	TerminationGracePeriodSeconds *int64                        `json:"terminationGracePeriodSeconds,omitempty"`
+	ActiveDeadlineSeconds         *int64                        `json:"activeDeadlineSeconds,omitempty"`
+	DNSPolicy                     *v1.DNSPolicy                 `json:"dnsPolicy,omitempty"`
+	NodeSelector                  map[string]string             `json:"nodeSelector,omitempty"`
+	TopologySpreadConstraints     []v1.TopologySpreadConstraint `json:"topologySpreadConstraints,omitempty"`
+	SecurityContext               *v1.PodSecurityContext        `json:"securityContext,omitempty"`
 }
 
 // PodSpecApplyConfiguration constructs an declarative configuration of the PodSpec type for use with
@@ -49,12 +48,9 @@ func PodSpec() *PodSpecApplyConfiguration {
 // WithVolumes adds the given value to the Volumes field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Volumes field.
-func (b *PodSpecApplyConfiguration) WithVolumes(values ...*v1.VolumeApplyConfiguration) *PodSpecApplyConfiguration {
+func (b *PodSpecApplyConfiguration) WithVolumes(values ...v1.Volume) *PodSpecApplyConfiguration {
 	for i := range values {
-		if values[i] == nil {
-			panic("nil value passed to WithVolumes")
-		}
-		b.Volumes = append(b.Volumes, *values[i])
+		b.Volumes = append(b.Volumes, values[i])
 	}
 	return b
 }
@@ -62,12 +58,9 @@ func (b *PodSpecApplyConfiguration) WithVolumes(values ...*v1.VolumeApplyConfigu
 // WithInitContainers adds the given value to the InitContainers field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the InitContainers field.
-func (b *PodSpecApplyConfiguration) WithInitContainers(values ...*v1.ContainerApplyConfiguration) *PodSpecApplyConfiguration {
+func (b *PodSpecApplyConfiguration) WithInitContainers(values ...v1.Container) *PodSpecApplyConfiguration {
 	for i := range values {
-		if values[i] == nil {
-			panic("nil value passed to WithInitContainers")
-		}
-		b.InitContainers = append(b.InitContainers, *values[i])
+		b.InitContainers = append(b.InitContainers, values[i])
 	}
 	return b
 }
@@ -75,12 +68,9 @@ func (b *PodSpecApplyConfiguration) WithInitContainers(values ...*v1.ContainerAp
 // WithContainers adds the given value to the Containers field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Containers field.
-func (b *PodSpecApplyConfiguration) WithContainers(values ...*v1.ContainerApplyConfiguration) *PodSpecApplyConfiguration {
+func (b *PodSpecApplyConfiguration) WithContainers(values ...v1.Container) *PodSpecApplyConfiguration {
 	for i := range values {
-		if values[i] == nil {
-			panic("nil value passed to WithContainers")
-		}
-		b.Containers = append(b.Containers, *values[i])
+		b.Containers = append(b.Containers, values[i])
 	}
 	return b
 }
@@ -88,12 +78,9 @@ func (b *PodSpecApplyConfiguration) WithContainers(values ...*v1.ContainerApplyC
 // WithEphemeralContainers adds the given value to the EphemeralContainers field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the EphemeralContainers field.
-func (b *PodSpecApplyConfiguration) WithEphemeralContainers(values ...*v1.EphemeralContainerApplyConfiguration) *PodSpecApplyConfiguration {
+func (b *PodSpecApplyConfiguration) WithEphemeralContainers(values ...v1.EphemeralContainer) *PodSpecApplyConfiguration {
 	for i := range values {
-		if values[i] == nil {
-			panic("nil value passed to WithEphemeralContainers")
-		}
-		b.EphemeralContainers = append(b.EphemeralContainers, *values[i])
+		b.EphemeralContainers = append(b.EphemeralContainers, values[i])
 	}
 	return b
 }
@@ -101,7 +88,7 @@ func (b *PodSpecApplyConfiguration) WithEphemeralContainers(values ...*v1.Epheme
 // WithRestartPolicy sets the RestartPolicy field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the RestartPolicy field is set to the value of the last call.
-func (b *PodSpecApplyConfiguration) WithRestartPolicy(value corev1.RestartPolicy) *PodSpecApplyConfiguration {
+func (b *PodSpecApplyConfiguration) WithRestartPolicy(value v1.RestartPolicy) *PodSpecApplyConfiguration {
 	b.RestartPolicy = &value
 	return b
 }
@@ -125,7 +112,7 @@ func (b *PodSpecApplyConfiguration) WithActiveDeadlineSeconds(value int64) *PodS
 // WithDNSPolicy sets the DNSPolicy field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the DNSPolicy field is set to the value of the last call.
-func (b *PodSpecApplyConfiguration) WithDNSPolicy(value corev1.DNSPolicy) *PodSpecApplyConfiguration {
+func (b *PodSpecApplyConfiguration) WithDNSPolicy(value v1.DNSPolicy) *PodSpecApplyConfiguration {
 	b.DNSPolicy = &value
 	return b
 }
@@ -147,12 +134,9 @@ func (b *PodSpecApplyConfiguration) WithNodeSelector(entries map[string]string) 
 // WithTopologySpreadConstraints adds the given value to the TopologySpreadConstraints field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the TopologySpreadConstraints field.
-func (b *PodSpecApplyConfiguration) WithTopologySpreadConstraints(values ...*v1.TopologySpreadConstraintApplyConfiguration) *PodSpecApplyConfiguration {
+func (b *PodSpecApplyConfiguration) WithTopologySpreadConstraints(values ...v1.TopologySpreadConstraint) *PodSpecApplyConfiguration {
 	for i := range values {
-		if values[i] == nil {
-			panic("nil value passed to WithTopologySpreadConstraints")
-		}
-		b.TopologySpreadConstraints = append(b.TopologySpreadConstraints, *values[i])
+		b.TopologySpreadConstraints = append(b.TopologySpreadConstraints, values[i])
 	}
 	return b
 }
@@ -160,7 +144,7 @@ func (b *PodSpecApplyConfiguration) WithTopologySpreadConstraints(values ...*v1.
 // WithSecurityContext sets the SecurityContext field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the SecurityContext field is set to the value of the last call.
-func (b *PodSpecApplyConfiguration) WithSecurityContext(value *v1.PodSecurityContextApplyConfiguration) *PodSpecApplyConfiguration {
-	b.SecurityContext = value
+func (b *PodSpecApplyConfiguration) WithSecurityContext(value v1.PodSecurityContext) *PodSpecApplyConfiguration {
+	b.SecurityContext = &value
 	return b
 }

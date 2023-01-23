@@ -21,31 +21,31 @@ package v1
 
 import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	corev1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // IntegrationStatusApplyConfiguration represents an declarative configuration of the IntegrationStatus type for use
 // with apply.
 type IntegrationStatusApplyConfiguration struct {
-	ObservedGeneration      *int64                                    `json:"observedGeneration,omitempty"`
-	Phase                   *v1.IntegrationPhase                      `json:"phase,omitempty"`
-	Digest                  *string                                   `json:"digest,omitempty"`
-	Image                   *string                                   `json:"image,omitempty"`
-	Dependencies            []string                                  `json:"dependencies,omitempty"`
-	Profile                 *v1.TraitProfile                          `json:"profile,omitempty"`
-	IntegrationKit          *corev1.ObjectReferenceApplyConfiguration `json:"integrationKit,omitempty"`
-	Platform                *string                                   `json:"platform,omitempty"`
-	GeneratedSources        []SourceSpecApplyConfiguration            `json:"generatedSources,omitempty"`
-	RuntimeVersion          *string                                   `json:"runtimeVersion,omitempty"`
-	RuntimeProvider         *v1.RuntimeProvider                       `json:"runtimeProvider,omitempty"`
-	Configuration           []ConfigurationSpecApplyConfiguration     `json:"configuration,omitempty"`
-	Conditions              []IntegrationConditionApplyConfiguration  `json:"conditions,omitempty"`
-	Version                 *string                                   `json:"version,omitempty"`
-	Replicas                *int32                                    `json:"replicas,omitempty"`
-	Selector                *string                                   `json:"selector,omitempty"`
-	Capabilities            []string                                  `json:"capabilities,omitempty"`
-	InitializationTimestamp *metav1.Time                              `json:"lastInitTimestamp,omitempty"`
+	ObservedGeneration      *int64                                   `json:"observedGeneration,omitempty"`
+	Phase                   *v1.IntegrationPhase                     `json:"phase,omitempty"`
+	Digest                  *string                                  `json:"digest,omitempty"`
+	Image                   *string                                  `json:"image,omitempty"`
+	Dependencies            []string                                 `json:"dependencies,omitempty"`
+	Profile                 *v1.TraitProfile                         `json:"profile,omitempty"`
+	IntegrationKit          *corev1.ObjectReference                  `json:"integrationKit,omitempty"`
+	Platform                *string                                  `json:"platform,omitempty"`
+	GeneratedSources        []SourceSpecApplyConfiguration           `json:"generatedSources,omitempty"`
+	RuntimeVersion          *string                                  `json:"runtimeVersion,omitempty"`
+	RuntimeProvider         *v1.RuntimeProvider                      `json:"runtimeProvider,omitempty"`
+	Configuration           []ConfigurationSpecApplyConfiguration    `json:"configuration,omitempty"`
+	Conditions              []IntegrationConditionApplyConfiguration `json:"conditions,omitempty"`
+	Version                 *string                                  `json:"version,omitempty"`
+	Replicas                *int32                                   `json:"replicas,omitempty"`
+	Selector                *string                                  `json:"selector,omitempty"`
+	Capabilities            []string                                 `json:"capabilities,omitempty"`
+	InitializationTimestamp *metav1.Time                             `json:"lastInitTimestamp,omitempty"`
 }
 
 // IntegrationStatusApplyConfiguration constructs an declarative configuration of the IntegrationStatus type for use with
@@ -107,8 +107,8 @@ func (b *IntegrationStatusApplyConfiguration) WithProfile(value v1.TraitProfile)
 // WithIntegrationKit sets the IntegrationKit field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the IntegrationKit field is set to the value of the last call.
-func (b *IntegrationStatusApplyConfiguration) WithIntegrationKit(value *corev1.ObjectReferenceApplyConfiguration) *IntegrationStatusApplyConfiguration {
-	b.IntegrationKit = value
+func (b *IntegrationStatusApplyConfiguration) WithIntegrationKit(value corev1.ObjectReference) *IntegrationStatusApplyConfiguration {
+	b.IntegrationKit = &value
 	return b
 }
 
