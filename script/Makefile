@@ -74,7 +74,7 @@ OPM := opm
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
 
-STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1499
+STAGING_RUNTIME_REPO :=
 
 # Kamelets options
 INSTALL_DEFAULT_KAMELETS ?= true
