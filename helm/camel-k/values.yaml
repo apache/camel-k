@@ -23,7 +23,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 operator:
-  image: docker.io/apache/camel-k:1.10.4-SNAPSHOT
+  image: docker.io/apache/camel-k:1.10.4
   global: "false"
   resources: {}
   securityContext: {}
