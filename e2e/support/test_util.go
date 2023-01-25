@@ -25,10 +25,13 @@ package support
 import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
-	"os"
-
 	"github.com/onsi/gomega/types"
+	"os"
 )
+
+func init() {
+
+}
 
 func EqualP(expected interface{}) types.GomegaMatcher {
 	return PointTo(Equal(expected))
