@@ -19,14 +19,14 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <parent>
-    <groupId>org.apache.camel</groupId>
-    <artifactId>camel-dependencies</artifactId>
-    <version>3.19.0</version>
+    <groupId>org.apache</groupId>
+    <artifactId>apache</artifactId>
+    <version>23</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.camel.k</groupId>
-  <artifactId>camel-k-extension</artifactId>
+  <artifactId>camel-k-crd</artifactId>
   <version>1.17.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
