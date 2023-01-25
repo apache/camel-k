@@ -250,6 +250,13 @@ func KamelInstallWithContext(ctx context.Context, operatorID string, namespace s
 		installArgs = []string{"install", "-n", namespace, "--operator-id", operatorID}
 	}
 
+	// Default behavior, we don't install Kamelet catalog to spare resources
+	// They need to be installed on purpose if required to be tested
+	enableKamelets := os.Getenv("CAMEL_K_TEST_KAMELET_CATALOG_INSTALL") == "true"
+	if !enableKamelets {
+		installArgs = append(installArgs, "--operator-env-vars", "KAMEL_INSTALL_DEFAULT_KAMELETS=false")
+	}
+
 	logLevel := os.Getenv("CAMEL_K_TEST_LOG_LEVEL")
 	if len(logLevel) > 0 {
 		fmt.Printf("Setting log-level to %s\n", logLevel)
