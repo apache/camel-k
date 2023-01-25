@@ -20,6 +20,7 @@ package integrationkit
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -259,6 +260,8 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 		NewErrorAction(),
 	}
 
+	var targetPhase v1.IntegrationKitPhase
+
 	for _, a := range actions {
 		a.InjectClient(r.client)
 		a.InjectLogger(targetLog)
@@ -267,6 +270,7 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 			targetLog.Infof("Invoking action %s", a.Name())
 
 			newTarget, err := a.Handle(ctx, target)
+
 			if err != nil {
 				camelevent.NotifyIntegrationKitError(ctx, r.client, r.recorder, &instance, newTarget, err)
 				return reconcile.Result{}, err
@@ -278,11 +282,13 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 					return res, err
 				}
 
-				if newTarget.Status.Phase != instance.Status.Phase {
+				targetPhase = newTarget.Status.Phase
+
+				if targetPhase != instance.Status.Phase {
 					targetLog.Info(
 						"state transition",
 						"phase-from", instance.Status.Phase,
-						"phase-to", newTarget.Status.Phase,
+						"phase-to", targetPhase,
 					)
 				}
 			}
@@ -292,6 +298,13 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 			camelevent.NotifyIntegrationKitUpdated(ctx, r.client, r.recorder, &instance, newTarget)
 			break
 		}
+	}
+
+	if targetPhase == v1.IntegrationKitPhaseWaitingForCatalog {
+		// Requeue
+		return reconcile.Result{
+			RequeueAfter: 2 * time.Second,
+		}, nil
 	}
 
 	return reconcile.Result{}, nil

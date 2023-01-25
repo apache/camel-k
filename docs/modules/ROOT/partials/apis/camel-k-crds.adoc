@@ -940,7 +940,7 @@ int64
 |
 
 
-ObservedGeneration is the most recent generation observed for this Kamelet.
+ObservedGeneration is the most recent generation observed for this Catalog.
 
 |`phase` +
 *xref:#_camel_apache_org_v1_CamelCatalogPhase[CamelCatalogPhase]*

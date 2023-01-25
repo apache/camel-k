@@ -112,7 +112,7 @@ type reconcilecatalog struct {
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *reconcilecatalog) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
-	rlog.Info("Reconciling catalog")
+	rlog.Info("Reconciling CamelCatalog")
 
 	// Make sure the operator is allowed to act on namespace
 	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
@@ -166,8 +166,8 @@ func (r *reconcilecatalog) Reconcile(ctx context.Context, request reconcile.Requ
 		targetLog.Infof("Invoking action %s", a.Name())
 
 		phaseFrom := target.Status.Phase
-
 		target, err = a.Handle(ctx, target)
+
 		if err != nil {
 			camelevent.NotifyCamelCatalogError(ctx, r.client, r.recorder, &instance, target, err)
 			return reconcile.Result{}, err
@@ -198,7 +198,8 @@ func (r *reconcilecatalog) Reconcile(ctx context.Context, request reconcile.Requ
 		break
 	}
 
-	if targetPhase == v1.CamelCatalogPhaseReady {
+	// TODO: understand how to reconcile if there is any error while building the image (if that is possible)
+	if targetPhase == v1.CamelCatalogPhaseReady || targetPhase == v1.CamelCatalogPhaseError {
 		return reconcile.Result{}, nil
 	}
 
