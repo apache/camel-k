@@ -29,7 +29,7 @@ asciidoc:
     requires: "'util=camel-website-util,ck=xref:js/ck.js'"
     lts: LTS
     prerelease: false
-    camel-kamelets-version: 0.9.3 # Makefile KAMELET_CATALOG_REPO_BRANCH
+    camel-kamelets-version: 0.9.4 # Makefile KAMELET_CATALOG_REPO_BRANCH
     camel-kamelets-docs-version: 0.9.x # Makefile KAMELET_CATALOG_REPO_BRANCH
     camel-k-runtime-version: 1.15.2 # Makefile RUNTIME_VERSION
     camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # Makefile BUNDLE_CAMEL_APIS
