@@ -52,11 +52,13 @@ func (action *buildAction) Name() string {
 
 func (action *buildAction) CanHandle(kit *v1.IntegrationKit) bool {
 	return kit.Status.Phase == v1.IntegrationKitPhaseBuildSubmitted ||
-		kit.Status.Phase == v1.IntegrationKitPhaseBuildRunning
+		kit.Status.Phase == v1.IntegrationKitPhaseBuildRunning ||
+		kit.Status.Phase == v1.IntegrationKitPhaseWaitingForCatalog
 }
 
 func (action *buildAction) Handle(ctx context.Context, kit *v1.IntegrationKit) (*v1.IntegrationKit, error) {
-	if kit.Status.Phase == v1.IntegrationKitPhaseBuildSubmitted {
+	if kit.Status.Phase == v1.IntegrationKitPhaseBuildSubmitted ||
+		kit.Status.Phase == v1.IntegrationKitPhaseWaitingForCatalog {
 		return action.handleBuildSubmitted(ctx, kit)
 	} else if kit.Status.Phase == v1.IntegrationKitPhaseBuildRunning {
 		return action.handleBuildRunning(ctx, kit)
@@ -83,6 +85,30 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 
 		if env.CamelCatalog == nil {
 			return nil, errors.New("undefined camel catalog")
+		}
+
+		catalog, err := kubernetes.GetCamelCatalog(
+			ctx,
+			action.client,
+			fmt.Sprintf("camel-catalog-%s-quarkus", env.CamelCatalog.Runtime.Version),
+			kit.Namespace,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if catalog.Status.Phase == v1.CamelCatalogPhaseError {
+			kit.Status.Phase = v1.IntegrationKitPhaseError
+			kit.Status.SetErrorCondition(
+				v1.IntegrationKitConditionCatalogAvailable,
+				fmt.Sprintf("Camel Catalog %s error", catalog.Spec.Runtime.Version),
+				errors.Errorf("%s", catalog.Status.GetCondition(v1.CamelCatalogConditionReady).Reason),
+			)
+			return kit, nil
+		}
+		if catalog.Status.Phase != v1.CamelCatalogPhaseReady {
+			kit.Status.Phase = v1.IntegrationKitPhaseWaitingForCatalog
+			return kit, nil
 		}
 
 		labels := kubernetes.FilterCamelCreatorLabels(kit.Labels)

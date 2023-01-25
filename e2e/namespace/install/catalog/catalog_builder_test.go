@@ -24,6 +24,7 @@ package catalog
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -31,20 +32,47 @@ import (
 
 	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
 func TestCamelCatalogBuilder(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+		Expect(KamelInstallWithID(operatorID, ns, "--operator-env-vars", "KAMEL_INSTALL_DEFAULT_KAMELETS=false").Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		Eventually(Platform(ns)).ShouldNot(BeNil())
 		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))
-		Eventually(CamelCatalog(ns)).ShouldNot(BeNil())
-		catalog := CamelCatalog(ns)()
-		imageName := fmt.Sprintf("camel-k-runtime-%s-builder-%s", catalog.Spec.Runtime.Provider, catalog.Spec.Runtime.Version)
-		Eventually(CamelCatalogPhase(ns), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
-		Eventually(CamelCatalogImage(ns), TestTimeoutMedium).Should(Equal(imageName))
+		catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
+		Eventually(CamelCatalog(ns, catalogName)).ShouldNot(BeNil())
+		catalog := CamelCatalog(ns, catalogName)()
+		imageName := fmt.Sprintf("camel-k-runtime-%s-builder-%s", catalog.Spec.Runtime.Provider, strings.ToLower(catalog.Spec.Runtime.Version))
+		Eventually(CamelCatalogPhase(ns, catalogName), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
+		Eventually(CamelCatalogImage(ns, catalogName), TestTimeoutMedium).Should(Equal(imageName))
+
+		// Run an integration with a catalog not compatible
+		// The operator should create the catalog, but fail on reconciliation and the integration should fail as well
+		t.Run("Run catalog not compatible", func(t *testing.T) {
+			name := "java"
+			nonCompatibleCatalogName := "camel-catalog-1.15.0-quarkus"
+			Expect(
+				KamelRunWithID(operatorID, ns, "../files/Java.java", "--name", name,
+					"-t", "camel.runtime-version=1.15.0",
+				).Execute()).To(Succeed())
+
+			Eventually(CamelCatalog(ns, nonCompatibleCatalogName)).ShouldNot(BeNil())
+			Eventually(CamelCatalogPhase(ns, nonCompatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseError))
+			Eventually(CamelCatalogCondition(ns, nonCompatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(ContainSubstring("Missing base image"))
+
+			Eventually(IntegrationKit(ns, name)).ShouldNot(Equal(""))
+			kitName := IntegrationKit(ns, name)()
+			Eventually(KitPhase(ns, kitName)).Should(Equal(v1.IntegrationKitPhaseError))
+			Eventually(KitCondition(ns, kitName, v1.IntegrationKitConditionCatalogAvailable)().Reason).Should(Equal("Camel Catalog 1.15.0 error"))
+			Eventually(IntegrationPhase(ns, name)).Should(Equal(v1.IntegrationPhaseError))
+			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionKitAvailable)().Status).Should(Equal(corev1.ConditionFalse))
+
+			// Clean up
+			Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+		})
 	})
 }

@@ -167,6 +167,8 @@ const (
 	IntegrationKitPhaseBuildSubmitted IntegrationKitPhase = "Build Submitted"
 	// IntegrationKitPhaseBuildRunning --
 	IntegrationKitPhaseBuildRunning IntegrationKitPhase = "Build Running"
+	// IntegrationKitPhaseWaitingForCatalog --
+	IntegrationKitPhaseWaitingForCatalog IntegrationKitPhase = "Waiting For Catalog"
 	// IntegrationKitPhaseReady --
 	IntegrationKitPhaseReady IntegrationKitPhase = "Ready"
 	// IntegrationKitPhaseError --
@@ -174,6 +176,8 @@ const (
 
 	// IntegrationKitConditionPlatformAvailable --
 	IntegrationKitConditionPlatformAvailable IntegrationKitConditionType = "IntegrationPlatformAvailable"
+	// IntegrationKitConditionCatalogAvailable --
+	IntegrationKitConditionCatalogAvailable IntegrationKitConditionType = "CamelCatalogAvailable"
 	// IntegrationKitConditionPlatformAvailableReason --
 	IntegrationKitConditionPlatformAvailableReason string = "IntegrationPlatformAvailable"
 )

@@ -1016,6 +1016,16 @@ func KitPhase(ns, name string) func() v1.IntegrationKitPhase {
 	}
 }
 
+func KitCondition(ns string, name string, conditionType v1.IntegrationKitConditionType) func() *v1.IntegrationKitCondition {
+	return func() *v1.IntegrationKitCondition {
+		kt := Kit(ns, name)()
+		if kt == nil {
+			return nil
+		}
+		return kt.Status.GetCondition(conditionType)
+	}
+}
+
 func UpdateIntegration(ns string, name string, mutate func(it *v1.Integration)) error {
 	it := Integration(ns, name)()
 	if it == nil {
@@ -1602,22 +1612,31 @@ func Platform(ns string) func() *v1.IntegrationPlatform {
 	}
 }
 
-func CamelCatalog(ns string) func() *v1.CamelCatalog {
+func CamelCatalog(ns, name string) func() *v1.CamelCatalog {
 	return func() *v1.CamelCatalog {
-		lst := v1.NewCamelCatalogList()
-		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
-			failTest(err)
+		cat := v1.CamelCatalog{}
+		key := ctrl.ObjectKey{
+			Namespace: ns,
+			Name:      name,
 		}
-		if len(lst.Items) == 0 {
+		if err := TestClient().Get(TestContext, key, &cat); err != nil && !k8serrors.IsNotFound(err) {
+			failTest(err)
+		} else if err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		}
-		return &lst.Items[0]
+		return &cat
 	}
 }
 
-func CamelCatalogPhase(ns string) func() v1.CamelCatalogPhase {
+func CreateCamelCatalog(catalog *v1.CamelCatalog) func() error {
+	return func() error {
+		return TestClient().Create(TestContext, catalog)
+	}
+}
+
+func CamelCatalogPhase(ns, name string) func() v1.CamelCatalogPhase {
 	return func() v1.CamelCatalogPhase {
-		c := CamelCatalog(ns)()
+		c := CamelCatalog(ns, name)()
 		if c == nil {
 			return ""
 		}
@@ -1625,9 +1644,24 @@ func CamelCatalogPhase(ns string) func() v1.CamelCatalogPhase {
 	}
 }
 
-func CamelCatalogImage(ns string) func() string {
+func CamelCatalogCondition(ns, name string, conditionType v1.CamelCatalogConditionType) func() *v1.CamelCatalogCondition {
+	return func() *v1.CamelCatalogCondition {
+		c := CamelCatalog(ns, name)()
+		if c == nil {
+			return nil
+		}
+		for _, condition := range c.Status.Conditions {
+			if condition.Type == conditionType {
+				return &condition
+			}
+		}
+		return nil
+	}
+}
+
+func CamelCatalogImage(ns, name string) func() string {
 	return func() string {
-		c := CamelCatalog(ns)()
+		c := CamelCatalog(ns, name)()
 		if c == nil {
 			return ""
 		}

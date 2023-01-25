@@ -174,8 +174,6 @@ replace github.com/docker/docker => github.com/moby/moby v0.7.3-0.20190826074503
 // Using a fork that removes the HTTPS ping before using HTTP for insecure registries (for Spectrum)
 replace github.com/google/go-containerregistry => github.com/container-tools/go-containerregistry v0.7.1-0.20211124090132-40ccc94a466b
 
-replace github.com/container-tools/spectrum => ../spectrum // Experiments
-
 // Local modules
 replace (
 	github.com/apache/camel-k/pkg/apis/camel => ./pkg/apis/camel

@@ -58,8 +58,12 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.CamelArtifactExclusionApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelCatalog"):
 		return &camelv1.CamelCatalogApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("CamelCatalogCondition"):
+		return &camelv1.CamelCatalogConditionApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelCatalogSpec"):
 		return &camelv1.CamelCatalogSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("CamelCatalogStatus"):
+		return &camelv1.CamelCatalogStatusApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelLoader"):
 		return &camelv1.CamelLoaderApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelScheme"):

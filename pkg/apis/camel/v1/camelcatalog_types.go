@@ -34,6 +34,7 @@ const (
 // +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="Runtime Version",type=string,JSONPath=`.spec.runtime.version`,description="The Camel K Runtime version"
 // +kubebuilder:printcolumn:name="Runtime Provider",type=string,JSONPath=`.spec.runtime.provider`,description="The Camel K Runtime provider"
+// +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The catalog phase"
 
 // CamelCatalog represents the languages, components, data formats and capabilities enabled on a given runtime provider. The catalog may be statically generated.
 type CamelCatalog struct {
@@ -67,13 +68,13 @@ type CamelCatalogSpec struct {
 
 // CamelCatalogStatus defines the observed state of CamelCatalog. As the catalog is a static resource, we expect it to be empty.
 type CamelCatalogStatus struct {
-	// ObservedGeneration is the most recent generation observed for this Kamelet.
+	// ObservedGeneration is the most recent generation observed for this Catalog.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
-	// Phase --
+	// the actual phase
 	Phase CamelCatalogPhase `json:"phase,omitempty"`
-	// Conditions --
+	// a list of events happened for the CamelCatalog
 	Conditions []CamelCatalogCondition `json:"conditions,omitempty"`
-	// Image --
+	// the container image available for building an application with this catalog
 	Image string `json:"image,omitempty"`
 }
 

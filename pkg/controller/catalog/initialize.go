@@ -24,9 +24,9 @@ import (
 	"io"
 	"os"
 	"runtime"
+	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/client"
 	platformutil "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/log"
@@ -52,22 +52,32 @@ func (action *initializeAction) CanHandle(catalog *v1.CamelCatalog) bool {
 }
 
 func (action *initializeAction) Handle(ctx context.Context, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
-	return initialize(ctx, action.client, catalog)
+	platform, err := platformutil.GetOrFindLocal(ctx, action.client, catalog.Namespace)
+
+	if err != nil {
+		return catalog, err
+	}
+
+	if platform.Status.Phase != v1.IntegrationPlatformPhaseReady {
+		// Wait the platform to be ready
+		return catalog, nil
+	}
+
+	return initialize(platform, catalog)
 }
 
-func initialize(ctx context.Context, c client.Client, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
+func initialize(platform *v1.IntegrationPlatform, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
 	target := catalog.DeepCopy()
 
-	imageName := fmt.Sprintf("camel-k-runtime-%s-builder-%s", catalog.Spec.Runtime.Provider, catalog.Spec.Runtime.Version)
+	imageName := fmt.Sprintf("camel-k-runtime-%s-builder-%s", catalog.Spec.Runtime.Provider, strings.ToLower(catalog.Spec.Runtime.Version))
 
-	platform, err := platformutil.GetOrFindLocal(ctx, c, catalog.Namespace)
-	if err != nil {
-		err = buildRuntimeBuilderImage(
-			catalog.Spec.GetQuarkusToolingImage(),
-			imageName,
-			platform.Spec.Build.Registry.Address,
-		)
-	}
+	// TODO: verify if the image already exists in the registry
+
+	err := buildRuntimeBuilderImage(
+		catalog.Spec.GetQuarkusToolingImage(),
+		imageName,
+		platform.Spec.Build.Registry.Address,
+	)
 
 	if err != nil {
 		target.Status.Phase = v1.CamelCatalogPhaseError
@@ -87,12 +97,15 @@ func initialize(ctx context.Context, c client.Client, catalog *v1.CamelCatalog) 
 		target.Status.Image = imageName
 	}
 
-	return target, err
+	return target, nil
 }
 
 // This func will take care to dynamically build an image that will contain the tools required
 // by the catalog build plus kamel binary and a maven wrapper required for the build.
 func buildRuntimeBuilderImage(baseImage, targetImage, registryAddress string) error {
+	if baseImage == "" {
+		return fmt.Errorf("Missing base image, likely catalog is not compatible with this Camel K version")
+	}
 	log.Infof("Making up Camel K builder container %s", targetImage)
 
 	newStdR, newStdW, pipeErr := os.Pipe()

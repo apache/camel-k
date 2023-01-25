@@ -41,5 +41,5 @@ func (action *monitorAction) CanHandle(catalog *v1.CamelCatalog) bool {
 }
 
 func (action *monitorAction) Handle(ctx context.Context, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
-	return initialize(ctx, action.client, catalog)
+	return catalog, nil
 }
