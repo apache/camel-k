@@ -91,5 +91,5 @@ jobs:
     - name: Deploy to ASF Snapshots Repository
       working-directory: java
       run: |
-        ./mvnw ${MAVEN_ARGS} clean deploy -DskipTests -DskipITs --settings .github/asf-deploy-settings.xml
+        mvn ${MAVEN_ARGS} clean deploy -DskipTests -DskipITs --settings .github/asf-deploy-settings.xml
 
