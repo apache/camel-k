@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.11.1...HEAD)
+
+**Closed issues:**
+
+- Set a more reasonable default for gomega eventually's polling interval [\#3992](https://github.com/apache/camel-k/issues/3992)
+- Automatic dependency scraping not working [\#3984](https://github.com/apache/camel-k/issues/3984)
+
 ## [v1.11.1](https://github.com/apache/camel-k/tree/v1.11.1) (2023-01-24)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.11.1...v1.11.1)
