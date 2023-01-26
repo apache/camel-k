@@ -35,7 +35,7 @@ import (
 func TestKamelCLIBind(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-cli-bind"
-		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+		Expect(KamelInstallWithIDAndKameletCatalog(operatorID, ns).Execute()).To(Succeed())
 		Expect(CreateTimerKamelet(ns, "test-timer-source")()).To(Succeed())
 
 		t.Run("bind timer to log", func(t *testing.T) {

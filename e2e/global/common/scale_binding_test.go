@@ -51,7 +51,7 @@ func TestKameletBindingScale(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		name := "binding"
 		operatorID := "camel-k-kamelet-scale"
-		Expect(KamelInstallWithID(operatorID, ns, "-w").Execute()).To(Succeed())
+		Expect(KamelInstallWithIDAndKameletCatalog(operatorID, ns, "-w").Execute()).To(Succeed())
 		Expect(KamelBindWithID(operatorID, ns, "timer-source?message=HelloBinding", "log-sink", "--name", name).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
