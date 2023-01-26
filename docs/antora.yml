@@ -34,11 +34,11 @@ asciidoc:
     camel-kamelets-docs-version: 0.10.x
     camel-k-runtime-version: 1.17.0-SNAPSHOT
     camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # from Makefile BUNDLE_CAMEL_APIS
-    camel-version: 3.19.0
-    camel-docs-version: 3.19.x
-    camel-quarkus-version: 2.14.0
-    camel-quarkus-docs-version: 2.14.x
-    quarkus-version: 2.14.0.Final
+    camel-version: 3.20.1
+    camel-docs-version: 3.20.x
+    camel-quarkus-version: 2.16.0
+    camel-quarkus-docs-version: 2.16.x
+    quarkus-version: 2.16.0.Final
     buildah-version: 1.23.3
     kaniko-version: 0.17.1
     kustomize-version: 4.5.4
