@@ -66,7 +66,7 @@ func TestErrorHandlerApplySource(t *testing.T) {
 	err = trait.Apply(e)
 	assert.Nil(t, err)
 	assert.Equal(t, `- error-handler:
-    ref: defaultErrorHandler
+    ref-error-handler: defaultErrorHandler
 `, e.Integration.Status.GeneratedSources[0].Content)
 }
 
