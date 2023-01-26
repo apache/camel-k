@@ -94,7 +94,7 @@ func (t *errorHandlerTrait) addErrorHandlerDependencies(e *Environment, uri stri
 func (t *errorHandlerTrait) addErrorHandlerAsSource(e *Environment) error {
 	flowErrorHandler := map[string]interface{}{
 		"error-handler": map[string]string{
-			"ref": t.ErrorHandlerRef,
+			"ref-error-handler": t.ErrorHandlerRef,
 		},
 	}
 	encodedFlowErrorHandler, err := yaml.Marshal([]map[string]interface{}{flowErrorHandler})
