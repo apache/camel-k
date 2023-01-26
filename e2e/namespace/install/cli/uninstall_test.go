@@ -51,8 +51,8 @@ func TestBasicUninstall(t *testing.T) {
 		}
 
 		if !uninstallViaOLM {
-		Eventually(Role(ns)).Should(BeNil())
-		Eventually(RoleBinding(ns)).Should(BeNil())
+			Eventually(Role(ns)).Should(BeNil())
+			Eventually(RoleBinding(ns)).Should(BeNil())
 			Eventually(ServiceAccount(ns, "camel-k-operator")).Should(BeNil())
 		} else {
 			Eventually(Role(ns)).ShouldNot(BeNil())
@@ -130,7 +130,7 @@ func TestUninstallSkipKamelets(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		// a successful new installation
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+		Expect(KamelInstallWithIDAndKameletCatalog(operatorID, ns).Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		Eventually(KameletList(ns)).ShouldNot(BeEmpty())
 		// on uninstall it should remove everything except kamelets

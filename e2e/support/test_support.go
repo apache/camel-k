@@ -228,10 +228,14 @@ func KamelInstall(namespace string, args ...string) *cobra.Command {
 }
 
 func KamelInstallWithID(operatorID string, namespace string, args ...string) *cobra.Command {
-	return KamelInstallWithContext(TestContext, operatorID, namespace, args...)
+	return kamelInstallWithContext(TestContext, operatorID, namespace, true, args...)
 }
 
-func KamelInstallWithContext(ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
+func KamelInstallWithIDAndKameletCatalog(operatorID string, namespace string, args ...string) *cobra.Command {
+	return kamelInstallWithContext(TestContext, operatorID, namespace, false, args...)
+}
+
+func kamelInstallWithContext(ctx context.Context, operatorID string, namespace string, skipKameletCatalog bool, args ...string) *cobra.Command {
 	var installArgs []string
 
 	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
@@ -250,10 +254,7 @@ func KamelInstallWithContext(ctx context.Context, operatorID string, namespace s
 		installArgs = []string{"install", "-n", namespace, "--operator-id", operatorID}
 	}
 
-	// Default behavior, we don't install Kamelet catalog to spare resources
-	// They need to be installed on purpose if required to be tested
-	enableKamelets := os.Getenv("CAMEL_K_TEST_KAMELET_CATALOG_INSTALL") == "true"
-	if !enableKamelets {
+	if skipKameletCatalog {
 		installArgs = append(installArgs, "--operator-env-vars", "KAMEL_INSTALL_DEFAULT_KAMELETS=false")
 	}
 

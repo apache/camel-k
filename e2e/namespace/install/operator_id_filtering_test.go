@@ -53,11 +53,11 @@ func TestOperatorIDFiltering(t *testing.T) {
 		WithNewTestNamespace(t, func(nsop1 string) {
 			WithNewTestNamespace(t, func(nsop2 string) {
 				operator1 := "operator-1"
-				Expect(KamelInstallWithID(operator1, nsop1, "--global", "--force").Execute()).To(Succeed())
+				Expect(KamelInstallWithIDAndKameletCatalog(operator1, nsop1, "--global", "--force").Execute()).To(Succeed())
 				Eventually(PlatformPhase(nsop1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 				operator2 := "operator-2"
-				Expect(KamelInstallWithID(operator2, nsop2, "--global", "--force").Execute()).To(Succeed())
+				Expect(KamelInstallWithIDAndKameletCatalog(operator2, nsop2, "--global", "--force").Execute()).To(Succeed())
 				Eventually(PlatformPhase(nsop2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 				t.Run("Operators ignore non-scoped integrations", func(t *testing.T) {
