@@ -123,3 +123,8 @@ runs:
         replacesArtifacts: true
         tag: ${{ env.VERSION }}
         commit: main
+    # If release was okey, we can also release the CRD Fabric8 extensions
+    - name: Deploy Camel-K-CRDs to ASF Snapshots Repository
+      working-directory: java
+      run: |
+        mvn clean deploy -DskipTests -DskipITs --settings .github/asf-deploy-settings.xml
