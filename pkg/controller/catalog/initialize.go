@@ -27,10 +27,13 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/builder"
+	"github.com/apache/camel-k/pkg/client"
 	platformutil "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/log"
 	spectrum "github.com/container-tools/spectrum/pkg/builder"
+	gcrv1 "github.com/google/go-containerregistry/pkg/v1"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -63,21 +66,59 @@ func (action *initializeAction) Handle(ctx context.Context, catalog *v1.CamelCat
 		return catalog, nil
 	}
 
-	return initialize(platform, catalog)
+	// Make basic options for building image in the registry
+	options, err := makeSpectrumOptions(ctx, action.client, platform.Namespace, platform.Spec.Build.Registry)
+	if err != nil {
+		return catalog, err
+	}
+
+	return initialize(options, platform.Spec.Build.Registry.Address, catalog)
 }
 
-func initialize(platform *v1.IntegrationPlatform, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
+func initialize(options spectrum.Options, registryAddress string, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
 	target := catalog.DeepCopy()
-
-	imageName := fmt.Sprintf("camel-k-runtime-%s-builder-%s", catalog.Spec.Runtime.Provider, strings.ToLower(catalog.Spec.Runtime.Version))
-
-	// TODO: verify if the image already exists in the registry
-
-	err := buildRuntimeBuilderImage(
-		catalog.Spec.GetQuarkusToolingImage(),
-		imageName,
-		platform.Spec.Build.Registry.Address,
+	imageName := fmt.Sprintf(
+		"%s/camel-k-runtime-%s-builder:%s",
+		registryAddress,
+		catalog.Spec.Runtime.Provider,
+		strings.ToLower(catalog.Spec.Runtime.Version),
 	)
+
+	newStdR, newStdW, pipeErr := os.Pipe()
+	defer util.CloseQuietly(newStdW)
+
+	if pipeErr != nil {
+		// In the unlikely case of an error, use stdout instead of aborting
+		log.Errorf(pipeErr, "Unable to remap I/O. Spectrum messages will be displayed on the stdout")
+		newStdW = os.Stdout
+	}
+	go readSpectrumLogs(newStdR)
+
+	// We use the future target image as a base just for the sake of pulling and verify it exists
+	options.Base = imageName
+	options.Stderr = newStdW
+	options.Stdout = newStdW
+
+	if imageExists(options) {
+		target.Status.Phase = v1.CamelCatalogPhaseReady
+		target.Status.SetCondition(
+			v1.CamelCatalogConditionReady,
+			corev1.ConditionTrue,
+			"Builder Image",
+			"Container image exists on registry",
+		)
+		target.Status.Image = imageName
+
+		return target, nil
+	}
+
+	// Now we properly set the base and the target image
+	options.Base = catalog.Spec.GetQuarkusToolingImage()
+	options.Target = imageName
+	// TODO properly build in the container withouth being root
+	options.RunAs = "0"
+
+	err := buildRuntimeBuilderImage(options)
 
 	if err != nil {
 		target.Status.Phase = v1.CamelCatalogPhaseError
@@ -100,45 +141,35 @@ func initialize(platform *v1.IntegrationPlatform, catalog *v1.CamelCatalog) (*v1
 	return target, nil
 }
 
+func imageExists(options spectrum.Options) bool {
+	log.Infof("Checking if Camel K builder container %s already exists...", options.Base)
+	ctrImg, err := spectrum.Pull(options)
+	if ctrImg != nil && err == nil {
+		var hash gcrv1.Hash
+		if hash, err = ctrImg.Digest(); err != nil {
+			log.Errorf(err, "Cannot calculate digest")
+			return false
+		}
+		log.Infof("Camel K builder container with digest %s", hash.String())
+		return true
+	}
+
+	log.Errorf(err, "Couldn't pull image")
+	return false
+}
+
 // This func will take care to dynamically build an image that will contain the tools required
 // by the catalog build plus kamel binary and a maven wrapper required for the build.
-func buildRuntimeBuilderImage(baseImage, targetImage, registryAddress string) error {
-	if baseImage == "" {
+func buildRuntimeBuilderImage(options spectrum.Options) error {
+	if options.Base == "" {
 		return fmt.Errorf("Missing base image, likely catalog is not compatible with this Camel K version")
 	}
-	log.Infof("Making up Camel K builder container %s", targetImage)
-
-	newStdR, newStdW, pipeErr := os.Pipe()
-	defer util.CloseQuietly(newStdW)
-
-	if pipeErr != nil {
-		// In the unlikely case of an error, use stdout instead of aborting
-		log.Errorf(pipeErr, "Unable to remap I/O. Spectrum messages will be displayed on the stdout")
-		newStdW = os.Stdout
-	}
-
-	// TODO provide proper configuration as in pkg/builder/spectrum.Do()
-	remoteTarget := fmt.Sprintf("%s/%s", registryAddress, targetImage)
-
-	options := spectrum.Options{
-		PullInsecure:    true,
-		PushInsecure:    true,
-		PullConfigDir:   "",
-		PushConfigDir:   "",
-		Base:            baseImage,
-		Target:          remoteTarget,
-		Stdout:          newStdW,
-		Stderr:          newStdW,
-		Recursive:       true,
-		ClearEntrypoint: true,
-		RunAs:           "0",
-	}
+	log.Infof("Making up Camel K builder container %s", options.Target)
 
 	if jobs := runtime.GOMAXPROCS(0); jobs > 1 {
 		options.Jobs = jobs
 	}
 
-	go readSpectrumLogs(newStdR)
 	_, err := spectrum.Build(options,
 		"/usr/local/bin/kamel:/usr/local/bin/",
 		"/usr/share/maven/mvnw/:/usr/share/maven/mvnw/",
@@ -157,4 +188,23 @@ func readSpectrumLogs(newStdOut io.Reader) {
 		line := scanner.Text()
 		log.Infof(line)
 	}
+}
+
+func makeSpectrumOptions(ctx context.Context, c client.Client, platformNamespace string, registry v1.RegistrySpec) (spectrum.Options, error) {
+	options := spectrum.Options{}
+	var err error
+	registryConfigDir := ""
+	if registry.Secret != "" {
+		registryConfigDir, err = builder.MountSecret(ctx, c, platformNamespace, registry.Secret)
+		if err != nil {
+			return options, err
+		}
+	}
+	options.PullInsecure = registry.Insecure
+	options.PushInsecure = registry.Insecure
+	options.PullConfigDir = registryConfigDir
+	options.PushConfigDir = registryConfigDir
+	options.Recursive = true
+
+	return options, nil
 }

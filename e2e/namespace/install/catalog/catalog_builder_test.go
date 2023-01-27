@@ -46,9 +46,13 @@ func TestCamelCatalogBuilder(t *testing.T) {
 		catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
 		Eventually(CamelCatalog(ns, catalogName)).ShouldNot(BeNil())
 		catalog := CamelCatalog(ns, catalogName)()
-		imageName := fmt.Sprintf("camel-k-runtime-%s-builder-%s", catalog.Spec.Runtime.Provider, strings.ToLower(catalog.Spec.Runtime.Version))
+		imageName := fmt.Sprintf("camel-k-runtime-%s-builder:%s", catalog.Spec.Runtime.Provider, strings.ToLower(catalog.Spec.Runtime.Version))
 		Eventually(CamelCatalogPhase(ns, catalogName), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
-		Eventually(CamelCatalogImage(ns, catalogName), TestTimeoutMedium).Should(Equal(imageName))
+		Eventually(CamelCatalogImage(ns, catalogName), TestTimeoutMedium).Should(ContainSubstring(imageName))
+		// The container may have been created by previous test
+		Eventually(CamelCatalogCondition(ns, catalogName, v1.CamelCatalogConditionReady)().Message).Should(
+			Or(Equal("Container image successfully built"), Equal("Container image exists on registry")),
+		)
 
 		// Run an integration with a catalog not compatible
 		// The operator should create the catalog, but fail on reconciliation and the integration should fail as well
@@ -74,5 +78,21 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			// Clean up
 			Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
 		})
+	})
+
+	WithNewTestNamespace(t, func(ns string) {
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns, "--operator-env-vars", "KAMEL_INSTALL_DEFAULT_KAMELETS=false").Execute()).To(Succeed())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+		Eventually(Platform(ns)).ShouldNot(BeNil())
+		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
+			Should(Equal(corev1.ConditionTrue))
+		catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
+		Eventually(CamelCatalog(ns, catalogName)).ShouldNot(BeNil())
+		catalog := CamelCatalog(ns, catalogName)()
+		imageName := fmt.Sprintf("camel-k-runtime-%s-builder:%s", catalog.Spec.Runtime.Provider, strings.ToLower(catalog.Spec.Runtime.Version))
+		Eventually(CamelCatalogPhase(ns, catalogName), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
+		Eventually(CamelCatalogImage(ns, catalogName), TestTimeoutMedium).Should(ContainSubstring(imageName))
+		Eventually(CamelCatalogCondition(ns, catalogName, v1.CamelCatalogConditionReady)().Message).Should(Equal("Container image exists on registry"))
 	})
 }
