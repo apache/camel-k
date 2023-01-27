@@ -22,10 +22,17 @@ inputs:
     type: string
   secretGithubToken:
     required: true
+  goVersion:
+    required: true
+    type: string
 
 runs:
   using: "composite"
   steps:
+    - name: Install Go ${{ inputs.goVersion }}
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ inputs.goVersion }}
     - name: Generate changelog
       uses: ./.github/actions/changelog
       with:
