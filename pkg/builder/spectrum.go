@@ -99,7 +99,7 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 
 	registryConfigDir := ""
 	if t.task.Registry.Secret != "" {
-		registryConfigDir, err = mountSecret(ctx, t.c, t.build.Namespace, t.task.Registry.Secret)
+		registryConfigDir, err = MountSecret(ctx, t.c, t.build.Namespace, t.task.Registry.Secret)
 		if err != nil {
 			return status.Failed(err)
 		}
@@ -158,7 +158,7 @@ func readSpectrumLogs(newStdOut io.Reader) {
 	}
 }
 
-func mountSecret(ctx context.Context, c client.Client, namespace, name string) (string, error) {
+func MountSecret(ctx context.Context, c client.Client, namespace, name string) (string, error) {
 	dir, err := ioutil.TempDir("", "spectrum-secret-")
 	if err != nil {
 		return "", err
