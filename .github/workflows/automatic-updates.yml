@@ -39,6 +39,7 @@ jobs:
       with:
         branch-ref: "main"
         secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
+        goVersion: "1.18.x"
 
   v1_10_x:
     if: github.repository == 'apache/camel-k'
@@ -55,6 +56,7 @@ jobs:
       with:
         branch-ref: "release-1.10.x"
         secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
+        goVersion: "1.17.x"
 
   v1_11_x:
     if: github.repository == 'apache/camel-k'
@@ -71,3 +73,4 @@ jobs:
       with:
         branch-ref: "release-1.11.x"
         secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
+        goVersion: "1.17.x"
