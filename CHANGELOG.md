@@ -6,8 +6,10 @@
 
 **Closed issues:**
 
+- Camel 3.20 incompatibilities [\#4011](https://github.com/apache/camel-k/issues/4011)
 - Set a more reasonable default for gomega eventually's polling interval [\#3992](https://github.com/apache/camel-k/issues/3992)
 - Automatic dependency scraping not working [\#3984](https://github.com/apache/camel-k/issues/3984)
+- Facing an error while Invoking a SOAP service method from Camel-K [\#3973](https://github.com/apache/camel-k/issues/3973)
 
 ## [v1.11.1](https://github.com/apache/camel-k/tree/v1.11.1) (2023-01-24)
 
