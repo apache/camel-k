@@ -93,21 +93,21 @@ __kamel_kubectl_get_servicebinding() {
     local service_names
     local services_list
     local namespace_condition
-    
+
     if command -v awk &> /dev/null ; then
         local namespace_config=$(${COMP_WORDS[0]} config --list | awk '/default-namespace/{print $2}')
         if [ ! -z $namespace_config ]; then
             namespace_condition=$(echo "--namespace ${namespace_config}")
         fi
     fi
-    
+
     local namespace_flag=$(echo "${flaghash['-n']}${flaghash['--namespace']}")
     if [ ! -z $namespace_flag ]; then
         namespace_condition=$(echo "--namespace ${namespace_flag}")
     fi
 
     template="{{ range .items  }}{{ .metadata.name }} {{ end }}"
-    template_gvkn="{{ range .items  }}{{ .kind  }}/{{ .apiVersion  }}/{{ .metadata.name }} {{ end }}" 
+    template_gvkn="{{ range .items  }}{{ .kind  }}/{{ .apiVersion  }}/{{ .metadata.name }} {{ end }}"
     if kubectl_out=$(kubectl get -o template --template="${template}" ${namespace_condition} crd -l service.binding/provisioned-service=true 2>/dev/null); then
         kubectl_out="${kubectl_out// /,}"
         service_names="${kubectl_out}servicebinding"
@@ -129,14 +129,14 @@ __kamel_kubectl_get_configmap() {
     local template
     local kubectl_out
     local namespace_condition
-    
+
     if command -v awk &> /dev/null ; then
         local namespace_config=$(${COMP_WORDS[0]} config --list | awk '/default-namespace/{print $2}')
         if [ ! -z $namespace_config ]; then
             namespace_condition=$(echo "--namespace ${namespace_config}")
         fi
     fi
-    
+
     local namespace_flag=$(echo "${flaghash['-n']}${flaghash['--namespace']}")
     if [ ! -z $namespace_flag ]; then
         namespace_condition=$(echo "--namespace ${namespace_flag}")
@@ -153,14 +153,14 @@ __kamel_kubectl_get_secret() {
     local template
     local kubectl_out
     local namespace_condition
-    
+
     if command -v awk &> /dev/null ; then
         local namespace_config=$(${COMP_WORDS[0]} config --list | awk '/default-namespace/{print $2}')
         if [ ! -z $namespace_config ]; then
             namespace_condition=$(echo "--namespace ${namespace_config}")
         fi
     fi
-    
+
     local namespace_flag=$(echo "${flaghash['-n']}${flaghash['--namespace']}")
     if [ ! -z $namespace_flag ]; then
         namespace_condition=$(echo "--namespace ${namespace_flag}")
@@ -177,14 +177,14 @@ __kamel_kubectl_get_integrations() {
     local template
     local kubectl_out
     local namespace_condition
-    
+
     if command -v awk &> /dev/null ; then
         local namespace_config=$(${COMP_WORDS[0]} config --list | awk '/default-namespace/{print $2}')
         if [ ! -z $namespace_config ]; then
             namespace_condition=$(echo "--namespace ${namespace_config}")
         fi
     fi
-    
+
     local namespace_flag=$(echo "${flaghash['-n']}${flaghash['--namespace']}")
     if [ ! -z $namespace_flag ]; then
         namespace_condition=$(echo "--namespace ${namespace_flag}")
@@ -201,14 +201,14 @@ __kamel_kubectl_get_integrationkits() {
     local template
     local kubectl_out
     local namespace_condition
-    
+
     if command -v awk &> /dev/null ; then
         local namespace_config=$(${COMP_WORDS[0]} config --list | awk '/default-namespace/{print $2}')
         if [ ! -z $namespace_config ]; then
             namespace_condition=$(echo "--namespace ${namespace_config}")
         fi
     fi
-    
+
     local namespace_flag=$(echo "${flaghash['-n']}${flaghash['--namespace']}")
     if [ ! -z $namespace_flag ]; then
         namespace_condition=$(echo "--namespace ${namespace_flag}")
@@ -225,14 +225,14 @@ __kamel_kubectl_get_non_platform_integrationkits() {
     local template
     local kubectl_out
     local namespace_condition
-    
+
     if command -v awk &> /dev/null ; then
         local namespace_config=$(${COMP_WORDS[0]} config --list | awk '/default-namespace/{print $2}')
         if [ ! -z $namespace_config ]; then
             namespace_condition=$(echo "--namespace ${namespace_config}")
         fi
     fi
-    
+
     local namespace_flag=$(echo "${flaghash['-n']}${flaghash['--namespace']}")
     if [ ! -z $namespace_flag ]; then
         namespace_condition=$(echo "--namespace ${namespace_flag}")
@@ -250,14 +250,14 @@ __kamel_kubectl_get_kamelets() {
     local template
     local kubectl_out
     local namespace_condition
-    
+
     if command -v awk &> /dev/null ; then
         local namespace_config=$(${COMP_WORDS[0]} config --list | awk '/default-namespace/{print $2}')
         if [ ! -z $namespace_config ]; then
             namespace_condition=$(echo "--namespace ${namespace_config}")
         fi
     fi
-    
+
     local namespace_flag=$(echo "${flaghash['-n']}${flaghash['--namespace']}")
     if [ ! -z $namespace_flag ]; then
         namespace_condition=$(echo "--namespace ${namespace_flag}")
@@ -274,14 +274,14 @@ __kamel_kubectl_get_non_bundled_non_readonly_kamelets() {
     local template
     local kubectl_out
     local namespace_condition
-    
+
     if command -v awk &> /dev/null ; then
         local namespace_config=$(${COMP_WORDS[0]} config --list | awk '/default-namespace/{print $2}')
         if [ ! -z $namespace_config ]; then
             namespace_condition=$(echo "--namespace ${namespace_config}")
         fi
     fi
-    
+
     local namespace_flag=$(echo "${flaghash['-n']}${flaghash['--namespace']}")
     if [ ! -z $namespace_flag ]; then
         namespace_condition=$(echo "--namespace ${namespace_flag}")
@@ -430,7 +430,7 @@ func configureBashAnnotationForFlag(command *cobra.Command, flagName string, ann
 func computeCamelDependencies() string {
 	catalog, err := camel.DefaultCatalog()
 	if err != nil || catalog == nil {
-		catalog = camel.NewRuntimeCatalog(v1.CamelCatalog{}.Spec)
+		catalog = camel.NewRuntimeCatalog(v1.CamelCatalog{})
 	}
 
 	results := make([]string, 0, len(catalog.Artifacts)+len(catalog.Loaders))
