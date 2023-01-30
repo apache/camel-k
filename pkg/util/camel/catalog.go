@@ -156,7 +156,7 @@ func GenerateCatalogCommon(
 		return yaml2.Unmarshal(content, &catalog)
 	})
 
-	return NewRuntimeCatalog(catalog.Spec), err
+	return NewRuntimeCatalog(catalog), err
 }
 
 func generateMavenProject(runtimeVersion string, providerDependencies []maven.Dependency) maven.Project {

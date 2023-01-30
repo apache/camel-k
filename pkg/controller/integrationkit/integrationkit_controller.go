@@ -260,7 +260,7 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 		NewErrorAction(),
 	}
 
-	var targetPhase v1.IntegrationKitPhase
+	targetPhase := instance.Status.Phase
 
 	for _, a := range actions {
 		a.InjectClient(r.client)

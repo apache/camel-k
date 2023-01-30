@@ -42,7 +42,7 @@ var (
 func findBestMatch(catalogs []v1.CamelCatalog, runtime v1.RuntimeSpec) (*RuntimeCatalog, error) {
 	for _, catalog := range catalogs {
 		if catalog.Spec.Runtime.Version == runtime.Version && catalog.Spec.Runtime.Provider == runtime.Provider {
-			return NewRuntimeCatalog(catalog.Spec), nil
+			return NewRuntimeCatalog(catalog), nil
 		}
 	}
 
@@ -54,7 +54,7 @@ func findBestMatch(catalogs []v1.CamelCatalog, runtime v1.RuntimeSpec) (*Runtime
 	cc := newCatalogVersionCollection(catalogs)
 	for _, c := range cc {
 		if rc.Check(c.RuntimeVersion) {
-			return NewRuntimeCatalog(c.Catalog.Spec), nil
+			return NewRuntimeCatalog(*c.Catalog), nil
 		}
 	}
 

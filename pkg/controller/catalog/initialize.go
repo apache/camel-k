@@ -31,7 +31,6 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	platformutil "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/log"
 	spectrum "github.com/container-tools/spectrum/pkg/builder"
 	gcrv1 "github.com/google/go-containerregistry/pkg/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -89,7 +88,7 @@ func initialize(options spectrum.Options, registryAddress string, catalog *v1.Ca
 
 	if pipeErr != nil {
 		// In the unlikely case of an error, use stdout instead of aborting
-		log.Errorf(pipeErr, "Unable to remap I/O. Spectrum messages will be displayed on the stdout")
+		Log.Errorf(pipeErr, "Unable to remap I/O. Spectrum messages will be displayed on the stdout")
 		newStdW = os.Stdout
 	}
 	go readSpectrumLogs(newStdR)
@@ -142,19 +141,19 @@ func initialize(options spectrum.Options, registryAddress string, catalog *v1.Ca
 }
 
 func imageExists(options spectrum.Options) bool {
-	log.Infof("Checking if Camel K builder container %s already exists...", options.Base)
+	Log.Infof("Checking if Camel K builder container %s already exists...", options.Base)
 	ctrImg, err := spectrum.Pull(options)
 	if ctrImg != nil && err == nil {
 		var hash gcrv1.Hash
 		if hash, err = ctrImg.Digest(); err != nil {
-			log.Errorf(err, "Cannot calculate digest")
+			Log.Errorf(err, "Cannot calculate digest")
 			return false
 		}
-		log.Infof("Camel K builder container with digest %s", hash.String())
+		Log.Infof("found Camel K builder container with digest %s", hash.String())
 		return true
 	}
 
-	log.Errorf(err, "Couldn't pull image")
+	Log.Errorf(err, "Couldn't pull image")
 	return false
 }
 
@@ -164,7 +163,7 @@ func buildRuntimeBuilderImage(options spectrum.Options) error {
 	if options.Base == "" {
 		return fmt.Errorf("Missing base image, likely catalog is not compatible with this Camel K version")
 	}
-	log.Infof("Making up Camel K builder container %s", options.Target)
+	Log.Infof("Making up Camel K builder container %s", options.Target)
 
 	if jobs := runtime.GOMAXPROCS(0); jobs > 1 {
 		options.Jobs = jobs
@@ -186,7 +185,7 @@ func readSpectrumLogs(newStdOut io.Reader) {
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		log.Infof(line)
+		Log.Infof(line)
 	}
 }
 

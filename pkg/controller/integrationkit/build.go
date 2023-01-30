@@ -87,30 +87,6 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 			return nil, errors.New("undefined camel catalog")
 		}
 
-		catalog, err := kubernetes.GetCamelCatalog(
-			ctx,
-			action.client,
-			fmt.Sprintf("camel-catalog-%s-quarkus", env.CamelCatalog.Runtime.Version),
-			kit.Namespace,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		if catalog.Status.Phase == v1.CamelCatalogPhaseError {
-			kit.Status.Phase = v1.IntegrationKitPhaseError
-			kit.Status.SetErrorCondition(
-				v1.IntegrationKitConditionCatalogAvailable,
-				fmt.Sprintf("Camel Catalog %s error", catalog.Spec.Runtime.Version),
-				errors.Errorf("%s", catalog.Status.GetCondition(v1.CamelCatalogConditionReady).Reason),
-			)
-			return kit, nil
-		}
-		if catalog.Status.Phase != v1.CamelCatalogPhaseReady {
-			kit.Status.Phase = v1.IntegrationKitPhaseWaitingForCatalog
-			return kit, nil
-		}
-
 		labels := kubernetes.FilterCamelCreatorLabels(kit.Labels)
 		labels[v1.IntegrationKitLayoutLabel] = kit.Labels[v1.IntegrationKitLayoutLabel]
 
@@ -137,6 +113,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 
 			if buildStrategy == v1.BuildStrategyPod {
 				// We must ensure the expected service account is available or create it
+				// TODO make it singleton
 				err = platform.CreateBuilderServiceAccount(env.Ctx, env.Client, env.Platform)
 				if err != nil {
 					return nil, errors.Wrap(err, "Error while creating Camel K Builder service account")

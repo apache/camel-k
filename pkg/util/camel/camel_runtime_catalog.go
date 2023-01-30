@@ -23,10 +23,11 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// NewRuntimeCatalog creates a runtime catalog with the given catalog spec.
-func NewRuntimeCatalog(spec v1.CamelCatalogSpec) *RuntimeCatalog {
+// NewRuntimeCatalog creates a runtime catalog with the given catalog.
+func NewRuntimeCatalog(cat v1.CamelCatalog) *RuntimeCatalog {
 	catalog := RuntimeCatalog{}
-	catalog.CamelCatalogSpec = spec
+	catalog.CamelCatalogSpec = cat.Spec
+	catalog.CamelCatalogStatus = cat.Status
 	catalog.artifactByScheme = make(map[string]string)
 	catalog.artifactByDataFormat = make(map[string]string)
 	catalog.schemesByID = make(map[string]v1.CamelScheme)
