@@ -281,6 +281,14 @@ func createNominalJolokiaTest() (*jolokiaTrait, *Environment) {
 			Spec: v1.IntegrationKitSpec{
 				Profile: v1.TraitProfileKubernetes,
 			},
+			Status: v1.IntegrationKitStatus{
+				Artifacts: []v1.Artifact{
+					{
+						ID:     "org.jolokia.jolokia-jvm-1.7.1.jar",
+						Target: "dependencies/lib/main/org.jolokia.jolokia-jvm-1.7.1.jar",
+					},
+				},
+			},
 		},
 		Resources: kubernetes.NewCollection(
 			&appsv1.Deployment{
