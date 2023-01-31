@@ -1634,6 +1634,19 @@ func CreateCamelCatalog(catalog *v1.CamelCatalog) func() error {
 	}
 }
 
+func DeleteCamelCatalog(ns, name string) func() bool {
+	return func() bool {
+		cat := CamelCatalog(ns, name)()
+		if cat == nil {
+			return true
+		}
+		if err := TestClient().Delete(TestContext, cat); err != nil {
+			log.Error(err, "Got error while deleting the catalog")
+		}
+		return true
+	}
+}
+
 func CamelCatalogPhase(ns, name string) func() v1.CamelCatalogPhase {
 	return func() v1.CamelCatalogPhase {
 		c := CamelCatalog(ns, name)()

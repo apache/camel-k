@@ -62,6 +62,11 @@ func TestApplyCamelTraitSucceeds(t *testing.T) {
 	assert.Equal(t, "0.0.1", environment.RuntimeVersion)
 	assert.Equal(t, "0.0.1", environment.Integration.Status.RuntimeVersion)
 	assert.Equal(t, "0.0.1", environment.IntegrationKit.Status.RuntimeVersion)
+
+	// Test regex as well
+	assert.True(t, exactVersionRegexp.MatchString("1.2.3"))
+	assert.True(t, exactVersionRegexp.MatchString("1.0.0-SNAPSHOT"))
+	assert.False(t, exactVersionRegexp.MatchString("wroong"))
 }
 
 func TestApplyCamelTraitWithoutEnvironmentCatalogAndUnmatchableVersionFails(t *testing.T) {

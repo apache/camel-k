@@ -149,11 +149,11 @@ func imageExists(options spectrum.Options) bool {
 			Log.Errorf(err, "Cannot calculate digest")
 			return false
 		}
-		Log.Infof("found Camel K builder container with digest %s", hash.String())
+		Log.Infof("Found Camel K builder container with digest %s", hash.String())
 		return true
 	}
 
-	Log.Errorf(err, "Couldn't pull image")
+	Log.Infof("Couldn't pull image due to %s", err.Error())
 	return false
 }
 
@@ -169,6 +169,7 @@ func buildRuntimeBuilderImage(options spectrum.Options) error {
 		options.Jobs = jobs
 	}
 
+	// TODO support also S2I
 	_, err := spectrum.Build(options,
 		"/usr/local/bin/kamel:/usr/local/bin/",
 		"/usr/share/maven/mvnw/:/usr/share/maven/mvnw/",
