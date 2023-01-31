@@ -26,7 +26,7 @@ import (
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/api/errors"
 )
 
 // NewInitializeAction creates a new initialization handling action for the kit.
@@ -43,7 +43,8 @@ func (action *initializeAction) Name() string {
 }
 
 func (action *initializeAction) CanHandle(kit *v1.IntegrationKit) bool {
-	return kit.Status.Phase == v1.IntegrationKitPhaseInitialization
+	return kit.Status.Phase == v1.IntegrationKitPhaseInitialization ||
+		kit.Status.Phase == v1.IntegrationKitPhaseWaitingForCatalog
 }
 
 func (action *initializeAction) Handle(ctx context.Context, kit *v1.IntegrationKit) (*v1.IntegrationKit, error) {
@@ -52,11 +53,9 @@ func (action *initializeAction) Handle(ctx context.Context, kit *v1.IntegrationK
 		return nil, err
 	}
 
-	if kit.Spec.Image == "" {
-		// by default the kit should be built
-		kit.Status.Phase = v1.IntegrationKitPhaseBuildSubmitted
-	} else {
+	kit.Status.Version = defaults.Version
 
+	if kit.Spec.Image == "" {
 		// Wait for CamelCatalog to be ready
 		catalog, err := kubernetes.GetCamelCatalog(
 			ctx,
@@ -64,8 +63,14 @@ func (action *initializeAction) Handle(ctx context.Context, kit *v1.IntegrationK
 			fmt.Sprintf("camel-catalog-%s", strings.ToLower(env.RuntimeVersion)),
 			kit.Namespace,
 		)
+
 		if err != nil {
-			Log.Infof("Camel Catalog - could not retrieve catalog %s", err.Error())
+			if errors.IsNotFound(err) {
+				// If the catalog is not available, likely it was required to be created
+				// by Integration trait, so we'll need to wait for it the be available
+				kit.Status.Phase = v1.IntegrationKitPhaseWaitingForCatalog
+				return kit, nil
+			}
 			return nil, err
 		}
 
@@ -74,15 +79,18 @@ func (action *initializeAction) Handle(ctx context.Context, kit *v1.IntegrationK
 			kit.Status.SetErrorCondition(
 				v1.IntegrationKitConditionCatalogAvailable,
 				fmt.Sprintf("Camel Catalog %s error", catalog.Spec.Runtime.Version),
-				errors.Errorf("%s", catalog.Status.GetCondition(v1.CamelCatalogConditionReady).Reason),
+				fmt.Errorf("%s", catalog.Status.GetCondition(v1.CamelCatalogConditionReady).Reason),
 			)
 			return kit, nil
 		}
+
 		if catalog.Status.Phase != v1.CamelCatalogPhaseReady {
 			kit.Status.Phase = v1.IntegrationKitPhaseWaitingForCatalog
 			return kit, nil
 		}
-
+		// now the kit can be built
+		kit.Status.Phase = v1.IntegrationKitPhaseBuildSubmitted
+	} else {
 		// but in case it has been created from an image, mark the
 		// kit as ready
 		kit.Status.Phase = v1.IntegrationKitPhaseReady
@@ -90,7 +98,6 @@ func (action *initializeAction) Handle(ctx context.Context, kit *v1.IntegrationK
 		// and set the image to be used
 		kit.Status.Image = kit.Spec.Image
 	}
-	kit.Status.Version = defaults.Version
 
 	return kit, nil
 }

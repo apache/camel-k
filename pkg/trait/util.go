@@ -71,7 +71,7 @@ func (u Options) Get(id string) (map[string]interface{}, bool) {
 	return nil, false
 }
 
-var exactVersionRegexp = regexp.MustCompile(`^(\d+)\.(\d+)\.([\w-.]+)$`)
+var exactVersionRegexp = regexp.MustCompile(`^(\d+)\.(\d+)\.(\d+)([\w-.]*)$`)
 
 // getIntegrationKit retrieves the kit set on the integration.
 func getIntegrationKit(ctx context.Context, c client.Client, integration *v1.Integration) (*v1.IntegrationKit, error) {

@@ -132,7 +132,7 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 			}
 
 			// sanitize catalog name
-			catalogName := "camel-catalog-" + strings.ToLower(runtimeVersion) + "-" + string(runtime.Provider)
+			catalogName := "camel-catalog-" + strings.ToLower(runtimeVersion)
 
 			cx := v1.NewCamelCatalogWithSpecs(ns, catalogName, catalog.CamelCatalogSpec)
 			cx.Labels = make(map[string]string)
