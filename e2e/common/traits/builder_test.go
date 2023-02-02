@@ -49,7 +49,7 @@ func TestBuilderTrait(t *testing.T) {
 
 			integrationKitName := IntegrationKit(ns, name)()
 			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
-			Eventually(Pod(ns, builderKitName), TestTimeoutShort).Should(Not(BeNil()))
+			Eventually(BuilderPod(ns, builderKitName), TestTimeoutShort).Should(Not(BeNil()))
 
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
