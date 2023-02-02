@@ -238,7 +238,7 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if !isOfflineCommand(cmd) && o.OperatorID != "" {
-		if err := verifyOperatorID(o.Context, client, o.OperatorID, cmd.OutOrStdout()); err != nil {
+		if err := verifyOperatorID(o.Context, client, o.OperatorID); err != nil {
 			if o.Force {
 				o.PrintfVerboseErrf(cmd, "%s, use --force option or make sure to use a proper operator id", err.Error())
 			} else {

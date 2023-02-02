@@ -22,7 +22,6 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"reflect"
 	"strings"
@@ -241,11 +240,10 @@ func fieldByMapstructureTagName(target reflect.Value, tagName string) (reflect.S
 	return reflect.StructField{}, false
 }
 
-func verifyOperatorID(ctx context.Context, client client.Client, operatorID string, out io.Writer) error {
+func verifyOperatorID(ctx context.Context, client client.Client, operatorID string) error {
 	if pl, err := platformutil.LookupForPlatformName(ctx, client, operatorID); err != nil {
 		if k8serrors.IsForbidden(err) {
-			_, printErr := fmt.Fprintf(out, "Unable to verify existence of operator id [%s] due to lack of user privileges\n", operatorID)
-			return printErr
+			return nil
 		}
 
 		return err

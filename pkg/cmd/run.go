@@ -624,7 +624,7 @@ func (o *runCmdOptions) applyAnnotations(cmd *cobra.Command, c client.Client, it
 	}
 
 	if !isOfflineCommand(cmd) && o.OperatorID != "" {
-		if err := verifyOperatorID(o.Context, c, o.OperatorID, cmd.OutOrStdout()); err != nil {
+		if err := verifyOperatorID(o.Context, c, o.OperatorID); err != nil {
 			if o.Force {
 				o.PrintfVerboseErrf(cmd, "%s, use --force option or make sure to use a proper operator id", err.Error())
 			} else {
