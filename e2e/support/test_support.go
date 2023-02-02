@@ -1349,7 +1349,7 @@ func Configmap(ns string, name string) func() *corev1.ConfigMap {
 	}
 }
 
-func Pod(ns string, name string) func() *corev1.Pod {
+func BuilderPod(ns string, name string) func() *corev1.Pod {
 	return func() *corev1.Pod {
 		pod := corev1.Pod{
 			TypeMeta: metav1.TypeMeta{
