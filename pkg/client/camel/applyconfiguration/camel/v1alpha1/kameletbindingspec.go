@@ -26,12 +26,13 @@ import (
 // KameletBindingSpecApplyConfiguration represents an declarative configuration of the KameletBindingSpec type for use
 // with apply.
 type KameletBindingSpecApplyConfiguration struct {
-	Integration  *v1.IntegrationSpecApplyConfiguration `json:"integration,omitempty"`
-	Source       *EndpointApplyConfiguration           `json:"source,omitempty"`
-	Sink         *EndpointApplyConfiguration           `json:"sink,omitempty"`
-	ErrorHandler *ErrorHandlerSpecApplyConfiguration   `json:"errorHandler,omitempty"`
-	Steps        []EndpointApplyConfiguration          `json:"steps,omitempty"`
-	Replicas     *int32                                `json:"replicas,omitempty"`
+	Integration        *v1.IntegrationSpecApplyConfiguration `json:"integration,omitempty"`
+	Source             *EndpointApplyConfiguration           `json:"source,omitempty"`
+	Sink               *EndpointApplyConfiguration           `json:"sink,omitempty"`
+	ErrorHandler       *ErrorHandlerSpecApplyConfiguration   `json:"errorHandler,omitempty"`
+	Steps              []EndpointApplyConfiguration          `json:"steps,omitempty"`
+	Replicas           *int32                                `json:"replicas,omitempty"`
+	ServiceAccountName *string                               `json:"serviceAccountName,omitempty"`
 }
 
 // KameletBindingSpecApplyConfiguration constructs an declarative configuration of the KameletBindingSpec type for use with
@@ -90,5 +91,13 @@ func (b *KameletBindingSpecApplyConfiguration) WithSteps(values ...*EndpointAppl
 // If called multiple times, the Replicas field is set to the value of the last call.
 func (b *KameletBindingSpecApplyConfiguration) WithReplicas(value int32) *KameletBindingSpecApplyConfiguration {
 	b.Replicas = &value
+	return b
+}
+
+// WithServiceAccountName sets the ServiceAccountName field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the ServiceAccountName field is set to the value of the last call.
+func (b *KameletBindingSpecApplyConfiguration) WithServiceAccountName(value string) *KameletBindingSpecApplyConfiguration {
+	b.ServiceAccountName = &value
 	return b
 }

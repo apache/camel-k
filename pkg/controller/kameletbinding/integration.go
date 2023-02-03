@@ -93,6 +93,10 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, kameletbinding *
 	}
 	it.Spec.Profile = profile
 
+	if kameletbinding.Spec.ServiceAccountName != "" {
+		it.Spec.ServiceAccountName = kameletbinding.Spec.ServiceAccountName
+	}
+
 	bindingContext := bindings.BindingContext{
 		Ctx:       ctx,
 		Client:    c,
