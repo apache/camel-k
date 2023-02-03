@@ -122,6 +122,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArray("label", nil, "Add a label to the integration. E.g. \"--label my.company=hello\"")
 	cmd.Flags().StringArray("source", nil, "Add source file to your integration, this is added to the list of files listed as arguments of the command")
 	cmd.Flags().String("pod-template", "", "The path of the YAML file containing a PodSpec template to be used for the Integration pods")
+	cmd.Flags().String("service-account", "", "The SA to use to run this Integration")
 	cmd.Flags().Bool("force", false, "Force creation of integration regardless of potential misconfiguration.")
 
 	cmd.Flags().Bool("save", false, "Save the run parameters into the default kamel configuration file (kamel-config.yaml)")
@@ -147,6 +148,7 @@ type runCmdOptions struct {
 	OperatorID      string   `mapstructure:"operator-id" yaml:",omitempty"`
 	OutputFormat    string   `mapstructure:"output" yaml:",omitempty"`
 	PodTemplate     string   `mapstructure:"pod-template" yaml:",omitempty"`
+	ServiceAccount  string   `mapstructure:"service-account" yaml:",omitempty"`
 	Connects        []string `mapstructure:"connects" yaml:",omitempty"`
 	Resources       []string `mapstructure:"resources" yaml:",omitempty"`
 	OpenAPIs        []string `mapstructure:"open-apis" yaml:",omitempty"`
@@ -549,6 +551,10 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		if err := configureTraits(o.Traits, &integration.Spec.Traits, catalog); err != nil {
 			return nil, err
 		}
+	}
+
+	if o.ServiceAccount != "" {
+		integration.Spec.ServiceAccountName = o.ServiceAccount
 	}
 
 	if o.OutputFormat != "" {
