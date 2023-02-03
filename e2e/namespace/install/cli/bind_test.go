@@ -25,7 +25,7 @@ package common
 import (
 	"testing"
 
-	corev1 "k8s.io/api/core/v1"
+	//corev1 "k8s.io/api/core/v1"
 
 	. "github.com/onsi/gomega"
 
@@ -57,6 +57,13 @@ func TestKamelCLIBind(t *testing.T) {
 			Expect(KamelBindWithID(operatorID, ns, "timer:foo", "log:bar").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "timer-to-log"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, "timer-to-log")).Should(ContainSubstring("Body is null"))
+
+			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("bind with custom SA", func(t *testing.T) {
+			Expect(KamelBindWithID(operatorID, ns, "timer:foo", "log:bar", "--service-account", "my-service-account").Execute()).To(Succeed())
+			Eventually(IntegrationSpecSA(ns, "timer-to-log")).Should(Equal("my-service-account"))
 
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})

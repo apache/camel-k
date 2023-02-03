@@ -853,6 +853,13 @@ int32
 
 Replicas is the number of desired replicas for the binding
 
+|`serviceAccountName` +
+string
+|
+
+
+Custom SA to use for the binding
+
 
 |===
 

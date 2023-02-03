@@ -7660,6 +7660,9 @@ spec:
                 description: Replicas is the number of desired replicas for the binding
                 format: int32
                 type: integer
+              serviceAccountName:
+                description: Custom SA to use for the binding
+                type: string
               sink:
                 description: Sink is the destination of the integration defined by
                   this binding
