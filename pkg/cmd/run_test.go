@@ -693,3 +693,20 @@ func TestResolveJsonPodTemplateWithSupplementalGroups(t *testing.T) {
 	assert.Equal(t, 1, len(integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups))
 	assert.Contains(t, integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups, int64(666))
 }
+
+func TestIntegrationServiceAccountName(t *testing.T) {
+	var tmpFile *os.File
+	var err error
+	if tmpFile, err = ioutil.TempFile("", "camel-k-"); err != nil {
+		t.Error(err)
+	}
+
+	assert.Nil(t, tmpFile.Close())
+	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
+
+	_, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
+	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "--service-account", "my-service-account")
+
+	assert.Nil(t, err)
+	assert.Contains(t, output, "serviceAccountName: my-service-account")
+}
