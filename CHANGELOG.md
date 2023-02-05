@@ -11,6 +11,7 @@
 - Camel-k checks other namespaces and error given  [\#3996](https://github.com/apache/camel-k/issues/3996)
 - Default namespace not used when `-o yaml` [\#3955](https://github.com/apache/camel-k/issues/3955)
 - Unable to configure ServiceAccountName using Kamel run [\#3797](https://github.com/apache/camel-k/issues/3797)
+- Camel-K initContainer [\#3459](https://github.com/apache/camel-k/issues/3459)
 - Choose a single location for examples [\#2826](https://github.com/apache/camel-k/issues/2826)
 - Camel-K Tracing Trait error [\#2633](https://github.com/apache/camel-k/issues/2633)
 - Provide non-regression tests for regression \#1872 [\#1875](https://github.com/apache/camel-k/issues/1875)
