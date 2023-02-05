@@ -299,7 +299,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 	}
 
 	if err = installNamespacedRoleBinding(ctx, c, collection, cfg.Namespace, "/rbac/operator-role-binding-local-registry.yaml"); err != nil {
-		fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the operator won't be able to detect a local image registry via KEP-1755")
+		fmt.Fprintln(cmd.ErrOrStderr(), "")
 	}
 
 	if cfg.Monitoring.Enabled {
