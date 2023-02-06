@@ -34,5 +34,6 @@ go run ./cmd/util/doc-gen \
   --input-dirs github.com/apache/camel-k/addons/telemetry \
   --input-dirs github.com/apache/camel-k/addons/vault/aws \
   --input-dirs github.com/apache/camel-k/addons/vault/gcp \
-  --input-dirs github.com/apache/camel-k/addons/vault/azure
+  --input-dirs github.com/apache/camel-k/addons/vault/azure \
+  --input-dirs github.com/apache/camel-k/addons/vault/hashicorp
 echo "Generating traits documentation... done!"
