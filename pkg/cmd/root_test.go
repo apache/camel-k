@@ -23,32 +23,42 @@ import (
 	"os"
 	"testing"
 
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 func kamelTestPostAddCommandInit(t *testing.T, rootCmd *cobra.Command) {
+	t.Helper()
+
 	err := kamelPostAddCommandInit(rootCmd)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 }
 
-func kamelTestPreAddCommandInit() (*RootCmdOptions, *cobra.Command) {
-	fakeClient, _ := test.NewFakeClient()
+func kamelTestPreAddCommandInitWithClient(client client.Client) (*RootCmdOptions, *cobra.Command) {
 	options := RootCmdOptions{
 		Context: context.Background(),
-		_client: fakeClient,
+		_client: client,
 	}
 	rootCmd := kamelPreAddCommandInit(&options)
 	rootCmd.Run = test.EmptyRun
 	return &options, rootCmd
 }
 
+func kamelTestPreAddCommandInit() (*RootCmdOptions, *cobra.Command) {
+	fakeClient, _ := test.NewFakeClient()
+	return kamelTestPreAddCommandInitWithClient(fakeClient)
+}
+
 func TestLoadFromEnvVar(t *testing.T) {
-	//shows how to include a "," character inside an env value see VAR1 value
-	os.Setenv("KAMEL_RUN_ENVS", "\"VAR1=value,\"\"othervalue\"\"\",VAR2=value2")
+	defer teardown(t)
+	// shows how to include a "," character inside an env value see VAR1 value
+	if err := os.Setenv("KAMEL_RUN_ENVS", "\"VAR1=value,\"\"othervalue\"\"\",VAR2=value2"); err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
 
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 
@@ -65,10 +75,10 @@ func TestLoadFromEnvVar(t *testing.T) {
 }
 
 func TestLoadFromFile(t *testing.T) {
-	//shows how to include a "," character inside a property value see VAR1 value
-	var propertiesFile = []byte(`kamel.run.envs: "VAR1=value,""othervalue""",VAR2=value2`)
+	// shows how to include a "," character inside a property value see VAR1 value
+	propertiesFile := []byte(`kamel.run.envs: "VAR1=value,""othervalue""",VAR2=value2`)
 	viper.SetConfigType("properties")
-	readViperConfigFromBytes(propertiesFile, t)
+	readViperConfigFromBytes(t, propertiesFile)
 
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 
@@ -85,10 +95,14 @@ func TestLoadFromFile(t *testing.T) {
 }
 
 func TestPrecedenceEnvVarOverFile(t *testing.T) {
-	os.Setenv("KAMEL_RUN_ENVS", "VAR1=envVar")
-	var propertiesFile = []byte(`kamel.run.envs: VAR2=file`)
+	defer teardown(t)
+	if err := os.Setenv("KAMEL_RUN_ENVS", "VAR1=envVar"); err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	propertiesFile := []byte(`kamel.run.envs: VAR2=file`)
 	viper.SetConfigType("properties")
-	readViperConfigFromBytes(propertiesFile, t)
+	readViperConfigFromBytes(t, propertiesFile)
 
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 
@@ -105,10 +119,14 @@ func TestPrecedenceEnvVarOverFile(t *testing.T) {
 }
 
 func TestPrecedenceCommandLineOverEverythingElse(t *testing.T) {
-	os.Setenv("KAMEL_RUN_ENVS", "VAR1=envVar")
-	var propertiesFile = []byte(`kamel.run.envs: VAR2=file`)
+	defer teardown(t)
+	if err := os.Setenv("KAMEL_RUN_ENVS", "VAR1=envVar"); err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	propertiesFile := []byte(`kamel.run.envs: VAR2=file`)
 	viper.SetConfigType("properties")
-	readViperConfigFromBytes(propertiesFile, t)
+	readViperConfigFromBytes(t, propertiesFile)
 
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 
@@ -124,9 +142,20 @@ func TestPrecedenceCommandLineOverEverythingElse(t *testing.T) {
 	}
 }
 
-func readViperConfigFromBytes(propertiesFile []byte, t *testing.T) {
+func readViperConfigFromBytes(t *testing.T, propertiesFile []byte) {
+	t.Helper()
+
 	unexpectedErr := viper.ReadConfig(bytes.NewReader(propertiesFile))
 	if unexpectedErr != nil {
 		t.Fatalf("Unexpected error: %v", unexpectedErr)
 	}
+}
+
+// We must ALWAYS clean the environment variables and viper library properties to avoid mess up with the rest of the tests.
+func teardown(t *testing.T) {
+	t.Helper()
+	if err := os.Setenv("KAMEL_RUN_ENVS", ""); err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	readViperConfigFromBytes(t, make([]byte, 0))
 }

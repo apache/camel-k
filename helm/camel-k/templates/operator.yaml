@@ -22,6 +22,10 @@ metadata:
     app: camel-k
     camel.apache.org/component: operator
     {{- include "camel-k.labels" . | nindent 4 }}
+  {{- with .Values.operator.annotations }}
+  annotations:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
   name: camel-k-operator
 spec:
   replicas: 1
@@ -37,15 +41,26 @@ spec:
         camel.apache.org/component: operator
         name: camel-k-operator
     spec:
+    {{- if .Values.operator.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.operator.imagePullSecrets | indent 8 }}
+    {{- end }}
+
       containers:
         - command:
             - kamel
             - operator
           env:
             - name: WATCH_NAMESPACE
+              {{- if eq .Values.operator.global "false" }}
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+              {{- else }}
+              value: ""
+              {{- end }}
+            - name: LOG_LEVEL
+              value: {{ .Values.operator.logLevel }}
             - name: OPERATOR_NAME
               value: camel-k
             - name: POD_NAME
@@ -56,6 +71,8 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            - name: KAMEL_OPERATOR_ID
+              value: {{ .Values.operator.operatorId }}
           image: {{ .Values.operator.image }}
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -68,5 +85,16 @@ spec:
           ports:
             - containerPort: 8080
               name: metrics
-          resources: {}
+          {{- with .Values.operator.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.operator.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
       serviceAccountName: camel-k-operator
+      {{- with .Values.operator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

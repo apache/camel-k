@@ -29,7 +29,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// LoadResourceFromYaml loads a k8s resource from a yaml definition
+// LoadResourceFromYaml returns a Kubernetes resource from its serialized YAML definition.
 func LoadResourceFromYaml(scheme *runtime.Scheme, data string) (ctrl.Object, error) {
 	source := []byte(data)
 	jsonSource, err := yaml.ToJSON(source)
@@ -45,26 +45,26 @@ func LoadResourceFromYaml(scheme *runtime.Scheme, data string) (ctrl.Object, err
 	if err != nil {
 		return nil, err
 	}
-	if o, ok := ro.(ctrl.Object); !ok {
-		return nil, err
-	} else {
-		return o, nil
+	o, ok := ro.(ctrl.Object)
+	if !ok {
+		return nil, fmt.Errorf("type assertion failed: %v", ro)
 	}
+
+	return o, nil
 }
 
-// LoadRawResourceFromYaml loads a k8s resource from a yaml definition without making assumptions on the underlying type
-func LoadRawResourceFromYaml(data string) (runtime.Object, error) {
-	source := []byte(data)
-	jsonSource, err := yaml.ToJSON(source)
+// LoadUnstructuredFromYaml returns an unstructured resource from its serialized YAML definition.
+func LoadUnstructuredFromYaml(data string) (ctrl.Object, error) {
+	source, err := yaml.ToJSON([]byte(data))
 	if err != nil {
 		return nil, err
 	}
-	var objmap map[string]interface{}
-	if err = json.Unmarshal(jsonSource, &objmap); err != nil {
+	var obj map[string]interface{}
+	if err = json.Unmarshal(source, &obj); err != nil {
 		return nil, err
 	}
 	return &unstructured.Unstructured{
-		Object: objmap,
+		Object: obj,
 	}, nil
 }
 
@@ -75,11 +75,11 @@ func runtimeObjectFromUnstructured(scheme *runtime.Scheme, u *unstructured.Unstr
 
 	b, err := u.MarshalJSON()
 	if err != nil {
-		return nil, fmt.Errorf("error running MarshalJSON on unstructured object: %v", err)
+		return nil, fmt.Errorf("error running MarshalJSON on unstructured object: %w", err)
 	}
 	ro, _, err := decoder.Decode(b, &gvk, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode json data with gvk(%v): %v", gvk.String(), err)
+		return nil, fmt.Errorf("failed to decode json data with gvk(%v): %w", gvk.String(), err)
 	}
 	return ro, nil
 }

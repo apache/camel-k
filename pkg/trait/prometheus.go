@@ -22,56 +22,45 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util"
 )
 
-// The Prometheus trait configures a Prometheus-compatible endpoint. It also creates a `PodMonitor` resource,
-// so that the endpoint can be scraped automatically, when using the Prometheus operator.
-//
-// The metrics are exposed using MicroProfile Metrics.
-//
-// WARNING: The creation of the `PodMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]
-// custom resource definition to be installed.
-// You can set `pod-monitor` to `false` for the Prometheus trait to work without the Prometheus Operator.
-//
-// The Prometheus trait is disabled by default.
-//
-// +camel-k:trait=prometheus
 type prometheusTrait struct {
-	BaseTrait `property:",squash"`
-	// Whether a `PodMonitor` resource is created (default `true`).
-	PodMonitor *bool `property:"pod-monitor" json:"podMonitor,omitempty"`
-	// The `PodMonitor` resource labels, applicable when `pod-monitor` is `true`.
-	PodMonitorLabels []string `property:"pod-monitor-labels" json:"podMonitorLabels,omitempty"`
+	BaseTrait
+	traitv1.PrometheusTrait `property:",squash"`
 }
 
 func newPrometheusTrait() Trait {
 	return &prometheusTrait{
-		BaseTrait:  NewBaseTrait("prometheus", 1900),
-		PodMonitor: BoolP(true),
+		BaseTrait: NewBaseTrait("prometheus", 1900),
+		PrometheusTrait: traitv1.PrometheusTrait{
+			PodMonitor: pointer.Bool(true),
+		},
 	}
 }
 
 func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
-	return IsTrue(t.Enabled) && e.IntegrationInPhase(
-		v1.IntegrationPhaseInitialization,
-		v1.IntegrationPhaseDeploying,
-		v1.IntegrationPhaseRunning,
-	), nil
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+		return false, nil
+	}
+
+	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), nil
 }
 
-func (t *prometheusTrait) Apply(e *Environment) (err error) {
+func (t *prometheusTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		// Add the Camel Quarkus MP Metrics extension
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-microprofile-metrics")
 		return nil
 	}
 
-	container := e.getIntegrationContainer()
+	container := e.GetIntegrationContainer()
 	if container == nil {
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionPrometheusAvailable,
@@ -102,7 +91,7 @@ func (t *prometheusTrait) Apply(e *Environment) (err error) {
 	condition.Message = fmt.Sprintf("%s(%d)", container.Name, containerPort.ContainerPort)
 
 	// Add the PodMonitor resource
-	if IsTrue(t.PodMonitor) {
+	if pointer.BoolDeref(t.PodMonitor, false) {
 		portName := containerPort.Name
 		// Knative defaults to naming the userland container port "user-port".
 		// Let's rely on that default, granted it is not officially part of the Knative
@@ -132,8 +121,10 @@ func (t *prometheusTrait) getContainerPort(e *Environment, controller Controller
 	var port int
 
 	if t := e.Catalog.GetTrait(containerTraitID); t != nil {
-		name = t.(*containerTrait).PortName
-		port = t.(*containerTrait).Port
+		if ct, ok := t.(*containerTrait); ok {
+			name = ct.PortName
+			port = ct.Port
+		}
 	}
 
 	// Let's rely on Knative default HTTP negotiation

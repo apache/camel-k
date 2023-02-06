@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"encoding/json"
 	"testing"
 
@@ -28,6 +27,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -41,7 +41,7 @@ func TestConfigurationNoKameletsUsed(t *testing.T) {
     - to: log:info
 `)
 	enabled, err := trait.Configure(environment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, enabled)
 	assert.Equal(t, "", trait.List)
 }
@@ -61,7 +61,7 @@ func TestConfigurationWithKamelets(t *testing.T) {
     - to: kamelet://complex-.-.-1c/b
 `)
 	enabled, err := trait.Configure(environment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Equal(t, []string{"c0", "c1", "c2", "complex-.-.-1a", "complex-.-.-1b", "complex-.-.-1c"}, trait.getKameletKeys())
 	assert.Equal(t, []configurationKey{
@@ -88,7 +88,7 @@ func TestKameletLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: marshalOrFail(map[string]interface{}{
+			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
@@ -101,12 +101,12 @@ func TestKameletLookup(t *testing.T) {
 		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
 	})
 	enabled, err := trait.Configure(environment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 
 	err = trait.Apply(environment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	cm := environment.Resources.GetConfigMap(func(_ *corev1.ConfigMap) bool { return true })
 	assert.NotNil(t, cm)
 	assert.Equal(t, "it-kamelet-timer-template", cm.Name)
@@ -132,7 +132,7 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: marshalOrFail(map[string]interface{}{
+			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
@@ -150,12 +150,12 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
 		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
 	})
 	enabled, err := trait.Configure(environment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 
 	err = trait.Apply(environment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	cmFlow := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "it-kamelet-timer-template" })
 	assert.NotNil(t, cmFlow)
 	cmRes := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "it-kamelet-timer-000" })
@@ -201,12 +201,12 @@ func TestNonYAMLKameletLookup(t *testing.T) {
 		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
 	})
 	enabled, err := trait.Configure(environment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 
 	err = trait.Apply(environment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	cm := environment.Resources.GetConfigMap(func(_ *corev1.ConfigMap) bool { return true })
 	assert.NotNil(t, cm)
 	assert.Equal(t, "it-kamelet-timer-000", cm.Name)
@@ -231,7 +231,7 @@ func TestMultipleKamelets(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: marshalOrFail(map[string]interface{}{
+			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
@@ -257,7 +257,7 @@ func TestMultipleKamelets(t *testing.T) {
 			Name:      "logger",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: marshalOrFail(map[string]interface{}{
+			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "tbd:endpoint",
 					"steps": []interface{}{
@@ -277,12 +277,12 @@ func TestMultipleKamelets(t *testing.T) {
 		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
 	})
 	enabled, err := trait.Configure(environment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Equal(t, []string{"logger", "timer"}, trait.getKameletKeys())
 
 	err = trait.Apply(environment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	cmFlow := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "it-kamelet-timer-template" })
 	assert.NotNil(t, cmFlow)
@@ -326,7 +326,7 @@ func TestKameletConfigLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: marshalOrFail(map[string]interface{}{
+			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
@@ -364,13 +364,13 @@ func TestKameletConfigLookup(t *testing.T) {
 		},
 	})
 	enabled, err := trait.Configure(environment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 	assert.Equal(t, []configurationKey{newConfigurationKey("timer", "")}, trait.getConfigurationKeys())
 
 	err = trait.Apply(environment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, environment.Integration.Status.Configuration, 2)
 	assert.Contains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret"})
 	assert.NotContains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret2"})
@@ -389,7 +389,7 @@ func TestKameletNamedConfigLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1alpha1.KameletSpec{
-			Flow: marshalOrFail(map[string]interface{}{
+			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
 				},
@@ -428,7 +428,7 @@ func TestKameletNamedConfigLookup(t *testing.T) {
 		},
 	})
 	enabled, err := trait.Configure(environment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 	assert.Equal(t, []configurationKey{
@@ -437,7 +437,7 @@ func TestKameletNamedConfigLookup(t *testing.T) {
 	}, trait.getConfigurationKeys())
 
 	err = trait.Apply(environment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, environment.Integration.Status.Configuration, 2)
 	assert.Contains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret"})
 	assert.Contains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret2"})
@@ -459,7 +459,7 @@ func TestKameletConditionFalse(t *testing.T) {
 				Name:      "timer",
 			},
 			Spec: v1alpha1.KameletSpec{
-				Flow: marshalOrFail(map[string]interface{}{
+				Template: templateOrFail(map[string]interface{}{
 					"from": map[string]interface{}{
 						"uri": "timer:tick",
 					},
@@ -469,7 +469,7 @@ func TestKameletConditionFalse(t *testing.T) {
 		})
 
 	enabled, err := trait.Configure(environment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 
 	err = trait.Apply(environment)
@@ -479,8 +479,8 @@ func TestKameletConditionFalse(t *testing.T) {
 	cond := environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable)
 	assert.Equal(t, corev1.ConditionFalse, cond.Status)
 	assert.Equal(t, v1.IntegrationConditionKameletsAvailableReason, cond.Reason)
-	assert.Contains(t, cond.Message, "timer found")
-	assert.Contains(t, cond.Message, "none not found")
+	assert.Contains(t, cond.Message, "[timer] found")
+	assert.Contains(t, cond.Message, "[none] not found")
 }
 
 func TestKameletConditionTrue(t *testing.T) {
@@ -498,7 +498,7 @@ func TestKameletConditionTrue(t *testing.T) {
 				Name:      "timer",
 			},
 			Spec: v1alpha1.KameletSpec{
-				Flow: marshalOrFail(map[string]interface{}{
+				Template: templateOrFail(map[string]interface{}{
 					"from": map[string]interface{}{
 						"uri": "timer:tick",
 					},
@@ -512,7 +512,7 @@ func TestKameletConditionTrue(t *testing.T) {
 				Name:      "none",
 			},
 			Spec: v1alpha1.KameletSpec{
-				Flow: marshalOrFail(map[string]interface{}{
+				Template: templateOrFail(map[string]interface{}{
 					"from": map[string]interface{}{
 						"uri": "timer:tick",
 					},
@@ -522,29 +522,28 @@ func TestKameletConditionTrue(t *testing.T) {
 		})
 
 	enabled, err := trait.Configure(environment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 
 	err = trait.Apply(environment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 
 	cond := environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable)
 	assert.Equal(t, corev1.ConditionTrue, cond.Status)
 	assert.Equal(t, v1.IntegrationConditionKameletsAvailableReason, cond.Reason)
-	assert.Contains(t, cond.Message, "none,timer found")
+	assert.Contains(t, cond.Message, "[none,timer] found")
 }
 
 func createKameletsTestEnvironment(flow string, objects ...runtime.Object) (*kameletsTrait, *Environment) {
 	catalog, _ := camel.DefaultCatalog()
 
 	client, _ := test.NewFakeClient(objects...)
-	trait := newKameletsTrait().(*kameletsTrait)
-	trait.Ctx = context.TODO()
+	trait, _ := newKameletsTrait().(*kameletsTrait)
 	trait.Client = client
 
 	environment := &Environment{
-		Catalog:      NewCatalog(context.TODO(), client),
+		Catalog:      NewCatalog(client),
 		Client:       client,
 		CamelCatalog: catalog,
 		Integration: &v1.Integration{
@@ -573,11 +572,11 @@ func createKameletsTestEnvironment(flow string, objects ...runtime.Object) (*kam
 	return trait, environment
 }
 
-func marshalOrFail(flow map[string]interface{}) *v1.Flow {
-	data, err := json.Marshal(flow)
+func templateOrFail(template map[string]interface{}) *v1alpha1.Template {
+	data, err := json.Marshal(template)
 	if err != nil {
 		panic(err)
 	}
-	f := v1.Flow{RawMessage: data}
-	return &f
+	t := v1alpha1.Template{RawMessage: data}
+	return &t
 }

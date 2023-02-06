@@ -15,10 +15,90 @@ This dependency resolution mechanism is transparent to the user, that will just 
 
 Automatic resolution is also a nice feature in xref:running/dev-mode.adoc[dev mode], because you are allowed to add all components you need *without exiting the dev loop*.
 
-You can explicitly add dependency explicitly using the `-d` flag. This is useful when you need to use dependencies that are not included in the Camel catalog. For example:
+NOTE: Camel K won't be able to resolve automatically the dependencies when your routes specify dynamic URIs.
+
+[[dependencies-explicit]]
+== Add explicit dependencies
+
+You can explicitly add dependency using the `-d` flag (short name of the flag `--dependency`) of the `kamel run` command. This is useful when you need to use dependencies that are not included in the Camel catalog or when the URI of your routes cannot be automatically discovered (see Dynamic URIs). For example:
 
 ```
-kamel run -d mvn:com.google.guava:guava:26.0-jre -d camel-mina2 Integration.java
+kamel run -d mvn:com.google.guava:guava:26.0-jre -d camel:http Integration.java
 ```
 
-This feature can also be disabled if needed (although we discourage you from doing it) by disabling the _dependencies_ trait (`-t dependencies.enabled=false`).
+With that command you will add a dependency of Guava and the Camel HTTP component. This feature can also be disabled if needed (although we discourage you from doing it) by disabling the _dependencies_ trait (`-t dependencies.enabled=false`).
+
+[[dependencies-kind]]
+== Kind of dependencies
+
+The `-d` flag of the `kamel run` command is flexible and support multiple kind of dependencies.
+
+*Camel dependencies* can be added directly using the `-d` flag like this:
+```
+kamel run -d camel:http Integration.java
+```
+In this case, the dependency will be added with the correct version. Note that the standard notation for specifying a Camel dependency is `camel:xxx`, while `kamel` also accepts `camel-xxx` for usability.
+
+*External dependencies* can be added using the `-d` flag, the `mvn` prefix, and the maven coordinates:
+```
+kamel run -d mvn:com.google.guava:guava:26.0-jre Integration.java
+```
+Note that if your dependencies belong to a private repository, this repository needs to be defined. See xref:configuration/maven.adoc[Configure maven].
+
+[[local-dependencies]]
+*Local dependencies* can be added using the `-d` flag and the `file://` prefix:
+```
+kamel run -d file://path/to/integration-dep.jar Integration.java
+```
+
+The content of `integration-dep.jar` will then be accessible in your integration for you to use.
+
+You can also specify data files to be mounted in the running container:
+
+```
+kamel run -d file://path/to/data.csv:path/in/container/data.csv Integration.java
+```
+
+Specifying a directory with also work recursively.
+
+Note that this feature relies on the Image Registry being setup xref:cli/cli.adoc[correctly].
+
+[[dependencies-kind-jitpack]]
+=== Jitpack dependencies
+
+If your dependency is not published in a `maven` repository you will find very useful https://jitpack.io/[Jitpack] as a way to provide any custom dependency to your runtime Integration environment. In certain occasion you will find useful to include not only your route definition, but also some helper class or any other class which has to be used while defining the Integration behavior. With Jitpack you will be able to compile on the fly a java project hosted in a remote repository and use the produced package as a dependency of your Integration.
+
+The usage is the same as defined above for any maven dependency. It can be added using the `-d` flag, but, this time, you need to define the prefix as expected for the project repository you are using (ie, `github`). It has to be provided in the form `repository-kind:user/repo/version`. As an example, you can provide the Apache Commons CSV dependency by executing:
+
+```
+kamel run -d github:apache/commons-csv/1.1 Integration.java
+```
+
+We support the most important public code repositories:
+
+```
+github:user/repo/version
+gitlab:user/repo/version
+bitbucket:user/repo/version
+gitee:user/repo/version
+azure:user/repo/version
+```
+
+The `version` can be omitted when you are willing to use the `main` branch. Otherwise it will represent the branch or tag used in the project repo. 
+
+[[dependencies-dynamic]]
+== Dynamic URIs
+
+Unfortunately, Camel K won't be able to always discover all your dependencies. When you are creating an URI dynamically, then you will also need to instruct Camel K which component to load (via `-d` parameter). An example is illustrated in the following code snippet:
+
+[source,java]
+.DynamicURI.java
+----
+...
+String myTopic = "purchases"
+from("kafka:" + myTopic + "? ... ")
+    .to(...)
+...
+----
+
+Here the `from` URI is dynamically created from some variables that will be resolved at runtime. In cases like this, you will need to specify the component and the related dependency to be loaded in the `Integration`.

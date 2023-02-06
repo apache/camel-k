@@ -19,21 +19,25 @@ package trait
 
 import (
 	"fmt"
-	"path"
-	"sort"
+	"path/filepath"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/batch/v1beta1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/utils/pointer"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/pkg/util/digest"
 	"github.com/apache/camel-k/pkg/util/envvar"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 const (
@@ -41,174 +45,102 @@ const (
 	defaultContainerPort     = 8080
 	defaultContainerPortName = "http"
 	defaultServicePort       = 80
-	defaultProbePath         = "/q/health"
 	containerTraitID         = "container"
 )
 
-// The Container trait can be used to configure properties of the container where the integration will run.
-//
-// It also provides configuration for Services associated to the container.
-//
-// +camel-k:trait=container
 type containerTrait struct {
-	BaseTrait `property:",squash"`
-
-	Auto *bool `property:"auto" json:"auto,omitempty"`
-
-	// The minimum amount of CPU required.
-	RequestCPU string `property:"request-cpu" json:"requestCPU,omitempty"`
-	// The minimum amount of memory required.
-	RequestMemory string `property:"request-memory" json:"requestMemory,omitempty"`
-	// The maximum amount of CPU required.
-	LimitCPU string `property:"limit-cpu" json:"limitCPU,omitempty"`
-	// The maximum amount of memory required.
-	LimitMemory string `property:"limit-memory" json:"limitMemory,omitempty"`
-
-	// Can be used to enable/disable exposure via kubernetes Service.
-	Expose *bool `property:"expose" json:"expose,omitempty"`
-	// To configure a different port exposed by the container (default `8080`).
-	Port int `property:"port" json:"port,omitempty"`
-	// To configure a different port name for the port exposed by the container (default `http`).
-	PortName string `property:"port-name" json:"portName,omitempty"`
-	// To configure under which service port the container port is to be exposed (default `80`).
-	ServicePort int `property:"service-port" json:"servicePort,omitempty"`
-	// To configure under which service port name the container port is to be exposed (default `http`).
-	ServicePortName string `property:"service-port-name" json:"servicePortName,omitempty"`
-
-	// The main container name. It's named `integration` by default.
-	Name string `property:"name" json:"name,omitempty"`
-	// The main container image
-	Image string `property:"image" json:"image,omitempty"`
-
-	// ProbesEnabled enable/disable probes on the container (default `false`)
-	ProbesEnabled *bool `property:"probes-enabled" json:"probesEnabled,omitempty"`
-	// Scheme to use when connecting. Defaults to HTTP. Applies to the liveness probe.
-	LivenessScheme string `property:"liveness-scheme" json:"livenessScheme,omitempty"`
-	// Number of seconds after the container has started before liveness probes are initiated.
-	LivenessInitialDelay int32 `property:"liveness-initial-delay" json:"livenessInitialDelay,omitempty"`
-	// Number of seconds after which the probe times out. Applies to the liveness probe.
-	LivenessTimeout int32 `property:"liveness-timeout" json:"livenessTimeout,omitempty"`
-	// How often to perform the probe. Applies to the liveness probe.
-	LivenessPeriod int32 `property:"liveness-period" json:"livenessPeriod,omitempty"`
-	// Minimum consecutive successes for the probe to be considered successful after having failed.
-	// Applies to the liveness probe.
-	LivenessSuccessThreshold int32 `property:"liveness-success-threshold" json:"livenessSuccessThreshold,omitempty"`
-	// Minimum consecutive failures for the probe to be considered failed after having succeeded.
-	// Applies to the liveness probe.
-	LivenessFailureThreshold int32 `property:"liveness-failure-threshold" json:"livenessFailureThreshold,omitempty"`
-	// Scheme to use when connecting. Defaults to HTTP. Applies to the readiness probe.
-	ReadinessScheme string `property:"readiness-scheme" json:"readinessScheme,omitempty"`
-	// Number of seconds after the container has started before readiness probes are initiated.
-	ReadinessInitialDelay int32 `property:"readiness-initial-delay" json:"readinessInitialDelay,omitempty"`
-	// Number of seconds after which the probe times out. Applies to the readiness probe.
-	ReadinessTimeout int32 `property:"readiness-timeout" json:"readinessTimeout,omitempty"`
-	// How often to perform the probe. Applies to the readiness probe.
-	ReadinessPeriod int32 `property:"readiness-period" json:"readinessPeriod,omitempty"`
-	// Minimum consecutive successes for the probe to be considered successful after having failed.
-	// Applies to the readiness probe.
-	ReadinessSuccessThreshold int32 `property:"readiness-success-threshold" json:"readinessSuccessThreshold,omitempty"`
-	// Minimum consecutive failures for the probe to be considered failed after having succeeded.
-	// Applies to the readiness probe.
-	ReadinessFailureThreshold int32 `property:"readiness-failure-threshold" json:"readinessFailureThreshold,omitempty"`
+	BaseTrait
+	traitv1.ContainerTrait `property:",squash"`
 }
 
 func newContainerTrait() Trait {
 	return &containerTrait{
-		BaseTrait:       NewBaseTrait(containerTraitID, 1600),
-		Port:            defaultContainerPort,
-		ServicePort:     defaultServicePort,
-		ServicePortName: defaultContainerPortName,
-		Name:            defaultContainerName,
-		ProbesEnabled:   BoolP(false),
-		LivenessScheme:  string(corev1.URISchemeHTTP),
-		ReadinessScheme: string(corev1.URISchemeHTTP),
+		BaseTrait: NewBaseTrait(containerTraitID, 1600),
+		ContainerTrait: traitv1.ContainerTrait{
+			Port:            defaultContainerPort,
+			ServicePort:     defaultServicePort,
+			ServicePortName: defaultContainerPortName,
+			Name:            defaultContainerName,
+		},
 	}
 }
 
 func (t *containerTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil
 	}
 
-	if IsNilOrTrue(t.Auto) {
+	if pointer.BoolDeref(t.Auto, true) {
 		if t.Expose == nil {
 			e := e.Resources.GetServiceForIntegration(e.Integration) != nil
 			t.Expose = &e
 		}
 	}
 
+	if !isValidPullPolicy(t.ImagePullPolicy) {
+		return false, fmt.Errorf("unsupported pull policy %s", t.ImagePullPolicy)
+	}
+
 	return true, nil
 }
 
-func (t *containerTrait) Apply(e *Environment) error {
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		return t.configureDependencies(e)
-	}
-
-	if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
-		return t.configureContainer(e)
-	}
-
-	return nil
+func isValidPullPolicy(policy corev1.PullPolicy) bool {
+	return policy == "" || policy == corev1.PullAlways || policy == corev1.PullIfNotPresent || policy == corev1.PullNever
 }
 
-// IsPlatformTrait overrides base class method
+func (t *containerTrait) Apply(e *Environment) error {
+	if err := t.configureImageIntegrationKit(e); err != nil {
+		return err
+	}
+	return t.configureContainer(e)
+}
+
+// IsPlatformTrait overrides base class method.
 func (t *containerTrait) IsPlatformTrait() bool {
 	return true
 }
 
-func (t *containerTrait) configureDependencies(e *Environment) error {
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		if t.Image != "" {
-			if e.Integration.Spec.IntegrationKit != nil {
-				return fmt.Errorf(
-					"unsupported configuration: a container image has been set in conjunction with an IntegrationKit %v",
-					e.Integration.Spec.IntegrationKit)
-			}
-			if e.Integration.Spec.Kit != "" {
-				return fmt.Errorf(
-					"unsupported configuration: a container image has been set in conjunction with an IntegrationKit %s",
-					e.Integration.Spec.Kit)
-			}
-
-			kitName := fmt.Sprintf("kit-%s", e.Integration.Name)
-			kit := v1.NewIntegrationKit(e.Integration.Namespace, kitName)
-			kit.Spec.Image = t.Image
-
-			// Add some information for post-processing, this may need to be refactored
-			// to a proper data structure
-			kit.Labels = map[string]string{
-				"camel.apache.org/kit.type":           v1.IntegrationKitTypeExternal,
-				kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
-				kubernetes.CamelCreatorLabelName:      e.Integration.Name,
-				kubernetes.CamelCreatorLabelNamespace: e.Integration.Namespace,
-				kubernetes.CamelCreatorLabelVersion:   e.Integration.ResourceVersion,
-			}
-
-			t.L.Infof("image %s", kit.Spec.Image)
-			e.Resources.Add(&kit)
-			e.Integration.SetIntegrationKit(&kit)
+func (t *containerTrait) configureImageIntegrationKit(e *Environment) error {
+	if t.Image != "" {
+		if e.Integration.Spec.IntegrationKit != nil {
+			return fmt.Errorf(
+				"unsupported configuration: a container image has been set in conjunction with an IntegrationKit %v",
+				e.Integration.Spec.IntegrationKit)
 		}
-		if IsTrue(t.ProbesEnabled) {
-			if capability, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityHealth]; ok {
-				for _, dependency := range capability.Dependencies {
-					util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dependency.GetDependencyID())
-				}
 
-				// sort the dependencies to get always the same list if they don't change
-				sort.Strings(e.Integration.Status.Dependencies)
-			}
+		kitName := fmt.Sprintf("kit-%s", e.Integration.Name)
+		kit := v1.NewIntegrationKit(e.Integration.Namespace, kitName)
+		kit.Spec.Image = t.Image
+
+		// Add some information for post-processing, this may need to be refactored
+		// to a proper data structure
+		kit.Labels = map[string]string{
+			v1.IntegrationKitTypeLabel:            v1.IntegrationKitTypeExternal,
+			kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
+			kubernetes.CamelCreatorLabelName:      e.Integration.Name,
+			kubernetes.CamelCreatorLabelNamespace: e.Integration.Namespace,
+			kubernetes.CamelCreatorLabelVersion:   e.Integration.ResourceVersion,
 		}
+
+		if v, ok := e.Integration.Annotations[v1.PlatformSelectorAnnotation]; ok {
+			v1.SetAnnotation(&kit.ObjectMeta, v1.PlatformSelectorAnnotation, v)
+		}
+		operatorID := defaults.OperatorID()
+		if operatorID != "" {
+			kit.SetOperatorID(operatorID)
+		}
+
+		t.L.Infof("image %s", kit.Spec.Image)
+		e.Resources.Add(kit)
+		e.Integration.SetIntegrationKit(kit)
 	}
-
 	return nil
 }
 
-// nolint:gocyclo
 func (t *containerTrait) configureContainer(e *Environment) error {
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)
@@ -220,50 +152,43 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		Env:   make([]corev1.EnvVar, 0),
 	}
 
+	if t.ImagePullPolicy != "" {
+		container.ImagePullPolicy = t.ImagePullPolicy
+	}
+
 	// combine Environment of integration with platform, kit, integration
 	for _, env := range e.collectConfigurationPairs("env") {
 		envvar.SetVal(&container.Env, env.Name, env.Value)
 	}
 
-	envvar.SetVal(&container.Env, "CAMEL_K_DIGEST", e.Integration.Status.Digest)
-	envvar.SetVal(&container.Env, "CAMEL_K_CONF", path.Join(basePath, "application.properties"))
-	envvar.SetVal(&container.Env, "CAMEL_K_CONF_D", confDPath)
+	envvar.SetVal(&container.Env, digest.IntegrationDigestEnvVar, e.Integration.Status.Digest)
+	envvar.SetVal(&container.Env, "CAMEL_K_CONF", filepath.Join(camel.BasePath, "application.properties"))
+	envvar.SetVal(&container.Env, "CAMEL_K_CONF_D", camel.ConfDPath)
 
 	e.addSourcesProperties()
+	if props, err := e.computeApplicationProperties(); err != nil {
+		return err
+	} else if props != nil {
+		e.Resources.Add(props)
+	}
 
 	t.configureResources(e, &container)
-
-	if IsTrue(t.Expose) {
+	if pointer.BoolDeref(t.Expose, false) {
 		t.configureService(e, &container)
 	}
 	t.configureCapabilities(e)
 
-	portName := t.PortName
-	if portName == "" {
-		portName = defaultContainerPortName
-	}
+	var containers *[]corev1.Container
+	visited := false
+
 	// Deployment
 	if err := e.Resources.VisitDeploymentE(func(deployment *appsv1.Deployment) error {
-		if IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
-			t.configureProbes(&container, t.Port, defaultProbePath)
-		}
-
 		for _, envVar := range e.EnvVars {
 			envvar.SetVar(&container.Env, envVar)
 		}
-		if props, err := e.computeApplicationProperties(); err != nil {
-			return err
-		} else if props != nil {
-			e.Resources.Add(props)
-		}
 
-		e.configureVolumesAndMounts(
-			&deployment.Spec.Template.Spec.Volumes,
-			&container.VolumeMounts,
-		)
-
-		deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, container)
-
+		containers = &deployment.Spec.Template.Spec.Containers
+		visited = true
 		return nil
 	}); err != nil {
 		return err
@@ -271,11 +196,6 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 
 	// Knative Service
 	if err := e.Resources.VisitKnativeServiceE(func(service *serving.Service) error {
-		if IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
-			// don't set the port on Knative service as it is not allowed.
-			t.configureProbes(&container, 0, defaultProbePath)
-		}
-
 		for _, env := range e.EnvVars {
 			switch {
 			case env.ValueFrom == nil:
@@ -290,49 +210,29 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 				envvar.SetVar(&container.Env, env)
 			}
 		}
-		if props, err := e.computeApplicationProperties(); err != nil {
-			return err
-		} else if props != nil {
-			e.Resources.Add(props)
-		}
 
-		e.configureVolumesAndMounts(
-			&service.Spec.ConfigurationSpec.Template.Spec.Volumes,
-			&container.VolumeMounts,
-		)
-
-		service.Spec.ConfigurationSpec.Template.Spec.Containers = append(service.Spec.ConfigurationSpec.Template.Spec.Containers, container)
-
+		containers = &service.Spec.ConfigurationSpec.Template.Spec.Containers
+		visited = true
 		return nil
 	}); err != nil {
 		return err
 	}
 
 	// CronJob
-	if err := e.Resources.VisitCronJobE(func(cron *v1beta1.CronJob) error {
-		if IsTrue(t.ProbesEnabled) && portName == defaultContainerPortName {
-			t.configureProbes(&container, t.Port, defaultProbePath)
-		}
-
+	if err := e.Resources.VisitCronJobE(func(cron *batchv1.CronJob) error {
 		for _, envVar := range e.EnvVars {
 			envvar.SetVar(&container.Env, envVar)
 		}
-		if props, err := e.computeApplicationProperties(); err != nil {
-			return err
-		} else if props != nil {
-			e.Resources.Add(props)
-		}
 
-		e.configureVolumesAndMounts(
-			&cron.Spec.JobTemplate.Spec.Template.Spec.Volumes,
-			&container.VolumeMounts,
-		)
-
-		cron.Spec.JobTemplate.Spec.Template.Spec.Containers = append(cron.Spec.JobTemplate.Spec.Template.Spec.Containers, container)
-
+		containers = &cron.Spec.JobTemplate.Spec.Template.Spec.Containers
+		visited = true
 		return nil
 	}); err != nil {
 		return err
+	}
+
+	if visited {
+		*containers = append(*containers, container)
 	}
 
 	return nil
@@ -430,53 +330,4 @@ func (t *containerTrait) configureCapabilities(e *Environment) {
 	if util.StringSliceExists(e.Integration.Status.Capabilities, v1.CapabilityRest) {
 		e.ApplicationProperties["camel.context.rest-configuration.component"] = "platform-http"
 	}
-}
-
-func (t *containerTrait) configureProbes(container *corev1.Container, port int, path string) {
-	container.LivenessProbe = t.newLivenessProbe(port, path)
-	container.ReadinessProbe = t.newReadinessProbe(port, path)
-}
-
-func (t *containerTrait) newLivenessProbe(port int, path string) *corev1.Probe {
-	action := corev1.HTTPGetAction{}
-	action.Path = path
-	action.Scheme = corev1.URIScheme(t.LivenessScheme)
-
-	if port > 0 {
-		action.Port = intstr.FromInt(port)
-	}
-
-	p := corev1.Probe{
-		Handler: corev1.Handler{
-			HTTPGet: &action,
-		},
-	}
-
-	p.InitialDelaySeconds = t.LivenessInitialDelay
-	p.TimeoutSeconds = t.LivenessTimeout
-	p.PeriodSeconds = t.LivenessPeriod
-	p.SuccessThreshold = t.LivenessSuccessThreshold
-	p.FailureThreshold = t.LivenessFailureThreshold
-
-	return &p
-}
-
-func (t *containerTrait) newReadinessProbe(port int, path string) *corev1.Probe {
-	p := corev1.Probe{
-		Handler: corev1.Handler{
-			HTTPGet: &corev1.HTTPGetAction{
-				Port:   intstr.FromInt(port),
-				Path:   path,
-				Scheme: corev1.URIScheme(t.ReadinessScheme),
-			},
-		},
-	}
-
-	p.InitialDelaySeconds = t.ReadinessInitialDelay
-	p.TimeoutSeconds = t.ReadinessTimeout
-	p.PeriodSeconds = t.ReadinessPeriod
-	p.SuccessThreshold = t.ReadinessSuccessThreshold
-	p.FailureThreshold = t.ReadinessFailureThreshold
-
-	return &p
 }

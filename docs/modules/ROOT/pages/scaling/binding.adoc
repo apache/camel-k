@@ -1,0 +1,109 @@
+[[binding-scaling]]
+= Camel K KameletBinding Scaling
+
+== Manual Scaling
+
+A KameletBinding can be scaled using the `kubectl scale` command, e.g.:
+
+[source,console]
+----
+$ kubectl scale klb <kamelet_binding_name> --replicas <number_of_replicas>
+----
+
+This can also be achieved by editing the KameletBinding resource directly, e.g.:
+
+[source,console]
+----
+$ kubectl patch klb <kamelet_binding_name> -p '{"spec":{"replicas":<number_of_replicas>}}'
+----
+
+The KameletBinding also reports its number of replicas in the `.status.replicas` field, e.g.:
+
+[source,console]
+----
+$ kubectl get klb <kamelet_binding_name> -o jsonpath='{.status.replicas}'
+----
+
+== Autoscaling with Knative
+
+A KameletBinding that binds an HTTP-based source Kamelet can automatically scale based on _incoming_ traffic when installed on a cluster with _Knative_ enabled, including scaling to zero.
+
+The _incoming_ traffic measures either as:
+
+* The number of simultaneous requests, that are processed by each replica at any given time;
+* Or the number of requests that are processed per second, per replica.
+
+The `webhook-source` Kamelet is one of the sources that enables auto-scaling when used in a KameletBinding:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  name: webhook-binding
+spec:
+  source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1alpha1
+      name: webhook-source
+  sink:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1alpha1
+      name: log-sink
+----
+
+The Knative https://knative.dev/docs/serving/autoscaling/autoscaling-concepts/#supported-autoscaler-types[_Autoscaler_] can be configured using the xref:traits:knative-service.adoc[Knative Service] trait, e.g., to set the scaling upper bound (the maximum number of replicas):
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  name: webhook-binding
+spec:
+  integration:
+      traits:
+        knative-service:
+          configuration:
+            maxScale: 10
+  source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1alpha1
+      name: webhook-source
+  sink:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1alpha1
+      name: log-sink
+----
+
+More information can be found in the Knative https://knative.dev/docs/serving/autoscaling/[Autoscaling] documentation.
+
+[NOTE]
+====
+When <<Manual Scaling,manually scaling>> a KameletBinding that deploys as a Knative Service, both https://knative.dev/docs/serving/autoscaling/scale-bounds/[scale bounds], i.e., `minScale` and `maxScale`, are set to the specified number of replicas.
+Scale bounds can be reset by removing the `.spec.replicas` field from the KameletBinding, e.g., with:
+
+[source,console]
+----
+$ kubectl patch klb <kamelet_binding_name> --type=json -p='[{"op": "remove", "path": "/spec/replicas"}]'
+----
+====
+
+== Autoscaling with HPA
+
+A KameletBinding can automatically scale based on its CPU utilization and custom metrics using https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/[horizontal pod autoscaling (HPA)].
+
+For example, executing the following command creates an _autoscaler_ for the KameletBinding, with target CPU utilization set to 80%, and the number of replicas between 2 and 5:
+
+[source,console]
+----
+$ kubectl autoscale klb <kamelet_binding_name> --min=2 --max=5 --cpu-percent=80
+----
+
+Refer to the xref:scaling/integration.adoc[Integration scaling] guide for information about using custom metrics.
+
+NOTE: HPA can also be used with Knative, by installing the https://knative.dev/docs/install/install-extensions/#install-optional-serving-extensions[HPA autoscaling Serving extension].

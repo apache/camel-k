@@ -23,62 +23,82 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"io/fs"
+	"math/rand"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
+	"time"
+
+	"go.uber.org/multierr"
+
+	yaml2 "gopkg.in/yaml.v2"
 
 	"github.com/pkg/errors"
-
 	"github.com/scylladb/go-set/strset"
-	yaml2 "gopkg.in/yaml.v2"
 )
 
-/// Directories and file names:
+// Directories and file names:
 
-// MavenWorkingDirectory --  Directory used by Maven for an invocation of the kamel local command. By default a temporary folder will be used.
-var MavenWorkingDirectory string = ""
-
-// DefaultDependenciesDirectoryName --
+// DefaultDependenciesDirectoryName --.
 const DefaultDependenciesDirectoryName = "dependencies"
 
-// DefaultPropertiesDirectoryName --
+// DefaultPropertiesDirectoryName --.
 const DefaultPropertiesDirectoryName = "properties"
 
-// DefaultRoutesDirectoryName --
+// DefaultRoutesDirectoryName --.
 const DefaultRoutesDirectoryName = "routes"
 
-// DefaultWorkingDirectoryName --
+// DefaultWorkingDirectoryName --.
 const DefaultWorkingDirectoryName = "workspace"
 
-// ContainerDependenciesDirectory --
+// CustomQuarkusDirectoryName --.
+const CustomQuarkusDirectoryName = "quarkus"
+
+// CustomAppDirectoryName --.
+const CustomAppDirectoryName = "app"
+
+// CustomLibDirectoryName --.
+const CustomLibDirectoryName = "lib/main"
+
+// ContainerDependenciesDirectory --.
 var ContainerDependenciesDirectory = "/deployments/dependencies"
 
-// ContainerPropertiesDirectory --
+// ContainerPropertiesDirectory --.
 var ContainerPropertiesDirectory = "/etc/camel/conf.d"
 
-// ContainerRoutesDirectory --
+// ContainerRoutesDirectory --.
 var ContainerRoutesDirectory = "/etc/camel/sources"
 
-// ContainerResourcesDirectory --
+// ContainerResourcesDirectory --.
 var ContainerResourcesDirectory = "/etc/camel/resources"
 
-// QuarkusDependenciesBaseDirectory --
+// ContainerQuarkusDirectoryName --.
+const ContainerQuarkusDirectoryName = "/quarkus"
+
+// ContainerAppDirectoryName --.
+const ContainerAppDirectoryName = "/app"
+
+// ContainerLibDirectoryName --.
+const ContainerLibDirectoryName = "/lib/main"
+
+// QuarkusDependenciesBaseDirectory --.
 var QuarkusDependenciesBaseDirectory = "/quarkus-app"
 
 // ListOfLazyEvaluatedEnvVars -- List of unevaluated environment variables.
-// These are sensitive values or values that may have different values depending
+// These are sensitive values or values that may have different values depending on
 // where the integration is run (locally vs. the cloud). These environment variables
 // are evaluated at the time of the integration invocation.
-var ListOfLazyEvaluatedEnvVars []string = []string{}
+var ListOfLazyEvaluatedEnvVars = []string{}
 
 // CLIEnvVars -- List of CLI provided environment variables. They take precedence over
 // any environment variables with the same name.
-var CLIEnvVars []string = []string{}
+var CLIEnvVars = make([]string, 0)
 
-// StringSliceJoin --
 func StringSliceJoin(slices ...[]string) []string {
 	size := 0
 
@@ -95,7 +115,6 @@ func StringSliceJoin(slices ...[]string) []string {
 	return result
 }
 
-// StringSliceContains --
 func StringSliceContains(slice []string, items []string) bool {
 	for i := 0; i < len(items); i++ {
 		if !StringSliceExists(slice, items[i]) {
@@ -106,7 +125,6 @@ func StringSliceContains(slice []string, items []string) bool {
 	return true
 }
 
-// StringSliceExists --
 func StringSliceExists(slice []string, item string) bool {
 	for i := 0; i < len(slice); i++ {
 		if slice[i] == item {
@@ -117,7 +135,16 @@ func StringSliceExists(slice []string, item string) bool {
 	return false
 }
 
-// StringSliceContainsAnyOf --
+func StringContainsPrefix(slice []string, prefix string) bool {
+	for i := 0; i < len(slice); i++ {
+		if strings.HasPrefix(slice[i], prefix) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func StringSliceContainsAnyOf(slice []string, items ...string) bool {
 	for i := 0; i < len(slice); i++ {
 		for j := 0; j < len(items); j++ {
@@ -130,7 +157,7 @@ func StringSliceContainsAnyOf(slice []string, items ...string) bool {
 	return false
 }
 
-// StringSliceUniqueAdd append the given item if not already present in the slice
+// StringSliceUniqueAdd appends the given item if not already present in the slice.
 func StringSliceUniqueAdd(slice *[]string, item string) bool {
 	if slice == nil {
 		newSlice := make([]string, 0)
@@ -147,7 +174,7 @@ func StringSliceUniqueAdd(slice *[]string, item string) bool {
 	return true
 }
 
-// StringSliceUniqueConcat append all the items of the "items" slice if they are not already present in the slice
+// StringSliceUniqueConcat appends all the items of the "items" slice if they are not already present in the slice.
 func StringSliceUniqueConcat(slice *[]string, items []string) bool {
 	changed := false
 	for _, item := range items {
@@ -155,19 +182,56 @@ func StringSliceUniqueConcat(slice *[]string, items []string) bool {
 			changed = true
 		}
 	}
+
 	return changed
 }
 
-// SubstringFrom --
 func SubstringFrom(s string, substr string) string {
 	index := strings.Index(s, substr)
 	if index != -1 {
 		return s[index:]
 	}
+
 	return ""
 }
 
-// EncodeXML --
+func SubstringBefore(s string, substr string) string {
+	index := strings.LastIndex(s, substr)
+	if index != -1 {
+		return s[:index]
+	}
+
+	return ""
+}
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+const (
+	letterIdxBits = 6                    // 6 bits to represent a letter index
+	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
+	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
+)
+
+var randomSource = rand.NewSource(time.Now().UnixNano())
+
+func RandomString(n int) string {
+	sb := strings.Builder{}
+	sb.Grow(n)
+	for i, cache, remain := n-1, randomSource.Int63(), letterIdxMax; i >= 0; {
+		if remain == 0 {
+			cache, remain = randomSource.Int63(), letterIdxMax
+		}
+		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
+			sb.WriteByte(letterBytes[idx])
+			i--
+		}
+		cache >>= letterIdxBits
+		remain--
+	}
+
+	return sb.String()
+}
+
 func EncodeXML(content interface{}) ([]byte, error) {
 	w := &bytes.Buffer{}
 	w.WriteString(xml.Header)
@@ -175,79 +239,100 @@ func EncodeXML(content interface{}) ([]byte, error) {
 	e := xml.NewEncoder(w)
 	e.Indent("", "  ")
 
-	err := e.Encode(content)
-	if err != nil {
+	if err := e.Encode(content); err != nil {
 		return []byte{}, err
 	}
 
 	return w.Bytes(), nil
 }
 
-// CopyFile --
 func CopyFile(src, dst string) (int64, error) {
-	sourceFileStat, err := os.Stat(src)
+	stat, err := os.Stat(src)
 	if err != nil {
 		return 0, err
 	}
 
-	if !sourceFileStat.Mode().IsRegular() {
-		return 0, fmt.Errorf("%s is not a regular file", src)
-	}
-
-	source, err := os.Open(src)
-	if err != nil {
+	if !stat.Mode().IsRegular() {
+		err = fmt.Errorf("%s is not a regular file", src)
 		return 0, err
 	}
-	defer source.Close()
 
-	err = os.MkdirAll(path.Dir(dst), 0777)
+	source, err := Open(src)
 	if err != nil {
 		return 0, err
 	}
 
-	destination, err := os.Create(dst)
+	defer func() {
+		err = Close(err, source)
+	}()
+
+	// we need to have group and other to be able to access the directory as the user
+	// in the container may not be the same as the one owning the files
+	//
+	// #nosec G301
+	if err = os.MkdirAll(path.Dir(dst), 0o755); err != nil {
+		return 0, err
+	}
+
+	destination, err := OpenFile(dst, os.O_RDWR|os.O_CREATE|os.O_TRUNC, stat.Mode())
 	if err != nil {
 		return 0, err
 	}
-	defer destination.Close()
+
+	defer func() {
+		err = Close(err, destination)
+	}()
+
 	nBytes, err := io.Copy(destination, source)
+
 	return nBytes, err
 }
 
-// WriteFileWithContent --
-func WriteFileWithContent(buildDir string, relativePath string, content []byte) error {
-	filePath := path.Join(buildDir, relativePath)
-	fileDir := path.Dir(filePath)
-	// Create dir if not present
-	err := os.MkdirAll(fileDir, 0777)
+func CopyDir(src, dst string) error {
+	entries, err := os.ReadDir(src)
 	if err != nil {
-		return errors.Wrap(err, "could not create dir for file "+relativePath)
+		return err
 	}
-	// Create file
-	file, err := os.Create(filePath)
-	if err != nil {
-		return errors.Wrap(err, "could not create file "+relativePath)
-	}
-	defer file.Close()
 
-	_, err = file.Write(content)
-	if err != nil {
-		return errors.Wrap(err, "could not write to file "+relativePath)
+	for _, entry := range entries {
+		srcEntry := filepath.Join(src, entry.Name())
+		dstEntry := filepath.Join(dst, entry.Name())
+		realEntry := entry
+		if entry.Type() == os.ModeSymlink {
+			realPath, err := filepath.EvalSymlinks(srcEntry)
+			if err != nil {
+				return err
+			}
+			realInfo, err := os.Stat(realPath)
+			if err != nil {
+				return err
+			}
+			srcEntry = realPath
+			realEntry = fs.FileInfoToDirEntry(realInfo)
+		}
+		if realEntry.IsDir() {
+			if err := CopyDir(srcEntry, dstEntry); err != nil {
+				return err
+			}
+		} else {
+			if _, err := CopyFile(srcEntry, dstEntry); err != nil {
+				return err
+			}
+		}
 	}
+
 	return nil
 }
 
-// WriteFileWithBytesMarshallerContent --
-func WriteFileWithBytesMarshallerContent(buildDir string, relativePath string, content BytesMarshaller) error {
+func WriteFileWithBytesMarshallerContent(basePath string, filePath string, content BytesMarshaller) error {
 	data, err := content.MarshalBytes()
 	if err != nil {
 		return err
 	}
 
-	return WriteFileWithContent(buildDir, relativePath, data)
+	return WriteFileWithContent(filepath.Join(basePath, filePath), data)
 }
 
-// FindAllDistinctStringSubmatch --
 func FindAllDistinctStringSubmatch(data string, regexps ...*regexp.Regexp) []string {
 	submatchs := strset.New()
 
@@ -264,7 +349,6 @@ func FindAllDistinctStringSubmatch(data string, regexps ...*regexp.Regexp) []str
 	return submatchs.List()
 }
 
-// FindNamedMatches ---
 func FindNamedMatches(expr string, str string) map[string]string {
 	regex := regexp.MustCompile(expr)
 	match := regex.FindStringSubmatch(str)
@@ -276,7 +360,6 @@ func FindNamedMatches(expr string, str string) map[string]string {
 	return results
 }
 
-// FileExists --
 func FileExists(name string) (bool, error) {
 	info, err := os.Stat(name)
 	if os.IsNotExist(err) {
@@ -286,7 +369,6 @@ func FileExists(name string) (bool, error) {
 	return !info.IsDir(), err
 }
 
-// DirectoryExists --
 func DirectoryExists(directory string) (bool, error) {
 	info, err := os.Stat(directory)
 	if os.IsNotExist(err) {
@@ -300,32 +382,49 @@ func DirectoryExists(directory string) (bool, error) {
 	return info.IsDir(), nil
 }
 
-// CreateDirectory --
-func CreateDirectory(directory string) error {
-	if directory != "" {
-		// If directory does not exist, create it.
-		directoryExists, err := DirectoryExists(directory)
-		if err != nil {
-			return err
-		}
+func DirectoryEmpty(directory string) (bool, error) {
+	f, err := Open(directory)
+	if err != nil {
+		return false, err
+	}
 
-		if !directoryExists {
-			err := os.MkdirAll(directory, 0777)
-			if err != nil {
-				return err
-			}
+	defer func() {
+		err = Close(err, f)
+	}()
+
+	ok := false
+	if _, err = f.Readdirnames(1); errors.Is(err, io.EOF) {
+		ok = true
+	}
+
+	return ok, err
+}
+
+// CreateDirectory creates a directory if it does not exist.
+func CreateDirectory(directory string) error {
+	if directory == "" {
+		return errors.New("directory name must not be empty")
+	}
+
+	directoryExists, err := DirectoryExists(directory)
+	if err != nil {
+		return err
+	}
+
+	if !directoryExists {
+		// #nosec G301
+		if err := os.MkdirAll(directory, 0o755); err != nil {
+			return err
 		}
 	}
 
 	return nil
 }
 
-// BytesMarshaller --
 type BytesMarshaller interface {
 	MarshalBytes() ([]byte, error)
 }
 
-// SortedMapKeys --
 func SortedMapKeys(m map[string]interface{}) []string {
 	res := make([]string, len(m))
 	i := 0
@@ -337,7 +436,6 @@ func SortedMapKeys(m map[string]interface{}) []string {
 	return res
 }
 
-// SortedStringMapKeys --
 func SortedStringMapKeys(m map[string]string) []string {
 	res := make([]string, len(m))
 	i := 0
@@ -349,7 +447,7 @@ func SortedStringMapKeys(m map[string]string) []string {
 	return res
 }
 
-// CopyMap clones a map of strings
+// CopyMap clones a map of strings.
 func CopyMap(source map[string]string) map[string]string {
 	if source == nil {
 		return nil
@@ -361,130 +459,43 @@ func CopyMap(source map[string]string) map[string]string {
 	return dest
 }
 
-// DependenciesToJSON --
-func DependenciesToJSON(list []string) ([]byte, error) {
-	jsondata := map[string]interface{}{}
-	jsondata["dependencies"] = list
-	return json.Marshal(jsondata)
-}
-
-// DependenciesToYAML --
-func DependenciesToYAML(list []string) ([]byte, error) {
-	data, err := DependenciesToJSON(list)
+func JSONToYAML(src []byte) ([]byte, error) {
+	mapdata, err := JSONToMap(src)
 	if err != nil {
 		return nil, err
 	}
 
-	return JSONToYAML(data)
+	return MapToYAML(mapdata)
 }
 
-// JSONToYAML --
-func JSONToYAML(src []byte) ([]byte, error) {
+func JSONToMap(src []byte) (map[string]interface{}, error) {
 	jsondata := map[string]interface{}{}
 	err := json.Unmarshal(src, &jsondata)
 	if err != nil {
-		return nil, fmt.Errorf("error unmarshalling json: %v", err)
+		return nil, fmt.Errorf("error unmarshalling json: %w", err)
 	}
-	yamldata, err := yaml2.Marshal(&jsondata)
+
+	return jsondata, nil
+}
+
+func MapToYAML(src map[string]interface{}) ([]byte, error) {
+	yamldata, err := yaml2.Marshal(&src)
 	if err != nil {
-		return nil, fmt.Errorf("error marshalling to yaml: %v", err)
+		return nil, fmt.Errorf("error marshalling to yaml: %w", err)
 	}
 
 	return yamldata, nil
 }
 
-// WriteToFile --
 func WriteToFile(filePath string, fileContents string) error {
-	err := ioutil.WriteFile(filePath, []byte(fileContents), 0777)
+	err := os.WriteFile(filePath, []byte(fileContents), 0o400)
 	if err != nil {
 		return errors.Errorf("error writing file: %v", filePath)
 	}
 
-	// All went well, return true.
 	return nil
 }
 
-/// Local directories:
-
-// GetLocalPropertiesDir -- <mavenWorkingDirectory>/properties
-func GetLocalPropertiesDir() string {
-	return path.Join(MavenWorkingDirectory, DefaultPropertiesDirectoryName)
-}
-
-// GetLocalDependenciesDir --<mavenWorkingDirectory>/dependencies
-func GetLocalDependenciesDir() string {
-	return path.Join(MavenWorkingDirectory, DefaultDependenciesDirectoryName)
-}
-
-// GetLocalRoutesDir -- <mavenWorkingDirectory>/routes
-func GetLocalRoutesDir() string {
-	return path.Join(MavenWorkingDirectory, DefaultRoutesDirectoryName)
-}
-
-// CreateLocalPropertiesDirectory --
-func CreateLocalPropertiesDirectory() error {
-	// Do not create a directory unless the maven directory contains a valid value.
-	if MavenWorkingDirectory == "" {
-		return nil
-	}
-
-	directoryExists, err := DirectoryExists(GetLocalPropertiesDir())
-	if err != nil {
-		return err
-	}
-
-	if !directoryExists {
-		err := os.MkdirAll(GetLocalPropertiesDir(), 0777)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// CreateLocalDependenciesDirectory --
-func CreateLocalDependenciesDirectory() error {
-	// Do not create a directory unless the maven directory contains a valid value.
-	if MavenWorkingDirectory == "" {
-		return nil
-	}
-
-	directoryExists, err := DirectoryExists(GetLocalDependenciesDir())
-	if err != nil {
-		return err
-	}
-
-	if !directoryExists {
-		err := os.MkdirAll(GetLocalDependenciesDir(), 0777)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// CreateLocalRoutesDirectory --
-func CreateLocalRoutesDirectory() error {
-	// Do not create a directory unless the maven directory contains a valid value.
-	if MavenWorkingDirectory == "" {
-		return nil
-	}
-
-	directoryExists, err := DirectoryExists(GetLocalRoutesDir())
-	if err != nil {
-		return err
-	}
-
-	if !directoryExists {
-		err := os.MkdirAll(GetLocalRoutesDir(), 0777)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// GetEnvironmentVariable --
 func GetEnvironmentVariable(variable string) (string, error) {
 	value, isPresent := os.LookupEnv(variable)
 	if !isPresent {
@@ -498,12 +509,12 @@ func GetEnvironmentVariable(variable string) (string, error) {
 	return value, nil
 }
 
-// EvaluateCLIAndLazyEnvVars -- Function that creates a list of environment
+// EvaluateCLIAndLazyEnvVars creates a list of environment
 // variables with entries VAR=value that can be passed when running the integration.
 func EvaluateCLIAndLazyEnvVars() ([]string, error) {
 	evaluatedEnvVars := []string{}
 
-	// Add CLI environment variables.
+	// Add CLI environment variables
 	setEnvVars := []string{}
 	for _, cliEnvVar := range CLIEnvVars {
 		// Mark variable name as set.
@@ -520,6 +531,7 @@ func EvaluateCLIAndLazyEnvVars() ([]string, error) {
 		for _, setEnvVar := range setEnvVars {
 			if setEnvVar == lazyEnvVar {
 				alreadySet = true
+
 				break
 			}
 		}
@@ -536,21 +548,174 @@ func EvaluateCLIAndLazyEnvVars() ([]string, error) {
 	return evaluatedEnvVars, nil
 }
 
-// CopyIntegrationFilesToDirectory --
-func CopyIntegrationFilesToDirectory(files []string, directory string) ([]string, error) {
-	// Create directory if one does not already exist.
-	err := CreateDirectory(directory)
+// Open a safe wrapper of os.Open.
+func Open(name string) (*os.File, error) {
+	return os.Open(filepath.Clean(name))
+}
+
+// OpenFile a safe wrapper of os.OpenFile.
+func OpenFile(name string, flag int, perm os.FileMode) (*os.File, error) {
+	// #nosec G304
+	return os.OpenFile(filepath.Clean(name), flag, perm)
+}
+
+// ReadFile a safe wrapper of os.ReadFile.
+func ReadFile(filename string) ([]byte, error) {
+	return os.ReadFile(filepath.Clean(filename))
+}
+
+func Close(err error, closer io.Closer) error {
+	return multierr.Append(err, closer.Close())
+}
+
+// CloseQuietly unconditionally close an io.Closer
+// It should not be used to replace the Close statement(s).
+func CloseQuietly(closer io.Closer) {
+	_ = closer.Close()
+}
+
+// WithFile a safe wrapper to process a file.
+func WithFile(name string, flag int, perm os.FileMode, consumer func(file *os.File) error) error {
+	// #nosec G304
+	file, err := os.OpenFile(filepath.Clean(name), flag, perm)
+	if err == nil {
+		err = consumer(file)
+	}
+
+	return Close(err, file)
+}
+
+// WithFileReader a safe wrapper to process a file.
+func WithFileReader(name string, consumer func(reader io.Reader) error) error {
+	// #nosec G304
+	file, err := os.Open(filepath.Clean(name))
+	if err == nil {
+		err = consumer(file)
+	}
+
+	return Close(err, file)
+}
+
+// WithFileContent a safe wrapper to process a file content.
+func WithFileContent(name string, consumer func(file *os.File, data []byte) error) error {
+	return WithFile(name, os.O_RDWR|os.O_CREATE, 0o644, func(file *os.File) error {
+		content, err := ReadFile(name)
+		if err != nil {
+			return err
+		}
+
+		return consumer(file, content)
+	})
+}
+
+// WriteFileWithContent a safe wrapper to write content to a file.
+func WriteFileWithContent(filePath string, content []byte) error {
+	fileDir := path.Dir(filePath)
+
+	// Create dir if not present
+	err := os.MkdirAll(fileDir, 0o700)
 	if err != nil {
-		return nil, err
+		return errors.Wrap(err, "could not create dir for file "+filePath)
 	}
 
-	// Coopy files to new location. Also create the list with relocated files.
-	relocatedFilesList := []string{}
-	for _, filePath := range files {
-		newFilePath := path.Join(directory, path.Base(filePath))
-		CopyFile(filePath, newFilePath)
-		relocatedFilesList = append(relocatedFilesList, newFilePath)
+	// Create file
+	file, err := os.Create(filePath)
+	if err != nil {
+		return errors.Wrap(err, "could not create file "+filePath)
 	}
 
-	return relocatedFilesList, nil
+	_, err = file.Write(content)
+	if err != nil {
+		err = errors.Wrap(err, "could not write to file "+filePath)
+	}
+
+	return Close(err, file)
+}
+
+// WithTempDir a safe wrapper to deal with temporary directories.
+func WithTempDir(pattern string, consumer func(string) error) error {
+	tmpDir, err := os.MkdirTemp("", pattern)
+	if err != nil {
+		return err
+	}
+
+	consumerErr := consumer(tmpDir)
+	removeErr := os.RemoveAll(tmpDir)
+
+	return multierr.Append(consumerErr, removeErr)
+}
+
+// Parses a property spec and returns its parts.
+func ConfigTreePropertySplit(property string) []string {
+	var res = make([]string, 0)
+	initialParts := strings.Split(property, ".")
+	for _, p := range initialParts {
+		cur := p
+		var tmp []string
+		for strings.Contains(cur[1:], "[") && strings.HasSuffix(cur, "]") {
+			pos := strings.LastIndex(cur, "[")
+			tmp = append(tmp, cur[pos:])
+			cur = cur[0:pos]
+		}
+		if len(cur) > 0 {
+			tmp = append(tmp, cur)
+		}
+		for i := len(tmp) - 1; i >= 0; i-- {
+			res = append(res, tmp[i])
+		}
+	}
+	return res
+}
+
+// NavigateConfigTree switch to the element in the tree represented by the "nodes" spec and creates intermediary
+// nodes if missing. Nodes specs starting with "[" and ending in "]" are treated as slice indexes.
+func NavigateConfigTree(current interface{}, nodes []string) (interface{}, error) {
+	if len(nodes) == 0 {
+		return current, nil
+	}
+	isSlice := func(idx int) bool {
+		if idx >= len(nodes) {
+			return false
+		}
+		return strings.HasPrefix(nodes[idx], "[") && strings.HasSuffix(nodes[idx], "]")
+	}
+	makeNext := func() interface{} {
+		if isSlice(1) {
+			slice := make([]interface{}, 0)
+			return &slice
+		}
+		return make(map[string]interface{})
+	}
+	switch c := current.(type) {
+	case map[string]interface{}:
+		var next interface{}
+		if n, ok := c[nodes[0]]; ok {
+			next = n
+		} else {
+			next = makeNext()
+			c[nodes[0]] = next
+		}
+		return NavigateConfigTree(next, nodes[1:])
+	case *[]interface{}:
+		if !isSlice(0) {
+			return nil, fmt.Errorf("attempting to set map value %q into a slice", nodes[0])
+		}
+		pos, err := strconv.Atoi(nodes[0][1 : len(nodes[0])-1])
+		if err != nil {
+			return nil, errors.Wrapf(err, "value %q inside brackets is not numeric", nodes[0])
+		}
+		var next interface{}
+		if len(*c) > pos && (*c)[pos] != nil {
+			next = (*c)[pos]
+		} else {
+			next = makeNext()
+			for len(*c) <= pos {
+				*c = append(*c, nil)
+			}
+			(*c)[pos] = next
+		}
+		return NavigateConfigTree(next, nodes[1:])
+	default:
+		return nil, errors.New("invalid node type in configuration")
+	}
 }

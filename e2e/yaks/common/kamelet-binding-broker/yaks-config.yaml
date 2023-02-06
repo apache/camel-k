@@ -21,12 +21,7 @@ config:
 pre:
 - name: installation
   run: |
-    # One of the two labels should work
-    oc label namespace $YAKS_NAMESPACE eventing.knative.dev/injection=enabled
-    oc label namespace $YAKS_NAMESPACE knative-eventing-injection=enabled
-
-    kamel install -n $YAKS_NAMESPACE
-
+    kubectl apply -f sample-broker.yaml -n $YAKS_NAMESPACE
     kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
     kubectl apply -f logger-sink.kamelet.yaml -n $YAKS_NAMESPACE
 
@@ -34,3 +29,7 @@ pre:
     kubectl apply -f logger-sink-binding.yaml -n $YAKS_NAMESPACE
     kubectl wait kameletbinding timer-source-binding --for=condition=Ready --timeout=15m -n $YAKS_NAMESPACE
     kubectl wait kameletbinding logger-sink-binding --for=condition=Ready --timeout=15m -n $YAKS_NAMESPACE
+post:
+  - name: print dump
+    if: env:CI=true && failure()
+    run: yaks dump --includes app=camel-k

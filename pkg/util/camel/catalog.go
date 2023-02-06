@@ -19,16 +19,15 @@ package camel
 
 import (
 	"context"
-	"io/ioutil"
-	"os"
-	"path"
+	"path/filepath"
 
 	yaml2 "gopkg.in/yaml.v2"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/resources"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/jvm"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -46,9 +45,20 @@ func QuarkusCatalog() (*RuntimeCatalog, error) {
 func catalogForRuntimeProvider(provider v1.RuntimeProvider) (*RuntimeCatalog, error) {
 	catalogs := make([]v1.CamelCatalog, 0)
 
-	for _, name := range resources.ResourcesWithPrefix("/camel-catalog-") {
+	names, err := resources.WithPrefix("/camel-catalog-")
+	if err != nil {
+		return nil, err
+	}
+
+	for _, name := range names {
+
+		content, err := resources.Resource(name)
+		if err != nil {
+			return nil, err
+		}
+
 		var c v1.CamelCatalog
-		if err := yaml2.Unmarshal(resources.Resource(name), &c); err != nil {
+		if err := yaml2.Unmarshal(content, &c); err != nil {
 			return nil, err
 		}
 
@@ -64,90 +74,89 @@ func catalogForRuntimeProvider(provider v1.RuntimeProvider) (*RuntimeCatalog, er
 
 func GenerateCatalog(
 	ctx context.Context,
-	client k8sclient.Reader,
+	client ctrl.Reader,
 	namespace string,
 	mvn v1.MavenSpec,
 	runtime v1.RuntimeSpec,
 	providerDependencies []maven.Dependency) (*RuntimeCatalog, error) {
 
-	settings, err := kubernetes.ResolveValueSource(ctx, client, namespace, &mvn.Settings)
+	userSettings, err := kubernetes.ResolveValueSource(ctx, client, namespace, &mvn.Settings)
+	if err != nil {
+		return nil, err
+	}
+	settings, err := maven.NewSettings(maven.DefaultRepositories, maven.ProxyFromEnvironment)
+	if err != nil {
+		return nil, err
+	}
+	globalSettings, err := settings.MarshalBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	var caCert []byte
-	if mvn.CASecret != nil {
-		caCert, err = kubernetes.GetSecretRefData(ctx, client, namespace, mvn.CASecret)
+	var caCerts [][]byte
+	if mvn.CASecrets != nil {
+		caCerts, err = kubernetes.GetSecretsRefData(ctx, client, namespace, mvn.CASecrets)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return GenerateCatalogCommon(ctx, settings, caCert, mvn, runtime, providerDependencies)
+	return GenerateCatalogCommon(ctx, globalSettings, []byte(userSettings), caCerts, mvn, runtime, providerDependencies)
 }
 
 func GenerateCatalogCommon(
 	ctx context.Context,
-	settings string,
-	caCert []byte,
+	globalSettings []byte,
+	userSettings []byte,
+	caCert [][]byte,
 	mvn v1.MavenSpec,
 	runtime v1.RuntimeSpec,
 	providerDependencies []maven.Dependency) (*RuntimeCatalog, error) {
 
-	root := os.TempDir()
-	tmpDir, err := ioutil.TempDir(root, "camel-catalog")
-	if err != nil {
-		return nil, err
-	}
-
-	defer os.RemoveAll(tmpDir)
-
-	if err := os.MkdirAll(tmpDir, os.ModePerm); err != nil {
-		return nil, err
-	}
-
-	project := generateMavenProject(runtime.Version, providerDependencies)
-
-	mc := maven.NewContext(tmpDir)
-	mc.LocalRepository = mvn.LocalRepository
-	mc.AddSystemProperty("catalog.path", tmpDir)
-	mc.AddSystemProperty("catalog.file", "catalog.yaml")
-	mc.AddSystemProperty("catalog.runtime", string(runtime.Provider))
-
-	mc.SettingsContent = nil
-	if settings != "" {
-		mc.SettingsContent = []byte(settings)
-	}
-
-	if caCert != nil {
-		trustStoreName := "trust.jks"
-		trustStorePass := jvm.NewKeystorePassword()
-		err := jvm.GenerateKeystore(context.Background(), tmpDir, trustStoreName, trustStorePass, caCert)
-		if err != nil {
-			return nil, err
-		}
-		mc.ExtraMavenOpts = append(mc.ExtraMavenOpts,
-			"-Djavax.net.ssl.trustStore="+trustStoreName,
-			"-Djavax.net.ssl.trustStorePassword="+trustStorePass,
-		)
-	}
-
-	err = project.Command(mc).Do(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	content, err := ioutil.ReadFile(path.Join(tmpDir, "catalog.yaml"))
-	if err != nil {
-		return nil, err
-	}
-
 	catalog := v1.CamelCatalog{}
-	if err := yaml2.Unmarshal(content, &catalog); err != nil {
-		return nil, err
-	}
 
-	return NewRuntimeCatalog(catalog.Spec), nil
+	err := util.WithTempDir("camel-catalog", func(tmpDir string) error {
+		project := generateMavenProject(runtime.Version, providerDependencies)
+
+		mc := maven.NewContext(tmpDir)
+		mc.LocalRepository = mvn.LocalRepository
+		mc.AdditionalArguments = mvn.CLIOptions
+		mc.AddSystemProperty("catalog.path", tmpDir)
+		mc.AddSystemProperty("catalog.file", "catalog.yaml")
+		mc.AddSystemProperty("catalog.runtime", string(runtime.Provider))
+
+		if len(globalSettings) > 0 {
+			mc.GlobalSettings = globalSettings
+		}
+		if len(userSettings) > 0 {
+			mc.UserSettings = userSettings
+		}
+
+		if caCert != nil {
+			trustStoreName := "trust.jks"
+			trustStorePass := jvm.NewKeystorePassword()
+			if err := jvm.GenerateKeystore(ctx, tmpDir, trustStoreName, trustStorePass, caCert); err != nil {
+				return err
+			}
+			mc.ExtraMavenOpts = append(mc.ExtraMavenOpts,
+				"-Djavax.net.ssl.trustStore="+trustStoreName,
+				"-Djavax.net.ssl.trustStorePassword="+trustStorePass,
+			)
+		}
+
+		if err := project.Command(mc).Do(ctx); err != nil {
+			return err
+		}
+
+		content, err := util.ReadFile(filepath.Join(tmpDir, "catalog.yaml"))
+		if err != nil {
+			return err
+		}
+
+		return yaml2.Unmarshal(content, &catalog)
+	})
+
+	return NewRuntimeCatalog(catalog.Spec), err
 }
 
 func generateMavenProject(runtimeVersion string, providerDependencies []maven.Dependency) maven.Project {

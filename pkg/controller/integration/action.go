@@ -25,7 +25,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
-// Action --
+// Action --.
 type Action interface {
 	client.Injectable
 	log.Injectable

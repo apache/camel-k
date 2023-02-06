@@ -18,14 +18,53 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"testing"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 )
+
+func TestTraitConfiguration(t *testing.T) {
+	env := Environment{
+		Integration: &v1.Integration{
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKubernetes,
+				Traits: v1.Traits{
+					Logging: &traitv1.LoggingTrait{
+						JSON:            pointer.Bool(true),
+						JSONPrettyPrint: pointer.Bool(false),
+						Level:           "DEBUG",
+					},
+					Service: &traitv1.ServiceTrait{
+						Trait: traitv1.Trait{
+							Enabled: pointer.Bool(true),
+						},
+						Auto:     pointer.Bool(true),
+						NodePort: pointer.Bool(false),
+					},
+				},
+			},
+		},
+	}
+	c := NewCatalog(nil)
+	assert.NoError(t, c.Configure(&env))
+	logging, ok := c.GetTrait("logging").(*loggingTrait)
+	require.True(t, ok)
+	assert.True(t, *logging.JSON)
+	assert.False(t, *logging.JSONPrettyPrint)
+	assert.Equal(t, "DEBUG", logging.Level)
+	service, ok := c.GetTrait("service").(*serviceTrait)
+	require.True(t, ok)
+	assert.True(t, *service.Enabled)
+	assert.True(t, *service.Auto)
+	assert.False(t, *service.NodePort)
+}
 
 func TestTraitConfigurationFromAnnotations(t *testing.T) {
 	env := Environment{
@@ -38,20 +77,22 @@ func TestTraitConfigurationFromAnnotations(t *testing.T) {
 			},
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
-				Traits: map[string]v1.TraitSpec{
-					"cron": test.TraitSpecFromMap(t, map[string]interface{}{
-						"fallback":          true,
-						"concurrencyPolicy": "mypolicy",
-					}),
+				Traits: v1.Traits{
+					Cron: &traitv1.CronTrait{
+						Fallback:          pointer.Bool(true),
+						ConcurrencyPolicy: "mypolicy",
+					},
 				},
 			},
 		},
 	}
-	c := NewCatalog(context.Background(), nil)
-	assert.NoError(t, c.configure(&env))
-	assert.True(t, *c.GetTrait("cron").(*cronTrait).Fallback)
-	assert.Equal(t, "annotated-policy", c.GetTrait("cron").(*cronTrait).ConcurrencyPolicy)
-	assert.True(t, *c.GetTrait("environment").(*environmentTrait).ContainerMeta)
+	c := NewCatalog(nil)
+	assert.NoError(t, c.Configure(&env))
+	ct, _ := c.GetTrait("cron").(*cronTrait)
+	assert.True(t, *ct.Fallback)
+	assert.Equal(t, "annotated-policy", ct.ConcurrencyPolicy)
+	et, _ := c.GetTrait("environment").(*environmentTrait)
+	assert.True(t, *et.ContainerMeta)
 }
 
 func TestFailOnWrongTraitAnnotations(t *testing.T) {
@@ -67,8 +108,8 @@ func TestFailOnWrongTraitAnnotations(t *testing.T) {
 			},
 		},
 	}
-	c := NewCatalog(context.Background(), nil)
-	assert.Error(t, c.configure(&env))
+	c := NewCatalog(nil)
+	assert.Error(t, c.Configure(&env))
 }
 
 func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
@@ -81,51 +122,56 @@ func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
 				},
 			},
 			Spec: v1.IntegrationPlatformSpec{
-				Traits: map[string]v1.TraitSpec{
-					"cron": test.TraitSpecFromMap(t, map[string]interface{}{
-						"components": "cmp1",
-						"schedule":   "schedule1",
-					}),
+				Traits: v1.Traits{
+					Cron: &traitv1.CronTrait{
+						Components:        "cmp1",
+						Schedule:          "schedule1",
+						ConcurrencyPolicy: "policy1",
+					},
 				},
 			},
 		},
 		IntegrationKit: &v1.IntegrationKit{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
-					"trait.camel.apache.org/cron.components":         "cmp4",
+					"trait.camel.apache.org/cron.components":         "cmp3",
 					"trait.camel.apache.org/cron.concurrency-policy": "policy2",
+					"trait.camel.apache.org/builder.verbose":         "true",
 				},
 			},
 			Spec: v1.IntegrationKitSpec{
-				Traits: map[string]v1.TraitSpec{
-					"cron": test.TraitSpecFromMap(t, map[string]interface{}{
-						"components":        "cmp3",
-						"concurrencyPolicy": "policy1",
-					}),
+				Traits: v1.IntegrationKitTraits{
+					Builder: &traitv1.BuilderTrait{
+						Verbose: pointer.Bool(false),
+					},
 				},
 			},
 		},
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
+					"trait.camel.apache.org/cron.components":         "cmp4",
 					"trait.camel.apache.org/cron.concurrency-policy": "policy4",
 				},
 			},
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
-				Traits: map[string]v1.TraitSpec{
-					"cron": test.TraitSpecFromMap(t, map[string]interface{}{
-						"concurrencyPolicy": "policy3",
-					}),
+				Traits: v1.Traits{
+					Cron: &traitv1.CronTrait{
+						ConcurrencyPolicy: "policy3",
+					},
 				},
 			},
 		},
 	}
-	c := NewCatalog(context.Background(), nil)
-	assert.NoError(t, c.configure(&env))
-	assert.Equal(t, "schedule2", c.GetTrait("cron").(*cronTrait).Schedule)
-	assert.Equal(t, "cmp4", c.GetTrait("cron").(*cronTrait).Components)
-	assert.Equal(t, "policy4", c.GetTrait("cron").(*cronTrait).ConcurrencyPolicy)
+	c := NewCatalog(nil)
+	assert.NoError(t, c.Configure(&env))
+	ct, _ := c.GetTrait("cron").(*cronTrait)
+	assert.Equal(t, "schedule2", ct.Schedule)
+	assert.Equal(t, "cmp4", ct.Components)
+	assert.Equal(t, "policy4", ct.ConcurrencyPolicy)
+	bt, _ := c.GetTrait("builder").(*builderTrait)
+	assert.True(t, *bt.Verbose)
 }
 
 func TestTraitListConfigurationFromAnnotations(t *testing.T) {
@@ -133,8 +179,8 @@ func TestTraitListConfigurationFromAnnotations(t *testing.T) {
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
-					"trait.camel.apache.org/jolokia.options":                  `["opt1", "opt2"]`,
-					"trait.camel.apache.org/service-binding.service-bindings": `Binding:xxx`, // lenient
+					"trait.camel.apache.org/jolokia.options":          `["opt1", "opt2"]`,
+					"trait.camel.apache.org/service-binding.services": `Binding:xxx`, // lenient
 				},
 			},
 			Spec: v1.IntegrationSpec{
@@ -142,8 +188,54 @@ func TestTraitListConfigurationFromAnnotations(t *testing.T) {
 			},
 		},
 	}
-	c := NewCatalog(context.Background(), nil)
-	assert.NoError(t, c.configure(&env))
-	assert.Equal(t, []string{"opt1", "opt2"}, c.GetTrait("jolokia").(*jolokiaTrait).Options)
-	assert.Equal(t, []string{"Binding:xxx"}, c.GetTrait("service-binding").(*serviceBindingTrait).ServiceBindings)
+	c := NewCatalog(nil)
+	assert.NoError(t, c.Configure(&env))
+	jt, _ := c.GetTrait("jolokia").(*jolokiaTrait)
+	assert.Equal(t, []string{"opt1", "opt2"}, jt.Options)
+	sbt, _ := c.GetTrait("service-binding").(*serviceBindingTrait)
+	assert.Equal(t, []string{"Binding:xxx"}, sbt.Services)
+}
+
+func TestTraitSplitConfiguration(t *testing.T) {
+	env := Environment{
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Annotations: map[string]string{
+					"trait.camel.apache.org/owner.target-labels": "[\"opt1\", \"opt2\"]",
+				},
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKubernetes,
+			},
+		},
+	}
+	c := NewCatalog(nil)
+	assert.NoError(t, c.Configure(&env))
+	ot, _ := c.GetTrait("owner").(*ownerTrait)
+	assert.Equal(t, []string{"opt1", "opt2"}, ot.TargetLabels)
+}
+
+func TestTraitDecode(t *testing.T) {
+	trait := traitToMap(t, traitv1.ContainerTrait{
+		Trait: traitv1.Trait{
+			Enabled: pointer.Bool(false),
+			Configuration: configurationFromMap(t, map[string]interface{}{
+				"name": "test-container",
+				"port": 8081,
+			}),
+		},
+		Port: 7071,
+		Auto: pointer.Bool(false),
+	})
+
+	target, ok := newContainerTrait().(*containerTrait)
+	require.True(t, ok)
+	err := decodeTrait(trait, target)
+	require.NoError(t, err)
+
+	assert.Equal(t, false, pointer.BoolDeref(target.Enabled, true))
+	assert.Equal(t, "test-container", target.Name)
+	// legacy configuration should not override a value in new API field
+	assert.Equal(t, 7071, target.Port)
+	assert.Equal(t, false, pointer.BoolDeref(target.Auto, true))
 }

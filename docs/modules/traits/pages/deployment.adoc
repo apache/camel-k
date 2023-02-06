@@ -16,7 +16,7 @@ WARNING: The deployment trait is a *platform trait*: disabling it may compromise
 Trait properties can be specified when running any integration with the CLI:
 [source,console]
 ----
-$ kamel run --trait deployment.[key]=[value] integration.groovy
+$ kamel run --trait deployment.[key]=[value] --trait deployment.[key2]=[value2] integration.groovy
 ----
 The following configuration options are available:
 
@@ -27,6 +27,32 @@ The following configuration options are available:
 | deployment.enabled
 | bool
 | Can be used to enable or disable a trait. All traits share this common property.
+
+| deployment.progress-deadline-seconds
+| int32
+| The maximum time in seconds for the deployment to make progress before it
+is considered to be failed. It defaults to 60s.
+
+| deployment.strategy
+| DeploymentStrategyType
+| The deployment strategy to use to replace existing pods with new ones.
+
+| deployment.rolling-update-max-unavailable
+| int
+| The maximum number of pods that can be unavailable during the update.
+Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).
+Absolute number is calculated from percentage by rounding down.
+This can not be 0 if MaxSurge is 0.
+Defaults to 25%.
+
+| deployment.rolling-update-max-surge
+| int
+| The maximum number of pods that can be scheduled above the desired number of
+pods.
+Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).
+This can not be 0 if MaxUnavailable is 0.
+Absolute number is calculated from percentage by rounding up.
+Defaults to 25%.
 
 |===
 

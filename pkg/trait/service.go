@@ -18,26 +18,21 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-// The Service trait exposes the integration with a Service resource so that it can be accessed by other applications
-// (or integrations) in the same namespace.
-//
-// It's enabled by default if the integration depends on a Camel component that can expose a HTTP endpoint.
-//
-// +camel-k:trait=service
 type serviceTrait struct {
-	BaseTrait `property:",squash"`
-	// To automatically detect from the code if a Service needs to be created.
-	Auto *bool `property:"auto" json:"auto,omitempty"`
-	// Enable Service to be exposed as NodePort
-	NodePort *bool `property:"node-port" json:"nodePort,omitempty"`
+	BaseTrait
+	traitv1.ServiceTrait `property:",squash"`
 }
 
 const serviceTraitID = "service"
@@ -48,30 +43,35 @@ func newServiceTrait() Trait {
 	}
 }
 
-// IsAllowedInProfile overrides default
-func (t *serviceTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
-	return profile == v1.TraitProfileKubernetes ||
-		profile == v1.TraitProfileOpenShift
-}
-
 func (t *serviceTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
-		e.Integration.Status.SetCondition(
-			v1.IntegrationConditionServiceAvailable,
-			corev1.ConditionFalse,
-			v1.IntegrationConditionServiceNotAvailableReason,
-			"explicitly disabled",
-		)
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
+		if e.Integration != nil {
+			e.Integration.Status.SetCondition(
+				v1.IntegrationConditionServiceAvailable,
+				corev1.ConditionFalse,
+				v1.IntegrationConditionServiceNotAvailableReason,
+				"explicitly disabled",
+			)
+		}
 
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+	// in case the knative-service and service trait are enabled, the knative-service has priority
+	// then this service is disabled
+	if e.GetTrait(knativeServiceTraitID) != nil {
+		knativeServiceTrait, _ := e.GetTrait(knativeServiceTraitID).(*knativeServiceTrait)
+		if pointer.BoolDeref(knativeServiceTrait.Enabled, true) {
+			return false, nil
+		}
+	}
+
+	if !e.IntegrationInRunningPhases() {
 		return false, nil
 	}
 
-	if IsNilOrTrue(t.Auto) {
-		sources, err := kubernetes.ResolveIntegrationSources(t.Ctx, t.Client, e.Integration, e.Resources)
+	if pointer.BoolDeref(t.Auto, true) {
+		sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
 		if err != nil {
 			e.Integration.Status.SetCondition(
 				v1.IntegrationConditionServiceAvailable,
@@ -83,7 +83,10 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 			return false, err
 		}
 
-		meta := metadata.ExtractAll(e.CamelCatalog, sources)
+		meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
+		if err != nil {
+			return false, err
+		}
 		if !meta.ExposesHTTPServices {
 			e.Integration.Status.SetCondition(
 				v1.IntegrationConditionServiceAvailable,
@@ -95,7 +98,6 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 			return false, nil
 		}
 	}
-
 	return true, nil
 }
 
@@ -105,9 +107,23 @@ func (t *serviceTrait) Apply(e *Environment) error {
 	if svc == nil {
 		svc = getServiceFor(e)
 
-		if IsNilOrTrue(t.NodePort) {
-			svc.Spec.Type = corev1.ServiceTypeNodePort
+		var serviceType corev1.ServiceType
+		if t.Type != nil {
+			switch *t.Type {
+			case traitv1.ServiceTypeClusterIP:
+				serviceType = corev1.ServiceTypeClusterIP
+			case traitv1.ServiceTypeNodePort:
+				serviceType = corev1.ServiceTypeNodePort
+			case traitv1.ServiceTypeLoadBalancer:
+				serviceType = corev1.ServiceTypeLoadBalancer
+			default:
+				return fmt.Errorf("unsupported service type: %s", *t.Type)
+			}
+		} else if pointer.BoolDeref(t.NodePort, false) {
+			t.L.ForIntegration(e.Integration).Infof("Integration %s/%s should no more use the flag node-port as it is deprecated, use type instead", e.Integration.Namespace, e.Integration.Name)
+			serviceType = corev1.ServiceTypeNodePort
 		}
+		svc.Spec.Type = serviceType
 	}
 	e.Resources.Add(svc)
 	return nil

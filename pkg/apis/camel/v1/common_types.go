@@ -20,59 +20,212 @@ package v1
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 )
 
-const TraitAnnotationPrefix = "trait.camel.apache.org/"
+const (
+	// TraitAnnotationPrefix represents the prefix used for traits annotations
+	TraitAnnotationPrefix = "trait.camel.apache.org/"
+	// OperatorIDAnnotation operator id annotation label
+	OperatorIDAnnotation = "camel.apache.org/operator.id"
+	// SecondaryPlatformAnnotation secondary platform annotation label
+	SecondaryPlatformAnnotation = "camel.apache.org/secondary.platform"
+	// PlatformSelectorAnnotation platform id annotation label
+	PlatformSelectorAnnotation = "camel.apache.org/platform.id"
+)
 
-// ConfigurationSpec --
-type ConfigurationSpec struct {
-	Type               string `json:"type"`
-	Value              string `json:"value"`
-	ResourceType       string `json:"resourceType,omitempty"`
-	ResourceMountPoint string `json:"resourceMountPoint,omitempty"`
-	ResourceKey        string `json:"resourceKey,omitempty"`
+// BuildStrategy specifies how the Build should be executed.
+// It will trigger a Maven process that will take care of producing the expected Camel/Camel-Quarkus runtime.
+// +kubebuilder:validation:Enum=routine;pod
+type BuildStrategy string
+
+const (
+	// BuildStrategyRoutine performs the build in a routine (will be executed as a process inside the same Camel K operator `Pod`).
+	// A routine may be preferred to a `pod` strategy since it reuse the Maven repository dependency cached locally. It is executed as
+	// a parallel process, so you may need to consider the quantity of concurrent build process running simultaneously.
+	BuildStrategyRoutine BuildStrategy = "routine"
+	// BuildStrategyPod performs the build in a `Pod` (will schedule a new builder ephemeral `Pod` which will take care of the build action).
+	// This strategy has the limitation that every build will have to download all the dependencies required by the Maven build.
+	BuildStrategyPod BuildStrategy = "pod"
+)
+
+// BuildStrategies is a list of strategies allowed for the build
+var BuildStrategies = []BuildStrategy{
+	BuildStrategyRoutine,
+	BuildStrategyPod,
 }
 
-// Artifact --
+// ConfigurationSpec represents a generic configuration specification
+type ConfigurationSpec struct {
+	// represents the type of configuration, ie: property, configmap, secret, ...
+	Type string `json:"type"`
+	// the value to assign to the configuration (syntax may vary depending on the `Type`)
+	Value string `json:"value"`
+}
+
+// Artifact represents a materialized artifact (a jar dependency or in general a file used by the build)
 type Artifact struct {
-	ID       string `json:"id" yaml:"id"`
+	// the identification (GAV for maven dependencies or file name for other file types)
+	ID string `json:"id" yaml:"id"`
+	// where it is located in the builder `Pod`
 	Location string `json:"location,omitempty" yaml:"location,omitempty"`
-	Target   string `json:"target,omitempty" yaml:"target,omitempty"`
+	// the expected location in the runtime
+	Target string `json:"target,omitempty" yaml:"target,omitempty"`
+	// a checksum (SHA1) of the content
 	Checksum string `json:"checksum,omitempty" yaml:"checksum,omitempty"`
 }
 
-// Failure --
+// Failure represent a message specifying the reason and the time of an event failure
 type Failure struct {
-	Reason   string          `json:"reason"`
-	Time     metav1.Time     `json:"time"`
+	// a short text specifying the reason
+	Reason string `json:"reason"`
+	// the time when the failure has happened
+	Time metav1.Time `json:"time"`
+	// the recovery attempted for this failure
 	Recovery FailureRecovery `json:"recovery"`
 }
 
-// FailureRecovery --
+// FailureRecovery defines the attempts to recover a failure
 type FailureRecovery struct {
-	Attempt    int `json:"attempt"`
+	// attempt number
+	Attempt int `json:"attempt"`
+	// maximum number of attempts
 	AttemptMax int `json:"attemptMax"`
+	// time of the attempt execution
 	// +optional
 	AttemptTime metav1.Time `json:"attemptTime"`
 }
 
-// A TraitSpec contains the configuration of a trait
-type TraitSpec struct {
-	// TraitConfiguration --
-	Configuration TraitConfiguration `json:"configuration"`
+// TraitProfile represents lists of traits that are enabled for the specific installation/integration
+type TraitProfile string
+
+const (
+	// TraitProfileOpenShift is used by default on OpenShift clusters
+	TraitProfileOpenShift TraitProfile = "OpenShift"
+	// TraitProfileKubernetes is used by default on Kubernetes clusters
+	TraitProfileKubernetes TraitProfile = "Kubernetes"
+	// TraitProfileKnative is used by default on OpenShift/Kubernetes clusters powered by Knative
+	TraitProfileKnative TraitProfile = "Knative"
+	// DefaultTraitProfile is the trait profile used as default when no other profile is set
+	DefaultTraitProfile = TraitProfileKubernetes
+)
+
+// AllTraitProfiles contains all allowed profiles
+var AllTraitProfiles = []TraitProfile{TraitProfileKubernetes, TraitProfileKnative, TraitProfileOpenShift}
+
+// Traits represents the collection of trait configurations
+type Traits struct {
+	// The configuration of Affinity trait
+	Affinity *trait.AffinityTrait `property:"affinity" json:"affinity,omitempty"`
+	// The configuration of Builder trait
+	Builder *trait.BuilderTrait `property:"builder" json:"builder,omitempty"`
+	// The configuration of Camel trait
+	Camel *trait.CamelTrait `property:"camel" json:"camel,omitempty"`
+	// The configuration of Container trait
+	Container *trait.ContainerTrait `property:"container" json:"container,omitempty"`
+	// The configuration of Cron trait
+	Cron *trait.CronTrait `property:"cron" json:"cron,omitempty"`
+	// The configuration of Dependencies trait
+	Dependencies *trait.DependenciesTrait `property:"dependencies" json:"dependencies,omitempty"`
+	// The configuration of Deployer trait
+	Deployer *trait.DeployerTrait `property:"deployer" json:"deployer,omitempty"`
+	// The configuration of Deployment trait
+	Deployment *trait.DeploymentTrait `property:"deployment" json:"deployment,omitempty"`
+	// The configuration of Environment trait
+	Environment *trait.EnvironmentTrait `property:"environment" json:"environment,omitempty"`
+	// The configuration of Error Handler trait
+	ErrorHandler *trait.ErrorHandlerTrait `property:"error-handler" json:"error-handler,omitempty"`
+	// The configuration of GC trait
+	GC *trait.GCTrait `property:"gc" json:"gc,omitempty"`
+	// The configuration of Health trait
+	Health *trait.HealthTrait `property:"health" json:"health,omitempty"`
+	// The configuration of Ingress trait
+	Ingress *trait.IngressTrait `property:"ingress" json:"ingress,omitempty"`
+	// The configuration of Istio trait
+	Istio *trait.IstioTrait `property:"istio" json:"istio,omitempty"`
+	// The configuration of Jolokia trait
+	Jolokia *trait.JolokiaTrait `property:"jolokia" json:"jolokia,omitempty"`
+	// The configuration of JVM trait
+	JVM *trait.JVMTrait `property:"jvm" json:"jvm,omitempty"`
+	// The configuration of Kamelets trait
+	Kamelets *trait.KameletsTrait `property:"kamelets" json:"kamelets,omitempty"`
+	// The configuration of Knative trait
+	Knative *trait.KnativeTrait `property:"knative" json:"knative,omitempty"`
+	// The configuration of Knative Service trait
+	KnativeService *trait.KnativeServiceTrait `property:"knative-service" json:"knative-service,omitempty"`
+	// The configuration of Logging trait
+	Logging *trait.LoggingTrait `property:"logging" json:"logging,omitempty"`
+	// The configuration of Mount trait
+	Mount *trait.MountTrait `property:"mount" json:"mount,omitempty"`
+	// The configuration of OpenAPI trait
+	OpenAPI *trait.OpenAPITrait `property:"openapi" json:"openapi,omitempty"`
+	// The configuration of Owner trait
+	Owner *trait.OwnerTrait `property:"owner" json:"owner,omitempty"`
+	// The configuration of PDB trait
+	PDB *trait.PDBTrait `property:"pdb" json:"pdb,omitempty"`
+	// The configuration of Platform trait
+	Platform *trait.PlatformTrait `property:"platform" json:"platform,omitempty"`
+	// The configuration of Pod trait
+	Pod *trait.PodTrait `property:"pod" json:"pod,omitempty"`
+	// The configuration of Prometheus trait
+	Prometheus *trait.PrometheusTrait `property:"prometheus" json:"prometheus,omitempty"`
+	// The configuration of Pull Secret trait
+	PullSecret *trait.PullSecretTrait `property:"pull-secret" json:"pull-secret,omitempty"`
+	// The configuration of Quarkus trait
+	Quarkus *trait.QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
+	// The configuration of Registry trait
+	Registry *trait.RegistryTrait `property:"registry" json:"registry,omitempty"`
+	// The configuration of Route trait
+	Route *trait.RouteTrait `property:"route" json:"route,omitempty"`
+	// The configuration of Service trait
+	Service *trait.ServiceTrait `property:"service" json:"service,omitempty"`
+	// The configuration of Service Binding trait
+	ServiceBinding *trait.ServiceBindingTrait `property:"service-binding" json:"service-binding,omitempty"`
+	// The configuration of Toleration trait
+	Toleration *trait.TolerationTrait `property:"toleration" json:"toleration,omitempty"`
+
+	// The extension point with addon traits
+	Addons map[string]AddonTrait `json:"addons,omitempty"`
+
+	// Deprecated: for backward compatibility.
+	Keda *TraitSpec `property:"keda" json:"keda,omitempty"`
+	// Deprecated: for backward compatibility.
+	Master *TraitSpec `property:"master" json:"master,omitempty"`
+	// Deprecated: for backward compatibility.
+	Strimzi *TraitSpec `property:"strimzi" json:"strimzi,omitempty"`
+	// Deprecated: for backward compatibility.
+	ThreeScale *TraitSpec `property:"3scale" json:"3scale,omitempty"`
+	// Deprecated: for backward compatibility.
+	Tracing *TraitSpec `property:"tracing" json:"tracing,omitempty"`
 }
 
-type TraitConfiguration struct {
+// AddonTrait represents the configuration of an addon trait
+type AddonTrait struct {
+	// Generic raw message, typically a map containing the keys (trait parameters) and the values (either single text or array)
 	RawMessage `json:",inline"`
 }
 
-// +kubebuilder:validation:Type=object
-// +kubebuilder:validation:Format=""
-// +kubebuilder:pruning:PreserveUnknownFields
+// A TraitSpec contains the configuration of a trait
+// Deprecated: superceded by each Trait type, left for backward compatibility.
+type TraitSpec struct {
+	// TraitConfiguration parameters configuration
+	Configuration TraitConfiguration `json:"configuration"`
+}
+
+// TraitConfiguration represents the expected configuration for a given trait parameter
+// Deprecated: superceded by each Trait type, left for backward compatibility.
+type TraitConfiguration struct {
+	// generic raw message, typically a map containing the keys (trait parameters) and the values (either single text or array)
+	RawMessage `json:",inline"`
+}
 
 // RawMessage is a raw encoded JSON value.
 // It implements Marshaler and Unmarshaler and can
 // be used to delay JSON decoding or precompute a JSON encoding.
+// +kubebuilder:validation:Type=object
+// +kubebuilder:validation:Format=""
+// +kubebuilder:pruning:PreserveUnknownFields
 type RawMessage []byte
 
 // +kubebuilder:object:generate=false
@@ -82,34 +235,18 @@ type Configurable interface {
 	Configurations() []ConfigurationSpec
 }
 
-// +kubebuilder:object:generate=false
-
-// PlatformInjectable --
-type PlatformInjectable interface {
-	SetIntegrationPlatform(platform *IntegrationPlatform)
-}
-
-// MavenSpec --
-type MavenSpec struct {
-	// The path of the local Maven repository.
-	LocalRepository string `json:"localRepository,omitempty"`
-	// The Maven properties.
-	Properties map[string]string `json:"properties,omitempty"`
-	// A reference to the ConfigMap or Secret key that contains
-	// the Maven settings.
-	Settings ValueSource `json:"settings,omitempty"`
-	// The Secret name and key, containing the CA certificate(s) used to connect
-	// to remote Maven repositories.
-	// It can contain X.509 certificates, and PKCS#7 formatted certificate chains.
-	// A JKS formatted keystore is automatically created to store the CA certificate(s),
-	// and configured to be used as a trusted certificate(s) by the Maven commands.
-	// Note that the root CA certificates are also imported into the created keystore.
-	CASecret *corev1.SecretKeySelector `json:"caSecret,omitempty"`
-	// Deprecated: use IntegrationPlatform.Spec.Build.Timeout instead
-	Timeout      *metav1.Duration `json:"timeout,omitempty"`
-	Repositories []Repository     `json:"repositories,omitempty"`
-	// Maven build extensions https://maven.apache.org/guides/mini/guide-using-extensions.html
-	Extension []MavenArtifact `json:"extension,omitempty"`
+// RegistrySpec provides the configuration for the container registry
+type RegistrySpec struct {
+	// if the container registry is insecure (ie, http only)
+	Insecure bool `json:"insecure,omitempty"`
+	// the URI to access
+	Address string `json:"address,omitempty"`
+	// the secret where credentials are stored
+	Secret string `json:"secret,omitempty"`
+	// the configmap which stores the Certificate Authority
+	CA string `json:"ca,omitempty"`
+	// the registry organization
+	Organization string `json:"organization,omitempty"`
 }
 
 // ValueSource --
@@ -120,47 +257,55 @@ type ValueSource struct {
 	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty"`
 }
 
-// MavenArtifact --
-type MavenArtifact struct {
-	GroupID    string `json:"groupId" yaml:"groupId" xml:"groupId"`
-	ArtifactID string `json:"artifactId" yaml:"artifactId" xml:"artifactId"`
-	Version    string `json:"version,omitempty" yaml:"version,omitempty" xml:"version,omitempty"`
-}
-
-// RuntimeSpec --
+// RuntimeSpec represents the configuration for the Java runtime in charge to execute the Camel application
 type RuntimeSpec struct {
-	Version          string                `json:"version" yaml:"version"`
-	Provider         RuntimeProvider       `json:"provider" yaml:"provider"`
-	ApplicationClass string                `json:"applicationClass" yaml:"applicationClass"`
-	Dependencies     []MavenArtifact       `json:"dependencies" yaml:"dependencies"`
-	Metadata         map[string]string     `json:"metadata,omitempty" yaml:"metadata,omitempty"`
-	Capabilities     map[string]Capability `json:"capabilities,omitempty" yaml:"capabilities,omitempty"`
+	// Camel K Runtime version
+	Version string `json:"version" yaml:"version"`
+	// Camel main application provider, ie, Camel Quarkus
+	Provider RuntimeProvider `json:"provider" yaml:"provider"`
+	// application entry point (main) to be executed
+	ApplicationClass string `json:"applicationClass" yaml:"applicationClass"`
+	// list of dependencies needed to run the application
+	Dependencies []MavenArtifact `json:"dependencies" yaml:"dependencies"`
+	// set of metadata
+	Metadata map[string]string `json:"metadata,omitempty" yaml:"metadata,omitempty"`
+	// features offered by this runtime
+	Capabilities map[string]Capability `json:"capabilities,omitempty" yaml:"capabilities,omitempty"`
 }
 
-// Capability --
+// Capability is a particular feature which requires a well known set of dependencies
 type Capability struct {
-	Dependencies []MavenArtifact   `json:"dependencies" yaml:"dependencies"`
-	Metadata     map[string]string `json:"metadata,omitempty" yaml:"metadata,omitempty"`
+	Dependencies []MavenArtifact `json:"dependencies" yaml:"dependencies"`
 }
 
 const (
-	// ServiceTypeUser --
+	// ServiceTypeUser service user type label marker
 	ServiceTypeUser = "user"
 
-	// CapabilityRest --
+	// CapabilityRest defines the REST API service exposure capability
 	CapabilityRest = "rest"
-	// CapabilityHealth --
+	// CapabilityHealth defines the health monitoring capability
 	CapabilityHealth = "health"
-	// CapabilityCron --
+	// CapabilityCron defines the cron execution capability
 	CapabilityCron = "cron"
-	// CapabilityPlatformHTTP --
+	// CapabilityPlatformHTTP defines the http service exposure capability
 	CapabilityPlatformHTTP = "platform-http"
-	// CapabilityCircuitBreaker --
+	// CapabilityCircuitBreaker defines the circuit breaker capability
 	CapabilityCircuitBreaker = "circuit-breaker"
-	// CapabilityTracing --
+	// CapabilityTracing defines the tracing (opentracing) capability
 	CapabilityTracing = "tracing"
-	// CapabilityMaster --
+	// CapabilityTelemetry defines the telemetry (opentelemetry) capability
+	CapabilityTelemetry = "telemetry"
+	// CapabilityMaster defines the master capability
 	CapabilityMaster = "master"
+	// CapabilityResumeKafka defines the resume capability
+	CapabilityResumeKafka = "resume-kafka"
+	// CapabilityAwsSecretsManager defines the aws secrets manager capability
+	CapabilityAwsSecretsManager = "aws-secrets-manager"
+	// CapabilityGcpSecretManager defines the gcp secret manager capability
+	CapabilityGcpSecretManager = "gcp-secret-manager"
+	// CapabilityGcpSecretManager defines the azure key vault capability
+	CapabilityAzureKeyVault = "azure-key-vault"
 )
 
 // +kubebuilder:object:generate=false
@@ -180,41 +325,42 @@ type Flow struct {
 	RawMessage `json:",inline"`
 }
 
-// Template is an unstructured object representing a Kamelet template in YAML/JSON DSL
-type Template struct {
-	RawMessage `json:",inline"`
-}
-
-// RuntimeProvider --
+// RuntimeProvider is the provider chosen for the runtime
 type RuntimeProvider string
 
 const (
-	// RuntimeProviderQuarkus --
+	// RuntimeProviderQuarkus Camel Quarkus runtime
 	RuntimeProviderQuarkus RuntimeProvider = "quarkus"
 )
 
-// ResourceType --
-type ResourceType string
-
-// ResourceSpec --
+// ResourceSpec represent an attached resource which will be materialized as a file on the running `Pod`
+// TODO: we should deprecate in future releases in favour of mount, openapi or camel traits
 type ResourceSpec struct {
-	DataSpec  `json:",inline"`
-	Type      ResourceType `json:"type,omitempty"`
-	MountPath string       `json:"mountPath,omitempty"`
+	// the content of the resource
+	DataSpec `json:",inline"`
+	// the kind of data to expect
+	Type ResourceType `json:"type,omitempty"`
+	// the mount path on destination `Pod`
+	MountPath string `json:"mountPath,omitempty"`
 }
 
+// ResourceType defines a kind of resource
+type ResourceType string
+
 const (
-	// ResourceTypeData represents a generic data resource
+	// ResourceTypeData represents a generic data resource (text or binary)
 	ResourceTypeData ResourceType = "data"
-	// ResourceTypeConfig represents a config resource known to runtime
+	// ResourceTypeConfig represents a configuration resource (text only)
 	ResourceTypeConfig ResourceType = "config"
-	// ResourceTypeOpenAPI represents an OpenAPI config resource
+	// ResourceTypeOpenAPI represents an OpenAPI specification resource
 	ResourceTypeOpenAPI ResourceType = "openapi"
 )
 
-// SourceSpec --
+// SourceSpec defines the configuration for one or more routes to be executed in a certain Camel DSL language
 type SourceSpec struct {
+	// contains configuration related to the source code
 	DataSpec `json:",inline"`
+	// specify which is the language (Camel DSL) used to interpret this source code
 	Language Language `json:"language,omitempty"`
 	// Loader is an optional id of the org.apache.camel.k.RoutesLoader that will
 	// interpret this source at runtime
@@ -228,43 +374,55 @@ type SourceSpec struct {
 	PropertyNames []string `json:"property-names,omitempty"`
 }
 
+// SourceType represents an available source type
 type SourceType string
 
 const (
-	SourceTypeDefault      SourceType = ""
-	SourceTypeTemplate     SourceType = "template"
+	// SourceTypeDefault is used to represent a source code
+	SourceTypeDefault SourceType = ""
+	// SourceTypeTemplate is used to represent a template
+	SourceTypeTemplate SourceType = "template"
+	// SourceTypeErrorHandler is used to represent an error handler
 	SourceTypeErrorHandler SourceType = "errorHandler"
 )
 
-// DataSpec --
+// DataSpec represents the way the source is materialized in the running `Pod`
 type DataSpec struct {
-	Name        string `json:"name,omitempty"`
-	Path        string `json:"path,omitempty"`
-	Content     string `json:"content,omitempty"`
-	RawContent  []byte `json:"rawContent,omitempty"`
-	ContentRef  string `json:"contentRef,omitempty"`
-	ContentKey  string `json:"contentKey,omitempty"`
+	// the name of the specification
+	Name string `json:"name,omitempty"`
+	// the path where the file is stored
+	Path string `json:"path,omitempty"`
+	// the source code (plain text)
+	Content string `json:"content,omitempty"`
+	// the source code (binary)
+	RawContent []byte `json:"rawContent,omitempty"`
+	// the confimap reference holding the source content
+	ContentRef string `json:"contentRef,omitempty"`
+	// the confimap key holding the source content
+	ContentKey string `json:"contentKey,omitempty"`
+	// the content type (tipically text or binary)
 	ContentType string `json:"contentType,omitempty"`
-	Compression bool   `json:"compression,omitempty"`
+	// if the content is compressed (base64 encrypted)
+	Compression bool `json:"compression,omitempty"`
 }
 
-// Language --
+// Language represents a supported language (Camel DSL)
 type Language string
 
 const (
-	// LanguageJavaSource --
+	// LanguageJavaSource used for Java
 	LanguageJavaSource Language = "java"
-	// LanguageGroovy --
+	// LanguageGroovy used for Groovy
 	LanguageGroovy Language = "groovy"
-	// LanguageJavaScript --
+	// LanguageJavaScript  used for Javascript
 	LanguageJavaScript Language = "js"
-	// LanguageXML --
+	// LanguageXML used for XML
 	LanguageXML Language = "xml"
-	// LanguageKotlin --
+	// LanguageKotlin used for Kotlin
 	LanguageKotlin Language = "kts"
-	// LanguageYaml --
+	// LanguageYaml used for YAML
 	LanguageYaml Language = "yaml"
-	// LanguageKamelet --
+	// LanguageKamelet used for Kamelets
 	LanguageKamelet Language = "kamelet"
 )
 

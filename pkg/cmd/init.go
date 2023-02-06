@@ -24,8 +24,10 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/apache/camel-k/pkg/resources"
+	"github.com/apache/camel-k/pkg/util"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/resources"
 	"github.com/spf13/cobra"
 )
 
@@ -34,10 +36,11 @@ func newCmdInit(rootCmdOptions *RootCmdOptions) (*cobra.Command, *initCmdOptions
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     "init [flags] IntegrationFile.java",
-		Short:   "Initialize empty Camel K files",
-		Long:    `Initialize empty Camel K integrations and other resources.`,
-		PreRunE: decode(&options),
+		Use:        "init [flags] IntegrationFile.java",
+		Short:      "Initialize empty Camel K files",
+		Long:       `Initialize empty Camel K integrations and other resources.`,
+		Deprecated: "consider using Camel JBang instead (https://camel.apache.org/manual/camel-jbang.html)",
+		PreRunE:    decode(&options),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(cmd, args); err != nil {
 				return err
@@ -64,8 +67,7 @@ func (o *initCmdOptions) validate(_ *cobra.Command, args []string) error {
 		return fmt.Errorf("init expects exactly 1 argument, received %d", len(args))
 	}
 
-	fileName := args[0]
-	if o.extractLanguage(fileName) == nil {
+	if fileName := args[0]; o.extractLanguage(fileName) == nil {
 		return fmt.Errorf("unsupported file type: %s", fileName)
 	}
 
@@ -90,7 +92,11 @@ func (o *initCmdOptions) writeFromTemplate(language v1.Language, fileName string
 	params := TemplateParameters{
 		Name: simpleName,
 	}
-	rawData := resources.ResourceAsString(fmt.Sprintf("/templates/%s.tmpl", language))
+
+	rawData, err := resources.ResourceAsString(fmt.Sprintf("/templates/%s.tmpl", language))
+	if err != nil {
+		return err
+	}
 	if rawData == "" {
 		return fmt.Errorf("cannot find template for language %s", string(language))
 	}
@@ -98,13 +104,10 @@ func (o *initCmdOptions) writeFromTemplate(language v1.Language, fileName string
 	if err != nil {
 		return err
 	}
-	out, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0777)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
 
-	return tmpl.Execute(out, params)
+	return util.WithFile(fileName, os.O_RDWR|os.O_CREATE, 0o644, func(file *os.File) error {
+		return tmpl.Execute(file, params)
+	})
 }
 
 func (o *initCmdOptions) extractLanguage(fileName string) *v1.Language {

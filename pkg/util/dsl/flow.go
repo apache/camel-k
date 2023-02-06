@@ -31,12 +31,12 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// FromYamlDSLString creates a slice of flows from a Camel YAML DSL string
+// FromYamlDSLString creates a slice of flows from a Camel YAML DSL string.
 func FromYamlDSLString(flowsString string) ([]v1.Flow, error) {
 	return FromYamlDSL(bytes.NewReader([]byte(flowsString)))
 }
 
-// FromYamlDSL creates a slice of flows from a Camel YAML DSL stream
+// FromYamlDSL creates a slice of flows from a Camel YAML DSL stream.
 func FromYamlDSL(reader io.Reader) ([]v1.Flow, error) {
 	buffered, err := ioutil.ReadAll(reader)
 	if err != nil {
@@ -56,7 +56,7 @@ func FromYamlDSL(reader io.Reader) ([]v1.Flow, error) {
 	return flows, err
 }
 
-// ToYamlDSL converts a flow into its Camel YAML DSL equivalent
+// ToYamlDSL converts a flow into its Camel YAML DSL equivalent.
 func ToYamlDSL(flows []v1.Flow) ([]byte, error) {
 	data, err := json.Marshal(&flows)
 	if err != nil {
@@ -65,11 +65,11 @@ func ToYamlDSL(flows []v1.Flow) ([]byte, error) {
 	jsondata := make([]map[string]interface{}, 0)
 	err = json.Unmarshal(data, &jsondata)
 	if err != nil {
-		return nil, fmt.Errorf("error unmarshalling json: %v", err)
+		return nil, fmt.Errorf("error unmarshalling json: %w", err)
 	}
 	yamldata, err := yaml2.Marshal(&jsondata)
 	if err != nil {
-		return nil, fmt.Errorf("error marshalling to yaml: %v", err)
+		return nil, fmt.Errorf("error marshalling to yaml: %w", err)
 	}
 
 	return yamldata, nil

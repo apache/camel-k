@@ -26,6 +26,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"go.uber.org/multierr"
+
 	klog "github.com/apache/camel-k/pkg/util/log"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,7 +35,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-// SelectorScraper scrapes all pods with a given selector
+// SelectorScraper scrapes all pods with a given selector.
 type SelectorScraper struct {
 	client               kubernetes.Interface
 	namespace            string
@@ -42,35 +44,37 @@ type SelectorScraper struct {
 	podScrapers          sync.Map
 	counter              uint64
 	L                    klog.Logger
+	tailLines            *int64
 }
 
-// NewSelectorScraper creates a new SelectorScraper
-func NewSelectorScraper(client kubernetes.Interface, namespace string, defaultContainerName string, labelSelector string) *SelectorScraper {
+// NewSelectorScraper creates a new SelectorScraper.
+func NewSelectorScraper(client kubernetes.Interface, namespace string, defaultContainerName string, labelSelector string, tailLines *int64) *SelectorScraper {
 	return &SelectorScraper{
 		client:               client,
 		namespace:            namespace,
 		defaultContainerName: defaultContainerName,
 		labelSelector:        labelSelector,
 		L:                    klog.WithName("scraper").WithName("label").WithValues("selector", labelSelector),
+		tailLines:            tailLines,
 	}
 }
 
-// Start returns a reader that streams the log of all selected pods
+// Start returns a reader that streams the log of all selected pods.
 func (s *SelectorScraper) Start(ctx context.Context) *bufio.Reader {
 	pipeIn, pipeOut := io.Pipe()
 	bufPipeIn := bufio.NewReader(pipeIn)
 	bufPipeOut := bufio.NewWriter(pipeOut)
 	closeFun := func() error {
-		bufPipeOut.Flush()
-		return pipeOut.Close()
+		return multierr.Append(
+			bufPipeOut.Flush(),
+			pipeOut.Close())
 	}
 	go s.periodicSynchronize(ctx, bufPipeOut, closeFun)
 	return bufPipeIn
 }
 
 func (s *SelectorScraper) periodicSynchronize(ctx context.Context, out *bufio.Writer, clientCloser func() error) {
-	err := s.synchronize(ctx, out)
-	if err != nil {
+	if err := s.synchronize(ctx, out); err != nil {
 		s.L.Info("Could not synchronize log")
 	}
 	select {
@@ -128,7 +132,7 @@ func (s *SelectorScraper) synchronize(ctx context.Context, out *bufio.Writer) er
 }
 
 func (s *SelectorScraper) addPodScraper(ctx context.Context, podName string, out *bufio.Writer) {
-	podScraper := NewPodScraper(s.client, s.namespace, podName, s.defaultContainerName)
+	podScraper := NewPodScraper(s.client, s.namespace, podName, s.defaultContainerName, s.tailLines)
 	podCtx, podCancel := context.WithCancel(ctx)
 	id := atomic.AddUint64(&s.counter, 1)
 	prefix := "[" + strconv.FormatUint(id, 10) + "] "
@@ -153,7 +157,10 @@ func (s *SelectorScraper) addPodScraper(ctx context.Context, podName string, out
 				s.L.Error(err, "Cannot write to output")
 				return
 			}
-			out.Flush()
+			if err := out.Flush(); err != nil {
+				s.L.Error(err, "Cannot flush output")
+				return
+			}
 			if podCtx.Err() != nil {
 				return
 			}

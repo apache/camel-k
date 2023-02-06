@@ -18,6 +18,7 @@ limitations under the License.
 package source
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -29,7 +30,7 @@ import (
 type catalog2deps func(*camel.RuntimeCatalog) []string
 
 const (
-	defaultJsonDataFormat = "json-jackson"
+	defaultJSONDataFormat = "jackson"
 )
 
 var (
@@ -40,9 +41,11 @@ var (
 	singleQuotedTo          = regexp.MustCompile(`\.to\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
 	singleQuotedToD         = regexp.MustCompile(`\.toD\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
 	singleQuotedToF         = regexp.MustCompile(`\.toF\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
+	singleQuotedWireTap     = regexp.MustCompile(`\.wireTap\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
 	doubleQuotedTo          = regexp.MustCompile(`\.to\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
 	doubleQuotedToD         = regexp.MustCompile(`\.toD\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
 	doubleQuotedToF         = regexp.MustCompile(`\.toF\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
+	doubleQuotedWireTap     = regexp.MustCompile(`\.wireTap\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
 	languageRegexp          = regexp.MustCompile(`language\s*\(\s*["|']([a-zA-Z0-9-]+[^"|']+)["|']\s*,.*\)`)
 	camelTypeRegexp         = regexp.MustCompile(`.*(org.apache.camel.*Component|DataFormat|Language)`)
 	jsonLibraryRegexp       = regexp.MustCompile(`.*JsonLibrary\.Jackson.*`)
@@ -68,21 +71,21 @@ var (
 	sourceDependencies = map[*regexp.Regexp]catalog2deps{
 		jsonLibraryRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			res := make([]string, 0)
-			if jsonDF := catalog.GetArtifactByDataFormat(defaultJsonDataFormat); jsonDF != nil {
+			if jsonDF := catalog.GetArtifactByDataFormat(defaultJSONDataFormat); jsonDF != nil {
 				res = append(res, jsonDF.GetDependencyID())
 			}
 			return res
 		},
 		jsonLanguageRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			res := make([]string, 0)
-			if jsonDF := catalog.GetArtifactByDataFormat(defaultJsonDataFormat); jsonDF != nil {
+			if jsonDF := catalog.GetArtifactByDataFormat(defaultJSONDataFormat); jsonDF != nil {
 				res = append(res, jsonDF.GetDependencyID())
 			}
 			return res
 		},
 		restConfigurationRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			deps := make([]string, 0)
-			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities["rest"]; ok {
+			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities[v1.CapabilityRest]; ok {
 				for _, d := range c.Dependencies {
 					deps = append(deps, d.GetDependencyID())
 				}
@@ -91,7 +94,7 @@ var (
 		},
 		restRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			deps := make([]string, 0)
-			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities["rest"]; ok {
+			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities[v1.CapabilityRest]; ok {
 				for _, d := range c.Dependencies {
 					deps = append(deps, d.GetDependencyID())
 				}
@@ -100,7 +103,7 @@ var (
 		},
 		restClosureRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			deps := make([]string, 0)
-			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities["rest"]; ok {
+			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities[v1.CapabilityRest]; ok {
 				for _, d := range c.Dependencies {
 					deps = append(deps, d.GetDependencyID())
 				}
@@ -159,12 +162,13 @@ var (
 	}
 )
 
-// Inspector --
+// Inspector is the common interface for language specific inspector implementations.
 type Inspector interface {
 	Extract(v1.SourceSpec, *Metadata) error
 }
 
-// InspectorForLanguage --
+// InspectorForLanguage is the factory function to return a new inspector for the given language
+// with the catalog.
 func InspectorForLanguage(catalog *camel.RuntimeCatalog, language v1.Language) Inspector {
 	switch language {
 	case v1.LanguageJavaSource:
@@ -215,13 +219,40 @@ func (i baseInspector) Extract(v1.SourceSpec, *Metadata) error {
 	return nil
 }
 
-// discoverDependencies returns a list of dependencies required by the given source code
-func (i *baseInspector) discoverCapabilities(source v1.SourceSpec, meta *Metadata) {
+func (i *baseInspector) extract(source v1.SourceSpec, meta *Metadata,
+	from, to, kameletEips []string, hasRest bool) error {
+	meta.FromURIs = append(meta.FromURIs, from...)
+	meta.ToURIs = append(meta.ToURIs, to...)
+
+	for _, k := range kameletEips {
+		AddKamelet(meta, "kamelet:"+k)
+	}
+
+	if err := i.discoverCapabilities(source, meta); err != nil {
+		return err
+	}
+	if err := i.discoverDependencies(source, meta); err != nil {
+		return err
+	}
+	i.discoverKamelets(meta)
+
+	if hasRest {
+		meta.AddRequiredCapability(v1.CapabilityRest)
+	}
+
+	meta.ExposesHTTPServices = hasRest || i.containsHTTPURIs(meta.FromURIs)
+	meta.PassiveEndpoints = i.hasOnlyPassiveEndpoints(meta.FromURIs)
+
+	return nil
+}
+
+// discoverCapabilities returns a list of dependencies required by the given source code.
+func (i *baseInspector) discoverCapabilities(source v1.SourceSpec, meta *Metadata) error {
 	uris := util.StringSliceJoin(meta.FromURIs, meta.ToURIs)
 
 	for _, uri := range uris {
 		if i.getURIPrefix(uri) == "platform-http" {
-			meta.RequiredCapabilities.Add(v1.CapabilityPlatformHTTP)
+			meta.AddRequiredCapability(v1.CapabilityPlatformHTTP)
 		}
 	}
 
@@ -231,34 +262,37 @@ func (i *baseInspector) discoverCapabilities(source v1.SourceSpec, meta *Metadat
 		}
 
 		for _, capability := range capabilities {
-			meta.RequiredCapabilities.Add(capability)
+			meta.AddRequiredCapability(capability)
 		}
 	}
+
+	// validate capabilities
+	var err error
+	meta.RequiredCapabilities.Each(func(capability string) bool {
+		if !i.catalog.HasCapability(capability) {
+			err = fmt.Errorf("capability %s not supported in camel catalog runtime version %s",
+				capability, i.catalog.GetRuntimeVersion())
+			return false
+		}
+		return true
+	})
+
+	return err
 }
 
-// discoverDependencies returns a list of dependencies required by the given source code
-func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadata) {
+// discoverDependencies returns a list of dependencies required by the given source code.
+func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadata) error {
 	for _, uri := range meta.FromURIs {
-		candidateComp, scheme := i.decodeComponent(uri)
-		if candidateComp != nil {
-			i.addDependency(candidateComp.GetDependencyID(), meta)
-			if scheme != nil {
-				for _, dep := range candidateComp.GetConsumerDependencyIDs(scheme.ID) {
-					i.addDependency(dep, meta)
-				}
-			}
+		// consumer
+		if err := i.addDependencies(uri, meta, true); err != nil {
+			return err
 		}
 	}
 
 	for _, uri := range meta.ToURIs {
-		candidateComp, scheme := i.decodeComponent(uri)
-		if candidateComp != nil {
-			i.addDependency(candidateComp.GetDependencyID(), meta)
-			if scheme != nil {
-				for _, dep := range candidateComp.GetProducerDependencyIDs(scheme.ID) {
-					i.addDependency(dep, meta)
-				}
-			}
+		// producer
+		if err := i.addDependencies(uri, meta, false); err != nil {
+			return err
 		}
 	}
 
@@ -268,14 +302,14 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 		}
 
 		for _, dep := range supplier(i.catalog) {
-			i.addDependency(dep, meta)
+			meta.AddDependency(dep)
 		}
 	}
 
 	for _, match := range languageRegexp.FindAllStringSubmatch(source.Content, -1) {
 		if len(match) > 1 {
 			if dependency, ok := i.catalog.GetLanguageDependency(match[1]); ok {
-				i.addDependency(dependency, meta)
+				meta.AddDependency(dependency)
 			}
 		}
 	}
@@ -283,14 +317,16 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 	for _, match := range camelTypeRegexp.FindAllStringSubmatch(source.Content, -1) {
 		if len(match) > 1 {
 			if dependency, ok := i.catalog.GetJavaTypeDependency(match[1]); ok {
-				i.addDependency(dependency, meta)
+				meta.AddDependency(dependency)
 			}
 		}
 	}
+
+	return nil
 }
 
-// discoverDependencies inspects endpoints and extract kamelets
-func (i *baseInspector) discoverKamelets(source v1.SourceSpec, meta *Metadata) {
+// discoverKamelets inspects endpoints and extract kamelets.
+func (i *baseInspector) discoverKamelets(meta *Metadata) {
 	for _, uri := range meta.FromURIs {
 		AddKamelet(meta, uri)
 	}
@@ -299,25 +335,58 @@ func (i *baseInspector) discoverKamelets(source v1.SourceSpec, meta *Metadata) {
 	}
 }
 
-func (i *baseInspector) addDependency(dependency string, meta *Metadata) {
-	meta.Dependencies.Add(dependency)
+func (i *baseInspector) addDependencies(uri string, meta *Metadata, consumer bool) error {
+	if !i.catalog.IsResolvable(uri) {
+		// ignore dependencies for given URI as it is not resolvable in this state
+		// (e.g. using a property placeholder such as {{url} or {{scheme}}:{{resource}})
+		return nil
+	}
+
+	candidateComp, scheme := i.catalog.DecodeComponent(uri)
+
+	if candidateComp == nil || scheme == nil {
+		return fmt.Errorf("component not found for uri %q in camel catalog runtime version %s",
+			uri, i.catalog.GetRuntimeVersion())
+	}
+
+	meta.AddDependency(candidateComp.GetDependencyID())
+	var deps []string
+	if consumer {
+		deps = candidateComp.GetConsumerDependencyIDs(scheme.ID)
+	} else {
+		deps = candidateComp.GetProducerDependencyIDs(scheme.ID)
+	}
+	for _, dep := range deps {
+		meta.AddDependency(dep)
+	}
+
+	// some components require additional dependency resolution based on URI
+	if err := i.addDependenciesFromURI(uri, scheme, meta); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (i *baseInspector) decodeComponent(uri string) (*v1.CamelArtifact, *v1.CamelScheme) {
-	uriSplit := strings.SplitN(uri, ":", 2)
-	if len(uriSplit) < 2 {
-		return nil, nil
+func (i *baseInspector) addDependenciesFromURI(uri string, scheme *v1.CamelScheme, meta *Metadata) error {
+	if scheme.ID == "dataformat" {
+		// dataformat:name:(marshal|unmarshal)[?options]
+		parts := strings.Split(uri, ":")
+		if len(parts) < 3 {
+			return fmt.Errorf("invalid dataformat uri: %s", uri)
+		}
+		name := parts[1]
+		df := i.catalog.GetArtifactByDataFormat(name)
+		if df == nil {
+			return fmt.Errorf("dataformat %q not found: %s", name, uri)
+		}
+		meta.AddDependency(df.GetDependencyID())
 	}
-	uriStart := uriSplit[0]
-	scheme, ok := i.catalog.GetScheme(uriStart)
-	var schemeRef *v1.CamelScheme
-	if ok {
-		schemeRef = &scheme
-	}
-	return i.catalog.GetArtifactByScheme(uriStart), schemeRef
+
+	return nil
 }
 
-// hasOnlyPassiveEndpoints returns true if the source has no endpoint that needs to remain always active
+// hasOnlyPassiveEndpoints returns true if the source has no endpoint that needs to remain always active.
 func (i *baseInspector) hasOnlyPassiveEndpoints(fromURIs []string) bool {
 	passivePlusHTTP := make(map[string]bool)
 	i.catalog.VisitSchemes(func(id string, scheme v1.CamelScheme) bool {

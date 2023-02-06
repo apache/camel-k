@@ -1,0 +1,475 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+{{- if eq .Values.operator.global "true" }}
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-edit
+  labels:
+    app: "camel-k"
+    # Add these permissions to the "admin" and "edit" default roles.
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - builds
+  - camelcatalogs
+  - integrationkits
+  - integrationplatforms
+  - integrations
+  - kameletbindings
+  - kamelets
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - builds/status
+  - camelcatalogs/status
+  - integrationkits/status
+  - integrationplatforms/status
+  - integrations/scale
+  - integrations/status
+  - kameletbindings/scale
+  - kameletbindings/status
+  - kamelets/status
+  verbs:
+  - get
+  - patch
+  - update
+
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - builds
+  - camelcatalogs
+  - integrationkits
+  - integrationplatforms
+  - integrations
+  - kameletbindings
+  - kamelets
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - builds
+  verbs:
+  - delete
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - builds/status
+  - camelcatalogs/status
+  - integrationkits/status
+  - integrationplatforms/status
+  - integrations/scale
+  - integrations/status
+  - kameletbindings/status
+  - kameletbindings/scale
+  - kamelets/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  - endpoints
+  - persistentvolumeclaims
+  - configmaps
+  - secrets
+  - serviceaccounts
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/exec
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - pods/proxy
+  verbs:
+  - get
+- apiGroups:
+  - policy
+  resources:
+  - poddisruptionbudgets
+  verbs:
+  - create
+  - delete
+  - get
+  - update
+  - list
+  - patch
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - roles
+  - rolebindings
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - cronjobs
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-custom-resource-definitions
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - get
+
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-events
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+  - get
+  - list
+  - watch
+
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-keda
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - "keda.sh"
+  resources:
+  - scaledobjects
+  - triggerauthentications
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-leases
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - "coordination.k8s.io"
+  resources:
+  - leases
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-local-registry
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["local-registry-hosting"]
+    verbs: ["get"]
+
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-podmonitors
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - podmonitors
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-strimzi
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - "kafka.strimzi.io"
+  resources:
+  - kafkatopics
+  - kafkas
+  verbs:
+  - get
+  - list
+  - watch
+
+
+{{- if eq .Values.platform.cluster "OpenShift" }}
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-console-openshift
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - console.openshift.io
+  resources:
+  - consoleclidownloads
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator-openshift
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - builds/finalizers
+  - integrationkits/finalizers
+  - integrationplatforms/finalizers
+  - integrations/finalizers
+  - kameletbindings/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  - "build.openshift.io"
+  resources:
+  - buildconfigs
+  - buildconfigs/webhooks
+  - builds
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  - "image.openshift.io"
+  resources:
+  - imagestreamimages
+  - imagestreammappings
+  - imagestreams
+  - imagestreams/secrets
+  - imagestreamtags
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  - build.openshift.io
+  resources:
+  - buildconfigs/instantiate
+  - buildconfigs/instantiatebinary
+  - builds/clone
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  - "route.openshift.io"
+  resources:
+  - routes
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  - route.openshift.io
+  resources:
+  - routes/custom-host
+  verbs:
+  - create
+{{- end }}
+
+{{- end }}

@@ -21,7 +21,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/source"
 )
 
-// IntegrationMetadata contains aggregate metadata about all Camel routes in a integrations
+// IntegrationMetadata contains aggregate metadata about all Camel routes in a integrations.
 type IntegrationMetadata struct {
 	source.Metadata
 }

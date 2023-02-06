@@ -18,22 +18,29 @@ limitations under the License.
 package tracing
 
 import (
+	"k8s.io/utils/pointer"
+
 	"github.com/apache/camel-k/addons/tracing/discovery"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
 )
 
-// The Tracing trait can be used to automatically publish tracing information to an
-// OpenTracing compatible collector.
+//
+// WARNING: The Tracing trait has been **deprecated** in favor of the xref:traits:telemetry.adoc[Telemetry] trait.
+//
+// The Tracing trait can be used to automatically publish tracing information to an OpenTracing compatible collector.
 //
 // The trait is able to automatically discover the tracing endpoint available in the namespace (supports **Jaeger**).
 //
 // The Tracing trait is disabled by default.
 //
-// +camel-k:trait=tracing
-type tracingTrait struct {
-	trait.BaseTrait `property:",squash"`
+// WARNING: The Tracing trait can't be enabled at the same time as the Telemetry trait.
+//
+// +camel-k:trait=tracing.
+type Trait struct {
+	traitv1.Trait `property:",squash" json:",inline"`
 	// Enables automatic configuration of the trait, including automatic discovery of the tracing endpoint.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The name of the service that publishes tracing data (defaults to the integration name)
@@ -44,6 +51,11 @@ type tracingTrait struct {
 	SamplerType *string `property:"sampler-type" json:"samplerType,omitempty"`
 	// The sampler specific param (default "1")
 	SamplerParam *string `property:"sampler-param" json:"samplerParam,omitempty"`
+}
+
+type tracingTrait struct {
+	trait.BaseTrait
+	Trait `property:",squash"`
 }
 
 const (
@@ -68,7 +80,7 @@ var (
 	defaultSamplerParam = "1"
 )
 
-// NewTracingTrait --
+// NewTracingTrait --.
 func NewTracingTrait() trait.Trait {
 	return &tracingTrait{
 		BaseTrait: trait.NewBaseTrait("tracing", trait.TraitOrderBeforeControllerCreation),
@@ -76,14 +88,14 @@ func NewTracingTrait() trait.Trait {
 }
 
 func (t *tracingTrait) Configure(e *trait.Environment) (bool, error) {
-	if trait.IsNilOrFalse(t.Enabled) {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
 		return false, nil
 	}
 
-	if trait.IsNilOrTrue(t.Auto) {
+	if pointer.BoolDeref(t.Auto, true) {
 		if t.Endpoint == "" {
 			for _, locator := range discovery.TracingLocators {
-				endpoint, err := locator.FindEndpoint(e.C, t.Client, t.L, e)
+				endpoint, err := locator.FindEndpoint(e.Ctx, t.Client, t.L, e)
 				if err != nil {
 					return false, err
 				}
@@ -112,7 +124,6 @@ func (t *tracingTrait) Configure(e *trait.Environment) (bool, error) {
 }
 
 func (t *tracingTrait) Apply(e *trait.Environment) error {
-
 	util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityTracing)
 
 	if e.CamelCatalog != nil {

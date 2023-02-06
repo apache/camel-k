@@ -23,83 +23,51 @@ import (
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util"
 )
 
-// The Jolokia trait activates and configures the Jolokia Java agent.
-//
-// See https://jolokia.org/reference/html/agents.html
-//
-// +camel-k:trait=jolokia
 type jolokiaTrait struct {
-	BaseTrait `property:",squash"`
-	// The PEM encoded CA certification file path, used to verify client certificates,
-	// applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
-	// (default `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt` for OpenShift).
-	CaCert *string `property:"ca-cert" json:"CACert,omitempty"`
-	// The principal(s) which must be given in a client certificate to allow access to the Jolokia endpoint,
-	// applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
-	// (default `clientPrincipal=cn=system:master-proxy`, `cn=hawtio-online.hawtio.svc` and `cn=fuse-console.fuse.svc` for OpenShift).
-	ClientPrincipal []string `property:"client-principal" json:"clientPrincipal,omitempty"`
-	// Listen for multicast requests (default `false`)
-	DiscoveryEnabled *bool `property:"discovery-enabled" json:"discoveryEnabled,omitempty"`
-	// Mandate the client certificate contains a client flag in the extended key usage section,
-	// applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
-	// (default `true` for OpenShift).
-	ExtendedClientCheck *bool `property:"extended-client-check" json:"extendedClientCheck,omitempty"`
-	// The Host address to which the Jolokia agent should bind to. If `"\*"` or `"0.0.0.0"` is given,
-	// the servers binds to every network interface (default `"*"`).
-	Host *string `property:"host" json:"host,omitempty"`
-	// The password used for authentication, applicable when the `user` option is set.
-	Password *string `property:"password" json:"password,omitempty"`
-	// The Jolokia endpoint port (default `8778`).
-	Port int `property:"port" json:"port,omitempty"`
-	// The protocol to use, either `http` or `https` (default `https` for OpenShift)
-	Protocol *string `property:"protocol" json:"protocol,omitempty"`
-	// The user to be used for authentication
-	User *string `property:"user" json:"user,omitempty"`
-	// Whether client certificates should be used for authentication (default `true` for OpenShift).
-	UseSslClientAuthentication *bool `property:"use-ssl-client-authentication" json:"useSSLClientAuthentication,omitempty"`
-	// A list of additional Jolokia options as defined
-	// in https://jolokia.org/reference/html/agents.html#agent-jvm-config[JVM agent configuration options]
-	Options []string `property:"options" json:"options,omitempty"`
+	BaseTrait
+	traitv1.JolokiaTrait `property:",squash"`
 }
 
 func newJolokiaTrait() Trait {
 	return &jolokiaTrait{
 		BaseTrait: NewBaseTrait("jolokia", 1800),
-		Port:      8778,
+		JolokiaTrait: traitv1.JolokiaTrait{
+			Port: 8778,
+		},
 	}
 }
 
 func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
-	return IsTrue(t.Enabled) && e.IntegrationInPhase(
-		v1.IntegrationPhaseInitialization,
-		v1.IntegrationPhaseDeploying,
-		v1.IntegrationPhaseRunning,
-	), nil
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+		return false, nil
+	}
+
+	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), nil
 }
 
-func (t *jolokiaTrait) Apply(e *Environment) (err error) {
+func (t *jolokiaTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		// Add the Camel management and Jolokia agent dependencies
 		// Also add the Camel JAXB dependency, that's required by Hawtio
 
-		switch e.CamelCatalog.Runtime.Provider {
-		case v1.RuntimeProviderQuarkus:
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-management")
+		if e.CamelCatalog.Runtime.Provider == v1.RuntimeProviderQuarkus {
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel-quarkus:management")
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel:jaxb")
 		}
 
-		// TODO: We may want to make the Jolokia version configurable
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.jolokia:jolokia-jvm:jar:agent:1.6.2")
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.jolokia:jolokia-jvm")
 
 		return nil
 	}
 
-	container := e.getIntegrationContainer()
+	container := e.GetIntegrationContainer()
 	if container == nil {
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionJolokiaAvailable,
@@ -153,7 +121,14 @@ func (t *jolokiaTrait) Apply(e *Environment) (err error) {
 		optionValues[i] = k + "=" + options[k]
 	}
 
-	container.Args = append(container.Args, "-javaagent:dependencies/lib/main/org.jolokia.jolokia-jvm-1.6.2-agent.jar="+strings.Join(optionValues, ","))
+	jolokiaFilepath := ""
+	for _, ar := range e.IntegrationKit.Status.Artifacts {
+		if strings.HasPrefix(ar.ID, "org.jolokia.jolokia-jvm") {
+			jolokiaFilepath = ar.Target
+			break
+		}
+	}
+	container.Args = append(container.Args, "-javaagent:"+jolokiaFilepath+"="+strings.Join(optionValues, ","))
 
 	containerPort := corev1.ContainerPort{
 		Name:          "jolokia",
@@ -181,22 +156,22 @@ func (t *jolokiaTrait) setDefaultJolokiaOption(options map[string]string, option
 	switch o := option.(type) {
 	case **bool:
 		if *o == nil {
-			v := value.(bool)
+			v, _ := value.(bool)
 			*o = &v
 		}
 	case **int:
 		if *o == nil {
-			v := value.(int)
+			v, _ := value.(int)
 			*o = &v
 		}
 	case **string:
 		if *o == nil {
-			v := value.(string)
+			v, _ := value.(string)
 			*o = &v
 		}
 	case *[]string:
 		if len(*o) == 0 {
-			*o = value.([]string)
+			*o, _ = value.([]string)
 		}
 	}
 }

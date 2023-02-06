@@ -34,32 +34,51 @@ func newCmdRebuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *rebuildCmdO
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     "rebuild [integration]",
+		Use:     "rebuild [integration1] [integration2] ...",
 		Short:   "Clear the state of integrations to rebuild them",
 		Long:    `Clear the state of one or more integrations causing a rebuild.`,
 		PreRunE: decode(&options),
-		RunE:    options.rebuild,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := options.validate(args); err != nil {
+				return err
+			}
+			return options.run(cmd, args)
+		},
 	}
+
+	cmd.Flags().Bool("all", false, "Rebuild all integrations")
 
 	return &cmd, &options
 }
 
 type rebuildCmdOptions struct {
 	*RootCmdOptions
+	RebuildAll bool `mapstructure:"all"`
 }
 
-func (o *rebuildCmdOptions) rebuild(_ *cobra.Command, args []string) error {
+func (o *rebuildCmdOptions) validate(args []string) error {
+	if o.RebuildAll && len(args) > 0 {
+		return errors.New("invalid combination: --all flag is set and at least one integration name is provided")
+	}
+	if !o.RebuildAll && len(args) == 0 {
+		return errors.New("invalid combination: provide one or several integration names or set --all flag for all integrations")
+	}
+
+	return nil
+}
+
+func (o *rebuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		return err
 	}
 
 	var integrations []v1.Integration
-	if len(args) == 0 {
+	if o.RebuildAll {
 		if integrations, err = o.listAllIntegrations(c); err != nil {
 			return err
 		}
-	} else {
+	} else if len(args) > 0 {
 		if integrations, err = o.getIntegrations(c, args); err != nil {
 			return err
 		}
@@ -69,7 +88,7 @@ func (o *rebuildCmdOptions) rebuild(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Printf("%d integrations have been rebuilt\n", len(integrations))
+	fmt.Fprintln(cmd.OutOrStdout(), len(integrations), "integrations have been rebuilt")
 	return nil
 }
 

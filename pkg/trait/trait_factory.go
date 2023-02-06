@@ -17,13 +17,13 @@ limitations under the License.
 
 package trait
 
-// Factory is a generic factory for a trait
+// Factory is a generic factory for a trait.
 type Factory = func() Trait
 
-// FactoryList contains the default list of trait Factory
+// FactoryList contains the default list of trait Factory.
 var FactoryList []Factory
 
-// AddToTraits registers a trait Factory
+// AddToTraits registers a trait Factory.
 func AddToTraits(factory Factory) {
 	FactoryList = append(FactoryList, factory)
 }

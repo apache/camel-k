@@ -156,6 +156,8 @@ func TestAPIs(t *testing.T) {
 }
 
 func checkValidRefs(t *testing.T, refs []v1.ObjectReference) {
+	t.Helper()
+
 	assert.True(t, len(refs) > 0)
 	for _, ref := range refs {
 		assert.NotNil(t, ref.Name)

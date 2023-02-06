@@ -20,19 +20,21 @@ package trait
 import (
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/utils/pointer"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/pkg/util/label"
 )
 
-// The Deployment trait is responsible for generating the Kubernetes deployment that will make sure
-// the integration will run in the cluster.
-//
-// +camel-k:trait=deployment
 type deploymentTrait struct {
-	BaseTrait `property:",squash"`
+	BaseTrait
+	traitv1.DeploymentTrait `property:",squash"`
 }
 
 var _ ControllerStrategySelector = &deploymentTrait{}
@@ -44,18 +46,21 @@ func newDeploymentTrait() Trait {
 }
 
 func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if !e.IntegrationInRunningPhases() {
+		return false, nil
+	}
+
+	if !pointer.BoolDeref(t.Enabled, true) {
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionDeploymentAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionDeploymentAvailableReason,
 			"explicitly disabled",
 		)
-
 		return false, nil
 	}
 
-	if e.IntegrationInPhase(v1.IntegrationPhaseRunning) {
+	if e.IntegrationInPhase(v1.IntegrationPhaseRunning, v1.IntegrationPhaseError) {
 		condition := e.Integration.Status.GetCondition(v1.IntegrationConditionDeploymentAvailable)
 		return condition != nil && condition.Status == corev1.ConditionTrue, nil
 	}
@@ -86,7 +91,7 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *deploymentTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
-	if IsFalse(t.Enabled) {
+	if !pointer.BoolDeref(t.Enabled, true) {
 		return nil, nil
 	}
 	deploymentStrategy := ControllerStrategyDeployment
@@ -98,39 +103,20 @@ func (t *deploymentTrait) ControllerStrategySelectorOrder() int {
 }
 
 func (t *deploymentTrait) Apply(e *Environment) error {
-	if e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseDeploying) ||
-		e.InPhase(v1.IntegrationKitPhaseReady, v1.IntegrationPhaseRunning) {
-		maps := e.computeConfigMaps()
-		deployment := t.getDeploymentFor(e)
+	deployment := t.getDeploymentFor(e)
+	e.Resources.Add(deployment)
 
-		e.Resources.AddAll(maps)
-		e.Resources.Add(deployment)
-
-		e.Integration.Status.SetCondition(
-			v1.IntegrationConditionDeploymentAvailable,
-			corev1.ConditionTrue,
-			v1.IntegrationConditionDeploymentAvailableReason,
-			fmt.Sprintf("deployment name is %s", deployment.Name),
-		)
-
-		if e.IntegrationInPhase(v1.IntegrationPhaseRunning) {
-			// Reconcile the deployment replicas
-			replicas := e.Integration.Spec.Replicas
-			// Deployment replicas defaults to 1, so we avoid forcing
-			// an update to nil that will result to another update cycle
-			// back to that default value by the Deployment controller.
-			if replicas == nil {
-				one := int32(1)
-				replicas = &one
-			}
-			deployment.Spec.Replicas = replicas
-		}
-	}
+	e.Integration.Status.SetCondition(
+		v1.IntegrationConditionDeploymentAvailable,
+		corev1.ConditionTrue,
+		v1.IntegrationConditionDeploymentAvailableReason,
+		fmt.Sprintf("deployment name is %s", deployment.Name),
+	)
 
 	return nil
 }
 
-// IsPlatformTrait overrides base class method
+// IsPlatformTrait overrides base class method.
 func (t *deploymentTrait) IsPlatformTrait() bool {
 	return true
 }
@@ -142,6 +128,11 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 		for k, v := range filterTransferableAnnotations(e.Integration.Annotations) {
 			annotations[k] = v
 		}
+	}
+
+	deadline := int32(60)
+	if t.ProgressDeadlineSeconds != nil {
+		deadline = *t.ProgressDeadlineSeconds
 	}
 
 	deployment := appsv1.Deployment{
@@ -158,7 +149,8 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			Annotations: annotations,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: e.Integration.Spec.Replicas,
+			ProgressDeadlineSeconds: &deadline,
+			Replicas:                e.Integration.Spec.Replicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
 					v1.IntegrationLabel: e.Integration.Name,
@@ -166,9 +158,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{
-						v1.IntegrationLabel: e.Integration.Name,
-					},
+					Labels:      label.AddLabels(e.Integration.Name),
 					Annotations: annotations,
 				},
 				Spec: corev1.PodSpec{
@@ -177,6 +167,47 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			},
 		},
 	}
+
+	switch t.Strategy {
+	case appsv1.RecreateDeploymentStrategyType:
+		deployment.Spec.Strategy = appsv1.DeploymentStrategy{
+			Type: t.Strategy,
+		}
+	case appsv1.RollingUpdateDeploymentStrategyType:
+		deployment.Spec.Strategy = appsv1.DeploymentStrategy{
+			Type: t.Strategy,
+		}
+
+		if t.RollingUpdateMaxSurge != nil || t.RollingUpdateMaxUnavailable != nil {
+			var maxSurge *intstr.IntOrString
+			var maxUnavailable *intstr.IntOrString
+
+			if t.RollingUpdateMaxSurge != nil {
+				v := intstr.FromInt(*t.RollingUpdateMaxSurge)
+				maxSurge = &v
+			}
+			if t.RollingUpdateMaxUnavailable != nil {
+				v := intstr.FromInt(*t.RollingUpdateMaxUnavailable)
+				maxUnavailable = &v
+			}
+
+			deployment.Spec.Strategy.RollingUpdate = &appsv1.RollingUpdateDeployment{
+				MaxSurge:       maxSurge,
+				MaxUnavailable: maxUnavailable,
+			}
+		}
+	}
+
+	// Reconcile the deployment replicas
+	replicas := e.Integration.Spec.Replicas
+	// Deployment replicas defaults to 1, so we avoid forcing
+	// an update to nil that will result to another update cycle
+	// back to that default value by the Deployment controller.
+	if replicas == nil {
+		one := int32(1)
+		replicas = &one
+	}
+	deployment.Spec.Replicas = replicas
 
 	return &deployment
 }

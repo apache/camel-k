@@ -21,15 +21,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	serving "knative.dev/serving/pkg/apis/serving/v1"
-
-	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/batch/v1beta1"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 func TestMultilinePropertiesHandled(t *testing.T) {
@@ -45,89 +38,118 @@ func TestMultilinePropertiesHandled(t *testing.T) {
 	assert.Equal(t, "prop = multi\\nline\n", cm.Data["application.properties"])
 }
 
-func createNominalDeploymentTraitTest() (*Environment, *appsv1.Deployment) {
-	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "integration-name",
-		},
-		Spec: appsv1.DeploymentSpec{
-			Template: corev1.PodTemplateSpec{},
-		},
-	}
-
-	environment := &Environment{
+func TestCollectConfigurationValues(t *testing.T) {
+	e := Environment{
 		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "integration-name",
-			},
-			Status: v1.IntegrationStatus{
-				Phase: v1.IntegrationPhaseDeploying,
+			Spec: v1.IntegrationSpec{
+				Configuration: []v1.ConfigurationSpec{
+					{Type: "configmap", Value: "my-cm-integration"},
+					{Type: "env", Value: "my-env-integration"},
+				},
 			},
 		},
-		Resources: kubernetes.NewCollection(deployment),
+		IntegrationKit: &v1.IntegrationKit{
+			Spec: v1.IntegrationKitSpec{
+				Configuration: []v1.ConfigurationSpec{
+					{Type: "configmap", Value: "my-cm-kit"},
+					{Type: "property", Value: "my-p-kit"},
+				},
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Configuration: []v1.ConfigurationSpec{
+					{Type: "configmap", Value: "my-cm-platform"},
+					{Type: "secret", Value: "my-secret-platform"},
+					{Type: "property", Value: "my-p-platform"},
+					{Type: "env", Value: "my-env-platform"},
+				},
+			},
+		},
 	}
+	e.Platform.ResyncStatusFullConfig()
 
-	return environment, deployment
+	assert.Contains(t, e.collectConfigurationValues("configmap"), "my-cm-integration")
+	assert.Contains(t, e.collectConfigurationValues("secret"), "my-secret-platform")
+	assert.Contains(t, e.collectConfigurationValues("property"), "my-p-kit")
+	assert.Contains(t, e.collectConfigurationValues("env"), "my-env-integration")
 }
 
-func createNominalMissingDeploymentTraitTest() *Environment {
-	environment := &Environment{
+func TestCollectConfigurationPairs(t *testing.T) {
+	e := Environment{
 		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "integration-name",
-			},
-			Status: v1.IntegrationStatus{
-				Phase: v1.IntegrationPhaseDeploying,
+			Spec: v1.IntegrationSpec{
+				Configuration: []v1.ConfigurationSpec{
+					{Type: "property", Value: "p1=integration"},
+					{Type: "property", Value: "p4=integration"},
+				},
 			},
 		},
-		Resources: kubernetes.NewCollection(),
+		IntegrationKit: &v1.IntegrationKit{
+			Spec: v1.IntegrationKitSpec{
+				Configuration: []v1.ConfigurationSpec{
+					{Type: "property", Value: "p1=kit"},
+					{Type: "property", Value: "p2=kit"},
+				},
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Configuration: []v1.ConfigurationSpec{
+					{Type: "property", Value: "p1=platform"},
+					{Type: "property", Value: "p2=platform"},
+					{Type: "property", Value: "p3=platform"},
+					{Type: "property", Value: "p4=platform"},
+				},
+			},
+		},
 	}
+	e.Platform.ResyncStatusFullConfig()
 
-	return environment
+	pairs := e.collectConfigurationPairs("property")
+	assert.Equal(t, pairs, []variable{
+		{Name: "p1", Value: "integration"},
+		{Name: "p2", Value: "kit"},
+		{Name: "p3", Value: "platform"},
+		{Name: "p4", Value: "integration"},
+	})
 }
 
-func createNominalKnativeServiceTraitTest() (*Environment, *serving.Service) {
-	knativeService := &serving.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "integration-name",
-		},
-		Spec: serving.ServiceSpec{},
-	}
-
-	environment := &Environment{
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "integration-name",
-			},
-			Status: v1.IntegrationStatus{
-				Phase: v1.IntegrationPhaseDeploying,
-			},
-		},
-		Resources: kubernetes.NewCollection(knativeService),
-	}
-
-	return environment, knativeService
+func TestVolumeWithKeyAndPath(t *testing.T) {
+	v := getVolume("SomeVolName", "secret", "SomeSecretName", "SomeKey", "SomePath")
+	assert.NotNil(t, v)
+	assert.Equal(t, "SomeVolName", v.Name)
+	s := v.VolumeSource.Secret
+	assert.NotNil(t, s)
+	assert.Equal(t, "SomeSecretName", s.SecretName)
+	items := s.Items
+	assert.NotNil(t, items)
+	assert.Equal(t, 1, len(items))
+	assert.Equal(t, "SomeKey", items[0].Key)
+	assert.Equal(t, "SomePath", items[0].Path)
 }
 
-func createNominalCronJobTraitTest() (*Environment, *v1beta1.CronJob) {
-	cronJob := &v1beta1.CronJob{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "integration-name",
-		},
-		Spec: v1beta1.CronJobSpec{},
-	}
+func TestVolumeWithPathOnly(t *testing.T) {
+	v := getVolume("SomeVolName", "secret", "SomeSecretName", "", "SomePath")
+	assert.NotNil(t, v)
+	assert.Equal(t, "SomeVolName", v.Name)
+	s := v.VolumeSource.Secret
+	assert.NotNil(t, s)
+	assert.Equal(t, "SomeSecretName", s.SecretName)
+	items := s.Items
+	assert.Nil(t, items)
+}
 
-	environment := &Environment{
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "integration-name",
-			},
-			Status: v1.IntegrationStatus{
-				Phase: v1.IntegrationPhaseDeploying,
-			},
-		},
-		Resources: kubernetes.NewCollection(cronJob),
-	}
-
-	return environment, cronJob
+func TestVolumeWithKeyOnly(t *testing.T) {
+	v := getVolume("SomeVolName", "secret", "SomeSecretName", "SomeKey", "")
+	assert.NotNil(t, v)
+	assert.Equal(t, "SomeVolName", v.Name)
+	s := v.VolumeSource.Secret
+	assert.NotNil(t, s)
+	assert.Equal(t, "SomeSecretName", s.SecretName)
+	items := s.Items
+	assert.NotNil(t, items)
+	assert.Equal(t, 1, len(items))
+	assert.Equal(t, "SomeKey", items[0].Key)
+	assert.Equal(t, "SomeKey", items[0].Path)
 }

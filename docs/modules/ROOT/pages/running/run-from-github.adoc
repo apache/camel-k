@@ -1,9 +1,9 @@
 [[run-from-github]]
-= Run from GitHub
+= Run an Integration from GitHub
 
 It is possible to run integrations from a GitHub repository or Gist with dedicated URL syntax:
 
-== Repository
+== Integration code stored in a Github repository
 
 .Syntax
 [source]
@@ -30,7 +30,7 @@ but does not require to type the full GitHub RAW URL.
 
 Declaring the branch query param is not required and defaults to `master` if not explicit set.
 
-== Gist
+== Integration code stored in a Gist
 
 .Syntax
 [source]
@@ -39,7 +39,7 @@ kamel run https://gist.github.com/${user-id}/${gist-id}
 kamel run gist:${gist-id}
 ----
 
-camel-k will add any file that is part of the Gist as a source.
+Camel k will add any file that is part of the Gist as a source.
 
 As example, assuming there are two files listed as part of a Gist, beans.yaml and routes.yaml, then the following command
 

@@ -17,6 +17,9 @@
 
 name: builder
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 on:
   pull_request:
     branches:
@@ -42,9 +45,26 @@ on:
       - 'KEYS'
       - 'LICENSE'
       - 'NOTICE'
+  workflow_dispatch:
+    inputs:
+      log-level:
+        description: 'Set the operator log level (info or debug)'
+        required: false
+      pre-built-kamel-image:
+        description: 'Kamel image url for skipping building of kamel stages. Used for debugging'
+        required: false
+      skip-problematic:
+        description: 'Whether tests marked as problematic should be skipped - false by default (sets CAMEL_K_TEST_SKIP_PROBLEMATIC)'
+        required: false
+        default: false
+      test-filters:
+        description: |
+          Filter the tests in this test suite by assigning the test pattern to TEST_KNATIVE_RUN,
+          eg. TEST_KNATIVE_RUN=TestBasic will only run tests prefixed with 'TestBasic'
+        required: false
 
 concurrency:
-  group: ${{ github.ref }}-${{ github.workflow }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -52,74 +72,28 @@ jobs:
     runs-on: ubuntu-20.04
 
     strategy:
+      fail-fast: false
       matrix:
         publisher: ["Buildah", "Spectrum", "Kaniko"]
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Cleanup
-      run: |
-        ls -lart
-        echo "Initial status:"
-        df -h
-
-        echo "Cleaning up resources:"
-        sudo swapoff -a
-        sudo rm -f /swapfile
-        sudo apt clean
-        docker rmi $(docker image ls -aq)
-
-        echo "Final status:"
-        df -h
-    - name: Set up JDK 11
-      uses: AdoptOpenJDK/install-jdk@v1
       with:
-        version: "11"
-    - name: Set Go
-      uses: actions/setup-go@v1
+        persist-credentials: false
+        submodules: recursive
+    - name: Convert input parameters to env vars
+      shell: bash
+      run: |
+        ./.github/workflows/manual-exec-process-inputs.sh \
+          -i "${{ github.event.inputs.pre-built-kamel-image }}" \
+          -p "${{ github.event.inputs.skip-problematic }}" \
+          -q "${{ github.event.inputs.log-level }}" \
+          -t "${{ github.event.inputs.test-filters }}"
+
+    - name: Execute Builder Tests
+      uses: ./.github/actions/e2e-builder
       with:
-        go-version: 1.15.x
-    - name: Kubernetes KinD Cluster
-      uses: container-tools/kind-action@v1
-      with:
-        version: v0.11.0
-        node_image: kindest/node:v1.21.1@sha256:fae9a58f17f18f06aeac9772ca8b5ac680ebbed985e266f711d936e91d113bad
-    - name: Info
-      run: |
-        kubectl cluster-info
-        kubectl describe nodes
-    - name: Build Operator
-      run: |
-        echo "Build project"
-        export LOCAL_IMAGE=${KIND_REGISTRY}/apache/camel-k
-        echo "LOCAL_IMAGE=${LOCAL_IMAGE}:$(make get-version)" >> $GITHUB_ENV
-        make IMAGE_NAME=${LOCAL_IMAGE} PACKAGE_ARTIFACTS_STRATEGY=download build package-artifacts images images-push
-
-        sudo mv ./kamel /usr/local/bin
-    - name: Run IT
-      # Disable registry tests as not compatible with KinD
-      #env:
-      #  TEST_DOCKER_HUB_USERNAME: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
-      #  TEST_DOCKER_HUB_PASSWORD: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
-      #  TEST_GITHUB_PACKAGES_REPO: ${{ secrets.TEST_GITHUB_PACKAGES_REPO }}
-      #  TEST_GITHUB_PACKAGES_USERNAME: ${{ secrets.TEST_GITHUB_PACKAGES_USERNAME }}
-      #  TEST_GITHUB_PACKAGES_PASSWORD: ${{ secrets.TEST_GITHUB_PACKAGES_PASSWORD }}
-      env:
-        KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY: ${{ matrix.publisher }}
-      run: |
-        echo "Installing camel k cluster resources"
-        kamel install --cluster-setup
-
-        # Configure install options
-        export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
-        export KAMEL_INSTALL_REGISTRY=$KIND_REGISTRY
-        export KAMEL_INSTALL_REGISTRY_INSECURE=true
-        export KAMEL_INSTALL_OPERATOR_IMAGE=$KIND_REGISTRY/apache/camel-k:$(make get-version)
-
-        # Configure test options
-        export CAMEL_K_TEST_IMAGE_NAME=$KIND_REGISTRY/apache/camel-k
-        export CAMEL_K_TEST_IMAGE_VERSION=$(make get-version)
-
-        # Then run integration tests
-        make test-builder
+        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
+        publisher: ${{ matrix.publisher }}

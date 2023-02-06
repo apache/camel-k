@@ -18,52 +18,45 @@
 linters-settings:
   lll:
     line-length: 170
+  goconst:
+    ignore-tests: true
 linters:
   enable-all: true
   disable:
+    - cyclop
     - dupl
-    - gochecknoinits
-    - gochecknoglobals
+    - exhaustive
+    - exhaustivestruct
+    - exhaustruct
+    - forbidigo
     - funlen
-    - godox
-    - whitespace
+    - gci
+    - gochecknoglobals
+    - gochecknoinits
     - gocognit
+    - goconst
+    - gocyclo
+    - godox
+    - goerr113
+    - gofumpt
+    - golint
+    - gomnd
+    - gomoddirectives
+    - interfacer
+    - ireturn
+    - lll
+    - maligned
+    - nakedret
+    - nestif
+    - nilnil
+    - nlreturn
+    - nosnakecase
+    - paralleltest
+    - scopelint
+    - tagliatelle
+    - tenv
+    - testpackage
+    - varnamelen
+    - whitespace
+    - wrapcheck
     - wsl
-issues:
-  exclude-rules:
-    - path: pkg/client/clientset
-      linters:
-        - stylecheck
-        - golint
-        - deadcode
-        - lll
-        - unparam
-        - varcheck
-        - unused
-    - path: pkg/client/informers
-      linters:
-        - stylecheck
-        - golint
-        - deadcode
-        - lll
-        - unparam
-        - varcheck
-        - unused
-    - path: pkg/client/listers
-      linters:
-        - stylecheck
-        - golint
-        - deadcode
-        - lll
-        - unparam
-        - varcheck
-        - unused
-    - path: deploy/resources.go
-      linters:
-        - stylecheck
-        - golint
-        - deadcode
-        - lll
-        - unparam
-        - varcheck
-        - unused

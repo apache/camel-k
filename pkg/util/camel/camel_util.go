@@ -18,6 +18,7 @@ limitations under the License.
 package camel
 
 import (
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -25,6 +26,17 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/log"
+)
+
+var (
+	BasePath                  = "/etc/camel"
+	ConfDPath                 = filepath.Join(BasePath, "conf.d")
+	SourcesMountPath          = filepath.Join(BasePath, "sources")
+	ResourcesDefaultMountPath = filepath.Join(BasePath, "resources")
+	ConfigResourcesMountPath  = filepath.Join(ConfDPath, "_resources")
+	ConfigConfigmapsMountPath = filepath.Join(ConfDPath, "_configmaps")
+	ConfigSecretsMountPath    = filepath.Join(ConfDPath, "_secrets")
+	ServiceBindingsMountPath  = filepath.Join(ConfDPath, "_servicebindings")
 )
 
 func findBestMatch(catalogs []v1.CamelCatalog, runtime v1.RuntimeSpec) (*RuntimeCatalog, error) {
@@ -53,10 +65,10 @@ func newSemVerConstraint(versionConstraint string) *semver.Constraints {
 	constraint, err := semver.NewConstraint(versionConstraint)
 	if err != nil || constraint == nil {
 		if err != nil {
-			log.Debug("Unable to parse version constraint: %s, error:\n", versionConstraint, err.Error())
+			log.Debugf("Unable to parse version constraint: %s, error: %s", versionConstraint, err.Error())
 		}
 		if constraint == nil {
-			log.Debug("Unable to parse version constraint: %s\n", versionConstraint)
+			log.Debugf("Unable to parse version constraint: %s", versionConstraint)
 		}
 	}
 
@@ -70,6 +82,7 @@ func newCatalogVersionCollection(catalogs []v1.CamelCatalog) CatalogVersionColle
 		rv, err := semver.NewVersion(catalogs[i].Spec.Runtime.Version)
 		if err != nil {
 			log.Debugf("Invalid semver version (runtime) %s", rv)
+
 			continue
 		}
 

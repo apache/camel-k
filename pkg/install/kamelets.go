@@ -19,98 +19,196 @@ package install
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
-	"io/ioutil"
+	"io/fs"
+	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
+	"sync"
+	"sync/atomic"
 
-	"github.com/pkg/errors"
+	gerrors "github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/patch"
 )
 
-const kameletDirEnv = "KAMELET_CATALOG_DIR"
-const defaultKameletDir = "/kamelets/"
+const (
+	kameletDirEnv     = "KAMELET_CATALOG_DIR"
+	defaultKameletDir = "/kamelets/"
+)
 
-// KameletCatalog installs the bundled KameletCatalog into one namespace
+var (
+	log = logf.Log
+
+	hasServerSideApply atomic.Value
+	tryServerSideApply sync.Once
+)
+
+// KameletCatalog installs the bundled Kamelets into the specified namespace.
 func KameletCatalog(ctx context.Context, c client.Client, namespace string) error {
 	kameletDir := os.Getenv(kameletDirEnv)
 	if kameletDir == "" {
 		kameletDir = defaultKameletDir
 	}
-	if d, err := os.Stat(kameletDir); err != nil && os.IsNotExist(err) {
+	d, err := os.Stat(kameletDir)
+	switch {
+	case err != nil && os.IsNotExist(err):
 		return nil
-	} else if err != nil {
+	case err != nil:
 		return err
-	} else if !d.IsDir() {
-		return fmt.Errorf("Kamelet directory %q is a file", kameletDir)
+	case !d.IsDir():
+		return fmt.Errorf("kamelet directory %q is a file", kameletDir)
 	}
 
-	files, err := ioutil.ReadDir(kameletDir)
+	g, gCtx := errgroup.WithContext(ctx)
+
+	err = filepath.WalkDir(kameletDir, func(p string, f fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if f.IsDir() && f.Name() != d.Name() {
+			return fs.SkipDir
+		}
+		if !(strings.HasSuffix(f.Name(), ".yaml") || strings.HasSuffix(f.Name(), ".yml")) {
+			return nil
+		}
+		// We may want to throttle the creation of Go routines if the number of bundled Kamelets increases.
+		g.Go(func() error {
+			kamelet, err := loadKamelet(filepath.Join(kameletDir, f.Name()), namespace)
+			if err != nil {
+				return err
+			}
+			once := false
+			tryServerSideApply.Do(func() {
+				once = true
+				if err = serverSideApply(gCtx, c, kamelet); err != nil {
+					if isIncompatibleServerError(err) {
+						log.Info("Fallback to client-side apply for installing bundled Kamelets")
+						hasServerSideApply.Store(false)
+						err = nil
+					} else {
+						// Unexpected error occurred
+						err = gerrors.Wrap(err, "Unexpected error occurred whilst validating kamelet")
+						log.Error(err, "Error occurred whilst loading kamelets")
+					}
+				} else {
+					hasServerSideApply.Store(true)
+				}
+			})
+			if err != nil {
+				return err
+			}
+			v := hasServerSideApply.Load()
+			if vb, ok := v.(bool); ok && vb {
+				if !once {
+					return serverSideApply(gCtx, c, kamelet)
+				}
+			} else {
+				return clientSideApply(gCtx, c, kamelet)
+			}
+			return nil
+		})
+		return nil
+	})
 	if err != nil {
 		return err
 	}
 
-	for _, file := range files {
-		if file.IsDir() || !(strings.HasSuffix(file.Name(), ".yaml") || strings.HasSuffix(file.Name(), ".yml")) {
-			continue
-		}
-
-		content, err := ioutil.ReadFile(path.Join(kameletDir, file.Name()))
-		if err != nil {
-			return err
-		}
-
-		obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), string(content))
-		if err != nil {
-			return err
-		}
-		if k, ok := obj.(*v1alpha1.Kamelet); ok {
-			existing := &v1alpha1.Kamelet{}
-			err = c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: k.Name}, existing)
-			if err != nil {
-				if k8serrors.IsNotFound(err) {
-					existing = nil
-				} else {
-					return err
-				}
-			}
-
-			if existing == nil || existing.Annotations[kamelVersionAnnotation] != defaults.Version {
-				if k.GetAnnotations() == nil {
-					k.SetAnnotations(make(map[string]string))
-				}
-				k.GetAnnotations()[kamelVersionAnnotation] = defaults.Version
-
-				if k.GetLabels() == nil {
-					k.SetLabels(make(map[string]string))
-				}
-				k.GetLabels()[v1alpha1.KameletBundledLabel] = "true"
-				k.GetLabels()[v1alpha1.KameletReadOnlyLabel] = "true"
-
-				err := ObjectOrCollect(ctx, c, namespace, nil, true, k)
-
-				if err != nil {
-					return errors.Wrapf(err, "could not create resource from file %q", path.Join(kameletDir, file.Name()))
-				}
-			}
-
-		}
-	}
-
-	return nil
+	return g.Wait()
 }
 
-// KameletViewerRole installs the role that allows any user ro access kamelets in the global namespace
-func KameletViewerRole(ctx context.Context, c client.Client, namespace string) error {
-	if err := Resource(ctx, c, namespace, true, IdentityResourceCustomizer, "/rbac/user-global-kamelet-viewer-role.yaml"); err != nil {
+func serverSideApply(ctx context.Context, c client.Client, resource runtime.Object) error {
+	target, err := patch.ApplyPatch(resource)
+	if err != nil {
 		return err
 	}
-	return Resource(ctx, c, namespace, true, IdentityResourceCustomizer, "/rbac/user-global-kamelet-viewer-role-binding.yaml")
+	return c.Patch(ctx, target, ctrl.Apply, ctrl.ForceOwnership, ctrl.FieldOwner("camel-k-operator"))
+}
+
+func clientSideApply(ctx context.Context, c client.Client, resource ctrl.Object) error {
+	if err := c.Create(ctx, resource); err == nil {
+		return nil
+	} else if !k8serrors.IsAlreadyExists(err) {
+		return fmt.Errorf("error during create resource: %s/%s: %w", resource.GetNamespace(), resource.GetName(), err)
+	}
+	// Directly use the serialized resource as JSON merge patch since it's prescriptive
+	p, err := json.Marshal(resource)
+	if err != nil {
+		return err
+	}
+	return c.Patch(ctx, resource, ctrl.RawPatch(types.MergePatchType, p))
+}
+
+func isIncompatibleServerError(err error) bool {
+	// First simpler check for older servers (i.e. OpenShift 3.11)
+	if strings.Contains(err.Error(), "415: Unsupported Media Type") {
+		return true
+	}
+	// 415: Unsupported media type means we're talking to a server which doesn't
+	// support server-side apply.
+	var serr *k8serrors.StatusError
+	if errors.As(err, &serr) {
+		return serr.Status().Code == http.StatusUnsupportedMediaType
+	}
+	// Non-StatusError means the error isn't because the server is incompatible.
+	return false
+}
+
+func loadKamelet(path string, namespace string) (ctrl.Object, error) {
+	content, err := util.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	kamelet, err := kubernetes.LoadUnstructuredFromYaml(string(content))
+	if err != nil {
+		return nil, err
+	}
+	gvk := kamelet.GetObjectKind().GroupVersionKind()
+	if gvk.Group != v1alpha1.SchemeGroupVersion.Group || gvk.Kind != "Kamelet" {
+		return nil, fmt.Errorf("file %q does not define a Kamelet", path)
+	}
+
+	kamelet.SetNamespace(namespace)
+
+	annotations := kamelet.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+	annotations[kamelVersionAnnotation] = defaults.Version
+	kamelet.SetAnnotations(annotations)
+
+	labels := kamelet.GetLabels()
+	if labels == nil {
+		labels = make(map[string]string)
+	}
+	labels[v1alpha1.KameletBundledLabel] = "true"
+	labels[v1alpha1.KameletReadOnlyLabel] = "true"
+
+	kamelet.SetLabels(labels)
+
+	return kamelet, nil
+}
+
+// KameletViewerRole installs the role that allows any user ro access kamelets in the global namespace.
+func KameletViewerRole(ctx context.Context, c client.Client, namespace string) error {
+	if err := Resource(ctx, c, namespace, true, IdentityResourceCustomizer, "/viewer/user-global-kamelet-viewer-role.yaml"); err != nil {
+		return err
+	}
+	return Resource(ctx, c, namespace, true, IdentityResourceCustomizer, "/viewer/user-global-kamelet-viewer-role-binding.yaml")
 }

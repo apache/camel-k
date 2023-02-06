@@ -52,7 +52,7 @@ func printVersion() {
 	log.Info(fmt.Sprintf("Camel K Version: %v", defaults.Version))
 }
 
-// Run a build resource in the specified namespace
+// Run a build resource in the specified namespace.
 func Run(namespace string, buildName string, taskName string) {
 	logf.SetLogger(zap.New(func(o *zap.Options) {
 		o.Development = false
@@ -78,7 +78,7 @@ func Run(namespace string, buildName string, taskName string) {
 	// is made on the build containers.
 	target.Status.Phase = v1.BuildPhaseNone
 	// Patch the build status with the result
-	p, err := patch.PositiveMergePatch(build, target)
+	p, err := patch.MergePatch(build, target)
 	exitOnError(err, "cannot create merge patch")
 
 	if len(p) > 0 {
@@ -107,7 +107,8 @@ func exitOnError(err error, msg string) {
 }
 
 func writeTerminationMessage(message string) {
-	err := ioutil.WriteFile(terminationMessagePath, []byte(message), 0644)
+	// #nosec G306
+	err := ioutil.WriteFile(terminationMessagePath, []byte(message), 0o644)
 	if err != nil {
 		log.Error(err, "cannot write termination message")
 	}

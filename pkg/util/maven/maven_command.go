@@ -18,15 +18,16 @@ limitations under the License.
 package maven
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"regexp"
+	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -53,25 +54,35 @@ func (c *Command) Do(ctx context.Context) error {
 	}
 
 	args := make([]string, 0)
-	args = append(args, "--batch-mode")
+	args = append(args, c.context.AdditionalArguments...)
 
-	if c.context.LocalRepository == "" {
-		args = append(args, "-Dcamel.noop=true")
-	} else if _, err := os.Stat(c.context.LocalRepository); err == nil {
-		args = append(args, "-Dmaven.repo.local="+c.context.LocalRepository)
+	if c.context.LocalRepository != "" {
+		if _, err := os.Stat(c.context.LocalRepository); err == nil {
+			args = append(args, "-Dmaven.repo.local="+c.context.LocalRepository)
+		}
 	}
 
-	settingsPath := path.Join(c.context.Path, "settings.xml")
-	settingsExists, err := util.FileExists(settingsPath)
-	if err != nil {
+	settingsPath := filepath.Join(c.context.Path, "settings.xml")
+	if settingsExists, err := util.FileExists(settingsPath); err != nil {
 		return err
+	} else if settingsExists {
+		args = append(args, "--global-settings", settingsPath)
 	}
 
-	if settingsExists {
+	settingsPath = filepath.Join(c.context.Path, "user-settings.xml")
+	if settingsExists, err := util.FileExists(settingsPath); err != nil {
+		return err
+	} else if settingsExists {
 		args = append(args, "--settings", settingsPath)
 	}
 
-	args = append(args, c.context.AdditionalArguments...)
+	if !util.StringContainsPrefix(c.context.AdditionalArguments, "-Dmaven.artifact.threads") {
+		args = append(args, "-Dmaven.artifact.threads="+strconv.Itoa(runtime.GOMAXPROCS(0)))
+	}
+
+	if !util.StringSliceExists(c.context.AdditionalArguments, "-T") {
+		args = append(args, "-T", strconv.Itoa(runtime.GOMAXPROCS(0)))
+	}
 
 	cmd := exec.CommandContext(ctx, mvnCmd, args...)
 	cmd.Dir = c.context.Path
@@ -96,6 +107,7 @@ func (c *Command) Do(ctx context.Context) error {
 				for _, opt := range options {
 					if strings.HasPrefix(opt, key) {
 						exists = true
+
 						break
 					}
 				}
@@ -119,35 +131,7 @@ func (c *Command) Do(ctx context.Context) error {
 
 	Log.WithValues("MAVEN_OPTS", mavenOptions).Infof("executing: %s", strings.Join(cmd.Args, " "))
 
-	stdOut, err := cmd.StdoutPipe()
-	if err != nil {
-		return nil
-	}
-
-	err = cmd.Start()
-
-	if err != nil {
-		return err
-	}
-
-	scanner := bufio.NewScanner(stdOut)
-
-	Log.Debug("About to start parsing the Maven output")
-	for scanner.Scan() {
-		line := scanner.Text()
-		mavenLog, parseError := parseLog(line)
-		if parseError == nil {
-			normalizeLog(mavenLog)
-		} else {
-			// Why we are ignoring the parsing errors here: there are a few scenarios where this would likely occur.
-			// For example, if something outside of Maven outputs something (i.e.: the JDK, a misbehaved plugin,
-			// etc). The build may still have succeeded, though.
-			nonNormalizedLog(line)
-		}
-	}
-	Log.Debug("Finished parsing Maven output")
-
-	return cmd.Wait()
+	return util.RunAndLog(ctx, cmd, mavenLogHandler, mavenLogHandler)
 }
 
 func NewContext(buildDir string) Context {
@@ -159,15 +143,14 @@ func NewContext(buildDir string) Context {
 }
 
 type Context struct {
-	Path string
-	// Project             Project
+	Path                string
 	ExtraMavenOpts      []string
-	SettingsContent     []byte
+	GlobalSettings      []byte
+	UserSettings        []byte
+	SettingsSecurity    []byte
 	AdditionalArguments []string
 	AdditionalEntries   map[string]interface{}
-	// Timeout             time.Duration
-	LocalRepository string
-	// Stdout              io.Writer
+	LocalRepository     string
 }
 
 func (c *Context) AddEntry(id string, entry interface{}) {
@@ -199,8 +182,20 @@ func generateProjectStructure(context Context, project Project) error {
 		return err
 	}
 
-	if context.SettingsContent != nil {
-		if err := util.WriteFileWithContent(context.Path, "settings.xml", context.SettingsContent); err != nil {
+	if context.GlobalSettings != nil {
+		if err := util.WriteFileWithContent(filepath.Join(context.Path, "settings.xml"), context.GlobalSettings); err != nil {
+			return err
+		}
+	}
+
+	if context.UserSettings != nil {
+		if err := util.WriteFileWithContent(filepath.Join(context.Path, "user-settings.xml"), context.UserSettings); err != nil {
+			return err
+		}
+	}
+
+	if context.SettingsSecurity != nil {
+		if err := util.WriteFileWithContent(filepath.Join(context.Path, "settings-security.xml"), context.SettingsSecurity); err != nil {
 			return err
 		}
 	}
@@ -223,7 +218,7 @@ func generateProjectStructure(context Context, project Project) error {
 		if len(bytes) > 0 {
 			Log.Infof("write entry: %s (%d bytes)", k, len(bytes))
 
-			err = util.WriteFileWithContent(context.Path, k, bytes)
+			err = util.WriteFileWithContent(filepath.Join(context.Path, k), bytes)
 			if err != nil {
 				return err
 			}

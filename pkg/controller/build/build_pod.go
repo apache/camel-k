@@ -20,21 +20,20 @@ package build
 import (
 	"context"
 	"fmt"
-	"path"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -114,7 +113,7 @@ var (
 	}
 )
 
-func newBuildPod(ctx context.Context, c client.Client, build *v1.Build) (*corev1.Pod, error) {
+func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.Pod, error) {
 	pod := &corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -137,31 +136,23 @@ func newBuildPod(ctx context.Context, c client.Client, build *v1.Build) (*corev1
 	pod.Labels = kubernetes.MergeCamelCreatorLabels(build.Labels, pod.Labels)
 
 	for _, task := range build.Spec.Tasks {
-		if task.Builder != nil {
-			err := addBuildTaskToPod(ctx, c, build, task.Builder.Name, pod)
-			if err != nil {
-				return nil, err
-			}
-		} else if task.Buildah != nil {
+		switch {
+		case task.Builder != nil:
+			addBuildTaskToPod(build, task.Builder.Name, pod)
+		case task.Buildah != nil:
 			err := addBuildahTaskToPod(ctx, c, build, task.Buildah, pod)
 			if err != nil {
 				return nil, err
 			}
-		} else if task.Kaniko != nil {
+		case task.Kaniko != nil:
 			err := addKanikoTaskToPod(ctx, c, build, task.Kaniko, pod)
 			if err != nil {
 				return nil, err
 			}
-		} else if task.S2i != nil {
-			err := addBuildTaskToPod(ctx, c, build, task.S2i.Name, pod)
-			if err != nil {
-				return nil, err
-			}
-		} else if task.Spectrum != nil {
-			err := addBuildTaskToPod(ctx, c, build, task.Spectrum.Name, pod)
-			if err != nil {
-				return nil, err
-			}
+		case task.S2i != nil:
+			addBuildTaskToPod(build, task.S2i.Name, pod)
+		case task.Spectrum != nil:
+			addBuildTaskToPod(build, task.Spectrum.Name, pod)
 		}
 	}
 
@@ -209,7 +200,7 @@ func buildPodName(build *v1.Build) string {
 	return "camel-k-" + build.Name + "-builder"
 }
 
-func addBuildTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, taskName string, pod *corev1.Pod) error {
+func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 	if !hasBuilderVolume(pod) {
 		// Add the EmptyDir volume used to share the build state across tasks
 		pod.Spec.Volumes = append(pod.Spec.Volumes, corev1.Volume{
@@ -220,11 +211,7 @@ func addBuildTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task
 		})
 	}
 
-	// TODO: Move the retrieval of the operator image into the controller
-	operatorImage, err := platform.GetCurrentOperatorImage(ctx, c)
-	if err != nil {
-		return err
-	}
+	operatorImage := platform.OperatorImage
 	if operatorImage == "" {
 		operatorImage = defaults.ImageName + ":" + defaults.Version
 	}
@@ -243,24 +230,37 @@ func addBuildTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task
 			"--task-name",
 			taskName,
 		},
-		WorkingDir: path.Join(builderDir, build.Name),
+		WorkingDir: filepath.Join(builderDir, build.Name),
+		Env:        proxyFromEnvironment(),
 	}
 
 	addContainerToPod(build, container, pod)
-	return nil
 }
 
-func addBuildahTaskToPod(ctx context.Context, c client.Client, build *v1.Build, task *v1.BuildahTask, pod *corev1.Pod) error {
-	bud := []string{
+func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task *v1.BuildahTask, pod *corev1.Pod) error {
+	var bud []string
+
+	bud = []string{
 		"buildah",
 		"bud",
 		"--storage-driver=vfs",
+	}
+
+	if task.Platform != "" {
+		bud = append(bud, []string{
+			"--platform",
+			task.Platform,
+		}...)
+	}
+
+	bud = append(bud, []string{
+		"--pull-always",
 		"-f",
 		"Dockerfile",
 		"-t",
 		task.Image,
 		".",
-	}
+	}...)
 
 	push := []string{
 		"buildah",
@@ -314,7 +314,7 @@ func addBuildahTaskToPod(ctx context.Context, c client.Client, build *v1.Build, 
 		push = append(push[:2], append([]string{"--tls-verify=false"}, push[2:]...)...)
 	}
 
-	env = append(env, proxySecretEnvVars(task.HttpProxySecret)...)
+	env = append(env, proxyFromEnvironment()...)
 
 	args := []string{
 		strings.Join(bud, " "),
@@ -324,14 +324,19 @@ func addBuildahTaskToPod(ctx context.Context, c client.Client, build *v1.Build, 
 		args = append([]string{auth}, args...)
 	}
 
+	image := task.ExecutorImage
+	if image == "" {
+		image = fmt.Sprintf("%s:v%s", builder.BuildahDefaultImageName, defaults.BuildahVersion)
+	}
+
 	container := corev1.Container{
 		Name:            task.Name,
-		Image:           fmt.Sprintf("quay.io/buildah/stable:v%s", defaults.BuildahVersion),
+		Image:           image,
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Command:         []string{"/bin/sh", "-c"},
 		Args:            []string{strings.Join(args, " && ")},
 		Env:             env,
-		WorkingDir:      path.Join(builderDir, build.Name, builder.ContextDir),
+		WorkingDir:      filepath.Join(builderDir, build.Name, builder.ContextDir),
 		VolumeMounts:    volumeMounts,
 	}
 
@@ -350,7 +355,7 @@ func addKanikoTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, tas
 
 	args := []string{
 		"--dockerfile=Dockerfile",
-		"--context=" + path.Join(builderDir, build.Name, builder.ContextDir),
+		"--context=" + filepath.Join(builderDir, build.Name, builder.ContextDir),
 		"--destination=" + task.Image,
 		"--cache=" + strconv.FormatBool(cache),
 		"--cache-dir=" + builder.KanikoCacheDir,
@@ -378,7 +383,7 @@ func addKanikoTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, tas
 		args = append(args, "--insecure-pull")
 	}
 
-	env = append(env, proxySecretEnvVars(task.HttpProxySecret)...)
+	env = append(env, proxyFromEnvironment()...)
 
 	if cache {
 		// Co-locate with the Kaniko warmer pod for sharing the host path volume as the current
@@ -436,13 +441,18 @@ func addKanikoTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, tas
 		})
 	}
 
+	image := task.ExecutorImage
+	if image == "" {
+		image = fmt.Sprintf("%s:v%s", builder.KanikoDefaultExecutorImageName, defaults.KanikoVersion)
+	}
+
 	container := corev1.Container{
 		Name:            task.Name,
-		Image:           fmt.Sprintf("gcr.io/kaniko-project/executor:v%s", defaults.KanikoVersion),
+		Image:           image,
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Args:            args,
 		Env:             env,
-		WorkingDir:      path.Join(builderDir, build.Name, builder.ContextDir),
+		WorkingDir:      filepath.Join(builderDir, build.Name, builder.ContextDir),
 		VolumeMounts:    volumeMounts,
 	}
 
@@ -459,7 +469,7 @@ func addContainerToPod(build *v1.Build, container corev1.Container, pod *corev1.
 	if hasBuilderVolume(pod) {
 		container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
 			Name:      builderVolume,
-			MountPath: path.Join(builderDir, build.Name),
+			MountPath: filepath.Join(builderDir, build.Name),
 		})
 	}
 
@@ -553,35 +563,34 @@ func addRegistrySecret(name string, secret registrySecret, volumes *[]corev1.Vol
 	if secret.refEnv != "" {
 		*env = append(*env, corev1.EnvVar{
 			Name:  secret.refEnv,
-			Value: path.Join(secret.mountPath, secret.destination),
+			Value: filepath.Join(secret.mountPath, secret.destination),
 		})
 	}
 }
 
-func proxySecretEnvVars(secret string) []corev1.EnvVar {
-	if secret == "" {
-		return []corev1.EnvVar{}
+func proxyFromEnvironment() []corev1.EnvVar {
+	var envVars []corev1.EnvVar
+
+	if httpProxy, ok := os.LookupEnv("HTTP_PROXY"); ok {
+		envVars = append(envVars, corev1.EnvVar{
+			Name:  "HTTP_PROXY",
+			Value: httpProxy,
+		})
 	}
 
-	return []corev1.EnvVar{
-		proxySecretEnvVar("HTTP_PROXY", secret),
-		proxySecretEnvVar("HTTPS_PROXY", secret),
-		proxySecretEnvVar("NO_PROXY", secret),
+	if httpsProxy, ok := os.LookupEnv("HTTPS_PROXY"); ok {
+		envVars = append(envVars, corev1.EnvVar{
+			Name:  "HTTPS_PROXY",
+			Value: httpsProxy,
+		})
 	}
-}
 
-func proxySecretEnvVar(name string, secret string) corev1.EnvVar {
-	optional := true
-	return corev1.EnvVar{
-		Name: name,
-		ValueFrom: &corev1.EnvVarSource{
-			SecretKeyRef: &corev1.SecretKeySelector{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: secret,
-				},
-				Key:      name,
-				Optional: &optional,
-			},
-		},
+	if noProxy, ok := os.LookupEnv("NO_PROXY"); ok {
+		envVars = append(envVars, corev1.EnvVar{
+			Name:  "NO_PROXY",
+			Value: noProxy,
+		})
 	}
+
+	return envVars
 }

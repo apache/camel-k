@@ -25,6 +25,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -106,11 +107,10 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 		panic(err)
 	}
 
-	kanikoCache := false
 	res := &Environment{
-		C:            context.TODO(),
+		Ctx:          context.TODO(),
 		CamelCatalog: c,
-		Catalog:      NewCatalog(context.TODO(), nil),
+		Catalog:      NewCatalog(nil),
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -129,12 +129,15 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 			Spec: v1.IntegrationPlatformSpec{
 				Cluster: cluster,
 				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy:  strategy,
-					Registry:         v1.IntegrationPlatformRegistrySpec{Address: "registry"},
-					RuntimeVersion:   defaults.DefaultRuntimeVersion,
-					RuntimeProvider:  v1.RuntimeProviderQuarkus,
-					KanikoBuildCache: &kanikoCache,
+					PublishStrategy:        strategy,
+					Registry:               v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:         defaults.DefaultRuntimeVersion,
+					RuntimeProvider:        v1.RuntimeProviderQuarkus,
+					PublishStrategyOptions: map[string]string{},
 				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
@@ -148,7 +151,7 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 }
 
 func NewBuilderTestCatalog() *Catalog {
-	return NewCatalog(context.TODO(), nil)
+	return NewCatalog(nil)
 }
 
 func TestMavenPropertyBuilderTrait(t *testing.T) {
@@ -163,8 +166,8 @@ func TestMavenPropertyBuilderTrait(t *testing.T) {
 }
 
 func createNominalBuilderTraitTest() *builderTrait {
-	builderTrait := newBuilderTrait().(*builderTrait)
-	builderTrait.Enabled = BoolP(true)
+	builderTrait, _ := newBuilderTrait().(*builderTrait)
+	builderTrait.Enabled = pointer.Bool(true)
 
 	return builderTrait
 }

@@ -1,0 +1,76 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: kamel-cleanup
+description: 'Cleans up the target cluster, removing any e2e test resources'
+
+inputs:
+  catalog-source-name:
+    description: "Name of the catalog source for the build bundle image"
+    required: true
+  catalog-source-namespace:
+    description: "Namespace of the catalog source for the build bundle image"
+    required: true
+  image-namespace:
+    description: "Installed location of the images if resident on the cluster (only applies to clusters with partnered registries)"
+    required: false
+  global-operator-namespace:
+    description: "The namespace to uninstall the global operator from"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - id: uninstall-global-operator
+      name: Execute Operator Uninstall
+      shell: bash
+      run: |
+        ./.github/actions/kamel-cleanup/uninstall-global-operator.sh \
+          -c "${{ inputs.catalog-source-namespace }}" \
+          -g "${{ inputs.global-operator-namespace }}"
+
+    - id: remove-orphan-resources
+      name: Remove Orphaned Resources
+      shell: bash
+      if: ${{ always() }}
+      run: |
+        ./.github/actions/kamel-cleanup/clean-orphan-resources.sh
+
+    - id: remove-leftover-operatorgroups
+      name: Remove Leftover OperatorGroups
+      shell: bash
+      if: ${{ always() }}
+      run: |
+        ./.github/actions/kamel-cleanup/clean-operator-groups.sh
+
+    - id: remove-telemetry-resources
+      name: Remove Installed Telemetry Resources
+      shell: bash
+      if: ${{ always() }}
+      run: |
+        ./.github/actions/kamel-cleanup/clean-telemetry-resources.sh
+
+    - id: remove-installed-kamel
+      name: Remove Installed Kamel
+      shell: bash
+      if: ${{ always() }}
+      run: |
+        ./.github/actions/kamel-cleanup/cleanup.sh \
+          -b "${{ inputs.catalog-source-name }}" \
+          -c "${{ inputs.catalog-source-namespace }}" \
+          -i "${{ inputs.image-namespace }}" \
+          -x "${{ env.CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE }}"

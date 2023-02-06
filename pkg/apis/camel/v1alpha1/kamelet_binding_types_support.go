@@ -18,6 +18,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 
@@ -63,6 +64,11 @@ func (c KameletBindingCondition) GetReason() string {
 // GetMessage --
 func (c KameletBindingCondition) GetMessage() string {
 	return c.Message
+}
+
+// SetOperatorID sets the given operator id as an annotation
+func (in *KameletBinding) SetOperatorID(operatorID string) {
+	v1.SetAnnotation(&in.ObjectMeta, v1.OperatorIDAnnotation, operatorID)
 }
 
 // GetCondition returns the condition with the provided type.
@@ -151,7 +157,9 @@ func (p *EndpointProperties) GetPropertyMap() (map[string]string, error) {
 
 	// Convert json property values to objects before getting their string representation
 	var props map[string]interface{}
-	if err := json.Unmarshal(p.RawMessage, &props); err != nil {
+	d := json.NewDecoder(bytes.NewReader(p.RawMessage))
+	d.UseNumber()
+	if err := d.Decode(&props); err != nil {
 		return nil, err
 	}
 	stringProps := make(map[string]string, len(props))

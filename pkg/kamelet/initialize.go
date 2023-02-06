@@ -18,6 +18,7 @@ limitations under the License.
 package kamelet
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"sort"
@@ -47,15 +48,6 @@ func Initialize(kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
 			corev1.ConditionFalse,
 			v1alpha1.KameletConditionReasonInvalidProperty,
 			fmt.Sprintf("Kamelet property %q is reserved and cannot be part of the schema", v1alpha1.KameletIDProperty),
-		)
-	}
-	if !v1alpha1.ValidKameletTemplate(kamelet) {
-		ok = false
-		target.Status.SetCondition(
-			v1alpha1.KameletConditionReady,
-			corev1.ConditionFalse,
-			v1alpha1.KameletConditionReasonInvalidTemplate,
-			`Kamelet can only specify one of "flow" or "template"`,
 		)
 	}
 
@@ -92,7 +84,9 @@ func recomputeProperties(kamelet *v1alpha1.Kamelet) error {
 		defValue := ""
 		if v.Default != nil {
 			var val interface{}
-			if err := json.Unmarshal(v.Default.RawMessage, &val); err != nil {
+			d := json.NewDecoder(bytes.NewReader(v.Default.RawMessage))
+			d.UseNumber()
+			if err := d.Decode(&val); err != nil {
 				return errors.Wrapf(err, "cannot decode default value for property %q", k)
 			}
 			defValue = fmt.Sprintf("%v", val)

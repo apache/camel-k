@@ -35,7 +35,7 @@ spec:
     required:
     - message
     title: Example Timer
-  flow:
+  template:
     from:
       parameters:
         period: "#property:period"

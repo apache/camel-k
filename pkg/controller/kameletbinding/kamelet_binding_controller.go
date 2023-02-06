@@ -19,7 +19,6 @@ package kameletbinding
 
 import (
 	"context"
-	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -31,25 +30,23 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/pkg/trait"
+
 	camelevent "github.com/apache/camel-k/pkg/event"
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/log"
 	"github.com/apache/camel-k/pkg/util/monitoring"
 )
 
 // Add creates a new KameletBinding Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
-func Add(mgr manager.Manager) error {
-	c, err := client.FromManager(mgr)
-	if err != nil {
-		return err
-	}
+func Add(mgr manager.Manager, c client.Client) error {
 	return add(mgr, newReconciler(mgr, c))
 }
 
@@ -69,7 +66,6 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 }
 
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	// Create a new controller
 	c, err := controller.New("kamelet-binding-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
@@ -78,10 +74,29 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to primary resource KameletBinding
 	err = c.Watch(&source.Kind{Type: &v1alpha1.KameletBinding{}},
 		&handler.EnqueueRequestForObject{},
-		predicate.Funcs{
+		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldKameletBinding := e.ObjectOld.(*v1alpha1.KameletBinding)
-				newKameletBinding := e.ObjectNew.(*v1alpha1.KameletBinding)
+				oldKameletBinding, ok := e.ObjectOld.(*v1alpha1.KameletBinding)
+				if !ok {
+					return false
+				}
+				newKameletBinding, ok := e.ObjectNew.(*v1alpha1.KameletBinding)
+				if !ok {
+					return false
+				}
+
+				// If traits have changed, the reconciliation loop must kick in as
+				// traits may have impact
+				sameTraits, err := trait.KameletBindingsHaveSameTraits(oldKameletBinding, newKameletBinding)
+				if err != nil {
+					Log.ForKameletBinding(newKameletBinding).Error(
+						err,
+						"unable to determine if old and new resource have the same traits")
+				}
+				if !sameTraits {
+					return true
+				}
+
 				// Ignore updates to the kameletBinding status in which case metadata.Generation
 				// does not change, or except when the kameletBinding phase changes as it's used
 				// to transition from one phase to another
@@ -112,7 +127,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 var _ reconcile.Reconciler = &ReconcileKameletBinding{}
 
-// ReconcileKameletBinding reconciles a KameletBinding object
+// ReconcileKameletBinding reconciles a KameletBinding object.
 type ReconcileKameletBinding struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the API server
@@ -154,12 +169,17 @@ func (r *ReconcileKameletBinding) Reconcile(ctx context.Context, request reconci
 		return reconcile.Result{}, err
 	}
 
+	// Only process resources assigned to the operator
+	if !platform.IsOperatorHandlerConsideringLock(ctx, r.client, request.Namespace, &instance) {
+		rlog.Info("Ignoring request because resource is not assigned to current operator")
+		return reconcile.Result{}, nil
+	}
+
 	actions := []Action{
 		NewInitializeAction(),
 		NewMonitorAction(),
 	}
 
-	var targetPhase v1alpha1.KameletBindingPhase
 	var err error
 
 	target := instance.DeepCopy()
@@ -172,28 +192,20 @@ func (r *ReconcileKameletBinding) Reconcile(ctx context.Context, request reconci
 		if a.CanHandle(target) {
 			targetLog.Infof("Invoking action %s", a.Name())
 
-			phaseFrom := target.Status.Phase
-
 			target, err = a.Handle(ctx, target)
 			if err != nil {
 				camelevent.NotifyKameletBindingError(ctx, r.client, r.recorder, &instance, target, err)
+				// Update the kameletbinding (mostly just to update its phase) if the new instance is returned
+				if target != nil {
+					_ = r.update(ctx, &instance, target, &targetLog)
+				}
 				return reconcile.Result{}, err
 			}
 
 			if target != nil {
-				if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(&instance)); err != nil {
+				if err := r.update(ctx, &instance, target, &targetLog); err != nil {
 					camelevent.NotifyKameletBindingError(ctx, r.client, r.recorder, &instance, target, err)
 					return reconcile.Result{}, err
-				}
-
-				targetPhase = target.Status.Phase
-
-				if targetPhase != phaseFrom {
-					targetLog.Info(
-						"state transition",
-						"phase-from", phaseFrom,
-						"phase-to", target.Status.Phase,
-					)
 				}
 			}
 
@@ -204,12 +216,24 @@ func (r *ReconcileKameletBinding) Reconcile(ctx context.Context, request reconci
 		}
 	}
 
-	if targetPhase == v1alpha1.KameletBindingPhaseReady {
-		return reconcile.Result{}, nil
+	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileKameletBinding) update(ctx context.Context, base *v1alpha1.KameletBinding, target *v1alpha1.KameletBinding, log *log.Logger) error {
+	target.Status.ObservedGeneration = base.Generation
+
+	if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base)); err != nil {
+		camelevent.NotifyKameletBindingError(ctx, r.client, r.recorder, base, target, err)
+		return err
 	}
 
-	// Requeue
-	return reconcile.Result{
-		RequeueAfter: 5 * time.Second,
-	}, nil
+	if target.Status.Phase != base.Status.Phase {
+		log.Info(
+			"state transition",
+			"phase-from", base.Status.Phase,
+			"phase-to", target.Status.Phase,
+		)
+	}
+
+	return nil
 }

@@ -19,8 +19,8 @@ package install
 
 import (
 	"context"
-	"io/ioutil"
 
+	"github.com/apache/camel-k/pkg/util"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -31,7 +31,7 @@ import (
 
 const registrySecretName = "camel-k-registry-secret"
 
-// RegistrySecretOrCollect generates a secret from auth settings and creates it on the cluster (or appends it to the collection)
+// RegistrySecretOrCollect generates a secret from auth settings and creates it on the cluster (or appends it to the collection).
 func RegistrySecretOrCollect(ctx context.Context, c client.Client, namespace string, auth registry.Auth, collection *kubernetes.Collection, force bool) (string, error) {
 	secretData, err := auth.GenerateDockerConfig()
 	if err != nil {
@@ -41,9 +41,9 @@ func RegistrySecretOrCollect(ctx context.Context, c client.Client, namespace str
 	return registrySecretFromDataOrCollect(ctx, c, namespace, secretData, collection, force)
 }
 
-// RegistrySecretFromFileOrCollect generates a secret from a docker-config.json file and creates it on the cluster (or appends it to the collection)
+// RegistrySecretFromFileOrCollect generates a secret from a docker-config.json file and creates it on the cluster (or appends it to the collection).
 func RegistrySecretFromFileOrCollect(ctx context.Context, c client.Client, namespace string, file string, collection *kubernetes.Collection, force bool) (string, error) {
-	secretData, err := ioutil.ReadFile(file)
+	secretData, err := util.ReadFile(file)
 	if err != nil {
 		return "", err
 	}
@@ -51,7 +51,7 @@ func RegistrySecretFromFileOrCollect(ctx context.Context, c client.Client, names
 	return registrySecretFromDataOrCollect(ctx, c, namespace, secretData, collection, force)
 }
 
-// registrySecretFromDataOrCollect generates a secret from a docker config file content file and creates it on the cluster (or appends it to the collection)
+// registrySecretFromDataOrCollect generates a secret from a docker config file content file and creates it on the cluster (or appends it to the collection).
 func registrySecretFromDataOrCollect(ctx context.Context, c client.Client, namespace string, secretData []byte, collection *kubernetes.Collection, force bool) (string, error) {
 	registrySecret := v1.Secret{
 		TypeMeta: metav1.TypeMeta{

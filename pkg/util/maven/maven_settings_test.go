@@ -30,6 +30,7 @@ const expectedSettings = `<?xml version="1.0" encoding="UTF-8"?>
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ` +
 	`xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
   <localRepository>/tmp/artifacts/m2</localRepository>
+  <servers></servers>
   <profiles>
     <profile>
       <id>my-profile</id>
@@ -54,6 +55,7 @@ const expectedSettings = `<?xml version="1.0" encoding="UTF-8"?>
       <pluginRepositories></pluginRepositories>
     </profile>
   </profiles>
+  <proxies></proxies>
   <mirrors></mirrors>
 </settings>`
 
@@ -61,9 +63,10 @@ const expectedDefaultSettings = `<?xml version="1.0" encoding="UTF-8"?>
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ` +
 	`xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
   <localRepository></localRepository>
+  <servers></servers>
   <profiles>
     <profile>
-      <id>maven-settings</id>
+      <id>camel-k</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
@@ -97,6 +100,7 @@ const expectedDefaultSettings = `<?xml version="1.0" encoding="UTF-8"?>
       </pluginRepositories>
     </profile>
   </profiles>
+  <proxies></proxies>
   <mirrors></mirrors>
 </settings>`
 
@@ -104,9 +108,10 @@ const expectedDefaultSettingsWithExtraRepo = `<?xml version="1.0" encoding="UTF-
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ` +
 	`xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
   <localRepository></localRepository>
+  <servers></servers>
   <profiles>
     <profile>
-      <id>maven-settings</id>
+      <id>camel-k</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
@@ -164,6 +169,7 @@ const expectedDefaultSettingsWithExtraRepo = `<?xml version="1.0" encoding="UTF-
       </pluginRepositories>
     </profile>
   </profiles>
+  <proxies></proxies>
   <mirrors>
     <mirror>
       <id>foo</id>
@@ -174,7 +180,9 @@ const expectedDefaultSettingsWithExtraRepo = `<?xml version="1.0" encoding="UTF-
 </settings>`
 
 func TestSettingsGeneration(t *testing.T) {
-	settings := NewSettings()
+	settings, err := NewSettings()
+	assert.Nil(t, err)
+
 	settings.LocalRepository = "/tmp/artifacts/m2"
 	settings.Profiles = []Profile{
 		{
@@ -209,7 +217,8 @@ func TestSettingsGeneration(t *testing.T) {
 }
 
 func TestDefaultSettingsGeneration(t *testing.T) {
-	settings := NewDefaultSettings([]v1.Repository{}, []Mirror{})
+	settings, err := NewSettings(DefaultRepositories)
+	assert.Nil(t, err)
 
 	content, err := util.EncodeXML(settings)
 
@@ -220,14 +229,13 @@ func TestDefaultSettingsGeneration(t *testing.T) {
 }
 
 func TestDefaultSettingsGenerationWithAdditionalRepo(t *testing.T) {
-	repositories := []v1.Repository{
-		NewRepository("https://repo1.maven.org/maven2@id=central"),
-		NewRepository("https://foo.bar.org/repo@id=foo"),
+	repositories := []string{
+		"https://repo1.maven.org/maven2@id=central",
+		"https://foo.bar.org/repo@id=foo",
+		"https://foo.bar.org/repo@id=foo@mirrorOf=*",
 	}
-	mirrors := []Mirror{
-		NewMirror("https://foo.bar.org/repo@id=foo@mirrorOf=*"),
-	}
-	settings := NewDefaultSettings(repositories, mirrors)
+	settings, err := NewSettings(Repositories(repositories...))
+	assert.Nil(t, err)
 
 	content, err := util.EncodeXML(settings)
 
@@ -235,19 +243,4 @@ func TestDefaultSettingsGenerationWithAdditionalRepo(t *testing.T) {
 	assert.NotNil(t, settings)
 
 	assert.Equal(t, expectedDefaultSettingsWithExtraRepo, string(content))
-}
-
-func TestCreateSettingsConfigMap(t *testing.T) {
-	settings := NewDefaultSettings([]v1.Repository{}, []Mirror{})
-
-	configMap, err := SettingsConfigMap("foo", "bar", settings)
-	assert.Nil(t, err)
-	assert.NotNil(t, configMap)
-
-	content, err := util.EncodeXML(settings)
-
-	assert.Nil(t, err)
-	assert.NotNil(t, settings)
-
-	assert.Equal(t, string(content), configMap.Data["settings.xml"])
 }

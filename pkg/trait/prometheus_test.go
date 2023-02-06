@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -45,7 +44,7 @@ func TestConfigurePrometheusTraitInRightPhaseDoesSucceed(t *testing.T) {
 
 func TestConfigurePrometheusTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 	trait, environment := createNominalPrometheusTest()
-	environment.Integration.Status.Phase = v1.IntegrationPhaseResolvingKit
+	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 
 	configured, err := trait.Configure(environment)
 
@@ -114,7 +113,7 @@ func TestPrometheusTraitGetPodMonitor(t *testing.T) {
 }
 
 func createNominalPrometheusTest() (*prometheusTrait, *Environment) {
-	trait := newPrometheusTrait().(*prometheusTrait)
+	trait, _ := newPrometheusTrait().(*prometheusTrait)
 	enabled := true
 	trait.Enabled = &enabled
 
@@ -124,7 +123,7 @@ func createNominalPrometheusTest() (*prometheusTrait, *Environment) {
 	}
 
 	environment := &Environment{
-		Catalog:      NewCatalog(context.TODO(), nil),
+		Catalog:      NewCatalog(nil),
 		CamelCatalog: camelCatalog,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{

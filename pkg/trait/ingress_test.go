@@ -18,18 +18,18 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/stretchr/testify/assert"
-
-	"k8s.io/api/extensions/v1beta1"
-	"k8s.io/apimachinery/pkg/runtime"
-
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestConfigureIngressTraitDoesSucceed(t *testing.T) {
@@ -43,7 +43,7 @@ func TestConfigureIngressTraitDoesSucceed(t *testing.T) {
 
 func TestConfigureDisabledIngressTraitDoesNotSucceed(t *testing.T) {
 	ingressTrait, environment := createNominalIngressTest()
-	ingressTrait.Enabled = BoolP(false)
+	ingressTrait.Enabled = pointer.Bool(false)
 
 	configured, err := ingressTrait.Configure(environment)
 
@@ -60,14 +60,14 @@ func TestConfigureIngressTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 
 	configured, err := ingressTrait.Configure(environment)
 
-	assert.False(t, configured)
+	assert.True(t, configured)
 	assert.Nil(t, err)
 	assert.Len(t, environment.Integration.Status.Conditions, 0)
 }
 
 func TestConfigureAutoIngressTraitWithoutUserServiceDoesNotSucceed(t *testing.T) {
 	ingressTrait, environment := createNominalIngressTest()
-	ingressTrait.Auto = BoolP(true)
+	ingressTrait.Auto = pointer.Bool(true)
 	environment.Resources = kubernetes.NewCollection()
 
 	configured, err := ingressTrait.Configure(environment)
@@ -76,21 +76,7 @@ func TestConfigureAutoIngressTraitWithoutUserServiceDoesNotSucceed(t *testing.T)
 	assert.Nil(t, err)
 	conditions := environment.Integration.Status.Conditions
 	assert.Len(t, conditions, 1)
-	assert.Equal(t, "no host or service defined", conditions[0].Message)
-}
-
-func TestConfigureAutoIngressTraitWithEmptyHostDoesNotSucceed(t *testing.T) {
-	ingressTrait, environment := createNominalIngressTest()
-	ingressTrait.Auto = nil
-	ingressTrait.Host = ""
-
-	configured, err := ingressTrait.Configure(environment)
-
-	assert.False(t, configured)
-	assert.Nil(t, err)
-	conditions := environment.Integration.Status.Conditions
-	assert.Len(t, conditions, 1)
-	assert.Equal(t, "no host or service defined", conditions[0].Message)
+	assert.Equal(t, "no service defined", conditions[0].Message)
 }
 
 func TestConfigureAutoIngressTraitWithUserServiceDoesSucceed(t *testing.T) {
@@ -102,20 +88,6 @@ func TestConfigureAutoIngressTraitWithUserServiceDoesSucceed(t *testing.T) {
 	assert.True(t, configured)
 	assert.Nil(t, err)
 	assert.Len(t, environment.Integration.Status.Conditions, 0)
-}
-
-func TestConfigureIngressTraitWithoutHostDoesNotSucceed(t *testing.T) {
-	ingressTrait, environment := createNominalIngressTest()
-	ingressTrait.Host = ""
-
-	configured, err := ingressTrait.Configure(environment)
-
-	assert.False(t, configured)
-	assert.NotNil(t, err)
-	assert.Equal(t, "cannot Apply ingress trait: no host defined", err.Error())
-	conditions := environment.Integration.Status.Conditions
-	assert.Len(t, conditions, 1)
-	assert.Equal(t, "no host defined", conditions[0].Message)
 }
 
 func TestApplyIngressTraitWithoutUserServiceDoesNotSucceed(t *testing.T) {
@@ -139,12 +111,16 @@ func TestApplyIngressTraitDoesSucceed(t *testing.T) {
 
 	assert.Len(t, environment.Resources.Items(), 2)
 	environment.Resources.Visit(func(resource runtime.Object) {
-		if ingress, ok := resource.(*v1beta1.Ingress); ok {
+		if ingress, ok := resource.(*networkingv1.Ingress); ok {
 			assert.Equal(t, "service-name", ingress.Name)
 			assert.Equal(t, "namespace", ingress.Namespace)
-			assert.Equal(t, "service-name", ingress.Spec.Backend.ServiceName)
 			assert.Len(t, ingress.Spec.Rules, 1)
 			assert.Equal(t, "hostname", ingress.Spec.Rules[0].Host)
+			assert.Len(t, ingress.Spec.Rules[0].HTTP.Paths, 1)
+			assert.Equal(t, "service-name", ingress.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Name)
+			assert.Equal(t, "/", ingress.Spec.Rules[0].HTTP.Paths[0].Path)
+			assert.NotNil(t, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+			assert.Equal(t, networkingv1.PathTypePrefix, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
 		}
 	})
 
@@ -154,13 +130,13 @@ func TestApplyIngressTraitDoesSucceed(t *testing.T) {
 }
 
 func createNominalIngressTest() (*ingressTrait, *Environment) {
-	trait := newIngressTrait().(*ingressTrait)
-	trait.Enabled = BoolP(true)
-	trait.Auto = BoolP(false)
+	trait, _ := newIngressTrait().(*ingressTrait)
+	trait.Enabled = pointer.Bool(true)
+	trait.Auto = pointer.Bool(false)
 	trait.Host = "hostname"
 
 	environment := &Environment{
-		Catalog: NewCatalog(context.TODO(), nil),
+		Catalog: NewCatalog(nil),
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "integration-name",

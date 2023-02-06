@@ -26,8 +26,9 @@ The following configuration options are available:
 | Can be used to enable or disable a trait. All traits share this common property.
 
 | gc.discovery-cache
-| ./pkg/trait.discoveryCacheType
-| Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`)
+| github.com/apache/camel-k/pkg/apis/camel/v1/trait.DiscoveryCacheType
+| Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
+Deprecated: to be removed from trait configuration.
 
 |===
 

@@ -18,40 +18,79 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
+
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/spf13/cobra"
 )
 
-// NewCmdLocal -- Add local kamel subcommand with several other subcommands of its own.
-func newCmdLocal(rootCmdOptions *RootCmdOptions) *cobra.Command {
+// Usage descritions of common flags that are shared across some of the subcommands.
+const (
+	usageImage                = `Full path to integration image including registry, e.g. "docker.io/user/app"`
+	usageIntegrationDirectory = "Directory to hold local integration files"
+	usagePropertyFile         = "Add a property file to the integration"
+	usageProperty             = "Add a Camel property to the integration"
+)
+
+// newCmdLocal -- Add local kamel subcommand with several other subcommands of its own.
+func newCmdLocal(rootCmdOptions *RootCmdOptions) (*cobra.Command, *LocalCmdOptions) {
+	options := LocalCmdOptions{
+		RootCmdOptions: rootCmdOptions,
+	}
+
 	cmd := cobra.Command{
-		Use:   "local [sub-command]",
-		Short: "Perform integration actions locally.",
-		Long:  `Perform integration actions locally given a set of input integration files.`,
+		Use:               "local [sub-command]",
+		Short:             "Perform integration actions locally.",
+		Long:              `Perform integration actions locally given a set of input integration files.`,
+		Deprecated:        "consider using Camel JBang instead (https://camel.apache.org/manual/camel-jbang.html)",
+		PersistentPreRunE: options.persistentPreRun,
 		Annotations: map[string]string{
 			offlineCommandLabel: "true",
 		},
 	}
 
-	return &cmd
+	cmd.PersistentFlags().StringArrayVarP(&options.Dependencies, "dependency", "d", nil, usageDependency)
+	cmd.PersistentFlags().StringArrayVar(&options.MavenRepositories, "maven-repository", nil,
+		"Use a maven repository")
+
+	// hidden flags for compatibility with kamel run
+	cmd.PersistentFlags().StringArrayVarP(&options.Traits, "trait", "t", nil, "")
+	if err := cmd.PersistentFlags().MarkHidden("trait"); err != nil {
+		fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
+	}
+
+	// completion support
+	configureKnownCompletions(&cmd)
+
+	cmd.AddCommand(cmdOnly(newCmdLocalBuild(&options)))
+	cmd.AddCommand(cmdOnly(newCmdLocalInspect(&options)))
+	cmd.AddCommand(cmdOnly(newCmdLocalRun(&options)))
+
+	return &cmd, &options
 }
 
-func addLocalSubCommands(cmd *cobra.Command, options *RootCmdOptions) error {
-	var localCmd *cobra.Command
-	for _, c := range cmd.Commands() {
-		if c.Name() == "local" {
-			localCmd = c
-			break
-		}
+type LocalCmdOptions struct {
+	*RootCmdOptions
+	Dependencies      []string `mapstructure:"dependencies"`
+	MavenRepositories []string `mapstructure:"maven-repositories"`
+	Traits            []string `mapstructure:"traits"`
+}
+
+func (o *LocalCmdOptions) persistentPreRun(cmd *cobra.Command, args []string) error {
+	// pre-process dependencies
+	for i, dependency := range o.Dependencies {
+		o.Dependencies[i] = camel.NormalizeDependency(dependency)
 	}
 
-	if localCmd == nil {
-		return errors.New("could not find any configured local command")
-	}
-
-	localCmd.AddCommand(cmdOnly(newCmdLocalBuild(options)))
-	localCmd.AddCommand(cmdOnly(newCmdLocalInspect(options)))
-	localCmd.AddCommand(cmdOnly(newCmdLocalRun(options)))
+	// validate traits
+	warnTraitUsages(cmd, o.Traits)
 
 	return nil
+}
+
+func warnTraitUsages(cmd *cobra.Command, traits []string) {
+	if len(traits) > 0 {
+		fmt.Fprintf(cmd.ErrOrStderr(),
+			"Warning: traits are specified but don't take effect for local run: %v\n", traits)
+	}
 }

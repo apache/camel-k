@@ -18,8 +18,10 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +29,10 @@ import (
 
 const cmdVersion = "version"
 
+// nolint: unparam
 func initializeVersionCmdOptions(t *testing.T) (*versionCmdOptions, *cobra.Command, RootCmdOptions) {
+	t.Helper()
+
 	options, rootCmd := kamelTestPreAddCommandInit()
 	versionCmdOptions := addTestVersionCmd(*options, rootCmd)
 	kamelTestPostAddCommandInit(t, rootCmd)
@@ -36,14 +41,8 @@ func initializeVersionCmdOptions(t *testing.T) (*versionCmdOptions, *cobra.Comma
 }
 
 func addTestVersionCmd(options RootCmdOptions, rootCmd *cobra.Command) *versionCmdOptions {
-	//add a testing version of version Command
+	// add a testing version of version Command
 	versionCmd, versionOptions := newCmdVersion(&options)
-	versionCmd.RunE = func(c *cobra.Command, args []string) error {
-		return nil
-	}
-	versionCmd.PostRunE = func(c *cobra.Command, args []string) error {
-		return nil
-	}
 	versionCmd.Args = test.ArbitraryArgs
 	rootCmd.AddCommand(versionCmd)
 	return versionOptions
@@ -55,6 +54,13 @@ func TestVersionNonExistingFlag(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestVersionClient(t *testing.T) {
+	_, rootCmd, _ := initializeVersionCmdOptions(t)
+	output, err := test.ExecuteCommand(rootCmd, cmdVersion)
+	assert.Nil(t, err)
+	assert.Equal(t, fmt.Sprintf("Camel K Client %s\n", defaults.Version), output)
+}
+
 func TestVersionOperatorFlag(t *testing.T) {
 	versionCmdOptions, rootCmd, _ := initializeVersionCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdVersion, "--operator")
@@ -62,12 +68,21 @@ func TestVersionOperatorFlag(t *testing.T) {
 	assert.Equal(t, true, versionCmdOptions.Operator)
 }
 
+func TestVersionClientVerbose(t *testing.T) {
+	versionCmdOptions, rootCmd, _ := initializeVersionCmdOptions(t)
+	output, err := test.ExecuteCommand(rootCmd, cmdVersion, "-v")
+	assert.Nil(t, err)
+	assert.Equal(t, true, versionCmdOptions.Verbose)
+	assert.Equal(t, fmt.Sprintf("Camel K Client %s\nGit Commit: %s\n", defaults.Version, defaults.GitCommit), output)
+}
+
 func TestCompatibleVersions(t *testing.T) {
-	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.0"))
-	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.1"))
-	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.0-SNAPSHOT"))
-	assert.Equal(t, false, compatibleVersions("1.3.0", "1.2.0"))
-	assert.Equal(t, false, compatibleVersions("1.3.0", "2.3.0"))
-	assert.Equal(t, false, compatibleVersions("1.3.0", "dsadsa"))
-	assert.Equal(t, false, compatibleVersions("dsadsa", "1.3.4"))
+	_, rootCmd, _ := initializeVersionCmdOptions(t)
+	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.0", rootCmd))
+	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.1", rootCmd))
+	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.0-SNAPSHOT", rootCmd))
+	assert.Equal(t, false, compatibleVersions("1.3.0", "1.2.0", rootCmd))
+	assert.Equal(t, false, compatibleVersions("1.3.0", "2.3.0", rootCmd))
+	assert.Equal(t, false, compatibleVersions("1.3.0", "dsadsa", rootCmd))
+	assert.Equal(t, false, compatibleVersions("dsadsa", "1.3.4", rootCmd))
 }

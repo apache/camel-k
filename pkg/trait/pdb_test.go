@@ -24,8 +24,9 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/api/policy/v1beta1"
+	policyv1 "k8s.io/api/policy/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -48,10 +49,11 @@ func TestConfigurePdbTraitDoesNotSucceed(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.False(t, configured)
 }
+
 func TestPdbIsCreatedWithoutParametersEnabled(t *testing.T) {
 	pdbTrait, environment, _ := createPdbTest()
 
-	pdb := pdbCreatedCheck(pdbTrait, environment, t)
+	pdb := pdbCreatedCheck(t, pdbTrait, environment)
 	assert.Equal(t, int32(1), pdb.Spec.MaxUnavailable.IntVal)
 }
 
@@ -59,7 +61,7 @@ func TestPdbIsCreatedWithMaxUnavailable(t *testing.T) {
 	pdbTrait, environment, _ := createPdbTest()
 	pdbTrait.MaxUnavailable = "1"
 
-	pdb := pdbCreatedCheck(pdbTrait, environment, t)
+	pdb := pdbCreatedCheck(t, pdbTrait, environment)
 	assert.Equal(t, int32(1), pdb.Spec.MaxUnavailable.IntVal)
 }
 
@@ -67,11 +69,13 @@ func TestPdbIsCreatedWithMinAvailable(t *testing.T) {
 	pdbTrait, environment, _ := createPdbTest()
 	pdbTrait.MinAvailable = "2"
 
-	pdb := pdbCreatedCheck(pdbTrait, environment, t)
+	pdb := pdbCreatedCheck(t, pdbTrait, environment)
 	assert.Equal(t, int32(2), pdb.Spec.MinAvailable.IntVal)
 }
 
-func pdbCreatedCheck(pdbTrait *pdbTrait, environment *Environment, t *testing.T) *v1beta1.PodDisruptionBudget {
+func pdbCreatedCheck(t *testing.T, pdbTrait *pdbTrait, environment *Environment) *policyv1.PodDisruptionBudget {
+	t.Helper()
+
 	err := pdbTrait.Apply(environment)
 	assert.Nil(t, err)
 	pdb := findPdb(environment.Resources)
@@ -83,18 +87,19 @@ func pdbCreatedCheck(pdbTrait *pdbTrait, environment *Environment, t *testing.T)
 	return pdb
 }
 
-func findPdb(resources *kubernetes.Collection) *v1beta1.PodDisruptionBudget {
+func findPdb(resources *kubernetes.Collection) *policyv1.PodDisruptionBudget {
 	for _, a := range resources.Items() {
-		if _, ok := a.(*v1beta1.PodDisruptionBudget); ok {
-			return a.(*v1beta1.PodDisruptionBudget)
+		if pdb, ok := a.(*policyv1.PodDisruptionBudget); ok {
+			return pdb
 		}
 	}
 	return nil
 }
 
+// nolint: unparam
 func createPdbTest() (*pdbTrait, *Environment, *appsv1.Deployment) {
-	trait := newPdbTrait().(*pdbTrait)
-	trait.Enabled = BoolP(true)
+	trait, _ := newPdbTrait().(*pdbTrait)
+	trait.Enabled = pointer.Bool(true)
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{

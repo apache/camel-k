@@ -18,7 +18,7 @@
 config:
   namespace:
     temporary: true
-pre:
-- name: installation
-  run: |
-    kamel install -n $YAKS_NAMESPACE
+post:
+  - name: print dump
+    if: env:CI=true && failure()
+    run: yaks dump --includes app=camel-k

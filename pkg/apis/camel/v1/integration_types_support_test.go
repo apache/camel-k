@@ -62,7 +62,10 @@ func TestLanguageAlreadySet(t *testing.T) {
 
 func TestAddDependency(t *testing.T) {
 	integration := IntegrationSpec{}
-	integration.AddDependency("camel-file")
+	integration.AddDependency("camel:file")
+	assert.Equal(t, integration.Dependencies, []string{"camel:file"})
+	// adding the same dependency twice won't duplicate it in the list
+	integration.AddDependency("camel:file")
 	assert.Equal(t, integration.Dependencies, []string{"camel:file"})
 
 	integration = IntegrationSpec{}

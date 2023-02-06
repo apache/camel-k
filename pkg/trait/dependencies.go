@@ -20,18 +20,19 @@ package trait
 import (
 	"github.com/scylladb/go-set/strset"
 
+	"k8s.io/utils/pointer"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-// The Dependencies trait is internally used to automatically add runtime dependencies based on the
-// integration that the user wants to run.
-//
-// +camel-k:trait=dependencies
 type dependenciesTrait struct {
-	BaseTrait `property:",squash"`
+	BaseTrait
+	traitv1.DependenciesTrait `property:",squash"`
 }
 
 func newDependenciesTrait() Trait {
@@ -41,7 +42,7 @@ func newDependenciesTrait() Trait {
 }
 
 func (t *dependenciesTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 
@@ -56,6 +57,9 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 	dependencies := strset.New()
 
 	if e.Integration.Spec.Dependencies != nil {
+		if err := camel.ValidateDependenciesE(e.CamelCatalog, e.Integration.Spec.Dependencies); err != nil {
+			return err
+		}
 		dependencies.Add(e.Integration.Spec.Dependencies...)
 	}
 
@@ -64,15 +68,22 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 		dependencies.Add(d.GetDependencyID())
 	}
 
-	sources, err := kubernetes.ResolveIntegrationSources(e.C, e.Client, e.Integration, e.Resources)
+	sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
 	if err != nil {
 		return err
 	}
 	for _, s := range sources {
 		// Add source-related dependencies
-		dependencies.Merge(AddSourceDependencies(s, e.CamelCatalog))
+		srcDeps, err := ExtractSourceDependencies(s, e.CamelCatalog)
+		if err != nil {
+			return err
+		}
+		dependencies.Merge(srcDeps)
 
-		meta := metadata.Extract(e.CamelCatalog, s)
+		meta, err := metadata.Extract(e.CamelCatalog, s)
+		if err != nil {
+			return err
+		}
 		meta.RequiredCapabilities.Each(func(item string) bool {
 			util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, item)
 			return true
@@ -88,7 +99,7 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 	return nil
 }
 
-// IsPlatformTrait overrides base class method
+// IsPlatformTrait overrides base class method.
 func (t *dependenciesTrait) IsPlatformTrait() bool {
 	return true
 }

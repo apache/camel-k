@@ -26,21 +26,27 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// EnvVarExists --
+// EnvVarExists --.
 func EnvVarExists(t *testing.T, env []corev1.EnvVar, name string) {
+	t.Helper()
+
 	ev := envvar.Get(env, name)
 	assert.NotNil(t, ev)
 }
 
-// EnvVarHasValue --
+// EnvVarHasValue --.
 func EnvVarHasValue(t *testing.T, env []corev1.EnvVar, name string, val string) {
+	t.Helper()
+
 	ev := envvar.Get(env, name)
 	assert.NotNil(t, ev)
 	assert.Equal(t, val, ev.Value)
 }
 
-// HasVolume --
+// HasVolume --.
 func HasVolume(t *testing.T, volumes []corev1.Volume, name string) {
+	t.Helper()
+
 	assert.Condition(t, func() bool {
 		for _, v := range volumes {
 			if v.Name == name {

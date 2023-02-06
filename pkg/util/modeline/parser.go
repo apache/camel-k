@@ -24,21 +24,21 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/mattn/go-shellwords"
 )
 
 var (
 	commonModelineRegexp = regexp.MustCompile(`^\s*//\s*camel-k\s*:\s*([^\s]+.*)$`)
 	yamlModelineRegexp   = regexp.MustCompile(`^\s*#+\s*camel-k\s*:\s*([^\s]+.*)$`)
 	xmlModelineRegexp    = regexp.MustCompile(`^.*<!--\s*camel-k\s*:\s*([^\s]+[^>]*)-->.*$`)
-
-	delimiter = regexp.MustCompile(`\s+`)
 )
 
-func Parse(name, content string) (res []Option, err error) {
+func Parse(name, content string) ([]Option, error) {
 	lang := inferLanguage(name)
 	if lang == "" {
 		return nil, fmt.Errorf("unsupported file type %s", name)
 	}
+	var res []Option
 	scanner := bufio.NewScanner(strings.NewReader(content))
 	for scanner.Scan() {
 		res = append(res, getModelineOptions(scanner.Text(), lang)...)
@@ -46,14 +46,15 @@ func Parse(name, content string) (res []Option, err error) {
 	return res, scanner.Err()
 }
 
-func getModelineOptions(line string, lang v1.Language) (res []Option) {
+func getModelineOptions(line string, lang v1.Language) []Option {
 	reg := modelineRegexp(lang)
 	if !reg.MatchString(line) {
 		return nil
 	}
+	var res []Option
 	strs := reg.FindStringSubmatch(line)
 	if len(strs) == 2 {
-		tokens := delimiter.Split(strs[1], -1)
+		tokens, _ := shellwords.Parse(strs[1])
 		for _, token := range tokens {
 			if len(strings.Trim(token, "\t\n\f\r ")) == 0 {
 				continue

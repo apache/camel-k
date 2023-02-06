@@ -22,23 +22,34 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"k8s.io/utils/pointer"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/util/camel"
 )
 
-func TestConfigureQuarkusTraitShouldSucceed(t *testing.T) {
+func TestConfigureQuarkusTraitBuildSubmitted(t *testing.T) {
 	quarkusTrait, environment := createNominalQuarkusTest()
+	environment.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseBuildSubmitted
 
 	configured, err := quarkusTrait.Configure(environment)
 
 	assert.True(t, configured)
 	assert.Nil(t, err)
+
+	err = quarkusTrait.Apply(environment)
+	assert.Nil(t, err)
+
+	build := getBuilderTask(environment.BuildTasks)
+	assert.NotNil(t, t, build)
+
+	assert.Len(t, build.Steps, len(builder.Quarkus.CommonSteps)+3)
 }
 
 func TestConfigureDisabledQuarkusTraitShouldFail(t *testing.T) {
 	quarkusTrait, environment := createNominalQuarkusTest()
-	quarkusTrait.Enabled = BoolP(false)
+	quarkusTrait.Enabled = pointer.Bool(false)
 
 	configured, err := quarkusTrait.Configure(environment)
 
@@ -46,28 +57,41 @@ func TestConfigureDisabledQuarkusTraitShouldFail(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestApplyQuarkusTraitDoesNothing(t *testing.T) {
+func TestApplyQuarkusTraitDefaultKitLayout(t *testing.T) {
 	quarkusTrait, environment := createNominalQuarkusTest()
+	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 
-	err := quarkusTrait.Apply(environment)
-
+	configured, err := quarkusTrait.Configure(environment)
+	assert.True(t, configured)
 	assert.Nil(t, err)
+
+	err = quarkusTrait.Apply(environment)
+	assert.Nil(t, err)
+	assert.Len(t, environment.IntegrationKits, 1)
+	assert.Equal(t, environment.IntegrationKits[0].Labels[v1.IntegrationKitLayoutLabel], v1.IntegrationKitLayoutFastJar)
 }
 
-func TestQuarkusTraitAddBuildStepsShouldSucceed(t *testing.T) {
-	quarkusTrait, _ := createNominalQuarkusTest()
+func TestApplyQuarkusTraitAnnotationKitConfiguration(t *testing.T) {
+	quarkusTrait, environment := createNominalQuarkusTest()
+	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 
-	steps := make([]builder.Step, 0)
-	steps = append(steps, builder.DefaultSteps...)
+	v1.SetAnnotation(&environment.Integration.ObjectMeta, v1.TraitAnnotationPrefix+"quarkus.foo", "camel-k")
 
-	quarkusTrait.addBuildSteps(&steps)
+	configured, err := quarkusTrait.Configure(environment)
+	assert.True(t, configured)
+	assert.Nil(t, err)
 
-	assert.Len(t, steps, len(builder.DefaultSteps)+len(builder.QuarkusSteps))
+	err = quarkusTrait.Apply(environment)
+	assert.Nil(t, err)
+	assert.Len(t, environment.IntegrationKits, 1)
+	assert.Equal(t, v1.IntegrationKitLayoutFastJar, environment.IntegrationKits[0].Labels[v1.IntegrationKitLayoutLabel])
+	assert.Equal(t, "camel-k", environment.IntegrationKits[0].Annotations[v1.TraitAnnotationPrefix+"quarkus.foo"])
+
 }
 
 func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
-	trait := newQuarkusTrait().(*quarkusTrait)
-	trait.Enabled = BoolP(true)
+	trait, _ := newQuarkusTrait().(*quarkusTrait)
+	trait.Enabled = pointer.Bool(true)
 
 	environment := &Environment{
 		CamelCatalog: &camel.RuntimeCatalog{},
@@ -78,6 +102,12 @@ func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
 						Language: v1.LanguageJavaSource,
 					},
 				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{},
+		BuildTasks: []v1.Task{
+			{
+				Builder: &v1.BuilderTask{},
 			},
 		},
 		Platform: &v1.IntegrationPlatform{},

@@ -17,6 +17,9 @@
 
 name: build
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 on:
   pull_request:
     branches:
@@ -42,9 +45,11 @@ on:
       - 'KEYS'
       - 'LICENSE'
       - 'NOTICE'
+  workflow_dispatch:
+    inputs:
 
 concurrency:
-  group: ${{ github.ref }}-${{ github.workflow }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -54,24 +59,13 @@ jobs:
         # TODO: test an all the supported OS
         # [ubuntu-20.04, macos-latest, windows-latest]
         os: [ubuntu-20.04]
+
     runs-on: ${{ matrix.os }}
     steps:
-    - name: Set up JDK 11
-      uses: AdoptOpenJDK/install-jdk@v1
-      with:
-        version: "11"
-    - name: Install Go
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.15.x
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Cache modules
-      uses: actions/cache@v1
       with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-    - name: Test
-      run: make
+        persist-credentials: false
+        submodules: recursive
+    - name: Execute Build Tests
+      uses: ./.github/actions/e2e-build

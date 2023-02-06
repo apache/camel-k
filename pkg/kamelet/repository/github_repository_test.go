@@ -19,17 +19,23 @@ package repository
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGithubRepository(t *testing.T) {
+	if os.Getenv("GITHUB_TOKEN") == "" {
+		t.Skip("WARNING: This test requires GITHUB_TOKEN env var")
+	}
+
 	ctx := context.Background()
-	repo := newGithubKameletRepository("apache", "camel-kamelets", "", "")
+	repo := newGithubKameletRepository("apache", "camel-kamelets", "kamelets", "")
 	list, err := repo.List(ctx)
 	assert.NoError(t, err)
-	assert.True(t, len(list) > 0)
+	require.True(t, len(list) > 0)
 	// Repeat multiple times to be sure cache is working and we don't hit rate limits
 	maxDistinct := 5
 	for i := 0; i < 200; i++ {

@@ -1,0 +1,5815 @@
+[#_camel_apache_org_v1]
+== camel.apache.org/v1
+
+Package v1 contains API Schema definitions for the camel v1 API group
+
+==  Resource Types
+
+[#_camel_apache_org_v1_Build]
+=== Build
+
+Build is the Schema for the builds API
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`apiVersion` +
+string
+|`camel.apache.org/v1`
+
+|`kind` +
+string
+|`Build`
+|`metadata` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+|
+
+
+
+
+Refer to the Kubernetes API documentation for the fields of the `metadata` field.
+|`spec` +
+*xref:#_camel_apache_org_v1_BuildSpec[BuildSpec]*
+|
+
+
+
+
+|`status` +
+*xref:#_camel_apache_org_v1_BuildStatus[BuildStatus]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_CamelCatalog]
+=== CamelCatalog
+
+CamelCatalog represents the languages, components, data formats and capabilities enabled on a given runtime provider. The catalog may be statically generated.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`apiVersion` +
+string
+|`camel.apache.org/v1`
+
+|`kind` +
+string
+|`CamelCatalog`
+|`metadata` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+|
+
+
+
+
+Refer to the Kubernetes API documentation for the fields of the `metadata` field.
+|`status` +
+*xref:#_camel_apache_org_v1_CamelCatalogStatus[CamelCatalogStatus]*
+|
+
+
+the actual state of the catalog
+
+|`spec` +
+*xref:#_camel_apache_org_v1_CamelCatalogSpec[CamelCatalogSpec]*
+|
+
+
+the desired state of the catalog
+
+
+|===
+
+[#_camel_apache_org_v1_Integration]
+=== Integration
+
+Integration is the Schema for the integrations API
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`apiVersion` +
+string
+|`camel.apache.org/v1`
+
+|`kind` +
+string
+|`Integration`
+|`metadata` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+|
+
+
+
+
+Refer to the Kubernetes API documentation for the fields of the `metadata` field.
+|`spec` +
+*xref:#_camel_apache_org_v1_IntegrationSpec[IntegrationSpec]*
+|
+
+
+the desired Integration specification
+
+|`status` +
+*xref:#_camel_apache_org_v1_IntegrationStatus[IntegrationStatus]*
+|
+
+
+the status of the Integration
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationKit]
+=== IntegrationKit
+
+IntegrationKit defines a container image and additional configuration needed to run an `Integration`.
+An `IntegrationKit` is a generic image generally built from the requirements of an `Integration`, but agnostic to it,
+in order to be reused by any other `Integration` which has the same required set of capabilities. An `IntegrationKit`
+may be used for other kits as a base container layer, when the `incremental` build option is enabled.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`apiVersion` +
+string
+|`camel.apache.org/v1`
+
+|`kind` +
+string
+|`IntegrationKit`
+|`metadata` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+|
+
+
+
+
+Refer to the Kubernetes API documentation for the fields of the `metadata` field.
+|`spec` +
+*xref:#_camel_apache_org_v1_IntegrationKitSpec[IntegrationKitSpec]*
+|
+
+
+the desired configuration
+
+|`status` +
+*xref:#_camel_apache_org_v1_IntegrationKitStatus[IntegrationKitStatus]*
+|
+
+
+the actual status
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationPlatform]
+=== IntegrationPlatform
+
+IntegrationPlatform is the resource used to drive the Camel K operator behavior.
+It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
+When the Camel K operator is installed in `global` mode,
+you will need to specify an `IntegrationPlatform` in each namespace where you want the Camel K operator to be executed
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`apiVersion` +
+string
+|`camel.apache.org/v1`
+
+|`kind` +
+string
+|`IntegrationPlatform`
+|`metadata` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+|
+
+
+
+
+Refer to the Kubernetes API documentation for the fields of the `metadata` field.
+|`spec` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformSpec[IntegrationPlatformSpec]*
+|
+
+
+
+
+|`status` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformStatus[IntegrationPlatformStatus]*
+|
+
+
+
+
+
+|===
+
+== Internal Types
+
+[#_camel_apache_org_v1_AddonTrait]
+=== AddonTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitTraits, IntegrationKitTraits>>
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+AddonTrait represents the configuration of an addon trait
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`RawMessage` +
+*xref:#_camel_apache_org_v1_RawMessage[RawMessage]*
+|(Members of `RawMessage` are embedded into this type.)
+
+
+Generic raw message, typically a map containing the keys (trait parameters) and the values (either single text or array)
+
+
+|===
+
+[#_camel_apache_org_v1_Artifact]
+=== Artifact
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildStatus, BuildStatus>>
+* <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
+
+Artifact represents a materialized artifact (a jar dependency or in general a file used by the build)
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`id` +
+string
+|
+
+
+the identification (GAV for maven dependencies or file name for other file types)
+
+|`location` +
+string
+|
+
+
+where it is located in the builder `Pod`
+
+|`target` +
+string
+|
+
+
+the expected location in the runtime
+
+|`checksum` +
+string
+|
+
+
+a checksum (SHA1) of the content
+
+
+|===
+
+[#_camel_apache_org_v1_BaseTask]
+=== BaseTask
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildahTask, BuildahTask>>
+* <<#_camel_apache_org_v1_BuilderTask, BuilderTask>>
+* <<#_camel_apache_org_v1_KanikoTask, KanikoTask>>
+* <<#_camel_apache_org_v1_S2iTask, S2iTask>>
+* <<#_camel_apache_org_v1_SpectrumTask, SpectrumTask>>
+
+BaseTask is a base for the struct hierarchy
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`name` +
+string
+|
+
+
+name of the task
+
+
+|===
+
+[#_camel_apache_org_v1_BuildCondition]
+=== BuildCondition
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildStatus, BuildStatus>>
+
+BuildCondition describes the state of a resource at a certain point.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+*xref:#_camel_apache_org_v1_BuildConditionType[BuildConditionType]*
+|
+
+
+Type of integration condition.
+
+|`status` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+|
+
+
+Status of the condition, one of True, False, Unknown.
+
+|`lastUpdateTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+The last time this condition was updated.
+
+|`lastTransitionTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+Last time the condition transitioned from one status to another.
+
+|`reason` +
+string
+|
+
+
+The reason for the condition's last transition.
+
+|`message` +
+string
+|
+
+
+A human-readable message indicating details about the transition.
+
+
+|===
+
+[#_camel_apache_org_v1_BuildConditionType]
+=== BuildConditionType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildCondition, BuildCondition>>
+
+BuildConditionType --
+
+
+[#_camel_apache_org_v1_BuildPhase]
+=== BuildPhase(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildStatus, BuildStatus>>
+
+BuildPhase --
+
+
+[#_camel_apache_org_v1_BuildSpec]
+=== BuildSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Build, Build>>
+
+BuildSpec defines the Build operation to be executed
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`tasks` +
+*xref:#_camel_apache_org_v1_Task[[\]Task]*
+|
+
+
+The sequence of Build tasks to be performed as part of the Build execution.
+
+|`strategy` +
+*xref:#_camel_apache_org_v1_BuildStrategy[BuildStrategy]*
+|
+
+
+The strategy that should be used to perform the Build.
+
+|`timeout` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta[Kubernetes meta/v1.Duration]*
+|
+
+
+Timeout defines the Build maximum execution duration.
+The Build deadline is set to the Build start time plus the Timeout duration.
+If the Build deadline is exceeded, the Build context is canceled,
+and its phase set to BuildPhaseFailed.
+
+
+|===
+
+[#_camel_apache_org_v1_BuildStatus]
+=== BuildStatus
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Build, Build>>
+
+BuildStatus defines the observed state of Build
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`observedGeneration` +
+int64
+|
+
+
+ObservedGeneration is the most recent generation observed for this Build.
+
+|`phase` +
+*xref:#_camel_apache_org_v1_BuildPhase[BuildPhase]*
+|
+
+
+describes the phase
+
+|`image` +
+string
+|
+
+
+the image name built
+
+|`digest` +
+string
+|
+
+
+the digest from image
+
+|`baseImage` +
+string
+|
+
+
+the base image used for this build
+
+|`artifacts` +
+*xref:#_camel_apache_org_v1_Artifact[[\]Artifact]*
+|
+
+
+a list of artifacts contained in the build
+
+|`error` +
+string
+|
+
+
+the error description (if any)
+
+|`failure` +
+*xref:#_camel_apache_org_v1_Failure[Failure]*
+|
+
+
+the reason of the failure (if any)
+
+|`startedAt` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+the time when it started
+
+|`conditions` +
+*xref:#_camel_apache_org_v1_BuildCondition[[\]BuildCondition]*
+|
+
+
+a list of conditions occurred during the build
+
+|`duration` +
+string
+|
+
+
+how long it took for the build
+Change to Duration / ISO 8601 when CRD uses OpenAPI spec v3
+https://github.com/OAI/OpenAPI-Specification/issues/845
+
+
+|===
+
+[#_camel_apache_org_v1_BuildStrategy]
+=== BuildStrategy(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildSpec, BuildSpec>>
+* <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
+
+BuildStrategy specifies how the Build should be executed.
+It will trigger a Maven process that will take care of producing the expected Camel/Camel-Quarkus runtime.
+
+
+[#_camel_apache_org_v1_BuildahTask]
+=== BuildahTask
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Task, Task>>
+
+BuildahTask is used to configure Buildah
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`BaseTask` +
+*xref:#_camel_apache_org_v1_BaseTask[BaseTask]*
+|(Members of `BaseTask` are embedded into this type.)
+
+
+
+
+|`PublishTask` +
+*xref:#_camel_apache_org_v1_PublishTask[PublishTask]*
+|(Members of `PublishTask` are embedded into this type.)
+
+
+
+
+|`platform` +
+string
+|
+
+
+The platform of build image
+
+|`verbose` +
+bool
+|
+
+
+log more information
+
+|`executorImage` +
+string
+|
+
+
+docker image to use
+
+
+|===
+
+[#_camel_apache_org_v1_BuilderTask]
+=== BuilderTask
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Task, Task>>
+
+BuilderTask is the generic task in charge of building the application image
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`BaseTask` +
+*xref:#_camel_apache_org_v1_BaseTask[BaseTask]*
+|(Members of `BaseTask` are embedded into this type.)
+
+
+
+
+|`baseImage` +
+string
+|
+
+
+the base image layer
+
+|`runtime` +
+*xref:#_camel_apache_org_v1_RuntimeSpec[RuntimeSpec]*
+|
+
+
+the configuration required for the runtime application
+
+|`dependencies` +
+[]string
+|
+
+
+the list of dependencies to use for this build
+
+|`steps` +
+[]string
+|
+
+
+the list of steps to execute (see pkg/builder/)
+
+|`maven` +
+*xref:#_camel_apache_org_v1_MavenBuildSpec[MavenBuildSpec]*
+|
+
+
+the configuration required by Maven for the application build phase
+
+|`buildDir` +
+string
+|
+
+
+workspace directory to use
+
+
+|===
+
+[#_camel_apache_org_v1_CamelArtifact]
+=== CamelArtifact
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelCatalogSpec, CamelCatalogSpec>>
+
+CamelArtifact represent the configuration for a feature offered by Camel
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`CamelArtifactDependency` +
+*xref:#_camel_apache_org_v1_CamelArtifactDependency[CamelArtifactDependency]*
+|(Members of `CamelArtifactDependency` are embedded into this type.)
+
+
+Base Camel Artifact dependency
+
+|`schemes` +
+*xref:#_camel_apache_org_v1_CamelScheme[[\]CamelScheme]*
+|
+
+
+accepted URI schemes
+
+|`languages` +
+[]string
+|
+
+
+accepted languages
+
+|`dataformats` +
+[]string
+|
+
+
+accepted data formats
+
+|`dependencies` +
+*xref:#_camel_apache_org_v1_CamelArtifactDependency[[\]CamelArtifactDependency]*
+|
+
+
+required dependencies
+
+|`javaTypes` +
+[]string
+|
+
+
+the Java types used by the artifact feature (ie, component, data format, ...)
+
+
+|===
+
+[#_camel_apache_org_v1_CamelArtifactDependency]
+=== CamelArtifactDependency
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelArtifact, CamelArtifact>>
+* <<#_camel_apache_org_v1_CamelSchemeScope, CamelSchemeScope>>
+
+CamelArtifactDependency represent a maven's dependency
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`MavenArtifact` +
+*xref:#_camel_apache_org_v1_MavenArtifact[MavenArtifact]*
+|(Members of `MavenArtifact` are embedded into this type.)
+
+
+the maven dependency
+
+|`exclusions` +
+*xref:#_camel_apache_org_v1_CamelArtifactExclusion[[\]CamelArtifactExclusion]*
+|
+
+
+provide a list of artifacts to exclude for this dependency
+
+
+|===
+
+[#_camel_apache_org_v1_CamelArtifactExclusion]
+=== CamelArtifactExclusion
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelArtifactDependency, CamelArtifactDependency>>
+
+CamelArtifactExclusion represents an exclusion clause
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`groupId` +
+string
+|
+
+
+Maven Group
+
+|`artifactId` +
+string
+|
+
+
+Maven Artifact
+
+
+|===
+
+[#_camel_apache_org_v1_CamelCatalogSpec]
+=== CamelCatalogSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelCatalog, CamelCatalog>>
+
+CamelCatalogSpec specify what features a Camel runtime provides
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`runtime` +
+*xref:#_camel_apache_org_v1_RuntimeSpec[RuntimeSpec]*
+|
+
+
+the runtime targeted for the catalog
+
+|`artifacts` +
+*xref:#_camel_apache_org_v1_CamelArtifact[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.CamelArtifact]*
+|
+
+
+artifacts required by this catalog
+
+|`loaders` +
+*xref:#_camel_apache_org_v1_CamelLoader[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.CamelLoader]*
+|
+
+
+loaders required by this catalog
+
+
+|===
+
+[#_camel_apache_org_v1_CamelCatalogStatus]
+=== CamelCatalogStatus
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelCatalog, CamelCatalog>>
+
+CamelCatalogStatus defines the observed state of CamelCatalog. As the catalog is a static resource, we expect it to be empty.
+
+
+[#_camel_apache_org_v1_CamelLoader]
+=== CamelLoader
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelCatalogSpec, CamelCatalogSpec>>
+
+CamelLoader represents the configuration required to load a DSL
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`MavenArtifact` +
+*xref:#_camel_apache_org_v1_MavenArtifact[MavenArtifact]*
+|(Members of `MavenArtifact` are embedded into this type.)
+
+
+the base Maven artifact required
+
+|`languages` +
+[]string
+|
+
+
+a list of DSLs supported
+
+|`dependencies` +
+*xref:#_camel_apache_org_v1_MavenArtifact[[\]MavenArtifact]*
+|
+
+
+a list of additional dependencies required beside the base one
+
+
+|===
+
+[#_camel_apache_org_v1_CamelScheme]
+=== CamelScheme
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelArtifact, CamelArtifact>>
+
+CamelScheme represents the scheme used to identify a component in a URI (ie, timer in a timer:xyz endpoint URI)
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`id` +
+string
+|
+
+
+the ID (ie, timer in a timer:xyz URI)
+
+|`passive` +
+bool
+|
+
+
+is a passive scheme
+
+|`http` +
+bool
+|
+
+
+is a HTTP based scheme
+
+|`consumer` +
+*xref:#_camel_apache_org_v1_CamelSchemeScope[CamelSchemeScope]*
+|
+
+
+required scope for consumer
+
+|`producer` +
+*xref:#_camel_apache_org_v1_CamelSchemeScope[CamelSchemeScope]*
+|
+
+
+required scope for producers
+
+
+|===
+
+[#_camel_apache_org_v1_CamelSchemeScope]
+=== CamelSchemeScope
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelScheme, CamelScheme>>
+
+CamelSchemeScope contains scoped information about a scheme
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`dependencies` +
+*xref:#_camel_apache_org_v1_CamelArtifactDependency[[\]CamelArtifactDependency]*
+|
+
+
+list of dependencies needed for this scope
+
+
+|===
+
+[#_camel_apache_org_v1_Capability]
+=== Capability
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_RuntimeSpec, RuntimeSpec>>
+
+Capability is a particular feature which requires a well known set of dependencies
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`dependencies` +
+*xref:#_camel_apache_org_v1_MavenArtifact[[\]MavenArtifact]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_Configurable]
+=== Configurable
+
+Configurable --
+
+
+[#_camel_apache_org_v1_ConfigurationSpec]
+=== ConfigurationSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitSpec, IntegrationKitSpec>>
+* <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
+* <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+
+ConfigurationSpec represents a generic configuration specification
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+string
+|
+
+
+represents the type of configuration, ie: property, configmap, secret, ...
+
+|`value` +
+string
+|
+
+
+the value to assign to the configuration (syntax may vary depending on the `Type`)
+
+
+|===
+
+[#_camel_apache_org_v1_DataSpec]
+=== DataSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_ResourceSpec, ResourceSpec>>
+* <<#_camel_apache_org_v1_SourceSpec, SourceSpec>>
+
+DataSpec represents the way the source is materialized in the running `Pod`
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`name` +
+string
+|
+
+
+the name of the specification
+
+|`path` +
+string
+|
+
+
+the path where the file is stored
+
+|`content` +
+string
+|
+
+
+the source code (plain text)
+
+|`rawContent` +
+[]byte
+|
+
+
+the source code (binary)
+
+|`contentRef` +
+string
+|
+
+
+the confimap reference holding the source content
+
+|`contentKey` +
+string
+|
+
+
+the confimap key holding the source content
+
+|`contentType` +
+string
+|
+
+
+the content type (tipically text or binary)
+
+|`compression` +
+bool
+|
+
+
+if the content is compressed (base64 encrypted)
+
+
+|===
+
+[#_camel_apache_org_v1_Failure]
+=== Failure
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildStatus, BuildStatus>>
+* <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
+
+Failure represent a message specifying the reason and the time of an event failure
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`reason` +
+string
+|
+
+
+a short text specifying the reason
+
+|`time` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+the time when the failure has happened
+
+|`recovery` +
+*xref:#_camel_apache_org_v1_FailureRecovery[FailureRecovery]*
+|
+
+
+the recovery attempted for this failure
+
+
+|===
+
+[#_camel_apache_org_v1_FailureRecovery]
+=== FailureRecovery
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Failure, Failure>>
+
+FailureRecovery defines the attempts to recover a failure
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`attempt` +
+int
+|
+
+
+attempt number
+
+|`attemptMax` +
+int
+|
+
+
+maximum number of attempts
+
+|`attemptTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+*(Optional)*
+
+time of the attempt execution
+
+
+|===
+
+[#_camel_apache_org_v1_Flow]
+=== Flow
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+
+Flow is an unstructured object representing a Camel Flow in YAML/JSON DSL
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`RawMessage` +
+*xref:#_camel_apache_org_v1_RawMessage[RawMessage]*
+|(Members of `RawMessage` are embedded into this type.)
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_HealthCheck]
+=== HealthCheck
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`status` +
+*xref:#_camel_apache_org_v1_HealthCheckStatus[HealthCheckStatus]*
+|
+
+
+
+
+|`checks` +
+*xref:#_camel_apache_org_v1_HealthCheckResponse[[\]HealthCheckResponse]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_HealthCheckResponse]
+=== HealthCheckResponse
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_HealthCheck, HealthCheck>>
+* <<#_camel_apache_org_v1_PodCondition, PodCondition>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`name` +
+string
+|
+
+
+
+
+|`status` +
+*xref:#_camel_apache_org_v1_HealthCheckStatus[HealthCheckStatus]*
+|
+
+
+
+
+|`data` +
+*xref:#_camel_apache_org_v1_RawMessage[RawMessage]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_HealthCheckStatus]
+=== HealthCheckStatus(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_HealthCheck, HealthCheck>>
+* <<#_camel_apache_org_v1_HealthCheckResponse, HealthCheckResponse>>
+
+
+
+
+[#_camel_apache_org_v1_IntegrationCondition]
+=== IntegrationCondition
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+
+IntegrationCondition describes the state of a resource at a certain point.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+*xref:#_camel_apache_org_v1_IntegrationConditionType[IntegrationConditionType]*
+|
+
+
+Type of integration condition.
+
+|`status` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+|
+
+
+Status of the condition, one of True, False, Unknown.
+
+|`lastUpdateTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+The last time this condition was updated.
+
+|`lastTransitionTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+Last time the condition transitioned from one status to another.
+
+|`firstTruthyTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+First time the condition status transitioned to True.
+
+|`reason` +
+string
+|
+
+
+The reason for the condition's last transition.
+
+|`message` +
+string
+|
+
+
+A human-readable message indicating details about the transition.
+
+|`pods` +
+*xref:#_camel_apache_org_v1_PodCondition[[\]PodCondition]*
+|
+
+
+Pods collect health and conditions information from the owned PODs
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationConditionType]
+=== IntegrationConditionType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationCondition, IntegrationCondition>>
+
+IntegrationConditionType --
+
+
+[#_camel_apache_org_v1_IntegrationKitCondition]
+=== IntegrationKitCondition
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
+
+IntegrationKitCondition describes the state of a resource at a certain point.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+*xref:#_camel_apache_org_v1_IntegrationKitConditionType[IntegrationKitConditionType]*
+|
+
+
+Type of integration condition.
+
+|`status` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+|
+
+
+Status of the condition, one of True, False, Unknown.
+
+|`lastUpdateTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+The last time this condition was updated.
+
+|`lastTransitionTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+Last time the condition transitioned from one status to another.
+
+|`reason` +
+string
+|
+
+
+The reason for the condition's last transition.
+
+|`message` +
+string
+|
+
+
+A human-readable message indicating details about the transition.
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationKitConditionType]
+=== IntegrationKitConditionType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitCondition, IntegrationKitCondition>>
+
+IntegrationKitConditionType --
+
+
+[#_camel_apache_org_v1_IntegrationKitPhase]
+=== IntegrationKitPhase(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
+
+IntegrationKitPhase --
+
+
+[#_camel_apache_org_v1_IntegrationKitSpec]
+=== IntegrationKitSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKit, IntegrationKit>>
+
+IntegrationKitSpec defines a container image and additional configurations required to kick off an `Integration` with certain features
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`image` +
+string
+|
+
+
+the container image as identified in the container registry
+
+|`dependencies` +
+[]string
+|
+
+
+a list of Camel dependecies used by this kit
+
+|`profile` +
+*xref:#_camel_apache_org_v1_TraitProfile[TraitProfile]*
+|
+
+
+the profile which is expected by this kit
+
+|`traits` +
+*xref:#_camel_apache_org_v1_IntegrationKitTraits[IntegrationKitTraits]*
+|
+
+
+traits that the kit will execute
+
+|`configuration` +
+*xref:#_camel_apache_org_v1_ConfigurationSpec[[\]ConfigurationSpec]*
+|
+
+
+Deprecated:
+Use camel trait (camel.properties) to manage properties
+Use mount trait (mount.configs) to manage configs
+Use mount trait (mount.resources) to manage resources
+Use mount trait (mount.volumes) to manage volumes
+configuration used by the kit
+
+|`repositories` +
+[]string
+|
+
+
+Maven repositories that can be used by the kit
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationKitStatus]
+=== IntegrationKitStatus
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKit, IntegrationKit>>
+
+IntegrationKitStatus defines the observed state of IntegrationKit
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`observedGeneration` +
+int64
+|
+
+
+ObservedGeneration is the most recent generation observed for this IntegrationKit.
+
+|`phase` +
+*xref:#_camel_apache_org_v1_IntegrationKitPhase[IntegrationKitPhase]*
+|
+
+
+phase of the kit
+
+|`baseImage` +
+string
+|
+
+
+base image used by the kit
+
+|`image` +
+string
+|
+
+
+actual image name of the kit
+
+|`digest` +
+string
+|
+
+
+actual image digest of the kit
+
+|`artifacts` +
+*xref:#_camel_apache_org_v1_Artifact[[\]Artifact]*
+|
+
+
+list of artifacts used by the kit
+
+|`failure` +
+*xref:#_camel_apache_org_v1_Failure[Failure]*
+|
+
+
+failure reason (if any)
+
+|`runtimeVersion` +
+string
+|
+
+
+the runtime version for which this kit was configured
+
+|`runtimeProvider` +
+*xref:#_camel_apache_org_v1_RuntimeProvider[RuntimeProvider]*
+|
+
+
+the runtime provider for which this kit was configured
+
+|`platform` +
+string
+|
+
+
+the platform for which this kit was configured
+
+|`version` +
+string
+|
+
+
+the Camel K operator version for which this kit was configured
+
+|`conditions` +
+*xref:#_camel_apache_org_v1_IntegrationKitCondition[[\]IntegrationKitCondition]*
+|
+
+
+a list of conditions which happened for the events related the kit
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationKitTraits]
+=== IntegrationKitTraits
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitSpec, IntegrationKitSpec>>
+
+IntegrationKitTraits defines traits assigned to an `IntegrationKit`
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`builder` +
+*xref:#_camel_apache_org_v1_trait_BuilderTrait[BuilderTrait]*
+|
+
+
+The builder trait is internally used to determine the best strategy to build and configure IntegrationKits.
+
+|`camel` +
+*xref:#_camel_apache_org_v1_trait_CamelTrait[CamelTrait]*
+|
+
+
+The Camel trait sets up Camel configuration.
+
+|`quarkus` +
+*xref:#_camel_apache_org_v1_trait_QuarkusTrait[QuarkusTrait]*
+|
+
+
+The Quarkus trait configures the Quarkus runtime.
+It's enabled by default.
+NOTE: Compiling to a native executable, i.e. when using `package-type=native`, is only supported for kamelets, as well as YAML and XML integrations. It also requires at least 4GiB of memory, so the Pod running the native build, that is either the operator Pod, or the build Pod (depending on the build strategy configured for the platform), must have enough memory available.
+
+|`registry` +
+*xref:#_camel_apache_org_v1_trait_RegistryTrait[RegistryTrait]*
+|
+
+
+The Registry trait sets up Maven to use the Image registry as a Maven repository.
+
+|`addons` +
+*xref:#_camel_apache_org_v1_AddonTrait[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.AddonTrait]*
+|
+
+
+The collection of addon trait configurations
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationPhase]
+=== IntegrationPhase(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+
+IntegrationPhase --
+
+
+[#_camel_apache_org_v1_IntegrationPlatformBuildPublishStrategy]
+=== IntegrationPlatformBuildPublishStrategy(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
+
+IntegrationPlatformBuildPublishStrategy defines the strategy used to package and publish an Integration base image
+
+
+[#_camel_apache_org_v1_IntegrationPlatformBuildSpec]
+=== IntegrationPlatformBuildSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
+
+IntegrationPlatformBuildSpec contains platform related build information.
+This configuration can be used to tune the behavior of the Integration/IntegrationKit image builds.
+You can define the build strategy, the image registry to use and the Maven configuration to adopt.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`buildStrategy` +
+*xref:#_camel_apache_org_v1_BuildStrategy[BuildStrategy]*
+|
+
+
+the strategy to adopt for building an Integration base image
+
+|`publishStrategy` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformBuildPublishStrategy[IntegrationPlatformBuildPublishStrategy]*
+|
+
+
+the strategy to adopt for publishing an Integration base image
+
+|`runtimeVersion` +
+string
+|
+
+
+the Camel K Runtime dependency version
+
+|`runtimeProvider` +
+*xref:#_camel_apache_org_v1_RuntimeProvider[RuntimeProvider]*
+|
+
+
+the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
+
+|`baseImage` +
+string
+|
+
+
+a base image that can be used as base layer for all images.
+It can be useful if you want to provide some custom base image with further utility softwares
+
+|`registry` +
+*xref:#_camel_apache_org_v1_RegistrySpec[RegistrySpec]*
+|
+
+
+the image registry used to push/pull Integration images
+
+|`timeout` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta[Kubernetes meta/v1.Duration]*
+|
+
+
+how much time to wait before time out the build process
+
+|`maven` +
+*xref:#_camel_apache_org_v1_MavenSpec[MavenSpec]*
+|
+
+
+Maven configuration used to build the Camel/Camel-Quarkus applications
+
+|`PublishStrategyOptions` +
+map[string]string
+|
+
+
+Generic options that can used by each publish strategy
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationPlatformCluster]
+=== IntegrationPlatformCluster(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
+
+IntegrationPlatformCluster is the kind of orchestration cluster the platform is installed into
+
+
+[#_camel_apache_org_v1_IntegrationPlatformCondition]
+=== IntegrationPlatformCondition
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformStatus, IntegrationPlatformStatus>>
+
+IntegrationPlatformCondition describes the state of a resource at a certain point.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformConditionType[IntegrationPlatformConditionType]*
+|
+
+
+Type of integration condition.
+
+|`status` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+|
+
+
+Status of the condition, one of True, False, Unknown.
+
+|`lastUpdateTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+The last time this condition was updated.
+
+|`lastTransitionTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+Last time the condition transitioned from one status to another.
+
+|`reason` +
+string
+|
+
+
+The reason for the condition's last transition.
+
+|`message` +
+string
+|
+
+
+A human-readable message indicating details about the transition.
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationPlatformConditionType]
+=== IntegrationPlatformConditionType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformCondition, IntegrationPlatformCondition>>
+
+IntegrationPlatformConditionType defines the type of condition
+
+
+[#_camel_apache_org_v1_IntegrationPlatformKameletRepositorySpec]
+=== IntegrationPlatformKameletRepositorySpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformKameletSpec, IntegrationPlatformKameletSpec>>
+
+IntegrationPlatformKameletRepositorySpec defines the location of the Kamelet catalog to use
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`uri` +
+string
+|
+
+
+the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationPlatformKameletSpec]
+=== IntegrationPlatformKameletSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
+
+IntegrationPlatformKameletSpec define the behavior for all the Kamelets controller by the IntegrationPlatform
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`repositories` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformKameletRepositorySpec[[\]IntegrationPlatformKameletRepositorySpec]*
+|
+
+
+remote repository used to retrieve Kamelet catalog
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationPlatformPhase]
+=== IntegrationPlatformPhase(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformStatus, IntegrationPlatformStatus>>
+
+IntegrationPlatformPhase is the phase of an IntegrationPlatform
+
+
+[#_camel_apache_org_v1_IntegrationPlatformSpec]
+=== IntegrationPlatformSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatform, IntegrationPlatform>>
+* <<#_camel_apache_org_v1_IntegrationPlatformStatus, IntegrationPlatformStatus>>
+
+IntegrationPlatformSpec defines the desired state of IntegrationPlatform
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`cluster` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformCluster[IntegrationPlatformCluster]*
+|
+
+
+what kind of cluster you're running (ie, plain Kubernetes or OpenShift)
+
+|`profile` +
+*xref:#_camel_apache_org_v1_TraitProfile[TraitProfile]*
+|
+
+
+the profile you wish to use. It will apply certain traits which are required by the specific profile chosen.
+It usually relates the Cluster with the optional definition of special profiles (ie, Knative)
+
+|`build` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformBuildSpec[IntegrationPlatformBuildSpec]*
+|
+
+
+specify how to build the Integration/IntegrationKits
+
+|`traits` +
+*xref:#_camel_apache_org_v1_Traits[Traits]*
+|
+
+
+list of traits to be executed for all the Integration/IntegrationKits built from this IntegrationPlatform
+
+|`configuration` +
+*xref:#_camel_apache_org_v1_ConfigurationSpec[[\]ConfigurationSpec]*
+|
+
+
+Deprecated:
+Use camel trait (camel.properties) to manage properties
+Use mount trait (mount.configs) to manage configs
+Use mount trait (mount.resources) to manage resources
+Use mount trait (mount.volumes) to manage volumes
+list of configuration properties to be attached to all the Integration/IntegrationKits built from this IntegrationPlatform
+
+|`kamelet` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformKameletSpec[IntegrationPlatformKameletSpec]*
+|
+
+
+configuration to be executed to all Kamelets controlled by this IntegrationPlatform
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationPlatformStatus]
+=== IntegrationPlatformStatus
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatform, IntegrationPlatform>>
+
+IntegrationPlatformStatus defines the observed state of IntegrationPlatform
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`IntegrationPlatformSpec` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformSpec[IntegrationPlatformSpec]*
+|(Members of `IntegrationPlatformSpec` are embedded into this type.)
+
+
+
+
+|`observedGeneration` +
+int64
+|
+
+
+ObservedGeneration is the most recent generation observed for this IntegrationPlatform.
+
+|`phase` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformPhase[IntegrationPlatformPhase]*
+|
+
+
+defines in what phase the IntegrationPlatform is found
+
+|`conditions` +
+*xref:#_camel_apache_org_v1_IntegrationPlatformCondition[[\]IntegrationPlatformCondition]*
+|
+
+
+which are the conditions met (particularly useful when in ERROR phase)
+
+|`version` +
+string
+|
+
+
+the Camel K operator version controlling this IntegrationPlatform
+
+|`info` +
+map[string]string
+|
+
+
+generic information related to the build of Camel K operator software
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationSpec]
+=== IntegrationSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Integration, Integration>>
+
+IntegrationSpec specifies the configuration of an Integration.
+The Integration will be watched by the operator which will be in charge to run the related application, according to the configuration specified.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`replicas` +
+int32
+|
+
+
+the number of `Pods` needed for the running Integration
+
+|`sources` +
+*xref:#_camel_apache_org_v1_SourceSpec[[\]SourceSpec]*
+|
+
+
+the sources which contain the Camel routes to run
+
+|`flows` +
+*xref:#_camel_apache_org_v1_Flow[[\]Flow]*
+|
+
+
+a source in YAML DSL language which contain the routes to run
+
+|`integrationKit` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core[Kubernetes core/v1.ObjectReference]*
+|
+
+
+the reference of the `IntegrationKit` which is used for this Integration
+
+|`dependencies` +
+[]string
+|
+
+
+the list of Camel or Maven dependencies required by the Integration
+
+|`profile` +
+*xref:#_camel_apache_org_v1_TraitProfile[TraitProfile]*
+|
+
+
+the profile needed to run this Integration
+
+|`traits` +
+*xref:#_camel_apache_org_v1_Traits[Traits]*
+|
+
+
+the traits needed to run this Integration
+
+|`template` +
+*xref:#_camel_apache_org_v1_PodSpecTemplate[PodSpecTemplate]*
+|
+
+
+Pod template customization
+
+|`configuration` +
+*xref:#_camel_apache_org_v1_ConfigurationSpec[[\]ConfigurationSpec]*
+|
+
+
+Deprecated:
+Use camel trait (camel.properties) to manage properties
+Use mount trait (mount.configs) to manage configs
+Use mount trait (mount.resources) to manage resources
+Use mount trait (mount.volumes) to manage volumes
+
+|`repositories` +
+[]string
+|
+
+
+additional Maven repositories to be used
+
+|`serviceAccountName` +
+string
+|
+
+
+custom SA to use for the Integration
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationStatus]
+=== IntegrationStatus
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Integration, Integration>>
+
+IntegrationStatus defines the observed state of Integration
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`observedGeneration` +
+int64
+|
+
+
+ObservedGeneration is the most recent generation observed for this Integration.
+
+|`phase` +
+*xref:#_camel_apache_org_v1_IntegrationPhase[IntegrationPhase]*
+|
+
+
+the actual phase
+
+|`digest` +
+string
+|
+
+
+the digest calculated for this Integration
+
+|`image` +
+string
+|
+
+
+the container image used
+
+|`dependencies` +
+[]string
+|
+
+
+a list of dependencies needed by the application
+
+|`profile` +
+*xref:#_camel_apache_org_v1_TraitProfile[TraitProfile]*
+|
+
+
+the profile needed to run this Integration
+
+|`integrationKit` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectreference-v1-core[Kubernetes core/v1.ObjectReference]*
+|
+
+
+the reference of the `IntegrationKit` which is used for this Integration
+
+|`platform` +
+string
+|
+
+
+The IntegrationPlatform watching this Integration
+
+|`generatedSources` +
+*xref:#_camel_apache_org_v1_SourceSpec[[\]SourceSpec]*
+|
+
+
+a list of sources generated for this Integration
+
+|`runtimeVersion` +
+string
+|
+
+
+the runtime version targeted for this Integration
+
+|`runtimeProvider` +
+*xref:#_camel_apache_org_v1_RuntimeProvider[RuntimeProvider]*
+|
+
+
+the runtime provider targeted for this Integration
+
+|`configuration` +
+*xref:#_camel_apache_org_v1_ConfigurationSpec[[\]ConfigurationSpec]*
+|
+
+
+Deprecated:
+a list of configuration specification
+
+|`conditions` +
+*xref:#_camel_apache_org_v1_IntegrationCondition[[\]IntegrationCondition]*
+|
+
+
+a list of events happened for the Integration
+
+|`version` +
+string
+|
+
+
+the operator version
+
+|`replicas` +
+int32
+|
+
+
+the number of replicas
+
+|`selector` +
+string
+|
+
+
+label selector
+
+|`capabilities` +
+[]string
+|
+
+
+features offered by the Integration
+
+|`lastInitTimestamp` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+the timestamp representing the last time when this integration was initialized.
+
+
+|===
+
+[#_camel_apache_org_v1_KanikoTask]
+=== KanikoTask
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Task, Task>>
+
+KanikoTask is used to configure Kaniko
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`BaseTask` +
+*xref:#_camel_apache_org_v1_BaseTask[BaseTask]*
+|(Members of `BaseTask` are embedded into this type.)
+
+
+
+
+|`PublishTask` +
+*xref:#_camel_apache_org_v1_PublishTask[PublishTask]*
+|(Members of `PublishTask` are embedded into this type.)
+
+
+
+
+|`verbose` +
+bool
+|
+
+
+log more information
+
+|`cache` +
+*xref:#_camel_apache_org_v1_KanikoTaskCache[KanikoTaskCache]*
+|
+
+
+use a cache
+
+|`executorImage` +
+string
+|
+
+
+docker image to use
+
+
+|===
+
+[#_camel_apache_org_v1_KanikoTaskCache]
+=== KanikoTaskCache
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_KanikoTask, KanikoTask>>
+
+KanikoTaskCache is used to configure Kaniko cache
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`enabled` +
+bool
+|
+
+
+true if a cache is enabled
+
+|`persistentVolumeClaim` +
+string
+|
+
+
+the PVC used to store the cache
+
+
+|===
+
+[#_camel_apache_org_v1_Language]
+=== Language(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_SourceSpec, SourceSpec>>
+
+Language represents a supported language (Camel DSL)
+
+
+[#_camel_apache_org_v1_MavenArtifact]
+=== MavenArtifact
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelArtifactDependency, CamelArtifactDependency>>
+* <<#_camel_apache_org_v1_CamelLoader, CamelLoader>>
+* <<#_camel_apache_org_v1_Capability, Capability>>
+* <<#_camel_apache_org_v1_MavenSpec, MavenSpec>>
+* <<#_camel_apache_org_v1_RuntimeSpec, RuntimeSpec>>
+
+MavenArtifact defines a GAV (Group:Artifact:Version) Maven artifact
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`groupId` +
+string
+|
+
+
+Maven Group
+
+|`artifactId` +
+string
+|
+
+
+Maven Artifact
+
+|`version` +
+string
+|
+
+
+Maven Version
+
+
+|===
+
+[#_camel_apache_org_v1_MavenBuildSpec]
+=== MavenBuildSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuilderTask, BuilderTask>>
+
+MavenBuildSpec defines the Maven configuration plus additional repositories to use
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`MavenSpec` +
+*xref:#_camel_apache_org_v1_MavenSpec[MavenSpec]*
+|(Members of `MavenSpec` are embedded into this type.)
+
+
+base Maven specification
+
+|`repositories` +
+*xref:#_camel_apache_org_v1_Repository[[\]Repository]*
+|
+
+
+additional repositories
+
+|`servers` +
+*xref:#_camel_apache_org_v1_Server[[\]Server]*
+|
+
+
+Servers (auth)
+
+
+|===
+
+[#_camel_apache_org_v1_MavenSpec]
+=== MavenSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
+* <<#_camel_apache_org_v1_MavenBuildSpec, MavenBuildSpec>>
+
+MavenSpec --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`localRepository` +
+string
+|
+
+
+The path of the local Maven repository.
+
+|`properties` +
+map[string]string
+|
+
+
+The Maven properties.
+
+|`settings` +
+*xref:#_camel_apache_org_v1_ValueSource[ValueSource]*
+|
+
+
+A reference to the ConfigMap or Secret key that contains
+the Maven settings.
+
+|`settingsSecurity` +
+*xref:#_camel_apache_org_v1_ValueSource[ValueSource]*
+|
+
+
+A reference to the ConfigMap or Secret key that contains
+the security of the Maven settings.
+
+|`caSecrets` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#secretkeyselector-v1-core[[\]Kubernetes core/v1.SecretKeySelector]*
+|
+
+
+The Secrets name and key, containing the CA certificate(s) used to connect
+to remote Maven repositories.
+It can contain X.509 certificates, and PKCS#7 formatted certificate chains.
+A JKS formatted keystore is automatically created to store the CA certificate(s),
+and configured to be used as a trusted certificate(s) by the Maven commands.
+Note that the root CA certificates are also imported into the created keystore.
+
+|`extension` +
+*xref:#_camel_apache_org_v1_MavenArtifact[[\]MavenArtifact]*
+|
+
+
+The Maven build extensions.
+See https://maven.apache.org/guides/mini/guide-using-extensions.html.
+
+|`cliOptions` +
+[]string
+|
+
+
+The CLI options that are appended to the list of arguments for Maven commands,
+e.g., `-V,--no-transfer-progress,-Dstyle.color=never`.
+See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.
+
+
+|===
+
+[#_camel_apache_org_v1_PluginProperties]
+=== PluginProperties(`map[string]github.com/apache/camel-k/pkg/apis/camel/v1.StringOrProperties` alias)
+
+
+
+
+[#_camel_apache_org_v1_PodCondition]
+=== PodCondition
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationCondition, IntegrationCondition>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`name` +
+string
+|
+
+
+
+
+|`condition` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podcondition-v1-core[Kubernetes core/v1.PodCondition]*
+|
+
+
+
+
+|`health` +
+*xref:#_camel_apache_org_v1_HealthCheckResponse[[\]HealthCheckResponse]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_PodSpec]
+=== PodSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_PodSpecTemplate, PodSpecTemplate>>
+
+PodSpec defines a group of Kubernetes resources
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`volumes` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core[[\]Kubernetes core/v1.Volume]*
+|
+
+
+Volumes
+
+|`initContainers` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core[[\]Kubernetes core/v1.Container]*
+|
+
+
+InitContainers
+
+|`containers` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core[[\]Kubernetes core/v1.Container]*
+|
+
+
+Containers
+
+|`ephemeralContainers` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#ephemeralcontainer-v1-core[[\]Kubernetes core/v1.EphemeralContainer]*
+|
+
+
+EphemeralContainers
+
+|`restartPolicy` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#restartpolicy-v1-core[Kubernetes core/v1.RestartPolicy]*
+|
+
+
+RestartPolicy
+
+|`terminationGracePeriodSeconds` +
+int64
+|
+
+
+TerminationGracePeriodSeconds
+
+|`activeDeadlineSeconds` +
+int64
+|
+
+
+ActiveDeadlineSeconds
+
+|`dnsPolicy` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#dnspolicy-v1-core[Kubernetes core/v1.DNSPolicy]*
+|
+
+
+DNSPolicy
+
+|`nodeSelector` +
+map[string]string
+|
+
+
+NodeSelector
+
+|`topologySpreadConstraints` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#topologyspreadconstraint-v1-core[[\]Kubernetes core/v1.TopologySpreadConstraint]*
+|
+
+
+TopologySpreadConstraints
+
+|`securityContext` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core[Kubernetes core/v1.PodSecurityContext]*
+|
+
+
+PodSecurityContext
+
+
+|===
+
+[#_camel_apache_org_v1_PodSpecTemplate]
+=== PodSpecTemplate
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+
+PodSpecTemplate represent a template used to deploy an Integration `Pod`
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`spec` +
+*xref:#_camel_apache_org_v1_PodSpec[PodSpec]*
+|
+
+
+the specification
+
+
+|===
+
+[#_camel_apache_org_v1_Properties]
+=== Properties(`map[string]string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Server, Server>>
+* <<#_camel_apache_org_v1_StringOrProperties, StringOrProperties>>
+
+
+
+
+[#_camel_apache_org_v1_PublishTask]
+=== PublishTask
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildahTask, BuildahTask>>
+* <<#_camel_apache_org_v1_KanikoTask, KanikoTask>>
+* <<#_camel_apache_org_v1_SpectrumTask, SpectrumTask>>
+
+PublishTask image publish configuration
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`contextDir` +
+string
+|
+
+
+can be useful to share info with other tasks
+
+|`baseImage` +
+string
+|
+
+
+base image layer
+
+|`image` +
+string
+|
+
+
+final image name
+
+|`registry` +
+*xref:#_camel_apache_org_v1_RegistrySpec[RegistrySpec]*
+|
+
+
+where to publish the final image
+
+
+|===
+
+[#_camel_apache_org_v1_RawMessage]
+=== RawMessage(`[]byte` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_AddonTrait, AddonTrait>>
+* <<#_camel_apache_org_v1_Flow, Flow>>
+* <<#_camel_apache_org_v1_HealthCheckResponse, HealthCheckResponse>>
+* <<#_camel_apache_org_v1_TraitConfiguration, TraitConfiguration>>
+
+RawMessage is a raw encoded JSON value.
+It implements Marshaler and Unmarshaler and can
+be used to delay JSON decoding or precompute a JSON encoding.
+
+
+[#_camel_apache_org_v1_RegistrySpec]
+=== RegistrySpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
+* <<#_camel_apache_org_v1_PublishTask, PublishTask>>
+
+RegistrySpec provides the configuration for the container registry
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`insecure` +
+bool
+|
+
+
+if the container registry is insecure (ie, http only)
+
+|`address` +
+string
+|
+
+
+the URI to access
+
+|`secret` +
+string
+|
+
+
+the secret where credentials are stored
+
+|`ca` +
+string
+|
+
+
+the configmap which stores the Certificate Authority
+
+|`organization` +
+string
+|
+
+
+the registry organization
+
+
+|===
+
+[#_camel_apache_org_v1_Repository]
+=== Repository
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_MavenBuildSpec, MavenBuildSpec>>
+
+Repository defines a Maven repository
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`id` +
+string
+|
+
+
+identifies the repository
+
+|`name` +
+string
+|
+
+
+name of the repository
+
+|`url` +
+string
+|
+
+
+location of the repository
+
+|`snapshots` +
+*xref:#_camel_apache_org_v1_RepositoryPolicy[RepositoryPolicy]*
+|
+
+
+can use snapshot
+
+|`releases` +
+*xref:#_camel_apache_org_v1_RepositoryPolicy[RepositoryPolicy]*
+|
+
+
+can use stable releases
+
+
+|===
+
+[#_camel_apache_org_v1_RepositoryPolicy]
+=== RepositoryPolicy
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Repository, Repository>>
+
+RepositoryPolicy defines the policy associated to a Maven repository
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`enabled` +
+bool
+|
+
+
+is the policy activated or not
+
+|`updatePolicy` +
+string
+|
+
+
+This element specifies how often updates should attempt to occur.
+Maven will compare the local POM's timestamp (stored in a repository's maven-metadata file) to the remote.
+The choices are: `always`, `daily` (default), `interval:X` (where X is an integer in minutes) or `never`
+
+|`checksumPolicy` +
+string
+|
+
+
+When Maven deploys files to the repository, it also deploys corresponding checksum files.
+Your options are to `ignore`, `fail`, or `warn` on missing or incorrect checksums.
+
+
+|===
+
+[#_camel_apache_org_v1_ResourceCondition]
+=== ResourceCondition
+
+ResourceCondition is a common type for all conditions
+
+
+[#_camel_apache_org_v1_ResourceSpec]
+=== ResourceSpec
+
+ResourceSpec represent an attached resource which will be materialized as a file on the running `Pod`
+TODO: we should deprecate in future releases in favour of mount, openapi or camel traits
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`DataSpec` +
+*xref:#_camel_apache_org_v1_DataSpec[DataSpec]*
+|(Members of `DataSpec` are embedded into this type.)
+
+
+the content of the resource
+
+|`type` +
+*xref:#_camel_apache_org_v1_ResourceType[ResourceType]*
+|
+
+
+the kind of data to expect
+
+|`mountPath` +
+string
+|
+
+
+the mount path on destination `Pod`
+
+
+|===
+
+[#_camel_apache_org_v1_ResourceType]
+=== ResourceType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_ResourceSpec, ResourceSpec>>
+
+ResourceType defines a kind of resource
+
+
+[#_camel_apache_org_v1_RuntimeProvider]
+=== RuntimeProvider(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
+* <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+* <<#_camel_apache_org_v1_RuntimeSpec, RuntimeSpec>>
+
+RuntimeProvider is the provider chosen for the runtime
+
+
+[#_camel_apache_org_v1_RuntimeSpec]
+=== RuntimeSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuilderTask, BuilderTask>>
+* <<#_camel_apache_org_v1_CamelCatalogSpec, CamelCatalogSpec>>
+
+RuntimeSpec represents the configuration for the Java runtime in charge to execute the Camel application
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`version` +
+string
+|
+
+
+Camel K Runtime version
+
+|`provider` +
+*xref:#_camel_apache_org_v1_RuntimeProvider[RuntimeProvider]*
+|
+
+
+Camel main application provider, ie, Camel Quarkus
+
+|`applicationClass` +
+string
+|
+
+
+application entry point (main) to be executed
+
+|`dependencies` +
+*xref:#_camel_apache_org_v1_MavenArtifact[[\]MavenArtifact]*
+|
+
+
+list of dependencies needed to run the application
+
+|`metadata` +
+map[string]string
+|
+
+
+set of metadata
+
+|`capabilities` +
+*xref:#_camel_apache_org_v1_Capability[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.Capability]*
+|
+
+
+features offered by this runtime
+
+
+|===
+
+[#_camel_apache_org_v1_S2iTask]
+=== S2iTask
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Task, Task>>
+
+S2iTask is used to configure S2I
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`BaseTask` +
+*xref:#_camel_apache_org_v1_BaseTask[BaseTask]*
+|(Members of `BaseTask` are embedded into this type.)
+
+
+
+
+|`contextDir` +
+string
+|
+
+
+can be useful to share info with other tasks
+
+|`tag` +
+string
+|
+
+
+used by the ImageStream
+
+
+|===
+
+[#_camel_apache_org_v1_Server]
+=== Server
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_MavenBuildSpec, MavenBuildSpec>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`-` +
+encoding/xml.Name
+|
+
+
+
+
+|`id` +
+string
+|
+
+
+
+
+|`username` +
+string
+|
+
+
+
+
+|`password` +
+string
+|
+
+
+
+
+|`configuration` +
+*xref:#_camel_apache_org_v1_Properties[Properties]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_SourceSpec]
+=== SourceSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+
+SourceSpec defines the configuration for one or more routes to be executed in a certain Camel DSL language
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`DataSpec` +
+*xref:#_camel_apache_org_v1_DataSpec[DataSpec]*
+|(Members of `DataSpec` are embedded into this type.)
+
+
+contains configuration related to the source code
+
+|`language` +
+*xref:#_camel_apache_org_v1_Language[Language]*
+|
+
+
+specify which is the language (Camel DSL) used to interpret this source code
+
+|`loader` +
+string
+|
+
+
+Loader is an optional id of the org.apache.camel.k.RoutesLoader that will
+interpret this source at runtime
+
+|`interceptors` +
+[]string
+|
+
+
+Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
+uses to pre/post process sources
+
+|`type` +
+*xref:#_camel_apache_org_v1_SourceType[SourceType]*
+|
+
+
+Type defines the kind of source described by this object
+
+|`property-names` +
+[]string
+|
+
+
+List of property names defined in the source (e.g. if type is "template")
+
+
+|===
+
+[#_camel_apache_org_v1_SourceType]
+=== SourceType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_SourceSpec, SourceSpec>>
+
+SourceType represents an available source type
+
+
+[#_camel_apache_org_v1_SpectrumTask]
+=== SpectrumTask
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Task, Task>>
+
+SpectrumTask is used to configure Spectrum
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`BaseTask` +
+*xref:#_camel_apache_org_v1_BaseTask[BaseTask]*
+|(Members of `BaseTask` are embedded into this type.)
+
+
+
+
+|`PublishTask` +
+*xref:#_camel_apache_org_v1_PublishTask[PublishTask]*
+|(Members of `PublishTask` are embedded into this type.)
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_StringOrProperties]
+=== StringOrProperties
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`-` +
+string
+|
+
+
+
+
+|`properties` +
+*xref:#_camel_apache_org_v1_Properties[Properties]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_Task]
+=== Task
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildSpec, BuildSpec>>
+
+Task represents the abstract task. Only one of the task should be configured to represent the specific task chosen.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`builder` +
+*xref:#_camel_apache_org_v1_BuilderTask[BuilderTask]*
+|
+
+
+a BuilderTask (base task)
+
+|`buildah` +
+*xref:#_camel_apache_org_v1_BuildahTask[BuildahTask]*
+|
+
+
+a BuildahTask, for Buildah strategy
+
+|`kaniko` +
+*xref:#_camel_apache_org_v1_KanikoTask[KanikoTask]*
+|
+
+
+a KanikoTask, for Kaniko strategy
+
+|`spectrum` +
+*xref:#_camel_apache_org_v1_SpectrumTask[SpectrumTask]*
+|
+
+
+a SpectrumTask, for Spectrum strategy
+
+|`s2i` +
+*xref:#_camel_apache_org_v1_S2iTask[S2iTask]*
+|
+
+
+a S2iTask, for S2I strategy
+
+
+|===
+
+[#_camel_apache_org_v1_TraitConfiguration]
+=== TraitConfiguration
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_TraitSpec, TraitSpec>>
+
+TraitConfiguration represents the expected configuration for a given trait parameter
+Deprecated: superceded by each Trait type, left for backward compatibility.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`RawMessage` +
+*xref:#_camel_apache_org_v1_RawMessage[RawMessage]*
+|(Members of `RawMessage` are embedded into this type.)
+
+
+generic raw message, typically a map containing the keys (trait parameters) and the values (either single text or array)
+
+
+|===
+
+[#_camel_apache_org_v1_TraitProfile]
+=== TraitProfile(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitSpec, IntegrationKitSpec>>
+* <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
+* <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+
+TraitProfile represents lists of traits that are enabled for the specific installation/integration
+
+
+[#_camel_apache_org_v1_TraitSpec]
+=== TraitSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+A TraitSpec contains the configuration of a trait
+Deprecated: superceded by each Trait type, left for backward compatibility.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`configuration` +
+*xref:#_camel_apache_org_v1_TraitConfiguration[TraitConfiguration]*
+|
+
+
+TraitConfiguration parameters configuration
+
+
+|===
+
+[#_camel_apache_org_v1_Traits]
+=== Traits
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
+* <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+
+Traits represents the collection of trait configurations
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`affinity` +
+*xref:#_camel_apache_org_v1_trait_AffinityTrait[AffinityTrait]*
+|
+
+
+The configuration of Affinity trait
+
+|`builder` +
+*xref:#_camel_apache_org_v1_trait_BuilderTrait[BuilderTrait]*
+|
+
+
+The configuration of Builder trait
+
+|`camel` +
+*xref:#_camel_apache_org_v1_trait_CamelTrait[CamelTrait]*
+|
+
+
+The configuration of Camel trait
+
+|`container` +
+*xref:#_camel_apache_org_v1_trait_ContainerTrait[ContainerTrait]*
+|
+
+
+The configuration of Container trait
+
+|`cron` +
+*xref:#_camel_apache_org_v1_trait_CronTrait[CronTrait]*
+|
+
+
+The configuration of Cron trait
+
+|`dependencies` +
+*xref:#_camel_apache_org_v1_trait_DependenciesTrait[DependenciesTrait]*
+|
+
+
+The configuration of Dependencies trait
+
+|`deployer` +
+*xref:#_camel_apache_org_v1_trait_DeployerTrait[DeployerTrait]*
+|
+
+
+The configuration of Deployer trait
+
+|`deployment` +
+*xref:#_camel_apache_org_v1_trait_DeploymentTrait[DeploymentTrait]*
+|
+
+
+The configuration of Deployment trait
+
+|`environment` +
+*xref:#_camel_apache_org_v1_trait_EnvironmentTrait[EnvironmentTrait]*
+|
+
+
+The configuration of Environment trait
+
+|`error-handler` +
+*xref:#_camel_apache_org_v1_trait_ErrorHandlerTrait[ErrorHandlerTrait]*
+|
+
+
+The configuration of Error Handler trait
+
+|`gc` +
+*xref:#_camel_apache_org_v1_trait_GCTrait[GCTrait]*
+|
+
+
+The configuration of GC trait
+
+|`health` +
+*xref:#_camel_apache_org_v1_trait_HealthTrait[HealthTrait]*
+|
+
+
+The configuration of Health trait
+
+|`ingress` +
+*xref:#_camel_apache_org_v1_trait_IngressTrait[IngressTrait]*
+|
+
+
+The configuration of Ingress trait
+
+|`istio` +
+*xref:#_camel_apache_org_v1_trait_IstioTrait[IstioTrait]*
+|
+
+
+The configuration of Istio trait
+
+|`jolokia` +
+*xref:#_camel_apache_org_v1_trait_JolokiaTrait[JolokiaTrait]*
+|
+
+
+The configuration of Jolokia trait
+
+|`jvm` +
+*xref:#_camel_apache_org_v1_trait_JVMTrait[JVMTrait]*
+|
+
+
+The configuration of JVM trait
+
+|`kamelets` +
+*xref:#_camel_apache_org_v1_trait_KameletsTrait[KameletsTrait]*
+|
+
+
+The configuration of Kamelets trait
+
+|`knative` +
+*xref:#_camel_apache_org_v1_trait_KnativeTrait[KnativeTrait]*
+|
+
+
+The configuration of Knative trait
+
+|`knative-service` +
+*xref:#_camel_apache_org_v1_trait_KnativeServiceTrait[KnativeServiceTrait]*
+|
+
+
+The configuration of Knative Service trait
+
+|`logging` +
+*xref:#_camel_apache_org_v1_trait_LoggingTrait[LoggingTrait]*
+|
+
+
+The configuration of Logging trait
+
+|`mount` +
+*xref:#_camel_apache_org_v1_trait_MountTrait[MountTrait]*
+|
+
+
+The configuration of Mount trait
+
+|`openapi` +
+*xref:#_camel_apache_org_v1_trait_OpenAPITrait[OpenAPITrait]*
+|
+
+
+The configuration of OpenAPI trait
+
+|`owner` +
+*xref:#_camel_apache_org_v1_trait_OwnerTrait[OwnerTrait]*
+|
+
+
+The configuration of Owner trait
+
+|`pdb` +
+*xref:#_camel_apache_org_v1_trait_PDBTrait[PDBTrait]*
+|
+
+
+The configuration of PDB trait
+
+|`platform` +
+*xref:#_camel_apache_org_v1_trait_PlatformTrait[PlatformTrait]*
+|
+
+
+The configuration of Platform trait
+
+|`pod` +
+*xref:#_camel_apache_org_v1_trait_PodTrait[PodTrait]*
+|
+
+
+The configuration of Pod trait
+
+|`prometheus` +
+*xref:#_camel_apache_org_v1_trait_PrometheusTrait[PrometheusTrait]*
+|
+
+
+The configuration of Prometheus trait
+
+|`pull-secret` +
+*xref:#_camel_apache_org_v1_trait_PullSecretTrait[PullSecretTrait]*
+|
+
+
+The configuration of Pull Secret trait
+
+|`quarkus` +
+*xref:#_camel_apache_org_v1_trait_QuarkusTrait[QuarkusTrait]*
+|
+
+
+The configuration of Quarkus trait
+
+|`registry` +
+*xref:#_camel_apache_org_v1_trait_RegistryTrait[RegistryTrait]*
+|
+
+
+The configuration of Registry trait
+
+|`route` +
+*xref:#_camel_apache_org_v1_trait_RouteTrait[RouteTrait]*
+|
+
+
+The configuration of Route trait
+
+|`service` +
+*xref:#_camel_apache_org_v1_trait_ServiceTrait[ServiceTrait]*
+|
+
+
+The configuration of Service trait
+
+|`service-binding` +
+*xref:#_camel_apache_org_v1_trait_ServiceBindingTrait[ServiceBindingTrait]*
+|
+
+
+The configuration of Service Binding trait
+
+|`toleration` +
+*xref:#_camel_apache_org_v1_trait_TolerationTrait[TolerationTrait]*
+|
+
+
+The configuration of Toleration trait
+
+|`addons` +
+*xref:#_camel_apache_org_v1_AddonTrait[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.AddonTrait]*
+|
+
+
+The extension point with addon traits
+
+|`keda` +
+*xref:#_camel_apache_org_v1_TraitSpec[TraitSpec]*
+|
+
+
+Deprecated: for backward compatibility.
+
+|`master` +
+*xref:#_camel_apache_org_v1_TraitSpec[TraitSpec]*
+|
+
+
+Deprecated: for backward compatibility.
+
+|`strimzi` +
+*xref:#_camel_apache_org_v1_TraitSpec[TraitSpec]*
+|
+
+
+Deprecated: for backward compatibility.
+
+|`3scale` +
+*xref:#_camel_apache_org_v1_TraitSpec[TraitSpec]*
+|
+
+
+Deprecated: for backward compatibility.
+
+|`tracing` +
+*xref:#_camel_apache_org_v1_TraitSpec[TraitSpec]*
+|
+
+
+Deprecated: for backward compatibility.
+
+
+|===
+
+[#_camel_apache_org_v1_ValueSource]
+=== ValueSource
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_MavenSpec, MavenSpec>>
+
+ValueSource --
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`configMapKeyRef` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#configmapkeyselector-v1-core[Kubernetes core/v1.ConfigMapKeySelector]*
+|
+
+
+Selects a key of a ConfigMap.
+
+|`secretKeyRef` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#secretkeyselector-v1-core[Kubernetes core/v1.SecretKeySelector]*
+|
+
+
+Selects a key of a secret.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_AffinityTrait]
+=== AffinityTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+Allows constraining which nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node,
+or with inter-pod affinity and anti-affinity, based on labels on pods that are already running on the nodes.
+
+It's disabled by default.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`podAffinity` +
+bool
+|
+
+
+Always co-locates multiple replicas of the integration in the same node (default *false*).
+
+|`podAntiAffinity` +
+bool
+|
+
+
+Never co-locates multiple replicas of the integration in the same node (default *false*).
+
+|`nodeAffinityLabels` +
+[]string
+|
+
+
+Defines a set of nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node.
+
+|`podAffinityLabels` +
+[]string
+|
+
+
+Defines a set of pods (namely those matching the label selector, relative to the given namespace) that the
+integration pod(s) should be co-located with.
+
+|`podAntiAffinityLabels` +
+[]string
+|
+
+
+Defines a set of pods (namely those matching the label selector, relative to the given namespace) that the
+integration pod(s) should not be co-located with.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_BuilderTrait]
+=== BuilderTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitTraits, IntegrationKitTraits>>
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The builder trait is internally used to determine the best strategy to
+build and configure IntegrationKits.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`verbose` +
+bool
+|
+
+
+Enable verbose logging on build components that support it (e.g. Kaniko build pod).
+
+|`properties` +
+[]string
+|
+
+
+A list of properties to be provided to the build task
+
+
+|===
+
+[#_camel_apache_org_v1_trait_CamelTrait]
+=== CamelTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitTraits, IntegrationKitTraits>>
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Camel trait can be used to configure versions of Apache Camel K runtime and related libraries, it cannot be disabled.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`runtimeVersion` +
+string
+|
+
+
+The camel-k-runtime version to use for the integration. It overrides the default version set in the Integration Platform.
+
+|`properties` +
+[]string
+|
+
+
+A list of properties to be provided to the Integration runtime
+
+
+|===
+
+[#_camel_apache_org_v1_trait_Configuration]
+=== Configuration
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_trait_Trait, Trait>>
+
+Deprecated: for backward compatibility.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`RawMessage` +
+*xref:#_camel_apache_org_v1_trait_RawMessage[RawMessage]*
+|(Members of `RawMessage` are embedded into this type.)
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_trait_ContainerTrait]
+=== ContainerTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Container trait can be used to configure properties of the container where the integration will run.
+
+It also provides configuration for Services associated to the container.
+
+nolint: tagliatelle
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`auto` +
+bool
+|
+
+
+To automatically enable the trait
+
+|`requestCPU` +
+string
+|
+
+
+The minimum amount of CPU required.
+
+|`requestMemory` +
+string
+|
+
+
+The minimum amount of memory required.
+
+|`limitCPU` +
+string
+|
+
+
+The maximum amount of CPU required.
+
+|`limitMemory` +
+string
+|
+
+
+The maximum amount of memory required.
+
+|`expose` +
+bool
+|
+
+
+Can be used to enable/disable exposure via kubernetes Service.
+
+|`port` +
+int
+|
+
+
+To configure a different port exposed by the container (default `8080`).
+
+|`portName` +
+string
+|
+
+
+To configure a different port name for the port exposed by the container. It defaults to `http` only when the `expose` parameter is true.
+
+|`servicePort` +
+int
+|
+
+
+To configure under which service port the container port is to be exposed (default `80`).
+
+|`servicePortName` +
+string
+|
+
+
+To configure under which service port name the container port is to be exposed (default `http`).
+
+|`name` +
+string
+|
+
+
+The main container name. It's named `integration` by default.
+
+|`image` +
+string
+|
+
+
+The main container image
+
+|`imagePullPolicy` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#pullpolicy-v1-core[Kubernetes core/v1.PullPolicy]*
+|
+
+
+The pull policy: Always{vbar}Never{vbar}IfNotPresent
+
+
+|===
+
+[#_camel_apache_org_v1_trait_CronTrait]
+=== CronTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Cron trait can be used to customize the behaviour of periodic timer/cron based integrations.
+
+While normally an integration requires a pod to be always up and running, some periodic tasks, such as batch jobs,
+require to be activated at specific hours of the day or with a periodic delay of minutes.
+For such tasks, the cron trait can materialize the integration as a Kubernetes CronJob instead of a standard deployment,
+in order to save resources when the integration does not need to be executed.
+
+Integrations that start from the following components are evaluated by the cron trait: `timer`, `cron`, `quartz`.
+
+The rules for using a Kubernetes CronJob are the following:
+- `timer`: when periods can be written as cron expressions. E.g. `timer:tick?period=60000`.
+- `cron`, `quartz`: when the cron expression does not contain seconds (or the "seconds" part is set to 0). E.g.
+  `cron:tab?schedule=0/2$\{plus}*\{plus}*\{plus}*\{plus}?` or `quartz:trigger?cron=0\{plus}0/2\{plus}*\{plus}*\{plus}*\{plus}?`.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`schedule` +
+string
+|
+
+
+The CronJob schedule for the whole integration. If multiple routes are declared, they must have the same schedule for this
+mechanism to work correctly.
+
+|`components` +
+string
+|
+
+
+A comma separated list of the Camel components that need to be customized in order for them to work when the schedule is triggered externally by Kubernetes.
+A specific customizer is activated for each specified component. E.g. for the `timer` component, the `cron-timer` customizer is
+activated (it's present in the `org.apache.camel.k:camel-k-cron` library).
+
+Supported components are currently: `cron`, `timer` and `quartz`.
+
+|`fallback` +
+bool
+|
+
+
+Use the default Camel implementation of the `cron` endpoint (`quartz`) instead of trying to materialize the integration
+as Kubernetes CronJob.
+
+|`concurrencyPolicy` +
+string
+|
+
+
+Specifies how to treat concurrent executions of a Job.
+Valid values are:
+- "Allow": allows CronJobs to run concurrently;
+- "Forbid" (default): forbids concurrent runs, skipping next run if previous run hasn't finished yet;
+- "Replace": cancels currently running job and replaces it with a new one
+
+|`auto` +
+bool
+|
+
+
+Automatically deploy the integration as CronJob when all routes are
+either starting from a periodic consumer (only `cron`, `timer` and `quartz` are supported) or a passive consumer (e.g. `direct` is a passive consumer).
+
+It's required that all periodic consumers have the same period, and it can be expressed as cron schedule (e.g. `1m` can be expressed as `0/1 * * * *`,
+while `35m` or `50s` cannot).
+
+|`startingDeadlineSeconds` +
+int64
+|
+
+
+Optional deadline in seconds for starting the job if it misses scheduled
+time for any reason.  Missed jobs executions will be counted as failed ones.
+
+|`activeDeadlineSeconds` +
+int64
+|
+
+
+Specifies the duration in seconds, relative to the start time, that the job
+may be continuously active before it is considered to be failed.
+It defaults to 60s.
+
+|`backoffLimit` +
+int32
+|
+
+
+Specifies the number of retries before marking the job failed.
+It defaults to 2.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_DependenciesTrait]
+=== DependenciesTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Dependencies trait is internally used to automatically add runtime dependencies based on the
+integration that the user wants to run.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_trait_DeployerTrait]
+=== DeployerTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The deployer trait is responsible for deploying the resources owned by the integration, and can be used
+to explicitly select the underlying controller that will manage the integration pods.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`kind` +
+string
+|
+
+
+Allows to explicitly select the desired deployment kind between `deployment`, `cron-job` or `knative-service` when creating the resources for running the integration.
+
+|`useSSA` +
+bool
+|
+
+
+Use server-side apply to update the owned resources (default `true`).
+Note that it automatically falls back to client-side patching, if SSA is not available, e.g., on old Kubernetes clusters.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_DeploymentTrait]
+=== DeploymentTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Deployment trait is responsible for generating the Kubernetes deployment that will make sure
+the integration will run in the cluster.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`progressDeadlineSeconds` +
+int32
+|
+
+
+The maximum time in seconds for the deployment to make progress before it
+is considered to be failed. It defaults to 60s.
+
+|`strategy` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#deploymentstrategytype-v1-apps[Kubernetes apps/v1.DeploymentStrategyType]*
+|
+
+
+The deployment strategy to use to replace existing pods with new ones.
+
+|`rollingUpdateMaxUnavailable` +
+int
+|
+
+
+The maximum number of pods that can be unavailable during the update.
+Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).
+Absolute number is calculated from percentage by rounding down.
+This can not be 0 if MaxSurge is 0.
+Defaults to 25%.
+
+|`rollingUpdateMaxSurge` +
+int
+|
+
+
+The maximum number of pods that can be scheduled above the desired number of
+pods.
+Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).
+This can not be 0 if MaxUnavailable is 0.
+Absolute number is calculated from percentage by rounding up.
+Defaults to 25%.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_DiscoveryCacheType]
+=== DiscoveryCacheType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_trait_GCTrait, GCTrait>>
+
+
+
+
+[#_camel_apache_org_v1_trait_EnvironmentTrait]
+=== EnvironmentTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The environment trait is used internally to inject standard environment variables in the integration container,
+such as `NAMESPACE`, `POD_NAME` and others.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`containerMeta` +
+bool
+|
+
+
+Enables injection of `NAMESPACE` and `POD_NAME` environment variables (default `true`)
+
+|`httpProxy` +
+bool
+|
+
+
+Propagates the `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY` environment variables (default `true`)
+
+|`vars` +
+[]string
+|
+
+
+A list of environment variables to be added to the integration container.
+The syntax is KEY=VALUE, e.g., `MY_VAR="my value"`.
+These take precedence over the previously defined environment variables.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_ErrorHandlerTrait]
+=== ErrorHandlerTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The error-handler is a platform trait used to inject Error Handler source into the integration runtime.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`ref` +
+string
+|
+
+
+The error handler ref name provided or found in application properties
+
+
+|===
+
+[#_camel_apache_org_v1_trait_GCTrait]
+=== GCTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The GC Trait garbage-collects all resources that are no longer necessary upon integration updates.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`discoveryCache` +
+*xref:#_camel_apache_org_v1_trait_DiscoveryCacheType[DiscoveryCacheType]*
+|
+
+
+Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
+Deprecated: to be removed from trait configuration.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_HealthTrait]
+=== HealthTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The health trait is responsible for configuring the health probes on the integration container.
+
+It's disabled by default.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`livenessProbeEnabled` +
+bool
+|
+
+
+Configures the liveness probe for the integration container (default `false`).
+
+|`livenessScheme` +
+string
+|
+
+
+Scheme to use when connecting to the liveness probe (default `HTTP`).
+
+|`livenessInitialDelay` +
+int32
+|
+
+
+Number of seconds after the container has started before the liveness probe is initiated.
+
+|`livenessTimeout` +
+int32
+|
+
+
+Number of seconds after which the liveness probe times out.
+
+|`livenessPeriod` +
+int32
+|
+
+
+How often to perform the liveness probe.
+
+|`livenessSuccessThreshold` +
+int32
+|
+
+
+Minimum consecutive successes for the liveness probe to be considered successful after having failed.
+
+|`livenessFailureThreshold` +
+int32
+|
+
+
+Minimum consecutive failures for the liveness probe to be considered failed after having succeeded.
+
+|`readinessProbeEnabled` +
+bool
+|
+
+
+Configures the readiness probe for the integration container (default `true`).
+
+|`readinessScheme` +
+string
+|
+
+
+Scheme to use when connecting to the readiness probe (default `HTTP`).
+
+|`readinessInitialDelay` +
+int32
+|
+
+
+Number of seconds after the container has started before the readiness probe is initiated.
+
+|`readinessTimeout` +
+int32
+|
+
+
+Number of seconds after which the readiness probe times out.
+
+|`readinessPeriod` +
+int32
+|
+
+
+How often to perform the readiness probe.
+
+|`readinessSuccessThreshold` +
+int32
+|
+
+
+Minimum consecutive successes for the readiness probe to be considered successful after having failed.
+
+|`readinessFailureThreshold` +
+int32
+|
+
+
+Minimum consecutive failures for the readiness probe to be considered failed after having succeeded.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_IngressTrait]
+=== IngressTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Ingress trait can be used to expose the service associated with the integration
+to the outside world with a Kubernetes Ingress.
+
+It's enabled by default whenever a Service is added to the integration (through the `service` trait).
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`host` +
+string
+|
+
+
+To configure the host exposed by the ingress.
+
+|`auto` +
+bool
+|
+
+
+To automatically add an ingress whenever the integration uses an HTTP endpoint consumer.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_IstioTrait]
+=== IstioTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Istio trait allows configuring properties related to the Istio service mesh,
+such as sidecar injection and outbound IP ranges.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`allow` +
+string
+|
+
+
+Configures a (comma-separated) list of CIDR subnets that should not be intercepted by the Istio proxy (`10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` by default).
+
+|`inject` +
+bool
+|
+
+
+Forces the value for labels `sidecar.istio.io/inject`. By default the label is set to `true` on deployment and not set on Knative Service.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_JVMTrait]
+=== JVMTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The JVM trait is used to configure the JVM that runs the integration.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`debug` +
+bool
+|
+
+
+Activates remote debugging, so that a debugger can be attached to the JVM, e.g., using port-forwarding
+
+|`debugSuspend` +
+bool
+|
+
+
+Suspends the target JVM immediately before the main class is loaded
+
+|`printCommand` +
+bool
+|
+
+
+Prints the command used the start the JVM in the container logs (default `true`)
+
+|`debugAddress` +
+string
+|
+
+
+Transport address at which to listen for the newly launched JVM (default `*:5005`)
+
+|`options` +
+[]string
+|
+
+
+A list of JVM options
+
+|`classpath` +
+string
+|
+
+
+Additional JVM classpath (use `Linux` classpath separator)
+
+
+|===
+
+[#_camel_apache_org_v1_trait_JolokiaTrait]
+=== JolokiaTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Jolokia trait activates and configures the Jolokia Java agent.
+
+See https://jolokia.org/reference/html/agents.html
+
+nolint: tagliatelle
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`CACert` +
+string
+|
+
+
+The PEM encoded CA certification file path, used to verify client certificates,
+applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
+(default `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt` for OpenShift).
+
+|`clientPrincipal` +
+[]string
+|
+
+
+The principal(s) which must be given in a client certificate to allow access to the Jolokia endpoint,
+applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
+(default `clientPrincipal=cn=system:master-proxy`, `cn=hawtio-online.hawtio.svc` and `cn=fuse-console.fuse.svc` for OpenShift).
+
+|`discoveryEnabled` +
+bool
+|
+
+
+Listen for multicast requests (default `false`)
+
+|`extendedClientCheck` +
+bool
+|
+
+
+Mandate the client certificate contains a client flag in the extended key usage section,
+applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
+(default `true` for OpenShift).
+
+|`host` +
+string
+|
+
+
+The Host address to which the Jolokia agent should bind to. If `"\*"` or `"0.0.0.0"` is given,
+the servers binds to every network interface (default `"*"`).
+
+|`password` +
+string
+|
+
+
+The password used for authentication, applicable when the `user` option is set.
+
+|`port` +
+int
+|
+
+
+The Jolokia endpoint port (default `8778`).
+
+|`protocol` +
+string
+|
+
+
+The protocol to use, either `http` or `https` (default `https` for OpenShift)
+
+|`user` +
+string
+|
+
+
+The user to be used for authentication
+
+|`useSSLClientAuthentication` +
+bool
+|
+
+
+Whether client certificates should be used for authentication (default `true` for OpenShift).
+
+|`options` +
+[]string
+|
+
+
+A list of additional Jolokia options as defined
+in https://jolokia.org/reference/html/agents.html#agent-jvm-config[JVM agent configuration options]
+
+
+|===
+
+[#_camel_apache_org_v1_trait_KameletsTrait]
+=== KameletsTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The kamelets trait is a platform trait used to inject Kamelets into the integration runtime.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`auto` +
+bool
+|
+
+
+Automatically inject all referenced Kamelets and their default configuration (enabled by default)
+
+|`list` +
+string
+|
+
+
+Comma separated list of Kamelet names to load into the current integration
+
+
+|===
+
+[#_camel_apache_org_v1_trait_KnativeServiceTrait]
+=== KnativeServiceTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Knative Service trait allows configuring options when running the Integration as a Knative service, instead of
+a standard Kubernetes Deployment.
+
+Running an Integration as a Knative Service enables auto-scaling (and scaling-to-zero), but those features
+are only relevant when the Camel route(s) use(s) an HTTP endpoint consumer.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`class` +
+string
+|
+
+
+Configures the Knative autoscaling class property (e.g. to set `hpa.autoscaling.knative.dev` or `kpa.autoscaling.knative.dev` autoscaling).
+
+Refer to the Knative documentation for more information.
+
+|`autoscalingMetric` +
+string
+|
+
+
+Configures the Knative autoscaling metric property (e.g. to set `concurrency` based or `cpu` based autoscaling).
+
+Refer to the Knative documentation for more information.
+
+|`autoscalingTarget` +
+int
+|
+
+
+Sets the allowed concurrency level or CPU percentage (depending on the autoscaling metric) for each Pod.
+
+Refer to the Knative documentation for more information.
+
+|`minScale` +
+int
+|
+
+
+The minimum number of Pods that should be running at any time for the integration. It's **zero** by default, meaning that
+the integration is scaled down to zero when not used for a configured amount of time.
+
+Refer to the Knative documentation for more information.
+
+|`maxScale` +
+int
+|
+
+
+An upper bound for the number of Pods that can be running in parallel for the integration.
+Knative has its own cap value that depends on the installation.
+
+Refer to the Knative documentation for more information.
+
+|`rolloutDuration` +
+string
+|
+
+
+Enables to gradually shift traffic to the latest Revision and sets the rollout duration.
+It's disabled by default and must be expressed as a Golang `time.Duration` string representation,
+rounded to a second precision.
+
+|`visibility` +
+string
+|
+
+
+Setting `cluster-local`, Knative service becomes a private service.
+Specifically, this option applies the `networking.knative.dev/visibility` label to Knative service.
+
+Refer to the Knative documentation for more information.
+
+|`auto` +
+bool
+|
+
+
+Automatically deploy the integration as Knative service when all conditions hold:
+
+* Integration is using the Knative profile
+* All routes are either starting from an HTTP based consumer or a passive consumer (e.g. `direct` is a passive consumer)
+
+
+|===
+
+[#_camel_apache_org_v1_trait_KnativeTrait]
+=== KnativeTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Knative trait automatically discovers addresses of Knative resources and inject them into the
+running integration.
+
+The full Knative configuration is injected in the CAMEL_KNATIVE_CONFIGURATION in JSON format.
+The Camel Knative component will then use the full configuration to configure the routes.
+
+The trait is enabled by default when the Knative profile is active.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`config` +
+string
+|
+
+
+Can be used to inject a Knative complete configuration in JSON format.
+
+|`channelSources` +
+[]string
+|
+
+
+List of channels used as source of integration routes.
+Can contain simple channel names or full Camel URIs.
+
+|`channelSinks` +
+[]string
+|
+
+
+List of channels used as destination of integration routes.
+Can contain simple channel names or full Camel URIs.
+
+|`endpointSources` +
+[]string
+|
+
+
+List of channels used as source of integration routes.
+
+|`endpointSinks` +
+[]string
+|
+
+
+List of endpoints used as destination of integration routes.
+Can contain simple endpoint names or full Camel URIs.
+
+|`eventSources` +
+[]string
+|
+
+
+List of event types that the integration will be subscribed to.
+Can contain simple event types or full Camel URIs (to use a specific broker different from "default").
+
+|`eventSinks` +
+[]string
+|
+
+
+List of event types that the integration will produce.
+Can contain simple event types or full Camel URIs (to use a specific broker).
+
+|`filterSourceChannels` +
+bool
+|
+
+
+Enables filtering on events based on the header "ce-knativehistory". Since this header has been removed in newer versions of
+Knative, filtering is disabled by default.
+
+|`sinkBinding` +
+bool
+|
+
+
+Allows binding the integration to a sink via a Knative SinkBinding resource.
+This can be used when the integration targets a single sink.
+It's enabled by default when the integration targets a single sink
+(except when the integration is owned by a Knative source).
+
+|`auto` +
+bool
+|
+
+
+Enable automatic discovery of all trait properties.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_LoggingTrait]
+=== LoggingTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Logging trait is used to configure Integration runtime logging options (such as color and format).
+The logging backend is provided by Quarkus, whose configuration is documented at https://quarkus.io/guides/logging.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`color` +
+bool
+|
+
+
+Colorize the log output
+
+|`format` +
+string
+|
+
+
+Logs message format
+
+|`level` +
+string
+|
+
+
+Adjust the logging level (defaults to INFO)
+
+|`json` +
+bool
+|
+
+
+Output the logs in JSON
+
+|`jsonPrettyPrint` +
+bool
+|
+
+
+Enable "pretty printing" of the JSON logs
+
+
+|===
+
+[#_camel_apache_org_v1_trait_MountTrait]
+=== MountTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Mount trait can be used to configure volumes mounted on the Integration Pods.
+
+nolint: tagliatelle
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`configs` +
+[]string
+|
+
+
+A list of configuration pointing to configmap/secret.
+The configuration are expected to be UTF-8 resources as they are processed by runtime Camel Context and tried to be parsed as property files.
+They are also made available on the classpath in order to ease their usage directly from the Route.
+Syntax: [configmap{vbar}secret]:name[/key], where name represents the resource name and key optionally represents the resource key to be filtered
+
+|`resources` +
+[]string
+|
+
+
+A list of resources (text or binary content) pointing to configmap/secret.
+The resources are expected to be any resource type (text or binary content).
+The destination path can be either a default location or any path specified by the user.
+Syntax: [configmap{vbar}secret]:name[/key][@path], where name represents the resource name, key optionally represents the resource key to be filtered and path represents the destination path
+
+|`volumes` +
+[]string
+|
+
+
+A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]
+
+
+|===
+
+[#_camel_apache_org_v1_trait_OpenAPITrait]
+=== OpenAPITrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The OpenAPI DSL trait is internally used to allow creating integrations from a OpenAPI specs.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`configmaps` +
+[]string
+|
+
+
+The configmaps holding the spec of the OpenAPI
+
+
+|===
+
+[#_camel_apache_org_v1_trait_OwnerTrait]
+=== OwnerTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Owner trait ensures that all created resources belong to the integration being created
+and transfers annotations and labels on the integration onto these owned resources.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`targetAnnotations` +
+[]string
+|
+
+
+The set of annotations to be transferred
+
+|`targetLabels` +
+[]string
+|
+
+
+The set of labels to be transferred
+
+
+|===
+
+[#_camel_apache_org_v1_trait_PDBTrait]
+=== PDBTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The PDB trait allows to configure the PodDisruptionBudget resource for the Integration pods.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`minAvailable` +
+string
+|
+
+
+The number of pods for the Integration that must still be available after an eviction.
+It can be either an absolute number or a percentage.
+Only one of `min-available` and `max-unavailable` can be specified.
+
+|`maxUnavailable` +
+string
+|
+
+
+The number of pods for the Integration that can be unavailable after an eviction.
+It can be either an absolute number or a percentage (default `1` if `min-available` is also not set).
+Only one of `max-unavailable` and `min-available` can be specified.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_PlatformTrait]
+=== PlatformTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The platform trait is a base trait that is used to assign an integration platform to an integration.
+
+In case the platform is missing, the trait is allowed to create a default platform.
+This feature is especially useful in contexts where there's no need to provide a custom configuration for the platform
+(e.g. on OpenShift the default settings work, since there's an embedded container image registry).
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`createDefault` +
+bool
+|
+
+
+To create a default (empty) platform when the platform is missing.
+
+|`global` +
+bool
+|
+
+
+Indicates if the platform should be created globally in the case of global operator (default true).
+
+|`auto` +
+bool
+|
+
+
+To automatically detect from the environment if a default platform can be created (it will be created on OpenShift only).
+
+
+|===
+
+[#_camel_apache_org_v1_trait_PodTrait]
+=== PodTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The pod trait allows the customization of the Integration pods.
+It applies the `PodSpecTemplate` struct contained in the Integration `.spec.podTemplate` field,
+into the Integration deployment Pods template, using strategic merge patch.
+
+This can be used to customize the container where Camel routes execute,
+by using the `integration` container name.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_trait_PrometheusTrait]
+=== PrometheusTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Prometheus trait configures a Prometheus-compatible endpoint. It also creates a `PodMonitor` resource,
+so that the endpoint can be scraped automatically, when using the Prometheus operator.
+
+The metrics are exposed using MicroProfile Metrics.
+
+WARNING: The creation of the `PodMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]
+custom resource definition to be installed.
+You can set `pod-monitor` to `false` for the Prometheus trait to work without the Prometheus Operator.
+
+The Prometheus trait is disabled by default.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`podMonitor` +
+bool
+|
+
+
+Whether a `PodMonitor` resource is created (default `true`).
+
+|`podMonitorLabels` +
+[]string
+|
+
+
+The `PodMonitor` resource labels, applicable when `pod-monitor` is `true`.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_PullSecretTrait]
+=== PullSecretTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Pull Secret trait sets a pull secret on the pod,
+to allow Kubernetes to retrieve the container image from an external registry.
+
+The pull secret can be specified manually or, in case you've configured authentication for an external container registry
+on the `IntegrationPlatform`, the same secret is used to pull images.
+
+It's enabled by default whenever you configure authentication for an external container registry,
+so it assumes that external registries are private.
+
+If your registry does not need authentication for pulling images, you can disable this trait.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`secretName` +
+string
+|
+
+
+The pull secret name to set on the Pod. If left empty this is automatically taken from the `IntegrationPlatform` registry configuration.
+
+|`imagePullerDelegation` +
+bool
+|
+
+
+When using a global operator with a shared platform, this enables delegation of the `system:image-puller` cluster role on the operator namespace to the integration service account.
+
+|`auto` +
+bool
+|
+
+
+Automatically configures the platform registry secret on the pod if it is of type `kubernetes.io/dockerconfigjson`.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_QuarkusPackageType]
+=== QuarkusPackageType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_trait_QuarkusTrait, QuarkusTrait>>
+
+Quarkus package type.
+
+
+[#_camel_apache_org_v1_trait_QuarkusTrait]
+=== QuarkusTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitTraits, IntegrationKitTraits>>
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Quarkus trait configures the Quarkus runtime.
+
+It's enabled by default.
+
+NOTE: Compiling to a native executable, i.e. when using `package-type=native`, is only supported
+for kamelets, as well as YAML and XML integrations.
+It also requires at least 4GiB of memory, so the Pod running the native build, that is either
+the operator Pod, or the build Pod (depending on the build strategy configured for the platform),
+must have enough memory available.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`packageTypes` +
+*xref:#_camel_apache_org_v1_trait_QuarkusPackageType[[\]QuarkusPackageType]*
+|
+
+
+The Quarkus package types, either `fast-jar` or `native` (default `fast-jar`).
+In case both `fast-jar` and `native` are specified, two `IntegrationKit` resources are created,
+with the `native` kit having precedence over the `fast-jar` one once ready.
+The order influences the resolution of the current kit for the integration.
+The kit corresponding to the first package type will be assigned to the
+integration in case no existing kit that matches the integration exists.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_RawMessage]
+=== RawMessage(`[]byte` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_trait_Configuration, Configuration>>
+
+Deprecated: for backward compatibility.
+
+
+[#_camel_apache_org_v1_trait_RegistryTrait]
+=== RegistryTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitTraits, IntegrationKitTraits>>
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Registry trait sets up Maven to use the Image registry
+as a Maven repository.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_trait_RouteTrait]
+=== RouteTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Route trait can be used to configure the creation of OpenShift routes for the integration.
+
+The certificate and key contents may be sourced either from the local filesystem or in a OpenShift `secret` object.
+The user may use the parameters ending in `-secret` (example: `tls-certificate-secret`) to reference a certificate stored in a `secret`.
+Parameters ending in `-secret` have higher priorities and in case the same route parameter is set, for example: `tls-key-secret` and `tls-key`,
+then `tls-key-secret` is used.
+The recommended approach to set the key and certificates is to use `secrets` to store their contents and use the
+following parameters to reference them: `tls-certificate-secret`, `tls-key-secret`, `tls-ca-certificate-secret`, `tls-destination-ca-certificate-secret`
+See the examples section at the end of this page to see the setup options.
+
+nolint: tagliatelle
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`host` +
+string
+|
+
+
+To configure the host exposed by the route.
+
+|`tlsTermination` +
+string
+|
+
+
+The TLS termination type, like `edge`, `passthrough` or `reencrypt`.
+
+Refer to the OpenShift route documentation for additional information.
+
+|`tlsCertificate` +
+string
+|
+
+
+The TLS certificate contents.
+
+Refer to the OpenShift route documentation for additional information.
+
+|`tlsCertificateSecret` +
+string
+|
+
+
+The secret name and key reference to the TLS certificate. The format is "secret-name[/key-name]", the value represents the secret name, if there is only one key in the secret it will be read, otherwise you can set a key name separated with a "/".
+
+Refer to the OpenShift route documentation for additional information.
+
+|`tlsKey` +
+string
+|
+
+
+The TLS certificate key contents.
+
+Refer to the OpenShift route documentation for additional information.
+
+|`tlsKeySecret` +
+string
+|
+
+
+The secret name and key reference to the TLS certificate key. The format is "secret-name[/key-name]", the value represents the secret name, if there is only one key in the secret it will be read, otherwise you can set a key name separated with a "/".
+
+Refer to the OpenShift route documentation for additional information.
+
+|`tlsCACertificate` +
+string
+|
+
+
+The TLS CA certificate contents.
+
+Refer to the OpenShift route documentation for additional information.
+
+|`tlsCACertificateSecret` +
+string
+|
+
+
+The secret name and key reference to the TLS CA certificate. The format is "secret-name[/key-name]", the value represents the secret name, if there is only one key in the secret it will be read, otherwise you can set a key name separated with a "/".
+
+Refer to the OpenShift route documentation for additional information.
+
+|`tlsDestinationCACertificate` +
+string
+|
+
+
+The destination CA certificate provides the contents of the ca certificate of the final destination.  When using reencrypt
+termination this file should be provided in order to have routers use it for health checks on the secure connection.
+If this field is not specified, the router may provide its own destination CA and perform hostname validation using
+the short service name (service.namespace.svc), which allows infrastructure generated certificates to automatically
+verify.
+
+Refer to the OpenShift route documentation for additional information.
+
+|`tlsDestinationCACertificateSecret` +
+string
+|
+
+
+The secret name and key reference to the destination CA certificate. The format is "secret-name[/key-name]", the value represents the secret name, if there is only one key in the secret it will be read, otherwise you can set a key name separated with a "/".
+
+Refer to the OpenShift route documentation for additional information.
+
+|`tlsInsecureEdgeTerminationPolicy` +
+string
+|
+
+
+To configure how to deal with insecure traffic, e.g. `Allow`, `Disable` or `Redirect` traffic.
+
+Refer to the OpenShift route documentation for additional information.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_ServiceBindingTrait]
+=== ServiceBindingTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Service Binding trait allows users to connect to Services in Kubernetes:
+https://github.com/k8s-service-bindings/spec#service-binding
+As the specification is still evolving this is subject to change.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`services` +
+[]string
+|
+
+
+List of Services in the form [[apigroup/]version:]kind:[namespace/]name
+
+
+|===
+
+[#_camel_apache_org_v1_trait_ServiceTrait]
+=== ServiceTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Service trait exposes the integration with a Service resource so that it can be accessed by other applications
+(or integrations) in the same namespace.
+
+It's enabled by default if the integration depends on a Camel component that can expose a HTTP endpoint.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`auto` +
+bool
+|
+
+
+To automatically detect from the code if a Service needs to be created.
+
+|`nodePort` +
+bool
+|
+
+
+Enable Service to be exposed as NodePort (default `false`).
+Deprecated: Use service type instead.
+
+|`type` +
+*xref:#_camel_apache_org_v1_trait_ServiceType[ServiceType]*
+|
+
+
+The type of service to be used, either 'ClusterIP', 'NodePort' or 'LoadBalancer'.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_ServiceType]
+=== ServiceType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_trait_ServiceTrait, ServiceTrait>>
+
+
+
+
+[#_camel_apache_org_v1_trait_TolerationTrait]
+=== TolerationTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+This trait sets Tolerations over Integration pods. Tolerations allow (but do not require) the pods to schedule onto nodes with matching taints.
+See https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ for more details.
+
+The toleration should be expressed in a similar manner that of taints, i.e., `Key[=Value]:Effect[:Seconds]`, where values in square brackets are optional.
+
+For examples:
+
+- `node-role.kubernetes.io/master:NoSchedule`
+- `node.kubernetes.io/network-unavailable:NoExecute:3000`
+- `disktype=ssd:PreferNoSchedule`
+
+It's disabled by default.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`taints` +
+[]string
+|
+
+
+The list of taints to tolerate, in the form `Key[=Value]:Effect[:Seconds]`
+
+
+|===
+
+[#_camel_apache_org_v1_trait_Trait]
+=== Trait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_trait_AffinityTrait, AffinityTrait>>
+* <<#_camel_apache_org_v1_trait_BuilderTrait, BuilderTrait>>
+* <<#_camel_apache_org_v1_trait_CamelTrait, CamelTrait>>
+* <<#_camel_apache_org_v1_trait_ContainerTrait, ContainerTrait>>
+* <<#_camel_apache_org_v1_trait_CronTrait, CronTrait>>
+* <<#_camel_apache_org_v1_trait_DependenciesTrait, DependenciesTrait>>
+* <<#_camel_apache_org_v1_trait_DeployerTrait, DeployerTrait>>
+* <<#_camel_apache_org_v1_trait_DeploymentTrait, DeploymentTrait>>
+* <<#_camel_apache_org_v1_trait_EnvironmentTrait, EnvironmentTrait>>
+* <<#_camel_apache_org_v1_trait_ErrorHandlerTrait, ErrorHandlerTrait>>
+* <<#_camel_apache_org_v1_trait_GCTrait, GCTrait>>
+* <<#_camel_apache_org_v1_trait_HealthTrait, HealthTrait>>
+* <<#_camel_apache_org_v1_trait_IngressTrait, IngressTrait>>
+* <<#_camel_apache_org_v1_trait_IstioTrait, IstioTrait>>
+* <<#_camel_apache_org_v1_trait_JVMTrait, JVMTrait>>
+* <<#_camel_apache_org_v1_trait_JolokiaTrait, JolokiaTrait>>
+* <<#_camel_apache_org_v1_trait_KameletsTrait, KameletsTrait>>
+* <<#_camel_apache_org_v1_trait_KnativeServiceTrait, KnativeServiceTrait>>
+* <<#_camel_apache_org_v1_trait_KnativeTrait, KnativeTrait>>
+* <<#_camel_apache_org_v1_trait_LoggingTrait, LoggingTrait>>
+* <<#_camel_apache_org_v1_trait_MountTrait, MountTrait>>
+* <<#_camel_apache_org_v1_trait_OpenAPITrait, OpenAPITrait>>
+* <<#_camel_apache_org_v1_trait_OwnerTrait, OwnerTrait>>
+* <<#_camel_apache_org_v1_trait_PDBTrait, PDBTrait>>
+* <<#_camel_apache_org_v1_trait_PlatformTrait, PlatformTrait>>
+* <<#_camel_apache_org_v1_trait_PodTrait, PodTrait>>
+* <<#_camel_apache_org_v1_trait_PrometheusTrait, PrometheusTrait>>
+* <<#_camel_apache_org_v1_trait_PullSecretTrait, PullSecretTrait>>
+* <<#_camel_apache_org_v1_trait_QuarkusTrait, QuarkusTrait>>
+* <<#_camel_apache_org_v1_trait_RegistryTrait, RegistryTrait>>
+* <<#_camel_apache_org_v1_trait_RouteTrait, RouteTrait>>
+* <<#_camel_apache_org_v1_trait_ServiceBindingTrait, ServiceBindingTrait>>
+* <<#_camel_apache_org_v1_trait_ServiceTrait, ServiceTrait>>
+* <<#_camel_apache_org_v1_trait_TolerationTrait, TolerationTrait>>
+
+Base type for all traits.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`enabled` +
+bool
+|
+
+
+Can be used to enable or disable a trait. All traits share this common property.
+
+|`configuration` +
+*xref:#_camel_apache_org_v1_trait_Configuration[Configuration]*
+|
+
+
+Legacy trait configuration parameters.
+Deprecated: for backward compatibility.
+
+
+|===

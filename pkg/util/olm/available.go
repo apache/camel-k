@@ -31,7 +31,7 @@ import (
 	kubernetesutils "github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-// IsAPIAvailable returns true if we are connected to a cluster with OLM installed
+// IsAPIAvailable returns true if we are connected to a cluster with OLM installed.
 //
 // This method should not be called from the operator, as it might require permissions that are not available.
 func IsAPIAvailable(ctx context.Context, c kubernetes.Interface, namespace string) (bool, error) {

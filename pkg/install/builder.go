@@ -24,7 +24,7 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 )
 
-// BuilderServiceAccountRoles installs the builder service account and related roles in the given namespace
+// BuilderServiceAccountRoles installs the builder service account and related roles in the given namespace.
 func BuilderServiceAccountRoles(ctx context.Context, c client.Client, namespace string, cluster v1.IntegrationPlatformCluster) error {
 	if cluster == v1.IntegrationPlatformClusterOpenShift {
 		if err := installBuilderServiceAccountRolesOpenShift(ctx, c, namespace); err != nil {
@@ -40,16 +40,18 @@ func BuilderServiceAccountRoles(ctx context.Context, c client.Client, namespace 
 
 func installBuilderServiceAccountRolesOpenShift(ctx context.Context, c client.Client, namespace string) error {
 	return ResourcesOrCollect(ctx, c, namespace, nil, true, IdentityResourceCustomizer,
-		"/manager/builder-service-account.yaml",
-		"/rbac/builder-role-openshift.yaml",
-		"/rbac/builder-role-binding.yaml",
+		"/builder/builder-service-account.yaml",
+		"/builder/builder-role.yaml",
+		"/builder/builder-role-binding.yaml",
+		"/builder/builder-role-openshift.yaml",
+		"/builder/builder-role-binding-openshift.yaml",
 	)
 }
 
 func installBuilderServiceAccountRolesKubernetes(ctx context.Context, c client.Client, namespace string) error {
 	return ResourcesOrCollect(ctx, c, namespace, nil, true, IdentityResourceCustomizer,
-		"/manager/builder-service-account.yaml",
-		"/rbac/builder-role-kubernetes.yaml",
-		"/rbac/builder-role-binding.yaml",
+		"/builder/builder-service-account.yaml",
+		"/builder/builder-role.yaml",
+		"/builder/builder-role-binding.yaml",
 	)
 }

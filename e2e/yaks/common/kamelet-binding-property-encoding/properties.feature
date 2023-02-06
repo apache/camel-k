@@ -3,13 +3,13 @@ Feature: Ensure that Kamelets support multiline configuration
   Background:
     Given Disable auto removal of Kamelet resources
     Given Disable auto removal of Kubernetes resources
-    Given Camel-K resource polling configuration
+    Given Camel K resource polling configuration
       | maxAttempts          | 60   |
       | delayBetweenAttempts | 3000 |
 
   Scenario: Wait for binding to start
     Given create Kubernetes service probe-service with target port 8080
-    Then Camel-K integration properties-binding should be running
+    Then Camel K integration properties-binding should be running
 
   Scenario: Verify binding
     Given HTTP server "probe-service"

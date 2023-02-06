@@ -18,8 +18,9 @@ limitations under the License.
 package trait
 
 import (
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util"
+	"k8s.io/utils/pointer"
+
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/envvar"
 )
 
@@ -27,74 +28,51 @@ const (
 	envVarQuarkusLogLevel                  = "QUARKUS_LOG_LEVEL"
 	envVarQuarkusLogConsoleColor           = "QUARKUS_LOG_CONSOLE_COLOR"
 	envVarQuarkusLogConsoleFormat          = "QUARKUS_LOG_CONSOLE_FORMAT"
-	envVarQuarkusLogConsoleJson            = "QUARKUS_LOG_CONSOLE_JSON"
-	envVarQuarkusLogConsoleJsonPrettyPrint = "QUARKUS_LOG_CONSOLE_JSON_PRETTY_PRINT"
-	depQuarkusLoggingJson                  = "mvn:io.quarkus:quarkus-logging-json"
+	envVarQuarkusLogConsoleJSON            = "QUARKUS_LOG_CONSOLE_JSON"
+	envVarQuarkusLogConsoleJSONPrettyPrint = "QUARKUS_LOG_CONSOLE_JSON_PRETTY_PRINT"
 	defaultLogLevel                        = "INFO"
 )
 
-// The Logging trait is used to configure Integration runtime logging options (such as color and format).
-// The logging backend is provided by Quarkus, whose configuration is documented at https://quarkus.io/guides/logging.
-//
-// +camel-k:trait=logging
 type loggingTrait struct {
-	BaseTrait `property:",squash"`
-	// Colorize the log output
-	Color *bool `property:"color" json:"color,omitempty"`
-	// Logs message format
-	Format string `property:"format" json:"format,omitempty"`
-	// Adjust the logging level (defaults to INFO)
-	Level string `property:"level" json:"level,omitempty"`
-	// Output the logs in JSON
-	Json *bool `property:"json" json:"json,omitempty"`
-	// Enable "pretty printing" of the JSON logs
-	JsonPrettyPrint *bool `property:"json-pretty-print" json:"jsonPrettyPrint,omitempty"`
+	BaseTrait
+	traitv1.LoggingTrait `property:",squash"`
 }
 
 func newLoggingTraitTrait() Trait {
 	return &loggingTrait{
 		BaseTrait: NewBaseTrait("logging", 800),
-		Level:     defaultLogLevel,
+		LoggingTrait: traitv1.LoggingTrait{
+			Level: defaultLogLevel,
+		},
 	}
 }
 
-func (l loggingTrait) Configure(environment *Environment) (bool, error) {
-	if IsFalse(l.Enabled) {
+func (l loggingTrait) Configure(e *Environment) (bool, error) {
+	if e.Integration == nil || !pointer.BoolDeref(l.Enabled, true) {
 		return false, nil
 	}
 
-	return environment.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying,
-		v1.IntegrationPhaseRunning), nil
+	return e.IntegrationInRunningPhases(), nil
 }
 
-func (l loggingTrait) Apply(environment *Environment) error {
-	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		if IsTrue(l.Json) {
-			if environment.Integration.Status.Dependencies == nil {
-				environment.Integration.Status.Dependencies = make([]string, 0)
-			}
-			util.StringSliceUniqueAdd(&environment.Integration.Status.Dependencies, depQuarkusLoggingJson)
-		}
-
-		return nil
-	}
-
-	envvar.SetVal(&environment.EnvVars, envVarQuarkusLogLevel, l.Level)
+func (l loggingTrait) Apply(e *Environment) error {
+	envvar.SetVal(&e.EnvVars, envVarQuarkusLogLevel, l.Level)
 
 	if l.Format != "" {
-		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleFormat, l.Format)
+		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleFormat, l.Format)
 	}
 
-	if IsTrue(l.Json) {
-		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJson, True)
-		if IsTrue(l.JsonPrettyPrint) {
-			envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJsonPrettyPrint, True)
+	if pointer.BoolDeref(l.JSON, false) {
+		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSON, True)
+		if pointer.BoolDeref(l.JSONPrettyPrint, false) {
+			envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSONPrettyPrint, True)
 		}
 	} else {
-		envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleJson, False)
+		// If the trait is false OR unset, we default to false.
+		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSON, False)
 
-		if IsNilOrTrue(l.Color) {
-			envvar.SetVal(&environment.EnvVars, envVarQuarkusLogConsoleColor, True)
+		if pointer.BoolDeref(l.Color, true) {
+			envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleColor, True)
 		}
 	}
 

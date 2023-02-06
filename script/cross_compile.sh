@@ -22,13 +22,14 @@ rm -rf ${builddir}
 
 basename=camel-k-client
 
-if [ "$#" -ne 2 ]; then
-    echo "usage: $0 version build_flags"
+if [ "$#" -lt 2 ]; then
+    echo "usage: $0 <version> <build_flags...>"
     exit 1
 fi
 
 version=$1
-build_flags=$2
+shift
+build_flags="$*"
 
 cross_compile () {
 	local label=$1
@@ -42,7 +43,7 @@ cross_compile () {
 	fi
 
 	targetdir=${builddir}/${label}
-	eval go build "$build_flags" -o ${targetdir}/kamel${extension} ./cmd/kamel/...
+	eval go build $build_flags -o ${targetdir}/kamel${extension} ./cmd/kamel/...
 
 	if [ -n "$GPG_PASS" ]; then
 	    gpg --output ${targetdir}/kamel${extension}.asc --armor --detach-sig --passphrase ${GPG_PASS} ${targetdir}/kamel${extension}

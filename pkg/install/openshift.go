@@ -39,23 +39,23 @@ const (
 	kamelVersionAnnotation = "camel.apache.org/version"
 )
 
-// The following variables may be overridden at build time
+// The following variables may be overridden at build time.
 var (
-	// KamelCLIDownloadName --
+	// KamelCLIDownloadName --.
 	KamelCLIDownloadName = "kamel-cli"
-	// KamelCLIDownloadDisplayName is the name as seen in the download page
+	// KamelCLIDownloadDisplayName is the name as seen in the download page.
 	KamelCLIDownloadDisplayName = "kamel - Apache Camel K Command Line Interface"
-	// KamelCLIDownloadDescription is the description as seen in the download page
+	// KamelCLIDownloadDescription is the description as seen in the download page.
 	KamelCLIDownloadDescription = "Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless superpowers.\n\n" +
 		"The `kamel` binary can be used to both configure the cluster and run integrations. " +
 		"Once you've downloaded the `kamel` binary, log into the cluster using the `oc` client tool and start using the `kamel` CLI.\n\n" +
 		"You can run `kamel help` to list the available commands or go to the [Camel K Website](https://camel.apache.org/projects/camel-k/) for more information."
 
-	// KamelCLIDownloadURLTemplate is the download template with 3 missing parameters (version, version, os)
+	// KamelCLIDownloadURLTemplate is the download template with 3 missing parameters (version, version, os).
 	KamelCLIDownloadURLTemplate = "https://github.com/apache/camel-k/releases/download/v%s/camel-k-client-%s-%s-64bit.tar.gz"
 )
 
-// OpenShiftConsoleDownloadLink installs the download link for the OpenShift console
+// OpenShiftConsoleDownloadLink installs the download link for the OpenShift console.
 func OpenShiftConsoleDownloadLink(ctx context.Context, c client.Client) error {
 	// Check the ConsoleCLIDownload CRD is present, which should be starting OpenShift version 4.2.
 	// That check is also enough to exclude Kubernetes clusters.

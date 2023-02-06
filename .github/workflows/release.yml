@@ -1,3 +1,5 @@
+--- # ---------------------------------------------------------------------------
+
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -13,120 +15,78 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# ---------------------------------------------------------------------------
-
 name: release
 
+env:
+  TEST_CLUSTER: kind
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 on:
-  push:
-    tags:
-      - '*nightly*'
+  schedule:
+    - cron: "10 23 * * *"
 
 jobs:
-  release:
+  main:
+    if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
     steps:
-    - name: Set up JDK 11
-      uses: AdoptOpenJDK/install-jdk@v1
-      with:
-        version: "11"
-    - name: Install Go
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.15.x
-    - name: Checkout code
+    - name: "Checkout code"
       uses: actions/checkout@v2
-    - name: Cache modules
-      uses: actions/cache@v1
       with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-
-    - name: Global Env
-      env:
-        TEST_DOCKER_HUB_USERNAME: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
-        TEST_DOCKER_HUB_PASSWORD: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
-      run: |
-        TAG=${GITHUB_REF##*/}
-        VERSION=${TAG:1}
-        echo "Using VERSION=$VERSION"
-        echo "::set-env name=VERSION::$VERSION"
-
-        IMAGE_NAME=docker.io/${TEST_DOCKER_HUB_USERNAME:-testcamelk}/camel-k
-        echo "Using IMAGE_NAME=$IMAGE_NAME"
-        echo "::set-env name=IMAGE_NAME::$IMAGE_NAME"
-
-        MAVEN_REPOSITORY=$(make get-staging-repo)
-        echo "Using MAVEN_REPOSITORY=$MAVEN_REPOSITORY"
-        echo "::set-env name=MAVEN_REPOSITORY::$MAVEN_REPOSITORY"
-
-        docker login -u $TEST_DOCKER_HUB_USERNAME -p $TEST_DOCKER_HUB_PASSWORD
-
-    - name: Codegen
-      run: |
-        make VERSION=$VERSION IMAGE_NAME=$IMAGE_NAME codegen set-version build-resources
-
-    - name: Build
-      run: |
-        make VERSION=$VERSION IMAGE_NAME=$IMAGE_NAME release-nightly
-
-    - name: Check
-      run: ls -l
-
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@latest
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ref: main
+        persist-credentials: false
+        submodules: recursive
+    - name: Release main nightly
+      uses: ./.github/actions/release-nightly
       with:
-        tag_name: ${{ env.VERSION }}
-        release_name: Release ${{ env.VERSION }}
-        body: |
-          Apache Camel K nightly build for testing (unstable).
+        goVersion: "1.18.x"
+        javaVersion: "11"
+        secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
+        secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+        secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
+        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
 
-          To test it, download the client for your OS and run:
+  v1_10_x:
+    if: github.repository == 'apache/camel-k'
+    runs-on: ubuntu-20.04
+    steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v2
+      with:
+        ref: release-1.10.x
+        persist-credentials: false
+        submodules: recursive
+    - name: release-1.10.x nightly
+      uses: ./.github/actions/release-nightly
+      with:
+        goVersion: "1.17.x"
+        javaVersion: "11"
+        secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
+        secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+        secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
+        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
 
-          ```
-          kamel install --olm=false --maven-repository=${{ env.MAVEN_REPOSITORY }}
-          ```
+  v1_11_x:
+    if: github.repository == 'apache/camel-k'
+    runs-on: ubuntu-20.04
+    steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v2
+      with:
+        ref: release-1.11.x
+        persist-credentials: false
+        submodules: recursive
+    - name: release-1.11.x nightly
+      uses: ./.github/actions/release-nightly
+      with:
+        goVersion: "1.17.x"
+        javaVersion: "11"
+        secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
+        secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+        secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
+        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
 
-        draft: false
-        prerelease: true
-    - name: Upload Client Linux
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./camel-k-client-${{ env.VERSION }}-linux-64bit.tar.gz
-        asset_name: camel-k-client-${{ env.VERSION }}-linux-64bit.tar.gz
-        asset_content_type: application/tar+gzip
-    - name: Upload Client Mac
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./camel-k-client-${{ env.VERSION }}-mac-64bit.tar.gz
-        asset_name: camel-k-client-${{ env.VERSION }}-mac-64bit.tar.gz
-        asset_content_type: application/tar+gzip
-    - name: Upload Client Windows
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./camel-k-client-${{ env.VERSION }}-windows-64bit.tar.gz
-        asset_name: camel-k-client-${{ env.VERSION }}-windows-64bit.tar.gz
-        asset_content_type: application/tar+gzip
-    - name: Upload Examples
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./camel-k-examples-${{ env.VERSION }}.tar.gz
-        asset_name: camel-k-examples-${{ env.VERSION }}.tar.gz
-        asset_content_type: application/tar+gzip
+

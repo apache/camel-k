@@ -19,7 +19,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.4.1
+    controller-gen.kubebuilder.io/version: v0.6.1
   creationTimestamp: null
   labels:
     app: camel-k
@@ -61,14 +61,10 @@ spec:
           metadata:
             type: object
           spec:
-            description: KameletSpec defines the desired state of Kamelet
+            description: the desired specification
             properties:
-              authorization:
-                description: AuthorizationSpec is TODO (oauth information)
-                type: object
               definition:
-                description: JSONSchemaProps is a JSON-Schema following Specification
-                  Draft 4 (http://json-schema.org/).
+                description: defines the formal configuration of the Kamelet
                 properties:
                   $schema:
                     description: JSONSchemaURL represents a schema url.
@@ -143,8 +139,8 @@ spec:
                             with any non digit characters mixed in - ssn: a U.S. social
                             security number following the regex ^\\\\d{3}[- ]?\\\\d{2}[-
                             ]?\\\\d{4}$ - hexcolor: an hexadecimal color code like
-                            \"#FFFFFF: following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
-                            - rgbcolor: an RGB color code like rgb like \"rgb(255,255,2559\"
+                            \"#FFFFFF\" following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
+                            - rgbcolor: an RGB color code like rgb like \"rgb(255,255,255)\"
                             - byte: base64 encoded binary data - password: any kind
                             of string - date: a date string like \"2006-01-02\" as
                             defined by full-date in RFC3339 - duration: a duration
@@ -193,8 +189,8 @@ spec:
                         uniqueItems:
                           type: boolean
                         x-descriptors:
-                          description: The list of descriptors that determine which
-                            UI components to use on different views
+                          description: XDescriptors is a list of extended properties
+                            that trigger a custom behavior in external systems
                           items:
                             type: string
                           type: array
@@ -210,26 +206,30 @@ spec:
                     type: string
                 type: object
               dependencies:
+                description: Camel dependencies needed by the Kamelet
                 items:
                   type: string
                 type: array
-              flow:
-                description: 'Deprecated: use template'
-                type: object
-                x-kubernetes-preserve-unknown-fields: true
               sources:
+                description: sources in any Camel DSL supported
                 items:
-                  description: SourceSpec --
+                  description: SourceSpec defines the configuration for one or more
+                    routes to be executed in a certain Camel DSL language
                   properties:
                     compression:
+                      description: if the content is compressed (base64 encrypted)
                       type: boolean
                     content:
+                      description: the source code (plain text)
                       type: string
                     contentKey:
+                      description: the confimap key holding the source content
                       type: string
                     contentRef:
+                      description: the confimap reference holding the source content
                       type: string
                     contentType:
+                      description: the content type (tipically text or binary)
                       type: string
                     interceptors:
                       description: Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
@@ -238,15 +238,18 @@ spec:
                         type: string
                       type: array
                     language:
-                      description: Language --
+                      description: specify which is the language (Camel DSL) used
+                        to interpret this source code
                       type: string
                     loader:
                       description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
                         that will interpret this source at runtime
                       type: string
                     name:
+                      description: the name of the specification
                       type: string
                     path:
+                      description: the path where the file is stored
                       type: string
                     property-names:
                       description: List of property names defined in the source (e.g.
@@ -255,6 +258,7 @@ spec:
                         type: string
                       type: array
                     rawContent:
+                      description: the source code (binary)
                       format: byte
                       type: string
                     type:
@@ -264,18 +268,20 @@ spec:
                   type: object
                 type: array
               template:
-                description: Template is an unstructured object representing a Kamelet
-                  template in YAML/JSON DSL
+                description: the main source in YAML DSL
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
               types:
                 additionalProperties:
+                  description: EventTypeSpec represents a specification for an event
+                    type
                   properties:
                     mediaType:
+                      description: media type as expected for HTTP media types (ie,
+                        application/json)
                       type: string
                     schema:
-                      description: JSONSchemaProps is a JSON-Schema following Specification
-                        Draft 4 (http://json-schema.org/).
+                      description: the expected schema for the event
                       properties:
                         $schema:
                           description: JSONSchemaURL represents a schema url.
@@ -354,9 +360,9 @@ spec:
                                   with any non digit characters mixed in - ssn: a
                                   U.S. social security number following the regex
                                   ^\\\\d{3}[- ]?\\\\d{2}[- ]?\\\\d{4}$ - hexcolor:
-                                  an hexadecimal color code like \"#FFFFFF: following
+                                  an hexadecimal color code like \"#FFFFFF\" following
                                   the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$ -
-                                  rgbcolor: an RGB color code like rgb like \"rgb(255,255,2559\"
+                                  rgbcolor: an RGB color code like rgb like \"rgb(255,255,255)\"
                                   - byte: base64 encoded binary data - password: any
                                   kind of string - date: a date string like \"2006-01-02\"
                                   as defined by full-date in RFC3339 - duration: a
@@ -405,8 +411,8 @@ spec:
                               uniqueItems:
                                 type: boolean
                               x-descriptors:
-                                description: The list of descriptors that determine
-                                  which UI components to use on different views
+                                description: XDescriptors is a list of extended properties
+                                  that trigger a custom behavior in external systems
                                 items:
                                   type: string
                                 type: array
@@ -422,12 +428,15 @@ spec:
                           type: string
                       type: object
                   type: object
+                description: data specification types for the events consumed/produced
+                  by the Kamelet
                 type: object
             type: object
           status:
-            description: KameletStatus defines the observed state of Kamelet
+            description: the actual status of the resource
             properties:
               conditions:
+                description: Conditions --
                 items:
                   description: KameletCondition describes the state of a resource
                     at a certain point.
@@ -442,7 +451,7 @@ spec:
                       format: date-time
                       type: string
                     message:
-                      description: A human readable message indicating details about
+                      description: A human-readable message indicating details about
                         the transition.
                       type: string
                     reason:
@@ -459,14 +468,25 @@ spec:
                   - type
                   type: object
                 type: array
+              observedGeneration:
+                description: ObservedGeneration is the most recent generation observed
+                  for this Kamelet.
+                format: int64
+                type: integer
               phase:
+                description: Phase --
                 type: string
               properties:
+                description: Properties --
                 items:
+                  description: KameletProperty specify the behavior of a property
+                    in a Kamelet
                   properties:
                     default:
+                      description: the default value of the property (if any)
                       type: string
                     name:
+                      description: the name of the property
                       type: string
                   type: object
                 type: array

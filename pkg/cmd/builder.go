@@ -22,12 +22,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const builderCommand = "builder"
+
 func newCmdBuilder(rootCmdOptions *RootCmdOptions) (*cobra.Command, *builderCmdOptions) {
 	options := builderCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     "builder",
+		Use:     builderCommand,
 		Short:   "Run the Camel K builder",
 		Long:    `Run the Camel K builder`,
 		Hidden:  true,

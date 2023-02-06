@@ -23,5 +23,5 @@ import (
 )
 
 func init() {
-	bindings.RegisterBindingProvider(strimzi.StrimziBindingProvider{})
+	bindings.RegisterBindingProvider(strimzi.BindingProvider{})
 }

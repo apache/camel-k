@@ -13,28 +13,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM adoptopenjdk/openjdk11:slim
+FROM quay.io/quarkus/ubi-quarkus-mandrel:22.2.0.0-Final-java11
 
-ARG MAVEN_VERSION="3.6.3"
-ARG SHA="c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0"
-ARG BASE_URL="https://apache.osuosl.org/maven/maven-3/${MAVEN_VERSION}/binaries"
+ARG MAVEN_VERSION="3.8.6"
+ARG MAVEN_HOME="/usr/share/maven"
+ARG SHA="f790857f3b1f90ae8d16281f902c689e4f136ebe584aba45e4b1fa66c80cba826d3e0e52fdd04ed44b4c66f6d3fe3584a057c26dfcac544a60b301e6d0f91c26"
+ARG BASE_URL="https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries"
 
-RUN mkdir -p /usr/share/maven \
+USER 0
+
+RUN mkdir -p ${MAVEN_HOME} \
     && curl -Lso /tmp/maven.tar.gz ${BASE_URL}/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
     && echo "${SHA} /tmp/maven.tar.gz" | sha512sum -c - \
-    && tar -xzC /usr/share/maven --strip-components=1 -f /tmp/maven.tar.gz \
+    && tar -xzC ${MAVEN_HOME} --strip-components=1 -f /tmp/maven.tar.gz \
     && rm -v /tmp/maven.tar.gz \
-    && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn \
-    && rm /usr/share/maven/lib/maven-slf4j-provider*
+    && ln -s ${MAVEN_HOME}/bin/mvn /usr/bin/mvn \
+    && rm ${MAVEN_HOME}/lib/maven-slf4j-provider*
 
 ADD build/_maven_output /tmp/artifacts/m2
 ADD build/_kamelets /kamelets
 COPY build/_maven_overlay/ /usr/share/maven/lib/
-ADD build/logback.xml /usr/share/maven/conf/
+ADD build/_maven_overlay/logback.xml /usr/share/maven/conf/
 
 ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=/usr/share/maven/conf/logback.xml"
-
-USER 0
 
 RUN chgrp -R 0 /tmp/artifacts/m2 \
     && chmod -R g=u /tmp/artifacts/m2 \

@@ -18,13 +18,14 @@ limitations under the License.
 package v1
 
 import (
+	"strconv"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// NewIntegrationKit --
-func NewIntegrationKit(namespace string, name string) IntegrationKit {
-	return IntegrationKit{
+func NewIntegrationKit(namespace string, name string) *IntegrationKit {
+	return &IntegrationKit{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: SchemeGroupVersion.String(),
 			Kind:       IntegrationKitKind,
@@ -36,7 +37,6 @@ func NewIntegrationKit(namespace string, name string) IntegrationKit {
 	}
 }
 
-// NewIntegrationKitList --
 func NewIntegrationKitList() IntegrationKitList {
 	return IntegrationKitList{
 		TypeMeta: metav1.TypeMeta{
@@ -46,7 +46,6 @@ func NewIntegrationKitList() IntegrationKitList {
 	}
 }
 
-// Configurations --
 func (in *IntegrationKitSpec) Configurations() []ConfigurationSpec {
 	if in == nil {
 		return []ConfigurationSpec{}
@@ -55,7 +54,11 @@ func (in *IntegrationKitSpec) Configurations() []ConfigurationSpec {
 	return in.Configuration
 }
 
-// Configurations --
+// SetOperatorID sets the given operator id as an annotation
+func (in *IntegrationKit) SetOperatorID(operatorID string) {
+	SetAnnotation(&in.ObjectMeta, OperatorIDAnnotation, operatorID)
+}
+
 func (in *IntegrationKit) Configurations() []ConfigurationSpec {
 	if in == nil {
 		return []ConfigurationSpec{}
@@ -64,7 +67,6 @@ func (in *IntegrationKit) Configurations() []ConfigurationSpec {
 	return in.Spec.Configuration
 }
 
-// SetIntegrationPlatform --
 func (in *IntegrationKit) SetIntegrationPlatform(platform *IntegrationPlatform) {
 	cs := corev1.ConditionTrue
 
@@ -81,6 +83,22 @@ func (in *IntegrationKit) SetIntegrationPlatform(platform *IntegrationPlatform) 
 	in.Status.Platform = platform.Name
 }
 
+func (in *IntegrationKit) HasHigherPriorityThan(kit *IntegrationKit) bool {
+	p1 := 0
+	p2 := 0
+	if l, ok := in.Labels[IntegrationKitPriorityLabel]; ok {
+		if p, err := strconv.Atoi(l); err == nil {
+			p1 = p
+		}
+	}
+	if l, ok := kit.Labels[IntegrationKitPriorityLabel]; ok {
+		if p, err := strconv.Atoi(l); err == nil {
+			p2 = p
+		}
+	}
+	return p1 > p2
+}
+
 // GetCondition returns the condition with the provided type.
 func (in *IntegrationKitStatus) GetCondition(condType IntegrationKitConditionType) *IntegrationKitCondition {
 	for i := range in.Conditions {
@@ -92,7 +110,6 @@ func (in *IntegrationKitStatus) GetCondition(condType IntegrationKitConditionTyp
 	return nil
 }
 
-// SetCondition --
 func (in *IntegrationKitStatus) SetCondition(condType IntegrationKitConditionType, status corev1.ConditionStatus, reason string, message string) {
 	in.SetConditions(IntegrationKitCondition{
 		Type:               condType,
@@ -104,7 +121,6 @@ func (in *IntegrationKitStatus) SetCondition(condType IntegrationKitConditionTyp
 	})
 }
 
-// SetErrorCondition --
 func (in *IntegrationKitStatus) SetErrorCondition(condType IntegrationKitConditionType, reason string, err error) {
 	in.SetConditions(IntegrationKitCondition{
 		Type:               condType,
@@ -158,7 +174,6 @@ func (in *IntegrationKitStatus) RemoveCondition(condType IntegrationKitCondition
 
 var _ ResourceCondition = IntegrationKitCondition{}
 
-// GetConditions --
 func (in *IntegrationKitStatus) GetConditions() []ResourceCondition {
 	res := make([]ResourceCondition, 0, len(in.Conditions))
 	for _, c := range in.Conditions {
@@ -167,32 +182,26 @@ func (in *IntegrationKitStatus) GetConditions() []ResourceCondition {
 	return res
 }
 
-// GetType --
 func (c IntegrationKitCondition) GetType() string {
 	return string(c.Type)
 }
 
-// GetStatus --
 func (c IntegrationKitCondition) GetStatus() corev1.ConditionStatus {
 	return c.Status
 }
 
-// GetLastUpdateTime --
 func (c IntegrationKitCondition) GetLastUpdateTime() metav1.Time {
 	return c.LastUpdateTime
 }
 
-// GetLastTransitionTime --
 func (c IntegrationKitCondition) GetLastTransitionTime() metav1.Time {
 	return c.LastTransitionTime
 }
 
-// GetReason --
 func (c IntegrationKitCondition) GetReason() string {
 	return c.Reason
 }
 
-// GetMessage --
 func (c IntegrationKitCondition) GetMessage() string {
 	return c.Message
 }

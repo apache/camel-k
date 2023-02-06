@@ -1,0 +1,131 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: kamel-config-cluster-custom
+description: 'Provides configuration for acessing a custom kubernetes cluster'
+
+inputs:
+  cluster-config-data:
+    description: 'Non-Secure Variables for the cluster configuration'
+    required: true
+  cluster-kube-config-data:
+    description: 'Base16 encoded kube config'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - id: connect-cluster
+      name: Connect to cluster
+      shell: bash
+      run: |
+        ./.github/actions/kamel-config-cluster-custom/connect-cluster.sh \
+          -c "${{ inputs.cluster-config-data }}" \
+          -k "${{ inputs.cluster-kube-config-data }}"
+
+    - id: configure-developer-user
+      name: Configure Developer User
+      shell: bash
+      run: |
+        # Aggregate pod eviction permission to the default admin role
+        cat <<EOF | kubectl apply -f -
+        kind: ClusterRole
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:eviction
+          labels:
+            rbac.authorization.k8s.io/aggregate-to-admin: "true"
+        rules:
+        - apiGroups: [""]
+          resources: ["pods/eviction"]
+          verbs: ["create"]
+        EOF
+
+        # Grant nodes permission to the default developer user
+        cat <<EOF | kubectl apply -f -
+        kind: ClusterRole
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:nodes
+        rules:
+        - apiGroups: [""]
+          resources: ["nodes"]
+          verbs: ["get","list"]
+        EOF
+
+        cat <<EOF | kubectl apply -f -
+        kind: ClusterRoleBinding
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:nodes
+        subjects:
+        - kind: User
+          name: developer
+        roleRef:
+          kind: ClusterRole
+          name: camel-k-test:nodes
+          apiGroup: rbac.authorization.k8s.io
+        EOF
+
+        # Aggregate finalizers permission to the default admin role
+        cat <<EOF | oc apply -f -
+        kind: ClusterRole
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: camel-k-test:finalizers
+          labels:
+            rbac.authorization.k8s.io/aggregate-to-admin: "true"
+        rules:
+        - apiGroups: ["camel.apache.org"]
+          resources: ["*/finalizers"]
+          verbs: ["update"]
+        EOF
+
+        # Set the context to the user
+        kubectl config use-context ${{ steps.connect-cluster.outputs.cluster-kube-user-ctx }}
+
+outputs:
+  cluster-image-registry-push-host:
+    description: "The image registry to which to push images"
+    value: ${{ steps.connect-cluster.outputs.cluster-image-registry-push-host }}
+  cluster-image-registry-pull-host:
+    description: "The image registry from which to pull images"
+    value: ${{ steps.connect-cluster.outputs.cluster-image-registry-pull-host }}
+  cluster-image-registry-insecure:
+    description: "Whether the pull registry is insecure"
+    value: ${{ steps.connect-cluster.outputs.cluster-image-registry-insecure }}
+  cluster-catalog-source-name:
+    description: "The name of the OLM catalog source to install"
+    value: ${{ steps.connect-cluster.outputs.cluster-catalog-source-name }}
+  cluster-catalog-source-namespace:
+    description: "The namespace in which to install the OLM catalog source"
+    value: ${{ steps.connect-cluster.outputs.cluster-catalog-source-namespace }}
+  cluster-image-namespace:
+    description: "The namespace to install the camel-k images"
+    value: ${{ steps.connect-cluster.outputs.cluster-image-namespace }}
+  cluster-kube-admin-user-ctx:
+    description: "The context of the kube admin user"
+    value: ${{ steps.connect-cluster.outputs.cluster-kube-admin-user-ctx }}
+  cluster-kube-user-ctx:
+    description: "The context of the kube user"
+    value: ${{ steps.connect-cluster.outputs.cluster-kube-user-ctx }}
+  cluster-has-olm:
+    description: "Does the cluster have OLM"
+    value: ${{ steps.connect-cluster.outputs.cluster-has-olm }}
+  cluster-global-operator-namespace:
+    description: "Namespace to install a global operator"
+    value: ${{ steps.connect-cluster.outputs.cluster-global-operator-namespace}}

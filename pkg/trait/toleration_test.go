@@ -23,6 +23,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/pointer"
 )
 
 func TestConfigureTolerationTraitMissingTaint(t *testing.T) {
@@ -70,6 +71,8 @@ func TestApplyPodTolerationLabelsDefault(t *testing.T) {
 }
 
 func testApplyPodTolerationLabelsDefault(t *testing.T, trait *tolerationTrait, environment *Environment, tolerations *[]corev1.Toleration) {
+	t.Helper()
+
 	err := trait.Apply(environment)
 
 	assert.Nil(t, err)
@@ -96,6 +99,8 @@ func TestApplyPodTolerationLabelsTolerationSeconds(t *testing.T) {
 }
 
 func testApplyPodTolerationLabelsTolerationSeconds(t *testing.T, trait *tolerationTrait, environment *Environment, tolerations *[]corev1.Toleration) {
+	t.Helper()
+
 	err := trait.Apply(environment)
 
 	assert.Nil(t, err)
@@ -125,8 +130,8 @@ func TestTolerationValidTaints(t *testing.T) {
 }
 
 func createNominalTolerationTrait() *tolerationTrait {
-	tolerationTrait := newTolerationTrait().(*tolerationTrait)
-	tolerationTrait.Enabled = BoolP(true)
+	tolerationTrait, _ := newTolerationTrait().(*tolerationTrait)
+	tolerationTrait.Enabled = pointer.Bool(true)
 	tolerationTrait.Taints = make([]string, 0)
 
 	return tolerationTrait

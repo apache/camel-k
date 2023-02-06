@@ -1,0 +1,112 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: kamel-prepare-env
+description: 'Initialise the test environment with tools. (Will only run once per workflow)'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set Env Vars
+      shell: bash
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          SUDO=sudo
+        fi
+
+        echo "SUDO=${SUDO}" >> $GITHUB_ENV
+    #
+    # This is a docker action so its pre-builds the image prior to
+    # running it. The building occurs prior to all steps regardless
+    # of where its located to run. Therefore, it must be run prior to
+    # clean-up since that step removes all docker image in order to
+    # claim back as much space as possible.
+    #
+    - name: Cleanup
+      shell: bash
+      if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
+      run: |
+        ls -lart
+        echo "Initial status:"
+        df -h
+
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          echo "Cleaning up resources:"
+          ${{ env.SUDO }} swapoff -a
+          ${{ env.SUDO }} rm -f /swapfile
+          ${{ env.SUDO }} apt clean
+          ${{ env.SUDO }} rm -rf /usr/share/dotnet
+          ${{ env.SUDO }} rm -rf /opt/ghc
+          ${{ env.SUDO }} rm -rf "/usr/local/share/boost"
+          ${{ env.SUDO }} rm -rf "$AGENT_TOOLSDIRECTORY"
+        fi
+
+        df -kh
+        docker rmi $(docker image ls -aq) || true # Don't fail if image is not present
+        df -kh
+
+        echo "Final status:"
+        df -h
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      if: ${{ env.ENV_PREPARED != 'true' }}
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+
+    - name: Set up Go
+      uses: actions/setup-go@v2 # Version 2 adds GOBIN to PATH
+      if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
+      with:
+        go-version: 1.18.x
+
+    - name: (Re-)install kustomize
+      shell: bash
+      if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
+      run: |
+        # reinstall kustomize to be always on the same version
+        set +e
+        $(which kustomize &> /dev/null)
+        if [ "$?" == "0" ]; then
+          ${{ env.SUDO }} rm $(which kustomize)
+        fi
+        set -e
+        make kustomize
+
+        # Add kustomize to PATH
+        echo "${{ env.GOPATH }}/bin" >> $GITHUB_PATH
+        which kustomize || { echo 'kustomize not found' ; exit 1; }
+
+    #
+    # Install a version of kubectl for generic access to cluster
+    #
+    - id: install-kubectl
+      uses: azure/setup-kubectl@v3
+      if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
+      with:
+        version: 'latest'
+
+    - id: complete-action
+      name: Environment Prepared
+      shell: bash
+      if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
+      run : |
+        #
+        # Avoid preparing the environment repeatedly
+        #
+        echo "KAMEL_PREPARE_ENV=true" >> $GITHUB_ENV

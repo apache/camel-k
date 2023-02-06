@@ -24,7 +24,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/indentedwriter"
@@ -41,12 +41,12 @@ func newDescribeKitCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *describ
 		Short:   "Describe an Integration Kit",
 		Long:    `Describe an Integration Kit.`,
 		PreRunE: decode(&options),
-		RunE: func(_ *cobra.Command, args []string) error {
-			if err := options.validate(args); err != nil {
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := options.validate(cmd, args); err != nil {
 				return err
 			}
-			if err := options.run(args); err != nil {
-				fmt.Println(err.Error())
+			if err := options.run(cmd, args); err != nil {
+				fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
 			}
 
 			return nil
@@ -60,75 +60,75 @@ type describeKitCommandOptions struct {
 	*RootCmdOptions
 }
 
-func (command *describeKitCommandOptions) validate(args []string) error {
+func (command *describeKitCommandOptions) validate(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return errors.New("describe expects a kit name argument")
 	}
 	return nil
 }
 
-func (command *describeKitCommandOptions) run(args []string) error {
+func (command *describeKitCommandOptions) run(cmd *cobra.Command, args []string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
 	}
 
 	kit := v1.NewIntegrationKit(command.Namespace, args[0])
-	kitKey := k8sclient.ObjectKey{
+	kitKey := ctrl.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      args[0],
 	}
 
-	if err := c.Get(command.Context, kitKey, &kit); err == nil {
-		if desc, err := command.describeIntegrationKit(kit); err == nil {
-			fmt.Print(desc)
+	if err := c.Get(command.Context, kitKey, kit); err == nil {
+		if desc, err := command.describeIntegrationKit(cmd, kit); err == nil {
+			fmt.Fprint(cmd.OutOrStdout(), desc)
 		} else {
-			fmt.Println(err)
+			fmt.Fprintln(cmd.ErrOrStderr(), err)
 		}
 	} else {
-		fmt.Printf("IntegrationKit '%s' does not exist.\n", args[0])
+		fmt.Fprintln(cmd.OutOrStdout(), "IntegrationKit '"+args[0]+"' does not exist")
 	}
 
 	return nil
 }
 
-func (command *describeKitCommandOptions) describeIntegrationKit(kit v1.IntegrationKit) (string, error) {
+func (command *describeKitCommandOptions) describeIntegrationKit(cmd *cobra.Command, kit *v1.IntegrationKit) (string, error) {
 	return indentedwriter.IndentedString(func(out io.Writer) error {
-		w := indentedwriter.NewWriter(out)
+		w := indentedwriter.NewWriter(cmd.OutOrStdout())
 
 		describeObjectMeta(w, kit.ObjectMeta)
 
-		w.Write(0, "Phase:\t%s\n", kit.Status.Phase)
-		w.Write(0, "Runtime Version:\t%s\n", kit.Status.RuntimeVersion)
-		w.Write(0, "Image:\t%s\n", kit.Status.Image)
-		w.Write(0, "Version:\t%s\n", kit.Status.Version)
+		w.Writef(0, "Phase:\t%s\n", kit.Status.Phase)
+		w.Writef(0, "Runtime Version:\t%s\n", kit.Status.RuntimeVersion)
+		w.Writef(0, "Image:\t%s\n", kit.Status.Image)
+		w.Writef(0, "Version:\t%s\n", kit.Status.Version)
 
 		if len(kit.Status.Artifacts) > 0 {
-			w.Write(0, "Artifacts:\t\n")
+			w.Writef(0, "Artifacts:\t\n")
 			for _, artifact := range kit.Status.Artifacts {
-				w.Write(1, "%s\n", artifact.ID)
+				w.Writef(1, "%s\n", artifact.ID)
 			}
 		}
 
 		if len(kit.Spec.Configuration) > 0 {
-			w.Write(0, "Configuration:\n")
+			w.Writef(0, "Configuration:\n")
 			for _, config := range kit.Spec.Configuration {
-				w.Write(1, "Type:\t%s\n", config.Type)
-				w.Write(1, "Value:\t%s\n", config.Value)
+				w.Writef(1, "Type:\t%s\n", config.Type)
+				w.Writef(1, "Value:\t%s\n", config.Value)
 			}
 		}
 
 		if len(kit.Spec.Dependencies) > 0 {
-			w.Write(0, "Dependencies:\t\n")
+			w.Writef(0, "Dependencies:\t\n")
 			for _, dependency := range kit.Spec.Dependencies {
-				w.Write(1, "%s\n", dependency)
+				w.Writef(1, "%s\n", dependency)
 			}
 		}
 
 		if len(kit.Spec.Repositories) > 0 {
-			w.Write(0, "Repositories:\n")
+			w.Writef(0, "Repositories:\n")
 			for _, repository := range kit.Spec.Repositories {
-				w.Write(1, "%s\n", repository)
+				w.Writef(1, "%s\n", repository)
 			}
 		}
 

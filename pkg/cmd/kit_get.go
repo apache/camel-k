@@ -42,11 +42,8 @@ func newKitGetCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitGetComman
 			if err := options.validate(cmd, args); err != nil {
 				return err
 			}
-			if err := options.run(cmd); err != nil {
-				fmt.Println(err.Error())
-			}
 
-			return nil
+			return options.run(cmd)
 		},
 	}
 
@@ -81,7 +78,7 @@ func (command *kitGetCommandOptions) run(cmd *cobra.Command) error {
 	w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 8, 1, '\t', 0)
 	fmt.Fprintln(w, "NAME\tPHASE\tTYPE\tIMAGE")
 	for _, ctx := range kitList.Items {
-		t := ctx.Labels["camel.apache.org/kit.type"]
+		t := ctx.Labels[v1.IntegrationKitTypeLabel]
 		u := command.User && t == v1.IntegrationKitTypeUser
 		e := command.External && t == v1.IntegrationKitTypeExternal
 		p := command.Platform && t == v1.IntegrationKitTypePlatform
@@ -90,7 +87,6 @@ func (command *kitGetCommandOptions) run(cmd *cobra.Command) error {
 			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", ctx.Name, string(ctx.Status.Phase), t, ctx.Status.Image)
 		}
 	}
-	w.Flush()
 
-	return nil
+	return w.Flush()
 }

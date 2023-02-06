@@ -18,7 +18,7 @@ limitations under the License.
 package v1
 
 import (
-	"strings"
+	"strconv"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -48,16 +48,6 @@ func NewIntegrationPlatform(namespace string, name string) IntegrationPlatform {
 	}
 }
 
-// TraitProfileByName returns the trait profile corresponding to the given name (case insensitive)
-func TraitProfileByName(name string) TraitProfile {
-	for _, p := range AllTraitProfiles {
-		if strings.EqualFold(name, string(p)) {
-			return p
-		}
-	}
-	return ""
-}
-
 // Configurations --
 func (in *IntegrationPlatformSpec) Configurations() []ConfigurationSpec {
 	if in == nil {
@@ -65,6 +55,11 @@ func (in *IntegrationPlatformSpec) Configurations() []ConfigurationSpec {
 	}
 
 	return in.Configuration
+}
+
+// SetOperatorID sets the given operator id as an annotation
+func (in *IntegrationPlatform) SetOperatorID(operatorID string) {
+	SetAnnotation(&in.ObjectMeta, OperatorIDAnnotation, operatorID)
 }
 
 // Configurations --
@@ -114,7 +109,7 @@ func (in *IntegrationPlatformStatus) GetCondition(condType IntegrationPlatformCo
 	return nil
 }
 
-// SetCondition --
+// SetCondition sets the condition with the given status, reason, and message.
 func (in *IntegrationPlatformStatus) SetCondition(condType IntegrationPlatformConditionType, status corev1.ConditionStatus, reason string, message string) {
 	in.SetConditions(IntegrationPlatformCondition{
 		Type:               condType,
@@ -126,7 +121,7 @@ func (in *IntegrationPlatformStatus) SetCondition(condType IntegrationPlatformCo
 	})
 }
 
-// SetErrorCondition --
+// SetErrorCondition sets the condition with the given reason and error message.
 func (in *IntegrationPlatformStatus) SetErrorCondition(condType IntegrationPlatformConditionType, reason string, err error) {
 	in.SetConditions(IntegrationPlatformCondition{
 		Type:               condType,
@@ -178,13 +173,27 @@ func (in *IntegrationPlatformStatus) RemoveCondition(condType IntegrationPlatfor
 	in.Conditions = newConditions
 }
 
-// IsKanikoCacheEnabled tells if the KanikoCache is enabled on the integration platform build spec
-func (b IntegrationPlatformBuildSpec) IsKanikoCacheEnabled() bool {
-	if b.KanikoBuildCache == nil {
-		// Cache is disabled by default
-		return false
+// IsOptionEnabled tells if provided option key is present in PublishStrategyOptions and enabled
+func (b IntegrationPlatformBuildSpec) IsOptionEnabled(option string) bool {
+	//Key defined in builder/kaniko.go
+	if enabled, ok := b.PublishStrategyOptions[option]; ok {
+		res, err := strconv.ParseBool(enabled)
+		if err != nil {
+			return false
+		}
+		return res
 	}
-	return *b.KanikoBuildCache
+	return false
+}
+
+// Add a publish strategy option
+func (b *IntegrationPlatformBuildSpec) AddOption(option string, value string) {
+	options := b.PublishStrategyOptions
+	if options == nil {
+		options = make(map[string]string)
+		b.PublishStrategyOptions = options
+	}
+	options[option] = value
 }
 
 // GetTimeout returns the specified duration or a default one

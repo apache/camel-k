@@ -42,5 +42,6 @@ func NewTimer() *Timer {
 func (t *Timer) ObserveDurationInSeconds(o prometheus.Observer) time.Duration {
 	d := time.Since(t.begin)
 	o.Observe(d.Seconds())
+
 	return d
 }

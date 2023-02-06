@@ -19,15 +19,28 @@ package source
 
 import (
 	"fmt"
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/apache/camel-k/pkg/util/camel"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-const XMLKameletEip = `
+func newTestXMLInspector(t *testing.T) XMLInspector {
+	t.Helper()
+
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	return XMLInspector{
+		baseInspector: baseInspector{
+			catalog: catalog,
+		},
+	}
+}
+
+const xmlKameletEip = `
 <camelContext xmlns="http://camel.apache.org/schema/spring">
   <route>
     <from uri="direct:start"/>
@@ -36,11 +49,21 @@ const XMLKameletEip = `
   </route>
 </camelContext>
 `
-const XMLKameletEndpoint = `
+
+const xmlKameletEndpoint = `
 <camelContext xmlns="http://camel.apache.org/schema/spring">
   <route>
     <from uri="direct:start"/>
     <to uri="kamelet:foo/bar?baz=test"/>
+  </route>
+</camelContext>
+`
+
+const xmlWireTapEndpoint = `
+<camelContext xmlns="http://camel.apache.org/schema/spring">
+  <route>
+    <from uri="direct:start"/>
+    <wireTap uri="kamelet:foo/bar?baz=test"/>
   </route>
 </camelContext>
 `
@@ -51,40 +74,115 @@ func TestXMLKamelet(t *testing.T) {
 		kamelets []string
 	}{
 		{
-			source:   XMLKameletEip,
+			source:   xmlKameletEip,
 			kamelets: []string{"foo/bar"},
 		},
 		{
-			source:   XMLKameletEndpoint,
+			source:   xmlKameletEndpoint,
+			kamelets: []string{"foo/bar"},
+		},
+		{
+			source:   xmlWireTapEndpoint,
 			kamelets: []string{"foo/bar"},
 		},
 	}
 
-	for i, test := range tc {
+	inspector := newTestXMLInspector(t)
+	for i := range tc {
+		test := tc[i]
 		t.Run(fmt.Sprintf("TestXMLKamelet-%d", i), func(t *testing.T) {
-			code := v1.SourceSpec{
-				DataSpec: v1.DataSpec{
-					Content: test.source,
-				},
-			}
+			assertExtract(t, inspector, test.source, func(meta *Metadata) {
+				assert.True(t, meta.RequiredCapabilities.IsEmpty())
 
-			catalog, err := camel.DefaultCatalog()
-			assert.Nil(t, err)
+				for _, k := range test.kamelets {
+					assert.Contains(t, meta.Kamelets, k)
+				}
+			})
+		})
+	}
+}
 
-			meta := NewMetadata()
-			inspector := XMLInspector{
-				baseInspector: baseInspector{
-					catalog: catalog,
-				},
-			}
+const xmlJSONEip = `
+<camelContext xmlns="http://camel.apache.org/schema/spring">
+  <route>
+    <from uri="direct:start"/>
+    <marshal><json/></marshal>
+  </route>
+</camelContext>
+`
 
-			err = inspector.Extract(code, &meta)
-			assert.Nil(t, err)
-			assert.True(t, meta.RequiredCapabilities.IsEmpty())
+const xmlJSONJacksonEip = `
+<camelContext xmlns="http://camel.apache.org/schema/spring">
+  <route>
+    <from uri="direct:start"/>
+    <marshal><json library="Jackson"/></marshal>
+  </route>
+</camelContext>
+`
 
-			for _, k := range test.kamelets {
-				assert.Contains(t, meta.Kamelets, k)
-			}
+const xmlAvroEndpoint = `
+<camelContext xmlns="http://camel.apache.org/schema/spring">
+  <route>
+    <from uri="direct:start"/>
+    <to uri="dataformat:avro:marshal"/>
+  </route>
+</camelContext>
+`
+
+const xmlJacksonEndpoint = `
+<camelContext xmlns="http://camel.apache.org/schema/spring">
+  <route>
+    <from uri="direct:start"/>
+    <to uri="dataformat:jackson:marshal"/>
+  </route>
+</camelContext>
+`
+
+const xmlProtobufEndpoint = `
+<camelContext xmlns="http://camel.apache.org/schema/spring">
+  <route>
+    <from uri="direct:start"/>
+    <to uri="dataformat:protobuf:marshal"/>
+  </route>
+</camelContext>
+`
+
+func TestXMLDataFormat(t *testing.T) {
+	tc := []struct {
+		source string
+		deps   []string
+	}{
+		{
+			source: xmlJSONEip,
+			deps:   []string{"camel:jackson"},
+		},
+		{
+			source: xmlJSONJacksonEip,
+			deps:   []string{"camel:jackson"},
+		},
+		{
+			source: xmlAvroEndpoint,
+			deps:   []string{"camel:dataformat", "camel:avro"},
+		},
+		{
+			source: xmlJacksonEndpoint,
+			deps:   []string{"camel:dataformat", "camel:jackson"},
+		},
+		{
+			source: xmlProtobufEndpoint,
+			deps:   []string{"camel:dataformat", "camel:protobuf"},
+		},
+	}
+
+	inspector := newTestXMLInspector(t)
+	for i := range tc {
+		test := tc[i]
+		t.Run(fmt.Sprintf("TestXMLDataFormat-%d", i), func(t *testing.T) {
+			assertExtract(t, inspector, test.source, func(meta *Metadata) {
+				for _, d := range test.deps {
+					assert.Contains(t, meta.Dependencies.List(), d)
+				}
+			})
 		})
 	}
 }

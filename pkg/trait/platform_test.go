@@ -24,12 +24,14 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/test"
+
 	"github.com/stretchr/testify/assert"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 )
 
 func TestPlatformTraitChangeStatus(t *testing.T) {
-
 	table := []struct {
 		name         string
 		initialPhase v1.IntegrationPhase
@@ -56,8 +58,8 @@ func TestPlatformTraitChangeStatus(t *testing.T) {
 				},
 			}
 
-			trait := newPlatformTrait().(*platformTrait)
-			trait.CreateDefault = BoolP(false)
+			trait, _ := newPlatformTrait().(*platformTrait)
+			trait.CreateDefault = pointer.Bool(false)
 
 			var err error
 			trait.Client, err = test.NewFakeClient()
@@ -90,8 +92,8 @@ func TestPlatformTraitCreatesDefaultPlatform(t *testing.T) {
 		},
 	}
 
-	trait := newPlatformTrait().(*platformTrait)
-	trait.CreateDefault = BoolP(true)
+	trait, _ := newPlatformTrait().(*platformTrait)
+	trait.CreateDefault = pointer.Bool(true)
 
 	var err error
 	trait.Client, err = test.NewFakeClient()
@@ -112,7 +114,6 @@ func TestPlatformTraitCreatesDefaultPlatform(t *testing.T) {
 }
 
 func TestPlatformTraitExisting(t *testing.T) {
-
 	table := []struct {
 		name          string
 		platformPhase v1.IntegrationPlatformPhase
@@ -126,7 +127,7 @@ func TestPlatformTraitExisting(t *testing.T) {
 		{
 			name:          "Move state",
 			platformPhase: v1.IntegrationPlatformPhaseReady,
-			expectedPhase: v1.IntegrationPhaseInitialization,
+			expectedPhase: v1.IntegrationPhaseNone,
 		},
 	}
 
@@ -146,8 +147,8 @@ func TestPlatformTraitExisting(t *testing.T) {
 				},
 			}
 
-			trait := newPlatformTrait().(*platformTrait)
-			trait.CreateDefault = BoolP(true)
+			trait, _ := newPlatformTrait().(*platformTrait)
+			trait.CreateDefault = pointer.Bool(true)
 
 			var err error
 			existingPlatform := v1.NewIntegrationPlatform("ns1", "existing")

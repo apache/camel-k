@@ -3,24 +3,27 @@
 
 The Camel K monitoring architecture relies on https://prometheus.io[Prometheus] and the eponymous operator.
 
-The https://github.com/coreos/prometheus-operator[Prometheus Operator] serves to make running Prometheus on top of Kubernetes as easy as possible, while preserving Kubernetes-native configuration options.
+The https://prometheus-operator.dev[Prometheus Operator] serves to make running Prometheus on top of Kubernetes as easy as possible, while preserving Kubernetes-native configuration options.
 
 [[prerequisites]]
 == Prerequisites
 
-To take full advantage of the Camel K monitoring capabilities, it is recommended to have a Prometheus Operator instance, that can be configured to integrate Camel K integrations.
+To take full advantage of the Camel K monitoring capabilities, it is recommended to have a Prometheus Operator instance, that can be configured to integrate the Camel K operator and integrations.
 
 [[kubernetes]]
 === Kubernetes
 
-You can deploy the Prometheus operator by running:
+The easiest way of starting with the Prometheus Operator is by deploying it as part of https://github.com/prometheus-operator/kube-prometheus[kube-prometheus], which provisions an entire monitoring stack.
+You can follow the https://prometheus-operator.dev/docs/prologue/quick-start/[quickstart] from the Prometheus Operator https://prometheus-operator.dev/[documentation].
+
+Alternatively, you can quickly deploy the Prometheus operator by running:
 
 [source,console]
 ----
-$ kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/v0.38.0/bundle.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/bundle.yaml
 ----
 
-WARNING: Beware this installs the operator in the `default` namespace. You must download the file locally and replace the `namespace` fields to deploy the resources into another namespace.
+WARNING: Beware this installs the operator in the `default` namespace. You must download the file locally and replace the `namespace` fields to deploy the resources into another namespace. This also installs the version from the `main` branch, which you can change in the URL by choosing a stable release version.
 
 Then, you can create a `Prometheus` resource, that the operator will use as configuration to deploy a managed Prometheus instance:
 

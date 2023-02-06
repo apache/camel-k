@@ -21,8 +21,11 @@ package fake
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	applyconfigurationcamelv1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/camel/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -119,7 +122,7 @@ func (c *FakeIntegrations) UpdateStatus(ctx context.Context, integration *camelv
 // Delete takes name of the integration and deletes it. Returns an error if one occurs.
 func (c *FakeIntegrations) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(integrationsResource, c.ns, name), &camelv1.Integration{})
+		Invokes(testing.NewDeleteActionWithOptions(integrationsResource, c.ns, name, opts), &camelv1.Integration{})
 
 	return err
 }
@@ -136,6 +139,51 @@ func (c *FakeIntegrations) DeleteCollection(ctx context.Context, opts v1.DeleteO
 func (c *FakeIntegrations) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *camelv1.Integration, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(integrationsResource, c.ns, name, pt, data, subresources...), &camelv1.Integration{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*camelv1.Integration), err
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied integration.
+func (c *FakeIntegrations) Apply(ctx context.Context, integration *applyconfigurationcamelv1.IntegrationApplyConfiguration, opts v1.ApplyOptions) (result *camelv1.Integration, err error) {
+	if integration == nil {
+		return nil, fmt.Errorf("integration provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(integration)
+	if err != nil {
+		return nil, err
+	}
+	name := integration.Name
+	if name == nil {
+		return nil, fmt.Errorf("integration.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(integrationsResource, c.ns, *name, types.ApplyPatchType, data), &camelv1.Integration{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*camelv1.Integration), err
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *FakeIntegrations) ApplyStatus(ctx context.Context, integration *applyconfigurationcamelv1.IntegrationApplyConfiguration, opts v1.ApplyOptions) (result *camelv1.Integration, err error) {
+	if integration == nil {
+		return nil, fmt.Errorf("integration provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(integration)
+	if err != nil {
+		return nil, err
+	}
+	name := integration.Name
+	if name == nil {
+		return nil, fmt.Errorf("integration.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(integrationsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &camelv1.Integration{})
 
 	if obj == nil {
 		return nil, err

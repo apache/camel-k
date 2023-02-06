@@ -23,8 +23,10 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/trait"
@@ -80,41 +82,41 @@ func (command *kitCreateCommandOptions) validateArgs(_ *cobra.Command, args []st
 	return nil
 }
 
-func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) error {
+func (command *kitCreateCommandOptions) run(cmd *cobra.Command, args []string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
 	}
 
-	catalog := trait.NewCatalog(command.Context, c)
+	catalog := trait.NewCatalog(c)
 	tp := catalog.ComputeTraitsProperties()
 	for _, t := range command.Traits {
 		kv := strings.SplitN(t, "=", 2)
 
 		if !util.StringSliceExists(tp, kv[0]) {
-			fmt.Printf("Error: %s is not a valid trait property\n", t)
+			fmt.Fprintln(cmd.OutOrStdout(), "Error:", t, "is not a valid trait property")
 			return nil
 		}
 	}
 
 	kit := v1.NewIntegrationKit(command.Namespace, args[0])
-	key := k8sclient.ObjectKey{
+	key := ctrl.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      args[0],
 	}
-	if err := c.Get(command.Context, key, &kit); err == nil {
+	if err := c.Get(command.Context, key, kit); err == nil {
 		// the integration kit already exists, let's check that it is
 		// not a platform one which is supposed to be "read only"
 
-		if kit.Labels["camel.apache.org/kit.type"] == v1.IntegrationKitTypePlatform {
-			fmt.Printf("integration kit \"%s\" is not editable\n", kit.Name)
+		if kit.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypePlatform {
+			fmt.Fprintln(cmd.OutOrStdout(), `integration kit "`+kit.Name+`" is not editable`)
 			return nil
 		}
 	}
 
 	kit = v1.NewIntegrationKit(command.Namespace, kubernetes.SanitizeName(args[0]))
 	kit.Labels = map[string]string{
-		"camel.apache.org/kit.type": v1.IntegrationKitTypeUser,
+		v1.IntegrationKitTypeLabel: v1.IntegrationKitTypeUser,
 	}
 	kit.Spec = v1.IntegrationKitSpec{
 		Dependencies:  make([]string, 0, len(command.Dependencies)),
@@ -126,81 +128,70 @@ func (command *kitCreateCommandOptions) run(_ *cobra.Command, args []string) err
 		// if the Image is set, the kit do not require any build but
 		// is be marked as external as the information about the classpath
 		// is missing so it cannot be used as base for other Kits
-		kit.Labels["camel.apache.org/kit.type"] = v1.IntegrationKitTypeExternal
+		kit.Labels[v1.IntegrationKitTypeLabel] = v1.IntegrationKitTypeExternal
 
 		// Set the Image to be used by the kit
 		kit.Spec.Image = command.Image
 	}
 	for _, item := range command.Dependencies {
 		switch {
-		case strings.HasPrefix(item, "mvn:"):
-			kit.Spec.Dependencies = append(kit.Spec.Dependencies, item)
-		case strings.HasPrefix(item, "file:"):
-			kit.Spec.Dependencies = append(kit.Spec.Dependencies, item)
 		case strings.HasPrefix(item, "camel-quarkus-"):
 			kit.Spec.Dependencies = append(kit.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-quarkus-"))
+		case strings.HasPrefix(item, "camel-k-"):
+			kit.Spec.Dependencies = append(kit.Spec.Dependencies, "camel-k:"+strings.TrimPrefix(item, "camel-k-"))
 		case strings.HasPrefix(item, "camel-"):
 			kit.Spec.Dependencies = append(kit.Spec.Dependencies, "camel:"+strings.TrimPrefix(item, "camel-"))
+		default:
+			kit.Spec.Dependencies = append(kit.Spec.Dependencies, item)
 		}
 	}
 
-	for _, item := range command.Properties {
-		kit.Spec.Configuration = append(kit.Spec.Configuration, v1.ConfigurationSpec{
-			Type:  "property",
-			Value: item,
-		})
-	}
-	for _, item := range command.Configmaps {
-		kit.Spec.Configuration = append(kit.Spec.Configuration, v1.ConfigurationSpec{
-			Type:  "configmap",
-			Value: item,
-		})
-	}
-	for _, item := range command.Secrets {
-		kit.Spec.Configuration = append(kit.Spec.Configuration, v1.ConfigurationSpec{
-			Type:  "secret",
-			Value: item,
-		})
-	}
-	if err := command.configureTraits(&kit, command.Traits, catalog); err != nil {
-		return nil
+	if err := command.parseAndConvertToTrait(command.Properties, "camel.properties"); err != nil {
+		return err
 	}
 
+	if err := command.parseAndConvertToTrait(command.Configmaps, "mount.config"); err != nil {
+		return err
+	}
+
+	if err := command.parseAndConvertToTrait(command.Secrets, "mount.config"); err != nil {
+		return err
+	}
+	if err := configureTraits(command.Traits, &kit.Spec.Traits, catalog); err != nil {
+		return err
+	}
 	existed := false
-	err = c.Create(command.Context, &kit)
+	err = c.Create(command.Context, kit)
 	if err != nil && k8serrors.IsAlreadyExists(err) {
 		existed = true
 		existing := v1.NewIntegrationKit(kit.Namespace, kit.Name)
-		err = c.Get(command.Context, key, &existing)
+		err = c.Get(command.Context, key, existing)
 		if err != nil {
-			fmt.Print(err.Error())
+			fmt.Fprint(cmd.ErrOrStderr(), err.Error())
 			return nil
 		}
 		kit.ResourceVersion = existing.ResourceVersion
-		err = c.Update(command.Context, &kit)
+		err = c.Update(command.Context, kit)
 	}
 
 	if err != nil {
-		fmt.Print(err.Error())
+		fmt.Fprint(cmd.ErrOrStderr(), err.Error())
 		return nil
 	}
 
 	if !existed {
-		fmt.Printf("integration kit \"%s\" created\n", kit.Name)
+		fmt.Fprintln(cmd.OutOrStdout(), `integration kit "`+kit.Name+`" created`)
 	} else {
-		fmt.Printf("integration kit \"%s\" updated\n", kit.Name)
+		fmt.Fprintln(cmd.OutOrStdout(), `integration kit "`+kit.Name+`" updated`)
 	}
 
 	return nil
 }
 
-func (*kitCreateCommandOptions) configureTraits(kit *v1.IntegrationKit, options []string, catalog *trait.Catalog) error {
-	traits, err := configureTraits(options, catalog)
-	if err != nil {
-		return err
+func (command *kitCreateCommandOptions) parseAndConvertToTrait(params []string, traitParam string) error {
+	for _, param := range params {
+		command.Traits = append(command.Traits, convertToTrait(param, traitParam))
 	}
-
-	kit.Spec.Traits = traits
 
 	return nil
 }

@@ -33,7 +33,7 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// newCmdDelete --
+// newCmdDelete --.
 func newCmdDelete(rootCmdOptions *RootCmdOptions) (*cobra.Command, *deleteCmdOptions) {
 	options := deleteCmdOptions{
 		RootCmdOptions: rootCmdOptions,
@@ -42,15 +42,11 @@ func newCmdDelete(rootCmdOptions *RootCmdOptions) (*cobra.Command, *deleteCmdOpt
 		Use:     "delete [integration1] [integration2] ...",
 		Short:   "Delete integrations deployed on Kubernetes",
 		PreRunE: decode(&options),
-		RunE: func(_ *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
 				return err
 			}
-			if err := options.run(args); err != nil {
-				fmt.Println(err.Error())
-			}
-
-			return nil
+			return options.run(cmd, args)
 		},
 	}
 
@@ -66,16 +62,16 @@ type deleteCmdOptions struct {
 
 func (command *deleteCmdOptions) validate(args []string) error {
 	if command.DeleteAll && len(args) > 0 {
-		return errors.New("invalid combination: both all flag and named integrations are set")
+		return errors.New("invalid combination: --all flag is set and at least one integration name is provided")
 	}
 	if !command.DeleteAll && len(args) == 0 {
-		return errors.New("invalid combination: neither all flag nor named integrations are set")
+		return errors.New("invalid combination: provide one or several integration names or set --all flag for all integrations")
 	}
 
 	return nil
 }
 
-func (command *deleteCmdOptions) run(args []string) error {
+func (command *deleteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return err
@@ -86,16 +82,16 @@ func (command *deleteCmdOptions) run(args []string) error {
 			integration, err := getIntegration(command.Context, c, name, command.Namespace)
 			if err != nil {
 				if k8errors.IsNotFound(err) {
-					fmt.Println("Integration " + name + " not found. Skipped.")
+					fmt.Fprintln(cmd.OutOrStdout(), "Integration "+name+" not found. Skipped.")
 				} else {
 					return err
 				}
 			} else {
-				err := deleteIntegration(command.Context, c, integration)
+				err := deleteIntegration(command.Context, cmd, c, integration)
 				if err != nil {
 					return err
 				}
-				fmt.Println("Integration " + name + " deleted")
+				fmt.Fprintln(cmd.OutOrStdout(), "Integration "+name+" deleted")
 			}
 		}
 	} else if command.DeleteAll {
@@ -106,22 +102,21 @@ func (command *deleteCmdOptions) run(args []string) error {
 			},
 		}
 
-		//Looks like Operator SDK doesn't support deletion of all objects with one command
 		err := c.List(command.Context, &integrationList, k8sclient.InNamespace(command.Namespace))
 		if err != nil {
 			return err
 		}
 		for _, integration := range integrationList.Items {
 			integration := integration // pin
-			err := deleteIntegration(command.Context, c, &integration)
+			err := deleteIntegration(command.Context, cmd, c, &integration)
 			if err != nil {
 				return err
 			}
 		}
 		if len(integrationList.Items) == 0 {
-			fmt.Println("Nothing to delete")
+			fmt.Fprintln(cmd.OutOrStdout(), "Nothing to delete")
 		} else {
-			fmt.Println(strconv.Itoa(len(integrationList.Items)) + " integration(s) deleted")
+			fmt.Fprintln(cmd.OutOrStdout(), strconv.Itoa(len(integrationList.Items))+" integration(s) deleted")
 		}
 	}
 
@@ -140,14 +135,14 @@ func getIntegration(ctx context.Context, c client.Client, name string, namespace
 	return &answer, nil
 }
 
-func deleteIntegration(ctx context.Context, c client.Client, integration *v1.Integration) error {
+func deleteIntegration(ctx context.Context, cmd *cobra.Command, c client.Client, integration *v1.Integration) error {
 	deleted, binding, err := deleteKameletBindingIfExists(ctx, c, integration)
 	if err != nil {
 		return err
 	}
 	if deleted {
 		// Deleting KameletBinding will automatically clean up the integration
-		fmt.Println("KameletBinding " + binding + " deleted")
+		fmt.Fprintln(cmd.OutOrStdout(), "KameletBinding "+binding+" deleted")
 		return nil
 	}
 	return c.Delete(ctx, integration)

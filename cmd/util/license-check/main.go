@@ -19,38 +19,37 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util"
 )
 
 func main() {
-
 	if len(os.Args) != 3 {
-		fmt.Println(`Use "license-check <file> <license>`)
+		fmt.Fprintln(os.Stderr, `Use "license-check <file> <license>`)
 		os.Exit(1)
 	}
 
 	fileName := os.Args[1]
 	licenseName := os.Args[2]
 
-	fileBin, err := ioutil.ReadFile(fileName)
+	fileBin, err := util.ReadFile(fileName)
 	if err != nil {
-		os.Stderr.WriteString(fmt.Sprintf("cannot read file %s: %v\n", fileName, err))
+		_, _ = fmt.Fprintf(os.Stderr, "cannot read file %s: %v\n", fileName, err)
 		os.Exit(1)
 	}
 	file := string(fileBin)
 
-	licenseBin, err := ioutil.ReadFile(licenseName)
+	licenseBin, err := util.ReadFile(licenseName)
 	if err != nil {
-		os.Stderr.WriteString(fmt.Sprintf("cannot read file %s: %v\n", licenseName, err))
+		_, _ = fmt.Fprintf(os.Stderr, "cannot read file %s: %v\n", licenseName, err)
 		os.Exit(1)
 	}
 	license := string(licenseBin)
 
 	if !strings.Contains(file, license) {
-		os.Stderr.WriteString(fmt.Sprintf("file %s does not contain license\n", fileName))
+		_, _ = fmt.Fprintf(os.Stderr, "file %s does not contain license\n", fileName)
 		os.Exit(1)
 	}
-
 }

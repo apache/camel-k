@@ -20,21 +20,17 @@ package trait
 import (
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
+
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 )
 
-// The Owner trait ensures that all created resources belong to the integration being created
-// and transfers annotations and labels on the integration onto these owned resources.
-//
-// +camel-k:trait=owner
 type ownerTrait struct {
-	BaseTrait `property:",squash"`
-	// The set of annotations to be transferred
-	TargetAnnotations []string `property:"target-annotations" json:"targetAnnotations,omitempty"`
-	// The set of labels to be transferred
-	TargetLabels []string `property:"target-labels" json:"targetLabels,omitempty"`
+	BaseTrait
+	traitv1.OwnerTrait `property:",squash"`
 }
 
 func newOwnerTrait() Trait {
@@ -44,15 +40,11 @@ func newOwnerTrait() Trait {
 }
 
 func (t *ownerTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 
-	if e.Integration == nil {
-		return false, nil
-	}
-
-	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), nil
 }
 
 func (t *ownerTrait) Apply(e *Environment) error {
@@ -110,7 +102,7 @@ func (t *ownerTrait) Apply(e *Environment) error {
 	return nil
 }
 
-// IsPlatformTrait overrides base class method
+// IsPlatformTrait overrides base class method.
 func (t *ownerTrait) IsPlatformTrait() bool {
 	return true
 }

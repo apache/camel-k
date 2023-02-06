@@ -63,25 +63,25 @@ func TestParseErrorHandlerLogWithParametersDoesSucceed(t *testing.T) {
 	assert.Equal(t, v1alpha1.ErrorHandlerRefDefaultName, parameters[v1alpha1.ErrorHandlerRefName])
 }
 
-func TestParseErrorHandlerDLCDoesSucceed(t *testing.T) {
+func TestParseErrorHandlerSinkDoesSucceed(t *testing.T) {
 	fmt.Println("Test")
-	dlcErrorHandler, err := parseErrorHandler(
-		[]byte(`{"dead-letter-channel": {"endpoint": {"uri": "someUri"}}}`),
+	sinkErrorHandler, err := parseErrorHandler(
+		[]byte(`{"sink": {"endpoint": {"uri": "someUri"}}}`),
 	)
 	assert.Nil(t, err)
-	assert.NotNil(t, dlcErrorHandler)
-	assert.Equal(t, v1alpha1.ErrorHandlerTypeDeadLetterChannel, dlcErrorHandler.Type())
-	assert.Equal(t, "someUri", *dlcErrorHandler.Endpoint().URI)
-	parameters, err := dlcErrorHandler.Configuration()
+	assert.NotNil(t, sinkErrorHandler)
+	assert.Equal(t, v1alpha1.ErrorHandlerTypeSink, sinkErrorHandler.Type())
+	assert.Equal(t, "someUri", *sinkErrorHandler.Endpoint().URI)
+	parameters, err := sinkErrorHandler.Configuration()
 	assert.Nil(t, err)
 	assert.Equal(t, "#class:org.apache.camel.builder.DeadLetterChannelBuilder", parameters[v1alpha1.ErrorHandlerAppPropertiesPrefix])
 	assert.Equal(t, v1alpha1.ErrorHandlerRefDefaultName, parameters[v1alpha1.ErrorHandlerRefName])
 }
 
-func TestParseErrorHandlerDLCWithParametersDoesSucceed(t *testing.T) {
-	dlcErrorHandler, err := parseErrorHandler(
+func TestParseErrorHandlerSinkWithParametersDoesSucceed(t *testing.T) {
+	sinkErrorHandler, err := parseErrorHandler(
 		[]byte(`{
-			"dead-letter-channel": {
+			"sink": {
 				"endpoint": {
 					"uri": "someUri"
 					}, 
@@ -91,44 +91,13 @@ func TestParseErrorHandlerDLCWithParametersDoesSucceed(t *testing.T) {
 		}`),
 	)
 	assert.Nil(t, err)
-	assert.NotNil(t, dlcErrorHandler)
-	assert.Equal(t, v1alpha1.ErrorHandlerTypeDeadLetterChannel, dlcErrorHandler.Type())
-	assert.Equal(t, "someUri", *dlcErrorHandler.Endpoint().URI)
-	parameters, err := dlcErrorHandler.Configuration()
+	assert.NotNil(t, sinkErrorHandler)
+	assert.Equal(t, v1alpha1.ErrorHandlerTypeSink, sinkErrorHandler.Type())
+	assert.Equal(t, "someUri", *sinkErrorHandler.Endpoint().URI)
+	parameters, err := sinkErrorHandler.Configuration()
 	assert.Nil(t, err)
 	assert.Equal(t, "#class:org.apache.camel.builder.DeadLetterChannelBuilder", parameters[v1alpha1.ErrorHandlerAppPropertiesPrefix])
 	assert.Equal(t, v1alpha1.ErrorHandlerRefDefaultName, parameters[v1alpha1.ErrorHandlerRefName])
 	assert.Equal(t, "value1", parameters["camel.beans.defaultErrorHandler.param1"])
 	assert.Equal(t, "value2", parameters["camel.beans.defaultErrorHandler.param2"])
-}
-
-func TestParseErrorHandlerBeanWithParamsDoesSucceed(t *testing.T) {
-	beanErrorHandler, err := parseErrorHandler(
-		[]byte(`{
-			"bean": {
-				"type": "com.acme.MyType",
-				"properties": 
-					{"beanProp1": "value1", "beanProp2": "value2"}
-			}
-		}`),
-	)
-	assert.Nil(t, err)
-	assert.Equal(t, v1alpha1.ErrorHandlerTypeBean, beanErrorHandler.Type())
-	parameters, err := beanErrorHandler.Configuration()
-	assert.Nil(t, err)
-	assert.Equal(t, "#class:com.acme.MyType", parameters[v1alpha1.ErrorHandlerAppPropertiesPrefix])
-	assert.Equal(t, v1alpha1.ErrorHandlerRefDefaultName, parameters[v1alpha1.ErrorHandlerRefName])
-	assert.Equal(t, "value1", parameters["camel.beans.defaultErrorHandler.beanProp1"])
-	assert.Equal(t, "value2", parameters["camel.beans.defaultErrorHandler.beanProp2"])
-}
-
-func TestParseErrorHandlerRefDoesSucceed(t *testing.T) {
-	refErrorHandler, err := parseErrorHandler(
-		[]byte(`{"ref": "my-registry-ref"}`),
-	)
-	assert.Nil(t, err)
-	assert.Equal(t, v1alpha1.ErrorHandlerTypeRef, refErrorHandler.Type())
-	parameters, err := refErrorHandler.Configuration()
-	assert.Nil(t, err)
-	assert.Equal(t, "my-registry-ref", parameters[v1alpha1.ErrorHandlerRefName])
 }

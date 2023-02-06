@@ -88,7 +88,6 @@ func TestQueryParameter(t *testing.T) {
 			assert.Equal(t, thetest.expected, param)
 		})
 	}
-
 }
 
 func TestAppendParameters(t *testing.T) {
@@ -135,7 +134,8 @@ func TestAppendParameters(t *testing.T) {
 		},
 	}
 
-	for i, test := range tests {
+	for i := range tests {
+		test := tests[i]
 		t.Run(fmt.Sprintf("appendParameters-%d-%s", i, test.expected), func(t *testing.T) {
 			uri := AppendParameters(test.prefix, test.params)
 			assert.Equal(t, test.expected, uri)
@@ -173,9 +173,77 @@ func TestCamelURIFormat(t *testing.T) {
 		},
 	}
 
-	for i, tc := range tests {
+	for i := range tests {
+		tc := tests[i]
 		t.Run(fmt.Sprintf("%d-%s", i, tc.uri), func(t *testing.T) {
 			assert.Equal(t, !tc.invalid, HasCamelURIFormat(tc.uri))
+		})
+	}
+}
+
+func TestPathSegment(t *testing.T) {
+	tests := []struct {
+		uri      string
+		pos      int
+		expected string
+	}{
+		{
+			uri: "direct:endpoint",
+			pos: 0,
+		},
+		{
+			uri: "direct:endpoint",
+			pos: 12,
+		},
+		{
+			uri: "kamelet:endpoint/",
+			pos: 0,
+		},
+		{
+			uri:      "kamelet:endpoint/s",
+			pos:      0,
+			expected: "s",
+		},
+		{
+			uri: "kamelet:endpoint/s",
+			pos: 1,
+		},
+		{
+			uri:      "kamelet://endpoint/s",
+			pos:      0,
+			expected: "s",
+		},
+		{
+			uri:      "kamelet://endpoint/s/p",
+			pos:      0,
+			expected: "s",
+		},
+		{
+			uri:      "kamelet://endpoint/s/p",
+			pos:      1,
+			expected: "p",
+		},
+		{
+			uri:      "kamelet://endpoint/s/p?param=n",
+			pos:      1,
+			expected: "p",
+		},
+		{
+			uri:      "kamelet://endpoint/s/p?param=n&p2=n2",
+			pos:      1,
+			expected: "p",
+		},
+		{
+			uri: "kamelet://endpoint/s/p?param=n&p2=n2",
+			pos: 2,
+		},
+	}
+
+	for _, test := range tests {
+		thetest := test
+		t.Run(thetest.uri, func(t *testing.T) {
+			param := GetPathSegment(thetest.uri, thetest.pos)
+			assert.Equal(t, thetest.expected, param)
 		})
 	}
 }

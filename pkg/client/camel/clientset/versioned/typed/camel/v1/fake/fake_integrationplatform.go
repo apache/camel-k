@@ -21,8 +21,11 @@ package fake
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	applyconfigurationcamelv1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/camel/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -118,7 +121,7 @@ func (c *FakeIntegrationPlatforms) UpdateStatus(ctx context.Context, integration
 // Delete takes name of the integrationPlatform and deletes it. Returns an error if one occurs.
 func (c *FakeIntegrationPlatforms) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(integrationplatformsResource, c.ns, name), &camelv1.IntegrationPlatform{})
+		Invokes(testing.NewDeleteActionWithOptions(integrationplatformsResource, c.ns, name, opts), &camelv1.IntegrationPlatform{})
 
 	return err
 }
@@ -135,6 +138,51 @@ func (c *FakeIntegrationPlatforms) DeleteCollection(ctx context.Context, opts v1
 func (c *FakeIntegrationPlatforms) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *camelv1.IntegrationPlatform, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(integrationplatformsResource, c.ns, name, pt, data, subresources...), &camelv1.IntegrationPlatform{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*camelv1.IntegrationPlatform), err
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied integrationPlatform.
+func (c *FakeIntegrationPlatforms) Apply(ctx context.Context, integrationPlatform *applyconfigurationcamelv1.IntegrationPlatformApplyConfiguration, opts v1.ApplyOptions) (result *camelv1.IntegrationPlatform, err error) {
+	if integrationPlatform == nil {
+		return nil, fmt.Errorf("integrationPlatform provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(integrationPlatform)
+	if err != nil {
+		return nil, err
+	}
+	name := integrationPlatform.Name
+	if name == nil {
+		return nil, fmt.Errorf("integrationPlatform.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(integrationplatformsResource, c.ns, *name, types.ApplyPatchType, data), &camelv1.IntegrationPlatform{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*camelv1.IntegrationPlatform), err
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *FakeIntegrationPlatforms) ApplyStatus(ctx context.Context, integrationPlatform *applyconfigurationcamelv1.IntegrationPlatformApplyConfiguration, opts v1.ApplyOptions) (result *camelv1.IntegrationPlatform, err error) {
+	if integrationPlatform == nil {
+		return nil, fmt.Errorf("integrationPlatform provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(integrationPlatform)
+	if err != nil {
+		return nil, err
+	}
+	name := integrationPlatform.Name
+	if name == nil {
+		return nil, fmt.Errorf("integrationPlatform.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(integrationplatformsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &camelv1.IntegrationPlatform{})
 
 	if obj == nil {
 		return nil, err

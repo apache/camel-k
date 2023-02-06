@@ -24,13 +24,11 @@ import (
 	"fmt"
 )
 
-var (
-	knownServersByRegistry = map[string]string{
-		"docker.io": "https://index.docker.io/v1/",
-	}
-)
+var knownServersByRegistry = map[string]string{
+	"docker.io": "https://index.docker.io/v1/",
+}
 
-// Auth contains basic information for authenticating against a container registry
+// Auth contains basic information for authenticating against a container registry.
 type Auth struct {
 	Server   string
 	Username string
@@ -40,43 +38,47 @@ type Auth struct {
 	Registry string
 }
 
-type dockerConfigList struct {
-	Auths map[string]dockerConfig `json:"auths,omitempty"`
+type DockerConfigList struct {
+	Auths map[string]DockerConfig `json:"auths,omitempty"`
 }
 
-type dockerConfig struct {
-	Auth string `json:"auth,omitempty"`
+type DockerConfig struct {
+	Auth     string `json:"auth,omitempty"`
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
-// IsSet returns if information has been set on the object
+// IsSet returns if information has been set on the object.
 func (a Auth) IsSet() bool {
 	return a.Server != "" ||
 		a.Username != "" ||
 		a.Password != ""
 }
 
-// validate checks if all fields are populated correctly
+// validate checks if all fields are populated correctly.
 func (a Auth) validate() error {
 	if a.getActualServer() == "" || a.Username == "" {
 		return errors.New("not enough information to generate a registry authentication file")
 	}
+
 	return nil
 }
 
-// GenerateDockerConfig generates a Docker compatible config.json file
+// GenerateDockerConfig generates a Docker compatible config.json file.
 func (a Auth) GenerateDockerConfig() ([]byte, error) {
 	if err := a.validate(); err != nil {
 		return nil, err
 	}
 	content := a.generateDockerConfigObject()
+
 	return json.Marshal(content)
 }
 
-func (a Auth) generateDockerConfigObject() dockerConfigList {
-	return dockerConfigList{
-		map[string]dockerConfig{
+func (a Auth) generateDockerConfigObject() DockerConfigList {
+	return DockerConfigList{
+		map[string]DockerConfig{
 			a.getActualServer(): {
-				a.encodedCredentials(),
+				Auth: a.encodedCredentials(),
 			},
 		},
 	}
@@ -89,6 +91,7 @@ func (a Auth) getActualServer() string {
 	if p, ok := knownServersByRegistry[a.Registry]; ok {
 		return p
 	}
+
 	return a.Registry
 }
 

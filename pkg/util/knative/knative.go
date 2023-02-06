@@ -43,7 +43,6 @@ import (
 	util "github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-// CreateSubscription ---
 func CreateSubscription(channelReference corev1.ObjectReference, serviceName string, path string) *messaging.Subscription {
 	return &messaging.Subscription{
 		TypeMeta: metav1.TypeMeta{
@@ -55,7 +54,7 @@ func CreateSubscription(channelReference corev1.ObjectReference, serviceName str
 			Name:      channelReference.Name + "-" + serviceName,
 		},
 		Spec: messaging.SubscriptionSpec{
-			Channel: corev1.ObjectReference{
+			Channel: duckv1.KReference{
 				APIVersion: channelReference.GroupVersionKind().GroupVersion().String(),
 				Kind:       channelReference.Kind,
 				Name:       channelReference.Name,
@@ -74,7 +73,6 @@ func CreateSubscription(channelReference corev1.ObjectReference, serviceName str
 	}
 }
 
-// CreateTrigger ---
 func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, eventType string, path string) *eventing.Trigger {
 	nameSuffix := ""
 	var attributes map[string]string
@@ -112,7 +110,6 @@ func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, e
 	}
 }
 
-// CreateSinkBinding ---
 func CreateSinkBinding(source corev1.ObjectReference, target corev1.ObjectReference) *sources.SinkBinding {
 	return &sources.SinkBinding{
 		TypeMeta: metav1.TypeMeta{
@@ -144,7 +141,7 @@ func CreateSinkBinding(source corev1.ObjectReference, target corev1.ObjectRefere
 	}
 }
 
-// GetAddressableReference looks up the resource among all given types and returns an object reference to it
+// GetAddressableReference looks up the resource among all given types and returns an object reference to it.
 func GetAddressableReference(ctx context.Context, c client.Client,
 	possibleReferences []corev1.ObjectReference, namespace string, name string) (*corev1.ObjectReference, error) {
 
@@ -163,7 +160,7 @@ func GetAddressableReference(ctx context.Context, c client.Client,
 	return nil, k8serrors.NewNotFound(schema.GroupResource{}, name)
 }
 
-// GetSinkURL returns the sink as *url.URL
+// GetSinkURL returns the sink as *url.URL.
 func GetSinkURL(ctx context.Context, c client.Client, sink *corev1.ObjectReference, namespace string) (*url.URL, error) {
 	res, err := getSinkURI(ctx, c, sink, namespace)
 	if err != nil {
@@ -196,7 +193,7 @@ func getSinkURI(ctx context.Context, c client.Client, sink *corev1.ObjectReferen
 	t := duckv1.AddressableType{}
 	err = duck.FromUnstructured(u, &t)
 	if err != nil {
-		return "", fmt.Errorf("failed to deserialize sink %s: %v", objIdentifier, err)
+		return "", fmt.Errorf("failed to deserialize sink %s: %w", objIdentifier, err)
 	}
 
 	if t.Status.Address == nil || t.Status.Address.URL == nil {

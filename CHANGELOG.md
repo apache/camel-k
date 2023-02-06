@@ -2,28 +2,1367 @@
 
 ## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.5.0...HEAD)
+[Full Changelog](https://github.com/apache/camel-k/compare/1.11.2-nightly...HEAD)
 
 **Closed issues:**
 
-- controller: panic on nil annotation [\#2556](https://github.com/apache/camel-k/issues/2556)
-- Remove "attributeRestrictions" from operator-role.yaml [\#2549](https://github.com/apache/camel-k/issues/2549)
-- Error in OpenShift image-pull delegation on IBM Cloud [\#2530](https://github.com/apache/camel-k/issues/2530)
-- Runtime issue: cannot use KameletBinding error handler [\#2525](https://github.com/apache/camel-k/issues/2525)
-- KameletBinding error handler nil map [\#2524](https://github.com/apache/camel-k/issues/2524)
-- camel-k-client tar.gz changes the uid/gid of cwd [\#2514](https://github.com/apache/camel-k/issues/2514)
-- \[CMD\] `kamel bind` empty error handler [\#2493](https://github.com/apache/camel-k/issues/2493)
-- ServiceBinding CR sometimes doesn't get created [\#2482](https://github.com/apache/camel-k/issues/2482)
-- V1.5.0 release without assets [\#2481](https://github.com/apache/camel-k/issues/2481)
-- Kamel uninstall should delete kamelets [\#2479](https://github.com/apache/camel-k/issues/2479)
-- Release 1.4.1 [\#2471](https://github.com/apache/camel-k/issues/2471)
-- Release 1.5.0 [\#2470](https://github.com/apache/camel-k/issues/2470)
-- Duplicated trait set as modeline and kamel run parameters causes error [\#2466](https://github.com/apache/camel-k/issues/2466)
-- Update Camel K Serverless api examples to not use --property-file [\#2463](https://github.com/apache/camel-k/issues/2463)
-- kamel CLI binary for apple silicon / arm [\#2022](https://github.com/apache/camel-k/issues/2022)
+- Native builds failure due to missing catalog [\#4022](https://github.com/apache/camel-k/issues/4022)
+- operator refers to a openjdk image tag not found in docker.io [\#3998](https://github.com/apache/camel-k/issues/3998)
+- Camel-k checks other namespaces and error given  [\#3996](https://github.com/apache/camel-k/issues/3996)
+- Default namespace not used when `-o yaml` [\#3955](https://github.com/apache/camel-k/issues/3955)
+- Unable to configure ServiceAccountName using Kamel run [\#3797](https://github.com/apache/camel-k/issues/3797)
+- Camel-K initContainer [\#3459](https://github.com/apache/camel-k/issues/3459)
+- Choose a single location for examples [\#2826](https://github.com/apache/camel-k/issues/2826)
+- Camel-K Tracing Trait error [\#2633](https://github.com/apache/camel-k/issues/2633)
+- Provide non-regression tests for regression \#1872 [\#1875](https://github.com/apache/camel-k/issues/1875)
+- rethink configurations spec [\#1680](https://github.com/apache/camel-k/issues/1680)
+
+## [1.11.2-nightly](https://github.com/apache/camel-k/tree/1.11.2-nightly) (2023-02-02)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.11.1...1.11.2-nightly)
+
+**Closed issues:**
+
+- Camel 3.20 incompatibilities [\#4011](https://github.com/apache/camel-k/issues/4011)
+- Release 1.11.1 [\#4006](https://github.com/apache/camel-k/issues/4006)
+- Set a more reasonable default for gomega eventually's polling interval [\#3992](https://github.com/apache/camel-k/issues/3992)
+- Automatic dependency scraping not working [\#3984](https://github.com/apache/camel-k/issues/3984)
+- Release 1.10.4 [\#3982](https://github.com/apache/camel-k/issues/3982)
+- Facing an error while Invoking a SOAP service method from Camel-K [\#3973](https://github.com/apache/camel-k/issues/3973)
+- Default `operator.id` annotation [\#3725](https://github.com/apache/camel-k/issues/3725)
 
 **Merged pull requests:**
 
+- fix\(ci\): shell step [\#4015](https://github.com/apache/camel-k/pull/4015) ([squakez](https://github.com/squakez))
+- fix\(ci\): CRD dependency release in action [\#4014](https://github.com/apache/camel-k/pull/4014) ([squakez](https://github.com/squakez))
+- chore\(ci\): automatic updates go version [\#4013](https://github.com/apache/camel-k/pull/4013) ([squakez](https://github.com/squakez))
+- fix\(trait\): error handler ref in camel 3.20 [\#4012](https://github.com/apache/camel-k/pull/4012) ([squakez](https://github.com/squakez))
+- chore\(test\): don't install kamelet catalog [\#4009](https://github.com/apache/camel-k/pull/4009) ([squakez](https://github.com/squakez))
+- feat\(e2e\): Set a more reasonable default for gomega eventually's polling interval [\#4008](https://github.com/apache/camel-k/pull/4008) ([lburgazzoli](https://github.com/lburgazzoli))
+- chore\(deps\): bump github.com/onsi/gomega from 1.25.0 to 1.26.0 [\#4001](https://github.com/apache/camel-k/pull/4001) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.4.0 to 0.5.0 [\#3999](https://github.com/apache/camel-k/pull/3999) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/spf13/viper from 1.14.0 to 1.15.0 [\#3995](https://github.com/apache/camel-k/pull/3995) ([dependabot[bot]](https://github.com/apps/dependabot))
+- \[proposal\] Publish a generated extension for Java [\#3994](https://github.com/apache/camel-k/pull/3994) ([andreaTP](https://github.com/andreaTP))
+- fix\(\#3988\): Fix flaky E2E test on operator multi tenancy [\#3990](https://github.com/apache/camel-k/pull/3990) ([christophd](https://github.com/christophd))
+- Add TIP for optional prop placeholder for non-req param [\#3989](https://github.com/apache/camel-k/pull/3989) ([tarilabs](https://github.com/tarilabs))
+- chore\(deps\): bump github.com/onsi/gomega from 1.22.1 to 1.25.0 [\#3987](https://github.com/apache/camel-k/pull/3987) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/redhat-developer/service-binding-operator from 1.3.2 to 1.3.3 [\#3978](https://github.com/apache/camel-k/pull/3978) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat: Render error message condition as json/structured message [\#3977](https://github.com/apache/camel-k/pull/3977) ([lburgazzoli](https://github.com/lburgazzoli))
+- chore\(doc\): cannot use build pod strategy [\#3976](https://github.com/apache/camel-k/pull/3976) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/stoewer/go-strcase from 1.2.0 to 1.2.1 [\#3975](https://github.com/apache/camel-k/pull/3975) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat\(trait\): Add telemetry trait [\#3970](https://github.com/apache/camel-k/pull/3970) ([gansheer](https://github.com/gansheer))
+- api: Generate apply configurations [\#3968](https://github.com/apache/camel-k/pull/3968) ([astefanutti](https://github.com/astefanutti))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.3.11 to 0.4.0 [\#3966](https://github.com/apache/camel-k/pull/3966) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Upgrade k8s, knative dependencies and Golang 1.18 [\#3963](https://github.com/apache/camel-k/pull/3963) ([astefanutti](https://github.com/astefanutti))
+- chore\(deps\): bump golang.org/x/oauth2 from 0.3.0 to 0.4.0 [\#3962](https://github.com/apache/camel-k/pull/3962) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(ci\): use kamelets tag [\#3960](https://github.com/apache/camel-k/pull/3960) ([squakez](https://github.com/squakez))
+- fix\(e2e\): Kamelets tag compatibility with 3.19 [\#3958](https://github.com/apache/camel-k/pull/3958) ([squakez](https://github.com/squakez))
+- fix\(e2e\): stabilise kustomize uninstall tests [\#3954](https://github.com/apache/camel-k/pull/3954) ([tadayosi](https://github.com/tadayosi))
+- fix\(test\): temporary remove env var [\#3953](https://github.com/apache/camel-k/pull/3953) ([squakez](https://github.com/squakez))
+- fix\(\#3844\): Add service discovery for Kamelet data type converter [\#3912](https://github.com/apache/camel-k/pull/3912) ([christophd](https://github.com/christophd))
+- fix\(\#3896\): Fix dependency inspector supporting property placeholders [\#3901](https://github.com/apache/camel-k/pull/3901) ([christophd](https://github.com/christophd))
+
+## [v1.11.1](https://github.com/apache/camel-k/tree/v1.11.1) (2023-01-24)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.11.1...v1.11.1)
+
+## [pkg/apis/camel/v1.11.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.11.1) (2023-01-24)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.11.1...pkg/apis/camel/v1.11.1)
+
+## [pkg/kamelet/repository/v1.11.1](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.11.1) (2023-01-24)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.11.1...pkg/kamelet/repository/v1.11.1)
+
+## [pkg/client/camel/v1.11.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.11.1) (2023-01-24)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.10.4...pkg/client/camel/v1.11.1)
+
+## [pkg/apis/camel/v1.10.4](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.10.4) (2023-01-24)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.10.4...pkg/apis/camel/v1.10.4)
+
+## [pkg/kamelet/repository/v1.10.4](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.10.4) (2023-01-24)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.10.4...pkg/kamelet/repository/v1.10.4)
+
+## [pkg/client/camel/v1.10.4](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.10.4) (2023-01-24)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.10.4...pkg/client/camel/v1.10.4)
+
+## [v1.10.4](https://github.com/apache/camel-k/tree/v1.10.4) (2023-01-24)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.11.1-nightly...v1.10.4)
+
+**Closed issues:**
+
+- Multi tenancy operator flaky test [\#3988](https://github.com/apache/camel-k/issues/3988)
+- unable to set null-like default for non-required Kamelet property [\#3986](https://github.com/apache/camel-k/issues/3986)
+- Render error message condition as json/structured message [\#3967](https://github.com/apache/camel-k/issues/3967)
+- Smoke test error TestKameletBindingScale [\#3959](https://github.com/apache/camel-k/issues/3959)
+- Nightly smoke test failure for Kamelets [\#3957](https://github.com/apache/camel-k/issues/3957)
+- E2E - TestKamelCLIRun constantly failing after secrets.GITHUB\_TOKEN applied [\#3952](https://github.com/apache/camel-k/issues/3952)
+- Important increase of size of apache/camel-k Docker image [\#3925](https://github.com/apache/camel-k/issues/3925)
+- `kamel uninstall` doesn't uninstall IntegrationPlatform [\#3916](https://github.com/apache/camel-k/issues/3916)
+- Kamelet http-sink not working [\#3896](https://github.com/apache/camel-k/issues/3896)
+- Add data type converter factory finder discovery in camel-quarkus [\#3844](https://github.com/apache/camel-k/issues/3844)
+- Upgrade to Go 1.18.x [\#3807](https://github.com/apache/camel-k/issues/3807)
+- e2e testing: refactor to remove deprecated functions [\#3751](https://github.com/apache/camel-k/issues/3751)
+- e2e test TestKamelCLIRun \(Run with http dependency\) consistently failing on OCP4 [\#3708](https://github.com/apache/camel-k/issues/3708)
+- Move tracing from opentracing to opentelemetry [\#3519](https://github.com/apache/camel-k/issues/3519)
+
+## [1.11.1-nightly](https://github.com/apache/camel-k/tree/1.11.1-nightly) (2022-12-23)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.11.0...1.11.1-nightly)
+
+**Closed issues:**
+
+- Container trait : setting `container.name` result in wrong integration condition type `Ready`  [\#3941](https://github.com/apache/camel-k/issues/3941)
+- V 1.11.0 nightly wrong image name [\#3930](https://github.com/apache/camel-k/issues/3930)
+- GraalVM removal from doc [\#3929](https://github.com/apache/camel-k/issues/3929)
+- Use flag/config namespace for existing CLI completion kubectl commands [\#3922](https://github.com/apache/camel-k/issues/3922)
+- Bundle Kamelets from a released version [\#3919](https://github.com/apache/camel-k/issues/3919)
+- Automate the dependencies in doc setting [\#3867](https://github.com/apache/camel-k/issues/3867)
+- Kustomize-based installation method doesn't provide uninstall [\#3866](https://github.com/apache/camel-k/issues/3866)
+- Helm - missing parameters [\#3763](https://github.com/apache/camel-k/issues/3763)
+- Kamelet API test rate limit [\#3760](https://github.com/apache/camel-k/issues/3760)
+- Side services compatibility matrix [\#3306](https://github.com/apache/camel-k/issues/3306)
+- Way to set a serviceaccount for the integration pod? [\#1030](https://github.com/apache/camel-k/issues/1030)
+
+**Merged pull requests:**
+
+- fix\(controller\): ensure `container.name` trait is used by the integration controller [\#3951](https://github.com/apache/camel-k/pull/3951) ([gansheer](https://github.com/gansheer))
+- chore: use latest kamelets [\#3948](https://github.com/apache/camel-k/pull/3948) ([squakez](https://github.com/squakez))
+- fix\(ci\): revert usage of TEST\_CLUSTER [\#3947](https://github.com/apache/camel-k/pull/3947) ([squakez](https://github.com/squakez))
+- fix\(ci\): use shell for action steps [\#3938](https://github.com/apache/camel-k/pull/3938) ([squakez](https://github.com/squakez))
+- fix\(ci\): github rate limit [\#3936](https://github.com/apache/camel-k/pull/3936) ([squakez](https://github.com/squakez))
+- fix\(ci\): pass token via inputs [\#3931](https://github.com/apache/camel-k/pull/3931) ([squakez](https://github.com/squakez))
+- feat\(kustomize\): add uninstall target to Makefile [\#3928](https://github.com/apache/camel-k/pull/3928) ([tadayosi](https://github.com/tadayosi))
+- feat\(cli\): Add namespace in command autocompletion bash [\#3927](https://github.com/apache/camel-k/pull/3927) ([gansheer](https://github.com/gansheer))
+- Test config revertions [\#3926](https://github.com/apache/camel-k/pull/3926) ([phantomjinx](https://github.com/phantomjinx))
+- feat\(doc\): automatic version scraping [\#3924](https://github.com/apache/camel-k/pull/3924) ([squakez](https://github.com/squakez))
+- chore\(cli\): Remove dead code on completion for context flag [\#3921](https://github.com/apache/camel-k/pull/3921) ([gansheer](https://github.com/gansheer))
+- e2e fixes and changes [\#3823](https://github.com/apache/camel-k/pull/3823) ([phantomjinx](https://github.com/phantomjinx))
+
+## [1.11.0](https://github.com/apache/camel-k/tree/1.11.0) (2022-12-16)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.12.0-nightly...1.11.0)
+
+**Closed issues:**
+
+- Create release actions for 1.11 version [\#3910](https://github.com/apache/camel-k/issues/3910)
+- Delete camel k examples and provide a link to camel-k-example repo [\#3889](https://github.com/apache/camel-k/issues/3889)
+- Remove `make install-minikube` and `make install-crc` [\#3873](https://github.com/apache/camel-k/issues/3873)
+- Automatically `make generate` every night [\#3868](https://github.com/apache/camel-k/issues/3868)
+- Enable CLI completion for integration, kit, kamelet names [\#3628](https://github.com/apache/camel-k/issues/3628)
+- Propagate errors to KameletBinding status [\#3389](https://github.com/apache/camel-k/issues/3389)
+- Health trait usage example [\#3141](https://github.com/apache/camel-k/issues/3141)
+- If a KameletBinding is invalid, the related status is not updated to report an error [\#3010](https://github.com/apache/camel-k/issues/3010)
+- Remove deprecated Kubernetes API [\#3840](https://github.com/apache/camel-k/issues/3840)
+- Release 1.11.0 [\#3837](https://github.com/apache/camel-k/issues/3837)
+- Deprecate overlapping Kamel CLI features in favour of Camel JBang [\#3790](https://github.com/apache/camel-k/issues/3790)
+- Ready condition message not always taken from Camel Health Check [\#3761](https://github.com/apache/camel-k/issues/3761)
+- camel k 0.11.0 helm - Error: parse error at \(camel-k/templates/operator.yaml:87\): "-en" [\#3654](https://github.com/apache/camel-k/issues/3654)
+- Run E2E test before nightly releases [\#3572](https://github.com/apache/camel-k/issues/3572)
+- Raise error when dependency could not be resolved via CamelCatalog [\#3449](https://github.com/apache/camel-k/issues/3449)
+- Log a warn message once the component used has not a quarkus extension [\#3127](https://github.com/apache/camel-k/issues/3127)
+- Delete knative warning when Knative is not installed [\#2397](https://github.com/apache/camel-k/issues/2397)
+
+**Merged pull requests:**
+
+- feat\(doc\): automatic doc configuration [\#3920](https://github.com/apache/camel-k/pull/3920) ([squakez](https://github.com/squakez))
+- fix\(ci\): actions requires checking out code [\#3918](https://github.com/apache/camel-k/pull/3918) ([squakez](https://github.com/squakez))
+-  chore\(build\): force using bash in Makefile to avoid incompatibilities [\#3917](https://github.com/apache/camel-k/pull/3917) ([tadayosi](https://github.com/tadayosi))
+- chore\(deps\): bump github.com/redhat-developer/service-binding-operator from 1.3.1 to 1.3.2 [\#3915](https://github.com/apache/camel-k/pull/3915) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore: scripts cleaning [\#3914](https://github.com/apache/camel-k/pull/3914) ([squakez](https://github.com/squakez))
+- feat: automatic github actions bump  [\#3913](https://github.com/apache/camel-k/pull/3913) ([squakez](https://github.com/squakez))
+- feat\(ci\): automatic make generate  [\#3911](https://github.com/apache/camel-k/pull/3911) ([squakez](https://github.com/squakez))
+- chore: deprecate bind funcs [\#3909](https://github.com/apache/camel-k/pull/3909) ([squakez](https://github.com/squakez))
+- chore: link to official examples repo [\#3908](https://github.com/apache/camel-k/pull/3908) ([squakez](https://github.com/squakez))
+- Fix typo in README [\#3907](https://github.com/apache/camel-k/pull/3907) ([JapuDCret](https://github.com/JapuDCret))
+- chore\(deps\): bump github.com/prometheus/common from 0.38.0 to 0.39.0 [\#3905](https://github.com/apache/camel-k/pull/3905) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat\(cli\): Add autocomplete on integrations, kits, kamelets commands [\#3902](https://github.com/apache/camel-k/pull/3902) ([gansheer](https://github.com/gansheer))
+- fix\(cmd\): refactor install cmd to remove maintidx lint [\#3900](https://github.com/apache/camel-k/pull/3900) ([tadayosi](https://github.com/tadayosi))
+- fix: reconciliation loops behaviors [\#3897](https://github.com/apache/camel-k/pull/3897) ([squakez](https://github.com/squakez))
+- fix\(core\): move to policy/v1 [\#3841](https://github.com/apache/camel-k/pull/3841) ([squakez](https://github.com/squakez))
+- chore: deprecated commands [\#3839](https://github.com/apache/camel-k/pull/3839) ([squakez](https://github.com/squakez))
+- Fix tests related to recent camel-k-runtime changes [\#3838](https://github.com/apache/camel-k/pull/3838) ([claudio4j](https://github.com/claudio4j))
+- Minor steps improvements in release guide [\#3809](https://github.com/apache/camel-k/pull/3809) ([oscerd](https://github.com/oscerd))
+- fix\(trait\): Camel trait as IntegrationKit [\#3788](https://github.com/apache/camel-k/pull/3788) ([squakez](https://github.com/squakez))
+- feat\(build\): parse cmd execution for errors [\#3786](https://github.com/apache/camel-k/pull/3786) ([squakez](https://github.com/squakez))
+- feat\(controller\): add Ready condition to IntegrationPlatform [\#3783](https://github.com/apache/camel-k/pull/3783) ([tadayosi](https://github.com/tadayosi))
+- Release Helm Chart 1.10.2 [\#3757](https://github.com/apache/camel-k/pull/3757) ([oscerd](https://github.com/oscerd))
+- Use jolokia version defined in camel-k-runtime [\#3754](https://github.com/apache/camel-k/pull/3754) ([claudio4j](https://github.com/claudio4j))
+- Fixes licenses in pkg [\#3732](https://github.com/apache/camel-k/pull/3732) ([oscerd](https://github.com/oscerd))
+- Fixed licenses for addons [\#3729](https://github.com/apache/camel-k/pull/3729) ([oscerd](https://github.com/oscerd))
+- Added Support for Azure Key Vault addon [\#3706](https://github.com/apache/camel-k/pull/3706) ([oscerd](https://github.com/oscerd))
+- GCP Vault Support leveraging Camel-Google-Secret-Manager Properties Function [\#3697](https://github.com/apache/camel-k/pull/3697) ([oscerd](https://github.com/oscerd))
+- chore\(api\): Add validation to trait enum parameters in CRDs [\#3696](https://github.com/apache/camel-k/pull/3696) ([astefanutti](https://github.com/astefanutti))
+- fix: Use SIGTERM and SIGINT aware context for bootstrap operations [\#3691](https://github.com/apache/camel-k/pull/3691) ([astefanutti](https://github.com/astefanutti))
+- More docs AWS Secrets Manager Vault [\#3689](https://github.com/apache/camel-k/pull/3689) ([oscerd](https://github.com/oscerd))
+- chore\(trait\): Deprecate cached discovery option from GC trait [\#3688](https://github.com/apache/camel-k/pull/3688) ([astefanutti](https://github.com/astefanutti))
+- Adds the default maven repositories if extra ones are added [\#3684](https://github.com/apache/camel-k/pull/3684) ([phantomjinx](https://github.com/phantomjinx))
+- Added docs for AWS Secrets Manager Vault trait [\#3683](https://github.com/apache/camel-k/pull/3683) ([oscerd](https://github.com/oscerd))
+- fix\(\#3671\): Fix native mode for KameletBinding [\#3682](https://github.com/apache/camel-k/pull/3682) ([christophd](https://github.com/christophd))
+- Added Support AWS Secrets Manager Vault from Camel [\#3679](https://github.com/apache/camel-k/pull/3679) ([oscerd](https://github.com/oscerd))
+- feat\(cli\): promote allow Integration update [\#3674](https://github.com/apache/camel-k/pull/3674) ([squakez](https://github.com/squakez))
+- fix\(\#3657\): Use OPERATOR\_ID EnvVar consistently [\#3660](https://github.com/apache/camel-k/pull/3660) ([christophd](https://github.com/christophd))
+- feat\(controller/cli\): improve handling of invalid components & dependencies against Camel catalog [\#3640](https://github.com/apache/camel-k/pull/3640) ([tadayosi](https://github.com/tadayosi))
+- feat\(cli\): Allow to set build publish strategy options from install cmd [\#3631](https://github.com/apache/camel-k/pull/3631) ([essobedo](https://github.com/essobedo))
+- feat\(cmd/run\): secret/configmap as runtime/build-time properties [\#3626](https://github.com/apache/camel-k/pull/3626) ([essobedo](https://github.com/essobedo))
+- doc: generate Resume trait doc [\#3624](https://github.com/apache/camel-k/pull/3624) ([tadayosi](https://github.com/tadayosi))
+- feat\(cli\): Add add-repo command to add a repo for custom Kamelet catalog [\#3623](https://github.com/apache/camel-k/pull/3623) ([essobedo](https://github.com/essobedo))
+- feat: Ingress trait host is optional [\#3617](https://github.com/apache/camel-k/pull/3617) ([astefanutti](https://github.com/astefanutti))
+- feat\(cli\): Add a config command to manage the default settings [\#3599](https://github.com/apache/camel-k/pull/3599) ([essobedo](https://github.com/essobedo))
+- feat\(ci\): smoke test before nightly release [\#3594](https://github.com/apache/camel-k/pull/3594) ([squakez](https://github.com/squakez))
+- feat\(cli\): Add tail flag to the log command [\#3589](https://github.com/apache/camel-k/pull/3589) ([essobedo](https://github.com/essobedo))
+- feat\(metadata\): raise error when capability/dependency not resolved in CamelCatalog [\#3571](https://github.com/apache/camel-k/pull/3571) ([tadayosi](https://github.com/tadayosi))
+- feat\(cli\): Allow to specify custom Kaniko and Buildah images [\#3558](https://github.com/apache/camel-k/pull/3558) ([essobedo](https://github.com/essobedo))
+
+## [1.12.0-nightly](https://github.com/apache/camel-k/tree/1.12.0-nightly) (2022-12-14)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.11.0...1.12.0-nightly)
+
+**Closed issues:**
+
+- Saga example failing with version \> 1.10 [\#3869](https://github.com/apache/camel-k/issues/3869)
+- E2E - Isolate native tests into a dedicated workflow and put each test with a separate job in the workflow [\#3777](https://github.com/apache/camel-k/issues/3777)
+- E2E - Kustomize tests are unstable [\#3772](https://github.com/apache/camel-k/issues/3772)
+- Apache sync not working [\#3734](https://github.com/apache/camel-k/issues/3734)
+- OPC UA server not reachable from client [\#3580](https://github.com/apache/camel-k/issues/3580)
+- How to run a Camel process as a cron job \(other than a timer\) [\#3576](https://github.com/apache/camel-k/issues/3576)
+- `kamel uninstall` should also delete leases [\#3473](https://github.com/apache/camel-k/issues/3473)
+- failed: could not pull base image image adoptopenjdk/openjdk11:slim: https://auth.docker.io/token dial tcp: i/o timeout [\#3425](https://github.com/apache/camel-k/issues/3425)
+- Kamel `bind` step index unclear [\#2586](https://github.com/apache/camel-k/issues/2586)
+- Migrate the PodDisruptionBudget trait to `policy/v1` API [\#2206](https://github.com/apache/camel-k/issues/2206)
+
+**Merged pull requests:**
+
+- Update runtime-resources.adoc [\#3898](https://github.com/apache/camel-k/pull/3898) ([tarilabs](https://github.com/tarilabs))
+- chore\(deps\): bump go.uber.org/multierr from 1.8.0 to 1.9.0 [\#3895](https://github.com/apache/camel-k/pull/3895) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Upgrade release.adoc with instruction about upload/promote sources [\#3892](https://github.com/apache/camel-k/pull/3892) ([oscerd](https://github.com/oscerd))
+- chore\(deps\): bump github.com/magiconair/properties from 1.8.6 to 1.8.7 [\#3887](https://github.com/apache/camel-k/pull/3887) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/prometheus/common from 0.37.0 to 0.38.0 [\#3886](https://github.com/apache/camel-k/pull/3886) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat\(cli\): Update Kamel bind step index in properties to start at 1 instead of 0 [\#3884](https://github.com/apache/camel-k/pull/3884) ([gansheer](https://github.com/gansheer))
+- Fix \#3869: Update Saga Example [\#3883](https://github.com/apache/camel-k/pull/3883) ([MotaOcimar](https://github.com/MotaOcimar))
+- Revert "prometheus trait fully tested as in CI, the version of OCP is 4.x" [\#3881](https://github.com/apache/camel-k/pull/3881) ([squakez](https://github.com/squakez))
+- fix\(\#3800\): Add proper kamel linux binary on MacOS [\#3879](https://github.com/apache/camel-k/pull/3879) ([christophd](https://github.com/christophd))
+- Prepare release 1.11.0  [\#3878](https://github.com/apache/camel-k/pull/3878) ([oscerd](https://github.com/oscerd))
+- prometheus trait fully tested as in CI, the version of OCP is 4.x [\#3875](https://github.com/apache/camel-k/pull/3875) ([vitorz](https://github.com/vitorz))
+- fix\(e2e\): use generated API methods [\#3874](https://github.com/apache/camel-k/pull/3874) ([squakez](https://github.com/squakez))
+- fix\(service\): Create k8s service when knative-service trait is disabled [\#3871](https://github.com/apache/camel-k/pull/3871) ([claudio4j](https://github.com/claudio4j))
+- fix\(e2e\): isolate kustomize tests not to interfere with each other [\#3863](https://github.com/apache/camel-k/pull/3863) ([tadayosi](https://github.com/tadayosi))
+- chore\(deps\): bump go.uber.org/zap from 1.23.0 to 1.24.0 [\#3862](https://github.com/apache/camel-k/pull/3862) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(ci\): move native into nigtly release wf [\#3860](https://github.com/apache/camel-k/pull/3860) ([squakez](https://github.com/squakez))
+- fix\(trait\): trait error "camel-catalog already exists" during upgrade [\#3858](https://github.com/apache/camel-k/pull/3858) ([tadayosi](https://github.com/tadayosi))
+- fix\(source\): dataformat dependencies not resolved [\#3856](https://github.com/apache/camel-k/pull/3856) ([tadayosi](https://github.com/tadayosi))
+- fix: typo on operator.adoc [\#3850](https://github.com/apache/camel-k/pull/3850) ([mertdotcc](https://github.com/mertdotcc))
+- fix\(GC\): Default to APIResourceList group when APIResource group is empty [\#3834](https://github.com/apache/camel-k/pull/3834) ([astefanutti](https://github.com/astefanutti))
+- fix: bundle all Camel K runtime artifacts [\#3830](https://github.com/apache/camel-k/pull/3830) ([squakez](https://github.com/squakez))
+- chore\(test\) : TestRunAndLog to pass on mac os [\#3828](https://github.com/apache/camel-k/pull/3828) ([u5surf](https://github.com/u5surf))
+- Fix space in get\_catalog.sh [\#3827](https://github.com/apache/camel-k/pull/3827) ([claudio4j](https://github.com/claudio4j))
+- chore\(build\): upgrade Maven and ubi-quarkus-mandrel base image [\#3825](https://github.com/apache/camel-k/pull/3825) ([tadayosi](https://github.com/tadayosi))
+- chore: remove deprecated code [\#3819](https://github.com/apache/camel-k/pull/3819) ([squakez](https://github.com/squakez))
+- chore\(e2e\): separate native-it and run it nightly [\#3816](https://github.com/apache/camel-k/pull/3816) ([tadayosi](https://github.com/tadayosi))
+- fix\(controller\): Ready condition message not always taken from Camel Health Checks [\#3814](https://github.com/apache/camel-k/pull/3814) ([tadayosi](https://github.com/tadayosi))
+- feat\(cli\): Support build time dependencies for dependencies uploaded … [\#3808](https://github.com/apache/camel-k/pull/3808) ([johnpoth](https://github.com/johnpoth))
+- fix\(\#3800\): Add proper kamel CLI to image build on macOS [\#3804](https://github.com/apache/camel-k/pull/3804) ([christophd](https://github.com/christophd))
+- chore\(deps\): bump github.com/prometheus/client\_golang from 1.13.0 to 1.14.0 [\#3801](https://github.com/apache/camel-k/pull/3801) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [v1.11.0](https://github.com/apache/camel-k/tree/v1.11.0) (2022-12-07)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.11.0...v1.11.0)
+
+## [pkg/apis/camel/v1.11.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.11.0) (2022-12-07)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.11.0...pkg/apis/camel/v1.11.0)
+
+## [pkg/client/camel/v1.11.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.11.0) (2022-12-07)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.11.0...pkg/client/camel/v1.11.0)
+
+## [pkg/kamelet/repository/v1.11.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.11.0) (2022-12-07)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.10.4-nightly...pkg/kamelet/repository/v1.11.0)
+
+**Closed issues:**
+
+- E2E - Prometheus trait tests started to fail constantly after \#3875 [\#3880](https://github.com/apache/camel-k/issues/3880)
+- Recent testing failures [\#3861](https://github.com/apache/camel-k/issues/3861)
+- Update dependency versions in the documentation for 1.10.x and Next versions [\#3852](https://github.com/apache/camel-k/issues/3852)
+- gc trait fails for: cannot list resource \"endpoints\" in API group \"submariner.io\" [\#3833](https://github.com/apache/camel-k/issues/3833)
+- Bundle m2 camel k runtime distribution [\#3826](https://github.com/apache/camel-k/issues/3826)
+- E2E - Upgrade tests has become flaky saying '"camel-catalog-1.16.0-snapshot-quarkus" already exists' [\#3822](https://github.com/apache/camel-k/issues/3822)
+- `make generate` removes `PatchScale` func [\#3818](https://github.com/apache/camel-k/issues/3818)
+- E2E - Builder tests are constantly failing due to "Out of date version of GraalVM detected: native-image 21.3.0.0-Final" [\#3817](https://github.com/apache/camel-k/issues/3817)
+- query regarding using camel k [\#3815](https://github.com/apache/camel-k/issues/3815)
+- TestRunAndLog refactoring [\#3813](https://github.com/apache/camel-k/issues/3813)
+- FTP sink does not create directories when writing [\#3812](https://github.com/apache/camel-k/issues/3812)
+- `make install-minikube` does not work on macOS [\#3800](https://github.com/apache/camel-k/issues/3800)
+- Release 1.10.3 [\#3796](https://github.com/apache/camel-k/issues/3796)
+- Remove code deprecated before 1.8 \(LTS\) [\#3787](https://github.com/apache/camel-k/issues/3787)
+- Native checks to run on a nightly basis instead of on each PR [\#3784](https://github.com/apache/camel-k/issues/3784)
+- Unable to set env var OPERATOR\_ID in Helm installation [\#3739](https://github.com/apache/camel-k/issues/3739)
+- Camel version mismatch [\#3481](https://github.com/apache/camel-k/issues/3481)
+- Why's there JDK inside the camel-k-kit-\* images? [\#3424](https://github.com/apache/camel-k/issues/3424)
+- Drop support for Openshift 3 and related E2E test [\#3421](https://github.com/apache/camel-k/issues/3421)
+- Turn AWS region parameter into an enum? [\#3289](https://github.com/apache/camel-k/issues/3289)
+- Install Camel-K Operator based on Helm Chart with --global option [\#3054](https://github.com/apache/camel-k/issues/3054)
+- Camel 3.15 - Data formats renamed [\#2880](https://github.com/apache/camel-k/issues/2880)
+- Add official documentation on Kustomize introduced in 1.7 [\#2758](https://github.com/apache/camel-k/issues/2758)
+
+## [1.10.4-nightly](https://github.com/apache/camel-k/tree/1.10.4-nightly) (2022-11-14)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.10.3...1.10.4-nightly)
+
+**Merged pull requests:**
+
+- chore: Fix tests on macOS aarch64 [\#3805](https://github.com/apache/camel-k/pull/3805) ([christophd](https://github.com/christophd))
+- chore\(deps\): bump github.com/redhat-developer/service-binding-operator from 1.3.0 to 1.3.1 [\#3799](https://github.com/apache/camel-k/pull/3799) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/spf13/viper from 1.13.0 to 1.14.0 [\#3798](https://github.com/apache/camel-k/pull/3798) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(e2e\): clean up OCP3 guards [\#3782](https://github.com/apache/camel-k/pull/3782) ([tadayosi](https://github.com/tadayosi))
+- chore: removed module [\#3780](https://github.com/apache/camel-k/pull/3780) ([squakez](https://github.com/squakez))
+- fix helm annotations and kamel\_id [\#3778](https://github.com/apache/camel-k/pull/3778) ([milank78git](https://github.com/milank78git))
+- fix\(e2e\): increase build timeout for native build tests: 40m -\> 60m [\#3776](https://github.com/apache/camel-k/pull/3776) ([tadayosi](https://github.com/tadayosi))
+- chore\(deps\): bump github.com/stretchr/testify from 1.8.0 to 1.8.1 [\#3771](https://github.com/apache/camel-k/pull/3771) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/spf13/cobra from 1.6.0 to 1.6.1 [\#3770](https://github.com/apache/camel-k/pull/3770) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat\(ci\): latest runtime snapshot available [\#3764](https://github.com/apache/camel-k/pull/3764) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/prometheus/client\_model from 0.2.0 to 0.3.0 [\#3752](https://github.com/apache/camel-k/pull/3752) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [pkg/client/camel/v1.10.3](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.10.3) (2022-11-11)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.10.3...pkg/client/camel/v1.10.3)
+
+## [v1.10.3](https://github.com/apache/camel-k/tree/v1.10.3) (2022-11-11)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.10.3...v1.10.3)
+
+## [pkg/apis/camel/v1.10.3](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.10.3) (2022-11-11)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.10.3...pkg/apis/camel/v1.10.3)
+
+## [pkg/kamelet/repository/v1.10.3](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.10.3) (2022-11-11)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.10.3-nightly...pkg/kamelet/repository/v1.10.3)
+
+**Closed issues:**
+
+- Improve the user feedback when the integration kit fails [\#3779](https://github.com/apache/camel-k/issues/3779)
+- KameletBinding in Error when prometheus trait is enabled [\#3775](https://github.com/apache/camel-k/issues/3775)
+- E2E - No longer able to run native build tests with Quarkus 2.13.0 \(Camel Catalog 1.15.x\) [\#3773](https://github.com/apache/camel-k/issues/3773)
+- Runtime trait failure [\#3758](https://github.com/apache/camel-k/issues/3758)
+- Option ```--registry-insecure false``` takes no effect when using local dependencies ```-d file:///path/xxx.jar```  [\#3455](https://github.com/apache/camel-k/issues/3455)
+- Unable to run an integration on Minikube [\#3442](https://github.com/apache/camel-k/issues/3442)
+- Prometheus monitoring doc doesn't help to get monitoring working [\#3428](https://github.com/apache/camel-k/issues/3428)
+- Upgrade can result in integration being rebuilt using the old integrationkit [\#3359](https://github.com/apache/camel-k/issues/3359)
+- Integration Platform issues when using the Operator  [\#3297](https://github.com/apache/camel-k/issues/3297)
+- Make knative broker name configurable [\#2864](https://github.com/apache/camel-k/issues/2864)
+- integration platform: add conditions [\#2555](https://github.com/apache/camel-k/issues/2555)
+
+## [1.10.3-nightly](https://github.com/apache/camel-k/tree/1.10.3-nightly) (2022-10-25)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.10.2...1.10.3-nightly)
+
+**Merged pull requests:**
+
+- fix\(ci\): add cluster type for nightly releases [\#3768](https://github.com/apache/camel-k/pull/3768) ([squakez](https://github.com/squakez))
+- chore: update LAST\_RELEASED\_VERSION to 1.10.2 [\#3767](https://github.com/apache/camel-k/pull/3767) ([tadayosi](https://github.com/tadayosi))
+
+## [1.10.2](https://github.com/apache/camel-k/tree/1.10.2) (2022-10-22)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.10.2...1.10.2)
+
+**Closed issues:**
+
+- Native E2E tests failing [\#3715](https://github.com/apache/camel-k/issues/3715)
+- Unable to get basic hello.groovy example working on local single node KIND cluster [\#3349](https://github.com/apache/camel-k/issues/3349)
+- Release 1.10.2 [\#3746](https://github.com/apache/camel-k/issues/3746)
+
+**Merged pull requests:**
+
+- chore\(ci\): clean actions [\#3759](https://github.com/apache/camel-k/pull/3759) ([squakez](https://github.com/squakez))
+- Fix get\_catalog.sh when runtime is snapshot [\#3755](https://github.com/apache/camel-k/pull/3755) ([claudio4j](https://github.com/claudio4j))
+- fix\(e2e\): stabilise TestNativeBinding [\#3747](https://github.com/apache/camel-k/pull/3747) ([tadayosi](https://github.com/tadayosi))
+- fix\(e2e\): fix minor issue in e2e upgrade util.go [\#3745](https://github.com/apache/camel-k/pull/3745) ([tadayosi](https://github.com/tadayosi))
+- change\(helm\): logLevel configuration enabled [\#3744](https://github.com/apache/camel-k/pull/3744) ([leewoobin789](https://github.com/leewoobin789))
+- chore\(deps\): bump github.com/spf13/cobra from 1.5.0 to 1.6.0 [\#3742](https://github.com/apache/camel-k/pull/3742) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/onsi/gomega from 1.21.1 to 1.22.1 [\#3741](https://github.com/apache/camel-k/pull/3741) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Minor updates for bundle generation [\#3423](https://github.com/apache/camel-k/pull/3423) ([phantomjinx](https://github.com/phantomjinx))
+
+## [pkg/apis/camel/v1.10.2](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.10.2) (2022-10-18)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.10.2...pkg/apis/camel/v1.10.2)
+
+## [pkg/client/camel/v1.10.2](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.10.2) (2022-10-18)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.10.2...pkg/client/camel/v1.10.2)
+
+## [pkg/kamelet/repository/v1.10.2](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.10.2) (2022-10-18)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.10.2...pkg/kamelet/repository/v1.10.2)
+
+## [v1.10.2](https://github.com/apache/camel-k/tree/v1.10.2) (2022-10-18)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.10.2-nightly...v1.10.2)
+
+**Closed issues:**
+
+- Missing container image docker.io/apache/camel-k:1.10.1-SNAPSHOT [\#3720](https://github.com/apache/camel-k/issues/3720)
+
+## [1.10.2-nightly](https://github.com/apache/camel-k/tree/1.10.2-nightly) (2022-10-14)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.10.1...1.10.2-nightly)
+
+**Closed issues:**
+
+- E2E native flaky tests [\#3726](https://github.com/apache/camel-k/issues/3726)
+- The --add-repo switch fails with a global operator [\#3667](https://github.com/apache/camel-k/issues/3667)
+- Should `make bundle` update kustomization.yaml? [\#3606](https://github.com/apache/camel-k/issues/3606)
+- Release 1.10.1 [\#3605](https://github.com/apache/camel-k/issues/3605)
+
+**Merged pull requests:**
+
+- \#2758 documentation for kustomize installation [\#3738](https://github.com/apache/camel-k/pull/3738) ([phantomjinx](https://github.com/phantomjinx))
+- Due to slower performance revert tests to sub-tests from separate functions [\#3737](https://github.com/apache/camel-k/pull/3737) ([phantomjinx](https://github.com/phantomjinx))
+- chore: gotestfmt is renamed to gotesttools/gotestfmt [\#3735](https://github.com/apache/camel-k/pull/3735) ([tadayosi](https://github.com/tadayosi))
+- feat\(cli\): Make add-repo and remove-repo compatible with a global operator [\#3731](https://github.com/apache/camel-k/pull/3731) ([essobedo](https://github.com/essobedo))
+- chore\(deps\): bump github.com/redhat-developer/service-binding-operator from 1.2.0 to 1.3.0 [\#3727](https://github.com/apache/camel-k/pull/3727) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(cli\): don't verify operator [\#3723](https://github.com/apache/camel-k/pull/3723) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/onsi/gomega from 1.20.2 to 1.21.1 [\#3722](https://github.com/apache/camel-k/pull/3722) ([dependabot[bot]](https://github.com/apps/dependabot))
+- e2e: test fixes and bug fixes from test runs [\#3716](https://github.com/apache/camel-k/pull/3716) ([phantomjinx](https://github.com/phantomjinx))
+- fix\(ci\): build resources before testing [\#3714](https://github.com/apache/camel-k/pull/3714) ([squakez](https://github.com/squakez))
+- chore: add test-fmt make target [\#3712](https://github.com/apache/camel-k/pull/3712) ([tadayosi](https://github.com/tadayosi))
+- chore: Upgrade go.uber.org/automaxprocs to v1.5.1 [\#3711](https://github.com/apache/camel-k/pull/3711) ([astefanutti](https://github.com/astefanutti))
+- chore: Use global client discovery API to check Knative install [\#3701](https://github.com/apache/camel-k/pull/3701) ([astefanutti](https://github.com/astefanutti))
+- Update camel quarkus micropofile metrics doc [\#3698](https://github.com/apache/camel-k/pull/3698) ([zbendhiba](https://github.com/zbendhiba))
+- Remove deprecated spectrum fix [\#3693](https://github.com/apache/camel-k/pull/3693) ([tadayosi](https://github.com/tadayosi))
+- chore: Add client argument to controllers [\#3681](https://github.com/apache/camel-k/pull/3681) ([astefanutti](https://github.com/astefanutti))
+- chore: Propagate reconcilation context to build routine [\#3678](https://github.com/apache/camel-k/pull/3678) ([astefanutti](https://github.com/astefanutti))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.3.10 to 0.3.11 [\#3675](https://github.com/apache/camel-k/pull/3675) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(test\): KameletBinding native mode [\#3670](https://github.com/apache/camel-k/pull/3670) ([bouskaJ](https://github.com/bouskaJ))
+- doc: add kamel promote [\#3665](https://github.com/apache/camel-k/pull/3665) ([squakez](https://github.com/squakez))
+- chore: enable latest LTS nightly [\#3663](https://github.com/apache/camel-k/pull/3663) ([squakez](https://github.com/squakez))
+- trait\(ingress\): Configure backend in ingress rule [\#3652](https://github.com/apache/camel-k/pull/3652) ([astefanutti](https://github.com/astefanutti))
+- chore\(ci\): experimental use of gotestfmt for e2e [\#3651](https://github.com/apache/camel-k/pull/3651) ([tadayosi](https://github.com/tadayosi))
+- chore\(deps\): bump github.com/redhat-developer/service-binding-operator from 1.1.1 to 1.2.0 [\#3637](https://github.com/apache/camel-k/pull/3637) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Improvements to OLM bundle building of test index [\#3527](https://github.com/apache/camel-k/pull/3527) ([phantomjinx](https://github.com/phantomjinx))
+
+## [pkg/kamelet/repository/v1.10.1](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.10.1) (2022-10-10)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.10.1...pkg/kamelet/repository/v1.10.1)
+
+## [pkg/client/camel/v1.10.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.10.1) (2022-10-10)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.10.1...pkg/client/camel/v1.10.1)
+
+## [v1.10.1](https://github.com/apache/camel-k/tree/v1.10.1) (2022-10-10)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.10.1...v1.10.1)
+
+## [pkg/apis/camel/v1.10.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.10.1) (2022-10-10)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.10.1-nightly...pkg/apis/camel/v1.10.1)
+
+**Closed issues:**
+
+- Cannot build the project, likely `gotestfmt` [\#3677](https://github.com/apache/camel-k/issues/3677)
+- Add an info after `kamel promote` [\#3676](https://github.com/apache/camel-k/issues/3676)
+- Allow continuous deployment for `kamel promote` [\#3673](https://github.com/apache/camel-k/issues/3673)
+- Can't run KameletBinding with the native mode [\#3671](https://github.com/apache/camel-k/issues/3671)
+- kamel local run: extension to "build and output" CRs  [\#3662](https://github.com/apache/camel-k/issues/3662)
+- OLM installtion needs to set KAMEL\_OPERATOR\_ID EnvVar [\#3657](https://github.com/apache/camel-k/issues/3657)
+- Provide documentation for LTS support [\#3647](https://github.com/apache/camel-k/issues/3647)
+- Wrong compatibility matrix [\#3622](https://github.com/apache/camel-k/issues/3622)
+- 1.10.x Smoke test failure TestBindingWithImage [\#3619](https://github.com/apache/camel-k/issues/3619)
+- Nightly release 1.9.x missing tests [\#3613](https://github.com/apache/camel-k/issues/3613)
+- `kamel promote` documentation [\#3375](https://github.com/apache/camel-k/issues/3375)
+- Kamel install error on Minikube [\#3348](https://github.com/apache/camel-k/issues/3348)
+- Camel route terminates when route takes longer than 5 minutes [\#3335](https://github.com/apache/camel-k/issues/3335)
+- \[E2E\] Split integration test suite for kubernetes and openshift CI workflows [\#3210](https://github.com/apache/camel-k/issues/3210)
+- \[regression\] Cannot provide 2 resources with 1.8.0 and 1.8.1 [\#3077](https://github.com/apache/camel-k/issues/3077)
+
+## [1.10.1-nightly](https://github.com/apache/camel-k/tree/1.10.1-nightly) (2022-09-20)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.11.0-nightly...1.10.1-nightly)
+
+**Closed issues:**
+
+- `make bundle` failure [\#3602](https://github.com/apache/camel-k/issues/3602)
+- Parametrize kaniko executor image to point to private registry [\#3350](https://github.com/apache/camel-k/issues/3350)
+- kamel uninstall --all does not remove Kamelets [\#3342](https://github.com/apache/camel-k/issues/3342)
+- Configure parallel container image layers push based on CPU quota [\#3340](https://github.com/apache/camel-k/issues/3340)
+- Configure Maven builds based on CPU quota [\#3339](https://github.com/apache/camel-k/issues/3339)
+- Add a `kamel install --publish-strategy-option` [\#3308](https://github.com/apache/camel-k/issues/3308)
+- Simple KameletBinding created with Errors [\#3299](https://github.com/apache/camel-k/issues/3299)
+- Proposal: Clarify the description for the Operator in the OLM catalog [\#3267](https://github.com/apache/camel-k/issues/3267)
+- Flaky E2E tests identified in 1.9.x [\#3234](https://github.com/apache/camel-k/issues/3234)
+- kamel log tail option [\#3004](https://github.com/apache/camel-k/issues/3004)
+- Builder/Camel trait configmap/secret beside properties [\#3002](https://github.com/apache/camel-k/issues/3002)
+- Provide a command to add a repo for custom Kamelet catalog [\#2850](https://github.com/apache/camel-k/issues/2850)
+- Ability to set labels on knative service \(for things like "cluster-local"\) [\#1712](https://github.com/apache/camel-k/issues/1712)
+- Allow overriding of buildah image with "kamel install" switches [\#1424](https://github.com/apache/camel-k/issues/1424)
+- kamel CLI - Allow to specify a namespace to use instead of default [\#1184](https://github.com/apache/camel-k/issues/1184)
+- Create a Github Action for Camel K [\#1163](https://github.com/apache/camel-k/issues/1163)
+- Camel K doesn't support kubernetes services of type loadbalancer [\#1070](https://github.com/apache/camel-k/issues/1070)
+- Camel-K operator should clean up kits and kit builders after integrations are deleted [\#889](https://github.com/apache/camel-k/issues/889)
+- support for multiple type of builders [\#687](https://github.com/apache/camel-k/issues/687)
+- Let dependencies be defined using HTTP URLs [\#240](https://github.com/apache/camel-k/issues/240)
+
+**Merged pull requests:**
+
+- Fix README in examples/openapi [\#3655](https://github.com/apache/camel-k/pull/3655) ([halmakidon](https://github.com/halmakidon))
+- fix: release action to use secrets properly [\#3648](https://github.com/apache/camel-k/pull/3648) ([squakez](https://github.com/squakez))
+- fix: release as an action [\#3646](https://github.com/apache/camel-k/pull/3646) ([squakez](https://github.com/squakez))
+- feat\(cli/run\): Support dependencies defined using HTTP URLs [\#3644](https://github.com/apache/camel-k/pull/3644) ([essobedo](https://github.com/essobedo))
+- Fix Camel website build by removing invalid link [\#3642](https://github.com/apache/camel-k/pull/3642) ([apupier](https://github.com/apupier))
+- fix: release as an action [\#3636](https://github.com/apache/camel-k/pull/3636) ([squakez](https://github.com/squakez))
+- Fixed helm install failing [\#3634](https://github.com/apache/camel-k/pull/3634) ([halmakidon](https://github.com/halmakidon))
+- Update documentation for kamelet type that can also be action [\#3632](https://github.com/apache/camel-k/pull/3632) ([apupier](https://github.com/apupier))
+- test: Use camel-k repo in the test for the add-repo command [\#3630](https://github.com/apache/camel-k/pull/3630) ([essobedo](https://github.com/essobedo))
+- fix: release as an action [\#3629](https://github.com/apache/camel-k/pull/3629) ([squakez](https://github.com/squakez))
+- migrate and improve master example [\#3627](https://github.com/apache/camel-k/pull/3627) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- fix: release as an action [\#3625](https://github.com/apache/camel-k/pull/3625) ([squakez](https://github.com/squakez))
+- chore\(ci\): release as an action [\#3621](https://github.com/apache/camel-k/pull/3621) ([squakez](https://github.com/squakez))
+- feat\(trait\): Provide the service type from the trait configuration [\#3618](https://github.com/apache/camel-k/pull/3618) ([essobedo](https://github.com/essobedo))
+- Fix panics when integration is waiting for platform [\#3616](https://github.com/apache/camel-k/pull/3616) ([astefanutti](https://github.com/astefanutti))
+- fix: do not run smoke tests on 1.9 nightly [\#3614](https://github.com/apache/camel-k/pull/3614) ([squakez](https://github.com/squakez))
+- feat: Auto-create platform when registry can be inferred from KEP-1755 [\#3612](https://github.com/apache/camel-k/pull/3612) ([astefanutti](https://github.com/astefanutti))
+- fix: Panic with odd number of key / value arguments [\#3610](https://github.com/apache/camel-k/pull/3610) ([astefanutti](https://github.com/astefanutti))
+- chore\(deps\): bump github.com/spf13/viper from 1.12.0 to 1.13.0 [\#3609](https://github.com/apache/camel-k/pull/3609) ([dependabot[bot]](https://github.com/apps/dependabot))
+- \[TEST\] OLM fresh install test [\#3593](https://github.com/apache/camel-k/pull/3593) ([bouskaJ](https://github.com/bouskaJ))
+
+## [1.11.0-nightly](https://github.com/apache/camel-k/tree/1.11.0-nightly) (2022-09-06)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.10.0...1.11.0-nightly)
+
+**Closed issues:**
+
+- Test failing after release update [\#3600](https://github.com/apache/camel-k/issues/3600)
+- Validate failure in CI [\#3591](https://github.com/apache/camel-k/issues/3591)
+- Add back beginner examples [\#3579](https://github.com/apache/camel-k/issues/3579)
+- 1.10.0 Release [\#3560](https://github.com/apache/camel-k/issues/3560)
+- TestOperatorIDFiltering/Operators\_can\_handoff\_scoped\_integrations test failing [\#3542](https://github.com/apache/camel-k/issues/3542)
+- `golangci-lint` version `1.47.2` reports more errors [\#3536](https://github.com/apache/camel-k/issues/3536)
+- CPU Spikes on Openshift with unusual operator behaviour [\#3441](https://github.com/apache/camel-k/issues/3441)
+- ERROR: could not find any knative type in namespace default, last error was: the server could not find the requested resource [\#3430](https://github.com/apache/camel-k/issues/3430)
+- Release documentation: Review steps and make it a bit more complete for new release manager [\#2931](https://github.com/apache/camel-k/issues/2931)
+
+**Merged pull requests:**
+
+- chore: add a post release bump chapter [\#3608](https://github.com/apache/camel-k/pull/3608) ([squakez](https://github.com/squakez))
+- chore\(ci\): support 1.10.x nightly release [\#3607](https://github.com/apache/camel-k/pull/3607) ([squakez](https://github.com/squakez))
+- fix\(e2e\): codegen [\#3601](https://github.com/apache/camel-k/pull/3601) ([squakez](https://github.com/squakez))
+- fix\(e2e\): relax constraints for builder kit full build test [\#3597](https://github.com/apache/camel-k/pull/3597) ([tadayosi](https://github.com/tadayosi))
+- chore\(deps\): bump github.com/onsi/gomega from 1.20.1 to 1.20.2 [\#3596](https://github.com/apache/camel-k/pull/3596) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(lint\): suppress nolintlint - unused staticcheck [\#3592](https://github.com/apache/camel-k/pull/3592) ([tadayosi](https://github.com/tadayosi))
+- fix\(e2e\): fix TestBindingWithImage [\#3590](https://github.com/apache/camel-k/pull/3590) ([tadayosi](https://github.com/tadayosi))
+- Update the staging repository for camel-k-runtime 1.14.0 [\#3588](https://github.com/apache/camel-k/pull/3588) ([oscerd](https://github.com/oscerd))
+- fix: Panic with odd number of key / value arguments [\#3587](https://github.com/apache/camel-k/pull/3587) ([astefanutti](https://github.com/astefanutti))
+- test: Add an E2E test for deploying an it using secret key filtering [\#3585](https://github.com/apache/camel-k/pull/3585) ([essobedo](https://github.com/essobedo))
+- fix\(e2e\): fix TestHealthTrait for upgraded Camel 3.18.x [\#3584](https://github.com/apache/camel-k/pull/3584) ([tadayosi](https://github.com/tadayosi))
+- fix\(e2e\): attempt to stabilise TestNativeIntegrations [\#3583](https://github.com/apache/camel-k/pull/3583) ([tadayosi](https://github.com/tadayosi))
+- chore\(deps\): bump github.com/onsi/gomega from 1.20.0 to 1.20.1 [\#3581](https://github.com/apache/camel-k/pull/3581) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(e2e\): make package-artifacts to be aware of staging repo [\#3578](https://github.com/apache/camel-k/pull/3578) ([tadayosi](https://github.com/tadayosi))
+- fix\(e2e\): local test when staging [\#3574](https://github.com/apache/camel-k/pull/3574) ([squakez](https://github.com/squakez))
+- chore\(build\): Use global operator in YAKS E2E tests [\#3573](https://github.com/apache/camel-k/pull/3573) ([christophd](https://github.com/christophd))
+- chore\(deps\): bump go.uber.org/zap from 1.22.0 to 1.23.0 [\#3570](https://github.com/apache/camel-k/pull/3570) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(knative\): Remove obsolete Knative service beta v1 mappings [\#3569](https://github.com/apache/camel-k/pull/3569) ([christophd](https://github.com/christophd))
+- chore\(build\): Restrict release workflow execution [\#3568](https://github.com/apache/camel-k/pull/3568) ([christophd](https://github.com/christophd))
+- Update the staging repository for camel-k-runtime 1.14.0 [\#3567](https://github.com/apache/camel-k/pull/3567) ([oscerd](https://github.com/oscerd))
+- Add preliminary support for the resume API [\#3566](https://github.com/apache/camel-k/pull/3566) ([orpiske](https://github.com/orpiske))
+- migrate and improve knative example [\#3565](https://github.com/apache/camel-k/pull/3565) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- Camel k runtime 1.14.0 as Default [\#3564](https://github.com/apache/camel-k/pull/3564) ([oscerd](https://github.com/oscerd))
+- chore\(deps\): bump github.com/go-logr/logr from 1.2.2 to 1.2.3 [\#3562](https://github.com/apache/camel-k/pull/3562) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Release 1.10.0: Staging camel-k-runtime 1.14.0 and kamelet-catalog 0.9.0 tag [\#3561](https://github.com/apache/camel-k/pull/3561) ([oscerd](https://github.com/oscerd))
+- migrate and improve kamelets example [\#3559](https://github.com/apache/camel-k/pull/3559) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- chore: add pod tolerations options to operator [\#3557](https://github.com/apache/camel-k/pull/3557) ([zhiminglim](https://github.com/zhiminglim))
+- feat\(cli\): Force arguments for the rebuild command [\#3556](https://github.com/apache/camel-k/pull/3556) ([essobedo](https://github.com/essobedo))
+- chore\(cli\): refactor run cmd to remove nolint maintidx [\#3555](https://github.com/apache/camel-k/pull/3555) ([tadayosi](https://github.com/tadayosi))
+- migrate and improve languages example [\#3554](https://github.com/apache/camel-k/pull/3554) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- fix: properly set annotations and labels to Kamelets [\#3553](https://github.com/apache/camel-k/pull/3553) ([essobedo](https://github.com/essobedo))
+- chore: Upgrade k8s and Knative dependencies [\#3552](https://github.com/apache/camel-k/pull/3552) ([astefanutti](https://github.com/astefanutti))
+- fix\(knative\): Fix the knative pods created until exhaustion [\#3548](https://github.com/apache/camel-k/pull/3548) ([claudio4j](https://github.com/claudio4j))
+- fix\(rbac\): missing clusterrolebinding permission [\#3547](https://github.com/apache/camel-k/pull/3547) ([claudio4j](https://github.com/claudio4j))
+- Feat\(trait\): Knative service visibility support [\#3546](https://github.com/apache/camel-k/pull/3546) ([halmakidon](https://github.com/halmakidon))
+- Add operator global option when installing with Helm Chart [\#3545](https://github.com/apache/camel-k/pull/3545) ([zhiminglim](https://github.com/zhiminglim))
+- fix\(trait\): force a volume path when key is set [\#3544](https://github.com/apache/camel-k/pull/3544) ([essobedo](https://github.com/essobedo))
+- Remove overinstalling the timer kamelet [\#3515](https://github.com/apache/camel-k/pull/3515) ([bouskaJ](https://github.com/bouskaJ))
+- chore\(build\): Use Camel K runtime Maven structural logging module [\#3376](https://github.com/apache/camel-k/pull/3376) ([christophd](https://github.com/christophd))
+- fix\(knative\): Make knative broker name configurable [\#3373](https://github.com/apache/camel-k/pull/3373) ([claudio4j](https://github.com/claudio4j))
+- chore\(build\): let bom managed by camel k runtime [\#3317](https://github.com/apache/camel-k/pull/3317) ([squakez](https://github.com/squakez))
+
+## [v1.10.0](https://github.com/apache/camel-k/tree/v1.10.0) (2022-08-31)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.10.0...v1.10.0)
+
+## [pkg/apis/camel/v1.10.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.10.0) (2022-08-31)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.10.0...pkg/apis/camel/v1.10.0)
+
+## [pkg/client/camel/v1.10.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.10.0) (2022-08-31)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.10.0...pkg/client/camel/v1.10.0)
+
+## [pkg/kamelet/repository/v1.10.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.10.0) (2022-08-31)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.8.3-nightly...pkg/kamelet/repository/v1.10.0)
+
+**Closed issues:**
+
+- Base Image is pulled via http instead of https [\#3577](https://github.com/apache/camel-k/issues/3577)
+- How to run a Camel process as a cron job \(other than a timer\) [\#3575](https://github.com/apache/camel-k/issues/3575)
+- Add E2E test for deploying an integration using configmap/secret key filtering [\#3563](https://github.com/apache/camel-k/issues/3563)
+- load camel-cxf in camel-k integration [\#3550](https://github.com/apache/camel-k/issues/3550)
+- Cannot deploy an integration using configmap/secret key filtering [\#3543](https://github.com/apache/camel-k/issues/3543)
+- In a specific scenario a new integration pod is created every ~0.5 seconds [\#3522](https://github.com/apache/camel-k/issues/3522)
+- `make generate-crd` error [\#3453](https://github.com/apache/camel-k/issues/3453)
+- `kamel rebuild` default should not rebuild all Integrations [\#3445](https://github.com/apache/camel-k/issues/3445)
+- Update to Knative v1.5.0 [\#3381](https://github.com/apache/camel-k/issues/3381)
+- kamel local build is writing on stderr with Maven dependency specified as modeline even if it is working [\#3252](https://github.com/apache/camel-k/issues/3252)
+- Unable to access MongoDB from kamelets binding \[DOCS bug\] [\#3228](https://github.com/apache/camel-k/issues/3228)
+- Update the DSL yaml doc about the extension section [\#3151](https://github.com/apache/camel-k/issues/3151)
+
+## [1.8.3-nightly](https://github.com/apache/camel-k/tree/1.8.3-nightly) (2022-08-16)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.9.3-nightly...1.8.3-nightly)
+
+## [1.9.3-nightly](https://github.com/apache/camel-k/tree/1.9.3-nightly) (2022-08-16)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.10.0-nightly...1.9.3-nightly)
+
+**Closed issues:**
+
+- Passing namespace info for CXF Endpoint in Camel-K YAML DSL [\#3503](https://github.com/apache/camel-k/issues/3503)
+- Trait owner.target-annotations is not propagated to K8S Services [\#3494](https://github.com/apache/camel-k/issues/3494)
+- Release nightly fails [\#3492](https://github.com/apache/camel-k/issues/3492)
+- Kamel install error on Kind [\#3483](https://github.com/apache/camel-k/issues/3483)
+- camel-k ignores changes to traits configured using annotations [\#3479](https://github.com/apache/camel-k/issues/3479)
+- Integration cannot be run from github with different branch [\#3475](https://github.com/apache/camel-k/issues/3475)
+- `make images` is not building the binary [\#3474](https://github.com/apache/camel-k/issues/3474)
+- `kamel operator` does not work locally [\#3472](https://github.com/apache/camel-k/issues/3472)
+- `install-it` workflow is failing silently [\#3465](https://github.com/apache/camel-k/issues/3465)
+- Declaring multiple traits in KameletBinding fails badly [\#3458](https://github.com/apache/camel-k/issues/3458)
+- `camel-k-operator` pod in `CrashLoopBackOff` [\#3456](https://github.com/apache/camel-k/issues/3456)
+- Option `--maven-repository` on kamel run command has no effect [\#3447](https://github.com/apache/camel-k/issues/3447)
+- `make generate-doc` outputs non-deterministic `resources/traits.yaml` [\#3431](https://github.com/apache/camel-k/issues/3431)
+- Any ideas on disabling property expansion in kamel run? [\#3422](https://github.com/apache/camel-k/issues/3422)
+- Camel K integration Prometheus Trait label autocreation with Integration Platform not working [\#3415](https://github.com/apache/camel-k/issues/3415)
+- Example readme page 404 links [\#3413](https://github.com/apache/camel-k/issues/3413)
+- Failing integration does not report error condition [\#3412](https://github.com/apache/camel-k/issues/3412)
+- Set log-level on Camel K operator not working [\#3399](https://github.com/apache/camel-k/issues/3399)
+- kamel run --output yaml does not include resources [\#3396](https://github.com/apache/camel-k/issues/3396)
+- Migrate from batch/v1beta1 to batch/v1 [\#3393](https://github.com/apache/camel-k/issues/3393)
+- RBAC missing permissions for channels and inmemorychannels in messaging.knative.dev [\#3390](https://github.com/apache/camel-k/issues/3390)
+- Update to golangci-lint 1.46.x [\#3387](https://github.com/apache/camel-k/issues/3387)
+- kamel local run support --build-property ? [\#3356](https://github.com/apache/camel-k/issues/3356)
+- Configmap properties changes are not being detected in dev mode [\#3347](https://github.com/apache/camel-k/issues/3347)
+- How to deal with `SNAPSHOT` dependencies? [\#3341](https://github.com/apache/camel-k/issues/3341)
+- CamelK 1.9.2 when installed via OLM "system:serviceaccount:openshift-operators:camel-k-operator" cannot get resource "channels" in API group "messaging.knative.dev" [\#3328](https://github.com/apache/camel-k/issues/3328)
+- `make bundle` adds duplicate `replaces` to Camel K CSV [\#3321](https://github.com/apache/camel-k/issues/3321)
+- E2E repeated failure [\#3315](https://github.com/apache/camel-k/issues/3315)
+- Integrations, IntegrationKits, IntegrationPlatforms are not owned by Namespaces [\#3311](https://github.com/apache/camel-k/issues/3311)
+- kamel local build:failure while building project: exit status 1 [\#3307](https://github.com/apache/camel-k/issues/3307)
+- Helm Chart for camel-k 1.9.2 is invalid [\#3300](https://github.com/apache/camel-k/issues/3300)
+- Our preference on defining multiple e2e tests [\#3298](https://github.com/apache/camel-k/issues/3298)
+- Kamel run default service nodePort is invalid [\#3296](https://github.com/apache/camel-k/issues/3296)
+- Integration upgraded automatically after operator upgrade [\#3294](https://github.com/apache/camel-k/issues/3294)
+- `kamel rebuild` does not seem to work [\#3293](https://github.com/apache/camel-k/issues/3293)
+- Dependency doc is wrong about how to add camel components [\#3291](https://github.com/apache/camel-k/issues/3291)
+- Cannot find RestProducerFactory in Registry or as a Component to use" [\#3290](https://github.com/apache/camel-k/issues/3290)
+- Never stale a bug issue [\#3283](https://github.com/apache/camel-k/issues/3283)
+- Moving main to 1.10.0-SNAPSHOT [\#3280](https://github.com/apache/camel-k/issues/3280)
+- Release 1.9.2 [\#3275](https://github.com/apache/camel-k/issues/3275)
+- TestOLMAutomaticUpgrade test failing in 1.9.x [\#3261](https://github.com/apache/camel-k/issues/3261)
+- 1.9.x TestHealthTrait/Readiness\_condition\_with\_stopped\_route failure [\#3258](https://github.com/apache/camel-k/issues/3258)
+- Release 1.9.0 - Failure to install via OLM [\#3246](https://github.com/apache/camel-k/issues/3246)
+- `make generate-doc` doesn't update CRD API doc when using Go 1.16.x [\#3236](https://github.com/apache/camel-k/issues/3236)
+- Add e2e test for kamel run --dev in a warmed-up environment [\#3211](https://github.com/apache/camel-k/issues/3211)
+- Nil pointer dereference tracing trait [\#3205](https://github.com/apache/camel-k/issues/3205)
+- E2E errors in `1.8.x` [\#3191](https://github.com/apache/camel-k/issues/3191)
+- Improve the reliability of e2e tests by installing operator globally as a pre-requisite. [\#3183](https://github.com/apache/camel-k/issues/3183)
+- Add `.status.observedGeneration` to Camel K CRDs [\#3182](https://github.com/apache/camel-k/issues/3182)
+- simplify platforms handling/configuration [\#3164](https://github.com/apache/camel-k/issues/3164)
+- Service Binding trait usage example [\#3147](https://github.com/apache/camel-k/issues/3147)
+- Route trait usage example [\#3146](https://github.com/apache/camel-k/issues/3146)
+- PDB trait usage example [\#3145](https://github.com/apache/camel-k/issues/3145)
+- Logging trait usage example [\#3143](https://github.com/apache/camel-k/issues/3143)
+- Knative trait usage example [\#3142](https://github.com/apache/camel-k/issues/3142)
+- Camel K operator scaling documentation [\#3133](https://github.com/apache/camel-k/issues/3133)
+- Support operator hub bundle format in `make bundle` [\#3128](https://github.com/apache/camel-k/issues/3128)
+- hello yaml example output [\#3124](https://github.com/apache/camel-k/issues/3124)
+- java.lang.ClassNotFoundException: io.quarkus.bootstrap.runner.QuarkusEntryPoint after k8s node update [\#3122](https://github.com/apache/camel-k/issues/3122)
+- E2E failing in release-1.8.x [\#3120](https://github.com/apache/camel-k/issues/3120)
+- cyrus-sasl-lib \(CVE-2022-24407\), CVE-2022-23806 and multiple go related vulnerabilities in Docker Image 1.7.0, 1.8.1, 1.8.2 [\#3113](https://github.com/apache/camel-k/issues/3113)
+- More user-friendly error messages for `kamel local` subcommands [\#3028](https://github.com/apache/camel-k/issues/3028)
+- OLM scorecard tests missing [\#3022](https://github.com/apache/camel-k/issues/3022)
+- cron.concurrency-policy does not work correctly [\#3019](https://github.com/apache/camel-k/issues/3019)
+- kamel uninstall seems to remain some resources in the cluster [\#3013](https://github.com/apache/camel-k/issues/3013)
+- Access channel in different namespace [\#3009](https://github.com/apache/camel-k/issues/3009)
+- Operator creates too many repositories [\#3003](https://github.com/apache/camel-k/issues/3003)
+- Improve message error when IntegrationPlatform failure [\#2996](https://github.com/apache/camel-k/issues/2996)
+- Release: scripting Renaming files for operator works [\#2984](https://github.com/apache/camel-k/issues/2984)
+- Autoscaling not working [\#2982](https://github.com/apache/camel-k/issues/2982)
+- Modify e2e tests so that if failed the tests is repeated in a new namespace [\#2965](https://github.com/apache/camel-k/issues/2965)
+- Update readiness condition based on new Camel health check format [\#2886](https://github.com/apache/camel-k/issues/2886)
+- IntegrationPlatform camel-k hardcoded name causes wrong assumptions [\#2883](https://github.com/apache/camel-k/issues/2883)
+- Using REST as consumer and producer appends PATH to producer URL [\#2867](https://github.com/apache/camel-k/issues/2867)
+- Use deprecated field of yaml schema specification instead of only modifying description [\#2817](https://github.com/apache/camel-k/issues/2817)
+- Adding mavens settings-security.xml to the spec.build.maven is not possible [\#2747](https://github.com/apache/camel-k/issues/2747)
+- Integration won't rollout with changes outside spec [\#2648](https://github.com/apache/camel-k/issues/2648)
+- Kamel 1.5.1 CLI generates broken zsh completions [\#2622](https://github.com/apache/camel-k/issues/2622)
+- ImagePullBackOff when node failed [\#2485](https://github.com/apache/camel-k/issues/2485)
+- Debug seems not to work on knative pods [\#2474](https://github.com/apache/camel-k/issues/2474)
+- Groovy script JSON paring runs into java.util.ServiceConfigurationError: org.apache.groovy.json.FastStringServiceFactory: org.apache.groovy.json.DefaultFastStringServiceFactory not a subtype [\#2418](https://github.com/apache/camel-k/issues/2418)
+- Migrate CronJob to `batch/v1` [\#2408](https://github.com/apache/camel-k/issues/2408)
+- re-deployment strategies [\#2256](https://github.com/apache/camel-k/issues/2256)
+- `kamel local build` doesn't support same dependency notation [\#2213](https://github.com/apache/camel-k/issues/2213)
+- Provide option to have symbolic link for kamel local build --integration-directory \<folder\> [\#2179](https://github.com/apache/camel-k/issues/2179)
+- Global vs local operator  [\#2177](https://github.com/apache/camel-k/issues/2177)
+- Refactoring dump function [\#2172](https://github.com/apache/camel-k/issues/2172)
+- In troubleshooting documentation section, provide information on which logs to look at [\#2031](https://github.com/apache/camel-k/issues/2031)
+- Make the Camel K operator more involved in the Knative SinkBinding flow [\#1976](https://github.com/apache/camel-k/issues/1976)
+- Take into account consumer/producer dependencies [\#1808](https://github.com/apache/camel-k/issues/1808)
+- Camel K on GKE doesn't seem to work [\#1770](https://github.com/apache/camel-k/issues/1770)
+- Populate Knative event registry when using KameletBinding [\#1689](https://github.com/apache/camel-k/issues/1689)
+- List of supported versions combinations for running Camel-K with Knative [\#1665](https://github.com/apache/camel-k/issues/1665)
+- Import release notes from Camel K Runtime on release [\#1623](https://github.com/apache/camel-k/issues/1623)
+- Traits configuration schema [\#1614](https://github.com/apache/camel-k/issues/1614)
+- Drop OpenShift 3 support [\#1550](https://github.com/apache/camel-k/issues/1550)
+- No way to configure Ingress Trait with annotations [\#1535](https://github.com/apache/camel-k/issues/1535)
+- kamel run directory \(self contained\) [\#1523](https://github.com/apache/camel-k/issues/1523)
+- Modeline and file-based options on http/github endpoints [\#1522](https://github.com/apache/camel-k/issues/1522)
+- OLM: enable support for OperatorGroup [\#1471](https://github.com/apache/camel-k/issues/1471)
+- create trait to configure the http layer [\#1406](https://github.com/apache/camel-k/issues/1406)
+- MicroK8s' built-in registry declared for the Camel K installation, but not used - integration installations fail [\#1376](https://github.com/apache/camel-k/issues/1376)
+- Detect components from xxx.properties [\#1363](https://github.com/apache/camel-k/issues/1363)
+- Add a compatibility matrix in documentation related to knative vs camel-k version [\#1336](https://github.com/apache/camel-k/issues/1336)
+- watch of \*v1.ConfigMap ended with: too old resource version [\#1296](https://github.com/apache/camel-k/issues/1296)
+- Restful sample does not work [\#589](https://github.com/apache/camel-k/issues/589)
+- Improve IDE compatibility [\#564](https://github.com/apache/camel-k/issues/564)
+- create test suite [\#558](https://github.com/apache/camel-k/issues/558)
+- Refactor roles to simplify them [\#516](https://github.com/apache/camel-k/issues/516)
+- CRD's without cluster admin access / No direct network access from cluster [\#512](https://github.com/apache/camel-k/issues/512)
+- Improving kamel install [\#481](https://github.com/apache/camel-k/issues/481)
+- Allow to remap headers to cloudevents headers [\#361](https://github.com/apache/camel-k/issues/361)
+- Automatically add release notes on github releases [\#354](https://github.com/apache/camel-k/issues/354)
+- Add status check that generated files have been committed [\#345](https://github.com/apache/camel-k/issues/345)
+- support for dependencies archive [\#334](https://github.com/apache/camel-k/issues/334)
+- Invistegate wg-serverless workflow support [\#327](https://github.com/apache/camel-k/issues/327)
+- Reintegrate new doc in antora website [\#299](https://github.com/apache/camel-k/issues/299)
+- build camel-k on windows linux subsystem \(ubuntu\) [\#214](https://github.com/apache/camel-k/issues/214)
+- build camel-k on windows [\#213](https://github.com/apache/camel-k/issues/213)
+- Evaluate how to add tracing information [\#78](https://github.com/apache/camel-k/issues/78)
+- Improve user guide [\#37](https://github.com/apache/camel-k/issues/37)
+
+**Merged pull requests:**
+
+- fix actions/setup-java parameters [\#3549](https://github.com/apache/camel-k/pull/3549) ([lburgazzoli](https://github.com/lburgazzoli))
+- doc: local operator id procedure [\#3540](https://github.com/apache/camel-k/pull/3540) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/onsi/gomega from 1.19.0 to 1.20.0 [\#3538](https://github.com/apache/camel-k/pull/3538) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix wrong workflow name [\#3535](https://github.com/apache/camel-k/pull/3535) ([lburgazzoli](https://github.com/lburgazzoli))
+- chore\(deps\): bump go.uber.org/zap from 1.21.0 to 1.22.0 [\#3534](https://github.com/apache/camel-k/pull/3534) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Test operator image installed by the OLM [\#3531](https://github.com/apache/camel-k/pull/3531) ([bouskaJ](https://github.com/bouskaJ))
+- chore\(deps\): bump github.com/prometheus/client\_golang from 1.12.2 to 1.13.0 [\#3530](https://github.com/apache/camel-k/pull/3530) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/sirupsen/logrus from 1.8.1 to 1.9.0 [\#3529](https://github.com/apache/camel-k/pull/3529) ([dependabot[bot]](https://github.com/apps/dependabot))
+- delete unreachable code caused by log.Fatalln [\#3526](https://github.com/apache/camel-k/pull/3526) ([Abirdcfly](https://github.com/Abirdcfly))
+- \[TEST\] Test container command [\#3521](https://github.com/apache/camel-k/pull/3521) ([bouskaJ](https://github.com/bouskaJ))
+- feat: also build 1.9.x and 1.8.x as part of nightly builds [\#3520](https://github.com/apache/camel-k/pull/3520) ([lburgazzoli](https://github.com/lburgazzoli))
+- Add missing import in kamelets-dev.adoc [\#3518](https://github.com/apache/camel-k/pull/3518) ([essobedo](https://github.com/essobedo))
+- ensure gobin exists before copying operator-sdk [\#3517](https://github.com/apache/camel-k/pull/3517) ([lburgazzoli](https://github.com/lburgazzoli))
+- fix: fix invalid type mapping for operator resources and securityContext [\#3516](https://github.com/apache/camel-k/pull/3516) ([zhiminglim](https://github.com/zhiminglim))
+- Some improvements in runtime-resources.adoc [\#3513](https://github.com/apache/camel-k/pull/3513) ([essobedo](https://github.com/essobedo))
+- Some various improvements in runtime-config.adoc [\#3512](https://github.com/apache/camel-k/pull/3512) ([essobedo](https://github.com/essobedo))
+- re-deployment strategies [\#3511](https://github.com/apache/camel-k/pull/3511) ([lburgazzoli](https://github.com/lburgazzoli))
+- Some improvements in runtime-properties.adoc [\#3510](https://github.com/apache/camel-k/pull/3510) ([essobedo](https://github.com/essobedo))
+- Some various improvements in dependencies.adoc [\#3509](https://github.com/apache/camel-k/pull/3509) ([essobedo](https://github.com/essobedo))
+- makefile [\#3508](https://github.com/apache/camel-k/pull/3508) ([lburgazzoli](https://github.com/lburgazzoli))
+- Some various improvements [\#3507](https://github.com/apache/camel-k/pull/3507) ([essobedo](https://github.com/essobedo))
+- Fix the file path in run command [\#3506](https://github.com/apache/camel-k/pull/3506) ([essobedo](https://github.com/essobedo))
+- Fix typo in local.adoc [\#3505](https://github.com/apache/camel-k/pull/3505) ([essobedo](https://github.com/essobedo))
+- Update the path of the file Sample.java [\#3504](https://github.com/apache/camel-k/pull/3504) ([essobedo](https://github.com/essobedo))
+- Fix building multi-arch containers on ARM on MacOS [\#3500](https://github.com/apache/camel-k/pull/3500) ([orpiske](https://github.com/orpiske))
+- fix\(cli\): more user-friendly error messages for kamel local subcommands [\#3499](https://github.com/apache/camel-k/pull/3499) ([tadayosi](https://github.com/tadayosi))
+- migrate and improve kafka example [\#3495](https://github.com/apache/camel-k/pull/3495) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- fix\(trait\): camel to use a single properties file  [\#3493](https://github.com/apache/camel-k/pull/3493) ([squakez](https://github.com/squakez))
+- fix\(lint\): nolintlint [\#3491](https://github.com/apache/camel-k/pull/3491) ([tadayosi](https://github.com/tadayosi))
+- fix\(e2e\): stabilise knative/yaks tests [\#3490](https://github.com/apache/camel-k/pull/3490) ([tadayosi](https://github.com/tadayosi))
+- fix\(cli\): run Integration from GitHub branch [\#3489](https://github.com/apache/camel-k/pull/3489) ([tadayosi](https://github.com/tadayosi))
+- fix\(ci\): build before making images [\#3488](https://github.com/apache/camel-k/pull/3488) ([squakez](https://github.com/squakez))
+- fix\(core\): cascade Integration error when kit in... [\#3487](https://github.com/apache/camel-k/pull/3487) ([squakez](https://github.com/squakez))
+- Fix windows paths in --resource [\#3485](https://github.com/apache/camel-k/pull/3485) ([mmajerni](https://github.com/mmajerni))
+- fix\(doc\): standardise Camel dependency notation in docs and examples [\#3482](https://github.com/apache/camel-k/pull/3482) ([tadayosi](https://github.com/tadayosi))
+- fix: camel-k ignores changes to traits configured using annotations  [\#3480](https://github.com/apache/camel-k/pull/3480) ([lburgazzoli](https://github.com/lburgazzoli))
+- fix\(ci\): common & install e2e workflows fail silently [\#3478](https://github.com/apache/camel-k/pull/3478) ([tadayosi](https://github.com/tadayosi))
+- chore\(knative\): upgrade Knative to 1.3 \(0.30\) \#3381 [\#3477](https://github.com/apache/camel-k/pull/3477) ([tadayosi](https://github.com/tadayosi))
+- fix\(trait\): nil pointer dereference when applying traits during kit building [\#3471](https://github.com/apache/camel-k/pull/3471) ([tadayosi](https://github.com/tadayosi))
+- fix\(doc\): fix doc-gen to insert space between lines [\#3470](https://github.com/apache/camel-k/pull/3470) ([tadayosi](https://github.com/tadayosi))
+- Provides Makefile with ability to generate a test bundle index image [\#3468](https://github.com/apache/camel-k/pull/3468) ([phantomjinx](https://github.com/phantomjinx))
+- chore\(api\): refer to correct trait [\#3467](https://github.com/apache/camel-k/pull/3467) ([squakez](https://github.com/squakez))
+- chore\(lint\): upgrade golangci-lint to 1.47.1 [\#3466](https://github.com/apache/camel-k/pull/3466) ([tadayosi](https://github.com/tadayosi))
+- migrate ibm-mq example [\#3461](https://github.com/apache/camel-k/pull/3461) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- fix\(olm\): fix profile name: Openshift -\> OpenShift in OLM sample [\#3460](https://github.com/apache/camel-k/pull/3460) ([tadayosi](https://github.com/tadayosi))
+- migrate and improve http example [\#3452](https://github.com/apache/camel-k/pull/3452) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- chore\(e2e\): reuse namespaces as much as possible for E2E tests [\#3451](https://github.com/apache/camel-k/pull/3451) ([tadayosi](https://github.com/tadayosi))
+- chore\(deps\): bump github.com/prometheus/common from 0.35.0 to 0.37.0 [\#3450](https://github.com/apache/camel-k/pull/3450) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(lint\): upgrade golangci-lint to 1.46.2 [\#3448](https://github.com/apache/camel-k/pull/3448) ([tadayosi](https://github.com/tadayosi))
+- fix\(doc\): fix camel-website build [\#3446](https://github.com/apache/camel-k/pull/3446) ([tadayosi](https://github.com/tadayosi))
+- fix\(cli\): `kamel local build` doesn't support same dependency notation [\#3444](https://github.com/apache/camel-k/pull/3444) ([tadayosi](https://github.com/tadayosi))
+- chore\(deps\): bump github.com/redhat-developer/service-binding-operator from 1.1.0 to 1.1.1 [\#3443](https://github.com/apache/camel-k/pull/3443) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(build\): `make generate-doc` outputs non-deterministic resources/traits.yaml [\#3440](https://github.com/apache/camel-k/pull/3440) ([tadayosi](https://github.com/tadayosi))
+- Fix CLI test - update file name path [\#3436](https://github.com/apache/camel-k/pull/3436) ([mmajerni](https://github.com/mmajerni))
+- fix\(doc\): fix gen-crd-api-reference-docs and regen API doc with Traits [\#3435](https://github.com/apache/camel-k/pull/3435) ([tadayosi](https://github.com/tadayosi))
+- feat\(build\): Golang 1.17 [\#3432](https://github.com/apache/camel-k/pull/3432) ([squakez](https://github.com/squakez))
+- migrate and improve jitpack example [\#3420](https://github.com/apache/camel-k/pull/3420) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- Handle OCP3 in e2e kustomize install tests [\#3419](https://github.com/apache/camel-k/pull/3419) ([phantomjinx](https://github.com/phantomjinx))
+- migrate and improve dns example [\#3414](https://github.com/apache/camel-k/pull/3414) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- fix\(\#3393\): Fix e2e CronJob test [\#3411](https://github.com/apache/camel-k/pull/3411) ([christophd](https://github.com/christophd))
+- migrate and improve database example [\#3410](https://github.com/apache/camel-k/pull/3410) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- chore\(ci\): regen docs & add generate workflow to test `make generate` [\#3409](https://github.com/apache/camel-k/pull/3409) ([tadayosi](https://github.com/tadayosi))
+- chore\(deps\): bump github.com/stretchr/testify from 1.7.4 to 1.8.0 [\#3407](https://github.com/apache/camel-k/pull/3407) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(e2e\): promote typo [\#3406](https://github.com/apache/camel-k/pull/3406) ([squakez](https://github.com/squakez))
+- allow setting resources & securityContext in Helm Chart values [\#3403](https://github.com/apache/camel-k/pull/3403) ([d-lopes](https://github.com/d-lopes))
+- fix\(\#3393\): Update to CronJob batch/v1 [\#3402](https://github.com/apache/camel-k/pull/3402) ([christophd](https://github.com/christophd))
+- fix\(\#3399\): Improve operator log level adjustments [\#3401](https://github.com/apache/camel-k/pull/3401) ([christophd](https://github.com/christophd))
+- fix\(\#3390\): Fix Knative addressable resolver cluster role binding [\#3400](https://github.com/apache/camel-k/pull/3400) ([christophd](https://github.com/christophd))
+- chore\(build\): Assume gnu-sed usage for MacOS users [\#3398](https://github.com/apache/camel-k/pull/3398) ([christophd](https://github.com/christophd))
+- migrate and improve basic example [\#3395](https://github.com/apache/camel-k/pull/3395) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- migrate and improve caffeine example [\#3394](https://github.com/apache/camel-k/pull/3394) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- chore\(deps\): bump github.com/spf13/cobra from 1.4.0 to 1.5.0 [\#3388](https://github.com/apache/camel-k/pull/3388) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(build\): tidy submodules and make their tests run in build [\#3386](https://github.com/apache/camel-k/pull/3386) ([tadayosi](https://github.com/tadayosi))
+- migrate and improve amqp example [\#3383](https://github.com/apache/camel-k/pull/3383) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- Improves reliability of e2e testing [\#3382](https://github.com/apache/camel-k/pull/3382) ([phantomjinx](https://github.com/phantomjinx))
+- chore\(deps\): bump github.com/prometheus/common from 0.34.0 to 0.35.0 [\#3380](https://github.com/apache/camel-k/pull/3380) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/stretchr/testify from 1.7.2 to 1.7.4 [\#3379](https://github.com/apache/camel-k/pull/3379) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(trait\): use k8s.io/utils/pointer instead of homemade utils for pointer operations [\#3377](https://github.com/apache/camel-k/pull/3377) ([tadayosi](https://github.com/tadayosi))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.3.9 to 0.3.10 [\#3374](https://github.com/apache/camel-k/pull/3374) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/redhat-developer/service-binding-operator from 1.0.1 to 1.1.0 [\#3370](https://github.com/apache/camel-k/pull/3370) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Fixes `kamel local run` panic on Windows [\#3368](https://github.com/apache/camel-k/pull/3368) ([ammachado](https://github.com/ammachado))
+- introduce spectrum option job [\#3366](https://github.com/apache/camel-k/pull/3366) ([SubhasmitaSw](https://github.com/SubhasmitaSw))
+- Fixes GIT\_COMMIT assignment failure in build [\#3361](https://github.com/apache/camel-k/pull/3361) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.3.8 to 0.3.9 [\#3360](https://github.com/apache/camel-k/pull/3360) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Improve multi operator handling and multi tenancy model [\#3358](https://github.com/apache/camel-k/pull/3358) ([christophd](https://github.com/christophd))
+- chore\(deps\): bump github.com/stretchr/testify from 1.7.1 to 1.7.2 [\#3355](https://github.com/apache/camel-k/pull/3355) ([dependabot[bot]](https://github.com/apps/dependabot))
+- move cron example to camel-k-examples repo [\#3352](https://github.com/apache/camel-k/pull/3352) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- \[TEST\] Add kamel reset test [\#3351](https://github.com/apache/camel-k/pull/3351) ([bouskaJ](https://github.com/bouskaJ))
+- fix\(lint\): fix more forcetypeassert [\#3346](https://github.com/apache/camel-k/pull/3346) ([tadayosi](https://github.com/tadayosi))
+- chore: Regen resources and use golangci config for lint in Makefile [\#3345](https://github.com/apache/camel-k/pull/3345) ([christophd](https://github.com/christophd))
+- configuring maven builds based on CPU quota if set any [\#3344](https://github.com/apache/camel-k/pull/3344) ([SubhasmitaSw](https://github.com/SubhasmitaSw))
+- \#3321: Fixes pre-bundle rule in Makefile [\#3343](https://github.com/apache/camel-k/pull/3343) ([phantomjinx](https://github.com/phantomjinx))
+- fix\(e2e\): stabilise E2E tests [\#3334](https://github.com/apache/camel-k/pull/3334) ([tadayosi](https://github.com/tadayosi))
+- chore: ci build rule and license fix [\#3333](https://github.com/apache/camel-k/pull/3333) ([squakez](https://github.com/squakez))
+- Fix `make generate-strimzi` [\#3331](https://github.com/apache/camel-k/pull/3331) ([tadayosi](https://github.com/tadayosi))
+- Adding basic support for `PodSecurityContext`. [\#3330](https://github.com/apache/camel-k/pull/3330) ([ammachado](https://github.com/ammachado))
+- feat\(gc\): Skip GC for first integration generation [\#3327](https://github.com/apache/camel-k/pull/3327) ([astefanutti](https://github.com/astefanutti))
+- feat\(gc\): Use SelfSubjectRulesReview to scan for garbage collectable resources [\#3326](https://github.com/apache/camel-k/pull/3326) ([astefanutti](https://github.com/astefanutti))
+- feat\(cli\): environment promotion [\#3325](https://github.com/apache/camel-k/pull/3325) ([squakez](https://github.com/squakez))
+- chore\(docs\): maven local repository [\#3324](https://github.com/apache/camel-k/pull/3324) ([squakez](https://github.com/squakez))
+- \[TEST\] Add autoscaling test [\#3322](https://github.com/apache/camel-k/pull/3322) ([bouskaJ](https://github.com/bouskaJ))
+- Enable parsing pod template as a modeline. [\#3319](https://github.com/apache/camel-k/pull/3319) ([ammachado](https://github.com/ammachado))
+- fix\(ci\): fix Upgrade E2E testing on CI [\#3318](https://github.com/apache/camel-k/pull/3318) ([tadayosi](https://github.com/tadayosi))
+- Local dependencies options [\#3316](https://github.com/apache/camel-k/pull/3316) ([johnpoth](https://github.com/johnpoth))
+- chore\(deps\): bump github.com/spf13/viper from 1.11.0 to 1.12.0 [\#3313](https://github.com/apache/camel-k/pull/3313) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Detect wire tap EIP endpoints [\#3312](https://github.com/apache/camel-k/pull/3312) ([ammachado](https://github.com/ammachado))
+- fix\(health\): support new Camel health check format [\#3310](https://github.com/apache/camel-k/pull/3310) ([tadayosi](https://github.com/tadayosi))
+- MultiArchitecture support [\#3309](https://github.com/apache/camel-k/pull/3309) ([robertonav20](https://github.com/robertonav20))
+- test\(e2e\): add test for 'kamel run --dev' in a warmed-up environment [\#3303](https://github.com/apache/camel-k/pull/3303) ([tadayosi](https://github.com/tadayosi))
+- Fix typo [\#3301](https://github.com/apache/camel-k/pull/3301) ([lamabro23](https://github.com/lamabro23))
+- Never stale a bug issue [\#3292](https://github.com/apache/camel-k/pull/3292) ([tal66](https://github.com/tal66))
+- Fix \#3257: fix uploading checksum files to the image registry on Windows [\#3288](https://github.com/apache/camel-k/pull/3288) ([johnpoth](https://github.com/johnpoth))
+- Fix: use platform.Status instead of platform.Spec [\#3287](https://github.com/apache/camel-k/pull/3287) ([johnpoth](https://github.com/johnpoth))
+- chore\(deps\): bump github.com/prometheus/client\_golang from 1.12.1 to 1.12.2 [\#3273](https://github.com/apache/camel-k/pull/3273) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/gertd/go-pluralize from 0.2.0 to 0.2.1 [\#3272](https://github.com/apache/camel-k/pull/3272) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat\(CRD\): Traits configuration schema [\#3235](https://github.com/apache/camel-k/pull/3235) ([tadayosi](https://github.com/tadayosi))
+- chore\(deps\): bump github.com/mitchellh/mapstructure from 1.4.3 to 1.5.0 [\#3225](https://github.com/apache/camel-k/pull/3225) ([dependabot[bot]](https://github.com/apps/dependabot))
+- added .status.observedGeneration to camel K CRDs [\#3218](https://github.com/apache/camel-k/pull/3218) ([SubhasmitaSw](https://github.com/SubhasmitaSw))
+- Add settings security to Maven build [\#3185](https://github.com/apache/camel-k/pull/3185) ([haanhvu](https://github.com/haanhvu))
+- \[TEST\] Add kamel debug test [\#3131](https://github.com/apache/camel-k/pull/3131) ([bouskaJ](https://github.com/bouskaJ))
+
+## [1.10.0-nightly](https://github.com/apache/camel-k/tree/1.10.0-nightly) (2022-05-18)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.9.2...1.10.0-nightly)
+
+**Closed issues:**
+
+- Cannot upgrade from 1.8.x to 1.9.0-SNAPSHOT [\#3063](https://github.com/apache/camel-k/issues/3063)
+
+**Merged pull requests:**
+
+- chore\(trait\): Add an option to disable SSA in deployer trait [\#3286](https://github.com/apache/camel-k/pull/3286) ([astefanutti](https://github.com/astefanutti))
+- fix: Use status change predicate to filter updates on owned resources [\#3285](https://github.com/apache/camel-k/pull/3285) ([astefanutti](https://github.com/astefanutti))
+- Moving to 1.10.0-SNAPSHOT [\#3284](https://github.com/apache/camel-k/pull/3284) ([oscerd](https://github.com/oscerd))
+- chore\(cmd/trait\): refactor cmd & trait packages [\#3279](https://github.com/apache/camel-k/pull/3279) ([tadayosi](https://github.com/tadayosi))
+
+## [v1.9.2](https://github.com/apache/camel-k/tree/v1.9.2) (2022-05-17)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.9.2...v1.9.2)
+
+## [pkg/kamelet/repository/v1.9.2](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.9.2) (2022-05-17)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.9.2...pkg/kamelet/repository/v1.9.2)
+
+## [pkg/client/camel/v1.9.2](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.9.2) (2022-05-17)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.9.2...pkg/client/camel/v1.9.2)
+
+## [pkg/apis/camel/v1.9.2](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.9.2) (2022-05-17)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.9.2-nightly...pkg/apis/camel/v1.9.2)
+
+## [1.9.2-nightly](https://github.com/apache/camel-k/tree/1.9.2-nightly) (2022-05-17)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.9.1...1.9.2-nightly)
+
+**Closed issues:**
+
+- Local Dependencies Registry Problem [\#3271](https://github.com/apache/camel-k/issues/3271)
+- Path-problem with local dependency \(jar\) on windows [\#3257](https://github.com/apache/camel-k/issues/3257)
+- Enable Service to be exposed as NodePort should be disabled by default [\#3253](https://github.com/apache/camel-k/issues/3253)
+- Default `make` fallback to `test` [\#3242](https://github.com/apache/camel-k/issues/3242)
+- kamel init - Use camelCase for yaml created sample files [\#3206](https://github.com/apache/camel-k/issues/3206)
+
+**Merged pull requests:**
+
+- Fix \#3271: Prepend Organization/Namespace in HTTP path when uploading… [\#3278](https://github.com/apache/camel-k/pull/3278) ([johnpoth](https://github.com/johnpoth))
+- fix: Bump remaining resources to 1.9.2 [\#3270](https://github.com/apache/camel-k/pull/3270) ([phantomjinx](https://github.com/phantomjinx))
+- Fix: support absolute paths on Windows [\#3269](https://github.com/apache/camel-k/pull/3269) ([johnpoth](https://github.com/johnpoth))
+- Fix \#3257: work with relative paths on windows to avoid extra semicolon [\#3265](https://github.com/apache/camel-k/pull/3265) ([johnpoth](https://github.com/johnpoth))
+- fix\(trait\): disable NodePort by default for Service trait [\#3263](https://github.com/apache/camel-k/pull/3263) ([tadayosi](https://github.com/tadayosi))
+- fix\(kamelet\): migrate to Camel 3.15 yaml definition [\#3256](https://github.com/apache/camel-k/pull/3256) ([squakez](https://github.com/squakez))
+- chore\(ci\): force unit test [\#3251](https://github.com/apache/camel-k/pull/3251) ([squakez](https://github.com/squakez))
+- added logging traits documentation.  [\#3231](https://github.com/apache/camel-k/pull/3231) ([Gre8t](https://github.com/Gre8t))
+- chore: Improve extract Camel catalog script [\#3221](https://github.com/apache/camel-k/pull/3221) ([christophd](https://github.com/christophd))
+- CamelCase for yaml created sample files [\#3209](https://github.com/apache/camel-k/pull/3209) ([SarveshLimaye](https://github.com/SarveshLimaye))
+
+## [pkg/client/camel/v1.9.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.9.1) (2022-05-09)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.9.1...pkg/client/camel/v1.9.1)
+
+## [v1.9.1](https://github.com/apache/camel-k/tree/v1.9.1) (2022-05-09)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.9.1...v1.9.1)
+
+## [pkg/apis/camel/v1.9.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.9.1) (2022-05-09)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.9.1...pkg/apis/camel/v1.9.1)
+
+## [pkg/kamelet/repository/v1.9.1](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.9.1) (2022-05-09)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.9.1-nightly...pkg/kamelet/repository/v1.9.1)
+
+**Closed issues:**
+
+- Yaml sources failure in 1.9.0 [\#3255](https://github.com/apache/camel-k/issues/3255)
+- Release 1.9.0 [\#3220](https://github.com/apache/camel-k/issues/3220)
+- Nightly builds in test docker repo [\#3106](https://github.com/apache/camel-k/issues/3106)
+- Add log-level setting on Camel K operator [\#3053](https://github.com/apache/camel-k/issues/3053)
+- kamel local run/build practices for creating a YAML output [\#3021](https://github.com/apache/camel-k/issues/3021)
+- Upgrade deprecated linters [\#3012](https://github.com/apache/camel-k/issues/3012)
+- Intermittent problem with integration remaining at phase "Building Kit" [\#2905](https://github.com/apache/camel-k/issues/2905)
+
+## [1.9.1-nightly](https://github.com/apache/camel-k/tree/1.9.1-nightly) (2022-05-05)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.9.0...1.9.1-nightly)
+
+**Closed issues:**
+
+- Provide example for IBM MQ Server [\#3247](https://github.com/apache/camel-k/issues/3247)
+- Preflight Test: Failure [\#3243](https://github.com/apache/camel-k/issues/3243)
+- Operators: `make prepare-operators` should use the same folder structure of the Kubernetes output for the Openshift ecosystem [\#3237](https://github.com/apache/camel-k/issues/3237)
+- Jitpack example deployment fails [\#3207](https://github.com/apache/camel-k/issues/3207)
+- Mount trait usage example [\#3140](https://github.com/apache/camel-k/issues/3140)
+- `Kamel kit create` to use mount/camel traits [\#2915](https://github.com/apache/camel-k/issues/2915)
+- \[CLI\] Format long subcommand descriptions [\#2318](https://github.com/apache/camel-k/issues/2318)
+- Camel K CLI asks for an OpenAPI v2 when also v3 is supported [\#2238](https://github.com/apache/camel-k/issues/2238)
+- Traits to configure the container image and location fo the sources [\#2232](https://github.com/apache/camel-k/issues/2232)
+- Lower priority of modeline options [\#1843](https://github.com/apache/camel-k/issues/1843)
+
+**Merged pull requests:**
+
+- fix\(ci\): release action tag params [\#3254](https://github.com/apache/camel-k/pull/3254) ([squakez](https://github.com/squakez))
+- fix\(ci\): typo [\#3250](https://github.com/apache/camel-k/pull/3250) ([squakez](https://github.com/squakez))
+- package\_maven\_artifacts: run unzip in silent mode [\#3249](https://github.com/apache/camel-k/pull/3249) ([claudio4j](https://github.com/claudio4j))
+- Provide example for IBM MQ Server [\#3248](https://github.com/apache/camel-k/pull/3248) ([claudio4j](https://github.com/claudio4j))
+- \#3053 \#3242 Fixes e2e preflight and adds debug level to logging [\#3245](https://github.com/apache/camel-k/pull/3245) ([phantomjinx](https://github.com/phantomjinx))
+- Operators: make prepare-operators should use the same folder structur… [\#3239](https://github.com/apache/camel-k/pull/3239) ([oscerd](https://github.com/oscerd))
+- fix\[cli\]: format long subcommand descriptions [\#3227](https://github.com/apache/camel-k/pull/3227) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- chore\(deps\): bump github.com/prometheus/common from 0.33.0 to 0.34.0 [\#3226](https://github.com/apache/camel-k/pull/3226) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(ci\): updating release action [\#3224](https://github.com/apache/camel-k/pull/3224) ([squakez](https://github.com/squakez))
+- chore: Log build duration metrics [\#3223](https://github.com/apache/camel-k/pull/3223) ([christophd](https://github.com/christophd))
+- fix: kamel run -o incompatible with --dev [\#3219](https://github.com/apache/camel-k/pull/3219) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- Docs: fixed some grammatical errors [\#3215](https://github.com/apache/camel-k/pull/3215) ([parul5sahoo](https://github.com/parul5sahoo))
+- fix\(cli\): kamel panics when unknown command is passed [\#3204](https://github.com/apache/camel-k/pull/3204) ([tadayosi](https://github.com/tadayosi))
+- chore\(deps\): bump github.com/spf13/viper from 1.10.1 to 1.11.0 [\#3202](https://github.com/apache/camel-k/pull/3202) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Release 1.9.0 preparation [\#3201](https://github.com/apache/camel-k/pull/3201) ([oscerd](https://github.com/oscerd))
+- feat\(cli\): disconnected run and bind [\#3198](https://github.com/apache/camel-k/pull/3198) ([squakez](https://github.com/squakez))
+- chore\(deps\): library upgrade [\#3197](https://github.com/apache/camel-k/pull/3197) ([squakez](https://github.com/squakez))
+- fix\(cli\): modeline warn output to stderr [\#3196](https://github.com/apache/camel-k/pull/3196) ([squakez](https://github.com/squakez))
+- Fix \#3192: use correct print function [\#3194](https://github.com/apache/camel-k/pull/3194) ([johnpoth](https://github.com/johnpoth))
+- Add verbose flag for the run command [\#3193](https://github.com/apache/camel-k/pull/3193) ([johnpoth](https://github.com/johnpoth))
+- fix\(e2e\): resolve Camel version from catalog for test local [\#3189](https://github.com/apache/camel-k/pull/3189) ([tadayosi](https://github.com/tadayosi))
+- fix\(ci\): replace release action [\#3188](https://github.com/apache/camel-k/pull/3188) ([squakez](https://github.com/squakez))
+- added a file-config doc [\#3187](https://github.com/apache/camel-k/pull/3187) ([Gre8t](https://github.com/Gre8t))
+- tracing trait usage example [\#3184](https://github.com/apache/camel-k/pull/3184) ([SubhasmitaSw](https://github.com/SubhasmitaSw))
+- chore\(doc\): removing useless fragment [\#3181](https://github.com/apache/camel-k/pull/3181) ([squakez](https://github.com/squakez))
+- chore\(examples\): olm installation [\#3179](https://github.com/apache/camel-k/pull/3179) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/prometheus/common from 0.32.1 to 0.33.0 [\#3178](https://github.com/apache/camel-k/pull/3178) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(olm\): IntegrationPlatform reconciled by operator  [\#3172](https://github.com/apache/camel-k/pull/3172) ([squakez](https://github.com/squakez))
+- fix \#2835 address comments [\#3171](https://github.com/apache/camel-k/pull/3171) ([johnpoth](https://github.com/johnpoth))
+- Add Mount trait example [\#3166](https://github.com/apache/camel-k/pull/3166) ([haanhvu](https://github.com/haanhvu))
+- operator: allow to configure the lock name [\#3163](https://github.com/apache/camel-k/pull/3163) ([lburgazzoli](https://github.com/lburgazzoli))
+- refactored redundant kamel kit flags [\#3160](https://github.com/apache/camel-k/pull/3160) ([Gre8t](https://github.com/Gre8t))
+- added trait example of services [\#3159](https://github.com/apache/camel-k/pull/3159) ([Gre8t](https://github.com/Gre8t))
+- Disable deprecate linters [\#3158](https://github.com/apache/camel-k/pull/3158) ([Gre8t](https://github.com/Gre8t))
+- Makefile windows support [\#3157](https://github.com/apache/camel-k/pull/3157) ([SubhasmitaSw](https://github.com/SubhasmitaSw))
+- chore\(deps\): bump github.com/rs/xid from 1.3.0 to 1.4.0 [\#3156](https://github.com/apache/camel-k/pull/3156) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/stretchr/testify from 1.7.0 to 1.7.1 [\#3155](https://github.com/apache/camel-k/pull/3155) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(ci\): nightly allow release update [\#3154](https://github.com/apache/camel-k/pull/3154) ([squakez](https://github.com/squakez))
+- fix: redirect ouput and errors to appropriate writer [\#3153](https://github.com/apache/camel-k/pull/3153) ([KuthumiPepple](https://github.com/KuthumiPepple))
+- Example to show usage of prometheus trait [\#3152](https://github.com/apache/camel-k/pull/3152) ([SubhasmitaSw](https://github.com/SubhasmitaSw))
+- add k8s labels to deployment service [\#3150](https://github.com/apache/camel-k/pull/3150) ([desirekaleba](https://github.com/desirekaleba))
+- chore\(deps\): bump github.com/onsi/gomega from 1.16.0 to 1.19.0 [\#3135](https://github.com/apache/camel-k/pull/3135) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(ci\): remove unused maven references [\#3123](https://github.com/apache/camel-k/pull/3123) ([squakez](https://github.com/squakez))
+- Stabilize route test [\#3121](https://github.com/apache/camel-k/pull/3121) ([bouskaJ](https://github.com/bouskaJ))
+- chore\(deps\): bump github.com/redhat-developer/service-binding-operator from 1.0.0 to 1.0.1 [\#3118](https://github.com/apache/camel-k/pull/3118) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/spf13/cobra from 1.2.1 to 1.4.0 [\#3112](https://github.com/apache/camel-k/pull/3112) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(e2e\): stabilise local e2e tests [\#3084](https://github.com/apache/camel-k/pull/3084) ([tadayosi](https://github.com/tadayosi))
+- Migrates opm to file based indexes and fixes e2e upgrade tests [\#3078](https://github.com/apache/camel-k/pull/3078) ([phantomjinx](https://github.com/phantomjinx))
+- Local dependencies [\#2835](https://github.com/apache/camel-k/pull/2835) ([johnpoth](https://github.com/johnpoth))
+- Global test on ns with its own op fix [\#2784](https://github.com/apache/camel-k/pull/2784) ([vitorz](https://github.com/vitorz))
+-  fix 1802: leverage KEP-1755 to retrieve local image registry host an… [\#2696](https://github.com/apache/camel-k/pull/2696) ([johnpoth](https://github.com/johnpoth))
+
+## [pkg/kamelet/repository/v1.9.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.9.0) (2022-04-21)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.9.0...pkg/kamelet/repository/v1.9.0)
+
+## [pkg/apis/camel/v1.9.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.9.0) (2022-04-21)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.9.0...pkg/apis/camel/v1.9.0)
+
+## [v1.9.0](https://github.com/apache/camel-k/tree/v1.9.0) (2022-04-21)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.9.0...v1.9.0)
+
+## [pkg/client/camel/v1.9.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.9.0) (2022-04-21)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.9.0-nightly...pkg/client/camel/v1.9.0)
+
+**Closed issues:**
+
+- \[SOLVED\]Cant specify fastjson when marshal [\#3212](https://github.com/apache/camel-k/issues/3212)
+- Camel K CLI panics when unknown command is passed [\#3203](https://github.com/apache/camel-k/issues/3203)
+- Kamel run -o incompatible with --dev [\#3195](https://github.com/apache/camel-k/issues/3195)
+- Cosmetic log error [\#3192](https://github.com/apache/camel-k/issues/3192)
+- Update allowed release Github action [\#3190](https://github.com/apache/camel-k/issues/3190)
+- Make CLI --output argument more clean [\#3177](https://github.com/apache/camel-k/issues/3177)
+- operator: allow to configure the lock name  [\#3162](https://github.com/apache/camel-k/issues/3162)
+- Error when running camel-k in global mode with label selection [\#3161](https://github.com/apache/camel-k/issues/3161)
+- Improve the logging of quarkus build failures [\#3149](https://github.com/apache/camel-k/issues/3149)
+- Tracing trait usage example [\#3148](https://github.com/apache/camel-k/issues/3148)
+- Prometheus trait usage example [\#3144](https://github.com/apache/camel-k/issues/3144)
+- Prepare for releasing Camel-K with Camel 3.16.0 [\#3138](https://github.com/apache/camel-k/issues/3138)
+- Use Kubernetes recommended labels  [\#3137](https://github.com/apache/camel-k/issues/3137)
+- Nightly release fail to create an existing tag [\#3130](https://github.com/apache/camel-k/issues/3130)
+- Jsonata does not evaluate correctly [\#3129](https://github.com/apache/camel-k/issues/3129)
+- wrong XSD url generated with XML initialiser [\#3093](https://github.com/apache/camel-k/issues/3093)
+- Openshift integration tests failure [\#3055](https://github.com/apache/camel-k/issues/3055)
+- Scaling integration pod and the replicas are not able to receive traffic via UDP port [\#2847](https://github.com/apache/camel-k/issues/2847)
+- Best practice to manage multiple routes in Camel-K [\#2824](https://github.com/apache/camel-k/issues/2824)
+- way to add a trusted root cert? \(non-maven\) [\#2820](https://github.com/apache/camel-k/issues/2820)
+- Remove usage of deprecated "flow" in Kamelet CRD in the documentation examples [\#2816](https://github.com/apache/camel-k/issues/2816)
+- Be able to configure PodMonitor via prometheus trait [\#2812](https://github.com/apache/camel-k/issues/2812)
+- camel-k doesn't create a service [\#2810](https://github.com/apache/camel-k/issues/2810)
+- SEDA low performance issue [\#2808](https://github.com/apache/camel-k/issues/2808)
+- Get rid of `fmt.Print...()` methods [\#2773](https://github.com/apache/camel-k/issues/2773)
+- Remove maven wrapper and any leftover pom.xml [\#2659](https://github.com/apache/camel-k/issues/2659)
+- kamelet binding annotation should be propagated to the integration  [\#2436](https://github.com/apache/camel-k/issues/2436)
+- languages: support kamelet eip [\#2375](https://github.com/apache/camel-k/issues/2375)
+- kamelet binding: use the Kamelet EIP for steps [\#2370](https://github.com/apache/camel-k/issues/2370)
+- Use local registry config from cluster [\#1802](https://github.com/apache/camel-k/issues/1802)
+- Istio sidecar injection is enabled for builder pod [\#1706](https://github.com/apache/camel-k/issues/1706)
+- Integration controller issue [\#1691](https://github.com/apache/camel-k/issues/1691)
+- Create ConsoleYAMLSample for Integration and IntegrationPlatform CRDs on OpenShift [\#1480](https://github.com/apache/camel-k/issues/1480)
+- Kamel run fails to pull in camel-k-builder after installing with helm [\#1476](https://github.com/apache/camel-k/issues/1476)
+- Let dependencies be defined using file URLs [\#1227](https://github.com/apache/camel-k/issues/1227)
+- Write doc about file based configuration for kamel CLI [\#1155](https://github.com/apache/camel-k/issues/1155)
+- Deployment not found while replacing CamelSource [\#1028](https://github.com/apache/camel-k/issues/1028)
+- Document how to use Camel K without the "kamel" tool [\#52](https://github.com/apache/camel-k/issues/52)
+- Add roadmap information [\#35](https://github.com/apache/camel-k/issues/35)
+
+## [1.9.0-nightly](https://github.com/apache/camel-k/tree/1.9.0-nightly) (2022-03-14)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.9.0-nightly.202203101127...1.9.0-nightly)
+
+**Closed issues:**
+
+- Nightly tag failure [\#3107](https://github.com/apache/camel-k/issues/3107)
+- Kaniko settings refactoring [\#3005](https://github.com/apache/camel-k/issues/3005)
+- Add daily operator image builds [\#393](https://github.com/apache/camel-k/issues/393)
+
+**Merged pull requests:**
+
+- fix\(ci\): attempt for a single nightly release [\#3117](https://github.com/apache/camel-k/pull/3117) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/gertd/go-pluralize from 0.1.1 to 0.2.0 [\#3116](https://github.com/apache/camel-k/pull/3116) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/prometheus/client\_golang from 1.11.0 to 1.12.1 [\#3110](https://github.com/apache/camel-k/pull/3110) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix: Propagate readiness condition message in KameletBinding if present [\#3108](https://github.com/apache/camel-k/pull/3108) ([astefanutti](https://github.com/astefanutti))
+- chore\(deps\): bump github.com/magiconair/properties from 1.8.5 to 1.8.6 [\#3104](https://github.com/apache/camel-k/pull/3104) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(cli\): resource file with same content [\#3103](https://github.com/apache/camel-k/pull/3103) ([squakez](https://github.com/squakez))
+- \[\#3093\] wrong XSD url generated with XML initialiser [\#3102](https://github.com/apache/camel-k/pull/3102) ([rnetuka](https://github.com/rnetuka))
+- fix\(ci\): creating nightly tag [\#3100](https://github.com/apache/camel-k/pull/3100) ([squakez](https://github.com/squakez))
+- Refactor kaniko settings [\#3032](https://github.com/apache/camel-k/pull/3032) ([mmelko](https://github.com/mmelko))
+- chore\(deps\): bump go.uber.org/zap from 1.19.1 to 1.21.0 [\#2995](https://github.com/apache/camel-k/pull/2995) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/rs/xid from 1.2.1 to 1.3.0 [\#2980](https://github.com/apache/camel-k/pull/2980) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/radovskyb/watcher from 1.0.6 to 1.0.7 [\#2863](https://github.com/apache/camel-k/pull/2863) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.3.7 to 0.3.8 [\#2862](https://github.com/apache/camel-k/pull/2862) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [1.9.0-nightly.202203101127](https://github.com/apache/camel-k/tree/1.9.0-nightly.202203101127) (2022-03-10)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.9.0-nightly.202203101040...1.9.0-nightly.202203101127)
+
+**Closed issues:**
+
+- integration readiness condition is not reported to kamelet binding [\#3091](https://github.com/apache/camel-k/issues/3091)
+
+**Merged pull requests:**
+
+- fix\(ci\): nightly build [\#3099](https://github.com/apache/camel-k/pull/3099) ([squakez](https://github.com/squakez))
+- Fix script name for set version: from set-version to set\_version [\#3094](https://github.com/apache/camel-k/pull/3094) ([oscerd](https://github.com/oscerd))
+- fix: The KameletBinding readiness condition should mirror its Integration one [\#3092](https://github.com/apache/camel-k/pull/3092) ([astefanutti](https://github.com/astefanutti))
+
+## [1.9.0-nightly.202203101040](https://github.com/apache/camel-k/tree/1.9.0-nightly.202203101040) (2022-03-09)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.8.2...1.9.0-nightly.202203101040)
+
+**Closed issues:**
+
+- Post release steps: Operators manifests [\#3085](https://github.com/apache/camel-k/issues/3085)
+- Release 1.8.2 [\#3057](https://github.com/apache/camel-k/issues/3057)
+- Why do we println errors in `kamel local` instead of returning them? [\#3029](https://github.com/apache/camel-k/issues/3029)
+- Migrate the OLM metadata CSVs to bundle format [\#3018](https://github.com/apache/camel-k/issues/3018)
+- How to package integration to deploy it into a private k8s cluster without internet connection [\#2737](https://github.com/apache/camel-k/issues/2737)
+- Allow trait customization through kamel bind [\#2596](https://github.com/apache/camel-k/issues/2596)
+- Provide automated tests for "kamel local build" command [\#2074](https://github.com/apache/camel-k/issues/2074)
+
+**Merged pull requests:**
+
+- fix\(cli\): make sure kamel local run clean up dirs at ctrl+c [\#3088](https://github.com/apache/camel-k/pull/3088) ([tadayosi](https://github.com/tadayosi))
+- Post release steps: Operators manifests [\#3087](https://github.com/apache/camel-k/pull/3087) ([oscerd](https://github.com/oscerd))
+- Post release 1.8.2 [\#3086](https://github.com/apache/camel-k/pull/3086) ([oscerd](https://github.com/oscerd))
+- Update compatibility matrix reflectin main changes [\#3081](https://github.com/apache/camel-k/pull/3081) ([oscerd](https://github.com/oscerd))
+- test\(e2e\): add tests for `kamel local build` [\#3079](https://github.com/apache/camel-k/pull/3079) ([tadayosi](https://github.com/tadayosi))
+- Release documentation: Update docs for OperatorHub with new repositories [\#3073](https://github.com/apache/camel-k/pull/3073) ([oscerd](https://github.com/oscerd))
+- fix: Fix image tag in operator deployment [\#3071](https://github.com/apache/camel-k/pull/3071) ([astefanutti](https://github.com/astefanutti))
+- feat\(cli\): kamel bind --trait option [\#3070](https://github.com/apache/camel-k/pull/3070) ([squakez](https://github.com/squakez))
+- chore: Add camel-catalog-1.12.0.yaml to embedded resources [\#3069](https://github.com/apache/camel-k/pull/3069) ([astefanutti](https://github.com/astefanutti))
+- fix\(olm\): Upgrade container image in base CSV manifest [\#3068](https://github.com/apache/camel-k/pull/3068) ([astefanutti](https://github.com/astefanutti))
+- chore: Update last released version to 1.8.1 [\#3067](https://github.com/apache/camel-k/pull/3067) ([astefanutti](https://github.com/astefanutti))
+- chore: Upgrade Kamelet catalog to version 0.7.1 [\#3066](https://github.com/apache/camel-k/pull/3066) ([astefanutti](https://github.com/astefanutti))
+- chore: Upgrade Camel K runtime to version 1.12.0 [\#3065](https://github.com/apache/camel-k/pull/3065) ([astefanutti](https://github.com/astefanutti))
+- fix: The error handler trait should update status dependencies [\#3056](https://github.com/apache/camel-k/pull/3056) ([astefanutti](https://github.com/astefanutti))
+- chore: Tune operator logging [\#3050](https://github.com/apache/camel-k/pull/3050) ([christophd](https://github.com/christophd))
+- Makefile Release staging: Pass the remote repository name as argument… [\#3048](https://github.com/apache/camel-k/pull/3048) ([oscerd](https://github.com/oscerd))
+- Release note script: Check if the GITHUB\_TOKEN var has been set befor… [\#3045](https://github.com/apache/camel-k/pull/3045) ([oscerd](https://github.com/oscerd))
+- Add Helm Chart 1.8.0 and 1.8.1 [\#3043](https://github.com/apache/camel-k/pull/3043) ([oscerd](https://github.com/oscerd))
+- Release instruction: remove QUARKUS placeholder, not used anymore in … [\#3039](https://github.com/apache/camel-k/pull/3039) ([oscerd](https://github.com/oscerd))
+- test\(e2e\): add test for 'kamel local run --integration-directory' [\#3038](https://github.com/apache/camel-k/pull/3038) ([tadayosi](https://github.com/tadayosi))
+- Stop make erroring on lack of kubectl [\#3035](https://github.com/apache/camel-k/pull/3035) ([phantomjinx](https://github.com/phantomjinx))
+- fix\(cli\): kamel local subcommands accept traits but simply ignore them [\#3034](https://github.com/apache/camel-k/pull/3034) ([tadayosi](https://github.com/tadayosi))
+- doc\(cli\): add documentation for kamel local subcommands [\#3030](https://github.com/apache/camel-k/pull/3030) ([tadayosi](https://github.com/tadayosi))
+- chore\(api\): full spec [\#3026](https://github.com/apache/camel-k/pull/3026) ([squakez](https://github.com/squakez))
+- chore\(cmd\): refactor kamel local commands [\#3025](https://github.com/apache/camel-k/pull/3025) ([tadayosi](https://github.com/tadayosi))
+- Adds OLM channels to bundle metadata [\#3020](https://github.com/apache/camel-k/pull/3020) ([phantomjinx](https://github.com/phantomjinx))
+- chore\(ci\): revert nolint [\#3015](https://github.com/apache/camel-k/pull/3015) ([squakez](https://github.com/squakez))
+- fix\(build\): incremental build [\#3008](https://github.com/apache/camel-k/pull/3008) ([squakez](https://github.com/squakez))
+- Update tekton documentation [\#3000](https://github.com/apache/camel-k/pull/3000) ([livespotty](https://github.com/livespotty))
+- fix\(cmd/run\): allow multiple resources [\#2997](https://github.com/apache/camel-k/pull/2997) ([squakez](https://github.com/squakez))
+- fix\(kamelet\): reconcile when errored [\#2993](https://github.com/apache/camel-k/pull/2993) ([squakez](https://github.com/squakez))
+- Enhance Http proxy test about the OLM [\#2992](https://github.com/apache/camel-k/pull/2992) ([bouskaJ](https://github.com/bouskaJ))
+- fix\(yaml\): also consider toD while parsing YAML DSL steps [\#2989](https://github.com/apache/camel-k/pull/2989) ([toonalbers](https://github.com/toonalbers))
+- fix\(cli\): kamel run -v should configure the mount trait [\#2986](https://github.com/apache/camel-k/pull/2986) ([astefanutti](https://github.com/astefanutti))
+- chore: Upgrade Knative to version 1.2.0 [\#2979](https://github.com/apache/camel-k/pull/2979) ([astefanutti](https://github.com/astefanutti))
+- \[TEST\] Fix route test on Knative enabled clusters [\#2974](https://github.com/apache/camel-k/pull/2974) ([bouskaJ](https://github.com/bouskaJ))
+- feat\(cli\): add flag --skip-default-kamelets-setup to kamel install [\#2973](https://github.com/apache/camel-k/pull/2973) ([tadayosi](https://github.com/tadayosi))
+- fix\(e2e\): Decode OpenShift ProjectRequest into a Project struct [\#2971](https://github.com/apache/camel-k/pull/2971) ([astefanutti](https://github.com/astefanutti))
+- chore: Upgrade controller-runtime to v0.10.3 [\#2970](https://github.com/apache/camel-k/pull/2970) ([astefanutti](https://github.com/astefanutti))
+- \[TEST\] Add CliDownloadTest [\#2969](https://github.com/apache/camel-k/pull/2969) ([bouskaJ](https://github.com/bouskaJ))
+- chore: Upgrade sub-modules to Kubernetes API v0.22.5 [\#2968](https://github.com/apache/camel-k/pull/2968) ([astefanutti](https://github.com/astefanutti))
+- fix\(cli\): Kamel CLI zero-code exists when trait properties validation fails [\#2964](https://github.com/apache/camel-k/pull/2964) ([astefanutti](https://github.com/astefanutti))
+- Generate crd API docs as AsciiDoc \(main\) \(Update\) [\#2963](https://github.com/apache/camel-k/pull/2963) ([djencks](https://github.com/djencks))
+- feat\(knative\): Rely on addressable-resolver ClusterRole to transfer RBAC for Knative Sinks [\#2958](https://github.com/apache/camel-k/pull/2958) ([astefanutti](https://github.com/astefanutti))
+- \[TEST\] Add Global operator + namespaced kamelet test [\#2955](https://github.com/apache/camel-k/pull/2955) ([bouskaJ](https://github.com/bouskaJ))
+- fix\(api\): Add missing loader metadata field in CamelCatalog API [\#2953](https://github.com/apache/camel-k/pull/2953) ([astefanutti](https://github.com/astefanutti))
+- Kamel dump: make the command smarter  [\#2952](https://github.com/apache/camel-k/pull/2952) ([oscerd](https://github.com/oscerd))
+- WIP separate v1 and v1alpha1 api packages as much as possible [\#2951](https://github.com/apache/camel-k/pull/2951) ([djencks](https://github.com/djencks))
+- chore\(deps\): remove kamelet-reify [\#2949](https://github.com/apache/camel-k/pull/2949) ([squakez](https://github.com/squakez))
+- fix\(e2e\): Patch OLM Subscription to avoid conflicting updates [\#2946](https://github.com/apache/camel-k/pull/2946) ([astefanutti](https://github.com/astefanutti))
+- chore: Upgrade Kubernetes API to version 1.22.5 [\#2945](https://github.com/apache/camel-k/pull/2945) ([astefanutti](https://github.com/astefanutti))
+- fix\(e2e\): Do not add snapshot bundle to stable channel [\#2939](https://github.com/apache/camel-k/pull/2939) ([astefanutti](https://github.com/astefanutti))
+- fix: Fix number of found deployments in dump [\#2933](https://github.com/apache/camel-k/pull/2933) ([christophd](https://github.com/christophd))
+- chore: remove deprecated code in pre 1.6 releases [\#2932](https://github.com/apache/camel-k/pull/2932) ([squakez](https://github.com/squakez))
+- chore: Bump version to 1.9.0-SNAPSHOT [\#2930](https://github.com/apache/camel-k/pull/2930) ([astefanutti](https://github.com/astefanutti))
+- fix: Camel Catalog generation fails with empty Maven effective settings [\#2929](https://github.com/apache/camel-k/pull/2929) ([astefanutti](https://github.com/astefanutti))
+- Release Documentation: It's release-helm and not generate-helm command [\#2919](https://github.com/apache/camel-k/pull/2919) ([oscerd](https://github.com/oscerd))
+- \[Backport main\] Updated the helm index.yml file, by only adding the latest helm chart [\#2918](https://github.com/apache/camel-k/pull/2918) ([github-actions[bot]](https://github.com/apps/github-actions))
+- \[Backport main\] Helm release and next [\#2914](https://github.com/apache/camel-k/pull/2914) ([github-actions[bot]](https://github.com/apps/github-actions))
+- fix\(e2e\): Update health tests based on Camel 3.14 new health check responses [\#2911](https://github.com/apache/camel-k/pull/2911) ([astefanutti](https://github.com/astefanutti))
+- camel-website \#701 camel-k RI table setup \(main\) [\#2906](https://github.com/apache/camel-k/pull/2906) ([djencks](https://github.com/djencks))
+- fix\(e2e\): Use X.Y channels for OLM upgrade e2e tests [\#2901](https://github.com/apache/camel-k/pull/2901) ([astefanutti](https://github.com/astefanutti))
+- See \#2898 Generate CRD API docs as AsciiDoc [\#2899](https://github.com/apache/camel-k/pull/2899) ([djencks](https://github.com/djencks))
+- \[TEST\] - check IntegrationPlatform namespace with global operator [\#2895](https://github.com/apache/camel-k/pull/2895) ([bouskaJ](https://github.com/bouskaJ))
+- Update stale.yaml [\#2894](https://github.com/apache/camel-k/pull/2894) ([squakez](https://github.com/squakez))
+- Fix \#2788: use kamelets 0.7.0 and align with new dir structure [\#2887](https://github.com/apache/camel-k/pull/2887) ([nicolaferraro](https://github.com/nicolaferraro))
+- doc: add more details about installation on IKS/ICR [\#2882](https://github.com/apache/camel-k/pull/2882) ([tadayosi](https://github.com/tadayosi))
+- fix: Install Kamelets as unstructured resources [\#2881](https://github.com/apache/camel-k/pull/2881) ([astefanutti](https://github.com/astefanutti))
+- feat\(maven\): Configurable Maven CLI options [\#2879](https://github.com/apache/camel-k/pull/2879) ([astefanutti](https://github.com/astefanutti))
+- fix\(log\): Structure keytool logs [\#2878](https://github.com/apache/camel-k/pull/2878) ([astefanutti](https://github.com/astefanutti))
+- fix http-proxy-docs [\#2874](https://github.com/apache/camel-k/pull/2874) ([djencks](https://github.com/djencks))
+- fix: filter lint comment in traits [\#2873](https://github.com/apache/camel-k/pull/2873) ([squakez](https://github.com/squakez))
+-  camel-website \#701: RI info \(main\) [\#2868](https://github.com/apache/camel-k/pull/2868) ([djencks](https://github.com/djencks))
+- feat: Global HTTP proxy support [\#2858](https://github.com/apache/camel-k/pull/2858) ([astefanutti](https://github.com/astefanutti))
+- doc\(jitpack\): detailed info and link to example [\#2857](https://github.com/apache/camel-k/pull/2857) ([squakez](https://github.com/squakez))
+- \#2852 Update Antora usage and move diagram source \(main\) [\#2853](https://github.com/apache/camel-k/pull/2853) ([djencks](https://github.com/djencks))
+- fix\(doc\): filter nolint comments in documentation trait [\#2851](https://github.com/apache/camel-k/pull/2851) ([squakez](https://github.com/squakez))
+- doc\(kamelets\): custom repository [\#2849](https://github.com/apache/camel-k/pull/2849) ([squakez](https://github.com/squakez))
+- chore: Upgrade Knative to version 1.1.0 [\#2846](https://github.com/apache/camel-k/pull/2846) ([astefanutti](https://github.com/astefanutti))
+- chore\(kamelet\): remove bean and ref error handler types [\#2843](https://github.com/apache/camel-k/pull/2843) ([squakez](https://github.com/squakez))
+- AFTER camel-website \#740: local build v2 [\#2839](https://github.com/apache/camel-k/pull/2839) ([djencks](https://github.com/djencks))
+- Add support for KEDA [\#2838](https://github.com/apache/camel-k/pull/2838) ([nicolaferraro](https://github.com/nicolaferraro))
+- feat: Set GOMAXPROCS based on CPU quota [\#2837](https://github.com/apache/camel-k/pull/2837) ([astefanutti](https://github.com/astefanutti))
+- fix\(e2e\): Account for requeued and errored integration reconciliations [\#2836](https://github.com/apache/camel-k/pull/2836) ([astefanutti](https://github.com/astefanutti))
+- fix\(e2e\): Avoid nested Gomega fields matcher [\#2833](https://github.com/apache/camel-k/pull/2833) ([astefanutti](https://github.com/astefanutti))
+- chore: Try SSA for Kamelet install only once [\#2823](https://github.com/apache/camel-k/pull/2823) ([astefanutti](https://github.com/astefanutti))
+- fix\(yaml\): Take to-d into account while parsing YAML DSL steps [\#2822](https://github.com/apache/camel-k/pull/2822) ([astefanutti](https://github.com/astefanutti))
+- fix: First bundle Kamelets install with client-side apply [\#2821](https://github.com/apache/camel-k/pull/2821) ([astefanutti](https://github.com/astefanutti))
+- feat: Faster operator startup [\#2814](https://github.com/apache/camel-k/pull/2814) ([astefanutti](https://github.com/astefanutti))
+- chore\(ci\): Better GitHub Actions concurrency group [\#2811](https://github.com/apache/camel-k/pull/2811) ([astefanutti](https://github.com/astefanutti))
+- fix\(OLM\): Remove aggregated cluster roles from OLM bundle [\#2809](https://github.com/apache/camel-k/pull/2809) ([astefanutti](https://github.com/astefanutti))
+- chore\(RBAC\): Remove wildcards from Knative role [\#2807](https://github.com/apache/camel-k/pull/2807) ([astefanutti](https://github.com/astefanutti))
+- chore: Remove custom REST client [\#2806](https://github.com/apache/camel-k/pull/2806) ([astefanutti](https://github.com/astefanutti))
+- chore\(build\): Upgrade base image to ubi-quarkus-mandrel:21.3.0.0 [\#2798](https://github.com/apache/camel-k/pull/2798) ([astefanutti](https://github.com/astefanutti))
+- fix\(build\): Fix OLM bundle generation on Mac OS [\#2797](https://github.com/apache/camel-k/pull/2797) ([astefanutti](https://github.com/astefanutti))
+- fix\(cli\): Skip version compatibility check for builder command [\#2796](https://github.com/apache/camel-k/pull/2796) ([astefanutti](https://github.com/astefanutti))
+- fix\(doc\): Update Prometheus Operator setup documentation [\#2795](https://github.com/apache/camel-k/pull/2795) ([astefanutti](https://github.com/astefanutti))
+- chore\(RBAC\): Remove wildcards from roles [\#2793](https://github.com/apache/camel-k/pull/2793) ([astefanutti](https://github.com/astefanutti))
+- Makefile: for the generate-doc target don't use show-progress for wget [\#2792](https://github.com/apache/camel-k/pull/2792) ([oscerd](https://github.com/oscerd))
+- Fix doc port name [\#2790](https://github.com/apache/camel-k/pull/2790) ([oscerd](https://github.com/oscerd))
+- fix\(doc\): header complain [\#2787](https://github.com/apache/camel-k/pull/2787) ([squakez](https://github.com/squakez))
+- fix\(lint\): error return value are not checked [\#2786](https://github.com/apache/camel-k/pull/2786) ([lburgazzoli](https://github.com/lburgazzoli))
+- doc: no CLI integration run [\#2783](https://github.com/apache/camel-k/pull/2783) ([squakez](https://github.com/squakez))
+- fix\(ci\): Fix OLM upgrade e2e tests [\#2782](https://github.com/apache/camel-k/pull/2782) ([astefanutti](https://github.com/astefanutti))
+- fix\(doc\): broken links [\#2781](https://github.com/apache/camel-k/pull/2781) ([squakez](https://github.com/squakez))
+- lint [\#2780](https://github.com/apache/camel-k/pull/2780) ([lburgazzoli](https://github.com/lburgazzoli))
+- chore: Upgrade Spectrum and go-containerregistry [\#2779](https://github.com/apache/camel-k/pull/2779) ([astefanutti](https://github.com/astefanutti))
+- doc: cleaning [\#2778](https://github.com/apache/camel-k/pull/2778) ([squakez](https://github.com/squakez))
+- fix\(build\): default jitpack to main [\#2775](https://github.com/apache/camel-k/pull/2775) ([squakez](https://github.com/squakez))
+- doc\(install\): suggested resource configuration [\#2774](https://github.com/apache/camel-k/pull/2774) ([squakez](https://github.com/squakez))
+- feat\(cmd/run\): autogenerated configmap for resource/config local files [\#2771](https://github.com/apache/camel-k/pull/2771) ([squakez](https://github.com/squakez))
+- chore\(release\): Update latest released version and OLM base CSV manifest [\#2770](https://github.com/apache/camel-k/pull/2770) ([astefanutti](https://github.com/astefanutti))
+- chore\(build\): Upgrade Maven to version 3.8.4 [\#2767](https://github.com/apache/camel-k/pull/2767) ([astefanutti](https://github.com/astefanutti))
+- gosec [\#2766](https://github.com/apache/camel-k/pull/2766) ([lburgazzoli](https://github.com/lburgazzoli))
+- Update the operator-sdk version [\#2755](https://github.com/apache/camel-k/pull/2755) ([phantomjinx](https://github.com/phantomjinx))
+- Fix \#2638: fix condition for external kit and add test [\#2754](https://github.com/apache/camel-k/pull/2754) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore\(release\): Remove staging repository [\#2750](https://github.com/apache/camel-k/pull/2750) ([astefanutti](https://github.com/astefanutti))
+- chore\(e2e\): disable object truncation on test results [\#2745](https://github.com/apache/camel-k/pull/2745) ([tadayosi](https://github.com/tadayosi))
+- feat: Health trait [\#2740](https://github.com/apache/camel-k/pull/2740) ([astefanutti](https://github.com/astefanutti))
+- feat\(cmd\): OLM default discovery [\#2735](https://github.com/apache/camel-k/pull/2735) ([squakez](https://github.com/squakez))
+- fix\(e2e\): Update latest released version to fix upgrade tests [\#2734](https://github.com/apache/camel-k/pull/2734) ([astefanutti](https://github.com/astefanutti))
+- chore: Upgrade Knative to version 1.0.0 [\#2733](https://github.com/apache/camel-k/pull/2733) ([astefanutti](https://github.com/astefanutti))
+- Add pojo-jar example [\#2731](https://github.com/apache/camel-k/pull/2731) ([dweber019](https://github.com/dweber019))
+- feat\(cmd\): operator additional info [\#2730](https://github.com/apache/camel-k/pull/2730) ([squakez](https://github.com/squakez))
+- chore\(sbo\): upgrade Servce Binding Operator to 1.0.0 GA [\#2729](https://github.com/apache/camel-k/pull/2729) ([johnpoth](https://github.com/johnpoth))
+- Fix \#2724: assign an ID to the binding main route [\#2727](https://github.com/apache/camel-k/pull/2727) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore\(e2e\): temporarily disable TestKameletBindingScale test for OpenShift 3 [\#2723](https://github.com/apache/camel-k/pull/2723) ([tadayosi](https://github.com/tadayosi))
+- update site links to point to 'next' [\#2722](https://github.com/apache/camel-k/pull/2722) ([jbpratt](https://github.com/jbpratt))
+- chore: Set indent size for Go files in .editorconfig [\#2721](https://github.com/apache/camel-k/pull/2721) ([astefanutti](https://github.com/astefanutti))
+- Some more e2e stabilisation & improvements [\#2720](https://github.com/apache/camel-k/pull/2720) ([tadayosi](https://github.com/tadayosi))
+- feat: Report runtime health checks into Integration readiness condition [\#2719](https://github.com/apache/camel-k/pull/2719) ([astefanutti](https://github.com/astefanutti))
+- camel k main latest to next [\#2716](https://github.com/apache/camel-k/pull/2716) ([djencks](https://github.com/djencks))
+- \[TEST\] Add cross-channel upgrade test feature [\#2715](https://github.com/apache/camel-k/pull/2715) ([bouskaJ](https://github.com/bouskaJ))
+- chore\(ci\): update to golangci-lint 1.42.x and use golangci/golangci-lint-action [\#2714](https://github.com/apache/camel-k/pull/2714) ([tadayosi](https://github.com/tadayosi))
+- E2E development allowing injection of secrets denoting testing on custom clusters [\#2711](https://github.com/apache/camel-k/pull/2711) ([phantomjinx](https://github.com/phantomjinx))
+- fix refs to camel-quarkus docs to point to latest released version [\#2708](https://github.com/apache/camel-k/pull/2708) ([djencks](https://github.com/djencks))
+- fix\(ci\): proper action/staleV3 configuration [\#2707](https://github.com/apache/camel-k/pull/2707) ([squakez](https://github.com/squakez))
+- chore\(dev\): add .editorconfig [\#2705](https://github.com/apache/camel-k/pull/2705) ([tadayosi](https://github.com/tadayosi))
+- fix: Avoid operator panic when Quarkus fast-jar directory is empty [\#2704](https://github.com/apache/camel-k/pull/2704) ([astefanutti](https://github.com/astefanutti))
+- fix: Use a single operator and CLI client globally [\#2703](https://github.com/apache/camel-k/pull/2703) ([astefanutti](https://github.com/astefanutti))
+- fix\(script\): goldflag with empty space [\#2701](https://github.com/apache/camel-k/pull/2701) ([squakez](https://github.com/squakez))
+- CI test dump improvements [\#2700](https://github.com/apache/camel-k/pull/2700) ([tadayosi](https://github.com/tadayosi))
+- fix\(ci\): broken stale action [\#2699](https://github.com/apache/camel-k/pull/2699) ([squakez](https://github.com/squakez))
+- Fix \#2687: Allow multiple integration platforms in the same namespace [\#2695](https://github.com/apache/camel-k/pull/2695) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore\(runtime\): update to Camel K Runtime 1.10.0-SNAPSHOT [\#2694](https://github.com/apache/camel-k/pull/2694) ([tadayosi](https://github.com/tadayosi))
+- chore: Bypass cache round-trips to reconcile integration status [\#2692](https://github.com/apache/camel-k/pull/2692) ([astefanutti](https://github.com/astefanutti))
+- fix: Integration readiness status should account for updated replicas [\#2691](https://github.com/apache/camel-k/pull/2691) ([astefanutti](https://github.com/astefanutti))
+- fix: Round meta.Time fields to second precision as they are marshalled in RFC3339 format [\#2689](https://github.com/apache/camel-k/pull/2689) ([astefanutti](https://github.com/astefanutti))
+- chore\(builder\): Self-defined Build spec [\#2688](https://github.com/apache/camel-k/pull/2688) ([astefanutti](https://github.com/astefanutti))
+- fix\(e2e\): Resolve kamel bind e2e test conflict [\#2686](https://github.com/apache/camel-k/pull/2686) ([astefanutti](https://github.com/astefanutti))
+- Fix \#1943: allow multiple operators to reconcile label filtered resources [\#2683](https://github.com/apache/camel-k/pull/2683) ([nicolaferraro](https://github.com/nicolaferraro))
+- feat: Comprehensive Integration error status [\#2682](https://github.com/apache/camel-k/pull/2682) ([astefanutti](https://github.com/astefanutti))
+- fix\(cli\): apply --registry\* flags even on OpenShift for kamel install [\#2681](https://github.com/apache/camel-k/pull/2681) ([tadayosi](https://github.com/tadayosi))
+- \[TEST\] Missing cli tests were added [\#2680](https://github.com/apache/camel-k/pull/2680) ([vsokolov00](https://github.com/vsokolov00))
+- \[TEST\] Global kamelet test - support for openshift [\#2679](https://github.com/apache/camel-k/pull/2679) ([asmigala](https://github.com/asmigala))
+- feat: Add active-deadline-seconds and backoff-limit options to cron trait [\#2678](https://github.com/apache/camel-k/pull/2678) ([astefanutti](https://github.com/astefanutti))
+- feat: Add progress-deadline-seconds option to deployment trait [\#2677](https://github.com/apache/camel-k/pull/2677) ([astefanutti](https://github.com/astefanutti))
+- fix\(cli\): kamel install fails with error: Object 'Kind' is missing in 'null' [\#2676](https://github.com/apache/camel-k/pull/2676) ([tadayosi](https://github.com/tadayosi))
+- doc\(dev\): update required Go version to 1.16 [\#2675](https://github.com/apache/camel-k/pull/2675) ([tadayosi](https://github.com/tadayosi))
+- chore\(cli\): Add operator env vars option to install CLI [\#2673](https://github.com/apache/camel-k/pull/2673) ([astefanutti](https://github.com/astefanutti))
+- fix\(ci\): Disable default Kamelets installation for builder e2e tests [\#2672](https://github.com/apache/camel-k/pull/2672) ([astefanutti](https://github.com/astefanutti))
+- fix\(build\): Update Maven binary download URL [\#2671](https://github.com/apache/camel-k/pull/2671) ([astefanutti](https://github.com/astefanutti))
+- fix: Handle Integration changes while waiting for Kit build [\#2670](https://github.com/apache/camel-k/pull/2670) ([astefanutti](https://github.com/astefanutti))
+- chore: Parallel Kamelets reconciliation [\#2668](https://github.com/apache/camel-k/pull/2668) ([astefanutti](https://github.com/astefanutti))
+- feat\(native\): Add support for Knative service gradual roll-out [\#2667](https://github.com/apache/camel-k/pull/2667) ([astefanutti](https://github.com/astefanutti))
+- fix: Affinity trait must run after the Knative Service trait [\#2666](https://github.com/apache/camel-k/pull/2666) ([astefanutti](https://github.com/astefanutti))
+- chore\(jolokia\): upgrade to Jolokia 1.7.1 [\#2665](https://github.com/apache/camel-k/pull/2665) ([tadayosi](https://github.com/tadayosi))
+- chore : automatic PR creation to update "peripheral" go dependencies [\#2664](https://github.com/apache/camel-k/pull/2664) ([apupier](https://github.com/apupier))
+- feat: Consistent Integration scale status [\#2662](https://github.com/apache/camel-k/pull/2662) ([astefanutti](https://github.com/astefanutti))
+- chore: refresh kamelets also when operator version does not change an… [\#2661](https://github.com/apache/camel-k/pull/2661) ([nicolaferraro](https://github.com/nicolaferraro))
+- Make quarkus dependencies management more robust [\#2658](https://github.com/apache/camel-k/pull/2658) ([doru1004](https://github.com/doru1004))
+- chore\(ci\): Use `github.head_ref` as concurrency group key [\#2657](https://github.com/apache/camel-k/pull/2657) ([astefanutti](https://github.com/astefanutti))
+-  Output redirection Fix: \#2495 [\#2656](https://github.com/apache/camel-k/pull/2656) ([vsokolov00](https://github.com/vsokolov00))
+- chore\(build\): Upgrade Go dependencies [\#2655](https://github.com/apache/camel-k/pull/2655) ([astefanutti](https://github.com/astefanutti))
+- Fix local builds from directory for containerized and non-containerized uses. [\#2654](https://github.com/apache/camel-k/pull/2654) ([doru1004](https://github.com/doru1004))
+- \[TEST\] Global test - support for openshift [\#2653](https://github.com/apache/camel-k/pull/2653) ([bouskaJ](https://github.com/bouskaJ))
+- Update dependencies.adoc [\#2651](https://github.com/apache/camel-k/pull/2651) ([hadoken79](https://github.com/hadoken79))
+- feat\(trait\): environment variables [\#2650](https://github.com/apache/camel-k/pull/2650) ([squakez](https://github.com/squakez))
+- fix: Switch off color in Maven logs [\#2647](https://github.com/apache/camel-k/pull/2647) ([astefanutti](https://github.com/astefanutti))
+- Alow fixed custom labels in any pod [\#2646](https://github.com/apache/camel-k/pull/2646) ([claudio4j](https://github.com/claudio4j))
+- fix: Unify post-build integration phases reconciliation [\#2645](https://github.com/apache/camel-k/pull/2645) ([astefanutti](https://github.com/astefanutti))
+- Fix \#2638: sync owned integration kit to avoid gc [\#2639](https://github.com/apache/camel-k/pull/2639) ([nicolaferraro](https://github.com/nicolaferraro))
+- Fix documentation for building website [\#2637](https://github.com/apache/camel-k/pull/2637) ([oscerd](https://github.com/oscerd))
+- Fixed website build [\#2636](https://github.com/apache/camel-k/pull/2636) ([oscerd](https://github.com/oscerd))
+- feat\(trait\): camel trait to include properties [\#2635](https://github.com/apache/camel-k/pull/2635) ([squakez](https://github.com/squakez))
+- doc: architecture \> runtime section [\#2634](https://github.com/apache/camel-k/pull/2634) ([squakez](https://github.com/squakez))
+- doc\(native\): Add package type tag to build metrics [\#2632](https://github.com/apache/camel-k/pull/2632) ([astefanutti](https://github.com/astefanutti))
+- chore\(native\): Fail-fast native build for unsupported languages [\#2631](https://github.com/apache/camel-k/pull/2631) ([astefanutti](https://github.com/astefanutti))
+- chore: stale bot configuration [\#2630](https://github.com/apache/camel-k/pull/2630) ([squakez](https://github.com/squakez))
+- fix\(doc\): escape characters in trait doc [\#2628](https://github.com/apache/camel-k/pull/2628) ([squakez](https://github.com/squakez))
+- Upgrade sbo [\#2627](https://github.com/apache/camel-k/pull/2627) ([johnpoth](https://github.com/johnpoth))
+- chore\(release\): Update OLM base CSV manifest [\#2624](https://github.com/apache/camel-k/pull/2624) ([astefanutti](https://github.com/astefanutti))
+- Fix \#2616: correctly encode numbers in Kamelet parameters [\#2617](https://github.com/apache/camel-k/pull/2617) ([nicolaferraro](https://github.com/nicolaferraro))
+- \[website\] fix attribute usage, and put the crd html file in partials [\#2614](https://github.com/apache/camel-k/pull/2614) ([djencks](https://github.com/djencks))
+- chore: Update embedded catalog to 1.9.0-SNAPSHOT runtime [\#2613](https://github.com/apache/camel-k/pull/2613) ([astefanutti](https://github.com/astefanutti))
+- fix\(ci\): Update latest release version to 1.5.1 [\#2612](https://github.com/apache/camel-k/pull/2612) ([astefanutti](https://github.com/astefanutti))
+- Bump Camel K Runtime to 1.9.x [\#2611](https://github.com/apache/camel-k/pull/2611) ([orpiske](https://github.com/orpiske))
+- fix\(ci\): Fix YAKS binary download [\#2610](https://github.com/apache/camel-k/pull/2610) ([astefanutti](https://github.com/astefanutti))
+- doc\(kamelets\): trait array vaue syntax [\#2609](https://github.com/apache/camel-k/pull/2609) ([squakez](https://github.com/squakez))
+- Update dependencies.adoc [\#2607](https://github.com/apache/camel-k/pull/2607) ([mmacphail](https://github.com/mmacphail))
+- Fix \#2487: do not directly delete owned integrations on reset [\#2603](https://github.com/apache/camel-k/pull/2603) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore\(build\): use batch-mode for maven-overlay task in CI [\#2601](https://github.com/apache/camel-k/pull/2601) ([tadayosi](https://github.com/tadayosi))
+- doc\(dependencies\): note on dynamic URIs [\#2599](https://github.com/apache/camel-k/pull/2599) ([squakez](https://github.com/squakez))
+- fix\(kamelets\): error handler uri autodiscovery [\#2597](https://github.com/apache/camel-k/pull/2597) ([squakez](https://github.com/squakez))
+- chore\(strimzi\): upgrade API to v1beta2 [\#2595](https://github.com/apache/camel-k/pull/2595) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore\(jolokia\): upgrade to Jolokia 1.7.0 [\#2594](https://github.com/apache/camel-k/pull/2594) ([tadayosi](https://github.com/tadayosi))
+- Kamelet binding sbo [\#2592](https://github.com/apache/camel-k/pull/2592) ([johnpoth](https://github.com/johnpoth))
+- Fix typo [\#2588](https://github.com/apache/camel-k/pull/2588) ([mmacphail](https://github.com/mmacphail))
+- feat\(cmd/bind\): error-handler setting [\#2587](https://github.com/apache/camel-k/pull/2587) ([squakez](https://github.com/squakez))
+- doc: contribute links [\#2584](https://github.com/apache/camel-k/pull/2584) ([squakez](https://github.com/squakez))
+- feat\(trait\): container image pull policy [\#2583](https://github.com/apache/camel-k/pull/2583) ([squakez](https://github.com/squakez))
+- Fix \#2486: make kamelet binding scalable [\#2582](https://github.com/apache/camel-k/pull/2582) ([nicolaferraro](https://github.com/nicolaferraro))
+- doc\(kamelets\): trait annotation usage and examples [\#2581](https://github.com/apache/camel-k/pull/2581) ([squakez](https://github.com/squakez))
+- Reworked logging trait dependencies [\#2580](https://github.com/apache/camel-k/pull/2580) ([orpiske](https://github.com/orpiske))
+- trait: Add tests for route trait and read certificate from secrets [\#2577](https://github.com/apache/camel-k/pull/2577) ([claudio4j](https://github.com/claudio4j))
+- fix\(cmd/bind\): show expected kameletbinding [\#2575](https://github.com/apache/camel-k/pull/2575) ([squakez](https://github.com/squakez))
+- ad \[FUSEQE-13946\] Probably incorrect integration name [\#2572](https://github.com/apache/camel-k/pull/2572) ([lfabriko](https://github.com/lfabriko))
+- fix\(cli\): modeline build-property check [\#2571](https://github.com/apache/camel-k/pull/2571) ([squakez](https://github.com/squakez))
+- fix\(cli\): property priority [\#2570](https://github.com/apache/camel-k/pull/2570) ([squakez](https://github.com/squakez))
 - fix\(api\): property leading space [\#2564](https://github.com/apache/camel-k/pull/2564) ([squakez](https://github.com/squakez))
 - fix TestPermissionDenied should ignore darwin  [\#2561](https://github.com/apache/camel-k/pull/2561) ([Abirdcfly](https://github.com/Abirdcfly))
 - fix\(controller\): panic on nil annotation [\#2557](https://github.com/apache/camel-k/pull/2557) ([Abirdcfly](https://github.com/Abirdcfly))
@@ -33,11 +1372,14 @@
 - fix\(builder\): Fix race-condition when Build transitions to running phase [\#2545](https://github.com/apache/camel-k/pull/2545) ([astefanutti](https://github.com/astefanutti))
 - Move bool pointer functions to trait package and use them throughout the traits [\#2543](https://github.com/apache/camel-k/pull/2543) ([tadayosi](https://github.com/tadayosi))
 - Forcelly set QUARKUS\_LOG\_CONSOLE\_JSON to false if the trait is not provided \(GH issue \#2539\) [\#2540](https://github.com/apache/camel-k/pull/2540) ([orpiske](https://github.com/orpiske))
+- feat: Quarkus native build support [\#2536](https://github.com/apache/camel-k/pull/2536) ([astefanutti](https://github.com/astefanutti))
 - Fix \#2530: fix type and do not add cross-namespace owner references [\#2535](https://github.com/apache/camel-k/pull/2535) ([nicolaferraro](https://github.com/nicolaferraro))
 - chore: add support for darwin/atm64 [\#2532](https://github.com/apache/camel-k/pull/2532) ([lburgazzoli](https://github.com/lburgazzoli))
 - \[test\] Remove 3rd party dependencies [\#2529](https://github.com/apache/camel-k/pull/2529) ([bouskaJ](https://github.com/bouskaJ))
 - Allow Probe Scheme to Be Customized [\#2527](https://github.com/apache/camel-k/pull/2527) ([Kyle-Cooley](https://github.com/Kyle-Cooley))
 - fix\(controller\): panic on nil application properties [\#2526](https://github.com/apache/camel-k/pull/2526) ([squakez](https://github.com/squakez))
+- \[test\] add Kamelet errorHandler test [\#2522](https://github.com/apache/camel-k/pull/2522) ([bouskaJ](https://github.com/bouskaJ))
+- doc: Improve Helm configuration section and architecture integration platform [\#2521](https://github.com/apache/camel-k/pull/2521) ([toonalbers](https://github.com/toonalbers))
 - Use https instead of http for xsd location [\#2517](https://github.com/apache/camel-k/pull/2517) ([apupier](https://github.com/apupier))
 - Add classpath kamelet loading test [\#2516](https://github.com/apache/camel-k/pull/2516) ([bouskaJ](https://github.com/bouskaJ))
 - fix\(\#2514\): Fix tar.gz changes the uid/gid of cwd [\#2515](https://github.com/apache/camel-k/pull/2515) ([christophd](https://github.com/christophd))
@@ -154,6 +1496,7 @@
 - Configure kubernetes to use structured log [\#2290](https://github.com/apache/camel-k/pull/2290) ([orpiske](https://github.com/orpiske))
 - fix\(doc\): camel website error fixes [\#2288](https://github.com/apache/camel-k/pull/2288) ([squakez](https://github.com/squakez))
 - chore\(e2e\): Assert upgraded integration Pod uses new version Kit [\#2285](https://github.com/apache/camel-k/pull/2285) ([astefanutti](https://github.com/astefanutti))
+- Creates alternative kustomize installer for installation of the camel-k operator [\#2284](https://github.com/apache/camel-k/pull/2284) ([phantomjinx](https://github.com/phantomjinx))
 - chore\(e2e\): Remove obsolete operator upgrade e2e test [\#2283](https://github.com/apache/camel-k/pull/2283) ([astefanutti](https://github.com/astefanutti))
 - fix\(doc\): broken links [\#2282](https://github.com/apache/camel-k/pull/2282) ([squakez](https://github.com/squakez))
 - fix\(e2e\): Fix OLM upgrade e2e test [\#2281](https://github.com/apache/camel-k/pull/2281) ([astefanutti](https://github.com/astefanutti))
@@ -244,6 +1587,7 @@
 - chore : Fix links to the developers guide - needs to point to latest/contributing/developers.html [\#2102](https://github.com/apache/camel-k/pull/2102) ([cunningt](https://github.com/cunningt))
 - chore: Upgrade Knative to version 0.21.0 [\#2101](https://github.com/apache/camel-k/pull/2101) ([astefanutti](https://github.com/astefanutti))
 - chore: Rely on Lease from controller-runtime for leader election [\#2100](https://github.com/apache/camel-k/pull/2100) ([astefanutti](https://github.com/astefanutti))
+- tests: common/files are rewritten to yaml [\#2099](https://github.com/apache/camel-k/pull/2099) ([vsokolov00](https://github.com/vsokolov00))
 - Add missing classpath locations for external kits [\#2097](https://github.com/apache/camel-k/pull/2097) ([jamesnetherton](https://github.com/jamesnetherton))
 - fix: Use correct versions to access OLM APIs [\#2095](https://github.com/apache/camel-k/pull/2095) ([astefanutti](https://github.com/astefanutti))
 - Upgrade sbo [\#2094](https://github.com/apache/camel-k/pull/2094) ([johnpoth](https://github.com/johnpoth))
@@ -252,6 +1596,7 @@
 - Fix \#200: Add support for mirrorOf attribute [\#2089](https://github.com/apache/camel-k/pull/2089) ([bouskaJ](https://github.com/bouskaJ))
 - chore: Upgrade controller-runtime to version 0.7.2 [\#2087](https://github.com/apache/camel-k/pull/2087) ([astefanutti](https://github.com/astefanutti))
 - chore\(kamelets\): embed kamelet repository and remove lookup from gith… [\#2086](https://github.com/apache/camel-k/pull/2086) ([nicolaferraro](https://github.com/nicolaferraro))
+- chore: Upgrade to `networking.k8s.io/v1` Ingress API [\#2084](https://github.com/apache/camel-k/pull/2084) ([astefanutti](https://github.com/astefanutti))
 - refactor\(trait\): affinity  [\#2078](https://github.com/apache/camel-k/pull/2078) ([squakez](https://github.com/squakez))
 - Upgrade Kubernetes to v0.19.8 and Service Binding operator to v0.4.1 [\#2076](https://github.com/apache/camel-k/pull/2076) ([astefanutti](https://github.com/astefanutti))
 - Fix deprecated annotation [\#2070](https://github.com/apache/camel-k/pull/2070) ([bouskaJ](https://github.com/bouskaJ))
@@ -578,9 +1923,372 @@
 - Allow the short syntax in knative endpoints [\#1458](https://github.com/apache/camel-k/pull/1458) ([nicolaferraro](https://github.com/nicolaferraro))
 - Remove unused import package in example [\#1457](https://github.com/apache/camel-k/pull/1457) ([apupier](https://github.com/apupier))
 
-## [v1.5.0](https://github.com/apache/camel-k/tree/v1.5.0) (2021-07-05)
+## [pkg/kamelet/repository/v1.8.2](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.8.2) (2022-03-03)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.5.0...v1.5.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.8.2...pkg/kamelet/repository/v1.8.2)
+
+## [pkg/apis/camel/v1.8.2](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.8.2) (2022-03-03)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.8.2...pkg/apis/camel/v1.8.2)
+
+## [pkg/client/camel/v1.8.2](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.8.2) (2022-03-03)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.8.2...pkg/client/camel/v1.8.2)
+
+## [v1.8.2](https://github.com/apache/camel-k/tree/v1.8.2) (2022-03-03)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.8.1...v1.8.2)
+
+**Closed issues:**
+
+- Container Trait for Resource Allocation on Openshift [\#3052](https://github.com/apache/camel-k/issues/3052)
+- IntegrationKit creation based on YAML file fails [\#3033](https://github.com/apache/camel-k/issues/3033)
+- Expose Camel-related metrics \(Prometheus\) [\#3027](https://github.com/apache/camel-k/issues/3027)
+- Helm multiple namespace install Camel-K [\#2985](https://github.com/apache/camel-k/issues/2985)
+- Release 1.8.1 [\#2983](https://github.com/apache/camel-k/issues/2983)
+- Makefile Release staging: Pass the remote repository name as argument with origin as default  [\#2891](https://github.com/apache/camel-k/issues/2891)
+- Release note script: Check if the GITHUB\_TOKEN var has been set before running the command [\#2890](https://github.com/apache/camel-k/issues/2890)
+- Remove deprecated code [\#2751](https://github.com/apache/camel-k/issues/2751)
+- \[E2E\] Test error handler appears to be flaky [\#2744](https://github.com/apache/camel-k/issues/2744)
+- `Kamel local` chokes on traits [\#2499](https://github.com/apache/camel-k/issues/2499)
+- Documentation for `kamel local run` [\#2490](https://github.com/apache/camel-k/issues/2490)
+- Support for HashiCorp Vault [\#2107](https://github.com/apache/camel-k/issues/2107)
+- Provide automated tests for "kamel local run --integration-directory \<dir-name\>" command [\#2075](https://github.com/apache/camel-k/issues/2075)
+- Support for POJO, bring it back!  [\#1821](https://github.com/apache/camel-k/issues/1821)
+
+## [pkg/apis/camel/v1.8.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.8.1) (2022-02-21)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.8.1...pkg/apis/camel/v1.8.1)
+
+## [pkg/kamelet/repository/v1.8.1](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.8.1) (2022-02-21)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.8.1...pkg/kamelet/repository/v1.8.1)
+
+## [v1.8.1](https://github.com/apache/camel-k/tree/v1.8.1) (2022-02-21)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.8.1...v1.8.1)
+
+## [pkg/client/camel/v1.8.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.8.1) (2022-02-21)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.8.0...pkg/client/camel/v1.8.1)
+
+**Closed issues:**
+
+- logging.level.org.apache.camel=DEBUG does not affect integration logs. [\#3024](https://github.com/apache/camel-k/issues/3024)
+- Build artifact checksum not working [\#3007](https://github.com/apache/camel-k/issues/3007)
+- kamel client for macOS from release 1.8.0 is really 1.0.0-M4 [\#3006](https://github.com/apache/camel-k/issues/3006)
+- SEDA multiple threads not working [\#3001](https://github.com/apache/camel-k/issues/3001)
+- Errored status Kamelet cannot be reconciled to Ready status [\#2988](https://github.com/apache/camel-k/issues/2988)
+- Kamel install failure [\#2987](https://github.com/apache/camel-k/issues/2987)
+- Configure Maven: Artifact Repository is not recognized [\#2966](https://github.com/apache/camel-k/issues/2966)
+- camel-k-operator forbidden to get kafkachannels.messaging.knative.dev since 1.8.x [\#2950](https://github.com/apache/camel-k/issues/2950)
+- \[regression\] Cannot provide 2 resources with 1.8.0 [\#2943](https://github.com/apache/camel-k/issues/2943)
+- \[Docs/Website\] Generate API documentation as AsciiDoc rather than html [\#2898](https://github.com/apache/camel-k/issues/2898)
+- Enabling prometheus causes KameletBindings to be stuck in status "Creating" [\#2896](https://github.com/apache/camel-k/issues/2896)
+- Stale bot is setting issue `stale` where marked as `never-stale` [\#2893](https://github.com/apache/camel-k/issues/2893)
+- camel-k-client binary is missing in the latest release assets [\#2892](https://github.com/apache/camel-k/issues/2892)
+- Release 1.8.0 [\#2848](https://github.com/apache/camel-k/issues/2848)
+- Error: unknown flag: --trait on local build [\#2776](https://github.com/apache/camel-k/issues/2776)
+- Implement gosec to inspect source code for security problems [\#2763](https://github.com/apache/camel-k/issues/2763)
+- Kamelet with MQTT Broker Mosquitto [\#2690](https://github.com/apache/camel-k/issues/2690)
+- Unable to access MongoDB [\#2684](https://github.com/apache/camel-k/issues/2684)
+- KAMEL\_INSTALL\_DEFAULT\_KAMELETS behavior [\#2560](https://github.com/apache/camel-k/issues/2560)
+- Log warnings with kamelets [\#2395](https://github.com/apache/camel-k/issues/2395)
+- Json marshalling is needed for Rest route and uncommented code seems to be executed [\#2341](https://github.com/apache/camel-k/issues/2341)
+- build: use golangci/golangci-lint-action [\#2334](https://github.com/apache/camel-k/issues/2334)
+- Change autogen doc template to adoc [\#2289](https://github.com/apache/camel-k/issues/2289)
+- Kamel dump: make the command smarter [\#2189](https://github.com/apache/camel-k/issues/2189)
+
+## [v1.8.0](https://github.com/apache/camel-k/tree/v1.8.0) (2022-01-19)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.8.0...v1.8.0)
+
+## [pkg/client/camel/v1.8.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.8.0) (2022-01-19)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.8.0...pkg/client/camel/v1.8.0)
+
+## [pkg/kamelet/repository/v1.8.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.8.0) (2022-01-19)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.8.0...pkg/kamelet/repository/v1.8.0)
+
+## [pkg/apis/camel/v1.8.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.8.0) (2022-01-19)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.7.0...pkg/apis/camel/v1.8.0)
+
+**Closed issues:**
+
+- Update Antora usage [\#2852](https://github.com/apache/camel-k/issues/2852)
+- Support local dependencies when running an integration [\#2834](https://github.com/apache/camel-k/issues/2834)
+- Log4j Security Issue [\#2830](https://github.com/apache/camel-k/issues/2830)
+- Outdated `ca-cert` path for Jolokia trait [\#2827](https://github.com/apache/camel-k/issues/2827)
+- Kafka component propagating headers is supported? [\#2825](https://github.com/apache/camel-k/issues/2825)
+- Integration with To-D can't find Kamelet [\#2819](https://github.com/apache/camel-k/issues/2819)
+- KameletBinding - Make error handler more simpler [\#2815](https://github.com/apache/camel-k/issues/2815)
+- CXF Support [\#2799](https://github.com/apache/camel-k/issues/2799)
+- Update documentation about monitoring metrics using Prometheus Operator 0.38.0 [\#2794](https://github.com/apache/camel-k/issues/2794)
+- Makefile: for the generate-doc target don't use show-progress for wget [\#2791](https://github.com/apache/camel-k/issues/2791)
+- how i use build-property on Integration crd [\#2789](https://github.com/apache/camel-k/issues/2789)
+- Align to the new folder structure on Camel-Kamelets [\#2788](https://github.com/apache/camel-k/issues/2788)
+- user provided maven setting are overridden by the camel-k operator [\#2777](https://github.com/apache/camel-k/issues/2777)
+- Let user configure configmaps/secrets for `kamel run --openapi` option [\#2772](https://github.com/apache/camel-k/issues/2772)
+- Dry run kamel run [\#2769](https://github.com/apache/camel-k/issues/2769)
+- Is there any resources requirements for camel-k operator Deployment? [\#2768](https://github.com/apache/camel-k/issues/2768)
+- How to use a custom Kamelet Repository? [\#2765](https://github.com/apache/camel-k/issues/2765)
+- Jitpack still configured with `master` branch [\#2764](https://github.com/apache/camel-k/issues/2764)
+- How can I find the log file location in the integration pod?  [\#2762](https://github.com/apache/camel-k/issues/2762)
+- Default value of trait container.port-name is missing from catalog [\#2761](https://github.com/apache/camel-k/issues/2761)
+- Trait catalog provided by kamel CLI contains a description mentioning "the end of this page"  [\#2760](https://github.com/apache/camel-k/issues/2760)
+- Document dependency on camel-quarkus \(and camel\) [\#2759](https://github.com/apache/camel-k/issues/2759)
+- How to remove Kamelets installation when installing IntegrationPlatform CRD? [\#2756](https://github.com/apache/camel-k/issues/2756)
+- Add 1.7.x documentation tag [\#2753](https://github.com/apache/camel-k/issues/2753)
+- Generated bundle created from `make bundle` contains separate service-account resource [\#2749](https://github.com/apache/camel-k/issues/2749)
+- Could not pull base image - Build kit failed \(No matching credentials were found, falling back on anonymous\) [\#2748](https://github.com/apache/camel-k/issues/2748)
+- Cannot deploy XML integration with undertow [\#2746](https://github.com/apache/camel-k/issues/2746)
+- Release 1.7.0 [\#2743](https://github.com/apache/camel-k/issues/2743)
+- \[E2E\] Reconciliation duration metric failure [\#2742](https://github.com/apache/camel-k/issues/2742)
+- Camel K SEDA Queue full Issue [\#2725](https://github.com/apache/camel-k/issues/2725)
+- How to set map properties in the kamelet parameters via the yaml definition? [\#2608](https://github.com/apache/camel-k/issues/2608)
+- Provide a way to specify exclusions for a dependency [\#2598](https://github.com/apache/camel-k/issues/2598)
+- Google storage component doesn't work [\#2576](https://github.com/apache/camel-k/issues/2576)
+- topicName [\#2567](https://github.com/apache/camel-k/issues/2567)
+- Kamelet: default KameletBindings configuration settings [\#2558](https://github.com/apache/camel-k/issues/2558)
+- Trying to run Sample.java in Kind cluster [\#2542](https://github.com/apache/camel-k/issues/2542)
+- Multiple of the examples fail on Minikube [\#2537](https://github.com/apache/camel-k/issues/2537)
+- Camel-K - uninstall and namespace deletion w/ k8s let all Camel-K Integrations in this namespace alive [\#2533](https://github.com/apache/camel-k/issues/2533)
+- insecure=true does not work with base image [\#2531](https://github.com/apache/camel-k/issues/2531)
+- Install Error [\#2498](https://github.com/apache/camel-k/issues/2498)
+- Make sure Camel K runs on Microshift [\#2473](https://github.com/apache/camel-k/issues/2473)
+- If the pod is in CrashLoopBackOff, the phase is reported as Running [\#2445](https://github.com/apache/camel-k/issues/2445)
+- \[Trait\] Configuration refactoring [\#2320](https://github.com/apache/camel-k/issues/2320)
+- Wait for dependencies  [\#2151](https://github.com/apache/camel-k/issues/2151)
+- Secret type not supported with buildah on K3S [\#2136](https://github.com/apache/camel-k/issues/2136)
+- Camel K doesn't automatically create an endpoint to view the Openapi doc that it was built with. [\#2135](https://github.com/apache/camel-k/issues/2135)
+- Ability to pre-build integrations [\#2129](https://github.com/apache/camel-k/issues/2129)
+- Kamelet using Java DSL [\#2117](https://github.com/apache/camel-k/issues/2117)
+- Add sample using Flink [\#2116](https://github.com/apache/camel-k/issues/2116)
+- OLM installation may fail with default values [\#2113](https://github.com/apache/camel-k/issues/2113)
+- Runtime reload configmap/secret when they change [\#2106](https://github.com/apache/camel-k/issues/2106)
+- Kamelet - Possible to pre configure component options [\#2081](https://github.com/apache/camel-k/issues/2081)
+- Monitor integration related events [\#2025](https://github.com/apache/camel-k/issues/2025)
+- Switch to UBI minimal  [\#2007](https://github.com/apache/camel-k/issues/2007)
+- AMQP connection factory injection example improvement [\#1961](https://github.com/apache/camel-k/issues/1961)
+- Option to declare capabilities an integration requires [\#1948](https://github.com/apache/camel-k/issues/1948)
+- Expose operator information [\#1947](https://github.com/apache/camel-k/issues/1947)
+- not able to use json: MethodNotFoundException [\#1915](https://github.com/apache/camel-k/issues/1915)
+- hotrod-client.properties not picked up [\#1898](https://github.com/apache/camel-k/issues/1898)
+- Using -SNAPSHOT prevents rebuilding past commits [\#1878](https://github.com/apache/camel-k/issues/1878)
+- './kamel run xxx' and 'make test-integration' pod failures on Ubuntu 16.04 \(with minikube\) [\#1869](https://github.com/apache/camel-k/issues/1869)
+- GitHub Packages registry cannot be used as expected [\#1860](https://github.com/apache/camel-k/issues/1860)
+- Camel sslContextParameter not working [\#1815](https://github.com/apache/camel-k/issues/1815)
+- Document Jitpack usage [\#1789](https://github.com/apache/camel-k/issues/1789)
+- Global operator mode on Minikube not working [\#1766](https://github.com/apache/camel-k/issues/1766)
+- Consider listing operator in Artifact Hub [\#1732](https://github.com/apache/camel-k/issues/1732)
+- can't run hello.java,maybe somethings wrong with registry [\#1699](https://github.com/apache/camel-k/issues/1699)
+- Support for Camel Kafka Connector [\#1682](https://github.com/apache/camel-k/issues/1682)
+- Workaround for knative-source loader does not exists any more? [\#1666](https://github.com/apache/camel-k/issues/1666)
+- IntegrationKit stuck in 'Build Submitted' phase due to validation error 'type in spec.tasks.image.volumes.secret is required' on GKE [\#1663](https://github.com/apache/camel-k/issues/1663)
+- Unable to install camel-k with Google Kubernetes Engine [\#1661](https://github.com/apache/camel-k/issues/1661)
+- Regression on CLI 1.0.0 injecting routes file? [\#1651](https://github.com/apache/camel-k/issues/1651)
+- Add the option to deploy a CamelSource Integration from the CLI [\#1650](https://github.com/apache/camel-k/issues/1650)
+- Kaniko produces " UNAUTHORIZED: authentication required" error when building an integration route with Dockerhub [\#1572](https://github.com/apache/camel-k/issues/1572)
+- Buildah produces "stderr: permission denied" when building an integration route with Dockerhub  [\#1571](https://github.com/apache/camel-k/issues/1571)
+- Running in Azure AKS with ACR Registry [\#1566](https://github.com/apache/camel-k/issues/1566)
+- Kamel run issue [\#1551](https://github.com/apache/camel-k/issues/1551)
+- Kamel 1.0 fails on install on mac [\#1543](https://github.com/apache/camel-k/issues/1543)
+- kamel run that can auto discover/guess what to include and run [\#1409](https://github.com/apache/camel-k/issues/1409)
+- Honor cluster PROXY settings [\#1402](https://github.com/apache/camel-k/issues/1402)
+- Configurable maven options [\#1332](https://github.com/apache/camel-k/issues/1332)
+- traits: support capabilities [\#1331](https://github.com/apache/camel-k/issues/1331)
+- Cannot append/override stored properties [\#1323](https://github.com/apache/camel-k/issues/1323)
+- CLI log could use some kind of feedback when waiting for pod to spin up [\#1283](https://github.com/apache/camel-k/issues/1283)
+- Kaniko in builder pod failed to push image to docker registry [\#1282](https://github.com/apache/camel-k/issues/1282)
+- Add a trait\(?\) to enable default REST DSL endpoint [\#1239](https://github.com/apache/camel-k/issues/1239)
+- Camel-K Doesn't Create a Service or Ingress for an Integration [\#1232](https://github.com/apache/camel-k/issues/1232)
+- Performance and Architectural Questions On Camel-K [\#1196](https://github.com/apache/camel-k/issues/1196)
+- Transactions with Camel K [\#1128](https://github.com/apache/camel-k/issues/1128)
+- Investigate integration with Keda [\#1107](https://github.com/apache/camel-k/issues/1107)
+- Camel K Operator don't ignore commented endpoint in the JAVA DSL source [\#1057](https://github.com/apache/camel-k/issues/1057)
+- Kamel cli should send exit code when integration in --dev mode is deleted [\#938](https://github.com/apache/camel-k/issues/938)
+- Kafka example not building on OpenShit v4.? - latest crc version on Mac [\#918](https://github.com/apache/camel-k/issues/918)
+- Documenting expected behavior with certain potential collisions [\#870](https://github.com/apache/camel-k/issues/870)
+- no matches for kind "BuildConfig" in version "build.openshift.io/v1" [\#739](https://github.com/apache/camel-k/issues/739)
+- Add camel-k-runtime to the root readme [\#630](https://github.com/apache/camel-k/issues/630)
+- support versions like 2.21.0.tag-730075-anothertag-00002 in version matching [\#617](https://github.com/apache/camel-k/issues/617)
+- Camel K with Java routes without public class and imports ... [\#605](https://github.com/apache/camel-k/issues/605)
+
+## [v1.7.0](https://github.com/apache/camel-k/tree/v1.7.0) (2021-11-10)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.7.0...v1.7.0)
+
+## [pkg/kamelet/repository/v1.7.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.7.0) (2021-11-10)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.7.0...pkg/kamelet/repository/v1.7.0)
+
+## [pkg/apis/camel/v1.7.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.7.0) (2021-11-10)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.7.0...pkg/apis/camel/v1.7.0)
+
+## [pkg/client/camel/v1.7.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.7.0) (2021-11-10)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.6.1...pkg/client/camel/v1.7.0)
+
+**Closed issues:**
+
+- 02-serverless-api example fails in the camel-k-examples repo \(same as \#2400\) [\#2738](https://github.com/apache/camel-k/issues/2738)
+- ErrorHandler for stopping a route when an error occurs [\#2724](https://github.com/apache/camel-k/issues/2724)
+- Release 1.6.1 [\#2713](https://github.com/apache/camel-k/issues/2713)
+- Building with buildah not working [\#2685](https://github.com/apache/camel-k/issues/2685)
+- Flaky TestKameletBindingScale test? [\#2660](https://github.com/apache/camel-k/issues/2660)
+- CloudEvent header mapping is confusing [\#2501](https://github.com/apache/camel-k/issues/2501)
+- Revisit saga example [\#2472](https://github.com/apache/camel-k/issues/2472)
+- kamel run command creates 2 pods [\#2469](https://github.com/apache/camel-k/issues/2469)
+- Trying to use bean method call \#class:com.mongodb.client.MongoClients\#create\("mongodb://foo"\) throws ClassNotFoundException [\#2444](https://github.com/apache/camel-k/issues/2444)
+- kamelet binding: support for openapi ? [\#2409](https://github.com/apache/camel-k/issues/2409)
+- kamel uninstall should uninstall everything by default [\#2405](https://github.com/apache/camel-k/issues/2405)
+- `kamel run --maven-repository` doesn't work when we have `@mirrorOf=*` at `kamel install` [\#2391](https://github.com/apache/camel-k/issues/2391)
+- kamel subcommand for kamelet bindings? [\#2363](https://github.com/apache/camel-k/issues/2363)
+- build: install required binaries in a temporary subdirectory of the project [\#2335](https://github.com/apache/camel-k/issues/2335)
+- build: update to latest golangci-lint [\#2333](https://github.com/apache/camel-k/issues/2333)
+- "cannot find symbol" issue in camel-k releases v1.4.0 [\#2317](https://github.com/apache/camel-k/issues/2317)
+- Leverage KinD multi-nodes cluster setup for CI [\#2302](https://github.com/apache/camel-k/issues/2302)
+- Docs validation CI workflow [\#2278](https://github.com/apache/camel-k/issues/2278)
+- Kamel reset fails with KameletBinding [\#2221](https://github.com/apache/camel-k/issues/2221)
+- Use environment independent `operator-sdk` CLI version [\#2167](https://github.com/apache/camel-k/issues/2167)
+- Extend config docs to reflect all possibilities coming from camel [\#2153](https://github.com/apache/camel-k/issues/2153)
+- Separate readiness and liveness probe [\#1610](https://github.com/apache/camel-k/issues/1610)
+
+## [pkg/kamelet/repository/v1.6.1](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.6.1) (2021-10-23)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.6.1...pkg/kamelet/repository/v1.6.1)
+
+## [pkg/client/camel/v1.6.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.6.1) (2021-10-23)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.6.1...pkg/client/camel/v1.6.1)
+
+## [v1.6.1](https://github.com/apache/camel-k/tree/v1.6.1) (2021-10-23)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.6.1...v1.6.1)
+
+## [pkg/apis/camel/v1.6.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.6.1) (2021-10-23)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.6.0...pkg/apis/camel/v1.6.1)
+
+**Closed issues:**
+
+- kamel install: cannot find k8s-certificates [\#2702](https://github.com/apache/camel-k/issues/2702)
+- Stale bot action failing [\#2698](https://github.com/apache/camel-k/issues/2698)
+- panic: runtime error: invalid memory address or nil pointer dereference when running a simple integration [\#2697](https://github.com/apache/camel-k/issues/2697)
+- Enable secondary integration platforms [\#2687](https://github.com/apache/camel-k/issues/2687)
+- Error: Object 'Kind' is missing in 'null' [\#2674](https://github.com/apache/camel-k/issues/2674)
+- Provide automatic PR creation to update "peripheral" go dependencies [\#2663](https://github.com/apache/camel-k/issues/2663)
+- Alow fixed custom labels in any pod [\#2642](https://github.com/apache/camel-k/issues/2642)
+- Integration in error phase can't be scaled: why don't we just rebuild it? [\#2640](https://github.com/apache/camel-k/issues/2640)
+- kamelet binding: scaling to 0 and the to 1 not working when a container image is provided [\#2638](https://github.com/apache/camel-k/issues/2638)
+- Container trait documentation messed up [\#2626](https://github.com/apache/camel-k/issues/2626)
+- Bots to simplify project managment [\#2623](https://github.com/apache/camel-k/issues/2623)
+- Contribution missing in 1.6.0 release note [\#2621](https://github.com/apache/camel-k/issues/2621)
+- Kamelet add support for tolerations [\#2602](https://github.com/apache/camel-k/issues/2602)
+- Release 1.6.0 [\#2591](https://github.com/apache/camel-k/issues/2591)
+- Should we move to go 1.16 / 1.17 ? [\#2579](https://github.com/apache/camel-k/issues/2579)
+- Read certificates from secrets to setup TLS config for route trait [\#2574](https://github.com/apache/camel-k/issues/2574)
+- kamel bind does not support --connect for ServiceBinding [\#2566](https://github.com/apache/camel-k/issues/2566)
+- Investigate Camel K deployment on k3d [\#2518](https://github.com/apache/camel-k/issues/2518)
+- Issue when trying to configure env vars with annotations [\#2512](https://github.com/apache/camel-k/issues/2512)
+- kamel cli output redirection doesn't work for some commands [\#2495](https://github.com/apache/camel-k/issues/2495)
+- Cron Trait - Should use max idle seconds to auto terminate instead of max messages [\#2439](https://github.com/apache/camel-k/issues/2439)
+- install: optional registry [\#2358](https://github.com/apache/camel-k/issues/2358)
+- kamelet binding: make it possible to use normalized name  [\#2296](https://github.com/apache/camel-k/issues/2296)
+- \[Doc\] Add documentation for architecture [\#2273](https://github.com/apache/camel-k/issues/2273)
+- Provide kustomize installation configuration for install of camel-k [\#1979](https://github.com/apache/camel-k/issues/1979)
+- operator: option to limit CRs the operator should handle [\#1943](https://github.com/apache/camel-k/issues/1943)
+- Document, or provide examples for, TLS configuration on OpenShift [\#1033](https://github.com/apache/camel-k/issues/1033)
+- support for quarkus in native mode [\#991](https://github.com/apache/camel-k/issues/991)
+- Release yaml files for installation [\#550](https://github.com/apache/camel-k/issues/550)
+
+## [pkg/apis/camel/v1.6.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.6.0) (2021-09-03)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.6.0...pkg/apis/camel/v1.6.0)
+
+## [pkg/kamelet/repository/v1.6.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.6.0) (2021-09-03)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.6.0...pkg/kamelet/repository/v1.6.0)
+
+## [v1.6.0](https://github.com/apache/camel-k/tree/v1.6.0) (2021-09-03)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.6.0...v1.6.0)
+
+## [pkg/client/camel/v1.6.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.6.0) (2021-09-03)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.5.1...pkg/client/camel/v1.6.0)
+
+**Closed issues:**
+
+- Numeric values are not properly encoded in KameletBindings [\#2616](https://github.com/apache/camel-k/issues/2616)
+- How to define custom container specs ? [\#2606](https://github.com/apache/camel-k/issues/2606)
+- groupId is overriden by `camel-k-integration` using kafka consumer [\#2605](https://github.com/apache/camel-k/issues/2605)
+- Release 1.5.1 [\#2590](https://github.com/apache/camel-k/issues/2590)
+- jitpack dependency is not resolved [\#2589](https://github.com/apache/camel-k/issues/2589)
+- Upgrade Service Binding Operator to latest version [\#2553](https://github.com/apache/camel-k/issues/2553)
+- Evaluate/Cleanup logging trait dependency [\#2541](https://github.com/apache/camel-k/issues/2541)
+- kamelet binding : camel controller fail reconcile the kafka sink resource. [\#2528](https://github.com/apache/camel-k/issues/2528)
+- camel-k-integration override provided groupId name in Kafka component [\#2523](https://github.com/apache/camel-k/issues/2523)
+- DeadLetterURI Dependency autodiscover [\#2492](https://github.com/apache/camel-k/issues/2492)
+- kamel bind -o yaml creates wrong data [\#2480](https://github.com/apache/camel-k/issues/2480)
+- propagate labels to deployments and pods [\#2446](https://github.com/apache/camel-k/issues/2446)
+- Supporting Apache Camel 3.10 [\#2326](https://github.com/apache/camel-k/issues/2326)
+- No possibility to disable compression while executing `kamel run` [\#2227](https://github.com/apache/camel-k/issues/2227)
+- `extensions/v1beta1` Ingress is deprecated [\#2157](https://github.com/apache/camel-k/issues/2157)
+- Wiretap to Kamelet does not work in YAML [\#2139](https://github.com/apache/camel-k/issues/2139)
+- More information needed about dependency resolution [\#2085](https://github.com/apache/camel-k/issues/2085)
+
+## [v1.5.1](https://github.com/apache/camel-k/tree/v1.5.1) (2021-08-27)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.5.1...v1.5.1)
+
+## [pkg/client/camel/v1.5.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.5.1) (2021-08-27)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.5.1...pkg/client/camel/v1.5.1)
+
+## [pkg/kamelet/repository/v1.5.1](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.5.1) (2021-08-27)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.5.1...pkg/kamelet/repository/v1.5.1)
+
+## [pkg/apis/camel/v1.5.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.5.1) (2021-08-27)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.5.0...pkg/apis/camel/v1.5.1)
+
+**Closed issues:**
+
+- Upgrade to Jolokia 1.7.0 [\#2593](https://github.com/apache/camel-k/issues/2593)
+- Modeline, build-property not checking if option also provided by the user [\#2569](https://github.com/apache/camel-k/issues/2569)
+- Kamel bind produces incomplete yaml files with -o yaml [\#2565](https://github.com/apache/camel-k/issues/2565)
+- controller: panic on nil annotation [\#2556](https://github.com/apache/camel-k/issues/2556)
+- Remove "attributeRestrictions" from operator-role.yaml [\#2549](https://github.com/apache/camel-k/issues/2549)
+- trait logging.json: "false" does not have effect if the integration includes quarkus-logging-json [\#2539](https://github.com/apache/camel-k/issues/2539)
+- CLI parameter does not overwrite application.properties [\#2538](https://github.com/apache/camel-k/issues/2538)
+- Component: AtlasMap - NullPointerException [\#2534](https://github.com/apache/camel-k/issues/2534)
+- Error in OpenShift image-pull delegation on IBM Cloud [\#2530](https://github.com/apache/camel-k/issues/2530)
+- Runtime issue: cannot use KameletBinding error handler [\#2525](https://github.com/apache/camel-k/issues/2525)
+- KameletBinding error handler nil map [\#2524](https://github.com/apache/camel-k/issues/2524)
+- camel-k-client tar.gz changes the uid/gid of cwd [\#2514](https://github.com/apache/camel-k/issues/2514)
+- Liveness and Readiness Probes not Supported When Using HTTPS [\#2513](https://github.com/apache/camel-k/issues/2513)
+- container trait : add a flag to configure the image pull policy [\#2503](https://github.com/apache/camel-k/issues/2503)
+- \[Doc\] Feedback channels missing in contributing page [\#2502](https://github.com/apache/camel-k/issues/2502)
+- \[Doc\] Trait annotations [\#2500](https://github.com/apache/camel-k/issues/2500)
+- \[CMD\] `kamel bind --error-handler` feature [\#2494](https://github.com/apache/camel-k/issues/2494)
+- \[CMD\] `kamel bind` empty error handler [\#2493](https://github.com/apache/camel-k/issues/2493)
+- kamel reset should not fail for integration missing due to owning kameletbinding removed [\#2487](https://github.com/apache/camel-k/issues/2487)
+- kamelet binding: make it scalable ? [\#2486](https://github.com/apache/camel-k/issues/2486)
+- kamel 1.4.1 build failure [\#2484](https://github.com/apache/camel-k/issues/2484)
+- ServiceBinding CR sometimes doesn't get created [\#2482](https://github.com/apache/camel-k/issues/2482)
+- V1.5.0 release without assets [\#2481](https://github.com/apache/camel-k/issues/2481)
+- Kamel uninstall should delete kamelets [\#2479](https://github.com/apache/camel-k/issues/2479)
+- Release 1.4.1 [\#2471](https://github.com/apache/camel-k/issues/2471)
+- Release 1.5.0 [\#2470](https://github.com/apache/camel-k/issues/2470)
+- Duplicated trait set as modeline and kamel run parameters causes error [\#2466](https://github.com/apache/camel-k/issues/2466)
+- Update Camel K Serverless api examples to not use --property-file [\#2463](https://github.com/apache/camel-k/issues/2463)
+- Kamelets: configuration does not seem to cascade to the integration [\#2396](https://github.com/apache/camel-k/issues/2396)
+- kamel CLI binary for apple silicon / arm [\#2022](https://github.com/apache/camel-k/issues/2022)
 
 ## [pkg/client/camel/v1.5.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.5.0) (2021-07-05)
 
@@ -588,11 +2296,15 @@
 
 ## [pkg/kamelet/repository/v1.5.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.5.0) (2021-07-05)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.5.0...pkg/kamelet/repository/v1.5.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.5.0...pkg/kamelet/repository/v1.5.0)
+
+## [v1.5.0](https://github.com/apache/camel-k/tree/v1.5.0) (2021-07-05)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.5.0...v1.5.0)
 
 ## [pkg/apis/camel/v1.5.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.5.0) (2021-07-05)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.4.1...pkg/apis/camel/v1.5.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.4.1...pkg/apis/camel/v1.5.0)
 
 **Closed issues:**
 
@@ -600,21 +2312,21 @@
 - Oddity in channel name [\#2468](https://github.com/apache/camel-k/issues/2468)
 - No endpoint found for Smooks after explicitly adding dependency with kamel [\#2437](https://github.com/apache/camel-k/issues/2437)
 
-## [v1.4.1](https://github.com/apache/camel-k/tree/v1.4.1) (2021-06-30)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.4.1...v1.4.1)
-
 ## [pkg/apis/camel/v1.4.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.4.1) (2021-06-30)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.4.1...pkg/apis/camel/v1.4.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.4.1...pkg/apis/camel/v1.4.1)
 
-## [pkg/kamelet/repository/v1.4.1](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.4.1) (2021-06-30)
+## [v1.4.1](https://github.com/apache/camel-k/tree/v1.4.1) (2021-06-30)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.4.1...pkg/kamelet/repository/v1.4.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.4.1...v1.4.1)
 
 ## [pkg/client/camel/v1.4.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.4.1) (2021-06-30)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.4.0...pkg/client/camel/v1.4.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.4.1...pkg/client/camel/v1.4.1)
+
+## [pkg/kamelet/repository/v1.4.1](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.4.1) (2021-06-30)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.4.0...pkg/kamelet/repository/v1.4.1)
 
 **Closed issues:**
 
@@ -683,21 +2395,21 @@
 - Integration logging configuration [\#580](https://github.com/apache/camel-k/issues/580)
 - kamel run - compile errors should be more visible [\#185](https://github.com/apache/camel-k/issues/185)
 
-## [v1.4.0](https://github.com/apache/camel-k/tree/v1.4.0) (2021-04-16)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.4.0...v1.4.0)
-
 ## [pkg/client/camel/v1.4.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.4.0) (2021-04-16)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.4.0...pkg/client/camel/v1.4.0)
-
-## [pkg/kamelet/repository/v1.4.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.4.0) (2021-04-16)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.4.0...pkg/kamelet/repository/v1.4.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.4.0...pkg/client/camel/v1.4.0)
 
 ## [pkg/apis/camel/v1.4.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.4.0) (2021-04-16)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.3.2...pkg/apis/camel/v1.4.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.4.0...pkg/apis/camel/v1.4.0)
+
+## [v1.4.0](https://github.com/apache/camel-k/tree/v1.4.0) (2021-04-16)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.4.0...v1.4.0)
+
+## [pkg/kamelet/repository/v1.4.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.4.0) (2021-04-16)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.3.2...pkg/kamelet/repository/v1.4.0)
 
 **Closed issues:**
 
@@ -728,13 +2440,13 @@
 - Adding camel-jackson dependency creates issues with inner classes  [\#1507](https://github.com/apache/camel-k/issues/1507)
 - Adding a dump command [\#1415](https://github.com/apache/camel-k/issues/1415)
 
-## [pkg/kamelet/repository/v1.3.2](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.3.2) (2021-03-19)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.3.2...pkg/kamelet/repository/v1.3.2)
-
 ## [pkg/client/camel/v1.3.2](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.3.2) (2021-03-19)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.3.2...pkg/client/camel/v1.3.2)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.3.2...pkg/client/camel/v1.3.2)
+
+## [pkg/kamelet/repository/v1.3.2](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.3.2) (2021-03-19)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.3.2...pkg/kamelet/repository/v1.3.2)
 
 ## [v1.3.2](https://github.com/apache/camel-k/tree/v1.3.2) (2021-03-19)
 
@@ -742,7 +2454,7 @@
 
 ## [pkg/apis/camel/v1.3.2](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.3.2) (2021-03-19)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.3.1...pkg/apis/camel/v1.3.2)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.3.1...pkg/apis/camel/v1.3.2)
 
 **Closed issues:**
 
@@ -792,21 +2504,21 @@
 - Build controller service / operator [\#681](https://github.com/apache/camel-k/issues/681)
 - Add support for template endpoint [\#249](https://github.com/apache/camel-k/issues/249)
 
+## [pkg/apis/camel/v1.3.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.3.1) (2021-02-01)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.3.1...pkg/apis/camel/v1.3.1)
+
 ## [pkg/kamelet/repository/v1.3.1](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.3.1) (2021-02-01)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.3.1...pkg/kamelet/repository/v1.3.1)
-
-## [pkg/client/camel/v1.3.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.3.1) (2021-02-01)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.3.1...pkg/client/camel/v1.3.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.3.1...pkg/kamelet/repository/v1.3.1)
 
 ## [v1.3.1](https://github.com/apache/camel-k/tree/v1.3.1) (2021-02-01)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.3.1...v1.3.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.3.1...v1.3.1)
 
-## [pkg/apis/camel/v1.3.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.3.1) (2021-02-01)
+## [pkg/client/camel/v1.3.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.3.1) (2021-02-01)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.3.0...pkg/apis/camel/v1.3.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.3.0...pkg/client/camel/v1.3.1)
 
 **Closed issues:**
 
@@ -841,21 +2553,21 @@
 - Implement builder command's flags test [\#1156](https://github.com/apache/camel-k/issues/1156)
 - kamel --output option should not need deploy resources to cluster [\#886](https://github.com/apache/camel-k/issues/886)
 
-## [pkg/kamelet/repository/v1.3.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.3.0) (2020-12-22)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.3.0...pkg/kamelet/repository/v1.3.0)
-
 ## [pkg/client/camel/v1.3.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.3.0) (2020-12-22)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.3.0...pkg/client/camel/v1.3.0)
 
 ## [pkg/apis/camel/v1.3.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.3.0) (2020-12-22)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.3.0...pkg/apis/camel/v1.3.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.3.0...pkg/apis/camel/v1.3.0)
+
+## [pkg/kamelet/repository/v1.3.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.3.0) (2020-12-22)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.3.0...pkg/kamelet/repository/v1.3.0)
 
 ## [v1.3.0](https://github.com/apache/camel-k/tree/v1.3.0) (2020-12-22)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.2.1...v1.3.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.2.1...v1.3.0)
 
 **Closed issues:**
 
@@ -873,17 +2585,17 @@
 - Document the --config option in the kamel CLI [\#1185](https://github.com/apache/camel-k/issues/1185)
 - Basic module structure for Camel K projects [\#1135](https://github.com/apache/camel-k/issues/1135)
 
+## [pkg/client/camel/v1.2.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.2.1) (2020-11-23)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.2.1...pkg/client/camel/v1.2.1)
+
 ## [pkg/apis/camel/v1.2.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.2.1) (2020-11-23)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v1.2.1...pkg/apis/camel/v1.2.1)
 
 ## [v1.2.1](https://github.com/apache/camel-k/tree/v1.2.1) (2020-11-23)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.2.1...v1.2.1)
-
-## [pkg/client/camel/v1.2.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.2.1) (2020-11-23)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.2.0...pkg/client/camel/v1.2.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.2.0...v1.2.1)
 
 **Closed issues:**
 
@@ -912,17 +2624,17 @@
 - Make sure global and local operators can cohexist [\#751](https://github.com/apache/camel-k/issues/751)
 - Document architecture [\#36](https://github.com/apache/camel-k/issues/36)
 
-## [pkg/apis/camel/v1.2.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.2.0) (2020-10-08)
+## [v1.2.0](https://github.com/apache/camel-k/tree/v1.2.0) (2020-10-08)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.2.0...pkg/apis/camel/v1.2.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.2.0...v1.2.0)
 
 ## [pkg/client/camel/v1.2.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.2.0) (2020-10-08)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.2.0...pkg/client/camel/v1.2.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.2.0...pkg/client/camel/v1.2.0)
 
-## [v1.2.0](https://github.com/apache/camel-k/tree/v1.2.0) (2020-10-08)
+## [pkg/apis/camel/v1.2.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.2.0) (2020-10-08)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.1.1...v1.2.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.1.1...pkg/apis/camel/v1.2.0)
 
 **Closed issues:**
 
@@ -950,15 +2662,15 @@
 
 ## [pkg/client/camel/v1.1.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.1.1) (2020-09-11)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.1.1...pkg/client/camel/v1.1.1)
-
-## [v1.1.1](https://github.com/apache/camel-k/tree/v1.1.1) (2020-09-11)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.1.1...v1.1.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.1.1...pkg/client/camel/v1.1.1)
 
 ## [pkg/apis/camel/v1.1.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.1.1) (2020-09-11)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.1.0...pkg/apis/camel/v1.1.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.1.1...pkg/apis/camel/v1.1.1)
+
+## [v1.1.1](https://github.com/apache/camel-k/tree/v1.1.1) (2020-09-11)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.1.0...v1.1.1)
 
 **Closed issues:**
 
@@ -981,17 +2693,17 @@
 - PublishStrategy missing from IntegrationPlatform build spec [\#1370](https://github.com/apache/camel-k/issues/1370)
 - kamel install not working - Error: cannot find automatically a registry where to push images [\#674](https://github.com/apache/camel-k/issues/674)
 
+## [pkg/client/camel/v1.1.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.1.0) (2020-07-21)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.1.0...pkg/client/camel/v1.1.0)
+
 ## [v1.1.0](https://github.com/apache/camel-k/tree/v1.1.0) (2020-07-21)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.1.0...v1.1.0)
 
 ## [pkg/apis/camel/v1.1.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.1.0) (2020-07-21)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.1.0...pkg/apis/camel/v1.1.0)
-
-## [pkg/client/camel/v1.1.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.1.0) (2020-07-21)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/1.0.1...pkg/client/camel/v1.1.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/1.0.1...pkg/apis/camel/v1.1.0)
 
 **Closed issues:**
 
@@ -1050,7 +2762,6 @@
 - one page of documentation to install Camel-K on Minikube is incorrect [\#798](https://github.com/apache/camel-k/issues/798)
 - Kamel run Sample.java --dev hanged with "Waiting for Platform". Error - Non-resolvable import POM [\#677](https://github.com/apache/camel-k/issues/677)
 - Sample does not work after change camel version [\#664](https://github.com/apache/camel-k/issues/664)
-- Cannot load Knative configuration from file or env variable [\#654](https://github.com/apache/camel-k/issues/654)
 - Release 1.0.1 [\#1565](https://github.com/apache/camel-k/issues/1565)
 - Cannot expose knative endpoints in YAML [\#1539](https://github.com/apache/camel-k/issues/1539)
 - kamel install uses the wrong channel in OLM [\#1524](https://github.com/apache/camel-k/issues/1524)

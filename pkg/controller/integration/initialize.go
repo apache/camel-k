@@ -30,7 +30,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
-// NewInitializeAction creates a new initialize action
+// NewInitializeAction creates a new initialize action.
 func NewInitializeAction() Action {
 	return &initializeAction{}
 }
@@ -39,36 +39,32 @@ type initializeAction struct {
 	baseAction
 }
 
-// Name returns a common name of the action
+// Name returns a common name of the action.
 func (action *initializeAction) Name() string {
 	return "initialize"
 }
 
-// CanHandle tells whether this action can handle the integration
+// CanHandle tells whether this action can handle the integration.
 func (action *initializeAction) CanHandle(integration *v1.Integration) bool {
 	return integration.Status.Phase == v1.IntegrationPhaseInitialization
 }
 
-// Handle handles the integrations
+// Handle handles the integrations.
 func (action *initializeAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	if _, err := trait.Apply(ctx, action.client, integration, nil); err != nil {
-		return nil, err
+		integration.Status.Phase = v1.IntegrationPhaseError
+		integration.SetReadyCondition(corev1.ConditionFalse,
+			v1.IntegrationConditionInitializationFailedReason, err.Error())
+		return integration, err
 	}
 
 	if integration.Status.IntegrationKit == nil {
-		if integration.Spec.IntegrationKit == nil && integration.Spec.Kit != "" {
-			// TODO: temporary fallback until deprecated field gets removed
-			integration.Spec.IntegrationKit = &corev1.ObjectReference{
-				Name: integration.Spec.Kit,
-			}
-		}
-
 		if integration.Spec.IntegrationKit != nil && integration.Spec.IntegrationKit.Name != "" {
 			kitNamespace := integration.Spec.IntegrationKit.Namespace
 			kitName := integration.Spec.IntegrationKit.Name
 
 			if kitNamespace == "" {
-				pl, err := platform.GetCurrent(ctx, action.client, integration.Namespace)
+				pl, err := platform.GetForResource(ctx, action.client, integration)
 				if err != nil && !k8serrors.IsNotFound(err) {
 					return nil, err
 				}
@@ -77,7 +73,7 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 				}
 			}
 			kit := v1.NewIntegrationKit(kitNamespace, kitName)
-			integration.SetIntegrationKit(&kit)
+			integration.SetIntegrationKit(kit)
 		} else {
 			integration.Status.IntegrationKit = nil
 		}
@@ -86,7 +82,8 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 	integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 	integration.Status.Version = defaults.Version
 	if timestamp := integration.Status.InitializationTimestamp; timestamp == nil || timestamp.IsZero() {
-		now := metav1.Now()
+		// Round to second precision, as meta.Time fields are marshalled in RFC3339 format
+		now := metav1.Now().Rfc3339Copy()
 		integration.Status.InitializationTimestamp = &now
 	}
 

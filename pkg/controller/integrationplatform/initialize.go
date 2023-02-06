@@ -26,12 +26,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/client"
 	platformutil "github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
-// NewInitializeAction returns a action that initializes the platform configuration when not provided by the user
+// NewInitializeAction returns a action that initializes the platform configuration when not provided by the user.
 func NewInitializeAction() Action {
 	return &initializeAction{}
 }
@@ -49,7 +50,7 @@ func (action *initializeAction) CanHandle(platform *v1.IntegrationPlatform) bool
 }
 
 func (action *initializeAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
-	duplicate, err := action.isDuplicate(ctx, platform)
+	duplicate, err := action.isPrimaryDuplicate(ctx, platform)
 	if err != nil {
 		return nil, err
 	}
@@ -68,9 +69,9 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1.Integra
 	if err = platformutil.ConfigureDefaults(ctx, action.client, platform, true); err != nil {
 		return nil, err
 	}
-
 	if platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko {
-		if platform.Status.Build.IsKanikoCacheEnabled() {
+		cacheEnabled := platform.Status.Build.IsOptionEnabled(builder.KanikoBuildCacheEnabled)
+		if cacheEnabled {
 			// Create the persistent volume claim used by the Kaniko cache
 			action.L.Info("Create persistent volume claim")
 			err := createPersistentVolumeClaim(ctx, action.client, platform)
@@ -96,8 +97,12 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1.Integra
 	return platform, nil
 }
 
-func (action *initializeAction) isDuplicate(ctx context.Context, thisPlatform *v1.IntegrationPlatform) (bool, error) {
-	platforms, err := platformutil.ListPlatforms(ctx, action.client, thisPlatform.Namespace)
+func (action *initializeAction) isPrimaryDuplicate(ctx context.Context, thisPlatform *v1.IntegrationPlatform) (bool, error) {
+	if platformutil.IsSecondary(thisPlatform) {
+		// Always reconcile secondary platforms
+		return false, nil
+	}
+	platforms, err := platformutil.ListPrimaryPlatforms(ctx, action.client, thisPlatform.Namespace)
 	if err != nil {
 		return false, err
 	}
@@ -116,7 +121,7 @@ func createPersistentVolumeClaim(ctx context.Context, client client.Client, plat
 	if err != nil {
 		return err
 	}
-
+	pvcName := platform.Status.Build.PublishStrategyOptions[builder.KanikoPVCName]
 	pvc := &corev1.PersistentVolumeClaim{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -124,7 +129,7 @@ func createPersistentVolumeClaim(ctx context.Context, client client.Client, plat
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: platform.Namespace,
-			Name:      platform.Status.Build.PersistentVolumeClaim,
+			Name:      pvcName,
 			Labels: map[string]string{
 				"app": "camel-k",
 			},

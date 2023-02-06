@@ -1,0 +1,94 @@
+= File Based Configuration
+
+File-based configuration is used to set command flags. Flag values do not need to be entered on a regular basis. The file is read on Kamel startup and the flags are set accordingly.
+
+The file's default name is `kamel-config.yaml`, it can be changed by setting the environment variable `KAMEL_CONFIG_NAME`. Kamel tries to read the file from the following directories in the given order:
+
+ - `.`
+ - `./.kamel/`
+ - `~/.kamel/`
+
+It can be overridden by setting the environment variable `KAMEL_CONFIG_PATH` to file path.
+
+
+To configure this flag, create a file named `kamel-config.yaml` on the same directory as your integration. The file must contain a yaml structure as shown below:
+
+.kamel-config.yaml
+
+```yaml
+kamel:
+    install:
+        health-port: 8081
+        monitoring-port: 8082
+```
+
+As there are several supported locations, it can be handy to list a configuration file in one specific location, in this particular case the `config` command can be used.
+
+To list the configuration file used in practice by Kamel:
+
+[source,console]
+----
+$ kamel config --list
+The configuration file is read from /some/path/kamel-config.yaml
+kamel:
+  config:
+    default-namespace: some-name
+----
+
+Alternatively, the same result can be retrieved using the `--folder` flag with `used` as value.
+
+[source,console]
+----
+$ kamel config --list --folder used
+----
+
+The flag `--folder` accepts 4 other possible values, one per possible location.
+
+To list the configuration file in the working directory (`.`):
+
+[source,console]
+----
+$ kamel config --list --folder working
+----
+
+To list the configuration file in the folder `.kamel` located in the working directory (`./.kamel/`):
+
+[source,console]
+----
+$ kamel config --list --folder sub
+----
+
+To list the configuration file in the home directory (`~/.kamel/`):
+
+[source,console]
+----
+$ kamel config --list --folder home
+----
+
+To list the configuration file located in the folder whose path is set in the environment variable `KAMEL_CONFIG_PATH`:
+
+[source,console]
+----
+$ kamel config --list --folder env
+----
+
+The `config` command can also set the default namespace for all Kamel commands thanks to the flag `--default-namespace` as next:
+
+[source,console]
+----
+$ kamel config --default-namespace some-name
+----
+
+Note that the flag `--default-namespace` can be associated with `--list` to see directly the resulting content:
+
+[source,console]
+----
+$ kamel config --list --default-namespace some-name
+The configuration file is read from /some/path/kamel-config.yaml
+kamel:
+  config:
+    default-namespace: some-name
+  install:
+    health-port: 8081
+    monitoring-port: 8082
+----

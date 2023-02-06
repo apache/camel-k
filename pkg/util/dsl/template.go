@@ -23,30 +23,30 @@ import (
 
 	yaml2 "gopkg.in/yaml.v2"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 )
 
-// TemplateToYamlDSL converts a kamelet template into its Camel YAML DSL equivalent
+// TemplateToYamlDSL converts a kamelet template into its Camel YAML DSL equivalent.
 func TemplateToYamlDSL(template v1.Template, id string) ([]byte, error) {
 	data, err := json.Marshal(&template)
 	if err != nil {
 		return nil, err
 	}
-	jsondata := make(map[string]interface{}, 0)
+	jsondata := make(map[string]interface{})
 	err = json.Unmarshal(data, &jsondata)
 	if err != nil {
-		return nil, fmt.Errorf("error unmarshalling json: %v", err)
+		return nil, fmt.Errorf("error unmarshalling json: %w", err)
 	}
 	if _, present := jsondata["id"]; !present {
 		jsondata["id"] = id
 	}
 	templateWrapper := make(map[string]interface{}, 2)
-	templateWrapper["template"] = jsondata
+	templateWrapper["routeTemplate"] = jsondata
 	listWrapper := make([]interface{}, 0, 1)
 	listWrapper = append(listWrapper, templateWrapper)
 	yamldata, err := yaml2.Marshal(listWrapper)
 	if err != nil {
-		return nil, fmt.Errorf("error marshalling to yaml: %v", err)
+		return nil, fmt.Errorf("error marshalling to yaml: %w", err)
 	}
 
 	return yamldata, nil

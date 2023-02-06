@@ -37,31 +37,14 @@ func (i KotlinInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 		doubleQuotedTo,
 		doubleQuotedToD,
 		doubleQuotedToF,
+		doubleQuotedWireTap,
 	)
-
-	meta.FromURIs = append(meta.FromURIs, from...)
-	meta.ToURIs = append(meta.ToURIs, to...)
-
 	kameletEips := util.FindAllDistinctStringSubmatch(
 		source.Content,
 		singleQuotedKameletEip,
 		doubleQuotedKameletEip)
 
-	for _, k := range kameletEips {
-		AddKamelet(meta, "kamelet:"+k)
-	}
-
-	i.discoverCapabilities(source, meta)
-	i.discoverDependencies(source, meta)
-	i.discoverKamelets(source, meta)
-
 	hasRest := restRegexp.MatchString(source.Content) || restClosureRegexp.MatchString(source.Content)
-	if hasRest {
-		meta.RequiredCapabilities.Add(v1.CapabilityRest)
-	}
 
-	meta.ExposesHTTPServices = hasRest || i.containsHTTPURIs(meta.FromURIs)
-	meta.PassiveEndpoints = i.hasOnlyPassiveEndpoints(meta.FromURIs)
-
-	return nil
+	return i.extract(source, meta, from, to, kameletEips, hasRest)
 }

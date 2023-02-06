@@ -25,53 +25,40 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 )
 
-// Allows constraining which nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node,
-// or with inter-pod affinity and anti-affinity, based on labels on pods that are already running on the nodes.
-//
-// It's disabled by default.
-//
-// +camel-k:trait=affinity
 type affinityTrait struct {
-	BaseTrait `property:",squash"`
-	// Always co-locates multiple replicas of the integration in the same node (default *false*).
-	PodAffinity *bool `property:"pod-affinity" json:"podAffinity,omitempty"`
-	// Never co-locates multiple replicas of the integration in the same node (default *false*).
-	PodAntiAffinity *bool `property:"pod-anti-affinity" json:"podAntiAffinity,omitempty"`
-	// Defines a set of nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node.
-	NodeAffinityLabels []string `property:"node-affinity-labels" json:"nodeAffinityLabels,omitempty"`
-	// Defines a set of pods (namely those matching the label selector, relative to the given namespace) that the
-	// integration pod(s) should be co-located with.
-	PodAffinityLabels []string `property:"pod-affinity-labels" json:"podAffinityLabels,omitempty"`
-	// Defines a set of pods (namely those matching the label selector, relative to the given namespace) that the
-	// integration pod(s) should not be co-located with.
-	PodAntiAffinityLabels []string `property:"pod-anti-affinity-labels" json:"podAntiAffinityLabels,omitempty"`
+	BaseTrait
+	traitv1.AffinityTrait `property:",squash"`
 }
 
 func newAffinityTrait() Trait {
 	return &affinityTrait{
-		BaseTrait:       NewBaseTrait("affinity", 1300),
-		PodAffinity:     BoolP(false),
-		PodAntiAffinity: BoolP(false),
+		BaseTrait: NewBaseTrait("affinity", 1500),
+		AffinityTrait: traitv1.AffinityTrait{
+			PodAffinity:     pointer.Bool(false),
+			PodAntiAffinity: pointer.Bool(false),
+		},
 	}
 }
 
 func (t *affinityTrait) Configure(e *Environment) (bool, error) {
-	if IsNilOrFalse(t.Enabled) {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
 		return false, nil
 	}
 
-	if IsTrue(t.PodAffinity) && IsTrue(t.PodAntiAffinity) {
+	if pointer.BoolDeref(t.PodAffinity, false) && pointer.BoolDeref(t.PodAntiAffinity, false) {
 		return false, fmt.Errorf("both pod affinity and pod anti-affinity can't be set simultaneously")
 	}
 
-	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
+	return e.IntegrationInRunningPhases(), nil
 }
 
-func (t *affinityTrait) Apply(e *Environment) (err error) {
+func (t *affinityTrait) Apply(e *Environment) error {
 	podSpec := e.GetIntegrationPodSpec()
 
 	if podSpec == nil {
@@ -131,7 +118,7 @@ func (t *affinityTrait) addNodeAffinity(_ *Environment, podSpec *corev1.PodSpec)
 }
 
 func (t *affinityTrait) addPodAffinity(e *Environment, podSpec *corev1.PodSpec) error {
-	if IsNilOrFalse(t.PodAffinity) && len(t.PodAffinityLabels) == 0 {
+	if !pointer.BoolDeref(t.PodAffinity, false) && len(t.PodAffinityLabels) == 0 {
 		return nil
 	}
 
@@ -156,7 +143,7 @@ func (t *affinityTrait) addPodAffinity(e *Environment, podSpec *corev1.PodSpec) 
 		}
 	}
 
-	if IsTrue(t.PodAffinity) {
+	if pointer.BoolDeref(t.PodAffinity, false) {
 		labelSelectorRequirements = append(labelSelectorRequirements, metav1.LabelSelectorRequirement{
 			Key:      v1.IntegrationLabel,
 			Operator: metav1.LabelSelectorOpIn,
@@ -182,7 +169,7 @@ func (t *affinityTrait) addPodAffinity(e *Environment, podSpec *corev1.PodSpec) 
 }
 
 func (t *affinityTrait) addPodAntiAffinity(e *Environment, podSpec *corev1.PodSpec) error {
-	if IsNilOrFalse(t.PodAntiAffinity) && len(t.PodAntiAffinityLabels) == 0 {
+	if !pointer.BoolDeref(t.PodAntiAffinity, false) && len(t.PodAntiAffinityLabels) == 0 {
 		return nil
 	}
 
@@ -207,7 +194,7 @@ func (t *affinityTrait) addPodAntiAffinity(e *Environment, podSpec *corev1.PodSp
 		}
 	}
 
-	if IsTrue(t.PodAntiAffinity) {
+	if pointer.BoolDeref(t.PodAntiAffinity, false) {
 		labelSelectorRequirements = append(labelSelectorRequirements, metav1.LabelSelectorRequirement{
 			Key:      v1.IntegrationLabel,
 			Operator: metav1.LabelSelectorOpIn,

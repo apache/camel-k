@@ -19,10 +19,11 @@ package build
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 	"sync"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,6 +34,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/builder"
 	"github.com/apache/camel-k/pkg/event"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/patch"
 )
 
@@ -46,17 +48,17 @@ type monitorRoutineAction struct {
 	baseAction
 }
 
-// Name returns a common name of the action
+// Name returns a common name of the action.
 func (action *monitorRoutineAction) Name() string {
 	return "monitor-routine"
 }
 
-// CanHandle tells whether this action can handle the build
+// CanHandle tells whether this action can handle the build.
 func (action *monitorRoutineAction) CanHandle(build *v1.Build) bool {
 	return build.Status.Phase == v1.BuildPhasePending || build.Status.Phase == v1.BuildPhaseRunning
 }
 
-// Handle handles the builds
+// Handle handles the builds.
 func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
 	switch build.Status.Phase {
 
@@ -74,7 +76,8 @@ func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1.Build)
 		}
 		// Start the build asynchronously to avoid blocking the reconciliation loop
 		routines.Store(build.Name, true)
-		go action.runBuild(build)
+
+		go action.runBuild(ctx, build)
 
 	case v1.BuildPhaseRunning:
 		if _, ok := routines.Load(build.Name); !ok {
@@ -89,10 +92,9 @@ func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1.Build)
 	return nil, nil
 }
 
-func (action *monitorRoutineAction) runBuild(build *v1.Build) {
+func (action *monitorRoutineAction) runBuild(ctx context.Context, build *v1.Build) {
 	defer routines.Delete(build.Name)
 
-	ctx := context.Background()
 	ctxWithTimeout, cancel := context.WithDeadline(ctx, build.Status.StartedAt.Add(build.Spec.Timeout.Duration))
 	defer cancel()
 
@@ -104,7 +106,7 @@ tasks:
 	for i, task := range build.Spec.Tasks {
 		select {
 		case <-ctxWithTimeout.Done():
-			if ctxWithTimeout.Err() == context.Canceled {
+			if errors.Is(ctxWithTimeout.Err(), context.Canceled) {
 				// Context canceled
 				status.Phase = v1.BuildPhaseInterrupted
 			} else {
@@ -112,6 +114,7 @@ tasks:
 				status.Phase = v1.BuildPhaseFailed
 			}
 			status.Error = ctxWithTimeout.Err().Error()
+
 			break tasks
 
 		default:
@@ -121,6 +124,7 @@ tasks:
 					tmpDir, err := ioutil.TempDir(os.TempDir(), build.Name+"-")
 					if err != nil {
 						status.Failed(err)
+
 						break tasks
 					}
 					t.BuildDir = tmpDir
@@ -133,13 +137,13 @@ tasks:
 					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
 					break tasks
 				}
-				t.ContextDir = path.Join(buildDir, builder.ContextDir)
+				t.ContextDir = filepath.Join(buildDir, builder.ContextDir)
 			} else if t := task.S2i; t != nil && t.ContextDir == "" {
 				if buildDir == "" {
 					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
 					break tasks
 				}
-				t.ContextDir = path.Join(buildDir, builder.ContextDir)
+				t.ContextDir = filepath.Join(buildDir, builder.ContextDir)
 			}
 
 			// Execute the task
@@ -169,8 +173,10 @@ tasks:
 
 	duration := metav1.Now().Sub(build.Status.StartedAt.Time)
 	status.Duration = duration.String()
+
+	buildCreator := kubernetes.GetCamelCreator(build)
 	// Account for the Build metrics
-	observeBuildResult(build, status.Phase, duration)
+	observeBuildResult(build, status.Phase, buildCreator, duration)
 
 	_ = action.updateBuildStatus(ctx, build, status)
 }
@@ -181,7 +187,7 @@ func (action *monitorRoutineAction) updateBuildStatus(ctx context.Context, build
 	// Copy the failure field from the build to persist recovery state
 	target.Status.Failure = build.Status.Failure
 	// Patch the build status with the result
-	p, err := patch.PositiveMergePatch(build, target)
+	p, err := patch.MergePatch(build, target)
 	if err != nil {
 		action.L.Errorf(err, "Cannot patch build status: %s", build.Name)
 		event.NotifyBuildError(ctx, action.client, action.recorder, build, target, err)

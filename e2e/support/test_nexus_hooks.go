@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
@@ -26,6 +27,7 @@ import (
 	"os"
 
 	corev1 "k8s.io/api/core/v1"
+
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 

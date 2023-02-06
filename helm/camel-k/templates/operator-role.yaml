@@ -15,6 +15,7 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
+{{- if eq .Values.operator.global "false" }}
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -26,9 +27,42 @@ rules:
 - apiGroups:
   - camel.apache.org
   resources:
-  - "*"
+  - builds
+  - camelcatalogs
+  - integrationkits
+  - integrationplatforms
+  - integrations
+  - kameletbindings
+  - kamelets
   verbs:
-  - "*"
+  - create
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - builds
+  verbs:
+  - delete
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - builds/status
+  - camelcatalogs/status
+  - integrationkits/status
+  - integrationplatforms/status
+  - integrations/scale
+  - integrations/status
+  - kameletbindings/status
+  - kameletbindings/scale
+  - kamelets/status
+  verbs:
+  - get
+  - patch
+  - update
 - apiGroups:
   - ""
   resources:
@@ -54,6 +88,12 @@ rules:
   - pods/exec
   verbs:
   - create
+- apiGroups:
+  - ""
+  resources:
+  - pods/proxy
+  verbs:
+  - get
 - apiGroups:
   - policy
   resources:
@@ -81,21 +121,9 @@ rules:
   - update
   - watch
 - apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
-  - get
-  - list
-  - watch
-- apiGroups:
   - apps
   resources:
   - deployments
-  - replicasets
-  - statefulsets
   verbs:
   - create
   - delete
@@ -119,15 +147,15 @@ rules:
   - update
   - watch
 - apiGroups:
-  - apps
+  - batch
   resources:
-  - daemonsets
+  - jobs
   verbs:
   - get
   - list
   - watch
 - apiGroups:
-  - extensions
+  - networking.k8s.io
   resources:
   - ingresses
   verbs:
@@ -141,7 +169,99 @@ rules:
   - watch
 - apiGroups:
   - ""
-  - "build.openshift.io"
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+  - get
+  - list
+  - watch
+- apiGroups:
+  - keda.sh
+  resources:
+  - scaledobjects
+  - triggerauthentications
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - serving.knative.dev
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - eventing.knative.dev
+  resources:
+  - triggers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+- apiGroups:
+  - messaging.knative.dev
+  resources:
+  - subscriptions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+- apiGroups:
+  - sources.knative.dev
+  resources:
+  - sinkbindings
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - builds/finalizers
+  - integrationkits/finalizers
+  - integrationplatforms/finalizers
+  - integrations/finalizers
+  - kameletbindings/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  - build.openshift.io
   resources:
   - buildconfigs
   - buildconfigs/webhooks
@@ -157,7 +277,7 @@ rules:
   - watch
 - apiGroups:
   - ""
-  - "image.openshift.io"
+  - image.openshift.io
   resources:
   - imagestreamimages
   - imagestreammappings
@@ -184,7 +304,7 @@ rules:
   - create
 - apiGroups:
   - ""
-  - "route.openshift.io"
+  - route.openshift.io
   resources:
   - routes
   verbs:
@@ -204,42 +324,6 @@ rules:
   verbs:
   - create
 - apiGroups:
-  - serving.knative.dev
-  resources:
-  - services
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - eventing.knative.dev
-  - messaging.knative.dev
-  - sources.knative.dev
-  resources:
-  - "*"
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - clusterroles
-  verbs:
-  - bind
-  resourceNames:
-  - system:image-builder
-- apiGroups:
   - monitoring.coreos.com
   resources:
   - podmonitors
@@ -253,7 +337,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - "kafka.strimzi.io"
+  - kafka.strimzi.io
   resources:
   - kafkatopics
   - kafkas
@@ -262,28 +346,15 @@ rules:
   - list
   - watch
 - apiGroups:
-  - "coordination.k8s.io"
+  - "apiextensions.k8s.io"
   resources:
-  - leases
+  - customresourcedefinitions
   verbs:
-  - create
-  - delete
-  - deletecollection
   - get
-  - list
-  - patch
-  - update
-  - watch
 - apiGroups:
-  - "operators.coreos.com"
+  - rbac.authorization.k8s.io
   resources:
-  - servicebindings
+  - clusterroles
   verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
+  - bind
+{{- end }}

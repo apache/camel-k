@@ -13,3 +13,22 @@ For example, the Maven build logs display like this:
 ----
 
 This may differ when running the operator locally, for development purposes, in which case the local Maven installation that is used may provide a different output.
+
+[[operator-logging-level]]
+== Logging Level
+
+The operator log level is controlled by an environment setting (`LOG_LEVEL`) on the operator deployment. You can set the log level on the kamel install command like this
+
+[source,bash]
+----
+kamel install --log-level debug
+----
+
+This will set the log level to `debug`, so you can expect a more verbose operator output. The default level is `info`.
+
+In general log levels are represented by numeric verbosity levels where `0` is the standard
+info log level and `1` is debug level. All values `2-10` represent different trace levels.
+You can set numeric values or one of the preset values `info`, `debug`, `error`.
+
+As an alternative to using the `--log-level` option on the kamel CLI you can add an environment variable (`LOG_LEVEL=debug`) directly to the Camel K operator deployment.
+You may need to restart the operator pods controlled by the deployment to see the effect in the log output.

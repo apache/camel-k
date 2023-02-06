@@ -15,6 +15,11 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
+#
+# * patches/integration-platform-patch.yaml
+# customizes the integration platform custom resource
+# Edit the patch manually to add required configuration
+#
 resources:
 - bases/camel_v1_integrationplatform.yaml
 - bases/camel_v1_integration.yaml
@@ -23,3 +28,6 @@ resources:
 - bases/camel_v1_build.yaml
 - bases/camel_v1_kamelet.yaml
 - bases/camel_v1_kameletbinding.yaml
+
+patchesStrategicMerge:
+- patch-integration-platform.yaml

@@ -37,7 +37,7 @@ spec:
         title: Message
         description: The message to generate
         type: string
-  flow:
+  template:
     from:
       uri: timer:tick
       parameters:

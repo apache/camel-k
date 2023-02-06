@@ -17,26 +17,28 @@
 
 location=$(dirname $0)
 rootdir=$location/../..
-crd_file=$rootdir/docs/modules/ROOT/pages/apis/crds-html.adoc
+crd_file_camel=$rootdir/docs/modules/ROOT/partials/apis/camel-k-crds.adoc
+crd_file_kamelets=$rootdir/docs/modules/ROOT/partials/apis/kamelets-crds.adoc
 
-echo "Downloading gen-crd-api-reference-docs binary..."
-TMPFILE=`mktemp`
-TMPDIR=`mktemp -d`
-PWD=`pwd`
-# TODO detect proper binary, based on the OS running this script
-wget -q --show-progress https://github.com/ahmetb/gen-crd-api-reference-docs/releases/download/v0.1.5/gen-crd-api-reference-docs_linux_amd64.tar.gz -O $TMPFILE
-tar -C $TMPDIR -xf $TMPFILE
+# Until the pull req below is merged upstream, we need to use a self-hosted
+# version of gen-crd-api-reference-docs:
+#   https://github.com/ahmetb/gen-crd-api-reference-docs/pull/45
 
 echo "Generating CRD API documentation..."
-$TMPDIR/gen-crd-api-reference-docs \
+# to run a local copy use something like
+#go run /Users/david/projects/camel/gen-crd-api-reference-docs/main.go \
+#you will probably need to comment out use of blackfriday.
+go run github.com/tadayosi/gen-crd-api-reference-docs@v0.4.0-camel-k-2 \
     -config $location/gen-crd-api-config.json \
     -template-dir $location/template \
-    -api-dir "github.com/apache/camel-k/pkg/apis/camel" \
-    -out-file $crd_file
+    -api-dir "github.com/apache/camel-k/pkg/apis/camel/v1" \
+    -out-file $crd_file_camel
 
-# Workaround: https://github.com/ahmetb/gen-crd-api-reference-docs/issues/33
-sed -i -E "s/%2f/\//" $crd_file
+#go run /Users/david/projects/camel/gen-crd-api-reference-docs/main.go \
+go run github.com/tadayosi/gen-crd-api-reference-docs@v0.4.0-camel-k-2 \
+    -config $location/gen-kamelets-crd-api-config.json \
+    -template-dir $location/template \
+    -api-dir "github.com/apache/camel-k/pkg/apis/camel/v1alpha1" \
+    -out-file $crd_file_kamelets
 
-echo "Cleaning the gen-crd-api-reference-docs binary..."
-rm $TMPFILE
-rm -rf $TMPDIR
+echo "Generating CRD API documentation... Done."

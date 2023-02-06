@@ -35,11 +35,6 @@ created=$(date -u +%FT%TZ)
 
 set +e
 for file in `find "$dir" -type f`; do
-  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    sed -i "s/createdAt: .*/createdAt: ${created}/" "${file}"
-  elif [[ "$OSTYPE" == "darwin"* ]]; then
-    # Mac OSX
-    sed -i '' "s/createdAt: .*/createdAt: ${created}/" "${file}"
-  fi
+  sed -i "s/createdAt: .*/createdAt: ${created}/" "${file}"
 done
 set -e

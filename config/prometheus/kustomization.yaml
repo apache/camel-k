@@ -16,3 +16,5 @@
 # ---------------------------------------------------------------------------
 
 resources:
+- operator-pod-monitor.yaml
+- operator-prometheus-rule.yaml

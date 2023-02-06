@@ -19,8 +19,8 @@ package builder
 
 import (
 	"context"
+	"errors"
 	"os"
-	"path"
 	"sort"
 	"strconv"
 	"time"
@@ -64,36 +64,11 @@ func (t *builderTask) Do(ctx context.Context) v1.BuildStatus {
 		BaseImage: t.task.BaseImage,
 	}
 
-	// Add sources
-	for _, data := range t.task.Sources {
-		c.Resources = append(c.Resources, resource{
-			Content: []byte(data.Content),
-			Target:  path.Join("sources", data.Name),
-		})
-	}
-
-	// Add resources
-	for _, data := range t.task.Resources {
-		t := path.Join("resources", data.Name)
-
-		if data.MountPath != "" {
-			t = path.Join(data.MountPath, data.Name)
-		}
-
-		c.Resources = append(c.Resources, resource{
-			Content: []byte(data.Content),
-			Target:  t,
-		})
-	}
-
-	steps := make([]Step, 0)
-	for _, step := range t.task.Steps {
-		s, ok := stepsByID[step]
-		if !ok {
-			log.Info("Skipping unknown build step", "step", step)
-			continue
-		}
-		steps = append(steps, s)
+	steps, err := StepsFrom(t.task.Steps...)
+	if err != nil {
+		t.log.Errorf(err, "invalid builder steps: %s", t.task.Steps)
+		result.Failed(err)
+		return result
 	}
 	// Sort steps by phase
 	sort.SliceStable(steps, func(i, j int) bool {
@@ -107,7 +82,7 @@ steps:
 		select {
 
 		case <-ctx.Done():
-			if ctx.Err() == context.Canceled {
+			if errors.Is(ctx.Err(), context.Canceled) {
 				// Context canceled
 				result.Phase = v1.BuildPhaseInterrupted
 			} else {

@@ -31,7 +31,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
@@ -42,21 +41,17 @@ import (
 	"github.com/apache/camel-k/pkg/util/monitoring"
 )
 
-// Add creates a new IntegrationPlatform Controller and adds it to the Manager. The Manager will set fields on the Controller
-// and Start it when the Manager is Started.
-func Add(mgr manager.Manager) error {
-	c, err := client.FromManager(mgr)
-	if err != nil {
-		return err
-	}
+// Add creates a new IntegrationPlatform Controller and adds it to the Manager. The Manager will set fields
+// on the Controller and Start it when the Manager is Started.
+func Add(mgr manager.Manager, c client.Client) error {
 	return add(mgr, newReconciler(mgr, c))
 }
 
-// newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	return monitoring.NewInstrumentedReconciler(
 		&reconcileIntegrationPlatform{
 			client:   c,
+			reader:   mgr.GetAPIReader(),
 			scheme:   mgr.GetScheme(),
 			recorder: mgr.GetEventRecorderFor("camel-k-integration-platform-controller"),
 		},
@@ -68,9 +63,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	)
 }
 
-// add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	// Create a new controller
 	c, err := controller.New("integrationplatform-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
@@ -79,10 +72,16 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to primary resource IntegrationPlatform
 	err = c.Watch(&source.Kind{Type: &v1.IntegrationPlatform{}},
 		&handler.EnqueueRequestForObject{},
-		predicate.Funcs{
+		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldIntegrationPlatform := e.ObjectOld.(*v1.IntegrationPlatform)
-				newIntegrationPlatform := e.ObjectNew.(*v1.IntegrationPlatform)
+				oldIntegrationPlatform, ok := e.ObjectOld.(*v1.IntegrationPlatform)
+				if !ok {
+					return false
+				}
+				newIntegrationPlatform, ok := e.ObjectNew.(*v1.IntegrationPlatform)
+				if !ok {
+					return false
+				}
 				// Ignore updates to the integration platform status in which case metadata.Generation
 				// does not change, or except when the integration platform phase changes as it's used
 				// to transition from one phase to another
@@ -104,11 +103,13 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 var _ reconcile.Reconciler = &reconcileIntegrationPlatform{}
 
-// reconcileIntegrationPlatform reconciles a IntegrationPlatform object
+// reconcileIntegrationPlatform reconciles a IntegrationPlatform object.
 type reconcileIntegrationPlatform struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the API server
-	client   client.Client
+	client client.Client
+	// Non-caching client
+	reader   ctrl.Reader
 	scheme   *runtime.Scheme
 	recorder record.EventRecorder
 }
@@ -146,9 +147,15 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 		return reconcile.Result{}, err
 	}
 
+	// Only process resources assigned to the operator
+	if !platform.IsOperatorHandlerConsideringLock(ctx, r.client, request.Namespace, &instance) {
+		rlog.Info("Ignoring request because resource is not assigned to current operator")
+		return reconcile.Result{}, nil
+	}
+
 	actions := []Action{
 		NewInitializeAction(),
-		NewWarmAction(),
+		NewWarmAction(r.reader),
 		NewCreateAction(),
 		NewMonitorAction(),
 	}
@@ -175,6 +182,8 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 			}
 
 			if target != nil {
+				target.Status.ObservedGeneration = instance.Generation
+
 				if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(&instance)); err != nil {
 					camelevent.NotifyIntegrationPlatformError(ctx, r.client, r.recorder, &instance, target, err)
 					return reconcile.Result{}, err

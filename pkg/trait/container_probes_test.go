@@ -22,167 +22,172 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	serving "knative.dev/serving/pkg/apis/serving/v1"
-
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-func newTestProbesEnv(t *testing.T, provider v1.RuntimeProvider) Environment {
-	var catalog *camel.RuntimeCatalog = nil
-	var err error = nil
+func newTestProbesEnv(t *testing.T, integration *v1.Integration) Environment {
+	t.Helper()
 
-	switch provider {
-	case v1.RuntimeProviderQuarkus:
-		catalog, err = camel.QuarkusCatalog()
-	default:
-		panic("unknown provider " + provider)
-	}
-
+	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 	assert.NotNil(t, catalog)
 
+	traitCatalog := NewCatalog(nil)
+
 	return Environment{
+		Catalog:      traitCatalog,
 		CamelCatalog: catalog,
-		Integration: &v1.Integration{
-			Status: v1.IntegrationStatus{},
+		Platform: &v1.IntegrationPlatform{
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+				IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
+					Build: v1.IntegrationPlatformBuildSpec{
+						RuntimeVersion: catalog.Runtime.Version,
+					},
+				},
+			},
 		},
+		Integration:           integration,
 		Resources:             kubernetes.NewCollection(),
 		ApplicationProperties: make(map[string]string),
 	}
 }
 
-func newTestContainerTrait() *containerTrait {
-	tr := newContainerTrait().(*containerTrait)
-	tr.ProbesEnabled = BoolP(true)
+func TestProbesDependencies(t *testing.T) {
+	integration := &v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Traits: v1.Traits{
+				Health: &traitv1.HealthTrait{
+					Trait: traitv1.Trait{
+						Enabled: pointer.Bool(true),
+					},
+				},
+			},
+		},
+	}
 
-	return tr
-}
-
-func TestProbesDepsQuarkus(t *testing.T) {
-	env := newTestProbesEnv(t, v1.RuntimeProviderQuarkus)
+	env := newTestProbesEnv(t, integration)
 	env.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 
-	ctr := newTestContainerTrait()
-
-	ok, err := ctr.Configure(&env)
+	err := env.Catalog.apply(&env)
 	assert.Nil(t, err)
-	assert.True(t, ok)
 
-	err = ctr.Apply(&env)
-	assert.Nil(t, err)
 	assert.Contains(t, env.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-microprofile-health")
 }
 
 func TestProbesOnDeployment(t *testing.T) {
-	target := appsv1.Deployment{}
+	integration := &v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Traits: v1.Traits{
+				Health: &traitv1.HealthTrait{
+					Trait: traitv1.Trait{
+						Enabled: pointer.Bool(true),
+					},
+					LivenessProbeEnabled:  pointer.Bool(true),
+					ReadinessProbeEnabled: pointer.Bool(true),
+					LivenessTimeout:       1234,
+				},
+			},
+		},
+	}
 
-	env := newTestProbesEnv(t, v1.RuntimeProviderQuarkus)
+	env := newTestProbesEnv(t, integration)
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
-	env.Resources.Add(&target)
 
-	ctr := newTestContainerTrait()
-	ctr.Expose = BoolP(true)
-	ctr.LivenessTimeout = 1234
-
-	err := ctr.Apply(&env)
+	err := env.Catalog.apply(&env)
 	assert.Nil(t, err)
 
-	assert.Equal(t, "", target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Host)
-	assert.Equal(t, int32(defaultContainerPort), target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Port.IntVal)
-	assert.Equal(t, defaultProbePath, target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Path)
-	assert.Equal(t, corev1.URISchemeHTTP, target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Scheme)
-	assert.Equal(t, "", target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Host)
-	assert.Equal(t, int32(defaultContainerPort), target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Port.IntVal)
-	assert.Equal(t, defaultProbePath, target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Path)
-	assert.Equal(t, corev1.URISchemeHTTP, target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Scheme)
-	assert.Equal(t, int32(1234), target.Spec.Template.Spec.Containers[0].LivenessProbe.TimeoutSeconds)
+	container := env.GetIntegrationContainer()
+
+	assert.Equal(t, "", container.LivenessProbe.HTTPGet.Host)
+	assert.Equal(t, int32(defaultContainerPort), container.LivenessProbe.HTTPGet.Port.IntVal)
+	assert.Equal(t, defaultLivenessProbePath, container.LivenessProbe.HTTPGet.Path)
+	assert.Equal(t, corev1.URISchemeHTTP, container.ReadinessProbe.HTTPGet.Scheme)
+	assert.Equal(t, "", container.ReadinessProbe.HTTPGet.Host)
+	assert.Equal(t, int32(defaultContainerPort), container.ReadinessProbe.HTTPGet.Port.IntVal)
+	assert.Equal(t, defaultReadinessProbePath, container.ReadinessProbe.HTTPGet.Path)
+	assert.Equal(t, corev1.URISchemeHTTP, container.LivenessProbe.HTTPGet.Scheme)
+	assert.Equal(t, int32(1234), container.LivenessProbe.TimeoutSeconds)
 }
 
 func TestProbesOnDeploymentWithCustomScheme(t *testing.T) {
-	target := appsv1.Deployment{}
+	integration := &v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Traits: v1.Traits{
+				Health: &traitv1.HealthTrait{
+					Trait: traitv1.Trait{
+						Enabled: pointer.Bool(true),
+					},
+					LivenessProbeEnabled:  pointer.Bool(true),
+					ReadinessProbeEnabled: pointer.Bool(true),
+					LivenessScheme:        "HTTPS",
+					ReadinessScheme:       "HTTPS",
+					LivenessTimeout:       1234,
+				},
+			},
+		},
+	}
 
-	env := newTestProbesEnv(t, v1.RuntimeProviderQuarkus)
+	env := newTestProbesEnv(t, integration)
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
-	env.Resources.Add(&target)
 
-	ctr := newTestContainerTrait()
-	ctr.Expose = BoolP(true)
-	ctr.LivenessTimeout = 1234
-	ctr.LivenessScheme = "HTTPS"
-	ctr.ReadinessScheme = "HTTPS"
-
-	err := ctr.Apply(&env)
+	err := env.Catalog.apply(&env)
 	assert.Nil(t, err)
 
-	assert.Equal(t, "", target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Host)
-	assert.Equal(t, int32(defaultContainerPort), target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Port.IntVal)
-	assert.Equal(t, defaultProbePath, target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Path)
-	assert.Equal(t, corev1.URISchemeHTTPS, target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Scheme)
-	assert.Equal(t, "", target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Host)
-	assert.Equal(t, int32(defaultContainerPort), target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Port.IntVal)
-	assert.Equal(t, defaultProbePath, target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Path)
-	assert.Equal(t, corev1.URISchemeHTTPS, target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Scheme)
-	assert.Equal(t, int32(1234), target.Spec.Template.Spec.Containers[0].LivenessProbe.TimeoutSeconds)
-}
+	container := env.GetIntegrationContainer()
 
-func TestProbesOnDeploymentWithNoHttpPort(t *testing.T) {
-	target := appsv1.Deployment{}
-
-	env := newTestProbesEnv(t, v1.RuntimeProviderQuarkus)
-	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
-	env.Resources.Add(&target)
-
-	ctr := newTestContainerTrait()
-	ctr.PortName = "custom"
-	ctr.LivenessTimeout = 1234
-
-	err := ctr.Apply(&env)
-	assert.Nil(t, err)
-	assert.Nil(t, target.Spec.Template.Spec.Containers[0].LivenessProbe)
-	assert.Nil(t, target.Spec.Template.Spec.Containers[0].ReadinessProbe)
+	assert.Equal(t, "", container.LivenessProbe.HTTPGet.Host)
+	assert.Equal(t, int32(defaultContainerPort), container.LivenessProbe.HTTPGet.Port.IntVal)
+	assert.Equal(t, defaultLivenessProbePath, container.LivenessProbe.HTTPGet.Path)
+	assert.Equal(t, corev1.URISchemeHTTPS, container.ReadinessProbe.HTTPGet.Scheme)
+	assert.Equal(t, "", container.ReadinessProbe.HTTPGet.Host)
+	assert.Equal(t, int32(defaultContainerPort), container.ReadinessProbe.HTTPGet.Port.IntVal)
+	assert.Equal(t, defaultReadinessProbePath, container.ReadinessProbe.HTTPGet.Path)
+	assert.Equal(t, corev1.URISchemeHTTPS, container.LivenessProbe.HTTPGet.Scheme)
+	assert.Equal(t, int32(1234), container.LivenessProbe.TimeoutSeconds)
 }
 
 func TestProbesOnKnativeService(t *testing.T) {
-	target := serving.Service{}
+	integration := &v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Profile: v1.TraitProfileKnative,
+			Traits: v1.Traits{
+				KnativeService: &traitv1.KnativeServiceTrait{
+					Trait: traitv1.Trait{
+						Enabled: pointer.Bool(true),
+					},
+				},
+				Health: &traitv1.HealthTrait{
+					Trait: traitv1.Trait{
+						Enabled: pointer.Bool(true),
+					},
+					LivenessProbeEnabled:  pointer.Bool(true),
+					ReadinessProbeEnabled: pointer.Bool(true),
+					LivenessTimeout:       1234,
+				},
+			},
+		},
+	}
 
-	env := newTestProbesEnv(t, v1.RuntimeProviderQuarkus)
+	env := newTestProbesEnv(t, integration)
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
-	env.Resources.Add(&target)
 
-	ctr := newTestContainerTrait()
-	ctr.Expose = BoolP(true)
-	ctr.LivenessTimeout = 1234
-
-	err := ctr.Apply(&env)
+	err := env.Catalog.apply(&env)
 	assert.Nil(t, err)
 
-	assert.Equal(t, "", target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Host)
-	assert.Equal(t, int32(0), target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Port.IntVal)
-	assert.Equal(t, defaultProbePath, target.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Path)
-	assert.Equal(t, "", target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Host)
-	assert.Equal(t, int32(0), target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Port.IntVal)
-	assert.Equal(t, defaultProbePath, target.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Path)
-	assert.Equal(t, int32(1234), target.Spec.Template.Spec.Containers[0].LivenessProbe.TimeoutSeconds)
-}
+	container := env.GetIntegrationContainer()
 
-func TestProbesOnKnativeServiceWithNoHttpPort(t *testing.T) {
-	target := serving.Service{}
-
-	env := newTestProbesEnv(t, v1.RuntimeProviderQuarkus)
-	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
-	env.Resources.Add(&target)
-
-	ctr := newTestContainerTrait()
-	ctr.PortName = "custom"
-	ctr.LivenessTimeout = 1234
-
-	err := ctr.Apply(&env)
-	assert.Nil(t, err)
-	assert.Nil(t, target.Spec.Template.Spec.Containers[0].LivenessProbe)
-	assert.Nil(t, target.Spec.Template.Spec.Containers[0].ReadinessProbe)
+	assert.Equal(t, "", container.LivenessProbe.HTTPGet.Host)
+	assert.Equal(t, int32(0), container.LivenessProbe.HTTPGet.Port.IntVal)
+	assert.Equal(t, defaultLivenessProbePath, container.LivenessProbe.HTTPGet.Path)
+	assert.Equal(t, "", container.ReadinessProbe.HTTPGet.Host)
+	assert.Equal(t, int32(0), container.ReadinessProbe.HTTPGet.Port.IntVal)
+	assert.Equal(t, defaultReadinessProbePath, container.ReadinessProbe.HTTPGet.Path)
+	assert.Equal(t, int32(1234), container.LivenessProbe.TimeoutSeconds)
 }

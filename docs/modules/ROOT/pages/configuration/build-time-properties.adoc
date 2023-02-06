@@ -18,7 +18,7 @@ from('timer:build-property')
 In order to give a value to the `quarkus.application.name` property you can pass it using the command line with the `--build-property` flag:
 
 ----
-kamel run --build-property=quarkus.application.name=my-super-application build-property-route.groovy --dev
+kamel run --build-property=quarkus.application.name=my-super-application build-property-route.groovy
 ----
 
 You can provide more than one single `build-property` at once by just adding the flag repeatedly (ie, `--build-property=prop1=val1 --build-property=prop2=val2 ...`)
@@ -26,7 +26,7 @@ You can provide more than one single `build-property` at once by just adding the
 [[build-time-props-file]]
 == Property File
 
-Repeating the property flag when you have many *build time configuration* may be cumbersome. Usually you deal with property files instead. You will be able to use the _file_ syntax available for `--build-property` flag. Here, as an example you have a property files with 2 `Quarkus` properties:
+Repeating the `--build-property` flag when you have many *build time configuration* may be cumbersome. Usually you deal with property files instead. You will be able to use the _file_ syntax available for `--build-property` flag. Here, as an example you have a property file with 2 `Quarkus` properties:
 
 [source,properties]
 .quarkus.properties
@@ -45,10 +45,75 @@ from('timer:build-property')
 The `quarkus.banner.enabled` is configured to show the banner during the `Integration` startup. Let's use `--build-property` flag in conjunction with file:
 
 ----
-kamel run --build-property=file:quarkus.properties build-property-file-route.groovy --dev
+kamel run --build-property=file:quarkus.properties build-property-route.groovy
 ----
 
 The property file is parsed and its properties configured on the `Integration`. As soon as the application starts, you will see the log with the expected configuration.
+
+[[build-time-configmap]]
+== Property from ConfigMap/Secret
+
+In case some build-time properties are stored into a `Configmap` or a `Secret`, you can use the `--build-property` flag with a value of type respectively _configmap:name-of-configmap_ or _secret:name-of-secret_ to refer to the specific resource to use as build-time properties.
+
+As an example, let's create a `Configmap` named _my-cm-bp_ containing the build-time properties to load. You can alternatively use any `Configmap` you've already stored in your cluster:
+
+----
+kubectl create configmap my-cm-bp --from-literal=quarkus.application.name="my-great-application" --from-literal=quarkus.banner.enabled="true"
+----
+
+Here, as an example we have create a configmap with 2 `Quarkus` properties.
+
+[source,groovy]
+.build-property-route.groovy
+----
+from('timer:build-property')
+    .log('The application name: {{quarkus.application.name}}')
+----
+
+The `quarkus.banner.enabled` is configured to show the banner during the `Integration` startup. Let's use `--build-property` flag in conjunction with file:
+
+----
+kamel run --build-property=configmap:my-cm-bp build-property-route.groovy
+----
+
+The key-value pairs of the `ConfigMap` are loaded and used as build-time properties of the `Integration`. As soon as the application starts, you will see the log with the expected configuration.
+
+[[build-time-configmap-as-file]]
+== Property from ConfigMap/Secret as file
+
+When you have a lot of key-value pairs to store into a given `ConfigMap`/`Secret`, you may consider storing some build-time properties as a file into a specific key-value pair for the sake of simplicity. 
+
+The only constraint is to use `.properties` as a suffix of the key to indicate that the value is actually a property file, not a simple value.
+
+As an example, let's use the same `Integration` as the previous section but with a `ConfigMap` that contains all the properties into the same key-value pair.
+
+For this we need a properties file as next:
+
+[source,properties]
+.quarkus.properties
+----
+quarkus.application.name = my-super-application
+quarkus.banner.enabled = true
+----
+
+That we will load into a specific `ConfigMap` using the following command:
+
+----
+kubectl create configmap my-cm-bps --from-file=quarkus.properties
+----
+
+Then we launch the `run` command with the `--build-property` flag whose value matches with the appropriate syntax to refer to `my-cm-bps`:
+
+----
+kamel run --build-property configmap:my-cm-bps build-property-route.groovy
+----
+
+The value of the key-value of the `ConfigMap` is loaded as a property file and used as build-time properties of the `Integration`. you will see the log with the expected configuration.
+
+[[build-time-props-file-precedence]]
+== Property collision priority
+
+If you have a property repeated more than once, the general rule is that the last one declared in your `kamel run` statement will be taken in consideration. If the same property is found both in a single option declaration and inside a file/configmap/secret, then, the single option will have higher priority and will be used.
 
 [[build-time-runtime-conf]]
 == Run time properties

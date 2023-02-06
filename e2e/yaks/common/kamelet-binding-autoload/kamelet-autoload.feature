@@ -3,7 +3,7 @@ Feature: Camel K can load default secrets for Kamelets
   Background:
     Given Disable auto removal of Kamelet resources
     Given Disable auto removal of Kubernetes resources
-    Given Camel-K resource polling configuration
+    Given Camel K resource polling configuration
       | maxAttempts          | 40   |
       | delayBetweenAttempts | 3000 |
 

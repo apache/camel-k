@@ -22,6 +22,10 @@ metadata:
   labels:
     app: "camel-k"
     camel.apache.org/component: operator
+    name: camel-k-operator
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/name: camel-k
+    app.kubernetes.io/version: "1.12.0-SNAPSHOT"
 spec:
   replicas: 1
   strategy:
@@ -35,11 +39,14 @@ spec:
         name: camel-k-operator
         camel.apache.org/component: operator
         app: "camel-k"
+        app.kubernetes.io/component: operator
+        app.kubernetes.io/name: camel-k
+        app.kubernetes.io/version: "1.12.0-SNAPSHOT"
     spec:
       serviceAccountName: camel-k-operator
       containers:
         - name: camel-k-operator
-          image: docker.io/apache/camel-k:1.6.0-SNAPSHOT
+          image: docker.io/apache/camel-k:1.12.0-SNAPSHOT
           imagePullPolicy: IfNotPresent
           command:
             - kamel
@@ -54,11 +61,13 @@ spec:
                   fieldPath: metadata.namespace
             - name: OPERATOR_NAME
               value: "camel-k"
+            - name: OPERATOR_ID
+              value: "camel-k"
             - name: POD_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            # NAMESPACE is always the operator namespace, independently from WATCH_NAMESPACE
+            # NAMESPACE is always the operator namespace, independently of WATCH_NAMESPACE
             - name: NAMESPACE
               valueFrom:
                 fieldRef:

@@ -18,33 +18,36 @@ limitations under the License.
 package client
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 
-	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
-	camelv1alpha1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"
 	user "github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"k8s.io/client-go/scale"
 
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"k8s.io/client-go/kubernetes"
-	clientscheme "k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	clientcmdlatest "k8s.io/client-go/tools/clientcmd/api/latest"
 
-	controller "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/apache/camel-k/pkg/apis"
 	camel "github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
+	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
+	camelv1alpha1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/util"
 )
 
 const (
@@ -52,36 +55,38 @@ const (
 	kubeConfigEnvVar         = "KUBECONFIG"
 )
 
-// Client is an abstraction for a k8s client
+// Client is an abstraction for a k8s client.
 type Client interface {
-	controller.Client
+	ctrl.Client
 	kubernetes.Interface
 	CamelV1() camelv1.CamelV1Interface
 	CamelV1alpha1() camelv1alpha1.CamelV1alpha1Interface
 	GetScheme() *runtime.Scheme
 	GetConfig() *rest.Config
 	GetCurrentNamespace(kubeConfig string) (string, error)
+	ServerOrClientSideApplier() ServerOrClientSideApplier
+	ScalesClient() (scale.ScalesGetter, error)
 }
 
-// Injectable identifies objects that can receive a Client
+// Injectable identifies objects that can receive a Client.
 type Injectable interface {
 	InjectClient(Client)
 }
 
-// Provider is used to provide a new instance of the Client each time it's required
+// Provider is used to provide a new instance of the Client each time it's required.
 type Provider struct {
 	Get func() (Client, error)
 }
 
 type defaultClient struct {
-	controller.Client
+	ctrl.Client
 	kubernetes.Interface
 	camel  camel.Interface
 	scheme *runtime.Scheme
 	config *rest.Config
 }
 
-// Check interface compliance
+// Check interface compliance.
 var _ Client = &defaultClient{}
 
 func (c *defaultClient) CamelV1() camelv1.CamelV1Interface {
@@ -104,25 +109,29 @@ func (c *defaultClient) GetCurrentNamespace(kubeConfig string) (string, error) {
 	return GetCurrentNamespace(kubeConfig)
 }
 
-// NewOutOfClusterClient creates a new k8s client that can be used from outside the cluster
+// NewOutOfClusterClient creates a new k8s client that can be used from outside the cluster.
 func NewOutOfClusterClient(kubeconfig string) (Client, error) {
 	initialize(kubeconfig)
 	// using fast discovery from outside the cluster
 	return NewClient(true)
 }
 
-// NewClient creates a new k8s client that can be used from outside or in the cluster
+// NewClient creates a new k8s client that can be used from outside or in the cluster.
 func NewClient(fastDiscovery bool) (Client, error) {
-	// Get a config to talk to the apiserver
 	cfg, err := config.GetConfig()
 	if err != nil {
 		return nil, err
 	}
+	return NewClientWithConfig(fastDiscovery, cfg)
+}
 
-	scheme := clientscheme.Scheme
+// NewClientWithConfig creates a new k8s client that can be used from outside or in the cluster.
+func NewClientWithConfig(fastDiscovery bool, cfg *rest.Config) (Client, error) {
+	clientScheme := scheme.Scheme
 
 	// Setup Scheme for all resources
-	if err := apis.AddToScheme(scheme); err != nil {
+	err := apis.AddToScheme(clientScheme)
+	if err != nil {
 		return nil, err
 	}
 
@@ -142,11 +151,11 @@ func NewClient(fastDiscovery bool) (Client, error) {
 	}
 
 	// Create a new client to avoid using cache (enabled by default with controller-runtime client)
-	clientOptions := controller.Options{
-		Scheme: scheme,
+	clientOptions := ctrl.Options{
+		Scheme: clientScheme,
 		Mapper: mapper,
 	}
-	dynClient, err := controller.New(cfg, clientOptions)
+	dynClient, err := ctrl.New(cfg, clientOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +169,7 @@ func NewClient(fastDiscovery bool) (Client, error) {
 	}, nil
 }
 
-// FromManager creates a new k8s client from a manager object
+// FromManager creates a new k8s client from a manager object.
 func FromManager(manager manager.Manager) (Client, error) {
 	var err error
 	var clientset kubernetes.Interface
@@ -171,6 +180,7 @@ func FromManager(manager manager.Manager) (Client, error) {
 	if camelClientset, err = camel.NewForConfig(manager.GetConfig()); err != nil {
 		return nil, err
 	}
+
 	return &defaultClient{
 		Client:    manager.GetClient(),
 		Interface: clientset,
@@ -180,7 +190,7 @@ func FromManager(manager manager.Manager) (Client, error) {
 	}, nil
 }
 
-// init initialize the k8s client for usage outside the cluster
+// initialize the k8s client for usage outside the cluster.
 func initialize(kubeconfig string) {
 	if kubeconfig == "" {
 		// skip out-of-cluster initialization if inside the container
@@ -195,7 +205,10 @@ func initialize(kubeconfig string) {
 			panic(err)
 		}
 	}
-	os.Setenv(kubeConfigEnvVar, kubeconfig)
+
+	if err := os.Setenv(kubeConfigEnvVar, kubeconfig); err != nil {
+		panic(err)
+	}
 }
 
 func getDefaultKubeConfigFile() (string, error) {
@@ -203,10 +216,11 @@ func getDefaultKubeConfigFile() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return filepath.Join(dir, ".kube", "config"), nil
 }
 
-// GetCurrentNamespace --
+// GetCurrentNamespace --.
 func GetCurrentNamespace(kubeconfig string) (string, error) {
 	if kubeconfig == "" {
 		kubeContainer, err := shouldUseContainerMode()
@@ -228,7 +242,7 @@ func GetCurrentNamespace(kubeconfig string) (string, error) {
 		return "default", nil
 	}
 
-	data, err := ioutil.ReadFile(kubeconfig)
+	data, err := util.ReadFile(kubeconfig)
 	if err != nil {
 		return "", err
 	}
@@ -242,7 +256,10 @@ func GetCurrentNamespace(kubeconfig string) (string, error) {
 		return "", err
 	}
 
-	clientcmdconfig := decoded.(*clientcmdapi.Config)
+	clientcmdconfig, ok := decoded.(*clientcmdapi.Config)
+	if !ok {
+		return "", fmt.Errorf("type assertion failed: %v", decoded)
+	}
 
 	cc := clientcmd.NewDefaultClientConfig(*clientcmdconfig, &clientcmd.ConfigOverrides{})
 	ns, _, err := cc.Namespace()

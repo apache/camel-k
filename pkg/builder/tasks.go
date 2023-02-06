@@ -32,36 +32,38 @@ func (b *Builder) Build(build *v1.Build) *Build {
 }
 
 func (b *Build) Task(task v1.Task) Task {
-	if task.Builder != nil {
+	switch {
+	case task.Builder != nil:
 		return &builderTask{
 			c:     b.builder.client,
 			log:   b.builder.log,
 			build: b.build,
 			task:  task.Builder,
 		}
-	} else if task.Buildah != nil {
+	case task.Buildah != nil:
 		return &unsupportedTask{
 			build: b.build,
 			name:  task.Buildah.Name,
 		}
-	} else if task.Kaniko != nil {
+	case task.Kaniko != nil:
 		return &unsupportedTask{
 			build: b.build,
 			name:  task.Kaniko.Name,
 		}
-	} else if task.Spectrum != nil {
+	case task.Spectrum != nil:
 		return &spectrumTask{
 			c:     b.builder.client,
 			build: b.build,
 			task:  task.Spectrum,
 		}
-	} else if task.S2i != nil {
+	case task.S2i != nil:
 		return &s2iTask{
 			c:     b.builder.client,
 			build: b.build,
 			task:  task.S2i,
 		}
 	}
+
 	return &emptyTask{
 		build: b.build,
 	}
@@ -106,30 +108,31 @@ var _ Task = &missingTask{}
 
 func (b *Build) TaskByName(name string) Task {
 	for _, task := range b.build.Spec.Tasks {
-		if task.Builder != nil && task.Builder.Name == name {
+		switch {
+		case task.Builder != nil && task.Builder.Name == name:
 			return &builderTask{
 				c:     b.builder.client,
 				log:   b.builder.log,
 				build: b.build,
 				task:  task.Builder,
 			}
-		} else if task.Buildah != nil && task.Buildah.Name == name {
+		case task.Buildah != nil && task.Buildah.Name == name:
 			return &unsupportedTask{
 				build: b.build,
 				name:  task.Buildah.Name,
 			}
-		} else if task.Kaniko != nil && task.Kaniko.Name == name {
+		case task.Kaniko != nil && task.Kaniko.Name == name:
 			return &unsupportedTask{
 				build: b.build,
 				name:  task.Kaniko.Name,
 			}
-		} else if task.Spectrum != nil && task.Spectrum.Name == name {
+		case task.Spectrum != nil && task.Spectrum.Name == name:
 			return &spectrumTask{
 				c:     b.builder.client,
 				build: b.build,
 				task:  task.Spectrum,
 			}
-		} else if task.S2i != nil && task.S2i.Name == name {
+		case task.S2i != nil && task.S2i.Name == name:
 			return &s2iTask{
 				c:     b.builder.client,
 				build: b.build,

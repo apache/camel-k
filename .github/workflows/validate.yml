@@ -28,7 +28,7 @@ on:
       - "release-*"
 
 concurrency:
-  group: ${{ github.ref }}-${{ github.workflow }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -37,16 +37,14 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-      - name: Cache modules
-        uses: actions/cache@v1
+      - name: Install Go
+        uses: actions/setup-go@v2
         with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-      - name: Lint
-        run: |
-          curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b . v1.20.1
-          ./golangci-lint config path
-          ./golangci-lint --version
-          GOGC=20 ./golangci-lint run --verbose --deadline 15m --config .golangci.yml
+          go-version: 1.18.x
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        env:
+          GOGC: 20
+        with:
+          version: v1.47.3
+          args: --verbose --deadline 15m --config .golangci.yml

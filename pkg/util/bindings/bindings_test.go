@@ -24,12 +24,16 @@ import (
 	"net/url"
 	"testing"
 
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/pointer"
+
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	knativeapis "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/test"
+
 	"github.com/stretchr/testify/assert"
-	corev1 "k8s.io/api/core/v1"
 )
 
 func TestBindings(t *testing.T) {
@@ -38,7 +42,7 @@ func TestBindings(t *testing.T) {
 		endpoint     v1alpha1.Endpoint
 		profile      camelv1.TraitProfile
 		uri          string
-		traits       map[string]camelv1.TraitSpec
+		traits       camelv1.Traits
 		props        map[string]string
 	}{
 		{
@@ -122,7 +126,7 @@ func TestBindings(t *testing.T) {
 					"type": "myeventtype",
 				}),
 			},
-			uri: "knative:event/myeventtype?apiVersion=eventing.knative.dev%2Fv1&kind=Broker",
+			uri: "knative:event/myeventtype?apiVersion=eventing.knative.dev%2Fv1&kind=Broker&name=default",
 		},
 		{
 			endpointType: v1alpha1.EndpointTypeSource,
@@ -174,21 +178,23 @@ func TestBindings(t *testing.T) {
 		{
 			endpointType: v1alpha1.EndpointTypeSink,
 			endpoint: v1alpha1.Endpoint{
-				URI: asStringPointer("https://myurl/hey"),
+				URI: pointer.String("https://myurl/hey"),
 				Properties: asEndpointProperties(map[string]string{
 					"ce.override.ce-type": "mytype",
 				}),
 			},
 			uri: "knative:endpoint/sink?ce.override.ce-type=mytype",
-			traits: asTraitSpec("knative", map[string]interface{}{
-				"sinkBinding":   false,
-				"configuration": asKnativeConfig("https://myurl/hey"),
-			}),
+			traits: camelv1.Traits{
+				Knative: &traitv1.KnativeTrait{
+					SinkBinding:   pointer.Bool(false),
+					Configuration: asKnativeConfig("https://myurl/hey"),
+				},
+			},
 		},
 		{
 			endpointType: v1alpha1.EndpointTypeSink,
 			endpoint: v1alpha1.Endpoint{
-				URI: asStringPointer("https://myurl/hey"),
+				URI: pointer.String("https://myurl/hey"),
 			},
 			profile: camelv1.TraitProfileKubernetes,
 			uri:     "https://myurl/hey",
@@ -196,7 +202,7 @@ func TestBindings(t *testing.T) {
 		{
 			endpointType: v1alpha1.EndpointTypeSink,
 			endpoint: v1alpha1.Endpoint{
-				URI: asStringPointer("docker://xxx"),
+				URI: pointer.String("docker://xxx"),
 			},
 			uri: "docker://xxx",
 		},
@@ -242,24 +248,6 @@ func asEndpointProperties(props map[string]string) *v1alpha1.EndpointProperties 
 	return &v1alpha1.EndpointProperties{
 		RawMessage: serialized,
 	}
-}
-
-func asTraitSpec(key string, data map[string]interface{}) map[string]camelv1.TraitSpec {
-	res := make(map[string]camelv1.TraitSpec)
-	serialized, err := json.Marshal(data)
-	if err != nil {
-		panic(err)
-	}
-	res[key] = camelv1.TraitSpec{
-		Configuration: camelv1.TraitConfiguration{
-			RawMessage: serialized,
-		},
-	}
-	return res
-}
-
-func asStringPointer(str string) *string {
-	return &str
 }
 
 func asKnativeConfig(endpointURL string) string {

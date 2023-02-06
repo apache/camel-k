@@ -19,17 +19,22 @@ package kameletbinding
 
 import (
 	"context"
+	"fmt"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/pkg/errors"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/trait"
 )
 
-// NewMonitorAction returns an action that monitors the kamelet binding after it's fully initialized
+// NewMonitorAction returns an action that monitors the KameletBinding after it's fully initialized.
 func NewMonitorAction() Action {
 	return &monitorAction{}
 }
@@ -44,7 +49,8 @@ func (action *monitorAction) Name() string {
 
 func (action *monitorAction) CanHandle(kameletbinding *v1alpha1.KameletBinding) bool {
 	return kameletbinding.Status.Phase == v1alpha1.KameletBindingPhaseCreating ||
-		kameletbinding.Status.Phase == v1alpha1.KameletBindingPhaseError ||
+		(kameletbinding.Status.Phase == v1alpha1.KameletBindingPhaseError &&
+			kameletbinding.Status.GetCondition(v1alpha1.KameletBindingIntegrationConditionError) == nil) ||
 		kameletbinding.Status.Phase == v1alpha1.KameletBindingPhaseReady
 }
 
@@ -69,13 +75,32 @@ func (action *monitorAction) Handle(ctx context.Context, kameletbinding *v1alpha
 		return nil, errors.Wrapf(err, "could not load integration for KameletBinding %q", kameletbinding.Name)
 	}
 
-	// Check if the integration needs to be changed
-	expected, err := createIntegrationFor(ctx, action.client, kameletbinding)
+	operatorIDChanged := v1.GetOperatorIDAnnotation(kameletbinding) != "" &&
+		(v1.GetOperatorIDAnnotation(kameletbinding) != v1.GetOperatorIDAnnotation(&it))
+
+	sameTraits, err := trait.IntegrationAndBindingSameTraits(&it, kameletbinding)
 	if err != nil {
 		return nil, err
 	}
 
-	if !equality.Semantic.DeepDerivative(expected.Spec, it.Spec) {
+	// Check if the integration needs to be changed
+	expected, err := CreateIntegrationFor(ctx, action.client, kameletbinding)
+	if err != nil {
+		kameletbinding.Status.Phase = v1alpha1.KameletBindingPhaseError
+		kameletbinding.Status.SetErrorCondition(v1alpha1.KameletBindingIntegrationConditionError,
+			"Couldn't create an Integration custom resource", err)
+		return kameletbinding, err
+	}
+
+	semanticEquality := equality.Semantic.DeepDerivative(expected.Spec, it.Spec)
+
+	if !semanticEquality || operatorIDChanged || !sameTraits {
+		action.L.Info(
+			"KameletBinding needs a rebuild",
+			"semantic-equality", !semanticEquality,
+			"operatorid-changed", operatorIDChanged,
+			"traits-changed", !sameTraits)
+
 		// KameletBinding has changed and needs rebuild
 		target := kameletbinding.DeepCopy()
 		// Rebuild the integration
@@ -89,32 +114,73 @@ func (action *monitorAction) Handle(ctx context.Context, kameletbinding *v1alpha
 		return target, nil
 	}
 
-	// Map integration phases to KameletBinding phases
+	// Map integration phase and conditions to KameletBinding
 	target := kameletbinding.DeepCopy()
-	if it.Status.Phase == v1.IntegrationPhaseRunning {
+
+	switch it.Status.Phase {
+
+	case v1.IntegrationPhaseRunning:
 		target.Status.Phase = v1alpha1.KameletBindingPhaseReady
-		target.Status.SetCondition(
-			v1alpha1.KameletBindingConditionReady,
-			corev1.ConditionTrue,
-			"",
-			"",
-		)
-	} else if it.Status.Phase == v1.IntegrationPhaseError {
+		setKameletBindingReadyCondition(target, &it)
+
+	case v1.IntegrationPhaseError:
 		target.Status.Phase = v1alpha1.KameletBindingPhaseError
-		target.Status.SetCondition(
-			v1alpha1.KameletBindingConditionReady,
-			corev1.ConditionFalse,
-			string(target.Status.Phase),
-			"",
-		)
-	} else {
+		setKameletBindingReadyCondition(target, &it)
+
+	default:
 		target.Status.Phase = v1alpha1.KameletBindingPhaseCreating
-		target.Status.SetCondition(
+
+		c := v1alpha1.KameletBindingCondition{
+			Type:    v1alpha1.KameletBindingConditionReady,
+			Status:  corev1.ConditionFalse,
+			Reason:  string(target.Status.Phase),
+			Message: fmt.Sprintf("Integration %q is in %q phase", it.GetName(), target.Status.Phase),
+		}
+
+		if condition := it.Status.GetCondition(v1.IntegrationConditionReady); condition != nil {
+			if condition.Pods != nil {
+				c.Pods = make([]v1.PodCondition, 0, len(condition.Pods))
+				c.Pods = append(c.Pods, condition.Pods...)
+			}
+		}
+
+		target.Status.SetConditions(c)
+	}
+
+	// Mirror status replicas and selector
+	target.Status.Replicas = it.Status.Replicas
+	target.Status.Selector = it.Status.Selector
+
+	return target, nil
+}
+
+func setKameletBindingReadyCondition(kb *v1alpha1.KameletBinding, it *v1.Integration) {
+	if condition := it.Status.GetCondition(v1.IntegrationConditionReady); condition != nil {
+		message := condition.Message
+		if message == "" {
+			message = fmt.Sprintf("Integration %q readiness condition is %q", it.GetName(), condition.Status)
+		}
+
+		c := v1alpha1.KameletBindingCondition{
+			Type:    v1alpha1.KameletBindingConditionReady,
+			Status:  condition.Status,
+			Reason:  condition.Reason,
+			Message: message,
+		}
+
+		if condition.Pods != nil {
+			c.Pods = make([]v1.PodCondition, 0, len(condition.Pods))
+			c.Pods = append(c.Pods, condition.Pods...)
+		}
+
+		kb.Status.SetConditions(c)
+
+	} else {
+		kb.Status.SetCondition(
 			v1alpha1.KameletBindingConditionReady,
-			corev1.ConditionFalse,
-			string(target.Status.Phase),
+			corev1.ConditionUnknown,
 			"",
+			fmt.Sprintf("Integration %q does not have a readiness condition", it.GetName()),
 		)
 	}
-	return target, nil
 }

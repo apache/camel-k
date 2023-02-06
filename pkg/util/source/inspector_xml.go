@@ -24,12 +24,12 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-// XMLInspector --
+// XMLInspector --.
 type XMLInspector struct {
 	baseInspector
 }
 
-// Extract --
+// Extract --.
 func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	content := strings.NewReader(source.Content)
 	decoder := xml.NewDecoder(content)
@@ -48,11 +48,21 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 				meta.RequiredCapabilities.Add(v1.CapabilityRest)
 			case "circuitBreaker":
 				meta.RequiredCapabilities.Add(v1.CapabilityCircuitBreaker)
+			case "json":
+				dataFormatID := defaultJSONDataFormat
+				for _, a := range se.Attr {
+					if a.Name.Local == "library" {
+						dataFormatID = strings.ToLower(a.Value)
+					}
+				}
+				if dfDep := i.catalog.GetArtifactByDataFormat(dataFormatID); dfDep != nil {
+					meta.AddDependency(dfDep.GetDependencyID())
+				}
 			case "language":
 				for _, a := range se.Attr {
 					if a.Name.Local == "language" {
 						if dependency, ok := i.catalog.GetLanguageDependency(a.Value); ok {
-							i.addDependency(dependency, meta)
+							meta.AddDependency(dependency)
 						}
 					}
 				}
@@ -62,7 +72,7 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 						meta.FromURIs = append(meta.FromURIs, a.Value)
 					}
 				}
-			case "to", "toD", "toF":
+			case "to", "toD", "toF", "wireTap":
 				for _, a := range se.Attr {
 					if a.Name.Local == "uri" {
 						meta.ToURIs = append(meta.ToURIs, a.Value)
@@ -77,14 +87,18 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 			}
 
 			if dependency, ok := i.catalog.GetLanguageDependency(se.Name.Local); ok {
-				i.addDependency(dependency, meta)
+				meta.AddDependency(dependency)
 			}
 		}
 	}
 
-	i.discoverCapabilities(source, meta)
-	i.discoverDependencies(source, meta)
-	i.discoverKamelets(source, meta)
+	if err := i.discoverCapabilities(source, meta); err != nil {
+		return err
+	}
+	if err := i.discoverDependencies(source, meta); err != nil {
+		return err
+	}
+	i.discoverKamelets(meta)
 
 	meta.ExposesHTTPServices = meta.ExposesHTTPServices || i.containsHTTPURIs(meta.FromURIs)
 	meta.PassiveEndpoints = i.hasOnlyPassiveEndpoints(meta.FromURIs)

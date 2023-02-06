@@ -26,7 +26,7 @@ import (
 	"github.com/radovskyb/watcher"
 )
 
-// File returns a channel that signals each time the content of the file changes
+// File returns a channel that signals each time the content of the file changes.
 func File(ctx context.Context, path string) (<-chan bool, error) {
 	w := watcher.New()
 	if err := w.Add(path); err != nil {

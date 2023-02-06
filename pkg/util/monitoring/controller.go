@@ -48,7 +48,6 @@ type tagLabelValue string
 
 const (
 	platformError tagLabelValue = "PlatformError"
-	userError     tagLabelValue = "UserError"
 )
 
 type instrumentedReconciler struct {
@@ -90,37 +89,37 @@ func (r *instrumentedReconciler) Reconcile(ctx context.Context, request reconcil
 
 func resultLabelFor(res reconcile.Result, err error) string {
 	var label resultLabelValue
-	if err != nil {
+	switch {
+	case err != nil:
 		label = errored
-	} else if res.Requeue || res.RequeueAfter > 0 {
+	case res.Requeue || res.RequeueAfter > 0:
 		label = requeued
-	} else {
+	default:
 		label = reconciled
 	}
+
 	return string(label)
 }
 
-var (
-	loopDuration = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name: "camel_k_reconciliation_duration_seconds",
-			Help: "Camel K reconciliation loop duration",
-			Buckets: []float64{
-				0.25 * time.Second.Seconds(),
-				0.5 * time.Second.Seconds(),
-				1 * time.Second.Seconds(),
-				5 * time.Second.Seconds(),
-			},
+var loopDuration = prometheus.NewHistogramVec(
+	prometheus.HistogramOpts{
+		Name: "camel_k_reconciliation_duration_seconds",
+		Help: "Camel K reconciliation loop duration",
+		Buckets: []float64{
+			0.25 * time.Second.Seconds(),
+			0.5 * time.Second.Seconds(),
+			1 * time.Second.Seconds(),
+			5 * time.Second.Seconds(),
 		},
-		[]string{
-			namespaceLabel,
-			groupLabel,
-			versionLabel,
-			kindLabel,
-			resultLabel,
-			tagLabel,
-		},
-	)
+	},
+	[]string{
+		namespaceLabel,
+		groupLabel,
+		versionLabel,
+		kindLabel,
+		resultLabel,
+		tagLabel,
+	},
 )
 
 func init() {

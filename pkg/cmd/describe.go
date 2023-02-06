@@ -18,57 +18,55 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"strings"
 	"time"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	"github.com/spf13/cobra"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/indentedwriter"
 )
 
 func describeObjectMeta(w *indentedwriter.Writer, om metav1.ObjectMeta) {
-	w.Write(0, "Name:\t%s\n", om.Name)
-	w.Write(0, "Namespace:\t%s\n", om.Namespace)
+	w.Writef(0, "Name:\t%s\n", om.Name)
+	w.Writef(0, "Namespace:\t%s\n", om.Namespace)
 
 	if len(om.GetLabels()) > 0 {
-		w.Write(0, "Labels:")
+		w.Writef(0, "Labels:")
 		for k, v := range om.Labels {
-			w.Write(0, "\t%s=%s\n", k, strings.TrimSpace(v))
+			w.Writef(0, "\t%s=%s\n", k, strings.TrimSpace(v))
 		}
 	}
 
 	if len(om.GetAnnotations()) > 0 {
-		w.Write(0, "Annotations:")
+		w.Writef(0, "Annotations:")
 		for k, v := range om.Annotations {
-			w.Write(0, "\t%s=%s\n", k, strings.TrimSpace(v))
+			w.Writef(0, "\t%s=%s\n", k, strings.TrimSpace(v))
 		}
 	}
 
-	w.Write(0, "Creation Timestamp:\t%s\n", om.CreationTimestamp.Format(time.RFC1123Z))
+	w.Writef(0, "Creation Timestamp:\t%s\n", om.CreationTimestamp.Format(time.RFC1123Z))
 }
 
-func describeTraits(w *indentedwriter.Writer, traits map[string]v1.TraitSpec) error {
-	if len(traits) > 0 {
-		w.Write(0, "Traits:\n")
+func describeTraits(w *indentedwriter.Writer, traits interface{}) error {
+	traitMap, err := trait.ToTraitMap(traits)
+	if err != nil {
+		return err
+	}
 
-		for trait := range traits {
-			w.Write(1, "%s:\n", strings.Title(trait))
-			//TODO: print the whole TraitSpec as Yaml
-			data, err := json.Marshal(traits[trait])
-			if err != nil {
-				return err
-			}
-			config := make(map[string]interface{})
-			err = json.Unmarshal(data, &config)
-			if err != nil {
-				return err
-			}
-			for k, v := range config {
-				w.Write(2, "%s:\t%v\n", strings.Title(k), v)
+	if len(traitMap) > 0 {
+		w.Writef(0, "Traits:\n")
+
+		for id, trait := range traitMap {
+			w.Writef(1, "%s:\n", cases.Title(language.English).String(id))
+			// TODO: print the whole TraitSpec as Yaml
+			for k, v := range trait {
+				w.Writef(2, "%s:\t%v\n", cases.Title(language.English).String(k), v)
 			}
 		}
 	}

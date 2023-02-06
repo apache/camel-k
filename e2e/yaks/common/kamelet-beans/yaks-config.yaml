@@ -21,6 +21,8 @@ config:
 pre:
 - name: installation
   run: |
-    kamel install -n $YAKS_NAMESPACE
-
     kubectl apply -f beans-source.kamelet.yaml -n $YAKS_NAMESPACE
+post:
+  - name: print dump
+    if: env:CI=true && failure()
+    run: yaks dump --includes app=camel-k

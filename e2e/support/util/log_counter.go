@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 /*
@@ -24,7 +25,7 @@ import (
 )
 
 type LogCounter struct {
-	logs  *[]LogEntry
+	logs *[]LogEntry
 }
 
 func NewLogCounter(logs *[]LogEntry) *LogCounter {

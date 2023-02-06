@@ -18,7 +18,7 @@ limitations under the License.
 package docker
 
 import (
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/apache/camel-k/pkg/util"
@@ -28,19 +28,19 @@ import (
 var RegistryName = ""
 
 // BaseImageName -- base image name.
-var BaseImageName string = "integration-base-image"
+var BaseImageName = "integration-base-image"
 
 // BaseWorkingDirectory -- directory used by Docker to construct the base image.
-var BaseWorkingDirectory string = ""
+var BaseWorkingDirectory = ""
 
 // IntegrationWorkingDirectory -- directory used by Docker to construct the integration image.
-var IntegrationWorkingDirectory string = ""
+var IntegrationWorkingDirectory = ""
 
 // NetworkName -- network used by Docker when running the image.
-var NetworkName string = "host"
+var NetworkName = "host"
 
 // Internal variables.
-var (
+const (
 	dockerEndpointSeparator = "/"
 	containerFileSeparator  = "/"
 	latestTag               = "latest"
@@ -56,7 +56,7 @@ func BuildImageArgs(dockerFileDir string, imageName string, sourceDir string) []
 	args = append(args, "build")
 
 	// Add path to Dockerfile:
-	dockerFile := path.Join(dockerFileDir, "Dockerfile")
+	dockerFile := filepath.Join(dockerFileDir, "Dockerfile")
 
 	args = append(args, DockerfilePathArg(dockerFile)...)
 
@@ -99,7 +99,7 @@ func RunImageArgs(imagePath string, imageTag string) ([]string, error) {
 // Arguments to docker command line.
 //
 
-// DockerfilePathArg --
+// DockerfilePathArg --.
 func DockerfilePathArg(dockerfilePath string) []string {
 	args := make([]string, 0)
 	args = append(args, "-f")
@@ -107,7 +107,7 @@ func DockerfilePathArg(dockerfilePath string) []string {
 	return args
 }
 
-// ImageArg --
+// ImageArg --.
 func ImageArg(dockerImageName string, tag string) []string {
 	args := make([]string, 0)
 	args = append(args, "-t")
@@ -115,7 +115,7 @@ func ImageArg(dockerImageName string, tag string) []string {
 	return args
 }
 
-// LatestImageArg --
+// LatestImageArg --.
 func LatestImageArg(dockerImageName string) []string {
 	args := make([]string, 0)
 	args = append(args, "-t")
@@ -123,12 +123,20 @@ func LatestImageArg(dockerImageName string) []string {
 	return args
 }
 
-// FullImageArg --
+// FullImageArg --.
 func FullImageArg(dockerImage string) []string {
 	imageComponents := strings.Split(dockerImage, ":")
 	if len(imageComponents) == 2 {
 		// Image has a tag already.
 		return ImageArg(imageComponents[0], imageComponents[1])
+	} else if len(imageComponents) > 2 {
+		// Image has an image registry name with a colon inside it:
+		// localhost:5000
+		// and image also has a tag:
+		// localhost:5000/image:latest
+		// Assume tag is always included and is last in the imageComponents list.
+		last := len(imageComponents) - 1
+		return ImageArg(strings.Join(imageComponents[:last], ":"), imageComponents[last])
 	}
 
 	// Image has no tag, latest tag will be added automatically.
@@ -139,7 +147,7 @@ func FullImageArg(dockerImage string) []string {
 // Docker-spcific helper functions.
 //
 
-// GetImage - <image-name>:<tag>
+// GetImage - <image-name>:<tag>.
 func GetImage(dockerImageName string, tag string) string {
 	image := make([]string, 0)
 	image = append(image, dockerImageName)
@@ -147,12 +155,12 @@ func GetImage(dockerImageName string, tag string) string {
 	return strings.Join(image, ":")
 }
 
-// GetLatestImage - <image-name>:latest
+// GetLatestImage - <image-name>:latest.
 func GetLatestImage(dockerImageName string) string {
 	return GetImage(dockerImageName, latestTag)
 }
 
-// GetFullDockerImage - <docker-registry>/<image-name>:<tag>
+// GetFullDockerImage - <docker-registry>/<image-name>:<tag>.
 func GetFullDockerImage(dockerImageName string, tag string) string {
 	fullImagePath := make([]string, 0)
 
@@ -166,7 +174,7 @@ func GetFullDockerImage(dockerImageName string, tag string) string {
 	return strings.Join(fullImagePath, dockerEndpointSeparator)
 }
 
-// GetBaseImagePath --
+// GetBaseImagePath returns Docker base image path.
 func GetBaseImagePath() string {
 	return RegistryName + dockerEndpointSeparator + BaseImageName
 }
@@ -187,67 +195,67 @@ func JoinPath(lhsPath string, rhsPath string) string {
 
 // Generic commands.
 
-// COPY --
+// COPY --.
 func COPY(from string, to string) string {
 	c := []string{"COPY", from, to}
 	return strings.Join(c, " ")
 }
 
-// RUN --
+// RUN --.
 func RUN(command string) string {
 	c := []string{"RUN", command}
 	return strings.Join(c, " ")
 }
 
-// FROM --
+// FROM --.
 func FROM(imageName string) string {
 	c := []string{"FROM", imageName}
 	return strings.Join(c, " ")
 }
 
-// WORKDIR --
+// WORKDIR --.
 func WORKDIR(workDir string) string {
 	c := []string{"WORKDIR", workDir}
 	return strings.Join(c, " ")
 }
 
-// ENV --
+// ENV --.
 func ENV(envVar string, value string) string {
 	p := []string{envVar, value}
 	c := []string{"ENV", strings.Join(p, "=")}
 	return strings.Join(c, " ")
 }
 
-// AS --
+// AS --.
 func AS(image string, alias string) string {
 	c := []string{image, "as", alias}
 	return strings.Join(c, " ")
 }
 
-// CMD --
+// CMD --.
 func CMD(command string) string {
 	c := []string{"CMD", command}
 	return strings.Join(c, " ")
 }
 
-// RUNMavenInstall --
+// RUNMavenInstall --.
 func RUNMavenInstall() string {
 	return RUN("apt-get update && apt-get install maven -y && apt-get upgrade -y")
 }
 
-// RUNMakeDir --
+// RUNMakeDir --.
 func RUNMakeDir(dirName string) string {
 	c := []string{"mkdir", "-p", dirName}
 	return RUN(strings.Join(c, " "))
 }
 
-// ENVAppend --
+// ENVAppend --.
 func ENVAppend(envVar string, value string) string {
 	tail := []string{value, "$" + envVar}
 	return ENV(envVar, strings.Join(tail, ":"))
 }
 
-// CMDShellWrap --
+// CMDShellWrap --.
 func CMDShellWrap(command string) string {
 	return CMD("/bin/sh -c \"" + command + "\"")
 }

@@ -1,9 +1,12 @@
 # Go vendor
 /vendor
+/github.com
 
 # Binary files
 /kamel
+/kamel.*
 /license-check
+/**/platform-check
 
 # Config files
 /kamel-config.yaml
@@ -16,10 +19,14 @@
 /release-notes.md
 
 # Unuseful file
-/deploy/operator.yaml
+/resources/operator.yaml
 
 # Bundle directory
 /bundle
+
+# Bundle Index directory
+/index
+index.Dockerfile
 
 # IDEs
 .idea
@@ -36,6 +43,8 @@ build/_maven_overlay
 build/_kamelets
 build/_maven_overlay/
 build/maven/target/
+build/maven
+build/m2
 /api_*
 
 # envrc
@@ -152,3 +161,10 @@ mvnw text eol=lf
 .history
 
 # End of https://www.gitignore.io/api/go,vim,emacs,visualstudiocode
+
+### config kustomize ###
+config/**/*.gen.tmpl
+config/**/*.gen.yaml
+config/**/*.gen.json
+
+*-installer*

@@ -21,24 +21,19 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/apache/camel-k/pkg/util/property"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/builder"
 	mvn "github.com/apache/camel-k/pkg/util/maven"
+	"github.com/apache/camel-k/pkg/util/property"
 )
 
-// The builder trait is internally used to determine the best strategy to
-// build and configure IntegrationKits.
-//
-// +camel-k:trait=builder
 type builderTrait struct {
-	BaseTrait `property:",squash"`
-	// Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-	Verbose *bool `property:"verbose" json:"verbose,omitempty"`
-	// A list of properties to be provided to the build task
-	Properties []string `property:"properties" json:"properties,omitempty"`
+	BaseTrait
+	traitv1.BuilderTrait `property:",squash"`
 }
 
 func newBuilderTrait() Trait {
@@ -47,18 +42,18 @@ func newBuilderTrait() Trait {
 	}
 }
 
-// IsPlatformTrait overrides base class method
+// IsPlatformTrait overrides base class method.
 func (t *builderTrait) IsPlatformTrait() bool {
 	return true
 }
 
-// InfluencesKit overrides base class method
+// InfluencesKit overrides base class method.
 func (t *builderTrait) InfluencesKit() bool {
 	return true
 }
 
 func (t *builderTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if e.IntegrationKit == nil || !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 
@@ -71,7 +66,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 		e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseError
 		e.IntegrationKit.Status.SetCondition("IntegrationKitPropertiesFormatValid", corev1.ConditionFalse,
 			"IntegrationKitPropertiesFormatValid", fmt.Sprintf("One or more properties where not formatted as expected: %s", err.Error()))
-		if err := e.Client.Status().Update(e.C, e.IntegrationKit); err != nil {
+		if err := e.Client.Status().Update(e.Ctx, e.IntegrationKit); err != nil {
 			return err
 		}
 		return nil
@@ -101,7 +96,21 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}})
 
 	case v1.IntegrationPlatformBuildPublishStrategyBuildah:
+		var platform string
+		var found bool
+		if platform, found = e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahPlatform]; !found {
+			platform = ""
+			t.L.Infof("Attribute platform for buildah not found, default from host will be used!")
+		} else {
+			t.L.Infof("User defined %s platform, will be used from buildah!", platform)
+		}
+		var executorImage string
+		if image, found := e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahImage]; found {
+			executorImage = image
+			t.L.Infof("User defined executor image %s will be used for buildah", image)
+		}
 		e.BuildTasks = append(e.BuildTasks, v1.Task{Buildah: &v1.BuildahTask{
+			Platform: platform,
 			BaseTask: v1.BaseTask{
 				Name: "buildah",
 			},
@@ -109,11 +118,20 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Image:    getImageName(e),
 				Registry: e.Platform.Status.Build.Registry,
 			},
-			HttpProxySecret: e.Platform.Status.Build.HTTPProxySecret,
-			Verbose:         t.Verbose,
+			Verbose:       t.Verbose,
+			ExecutorImage: executorImage,
 		}})
-
+	//nolint: staticcheck,nolintlint
 	case v1.IntegrationPlatformBuildPublishStrategyKaniko:
+		persistentVolumeClaim := e.Platform.Status.Build.PublishStrategyOptions[builder.KanikoPVCName]
+		cacheEnabled := e.Platform.Status.Build.IsOptionEnabled(builder.KanikoBuildCacheEnabled)
+
+		var executorImage string
+		if image, found := e.Platform.Status.Build.PublishStrategyOptions[builder.KanikoExecutorImage]; found {
+			executorImage = image
+			t.L.Infof("User defined executor image %s will be used for kaniko", image)
+		}
+
 		e.BuildTasks = append(e.BuildTasks, v1.Task{Kaniko: &v1.KanikoTask{
 			BaseTask: v1.BaseTask{
 				Name: "kaniko",
@@ -123,11 +141,11 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Registry: e.Platform.Status.Build.Registry,
 			},
 			Cache: v1.KanikoTaskCache{
-				Enabled:               e.Platform.Status.Build.KanikoBuildCache,
-				PersistentVolumeClaim: e.Platform.Status.Build.PersistentVolumeClaim,
+				Enabled:               &cacheEnabled,
+				PersistentVolumeClaim: persistentVolumeClaim,
 			},
-			HttpProxySecret: e.Platform.Status.Build.HTTPProxySecret,
-			Verbose:         t.Verbose,
+			Verbose:       t.Verbose,
+			ExecutorImage: executorImage,
 		}})
 	}
 
@@ -135,16 +153,19 @@ func (t *builderTrait) Apply(e *Environment) error {
 }
 
 func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
-	maven := e.Platform.Status.Build.Maven
-
-	// Add Maven repositories defined in the IntergrationKit
+	maven := v1.MavenBuildSpec{
+		MavenSpec: e.Platform.Status.Build.Maven,
+	}
+	// Add Maven repositories defined in the IntegrationKit
 	for _, repo := range e.IntegrationKit.Spec.Repositories {
 		maven.Repositories = append(maven.Repositories, mvn.NewRepository(repo))
 	}
+
 	task := &v1.BuilderTask{
 		BaseTask: v1.BaseTask{
 			Name: "builder",
 		},
+		BaseImage:    e.Platform.Status.Build.BaseImage,
 		Runtime:      e.CamelCatalog.Runtime,
 		Dependencies: e.IntegrationKit.Spec.Dependencies,
 		Maven:        maven,
@@ -166,10 +187,7 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 	}
 
 	steps := make([]builder.Step, 0)
-	steps = append(steps, builder.DefaultSteps...)
-
-	quarkus := e.Catalog.GetTrait("quarkus").(*quarkusTrait)
-	quarkus.addBuildSteps(&steps)
+	steps = append(steps, builder.Project.CommonSteps...)
 
 	// sort steps by phase
 	sort.SliceStable(steps, func(i, j int) bool {

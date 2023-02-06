@@ -33,19 +33,19 @@ const (
 	OrderLast     = 100
 )
 
-// Binding represents how a Kubernetes object is represented in Camel K resources
+// Binding represents how a Kubernetes object is represented in Camel K resources.
 type Binding struct {
 	// URI is the Camel URI equivalent
 	URI string
 	// Step is to support complex mapping such as Camel's EIPs
 	Step map[string]interface{}
 	// Traits is a partial trait specification that should be merged into the integration
-	Traits map[string]v1.TraitSpec
+	Traits v1.Traits
 	// ApplicationProperties contain properties that should be set on the integration for the binding to work
 	ApplicationProperties map[string]string
 }
 
-// BindingProvider maps a KameletBinding endpoint into Camel K resources
+// BindingProvider maps a KameletBinding endpoint into Camel K resources.
 type BindingProvider interface {
 	// ID returns the name of the binding provider
 	ID() string
@@ -55,6 +55,7 @@ type BindingProvider interface {
 	Order() int
 }
 
+// nolint: containedctx
 type BindingContext struct {
 	Ctx       context.Context
 	Client    client.Client

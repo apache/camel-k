@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
@@ -33,16 +34,16 @@ func TestHttpJavaSource(t *testing.T) {
 			Content: `
 			from("telegram:bots/cippa").to("log:stash");
 			from("netty-http:uri").to("log:stash");
-			from("ine:xistent").to("log:stash");
 		`,
 		},
 		Language: v1.LanguageJavaSource,
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	require.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.False(t, meta.PassiveEndpoints)
@@ -64,9 +65,10 @@ func TestHttpOnlyJavaSource(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	require.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
@@ -85,9 +87,10 @@ func TestHttpOnlyJavaSourceRest(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	require.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
@@ -106,9 +109,10 @@ func TestHttpOnlyJavaSourceRest2(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	require.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
@@ -120,7 +124,7 @@ func TestNoHttpGroovySource(t *testing.T) {
 			Name: "Request.groovy",
 			Content: `
 			from('direct:bots/cippa').to("log:stash");
-			from('teelgram:uri').to("log:stash");
+			from('telegram:uri').to("log:stash");
 			from('seda:path').to("log:stash");
 		`,
 		},
@@ -128,9 +132,10 @@ func TestNoHttpGroovySource(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	require.NoError(t, err)
 
 	assert.False(t, meta.ExposesHTTPServices)
 	assert.False(t, meta.PassiveEndpoints)
@@ -150,9 +155,10 @@ func TestHttpOnlyGroovySource(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	require.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
@@ -172,9 +178,10 @@ func TestHttpXMLSource(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	require.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.False(t, meta.PassiveEndpoints)
@@ -195,9 +202,10 @@ func TestHttpOnlyXMLSource(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
-	meta := Extract(catalog, code)
+	meta, err := Extract(catalog, code)
+	require.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
@@ -229,9 +237,10 @@ func TestMultilangHTTPOnlySource(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
-	meta := ExtractAll(catalog, codes)
+	meta, err := ExtractAll(catalog, codes)
+	require.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.True(t, meta.PassiveEndpoints)
@@ -265,9 +274,10 @@ func TestMultilangHTTPSource(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
-	meta := ExtractAll(catalog, codes)
+	meta, err := ExtractAll(catalog, codes)
+	require.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
 	assert.False(t, meta.PassiveEndpoints)

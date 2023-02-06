@@ -21,25 +21,34 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"math/rand"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"strings"
-	"time"
+
+	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/log"
 )
 
-func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePass string, data []byte) error {
-	args := strings.Fields(fmt.Sprintf("-importcert -noprompt -alias maven -storepass %s -keystore %s", keystorePass, keystoreName))
-	cmd := exec.CommandContext(ctx, "keytool", args...)
-	cmd.Dir = keystoreDir
-	cmd.Stdin = bytes.NewReader(data)
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
+var (
+	logger = log.WithName("keytool")
 
-	err := cmd.Run()
-	if err != nil {
-		return err
+	loggerInfo  = func(s string) string { logger.Info(s); return "" }
+	loggerError = func(s string) string { logger.Error(nil, s); return "" }
+)
+
+func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePass string, data [][]byte) error {
+	for i, data := range data {
+		args := strings.Fields(fmt.Sprintf("-importcert -noprompt -alias maven-%d -storepass %s -keystore %s", i, keystorePass, keystoreName))
+		cmd := exec.CommandContext(ctx, "keytool", args...)
+		cmd.Dir = keystoreDir
+		cmd.Stdin = bytes.NewReader(data)
+		// keytool logs info messages to stderr, as stdout is used to output results,
+		// otherwise it logs error messages to stdout.
+		err := util.RunAndLog(ctx, cmd, loggerError, loggerInfo)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Try to locate root CA certificates truststore, in order to import them
@@ -47,14 +56,13 @@ func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePa
 	// JVM truststore.
 	javaHome, ok := os.LookupEnv("JAVA_HOME")
 	if ok {
-		caCertsPath := path.Join(javaHome, "lib/security/cacerts")
+		caCertsPath := filepath.Join(javaHome, "lib/security/cacerts")
 		args := strings.Fields(fmt.Sprintf("-importkeystore -noprompt -srckeystore %s -srcstorepass %s -destkeystore %s -deststorepass %s", caCertsPath, "changeit", keystoreName, keystorePass))
 		cmd := exec.CommandContext(ctx, "keytool", args...)
 		cmd.Dir = keystoreDir
-		cmd.Stderr = os.Stderr
-		cmd.Stdout = os.Stdout
-
-		err := cmd.Run()
+		// keytool logs info messages to stderr, as stdout is used to output results,
+		// otherwise it logs error messages to stdout.
+		err := util.RunAndLog(ctx, cmd, loggerError, loggerInfo)
 		if err != nil {
 			return err
 		}
@@ -63,36 +71,9 @@ func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePa
 	return nil
 }
 
+// NewKeystorePassword generates a random password.
 // The keytool CLI mandates a password at least 6 characters long
 // to access any key stores.
 func NewKeystorePassword() string {
-	return randString(10)
-}
-
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-const (
-	letterIdxBits = 6                    // 6 bits to represent a letter index
-	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
-	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
-)
-
-var src = rand.NewSource(time.Now().UnixNano())
-
-func randString(n int) string {
-	sb := strings.Builder{}
-	sb.Grow(n)
-	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
-		if remain == 0 {
-			cache, remain = src.Int63(), letterIdxMax
-		}
-		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
-			sb.WriteByte(letterBytes[idx])
-			i--
-		}
-		cache >>= letterIdxBits
-		remain--
-	}
-
-	return sb.String()
+	return util.RandomString(10)
 }

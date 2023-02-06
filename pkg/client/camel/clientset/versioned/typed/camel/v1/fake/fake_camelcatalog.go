@@ -21,8 +21,11 @@ package fake
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	applyconfigurationcamelv1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/camel/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -118,7 +121,7 @@ func (c *FakeCamelCatalogs) UpdateStatus(ctx context.Context, camelCatalog *came
 // Delete takes name of the camelCatalog and deletes it. Returns an error if one occurs.
 func (c *FakeCamelCatalogs) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(camelcatalogsResource, c.ns, name), &camelv1.CamelCatalog{})
+		Invokes(testing.NewDeleteActionWithOptions(camelcatalogsResource, c.ns, name, opts), &camelv1.CamelCatalog{})
 
 	return err
 }
@@ -135,6 +138,51 @@ func (c *FakeCamelCatalogs) DeleteCollection(ctx context.Context, opts v1.Delete
 func (c *FakeCamelCatalogs) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *camelv1.CamelCatalog, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(camelcatalogsResource, c.ns, name, pt, data, subresources...), &camelv1.CamelCatalog{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*camelv1.CamelCatalog), err
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied camelCatalog.
+func (c *FakeCamelCatalogs) Apply(ctx context.Context, camelCatalog *applyconfigurationcamelv1.CamelCatalogApplyConfiguration, opts v1.ApplyOptions) (result *camelv1.CamelCatalog, err error) {
+	if camelCatalog == nil {
+		return nil, fmt.Errorf("camelCatalog provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(camelCatalog)
+	if err != nil {
+		return nil, err
+	}
+	name := camelCatalog.Name
+	if name == nil {
+		return nil, fmt.Errorf("camelCatalog.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(camelcatalogsResource, c.ns, *name, types.ApplyPatchType, data), &camelv1.CamelCatalog{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*camelv1.CamelCatalog), err
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *FakeCamelCatalogs) ApplyStatus(ctx context.Context, camelCatalog *applyconfigurationcamelv1.CamelCatalogApplyConfiguration, opts v1.ApplyOptions) (result *camelv1.CamelCatalog, err error) {
+	if camelCatalog == nil {
+		return nil, fmt.Errorf("camelCatalog provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(camelCatalog)
+	if err != nil {
+		return nil, err
+	}
+	name := camelCatalog.Name
+	if name == nil {
+		return nil, fmt.Errorf("camelCatalog.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(camelcatalogsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &camelv1.CamelCatalog{})
 
 	if obj == nil {
 		return nil, err

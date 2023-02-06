@@ -20,14 +20,16 @@ package integrationplatform
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/resources"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	corev1 "k8s.io/api/core/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/install"
+	platformutil "github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/resources"
+	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
-// NewCreateAction returns a action that creates resources needed by the platform
+// NewCreateAction returns a action that creates resources needed by the platform.
 func NewCreateAction() Action {
 	return &createAction{}
 }
@@ -45,7 +47,12 @@ func (action *createAction) CanHandle(platform *v1.IntegrationPlatform) bool {
 }
 
 func (action *createAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
-	for _, k := range resources.ResourcesWithPrefix("/camel-catalog-") {
+	paths, err := resources.WithPrefix("/camel-catalog-")
+	if err != nil {
+		return nil, err
+	}
+
+	for _, k := range paths {
 		action.L.Infof("Installing camel catalog: %s", k)
 		err := install.Resources(ctx, action.client, platform.Namespace, true, install.IdentityResourceCustomizer, k)
 		if err != nil {
@@ -53,7 +60,7 @@ func (action *createAction) Handle(ctx context.Context, platform *v1.Integration
 		}
 	}
 
-	if defaults.InstallDefaultKamelets() {
+	if !platformutil.IsSecondary(platform) && defaults.InstallDefaultKamelets() {
 		// Kamelet Catalog installed on platform reconciliation for cases where users install a global operator
 		if err := install.KameletCatalog(ctx, action.client, platform.Namespace); err != nil {
 			return nil, err
@@ -61,6 +68,11 @@ func (action *createAction) Handle(ctx context.Context, platform *v1.Integration
 	}
 
 	platform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	platform.Status.SetCondition(
+		v1.IntegrationPlatformConditionReady,
+		corev1.ConditionTrue,
+		v1.IntegrationPlatformConditionCreatedReason,
+		"integration platform created")
 
 	return platform, nil
 }

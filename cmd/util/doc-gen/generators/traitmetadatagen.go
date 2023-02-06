@@ -23,7 +23,10 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"sort"
 	"strings"
+
+	"github.com/apache/camel-k/pkg/util"
 
 	"gopkg.in/yaml.v2"
 	"k8s.io/gengo/args"
@@ -31,7 +34,9 @@ import (
 	"k8s.io/gengo/types"
 )
 
-// traitMetaDataGen produces YAML documentation about trait descriptions
+const traitFile = "traits.yaml"
+
+// traitMetaDataGen produces YAML documentation about trait descriptions.
 type traitMetaDataGen struct {
 	generator.DefaultGen
 	arguments *args.GeneratorArgs
@@ -56,7 +61,10 @@ type traitPropertyMetaData struct {
 	Description string `yaml:"description"`
 }
 
-// NewtraitMetaDataGen --
+// traitMetaDataGen implements Generator interface.
+var _ generator.Generator = &traitMetaDataGen{}
+
+// NewtraitMetaDataGen --.
 func NewtraitMetaDataGen(arguments *args.GeneratorArgs) generator.Generator {
 	return &traitMetaDataGen{
 		DefaultGen: generator.DefaultGen{},
@@ -88,27 +96,31 @@ func (g *traitMetaDataGen) GenerateType(context *generator.Context, t *types.Typ
 }
 
 func (g *traitMetaDataGen) Finalize(c *generator.Context, w io.Writer) error {
-
-	deployDir := g.arguments.CustomArgs.(*CustomArgs).DeployDir
-	traitFile := "traits.yaml"
+	customArgs, ok := g.arguments.CustomArgs.(*CustomArgs)
+	if !ok {
+		return fmt.Errorf("type assertion failed: %v", g.arguments.CustomArgs)
+	}
+	deployDir := customArgs.ResourceDir
 	filename := path.Join(deployDir, traitFile)
 
-	var file *os.File
-	var err error
-	if file, err = os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0777); err != nil {
-		return err
-	}
-	if err = file.Truncate(0); err != nil {
-		return err
-	}
-	defer file.Close()
+	// reorder the traits metadata so that it always gets the identical result
+	sort.Slice(g.Root.Traits, func(i, j int) bool {
+		return g.Root.Traits[i].Name < g.Root.Traits[j].Name
+	})
 
-	data, err := yaml.Marshal(g.Root)
-	if err != nil {
-		fmt.Fprintf(file, "error: %v", err)
-	}
-	fmt.Fprintf(file, "%s", string(data))
-	return nil
+	return util.WithFile(filename, os.O_RDWR|os.O_CREATE, 0o777, func(file *os.File) error {
+		if err := file.Truncate(0); err != nil {
+			return err
+		}
+
+		data, err := yaml.Marshal(g.Root)
+		if err != nil {
+			fmt.Fprintf(file, "error: %v", err)
+		}
+		fmt.Fprintf(file, "%s", string(data))
+
+		return nil
+	})
 }
 
 func (g *traitMetaDataGen) getTraitID(t *types.Type) string {
@@ -125,8 +137,8 @@ func (g *traitMetaDataGen) getTraitID(t *types.Type) string {
 }
 
 func (g *traitMetaDataGen) buildDescription(t *types.Type, traitID string, td *traitMetaData) {
-	var desc = []string(nil)
-	desc = append(desc, g.filterOutTagsAndComments(t.CommentLines)...)
+	desc := []string(nil)
+	desc = append(desc, filterOutTagsAndComments(t.CommentLines)...)
 	td.Name = traitID
 	td.Description = ""
 	for _, line := range desc {
@@ -145,7 +157,7 @@ func (g *traitMetaDataGen) buildDescription(t *types.Type, traitID string, td *t
 
 func (g *traitMetaDataGen) buildFields(t *types.Type, td *traitMetaData) {
 	if len(t.Members) > 1 {
-		var res = []string(nil)
+		res := []string(nil)
 		g.buildMembers(t, &res, td)
 	}
 }
@@ -163,20 +175,9 @@ func (g *traitMetaDataGen) buildMembers(t *types.Type, content *[]string, td *tr
 				pd.TypeName = strings.TrimPrefix(m.Type.Name.Name, "*")
 
 				res = append(res, filterOutTagsAndComments(m.CommentLines)...)
-				pd.Description = strings.Join(res, "")
+				pd.Description = strings.Join(res, " ")
 				td.Properties = append(td.Properties, pd)
 			}
 		}
 	}
-}
-
-func (g *traitMetaDataGen) filterOutTagsAndComments(comments []string) []string {
-	res := make([]string, 0, len(comments))
-	for _, l := range comments {
-		if !strings.HasPrefix(strings.TrimLeft(l, " \t"), "+") &&
-			!strings.HasPrefix(strings.TrimLeft(l, " \t"), "TODO:") {
-			res = append(res, l)
-		}
-	}
-	return res
 }

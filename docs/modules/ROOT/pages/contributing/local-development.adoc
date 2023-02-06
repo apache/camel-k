@@ -1,39 +1,40 @@
 [[development-environment]]
 = Local development environment
 
-If you plan to contribute to Camel K, you will end up needing to run and troubleshoot your operator code locally. Here a guideline that will help you configure your local operator running.
+If you plan on contributing to Camel K, you will end up needing to run and troubleshoot your operator code locally. Here is a guideline that will help you configure your local operator running.
 
 [[local-operator]]
 == Running operator locally
 
 As soon as you build your operator locally you will ask yourself how to test it. The idea is that you execute it locally and instruct it to **watch** a namespace on a Kubernetes cluster (it may be remote or any local environment). Let's use a namespace called ``operator-test``.
 
-* We start by setting the environment variable ``WATCH_NAMESPACE`` with the namespace you'd like your operator to watch.
+* You can start with setting the environment variable ``WATCH_NAMESPACE`` with the namespace you'd like your operator to watch. You also need to specify the name of the operator, as you may have different operators running on the cluster.
 ----
 export WATCH_NAMESPACE=operator-test
+export OPERATOR_ID="camel-k-dev"
 ----
 
-* The next step is to install an ``IntegrationPlatform`` on the cluster namespace. You probably need to tweak the registry parameters in order to be able to authenticate against an image repository (see below paragraph for local repository instructions).
+* The next step is to install an ``IntegrationPlatform`` on the cluster namespace. You probably need to tweak the registry parameters in order to be able to authenticate against an image repository (see below paragraph for local repository instructions). It's important to specify the target operator that will take care of this IntegrationPlatform (`-x` or `--operator-id` option).
 ----
-./kamel install --skip-operator-setup -n operator-test --registry my-registry:5000
+./kamel install --skip-operator-setup -n operator-test --registry my-registry:5000 -x camel-k-dev
 ----
 
-* Finally, assuming you've builded your application correctly we can run the operator:
+* Finally, assuming you've built your application correctly we can run the operator:
 -----
 ./kamel operator
 -----
 
 * Test the local operator by creating a test `Integration`.
 -----
-./kamel run xyz.abc -n operator-test
+./kamel run xyz.abc -n operator-test -x camel-k-dev
 -----
 
-IMPORTANT: make sure no other Camel K Operators are watching that namespace, neither you have a global Camel K Operator installed on your cluster.
+IMPORTANT: make sure no other Camel K Operators are watching this namespace, neither you have a global Camel K Operator  installed on your cluster. As you may have more than one Camel K operator installed on the cluster, it's important you specify the `-x` (or `--operator-id`) option.
 
 [[local-minikube]]
 == Local operator and local cluster
 
-If you want to run a local operator togheter with ``Minikube`` you will need an additional step in order to let the local operator being able to push images in the local registry. We need to expose the local registry as described in https://minikube.sigs.k8s.io/docs/handbook/registry/#docker-on-windows[this procedure]:
+If you want to run a local operator togheter with ``Minikube`` you will need an additional step in order to let the local operator push images in the local registry. We need to expose the local registry as described in https://minikube.sigs.k8s.io/docs/handbook/registry/#docker-on-windows[this procedure]:
 
 * Enable the addon registry (this should be already in place):
 ----
@@ -53,16 +54,35 @@ kubectl port-forward --namespace kube-system registry-fttbv 5000:5000
 
 * Update the ``IntegrationPlatform`` to instruct it to use the ``localhost`` registry:
 ----
-./kamel install --skip-operator-setup -n operator-test --registry localhost:5000 --force
+./kamel install --skip-operator-setup -n operator-test --registry localhost:5000 --force -x camel-k-dev
 ----
 
 A similar procedure may work if you use other local environments. The idea is to expose the docker registry and be able to use it from your local operator.
+
+IMPORTANT: using build strategy as `Pod` won't probably work as it will expect the registry to be available at a URL not possible to reach from a local machine.
 
 === Local Camel K runtime
 
 Camel K integrations are based on https://github.com/apache/camel-k-runtime[Camel K runtime], generally paired with the operator release. If you need to specify a different runtime, or you have a local Camel K runtime that you want to test, then you will need to specify it in the `Integration Platform`:
 ----
-./kamel install --skip-operator-setup -n operator-test --registry localhost:5000 --force --runtime-version 1.7.0-SNAPSHOT
+./kamel install --skip-operator-setup -n operator-test --registry localhost:5000 --force --runtime-version $version -x camel-k-dev
 ----
 
-With the above instructions, the operator will pick up and use the snapshot version you have released locally.
+The `$version` variable must be replaced with the version you are building. For example, `1.3.1-SNAPSHOT`. With these instructions, the operator will pick up and use the snapshot version you have released locally. In order to use the local maven repository, you will also need to edit your IntegrationPlatform as follow:
+----
+$ k edit ip -n operator-test
+
+...
+  spec:
+    build:
+      maven:
+        cliOptions:
+        - -V
+        localRepository: /home/user/.m2/repository
+        settings: {}
+...
+----
+pointing the `localRepository` where your local maven is storing the artifacts (it will look for the camel-k-runtime dependencies there).
+
+
+Alternatively, if no local registry is available, you can use another type of registry as explained in xref:installation/registry/registry.adoc[the Registry section].

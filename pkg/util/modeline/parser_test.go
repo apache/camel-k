@@ -144,7 +144,7 @@ func TestParseXMLFile(t *testing.T) {
 				xmlns="http://camel.apache.org/schema/spring"
 				xsi:schemaLocation="
 					http://camel.apache.org/schema/spring
-					http://camel.apache.org/schema/spring/camel-spring.xsd">
+					https://camel.apache.org/schema/spring/camel-spring.xsd">
 		
 			<!-- Write your routes here, for example: -->
 			<route id="xml">

@@ -19,10 +19,12 @@ package maven
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
+// nolint: stylecheck
 type mavenLog struct {
 	Level            string `json:"level"`
 	Ts               string `json:"ts"`
@@ -46,10 +48,29 @@ const (
 
 var mavenLogger = log.WithName("maven.build")
 
-func parseLog(line string) (mavenLog mavenLog, error error) {
-	error = json.Unmarshal([]byte(line), &mavenLog)
+func mavenLogHandler(s string) string {
+	mavenLog, parseError := parseLog(s)
+	if parseError == nil {
+		normalizeLog(mavenLog)
+	} else {
+		// Why we are ignoring the parsing errors here: there are a few scenarios where this would likely occur.
+		// For example, if something outside of Maven outputs something (i.e.: the JDK, a misbehaved plugin,
+		// etc). The build may still have succeeded, though.
+		nonNormalizedLog(s)
+	}
 
-	return mavenLog, error
+	// Return the error message according to maven log
+	if strings.HasPrefix(s, "[ERROR]") {
+		return s
+	}
+
+	return ""
+}
+
+func parseLog(line string) (mavenLog, error) {
+	var l mavenLog
+	err := json.Unmarshal([]byte(line), &l)
+	return l, err
 }
 
 func normalizeLog(mavenLog mavenLog) {
@@ -59,10 +80,15 @@ func normalizeLog(mavenLog mavenLog) {
 	case INFO, WARN:
 		mavenLogger.Info(mavenLog.Msg)
 	case ERROR, FATAL:
-		mavenLogger.Errorf(nil, mavenLog.Msg)
+		mavenLogger.Error(nil, mavenLog.Msg)
 	}
 }
 
 func nonNormalizedLog(rawLog string) {
-	mavenLogger.Info(rawLog)
+	// Distinguish an error message from the rest
+	if strings.HasPrefix(rawLog, "[ERROR]") {
+		mavenLogger.Error(nil, rawLog)
+	} else {
+		mavenLogger.Info(rawLog)
+	}
 }

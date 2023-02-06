@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"reflect"
 	"sort"
 	"strings"
@@ -31,15 +30,15 @@ import (
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
-// Catalog collects all information about traits in one place
+// Catalog collects all information about traits in one place.
 type Catalog struct {
 	L      log.Logger
 	traits []Trait
 }
 
-// NewCatalog creates a new trait Catalog
-func NewCatalog(ctx context.Context, c client.Client) *Catalog {
-	var traitList = make([]Trait, 0, len(FactoryList))
+// NewCatalog creates a new trait Catalog.
+func NewCatalog(c client.Client) *Catalog {
+	traitList := make([]Trait, 0, len(FactoryList))
 	for _, factory := range FactoryList {
 		traitList = append(traitList, factory())
 	}
@@ -55,10 +54,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 		traits: traitList,
 	}
 
-	for _, t := range catalog.allTraits() {
-		if ctx != nil {
-			t.InjectContext(ctx)
-		}
+	for _, t := range catalog.AllTraits() {
 		if c != nil {
 			t.InjectClient(c)
 		}
@@ -66,7 +62,7 @@ func NewCatalog(ctx context.Context, c client.Client) *Catalog {
 	return &catalog
 }
 
-func (c *Catalog) allTraits() []Trait {
+func (c *Catalog) AllTraits() []Trait {
 	return append([]Trait(nil), c.traits...)
 }
 
@@ -83,7 +79,7 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 // so care must be taken while changing the lists order.
 func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 	var res []Trait
-	for _, t := range c.allTraits() {
+	for _, t := range c.AllTraits() {
 		if t.IsAllowedInProfile(profile) {
 			res = append(res, t)
 		}
@@ -92,7 +88,7 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 }
 
 func (c *Catalog) apply(environment *Environment) error {
-	if err := c.configure(environment); err != nil {
+	if err := c.Configure(environment); err != nil {
 		return err
 	}
 	traits := c.traitsFor(environment)
@@ -100,8 +96,9 @@ func (c *Catalog) apply(environment *Environment) error {
 
 	applicable := false
 	for _, trait := range traits {
-		if environment.Platform == nil && trait.RequiresIntegrationPlatform() {
-			c.L.Debug("Skipping trait because of missing integration platform: %s", trait.ID())
+		if !environment.PlatformInPhase(v1.IntegrationPlatformPhaseReady) && trait.RequiresIntegrationPlatform() {
+			c.L.Debugf("Skipping trait because of missing integration platform: %s", trait.ID())
+
 			continue
 		}
 		applicable = true
@@ -111,8 +108,6 @@ func (c *Catalog) apply(environment *Environment) error {
 		}
 
 		if enabled {
-			c.L.Infof("Apply trait: %s", trait.ID())
-
 			err = trait.Apply(environment)
 			if err != nil {
 				return err
@@ -130,8 +125,14 @@ func (c *Catalog) apply(environment *Environment) error {
 		}
 	}
 
-	if !applicable && environment.Platform == nil {
-		return errors.New("no trait can be executed because of no integration platform found")
+	traitIds := make([]string, 0)
+	for _, trait := range environment.ExecutedTraits {
+		traitIds = append(traitIds, string(trait.ID()))
+	}
+	c.L.Debugf("Applied traits: %s", strings.Join(traitIds, ","))
+
+	if !applicable && environment.PlatformInPhase(v1.IntegrationPlatformPhaseReady) {
+		return errors.New("no trait can be executed because of no ready platform found")
 	}
 
 	for _, processor := range environment.PostProcessors {
@@ -144,9 +145,9 @@ func (c *Catalog) apply(environment *Environment) error {
 	return nil
 }
 
-// GetTrait returns the trait with the given ID
+// GetTrait returns the trait with the given ID.
 func (c *Catalog) GetTrait(id string) Trait {
-	for _, t := range c.allTraits() {
+	for _, t := range c.AllTraits() {
 		if t.ID() == ID(id) {
 			return t
 		}
@@ -154,10 +155,10 @@ func (c *Catalog) GetTrait(id string) Trait {
 	return nil
 }
 
-// ComputeTraitsProperties returns all key/value configuration properties that can be used to configure traits
+// ComputeTraitsProperties returns all key/value configuration properties that can be used to configure traits.
 func (c *Catalog) ComputeTraitsProperties() []string {
 	results := make([]string, 0)
-	for _, trait := range c.allTraits() {
+	for _, trait := range c.AllTraits() {
 		trait := trait // pin
 		c.processFields(structs.Fields(trait), func(name string) {
 			results = append(results, string(trait.ID())+"."+name)
@@ -185,3 +186,9 @@ func (c *Catalog) processFields(fields []*structs.Field, processor func(string))
 		}
 	}
 }
+
+type Finder interface {
+	GetTrait(id string) Trait
+}
+
+var _ Finder = &Catalog{}

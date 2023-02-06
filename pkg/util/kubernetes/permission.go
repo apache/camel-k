@@ -23,16 +23,15 @@ import (
 	authorizationv1 "k8s.io/api/authorization/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/apache/camel-k/pkg/client"
+	"k8s.io/client-go/kubernetes"
 )
 
 // CheckPermission can be used to check if the current user/service-account is allowed to execute a given operation
 // in the cluster.
 // E.g. checkPermission(client, olmv1alpha1.GroupName, "clusterserviceversions", namespace, "camel-k", "get")
 //
-// nolint:unparam
-func CheckPermission(ctx context.Context, client client.Client, group, resource, namespace, name, verb string) (bool, error) {
+
+func CheckPermission(ctx context.Context, client kubernetes.Interface, group, resource, namespace, name, verb string) (bool, error) {
 	sarReview := &authorizationv1.SelfSubjectAccessReview{
 		Spec: authorizationv1.SelfSubjectAccessReviewSpec{
 			ResourceAttributes: &authorizationv1.ResourceAttributes{
@@ -51,7 +50,7 @@ func CheckPermission(ctx context.Context, client client.Client, group, resource,
 			return false, nil
 		}
 		return false, err
-	} else {
-		return sar.Status.Allowed, nil
 	}
+
+	return sar.Status.Allowed, nil
 }

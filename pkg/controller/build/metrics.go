@@ -26,9 +26,13 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
-const buildResultLabel = "result"
+const (
+	buildResultLabel = "result"
+	buildTypeLabel   = "type"
+)
 
 var (
 	buildDuration = prometheus.NewHistogramVec(
@@ -46,6 +50,7 @@ var (
 		},
 		[]string{
 			buildResultLabel,
+			buildTypeLabel,
 		},
 	)
 
@@ -57,10 +62,11 @@ var (
 		},
 		[]string{
 			buildResultLabel,
+			buildTypeLabel,
 		},
 	)
 
-	queueDuration = prometheus.NewHistogram(
+	queueDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name: "camel_k_build_queue_duration_seconds",
 			Help: "Camel K build queue duration",
@@ -72,6 +78,9 @@ var (
 				5 * time.Minute.Seconds(),
 			},
 		},
+		[]string{
+			buildTypeLabel,
+		},
 	)
 )
 
@@ -80,7 +89,23 @@ func init() {
 	metrics.Registry.MustRegister(buildDuration, buildRecovery, queueDuration)
 }
 
-func observeBuildResult(build *v1.Build, phase v1.BuildPhase, duration time.Duration) {
+func observeBuildQueueDuration(build *v1.Build, creator *corev1.ObjectReference) {
+	duration := time.Since(getBuildQueuingTime(build))
+
+	requestName := build.Name
+	requestNamespace := build.Namespace
+	if creator != nil {
+		requestName = creator.Name
+		requestNamespace = creator.Namespace
+	}
+
+	Log.WithValues("request-namespace", requestNamespace, "request-name", requestName, "build-queue-duration", duration.Seconds()).
+		ForBuild(build).Infof("Build queue duration %s", duration)
+	queueDuration.WithLabelValues(build.Labels[v1.IntegrationKitLayoutLabel]).
+		Observe(duration.Seconds())
+}
+
+func observeBuildResult(build *v1.Build, phase v1.BuildPhase, creator *corev1.ObjectReference, duration time.Duration) {
 	attempt, attemptMax := getBuildAttemptFor(build)
 
 	if phase == v1.BuildPhaseFailed && attempt >= attemptMax {
@@ -89,8 +114,20 @@ func observeBuildResult(build *v1.Build, phase v1.BuildPhase, duration time.Dura
 		phase = v1.BuildPhaseError
 	}
 
-	buildRecovery.WithLabelValues(phase.String()).Observe(float64(attempt))
-	buildDuration.WithLabelValues(phase.String()).Observe(duration.Seconds())
+	resultLabel := phase.String()
+	typeLabel := build.Labels[v1.IntegrationKitLayoutLabel]
+
+	requestName := build.Name
+	requestNamespace := build.Namespace
+	if creator != nil {
+		requestName = creator.Name
+		requestNamespace = creator.Namespace
+	}
+
+	Log.WithValues("request-namespace", requestNamespace, "request-name", requestName, "build-attempt", float64(attempt), "build-result", resultLabel, "build-duration", duration.Seconds()).
+		ForBuild(build).Infof("Build duration %s", duration)
+	buildRecovery.WithLabelValues(resultLabel, typeLabel).Observe(float64(attempt))
+	buildDuration.WithLabelValues(resultLabel, typeLabel).Observe(duration.Seconds())
 }
 
 func getBuildAttemptFor(build *v1.Build) (int, int) {

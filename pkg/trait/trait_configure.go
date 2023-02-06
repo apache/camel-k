@@ -23,37 +23,34 @@ import (
 	"reflect"
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
+
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util"
 )
 
-func (c *Catalog) configure(env *Environment) error {
+// Configure reads trait configurations from environment and applies them to catalog.
+func (c *Catalog) Configure(env *Environment) error {
 	if env.Platform != nil {
-		if env.Platform.Status.Traits != nil {
-			if err := c.configureTraits(env.Platform.Status.Traits); err != nil {
-				return err
-			}
+		if err := c.configureTraits(env.Platform.Status.Traits); err != nil {
+			return err
 		}
 		if err := c.configureTraitsFromAnnotations(env.Platform.Annotations); err != nil {
 			return err
 		}
 	}
 	if env.IntegrationKit != nil {
-		if env.IntegrationKit.Spec.Traits != nil {
-			if err := c.configureTraits(env.IntegrationKit.Spec.Traits); err != nil {
-				return err
-			}
+		if err := c.configureTraits(env.IntegrationKit.Spec.Traits); err != nil {
+			return err
 		}
 		if err := c.configureTraitsFromAnnotations(env.IntegrationKit.Annotations); err != nil {
 			return err
 		}
 	}
 	if env.Integration != nil {
-		if env.Integration.Spec.Traits != nil {
-			if err := c.configureTraits(env.Integration.Spec.Traits); err != nil {
-				return err
-			}
+		if err := c.configureTraits(env.Integration.Spec.Traits); err != nil {
+			return err
 		}
 		if err := c.configureTraitsFromAnnotations(env.Integration.Annotations); err != nil {
 			return err
@@ -63,12 +60,26 @@ func (c *Catalog) configure(env *Environment) error {
 	return nil
 }
 
-func (c *Catalog) configureTraits(traits map[string]v1.TraitSpec) error {
-	for id, traitSpec := range traits {
-		catTrait := c.GetTrait(id)
-		if catTrait != nil {
-			trait := traitSpec
-			if err := decodeTraitSpec(&trait, catTrait); err != nil {
+func (c *Catalog) configureTraits(traits interface{}) error {
+	traitMap, err := ToTraitMap(traits)
+	if err != nil {
+		return err
+	}
+
+	for id, trait := range traitMap {
+		if id == "addons" {
+			// Handle addons later so that the configurations on the new API
+			// take precedence over the legacy addon configurations
+			continue
+		}
+		if err := c.configureTrait(id, trait); err != nil {
+			return err
+		}
+	}
+	// Addons
+	for id, trait := range traitMap["addons"] {
+		if addons, ok := trait.(map[string]interface{}); ok {
+			if err := c.configureTrait(id, addons); err != nil {
 				return err
 			}
 		}
@@ -77,17 +88,32 @@ func (c *Catalog) configureTraits(traits map[string]v1.TraitSpec) error {
 	return nil
 }
 
-func decodeTraitSpec(in *v1.TraitSpec, target interface{}) error {
-	data, err := json.Marshal(&in.Configuration)
+func (c *Catalog) configureTrait(id string, trait map[string]interface{}) error {
+	if catTrait := c.GetTrait(id); catTrait != nil {
+		if err := decodeTrait(trait, catTrait); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func decodeTrait(in map[string]interface{}, target Trait) error {
+	// Migrate legacy configuration properties before applying to catalog
+	if err := MigrateLegacyConfiguration(in); err != nil {
+		return err
+	}
+
+	data, err := json.Marshal(&in)
 	if err != nil {
 		return err
 	}
 
-	return json.Unmarshal(data, &target)
+	return json.Unmarshal(data, target)
 }
 
 func (c *Catalog) configureTraitsFromAnnotations(annotations map[string]string) error {
-	options := make(map[string]map[string]string, len(annotations))
+	options := make(map[string]map[string]interface{}, len(annotations))
 	for k, v := range annotations {
 		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
 			configKey := strings.TrimPrefix(k, v1.TraitAnnotationPrefix)
@@ -96,9 +122,24 @@ func (c *Catalog) configureTraitsFromAnnotations(annotations map[string]string) 
 				id := parts[0]
 				prop := parts[1]
 				if _, ok := options[id]; !ok {
-					options[id] = make(map[string]string)
+					options[id] = make(map[string]interface{})
 				}
-				options[id][prop] = v
+
+				propParts := util.ConfigTreePropertySplit(prop)
+				var current = options[id]
+				if len(propParts) > 1 {
+					c, err := util.NavigateConfigTree(current, propParts[0:len(propParts)-1])
+					if err != nil {
+						return err
+					}
+					if cc, ok := c.(map[string]interface{}); ok {
+						current = cc
+					} else {
+						return errors.New(`invalid array specification: to set an array value use the ["v1", "v2"] format`)
+					}
+				}
+				current[prop] = v
+
 			} else {
 				return fmt.Errorf("wrong format for trait annotation %q: missing trait ID", k)
 			}
@@ -107,7 +148,7 @@ func (c *Catalog) configureTraitsFromAnnotations(annotations map[string]string) 
 	return c.configureFromOptions(options)
 }
 
-func (c *Catalog) configureFromOptions(traits map[string]map[string]string) error {
+func (c *Catalog) configureFromOptions(traits map[string]map[string]interface{}) error {
 	for id, config := range traits {
 		t := c.GetTrait(id)
 		if t != nil {
@@ -120,7 +161,7 @@ func (c *Catalog) configureFromOptions(traits map[string]map[string]string) erro
 	return nil
 }
 
-func configureTrait(id string, config map[string]string, trait interface{}) error {
+func configureTrait(id string, config map[string]interface{}, trait interface{}) error {
 	md := mapstructure.Metadata{}
 
 	var valueConverter mapstructure.DecodeHookFuncKind = func(sourceKind reflect.Kind, targetKind reflect.Kind, data interface{}) (interface{}, error) {
@@ -147,9 +188,8 @@ func configureTrait(id string, config map[string]string, trait interface{}) erro
 			ErrorUnused:      true,
 		},
 	)
-
 	if err != nil {
-		return errors.Wrapf(err, "error while decoding trait configuration from annotations on trait %q", id)
+		return errors.Wrapf(err, "error while decoding trait configuration %q", id)
 	}
 
 	return decoder.Decode(config)

@@ -58,7 +58,7 @@ func TestWarm_Succeeded(t *testing.T) {
 
 	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
 
-	h := NewWarmAction()
+	h := NewWarmAction(c)
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
 
@@ -93,7 +93,7 @@ func TestWarm_Failing(t *testing.T) {
 
 	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
 
-	h := NewWarmAction()
+	h := NewWarmAction(c)
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
 
@@ -128,7 +128,7 @@ func TestWarm_WarmingUp(t *testing.T) {
 
 	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
 
-	h := NewWarmAction()
+	h := NewWarmAction(c)
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
 

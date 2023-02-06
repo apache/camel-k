@@ -1,0 +1,4 @@
+= Camel K API
+:page-aliases: camel.adoc
+
+include::partial$apis/camel-k-crds.adoc[]

@@ -19,7 +19,7 @@ Camel K needs a xref:installation/registry/registry.adoc[registry] to push the i
 
 Most of the those registries require authentication to push images. Therefore, we have to create a secret the namespace that will contain the credentials to access it. To do so, you can execute:
 
-*Note*: before running the command below, please make sure that you are logged in to the registry you are planning to use.
+NOTE: Before running the command below, please make sure that you are logged in to the registry you are planning to use.
 
 ```
 kubectl -n camel-k-test create secret generic my-registry-secret --from-file=$HOME/.docker/config.json

@@ -24,7 +24,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/digest"
 )
 
-// NewMonitorAction creates a new monitoring handling action for the kit
+// NewMonitorAction creates a new monitoring handling action for the kit.
 func NewMonitorAction() Action {
 	return &monitorAction{}
 }

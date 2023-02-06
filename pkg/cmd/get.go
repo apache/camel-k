@@ -88,7 +88,6 @@ func (o *getCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 		fmt.Fprintf(w, "%s\t%s\t%s\n", integration.Name, string(integration.Status.Phase), kit)
 	}
-	w.Flush()
 
-	return nil
+	return w.Flush()
 }

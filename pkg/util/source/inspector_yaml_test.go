@@ -19,17 +19,21 @@ package source
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/camel"
 )
 
-func NewtestYAMLInspector(t *testing.T) YAMLInspector {
+func newTestYAMLInspector(t *testing.T) YAMLInspector {
+	t.Helper()
+
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	return YAMLInspector{
 		baseInspector: baseInspector{
@@ -38,7 +42,7 @@ func NewtestYAMLInspector(t *testing.T) YAMLInspector {
 	}
 }
 
-const YAMLRouteConsumer = `
+const yamlRouteConsumer = `
 - from:
     uri: knative:endpoint/default
     steps:
@@ -46,7 +50,7 @@ const YAMLRouteConsumer = `
           uri: "log:out"
 `
 
-const YAMLRouteProducer = `
+const yamlRouteProducer = `
 - from:
     uri: timer:tick
     steps:
@@ -54,7 +58,7 @@ const YAMLRouteProducer = `
           uri: knative:endpoint/service
 `
 
-const YAMLRouteTransformer = `
+const yamlRouteTransformer = `
 - from:
     uri: knative:channel/mychannel
     steps:
@@ -62,14 +66,14 @@ const YAMLRouteTransformer = `
           uri: knative:endpoint/service
 `
 
-const YAMLInvalid = `
+const yamlInvalid = `
 - from:
     uri: knative:endpoint/default
     steps:
       - "log:out"
 `
 
-const YAMLInDepthChannel = `
+const yamlInDepthChannel = `
 - from:
     uri: knative:channel/mychannel
     steps:
@@ -81,6 +85,26 @@ const YAMLInDepthChannel = `
                 uri: knative:endpoint/service
 `
 
+const yamlWireTapKnativeEIP = `
+- from:
+    uri: knative:channel/mychannel
+    parameters:
+      period: "1000"
+    steps:
+      - wireTap:
+          uri: knative:channel/mychannel
+`
+
+const yamlWireTapJmsEIP = `
+- from:
+    uri: knative:channel/mychannel
+    parameters:
+      period: "1000"
+    steps:
+      - wireTap:
+          uri: jms:queue:foo
+`
+
 func TestYAMLDependencies(t *testing.T) {
 	tests := []struct {
 		name                string
@@ -89,67 +113,70 @@ func TestYAMLDependencies(t *testing.T) {
 		missingDependencies []string
 	}{
 		{
-			name:                "consumer",
-			source:              YAMLRouteConsumer,
-			dependencies:        []string{`mvn:org.apache.camel.k:camel-k-knative-consumer`},
-			missingDependencies: []string{`mvn:org.apache.camel.k:camel-k-knative-producer`},
+			name:         "consumer",
+			source:       yamlRouteConsumer,
+			dependencies: []string{`camel:knative`},
 		},
 		{
-			name:                "producer",
-			source:              YAMLRouteProducer,
-			dependencies:        []string{`mvn:org.apache.camel.k:camel-k-knative-producer`},
-			missingDependencies: []string{`mvn:org.apache.camel.k:camel-k-knative-consumer`},
+			name:         "producer",
+			source:       yamlRouteProducer,
+			dependencies: []string{`camel:knative`},
 		},
 		{
 			name:   "transformer",
-			source: YAMLRouteTransformer,
+			source: yamlRouteTransformer,
 			dependencies: []string{
-				`mvn:org.apache.camel.k:camel-k-knative-producer`,
-				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
+				`camel:knative`,
 			},
 		},
 		{
 			name:   "invalid",
-			source: YAMLInvalid,
+			source: yamlInvalid,
 			dependencies: []string{
-				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
+				`camel:knative`,
 			},
 		},
 		{
 			name:   "in-depth",
-			source: YAMLInDepthChannel,
+			source: yamlInDepthChannel,
 			dependencies: []string{
-				`mvn:org.apache.camel.k:camel-k-knative-producer`,
-				`mvn:org.apache.camel.k:camel-k-knative-consumer`,
+				`camel:knative`,
+			},
+		},
+		{
+			name:   "wire-tap-knative",
+			source: yamlWireTapKnativeEIP,
+			dependencies: []string{
+				`camel:knative`,
+			},
+		},
+		{
+			name:   "wire-tap-jms",
+			source: yamlWireTapJmsEIP,
+			dependencies: []string{
+				`camel:knative`,
+				`camel:jms`,
 			},
 		},
 	}
-	for _, test := range tests {
+
+	inspector := newTestYAMLInspector(t)
+	for i := range tests {
+		test := tests[i]
 		t.Run(test.name, func(t *testing.T) {
-			code := v1.SourceSpec{
-				DataSpec: v1.DataSpec{
-					Name:    "route.yaml",
-					Content: test.source,
-				},
-				Language: v1.LanguageYaml,
-			}
-
-			meta := NewMetadata()
-			inspector := NewtestYAMLInspector(t)
-
-			err := inspector.Extract(code, &meta)
-			assert.Nil(t, err)
-			for _, dependency := range test.dependencies {
-				assert.Contains(t, meta.Dependencies.List(), dependency)
-			}
-			for _, missingDependency := range test.missingDependencies {
-				assert.NotContains(t, meta.Dependencies.List(), missingDependency)
-			}
+			assertExtractYAML(t, inspector, test.source, func(meta *Metadata) {
+				for _, dependency := range test.dependencies {
+					assert.Contains(t, meta.Dependencies.List(), dependency)
+				}
+				for _, missingDependency := range test.missingDependencies {
+					assert.NotContains(t, meta.Dependencies.List(), missingDependency)
+				}
+			})
 		})
 	}
 }
 
-const YAMLRestDSL = `
+const yamlRestDSL = `
 - rest:
     verb: "post"
     uri: "/api/flow"
@@ -170,7 +197,7 @@ const YAMLRestDSL = `
           uri: "log:out"
 `
 
-const YAMLRestDSLWithRoute = `
+const yamlRestDSLWithRoute = `
 - route:
     id: "flow"
     group: "routes"
@@ -195,30 +222,23 @@ const YAMLRestDSLWithRoute = `
 `
 
 func TestYAMLRestDSL(t *testing.T) {
-	for name, content := range map[string]string{"YAMLRestDSL": YAMLRestDSL, "YAMLRestDSLWithRoute": YAMLRestDSLWithRoute} {
+	inspector := newTestYAMLInspector(t)
+	for name, content := range map[string]string{
+		"yamlRestDSL":          yamlRestDSL,
+		"yamlRestDSLWithRoute": yamlRestDSLWithRoute,
+	} {
 		sourceContent := content
 		t.Run(name, func(t *testing.T) {
-			code := v1.SourceSpec{
-				DataSpec: v1.DataSpec{
-					Name:    "route.yaml",
-					Content: sourceContent,
-				},
-				Language: v1.LanguageYaml,
-			}
-
-			meta := NewMetadata()
-			inspector := NewtestYAMLInspector(t)
-
-			err := inspector.Extract(code, &meta)
-			assert.Nil(t, err)
-			assert.True(t, meta.RequiredCapabilities.Has(v1.CapabilityRest))
-			assert.True(t, meta.Dependencies.Has("camel:log"))
-			assert.True(t, meta.ExposesHTTPServices)
+			assertExtractYAML(t, inspector, sourceContent, func(meta *Metadata) {
+				assert.True(t, meta.RequiredCapabilities.Has(v1.CapabilityRest))
+				assert.True(t, meta.Dependencies.Has("camel:log"))
+				assert.True(t, meta.ExposesHTTPServices)
+			})
 		})
 	}
 }
 
-const YAMLFromDSL = `
+const yamlFromDSL = `
 - from:
     uri: "timer:tick"
     parameters:
@@ -231,7 +251,7 @@ const YAMLFromDSL = `
       - to: "log:info"
 `
 
-const YAMLFromDSLWithRoute = `
+const yamlFromDSLWithRoute = `
 - route:
     id: route1
     from:
@@ -247,30 +267,24 @@ const YAMLFromDSLWithRoute = `
 `
 
 func TestYAMLRouteAndFromEquivalence(t *testing.T) {
-	for name, content := range map[string]string{"YAMLFromDSL": YAMLFromDSL, "YAMLFromDSLWithRoute": YAMLFromDSLWithRoute} {
+	inspector := newTestYAMLInspector(t)
+	for name, content := range map[string]string{
+		"yamlFromDSL":          yamlFromDSL,
+		"yamlFromDSLWithRoute": yamlFromDSLWithRoute,
+	} {
 		sourceContent := content
 		t.Run(name, func(t *testing.T) {
-			code := v1.SourceSpec{
-				DataSpec: v1.DataSpec{
-					Name:    "route.yaml",
-					Content: sourceContent,
-				},
-				Language: v1.LanguageYaml,
-			}
-
-			meta := NewMetadata()
-			inspector := NewtestYAMLInspector(t)
-			err := inspector.Extract(code, &meta)
-			assert.Nil(t, err)
-			assert.Equal(t, meta.FromURIs, []string{"timer:tick?period=5000"})
-			assert.Equal(t, meta.ToURIs, []string{"log:info"})
-			assert.True(t, meta.Dependencies.Has("camel:log"))
-			assert.True(t, meta.Dependencies.Has("camel:timer"))
+			assertExtractYAML(t, inspector, sourceContent, func(meta *Metadata) {
+				assert.Equal(t, meta.FromURIs, []string{"timer:tick?period=5000"})
+				assert.Equal(t, meta.ToURIs, []string{"log:info"})
+				assert.True(t, meta.Dependencies.Has("camel:log"))
+				assert.True(t, meta.Dependencies.Has("camel:timer"))
+			})
 		})
 	}
 }
 
-const YAMLJSONMarshal = `
+const yamlJSONMarshal = `
 - from:
     uri: timer:tick
     steps:
@@ -278,7 +292,7 @@ const YAMLJSONMarshal = `
         json: {}
 `
 
-const YAMLJSONUnmarshal = `
+const yamlJSONUnmarshal = `
 - from:
     uri: timer:tick
     steps:
@@ -286,7 +300,7 @@ const YAMLJSONUnmarshal = `
         json: {}
 `
 
-const YAMLJSONGsonMarshal = `
+const yamlJSONGsonMarshal = `
 - from:
     uri: timer:tick
     steps:
@@ -295,7 +309,7 @@ const YAMLJSONGsonMarshal = `
           library: Gson
 `
 
-const YAMLJSONUnknownMarshal = `
+const yamlJSONUnknownMarshal = `
 - from:
     uri: timer:tick
     steps:
@@ -310,65 +324,115 @@ func TestYAMLJson(t *testing.T) {
 		dependency string
 	}{
 		{
-			source:     YAMLJSONMarshal,
+			source:     yamlJSONMarshal,
 			dependency: "camel:jackson",
 		},
 		{
-			source:     YAMLJSONUnmarshal,
+			source:     yamlJSONUnmarshal,
 			dependency: "camel:jackson",
 		},
 		{
-			source:     YAMLJSONGsonMarshal,
+			source:     yamlJSONGsonMarshal,
 			dependency: "camel:gson",
 		},
 		{
-			source:     YAMLJSONUnknownMarshal,
+			source:     yamlJSONUnknownMarshal,
 			dependency: "camel:timer",
 		},
 	}
 
-	for i, test := range tc {
+	inspector := newTestYAMLInspector(t)
+	for i := range tc {
+		test := tc[i]
 		t.Run(fmt.Sprintf("%s-%d", test.dependency, i), func(t *testing.T) {
-			code := v1.SourceSpec{
-				DataSpec: v1.DataSpec{
-					Name:    "route.yaml",
-					Content: test.source,
-				},
-				Language: v1.LanguageYaml,
-			}
-
-			meta := NewMetadata()
-			inspector := NewtestYAMLInspector(t)
-
-			err := inspector.Extract(code, &meta)
-			assert.Nil(t, err)
-			assert.True(t, meta.RequiredCapabilities.IsEmpty())
-			assert.Contains(t, meta.Dependencies.List(), test.dependency)
+			assertExtractYAML(t, inspector, test.source, func(meta *Metadata) {
+				assert.True(t, meta.RequiredCapabilities.IsEmpty())
+				assert.Contains(t, meta.Dependencies.List(), test.dependency)
+			})
 		})
 	}
 }
 
-const YAMLKameletEipNoId = `
+const yamlAvroEndpoint = `
+- from:
+    uri: direct:start
+    steps:
+    - to:
+        uri: dataformat:avro:marshal
+`
+
+const yamlJacksonEndpoint = `
+- from:
+    uri: direct:start
+    steps:
+    - to:
+        uri: dataformat:jackson:marshal
+`
+
+const yamlProtobufEndpoint = `
+- from:
+    uri: direct:start
+    steps:
+    - to:
+        uri: dataformat:protobuf:marshal
+`
+
+func TestYAMLDataFormat(t *testing.T) {
+	tc := []struct {
+		source string
+		deps   []string
+	}{
+		{
+			source: yamlAvroEndpoint,
+			deps:   []string{"camel:dataformat", "camel:avro"},
+		},
+		{
+			source: yamlJacksonEndpoint,
+			deps:   []string{"camel:dataformat", "camel:jackson"},
+		},
+		{
+			source: yamlProtobufEndpoint,
+			deps:   []string{"camel:dataformat", "camel:protobuf"},
+		},
+	}
+
+	inspector := newTestYAMLInspector(t)
+	for i := range tc {
+		test := tc[i]
+		t.Run(fmt.Sprintf("TestYAMLDataFormat-%d", i), func(t *testing.T) {
+			assertExtract(t, inspector, test.source, func(meta *Metadata) {
+				for _, d := range test.deps {
+					assert.Contains(t, meta.Dependencies.List(), d)
+				}
+			})
+		})
+	}
+}
+
+const yamlKameletEipNoID = `
 - from:
     uri: timer:tick
     steps:
     - kamelet: "foo"
 `
 
-const YAMLKameletEipInline = `
+const yamlKameletEipInline = `
 - from:
     uri: timer:tick
     steps:
     - kamelet: "foo/bar?baz=test"
 `
-const YAMLKameletEipMap = `
+
+const yamlKameletEipMap = `
 - from:
     uri: timer:tick
     steps:
     - kamelet: 
         name: "foo/bar?baz=test"
 `
-const YAMLKameletEipMapWithParams = `
+
+// #nosec G101
+const yamlKameletEipMapWithParams = `
 - from:
     uri: timer:tick
     steps:
@@ -377,7 +441,8 @@ const YAMLKameletEipMapWithParams = `
         parameters:
           baz:test
 `
-const YAMLKameletEndpoint = `
+
+const yamlKameletEndpoint = `
 - from:
     uri: timer:tick
     steps:
@@ -390,57 +455,42 @@ func TestYAMLKamelet(t *testing.T) {
 		kamelets []string
 	}{
 		{
-			source:   YAMLKameletEipNoId,
+			source:   yamlKameletEipNoID,
 			kamelets: []string{"foo"},
 		},
 		{
-			source:   YAMLKameletEipInline,
+			source:   yamlKameletEipInline,
 			kamelets: []string{"foo/bar"},
 		},
 		{
-			source:   YAMLKameletEipMap,
+			source:   yamlKameletEipMap,
 			kamelets: []string{"foo/bar"},
 		},
 		{
-			source:   YAMLKameletEipMapWithParams,
+			source:   yamlKameletEipMapWithParams,
 			kamelets: []string{"foo/bar"},
 		},
 		{
-			source:   YAMLKameletEndpoint,
+			source:   yamlKameletEndpoint,
 			kamelets: []string{"foo/bar"},
 		},
 	}
 
-	for i, test := range tc {
+	inspector := newTestYAMLInspector(t)
+	for i := range tc {
+		test := tc[i]
 		t.Run(fmt.Sprintf("TestYAMLKamelet-%d", i), func(t *testing.T) {
-			code := v1.SourceSpec{
-				DataSpec: v1.DataSpec{
-					Content: test.source,
-				},
-			}
-
-			catalog, err := camel.DefaultCatalog()
-			assert.Nil(t, err)
-
-			meta := NewMetadata()
-			inspector := YAMLInspector{
-				baseInspector: baseInspector{
-					catalog: catalog,
-				},
-			}
-
-			err = inspector.Extract(code, &meta)
-			assert.Nil(t, err)
-			assert.True(t, meta.RequiredCapabilities.IsEmpty())
-
-			for _, k := range test.kamelets {
-				assert.Contains(t, meta.Kamelets, k)
-			}
+			assertExtract(t, inspector, test.source, func(meta *Metadata) {
+				assert.True(t, meta.RequiredCapabilities.IsEmpty())
+				for _, k := range test.kamelets {
+					assert.Contains(t, meta.Kamelets, k)
+				}
+			})
 		})
 	}
 }
 
-const YAMLKameletExplicitParams = `
+const yamlKameletExplicitParams = `
 - from:
     uri: cron:tab
     parameters:
@@ -452,7 +502,7 @@ const YAMLKameletExplicitParams = `
           cloudEventsSpecVersion: "1.0"
 `
 
-const YAMLKameletExplicitNumericParams = `
+const yamlKameletExplicitNumericParams = `
 - from:
     uri: timer:tick
     parameters:
@@ -468,46 +518,128 @@ func TestYAMLExplicitParameters(t *testing.T) {
 		toURIs   []string
 	}{
 		{
-			source:   YAMLKameletExplicitParams,
+			source:   yamlKameletExplicitParams,
 			fromURIs: []string{"cron:tab?schedule=%2A+%2A+%2A+%2A+%3F"},
 			toURIs:   []string{"knative:channel/a?cloudEventsSpecVersion=1.0"},
 		},
 		{
-			source:   YAMLKameletExplicitNumericParams,
+			source:   yamlKameletExplicitNumericParams,
 			fromURIs: []string{"timer:tick?period=1000"},
 		},
 	}
 
-	for i, test := range tc {
+	inspector := newTestYAMLInspector(t)
+	for i := range tc {
+		test := tc[i]
 		t.Run(fmt.Sprintf("TestYAMLExplicitParameters-%d", i), func(t *testing.T) {
-			code := v1.SourceSpec{
-				DataSpec: v1.DataSpec{
-					Content: test.source,
-				},
-			}
+			assertExtract(t, inspector, test.source, func(meta *Metadata) {
+				assert.True(t, meta.RequiredCapabilities.IsEmpty())
+				assert.Len(t, meta.FromURIs, len(test.fromURIs))
+				for _, k := range test.fromURIs {
+					assert.Contains(t, meta.FromURIs, k)
+				}
+				assert.Len(t, meta.ToURIs, len(test.toURIs))
+				for _, k := range test.toURIs {
+					assert.Contains(t, meta.ToURIs, k)
+				}
+			})
+		})
+	}
+}
 
-			catalog, err := camel.DefaultCatalog()
-			assert.Nil(t, err)
+const yamlFromDSLWithPropertyPlaceholder = `
+- route:
+    id: route1
+    from:
+      uri: "timer:tick"
+      parameters:
+        period: "5000"
+    steps:
+      - set-body:
+          constant: "Hello Yaml !!!"
+      - transform:
+          simple: "${body.toUpperCase()}"
+      - to: "{{url}}"
+`
 
-			meta := NewMetadata()
-			inspector := YAMLInspector{
-				baseInspector: baseInspector{
-					catalog: catalog,
-				},
-			}
+const yamlFromDSLWithPropertyPlaceholderScheme = `
+- route:
+    id: route2
+    from:
+      uri: "timer:tick"
+      parameters:
+        period: "5000"
+    steps:
+      - set-body:
+          constant: "Hello Yaml !!!"
+      - transform:
+          simple: "${body.toUpperCase()}"
+      - to: "{{scheme}}:{{resource}}"
+`
 
-			err = inspector.Extract(code, &meta)
-			assert.Nil(t, err)
-			assert.True(t, meta.RequiredCapabilities.IsEmpty())
+func TestYAMLRouteWithPropertyPlaceholder(t *testing.T) {
+	tc := []struct {
+		source   string
+		fromURIs []string
+		toURIs   []string
+	}{
+		{
+			source:   yamlFromDSLWithPropertyPlaceholder,
+			fromURIs: []string{"timer:tick?period=5000"},
+			toURIs:   []string{"{{url}}"},
+		},
+		{
+			source:   yamlFromDSLWithPropertyPlaceholderScheme,
+			fromURIs: []string{"timer:tick?period=5000"},
+			toURIs:   []string{"{{scheme}}:{{resource}}"},
+		},
+	}
 
-			assert.Len(t, meta.FromURIs, len(test.fromURIs))
-			for _, k := range test.fromURIs {
-				assert.Contains(t, meta.FromURIs, k)
-			}
-			assert.Len(t, meta.ToURIs, len(test.toURIs))
-			for _, k := range test.toURIs {
-				assert.Contains(t, meta.ToURIs, k)
-			}
+	inspector := newTestYAMLInspector(t)
+	for i, test := range tc {
+		t.Run(fmt.Sprintf("TestYAMLRouteWithPropertyPlaceholder-%d", i), func(t *testing.T) {
+			assertExtractYAML(t, inspector, test.source, func(meta *Metadata) {
+				assert.Len(t, meta.FromURIs, len(test.fromURIs))
+				for _, k := range test.fromURIs {
+					assert.Contains(t, meta.FromURIs, k)
+				}
+				assert.Len(t, meta.ToURIs, len(test.toURIs))
+				for _, k := range test.toURIs {
+					assert.Contains(t, meta.ToURIs, k)
+				}
+				assert.Equal(t, meta.Dependencies.Size(), 2)
+				assert.True(t, meta.Dependencies.Has("camel:core"))
+				assert.True(t, meta.Dependencies.Has("camel:timer"))
+			})
+		})
+	}
+}
+
+const yamlFromDSLWithUnknownFromScheme = `
+- route:
+    id: route1
+    from:
+      uri: "unknown:foo"
+    steps:
+      - to: "log:info"
+`
+
+const yamlFromDSLWithUnknownToScheme = `
+- route:
+    id: route2
+    from:
+      uri: "timer:tick"
+    steps:
+      - to: "unknown:foo"
+`
+
+func TestYAMLRouteWithUnknownScheme(t *testing.T) {
+	inspector := newTestYAMLInspector(t)
+	for i, source := range []string{yamlFromDSLWithUnknownFromScheme, yamlFromDSLWithUnknownToScheme} {
+		t.Run(fmt.Sprintf("TestYAMLRouteWithUnknownScheme-%d", i), func(t *testing.T) {
+			assertExtractYAMLError(t, inspector, source, func(err error) {
+				assert.True(t, strings.HasPrefix(err.Error(), fmt.Sprintf("component not found for uri %q", "unknown:foo")))
+			})
 		})
 	}
 }

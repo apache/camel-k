@@ -21,26 +21,21 @@ import (
 	"fmt"
 
 	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/api/batch/v1beta1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
+	"k8s.io/utils/pointer"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 )
 
-// The pod trait allows the customization of the Integration pods.
-// It applies the `PodSpecTemplate` struct contained in the Integration `.spec.podTemplate` field,
-// into the Integration deployment Pods template, using strategic merge patch.
-//
-// This can be used to customize the container where Camel routes execute,
-// by using the `integration` container name.
-//
-// +camel-k:trait=pod
 type podTrait struct {
-	BaseTrait `property:",squash"`
+	BaseTrait
+	traitv1.PodTrait `property:",squash"`
 }
 
 func newPodTrait() Trait {
@@ -50,15 +45,15 @@ func newPodTrait() Trait {
 }
 
 func (t *podTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 
-	if e.Integration != nil && e.Integration.Spec.PodTemplate == nil {
+	if e.Integration.Spec.PodTemplate == nil {
 		return false, nil
 	}
 
-	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning), nil
+	return e.IntegrationInRunningPhases(), nil
 }
 
 func (t *podTrait) Apply(e *Environment) error {
@@ -70,7 +65,7 @@ func (t *podTrait) Apply(e *Environment) error {
 	}
 	switch strategy {
 	case ControllerStrategyCronJob:
-		e.Resources.VisitCronJob(func(c *v1beta1.CronJob) {
+		e.Resources.VisitCronJob(func(c *batchv1.CronJob) {
 			if c.Name == e.Integration.Name {
 				if patchedPodSpec, err = t.applyChangesTo(&c.Spec.JobTemplate.Spec.Template.Spec, changes); err == nil {
 					c.Spec.JobTemplate.Spec.Template.Spec = *patchedPodSpec
@@ -103,22 +98,24 @@ func (t *podTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *podTrait) applyChangesTo(podSpec *corev1.PodSpec, changes v1.PodSpec) (patchedPodSpec *corev1.PodSpec, err error) {
+func (t *podTrait) applyChangesTo(podSpec *corev1.PodSpec, changes v1.PodSpec) (*corev1.PodSpec, error) {
 	patch, err := json.Marshal(changes)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	sourceJson, err := json.Marshal(podSpec)
+	sourceJSON, err := json.Marshal(podSpec)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	patched, err := strategicpatch.StrategicMergePatch(sourceJson, patch, corev1.PodSpec{})
+	patched, err := strategicpatch.StrategicMergePatch(sourceJSON, patch, corev1.PodSpec{})
 	if err != nil {
-		return
+		return nil, err
 	}
 
+	var patchedPodSpec *corev1.PodSpec
 	err = json.Unmarshal(patched, &patchedPodSpec)
-	return
+
+	return patchedPodSpec, err
 }

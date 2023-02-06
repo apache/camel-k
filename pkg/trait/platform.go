@@ -18,27 +18,23 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
+
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/utils/pointer"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/pkg/install"
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/openshift"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	image "github.com/apache/camel-k/pkg/util/registry"
 )
 
-// The platform trait is a base trait that is used to assign an integration platform to an integration.
-//
-// In case the platform is missing, the trait is allowed to create a default platform.
-// This feature is especially useful in contexts where there's no need to provide a custom configuration for the platform
-// (e.g. on OpenShift the default settings work, since there's an embedded container image registry).
-//
-// +camel-k:trait=platform
 type platformTrait struct {
-	BaseTrait `property:",squash"`
-	// To create a default (empty) platform when the platform is missing.
-	CreateDefault *bool `property:"create-default" json:"createDefault,omitempty"`
-	// Indicates if the platform should be created globally in the case of global operator (default true).
-	Global *bool `property:"global" json:"global,omitempty"`
-	// To automatically detect from the environment if a default platform can be created (it will be created on OpenShift only).
-	Auto *bool `property:"auto" json:"auto,omitempty"`
+	BaseTrait
+	traitv1.PlatformTrait `property:",squash"`
 }
 
 func newPlatformTrait() Trait {
@@ -48,7 +44,7 @@ func newPlatformTrait() Trait {
 }
 
 func (t *platformTrait) Configure(e *Environment) (bool, error) {
-	if IsFalse(t.Enabled) {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 
@@ -56,7 +52,7 @@ func (t *platformTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if IsNilOrFalse(t.Auto) {
+	if !pointer.BoolDeref(t.Auto, false) {
 		if e.Platform == nil {
 			if t.CreateDefault == nil {
 				// Calculate if the platform should be automatically created when missing.
@@ -64,6 +60,10 @@ func (t *platformTrait) Configure(e *Environment) (bool, error) {
 					return false, err
 				} else if ocp {
 					t.CreateDefault = &ocp
+				} else if addr, err := image.GetRegistryAddress(e.Ctx, t.Client); err != nil {
+					return false, err
+				} else if addr != nil {
+					t.CreateDefault = pointer.Bool(true)
 				}
 			}
 			if t.Global == nil {
@@ -80,59 +80,83 @@ func (t *platformTrait) Apply(e *Environment) error {
 	initial := e.Integration.DeepCopy()
 
 	pl, err := t.getOrCreatePlatform(e)
-	if err != nil || pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
+	// Do not change to Initialization phase within the trait
+	switch {
+	case err != nil:
 		e.Integration.Status.Phase = v1.IntegrationPhaseWaitingForPlatform
-	} else {
-		e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
-	}
+		if initial.Status.Phase != e.Integration.Status.Phase {
+			e.Integration.Status.SetErrorCondition(
+				v1.IntegrationConditionPlatformAvailable,
+				v1.IntegrationConditionPlatformAvailableReason,
+				err)
 
-	if initial.Status.Phase != e.Integration.Status.Phase {
-		if err != nil {
-			e.Integration.Status.SetErrorCondition(v1.IntegrationConditionPlatformAvailable, v1.IntegrationConditionPlatformAvailableReason, err)
+			if pl != nil {
+				e.Integration.SetIntegrationPlatform(pl)
+			}
 		}
-
-		if pl != nil {
+	case pl == nil:
+		e.Integration.Status.Phase = v1.IntegrationPhaseWaitingForPlatform
+	case pl.Status.Phase != v1.IntegrationPlatformPhaseReady:
+		e.Integration.Status.Phase = v1.IntegrationPhaseWaitingForPlatform
+		if initial.Status.Phase != e.Integration.Status.Phase {
 			e.Integration.SetIntegrationPlatform(pl)
 		}
+	default:
+		// In success case, phase should be reset to none
+		e.Integration.Status.Phase = v1.IntegrationPhaseNone
+		e.Integration.SetIntegrationPlatform(pl)
 	}
 
 	return nil
 }
 
 func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlatform, error) {
-	pl, err := platform.GetOrFind(t.Ctx, t.Client, e.Integration.Namespace, e.Integration.Status.Platform, false)
-	if err != nil && k8serrors.IsNotFound(err) {
-		if IsTrue(t.CreateDefault) {
-			platformName := e.Integration.Status.Platform
-			if platformName == "" {
-				platformName = platform.DefaultPlatformName
-			}
-			namespace := e.Integration.Namespace
-			if IsTrue(t.Global) {
-				operatorNamespace := platform.GetOperatorNamespace()
-				if operatorNamespace != "" {
-					namespace = operatorNamespace
-				}
-			}
-			defaultPlatform := v1.NewIntegrationPlatform(namespace, platformName)
-			if defaultPlatform.Labels == nil {
-				defaultPlatform.Labels = make(map[string]string)
-			}
-			defaultPlatform.Labels["camel.apache.org/platform.generated"] = True
-			pl = &defaultPlatform
-			e.Resources.Add(pl)
-			return pl, nil
+	pl, err := platform.GetOrFindForResource(e.Ctx, t.Client, e.Integration, false)
+	if err != nil && apierrors.IsNotFound(err) && pointer.BoolDeref(t.CreateDefault, false) {
+		platformName := e.Integration.Status.Platform
+		if platformName == "" {
+			platformName = defaults.OperatorID()
 		}
+
+		if platformName == "" {
+			platformName = platform.DefaultPlatformName
+		}
+		namespace := e.Integration.Namespace
+		if pointer.BoolDeref(t.Global, false) {
+			operatorNamespace := platform.GetOperatorNamespace()
+			if operatorNamespace != "" {
+				namespace = operatorNamespace
+			}
+		}
+		defaultPlatform := v1.NewIntegrationPlatform(namespace, platformName)
+		if defaultPlatform.Labels == nil {
+			defaultPlatform.Labels = make(map[string]string)
+		}
+		defaultPlatform.Labels["camel.apache.org/platform.generated"] = True
+		// Cascade the operator id in charge to reconcile the Integration
+		if v1.GetOperatorIDAnnotation(e.Integration) != "" {
+			defaultPlatform.SetOperatorID(v1.GetOperatorIDAnnotation(e.Integration))
+		}
+		pl = &defaultPlatform
+		e.Resources.Add(pl)
+
+		// Make sure that IntegrationPlatform installed in operator namespace can be seen by others
+		if err := install.IntegrationPlatformViewerRole(e.Ctx, t.Client, namespace); err != nil && !apierrors.IsAlreadyExists(err) {
+			t.L.Info(fmt.Sprintf("Cannot install global IntegrationPlatform viewer role in namespace '%s': skipping.", namespace))
+		}
+
+		return pl, nil
 	}
+
 	return pl, err
 }
 
-// IsPlatformTrait overrides base class method
+// IsPlatformTrait overrides base class method.
 func (t *platformTrait) IsPlatformTrait() bool {
 	return true
 }
 
-// RequiresIntegrationPlatform overrides base class method
+// RequiresIntegrationPlatform overrides base class method.
 func (t *platformTrait) RequiresIntegrationPlatform() bool {
 	return false
 }

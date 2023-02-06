@@ -26,11 +26,12 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/term"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/apache/camel-k/pkg/client"
-	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
+	v1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
@@ -38,7 +39,8 @@ const kamelCommandLongDescription = `Apache Camel K is a lightweight integration
 superpowers.
 `
 
-// RootCmdOptions --
+// RootCmdOptions --.
+// nolint: containedctx
 type RootCmdOptions struct {
 	RootContext   context.Context    `mapstructure:"-"`
 	Context       context.Context    `mapstructure:"-"`
@@ -46,9 +48,10 @@ type RootCmdOptions struct {
 	_client       client.Client      `mapstructure:"-"`
 	KubeConfig    string             `mapstructure:"kube-config"`
 	Namespace     string             `mapstructure:"namespace"`
+	Verbose       bool               `mapstructure:"verbose" yaml:",omitempty"`
 }
 
-// NewKamelCommand --
+// NewKamelCommand --.
 func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 	childCtx, childCancel := context.WithCancel(ctx)
 	options := RootCmdOptions{
@@ -57,7 +60,6 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 		ContextCancel: childCancel,
 	}
 
-	var err error
 	cmd := kamelPreAddCommandInit(&options)
 	addKamelSubcommands(cmd, &options)
 
@@ -65,17 +67,13 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 		return cmd, err
 	}
 
-	if err := addLocalSubCommands(cmd, &options); err != nil {
-		return cmd, err
-	}
-
-	err = kamelPostAddCommandInit(cmd)
+	err := kamelPostAddCommandInit(cmd)
 
 	return cmd, err
 }
 
 func kamelPreAddCommandInit(options *RootCmdOptions) *cobra.Command {
-	var cmd = cobra.Command{
+	cmd := cobra.Command{
 		BashCompletionFunction: bashCompletionFunction,
 		PersistentPreRunE:      options.preRun,
 		Use:                    "kamel",
@@ -86,6 +84,10 @@ func kamelPreAddCommandInit(options *RootCmdOptions) *cobra.Command {
 
 	cmd.PersistentFlags().StringVar(&options.KubeConfig, "kube-config", os.Getenv("KUBECONFIG"), "Path to the kube config file to use for CLI requests")
 	cmd.PersistentFlags().StringVarP(&options.Namespace, "namespace", "n", "", "Namespace to use for all operations")
+	cmd.PersistentFlags().BoolVarP(&options.Verbose, "verbose", "V", false, "Verbose logging")
+
+	cobra.AddTemplateFunc("wrappedFlagUsages", wrappedFlagUsages)
+	cmd.SetUsageTemplate(usageTemplate)
 
 	return &cmd
 }
@@ -120,7 +122,7 @@ func kamelPostAddCommandInit(cmd *cobra.Command) error {
 	))
 
 	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+		if !errors.As(err, &viper.ConfigFileNotFoundError{}) {
 			return err
 		}
 	}
@@ -146,9 +148,11 @@ func addKamelSubcommands(cmd *cobra.Command, options *RootCmdOptions) {
 	cmd.AddCommand(cmdOnly(newCmdInit(options)))
 	cmd.AddCommand(cmdOnly(newCmdDebug(options)))
 	cmd.AddCommand(cmdOnly(newCmdDump(options)))
-	cmd.AddCommand(newCmdLocal(options))
+	cmd.AddCommand(cmdOnly(newCmdLocal(options)))
 	cmd.AddCommand(cmdOnly(newCmdBind(options)))
+	cmd.AddCommand(cmdOnly(newCmdPromote(options)))
 	cmd.AddCommand(newCmdKamelet(options))
+	cmd.AddCommand(cmdOnly(newCmdConfig(options)))
 }
 
 func addHelpSubCommands(cmd *cobra.Command, options *RootCmdOptions) error {
@@ -179,9 +183,13 @@ func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 			return errors.Wrap(err, "cannot get command client")
 		}
 		if command.Namespace == "" {
-			current, err := c.GetCurrentNamespace(command.KubeConfig)
-			if err != nil {
-				return errors.Wrap(err, "cannot get current namespace")
+			current := viper.GetString("kamel.config.default-namespace")
+			if current == "" {
+				defaultNS, err := c.GetCurrentNamespace(command.KubeConfig)
+				if err != nil {
+					return errors.Wrap(err, "cannot get current namespace")
+				}
+				current = defaultNS
 			}
 			err = cmd.Flag("namespace").Value.Set(current)
 			if err != nil {
@@ -194,15 +202,15 @@ func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 		// reconciled. Hence the compatibility check is skipped for the install and the operator command.
 		// Furthermore, there can be any incompatibilities, as the install command deploys
 		// the operator version it's compatible with.
-		if cmd.Use != installCommand && cmd.Use != operatorCommand {
-			checkAndShowCompatibilityWarning(cmd, command.Context, c, command.Namespace)
+		if cmd.Use != builderCommand && cmd.Use != installCommand && cmd.Use != operatorCommand {
+			checkAndShowCompatibilityWarning(command.Context, cmd, c, command.Namespace)
 		}
 	}
 
 	return nil
 }
 
-func checkAndShowCompatibilityWarning(cmd *cobra.Command, ctx context.Context, c client.Client, namespace string) {
+func checkAndShowCompatibilityWarning(ctx context.Context, cmd *cobra.Command, c client.Client, namespace string) {
 	operatorVersion, err := operatorVersion(ctx, c, namespace)
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
@@ -211,13 +219,13 @@ func checkAndShowCompatibilityWarning(cmd *cobra.Command, ctx context.Context, c
 			fmt.Fprintf(cmd.ErrOrStderr(), "Unable to retrieve the operator version: %s\n", err.Error())
 		}
 	} else {
-		if operatorVersion != "" && !compatibleVersions(operatorVersion, defaults.Version) {
+		if operatorVersion != "" && !compatibleVersions(operatorVersion, defaults.Version, cmd) {
 			fmt.Fprintf(cmd.ErrOrStderr(), "You're using Camel K %s client with a %s cluster operator, it's recommended to use the same version to improve compatibility.\n\n", defaults.Version, operatorVersion)
 		}
 	}
 }
 
-// GetCmdClient returns the client that can be used from command line tools
+// GetCmdClient returns the client that can be used from command line tools.
 func (command *RootCmdOptions) GetCmdClient() (client.Client, error) {
 	// Get the pre-computed client
 	if command._client != nil {
@@ -228,16 +236,57 @@ func (command *RootCmdOptions) GetCmdClient() (client.Client, error) {
 	return command._client, err
 }
 
-// GetCamelCmdClient returns a client to access the Camel resources
-func (command *RootCmdOptions) GetCamelCmdClient() (*camelv1.CamelV1Client, error) {
+// GetCamelCmdClient returns a client to access the Camel resources.
+func (command *RootCmdOptions) GetCamelCmdClient() (*v1.CamelV1Client, error) {
 	c, err := command.GetCmdClient()
 	if err != nil {
 		return nil, err
 	}
-	return camelv1.NewForConfig(c.GetConfig())
+	return v1.NewForConfig(c.GetConfig())
 }
 
-// NewCmdClient returns a new client that can be used from command line tools
+// NewCmdClient returns a new client that can be used from command line tools.
 func (command *RootCmdOptions) NewCmdClient() (client.Client, error) {
 	return client.NewOutOfClusterClient(command.KubeConfig)
 }
+
+func (command *RootCmdOptions) PrintVerboseOut(cmd *cobra.Command, a ...interface{}) {
+	if command.Verbose {
+		fmt.Fprintln(cmd.OutOrStdout(), a...)
+	}
+}
+
+func (command *RootCmdOptions) PrintfVerboseOutf(cmd *cobra.Command, format string, a ...interface{}) {
+	if command.Verbose {
+		fmt.Fprintf(cmd.OutOrStdout(), format, a...)
+	}
+}
+func (command *RootCmdOptions) PrintfVerboseErrf(cmd *cobra.Command, format string, a ...interface{}) {
+	if command.Verbose {
+		fmt.Fprintf(cmd.ErrOrStderr(), format, a...)
+	}
+}
+
+func wrappedFlagUsages(cmd *cobra.Command) string {
+	width := 80
+	if w, _, err := term.GetSize(0); err == nil {
+		width = w
+	}
+	return cmd.Flags().FlagUsagesWrapped(width - 1)
+}
+
+var usageTemplate = `Usage:{{if .Runnable}}
+  {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
+  {{.CommandPath}} [command]{{end}}{{if .HasAvailableSubCommands}}
+
+Available Commands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+
+Flags:
+{{ wrappedFlagUsages . | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+
+Global Flags:
+{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableSubCommands}}
+
+Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
+`

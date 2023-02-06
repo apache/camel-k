@@ -21,8 +21,11 @@ package fake
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	applyconfigurationcamelv1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/camel/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -118,7 +121,7 @@ func (c *FakeBuilds) UpdateStatus(ctx context.Context, build *camelv1.Build, opt
 // Delete takes name of the build and deletes it. Returns an error if one occurs.
 func (c *FakeBuilds) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(buildsResource, c.ns, name), &camelv1.Build{})
+		Invokes(testing.NewDeleteActionWithOptions(buildsResource, c.ns, name, opts), &camelv1.Build{})
 
 	return err
 }
@@ -135,6 +138,51 @@ func (c *FakeBuilds) DeleteCollection(ctx context.Context, opts v1.DeleteOptions
 func (c *FakeBuilds) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *camelv1.Build, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(buildsResource, c.ns, name, pt, data, subresources...), &camelv1.Build{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*camelv1.Build), err
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied build.
+func (c *FakeBuilds) Apply(ctx context.Context, build *applyconfigurationcamelv1.BuildApplyConfiguration, opts v1.ApplyOptions) (result *camelv1.Build, err error) {
+	if build == nil {
+		return nil, fmt.Errorf("build provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(build)
+	if err != nil {
+		return nil, err
+	}
+	name := build.Name
+	if name == nil {
+		return nil, fmt.Errorf("build.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(buildsResource, c.ns, *name, types.ApplyPatchType, data), &camelv1.Build{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*camelv1.Build), err
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *FakeBuilds) ApplyStatus(ctx context.Context, build *applyconfigurationcamelv1.BuildApplyConfiguration, opts v1.ApplyOptions) (result *camelv1.Build, err error) {
+	if build == nil {
+		return nil, fmt.Errorf("build provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(build)
+	if err != nil {
+		return nil, err
+	}
+	name := build.Name
+	if name == nil {
+		return nil, fmt.Errorf("build.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(buildsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &camelv1.Build{})
 
 	if obj == nil {
 		return nil, err

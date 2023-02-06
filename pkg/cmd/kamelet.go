@@ -30,6 +30,8 @@ func newCmdKamelet(rootCmdOptions *RootCmdOptions) *cobra.Command {
 
 	cmd.AddCommand(cmdOnly(newKameletGetCmd(rootCmdOptions)))
 	cmd.AddCommand(cmdOnly(newKameletDeleteCmd(rootCmdOptions)))
+	cmd.AddCommand(cmdOnly(newKameletAddRepoCmd(rootCmdOptions)))
+	cmd.AddCommand(cmdOnly(newKameletRemoveRepoCmd(rootCmdOptions)))
 
 	return &cmd
 }

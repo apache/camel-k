@@ -1,7 +1,7 @@
 [[configuring-registry-gcr]]
 = Configuring a Gcr.io Registry
 
-You can use gcr.io as registry to host Camel K images. Usually, users may want to use gcr.io in combination with xref:installation/gke.adoc[Google GKE].
+You can use gcr.io as registry to host Camel K images. Usually, users may want to use gcr.io in combination with xref:installation/platform/gke.adoc[Google GKE].
 
 In order to push images to `gcr.io`, you need to provide a valid key to Camel K.
 The best way to obtain a valid key is from the Google web console:

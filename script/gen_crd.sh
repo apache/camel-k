@@ -21,15 +21,17 @@ location=$(dirname "$0")
 apidir=$location/../pkg/apis/camel
 
 cd "$apidir"
-$CONTROLLER_GEN crd paths=./... output:crd:artifacts:config=../../../config/crd/bases output:crd:dir=../../../config/crd/bases crd:crdVersions=v1
+$(go env GOPATH)/bin/controller-gen crd \
+  paths=./... \
+  output:crd:artifacts:config=../../../config/crd/bases \
+  output:crd:dir=../../../config/crd/bases \
+  crd:crdVersions=v1
 
 # cleanup working directory in $apidir
 rm -rf ./config
 
 # to root
 cd ../../../
-
-version=$(make -s get-version | tr '[:upper:]' '[:lower:]')
 
 deploy_crd_file() {
   source=$1
@@ -40,16 +42,9 @@ deploy_crd_file() {
   # Post-process source
   cat ./script/headers/yaml.txt > "$source"
   echo "" >> "$source"
-  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    cat "${source}.orig" | sed -n '/^---/,/^status/p;/^status/q' \
-      | sed '1d;$d' \
-      | sed '/creationTimestamp:/a\  labels:\n    app: camel-k' >> "$source"
-  elif [[ "$OSTYPE" == "darwin"* ]]; then
-    # Mac OSX
-    cat "${source}.orig" | sed -n '/^---/,/^status/p;/^status/q' \
-      | sed '1d;$d' \
-      | sed -e $'/^  creationTimestamp:/a\\\n  labels:\\\n    app: camel-k' >> "$source"
-  fi
+  sed -n '/^---/,/^status/p;/^status/q' "${source}.orig" \
+    | sed '1d;$d' \
+    | sed '/creationTimestamp:/a\  labels:\n    app: camel-k' >> "$source"
 
   for dest in "${@:2}"; do
     cp "$source" "$dest"

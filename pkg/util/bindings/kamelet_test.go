@@ -20,13 +20,14 @@ package bindings
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/test"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestKameletBindingProvider(t *testing.T) {
@@ -56,7 +57,8 @@ func TestKameletBindingProvider(t *testing.T) {
 		},
 	}
 
-	for i, tc := range testcases {
+	for i := range testcases {
+		tc := testcases[i]
 		t.Run(fmt.Sprintf("test-%d-%s", i, tc.uri), func(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
@@ -88,5 +90,4 @@ func TestKameletBindingProvider(t *testing.T) {
 			assert.Equal(t, tc.uri, binding.URI)
 		})
 	}
-
 }

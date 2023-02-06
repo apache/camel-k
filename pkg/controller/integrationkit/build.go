@@ -21,7 +21,9 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/pkg/errors"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -34,7 +36,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
-// NewBuildAction creates a new build request handling action for the kit
+// NewBuildAction creates a new build request handling action for the kit.
 func NewBuildAction() Action {
 	return &buildAction{}
 }
@@ -44,7 +46,7 @@ type buildAction struct {
 }
 
 func (action *buildAction) Name() string {
-	return "build-submitted"
+	return "build"
 }
 
 func (action *buildAction) CanHandle(kit *v1.IntegrationKit) bool {
@@ -82,19 +84,40 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 			return nil, errors.New("undefined camel catalog")
 		}
 
+		labels := kubernetes.FilterCamelCreatorLabels(kit.Labels)
+		labels[v1.IntegrationKitLayoutLabel] = kit.Labels[v1.IntegrationKitLayoutLabel]
+
+		annotations := make(map[string]string)
+		if v, ok := kit.Annotations[v1.PlatformSelectorAnnotation]; ok {
+			annotations[v1.PlatformSelectorAnnotation] = v
+		}
+		operatorID := defaults.OperatorID()
+		if operatorID != "" {
+			annotations[v1.OperatorIDAnnotation] = operatorID
+		}
+
+		timeout := env.Platform.Status.Build.GetTimeout()
+		if layout := labels[v1.IntegrationKitLayoutLabel]; env.Platform.Spec.Build.Timeout == nil && layout == v1.IntegrationKitLayoutNative {
+			// Increase the timeout to a sensible default
+			timeout = metav1.Duration{
+				Duration: 10 * time.Minute,
+			}
+		}
 		build = &v1.Build{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1.SchemeGroupVersion.String(),
 				Kind:       v1.BuildKind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Namespace: kit.Namespace,
-				Name:      kit.Name,
-				Labels:    kubernetes.FilterCamelCreatorLabels(kit.Labels),
+				Namespace:   kit.Namespace,
+				Name:        kit.Name,
+				Labels:      labels,
+				Annotations: annotations,
 			},
 			Spec: v1.BuildSpec{
-				Tasks:   env.BuildTasks,
-				Timeout: env.Platform.Status.Build.GetTimeout(),
+				Strategy: env.Platform.Status.Build.BuildStrategy,
+				Tasks:    env.BuildTasks,
+				Timeout:  timeout,
 			},
 		}
 

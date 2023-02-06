@@ -49,3 +49,12 @@ func TestOverriddenInstallDefaultKamelets(t *testing.T) {
 	assert.False(t, InstallDefaultKamelets())
 	assert.NoError(t, os.Setenv(env, oldEnvVal))
 }
+
+func TestOverriddenOperatorID(t *testing.T) {
+	env := "KAMEL_OPERATOR_ID"
+	oldEnvVal := os.Getenv(env)
+	overriddenID := "operator-1"
+	assert.NoError(t, os.Setenv(env, overriddenID))
+	assert.Equal(t, overriddenID, OperatorID())
+	assert.NoError(t, os.Setenv(env, oldEnvVal))
+}

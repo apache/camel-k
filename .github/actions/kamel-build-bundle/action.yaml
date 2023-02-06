@@ -1,0 +1,101 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: kamel-build-bundle
+description: 'Builds kamel operator metadata bundle'
+
+inputs:
+  image-registry-push-host:
+    description: 'Location of image registry push host'
+    required: false
+  image-registry-pull-host:
+    description: 'Location of image registry pull host'
+    required: false
+  image-namespace:
+    description: 'Namespace in which to store the image'
+    required: false
+    default: 'apache'
+  local-image-name:
+    description: 'Reference of the camel-k image'
+    required: true
+  local-image-version:
+    description: "Reference of the camel-k image version"
+    required: true
+  catalog-source-name:
+    description: 'Name of the catalog source for the bundle (if required)'
+    required: false
+  catalog-source-namespace:
+    description: 'Namespace in which to install the catalog source for the bundle (if required)'
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+
+    - id: build-bundle-image
+      name: Build Operator bundle
+      shell: bash
+      run: |
+        ./.github/actions/kamel-build-bundle/build-bundle-image.sh \
+          -i "${{ inputs.image-namespace }}" \
+          -l "${{ inputs.image-registry-pull-host }}" \
+          -n "${{ inputs.local-image-name }}" \
+          -s "${{ inputs.image-registry-push-host }}" \
+          -v "${{ inputs.local-image-version }}"
+
+    - id: install-opm
+      name: Install opm if required
+      shell: bash
+      run: |
+        make opm
+
+        # Append to PATH if not already
+        echo "${{ env.GOPATH }}/bin" >> $GITHUB_PATH
+        which opm || { echo 'opm not found' ; exit 1; }
+
+    - id: build-index-image
+      name: Create New Index Image
+      shell: bash
+      run: |
+        ./.github/actions/kamel-build-bundle/build-index-image.sh \
+          -b "${{ steps.build-bundle-image.outputs.build-bundle-local-image }}" \
+          -i "${{ inputs.image-namespace }}" \
+          -l "${{ inputs.image-registry-pull-host }}" \
+          -n "${{ inputs.local-image-name }}" \
+          -s "${{ inputs.image-registry-push-host }}" \
+          -v "${{ inputs.local-image-version }}" \
+          -x "$(make get-csv-name)" \
+          -y "$(make get-last-released-img-name)" \
+          -z "$(make get-last-released-version)"
+
+    - id: build-image-catalog
+      name: Create a new catalog to host the index image
+      shell: bash
+      run: |
+        ./.github/actions/kamel-build-bundle/build-image-catalog.sh \
+          -b "${{ inputs.catalog-source-name }}" \
+          -c "${{ inputs.catalog-source-namespace }}" \
+          -i "${{ inputs.image-namespace }}" \
+          -x "${{ steps.build-index-image.outputs.build-bundle-image-bundle-index }}"
+
+outputs:
+  build-bundle-local-image:
+    description: "Full name of the bundle image"
+    value: ${{ steps.build-bundle-image.outputs.build-bundle-local-image }}
+  build-bundle-image-bundle-index:
+    description: "Full name of the bundle index image"
+    value: ${{ steps.build-index-image.outputs.build-bundle-image-bundle-index }}

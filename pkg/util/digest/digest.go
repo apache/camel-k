@@ -18,15 +18,16 @@ limitations under the License.
 package digest
 
 import (
-	// nolint: gosec
+	// this is needed to generate an SHA1 sum for Jars
+	// #nosec G505
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"hash"
 	"io"
-	"os"
-	"path"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -37,14 +38,24 @@ import (
 	"github.com/apache/camel-k/pkg/util/dsl"
 )
 
+const (
+	IntegrationDigestEnvVar = "CAMEL_K_DIGEST"
+)
+
 // ComputeForIntegration a digest of the fields that are relevant for the deployment
-// Produces a digest that can be used as docker image tag
+// Produces a digest that can be used as docker image tag.
 func ComputeForIntegration(integration *v1.Integration) (string, error) {
 	hash := sha256.New()
 	// Integration version is relevant
 	if _, err := hash.Write([]byte(integration.Status.Version)); err != nil {
 		return "", err
 	}
+
+	// Integration operator id is relevant
+	if _, err := hash.Write([]byte(v1.GetOperatorIDAnnotation(integration))); err != nil {
+		return "", err
+	}
+
 	// Integration Kit is relevant
 	if integration.Spec.IntegrationKit != nil {
 		if _, err := hash.Write([]byte(fmt.Sprintf("%s/%s", integration.Spec.IntegrationKit.Namespace, integration.Spec.IntegrationKit.Name))); err != nil {
@@ -62,13 +73,6 @@ func ComputeForIntegration(integration *v1.Integration) (string, error) {
 			if _, err := hash.Write([]byte(s.Content)); err != nil {
 				return "", err
 			}
-		}
-	}
-
-	// Integration resources
-	for _, item := range integration.Spec.Resources {
-		if _, err := hash.Write([]byte(item.Content)); err != nil {
-			return "", err
 		}
 	}
 
@@ -98,27 +102,28 @@ func ComputeForIntegration(integration *v1.Integration) (string, error) {
 	}
 
 	// Integration traits
-	for _, name := range sortedTraitSpecMapKeys(integration.Spec.Traits) {
-		if _, err := hash.Write([]byte(name + "[")); err != nil {
-			return "", err
-		}
-		spec, err := json.Marshal(integration.Spec.Traits[name].Configuration)
-		if err != nil {
-			return "", err
-		}
-		trait := make(map[string]interface{})
-		err = json.Unmarshal(spec, &trait)
-		if err != nil {
-			return "", err
-		}
-		for _, prop := range util.SortedMapKeys(trait) {
-			val := trait[prop]
-			if _, err := hash.Write([]byte(fmt.Sprintf("%s=%v,", prop, val))); err != nil {
+	// Calculation logic prior to 1.10.0 (the new Traits API schema) is maintained
+	// in order to keep consistency in the digest calculated from the same set of
+	// Trait configurations for backward compatibility.
+	traitsMap, err := toMap(integration.Spec.Traits)
+	if err != nil {
+		return "", err
+	}
+	for _, name := range sortedTraitsMapKeys(traitsMap) {
+		if name != "addons" {
+			if err := computeForTrait(hash, name, traitsMap[name]); err != nil {
 				return "", err
 			}
-		}
-		if _, err := hash.Write([]byte("]")); err != nil {
-			return "", err
+		} else {
+			// Addons
+			addons := traitsMap["addons"]
+			for _, name := range util.SortedMapKeys(addons) {
+				if addon, ok := addons[name].(map[string]interface{}); ok {
+					if err := computeForTrait(hash, name, addon); err != nil {
+						return "", err
+					}
+				}
+			}
 		}
 	}
 	// Integration traits as annotations
@@ -134,12 +139,63 @@ func ComputeForIntegration(integration *v1.Integration) (string, error) {
 	return digest, nil
 }
 
+func computeForTrait(hash hash.Hash, name string, trait map[string]interface{}) error {
+	if _, err := hash.Write([]byte(name + "[")); err != nil {
+		return err
+	}
+	// hash legacy configuration first
+	if trait["configuration"] != nil {
+		if config, ok := trait["configuration"].(map[string]interface{}); ok {
+			if err := computeForTraitProps(hash, config); err != nil {
+				return err
+			}
+		}
+		delete(trait, "configuration")
+	}
+	if err := computeForTraitProps(hash, trait); err != nil {
+		return err
+	}
+	if _, err := hash.Write([]byte("]")); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func computeForTraitProps(hash hash.Hash, props map[string]interface{}) error {
+	for _, prop := range util.SortedMapKeys(props) {
+		val := props[prop]
+		if _, err := hash.Write([]byte(fmt.Sprintf("%s=%v,", prop, val))); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func toMap(traits v1.Traits) (map[string]map[string]interface{}, error) {
+	data, err := json.Marshal(traits)
+	if err != nil {
+		return nil, err
+	}
+	traitsMap := make(map[string]map[string]interface{})
+	if err = json.Unmarshal(data, &traitsMap); err != nil {
+		return nil, err
+	}
+
+	return traitsMap, nil
+}
+
 // ComputeForIntegrationKit a digest of the fields that are relevant for the deployment
-// Produces a digest that can be used as docker image tag
+// Produces a digest that can be used as docker image tag.
 func ComputeForIntegrationKit(kit *v1.IntegrationKit) (string, error) {
 	hash := sha256.New()
 	// Kit version is relevant
 	if _, err := hash.Write([]byte(kit.Status.Version)); err != nil {
+		return "", err
+	}
+
+	if _, err := hash.Write([]byte(kit.Spec.Image)); err != nil {
 		return "", err
 	}
 
@@ -159,8 +215,8 @@ func ComputeForIntegrationKit(kit *v1.IntegrationKit) (string, error) {
 	return digest, nil
 }
 
-// ComputeForResource returns a digest for the specific resource
-func ComputeForResource(res v1.ResourceSpec) (string, error) {
+// ComputeForResource returns a digest for the specific resource.
+func ComputeForResource(res v1.DataSpec) (string, error) {
 	hash := sha256.New()
 	// Operator version is relevant
 	if _, err := hash.Write([]byte(defaults.Version)); err != nil {
@@ -173,16 +229,10 @@ func ComputeForResource(res v1.ResourceSpec) (string, error) {
 	if _, err := hash.Write([]byte(res.Name)); err != nil {
 		return "", err
 	}
-	if _, err := hash.Write([]byte(res.Type)); err != nil {
-		return "", err
-	}
 	if _, err := hash.Write([]byte(res.ContentKey)); err != nil {
 		return "", err
 	}
 	if _, err := hash.Write([]byte(res.ContentRef)); err != nil {
-		return "", err
-	}
-	if _, err := hash.Write([]byte(res.MountPath)); err != nil {
 		return "", err
 	}
 	if _, err := hash.Write([]byte(strconv.FormatBool(res.Compression))); err != nil {
@@ -194,7 +244,7 @@ func ComputeForResource(res v1.ResourceSpec) (string, error) {
 	return digest, nil
 }
 
-// ComputeForSource returns a digest for the specific source
+// ComputeForSource returns a digest for the specific source.
 func ComputeForSource(s v1.SourceSpec) (string, error) {
 	hash := sha256.New()
 	// Operator version is relevant
@@ -238,7 +288,7 @@ func ComputeForSource(s v1.SourceSpec) (string, error) {
 	return digest, nil
 }
 
-func sortedTraitSpecMapKeys(m map[string]v1.TraitSpec) []string {
+func sortedTraitsMapKeys(m map[string]map[string]interface{}) []string {
 	res := make([]string, len(m))
 	i := 0
 	for k := range m {
@@ -261,19 +311,21 @@ func sortedTraitAnnotationsKeys(it *v1.Integration) []string {
 }
 
 func ComputeSHA1(elem ...string) (string, error) {
-	file := path.Join(elem...)
+	file := filepath.Join(elem...)
 
-	f, err := os.Open(file)
+	// #nosec G401
+	h := sha1.New()
+
+	err := util.WithFileReader(file, func(file io.Reader) error {
+		if _, err := io.Copy(h, file); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
 	if err != nil {
 		return "", err
 	}
-	defer f.Close()
-
-	// nolint: gosec
-	h := sha1.New()
-	if _, err := io.Copy(h, f); err != nil {
-		return "", err
-	}
-
 	return base64.StdEncoding.EncodeToString(h.Sum(nil)), nil
 }

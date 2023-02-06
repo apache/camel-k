@@ -25,20 +25,18 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-var (
-	timeToFirstReadiness = prometheus.NewHistogram(
-		prometheus.HistogramOpts{
-			Name: "camel_k_integration_first_readiness_seconds",
-			Help: "Camel K integration time to first readiness",
-			Buckets: []float64{
-				5 * time.Second.Seconds(),
-				10 * time.Second.Seconds(),
-				30 * time.Second.Seconds(),
-				1 * time.Minute.Seconds(),
-				2 * time.Minute.Seconds(),
-			},
+var timeToFirstReadiness = prometheus.NewHistogram(
+	prometheus.HistogramOpts{
+		Name: "camel_k_integration_first_readiness_seconds",
+		Help: "Camel K integration time to first readiness",
+		Buckets: []float64{
+			5 * time.Second.Seconds(),
+			10 * time.Second.Seconds(),
+			30 * time.Second.Seconds(),
+			1 * time.Minute.Seconds(),
+			2 * time.Minute.Seconds(),
 		},
-	)
+	},
 )
 
 func init() {

@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,45 +25,19 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestDefaultEnvironment(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	env := Environment{
-		CamelCatalog: catalog,
-		Catalog:      NewCatalog(context.TODO(), nil),
-		Integration: &v1.Integration{
-			Status: v1.IntegrationStatus{
-				Phase: v1.IntegrationPhaseDeploying,
-			},
-			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileOpenShift,
-			},
-		},
-		IntegrationKit: &v1.IntegrationKit{
-			Status: v1.IntegrationKitStatus{
-				Phase: v1.IntegrationKitPhaseReady,
-			},
-		},
-		Platform: &v1.IntegrationPlatform{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "ns",
-			},
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-			},
-		},
-		EnvVars:        make([]corev1.EnvVar, 0),
-		ExecutedTraits: make([]Trait, 0),
-		Resources:      kubernetes.NewCollection(),
-	}
+	env := mockEnvironment(catalog)
 	env.Platform.ResyncStatusFullConfig()
 
 	err = NewEnvironmentTestCatalog().apply(&env)
@@ -108,38 +81,11 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 	c, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	env := Environment{
-		CamelCatalog: c,
-		Catalog:      NewCatalog(context.TODO(), nil),
-		Integration: &v1.Integration{
-			Status: v1.IntegrationStatus{
-				Phase: v1.IntegrationPhaseDeploying,
-			},
-			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileOpenShift,
-				Traits: map[string]v1.TraitSpec{
-					"environment": test.TraitSpecFromMap(t, map[string]interface{}{
-						"containerMeta": true,
-					}),
-				},
-			},
+	env := mockEnvironment(c)
+	env.Integration.Spec.Traits = v1.Traits{
+		Environment: &traitv1.EnvironmentTrait{
+			ContainerMeta: pointer.Bool(true),
 		},
-		IntegrationKit: &v1.IntegrationKit{
-			Status: v1.IntegrationKitStatus{
-				Phase: v1.IntegrationKitPhaseReady,
-			},
-		},
-		Platform: &v1.IntegrationPlatform{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "ns",
-			},
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-			},
-		},
-		EnvVars:        make([]corev1.EnvVar, 0),
-		ExecutedTraits: make([]Trait, 0),
-		Resources:      kubernetes.NewCollection(),
 	}
 	env.Platform.ResyncStatusFullConfig()
 
@@ -174,39 +120,13 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 	c, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	env := Environment{
-		CamelCatalog: c,
-		Catalog:      NewCatalog(context.TODO(), nil),
-		Integration: &v1.Integration{
-			Status: v1.IntegrationStatus{
-				Phase: v1.IntegrationPhaseDeploying,
-			},
-			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileOpenShift,
-				Traits: map[string]v1.TraitSpec{
-					"environment": test.TraitSpecFromMap(t, map[string]interface{}{
-						"containerMeta": false,
-					}),
-				},
-			},
+	env := mockEnvironment(c)
+	env.Integration.Spec.Traits = v1.Traits{
+		Environment: &traitv1.EnvironmentTrait{
+			ContainerMeta: pointer.Bool(false),
 		},
-		IntegrationKit: &v1.IntegrationKit{
-			Status: v1.IntegrationKitStatus{
-				Phase: v1.IntegrationKitPhaseReady,
-			},
-		},
-		Platform: &v1.IntegrationPlatform{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "ns",
-			},
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-			},
-		},
-		EnvVars:        make([]corev1.EnvVar, 0),
-		ExecutedTraits: make([]Trait, 0),
-		Resources:      kubernetes.NewCollection(),
 	}
+
 	env.Platform.ResyncStatusFullConfig()
 
 	err = NewEnvironmentTestCatalog().apply(&env)
@@ -236,6 +156,77 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 	assert.True(t, ck)
 }
 
+func TestCustomEnvVars(t *testing.T) {
+	c, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	env := mockEnvironment(c)
+	env.Integration.Spec.Traits = v1.Traits{
+		Environment: &traitv1.EnvironmentTrait{
+			Vars: []string{"key1=val1", "key2 = val2"},
+		},
+	}
+	env.Platform.ResyncStatusFullConfig()
+
+	err = NewEnvironmentTestCatalog().apply(&env)
+
+	assert.Nil(t, err)
+
+	userK1 := false
+	userK2 := false
+
+	env.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
+		for _, e := range deployment.Spec.Template.Spec.Containers[0].Env {
+			if e.Name == "key1" {
+				userK1 = e.Value == "val1"
+			}
+			if e.Name == "key2" {
+				userK2 = e.Value == "val2"
+			}
+		}
+	})
+
+	assert.True(t, userK1)
+	assert.True(t, userK2)
+}
+
 func NewEnvironmentTestCatalog() *Catalog {
-	return NewCatalog(context.TODO(), nil)
+	return NewCatalog(nil)
+}
+
+func mockEnvironment(catalog *camel.RuntimeCatalog) Environment {
+	return Environment{
+		CamelCatalog: catalog,
+		Catalog:      NewCatalog(nil),
+		Integration: &v1.Integration{
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileOpenShift,
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+			},
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					RuntimeVersion: catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
 }

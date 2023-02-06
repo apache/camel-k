@@ -41,14 +41,10 @@ The following configuration options are available:
 E.g. when using `master:lockname:timer`, then `camel:timer` is automatically added to the set of dependencies.
 It's enabled by default.
 
-| master.configmap
-| string
-| Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
-Deprecated: replaced by "resource-name".
-
 | master.resource-name
 | string
-| Name of the configmap/lease resource that will be used to store the lock. Defaults to "<integration-name>-lock".
+| Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
+Name of the configmap/lease resource that will be used to store the lock. Defaults to "<integration-name>-lock".
 
 | master.resource-type
 | string

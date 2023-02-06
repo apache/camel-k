@@ -25,7 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-// KameletBindingProvider converts a reference to a Kamelet into a Camel URI
+// KameletBindingProvider converts a reference to a Kamelet into a Camel URI.
 type KameletBindingProvider struct{}
 
 func (k KameletBindingProvider) ID() string {

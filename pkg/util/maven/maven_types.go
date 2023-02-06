@@ -45,25 +45,26 @@ type Plugin struct {
 }
 
 type Execution struct {
-	ID    string   `xml:"id,omitempty"`
-	Phase string   `xml:"phase,omitempty"`
-	Goals []string `xml:"goals>goal,omitempty"`
+	ID            string              `xml:"id,omitempty"`
+	Phase         string              `xml:"phase,omitempty"`
+	Goals         []string            `xml:"goals>goal,omitempty"`
+	Configuration v1.PluginProperties `xml:"configuration,omitempty"`
 }
 
-type Properties map[string]string
-
-// Settings models a Maven settings
+// Settings models a Maven settings.
 type Settings struct {
 	XMLName           xml.Name
-	XMLNs             string    `xml:"xmlns,attr"`
-	XMLNsXsi          string    `xml:"xmlns:xsi,attr"`
-	XsiSchemaLocation string    `xml:"xsi:schemaLocation,attr"`
-	LocalRepository   string    `xml:"localRepository"`
-	Profiles          []Profile `xml:"profiles>profile,omitempty"`
-	Mirrors           []Mirror  `xml:"mirrors>mirror,omitempty"`
+	XMLNs             string      `xml:"xmlns,attr"`
+	XMLNsXsi          string      `xml:"xmlns:xsi,attr"`
+	XsiSchemaLocation string      `xml:"xsi:schemaLocation,attr"`
+	LocalRepository   string      `xml:"localRepository"`
+	Servers           []v1.Server `xml:"servers>server,omitempty"`
+	Profiles          []Profile   `xml:"profiles>profile,omitempty"`
+	Proxies           []Proxy     `xml:"proxies>proxy,omitempty"`
+	Mirrors           []Mirror    `xml:"mirrors>mirror,omitempty"`
 }
 
-// Project models a Maven project
+// Project models a Maven project.
 type Project struct {
 	XMLName              xml.Name
 	XMLNs                string                `xml:"xmlns,attr"`
@@ -73,7 +74,7 @@ type Project struct {
 	GroupID              string                `xml:"groupId"`
 	ArtifactID           string                `xml:"artifactId"`
 	Version              string                `xml:"version"`
-	Properties           Properties            `xml:"properties,omitempty"`
+	Properties           v1.Properties         `xml:"properties,omitempty"`
 	DependencyManagement *DependencyManagement `xml:"dependencyManagement"`
 	Dependencies         []Dependency          `xml:"dependencies>dependency,omitempty"`
 	Repositories         []v1.Repository       `xml:"repositories>repository,omitempty"`
@@ -81,18 +82,18 @@ type Project struct {
 	Build                *Build                `xml:"build,omitempty"`
 }
 
-// Exclusion models a dependency exclusion
+// Exclusion models a dependency exclusion.
 type Exclusion struct {
 	GroupID    string `xml:"groupId" yaml:"groupId"`
 	ArtifactID string `xml:"artifactId" yaml:"artifactId"`
 }
 
-// DependencyManagement models dependency management
+// DependencyManagement models dependency management.
 type DependencyManagement struct {
 	Dependencies []Dependency `xml:"dependencies>dependency,omitempty"`
 }
 
-// Dependency models a dependency
+// Dependency models a dependency.
 type Dependency struct {
 	GroupID    string       `xml:"groupId" yaml:"groupId"`
 	ArtifactID string       `xml:"artifactId" yaml:"artifactId"`
@@ -106,7 +107,7 @@ type Dependency struct {
 type Profile struct {
 	ID                 string          `xml:"id"`
 	Activation         Activation      `xml:"activation,omitempty"`
-	Properties         Properties      `xml:"properties,omitempty"`
+	Properties         v1.Properties   `xml:"properties,omitempty"`
 	Repositories       []v1.Repository `xml:"repositories>repository,omitempty"`
 	PluginRepositories []v1.Repository `xml:"pluginRepositories>pluginRepository,omitempty"`
 }
@@ -119,4 +120,15 @@ type Activation struct {
 type PropertyActivation struct {
 	Name  string `xml:"name"`
 	Value string `xml:"value"`
+}
+
+type Proxy struct {
+	ID            string `xml:"id"`
+	Active        bool   `xml:"active"`
+	Protocol      string `xml:"protocol"`
+	Host          string `xml:"host"`
+	Port          string `xml:"port,omitempty"`
+	Username      string `xml:"username,omitempty"`
+	Password      string `xml:"password,omitempty"`
+	NonProxyHosts string `xml:"nonProxyHosts,omitempty"`
 }
