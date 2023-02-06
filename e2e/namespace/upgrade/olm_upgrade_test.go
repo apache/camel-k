@@ -202,8 +202,10 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 			// Check the Integration version has been upgraded
 			Eventually(IntegrationVersion(ns, name)).Should(ContainSubstring(newIPVersionPrefix))
 
-			// Check the previous kit is not garbage collected
-			Eventually(Kits(ns, KitWithVersion(prevCSVVersion.String()))).Should(HaveLen(1))
+			// Check the previous kit is not garbage collected (skip Build - present in case of respin)
+			prevCSVVersionMajorMinorPatch := fmt.Sprintf("%d.%d.%d",
+				prevCSVVersion.Version.Major, prevCSVVersion.Version.Minor, prevCSVVersion.Version.Patch)
+			Eventually(Kits(ns, KitWithVersion(prevCSVVersionMajorMinorPatch))).Should(HaveLen(1))
 			// Check a new kit is created with the current version
 			Eventually(Kits(ns, KitWithVersion(defaults.Version)),
 				TestTimeoutMedium).Should(HaveLen(1))
