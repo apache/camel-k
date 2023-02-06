@@ -35,7 +35,7 @@ import (
 // the following trait options:
 // -t hashicorp-vault.enabled=true -t hashicorp-vault.token="token" -t hashicorp-vault.port="port" -t hashicorp-vault.engine="engine" -t hashicorp-vault.port="port" -t hashicorp-vault.scheme="scheme"
 //
-// +camel-k:trait=aws-secrets-manager.
+// +camel-k:trait=hashicorp-vault.
 type Trait struct {
 	traitv1.Trait `property:",squash"`
 	// Enables automatic configuration of the trait.
