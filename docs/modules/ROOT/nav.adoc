@@ -67,6 +67,7 @@
 ** xref:traits:error-handler.adoc[Error Handler]
 ** xref:traits:gc.adoc[Gc]
 ** xref:traits:gcp-secret-manager.adoc[Gcp Secret Manager]
+** xref:traits:hashicorp-vault.adoc[Hashicorp Vault]
 ** xref:traits:health.adoc[Health]
 ** xref:traits:ingress.adoc[Ingress]
 ** xref:traits:istio.adoc[Istio]
