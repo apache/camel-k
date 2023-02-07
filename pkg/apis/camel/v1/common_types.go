@@ -304,8 +304,10 @@ const (
 	CapabilityAwsSecretsManager = "aws-secrets-manager"
 	// CapabilityGcpSecretManager defines the gcp secret manager capability
 	CapabilityGcpSecretManager = "gcp-secret-manager"
-	// CapabilityGcpSecretManager defines the azure key vault capability
+	// CapabilityAzureKeyVault defines the azure key vault capability
 	CapabilityAzureKeyVault = "azure-key-vault"
+	// CapabilityHashicorpVault defines the Hashicorp Vault capability
+	CapabilityHashicorpVault = "hashicorp-vault"
 )
 
 // +kubebuilder:object:generate=false
