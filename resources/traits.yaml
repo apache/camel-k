@@ -99,42 +99,6 @@ traits:
     type: bool
     description: Define if we want to use the Default Credentials Provider chain as
       authentication method
-- name: aws-secrets-manager
-  platform: false
-  profiles:
-  - Kubernetes
-  - Knative
-  - OpenShift
-  description: 'The Hashicorp Vault trait can be used to use secrets from Hashicorp
-    Vault The Hashicorp Vault trait is disabled by default. For more information about
-    how to use secrets from Hashicorp vault take a look at the components docs: xref:components::hashicorp-vault-component.adoc[Hashicorp
-    Vault component] A sample execution of this trait, would require the following
-    trait options: -t hashicorp-vault.enabled=true -t hashicorp-vault.token="token"
-    -t hashicorp-vault.port="port" -t hashicorp-vault.engine="engine" -t hashicorp-vault.port="port"
-    -t hashicorp-vault.scheme="scheme"'
-  properties:
-  - name: enabled
-    type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
-  - name: auto
-    type: bool
-    description: Enables automatic configuration of the trait.
-  - name: host,omitempty
-    type: string
-    description: The Host to use
-  - name: port,omitempty
-    type: string
-    description: The Port to use
-  - name: engine,omitempty
-    type: string
-    description: The Hashicorp engine to use
-  - name: token,omitempty
-    type: string
-    description: The token to access Hashicorp Vault
-  - name: scheme,omitempty
-    type: string
-    description: The scheme to access Hashicorp Vault
 - name: azure-key-vault
   platform: false
   profiles:
@@ -487,6 +451,42 @@ traits:
     type: bool
     description: Define if we want to use the Default Instance approach for accessing
       the Google Secret Manager service
+- name: hashicorp-vault
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: 'The Hashicorp Vault trait can be used to use secrets from Hashicorp
+    Vault The Hashicorp Vault trait is disabled by default. For more information about
+    how to use secrets from Hashicorp vault take a look at the components docs: xref:components::hashicorp-vault-component.adoc[Hashicorp
+    Vault component] A sample execution of this trait, would require the following
+    trait options: -t hashicorp-vault.enabled=true -t hashicorp-vault.token="token"
+    -t hashicorp-vault.port="port" -t hashicorp-vault.engine="engine" -t hashicorp-vault.port="port"
+    -t hashicorp-vault.scheme="scheme"'
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: auto
+    type: bool
+    description: Enables automatic configuration of the trait.
+  - name: host,omitempty
+    type: string
+    description: The Host to use
+  - name: port,omitempty
+    type: string
+    description: The Port to use
+  - name: engine,omitempty
+    type: string
+    description: The Hashicorp engine to use
+  - name: token,omitempty
+    type: string
+    description: The token to access Hashicorp Vault
+  - name: scheme,omitempty
+    type: string
+    description: The scheme to access Hashicorp Vault
 - name: health
   platform: false
   profiles:
