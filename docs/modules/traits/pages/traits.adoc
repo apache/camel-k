@@ -53,12 +53,47 @@ metadata:
 spec:
   traits:
     jvm:
-      configuration:
-        classpath: /path/to/my.jar
+      classpath: /path/to/my.jar
 ...
 ----
 
-The `.spec.traits` holds an array of traits, identified by their id (`jvm`, in this case). Then, the `.jvm.configuration.classpath` is the property we want to set. If you need to set a trait directly in the `Integration` spec, then, you should proceed in the way illustrated above.
+The `.spec.traits` holds an array of traits, identified by their id (`jvm`, in this case). Then, the `.jvm.classpath` is the property we want to set. If you need to set a trait directly in the `Integration` spec, then, you should proceed in the way illustrated above.
+
+=== Configure as an annotation
+
+When working directly with Integration specification, it may result handy to use a more compact approach than configuring the `.spec.traits`: we can use a special annotation instead:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: my-integration
+  annotations:
+    trait.camel.apache.org/jvm.classpath: /path/to/my.jar
+...
+----
+
+When using this strategy you're having a higher degree of flexibility but you're losing the possibility to validate the type of data against the expected type (ie, trying to parse a string instead of a number).
+
+NOTE: if you need to specify an array of values, the syntax will be `trait.camel.apache.org/trait.conf: "[\"opt1\", \"opt2\", …​]"`
+
+=== Configure trait dynamically
+
+When using the trait annotation configuration you can benefit of its flexibility to use dynamic values stored in the cluster as `Configmap`:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: my-integration
+  annotations:
+    trait.camel.apache.org/container.request-memory: {{configmap:my-cm/my-property}}
+...
+----
+
+This approach is very useful when you want to provide a specific configuration for your Integration based in the namespace where it's supposed to be executed (ie, you can have sensible value in a production and development environment). Just make sure the `Configmap` exists and has the expected values.
 
 [[traits-list]]
 == List of available traits
