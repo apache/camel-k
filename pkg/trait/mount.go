@@ -162,7 +162,7 @@ func (t *mountTrait) attachResource(e *Environment, conf *utilResource.Config) {
 		cm, err := kubernetes.GetUnstructured(e.Ctx, e.Client, schema.GroupVersionKind{Group: "", Version: "v1", Kind: "ConfigMap"},
 			conf.Name(), e.Integration.Namespace)
 		if err == nil && cm != nil && cm.GetLabels()[kubernetes.ConfigMapAutogenLabel] == "true" {
-			refCm := kubernetes.NewConfigMap(e.Integration.Namespace, conf.Name(), "", "", "", nil)
+			refCm := kubernetes.NewConfigMap(e.Integration.Namespace, conf.Name(), "", nil, nil)
 			e.Resources.Add(refCm)
 		}
 	}

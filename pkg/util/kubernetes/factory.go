@@ -123,8 +123,7 @@ func NewResourceRequirements(reqs []string) (corev1.ResourceRequirements, error)
 }
 
 // NewConfigMap will create a ConfigMap.
-func NewConfigMap(namespace, cmName, originalFilename string, generatedKey string,
-	textData string, binaryData []byte) *corev1.ConfigMap {
+func NewConfigMap(namespace, cmName, originalFilename string, data map[string]string, binaryData map[string][]byte) *corev1.ConfigMap {
 	immutable := true
 	cm := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
@@ -141,15 +140,11 @@ func NewConfigMap(namespace, cmName, originalFilename string, generatedKey strin
 		},
 		Immutable: &immutable,
 	}
-	if textData != "" {
-		cm.Data = map[string]string{
-			generatedKey: textData,
-		}
+	if data != nil {
+		cm.Data = data
 	}
 	if binaryData != nil {
-		cm.BinaryData = map[string][]byte{
-			generatedKey: binaryData,
-		}
+		cm.BinaryData = binaryData
 	}
 	return &cm
 }

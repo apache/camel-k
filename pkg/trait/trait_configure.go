@@ -18,41 +18,48 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
+
+var traitCm = regexp.MustCompile("{{configmap:([a-z0-9-]+)/([a-z0-9-]+)}}")
 
 // Configure reads trait configurations from environment and applies them to catalog.
 func (c *Catalog) Configure(env *Environment) error {
 	if env.Platform != nil {
-		if err := c.configureTraits(env.Platform.Status.Traits); err != nil {
+		if err := c.configureTraits(env.Ctx, env.Client, env.Platform.Namespace, env.Platform.Status.Traits); err != nil {
 			return err
 		}
-		if err := c.configureTraitsFromAnnotations(env.Platform.Annotations); err != nil {
+		if err := c.configureTraitsFromAnnotations(env.Ctx, env.Client, env.Platform.Namespace, env.Platform.Annotations); err != nil {
 			return err
 		}
 	}
 	if env.IntegrationKit != nil {
-		if err := c.configureTraits(env.IntegrationKit.Spec.Traits); err != nil {
+		if err := c.configureTraits(env.Ctx, env.Client, env.IntegrationKit.Namespace, env.IntegrationKit.Spec.Traits); err != nil {
 			return err
 		}
-		if err := c.configureTraitsFromAnnotations(env.IntegrationKit.Annotations); err != nil {
+		if err := c.configureTraitsFromAnnotations(env.Ctx, env.Client, env.IntegrationKit.Namespace, env.IntegrationKit.Annotations); err != nil {
 			return err
 		}
 	}
 	if env.Integration != nil {
-		if err := c.configureTraits(env.Integration.Spec.Traits); err != nil {
+		if err := c.configureTraits(env.Ctx, env.Client, env.Integration.Namespace, env.Integration.Spec.Traits); err != nil {
 			return err
 		}
-		if err := c.configureTraitsFromAnnotations(env.Integration.Annotations); err != nil {
+		if err := c.configureTraitsFromAnnotations(env.Ctx, env.Client, env.Integration.Namespace, env.Integration.Annotations); err != nil {
 			return err
 		}
 	}
@@ -60,7 +67,7 @@ func (c *Catalog) Configure(env *Environment) error {
 	return nil
 }
 
-func (c *Catalog) configureTraits(traits interface{}) error {
+func (c *Catalog) configureTraits(ctx context.Context, cl client.Client, ns string, traits interface{}) error {
 	traitMap, err := ToTraitMap(traits)
 	if err != nil {
 		return err
@@ -72,14 +79,14 @@ func (c *Catalog) configureTraits(traits interface{}) error {
 			// take precedence over the legacy addon configurations
 			continue
 		}
-		if err := c.configureTrait(id, trait); err != nil {
+		if err := c.configureTrait(ctx, cl, ns, id, trait); err != nil {
 			return err
 		}
 	}
 	// Addons
 	for id, trait := range traitMap["addons"] {
 		if addons, ok := trait.(map[string]interface{}); ok {
-			if err := c.configureTrait(id, addons); err != nil {
+			if err := c.configureTrait(ctx, cl, ns, id, addons); err != nil {
 				return err
 			}
 		}
@@ -88,9 +95,9 @@ func (c *Catalog) configureTraits(traits interface{}) error {
 	return nil
 }
 
-func (c *Catalog) configureTrait(id string, trait map[string]interface{}) error {
+func (c *Catalog) configureTrait(ctx context.Context, cl client.Client, ns string, id string, trait map[string]interface{}) error {
 	if catTrait := c.GetTrait(id); catTrait != nil {
-		if err := decodeTrait(trait, catTrait); err != nil {
+		if err := decodeTrait(ctx, cl, ns, trait, catTrait); err != nil {
 			return err
 		}
 	}
@@ -98,7 +105,7 @@ func (c *Catalog) configureTrait(id string, trait map[string]interface{}) error 
 	return nil
 }
 
-func decodeTrait(in map[string]interface{}, target Trait) error {
+func decodeTrait(ctx context.Context, cl client.Client, ns string, in map[string]interface{}, target Trait) error {
 	// Migrate legacy configuration properties before applying to catalog
 	if err := MigrateLegacyConfiguration(in); err != nil {
 		return err
@@ -112,7 +119,7 @@ func decodeTrait(in map[string]interface{}, target Trait) error {
 	return json.Unmarshal(data, target)
 }
 
-func (c *Catalog) configureTraitsFromAnnotations(annotations map[string]string) error {
+func (c *Catalog) configureTraitsFromAnnotations(ctx context.Context, cl client.Client, ns string, annotations map[string]string) error {
 	options := make(map[string]map[string]interface{}, len(annotations))
 	for k, v := range annotations {
 		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
@@ -145,14 +152,14 @@ func (c *Catalog) configureTraitsFromAnnotations(annotations map[string]string) 
 			}
 		}
 	}
-	return c.configureFromOptions(options)
+	return c.configureFromOptions(ctx, cl, ns, options)
 }
 
-func (c *Catalog) configureFromOptions(traits map[string]map[string]interface{}) error {
+func (c *Catalog) configureFromOptions(ctx context.Context, cl client.Client, ns string, traits map[string]map[string]interface{}) error {
 	for id, config := range traits {
 		t := c.GetTrait(id)
 		if t != nil {
-			err := configureTrait(id, config, t)
+			err := configureTrait(ctx, cl, ns, id, config, t)
 			if err != nil {
 				return err
 			}
@@ -161,7 +168,12 @@ func (c *Catalog) configureFromOptions(traits map[string]map[string]interface{})
 	return nil
 }
 
-func configureTrait(id string, config map[string]interface{}, trait interface{}) error {
+func configureTrait(ctx context.Context, c client.Client, ns string, id string, config map[string]interface{}, trait interface{}) error {
+	err := parse(ctx, c, ns, config)
+	if err != nil {
+		return err
+	}
+
 	md := mapstructure.Metadata{}
 
 	var valueConverter mapstructure.DecodeHookFuncKind = func(sourceKind reflect.Kind, targetKind reflect.Kind, data interface{}) (interface{}, error) {
@@ -193,4 +205,68 @@ func configureTrait(id string, config map[string]interface{}, trait interface{})
 	}
 
 	return decoder.Decode(config)
+}
+
+func parse(ctx context.Context, c client.Client, ns string, config map[string]interface{}) error {
+	for prop, val := range config {
+		switch x := val.(type) {
+		// if the value is an array, we need to recursively parse it as well
+		case []interface{}:
+			traitStr := val.([]interface{})
+			for i, k := range traitStr {
+				valFromCm, err := getFromConfigmap(ctx, c, ns, k)
+				if err != nil {
+					return err
+				}
+				// Replace the value with the one loaded dynamically
+				if valFromCm != "" && valFromCm != k {
+					traitStr[i] = valFromCm
+				}
+			}
+		case interface{}:
+			traitStr := val.(interface{})
+			valFromCm, err := getFromConfigmap(ctx, c, ns, traitStr)
+			if err != nil {
+				return err
+			}
+			// Replace the value with the one loaded dynamically
+			if valFromCm != "" && valFromCm != traitStr {
+				config[prop] = valFromCm
+			}
+
+		default:
+			return fmt.Errorf("unable to parse type %T", x)
+		}
+	}
+
+	return nil
+}
+
+func getFromConfigmap(ctx context.Context, c client.Client, ns string, value interface{}) (interface{}, error) {
+	strVal := fmt.Sprintf("%v", value)
+	if !traitCm.MatchString(strVal) {
+		// Nothing to parse, it's not a dynamic value
+		return "", nil
+	}
+	matches := traitCm.FindStringSubmatch(strVal)
+	// The regexp returns also the whole string, reason why we expect 3 values
+	if len(matches) != 3 {
+		return "", fmt.Errorf("unable to extract a value for %s configmap, syntax must be {{configmap:my-cm/my-prop}}", strVal)
+	}
+	// TODO we may cache locally the contents of the configmap
+	cm := kubernetes.LookupConfigmap(ctx, c, ns, matches[1])
+	if cm == nil {
+		return "", fmt.Errorf("%v configmap not found in %s namespace, make sure to provide it before the Integration can run", matches[1], ns)
+	}
+	if cm.Data[matches[2]] == "" {
+		return "", fmt.Errorf("Empty value for configmap property %s", matches[2])
+	}
+
+	if intValue, err := strconv.Atoi(cm.Data[matches[2]]); err == nil {
+		return intValue, nil
+	}
+	if boolValue, err := strconv.ParseBool(cm.Data[matches[2]]); err == nil {
+		return boolValue, nil
+	}
+	return cm.Data[matches[2]], nil
 }

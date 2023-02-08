@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -28,6 +29,9 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestTraitConfiguration(t *testing.T) {
@@ -230,7 +234,7 @@ func TestTraitDecode(t *testing.T) {
 
 	target, ok := newContainerTrait().(*containerTrait)
 	require.True(t, ok)
-	err := decodeTrait(trait, target)
+	err := decodeTrait(nil, nil, "", trait, target)
 	require.NoError(t, err)
 
 	assert.Equal(t, false, pointer.BoolDeref(target.Enabled, true))
@@ -238,4 +242,49 @@ func TestTraitDecode(t *testing.T) {
 	// legacy configuration should not override a value in new API field
 	assert.Equal(t, 7071, target.Port)
 	assert.Equal(t, false, pointer.BoolDeref(target.Auto, true))
+}
+
+func TestDynamicConfigurationFromAnnotations(t *testing.T) {
+	env := getAnnotationTraitNominalEnv(t)
+	c := NewCatalog(nil)
+	assert.NoError(t, c.Configure(env))
+	ct, found := c.GetTrait("camel").(*camelTrait)
+	assert.True(t, found)
+	assert.Equal(t, "1.0.0", ct.RuntimeVersion)
+	et, found := c.GetTrait("environment").(*environmentTrait)
+	assert.True(t, found)
+	assert.Equal(t, []string{"E1=X", "E2=Y"}, et.Vars)
+	gt, found := c.GetTrait("gc").(*gcTrait)
+	assert.True(t, found)
+	assert.True(t, *gt.Enabled)
+}
+
+func getAnnotationTraitNominalEnv(t *testing.T) *Environment {
+	t.Helper()
+	cm := kubernetes.NewConfigMap("default", "my-cm", "my-cm", map[string]string{
+		"env":        `["E1=X", "E2=Y"]`,
+		"ck-runtime": "1.0.0",
+		"gc":         "true",
+	}, nil)
+	traitCatalog := NewCatalog(nil)
+	fakeClient, _ := test.NewFakeClient(cm)
+	catalog, _ := camel.DefaultCatalog()
+
+	return &Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Ctx:          context.Background(),
+		Client:       fakeClient,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "hello",
+				Namespace: "default",
+				Annotations: map[string]string{
+					"trait.camel.apache.org/environment.vars":      `{{configmap:my-cm/env}}`,
+					"trait.camel.apache.org/camel.runtime-version": `{{configmap:my-cm/ck-runtime}}`,
+					"trait.camel.apache.org/gc.enabled":            `{{configmap:my-cm/gc}}`,
+				},
+			},
+		},
+	}
 }

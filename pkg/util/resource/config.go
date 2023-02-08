@@ -220,7 +220,11 @@ func ConvertFileToConfigmap(ctx context.Context, c client.Client, config *Config
 		config.resourceKey = filepath.Base(config.DestinationPath())
 	}
 	genCmName := fmt.Sprintf("cm-%s", hashFrom([]byte(filename), []byte(integrationName), []byte(content), rawContent))
-	cm := kubernetes.NewConfigMap(namespace, genCmName, filename, config.Key(), content, rawContent)
+	cm := kubernetes.NewConfigMap(
+		namespace, genCmName, filename,
+		map[string]string{config.Key(): content},
+		map[string][]byte{config.Key(): rawContent},
+	)
 	err := c.Create(ctx, cm)
 	if err != nil {
 		if k8serrors.IsAlreadyExists(err) {

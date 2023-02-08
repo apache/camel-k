@@ -106,7 +106,7 @@ func (t *openAPITrait) generateFromConfigmaps(e *Environment, tmpDir string) ([]
 		cm, err := kubernetes.GetUnstructured(e.Ctx, e.Client, schema.GroupVersionKind{Group: "", Version: "v1", Kind: "ConfigMap"},
 			configmap, e.Integration.Namespace)
 		if err == nil && cm != nil && cm.GetLabels()[kubernetes.ConfigMapAutogenLabel] == "true" {
-			refCm := kubernetes.NewConfigMap(e.Integration.Namespace, configmap, "", "", "", nil)
+			refCm := kubernetes.NewConfigMap(e.Integration.Namespace, configmap, "", nil, nil)
 			e.Resources.Add(refCm)
 		}
 		// Iterate over each configmap key which may hold a different OpenAPI spec
