@@ -2797,28 +2797,39 @@ spec:
       languages:
       - groovy
       metadata:
-        native: "false"
+        native: "true"
+        sources-required-at-build-time: "true"
     java:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-java-joor-dsl
       languages:
       - java
       metadata:
-        native: "false"
+        native: "true"
+        sources-required-at-build-time: "true"
     js:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-js-dsl
       languages:
       - js
       metadata:
-        native: "true"
+        native: "false"
+    jsh:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-jsh-dsl
+      languages:
+      - jsh
+      metadata:
+        native: "false"
+        sources-required-at-build-time: "true"
     kts:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-kotlin-dsl
       languages:
       - kts
       metadata:
-        native: "false"
+        native: "true"
+        sources-required-at-build-time: "true"
     xml:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-xml-io-dsl
