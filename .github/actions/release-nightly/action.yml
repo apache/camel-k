@@ -38,6 +38,9 @@ inputs:
 runs:
   using: "composite"
 
+  env:
+      NEXUS_DEPLOY_USERNAME: ${{ secrets.NEXUS_USER }}
+      NEXUS_DEPLOY_PASSWORD: ${{ secrets.NEXUS_PW }}
   steps:
     - name: Set up JDK ${{ inputs.javaVersion }}
       uses: actions/setup-java@v2
