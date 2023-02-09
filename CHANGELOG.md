@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Compatibility matrix show wrong kamelets version for camel-k releases 1.10.x and 1.11.x [\#4023](https://github.com/apache/camel-k/issues/4023)
 - Native builds failure due to missing catalog [\#4022](https://github.com/apache/camel-k/issues/4022)
 - operator refers to a openjdk image tag not found in docker.io [\#3998](https://github.com/apache/camel-k/issues/3998)
 - Camel-k checks other namespaces and error given  [\#3996](https://github.com/apache/camel-k/issues/3996)
