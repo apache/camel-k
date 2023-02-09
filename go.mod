@@ -24,7 +24,7 @@ require (
 	github.com/openshift/api v3.9.1-0.20190927182313-d4a64ec2cbd8+incompatible
 	github.com/operator-framework/api v0.13.0
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.50.0
+	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.60.0
 	github.com/prometheus/client_golang v1.14.0
 	github.com/prometheus/client_model v0.3.0
 	github.com/prometheus/common v0.39.0
@@ -56,9 +56,9 @@ require (
 	k8s.io/cli-runtime v0.25.2
 	k8s.io/client-go v0.25.2
 	k8s.io/gengo v0.0.0-20220613173612-397b4ae3bce7
-	k8s.io/klog/v2 v2.70.2-0.20220707122935-0990e81f1a8f
+	k8s.io/klog/v2 v2.80.0
 	k8s.io/kubectl v0.25.2
-	k8s.io/utils v0.0.0-20220728103510-ee6ede2d64ed
+	k8s.io/utils v0.0.0-20220823124924-e9cbc92d1a73
 	knative.dev/eventing v0.35.3
 	knative.dev/pkg v0.0.0-20221123011842-b78020c16606
 	knative.dev/serving v0.35.3
