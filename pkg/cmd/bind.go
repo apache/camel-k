@@ -264,7 +264,7 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if o.OutputFormat != "" {
-		return showOutput(cmd, &binding, o.OutputFormat, client.GetScheme())
+		return showKameletBindingOutput(cmd, &binding, o.OutputFormat, client.GetScheme())
 	}
 
 	replaced, err := kubernetes.ReplaceResource(o.Context, client, &binding)
@@ -280,7 +280,7 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func showOutput(cmd *cobra.Command, binding *v1alpha1.KameletBinding, outputFormat string, scheme runtime.ObjectTyper) error {
+func showKameletBindingOutput(cmd *cobra.Command, binding *v1alpha1.KameletBinding, outputFormat string, scheme runtime.ObjectTyper) error {
 	printer := printers.NewTypeSetter(scheme)
 	printer.Delegate = &kubernetes.CLIPrinter{
 		Format: outputFormat,
