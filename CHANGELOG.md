@@ -6,14 +6,21 @@
 
 **Closed issues:**
 
+- YAKS test failure [\#4044](https://github.com/apache/camel-k/issues/4044)
 - Compatibility matrix show wrong kamelets version for camel-k releases 1.10.x and 1.11.x [\#4023](https://github.com/apache/camel-k/issues/4023)
 - Native builds failure due to missing catalog [\#4022](https://github.com/apache/camel-k/issues/4022)
 - operator refers to a openjdk image tag not found in docker.io [\#3998](https://github.com/apache/camel-k/issues/3998)
 - Camel-k checks other namespaces and error given  [\#3996](https://github.com/apache/camel-k/issues/3996)
+- Prometheus bump [\#3985](https://github.com/apache/camel-k/issues/3985)
+- org.apache.camel.CamelExecutionException: Exception occurred during execution on the exchange: Exchange\[\] [\#3969](https://github.com/apache/camel-k/issues/3969)
 - \[Discussion\] Camel K 2023 roadmap [\#3964](https://github.com/apache/camel-k/issues/3964)
 - Default namespace not used when `-o yaml` [\#3955](https://github.com/apache/camel-k/issues/3955)
+- --config property by kamel \> 1.10: Errror spec.traits.mount.configuration: Required value [\#3923](https://github.com/apache/camel-k/issues/3923)
 - Support Hashicorp Vault as secrets properties source [\#3904](https://github.com/apache/camel-k/issues/3904)
+- Allow traits to be configured via configmap/secrets [\#3891](https://github.com/apache/camel-k/issues/3891)
+- Kamelets load properties from ConfigMap [\#3811](https://github.com/apache/camel-k/issues/3811)
 - Unable to configure ServiceAccountName using Kamel run [\#3797](https://github.com/apache/camel-k/issues/3797)
+- Integration Kit image build runs into an endless loop when a lower level image can't be pulled from Registry [\#3266](https://github.com/apache/camel-k/issues/3266)
 - Choose a single location for examples [\#2826](https://github.com/apache/camel-k/issues/2826)
 - Camel-K Tracing Trait error [\#2633](https://github.com/apache/camel-k/issues/2633)
 - Provide non-regression tests for regression \#1872 [\#1875](https://github.com/apache/camel-k/issues/1875)
