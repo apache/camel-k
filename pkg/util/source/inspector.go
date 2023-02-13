@@ -207,6 +207,12 @@ func InspectorForLanguage(catalog *camel.RuntimeCatalog, language v1.Language) I
 				catalog: catalog,
 			},
 		}
+	case v1.LanguageJavaShell:
+		return &JavaSourceInspector{
+			baseInspector: baseInspector{
+				catalog: catalog,
+			},
+		}
 	}
 	return &baseInspector{}
 }

@@ -1,5 +1,5 @@
-//go:build integration
-// +build integration
+//go:build integration && !high_memory
+// +build integration,!high_memory
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
 
@@ -38,14 +38,14 @@ func TestNativeIntegrations(t *testing.T) {
 		operatorID := "camel-k-quarkus-native"
 		Expect(KamelInstallWithID(operatorID, ns,
 			"--build-timeout", "90m0s",
-			"--operator-resources", "limits.memory=4.5Gi",
-			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=3g",
+			"--operator-resources", "limits.memory=6.5Gi",
+			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=6g",
 		).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("unsupported integration source language", func(t *testing.T) {
-			name := "unsupported-java"
-			Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
+			name := "unsupported-js"
+			Expect(KamelRunWithID(operatorID, ns, "files/JavaScript.js", "--name", name,
 				"-t", "quarkus.package-type=native",
 			).Execute()).To(Succeed())
 
@@ -54,6 +54,24 @@ func TestNativeIntegrations(t *testing.T) {
 				Should(Equal(corev1.ConditionFalse))
 
 				// Clean up
+			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("xml native support", func(t *testing.T) {
+			name := "xml-native"
+			Expect(KamelRunWithID(operatorID, ns, "files/Xml.xml", "--name", name,
+				"-t", "quarkus.package-type=native",
+			).Execute()).To(Succeed())
+
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationPod(ns, name), TestTimeoutShort).
+				Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
+
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("XML Magicstring!"))
+
+			// Clean up
 			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
 		})
 
@@ -117,13 +135,16 @@ func TestNativeIntegrations(t *testing.T) {
 			Eventually(IntegrationPodImage(ns, name)).Should(Equal(nativeKit.Status.Image))
 
 			// Check the Integration is still ready
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationPod(ns, name), TestTimeoutShort).
 				Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
 
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+			// Clean up
+			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
 		})
 
 		// Clean up

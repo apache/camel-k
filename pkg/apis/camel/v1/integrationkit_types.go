@@ -69,6 +69,8 @@ type IntegrationKitSpec struct {
 	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
 	// Maven repositories that can be used by the kit
 	Repositories []string `json:"repositories,omitempty"`
+	// the sources to add at build time
+	Sources []SourceSpec `json:"sources,omitempty"`
 }
 
 // IntegrationKitTraits defines traits assigned to an `IntegrationKit`

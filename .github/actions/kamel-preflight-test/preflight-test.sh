@@ -38,7 +38,7 @@ waitForOperator() {
   #
   # Wait for the operator to be running
   #
-  local timeout=180
+  local timeout=360
   local i=1
   local command="kubectl get pods -n ${NAMESPACE} 2> /dev/null | grep camel-k | grep Running &> /dev/null"
 

@@ -25,7 +25,7 @@
 
 set -e
 
-while getopts ":b:c:i:l:n:s:v:x:" opt; do
+while getopts ":b:c:i:l:n:q:s:t:v:x:" opt; do
   case "${opt}" in
     b)
       BUILD_CATALOG_SOURCE_NAME=${OPTARG}
@@ -42,8 +42,14 @@ while getopts ":b:c:i:l:n:s:v:x:" opt; do
     n)
       IMAGE_NAME=${OPTARG}
       ;;
+    q)
+      LOG_LEVEL=${OPTARG}
+      ;;
     s)
       REGISTRY_INSECURE=${OPTARG}
+      ;;
+    t)
+      HIGH_MEMORY=${OPTARG}
       ;;
     v)
       IMAGE_VERSION=${OPTARG}
@@ -116,5 +122,14 @@ export CAMEL_K_TEST_IMAGE_NAME=${CUSTOM_IMAGE}
 export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
 export CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE=${SAVE_FAILED_TEST_NS}
 
+export CAMEL_K_TEST_LOG_LEVEL="${LOG_LEVEL}"
+if [ "${LOG_LEVEL}" == "debug" ]; then
+  export CAMEL_K_TEST_MAVEN_CLI_OPTIONS="-X ${CAMEL_K_TEST_MAVEN_CLI_OPTIONS}"
+fi
+
 # Then run integration tests
-DO_TEST_PREBUILD=false make test-quarkus-native
+if [ "${HIGH_MEMORY}" == "true" ]; then
+  DO_TEST_PREBUILD=false make test-quarkus-native-high-memory
+else
+  DO_TEST_PREBUILD=false make test-quarkus-native
+fi

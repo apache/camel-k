@@ -93,10 +93,10 @@ const kubeConfigEnvVar = "KUBECONFIG"
 
 var TestTimeoutShort = 1 * time.Minute
 var TestTimeoutMedium = 5 * time.Minute
-var TestTimeoutLong = 10 * time.Minute
+var TestTimeoutLong = 15 * time.Minute
 
 // TestTimeoutVeryLong should be used only for testing native builds.
-var TestTimeoutVeryLong = 90 * time.Minute
+var TestTimeoutVeryLong = 60 * time.Minute
 
 var NoOlmOperatorImage string
 

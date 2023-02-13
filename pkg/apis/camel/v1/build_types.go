@@ -74,6 +74,8 @@ type BuilderTask struct {
 	Maven MavenBuildSpec `json:"maven,omitempty"`
 	// workspace directory to use
 	BuildDir string `json:"buildDir,omitempty"`
+	// the sources to add at build time
+	Sources []SourceSpec `json:"sources,omitempty"`
 }
 
 // MavenBuildSpec defines the Maven configuration plus additional repositories to use
