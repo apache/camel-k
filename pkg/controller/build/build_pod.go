@@ -18,10 +18,8 @@ limitations under the License.
 package build
 
 import (
-	"bufio"
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -39,7 +37,6 @@ import (
 	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/log"
 )
 
 const (
@@ -204,14 +201,29 @@ func buildPodName(build *v1.Build) string {
 }
 
 func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
-	if !hasBuilderVolume(pod) {
-		// Add the EmptyDir volume used to share the build state across tasks
-		pod.Spec.Volumes = append(pod.Spec.Volumes, corev1.Volume{
-			Name: builderVolume,
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
+	if !hasVolume(pod, builderVolume) {
+		pod.Spec.Volumes = append(pod.Spec.Volumes,
+			// EmptyDir volume used to share the build state across tasks
+			corev1.Volume{
+				Name: builderVolume,
+				VolumeSource: corev1.VolumeSource{
+					EmptyDir: &corev1.EmptyDirVolumeSource{},
+				},
 			},
-		})
+		)
+	}
+	if !hasVolume(pod, "camel-k-maven-repo") {
+		pod.Spec.Volumes = append(pod.Spec.Volumes,
+			// Maven repo volume
+			corev1.Volume{
+				Name: "camel-k-maven-repo",
+				VolumeSource: corev1.VolumeSource{
+					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+						ClaimName: "camel-k-maven-repo",
+					},
+				},
+			},
+		)
 	}
 
 	container := corev1.Container{
@@ -233,15 +245,6 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 	}
 
 	addContainerToPod(build, container, pod)
-}
-
-func readSpectrumLogs(newStdOut io.Reader) {
-	scanner := bufio.NewScanner(newStdOut)
-
-	for scanner.Scan() {
-		line := scanner.Text()
-		log.Infof(line)
-	}
 }
 
 func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task *v1.BuildahTask, pod *corev1.Pod) error {
@@ -473,19 +476,25 @@ func addKanikoTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, tas
 }
 
 func addContainerToPod(build *v1.Build, container corev1.Container, pod *corev1.Pod) {
-	if hasBuilderVolume(pod) {
+	if hasVolume(pod, builderVolume) {
 		container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
 			Name:      builderVolume,
 			MountPath: filepath.Join(builderDir, build.Name),
+		})
+	}
+	if hasVolume(pod, "camel-k-maven-repo") {
+		container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
+			Name:      "camel-k-maven-repo",
+			MountPath: "/tmp/artifacts/m2",
 		})
 	}
 
 	pod.Spec.InitContainers = append(pod.Spec.InitContainers, container)
 }
 
-func hasBuilderVolume(pod *corev1.Pod) bool {
+func hasVolume(pod *corev1.Pod, name string) bool {
 	for _, volume := range pod.Spec.Volumes {
-		if volume.Name == builderVolume {
+		if volume.Name == name {
 			return true
 		}
 	}

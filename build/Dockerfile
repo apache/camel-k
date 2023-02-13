@@ -40,10 +40,11 @@ RUN ${MVNW_DIR}/mvnw --version | grep "Maven home:" | sed 's/Maven home: //' >> 
     && rm $(cat ${MVNW_DIR}default)/lib/maven-slf4j-provider*
 ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=${MAVEN_HOME}/conf/logback.xml"
 
-ADD build/_maven_output /tmp/artifacts/m2
+ADD build/_maven_output /tmp/local/m2
 ADD build/_kamelets /kamelets
 
-RUN chgrp -R 0 /tmp/artifacts/m2 \
+RUN mkdir -p /tmp/artifacts/m2 \
+    && chgrp -R 0 /tmp/artifacts/m2 \
     && chmod -R g=u /tmp/artifacts/m2 \
     && chgrp -R 0 /kamelets \
     && chmod -R g=u /kamelets \

@@ -947,21 +947,21 @@ ObservedGeneration is the most recent generation observed for this Catalog.
 |
 
 
-Phase --
+the actual phase
 
 |`conditions` +
 *xref:#_camel_apache_org_v1_CamelCatalogCondition[[\]CamelCatalogCondition]*
 |
 
 
-Conditions --
+a list of events happened for the CamelCatalog
 
 |`image` +
 string
 |
 
 
-Image --
+the container image available for building an application with this catalog
 
 
 |===

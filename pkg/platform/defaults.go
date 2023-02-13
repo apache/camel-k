@@ -69,24 +69,17 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	}
 
 	if p.Status.Build.PublishStrategy == "" {
-		log.Debugf("Integration Platform [%s]: setting publishing strategy", p.Namespace)
 		if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift {
 			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyS2I
 		} else {
 			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategySpectrum
 		}
+		log.Debugf("Integration Platform [%s]: setting publishing strategy %s", p.Namespace, p.Status.Build.PublishStrategy)
 	}
 
 	if p.Status.Build.BuildStrategy == "" {
-		log.Debugf("Integration Platform [%s]: setting build strategy", p.Namespace)
-		// Use the fastest strategy that they support (routine when possible)
-		if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I ||
-			p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategySpectrum {
-			p.Status.Build.BuildStrategy = v1.BuildStrategyRoutine
-		} else {
-			// The build output has to be shared via a volume
-			p.Status.Build.BuildStrategy = v1.BuildStrategyPod
-		}
+		p.Status.Build.BuildStrategy = v1.BuildStrategyPod
+		log.Debugf("Integration Platform [%s]: setting build strategy %s", p.Namespace, p.Status.Build.BuildStrategy)
 	}
 
 	err := setPlatformDefaults(p, verbose)

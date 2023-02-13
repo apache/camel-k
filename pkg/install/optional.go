@@ -24,10 +24,16 @@ import (
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	logutil "github.com/apache/camel-k/pkg/util/log"
+	cp "github.com/otiai10/copy"
 )
 
 // OperatorStartupOptionalTools tries to install optional tools at operator startup and warns if something goes wrong.
 func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespace string, operatorNamespace string, log logutil.Logger) {
+	// Try to copy any local runtime dependency to maven repository
+	if err := cp.Copy("/tmp/local/m2", "/tmp/artifacts/m2"); err != nil {
+		log.Info("Could not copy local runtime dependencies due to", err.Error())
+	}
+
 	// Try to register the OpenShift CLI Download link if possible
 	if err := OpenShiftConsoleDownloadLink(ctx, c); err != nil {
 		log.Info("Cannot install OpenShift CLI download link: skipping.")

@@ -456,6 +456,7 @@ func installKubernetesRoles(ctx context.Context, c client.Client, namespace stri
 
 func installOperator(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
+		"/manager/operator-storage.yaml",
 		"/manager/operator-deployment.yaml",
 	)
 }

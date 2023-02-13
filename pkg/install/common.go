@@ -110,6 +110,7 @@ func ObjectOrCollect(ctx context.Context, c client.Client, namespace string, col
 		if err := c.Create(ctx, obj); err != nil && !errors.IsAlreadyExists(err) {
 			return err
 		}
+		return nil
 	}
 
 	if force {
