@@ -87,7 +87,7 @@ func (t *gcpSecretManagerTrait) Configure(environment *trait.Environment) (bool,
 	if t.ContextReloadEnabled == nil {
 		t.ContextReloadEnabled = pointer.Bool(false)
 	}
-	
+
 	if t.RefreshEnabled == nil {
 		t.RefreshEnabled = pointer.Bool(false)
 	}
