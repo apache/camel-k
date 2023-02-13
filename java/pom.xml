@@ -28,7 +28,7 @@
   <groupId>org.apache.camel.k</groupId>
   <artifactId>camel-k-crd</artifactId>
   <version>1.17.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -37,7 +37,7 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
 
-    <fabric8-version>6.4.0</fabric8-version>
+    <fabric8-version>6.4.1</fabric8-version>
   </properties>
 
   <developers>
