@@ -145,6 +145,7 @@ update-docs: build-resources
 bump-replace:
 	@# Bump version and replace with the variables provided by the user
 	@sed -i 's/^VERSION ?= .*$//VERSION ?= $(VERSION)/' ./script/Makefile
+	@mvn -f java/pom.xml versions:set -DgenerateBackupPoms=false -DnewVersion=$(VERSION)
 	@sed -i 's/^LAST_RELEASED_VERSION ?= .*$//LAST_RELEASED_VERSION ?= $(LAST_RELEASED_VERSION)/' ./script/Makefile
 	@sed -i 's/^STAGING_RUNTIME_REPO :=.*$//STAGING_RUNTIME_REPO :=/' ./script/Makefile
 	@sed -i 's/^KAMELET_CATALOG_REPO_TAG :=.*$//KAMELET_CATALOG_REPO_TAG := main/' ./script/Makefile
