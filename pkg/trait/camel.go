@@ -217,7 +217,7 @@ func (t *camelTrait) computeConfigMaps(e *Environment) []ctrl.Object {
 	}
 
 	for i, s := range sources {
-		if s.ContentRef != "" {
+		if s.ContentRef != "" || e.isEmbedded(s) {
 			continue
 		}
 

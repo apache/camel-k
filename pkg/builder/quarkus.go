@@ -30,7 +30,9 @@ import (
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/digest"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/maven"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func init() {
@@ -48,6 +50,7 @@ type quarkusSteps struct {
 	GenerateQuarkusProject     Step
 	BuildQuarkusRunner         Step
 	ComputeQuarkusDependencies Step
+	PrepareProjectWithSources  Step
 
 	CommonSteps []Step
 }
@@ -55,8 +58,56 @@ type quarkusSteps struct {
 var Quarkus = quarkusSteps{
 	LoadCamelQuarkusCatalog:    NewStep(InitPhase, loadCamelQuarkusCatalog),
 	GenerateQuarkusProject:     NewStep(ProjectGenerationPhase, generateQuarkusProject),
+	PrepareProjectWithSources:  NewStep(ProjectBuildPhase-1, prepareProjectWithSources),
 	BuildQuarkusRunner:         NewStep(ProjectBuildPhase, buildQuarkusRunner),
 	ComputeQuarkusDependencies: NewStep(ProjectBuildPhase+1, computeQuarkusDependencies),
+}
+
+func resolveBuildSources(ctx *builderContext) ([]v1.SourceSpec, error) {
+	resources := kubernetes.NewCollection()
+	return kubernetes.ResolveSources(ctx.Build.Sources, func(name string) (*corev1.ConfigMap, error) {
+		// the config map could be part of the resources created
+		// by traits
+		cm := resources.GetConfigMap(func(m *corev1.ConfigMap) bool {
+			return m.Name == name
+		})
+
+		if cm != nil {
+			return cm, nil
+		}
+
+		return kubernetes.GetConfigMap(ctx.C, ctx.Client, name, ctx.Namespace)
+	})
+}
+
+func prepareProjectWithSources(ctx *builderContext) error {
+	sources, err := resolveBuildSources(ctx)
+	if err != nil {
+		return err
+	}
+	sourcesPath := filepath.Join(ctx.Path, "maven", "src", "main", "resources", "routes")
+	if err := os.MkdirAll(sourcesPath, os.ModePerm); err != nil {
+		return errors.Wrap(err, "failure while creating resource folder")
+	}
+
+	sourceList := ""
+	for _, source := range sources {
+		if sourceList != "" {
+			sourceList += ","
+		}
+		sourceList += "classpath:routes/" + source.Name
+		if err := os.WriteFile(filepath.Join(sourcesPath, source.Name), []byte(source.Content), os.ModePerm); err != nil {
+			return errors.Wrapf(err, "failure while writing %s", source.Name)
+		}
+	}
+
+	if sourceList != "" {
+		routesIncludedPattern := "camel.main.routes-include-pattern = " + sourceList
+		if err := os.WriteFile(filepath.Join(filepath.Dir(sourcesPath), "application.properties"), []byte(routesIncludedPattern), os.ModePerm); err != nil {
+			return errors.Wrapf(err, "failure while writing the configuration application.properties")
+		}
+	}
+	return nil
 }
 
 func loadCamelQuarkusCatalog(ctx *builderContext) error {
@@ -196,7 +247,7 @@ func BuildQuarkusRunnerCommon(ctx context.Context, mc maven.Context, project mav
 	// may fail the build.
 	// In the future there should be a way to provide build information from secrets,
 	// configmap, etc.
-	if _, err := os.Create(filepath.Join(resourcesPath, "application.properties")); err != nil {
+	if _, err := os.OpenFile(filepath.Join(resourcesPath, "application.properties"), os.O_RDWR|os.O_CREATE, 0666); err != nil {
 		return errors.Wrap(err, "failure while creating application.properties")
 	}
 

@@ -1,5 +1,5 @@
-//go:build integration
-// +build integration
+//go:build integration && !high_memory
+// +build integration,!high_memory
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
 
@@ -40,8 +40,8 @@ func TestNativeBinding(t *testing.T) {
 		operatorID := "camel-k-native-binding"
 		Expect(KamelInstallWithIDAndKameletCatalog(operatorID, ns,
 			"--build-timeout", "90m0s",
-			"--operator-resources", "limits.memory=4.5Gi",
-			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=3g",
+			"--operator-resources", "limits.memory=6.5Gi",
+			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=6g",
 		).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
@@ -98,6 +98,7 @@ func TestNativeBinding(t *testing.T) {
 
 			// Clean up
 			Expect(Kamel("delete", bindingName, "-n", ns).Execute()).To(Succeed())
+			Expect(DeleteKits(ns)).To(Succeed())
 		})
 
 		// Clean up

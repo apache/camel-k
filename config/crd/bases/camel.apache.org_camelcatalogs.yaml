@@ -305,6 +305,11 @@ spec:
                       items:
                         type: string
                       type: array
+                    metadata:
+                      additionalProperties:
+                        type: string
+                      description: the metadata of the loader
+                      type: object
                     version:
                       description: Maven Version
                       type: string

@@ -97,7 +97,11 @@ fi
 
 echo "Moving kamel binary to be visible on PATH"
 
-${SUDO} mv ./kamel /usr/bin
+if [ "$RUNNER_OS" == "macOS" ]; then
+  ${SUDO} mv ./kamel /usr/local/bin
+else
+  ${SUDO} mv ./kamel /usr/bin
+fi
 echo "Kamel version installed: $(kamel version)"
 
 #

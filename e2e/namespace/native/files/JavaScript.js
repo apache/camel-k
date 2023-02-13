@@ -15,14 +15,7 @@
  * limitations under the License.
  */
 
- import org.apache.camel.builder.RouteBuilder;
-
- public class Java extends RouteBuilder {
-   @Override
-   public void configure() throws Exception {
-     from("timer:tick")
-       .setHeader("m").constant("string!")
-       .setBody().simple("Magic${header.m}")
-       .log("Java ${body}");
-   }
- }
+from('timer:tick')
+  .setHeader('m').constant('string!')
+  .setBody().simple('Magic${header.m}')
+  .log('JavaScript ${body}')

@@ -25,6 +25,10 @@ inputs:
   cluster-kube-config-data:
     description: 'Base16 encoded kube config - required for custom cluster type only'
     required: false
+  high-memory:
+    description: 'Indicates whether the high memory integration tests should be launched (default false)'
+    default: 'false'
+    required: false
 
 runs:
   using: "composite"
@@ -90,7 +94,7 @@ runs:
     name: List Tests Marked As Problematic
     uses: ./.github/actions/kamel-report-problematic
     with:
-      test-suite: namespace/install
+      test-suite: namespace/native
 
   - id: run-it
     name: Run IT
@@ -104,6 +108,8 @@ runs:
         -n "${{ steps.build-kamel.outputs.build-binary-local-image-name }}" \
         -s "${{steps.config-cluster.outputs.cluster-image-registry-insecure }}" \
         -v "${{ steps.build-kamel.outputs.build-binary-local-image-version }}" \
+        -t "${{ inputs.high-memory }}" \
+        -q "${{ env.CAMEL_K_LOG_LEVEL }}" \
         -x "${{ env.CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE }}"
 
   - name: Cleanup

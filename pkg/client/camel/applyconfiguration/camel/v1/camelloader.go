@@ -25,6 +25,7 @@ type CamelLoaderApplyConfiguration struct {
 	MavenArtifactApplyConfiguration `json:",inline"`
 	Languages                       []string                          `json:"languages,omitempty"`
 	Dependencies                    []MavenArtifactApplyConfiguration `json:"dependencies,omitempty"`
+	Metadata                        map[string]string                 `json:"metadata,omitempty"`
 }
 
 // CamelLoaderApplyConfiguration constructs an declarative configuration of the CamelLoader type for use with
@@ -76,6 +77,20 @@ func (b *CamelLoaderApplyConfiguration) WithDependencies(values ...*MavenArtifac
 			panic("nil value passed to WithDependencies")
 		}
 		b.Dependencies = append(b.Dependencies, *values[i])
+	}
+	return b
+}
+
+// WithMetadata puts the entries into the Metadata field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, the entries provided by each call will be put on the Metadata field,
+// overwriting an existing map entries in Metadata field with the same key.
+func (b *CamelLoaderApplyConfiguration) WithMetadata(entries map[string]string) *CamelLoaderApplyConfiguration {
+	if b.Metadata == nil && len(entries) > 0 {
+		b.Metadata = make(map[string]string, len(entries))
+	}
+	for k, v := range entries {
+		b.Metadata[k] = v
 	}
 	return b
 }

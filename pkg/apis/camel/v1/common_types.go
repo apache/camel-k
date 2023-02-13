@@ -426,6 +426,8 @@ const (
 	LanguageYaml Language = "yaml"
 	// LanguageKamelet used for Kamelets
 	LanguageKamelet Language = "kamelet"
+	// LanguageJavaShell used for Java Shell
+	LanguageJavaShell Language = "jsh"
 )
 
 // Languages is the list of all supported languages
@@ -437,4 +439,5 @@ var Languages = []Language{
 	LanguageKotlin,
 	LanguageYaml,
 	LanguageKamelet,
+	LanguageJavaShell,
 }
