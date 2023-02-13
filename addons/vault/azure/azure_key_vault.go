@@ -18,12 +18,13 @@ limitations under the License.
 package azure
 
 import (
+	"strconv"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util"
 	"k8s.io/utils/pointer"
-	"strconv"
 )
 
 // The Azure Key Vault trait can be used to use secrets from Azure Key Vault service
