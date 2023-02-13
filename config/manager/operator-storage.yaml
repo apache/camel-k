@@ -15,15 +15,13 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-- operator-deployment.yaml
-- operator-storage.yaml
-- operator-service-account.yaml
-
-patchesStrategicMerge:
-- patch-toleration.yaml
-- patch-node-selector.yaml
-- patch-resource-requirements.yaml
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: camel-k-maven-repo
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
