@@ -37,6 +37,11 @@ import (
 // the following trait options:
 // -t aws-secrets-manager.enabled=true -t aws-secrets-manager.access-key="aws-access-key" -t aws-secrets-manager.secret-key="aws-secret-key" -t aws-secrets-manager.region="aws-region"
 //
+// To enable the automatic context reload on secrets updates you should define
+// the following trait options:
+// -t aws-secrets-manager.enabled=true -t aws-secrets-manager.access-key="aws-access-key" -t aws-secrets-manager.secret-key="aws-secret-key" -t aws-secrets-manager.region="aws-region" -t aws-secrets-manager.context-reload-enabled="true" -t aws-secrets-manager.refresh-enabled="true" -t aws-secrets-manager.refresh-period="30000" -t aws-secrets-manager.secrets="test*"
+//
+//
 // +camel-k:trait=aws-secrets-manager.
 type Trait struct {
 	traitv1.Trait `property:",squash"`
