@@ -21,7 +21,6 @@ import (
 	"bufio"
 	"context"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -159,7 +158,7 @@ func readSpectrumLogs(newStdOut io.Reader) {
 }
 
 func MountSecret(ctx context.Context, c client.Client, namespace, name string) (string, error) {
-	dir, err := ioutil.TempDir("", "spectrum-secret-")
+	dir, err := os.MkdirTemp("", "spectrum-secret-")
 	if err != nil {
 		return "", err
 	}
@@ -173,7 +172,7 @@ func MountSecret(ctx context.Context, c client.Client, namespace, name string) (
 	}
 
 	for file, content := range secret.Data {
-		if err := ioutil.WriteFile(filepath.Join(dir, remap(file)), content, 0o600); err != nil {
+		if err := os.WriteFile(filepath.Join(dir, remap(file)), content, 0o600); err != nil {
 			if removeErr := os.RemoveAll(dir); removeErr != nil {
 				err = multierr.Append(err, removeErr)
 			}

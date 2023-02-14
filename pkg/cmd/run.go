@@ -33,7 +33,6 @@ import (
 	"hash"
 	"io"
 	"io/fs"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"os/signal"
@@ -1147,7 +1146,7 @@ func (o *runCmdOptions) extractGav(src *zip.File, localPath string, cmd *cobra.C
 		return maven.Dependency{}, false
 	}
 	defer rc.Close()
-	data, err := ioutil.ReadAll(rc)
+	data, err := io.ReadAll(rc)
 	if err != nil {
 		o.PrintfVerboseErrf(cmd, "Error while reading pom.properties from [%s], switching to default: \n %s err \n", localPath, err)
 		return maven.Dependency{}, false
@@ -1206,7 +1205,7 @@ func extractGavFromPom(path string, gav maven.Dependency) maven.Dependency {
 		return gav
 	}
 	defer file.Close()
-	content, err := ioutil.ReadAll(file)
+	content, err := io.ReadAll(file)
 	if err != nil {
 		return gav
 	}

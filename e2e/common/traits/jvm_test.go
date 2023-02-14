@@ -23,7 +23,7 @@ limitations under the License.
 package traits
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -41,7 +41,7 @@ func TestJVMTrait(t *testing.T) {
 	// Store a configmap holding a jar
 	var cmData = make(map[string][]byte)
 	// We calculate the expected content
-	source, err := ioutil.ReadFile("./files/jvm/sample-1.0.jar")
+	source, err := os.ReadFile("./files/jvm/sample-1.0.jar")
 	assert.Nil(t, err)
 	cmData["sample-1.0.jar"] = source
 	err = CreateBinaryConfigmap(ns, "my-deps", cmData)

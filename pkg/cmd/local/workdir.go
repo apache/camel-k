@@ -18,7 +18,6 @@ limitations under the License.
 package local
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -33,7 +32,7 @@ var MavenWorkingDirectory = ""
 
 // CreateMavenWorkingDirectory creates local Maven working directory.
 func CreateMavenWorkingDirectory() error {
-	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "maven-")
+	temporaryDirectory, err := os.MkdirTemp(os.TempDir(), "maven-")
 	if err != nil {
 		return err
 	}

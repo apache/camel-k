@@ -20,7 +20,6 @@ package builder
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -108,7 +107,7 @@ func exitOnError(err error, msg string) {
 
 func writeTerminationMessage(message string) {
 	// #nosec G306
-	err := ioutil.WriteFile(terminationMessagePath, []byte(message), 0o644)
+	err := os.WriteFile(terminationMessagePath, []byte(message), 0o644)
 	if err != nil {
 		log.Error(err, "cannot write termination message")
 	}

@@ -21,7 +21,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -220,7 +219,7 @@ func generateProjectStructure(context Context, project Project) error {
 		if dc, ok := v.([]byte); ok {
 			bytes = dc
 		} else if dc, ok := v.(io.Reader); ok {
-			bytes, err = ioutil.ReadAll(dc)
+			bytes, err = io.ReadAll(dc)
 			if err != nil {
 				return err
 			}
@@ -241,7 +240,7 @@ func generateProjectStructure(context Context, project Project) error {
 	return nil
 }
 
-// We expect a maven wrapper under /usr/share/maven/mvnw
+// We expect a maven wrapper under /usr/share/maven/mvnw.
 func (c *Command) prepareMavenWrapper(ctx context.Context) error {
 	cmd := exec.CommandContext(ctx, "cp", "--recursive", "/usr/share/maven/mvnw/.", ".")
 	cmd.Dir = c.context.Path

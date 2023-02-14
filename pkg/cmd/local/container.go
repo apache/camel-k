@@ -21,7 +21,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -37,7 +36,7 @@ import (
 
 // CreateDockerBaseWorkingDirectory creates local docker base directory.
 func CreateDockerBaseWorkingDirectory() error {
-	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "docker-base-")
+	temporaryDirectory, err := os.MkdirTemp(os.TempDir(), "docker-base-")
 	if err != nil {
 		return err
 	}
@@ -55,7 +54,7 @@ func DeleteDockerBaseWorkingDirectory() error {
 
 // CreateDockerWorkingDirectory creates local docker directory.
 func CreateDockerWorkingDirectory() error {
-	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "docker-")
+	temporaryDirectory, err := os.MkdirTemp(os.TempDir(), "docker-")
 	if err != nil {
 		return err
 	}

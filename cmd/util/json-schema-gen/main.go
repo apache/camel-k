@@ -20,7 +20,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"reflect"
 	"strings"
@@ -99,7 +98,7 @@ func generate(crdFilename, dslFilename, path string, isArray bool, destination s
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(destination, result, 0o600)
+	return os.WriteFile(destination, result, 0o600)
 }
 
 func remapRef(ref string) string {
