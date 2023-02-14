@@ -153,6 +153,11 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	// save
 	cmd.Flags().Bool("save", false, "Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
 
+	// Storage settings
+	cmd.Flags().String("storage-class-name", "", "Use a storage class name to create a dynamic volume (if empty will look up for cluster default)")
+	cmd.Flags().String("storage-capacity", "20Gi", "How much capacity to use")
+	cmd.Flags().String("storage-volume-name", "", "Use an existing PersistentVolume")
+
 	return &cmd, &options
 }
 
@@ -198,6 +203,9 @@ type installCmdOptions struct {
 	ResourcesRequirements       []string `mapstructure:"operator-resources"`
 	LogLevel                    string   `mapstructure:"log-level"`
 	EnvVars                     []string `mapstructure:"operator-env-vars"`
+	StorageClassName            string   `mapstructure:"storage-class-name"`
+	StorageCapacity             string   `mapstructure:"storage-capacity"`
+	StorageVolumeName           string   `mapstructure:"storage-volume-name"`
 
 	registry         v1.RegistrySpec
 	registryAuth     registry.Auth
@@ -428,6 +436,11 @@ func (o *installCmdOptions) setupOperator(
 		NodeSelectors:         o.NodeSelectors,
 		ResourcesRequirements: o.ResourcesRequirements,
 		EnvVars:               o.EnvVars,
+		Storage: install.OperatorStorageConfiguration{
+			ClassName:  o.StorageClassName,
+			Capacity:   o.StorageCapacity,
+			VolumeName: o.StorageVolumeName,
+		},
 	}
 
 	return install.OperatorOrCollect(o.Context, cmd, c, cfg, output, o.Force)

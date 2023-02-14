@@ -40,6 +40,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/client"
 	"github.com/apache/camel-k/pkg/resources"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/envvar"
 	"github.com/apache/camel-k/pkg/util/knative"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
@@ -60,6 +61,7 @@ type OperatorConfiguration struct {
 	NodeSelectors         []string
 	ResourcesRequirements []string
 	EnvVars               []string
+	Storage               OperatorStorageConfiguration
 }
 
 type OperatorHealthConfiguration struct {
@@ -71,6 +73,13 @@ type OperatorMonitoringConfiguration struct {
 	Port    int32
 }
 
+// OperatorStorageConfiguration represents the configuration required for Camel K operator storage
+type OperatorStorageConfiguration struct {
+	ClassName  string
+	Capacity   string
+	VolumeName string
+}
+
 // OperatorOrCollect installs the operator resources or adds them to the collector if present.
 // nolint: maintidx // TODO: refactor the code
 func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection, force bool) error {
@@ -79,7 +88,40 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 		return err
 	}
 
+	camelKPVC, err := installPVC(ctx, cmd, c, cfg, collection, force)
+	if err != nil {
+		return err
+	}
+
 	customizer := func(o ctrl.Object) ctrl.Object {
+		if camelKPVC != nil {
+			if d, ok := o.(*appsv1.Deployment); ok {
+				if d.Labels["camel.apache.org/component"] == "operator" {
+					volume := corev1.Volume{
+						Name: defaults.DefaultPVC,
+						VolumeSource: corev1.VolumeSource{
+							PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+								ClaimName: camelKPVC.Name,
+							},
+						},
+					}
+					if d.Spec.Template.Spec.Volumes == nil {
+						d.Spec.Template.Spec.Volumes = make([]corev1.Volume, 0, 1)
+					}
+					d.Spec.Template.Spec.Volumes = append(d.Spec.Template.Spec.Volumes, volume)
+
+					vm := corev1.VolumeMount{
+						MountPath: defaults.LocalRepository,
+						Name:      volume.Name,
+					}
+					if d.Spec.Template.Spec.Containers[0].VolumeMounts == nil {
+						d.Spec.Template.Spec.Containers[0].VolumeMounts = make([]corev1.VolumeMount, 0, 1)
+					}
+					d.Spec.Template.Spec.Containers[0].VolumeMounts = append(d.Spec.Template.Spec.Containers[0].VolumeMounts, vm)
+				}
+			}
+		}
+
 		if cfg.CustomImage != "" {
 			if d, ok := o.(*appsv1.Deployment); ok {
 				if d.Labels["camel.apache.org/component"] == "operator" {
@@ -318,6 +360,65 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 	return nil
 }
 
+func installPVC(ctx context.Context, cmd *cobra.Command, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection, force bool) (*corev1.PersistentVolumeClaim, error) {
+	// Verify if a PVC already exists
+	camelKPVC, err := kubernetes.LookupPersistentVolumeClaim(ctx, c, cfg.Namespace, defaults.DefaultPVC)
+	if err != nil {
+		return nil, err
+	}
+	if camelKPVC != nil {
+		fmt.Fprintf(cmd.ErrOrStderr(), "A persistent volume claim for \"%s\" already exist, reusing it\n", defaults.DefaultPVC)
+		return camelKPVC, nil
+	}
+
+	// Use a static persistent volume
+	if cfg.Storage.VolumeName != "" {
+		fmt.Fprintf(cmd.ErrOrStderr(), "Using a static persistent volume \"%s\" for the operator\n", cfg.Storage.VolumeName)
+		camelKPVC = kubernetes.NewPersistentVolumeClaim(
+			cfg.Namespace,
+			defaults.DefaultPVC,
+			"",
+			cfg.Storage.VolumeName,
+			cfg.Storage.Capacity,
+			corev1.ReadWriteMany,
+		)
+		err = ObjectOrCollect(ctx, c, cfg.Namespace, collection, false, camelKPVC)
+		return camelKPVC, err
+	}
+
+	// Use a dynamic volume based on storage classes
+	storageClassName, err := getStorageClassName(ctx, c, cfg.Storage.ClassName)
+	if err != nil {
+		return nil, err
+	}
+	if storageClassName != "" {
+		fmt.Fprintf(cmd.ErrOrStderr(), "Using storage class \"%s\" to create a dynamic volume or the operator\n", storageClassName)
+		camelKPVC = kubernetes.NewPersistentVolumeClaim(
+			cfg.Namespace,
+			defaults.DefaultPVC,
+			storageClassName,
+			"",
+			cfg.Storage.Capacity,
+			corev1.ReadWriteMany,
+		)
+		err = ObjectOrCollect(ctx, c, cfg.Namespace, collection, false, camelKPVC)
+		return camelKPVC, err
+	}
+	fmt.Fprintf(cmd.ErrOrStderr(), "Could not find a default storage class in the cluster. The operator will be installed with an ephemeral storage. Bear in mind certain build strategies such as \"pod\" may not work as expected.\n")
+	return nil, nil
+}
+
+func getStorageClassName(ctx context.Context, c client.Client, cfgStorageClassName string) (string, error) {
+	if cfgStorageClassName != "" {
+		return cfgStorageClassName, nil
+	}
+	defaultStorageClass, err := kubernetes.LookupDefaultStorageClass(ctx, c)
+	if err != nil {
+		return "", err
+	}
+	return defaultStorageClass.Name, nil
+}
+
 func installNamespacedRoleBinding(ctx context.Context, c client.Client, collection *kubernetes.Collection, namespace string, path string) error {
 	yaml, err := resources.ResourceAsString(path)
 	if err != nil {
@@ -456,7 +557,6 @@ func installKubernetesRoles(ctx context.Context, c client.Client, namespace stri
 
 func installOperator(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-		"/manager/operator-storage.yaml",
 		"/manager/operator-deployment.yaml",
 	)
 }

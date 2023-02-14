@@ -33,6 +33,7 @@ KUSTOMIZE_VERSION := v4.5.4
 OPM_VERSION := v1.24.0
 BASE_IMAGE := docker.io/eclipse-temurin:11
 LOCAL_REPOSITORY := /tmp/artifacts/m2
+DEFAULT_PVC := camel-k-pvc
 IMAGE_NAME ?= docker.io/apache/camel-k
 
 #
@@ -184,6 +185,9 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // LocalRepository -- " >> $(VERSIONFILE)
 	@echo "  LocalRepository = \"$(LOCAL_REPOSITORY)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
+	@echo "  // DefaultPVC -- " >> $(VERSIONFILE)
+	@echo "  DefaultPVC = \"$(DEFAULT_PVC)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // ImageName -- " >> $(VERSIONFILE)
 	@echo "  ImageName = \"$(CUSTOM_IMAGE)\"" >> $(VERSIONFILE)

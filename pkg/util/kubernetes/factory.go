@@ -153,3 +153,60 @@ func NewConfigMap(namespace, cmName, originalFilename string, generatedKey strin
 	}
 	return &cm
 }
+
+// NewPersistentVolumeClaim will create a NewPersistentVolumeClaim based on the default StorageClass (may not be suitable for production).
+func NewPersistentVolumeClaim(ns, name, storageClassName, volumeName, capacityStorage string, accessMode corev1.PersistentVolumeAccessMode) *corev1.PersistentVolumeClaim {
+	pvc := corev1.PersistentVolumeClaim{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "PersistentVolumeClaim",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+		Spec: corev1.PersistentVolumeClaimSpec{
+			StorageClassName: &storageClassName,
+			VolumeName:       volumeName,
+			AccessModes: []corev1.PersistentVolumeAccessMode{
+				accessMode,
+			},
+			Resources: corev1.ResourceRequirements{
+				Requests: corev1.ResourceList{
+					"storage": resource.MustParse(capacityStorage),
+				},
+			},
+		},
+	}
+	return &pvc
+}
+
+// NewHostPathPersistentVolume will create a local HostPath PersistentVolume (use it for development purposes only).
+func NewHostPathPersistentVolume(ns, name, storageClassName, localHostPath, capacityStorage string,
+	accessMode corev1.PersistentVolumeAccessMode) *corev1.PersistentVolume {
+	pv := corev1.PersistentVolume{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "PersistentVolume",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+		Spec: corev1.PersistentVolumeSpec{
+			StorageClassName: storageClassName,
+			AccessModes: []corev1.PersistentVolumeAccessMode{
+				accessMode,
+			},
+			Capacity: corev1.ResourceList{
+				"storage": resource.MustParse(capacityStorage),
+			},
+			PersistentVolumeSource: corev1.PersistentVolumeSource{
+				HostPath: &corev1.HostPathVolumeSource{
+					Path: localHostPath,
+				},
+			},
+		},
+	}
+	return &pv
+}
