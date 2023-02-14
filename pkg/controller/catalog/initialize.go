@@ -66,7 +66,7 @@ func (action *initializeAction) Handle(ctx context.Context, catalog *v1.CamelCat
 	}
 
 	// Make basic options for building image in the registry
-	options, err := makeSpectrumOptions(ctx, action.client, platform.Namespace, platform.Spec.Build.Registry)
+	options, err := makeSpectrumOptions(ctx, action.client, platform.Namespace, platform.Status.Build.Registry)
 	if err != nil {
 		return catalog, err
 	}
@@ -172,8 +172,7 @@ func buildRuntimeBuilderImage(options spectrum.Options) error {
 	// TODO support also S2I
 	_, err := spectrum.Build(options,
 		"/usr/local/bin/kamel:/usr/local/bin/",
-		"/usr/share/maven/mvnw/:/usr/share/maven/mvnw/",
-		"/tmp/artifacts/m2/org/apache/camel/:/tmp/artifacts/m2/org/apache/camel/")
+		"/usr/share/maven/mvnw/:/usr/share/maven/mvnw/")
 	if err != nil {
 		return err
 	}

@@ -156,7 +156,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	// Storage settings
 	cmd.Flags().String("storage-class-name", "", "Use a storage class name to create a dynamic volume (if empty will look up for cluster default)")
 	cmd.Flags().String("storage-capacity", "20Gi", "How much capacity to use")
-	cmd.Flags().String("storage-volume-name", "", "Use an existing PersistentVolume")
+	cmd.Flags().String("storage-access-mode", "ReadWriteOnce", "Persistent Volume Access Mode (any of ReadWriteOnce, ReadOnlyMany, ReadWriteMany or ReadWriteOncePod)")
 
 	return &cmd, &options
 }
@@ -203,15 +203,13 @@ type installCmdOptions struct {
 	ResourcesRequirements       []string `mapstructure:"operator-resources"`
 	LogLevel                    string   `mapstructure:"log-level"`
 	EnvVars                     []string `mapstructure:"operator-env-vars"`
-	StorageClassName            string   `mapstructure:"storage-class-name"`
-	StorageCapacity             string   `mapstructure:"storage-capacity"`
-	StorageVolumeName           string   `mapstructure:"storage-volume-name"`
-
-	registry         v1.RegistrySpec
-	registryAuth     registry.Auth
-	RegistryAuthFile string `mapstructure:"registry-auth-file"`
-
-	olmOptions olm.Options
+	registry                    v1.RegistrySpec
+	registryAuth                registry.Auth
+	RegistryAuthFile            string `mapstructure:"registry-auth-file"`
+	olmOptions                  olm.Options
+	StorageClassName            string `mapstructure:"storage-class-name"`
+	StorageCapacity             string `mapstructure:"storage-capacity"`
+	StorageAccessMode           string `mapstructure:"storage-access-mode"`
 }
 
 func (o *installCmdOptions) install(cmd *cobra.Command, _ []string) error {
@@ -439,7 +437,7 @@ func (o *installCmdOptions) setupOperator(
 		Storage: install.OperatorStorageConfiguration{
 			ClassName:  o.StorageClassName,
 			Capacity:   o.StorageCapacity,
-			VolumeName: o.StorageVolumeName,
+			AccessMode: o.StorageAccessMode,
 		},
 	}
 

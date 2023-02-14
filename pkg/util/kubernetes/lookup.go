@@ -100,30 +100,6 @@ func LookupPersistentVolumeClaim(ctx context.Context, c client.Client, ns string
 	return &pvc, nil
 }
 
-// LookupPersistentVolume will look for any k8s PersistentVolume with a given name in a given namespace.
-func LookupPersistentVolume(ctx context.Context, c client.Client, ns string, name string) (*corev1.PersistentVolume, error) {
-	pv := corev1.PersistentVolume{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "PersistentVolume",
-			APIVersion: corev1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      name,
-		},
-	}
-	key := ctrl.ObjectKey{
-		Namespace: ns,
-		Name:      name,
-	}
-	if err := c.Get(ctx, key, &pv); err != nil && k8serrors.IsNotFound(err) {
-		return nil, nil
-	} else if err != nil {
-		return nil, err
-	}
-	return &pv, nil
-}
-
 // LookupDefaultStorageClass will look for the default k8s StorageClass in a given namespace.
 func LookupDefaultStorageClass(ctx context.Context, c client.Client) (*storagev1.StorageClass, error) {
 	storageClasses, err := c.StorageV1().StorageClasses().List(ctx, metav1.ListOptions{})

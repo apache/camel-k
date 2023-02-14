@@ -114,6 +114,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 			if buildStrategy == v1.BuildStrategyPod {
 				// We must ensure the expected service account is available or create it
 				// TODO make it singleton
+				// nolint: contextcheck
 				err = platform.CreateBuilderServiceAccount(env.Ctx, env.Client, env.Platform)
 				if err != nil {
 					return nil, errors.Wrap(err, "Error while creating Camel K Builder service account")
