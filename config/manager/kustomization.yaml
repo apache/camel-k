@@ -20,7 +20,6 @@ kind: Kustomization
 
 resources:
 - operator-deployment.yaml
-- operator-storage.yaml
 - operator-service-account.yaml
 
 patchesStrategicMerge:

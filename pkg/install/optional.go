@@ -31,7 +31,7 @@ import (
 func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespace string, operatorNamespace string, log logutil.Logger) {
 	// Try to copy any local runtime dependency to maven repository
 	if err := cp.Copy("/tmp/local/m2", "/tmp/artifacts/m2"); err != nil {
-		log.Info("Could not copy local runtime dependencies due to", err.Error())
+		log.Infof("Could not copy local runtime dependencies due to %s", err.Error())
 	}
 
 	// Try to register the OpenShift CLI Download link if possible

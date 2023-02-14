@@ -73,11 +73,11 @@ type OperatorMonitoringConfiguration struct {
 	Port    int32
 }
 
-// OperatorStorageConfiguration represents the configuration required for Camel K operator storage
+// OperatorStorageConfiguration represents the configuration required for Camel K operator storage.
 type OperatorStorageConfiguration struct {
 	ClassName  string
 	Capacity   string
-	VolumeName string
+	AccessMode string
 }
 
 // OperatorOrCollect installs the operator resources or adds them to the collector if present.
@@ -88,7 +88,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 		return err
 	}
 
-	camelKPVC, err := installPVC(ctx, cmd, c, cfg, collection, force)
+	camelKPVC, err := installPVC(ctx, cmd, c, cfg, collection)
 	if err != nil {
 		return err
 	}
@@ -360,7 +360,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 	return nil
 }
 
-func installPVC(ctx context.Context, cmd *cobra.Command, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection, force bool) (*corev1.PersistentVolumeClaim, error) {
+func installPVC(ctx context.Context, cmd *cobra.Command, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection) (*corev1.PersistentVolumeClaim, error) {
 	// Verify if a PVC already exists
 	camelKPVC, err := kubernetes.LookupPersistentVolumeClaim(ctx, c, cfg.Namespace, defaults.DefaultPVC)
 	if err != nil {
@@ -371,35 +371,19 @@ func installPVC(ctx context.Context, cmd *cobra.Command, c client.Client, cfg Op
 		return camelKPVC, nil
 	}
 
-	// Use a static persistent volume
-	if cfg.Storage.VolumeName != "" {
-		fmt.Fprintf(cmd.ErrOrStderr(), "Using a static persistent volume \"%s\" for the operator\n", cfg.Storage.VolumeName)
-		camelKPVC = kubernetes.NewPersistentVolumeClaim(
-			cfg.Namespace,
-			defaults.DefaultPVC,
-			"",
-			cfg.Storage.VolumeName,
-			cfg.Storage.Capacity,
-			corev1.ReadWriteMany,
-		)
-		err = ObjectOrCollect(ctx, c, cfg.Namespace, collection, false, camelKPVC)
-		return camelKPVC, err
-	}
-
 	// Use a dynamic volume based on storage classes
 	storageClassName, err := getStorageClassName(ctx, c, cfg.Storage.ClassName)
 	if err != nil {
 		return nil, err
 	}
 	if storageClassName != "" {
-		fmt.Fprintf(cmd.ErrOrStderr(), "Using storage class \"%s\" to create a dynamic volume or the operator\n", storageClassName)
+		fmt.Fprintf(cmd.ErrOrStderr(), "Using storage class \"%s\" to create \"%s\" volume for the operator\n", storageClassName, defaults.DefaultPVC)
 		camelKPVC = kubernetes.NewPersistentVolumeClaim(
 			cfg.Namespace,
 			defaults.DefaultPVC,
 			storageClassName,
-			"",
 			cfg.Storage.Capacity,
-			corev1.ReadWriteMany,
+			corev1.PersistentVolumeAccessMode(cfg.Storage.AccessMode),
 		)
 		err = ObjectOrCollect(ctx, c, cfg.Namespace, collection, false, camelKPVC)
 		return camelKPVC, err
