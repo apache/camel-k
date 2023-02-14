@@ -130,7 +130,15 @@ traits:
     docs: xref:components::azure-key-vault-component.adoc[Azure Key Vault component]
     A sample execution of this trait, would require the following trait options: -t
     azure-key-vault.enabled=true -t azure-key-vault.tenant-id="tenant-id" -t azure-key-vault.client-id="client-id"
-    -t azure-key-vault.client-secret="client-secret" -t azure-key-vault.vault-name="vault-name"'
+    -t azure-key-vault.client-secret="client-secret" -t azure-key-vault.vault-name="vault-name"
+    To enable the automatic context reload on secrets updates you should define the
+    following trait options: -t azure-key-vault.enabled=true -t azure-key-vault.tenant-id="tenant-id"
+    -t azure-key-vault.client-id="client-id" -t azure-key-vault.client-secret="client-secret"
+    -t azure-key-vault.vault-name="vault-name" -t azure-key-vault.context-reload-enabled="true"
+    -t azure-key-vault.refresh-enabled="true" -t azure-key-vault.refresh-period="30000"
+    -t azure-key-vault.secrets="test*" -t azure-key-vault.eventhub-connection-string="connection-string"
+    -t azure-key-vault.blob-account-name="account-name"  -t azure-key-vault.blob-container-name="container-name"  -t
+    azure-key-vault.blob-access-key="account-name"'
   properties:
   - name: enabled
     type: bool
