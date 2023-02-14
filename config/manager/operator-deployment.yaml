@@ -44,10 +44,6 @@ spec:
         app.kubernetes.io/version: "2.0.0-SNAPSHOT"
     spec:
       serviceAccountName: camel-k-operator
-      volumes:
-        - name: camel-k-maven-repo
-          persistentVolumeClaim:
-            claimName: camel-k-maven-repo
       containers:
         - name: camel-k-operator
           image: docker.io/apache/camel-k:2.0.0-SNAPSHOT
@@ -82,6 +78,4 @@ spec:
               port: 8081
             initialDelaySeconds: 20
             periodSeconds: 10
-          volumeMounts:
-            - mountPath: "/tmp/artifacts/m2"
-              name: camel-k-maven-repo
+

@@ -212,14 +212,14 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 			},
 		)
 	}
-	if !hasVolume(pod, "camel-k-maven-repo") {
+	if !hasVolume(pod, defaults.DefaultPVC) {
 		pod.Spec.Volumes = append(pod.Spec.Volumes,
 			// Maven repo volume
 			corev1.Volume{
-				Name: "camel-k-maven-repo",
+				Name: defaults.DefaultPVC,
 				VolumeSource: corev1.VolumeSource{
 					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-						ClaimName: "camel-k-maven-repo",
+						ClaimName: defaults.DefaultPVC,
 					},
 				},
 			},
@@ -482,9 +482,9 @@ func addContainerToPod(build *v1.Build, container corev1.Container, pod *corev1.
 			MountPath: filepath.Join(builderDir, build.Name),
 		})
 	}
-	if hasVolume(pod, "camel-k-maven-repo") {
+	if hasVolume(pod, defaults.DefaultPVC) {
 		container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
-			Name:      "camel-k-maven-repo",
+			Name:      defaults.DefaultPVC,
 			MountPath: "/tmp/artifacts/m2",
 		})
 	}
