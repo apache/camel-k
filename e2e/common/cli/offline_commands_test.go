@@ -23,7 +23,7 @@ limitations under the License.
 package cli
 
 import (
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -42,7 +42,7 @@ func TestKamelHelpTraitWorksOffline(t *testing.T) {
 	RegisterTestingT(t)
 
 	traitCmd := Kamel("help", "trait", "--all", "--kube-config", "non-existent-kubeconfig-file")
-	traitCmd.SetOut(ioutil.Discard)
+	traitCmd.SetOut(io.Discard)
 	assert.Nil(t, traitCmd.Execute())
 }
 
@@ -50,7 +50,7 @@ func TestKamelHelpOptionWorksOffline(t *testing.T) {
 	RegisterTestingT(t)
 
 	traitCmd := Kamel("run", "Xxx.java", "--help")
-	traitCmd.SetOut(ioutil.Discard)
+	traitCmd.SetOut(io.Discard)
 	assert.Nil(t, traitCmd.Execute())
 }
 
@@ -58,9 +58,9 @@ func TestKamelCompletionWorksOffline(t *testing.T) {
 	RegisterTestingT(t)
 
 	bashCmd := Kamel("completion", "bash", "--kube-config", "non-existent-kubeconfig-file")
-	bashCmd.SetOut(ioutil.Discard)
+	bashCmd.SetOut(io.Discard)
 	zshCmd := Kamel("completion", "zsh", "--kube-config", "non-existent-kubeconfig-file")
-	zshCmd.SetOut(ioutil.Discard)
+	zshCmd.SetOut(io.Discard)
 	assert.Nil(t, bashCmd.Execute())
 	assert.Nil(t, zshCmd.Execute())
 }

@@ -21,7 +21,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/spf13/cobra"
@@ -39,7 +38,7 @@ func PrintUsingSelector(ctx context.Context, cmd *cobra.Command, client kubernet
 	scraper := NewSelectorScraper(client, namespace, defaultContainerName, selector, tailLines)
 	reader := scraper.Start(ctx)
 
-	if _, err := io.Copy(out, ioutil.NopCloser(reader)); err != nil {
+	if _, err := io.Copy(out, io.NopCloser(reader)); err != nil {
 		fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
 	}
 

@@ -18,7 +18,6 @@ limitations under the License.
 package local
 
 import (
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -29,12 +28,12 @@ import (
 func TestValidatePropertyFiles_ShouldSucceed(t *testing.T) {
 	var tmpFile1 *os.File
 	var err error
-	if tmpFile1, err = ioutil.TempFile("", "camel-k-*.properties"); err != nil {
+	if tmpFile1, err = os.CreateTemp("", "camel-k-*.properties"); err != nil {
 		t.Error(err)
 	}
 
 	assert.Nil(t, tmpFile1.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile1.Name(), []byte("key=value"), 0o400))
+	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte("key=value"), 0o400))
 
 	inputValues := []string{tmpFile1.Name()}
 	err = ValidatePropertyFiles(inputValues)
@@ -45,12 +44,12 @@ func TestValidatePropertyFiles_ShouldSucceed(t *testing.T) {
 func TestValidatePropertyFiles_ShouldFailNotAPropertiesFile(t *testing.T) {
 	var tmpFile1 *os.File
 	var err error
-	if tmpFile1, err = ioutil.TempFile("", "camel-k-"); err != nil {
+	if tmpFile1, err = os.CreateTemp("", "camel-k-"); err != nil {
 		t.Error(err)
 	}
 
 	assert.Nil(t, tmpFile1.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile1.Name(), []byte("key=value"), 0o400))
+	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte("key=value"), 0o400))
 
 	inputValues := []string{tmpFile1.Name()}
 	err = ValidatePropertyFiles(inputValues)

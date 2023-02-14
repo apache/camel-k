@@ -157,7 +157,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 		case string(v1.BuildStrategyRoutine):
 			e.BuildStrategy = v1.BuildStrategyRoutine
 		default:
-			return fmt.Errorf("Must specify either pod or routine build strategy, unknown %s", t.Strategy)
+			return fmt.Errorf("must specify either pod or routine build strategy, unknown %s", t.Strategy)
 		}
 	}
 

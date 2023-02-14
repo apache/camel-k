@@ -20,7 +20,6 @@ package trait
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -84,7 +83,7 @@ func (t *openAPITrait) Apply(e *Environment) error {
 	util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityRest)
 
 	root := os.TempDir()
-	tmpDir, err := ioutil.TempDir(root, "openapi")
+	tmpDir, err := os.MkdirTemp(root, "openapi")
 	if err != nil {
 		return err
 	}
@@ -210,7 +209,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 	in := filepath.Join(tmpDir, resource.Name)
 	out := filepath.Join(tmpDir, "openapi-dsl.xml")
 
-	err = ioutil.WriteFile(in, content, 0o400)
+	err = os.WriteFile(in, content, 0o400)
 	if err != nil {
 		return err
 	}

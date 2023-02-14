@@ -29,7 +29,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"reflect"
@@ -477,7 +476,7 @@ func Logs(ns, podName string, options corev1.PodLogOptions) func() string {
 			}
 		}()
 
-		bytes, err := ioutil.ReadAll(byteReader)
+		bytes, err := io.ReadAll(byteReader)
 		if err != nil {
 			log.Error(err, "Error while reading container logs")
 			return ""

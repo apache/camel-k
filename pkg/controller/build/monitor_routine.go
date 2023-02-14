@@ -21,7 +21,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
@@ -121,7 +120,7 @@ tasks:
 			// Coordinate the build and context directories across the sequence of tasks
 			if t := task.Builder; t != nil {
 				if t.BuildDir == "" {
-					tmpDir, err := ioutil.TempDir(os.TempDir(), build.Name+"-")
+					tmpDir, err := os.MkdirTemp(os.TempDir(), build.Name+"-")
 					if err != nil {
 						status.Failed(err)
 

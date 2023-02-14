@@ -18,7 +18,6 @@ limitations under the License.
 package builder
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -88,7 +87,7 @@ func executableDockerfile(ctx *builderContext) error {
 		USER nonroot
 	`)
 
-	err := ioutil.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
+	err := os.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
 	if err != nil {
 		return err
 	}
@@ -112,7 +111,7 @@ func jvmDockerfile(ctx *builderContext) error {
 		USER 1000
 	`)
 
-	err := ioutil.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
+	err := os.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
 	if err != nil {
 		return err
 	}

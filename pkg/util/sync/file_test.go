@@ -19,7 +19,6 @@ package sync
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"strconv"
 	"testing"
@@ -43,7 +42,7 @@ func TestFile(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	expectedNumChanges := 3
 	for i := 0; i < expectedNumChanges; i++ {
-		if err := ioutil.WriteFile(file.Name(), []byte("data-"+strconv.Itoa(i)), 0o600); err != nil {
+		if err := os.WriteFile(file.Name(), []byte("data-"+strconv.Itoa(i)), 0o600); err != nil {
 			t.Error(err)
 		}
 		time.Sleep(350 * time.Millisecond)

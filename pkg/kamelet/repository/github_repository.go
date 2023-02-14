@@ -21,7 +21,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"sort"
@@ -127,7 +127,7 @@ func (c *githubKameletRepository) downloadKamelet(ctx context.Context, url strin
 		return nil, fmt.Errorf("cannot download file %s: %d %s", url, resp.StatusCode, resp.Status)
 	}
 
-	content, err := ioutil.ReadAll(resp.Body)
+	content, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}

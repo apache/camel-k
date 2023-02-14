@@ -161,7 +161,7 @@ func imageExists(options spectrum.Options) bool {
 // by the catalog build plus kamel binary and a maven wrapper required for the build.
 func buildRuntimeBuilderImage(options spectrum.Options) error {
 	if options.Base == "" {
-		return fmt.Errorf("Missing base image, likely catalog is not compatible with this Camel K version")
+		return fmt.Errorf("missing base image, likely catalog is not compatible with this Camel K version")
 	}
 	Log.Infof("Making up Camel K builder container %s", options.Target)
 
@@ -173,7 +173,7 @@ func buildRuntimeBuilderImage(options spectrum.Options) error {
 	_, err := spectrum.Build(options,
 		"/usr/local/bin/kamel:/usr/local/bin/",
 		"/usr/share/maven/mvnw/:/usr/share/maven/mvnw/",
-		"/tmp/artifacts/m2/org/apache/camel/:/tmp/artifacts/m2/org/apache/camel/") //nolint
+		"/tmp/artifacts/m2/org/apache/camel/:/tmp/artifacts/m2/org/apache/camel/")
 	if err != nil {
 		return err
 	}
