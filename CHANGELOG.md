@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - YAKS test failure [\#4044](https://github.com/apache/camel-k/issues/4044)
+- Fabric8 CRD deploy action fails [\#4035](https://github.com/apache/camel-k/issues/4035)
 - Compatibility matrix show wrong kamelets version for camel-k releases 1.10.x and 1.11.x [\#4023](https://github.com/apache/camel-k/issues/4023)
 - Native builds failure due to missing catalog [\#4022](https://github.com/apache/camel-k/issues/4022)
 - operator refers to a openjdk image tag not found in docker.io [\#3998](https://github.com/apache/camel-k/issues/3998)
@@ -17,7 +18,9 @@
 - Default namespace not used when `-o yaml` [\#3955](https://github.com/apache/camel-k/issues/3955)
 - --config property by kamel \> 1.10: Errror spec.traits.mount.configuration: Required value [\#3923](https://github.com/apache/camel-k/issues/3923)
 - Support Hashicorp Vault as secrets properties source [\#3904](https://github.com/apache/camel-k/issues/3904)
+- Support secret refresh through the existing addons [\#3903](https://github.com/apache/camel-k/issues/3903)
 - Allow traits to be configured via configmap/secrets [\#3891](https://github.com/apache/camel-k/issues/3891)
+- Allow "kamel promote" integrate with GitOps styled deployments [\#3888](https://github.com/apache/camel-k/issues/3888)
 - Kamelets load properties from ConfigMap [\#3811](https://github.com/apache/camel-k/issues/3811)
 - Unable to configure ServiceAccountName using Kamel run [\#3797](https://github.com/apache/camel-k/issues/3797)
 - Integration Kit image build runs into an endless loop when a lower level image can't be pulled from Registry [\#3266](https://github.com/apache/camel-k/issues/3266)
@@ -25,6 +28,7 @@
 - Camel-K Tracing Trait error [\#2633](https://github.com/apache/camel-k/issues/2633)
 - Provide non-regression tests for regression \#1872 [\#1875](https://github.com/apache/camel-k/issues/1875)
 - rethink configurations spec [\#1680](https://github.com/apache/camel-k/issues/1680)
+- Support for AWS ECR in kaniko builder in Operator [\#1031](https://github.com/apache/camel-k/issues/1031)
 
 ## [1.11.2-nightly](https://github.com/apache/camel-k/tree/1.11.2-nightly) (2023-02-02)
 
