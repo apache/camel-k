@@ -33,7 +33,7 @@ spec:
         description: The data type to convert incoming events to
         type: string
   dependencies:
-    - github:apache.camel-kamelets:camel-kamelets-utils:main-SNAPSHOT
+    - github:apache.camel-kamelets:camel-kamelets-utils:3.x-SNAPSHOT
     - "camel:core"
     - "camel:kamelet"
   template:

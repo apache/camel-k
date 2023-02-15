@@ -37,6 +37,10 @@ import (
 // the following trait options:
 // -t gpc-secret-manager.enabled=true -t gpc-secret-manager.project-id="project-id" -t gpc-secret-manager.service-account-key="file:serviceaccount.json"
 //
+// To enable the automatic context reload on secrets updates you should define
+// the following trait options:
+// -t gpc-secret-manager.enabled=true -t gpc-secret-manager.project-id="project-id" -t gpc-secret-manager.service-account-key="file:serviceaccount.json" -t gcp-secret-manager.subscription-name="pubsub-sub" -t gcp-secret-manager.context-reload-enabled="true" -t gcp-secret-manager.refresh-enabled="true" -t gcp-secret-manager.refresh-period="30000" -t gcp-secret-manager.secrets="test*"
+//
 // +camel-k:trait=gcp-secret-manager.
 type Trait struct {
 	traitv1.Trait `property:",squash"`
@@ -48,6 +52,16 @@ type Trait struct {
 	ServiceAccountKey string `property:"service-account-key,omitempty"`
 	// Define if we want to use the Default Instance approach for accessing the Google Secret Manager service
 	UseDefaultInstance *bool `property:"use-default-instance,omitempty"`
+	// Define if we want to use the Camel Context Reload feature or not
+	ContextReloadEnabled *bool `property:"context-reload-enabled,omitempty"`
+	// Define if we want to use the Refresh Feature for secrets
+	RefreshEnabled *bool `property:"refresh-enabled,omitempty"`
+	// If Refresh is enabled, this defines the interval to check the refresh event
+	RefreshPeriod string `property:"refresh-period,omitempty"`
+	// If Refresh is enabled, the regular expression representing the secrets we want to track
+	Secrets string `property:"refresh-period,omitempty"`
+	// If Refresh is enabled, this defines the subscription name to the Google PubSub topic used to keep track of updates
+	SubscriptionName string `property:"refresh-period,omitempty"`
 }
 
 type gcpSecretManagerTrait struct {
@@ -74,6 +88,14 @@ func (t *gcpSecretManagerTrait) Configure(environment *trait.Environment) (bool,
 		t.UseDefaultInstance = pointer.Bool(false)
 	}
 
+	if t.ContextReloadEnabled == nil {
+		t.ContextReloadEnabled = pointer.Bool(false)
+	}
+
+	if t.RefreshEnabled == nil {
+		t.RefreshEnabled = pointer.Bool(false)
+	}
+
 	return true, nil
 }
 
@@ -88,6 +110,13 @@ func (t *gcpSecretManagerTrait) Apply(environment *trait.Environment) error {
 		environment.ApplicationProperties["camel.vault.gcp.projectId"] = t.ProjectID
 		environment.ApplicationProperties["camel.vault.gcp.serviceAccountKey"] = t.ServiceAccountKey
 		environment.ApplicationProperties["camel.vault.gcp.useDefaultInstance"] = strconv.FormatBool(*t.UseDefaultInstance)
+		environment.ApplicationProperties["camel.vault.gcp.refreshEnabled"] = strconv.FormatBool(*t.RefreshEnabled)
+		environment.ApplicationProperties["camel.main.context-reload-enabled"] = strconv.FormatBool(*t.ContextReloadEnabled)
+		environment.ApplicationProperties["camel.vault.gcp.refreshPeriod"] = t.RefreshPeriod
+		environment.ApplicationProperties["camel.vault.gcp.subscriptionName"] = t.SubscriptionName
+		if t.Secrets != "" {
+			environment.ApplicationProperties["camel.vault.gcp.secrets"] = t.Secrets
+		}
 	}
 
 	return nil

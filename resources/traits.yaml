@@ -77,7 +77,12 @@ traits:
     docs: xref:components::aws-secrets-manager-component.adoc[AWS Secrets Manager
     component] A sample execution of this trait, would require the following trait
     options: -t aws-secrets-manager.enabled=true -t aws-secrets-manager.access-key="aws-access-key"
-    -t aws-secrets-manager.secret-key="aws-secret-key" -t aws-secrets-manager.region="aws-region"'
+    -t aws-secrets-manager.secret-key="aws-secret-key" -t aws-secrets-manager.region="aws-region"
+    To enable the automatic context reload on secrets updates you should define the
+    following trait options: -t aws-secrets-manager.enabled=true -t aws-secrets-manager.access-key="aws-access-key"
+    -t aws-secrets-manager.secret-key="aws-secret-key" -t aws-secrets-manager.region="aws-region"
+    -t aws-secrets-manager.context-reload-enabled="true" -t aws-secrets-manager.refresh-enabled="true"
+    -t aws-secrets-manager.refresh-period="30000" -t aws-secrets-manager.secrets="test*"'
   properties:
   - name: enabled
     type: bool
@@ -99,42 +104,20 @@ traits:
     type: bool
     description: Define if we want to use the Default Credentials Provider chain as
       authentication method
-- name: aws-secrets-manager
-  platform: false
-  profiles:
-  - Kubernetes
-  - Knative
-  - OpenShift
-  description: 'The Hashicorp Vault trait can be used to use secrets from Hashicorp
-    Vault The Hashicorp Vault trait is disabled by default. For more information about
-    how to use secrets from Hashicorp vault take a look at the components docs: xref:components::hashicorp-vault-component.adoc[Hashicorp
-    Vault component] A sample execution of this trait, would require the following
-    trait options: -t hashicorp-vault.enabled=true -t hashicorp-vault.token="token"
-    -t hashicorp-vault.port="port" -t hashicorp-vault.engine="engine" -t hashicorp-vault.port="port"
-    -t hashicorp-vault.scheme="scheme"'
-  properties:
-  - name: enabled
+  - name: context-reload-enabled,omitempty
     type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
-  - name: auto
+    description: Define if we want to use the Camel Context Reload feature or not
+  - name: refresh-enabled,omitempty
     type: bool
-    description: Enables automatic configuration of the trait.
-  - name: host,omitempty
+    description: Define if we want to use the Refresh Feature for secrets
+  - name: refresh-period,omitempty
     type: string
-    description: The Host to use
-  - name: port,omitempty
+    description: If Refresh is enabled, this defines the interval to check the refresh
+      event
+  - name: refresh-period,omitempty
     type: string
-    description: The Port to use
-  - name: engine,omitempty
-    type: string
-    description: The Hashicorp engine to use
-  - name: token,omitempty
-    type: string
-    description: The token to access Hashicorp Vault
-  - name: scheme,omitempty
-    type: string
-    description: The scheme to access Hashicorp Vault
+    description: If Refresh is enabled, the regular expression representing the secrets
+      we want to track
 - name: azure-key-vault
   platform: false
   profiles:
@@ -147,7 +130,15 @@ traits:
     docs: xref:components::azure-key-vault-component.adoc[Azure Key Vault component]
     A sample execution of this trait, would require the following trait options: -t
     azure-key-vault.enabled=true -t azure-key-vault.tenant-id="tenant-id" -t azure-key-vault.client-id="client-id"
-    -t azure-key-vault.client-secret="client-secret" -t azure-key-vault.vault-name="vault-name"'
+    -t azure-key-vault.client-secret="client-secret" -t azure-key-vault.vault-name="vault-name"
+    To enable the automatic context reload on secrets updates you should define the
+    following trait options: -t azure-key-vault.enabled=true -t azure-key-vault.tenant-id="tenant-id"
+    -t azure-key-vault.client-id="client-id" -t azure-key-vault.client-secret="client-secret"
+    -t azure-key-vault.vault-name="vault-name" -t azure-key-vault.context-reload-enabled="true"
+    -t azure-key-vault.refresh-enabled="true" -t azure-key-vault.refresh-period="30000"
+    -t azure-key-vault.secrets="test*" -t azure-key-vault.eventhub-connection-string="connection-string"
+    -t azure-key-vault.blob-account-name="account-name"  -t azure-key-vault.blob-container-name="container-name"  -t
+    azure-key-vault.blob-access-key="account-name"'
   properties:
   - name: enabled
     type: bool
@@ -168,6 +159,36 @@ traits:
   - name: vault-name,omitempty
     type: string
     description: The Azure Vault Name for accessing Key Vault
+  - name: context-reload-enabled,omitempty
+    type: bool
+    description: Define if we want to use the Camel Context Reload feature or not
+  - name: refresh-enabled,omitempty
+    type: bool
+    description: Define if we want to use the Refresh Feature for secrets
+  - name: refresh-period,omitempty
+    type: string
+    description: If Refresh is enabled, this defines the interval to check the refresh
+      event
+  - name: refresh-period,omitempty
+    type: string
+    description: If Refresh is enabled, the regular expression representing the secrets
+      we want to track
+  - name: refresh-period,omitempty
+    type: string
+    description: If Refresh is enabled, the connection String to point to the Eventhub
+      service used to track updates
+  - name: refresh-period,omitempty
+    type: string
+    description: If Refresh is enabled, the account name for Azure Storage Blob service
+      used to save checkpoint while consuming from Eventhub
+  - name: refresh-period,omitempty
+    type: string
+    description: If Refresh is enabled, the access key for Azure Storage Blob service
+      used to save checkpoint while consuming from Eventhub
+  - name: refresh-period,omitempty
+    type: string
+    description: If Refresh is enabled, the container name for Azure Storage Blob
+      service used to save checkpoint while consuming from Eventhub
 - name: builder
   platform: true
   profiles:
@@ -467,7 +488,12 @@ traits:
     the components docs: xref:components::google-secret-manager-component.adoc[AWS
     Secrets Manager component] A sample execution of this trait, would require the
     following trait options: -t gpc-secret-manager.enabled=true -t gpc-secret-manager.project-id="project-id"
-    -t gpc-secret-manager.service-account-key="file:serviceaccount.json"'
+    -t gpc-secret-manager.service-account-key="file:serviceaccount.json" To enable
+    the automatic context reload on secrets updates you should define the following
+    trait options: -t gpc-secret-manager.enabled=true -t gpc-secret-manager.project-id="project-id"
+    -t gpc-secret-manager.service-account-key="file:serviceaccount.json" -t gcp-secret-manager.subscription-name="pubsub-sub"
+    -t gcp-secret-manager.context-reload-enabled="true" -t gcp-secret-manager.refresh-enabled="true"
+    -t gcp-secret-manager.refresh-period="30000" -t gcp-secret-manager.secrets="test*"'
   properties:
   - name: enabled
     type: bool
@@ -487,6 +513,60 @@ traits:
     type: bool
     description: Define if we want to use the Default Instance approach for accessing
       the Google Secret Manager service
+  - name: context-reload-enabled,omitempty
+    type: bool
+    description: Define if we want to use the Camel Context Reload feature or not
+  - name: refresh-enabled,omitempty
+    type: bool
+    description: Define if we want to use the Refresh Feature for secrets
+  - name: refresh-period,omitempty
+    type: string
+    description: If Refresh is enabled, this defines the interval to check the refresh
+      event
+  - name: refresh-period,omitempty
+    type: string
+    description: If Refresh is enabled, the regular expression representing the secrets
+      we want to track
+  - name: refresh-period,omitempty
+    type: string
+    description: If Refresh is enabled, this defines the subscription name to the
+      Google PubSub topic used to keep track of updates
+- name: hashicorp-vault
+  platform: false
+  profiles:
+  - Kubernetes
+  - Knative
+  - OpenShift
+  description: 'The Hashicorp Vault trait can be used to use secrets from Hashicorp
+    Vault The Hashicorp Vault trait is disabled by default. For more information about
+    how to use secrets from Hashicorp vault take a look at the components docs: xref:components::hashicorp-vault-component.adoc[Hashicorp
+    Vault component] A sample execution of this trait, would require the following
+    trait options: -t hashicorp-vault.enabled=true -t hashicorp-vault.token="token"
+    -t hashicorp-vault.port="port" -t hashicorp-vault.engine="engine" -t hashicorp-vault.port="port"
+    -t hashicorp-vault.scheme="scheme"'
+  properties:
+  - name: enabled
+    type: bool
+    description: Can be used to enable or disable a trait. All traits share this common
+      property.
+  - name: auto
+    type: bool
+    description: Enables automatic configuration of the trait.
+  - name: host,omitempty
+    type: string
+    description: The Host to use
+  - name: port,omitempty
+    type: string
+    description: The Port to use
+  - name: engine,omitempty
+    type: string
+    description: The Hashicorp engine to use
+  - name: token,omitempty
+    type: string
+    description: The token to access Hashicorp Vault
+  - name: scheme,omitempty
+    type: string
+    description: The scheme to access Hashicorp Vault
 - name: health
   platform: false
   profiles:
