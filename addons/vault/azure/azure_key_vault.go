@@ -18,6 +18,8 @@ limitations under the License.
 package azure
 
 import (
+	"strconv"
+
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/trait"
@@ -35,6 +37,10 @@ import (
 // the following trait options:
 // -t azure-key-vault.enabled=true -t azure-key-vault.tenant-id="tenant-id" -t azure-key-vault.client-id="client-id" -t azure-key-vault.client-secret="client-secret" -t azure-key-vault.vault-name="vault-name"
 //
+// To enable the automatic context reload on secrets updates you should define
+// the following trait options:
+// -t azure-key-vault.enabled=true -t azure-key-vault.tenant-id="tenant-id" -t azure-key-vault.client-id="client-id" -t azure-key-vault.client-secret="client-secret" -t azure-key-vault.vault-name="vault-name" -t azure-key-vault.context-reload-enabled="true" -t azure-key-vault.refresh-enabled="true" -t azure-key-vault.refresh-period="30000" -t azure-key-vault.secrets="test*" -t azure-key-vault.eventhub-connection-string="connection-string" -t azure-key-vault.blob-account-name="account-name"  -t azure-key-vault.blob-container-name="container-name"  -t azure-key-vault.blob-access-key="account-name"
+//
 // +camel-k:trait=azure-key-vault.
 type Trait struct {
 	traitv1.Trait `property:",squash"`
@@ -48,6 +54,22 @@ type Trait struct {
 	ClientSecret string `property:"client-secret,omitempty"`
 	// The Azure Vault Name for accessing Key Vault
 	VaultName string `property:"vault-name,omitempty"`
+	// Define if we want to use the Camel Context Reload feature or not
+	ContextReloadEnabled *bool `property:"context-reload-enabled,omitempty"`
+	// Define if we want to use the Refresh Feature for secrets
+	RefreshEnabled *bool `property:"refresh-enabled,omitempty"`
+	// If Refresh is enabled, this defines the interval to check the refresh event
+	RefreshPeriod string `property:"refresh-period,omitempty"`
+	// If Refresh is enabled, the regular expression representing the secrets we want to track
+	Secrets string `property:"refresh-period,omitempty"`
+	// If Refresh is enabled, the connection String to point to the Eventhub service used to track updates
+	EventhubConnectionString string `property:"refresh-period,omitempty"`
+	// If Refresh is enabled, the account name for Azure Storage Blob service used to save checkpoint while consuming from Eventhub
+	BlobAccountName string `property:"refresh-period,omitempty"`
+	// If Refresh is enabled, the access key for Azure Storage Blob service used to save checkpoint while consuming from Eventhub
+	BlobAccessKey string `property:"refresh-period,omitempty"`
+	// If Refresh is enabled, the container name for Azure Storage Blob service used to save checkpoint while consuming from Eventhub
+	BlobContainerName string `property:"refresh-period,omitempty"`
 }
 
 type azureKeyVaultTrait struct {
@@ -70,6 +92,14 @@ func (t *azureKeyVaultTrait) Configure(environment *trait.Environment) (bool, er
 		return false, nil
 	}
 
+	if t.ContextReloadEnabled == nil {
+		t.ContextReloadEnabled = pointer.Bool(false)
+	}
+
+	if t.RefreshEnabled == nil {
+		t.RefreshEnabled = pointer.Bool(false)
+	}
+
 	return true, nil
 }
 
@@ -85,6 +115,16 @@ func (t *azureKeyVaultTrait) Apply(environment *trait.Environment) error {
 		environment.ApplicationProperties["camel.vault.azure.clientId"] = t.ClientID
 		environment.ApplicationProperties["camel.vault.azure.clientSecret"] = t.ClientSecret
 		environment.ApplicationProperties["camel.vault.azure.vaultName"] = t.VaultName
+		environment.ApplicationProperties["camel.vault.azure.refreshEnabled"] = strconv.FormatBool(*t.RefreshEnabled)
+		environment.ApplicationProperties["camel.main.context-reload-enabled"] = strconv.FormatBool(*t.ContextReloadEnabled)
+		environment.ApplicationProperties["camel.vault.azure.refreshPeriod"] = t.RefreshPeriod
+		if t.Secrets != "" {
+			environment.ApplicationProperties["camel.vault.azure.secrets"] = t.Secrets
+		}
+		environment.ApplicationProperties["camel.vault.azure.eventhubConnectionString"] = t.EventhubConnectionString
+		environment.ApplicationProperties["camel.vault.azure.blobAccountName"] = t.BlobAccountName
+		environment.ApplicationProperties["camel.vault.azure.blobContainerName"] = t.BlobContainerName
+		environment.ApplicationProperties["camel.vault.azure.blobAccessKey"] = t.BlobAccessKey
 	}
 
 	return nil

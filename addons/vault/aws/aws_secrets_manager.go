@@ -37,6 +37,11 @@ import (
 // the following trait options:
 // -t aws-secrets-manager.enabled=true -t aws-secrets-manager.access-key="aws-access-key" -t aws-secrets-manager.secret-key="aws-secret-key" -t aws-secrets-manager.region="aws-region"
 //
+// To enable the automatic context reload on secrets updates you should define
+// the following trait options:
+// -t aws-secrets-manager.enabled=true -t aws-secrets-manager.access-key="aws-access-key" -t aws-secrets-manager.secret-key="aws-secret-key" -t aws-secrets-manager.region="aws-region" -t aws-secrets-manager.context-reload-enabled="true" -t aws-secrets-manager.refresh-enabled="true" -t aws-secrets-manager.refresh-period="30000" -t aws-secrets-manager.secrets="test*"
+//
+//
 // +camel-k:trait=aws-secrets-manager.
 type Trait struct {
 	traitv1.Trait `property:",squash"`
@@ -50,6 +55,14 @@ type Trait struct {
 	Region string `property:"region,omitempty"`
 	// Define if we want to use the Default Credentials Provider chain as authentication method
 	UseDefaultCredentialsProvider *bool `property:"use-default-credentials-provider,omitempty"`
+	// Define if we want to use the Camel Context Reload feature or not
+	ContextReloadEnabled *bool `property:"context-reload-enabled,omitempty"`
+	// Define if we want to use the Refresh Feature for secrets
+	RefreshEnabled *bool `property:"refresh-enabled,omitempty"`
+	// If Refresh is enabled, this defines the interval to check the refresh event
+	RefreshPeriod string `property:"refresh-period,omitempty"`
+	// If Refresh is enabled, the regular expression representing the secrets we want to track
+	Secrets string `property:"refresh-period,omitempty"`
 }
 
 type awsSecretsManagerTrait struct {
@@ -75,6 +88,12 @@ func (t *awsSecretsManagerTrait) Configure(environment *trait.Environment) (bool
 	if t.UseDefaultCredentialsProvider == nil {
 		t.UseDefaultCredentialsProvider = pointer.Bool(false)
 	}
+	if t.ContextReloadEnabled == nil {
+		t.ContextReloadEnabled = pointer.Bool(false)
+	}
+	if t.RefreshEnabled == nil {
+		t.RefreshEnabled = pointer.Bool(false)
+	}
 
 	return true, nil
 }
@@ -91,6 +110,12 @@ func (t *awsSecretsManagerTrait) Apply(environment *trait.Environment) error {
 		environment.ApplicationProperties["camel.vault.aws.secretKey"] = t.SecretKey
 		environment.ApplicationProperties["camel.vault.aws.region"] = t.Region
 		environment.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"] = strconv.FormatBool(*t.UseDefaultCredentialsProvider)
+		environment.ApplicationProperties["camel.vault.aws.refreshEnabled"] = strconv.FormatBool(*t.RefreshEnabled)
+		environment.ApplicationProperties["camel.main.context-reload-enabled"] = strconv.FormatBool(*t.ContextReloadEnabled)
+		environment.ApplicationProperties["camel.vault.aws.refreshPeriod"] = t.RefreshPeriod
+		if t.Secrets != "" {
+			environment.ApplicationProperties["camel.vault.aws.secrets"] = t.Secrets
+		}
 	}
 
 	return nil

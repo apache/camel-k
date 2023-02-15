@@ -45,6 +45,10 @@ maven_repo=${staging_repo:-https://repo1.maven.org/maven2}
 rm -rf ${rootdir}/build/m2
 mkdir -p ${rootdir}/build/m2
 
+# Refresh maven output dir
+rm -rf ${camel_k_destination}
+mkdir -p ${camel_k_destination}
+
 if [ -z "${local_runtime_dir}" ]; then
   # Remote M2 distro
   if [ ! -z $staging_repo ]; then
@@ -59,19 +63,18 @@ if [ -z "${local_runtime_dir}" ]; then
     echo "Please, remove this check when Camel K Runtime 1.16.0 is officially released"
     exit 0
   fi
+  echo "Downloading Camel K runtime $camel_k_runtime_version M2 (may take some minute ...)"
+  mvn -q dependency:copy -Dartifact="org.apache.camel.k:apache-camel-k-runtime:$camel_k_runtime_version:zip:m2" \
+    -Dmdep.useBaseVersion=true \
+    -DoutputDirectory=${rootdir}/build/m2 \
+    -s $location/maven-settings.xml \
+    -Papache
+  unzip -q -o $PWD/build/m2/apache-camel-k-runtime-${camel_k_runtime_version}-m2.zip -d $camel_k_destination
 else
   # Local M2 distro
   echo "Installing local Camel K runtime $camel_k_runtime_version M2 from $local_runtime_dir (may take some minute ...)"
   mvn -q -f $local_runtime_dir/distribution clean install
+  unzip -q -o $local_runtime_dir/distribution/target/apache-camel-k-runtime-${camel_k_runtime_version}-m2.zip -d $camel_k_destination
 fi
 
-echo "Downloading Camel K runtime $camel_k_runtime_version M2 (may take some minute ...)"
-mvn -q dependency:copy -Dartifact="org.apache.camel.k:apache-camel-k-runtime:$camel_k_runtime_version:zip:m2" \
-  -Dmdep.useBaseVersion=true \
-  -DoutputDirectory=${rootdir}/build/m2 \
-  -s $location/maven-settings.xml \
-  -Papache
-# Refresh maven output dir
-rm -rf ${camel_k_destination}
-mkdir -p ${camel_k_destination}
-unzip -q -o $PWD/build/m2/apache-camel-k-runtime-${camel_k_runtime_version}-m2.zip -d $camel_k_destination
+

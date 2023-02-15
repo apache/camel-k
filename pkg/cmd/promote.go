@@ -51,7 +51,7 @@ func newCmdPromote(rootCmdOptions *RootCmdOptions) (*cobra.Command, *promoteCmdO
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     "promote integration --to [namespace] ...",
+		Use:     "promote my-it --to [namespace]",
 		Short:   "Promote an Integration/KameletBinding from an environment to another",
 		Long:    "Promote an Integration/KameletBinding from an environment to another, for example from a Development environment to a Production environment",
 		PreRunE: decode(&options),
@@ -59,13 +59,15 @@ func newCmdPromote(rootCmdOptions *RootCmdOptions) (*cobra.Command, *promoteCmdO
 	}
 
 	cmd.Flags().String("to", "", "The namespace where to promote the Integration")
+	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 
 	return &cmd, &options
 }
 
 type promoteCmdOptions struct {
 	*RootCmdOptions
-	To string `mapstructure:"to" yaml:",omitempty"`
+	To           string `mapstructure:"to" yaml:",omitempty"`
+	OutputFormat string `mapstructure:"output" yaml:",omitempty"`
 }
 
 func (o *promoteCmdOptions) validate(_ *cobra.Command, args []string) error {
@@ -88,7 +90,6 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return errors.Wrap(err, "could not retrieve cluster client")
 	}
-
 	opSource, err := operatorInfo(o.Context, c, o.Namespace)
 	if err != nil {
 		return errors.Wrap(err, "could not retrieve info for Camel K operator source")
@@ -123,11 +124,19 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return errors.Wrap(err, "could not validate destination resources")
 	}
-	if promoteKameletBinding {
-		// KameletBinding promotion
-		destKameletBinding := o.editKameletBinding(sourceKameletBinding, sourceIntegration)
 
+	// KameletBinding promotion
+	if promoteKameletBinding {
+		destKameletBinding := o.editKameletBinding(sourceKameletBinding, sourceIntegration)
+		// Ensure the destination namespace has access to the source namespace images
+		err = addSystemPullerRoleBinding(o.Context, c, sourceIntegration.Namespace, destKameletBinding.Namespace)
+		if err != nil {
+			return err
+		}
 		replaced, err := o.replaceResource(destKameletBinding)
+		if o.OutputFormat != "" {
+			return showKameletBindingOutput(cmd, destKameletBinding, o.OutputFormat, c.GetScheme())
+		}
 		if !replaced {
 			fmt.Fprintln(cmd.OutOrStdout(), `Promoted Integration "`+name+`" created`)
 		} else {
@@ -135,15 +144,17 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 		return err
 	}
+
 	// Plain Integration promotion
 	destIntegration := o.editIntegration(sourceIntegration)
-
 	// Ensure the destination namespace has access to the source namespace images
 	err = addSystemPullerRoleBinding(o.Context, c, sourceIntegration.Namespace, destIntegration.Namespace)
 	if err != nil {
 		return err
 	}
-
+	if o.OutputFormat != "" {
+		return showIntegrationOutput(cmd, destIntegration, o.OutputFormat, c.GetScheme())
+	}
 	replaced, err := o.replaceResource(destIntegration)
 	if !replaced {
 		fmt.Fprintln(cmd.OutOrStdout(), `Promoted Integration "`+name+`" created`)
