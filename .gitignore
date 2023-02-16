@@ -168,3 +168,6 @@ config/**/*.gen.yaml
 config/**/*.gen.json
 
 *-installer*
+
+# Fabric8 CRDs
+java/target

@@ -123,4 +123,4 @@ runs:
       working-directory: java
       shell: bash
       run: |
-        mvn clean deploy --settings ../.github/asf-deploy-settings.xml
+        ./mvnw clean deploy --settings ../.github/asf-deploy-settings.xml

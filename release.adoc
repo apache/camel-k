@@ -61,6 +61,35 @@ cd release-utils/scripts/
 
 Voting can start for camel-k-runtime, or a combined vote with camel-k can be started later.
 
+[[releasing-camel-k-crds]]
+== Releasing Camel K CRD dependency
+
+Camel K ships a Maven dependency containing the CRDs required in Kubernetes. This dependency is available in `/java/` directory and has to be released togheter with Camel K. The process below is the same used for Camel K Runtime.
+
+Follow the https://github.com/apache/camel/blob/main/docs/user-manual/modules/ROOT/pages/release-guide.adoc[Camel release guide] in order to setup the Maven environment and gpg for the release.
+
+To prepare a release and check problems:
+```
+./java/mvnw release:prepare -DdryRun -Prelease
+```
+
+Check the signatures of the files, then clean and prepare the actual release:
+
+```
+./java/mvnw release:clean -Prelease
+./java/mvnw release:prepare -Prelease
+```
+
+Then perform the release:
+
+```
+./java/mvnw release:perform -Prelease
+```
+
+Go to https://repository.apache.org/ and close the staging repository.
+
+A URL will be generated for the repository, like: https://repository.apache.org/content/repositories/orgapachecamel-xxxx. The URL needs to be communicated during the voting process.
+
 [[releasing-camel-k]]
 == Releasing Camel K
 

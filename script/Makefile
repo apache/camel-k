@@ -484,6 +484,9 @@ set-module-version:
 git-tag:
 	./script/git_tag.sh $(CUSTOM_VERSION) $(RELEASE_GIT_REMOTE)
 
+fabric8-crds:
+	./java/mvnw -f java/pom.xml clean package
+
 cross-compile:
 	# we must wrap the goldflags parameters with quotes as they will need to
 	# be processed as a single argument by the cross compile script
@@ -491,7 +494,7 @@ cross-compile:
 
 release: clean codegen set-module-version set-version build-resources check-licenses build images images-push cross-compile git-tag
 
-release-staging: clean codegen set-module-version set-version build-resources check-licenses build images images-push-staging cross-compile git-tag
+release-staging: clean codegen set-module-version set-version build-resources check-licenses build images images-push-staging cross-compile fabric8-crds git-tag
 
 release-nightly: clean codegen set-module-version set-version build-resources build images images-push cross-compile
 
