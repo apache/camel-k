@@ -46,8 +46,8 @@ import (
 
 // Add creates a new IntegrationKit Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
-func Add(mgr manager.Manager, c client.Client) error {
-	return add(mgr, newReconciler(mgr, c))
+func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
+	return add(ctx, mgr, newReconciler(mgr, c))
 }
 
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
@@ -65,7 +65,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	)
 }
 
-func add(mgr manager.Manager, r reconcile.Reconciler) error {
+func add(_ context.Context, mgr manager.Manager, r reconcile.Reconciler) error {
 	c, err := controller.New("integrationkit-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
