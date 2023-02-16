@@ -23,6 +23,8 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/pkg/errors"
+
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -54,8 +56,18 @@ import (
 	"github.com/apache/camel-k/pkg/util/monitoring"
 )
 
-func Add(mgr manager.Manager, c client.Client) error {
-	return add(mgr, c, newReconciler(mgr, c))
+func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
+	err := mgr.GetFieldIndexer().IndexField(ctx, &corev1.Pod{}, "status.phase",
+		func(obj ctrl.Object) []string {
+			pod, _ := obj.(*corev1.Pod)
+			return []string{string(pod.Status.Phase)}
+		})
+
+	if err != nil {
+		return errors.Wrapf(err, "unable to set up field indexer for status.phase")
+	}
+
+	return add(ctx, mgr, c, newReconciler(mgr, c))
 }
 
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
@@ -113,7 +125,7 @@ func isIntegrationUpdated(it *v1.Integration, previous, next *v1.IntegrationCond
 	return false
 }
 
-func integrationKitEnqueueRequestsFromMapFunc(c client.Client, kit *v1.IntegrationKit) []reconcile.Request {
+func integrationKitEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, kit *v1.IntegrationKit) []reconcile.Request {
 	var requests []reconcile.Request
 	if kit.Status.Phase != v1.IntegrationKitPhaseReady && kit.Status.Phase != v1.IntegrationKitPhaseError {
 		return requests
@@ -125,7 +137,7 @@ func integrationKitEnqueueRequestsFromMapFunc(c client.Client, kit *v1.Integrati
 	if !platform.IsCurrentOperatorGlobal() {
 		opts = append(opts, ctrl.InNamespace(kit.Namespace))
 	}
-	if err := c.List(context.Background(), list, opts...); err != nil {
+	if err := c.List(ctx, list, opts...); err != nil {
 		log.Error(err, "Failed to retrieve integration list")
 		return requests
 	}
@@ -158,7 +170,7 @@ func integrationKitEnqueueRequestsFromMapFunc(c client.Client, kit *v1.Integrati
 	return requests
 }
 
-func integrationPlatformEnqueueRequestsFromMapFunc(c client.Client, p *v1.IntegrationPlatform) []reconcile.Request {
+func integrationPlatformEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) []reconcile.Request {
 	var requests []reconcile.Request
 
 	if p.Status.Phase == v1.IntegrationPlatformPhaseReady {
@@ -170,7 +182,7 @@ func integrationPlatformEnqueueRequestsFromMapFunc(c client.Client, p *v1.Integr
 			opts = append(opts, ctrl.InNamespace(p.Namespace))
 		}
 
-		if err := c.List(context.Background(), list, opts...); err != nil {
+		if err := c.List(ctx, list, opts...); err != nil {
 			log.Error(err, "Failed to list integrations")
 			return requests
 		}
@@ -191,7 +203,7 @@ func integrationPlatformEnqueueRequestsFromMapFunc(c client.Client, p *v1.Integr
 	return requests
 }
 
-func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
+func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 	b := builder.ControllerManagedBy(mgr).
 		Named("integration-controller").
 		// Watch for changes to primary resource Integration
@@ -225,7 +237,7 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 					return []reconcile.Request{}
 				}
 
-				return integrationKitEnqueueRequestsFromMapFunc(c, kit)
+				return integrationKitEnqueueRequestsFromMapFunc(ctx, c, kit)
 			})).
 		// Watch for IntegrationPlatform phase transitioning to ready and enqueue
 		// requests for any integrations that are in phase waiting for platform
@@ -237,7 +249,7 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 					return []reconcile.Request{}
 				}
 
-				return integrationPlatformEnqueueRequestsFromMapFunc(c, p)
+				return integrationPlatformEnqueueRequestsFromMapFunc(ctx, c, p)
 			})).
 		// Watch for the owned Deployments
 		Owns(&appsv1.Deployment{}, builder.WithPredicates(StatusChangedPredicate{})).
@@ -269,9 +281,9 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 		return err
 	} else if ok {
 		// Check for permission to watch the ConsoleCLIDownload resource
-		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		checkCtx, cancel := context.WithTimeout(ctx, time.Minute)
 		defer cancel()
-		if ok, err = kubernetes.CheckPermission(ctx, c, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); err != nil {
+		if ok, err = kubernetes.CheckPermission(checkCtx, c, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); err != nil {
 			return err
 		} else if ok {
 			b.Owns(&servingv1.Service{}, builder.WithPredicates(StatusChangedPredicate{}))

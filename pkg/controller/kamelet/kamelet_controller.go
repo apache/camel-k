@@ -43,7 +43,7 @@ import (
 
 // Add creates a new Kamelet Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
-func Add(mgr manager.Manager, c client.Client) error {
+func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
 	return add(mgr, newReconciler(mgr, c))
 }
 

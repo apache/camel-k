@@ -224,21 +224,12 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	})
 	exitOnError(err, "")
 
-	exitOnError(
-		mgr.GetFieldIndexer().IndexField(ctx, &corev1.Pod{}, "status.phase",
-			func(obj ctrl.Object) []string {
-				pod, _ := obj.(*corev1.Pod)
-				return []string{string(pod.Status.Phase)}
-			}),
-		"unable to set up field indexer for status.phase: %v",
-	)
-
 	log.Info("Configuring manager")
 	exitOnError(mgr.AddHealthzCheck("health-probe", healthz.Ping), "Unable add liveness check")
 	exitOnError(apis.AddToScheme(mgr.GetScheme()), "")
 	ctrlClient, err := client.FromManager(mgr)
 	exitOnError(err, "")
-	exitOnError(controller.AddToManager(mgr, ctrlClient), "")
+	exitOnError(controller.AddToManager(ctx, mgr, ctrlClient), "")
 
 	log.Info("Installing operator resources")
 	installCtx, installCancel := context.WithTimeout(ctx, 1*time.Minute)
