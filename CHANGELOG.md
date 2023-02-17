@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Publish Fabric8 Java extension beside release [\#4055](https://github.com/apache/camel-k/issues/4055)
 - YAKS test failure [\#4044](https://github.com/apache/camel-k/issues/4044)
 - Fabric8 CRD deploy action fails [\#4035](https://github.com/apache/camel-k/issues/4035)
 - Compatibility matrix show wrong kamelets version for camel-k releases 1.10.x and 1.11.x [\#4023](https://github.com/apache/camel-k/issues/4023)
@@ -23,6 +24,7 @@
 - Allow "kamel promote" integrate with GitOps styled deployments [\#3888](https://github.com/apache/camel-k/issues/3888)
 - Kamelets load properties from ConfigMap [\#3811](https://github.com/apache/camel-k/issues/3811)
 - Unable to configure ServiceAccountName using Kamel run [\#3797](https://github.com/apache/camel-k/issues/3797)
+- Split with parallelProcessing runs sequentially [\#3785](https://github.com/apache/camel-k/issues/3785)
 - Integration Kit image build runs into an endless loop when a lower level image can't be pulled from Registry [\#3266](https://github.com/apache/camel-k/issues/3266)
 - Choose a single location for examples [\#2826](https://github.com/apache/camel-k/issues/2826)
 - Camel-K Tracing Trait error [\#2633](https://github.com/apache/camel-k/issues/2633)
