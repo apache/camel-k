@@ -26,6 +26,7 @@
 - Unable to configure ServiceAccountName using Kamel run [\#3797](https://github.com/apache/camel-k/issues/3797)
 - Split with parallelProcessing runs sequentially [\#3785](https://github.com/apache/camel-k/issues/3785)
 - Integration Kit image build runs into an endless loop when a lower level image can't be pulled from Registry [\#3266](https://github.com/apache/camel-k/issues/3266)
+- Camel-K Java native support - native run of a java route fails [\#3023](https://github.com/apache/camel-k/issues/3023)
 - Choose a single location for examples [\#2826](https://github.com/apache/camel-k/issues/2826)
 - Camel-K Tracing Trait error [\#2633](https://github.com/apache/camel-k/issues/2633)
 - Provide non-regression tests for regression \#1872 [\#1875](https://github.com/apache/camel-k/issues/1875)
