@@ -114,8 +114,6 @@ func initialize(options spectrum.Options, registryAddress string, catalog *v1.Ca
 	// Now we properly set the base and the target image
 	options.Base = catalog.Spec.GetQuarkusToolingImage()
 	options.Target = imageName
-	// TODO properly build in the container withouth being root
-	options.RunAs = "0"
 
 	err := buildRuntimeBuilderImage(options)
 
