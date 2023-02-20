@@ -85,7 +85,7 @@ STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgap
 INSTALL_DEFAULT_KAMELETS ?= true
 KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
 # Make sure to use a released tag or empty if you want to get the latest development bits
-KAMELET_CATALOG_REPO_TAG := v0.10.0
+KAMELET_CATALOG_REPO_TAG := v3.20.1.1
 
 # When performing integration tests, it is not necessary to always execute build, especially
 # in e2e tests when lots of tests are being executed sequentially & the build has already taken place.
