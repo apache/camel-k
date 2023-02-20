@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
+set -ex
 
 location=$(dirname $0)
 rootdir=$location/../
@@ -29,7 +29,7 @@ runtime_version="$1"
 if [ ! -z $2 ]; then
   # Change the settings to include the staging repo if it's not already there
   echo "INFO: updating the settings staging repository"
-  sed -i "s;<url>https://repository\.apache\.org/content/repositories/orgapachecamel-.*</url>;<url>$2</url>;" $location/maven-settings.xml
+  sed -i.bak "s;<url>https://repository\.apache\.org/content/repositories/orgapachecamel-.*</url>;<url>$2</url>;" $location/maven-settings.xml
 fi
 
 # Refresh catalog sets. We can clean any leftover as well.
