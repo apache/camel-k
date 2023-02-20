@@ -41,7 +41,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/monitoring"
 )
 
-// Add creates a new catalog Controller and adds it to the Manager. The Manager will set fields on the Controller
+// Add creates a new Catalog Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
 	return add(mgr, newReconciler(mgr, c))
@@ -49,7 +49,7 @@ func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
 
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	return monitoring.NewInstrumentedReconciler(
-		&reconcilecatalog{
+		&reconcileCatalog{
 			client:   c,
 			scheme:   mgr.GetScheme(),
 			recorder: mgr.GetEventRecorderFor("camel-k-catalog-controller"),
@@ -94,10 +94,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		Complete(r)
 }
 
-var _ reconcile.Reconciler = &reconcilecatalog{}
+var _ reconcile.Reconciler = &reconcileCatalog{}
 
 // reconcilecatalog reconciles a catalog object.
-type reconcilecatalog struct {
+type reconcileCatalog struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the API server
 	client   client.Client
@@ -110,7 +110,7 @@ type reconcilecatalog struct {
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *reconcilecatalog) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
+func (r *reconcileCatalog) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
 	rlog.Info("Reconciling CamelCatalog")
 
