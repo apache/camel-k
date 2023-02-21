@@ -1,0 +1,3 @@
+kamel:
+  config:
+    default-namespace: camel-k-test-integration

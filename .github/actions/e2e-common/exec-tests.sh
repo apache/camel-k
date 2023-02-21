@@ -134,9 +134,7 @@ fi
 # Then run all integration tests rather than ending on first failure
 set -e
 exit_code=0
-DO_TEST_PREBUILD=false make test-integration || exit_code=1
-DO_TEST_PREBUILD=false make test-registry-maven-wagon || exit_code=1
-DO_TEST_PREBUILD=false make test-service-binding || exit_code=1
+DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common || exit_code=1
 set +e
 
 echo "Tests completed with exit code: ${exit_code}"
