@@ -2198,7 +2198,7 @@ func Pods(ns string) func() []corev1.Pod {
 
 func WithNewTestNamespace(t *testing.T, doRun func(string)) {
 	setTestLocus(t)
-	ns := newTestNamespace(false)
+	ns := NewTestNamespace(false)
 	defer deleteTestNamespace(t, ns)
 	defer userCleanup(t)
 
@@ -2220,7 +2220,7 @@ func WithGlobalOperatorNamespace(t *testing.T, test func(string)) {
 
 func WithNewTestNamespaceWithKnativeBroker(t *testing.T, doRun func(string)) {
 	setTestLocus(t)
-	ns := newTestNamespace(true)
+	ns := NewTestNamespace(true)
 	defer deleteTestNamespace(t, ns)
 	defer deleteKnativeBroker(ns)
 	defer userCleanup(t)
@@ -2362,8 +2362,18 @@ func testNamespaceExists(ns string) (bool, error) {
 
 	return true, nil
 }
+func DeleteNamespace(t *testing.T, ns string) error {
+	nsObj, err := TestClient().CoreV1().Namespaces().Get(TestContext, ns, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
 
-func newTestNamespace(injectKnativeBroker bool) ctrl.Object {
+	deleteTestNamespace(t, nsObj)
+
+	return nil
+}
+
+func NewTestNamespace(injectKnativeBroker bool) ctrl.Object {
 	brokerLabel := "eventing.knative.dev/injection"
 	name := os.Getenv("CAMEL_K_TEST_NS")
 	if name == "" {
