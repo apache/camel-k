@@ -23,29 +23,18 @@ limitations under the License.
 package knative
 
 import (
-	. "github.com/apache/camel-k/e2e/support"
-	. "github.com/onsi/gomega"
 	"testing"
+
+	. "github.com/onsi/gomega"
+
+	. "github.com/apache/camel-k/e2e/support"
 )
 
-func TestOpenAPIService(t *testing.T) {
+func TestKNativeCamelKInstallTeardown(t *testing.T) {
 	RegisterTestingT(t)
 
-	Expect(KamelRunWithID(operatorID, ns,
-		"--name", "petstore",
-		"--open-api", "file:files/petstore-api.yaml",
-		"files/petstore.groovy",
-	).Execute()).To(Succeed())
-
-	Eventually(KnativeService(ns, "petstore"), TestTimeoutLong).
-		Should(Not(BeNil()))
-
-	Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
-		Should(ContainSubstring("Started listPets (rest://get:/v1:/pets)"))
-	Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
-		Should(ContainSubstring("Started createPets (rest://post:/v1:/pets)"))
-	Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
-		Should(ContainSubstring("Started showPetById (rest://get:/v1:/pets/%7BpetId%7D)"))
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	ns := GetCIProcessID()
+	Expect(ns).ShouldNot(BeNil())
+	Expect(DeleteNamespace(t, ns)).To(Succeed())
+	DeleteCIProcessID()
 }

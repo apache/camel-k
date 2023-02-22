@@ -32,7 +32,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-func TestDefaultCamelKInstallStartup(t *testing.T) {
+func TestCommonCamelKInstallStartup(t *testing.T) {
 	RegisterTestingT(t)
 
 	ns := NewTestNamespace(false)

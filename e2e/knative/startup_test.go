@@ -23,29 +23,27 @@ limitations under the License.
 package knative
 
 import (
-	. "github.com/apache/camel-k/e2e/support"
-	. "github.com/onsi/gomega"
 	"testing"
+
+	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
+
+	. "github.com/apache/camel-k/e2e/support"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-func TestOpenAPIService(t *testing.T) {
+func TestKNativeCamelKInstallStartup(t *testing.T) {
 	RegisterTestingT(t)
 
-	Expect(KamelRunWithID(operatorID, ns,
-		"--name", "petstore",
-		"--open-api", "file:files/petstore-api.yaml",
-		"files/petstore.groovy",
-	).Execute()).To(Succeed())
+	ns := NewTestNamespace(false)
+	Expect(ns).ShouldNot(BeNil())
+	// the namespace is dynamic if there is some collision
+	// we store this value as it will be used for cleaning in the teardown process
+	SaveCIProcessID(ns.GetName())
 
-	Eventually(KnativeService(ns, "petstore"), TestTimeoutLong).
-		Should(Not(BeNil()))
-
-	Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
-		Should(ContainSubstring("Started listPets (rest://get:/v1:/pets)"))
-	Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
-		Should(ContainSubstring("Started createPets (rest://post:/v1:/pets)"))
-	Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
-		Should(ContainSubstring("Started showPetById (rest://get:/v1:/pets/%7BpetId%7D)"))
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	Expect(KamelInstallWithIDAndKameletCatalog(ns.GetName(), ns.GetName(), "--trait-profile", "knative").Execute()).To(Succeed())
+	Eventually(OperatorPod(ns.GetName())).ShouldNot(BeNil())
+	Eventually(Platform(ns.GetName())).ShouldNot(BeNil())
+	Eventually(PlatformConditionStatus(ns.GetName(), v1.IntegrationPlatformConditionReady), TestTimeoutShort).
+		Should(Equal(corev1.ConditionTrue))
 }
