@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package misc
+package commonwithcustominstall
 
 import (
 	"testing"
@@ -35,14 +35,14 @@ import (
 func TestTektonLikeBehavior(t *testing.T) {
 	RegisterTestingT(t)
 
-	Expect(CreateOperatorServiceAccount(ns)).To(Succeed())
-	Expect(CreateOperatorRole(ns)).To(Succeed())
-	Expect(CreateOperatorRoleBinding(ns)).To(Succeed())
+	WithNewTestNamespace(t, func(ns string) {
+		Expect(CreateOperatorServiceAccount(ns)).To(Succeed())
+		Expect(CreateOperatorRole(ns)).To(Succeed())
+		Expect(CreateOperatorRoleBinding(ns)).To(Succeed())
 
-	Eventually(OperatorPod(ns)).Should(BeNil())
-	Expect(CreateKamelPod(ns, "tekton-task", "install", "--skip-cluster-setup", "--force")).To(Succeed())
+		Eventually(OperatorPod(ns)).Should(BeNil())
+		Expect(CreateKamelPod(ns, "tekton-task", "install", "--skip-cluster-setup", "--force")).To(Succeed())
 
-	Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+	})
 }

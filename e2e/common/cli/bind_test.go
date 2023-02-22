@@ -35,10 +35,11 @@ import (
 func TestKamelCLIBind(t *testing.T) {
 	RegisterTestingT(t)
 
-	Expect(CreateTimerKamelet(ns, "test-timer-source")()).To(Succeed())
+	kameletName := "test-timer-source"
+	Expect(CreateTimerKamelet(ns, kameletName)()).To(Succeed())
 
 	t.Run("bind timer to log", func(t *testing.T) {
-		Expect(KamelBindWithID(operatorID, ns, "test-timer-source", "log:info", "-p", "source.message=helloTest").Execute()).To(Succeed())
+		Expect(KamelBindWithID(operatorID, ns, kameletName, "log:info", "-p", "source.message=helloTest").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "test-timer-source-to-log"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationLogs(ns, "test-timer-source-to-log")).Should(ContainSubstring("Body: helloTest"))
 		Expect(KamelBindWithID(operatorID, ns, "test-timer-source", "log:info", "-p", "source.message=newText").Execute()).To(Succeed())

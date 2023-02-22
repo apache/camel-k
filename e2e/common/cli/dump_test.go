@@ -35,16 +35,7 @@ import (
 func TestKamelCLIDump(t *testing.T) {
 	RegisterTestingT(t)
 
-	t.Run("dump empty namespace", func(t *testing.T) {
-		dump := GetOutputString(Kamel("dump", "-n", ns))
-
-		Expect(dump).To(ContainSubstring("Found 0 integrations:"))
-		Expect(dump).To(ContainSubstring("Found 0 deployments:"))
-	})
-
 	t.Run("dump non-empty namespace", func(t *testing.T) {
-		operatorID := "camel-k-cli-dump"
-		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationLogs(ns, "yaml")).Should(ContainSubstring("Magicstring!"))

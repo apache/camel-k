@@ -23,7 +23,6 @@ limitations under the License.
 package common
 
 import (
-	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -34,6 +33,8 @@ import (
 func TestDefaultCamelKInstallTeardown(t *testing.T) {
 	RegisterTestingT(t)
 
-	ns := os.Getenv("CAMEL_K_TEST_NS")
+	ns := GetCIProcessID()
+	Expect(ns).ShouldNot(BeNil())
 	Expect(DeleteNamespace(t, ns)).To(Succeed())
+	DeleteCIProcessID()
 }

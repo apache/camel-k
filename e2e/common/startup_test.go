@@ -23,7 +23,6 @@ limitations under the License.
 package common
 
 import (
-	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -36,12 +35,15 @@ import (
 func TestDefaultCamelKInstallStartup(t *testing.T) {
 	RegisterTestingT(t)
 
-	ns := "camel-k-test-integration"
-	os.Setenv("CAMEL_K_TEST_NS", ns)
-	Expect(NewTestNamespace(false)).ShouldNot(BeNil())
-	Expect(KamelInstallWithID(ns, ns).Execute()).To(Succeed())
-	Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-	Eventually(Platform(ns)).ShouldNot(BeNil())
-	Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
+	ns := NewTestNamespace(false)
+	Expect(ns).ShouldNot(BeNil())
+	// the namespace is dynamic if there is some collision
+	// we store this value as it will be used for cleaning in the teardown process
+	SaveCIProcessID(ns.GetName())
+
+	Expect(KamelInstallWithIDAndKameletCatalog(ns.GetName(), ns.GetName()).Execute()).To(Succeed())
+	Eventually(OperatorPod(ns.GetName())).ShouldNot(BeNil())
+	Eventually(Platform(ns.GetName())).ShouldNot(BeNil())
+	Eventually(PlatformConditionStatus(ns.GetName(), v1.IntegrationPlatformConditionReady), TestTimeoutShort).
 		Should(Equal(corev1.ConditionTrue))
 }

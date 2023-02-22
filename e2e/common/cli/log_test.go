@@ -37,7 +37,7 @@ func TestKamelCLILog(t *testing.T) {
 	RegisterTestingT(t)
 
 	t.Run("check integration log", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "../files/yaml.yaml").Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		// first line of the integration logs
 		firstLine := strings.Split(IntegrationLogs(ns, "yaml")(), "\n")[0]

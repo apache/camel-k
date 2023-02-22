@@ -129,7 +129,7 @@ fi
 
 # Then run integration tests
 if [ "${HIGH_MEMORY}" == "true" ]; then
-  DO_TEST_PREBUILD=false make test-quarkus-native-high-memory
+  DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-quarkus-native-high-memory
 else
-  DO_TEST_PREBUILD=false make test-quarkus-native
+  DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-quarkus-native
 fi

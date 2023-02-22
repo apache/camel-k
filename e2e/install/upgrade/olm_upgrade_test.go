@@ -67,7 +67,7 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(createOrUpdateCatalogSource(ns, catalogSourceName, prevIIB)).To(Succeed())
+		Expect(CreateOrUpdateCatalogSource(ns, catalogSourceName, prevIIB)).To(Succeed())
 		ocp, err := openshift.IsOpenShift(TestClient())
 		assert.Nil(t, err)
 
@@ -78,8 +78,8 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 			Eventually(SecretByName(ns, secretPrefix), TestTimeoutLong).Should(Not(BeNil()))
 		}
 
-		Eventually(catalogSourcePodRunning(ns, catalogSourceName), TestTimeoutMedium).Should(BeNil())
-		Eventually(catalogSourcePhase(ns, catalogSourceName), TestTimeoutMedium).Should(Equal("READY"))
+		Eventually(CatalogSourcePodRunning(ns, catalogSourceName), TestTimeoutMedium).Should(BeNil())
+		Eventually(CatalogSourcePhase(ns, catalogSourceName), TestTimeoutMedium).Should(Equal("READY"))
 
 		// Set KAMEL_BIN only for this test - don't override the ENV variable for all tests
 		Expect(os.Setenv("KAMEL_BIN", kamel)).To(Succeed())
@@ -103,7 +103,7 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 		noAdditionalConditions := func(csv olm.ClusterServiceVersion) bool {
 			return true
 		}
-		Eventually(clusterServiceVersionPhase(noAdditionalConditions, ns), TestTimeoutMedium).
+		Eventually(ClusterServiceVersionPhase(noAdditionalConditions, ns), TestTimeoutMedium).
 			Should(Equal(olm.CSVPhaseSucceeded))
 
 		// Refresh the test client to account for the newly installed CRDs
@@ -117,7 +117,7 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 		var prevIPVersionPrefix string
 		var newIPVersionPrefix string
 
-		prevCSVVersion = clusterServiceVersion(noAdditionalConditions, ns)().Spec.Version
+		prevCSVVersion = ClusterServiceVersion(noAdditionalConditions, ns)().Spec.Version
 		prevIPVersionPrefix = fmt.Sprintf("%d.%d", prevCSVVersion.Version.Major, prevCSVVersion.Version.Minor)
 		t.Logf("Using Previous CSV Version: %s", prevCSVVersion.Version.String())
 
@@ -139,11 +139,11 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 
 		t.Run("OLM upgrade", func(t *testing.T) {
 			// Trigger Camel K operator upgrade by updating the CatalogSource with the new index image
-			Expect(createOrUpdateCatalogSource(ns, catalogSourceName, newIIB)).To(Succeed())
+			Expect(CreateOrUpdateCatalogSource(ns, catalogSourceName, newIIB)).To(Succeed())
 
 			if crossChannelUpgrade {
 				t.Log("Patching Camel K OLM subscription channel.")
-				subscription, err := getSubscription(ns)
+				subscription, err := GetSubscription(ns)
 				Expect(err).To(BeNil())
 				Expect(subscription).NotTo(BeNil())
 
@@ -157,21 +157,21 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 			}
 
 			// Check the previous CSV is being replaced
-			Eventually(clusterServiceVersionPhase(func(csv olm.ClusterServiceVersion) bool {
+			Eventually(ClusterServiceVersionPhase(func(csv olm.ClusterServiceVersion) bool {
 				return csv.Spec.Version.Version.String() == prevCSVVersion.Version.String()
 			}, ns), TestTimeoutMedium).Should(Equal(olm.CSVPhaseReplacing))
 
 			// The new CSV is installed
-			Eventually(clusterServiceVersionPhase(func(csv olm.ClusterServiceVersion) bool {
+			Eventually(ClusterServiceVersionPhase(func(csv olm.ClusterServiceVersion) bool {
 				return csv.Spec.Version.Version.String() != prevCSVVersion.Version.String()
 			}, ns), TestTimeoutMedium).Should(Equal(olm.CSVPhaseSucceeded))
 
 			// The old CSV is gone
-			Eventually(clusterServiceVersion(func(csv olm.ClusterServiceVersion) bool {
+			Eventually(ClusterServiceVersion(func(csv olm.ClusterServiceVersion) bool {
 				return csv.Spec.Version.Version.String() == prevCSVVersion.Version.String()
 			}, ns), TestTimeoutMedium).Should(BeNil())
 
-			newCSVVersion = clusterServiceVersion(noAdditionalConditions, ns)().Spec.Version
+			newCSVVersion = ClusterServiceVersion(noAdditionalConditions, ns)().Spec.Version
 			newIPVersionPrefix = fmt.Sprintf("%d.%d", newCSVVersion.Version.Major, newCSVVersion.Version.Minor)
 
 			Expect(prevCSVVersion.Version.String()).NotTo(Equal(newCSVVersion.Version.String()))

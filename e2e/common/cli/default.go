@@ -20,5 +20,7 @@ limitations under the License.
 
 package cli
 
-const ns = "camel-k-test-integration"
-const operatorID = "camel-k-test-integration"
+import "github.com/apache/camel-k/e2e/support"
+
+var ns = support.GetCIProcessID()
+var operatorID = support.GetCIProcessID()

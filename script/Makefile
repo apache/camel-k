@@ -250,8 +250,8 @@ test-fmt: do-build
 	cd pkg/kamelet/repository && go test -v ./... -json 2>&1 | gotestfmt
 
 #
-# Note
-# This should execute all tests and not exit if one of the suites fail
+# Common tests that do not require any customized operator setting. They can leverage a unique namespaced operator installation to reduce
+# the time to complete (they are used also as smoke test for nightly release)
 #
 test-common: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
@@ -264,36 +264,68 @@ test-common: do-build
 	go test -timeout 30m -v ./e2e/common/teardown_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	exit $${FAILED}
 
-test-knative: do-build
-	#STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/knative -tags=integration $(TEST_KNATIVE_RUN) -json 2>&1 | gotestfmt
-
-test-builder: do-build
-	#STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 30m -v ./e2e/builder -tags=integration $(TEST_BUILDER_RUN) -json 2>&1 | gotestfmt
-
-test-telemetry: do-build
-	#STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 30m -v ./e2e/telemetry -tags=integration $(TEST_TELEMETRY_RUN) -json 2>&1 | gotestfmt
-
-test-with-new-namespace: do-build
-	#FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 60m -v ./e2e/withnewnamespace/install/cli -tags=integration $(TEST_INSTALL_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
-	go test -timeout 60m -v ./e2e/withnewnamespace/install/kustomize -tags=integration $(TEST_INSTALL_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
-	go test -timeout 60m -v ./e2e/withnewnamespace/misc -tags=integration $(TEST_INSTALL_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+#
+# Common tests that require some particular operator setting or need to be installed in multiple namespaces
+#
+test-common-with-custom-install: do-build
+	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	go test -timeout 60m -v ./e2e/commonwithcustominstall -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
 	exit $${FAILED}
 
+#
+# Installation procedure test using different methodologies
+#
+test-install: do-build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	go test -timeout 60m -v ./e2e/install/cli -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 60m -v ./e2e/install/olm -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 60m -v ./e2e/install/kustomize -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
+	exit $${FAILED}
+
+#
+# Upgrade procedure test (require a previous version of Kamel CLI)
+#
+test-install-upgrade: do-build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	go test -timeout 60m -v ./e2e/install/upgrade -tags=integration $(TEST_UPGRADE_RUN) $(GOTESTFMT) || FAILED=1; \
+	exit $${FAILED}
+
+#
+# Knative tests that require the presence of KNative configuration
+#
+test-knative: do-build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	go test -timeout 60m -v ./e2e/knative -tags=integration $(TEST_KNATIVE_RUN) $(GOTESTFMT)
+
+#
+# Builder tests that require a custom build strategy
+#
+test-builder: do-build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	go test -timeout 30m -v ./e2e/builder -tags=integration $(TEST_BUILDER_RUN) $(GOTESTFMT)
+
+#
+# Telemetry tests that require the configuration of telemtry endpoints
+#
+test-telemetry: do-build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	go test -timeout 30m -v ./e2e/telemetry -tags=integration $(TEST_TELEMETRY_RUN) $(GOTESTFMT)
+
+#
+# Quarkus native test which require a lower memory resources
+#
 test-quarkus-native: do-build
-	#STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 180m -v ./e2e/namespace/native -tags=integration $(TEST_QUARKUS_RUN) -json 2>&1 | gotestfmt
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	go test -timeout 180m -v ./e2e/native -tags=integration $(TEST_QUARKUS_RUN) $(GOTESTFMT)
 
+#
+# Quarkus native test which require a higher memory resources
+#
 test-quarkus-native-high-memory: do-build
-	#STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 180m -v ./e2e/namespace/native -tags=integration,high_memory $(TEST_QUARKUS_RUN) -json 2>&1 | gotestfmt
-
-test-upgrade: do-build
-	#STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/namespace/upgrade -tags=integration $(TEST_UPGRADE_RUN) -json 2>&1 | gotestfmt
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	go test -timeout 180m -v ./e2e/namespace/native -tags=integration,high_memory $(TEST_QUARKUS_RUN) $(GOTESTFMT)
 
 build-kamel:
 	@echo "####### Building kamel CLI..."

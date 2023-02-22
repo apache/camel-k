@@ -36,7 +36,7 @@ func TestKamelCLIDebug(t *testing.T) {
 	RegisterTestingT(t)
 
 	t.Run("debug local default port check", func(t *testing.T) {
-		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 		Expect(portIsInUse("127.0.0.1", "5005")()).To(BeFalse())
 
@@ -49,7 +49,7 @@ func TestKamelCLIDebug(t *testing.T) {
 	})
 
 	t.Run("debug local port check", func(t *testing.T) {
-		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 		Expect(portIsInUse("127.0.0.1", "5006")()).To(BeFalse())
 
@@ -62,7 +62,7 @@ func TestKamelCLIDebug(t *testing.T) {
 	})
 
 	t.Run("debug logs check", func(t *testing.T) {
-		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 
 		debugTestContext, cancel := context.WithCancel(TestContext)
@@ -74,7 +74,7 @@ func TestKamelCLIDebug(t *testing.T) {
 	})
 
 	t.Run("Pod config test", func(t *testing.T) {
-		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
 
 		debugTestContext, cancel := context.WithCancel(TestContext)
