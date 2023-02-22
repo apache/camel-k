@@ -148,7 +148,7 @@ func TestKamelCLIRun(t *testing.T) {
 		if os.Getenv("CAMEL_K_TEST_SKIP_PROBLEMATIC") == "true" {
 			t.Skip("WARNING: Test marked as problematic ... skipping")
 		}
-		Expect(KamelRunWithID(operatorID, ns, "../../../global/common/traits/files/jvm/Classpath.java",
+		Expect(KamelRunWithID(operatorID, ns, "../traits/files/jvm/Classpath.java",
 			"-d", sampleJar,
 		).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "classpath"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -167,7 +167,7 @@ func TestKamelCLIRun(t *testing.T) {
 		if os.Getenv("CAMEL_K_TEST_SKIP_PROBLEMATIC") == "true" {
 			t.Skip("WARNING: Test marked as problematic ... skipping")
 		}
-		Expect(KamelRunWithID(operatorID, ns, "../../../global/common/traits/files/jvm/Classpath.java",
+		Expect(KamelRunWithID(operatorID, ns, "../traits/files/jvm/Classpath.java",
 			"-d", sampleJar,
 			"-d", "https://raw.githubusercontent.com/apache/camel-k/main/e2e/namespace/install/cli/files/Java.java|targetPath=/tmp/foo",
 		).Execute()).To(Succeed())

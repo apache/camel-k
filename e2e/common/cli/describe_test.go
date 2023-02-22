@@ -71,7 +71,7 @@ func TestKamelCliDescribe(t *testing.T) {
 
 	t.Run("Test kamel describe integration platform", func(t *testing.T) {
 		platform := GetOutputString(Kamel("describe", "platform", operatorID, "-n", ns))
-		Expect(platform).To(ContainSubstring(fmt.Sprintf("Name: %s", operatorID)))
+		Expect(platform).To(ContainSubstring(fmt.Sprintf("Name:	%s", operatorID)))
 
 		r, _ := regexp.Compile("(?sm).*Namespace:\\s+" + ns + ".*")
 		Expect(platform).To(MatchRegexp(r.String()))
