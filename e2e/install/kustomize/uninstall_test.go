@@ -35,7 +35,7 @@ import (
 )
 
 func TestUninstallBasic(t *testing.T) {
-	makeDir := testutil.MakeTempCopyDir(t, "../../../../install")
+	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
@@ -76,7 +76,7 @@ func TestUninstallBasic(t *testing.T) {
 }
 
 func TestUninstallGlobal(t *testing.T) {
-	makeDir := testutil.MakeTempCopyDir(t, "../../../../install")
+	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed

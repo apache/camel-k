@@ -111,7 +111,7 @@ jobs:
           -p "${{ github.event.inputs.skip-problematic }}" \
           -q "${{ github.event.inputs.log-level }}" \
           -t "${{ github.event.inputs.test-filters }}"
-    - name: Execute Tests
+    - name: Common advanced tests
       uses: ./.github/actions/e2e-common
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
