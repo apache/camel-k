@@ -68,7 +68,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
+  knative-test:
     runs-on: ubuntu-20.04
     steps:
 
@@ -86,13 +86,13 @@ jobs:
           -q "${{ github.event.inputs.log-level }}" \
           -t "${{ github.event.inputs.test-filters }}"
 
-    - name: Execute KNative Tests
+    - name: KNative Tests
       uses: ./.github/actions/e2e-knative
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
         cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
 
-  yaks:
+  yaks-test:
     runs-on: ubuntu-20.04
     steps:
     - name: Checkout code
@@ -101,7 +101,7 @@ jobs:
         persist-credentials: false
         submodules: recursive
 
-    - name: Execute Knative YAKS Tests
+    - name: YAKS Tests
       uses: ./.github/actions/e2e-knative-yaks
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}

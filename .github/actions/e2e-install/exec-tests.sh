@@ -124,4 +124,4 @@ export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
 export CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE=${SAVE_FAILED_TEST_NS}
 
 # Then run integration tests
-DO_TEST_PREBUILD=false make test-install
+DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-install

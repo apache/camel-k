@@ -134,7 +134,7 @@ fi
 # Then run all integration telemetry test rather than ending on first failure
 set -e
 exit_code=0
-DO_TEST_PREBUILD=false make test-telemetry || exit_code=1
+DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-telemetry || exit_code=1
 set +e
 
 echo "Tests completed with exit code: ${exit_code}"

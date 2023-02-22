@@ -23,6 +23,7 @@ limitations under the License.
 package cli
 
 import (
+	"fmt"
 	"regexp"
 	"testing"
 
@@ -70,10 +71,9 @@ func TestKamelCliDescribe(t *testing.T) {
 
 	t.Run("Test kamel describe integration platform", func(t *testing.T) {
 		platform := GetOutputString(Kamel("describe", "platform", operatorID, "-n", ns))
-		r, _ := regexp.Compile("(?sm).*Name:\\s+camel-k.*")
-		Expect(platform).To(MatchRegexp(r.String()))
+		Expect(platform).To(ContainSubstring(fmt.Sprintf("Name: %s", operatorID)))
 
-		r, _ = regexp.Compile("(?sm).*Namespace:\\s+" + ns + ".*")
+		r, _ := regexp.Compile("(?sm).*Namespace:\\s+" + ns + ".*")
 		Expect(platform).To(MatchRegexp(r.String()))
 
 		r, _ = regexp.Compile("(?sm).*Runtime Version:\\s+" + defaults.DefaultRuntimeVersion + ".*")

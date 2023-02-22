@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package upgrade
+package olm
 
 import (
 	"fmt"
@@ -54,7 +54,7 @@ func TestOLMInstallation(t *testing.T) {
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
-		Expect(createOrUpdateCatalogSource(ns, installCatalogSourceName, newIIB)).To(Succeed())
+		Expect(CreateOrUpdateCatalogSource(ns, installCatalogSourceName, newIIB)).To(Succeed())
 
 		ocp, err := openshift.IsOpenShift(TestClient())
 		assert.Nil(t, err)
@@ -66,8 +66,8 @@ func TestOLMInstallation(t *testing.T) {
 			Eventually(SecretByName(ns, secretPrefix), TestTimeoutLong).Should(Not(BeNil()))
 		}
 
-		Eventually(catalogSourcePodRunning(ns, installCatalogSourceName), TestTimeoutMedium).Should(BeNil())
-		Eventually(catalogSourcePhase(ns, installCatalogSourceName), TestTimeoutLong).Should(Equal("READY"))
+		Eventually(CatalogSourcePodRunning(ns, installCatalogSourceName), TestTimeoutMedium).Should(BeNil())
+		Eventually(CatalogSourcePhase(ns, installCatalogSourceName), TestTimeoutLong).Should(Equal("READY"))
 
 		args := []string{"install", "-n", ns, "--olm=true", "--olm-source", installCatalogSourceName, "--olm-source-namespace", ns}
 
@@ -81,12 +81,12 @@ func TestOLMInstallation(t *testing.T) {
 		noAdditionalConditions := func(csv olm.ClusterServiceVersion) bool {
 			return true
 		}
-		Eventually(clusterServiceVersionPhase(noAdditionalConditions, ns), TestTimeoutMedium).Should(Equal(olm.CSVPhaseSucceeded))
+		Eventually(ClusterServiceVersionPhase(noAdditionalConditions, ns), TestTimeoutMedium).Should(Equal(olm.CSVPhaseSucceeded))
 
 		// Refresh the test client to account for the newly installed CRDs
 		SyncClient()
 
-		csvVersion := clusterServiceVersion(noAdditionalConditions, ns)().Spec.Version
+		csvVersion := ClusterServiceVersion(noAdditionalConditions, ns)().Spec.Version
 		ipVersionPrefix := fmt.Sprintf("%d.%d", csvVersion.Version.Major, csvVersion.Version.Minor)
 		t.Logf("CSV Version installed: %s", csvVersion.Version.String())
 

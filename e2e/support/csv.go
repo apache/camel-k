@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package upgrade
+package support
 
 import (
 	"fmt"
@@ -37,11 +37,10 @@ import (
 
 	olm "github.com/operator-framework/api/pkg/operators/v1alpha1"
 
-	. "github.com/apache/camel-k/e2e/support"
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
-func clusterServiceVersion(conditions func(olm.ClusterServiceVersion) bool, ns string) func() *olm.ClusterServiceVersion {
+func ClusterServiceVersion(conditions func(olm.ClusterServiceVersion) bool, ns string) func() *olm.ClusterServiceVersion {
 	return func() *olm.ClusterServiceVersion {
 		lst := olm.ClusterServiceVersionList{}
 		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
@@ -56,16 +55,16 @@ func clusterServiceVersion(conditions func(olm.ClusterServiceVersion) bool, ns s
 	}
 }
 
-func clusterServiceVersionPhase(conditions func(olm.ClusterServiceVersion) bool, ns string) func() olm.ClusterServiceVersionPhase {
+func ClusterServiceVersionPhase(conditions func(olm.ClusterServiceVersion) bool, ns string) func() olm.ClusterServiceVersionPhase {
 	return func() olm.ClusterServiceVersionPhase {
-		if csv := clusterServiceVersion(conditions, ns)(); csv != nil && unsafe.Sizeof(csv.Status) > 0 {
+		if csv := ClusterServiceVersion(conditions, ns)(); csv != nil && unsafe.Sizeof(csv.Status) > 0 {
 			return csv.Status.Phase
 		}
 		return ""
 	}
 }
 
-func createOrUpdateCatalogSource(ns, name, image string) error {
+func CreateOrUpdateCatalogSource(ns, name, image string) error {
 	catalogSource := &olm.CatalogSource{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
@@ -86,7 +85,7 @@ func createOrUpdateCatalogSource(ns, name, image string) error {
 	return err
 }
 
-func catalogSource(ns, name string) func() *olm.CatalogSource {
+func CatalogSource(ns, name string) func() *olm.CatalogSource {
 	return func() *olm.CatalogSource {
 		cs := &olm.CatalogSource{
 			TypeMeta: metav1.TypeMeta{
@@ -108,16 +107,16 @@ func catalogSource(ns, name string) func() *olm.CatalogSource {
 	}
 }
 
-func catalogSourcePhase(ns, name string) func() string {
+func CatalogSourcePhase(ns, name string) func() string {
 	return func() string {
-		if source := catalogSource(ns, name)(); source != nil && source.Status.GRPCConnectionState != nil {
-			return catalogSource(ns, name)().Status.GRPCConnectionState.LastObservedState
+		if source := CatalogSource(ns, name)(); source != nil && source.Status.GRPCConnectionState != nil {
+			return CatalogSource(ns, name)().Status.GRPCConnectionState.LastObservedState
 		}
 		return ""
 	}
 }
 
-func catalogSourcePod(ns, csName string) func() *corev1.Pod {
+func CatalogSourcePod(ns, csName string) func() *corev1.Pod {
 	return func() *corev1.Pod {
 		podList, err := TestClient().CoreV1().Pods(ns).List(TestContext, metav1.ListOptions{})
 		if err != nil && errors.IsNotFound(err) {
@@ -140,8 +139,8 @@ func catalogSourcePod(ns, csName string) func() *corev1.Pod {
 	}
 }
 
-func catalogSourcePodRunning(ns, csName string) error {
-	podFunc := catalogSourcePod(ns, csName)
+func CatalogSourcePodRunning(ns, csName string) error {
+	podFunc := CatalogSourcePod(ns, csName)
 
 	for i := 1; i < 5; i++ {
 		csPod := podFunc()
@@ -163,7 +162,7 @@ func catalogSourcePodRunning(ns, csName string) error {
 	return fmt.Errorf("Catalog Source Pod failed to reach a 'running' state")
 }
 
-func getSubscription(ns string) (*olm.Subscription, error) {
+func GetSubscription(ns string) (*olm.Subscription, error) {
 	lst := olm.SubscriptionList{}
 	if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
 		return nil, err

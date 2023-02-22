@@ -15,8 +15,8 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: e2e-install-native
-description: 'End-to-End tests for install use-cases (namespaced rather than global operator so no global operator install) with native builds'
+name: e2e-native
+description: 'End-to-End tests for Quarkus native builds'
 
 inputs:
   cluster-config-data:
@@ -100,7 +100,7 @@ runs:
     name: Run IT
     shell: bash
     run: |
-      ./.github/actions/e2e-install-native/exec-tests.sh \
+      ./.github/actions/e2e-native/exec-tests.sh \
         -b "${{ steps.config-cluster.outputs.cluster-catalog-source-name }}" \
         -c "${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}" \
         -i "${{ steps.config-cluster.outputs.cluster-image-namespace }}" \

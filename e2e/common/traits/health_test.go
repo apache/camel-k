@@ -136,6 +136,10 @@ func TestHealthTrait(t *testing.T) {
 	t.Run("Readiness condition with stopped binding", func(t *testing.T) {
 		name := "stopped-binding"
 
+		// Clean up any previous kamelet with same name
+		Expect(TestClient().Delete(TestContext, Kamelet("my-own-timer-source", ns)())).To(Succeed())
+		Expect(TestClient().Delete(TestContext, Kamelet("my-own-log-sink", ns)())).To(Succeed())
+
 		Expect(CreateTimerKamelet(ns, "my-own-timer-source")()).To(Succeed())
 		Expect(CreateLogKamelet(ns, "my-own-log-sink")()).To(Succeed())
 

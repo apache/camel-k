@@ -80,8 +80,8 @@ jobs:
           -p "${{ github.event.inputs.skip-problematic }}" \
           -q "${{ github.event.inputs.log-level }}" \
           -t "${{ github.event.inputs.test-filters }}"
-    - name: Native smoke tests
-      uses: ./.github/actions/e2e-install-native
+    - name: Native test
+      uses: ./.github/actions/e2e-native
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
         cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
@@ -105,8 +105,8 @@ jobs:
           -p "${{ github.event.inputs.skip-problematic }}" \
           -q "${{ github.event.inputs.log-level }}" \
           -t "${{ github.event.inputs.test-filters }}"
-    - name: Native smoke tests
-      uses: ./.github/actions/e2e-install-native
+    - name: Native test
+      uses: ./.github/actions/e2e-native
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
         cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}

@@ -90,6 +90,7 @@ import (
 )
 
 const kubeConfigEnvVar = "KUBECONFIG"
+const ciPID = "/tmp/ci-k8s-pid"
 
 var TestTimeoutShort = 1 * time.Minute
 var TestTimeoutMedium = 5 * time.Minute
@@ -2362,6 +2363,7 @@ func testNamespaceExists(ns string) (bool, error) {
 
 	return true, nil
 }
+
 func DeleteNamespace(t *testing.T, ns string) error {
 	nsObj, err := TestClient().CoreV1().Namespaces().Get(TestContext, ns, metav1.GetOptions{})
 	if err != nil {
@@ -2501,4 +2503,26 @@ func CreateLogKamelet(ns string, name string) func() error {
 	}
 
 	return CreateKamelet(ns, name, flow, props, nil)
+}
+
+func GetCIProcessID() string {
+	id, err := os.ReadFile(ciPID)
+	if err != nil {
+		return ""
+	}
+	return string(id)
+}
+
+func SaveCIProcessID(id string) {
+	err := os.WriteFile(ciPID, []byte(id), 0644)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func DeleteCIProcessID() {
+	err := os.Remove(ciPID)
+	if err != nil {
+		panic(err)
+	}
 }

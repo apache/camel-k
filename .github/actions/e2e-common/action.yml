@@ -25,6 +25,9 @@ inputs:
   cluster-kube-config-data:
     description: 'Base16 encoded kube config - required for custom cluster type only'
     required: false
+  with-custom-install:
+    description: 'Special type of common tests which require customized installation procedure'
+    required: false
 
 runs:
   using: "composite"
@@ -120,6 +123,7 @@ runs:
         -s "${{steps.config-cluster.outputs.cluster-image-registry-insecure }}" \
         -v "${{ steps.build-kamel.outputs.build-binary-local-image-version }}" \
         -x "${{ env.CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE }}"
+        -z "${{ inputs.with-custom-install }}"
 
   - name: Cleanup
     uses: ./.github/actions/kamel-cleanup

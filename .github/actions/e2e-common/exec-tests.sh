@@ -25,7 +25,7 @@
 
 set -e
 
-while getopts ":b:c:g:i:l:n:q:s:v:x:" opt; do
+while getopts ":b:c:g:i:l:n:q:s:v:x:z:" opt; do
   case "${opt}" in
     b)
       BUILD_CATALOG_SOURCE_NAME=${OPTARG}
@@ -56,6 +56,9 @@ while getopts ":b:c:g:i:l:n:q:s:v:x:" opt; do
       ;;
     x)
       SAVE_FAILED_TEST_NS=${OPTARG}
+      ;;
+    z)
+      CUSTOM_INSTALL_TEST=${OPTARG}
       ;;
     :)
       echo "ERROR: Option -$OPTARG requires an argument"
@@ -134,7 +137,11 @@ fi
 # Then run all integration tests rather than ending on first failure
 set -e
 exit_code=0
-DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common || exit_code=1
+if [ -z "${CUSTOM_INSTALL_TEST}" ]; then
+  DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common-with-custom-install || exit_code=1
+else
+  DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common || exit_code=1
+fi
 set +e
 
 echo "Tests completed with exit code: ${exit_code}"

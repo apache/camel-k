@@ -135,4 +135,4 @@ if [ -n "${GLOBAL_OPERATOR_NAMESPACE}" ]; then
 fi
 
 # Then run integration tests
-DO_TEST_PREBUILD=false make test-knative
+DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-knative
