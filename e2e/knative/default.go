@@ -1,8 +1,6 @@
 //go:build integration
 // +build integration
 
-// To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
-
 /*
 Licensed to the Apache Software Foundation (ASF) under one or more
 contributor license agreements.  See the NOTICE file distributed with
@@ -20,21 +18,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package common
+package knative
 
-import (
-	"testing"
+import "github.com/apache/camel-k/e2e/support"
 
-	. "github.com/onsi/gomega"
-
-	. "github.com/apache/camel-k/e2e/support"
-)
-
-func TestCommonCamelKInstallTeardown(t *testing.T) {
-	RegisterTestingT(t)
-
-	ns := GetCIProcessID()
-	Expect(ns).ShouldNot(BeNil())
-	Expect(DeleteNamespace(t, ns)).To(Succeed())
-	DeleteCIProcessID()
-}
+var ns = support.GetCIProcessID()
+var operatorID = support.GetCIProcessID()

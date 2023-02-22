@@ -39,51 +39,50 @@ import (
 )
 
 func TestKnativePlatform(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		installed, err := knative.IsInstalled(TestClient())
-		Expect(err).NotTo(HaveOccurred())
-		if !installed {
-			t.Error("Knative not installed in the cluster")
-			t.FailNow()
-		}
+	RegisterTestingT(t)
 
-		operatorID := "camel-k-knative"
-		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
-		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-		Eventually(PlatformProfile(ns), TestTimeoutShort).Should(Equal(v1.TraitProfile("")))
-		cluster := Platform(ns)().Status.Cluster
+	installed, err := knative.IsInstalled(TestClient())
+	Expect(err).NotTo(HaveOccurred())
+	if !installed {
+		t.Error("Knative not installed in the cluster")
+		t.FailNow()
+	}
 
-		t.Run("run yaml on cluster profile", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--profile", string(cluster)).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Eventually(IntegrationProfile(ns, "yaml"), TestTimeoutShort).Should(Equal(v1.TraitProfile(string(cluster))))
-			// Change something in the integration to produce a redeploy
-			Expect(UpdateIntegration(ns, "yaml", func(it *v1.Integration) {
-				it.Spec.Profile = ""
-				content, err := dsl.ToYamlDSL(it.Spec.Flows)
-				assert.NoError(t, err)
-				newData := strings.ReplaceAll(string(content), "string!", "string!!!")
-				newFlows, err := dsl.FromYamlDSLString(newData)
-				assert.NoError(t, err)
-				it.Spec.Flows = newFlows
-			})).To(Succeed())
-			// Spec profile should be reset by "kamel run"
-			Eventually(IntegrationSpecProfile(ns, "yaml")).Should(Equal(v1.TraitProfile("")))
-			// When integration is running again ...
-			Eventually(IntegrationPhase(ns, "yaml")).Should(Equal(v1.IntegrationPhaseRunning))
-			Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!!!"))
-			// It should keep the old profile saved in status
-			Eventually(IntegrationProfile(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.TraitProfile(cluster)))
+	operatorID := "camel-k-knative"
+	Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+	Eventually(PlatformProfile(ns), TestTimeoutShort).Should(Equal(v1.TraitProfile("")))
+	cluster := Platform(ns)().Status.Cluster
 
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-		})
+	t.Run("run yaml on cluster profile", func(t *testing.T) {
+		Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--profile", string(cluster)).Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		Eventually(IntegrationProfile(ns, "yaml"), TestTimeoutShort).Should(Equal(v1.TraitProfile(string(cluster))))
+		// Change something in the integration to produce a redeploy
+		Expect(UpdateIntegration(ns, "yaml", func(it *v1.Integration) {
+			it.Spec.Profile = ""
+			content, err := dsl.ToYamlDSL(it.Spec.Flows)
+			assert.NoError(t, err)
+			newData := strings.ReplaceAll(string(content), "string!", "string!!!")
+			newFlows, err := dsl.FromYamlDSLString(newData)
+			assert.NoError(t, err)
+			it.Spec.Flows = newFlows
+		})).To(Succeed())
+		// Spec profile should be reset by "kamel run"
+		Eventually(IntegrationSpecProfile(ns, "yaml")).Should(Equal(v1.TraitProfile("")))
+		// When integration is running again ...
+		Eventually(IntegrationPhase(ns, "yaml")).Should(Equal(v1.IntegrationPhaseRunning))
+		Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!!!"))
+		// It should keep the old profile saved in status
+		Eventually(IntegrationProfile(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.TraitProfile(cluster)))
 
-		t.Run("run yaml on automatic profile", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationProfile(ns, "yaml"), TestTimeoutShort).Should(Equal(v1.TraitProfileKnative))
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-		})
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
+
+	t.Run("run yaml on automatic profile", func(t *testing.T) {
+		Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationProfile(ns, "yaml"), TestTimeoutShort).Should(Equal(v1.TraitProfileKnative))
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

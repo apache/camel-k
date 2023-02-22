@@ -58,7 +58,7 @@ while getopts ":b:c:g:i:l:n:q:s:v:x:z:" opt; do
       SAVE_FAILED_TEST_NS=${OPTARG}
       ;;
     z)
-      CUSTOM_INSTALL_TEST=${OPTARG}
+      CUSTOM_INSTALL_TEST="${OPTARG}"
       ;;
     :)
       echo "ERROR: Option -$OPTARG requires an argument"
