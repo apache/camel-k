@@ -22,6 +22,11 @@ env:
 
 on:
   pull_request:
+    types:
+      - labeled
+      - opened
+      - synchronize
+      - reopened
     branches:
       - main
       - "release-*"
@@ -69,7 +74,7 @@ concurrency:
 
 jobs:
   install-native-high-memory:
-
+    if: contains(github.event.pull_request.labels.*.name, 'trigger native test')
     runs-on: macos-12
 
     steps:
@@ -94,7 +99,7 @@ jobs:
         high-memory: 'true'
 
   install-native:
-
+    if: contains(github.event.pull_request.labels.*.name, 'trigger native test')
     runs-on: macos-12
 
     steps:
