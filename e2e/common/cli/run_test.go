@@ -44,32 +44,32 @@ func TestKamelCLIRun(t *testing.T) {
 	t.Run("Examples from GitHub", func(t *testing.T) {
 		t.Run("Java", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns,
-				"github:apache/camel-k/e2e/namespace/install/files/Java.java").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).
+				"github:apache/camel-k-examples/blob/main/generic-examples/languages/Sample.java").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "sample"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "sample", v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationLogs(ns, "sample"), TestTimeoutShort).Should(ContainSubstring("Hello Camel K!"))
 			Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
 		})
 
 		t.Run("Java (RAW)", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns,
-				"https://raw.githubusercontent.com/apache/camel-k/main/e2e/namespace/install/files/Java.java").Execute()).
+				"https://raw.githubusercontent.com/apache/camel-k-examples/blob/main/generic-examples/languages/Sample.java").Execute()).
 				To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).
+			Eventually(IntegrationPodPhase(ns, "sample"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "sample", v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationLogs(ns, "sample"), TestTimeoutShort).Should(ContainSubstring("Hello Camel K!"))
 			Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
 		})
 
 		t.Run("Java (branch)", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns,
-				"github:apache/camel-k/e2e/namespace/install/files/Java.java?branch=main").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).
+				"github:apache/camel-k-examples/blob/main/generic-examples/languages/Sample.java?branch=main").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "sample"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "sample", v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationLogs(ns, "sample"), TestTimeoutShort).Should(ContainSubstring("Hello Camel K!"))
 			Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
 		})
 
@@ -169,7 +169,7 @@ func TestKamelCLIRun(t *testing.T) {
 		}
 		Expect(KamelRunWithID(operatorID, ns, "../traits/files/jvm/Classpath.java",
 			"-d", sampleJar,
-			"-d", "https://raw.githubusercontent.com/apache/camel-k/main/e2e/namespace/install/cli/files/Java.java|targetPath=/tmp/foo",
+			"-d", "https://raw.githubusercontent.com/apache/camel-k-examples/blob/main/generic-examples/languages/Sample.java|targetPath=/tmp/foo",
 		).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "classpath"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, "classpath", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))

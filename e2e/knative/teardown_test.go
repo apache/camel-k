@@ -34,7 +34,7 @@ func TestKNativeCamelKInstallTeardown(t *testing.T) {
 	RegisterTestingT(t)
 
 	ns := GetCIProcessID()
-	Expect(ns).ShouldNot(BeNil())
+	Expect(ns).ShouldNot(Equal(""))
 	Expect(DeleteNamespace(t, ns)).To(Succeed())
 	DeleteCIProcessID()
 }

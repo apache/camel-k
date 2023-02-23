@@ -40,8 +40,9 @@ func TestKamelCLIGet(t *testing.T) {
 		Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		// regex is used for the compatibility of tests between OC and vanilla K8
-		// kamel get may have different output depending og the platform
-		kitName := Integration(ns, "yaml")().Status.IntegrationKit.Name
+		// kamel get may have different output depending on the platform
+		Eventually(IntegrationKit(ns, "yaml")).ShouldNot(Equal(""))
+		kitName := IntegrationKit(ns, "yaml")()
 		regex := fmt.Sprintf("^NAME\tPHASE\tKIT\n\\s*yaml\tRunning\t(%s/%s|%s)", ns, kitName, kitName)
 		Expect(GetOutputString(Kamel("get", "-n", ns))).To(MatchRegexp(regex))
 
@@ -54,8 +55,10 @@ func TestKamelCLIGet(t *testing.T) {
 		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
-		kitName1 := Integration(ns, "java")().Status.IntegrationKit.Name
-		kitName2 := Integration(ns, "yaml")().Status.IntegrationKit.Name
+		Eventually(IntegrationKit(ns, "yajavaml")).ShouldNot(Equal(""))
+		Eventually(IntegrationKit(ns, "yaml")).ShouldNot(Equal(""))
+		kitName1 := IntegrationKit(ns, "java")()
+		kitName2 := IntegrationKit(ns, "yaml")()
 		regex := fmt.Sprintf("^NAME\tPHASE\tKIT\n\\s*java\tRunning\t"+
 			"(%s/%s|%s)\n\\s*yaml\tRunning\t(%s/%s|%s)\n", ns, kitName1, kitName1, ns, kitName2, kitName2)
 		Expect(GetOutputString(Kamel("get", "-n", ns))).To(MatchRegexp(regex))
