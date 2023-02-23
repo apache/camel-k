@@ -38,18 +38,7 @@ on:
       - 'KEYS'
       - 'LICENSE'
       - 'NOTICE'
-  push:
-    branches:
-      - main
-      - "release-*"
-    paths-ignore:
-      - 'docs/**'
-      - 'proposals/**'
-      - '**.adoc'
-      - '**.md'
-      - 'KEYS'
-      - 'LICENSE'
-      - 'NOTICE'
+
   workflow_dispatch:
     inputs:
       log-level:

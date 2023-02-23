@@ -1,5 +1,3 @@
---- # ---------------------------------------------------------------------------
-
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -15,23 +13,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: release
+# ---------------------------------------------------------------------------
+
+name: Nightly Quarkus native checks
 
 env:
-  TEST_CLUSTER: kind
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  NEXUS_DEPLOY_USERNAME: ${{ secrets.NEXUS_USER }}
-  NEXUS_DEPLOY_PASSWORD: ${{ secrets.NEXUS_PW }}
 
 on:
   schedule:
-    - cron: "10 23 * * *"
+    - cron:  '45 3 * * *'
   workflow_dispatch:
 
 jobs:
   main:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
+    name: Generate changelog for main branch
     steps:
     - name: "Checkout code"
       uses: actions/checkout@v2
@@ -39,18 +37,19 @@ jobs:
         ref: main
         persist-credentials: false
         submodules: recursive
-    - name: Release main nightly
-      uses: ./.github/actions/release-nightly
+    - name: Higher mem native smoke tests
+      uses: ./.github/actions/e2e-install-native
       with:
-        goVersion: "1.18.x"
-        javaVersion: "11"
-        secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
-        secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
-        secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
-        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
+        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
+        high-memory: 'true'
+    - name: Lower mem native smoke tests
+      uses: ./.github/actions/e2e-install-native
+      with:
+        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
 
-  v1_12_x:
+  v1_10_x:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
     steps:
@@ -60,16 +59,17 @@ jobs:
         ref: release-1.10.x
         persist-credentials: false
         submodules: recursive
-    - name: release-1.10.x nightly
-      uses: ./.github/actions/release-nightly
+    - name: Higher mem native smoke tests
+      uses: ./.github/actions/e2e-install-native
       with:
-        goVersion: "1.17.x"
-        javaVersion: "11"
-        secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
-        secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
-        secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
-        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
+        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
+        high-memory: 'true'
+    - name: Lower mem native smoke tests
+      uses: ./.github/actions/e2e-install-native
+      with:
+        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
 
   v1_11_x:
     if: github.repository == 'apache/camel-k'
@@ -81,15 +81,14 @@ jobs:
         ref: release-1.11.x
         persist-credentials: false
         submodules: recursive
-    - name: release-1.11.x nightly
-      uses: ./.github/actions/release-nightly
+    - name: Higher mem native smoke tests
+      uses: ./.github/actions/e2e-install-native
       with:
-        goVersion: "1.17.x"
-        javaVersion: "11"
-        secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
-        secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
-        secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
-        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
-
-
+        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
+        high-memory: 'true'
+    - name: Lower mem native smoke tests
+      uses: ./.github/actions/e2e-install-native
+      with:
+        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
