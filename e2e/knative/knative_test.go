@@ -42,8 +42,6 @@ func TestKnative(t *testing.T) {
 	knChannelWords := "words"
 	Expect(CreateKnativeChannel(ns, knChannelMessages)()).To(Succeed())
 	Expect(CreateKnativeChannel(ns, knChannelWords)()).To(Succeed())
-	operatorID := fmt.Sprintf("camel-k-%s", ns)
-	Expect(KamelInstallWithID(operatorID, ns, "--trait-profile", "knative").Execute()).To(Succeed())
 
 	t.Run("Service combo", func(t *testing.T) {
 		Expect(KamelRunWithID(operatorID, ns, "files/knative2.groovy").Execute()).To(Succeed())
