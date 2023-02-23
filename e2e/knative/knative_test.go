@@ -38,8 +38,10 @@ import (
 func TestKnative(t *testing.T) {
 	RegisterTestingT(t)
 
-	Expect(CreateKnativeChannel(ns, "messages")()).To(Succeed())
-	Expect(CreateKnativeChannel(ns, "words")()).To(Succeed())
+	knChannelMessages := "messages"
+	knChannelWords := "words"
+	Expect(CreateKnativeChannel(ns, knChannelMessages)()).To(Succeed())
+	Expect(CreateKnativeChannel(ns, knChannelWords)()).To(Succeed())
 	operatorID := fmt.Sprintf("camel-k-%s", ns)
 	Expect(KamelInstallWithID(operatorID, ns, "--trait-profile", "knative").Execute()).To(Succeed())
 

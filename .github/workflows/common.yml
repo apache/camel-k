@@ -116,4 +116,4 @@ jobs:
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
         cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
-        with-custom-install: true
+        with-custom-install: 'true'
