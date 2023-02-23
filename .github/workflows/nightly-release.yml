@@ -1,3 +1,5 @@
+--- # ---------------------------------------------------------------------------
+
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -13,20 +15,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# ---------------------------------------------------------------------------
+name: Nightly release
 
-name: Automatic Updates
+env:
+  TEST_CLUSTER: kind
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  NEXUS_DEPLOY_USERNAME: ${{ secrets.NEXUS_USER }}
+  NEXUS_DEPLOY_PASSWORD: ${{ secrets.NEXUS_PW }}
 
 on:
   schedule:
-    - cron:  '30 0 * * *'
+    - cron: "15 0 * * *"
   workflow_dispatch:
 
 jobs:
   main:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
-    name: Generate changelog for main branch
     steps:
     - name: "Checkout code"
       uses: actions/checkout@v2
@@ -34,12 +39,16 @@ jobs:
         ref: main
         persist-credentials: false
         submodules: recursive
-    - name: Automatic updates on main
-      uses: ./.github/actions/automatic-updates
+    - name: Release main nightly
+      uses: ./.github/actions/release-nightly
       with:
-        branch-ref: "main"
-        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
         goVersion: "1.18.x"
+        javaVersion: "11"
+        secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
+        secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+        secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
+        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
 
   v1_12_x:
     if: github.repository == 'apache/camel-k'
@@ -51,12 +60,16 @@ jobs:
         ref: release-1.10.x
         persist-credentials: false
         submodules: recursive
-    - name: Automatic updates on release-1.10.x
-      uses: ./.github/actions/automatic-updates
+    - name: release-1.10.x nightly
+      uses: ./.github/actions/release-nightly
       with:
-        branch-ref: "release-1.10.x"
-        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
         goVersion: "1.17.x"
+        javaVersion: "11"
+        secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
+        secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+        secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
+        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
 
   v1_11_x:
     if: github.repository == 'apache/camel-k'
@@ -68,9 +81,15 @@ jobs:
         ref: release-1.11.x
         persist-credentials: false
         submodules: recursive
-    - name: Automatic updates on release-1.11.x
-      uses: ./.github/actions/automatic-updates
+    - name: release-1.11.x nightly
+      uses: ./.github/actions/release-nightly
       with:
-        branch-ref: "release-1.11.x"
-        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
         goVersion: "1.17.x"
+        javaVersion: "11"
+        secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
+        secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+        secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
+        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
+
+
