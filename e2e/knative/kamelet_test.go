@@ -83,7 +83,7 @@ func TestKameletChange(t *testing.T) {
 
 	Eventually(IntegrationPodPhase(ns, "timer-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 	Eventually(IntegrationConditionStatus(ns, "timer-binding", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-	Eventually(IntegrationLogs(ns, "display"), TestTimeoutShort).Should(ContainSubstring("message is Hi"))
+	Eventually(IntegrationLogs(ns, "test-kamelet-display"), TestTimeoutShort).Should(ContainSubstring("message is Hi"))
 
 	Eventually(KameletBindingCondition(ns, timerBinding, v1alpha1.KameletBindingConditionReady), TestTimeoutMedium).
 		Should(And(
