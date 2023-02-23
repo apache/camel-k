@@ -40,6 +40,8 @@ func TestKNativeCamelKInstallStartup(t *testing.T) {
 	// the namespace is dynamic if there is some collision
 	// we store this value as it will be used for cleaning in the teardown process
 	SaveCIProcessID(ns.GetName())
+	// fail fast if something did not work writing the resource
+	Expect(GetCIProcessID()).ShouldNot(Equal(""))
 
 	Expect(KamelInstallWithIDAndKameletCatalog(ns.GetName(), ns.GetName(), "--trait-profile", "knative").Execute()).To(Succeed())
 	Eventually(OperatorPod(ns.GetName())).ShouldNot(BeNil())
