@@ -58,7 +58,7 @@ while getopts ":b:c:g:i:l:n:q:s:v:x:z:" opt; do
       SAVE_FAILED_TEST_NS=${OPTARG}
       ;;
     z)
-      CUSTOM_INSTALL_TEST="${OPTARG}"
+      CUSTOM_INSTALL_TEST=${OPTARG}
       ;;
     :)
       echo "ERROR: Option -$OPTARG requires an argument"
@@ -137,7 +137,7 @@ fi
 # Then run all integration tests rather than ending on first failure
 set -e
 exit_code=0
-if [ ! -z "${CUSTOM_INSTALL_TEST}" ] && [ "${CUSTOM_INSTALL_TEST}" == "true" ]; then
+if [ "${CUSTOM_INSTALL_TEST}" == "true" ]; then
   DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common-with-custom-install || exit_code=1
 else
   DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common || exit_code=1

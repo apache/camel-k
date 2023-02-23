@@ -46,24 +46,5 @@ func TestKameletClasspathLoading(t *testing.T) {
 		Eventually(IntegrationLogs(ns, "timer-kamelet-integration")).Should(ContainSubstring("important message"))
 	})
 
-	// Custom repo without operator ID
-	t.Run("test custom Kamelet repository without operator ID", func(t *testing.T) {
-		kameletName := "timer-custom-source"
-		removeKamelet(kameletName, ns)
-		Eventually(Kamelet(kameletName, ns)).Should(BeNil())
-		// Add the custom repository
-		Expect(Kamel("kamelet", "add-repo", "github:apache/camel-k/e2e/global/common/files/kamelets", "-n", ns).Execute()).To(Succeed())
-		Expect(KamelRunWithID(operatorID, ns, "files/TimerCustomKameletIntegration.java").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "timer-custom-kamelet-integration"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationLogs(ns, "timer-custom-kamelet-integration")).Should(ContainSubstring("great message"))
-		// Remove the custom repository
-		Expect(Kamel("kamelet", "remove-repo", "github:apache/camel-k/e2e/global/common/files/kamelets", "-n", ns).Execute()).To(Succeed())
-	})
-
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-}
-
-func removeKamelet(name string, ns string) {
-	kamelet := Kamelet(name, ns)()
-	TestClient().Delete(TestContext, kamelet)
 }

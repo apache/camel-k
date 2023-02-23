@@ -15,6 +15,6 @@
  * limitations under the License.
  */
 
-from('knative:channel/messages')
+from('knative:channel/test-kamelet-messages')
     .convertBodyTo(String.class)
     .to('log:info?showAll=false')

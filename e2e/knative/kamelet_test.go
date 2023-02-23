@@ -41,10 +41,11 @@ import (
 func TestKameletChange(t *testing.T) {
 	RegisterTestingT(t)
 
+	knChannel := "test-kamelet-messages"
 	timerSource := "my-timer-source"
 	Expect(CreateTimerKamelet(ns, timerSource)()).To(Succeed())
-	Expect(CreateKnativeChannel(ns, "messages")()).To(Succeed())
-	Expect(KamelRunWithID(operatorID, ns, "files/display.groovy", "-w").Execute()).To(Succeed())
+	Expect(CreateKnativeChannel(ns, knChannel)()).To(Succeed())
+	Expect(KamelRunWithID(operatorID, ns, "files/test-kamelet-display.groovy", "-w").Execute()).To(Succeed())
 
 	from := corev1.ObjectReference{
 		Kind:       "Kamelet",
@@ -54,7 +55,7 @@ func TestKameletChange(t *testing.T) {
 
 	to := corev1.ObjectReference{
 		Kind:       "InMemoryChannel",
-		Name:       "messages",
+		Name:       knChannel,
 		APIVersion: messaging.SchemeGroupVersion.String(),
 	}
 

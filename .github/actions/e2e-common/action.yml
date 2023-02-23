@@ -26,7 +26,8 @@ inputs:
     description: 'Base16 encoded kube config - required for custom cluster type only'
     required: false
   with-custom-install:
-    description: 'Special type of common tests which require customized installation procedure'
+    description: 'Indicates whether the advanced common integration tests should be launched (default false)'
+    default: 'false'
     required: false
 
 runs:
