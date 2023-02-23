@@ -20,9 +20,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cli
+package commonwithcustominstall
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -35,28 +36,32 @@ import (
 func TestKameletFromCustomRepository(t *testing.T) {
 	RegisterTestingT(t)
 
-	Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+	WithNewTestNamespace(t, func(ns string) {
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-	kameletName := "timer-custom-source"
-	removeKamelet(kameletName, ns)
+		kameletName := "timer-custom-source"
+		removeKamelet(kameletName, ns)
 
-	Eventually(Kamelet(kameletName, ns)).Should(BeNil())
-	// Add the custom repository
-	Expect(Kamel("kamelet", "add-repo",
-		"github:squakez/ck-kamelet-test-repo/kamelets",
-		"-n", ns,
-		"-x", operatorID).Execute()).To(Succeed())
+		Eventually(Kamelet(kameletName, ns)).Should(BeNil())
+		// Add the custom repository
+		Expect(Kamel("kamelet", "add-repo",
+			"github:squakez/ck-kamelet-test-repo/kamelets",
+			"-n", ns,
+			"-x", operatorID).Execute()).To(Succeed())
 
-	Expect(KamelRunWithID(operatorID, ns, "files/TimerCustomKameletIntegration.java").Execute()).To(Succeed())
-	Eventually(IntegrationPodPhase(ns, "timer-custom-kamelet-integration"), TestTimeoutLong).
-		Should(Equal(corev1.PodRunning))
-	Eventually(IntegrationLogs(ns, "timer-custom-kamelet-integration")).Should(ContainSubstring("hello world"))
+		Expect(KamelRunWithID(operatorID, ns, "files/TimerCustomKameletIntegration.java").Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, "timer-custom-kamelet-integration"), TestTimeoutLong).
+			Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationLogs(ns, "timer-custom-kamelet-integration")).Should(ContainSubstring("hello world"))
 
-	// Remove the custom repository
-	Expect(Kamel("kamelet", "remove-repo",
-		"github:squakez/ck-kamelet-test-repo/kamelets",
-		"-n", ns,
-		"-x", operatorID).Execute()).To(Succeed())
+		// Remove the custom repository
+		Expect(Kamel("kamelet", "remove-repo",
+			"github:squakez/ck-kamelet-test-repo/kamelets",
+			"-n", ns,
+			"-x", operatorID).Execute()).To(Succeed())
+	})
 }
 
 func removeKamelet(name string, ns string) {
