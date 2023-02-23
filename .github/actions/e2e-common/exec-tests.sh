@@ -137,7 +137,6 @@ fi
 # Then run all integration tests rather than ending on first failure
 set -e
 exit_code=0
-echo "${CUSTOM_INSTALL_TEST}"
 if [ "${CUSTOM_INSTALL_TEST}" == "true" ]; then
   DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common-with-custom-install || exit_code=1
 else
