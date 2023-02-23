@@ -123,7 +123,7 @@ runs:
         -q "${{ env.CAMEL_K_LOG_LEVEL }}" \
         -s "${{steps.config-cluster.outputs.cluster-image-registry-insecure }}" \
         -v "${{ steps.build-kamel.outputs.build-binary-local-image-version }}" \
-        -x "${{ env.CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE }}"
+        -x "${{ env.CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE }}" \
         -z "${{ inputs.with-custom-install }}"
 
   - name: Cleanup
