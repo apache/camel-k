@@ -55,7 +55,7 @@ func TestKamelCLIGet(t *testing.T) {
 		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
-		Eventually(IntegrationKit(ns, "yajavaml")).ShouldNot(Equal(""))
+		Eventually(IntegrationKit(ns, "java")).ShouldNot(Equal(""))
 		Eventually(IntegrationKit(ns, "yaml")).ShouldNot(Equal(""))
 		kitName1 := IntegrationKit(ns, "java")()
 		kitName2 := IntegrationKit(ns, "yaml")()
