@@ -20,9 +20,9 @@
 SHELL := /bin/bash
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION ?= 1.12.0-SNAPSHOT
+VERSION ?= 1.12.1-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
-LAST_RELEASED_VERSION ?= 1.11.1
+LAST_RELEASED_VERSION ?= 1.12.0
 RUNTIME_VERSION := 1.17.0
 BUILDAH_VERSION := 1.23.3
 KANIKO_VERSION := 0.17.1
@@ -79,13 +79,13 @@ OPM := opm
 
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
-STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1528/
+STAGING_RUNTIME_REPO :=
 
 # Kamelets options
 INSTALL_DEFAULT_KAMELETS ?= true
 KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
 # Make sure to use a released tag or empty if you want to get the latest development bits
-KAMELET_CATALOG_REPO_TAG := v3.20.1.1
+KAMELET_CATALOG_REPO_TAG := main
 
 # When performing integration tests, it is not necessary to always execute build, especially
 # in e2e tests when lots of tests are being executed sequentially & the build has already taken place.
