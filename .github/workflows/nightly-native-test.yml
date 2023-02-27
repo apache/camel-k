@@ -26,59 +26,19 @@ on:
   workflow_dispatch:
 
 jobs:
-  main:
-    if: github.repository == 'apache/camel-k'
-    runs-on: ubuntu-20.04
-    name: Generate changelog for main branch
-    steps:
-    - name: "Checkout code"
-      uses: actions/checkout@v2
-      with:
-        ref: main
-        persist-credentials: false
-        submodules: recursive
-    - name: Higher mem native smoke tests
-      uses: ./.github/actions/e2e-install-native
-      with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
-        high-memory: 'true'
-    - name: Lower mem native smoke tests
-      uses: ./.github/actions/e2e-install-native
-      with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
+  strategy:
+    matrix:
+      ref-branch: [main, release-1.10.x, release-1.11.x]
 
-  v1_10_x:
+  native:
     if: github.repository == 'apache/camel-k'
-    runs-on: ubuntu-20.04
+    runs-on: macos-12
+    name: Quarkus native checks for ${{ matrix.ref-branch }}
     steps:
     - name: "Checkout code"
       uses: actions/checkout@v2
       with:
-        ref: release-1.10.x
-        persist-credentials: false
-        submodules: recursive
-    - name: Higher mem native smoke tests
-      uses: ./.github/actions/e2e-install-native
-      with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
-        high-memory: 'true'
-    - name: Lower mem native smoke tests
-      uses: ./.github/actions/e2e-install-native
-      with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
-
-  v1_11_x:
-    if: github.repository == 'apache/camel-k'
-    runs-on: ubuntu-20.04
-    steps:
-    - name: "Checkout code"
-      uses: actions/checkout@v2
-      with:
-        ref: release-1.11.x
+        ref: ${{ matrix.ref-branch }}
         persist-credentials: false
         submodules: recursive
     - name: Higher mem native smoke tests
