@@ -54,7 +54,7 @@ func TestKamelCLIRun(t *testing.T) {
 
 		t.Run("Java (RAW)", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns,
-				"https://raw.githubusercontent.com/apache/camel-k-examples/blob/main/generic-examples/languages/Sample.java").Execute()).
+				"https://raw.githubusercontent.com/apache/camel-k-examples/main/generic-examples/languages/Sample.java").Execute()).
 				To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "sample"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "sample", v1.IntegrationConditionReady), TestTimeoutShort).
@@ -169,7 +169,7 @@ func TestKamelCLIRun(t *testing.T) {
 		}
 		Expect(KamelRunWithID(operatorID, ns, "../traits/files/jvm/Classpath.java",
 			"-d", sampleJar,
-			"-d", "https://raw.githubusercontent.com/apache/camel-k-examples/blob/main/generic-examples/languages/Sample.java|targetPath=/tmp/foo",
+			"-d", "https://raw.githubusercontent.com/apache/camel-k-examples/main/generic-examples/languages/Sample.java|targetPath=/tmp/foo",
 		).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "classpath"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, "classpath", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
