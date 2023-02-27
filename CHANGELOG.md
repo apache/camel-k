@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.12.0...HEAD)
+
+**Closed issues:**
+
+- Release 1.12.0 [\#4002](https://github.com/apache/camel-k/issues/4002)
+- Rethink E2E execution flow [\#3847](https://github.com/apache/camel-k/issues/3847)
+
 ## [v1.12.0](https://github.com/apache/camel-k/tree/v1.12.0) (2023-02-21)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.12.0...v1.12.0)
