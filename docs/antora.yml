@@ -18,9 +18,7 @@
 # Another part of this distributed component is in camel-k-runtime docs
 name: camel-k
 title: Camel K
-version: next
-prerelease: true
-display-version: Next (Pre-release)
+version: 1.12.x
 nav:
   - modules/ROOT/nav.adoc
   - modules/languages/nav-languages.adoc
@@ -30,9 +28,9 @@ asciidoc:
   attributes:
     requires: "'util=camel-website-util,ck=xref:js/ck.js'"
     prerelease: true
-    camel-kamelets-version: '0.10.0'
-    camel-kamelets-docs-version: 0.10.x
-    camel-k-runtime-version: 1.17.0-SNAPSHOT
+    camel-kamelets-version: '3.20.1.1'
+    camel-kamelets-docs-version: 3.20.x
+    camel-k-runtime-version: 1.17.0
     camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # from Makefile BUNDLE_CAMEL_APIS
     camel-version: 3.20.1
     camel-docs-version: 3.20.x
