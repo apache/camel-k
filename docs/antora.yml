@@ -27,6 +27,7 @@ nav:
 asciidoc:
   attributes:
     requires: "'util=camel-website-util,ck=xref:js/ck.js'"
+    lts: LTS
     prerelease: true
     camel-kamelets-version: '3.20.1.1'
     camel-kamelets-docs-version: 3.20.x
