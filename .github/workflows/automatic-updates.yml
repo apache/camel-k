@@ -41,7 +41,7 @@ jobs:
         secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
         goVersion: "1.18.x"
 
-  v1_10_x:
+  v1_12_x:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
     steps:
