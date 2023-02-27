@@ -23,10 +23,10 @@ package defaults
 
 const (
 	// Version --
-	Version = "1.13.0-SNAPSHOT"
+	Version = "2.0.0-SNAPSHOT"
 
 	// DefaultRuntimeVersion --
-	DefaultRuntimeVersion = "1.17.0"
+	DefaultRuntimeVersion = "1.18.0-SNAPSHOT"
 
 	// BuildahVersion --
 	BuildahVersion = "1.23.3"
