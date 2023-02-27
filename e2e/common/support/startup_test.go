@@ -20,21 +20,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package common
+package support
 
 import (
 	"testing"
 
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/e2e/support"
+	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-func TestCommonCamelKInstallTeardown(t *testing.T) {
+func TestCommonCamelKInstallStartup(t *testing.T) {
 	RegisterTestingT(t)
 
-	ns := GetCIProcessID()
-	Expect(ns).ShouldNot(Equal(""))
-	Expect(DeleteNamespace(t, ns)).To(Succeed())
-	DeleteCIProcessID()
+	ns := NewTestNamespace(false)
+	Expect(ns).ShouldNot(BeNil())
+	// the namespace is dynamic if there is some collision
+	// we store this value as it will be used for cleaning in the teardown process
+	SaveCIProcessID(ns.GetName())
+	// fail fast if something did not work writing the resource
+	Expect(GetCIProcessID()).ShouldNot(Equal(""))
+
+	Expect(KamelInstallWithIDAndKameletCatalog(ns.GetName(), ns.GetName()).Execute()).To(Succeed())
+	Eventually(OperatorPod(ns.GetName())).ShouldNot(BeNil())
+	Eventually(Platform(ns.GetName())).ShouldNot(BeNil())
+	Eventually(PlatformConditionStatus(ns.GetName(), v1.IntegrationPlatformConditionReady), TestTimeoutShort).
+		Should(Equal(corev1.ConditionTrue))
 }

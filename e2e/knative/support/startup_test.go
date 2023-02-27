@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package common
+package support
 
 import (
 	"testing"
@@ -32,7 +32,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-func TestCommonCamelKInstallStartup(t *testing.T) {
+func TestKNativeCamelKInstallStartup(t *testing.T) {
 	RegisterTestingT(t)
 
 	ns := NewTestNamespace(false)
@@ -43,7 +43,7 @@ func TestCommonCamelKInstallStartup(t *testing.T) {
 	// fail fast if something did not work writing the resource
 	Expect(GetCIProcessID()).ShouldNot(Equal(""))
 
-	Expect(KamelInstallWithIDAndKameletCatalog(ns.GetName(), ns.GetName()).Execute()).To(Succeed())
+	Expect(KamelInstallWithIDAndKameletCatalog(ns.GetName(), ns.GetName(), "--trait-profile", "knative").Execute()).To(Succeed())
 	Eventually(OperatorPod(ns.GetName())).ShouldNot(BeNil())
 	Eventually(Platform(ns.GetName())).ShouldNot(BeNil())
 	Eventually(PlatformConditionStatus(ns.GetName(), v1.IntegrationPlatformConditionReady), TestTimeoutShort).

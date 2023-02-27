@@ -44,7 +44,7 @@ func TestKamelCLIRun(t *testing.T) {
 	t.Run("Examples from GitHub", func(t *testing.T) {
 		t.Run("Java", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns,
-				"github:apache/camel-k-examples/blob/main/generic-examples/languages/Sample.java").Execute()).To(Succeed())
+				"github:apache/camel-k-examples/generic-examples/languages/Sample.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "sample"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "sample", v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
@@ -65,7 +65,7 @@ func TestKamelCLIRun(t *testing.T) {
 
 		t.Run("Java (branch)", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns,
-				"github:apache/camel-k-examples/blob/main/generic-examples/languages/Sample.java?branch=main").Execute()).To(Succeed())
+				"github:apache/camel-k-examples/generic-examples/languages/Sample.java?branch=main").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "sample"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "sample", v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
