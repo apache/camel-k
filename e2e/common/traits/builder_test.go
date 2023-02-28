@@ -35,23 +35,21 @@ import (
 )
 
 func TestBuilderTrait(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		operatorID := "camel-k-trait-builder"
-		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
-		name := "java"
-		t.Run("Run build strategy pod", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-				"--name", name,
-				"-t", "builder.strategy=pod").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+	RegisterTestingT(t)
 
-			integrationKitName := IntegrationKit(ns, name)()
-			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
-			Eventually(BuilderPod(ns, builderKitName), TestTimeoutShort).Should(Not(BeNil()))
+	name := "java"
+	t.Run("Run build strategy pod", func(t *testing.T) {
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+			"--name", name,
+			"-t", "builder.strategy=pod").Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-		})
+		integrationKitName := IntegrationKit(ns, name)()
+		builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
+		Eventually(BuilderPod(ns, builderKitName), TestTimeoutShort).Should(Not(BeNil()))
+
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

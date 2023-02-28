@@ -29,7 +29,7 @@ import (
 const expectedSettings = `<?xml version="1.0" encoding="UTF-8"?>
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ` +
 	`xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
-  <localRepository>/tmp/artifacts/m2</localRepository>
+  <localRepository>/etc/maven/m2</localRepository>
   <servers></servers>
   <profiles>
     <profile>
@@ -183,7 +183,7 @@ func TestSettingsGeneration(t *testing.T) {
 	settings, err := NewSettings()
 	assert.Nil(t, err)
 
-	settings.LocalRepository = "/tmp/artifacts/m2"
+	settings.LocalRepository = "/etc/maven/m2"
 	settings.Profiles = []Profile{
 		{
 			ID: "my-profile",

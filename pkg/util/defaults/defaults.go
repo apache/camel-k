@@ -38,7 +38,7 @@ const (
 	baseImage = "docker.io/eclipse-temurin:11"
 
 	// LocalRepository --
-	LocalRepository = "/tmp/artifacts/m2"
+	LocalRepository = "/etc/maven/m2"
 
 	// DefaultPVC --
 	DefaultPVC = "camel-k-pvc"
