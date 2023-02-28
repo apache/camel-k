@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package catalog
+package commonwithcustominstall
 
 import (
 	"fmt"
@@ -38,7 +38,7 @@ import (
 func TestCamelCatalogBuilder(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(KamelInstallWithID(operatorID, ns, "--operator-env-vars", "KAMEL_INSTALL_DEFAULT_KAMELETS=false").Execute()).To(Succeed())
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		Eventually(Platform(ns)).ShouldNot(BeNil())
 		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
@@ -77,15 +77,14 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionKitAvailable)().Status).Should(Equal(corev1.ConditionFalse))
 
 			// Clean up
-			Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+			Eventually(DeleteIntegrations(ns)).Should(Equal(0))
 		})
 
 		// Run an integration with a compatible catalog
 		// The operator should create the catalog, reconcile it properly and run the Integration accordingly
 		t.Run("Run catalog compatible", func(t *testing.T) {
 			name := "java"
-			// TODO replace with fixed version, when it is officially released
-			compatibleVersion := "1.17.0-SNAPSHOT"
+			compatibleVersion := "1.17.0"
 			compatibleCatalogName := "camel-catalog-" + strings.ToLower(compatibleVersion)
 
 			// First of all we delete the catalog, if by any chance it was created previously
@@ -106,30 +105,47 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			Eventually(IntegrationKit(ns, name)).ShouldNot(Equal(""))
 			kitName := IntegrationKit(ns, name)()
 			Eventually(KitPhase(ns, kitName)).Should(Equal(v1.IntegrationKitPhaseReady))
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, name)).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			// Clean up
-			Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+			Eventually(DeleteIntegrations(ns)).Should(Equal(0))
 		})
-	})
 
-	// Create a new operator to check if it will reuse the container image catalog created in the previous test
-	WithNewTestNamespace(t, func(ns string) {
-		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(KamelInstallWithID(operatorID, ns, "--operator-env-vars", "KAMEL_INSTALL_DEFAULT_KAMELETS=false").Execute()).To(Succeed())
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(Platform(ns)).ShouldNot(BeNil())
-		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
-			Should(Equal(corev1.ConditionTrue))
-		catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
-		Eventually(CamelCatalog(ns, catalogName)).ShouldNot(BeNil())
-		catalog := CamelCatalog(ns, catalogName)()
-		imageName := fmt.Sprintf("camel-k-runtime-%s-builder:%s", catalog.Spec.Runtime.Provider, strings.ToLower(catalog.Spec.Runtime.Version))
-		Eventually(CamelCatalogPhase(ns, catalogName), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
-		Eventually(CamelCatalogImage(ns, catalogName), TestTimeoutMedium).Should(ContainSubstring(imageName))
-		Eventually(CamelCatalogCondition(ns, catalogName, v1.CamelCatalogConditionReady)().Message).Should(Equal("Container image exists on registry"))
+		t.Run("Run catalog container exists", func(t *testing.T) {
+			name := "java"
+			compatibleVersion := "1.17.0"
+			compatibleCatalogName := "camel-catalog-" + strings.ToLower(compatibleVersion)
+
+			// First of all we delete the catalog, if by any chance it was created previously
+			Expect(DeleteCamelCatalog(ns, compatibleCatalogName)()).Should(BeTrue())
+			Eventually(CamelCatalog(ns, compatibleCatalogName)).Should(BeNil())
+
+			Expect(
+				KamelRunWithID(operatorID, ns, "../files/Java.java", "--name", name,
+					"-t", "camel.runtime-version="+compatibleVersion,
+				).Execute()).To(Succeed())
+
+			Eventually(CamelCatalog(ns, compatibleCatalogName)).ShouldNot(BeNil())
+			Eventually(CamelCatalogPhase(ns, compatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseReady))
+			Eventually(CamelCatalogCondition(ns, compatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(
+				Equal("Container image exists on registry"),
+			)
+
+			Eventually(IntegrationKit(ns, name)).ShouldNot(Equal(""))
+			kitName := IntegrationKit(ns, name)()
+			Eventually(KitPhase(ns, kitName)).Should(Equal(v1.IntegrationKitPhaseReady))
+			Eventually(IntegrationPodPhase(ns, name)).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+			// Clean up
+			Eventually(DeleteIntegrations(ns)).Should(Equal(0))
+		})
+
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
