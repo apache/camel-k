@@ -40,6 +40,7 @@ func newIngressTrait() Trait {
 		BaseTrait: NewBaseTrait("ingress", 2400),
 		IngressTrait: traitv1.IngressTrait{
 			Host: "",
+			Path: "/",
 		},
 	}
 }
@@ -104,7 +105,7 @@ func (t *ingressTrait) Apply(e *Environment) error {
 						HTTP: &networkingv1.HTTPIngressRuleValue{
 							Paths: []networkingv1.HTTPIngressPath{
 								{
-									Path:     "/",
+									Path:     t.Path,
 									PathType: &pathType,
 									Backend: networkingv1.IngressBackend{
 										Service: &networkingv1.IngressServiceBackend{
