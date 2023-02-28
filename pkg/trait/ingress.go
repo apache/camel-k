@@ -39,8 +39,9 @@ func newIngressTrait() Trait {
 	return &ingressTrait{
 		BaseTrait: NewBaseTrait("ingress", 2400),
 		IngressTrait: traitv1.IngressTrait{
-			Host: "",
-			Path: "/",
+			Annotations: map[string]string{},
+			Host:        "",
+			Path:        "/",
 		},
 	}
 }
@@ -94,8 +95,9 @@ func (t *ingressTrait) Apply(e *Environment) error {
 			APIVersion: networkingv1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      service.Name,
-			Namespace: service.Namespace,
+			Name:        service.Name,
+			Namespace:   service.Namespace,
+			Annotations: t.Annotations,
 		},
 		Spec: networkingv1.IngressSpec{
 			Rules: []networkingv1.IngressRule{
