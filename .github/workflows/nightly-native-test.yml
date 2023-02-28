@@ -35,10 +35,6 @@ jobs:
       matrix:
         ref-branch: [main, release-1.10.x, release-1.12.x]
 
-  native:
-    if: github.repository == 'apache/camel-k'
-    runs-on: macos-12
-    name: Quarkus native checks for ${{ matrix.ref-branch }}
     steps:
     - name: "Checkout code"
       uses: actions/checkout@v2
