@@ -36,7 +36,7 @@ import (
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 )
 
-var sampleJar = "https://raw.githubusercontent.com/apache/camel-k/main/e2e/global/common/traits/files/jvm/sample-1.0.jar"
+var sampleJar = "https://raw.githubusercontent.com/apache/camel-k/main/e2e/common/traits/files/jvm/sample-1.0.jar"
 
 func TestKamelCLIRun(t *testing.T) {
 	RegisterTestingT(t)
