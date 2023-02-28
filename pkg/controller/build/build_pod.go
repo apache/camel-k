@@ -114,6 +114,7 @@ var (
 )
 
 func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.Pod, error) {
+	var ugfid int64 = 1000
 	pod := &corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -130,6 +131,11 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.P
 		Spec: corev1.PodSpec{
 			ServiceAccountName: platform.BuilderServiceAccount,
 			RestartPolicy:      corev1.RestartPolicyNever,
+			SecurityContext: &corev1.PodSecurityContext{
+				RunAsUser:  &ugfid,
+				RunAsGroup: &ugfid,
+				FSGroup:    &ugfid,
+			},
 		},
 	}
 
@@ -485,7 +491,7 @@ func addContainerToPod(build *v1.Build, container corev1.Container, pod *corev1.
 	if hasVolume(pod, defaults.DefaultPVC) {
 		container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
 			Name:      defaults.DefaultPVC,
-			MountPath: "/tmp/artifacts/m2",
+			MountPath: defaults.LocalRepository,
 		})
 	}
 

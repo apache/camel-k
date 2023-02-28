@@ -32,8 +32,8 @@ OPERATOR_SDK_VERSION := v1.26.1
 KUSTOMIZE_VERSION := v4.5.4
 OPM_VERSION := v1.24.0
 BASE_IMAGE := docker.io/eclipse-temurin:11
-LOCAL_REPOSITORY := /tmp/artifacts/m2
 DEFAULT_PVC := camel-k-pvc
+LOCAL_REPOSITORY := /etc/maven/m2
 IMAGE_NAME ?= docker.io/apache/camel-k
 
 #

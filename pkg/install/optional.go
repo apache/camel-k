@@ -30,7 +30,7 @@ import (
 // OperatorStartupOptionalTools tries to install optional tools at operator startup and warns if something goes wrong.
 func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespace string, operatorNamespace string, log logutil.Logger) {
 	// Try to copy any local runtime dependency to maven repository
-	if err := cp.Copy("/tmp/local/m2", "/tmp/artifacts/m2"); err != nil {
+	if err := cp.Copy("/tmp/local/m2", defaults.LocalRepository); err != nil {
 		log.Infof("Could not copy local runtime dependencies due to %s", err.Error())
 	}
 

@@ -98,7 +98,7 @@ func initialize(options spectrum.Options, registryAddress string, catalog *v1.Ca
 	options.Stderr = newStdW
 	options.Stdout = newStdW
 
-	if imageExists(options) {
+	if !imageSnapshot(options) && imageExists(options) {
 		target.Status.Phase = v1.CamelCatalogPhaseReady
 		target.Status.SetCondition(
 			v1.CamelCatalogConditionReady,
@@ -153,6 +153,10 @@ func imageExists(options spectrum.Options) bool {
 
 	Log.Infof("Couldn't pull image due to %s", err.Error())
 	return false
+}
+
+func imageSnapshot(options spectrum.Options) bool {
+	return strings.HasSuffix(options.Base, "snapshot")
 }
 
 // This func will take care to dynamically build an image that will contain the tools required
