@@ -38,17 +38,17 @@ func TestBuilderTrait(t *testing.T) {
 	RegisterTestingT(t)
 
 	name := "java"
-	t.Run("Run build strategy pod", func(t *testing.T) {
+	t.Run("Run build strategy routine", func(t *testing.T) {
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
-			"-t", "builder.strategy=pod").Execute()).To(Succeed())
+			"-t", "builder.strategy=routine").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		integrationKitName := IntegrationKit(ns, name)()
 		builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
-		Eventually(BuilderPod(ns, builderKitName), TestTimeoutShort).Should(Not(BeNil()))
+		Eventually(BuilderPod(ns, builderKitName), TestTimeoutShort).Should(BeNil())
 
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
