@@ -29,8 +29,8 @@ asciidoc:
     requires: "'util=camel-website-util,ck=xref:js/ck.js'"
     lts: LTS
     prerelease: true
-    camel-kamelets-version: '3.20.1.1'
-    camel-kamelets-docs-version: 3.20.x
+    camel-kamelets-version: 'latest'
+    camel-kamelets-docs-version: next
     camel-k-runtime-version: 1.17.0
     camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # from Makefile BUNDLE_CAMEL_APIS
     camel-version: 3.20.1
