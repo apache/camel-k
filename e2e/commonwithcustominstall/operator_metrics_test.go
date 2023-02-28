@@ -56,6 +56,8 @@ func TestMetrics(t *testing.T) {
 		t.Skip("WARNING: Test marked as problematic ... skipping")
 	}
 
+	RegisterTestingT(t)
+
 	WithNewTestNamespace(t, func(ns string) {
 		name := "java"
 		operatorID := "camel-k-metrics"
@@ -93,7 +95,6 @@ func TestMetrics(t *testing.T) {
 		Expect(build).NotTo(BeNil())
 
 		t.Run("Build duration metric", func(t *testing.T) {
-			RegisterTestingT(t)
 			// Get the duration from the Build status
 			duration, err := time.ParseDuration(build.Status.Duration)
 			Expect(err).To(BeNil())
@@ -109,8 +110,8 @@ func TestMetrics(t *testing.T) {
 					"RequestName": Equal(build.Name),
 				}), func(l *LogEntry) { ts1 = l.Timestamp.Time }).
 				AddStep(MatchFields(IgnoreExtras, Fields{
-					"LoggerName": Equal("camel-k.builder"),
-					"Message":    HavePrefix("resolved base image:"),
+					"LoggerName": Equal("camel-k.controller.build"),
+					"Message":    HavePrefix("Build duration"),
 				}), LogEntryNoop).
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.build"),
@@ -126,7 +127,8 @@ func TestMetrics(t *testing.T) {
 			Expect(ts2).To(BeTemporally(">", ts1))
 
 			durationFromLogs := ts2.Sub(ts1)
-			Expect(math.Abs((durationFromLogs - duration).Seconds())).To(BeNumerically("<", 1))
+			// With a build strategy there could be a little variance (less than 10 seconds should be enough)
+			Expect(math.Abs((durationFromLogs - duration).Seconds())).To(BeNumerically("<", 10))
 
 			// Check the duration is observed in the corresponding metric
 			Expect(metrics).To(HaveKey("camel_k_build_duration_seconds"))
@@ -153,7 +155,6 @@ func TestMetrics(t *testing.T) {
 		})
 
 		t.Run("Build recovery attempts metric", func(t *testing.T) {
-			RegisterTestingT(t)
 			// Check there are no failures reported in the Build status
 			Expect(build.Status.Failure).To(BeNil())
 
@@ -192,7 +193,6 @@ func TestMetrics(t *testing.T) {
 		})
 
 		t.Run("reconciliation duration metric", func(t *testing.T) {
-			RegisterTestingT(t)
 			Expect(metrics).To(HaveKey("camel_k_reconciliation_duration_seconds"))
 			Expect(metrics["camel_k_reconciliation_duration_seconds"]).To(PointTo(MatchFields(IgnoreExtras,
 				Fields{
@@ -396,7 +396,6 @@ func TestMetrics(t *testing.T) {
 		})
 
 		t.Run("Build queue duration metric", func(t *testing.T) {
-			RegisterTestingT(t)
 			var ts1, ts2 time.Time
 			// The start queuing time is taken from the creation time
 			ts1 = build.CreationTimestamp.Time
@@ -453,7 +452,6 @@ func TestMetrics(t *testing.T) {
 		})
 
 		t.Run("Integration first readiness metric", func(t *testing.T) {
-			RegisterTestingT(t)
 			var ts1, ts2 time.Time
 
 			// The start time is taken from the Integration status initialization timestamp
