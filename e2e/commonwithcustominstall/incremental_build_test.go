@@ -48,21 +48,39 @@ func TestRunIncrementalBuild(t *testing.T) {
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		integrationKitName := IntegrationKit(ns, name)()
 		Eventually(Kit(ns, integrationKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
-		// Another integration that should be built on top of the previous IntegrationKit
-		// just add a new random dependency
-		name2 := "java2"
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-			"--name", name2,
-			"-d", "camel:zipfile",
-		).Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, name2), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name2, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name2), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		integrationKitName2 := IntegrationKit(ns, name2)()
-		// the container can come in a format like
-		// 10.108.177.66/test-d7cad110-bb1d-4e79-8a0e-ebd44f6fe5d4/camel-k-kit-c8357r4k5tp6fn1idm60@sha256:d49716f0429ad8b23a1b8d20a357d64b1aa42a67c1a2a534ebd4c54cd598a18d
-		// we should be save just to check the substring is contained
-		Eventually(Kit(ns, integrationKitName2)().Status.BaseImage).Should(ContainSubstring(integrationKitName))
+		Eventually(BuilderPodsCount(ns)).Should(Equal(1))
+
+		t.Run("Reuse previous kit", func(t *testing.T) {
+			nameClone := "java-clone"
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+				"--name", nameClone,
+			).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, nameClone), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, nameClone, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, nameClone), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			integrationCloneKitName := IntegrationKit(ns, nameClone)()
+			Eventually(integrationCloneKitName).Should(Equal(integrationKitName))
+			Eventually(BuilderPodsCount(ns)).Should(Equal(1))
+		})
+
+		t.Run("Create incremental kit", func(t *testing.T) {
+			// Another integration that should be built on top of the previous IntegrationKit
+			// just add a new random dependency
+			nameIncremental := "java-incremental"
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+				"--name", nameIncremental,
+				"-d", "camel:zipfile",
+			).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, nameIncremental), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, nameIncremental, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, nameIncremental), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			integrationIncrementalKitName := IntegrationKit(ns, nameIncremental)()
+			// the container comes in a format like
+			// 10.108.177.66/test-d7cad110-bb1d-4e79-8a0e-ebd44f6fe5d4/camel-k-kit-c8357r4k5tp6fn1idm60@sha256:d49716f0429ad8b23a1b8d20a357d64b1aa42a67c1a2a534ebd4c54cd598a18d
+			// we should be save just to check the substring is contained
+			Eventually(Kit(ns, integrationIncrementalKitName)().Status.BaseImage).Should(ContainSubstring(integrationKitName))
+			Eventually(BuilderPodsCount(ns)).Should(Equal(2))
+		})
 
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
