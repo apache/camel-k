@@ -23,7 +23,9 @@ limitations under the License.
 package cli
 
 import (
+	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -37,6 +39,7 @@ import (
 	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/openshift"
 )
 
@@ -51,9 +54,27 @@ func TestRunGlobalInstall(t *testing.T) {
 		}
 	}
 
+	RegisterTestingT(t)
+
 	WithGlobalOperatorNamespace(t, func(operatorNamespace string) {
 		Expect(KamelInstall(operatorNamespace, "--global", "--force").Execute()).To(Succeed())
 		Eventually(OperatorPodPhase(operatorNamespace), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+
+		t.Run("Global CamelCatalog reconciliation", func(t *testing.T) {
+			Eventually(Platform(operatorNamespace)).ShouldNot(BeNil())
+			Eventually(PlatformConditionStatus(operatorNamespace, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
+			catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
+			Eventually(CamelCatalog(operatorNamespace, catalogName)).ShouldNot(BeNil())
+			catalog := CamelCatalog(operatorNamespace, catalogName)()
+			imageName := fmt.Sprintf("camel-k-runtime-%s-builder:%s", catalog.Spec.Runtime.Provider, strings.ToLower(catalog.Spec.Runtime.Version))
+			Eventually(CamelCatalogPhase(operatorNamespace, catalogName), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
+			Eventually(CamelCatalogImage(operatorNamespace, catalogName), TestTimeoutMedium).Should(ContainSubstring(imageName))
+			// The container may have been created by previous test
+			Eventually(CamelCatalogCondition(operatorNamespace, catalogName, v1.CamelCatalogConditionReady)().Message).Should(
+				Or(Equal("Container image successfully built"), Equal("Container image exists on registry")),
+			)
+		})
 
 		t.Run("Global test on namespace with platform", func(t *testing.T) {
 			WithNewTestNamespace(t, func(ns2 string) {

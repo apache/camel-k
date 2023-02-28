@@ -39,6 +39,8 @@ import (
 )
 
 func TestOperatorIDFiltering(t *testing.T) {
+	RegisterTestingT(t)
+
 	forceGlobalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
 	if !forceGlobalTest {
 		ocp, err := openshift.IsOpenShift(TestClient())
@@ -61,15 +63,11 @@ func TestOperatorIDFiltering(t *testing.T) {
 				Eventually(PlatformPhase(nsop2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 				t.Run("Operators ignore non-scoped integrations", func(t *testing.T) {
-					RegisterTestingT(t)
-
 					Expect(KamelRun(ns, "files/yaml.yaml", "--name", "untouched", "--force").Execute()).To(Succeed())
 					Consistently(IntegrationPhase(ns, "untouched"), 10*time.Second).Should(BeEmpty())
 				})
 
 				t.Run("Operators run scoped integrations", func(t *testing.T) {
-					RegisterTestingT(t)
-
 					Expect(KamelRun(ns, "files/yaml.yaml", "--name", "moving", "--force").Execute()).To(Succeed())
 					Expect(AssignIntegrationToOperator(ns, "moving", operator1)).To(Succeed())
 					Eventually(IntegrationPhase(ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
@@ -78,8 +76,6 @@ func TestOperatorIDFiltering(t *testing.T) {
 				})
 
 				t.Run("Operators can handoff scoped integrations", func(t *testing.T) {
-					RegisterTestingT(t)
-
 					Expect(AssignIntegrationToOperator(ns, "moving", operator2)).To(Succeed())
 					Eventually(IntegrationPhase(ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseBuildingKit))
 					Eventually(IntegrationPhase(ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
@@ -88,8 +84,6 @@ func TestOperatorIDFiltering(t *testing.T) {
 				})
 
 				t.Run("Operators can be deactivated after completely handing off scoped integrations", func(t *testing.T) {
-					RegisterTestingT(t)
-
 					Expect(ScaleOperator(nsop1, 0)).To(Succeed())
 					Expect(Kamel("rebuild", "-n", ns, "moving").Execute()).To(Succeed())
 					Eventually(IntegrationPhase(ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
@@ -99,8 +93,6 @@ func TestOperatorIDFiltering(t *testing.T) {
 				})
 
 				t.Run("Operators can run scoped integrations with fixed image", func(t *testing.T) {
-					RegisterTestingT(t)
-
 					image := IntegrationPodImage(ns, "moving")()
 					Expect(image).NotTo(BeEmpty())
 					// Save resources by deleting "moving" integration
@@ -117,8 +109,6 @@ func TestOperatorIDFiltering(t *testing.T) {
 				})
 
 				t.Run("Operators can run scoped kamelet bindings", func(t *testing.T) {
-					RegisterTestingT(t)
-
 					Expect(KamelBind(ns, "timer-source?message=Hello", "log-sink",
 						"--name", "klb", "--force").Execute()).To(Succeed())
 					Consistently(Integration(ns, "klb"), 10*time.Second).Should(BeNil())
@@ -131,8 +121,6 @@ func TestOperatorIDFiltering(t *testing.T) {
 			})
 		})
 
-		// Clean up
-		RegisterTestingT(t)
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
