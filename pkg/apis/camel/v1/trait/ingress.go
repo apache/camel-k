@@ -27,6 +27,8 @@ type IngressTrait struct {
 	Trait `property:",squash" json:",inline"`
 	// To configure the host exposed by the ingress.
 	Host string `property:"host" json:"host,omitempty"`
+	// To configure the path exposed by the ingress (default `/`).
+	Path string `property:"path" json:"path,omitempty"`
 	// To automatically add an ingress whenever the integration uses an HTTP endpoint consumer.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 }
