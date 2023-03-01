@@ -24,7 +24,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
@@ -42,6 +41,7 @@ func newIngressTrait() Trait {
 			Annotations: map[string]string{},
 			Host:        "",
 			Path:        "/",
+			PathType:    ptrFrom(networkingv1.PathTypePrefix),
 		},
 	}
 }
@@ -56,7 +56,7 @@ func (t *ingressTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptrDerefOr(t.Enabled, true) {
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionExposureAvailable,
 			corev1.ConditionFalse,
@@ -66,7 +66,7 @@ func (t *ingressTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if pointer.BoolDeref(t.Auto, true) {
+	if ptrDerefOr(t.Auto, true) {
 		if e.Resources.GetUserServiceForIntegration(e.Integration) == nil {
 			e.Integration.Status.SetCondition(
 				v1.IntegrationConditionExposureAvailable,
@@ -87,8 +87,6 @@ func (t *ingressTrait) Apply(e *Environment) error {
 		return errors.New("cannot Apply ingress trait: no target service")
 	}
 
-	pathType := networkingv1.PathTypePrefix
-
 	ingress := networkingv1.Ingress{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Ingress",
@@ -108,7 +106,7 @@ func (t *ingressTrait) Apply(e *Environment) error {
 							Paths: []networkingv1.HTTPIngressPath{
 								{
 									Path:     t.Path,
-									PathType: &pathType,
+									PathType: t.PathType,
 									Backend: networkingv1.IngressBackend{
 										Service: &networkingv1.IngressServiceBackend{
 											Name: service.Name,
