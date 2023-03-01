@@ -79,6 +79,10 @@ spec:
           spec:
             description: BuildSpec defines the Build operation to be executed
             properties:
+              operatorNamespace:
+                description: The namespace of the operator in charge of this Build
+                  reconciliation.
+                type: string
               strategy:
                 description: The strategy that should be used to perform the Build.
                 enum:

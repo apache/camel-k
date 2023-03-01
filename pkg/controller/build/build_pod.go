@@ -121,7 +121,7 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.P
 			Kind:       "Pod",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: build.Namespace,
+			Namespace: build.OperatorNamespace(),
 			Name:      buildPodName(build),
 			Labels: map[string]string{
 				"camel.apache.org/build":     build.Name,
@@ -176,7 +176,7 @@ func deleteBuilderPod(ctx context.Context, c ctrl.Writer, build *v1.Build) error
 			Kind:       "Pod",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: build.Namespace,
+			Namespace: build.OperatorNamespace(),
 			Name:      buildPodName(build),
 		},
 	}
@@ -191,7 +191,7 @@ func deleteBuilderPod(ctx context.Context, c ctrl.Writer, build *v1.Build) error
 
 func getBuilderPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.Pod, error) {
 	pod := corev1.Pod{}
-	err := c.Get(ctx, ctrl.ObjectKey{Namespace: build.Namespace, Name: buildPodName(build)}, &pod)
+	err := c.Get(ctx, ctrl.ObjectKey{Namespace: build.OperatorNamespace(), Name: buildPodName(build)}, &pod)
 	if err != nil && k8serrors.IsNotFound(err) {
 		return nil, nil
 	}

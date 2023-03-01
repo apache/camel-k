@@ -61,7 +61,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			name := "java"
 			nonCompatibleCatalogName := "camel-catalog-1.15.0"
 			Expect(
-				KamelRunWithID(operatorID, ns, "../files/Java.java", "--name", name,
+				KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
 					"-t", "camel.runtime-version=1.15.0",
 				).Execute()).To(Succeed())
 
@@ -92,7 +92,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			Eventually(CamelCatalog(ns, compatibleCatalogName)).Should(BeNil())
 
 			Expect(
-				KamelRunWithID(operatorID, ns, "../files/Java.java", "--name", name,
+				KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
 					"-t", "camel.runtime-version="+compatibleVersion,
 				).Execute()).To(Succeed())
 
@@ -124,7 +124,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			Eventually(CamelCatalog(ns, compatibleCatalogName)).Should(BeNil())
 
 			Expect(
-				KamelRunWithID(operatorID, ns, "../files/Java.java", "--name", name,
+				KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
 					"-t", "camel.runtime-version="+compatibleVersion,
 				).Execute()).To(Succeed())
 

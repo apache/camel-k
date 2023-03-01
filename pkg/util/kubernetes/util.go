@@ -18,6 +18,8 @@ limitations under the License.
 package kubernetes
 
 import (
+	"io/ioutil"
+
 	"github.com/apache/camel-k/pkg/util"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
@@ -55,4 +57,13 @@ func ToYAMLNoManagedFields(value runtime.Object) ([]byte, error) {
 	}
 
 	return util.MapToYAML(mapdata)
+}
+
+// CurrentPodNamespace return the Kubernetes namespace on which the caller of this funcion is running
+func CurrentPodNamespace() string {
+	ns, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+	if err != nil {
+		return ""
+	}
+	return string(ns)
 }

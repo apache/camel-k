@@ -436,6 +436,13 @@ string
 
 The container image to be used to run the build.
 
+|`operatorNamespace` +
+string
+|
+
+
+The namespace of the operator in charge of this Build reconciliation.
+
 |`timeout` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta[Kubernetes meta/v1.Duration]*
 |
