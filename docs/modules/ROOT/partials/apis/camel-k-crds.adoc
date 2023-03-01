@@ -4504,12 +4504,36 @@ It's enabled by default whenever a Service is added to the integration (through 
 
 
 
+|`annotations` +
+map[string]string
+|
+
+
+The annotations added to the ingress.
+This can be used to set controller specific annotations, e.g., when using the NGINX Ingress controller:
+See https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md
+
 |`host` +
 string
 |
 
 
 To configure the host exposed by the ingress.
+
+|`path` +
+string
+|
+
+
+To configure the path exposed by the ingress (default `/`).
+
+|`pathType` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#pathtype-v1-networking[Kubernetes networking/v1.PathType]*
+|
+
+
+To configure the path type exposed by the ingress.
+One of `Exact`, `Prefix`, `ImplementationSpecific` (default to `Prefix`).
 
 |`auto` +
 bool
