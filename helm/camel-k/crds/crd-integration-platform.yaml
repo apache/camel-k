@@ -800,6 +800,13 @@ spec:
                   ingress:
                     description: The configuration of Ingress trait
                     properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        description: 'The annotations added to the ingress. This can
+                          be used to set controller specific annotations, e.g., when
+                          using the NGINX Ingress controller: See https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md'
+                        type: object
                       auto:
                         description: To automatically add an ingress whenever the
                           integration uses an HTTP endpoint consumer.
@@ -815,6 +822,19 @@ spec:
                         type: boolean
                       host:
                         description: To configure the host exposed by the ingress.
+                        type: string
+                      path:
+                        description: To configure the path exposed by the ingress
+                          (default `/`).
+                        type: string
+                      pathType:
+                        description: To configure the path type exposed by the ingress.
+                          One of `Exact`, `Prefix`, `ImplementationSpecific` (default
+                          to `Prefix`).
+                        enum:
+                        - Exact
+                        - Prefix
+                        - ImplementationSpecific
                         type: string
                     type: object
                   istio:
@@ -2363,6 +2383,13 @@ spec:
                   ingress:
                     description: The configuration of Ingress trait
                     properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        description: 'The annotations added to the ingress. This can
+                          be used to set controller specific annotations, e.g., when
+                          using the NGINX Ingress controller: See https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md'
+                        type: object
                       auto:
                         description: To automatically add an ingress whenever the
                           integration uses an HTTP endpoint consumer.
@@ -2378,6 +2405,19 @@ spec:
                         type: boolean
                       host:
                         description: To configure the host exposed by the ingress.
+                        type: string
+                      path:
+                        description: To configure the path exposed by the ingress
+                          (default `/`).
+                        type: string
+                      pathType:
+                        description: To configure the path type exposed by the ingress.
+                          One of `Exact`, `Prefix`, `ImplementationSpecific` (default
+                          to `Prefix`).
+                        enum:
+                        - Exact
+                        - Prefix
+                        - ImplementationSpecific
                         type: string
                     type: object
                   istio:
