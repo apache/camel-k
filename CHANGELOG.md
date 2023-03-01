@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- MongoDB sink: error during trait customization: component not found for uri [\#4058](https://github.com/apache/camel-k/issues/4058)
 - Release 1.12.0 [\#4002](https://github.com/apache/camel-k/issues/4002)
 - Rethink E2E execution flow [\#3847](https://github.com/apache/camel-k/issues/3847)
 
