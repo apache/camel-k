@@ -23,7 +23,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/pkg/errors"
 
@@ -33,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/trait"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
@@ -112,9 +112,6 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 			buildStrategy = env.BuildStrategy
 
 			if buildStrategy == v1.BuildStrategyPod {
-				// We must ensure the expected service account is available or create it
-				// TODO make it singleton
-				// nolint: contextcheck
 				err = platform.CreateBuilderServiceAccount(env.Ctx, env.Client, env.Platform)
 				if err != nil {
 					return nil, errors.Wrap(err, "Error while creating Camel K Builder service account")
@@ -134,10 +131,11 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 				Annotations: annotations,
 			},
 			Spec: v1.BuildSpec{
-				Strategy:  buildStrategy,
-				ToolImage: env.CamelCatalog.Image,
-				Tasks:     env.BuildTasks,
-				Timeout:   timeout,
+				Strategy:          buildStrategy,
+				ToolImage:         env.CamelCatalog.Image,
+				OperatorNamespace: kubernetes.CurrentPodNamespace(),
+				Tasks:             env.BuildTasks,
+				Timeout:           timeout,
 			},
 		}
 

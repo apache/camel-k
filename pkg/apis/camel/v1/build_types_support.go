@@ -44,6 +44,11 @@ func NewBuildList() BuildList {
 	}
 }
 
+// OperatorNamespace returns the namespace of the operator in charge to reconcile this Build.
+func (build *Build) OperatorNamespace() string {
+	return build.Spec.OperatorNamespace
+}
+
 func (buildPhase *BuildPhase) String() string {
 	return string(*buildPhase)
 }

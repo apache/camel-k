@@ -30,7 +30,6 @@ import (
 	"k8s.io/client-go/tools/remotecommand"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/pkg/errors"
 
@@ -75,10 +74,11 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 			if pod, err = newBuildPod(ctx, action.reader, build); err != nil {
 				return nil, err
 			}
+			// TODO set the owner to the Build when non global, otherwise we can set to the global operator IP
 			// Set the Build as the Pod owner and controller
-			if err = controllerutil.SetControllerReference(build, pod, action.client.GetScheme()); err != nil {
+			/*if err = controllerutil.SetControllerReference(build, pod, action.client.GetScheme()); err != nil {
 				return nil, err
-			}
+			}*/
 			if err = action.client.Create(ctx, pod); err != nil {
 				return nil, errors.Wrap(err, "cannot create build pod")
 			}
