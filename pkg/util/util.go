@@ -93,7 +93,7 @@ var QuarkusDependenciesBaseDirectory = "/quarkus-app"
 // These are sensitive values or values that may have different values depending on
 // where the integration is run (locally vs. the cloud). These environment variables
 // are evaluated at the time of the integration invocation.
-var ListOfLazyEvaluatedEnvVars = []string{}
+var ListOfLazyEvaluatedEnvVars []string
 
 // CLIEnvVars -- List of CLI provided environment variables. They take precedence over
 // any environment variables with the same name.
@@ -645,12 +645,14 @@ func WithTempDir(pattern string, consumer func(string) error) error {
 	return multierr.Append(consumerErr, removeErr)
 }
 
-// Parses a property spec and returns its parts.
+var propertyRegex = regexp.MustCompile("'.+'|\".+\"|[^.]+")
+
+// ConfigTreePropertySplit Parses a property spec and returns its parts.
 func ConfigTreePropertySplit(property string) []string {
 	var res = make([]string, 0)
-	initialParts := strings.Split(property, ".")
+	initialParts := propertyRegex.FindAllString(property, -1)
 	for _, p := range initialParts {
-		cur := p
+		cur := trimQuotes(p)
 		var tmp []string
 		for strings.Contains(cur[1:], "[") && strings.HasSuffix(cur, "]") {
 			pos := strings.LastIndex(cur, "[")
@@ -665,6 +667,15 @@ func ConfigTreePropertySplit(property string) []string {
 		}
 	}
 	return res
+}
+
+func trimQuotes(s string) string {
+	if len(s) >= 2 {
+		if c := s[len(s)-1]; s[0] == c && (c == '"' || c == '\'') {
+			return s[1 : len(s)-1]
+		}
+	}
+	return s
 }
 
 // NavigateConfigTree switch to the element in the tree represented by the "nodes" spec and creates intermediary
