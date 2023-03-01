@@ -182,7 +182,11 @@ func (c *Catalog) processFields(fields []*structs.Field, processor func(string))
 
 		if property != "" {
 			items := strings.Split(property, ",")
-			processor(items[0])
+			if f.Kind() == reflect.Map {
+				processor(items[0] + ".*")
+			} else {
+				processor(items[0])
+			}
 		}
 	}
 }
