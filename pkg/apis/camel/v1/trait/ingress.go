@@ -17,6 +17,8 @@ limitations under the License.
 
 package trait
 
+import networkingv1 "k8s.io/api/networking/v1"
+
 // The Ingress trait can be used to expose the service associated with the integration
 // to the outside world with a Kubernetes Ingress.
 //
@@ -33,6 +35,10 @@ type IngressTrait struct {
 	Host string `property:"host" json:"host,omitempty"`
 	// To configure the path exposed by the ingress (default `/`).
 	Path string `property:"path" json:"path,omitempty"`
+	// To configure the path type exposed by the ingress.
+	// One of `Exact`, `Prefix`, `ImplementationSpecific` (default to `Prefix`).
+	// +kubebuilder:validation:Enum=Exact;Prefix;ImplementationSpecific
+	PathType *networkingv1.PathType `property:"path-type" json:"pathType,omitempty"`
 	// To automatically add an ingress whenever the integration uses an HTTP endpoint consumer.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 }
