@@ -26,6 +26,7 @@ import (
 
 type JSONSchemaProp struct {
 	ID          string `json:"id,omitempty"`
+	Deprecated  bool   `json:"deprecated,omitempty"`
 	Description string `json:"description,omitempty"`
 	Type        string `json:"type,omitempty"`
 	// format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:

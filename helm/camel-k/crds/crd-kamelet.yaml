@@ -94,6 +94,9 @@ spec:
                           description: default is a default value for undefined object
                             fields.
                           x-kubernetes-preserve-unknown-fields: true
+                        deprecated:
+                          type: boolean
+                          default: false
                         description:
                           type: string
                         enum:
