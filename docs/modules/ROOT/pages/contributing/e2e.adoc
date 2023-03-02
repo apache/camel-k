@@ -31,7 +31,7 @@ This is the list of the groups we are using (please, notice that they can slight
     * builder (`make test-builder`)
     * common (`make test-common`)
     * commonwithcustominstall (`make test-common-with-custom-install`)
-    * install (`make test-install` and `make test-install-upgrade`)
+    * install (`make test-install` and `make test-install-olm`)
     * knative (`make test-knative`)
     * native (`make test-quarkus-native` and `make test-quarkus-native-high-memory`)
     * telemetry (`make test-telemetry`)
