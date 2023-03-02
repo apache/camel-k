@@ -157,6 +157,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("storage-class-name", "", "Use a storage class name to create a dynamic volume (if empty will look up for cluster default)")
 	cmd.Flags().String("storage-capacity", "20Gi", "How much capacity to use")
 	cmd.Flags().String("storage-access-mode", "ReadWriteOnce", "Persistent Volume Access Mode (any of ReadWriteOnce, ReadOnlyMany, ReadWriteMany or ReadWriteOncePod)")
+	cmd.Flags().Bool("no-storage", false, "If true, it won't use a persistent storage (recommended for development purpose only)")
 
 	return &cmd, &options
 }
@@ -210,6 +211,7 @@ type installCmdOptions struct {
 	StorageClassName            string `mapstructure:"storage-class-name"`
 	StorageCapacity             string `mapstructure:"storage-capacity"`
 	StorageAccessMode           string `mapstructure:"storage-access-mode"`
+	NoStorage                   bool   `mapstructure:"no-storage"`
 }
 
 func (o *installCmdOptions) install(cmd *cobra.Command, _ []string) error {
@@ -435,6 +437,7 @@ func (o *installCmdOptions) setupOperator(
 		ResourcesRequirements: o.ResourcesRequirements,
 		EnvVars:               o.EnvVars,
 		Storage: install.OperatorStorageConfiguration{
+			NoStorage:  o.NoStorage,
 			ClassName:  o.StorageClassName,
 			Capacity:   o.StorageCapacity,
 			AccessMode: o.StorageAccessMode,
