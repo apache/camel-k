@@ -21,6 +21,7 @@ import (
 	"context"
 
 	corev1 "k8s.io/api/core/v1"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/install"
@@ -54,7 +55,13 @@ func (action *createAction) Handle(ctx context.Context, platform *v1.Integration
 
 	for _, k := range paths {
 		action.L.Infof("Installing camel catalog: %s", k)
-		err := install.Resources(ctx, action.client, platform.Namespace, true, install.IdentityResourceCustomizer, k)
+		err := install.Resources(ctx, action.client, platform.Namespace, true,
+			func(object ctrl.Object) ctrl.Object {
+				action.L.Infof("Copying platform annotations to catalog: %s", object.GetName())
+				object.SetAnnotations(platform.Annotations)
+				return object
+			},
+			k)
 		if err != nil {
 			return nil, err
 		}
