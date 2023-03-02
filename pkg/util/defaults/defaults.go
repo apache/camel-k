@@ -32,7 +32,7 @@ const (
 	BuildahVersion = "1.23.3"
 
 	// KanikoVersion --
-	KanikoVersion = "0.17.1"
+	KanikoVersion = "1.9.1"
 
 	// baseImage --
 	baseImage = "docker.io/eclipse-temurin:11"

@@ -476,6 +476,16 @@ func addKanikoTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, tas
 	pod.Spec.Affinity = affinity
 	pod.Spec.Volumes = append(pod.Spec.Volumes, volumes...)
 
+	// Warning: Kaniko requires root privileges to work correctly
+	// As we're planning to deprecate this building strategy we're fixing in the first
+	// releases of version 2
+	var ugfid int64 = 0
+	pod.Spec.SecurityContext = &corev1.PodSecurityContext{
+		RunAsUser:  &ugfid,
+		RunAsGroup: &ugfid,
+		FSGroup:    &ugfid,
+	}
+
 	addContainerToPod(build, container, pod)
 
 	return nil

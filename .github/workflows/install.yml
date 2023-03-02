@@ -112,7 +112,7 @@ jobs:
           -t "${{ github.event.inputs.test-filters }}"
 
     - name: Install and upgrade test (OLM)
-      uses: ./.github/actions/e2e-upgrade
+      uses: ./.github/actions/e2e-install-olm
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
         cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
