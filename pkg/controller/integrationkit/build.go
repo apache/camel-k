@@ -112,6 +112,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 			buildStrategy = env.BuildStrategy
 
 			if buildStrategy == v1.BuildStrategyPod {
+				// nolint: contextcheck
 				err = platform.CreateBuilderServiceAccount(env.Ctx, env.Client, env.Platform)
 				if err != nil {
 					return nil, errors.Wrap(err, "Error while creating Camel K Builder service account")
@@ -131,8 +132,9 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 				Annotations: annotations,
 			},
 			Spec: v1.BuildSpec{
-				Strategy:          buildStrategy,
-				ToolImage:         env.CamelCatalog.Image,
+				Strategy:  buildStrategy,
+				ToolImage: env.CamelCatalog.Image,
+				// TODO try to use platform.GetOperatorNamespace
 				OperatorNamespace: kubernetes.CurrentPodNamespace(),
 				Tasks:             env.BuildTasks,
 				Timeout:           timeout,

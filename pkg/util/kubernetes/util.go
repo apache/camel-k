@@ -59,7 +59,7 @@ func ToYAMLNoManagedFields(value runtime.Object) ([]byte, error) {
 	return util.MapToYAML(mapdata)
 }
 
-// CurrentPodNamespace return the Kubernetes namespace on which the caller of this funcion is running
+// CurrentPodNamespace return the Kubernetes namespace on which the caller of this funcion is running.
 func CurrentPodNamespace() string {
 	ns, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
 	if err != nil {

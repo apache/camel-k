@@ -25,6 +25,7 @@ package commonwithcustominstall
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -35,8 +36,19 @@ import (
 
 	. "github.com/apache/camel-k/e2e/support"
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/util/defaults"
 	"github.com/apache/camel-k/pkg/util/openshift"
 )
+
+func TestOperatorIDCamelCatalogReconciliation(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		operator1 := "operator-1"
+		Expect(KamelInstallWithID(operator1, ns, "--global", "--force").Execute()).To(Succeed())
+		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
+		Eventually(CamelCatalogPhase(ns, catalogName), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
+	})
+}
 
 func TestOperatorIDFiltering(t *testing.T) {
 	RegisterTestingT(t)

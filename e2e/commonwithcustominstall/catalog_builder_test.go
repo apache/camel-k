@@ -67,7 +67,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 
 			Eventually(CamelCatalog(ns, nonCompatibleCatalogName)).ShouldNot(BeNil())
 			Eventually(CamelCatalogPhase(ns, nonCompatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseError))
-			Eventually(CamelCatalogCondition(ns, nonCompatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(ContainSubstring("Missing base image"))
+			Eventually(CamelCatalogCondition(ns, nonCompatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(ContainSubstring("missing base image"))
 
 			Eventually(IntegrationKit(ns, name)).ShouldNot(Equal(""))
 			kitName := IntegrationKit(ns, name)()
