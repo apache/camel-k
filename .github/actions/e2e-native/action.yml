@@ -15,7 +15,7 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: e2e-install-native
+name: e2e-native
 description: 'End-to-End tests for install use-cases (namespaced rather than global operator so no global operator install) with native builds'
 
 inputs:
