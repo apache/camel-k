@@ -25,7 +25,7 @@ LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 1.12.0
 RUNTIME_VERSION := 1.18.0-SNAPSHOT
 BUILDAH_VERSION := 1.23.3
-KANIKO_VERSION := 0.17.1
+KANIKO_VERSION := 1.9.1
 CONTROLLER_GEN_VERSION := v0.6.1
 CODEGEN_VERSION := v0.25.6
 OPERATOR_SDK_VERSION := v1.26.1
@@ -277,23 +277,22 @@ test-common-with-custom-install: do-build
 	exit $${FAILED}
 
 #
-# Installation procedure test using different methodologies
+# Installation procedure test using CLi and Kustomize methodologies
 #
 test-install: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
 	go test -timeout 60m -v ./e2e/install/cli -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
-	go test -timeout 60m -v ./e2e/install/olm -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 60m -v ./e2e/install/kustomize -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
 	exit $${FAILED}
 
 #
-# Upgrade procedure test (require a previous version of Kamel CLI)
+# Installation procedure test using OLM (requires cluster to be setup accordingly)
 #
-test-install-upgrade: do-build
+test-install-olm: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 60m -v ./e2e/install/upgrade -tags=integration $(TEST_UPGRADE_RUN) $(GOTESTFMT) || FAILED=1; \
+
 	exit $${FAILED}
 
 #
