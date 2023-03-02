@@ -15,8 +15,8 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: e2e-upgrade
-description: 'End-to-End tests for upgrading to new version'
+name: e2e-install-olm
+description: 'End-to-End tests for OLM installation and upgrade procedure'
 
 inputs:
   cluster-config-data:

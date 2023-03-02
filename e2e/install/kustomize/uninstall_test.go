@@ -34,7 +34,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestUninstallBasic(t *testing.T) {
+func TestKustomizeUninstallBasic(t *testing.T) {
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
@@ -62,7 +62,8 @@ func TestUninstallBasic(t *testing.T) {
 
 		Eventually(OperatorPod(ns)).Should(BeNil())
 		Eventually(Platform(ns)).Should(BeNil())
-		Eventually(Role(ns)).Should(BeNil())
+		// The operator can dynamically create a for its builders
+		Eventually(Role(ns)).Should(HaveLen(1))
 		Eventually(ClusterRole()).Should(BeNil())
 		// CRDs should be still there
 		Eventually(CRDs()).Should(HaveLen(ExpectedCRDs))
