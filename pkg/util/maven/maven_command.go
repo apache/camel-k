@@ -76,6 +76,13 @@ func (c *Command) Do(ctx context.Context) error {
 		args = append(args, "--settings", settingsPath)
 	}
 
+	settingsSecurityPath := filepath.Join(c.context.Path, "settings-security.xml")
+	if settingsSecurityExists, err := util.FileExists(settingsSecurityPath); err != nil {
+		return err
+	} else if settingsSecurityExists {
+		args = append(args, "-Dsettings.security="+settingsSecurityPath)
+	}
+
 	if !util.StringContainsPrefix(c.context.AdditionalArguments, "-Dmaven.artifact.threads") {
 		args = append(args, "-Dmaven.artifact.threads="+strconv.Itoa(runtime.GOMAXPROCS(0)))
 	}
