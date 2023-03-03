@@ -9,6 +9,7 @@
 -  Nightly Quarkus native checks failure after 2.0 [\#4087](https://github.com/apache/camel-k/issues/4087)
 - MongoDB sink: error during trait customization: component not found for uri [\#4058](https://github.com/apache/camel-k/issues/4058)
 - Release 1.12.0 [\#4002](https://github.com/apache/camel-k/issues/4002)
+- Camel-K maven security [\#3956](https://github.com/apache/camel-k/issues/3956)
 - Create normal service when knative-service trait is disabled [\#3849](https://github.com/apache/camel-k/issues/3849)
 - Rethink E2E execution flow [\#3847](https://github.com/apache/camel-k/issues/3847)
 
