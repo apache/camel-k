@@ -27,6 +27,7 @@ import (
 // with apply.
 type JSONSchemaPropApplyConfiguration struct {
 	ID               *string                  `json:"id,omitempty"`
+	Deprecated       *bool                    `json:"deprecated,omitempty"`
 	Description      *string                  `json:"description,omitempty"`
 	Type             *string                  `json:"type,omitempty"`
 	Format           *string                  `json:"format,omitempty"`
@@ -62,6 +63,14 @@ func JSONSchemaProp() *JSONSchemaPropApplyConfiguration {
 // If called multiple times, the ID field is set to the value of the last call.
 func (b *JSONSchemaPropApplyConfiguration) WithID(value string) *JSONSchemaPropApplyConfiguration {
 	b.ID = &value
+	return b
+}
+
+// WithDeprecated sets the Deprecated field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Deprecated field is set to the value of the last call.
+func (b *JSONSchemaPropApplyConfiguration) WithDeprecated(value bool) *JSONSchemaPropApplyConfiguration {
+	b.Deprecated = &value
 	return b
 }
 
