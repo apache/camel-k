@@ -7749,6 +7749,8 @@ spec:
                                     description: default is a default value for undefined
                                       object fields.
                                     x-kubernetes-preserve-unknown-fields: true
+                                  deprecated:
+                                    type: boolean
                                   description:
                                     type: string
                                   enum:
@@ -7966,6 +7968,8 @@ spec:
                                     description: default is a default value for undefined
                                       object fields.
                                     x-kubernetes-preserve-unknown-fields: true
+                                  deprecated:
+                                    type: boolean
                                   description:
                                     type: string
                                   enum:
@@ -8188,6 +8192,8 @@ spec:
                                       description: default is a default value for
                                         undefined object fields.
                                       x-kubernetes-preserve-unknown-fields: true
+                                    deprecated:
+                                      type: boolean
                                     description:
                                       type: string
                                     enum:
