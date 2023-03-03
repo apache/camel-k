@@ -51,6 +51,19 @@ func TestBasicInstallation(t *testing.T) {
 		Eventually(Platform(ns)).ShouldNot(BeNil())
 		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))
+		Eventually(OperatorPodPVCName(ns)).Should(Equal(defaults.DefaultPVC))
+	})
+}
+
+func TestEphemeralInstallation(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns, "--no-storage").Execute()).To(Succeed())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+		Eventually(Platform(ns)).ShouldNot(BeNil())
+		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
+			Should(Equal(corev1.ConditionTrue))
+		Eventually(OperatorPodPVCName(ns)).Should(Equal(""))
 	})
 }
 
@@ -155,7 +168,7 @@ func TestConsoleCliDownload(t *testing.T) {
 func TestInstallSkipDefaultKameletsInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(KamelInstallWithID(operatorID, ns, "--skip-default-kamelets-setup").Execute()).To(Succeed())
+		Expect(KamelInstallWithIDAndKameletCatalog(operatorID, ns, "--skip-default-kamelets-setup").Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		Expect(KameletList(ns)()).Should(BeEmpty())
 	})

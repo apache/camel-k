@@ -96,6 +96,7 @@ func TestOLMInstallation(t *testing.T) {
 
 		// Check the IntegrationPlatform has been reconciled
 		Eventually(PlatformVersion(ns)).Should(ContainSubstring(ipVersionPrefix))
+		Eventually(OperatorPodPVCName(ns)).Should(Equal(defaults.DefaultPVC))
 
 		name := "yaml"
 		Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())

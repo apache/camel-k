@@ -62,7 +62,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  install-native-high-memory:
+  higher-memory:
     if: contains(github.event.pull_request.labels.*.name, 'trigger native test')
     runs-on: macos-12
 
@@ -87,7 +87,7 @@ jobs:
         cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
         high-memory: 'true'
 
-  install-native:
+  lower-memory:
     if: contains(github.event.pull_request.labels.*.name, 'trigger native test')
     runs-on: macos-12
 
