@@ -51,7 +51,7 @@ jobs:
         ref: release-1.12.x
         persist-credentials: false
         submodules: recursive
-    - name: Automatic updates on release-1.10.x
+    - name: Automatic updates on release-1.12.x
       uses: ./.github/actions/automatic-updates
       with:
         branch-ref: "release-1.12.x"
