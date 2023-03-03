@@ -105,7 +105,7 @@ runs:
     shell: bash
     run: |
       # Note different parameters due to alternative installation
-      ./.github/actions/e2e-upgrade/exec-tests.sh \
+      ./.github/actions/e2e-install-olm/exec-tests.sh \
         -b "${{ steps.released-kamel-cli.outputs.released-kamel-binary }}" \
         -d "${{ steps.build-kamel.outputs.build-bundle-image-bundle-index }}" \
         -l "${{ steps.config-cluster.outputs.cluster-image-registry-pull-host }}" \
