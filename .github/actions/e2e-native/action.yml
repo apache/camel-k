@@ -100,7 +100,7 @@ runs:
     name: Run IT
     shell: bash
     run: |
-      ./.github/actions/e2e-install-native/exec-tests.sh \
+      ./.github/actions/e2e-native/exec-tests.sh \
         -b "${{ steps.config-cluster.outputs.cluster-catalog-source-name }}" \
         -c "${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}" \
         -i "${{ steps.config-cluster.outputs.cluster-image-namespace }}" \
