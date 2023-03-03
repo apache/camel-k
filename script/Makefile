@@ -280,7 +280,6 @@ test-common-with-custom-install: do-build
 # Installation procedure test using CLi and Kustomize methodologies
 #
 test-install: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
 	go test -timeout 60m -v ./e2e/install/cli -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 60m -v ./e2e/install/kustomize -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
@@ -290,17 +289,14 @@ test-install: do-build
 # Installation procedure test using OLM (requires cluster to be setup accordingly)
 #
 test-install-olm: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 60m -v ./e2e/install/olm -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
-	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-
-	exit $${FAILED}
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	go test -timeout 60m -v ./e2e/install/olm -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT)
 
 #
 # Knative tests that require the presence of KNative configuration
 #
 test-knative: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
 	go test -timeout 30m -v ./e2e/knative/support/startup_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 60m -v ./e2e/knative -tags=integration $(TEST_KNATIVE_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 30m -v ./e2e/knative/support/teardown_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
@@ -310,7 +306,7 @@ test-knative: do-build
 # Builder tests that require a custom build strategy
 #
 test-builder: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
 	go test -timeout 30m -v ./e2e/builder -tags=integration $(TEST_BUILDER_RUN) $(GOTESTFMT)
 
 #
