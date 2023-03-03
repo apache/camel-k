@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cli
+package olm
 
 import (
 	"os"
@@ -36,6 +36,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/defaults"
 )
 
+// WARNING: this test is not OLM specific but needs certain setting we provide in OLM installation scenario
 func TestOperatorUpgrade(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		version, ok := os.LookupEnv("KAMEL_K_TEST_RELEASE_VERSION")
