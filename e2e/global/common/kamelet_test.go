@@ -63,7 +63,7 @@ func TestKameletClasspathLoading(t *testing.T) {
 			Eventually(Kamelet(kameletName, ns)).Should(BeNil())
 
 			// Add the custom repository
-			Expect(Kamel("kamelet", "add-repo", "github:apache/camel-k/e2e/global/common/files/kamelets", "-n", ns).Execute()).To(Succeed())
+			Expect(Kamel("kamelet", "add-repo", "github:squakez/ck-kamelet-test-repo/kamelets", "-n", ns).Execute()).To(Succeed())
 
 			Expect(KamelRunWithID(operatorID, ns, "files/TimerCustomKameletIntegration.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "timer-custom-kamelet-integration"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -71,7 +71,7 @@ func TestKameletClasspathLoading(t *testing.T) {
 			Eventually(IntegrationLogs(ns, "timer-custom-kamelet-integration")).Should(ContainSubstring("great message"))
 
 			// Remove the custom repository
-			Expect(Kamel("kamelet", "remove-repo", "github:apache/camel-k/e2e/global/common/files/kamelets", "-n", ns).Execute()).To(Succeed())
+			Expect(Kamel("kamelet", "remove-repo", "github:squakez/ck-kamelet-test-repo/kamelets", "-n", ns).Execute()).To(Succeed())
 		})
 	})
 }
