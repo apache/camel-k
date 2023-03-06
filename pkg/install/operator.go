@@ -75,7 +75,7 @@ type OperatorMonitoringConfiguration struct {
 
 // OperatorStorageConfiguration represents the configuration required for Camel K operator storage.
 type OperatorStorageConfiguration struct {
-	NoStorage  bool
+	Enabled    bool
 	ClassName  string
 	Capacity   string
 	AccessMode string
@@ -90,7 +90,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 	}
 
 	var camelKPVC *corev1.PersistentVolumeClaim
-	if !cfg.Storage.NoStorage {
+	if cfg.Storage.Enabled {
 		camelKPVC, err = installPVC(ctx, cmd, c, cfg, collection)
 		if err != nil {
 			return err
