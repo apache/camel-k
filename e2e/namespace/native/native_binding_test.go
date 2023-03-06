@@ -95,10 +95,6 @@ func TestNativeBinding(t *testing.T) {
 			Eventually(IntegrationPod(ns, bindingName), TestTimeoutShort).
 				Should(WithTransform(getContainerCommand(),
 					MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
-
-			// Clean up
-			Expect(Kamel("delete", bindingName, "-n", ns).Execute()).To(Succeed())
-			Expect(DeleteKits(ns)).To(Succeed())
 		})
 
 		// Clean up
