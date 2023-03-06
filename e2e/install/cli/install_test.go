@@ -54,9 +54,9 @@ func TestBasicInstallation(t *testing.T) {
 		Eventually(OperatorPodPVCName(ns)).Should(Equal(defaults.DefaultPVC))
 
 		t.Run("run yaml", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "../files/yaml.yaml").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, "yaml", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		})
 
@@ -67,7 +67,7 @@ func TestBasicInstallation(t *testing.T) {
 func TestEphemeralInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(KamelInstallWithID(operatorID, ns, "--no-storage").Execute()).To(Succeed())
+		Expect(KamelInstallWithID(operatorID, ns, "--storage=false").Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		Eventually(Platform(ns)).ShouldNot(BeNil())
 		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).

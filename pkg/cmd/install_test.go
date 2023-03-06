@@ -464,3 +464,42 @@ func TestInstallDebugLogging4(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "debug", installCmdOptions.LogLevel)
 }
+
+func TestInstallStorage(t *testing.T) {
+	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdInstall,
+		"--storage-class-name", "scn",
+		"--storage-access-mode", "sam",
+		"--storage-capacity", "10Gi",
+	)
+	assert.Nil(t, err)
+	assert.Equal(t, true, installCmdOptions.Storage)
+	assert.Equal(t, true, installCmdOptions.storageOptions.Enabled)
+	assert.Equal(t, "scn", installCmdOptions.storageOptions.ClassName)
+	assert.Equal(t, "sam", installCmdOptions.storageOptions.AccessMode)
+	assert.Equal(t, "10Gi", installCmdOptions.storageOptions.Capacity)
+}
+
+func TestInstallStorageFalse(t *testing.T) {
+	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdInstall,
+		"--storage=false",
+	)
+	assert.Nil(t, err)
+	assert.Equal(t, false, installCmdOptions.Storage)
+	assert.Equal(t, false, installCmdOptions.storageOptions.Enabled)
+	assert.Equal(t, "", installCmdOptions.storageOptions.ClassName)
+	assert.Equal(t, "", installCmdOptions.storageOptions.AccessMode)
+	assert.Equal(t, "", installCmdOptions.storageOptions.Capacity)
+}
+
+func TestInstallStorageDefault(t *testing.T) {
+	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdInstall)
+	assert.Nil(t, err)
+	assert.Equal(t, true, installCmdOptions.Storage)
+	assert.Equal(t, true, installCmdOptions.storageOptions.Enabled)
+	assert.Equal(t, "", installCmdOptions.storageOptions.ClassName)
+	assert.Equal(t, "ReadWriteOnce", installCmdOptions.storageOptions.AccessMode)
+	assert.Equal(t, "20Gi", installCmdOptions.storageOptions.Capacity)
+}
