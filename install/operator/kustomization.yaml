@@ -44,3 +44,8 @@ kind: Kustomization
 
 resources:
 - ../config/manager
+namespace: camel-k
+images:
+- name: docker.io/apache/camel-k
+  newName: docker.io/apache/camel-k
+  newTag: 2.0.0-SNAPSHOT

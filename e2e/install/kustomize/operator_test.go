@@ -31,7 +31,9 @@ import (
 
 	. "github.com/apache/camel-k/e2e/support"
 	testutil "github.com/apache/camel-k/e2e/support/util"
+	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/util/defaults"
+
 	. "github.com/onsi/gomega"
 )
 
@@ -61,10 +63,19 @@ func TestOperatorBasic(t *testing.T) {
 		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		Eventually(Platform(ns)).ShouldNot(BeNil())
 		Eventually(OperatorPodPVCName(ns)).Should(Equal(defaults.DefaultPVC))
+
+		t.Run("run yaml", func(t *testing.T) {
+			Expect(KamelRun(ns, "files/yaml.yaml").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "yaml", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		})
+
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 
-func TestOperatorAlternativeImage(t *testing.T) {
+func TestOperatorKustomizeAlternativeImage(t *testing.T) {
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
@@ -95,7 +106,7 @@ func TestOperatorAlternativeImage(t *testing.T) {
 	})
 }
 
-func TestOperatorGlobal(t *testing.T) {
+func TestOperatorKustomizeGlobal(t *testing.T) {
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
