@@ -15,20 +15,19 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-- operator-pvc.yaml
-- operator-deployment.yaml
-- operator-service-account.yaml
-
-patchesStrategicMerge:
-- patch-operator-pvc.yaml
-- patch-toleration.yaml
-- patch-node-selector.yaml
-- patch-resource-requirements.yaml
-patches:
-- path: patch-log-level.yaml
-  target:
-    kind: Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: camel-k-operator
+spec:
+  template:
+    spec:
+      containers:
+        - name: camel-k-operator
+          volumeMounts:
+          - mountPath: /etc/maven/m2
+            name: camel-k-pvc
+      volumes:
+      - name: camel-k-pvc
+        persistentVolumeClaim:
+          claimName: camel-k-pvc

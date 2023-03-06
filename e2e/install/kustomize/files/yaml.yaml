@@ -15,20 +15,14 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-- operator-pvc.yaml
-- operator-deployment.yaml
-- operator-service-account.yaml
-
-patchesStrategicMerge:
-- patch-operator-pvc.yaml
-- patch-toleration.yaml
-- patch-node-selector.yaml
-- patch-resource-requirements.yaml
-patches:
-- path: patch-log-level.yaml
-  target:
-    kind: Deployment
+- from:
+    uri: "timer:yaml"
+    parameters:
+      period: "5000"
+    steps:
+      - set-header:
+          name: "m"
+          constant: "string!"
+      - set-body:
+          simple: "Magic${header.m}"
+      - to: "log:info"

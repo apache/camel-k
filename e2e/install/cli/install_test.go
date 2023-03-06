@@ -52,6 +52,15 @@ func TestBasicInstallation(t *testing.T) {
 		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))
 		Eventually(OperatorPodPVCName(ns)).Should(Equal(defaults.DefaultPVC))
+
+		t.Run("run yaml", func(t *testing.T) {
+			Expect(KamelRunWithID(operatorID, ns, "../files/yaml.yaml").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "yaml", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		})
+
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 
