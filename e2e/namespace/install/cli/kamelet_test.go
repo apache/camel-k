@@ -48,7 +48,7 @@ func TestKameletFromCustomRepository(t *testing.T) {
 
 		// Add the custom repository
 		Expect(Kamel("kamelet", "add-repo",
-			"github:apache/camel-k/e2e/global/common/files/kamelets",
+			"github:squakez/ck-kamelet-test-repo/kamelets",
 			"-n", ns,
 			"-x", operatorID).Execute()).To(Succeed())
 
@@ -60,7 +60,7 @@ func TestKameletFromCustomRepository(t *testing.T) {
 
 		// Remove the custom repository
 		Expect(Kamel("kamelet", "remove-repo",
-			"github:apache/camel-k/e2e/global/common/files/kamelets",
+			"github:squakez/ck-kamelet-test-repo/kamelets",
 			"-n", ns,
 			"-x", operatorID).Execute()).To(Succeed())
 	})
