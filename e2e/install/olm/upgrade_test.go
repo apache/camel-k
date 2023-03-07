@@ -92,7 +92,7 @@ func TestOperatorUpgrade(t *testing.T) {
 		Expect(Kamel("rebuild", name, "-n", ns).Execute()).To(Succeed())
 
 		// Check the Integration version has been upgraded
-		Eventually(IntegrationVersion(ns, name)).Should(Equal(defaults.Version))
+		Eventually(IntegrationVersion(ns, name), TestTimeoutMedium).Should(Equal(defaults.Version))
 
 		// Check the previous kit is not garbage collected
 		Eventually(Kits(ns, KitWithVersion(version))).Should(HaveLen(1))

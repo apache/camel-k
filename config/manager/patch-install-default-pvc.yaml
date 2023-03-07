@@ -15,19 +15,14 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: camel-k-operator
-spec:
-  template:
-    spec:
-      containers:
-        - name: camel-k-operator
-          volumeMounts:
-          - mountPath: /etc/maven/m2
-            name: camel-k-pvc
-      volumes:
-      - name: camel-k-pvc
-        persistentVolumeClaim:
-          claimName: camel-k-pvc
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts
+  value:
+    - name: camel-k-pvc
+      mountPath: /etc/maven/m2
+- op: add
+  path: /spec/template/spec/volumes
+  value:
+    - name: camel-k-pvc
+      persistentVolumeClaim:
+        claimName: camel-k-pvc
