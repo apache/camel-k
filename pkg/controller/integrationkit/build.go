@@ -107,16 +107,25 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 			}
 		}
 
+		// It has to be the same namespace as the operator as they must share a PVC
+		builderPodNamespace := platform.GetOperatorNamespace()
 		buildStrategy := env.Platform.Status.Build.BuildStrategy
 		if env.BuildStrategy != "" {
 			buildStrategy = env.BuildStrategy
+		}
 
-			if buildStrategy == v1.BuildStrategyPod {
-				// nolint: contextcheck
+		// nolint: contextcheck
+		if buildStrategy == v1.BuildStrategyPod {
+			// Pod strategy requires a PVC to exist. If it does not exist, we warn the user and fallback to Routine build strategy
+			if pvc, err := kubernetes.LookupPersistentVolumeClaim(env.Ctx, env.Client, builderPodNamespace, defaults.DefaultPVC); pvc != nil || err != nil {
 				err = platform.CreateBuilderServiceAccount(env.Ctx, env.Client, env.Platform)
 				if err != nil {
 					return nil, errors.Wrap(err, "Error while creating Camel K Builder service account")
 				}
+			} else {
+				// Fallback to Routine strategy
+				buildStrategy = v1.BuildStrategyRoutine
+				Log.Info(`Warning: the operator was installed with an ephemeral storage, builder "pod" strategy is not supported: using "routine" build strategy as a fallback. We recommend to configure a PersistentVolumeClaim in order to be able to use "pod" builder strategy. Please consider that certain features such as Quarkus native require a "pod" builder strategy (hence a PVC) to work properly.`)
 			}
 		}
 
@@ -132,12 +141,11 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 				Annotations: annotations,
 			},
 			Spec: v1.BuildSpec{
-				Strategy:  buildStrategy,
-				ToolImage: env.CamelCatalog.Image,
-				// TODO try to use platform.GetOperatorNamespace
-				OperatorNamespace: kubernetes.CurrentPodNamespace(),
-				Tasks:             env.BuildTasks,
-				Timeout:           timeout,
+				Strategy:            buildStrategy,
+				ToolImage:           env.CamelCatalog.Image,
+				BuilderPodNamespace: builderPodNamespace,
+				Tasks:               env.BuildTasks,
+				Timeout:             timeout,
 			},
 		}
 

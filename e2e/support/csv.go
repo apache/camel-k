@@ -37,8 +37,6 @@ import (
 
 	olm "github.com/operator-framework/api/pkg/operators/v1alpha1"
 
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/log"
 )
 
@@ -64,33 +62,6 @@ func ClusterServiceVersionPhase(conditions func(olm.ClusterServiceVersion) bool,
 		}
 		return ""
 	}
-}
-
-func CreateIfNotExistsCamelKPVC(ns string) error {
-	// Verify if a PVC already exists
-	camelKPVC, err := kubernetes.LookupPersistentVolumeClaim(TestContext, TestClient(), ns, defaults.DefaultPVC)
-	if err != nil {
-		return err
-	}
-	if camelKPVC != nil {
-		fmt.Printf("A persistent volume claim for \"%s\" already exist, reusing it\n", defaults.DefaultPVC)
-		return nil
-	}
-
-	defaultStorageClass, err := kubernetes.LookupDefaultStorageClass(TestContext, TestClient())
-	if err != nil {
-		return err
-	}
-
-	camelKPVC = kubernetes.NewPersistentVolumeClaim(
-		ns,
-		defaults.DefaultPVC,
-		defaultStorageClass.Name,
-		"20Gi",
-		corev1.PersistentVolumeAccessMode("ReadWriteOnce"),
-	)
-
-	return TestClient().Create(TestContext, camelKPVC)
 }
 
 func CreateOrUpdateCatalogSource(ns, name, image string) error {

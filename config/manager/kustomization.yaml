@@ -24,11 +24,16 @@ resources:
 - operator-service-account.yaml
 
 patchesStrategicMerge:
-- patch-operator-pvc.yaml
 - patch-toleration.yaml
 - patch-node-selector.yaml
 - patch-resource-requirements.yaml
 patches:
 - path: patch-log-level.yaml
+  target:
+    kind: Deployment
+- path: patch-install-default-kamelets.yaml
+  target:
+    kind: Deployment
+- path: patch-install-default-pvc.yaml
   target:
     kind: Deployment

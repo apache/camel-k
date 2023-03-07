@@ -34,7 +34,7 @@ type BuildSpec struct {
 	// The container image to be used to run the build.
 	ToolImage string `json:"toolImage,omitempty"`
 	// The namespace of the operator in charge of this Build reconciliation.
-	OperatorNamespace string `json:"operatorNamespace,omitempty"`
+	BuilderPodNamespace string `json:"operatorNamespace,omitempty"`
 	// Timeout defines the Build maximum execution duration.
 	// The Build deadline is set to the Build start time plus the Timeout duration.
 	// If the Build deadline is exceeded, the Build context is canceled,

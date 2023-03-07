@@ -644,7 +644,7 @@ bundle: set-version kustomize operator-sdk pre-bundle $(BUNDLE_CAMEL_APIS)
 	@# Sets the operator image to the preferred image:tag
 	@cd config/manifests && $(KUSTOMIZE) edit set image $(IMAGE_NAME)=$(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 	@# Build kustomize manifests
-	@$(KUSTOMIZE) build config/manifests | \
+	@INSTALL_DEFAULT_PVC=false $(KUSTOMIZE) build config/manifests | \
 		$(OPERATOR_SDK) generate bundle \
 			-q --overwrite --version $(OPERATOR_VERSION) \
 			--kustomize-dir config/manifests $(BUNDLE_METADATA_OPTS)

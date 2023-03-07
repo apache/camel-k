@@ -44,7 +44,7 @@ kind: Kustomization
 
 resources:
 - ../config/manager
-namespace: camel-k
+namespace: default
 images:
 - name: docker.io/apache/camel-k
   newName: docker.io/apache/camel-k
