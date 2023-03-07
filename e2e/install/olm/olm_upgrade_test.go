@@ -67,6 +67,8 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 	}
 
 	WithNewTestNamespace(t, func(ns string) {
+		// TODO: we're installing a PVC, but we need to understand if it makes sense in OLM scenario
+		Expect(CreateIfNotExistsCamelKPVC(ns)).To(Succeed())
 		Expect(CreateOrUpdateCatalogSource(ns, catalogSourceName, prevIIB)).To(Succeed())
 		ocp, err := openshift.IsOpenShift(TestClient())
 		assert.Nil(t, err)
