@@ -48,19 +48,19 @@ type Trait struct {
 	// Enables automatic configuration of the trait.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The AWS Access Key to use
-	AccessKey string `property:"access-key" json:"access-key,omitempty"`
+	AccessKey string `property:"access-key" json:"accessKey,omitempty"`
 	// The AWS Secret Key to use
-	SecretKey string `property:"secret-key" json:"secret-key,omitempty"`
+	SecretKey string `property:"secret-key" json:"secretKey,omitempty"`
 	// The AWS Region to use
 	Region string `property:"region" json:"region,omitempty"`
 	// Define if we want to use the Default Credentials Provider chain as authentication method
-	UseDefaultCredentialsProvider *bool `property:"use-default-credentials-provider" json:"use-default-credentials-provider,omitempty"`
+	UseDefaultCredentialsProvider *bool `property:"use-default-credentials-provider" json:"useDefaultCredentialsProvider,omitempty"`
 	// Define if we want to use the Camel Context Reload feature or not
-	ContextReloadEnabled *bool `property:"context-reload-enabled" json:"context-reload-enabled,omitempty"`
+	ContextReloadEnabled *bool `property:"context-reload-enabled" json:"contextReloadEnabled,omitempty"`
 	// Define if we want to use the Refresh Feature for secrets
-	RefreshEnabled *bool `property:"refresh-enabled" json:"refresh-enabled,omitempty"`
+	RefreshEnabled *bool `property:"refresh-enabled" json:"refreshEnabled,omitempty"`
 	// If Refresh is enabled, this defines the interval to check the refresh event
-	RefreshPeriod string `property:"refresh-period" json:"refresh-period,omitempty"`
+	RefreshPeriod string `property:"refresh-period" json:"refreshPeriod,omitempty"`
 	// If Refresh is enabled, the regular expression representing the secrets we want to track
 	Secrets string `property:"secrets" json:"secrets,omitempty"`
 }
