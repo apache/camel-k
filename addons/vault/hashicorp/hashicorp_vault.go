@@ -41,15 +41,15 @@ type Trait struct {
 	// Enables automatic configuration of the trait.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The Host to use
-	Host string `property:"host,omitempty"`
+	Host string `property:"host" json:"host,omitempty"`
 	// The Port to use
-	Port string `property:"port,omitempty"`
+	Port string `property:"port" json:"port,omitempty"`
 	// The Hashicorp engine to use
-	Engine string `property:"engine,omitempty"`
+	Engine string `property:"engine" json:"engine,omitempty"`
 	// The token to access Hashicorp Vault
-	Token string `property:"token,omitempty"`
+	Token string `property:"token" json:"token,omitempty"`
 	// The scheme to access Hashicorp Vault
-	Scheme string `property:"scheme,omitempty"`
+	Scheme string `property:"scheme" json:"scheme,omitempty"`
 }
 
 type hashicorpVaultTrait struct {
