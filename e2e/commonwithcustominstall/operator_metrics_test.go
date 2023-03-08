@@ -346,10 +346,25 @@ func TestMetrics(t *testing.T) {
 					),
 				}))
 			Expect(integrationKitReconciled).NotTo(BeNil())
+
+			// Kit can be requeued, above all when a catalog needs to be built
+			integrationKitRequeued := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
+				MatchFieldsP(IgnoreExtras, Fields{
+					"Label": ConsistOf(
+						label("group", v1.SchemeGroupVersion.Group),
+						label("version", v1.SchemeGroupVersion.Version),
+						label("kind", "IntegrationKit"),
+						label("namespace", it.Status.IntegrationKit.Namespace),
+						label("result", "Requeued"),
+						label("tag", ""),
+					),
+				}))
+			Expect(integrationKitRequeued).NotTo(BeNil())
 			integrationKitReconciledCount := *integrationKitReconciled.Histogram.SampleCount
 			Expect(integrationKitReconciledCount).To(BeNumerically(">", 0))
+			integrationKitRequeuedCount := *integrationKitRequeued.Histogram.SampleCount
 
-			Expect(integrationKitReconciliations).To(BeNumerically("==", integrationKitReconciledCount))
+			Expect(integrationKitReconciliations).To(BeNumerically("==", integrationKitReconciledCount+integrationKitRequeuedCount))
 
 			// Count the number of Build reconciliations
 			buildReconciliations, err := counter.Count(MatchFields(IgnoreExtras, Fields{
