@@ -41,13 +41,13 @@ type Trait struct {
 	// Enables automatic configuration of the trait.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The Azure Tenant Id for accessing Key Vault
-	TenantID string `property:"tenant-id,omitempty"`
+	TenantID string `property:"tenant-id" json:"tenantId,omitempty"`
 	// The Azure Client Id for accessing Key Vault
-	ClientID string `property:"client-id,omitempty"`
+	ClientID string `property:"client-id" json:"clientId,omitempty"`
 	// The Azure Client Secret for accessing Key Vault
-	ClientSecret string `property:"client-secret,omitempty"`
+	ClientSecret string `property:"client-secret" json:"clientSecret,omitempty"`
 	// The Azure Vault Name for accessing Key Vault
-	VaultName string `property:"vault-name,omitempty"`
+	VaultName string `property:"vault-name" json:"vaultName,omitempty"`
 }
 
 type azureKeyVaultTrait struct {
