@@ -18,15 +18,15 @@
 apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-1.15.2
+  name: camel-catalog-1.15.3-snapshot
   labels:
     app: camel-k
     camel.apache.org/catalog.loader.version: 3.18.3
     camel.apache.org/catalog.version: 3.18.3
-    camel.apache.org/runtime.version: 1.15.2
+    camel.apache.org/runtime.version: 1.15.3-SNAPSHOT
 spec:
   runtime:
-    version: 1.15.2
+    version: 1.15.3-SNAPSHOT
     provider: quarkus
     applicationClass: io.quarkus.bootstrap.runner.QuarkusEntryPoint
     metadata:
@@ -2782,14 +2782,6 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.zookeepermaster.MasterComponent
-    jolokia-jvm:
-      groupId: org.jolokia
-      artifactId: jolokia-jvm
-      exclusions:
-      - groupId: com.googlecode.json-simple
-        artifactId: json-simple
-      - groupId: org.jolokia
-        artifactId: jolokia-core
   loaders:
     groovy:
       groupId: org.apache.camel.quarkus
