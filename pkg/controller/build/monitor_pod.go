@@ -30,10 +30,12 @@ import (
 	"k8s.io/client-go/tools/remotecommand"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/pkg/platform"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
@@ -74,11 +76,23 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 			if pod, err = newBuildPod(ctx, action.reader, build); err != nil {
 				return nil, err
 			}
-			// TODO set the owner to the Build when non global, otherwise we can set to the global operator IP
-			// Set the Build as the Pod owner and controller
-			/*if err = controllerutil.SetControllerReference(build, pod, action.client.GetScheme()); err != nil {
+
+			// If the Builder Pod is in the Build namespace, we can set the ownership to it. If not (global operator mode)
+			// we set the ownership to the Operator Pod instead
+			var owner metav1.Object
+			if build.Namespace == pod.Namespace {
+				owner = build
+			} else {
+				pl, err := platform.GetOrFindForResource(ctx, action.reader, build, true)
+				if err != nil {
+					return nil, err
+				}
+				owner = pl
+			}
+			if err = controllerutil.SetControllerReference(owner, pod, action.client.GetScheme()); err != nil {
 				return nil, err
-			}*/
+			}
+
 			if err = action.client.Create(ctx, pod); err != nil {
 				return nil, errors.Wrap(err, "cannot create build pod")
 			}

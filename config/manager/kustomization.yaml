@@ -31,9 +31,6 @@ patches:
 - path: patch-log-level.yaml
   target:
     kind: Deployment
-- path: patch-install-default-kamelets.yaml
-  target:
-    kind: Deployment
 - path: patch-install-default-pvc.yaml
   target:
     kind: Deployment
