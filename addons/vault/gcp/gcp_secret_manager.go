@@ -43,11 +43,11 @@ type Trait struct {
 	// Enables automatic configuration of the trait.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The Project Id from Google Cloud
-	ProjectID string `property:"project-id,omitempty"`
+	ProjectID string `property:"project-id" json:"projectId,omitempty"`
 	// The Path to a service account Key File to use secrets from Google Secret Manager
-	ServiceAccountKey string `property:"service-account-key,omitempty"`
+	ServiceAccountKey string `property:"service-account-key" json:"serviceAccountKey,omitempty"`
 	// Define if we want to use the Default Instance approach for accessing the Google Secret Manager service
-	UseDefaultInstance *bool `property:"use-default-instance,omitempty"`
+	UseDefaultInstance *bool `property:"use-default-instance" json:"useDefaultInstance,omitempty"`
 }
 
 type gcpSecretManagerTrait struct {
