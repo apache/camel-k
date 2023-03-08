@@ -108,7 +108,6 @@ func TestOLMInstallation(t *testing.T) {
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
 			// Check the Integration version matches that of the current operator
 			Expect(IntegrationVersion(ns, name)()).To(ContainSubstring(ipVersionPrefix))
-			// TODO check the build status strategy is POD
 			// Check the operator is warning
 			Eventually(Logs(ns, OperatorPod(ns)().Name, corev1.PodLogOptions{})).Should(ContainSubstring(`the operator was installed with an ephemeral storage, builder \"pod\" strategy is not supported: using \"routine\" build strategy as a fallback.`))
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
@@ -153,8 +152,6 @@ func TestOLMInstallation(t *testing.T) {
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
-			// TODO check the build status strategy is POD
 			Eventually(Logs(ns, OperatorPod(ns)().Name, corev1.PodLogOptions{})).ShouldNot(ContainSubstring(`the operator was installed with an ephemeral storage, builder \"pod\" strategy is not supported: using \"routine\" build strategy as a fallback.`))
 		})
 

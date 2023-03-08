@@ -14,25 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ---------------------------------------------------------------------------
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
 
-# Labels to add to all resources and selectors.
-commonLabels:
-  app: camel-k
-
-resources:
-- ../manager
-- ../crd
-- ../samples
-- ../scorecard
-- ../rbac
-- ../rbac/openshift
-
-patchesStrategicMerge:
-- patch-delete-user-cluster-role.yaml
-- patch-delete-pvc.yaml
-images:
-- name: docker.io/apache/camel-k
-  newName: docker.io/apache/camel-k
-  newTag: 2.0.0-SNAPSHOT
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: camel-k-operator
+spec:
+  template:
+    spec:
+      containers:
+        - name: camel-k-operator
+          volumeMounts: null
+      volumes: null
