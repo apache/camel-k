@@ -552,19 +552,19 @@ traits:
   - name: auto
     type: bool
     description: Enables automatic configuration of the trait.
-  - name: host,omitempty
+  - name: host
     type: string
     description: The Host to use
-  - name: port,omitempty
+  - name: port
     type: string
     description: The Port to use
-  - name: engine,omitempty
+  - name: engine
     type: string
     description: The Hashicorp engine to use
-  - name: token,omitempty
+  - name: token
     type: string
     description: The token to access Hashicorp Vault
-  - name: scheme,omitempty
+  - name: scheme
     type: string
     description: The scheme to access Hashicorp Vault
 - name: health
