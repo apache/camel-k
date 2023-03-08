@@ -37,84 +37,42 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
-options=""
-if [ "$CI" = "true" ]; then
-  options="--batch-mode"
-fi
-
 camel_k_destination="$PWD/build/_maven_output"
 camel_k_runtime_version=$1
 maven_repo=${staging_repo:-https://repo1.maven.org/maven2}
 
-if [ -n "$staging_repo" ]; then
-    if  [[ $staging_repo == http:* ]] || [[ $staging_repo == https:* ]]; then
-        options="${options} -s ${rootdir}/settings.xml"
-        cat << EOF > ${rootdir}/settings.xml
-<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
-  <profiles>
-    <profile>
-      <id>camel-k-staging</id>
-      <repositories>
-        <repository>
-          <id>camel-k-staging-releases</id>
-          <name>Camel K Staging</name>
-          <url>${staging_repo}</url>
-          <releases>
-            <enabled>true</enabled>
-            <updatePolicy>never</updatePolicy>
-          </releases>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-        </repository>
-      </repositories>
-    </profile>
-  </profiles>
-  <activeProfiles>
-    <activeProfile>camel-k-staging</activeProfile>
-  </activeProfiles>
-</settings>
-EOF
-    fi
-fi
+# Refresh m2 distro project
+rm -rf ${rootdir}/build/m2
+mkdir -p ${rootdir}/build/m2
+
+# Refresh maven output dir
+rm -rf ${camel_k_destination}
+mkdir -p ${camel_k_destination}
 
 if [ -z "${local_runtime_dir}" ]; then
-    is_snapshot=$(echo "${camel_k_runtime_version}" | grep "SNAPSHOT")
-    if [ "$is_snapshot" = "${camel_k_runtime_version}" ]; then
-        echo "You're trying to package SNAPSHOT artifacts. You probably wants them from your local environment, try calling:"
-        echo "$0 <Camel K runtime version> <local Camel K runtime project directory>"
-        exit 3
-    fi
+  # Remote M2 distro
+  if [ ! -z $staging_repo ]; then
+    # Change the settings to include the staging repo if it's not already there
+    echo "INFO: updating the settings staging repository"
+    sed -i "s;<url>https://repository\.apache\.org/content/repositories/orgapachecamel-.*</url>;<url>$staging_repo</url>;" $location/maven-settings.xml
+  fi
 
-    # Take the dependencies officially released
-    wget ${maven_repo}/org/apache/camel/k/apache-camel-k-runtime/${camel_k_runtime_version}/apache-camel-k-runtime-${camel_k_runtime_version}-source-release.zip -O $PWD/build/apache-camel-k-runtime-${camel_k_runtime_version}-source-release.zip
-    unzip -q -o $PWD/build/apache-camel-k-runtime-${camel_k_runtime_version}-source-release.zip -d $PWD/build
-    mvn -q \
-        $options \
-        -f $PWD/build/apache-camel-k-runtime-${camel_k_runtime_version}/pom.xml \
-        dependency:copy-dependencies \
-        -DincludeScope=runtime \
-        -Dmdep.copyPom=true \
-        -DoutputDirectory=$camel_k_destination \
-        -Dmdep.useRepositoryLayout=true
-    rm -rf $PWD/build/apache-camel-k-runtime*
+  #TODO: remove this check once Camel K 1.16.0 is released
+  if [[ $camel_k_runtime_version != *"SNAPSHOT"* ]]; then
+    echo "WARN: Package Camel K runtime artifacts temporary removed because of https://github.com/apache/camel-k-runtime/pull/928 issue"
+    echo "Please, remove this check when Camel K Runtime 1.16.0 is officially released"
+    exit 0
+  fi
+  echo "Downloading Camel K runtime $camel_k_runtime_version M2 (may take some minute ...)"
+  mvn -q dependency:copy -Dartifact="org.apache.camel.k:apache-camel-k-runtime:$camel_k_runtime_version:zip:m2" \
+    -Dmdep.useBaseVersion=true \
+    -DoutputDirectory=${rootdir}/build/m2 \
+    -s $location/maven-settings.xml \
+    -Papache
+  unzip -q -o $PWD/build/m2/apache-camel-k-runtime-${camel_k_runtime_version}-m2.zip -d $camel_k_destination
 else
-    # Take the dependencies from a local development environment
-    camel_k_runtime_source=${local_runtime_dir}
-    camel_k_runtime_source_version=$(mvn $options -f $camel_k_runtime_source/pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
-
-    if [ "$camel_k_runtime_version" != "$camel_k_runtime_source_version" ]; then
-        echo "Misaligned version. You're building Camel K project using $camel_k_runtime_version but trying to bundle dependencies from local Camel K runtime $camel_k_runtime_source_version"
-        exit 2
-    fi
-
-    mvn -q \
-        $options \
-        -f $camel_k_runtime_source/pom.xml \
-    dependency:copy-dependencies \
-        -DincludeScope=runtime \
-        -Dmdep.copyPom=true \
-        -DoutputDirectory=$camel_k_destination \
-        -Dmdep.useRepositoryLayout=true
+  # Local M2 distro
+  echo "Installing local Camel K runtime $camel_k_runtime_version M2 from $local_runtime_dir (may take some minute ...)"
+  mvn -q -f $local_runtime_dir/distribution clean install
+  unzip -q -o $local_runtime_dir/distribution/target/apache-camel-k-runtime-${camel_k_runtime_version}-m2.zip -d $camel_k_destination
 fi
