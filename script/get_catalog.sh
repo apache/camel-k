@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
+
 location=$(dirname $0)
 rootdir=$location/../
 
@@ -22,23 +24,24 @@ if [ "$#" -lt 1 ]; then
   echo "usage: $0 <Camel K runtime version> [<staging repository>]"
   exit 1
 fi
+runtime_version="$1"
 
-if [ -z $2 ]; then
-  mvn -q dependency:copy -Dartifact="org.apache.camel.k:camel-k-catalog:$1:yaml:catalog" -DoutputDirectory=${rootdir}/resources/
-  mv ${rootdir}/resources/camel-k-catalog-$1-catalog.yaml ${rootdir}/resources/camel-catalog-$1.yaml
-else
-  # TODO: fix this workaround to use the above mvn statement with the staging repository as well
-  echo "INFO: extracting a catalog from staging repository $2"
-  wget -q $2/org/apache/camel/k/camel-k-catalog/$1/camel-k-catalog-$1-catalog.yaml -O ${rootdir}/resources/camel-catalog.yaml
-
-  if [ -s ${rootdir}/resources/camel-catalog.yaml ]; then
-    # the extracted catalog file is not empty
-    mv ${rootdir}/resources/camel-catalog.yaml ${rootdir}/resources/camel-catalog-$1.yaml
-  else
-    # the extracted catalog file is empty - some error in staging repository
-    echo "WARNING: could not extract catalog from staging repository $2"
-    rm ${rootdir}/resources/camel-catalog.yaml
-  fi
+if [ ! -z $2 ]; then
+  # Change the settings to include the staging repo if it's not already there
+  echo "INFO: updating the settings staging repository"
+  sed -i.bak "s;<url>https://repository\.apache\.org/content/repositories/orgapachecamel-.*</url>;<url>$2</url>;" $location/maven-settings.xml
+  rm $location/maven-settings.xml.bak
 fi
 
+# Refresh catalog sets. We can clean any leftover as well.
+rm -f ${rootdir}/resources/camel-catalog-*
 
+mvn -q dependency:copy -Dartifact="org.apache.camel.k:camel-k-catalog:$runtime_version:yaml:catalog" \
+  -Dmdep.useBaseVersion=true \
+  -DoutputDirectory=${rootdir}/resources/ \
+  -s $location/maven-settings.xml \
+  -Papache
+
+if [ -f "${rootdir}/resources/camel-k-catalog-${runtime_version}-catalog.yaml" ]; then
+    mv ${rootdir}/resources/camel-k-catalog-"${runtime_version}"-catalog.yaml ${rootdir}/resources/camel-catalog-"${runtime_version}".yaml
+fi
