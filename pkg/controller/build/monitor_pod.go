@@ -80,14 +80,12 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 			// If the Builder Pod is in the Build namespace, we can set the ownership to it. If not (global operator mode)
 			// we set the ownership to the Operator Pod instead
 			var owner metav1.Object
-			if build.Namespace == pod.Namespace {
-				owner = build
-			} else {
-				pl, err := platform.GetOrFindForResource(ctx, action.reader, build, true)
-				if err != nil {
-					return nil, err
+			owner = build
+			if build.Namespace != pod.Namespace {
+				operatorPod := platform.GetOperatorPod(ctx, action.reader, pod.Namespace)
+				if operatorPod != nil {
+					owner = operatorPod
 				}
-				owner = pl
 			}
 			if err = controllerutil.SetControllerReference(owner, pod, action.client.GetScheme()); err != nil {
 				return nil, err
