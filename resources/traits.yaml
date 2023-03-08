@@ -86,19 +86,19 @@ traits:
   - name: auto
     type: bool
     description: Enables automatic configuration of the trait.
-  - name: access-key,omitempty
+  - name: access-key
     type: string
     description: The AWS Access Key to use
-  - name: secret-key,omitempty
+  - name: secret-key
     type: string
     description: The AWS Secret Key to use
-  - name: region,omitempty
+  - name: region
     type: string
     description: The AWS Region to use
-  - name: use-default-credentials-provider,omitempty
+  - name: use-default-credentials-provider
     type: bool
-    description: 'The adapter-specific policy to use when filling the cache (use:
-      minimizing / maximizing). Check the component documentation if unsure'
+    description: Define if we want to use the Default Credentials Provider chain as
+      authentication method
 - name: azure-key-vault
   platform: false
   profiles:
@@ -120,16 +120,16 @@ traits:
   - name: auto
     type: bool
     description: Enables automatic configuration of the trait.
-  - name: tenant-id,omitempty
+  - name: tenant-id
     type: string
     description: The Azure Tenant Id for accessing Key Vault
-  - name: client-id,omitempty
+  - name: client-id
     type: string
     description: The Azure Client Id for accessing Key Vault
-  - name: client-secret,omitempty
+  - name: client-secret
     type: string
     description: The Azure Client Secret for accessing Key Vault
-  - name: vault-name,omitempty
+  - name: vault-name
     type: string
     description: The Azure Vault Name for accessing Key Vault
 - name: builder
@@ -496,14 +496,14 @@ traits:
   - name: auto
     type: bool
     description: Enables automatic configuration of the trait.
-  - name: project-id,omitempty
+  - name: project-id
     type: string
     description: The Project Id from Google Cloud
-  - name: service-account-key,omitempty
+  - name: service-account-key
     type: string
     description: The Path to a service account Key File to use secrets from Google
       Secret Manager
-  - name: use-default-instance,omitempty
+  - name: use-default-instance
     type: bool
     description: Define if we want to use the Default Instance approach for accessing
       the Google Secret Manager service

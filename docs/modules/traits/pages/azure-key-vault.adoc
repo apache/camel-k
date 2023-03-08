@@ -37,19 +37,19 @@ The following configuration options are available:
 | bool
 | Enables automatic configuration of the trait.
 
-| azure-key-vault.tenant-id,omitempty
+| azure-key-vault.tenant-id
 | string
 | The Azure Tenant Id for accessing Key Vault
 
-| azure-key-vault.client-id,omitempty
+| azure-key-vault.client-id
 | string
 | The Azure Client Id for accessing Key Vault
 
-| azure-key-vault.client-secret,omitempty
+| azure-key-vault.client-secret
 | string
 | The Azure Client Secret for accessing Key Vault
 
-| azure-key-vault.vault-name,omitempty
+| azure-key-vault.vault-name
 | string
 | The Azure Vault Name for accessing Key Vault
 
