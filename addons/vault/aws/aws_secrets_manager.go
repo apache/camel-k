@@ -43,14 +43,13 @@ type Trait struct {
 	// Enables automatic configuration of the trait.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The AWS Access Key to use
-	AccessKey string `property:"access-key,omitempty"`
+	AccessKey string `property:"access-key" json:"accessKey,omitempty"`
 	// The AWS Secret Key to use
-	SecretKey string `property:"secret-key,omitempty"`
+	SecretKey string `property:"secret-key" json:"secretKey,omitempty"`
 	// The AWS Region to use
-	Region string `property:"region,omitempty"`
-	// The adapter-specific policy to use when filling the cache (use: minimizing / maximizing). Check
-	// the component documentation if unsure
-	UseDefaultCredentialsProvider *bool `property:"use-default-credentials-provider,omitempty"`
+	Region string `property:"region" json:"region,omitempty"`
+	// Define if we want to use the Default Credentials Provider chain as authentication method
+	UseDefaultCredentialsProvider *bool `property:"use-default-credentials-provider" json:"useDefaultCredentialsProvider,omitempty"`
 }
 
 type awsSecretsManagerTrait struct {
