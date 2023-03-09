@@ -25,8 +25,9 @@ spec:
       kind: Kamelet
       apiVersion: camel.apache.org/v1alpha1
       name: event-source
-    properties:
-      outputFormat: ${outputFormat}
+    dataTypes:
+      out:
+        format: binary
   steps:
     - ref:
         kind: Kamelet
@@ -37,5 +38,6 @@ spec:
       kind: Kamelet
       apiVersion: camel.apache.org/v1alpha1
       name: event-sink
-    properties:
-      inputFormat: ${inputFormat}
+    dataTypes:
+      in:
+        format: string
