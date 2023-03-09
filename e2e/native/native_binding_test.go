@@ -84,8 +84,5 @@ func TestNativeBinding(t *testing.T) {
 			Expect(Kamel("delete", bindingName, "-n", ns).Execute()).To(Succeed())
 			Expect(DeleteKits(ns)).To(Succeed())
 		})
-
-		// Clean up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
