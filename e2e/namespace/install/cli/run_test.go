@@ -51,7 +51,7 @@ func TestKamelCLIRun(t *testing.T) {
 				Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
 				Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Hello Camel K!"))
-				Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+				Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 			})
 
 			t.Run("Java (RAW)", func(t *testing.T) {
@@ -62,7 +62,7 @@ func TestKamelCLIRun(t *testing.T) {
 				Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
 				Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Hello Camel K!"))
-				Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+				Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 			})
 
 			t.Run("Java (branch)", func(t *testing.T) {
@@ -72,7 +72,7 @@ func TestKamelCLIRun(t *testing.T) {
 				Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
 				Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Hello Camel K!"))
-				Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+				Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 			})
 
 			t.Run("Gist (ID)", func(t *testing.T) {
@@ -98,9 +98,6 @@ func TestKamelCLIRun(t *testing.T) {
 				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Tick!"))
 				Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 			})
-
-			// Clean up
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("Run and update", func(t *testing.T) {
