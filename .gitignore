@@ -47,6 +47,10 @@ build/maven
 build/m2
 /api_*
 
+# YAKS test output
+.yaks-jbang/
+_output/
+
 # envrc
 .envrc
 

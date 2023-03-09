@@ -16,29 +16,29 @@
 # ---------------------------------------------------------------------------
 
 apiVersion: camel.apache.org/v1alpha1
-kind: Kamelet
+kind: KameletBinding
 metadata:
-  name: event-sink
-  labels:
-    camel.apache.org/kamelet.type: "sink"
+  name: timer-to-log
 spec:
-  definition:
-    title: "Event Sink"
-    description: "Handles incoming event with data type auto conversion"
-  dataTypes:
-    in:
-      default: string
-      types:
-        string:
-          mediaType: plain/text
-        binary:
-          mediaType: application/octet-stream
-  dependencies:
-    - "camel:core"
-    - "camel:kamelet"
-  template:
-    from:
-      uri: "kamelet:source"
-      steps:
-        - to:
-            uri: "log:info"
+  source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1alpha1
+      name: timer-source
+    properties:
+      message: "Hello from Camel K!"
+  steps:
+    - ref:
+        kind: Kamelet
+        apiVersion: camel.apache.org/v1alpha1
+        name: log-action
+      dataTypes:
+        in:
+          format: binary
+        out:
+          format: string
+  sink:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1alpha1
+      name: log-sink

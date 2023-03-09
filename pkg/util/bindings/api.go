@@ -20,7 +20,6 @@ package bindings
 
 import (
 	"context"
-	"fmt"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
@@ -66,12 +65,4 @@ type BindingContext struct {
 type EndpointContext struct {
 	Type     v1alpha1.EndpointType
 	Position *int
-}
-
-func (c EndpointContext) GenerateID() string {
-	id := string(c.Type)
-	if c.Position != nil {
-		id = fmt.Sprintf("%s-%d", id, *c.Position)
-	}
-	return id
 }

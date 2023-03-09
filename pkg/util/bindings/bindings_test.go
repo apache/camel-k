@@ -19,16 +19,13 @@ package bindings
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"net/url"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/pointer"
 
 	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	knativeapis "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/util/test"
@@ -137,7 +134,8 @@ func TestBindings(t *testing.T) {
 					Name:       "mykamelet",
 				},
 			},
-			uri: "kamelet:mykamelet/source",
+			uri:   "kamelet:mykamelet/source",
+			props: map[string]string{},
 		},
 		{
 			endpointType: v1alpha1.EndpointTypeSink,
@@ -238,32 +236,4 @@ func TestBindings(t *testing.T) {
 			assert.Equal(t, tc.props, binding.ApplicationProperties)
 		})
 	}
-}
-
-func asEndpointProperties(props map[string]string) *v1alpha1.EndpointProperties {
-	serialized, err := json.Marshal(props)
-	if err != nil {
-		panic(err)
-	}
-	return &v1alpha1.EndpointProperties{
-		RawMessage: serialized,
-	}
-}
-
-func asKnativeConfig(endpointURL string) string {
-	serviceURL, err := url.Parse(endpointURL)
-	if err != nil {
-		panic(err)
-	}
-	def, err := knativeapis.BuildCamelServiceDefinition("sink", knativeapis.CamelEndpointKindSink, knativeapis.CamelServiceTypeEndpoint, *serviceURL, "", "")
-	if err != nil {
-		panic(err)
-	}
-	env := knativeapis.NewCamelEnvironment()
-	env.Services = append(env.Services, def)
-	serialized, err := json.Marshal(env)
-	if err != nil {
-		panic(err)
-	}
-	return string(serialized)
 }
