@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - Upgrade Operator Framework SDK version [\#4105](https://github.com/apache/camel-k/issues/4105)
+- Automatic updates action failing [\#4073](https://github.com/apache/camel-k/issues/4073)
 
 ## [1.12.1-nightly](https://github.com/apache/camel-k/tree/1.12.1-nightly) (2023-03-08)
 
