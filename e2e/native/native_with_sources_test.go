@@ -96,8 +96,5 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 			// Clean up
 			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
 		})
-
-		// Clean up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

@@ -32,7 +32,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestSetupBasic(t *testing.T) {
+func TestSetupKustomizeBasic(t *testing.T) {
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
@@ -63,7 +63,7 @@ func TestSetupBasic(t *testing.T) {
 
 }
 
-func TestSetupGlobal(t *testing.T) {
+func TestSetupKustomizeGlobal(t *testing.T) {
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 

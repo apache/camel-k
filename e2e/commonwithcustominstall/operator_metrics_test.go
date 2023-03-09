@@ -346,6 +346,8 @@ func TestMetrics(t *testing.T) {
 					),
 				}))
 			Expect(integrationKitReconciled).NotTo(BeNil())
+			integrationKitReconciledCount := *integrationKitReconciled.Histogram.SampleCount
+			Expect(integrationKitReconciledCount).To(BeNumerically(">", 0))
 
 			// Kit can be requeued, above all when a catalog needs to be built
 			integrationKitRequeued := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
@@ -359,10 +361,11 @@ func TestMetrics(t *testing.T) {
 						label("tag", ""),
 					),
 				}))
-			Expect(integrationKitRequeued).NotTo(BeNil())
-			integrationKitReconciledCount := *integrationKitReconciled.Histogram.SampleCount
-			Expect(integrationKitReconciledCount).To(BeNumerically(">", 0))
-			integrationKitRequeuedCount := *integrationKitRequeued.Histogram.SampleCount
+			var integrationKitRequeuedCount uint64
+			integrationKitRequeuedCount = 0
+			if integrationKitRequeued != nil {
+				integrationKitRequeuedCount = *integrationKitRequeued.Histogram.SampleCount
+			}
 
 			Expect(integrationKitReconciliations).To(BeNumerically("==", integrationKitReconciledCount+integrationKitRequeuedCount))
 
