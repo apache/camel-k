@@ -33,7 +33,7 @@ if [[ "$KAMELET_CATALOG_REPO_TAG" == "main" ]]; then
     KAMELETS_VERSION="latest"
     KAMELETS_DOCS_VERSION="next"
 else
-    re="^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)$"
+    re="^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+).*$"
     if ! [[ $KAMELETS_VERSION =~ $re ]]; then
         echo "❗ argument must match semantic version: $KAMELETS_VERSION"
         exit 1
