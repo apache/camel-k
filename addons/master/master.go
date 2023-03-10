@@ -31,6 +31,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/property"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
@@ -38,6 +39,18 @@ import (
 // leader election and starting *master* routes only on certain instances.
 //
 // It's activated automatically when using the master endpoint in a route, e.g. `from("master:lockname:telegram:bots")...`.
+//
+// This trait is backed by camel-quarkus-kubernetes component and it requires build time properties if your integration needs customization.
+//
+// These are the three most commonly used parameters:
+//
+// `quarkus.camel.cluster.kubernetes.resource-name`: The name of the lease resource used to do optimistic locking (defaults to 'leaders').
+//
+// `quarkus.camel.cluster.kubernetes.lease-resource-type`: The lease resource type used in Kubernetes, either `ConfigMap` or `Lease`` (defaults to `Lease`).
+//
+// `quarkus.camel.cluster.kubernetes.labels`: The labels key/value used to identify the pods composing the cluster, defaults to empty map.
+//
+// The parameters must be set with `--build-property`, example: `--build-property quarkus.camel.cluster.kubernetes.resource-name=foobar`
 //
 // NOTE: this trait adds special permissions to the integration service account in order to read/write configmaps and read pods.
 // It's recommended to use a different service account than "default" when running the integration.
@@ -51,21 +64,13 @@ type Trait struct {
 	// E.g. when using `master:lockname:timer`, then `camel:timer` is automatically added to the set of dependencies.
 	// It's enabled by default.
 	IncludeDelegateDependencies *bool `property:"include-delegate-dependencies" json:"includeDelegateDependencies,omitempty"`
-	// Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
-	// Name of the configmap/lease resource that will be used to store the lock. Defaults to "<integration-name>-lock".
-	ResourceName *string `property:"resource-name" json:"resourceName,omitempty"`
-	// Type of Kubernetes resource to use for locking ("ConfigMap" or "Lease"). Defaults to "Lease".
-	ResourceType *string `property:"resource-type" json:"resourceType,omitempty"`
-	// Label that will be used to identify all pods contending the lock. Defaults to "camel.apache.org/integration".
-	LabelKey *string `property:"label-key" json:"labelKey,omitempty"`
-	// Label value that will be used to identify all pods contending the lock. Defaults to the integration name.
-	LabelValue *string `property:"label-value" json:"labelValue,omitempty"`
 }
 
 type masterTrait struct {
 	trait.BaseTrait
 	Trait                `property:",squash"`
 	delegateDependencies []string `json:"-"`
+	resourceType         string
 }
 
 // NewMasterTrait --.
@@ -85,67 +90,69 @@ var (
 )
 
 func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
+	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 
-	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() && !e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
 		return false, nil
 	}
 
-	if pointer.BoolDeref(t.Auto, true) {
-		// Check if the master component has been used
-		sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
-		if err != nil {
-			return false, err
-		}
+	if e.Integration != nil {
+		if pointer.BoolDeref(t.Auto, true) {
+			// Check if the master component has been used
+			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
+			if err != nil {
+				return false, err
+			}
 
-		meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
-		if err != nil {
-			return false, err
-		}
+			meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
+			if err != nil {
+				return false, err
+			}
 
-		if t.Enabled == nil {
-			for _, endpoint := range meta.FromURIs {
-				if uri.GetComponent(endpoint) == masterComponent {
-					enabled := true
-					t.Enabled = &enabled
+			if t.Enabled == nil {
+				for _, endpoint := range meta.FromURIs {
+					if uri.GetComponent(endpoint) == masterComponent {
+						enabled := true
+						t.Enabled = &enabled
+					}
+				}
+			}
+
+			if !pointer.BoolDeref(t.Enabled, false) {
+				return false, nil
+			}
+
+			if t.IncludeDelegateDependencies == nil || *t.IncludeDelegateDependencies {
+				t.delegateDependencies = findAdditionalDependencies(e, meta)
+			}
+		}
+	}
+	if e.IntegrationInRunningPhases() {
+
+		if e.Integration.Spec.Traits.Builder != nil && e.Integration.Spec.Traits.Builder.Properties != nil {
+			for _, v := range e.Integration.Spec.Traits.Builder.Properties {
+				key, value := property.SplitPropertyFileEntry(v)
+				if len(key) == 0 || len(value) == 0 {
+					t.L.Infof("maven property must have key=value format, it was %v", v)
+				}
+				if key == "quarkus.camel.cluster.kubernetes.lease-resource-type" {
+					t.resourceType = value
 				}
 			}
 		}
 
-		if !pointer.BoolDeref(t.Enabled, false) {
-			return false, nil
-		}
-
-		if t.IncludeDelegateDependencies == nil || *t.IncludeDelegateDependencies {
-			t.delegateDependencies = findAdditionalDependencies(e, meta)
-		}
-
-		if t.ResourceName == nil {
-			val := fmt.Sprintf("%s-lock", e.Integration.Name)
-			t.ResourceName = &val
-		}
-
-		if t.ResourceType == nil {
+		if t.resourceType == "" {
 			canUseLeases, err := t.canUseLeases(e)
 			if err != nil {
 				return false, err
 			}
 			if canUseLeases {
-				t.ResourceType = &leaseResourceType
+				t.resourceType = leaseResourceType
 			} else {
-				t.ResourceType = &configMapResourceType
+				t.resourceType = configMapResourceType
 			}
-		}
-
-		if t.LabelKey == nil {
-			val := v1.IntegrationLabel
-			t.LabelKey = &val
-		}
-
-		if t.LabelValue == nil {
-			t.LabelValue = &e.Integration.Name
 		}
 	}
 
@@ -153,13 +160,16 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 }
 
 func (t *masterTrait) Apply(e *trait.Environment) error {
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityMaster)
 
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		// util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityMaster)
 		// Master sub endpoints need to be added to the list of dependencies
 		for _, dep := range t.delegateDependencies {
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dep)
 		}
+	} else if e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
+		// if the master trait is enabled, then set this camel-quarkus-kubernetes build property
+		e.BuildProperties["quarkus.camel.cluster.kubernetes.enabled"] = "true"
 
 	} else if e.IntegrationInRunningPhases() {
 		serviceAccount := e.Integration.Spec.ServiceAccountName
@@ -178,8 +188,8 @@ func (t *masterTrait) Apply(e *trait.Environment) error {
 		}
 
 		roleSuffix := leaseResourceType
-		if t.ResourceType != nil {
-			roleSuffix = *t.ResourceType
+		if t.resourceType != "" {
+			roleSuffix = t.resourceType
 		}
 		roleSuffix = strings.ToLower(roleSuffix)
 
@@ -194,35 +204,6 @@ func (t *masterTrait) Apply(e *trait.Environment) error {
 
 		e.Resources.Add(role)
 		e.Resources.Add(roleBinding)
-
-		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-			v1.ConfigurationSpec{Type: "property", Value: "customizer.master.enabled=true"},
-		)
-
-		if t.ResourceName != nil {
-			resourceName := t.ResourceName
-			e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-				v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.kubernetesResourceName=%s", *resourceName)},
-			)
-		}
-
-		if t.ResourceType != nil {
-			e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-				v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.leaseResourceType=%s", *t.ResourceType)},
-			)
-		}
-
-		if t.LabelKey != nil {
-			e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-				v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.labelKey=%s", *t.LabelKey)},
-			)
-		}
-
-		if t.LabelValue != nil {
-			e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-				v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.labelValue=%s", *t.LabelValue)},
-			)
-		}
 	}
 
 	return nil

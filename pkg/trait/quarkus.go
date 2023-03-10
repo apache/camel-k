@@ -333,6 +333,10 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 		}
 	}
 
+	for k, v := range e.BuildProperties {
+		build.Maven.Properties[k] = v
+	}
+
 	// Sort steps by phase
 	sort.SliceStable(steps, func(i, j int) bool {
 		return steps[i].Phase() < steps[j].Phase()

@@ -1005,10 +1005,18 @@ traits:
   description: 'The Master trait allows to configure the integration to automatically
     leverage Kubernetes resources for doing leader election and starting *master*
     routes only on certain instances. It''s activated automatically when using the
-    master endpoint in a route, e.g. `from("master:lockname:telegram:bots")...`. NOTE:
-    this trait adds special permissions to the integration service account in order
-    to read/write configmaps and read pods. It''s recommended to use a different service
-    account than "default" when running the integration.'
+    master endpoint in a route, e.g. `from("master:lockname:telegram:bots")...`. This
+    trait is backed by camel-quarkus-kubernetes component and it requires build time
+    properties if your integration needs customization. These are the three most commonly
+    used parameters: `quarkus.camel.cluster.kubernetes.resource-name`: The name of
+    the lease resource used to do optimistic locking (defaults to ''leaders''). `quarkus.camel.cluster.kubernetes.lease-resource-type`:
+    The lease resource type used in Kubernetes, either `ConfigMap` or `Lease`` (defaults
+    to `Lease`). `quarkus.camel.cluster.kubernetes.labels`: The labels key/value used
+    to identify the pods composing the cluster, defaults to empty map. The parameters
+    must be set with `--build-property`, example: `--build-property quarkus.camel.cluster.kubernetes.resource-name=foobar`
+    NOTE: this trait adds special permissions to the integration service account in
+    order to read/write configmaps and read pods. It''s recommended to use a different
+    service account than "default" when running the integration.'
   properties:
   - name: enabled
     type: bool
@@ -1023,23 +1031,6 @@ traits:
       add dependencies required by delegate endpoints. E.g. when using `master:lockname:timer`,
       then `camel:timer` is automatically added to the set of dependencies. It's enabled
       by default.
-  - name: resource-name
-    type: string
-    description: Name of the configmap that will be used to store the lock. Defaults
-      to "<integration-name>-lock". Name of the configmap/lease resource that will
-      be used to store the lock. Defaults to "<integration-name>-lock".
-  - name: resource-type
-    type: string
-    description: Type of Kubernetes resource to use for locking ("ConfigMap" or "Lease").
-      Defaults to "Lease".
-  - name: label-key
-    type: string
-    description: Label that will be used to identify all pods contending the lock.
-      Defaults to "camel.apache.org/integration".
-  - name: label-value
-    type: string
-    description: Label value that will be used to identify all pods contending the
-      lock. Defaults to the integration name.
 - name: mount
   platform: true
   profiles:

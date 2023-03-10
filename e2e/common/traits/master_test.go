@@ -47,8 +47,7 @@ func TestMasterTrait(t *testing.T) {
 		Expect(KamelRunWithID(operatorID, ns, "files/Master.java",
 			"--name", "first",
 			"--label", "leader-group=same",
-			"-t", "master.label-key=leader-group",
-			"-t", "master.label-value=same",
+			"--build-property", "quarkus.camel.cluster.kubernetes.labels=leader-group=same",
 			"-t", "owner.target-labels=leader-group").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "first"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationLogs(ns, "first"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -56,9 +55,8 @@ func TestMasterTrait(t *testing.T) {
 		Expect(KamelRunWithID(operatorID, ns, "files/Master.java",
 			"--name", "second",
 			"--label", "leader-group=same",
-			"-t", "master.label-key=leader-group",
-			"-t", "master.label-value=same",
-			"-t", "master.resource-name=first-lock",
+			"--build-property", "quarkus.camel.cluster.kubernetes.labels=leader-group=same",
+			"--build-property", "quarkus.camel.cluster.kubernetes.resource-name=first-lock",
 			"-t", "owner.target-labels=leader-group").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "second"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationLogs(ns, "second"), TestTimeoutShort).Should(ContainSubstring("started in"))

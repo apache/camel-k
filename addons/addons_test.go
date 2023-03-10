@@ -40,9 +40,6 @@ func TestTraitConfiguration(t *testing.T) {
 					Addons: map[string]v1.AddonTrait{
 						"master": trait.ToAddonTrait(t, map[string]interface{}{
 							"enabled":      true,
-							"resourceName": "test-lock",
-							"labelKey":     "test-label",
-							"labelValue":   "test-value",
 						}),
 						"telemetry": trait.ToAddonTrait(t, map[string]interface{}{
 							"enabled": true,
@@ -59,9 +56,6 @@ func TestTraitConfiguration(t *testing.T) {
 	master, ok := c.GetTrait("master").(*master.TestMasterTrait)
 	require.True(t, ok)
 	assert.True(t, *master.Enabled)
-	assert.Equal(t, "test-lock", *master.ResourceName)
-	assert.Equal(t, "test-label", *master.LabelKey)
-	assert.Equal(t, "test-value", *master.LabelValue)
 
 	require.NotNil(t, c.GetTrait("telemetry"))
 	telemetry, ok := c.GetTrait("telemetry").(*telemetry.TestTelemetryTrait)
@@ -75,9 +69,6 @@ func TestTraitConfigurationFromAnnotations(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
 					"trait.camel.apache.org/master.enabled":       "true",
-					"trait.camel.apache.org/master.resource-name": "test-lock",
-					"trait.camel.apache.org/master.label-key":     "test-label",
-					"trait.camel.apache.org/master.label-value":   "test-value",
 					"trait.camel.apache.org/telemetry.enabled":    "true",
 				},
 			},
@@ -93,9 +84,6 @@ func TestTraitConfigurationFromAnnotations(t *testing.T) {
 	master, ok := c.GetTrait("master").(*master.TestMasterTrait)
 	require.True(t, ok)
 	assert.True(t, *master.Enabled)
-	assert.Equal(t, "test-lock", *master.ResourceName)
-	assert.Equal(t, "test-label", *master.LabelKey)
-	assert.Equal(t, "test-value", *master.LabelValue)
 
 	require.NotNil(t, c.GetTrait("telemetry"))
 	telemetry, ok := c.GetTrait("telemetry").(*telemetry.TestTelemetryTrait)

@@ -117,6 +117,7 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integr
 		Resources:             kubernetes.NewCollection(),
 		EnvVars:               make([]corev1.EnvVar, 0),
 		ApplicationProperties: make(map[string]string),
+		BuildProperties:       make(map[string]string),
 	}
 
 	return &env, nil

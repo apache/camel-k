@@ -190,6 +190,8 @@ type Environment struct {
 	PostStepProcessors    []func(*Environment) error
 	PostProcessors        []func(*Environment) error
 	BuildTasks            []v1.Task
+	// BuildProperties set in build time, only works when in v1.IntegrationKitPhaseBuildSubmitted
+	BuildProperties       map[string]string 
 	ConfiguredTraits      []Trait
 	ExecutedTraits        []Trait
 	EnvVars               []corev1.EnvVar
