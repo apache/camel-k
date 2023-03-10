@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Kamelets are tried to unmarshal with old Flow [\#4117](https://github.com/apache/camel-k/issues/4117)
 - Upgrade Operator Framework SDK version [\#4105](https://github.com/apache/camel-k/issues/4105)
 - Automatic updates action failing [\#4073](https://github.com/apache/camel-k/issues/4073)
 
