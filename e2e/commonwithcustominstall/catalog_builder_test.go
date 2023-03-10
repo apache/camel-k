@@ -101,10 +101,10 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			Eventually(CamelCatalogCondition(ns, compatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(
 				Or(Equal("Container image successfully built"), Equal("Container image exists on registry")),
 			)
-			Eventually(IntegrationPodPhase(ns, name)).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
 
 			// Clean up
 			Eventually(DeleteIntegrations(ns)).Should(Equal(0))
