@@ -1,11 +1,11 @@
 [[scheduling-infra-pod]]
-= Infrastructure Pods and Resource managment
+= Infrastructure Pods and Resource Management
 
 During the installation procedure you will be able to provide information on how to best "operationalize" your infrastructure. Through the configuration of `--node-selector`, `--toleration` and `--operator-resources` you will be able to drive the operator `Pods` scheduling and to be able to assign resources.
 
 The usage of these advanced properties assumes you're familiar with the https://kubernetes.io/docs/concepts/scheduling-eviction/[Kubernetes Scheduling] concepts and configurations.
 
-NOTE: the aforementioned flags setting will work both with `OLM` installation and regular installation.
+NOTE: The aforementioned flags setting will work both with `OLM` installation and regular installation.
 
 [[scheduling-infra-pod-scheduling]]
 == Scheduling
@@ -31,7 +31,7 @@ The option accept a value in the following format `Key[=Value]:Effect[:Seconds]`
 [[scheduling-infra-pod-resources]]
 == Resources
 
-While installing the Camel K operator, you can also specify the resources requests and limits to assign to the operator `Pod` with `--operator-resources` option. The option will expect the configuration as required by https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/[Kubernetes Resource managment]. 
+While installing the Camel K operator, you can also specify the resources requests and limits to assign to the operator `Pod` with `--operator-resources` option. The option will expect the configuration as required by https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/[Kubernetes Resource Management].
 
 ```
 kamel install --operator-resources requests.cpu=256m --operator-resources limits.cpu=500m --operator-resources limits.memory=512Mi ...
@@ -55,4 +55,4 @@ resources:
     memory: 512Mi
 ```
 
-Note that if you plan to perform **native builds**, then the memory requirements must be increased significantly. Also the CPU requirements are rather "soft", in the sense that it won't break the operator, but it'll perform slower in general.
+Note that if you plan to perform **native builds**, then the memory requirements must be increased significantly. Also, the CPU requirements are rather "soft", in the sense that it won't break the operator, but it'll perform slower in general.
