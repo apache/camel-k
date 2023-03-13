@@ -20,7 +20,7 @@ package catalog
 import (
 	"context"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 // NewMonitorAction returns an action that monitors the catalog after it's fully initialized.

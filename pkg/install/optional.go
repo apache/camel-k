@@ -21,9 +21,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	logutil "github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	logutil "github.com/apache/camel-k/v2/pkg/util/log"
 	cp "github.com/otiai10/copy"
 )
 

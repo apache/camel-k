@@ -20,8 +20,8 @@ package test
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 
 	"github.com/stretchr/testify/assert"
 )

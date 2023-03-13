@@ -29,7 +29,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	. "github.com/apache/camel-k/e2e/support"
+	. "github.com/apache/camel-k/v2/e2e/support"
 )
 
 func TestServiceTrait(t *testing.T) {

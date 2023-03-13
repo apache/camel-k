@@ -36,14 +36,14 @@ import (
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	knativeapi "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/metadata"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/envvar"
-	knativeutil "github.com/apache/camel-k/pkg/util/knative"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	knativeapi "github.com/apache/camel-k/v2/pkg/apis/camel/v1/knative"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/metadata"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/envvar"
+	knativeutil "github.com/apache/camel-k/v2/pkg/util/knative"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 type knativeTrait struct {

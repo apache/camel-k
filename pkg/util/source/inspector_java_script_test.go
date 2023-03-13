@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

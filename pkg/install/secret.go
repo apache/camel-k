@@ -20,13 +20,13 @@ package install
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/registry"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/registry"
 )
 
 const registrySecretName = "camel-k-registry-secret"

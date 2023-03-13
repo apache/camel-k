@@ -24,8 +24,8 @@ import (
 	"strings"
 	"testing"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/cmd/source"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/cmd/source"
 	"github.com/stretchr/testify/assert"
 )
 

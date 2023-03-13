@@ -28,7 +28,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/apache/camel-k/e2e/support"
+	. "github.com/apache/camel-k/v2/e2e/support"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
 
@@ -40,9 +40,9 @@ import (
 	"github.com/operator-framework/api/pkg/lib/version"
 	olm "github.com/operator-framework/api/pkg/operators/v1alpha1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/openshift"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 const catalogSourceName = "test-camel-k-source"

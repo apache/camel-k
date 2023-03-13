@@ -23,7 +23,7 @@ limitations under the License.
 package knative
 
 import (
-	. "github.com/apache/camel-k/e2e/support"
+	. "github.com/apache/camel-k/v2/e2e/support"
 	. "github.com/onsi/gomega"
 	"testing"
 )

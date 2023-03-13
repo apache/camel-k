@@ -1,4 +1,4 @@
-module github.com/apache/camel-k/pkg/apis/camel
+module github.com/apache/camel-k/v2/pkg/apis/camel
 
 go 1.18
 

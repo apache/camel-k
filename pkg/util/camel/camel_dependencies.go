@@ -23,9 +23,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/jitpack"
-	"github.com/apache/camel-k/pkg/util/maven"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/jitpack"
+	"github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/rs/xid"
 )
 

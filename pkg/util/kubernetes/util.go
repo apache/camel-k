@@ -18,7 +18,7 @@ limitations under the License.
 package kubernetes
 
 import (
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
 )

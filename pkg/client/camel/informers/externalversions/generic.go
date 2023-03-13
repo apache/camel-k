@@ -22,8 +22,8 @@ package externalversions
 import (
 	"fmt"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	v1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	v1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )

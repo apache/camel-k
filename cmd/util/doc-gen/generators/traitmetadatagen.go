@@ -26,7 +26,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util"
 
 	"gopkg.in/yaml.v2"
 	"k8s.io/gengo/args"

@@ -21,8 +21,8 @@ import (
 	"context"
 	"fmt"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/gzip"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/gzip"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	controller "sigs.k8s.io/controller-runtime/pkg/client"

@@ -22,7 +22,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/apache/camel-k/pkg/util/maven"
+	"github.com/apache/camel-k/v2/pkg/util/maven"
 )
 
 func TestConversion(t *testing.T) {

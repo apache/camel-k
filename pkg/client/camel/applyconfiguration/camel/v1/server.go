@@ -20,7 +20,7 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 // ServerApplyConfiguration represents an declarative configuration of the Server type for use

@@ -24,10 +24,10 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/resources"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/resources"
 	"github.com/spf13/cobra"
 )
 

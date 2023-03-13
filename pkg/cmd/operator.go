@@ -18,11 +18,11 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/spf13/cobra"
 
-	"github.com/apache/camel-k/pkg/cmd/operator"
+	"github.com/apache/camel-k/v2/pkg/cmd/operator"
 )
 
 const operatorCommand = "operator"

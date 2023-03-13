@@ -31,8 +31,8 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/util/patch"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/patch"
 )
 
 type deployerTrait struct {

@@ -28,10 +28,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util"
 
-	"github.com/apache/camel-k/cmd/util/vfs-gen/multifs"
-	"github.com/apache/camel-k/pkg/base"
+	"github.com/apache/camel-k/v2/cmd/util/vfs-gen/multifs"
+	"github.com/apache/camel-k/v2/pkg/base"
 	"github.com/shurcooL/httpfs/filter"
 	"github.com/shurcooL/vfsgen"
 )

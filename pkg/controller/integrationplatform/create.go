@@ -23,11 +23,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/install"
-	platformutil "github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/resources"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/install"
+	platformutil "github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/resources"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
 // NewCreateAction returns a action that creates resources needed by the platform.

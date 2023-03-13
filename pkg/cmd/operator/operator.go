@@ -59,16 +59,16 @@ import (
 
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
-	"github.com/apache/camel-k/pkg/apis"
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/controller"
-	"github.com/apache/camel-k/pkg/event"
-	"github.com/apache/camel-k/pkg/install"
-	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	logutil "github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/apis"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/controller"
+	"github.com/apache/camel-k/v2/pkg/event"
+	"github.com/apache/camel-k/v2/pkg/install"
+	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	logutil "github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 var log = logutil.Log.WithName("cmd")

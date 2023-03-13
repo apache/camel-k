@@ -20,7 +20,7 @@ package camel
 import (
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 // NewRuntimeCatalog creates a runtime catalog with the given catalog.
@@ -40,7 +40,7 @@ func NewRuntimeCatalog(cat v1.CamelCatalog) *RuntimeCatalog {
 			scheme := scheme
 
 			// In case of duplicate only, choose the "org.apache.camel.quarkus" artifact (if present).
-			// Workaround for https://github.com/apache/camel-k-runtime/issues/592
+			// Workaround for https://github.com/apache/camel-k/v2-runtime/issues/592
 			if _, duplicate := catalog.artifactByScheme[scheme.ID]; duplicate {
 				if artifact.GroupID != "org.apache.camel.quarkus" {
 					continue

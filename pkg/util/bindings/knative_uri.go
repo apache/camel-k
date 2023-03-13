@@ -23,11 +23,11 @@ import (
 
 	"k8s.io/utils/pointer"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	knativeapis "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/uri"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	knativeapis "github.com/apache/camel-k/v2/pkg/apis/camel/v1/knative"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
 // KnativeURIBindingProvider converts a HTTP/HTTPS URI into a Camel Knative endpoint (to call it via CloudEvents).

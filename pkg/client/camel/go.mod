@@ -1,9 +1,9 @@
-module github.com/apache/camel-k/pkg/client/camel
+module github.com/apache/camel-k/v2/pkg/client/camel
 
 go 1.18
 
 require (
-	github.com/apache/camel-k/pkg/apis/camel v0.0.0
+	github.com/apache/camel-k/v2/pkg/apis/camel v0.0.0
 	k8s.io/api v0.25.6
 	k8s.io/apimachinery v0.25.6
 	k8s.io/client-go v0.25.6
@@ -52,4 +52,4 @@ require (
 )
 
 // Local modules
-replace github.com/apache/camel-k/pkg/apis/camel => ../../apis/camel
+replace github.com/apache/camel-k/v2/pkg/apis/camel => ../../apis/camel

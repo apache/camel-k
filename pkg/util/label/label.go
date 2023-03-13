@@ -20,7 +20,7 @@ package label
 import (
 	"fmt"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"k8s.io/apimachinery/pkg/labels"
 )
 

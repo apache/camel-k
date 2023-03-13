@@ -28,8 +28,8 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	. "github.com/apache/camel-k/e2e/support"
-	"github.com/apache/camel-k/pkg/util/olm"
+	. "github.com/apache/camel-k/v2/e2e/support"
+	"github.com/apache/camel-k/v2/pkg/util/olm"
 )
 
 func TestBasicUninstall(t *testing.T) {

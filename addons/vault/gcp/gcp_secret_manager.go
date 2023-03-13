@@ -20,10 +20,10 @@ package gcp
 import (
 	"strconv"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util"
 	"k8s.io/utils/pointer"
 )
 

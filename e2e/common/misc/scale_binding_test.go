@@ -33,11 +33,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	. "github.com/apache/camel-k/e2e/support"
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
-	"github.com/apache/camel-k/pkg/util/openshift"
+	. "github.com/apache/camel-k/v2/e2e/support"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
+	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 func TestKameletBindingScale(t *testing.T) {

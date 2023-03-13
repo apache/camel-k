@@ -20,7 +20,7 @@ package install
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/client"
 )
 
 // IntegrationPlatformViewerRole installs the role that allows any user to access integrationplatforms in the global namespace.

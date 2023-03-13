@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	platformutil "github.com/apache/camel-k/pkg/platform"
+	platformutil "github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -42,17 +42,17 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/install"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/maven"
-	"github.com/apache/camel-k/pkg/util/olm"
-	"github.com/apache/camel-k/pkg/util/patch"
-	"github.com/apache/camel-k/pkg/util/registry"
-	"github.com/apache/camel-k/pkg/util/watch"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/install"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/maven"
+	"github.com/apache/camel-k/v2/pkg/util/olm"
+	"github.com/apache/camel-k/v2/pkg/util/patch"
+	"github.com/apache/camel-k/v2/pkg/util/registry"
+	"github.com/apache/camel-k/v2/pkg/util/watch"
 )
 
 const installCommand = "install"

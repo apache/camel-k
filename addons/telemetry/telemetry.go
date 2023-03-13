@@ -20,11 +20,11 @@ package telemetry
 import (
 	"k8s.io/utils/pointer"
 
-	"github.com/apache/camel-k/addons/telemetry/discovery"
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/v2/addons/telemetry/discovery"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util"
 )
 
 // The Telemetry trait can be used to automatically publish tracing information to an OTLP compatible collector.

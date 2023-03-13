@@ -36,10 +36,10 @@ import (
 
 	routev1 "github.com/openshift/api/route/v1"
 
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/openshift"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 // Dump prints all information about the given namespace to debug errors

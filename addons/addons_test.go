@@ -22,10 +22,10 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/addons/master"
-	"github.com/apache/camel-k/addons/telemetry"
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/trait"
+	"github.com/apache/camel-k/v2/addons/master"
+	"github.com/apache/camel-k/v2/addons/telemetry"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/trait"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

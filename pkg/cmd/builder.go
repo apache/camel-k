@@ -18,7 +18,7 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/apache/camel-k/pkg/cmd/builder"
+	"github.com/apache/camel-k/v2/pkg/cmd/builder"
 	"github.com/spf13/cobra"
 )
 

@@ -27,8 +27,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/docker"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/docker"
 	"github.com/pkg/errors"
 )
 

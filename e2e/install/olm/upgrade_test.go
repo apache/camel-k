@@ -31,9 +31,9 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	. "github.com/apache/camel-k/e2e/support"
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	. "github.com/apache/camel-k/v2/e2e/support"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
 // WARNING: this test is not OLM specific but needs certain setting we provide in OLM installation scenario

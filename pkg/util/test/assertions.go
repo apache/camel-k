@@ -20,7 +20,7 @@ package test
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/envvar"
+	"github.com/apache/camel-k/v2/pkg/util/envvar"
 	"github.com/stretchr/testify/assert"
 
 	corev1 "k8s.io/api/core/v1"

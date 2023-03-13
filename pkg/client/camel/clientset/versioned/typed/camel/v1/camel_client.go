@@ -22,8 +22,8 @@ package v1
 import (
 	"net/http"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/client/camel/clientset/versioned/scheme"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/scheme"
 	rest "k8s.io/client-go/rest"
 )
 

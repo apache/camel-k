@@ -23,8 +23,8 @@ import (
 	"os"
 	"strings"
 
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	coordination "k8s.io/api/coordination/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -32,7 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	"github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 

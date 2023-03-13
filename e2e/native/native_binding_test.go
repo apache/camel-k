@@ -25,14 +25,14 @@ package native
 import (
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
 
-	. "github.com/apache/camel-k/e2e/support"
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	. "github.com/apache/camel-k/v2/e2e/support"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 func TestNativeBinding(t *testing.T) {

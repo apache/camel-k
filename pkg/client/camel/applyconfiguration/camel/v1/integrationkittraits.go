@@ -20,7 +20,7 @@ limitations under the License.
 package v1
 
 import (
-	trait "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
+	trait "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
 // IntegrationKitTraitsApplyConfiguration represents an declarative configuration of the IntegrationKitTraits type for use
