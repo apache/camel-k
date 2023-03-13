@@ -143,6 +143,9 @@ default: build
 update-docs: build-resources
 	./script/update_docs.sh
 
+update-default-ck-runtime:
+	./script/update_defaults_ck_runtime.sh
+
 bump-replace:
 	@# Bump version and replace with the variables provided by the user
 	@sed -i 's/^VERSION ?= .*$//VERSION ?= $(VERSION)/' ./script/Makefile
