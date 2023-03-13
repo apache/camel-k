@@ -441,7 +441,7 @@ string
 |
 
 
-The namespace of the operator in charge of this Build reconciliation.
+The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
 
 |`timeout` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta[Kubernetes meta/v1.Duration]*
