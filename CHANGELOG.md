@@ -6,9 +6,12 @@
 
 **Closed issues:**
 
+- All KameletBindings reporting "Integration X does not have a readiness condition" error message [\#4129](https://github.com/apache/camel-k/issues/4129)
 - Kamelets are tried to unmarshal with old Flow [\#4117](https://github.com/apache/camel-k/issues/4117)
 - Upgrade Operator Framework SDK version [\#4105](https://github.com/apache/camel-k/issues/4105)
 - Automatic updates action failing [\#4073](https://github.com/apache/camel-k/issues/4073)
+- Build refactoring \(to address runtime decoupling\) [\#3831](https://github.com/apache/camel-k/issues/3831)
+- Add support for multiple data types and schemas in Kamelets [\#1980](https://github.com/apache/camel-k/issues/1980)
 
 ## [1.12.1-nightly](https://github.com/apache/camel-k/tree/1.12.1-nightly) (2023-03-08)
 
