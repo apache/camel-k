@@ -24,7 +24,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 var uriRegexp = regexp.MustCompile(`^[a-z0-9+][a-zA-Z0-9-+]*:.*$`)

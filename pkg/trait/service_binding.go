@@ -31,10 +31,10 @@ import (
 	"github.com/redhat-developer/service-binding-operator/pkg/reconcile/pipeline/handler/mapping"
 	"github.com/redhat-developer/service-binding-operator/pkg/reconcile/pipeline/handler/naming"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/reference"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/reference"
 )
 
 type serviceBindingTrait struct {

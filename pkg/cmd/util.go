@@ -28,9 +28,9 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/client"
-	platformutil "github.com/apache/camel-k/pkg/platform"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client"
+	platformutil "github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"

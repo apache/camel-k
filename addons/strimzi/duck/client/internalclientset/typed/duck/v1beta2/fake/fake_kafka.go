@@ -22,7 +22,7 @@ package fake
 import (
 	"context"
 
-	v1beta2 "github.com/apache/camel-k/addons/strimzi/duck/v1beta2"
+	v1beta2 "github.com/apache/camel-k/v2/addons/strimzi/duck/v1beta2"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

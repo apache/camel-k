@@ -31,10 +31,10 @@ import (
 	"github.com/fatih/camelcase"
 	"github.com/spf13/cobra"
 
-	"github.com/apache/camel-k/pkg/client"
-	platformutil "github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/client"
+	platformutil "github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 // VersionVariant may be overridden at build time.

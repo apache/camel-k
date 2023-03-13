@@ -20,8 +20,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	camelv1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	v1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/camel/v1"
+	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
 )
 
 // KameletSpecApplyConfiguration represents an declarative configuration of the KameletSpec type for use

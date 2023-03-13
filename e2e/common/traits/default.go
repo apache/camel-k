@@ -20,7 +20,7 @@ limitations under the License.
 
 package traits
 
-import "github.com/apache/camel-k/e2e/support"
+import "github.com/apache/camel-k/v2/e2e/support"
 
 var ns = support.GetCIProcessID()
 var operatorID = support.GetCIProcessID()

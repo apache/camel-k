@@ -27,7 +27,7 @@ import (
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 )
 
 func newKameletGetCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kameletGetCommandOptions) {

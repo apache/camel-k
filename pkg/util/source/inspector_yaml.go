@@ -23,8 +23,8 @@ import (
 
 	yaml2 "gopkg.in/yaml.v2"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/uri"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
 // YAMLInspector --.

@@ -20,10 +20,10 @@ limitations under the License.
 package applyconfiguration
 
 import (
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	v1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	camelv1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/camel/v1"
-	camelv1alpha1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	v1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
+	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 )
 

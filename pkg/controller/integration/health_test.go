@@ -22,7 +22,7 @@ import (
 	"reflect"
 	"testing"
 
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
 	"github.com/stretchr/testify/assert"
 )

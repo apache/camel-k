@@ -20,7 +20,7 @@ limitations under the License.
 package fake
 
 import (
-	v1beta2 "github.com/apache/camel-k/addons/strimzi/duck/client/internalclientset/typed/duck/v1beta2"
+	v1beta2 "github.com/apache/camel-k/v2/addons/strimzi/duck/client/internalclientset/typed/duck/v1beta2"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 )

@@ -20,9 +20,9 @@ limitations under the License.
 package fake
 
 import (
-	clientset "github.com/apache/camel-k/addons/strimzi/duck/client/internalclientset"
-	kafkav1beta2 "github.com/apache/camel-k/addons/strimzi/duck/client/internalclientset/typed/duck/v1beta2"
-	fakekafkav1beta2 "github.com/apache/camel-k/addons/strimzi/duck/client/internalclientset/typed/duck/v1beta2/fake"
+	clientset "github.com/apache/camel-k/v2/addons/strimzi/duck/client/internalclientset"
+	kafkav1beta2 "github.com/apache/camel-k/v2/addons/strimzi/duck/client/internalclientset/typed/duck/v1beta2"
+	fakekafkav1beta2 "github.com/apache/camel-k/v2/addons/strimzi/duck/client/internalclientset/typed/duck/v1beta2/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

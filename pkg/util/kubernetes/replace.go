@@ -33,8 +33,8 @@ import (
 
 	routev1 "github.com/openshift/api/route/v1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/client"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client"
 )
 
 // ReplaceResource allows to completely replace a resource on Kubernetes, taking care of immutable fields and resource versions.

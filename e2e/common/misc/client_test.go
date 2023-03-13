@@ -31,9 +31,9 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
-	. "github.com/apache/camel-k/e2e/support"
-	"github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
+	. "github.com/apache/camel-k/v2/e2e/support"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	. "github.com/onsi/gomega"
 )
 

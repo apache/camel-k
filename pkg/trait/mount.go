@@ -30,10 +30,10 @@ import (
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	utilResource "github.com/apache/camel-k/pkg/util/resource"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
 )
 
 type mountTrait struct {

@@ -27,8 +27,8 @@ import (
 	"os"
 	"testing"
 
-	. "github.com/apache/camel-k/e2e/support"
-	testutil "github.com/apache/camel-k/e2e/support/util"
+	. "github.com/apache/camel-k/v2/e2e/support"
+	testutil "github.com/apache/camel-k/v2/e2e/support/util"
 	. "github.com/onsi/gomega"
 )
 

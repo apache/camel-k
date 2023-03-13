@@ -30,9 +30,9 @@ import (
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
-	"github.com/apache/camel-k/pkg/client"
-	v1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/client"
+	v1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
 const kamelCommandLongDescription = `Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless

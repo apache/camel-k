@@ -20,7 +20,7 @@ package jitpack
 import (
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util/maven"
+	"github.com/apache/camel-k/v2/pkg/util/maven"
 )
 
 const (

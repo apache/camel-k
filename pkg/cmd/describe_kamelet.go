@@ -27,8 +27,8 @@ import (
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/indentedwriter"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/util/indentedwriter"
 )
 
 func newDescribeKameletCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *describeKameletCommandOptions) {

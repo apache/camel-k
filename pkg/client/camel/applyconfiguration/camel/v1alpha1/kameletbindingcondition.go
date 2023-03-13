@@ -20,8 +20,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	camelv1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/camel/v1"
+	v1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

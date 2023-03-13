@@ -23,7 +23,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util"
 )
 
 // MavenWorkingDirectory is the directory used by Maven for an invocation of the kamel local command.

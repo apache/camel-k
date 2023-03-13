@@ -21,7 +21,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.

@@ -39,9 +39,9 @@ import (
 	prometheus "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
 
-	. "github.com/apache/camel-k/e2e/support"
-	. "github.com/apache/camel-k/e2e/support/util"
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	. "github.com/apache/camel-k/v2/e2e/support"
+	. "github.com/apache/camel-k/v2/e2e/support/util"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 /*

@@ -21,8 +21,8 @@ import (
 	"encoding/json"
 	"net/url"
 
-	knativeapis "github.com/apache/camel-k/pkg/apis/camel/v1/knative"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	knativeapis "github.com/apache/camel-k/v2/pkg/apis/camel/v1/knative"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 )
 
 func asEndpointProperties(props map[string]string) *v1alpha1.EndpointProperties {

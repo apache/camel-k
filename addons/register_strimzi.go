@@ -18,8 +18,8 @@ limitations under the License.
 package addons
 
 import (
-	"github.com/apache/camel-k/addons/strimzi"
-	"github.com/apache/camel-k/pkg/util/bindings"
+	"github.com/apache/camel-k/v2/addons/strimzi"
+	"github.com/apache/camel-k/v2/pkg/util/bindings"
 )
 
 func init() {

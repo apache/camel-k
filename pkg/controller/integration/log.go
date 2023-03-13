@@ -17,7 +17,7 @@ limitations under the License.
 
 package integration
 
-import "github.com/apache/camel-k/pkg/util/log"
+import "github.com/apache/camel-k/v2/pkg/util/log"
 
 // Log --.
 var Log = log.Log.WithName("controller").WithName("integration")

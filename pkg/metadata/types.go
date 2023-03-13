@@ -18,7 +18,7 @@ limitations under the License.
 package metadata
 
 import (
-	"github.com/apache/camel-k/pkg/util/source"
+	"github.com/apache/camel-k/v2/pkg/util/source"
 )
 
 // IntegrationMetadata contains aggregate metadata about all Camel routes in a integrations.

@@ -27,7 +27,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	. "github.com/apache/camel-k/e2e/support"
+	. "github.com/apache/camel-k/v2/e2e/support"
 )
 
 // TestTektonLikeBehavior verifies that the kamel binary can be invoked from within the Camel K image.

@@ -23,7 +23,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util"
 	p "github.com/gertd/go-pluralize"
 
 	"github.com/spf13/cobra"

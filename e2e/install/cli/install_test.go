@@ -34,12 +34,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 
-	. "github.com/apache/camel-k/e2e/support"
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/install"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/openshift"
+	. "github.com/apache/camel-k/v2/e2e/support"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/install"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/openshift"
 	consolev1 "github.com/openshift/api/console/v1"
 )
 
@@ -138,7 +138,7 @@ func TestConsoleCliDownload(t *testing.T) {
 	}
 
 	name := GetEnvOrDefault("CAMEL_K_CONSOLE_CLI_DOWNLOAD_NAME", install.KamelCLIDownloadName)
-	downloadUrlTemplate := GetEnvOrDefault("CAMEL_K_CONSOLE_CLI_DOWNLOAD_URL_TEMPLATE", "https://github.com/apache/camel-k/releases/download/v{{ .Version}}/camel-k-client-{{ .Version}}-{{ .Platform}}-64bit.tar.gz")
+	downloadUrlTemplate := GetEnvOrDefault("CAMEL_K_CONSOLE_CLI_DOWNLOAD_URL_TEMPLATE", "https://github.com/apache/camel-k/v2/releases/download/v{{ .Version}}/camel-k-client-{{ .Version}}-{{ .Platform}}-64bit.tar.gz")
 
 	args := templateArgs{Version: defaults.Version}
 	templt, err := template.New("downloadLink").Parse(downloadUrlTemplate)

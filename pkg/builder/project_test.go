@@ -26,11 +26,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/maven"
-	"github.com/apache/camel-k/pkg/util/test"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/maven"
+	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 const customSettings = `<?xml version="1.0" encoding="UTF-8"?>
@@ -118,7 +118,7 @@ const expectedCustomSettingsWithExtraServers = `<?xml version="1.0" encoding="UT
 	  <configuration>
 	    <allowInsecureRegistries>false</allowInsecureRegistries>
 	  </configuration>
-    </server>	 
+    </server>
   </servers>
 
   <profiles>

@@ -27,7 +27,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util"
 
 	"github.com/pkg/errors"
 )
