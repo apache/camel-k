@@ -192,7 +192,7 @@ media type as expected for HTTP media types (ie, application/json)
 the list of Camel or Maven dependencies required by the data type
 
 |`headers` +
-*xref:#_camel_apache_org_v1alpha1_HeaderSpec[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.HeaderSpec]*
+*xref:#_camel_apache_org_v1alpha1_HeaderSpec[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.HeaderSpec]*
 |
 
 
@@ -230,14 +230,14 @@ string
 the default data type for this Kamelet
 
 |`types` +
-*xref:#_camel_apache_org_v1alpha1_DataTypeSpec[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.DataTypeSpec]*
+*xref:#_camel_apache_org_v1alpha1_DataTypeSpec[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.DataTypeSpec]*
 |
 
 
 one to many data type specifications
 
 |`headers` +
-*xref:#_camel_apache_org_v1alpha1_HeaderSpec[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.HeaderSpec]*
+*xref:#_camel_apache_org_v1alpha1_HeaderSpec[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.HeaderSpec]*
 |
 
 
@@ -283,7 +283,7 @@ URI can be used to specify the (Camel) endpoint explicitly
 Properties are a key value representation of endpoint properties
 
 |`types` +
-*xref:#_camel_apache_org_v1alpha1_EventTypeSpec[map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.TypeSlot\]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventTypeSpec]*
+*xref:#_camel_apache_org_v1alpha1_EventTypeSpec[map[github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.TypeSlot\]github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.EventTypeSpec]*
 |
 
 
@@ -291,7 +291,7 @@ Types defines the data type of the data produced/consumed by the endpoint and re
 Deprecated: In favor of using DataTypes
 
 |`dataTypes` +
-*xref:#_camel_apache_org_v1alpha1_DataTypeReference[map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.TypeSlot\]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.DataTypeReference]*
+*xref:#_camel_apache_org_v1alpha1_DataTypeReference[map[github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.TypeSlot\]github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.DataTypeReference]*
 |
 
 
@@ -856,7 +856,7 @@ string
 
 
 |`properties` +
-*xref:#_camel_apache_org_v1alpha1_JSONSchemaProp[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.JSONSchemaProp]*
+*xref:#_camel_apache_org_v1alpha1_JSONSchemaProp[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.JSONSchemaProp]*
 |
 
 
@@ -967,7 +967,7 @@ string
 A human readable message indicating details about the transition.
 
 |`pods` +
-*xref:apis/camel-k.adoc#_camel_apache_org_v1_PodCondition[[\]github.com/apache/camel-k/pkg/apis/camel/v1.PodCondition]*
+[]github.com/apache/camel-k/v2/pkg/apis/camel/v1.PodCondition
 |
 
 
@@ -1011,7 +1011,7 @@ KameletBindingSpec defines the binding between a source and a sink. It can inclu
 |Description
 
 |`integration` +
-*xref:apis/camel-k.adoc#_camel_apache_org_v1_IntegrationSpec[github.com/apache/camel-k/pkg/apis/camel/v1.IntegrationSpec]*
+github.com/apache/camel-k/v2/pkg/apis/camel/v1.IntegrationSpec
 |
 
 
@@ -1246,7 +1246,7 @@ KameletSpec specifies the configuration required to execute a Kamelet
 defines the formal configuration of the Kamelet
 
 |`sources` +
-*xref:apis/camel-k.adoc#_camel_apache_org_v1_SourceSpec[[\]github.com/apache/camel-k/pkg/apis/camel/v1.SourceSpec]*
+[]github.com/apache/camel-k/v2/pkg/apis/camel/v1.SourceSpec
 |
 
 
@@ -1260,7 +1260,7 @@ sources in any Camel DSL supported
 the main source in YAML DSL
 
 |`types` +
-*xref:#_camel_apache_org_v1alpha1_EventTypeSpec[map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.TypeSlot\]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventTypeSpec]*
+*xref:#_camel_apache_org_v1alpha1_EventTypeSpec[map[github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.TypeSlot\]github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.EventTypeSpec]*
 |
 
 
@@ -1268,7 +1268,7 @@ data specification types for the events consumed/produced by the Kamelet
 Deprecated: In favor of using DataTypes
 
 |`dataTypes` +
-*xref:#_camel_apache_org_v1alpha1_DataTypesSpec[map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.TypeSlot\]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.DataTypesSpec]*
+*xref:#_camel_apache_org_v1alpha1_DataTypesSpec[map[github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.TypeSlot\]github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.DataTypesSpec]*
 |
 
 

@@ -476,7 +476,7 @@ traits:
     description: Can be used to enable or disable a trait. All traits share this common
       property.
   - name: discovery-cache
-    type: github.com/apache/camel-k/pkg/apis/camel/v1/trait.DiscoveryCacheType
+    type: github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait.DiscoveryCacheType
     description: 'Discovery client cache to be used, either `disabled`, `disk` or
       `memory` (default `memory`). Deprecated: to be removed from trait configuration.'
 - name: gcp-secret-manager
@@ -844,7 +844,7 @@ traits:
     type: int32
     description: Maximum number of replicas.
   - name: triggers
-    type: '[]github.com/apache/camel-k/addons/keda.kedaTrigger'
+    type: '[]github.com/apache/camel-k/v2/addons/keda.kedaTrigger'
     description: Definition of triggers according to the KEDA format. Each trigger
       must contain `type` field corresponding to the name of a KEDA autoscaler and
       a key/value map named `metadata` containing specific trigger options. An optional
@@ -1245,7 +1245,7 @@ traits:
     description: Can be used to enable or disable a trait. All traits share this common
       property.
   - name: package-type
-    type: '[]github.com/apache/camel-k/pkg/apis/camel/v1/trait.QuarkusPackageType'
+    type: '[]github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait.QuarkusPackageType'
     description: The Quarkus package types, either `fast-jar` or `native` (default
       `fast-jar`). In case both `fast-jar` and `native` are specified, two `IntegrationKit`
       resources are created, with the `native` kit having precedence over the `fast-jar`
@@ -1404,7 +1404,7 @@ traits:
     description: 'Enable Service to be exposed as NodePort (default `false`). Deprecated:
       Use service type instead.'
   - name: type
-    type: github.com/apache/camel-k/pkg/apis/camel/v1/trait.ServiceType
+    type: github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait.ServiceType
     description: The type of service to be used, either 'ClusterIP', 'NodePort' or
       'LoadBalancer'.
 - name: service-binding

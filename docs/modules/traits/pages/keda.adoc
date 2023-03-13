@@ -63,7 +63,7 @@ The following configuration options are available:
 | Maximum number of replicas.
 
 | keda.triggers
-| []github.com/apache/camel-k/addons/keda.kedaTrigger
+| []github.com/apache/camel-k/v2/addons/keda.kedaTrigger
 | Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
 to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options.
 An optional `authentication-secret` can be declared per trigger and the operator will link each entry of

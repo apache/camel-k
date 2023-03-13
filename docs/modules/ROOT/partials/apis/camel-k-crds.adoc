@@ -912,14 +912,14 @@ CamelCatalogSpec specify what features a Camel runtime provides
 the runtime targeted for the catalog
 
 |`artifacts` +
-*xref:#_camel_apache_org_v1_CamelArtifact[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.CamelArtifact]*
+*xref:#_camel_apache_org_v1_CamelArtifact[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.CamelArtifact]*
 |
 
 
 artifacts required by this catalog
 
 |`loaders` +
-*xref:#_camel_apache_org_v1_CamelLoader[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.CamelLoader]*
+*xref:#_camel_apache_org_v1_CamelLoader[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.CamelLoader]*
 |
 
 
@@ -1789,7 +1789,7 @@ NOTE: Compiling to a native executable, i.e. when using `package-type=native`, i
 The Registry trait sets up Maven to use the Image registry as a Maven repository.
 
 |`addons` +
-*xref:#_camel_apache_org_v1_AddonTrait[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.AddonTrait]*
+*xref:#_camel_apache_org_v1_AddonTrait[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.AddonTrait]*
 |
 
 
@@ -2657,7 +2657,7 @@ See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.
 |===
 
 [#_camel_apache_org_v1_PluginProperties]
-=== PluginProperties(`map[string]github.com/apache/camel-k/pkg/apis/camel/v1.StringOrProperties` alias)
+=== PluginProperties(`map[string]github.com/apache/camel-k/v2/pkg/apis/camel/v1.StringOrProperties` alias)
 
 
 
@@ -3152,7 +3152,7 @@ map[string]string
 set of metadata
 
 |`capabilities` +
-*xref:#_camel_apache_org_v1_Capability[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.Capability]*
+*xref:#_camel_apache_org_v1_Capability[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.Capability]*
 |
 
 
@@ -3752,7 +3752,7 @@ The configuration of Service Binding trait
 The configuration of Toleration trait
 
 |`addons` +
-*xref:#_camel_apache_org_v1_AddonTrait[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.AddonTrait]*
+*xref:#_camel_apache_org_v1_AddonTrait[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.AddonTrait]*
 |
 
 
