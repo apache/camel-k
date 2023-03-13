@@ -25,7 +25,6 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: camel-k-operator
-  namespace: placeholder
 roleRef:
   kind: ClusterRole
   name: camel-k-operator-local-registry
