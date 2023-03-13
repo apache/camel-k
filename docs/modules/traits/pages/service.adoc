@@ -38,7 +38,7 @@ The following configuration options are available:
 Deprecated: Use service type instead.
 
 | service.type
-| github.com/apache/camel-k/pkg/apis/camel/v1/trait.ServiceType
+| github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait.ServiceType
 | The type of service to be used, either 'ClusterIP', 'NodePort' or 'LoadBalancer'.
 
 |===

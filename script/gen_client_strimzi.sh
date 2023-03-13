@@ -29,12 +29,12 @@ cd $rootdir
 $(go env GOPATH)/bin/client-gen \
   -h script/headers/default.txt \
   --input duck/v1beta2 \
-  --input-base=github.com/apache/camel-k/addons/strimzi \
+  --input-base=github.com/apache/camel-k/v2/addons/strimzi \
   --output-base=. \
-  --output-package=github.com/apache/camel-k/addons/strimzi/duck/client
+  --output-package=github.com/apache/camel-k/v2/addons/strimzi/duck/client
 
 rm -r ./addons/strimzi/duck/client || true
 
-mv github.com/apache/camel-k/addons/strimzi/duck/client ./addons/strimzi/duck/
+mv github.com/apache/camel-k/v2/addons/strimzi/duck/client ./addons/strimzi/duck/
 
 rm -r ./github.com

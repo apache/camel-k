@@ -96,13 +96,13 @@ DO_TEST_PREBUILD ?= true
 TEST_PREBUILD = build
 
 # OLM (Operator Lifecycle Manager and Operator Hub): uncomment to override operator settings at build time
-#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultOperatorName=camel-k-operator
-#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultPackage=camel-k
-#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultChannel=alpha
-#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultSource=community-operators
-#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultSourceNamespace=openshift-marketplace
-#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultStartingCSV=
-#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultGlobalNamespace=openshift-operators
+#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultOperatorName=camel-k-operator
+#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultPackage=camel-k
+#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultChannel=alpha
+#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultSource=community-operators
+#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultSourceNamespace=openshift-marketplace
+#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultStartingCSV=
+#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultGlobalNamespace=openshift-operators
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -113,7 +113,7 @@ endif
 
 # Build
 ifdef GIT_COMMIT
-GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/defaults.GitCommit=$(GIT_COMMIT)
+GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/defaults.GitCommit=$(GIT_COMMIT)
 else
 $(warning Could not retrieve a valid Git Commit)
 endif

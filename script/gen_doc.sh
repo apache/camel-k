@@ -25,15 +25,16 @@ echo "Generating API documentation... done!"
 echo "Generating traits documentation..."
 cd $rootdir
 go run ./cmd/util/doc-gen \
-  --input-dirs github.com/apache/camel-k/pkg/apis/camel/v1/trait \
-  --input-dirs github.com/apache/camel-k/addons/keda \
-  --input-dirs github.com/apache/camel-k/addons/master \
-  --input-dirs github.com/apache/camel-k/addons/resume \
-  --input-dirs github.com/apache/camel-k/addons/threescale \
-  --input-dirs github.com/apache/camel-k/addons/tracing \
-  --input-dirs github.com/apache/camel-k/addons/telemetry \
-  --input-dirs github.com/apache/camel-k/addons/vault/aws \
-  --input-dirs github.com/apache/camel-k/addons/vault/gcp \
-  --input-dirs github.com/apache/camel-k/addons/vault/azure \
-  --input-dirs github.com/apache/camel-k/addons/vault/hashicorp
+  --input-dirs github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait \
+  --input-dirs github.com/apache/camel-k/v2/addons/keda \
+  --input-dirs github.com/apache/camel-k/v2/addons/master \
+  --input-dirs github.com/apache/camel-k/v2/addons/resume \
+  --input-dirs github.com/apache/camel-k/v2/addons/strimzi \
+  --input-dirs github.com/apache/camel-k/v2/addons/threescale \
+  --input-dirs github.com/apache/camel-k/v2/addons/tracing \
+  --input-dirs github.com/apache/camel-k/v2/addons/telemetry \
+  --input-dirs github.com/apache/camel-k/v2/addons/vault/aws \
+  --input-dirs github.com/apache/camel-k/v2/addons/vault/gcp \
+  --input-dirs github.com/apache/camel-k/v2/addons/vault/azure \
+  --input-dirs github.com/apache/camel-k/v2/addons/vault/hashicorp
 echo "Generating traits documentation... done!"
