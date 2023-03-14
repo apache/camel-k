@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/1.12.1-nightly...HEAD)
+[Full Changelog](https://github.com/apache/camel-k/compare/1.10.5-nightly...HEAD)
+
+**Closed issues:**
+
+- Integration in error state when knative SinkBinding mode=inclusion [\#4119](https://github.com/apache/camel-k/issues/4119)
+
+## [1.10.5-nightly](https://github.com/apache/camel-k/tree/1.10.5-nightly) (2023-03-13)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.12.1-nightly...1.10.5-nightly)
 
 **Closed issues:**
 
@@ -13,9 +21,20 @@
 - Build refactoring \(to address runtime decoupling\) [\#3831](https://github.com/apache/camel-k/issues/3831)
 - Add support for multiple data types and schemas in Kamelets [\#1980](https://github.com/apache/camel-k/issues/1980)
 
+**Merged pull requests:**
+
+- chore\(deps\): bump github.com/onsi/gomega from 1.27.2 to 1.27.3 [\#4127](https://github.com/apache/camel-k/pull/4127) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix typos on traits.adoc and improve the overall language [\#4123](https://github.com/apache/camel-k/pull/4123) ([mertdotcc](https://github.com/mertdotcc))
+- fix typos on resources.adoc and improve language [\#4122](https://github.com/apache/camel-k/pull/4122) ([mertdotcc](https://github.com/mertdotcc))
+- fix\(doc\): kamelet semver [\#4115](https://github.com/apache/camel-k/pull/4115) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/prometheus/common from 0.41.0 to 0.42.0 [\#4113](https://github.com/apache/camel-k/pull/4113) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Secret managers parsing errors [\#4109](https://github.com/apache/camel-k/pull/4109) ([oscerd](https://github.com/oscerd))
+- fix\(\#1980\): Support data types in Kamelets [\#4100](https://github.com/apache/camel-k/pull/4100) ([christophd](https://github.com/christophd))
+- Free Camel K from runtime dependency [\#4025](https://github.com/apache/camel-k/pull/4025) ([squakez](https://github.com/squakez))
+
 ## [1.12.1-nightly](https://github.com/apache/camel-k/tree/1.12.1-nightly) (2023-03-08)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.12.0...1.12.1-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.12.0...1.12.1-nightly)
 
 **Closed issues:**
 
@@ -48,10 +67,6 @@
 - Use more recent link for Camel K tutorials [\#4071](https://github.com/apache/camel-k/pull/4071) ([apupier](https://github.com/apupier))
 - chore\(deps\): bump github.com/prometheus/common from 0.39.0 to 0.40.0 [\#4068](https://github.com/apache/camel-k/pull/4068) ([dependabot[bot]](https://github.com/apps/dependabot))
 
-## [pkg/client/camel/v1.12.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.12.0) (2023-02-21)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.12.0...pkg/client/camel/v1.12.0)
-
 ## [v1.12.0](https://github.com/apache/camel-k/tree/v1.12.0) (2023-02-21)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.12.0...v1.12.0)
@@ -62,7 +77,11 @@
 
 ## [pkg/kamelet/repository/v1.12.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.12.0) (2023-02-21)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/camel-k-crds-1.12.0...pkg/kamelet/repository/v1.12.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.12.0...pkg/kamelet/repository/v1.12.0)
+
+## [pkg/client/camel/v1.12.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.12.0) (2023-02-21)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/camel-k-crds-1.12.0...pkg/client/camel/v1.12.0)
 
 ## [camel-k-crds-1.12.0](https://github.com/apache/camel-k/tree/camel-k-crds-1.12.0) (2023-02-21)
 
@@ -172,7 +191,11 @@
 
 ## [pkg/apis/camel/v1.11.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.11.1) (2023-01-24)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.11.1...pkg/apis/camel/v1.11.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.11.1...pkg/apis/camel/v1.11.1)
+
+## [v1.11.1](https://github.com/apache/camel-k/tree/v1.11.1) (2023-01-24)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.11.1...v1.11.1)
 
 ## [pkg/kamelet/repository/v1.11.1](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.11.1) (2023-01-24)
 
@@ -180,27 +203,23 @@
 
 ## [pkg/client/camel/v1.11.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.11.1) (2023-01-24)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.11.1...pkg/client/camel/v1.11.1)
-
-## [v1.11.1](https://github.com/apache/camel-k/tree/v1.11.1) (2023-01-24)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.10.4...v1.11.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.10.4...pkg/client/camel/v1.11.1)
 
 ## [pkg/client/camel/v1.10.4](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.10.4) (2023-01-24)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.10.4...pkg/client/camel/v1.10.4)
-
-## [v1.10.4](https://github.com/apache/camel-k/tree/v1.10.4) (2023-01-24)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.10.4...v1.10.4)
-
-## [pkg/apis/camel/v1.10.4](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.10.4) (2023-01-24)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.10.4...pkg/apis/camel/v1.10.4)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.10.4...pkg/client/camel/v1.10.4)
 
 ## [pkg/kamelet/repository/v1.10.4](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.10.4) (2023-01-24)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/1.11.1-nightly...pkg/kamelet/repository/v1.10.4)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.10.4...pkg/kamelet/repository/v1.10.4)
+
+## [pkg/apis/camel/v1.10.4](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.10.4) (2023-01-24)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.10.4...pkg/apis/camel/v1.10.4)
+
+## [v1.10.4](https://github.com/apache/camel-k/tree/v1.10.4) (2023-01-24)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.11.1-nightly...v1.10.4)
 
 **Closed issues:**
 
@@ -329,7 +348,7 @@
 
 ## [1.12.0-nightly](https://github.com/apache/camel-k/tree/1.12.0-nightly) (2022-12-14)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.11.0...1.12.0-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.11.0...1.12.0-nightly)
 
 **Closed issues:**
 
@@ -377,21 +396,21 @@
 - fix\(\#3800\): Add proper kamel CLI to image build on macOS [\#3804](https://github.com/apache/camel-k/pull/3804) ([christophd](https://github.com/christophd))
 - chore\(deps\): bump github.com/prometheus/client\_golang from 1.13.0 to 1.14.0 [\#3801](https://github.com/apache/camel-k/pull/3801) ([dependabot[bot]](https://github.com/apps/dependabot))
 
+## [pkg/apis/camel/v1.11.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.11.0) (2022-12-07)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.11.0...pkg/apis/camel/v1.11.0)
+
 ## [pkg/client/camel/v1.11.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.11.0) (2022-12-07)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.11.0...pkg/client/camel/v1.11.0)
-
-## [v1.11.0](https://github.com/apache/camel-k/tree/v1.11.0) (2022-12-07)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.11.0...v1.11.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.11.0...pkg/client/camel/v1.11.0)
 
 ## [pkg/kamelet/repository/v1.11.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.11.0) (2022-12-07)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.11.0...pkg/kamelet/repository/v1.11.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.11.0...pkg/kamelet/repository/v1.11.0)
 
-## [pkg/apis/camel/v1.11.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.11.0) (2022-12-07)
+## [v1.11.0](https://github.com/apache/camel-k/tree/v1.11.0) (2022-12-07)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/1.10.4-nightly...pkg/apis/camel/v1.11.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/1.10.4-nightly...v1.11.0)
 
 **Closed issues:**
 
@@ -421,7 +440,7 @@
 
 ## [1.10.4-nightly](https://github.com/apache/camel-k/tree/1.10.4-nightly) (2022-11-14)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.10.3...1.10.4-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.10.3...1.10.4-nightly)
 
 **Merged pull requests:**
 
@@ -437,13 +456,13 @@
 - feat\(ci\): latest runtime snapshot available [\#3764](https://github.com/apache/camel-k/pull/3764) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/prometheus/client\_model from 0.2.0 to 0.3.0 [\#3752](https://github.com/apache/camel-k/pull/3752) ([dependabot[bot]](https://github.com/apps/dependabot))
 
-## [pkg/kamelet/repository/v1.10.3](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.10.3) (2022-11-11)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.10.3...pkg/kamelet/repository/v1.10.3)
-
 ## [pkg/client/camel/v1.10.3](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.10.3) (2022-11-11)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.10.3...pkg/client/camel/v1.10.3)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.10.3...pkg/client/camel/v1.10.3)
+
+## [pkg/kamelet/repository/v1.10.3](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.10.3) (2022-11-11)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.10.3...pkg/kamelet/repository/v1.10.3)
 
 ## [pkg/apis/camel/v1.10.3](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.10.3) (2022-11-11)
 
@@ -478,7 +497,7 @@
 
 ## [1.10.2](https://github.com/apache/camel-k/tree/1.10.2) (2022-10-22)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.10.2...1.10.2)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.10.2...1.10.2)
 
 **Closed issues:**
 
@@ -497,17 +516,17 @@
 - chore\(deps\): bump github.com/onsi/gomega from 1.21.1 to 1.22.1 [\#3741](https://github.com/apache/camel-k/pull/3741) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Minor updates for bundle generation [\#3423](https://github.com/apache/camel-k/pull/3423) ([phantomjinx](https://github.com/phantomjinx))
 
+## [v1.10.2](https://github.com/apache/camel-k/tree/v1.10.2) (2022-10-18)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.10.2...v1.10.2)
+
 ## [pkg/kamelet/repository/v1.10.2](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.10.2) (2022-10-18)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.10.2...pkg/kamelet/repository/v1.10.2)
 
 ## [pkg/apis/camel/v1.10.2](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.10.2) (2022-10-18)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.10.2...pkg/apis/camel/v1.10.2)
-
-## [v1.10.2](https://github.com/apache/camel-k/tree/v1.10.2) (2022-10-18)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.10.2...v1.10.2)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.10.2...pkg/apis/camel/v1.10.2)
 
 ## [pkg/client/camel/v1.10.2](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.10.2) (2022-10-18)
 
@@ -519,7 +538,7 @@
 
 ## [1.10.2-nightly](https://github.com/apache/camel-k/tree/1.10.2-nightly) (2022-10-14)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.10.1...1.10.2-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.10.1...1.10.2-nightly)
 
 **Closed issues:**
 
@@ -555,21 +574,21 @@
 - chore\(deps\): bump github.com/redhat-developer/service-binding-operator from 1.1.1 to 1.2.0 [\#3637](https://github.com/apache/camel-k/pull/3637) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Improvements to OLM bundle building of test index [\#3527](https://github.com/apache/camel-k/pull/3527) ([phantomjinx](https://github.com/phantomjinx))
 
-## [pkg/client/camel/v1.10.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.10.1) (2022-10-10)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.10.1...pkg/client/camel/v1.10.1)
-
 ## [pkg/kamelet/repository/v1.10.1](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.10.1) (2022-10-10)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.10.1...pkg/kamelet/repository/v1.10.1)
-
-## [pkg/apis/camel/v1.10.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.10.1) (2022-10-10)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.10.1...pkg/apis/camel/v1.10.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.10.1...pkg/kamelet/repository/v1.10.1)
 
 ## [v1.10.1](https://github.com/apache/camel-k/tree/v1.10.1) (2022-10-10)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/1.10.1-nightly...v1.10.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.10.1...v1.10.1)
+
+## [pkg/client/camel/v1.10.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.10.1) (2022-10-10)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.10.1...pkg/client/camel/v1.10.1)
+
+## [pkg/apis/camel/v1.10.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.10.1) (2022-10-10)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.10.1-nightly...pkg/apis/camel/v1.10.1)
 
 **Closed issues:**
 
@@ -1405,7 +1424,7 @@
 - Fix \#1943: allow multiple operators to reconcile label filtered resources [\#2683](https://github.com/apache/camel-k/pull/2683) ([nicolaferraro](https://github.com/nicolaferraro))
 - feat: Comprehensive Integration error status [\#2682](https://github.com/apache/camel-k/pull/2682) ([astefanutti](https://github.com/astefanutti))
 - fix\(cli\): apply --registry\* flags even on OpenShift for kamel install [\#2681](https://github.com/apache/camel-k/pull/2681) ([tadayosi](https://github.com/tadayosi))
-- \[TEST\] Missing cli tests were added [\#2680](https://github.com/apache/camel-k/pull/2680) ([vsokolov00](https://github.com/vsokolov00))
+- \[TEST\] Missing cli tests were added [\#2680](https://github.com/apache/camel-k/pull/2680) ([vsokolovskii](https://github.com/vsokolovskii))
 - \[TEST\] Global kamelet test - support for openshift [\#2679](https://github.com/apache/camel-k/pull/2679) ([asmigala](https://github.com/asmigala))
 - feat: Add active-deadline-seconds and backoff-limit options to cron trait [\#2678](https://github.com/apache/camel-k/pull/2678) ([astefanutti](https://github.com/astefanutti))
 - feat: Add progress-deadline-seconds option to deployment trait [\#2677](https://github.com/apache/camel-k/pull/2677) ([astefanutti](https://github.com/astefanutti))
@@ -1424,7 +1443,7 @@
 - chore: refresh kamelets also when operator version does not change an… [\#2661](https://github.com/apache/camel-k/pull/2661) ([nicolaferraro](https://github.com/nicolaferraro))
 - Make quarkus dependencies management more robust [\#2658](https://github.com/apache/camel-k/pull/2658) ([doru1004](https://github.com/doru1004))
 - chore\(ci\): Use `github.head_ref` as concurrency group key [\#2657](https://github.com/apache/camel-k/pull/2657) ([astefanutti](https://github.com/astefanutti))
--  Output redirection Fix: \#2495 [\#2656](https://github.com/apache/camel-k/pull/2656) ([vsokolov00](https://github.com/vsokolov00))
+-  Output redirection Fix: \#2495 [\#2656](https://github.com/apache/camel-k/pull/2656) ([vsokolovskii](https://github.com/vsokolovskii))
 - chore\(build\): Upgrade Go dependencies [\#2655](https://github.com/apache/camel-k/pull/2655) ([astefanutti](https://github.com/astefanutti))
 - Fix local builds from directory for containerized and non-containerized uses. [\#2654](https://github.com/apache/camel-k/pull/2654) ([doru1004](https://github.com/doru1004))
 - \[TEST\] Global test - support for openshift [\#2653](https://github.com/apache/camel-k/pull/2653) ([bouskaJ](https://github.com/bouskaJ))
@@ -1507,7 +1526,7 @@
 - Fix \#2468: parse all YAML nodes in the tree [\#2476](https://github.com/apache/camel-k/pull/2476) ([nicolaferraro](https://github.com/nicolaferraro))
 - fix\(cli\) Duplicated trait set as modeline and kamel run parameters causes error [\#2467](https://github.com/apache/camel-k/pull/2467) ([claudio4j](https://github.com/claudio4j))
 - doc\(architecture\): trait section [\#2465](https://github.com/apache/camel-k/pull/2465) ([squakez](https://github.com/squakez))
-- test: Missing cli e2e tests implementation [\#2461](https://github.com/apache/camel-k/pull/2461) ([vsokolov00](https://github.com/vsokolov00))
+- test: Missing cli e2e tests implementation [\#2461](https://github.com/apache/camel-k/pull/2461) ([vsokolovskii](https://github.com/vsokolovskii))
 - chore: Remove Camel Sources support from Knative trait [\#2460](https://github.com/apache/camel-k/pull/2460) ([astefanutti](https://github.com/astefanutti))
 - chore: Update embedded camel-catalog-1.8.0-SNAPSHOT.yaml [\#2459](https://github.com/apache/camel-k/pull/2459) ([astefanutti](https://github.com/astefanutti))
 - chore: Remove unsupported probe-path property from container trait [\#2458](https://github.com/apache/camel-k/pull/2458) ([astefanutti](https://github.com/astefanutti))
@@ -1529,7 +1548,7 @@
 - Sync main with the latest changes from camel-main [\#2426](https://github.com/apache/camel-k/pull/2426) ([orpiske](https://github.com/orpiske))
 - feat\(knative\): upgrade Knative to 0.23 \#2343 [\#2424](https://github.com/apache/camel-k/pull/2424) ([tadayosi](https://github.com/tadayosi))
 - fix\(cmd/run\): secret/configmap as property file [\#2423](https://github.com/apache/camel-k/pull/2423) ([squakez](https://github.com/squakez))
-- \[e2e-tests\] cli test \(without kamel debug\) [\#2422](https://github.com/apache/camel-k/pull/2422) ([vsokolov00](https://github.com/vsokolov00))
+- \[e2e-tests\] cli test \(without kamel debug\) [\#2422](https://github.com/apache/camel-k/pull/2422) ([vsokolovskii](https://github.com/vsokolovskii))
 - fix\(trait\): never fallback to client-side apply unless server-side apply is incombatible [\#2421](https://github.com/apache/camel-k/pull/2421) ([tadayosi](https://github.com/tadayosi))
 - chore\(ci\): upgrade Knative versions in CI to latest possible [\#2420](https://github.com/apache/camel-k/pull/2420) ([tadayosi](https://github.com/tadayosi))
 - fix\(cli\): resource path with quotes and spaces [\#2419](https://github.com/apache/camel-k/pull/2419) ([squakez](https://github.com/squakez))
@@ -1695,7 +1714,7 @@
 - chore : Fix links to the developers guide - needs to point to latest/contributing/developers.html [\#2102](https://github.com/apache/camel-k/pull/2102) ([cunningt](https://github.com/cunningt))
 - chore: Upgrade Knative to version 0.21.0 [\#2101](https://github.com/apache/camel-k/pull/2101) ([astefanutti](https://github.com/astefanutti))
 - chore: Rely on Lease from controller-runtime for leader election [\#2100](https://github.com/apache/camel-k/pull/2100) ([astefanutti](https://github.com/astefanutti))
-- tests: common/files are rewritten to yaml [\#2099](https://github.com/apache/camel-k/pull/2099) ([vsokolov00](https://github.com/vsokolov00))
+- tests: common/files are rewritten to yaml [\#2099](https://github.com/apache/camel-k/pull/2099) ([vsokolovskii](https://github.com/vsokolovskii))
 - Add missing classpath locations for external kits [\#2097](https://github.com/apache/camel-k/pull/2097) ([jamesnetherton](https://github.com/jamesnetherton))
 - fix: Use correct versions to access OLM APIs [\#2095](https://github.com/apache/camel-k/pull/2095) ([astefanutti](https://github.com/astefanutti))
 - Upgrade sbo [\#2094](https://github.com/apache/camel-k/pull/2094) ([johnpoth](https://github.com/johnpoth))
