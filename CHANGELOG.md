@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - Integration in error state when knative SinkBinding mode=inclusion [\#4119](https://github.com/apache/camel-k/issues/4119)
+- Camel K testing - official doc required [\#3848](https://github.com/apache/camel-k/issues/3848)
 
 ## [1.10.5-nightly](https://github.com/apache/camel-k/tree/1.10.5-nightly) (2023-03-13)
 
