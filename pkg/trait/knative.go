@@ -469,6 +469,16 @@ func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.Came
 						APIVersion: ref.APIVersion,
 					}
 
+					if pointer.BoolDeref(t.NamespaceLabel, true) {
+						// set the namespace label to allow automatic sinkbinding injection
+						enabled, err := knativeutil.EnableKnativeBindInNamespace(e.Ctx, e.Client, e.Integration.Namespace)
+						if err != nil {
+							t.L.Errorf(err, "Error setting label 'bindings.knative.dev/include=true' in namespace: %s", e.Integration.Namespace)
+						} else if enabled {
+							t.L.Infof("Label 'bindings.knative.dev/include=true' set in namespace: %s", e.Integration.Namespace)
+						}
+					}
+
 					// Add the SinkBinding in first position, to make sure it is created
 					// before the reference source, so that the SinkBinding webhook has
 					// all the information to perform injection.

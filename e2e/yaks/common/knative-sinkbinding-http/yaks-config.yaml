@@ -15,66 +15,21 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: camel-k-operator-knative
-  labels:
-    app: "camel-k"
-rules:
-- apiGroups:
-  - serving.knative.dev
-  resources:
-  - services
-  - routes
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - eventing.knative.dev
-  resources:
-  - triggers
-  - brokers
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-- apiGroups:
-  - messaging.knative.dev
-  resources:
-  - subscriptions
-  - channels
-  - inmemorychannels
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-- apiGroups:
-  - sources.knative.dev
-  resources:
-  - sinkbindings
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - get
-  - patch
+config:
+  namespace:
+    temporary: true
+pre:
+- name: installation
+  run: |
+    kubectl -n knative-eventing set env deployments eventing-webhook --containers="eventing-webhook" SINK_BINDING_SELECTION_MODE=inclusion
+    sleep 5s
+
+    kubectl apply -n $YAKS_NAMESPACE -f messages-channel.yaml
+
+    kamel run Rest2Channel.java -w -n $YAKS_NAMESPACE
+
+    kubectl wait integration --all --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
+post:
+  - name: print dump
+    if: env:CI=true && failure()
+    run: yaks dump --includes app=camel-k

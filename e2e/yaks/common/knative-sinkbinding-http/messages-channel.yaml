@@ -15,66 +15,7 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: messaging.knative.dev/v1
+kind: InMemoryChannel
 metadata:
-  name: camel-k-operator-knative
-  labels:
-    app: "camel-k"
-rules:
-- apiGroups:
-  - serving.knative.dev
-  resources:
-  - services
-  - routes
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - eventing.knative.dev
-  resources:
-  - triggers
-  - brokers
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-- apiGroups:
-  - messaging.knative.dev
-  resources:
-  - subscriptions
-  - channels
-  - inmemorychannels
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-- apiGroups:
-  - sources.knative.dev
-  resources:
-  - sinkbindings
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - get
-  - patch
+  name: messages

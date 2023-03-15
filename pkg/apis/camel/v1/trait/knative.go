@@ -57,4 +57,8 @@ type KnativeTrait struct {
 	SinkBinding *bool `property:"sink-binding" json:"sinkBinding,omitempty"`
 	// Enable automatic discovery of all trait properties.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
+	// Enables the camel-k-operator to set the "bindings.knative.dev/include=true" label to the namespace
+	// As Knative requires this label to perform injection of K_SINK URL into the service.
+	// If this is false, the integration pod may start and fail, read the SinkBinding Knative documentation. (default: true)
+	NamespaceLabel *bool `property:"namespace-label" json:"namespaceLabel,omitempty"`
 }
