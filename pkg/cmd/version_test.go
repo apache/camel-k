@@ -86,3 +86,9 @@ func TestCompatibleVersions(t *testing.T) {
 	assert.Equal(t, false, compatibleVersions("1.3.0", "dsadsa", rootCmd))
 	assert.Equal(t, false, compatibleVersions("dsadsa", "1.3.4", rootCmd))
 }
+
+func TestCompatibleVersionsNonSemver(t *testing.T) {
+	_, rootCmd, _ := initializeVersionCmdOptions(t)
+	assert.Equal(t, true, compatibleVersions("1.3.0.special-version", "1.3.0.special-version", rootCmd))
+	assert.Equal(t, false, compatibleVersions("1.3.1.special-version", "1.3.0.special-version", rootCmd))
+}
