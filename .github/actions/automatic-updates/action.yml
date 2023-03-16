@@ -55,7 +55,7 @@ runs:
       run: |
         make generate
         make update-docs
-        make update-default-ck-runtime
+        make update-default-camel
         git add -A && git commit -m 'chore: nightly resource refresh' && echo "refresh=1" >> $GITHUB_ENV || echo "No changes to make update-docs"
     - name: Push changes
       shell: bash

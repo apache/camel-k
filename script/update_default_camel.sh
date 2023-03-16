@@ -25,4 +25,14 @@ git clone --depth 1 https://github.com/apache/camel-k-runtime.git /tmp/camel-k-r
 ck_runtime_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout -f /tmp/camel-k-runtime/pom.xml)
 echo "INFO: last Camel K runtime version set at $ck_runtime_version"
 sed -i "s/^RUNTIME_VERSION := .*$/RUNTIME_VERSION := $ck_runtime_version/" $location/Makefile
-rm -rf /tmp/camel-k-runtime/
+
+git clone https://github.com/apache/camel-kamelets.git /tmp/camel-kamelets
+pushd /tmp/camel-kamelets
+ck_camel_base_version=$(echo "$ck_runtime_version" | sed -r 's/-SNAPSHOT//g')
+echo "INFO: Looking a suitable Kamelet tag for $ck_camel_base_version camel version"
+kamelets_tag=$(git tag | grep $ck_camel_base_version | sort -r | head -n 1)
+popd
+echo "INFO: Kamelets version set at $kamelets_tag"
+sed -i "s/^KAMELET_CATALOG_REPO_TAG := .*$/KAMELET_CATALOG_REPO_TAG := $kamelets_tag/" $location/Makefile
+
+rm -rf /tmp/camel-k-runtime/ /tmp/camel-kamelets
