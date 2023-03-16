@@ -43,7 +43,7 @@ In this case, the dependency will be added with the correct version. Note that t
 ```
 kamel run -d mvn:com.google.guava:guava:26.0-jre Integration.java
 ```
-Note that if your dependencies belong to a private repository, this repository needs to be defined. See xref:configuration/maven.adoc[Configure maven].
+Note that if your dependencies belong to a private repository, this repository needs to be defined. See xref:installation/advanced/maven.adoc[Configure maven].
 
 [[local-dependencies]]
 *Local dependencies* can be added using the `-d` flag and the `file://` prefix:
@@ -84,7 +84,7 @@ gitee:user/repo/version
 azure:user/repo/version
 ```
 
-The `version` can be omitted when you are willing to use the `main` branch. Otherwise it will represent the branch or tag used in the project repo. 
+The `version` can be omitted when you are willing to use the `main` branch. Otherwise it will represent the branch or tag used in the project repo.
 
 [[dependencies-dynamic]]
 == Dynamic URIs
