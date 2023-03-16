@@ -153,7 +153,7 @@ HTTP proxy can be configured on the Camel K operator Deployment, with the usual 
 
 The operator automatically configures Maven according to the values of these variables.
 
-See the xref:configuration/http-proxy.adoc[HTTP proxy] documentation for more details.
+See the xref:installation/advanced/http-proxy.adoc[HTTP proxy] documentation for more details.
 
 The generated configuration can be overwritten in the <<maven-settings>> if necessary.
 
@@ -230,7 +230,7 @@ The IntegrationPlatform resource can be edited directly, to add or remove extens
 $ kubectl edit ip camel-k
 ----
 
-Maven extensions are typically used to enable https://maven.apache.org/wagon/wagon-providers/[Wagon Providers], used for the transport of artifacts between repository. 
+Maven extensions are typically used to enable https://maven.apache.org/wagon/wagon-providers/[Wagon Providers], used for the transport of artifacts between repository.
 
 [[use-case]]
 == S3 Bucket as a Maven Repository
