@@ -18,15 +18,15 @@
 apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-1.18.0-snapshot
+  name: camel-catalog-3.20.1-snapshot
   labels:
     app: camel-k
     camel.apache.org/catalog.loader.version: 3.20.1
     camel.apache.org/catalog.version: 3.20.1
-    camel.apache.org/runtime.version: 1.18.0-SNAPSHOT
+    camel.apache.org/runtime.version: 3.20.1-SNAPSHOT
 spec:
   runtime:
-    version: 1.18.0-SNAPSHOT
+    version: 3.20.1-SNAPSHOT
     provider: quarkus
     applicationClass: io.quarkus.bootstrap.runner.QuarkusEntryPoint
     metadata:
@@ -50,10 +50,6 @@ spec:
         dependencies:
         - groupId: org.apache.camel.quarkus
           artifactId: camel-quarkus-microprofile-health
-      master:
-        dependencies:
-        - groupId: org.apache.camel.k
-          artifactId: camel-k-master
       platform-http:
         dependencies:
         - groupId: org.apache.camel.quarkus
@@ -80,9 +76,6 @@ spec:
     camel-k-cron:
       groupId: org.apache.camel.k
       artifactId: camel-k-cron
-    camel-k-master:
-      groupId: org.apache.camel.k
-      artifactId: camel-k-master
     camel-k-resume-kafka:
       groupId: org.apache.camel.k
       artifactId: camel-k-resume-kafka
