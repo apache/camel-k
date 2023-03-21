@@ -558,7 +558,7 @@ spec:
 ----
 <1> Defines the type of the `output`
 <2> Name of the data type
-<2> Optional JSON-schema definition of the output
+<3> Optional JSON-schema definition of the output
 
 Data shape can be indicated for the following channels:
 
