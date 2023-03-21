@@ -72,6 +72,7 @@ RBAC := $(CONFIG)/rbac
 RBAC_OS := $(RBAC)/openshift
 RBAC_GLOBAL := global
 OPERATOR := operator
+PLACEHOLDER := placeholder
 YAML := yaml
 
 # Fetch the latest image name - may override the original constant
