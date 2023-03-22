@@ -50,6 +50,10 @@ spec:
         dependencies:
         - groupId: org.apache.camel.quarkus
           artifactId: camel-quarkus-microprofile-health
+      master:
+        dependencies:
+        - groupId: org.apache.camel.k
+          artifactId: camel-k-master
       platform-http:
         dependencies:
         - groupId: org.apache.camel.quarkus
@@ -76,6 +80,9 @@ spec:
     camel-k-cron:
       groupId: org.apache.camel.k
       artifactId: camel-k-cron
+    camel-k-master:
+      groupId: org.apache.camel.k
+      artifactId: camel-k-master
     camel-k-resume-kafka:
       groupId: org.apache.camel.k
       artifactId: camel-k-resume-kafka
