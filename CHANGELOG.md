@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - Regression on Kustomize [\#4142](https://github.com/apache/camel-k/issues/4142)
+- Smoke test failing on master trait [\#4138](https://github.com/apache/camel-k/issues/4138)
 - Integration in error state when knative SinkBinding mode=inclusion [\#4119](https://github.com/apache/camel-k/issues/4119)
 - Nightly release fail after 2.0 [\#4086](https://github.com/apache/camel-k/issues/4086)
 - Failure when mounting condifgmap and secrets with the same name [\#3980](https://github.com/apache/camel-k/issues/3980)
