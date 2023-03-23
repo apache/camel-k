@@ -18,8 +18,10 @@ limitations under the License.
 package camel
 
 import (
+	"sort"
 	"testing"
 
+	"github.com/Masterminds/semver"
 	"github.com/stretchr/testify/assert"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -63,4 +65,55 @@ func TestFindRangeMatch(t *testing.T) {
 	assert.NotNil(t, c)
 	assert.Equal(t, "1.0.2", c.Runtime.Version)
 	assert.Equal(t, v1.RuntimeProviderQuarkus, c.Runtime.Provider)
+}
+
+func TestMissingMatch(t *testing.T) {
+	catalogs := []v1.CamelCatalog{
+		{Spec: v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Version: "1.0.0", Provider: v1.RuntimeProviderQuarkus}}},
+	}
+
+	c, err := findBestMatch(catalogs, v1.RuntimeSpec{Version: "1.0.1", Provider: v1.RuntimeProviderQuarkus})
+	assert.Nil(t, err)
+	assert.Nil(t, c)
+}
+
+func TestNewCatalogVersionCollection(t *testing.T) {
+	catalogs := []v1.CamelCatalog{
+		{Spec: v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Version: "1.0.0", Provider: v1.RuntimeProviderQuarkus}}},
+	}
+
+	versions := make([]CatalogVersion, 0, len(catalogs))
+	rv, _ := semver.NewVersion(catalogs[0].Spec.Runtime.Version)
+	versions = append(versions, CatalogVersion{
+		RuntimeVersion: rv,
+		Catalog:        &catalogs[0],
+	})
+	expected := CatalogVersionCollection(versions)
+	sort.Sort(sort.Reverse(expected))
+
+	c := newCatalogVersionCollection(catalogs)
+
+	assert.Equal(t, expected, c)
+
+}
+func TestIncorrectConstraint(t *testing.T) {
+	rc := newSemVerConstraint("1.A.0")
+	assert.Nil(t, rc)
+
+	catalogs := []v1.CamelCatalog{
+		{Spec: v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Version: "1.A.0", Provider: v1.RuntimeProviderQuarkus}}},
+	}
+	c, err := findBestMatch(catalogs, v1.RuntimeSpec{Version: "1.0.0", Provider: v1.RuntimeProviderQuarkus})
+	assert.Nil(t, err)
+	assert.Nil(t, c)
+}
+
+func TestGetDependency(t *testing.T) {
+	artifact := v1.CamelArtifact{}
+	artifact.ArtifactID = "camel-quarkus-"
+	provider := v1.RuntimeProviderQuarkus
+	assert.Equal(t, "camel:", getDependency(artifact, provider))
+	provider = v1.RuntimeProvider("notquarkus")
+	artifact.ArtifactID = "camel-"
+	assert.Equal(t, "camel:", getDependency(artifact, provider))
 }
