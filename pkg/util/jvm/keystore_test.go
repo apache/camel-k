@@ -15,31 +15,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package gzip
+package jvm
 
 import (
-	"bytes"
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCompression(t *testing.T) {
-	source := "this is a script"
-	var compressed bytes.Buffer
-	err := Compress(&compressed, []byte(source))
-	assert.Nil(t, err)
-	var uncompressed bytes.Buffer
-	err = Uncompress(&uncompressed, compressed.Bytes())
-	assert.Nil(t, err)
-	assert.Equal(t, source, uncompressed.String())
-}
+func TestGenerateKeystore(t *testing.T) {
 
-func TestCompression64(t *testing.T) {
-	source := "this is a script"
-	compressed, err := CompressBase64([]byte(source))
+	//No Data
+	var data [][]byte
+	ctx := context.Background()
+	err := GenerateKeystore(ctx, "", "name", NewKeystorePassword(), data)
 	assert.Nil(t, err)
-	uncompressed, err := UncompressBase64(compressed)
-	assert.Nil(t, err)
-	assert.Equal(t, source, string(uncompressed))
+
+	//Correct input
+	data = [][]byte{{0}, {1}}
+	err = GenerateKeystore(ctx, "", "name", NewKeystorePassword(), data)
+	assert.NotNil(t, err)
+
+	//Incorrect input format
+	err = GenerateKeystore(ctx, "", "name", "", data)
+	assert.NotNil(t, err)
 }
