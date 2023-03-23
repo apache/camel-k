@@ -338,3 +338,45 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 	assert.Nil(t, err)
 	assert.True(t, ok)
 }
+
+func TestHasMatchingSources(t *testing.T) {
+	integration := &v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+			},
+		},
+	}
+
+	kit := &v1.IntegrationKit{
+		Spec: v1.IntegrationKitSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+			},
+		},
+	}
+
+	hasMatchingSources := hasMatchingSources(integration, kit)
+	assert.True(t, hasMatchingSources)
+}
+
+func TestHasNotMatchingSources(t *testing.T) {
+	integration := &v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+			},
+		},
+	}
+
+	kit := &v1.IntegrationKit{
+		Spec: v1.IntegrationKitSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("test", "some content 2", v1.LanguageJavaShell),
+			},
+		},
+	}
+
+	hasMatchingSources := hasMatchingSources(integration, kit)
+	assert.False(t, hasMatchingSources)
+}
