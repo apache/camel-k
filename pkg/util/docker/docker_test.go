@@ -31,9 +31,9 @@ import (
 
 func TestCreateBaseImageDockerFile(t *testing.T) {
 
-	dockerfileExists, _ := util.FileExists("Dockerfile")
+	dockerfileExists, _ := util.FileExists("/tmp/Dockerfile")
 	if dockerfileExists {
-		os.Remove("Dockerfile")
+		os.Remove("/tmp/Dockerfile")
 	}
 
 	dockerFile := []string{}
@@ -41,7 +41,7 @@ func TestCreateBaseImageDockerFile(t *testing.T) {
 	dockerFile = append(dockerFile, RUNMavenInstall())
 	expected := strings.Join(dockerFile, "\n")
 
-	BaseWorkingDirectory = ""
+	BaseWorkingDirectory = "/tmp/"
 
 	err := CreateBaseImageDockerFile()
 	assert.Nil(t, err)
@@ -52,14 +52,15 @@ func TestCreateBaseImageDockerFile(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, expected, string(c))
 
+	os.Remove("/tmp/Dockerfile")
 }
 
 func TestCreateIntegrationImageDockerFile(t *testing.T) {
-	dockerfileExists, _ := util.FileExists("Dockerfile")
+	dockerfileExists, _ := util.FileExists("/tmp/Dockerfile")
 	if dockerfileExists {
-		os.Remove("Dockerfile")
+		os.Remove("/tmp/Dockerfile")
 	}
-
+	IntegrationWorkingDirectory = "/tmp/"
 	var cmd exec.Cmd
 	cmd.Path = "test"
 	cmd.Env = []string{"key=value"}
@@ -92,24 +93,23 @@ func TestCreateIntegrationImageDockerFile(t *testing.T) {
 	err := CreateIntegrationImageDockerFile(&cmd, false)
 	assert.Nil(t, err)
 
-	c, err := util.ReadFile("Dockerfile")
+	c, err := util.ReadFile("/tmp/Dockerfile")
 	assert.Nil(t, err)
 	assert.Equal(t, expected, string(c))
 
-	os.Remove("Dockerfile")
+	os.Remove("/tmp/Dockerfile")
 
 	expected = strings.Join(dockerFile2, "\n")
 
 	err = CreateIntegrationImageDockerFile(&cmd, true)
 	assert.Nil(t, err)
 
-	c, err = util.ReadFile("Dockerfile")
+	c, err = util.ReadFile("/tmp/Dockerfile")
 	assert.Nil(t, err)
 	assert.Equal(t, expected, string(c))
 
-	os.Remove("Dockerfile")
+	os.Remove("/tmp/Dockerfile")
 
-	CreateBaseImageDockerFile()
 }
 
 func TestContainerizeFilePaths(t *testing.T) {
