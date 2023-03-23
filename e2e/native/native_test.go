@@ -127,24 +127,25 @@ func TestNativeIntegrations(t *testing.T) {
 
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
+			t.Run("yaml native should not rebuild", func(t *testing.T) {
+				name := "yaml-native-2"
+				Expect(KamelRunWithID(operatorID, ns, "files/yaml2.yaml", "--name", name,
+					"-t", "quarkus.package-type=native",
+				).Execute()).To(Succeed())
+
+				// This one should run quickly as it suppose to reuse an IntegrationKit
+				Eventually(IntegrationPodPhase(ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationPod(ns, name), TestTimeoutShort).
+					Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
+				Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+					Should(Equal(corev1.ConditionTrue))
+				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!2"))
+				Expect(IntegrationKit(ns, "yaml-native")).Should(Equal(IntegrationKit(ns, "yaml-native-2")))
+			})
+
 			// Clean up
 			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
 		})
 
-		t.Run("yaml native should not rebuild", func(t *testing.T) {
-			name := "yaml-native-2"
-			Expect(KamelRunWithID(operatorID, ns, "files/yaml2.yaml", "--name", name,
-				"-t", "quarkus.package-type=native",
-			).Execute()).To(Succeed())
-
-			// This one should run quickly as it suppose to reuse an IntegrationKit
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationPod(ns, name), TestTimeoutShort).
-				Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
-				Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!2"))
-			Expect(IntegrationKit(ns, "yaml-native")).Should(Equal(IntegrationKit(ns, "yaml-native-2")))
-		})
 	})
 }
