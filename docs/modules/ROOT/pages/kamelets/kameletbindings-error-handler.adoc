@@ -1,12 +1,12 @@
-[[kameletbindings-error-handler]]
-= Kamelet Bindings Error Handler
+[[bindings-error-handler]]
+=Bindings Error Handler
 
 Kamelet Binding`s offer a mechanism to specify an error policy to adopt in case an event produced by a `source` or consumed by a `sink`. Through the definition of an `errorHandler` you will be able to apply certain logic to the failing event, such as simply logging, ignoring the event or posting the event to a `Sink`.
 
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+kind: Binding
 metadata:
   name: my-kamelet-binding
 spec:
@@ -20,12 +20,12 @@ spec:
 <2> Reference to the sink where data should be sent to
 <3> Error Handler Configuration
 
-[[kameletbindings-error-handler-types]]
+[[bindings-error-handler-types]]
 == Error Handler Types
 
 We have different types of error handler: `none`, `log` and `sink`. The `errorHandler` parameter is optional.
 
-[[kameletbindings-error-handler-none]]
+[[bindings-error-handler-none]]
 === No error handler
 
 There may be certain cases where you want to just ignore any failure happening on your integration. In this situation just use a `none` error handler.
@@ -33,20 +33,20 @@ There may be certain cases where you want to just ignore any failure happening o
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+kind: Binding
 metadata:
   name: my-kamelet-binding
 spec:
   source:
 ...
-  sink: 
+  sink:
 ...
-  errorHandler: 
+  errorHandler:
     none: # <1>
 ----
 <1> `none` error handler does not expect any configuration
 
-[[kameletbindings-error-handler-log]]
+[[bindings-error-handler-log]]
 === Log error handler
 
 Apache Camel offers a default behavior for handling any failure: log to standard output. However you can use the `log` error handler to specify other behaviors such as redelivery or delay policy.
@@ -54,15 +54,15 @@ Apache Camel offers a default behavior for handling any failure: log to standard
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+kind: Binding
 metadata:
   name: my-kamelet-binding
 spec:
   source:
 ...
-  sink: 
+  sink:
 ...
-  errorHandler: 
+  errorHandler:
     log:
       parameters: # <1>
         maximumRedeliveries: 3
@@ -70,7 +70,7 @@ spec:
 ----
 <1> Parameters belonging to the `log` error handler type
 
-[[kameletbindings-error-handler-sink]]
+[[bindings-error-handler-sink]]
 === Sink error handler
 
 The `Sink` is probably the most interesting error handler type as it allows you to redirect any failing event to any other component, such as a third party URI, a queue or even another `Kamelet` which will be performing certain logic with the failing event.
@@ -78,17 +78,17 @@ The `Sink` is probably the most interesting error handler type as it allows you 
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+kind: Binding
 metadata:
   name: my-kamelet-binding
 spec:
   source:
 ...
-  sink: 
+  sink:
 ...
-  errorHandler: 
+  errorHandler:
     sink:
-      endpoint: 
+      endpoint:
         ref: # <1>
           kind: Kamelet
           apiVersion: camel.apache.org/v1alpha1
@@ -98,7 +98,7 @@ spec:
           ...
       parameters:
         maximumRedeliveries: 1 # <3>
-        ... 
+        ...
 ----
 <1> You can use `ref` or `uri`. `ref` will be interpreted by the operator according the `kind`, `apiVersion` and `name`. You can use any `Kamelet`, `KafkaTopic` channel or `Knative` destination.
 <2> Properties belonging to the endpoint (in this example, to the `Kamelet` named error handler)

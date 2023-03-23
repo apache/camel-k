@@ -29,8 +29,8 @@ import (
 
 type CamelV1alpha1Interface interface {
 	RESTClient() rest.Interface
+	BindingsGetter
 	KameletsGetter
-	KameletBindingsGetter
 }
 
 // CamelV1alpha1Client is used to interact with features provided by the camel.apache.org group.
@@ -38,12 +38,12 @@ type CamelV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *CamelV1alpha1Client) Kamelets(namespace string) KameletInterface {
-	return newKamelets(c, namespace)
+func (c *CamelV1alpha1Client) Bindings(namespace string) BindingInterface {
+	return newBindings(c, namespace)
 }
 
-func (c *CamelV1alpha1Client) KameletBindings(namespace string) KameletBindingInterface {
-	return newKameletBindings(c, namespace)
+func (c *CamelV1alpha1Client) Kamelets(namespace string) KameletInterface {
+	return newKamelets(c, namespace)
 }
 
 // NewForConfig creates a new CamelV1alpha1Client for the given config.

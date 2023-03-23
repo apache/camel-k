@@ -200,8 +200,8 @@ func installCRDs(ctx context.Context, c client.Client, collection *kubernetes.Co
 		return err
 	}
 
-	// Install CRD for KameletBinding (if needed)
-	if err := installCRD(ctx, c, "KameletBinding", "v1alpha1", "camel.apache.org_kameletbindings.yaml",
+	// Install CRD for Binding (if needed)
+	if err := installCRD(ctx, c, "Binding", "v1alpha1", "camel.apache.org_bindings.yaml",
 		v1beta1Customizer, collection, force); err != nil {
 		return err
 	}
@@ -211,7 +211,7 @@ func installCRDs(ctx context.Context, c client.Client, collection *kubernetes.Co
 
 func downgradeToCRDv1beta1(isAPIExtensionsV1 bool) ResourceCustomizer {
 	return func(object ctrl.Object) ctrl.Object {
-		// Remove default values in v1beta1 Integration and KameletBinding CRDs,
+		// Remove default values in v1beta1 Integration and Binding CRDs,
 		removeDefaultFromCrd := func(crd *apiextensionsv1beta1.CustomResourceDefinition, property string) {
 			defaultValue := apiextensionsv1beta1.JSONSchemaProps{
 				Default: nil,
@@ -221,7 +221,7 @@ func downgradeToCRDv1beta1(isAPIExtensionsV1 bool) ResourceCustomizer {
 					Properties["spec"].Properties["template"].Properties["spec"].Properties[property].Items.Schema.
 					Properties["ports"].Items.Schema.Properties["protocol"] = defaultValue
 			}
-			if crd.Name == "kameletbindings.camel.apache.org" {
+			if crd.Name == "bindings.camel.apache.org" {
 				crd.Spec.Validation.OpenAPIV3Schema.Properties["spec"].Properties["integration"].Properties["template"].
 					Properties["spec"].Properties[property].Items.Schema.Properties["ports"].Items.Schema.
 					Properties["protocol"] = defaultValue
@@ -312,7 +312,7 @@ func areAllCrdInstalled(c client.Client) (bool, error) {
 	} else if !ok {
 		return false, nil
 	}
-	return isCrdInstalled(c, "KameletBinding", "v1alpha1")
+	return isCrdInstalled(c, "Binding", "v1alpha1")
 }
 
 func isCrdInstalled(c client.Client, kind string, version string) (bool, error) {

@@ -34,7 +34,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
-func TestKameletBinding(t *testing.T) {
+func TestBinding(t *testing.T) {
 	RegisterTestingT(t)
 
 	// Error Handler testing
@@ -91,8 +91,8 @@ func TestKameletBinding(t *testing.T) {
 		})
 	})
 
-	// Kamelet binding with traits testing
-	t.Run("test kamelet binding with trait", func(t *testing.T) {
+	//Binding with traits testing
+	t.Run("testBinding with trait", func(t *testing.T) {
 		Expect(CreateTimerKamelet(ns, "my-own-timer-source")()).To(Succeed())
 		// Log sink kamelet exists from previous test
 
@@ -119,17 +119,17 @@ func TestKameletBinding(t *testing.T) {
 		Eventually(IntegrationLogs(ns, "kb-with-traits"), TestTimeoutShort).Should(ContainSubstring("integrationLogger"))
 	})
 
-	// KameletBinding with wrong spec
-	t.Run("test KameletBinding with wrong spec", func(t *testing.T) {
+	// Binding with wrong spec
+	t.Run("test Binding with wrong spec", func(t *testing.T) {
 		name := "bad-klb"
-		kb := v1alpha1.NewKameletBinding(ns, name)
-		kb.Spec = v1alpha1.KameletBindingSpec{}
+		kb := v1alpha1.NewBinding(ns, name)
+		kb.Spec = v1alpha1.BindingSpec{}
 		_, err := kubernetes.ReplaceResource(TestContext, TestClient(), &kb)
 		Eventually(err).Should(BeNil())
-		Eventually(KameletBindingPhase(ns, name), TestTimeoutShort).Should(Equal(v1alpha1.KameletBindingPhaseError))
-		Eventually(KameletBindingConditionStatus(ns, name, v1alpha1.KameletBindingConditionReady), TestTimeoutShort).ShouldNot(Equal(corev1.ConditionTrue))
-		Eventually(KameletBindingCondition(ns, name, v1alpha1.KameletBindingIntegrationConditionError), TestTimeoutShort).Should(
-			WithTransform(KameletBindingConditionMessage, And(
+		Eventually(BindingPhase(ns, name), TestTimeoutShort).Should(Equal(v1alpha1.BindingPhaseError))
+		Eventually(BindingConditionStatus(ns, name, v1alpha1.BindingConditionReady), TestTimeoutShort).ShouldNot(Equal(corev1.ConditionTrue))
+		Eventually(BindingCondition(ns, name, v1alpha1.BindingIntegrationConditionError), TestTimeoutShort).Should(
+			WithTransform(BindingConditionMessage, And(
 				ContainSubstring("could not determine source URI"),
 				ContainSubstring("no ref or URI specified in endpoint"),
 			)))

@@ -5,6 +5,48 @@ Package v1alpha1 contains API Schema definitions for the camel v1alpha1 API grou
 
 ==  Resource Types
 
+[#_camel_apache_org_v1alpha1_Binding]
+=== Binding
+
+Binding is the Schema for the kamelets binding API
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`apiVersion` +
+string
+|`camel.apache.org/v1alpha1`
+
+|`kind` +
+string
+|`Binding`
+|`metadata` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+|
+
+
+
+
+Refer to the Kubernetes API documentation for the fields of the `metadata` field.
+|`spec` +
+*xref:#_camel_apache_org_v1alpha1_BindingSpec[BindingSpec]*
+|
+
+
+the specification of a Binding
+
+|`status` +
+*xref:#_camel_apache_org_v1alpha1_BindingStatus[BindingStatus]*
+|
+
+
+the status of a Binding
+
+
+|===
+
 [#_camel_apache_org_v1alpha1_Kamelet]
 === Kamelet
 
@@ -47,48 +89,6 @@ the actual status of the resource
 
 |===
 
-[#_camel_apache_org_v1alpha1_KameletBinding]
-=== KameletBinding
-
-KameletBinding is the Schema for the kamelets binding API
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`apiVersion` +
-string
-|`camel.apache.org/v1alpha1`
-
-|`kind` +
-string
-|`KameletBinding`
-|`metadata` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
-|
-
-
-
-
-Refer to the Kubernetes API documentation for the fields of the `metadata` field.
-|`spec` +
-*xref:#_camel_apache_org_v1alpha1_KameletBindingSpec[KameletBindingSpec]*
-|
-
-
-the specification of a KameletBinding
-
-|`status` +
-*xref:#_camel_apache_org_v1alpha1_KameletBindingStatus[KameletBindingStatus]*
-|
-
-
-the status of a KameletBinding
-
-
-|===
-
 == Internal Types
 
 [#_camel_apache_org_v1alpha1_BeanProperties]
@@ -107,6 +107,210 @@ BeanProperties represent an unstructured object properties to be set on a bean
 
 
 
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_BindingCondition]
+=== BindingCondition
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_BindingStatus, BindingStatus>>
+
+BindingCondition describes the state of a resource at a certain point.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+*xref:#_camel_apache_org_v1alpha1_BindingConditionType[BindingConditionType]*
+|
+
+
+Type of binding condition.
+
+|`status` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+|
+
+
+Status of the condition, one of True, False, Unknown.
+
+|`lastUpdateTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+The last time this condition was updated.
+
+|`lastTransitionTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+Last time the condition transitioned from one status to another.
+
+|`reason` +
+string
+|
+
+
+The reason for the condition's last transition.
+
+|`message` +
+string
+|
+
+
+A human readable message indicating details about the transition.
+
+|`pods` +
+[]github.com/apache/camel-k/v2/pkg/apis/camel/v1.PodCondition
+|
+
+
+Pods collect health and conditions information from the owned PODs
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_BindingConditionType]
+=== BindingConditionType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_BindingCondition, BindingCondition>>
+
+BindingConditionType --
+
+
+[#_camel_apache_org_v1alpha1_BindingPhase]
+=== BindingPhase(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_BindingStatus, BindingStatus>>
+
+BindingPhase --
+
+
+[#_camel_apache_org_v1alpha1_BindingSpec]
+=== BindingSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_Binding, Binding>>
+
+BindingSpec defines the binding between a source and a sink. It can include custom parameters and additional intermediate steps and error handling.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`integration` +
+github.com/apache/camel-k/v2/pkg/apis/camel/v1.IntegrationSpec
+|
+
+
+Integration is an optional integration used to specify custom parameters
+
+|`source` +
+*xref:#_camel_apache_org_v1alpha1_Endpoint[Endpoint]*
+|
+
+
+Source is the starting point of the integration defined by this binding
+
+|`sink` +
+*xref:#_camel_apache_org_v1alpha1_Endpoint[Endpoint]*
+|
+
+
+Sink is the destination of the integration defined by this binding
+
+|`errorHandler` +
+*xref:#_camel_apache_org_v1alpha1_ErrorHandlerSpec[ErrorHandlerSpec]*
+|
+
+
+ErrorHandler is an optional handler called upon an error occuring in the integration
+
+|`steps` +
+*xref:#_camel_apache_org_v1alpha1_Endpoint[[\]Endpoint]*
+|
+
+
+Steps contains an optional list of intermediate steps that are executed between the Source and the Sink
+
+|`replicas` +
+int32
+|
+
+
+Replicas is the number of desired replicas for the binding
+
+|`serviceAccountName` +
+string
+|
+
+
+Custom SA to use for the binding
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_BindingStatus]
+=== BindingStatus
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_Binding, Binding>>
+
+BindingStatus specify the status of a binding
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`observedGeneration` +
+int64
+|
+
+
+ObservedGeneration is the most recent generation observed for this Binding.
+
+|`phase` +
+*xref:#_camel_apache_org_v1alpha1_BindingPhase[BindingPhase]*
+|
+
+
+Phase --
+
+|`conditions` +
+*xref:#_camel_apache_org_v1alpha1_BindingCondition[[\]BindingCondition]*
+|
+
+
+Conditions --
+
+|`replicas` +
+int32
+|
+
+
+Replicas is the number of actual replicas of the binding
+
+|`selector` +
+string
+|
+
+
+Selector allows to identify pods belonging to the binding
 
 
 |===
@@ -251,8 +455,8 @@ one to many header specifications
 
 *Appears on:*
 
+* <<#_camel_apache_org_v1alpha1_BindingSpec, BindingSpec>>
 * <<#_camel_apache_org_v1alpha1_ErrorHandlerSink, ErrorHandlerSink>>
-* <<#_camel_apache_org_v1alpha1_KameletBindingSpec, KameletBindingSpec>>
 
 Endpoint represents a source/sink external entity (could be any Kubernetes resource or Camel URI)
 
@@ -440,7 +644,7 @@ ErrorHandlerSink represents a sink error handler type which behave like a dead l
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1alpha1_KameletBindingSpec, KameletBindingSpec>>
+* <<#_camel_apache_org_v1alpha1_BindingSpec, BindingSpec>>
 
 ErrorHandlerSpec represents an unstructured object for an error handler
 
@@ -909,210 +1113,6 @@ string
 
 JSONSchemaURL represents a schema url.
 
-
-[#_camel_apache_org_v1alpha1_KameletBindingCondition]
-=== KameletBindingCondition
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1alpha1_KameletBindingStatus, KameletBindingStatus>>
-
-KameletBindingCondition describes the state of a resource at a certain point.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`type` +
-*xref:#_camel_apache_org_v1alpha1_KameletBindingConditionType[KameletBindingConditionType]*
-|
-
-
-Type of kameletBinding condition.
-
-|`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
-|
-
-
-Status of the condition, one of True, False, Unknown.
-
-|`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-The last time this condition was updated.
-
-|`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-Last time the condition transitioned from one status to another.
-
-|`reason` +
-string
-|
-
-
-The reason for the condition's last transition.
-
-|`message` +
-string
-|
-
-
-A human readable message indicating details about the transition.
-
-|`pods` +
-[]github.com/apache/camel-k/v2/pkg/apis/camel/v1.PodCondition
-|
-
-
-Pods collect health and conditions information from the owned PODs
-
-
-|===
-
-[#_camel_apache_org_v1alpha1_KameletBindingConditionType]
-=== KameletBindingConditionType(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1alpha1_KameletBindingCondition, KameletBindingCondition>>
-
-KameletBindingConditionType --
-
-
-[#_camel_apache_org_v1alpha1_KameletBindingPhase]
-=== KameletBindingPhase(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1alpha1_KameletBindingStatus, KameletBindingStatus>>
-
-KameletBindingPhase --
-
-
-[#_camel_apache_org_v1alpha1_KameletBindingSpec]
-=== KameletBindingSpec
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1alpha1_KameletBinding, KameletBinding>>
-
-KameletBindingSpec defines the binding between a source and a sink. It can include custom parameters and additional intermediate steps and error handling.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`integration` +
-github.com/apache/camel-k/v2/pkg/apis/camel/v1.IntegrationSpec
-|
-
-
-Integration is an optional integration used to specify custom parameters
-
-|`source` +
-*xref:#_camel_apache_org_v1alpha1_Endpoint[Endpoint]*
-|
-
-
-Source is the starting point of the integration defined by this binding
-
-|`sink` +
-*xref:#_camel_apache_org_v1alpha1_Endpoint[Endpoint]*
-|
-
-
-Sink is the destination of the integration defined by this binding
-
-|`errorHandler` +
-*xref:#_camel_apache_org_v1alpha1_ErrorHandlerSpec[ErrorHandlerSpec]*
-|
-
-
-ErrorHandler is an optional handler called upon an error occuring in the integration
-
-|`steps` +
-*xref:#_camel_apache_org_v1alpha1_Endpoint[[\]Endpoint]*
-|
-
-
-Steps contains an optional list of intermediate steps that are executed between the Source and the Sink
-
-|`replicas` +
-int32
-|
-
-
-Replicas is the number of desired replicas for the binding
-
-|`serviceAccountName` +
-string
-|
-
-
-Custom SA to use for the binding
-
-
-|===
-
-[#_camel_apache_org_v1alpha1_KameletBindingStatus]
-=== KameletBindingStatus
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1alpha1_KameletBinding, KameletBinding>>
-
-KameletBindingStatus specify the status of a binding
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`observedGeneration` +
-int64
-|
-
-
-ObservedGeneration is the most recent generation observed for this KameletBinding.
-
-|`phase` +
-*xref:#_camel_apache_org_v1alpha1_KameletBindingPhase[KameletBindingPhase]*
-|
-
-
-Phase --
-
-|`conditions` +
-*xref:#_camel_apache_org_v1alpha1_KameletBindingCondition[[\]KameletBindingCondition]*
-|
-
-
-Conditions --
-
-|`replicas` +
-int32
-|
-
-
-Replicas is the number of actual replicas of the binding
-
-|`selector` +
-string
-|
-
-
-Selector allows to identify pods belonging to the binding
-
-
-|===
 
 [#_camel_apache_org_v1alpha1_KameletCondition]
 === KameletCondition

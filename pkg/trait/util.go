@@ -374,13 +374,13 @@ func IntegrationKitsHaveSameTraits(i1 *v1.IntegrationKit, i2 *v1.IntegrationKit)
 	return Equals(c1, c2), nil
 }
 
-// KameletBindingsHaveSameTraits return if traits are the same.
-func KameletBindingsHaveSameTraits(i1 *v1alpha1.KameletBinding, i2 *v1alpha1.KameletBinding) (bool, error) {
-	c1, err := NewTraitsOptionsForKameletBinding(i1)
+// BindingsHaveSameTraits return if traits are the same.
+func BindingsHaveSameTraits(i1 *v1alpha1.Binding, i2 *v1alpha1.Binding) (bool, error) {
+	c1, err := NewTraitsOptionsForBinding(i1)
 	if err != nil {
 		return false, err
 	}
-	c2, err := NewTraitsOptionsForKameletBinding(i2)
+	c2, err := NewTraitsOptionsForBinding(i2)
 	if err != nil {
 		return false, err
 	}
@@ -391,12 +391,12 @@ func KameletBindingsHaveSameTraits(i1 *v1alpha1.KameletBinding, i2 *v1alpha1.Kam
 // IntegrationAndBindingSameTraits return if traits are the same.
 // The comparison is done for the subset of traits defines on the binding as during the trait processing,
 // some traits may be added to the Integration i.e. knative configuration in case of sink binding.
-func IntegrationAndBindingSameTraits(i1 *v1.Integration, i2 *v1alpha1.KameletBinding) (bool, error) {
+func IntegrationAndBindingSameTraits(i1 *v1.Integration, i2 *v1alpha1.Binding) (bool, error) {
 	itOpts, err := NewTraitsOptionsForIntegration(i1)
 	if err != nil {
 		return false, err
 	}
-	klbOpts, err := NewTraitsOptionsForKameletBinding(i2)
+	klbOpts, err := NewTraitsOptionsForBinding(i2)
 	if err != nil {
 		return false, err
 	}
@@ -479,7 +479,7 @@ func NewTraitsOptionsForIntegrationPlatform(i *v1.IntegrationPlatform) (Options,
 	return m1, nil
 }
 
-func NewTraitsOptionsForKameletBinding(i *v1alpha1.KameletBinding) (Options, error) {
+func NewTraitsOptionsForBinding(i *v1alpha1.Binding) (Options, error) {
 	if i.Spec.Integration != nil {
 		m1, err := ToTraitMap(i.Spec.Integration.Traits)
 		if err != nil {

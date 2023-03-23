@@ -25,22 +25,22 @@ import (
 	v1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
-// KameletBindingApplyConfiguration represents an declarative configuration of the KameletBinding type for use
+// BindingApplyConfiguration represents an declarative configuration of the Binding type for use
 // with apply.
-type KameletBindingApplyConfiguration struct {
+type BindingApplyConfiguration struct {
 	v1.TypeMetaApplyConfiguration    `json:",inline"`
 	*v1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
-	Spec                             *KameletBindingSpecApplyConfiguration   `json:"spec,omitempty"`
-	Status                           *KameletBindingStatusApplyConfiguration `json:"status,omitempty"`
+	Spec                             *BindingSpecApplyConfiguration   `json:"spec,omitempty"`
+	Status                           *BindingStatusApplyConfiguration `json:"status,omitempty"`
 }
 
-// KameletBinding constructs an declarative configuration of the KameletBinding type for use with
+// Binding constructs an declarative configuration of the Binding type for use with
 // apply.
-func KameletBinding(name, namespace string) *KameletBindingApplyConfiguration {
-	b := &KameletBindingApplyConfiguration{}
+func Binding(name, namespace string) *BindingApplyConfiguration {
+	b := &BindingApplyConfiguration{}
 	b.WithName(name)
 	b.WithNamespace(namespace)
-	b.WithKind("KameletBinding")
+	b.WithKind("Binding")
 	b.WithAPIVersion("camel.apache.org/v1alpha1")
 	return b
 }
@@ -48,7 +48,7 @@ func KameletBinding(name, namespace string) *KameletBindingApplyConfiguration {
 // WithKind sets the Kind field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Kind field is set to the value of the last call.
-func (b *KameletBindingApplyConfiguration) WithKind(value string) *KameletBindingApplyConfiguration {
+func (b *BindingApplyConfiguration) WithKind(value string) *BindingApplyConfiguration {
 	b.Kind = &value
 	return b
 }
@@ -56,7 +56,7 @@ func (b *KameletBindingApplyConfiguration) WithKind(value string) *KameletBindin
 // WithAPIVersion sets the APIVersion field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the APIVersion field is set to the value of the last call.
-func (b *KameletBindingApplyConfiguration) WithAPIVersion(value string) *KameletBindingApplyConfiguration {
+func (b *BindingApplyConfiguration) WithAPIVersion(value string) *BindingApplyConfiguration {
 	b.APIVersion = &value
 	return b
 }
@@ -64,7 +64,7 @@ func (b *KameletBindingApplyConfiguration) WithAPIVersion(value string) *Kamelet
 // WithName sets the Name field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Name field is set to the value of the last call.
-func (b *KameletBindingApplyConfiguration) WithName(value string) *KameletBindingApplyConfiguration {
+func (b *BindingApplyConfiguration) WithName(value string) *BindingApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.Name = &value
 	return b
@@ -73,7 +73,7 @@ func (b *KameletBindingApplyConfiguration) WithName(value string) *KameletBindin
 // WithGenerateName sets the GenerateName field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the GenerateName field is set to the value of the last call.
-func (b *KameletBindingApplyConfiguration) WithGenerateName(value string) *KameletBindingApplyConfiguration {
+func (b *BindingApplyConfiguration) WithGenerateName(value string) *BindingApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.GenerateName = &value
 	return b
@@ -82,7 +82,7 @@ func (b *KameletBindingApplyConfiguration) WithGenerateName(value string) *Kamel
 // WithNamespace sets the Namespace field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Namespace field is set to the value of the last call.
-func (b *KameletBindingApplyConfiguration) WithNamespace(value string) *KameletBindingApplyConfiguration {
+func (b *BindingApplyConfiguration) WithNamespace(value string) *BindingApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.Namespace = &value
 	return b
@@ -91,7 +91,7 @@ func (b *KameletBindingApplyConfiguration) WithNamespace(value string) *KameletB
 // WithUID sets the UID field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the UID field is set to the value of the last call.
-func (b *KameletBindingApplyConfiguration) WithUID(value types.UID) *KameletBindingApplyConfiguration {
+func (b *BindingApplyConfiguration) WithUID(value types.UID) *BindingApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.UID = &value
 	return b
@@ -100,7 +100,7 @@ func (b *KameletBindingApplyConfiguration) WithUID(value types.UID) *KameletBind
 // WithResourceVersion sets the ResourceVersion field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ResourceVersion field is set to the value of the last call.
-func (b *KameletBindingApplyConfiguration) WithResourceVersion(value string) *KameletBindingApplyConfiguration {
+func (b *BindingApplyConfiguration) WithResourceVersion(value string) *BindingApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.ResourceVersion = &value
 	return b
@@ -109,7 +109,7 @@ func (b *KameletBindingApplyConfiguration) WithResourceVersion(value string) *Ka
 // WithGeneration sets the Generation field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Generation field is set to the value of the last call.
-func (b *KameletBindingApplyConfiguration) WithGeneration(value int64) *KameletBindingApplyConfiguration {
+func (b *BindingApplyConfiguration) WithGeneration(value int64) *BindingApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.Generation = &value
 	return b
@@ -118,7 +118,7 @@ func (b *KameletBindingApplyConfiguration) WithGeneration(value int64) *KameletB
 // WithCreationTimestamp sets the CreationTimestamp field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the CreationTimestamp field is set to the value of the last call.
-func (b *KameletBindingApplyConfiguration) WithCreationTimestamp(value metav1.Time) *KameletBindingApplyConfiguration {
+func (b *BindingApplyConfiguration) WithCreationTimestamp(value metav1.Time) *BindingApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.CreationTimestamp = &value
 	return b
@@ -127,7 +127,7 @@ func (b *KameletBindingApplyConfiguration) WithCreationTimestamp(value metav1.Ti
 // WithDeletionTimestamp sets the DeletionTimestamp field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the DeletionTimestamp field is set to the value of the last call.
-func (b *KameletBindingApplyConfiguration) WithDeletionTimestamp(value metav1.Time) *KameletBindingApplyConfiguration {
+func (b *BindingApplyConfiguration) WithDeletionTimestamp(value metav1.Time) *BindingApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.DeletionTimestamp = &value
 	return b
@@ -136,7 +136,7 @@ func (b *KameletBindingApplyConfiguration) WithDeletionTimestamp(value metav1.Ti
 // WithDeletionGracePeriodSeconds sets the DeletionGracePeriodSeconds field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the DeletionGracePeriodSeconds field is set to the value of the last call.
-func (b *KameletBindingApplyConfiguration) WithDeletionGracePeriodSeconds(value int64) *KameletBindingApplyConfiguration {
+func (b *BindingApplyConfiguration) WithDeletionGracePeriodSeconds(value int64) *BindingApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.DeletionGracePeriodSeconds = &value
 	return b
@@ -146,7 +146,7 @@ func (b *KameletBindingApplyConfiguration) WithDeletionGracePeriodSeconds(value 
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, the entries provided by each call will be put on the Labels field,
 // overwriting an existing map entries in Labels field with the same key.
-func (b *KameletBindingApplyConfiguration) WithLabels(entries map[string]string) *KameletBindingApplyConfiguration {
+func (b *BindingApplyConfiguration) WithLabels(entries map[string]string) *BindingApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	if b.Labels == nil && len(entries) > 0 {
 		b.Labels = make(map[string]string, len(entries))
@@ -161,7 +161,7 @@ func (b *KameletBindingApplyConfiguration) WithLabels(entries map[string]string)
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, the entries provided by each call will be put on the Annotations field,
 // overwriting an existing map entries in Annotations field with the same key.
-func (b *KameletBindingApplyConfiguration) WithAnnotations(entries map[string]string) *KameletBindingApplyConfiguration {
+func (b *BindingApplyConfiguration) WithAnnotations(entries map[string]string) *BindingApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	if b.Annotations == nil && len(entries) > 0 {
 		b.Annotations = make(map[string]string, len(entries))
@@ -175,7 +175,7 @@ func (b *KameletBindingApplyConfiguration) WithAnnotations(entries map[string]st
 // WithOwnerReferences adds the given value to the OwnerReferences field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the OwnerReferences field.
-func (b *KameletBindingApplyConfiguration) WithOwnerReferences(values ...*v1.OwnerReferenceApplyConfiguration) *KameletBindingApplyConfiguration {
+func (b *BindingApplyConfiguration) WithOwnerReferences(values ...*v1.OwnerReferenceApplyConfiguration) *BindingApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	for i := range values {
 		if values[i] == nil {
@@ -189,7 +189,7 @@ func (b *KameletBindingApplyConfiguration) WithOwnerReferences(values ...*v1.Own
 // WithFinalizers adds the given value to the Finalizers field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Finalizers field.
-func (b *KameletBindingApplyConfiguration) WithFinalizers(values ...string) *KameletBindingApplyConfiguration {
+func (b *BindingApplyConfiguration) WithFinalizers(values ...string) *BindingApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	for i := range values {
 		b.Finalizers = append(b.Finalizers, values[i])
@@ -197,7 +197,7 @@ func (b *KameletBindingApplyConfiguration) WithFinalizers(values ...string) *Kam
 	return b
 }
 
-func (b *KameletBindingApplyConfiguration) ensureObjectMetaApplyConfigurationExists() {
+func (b *BindingApplyConfiguration) ensureObjectMetaApplyConfigurationExists() {
 	if b.ObjectMetaApplyConfiguration == nil {
 		b.ObjectMetaApplyConfiguration = &v1.ObjectMetaApplyConfiguration{}
 	}
@@ -206,7 +206,7 @@ func (b *KameletBindingApplyConfiguration) ensureObjectMetaApplyConfigurationExi
 // WithSpec sets the Spec field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Spec field is set to the value of the last call.
-func (b *KameletBindingApplyConfiguration) WithSpec(value *KameletBindingSpecApplyConfiguration) *KameletBindingApplyConfiguration {
+func (b *BindingApplyConfiguration) WithSpec(value *BindingSpecApplyConfiguration) *BindingApplyConfiguration {
 	b.Spec = value
 	return b
 }
@@ -214,7 +214,7 @@ func (b *KameletBindingApplyConfiguration) WithSpec(value *KameletBindingSpecApp
 // WithStatus sets the Status field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Status field is set to the value of the last call.
-func (b *KameletBindingApplyConfiguration) WithStatus(value *KameletBindingStatusApplyConfiguration) *KameletBindingApplyConfiguration {
+func (b *BindingApplyConfiguration) WithStatus(value *BindingStatusApplyConfiguration) *BindingApplyConfiguration {
 	b.Status = value
 	return b
 }

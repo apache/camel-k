@@ -279,9 +279,9 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 	if err != nil {
 		return err
 	}
-	if ctrlRef.Kind == camelv1alpha1.KameletBindingKind {
+	if ctrlRef.Kind == camelv1alpha1.BindingKind {
 		scale.ObjectMeta.Name = ctrlRef.Name
-		_, err = scalesClient.Scales(e.Integration.Namespace).Update(e.Ctx, camelv1alpha1.SchemeGroupVersion.WithResource("kameletbindings").GroupResource(), &scale, metav1.UpdateOptions{})
+		_, err = scalesClient.Scales(e.Integration.Namespace).Update(e.Ctx, camelv1alpha1.SchemeGroupVersion.WithResource("bindings").GroupResource(), &scale, metav1.UpdateOptions{})
 		if err != nil {
 			return err
 		}
@@ -297,7 +297,7 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 
 func (t *kedaTrait) getTopControllerReference(e *trait.Environment) *v1.ObjectReference {
 	for _, o := range e.Integration.OwnerReferences {
-		if o.Kind == camelv1alpha1.KameletBindingKind && strings.HasPrefix(o.APIVersion, camelv1alpha1.SchemeGroupVersion.Group) {
+		if o.Kind == camelv1alpha1.BindingKind && strings.HasPrefix(o.APIVersion, camelv1alpha1.SchemeGroupVersion.Group) {
 			return &v1.ObjectReference{
 				APIVersion: o.APIVersion,
 				Kind:       o.Kind,

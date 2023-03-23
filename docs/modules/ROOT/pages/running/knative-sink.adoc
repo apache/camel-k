@@ -10,12 +10,12 @@ from('timer:tick')
   .to('knative:event/broker')
 ----
 
-Or as the value of the `sink` field in a `KameletBinding` resource, e.g.:
+Or as the value of the `sink` field in a `Binding` resource, e.g.:
 
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+kind: Binding
 metadata:
   name: timer-source-binding
 spec:

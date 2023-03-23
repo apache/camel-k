@@ -33,7 +33,7 @@ rules:
   - integrationkits
   - integrationplatforms
   - integrations
-  - kameletbindings
+  - bindings
   - kamelets
   verbs:
   - create
@@ -53,8 +53,8 @@ rules:
   - integrationplatforms/status
   - integrations/scale
   - integrations/status
-  - kameletbindings/scale
-  - kameletbindings/status
+  - bindings/scale
+  - bindings/status
   - kamelets/status
   verbs:
   - get

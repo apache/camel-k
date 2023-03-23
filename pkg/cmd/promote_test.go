@@ -114,7 +114,7 @@ func nominalIntegration(name string) v1.Integration {
 	return it
 }
 
-func TestKameletBindingDryRun(t *testing.T) {
+func TestBindingDryRun(t *testing.T) {
 	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
 	srcPlatform.Status.Version = defaults.Version
 	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
@@ -123,7 +123,7 @@ func TestKameletBindingDryRun(t *testing.T) {
 	dstPlatform.Status.Version = defaults.Version
 	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	defaultKB := nominalKameletBinding("my-kb-test")
+	defaultKB := nominalBinding("my-kb-test")
 	defaultIntegration := nominalIntegration("my-kb-test")
 	srcCatalog := createCamelCatalog(srcPlatform)
 	dstCatalog := createCamelCatalog(dstPlatform)
@@ -133,7 +133,7 @@ func TestKameletBindingDryRun(t *testing.T) {
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	assert.Nil(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+kind: Binding
 metadata:
   creationTimestamp: null
   name: my-kb-test
@@ -150,9 +150,9 @@ status: {}
 `, output)
 }
 
-func nominalKameletBinding(name string) v1alpha1.KameletBinding {
-	kb := v1alpha1.NewKameletBinding("default", name)
-	kb.Status.Phase = v1alpha1.KameletBindingPhaseReady
+func nominalBinding(name string) v1alpha1.Binding {
+	kb := v1alpha1.NewBinding("default", name)
+	kb.Status.Phase = v1alpha1.BindingPhaseReady
 	return kb
 }
 

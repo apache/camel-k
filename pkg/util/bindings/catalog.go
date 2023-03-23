@@ -58,7 +58,7 @@ func validateEndpoint(ctx BindingContext, e v1alpha1.Endpoint) error {
 		return errors.New("cannot use both ref and URI to specify an endpoint: only one of them should be used")
 	}
 	if e.Ref != nil && e.Ref.Namespace != "" && e.Ref.Namespace != ctx.Namespace {
-		return errors.New("cross-namespace references are not allowed in kamelet binding")
+		return errors.New("cross-namespace references are not allowed inBinding")
 	}
 	return nil
 }

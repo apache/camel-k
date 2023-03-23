@@ -32,7 +32,7 @@ rules:
   - integrationkits
   - integrationplatforms
   - integrations
-  - kameletbindings
+  - bindings
   - kamelets
   verbs:
   - create
@@ -56,8 +56,8 @@ rules:
   - integrationplatforms/status
   - integrations/scale
   - integrations/status
-  - kameletbindings/status
-  - kameletbindings/scale
+  - bindings/status
+  - bindings/scale
   - kamelets/status
   verbs:
   - get
@@ -256,7 +256,7 @@ rules:
   - integrationkits/finalizers
   - integrationplatforms/finalizers
   - integrations/finalizers
-  - kameletbindings/finalizers
+  - bindings/finalizers
   verbs:
   - update
 - apiGroups:

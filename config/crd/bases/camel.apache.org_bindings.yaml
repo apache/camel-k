@@ -23,23 +23,23 @@ metadata:
   creationTimestamp: null
   labels:
     app: camel-k
-  name: kameletbindings.camel.apache.org
+  name: bindings.camel.apache.org
 spec:
   group: camel.apache.org
   names:
     categories:
     - kamel
     - camel
-    kind: KameletBinding
-    listKind: KameletBindingList
-    plural: kameletbindings
+    kind: Binding
+    listKind: BindingList
+    plural: bindings
     shortNames:
     - klb
-    singular: kameletbinding
+    singular: binding
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: The Kamelet Binding phase
+    - description: TheBinding phase
       jsonPath: .status.phase
       name: Phase
       type: string
@@ -50,7 +50,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: KameletBinding is the Schema for the kamelets binding API
+        description: Binding is the Schema for the kamelets binding API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -65,7 +65,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: the specification of a KameletBinding
+            description: the specification of a Binding
             properties:
               errorHandler:
                 description: ErrorHandler is an optional handler called upon an error
@@ -8410,12 +8410,12 @@ spec:
                 type: array
             type: object
           status:
-            description: the status of a KameletBinding
+            description: the status of a Binding
             properties:
               conditions:
                 description: Conditions --
                 items:
-                  description: KameletBindingCondition describes the state of a resource
+                  description: BindingCondition describes the state of a resource
                     at a certain point.
                   properties:
                     lastTransitionTime:
@@ -8498,7 +8498,7 @@ spec:
                       description: Status of the condition, one of True, False, Unknown.
                       type: string
                     type:
-                      description: Type of kameletBinding condition.
+                      description: Type of binding condition.
                       type: string
                   required:
                   - status
@@ -8507,7 +8507,7 @@ spec:
                 type: array
               observedGeneration:
                 description: ObservedGeneration is the most recent generation observed
-                  for this KameletBinding.
+                  for this Binding.
                 format: int64
                 type: integer
               phase:

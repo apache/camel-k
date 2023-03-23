@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package kameletbinding
+package binding
 
 import (
 	"context"
@@ -33,11 +33,11 @@ type Action interface {
 	// a user friendly name for the action
 	Name() string
 
-	// returns true if the action can handle the kameletBinding
-	CanHandle(kamelet *v1alpha1.KameletBinding) bool
+	// returns true if the action can handle the binding
+	CanHandle(kamelet *v1alpha1.Binding) bool
 
 	// executes the handling function
-	Handle(ctx context.Context, kamelet *v1alpha1.KameletBinding) (*v1alpha1.KameletBinding, error)
+	Handle(ctx context.Context, kamelet *v1alpha1.Binding) (*v1alpha1.Binding, error)
 }
 
 type baseAction struct {

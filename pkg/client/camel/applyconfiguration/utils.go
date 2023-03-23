@@ -162,6 +162,14 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.ValueSourceApplyConfiguration{}
 
 		// Group=camel.apache.org, Version=v1alpha1
+	case v1alpha1.SchemeGroupVersion.WithKind("Binding"):
+		return &camelv1alpha1.BindingApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("BindingCondition"):
+		return &camelv1alpha1.BindingConditionApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("BindingSpec"):
+		return &camelv1alpha1.BindingSpecApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("BindingStatus"):
+		return &camelv1alpha1.BindingStatusApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("DataTypeReference"):
 		return &camelv1alpha1.DataTypeReferenceApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("DataTypeSpec"):
@@ -188,14 +196,6 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1alpha1.JSONSchemaPropsApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("Kamelet"):
 		return &camelv1alpha1.KameletApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("KameletBinding"):
-		return &camelv1alpha1.KameletBindingApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("KameletBindingCondition"):
-		return &camelv1alpha1.KameletBindingConditionApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("KameletBindingSpec"):
-		return &camelv1alpha1.KameletBindingSpecApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("KameletBindingStatus"):
-		return &camelv1alpha1.KameletBindingStatusApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("KameletCondition"):
 		return &camelv1alpha1.KameletConditionApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("KameletProperty"):

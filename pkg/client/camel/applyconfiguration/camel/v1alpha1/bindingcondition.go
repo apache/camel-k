@@ -26,10 +26,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// KameletBindingConditionApplyConfiguration represents an declarative configuration of the KameletBindingCondition type for use
+// BindingConditionApplyConfiguration represents an declarative configuration of the BindingCondition type for use
 // with apply.
-type KameletBindingConditionApplyConfiguration struct {
-	Type               *v1alpha1.KameletBindingConditionType    `json:"type,omitempty"`
+type BindingConditionApplyConfiguration struct {
+	Type               *v1alpha1.BindingConditionType           `json:"type,omitempty"`
 	Status             *v1.ConditionStatus                      `json:"status,omitempty"`
 	LastUpdateTime     *metav1.Time                             `json:"lastUpdateTime,omitempty"`
 	LastTransitionTime *metav1.Time                             `json:"lastTransitionTime,omitempty"`
@@ -38,16 +38,16 @@ type KameletBindingConditionApplyConfiguration struct {
 	Pods               []camelv1.PodConditionApplyConfiguration `json:"pods,omitempty"`
 }
 
-// KameletBindingConditionApplyConfiguration constructs an declarative configuration of the KameletBindingCondition type for use with
+// BindingConditionApplyConfiguration constructs an declarative configuration of the BindingCondition type for use with
 // apply.
-func KameletBindingCondition() *KameletBindingConditionApplyConfiguration {
-	return &KameletBindingConditionApplyConfiguration{}
+func BindingCondition() *BindingConditionApplyConfiguration {
+	return &BindingConditionApplyConfiguration{}
 }
 
 // WithType sets the Type field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Type field is set to the value of the last call.
-func (b *KameletBindingConditionApplyConfiguration) WithType(value v1alpha1.KameletBindingConditionType) *KameletBindingConditionApplyConfiguration {
+func (b *BindingConditionApplyConfiguration) WithType(value v1alpha1.BindingConditionType) *BindingConditionApplyConfiguration {
 	b.Type = &value
 	return b
 }
@@ -55,7 +55,7 @@ func (b *KameletBindingConditionApplyConfiguration) WithType(value v1alpha1.Kame
 // WithStatus sets the Status field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Status field is set to the value of the last call.
-func (b *KameletBindingConditionApplyConfiguration) WithStatus(value v1.ConditionStatus) *KameletBindingConditionApplyConfiguration {
+func (b *BindingConditionApplyConfiguration) WithStatus(value v1.ConditionStatus) *BindingConditionApplyConfiguration {
 	b.Status = &value
 	return b
 }
@@ -63,7 +63,7 @@ func (b *KameletBindingConditionApplyConfiguration) WithStatus(value v1.Conditio
 // WithLastUpdateTime sets the LastUpdateTime field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the LastUpdateTime field is set to the value of the last call.
-func (b *KameletBindingConditionApplyConfiguration) WithLastUpdateTime(value metav1.Time) *KameletBindingConditionApplyConfiguration {
+func (b *BindingConditionApplyConfiguration) WithLastUpdateTime(value metav1.Time) *BindingConditionApplyConfiguration {
 	b.LastUpdateTime = &value
 	return b
 }
@@ -71,7 +71,7 @@ func (b *KameletBindingConditionApplyConfiguration) WithLastUpdateTime(value met
 // WithLastTransitionTime sets the LastTransitionTime field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the LastTransitionTime field is set to the value of the last call.
-func (b *KameletBindingConditionApplyConfiguration) WithLastTransitionTime(value metav1.Time) *KameletBindingConditionApplyConfiguration {
+func (b *BindingConditionApplyConfiguration) WithLastTransitionTime(value metav1.Time) *BindingConditionApplyConfiguration {
 	b.LastTransitionTime = &value
 	return b
 }
@@ -79,7 +79,7 @@ func (b *KameletBindingConditionApplyConfiguration) WithLastTransitionTime(value
 // WithReason sets the Reason field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Reason field is set to the value of the last call.
-func (b *KameletBindingConditionApplyConfiguration) WithReason(value string) *KameletBindingConditionApplyConfiguration {
+func (b *BindingConditionApplyConfiguration) WithReason(value string) *BindingConditionApplyConfiguration {
 	b.Reason = &value
 	return b
 }
@@ -87,7 +87,7 @@ func (b *KameletBindingConditionApplyConfiguration) WithReason(value string) *Ka
 // WithMessage sets the Message field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Message field is set to the value of the last call.
-func (b *KameletBindingConditionApplyConfiguration) WithMessage(value string) *KameletBindingConditionApplyConfiguration {
+func (b *BindingConditionApplyConfiguration) WithMessage(value string) *BindingConditionApplyConfiguration {
 	b.Message = &value
 	return b
 }
@@ -95,7 +95,7 @@ func (b *KameletBindingConditionApplyConfiguration) WithMessage(value string) *K
 // WithPods adds the given value to the Pods field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Pods field.
-func (b *KameletBindingConditionApplyConfiguration) WithPods(values ...*camelv1.PodConditionApplyConfiguration) *KameletBindingConditionApplyConfiguration {
+func (b *BindingConditionApplyConfiguration) WithPods(values ...*camelv1.PodConditionApplyConfiguration) *BindingConditionApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
 			panic("nil value passed to WithPods")

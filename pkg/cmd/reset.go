@@ -49,9 +49,9 @@ func newCmdReset(rootCmdOptions *RootCmdOptions) (*cobra.Command, *resetCmdOptio
 
 type resetCmdOptions struct {
 	*RootCmdOptions
-	SkipKits            bool `mapstructure:"skip-kits"`
-	SkipIntegrations    bool `mapstructure:"skip-integrations"`
-	SkipKameletBindings bool `mapstructure:"skip-kamelet-bindings"`
+	SkipKits         bool `mapstructure:"skip-kits"`
+	SkipIntegrations bool `mapstructure:"skip-integrations"`
+	SkipBindings     bool `mapstructure:"skip-kamelet-bindings"`
 }
 
 func (o *resetCmdOptions) reset(cmd *cobra.Command, _ []string) {
@@ -62,8 +62,8 @@ func (o *resetCmdOptions) reset(cmd *cobra.Command, _ []string) {
 	}
 
 	var n int
-	if !o.SkipKameletBindings {
-		if n, err = o.deleteAllKameletBindings(c); err != nil {
+	if !o.SkipBindings {
+		if n, err = o.deleteAllBindings(c); err != nil {
 			fmt.Fprint(cmd.ErrOrStderr(), err)
 			return
 		}
@@ -126,15 +126,15 @@ func (o *resetCmdOptions) deleteAllIntegrationKits(c client.Client) (int, error)
 	return len(list.Items), nil
 }
 
-func (o *resetCmdOptions) deleteAllKameletBindings(c client.Client) (int, error) {
-	list := v1alpha1.NewKameletBindingList()
+func (o *resetCmdOptions) deleteAllBindings(c client.Client) (int, error) {
+	list := v1alpha1.NewBindingList()
 	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
-		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieve kamelet bindings from namespace %s", o.Namespace))
+		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieveBindings from namespace %s", o.Namespace))
 	}
 	for _, i := range list.Items {
 		klb := i
 		if err := c.Delete(o.Context, &klb); err != nil {
-			return 0, errors.Wrap(err, fmt.Sprintf("could not delete kamelet binding %s from namespace %s", klb.Name, klb.Namespace))
+			return 0, errors.Wrap(err, fmt.Sprintf("could not deleteBinding %s from namespace %s", klb.Name, klb.Namespace))
 		}
 	}
 	return len(list.Items), nil

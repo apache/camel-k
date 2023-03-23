@@ -30,7 +30,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestKameletBindingProvider(t *testing.T) {
+func TestBindingConverter(t *testing.T) {
 	testcases := []struct {
 		name                  string
 		endpointType          v1alpha1.EndpointType
@@ -95,7 +95,7 @@ func TestKameletBindingProvider(t *testing.T) {
 				endpoint.Properties = asEndpointProperties(tc.endpointProperties)
 			}
 
-			binding, err := KameletBindingProvider{}.Translate(
+			binding, err := BindingConverter{}.Translate(
 				BindingContext{
 					Ctx:       ctx,
 					Client:    client,
@@ -122,7 +122,7 @@ func TestKameletBindingProvider(t *testing.T) {
 	}
 }
 
-func TestKameletBindingProviderWithDataTypes(t *testing.T) {
+func TestBindingConverterWithDataTypes(t *testing.T) {
 	testcases := []struct {
 		name                  string
 		endpointType          v1alpha1.EndpointType
@@ -275,7 +275,7 @@ func TestKameletBindingProviderWithDataTypes(t *testing.T) {
 				}
 			}
 
-			binding, err := KameletBindingProvider{}.Translate(
+			binding, err := BindingConverter{}.Translate(
 				BindingContext{
 					Ctx:       ctx,
 					Client:    client,

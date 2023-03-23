@@ -25,10 +25,10 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
+	// Bindings returns a BindingInformer.
+	Bindings() BindingInformer
 	// Kamelets returns a KameletInformer.
 	Kamelets() KameletInformer
-	// KameletBindings returns a KameletBindingInformer.
-	KameletBindings() KameletBindingInformer
 }
 
 type version struct {
@@ -42,12 +42,12 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
+// Bindings returns a BindingInformer.
+func (v *version) Bindings() BindingInformer {
+	return &bindingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
 // Kamelets returns a KameletInformer.
 func (v *version) Kamelets() KameletInformer {
 	return &kameletInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
-}
-
-// KameletBindings returns a KameletBindingInformer.
-func (v *version) KameletBindings() KameletBindingInformer {
-	return &kameletBindingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

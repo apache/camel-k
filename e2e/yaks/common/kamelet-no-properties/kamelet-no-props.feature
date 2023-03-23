@@ -22,7 +22,7 @@ from:
   Scenario: Bind Kamelet to service
     Given create Kubernetes service greeting-service with target port 8080
     And bind Kamelet no-props-source to uri log:info
-    When create KameletBinding no-props-source-uri
-    Then KameletBinding no-props-source-uri should be available
+    When create Binding no-props-source-uri
+    Then Binding no-props-source-uri should be available
     Then Camel K integration no-props-source-uri should be running
     Then Camel K integration no-props-source-uri should print Hello World

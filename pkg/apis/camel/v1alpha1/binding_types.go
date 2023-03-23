@@ -26,27 +26,27 @@ import (
 
 // +genclient
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:path=kameletbindings,scope=Namespaced,shortName=klb,categories=kamel;camel
+// +kubebuilder:resource:path=bindings,scope=Namespaced,shortName=klb,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +genclient:method=GetScale,verb=get,subresource=scale,result=k8s.io/api/autoscaling/v1.Scale
 // +genclient:method=UpdateScale,verb=update,subresource=scale,input=k8s.io/api/autoscaling/v1.Scale,result=k8s.io/api/autoscaling/v1.Scale
 // +kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.selector
-// +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The Kamelet Binding phase"
+// +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="TheBinding phase"
 // +kubebuilder:printcolumn:name="Replicas",type=integer,JSONPath=`.status.replicas`,description="The number of pods"
 
-// KameletBinding is the Schema for the kamelets binding API
-type KameletBinding struct {
+// Binding is the Schema for the kamelets binding API
+type Binding struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	// the specification of a KameletBinding
-	Spec KameletBindingSpec `json:"spec,omitempty"`
-	// the status of a KameletBinding
-	Status KameletBindingStatus `json:"status,omitempty"`
+	// the specification of a Binding
+	Spec BindingSpec `json:"spec,omitempty"`
+	// the status of a Binding
+	Status BindingStatus `json:"status,omitempty"`
 }
 
-// KameletBindingSpec defines the binding between a source and a sink. It can include custom parameters and additional intermediate steps and error handling.
-type KameletBindingSpec struct {
+// BindingSpec defines the binding between a source and a sink. It can include custom parameters and additional intermediate steps and error handling.
+type BindingSpec struct {
 	// Integration is an optional integration used to specify custom parameters
 	Integration *v1.IntegrationSpec `json:"integration,omitempty"`
 	// Source is the starting point of the integration defined by this binding
@@ -97,24 +97,24 @@ type EndpointProperties struct {
 	RawMessage `json:",inline"`
 }
 
-// KameletBindingStatus specify the status of a binding
-type KameletBindingStatus struct {
-	// ObservedGeneration is the most recent generation observed for this KameletBinding.
+// BindingStatus specify the status of a binding
+type BindingStatus struct {
+	// ObservedGeneration is the most recent generation observed for this Binding.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 	// Phase --
-	Phase KameletBindingPhase `json:"phase,omitempty"`
+	Phase BindingPhase `json:"phase,omitempty"`
 	// Conditions --
-	Conditions []KameletBindingCondition `json:"conditions,omitempty"`
+	Conditions []BindingCondition `json:"conditions,omitempty"`
 	// Replicas is the number of actual replicas of the binding
 	Replicas *int32 `json:"replicas,omitempty"`
 	// Selector allows to identify pods belonging to the binding
 	Selector string `json:"selector,omitempty"`
 }
 
-// KameletBindingCondition describes the state of a resource at a certain point.
-type KameletBindingCondition struct {
-	// Type of kameletBinding condition.
-	Type KameletBindingConditionType `json:"type"`
+// BindingCondition describes the state of a resource at a certain point.
+type BindingCondition struct {
+	// Type of binding condition.
+	Type BindingConditionType `json:"type"`
 	// Status of the condition, one of True, False, Unknown.
 	Status corev1.ConditionStatus `json:"status"`
 	// The last time this condition was updated.
@@ -129,38 +129,38 @@ type KameletBindingCondition struct {
 	Pods []v1.PodCondition `json:"pods,omitempty"`
 }
 
-// KameletBindingConditionType --
-type KameletBindingConditionType string
+// BindingConditionType --
+type BindingConditionType string
 
 const (
-	// KameletBindingConditionReady --
-	KameletBindingConditionReady KameletBindingConditionType = "Ready"
-	// KameletBindingIntegrationConditionError is used to report the error on the generated Integration
-	KameletBindingIntegrationConditionError KameletBindingConditionType = "IntegrationError"
+	// BindingConditionReady --
+	BindingConditionReady BindingConditionType = "Ready"
+	// BindingIntegrationConditionError is used to report the error on the generated Integration
+	BindingIntegrationConditionError BindingConditionType = "IntegrationError"
 )
 
-// KameletBindingPhase --
-type KameletBindingPhase string
+// BindingPhase --
+type BindingPhase string
 
 const (
-	// KameletBindingKind --
-	KameletBindingKind string = "KameletBinding"
+	// BindingKind --
+	BindingKind string = "Binding"
 
-	// KameletBindingPhaseNone --
-	KameletBindingPhaseNone KameletBindingPhase = ""
-	// KameletBindingPhaseCreating --
-	KameletBindingPhaseCreating KameletBindingPhase = "Creating"
-	// KameletBindingPhaseError --
-	KameletBindingPhaseError KameletBindingPhase = "Error"
-	// KameletBindingPhaseReady --
-	KameletBindingPhaseReady KameletBindingPhase = "Ready"
+	// BindingPhaseNone --
+	BindingPhaseNone BindingPhase = ""
+	// BindingPhaseCreating --
+	BindingPhaseCreating BindingPhase = "Creating"
+	// BindingPhaseError --
+	BindingPhaseError BindingPhase = "Error"
+	// BindingPhaseReady --
+	BindingPhaseReady BindingPhase = "Ready"
 )
 
 // +kubebuilder:object:root=true
 
-// KameletBindingList contains a list of KameletBinding
-type KameletBindingList struct {
+// BindingList contains a list of Binding
+type BindingList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []KameletBinding `json:"items"`
+	Items           []Binding `json:"items"`
 }
