@@ -258,6 +258,9 @@ func matchesTrait(it map[string]interface{}, kt map[string]interface{}) bool {
 }
 
 func hasMatchingSources(it *v1.Integration, kit *v1.IntegrationKit) bool {
+	if len(it.Sources()) != len(kit.Spec.Sources) {
+		return false
+	}
 	for _, itSource := range it.Sources() {
 		found := false
 		for _, ikSource := range kit.Spec.Sources {

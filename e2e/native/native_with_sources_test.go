@@ -69,7 +69,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 				Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
 				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Java Magicstring!"))
-				Expect(IntegrationKit(ns, "java-native")).Should(Equal(IntegrationKit(ns, "java-native-clone")))
+				Eventually(IntegrationKit(ns, "java-native-clone")).Should(Equal(IntegrationKit(ns, "java-native")()))
 			})
 
 			t.Run("java native should rebuild", func(t *testing.T) {
@@ -84,7 +84,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 				Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
 				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Java Magic2string!"))
-				Expect(IntegrationKit(ns, "java-native-2")).ShouldNot(Equal(IntegrationKit(ns, "java-native")))
+				Eventually(IntegrationKit(ns, "java-native-2")).ShouldNot(Equal(IntegrationKit(ns, "java-native")()))
 			})
 
 			// Clean up

@@ -283,7 +283,7 @@ func TestRunConfigExamples(t *testing.T) {
 		Eventually(IntegrationConditionStatus(ns, "build-property-route-updated", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, "build-property-route-updated"), TestTimeoutShort).Should(ContainSubstring("my-super-application-updated"))
 		// Verify the integration kits are different
-		Expect(IntegrationKit(ns, "build-property-route")).ShouldNot(Equal(IntegrationKit(ns, "build-property-route-updated")))
+		Eventually(IntegrationKit(ns, "build-property-route-updated")).ShouldNot(Equal(IntegrationKit(ns, "build-property-route")()))
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 
