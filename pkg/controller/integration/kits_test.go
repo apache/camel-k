@@ -356,8 +356,54 @@ func TestHasMatchingSources(t *testing.T) {
 		},
 	}
 
-	hasMatchingSources := hasMatchingSources(integration, kit)
-	assert.True(t, hasMatchingSources)
+	hms := hasMatchingSources(integration, kit)
+	assert.True(t, hms)
+
+	kit2 := &v1.IntegrationKit{
+		Spec: v1.IntegrationKitSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("test", "some content 2", v1.LanguageJavaShell),
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+			},
+		},
+	}
+
+	hms2 := hasMatchingSources(integration, kit2)
+	assert.True(t, hms2)
+}
+
+func TestHasMatchingMultipleSources(t *testing.T) {
+	integration := &v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+				v1.NewSourceSpec("test", "some content 2", v1.LanguageJavaShell),
+			},
+		},
+	}
+
+	kit := &v1.IntegrationKit{
+		Spec: v1.IntegrationKitSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("test", "some content 2", v1.LanguageJavaShell),
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+			},
+		},
+	}
+
+	hms := hasMatchingSources(integration, kit)
+	assert.True(t, hms)
+
+	integration2 := &v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+			},
+		},
+	}
+
+	hms2 := hasMatchingSources(integration2, kit)
+	assert.True(t, hms2)
 }
 
 func TestHasNotMatchingSources(t *testing.T) {
