@@ -76,6 +76,8 @@ func TestNativeIntegrations(t *testing.T) {
 		})
 
 		t.Run("automatic rollout deployment from fast-jar to native kit", func(t *testing.T) {
+			// Let's make sure we start from a clean state
+			Expect(DeleteKits(ns)).To(Succeed())
 			name := "yaml-native"
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name,
 				"-t", "quarkus.package-type=fast-jar",
@@ -140,7 +142,7 @@ func TestNativeIntegrations(t *testing.T) {
 				Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
 				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!2"))
-				Expect(IntegrationKit(ns, "yaml-native")).Should(Equal(IntegrationKit(ns, "yaml-native-2")))
+				Eventually(IntegrationKit(ns, "yaml-native-2")).Should(Equal(IntegrationKit(ns, "yaml-native")()))
 			})
 
 			// Clean up

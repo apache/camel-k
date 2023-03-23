@@ -369,7 +369,7 @@ func TestHasMatchingSources(t *testing.T) {
 	}
 
 	hms2 := hasMatchingSources(integration, kit2)
-	assert.True(t, hms2)
+	assert.False(t, hms2)
 }
 
 func TestHasMatchingMultipleSources(t *testing.T) {
@@ -403,7 +403,7 @@ func TestHasMatchingMultipleSources(t *testing.T) {
 	}
 
 	hms2 := hasMatchingSources(integration2, kit)
-	assert.True(t, hms2)
+	assert.False(t, hms2)
 }
 
 func TestHasNotMatchingSources(t *testing.T) {
@@ -423,6 +423,15 @@ func TestHasNotMatchingSources(t *testing.T) {
 		},
 	}
 
-	hasMatchingSources := hasMatchingSources(integration, kit)
-	assert.False(t, hasMatchingSources)
+	hsm := hasMatchingSources(integration, kit)
+	assert.False(t, hsm)
+
+	kit2 := &v1.IntegrationKit{
+		Spec: v1.IntegrationKitSpec{
+			Sources: []v1.SourceSpec{},
+		},
+	}
+
+	hsm2 := hasMatchingSources(integration, kit2)
+	assert.False(t, hsm2)
 }
