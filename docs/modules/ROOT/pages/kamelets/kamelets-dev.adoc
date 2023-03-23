@@ -273,7 +273,7 @@ spec:
       - to: "kamelet:sink"
 ----
 <1> An icon with an appropriate license, better using svg+base64 URL encoding. You can encode icons using services like https://dopiaza.org/tools/datauri/index.php[this one]
-<2> The dataTypes section indicates that the Kamelet is going to produce JSON data as a default. The Kamelet is able to define multiple data types for in/out/error. The user will then be able to choose on of the data types in a KameletBinding when referencing the Kamelet.
+<2> The dataTypes section indicates that the Kamelet is going to produce JSON data as a default. The Kamelet is able to define multiple data types for in/out/error. The user will then be able to choose on of the data types in a Binding when referencing the Kamelet.
 <3> The previous YAML flow
 
 The Kamelet can be shared on the Catalog and or created on a Kubernetes cluster to let users use it.
@@ -294,7 +294,7 @@ Then you can create a binding like the following one to try it out:
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+kind: Binding
 metadata:
   name: twitter-search-source-binding
 spec:
@@ -867,7 +867,7 @@ spec:
 ----
 <1> Add an icon with an appropriate license, better using svg+base64 URL encoding. You can encode icons using services like https://dopiaza.org/tools/datauri/index.php[this one]
 <2> This marks the Kamelet as dependant on Quarkus since we're specifying explicit dependencies on Quarkus artifacts in the `spec` -> `dependencies` section
-<3> The types section indicates that the Kamelet is going to produce JSON data by default. The Kamelet is able to define multiple data types for in/out/error. The user will then be able to choose on of the data types in a KameletBinding when referencing the Kamelet.
+<3> The types section indicates that the Kamelet is going to produce JSON data by default. The Kamelet is able to define multiple data types for in/out/error. The user will then be able to choose on of the data types in a Binding when referencing the Kamelet.
 <4> Dependencies that we previously specified in the modeline options should be expressed now in the Kamelet spec
 
 The Kamelet is now ready to be used!
@@ -893,7 +893,7 @@ To check if it works, you can create a simple binding:
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+kind: Binding
 metadata:
   name: earthquake-source-binding
 spec:
@@ -1217,7 +1217,7 @@ So, for example, to send a text message to a chat, we may create a binding like 
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+kind: Binding
 metadata:
   name: telegram-text-binding
 spec:
@@ -1261,7 +1261,7 @@ To check if we can also receive pictures using the above Kamelet, we can create 
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+kind: Binding
 metadata:
   name: telegram-image-binding
 spec:
@@ -1314,8 +1314,8 @@ Feature: Kamelet earthquake-source works
   Scenario: Bind Kamelet to service
     Given create Kubernetes service test-service with target port 8080
     And bind Kamelet earthquake-source to uri http://test-service.${YAKS_NAMESPACE}.svc.cluster.local/test
-    When create KameletBinding earthquake-source-uri
-    Then KameletBinding earthquake-source-uri should be available
+    When create Binding earthquake-source-uri
+    Then Binding earthquake-source-uri should be available
     And Camel K integration earthquake-source-uri should be running
 
   Scenario: Verify binding
@@ -1323,7 +1323,7 @@ Feature: Kamelet earthquake-source works
     And HTTP server timeout is 120000 ms
     Then expect HTTP request header: Content-Type="application/json;charset=UTF-8"
     And receive POST /test
-    And delete KameletBinding earthquake-source-uri
+    And delete Binding earthquake-source-uri
 ----
 
 As you see this is a declarative test that is materialized into something that actually checks that the service generates some data.
@@ -1356,7 +1356,7 @@ send data to it via HTTP. Let's create a parameterized binding like the followin
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+kind: Binding
 metadata:
   name: webhook-to-telegram
 spec:
@@ -1406,8 +1406,8 @@ Feature: Kamelet telegram-sink works
 
   Scenario: Bind webhook to Kamelet sink
     Given load variables telegram-credentials.properties
-    And load KameletBinding webhook-to-telegram.yaml
-    Then KameletBinding webhook-to-telegram should be available
+    And load Binding webhook-to-telegram.yaml
+    Then Binding webhook-to-telegram should be available
     And Camel K integration webhook-to-telegram should be running
 
 
@@ -1423,7 +1423,7 @@ Feature: Kamelet telegram-sink works
     """
     When send POST /message
     Then receive HTTP 200 OK
-    And delete KameletBinding webhook-to-telegram
+    And delete Binding webhook-to-telegram
 
 ----
 

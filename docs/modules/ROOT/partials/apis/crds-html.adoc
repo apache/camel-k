@@ -769,7 +769,7 @@ IntegrationPlatformStatus
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuildStatus">BuildStatus</a>, 
+<a href="#camel.apache.org/v1.BuildStatus">BuildStatus</a>,
 <a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>)
 </p>
 <div>
@@ -829,10 +829,10 @@ string
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuildahTask">BuildahTask</a>, 
-<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>, 
-<a href="#camel.apache.org/v1.KanikoTask">KanikoTask</a>, 
-<a href="#camel.apache.org/v1.S2iTask">S2iTask</a>, 
+<a href="#camel.apache.org/v1.BuildahTask">BuildahTask</a>,
+<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>,
+<a href="#camel.apache.org/v1.KanikoTask">KanikoTask</a>,
+<a href="#camel.apache.org/v1.S2iTask">S2iTask</a>,
 <a href="#camel.apache.org/v1.SpectrumTask">SpectrumTask</a>)
 </p>
 <div>
@@ -1165,7 +1165,7 @@ string
 (<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuildSpec">BuildSpec</a>, 
+<a href="#camel.apache.org/v1.BuildSpec">BuildSpec</a>,
 <a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>)
 </p>
 <div>
@@ -1444,7 +1444,7 @@ CamelArtifactDependency
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.CamelArtifact">CamelArtifact</a>, 
+<a href="#camel.apache.org/v1.CamelArtifact">CamelArtifact</a>,
 <a href="#camel.apache.org/v1.CamelSchemeScope">CamelSchemeScope</a>)
 </p>
 <div>
@@ -1800,9 +1800,9 @@ map[string]string
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationKitSpec">IntegrationKitSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
+<a href="#camel.apache.org/v1.IntegrationKitSpec">IntegrationKitSpec</a>,
+<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>,
+<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>,
 <a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
 </p>
 <div>
@@ -1872,7 +1872,7 @@ string
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.ResourceSpec">ResourceSpec</a>, 
+<a href="#camel.apache.org/v1.ResourceSpec">ResourceSpec</a>,
 <a href="#camel.apache.org/v1.SourceSpec">SourceSpec</a>)
 </p>
 <div>
@@ -1972,7 +1972,7 @@ bool
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuildStatus">BuildStatus</a>, 
+<a href="#camel.apache.org/v1.BuildStatus">BuildStatus</a>,
 <a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>)
 </p>
 <div>
@@ -2900,7 +2900,7 @@ string
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatform">IntegrationPlatform</a>, 
+<a href="#camel.apache.org/v1.IntegrationPlatform">IntegrationPlatform</a>,
 <a href="#camel.apache.org/v1.IntegrationPlatformStatus">IntegrationPlatformStatus</a>)
 </p>
 <div>
@@ -3082,8 +3082,8 @@ map[string]string
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.Integration">Integration</a>, 
-<a href="#camel.apache.org/v1alpha1.KameletBindingSpec">KameletBindingSpec</a>)
+<a href="#camel.apache.org/v1.Integration">Integration</a>,
+<a href="#camel.apache.org/v1alpha1.BindingSpec">BindingSpec</a>)
 </p>
 <div>
 <p>IntegrationSpec defines the desired state of Integration</p>
@@ -3583,10 +3583,10 @@ string
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.CamelArtifactDependency">CamelArtifactDependency</a>, 
-<a href="#camel.apache.org/v1.CamelLoader">CamelLoader</a>, 
-<a href="#camel.apache.org/v1.Capability">Capability</a>, 
-<a href="#camel.apache.org/v1.MavenSpec">MavenSpec</a>, 
+<a href="#camel.apache.org/v1.CamelArtifactDependency">CamelArtifactDependency</a>,
+<a href="#camel.apache.org/v1.CamelLoader">CamelLoader</a>,
+<a href="#camel.apache.org/v1.Capability">Capability</a>,
+<a href="#camel.apache.org/v1.MavenSpec">MavenSpec</a>,
 <a href="#camel.apache.org/v1.RuntimeSpec">RuntimeSpec</a>)
 </p>
 <div>
@@ -3683,7 +3683,7 @@ MavenSpec
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>, 
+<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>,
 <a href="#camel.apache.org/v1.MavenBuildSpec">MavenBuildSpec</a>)
 </p>
 <div>
@@ -4077,8 +4077,8 @@ map[string]string
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuildahTask">BuildahTask</a>, 
-<a href="#camel.apache.org/v1.KanikoTask">KanikoTask</a>, 
+<a href="#camel.apache.org/v1.BuildahTask">BuildahTask</a>,
+<a href="#camel.apache.org/v1.KanikoTask">KanikoTask</a>,
 <a href="#camel.apache.org/v1.SpectrumTask">SpectrumTask</a>)
 </p>
 <div>
@@ -4140,12 +4140,12 @@ RegistrySpec
 (<code>[]byte</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1alpha1.BeanProperties">BeanProperties</a>, 
-<a href="#camel.apache.org/v1alpha1.EndpointProperties">EndpointProperties</a>, 
-<a href="#camel.apache.org/v1alpha1.ErrorHandlerParameters">ErrorHandlerParameters</a>, 
-<a href="#camel.apache.org/v1alpha1.ErrorHandlerSpec">ErrorHandlerSpec</a>, 
-<a href="#camel.apache.org/v1.Flow">Flow</a>, 
-<a href="#camel.apache.org/v1.Template">Template</a>, 
+<a href="#camel.apache.org/v1alpha1.BeanProperties">BeanProperties</a>,
+<a href="#camel.apache.org/v1alpha1.EndpointProperties">EndpointProperties</a>,
+<a href="#camel.apache.org/v1alpha1.ErrorHandlerParameters">ErrorHandlerParameters</a>,
+<a href="#camel.apache.org/v1alpha1.ErrorHandlerSpec">ErrorHandlerSpec</a>,
+<a href="#camel.apache.org/v1.Flow">Flow</a>,
+<a href="#camel.apache.org/v1.Template">Template</a>,
 <a href="#camel.apache.org/v1.TraitConfiguration">TraitConfiguration</a>)
 </p>
 <div>
@@ -4157,7 +4157,7 @@ be used to delay JSON decoding or precompute a JSON encoding.</p>
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>, 
+<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>,
 <a href="#camel.apache.org/v1.PublishTask">PublishTask</a>)
 </p>
 <div>
@@ -4354,8 +4354,8 @@ string
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>, 
-<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
+<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>,
+<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>,
 <a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
 </p>
 <div>
@@ -4421,9 +4421,9 @@ string
 (<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>, 
-<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>, 
+<a href="#camel.apache.org/v1.IntegrationKitStatus">IntegrationKitStatus</a>,
+<a href="#camel.apache.org/v1.IntegrationPlatformBuildSpec">IntegrationPlatformBuildSpec</a>,
+<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>,
 <a href="#camel.apache.org/v1.RuntimeSpec">RuntimeSpec</a>)
 </p>
 <div>
@@ -4433,7 +4433,7 @@ string
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>, 
+<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>,
 <a href="#camel.apache.org/v1.CamelCatalogSpec">CamelCatalogSpec</a>)
 </p>
 <div>
@@ -4573,9 +4573,9 @@ string
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>, 
-<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>, 
+<a href="#camel.apache.org/v1.BuilderTask">BuilderTask</a>,
+<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>,
+<a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>,
 <a href="#camel.apache.org/v1alpha1.KameletSpec">KameletSpec</a>)
 </p>
 <div>
@@ -4873,9 +4873,9 @@ RawMessage
 (<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationKitSpec">IntegrationKitSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>, 
+<a href="#camel.apache.org/v1.IntegrationKitSpec">IntegrationKitSpec</a>,
+<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>,
+<a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>,
 <a href="#camel.apache.org/v1.IntegrationStatus">IntegrationStatus</a>)
 </p>
 <div>
@@ -4885,8 +4885,8 @@ RawMessage
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.IntegrationKitSpec">IntegrationKitSpec</a>, 
-<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>, 
+<a href="#camel.apache.org/v1.IntegrationKitSpec">IntegrationKitSpec</a>,
+<a href="#camel.apache.org/v1.IntegrationPlatformSpec">IntegrationPlatformSpec</a>,
 <a href="#camel.apache.org/v1.IntegrationSpec">IntegrationSpec</a>)
 </p>
 <div>
@@ -4968,7 +4968,7 @@ Resource Types:
 <ul><li>
 <a href="#camel.apache.org/v1alpha1.Kamelet">Kamelet</a>
 </li><li>
-<a href="#camel.apache.org/v1alpha1.KameletBinding">KameletBinding</a>
+<a href="#camel.apache.org/v1alpha1.Binding">Binding</a>
 </li></ul>
 <h3 id="camel.apache.org/v1alpha1.Kamelet">Kamelet
 </h3>
@@ -5114,10 +5114,10 @@ KameletStatus
 </tr>
 </tbody>
 </table>
-<h3 id="camel.apache.org/v1alpha1.KameletBinding">KameletBinding
+<h3 id="camel.apache.org/v1alpha1.Binding">Binding
 </h3>
 <div>
-<p>KameletBinding is the Schema for the kamelets binding API</p>
+<p>Binding is the Schema for the kamelets binding API</p>
 </div>
 <table>
 <thead>
@@ -5142,7 +5142,7 @@ camel.apache.org/v1alpha1
 <code>kind</code></br>
 string
 </td>
-<td><code>KameletBinding</code></td>
+<td><code>Binding</code></td>
 </tr>
 <tr>
 <td>
@@ -5162,8 +5162,8 @@ Refer to the Kubernetes API documentation for the fields of the
 <td>
 <code>spec</code><br/>
 <em>
-<a href="#camel.apache.org/v1alpha1.KameletBindingSpec">
-KameletBindingSpec
+<a href="#camel.apache.org/v1alpha1.BindingSpec">
+BindingSpec
 </a>
 </em>
 </td>
@@ -5254,8 +5254,8 @@ int32
 <td>
 <code>status</code><br/>
 <em>
-<a href="#camel.apache.org/v1alpha1.KameletBindingStatus">
-KameletBindingStatus
+<a href="#camel.apache.org/v1alpha1.BindingStatus">
+BindingStatus
 </a>
 </em>
 </td>
@@ -5304,8 +5304,8 @@ RawMessage
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1alpha1.ErrorHandlerSink">ErrorHandlerSink</a>, 
-<a href="#camel.apache.org/v1alpha1.KameletBindingSpec">KameletBindingSpec</a>)
+<a href="#camel.apache.org/v1alpha1.ErrorHandlerSink">ErrorHandlerSink</a>,
+<a href="#camel.apache.org/v1alpha1.BindingSpec">BindingSpec</a>)
 </p>
 <div>
 <p>Endpoint represents a source/sink external entity</p>
@@ -5549,7 +5549,7 @@ Endpoint
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1alpha1.KameletBindingSpec">KameletBindingSpec</a>)
+<a href="#camel.apache.org/v1alpha1.BindingSpec">BindingSpec</a>)
 </p>
 <div>
 <p>ErrorHandlerSpec represents an unstructured object for an error handler</p>
@@ -5589,7 +5589,7 @@ RawMessage
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1alpha1.Endpoint">Endpoint</a>, 
+<a href="#camel.apache.org/v1alpha1.Endpoint">Endpoint</a>,
 <a href="#camel.apache.org/v1alpha1.KameletSpec">KameletSpec</a>)
 </p>
 <div>
@@ -5669,7 +5669,7 @@ string
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1alpha1.JSONSchemaProp">JSONSchemaProp</a>, 
+<a href="#camel.apache.org/v1alpha1.JSONSchemaProp">JSONSchemaProp</a>,
 <a href="#camel.apache.org/v1alpha1.JSONSchemaProps">JSONSchemaProps</a>)
 </p>
 <div>
@@ -5988,7 +5988,7 @@ bool
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1alpha1.EventTypeSpec">EventTypeSpec</a>, 
+<a href="#camel.apache.org/v1alpha1.EventTypeSpec">EventTypeSpec</a>,
 <a href="#camel.apache.org/v1alpha1.KameletSpec">KameletSpec</a>)
 </p>
 <div>
@@ -6111,14 +6111,14 @@ string
 <div>
 <p>JSONSchemaURL represents a schema url.</p>
 </div>
-<h3 id="camel.apache.org/v1alpha1.KameletBindingCondition">KameletBindingCondition
+<h3 id="camel.apache.org/v1alpha1.BindingCondition">BindingCondition
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1alpha1.KameletBindingStatus">KameletBindingStatus</a>)
+<a href="#camel.apache.org/v1alpha1.BindingStatus">BindingStatus</a>)
 </p>
 <div>
-<p>KameletBindingCondition describes the state of a resource at a certain point.</p>
+<p>BindingCondition describes the state of a resource at a certain point.</p>
 </div>
 <table>
 <thead>
@@ -6132,13 +6132,13 @@ string
 <td>
 <code>type</code><br/>
 <em>
-<a href="#camel.apache.org/v1alpha1.KameletBindingConditionType">
-KameletBindingConditionType
+<a href="#camel.apache.org/v1alpha1.BindingConditionType">
+BindingConditionType
 </a>
 </em>
 </td>
 <td>
-<p>Type of kameletBinding condition.</p>
+<p>Type of binding condition.</p>
 </td>
 </tr>
 <tr>
@@ -6204,30 +6204,30 @@ string
 </tr>
 </tbody>
 </table>
-<h3 id="camel.apache.org/v1alpha1.KameletBindingConditionType">KameletBindingConditionType
+<h3 id="camel.apache.org/v1alpha1.BindingConditionType">BindingConditionType
 (<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1alpha1.KameletBindingCondition">KameletBindingCondition</a>)
+<a href="#camel.apache.org/v1alpha1.BindingCondition">BindingCondition</a>)
 </p>
 <div>
 </div>
-<h3 id="camel.apache.org/v1alpha1.KameletBindingPhase">KameletBindingPhase
+<h3 id="camel.apache.org/v1alpha1.BindingPhase">BindingPhase
 (<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1alpha1.KameletBindingStatus">KameletBindingStatus</a>)
+<a href="#camel.apache.org/v1alpha1.BindingStatus">BindingStatus</a>)
 </p>
 <div>
 </div>
-<h3 id="camel.apache.org/v1alpha1.KameletBindingSpec">KameletBindingSpec
+<h3 id="camel.apache.org/v1alpha1.BindingSpec">BindingSpec
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1alpha1.KameletBinding">KameletBinding</a>)
+<a href="#camel.apache.org/v1alpha1.Binding">Binding</a>)
 </p>
 <div>
-<p>KameletBindingSpec &ndash;</p>
+<p>BindingSpec &ndash;</p>
 </div>
 <table>
 <thead>
@@ -6315,14 +6315,14 @@ int32
 </tr>
 </tbody>
 </table>
-<h3 id="camel.apache.org/v1alpha1.KameletBindingStatus">KameletBindingStatus
+<h3 id="camel.apache.org/v1alpha1.BindingStatus">BindingStatus
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1alpha1.KameletBinding">KameletBinding</a>)
+<a href="#camel.apache.org/v1alpha1.Binding">Binding</a>)
 </p>
 <div>
-<p>KameletBindingStatus &ndash;</p>
+<p>BindingStatus &ndash;</p>
 </div>
 <table>
 <thead>
@@ -6336,8 +6336,8 @@ int32
 <td>
 <code>phase</code><br/>
 <em>
-<a href="#camel.apache.org/v1alpha1.KameletBindingPhase">
-KameletBindingPhase
+<a href="#camel.apache.org/v1alpha1.BindingPhase">
+BindingPhase
 </a>
 </em>
 </td>
@@ -6349,8 +6349,8 @@ KameletBindingPhase
 <td>
 <code>conditions</code><br/>
 <em>
-<a href="#camel.apache.org/v1alpha1.KameletBindingCondition">
-[]KameletBindingCondition
+<a href="#camel.apache.org/v1alpha1.BindingCondition">
+[]BindingCondition
 </a>
 </em>
 </td>

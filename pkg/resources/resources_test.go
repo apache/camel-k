@@ -169,6 +169,6 @@ func TestCRDResources(t *testing.T) {
 	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_integrationkits.yaml", Resource)
 	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_integrationplatforms.yaml", Resource)
 	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_integrations.yaml", Resource)
-	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_kameletbindings.yaml", Resource)
+	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_bindings.yaml", Resource)
 	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_kamelets.yaml", Resource)
 }

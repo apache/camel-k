@@ -148,7 +148,7 @@ func TestKamelCLIPromote(t *testing.T) {
 				Expect(IntegrationPodImage(nsProd, "timer-kamelet-usage")()).Should(Equal(IntegrationPodImage(nsDev, "timer-kamelet-usage")()))
 			})
 
-			t.Run("no kamelet for kameletbinding in destination", func(t *testing.T) {
+			t.Run("no kamelet for binding in destination", func(t *testing.T) {
 				Expect(Kamel("promote", "-n", nsDev, "kb-timer-source-to-log", "--to", nsProd).Execute()).NotTo(Succeed())
 			})
 
@@ -160,7 +160,7 @@ func TestKamelCLIPromote(t *testing.T) {
 				// They must use the same image
 				Expect(IntegrationPodImage(nsProd, "kb-timer-source-to-log")()).Should(Equal(IntegrationPodImage(nsDev, "kb-timer-source-to-log")()))
 
-				// Kamelet Binding update
+				//Binding update
 				Expect(KamelBindWithID(operatorDevID, nsDev, "kb-timer-source", "log:info", "-p", "source.message=my-kamelet-binding-rocks-again").Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(nsDev, "kb-timer-source-to-log"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(nsDev, "kb-timer-source-to-log"), TestTimeoutShort).Should(ContainSubstring("my-kamelet-binding-rocks-again"))

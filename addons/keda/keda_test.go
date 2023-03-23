@@ -25,7 +25,7 @@ import (
 	"github.com/apache/camel-k/v2/addons/keda/duck/v1alpha1"
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/v2/pkg/controller/kameletbinding"
+	"github.com/apache/camel-k/v2/pkg/controller/binding"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -203,16 +203,16 @@ func TestKameletAutoDetection(t *testing.T) {
 	assert.Contains(t, secret.StringData, "cc")
 }
 
-func TestKameletBindingAutoDetection(t *testing.T) {
+func TestBindingAutoDetection(t *testing.T) {
 	keda, _ := NewKedaTrait().(*kedaTrait)
 	keda.Enabled = pointer.Bool(true)
 	logEndpoint := "log:info"
-	klb := camelv1alpha1.KameletBinding{
+	klb := camelv1alpha1.Binding{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "my-binding",
 		},
-		Spec: camelv1alpha1.KameletBindingSpec{
+		Spec: camelv1alpha1.BindingSpec{
 			Source: camelv1alpha1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Kamelet",
@@ -277,7 +277,7 @@ func TestKameletBindingAutoDetection(t *testing.T) {
 			},
 		})
 
-	it, err := kameletbinding.CreateIntegrationFor(env.Ctx, env.Client, &klb)
+	it, err := binding.CreateIntegrationFor(env.Ctx, env.Client, &klb)
 	assert.NoError(t, err)
 	assert.NotNil(t, it)
 	env.Integration = it
@@ -362,7 +362,7 @@ func TestHackKLBReplicas(t *testing.T) {
 	})
 	keda.HackControllerReplicas = pointer.Bool(true)
 	env := createBasicTestEnvironment(
-		&camelv1alpha1.KameletBinding{
+		&camelv1alpha1.Binding{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "test",
 				Name:      "my-klb",
@@ -375,7 +375,7 @@ func TestHackKLBReplicas(t *testing.T) {
 				OwnerReferences: []metav1.OwnerReference{
 					{
 						APIVersion: camelv1alpha1.SchemeGroupVersion.String(),
-						Kind:       "KameletBinding",
+						Kind:       "Binding",
 						Name:       "my-klb",
 					},
 				},
@@ -392,7 +392,7 @@ func TestHackKLBReplicas(t *testing.T) {
 	assert.NoError(t, keda.Apply(env))
 	scalesClient, err := env.Client.ScalesClient()
 	assert.NoError(t, err)
-	sc, err := scalesClient.Scales("test").Get(env.Ctx, camelv1alpha1.SchemeGroupVersion.WithResource("kameletbindings").GroupResource(), "my-klb", metav1.GetOptions{})
+	sc, err := scalesClient.Scales("test").Get(env.Ctx, camelv1alpha1.SchemeGroupVersion.WithResource("bindings").GroupResource(), "my-klb", metav1.GetOptions{})
 	assert.NoError(t, err)
 	assert.Equal(t, int32(1), sc.Spec.Replicas)
 }

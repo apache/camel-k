@@ -136,25 +136,25 @@ func getIntegration(ctx context.Context, c client.Client, name string, namespace
 }
 
 func deleteIntegration(ctx context.Context, cmd *cobra.Command, c client.Client, integration *v1.Integration) error {
-	deleted, binding, err := deleteKameletBindingIfExists(ctx, c, integration)
+	deleted, binding, err := deleteBindingIfExists(ctx, c, integration)
 	if err != nil {
 		return err
 	}
 	if deleted {
-		// Deleting KameletBinding will automatically clean up the integration
-		fmt.Fprintln(cmd.OutOrStdout(), "KameletBinding "+binding+" deleted")
+		// Deleting Binding will automatically clean up the integration
+		fmt.Fprintln(cmd.OutOrStdout(), "Binding "+binding+" deleted")
 		return nil
 	}
 	return c.Delete(ctx, integration)
 }
 
-func deleteKameletBindingIfExists(ctx context.Context, c client.Client, integration *v1.Integration) (bool, string, error) {
+func deleteBindingIfExists(ctx context.Context, c client.Client, integration *v1.Integration) (bool, string, error) {
 	kind, name := findCreator(integration)
-	if kind != v1alpha1.KameletBindingKind || name == "" {
+	if kind != v1alpha1.BindingKind || name == "" {
 		return false, "", nil
 	}
 
-	binding := v1alpha1.KameletBinding{
+	binding := v1alpha1.Binding{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       kind,
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
@@ -178,7 +178,7 @@ func findCreator(integration *v1.Integration) (string, string) {
 	if kind == "" && name == "" {
 		// Look up in OwnerReferences in case creator labels are absent
 		for _, owner := range integration.GetOwnerReferences() {
-			if owner.Kind == v1alpha1.KameletBindingKind {
+			if owner.Kind == v1alpha1.BindingKind {
 				return owner.Kind, owner.Name
 			}
 		}

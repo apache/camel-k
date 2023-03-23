@@ -29,7 +29,7 @@ rules:
   - integrationkits/finalizers
   - integrationplatforms/finalizers
   - integrations/finalizers
-  - kameletbindings/finalizers
+  - bindings/finalizers
   verbs:
   - update
 - apiGroups:

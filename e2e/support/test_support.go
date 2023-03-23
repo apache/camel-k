@@ -1068,9 +1068,9 @@ func ScaleIntegration(ns string, name string, replicas int32) error {
 	})
 }
 
-func KameletBinding(ns string, name string) func() *v1alpha1.KameletBinding {
-	return func() *v1alpha1.KameletBinding {
-		klb := v1alpha1.NewKameletBinding(ns, name)
+func Binding(ns string, name string) func() *v1alpha1.Binding {
+	return func() *v1alpha1.Binding {
+		klb := v1alpha1.NewBinding(ns, name)
 		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
@@ -1084,9 +1084,9 @@ func KameletBinding(ns string, name string) func() *v1alpha1.KameletBinding {
 	}
 }
 
-func KameletBindingPhase(ns string, name string) func() v1alpha1.KameletBindingPhase {
-	return func() v1alpha1.KameletBindingPhase {
-		klb := KameletBinding(ns, name)()
+func BindingPhase(ns string, name string) func() v1alpha1.BindingPhase {
+	return func() v1alpha1.BindingPhase {
+		klb := Binding(ns, name)()
 		if klb == nil {
 			return ""
 		}
@@ -1094,9 +1094,9 @@ func KameletBindingPhase(ns string, name string) func() v1alpha1.KameletBindingP
 	}
 }
 
-func KameletBindingSpecReplicas(ns string, name string) func() *int32 {
+func BindingSpecReplicas(ns string, name string) func() *int32 {
 	return func() *int32 {
-		klb := KameletBinding(ns, name)()
+		klb := Binding(ns, name)()
 		if klb == nil {
 			return nil
 		}
@@ -1104,9 +1104,9 @@ func KameletBindingSpecReplicas(ns string, name string) func() *int32 {
 	}
 }
 
-func KameletBindingStatusReplicas(ns string, name string) func() *int32 {
+func BindingStatusReplicas(ns string, name string) func() *int32 {
 	return func() *int32 {
-		klb := KameletBinding(ns, name)()
+		klb := Binding(ns, name)()
 		if klb == nil {
 			return nil
 		}
@@ -1114,9 +1114,9 @@ func KameletBindingStatusReplicas(ns string, name string) func() *int32 {
 	}
 }
 
-func KameletBindingCondition(ns string, name string, conditionType v1alpha1.KameletBindingConditionType) func() *v1alpha1.KameletBindingCondition {
-	return func() *v1alpha1.KameletBindingCondition {
-		kb := KameletBinding(ns, name)()
+func BindingCondition(ns string, name string, conditionType v1alpha1.BindingConditionType) func() *v1alpha1.BindingCondition {
+	return func() *v1alpha1.BindingCondition {
+		kb := Binding(ns, name)()
 		if kb == nil {
 			return nil
 		}
@@ -1128,32 +1128,32 @@ func KameletBindingCondition(ns string, name string, conditionType v1alpha1.Kame
 	}
 }
 
-func KameletBindingConditionStatusExtract(c *v1alpha1.KameletBindingCondition) corev1.ConditionStatus {
+func BindingConditionStatusExtract(c *v1alpha1.BindingCondition) corev1.ConditionStatus {
 	if c == nil {
 		return ""
 	}
 	return c.Status
 }
 
-func KameletBindingConditionReason(c *v1alpha1.KameletBindingCondition) string {
+func BindingConditionReason(c *v1alpha1.BindingCondition) string {
 	if c == nil {
 		return ""
 	}
 	return c.Reason
 }
 
-func KameletBindingConditionMessage(c *v1alpha1.KameletBindingCondition) string {
+func BindingConditionMessage(c *v1alpha1.BindingCondition) string {
 	if c == nil {
 		return ""
 	}
 	return c.Message
 }
 
-func KameletBindingConditionStatus(ns string, name string, conditionType v1alpha1.KameletBindingConditionType) func() corev1.ConditionStatus {
+func BindingConditionStatus(ns string, name string, conditionType v1alpha1.BindingConditionType) func() corev1.ConditionStatus {
 	return func() corev1.ConditionStatus {
-		klb := KameletBinding(ns, name)()
+		klb := Binding(ns, name)()
 		if klb == nil {
-			return "KameletBindingMissing"
+			return "BindingMissing"
 		}
 		c := klb.Status.GetCondition(conditionType)
 		if c == nil {
@@ -1163,10 +1163,10 @@ func KameletBindingConditionStatus(ns string, name string, conditionType v1alpha
 	}
 }
 
-func UpdateKameletBinding(ns string, name string, upd func(it *v1alpha1.KameletBinding)) error {
-	klb := KameletBinding(ns, name)()
+func UpdateBinding(ns string, name string, upd func(it *v1alpha1.Binding)) error {
+	klb := Binding(ns, name)()
 	if klb == nil {
-		return fmt.Errorf("no kamelet binding named %s found", name)
+		return fmt.Errorf("noBinding named %s found", name)
 	}
 	target := klb.DeepCopy()
 	upd(target)
@@ -1180,16 +1180,16 @@ func UpdateKameletBinding(ns string, name string, upd func(it *v1alpha1.KameletB
 	return TestClient().Patch(TestContext, target, ctrl.RawPatch(types.MergePatchType, p))
 }
 
-func ScaleKameletBinding(ns string, name string, replicas int32) error {
-	return UpdateKameletBinding(ns, name, func(klb *v1alpha1.KameletBinding) {
+func ScaleBinding(ns string, name string, replicas int32) error {
+	return UpdateBinding(ns, name, func(klb *v1alpha1.Binding) {
 		klb.Spec.Replicas = &replicas
 	})
 }
 
-func AssignKameletBindingToOperator(ns, name, operator string) error {
-	klb := KameletBinding(ns, name)()
+func AssignBindingToOperator(ns, name, operator string) error {
+	klb := Binding(ns, name)()
 	if klb == nil {
-		return fmt.Errorf("cannot assign kamelet binding %q to operator: kamelet binding not found", name)
+		return fmt.Errorf("cannot assignBinding %q to operator:Binding not found", name)
 	}
 
 	klb.SetOperatorID(operator)
@@ -1863,7 +1863,7 @@ func CRDs() func() []metav1.APIResource {
 			reflect.TypeOf(v1.IntegrationKit{}).Name(),
 			reflect.TypeOf(v1.IntegrationPlatform{}).Name(),
 			reflect.TypeOf(v1alpha1.Kamelet{}).Name(),
-			reflect.TypeOf(v1alpha1.KameletBinding{}).Name(),
+			reflect.TypeOf(v1alpha1.Binding{}).Name(),
 		}
 
 		versions := []string{"v1", "v1alpha1"}
@@ -2308,9 +2308,9 @@ func BindKameletTo(ns, name string, annotations map[string]string, from, to core
 func BindKameletToWithErrorHandler(ns, name string, annotations map[string]string, from, to corev1.ObjectReference,
 	sourceProperties, sinkProperties map[string]string, errorHandler map[string]interface{}) func() error {
 	return func() error {
-		kb := v1alpha1.NewKameletBinding(ns, name)
+		kb := v1alpha1.NewBinding(ns, name)
 		kb.Annotations = annotations
-		kb.Spec = v1alpha1.KameletBindingSpec{
+		kb.Spec = v1alpha1.BindingSpec{
 			Source: v1alpha1.Endpoint{
 				Ref:        &from,
 				Properties: asEndpointProperties(sourceProperties),

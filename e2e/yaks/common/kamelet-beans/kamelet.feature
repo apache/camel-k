@@ -9,7 +9,7 @@ Feature: Kamelets can declare local beans
 
   Scenario: Kamelets templates can use beans
     Given bind Kamelet beans-source to uri log:info
-    When create KameletBinding binding
-    Then KameletBinding binding should be available
+    When create Binding binding
+    Then Binding binding should be available
     Then Camel K integration binding should be running
     Then Camel K integration binding should print Bean time is 0!

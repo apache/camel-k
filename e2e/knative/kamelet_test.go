@@ -37,7 +37,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 )
 
-// Test that a KameletBinding can be changed and the changes are propagated to the Integration
+// Test that a Binding can be changed and the changes are propagated to the Integration
 func TestKameletChange(t *testing.T) {
 	RegisterTestingT(t)
 
@@ -65,31 +65,31 @@ func TestKameletChange(t *testing.T) {
 		"trait.camel.apache.org/health.readiness-initial-delay": "10",
 	}
 
-	// Create the KameletBinding
+	// Create the Binding
 	Expect(BindKameletTo(ns, timerBinding, annotations, from, to, map[string]string{"message": "message is Hello"}, map[string]string{})()).To(Succeed())
 
 	Eventually(IntegrationPodPhase(ns, timerBinding), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 	Eventually(IntegrationConditionStatus(ns, "timer-binding", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 	Eventually(IntegrationLogs(ns, "test-kamelet-display"), TestTimeoutShort).Should(ContainSubstring("message is Hello"))
 
-	Eventually(KameletBindingCondition(ns, timerBinding, v1alpha1.KameletBindingConditionReady), TestTimeoutMedium).Should(And(
-		WithTransform(KameletBindingConditionStatusExtract, Equal(corev1.ConditionTrue)),
-		WithTransform(KameletBindingConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),
-		WithTransform(KameletBindingConditionMessage, Equal(fmt.Sprintf("1/1 ready replicas"))),
+	Eventually(BindingCondition(ns, timerBinding, v1alpha1.BindingConditionReady), TestTimeoutMedium).Should(And(
+		WithTransform(BindingConditionStatusExtract, Equal(corev1.ConditionTrue)),
+		WithTransform(BindingConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),
+		WithTransform(BindingConditionMessage, Equal(fmt.Sprintf("1/1 ready replicas"))),
 	))
 
-	// Update the KameletBinding
+	// Update the Binding
 	Expect(BindKameletTo(ns, "timer-binding", annotations, from, to, map[string]string{"message": "message is Hi"}, map[string]string{})()).To(Succeed())
 
 	Eventually(IntegrationPodPhase(ns, "timer-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 	Eventually(IntegrationConditionStatus(ns, "timer-binding", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 	Eventually(IntegrationLogs(ns, "test-kamelet-display"), TestTimeoutShort).Should(ContainSubstring("message is Hi"))
 
-	Eventually(KameletBindingCondition(ns, timerBinding, v1alpha1.KameletBindingConditionReady), TestTimeoutMedium).
+	Eventually(BindingCondition(ns, timerBinding, v1alpha1.BindingConditionReady), TestTimeoutMedium).
 		Should(And(
-			WithTransform(KameletBindingConditionStatusExtract, Equal(corev1.ConditionTrue)),
-			WithTransform(KameletBindingConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),
-			WithTransform(KameletBindingConditionMessage, Equal("1/1 ready replicas")),
+			WithTransform(BindingConditionStatusExtract, Equal(corev1.ConditionTrue)),
+			WithTransform(BindingConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),
+			WithTransform(BindingConditionMessage, Equal("1/1 ready replicas")),
 		))
 
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())

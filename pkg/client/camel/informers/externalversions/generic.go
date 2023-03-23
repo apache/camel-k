@@ -67,10 +67,10 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1().IntegrationPlatforms().Informer()}, nil
 
 		// Group=camel.apache.org, Version=v1alpha1
+	case v1alpha1.SchemeGroupVersion.WithResource("bindings"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1alpha1().Bindings().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("kamelets"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1alpha1().Kamelets().Informer()}, nil
-	case v1alpha1.SchemeGroupVersion.WithResource("kameletbindings"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1alpha1().KameletBindings().Informer()}, nil
 
 	}
 

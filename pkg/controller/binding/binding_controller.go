@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package kameletbinding
+package binding
 
 import (
 	"context"
@@ -44,7 +44,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/monitoring"
 )
 
-// Add creates a new KameletBinding Controller and adds it to the Manager. The Manager will set fields on the Controller
+// Add creates a new Binding Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
 	return add(mgr, newReconciler(mgr, c))
@@ -52,7 +52,7 @@ func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
 
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	return monitoring.NewInstrumentedReconciler(
-		&ReconcileKameletBinding{
+		&ReconcileBinding{
 			client:   c,
 			scheme:   mgr.GetScheme(),
 			recorder: mgr.GetEventRecorderFor("camel-k-kamelet-binding-controller"),
@@ -60,7 +60,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 		schema.GroupVersionKind{
 			Group:   v1alpha1.SchemeGroupVersion.Group,
 			Version: v1alpha1.SchemeGroupVersion.Version,
-			Kind:    v1alpha1.KameletBindingKind,
+			Kind:    v1alpha1.BindingKind,
 		},
 	)
 }
@@ -71,25 +71,25 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// Watch for changes to primary resource KameletBinding
-	err = c.Watch(&source.Kind{Type: &v1alpha1.KameletBinding{}},
+	// Watch for changes to primary resource Binding
+	err = c.Watch(&source.Kind{Type: &v1alpha1.Binding{}},
 		&handler.EnqueueRequestForObject{},
 		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldKameletBinding, ok := e.ObjectOld.(*v1alpha1.KameletBinding)
+				oldBinding, ok := e.ObjectOld.(*v1alpha1.Binding)
 				if !ok {
 					return false
 				}
-				newKameletBinding, ok := e.ObjectNew.(*v1alpha1.KameletBinding)
+				newBinding, ok := e.ObjectNew.(*v1alpha1.Binding)
 				if !ok {
 					return false
 				}
 
 				// If traits have changed, the reconciliation loop must kick in as
 				// traits may have impact
-				sameTraits, err := trait.KameletBindingsHaveSameTraits(oldKameletBinding, newKameletBinding)
+				sameTraits, err := trait.BindingsHaveSameTraits(oldBinding, newBinding)
 				if err != nil {
-					Log.ForKameletBinding(newKameletBinding).Error(
+					Log.ForBinding(newBinding).Error(
 						err,
 						"unable to determine if old and new resource have the same traits")
 				}
@@ -97,11 +97,11 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 					return true
 				}
 
-				// Ignore updates to the kameletBinding status in which case metadata.Generation
-				// does not change, or except when the kameletBinding phase changes as it's used
+				// Ignore updates to the binding status in which case metadata.Generation
+				// does not change, or except when the binding phase changes as it's used
 				// to transition from one phase to another
-				return oldKameletBinding.Generation != newKameletBinding.Generation ||
-					oldKameletBinding.Status.Phase != newKameletBinding.Status.Phase
+				return oldBinding.Generation != newBinding.Generation ||
+					oldBinding.Status.Phase != newBinding.Status.Phase
 			},
 			DeleteFunc: func(e event.DeleteEvent) bool {
 				// Evaluates to false if the object has been confirmed deleted
@@ -115,7 +115,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// Watch Integration to propagate changes downstream
 	err = c.Watch(&source.Kind{Type: &v1.Integration{}}, &handler.EnqueueRequestForOwner{
-		OwnerType:    &v1alpha1.KameletBinding{},
+		OwnerType:    &v1alpha1.Binding{},
 		IsController: false,
 	})
 	if err != nil {
@@ -125,10 +125,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
-var _ reconcile.Reconciler = &ReconcileKameletBinding{}
+var _ reconcile.Reconciler = &ReconcileBinding{}
 
-// ReconcileKameletBinding reconciles a KameletBinding object.
-type ReconcileKameletBinding struct {
+// ReconcileBinding reconciles a Binding object.
+type ReconcileBinding struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the API server
 	client   client.Client
@@ -136,14 +136,14 @@ type ReconcileKameletBinding struct {
 	recorder record.EventRecorder
 }
 
-// Reconcile reads that state of the cluster for a KameletBinding object and makes changes based
-// on the state read and what is in the KameletBinding.Spec
+// Reconcile reads that state of the cluster for a Binding object and makes changes based
+// on the state read and what is in the Binding.Spec
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcileKameletBinding) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileBinding) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
-	rlog.Info("Reconciling KameletBinding")
+	rlog.Info("Reconciling Binding")
 
 	// Make sure the operator is allowed to act on namespace
 	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
@@ -153,8 +153,8 @@ func (r *ReconcileKameletBinding) Reconcile(ctx context.Context, request reconci
 		return reconcile.Result{}, nil
 	}
 
-	// Fetch the KameletBinding instance
-	var instance v1alpha1.KameletBinding
+	// Fetch the Binding instance
+	var instance v1alpha1.Binding
 
 	if err := r.client.Get(ctx, request.NamespacedName, &instance); err != nil {
 		if errors.IsNotFound(err) {
@@ -183,7 +183,7 @@ func (r *ReconcileKameletBinding) Reconcile(ctx context.Context, request reconci
 	var err error
 
 	target := instance.DeepCopy()
-	targetLog := rlog.ForKameletBinding(target)
+	targetLog := rlog.ForBinding(target)
 
 	for _, a := range actions {
 		a.InjectClient(r.client)
@@ -194,8 +194,8 @@ func (r *ReconcileKameletBinding) Reconcile(ctx context.Context, request reconci
 
 			target, err = a.Handle(ctx, target)
 			if err != nil {
-				camelevent.NotifyKameletBindingError(ctx, r.client, r.recorder, &instance, target, err)
-				// Update the kameletbinding (mostly just to update its phase) if the new instance is returned
+				camelevent.NotifyBindingError(ctx, r.client, r.recorder, &instance, target, err)
+				// Update the binding (mostly just to update its phase) if the new instance is returned
 				if target != nil {
 					_ = r.update(ctx, &instance, target, &targetLog)
 				}
@@ -204,14 +204,14 @@ func (r *ReconcileKameletBinding) Reconcile(ctx context.Context, request reconci
 
 			if target != nil {
 				if err := r.update(ctx, &instance, target, &targetLog); err != nil {
-					camelevent.NotifyKameletBindingError(ctx, r.client, r.recorder, &instance, target, err)
+					camelevent.NotifyBindingError(ctx, r.client, r.recorder, &instance, target, err)
 					return reconcile.Result{}, err
 				}
 			}
 
 			// handle one action at time so the resource
 			// is always at its latest state
-			camelevent.NotifyKameletBindingUpdated(ctx, r.client, r.recorder, &instance, target)
+			camelevent.NotifyBindingUpdated(ctx, r.client, r.recorder, &instance, target)
 			break
 		}
 	}
@@ -219,11 +219,11 @@ func (r *ReconcileKameletBinding) Reconcile(ctx context.Context, request reconci
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileKameletBinding) update(ctx context.Context, base *v1alpha1.KameletBinding, target *v1alpha1.KameletBinding, log *log.Logger) error {
+func (r *ReconcileBinding) update(ctx context.Context, base *v1alpha1.Binding, target *v1alpha1.Binding, log *log.Logger) error {
 	target.Status.ObservedGeneration = base.Generation
 
 	if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base)); err != nil {
-		camelevent.NotifyKameletBindingError(ctx, r.client, r.recorder, base, target, err)
+		camelevent.NotifyBindingError(ctx, r.client, r.recorder, base, target, err)
 		return err
 	}
 

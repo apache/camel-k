@@ -29,14 +29,14 @@ const (
 	datTypeActionKamelet = "data-type-action"
 )
 
-// KameletBindingProvider converts a reference to a Kamelet into a Camel URI.
-type KameletBindingProvider struct{}
+// BindingConverter converts a reference to a Kamelet into a Camel URI.
+type BindingConverter struct{}
 
-func (k KameletBindingProvider) ID() string {
+func (k BindingConverter) ID() string {
 	return "kamelet"
 }
 
-func (k KameletBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
+func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
 	if e.Ref == nil {
 		// works only on refs
 		return nil, nil
@@ -129,7 +129,7 @@ func (k KameletBindingProvider) Translate(ctx BindingContext, endpointCtx Endpoi
 	return nil, nil
 }
 
-func (k KameletBindingProvider) DataTypeStep(e v1alpha1.Endpoint, id string, typeSlot v1alpha1.TypeSlot) (map[string]interface{}, map[string]string) {
+func (k BindingConverter) DataTypeStep(e v1alpha1.Endpoint, id string, typeSlot v1alpha1.TypeSlot) (map[string]interface{}, map[string]string) {
 	if e.DataTypes == nil {
 		return nil, nil
 	}
@@ -156,10 +156,10 @@ func (k KameletBindingProvider) DataTypeStep(e v1alpha1.Endpoint, id string, typ
 	return nil, nil
 }
 
-func (k KameletBindingProvider) Order() int {
+func (k BindingConverter) Order() int {
 	return OrderStandard
 }
 
 func init() {
-	RegisterBindingProvider(KameletBindingProvider{})
+	RegisterBindingProvider(BindingConverter{})
 }

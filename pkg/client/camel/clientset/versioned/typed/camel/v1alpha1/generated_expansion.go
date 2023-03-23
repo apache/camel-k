@@ -19,6 +19,6 @@ limitations under the License.
 
 package v1alpha1
 
-type KameletExpansion interface{}
+type BindingExpansion interface{}
 
-type KameletBindingExpansion interface{}
+type KameletExpansion interface{}

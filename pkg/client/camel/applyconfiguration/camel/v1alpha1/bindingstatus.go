@@ -23,26 +23,26 @@ import (
 	v1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 )
 
-// KameletBindingStatusApplyConfiguration represents an declarative configuration of the KameletBindingStatus type for use
+// BindingStatusApplyConfiguration represents an declarative configuration of the BindingStatus type for use
 // with apply.
-type KameletBindingStatusApplyConfiguration struct {
-	ObservedGeneration *int64                                      `json:"observedGeneration,omitempty"`
-	Phase              *v1alpha1.KameletBindingPhase               `json:"phase,omitempty"`
-	Conditions         []KameletBindingConditionApplyConfiguration `json:"conditions,omitempty"`
-	Replicas           *int32                                      `json:"replicas,omitempty"`
-	Selector           *string                                     `json:"selector,omitempty"`
+type BindingStatusApplyConfiguration struct {
+	ObservedGeneration *int64                               `json:"observedGeneration,omitempty"`
+	Phase              *v1alpha1.BindingPhase               `json:"phase,omitempty"`
+	Conditions         []BindingConditionApplyConfiguration `json:"conditions,omitempty"`
+	Replicas           *int32                               `json:"replicas,omitempty"`
+	Selector           *string                              `json:"selector,omitempty"`
 }
 
-// KameletBindingStatusApplyConfiguration constructs an declarative configuration of the KameletBindingStatus type for use with
+// BindingStatusApplyConfiguration constructs an declarative configuration of the BindingStatus type for use with
 // apply.
-func KameletBindingStatus() *KameletBindingStatusApplyConfiguration {
-	return &KameletBindingStatusApplyConfiguration{}
+func BindingStatus() *BindingStatusApplyConfiguration {
+	return &BindingStatusApplyConfiguration{}
 }
 
 // WithObservedGeneration sets the ObservedGeneration field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ObservedGeneration field is set to the value of the last call.
-func (b *KameletBindingStatusApplyConfiguration) WithObservedGeneration(value int64) *KameletBindingStatusApplyConfiguration {
+func (b *BindingStatusApplyConfiguration) WithObservedGeneration(value int64) *BindingStatusApplyConfiguration {
 	b.ObservedGeneration = &value
 	return b
 }
@@ -50,7 +50,7 @@ func (b *KameletBindingStatusApplyConfiguration) WithObservedGeneration(value in
 // WithPhase sets the Phase field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Phase field is set to the value of the last call.
-func (b *KameletBindingStatusApplyConfiguration) WithPhase(value v1alpha1.KameletBindingPhase) *KameletBindingStatusApplyConfiguration {
+func (b *BindingStatusApplyConfiguration) WithPhase(value v1alpha1.BindingPhase) *BindingStatusApplyConfiguration {
 	b.Phase = &value
 	return b
 }
@@ -58,7 +58,7 @@ func (b *KameletBindingStatusApplyConfiguration) WithPhase(value v1alpha1.Kamele
 // WithConditions adds the given value to the Conditions field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Conditions field.
-func (b *KameletBindingStatusApplyConfiguration) WithConditions(values ...*KameletBindingConditionApplyConfiguration) *KameletBindingStatusApplyConfiguration {
+func (b *BindingStatusApplyConfiguration) WithConditions(values ...*BindingConditionApplyConfiguration) *BindingStatusApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
 			panic("nil value passed to WithConditions")
@@ -71,7 +71,7 @@ func (b *KameletBindingStatusApplyConfiguration) WithConditions(values ...*Kamel
 // WithReplicas sets the Replicas field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Replicas field is set to the value of the last call.
-func (b *KameletBindingStatusApplyConfiguration) WithReplicas(value int32) *KameletBindingStatusApplyConfiguration {
+func (b *BindingStatusApplyConfiguration) WithReplicas(value int32) *BindingStatusApplyConfiguration {
 	b.Replicas = &value
 	return b
 }
@@ -79,7 +79,7 @@ func (b *KameletBindingStatusApplyConfiguration) WithReplicas(value int32) *Kame
 // WithSelector sets the Selector field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Selector field is set to the value of the last call.
-func (b *KameletBindingStatusApplyConfiguration) WithSelector(value string) *KameletBindingStatusApplyConfiguration {
+func (b *BindingStatusApplyConfiguration) WithSelector(value string) *BindingStatusApplyConfiguration {
 	b.Selector = &value
 	return b
 }
