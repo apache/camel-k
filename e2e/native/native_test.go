@@ -75,24 +75,8 @@ func TestNativeIntegrations(t *testing.T) {
 			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
 		})
 
-		t.Run("warm up before native build testing", func(t *testing.T) {
-			// The following native build test is under tight time constraints, so here it runs
-			// a warm up testing to make sure necessary jars are already downloaded.
-			name := "warm-up-yaml"
-			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
-				Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
-			// Clean up
-			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
-			Expect(DeleteKits(ns)).To(Succeed())
-		})
-
 		t.Run("automatic rollout deployment from fast-jar to native kit", func(t *testing.T) {
-			name := "jvm-to-native"
+			name := "yaml-native"
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name,
 				"-t", "quarkus.package-type=fast-jar",
 				"-t", "quarkus.package-type=native",
@@ -145,6 +129,22 @@ func TestNativeIntegrations(t *testing.T) {
 
 			// Clean up
 			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("yaml native should not rebuild", func(t *testing.T) {
+			name := "yaml-native-2"
+			Expect(KamelRunWithID(operatorID, ns, "files/yaml2.yaml", "--name", name,
+				"-t", "quarkus.package-type=native",
+			).Execute()).To(Succeed())
+
+			// This one should run quickly as it suppose to reuse an IntegrationKit
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationPod(ns, name), TestTimeoutShort).
+				Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!2"))
+			Expect(IntegrationKit(ns, "yaml-native")).Should(Equal(IntegrationKit(ns, "yaml-native-2")))
 		})
 	})
 }

@@ -131,6 +131,12 @@ func integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bo
 		ilog.Debug("Integration and integration-kit dependencies do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
 		return false, nil
 	}
+	// If IntegrationKit has any source, we must verify that it corresponds with the one in the Integration.
+	// This is important in case of Native builds as we need to rebuild when language requires a source during build.
+	if (kit.Spec.Sources != nil && len(kit.Spec.Sources) > 0) && !hasMatchingSources(integration, kit) {
+		ilog.Debug("Integration and integration-kit sources do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
+		return false, nil
+	}
 
 	ilog.Debug("Matched Integration and integration-kit", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
 	return true, nil
@@ -249,4 +255,18 @@ func matchesComparableTrait(ct trait.ComparableTrait, it map[string]interface{},
 func matchesTrait(it map[string]interface{}, kt map[string]interface{}) bool {
 	// perform exact match on the two trait maps
 	return reflect.DeepEqual(it, kt)
+}
+
+func hasMatchingSources(it *v1.Integration, kit *v1.IntegrationKit) bool {
+	for _, itSource := range it.Sources() {
+		for _, ikSource := range kit.Spec.Sources {
+			if itSource.Content == ikSource.Content {
+				// found, let's move to the next one
+				break
+			}
+			return false
+		}
+
+	}
+	return true
 }

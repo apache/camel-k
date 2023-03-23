@@ -54,9 +54,38 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 				Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
-
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Java Magicstring!"))
+		})
 
+		t.Run("java native same should not rebuild", func(t *testing.T) {
+			name := "java-native-clone"
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
+				"-t", "quarkus.package-type=native",
+			).Execute()).To(Succeed())
+
+			// This one should run quickly as it suppose to reuse an IntegrationKit
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationPod(ns, name), TestTimeoutShort).
+				Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Java Magicstring!"))
+			Expect(IntegrationKit(ns, "java-native")).Should(Equal(IntegrationKit(ns, "java-native-clone")))
+		})
+
+		t.Run("java native should rebuild", func(t *testing.T) {
+			name := "java-native-2"
+			Expect(KamelRunWithID(operatorID, ns, "files/Java2.java", "--name", name,
+				"-t", "quarkus.package-type=native",
+			).Execute()).To(Succeed())
+
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationPod(ns, name), TestTimeoutShort).
+				Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Java Magic2string!"))
+			Expect(IntegrationKit(ns, "java-native-2")).ShouldNot(Equal(IntegrationKit(ns, "java-native")))
 			// Clean up
 			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
 		})
