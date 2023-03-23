@@ -70,10 +70,10 @@ func BuildImageArgs(dockerFileDir string, imageName string, sourceDir string) []
 }
 
 // RunImageArgs -- standard docker run arguments.
-func RunImageArgs(imagePath string, imageTag string) ([]string, error) {
+func RunImageArgs(imagePath string) ([]string, error) {
 	// Construct the docker command:
 	//
-	// docker run --network=<network-name> <image-name>:<tag>
+	// docker run --network=<network-name> --env=<env-var> <image-name>:latest
 	//
 	args := make([]string, 0)
 	args = append(args, "run")
