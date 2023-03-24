@@ -36,12 +36,12 @@ func TestBuildImageArgs(t *testing.T) {
 
 func TestRunImageArgs(t *testing.T) {
 
-	args, err := RunImageArgs("imagePath", "tag")
+	args, err := RunImageArgs("imagePath")
 	assert.Nil(t, err)
 	assert.Equal(t, "run", args[0])
 	assert.Equal(t, "--network="+NetworkName, args[1])
 	assert.Equal(t, "-t", args[2])
-	assert.Equal(t, "imagePath:tag", args[3])
+	assert.Equal(t, "imagePath:latest", args[3])
 }
 
 func TestDockerfilePathArg(t *testing.T) {
