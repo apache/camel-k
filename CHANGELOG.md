@@ -8,6 +8,7 @@
 
 - Unused parameter [\#4152](https://github.com/apache/camel-k/issues/4152)
 - + [\#4151](https://github.com/apache/camel-k/issues/4151)
+- Bring an option to force an image build to the kamel run command [\#4126](https://github.com/apache/camel-k/issues/4126)
 - Move from release nightly to Continuous Delivery [\#3260](https://github.com/apache/camel-k/issues/3260)
 
 ## [2.0.0-nightly](https://github.com/apache/camel-k/tree/2.0.0-nightly) (2023-03-22)
