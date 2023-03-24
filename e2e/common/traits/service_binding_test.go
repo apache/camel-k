@@ -74,7 +74,7 @@ func TestServiceBindingTrait(t *testing.T) {
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("%s:%s", host, port)))
 	})
 
-	t.Run("Kamelet Binding Service Binding", func(t *testing.T) {
+	t.Run("Binding Service Binding", func(t *testing.T) {
 		// Create our mock service config
 		message := "hello"
 		service := &corev1.ConfigMap{

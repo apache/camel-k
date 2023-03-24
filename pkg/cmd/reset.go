@@ -67,7 +67,7 @@ func (o *resetCmdOptions) reset(cmd *cobra.Command, _ []string) {
 			fmt.Fprint(cmd.ErrOrStderr(), err)
 			return
 		}
-		fmt.Fprintln(cmd.OutOrStdout(), n, "kamelet bindings deleted from namespace", o.Namespace)
+		fmt.Fprintln(cmd.OutOrStdout(), n, "bindings deleted from namespace", o.Namespace)
 	}
 
 	if !o.SkipIntegrations {

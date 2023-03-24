@@ -57,7 +57,7 @@ func TestNativeBinding(t *testing.T) {
 		}
 		message := "Magicstring!"
 
-		t.Run("kamelet binding with native build", func(t *testing.T) {
+		t.Run("binding with native build", func(t *testing.T) {
 			bindingName := "native-binding"
 			Expect(BindKameletTo(ns, bindingName,
 				map[string]string{"trait.camel.apache.org/quarkus.package-type": "native"},

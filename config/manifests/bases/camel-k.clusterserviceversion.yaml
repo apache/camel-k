@@ -23,7 +23,7 @@ metadata:
     categories: Integration & Delivery
     certified: "false"
     containerImage: docker.io/apache/camel-k:2.0.0-SNAPSHOT
-    createdAt: 2023-03-24T09:36:48Z
+    createdAt: 2023-03-24T15:48:09Z
     description: Apache Camel K is a lightweight integration platform, born on Kubernetes,
       with serverless superpowers.
     operators.operatorframework.io/builder: operator-sdk-v1.16.0
@@ -63,7 +63,7 @@ spec:
       kind: Integration
       name: integrations.camel.apache.org
       version: v1
-    - description: Binding is the Schema for the kamelets binding API
+    - description: Binding is the Schema for the binding API
       displayName: Binding
       kind: Binding
       name: bindings.camel.apache.org

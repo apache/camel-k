@@ -44,7 +44,7 @@ type Binding struct {
 	ApplicationProperties map[string]string
 }
 
-// BindingProvider maps a KameletBinding endpoint into Camel K resources.
+// BindingProvider maps a Binding endpoint into Camel K resources.
 type BindingProvider interface {
 	// ID returns the name of the binding provider
 	ID() string
