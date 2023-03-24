@@ -33,6 +33,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util/olm"
@@ -62,6 +63,7 @@ func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstall
 	cmd.Flags().Bool("skip-config-maps", false, "Do not uninstall the Camel K Config Maps in the current namespace")
 	cmd.Flags().Bool("skip-registry-secret", false, "Do not uninstall the Camel K Registry Secret in the current namespace")
 	cmd.Flags().Bool("skip-kamelets", false, "Do not uninstall the Kamelets in the current namespace")
+	cmd.Flags().Bool("skip-camel-catalogs", false, "Do not uninstall the Camel Catalogs in the current namespace")
 	cmd.Flags().Bool("global", false, "Indicates that a global installation is going to be uninstalled (affects OLM)")
 	cmd.Flags().Bool("olm", true, "Try to uninstall via OLM (Operator Lifecycle Manager) if available")
 	cmd.Flags().String("olm-operator-name", "", "Name of the Camel K operator in the OLM source or marketplace")
@@ -86,6 +88,7 @@ type uninstallCmdOptions struct {
 	SkipConfigMaps          bool `mapstructure:"skip-config-maps"`
 	SkipRegistrySecret      bool `mapstructure:"skip-registry-secret"`
 	SkipKamelets            bool `mapstructure:"skip-kamelets"`
+	SkipCamelCatalogs       bool `mapstructure:"skip-camel-catalogs"`
 	Global                  bool `mapstructure:"global"`
 	OlmEnabled              bool `mapstructure:"olm"`
 	UninstallAll            bool `mapstructure:"all"`
@@ -275,6 +278,13 @@ func (o *uninstallCmdOptions) uninstallNamespaceResources(ctx context.Context, c
 			return err
 		}
 		fmt.Fprintln(cmd.OutOrStdout(), "Camel K Platform Kamelets removed from namespace", o.Namespace)
+	}
+
+	if !o.SkipCamelCatalogs {
+		if err := o.uninstallCamelCatalogs(ctx, c); err != nil {
+			return err
+		}
+		fmt.Fprintln(cmd.OutOrStdout(), "Camel K Platform Camel Catalogs removed from namespace", o.Namespace)
 	}
 
 	return nil
@@ -481,6 +491,22 @@ func (o *uninstallCmdOptions) uninstallKamelets(ctx context.Context, c client.Cl
 			if err != nil {
 				return err
 			}
+		}
+	}
+
+	return nil
+}
+
+func (o *uninstallCmdOptions) uninstallCamelCatalogs(ctx context.Context, c client.Client) error {
+	camelCatalogList := v1.NewCamelCatalogList()
+	if err := c.List(ctx, &camelCatalogList, ctrl.InNamespace(o.Namespace)); err != nil {
+		return err
+	}
+
+	for i := range camelCatalogList.Items {
+		err := c.Delete(ctx, &camelCatalogList.Items[i])
+		if err != nil {
+			return err
 		}
 	}
 
