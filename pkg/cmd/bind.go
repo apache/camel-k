@@ -273,9 +273,9 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if !replaced {
-		fmt.Fprintln(cmd.OutOrStdout(), `kamelet binding "`+name+`" created`)
+		fmt.Fprintln(cmd.OutOrStdout(), `binding "`+name+`" created`)
 	} else {
-		fmt.Fprintln(cmd.OutOrStdout(), `kamelet binding "`+name+`" updated`)
+		fmt.Fprintln(cmd.OutOrStdout(), `binding "`+name+`" updated`)
 	}
 	return nil
 }
